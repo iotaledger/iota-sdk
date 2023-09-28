@@ -2,9 +2,8 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from enum import IntEnum
-
+from typing import List, Union
 from dataclasses import dataclass, field
-from typing import List
 
 from iota_sdk.types.address import Ed25519Address, AccountAddress, NFTAddress
 from iota_sdk.types.common import HexStr, json
@@ -44,7 +43,7 @@ class SenderFeature(Feature):
     Attributes:
         address: A given sender address.
     """
-    address: Ed25519Address | AccountAddress | NFTAddress
+    address: Union[Ed25519Address, AccountAddress, NFTAddress]
     type: int = field(
         default_factory=lambda: int(
             FeatureType.Sender),
@@ -58,7 +57,7 @@ class IssuerFeature(Feature):
     Attributes:
         address: A given issuer address.
     """
-    address: Ed25519Address | AccountAddress | NFTAddress
+    address: Union[Ed25519Address, AccountAddress, NFTAddress]
     type: int = field(
         default_factory=lambda: int(
             FeatureType.Issuer),

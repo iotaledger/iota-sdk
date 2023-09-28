@@ -15,9 +15,9 @@ class WalletEventType(IntEnum):
         TransactionInclusion (4): A transaction was included into the ledger.
         TransactionProgress (5): A progress update while submitting a transaction.
     """
-    ConsolidationRequired = 0,
-    LedgerAddressGeneration = 1,
-    NewOutput = 2,
-    SpentOutput = 3,
-    TransactionInclusion = 4,
-    TransactionProgress = 5,
+    ConsolidationRequired = 0
+    LedgerAddressGeneration = 1
+    NewOutput = 2
+    SpentOutput = 3
+    TransactionInclusion = 4
+    TransactionProgress = 5

@@ -80,7 +80,7 @@ pub enum Error {
     InvalidInputCount(<InputCount as TryFrom<usize>>::Error),
     InvalidInputOutputIndex(<OutputIndex as TryFrom<u16>>::Error),
     InvalidBech32Hrp(String),
-    InvalidBlockLength(usize),
+    InvalidBlockWrapperLength(usize),
     InvalidStateMetadataLength(<StateMetadataLength as TryFrom<usize>>::Error),
     InvalidManaValue(u64),
     InvalidMetadataFeatureLength(<MetadataFeatureLength as TryFrom<usize>>::Error),
@@ -171,6 +171,7 @@ pub enum Error {
     UnsupportedOutputKind(u8),
     DuplicateOutputChain(ChainId),
     InvalidField(&'static str),
+    NullDelegationValidatorId,
 }
 
 #[cfg(feature = "std")]
@@ -248,7 +249,7 @@ impl fmt::Display for Error {
             Self::InvalidInputKind(k) => write!(f, "invalid input kind: {k}"),
             Self::InvalidInputCount(count) => write!(f, "invalid input count: {count}"),
             Self::InvalidInputOutputIndex(index) => write!(f, "invalid input or output index: {index}"),
-            Self::InvalidBlockLength(length) => write!(f, "invalid block length {length}"),
+            Self::InvalidBlockWrapperLength(length) => write!(f, "invalid block wrapper length {length}"),
             Self::InvalidStateMetadataLength(length) => write!(f, "invalid state metadata length: {length}"),
             Self::InvalidManaValue(mana) => write!(f, "invalid mana value: {mana}"),
             Self::InvalidMetadataFeatureLength(length) => {
@@ -371,6 +372,7 @@ impl fmt::Display for Error {
             Self::UnsupportedOutputKind(k) => write!(f, "unsupported output kind: {k}"),
             Self::DuplicateOutputChain(chain_id) => write!(f, "duplicate output chain {chain_id}"),
             Self::InvalidField(field) => write!(f, "invalid field: {field}"),
+            Self::NullDelegationValidatorId => write!(f, "null delegation validator ID"),
         }
     }
 }

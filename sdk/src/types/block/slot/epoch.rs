@@ -32,7 +32,7 @@ use crate::types::block::Error;
 /// | 2  | 16  | 24  |
 // ...
 #[derive(
-    Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, From, Deref, Display, FromStr, packable::Packable,
+    Copy, Clone, Debug, Default, Eq, PartialEq, Ord, PartialOrd, Hash, From, Deref, Display, FromStr, packable::Packable,
 )]
 #[repr(transparent)]
 pub struct EpochIndex(u64);
@@ -84,6 +84,12 @@ impl EpochIndex {
 impl From<EpochIndex> for u64 {
     fn from(epoch_index: EpochIndex) -> Self {
         *epoch_index
+    }
+}
+
+impl PartialEq<u64> for EpochIndex {
+    fn eq(&self, other: &u64) -> bool {
+        self.0 == *other
     }
 }
 

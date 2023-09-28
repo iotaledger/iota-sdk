@@ -12,6 +12,7 @@ use futures::FutureExt;
 use instant::Instant;
 
 use crate::{
+    client::node_api::indexer::QueryParameter,
     types::block::{
         address::{Address, Bech32Address},
         output::OutputId,
@@ -38,6 +39,18 @@ impl Account {
                 .get_basic_output_ids_with_address_unlock_condition_only(bech32_address)
                 .await?;
             return Ok(output_ids);
+        }
+
+        // If interested in alias, basic, NFT and foundry outputs, get them all at once
+        if (address.is_ed25519() && sync_options.account.all_outputs())
+            || (address.is_nft() && sync_options.nft.all_outputs())
+            || (address.is_account() && sync_options.alias.all_outputs())
+        {
+            return Ok(self
+                .client()
+                .output_ids([QueryParameter::UnlockableByAddress(bech32_address)])
+                .await?
+                .items);
         }
 
         #[cfg(target_family = "wasm")]
@@ -126,6 +139,33 @@ impl Account {
                             account
                                 .get_account_and_foundry_output_ids(bech32_address, &sync_options)
                                 .await
+                        })
+                        .await
+                    }
+                    .boxed(),
+                );
+            }
+        } else if address.is_account() && sync_options.alias.foundry_outputs {
+            // foundries
+            #[cfg(target_family = "wasm")]
+            {
+                results.push(Ok(self
+                    .client()
+                    .foundry_output_ids([QueryParameter::AccountAddress(bech32_address)])
+                    .await?
+                    .items))
+            }
+
+            #[cfg(not(target_family = "wasm"))]
+            {
+                tasks.push(
+                    async move {
+                        let client = self.client().clone();
+                        tokio::spawn(async move {
+                            Ok(client
+                                .foundry_output_ids([QueryParameter::AccountAddress(bech32_address)])
+                                .await?
+                                .items)
                         })
                         .await
                     }

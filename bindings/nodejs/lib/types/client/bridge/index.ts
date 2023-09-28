@@ -3,6 +3,7 @@
 
 import type {
     __GetInfoMethod__,
+    __GetOutputIdsMethod__,
     __GetBasicOutputIdsMethod__,
     __GetOutputMethod__,
     __GetOutputsMethod__,
@@ -52,6 +53,7 @@ import type {
 export type __ClientMethods__ =
     | __GetInfoMethod__
     | __GetOutputMethod__
+    | __GetOutputIdsMethod__
     | __GetBasicOutputIdsMethod__
     | __GetOutputsMethod__
     | __PostBlockMethod__

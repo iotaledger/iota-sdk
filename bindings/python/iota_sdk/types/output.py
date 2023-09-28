@@ -4,8 +4,8 @@
 from __future__ import annotations
 from dataclasses import dataclass, field
 from enum import IntEnum
-from typing import Dict, Optional, List
-from dacite import from_dict
+from typing import Dict, Optional, List, Union
+
 from iota_sdk.types.common import HexStr, json
 from iota_sdk.types.feature import SenderFeature, IssuerFeature, MetadataFeature, TagFeature
 from iota_sdk.types.native_token import NativeToken
@@ -26,6 +26,7 @@ class OutputType(IntEnum):
     Account = 4
     Foundry = 5
     Nft = 6
+    Delegation = 7
 
 
 @json
@@ -56,11 +57,11 @@ class BasicOutput(Output):
     """
     amount: str
     mana: str
-    unlock_conditions: List[AddressUnlockCondition | ExpirationUnlockCondition | StorageDepositReturnUnlockCondition |
-                            TimelockUnlockCondition]
-    features: Optional[List[SenderFeature |
-                            MetadataFeature | TagFeature]] = None
-    native_tokens: Optional[List[NativeToken]] = None
+    unlockConditions: List[Union[AddressUnlockCondition, ExpirationUnlockCondition, StorageDepositReturnUnlockCondition,
+                           TimelockUnlockCondition]]
+    features: Optional[List[Union[SenderFeature,
+                            MetadataFeature, TagFeature]]] = None
+    nativeTokens: Optional[List[NativeToken]] = None
     type: int = field(
         default_factory=lambda: int(
             OutputType.Basic),
@@ -98,14 +99,14 @@ class AccountOutput(Output):
     amount: str
     mana: str
     account_id: HexStr
-    state_index: int
+    stateIndex: int
     foundry_counter: int
-    unlock_conditions: List[StateControllerAddressUnlockCondition |
-                            GovernorAddressUnlockCondition]
-    features: Optional[List[SenderFeature |
-                            MetadataFeature]] = None
-    immutable_features: Optional[List[IssuerFeature |
-                                      MetadataFeature]] = None
+    unlock_conditions: List[Union[StateControllerAddressUnlockCondition,
+                                  GovernorAddressUnlockCondition]]
+    features: Optional[List[Union[SenderFeature,
+                            MetadataFeature]]] = None
+    immutable_features: Optional[List[Union[IssuerFeature,
+                                            MetadataFeature]]] = None
     state_metadata: Optional[HexStr] = None
     native_tokens: Optional[List[NativeToken]] = None
     type: int = field(
@@ -174,14 +175,26 @@ class NftOutput(Output):
     amount: str
     mana: str
     nft_id: HexStr
-    unlock_conditions: List[AddressUnlockCondition | ExpirationUnlockCondition |
-                            StorageDepositReturnUnlockCondition | TimelockUnlockCondition]
-    features: Optional[List[SenderFeature |
-                            MetadataFeature | TagFeature]] = None
-    immutable_features: Optional[List[
-        IssuerFeature | MetadataFeature]] = None
+    unlock_conditions: List[Union[AddressUnlockCondition, ExpirationUnlockCondition,
+                                  StorageDepositReturnUnlockCondition, TimelockUnlockCondition]]
+    features: Optional[List[Union[SenderFeature,
+                            MetadataFeature, TagFeature]]] = None
+    immutable_features: Optional[List[Union[
+        IssuerFeature, MetadataFeature]]] = None
     native_tokens: Optional[List[NativeToken]] = None
     type: int = field(default_factory=lambda: int(OutputType.Nft), init=False)
+
+
+@json
+@dataclass
+class DelegationOutput(Output):
+    """Describes a delegation output.
+    Attributes:
+        type :
+            The type of output.
+    """
+    # TODO fields done in #1174
+    type: int = field(default_factory=lambda: int(OutputType.Delegation), init=False)
 
 
 @json
@@ -224,11 +237,41 @@ class OutputWithMetadata:
     """
 
     metadata: OutputMetadata
-    output: AccountOutput | FoundryOutput | NftOutput | BasicOutput
+    output: Union[AccountOutput, FoundryOutput, NftOutput, BasicOutput]
+
+    @classmethod
+    def from_dict(cls, data_dict: Dict) -> OutputWithMetadata:
+        """Creates an output with metadata instance from the dict object.
+        """
+        obj = cls.__new__(cls)
+        super(OutputWithMetadata, obj).__init__()
+        for k, v in data_dict.items():
+            setattr(obj, k, v)
+        return obj
+
+    def as_dict(self):
+        """Returns a dictionary representation of OutputWithMetadata, with the fields metadata and output.
+        """
+        config = {}
+
+        config['metadata'] = self.metadata.__dict__
+        config['output'] = self.output.as_dict()
+
+        return config
 
 
 def output_from_dict(
-        output: Dict[str, any]) -> BasicOutput | AccountOutput | FoundryOutput | NftOutput | Output:
+        output: Dict[str, any]) -> Union[BasicOutput, AccountOutput, FoundryOutput, NftOutput, Output]:
+    """
+    The function `output_from_dict` takes a dictionary as input and returns an instance of a specific
+    output class based on the value of the 'type' key in the dictionary.
+
+    Arguments:
+
+    * `output`: The `output` parameter is a dictionary that contains information about the output. It is
+    expected to have a key called 'type' which specifies the type of the output. The value of 'type'
+    should be one of the values defined in the `OutputType` enum.
+    """
     output_type = OutputType(output['type'])
 
     if output_type == OutputType.Basic:

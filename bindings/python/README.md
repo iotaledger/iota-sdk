@@ -17,7 +17,7 @@ Python binding to the [iota-sdk library](/README.md).
 
 ## Requirements
 
-- [Python 3.10+](https://www.python.org)
+- [Python 3.9+](https://www.python.org)
 - [pip ^21.x](https://pypi.org/project/pip)
 - `Rust` and `Cargo` to compile the binding. Install
   them [here](https://doc.rust-lang.org/cargo/getting-started/installation.html).
@@ -82,7 +82,7 @@ python3 example/[example file]
 - Where `[example file]` is the file name from the example folder. For example:
 
 ```bash
-python3 examples/client/00_get_info.py
+python3 examples/how_tos/client/get_info.py
 ```
 
 ## API Reference

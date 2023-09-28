@@ -168,7 +168,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         }
         ClientMethod::GetNode => Response::Node(client.get_node().await?),
         ClientMethod::GetNetworkInfo => Response::NetworkInfo(client.get_network_info().await?),
-        ClientMethod::GetNetworkId => Response::NetworkId(client.get_network_id().await?),
+        ClientMethod::GetNetworkId => Response::NetworkId(client.get_network_id().await?.to_string()),
         ClientMethod::GetBech32Hrp => Response::Bech32Hrp(client.get_bech32_hrp().await?),
         ClientMethod::GetProtocolParameters => Response::ProtocolParameters(client.get_protocol_parameters().await?),
         ClientMethod::PostBlockPayload { payload } => {
@@ -185,7 +185,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
                 )
                 .await?;
 
-            let block_id = block.id();
+            let block_id = client.block_id(&block).await?;
 
             Response::BlockIdWithBlock(block_id, BlockWrapperDto::from(&block))
         }
@@ -206,7 +206,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         ),
         ClientMethod::PostBlock { block } => Response::BlockId(
             client
-                .post_block(&BlockWrapper::try_from_dto(
+                .post_block(&BlockWrapper::try_from_dto_with_params(
                     block,
                     client.get_protocol_parameters().await?,
                 )?)
@@ -233,6 +233,9 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         )),
         ClientMethod::GetIncludedBlockMetadata { transaction_id } => {
             Response::BlockMetadata(client.get_included_block_metadata(&transaction_id).await?)
+        }
+        ClientMethod::OutputIds { query_parameters } => {
+            Response::OutputIdsResponse(client.output_ids(query_parameters).await?)
         }
         ClientMethod::BasicOutputIds { query_parameters } => {
             Response::OutputIdsResponse(client.basic_output_ids(query_parameters).await?)
@@ -314,7 +317,9 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
             Response::CustomJson(data)
         }
         ClientMethod::BlockId { block } => {
-            Response::BlockId(BlockWrapper::try_from_dto(block, client.get_protocol_parameters().await?)?.id())
+            let protocol_parameters = client.get_protocol_parameters().await?;
+            let block = BlockWrapper::try_from_dto_with_params(block, &protocol_parameters)?;
+            Response::BlockId(block.id(&protocol_parameters))
         }
     };
     Ok(response)

@@ -42,7 +42,7 @@ iota-crypto = { version = "0.23.0", default-features = false, features = [
     "secp256k1",
 ] }
 iterator-sorted = { version = "0.1.0", default-features = false }
-packable = { version = "0.8.1", default-features = false, features = [
+packable = { version = "0.8.3", default-features = false, features = [
     "primitive-types",
 ] }
 prefix-hex = { version = "0.7.1", default-features = false, features = [
@@ -50,7 +50,7 @@ prefix-hex = { version = "0.7.1", default-features = false, features = [
 ] }
 primitive-types = { version = "0.12.1", default-features = false }
 serde = { version = "1.0.188", default-features = false, features = ["derive"] }
-serde_json = { version = "1.0.105", default-features = false, features = [
+serde_json = { version = "1.0.107", default-features = false, features = [
     "alloc",
 ] }
 
@@ -66,7 +66,7 @@ futures = { version = "0.3.28", default-features = false, features = [
     "thread-pool",
 ], optional = true }
 instant = { version = "0.1.12", default-features = false, optional = true }
-iota-ledger-nano = { version = "1.0.0-alpha.4", default-features = false, optional = true }
+iota-ledger-nano = { version = "1.0.0-alpha.5", default-features = false, optional = true }
 iota_stronghold = { version = "2.0.0", default-features = false, optional = true }
 log = { version = "0.4.20", default-features = false, optional = true }
 once_cell = { version = "1.18.0", default-features = false, optional = true }
@@ -140,21 +140,19 @@ tokio = { version = "1.32.0", default-features = false, features = [
 
 [features]
 default = ["client", "wallet", "tls"]
-
-irc_27 = ["url", "serde"]
-irc_30 = ["url", "serde"]
-ledger_nano = ["iota-ledger-nano"]
-mqtt = ["std", "regex", "rumqttc", "dep:once_cell"]
+irc_27 = ["serde", "dep:url"]
+irc_30 = ["serde", "dep:url"]
+ledger_nano = ["dep:iota-ledger-nano"]
+mqtt = ["std", "tls", "dep:regex", "dep:rumqttc", "dep:once_cell"]
 participation = ["storage"]
-rand = ["dep:rand"]
-rocksdb = ["dep:rocksdb", "storage"]
+rocksdb = ["storage", "dep:rocksdb"]
 serde = [
-    "serde_repr",
     "hashbrown/serde",
     "packable/serde",
     "primitive-types/serde_no_std",
     "iota-crypto/serde",
     "zeroize?/serde",
+    "dep:serde_repr",
 ]
 std = [
     "packable/std",
@@ -171,35 +169,35 @@ std = [
 ]
 storage = ["iota-crypto/chacha", "dep:time", "dep:anymap", "dep:once_cell"]
 stronghold = [
-    "iota_stronghold",
     "iota-crypto/chacha",
+    "dep:iota_stronghold",
     "dep:time",
     "dep:anymap",
     "dep:once_cell",
 ]
 tls = ["reqwest?/rustls-tls", "rumqttc?/use-rustls"]
 events = []
-private_key_secret_manager = ["bs58"]
+private_key_secret_manager = ["dep:bs58"]
 
 client = [
-    "async-trait",
-    "dep:erased-serde",
-    "futures",
-    "instant",
+    "std",
+    "serde",
     "iota-crypto/bip39",
     "iota-crypto/bip39-en",
     "iota-crypto/bip44",
     "iota-crypto/keccak",
     "iota-crypto/random",
     "iota-crypto/slip10",
-    "log",
-    "reqwest",
-    "serde",
-    "std",
-    "thiserror",
-    "tokio",
-    "url",
-    "zeroize",
+    "dep:async-trait",
+    "dep:erased-serde",
+    "dep:futures",
+    "dep:instant",
+    "dep:log",
+    "dep:reqwest",
+    "dep:thiserror",
+    "dep:tokio",
+    "dep:url",
+    "dep:zeroize",
 ]
 wallet = ["client"]
 
@@ -354,6 +352,16 @@ required-features = ["wallet", "stronghold"]
 [[example]]
 name = "destroy_account_output"
 path = "examples/how_tos/account/destroy.rs"
+required-features = ["wallet", "stronghold"]
+
+[[example]]
+name = "state_transition"
+path = "examples/how_tos/account/state_transition.rs"
+required-features = ["wallet", "stronghold"]
+
+[[example]]
+name = "governance_transition"
+path = "examples/how_tos/account/governance_transition.rs"
 required-features = ["wallet", "stronghold"]
 
 # Outputs
@@ -672,11 +680,6 @@ required-features = ["wallet", "storage"]
 name = "storage"
 path = "examples/wallet/storage.rs"
 required-features = ["wallet", "storage"]
-
-[[example]]
-name = "update_account_output"
-path = "examples/wallet/update_account_output.rs"
-required-features = ["wallet", "stronghold"]
 
 [[example]]
 name = "wallet"

@@ -1,8 +1,13 @@
 # Copyright 2023 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
-import iota_sdk
-from iota_sdk import call_client_method, listen_mqtt
+from json import dumps, loads
+from datetime import timedelta
+from typing import Any, Dict, List, Optional, Union
+import humps
+from dacite import from_dict
+
+from iota_sdk.external import create_client, call_client_method, listen_mqtt
 from iota_sdk.client._node_core_api import NodeCoreAPI
 from iota_sdk.client._node_indexer_api import NodeIndexerAPI
 from iota_sdk.client._high_level_api import HighLevelAPI
@@ -18,16 +23,10 @@ from iota_sdk.types.payload import Payload, TransactionPayload
 from iota_sdk.types.token_scheme import SimpleTokenScheme
 from iota_sdk.types.unlock_condition import UnlockCondition
 from iota_sdk.types.transaction_data import PreparedTransactionData
-from json import dumps, loads
-import humps
-from datetime import timedelta
-from typing import Any, Dict, List, Optional
-from dacite import from_dict
 
 
 class ClientError(Exception):
     """Represents a client error."""
-    pass
 
 
 class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
@@ -37,9 +36,10 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         handle: The handle to the inner client object.
     """
 
+    # pylint: disable=unused-argument
     def __init__(
         self,
-        nodes: Optional[str | List[str]] = None,
+        nodes: Optional[Union[str, List[str]]] = None,
         primary_node: Optional[str] = None,
         permanode: Optional[str] = None,
         ignore_node_health: Optional[bool] = None,
@@ -114,7 +114,7 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
 
         # Create the message handler
         if client_handle is None:
-            self.handle = iota_sdk.create_client(client_config_str)
+            self.handle = create_client(client_config_str)
         else:
             self.handle = client_handle
 
@@ -139,8 +139,7 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
 
         if "payload" in json_response:
             return json_response['payload']
-        else:
-            return response
+        return response
 
     def get_handle(self):
         """Get the client handle.
@@ -380,8 +379,10 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         """
         return self._call_method('unhealthyNodes')
 
-    def sign_transaction(self, secret_manager: LedgerNanoSecretManager | MnemonicSecretManager | SeedSecretManager |
-                         StrongholdSecretManager, prepared_transaction_data: PreparedTransactionData) -> TransactionPayload:
+    def sign_transaction(
+            self,
+            secret_manager: Union[LedgerNanoSecretManager, MnemonicSecretManager, SeedSecretManager, StrongholdSecretManager],
+            prepared_transaction_data: PreparedTransactionData) -> TransactionPayload:
         """Sign a transaction.
 
         Args:
@@ -393,7 +394,7 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
             'preparedTransactionData': prepared_transaction_data
         }))
 
-    def submit_payload(self, payload: Payload) -> List[HexStr | Block]:
+    def submit_payload(self, payload: Payload) -> List[Union[HexStr, Block]]:
         """Submit a payload in a block.
 
         Args:

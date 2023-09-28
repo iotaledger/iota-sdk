@@ -2,7 +2,7 @@
 # Copyright 2023 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
-from iota_sdk import Block, Client, MnemonicSecretManager, Utils, SecretManager, OutputId, hex_to_utf8, utf8_to_hex, Bip44, CoinType
+from iota_sdk import Block, Client, MnemonicSecretManager, Utils, SecretManager, OutputId, hex_to_utf8, utf8_to_hex, Bip44, CoinType, Irc27Metadata, Irc30Metadata
 import json
 import unittest
 
@@ -98,7 +98,64 @@ def test_hex_utf8():
 
 
 def test_block():
-    block_dict = {"protocolVersion": 2, "strong_parents": ["0x28dbf8f5005c0de388cbbf23d14645a579fc0cb8278ad9cdc5a4252c7e8f0ed3", "0x440dbc33bf05c334c6d49f06514526d7f3e3c758028a2e87636e19f886290900",
-                                                           "0xd76cdb7acf228ecdad590a42b91acc077c1518c1a271411229e33e050fc19b44", "0xecef38d3af7e63da78a5e70128efe371f2191088b31879f7b0e81da657fa21c6"], "weak_parents": [], "shallow_like_parents": [], "payload": {"type": 5, "tag": "0x68656c6c6f", "data": "0x68656c6c6f"}}
+    block_dict = {
+        "protocolVersion": 2,
+        "strong_parents": [
+            "0x28dbf8f5005c0de388cbbf23d14645a579fc0cb8278ad9cdc5a4252c7e8f0ed3",
+            "0x440dbc33bf05c334c6d49f06514526d7f3e3c758028a2e87636e19f886290900",
+            "0xd76cdb7acf228ecdad590a42b91acc077c1518c1a271411229e33e050fc19b44",
+            "0xecef38d3af7e63da78a5e70128efe371f2191088b31879f7b0e81da657fa21c6"],
+        "weak_parents": [],
+        "shallow_like_parents": [],
+        "payload": {
+            "type": 5,
+            "tag": "0x68656c6c6f",
+            "data": "0x68656c6c6f"}}
     block = Block.from_dict(block_dict)
     assert block.id() == "0x7ce5ad074d4162e57f83cfa01cd2303ef5356567027ce0bcee0c9f57bc11656e"
+
+
+def test_irc_27():
+    metadata = Irc27Metadata(
+        "video/mp4",
+        "https://ipfs.io/ipfs/QmPoYcVm9fx47YXNTkhpMEYSxCD3Bqh7PJYr7eo5YjLgiT",
+        "Shimmer OG NFT",
+        description="The original Shimmer NFT"
+    )
+    metadata_dict = {
+        "standard": "IRC27",
+        "version": metadata.version,
+        "type": metadata.type,
+        "uri": metadata.uri,
+        "name": metadata.name,
+        "collectionName": metadata.collectionName,
+        "royalties": metadata.royalties,
+        "issuerName": metadata.issuerName,
+        "description": metadata.description,
+        "attributes": metadata.attributes
+    }
+    metadata_deser = Irc27Metadata.from_dict(metadata_dict)
+    assert metadata == metadata_deser
+
+
+def test_irc_30():
+    metadata = Irc30Metadata(
+        "FooCoin",
+        "FOO",
+        3,
+        description="FooCoin is the utility and governance token of FooLand, \
+                a revolutionary protocol in the play-to-earn crypto gaming field.",
+        url="https://foocoin.io/",
+        logoUrl="https://ipfs.io/ipfs/QmR36VFfo1hH2RAwVs4zVJ5btkopGip5cW7ydY4jUQBrkR"
+    )
+    metadata_dict = {
+        "standard": "IRC30",
+        "name": metadata.name,
+        "description": metadata.description,
+        "decimals": metadata.decimals,
+        "symbol": metadata.symbol,
+        "url": metadata.url,
+        "logoUrl": metadata.logoUrl
+    }
+    metadata_deser = Irc30Metadata.from_dict(metadata_dict)
+    assert metadata == metadata_deser

@@ -57,6 +57,7 @@ fn pack_unpack_valid() {
 #[test]
 fn transaction_id() {
     // Test from https://github.com/iotaledger/tips-draft/blob/tip46/tips/TIP-0046/tip-0046.md#transaction-id
+
     let transaction_payload_json = serde_json::json!({
       "type":6,
       "essence":{

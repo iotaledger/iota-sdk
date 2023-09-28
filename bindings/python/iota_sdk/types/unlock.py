@@ -9,6 +9,14 @@ from iota_sdk.types.common import json
 
 
 class UnlockType(IntEnum):
+    """Unlock variants.
+
+    Attributes:
+        Signature (0): An unlock holding a signature unlocking one or more inputs.
+        Reference (1): An unlock which must reference a previous unlock which unlocks also the input at the same index as this Reference Unlock.
+        Account (2): An unlock which must reference a previous unlock which unlocks the account that the input is locked to.
+        Nft (3): An unlock which must reference a previous unlock which unlocks the NFT that the input is locked to.
+    """
     Signature = 0
     Reference = 1
     Account = 2
