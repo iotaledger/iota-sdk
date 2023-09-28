@@ -1,7 +1,7 @@
 // Copyright 2021-2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { AliasId, Bech32 } from '../block';
+import { AliasId, Bech32Address } from '../block';
 import { TaggedDataPayload } from '../block/payload/tagged';
 import { Burn } from '../client';
 import { HexEncodedString } from '../utils';
@@ -79,15 +79,15 @@ export interface MintNftParams {
     /** Bech32 encoded address to which the Nft will be minted. Default will use the
      * first address of the account
      */
-    address?: Bech32;
+    address?: Bech32Address;
     /** Bech32 encoded sender address **/
-    sender?: Bech32;
+    sender?: Bech32Address;
     /** Hex encoded bytes */
     metadata?: HexEncodedString;
     /** Hex encoded bytes */
     tag?: HexEncodedString;
     /** Bech32 encoded issuer address **/
-    issuer?: Bech32;
+    issuer?: Bech32Address;
     /** Hex encoded bytes */
     immutableMetadata?: HexEncodedString;
 }
@@ -97,7 +97,7 @@ export interface AliasOutputParams {
     /** Bech32 encoded address to which the Nft will be minted. Default will use the
      * first address of the account
      */
-    address?: string;
+    address?: Bech32Address;
     /** Hex encoded bytes */
     immutableMetadata?: HexEncodedString;
     /** Hex encoded bytes */

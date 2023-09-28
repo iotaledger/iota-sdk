@@ -1,13 +1,13 @@
 // Copyright 2021-2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { Bech32, NftId, OutputId, TokenId } from '../block';
+import { Bech32Address, NftId, OutputId, TokenId } from '../block';
 import { NumericString } from '../utils';
 
 /** An Address of the Account */
 export interface AccountAddress {
     /** The Bech32 address. */
-    address: Bech32;
+    address: Bech32Address;
     /** The address key index. */
     keyIndex: number;
     /** Whether the address is a public or an internal (change) address. */
@@ -19,7 +19,7 @@ export interface AccountAddress {
 /** Address with a base token amount */
 export interface SendParams {
     /** The Bech32 address to send the amount to. */
-    address: Bech32;
+    address: Bech32Address;
     /** The amount to send. */
     amount: bigint | NumericString;
     /**
@@ -39,7 +39,7 @@ export interface SendParams {
 /** Address with unspent outputs */
 export interface AddressWithUnspentOutputs {
     /** The Bech32 address. */
-    address: Bech32;
+    address: Bech32Address;
     /** The address key index. */
     keyIndex: number;
     /** Whether the address is a public or an internal (change) address. */
@@ -51,14 +51,14 @@ export interface AddressWithUnspentOutputs {
 /** Address with native tokens */
 export interface SendNativeTokensParams {
     /** The Bech32 address. */
-    address: Bech32;
+    address: Bech32Address;
     /** The Native Tokens to send. */
     nativeTokens: [TokenId, bigint][];
     /**
      * Bech32 encoded address, to which the storage deposit will be returned.
      * Default will use the first address of the account.
      */
-    returnAddress?: Bech32;
+    returnAddress?: Bech32Address;
     /**
      * Expiration in seconds, after which the output will be available for the sender again, if not spent by the
      * receiver before. Default is 1 day.
@@ -69,7 +69,7 @@ export interface SendNativeTokensParams {
 /** Address with an NftId */
 export interface SendNftParams {
     /** The Bech32 address. */
-    address: Bech32;
+    address: Bech32Address;
     /** The ID of the NFT to send. */
     nftId: NftId;
 }

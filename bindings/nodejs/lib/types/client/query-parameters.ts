@@ -1,8 +1,7 @@
 // Copyright 2021-2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { Bech32 } from '../block';
-import { NumericString } from '../utils/numeric';
+import { Bech32Address } from '../block';
 
 /**
  * Query parameter for filtering output requests
@@ -78,11 +77,11 @@ export type GenericQueryParameter =
 
 /** Bech32-encoded address that should be searched for. */
 interface Address {
-    address: Bech32;
+    address: Bech32Address;
 }
 /** Filter foundry outputs based on bech32-encoded address of the controlling alias. */
 interface AliasAddress {
-    aliasAddress: Bech32;
+    aliasAddress: Bech32Address;
 }
 /** Filters outputs based on the presence of storage deposit return unlock condition. */
 interface HasStorageDepositReturn {
@@ -92,7 +91,7 @@ interface HasStorageDepositReturn {
  * in the storage deposit return unlock condition.
  */
 interface StorageDepositReturnAddress {
-    storageDepositReturnAddress: Bech32;
+    storageDepositReturnAddress: Bech32Address;
 }
 /** Filters outputs based on the presence of timelock unlock condition. */
 interface HasTimelock {
@@ -135,7 +134,7 @@ interface ExpiresAfter {
  * address in the expiration unlock condition.
  * */
 interface ExpirationReturnAddress {
-    expirationReturnAddress: Bech32;
+    expirationReturnAddress: Bech32Address;
 }
 /** Filter for a certain sender */
 interface Sender {
@@ -163,11 +162,11 @@ interface Issuer {
 }
 /** Filter outputs based on bech32-encoded state controller address. */
 interface StateController {
-    stateController: Bech32;
+    stateController: Bech32Address;
 }
 /** Filter outputs based on bech32-encoded governor (governance controller) address. */
 interface Governor {
-    governor: Bech32;
+    governor: Bech32Address;
 }
 /** Define the page size for the results. */
 interface PageSize {
@@ -175,5 +174,5 @@ interface PageSize {
 }
 /** Returns outputs that are unlockable by the bech32 address. */
 interface UnlockableByAddress {
-    unlockableByAddress: Bech32;
+    unlockableByAddress: Bech32Address;
 }

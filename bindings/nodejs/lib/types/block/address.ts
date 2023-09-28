@@ -8,7 +8,7 @@ import { AliasId, NftId } from './id';
 /**
  * A hex encoded address prepended by its network type.
  */
-type Bech32 = string;
+type Bech32Address = string;
 
 /**
  * Address type variants.
@@ -143,7 +143,7 @@ const AddressDiscriminator = {
 
 export {
     AddressDiscriminator,
-    Bech32,
+    Bech32Address,
     Address,
     AddressType,
     Ed25519Address,
