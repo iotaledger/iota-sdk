@@ -20,7 +20,7 @@ block_id = client.submit_payload(
 
 print(f'Data block sent: {os.environ["EXPLORER_URL"]}/block/{block_id}')
 
-block = client.get_block_data(block_id).block
+block = client.get_block(block_id).block
 
 if isinstance(block, BasicBlock):
     print(f'Block data: {json.dumps(asdict(block), indent=4)}')

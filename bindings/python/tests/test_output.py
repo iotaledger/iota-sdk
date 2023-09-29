@@ -6,7 +6,6 @@ from dacite import from_dict
 import pytest
 
 
-@pytest.mark.skip(reason="temporarily skipped until 2.0 blocks in use")
 def test_feature():
     feature_dict = {
         "type": 2,

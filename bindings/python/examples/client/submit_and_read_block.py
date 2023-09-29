@@ -82,7 +82,7 @@ print(f'  {block}')
 metadata = client.get_block_metadata(block_id)
 
 # Get the whole block
-block = client.get_block_data(block_id).block
+block = client.get_block(block_id).block
 if isinstance(block, BasicBlock):
     payload_out = block.payload
     tag_hex_out = block.payload.tag

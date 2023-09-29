@@ -71,7 +71,7 @@ class NodeCoreAPI(metaclass=ABCMeta):
             'block': block.__dict__
         })
 
-    def get_block_data(self, block_id: HexStr) -> BlockWrapper:
+    def get_block(self, block_id: HexStr) -> BlockWrapper:
         """Get the block corresponding to the given block id.
         """
         return BlockWrapper.from_dict(self._call_method('getBlock', {
