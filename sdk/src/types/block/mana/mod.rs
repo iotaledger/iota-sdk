@@ -55,13 +55,13 @@ impl ManaAllotments {
 
     /// Creates a new [`ManaAllotments`] from a vec.
     pub fn from_vec(allotments: Vec<ManaAllotment>) -> Result<Self, Error> {
-        Ok(Self(
-            allotments
-                .into_iter()
-                .collect::<BTreeSet<_>>()
-                .try_into()
-                .map_err(Error::InvalidManaAllotmentCount)?,
-        ))
+        let mut set = BTreeSet::new();
+        for t in allotments {
+            if !set.insert(t) {
+                return Err(Error::ManaAllotmentsNotUniqueSorted);
+            }
+        }
+        Ok(Self(set.try_into().map_err(Error::InvalidManaAllotmentCount)?))
     }
 
     /// Creates a new [`ManaAllotments`] from an ordered set.

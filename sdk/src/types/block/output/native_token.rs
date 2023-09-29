@@ -228,13 +228,13 @@ impl NativeTokens {
 
     /// Creates a new [`NativeTokens`] from a vec.
     pub fn from_vec(native_tokens: Vec<NativeToken>) -> Result<Self, Error> {
-        Ok(Self(
-            native_tokens
-                .into_iter()
-                .collect::<BTreeSet<_>>()
-                .try_into()
-                .map_err(Error::InvalidNativeTokenCount)?,
-        ))
+        let mut set = BTreeSet::new();
+        for t in native_tokens {
+            if !set.insert(t) {
+                return Err(Error::NativeTokensNotUniqueSorted);
+            }
+        }
+        Ok(Self(set.try_into().map_err(Error::InvalidNativeTokenCount)?))
     }
 
     /// Creates a new [`NativeTokens`] from an ordered set.

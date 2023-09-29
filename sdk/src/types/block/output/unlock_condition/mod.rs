@@ -363,13 +363,13 @@ impl UnlockConditions {
 
     /// Creates a new [`UnlockConditions`] from a vec.
     pub fn from_vec(unlock_conditions: Vec<UnlockCondition>) -> Result<Self, Error> {
-        Ok(Self(
-            unlock_conditions
-                .into_iter()
-                .collect::<BTreeSet<_>>()
-                .try_into()
-                .map_err(Error::InvalidUnlockConditionCount)?,
-        ))
+        let mut set = BTreeSet::new();
+        for t in unlock_conditions {
+            if !set.insert(t) {
+                return Err(Error::UnlockConditionsNotUniqueSorted);
+            }
+        }
+        Ok(Self(set.try_into().map_err(Error::InvalidUnlockConditionCount)?))
     }
 
     /// Creates a new [`UnlockConditions`] from an ordered set.

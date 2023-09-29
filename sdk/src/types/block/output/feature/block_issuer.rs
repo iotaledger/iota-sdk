@@ -158,13 +158,13 @@ impl BlockIssuerKeys {
 
     /// Creates a new [`BlockIssuerKeys`] from a vec.
     pub fn from_vec(block_issuer_keys: Vec<BlockIssuerKey>) -> Result<Self, Error> {
-        Ok(Self(
-            block_issuer_keys
-                .into_iter()
-                .collect::<BTreeSet<_>>()
-                .try_into()
-                .map_err(Error::InvalidBlockIssuerKeyCount)?,
-        ))
+        let mut set = BTreeSet::new();
+        for t in block_issuer_keys {
+            if !set.insert(t) {
+                return Err(Error::BlockIssuerKeysNotUniqueSorted);
+            }
+        }
+        Ok(Self(set.try_into().map_err(Error::InvalidBlockIssuerKeyCount)?))
     }
 
     /// Creates a new [`BlockIssuerKeys`] from an ordered set.

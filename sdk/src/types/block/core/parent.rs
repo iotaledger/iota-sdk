@@ -44,19 +44,19 @@ impl<const MIN: u8, const MAX: u8> Parents<MIN, MAX> {
     pub const COUNT_RANGE: RangeInclusive<u8> = MIN..=MAX;
 
     /// Creates new [`Parents`] from a vec.
-    pub fn from_vec(inner: Vec<BlockId>) -> Result<Self, Error> {
-        Ok(Self(
-            inner
-                .into_iter()
-                .collect::<BTreeSet<_>>()
-                .try_into()
-                .map_err(|_| Error::InvalidParentCount)?,
-        ))
+    pub fn from_vec(parents: Vec<BlockId>) -> Result<Self, Error> {
+        let mut set = BTreeSet::new();
+        for t in parents {
+            if !set.insert(t) {
+                return Err(Error::ParentsNotUniqueSorted);
+            }
+        }
+        Ok(Self(set.try_into().map_err(|_| Error::InvalidParentCount)?))
     }
 
     /// Creates new [`Parents`] from an ordered set.
-    pub fn from_set(inner: BTreeSet<BlockId>) -> Result<Self, Error> {
-        Ok(Self(inner.try_into().map_err(|_| Error::InvalidParentCount)?))
+    pub fn from_set(parents: BTreeSet<BlockId>) -> Result<Self, Error> {
+        Ok(Self(parents.try_into().map_err(|_| Error::InvalidParentCount)?))
     }
 
     /// Gets the underlying set.

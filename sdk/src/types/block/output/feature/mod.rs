@@ -284,13 +284,13 @@ impl Features {
 
     /// Creates a new [`Features`] from a vec.
     pub fn from_vec(features: Vec<Feature>) -> Result<Self, Error> {
-        Ok(Self(
-            features
-                .into_iter()
-                .collect::<BTreeSet<_>>()
-                .try_into()
-                .map_err(Error::InvalidFeatureCount)?,
-        ))
+        let mut set = BTreeSet::new();
+        for t in features {
+            if !set.insert(t) {
+                return Err(Error::FeaturesNotUniqueSorted);
+            }
+        }
+        Ok(Self(set.try_into().map_err(Error::InvalidFeatureCount)?))
     }
 
     /// Creates a new [`Features`] from an ordered set.
