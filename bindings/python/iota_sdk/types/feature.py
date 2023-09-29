@@ -6,7 +6,7 @@ from typing import List, Union
 from dataclasses import dataclass, field
 
 from iota_sdk.types.address import Ed25519Address, AccountAddress, NFTAddress
-from iota_sdk.types.common import HexStr, json
+from iota_sdk.types.common import EpochIndex, HexStr, json, SlotIndex
 
 
 class FeatureType(IntEnum):
@@ -97,8 +97,7 @@ class BlockIssuer(Feature):
         expiry_slot: The slot index at which the Block Issuer Feature expires and can be removed.
         public_keys: The Block Issuer Keys.
     """
-    # TODO Replace with a proper SlotIndex type
-    expiry_slot: str
+    expiry_slot: SlotIndex
     # TODO Replace with a list of PublicKey types
     public_keys: List[HexStr]
     type: int = field(
@@ -119,10 +118,8 @@ class StakingFeature(Feature):
     """
     staked_amount: str
     fixed_cost: str
-    # TODO Replace with an EpochIndex type
-    start_epoch: HexStr
-    # TODO Replace with an EpochIndex type
-    end_epoch: HexStr
+    start_epoch: EpochIndex
+    end_epoch: EpochIndex
     type: int = field(
         default_factory=lambda: int(
             FeatureType.Staking),

@@ -5,8 +5,7 @@ use alloc::vec::Vec;
 
 use super::signature::rand_sign_ed25519;
 use crate::types::block::{
-    core::{BasicBlockBuilder, BlockBuilder, BlockWrapper},
-    parent::StrongParents,
+    core::{basic, BasicBlockBuilder, BlockBuilder, BlockWrapper},
     protocol::ProtocolParameters,
     rand::{
         bytes::rand_bytes_array,
@@ -34,7 +33,7 @@ pub fn rand_block_ids(len: usize) -> Vec<BlockId> {
 /// Generates a random basic block with given strong parents.
 pub fn rand_basic_block_with_strong_parents(
     protocol_params: ProtocolParameters,
-    strong_parents: StrongParents,
+    strong_parents: basic::StrongParents,
 ) -> BlockWrapper {
     rand_basic_block_builder_with_strong_parents(protocol_params, strong_parents).sign_random()
 }
@@ -42,7 +41,7 @@ pub fn rand_basic_block_with_strong_parents(
 /// Generates a random basic block builder with given strong parents.
 pub fn rand_basic_block_builder_with_strong_parents(
     protocol_params: ProtocolParameters,
-    strong_parents: StrongParents,
+    strong_parents: basic::StrongParents,
 ) -> BlockBuilder<BasicBlockBuilder> {
     BlockWrapper::build_basic(
         protocol_params.version(),

@@ -7,14 +7,10 @@ pub mod transaction;
 pub use self::transaction::verify_semantic;
 use crate::{
     client::{ClientInner, Result},
-    types::{
-        api::core::response::IssuanceBlockHeaderResponse,
-        block::{
-            core::{BasicBlockBuilder, BlockBuilder, BlockWrapper},
-            parent::StrongParents,
-            payload::Payload,
-            IssuerId,
-        },
+    types::block::{
+        core::{basic, BasicBlockBuilder, BlockBuilder, BlockWrapper},
+        payload::Payload,
+        IssuerId,
     },
 };
 
@@ -23,17 +19,11 @@ impl ClientInner {
         &self,
         issuer_id: IssuerId,
         issuing_time: Option<u64>,
-        strong_parents: Option<StrongParents>,
+        strong_parents: Option<basic::StrongParents>,
         payload: Option<Payload>,
     ) -> Result<BlockBuilder<BasicBlockBuilder>> {
-        let IssuanceBlockHeaderResponse {
-            strong_parents: default_strong_parents,
-            weak_parents,
-            shallow_like_parents,
-            latest_finalized_slot,
-            commitment,
-        } = self.get_issuance().await?;
-        let strong_parents = strong_parents.unwrap_or(default_strong_parents);
+        let issuance = self.get_issuance().await?;
+        let strong_parents = strong_parents.unwrap_or(issuance.strong_parents()?);
 
         let issuing_time = issuing_time.unwrap_or_else(|| {
             #[cfg(feature = "std")]
@@ -53,15 +43,15 @@ impl ClientInner {
         Ok(BlockWrapper::build_basic(
             protocol_params.version(),
             protocol_params.network_id(),
-            commitment.id(),
-            latest_finalized_slot,
+            issuance.commitment.id(),
+            issuance.latest_finalized_slot,
             issuer_id,
             strong_parents,
             0, // TODO: burned mana calculation
         )
         .with_issuing_time(issuing_time)
-        .with_weak_parents(weak_parents)
-        .with_shallow_like_parents(shallow_like_parents)
+        .with_weak_parents(issuance.weak_parents()?)
+        .with_shallow_like_parents(issuance.shallow_like_parents()?)
         .with_payload(payload))
     }
 }

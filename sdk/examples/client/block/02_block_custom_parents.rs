@@ -36,7 +36,7 @@ async fn main() -> Result<()> {
         .unsigned_basic_block_builder(
             todo!("issuer id"),
             todo!("issuing time"),
-            Some(issuance.strong_parents),
+            Some(issuance.strong_parents()?),
             None,
         )
         .await?

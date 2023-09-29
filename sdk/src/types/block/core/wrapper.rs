@@ -15,8 +15,7 @@ use packable::{
 use super::{BasicBlockBuilder, ValidationBlockBuilder};
 use crate::types::block::{
     block_id::{BlockHash, BlockId},
-    core::{BasicBlock, ValidationBlock},
-    parent::StrongParents,
+    core::{basic, validation, BasicBlock, ValidationBlock},
     protocol::ProtocolParameters,
     signature::Signature,
     slot::{SlotCommitmentId, SlotIndex},
@@ -271,7 +270,7 @@ impl BlockWrapper {
         slot_commitment_id: SlotCommitmentId,
         latest_finalized_slot: SlotIndex,
         issuer_id: IssuerId,
-        strong_parents: StrongParents,
+        strong_parents: basic::StrongParents,
         burned_mana: u64,
     ) -> BlockBuilder<BasicBlockBuilder> {
         BlockBuilder::new(
@@ -291,7 +290,7 @@ impl BlockWrapper {
         slot_commitment_id: SlotCommitmentId,
         latest_finalized_slot: SlotIndex,
         issuer_id: IssuerId,
-        strong_parents: StrongParents,
+        strong_parents: validation::StrongParents,
         highest_supported_version: u8,
     ) -> BlockBuilder<ValidationBlockBuilder> {
         let protocol_hash = protocol_parameters.hash();
