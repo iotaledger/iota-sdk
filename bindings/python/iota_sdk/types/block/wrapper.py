@@ -22,13 +22,9 @@ class BlockWrapper:
         block: Holds either a `BasicBlock` or a `ValidationBlock`.
         signature: The Block signature.
     """
-
-    def __init__(self, header: BlockHeader, block: Block,
-                 signature: Signature):
-
-        self.header = header
-        self.block = block
-        self.signature = signature
+    header: Header
+    block: Block
+    signature: Signature
 
     def id(self) -> HexStr:
         """Returns the block ID as a hexadecimal string.
@@ -45,16 +41,12 @@ class BlockWrapper:
 
         An instance of the `BlockWrapper` class.
         """
-        header = wrapper_dict.get('header', None)
-        block = wrapper_dict.get('block', None)
-        signature = wrapper_dict.get('signature', None)
-
-        return cls(header, block, signature)
+        return from_dict(BlockWrapper, wrapper_dict)
 
 
 @json
 @dataclass
-class BlockHeader:
+class Header:
     """Shared data between a `BasicBlock` and a `ValidationBlock`.
 
     Attributes:
