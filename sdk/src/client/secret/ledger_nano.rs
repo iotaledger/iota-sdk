@@ -531,18 +531,17 @@ fn merge_unlocks(
         // Get the address that is required to unlock the input
         let TransactionEssence::Regular(regular) = &prepared_transaction_data.essence;
         let account_transition = is_account_transition(&input.output, *input.output_id(), regular.outputs(), None);
-        let (input_address, _) = input.output.required_and_unlocked_address(
+        let required_address = input.output.required_address(
             slot_index,
             protocol_parameters.min_committable_age(),
             protocol_parameters.max_committable_age(),
-            input.output_metadata.output_id(),
             account_transition,
         )?;
 
         // Check if we already added an [Unlock] for this address
-        match block_indexes.get(&input_address) {
+        match block_indexes.get(&required_address) {
             // If we already have an [Unlock] for this address, add a [Unlock] based on the address type
-            Some(block_index) => match input_address {
+            Some(block_index) => match required_address {
                 Address::Account(_account) => {
                     merged_unlocks.push(Unlock::Account(AccountUnlock::new(*block_index as u16)?))
                 }
@@ -555,7 +554,7 @@ fn merge_unlocks(
                 // We can only sign ed25519 addresses and block_indexes needs to contain the account or nft
                 // address already at this point, because the reference index needs to be lower
                 // than the current block index
-                if !input_address.is_ed25519() {
+                if !required_address.is_ed25519() {
                     return Err(Error::MissingInputWithEd25519Address);
                 }
 
@@ -563,7 +562,7 @@ fn merge_unlocks(
 
                 if let Unlock::Signature(signature_unlock) = &unlock {
                     let Signature::Ed25519(ed25519_signature) = signature_unlock.signature();
-                    let ed25519_address = match input_address {
+                    let ed25519_address = match required_address {
                         Address::Ed25519(ed25519_address) => ed25519_address,
                         _ => return Err(Error::MissingInputWithEd25519Address),
                     };
@@ -574,7 +573,7 @@ fn merge_unlocks(
 
                 // Add the ed25519 address to the block_indexes, so it gets referenced if further inputs have
                 // the same address in their unlock condition
-                block_indexes.insert(input_address, current_block_index);
+                block_indexes.insert(required_address, current_block_index);
             }
         }
 

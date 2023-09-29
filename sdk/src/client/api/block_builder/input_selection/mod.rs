@@ -61,16 +61,12 @@ impl InputSelection {
     fn required_account_nft_addresses(&self, input: &InputSigningData) -> Result<Option<Requirement>, Error> {
         let account_transition =
             is_account_transition(&input.output, *input.output_id(), &self.outputs, self.burn.as_ref());
-        let required_address = input
-            .output
-            .required_and_unlocked_address(
-                self.slot_index,
-                self.protocol_parameters.min_committable_age(),
-                self.protocol_parameters.max_committable_age(),
-                input.output_id(),
-                account_transition,
-            )?
-            .0;
+        let required_address = input.output.required_address(
+            self.slot_index,
+            self.protocol_parameters.min_committable_age(),
+            self.protocol_parameters.max_committable_age(),
+            account_transition,
+        )?;
 
         match required_address {
             Address::Ed25519(_) => {
@@ -251,16 +247,14 @@ impl InputSelection {
             let required_address = input
                 .output
                 // Account transition is irrelevant here as we keep accounts anyway.
-                .required_and_unlocked_address(
+                .required_address(
                     self.slot_index,
                     self.protocol_parameters.min_committable_age(),
                     self.protocol_parameters.max_committable_age(),
-                    input.output_id(),
                     None,
                 )
                 // PANIC: safe to unwrap as non basic/account/foundry/nft outputs are already filtered out.
-                .unwrap()
-                .0;
+                .unwrap();
 
             self.addresses.contains(&required_address)
         })
@@ -287,15 +281,9 @@ impl InputSelection {
                     outputs,
                     None,
                 );
-                let (input_address, _) = input_signing_data
+                let input_address = input_signing_data
                     .output
-                    .required_and_unlocked_address(
-                        slot_index,
-                        min_committable_age,
-                        max_committable_age,
-                        input_signing_data.output_id(),
-                        account_transition,
-                    )
+                    .required_address(slot_index, min_committable_age, max_committable_age, account_transition)
                     // PANIC: safe to unwrap, because we filtered irrelevant outputs out before
                     .unwrap();
 
@@ -304,32 +292,33 @@ impl InputSelection {
 
         for input in account_nft_address_inputs {
             let account_transition = is_account_transition(&input.output, *input.output_id(), outputs, None);
-            let (input_address, _) = input.output.required_and_unlocked_address(
+            let required_address = input.output.required_address(
                 slot_index,
                 min_committable_age,
                 max_committable_age,
-                input.output_id(),
                 account_transition,
             )?;
 
-            match sorted_inputs.iter().position(|input_signing_data| match input_address {
-                Address::Account(unlock_address) => {
-                    if let Output::Account(account_output) = &input_signing_data.output {
-                        *unlock_address.account_id()
-                            == account_output.account_id_non_null(input_signing_data.output_id())
-                    } else {
-                        false
+            match sorted_inputs
+                .iter()
+                .position(|input_signing_data| match required_address {
+                    Address::Account(unlock_address) => {
+                        if let Output::Account(account_output) = &input_signing_data.output {
+                            *unlock_address.account_id()
+                                == account_output.account_id_non_null(input_signing_data.output_id())
+                        } else {
+                            false
+                        }
                     }
-                }
-                Address::Nft(unlock_address) => {
-                    if let Output::Nft(nft_output) = &input_signing_data.output {
-                        *unlock_address.nft_id() == nft_output.nft_id_non_null(input_signing_data.output_id())
-                    } else {
-                        false
+                    Address::Nft(unlock_address) => {
+                        if let Output::Nft(nft_output) = &input_signing_data.output {
+                            *unlock_address.nft_id() == nft_output.nft_id_non_null(input_signing_data.output_id())
+                        } else {
+                            false
+                        }
                     }
-                }
-                _ => false,
-            }) {
+                    _ => false,
+                }) {
                 Some(position) => {
                     // Insert after the output we need
                     sorted_inputs.insert(position + 1, input);
@@ -355,19 +344,18 @@ impl InputSelection {
                                 outputs,
                                 None,
                             );
-                            let (input_address, _) = input_signing_data
+                            let required_address = input_signing_data
                                 .output
-                                .required_and_unlocked_address(
+                                .required_address(
                                     slot_index,
                                     min_committable_age,
                                     max_committable_age,
-                                    input.output_id(),
                                     account_transition,
                                 )
                                 // PANIC: safe to unwrap, because we filtered irrelevant outputs out before
                                 .unwrap();
 
-                            input_address == account_or_nft_address
+                            required_address == account_or_nft_address
                         }) {
                             Some(position) => {
                                 // Insert before the output with this address required for unlocking

@@ -36,15 +36,13 @@ impl InputSelection {
             // PANIC: safe to unwrap as outputs with no address have been filtered out already.
             let required_address = input
                 .output
-                .required_and_unlocked_address(
+                .required_address(
                     self.slot_index,
                     self.protocol_parameters.min_committable_age(),
                     self.protocol_parameters.max_committable_age(),
-                    input.output_id(),
                     account_transition,
                 )
-                .unwrap()
-                .0;
+                .unwrap();
 
             if required_address.is_ed25519() {
                 return Some((required_address, input.chain));

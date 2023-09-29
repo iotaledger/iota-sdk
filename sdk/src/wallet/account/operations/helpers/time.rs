@@ -29,19 +29,15 @@ pub(crate) fn can_output_be_unlocked_now(
         }
     }
 
-    let (required_unlock_address, _unlocked_account_or_nft_address) =
-        output_data.output.required_and_unlocked_address(
-            slot_index,
-            min_committable_age,
-            max_committable_age,
-            &output_data.output_id,
-            account_transition,
-        )?;
+    let required_address = output_data.output.required_address(
+        slot_index,
+        min_committable_age,
+        max_committable_age,
+        account_transition,
+    )?;
 
-    Ok(account_addresses
-        .iter()
-        .any(|a| a.address.inner == required_unlock_address)
-        || account_and_nft_addresses.iter().any(|a| *a == required_unlock_address))
+    Ok(account_addresses.iter().any(|a| a.address.inner == required_address)
+        || account_and_nft_addresses.iter().any(|a| *a == required_address))
 }
 
 // Check if an output can be unlocked by one of the account addresses at the current time and at any

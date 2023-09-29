@@ -61,21 +61,17 @@ impl OutputData {
         max_committable_age: u64,
         account_transition: Option<AccountTransition>,
     ) -> crate::wallet::Result<Option<InputSigningData>> {
-        let (unlock_address, _unlocked_account_or_nft_address) = self.output.required_and_unlocked_address(
-            slot_index,
-            min_committable_age,
-            max_committable_age,
-            &self.output_id,
-            account_transition,
-        )?;
+        let required_address =
+            self.output
+                .required_address(slot_index, min_committable_age, max_committable_age, account_transition)?;
 
-        let chain = if unlock_address == self.address {
+        let chain = if required_address == self.address {
             self.chain
-        } else if let Address::Ed25519(_) = unlock_address {
+        } else if let Address::Ed25519(_) = required_address {
             if let Some(address) = account
                 .addresses_with_unspent_outputs
                 .iter()
-                .find(|a| a.address.inner == unlock_address)
+                .find(|a| a.address.inner == required_address)
             {
                 Some(
                     Bip44::new(account.coin_type)
