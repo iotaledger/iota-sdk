@@ -70,7 +70,7 @@ impl OutputData {
             &self.output_id,
         )?;
 
-        let chain = if unlock_address == self.address {
+        let chain = if required_address == self.address {
             self.chain
         } else if let Address::Ed25519(_) = unlock_address {
             if wallet_data.address.inner() == &unlock_address {

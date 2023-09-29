@@ -10,14 +10,13 @@ impl InputSelection {
         // PANIC: safe to unwrap as outputs with no address have been filtered out already.
         let required_address = input
             .output
-            .required_and_unlocked_address(
+            .required_address(
                 self.slot_index,
                 self.protocol_parameters.min_committable_age(),
                 self.protocol_parameters.max_committable_age(),
                 input.output_id(),
             )
-            .unwrap()
-            .0;
+            .unwrap();
 
         &required_address == address
     }
