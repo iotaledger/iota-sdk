@@ -4,7 +4,7 @@
 from __future__ import annotations
 from enum import Enum, IntEnum
 from dataclasses import dataclass
-from typing import List, Optional
+from typing import Optional
 from iota_sdk.types.common import HexStr, json
 
 
@@ -30,45 +30,79 @@ class Block:
 @json
 @dataclass
 class BlockMetadata:
-    """Block Metadata.
+    """Represents the metadata of a block.
+    Response of GET /api/core/v3/blocks/{blockId}/metadata.
 
     Attributes:
-        block_id: The id of the block.
-        strong_parents: Blocks that are strongly directly approved.
-        weak_parents: Blocks that are weakly directly approved.
-        shallow_like_parents: Blocks that are directly referenced to adjust opinion.
-        is_solid: Whether the block is solid.
-        referenced_by_milestone_index: The milestone index referencing the block.
-        milestone_index: The milestone index if the block contains a milestone payload.
-        ledger_inclusion_state: The ledger inclusion state of the block.
-        conflict_reason: The optional conflict reason of the block.
-        should_promote: Whether the block should be promoted.
-        should_reattach: Whether the block should be reattached.
+        block_state: Option<BlockState>,
+        tx_state: Option<TransactionState>,
+        block_failure_reason: Option<BlockFailureReason>,
+        tx_failure_reason: Option<TransactionFailureReason>,
     """
     block_id: HexStr
-    strong_parents: List[HexStr]
-    weak_parents: List[HexStr]
-    shallow_like_parents: List[HexStr]
-    is_solid: bool
-    referenced_by_milestone_index: Optional[int] = None
-    milestone_index: Optional[int] = None
-    ledger_inclusion_state: Optional[LedgerInclusionState] = None
-    conflict_reason: Optional[TransactionFailureReason] = None
-    should_promote: Optional[bool] = None
-    should_reattach: Optional[bool] = None
+    # TODO: verify if really optional:
+    # https://github.com/iotaledger/tips-draft/pull/24/files#r1293426314
+    block_state: Optional[BlockState]
+    tx_state: Optional[TransactionState]
+    block_failure_reason: Optional[BlockFailureReason]
+    tx_failure_reason: Optional[TransactionFailureReason]
 
 
-class LedgerInclusionState(str, Enum):
-    """Represents whether a block is included in the ledger.
+@json
+@dataclass
+class BlockState(Enum):
+    """Describes the state of a block.
 
     Attributes:
-        noTransaction: The block does not contain a transaction.
-        included: The block contains an included transaction.
-        conflicting: The block contains a conflicting transaction.
+        Pending: Stored but not confirmed.
+        Confirmed: Confirmed with the first level of knowledge.
+        Finalized: Included and can no longer be reverted.
+        Rejected: Rejected by the node, and user should reissue payload if it contains one.
+        Failed: Not successfully issued due to failure reason.
     """
-    noTransaction = 'noTransaction'
-    included = 'included'
-    conflicting = 'conflicting'
+    Pending = 0
+    Confirmed = 1
+    Finalized = 2
+    Rejected = 3
+    Failed = 4
+
+
+@json
+@dataclass
+class TransactionState(Enum):
+    """Describes the state of a transaction.
+
+    Attributes:
+        Pending: Stored but not confirmed.
+        Confirmed: Confirmed with the first level of knowledge.
+        Finalized: Included and can no longer be reverted.
+        Failed: The block is not successfully issued due to failure reason.
+    """
+    Pending = 0
+    Confirmed = 1
+    Finalized = 2
+    Failed = 3
+
+
+@json
+@dataclass
+class BlockFailureReason(IntEnum):
+    """Describes the reason of a block failure.
+
+    Attributes:
+        TooOldToIssue (1): The block is too old to issue.
+        ParentTooOld (2): One of the block's parents is too old.
+        ParentDoesNotExist (3): One of the block's parents does not exist.
+        ParentInvalid (4): One of the block's parents is invalid.
+        DroppedDueToCongestion (5): The block is dropped due to congestion.
+        Invalid (6): The block is invalid.
+    """
+    TooOldToIssue = 1
+    ParentTooOld = 2
+    ParentDoesNotExist = 3
+    ParentInvalid = 4
+    DroppedDueToCongestion = 5
+    Invalid = 6
 
 
 class TransactionFailureReason(Enum):
