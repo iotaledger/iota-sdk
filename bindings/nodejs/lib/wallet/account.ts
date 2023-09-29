@@ -57,11 +57,7 @@ import {
     Bech32Address,
 } from '../types';
 import { plainToInstance } from 'class-transformer';
-import {
-    bigIntToHex,
-    HexEncodedString,
-    hexToBigInt,
-} from '../types/utils/hex-encoding';
+import { bigIntToHex, hexToBigInt } from '../types/utils/hex-encoding';
 
 /** The Account class. */
 export class Account {

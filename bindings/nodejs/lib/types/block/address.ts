@@ -6,7 +6,7 @@ import { HexEncodedString } from '../utils';
 import { AliasId, NftId } from './id';
 
 /**
- * A hex encoded address prepended by its network type.
+ * An address prepended by its network type.
  */
 type Bech32Address = string;
 

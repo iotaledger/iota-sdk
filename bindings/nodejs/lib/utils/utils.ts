@@ -292,7 +292,7 @@ export class Utils {
      * @param bech32Hrp The Bech32 HRP (human readable part) to use.
      * @returns The Bech32-encoded address string.
      */
-    static nftIdToBech32(nftId: string, bech32Hrp: string): Bech32Address {
+    static nftIdToBech32(nftId: NftId, bech32Hrp: string): Bech32Address {
         return callUtilsMethod({
             name: 'nftIdToBech32',
             data: {
