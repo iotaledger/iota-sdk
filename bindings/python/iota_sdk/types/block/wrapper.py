@@ -16,13 +16,16 @@ from iota_sdk.utils import Utils
 class BlockWrapper:
     """A block wrapper type that can hold either a `BasicBlock` or a `ValidationBlock`.
     Shared data is stored alongside such a block in the `BlockHeader` and `Signature` fields.
+
+    Attributes:
+        header: The Block header.
+        block: Holds either a `BasicBlock` or a `ValidationBlock`.
+        signature: The Block signature.
     """
 
     def __init__(self, header: BlockHeader, block: Block,
                  signature: Signature):
-        if not isinstance(block, Block):
-            raise ValueError(
-                "block must be an instance of Block or its subclasses")
+
         self.header = header
         self.block = block
         self.signature = signature
@@ -33,7 +36,7 @@ class BlockWrapper:
         return Utils.block_id(self)
 
     @classmethod
-    def from_dict(cls, block_wrapper_dict: Dict) -> BlockWrapper:
+    def from_dict(cls, wrapper_dict: Dict) -> BlockWrapper:
         """
         The function `from_dict` takes a dictionary that contains the data needed to
         create an instance of the `BlockWrapper` class.
@@ -42,13 +45,17 @@ class BlockWrapper:
 
         An instance of the `BlockWrapper` class.
         """
-        return from_dict(BlockWrapper, block_wrapper_dict)
+        header = wrapper_dict.get('header', None)
+        block = wrapper_dict.get('block', None)
+        signature = wrapper_dict.get('signature', None)
+
+        return cls(header, block, signature)
 
 
 @json
 @dataclass
 class BlockHeader:
-    """TODO
+    """Shared data between a `BasicBlock` and a `ValidationBlock`.
 
     Attributes:
         protocol_version: Protocol version of the network to which this block belongs.
