@@ -19,8 +19,8 @@ pub(crate) fn can_output_be_unlocked_now(
     account_and_nft_addresses: &[Address],
     output_data: &OutputData,
     slot_index: SlotIndex,
-    min_committable_age: SlotIndex,
-    max_committable_age: SlotIndex,
+    min_committable_age: u64,
+    max_committable_age: u64,
     account_transition: Option<AccountTransition>,
 ) -> crate::wallet::Result<bool> {
     if let Some(unlock_conditions) = output_data.output.unlock_conditions() {
@@ -52,8 +52,8 @@ pub(crate) fn can_output_be_unlocked_forever_from_now_on(
     account_addresses: &[AddressWithUnspentOutputs],
     output: &Output,
     slot_index: SlotIndex,
-    min_committable_age: SlotIndex,
-    max_committable_age: SlotIndex,
+    min_committable_age: u64,
+    max_committable_age: u64,
 ) -> bool {
     if let Some(unlock_conditions) = output.unlock_conditions() {
         if unlock_conditions.is_timelocked(slot_index, min_committable_age) {

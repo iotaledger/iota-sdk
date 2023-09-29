@@ -271,8 +271,8 @@ impl InputSelection {
         mut inputs: Vec<InputSigningData>,
         outputs: &[Output],
         slot_index: SlotIndex,
-        min_committable_age: SlotIndex,
-        max_committable_age: SlotIndex,
+        min_committable_age: u64,
+        max_committable_age: u64,
     ) -> Result<Vec<InputSigningData>, Error> {
         // initially sort by output to make it deterministic
         // TODO: rethink this, we only need it deterministic for tests, for the protocol it doesn't matter, also there

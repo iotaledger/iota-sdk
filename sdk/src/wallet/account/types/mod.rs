@@ -57,8 +57,8 @@ impl OutputData {
         &self,
         account: &AccountDetails,
         slot_index: SlotIndex,
-        min_committable_age: SlotIndex,
-        max_committable_age: SlotIndex,
+        min_committable_age: u64,
+        max_committable_age: u64,
         account_transition: Option<AccountTransition>,
     ) -> crate::wallet::Result<Option<InputSigningData>> {
         let (unlock_address, _unlocked_account_or_nft_address) = self.output.required_and_unlocked_address(
