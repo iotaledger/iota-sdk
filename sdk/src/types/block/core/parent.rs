@@ -95,6 +95,14 @@ impl<const MIN: u8, const MAX: u8> IntoIterator for Parents<MIN, MAX> {
     }
 }
 
-pub type StrongParents = Parents<1, 8>;
-pub type WeakParents = Parents<0, 8>;
-pub type ShallowLikeParents = Parents<0, 8>;
+pub(crate) fn verify_parents_sets(
+    strong_parents: &BTreeSet<BlockId>,
+    weak_parents: &BTreeSet<BlockId>,
+    shallow_like_parents: &BTreeSet<BlockId>,
+) -> Result<(), Error> {
+    if !weak_parents.is_disjoint(&strong_parents) || !weak_parents.is_disjoint(&shallow_like_parents) {
+        return Err(Error::NonDisjointParents);
+    }
+
+    Ok(())
+}

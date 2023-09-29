@@ -28,7 +28,7 @@ async fn main() -> Result<()> {
         block_id
     } else {
         // ... fetch one from the node.
-        *client.get_issuance().await?.strong_parents.first().unwrap()
+        client.get_issuance().await?.strong_parents.into_iter().next().unwrap()
     };
 
     // Get the block.

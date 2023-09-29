@@ -30,7 +30,7 @@ async fn main() -> Result<()> {
             todo!("issuer id"),
             todo!("block signature"),
             todo!("issuing time"),
-            Some(issuance.strong_parents),
+            Some(issuance.strong_parents()?),
             None,
         )
         .await?;
