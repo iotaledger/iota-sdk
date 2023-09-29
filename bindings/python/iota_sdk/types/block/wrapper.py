@@ -3,8 +3,7 @@
 
 from __future__ import annotations
 from dataclasses import dataclass
-from typing import Dict, Union
-from dacite import from_dict
+from typing import Union
 from iota_sdk.types.block.basic import BasicBlock
 from iota_sdk.types.block.validation import ValidationBlock
 from iota_sdk.types.common import HexStr, json
@@ -36,15 +35,3 @@ class BlockWrapper:
         """Returns the block ID as a hexadecimal string.
         """
         return Utils.block_id(self)
-
-    @classmethod
-    def from_dict(cls, wrapper_dict: Dict) -> BlockWrapper:
-        """
-        The function `from_dict` takes a dictionary that contains the data needed to
-        create an instance of the `BlockWrapper` class.
-
-        Returns:
-
-        An instance of the `BlockWrapper` class.
-        """
-        return from_dict(BlockWrapper, wrapper_dict)
