@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 from enum import IntEnum
-from typing import Dict, Optional, List, Union, Any
+from typing import Dict, Optional, List, TypeAlias, Union, Any
 from dataclasses import dataclass, field
 from dataclasses_json import config
 from iota_sdk.types.common import HexStr, json
@@ -227,8 +227,11 @@ class DelegationOutput(Output):
         OutputType.Delegation), init=False)
 
 
-def deserialize_output(d: Dict[str, Any]) -> Union[BasicOutput, AccountOutput,
-                                                   FoundryOutput, NftOutput, DelegationOutput]:
+OutputUnion: TypeAlias = Union[BasicOutput, AccountOutput,
+                               FoundryOutput, NftOutput, DelegationOutput]
+
+
+def deserialize_output(d: Dict[str, Any]) -> OutputUnion:
     """
     Takes a dictionary as input and returns an instance of a specific class based on the value of the 'type' key in the dictionary.
 
@@ -249,8 +252,7 @@ def deserialize_output(d: Dict[str, Any]) -> Union[BasicOutput, AccountOutput,
     raise Exception(f'invalid output type: {output_type}')
 
 
-def deserialize_outputs(dicts: List[Dict[str, Any]]) -> List[Union[BasicOutput,
-                                                                   AccountOutput, FoundryOutput, NftOutput, DelegationOutput]]:
+def deserialize_outputs(dicts: List[Dict[str, Any]]) -> List[OutputUnion]:
     """
     Takes a list of dictionaries as input and returns a list with specific instances of a classes based on the value of the 'type' key in the dictionary.
 

@@ -3,9 +3,9 @@
 
 from enum import IntEnum
 from dataclasses import dataclass, field
-from typing import Dict, List, Union, Any
+from typing import Dict, List, TypeAlias, Union, Any
 from dataclasses_json import config
-from iota_sdk.types.address import Ed25519Address, AccountAddress, NFTAddress
+from iota_sdk.types.address import AddressUnion, AccountAddress
 from iota_sdk.types.common import json
 from iota_sdk.types.address import deserialize_address
 
@@ -47,7 +47,7 @@ class AddressUnlockCondition(UnlockCondition):
     Args:
         address: An address unlocked with a private key.
     """
-    address: Union[Ed25519Address, AccountAddress, NFTAddress] = field(
+    address: AddressUnion = field(
         metadata=config(
             decoder=deserialize_address
         ))
@@ -66,7 +66,7 @@ class StorageDepositReturnUnlockCondition(UnlockCondition):
         return_address: The address to return the amount to.
     """
     amount: str
-    return_address: Union[Ed25519Address, AccountAddress, NFTAddress] = field(
+    return_address: AddressUnion = field(
         metadata=config(
             decoder=deserialize_address
         ))
@@ -97,7 +97,7 @@ class ExpirationUnlockCondition(UnlockCondition):
         return_address: The return address if the output was not claimed in time.
     """
     unix_time: int
-    return_address: Union[Ed25519Address, AccountAddress, NFTAddress] = field(
+    return_address: AddressUnion = field(
         metadata=config(
             decoder=deserialize_address
         ))
@@ -114,7 +114,7 @@ class StateControllerAddressUnlockCondition(UnlockCondition):
     Args:
         address: The state controller address that owns the output.
     """
-    address: Union[Ed25519Address, AccountAddress, NFTAddress] = field(
+    address: AddressUnion = field(
         metadata=config(
             decoder=deserialize_address
         ))
@@ -129,7 +129,7 @@ class GovernorAddressUnlockCondition(UnlockCondition):
     Args:
         address: The governor address that owns the output.
     """
-    address: Union[Ed25519Address, AccountAddress, NFTAddress] = field(
+    address: AddressUnion = field(
         metadata=config(
             decoder=deserialize_address
         ))
@@ -149,8 +149,11 @@ class ImmutableAccountAddressUnlockCondition(UnlockCondition):
         UnlockConditionType.ImmutableAccountAddress), init=False)
 
 
-def deserialize_unlock_condition(d: Dict[str, Any]) -> Union[AddressUnlockCondition, StorageDepositReturnUnlockCondition, TimelockUnlockCondition,
-                                                             ExpirationUnlockCondition, StateControllerAddressUnlockCondition, GovernorAddressUnlockCondition, ImmutableAccountAddressUnlockCondition]:
+UnlockConditionUnion: TypeAlias = Union[AddressUnlockCondition, StorageDepositReturnUnlockCondition, TimelockUnlockCondition,
+                                        ExpirationUnlockCondition, StateControllerAddressUnlockCondition, GovernorAddressUnlockCondition, ImmutableAccountAddressUnlockCondition]
+
+
+def deserialize_unlock_condition(d: Dict[str, Any]) -> UnlockConditionUnion:
     """
     Takes a dictionary as input and returns an instance of a specific class based on the value of the 'type' key in the dictionary.
 
@@ -176,8 +179,7 @@ def deserialize_unlock_condition(d: Dict[str, Any]) -> Union[AddressUnlockCondit
     raise Exception(f'invalid unlock condition type: {uc_type}')
 
 
-def deserialize_unlock_conditions(dicts: List[Dict[str, Any]]) -> List[Union[AddressUnlockCondition, StorageDepositReturnUnlockCondition, TimelockUnlockCondition,
-                                                                             ExpirationUnlockCondition, StateControllerAddressUnlockCondition, GovernorAddressUnlockCondition, ImmutableAccountAddressUnlockCondition]]:
+def deserialize_unlock_conditions(dicts: List[Dict[str, Any]]) -> List[UnlockConditionUnion]:
     """
     Takes a list of dictionaries as input and returns a list with specific instances of a classes based on the value of the 'type' key in the dictionary.
 

@@ -3,10 +3,8 @@
 
 from __future__ import annotations
 from enum import IntEnum
-from typing import Any, Dict, List, Union
-
+from typing import Any, Dict, List, TypeAlias, Union
 from dataclasses import dataclass, field
-
 from iota_sdk.types.common import HexStr, json
 from iota_sdk.types.essence import RegularTransactionEssence
 from iota_sdk.types.unlock import SignatureUnlock, ReferenceUnlock
@@ -65,7 +63,10 @@ class TransactionPayload(Payload):
         init=False)
 
 
-def deserialize_payload(d: Dict[str, Any]) -> Union[TaggedDataPayload, TransactionPayload]:
+PayloadUnion: TypeAlias = Union[TaggedDataPayload, TransactionPayload]
+
+
+def deserialize_payload(d: Dict[str, Any]) -> PayloadUnion:
     """
     Takes a dictionary as input and returns an instance of a specific class based on the value of the 'type' key in the dictionary.
 
@@ -81,7 +82,7 @@ def deserialize_payload(d: Dict[str, Any]) -> Union[TaggedDataPayload, Transacti
 
 
 def deserialize_payloads(
-        dicts: List[Dict[str, Any]]) -> List[Union[TaggedDataPayload, TransactionPayload]]:
+        dicts: List[Dict[str, Any]]) -> List[PayloadUnion]:
     """
     Takes a list of dictionaries as input and returns a list with specific instances of a classes based on the value of the 'type' key in the dictionary.
 

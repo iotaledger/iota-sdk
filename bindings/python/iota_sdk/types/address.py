@@ -2,11 +2,8 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from enum import IntEnum
-
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Union
-
-
+from typing import Any, Dict, List, TypeAlias, Union
 from iota_sdk.types.common import HexStr, json
 
 
@@ -81,7 +78,10 @@ class AddressWithUnspentOutputs():
     output_ids: bool
 
 
-def deserialize_address(d: Dict[str, Any]) -> Union[Ed25519Address, AccountAddress, NFTAddress]:
+AddressUnion: TypeAlias = Union[Ed25519Address, AccountAddress, NFTAddress]
+
+
+def deserialize_address(d: Dict[str, Any]) -> AddressUnion:
     """
     Takes a dictionary as input and returns an instance of a specific class based on the value of the 'type' key in the dictionary.
 
@@ -99,7 +99,7 @@ def deserialize_address(d: Dict[str, Any]) -> Union[Ed25519Address, AccountAddre
 
 
 def deserialize_addresses(
-        dicts: List[Dict[str, Any]]) -> List[Union[Ed25519Address, AccountAddress, NFTAddress]]:
+        dicts: List[Dict[str, Any]]) -> List[AddressUnion]:
     """
     Takes a list of dictionaries as input and returns a list with specific instances of a classes based on the value of the 'type' key in the dictionary.
 

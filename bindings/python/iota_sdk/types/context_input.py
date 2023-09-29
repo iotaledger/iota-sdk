@@ -4,7 +4,7 @@
 from __future__ import annotations
 from dataclasses import dataclass, field
 from enum import IntEnum
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List, TypeAlias, Union
 from iota_sdk.types.common import HexStr, json
 
 
@@ -73,8 +73,11 @@ class RewardContextInput(ContextInput):
         init=False)
 
 
-def deserialize_context_input(d: Dict[str, Any]) -> Union[CommitmentContextInput,
-                                                          BlockIssuanceCreditContextInput, RewardContextInput]:
+ContextInputUnion: TypeAlias = Union[CommitmentContextInput,
+                                     BlockIssuanceCreditContextInput, RewardContextInput]
+
+
+def deserialize_context_input(d: Dict[str, Any]) -> ContextInputUnion:
     """
     Takes a dictionary as input and returns an instance of a specific class based on the value of the 'type' key in the dictionary.
 
@@ -92,7 +95,7 @@ def deserialize_context_input(d: Dict[str, Any]) -> Union[CommitmentContextInput
 
 
 def deserialize_context_inputs(
-        dicts: List[Dict[str, Any]]) -> List[Union[CommitmentContextInput, BlockIssuanceCreditContextInput, RewardContextInput]]:
+        dicts: List[Dict[str, Any]]) -> List[ContextInputUnion]:
     """
     Takes a list of dictionaries as input and returns a list with specific instances of a classes based on the value of the 'type' key in the dictionary.
 
