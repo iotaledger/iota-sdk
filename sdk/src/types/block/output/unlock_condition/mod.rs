@@ -33,7 +33,7 @@ pub use self::{
 use crate::types::block::{address::Address, create_bitflags, protocol::ProtocolParameters, slot::SlotIndex, Error};
 
 ///
-#[derive(Clone, Eq, PartialEq, Hash, From)]
+#[derive(Clone, Eq, PartialEq, From)]
 pub enum UnlockCondition {
     /// An address unlock condition.
     Address(AddressUnlockCondition),
@@ -59,6 +59,11 @@ impl PartialOrd for UnlockCondition {
 impl Ord for UnlockCondition {
     fn cmp(&self, other: &Self) -> core::cmp::Ordering {
         self.kind().cmp(&other.kind())
+    }
+}
+impl core::hash::Hash for UnlockCondition {
+    fn hash<H: core::hash::Hasher>(&self, state: &mut H) {
+        self.kind().hash(state);
     }
 }
 impl core::borrow::Borrow<u8> for UnlockCondition {

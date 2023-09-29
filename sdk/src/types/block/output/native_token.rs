@@ -29,7 +29,7 @@ impl From<FoundryId> for TokenId {
 }
 
 ///
-#[derive(Copy, Clone, Debug, Eq, PartialEq, Hash, Packable)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq, Packable)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[packable(unpack_error = Error)]
 pub struct NativeToken {
@@ -73,6 +73,11 @@ impl PartialOrd for NativeToken {
 impl Ord for NativeToken {
     fn cmp(&self, other: &Self) -> core::cmp::Ordering {
         self.token_id.cmp(&other.token_id)
+    }
+}
+impl core::hash::Hash for NativeToken {
+    fn hash<H: core::hash::Hasher>(&self, state: &mut H) {
+        self.token_id.hash(state);
     }
 }
 

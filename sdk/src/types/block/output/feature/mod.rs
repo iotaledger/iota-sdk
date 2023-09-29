@@ -35,7 +35,7 @@ pub use self::{
 use crate::types::block::{create_bitflags, Error};
 
 ///
-#[derive(Clone, Eq, PartialEq, Hash, From, Packable)]
+#[derive(Clone, Eq, PartialEq, From, Packable)]
 #[packable(unpack_error = Error)]
 #[packable(tag_type = u8, with_error = Error::InvalidFeatureKind)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize), serde(untagged))]
@@ -69,6 +69,11 @@ impl PartialOrd for Feature {
 impl Ord for Feature {
     fn cmp(&self, other: &Self) -> core::cmp::Ordering {
         self.kind().cmp(&other.kind())
+    }
+}
+impl core::hash::Hash for Feature {
+    fn hash<H: core::hash::Hasher>(&self, state: &mut H) {
+        self.kind().hash(state);
     }
 }
 
