@@ -34,10 +34,10 @@ class BlockMetadata:
     Response of GET /api/core/v3/blocks/{blockId}/metadata.
 
     Attributes:
-        block_state: Option<BlockState>,
-        tx_state: Option<TransactionState>,
-        block_failure_reason: Option<BlockFailureReason>,
-        tx_failure_reason: Option<TransactionFailureReason>,
+        block_state: The block state.
+        tx_state: The transaction state.
+        block_failure_reason: The block failure reason.
+        tx_failure_reason: The transaction failure reason.
     """
     block_id: HexStr
     # TODO: verify if really optional:
