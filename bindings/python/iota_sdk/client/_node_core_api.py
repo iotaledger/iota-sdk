@@ -6,7 +6,7 @@ from abc import ABCMeta, abstractmethod
 from dacite import from_dict
 
 from iota_sdk.types.block.wrapper import BlockWrapper
-from iota_sdk.types.block.block import BlockMetadata
+from iota_sdk.types.block.metadata import BlockMetadata
 from iota_sdk.types.common import HexStr
 from iota_sdk.types.node_info import NodeInfo, NodeInfoWrapper
 from iota_sdk.types.output import OutputWithMetadata, OutputMetadata

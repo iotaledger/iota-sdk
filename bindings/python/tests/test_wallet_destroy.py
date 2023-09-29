@@ -8,7 +8,7 @@ import unittest
 
 
 class WalletDestroy(unittest.TestCase):
-    @pytest.mark.skip(reason="temporarily skipped until 2.0 blocks in use")
+    @pytest.mark.skip(reason="temporarily skipped")
     def test_wallet_destroy(self):
         db_path = './test_wallet_destroy'
         shutil.rmtree(db_path, ignore_errors=True)
@@ -41,7 +41,7 @@ class WalletDestroy(unittest.TestCase):
             0].address
         shutil.rmtree(db_path, ignore_errors=True)
 
-    @pytest.mark.skip(reason="temporarily skipped until 2.0 blocks in use")
+    @pytest.mark.skip(reason="temporarily skipped")
     def test_wallet_destroy_error(self):
         db_path = './test_wallet_destroy_error'
         shutil.rmtree(db_path, ignore_errors=True)

@@ -14,7 +14,7 @@ with open('../../sdk/tests/client/fixtures/test_vectors.json') as json_file:
 client = Client()
 
 
-@pytest.mark.skip(reason="temporarily skipped until 2.0 blocks in use")
+@pytest.mark.skip(reason="temporarily skipped")
 def test_mnemonic_address_generation():
     mnemonic_address_test_cases = tv['general']['address_generations']
 
@@ -33,7 +33,7 @@ def test_mnemonic_address_generation():
         assert test['bech32_address'] == generated_address[0]
 
 
-@pytest.mark.skip(reason="temporarily skipped until 2.0 blocks in use")
+@pytest.mark.skip(reason="temporarily skipped")
 def test_sign_verify_ed25519():
     secret_manager = MnemonicSecretManager(
         "acoustic trophy damage hint search taste love bicycle foster cradle brown govern endless depend situate athlete pudding blame question genius transfer van random vast")

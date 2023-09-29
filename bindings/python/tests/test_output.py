@@ -25,7 +25,7 @@ def test_feature():
     assert issuer_feature.to_dict() == issuer_dict
 
 
-@pytest.mark.skip(reason="temporarily skipped until 2.0 blocks in use")
+@pytest.mark.skip(reason="temporarily skipped")
 def test_output():
     basic_output_dict = {
         "type": 3,

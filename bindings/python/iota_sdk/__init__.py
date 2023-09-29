@@ -14,6 +14,7 @@ from .types.address import *
 from .types.balance import *
 from .types.block.basic import *
 from .types.block.block import *
+from .types.block.metadata import *
 from .types.block.wrapper import *
 from .types.block.validation import *
 from .types.block_builder_options import *
