@@ -89,6 +89,18 @@ impl<const MAX: u8> Default for Parents<0, MAX> {
     }
 }
 
-pub type StrongParents = Parents<1, 8>;
-pub type WeakParents = Parents<0, 8>;
-pub type ShallowLikeParents = Parents<0, 8>;
+pub(crate) fn verify_parents_sets(
+    strong_parents: &[BlockId],
+    weak_parents: &[BlockId],
+    shallow_like_parents: &[BlockId],
+) -> Result<(), Error> {
+    let strong_parents: BTreeSet<_> = strong_parents.iter().copied().collect();
+    let weak_parents: BTreeSet<_> = weak_parents.iter().copied().collect();
+    let shallow_like_parents: BTreeSet<_> = shallow_like_parents.iter().copied().collect();
+
+    if !weak_parents.is_disjoint(&strong_parents) || !weak_parents.is_disjoint(&shallow_like_parents) {
+        return Err(Error::NonDisjointParents);
+    }
+
+    Ok(())
+}
