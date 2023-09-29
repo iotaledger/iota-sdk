@@ -9,12 +9,15 @@ use packable::{
 };
 
 use crate::types::block::{
-    core::{verify_parents, Block},
-    parent::{ShallowLikeParents, StrongParents, WeakParents},
+    core::{parent::verify_parents_sets, Block, Parents},
     payload::{OptionalPayload, Payload},
     protocol::ProtocolParameters,
     Error,
 };
+
+pub type StrongParents = Parents<1, 8>;
+pub type WeakParents = Parents<0, 8>;
+pub type ShallowLikeParents = Parents<0, 8>;
 
 /// A builder for a [`BasicBlock`].
 pub struct BasicBlockBuilder {
@@ -75,7 +78,7 @@ impl BasicBlockBuilder {
 
     /// Finishes the builder into a [`BasicBlock`].
     pub fn finish(self) -> Result<BasicBlock, Error> {
-        verify_parents(&self.strong_parents, &self.weak_parents, &self.shallow_like_parents)?;
+        verify_parents_sets(&self.strong_parents, &self.weak_parents, &self.shallow_like_parents)?;
 
         Ok(BasicBlock {
             strong_parents: self.strong_parents,
@@ -164,7 +167,8 @@ impl Packable for BasicBlock {
         let shallow_like_parents = ShallowLikeParents::unpack::<_, VERIFY>(unpacker, &())?;
 
         if VERIFY {
-            verify_parents(&strong_parents, &weak_parents, &shallow_like_parents).map_err(UnpackError::Packable)?;
+            verify_parents_sets(&strong_parents, &weak_parents, &shallow_like_parents)
+                .map_err(UnpackError::Packable)?;
         }
 
         let payload = OptionalPayload::unpack::<_, VERIFY>(unpacker, visitor)?;
