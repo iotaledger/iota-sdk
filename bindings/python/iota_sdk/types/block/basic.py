@@ -32,15 +32,3 @@ class BasicBlock(Block):
     type: int = field(
         default_factory=lambda: BlockType.Basic,
         init=False)
-
-    @classmethod
-    def from_dict(cls, basic_block_dict: Dict) -> BasicBlock:
-        """
-        The function `from_dict` takes a dictionary that contains the data needed to
-        create an instance of the `BasicBlock` class .
-
-        Returns:
-
-        An instance of the `BasicBlock` class .
-        """
-        return from_dict(BasicBlock, basic_block_dict)

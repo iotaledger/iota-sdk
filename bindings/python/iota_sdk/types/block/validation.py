@@ -31,15 +31,3 @@ class ValidationBlock(Block):
     type: int = field(
         default_factory=lambda: BlockType.Validation,
         init=False)
-
-    @classmethod
-    def from_dict(cls, validation_block_dict: Dict) -> ValidationBlock:
-        """
-        The function `from_dict` takes a dictionary that contains the data needed to
-        create an instance of the `ValidationBlock` class.
-
-        Returns:
-
-        An instance of the `ValidationBlock` class.
-        """
-        return from_dict(ValidationBlock, validation_block_dict)
