@@ -63,7 +63,7 @@ impl Ord for UnlockCondition {
 }
 impl core::borrow::Borrow<u8> for UnlockCondition {
     fn borrow(&self) -> &u8 {
-        &self.ord_kind()
+        self.ord_kind()
     }
 }
 
@@ -87,7 +87,7 @@ impl UnlockCondition {
         *self.ord_kind()
     }
 
-    fn ord_kind<'a>(&'a self) -> &'a u8 {
+    fn ord_kind(&self) -> &u8 {
         match self {
             Self::Address(_) => &AddressUnlockCondition::KIND,
             Self::StorageDepositReturn(_) => &StorageDepositReturnUnlockCondition::KIND,

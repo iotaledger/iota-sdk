@@ -74,7 +74,7 @@ impl Ord for Feature {
 
 impl core::borrow::Borrow<u8> for Feature {
     fn borrow(&self) -> &u8 {
-        &self.ord_kind()
+        self.ord_kind()
     }
 }
 
@@ -97,7 +97,7 @@ impl Feature {
         *self.ord_kind()
     }
 
-    fn ord_kind<'a>(&'a self) -> &'a u8 {
+    fn ord_kind(&self) -> &u8 {
         match self {
             Self::Sender(_) => &SenderFeature::KIND,
             Self::Issuer(_) => &IssuerFeature::KIND,
