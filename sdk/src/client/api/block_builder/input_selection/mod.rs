@@ -62,7 +62,7 @@ impl InputSelection {
     fn required_account_nft_addresses(&self, input: &InputSigningData) -> Result<Option<Requirement>, Error> {
         let required_address = input
             .output
-            .required_and_unlocked_address(
+            .required_address(
                 self.slot_index,
                 self.protocol_parameters.min_committable_age(),
                 self.protocol_parameters.max_committable_age(),
@@ -271,8 +271,8 @@ impl InputSelection {
     pub(crate) fn sort_input_signing_data(
         mut inputs: Vec<InputSigningData>,
         slot_index: SlotIndex,
-        min_committable_age: u64,
-        max_committable_age: u64,
+        min_committable_age: u32,
+        max_committable_age: u32,
     ) -> Result<Vec<InputSigningData>, Error> {
         // initially sort by output to make it deterministic
         // TODO: rethink this, we only need it deterministic for tests, for the protocol it doesn't matter, also there
@@ -281,27 +281,27 @@ impl InputSelection {
         // filter for ed25519 address first
         let (mut sorted_inputs, account_nft_address_inputs): (Vec<InputSigningData>, Vec<InputSigningData>) =
             inputs.into_iter().partition(|input_signing_data| {
-                let (input_address, _) = input_signing_data
+                let required_address = input_signing_data
                     .output
-                    .required_and_unlocked_address(
+                    .required_address(
                         slot_index,
                         min_committable_age,
                         max_committable_age,
                         input_signing_data.output_id(),
                     )
-                    // PANIC: safe to unwrap, because we filtered irrelevant outputs out before
+                    // TODO
+                    .unwrap()
                     .unwrap();
 
-                input_address.is_ed25519()
+                required_address.is_ed25519()
             });
 
         for input in account_nft_address_inputs {
-            let (input_address, _) = input.output.required_and_unlocked_address(
-                slot_index,
-                min_committable_age,
-                max_committable_age,
-                input.output_id(),
-            )?;
+            let required_address = input
+                .output
+                .required_address(slot_index, min_committable_age, max_committable_age, input.output_id())?
+                // TODO
+                .unwrap();
 
             match sorted_inputs
                 .iter()
@@ -342,7 +342,7 @@ impl InputSelection {
                     if let Some(account_or_nft_address) = account_or_nft_address {
                         // Check for existing outputs for this address, and insert before
                         match sorted_inputs.iter().position(|input_signing_data| {
-                            let (input_address, _) = input_signing_data
+                            let required_address = input_signing_data
                                 .output
                                 .required_address(
                                     slot_index,
@@ -350,7 +350,8 @@ impl InputSelection {
                                     max_committable_age,
                                     input.output_id(),
                                 )
-                                // PANIC: safe to unwrap, because we filtered irrelevant outputs out before
+                                // TODO
+                                .unwrap()
                                 .unwrap();
 
                             required_address == account_or_nft_address

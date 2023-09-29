@@ -16,6 +16,8 @@ impl InputSelection {
                 self.protocol_parameters.max_committable_age(),
                 input.output_id(),
             )
+            // TODO
+            .unwrap()
             .unwrap();
 
         &required_address == address
@@ -24,14 +26,16 @@ impl InputSelection {
     // Checks if an available input can unlock a given ED25519 address.
     // In case an account input is selected, also tells if it needs to be state or governance transitioned.
     fn available_has_ed25519_address(&self, input: &InputSigningData, address: &Address) -> bool {
-        let (required_address, _) = input
+        let required_address = input
             .output
-            .required_and_unlocked_address(
+            .required_address(
                 self.slot_index,
                 self.protocol_parameters.min_committable_age(),
                 self.protocol_parameters.max_committable_age(),
                 input.output_id(),
             )
+            // TODO
+            .unwrap()
             .unwrap();
 
         &required_address == address

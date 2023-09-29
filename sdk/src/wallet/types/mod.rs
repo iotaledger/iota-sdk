@@ -63,14 +63,13 @@ impl OutputData {
         min_committable_age: SlotIndex,
         max_committable_age: SlotIndex,
     ) -> crate::wallet::Result<Option<InputSigningData>> {
-        let (unlock_address, _unlocked_account_or_nft_address) = self.output.required_and_unlocked_address(
-            slot_index,
-            min_committable_age,
-            max_committable_age,
-            &self.output_id,
-        )?;
+        let unlock_address = self
+            .output
+            .required_address(slot_index, min_committable_age, max_committable_age, &self.output_id)?
+            // TODO
+            .unwrap();
 
-        let chain = if required_address == self.address {
+        let chain = if unlock_address == self.address {
             self.chain
         } else if let Address::Ed25519(_) = unlock_address {
             if wallet_data.address.inner() == &unlock_address {

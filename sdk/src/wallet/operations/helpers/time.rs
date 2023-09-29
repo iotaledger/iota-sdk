@@ -20,13 +20,16 @@ pub(crate) fn can_output_be_unlocked_now(
         }
     }
 
-    let (required_unlock_address, _unlocked_account_or_nft_address) =
-        output_data.output.required_and_unlocked_address(
+    let required_unlock_address = output_data
+        .output
+        .required_address(
             slot_index,
             min_committable_age,
             max_committable_age,
             &output_data.output_id,
-        )?;
+        )?
+        // TODO
+        .unwrap();
 
     Ok(wallet_address == &required_unlock_address)
 }
@@ -37,8 +40,8 @@ pub(crate) fn can_output_be_unlocked_forever_from_now_on(
     wallet_address: &Address,
     output: &Output,
     slot_index: SlotIndex,
-    min_committable_age: u64,
-    max_committable_age: u64,
+    min_committable_age: u32,
+    max_committable_age: u32,
 ) -> bool {
     if let Some(unlock_conditions) = output.unlock_conditions() {
         if unlock_conditions.is_timelocked(slot_index, min_committable_age) {

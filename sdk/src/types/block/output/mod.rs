@@ -277,42 +277,27 @@ impl Output {
         min_committable_age: impl Into<SlotIndex>,
         max_committable_age: impl Into<SlotIndex>,
         output_id: &OutputId,
-    ) -> Result<(Address, Option<Address>), Error> {
-        match self {
-            Self::Basic(output) => Ok((
-                *output
-                    .unlock_conditions()
-                    .locked_address(output.address(), slot_index, min_committable_age, max_committable_age)
-                    // TODO
-                    .unwrap(),
-                None,
-            )),
-            Self::Account(output) => Ok((
-                output
-                    .unlock_conditions()
-                    .locked_address(output.address(), slot_index, min_committable_age, max_committable_age)
-                    .clone(),
-                Some(Address::Account(output.account_address(output_id))),
-            )),
-            Self::Anchor(_) => Err(Error::UnsupportedOutputKind(AnchorOutput::KIND)),
-            Self::Foundry(output) => Ok((Address::Account(*output.account_address()), None)),
-            Self::Nft(output) => Ok((
-                *output
-                    .unlock_conditions()
-                    .locked_address(output.address(), slot_index, min_committable_age, max_committable_age)
-                    // TODO
-                    .unwrap(),
-                Some(Address::Nft(output.nft_address(output_id))),
-            )),
-            Self::Delegation(output) => Ok((
-                *output
-                    .unlock_conditions()
-                    .locked_address(output.address(), slot_index, min_committable_age, max_committable_age)
-                    // TODO
-                    .unwrap(),
-                None,
-            )),
-        }
+    ) -> Result<Option<Address>, Error> {
+        Ok(match self {
+            Self::Basic(output) => output
+                .unlock_conditions()
+                .locked_address(output.address(), slot_index, min_committable_age, max_committable_age)
+                .cloned(),
+            Self::Account(output) => output
+                .unlock_conditions()
+                .locked_address(output.address(), slot_index, min_committable_age, max_committable_age)
+                .cloned(),
+            Self::Anchor(_) => return Err(Error::UnsupportedOutputKind(AnchorOutput::KIND)),
+            Self::Foundry(output) => Some(Address::Account(*output.account_address())),
+            Self::Nft(output) => output
+                .unlock_conditions()
+                .locked_address(output.address(), slot_index, min_committable_age, max_committable_age)
+                .cloned(),
+            Self::Delegation(output) => output
+                .unlock_conditions()
+                .locked_address(output.address(), slot_index, min_committable_age, max_committable_age)
+                .cloned(),
+        })
     }
 
     // /// Returns the address that is required to unlock this [`Output`] and the account or nft address that gets
