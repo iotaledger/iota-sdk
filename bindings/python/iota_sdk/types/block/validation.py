@@ -25,7 +25,7 @@ class ValidationBlock(Block):
     strong_parents: List[HexStr]
     weak_parents: List[HexStr]
     shallow_like_parents: List[HexStr]
-    protocol_version: int
+    highest_supported_version: int
     protocol_parameters_hash: HexStr
     type: int = field(
         default_factory=lambda: BlockType.Validation,
