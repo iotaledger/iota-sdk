@@ -4,10 +4,12 @@
 # In this example we create an account and store its addresses in a file which will be used later to find
 # inputs.
 
-from iota_sdk import Wallet, StrongholdSecretManager, CoinType, ClientOptions
-from dotenv import load_dotenv
 import json
 import os
+
+from dotenv import load_dotenv
+
+from iota_sdk import ClientOptions, CoinType, StrongholdSecretManager, Wallet
 
 load_dotenv()
 
@@ -43,6 +45,6 @@ addresses = account.addresses()
 
 json_data = json.dumps(list(map(lambda x: x.__dict__, addresses)), indent=4)
 print(f"example.addresses.json:\n{json_data}")
-f = open(ADDRESSES_FILE_PATH, "w")
+f = open(ADDRESSES_FILE_PATH, "w", encoding="utf-8")
 f.write(json_data)
 f.close()

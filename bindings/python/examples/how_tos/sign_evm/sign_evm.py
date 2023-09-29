@@ -1,6 +1,9 @@
-from iota_sdk import Client, StrongholdSecretManager, SecretManager, Bip44, CoinType, Utils, utf8_to_hex
-from dotenv import load_dotenv
 import os
+
+from dotenv import load_dotenv
+
+from iota_sdk import (Bip44, CoinType, SecretManager, StrongholdSecretManager,
+                      utf8_to_hex)
 
 load_dotenv()
 

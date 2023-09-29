@@ -1,0 +1,10 @@
+[MESSAGES CONTROL]
+disable=missing-module-docstring,
+	line-too-long, # enforced by PEP8 format checker
+	broad-exception-raised,
+	invalid-name, # files that starts with number
+	duplicate-code,
+	consider-using-with,
+	consider-using-f-string
+
+

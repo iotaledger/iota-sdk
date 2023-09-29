@@ -3,9 +3,11 @@
 
 # This example sends tokens to an address.
 
-from iota_sdk import Wallet, SyncOptions
-from dotenv import load_dotenv
 import os
+
+from dotenv import load_dotenv
+
+from iota_sdk import SyncOptions, Wallet
 
 # This example uses secrets in environment variables for simplicity which
 # should not be done in production.

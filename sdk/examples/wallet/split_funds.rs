@@ -43,7 +43,7 @@ async fn main() -> Result<()> {
         .await?;
 
     // Get account or create a new one
-    let account = create_account(&wallet, "Alice").await?;
+    let account = wallet.get_or_create_account("Alice").await?;
 
     let _ = ensure_enough_addresses(&account, ADDRESSES_TO_SPLIT_FUNDS).await?;
 
@@ -107,15 +107,6 @@ async fn main() -> Result<()> {
     println!("Example finished successfully");
 
     Ok(())
-}
-
-async fn create_account(wallet: &Wallet, alias: &str) -> Result<Account> {
-    Ok(if let Ok(account) = wallet.get_account(alias).await {
-        account
-    } else {
-        println!("Creating account '{alias}'");
-        wallet.create_account().with_alias(alias).finish().await?
-    })
 }
 
 async fn sync_print_balance(account: &Account) -> Result<()> {

@@ -45,7 +45,7 @@ async fn main() -> Result<()> {
         .with_coin_type(SHIMMER_COIN_TYPE)
         .finish()
         .await?;
-    let account = get_or_create_account(&wallet, ACCOUNT_ALIAS).await?;
+    let account = wallet.get_or_create_account(ACCOUNT_ALIAS).await?;
 
     let recv_address = *account.addresses().await?[0].address();
     println!("Recv address: {}", recv_address);
@@ -139,15 +139,6 @@ async fn main() -> Result<()> {
         );
     }
     Ok(())
-}
-
-async fn get_or_create_account(wallet: &Wallet, alias: &str) -> Result<Account> {
-    Ok(if let Ok(account) = wallet.get_account(alias).await {
-        account
-    } else {
-        println!("Creating account '{alias}'");
-        wallet.create_account().with_alias(alias).finish().await?
-    })
 }
 
 async fn ensure_enough_funds(account: &Account, bech32_address: &Bech32Address) -> Result<()> {

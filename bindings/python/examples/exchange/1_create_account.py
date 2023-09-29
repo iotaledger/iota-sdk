@@ -3,9 +3,12 @@
 
 # This example creates a new database and account.
 
-from iota_sdk import Wallet, StrongholdSecretManager, SyncOptions, CoinType, ClientOptions
-from dotenv import load_dotenv
 import os
+
+from dotenv import load_dotenv
+
+from iota_sdk import (ClientOptions, CoinType, StrongholdSecretManager,
+                      SyncOptions, Wallet)
 
 # This example uses secrets in environment variables for simplicity which
 # should not be done in production.

@@ -1,6 +1,8 @@
-from iota_sdk import Wallet, StrongholdSecretManager, CoinType, ClientOptions
-from dotenv import load_dotenv
 import os
+
+from dotenv import load_dotenv
+
+from iota_sdk import ClientOptions, CoinType, StrongholdSecretManager, Wallet
 
 load_dotenv()
 
@@ -31,4 +33,4 @@ account = wallet.store_mnemonic(os.environ['MNEMONIC'])
 accounts = wallet.create_account('Alice')
 
 wallet.backup("backup.stronghold", os.environ['STRONGHOLD_PASSWORD'])
-print(f'Created backup')
+print('Created backup')

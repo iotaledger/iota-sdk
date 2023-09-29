@@ -3,9 +3,11 @@
 
 # This example generates an address for an account.
 
-from iota_sdk import Wallet
-from dotenv import load_dotenv
 import os
+
+from dotenv import load_dotenv
+
+from iota_sdk import Wallet
 
 # This example uses secrets in environment variables for simplicity which
 # should not be done in production.
@@ -23,4 +25,4 @@ wallet.set_stronghold_password(os.environ["STRONGHOLD_PASSWORD"])
 account = wallet.get_account('Alice')
 
 address = account.generate_ed25519_addresses(1)[0]
-print(f'Address:', address.address)
+print('Address:', address.address)
