@@ -11,7 +11,7 @@ use packable::{prefix::StringPrefix, Packable, PackableExt};
 use super::{
     address::Hrp,
     mana::{ManaStructure, RewardsParameters},
-    slot::{EpochIndex, SlotIndex},
+    slot::SlotIndex,
 };
 use crate::types::block::{helper::network_name_to_id, output::RentStructure, ConvertTo, Error, PROTOCOL_VERSION};
 
@@ -55,23 +55,28 @@ pub struct ProtocolParameters {
     #[getset(skip)]
     pub(crate) mana_structure: ManaStructure,
     /// The unbonding period in epochs before an account can stop staking.
-    pub(crate) staking_unbonding_period: EpochIndex,
+    #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
+    pub(crate) staking_unbonding_period: u64,
     /// The number of validation blocks that each validator should issue each slot.
     pub(crate) validation_blocks_per_slot: u16,
     /// The number of epochs worth of Mana that a node is punished with for each additional validation block it issues.
     #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
     pub(crate) punishment_epochs: u64,
-    /// The slot index used by tip-selection to determine if a block is eligible by evaluating issuing times
-    /// and commitments in its past-cone against accepted tangle time and last committed slot respectively.
-    pub(crate) liveness_threshold: SlotIndex,
+    /// Liveness Threshold is used by tip-selection to determine if a block is eligible by evaluating issuingTimes and
+    /// commitments in its past-cone to Accepted Tangle Time and lastCommittedSlot respectively.
+    #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
+    pub(crate) liveness_threshold: u64,
     /// Minimum age relative to the accepted tangle time slot index that a slot can be committed.
-    pub(crate) min_committable_age: SlotIndex,
+    #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
+    pub(crate) min_committable_age: u64,
     /// Maximum age for a slot commitment to be included in a block relative to the slot index of the block issuing
     /// time.
-    pub(crate) max_committable_age: SlotIndex,
-    /// The slot index used by the epoch orchestrator to detect the slot that should trigger a new
+    #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
+    pub(crate) max_committable_age: u64,
+    /// Epoch Nearing Threshold is used by the epoch orchestrator to detect the slot that should trigger a new
     /// committee selection for the next and upcoming epoch.
-    pub(crate) epoch_nearing_threshold: SlotIndex,
+    #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
+    pub(crate) epoch_nearing_threshold: u64,
     /// Parameters used to calculate the Reference Mana Cost (RMC).
     pub(crate) congestion_control_parameters: CongestionControlParameters,
     /// Defines the parameters used to signal a protocol parameters upgrade.
@@ -100,15 +105,15 @@ impl Default for ProtocolParameters {
             token_supply: 1_813_620_509_061_365,
             genesis_unix_timestamp: 1582328545,
             slot_duration_in_seconds: 10,
-            epoch_nearing_threshold: 20.into(),
+            epoch_nearing_threshold: 20,
             slots_per_epoch_exponent: Default::default(),
             mana_structure: Default::default(),
-            staking_unbonding_period: 10.into(),
+            staking_unbonding_period: 10,
             validation_blocks_per_slot: 10,
             punishment_epochs: 9,
-            liveness_threshold: 5.into(),
-            min_committable_age: 10.into(),
-            max_committable_age: 20.into(),
+            liveness_threshold: 5,
+            min_committable_age: 10,
+            max_committable_age: 20,
             congestion_control_parameters: Default::default(),
             version_signaling: Default::default(),
             rewards_parameters: Default::default(),
@@ -127,7 +132,7 @@ impl ProtocolParameters {
         token_supply: u64,
         genesis_unix_timestamp: u64,
         slot_duration_in_seconds: u8,
-        epoch_nearing_threshold: impl Into<SlotIndex>,
+        epoch_nearing_threshold: u64,
     ) -> Result<Self, Error> {
         Ok(Self {
             version,
@@ -137,7 +142,7 @@ impl ProtocolParameters {
             token_supply,
             genesis_unix_timestamp,
             slot_duration_in_seconds,
-            epoch_nearing_threshold: epoch_nearing_threshold.into(),
+            epoch_nearing_threshold,
             ..Default::default()
         })
     }
