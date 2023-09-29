@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Optional, List, Union
 
 from dataclasses import dataclass, field
 
-from iota_sdk.types.common import HexStr, json
+from iota_sdk.types.common import HexStr, json, SlotIndex
 from iota_sdk.types.mana import ManaAllotment
 # TODO: Add missing output types in #1174
 # pylint: disable=no-name-in-module
@@ -54,11 +54,11 @@ class RegularTransactionEssence(TransactionEssence):
         payload: An optional tagged data payload
     """
     network_id: str
-    # TODO: Replace with a proper SlotIndex type
-    creation_slot: HexStr
+    creation_slot: SlotIndex
     inputs: List[UtxoInput]
     inputs_commitment: HexStr
-    outputs: List[Union[BasicOutput, AccountOutput, FoundryOutput, NftOutput, DelegationOutput]]
+    outputs: List[Union[BasicOutput, AccountOutput,
+                        FoundryOutput, NftOutput, DelegationOutput]]
     context_inputs: Optional[List[Union[CommitmentContextInput,
                                         BlockIssuanceCreditContextInput, RewardContextInput]]] = None
     allotments: Optional[List[ManaAllotment]] = None
