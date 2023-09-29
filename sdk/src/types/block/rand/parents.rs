@@ -6,7 +6,7 @@ use crate::types::block::{
     rand::{block::rand_block_ids, number::rand_number_range},
 };
 
-/// Generates random strong parents.
+/// Generates random parents.
 pub fn rand_parents<const MIN: u8, const MAX: u8>() -> Parents<MIN, MAX> {
     Parents::from_set(rand_block_ids(
         rand_number_range(Parents::<MIN, MAX>::COUNT_RANGE).into(),
