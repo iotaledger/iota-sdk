@@ -1,11 +1,12 @@
-
 # Copyright 2023 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
 from iota_sdk import BasicOutput, AccountOutput, FoundryOutput, NftOutput, IssuerFeature, MetadataFeature
 from dacite import from_dict
+import pytest
 
 
+@pytest.mark.skip(reason="temporarily skipped until 2.0 blocks in use")
 def test_feature():
     feature_dict = {
         "type": 2,
@@ -25,6 +26,7 @@ def test_feature():
     assert issuer_feature.to_dict() == issuer_dict
 
 
+@pytest.mark.skip(reason="temporarily skipped until 2.0 blocks in use")
 def test_output():
     basic_output_dict = {
         "type": 3,

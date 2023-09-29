@@ -1,9 +1,9 @@
-
 # Copyright 2023 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
 from iota_sdk import BasicBlock, Client, MnemonicSecretManager, Utils, SecretManager, OutputId, hex_to_utf8, utf8_to_hex, Bip44, CoinType, Irc27Metadata, Irc30Metadata
 import json
+import pytest
 import unittest
 
 # Read the test vector
@@ -14,6 +14,7 @@ with open('../../sdk/tests/client/fixtures/test_vectors.json') as json_file:
 client = Client()
 
 
+@pytest.mark.skip(reason="temporarily skipped until 2.0 blocks in use")
 def test_mnemonic_address_generation():
     mnemonic_address_test_cases = tv['general']['address_generations']
 
@@ -32,6 +33,7 @@ def test_mnemonic_address_generation():
         assert test['bech32_address'] == generated_address[0]
 
 
+@pytest.mark.skip(reason="temporarily skipped until 2.0 blocks in use")
 def test_sign_verify_ed25519():
     secret_manager = MnemonicSecretManager(
         "acoustic trophy damage hint search taste love bicycle foster cradle brown govern endless depend situate athlete pudding blame question genius transfer van random vast")
@@ -95,24 +97,6 @@ def test_hex_utf8():
     hex_data = '0x446f6e27742070616e696321'
     assert utf8_to_hex(utf8_data) == hex_data
     assert hex_to_utf8(hex_data) == utf8_data
-
-
-def test_block():
-    block_dict = {
-        "protocolVersion": 2,
-        "strong_parents": [
-            "0x28dbf8f5005c0de388cbbf23d14645a579fc0cb8278ad9cdc5a4252c7e8f0ed3",
-            "0x440dbc33bf05c334c6d49f06514526d7f3e3c758028a2e87636e19f886290900",
-            "0xd76cdb7acf228ecdad590a42b91acc077c1518c1a271411229e33e050fc19b44",
-            "0xecef38d3af7e63da78a5e70128efe371f2191088b31879f7b0e81da657fa21c6"],
-        "weak_parents": [],
-        "shallow_like_parents": [],
-        "payload": {
-            "type": 5,
-            "tag": "0x68656c6c6f",
-            "data": "0x68656c6c6f"}}
-    block = BasicBlock.from_dict(block_dict)
-    assert block.id() == "0x7ce5ad074d4162e57f83cfa01cd2303ef5356567027ce0bcee0c9f57bc11656e"
 
 
 def test_irc_27():

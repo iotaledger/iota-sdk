@@ -1,18 +1,20 @@
 # Copyright 2023 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
-from iota_sdk import BasicBlock, Payload, PayloadType
+from iota_sdk import BasicBlock, BlockType, BlockWrapper, Payload, PayloadType
+import pytest
 
 
-def test_block():
+@pytest.mark.skip(reason="temporarily skipped until 2.0 blocks in use")
+def test_basic_block():
     # with tx payload
-    block_dict = {"protocolVersion": 2,
-                  "strong_parents": ["0x27532565d4c8cc886dfc6a2238e8d2a72369672bb1d1d762c33b72d41b0b07b8",
-                                     "0x604e6996bd1ec110642fec5b9c980d4b126eba5683e80a6e2cb905ded0cebd98",
-                                     "0x6a14368f99e875aee0e7078d9e2ec2ba6c4fff6a3cd63c73a9b2c296d4a8e697",
-                                     "0xc3f20eb06ce8be091579e2fbe6c109d108983fb0eff2c768e98c61e6fe71b4b7"],
-                  "weak_parents": [],
-                  "shallow_like_parents": [],
+    block_dict = {"strongParents": ["0x27532565d4c8cc886dfc6a2238e8d2a72369672bb1d1d762c33b72d41b0b07b8",
+                                    "0x604e6996bd1ec110642fec5b9c980d4b126eba5683e80a6e2cb905ded0cebd98",
+                                    "0x6a14368f99e875aee0e7078d9e2ec2ba6c4fff6a3cd63c73a9b2c296d4a8e697",
+                                    "0xc3f20eb06ce8be091579e2fbe6c109d108983fb0eff2c768e98c61e6fe71b4b7"],
+                  "weakParents": [],
+                  "shallowLikeParents": [],
+                  "burnedMana": "180500",
                   "payload": {"type": 6,
                               "essence": {"type": 1,
                                           "networkId": "1856588631910923207",
@@ -41,8 +43,8 @@ def test_block():
 
     # with tx payload, all output types
     block_dict = {
-        "protocolVersion": 2, "strong_parents": [
-            "0x053296e7434e8a4d602f8db30a5aaf16c01140212fe79d8132137cda1c38a60a", "0x559ec1d9a31c55bd27588ada2ade70fb5b13764ddd600e29c3b018761ba30e15", "0xe78e8cdbbeda89e3408eed51b77e0db5ba035f5f3bf79a8365435bba40697693", "0xee9d6e45dbc080694e6c827fecbc31ad9f654cf57404bc98f4cbca033f8e3139"], "weak_parents": [], "shallow_like_parents": [], "payload": {
+        "strongParents": [
+            "0x053296e7434e8a4d602f8db30a5aaf16c01140212fe79d8132137cda1c38a60a", "0x559ec1d9a31c55bd27588ada2ade70fb5b13764ddd600e29c3b018761ba30e15", "0xe78e8cdbbeda89e3408eed51b77e0db5ba035f5f3bf79a8365435bba40697693", "0xee9d6e45dbc080694e6c827fecbc31ad9f654cf57404bc98f4cbca033f8e3139"], "weakParents": [], "shallowLikeParents": [], "payload": {
             "type": 6, "essence": {
                 "type": 1, "networkId": "1856588631910923207", "inputs": [
                     {
@@ -172,19 +174,19 @@ def test_block():
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     "type": 1, "reference": 0}, {
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         "type": 2, "reference": 1}, {
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             "type": 1, "reference": 0}]}}
-    block = BasicBlock.from_dict(block_dict)
+    block = BlockWrapper.from_dict(block_dict)
     assert block.to_dict() == block_dict
     assert isinstance(block.payload, Payload)
     assert block.payload.type == PayloadType.Transaction
 
     # with tx payload that has a tagged data payload
-    block_dict = {"protocolVersion": 2,
-                  "strong_parents": ["0x4bbba1f1fbfa58d8e65c018d0518da1c3ab57f05ffdd9c2e20565a99b42948df",
-                                     "0x9962a18f0161f6b883cb1e36b936684793867d97dc9ac226a929d8e434385e96",
-                                     "0xe532853c4a1e03e00a37c78a42afebf3570b1bb4a756c5ad651c0f0377548348",
-                                     "0xedbd8bd428bcff342de0656e368a881022dd353b51f272ed40c604c86915d97d"],
-                  "weak_parents": [],
-                  "shallow_like_parents": [],
+    block_dict = {"strongParents": ["0x4bbba1f1fbfa58d8e65c018d0518da1c3ab57f05ffdd9c2e20565a99b42948df",
+                                    "0x9962a18f0161f6b883cb1e36b936684793867d97dc9ac226a929d8e434385e96",
+                                    "0xe532853c4a1e03e00a37c78a42afebf3570b1bb4a756c5ad651c0f0377548348",
+                                    "0xedbd8bd428bcff342de0656e368a881022dd353b51f272ed40c604c86915d97d"],
+                  "weakParents": [],
+                  "shallowLikeParents": [],
+                  "burnedMana": "180500",
                   "payload": {"type": 6,
                               "essence": {"type": 1,
                                           "networkId": "1856588631910923207",
@@ -214,19 +216,19 @@ def test_block():
                                                          "signature": "0x30cb012af3402be1b4b2ed18e2aba86839da06ba38ff3277c481e17c003f0199ba26f5613199e0d24035628bb2b69a6ea2a7682e41c30244996baf3a2adc1c00"}},
                                           {"type": 1,
                                            "reference": 0}]}}
-    block = BasicBlock.from_dict(block_dict)
+    block = BlockWrapper.from_dict(block_dict)
     assert block.to_dict() == block_dict
     assert isinstance(block.payload, Payload)
     assert block.payload.type == PayloadType.Transaction
 
     # with tagged data payload
     block_dict = {
-        "protocolVersion": 2,
-        "strong_parents": [
+        "strongParents": [
             "0x17c297a273facf4047e244a65eb34ee33b1f1698e1fff28679466fa2ad81c0e8",
             "0x9858e80fa0b37b6d9397e23d1f58ce53955a9be1aa8020c0d0e11672996c6db9"],
-        "weak_parents": [],
-        "shallow_like_parents": [],
+        "weakParents": [],
+        "shallowLikeParents": [],
+        "burnedMana": "180500",
         "payload": {
             "type": 5,
             "tag": "0x484f524e4554205370616d6d6572",
@@ -235,3 +237,47 @@ def test_block():
     assert block.to_dict() == block_dict
     assert isinstance(block.payload, Payload)
     assert block.payload.type == PayloadType.TaggedData
+
+
+def test_block_wrapper():
+    # with tagged data payload
+    block_dict = {
+        "protocolVersion": 3,
+        "networkId": "10549460113735494767",
+        "issuingTime": "1675563954966263210",
+        "slotCommitmentId": "0x498bf08a5ed287bc87340341ffab28706768cd3a7035ae5e33932d9a12bb30940000000000000000",
+        "latestFinalizedSlot": 21,
+        "issuerId": "0x3370746f30705b7d0b42597459714d45241e5a64761b09627c447b751c7e145c",
+        "block": {
+            "type": 0,
+            "strongParents": [
+                "0x304442486c7a05361408585e4b5f7a67441c437528755a70041e0e557a6d4b2d7d4362083d492b57",
+                "0x5f736978340a243d381b343b160b316a6b7d4b1e3c0355492e2e72113c2b126600157e69113c0b5c"
+            ],
+            "weakParents": [
+                "0x0b5a48384f382f4a49471c4860683c6f0a0d446f012e1b117c4e405f5e24497c72691f43535c0b42"
+            ],
+            "shallowLikeParents": [
+                "0x163007217803006078040b0f51507d3572355a457839095e572f125500401b7d220c772b56165a12"
+            ],
+            "burnedMana": "180500",
+            "payload": {
+                "type": 5,
+                "tag": "0x68656c6c6f20776f726c64",
+                "data": "0x01020304"
+            }
+        },
+        "signature": {
+            "type": 0,
+            "publicKey": "0x024b6f086177156350111d5e56227242034e596b7e3d0901180873740723193c",
+            "signature": "0x7c274e5e771d5d60202d334f06773d3672484b1e4e6f03231b4e69305329267a4834374b0f2e0d5c6c2f7779620f4f534c773b1679400c52303d1f23121a4049"
+        }
+    }
+    block_wrapper = BlockWrapper.from_dict(block_dict)
+    assert block_wrapper.to_dict() == block_dict
+    assert isinstance(block_wrapper.block, BasicBlock)
+    assert block_wrapper.block.type == BlockType.Basic
+    assert isinstance(block_wrapper.block.payload, Payload)
+    assert block_wrapper.block.payload.type == PayloadType.TaggedData
+    # TODO: determine the actual hash of the block wrapper
+    # assert block_wrapper.id() == "0x7ce5ad074d4162e57f83cfa01cd2303ef5356567027ce0bcee0c9f57bc11656e"

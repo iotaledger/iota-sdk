@@ -3,11 +3,12 @@
 
 from __future__ import annotations
 from dataclasses import dataclass
-from typing import Dict
+from typing import Dict, Union
 from dacite import from_dict
-from iota_sdk.types.block.block import Block
+from iota_sdk.types.block.basic import BasicBlock
+from iota_sdk.types.block.validation import ValidationBlock
 from iota_sdk.types.common import HexStr, json
-from iota_sdk.types.signature import Signature
+from iota_sdk.types.signature import Ed25519Signature
 from iota_sdk.utils import Utils
 
 
@@ -22,9 +23,14 @@ class BlockWrapper:
         block: Holds either a `BasicBlock` or a `ValidationBlock`.
         signature: The Block signature.
     """
-    header: Header
-    block: Block
-    signature: Signature
+    protocol_version: int
+    network_id: str
+    issuing_time: str
+    slot_commitment_id: HexStr
+    latest_finalized_slot: int
+    issuer_id: HexStr
+    block: Union[BasicBlock, ValidationBlock]
+    signature: Union[Ed25519Signature]
 
     def id(self) -> HexStr:
         """Returns the block ID as a hexadecimal string.
@@ -42,24 +48,3 @@ class BlockWrapper:
         An instance of the `BlockWrapper` class.
         """
         return from_dict(BlockWrapper, wrapper_dict)
-
-
-@json
-@dataclass
-class Header:
-    """Shared data between a `BasicBlock` and a `ValidationBlock`.
-
-    Attributes:
-        protocol_version: Protocol version of the network to which this block belongs.
-        network_id: The identifier of the network to which this block belongs.
-        issuing_time: The time at which the block was issued. It is a Unix timestamp in nanoseconds.
-        slot_commitment_id: The identifier of the slot to which this block commits.
-        latest_finalized_slot: The slot index of the latest finalized slot.
-        issuer_id: The identifier of the account that issued this block.
-    """
-    protocol_version: int
-    network_id: str
-    issuing_time: str
-    slot_commitment_id: HexStr
-    latest_finalized_slot: int
-    issuer_id: HexStr
