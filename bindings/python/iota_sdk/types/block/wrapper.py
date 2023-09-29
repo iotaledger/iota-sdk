@@ -30,7 +30,7 @@ class BlockWrapper:
     latest_finalized_slot: int
     issuer_id: HexStr
     block: Union[BasicBlock, ValidationBlock]
-    signature: Union[Ed25519Signature]
+    signature: Ed25519Signature
 
     def id(self) -> HexStr:
         """Returns the block ID as a hexadecimal string.
