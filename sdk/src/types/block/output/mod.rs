@@ -312,32 +312,31 @@ impl Output {
         min_committable_age: impl Into<SlotIndex>,
         max_committable_age: impl Into<SlotIndex>,
         account_transition: Option<AccountTransition>,
-    ) -> Result<Address, Error> {
+    ) -> Option<Address> {
         match self {
-            Self::Basic(output) => Ok(*output
+            Self::Basic(output) => output
                 .unlock_conditions()
                 .locked_address(output.address(), slot_index, min_committable_age, max_committable_age)
-                // TODO
-                .unwrap()),
+                .copied(),
             Self::Account(output) => {
-                if account_transition.unwrap_or(AccountTransition::State) == AccountTransition::State {
-                    // Account address is only unlocked if it's a state transition
-                    Ok(*output.state_controller_address())
-                } else {
-                    Ok(*output.governor_address())
-                }
+                Some(
+                    if account_transition.unwrap_or(AccountTransition::State) == AccountTransition::State {
+                        // Account address is only unlocked if it's a state transition
+                        *output.state_controller_address()
+                    } else {
+                        *output.governor_address()
+                    },
+                )
             }
-            Self::Foundry(output) => Ok(Address::Account(*output.account_address())),
-            Self::Nft(output) => Ok(*output
+            Self::Foundry(output) => Some(Address::Account(*output.account_address())),
+            Self::Nft(output) => output
                 .unlock_conditions()
                 .locked_address(output.address(), slot_index, min_committable_age, max_committable_age)
-                // TODO
-                .unwrap()),
-            Self::Delegation(output) => Ok(*output
+                .copied(),
+            Self::Delegation(output) => output
                 .unlock_conditions()
                 .locked_address(output.address(), slot_index, min_committable_age, max_committable_age)
-                // TODO
-                .unwrap()),
+                .copied(),
         }
     }
 

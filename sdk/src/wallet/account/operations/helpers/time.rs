@@ -29,12 +29,11 @@ pub(crate) fn can_output_be_unlocked_now(
         }
     }
 
-    let required_address = output_data.output.required_address(
-        slot_index,
-        min_committable_age,
-        max_committable_age,
-        account_transition,
-    )?;
+    let required_address = output_data
+        .output
+        .required_address(slot_index, min_committable_age, max_committable_age, account_transition)
+        // TODO
+        .unwrap();
 
     Ok(account_addresses.iter().any(|a| a.address.inner == required_address)
         || account_and_nft_addresses.iter().any(|a| *a == required_address))

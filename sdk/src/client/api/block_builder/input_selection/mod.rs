@@ -61,12 +61,16 @@ impl InputSelection {
     fn required_account_nft_addresses(&self, input: &InputSigningData) -> Result<Option<Requirement>, Error> {
         let account_transition =
             is_account_transition(&input.output, *input.output_id(), &self.outputs, self.burn.as_ref());
-        let required_address = input.output.required_address(
-            self.slot_index,
-            self.protocol_parameters.min_committable_age(),
-            self.protocol_parameters.max_committable_age(),
-            account_transition,
-        )?;
+        let required_address = input
+            .output
+            .required_address(
+                self.slot_index,
+                self.protocol_parameters.min_committable_age(),
+                self.protocol_parameters.max_committable_age(),
+                account_transition,
+            )
+            // TODO
+            .unwrap();
 
         match required_address {
             Address::Ed25519(_) => {
@@ -253,7 +257,7 @@ impl InputSelection {
                     self.protocol_parameters.max_committable_age(),
                     None,
                 )
-                // PANIC: safe to unwrap as non basic/account/foundry/nft outputs are already filtered out.
+                // TODO
                 .unwrap();
 
             self.addresses.contains(&required_address)
@@ -284,7 +288,7 @@ impl InputSelection {
                 let input_address = input_signing_data
                     .output
                     .required_address(slot_index, min_committable_age, max_committable_age, account_transition)
-                    // PANIC: safe to unwrap, because we filtered irrelevant outputs out before
+                    // TODO
                     .unwrap();
 
                 input_address.is_ed25519()
@@ -292,12 +296,11 @@ impl InputSelection {
 
         for input in account_nft_address_inputs {
             let account_transition = is_account_transition(&input.output, *input.output_id(), outputs, None);
-            let required_address = input.output.required_address(
-                slot_index,
-                min_committable_age,
-                max_committable_age,
-                account_transition,
-            )?;
+            let required_address = input
+                .output
+                .required_address(slot_index, min_committable_age, max_committable_age, account_transition)
+                // TODO
+                .unwrap();
 
             match sorted_inputs
                 .iter()
@@ -352,7 +355,7 @@ impl InputSelection {
                                     max_committable_age,
                                     account_transition,
                                 )
-                                // PANIC: safe to unwrap, because we filtered irrelevant outputs out before
+                                // TODO
                                 .unwrap();
 
                             required_address == account_or_nft_address

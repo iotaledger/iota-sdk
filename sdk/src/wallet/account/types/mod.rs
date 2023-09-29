@@ -61,9 +61,11 @@ impl OutputData {
         max_committable_age: u64,
         account_transition: Option<AccountTransition>,
     ) -> crate::wallet::Result<Option<InputSigningData>> {
-        let required_address =
-            self.output
-                .required_address(slot_index, min_committable_age, max_committable_age, account_transition)?;
+        let required_address = self
+            .output
+            .required_address(slot_index, min_committable_age, max_committable_age, account_transition)
+            // TODO
+            .unwrap();
 
         let chain = if required_address == self.address {
             self.chain

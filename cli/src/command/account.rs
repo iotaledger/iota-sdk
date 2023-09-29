@@ -951,12 +951,16 @@ async fn print_address(account: &Account, address: &Bip44Address) -> Result<(), 
         for output_id in output_ids {
             if let Some(output_data) = account.get_output(output_id).await {
                 // Output might be associated with the address, but can't be unlocked by it, so we check that here.
-                let required_address = output_data.output.required_address(
-                    slot_index,
-                    protocol_parameters.min_committable_age(),
-                    protocol_parameters.max_committable_age(),
-                    None,
-                )?;
+                let required_address = output_data
+                    .output
+                    .required_address(
+                        slot_index,
+                        protocol_parameters.min_committable_age(),
+                        protocol_parameters.max_committable_age(),
+                        None,
+                    )
+                    // TODO
+                    .unwrap();
 
                 if address.address().as_ref() == &required_address {
                     if let Some(nts) = output_data.output.native_tokens() {

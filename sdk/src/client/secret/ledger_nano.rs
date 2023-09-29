@@ -531,12 +531,16 @@ fn merge_unlocks(
         // Get the address that is required to unlock the input
         let TransactionEssence::Regular(regular) = &prepared_transaction_data.essence;
         let account_transition = is_account_transition(&input.output, *input.output_id(), regular.outputs(), None);
-        let required_address = input.output.required_address(
-            slot_index,
-            protocol_parameters.min_committable_age(),
-            protocol_parameters.max_committable_age(),
-            account_transition,
-        )?;
+        let required_address = input
+            .output
+            .required_address(
+                slot_index,
+                protocol_parameters.min_committable_age(),
+                protocol_parameters.max_committable_age(),
+                account_transition,
+            )
+            // TODO
+            .unwrap();
 
         // Check if we already added an [Unlock] for this address
         match block_indexes.get(&required_address) {
