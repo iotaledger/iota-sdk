@@ -24,8 +24,6 @@ pub mod input;
 pub mod mana;
 /// A module that provides types and syntactic validations of outputs.
 pub mod output;
-/// A module that provides types and syntactic validations of parents.
-pub mod parent;
 /// A module that provides types and syntactic validations of payloads.
 pub mod payload;
 /// A module that provides types and syntactic validations of protocol parameters.
