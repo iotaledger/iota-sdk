@@ -6,11 +6,10 @@ from iota_sdk import SecretManager, StrongholdSecretManager
 
 load_dotenv()
 
-if 'MNEMONIC' not in os.environ:
-    raise Exception(".env MNEMONIC is undefined, see .env.example")
+for env_var in ['MNEMONIC', 'STRONGHOLD_PASSWORD']:
+    if env_var not in os.environ:
+        raise Exception(f'.env {env_var} is undefined, see .env.example')
 
-if 'STRONGHOLD_PASSWORD' not in os.environ:
-    raise Exception(".env STRONGHOLD_PASSWORD is undefined, see .env.example")
 
 secret_manager = SecretManager(StrongholdSecretManager(
     "example.stronghold", os.environ['STRONGHOLD_PASSWORD']))
