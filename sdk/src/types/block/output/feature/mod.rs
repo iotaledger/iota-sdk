@@ -4,6 +4,7 @@
 mod block_issuer;
 mod issuer;
 mod metadata;
+mod native_token;
 mod sender;
 mod staking;
 mod tag;
@@ -24,6 +25,7 @@ pub use self::{
     block_issuer::{BlockIssuerFeature, BlockIssuerKey, BlockIssuerKeys, Ed25519BlockIssuerKey},
     issuer::IssuerFeature,
     metadata::MetadataFeature,
+    native_token::NativeTokenFeature,
     sender::SenderFeature,
     staking::StakingFeature,
     tag::TagFeature,
@@ -54,6 +56,9 @@ pub enum Feature {
     /// A staking feature.
     #[packable(tag = StakingFeature::KIND)]
     Staking(StakingFeature),
+    /// A native token feature.
+    #[packable(tag = NativeTokenFeature::KIND)]
+    NativeToken(NativeTokenFeature),
 }
 
 impl PartialOrd for Feature {
@@ -77,6 +82,7 @@ impl core::fmt::Debug for Feature {
             Self::Tag(feature) => feature.fmt(f),
             Self::BlockIssuer(feature) => feature.fmt(f),
             Self::Staking(feature) => feature.fmt(f),
+            Self::NativeToken(feature) => feature.fmt(f),
         }
     }
 }
@@ -91,6 +97,7 @@ impl Feature {
             Self::Tag(_) => TagFeature::KIND,
             Self::BlockIssuer(_) => BlockIssuerFeature::KIND,
             Self::Staking(_) => StakingFeature::KIND,
+            Self::NativeToken(_) => NativeTokenFeature::KIND,
         }
     }
 
@@ -103,6 +110,7 @@ impl Feature {
             Self::Tag(_) => FeatureFlags::TAG,
             Self::BlockIssuer(_) => FeatureFlags::BLOCK_ISSUER,
             Self::Staking(_) => FeatureFlags::STAKING,
+            Self::NativeToken(_) => FeatureFlags::NATIVE_TOKEN,
         }
     }
 
@@ -195,6 +203,21 @@ impl Feature {
             panic!("invalid downcast of non-StakingFeature");
         }
     }
+
+    /// Checks whether the feature is a [`NativeTokenFeature`].
+    pub fn is_native_token(&self) -> bool {
+        matches!(self, Self::NativeToken(_))
+    }
+
+    /// Gets the feature as an actual [`NativeTokenFeature`].
+    /// NOTE: Will panic if the feature is not a [`NativeTokenFeature`].
+    pub fn as_native_token(&self) -> &NativeTokenFeature {
+        if let Self::NativeToken(feature) = self {
+            feature
+        } else {
+            panic!("invalid downcast of non-NativeTokenFeature");
+        }
+    }
 }
 
 create_bitflags!(
@@ -208,6 +231,7 @@ create_bitflags!(
         (TAG, TagFeature),
         (BLOCK_ISSUER, BlockIssuerFeature),
         (STAKING, StakingFeature),
+        (NATIVE_TOKEN, NativeTokenFeature),
     ]
 );
 
@@ -311,6 +335,11 @@ impl Features {
     pub fn staking(&self) -> Option<&StakingFeature> {
         self.get(StakingFeature::KIND).map(Feature::as_staking)
     }
+
+    /// Gets a reference to a [`NativeTokenFeature`], if any.
+    pub fn native_token(&self) -> Option<&NativeTokenFeature> {
+        self.get(NativeTokenFeature::KIND).map(Feature::as_native_token)
+    }
 }
 
 #[inline]
@@ -349,7 +378,8 @@ mod test {
                 FeatureFlags::METADATA,
                 FeatureFlags::TAG,
                 FeatureFlags::BLOCK_ISSUER,
-                FeatureFlags::STAKING
+                FeatureFlags::STAKING,
+                FeatureFlags::NATIVE_TOKEN
             ]
         );
     }
