@@ -242,7 +242,8 @@ impl BasicOutput {
     /// The set of allowed [`Feature`]s for an [`BasicOutput`].
     pub const ALLOWED_FEATURES: FeatureFlags = FeatureFlags::SENDER
         .union(FeatureFlags::METADATA)
-        .union(FeatureFlags::TAG);
+        .union(FeatureFlags::TAG)
+        .union(FeatureFlags::NATIVE_TOKEN);
 
     /// Creates a new [`BasicOutputBuilder`] with a provided amount.
     #[inline(always)]

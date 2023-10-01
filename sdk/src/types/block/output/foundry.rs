@@ -351,7 +351,7 @@ impl FoundryOutput {
     /// The set of allowed [`UnlockCondition`]s for a [`FoundryOutput`].
     pub const ALLOWED_UNLOCK_CONDITIONS: UnlockConditionFlags = UnlockConditionFlags::IMMUTABLE_ACCOUNT_ADDRESS;
     /// The set of allowed [`Feature`]s for a [`FoundryOutput`].
-    pub const ALLOWED_FEATURES: FeatureFlags = FeatureFlags::METADATA;
+    pub const ALLOWED_FEATURES: FeatureFlags = FeatureFlags::METADATA.union(FeatureFlags::NATIVE_TOKEN);
     /// The set of allowed immutable [`Feature`]s for a [`FoundryOutput`].
     pub const ALLOWED_IMMUTABLE_FEATURES: FeatureFlags = FeatureFlags::METADATA;
 
