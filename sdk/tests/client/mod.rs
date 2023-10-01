@@ -76,7 +76,6 @@ enum Build<'a> {
         u64,
         NftId,
         &'a str,
-        Option<Vec<(&'a str, u64)>>,
         Option<&'a str>,
         Option<&'a str>,
         Option<(&'a str, u64)>,
@@ -141,7 +140,6 @@ fn build_nft_output(
     amount: u64,
     nft_id: NftId,
     bech32_address: Bech32Address,
-    native_tokens: Option<Vec<(&str, u64)>>,
     bech32_sender: Option<Bech32Address>,
     bech32_issuer: Option<Bech32Address>,
     sdruc: Option<(Bech32Address, u64)>,
@@ -149,14 +147,6 @@ fn build_nft_output(
 ) -> Output {
     let mut builder = NftOutputBuilder::new_with_amount(amount, nft_id)
         .add_unlock_condition(AddressUnlockCondition::new(bech32_address));
-
-    if let Some(native_tokens) = native_tokens {
-        builder = builder.with_native_tokens(
-            native_tokens
-                .into_iter()
-                .map(|(id, amount)| NativeToken::new(TokenId::from_str(id).unwrap(), amount).unwrap()),
-        );
-    }
 
     if let Some(bech32_sender) = bech32_sender {
         builder = builder.add_feature(SenderFeature::new(bech32_sender));
@@ -241,22 +231,11 @@ fn build_output_inner(build: Build) -> (Output, Option<Bip44>) {
             ),
             chain,
         ),
-        Build::Nft(
-            amount,
-            nft_id,
-            bech32_address,
-            native_tokens,
-            bech32_sender,
-            bech32_issuer,
-            sdruc,
-            expiration,
-            chain,
-        ) => (
+        Build::Nft(amount, nft_id, bech32_address, bech32_sender, bech32_issuer, sdruc, expiration, chain) => (
             build_nft_output(
                 amount,
                 nft_id,
                 Bech32Address::try_from_str(bech32_address).unwrap(),
-                native_tokens,
                 bech32_sender.map(|address| Bech32Address::try_from_str(address).unwrap()),
                 bech32_issuer.map(|address| Bech32Address::try_from_str(address).unwrap()),
                 sdruc.map(|(address, exp)| (Bech32Address::try_from_str(address).unwrap(), exp)),

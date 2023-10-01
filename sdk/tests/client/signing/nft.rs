@@ -60,7 +60,6 @@ async fn nft_reference_unlocks() -> Result<()> {
             None,
             None,
             None,
-            None,
             Some(Bip44::new(SHIMMER_COIN_TYPE)),
         ),
         Basic(
@@ -90,7 +89,6 @@ async fn nft_reference_unlocks() -> Result<()> {
             1_000_000,
             nft_id,
             &bech32_address_0.to_string(),
-            None,
             None,
             None,
             None,

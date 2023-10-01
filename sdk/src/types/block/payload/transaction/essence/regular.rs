@@ -366,7 +366,7 @@ fn verify_outputs<const VERIFY: bool>(outputs: &[Output], visitor: &ProtocolPara
                 Output::Basic(output) => (output.amount(), Some(output.native_tokens()), None),
                 Output::Account(output) => (output.amount(), None, Some(output.chain_id())),
                 Output::Foundry(output) => (output.amount(), Some(output.native_tokens()), Some(output.chain_id())),
-                Output::Nft(output) => (output.amount(), Some(output.native_tokens()), Some(output.chain_id())),
+                Output::Nft(output) => (output.amount(), None, Some(output.chain_id())),
                 Output::Delegation(output) => (output.amount(), None, Some(output.chain_id())),
             };
 

@@ -180,7 +180,7 @@ impl Output {
             Self::Basic(output) => Some(output.native_tokens()),
             Self::Account(output) => None,
             Self::Foundry(output) => Some(output.native_tokens()),
-            Self::Nft(output) => Some(output.native_tokens()),
+            Self::Nft(output) => None,
             Self::Delegation(_) => None,
         }
     }

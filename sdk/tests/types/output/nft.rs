@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use iota_sdk::types::block::{
-    output::{FoundryId, NativeToken, NftId, NftOutput, Output, Rent, SimpleTokenScheme, TokenId},
+    output::{FoundryId, NftId, NftOutput, Output, Rent, SimpleTokenScheme},
     protocol::protocol_parameters,
     rand::{
         address::rand_account_address,
@@ -28,7 +28,6 @@ fn builder() {
     let amount = 500_000;
 
     let mut builder = NftOutput::build_with_amount(amount, NftId::null())
-        .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000).unwrap())
         .add_unlock_condition(address_1)
         .add_feature(sender_1)
         .replace_feature(sender_2)

@@ -136,7 +136,6 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         ClientMethod::BuildNftOutput {
             amount,
             mana,
-            native_tokens,
             nft_id,
             unlock_conditions,
             features,
@@ -149,7 +148,6 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
                     OutputBuilderAmount::MinimumStorageDeposit(client.get_rent_structure().await?)
                 },
                 mana,
-                native_tokens,
                 &nft_id,
                 unlock_conditions,
                 features,

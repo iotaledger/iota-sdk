@@ -441,14 +441,10 @@ impl OutputBuilder {
         self
     }
     fn with_native_tokens(mut self, native_tokens: impl IntoIterator<Item = NativeToken>) -> Self {
-        match self {
-            Self::Basic(b) => {
-                self = Self::Basic(b.with_native_tokens(native_tokens));
-            }
-            Self::Nft(b) => {
-                self = Self::Nft(b.with_native_tokens(native_tokens));
-            }
+        if let Self::Basic(b) = self {
+            self = Self::Basic(b.with_native_tokens(native_tokens));
         }
+
         self
     }
     fn finish_output(self, token_supply: u64) -> Result<Output, crate::types::block::Error> {

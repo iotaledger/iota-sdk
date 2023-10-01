@@ -85,7 +85,6 @@ pub enum ClientMethod {
         // TODO: Determine if `default` is wanted here
         #[serde(default, with = "string")]
         mana: u64,
-        native_tokens: Option<Vec<NativeToken>>,
         nft_id: NftId,
         unlock_conditions: Vec<UnlockConditionDto>,
         features: Option<Vec<Feature>>,
