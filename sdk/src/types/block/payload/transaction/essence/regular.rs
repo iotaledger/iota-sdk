@@ -363,9 +363,9 @@ fn verify_outputs<const VERIFY: bool>(outputs: &[Output], visitor: &ProtocolPara
 
         for output in outputs.iter() {
             let (amount, native_tokens, chain_id) = match output {
-                Output::Basic(output) => (output.amount(), Some(output.native_tokens()), None),
+                Output::Basic(output) => (output.amount(), output.native_token(), None),
                 Output::Account(output) => (output.amount(), None, Some(output.chain_id())),
-                Output::Foundry(output) => (output.amount(), Some(output.native_tokens()), Some(output.chain_id())),
+                Output::Foundry(output) => (output.amount(), output.native_token(), Some(output.chain_id())),
                 Output::Nft(output) => (output.amount(), None, Some(output.chain_id())),
                 Output::Delegation(output) => (output.amount(), None, Some(output.chain_id())),
             };
@@ -379,15 +379,16 @@ fn verify_outputs<const VERIFY: bool>(outputs: &[Output], visitor: &ProtocolPara
                 return Err(Error::InvalidTransactionAmountSum(amount_sum as u128));
             }
 
-            if let Some(native_tokens) = native_tokens {
-                native_tokens_count = native_tokens_count.checked_add(native_tokens.len() as u8).ok_or(
-                    Error::InvalidTransactionNativeTokensCount(native_tokens_count as u16 + native_tokens.len() as u16),
-                )?;
+            // TODO this should be lifted ?
+            // if let Some(native_tokens) = native_tokens {
+            //     native_tokens_count = native_tokens_count.checked_add(native_tokens.len() as u8).ok_or(
+            //         Error::InvalidTransactionNativeTokensCount(native_tokens_count as u16 + native_tokens.len() as u16),
+            //     )?;
 
-                if native_tokens_count > NativeTokens::COUNT_MAX {
-                    return Err(Error::InvalidTransactionNativeTokensCount(native_tokens_count as u16));
-                }
-            }
+            //     if native_tokens_count > NativeTokens::COUNT_MAX {
+            //         return Err(Error::InvalidTransactionNativeTokensCount(native_tokens_count as u16));
+            //     }
+            // }
 
             if let Some(chain_id) = chain_id {
                 if !chain_id.is_null() && !chain_ids.insert(chain_id) {
