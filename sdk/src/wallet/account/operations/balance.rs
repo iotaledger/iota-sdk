@@ -114,7 +114,9 @@ where
                                 total_rent_amount += rent;
                             }
                             // Add native tokens
-                            total_native_tokens.add_native_tokens(output.native_tokens().clone())?;
+                            if let Some(native_token) = output.native_token() {
+                                total_native_tokens.add_native_token(native_token.clone())?;
+                            }
 
                             balance.foundries.push(output.id());
                         }
@@ -138,10 +140,7 @@ where
                                 // Add storage deposit
                                 if output.is_basic() {
                                     balance.required_storage_deposit.basic += rent;
-                                    if output
-                                        .native_tokens()
-                                        .map(|native_tokens| !native_tokens.is_empty())
-                                        .unwrap_or(false)
+                                    if output.native_token().is_some()
                                         && !account_details.locked_outputs.contains(output_id)
                                     {
                                         total_rent_amount += rent;
@@ -154,8 +153,8 @@ where
                                 }
 
                                 // Add native tokens
-                                if let Some(native_tokens) = output.native_tokens() {
-                                    total_native_tokens.add_native_tokens(native_tokens.clone())?;
+                                if let Some(native_token) = output.native_token() {
+                                    total_native_tokens.add_native_token(native_token.clone())?;
                                 }
                             } else {
                                 // if we have multiple unlock conditions for basic or nft outputs, then we might can't
@@ -221,10 +220,7 @@ where
                                             // Amount for basic outputs isn't added to total_rent_amount if there aren't
                                             // native tokens, since we can
                                             // spend it without burning.
-                                            if output
-                                                .native_tokens()
-                                                .map(|native_tokens| !native_tokens.is_empty())
-                                                .unwrap_or(false)
+                                            if output.native_token().is_some()
                                                 && !account_details.locked_outputs.contains(output_id)
                                             {
                                                 total_rent_amount += rent;
@@ -237,8 +233,8 @@ where
                                         }
 
                                         // Add native tokens
-                                        if let Some(native_tokens) = output.native_tokens() {
-                                            total_native_tokens.add_native_tokens(native_tokens.clone())?;
+                                        if let Some(native_token) = output.native_token() {
+                                            total_native_tokens.add_native_token(native_token.clone())?;
                                         }
                                     } else {
                                         // only add outputs that can't be locked now and at any point in the future
@@ -298,8 +294,8 @@ where
                 // Only check outputs that are in this network
                 if output_data.network_id == network_id {
                     locked_amount += output_data.output.amount();
-                    if let Some(native_tokens) = output_data.output.native_tokens() {
-                        locked_native_tokens.add_native_tokens(native_tokens.clone())?;
+                    if let Some(native_token) = output_data.output.native_token() {
+                        locked_native_tokens.add_native_token(native_token.clone())?;
                     }
                 }
             }

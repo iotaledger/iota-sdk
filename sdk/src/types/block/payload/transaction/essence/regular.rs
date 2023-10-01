@@ -11,7 +11,7 @@ use crate::types::{
         context_input::{ContextInput, CONTEXT_INPUT_COUNT_RANGE},
         input::{Input, INPUT_COUNT_RANGE},
         mana::{verify_mana_allotments_sum, ManaAllotment, ManaAllotments},
-        output::{InputsCommitment, NativeTokens, Output, OUTPUT_COUNT_RANGE},
+        output::{InputsCommitment, Output, OUTPUT_COUNT_RANGE},
         payload::{OptionalPayload, Payload},
         protocol::ProtocolParameters,
         slot::SlotIndex,
@@ -382,8 +382,8 @@ fn verify_outputs<const VERIFY: bool>(outputs: &[Output], visitor: &ProtocolPara
             // TODO this should be lifted ?
             // if let Some(native_tokens) = native_tokens {
             //     native_tokens_count = native_tokens_count.checked_add(native_tokens.len() as u8).ok_or(
-            //         Error::InvalidTransactionNativeTokensCount(native_tokens_count as u16 + native_tokens.len() as u16),
-            //     )?;
+            //         Error::InvalidTransactionNativeTokensCount(native_tokens_count as u16 + native_tokens.len() as
+            // u16),     )?;
 
             //     if native_tokens_count > NativeTokens::COUNT_MAX {
             //         return Err(Error::InvalidTransactionNativeTokensCount(native_tokens_count as u16));
