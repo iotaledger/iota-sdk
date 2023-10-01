@@ -36,7 +36,6 @@ pub enum ClientMethod {
         // TODO: Determine if `default` is wanted here
         #[serde(default, with = "string")]
         mana: u64,
-        native_tokens: Option<Vec<NativeToken>>,
         account_id: AccountId,
         state_index: Option<u32>,
         state_metadata: Option<String>,

@@ -82,7 +82,6 @@ fn no_outputs_but_burn() {
         None,
         None,
         None,
-        None,
     )]);
     let outputs = Vec::new();
 

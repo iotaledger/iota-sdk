@@ -37,7 +37,6 @@ fn burn_account_present() {
             None,
             None,
             None,
-            None,
         ),
         Basic(1_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
     ]);
@@ -79,7 +78,6 @@ fn burn_account_present_and_required() {
             0,
             BECH32_ADDRESS_ED25519_0,
             BECH32_ADDRESS_ED25519_0,
-            None,
             None,
             None,
             None,
@@ -216,7 +214,6 @@ fn burn_accounts_present() {
             None,
             None,
             None,
-            None,
         ),
         Account(
             1_000_000,
@@ -224,7 +221,6 @@ fn burn_accounts_present() {
             0,
             BECH32_ADDRESS_ED25519_0,
             BECH32_ADDRESS_ED25519_0,
-            None,
             None,
             None,
             None,
@@ -271,7 +267,6 @@ fn burn_account_in_outputs() {
             None,
             None,
             None,
-            None,
         ),
         Basic(1_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
     ]);
@@ -282,7 +277,6 @@ fn burn_account_in_outputs() {
             0,
             BECH32_ADDRESS_ED25519_0,
             BECH32_ADDRESS_ED25519_0,
-            None,
             None,
             None,
             None,
@@ -408,7 +402,6 @@ fn burn_nft_id_zero() {
             0,
             BECH32_ADDRESS_ED25519_0,
             BECH32_ADDRESS_ED25519_0,
-            None,
             None,
             None,
             None,
@@ -610,7 +603,6 @@ fn burn_foundry_present() {
             None,
             None,
             None,
-            None,
         ),
         Basic(1_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
     ]);
@@ -651,7 +643,6 @@ fn burn_foundry_present() {
                 ));
             } else if output.is_account() {
                 assert_eq!(output.amount(), 1_000_000);
-                assert_eq!(output.as_account().native_tokens().len(), 0);
                 assert_eq!(*output.as_account().account_id(), account_id_1);
                 assert_eq!(output.as_account().unlock_conditions().len(), 2);
                 assert_eq!(output.as_account().features().len(), 0);
@@ -693,7 +684,6 @@ fn burn_foundry_absent() {
             0,
             BECH32_ADDRESS_ED25519_0,
             BECH32_ADDRESS_ED25519_0,
-            None,
             None,
             None,
             None,
@@ -755,7 +745,6 @@ fn burn_foundries_present() {
             None,
             None,
             None,
-            None,
         ),
     ]);
     let outputs = build_outputs([Basic(
@@ -789,7 +778,6 @@ fn burn_foundries_present() {
         if !outputs.contains(output) {
             assert!(output.is_account());
             assert_eq!(output.amount(), 1_000_000);
-            assert_eq!(output.as_account().native_tokens().len(), 0);
             assert_eq!(*output.as_account().account_id(), account_id_1);
             assert_eq!(output.as_account().unlock_conditions().len(), 2);
             assert_eq!(output.as_account().features().len(), 0);
@@ -905,7 +893,6 @@ fn burn_foundry_and_its_account() {
             0,
             BECH32_ADDRESS_ED25519_0,
             BECH32_ADDRESS_ED25519_0,
-            None,
             None,
             None,
             None,

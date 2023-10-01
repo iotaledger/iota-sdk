@@ -85,7 +85,6 @@ async fn all_combined() -> Result<()> {
             None,
             None,
             None,
-            None,
         ),
         Account(
             1_000_000,
@@ -93,7 +92,6 @@ async fn all_combined() -> Result<()> {
             0,
             &ed25519_bech32_address_0.to_string(),
             &ed25519_bech32_address_1.to_string(),
-            None,
             None,
             None,
             Some(Bip44::new(SHIMMER_COIN_TYPE)),
@@ -285,7 +283,6 @@ async fn all_combined() -> Result<()> {
             None,
             None,
             None,
-            None,
         ),
         Account(
             1_000_000,
@@ -293,7 +290,6 @@ async fn all_combined() -> Result<()> {
             1,
             &ed25519_bech32_address_0.to_string(),
             &ed25519_bech32_address_1.to_string(),
-            None,
             None,
             None,
             None,

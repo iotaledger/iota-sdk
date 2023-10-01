@@ -66,7 +66,6 @@ async fn sign_account_state_transition() -> Result<()> {
         &bech32_address_1.to_string(),
         None,
         None,
-        None,
         Some(Bip44::new(SHIMMER_COIN_TYPE)),
     )]);
 
@@ -76,7 +75,6 @@ async fn sign_account_state_transition() -> Result<()> {
         1,
         &bech32_address_0.to_string(),
         &bech32_address_1.to_string(),
-        None,
         None,
         None,
         None,
@@ -156,7 +154,6 @@ async fn sign_account_governance_transition() -> Result<()> {
         &bech32_address_1.to_string(),
         None,
         None,
-        None,
         Some(Bip44::new(SHIMMER_COIN_TYPE).with_address_index(1)),
     )]);
 
@@ -166,7 +163,6 @@ async fn sign_account_governance_transition() -> Result<()> {
         0,
         &bech32_address_0.to_string(),
         &bech32_address_1.to_string(),
-        None,
         None,
         None,
         None,
@@ -249,7 +245,6 @@ async fn account_reference_unlocks() -> Result<()> {
             &bech32_address_1.to_string(),
             None,
             None,
-            None,
             Some(Bip44::new(SHIMMER_COIN_TYPE)),
         ),
         Basic(
@@ -281,7 +276,6 @@ async fn account_reference_unlocks() -> Result<()> {
             1,
             &bech32_address_0.to_string(),
             &bech32_address_1.to_string(),
-            None,
             None,
             None,
             None,

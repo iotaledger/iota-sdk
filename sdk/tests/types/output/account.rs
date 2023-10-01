@@ -3,8 +3,7 @@
 
 use iota_sdk::types::{
     block::{
-        address::AccountAddress,
-        output::{AccountOutput, Feature, FoundryId, NativeToken, Output, Rent, SimpleTokenScheme, TokenId},
+        output::{AccountOutput, Feature, Output, Rent},
         protocol::protocol_parameters,
         rand::output::{
             feature::{rand_issuer_feature, rand_metadata_feature, rand_sender_feature},
@@ -23,7 +22,6 @@ use packable::PackableExt;
 fn builder() {
     let protocol_parameters = protocol_parameters();
     let account_id = rand_account_id();
-    let foundry_id = FoundryId::build(&AccountAddress::from(account_id), 0, SimpleTokenScheme::KIND);
     let gov_address_1 = rand_governor_address_unlock_condition_different_from(&account_id);
     let gov_address_2 = rand_governor_address_unlock_condition_different_from(&account_id);
     let state_address_1 = rand_state_controller_address_unlock_condition_different_from(&account_id);
@@ -35,7 +33,6 @@ fn builder() {
     let amount = 500_000;
 
     let mut builder = AccountOutput::build_with_amount(amount, account_id)
-        .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000).unwrap())
         .add_unlock_condition(gov_address_1)
         .add_unlock_condition(state_address_1)
         .add_feature(sender_1)

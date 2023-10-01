@@ -58,7 +58,6 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         ClientMethod::BuildAccountOutput {
             amount,
             mana,
-            native_tokens,
             account_id,
             state_index,
             state_metadata,
@@ -74,7 +73,6 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
                     OutputBuilderAmount::MinimumStorageDeposit(client.get_rent_structure().await?)
                 },
                 mana,
-                native_tokens,
                 &account_id,
                 state_index,
                 state_metadata.map(prefix_hex::decode).transpose()?,

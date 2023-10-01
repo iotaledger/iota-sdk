@@ -89,7 +89,6 @@ enum Build<'a> {
         u32,
         &'a str,
         &'a str,
-        Option<Vec<(&'a str, u64)>>,
         Option<&'a str>,
         Option<&'a str>,
         Option<Bip44>,
@@ -186,7 +185,6 @@ fn build_account_output(
     state_index: u32,
     state_address: Bech32Address,
     governor_address: Bech32Address,
-    native_tokens: Option<Vec<(&str, u64)>>,
     bech32_sender: Option<Bech32Address>,
     bech32_issuer: Option<Bech32Address>,
 ) -> Output {
@@ -194,14 +192,6 @@ fn build_account_output(
         .with_state_index(state_index)
         .add_unlock_condition(StateControllerAddressUnlockCondition::new(state_address))
         .add_unlock_condition(GovernorAddressUnlockCondition::new(governor_address));
-
-    if let Some(native_tokens) = native_tokens {
-        builder = builder.with_native_tokens(
-            native_tokens
-                .into_iter()
-                .map(|(id, amount)| NativeToken::new(TokenId::from_str(id).unwrap(), amount).unwrap()),
-        );
-    }
 
     if let Some(bech32_sender) = bech32_sender {
         builder = builder.add_feature(SenderFeature::new(bech32_sender));
@@ -280,7 +270,6 @@ fn build_output_inner(build: Build) -> (Output, Option<Bip44>) {
             state_index,
             state_address,
             governor_address,
-            native_tokens,
             bech32_sender,
             bech32_issuer,
             chain,
@@ -291,7 +280,6 @@ fn build_output_inner(build: Build) -> (Output, Option<Bip44>) {
                 state_index,
                 Bech32Address::try_from_str(state_address).unwrap(),
                 Bech32Address::try_from_str(governor_address).unwrap(),
-                native_tokens,
                 bech32_sender.map(|address| Bech32Address::try_from_str(address).unwrap()),
                 bech32_issuer.map(|address| Bech32Address::try_from_str(address).unwrap()),
             ),

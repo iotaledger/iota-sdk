@@ -512,7 +512,6 @@ fn sdruc_required_non_ed25519_in_address_unlock() {
             None,
             None,
             None,
-            None,
         ),
     ]);
     let outputs = build_outputs([Basic(
@@ -573,7 +572,6 @@ fn useless_sdruc_non_ed25519_in_address_unlock() {
             0,
             BECH32_ADDRESS_ED25519_0,
             BECH32_ADDRESS_ED25519_0,
-            None,
             None,
             None,
             None,

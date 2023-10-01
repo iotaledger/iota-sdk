@@ -101,8 +101,6 @@ where
                             if !account_details.locked_outputs.contains(output_id) {
                                 total_rent_amount += rent;
                             }
-                            // Add native tokens
-                            total_native_tokens.add_native_tokens(output.native_tokens().clone())?;
 
                             let account_id = output.account_id_non_null(output_id);
                             balance.accounts.push(account_id);

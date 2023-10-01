@@ -21,9 +21,8 @@ use crate::types::{
             unlock_condition::{
                 verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions,
             },
-            verify_output_amount_min, verify_output_amount_packable, verify_output_amount_supply, ChainId, NativeToken,
-            NativeTokens, Output, OutputBuilderAmount, OutputId, Rent, RentStructure, StateTransitionError,
-            StateTransitionVerifier,
+            verify_output_amount_min, verify_output_amount_packable, verify_output_amount_supply, ChainId, Output,
+            OutputBuilderAmount, OutputId, Rent, RentStructure, StateTransitionError, StateTransitionVerifier,
         },
         protocol::ProtocolParameters,
         semantic::{TransactionFailureReason, ValidationContext},
@@ -47,11 +46,7 @@ impl From<&OutputId> for AccountId {
 impl AccountId {
     ///
     pub fn or_from_output_id(self, output_id: &OutputId) -> Self {
-        if self.is_null() {
-            Self::from(output_id)
-        } else {
-            self
-        }
+        if self.is_null() { Self::from(output_id) } else { self }
     }
 }
 
@@ -98,7 +93,6 @@ impl core::fmt::Display for AccountTransition {
 pub struct AccountOutputBuilder {
     amount: OutputBuilderAmount,
     mana: u64,
-    native_tokens: BTreeSet<NativeToken>,
     account_id: AccountId,
     state_index: Option<u32>,
     state_metadata: Vec<u8>,
@@ -124,7 +118,6 @@ impl AccountOutputBuilder {
         Self {
             amount,
             mana: Default::default(),
-            native_tokens: BTreeSet::new(),
             account_id,
             state_index: None,
             state_metadata: Vec::new(),
@@ -153,20 +146,6 @@ impl AccountOutputBuilder {
     #[inline(always)]
     pub fn with_mana(mut self, mana: u64) -> Self {
         self.mana = mana;
-        self
-    }
-
-    ///
-    #[inline(always)]
-    pub fn add_native_token(mut self, native_token: NativeToken) -> Self {
-        self.native_tokens.insert(native_token);
-        self
-    }
-
-    ///
-    #[inline(always)]
-    pub fn with_native_tokens(mut self, native_tokens: impl IntoIterator<Item = NativeToken>) -> Self {
-        self.native_tokens = native_tokens.into_iter().collect();
         self
     }
 
@@ -310,7 +289,6 @@ impl AccountOutputBuilder {
         let mut output = AccountOutput {
             amount: 1,
             mana: self.mana,
-            native_tokens: NativeTokens::from_set(self.native_tokens)?,
             account_id: self.account_id,
             state_index,
             state_metadata,
@@ -357,7 +335,6 @@ impl From<&AccountOutput> for AccountOutputBuilder {
         Self {
             amount: OutputBuilderAmount::Amount(output.amount),
             mana: output.mana,
-            native_tokens: output.native_tokens.iter().copied().collect(),
             account_id: output.account_id,
             state_index: Some(output.state_index),
             state_metadata: output.state_metadata.to_vec(),
@@ -377,8 +354,6 @@ pub struct AccountOutput {
     // Amount of IOTA coins held by the output.
     amount: u64,
     mana: u64,
-    // Native tokens held by the output.
-    native_tokens: NativeTokens,
     // Unique identifier of the account.
     account_id: AccountId,
     // A counter that must increase by 1 every time the account is state transitioned.
@@ -432,12 +407,6 @@ impl AccountOutput {
     #[inline(always)]
     pub fn mana(&self) -> u64 {
         self.mana
-    }
-
-    ///
-    #[inline(always)]
-    pub fn native_tokens(&self) -> &NativeTokens {
-        &self.native_tokens
     }
 
     ///
@@ -605,7 +574,6 @@ impl AccountOutput {
         } else if next_state.state_index == current_state.state_index {
             // Governance transition.
             if current_state.amount != next_state.amount
-                || current_state.native_tokens != next_state.native_tokens
                 || current_state.state_metadata != next_state.state_metadata
                 || current_state.foundry_counter != next_state.foundry_counter
             {
@@ -662,7 +630,6 @@ impl Packable for AccountOutput {
     fn pack<P: Packer>(&self, packer: &mut P) -> Result<(), P::Error> {
         self.amount.pack(packer)?;
         self.mana.pack(packer)?;
-        self.native_tokens.pack(packer)?;
         self.account_id.pack(packer)?;
         self.state_index.pack(packer)?;
         self.state_metadata.pack(packer)?;
@@ -684,7 +651,6 @@ impl Packable for AccountOutput {
 
         let mana = u64::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
 
-        let native_tokens = NativeTokens::unpack::<_, VERIFY>(unpacker, &())?;
         let account_id = AccountId::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
         let state_index = u32::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
         let state_metadata = BoxedSlicePrefix::<u8, StateMetadataLength>::unpack::<_, VERIFY>(unpacker, &())
@@ -718,7 +684,6 @@ impl Packable for AccountOutput {
         Ok(Self {
             amount,
             mana,
-            native_tokens,
             account_id,
             state_index,
             state_metadata,
@@ -788,8 +753,6 @@ pub(crate) mod dto {
         pub amount: u64,
         #[serde(with = "string")]
         pub mana: u64,
-        #[serde(skip_serializing_if = "Vec::is_empty", default)]
-        pub native_tokens: Vec<NativeToken>,
         pub account_id: AccountId,
         pub state_index: u32,
         #[serde(skip_serializing_if = "<[_]>::is_empty", default, with = "prefix_hex_bytes")]
@@ -808,7 +771,6 @@ pub(crate) mod dto {
                 kind: AccountOutput::KIND,
                 amount: value.amount(),
                 mana: value.mana(),
-                native_tokens: value.native_tokens().to_vec(),
                 account_id: *value.account_id(),
                 state_index: value.state_index(),
                 state_metadata: value.state_metadata().into(),
@@ -829,7 +791,6 @@ pub(crate) mod dto {
                 .with_mana(dto.mana)
                 .with_state_index(dto.state_index)
                 .with_foundry_counter(dto.foundry_counter)
-                .with_native_tokens(dto.native_tokens)
                 .with_features(dto.features)
                 .with_immutable_features(dto.immutable_features)
                 .with_state_metadata(dto.state_metadata);
@@ -847,7 +808,6 @@ pub(crate) mod dto {
         pub fn try_from_dtos<'a>(
             amount: OutputBuilderAmount,
             mana: u64,
-            native_tokens: Option<Vec<NativeToken>>,
             account_id: &AccountId,
             state_index: Option<u32>,
             state_metadata: Option<Vec<u8>>,
@@ -865,10 +825,6 @@ pub(crate) mod dto {
                 }
             }
             .with_mana(mana);
-
-            if let Some(native_tokens) = native_tokens {
-                builder = builder.with_native_tokens(native_tokens);
-            }
 
             if let Some(state_index) = state_index {
                 builder = builder.with_state_index(state_index);
@@ -937,7 +893,6 @@ mod tests {
         let output_split = AccountOutput::try_from_dtos(
             OutputBuilderAmount::Amount(output.amount()),
             output.mana(),
-            Some(output.native_tokens().to_vec()),
             output.account_id(),
             output.state_index().into(),
             output.state_metadata().to_owned().into(),
@@ -959,7 +914,6 @@ mod tests {
             let output_split = AccountOutput::try_from_dtos(
                 builder.amount,
                 builder.mana,
-                Some(builder.native_tokens.iter().copied().collect()),
                 &builder.account_id,
                 builder.state_index,
                 builder.state_metadata.to_owned().into(),
@@ -974,7 +928,6 @@ mod tests {
         };
 
         let builder = AccountOutput::build_with_amount(100, account_id)
-            .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000).unwrap())
             .add_unlock_condition(gov_address)
             .add_unlock_condition(state_address)
             .with_features(rand_allowed_features(AccountOutput::ALLOWED_FEATURES))
@@ -983,7 +936,6 @@ mod tests {
 
         let builder =
             AccountOutput::build_with_minimum_storage_deposit(protocol_parameters.rent_structure(), account_id)
-                .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000).unwrap())
                 .add_unlock_condition(gov_address)
                 .add_unlock_condition(state_address)
                 .with_features(rand_allowed_features(AccountOutput::ALLOWED_FEATURES))

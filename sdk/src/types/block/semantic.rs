@@ -247,7 +247,7 @@ pub fn semantic_validation(
             Output::Account(output) => (
                 output.unlock(output_id, unlock, inputs, &mut context),
                 output.amount(),
-                Some(output.native_tokens()),
+                None,
                 output.unlock_conditions(),
             ),
             Output::Foundry(output) => (
@@ -321,7 +321,7 @@ pub fn semantic_validation(
 
                 (output.amount(), Some(output.native_tokens()), Some(output.features()))
             }
-            Output::Account(output) => (output.amount(), Some(output.native_tokens()), Some(output.features())),
+            Output::Account(output) => (output.amount(), None, Some(output.features())),
             Output::Foundry(output) => (output.amount(), Some(output.native_tokens()), Some(output.features())),
             Output::Nft(output) => (output.amount(), Some(output.native_tokens()), Some(output.features())),
             Output::Delegation(output) => (output.amount(), None, None),

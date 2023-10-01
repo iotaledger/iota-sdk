@@ -123,7 +123,6 @@ fn minted_native_tokens_in_new_remainder() {
             None,
             None,
             None,
-            None,
         ),
     ]);
     let outputs = build_outputs([Foundry(
@@ -174,7 +173,6 @@ fn minted_native_tokens_in_provided_output() {
             0,
             BECH32_ADDRESS_ED25519_0,
             BECH32_ADDRESS_ED25519_0,
-            None,
             None,
             None,
             None,
@@ -298,7 +296,6 @@ fn destroy_foundry_with_account_state_transition() {
             None,
             None,
             None,
-            None,
         ),
         Foundry(
             52_800,
@@ -346,7 +343,6 @@ fn destroy_foundry_with_account_governance_transition() {
             None,
             None,
             None,
-            None,
         ),
         Foundry(
             1_000_000,
@@ -385,7 +381,6 @@ fn destroy_foundry_with_account_burn() {
             1,
             BECH32_ADDRESS_ED25519_0,
             BECH32_ADDRESS_ED25519_0,
-            None,
             None,
             None,
             None,
@@ -440,7 +435,6 @@ fn prefer_basic_to_foundry() {
             1,
             BECH32_ADDRESS_ED25519_0,
             BECH32_ADDRESS_ED25519_0,
-            None,
             None,
             None,
             None,
@@ -537,7 +531,6 @@ fn simple_foundry_transition_basic_not_needed() {
         if !outputs.contains(output) {
             assert!(output.is_account());
             assert_eq!(output.amount(), 2_000_000);
-            assert_eq!(output.as_account().native_tokens().len(), 0);
             assert_eq!(*output.as_account().account_id(), account_id_1);
             assert_eq!(output.as_account().unlock_conditions().len(), 2);
             assert_eq!(output.as_account().features().len(), 0);
@@ -611,7 +604,6 @@ fn simple_foundry_transition_basic_not_needed_with_remainder() {
         if !outputs.contains(output) {
             if output.is_account() {
                 assert_eq!(output.amount(), 2_000_000);
-                assert_eq!(output.as_account().native_tokens().len(), 0);
                 assert_eq!(*output.as_account().account_id(), account_id_1);
                 assert_eq!(output.as_account().unlock_conditions().len(), 2);
                 assert_eq!(output.as_account().features().len(), 0);
@@ -840,7 +832,6 @@ fn create_native_token_but_burn_account() {
             None,
             None,
             None,
-            None,
         ),
         Foundry(
             1_000_000,
@@ -887,7 +878,6 @@ fn melted_tokens_not_provided() {
             1,
             BECH32_ADDRESS_ED25519_0,
             BECH32_ADDRESS_ED25519_0,
-            None,
             None,
             None,
             None,
@@ -939,7 +929,6 @@ fn burned_tokens_not_provided() {
             1,
             BECH32_ADDRESS_ED25519_0,
             BECH32_ADDRESS_ED25519_0,
-            None,
             None,
             None,
             None,
