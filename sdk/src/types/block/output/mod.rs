@@ -178,9 +178,9 @@ impl Output {
     pub fn native_tokens(&self) -> Option<&NativeTokens> {
         match self {
             Self::Basic(output) => Some(output.native_tokens()),
-            Self::Account(output) => None,
+            Self::Account(_) => None,
             Self::Foundry(output) => Some(output.native_tokens()),
-            Self::Nft(output) => None,
+            Self::Nft(_) => None,
             Self::Delegation(_) => None,
         }
     }

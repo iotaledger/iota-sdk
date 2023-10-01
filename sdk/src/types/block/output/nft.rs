@@ -613,13 +613,10 @@ mod tests {
     use super::*;
     use crate::types::{
         block::{
-            output::{dto::OutputDto, FoundryId, SimpleTokenScheme, TokenId},
+            output::dto::OutputDto,
             protocol::protocol_parameters,
-            rand::{
-                address::rand_account_address,
-                output::{
-                    feature::rand_allowed_features, rand_nft_output, unlock_condition::rand_address_unlock_condition,
-                },
+            rand::output::{
+                feature::rand_allowed_features, rand_nft_output, unlock_condition::rand_address_unlock_condition,
             },
         },
         TryFromDto,
@@ -634,8 +631,6 @@ mod tests {
         assert_eq!(&output, output_unver.as_nft());
         let output_ver = Output::try_from_dto_with_params(dto, &protocol_parameters).unwrap();
         assert_eq!(&output, output_ver.as_nft());
-
-        let foundry_id = FoundryId::build(&rand_account_address(), 0, SimpleTokenScheme::KIND);
 
         let output_split = NftOutput::try_from_dtos(
             OutputBuilderAmount::Amount(output.amount()),

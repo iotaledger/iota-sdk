@@ -2,15 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use iota_sdk::types::block::{
-    output::{FoundryId, NftId, NftOutput, Output, Rent, SimpleTokenScheme},
+    output::{NftId, NftOutput, Output, Rent},
     protocol::protocol_parameters,
-    rand::{
-        address::rand_account_address,
-        output::{
-            feature::{rand_issuer_feature, rand_sender_feature},
-            rand_nft_output,
-            unlock_condition::rand_address_unlock_condition,
-        },
+    rand::output::{
+        feature::{rand_issuer_feature, rand_sender_feature},
+        rand_nft_output,
+        unlock_condition::rand_address_unlock_condition,
     },
 };
 use packable::PackableExt;
@@ -18,7 +15,6 @@ use packable::PackableExt;
 #[test]
 fn builder() {
     let protocol_parameters = protocol_parameters();
-    let foundry_id = FoundryId::build(&rand_account_address(), 0, SimpleTokenScheme::KIND);
     let address_1 = rand_address_unlock_condition();
     let address_2 = rand_address_unlock_condition();
     let sender_1 = rand_sender_feature();

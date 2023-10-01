@@ -863,17 +863,14 @@ mod tests {
     use super::*;
     use crate::types::{
         block::{
-            output::{dto::OutputDto, FoundryId, SimpleTokenScheme, TokenId},
+            output::dto::OutputDto,
             protocol::protocol_parameters,
-            rand::{
-                address::rand_account_address,
-                output::{
-                    feature::rand_allowed_features,
-                    rand_account_id, rand_account_output,
-                    unlock_condition::{
-                        rand_governor_address_unlock_condition_different_from,
-                        rand_state_controller_address_unlock_condition_different_from,
-                    },
+            rand::output::{
+                feature::rand_allowed_features,
+                rand_account_id, rand_account_output,
+                unlock_condition::{
+                    rand_governor_address_unlock_condition_different_from,
+                    rand_state_controller_address_unlock_condition_different_from,
                 },
             },
         },
@@ -906,7 +903,6 @@ mod tests {
         assert_eq!(output, output_split);
 
         let account_id = rand_account_id();
-        let foundry_id = FoundryId::build(&rand_account_address(), 0, SimpleTokenScheme::KIND);
         let gov_address = rand_governor_address_unlock_condition_different_from(&account_id);
         let state_address = rand_state_controller_address_unlock_condition_different_from(&account_id);
 
