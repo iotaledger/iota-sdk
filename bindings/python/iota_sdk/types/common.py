@@ -7,6 +7,8 @@ from dataclasses import dataclass
 from dataclasses_json import DataClassJsonMixin, dataclass_json, LetterCase, Undefined
 
 HexStr = NewType("HexStr", str)
+EpochIndex = NewType("EpochIndex", int)
+SlotIndex = NewType("SlotIndex", int)
 
 
 def json(cls):

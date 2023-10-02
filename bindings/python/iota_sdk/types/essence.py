@@ -3,17 +3,15 @@
 
 from __future__ import annotations
 from enum import IntEnum
-from typing import TYPE_CHECKING, Optional, List, Union
+from typing import TYPE_CHECKING, Optional, List
 
 from dataclasses import dataclass, field
 
-from iota_sdk.types.common import HexStr, json
+from iota_sdk.types.common import HexStr, json, SlotIndex
 from iota_sdk.types.mana import ManaAllotment
-# TODO: Add missing output types in #1174
-# pylint: disable=no-name-in-module
-from iota_sdk.types.output import BasicOutput, AccountOutput, FoundryOutput, NftOutput, DelegationOutput
 from iota_sdk.types.input import UtxoInput
-from iota_sdk.types.context_input import CommitmentContextInput, BlockIssuanceCreditContextInput, RewardContextInput
+from iota_sdk.types.context_input import ContextInputUnion
+from iota_sdk.types.output import OutputUnion
 
 # Required to prevent circular import
 if TYPE_CHECKING:
@@ -54,13 +52,11 @@ class RegularTransactionEssence(TransactionEssence):
         payload: An optional tagged data payload
     """
     network_id: str
-    # TODO: Replace with a proper SlotIndex type
-    creation_slot: HexStr
+    creation_slot: SlotIndex
     inputs: List[UtxoInput]
     inputs_commitment: HexStr
-    outputs: List[Union[BasicOutput, AccountOutput, FoundryOutput, NftOutput, DelegationOutput]]
-    context_inputs: Optional[List[Union[CommitmentContextInput,
-                                        BlockIssuanceCreditContextInput, RewardContextInput]]] = None
+    outputs: List[OutputUnion]
+    context_inputs: Optional[List[ContextInputUnion]] = None
     allotments: Optional[List[ManaAllotment]] = None
     payload: Optional[Payload] = None
     type: int = field(
