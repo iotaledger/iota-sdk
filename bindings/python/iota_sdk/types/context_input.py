@@ -4,6 +4,7 @@
 from __future__ import annotations
 from dataclasses import dataclass, field
 from enum import IntEnum
+from typing import Any, Dict, List, TypeAlias, Union
 from iota_sdk.types.common import HexStr, json
 
 
@@ -70,3 +71,35 @@ class RewardContextInput(ContextInput):
         default_factory=lambda: int(
             ContextInputType.Reward),
         init=False)
+
+
+ContextInputUnion: TypeAlias = Union[CommitmentContextInput,
+                                     BlockIssuanceCreditContextInput, RewardContextInput]
+
+
+def deserialize_context_input(d: Dict[str, Any]) -> ContextInputUnion:
+    """
+    Takes a dictionary as input and returns an instance of a specific class based on the value of the 'type' key in the dictionary.
+
+    Arguments:
+    * `d`: A dictionary that is expected to have a key called 'type' which specifies the type of the returned value.
+    """
+    context_input_type = dict['type']
+    if context_input_type == ContextInputType.Commitment:
+        return CommitmentContextInput.from_dict(d)
+    if context_input_type == ContextInputType.BlockIssuanceCredit:
+        return BlockIssuanceCreditContextInput.from_dict(d)
+    if context_input_type == ContextInputType.Reward:
+        return RewardContextInput.from_dict(d)
+    raise Exception(f'invalid context input type: {context_input_type}')
+
+
+def deserialize_context_inputs(
+        dicts: List[Dict[str, Any]]) -> List[ContextInputUnion]:
+    """
+    Takes a list of dictionaries as input and returns a list with specific instances of a classes based on the value of the 'type' key in the dictionary.
+
+    Arguments:
+    * `dicts`: A list of dictionaries that are expected to have a key called 'type' which specifies the type of the returned value.
+    """
+    return list(map(deserialize_context_input, dicts))

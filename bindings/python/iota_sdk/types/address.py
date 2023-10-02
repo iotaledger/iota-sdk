@@ -2,10 +2,8 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from enum import IntEnum
-
 from dataclasses import dataclass, field
-
-
+from typing import Any, Dict, List, TypeAlias, Union
 from iota_sdk.types.common import HexStr, json
 
 
@@ -71,19 +69,6 @@ class NFTAddress(Address):
 
 @json
 @dataclass
-# pylint: disable=function-redefined
-# TODO: Change name
-class AccountAddress():
-    """An Address of the Account.
-    """
-    address: str
-    key_index: int
-    internal: bool
-    used: bool
-
-
-@json
-@dataclass
 class AddressWithUnspentOutputs():
     """An Address with unspent outputs.
     """
@@ -91,3 +76,34 @@ class AddressWithUnspentOutputs():
     key_index: int
     internal: bool
     output_ids: bool
+
+
+AddressUnion: TypeAlias = Union[Ed25519Address, AccountAddress, NFTAddress]
+
+
+def deserialize_address(d: Dict[str, Any]) -> AddressUnion:
+    """
+    Takes a dictionary as input and returns an instance of a specific class based on the value of the 'type' key in the dictionary.
+
+    Arguments:
+    * `d`: A dictionary that is expected to have a key called 'type' which specifies the type of the returned value.
+    """
+    address_type = d['type']
+    if address_type == AddressType.ED25519:
+        return Ed25519Address.from_dict(d)
+    if address_type == AddressType.ACCOUNT:
+        return AccountAddress.from_dict(d)
+    if address_type == AddressType.NFT:
+        return NFTAddress.from_dict(d)
+    raise Exception(f'invalid address type: {address_type}')
+
+
+def deserialize_addresses(
+        dicts: List[Dict[str, Any]]) -> List[AddressUnion]:
+    """
+    Takes a list of dictionaries as input and returns a list with specific instances of a classes based on the value of the 'type' key in the dictionary.
+
+    Arguments:
+    * `dicts`: A list of dictionaries that are expected to have a key called 'type' which specifies the type of the returned value.
+    """
+    return list(map(deserialize_address, dicts))
