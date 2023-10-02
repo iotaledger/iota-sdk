@@ -2,7 +2,7 @@ name: Test coverage
 
 on:
   push:
-    branches: [develop, production, "1.1"]
+    branches: [develop, staging]
     paths:
       - ".cargo/config.toml"
       - ".github/workflows/coverage.yml"
