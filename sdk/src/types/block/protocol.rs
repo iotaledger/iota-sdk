@@ -171,21 +171,6 @@ impl ProtocolParameters {
         )
     }
 
-    // TODO: wtf is this???
-    pub(crate) fn generate_something(&self, amount: u64) -> u64 {
-        let amount_hi = upper_bits(amount);
-        let amount_lo = lower_bits(amount);
-        let mana_structure = self.mana_structure();
-        let (amount_hi, amount_lo) = multiplication_and_shift(
-            amount_hi,
-            amount_lo,
-            mana_structure.decay_factor_epochs_sum() * mana_structure.generation_rate() as u32,
-            mana_structure.decay_factor_epochs_sum_exponent() + mana_structure.generation_rate_exponent()
-                - self.slots_per_epoch_exponent(),
-        );
-        amount_hi << 32 | amount_lo
-    }
-
     /// Returns the hash of the [`ProtocolParameters`].
     pub fn hash(&self) -> ProtocolParametersHash {
         ProtocolParametersHash::new(Blake2b256::digest(self.pack_to_vec()).into())
