@@ -37,7 +37,7 @@ where
             node_manager_builder,
             #[cfg(feature = "mqtt")]
             broker_options,
-            network_info,
+            mut network_info,
             api_timeout,
             remote_pow_timeout,
             #[cfg(not(target_family = "wasm"))]
@@ -48,7 +48,6 @@ where
         self.client
             .update_node_manager(node_manager_builder.build(HashMap::new()))
             .await?;
-        *self.client.network_info.write().await = network_info;
         *self.client.api_timeout.write().await = api_timeout;
         *self.client.remote_pow_timeout.write().await = remote_pow_timeout;
         #[cfg(not(target_family = "wasm"))]
@@ -61,6 +60,16 @@ where
         {
             *self.client.mqtt.broker_options.write().await = broker_options;
         }
+
+        // Update the protocol of the network_info to not have the default data, which can be wrong
+        let info = self.client.get_info().await?.node_info;
+        network_info.protocol_parameters = info.protocol.clone();
+        *self.client.network_info.write().await = network_info;
+
+        for account in self.accounts.write().await.iter_mut() {
+            account.update_account_bech32_hrp().await?;
+        }
+
         #[cfg(feature = "storage")]
         {
             WalletBuilder::from_wallet(self)
