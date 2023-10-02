@@ -77,12 +77,12 @@ class BlockWrapper {
 
     /**
      * Compute the block ID (Blake2b256 hash of the block bytes).
-     * 
+     *
      * @param params The network protocol parameters.
      * @returns The corresponding block ID.
      */
     id(params: ProtocolParameters): BlockId {
-        return Utils.blockId(this, params)
+        return Utils.blockId(this, params);
     }
 
     /**
