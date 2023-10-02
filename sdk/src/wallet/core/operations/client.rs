@@ -45,6 +45,10 @@ where
             #[cfg(not(target_family = "wasm"))]
             max_parallel_api_requests,
         } = client_options;
+
+        // Only check bech32 if something in the node_manager_builder changed
+        let change_in_node_manager = self.client_options().await.node_manager_builder != node_manager_builder;
+
         self.client
             .update_node_manager(node_manager_builder.build(HashMap::new()))
             .await?;
@@ -61,15 +65,17 @@ where
             *self.client.mqtt.broker_options.write().await = broker_options;
         }
 
-        // Update the protocol of the network_info to not have the default data, which can be wrong
-        // Ignore errors, because there might be no node at all and then it should still not error
-        if let Ok(info) = self.client.get_info().await {
-            network_info.protocol_parameters = info.node_info.protocol;
-        }
-        *self.client.network_info.write().await = network_info;
+        if change_in_node_manager {
+            // Update the protocol of the network_info to not have the default data, which can be wrong
+            // Ignore errors, because there might be no node at all and then it should still not error
+            if let Ok(info) = self.client.get_info().await {
+                network_info.protocol_parameters = info.node_info.protocol;
+            }
+            *self.client.network_info.write().await = network_info;
 
-        for account in self.accounts.write().await.iter_mut() {
-            account.update_account_bech32_hrp().await?;
+            for account in self.accounts.write().await.iter_mut() {
+                account.update_account_bech32_hrp().await?;
+            }
         }
 
         #[cfg(feature = "storage")]
