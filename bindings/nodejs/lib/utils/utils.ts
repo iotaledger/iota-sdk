@@ -194,17 +194,17 @@ export class Utils {
     }
 
     /**
-     * Compute the block ID (Blake2b256 hash of the block bytes) of a blockwrapper.
+     * Compute the block ID (Blake2b256 hash of the block bytes) of a block.
      *
-     * @param wrapper A blockwrapper.
+     * @param block A block.
      * @param params The network protocol parameters.
      * @returns The corresponding block ID.
      */
-    static blockId(wrapper: BlockWrapper, params: ProtocolParameters): BlockId {
+    static blockId(block: BlockWrapper, params: ProtocolParameters): BlockId {
         return callUtilsMethod({
             name: 'blockId',
             data: {
-                wrapper,
+                block,
                 params,
             },
         });
