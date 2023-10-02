@@ -50,15 +50,15 @@ pub enum Feature {
     /// A tag feature.
     #[packable(tag = TagFeature::KIND)]
     Tag(TagFeature),
+    /// A native token feature.
+    #[packable(tag = NativeTokenFeature::KIND)]
+    NativeToken(NativeTokenFeature),
     /// A block issuer feature.
     #[packable(tag = BlockIssuerFeature::KIND)]
     BlockIssuer(BlockIssuerFeature),
     /// A staking feature.
     #[packable(tag = StakingFeature::KIND)]
     Staking(StakingFeature),
-    /// A native token feature.
-    #[packable(tag = NativeTokenFeature::KIND)]
-    NativeToken(NativeTokenFeature),
 }
 
 impl PartialOrd for Feature {
@@ -80,9 +80,9 @@ impl core::fmt::Debug for Feature {
             Self::Issuer(feature) => feature.fmt(f),
             Self::Metadata(feature) => feature.fmt(f),
             Self::Tag(feature) => feature.fmt(f),
+            Self::NativeToken(feature) => feature.fmt(f),
             Self::BlockIssuer(feature) => feature.fmt(f),
             Self::Staking(feature) => feature.fmt(f),
-            Self::NativeToken(feature) => feature.fmt(f),
         }
     }
 }
@@ -95,9 +95,9 @@ impl Feature {
             Self::Issuer(_) => IssuerFeature::KIND,
             Self::Metadata(_) => MetadataFeature::KIND,
             Self::Tag(_) => TagFeature::KIND,
+            Self::NativeToken(_) => NativeTokenFeature::KIND,
             Self::BlockIssuer(_) => BlockIssuerFeature::KIND,
             Self::Staking(_) => StakingFeature::KIND,
-            Self::NativeToken(_) => NativeTokenFeature::KIND,
         }
     }
 
@@ -108,9 +108,9 @@ impl Feature {
             Self::Issuer(_) => FeatureFlags::ISSUER,
             Self::Metadata(_) => FeatureFlags::METADATA,
             Self::Tag(_) => FeatureFlags::TAG,
+            Self::NativeToken(_) => FeatureFlags::NATIVE_TOKEN,
             Self::BlockIssuer(_) => FeatureFlags::BLOCK_ISSUER,
             Self::Staking(_) => FeatureFlags::STAKING,
-            Self::NativeToken(_) => FeatureFlags::NATIVE_TOKEN,
         }
     }
 
@@ -174,6 +174,21 @@ impl Feature {
         }
     }
 
+    /// Checks whether the feature is a [`NativeTokenFeature`].
+    pub fn is_native_token(&self) -> bool {
+        matches!(self, Self::NativeToken(_))
+    }
+
+    /// Gets the feature as an actual [`NativeTokenFeature`].
+    /// NOTE: Will panic if the feature is not a [`NativeTokenFeature`].
+    pub fn as_native_token(&self) -> &NativeTokenFeature {
+        if let Self::NativeToken(feature) = self {
+            feature
+        } else {
+            panic!("invalid downcast of non-NativeTokenFeature");
+        }
+    }
+
     /// Checks whether the feature is a [`BlockIssuerFeature`].
     pub fn is_block_issuer(&self) -> bool {
         matches!(self, Self::BlockIssuer(_))
@@ -203,21 +218,6 @@ impl Feature {
             panic!("invalid downcast of non-StakingFeature");
         }
     }
-
-    /// Checks whether the feature is a [`NativeTokenFeature`].
-    pub fn is_native_token(&self) -> bool {
-        matches!(self, Self::NativeToken(_))
-    }
-
-    /// Gets the feature as an actual [`NativeTokenFeature`].
-    /// NOTE: Will panic if the feature is not a [`NativeTokenFeature`].
-    pub fn as_native_token(&self) -> &NativeTokenFeature {
-        if let Self::NativeToken(feature) = self {
-            feature
-        } else {
-            panic!("invalid downcast of non-NativeTokenFeature");
-        }
-    }
 }
 
 create_bitflags!(
@@ -229,9 +229,9 @@ create_bitflags!(
         (ISSUER, IssuerFeature),
         (METADATA, MetadataFeature),
         (TAG, TagFeature),
+        (NATIVE_TOKEN, NativeTokenFeature),
         (BLOCK_ISSUER, BlockIssuerFeature),
         (STAKING, StakingFeature),
-        (NATIVE_TOKEN, NativeTokenFeature),
     ]
 );
 
@@ -326,6 +326,11 @@ impl Features {
         self.get(TagFeature::KIND).map(Feature::as_tag)
     }
 
+    /// Gets a reference to a [`NativeTokenFeature`], if any.
+    pub fn native_token(&self) -> Option<&NativeTokenFeature> {
+        self.get(NativeTokenFeature::KIND).map(Feature::as_native_token)
+    }
+
     /// Gets a reference to a [`BlockIssuerFeature`], if any.
     pub fn block_issuer(&self) -> Option<&BlockIssuerFeature> {
         self.get(BlockIssuerFeature::KIND).map(Feature::as_block_issuer)
@@ -334,11 +339,6 @@ impl Features {
     /// Gets a reference to a [`StakingFeature`], if any.
     pub fn staking(&self) -> Option<&StakingFeature> {
         self.get(StakingFeature::KIND).map(Feature::as_staking)
-    }
-
-    /// Gets a reference to a [`NativeTokenFeature`], if any.
-    pub fn native_token(&self) -> Option<&NativeTokenFeature> {
-        self.get(NativeTokenFeature::KIND).map(Feature::as_native_token)
     }
 }
 
@@ -377,9 +377,9 @@ mod test {
                 FeatureFlags::ISSUER,
                 FeatureFlags::METADATA,
                 FeatureFlags::TAG,
-                FeatureFlags::BLOCK_ISSUER,
-                FeatureFlags::STAKING,
                 FeatureFlags::NATIVE_TOKEN
+                FeatureFlags::BLOCK_ISSUER,
+                FeatureFlags::STAKING
             ]
         );
     }

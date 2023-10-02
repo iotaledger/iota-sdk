@@ -62,6 +62,11 @@ pub fn rand_block_issuer_keys(len: usize) -> BTreeSet<BlockIssuerKey> {
     block_issuer_keys
 }
 
+/// Generates a random [`NativeTokenFeature`].
+pub fn rand_native_token_feature() -> NativeTokenFeature {
+    NativeTokenFeature::new(rand_native_token())
+}
+
 /// Generates a random [`BlockIssuerFeature`].
 pub fn rand_block_issuer_feature() -> BlockIssuerFeature {
     BlockIssuerFeature::new(
@@ -78,20 +83,15 @@ pub fn rand_staking_feature() -> StakingFeature {
     StakingFeature::new(rand_number(), rand_number(), rand_number::<u64>(), rand_number::<u64>())
 }
 
-/// Generates a random [`NativeTokenFeature`].
-pub fn rand_native_token_feature() -> NativeTokenFeature {
-    NativeTokenFeature::new(rand_native_token())
-}
-
 fn rand_feature_from_flag(flag: &FeatureFlags) -> Feature {
     match *flag {
         FeatureFlags::SENDER => Feature::Sender(rand_sender_feature()),
         FeatureFlags::ISSUER => Feature::Issuer(rand_issuer_feature()),
         FeatureFlags::METADATA => Feature::Metadata(rand_metadata_feature()),
         FeatureFlags::TAG => Feature::Tag(rand_tag_feature()),
+        FeatureFlags::NATIVE_TOKEN => Feature::NativeToken(rand_native_token_feature()),
         FeatureFlags::BLOCK_ISSUER => Feature::BlockIssuer(rand_block_issuer_feature()),
         FeatureFlags::STAKING => Feature::Staking(rand_staking_feature()),
-        FeatureFlags::NATIVE_TOKEN => Feature::NativeToken(rand_native_token_feature()),
         _ => unreachable!(),
     }
 }
