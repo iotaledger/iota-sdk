@@ -211,9 +211,6 @@ export class Utils {
     }
 
     /**
-
-
-    /**
      * Compute the transaction ID (Blake2b256 hash of the provided transaction payload) of a transaction payload.
      *
      * @param payload A transaction payload.
