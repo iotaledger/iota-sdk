@@ -17,6 +17,8 @@ use zeroize::Zeroizing;
 
 use crate::wallet::common::{setup, tear_down};
 
+const CHRYSALIS_ACCOUNT_INDEXATION_KEY: &str = "iota-wallet-account-indexation";
+
 #[tokio::test]
 async fn migrate_chrysalis_db() -> Result<()> {
     iota_stronghold::engine::snapshot::try_set_encrypt_work_factor(0).unwrap();
@@ -71,7 +73,7 @@ async fn migrate_chrysalis_db() -> Result<()> {
     );
 
     let chrysalis_data = wallet.get_chrysalis_data().await?.unwrap();
-    let accounts_indexation = chrysalis_data.get("iota-wallet-account-indexation").unwrap();
+    let accounts_indexation = chrysalis_data.get(CHRYSALIS_ACCOUNT_INDEXATION_KEY).unwrap();
     assert_eq!(
         accounts_indexation,
         "[{\"key\":\"wallet-account://b5e020ec9a67eb7ce07be742116bd27ae722e1159098c89dd7e50d972a7b13fc\"},{\"key\":\"wallet-account://e59975e320b8433916b4946bb1e21107e8d3f36d1e587782cbd35acf59c90d1a\"}]"
@@ -161,7 +163,7 @@ async fn migrate_chrysalis_db_encrypted() -> Result<()> {
     );
 
     let chrysalis_data = wallet.get_chrysalis_data().await?.unwrap();
-    let accounts_indexation = chrysalis_data.get("iota-wallet-account-indexation").unwrap();
+    let accounts_indexation = chrysalis_data.get(CHRYSALIS_ACCOUNT_INDEXATION_KEY).unwrap();
     assert_eq!(
         accounts_indexation,
         "[{\"key\":\"wallet-account://b5e020ec9a67eb7ce07be742116bd27ae722e1159098c89dd7e50d972a7b13fc\"},{\"key\":\"wallet-account://e59975e320b8433916b4946bb1e21107e8d3f36d1e587782cbd35acf59c90d1a\"}]"
@@ -247,7 +249,7 @@ async fn migrate_chrysalis_db_encrypted_encrypt_new() -> Result<()> {
     );
 
     let chrysalis_data = wallet.get_chrysalis_data().await?.unwrap();
-    let accounts_indexation = chrysalis_data.get("iota-wallet-account-indexation").unwrap();
+    let accounts_indexation = chrysalis_data.get(CHRYSALIS_ACCOUNT_INDEXATION_KEY).unwrap();
     assert_eq!(
         accounts_indexation,
         "[{\"key\":\"wallet-account://b5e020ec9a67eb7ce07be742116bd27ae722e1159098c89dd7e50d972a7b13fc\"},{\"key\":\"wallet-account://e59975e320b8433916b4946bb1e21107e8d3f36d1e587782cbd35acf59c90d1a\"}]"
@@ -324,7 +326,7 @@ async fn migrate_chrysalis_stronghold() -> Result<()> {
     );
 
     let chrysalis_data = wallet.get_chrysalis_data().await?.unwrap();
-    // "iota-wallet-account-indexation"
+    // CHRYSALIS_ACCOUNT_INDEXATION_KEY
     let accounts_indexation = chrysalis_data
         .get("0xddc058ad3b93b5a575b0051aafbc8ff17ad0415d7aa1c54d")
         .unwrap();
@@ -348,6 +350,34 @@ async fn migrate_chrysalis_stronghold() -> Result<()> {
     tear_down(storage_path)
 }
 
+#[tokio::test]
+async fn migrate_empty_chrysalis_db() -> Result<()> {
+    iota_stronghold::engine::snapshot::try_set_encrypt_work_factor(0).unwrap();
+    let storage_path = "migrate_empty_chrysalis_db";
+    setup(storage_path)?;
+
+    // Copy db so the original doesn't get modified
+    copy_folder("./tests/wallet/fixtures/check_existing_4_db_test", storage_path).unwrap();
+
+    assert!(matches!(
+        migrate_db_chrysalis_to_stardust("migrate_empty_chrysalis_db", None, None).await,
+        Err(iota_sdk::wallet::error::Error::Migration(msg)) if msg == "no chrysalis data to migrate"
+    ));
+
+    // add empty /db folder
+    fs::create_dir("migrate_empty_chrysalis_db/db")?;
+    assert!(matches!(
+        migrate_db_chrysalis_to_stardust("migrate_empty_chrysalis_db", None, None).await,
+        Err(iota_sdk::wallet::error::Error::Migration(msg)) if msg == "no chrysalis data to migrate"
+    ));
+
+    // stardust wallet data is still there
+    let wallet = Wallet::builder().with_storage_path(storage_path).finish().await?;
+    assert_eq!(wallet.get_accounts().await?.len(), 1);
+
+    tear_down(storage_path)
+}
+
 fn copy_folder(src: impl AsRef<Path>, dest: impl AsRef<Path>) -> io::Result<()> {
     fs::create_dir_all(&dest)?;
     for entry in fs::read_dir(src)? {
@@ -355,4 +385,51 @@ fn copy_folder(src: impl AsRef<Path>, dest: impl AsRef<Path>) -> io::Result<()> 
         fs::copy(entry.path(), dest.as_ref().join(entry.file_name()))?;
     }
     Ok(())
+}
+
+#[cfg(feature = "ledger_nano")]
+#[tokio::test]
+async fn migrate_chrysalis_db_ledger() -> Result<()> {
+    let storage_path = "migrate_chrysalis_db_ledger/db";
+    setup(storage_path)?;
+    // Copy db so the original doesn't get modified
+    copy_folder("./tests/wallet/fixtures/chrysalis-db-ledger/db", storage_path).unwrap();
+
+    migrate_db_chrysalis_to_stardust("migrate_chrysalis_db_ledger", None, None).await?;
+
+    let client_options = ClientOptions::new();
+    let wallet = Wallet::builder()
+        .with_storage_path("migrate_chrysalis_db_ledger")
+        .with_client_options(client_options)
+        .finish()
+        .await?;
+
+    let accounts = wallet.get_accounts().await?;
+    assert_eq!(accounts.len(), 1);
+    assert_eq!(accounts[0].alias().await, "ledger");
+
+    let alice_acc_details = accounts[0].details().await;
+    assert_eq!(alice_acc_details.public_addresses().len(), 4);
+    // mnemonic: glory promote mansion idle axis finger extra february uncover one trip resource lawn turtle enact
+    // monster seven myth punch hobby comfort wild raise skin
+    assert_eq!(
+        alice_acc_details.public_addresses()[0].address().try_to_bech32("rms")?,
+        "rms1qqdnv60ryxynaeyu8paq3lp9rkll7d7d92vpumz88fdj4l0pn5mruskth6z"
+    );
+    assert_eq!(alice_acc_details.internal_addresses().len(), 1);
+    assert_eq!(
+        alice_acc_details.internal_addresses()[0]
+            .address()
+            .try_to_bech32("rms")?,
+        "rms1qzev23h8qtdfjzzx4jqrdfaw2nnnwu2m4hhu2tkdmp2wrt6y8qwq22963tv"
+    );
+
+    let chrysalis_data = wallet.get_chrysalis_data().await?.unwrap();
+    let accounts_indexation = chrysalis_data.get(CHRYSALIS_ACCOUNT_INDEXATION_KEY).unwrap();
+    assert_eq!(
+        accounts_indexation,
+        "[{\"key\":\"wallet-account://2b9bd865368556d58f9d5a9fd44c30205f1fc80b09cde1dcb9b3a37748210854\"}]"
+    );
+
+    tear_down("migrate_chrysalis_db_ledger")
 }

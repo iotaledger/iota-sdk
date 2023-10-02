@@ -71,7 +71,7 @@ pub enum Response {
     NetworkInfo(NetworkInfo),
     /// Response for:
     /// - [`GetNetworkId`](crate::method::ClientMethod::GetNetworkId)
-    NetworkId(u64),
+    NetworkId(String),
     /// Response for:
     /// - [`GetBech32Hrp`](crate::method::ClientMethod::GetBech32Hrp)
     Bech32Hrp(Hrp),
@@ -168,6 +168,7 @@ pub enum Response {
     /// - [`BasicOutputIds`](crate::method::ClientMethod::BasicOutputIds)
     /// - [`FoundryOutputIds`](crate::method::ClientMethod::FoundryOutputIds)
     /// - [`NftOutputIds`](crate::method::ClientMethod::NftOutputIds)
+    /// - [`OutputIds`](crate::method::ClientMethod::OutputIds)
     OutputIdsResponse(OutputIdsResponse),
     /// Response for:
     /// - [`FindBlocks`](crate::method::ClientMethod::FindBlocks)
@@ -227,6 +228,8 @@ pub enum Response {
     NodeInfoWrapper(NodeInfoWrapper),
     /// Response for [`Bech32ToHex`](crate::method::UtilsMethod::Bech32ToHex)
     HexAddress(String),
+    /// Response for [`OutputHexBytes`](crate::method::UtilsMethod::OutputHexBytes)
+    HexBytes(String),
     /// Response for [`CallPluginRoute`](crate::method::ClientMethod::CallPluginRoute)
     CustomJson(serde_json::Value),
 

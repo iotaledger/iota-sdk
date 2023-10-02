@@ -9,11 +9,11 @@ import { Feature, FeatureDiscriminator } from './feature';
 
 // Temp solution for not double parsing JSON
 import { plainToInstance, Type } from 'class-transformer';
-import { HexEncodedString, hexToBigInt } from '../../utils';
+import { HexEncodedString, hexToBigInt, NumericString } from '../../utils';
 import { TokenScheme, TokenSchemeDiscriminator } from './token-scheme';
 import { INativeToken } from '../../models';
 
-export type OutputId = string;
+export type OutputId = HexEncodedString;
 
 /**
  * All of the output types.
@@ -35,7 +35,7 @@ enum OutputType {
  * The base class for outputs.
  */
 abstract class Output /*implements ICommonOutput*/ {
-    readonly amount: string;
+    readonly amount: NumericString;
 
     readonly type: OutputType;
 
@@ -43,7 +43,7 @@ abstract class Output /*implements ICommonOutput*/ {
      * @param type The type of output.
      * @param amount The amount of the output as big-integer or string.
      */
-    constructor(type: OutputType, amount: bigint | string) {
+    constructor(type: OutputType, amount: bigint | NumericString) {
         this.type = type;
         if (typeof amount == 'bigint') {
             this.amount = amount.toString(10);

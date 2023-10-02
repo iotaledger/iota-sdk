@@ -7,11 +7,22 @@ import type {
 } from '../../secret_manager/secret-manager';
 import type { IGenerateAddressesOptions } from '../generate-addresses-options';
 import type { IBuildBlockOptions } from '../build-block-options';
-import type { Block, BlockId, Output, Payload } from '../../block';
+import type {
+    AliasId,
+    Block,
+    BlockId,
+    FoundryId,
+    MilestoneId,
+    NftId,
+    Output,
+    OutputId,
+    Payload,
+} from '../../block';
 import type { PreparedTransactionData } from '../prepared-transaction-data';
 import type {
     AliasQueryParameter,
     FoundryQueryParameter,
+    GenericQueryParameter,
     NftQueryParameter,
     QueryParameter,
 } from '../query-parameters';
@@ -21,6 +32,7 @@ import type { AliasOutputBuilderParams } from '../output_builder_params/alias-ou
 import type { FoundryOutputBuilderParams } from '../output_builder_params/foundry-output-params';
 import type { NftOutputBuilderParams } from '../output_builder_params/nft-output-params';
 import { HexEncodedString } from '../../utils';
+import { TransactionId } from '../..';
 
 export interface __GetInfoMethod__ {
     name: 'getInfo';
@@ -29,7 +41,14 @@ export interface __GetInfoMethod__ {
 export interface __GetOutputMethod__ {
     name: 'getOutput';
     data: {
-        outputId: string;
+        outputId: OutputId;
+    };
+}
+
+export interface __GetOutputIdsMethod__ {
+    name: 'outputIds';
+    data: {
+        queryParameters: GenericQueryParameter[];
     };
 }
 
@@ -43,7 +62,7 @@ export interface __GetBasicOutputIdsMethod__ {
 export interface __GetOutputsMethod__ {
     name: 'getOutputs';
     data: {
-        outputIds: string[];
+        outputIds: OutputId[];
     };
 }
 
@@ -192,14 +211,14 @@ export interface __GetBlockRawMethod__ {
 export interface __GetMilestoneByIdMethod__ {
     name: 'getMilestoneById';
     data: {
-        milestoneId: string;
+        milestoneId: MilestoneId;
     };
 }
 
 export interface __GetUtxoChangesByIdMethod__ {
     name: 'getUtxoChangesById';
     data: {
-        milestoneId: string;
+        milestoneId: MilestoneId;
     };
 }
 export interface __GetMilestoneByIndexMethod__ {
@@ -234,21 +253,21 @@ export interface __GetTreasuryMethod__ {
 export interface __GetIncludedBlockMethod__ {
     name: 'getIncludedBlock';
     data: {
-        transactionId: string;
+        transactionId: TransactionId;
     };
 }
 
 export interface __GetIncludedBlockMetadataMethod__ {
     name: 'getIncludedBlockMetadata';
     data: {
-        transactionId: string;
+        transactionId: TransactionId;
     };
 }
 
 export interface __HexToBech32Method__ {
     name: 'hexToBech32';
     data: {
-        hex: string;
+        hex: HexEncodedString;
         bech32Hrp?: string;
     };
 }
@@ -256,7 +275,7 @@ export interface __HexToBech32Method__ {
 export interface __AliasIdToBech32Method__ {
     name: 'aliasIdToBech32';
     data: {
-        aliasId: string;
+        aliasId: AliasId;
         bech32Hrp?: string;
     };
 }
@@ -264,7 +283,7 @@ export interface __AliasIdToBech32Method__ {
 export interface __NftIdToBech32Method__ {
     name: 'nftIdToBech32';
     data: {
-        nftId: string;
+        nftId: NftId;
         bech32Hrp?: string;
     };
 }
@@ -272,7 +291,7 @@ export interface __NftIdToBech32Method__ {
 export interface __HexPublicKeyToBech32AddressMethod__ {
     name: 'hexPublicKeyToBech32Address';
     data: {
-        hex: string;
+        hex: HexEncodedString;
         bech32Hrp?: string;
     };
 }
@@ -287,7 +306,7 @@ export interface __AliasOutputIdsMethod__ {
 export interface __AliasOutputIdMethod__ {
     name: 'aliasOutputId';
     data: {
-        aliasId: string;
+        aliasId: AliasId;
     };
 }
 
@@ -301,7 +320,7 @@ export interface __NftOutputIdsMethod__ {
 export interface __NftOutputIdMethod__ {
     name: 'nftOutputId';
     data: {
-        nftId: string;
+        nftId: NftId;
     };
 }
 
@@ -315,35 +334,35 @@ export interface __FoundryOutputIdsMethod__ {
 export interface __FoundryOutputIdMethod__ {
     name: 'foundryOutputId';
     data: {
-        foundryId: string;
+        foundryId: FoundryId;
     };
 }
 
 export interface __GetOutputsIgnoreErrorsMethod__ {
     name: 'getOutputsIgnoreErrors';
     data: {
-        outputIds: string[];
+        outputIds: OutputId[];
     };
 }
 
 export interface __FindBlocksMethod__ {
     name: 'findBlocks';
     data: {
-        blockIds: string[];
+        blockIds: BlockId[];
     };
 }
 
 export interface __RetryMethod__ {
     name: 'retry';
     data: {
-        blockId: string;
+        blockId: BlockId;
     };
 }
 
 export interface __RetryUntilIncludedMethod__ {
     name: 'retryUntilIncluded';
     data: {
-        blockId: string;
+        blockId: BlockId;
         interval?: number;
         maxAttempts?: number;
     };

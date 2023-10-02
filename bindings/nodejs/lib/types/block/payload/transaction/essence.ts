@@ -2,11 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Type } from 'class-transformer';
-import { PayloadDiscriminator } from '..';
 import { HexEncodedString } from '../../../utils';
 import { Input, InputDiscriminator } from '../../input';
 import { Output, OutputDiscriminator } from '../../output';
-import { Payload } from '../payload';
+import { Payload, PayloadType } from '../payload';
+import { TaggedDataPayload } from '../tagged/tagged';
 
 /**
  * All of the essence types.
@@ -40,11 +40,21 @@ abstract class TransactionEssence {
 }
 
 /**
+ * PayloadDiscriminator for payloads inside of a TransactionEssence.
+ */
+const PayloadDiscriminator = {
+    property: 'type',
+    subTypes: [
+        { value: TaggedDataPayload, name: PayloadType.TaggedData as any },
+    ],
+};
+
+/**
  * RegularTransactionEssence transaction essence.
  */
 class RegularTransactionEssence extends TransactionEssence {
     /// The unique value denoting whether the block was meant for mainnet, testnet, or a private network.
-    networkId: number;
+    networkId: string;
     inputsCommitment: HexEncodedString;
 
     @Type(() => Input, {
@@ -71,7 +81,7 @@ class RegularTransactionEssence extends TransactionEssence {
      *
      */
     constructor(
-        networkId: number,
+        networkId: string,
         inputsCommitment: HexEncodedString,
         inputs: Input[],
         outputs: Output[],

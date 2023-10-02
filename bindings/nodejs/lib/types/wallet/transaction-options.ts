@@ -1,8 +1,10 @@
 // Copyright 2021-2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+import { AliasId, Bech32Address } from '../block';
 import { TaggedDataPayload } from '../block/payload/tagged';
 import { Burn } from '../client';
+import { HexEncodedString } from '../utils';
 import { AccountAddress } from './address';
 
 /** Options for creating a transaction. */
@@ -24,7 +26,7 @@ export interface TransactionOptions {
     /** Optional note, that is only stored locally. */
     note?: string;
     /** Whether to allow sending a micro amount. */
-    allowMicroAmount: boolean;
+    allowMicroAmount?: boolean;
 }
 
 /** The possible remainder value strategies. */
@@ -63,13 +65,13 @@ export type CustomAddress = {
 /** Options for creating Native Tokens. */
 export interface CreateNativeTokenParams {
     /** The Alias ID of the corresponding Foundry. */
-    aliasId?: string;
+    aliasId?: AliasId;
     /** Hex encoded number */
     circulatingSupply: bigint;
     /** Hex encoded number */
     maximumSupply: bigint;
     /** Hex encoded bytes */
-    foundryMetadata?: string;
+    foundryMetadata?: HexEncodedString;
 }
 
 /** Options for minting NFTs. */
@@ -77,17 +79,17 @@ export interface MintNftParams {
     /** Bech32 encoded address to which the Nft will be minted. Default will use the
      * first address of the account
      */
-    address?: string;
+    address?: Bech32Address;
     /** Bech32 encoded sender address **/
-    sender?: string;
+    sender?: Bech32Address;
     /** Hex encoded bytes */
-    metadata?: string;
+    metadata?: HexEncodedString;
     /** Hex encoded bytes */
-    tag?: string;
+    tag?: HexEncodedString;
     /** Bech32 encoded issuer address **/
-    issuer?: string;
+    issuer?: Bech32Address;
     /** Hex encoded bytes */
-    immutableMetadata?: string;
+    immutableMetadata?: HexEncodedString;
 }
 
 /** Options for the alias output creation */
@@ -95,11 +97,11 @@ export interface AliasOutputParams {
     /** Bech32 encoded address to which the Nft will be minted. Default will use the
      * first address of the account
      */
-    address?: string;
+    address?: Bech32Address;
     /** Hex encoded bytes */
-    immutableMetadata?: string;
+    immutableMetadata?: HexEncodedString;
     /** Hex encoded bytes */
-    metadata?: string;
+    metadata?: HexEncodedString;
     /** Hex encoded bytes */
-    stateMetadata?: string;
+    stateMetadata?: HexEncodedString;
 }

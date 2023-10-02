@@ -16,6 +16,7 @@ import {
     Output,
     IRent,
     OutputId,
+    Bech32Address,
 } from '../types';
 import { AliasId, BlockId, FoundryId, NftId, TokenId } from '../types/block/id';
 
@@ -51,7 +52,7 @@ export class Utils {
      * @param outputId The output ID as hex-encoded string.
      * @returns The Alias ID.
      */
-    static computeAliasId(outputId: string): AliasId {
+    static computeAliasId(outputId: OutputId): AliasId {
         return callUtilsMethod({
             name: 'computeAliasId',
             data: {
@@ -89,7 +90,7 @@ export class Utils {
      * @param outputId The output ID as hex-encoded string.
      * @returns The NFT ID.
      */
-    static computeNftId(outputId: string): NftId {
+    static computeNftId(outputId: OutputId): NftId {
         return callUtilsMethod({
             name: 'computeNftId',
             data: {
@@ -177,7 +178,7 @@ export class Utils {
      * @param address A Bech32 address as string.
      * @returns A Bech32 address.
      */
-    static parseBech32Address(address: string): Address {
+    static parseBech32Address(address: Bech32Address): Address {
         const addr = callUtilsMethod({
             name: 'parseBech32Address',
             data: {
@@ -238,7 +239,7 @@ export class Utils {
      * @param bech32 A Bech32 address.
      * @returns The hex-encoded string.
      */
-    static bech32ToHex(bech32: string): string {
+    static bech32ToHex(bech32: Bech32Address): HexEncodedString {
         return callUtilsMethod({
             name: 'bech32ToHex',
             data: {
@@ -254,7 +255,10 @@ export class Utils {
      * @param bech32Hrp The Bech32 HRP (human readable part) to use.
      * @returns The Bech32-encoded address string.
      */
-    static hexToBech32(hex: string, bech32Hrp: string): string {
+    static hexToBech32(
+        hex: HexEncodedString,
+        bech32Hrp: string,
+    ): Bech32Address {
         return callUtilsMethod({
             name: 'hexToBech32',
             data: {
@@ -271,7 +275,7 @@ export class Utils {
      * @param bech32Hrp The Bech32 HRP (human readable part) to use.
      * @returns The Bech32-encoded address string.
      */
-    static aliasIdToBech32(aliasId: string, bech32Hrp: string): string {
+    static aliasIdToBech32(aliasId: AliasId, bech32Hrp: string): Bech32Address {
         return callUtilsMethod({
             name: 'aliasIdToBech32',
             data: {
@@ -288,7 +292,7 @@ export class Utils {
      * @param bech32Hrp The Bech32 HRP (human readable part) to use.
      * @returns The Bech32-encoded address string.
      */
-    static nftIdToBech32(nftId: string, bech32Hrp: string): string {
+    static nftIdToBech32(nftId: NftId, bech32Hrp: string): Bech32Address {
         return callUtilsMethod({
             name: 'nftIdToBech32',
             data: {
@@ -305,7 +309,10 @@ export class Utils {
      * @param bech32Hrp The Bech32 HRP (human readable part) to use.
      * @returns The Bech32-encoded address string.
      */
-    static hexPublicKeyToBech32Address(hex: string, bech32Hrp: string): string {
+    static hexPublicKeyToBech32Address(
+        hex: HexEncodedString,
+        bech32Hrp: string,
+    ): Bech32Address {
         return callUtilsMethod({
             name: 'hexPublicKeyToBech32Address',
             data: {
@@ -396,5 +403,21 @@ export class Utils {
             name: 'verifyMnemonic',
             data: { mnemonic },
         });
+    }
+
+    /**
+     * Returns the hex representation of the serialized output bytes.
+     *
+     * @param output The output.
+     * @returns The hex representation of the serialized output bytes.
+     */
+    static outputHexBytes(output: Output): HexEncodedString {
+        const hexBytes = callUtilsMethod({
+            name: 'outputHexBytes',
+            data: {
+                output,
+            },
+        });
+        return hexBytes;
     }
 }

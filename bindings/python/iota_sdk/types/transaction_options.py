@@ -5,7 +5,7 @@ from iota_sdk.types.burn import Burn
 from iota_sdk.types.output_id import OutputId
 from iota_sdk.types.payload import TaggedDataPayload
 from enum import Enum
-from typing import Optional, List
+from typing import Optional, List, Union
 
 
 class RemainderValueStrategyCustomAddress:
@@ -59,7 +59,7 @@ class TransactionOptions():
         allow_micro_amount: Whether to allow sending a micro amount.
     """
 
-    def __init__(self, remainder_value_strategy: Optional[RemainderValueStrategy | RemainderValueStrategyCustomAddress] = None,
+    def __init__(self, remainder_value_strategy: Optional[Union[RemainderValueStrategy, RemainderValueStrategyCustomAddress]] = None,
                  tagged_data_payload: Optional[TaggedDataPayload] = None,
                  custom_inputs: Optional[List[OutputId]] = None,
                  mandatory_inputs: Optional[List[OutputId]] = None,
