@@ -3,6 +3,7 @@
 
 use alloc::{collections::BTreeSet, vec::Vec};
 
+use derive_more::{Deref, From};
 use hashbrown::HashSet;
 use packable::{bounded::BoundedU16, prefix::BoxedSlicePrefix, Packable};
 
@@ -30,6 +31,7 @@ pub struct RegularTransactionEssenceBuilder {
     inputs_commitment: InputsCommitment,
     outputs: Vec<Output>,
     allotments: BTreeSet<ManaAllotment>,
+    capabilities: TransactionCapabilities,
     payload: OptionalPayload,
     creation_slot: Option<SlotIndex>,
 }
@@ -44,6 +46,7 @@ impl RegularTransactionEssenceBuilder {
             inputs_commitment,
             outputs: Vec::new(),
             allotments: BTreeSet::new(),
+            capabilities: Default::default(),
             payload: OptionalPayload::default(),
             creation_slot: None,
         }
@@ -106,6 +109,11 @@ impl RegularTransactionEssenceBuilder {
     /// Adds a payload to a [`RegularTransactionEssenceBuilder`].
     pub fn with_payload(mut self, payload: impl Into<OptionalPayload>) -> Self {
         self.payload = payload.into();
+        self
+    }
+
+    pub fn with_capabilities(mut self, capabilities: impl Into<TransactionCapabilities>) -> Self {
+        self.capabilities = capabilities.into();
         self
     }
 
@@ -182,6 +190,7 @@ impl RegularTransactionEssenceBuilder {
             inputs_commitment: self.inputs_commitment,
             outputs,
             allotments,
+            capabilities: self.capabilities,
             payload: self.payload,
         })
     }
@@ -220,6 +229,7 @@ pub struct RegularTransactionEssence {
     #[packable(unpack_error_with = |e| e.unwrap_item_err_or_else(|p| Error::InvalidOutputCount(p.into())))]
     outputs: BoxedSlicePrefix<Output, OutputCount>,
     allotments: ManaAllotments,
+    capabilities: TransactionCapabilities,
     #[packable(verify_with = verify_payload_packable)]
     payload: OptionalPayload,
 }
@@ -417,6 +427,43 @@ fn verify_payload_packable<const VERIFY: bool>(
         verify_payload(payload)?;
     }
     Ok(())
+}
+
+pub struct TransactionCapabilityFlag;
+
+impl TransactionCapabilityFlag {
+    pub const BURN_NATIVE_TOKENS: u8 = 0b00000001;
+    pub const BURN_MANA: u8 = 0b00000010;
+    pub const DESTROY_ACCOUNT_OUTPUTS: u8 = 0b00000100;
+    pub const DESTROY_FOUNDRY_OUTPUTS: u8 = 0b00001000;
+    pub const DESTROY_NFT_OUTPUTS: u8 = 0b00010000;
+    pub const NONE: u8 = 0;
+    pub const ALL: u8 = 0b00011111;
+}
+
+#[derive(Copy, Clone, Debug, Default, Eq, PartialEq, Ord, PartialOrd, Hash, From, Deref, Packable)]
+#[repr(transparent)]
+pub struct TransactionCapabilities(u8);
+
+impl TransactionCapabilities {
+    pub fn with_capabilities(mut self, flags: impl Into<u8>) -> Self {
+        self.0 |= flags.into();
+        self
+    }
+
+    pub fn add_capabilities(&mut self, flags: impl Into<u8>) -> &mut Self {
+        self.0 |= flags.into();
+        self
+    }
+
+    pub fn set_capabilities(&mut self, flags: impl Into<u8>) -> &mut Self {
+        self.0 = flags.into();
+        self
+    }
+
+    pub fn has_capabilities(&self, flags: impl Into<u8>) -> bool {
+        self.0 & flags.into() != 0
+    }
 }
 
 #[cfg(feature = "serde")]
