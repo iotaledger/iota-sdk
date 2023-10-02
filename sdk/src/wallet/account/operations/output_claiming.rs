@@ -191,6 +191,9 @@ where
             })
     }
 
+    // TODO remove NFT related errors
+    // One basic output per unique ID
+    // See consolidation
     /// Try to claim basic outputs that have additional unlock conditions to their [AddressUnlockCondition].
     pub(crate) async fn claim_outputs_internal<I: IntoIterator<Item = OutputId> + Send>(
         &self,

@@ -129,6 +129,7 @@ where
             self.request_incoming_transaction_data(transaction_ids).await?;
         }
 
+        // TODO fix
         if options.sync_native_token_foundries {
             let native_token_foundry_ids = outputs_data
                 .iter()

@@ -17,7 +17,7 @@ use crate::types::{
         address::{AccountAddress, Address},
         output::{
             account::AccountId,
-            feature::{verify_allowed_features, Feature, FeatureFlags, Features},
+            feature::{verify_allowed_features, Feature, FeatureFlags, Features, NativeTokenFeature},
             unlock_condition::{
                 verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions,
             },
@@ -207,6 +207,12 @@ impl FoundryOutputBuilder {
     pub fn clear_features(mut self) -> Self {
         self.features.clear();
         self
+    }
+
+    /// Sets the native token of the builder.
+    #[inline(always)]
+    pub fn with_native_token(mut self, native_token: impl Into<NativeToken>) -> Self {
+        self.add_feature(NativeTokenFeature::from(native_token.into()))
     }
 
     /// Adds an immutable [`Feature`] to the builder, if one does not already exist of that type.

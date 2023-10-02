@@ -120,6 +120,11 @@ where
         Ok(consolidation_tx)
     }
 
+    // TODO can now create more than one output
+    // Can consolidate NTs if they are the same
+    // Skip basic output with unique NT
+    // Still consolidate if there is only one NT in the set of input???
+    // Take storage deposit into account
     /// Prepares the transaction for
     /// [Account::consolidate_outputs()](crate::wallet::Account::consolidate_outputs).
     pub async fn prepare_consolidate_outputs(&self, params: ConsolidationParams) -> Result<PreparedTransactionData> {

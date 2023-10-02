@@ -5,5 +5,5 @@ pub(crate) mod burning_melting;
 pub(crate) mod create_account;
 pub(crate) mod minting;
 pub(crate) mod send;
-pub(crate) mod send_native_tokens;
+pub(crate) mod send_native_token;
 pub(crate) mod send_nft;

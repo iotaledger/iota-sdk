@@ -141,15 +141,14 @@ impl InputSelection {
                 let inputs = self.available_inputs.iter().filter(|input| {
                     input
                         .output
-                        .native_tokens()
-                        .map_or(false, |native_tokens| native_tokens.contains(diff.token_id()))
+                        .native_token()
+                        .is_some_and(|native_token| native_token.token_id() == diff.token_id())
                 });
 
                 for input in inputs {
                     amount += input
                         .output
-                        .native_tokens()
-                        .and_then(|native_tokens| native_tokens.get(diff.token_id()))
+                        .native_token()
                         // PANIC: safe to unwrap as the filter guarantees inputs containing this native token.
                         .unwrap()
                         .amount();
