@@ -51,7 +51,7 @@ class OutputWithMetadata:
     metadata: OutputMetadata
     output: Union[AccountOutput, FoundryOutput,
                   NftOutput, BasicOutput, DelegationOutput] = field(metadata=config(
-                      decoder=deserialize_outputs
+                      decoder=deserialize_output
                   ))
 
     @classmethod
