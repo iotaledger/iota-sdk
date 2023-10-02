@@ -15,6 +15,8 @@ import {
     RentStructure,
     OutputId,
     u64,
+    BlockWrapper,
+    ProtocolParameters,
 } from '../types';
 import {
     AccountId,
@@ -193,16 +195,18 @@ export class Utils {
     }
 
     /**
-     * Compute the block ID (Blake2b256 hash of the block bytes) of a block.
+     * Compute the block ID (Blake2b256 hash of the block bytes) of a blockwrapper.
      *
-     * @param block A block.
+     * @param wrapper A blockwrapper.
+     * @param params The network protocol parameters.
      * @returns The corresponding block ID.
      */
-    static blockId(block: Block): BlockId {
+    static blockId(wrapper: BlockWrapper, params: ProtocolParameters): BlockId {
         return callUtilsMethod({
             name: 'blockId',
             data: {
-                block,
+                wrapper,
+                params,
             },
         });
     }
