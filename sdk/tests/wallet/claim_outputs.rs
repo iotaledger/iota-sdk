@@ -8,7 +8,7 @@ use iota_sdk::{
     },
     wallet::{
         account::{OutputsToClaim, TransactionOptions},
-        CreateNativeTokenParams, Result, SendNativeTokensParams, SendParams,
+        CreateNativeTokenParams, Result, SendNativeTokenParams, SendParams,
     },
     U256,
 };
@@ -223,13 +223,13 @@ async fn claim_2_native_tokens() -> Result<()> {
     accounts[1].sync(None).await?;
 
     let tx = accounts[1]
-        .send_native_tokens(
+        .send_native_token(
             [
-                SendNativeTokensParams::new(
+                SendNativeTokenParams::new(
                     *accounts[0].addresses().await?[0].address(),
                     [(create_tx_0.token_id, native_token_amount)],
                 )?,
-                SendNativeTokensParams::new(
+                SendNativeTokenParams::new(
                     *accounts[0].addresses().await?[0].address(),
                     [(create_tx_1.token_id, native_token_amount)],
                 )?,

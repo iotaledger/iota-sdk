@@ -24,7 +24,7 @@ use iota_sdk::{
             types::{AccountIdentifier, Bip44Address},
             Account, ConsolidationParams, OutputsToClaim, TransactionOptions,
         },
-        CreateNativeTokenParams, MintNftParams, SendNativeTokensParams, SendNftParams, SendParams,
+        CreateNativeTokenParams, MintNftParams, SendNativeTokenParams, SendNftParams, SendParams,
     },
     U256,
 };
@@ -737,7 +737,7 @@ pub async fn send_native_token_command(
         account.send_outputs(outputs, None).await?
     } else {
         // Send native tokens with storage deposit return and expiration
-        let outputs = [SendNativeTokensParams::new(
+        let outputs = [SendNativeTokenParams::new(
             address,
             [(
                 TokenId::from_str(&token_id)?,

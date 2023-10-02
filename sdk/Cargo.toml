@@ -323,7 +323,7 @@ path = "examples/how_tos/native_tokens/mint.rs"
 required-features = ["rocksdb", "stronghold"]
 
 [[example]]
-name = "send_native_tokens"
+name = "send_native_token"
 path = "examples/how_tos/native_tokens/send.rs"
 required-features = ["rocksdb", "stronghold"]
 

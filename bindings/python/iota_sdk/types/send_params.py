@@ -29,17 +29,17 @@ class SendParams():
 
 @json
 @dataclass
-class SendNativeTokensParams():
-    """Parameters for sending native tokens
+class SendNativeTokenParams():
+    """Parameters for sending a native token
 
     Attributes:
         address: The address to send to.
-        native_tokens: The native tokens to send.
-        return_address: The address to return the native tokens to if not claimed.
-        expiration: The expiration timestamp until native tokens can be claimed.
+        native_tokens: The native token to send.
+        return_address: The address to return the native token to if not claimed.
+        expiration: The expiration timestamp until the native token can be claimed.
     """
     address: str
-    native_tokens: List[NativeToken]
+    native_tokens: NativeToken
     return_address: Optional[str] = None
     expiration: Optional[int] = None
 

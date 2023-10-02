@@ -32,7 +32,7 @@ pub use self::{
         operations::transaction::high_level::{
             minting::{create_native_token::CreateNativeTokenParams, mint_nfts::MintNftParams},
             send::SendParams,
-            send_native_tokens::SendNativeTokensParams,
+            send_native_token::SendNativeTokenParams,
             send_nft::SendNftParams,
         },
         Account,

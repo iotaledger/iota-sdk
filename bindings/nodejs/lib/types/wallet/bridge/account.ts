@@ -4,7 +4,7 @@
 import type { SyncOptions, FilterOptions } from '../account';
 import type {
     SendParams,
-    SendNativeTokensParams,
+    SendNativeTokenParams,
     SendNftParams,
     GenerateAddressOptions,
 } from '../address';
@@ -235,10 +235,10 @@ export type __SendWithParamsMethod__ = {
     };
 };
 
-export type __PrepareSendNativeTokensMethod__ = {
-    name: 'prepareSendNativeTokens';
+export type __PrepareSendNativeTokenMethod__ = {
+    name: 'prepareSendNativeToken';
     data: {
-        params: SendNativeTokensParams[];
+        params: SendNativeTokenParams[];
         options?: TransactionOptions;
     };
 };

@@ -8,12 +8,12 @@
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh
-//! cargo run --release --all-features --example send_native_tokens
+//! cargo run --release --all-features --example send_native_token
 //! ```
 
 use iota_sdk::{
     types::block::address::Bech32Address,
-    wallet::{Result, SendNativeTokensParams},
+    wallet::{Result, SendNativeTokenParams},
     Wallet,
 };
 use primitive_types::U256;
@@ -59,7 +59,7 @@ async fn main() -> Result<()> {
 
         let bech32_address = RECV_ADDRESS.parse::<Bech32Address>()?;
 
-        let outputs = [SendNativeTokensParams::new(
+        let outputs = [SendNativeTokenParams::new(
             bech32_address,
             [(*token_id, U256::from(SEND_NATIVE_TOKEN_AMOUNT))],
         )?];

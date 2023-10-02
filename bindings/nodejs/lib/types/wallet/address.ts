@@ -46,12 +46,12 @@ export interface AddressWithUnspentOutputs {
     outputIds: string[];
 }
 
-/** Address with native tokens */
-export interface SendNativeTokensParams {
+/** Address with a native token */
+export interface SendNativeTokenParams {
     /** The Bech32 address. */
     address: string;
-    /** The Native Tokens to send. */
-    nativeTokens: [string, u256][];
+    /** The Native Token to send. */
+    nativeToken: [string, u256];
     /**
      * Bech32 encoded address, to which the storage deposit will be returned.
      * Default will use the first address of the account.

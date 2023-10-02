@@ -22,7 +22,7 @@ use iota_sdk::{
             ConsolidationParams, CreateAccountParams, CreateNativeTokenParams, FilterOptions, MintNftParams,
             OutputParams, OutputsToClaim, SyncOptions, TransactionOptions,
         },
-        SendNativeTokensParams, SendNftParams, SendParams,
+        SendNativeTokenParams, SendNftParams, SendParams,
     },
     U256,
 };
@@ -216,10 +216,10 @@ pub enum AccountMethod {
         params: Vec<SendParams>,
         options: Option<TransactionOptions>,
     },
-    /// Prepare to send native tokens.
+    /// Prepare to send a native token.
     /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
-    PrepareSendNativeTokens {
-        params: Vec<SendNativeTokensParams>,
+    PrepareSendNativeToken {
+        params: Vec<SendNativeTokenParams>,
         options: Option<TransactionOptions>,
     },
     /// Prepare to Send nft.

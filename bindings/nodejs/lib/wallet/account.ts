@@ -9,7 +9,7 @@ import {
     AccountMeta,
     Bip44Address,
     SendParams,
-    SendNativeTokensParams,
+    SendNativeTokenParams,
     SendNftParams,
     AddressWithUnspentOutputs,
     AccountOutputParams,
@@ -1188,38 +1188,38 @@ export class Account {
     }
 
     /**
-     * Send native tokens.
+     * Send a native token.
      *
      * @param params Addresses amounts and native tokens.
      * @param transactionOptions Additional transaction options
      * or custom inputs.
      * @returns The transaction.
      */
-    async sendNativeTokens(
-        params: SendNativeTokensParams[],
+    async sendNativeToken(
+        params: SendNativeTokenParams[],
         transactionOptions?: TransactionOptions,
     ): Promise<Transaction> {
         return (
-            await this.prepareSendNativeTokens(params, transactionOptions)
+            await this.prepareSendNativeToken(params, transactionOptions)
         ).send();
     }
 
     /**
-     * Send native tokens.
+     * Send a native token.
      *
      * @param params Addresses amounts and native tokens.
      * @param transactionOptions Additional transaction options
      * or custom inputs.
      * @returns The prepared transaction.
      */
-    async prepareSendNativeTokens(
-        params: SendNativeTokensParams[],
+    async prepareSendNativeToken(
+        params: SendNativeTokenParams[],
         transactionOptions?: TransactionOptions,
     ): Promise<PreparedTransaction> {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
-                name: 'prepareSendNativeTokens',
+                name: 'prepareSendNativeToken',
                 data: {
                     params,
                     options: transactionOptions,

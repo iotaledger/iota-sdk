@@ -165,8 +165,8 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
             let data = account.prepare_send(params, options).await?;
             Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
         }
-        AccountMethod::PrepareSendNativeTokens { params, options } => {
-            let data = account.prepare_send_native_tokens(params.clone(), options).await?;
+        AccountMethod::PrepareSendNativeToken { params, options } => {
+            let data = account.prepare_send_native_token(params.clone(), options).await?;
             Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
         }
         AccountMethod::PrepareSendNft { params, options } => {
