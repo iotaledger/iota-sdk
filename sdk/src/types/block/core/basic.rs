@@ -69,7 +69,7 @@ impl BasicBlockBuilder {
         self
     }
 
-    /// Adds burned mana to a [`BasicBlockBuilder`].
+    /// Adds max burned mana to a [`BasicBlockBuilder`].
     #[inline(always)]
     pub fn with_max_burned_mana(mut self, max_burned_mana: u64) -> Self {
         self.max_burned_mana = max_burned_mana;
@@ -137,7 +137,7 @@ impl BasicBlock {
         self.payload.as_ref()
     }
 
-    /// Returns the burned mana of a [`BasicBlock`].
+    /// Returns the max burned mana of a [`BasicBlock`].
     #[inline(always)]
     pub fn burned_mana(&self) -> u64 {
         self.max_burned_mana
