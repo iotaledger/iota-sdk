@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from typing import List, Optional
 from enum import Enum
 from iota_sdk.types.common import HexStr, json
-from iota_sdk.types.output import OutputWithMetadata
+from iota_sdk.types.output_metadata import OutputWithMetadata
 from iota_sdk.types.payload import TransactionPayload
 
 
