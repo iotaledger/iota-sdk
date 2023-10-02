@@ -6,7 +6,7 @@ use iota_sdk::types::block::{
     input::{Input, UtxoInput},
     output::{unlock_condition::AddressUnlockCondition, BasicOutput, Output},
     payload::{
-        transaction::{RegularTransactionEssence, TransactionId, TransactionPayload},
+        transaction::{RegularTransactionEssence, TransactionCapabilityFlag, TransactionId, TransactionPayload},
         Payload, TaggedDataPayload,
     },
     protocol::protocol_parameters,
@@ -62,6 +62,49 @@ fn transaction() {
         payload,
         PackableExt::unpack_verified(packed.as_slice(), &protocol_parameters).unwrap()
     );
+}
+
+#[test]
+fn transactions_capabilities() {
+    let protocol_parameters = protocol_parameters();
+    let transaction_id = TransactionId::new(prefix_hex::decode(TRANSACTION_ID).unwrap());
+    let input1 = Input::Utxo(UtxoInput::new(transaction_id, 0).unwrap());
+    let input2 = Input::Utxo(UtxoInput::new(transaction_id, 1).unwrap());
+    let address = Address::from(Ed25519Address::new(prefix_hex::decode(ED25519_ADDRESS).unwrap()));
+    let amount = 1_000_000;
+    let output = Output::Basic(
+        BasicOutput::build_with_amount(amount)
+            .add_unlock_condition(AddressUnlockCondition::new(address))
+            .finish_with_params(&protocol_parameters)
+            .unwrap(),
+    );
+    let essence = RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
+        .with_inputs(vec![input1, input2])
+        .add_output(output)
+        .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
+        .finish_with_params(&protocol_parameters)
+        .unwrap();
+    let mut capabilities = essence.capabilities();
+
+    use TransactionCapabilityFlag as Flag;
+
+    assert!(capabilities.is_none());
+
+    assert!(!capabilities.has_capabilities(Flag::BURN_NATIVE_TOKENS));
+    capabilities.add_capabilities(Flag::BURN_NATIVE_TOKENS);
+    assert!(capabilities.has_capabilities(Flag::BURN_NATIVE_TOKENS));
+
+    assert!(!capabilities.has_capabilities(Flag::BURN_MANA));
+    capabilities.set_capabilities(Flag::BURN_MANA | Flag::DESTROY_ACCOUNT_OUTPUTS);
+    assert!(capabilities.has_capabilities(Flag::BURN_MANA | Flag::DESTROY_ACCOUNT_OUTPUTS));
+    assert!(!capabilities.has_capabilities(Flag::BURN_NATIVE_TOKENS));
+
+    assert!(!capabilities.is_none());
+
+    assert!(!capabilities.has_capabilities(Flag::ALL));
+    capabilities.add_capabilities(Flag::ALL);
+    assert!(capabilities.has_capabilities(Flag::ALL));
+    assert!(capabilities.has_capabilities(Flag::DESTROY_FOUNDRY_OUTPUTS | Flag::DESTROY_NFT_OUTPUTS));
 }
 
 #[test]

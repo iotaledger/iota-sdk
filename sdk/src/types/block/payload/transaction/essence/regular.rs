@@ -278,6 +278,10 @@ impl RegularTransactionEssence {
         &self.allotments
     }
 
+    pub fn capabilities(&self) -> TransactionCapabilities {
+        self.capabilities
+    }
+
     /// Returns the optional payload of a [`RegularTransactionEssence`].
     pub fn payload(&self) -> Option<&Payload> {
         self.payload.as_ref()
@@ -462,7 +466,12 @@ impl TransactionCapabilities {
     }
 
     pub fn has_capabilities(&self, flags: impl Into<u8>) -> bool {
-        self.0 & flags.into() != 0
+        let flags = flags.into();
+        self.0 & flags == flags
+    }
+
+    pub fn is_none(&self) -> bool {
+        self.0 == 0
     }
 }
 
