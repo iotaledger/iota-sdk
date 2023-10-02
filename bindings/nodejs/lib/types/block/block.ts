@@ -4,6 +4,7 @@
 import type { HexEncodedString } from '../utils/hex-encoding';
 import { Payload, PayloadDiscriminator } from './payload';
 import { Type } from 'class-transformer';
+import { NumericString } from '../utils/numeric';
 
 /**
  * Block layout.
@@ -27,5 +28,5 @@ export class Block {
     /**
      * The nonce for the block.
      */
-    nonce!: string;
+    nonce!: NumericString;
 }

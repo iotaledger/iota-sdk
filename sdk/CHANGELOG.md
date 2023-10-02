@@ -47,6 +47,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Format of `milestoneIndex` query parameter of `ClientInner::event_status`;
 - Don't error if custom remainder address is provided with ledger nano;
+- `migrate_db_chrysalis_to_stardust()` when ledger nano was used as signer type;
 
 ## 1.0.3 - 2023-09-07
 
