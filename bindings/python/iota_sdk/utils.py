@@ -9,6 +9,7 @@ from dacite import from_dict
 from iota_sdk.types.signature import Ed25519Signature
 from iota_sdk.types.address import Address, AddressType, Ed25519Address, AccountAddress, NFTAddress
 from iota_sdk.types.common import HexStr
+from iota_sdk.types.essence import TransactionEssence
 from iota_sdk.types.node_info import ProtocolParameters
 from iota_sdk.types.output_id import OutputId
 from iota_sdk.types.output import Output
@@ -178,15 +179,15 @@ class Utils():
         """
         return _call_method('blockId', {
             'block': block.to_dict(),
-            'protocol_parameters': params,
+            'protocol_parameters': params.to_dict(),
         })
 
     @staticmethod
-    def hash_transaction_essence(essence) -> HexStr:
+    def hash_transaction_essence(essence: TransactionEssence) -> HexStr:
         """ Compute the hash of a transaction essence.
         """
         return _call_method('hashTransactionEssence', {
-            'essence': essence
+            'essence': essence.to_dict(),
         })
 
     @staticmethod
