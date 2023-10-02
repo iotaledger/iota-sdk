@@ -62,8 +62,10 @@ where
         }
 
         // Update the protocol of the network_info to not have the default data, which can be wrong
-        let info = self.client.get_info().await?.node_info;
-        network_info.protocol_parameters = info.protocol.clone();
+        // Ignore errors, because there might be no node at all and then it should still not error
+        if let Ok(info) = self.client.get_info().await {
+            network_info.protocol_parameters = info.node_info.protocol;
+        }
         *self.client.network_info.write().await = network_info;
 
         for account in self.accounts.write().await.iter_mut() {
