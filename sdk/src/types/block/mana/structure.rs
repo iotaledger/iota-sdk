@@ -50,16 +50,21 @@ impl ManaStructure {
         (1 << self.bits_count) - 1
     }
 
-    pub fn decay(&self, value: u64, n: u64) -> u64 {
-        /// Returns the upper n bits of a u64 value.
-        fn upper_bits(v: u64, n: usize) -> u64 {
-            v >> n
+    pub fn decay(&self, mana: u64, epoch_delta: u64) -> u64 {
+        /// Returns the upper 32 bits of a u64 value.
+        fn upper_bits(v: u64) -> u64 {
+            v >> 32
         }
 
         /// Returns the lower n bits of a u64 value.
-        fn lower_bits(mut v: u64, n: usize) -> u64 {
-            v = v << (64 - n);
-            v >> (64 - n)
+        fn lower_n_bits(v: u64, n: u8) -> u64 {
+            debug_assert!(n <= 64);
+            v & u64::MAX >> (64 - n)
+        }
+
+        /// Returns the lower 32 bits of a u64 value.
+        fn lower_bits(v: u64) -> u64 {
+            v & 0xFFFFFFFF
         }
 
         /// Returns the result of the multiplication ((value_hi << 32 + value_lo) * mult_factor) >> shift_factor
@@ -73,55 +78,52 @@ impl ManaStructure {
             mult_factor: u32,
             shift_factor: u8,
         ) -> (u64, u64) {
+            debug_assert!(shift_factor <= 32);
             // multiply the integer part of value_hi by mult_factor
             value_hi = value_hi * mult_factor as u64;
 
             // the lower shift_factor bits of the result are extracted and shifted left to form the remainder.
             // value_lo is multiplied by mult_factor and right-shifted by shift_factor bits.
             // the sum of these two values forms the new lower part (value_lo) of the result.
-            value_lo = (lower_bits(value_hi, shift_factor as usize) << (32 - shift_factor)) as u64
-                + (value_lo * mult_factor as u64)
+            value_lo = (lower_n_bits(value_hi, shift_factor) << (32 - shift_factor)) + (value_lo * mult_factor as u64)
                 >> shift_factor;
 
             // the right-shifted value_hi and the upper 32 bits of value_lo form the new higher part (value_hi) of the
             // result.
-            value_hi = (value_hi >> shift_factor) + upper_bits(value_lo, 32);
+            value_hi = (value_hi >> shift_factor) + upper_bits(value_lo);
 
             // the lower 32 bits of value_lo form the new lower part of the result.
-            value_lo = lower_bits(value_lo, 32);
+            value_lo = lower_bits(value_lo);
 
             // return the result as a fixed-point number composed of two 64-bit integers
             (value_hi, value_lo)
         }
 
-        // 	if value == 0 or n == 0 {
-        // 		return value
-        // 	}
+        if mana == 0 || epoch_delta == 0 {
+            return mana;
+        }
 
         // split the value into two uint64 variables to prevent overflowing
-        let mut value_hi = upper_bits(value, 32);
-        let mut value_lo = lower_bits(value, 32);
+        let mut value_hi = upper_bits(mana);
+        let mut value_lo = lower_bits(mana);
 
         // we keep applying the lookup table factors as long as n epochs are left
-        let mut remaining_epochs = n;
+        let mut remaining_epochs = epoch_delta;
 
         while remaining_epochs > 0 {
-            let mut epochs_to_decay = remaining_epochs;
-
-            if epochs_to_decay > 365 {
-                epochs_to_decay = 365
-            }
+            let epochs_to_decay = remaining_epochs.min(self.decay_factors().len() as u64);
             remaining_epochs -= epochs_to_decay;
 
-            let decay_factor = self.decay_factor_at(epochs_to_decay).unwrap();
+            // Unwrap: Safe because the index is at most the length
+            let decay_factor = self.decay_factor_at(epochs_to_decay - 1).unwrap();
 
             // apply the decay using fixed-point arithmetics.
             (value_hi, value_lo) =
-                multiplication_and_shift(value_hi, value_lo, decay_factor, self.decay_factors().len() as u8);
+                multiplication_and_shift(value_hi, value_lo, decay_factor, self.decay_factors_exponent());
         }
 
         // combine both uint64 variables to get the actual value
-        value_hi << 32 + value_lo
+        value_hi << 32 | value_lo
     }
 }
 
