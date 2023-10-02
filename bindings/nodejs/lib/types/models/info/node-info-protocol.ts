@@ -1,7 +1,9 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+import { NumericString } from '../../utils/numeric';
 import type { IRent } from '../rent';
+
 /**
  * The Protocol Info.
  */
@@ -17,7 +19,7 @@ export interface INodeInfoProtocol {
     /**
      * The token supply.
      */
-    tokenSupply: string;
+    tokenSupply: NumericString;
     /**
      * The protocol version.
      */
