@@ -507,7 +507,7 @@ checksum = "cd7cc57abe963c6d3b9d8be5b06ba7c8957a930305ca90304f24ef040aa6f961"
 
 [[package]]
 name = "cli-wallet"
-version = "1.0.0"
+version = "1.1.0"
 dependencies = [
  "chrono",
  "clap",
@@ -1621,7 +1621,7 @@ dependencies = [
 
 [[package]]
 name = "iota-sdk"
-version = "1.1.0-rc.0"
+version = "1.1.0"
 dependencies = [
  "anymap",
  "async-trait",
@@ -1717,7 +1717,7 @@ dependencies = [
 
 [[package]]
 name = "iota-sdk-python"
-version = "1.1.0-rc.0"
+version = "1.1.0"
 dependencies = [
  "futures",
  "iota-sdk-bindings-core",
