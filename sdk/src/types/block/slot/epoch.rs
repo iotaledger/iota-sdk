@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use derive_more::{Deref, Display, From, FromStr};
+use derive_more::{Add, AddAssign, Deref, Display, From, FromStr, Sub, SubAssign};
 
 use super::SlotIndex;
 use crate::types::block::Error;
@@ -32,7 +32,24 @@ use crate::types::block::Error;
 /// | 2  | 16  | 24  |
 // ...
 #[derive(
-    Copy, Clone, Debug, Default, Eq, PartialEq, Ord, PartialOrd, Hash, From, Deref, Display, FromStr, packable::Packable,
+    Copy,
+    Clone,
+    Debug,
+    Default,
+    Eq,
+    PartialEq,
+    Ord,
+    PartialOrd,
+    Hash,
+    From,
+    Deref,
+    Add,
+    AddAssign,
+    Sub,
+    SubAssign,
+    Display,
+    FromStr,
+    packable::Packable,
 )]
 #[repr(transparent)]
 pub struct EpochIndex(u64);
@@ -41,6 +58,33 @@ impl EpochIndex {
     /// Creates a new [`EpochIndex`].
     pub fn new(index: u64) -> Self {
         Self::from(index)
+    }
+
+    pub fn slot_index_range(
+        &self,
+        slots_per_epoch_exponent_iter: impl Iterator<Item = (Self, u8)>,
+    ) -> Result<core::ops::RangeInclusive<SlotIndex>, Error> {
+        let mut start_slot = 0;
+        let mut last = None;
+        for (start_epoch, exponent) in slots_per_epoch_exponent_iter {
+            if let Some((last_start_epoch, last_exponent)) = last {
+                if *start_epoch <= last_start_epoch {
+                    return Err(Error::InvalidStartEpoch(start_epoch));
+                }
+                start_slot += (*start_epoch - last_start_epoch) << last_exponent;
+            }
+            if start_epoch > *self {
+                break;
+            }
+            last = Some((*start_epoch, exponent));
+        }
+        if let Some((start_epoch, exponent)) = last {
+            let start_slot = SlotIndex::new(start_slot + ((**self - start_epoch) << exponent));
+            let end_slot = start_slot + (1 << exponent) - 1;
+            Ok(start_slot..=end_slot)
+        } else {
+            Err(Error::InvalidStartEpoch(*self))
+        }
     }
 
     /// Gets the epoch index given a [`SlotIndex`].
@@ -90,6 +134,34 @@ impl From<EpochIndex> for u64 {
 impl PartialEq<u64> for EpochIndex {
     fn eq(&self, other: &u64) -> bool {
         self.0 == *other
+    }
+}
+
+impl core::ops::Add<u64> for EpochIndex {
+    type Output = Self;
+
+    fn add(self, other: u64) -> Self {
+        Self(self.0 + other)
+    }
+}
+
+impl core::ops::AddAssign<u64> for EpochIndex {
+    fn add_assign(&mut self, other: u64) {
+        self.0 += other;
+    }
+}
+
+impl core::ops::Sub<u64> for EpochIndex {
+    type Output = Self;
+
+    fn sub(self, other: u64) -> Self {
+        Self(self.0 - other)
+    }
+}
+
+impl core::ops::SubAssign<u64> for EpochIndex {
+    fn sub_assign(&mut self, other: u64) {
+        self.0 -= other;
     }
 }
 
