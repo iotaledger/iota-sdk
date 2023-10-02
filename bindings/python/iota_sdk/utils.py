@@ -9,6 +9,7 @@ from dacite import from_dict
 from iota_sdk.types.signature import Ed25519Signature
 from iota_sdk.types.address import Address, AddressType, Ed25519Address, AccountAddress, NFTAddress
 from iota_sdk.types.common import HexStr
+from iota_sdk.types.node_info import ProtocolParameters
 from iota_sdk.types.output_id import OutputId
 from iota_sdk.types.output import Output
 from iota_sdk.external import call_utils_method
@@ -172,11 +173,12 @@ class Utils():
         })
 
     @staticmethod
-    def block_id(block: BlockWrapper) -> HexStr:
+    def block_id(block: BlockWrapper, params: ProtocolParameters) -> HexStr:
         """ Return a block ID (Blake2b256 hash of block bytes) from a block.
         """
         return _call_method('blockId', {
-            'block': block.to_dict()
+            'block': block.to_dict(),
+            'protocol_parameters': params,
         })
 
     @staticmethod

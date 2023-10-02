@@ -7,6 +7,7 @@ from typing import Union
 from iota_sdk.types.block.basic import BasicBlock
 from iota_sdk.types.block.validation import ValidationBlock
 from iota_sdk.types.common import HexStr, json, SlotIndex
+from iota_sdk.types.node_info import ProtocolParameters
 from iota_sdk.types.signature import Ed25519Signature
 from iota_sdk.utils import Utils
 
@@ -34,9 +35,9 @@ class BlockWrapper:
     latest_finalized_slot: SlotIndex
     issuer_id: HexStr
     block: Union[BasicBlock, ValidationBlock]
-    signature: Ed25519Signature
+    signature: Union[Ed25519Signature]
 
-    def id(self) -> HexStr:
+    def id(self, params: ProtocolParameters) -> HexStr:
         """Returns the block ID as a hexadecimal string.
         """
-        return Utils.block_id(self)
+        return Utils.block_id(self, params)
