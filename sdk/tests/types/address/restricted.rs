@@ -1,14 +1,8 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use crypto::{
-    hashes::{blake2b::Blake2b256, Digest},
-    signatures::ed25519::PublicKey,
-};
 use iota_sdk::types::block::{
-    address::{
-        Address, CapabilityFlag, Ed25519Address, ImplicitAccountCreationAddress, RestrictedAddress, ToBech32Ext,
-    },
+    address::{Address, CapabilityFlag, Ed25519Address, RestrictedAddress, ToBech32Ext},
     rand::address::rand_ed25519_address,
 };
 use packable::PackableExt;
@@ -35,20 +29,13 @@ fn capabilities() {
 #[test]
 fn restricted_ed25519() {
     // Test from https://github.com/iotaledger/tips-draft/blob/tip50/tips/TIP-0050/tip-0050.md#bech32-strings
-    let address = Ed25519Address::new(
-        Blake2b256::digest(
-            PublicKey::try_from_bytes(
-                hex::decode("6f1581709bb7b1ef030d210db18e3b0ba1c776fba65d8cdaad05415142d189f8")
-                    .unwrap()
-                    .try_into()
-                    .unwrap(),
-            )
+    let address = Ed25519Address::from_public_key_bytes(
+        hex::decode("6f1581709bb7b1ef030d210db18e3b0ba1c776fba65d8cdaad05415142d189f8")
             .unwrap()
-            .to_bytes(),
-        )
-        .try_into()
-        .unwrap(),
-    );
+            .try_into()
+            .unwrap(),
+    )
+    .unwrap();
     assert_eq!(
         hex::encode(address),
         "efdc112efe262b304bcf379b26c31bad029f616ee3ec4aa6345a366e4c9e43a3"
@@ -86,12 +73,6 @@ fn restricted_ed25519() {
     assert_eq!(
         address.clone().to_bech32_unchecked("iota"),
         "iota19qqwlhq39mlzv2esf08n0xexcvd66q5lv9hw8mz25c695dnwfj0y8gcpqytmqxr4"
-    );
-
-    let address = ImplicitAccountCreationAddress::from(*address.address().as_ed25519());
-    assert_eq!(
-        address.to_bech32_unchecked("iota"),
-        "iota1rrhacyfwlcnzkvzteumekfkrrwks98mpdm37cj4xx3drvmjvnep6xg4ad2d"
     );
 }
 
