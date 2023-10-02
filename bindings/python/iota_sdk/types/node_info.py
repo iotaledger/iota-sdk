@@ -4,7 +4,7 @@
 from __future__ import annotations
 from dataclasses import dataclass
 from typing import List, Optional
-from iota_sdk.types.common import HexStr, json
+from iota_sdk.types.common import EpochIndex, HexStr, json, SlotIndex
 
 
 @json
@@ -22,7 +22,7 @@ class NodeInfoStatus:
         latest_finalized_slot: The index of the latest finalized slot.
         latest_accepted_block_slot: The slot index of the latest accepted block.
         latest_confirmed_block_slot: The slot index of the latest confirmed block.
-        pruning_epoch: The index of the slot before which the tangle history is pruned.
+        pruning_epoch: The index of the epoch before which the tangle history is pruned.
     """
     is_healthy: bool
     accepted_tangle_time: str
@@ -30,14 +30,10 @@ class NodeInfoStatus:
     confirmed_tangle_time: str
     relative_confirmed_tangle_time: str
     latest_commitment_id: HexStr
-    # TODO Replace with a proper SlotIndex type
-    latest_finalized_slot: str
-    # TODO Replace with a proper SlotIndex type
-    latest_accepted_block_slot: str
-    # TODO Replace with a proper SlotIndex type
-    latest_confirmed_block_slot: str
-    # TODO Replace with a proper SlotIndex type
-    pruning_epoch: str
+    latest_finalized_slot: SlotIndex
+    latest_accepted_block_slot: SlotIndex
+    latest_confirmed_block_slot: SlotIndex
+    pruning_epoch: EpochIndex
 
 
 @json
@@ -217,11 +213,9 @@ class ProtocolParameters:
     staking_unbonding_period: str
     validation_blocks_per_slot: int
     punishment_epochs: str
-    staking_unbonding_period: str
     liveness_threshold: str
     min_committable_age: str
     max_committable_age: str
-    # TODO Replace with a proper SlotIndex type
     epoch_nearing_threshold: str
     congestion_control_parameters: CongestionControlParameters
     version_signaling: VersionSignaling
@@ -236,7 +230,7 @@ class ProtocolParametersResponse:
         start_epoch: The start epoch of the set of protocol parameters.
         parameters: The protocol parameters.
     """
-    start_epoch: str
+    start_epoch: EpochIndex
     parameters: ProtocolParameters
 
 
@@ -255,9 +249,9 @@ class NodeInfoBaseToken:
     name: str
     ticker_symbol: str
     unit: str
-    subunit: Optional[str] = None
     decimals: int
     use_metric_prefix: bool
+    subunit: Optional[str] = None
 
 
 @json
