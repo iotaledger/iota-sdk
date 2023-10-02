@@ -82,6 +82,7 @@ impl Input {
     }
 }
 
+#[cfg(feature = "serde")]
 pub mod dto {
     use serde::{Deserialize, Serialize};
 

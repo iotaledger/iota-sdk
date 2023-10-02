@@ -77,7 +77,7 @@ async fn main() -> Result<()> {
     let _ = client.retry_until_included(&block_1.id(), None, None).await?;
 
     //////////////////////////////////
-    // create second transaction with the actual AliasId (BLAKE2b-160 hash of the Output ID that created the alias) and
+    // create second transaction with the actual AliasId (BLAKE2b-256 hash of the Output ID that created the alias) and
     // make both alias outputs controlled by the first one
     //////////////////////////////////
     let alias_output_ids = get_new_alias_output_ids(block_1.payload().unwrap())?;

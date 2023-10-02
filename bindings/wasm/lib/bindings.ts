@@ -9,7 +9,7 @@ import { __UtilsMethods__ } from './utils';
 // Import needs to be in a single line, otherwise it breaks
 // prettier-ignore
 // @ts-ignore: path is set to match runtime transpiled js path when bundled.
-import { initLogger, createClient, destroyClient, createSecretManager, createWallet, callClientMethodAsync, callSecretManagerMethodAsync, callUtilsMethodRust, callWalletMethodAsync, destroyWallet, listenWalletAsync, getClientFromWallet, getSecretManagerFromWallet, listenMqtt, migrateStrongholdSnapshotV2ToV3 } from '../wasm/iota_sdk_wasm';
+import { initLogger, createClient, destroyClient, createSecretManager, createWallet, callClientMethodAsync, callSecretManagerMethodAsync, callUtilsMethodRust, callWalletMethodAsync, destroyWallet, listenWalletAsync, getClientFromWallet, getSecretManagerFromWallet, listenMqtt, migrateStrongholdSnapshotV2ToV3, migrateDbChrysalisToStardust } from '../wasm/iota_sdk_wasm';
 
 const callUtilsMethod = (method: __UtilsMethods__): any => {
     const response = JSON.parse(callUtilsMethodRust(JSON.stringify(method)));
@@ -36,4 +36,5 @@ export {
     getSecretManagerFromWallet,
     listenMqtt,
     migrateStrongholdSnapshotV2ToV3,
+    migrateDbChrysalisToStardust,
 };

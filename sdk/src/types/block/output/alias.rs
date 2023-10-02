@@ -706,6 +706,7 @@ fn verify_unlock_conditions(unlock_conditions: &UnlockConditions, alias_id: &Ali
     verify_allowed_unlock_conditions(unlock_conditions, AliasOutput::ALLOWED_UNLOCK_CONDITIONS)
 }
 
+#[cfg(feature = "serde")]
 pub(crate) mod dto {
     use alloc::{
         boxed::Box,

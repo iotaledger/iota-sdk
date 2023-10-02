@@ -1,10 +1,7 @@
 // Copyright 2020-2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use crate::types::{
-    block::{protocol::ProtocolParameters, Error},
-    ValidationParams,
-};
+use crate::types::block::{protocol::ProtocolParameters, Error};
 
 /// [`TreasuryOutput`] is an output which holds the treasury of a network.
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, packable::Packable)]
@@ -52,13 +49,14 @@ fn verify_amount_packable<const VERIFY: bool>(
     Ok(())
 }
 
+#[cfg(feature = "serde")]
 pub(crate) mod dto {
     use alloc::string::{String, ToString};
 
     use serde::{Deserialize, Serialize};
 
     use super::*;
-    use crate::types::{block::Error, TryFromDto};
+    use crate::types::{block::Error, TryFromDto, ValidationParams};
 
     /// Describes a treasury output.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]

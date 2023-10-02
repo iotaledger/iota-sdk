@@ -25,7 +25,7 @@ pub(super) const DERIVE_OUTPUT_RECORD_PATH: &[u8] = b"iota-wallet-derived";
 /// The client path for the seed.
 ///
 /// The value has been hard-coded historically.
-pub(super) const PRIVATE_DATA_CLIENT_PATH: &[u8] = b"iota_seed";
+pub(crate) const PRIVATE_DATA_CLIENT_PATH: &[u8] = b"iota_seed";
 
 /// The path for the user-data encryption key for the Stronghold store.
 pub(super) const USERDATA_STORE_KEY_RECORD_PATH: &[u8] = b"userdata-store-key";

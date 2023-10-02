@@ -76,9 +76,35 @@ pub enum ConflictReason {
     SemanticValidationFailed = 255,
 }
 
-impl Default for ConflictReason {
-    fn default() -> Self {
-        Self::None
+impl fmt::Display for ConflictReason {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::None => write!(f, "The block has no conflict"),
+            Self::InputUtxoAlreadySpent => write!(f, "The referenced UTXO was already spent"),
+            Self::InputUtxoAlreadySpentInThisMilestone => write!(
+                f,
+                "The referenced UTXO was already spent while confirming this milestone"
+            ),
+            Self::InputUtxoNotFound => write!(f, "The referenced UTXO cannot be found"),
+            Self::CreatedConsumedAmountMismatch => {
+                write!(f, "The sum of the inputs and output values does not match")
+            }
+            Self::InvalidSignature => write!(f, "The unlock block signature is invalid"),
+            Self::TimelockNotExpired => write!(f, "The configured timelock is not yet expired"),
+            Self::InvalidNativeTokens => write!(f, "The native tokens are invalid"),
+            Self::StorageDepositReturnUnfulfilled => write!(
+                f,
+                "The return amount in a transaction is not fulfilled by the output side"
+            ),
+            Self::InvalidUnlock => write!(f, "The input unlock is invalid"),
+            Self::InputsCommitmentsMismatch => write!(f, "The inputs commitment is invalid"),
+            Self::UnverifiedSender => write!(
+                f,
+                " The output contains a Sender with an ident (address) which is not unlocked"
+            ),
+            Self::InvalidChainStateTransition => write!(f, "The chain state transition is invalid"),
+            Self::SemanticValidationFailed => write!(f, "The semantic validation failed"),
+        }
     }
 }
 
@@ -103,6 +129,12 @@ impl TryFrom<u8> for ConflictReason {
             255 => Self::SemanticValidationFailed,
             x => return Err(Self::Error::InvalidConflict(x)),
         })
+    }
+}
+
+impl Default for ConflictReason {
+    fn default() -> Self {
+        Self::None
     }
 }
 

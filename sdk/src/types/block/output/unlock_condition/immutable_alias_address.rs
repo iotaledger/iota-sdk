@@ -47,6 +47,7 @@ fn verify_alias_address<const VERIFY: bool>(address: &Address, _: &()) -> Result
     }
 }
 
+#[cfg(feature = "serde")]
 pub(crate) mod dto {
     use serde::{Deserialize, Serialize};
 

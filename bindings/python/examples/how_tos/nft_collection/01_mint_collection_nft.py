@@ -1,8 +1,9 @@
-from iota_sdk import Wallet, Utils, utf8_to_hex, MintNftParams
-from dotenv import load_dotenv
 import os
 import sys
-import json
+
+from dotenv import load_dotenv
+
+from iota_sdk import MintNftParams, Utils, Wallet, Irc27Metadata
 
 load_dotenv()
 
@@ -34,41 +35,43 @@ bech32_hrp = wallet.get_client().get_bech32_hrp()
 issuer = Utils.nft_id_to_bech32(issuer_nft_id, bech32_hrp)
 
 
-def get_immutable_metadata(index: int, issuer_nft_id: str) -> str:
-    data = {
-        "standard": "IRC27",
-        "version": "v1.0",
-        "type": "video/mp4",
-        "uri": "ipfs://wrongcVm9fx47YXNTkhpMEYSxCD3Bqh7PJYr7eo5Ywrong",
-        "name": "Shimmer OG NFT #" + str(index),
-        "description": "The Shimmer OG NFT was handed out 1337 times by the IOTA Foundation to celebrate the official launch of the Shimmer Network.",
-        "issuerName": "IOTA Foundation",
-        "collectionId": issuer_nft_id,
-        "collectionName": "Shimmer OG"
-    }
-    return json.dumps(data, separators=(',', ':'))
+def get_immutable_metadata(index: int) -> str:
+    """Returns the immutable metadata for the NFT with the given index"""
+    Irc27Metadata(
+        "video/mp4",
+        "https://ipfs.io/ipfs/QmPoYcVm9fx47YXNTkhpMEYSxCD3Bqh7PJYr7eo5YjLgiT",
+        "Shimmer OG NFT #" + str(index),
+        description="The Shimmer OG NFT was handed out 1337 times by the IOTA Foundation to celebrate the official launch of the Shimmer Network.",
+        issuerName="IOTA Foundation",
+        collectionName="Shimmer OG",
+    ).as_hex()
 
 
 # Create the metadata with another index for each
-nft_mint_params = list(map(lambda index: MintNftParams(
-    immutableMetadata=utf8_to_hex(
-        get_immutable_metadata(index, issuer_nft_id)),
-    issuer=issuer
-), range(NFT_COLLECTION_SIZE)))
+nft_mint_params = list(
+    map(
+        lambda index: MintNftParams(
+            immutableMetadata=get_immutable_metadata(index), issuer=issuer
+        ),
+        range(NFT_COLLECTION_SIZE),
+    )
+)
 
 while nft_mint_params:
-    chunk, nft_mint_params = nft_mint_params[:NUM_NFTS_MINTED_PER_TRANSACTION], nft_mint_params[NUM_NFTS_MINTED_PER_TRANSACTION:]
+    chunk, nft_mint_params = (
+        nft_mint_params[:NUM_NFTS_MINTED_PER_TRANSACTION],
+        nft_mint_params[NUM_NFTS_MINTED_PER_TRANSACTION:],
+    )
     print(
-        f'Minting {len(chunk)} NFTs... ({NFT_COLLECTION_SIZE-len(nft_mint_params)}/{NFT_COLLECTION_SIZE})')
-    prepared = account.prepare_mint_nfts(chunk)
-    transaction = prepared.send()
+        f'Minting {len(chunk)} NFTs... ({NFT_COLLECTION_SIZE-len(nft_mint_params)}/{NFT_COLLECTION_SIZE})'
+    )
+    transaction = account.mint_nfts(chunk)
 
     # Wait for transaction to get included
     block_id = account.retry_transaction_until_included(
         transaction.transactionId)
 
-    print(
-        f'Block sent: {os.environ["EXPLORER_URL"]}/block/{block_id}')
+    print(f'Block sent: {os.environ["EXPLORER_URL"]}/block/{block_id}')
 
     # Sync so the new outputs are available again for new transactions
     account.sync()

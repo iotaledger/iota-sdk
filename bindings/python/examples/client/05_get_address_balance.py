@@ -1,6 +1,8 @@
-from iota_sdk import Client, NodeIndexerAPI
-from dotenv import load_dotenv
 import os
+
+from dotenv import load_dotenv
+
+from iota_sdk import Client, NodeIndexerAPI
 
 load_dotenv()
 
@@ -9,9 +11,9 @@ node_url = os.environ.get('NODE_URL', 'https://api.testnet.shimmer.network')
 # Create a Client instance
 client = Client(nodes=[node_url])
 
-address = 'rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy'
+ADDRESS = 'rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy'
 query_parameters = NodeIndexerAPI.QueryParameters(
-    address,
+    ADDRESS,
     has_expiration=False,
     has_timelock=False,
     has_storage_deposit_return=False
@@ -37,4 +39,4 @@ for output_with_metadata in outputs:
         native_tokens.append(output.nativeTokens)
 
 print(
-    f'Outputs controlled by {address} have {total_amount} glow and native tokens: {native_tokens}')
+    f'Outputs controlled by {ADDRESS} have {total_amount} glow and native tokens: {native_tokens}')

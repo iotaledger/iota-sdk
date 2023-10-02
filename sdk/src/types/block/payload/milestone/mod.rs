@@ -27,10 +27,7 @@ pub use self::{
     option::{MilestoneOption, MilestoneOptions, ParametersMilestoneOption, ReceiptMilestoneOption},
 };
 pub(crate) use self::{essence::MilestoneMetadataLength, option::BinaryParametersLength};
-use crate::types::{
-    block::{protocol::ProtocolParameters, signature::Signature, Error},
-    ValidationParams,
-};
+use crate::types::block::{protocol::ProtocolParameters, signature::Signature, Error};
 
 #[derive(Debug)]
 #[allow(missing_docs)]
@@ -161,6 +158,7 @@ fn verify_signatures_packable<const VERIFY: bool>(
     verify_signatures::<VERIFY>(signatures)
 }
 
+#[cfg(feature = "serde")]
 pub mod dto {
     use alloc::{boxed::Box, string::ToString};
     use core::str::FromStr;
@@ -174,7 +172,7 @@ pub mod dto {
             block::{
                 parent::Parents, payload::milestone::MilestoneIndex, signature::dto::SignatureDto, BlockId, Error,
             },
-            TryFromDto,
+            TryFromDto, ValidationParams,
         },
         utils::serde::prefix_hex_bytes,
     };

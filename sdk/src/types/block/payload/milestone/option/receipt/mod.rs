@@ -14,14 +14,11 @@ use iterator_sorted::is_unique_sorted;
 use packable::{bounded::BoundedU16, prefix::VecPrefix, Packable, PackableExt};
 
 pub use self::{migrated_funds_entry::MigratedFundsEntry, tail_transaction_hash::TailTransactionHash};
-use crate::types::{
-    block::{
-        output::OUTPUT_COUNT_RANGE,
-        payload::{milestone::MilestoneIndex, Payload, TreasuryTransactionPayload},
-        protocol::ProtocolParameters,
-        Error,
-    },
-    ValidationParams,
+use crate::types::block::{
+    output::OUTPUT_COUNT_RANGE,
+    payload::{milestone::MilestoneIndex, Payload, TreasuryTransactionPayload},
+    protocol::ProtocolParameters,
+    Error,
 };
 
 const MIGRATED_FUNDS_ENTRY_RANGE: RangeInclusive<u16> = OUTPUT_COUNT_RANGE;
@@ -151,6 +148,7 @@ fn verify_transaction_packable<const VERIFY: bool>(transaction: &Payload, _: &Pr
     verify_transaction::<VERIFY>(transaction)
 }
 
+#[cfg(feature = "serde")]
 pub(crate) mod dto {
     use serde::{Deserialize, Serialize};
 
@@ -161,7 +159,7 @@ pub(crate) mod dto {
             payload::dto::{PayloadDto, TreasuryTransactionPayloadDto},
             Error,
         },
-        TryFromDto,
+        TryFromDto, ValidationParams,
     };
 
     ///

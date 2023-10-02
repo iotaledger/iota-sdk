@@ -3,6 +3,7 @@
 
 pub mod types;
 
+use alloc::sync::Arc;
 use std::{
     collections::HashMap,
     fmt::{Debug, Formatter, Result},
@@ -10,7 +11,7 @@ use std::{
 
 pub use self::types::{Event, WalletEvent, WalletEventType};
 
-type Handler<T> = Box<dyn Fn(&T) + Send + Sync + 'static>;
+type Handler<T> = Arc<dyn Fn(&T) + Send + Sync + 'static>;
 
 pub struct EventEmitter {
     handlers: HashMap<WalletEventType, Vec<Handler<Event>>>,
@@ -28,9 +29,10 @@ impl EventEmitter {
     /// multiple listeners for a single event.
     pub fn on<F>(&mut self, events: impl IntoIterator<Item = WalletEventType>, handler: F)
     where
-        F: Fn(&Event) + 'static + Clone + Send + Sync,
+        F: Fn(&Event) + 'static + Send + Sync,
     {
         let mut events = events.into_iter().peekable();
+        let handler = Arc::new(handler);
         // if no event is provided the handler is registered for all event types
         if events.peek().is_none() {
             // we could use a crate like strum or a macro to iterate over all values, but not sure if it's worth it
@@ -43,14 +45,11 @@ impl EventEmitter {
                 #[cfg(feature = "ledger_nano")]
                 WalletEventType::LedgerAddressGeneration,
             ] {
-                self.handlers
-                    .entry(event_type)
-                    .or_default()
-                    .push(Box::new(handler.clone()));
+                self.handlers.entry(event_type).or_default().push(handler.clone());
             }
         }
         for event in events {
-            self.handlers.entry(event).or_default().push(Box::new(handler.clone()));
+            self.handlers.entry(event).or_default().push(handler.clone());
         }
     }
 

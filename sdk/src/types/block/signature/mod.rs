@@ -5,8 +5,6 @@ mod ed25519;
 
 use alloc::boxed::Box;
 
-use derive_more::From;
-
 pub use self::ed25519::Ed25519Signature;
 use crate::types::block::Error;
 
@@ -47,7 +45,9 @@ impl Signature {
     }
 }
 
+#[cfg(feature = "serde")]
 pub mod dto {
+    use derive_more::From;
     use serde::{Deserialize, Serialize};
 
     pub use super::ed25519::dto::Ed25519SignatureDto;

@@ -13,6 +13,10 @@ use derive_more::{Deref, From};
 use iterator_sorted::is_unique_sorted;
 use packable::{bounded::BoundedU8, prefix::BoxedSlicePrefix, Packable};
 
+#[cfg(feature = "irc_27")]
+pub use self::metadata::irc_27::{Attribute, Irc27Metadata};
+#[cfg(feature = "irc_30")]
+pub use self::metadata::irc_30::Irc30Metadata;
 pub use self::{issuer::IssuerFeature, metadata::MetadataFeature, sender::SenderFeature, tag::TagFeature};
 pub(crate) use self::{metadata::MetadataFeatureLength, tag::TagFeatureLength};
 use crate::types::block::{create_bitflags, Error};
@@ -38,12 +42,12 @@ pub enum Feature {
 
 impl PartialOrd for Feature {
     fn partial_cmp(&self, other: &Self) -> Option<core::cmp::Ordering> {
-        self.kind().partial_cmp(&other.kind())
+        Some(self.cmp(other))
     }
 }
 impl Ord for Feature {
     fn cmp(&self, other: &Self) -> core::cmp::Ordering {
-        self.partial_cmp(other).unwrap()
+        self.kind().cmp(&other.kind())
     }
 }
 
@@ -284,6 +288,7 @@ mod test {
     }
 }
 
+#[cfg(feature = "serde")]
 pub mod dto {
     use alloc::format;
 

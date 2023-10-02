@@ -2,8 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 mod account;
-mod account_completion;
-mod account_history;
 mod command;
 mod error;
 mod helper;
@@ -48,12 +46,9 @@ fn logger_init(cli: &WalletCli) -> Result<(), Error> {
 }
 
 async fn run(cli: WalletCli) -> Result<(), Error> {
-    let (wallet, account) = new_wallet(cli).await?;
-
-    if let Some(wallet) = wallet {
-        if let Some(account) = account {
-            account::account_prompt(wallet.get_account(account).await?).await?;
-        }
+    if let (Some(wallet), Some(account)) = new_wallet(cli).await? {
+        let account = wallet.get_account(account).await?;
+        account::account_prompt(&wallet, account).await?;
     }
 
     Ok(())

@@ -7,7 +7,9 @@ import { INodeInfoProtocol } from '../models/info';
  * Network types.
  */
 export enum Network {
+    /** The mainnet. */
     Mainnet,
+    /** The testnet */
     Testnet,
 }
 
@@ -15,7 +17,9 @@ export enum Network {
  * Basic Auth or JWT.
  */
 export interface IAuth {
+    /** JWT authentication parameters. */
     jwt?: string;
+    /** Basic authentication parameters. */
     basicAuthNamePwd?: [string, string];
 }
 
@@ -23,11 +27,15 @@ export interface IAuth {
  * Options for the MQTT broker.
  */
 export interface IMqttBrokerOptions {
+    /** Whether the MQTT broker should be automatically disconnected when all topics are unsubscribed or not. */
     automaticDisconnect?: boolean;
-    /** timeout in seconds */
+    /** Sets the timeout in seconds used for the MQTT operations. */
     timeout?: number;
+    /** Sets whether websockets should be used instead of regular TCP for the MQTT operations. */
     useWs?: boolean;
+    /** Sets the port used for the MQTT operations. */
     port?: number;
+    /** Sets the maximum number of reconnection attempts. 0 is unlimited. */
     maxReconnectionAttempts?: number;
 }
 
@@ -35,8 +43,11 @@ export interface IMqttBrokerOptions {
  * A node object for the client.
  */
 export interface INode {
+    /** The URL of the node. */
     url: string;
+    /** The authentication parameters. */
     auth?: IAuth;
+    /** Whether the node is disabled or not. */
     disabled?: boolean;
 }
 

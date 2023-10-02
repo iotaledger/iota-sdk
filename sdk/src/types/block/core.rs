@@ -13,13 +13,10 @@ use packable::{
 };
 
 use super::protocol::ProtocolParameters;
-use crate::types::{
-    block::{
-        parent::Parents,
-        payload::{OptionalPayload, Payload},
-        BlockId, Error, PROTOCOL_VERSION,
-    },
-    ValidationParams,
+use crate::types::block::{
+    parent::Parents,
+    payload::{OptionalPayload, Payload},
+    BlockId, Error, PROTOCOL_VERSION,
 };
 
 /// A builder to build a [`Block`].
@@ -253,6 +250,7 @@ fn verify_payload(payload: Option<&Payload>) -> Result<(), Error> {
     }
 }
 
+#[cfg(feature = "serde")]
 pub(crate) mod dto {
     use alloc::string::{String, ToString};
 
@@ -261,7 +259,7 @@ pub(crate) mod dto {
     use super::*;
     use crate::types::{
         block::{payload::dto::PayloadDto, Error},
-        TryFromDto,
+        TryFromDto, ValidationParams,
     };
 
     /// The block object that nodes gossip around in the network.

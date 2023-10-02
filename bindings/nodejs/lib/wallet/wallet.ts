@@ -22,6 +22,9 @@ import { SecretManager } from '../secret_manager';
 export class Wallet {
     private methodHandler: WalletMethodHandler;
 
+    /**
+     * @param options Wallet options.
+     */
     constructor(options: WalletOptions) {
         this.methodHandler = new WalletMethodHandler(options);
     }
@@ -143,6 +146,17 @@ export class Wallet {
      */
     async getClient(): Promise<Client> {
         return this.methodHandler.getClient();
+    }
+
+    /**
+     * Get chrysalis data.
+     */
+    async getChrysalisData(): Promise<Record<string, string>> {
+        const response = await this.methodHandler.callMethod({
+            name: 'getChrysalisData',
+        });
+
+        return JSON.parse(response).payload;
     }
 
     /**

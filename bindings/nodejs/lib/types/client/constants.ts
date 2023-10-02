@@ -7,7 +7,10 @@ export const SHIMMER_TESTNET_BECH32_HRP = 'rms';
 
 /** BIP44 Coin Types for IOTA and Shimmer. */
 export enum CoinType {
+    /** The IOTA coin. */
     IOTA = 4218,
+    /** The Shimmer coin. */
     Shimmer = 4219,
+    /** The Ether coin. */
     Ether = 60,
 }

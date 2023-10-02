@@ -69,6 +69,7 @@ impl Migration<crate::client::stronghold::StrongholdAdapter> for Migrate {
     }
 }
 
+#[cfg(feature = "storage")]
 fn migrate_wallet(wallet: &mut serde_json::Value) -> Result<()> {
     let wallet: &mut serde_json::Map<String, serde_json::Value> = wallet
         .as_object_mut()

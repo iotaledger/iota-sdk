@@ -1,9 +1,6 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-#[cfg(feature = "ledger_nano")]
-use std::sync::{Arc, Mutex};
-
 #[cfg(feature = "stronghold")]
 use crypto::keys::bip39::Mnemonic;
 #[cfg(feature = "stronghold")]
@@ -94,7 +91,7 @@ async fn wallet_address_generation_stronghold() -> Result<()> {
 }
 
 #[tokio::test]
-#[cfg(feature = "ledger_nano")]
+#[cfg(all(feature = "ledger_nano", feature = "events"))]
 #[ignore = "requires ledger nano instance"]
 async fn wallet_address_generation_ledger() -> Result<()> {
     let storage_path = "test-storage/wallet_address_generation_ledger";
@@ -127,16 +124,16 @@ async fn wallet_address_generation_ledger() -> Result<()> {
         "smr1qqdnv60ryxynaeyu8paq3lp9rkll7d7d92vpumz88fdj4l0pn5mruy3qdpm"
     );
 
-    let address_event = Arc::new(Mutex::new(None));
-    let address_event_clone = address_event.clone();
+    let (sender, mut receiver) = tokio::sync::mpsc::channel(1);
 
-    #[cfg(feature = "events")]
     wallet
         .listen([WalletEventType::LedgerAddressGeneration], move |event| {
             if let WalletEvent::LedgerAddressGeneration(address) = &event.event {
-                *address_event_clone.lock().unwrap() = Some(address.address);
+                sender
+                    .try_send(address.address)
+                    .expect("too many LedgerAddressGeneration events");
             } else {
-                panic!("expected LedgerAddressGeneration")
+                panic!("expected LedgerAddressGeneration event")
             }
         })
         .await;
@@ -162,10 +159,10 @@ async fn wallet_address_generation_ledger() -> Result<()> {
     );
 
     assert_eq!(
-        address_event
-            .lock()
-            .unwrap()
-            .unwrap()
+        receiver
+            .recv()
+            .await
+            .expect("never received event")
             .inner()
             .to_bech32_unchecked("smr"),
         // Address generated with bip32 path: [44, 4218, 0, 0, 0].

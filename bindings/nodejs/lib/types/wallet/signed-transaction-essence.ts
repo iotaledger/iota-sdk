@@ -7,8 +7,10 @@ import { InputSigningData } from '../client';
 
 /** The signed transaction with inputs data */
 export class SignedTransactionEssence {
+    /** A transaction payload. */
     @Type(() => TransactionPayload)
     transactionPayload!: TransactionPayload;
+    /** Signed inputs data. */
     @Type(() => InputSigningData)
     inputsData!: InputSigningData;
 }

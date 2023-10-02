@@ -67,6 +67,7 @@ impl core::fmt::Debug for TaggedDataPayload {
     }
 }
 
+#[cfg(feature = "serde")]
 pub mod dto {
     use serde::{Deserialize, Serialize};
 

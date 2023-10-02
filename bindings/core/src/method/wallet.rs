@@ -52,6 +52,11 @@ pub enum WalletMethod {
     /// Read accounts.
     /// Expected response: [`Accounts`](crate::Response::Accounts)
     GetAccounts,
+    /// Get historic chrysalis data.
+    /// Expected response: [`ChrysalisData`](crate::Response::ChrysalisData)
+    #[cfg(feature = "storage")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "storage")))]
+    GetChrysalisData,
     /// Consume an account method.
     /// Returns [`Response`](crate::Response)
     #[serde(rename_all = "camelCase")]

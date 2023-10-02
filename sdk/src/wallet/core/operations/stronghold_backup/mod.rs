@@ -9,7 +9,10 @@ use futures::{future::try_join_all, FutureExt};
 
 use self::stronghold_snapshot::read_data_from_stronghold_snapshot;
 #[cfg(feature = "storage")]
-use crate::wallet::WalletBuilder;
+use crate::{
+    client::storage::StorageAdapter,
+    wallet::{migration::chrysalis::CHRYSALIS_STORAGE_KEY, WalletBuilder},
+};
 use crate::{
     client::{
         secret::{stronghold::StrongholdSecretManager, SecretManager, SecretManagerConfig, SecretManagerDto},
@@ -102,6 +105,9 @@ impl Wallet {
             .password(stronghold_password.clone())
             .build(backup_path.clone())?;
 
+        #[cfg_attr(not(feature = "storage"), allow(unused))]
+        let chrysalis_data = stronghold_snapshot::migrate_snapshot_from_chrysalis_to_stardust(&new_stronghold).await?;
+
         let (read_client_options, read_coin_type, read_secret_manager, read_accounts) =
             read_data_from_stronghold_snapshot::<SecretManager>(&new_stronghold).await?;
 
@@ -140,6 +146,10 @@ impl Wallet {
                 stronghold.set_password(stronghold_password).await?;
             }
             *secret_manager = restored_secret_manager;
+        } else {
+            // If no secret manager data was in the backup, just copy the Stronghold file so the seed is available in
+            // the new location.
+            fs::copy(backup_path, new_snapshot_path)?;
         }
 
         // drop secret manager, otherwise we get a deadlock in set_client_options() (there inside of save_wallet_data())
@@ -199,6 +209,13 @@ impl Wallet {
             // also save account to db
             for account in accounts.iter() {
                 account.save(None).await?;
+            }
+            if let Some(chrysalis_data) = chrysalis_data {
+                self.storage_manager
+                    .read()
+                    .await
+                    .set(CHRYSALIS_STORAGE_KEY, &chrysalis_data)
+                    .await?;
             }
         }
 
@@ -267,6 +284,9 @@ impl Wallet<StrongholdSecretManager> {
         let new_stronghold = StrongholdSecretManager::builder()
             .password(stronghold_password.clone())
             .build(backup_path.clone())?;
+
+        #[cfg_attr(not(feature = "storage"), allow(unused))]
+        let chrysalis_data = stronghold_snapshot::migrate_snapshot_from_chrysalis_to_stardust(&new_stronghold).await?;
 
         let (read_client_options, read_coin_type, read_secret_manager, read_accounts) =
             read_data_from_stronghold_snapshot::<StrongholdSecretManager>(&new_stronghold).await?;
@@ -362,6 +382,13 @@ impl Wallet<StrongholdSecretManager> {
             // also save account to db
             for account in accounts.iter() {
                 account.save(None).await?;
+            }
+            if let Some(chrysalis_data) = chrysalis_data {
+                self.storage_manager
+                    .read()
+                    .await
+                    .set(CHRYSALIS_STORAGE_KEY, &chrysalis_data)
+                    .await?;
             }
         }
 

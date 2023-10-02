@@ -3,11 +3,8 @@
 
 use packable::Packable;
 
-use crate::types::{
-    block::{
-        address::Address, payload::milestone::option::receipt::TailTransactionHash, protocol::ProtocolParameters, Error,
-    },
-    ValidationParams,
+use crate::types::block::{
+    address::Address, payload::milestone::option::receipt::TailTransactionHash, protocol::ProtocolParameters, Error,
 };
 
 /// Describes funds which were migrated from a legacy network.
@@ -76,6 +73,7 @@ fn verify_amount_packable<const VERIFY: bool>(
     verify_amount::<VERIFY>(amount, &protocol_parameters.token_supply())
 }
 
+#[cfg(feature = "serde")]
 pub(crate) mod dto {
     use alloc::string::String;
 
@@ -84,7 +82,7 @@ pub(crate) mod dto {
     use super::*;
     use crate::types::{
         block::{address::dto::AddressDto, Error},
-        TryFromDto,
+        TryFromDto, ValidationParams,
     };
 
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]

@@ -39,7 +39,7 @@ async fn main() -> Result<()> {
 
     let wallet = create_wallet().await?;
 
-    let account = get_or_create_account(&wallet, "Alice").await?;
+    let account = wallet.get_or_create_account("Alice").await?;
     print_accounts(&wallet).await?;
 
     generate_addresses(&account, MAX_ADDRESSES_TO_GENERATE).await?;
@@ -70,16 +70,6 @@ async fn create_wallet() -> Result<Wallet> {
         .with_coin_type(SHIMMER_COIN_TYPE)
         .finish()
         .await
-}
-
-async fn get_or_create_account(wallet: &Wallet, alias: &str) -> Result<Account> {
-    let account = if let Ok(account) = wallet.get_account(alias).await {
-        account
-    } else {
-        println!("Creating account '{alias}'");
-        wallet.create_account().with_alias(alias).finish().await?
-    };
-    Ok(account)
 }
 
 async fn print_accounts(wallet: &Wallet) -> Result<()> {

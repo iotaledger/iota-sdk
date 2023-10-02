@@ -9,9 +9,9 @@ use tokio::sync::Mutex;
 use crate::client::storage::StorageAdapter;
 
 /// Key value storage adapter.
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct RocksdbStorageAdapter {
-    db: Arc<Mutex<DB>>,
+    pub(crate) db: Arc<Mutex<DB>>,
 }
 
 impl RocksdbStorageAdapter {

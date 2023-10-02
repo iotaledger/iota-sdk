@@ -49,6 +49,7 @@ impl core::fmt::Debug for UtxoInput {
     }
 }
 
+#[cfg(feature = "serde")]
 pub(crate) mod dto {
     use alloc::string::{String, ToString};
 

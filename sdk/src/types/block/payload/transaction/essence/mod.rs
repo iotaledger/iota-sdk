@@ -47,6 +47,7 @@ impl TransactionEssence {
     }
 }
 
+#[cfg(feature = "serde")]
 pub(crate) mod dto {
     use serde::{Deserialize, Serialize};
 

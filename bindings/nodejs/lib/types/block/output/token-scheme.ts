@@ -3,19 +3,29 @@
 
 import { hexToBigInt } from '../../utils/hex-encoding';
 
+/**
+ * All of the token scheme types.
+ */
 enum TokenSchemeType {
+    /** A simple token scheme. */
     Simple = 0,
 }
 
+/**
+ * The base class for token schemes.
+ */
 abstract class TokenScheme {
-    private type: TokenSchemeType;
+    readonly type: TokenSchemeType;
 
+    /**
+     * @param type The type of token scheme.
+     */
     constructor(type: TokenSchemeType) {
         this.type = type;
     }
 
     /**
-     * The type of token scheme.
+     * Get the type of token scheme.
      */
     getType(): TokenSchemeType {
         return this.type;
@@ -23,13 +33,18 @@ abstract class TokenScheme {
 }
 
 /**
- * Simple token scheme.
+ * A simple token scheme.
  */
 class SimpleTokenScheme extends TokenScheme {
-    private mintedTokens: bigint;
-    private meltedTokens: bigint;
-    private maximumSupply: bigint;
+    readonly mintedTokens: bigint;
+    readonly meltedTokens: bigint;
+    readonly maximumSupply: bigint;
 
+    /**
+     * @param mintedTokens The number of tokens that were minted.
+     * @param meltedTokens The number of tokens that were melted.
+     * @param maximumSupply The maximum supply of the token.
+     */
     constructor(
         mintedTokens: bigint,
         meltedTokens: bigint,
@@ -62,21 +77,21 @@ class SimpleTokenScheme extends TokenScheme {
     }
 
     /**
-     * Amount of tokens minted.
+     * Get the amount of tokens minted.
      */
     getMintedTokens(): bigint {
         return this.mintedTokens;
     }
 
     /**
-     * Amount of tokens melted.
+     * Get the amount of tokens melted.
      */
     getMeltedTokens(): bigint {
         return this.meltedTokens;
     }
 
     /**
-     * Maximum supply of tokens controlled.
+     * Get the maximum supply of tokens.
      */
     getMaximumSupply(): bigint {
         return this.maximumSupply;

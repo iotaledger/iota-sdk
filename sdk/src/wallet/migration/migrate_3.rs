@@ -37,12 +37,7 @@ impl Migration<crate::wallet::storage::Storage> for Migrate {
 
         if let Some(mut wallet) = storage.get::<serde_json::Value>(WALLET_INDEXATION_KEY).await? {
             if let Some(client_options) = wallet.get_mut("client_options") {
-                let params = client_options["protocolParameters"].as_object_mut().unwrap();
-                if let Some(version) = params.remove("protocol_version") {
-                    params.insert("version".to_owned(), version);
-                }
-                ConvertNetworkName::check(&mut client_options["protocolParameters"]["network_name"])?;
-                ConvertTokenSupply::check(&mut client_options["protocolParameters"]["token_supply"])?;
+                migrate_client_options(client_options)?;
             }
             rename_keys(&mut wallet);
 
@@ -69,18 +64,27 @@ impl Migration<crate::client::stronghold::StrongholdAdapter> for Migrate {
         }
 
         if let Some(mut client_options) = storage.get::<serde_json::Value>(CLIENT_OPTIONS_KEY).await? {
-            let params = client_options["protocolParameters"].as_object_mut().unwrap();
-            if let Some(version) = params.remove("protocol_version") {
-                params.insert("version".to_owned(), version);
-            }
-            ConvertNetworkName::check(&mut client_options["protocolParameters"]["network_name"])?;
-            ConvertTokenSupply::check(&mut client_options["protocolParameters"]["token_supply"])?;
+            migrate_client_options(&mut client_options)?;
             rename_keys(&mut client_options);
 
             storage.set(CLIENT_OPTIONS_KEY, &client_options).await?;
         }
         Ok(())
     }
+}
+
+fn migrate_client_options(client_options: &mut serde_json::Value) -> Result<()> {
+    if let Some(params) = client_options
+        .get_mut("protocolParameters")
+        .map(|p| p.as_object_mut().unwrap())
+    {
+        if let Some(version) = params.remove("protocol_version") {
+            params.insert("version".to_owned(), version);
+        }
+        ConvertNetworkName::check(&mut params["network_name"])?;
+        ConvertTokenSupply::check(&mut params["token_supply"])?;
+    }
+    Ok(())
 }
 
 fn migrate_account(account: &mut serde_json::Value) -> Result<()> {

@@ -47,6 +47,26 @@ pub(crate) async fn make_wallet(storage_path: &str, mnemonic: Option<Mnemonic>, 
     wallet_builder.finish().await
 }
 
+#[allow(dead_code, unused_variables)]
+#[cfg(feature = "ledger_nano")]
+pub(crate) async fn make_ledger_nano_wallet(storage_path: &str, node: Option<&str>) -> Result<Wallet> {
+    let client_options = ClientOptions::new().with_node(node.unwrap_or(NODE_LOCAL))?;
+    let mut secret_manager = iota_sdk::client::secret::ledger_nano::LedgerSecretManager::new(true);
+    secret_manager.non_interactive = true;
+
+    #[allow(unused_mut)]
+    let mut wallet_builder = Wallet::builder()
+        .with_secret_manager(SecretManager::LedgerNano(secret_manager))
+        .with_client_options(client_options)
+        .with_coin_type(SHIMMER_COIN_TYPE);
+    #[cfg(feature = "storage")]
+    {
+        wallet_builder = wallet_builder.with_storage_path(storage_path);
+    }
+
+    wallet_builder.finish().await
+}
+
 /// Create `amount` new accounts, request funds from the faucet and sync the accounts afterwards until the faucet output
 /// is available. Returns the new accounts.
 #[allow(dead_code)]

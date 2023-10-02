@@ -7,6 +7,7 @@ export * from './models';
 export * from './secret_manager';
 export * from './utils';
 export * from './wallet';
+export * from './logger-config';
 
 /**
  * Response from the message interface

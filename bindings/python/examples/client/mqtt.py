@@ -3,11 +3,13 @@
 
 # This example shows how to listen to MQTT events of a node.
 
-from iota_sdk import Client
-from dotenv import load_dotenv
+import json
 import os
 import threading
-import json
+
+from dotenv import load_dotenv
+
+from iota_sdk import Client
 
 load_dotenv()
 
@@ -22,8 +24,10 @@ received_10_events = threading.Event()
 
 
 def callback(event):
+    """Callback function for the MQTT listener"""
     event_dict = json.loads(event)
     print(event_dict)
+    # pylint: disable=global-statement
     global received_events
     received_events += 1
     if received_events > 10:

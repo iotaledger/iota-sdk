@@ -60,6 +60,7 @@ impl core::fmt::Debug for AliasAddress {
     }
 }
 
+#[cfg(feature = "serde")]
 pub(crate) mod dto {
     use alloc::string::{String, ToString};
 

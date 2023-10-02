@@ -43,6 +43,8 @@ export class OutputData {
 
 /** A Segment of the BIP32 path*/
 export interface Segment {
+    /** Whether the segment is hardened. */
     hardened: boolean;
+    /** The bytes of the segment. */
     bs: Uint8Array;
 }

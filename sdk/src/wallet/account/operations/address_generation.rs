@@ -69,28 +69,56 @@ where
         // needs to have it visible on the computer first, so we need to generate it without the
         // prompt first
         #[cfg(feature = "ledger_nano")]
-        let addresses = if options.ledger_nano_prompt
-            && self
-                .wallet
-                .secret_manager
-                .read()
-                .await
+        let addresses = {
+            use crate::wallet::account::SecretManager;
+            let secret_manager = self.wallet.secret_manager.read().await;
+            if secret_manager
                 .downcast::<LedgerSecretManager>()
+                .or_else(|| {
+                    secret_manager.downcast::<SecretManager>().and_then(|s| {
+                        if let SecretManager::LedgerNano(n) = s {
+                            Some(n)
+                        } else {
+                            None
+                        }
+                    })
+                })
                 .is_some()
-        {
-            #[cfg(feature = "events")]
-            let changed_options = {
-                // Change options so ledger will not show the prompt the first time
-                let mut changed_options = options;
-                changed_options.ledger_nano_prompt = false;
-                changed_options
-            };
-            let mut addresses = Vec::new();
-
-            for address_index in address_range {
+            {
                 #[cfg(feature = "events")]
-                {
-                    // Generate without prompt to be able to display it
+                let changed_options = {
+                    // Change options so ledger will not show the prompt the first time
+                    let mut changed_options = options;
+                    changed_options.ledger_nano_prompt = false;
+                    changed_options
+                };
+                let mut addresses = Vec::new();
+
+                for address_index in address_range {
+                    #[cfg(feature = "events")]
+                    {
+                        // Generate without prompt to be able to display it
+                        let address = self
+                            .wallet
+                            .secret_manager
+                            .read()
+                            .await
+                            .generate_ed25519_addresses(
+                                account_details.coin_type,
+                                account_details.index,
+                                address_index..address_index + 1,
+                                Some(changed_options),
+                            )
+                            .await?;
+                        self.emit(
+                            account_details.index,
+                            WalletEvent::LedgerAddressGeneration(AddressData {
+                                address: address[0].to_bech32(bech32_hrp),
+                            }),
+                        )
+                        .await;
+                    }
+                    // Generate with prompt so the user can verify
                     let address = self
                         .wallet
                         .secret_manager
@@ -100,45 +128,25 @@ where
                             account_details.coin_type,
                             account_details.index,
                             address_index..address_index + 1,
-                            Some(changed_options),
+                            Some(options),
                         )
                         .await?;
-                    self.emit(
-                        account_details.index,
-                        WalletEvent::LedgerAddressGeneration(AddressData {
-                            address: address[0].to_bech32(bech32_hrp),
-                        }),
-                    )
-                    .await;
+                    addresses.push(address[0]);
                 }
-                // Generate with prompt so the user can verify
-                let address = self
-                    .wallet
+                addresses
+            } else {
+                self.wallet
                     .secret_manager
                     .read()
                     .await
                     .generate_ed25519_addresses(
                         account_details.coin_type,
                         account_details.index,
-                        address_index..address_index + 1,
+                        address_range,
                         Some(options),
                     )
-                    .await?;
-                addresses.push(address[0]);
+                    .await?
             }
-            addresses
-        } else {
-            self.wallet
-                .secret_manager
-                .read()
-                .await
-                .generate_ed25519_addresses(
-                    account_details.coin_type,
-                    account_details.index,
-                    address_range,
-                    Some(options),
-                )
-                .await?
         };
 
         #[cfg(not(feature = "ledger_nano"))]

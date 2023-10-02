@@ -27,7 +27,7 @@ use crate::client::storage::StorageAdapter;
 
 #[derive(Debug)]
 pub struct Storage {
-    inner: Box<dyn DynStorageAdapter>,
+    pub(crate) inner: Box<dyn DynStorageAdapter>,
     encryption_key: Option<Zeroizing<[u8; 32]>>,
 }
 
@@ -60,12 +60,6 @@ impl StorageAdapter for Storage {
 
     async fn delete(&self, key: &str) -> Result<(), Self::Error> {
         self.inner.as_ref().delete(key).await
-    }
-}
-
-impl Drop for Storage {
-    fn drop(&mut self) {
-        log::debug!("drop Storage");
     }
 }
 

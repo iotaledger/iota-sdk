@@ -50,6 +50,7 @@ impl core::fmt::Debug for TreasuryInput {
     }
 }
 
+#[cfg(feature = "serde")]
 pub(crate) mod dto {
     use alloc::string::{String, ToString};
 
