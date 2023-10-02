@@ -18,7 +18,7 @@ from iota_sdk.types.common import HexStr, Node
 from iota_sdk.types.feature import Feature
 from iota_sdk.types.native_token import NativeToken
 from iota_sdk.types.network_info import NetworkInfo
-from iota_sdk.types.output import AccountOutput, BasicOutput, FoundryOutput, NftOutput, output_from_dict
+from iota_sdk.types.output import AccountOutput, BasicOutput, FoundryOutput, NftOutput, deserialize_output
 from iota_sdk.types.payload import Payload, TransactionPayload
 from iota_sdk.types.token_scheme import SimpleTokenScheme
 from iota_sdk.types.unlock_condition import UnlockCondition
@@ -197,7 +197,7 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         if mana:
             mana = str(mana)
 
-        return output_from_dict(self._call_method('buildAccountOutput', {
+        return deserialize_output(self._call_method('buildAccountOutput', {
             'accountId': account_id,
             'unlockConditions': unlock_conditions,
             'amount': amount,
@@ -245,7 +245,7 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         if mana:
             mana = str(mana)
 
-        return output_from_dict(self._call_method('buildBasicOutput', {
+        return deserialize_output(self._call_method('buildBasicOutput', {
             'unlockConditions': unlock_conditions,
             'amount': amount,
             'mana': mana,
@@ -292,7 +292,7 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         if amount:
             amount = str(amount)
 
-        return output_from_dict(self._call_method('buildFoundryOutput', {
+        return deserialize_output(self._call_method('buildFoundryOutput', {
             'serialNumber': serial_number,
             'tokenScheme': token_scheme.to_dict(),
             'unlockConditions': unlock_conditions,
@@ -344,7 +344,7 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         if mana:
             mana = str(mana)
 
-        return output_from_dict(self._call_method('buildNftOutput', {
+        return deserialize_output(self._call_method('buildNftOutput', {
             'nftId': nft_id,
             'unlockConditions': unlock_conditions,
             'amount': amount,

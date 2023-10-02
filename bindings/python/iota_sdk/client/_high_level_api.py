@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from abc import ABCMeta, abstractmethod
 from iota_sdk.types.block.wrapper import BlockWrapper
 from iota_sdk.types.common import CoinType, HexStr, json
-from iota_sdk.types.output import OutputWithMetadata
+from iota_sdk.types.output_metadata import OutputWithMetadata
 from iota_sdk.types.output_id import OutputId
 
 

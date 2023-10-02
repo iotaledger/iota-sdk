@@ -34,6 +34,7 @@ from .types.node_info import *
 from .types.output import *
 from .types.output_data import *
 from .types.output_id import *
+from .types.output_metadata import *
 from .types.output_params import *
 from .types.payload import *
 from .types.send_params import *
