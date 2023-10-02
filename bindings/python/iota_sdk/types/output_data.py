@@ -3,10 +3,11 @@
 
 from __future__ import annotations
 from dataclasses import dataclass
-from typing import Optional, Union
-from iota_sdk.types.address import Ed25519Address, AccountAddress, NFTAddress
+from typing import Optional
+from iota_sdk.types.address import AddressUnion
 from iota_sdk.types.common import HexStr, json
-from iota_sdk.types.output import BasicOutput, AccountOutput, FoundryOutput, NftOutput, OutputMetadata
+from iota_sdk.types.output import OutputUnion
+from iota_sdk.types.output_metadata import OutputMetadata
 from iota_sdk.types.signature import Bip44
 
 
@@ -27,9 +28,9 @@ class OutputData():
     """
     output_id: HexStr
     metadata: OutputMetadata
-    output: Union[AccountOutput, FoundryOutput, NftOutput, BasicOutput]
+    output: OutputUnion
     is_spent: bool
-    address: Union[Ed25519Address, AccountAddress, NFTAddress]
+    address: AddressUnion
     network_id: str
     remainder: bool
     chain: Optional[Bip44] = None
