@@ -1,7 +1,6 @@
 import {
     Ed25519Signature,
     HexEncodedString,
-    Block,
     TransactionEssence,
     TransactionPayload,
     TransactionId,

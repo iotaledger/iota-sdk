@@ -5,7 +5,6 @@ import { callUtilsMethod } from '../bindings';
 import {
     Address,
     HexEncodedString,
-    Block,
     Ed25519Signature,
     TransactionEssence,
     TransactionPayload,

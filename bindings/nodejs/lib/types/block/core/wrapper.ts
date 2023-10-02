@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { BlockId, IssuerId } from '../id';
+import { IssuerId } from '../id';
 import { Signature, SignatureDiscriminator } from '../signature';
 import { SlotCommitmentId, SlotIndex } from '../slot';
 import { u64 } from '../../utils/type-aliases';
@@ -10,8 +10,6 @@ import { Block, BlockType } from './block';
 import { BasicBlock } from './basic';
 import { ValidationBlock } from './validation';
 import { BlockDiscriminator } from './';
-import { Utils } from '../../../utils';
-import { ProtocolParameters } from '../../models';
 
 /**
  * Represent the object that nodes gossip around the network.
@@ -73,16 +71,6 @@ class BlockWrapper {
         this.issuerId = issuerId;
         this.signature = signature;
         this.block = block;
-    }
-
-    /**
-     * Compute the block ID (Blake2b256 hash of the block bytes).
-     *
-     * @param params The network protocol parameters.
-     * @returns The corresponding block ID.
-     */
-    id(params: ProtocolParameters): BlockId {
-        return Utils.blockId(this, params);
     }
 
     /**
