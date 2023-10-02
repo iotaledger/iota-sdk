@@ -173,40 +173,36 @@ impl InputSelection {
         base_inputs: impl Iterator<Item = &'a InputSigningData> + Clone,
         amount_selection: &mut AmountSelection,
     ) -> bool {
-        // No native tokens, expired SDRUC.
+        // No native token, expired SDRUC.
         let inputs = base_inputs.clone().filter(|input| {
-            input.output.native_tokens().unwrap().is_empty()
-                && sdruc_not_expired(&input.output, self.slot_index).is_none()
+            input.output.native_token().is_none() && sdruc_not_expired(&input.output, self.slot_index).is_none()
         });
 
         if amount_selection.fulfil(inputs) {
             return true;
         }
 
-        // No native tokens, unexpired SDRUC.
+        // No native token, unexpired SDRUC.
         let inputs = base_inputs.clone().filter(|input| {
-            input.output.native_tokens().unwrap().is_empty()
-                && sdruc_not_expired(&input.output, self.slot_index).is_some()
+            input.output.native_token().is_none() && sdruc_not_expired(&input.output, self.slot_index).is_some()
         });
 
         if amount_selection.fulfil(inputs) {
             return true;
         }
 
-        // Native tokens, expired SDRUC.
+        // Native token, expired SDRUC.
         let inputs = base_inputs.clone().filter(|input| {
-            !input.output.native_tokens().unwrap().is_empty()
-                && sdruc_not_expired(&input.output, self.slot_index).is_none()
+            input.output.native_token().is_some() && sdruc_not_expired(&input.output, self.slot_index).is_none()
         });
 
         if amount_selection.fulfil(inputs) {
             return true;
         }
 
-        // Native tokens, unexpired SDRUC.
+        // Native token, unexpired SDRUC.
         let inputs = base_inputs.clone().filter(|input| {
-            !input.output.native_tokens().unwrap().is_empty()
-                && sdruc_not_expired(&input.output, self.slot_index).is_some()
+            input.output.native_token().is_some() && sdruc_not_expired(&input.output, self.slot_index).is_some()
         });
 
         if amount_selection.fulfil(inputs) {

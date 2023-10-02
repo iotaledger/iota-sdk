@@ -8,8 +8,9 @@ use packable::Packable;
 use crate::types::block::{
     address::{Address, Ed25519Address},
     output::{
+        feature::NativeTokenFeature,
         unlock_condition::{AddressUnlockCondition, ExpirationUnlockCondition, StorageDepositReturnUnlockCondition},
-        BasicOutputBuilder, NativeTokens, Output, OutputId,
+        BasicOutputBuilder, NativeToken, Output, OutputId,
     },
     slot::SlotIndex,
     BlockId, Error,
@@ -192,9 +193,9 @@ impl MinimumStorageDepositBasicOutput {
         }
     }
 
-    pub fn with_native_tokens(mut self, native_tokens: impl Into<Option<NativeTokens>>) -> Self {
-        if let Some(native_tokens) = native_tokens.into() {
-            self.builder = self.builder.with_native_tokens(native_tokens);
+    pub fn with_native_token(mut self, native_token: impl Into<Option<NativeToken>>) -> Self {
+        if let Some(native_token) = native_token.into() {
+            self.builder = self.builder.add_feature(NativeTokenFeature::from(native_token));
         }
         self
     }
