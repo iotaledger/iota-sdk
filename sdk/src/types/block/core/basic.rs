@@ -139,7 +139,7 @@ impl BasicBlock {
 
     /// Returns the max burned mana of a [`BasicBlock`].
     #[inline(always)]
-    pub fn burned_mana(&self) -> u64 {
+    pub fn max_burned_mana(&self) -> u64 {
         self.max_burned_mana
     }
 }
