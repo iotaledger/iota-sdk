@@ -12,25 +12,11 @@ require('dotenv').config({ path: '.env' });
 // This example creates a new database and account.
 async function run() {
     initLogger();
-    if (!process.env.NODE_URL) {
-        throw new Error('.env NODE_URL is undefined, see .env.example');
+        for(const envVar of ['NODE_URL','STRONGHOLD_PASSWORD','STRONGHOLD_SNAPSHOT_PATH','MNEMONIC','WALLET_DB_PATH'])
+    if (!(envVar in process.env)) {
+        throw new Error(`.env ${envVar} is undefined, see .env.example`);
     }
-    if (!process.env.STRONGHOLD_PASSWORD) {
-        throw new Error(
-            '.env STRONGHOLD_PASSWORD is undefined, see .env.example',
-        );
-    }
-    if (!process.env.STRONGHOLD_SNAPSHOT_PATH) {
-        throw new Error(
-            '.env STRONGHOLD_SNAPSHOT_PATH is undefined, see .env.example',
-        );
-    }
-    if (!process.env.MNEMONIC) {
-        throw new Error('.env MNEMONIC is undefined, see .env.example');
-    }
-    if (!process.env.WALLET_DB_PATH) {
-        throw new Error('.env WALLET_DB_PATH is undefined, see .env.example');
-    }
+        if(process.env.NODE_URL && process.env.MNEMONIC ){
     try {
         const walletOptions: WalletOptions = {
             storagePath: process.env.WALLET_DB_PATH,
@@ -62,5 +48,5 @@ async function run() {
         console.error('Error: ', error);
     }
 }
-
+}
 run().then(() => process.exit());

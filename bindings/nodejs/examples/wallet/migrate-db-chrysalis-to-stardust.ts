@@ -16,17 +16,14 @@ async function run() {
         levelFilter: 'debug',
         targetExclusions: ['h2', 'hyper', 'rustls'],
     });
-    if (!process.env.NODE_URL) {
-        throw new Error('.env NODE_URL is undefined, see .env.example');
+        for(const envVar of ['NODE_URL','STRONGHOLD_PASSWORD'] )
+    if (!(envVar in process.env)) {
+        throw new Error(`.env ${envVar} is undefined, see .env.example`);
     }
-    if (!process.env.STRONGHOLD_PASSWORD) {
-        throw new Error(
-            '.env STRONGHOLD_PASSWORD is undefined, see .env.example',
-        );
-    }
-
+    
     migrateDbChrysalisToStardust(walletDbPath, 'password');
 
+    if(process.env.NODE_URL){
     const walletOptions: WalletOptions = {
         storagePath: walletDbPath,
         clientOptions: {
@@ -49,5 +46,5 @@ async function run() {
     const historicChrysalisData = await wallet.getChrysalisData();
     console.log(historicChrysalisData);
 }
-
+}
 run().then(() => process.exit());
