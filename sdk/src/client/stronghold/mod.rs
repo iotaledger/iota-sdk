@@ -582,6 +582,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_clear_key() {
+        iota_stronghold::engine::snapshot::try_set_encrypt_work_factor(0).unwrap();
         let timeout = Duration::from_millis(100);
 
         let stronghold_path = "test_clear_key.stronghold";
@@ -627,6 +628,7 @@ mod tests {
 
     #[tokio::test]
     async fn stronghold_password_already_set() {
+        iota_stronghold::engine::snapshot::try_set_encrypt_work_factor(0).unwrap();
         let stronghold_path = "stronghold_password_already_set.stronghold";
         let adapter = StrongholdAdapter::builder()
             .password("drowssap".to_owned())
