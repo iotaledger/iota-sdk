@@ -274,7 +274,7 @@ pub fn semantic_validation(
                 && !context
                     .essence
                     .capabilities()
-                    .has_capabilities(TransactionCapabilityFlag::DESTROY_ACCOUNT_OUTPUTS)
+                    .has_capability(TransactionCapabilityFlag::DestroyAccountOutputs)
             {
                 // TODO: better failure reason incoming?
                 return Ok(Some(TransactionFailureReason::SemanticValidationFailed));
@@ -287,7 +287,7 @@ pub fn semantic_validation(
                 && !context
                     .essence
                     .capabilities()
-                    .has_capabilities(TransactionCapabilityFlag::DESTROY_FOUNDRY_OUTPUTS)
+                    .has_capability(TransactionCapabilityFlag::DestroyFoundryOutputs)
             {
                 // TODO: better failure reason incoming?
                 return Ok(Some(TransactionFailureReason::SemanticValidationFailed));
@@ -300,7 +300,7 @@ pub fn semantic_validation(
                 && !context
                     .essence
                     .capabilities()
-                    .has_capabilities(TransactionCapabilityFlag::DESTROY_NFT_OUTPUTS)
+                    .has_capability(TransactionCapabilityFlag::DestroyNftOutputs)
             {
                 // TODO: better failure reason incoming?
                 return Ok(Some(TransactionFailureReason::SemanticValidationFailed));
@@ -439,7 +439,7 @@ pub fn semantic_validation(
         && context
             .essence
             .capabilities()
-            .has_capabilities(TransactionCapabilityFlag::BURN_MANA)
+            .has_capability(TransactionCapabilityFlag::BurnMana)
     {
         // TODO: better failure reason incoming?
         return Ok(Some(TransactionFailureReason::SemanticValidationFailed));
@@ -455,7 +455,7 @@ pub fn semantic_validation(
             && context
                 .essence
                 .capabilities()
-                .has_capabilities(TransactionCapabilityFlag::BURN_NATIVE_TOKENS)
+                .has_capability(TransactionCapabilityFlag::BurnNativeTokens)
         {
             // TODO: better failure reason incoming?
             return Ok(Some(TransactionFailureReason::SemanticValidationFailed));

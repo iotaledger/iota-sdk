@@ -6,7 +6,10 @@ use iota_sdk::types::block::{
     input::{Input, UtxoInput},
     output::{unlock_condition::AddressUnlockCondition, BasicOutput, Output},
     payload::{
-        transaction::{RegularTransactionEssence, TransactionCapabilityFlag, TransactionId, TransactionPayload},
+        transaction::{
+            RegularTransactionEssence, TransactionCapabilities, TransactionCapabilityFlag, TransactionId,
+            TransactionPayload,
+        },
         Payload, TaggedDataPayload,
     },
     protocol::protocol_parameters,
@@ -90,21 +93,21 @@ fn transactions_capabilities() {
 
     assert!(capabilities.is_none());
 
-    assert!(!capabilities.has_capabilities(Flag::BURN_NATIVE_TOKENS));
-    capabilities.add_capabilities(Flag::BURN_NATIVE_TOKENS);
-    assert!(capabilities.has_capabilities(Flag::BURN_NATIVE_TOKENS));
+    assert!(!capabilities.has_capability(Flag::BurnNativeTokens));
+    capabilities.add_capability(Flag::BurnNativeTokens);
+    assert!(capabilities.has_capabilities([Flag::BurnNativeTokens]));
 
-    assert!(!capabilities.has_capabilities(Flag::BURN_MANA));
-    capabilities.set_capabilities(Flag::BURN_MANA | Flag::DESTROY_ACCOUNT_OUTPUTS);
-    assert!(capabilities.has_capabilities(Flag::BURN_MANA | Flag::DESTROY_ACCOUNT_OUTPUTS));
-    assert!(!capabilities.has_capabilities(Flag::BURN_NATIVE_TOKENS));
+    assert!(!capabilities.has_capability(Flag::BurnMana));
+    capabilities.set_capabilities([Flag::BurnMana, Flag::DestroyAccountOutputs]);
+    assert!(capabilities.has_capabilities([Flag::BurnMana, Flag::DestroyAccountOutputs]));
+    assert!(!capabilities.has_capability(Flag::BurnNativeTokens));
 
     assert!(!capabilities.is_none());
 
-    assert!(!capabilities.has_capabilities(Flag::ALL));
-    capabilities.add_capabilities(Flag::ALL);
-    assert!(capabilities.has_capabilities(Flag::ALL));
-    assert!(capabilities.has_capabilities(Flag::DESTROY_FOUNDRY_OUTPUTS | Flag::DESTROY_NFT_OUTPUTS));
+    assert!(!capabilities.has_capabilities(TransactionCapabilities::ALL.split()));
+    capabilities.set_all();
+    assert!(capabilities.has_capabilities(TransactionCapabilities::ALL.split()));
+    assert!(capabilities.has_capabilities([Flag::DestroyFoundryOutputs, Flag::DestroyNftOutputs]));
 }
 
 #[test]

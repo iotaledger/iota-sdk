@@ -3,7 +3,7 @@
 
 use alloc::{collections::BTreeSet, vec::Vec};
 
-use derive_more::{Deref, From};
+use derive_more::Deref;
 use hashbrown::HashSet;
 use packable::{bounded::BoundedU16, prefix::BoxedSlicePrefix, Packable};
 
@@ -433,45 +433,96 @@ fn verify_payload_packable<const VERIFY: bool>(
     Ok(())
 }
 
-pub struct TransactionCapabilityFlag;
-
-impl TransactionCapabilityFlag {
-    pub const BURN_NATIVE_TOKENS: u8 = 0b00000001;
-    pub const BURN_MANA: u8 = 0b00000010;
-    pub const DESTROY_ACCOUNT_OUTPUTS: u8 = 0b00000100;
-    pub const DESTROY_FOUNDRY_OUTPUTS: u8 = 0b00001000;
-    pub const DESTROY_NFT_OUTPUTS: u8 = 0b00010000;
-    pub const NONE: u8 = 0;
-    pub const ALL: u8 = 0b00011111;
+#[derive(Copy, Clone, Eq, PartialEq, Debug)]
+#[non_exhaustive]
+#[repr(u8)]
+pub enum TransactionCapabilityFlag {
+    BurnNativeTokens = 0b00000001,
+    BurnMana = 0b00000010,
+    DestroyAccountOutputs = 0b00000100,
+    DestroyFoundryOutputs = 0b00001000,
+    DestroyNftOutputs = 0b00010000,
 }
 
-#[derive(Copy, Clone, Debug, Default, Eq, PartialEq, Ord, PartialOrd, Hash, From, Deref, Packable)]
+impl TransactionCapabilityFlag {
+    pub fn all() -> impl Iterator<Item = Self> {
+        [
+            Self::BurnNativeTokens,
+            Self::BurnMana,
+            Self::DestroyAccountOutputs,
+            Self::DestroyFoundryOutputs,
+            Self::DestroyNftOutputs,
+        ]
+        .into_iter()
+    }
+}
+
+#[derive(Copy, Clone, Debug, Default, Eq, PartialEq, Ord, PartialOrd, Hash, Deref, Packable)]
 #[repr(transparent)]
 pub struct TransactionCapabilities(u8);
 
 impl TransactionCapabilities {
-    pub fn with_capabilities(mut self, flags: impl Into<u8>) -> Self {
-        self.0 |= flags.into();
-        self
-    }
+    pub const NONE: Self = Self(0);
+    pub const ALL: Self = Self(0b00011111);
 
-    pub fn add_capabilities(&mut self, flags: impl Into<u8>) -> &mut Self {
-        self.0 |= flags.into();
-        self
-    }
-
-    pub fn set_capabilities(&mut self, flags: impl Into<u8>) -> &mut Self {
-        self.0 = flags.into();
-        self
-    }
-
-    pub fn has_capabilities(&self, flags: impl Into<u8>) -> bool {
-        let flags = flags.into();
-        self.0 & flags == flags
+    pub fn is_all(&self) -> bool {
+        Self::ALL.eq(self)
     }
 
     pub fn is_none(&self) -> bool {
-        self.0 == 0
+        Self::NONE.eq(self)
+    }
+
+    pub fn set_all(&mut self) -> &mut Self {
+        *self = Self::ALL;
+        self
+    }
+
+    pub fn set_none(&mut self) -> &mut Self {
+        *self = Self::NONE;
+        self
+    }
+
+    pub fn add_capability(&mut self, flag: TransactionCapabilityFlag) -> &mut Self {
+        self.0 |= flag as u8;
+        self
+    }
+
+    pub fn add_capabilities(&mut self, flags: impl IntoIterator<Item = TransactionCapabilityFlag>) -> &mut Self {
+        for flag in flags {
+            self.add_capability(flag);
+        }
+        self
+    }
+
+    pub fn with_capabilities(mut self, flags: impl IntoIterator<Item = TransactionCapabilityFlag>) -> Self {
+        for flag in flags {
+            self.add_capability(flag);
+        }
+        self
+    }
+
+    pub fn set_capabilities(&mut self, flags: impl IntoIterator<Item = TransactionCapabilityFlag>) -> &mut Self {
+        *self = Self::default().with_capabilities(flags);
+        self
+    }
+
+    pub fn has_capability(&self, flag: TransactionCapabilityFlag) -> bool {
+        self.0 & flag as u8 == flag as u8
+    }
+
+    pub fn has_capabilities(&self, flags: impl IntoIterator<Item = TransactionCapabilityFlag>) -> bool {
+        flags.into_iter().all(|flag| self.has_capability(flag))
+    }
+
+    pub fn split(self) -> impl Iterator<Item = TransactionCapabilityFlag> {
+        TransactionCapabilityFlag::all().filter(move |f| self.has_capability(*f))
+    }
+}
+
+impl<I: IntoIterator<Item = TransactionCapabilityFlag>> From<I> for TransactionCapabilities {
+    fn from(value: I) -> Self {
+        Self::default().with_capabilities(value)
     }
 }
 
@@ -554,7 +605,7 @@ pub(crate) mod dto {
                 .with_inputs(dto.inputs)
                 .with_outputs(outputs)
                 .with_mana_allotments(mana_allotments)
-                .with_capabilities(dto.capabilities);
+                .with_capabilities(TransactionCapabilities(dto.capabilities));
 
             builder = if let Some(p) = dto.payload {
                 if let PayloadDto::TaggedData(i) = p {
