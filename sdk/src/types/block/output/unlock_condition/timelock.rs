@@ -67,7 +67,7 @@ pub(crate) mod dto {
         type Error = Error;
 
         fn try_from(value: TimelockUnlockConditionDto) -> Result<Self, Error> {
-            Self::new(SlotIndex::from(value.slot_index)).map_err(|_| Error::InvalidField("timelockUnlockCondition"))
+            Self::new(value.slot_index).map_err(|_| Error::InvalidField("timelockUnlockCondition"))
         }
     }
 
