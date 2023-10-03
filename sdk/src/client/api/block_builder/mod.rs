@@ -49,7 +49,7 @@ impl ClientInner {
             issuance.commitment.id(),
             issuance.latest_finalized_slot,
             issuer_id,
-            // TODO correct value for burned_mana
+            // TODO correct value for max_burned_mana
             Block::build_basic(strong_parents, 0)
                 .with_weak_parents(issuance.weak_parents()?)
                 .with_shallow_like_parents(issuance.shallow_like_parents()?)
