@@ -80,7 +80,7 @@ pub enum Error {
     InvalidInputCount(<InputCount as TryFrom<usize>>::Error),
     InvalidInputOutputIndex(<OutputIndex as TryFrom<u16>>::Error),
     InvalidBech32Hrp(String),
-    InvalidCapabilitiesCount(<CapabilitiesCount as TryFrom<usize>>::Error),
+    InvalidAddressCapabilitiesCount(<CapabilitiesCount as TryFrom<u8>>::Error),
     InvalidBlockWrapperLength(usize),
     InvalidStateMetadataLength(<StateMetadataLength as TryFrom<usize>>::Error),
     InvalidManaValue(u64),
@@ -213,7 +213,7 @@ impl fmt::Display for Error {
             Self::InvalidAddressKind(k) => write!(f, "invalid address kind: {k}"),
             Self::InvalidAccountIndex(index) => write!(f, "invalid account index: {index}"),
             Self::InvalidBech32Hrp(err) => write!(f, "invalid bech32 hrp: {err}"),
-            Self::InvalidCapabilitiesCount(e) => write!(f, "invalid capabilities count: {e}"),
+            Self::InvalidAddressCapabilitiesCount(e) => write!(f, "invalid capabilities count: {e}"),
             Self::InvalidBlockKind(k) => write!(f, "invalid block kind: {k}"),
             Self::InvalidRewardInputIndex(idx) => write!(f, "invalid reward input index: {idx}"),
             Self::InvalidStorageDepositAmount(amount) => {

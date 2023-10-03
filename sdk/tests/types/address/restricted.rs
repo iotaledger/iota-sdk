@@ -2,28 +2,31 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use iota_sdk::types::block::{
-    address::{Address, CapabilityFlag, Ed25519Address, RestrictedAddress, ToBech32Ext},
+    address::{Address, AddressCapabilities, AddressCapabilityFlag, Ed25519Address, RestrictedAddress, ToBech32Ext},
     rand::address::rand_ed25519_address,
 };
 use packable::PackableExt;
 
 #[test]
 fn capabilities() {
+    use AddressCapabilityFlag as Flag;
     let address = RestrictedAddress::new(rand_ed25519_address())
         .unwrap()
-        .with_allowed_capabilities([0])
-        .unwrap();
-    let mut capabilities = address.allowed_capabilities()[0];
+        .with_allowed_capabilities(AddressCapabilities::NONE);
+    let mut capabilities = address.allowed_capabilities();
 
-    assert!(!capabilities.has_capabilities(CapabilityFlag::NATIVE_TOKENS));
-    capabilities.add_capabilities(CapabilityFlag::NATIVE_TOKENS);
-    assert!(capabilities.has_capabilities(CapabilityFlag::NATIVE_TOKENS));
+    assert!(!capabilities.has_capability(Flag::NativeTokens));
+    capabilities.add_capability(Flag::NativeTokens);
+    assert!(capabilities.has_capabilities([Flag::NativeTokens]));
+    assert!(!capabilities.has_capabilities(AddressCapabilities::ALL.split()));
+    assert_ne!(capabilities, AddressCapabilities::NONE);
 
-    assert!(!capabilities.has_capabilities(CapabilityFlag::MANA));
-    capabilities.set_capabilities(CapabilityFlag::MANA | CapabilityFlag::DELEGATION_OUTPUTS);
-    assert!(capabilities.has_capabilities(CapabilityFlag::MANA));
-    assert!(capabilities.has_capabilities(CapabilityFlag::DELEGATION_OUTPUTS));
-    assert!(!capabilities.has_capabilities(CapabilityFlag::NATIVE_TOKENS));
+    assert!(!capabilities.has_capability(Flag::Mana));
+    capabilities.set_capabilities([Flag::Mana, Flag::DelegationOutputs]);
+    assert!(capabilities.has_capability(Flag::Mana));
+    assert!(capabilities.has_capabilities([Flag::Mana, Flag::DelegationOutputs]));
+    assert!(!capabilities.has_capability(Flag::NativeTokens));
+    assert!(!capabilities.has_capabilities([Flag::Mana, Flag::DelegationOutputs, Flag::NativeTokens]));
 }
 
 #[test]
@@ -54,22 +57,20 @@ fn restricted_ed25519() {
     );
 
     // Restricted Ed25519 Address (Every Capability Allowed)
-    address.set_allowed_capabilities([CapabilityFlag::ALL]).unwrap();
+    address.set_allowed_capabilities(AddressCapabilities::ALL);
     assert_eq!(
         address.clone().to_bech32_unchecked("iota"),
         "iota19qqwlhq39mlzv2esf08n0xexcvd66q5lv9hw8mz25c695dnwfj0y8gcplupydhwt"
     );
 
-    address.set_allowed_capabilities([CapabilityFlag::NONE]).unwrap();
+    address.set_allowed_capabilities(AddressCapabilities::NONE);
     assert_eq!(
         address.clone().to_bech32_unchecked("iota"),
         "iota19qqwlhq39mlzv2esf08n0xexcvd66q5lv9hw8mz25c695dnwfj0y8gcq3l9hek"
     );
 
     // Restricted Ed25519 Address (Can receive Native Tokens)
-    address
-        .set_allowed_capabilities([CapabilityFlag::NATIVE_TOKENS])
-        .unwrap();
+    address.set_allowed_capabilities([AddressCapabilityFlag::NativeTokens]);
     assert_eq!(
         address.clone().to_bech32_unchecked("iota"),
         "iota19qqwlhq39mlzv2esf08n0xexcvd66q5lv9hw8mz25c695dnwfj0y8gcpqytmqxr4"
@@ -98,22 +99,20 @@ fn restricted_account() {
     );
 
     // Restricted Account Address (Every Capability Allowed)
-    address.set_allowed_capabilities([CapabilityFlag::ALL]).unwrap();
+    address.set_allowed_capabilities(AddressCapabilities::ALL);
     assert_eq!(
         address.clone().to_bech32_unchecked("iota"),
         "iota19qy0rsq3ld2d7jjwtvr5vffklwkvw7dlsrxytcpmcdqssdjc0d80exqplurds6sq"
     );
 
-    address.set_allowed_capabilities([CapabilityFlag::NONE]).unwrap();
+    address.set_allowed_capabilities(AddressCapabilities::NONE);
     assert_eq!(
         address.clone().to_bech32_unchecked("iota"),
         "iota19qy0rsq3ld2d7jjwtvr5vffklwkvw7dlsrxytcpmcdqssdjc0d80exqqdyjudm"
     );
 
     // Restricted Account Address (Can receive Native Tokens)
-    address
-        .set_allowed_capabilities([CapabilityFlag::NATIVE_TOKENS])
-        .unwrap();
+    address.set_allowed_capabilities([AddressCapabilityFlag::NativeTokens]);
     assert_eq!(
         address.clone().to_bech32_unchecked("iota"),
         "iota19qy0rsq3ld2d7jjwtvr5vffklwkvw7dlsrxytcpmcdqssdjc0d80exqpqyfjata7"
@@ -142,22 +141,20 @@ fn restricted_nft() {
     );
 
     // Restricted NFT Address (Every Capability Allowed)
-    address.set_allowed_capabilities([CapabilityFlag::ALL]).unwrap();
+    address.set_allowed_capabilities(AddressCapabilities::ALL);
     assert_eq!(
         address.clone().to_bech32_unchecked("iota"),
         "iota19qgvw2n94efawzue54lhycmml5w4afa6526t5z2unzdkvlfc2kqg0kcpluts738a"
     );
 
-    address.set_allowed_capabilities([CapabilityFlag::NONE]).unwrap();
+    address.set_allowed_capabilities(AddressCapabilities::NONE);
     assert_eq!(
         address.clone().to_bech32_unchecked("iota"),
         "iota19qgvw2n94efawzue54lhycmml5w4afa6526t5z2unzdkvlfc2kqg0kcqek0lex"
     );
 
     // Restricted NFT Address (Can receive Native Tokens)
-    address
-        .set_allowed_capabilities([CapabilityFlag::NATIVE_TOKENS])
-        .unwrap();
+    address.set_allowed_capabilities([AddressCapabilityFlag::NativeTokens]);
     assert_eq!(
         address.clone().to_bech32_unchecked("iota"),
         "iota19qgvw2n94efawzue54lhycmml5w4afa6526t5z2unzdkvlfc2kqg0kcpqyp0nq2r"

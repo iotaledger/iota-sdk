@@ -19,7 +19,7 @@ pub use self::{
     ed25519::Ed25519Address,
     implicit_account_creation::ImplicitAccountCreationAddress,
     nft::NftAddress,
-    restricted::{CapabilitiesCount, CapabilityFlag, RestrictedAddress},
+    restricted::{AddressCapabilities, AddressCapabilityFlag, CapabilitiesCount, RestrictedAddress},
 };
 use crate::types::block::{
     output::{Output, OutputId},
