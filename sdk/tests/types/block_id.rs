@@ -99,7 +99,7 @@ fn basic_block_id_tagged_data_payload() {
           "tag": "0x68656c6c6f20776f726c64",
           "data": "0x01020304"
         },
-        "burnedMana": "180500"
+        "maxBurnedMana": "180500"
       },
       "signature": {
         "type": 0,
@@ -214,7 +214,7 @@ fn basic_block_id_transaction_payload() {
             }
           ]
         },
-        "burnedMana": "180500"
+        "maxBurnedMana": "180500"
       },
       "signature": {
         "type": 0,
