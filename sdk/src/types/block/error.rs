@@ -30,8 +30,10 @@ use crate::types::block::{
 pub enum Error {
     ManaAllotmentsNotUniqueSorted,
     ConsumedAmountOverflow,
+    ConsumedManaOverflow,
     ConsumedNativeTokensAmountOverflow,
     CreatedAmountOverflow,
+    CreatedManaOverflow,
     CreatedNativeTokensAmountOverflow,
     Crypto(CryptoError),
     DuplicateBicAccountId(AccountId),
@@ -182,8 +184,10 @@ impl fmt::Display for Error {
         match self {
             Self::ManaAllotmentsNotUniqueSorted => write!(f, "mana allotments are not unique and/or sorted"),
             Self::ConsumedAmountOverflow => write!(f, "consumed amount overflow"),
+            Self::ConsumedManaOverflow => write!(f, "consumed mana overflow"),
             Self::ConsumedNativeTokensAmountOverflow => write!(f, "consumed native tokens amount overflow"),
             Self::CreatedAmountOverflow => write!(f, "created amount overflow"),
+            Self::CreatedManaOverflow => write!(f, "created mana overflow"),
             Self::CreatedNativeTokensAmountOverflow => write!(f, "created native tokens amount overflow"),
             Self::Crypto(e) => write!(f, "cryptographic error: {e}"),
             Self::DuplicateBicAccountId(account_id) => write!(f, "duplicate BIC account id: {account_id}"),
