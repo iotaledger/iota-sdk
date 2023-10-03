@@ -42,6 +42,7 @@ export interface PrivateKeySecretManager {
 export type SecretManagerType =
     | LedgerNanoSecretManager
     | MnemonicSecretManager
+    | SeedSecretManager
     | StrongholdSecretManager
     | PrivateKeySecretManager
     | PlaceholderSecretManager;
