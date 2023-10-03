@@ -65,7 +65,6 @@ pub struct AccountOutputBuilder {
     mana: u64,
     native_tokens: BTreeSet<NativeToken>,
     account_id: AccountId,
-    state_metadata: Vec<u8>,
     foundry_counter: Option<u32>,
     unlock_conditions: BTreeSet<UnlockCondition>,
     features: BTreeSet<Feature>,
@@ -90,7 +89,6 @@ impl AccountOutputBuilder {
             mana: Default::default(),
             native_tokens: BTreeSet::new(),
             account_id,
-            state_metadata: Vec::new(),
             foundry_counter: None,
             unlock_conditions: BTreeSet::new(),
             features: BTreeSet::new(),
@@ -137,13 +135,6 @@ impl AccountOutputBuilder {
     #[inline(always)]
     pub fn with_account_id(mut self, account_id: AccountId) -> Self {
         self.account_id = account_id;
-        self
-    }
-
-    ///
-    #[inline(always)]
-    pub fn with_state_metadata(mut self, state_metadata: impl Into<Vec<u8>>) -> Self {
-        self.state_metadata = state_metadata.into();
         self
     }
 
@@ -242,12 +233,6 @@ impl AccountOutputBuilder {
     pub fn finish(self) -> Result<AccountOutput, Error> {
         let foundry_counter = self.foundry_counter.unwrap_or(0);
 
-        let state_metadata = self
-            .state_metadata
-            .into_boxed_slice()
-            .try_into()
-            .map_err(Error::InvalidStateMetadataLength)?;
-
         verify_index_counter(&self.account_id, foundry_counter)?;
 
         let unlock_conditions = UnlockConditions::from_set(self.unlock_conditions)?;
@@ -267,7 +252,6 @@ impl AccountOutputBuilder {
             mana: self.mana,
             native_tokens: NativeTokens::from_set(self.native_tokens)?,
             account_id: self.account_id,
-            state_metadata,
             foundry_counter,
             unlock_conditions,
             features,
@@ -313,7 +297,6 @@ impl From<&AccountOutput> for AccountOutputBuilder {
             mana: output.mana,
             native_tokens: output.native_tokens.iter().copied().collect(),
             account_id: output.account_id,
-            state_metadata: output.state_metadata.to_vec(),
             foundry_counter: Some(output.foundry_counter),
             unlock_conditions: output.unlock_conditions.iter().cloned().collect(),
             features: output.features.iter().cloned().collect(),
@@ -334,8 +317,6 @@ pub struct AccountOutput {
     native_tokens: NativeTokens,
     // Unique identifier of the account.
     account_id: AccountId,
-    // Metadata that can only be changed by the state controller.
-    state_metadata: BoxedSlicePrefix<u8, StateMetadataLength>,
     // A counter that denotes the number of foundries created by this account.
     foundry_counter: u32,
     unlock_conditions: UnlockConditions,
@@ -400,12 +381,6 @@ impl AccountOutput {
     #[inline(always)]
     pub fn account_id_non_null(&self, output_id: &OutputId) -> AccountId {
         self.account_id.or_from_output_id(output_id)
-    }
-
-    ///
-    #[inline(always)]
-    pub fn state_metadata(&self) -> &[u8] {
-        &self.state_metadata
     }
 
     ///
@@ -585,7 +560,6 @@ impl Packable for AccountOutput {
         self.mana.pack(packer)?;
         self.native_tokens.pack(packer)?;
         self.account_id.pack(packer)?;
-        self.state_metadata.pack(packer)?;
         self.foundry_counter.pack(packer)?;
         self.unlock_conditions.pack(packer)?;
         self.features.pack(packer)?;
@@ -639,7 +613,6 @@ impl Packable for AccountOutput {
             mana,
             native_tokens,
             account_id,
-            state_metadata,
             foundry_counter,
             unlock_conditions,
             features,
@@ -683,7 +656,6 @@ fn verify_unlock_conditions(unlock_conditions: &UnlockConditions, account_id: &A
 
 #[cfg(feature = "serde")]
 pub(crate) mod dto {
-    use alloc::boxed::Box;
 
     use serde::{Deserialize, Serialize};
 
@@ -693,7 +665,7 @@ pub(crate) mod dto {
             block::{output::unlock_condition::dto::UnlockConditionDto, Error},
             TryFromDto,
         },
-        utils::serde::{prefix_hex_bytes, string},
+        utils::serde::string,
     };
 
     /// Describes an account in the ledger that can be controlled by the state and governance controllers.
@@ -709,8 +681,6 @@ pub(crate) mod dto {
         #[serde(skip_serializing_if = "Vec::is_empty", default)]
         pub native_tokens: Vec<NativeToken>,
         pub account_id: AccountId,
-        #[serde(skip_serializing_if = "<[_]>::is_empty", default, with = "prefix_hex_bytes")]
-        pub state_metadata: Box<[u8]>,
         pub foundry_counter: u32,
         pub unlock_conditions: Vec<UnlockConditionDto>,
         #[serde(skip_serializing_if = "Vec::is_empty", default)]
@@ -727,7 +697,6 @@ pub(crate) mod dto {
                 mana: value.mana(),
                 native_tokens: value.native_tokens().to_vec(),
                 account_id: *value.account_id(),
-                state_metadata: value.state_metadata().into(),
                 foundry_counter: value.foundry_counter(),
                 unlock_conditions: value.unlock_conditions().iter().map(Into::into).collect::<_>(),
                 features: value.features().to_vec(),
@@ -746,8 +715,7 @@ pub(crate) mod dto {
                 .with_foundry_counter(dto.foundry_counter)
                 .with_native_tokens(dto.native_tokens)
                 .with_features(dto.features)
-                .with_immutable_features(dto.immutable_features)
-                .with_state_metadata(dto.state_metadata);
+                .with_immutable_features(dto.immutable_features);
 
             for u in dto.unlock_conditions {
                 builder = builder.add_unlock_condition(UnlockCondition::try_from_dto_with_params(u, &params)?);
@@ -782,10 +750,6 @@ pub(crate) mod dto {
 
             if let Some(native_tokens) = native_tokens {
                 builder = builder.with_native_tokens(native_tokens);
-            }
-
-            if let Some(state_metadata) = state_metadata {
-                builder = builder.with_state_metadata(state_metadata);
             }
 
             if let Some(foundry_counter) = foundry_counter {

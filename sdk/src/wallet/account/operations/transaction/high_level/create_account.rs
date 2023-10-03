@@ -30,9 +30,6 @@ pub struct CreateAccountParams {
     /// Account metadata
     #[serde(default, with = "option_prefix_hex_bytes")]
     pub metadata: Option<Vec<u8>>,
-    /// Account state metadata
-    #[serde(default, with = "option_prefix_hex_bytes")]
-    pub state_metadata: Option<Vec<u8>>,
 }
 
 impl<S: 'static + SecretManage> Account<S>
@@ -100,7 +97,6 @@ where
         if let Some(CreateAccountParams {
             immutable_metadata,
             metadata,
-            state_metadata,
             ..
         }) = params
         {
@@ -110,9 +106,6 @@ where
             }
             if let Some(metadata) = metadata {
                 account_output_builder = account_output_builder.add_feature(MetadataFeature::new(metadata)?);
-            }
-            if let Some(state_metadata) = state_metadata {
-                account_output_builder = account_output_builder.with_state_metadata(state_metadata);
             }
         }
 
@@ -158,7 +151,6 @@ mod tests {
             address: None,
             immutable_metadata: None,
             metadata: None,
-            state_metadata: None,
         };
         let json_none = serde_json::to_string(&params_none_1).unwrap();
         let params_none_2 = serde_json::from_str(&json_none).unwrap();
@@ -169,7 +161,6 @@ mod tests {
             address: None,
             immutable_metadata: Some(b"immutable_metadata".to_vec()),
             metadata: Some(b"metadata".to_vec()),
-            state_metadata: Some(b"state_metadata".to_vec()),
         };
         let json_some = serde_json::to_string(&params_some_1).unwrap();
         let params_some_2 = serde_json::from_str(&json_some).unwrap();
