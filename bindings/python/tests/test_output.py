@@ -3,7 +3,6 @@
 
 from iota_sdk import BasicOutput, AccountOutput, FoundryOutput, NftOutput, IssuerFeature, MetadataFeature
 from dacite import from_dict
-import pytest
 
 
 def test_feature():
