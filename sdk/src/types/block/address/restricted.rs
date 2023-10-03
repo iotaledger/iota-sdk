@@ -86,27 +86,27 @@ impl AddressCapabilityFlag {
 
     pub fn as_byte(&self) -> u8 {
         match self {
-            AddressCapabilityFlag::NativeTokens => AddressCapabilityFlag::NATIVE_TOKENS,
-            AddressCapabilityFlag::Mana => AddressCapabilityFlag::MANA,
-            AddressCapabilityFlag::OutputsWithTimelock => AddressCapabilityFlag::OUTPUTS_WITH_TIMELOCK,
-            AddressCapabilityFlag::OutputsWithExpiration => AddressCapabilityFlag::OUTPUTS_WITH_EXPIRATION,
-            AddressCapabilityFlag::OutputsWithStorageDeposit => AddressCapabilityFlag::OUTPUTS_WITH_STORAGE_DEPOSIT,
-            AddressCapabilityFlag::AccountOutputs => AddressCapabilityFlag::ACCOUNT_OUTPUTS,
-            AddressCapabilityFlag::NftOutputs => AddressCapabilityFlag::NFT_OUTPUTS,
-            AddressCapabilityFlag::DelegationOutputs => AddressCapabilityFlag::DELEGATION_OUTPUTS,
+            Self::NativeTokens => Self::NATIVE_TOKENS,
+            Self::Mana => Self::MANA,
+            Self::OutputsWithTimelock => Self::OUTPUTS_WITH_TIMELOCK,
+            Self::OutputsWithExpiration => Self::OUTPUTS_WITH_EXPIRATION,
+            Self::OutputsWithStorageDeposit => Self::OUTPUTS_WITH_STORAGE_DEPOSIT,
+            Self::AccountOutputs => Self::ACCOUNT_OUTPUTS,
+            Self::NftOutputs => Self::NFT_OUTPUTS,
+            Self::DelegationOutputs => Self::DELEGATION_OUTPUTS,
         }
     }
 
     pub fn index(&self) -> usize {
         match self {
-            AddressCapabilityFlag::NativeTokens
-            | AddressCapabilityFlag::Mana
-            | AddressCapabilityFlag::OutputsWithTimelock
-            | AddressCapabilityFlag::OutputsWithExpiration
-            | AddressCapabilityFlag::OutputsWithStorageDeposit
-            | AddressCapabilityFlag::AccountOutputs
-            | AddressCapabilityFlag::NftOutputs
-            | AddressCapabilityFlag::DelegationOutputs => 0,
+            Self::NativeTokens
+            | Self::Mana
+            | Self::OutputsWithTimelock
+            | Self::OutputsWithExpiration
+            | Self::OutputsWithStorageDeposit
+            | Self::AccountOutputs
+            | Self::NftOutputs
+            | Self::DelegationOutputs => 0,
         }
     }
 
@@ -199,15 +199,10 @@ impl AddressCapabilities {
         flags.into_iter().all(|flag| self.has_capability(flag))
     }
 
-    pub fn split<'a>(&'a self) -> impl Iterator<Item = AddressCapabilityFlag> + 'a {
-        self.0
-            .iter()
-            .enumerate()
-            .map(|(idx, byte)| {
-                AddressCapabilityFlag::all()
-                    .filter_map(move |f| (idx == f.index() && byte & f.as_byte() == f.as_byte()).then_some(f))
-            })
-            .flatten()
+    pub fn split(&self) -> impl Iterator<Item = AddressCapabilityFlag> + '_ {
+        self.0.iter().enumerate().flat_map(|(idx, byte)| {
+            AddressCapabilityFlag::all().filter(move |f| (idx == f.index() && byte & f.as_byte() == f.as_byte()))
+        })
     }
 }
 
