@@ -16,7 +16,7 @@ use crate::types::block::{
     output::{
         feature::{BlockIssuerKeyCount, FeatureCount},
         unlock_condition::UnlockConditionCount,
-        AccountId, ChainId, MetadataFeatureLength, NativeTokenCount, NftId, OutputIndex, StateMetadataLength,
+        AccountId, AnchorId, ChainId, MetadataFeatureLength, NativeTokenCount, NftId, OutputIndex, StateMetadataLength,
         TagFeatureLength,
     },
     payload::{ContextInputCount, InputCount, OutputCount, TagLength, TaggedDataLength},
@@ -150,7 +150,9 @@ pub enum Error {
     },
     BlockIssuerKeysNotUniqueSorted,
     RemainingBytesAfterBlock,
+    // TODO remove?
     SelfControlledAccountOutput(AccountId),
+    SelfControlledAnchorOutput(AnchorId),
     SelfDepositNft(NftId),
     SignaturePublicKeyMismatch {
         expected: String,
@@ -345,6 +347,9 @@ impl fmt::Display for Error {
             }
             Self::SelfControlledAccountOutput(account_id) => {
                 write!(f, "self controlled account output, account ID {account_id}")
+            }
+            Self::SelfControlledAnchorOutput(anchor_id) => {
+                write!(f, "self controlled anchor output, anchor ID {anchor_id}")
             }
             Self::SelfDepositNft(nft_id) => {
                 write!(f, "self deposit nft output, NFT ID {nft_id}")

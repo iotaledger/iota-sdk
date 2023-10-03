@@ -368,6 +368,7 @@ fn verify_outputs<const VERIFY: bool>(outputs: &[Output], visitor: &ProtocolPara
                 Output::Foundry(output) => (output.amount(), Some(output.native_tokens()), Some(output.chain_id())),
                 Output::Nft(output) => (output.amount(), Some(output.native_tokens()), Some(output.chain_id())),
                 Output::Delegation(output) => (output.amount(), None, Some(output.chain_id())),
+                Output::Anchor(output) => (output.amount(), None, Some(output.chain_id())),
             };
 
             amount_sum = amount_sum

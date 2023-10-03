@@ -48,6 +48,7 @@ impl InputSelection {
                     Err(e) => Err(e),
                 }
             }
+            Address::Anchor(_) => todo!(),
         }
     }
 }

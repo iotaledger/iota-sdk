@@ -81,6 +81,7 @@ impl InputSelection {
                 AccountTransition::State,
             ))),
             Address::Nft(nft_address) => Ok(Some(Requirement::Nft(*nft_address.nft_id()))),
+            Address::Anchor(_) => todo!(),
         }
     }
 

@@ -966,6 +966,9 @@ async fn print_address(account: &Account, address: &Bip44Address) -> Result<(), 
                         Output::Delegation(_) => {
                             // TODO do we want to log them?
                         }
+                        Output::Anchor(_) => {
+                            // TODO do we want to log them?
+                        }
                     }
                     let unlock_conditions = output_data
                         .output

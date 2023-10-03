@@ -268,6 +268,7 @@ pub fn semantic_validation(
                 None,
                 output.unlock_conditions(),
             ),
+            Output::Anchor(_) => todo!(),
         };
 
         if let Err(conflict) = conflict {
@@ -325,6 +326,7 @@ pub fn semantic_validation(
             Output::Foundry(output) => (output.amount(), Some(output.native_tokens()), Some(output.features())),
             Output::Nft(output) => (output.amount(), Some(output.native_tokens()), Some(output.features())),
             Output::Delegation(output) => (output.amount(), None, None),
+            Output::Anchor(_) => todo!(),
         };
 
         if let Some(sender) = features.and_then(|f| f.sender()) {

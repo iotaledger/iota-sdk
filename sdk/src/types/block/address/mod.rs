@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 mod account;
+mod anchor;
 mod bech32;
 mod ed25519;
 mod nft;
@@ -10,6 +11,7 @@ use derive_more::From;
 
 pub use self::{
     account::AccountAddress,
+    anchor::AnchorAddress,
     bech32::{Bech32Address, Hrp},
     ed25519::Ed25519Address,
     nft::NftAddress,
@@ -37,6 +39,9 @@ pub enum Address {
     /// An NFT address.
     #[packable(tag = NftAddress::KIND)]
     Nft(NftAddress),
+    /// An anchor address.
+    #[packable(tag = AnchorAddress::KIND)]
+    Anchor(AnchorAddress),
 }
 
 impl core::fmt::Debug for Address {
@@ -45,6 +50,7 @@ impl core::fmt::Debug for Address {
             Self::Ed25519(address) => address.fmt(f),
             Self::Account(address) => address.fmt(f),
             Self::Nft(address) => address.fmt(f),
+            Self::Anchor(address) => address.fmt(f),
         }
     }
 }
@@ -56,6 +62,7 @@ impl Address {
             Self::Ed25519(_) => Ed25519Address::KIND,
             Self::Account(_) => AccountAddress::KIND,
             Self::Nft(_) => NftAddress::KIND,
+            Self::Anchor(_) => AnchorAddress::KIND,
         }
     }
 
@@ -101,6 +108,21 @@ impl Address {
             address
         } else {
             panic!("as_nft called on a non-nft address");
+        }
+    }
+
+    /// Checks whether the address is an [`AnchorAddress`].
+    pub fn is_anchor(&self) -> bool {
+        matches!(self, Self::Anchor(_))
+    }
+
+    /// Gets the address as an actual [`AnchorAddress`].
+    /// PANIC: do not call on a non-anchor address.
+    pub fn as_anchor(&self) -> &AnchorAddress {
+        if let Self::Anchor(address) = self {
+            address
+        } else {
+            panic!("as_anchor called on a non-anchor address");
         }
     }
 
