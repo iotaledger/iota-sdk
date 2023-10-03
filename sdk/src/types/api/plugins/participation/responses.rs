@@ -66,9 +66,9 @@ impl OutputStatusResponse {
     pub fn mock() -> Self {
         Self {
             participations: [(
-                ParticipationEventId::new([42; 32]),
+                ParticipationEventId::new([42; ParticipationEventId::LENGTH]),
                 TrackedParticipation {
-                    block_id: BlockId::new([23; 36]),
+                    block_id: BlockId::new([23; BlockId::LENGTH]),
                     amount: 100,
                     start_milestone_index: 1000,
                     end_milestone_index: 9999,
