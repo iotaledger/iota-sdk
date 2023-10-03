@@ -25,19 +25,19 @@ pub struct BasicBlockBuilder {
     weak_parents: WeakParents,
     shallow_like_parents: ShallowLikeParents,
     payload: OptionalPayload,
-    burned_mana: u64,
+    max_burned_mana: u64,
 }
 
 impl BasicBlockBuilder {
     /// Creates a new [`BasicBlockBuilder`].
     #[inline(always)]
-    pub fn new(strong_parents: StrongParents, burned_mana: u64) -> Self {
+    pub fn new(strong_parents: StrongParents, max_burned_mana: u64) -> Self {
         Self {
             strong_parents,
             weak_parents: WeakParents::default(),
             shallow_like_parents: ShallowLikeParents::default(),
             payload: OptionalPayload::default(),
-            burned_mana,
+            max_burned_mana,
         }
     }
 
@@ -69,10 +69,10 @@ impl BasicBlockBuilder {
         self
     }
 
-    /// Adds burned mana to a [`BasicBlockBuilder`].
+    /// Adds max burned mana to a [`BasicBlockBuilder`].
     #[inline(always)]
-    pub fn with_burned_mana(mut self, burned_mana: u64) -> Self {
-        self.burned_mana = burned_mana;
+    pub fn with_max_burned_mana(mut self, max_burned_mana: u64) -> Self {
+        self.max_burned_mana = max_burned_mana;
         self
     }
 
@@ -85,7 +85,7 @@ impl BasicBlockBuilder {
             weak_parents: self.weak_parents,
             shallow_like_parents: self.shallow_like_parents,
             payload: self.payload,
-            burned_mana: self.burned_mana,
+            max_burned_mana: self.max_burned_mana,
         })
     }
 
@@ -107,7 +107,7 @@ pub struct BasicBlock {
     payload: OptionalPayload,
     /// The amount of Mana the Account identified by [`IssuerId`](super::IssuerId) is at most willing to burn for this
     /// block.
-    burned_mana: u64,
+    max_burned_mana: u64,
 }
 
 impl BasicBlock {
@@ -137,10 +137,10 @@ impl BasicBlock {
         self.payload.as_ref()
     }
 
-    /// Returns the burned mana of a [`BasicBlock`].
+    /// Returns the max burned mana of a [`BasicBlock`].
     #[inline(always)]
-    pub fn burned_mana(&self) -> u64 {
-        self.burned_mana
+    pub fn max_burned_mana(&self) -> u64 {
+        self.max_burned_mana
     }
 }
 
@@ -153,7 +153,7 @@ impl Packable for BasicBlock {
         self.weak_parents.pack(packer)?;
         self.shallow_like_parents.pack(packer)?;
         self.payload.pack(packer)?;
-        self.burned_mana.pack(packer)?;
+        self.max_burned_mana.pack(packer)?;
 
         Ok(())
     }
@@ -173,14 +173,14 @@ impl Packable for BasicBlock {
 
         let payload = OptionalPayload::unpack::<_, VERIFY>(unpacker, visitor)?;
 
-        let burned_mana = u64::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
+        let max_burned_mana = u64::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
 
         Ok(Self {
             strong_parents,
             weak_parents,
             shallow_like_parents,
             payload,
-            burned_mana,
+            max_burned_mana,
         })
     }
 }
@@ -208,7 +208,7 @@ pub(crate) mod dto {
         #[serde(default, skip_serializing_if = "Option::is_none")]
         pub payload: Option<PayloadDto>,
         #[serde(with = "crate::utils::serde::string")]
-        pub burned_mana: u64,
+        pub max_burned_mana: u64,
     }
 
     impl From<&BasicBlock> for BasicBlockDto {
@@ -219,7 +219,7 @@ pub(crate) mod dto {
                 weak_parents: value.weak_parents.as_set().clone(),
                 shallow_like_parents: value.shallow_like_parents.as_set().clone(),
                 payload: value.payload.as_ref().map(Into::into),
-                burned_mana: value.burned_mana,
+                max_burned_mana: value.max_burned_mana,
             }
         }
     }
@@ -229,7 +229,7 @@ pub(crate) mod dto {
         type Error = Error;
 
         fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
-            BasicBlockBuilder::new(StrongParents::from_set(dto.strong_parents)?, dto.burned_mana)
+            BasicBlockBuilder::new(StrongParents::from_set(dto.strong_parents)?, dto.max_burned_mana)
                 .with_weak_parents(WeakParents::from_set(dto.weak_parents)?)
                 .with_shallow_like_parents(ShallowLikeParents::from_set(dto.shallow_like_parents)?)
                 .with_payload(
