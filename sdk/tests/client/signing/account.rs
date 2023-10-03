@@ -38,19 +38,11 @@ use crate::client::{
 async fn sign_account_state_transition() -> Result<()> {
     let secret_manager = SecretManager::try_from_mnemonic(Client::generate_mnemonic()?)?;
 
-    let bech32_address_0 = &secret_manager
+    let bech32_address = &secret_manager
         .generate_ed25519_addresses(
             GetAddressesOptions::default()
                 .with_coin_type(SHIMMER_COIN_TYPE)
                 .with_range(0..1),
-        )
-        .await?[0]
-        .to_bech32(SHIMMER_TESTNET_BECH32_HRP);
-    let bech32_address_1 = &secret_manager
-        .generate_ed25519_addresses(
-            GetAddressesOptions::default()
-                .with_coin_type(SHIMMER_COIN_TYPE)
-                .with_range(1..2),
         )
         .await?[0]
         .to_bech32(SHIMMER_TESTNET_BECH32_HRP);
@@ -61,7 +53,7 @@ async fn sign_account_state_transition() -> Result<()> {
     let inputs = build_inputs([Account(
         1_000_000,
         account_id,
-        &bech32_address_0.to_string(),
+        &bech32_address.to_string(),
         None,
         None,
         None,
@@ -71,7 +63,7 @@ async fn sign_account_state_transition() -> Result<()> {
     let outputs = build_outputs([Account(
         1_000_000,
         account_id,
-        &bech32_address_0.to_string(),
+        &bech32_address.to_string(),
         None,
         None,
         None,
@@ -124,19 +116,11 @@ async fn sign_account_state_transition() -> Result<()> {
 async fn sign_account_governance_transition() -> Result<()> {
     let secret_manager = SecretManager::try_from_mnemonic(Client::generate_mnemonic()?)?;
 
-    let bech32_address_0 = &secret_manager
+    let bech32_address = &secret_manager
         .generate_ed25519_addresses(
             GetAddressesOptions::default()
                 .with_coin_type(SHIMMER_COIN_TYPE)
                 .with_range(0..1),
-        )
-        .await?[0]
-        .to_bech32(SHIMMER_TESTNET_BECH32_HRP);
-    let bech32_address_1 = &secret_manager
-        .generate_ed25519_addresses(
-            GetAddressesOptions::default()
-                .with_coin_type(SHIMMER_COIN_TYPE)
-                .with_range(1..2),
         )
         .await?[0]
         .to_bech32(SHIMMER_TESTNET_BECH32_HRP);
@@ -147,7 +131,7 @@ async fn sign_account_governance_transition() -> Result<()> {
     let inputs = build_inputs([Account(
         1_000_000,
         account_id,
-        &bech32_address_0.to_string(),
+        &bech32_address.to_string(),
         None,
         None,
         None,
@@ -157,7 +141,7 @@ async fn sign_account_governance_transition() -> Result<()> {
     let outputs = build_outputs([Account(
         1_000_000,
         account_id,
-        &bech32_address_0.to_string(),
+        &bech32_address.to_string(),
         None,
         None,
         None,
@@ -210,19 +194,11 @@ async fn sign_account_governance_transition() -> Result<()> {
 async fn account_reference_unlocks() -> Result<()> {
     let secret_manager = SecretManager::try_from_mnemonic(Client::generate_mnemonic()?)?;
 
-    let bech32_address_0 = &secret_manager
+    let bech32_address = &secret_manager
         .generate_ed25519_addresses(
             GetAddressesOptions::default()
                 .with_coin_type(SHIMMER_COIN_TYPE)
                 .with_range(0..1),
-        )
-        .await?[0]
-        .to_bech32(SHIMMER_TESTNET_BECH32_HRP);
-    let bech32_address_1 = &secret_manager
-        .generate_ed25519_addresses(
-            GetAddressesOptions::default()
-                .with_coin_type(SHIMMER_COIN_TYPE)
-                .with_range(1..2),
         )
         .await?[0]
         .to_bech32(SHIMMER_TESTNET_BECH32_HRP);
@@ -236,7 +212,7 @@ async fn account_reference_unlocks() -> Result<()> {
         Account(
             1_000_000,
             account_id,
-            &bech32_address_0.to_string(),
+            &bech32_address.to_string(),
             None,
             None,
             None,
@@ -268,7 +244,7 @@ async fn account_reference_unlocks() -> Result<()> {
         Account(
             1_000_000,
             account_id,
-            &bech32_address_0.to_string(),
+            &bech32_address.to_string(),
             None,
             None,
             None,

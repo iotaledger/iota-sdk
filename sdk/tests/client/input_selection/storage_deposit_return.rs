@@ -317,14 +317,18 @@ fn two_sdrucs_to_different_addresses_both_needed() {
     assert!(unsorted_eq(&selected.inputs, &inputs));
     assert_eq!(selected.outputs.len(), 3);
     assert!(selected.outputs.contains(&outputs[0]));
-    assert!(selected
-        .outputs
-        .iter()
-        .any(|output| { is_remainder_or_return(output, 1_000_000, BECH32_ADDRESS_ED25519_1, None) }));
-    assert!(selected
-        .outputs
-        .iter()
-        .any(|output| { is_remainder_or_return(output, 1_000_000, BECH32_ADDRESS_ED25519_2, None) }));
+    assert!(
+        selected
+            .outputs
+            .iter()
+            .any(|output| { is_remainder_or_return(output, 1_000_000, BECH32_ADDRESS_ED25519_1, None) })
+    );
+    assert!(
+        selected
+            .outputs
+            .iter()
+            .any(|output| { is_remainder_or_return(output, 1_000_000, BECH32_ADDRESS_ED25519_2, None) })
+    );
 }
 
 #[test]
