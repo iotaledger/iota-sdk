@@ -304,46 +304,6 @@ fn destroy_foundry_with_account_state_transition() {
 }
 
 #[test]
-fn destroy_foundry_with_account_governance_transition() {
-    let protocol_parameters = protocol_parameters();
-    let account_id_2 = AccountId::from_str(ACCOUNT_ID_2).unwrap();
-
-    let inputs = build_inputs([
-        Account(
-            1_000_000,
-            account_id_2,
-            BECH32_ADDRESS_ED25519_0,
-            None,
-            None,
-            None,
-            None,
-        ),
-        Foundry(
-            1_000_000,
-            account_id_2,
-            1,
-            SimpleTokenScheme::new(10, 10, 10).unwrap(),
-            None,
-        ),
-    ]);
-    let outputs = [inputs[0].output.clone()];
-
-    let selected = InputSelection::new(
-        inputs.clone(),
-        outputs,
-        addresses([BECH32_ADDRESS_ED25519_0]),
-        protocol_parameters,
-    )
-    .with_burn(Burn::new().add_foundry(inputs[1].output.as_foundry().id()))
-    .select();
-
-    assert!(matches!(
-        selected,
-        Err(Error::UnfulfillableRequirement(Requirement::Account(account_id))) if account_id == account_id_2
-    ));
-}
-
-#[test]
 fn destroy_foundry_with_account_burn() {
     let protocol_parameters = protocol_parameters();
     let account_id_2 = AccountId::from_str(ACCOUNT_ID_2).unwrap();
@@ -379,7 +339,7 @@ fn destroy_foundry_with_account_burn() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        outputs,
+        outputs.clone(),
         addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
@@ -388,12 +348,22 @@ fn destroy_foundry_with_account_burn() {
             .add_foundry(inputs[1].output.as_foundry().id())
             .add_account(account_id_2),
     )
-    .select();
+    .select()
+    .unwrap();
 
-    assert!(matches!(
-        selected,
-        Err(Error::UnfulfillableRequirement(Requirement::Account(account_id))) if account_id == account_id_2
-    ));
+    assert!(unsorted_eq(&selected.inputs, &inputs));
+    assert_eq!(selected.outputs.len(), 2);
+    assert!(selected.outputs.contains(&outputs[0]));
+    selected.outputs.iter().for_each(|output| {
+        if !outputs.contains(output) {
+            assert!(is_remainder_or_return(
+                output,
+                1_000_000,
+                BECH32_ADDRESS_ED25519_0,
+                None,
+            ));
+        }
+    });
 }
 
 #[test]
@@ -501,7 +471,7 @@ fn simple_foundry_transition_basic_not_needed() {
             assert_eq!(output.amount(), 2_000_000);
             assert_eq!(output.as_account().native_tokens().len(), 0);
             assert_eq!(*output.as_account().account_id(), account_id_1);
-            assert_eq!(output.as_account().unlock_conditions().len(), 2);
+            assert_eq!(output.as_account().unlock_conditions().len(), 1);
             assert_eq!(output.as_account().features().len(), 0);
             assert_eq!(output.as_account().immutable_features().len(), 0);
             assert_eq!(
@@ -567,7 +537,7 @@ fn simple_foundry_transition_basic_not_needed_with_remainder() {
                 assert_eq!(output.amount(), 2_000_000);
                 assert_eq!(output.as_account().native_tokens().len(), 0);
                 assert_eq!(*output.as_account().account_id(), account_id_1);
-                assert_eq!(output.as_account().unlock_conditions().len(), 2);
+                assert_eq!(output.as_account().unlock_conditions().len(), 1);
                 assert_eq!(output.as_account().features().len(), 0);
                 assert_eq!(output.as_account().immutable_features().len(), 0);
                 assert_eq!(
@@ -628,7 +598,7 @@ fn simple_foundry_transition_basic_not_needed_with_remainder() {
 //     //             assert_eq!(output.amount(), 2_000_000);
 //     //             assert_eq!(output.as_account().native_tokens().len(), 0);
 //     //             assert_eq!(*output.as_account().account_id(), account_id_1);
-//     //             assert_eq!(output.as_account().unlock_conditions().len(), 2);
+//     //             assert_eq!(output.as_account().unlock_conditions().len(), 1);
 //     //             assert_eq!(output.as_account().features().len(), 0);
 //     //             assert_eq!(output.as_account().immutable_features().len(), 0);
 //     //             assert_eq!(

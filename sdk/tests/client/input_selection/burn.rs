@@ -637,7 +637,7 @@ fn burn_foundry_present() {
                 assert_eq!(output.amount(), 1_000_000);
                 assert_eq!(output.as_account().native_tokens().len(), 0);
                 assert_eq!(*output.as_account().account_id(), account_id_1);
-                assert_eq!(output.as_account().unlock_conditions().len(), 2);
+                assert_eq!(output.as_account().unlock_conditions().len(), 1);
                 assert_eq!(output.as_account().features().len(), 0);
                 assert_eq!(output.as_account().immutable_features().len(), 0);
                 assert_eq!(
@@ -767,7 +767,7 @@ fn burn_foundries_present() {
             assert_eq!(output.amount(), 1_000_000);
             assert_eq!(output.as_account().native_tokens().len(), 0);
             assert_eq!(*output.as_account().account_id(), account_id_1);
-            assert_eq!(output.as_account().unlock_conditions().len(), 2);
+            assert_eq!(output.as_account().unlock_conditions().len(), 1);
             assert_eq!(output.as_account().features().len(), 0);
             assert_eq!(output.as_account().immutable_features().len(), 0);
             assert_eq!(
