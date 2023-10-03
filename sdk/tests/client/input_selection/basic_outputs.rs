@@ -553,7 +553,6 @@ fn account_sender() {
         Account(
             1_000_000,
             account_id_1,
-            0,
             BECH32_ADDRESS_ED25519_0,
             BECH32_ADDRESS_ED25519_0,
             None,
@@ -608,7 +607,6 @@ fn account_sender_zero_id() {
         Account(
             1_000_000,
             account_id_0,
-            0,
             BECH32_ADDRESS_ED25519_0,
             BECH32_ADDRESS_ED25519_0,
             None,

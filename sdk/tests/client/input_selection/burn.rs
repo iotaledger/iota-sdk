@@ -10,7 +10,7 @@ use iota_sdk::{
     client::api::input_selection::{Burn, Error, InputSelection, Requirement},
     types::block::{
         address::Address,
-        output::{AccountId, AccountTransition, ChainId, NftId, SimpleTokenScheme, TokenId},
+        output::{AccountId, ChainId, NftId, SimpleTokenScheme, TokenId},
         protocol::protocol_parameters,
     },
 };
@@ -31,7 +31,6 @@ fn burn_account_present() {
         Account(
             1_000_000,
             account_id_1,
-            0,
             BECH32_ADDRESS_ED25519_0,
             BECH32_ADDRESS_ED25519_0,
             None,
@@ -76,7 +75,6 @@ fn burn_account_present_and_required() {
         Account(
             1_000_000,
             account_id_1,
-            0,
             BECH32_ADDRESS_ED25519_0,
             BECH32_ADDRESS_ED25519_0,
             None,
@@ -196,7 +194,7 @@ fn burn_account_absent() {
 
     assert!(matches!(
         selected,
-        Err(Error::UnfulfillableRequirement(Requirement::Account(account_id, AccountTransition::Governance))) if account_id == account_id_1
+        Err(Error::UnfulfillableRequirement(Requirement::Account(account_id))) if account_id == account_id_1
     ));
 }
 
@@ -210,7 +208,6 @@ fn burn_accounts_present() {
         Account(
             1_000_000,
             account_id_1,
-            0,
             BECH32_ADDRESS_ED25519_0,
             BECH32_ADDRESS_ED25519_0,
             None,
@@ -221,7 +218,6 @@ fn burn_accounts_present() {
         Account(
             1_000_000,
             account_id_2,
-            0,
             BECH32_ADDRESS_ED25519_0,
             BECH32_ADDRESS_ED25519_0,
             None,
@@ -265,7 +261,6 @@ fn burn_account_in_outputs() {
         Account(
             1_000_000,
             account_id_1,
-            0,
             BECH32_ADDRESS_ED25519_0,
             BECH32_ADDRESS_ED25519_0,
             None,
@@ -279,7 +274,6 @@ fn burn_account_in_outputs() {
         Account(
             1_000_000,
             account_id_1,
-            0,
             BECH32_ADDRESS_ED25519_0,
             BECH32_ADDRESS_ED25519_0,
             None,
@@ -405,7 +399,6 @@ fn burn_nft_id_zero() {
         Account(
             1_000_000,
             account_id_0,
-            0,
             BECH32_ADDRESS_ED25519_0,
             BECH32_ADDRESS_ED25519_0,
             None,
@@ -604,7 +597,6 @@ fn burn_foundry_present() {
         Account(
             1_000_000,
             account_id_1,
-            0,
             BECH32_ADDRESS_ED25519_0,
             BECH32_ADDRESS_ED25519_0,
             None,
@@ -657,11 +649,7 @@ fn burn_foundry_present() {
                 assert_eq!(output.as_account().features().len(), 0);
                 assert_eq!(output.as_account().immutable_features().len(), 0);
                 assert_eq!(
-                    *output.as_account().state_controller_address(),
-                    Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()
-                );
-                assert_eq!(
-                    *output.as_account().governor_address(),
+                    *output.as_account().address(),
                     Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()
                 );
             } else {
@@ -690,7 +678,6 @@ fn burn_foundry_absent() {
         Account(
             1_000_000,
             account_id_1,
-            0,
             BECH32_ADDRESS_ED25519_0,
             BECH32_ADDRESS_ED25519_0,
             None,
@@ -749,7 +736,6 @@ fn burn_foundries_present() {
         Account(
             1_000_000,
             account_id_1,
-            2,
             BECH32_ADDRESS_ED25519_0,
             BECH32_ADDRESS_ED25519_0,
             None,
@@ -795,11 +781,7 @@ fn burn_foundries_present() {
             assert_eq!(output.as_account().features().len(), 0);
             assert_eq!(output.as_account().immutable_features().len(), 0);
             assert_eq!(
-                *output.as_account().state_controller_address(),
-                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()
-            );
-            assert_eq!(
-                *output.as_account().governor_address(),
+                *output.as_account().address(),
                 Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()
             );
         }
@@ -902,7 +884,6 @@ fn burn_foundry_and_its_account() {
         Account(
             1_000_000,
             account_id_1,
-            0,
             BECH32_ADDRESS_ED25519_0,
             BECH32_ADDRESS_ED25519_0,
             None,
@@ -938,6 +919,6 @@ fn burn_foundry_and_its_account() {
 
     assert!(matches!(
         selected,
-        Err(Error::UnfulfillableRequirement(Requirement::Account(account_id, AccountTransition::State))) if account_id == account_id_1
+        Err(Error::UnfulfillableRequirement(Requirement::Account(account_id))) if account_id == account_id_1
     ));
 }

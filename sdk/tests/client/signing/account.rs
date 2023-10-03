@@ -61,7 +61,6 @@ async fn sign_account_state_transition() -> Result<()> {
     let inputs = build_inputs([Account(
         1_000_000,
         account_id,
-        0,
         &bech32_address_0.to_string(),
         &bech32_address_1.to_string(),
         None,
@@ -73,7 +72,6 @@ async fn sign_account_state_transition() -> Result<()> {
     let outputs = build_outputs([Account(
         1_000_000,
         account_id,
-        1,
         &bech32_address_0.to_string(),
         &bech32_address_1.to_string(),
         None,
@@ -151,7 +149,6 @@ async fn sign_account_governance_transition() -> Result<()> {
     let inputs = build_inputs([Account(
         1_000_000,
         account_id,
-        0,
         &bech32_address_0.to_string(),
         &bech32_address_1.to_string(),
         None,
@@ -163,7 +160,6 @@ async fn sign_account_governance_transition() -> Result<()> {
     let outputs = build_outputs([Account(
         1_000_000,
         account_id,
-        0,
         &bech32_address_0.to_string(),
         &bech32_address_1.to_string(),
         None,
@@ -244,7 +240,6 @@ async fn account_reference_unlocks() -> Result<()> {
         Account(
             1_000_000,
             account_id,
-            0,
             &bech32_address_0.to_string(),
             &bech32_address_1.to_string(),
             None,
@@ -278,7 +273,6 @@ async fn account_reference_unlocks() -> Result<()> {
         Account(
             1_000_000,
             account_id,
-            1,
             &bech32_address_0.to_string(),
             &bech32_address_1.to_string(),
             None,
