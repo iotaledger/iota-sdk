@@ -28,7 +28,6 @@ fn input_account_eq_output_account() {
         1_000_000,
         account_id_2,
         BECH32_ADDRESS_ED25519_0,
-        BECH32_ADDRESS_ED25519_0,
         None,
         None,
         None,
@@ -37,7 +36,6 @@ fn input_account_eq_output_account() {
     let outputs = build_outputs([Account(
         1_000_000,
         account_id_2,
-        BECH32_ADDRESS_ED25519_0,
         BECH32_ADDRESS_ED25519_0,
         None,
         None,
@@ -67,7 +65,6 @@ fn transition_account_id_zero() {
         1_000_000,
         account_id_0,
         BECH32_ADDRESS_ED25519_0,
-        BECH32_ADDRESS_ED25519_0,
         None,
         None,
         None,
@@ -77,7 +74,6 @@ fn transition_account_id_zero() {
     let outputs = build_outputs([Account(
         1_000_000,
         account_id,
-        BECH32_ADDRESS_ED25519_0,
         BECH32_ADDRESS_ED25519_0,
         None,
         None,
@@ -251,7 +247,6 @@ fn create_account() {
         1_000_000,
         account_id_0,
         BECH32_ADDRESS_ED25519_0,
-        BECH32_ADDRESS_ED25519_0,
         None,
         None,
         None,
@@ -288,7 +283,6 @@ fn burn_account() {
     let inputs = build_inputs([Account(
         2_000_000,
         account_id_2,
-        BECH32_ADDRESS_ED25519_0,
         BECH32_ADDRESS_ED25519_0,
         None,
         None,
@@ -384,7 +378,6 @@ fn missing_input_for_account_output() {
         1_000_000,
         account_id_2,
         BECH32_ADDRESS_ED25519_0,
-        BECH32_ADDRESS_ED25519_0,
         None,
         None,
         None,
@@ -416,7 +409,6 @@ fn missing_input_for_account_output_2() {
             2_000_000,
             account_id_1,
             BECH32_ADDRESS_ED25519_0,
-            BECH32_ADDRESS_ED25519_0,
             None,
             None,
             None,
@@ -427,7 +419,6 @@ fn missing_input_for_account_output_2() {
     let outputs = build_outputs([Account(
         1_000_000,
         account_id_2,
-        BECH32_ADDRESS_ED25519_0,
         BECH32_ADDRESS_ED25519_0,
         None,
         None,
@@ -468,7 +459,6 @@ fn missing_input_for_account_output_but_created() {
         1_000_000,
         account_id_0,
         BECH32_ADDRESS_ED25519_0,
-        BECH32_ADDRESS_ED25519_0,
         None,
         None,
         None,
@@ -495,7 +485,6 @@ fn account_in_output_and_sender() {
         Account(
             1_000_000,
             account_id_1,
-            BECH32_ADDRESS_ED25519_0,
             BECH32_ADDRESS_ED25519_0,
             None,
             None,
@@ -541,7 +530,6 @@ fn missing_ed25519_sender() {
         1_000_000,
         account_id_2,
         BECH32_ADDRESS_ED25519_0,
-        BECH32_ADDRESS_ED25519_0,
         None,
         None,
         None,
@@ -550,7 +538,6 @@ fn missing_ed25519_sender() {
     let outputs = build_outputs([Account(
         1_000_000,
         account_id_2,
-        BECH32_ADDRESS_ED25519_0,
         BECH32_ADDRESS_ED25519_0,
         None,
         Some(BECH32_ADDRESS_ED25519_1),
@@ -591,7 +578,6 @@ fn missing_ed25519_issuer_created() {
         1_000_000,
         account_id_0,
         BECH32_ADDRESS_ED25519_0,
-        BECH32_ADDRESS_ED25519_0,
         None,
         None,
         Some(BECH32_ADDRESS_ED25519_1),
@@ -621,7 +607,6 @@ fn missing_ed25519_issuer_transition() {
         1_000_000,
         account_id_1,
         BECH32_ADDRESS_ED25519_0,
-        BECH32_ADDRESS_ED25519_0,
         None,
         None,
         Some(BECH32_ADDRESS_ED25519_1),
@@ -630,7 +615,6 @@ fn missing_ed25519_issuer_transition() {
     let outputs = build_outputs([Account(
         1_000_000,
         account_id_1,
-        BECH32_ADDRESS_ED25519_0,
         BECH32_ADDRESS_ED25519_0,
         None,
         None,
@@ -658,7 +642,6 @@ fn missing_account_sender() {
         1_000_000,
         account_id_2,
         BECH32_ADDRESS_ED25519_0,
-        BECH32_ADDRESS_ED25519_0,
         None,
         None,
         None,
@@ -667,7 +650,6 @@ fn missing_account_sender() {
     let outputs = build_outputs([Account(
         1_000_000,
         account_id_2,
-        BECH32_ADDRESS_ED25519_0,
         BECH32_ADDRESS_ED25519_0,
         None,
         Some(BECH32_ADDRESS_ACCOUNT_1),
@@ -708,7 +690,6 @@ fn missing_account_issuer_created() {
         1_000_000,
         account_id_0,
         BECH32_ADDRESS_ED25519_0,
-        BECH32_ADDRESS_ED25519_0,
         None,
         None,
         Some(BECH32_ADDRESS_ACCOUNT_1),
@@ -738,7 +719,6 @@ fn missing_account_issuer_transition() {
         1_000_000,
         account_id_2,
         BECH32_ADDRESS_ED25519_0,
-        BECH32_ADDRESS_ED25519_0,
         None,
         None,
         Some(BECH32_ADDRESS_ACCOUNT_1),
@@ -747,7 +727,6 @@ fn missing_account_issuer_transition() {
     let outputs = build_outputs([Account(
         1_000_000,
         account_id_2,
-        BECH32_ADDRESS_ED25519_0,
         BECH32_ADDRESS_ED25519_0,
         None,
         None,
@@ -775,7 +754,6 @@ fn missing_nft_sender() {
         1_000_000,
         account_id_2,
         BECH32_ADDRESS_ED25519_0,
-        BECH32_ADDRESS_ED25519_0,
         None,
         None,
         None,
@@ -784,7 +762,6 @@ fn missing_nft_sender() {
     let outputs = build_outputs([Account(
         1_000_000,
         account_id_2,
-        BECH32_ADDRESS_ED25519_0,
         BECH32_ADDRESS_ED25519_0,
         None,
         Some(BECH32_ADDRESS_NFT_1),
@@ -825,7 +802,6 @@ fn missing_nft_issuer_created() {
         1_000_000,
         account_id_0,
         BECH32_ADDRESS_ED25519_0,
-        BECH32_ADDRESS_ED25519_0,
         None,
         None,
         Some(BECH32_ADDRESS_NFT_1),
@@ -855,7 +831,6 @@ fn missing_nft_issuer_transition() {
         1_000_000,
         account_id_1,
         BECH32_ADDRESS_ED25519_0,
-        BECH32_ADDRESS_ED25519_0,
         None,
         None,
         Some(BECH32_ADDRESS_NFT_1),
@@ -864,7 +839,6 @@ fn missing_nft_issuer_transition() {
     let outputs = build_outputs([Account(
         1_000_000,
         account_id_1,
-        BECH32_ADDRESS_ED25519_0,
         BECH32_ADDRESS_ED25519_0,
         None,
         None,
@@ -893,7 +867,6 @@ fn increase_account_amount() {
             2_000_000,
             account_id_1,
             BECH32_ADDRESS_ED25519_0,
-            BECH32_ADDRESS_ED25519_0,
             None,
             None,
             None,
@@ -904,7 +877,6 @@ fn increase_account_amount() {
     let outputs = build_outputs([Account(
         3_000_000,
         account_id_1,
-        BECH32_ADDRESS_ED25519_0,
         BECH32_ADDRESS_ED25519_0,
         None,
         None,
@@ -935,7 +907,6 @@ fn decrease_account_amount() {
             2_000_000,
             account_id_1,
             BECH32_ADDRESS_ED25519_0,
-            BECH32_ADDRESS_ED25519_0,
             None,
             None,
             None,
@@ -946,7 +917,6 @@ fn decrease_account_amount() {
     let outputs = build_outputs([Account(
         1_000_000,
         account_id_1,
-        BECH32_ADDRESS_ED25519_0,
         BECH32_ADDRESS_ED25519_0,
         None,
         None,
@@ -989,7 +959,6 @@ fn prefer_basic_to_account() {
             1_000_000,
             account_id_1,
             BECH32_ADDRESS_ED25519_0,
-            BECH32_ADDRESS_ED25519_0,
             None,
             None,
             None,
@@ -1031,7 +1000,6 @@ fn take_amount_from_account_to_fund_basic() {
         Account(
             2_000_000,
             account_id_1,
-            BECH32_ADDRESS_ED25519_0,
             BECH32_ADDRESS_ED25519_0,
             None,
             None,
@@ -1091,7 +1059,6 @@ fn account_burn_should_not_validate_account_sender() {
             1_000_000,
             account_id_1,
             BECH32_ADDRESS_ED25519_0,
-            BECH32_ADDRESS_ED25519_0,
             None,
             None,
             None,
@@ -1134,7 +1101,6 @@ fn account_burn_should_not_validate_account_address() {
         Account(
             1_000_000,
             account_id_1,
-            BECH32_ADDRESS_ED25519_0,
             BECH32_ADDRESS_ED25519_0,
             None,
             None,
@@ -1179,7 +1145,6 @@ fn account_governance_transition_should_not_validate_account_sender() {
             1_000_000,
             account_id_1,
             BECH32_ADDRESS_ED25519_0,
-            BECH32_ADDRESS_ED25519_0,
             None,
             None,
             None,
@@ -1223,7 +1188,6 @@ fn account_governance_transition_should_not_validate_account_address() {
             1_000_000,
             account_id_1,
             BECH32_ADDRESS_ED25519_0,
-            BECH32_ADDRESS_ED25519_0,
             None,
             None,
             None,
@@ -1264,7 +1228,6 @@ fn transitioned_zero_account_id_no_longer_is_zero() {
     let inputs = build_inputs([Account(
         2_000_000,
         account_id_0,
-        BECH32_ADDRESS_ED25519_0,
         BECH32_ADDRESS_ED25519_0,
         None,
         None,
@@ -1322,7 +1285,6 @@ fn two_accounts_required() {
             2_000_000,
             account_id_1,
             BECH32_ADDRESS_ED25519_0,
-            BECH32_ADDRESS_ED25519_0,
             None,
             None,
             None,
@@ -1331,7 +1293,6 @@ fn two_accounts_required() {
         Account(
             2_000_000,
             account_id_2,
-            BECH32_ADDRESS_ED25519_0,
             BECH32_ADDRESS_ED25519_0,
             None,
             None,
@@ -1362,26 +1323,22 @@ fn two_accounts_required() {
     assert!(unsorted_eq(&selected.inputs, &inputs));
     assert_eq!(selected.outputs.len(), 3);
     assert!(selected.outputs.contains(&outputs[0]));
-    assert!(
-        selected
-            .outputs
-            .iter()
-            .any(|output| if let Output::Account(output) = output {
-                output.account_id() == &account_id_1
-            } else {
-                false
-            })
-    );
-    assert!(
-        selected
-            .outputs
-            .iter()
-            .any(|output| if let Output::Account(output) = output {
-                output.account_id() == &account_id_2
-            } else {
-                false
-            })
-    )
+    assert!(selected
+        .outputs
+        .iter()
+        .any(|output| if let Output::Account(output) = output {
+            output.account_id() == &account_id_1
+        } else {
+            false
+        }));
+    assert!(selected
+        .outputs
+        .iter()
+        .any(|output| if let Output::Account(output) = output {
+            output.account_id() == &account_id_2
+        } else {
+            false
+        }))
 }
 
 #[test]
@@ -1393,7 +1350,6 @@ fn state_controller_sender_required() {
         2_000_000,
         account_id_1,
         BECH32_ADDRESS_ED25519_0,
-        BECH32_ADDRESS_ED25519_1,
         None,
         None,
         None,
@@ -1433,7 +1389,6 @@ fn state_controller_sender_required_already_selected() {
         2_000_000,
         account_id_1,
         BECH32_ADDRESS_ED25519_0,
-        BECH32_ADDRESS_ED25519_1,
         None,
         None,
         None,
@@ -1444,7 +1399,6 @@ fn state_controller_sender_required_already_selected() {
             1_000_000,
             account_id_1,
             BECH32_ADDRESS_ED25519_0,
-            BECH32_ADDRESS_ED25519_1,
             None,
             None,
             None,
@@ -1485,7 +1439,6 @@ fn state_controller_sender_required_but_governance() {
         2_000_000,
         account_id_1,
         BECH32_ADDRESS_ED25519_0,
-        BECH32_ADDRESS_ED25519_1,
         None,
         None,
         None,
@@ -1496,7 +1449,6 @@ fn state_controller_sender_required_but_governance() {
             1_000_000,
             account_id_1,
             BECH32_ADDRESS_ED25519_0,
-            BECH32_ADDRESS_ED25519_1,
             None,
             None,
             None,
@@ -1539,7 +1491,6 @@ fn governor_sender_required() {
             2_000_000,
             account_id_1,
             BECH32_ADDRESS_ED25519_0,
-            BECH32_ADDRESS_ED25519_1,
             None,
             None,
             None,
@@ -1582,7 +1533,6 @@ fn governor_sender_required_already_selected() {
             1_000_000,
             account_id_1,
             BECH32_ADDRESS_ED25519_0,
-            BECH32_ADDRESS_ED25519_1,
             None,
             None,
             None,
@@ -1595,7 +1545,6 @@ fn governor_sender_required_already_selected() {
             1_000_000,
             account_id_1,
             BECH32_ADDRESS_ED25519_0,
-            BECH32_ADDRESS_ED25519_1,
             None,
             None,
             None,
@@ -1636,7 +1585,6 @@ fn governance_transition_and_required() {
         2_000_000,
         account_id_1,
         BECH32_ADDRESS_ED25519_0,
-        BECH32_ADDRESS_ED25519_1,
         None,
         None,
         None,
@@ -1646,7 +1594,6 @@ fn governance_transition_and_required() {
         2_000_000,
         account_id_1,
         BECH32_ADDRESS_ED25519_0,
-        BECH32_ADDRESS_ED25519_1,
         None,
         None,
         None,
@@ -1676,7 +1623,6 @@ fn state_transition_and_required() {
         2_000_000,
         account_id_1,
         BECH32_ADDRESS_ED25519_0,
-        BECH32_ADDRESS_ED25519_1,
         None,
         None,
         None,
@@ -1686,7 +1632,6 @@ fn state_transition_and_required() {
         2_000_000,
         account_id_1,
         BECH32_ADDRESS_ED25519_0,
-        BECH32_ADDRESS_ED25519_1,
         None,
         None,
         None,
@@ -1716,7 +1661,6 @@ fn governor_sender_required_but_state() {
         2_000_000,
         account_id_1,
         BECH32_ADDRESS_ED25519_0,
-        BECH32_ADDRESS_ED25519_1,
         None,
         None,
         None,
@@ -1727,7 +1671,6 @@ fn governor_sender_required_but_state() {
             1_000_000,
             account_id_1,
             BECH32_ADDRESS_ED25519_0,
-            BECH32_ADDRESS_ED25519_1,
             None,
             None,
             None,
@@ -1769,7 +1712,6 @@ fn both_state_controller_and_governor_sender() {
         2_000_000,
         account_id_1,
         BECH32_ADDRESS_ED25519_0,
-        BECH32_ADDRESS_ED25519_1,
         None,
         None,
         None,
@@ -1821,7 +1763,6 @@ fn remainder_address_in_state_controller() {
         2_000_000,
         account_id_1,
         BECH32_ADDRESS_ED25519_0,
-        BECH32_ADDRESS_ACCOUNT_2,
         None,
         None,
         None,
@@ -1831,7 +1772,6 @@ fn remainder_address_in_state_controller() {
         1_000_000,
         account_id_1,
         BECH32_ADDRESS_ED25519_0,
-        BECH32_ADDRESS_ACCOUNT_2,
         None,
         None,
         None,
@@ -1872,7 +1812,6 @@ fn remainder_address_in_governor() {
             1_000_000,
             account_id_1,
             BECH32_ADDRESS_ACCOUNT_2,
-            BECH32_ADDRESS_ED25519_0,
             None,
             None,
             None,
@@ -1884,7 +1823,6 @@ fn remainder_address_in_governor() {
         1_000_000,
         account_id_1,
         BECH32_ADDRESS_ACCOUNT_2,
-        BECH32_ADDRESS_ED25519_0,
         None,
         None,
         None,
@@ -1926,7 +1864,6 @@ fn do_not_change_amount_of_governance_transition() {
         2_000_000,
         account_id_1,
         BECH32_ADDRESS_ED25519_0,
-        BECH32_ADDRESS_ED25519_1,
         None,
         None,
         None,
@@ -1969,7 +1906,6 @@ fn state_transition_required_but_state_controller_not_provided() {
         2_000_000,
         account_id_1,
         BECH32_ADDRESS_ED25519_0,
-        BECH32_ADDRESS_ED25519_1,
         None,
         None,
         None,
@@ -2012,7 +1948,6 @@ fn state_transition_but_state_controller_not_owned() {
         2_000_000,
         account_id_1,
         BECH32_ADDRESS_ED25519_0,
-        BECH32_ADDRESS_ED25519_1,
         None,
         None,
         None,
@@ -2022,7 +1957,6 @@ fn state_transition_but_state_controller_not_owned() {
         2_000_000,
         account_id_1,
         BECH32_ADDRESS_ED25519_0,
-        BECH32_ADDRESS_ED25519_1,
         None,
         None,
         None,
@@ -2052,7 +1986,6 @@ fn governance_transition_but_governor_not_owned() {
         2_000_000,
         account_id_1,
         BECH32_ADDRESS_ED25519_0,
-        BECH32_ADDRESS_ED25519_1,
         None,
         None,
         None,
@@ -2062,7 +1995,6 @@ fn governance_transition_but_governor_not_owned() {
         2_000_000,
         account_id_1,
         BECH32_ADDRESS_ED25519_0,
-        BECH32_ADDRESS_ED25519_1,
         None,
         None,
         None,
@@ -2092,7 +2024,6 @@ fn burn_account_but_governor_not_owned() {
         2_000_000,
         account_id_1,
         BECH32_ADDRESS_ED25519_0,
-        BECH32_ADDRESS_ED25519_1,
         None,
         None,
         None,
@@ -2133,7 +2064,6 @@ fn sender_in_state_controller_but_not_owned() {
         2_000_000,
         account_id_1,
         BECH32_ADDRESS_ED25519_0,
-        BECH32_ADDRESS_ED25519_1,
         None,
         None,
         None,
@@ -2173,7 +2103,6 @@ fn sender_in_governor_but_not_owned() {
         2_000_000,
         account_id_1,
         BECH32_ADDRESS_ED25519_0,
-        BECH32_ADDRESS_ED25519_1,
         None,
         None,
         None,

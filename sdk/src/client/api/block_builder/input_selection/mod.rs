@@ -209,6 +209,7 @@ impl InputSelection {
         self.available_inputs.retain(|input| {
             // Keep account outputs because at this point we do not know if a state or governor address will be
             // required.
+            // TODO remove ?
             if input.output.is_account() {
                 return true;
             }

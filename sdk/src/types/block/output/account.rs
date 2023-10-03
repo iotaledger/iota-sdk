@@ -46,7 +46,11 @@ impl From<&OutputId> for AccountId {
 impl AccountId {
     ///
     pub fn or_from_output_id(self, output_id: &OutputId) -> Self {
-        if self.is_null() { Self::from(output_id) } else { self }
+        if self.is_null() {
+            Self::from(output_id)
+        } else {
+            self
+        }
     }
 }
 
@@ -628,24 +632,14 @@ fn verify_index_counter(account_id: &AccountId, foundry_counter: u32) -> Result<
 }
 
 fn verify_unlock_conditions(unlock_conditions: &UnlockConditions, account_id: &AccountId) -> Result<(), Error> {
-    if let Some(unlock_condition) = unlock_conditions.state_controller_address() {
+    if let Some(unlock_condition) = unlock_conditions.address() {
         if let Address::Account(account_address) = unlock_condition.address() {
             if account_address.account_id() == account_id {
-                return Err(Error::SelfControlledAccountOutput(*account_id));
+                return Err(Error::SelfDepositAccount(*account_id));
             }
         }
     } else {
-        return Err(Error::MissingStateControllerUnlockCondition);
-    }
-
-    if let Some(unlock_condition) = unlock_conditions.governor_address() {
-        if let Address::Account(account_address) = unlock_condition.address() {
-            if account_address.account_id() == account_id {
-                return Err(Error::SelfControlledAccountOutput(*account_id));
-            }
-        }
-    } else {
-        return Err(Error::MissingGovernorUnlockCondition);
+        return Err(Error::MissingAddressUnlockCondition);
     }
 
     verify_allowed_unlock_conditions(unlock_conditions, AccountOutput::ALLOWED_UNLOCK_CONDITIONS)
@@ -782,12 +776,8 @@ mod tests {
             rand::{
                 address::rand_account_address,
                 output::{
-                    feature::rand_allowed_features,
-                    rand_account_id, rand_account_output,
-                    unlock_condition::{
-                        rand_governor_address_unlock_condition_different_from,
-                        rand_state_controller_address_unlock_condition_different_from,
-                    },
+                    feature::rand_allowed_features, rand_account_id, rand_account_output,
+                    unlock_condition::rand_address_unlock_condition_different_from_account_id,
                 },
             },
         },
@@ -820,8 +810,7 @@ mod tests {
 
         let account_id = rand_account_id();
         let foundry_id = FoundryId::build(&rand_account_address(), 0, SimpleTokenScheme::KIND);
-        let gov_address = rand_governor_address_unlock_condition_different_from(&account_id);
-        let state_address = rand_state_controller_address_unlock_condition_different_from(&account_id);
+        let address = rand_address_unlock_condition_different_from_account_id(&account_id);
 
         let test_split_dto = |builder: AccountOutputBuilder| {
             let output_split = AccountOutput::try_from_dtos(
@@ -841,8 +830,7 @@ mod tests {
 
         let builder = AccountOutput::build_with_amount(100, account_id)
             .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000).unwrap())
-            .add_unlock_condition(gov_address)
-            .add_unlock_condition(state_address)
+            .add_unlock_condition(address)
             .with_features(rand_allowed_features(AccountOutput::ALLOWED_FEATURES))
             .with_immutable_features(rand_allowed_features(AccountOutput::ALLOWED_IMMUTABLE_FEATURES));
         test_split_dto(builder);
@@ -850,8 +838,7 @@ mod tests {
         let builder =
             AccountOutput::build_with_minimum_storage_deposit(protocol_parameters.rent_structure(), account_id)
                 .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000).unwrap())
-                .add_unlock_condition(gov_address)
-                .add_unlock_condition(state_address)
+                .add_unlock_condition(address)
                 .with_features(rand_allowed_features(AccountOutput::ALLOWED_FEATURES))
                 .with_immutable_features(rand_allowed_features(AccountOutput::ALLOWED_IMMUTABLE_FEATURES));
         test_split_dto(builder);

@@ -24,8 +24,7 @@ use crate::types::block::{
             feature::rand_allowed_features,
             unlock_condition::{
                 rand_address_unlock_condition, rand_address_unlock_condition_different_from,
-                rand_governor_address_unlock_condition_different_from,
-                rand_state_controller_address_unlock_condition_different_from,
+                rand_address_unlock_condition_different_from_account_id,
             },
         },
         transaction::rand_transaction_id,
@@ -59,10 +58,7 @@ pub fn rand_account_output(token_supply: u64) -> AccountOutput {
 
     AccountOutput::build_with_amount(rand_number_range(Output::AMOUNT_MIN..token_supply), account_id)
         .with_features(rand_allowed_features(AccountOutput::ALLOWED_FEATURES))
-        .add_unlock_condition(rand_state_controller_address_unlock_condition_different_from(
-            &account_id,
-        ))
-        .add_unlock_condition(rand_governor_address_unlock_condition_different_from(&account_id))
+        .add_unlock_condition(rand_address_unlock_condition_different_from_account_id(&account_id))
         .finish_with_params(token_supply)
         .unwrap()
 }

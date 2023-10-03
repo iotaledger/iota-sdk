@@ -153,6 +153,7 @@ pub enum Error {
     // TODO remove?
     SelfControlledAccountOutput(AccountId),
     SelfControlledAnchorOutput(AnchorId),
+    SelfDepositAccount(AccountId),
     SelfDepositNft(NftId),
     SignaturePublicKeyMismatch {
         expected: String,
@@ -353,6 +354,9 @@ impl fmt::Display for Error {
             }
             Self::SelfDepositNft(nft_id) => {
                 write!(f, "self deposit nft output, NFT ID {nft_id}")
+            }
+            Self::SelfDepositAccount(account_id) => {
+                write!(f, "self deposit account output, account ID {account_id}")
             }
             Self::SignaturePublicKeyMismatch { expected, actual } => {
                 write!(f, "signature public key mismatch: expected {expected} but got {actual}",)

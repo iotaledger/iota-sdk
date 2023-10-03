@@ -14,7 +14,7 @@ use iota_sdk::{
         address::Address,
         output::{
             feature::{IssuerFeature, MetadataFeature, SenderFeature},
-            unlock_condition::{GovernorAddressUnlockCondition, StateControllerAddressUnlockCondition},
+            unlock_condition::AddressUnlockCondition,
             AccountId, AccountOutputBuilder,
         },
     },
@@ -48,8 +48,7 @@ async fn main() -> Result<()> {
         .add_feature(MetadataFeature::new(metadata)?)
         .add_immutable_feature(IssuerFeature::new(address))
         .add_immutable_feature(MetadataFeature::new(metadata)?)
-        .add_unlock_condition(StateControllerAddressUnlockCondition::new(address))
-        .add_unlock_condition(GovernorAddressUnlockCondition::new(address))
+        .add_unlock_condition(AddressUnlockCondition::new(address))
         .finish_output(token_supply)?;
 
     println!("{account_output:#?}");

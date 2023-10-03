@@ -118,7 +118,6 @@ fn minted_native_tokens_in_new_remainder() {
             1_000_000,
             account_id_2,
             BECH32_ADDRESS_ED25519_0,
-            BECH32_ADDRESS_ED25519_0,
             None,
             None,
             None,
@@ -165,7 +164,6 @@ fn minted_native_tokens_in_provided_output() {
         Account(
             1_000_000,
             account_id_2,
-            BECH32_ADDRESS_ED25519_0,
             BECH32_ADDRESS_ED25519_0,
             None,
             None,
@@ -277,16 +275,7 @@ fn destroy_foundry_with_account_state_transition() {
     let account_id_2 = AccountId::from_str(ACCOUNT_ID_2).unwrap();
 
     let inputs = build_inputs([
-        Account(
-            50_300,
-            account_id_2,
-            BECH32_ADDRESS_ED25519_0,
-            BECH32_ADDRESS_ED25519_0,
-            None,
-            None,
-            None,
-            None,
-        ),
+        Account(50_300, account_id_2, BECH32_ADDRESS_ED25519_0, None, None, None, None),
         Foundry(
             52_800,
             account_id_2,
@@ -327,7 +316,6 @@ fn destroy_foundry_with_account_governance_transition() {
             1_000_000,
             account_id_2,
             BECH32_ADDRESS_ED25519_0,
-            BECH32_ADDRESS_ED25519_0,
             None,
             None,
             None,
@@ -367,7 +355,6 @@ fn destroy_foundry_with_account_burn() {
         Account(
             1_000_000,
             account_id_2,
-            BECH32_ADDRESS_ED25519_0,
             BECH32_ADDRESS_ED25519_0,
             None,
             None,
@@ -421,7 +408,6 @@ fn prefer_basic_to_foundry() {
         Account(
             1_000_000,
             account_id_1,
-            BECH32_ADDRESS_ED25519_0,
             BECH32_ADDRESS_ED25519_0,
             None,
             None,
@@ -806,7 +792,6 @@ fn create_native_token_but_burn_account() {
             2_000_000,
             account_id_1,
             BECH32_ADDRESS_ED25519_0,
-            BECH32_ADDRESS_ED25519_0,
             None,
             None,
             None,
@@ -854,7 +839,6 @@ fn melted_tokens_not_provided() {
         Account(
             2_000_000,
             account_id_1,
-            BECH32_ADDRESS_ED25519_0,
             BECH32_ADDRESS_ED25519_0,
             None,
             None,
@@ -905,7 +889,6 @@ fn burned_tokens_not_provided() {
         Account(
             2_000_000,
             account_id_1,
-            BECH32_ADDRESS_ED25519_0,
             BECH32_ADDRESS_ED25519_0,
             None,
             None,

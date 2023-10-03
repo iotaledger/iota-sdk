@@ -5,10 +5,7 @@ use iota_sdk::types::block::{
     address::{AccountAddress, Address, Ed25519Address},
     input::{Input, UtxoInput},
     output::{
-        unlock_condition::{
-            AddressUnlockCondition, GovernorAddressUnlockCondition, ImmutableAccountAddressUnlockCondition,
-            StateControllerAddressUnlockCondition,
-        },
+        unlock_condition::{AddressUnlockCondition, ImmutableAccountAddressUnlockCondition},
         AccountId, AccountOutput, BasicOutput, ChainId, FoundryId, FoundryOutput, NativeToken, NftId, NftOutput,
         Output, SimpleTokenScheme, TokenId, TokenScheme,
     },
@@ -411,8 +408,7 @@ fn duplicate_output_account() {
         .unwrap();
     let account_id = AccountId::from(bytes);
     let account = AccountOutput::build_with_amount(1_000_000, account_id)
-        .add_unlock_condition(StateControllerAddressUnlockCondition::new(address))
-        .add_unlock_condition(GovernorAddressUnlockCondition::new(address))
+        .add_unlock_condition(AddressUnlockCondition::new(address))
         .finish_output(protocol_parameters.token_supply())
         .unwrap();
 

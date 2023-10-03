@@ -59,6 +59,7 @@ impl ClientInner {
         self.get_output_ids(route, query_parameters, true, false).await
     }
 
+    // TODO
     /// Get account outputs filtered by the given parameters.
     /// GET with query parameter returns all outputIDs that fit these filter criteria.
     /// Query parameters: "stateController", "governor", "issuer", "sender", "createdBefore", "createdAfter"

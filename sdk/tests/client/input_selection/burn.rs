@@ -32,7 +32,6 @@ fn burn_account_present() {
             1_000_000,
             account_id_1,
             BECH32_ADDRESS_ED25519_0,
-            BECH32_ADDRESS_ED25519_0,
             None,
             None,
             None,
@@ -75,7 +74,6 @@ fn burn_account_present_and_required() {
         Account(
             1_000_000,
             account_id_1,
-            BECH32_ADDRESS_ED25519_0,
             BECH32_ADDRESS_ED25519_0,
             None,
             None,
@@ -209,7 +207,6 @@ fn burn_accounts_present() {
             1_000_000,
             account_id_1,
             BECH32_ADDRESS_ED25519_0,
-            BECH32_ADDRESS_ED25519_0,
             None,
             None,
             None,
@@ -218,7 +215,6 @@ fn burn_accounts_present() {
         Account(
             1_000_000,
             account_id_2,
-            BECH32_ADDRESS_ED25519_0,
             BECH32_ADDRESS_ED25519_0,
             None,
             None,
@@ -262,7 +258,6 @@ fn burn_account_in_outputs() {
             1_000_000,
             account_id_1,
             BECH32_ADDRESS_ED25519_0,
-            BECH32_ADDRESS_ED25519_0,
             None,
             None,
             None,
@@ -274,7 +269,6 @@ fn burn_account_in_outputs() {
         Account(
             1_000_000,
             account_id_1,
-            BECH32_ADDRESS_ED25519_0,
             BECH32_ADDRESS_ED25519_0,
             None,
             None,
@@ -399,7 +393,6 @@ fn burn_nft_id_zero() {
         Account(
             1_000_000,
             account_id_0,
-            BECH32_ADDRESS_ED25519_0,
             BECH32_ADDRESS_ED25519_0,
             None,
             None,
@@ -598,7 +591,6 @@ fn burn_foundry_present() {
             1_000_000,
             account_id_1,
             BECH32_ADDRESS_ED25519_0,
-            BECH32_ADDRESS_ED25519_0,
             None,
             None,
             None,
@@ -679,7 +671,6 @@ fn burn_foundry_absent() {
             1_000_000,
             account_id_1,
             BECH32_ADDRESS_ED25519_0,
-            BECH32_ADDRESS_ED25519_0,
             None,
             None,
             None,
@@ -736,7 +727,6 @@ fn burn_foundries_present() {
         Account(
             1_000_000,
             account_id_1,
-            BECH32_ADDRESS_ED25519_0,
             BECH32_ADDRESS_ED25519_0,
             None,
             None,
@@ -884,7 +874,6 @@ fn burn_foundry_and_its_account() {
         Account(
             1_000_000,
             account_id_1,
-            BECH32_ADDRESS_ED25519_0,
             BECH32_ADDRESS_ED25519_0,
             None,
             None,

@@ -683,7 +683,6 @@ fn expiration_expired_only_account_addresses() {
             1_000_000,
             account_id_1,
             BECH32_ADDRESS_ED25519_0,
-            BECH32_ADDRESS_ED25519_0,
             None,
             None,
             None,

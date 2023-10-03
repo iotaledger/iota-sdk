@@ -493,12 +493,10 @@ fn ed25519_sender() {
 
     // Sender + another for amount
     assert_eq!(selected.inputs.len(), 2);
-    assert!(
-        selected
-            .inputs
-            .iter()
-            .any(|input| *input.output.as_basic().address() == sender)
-    );
+    assert!(selected
+        .inputs
+        .iter()
+        .any(|input| *input.output.as_basic().address() == sender));
     // Provided output + remainder
     assert_eq!(selected.outputs.len(), 2);
 }
@@ -554,7 +552,6 @@ fn account_sender() {
             1_000_000,
             account_id_1,
             BECH32_ADDRESS_ED25519_0,
-            BECH32_ADDRESS_ED25519_0,
             None,
             None,
             None,
@@ -586,12 +583,10 @@ fn account_sender() {
 
     // Sender + another for amount
     assert_eq!(selected.inputs.len(), 2);
-    assert!(
-        selected
-            .inputs
-            .iter()
-            .any(|input| input.output.is_account() && *input.output.as_account().account_id() == account_id_1)
-    );
+    assert!(selected
+        .inputs
+        .iter()
+        .any(|input| input.output.is_account() && *input.output.as_account().account_id() == account_id_1));
     // Provided output + account
     assert_eq!(selected.outputs.len(), 2);
     assert!(selected.outputs.contains(&outputs[0]));
@@ -607,7 +602,6 @@ fn account_sender_zero_id() {
         Account(
             1_000_000,
             account_id_0,
-            BECH32_ADDRESS_ED25519_0,
             BECH32_ADDRESS_ED25519_0,
             None,
             None,
@@ -642,12 +636,10 @@ fn account_sender_zero_id() {
 
     assert!(unsorted_eq(&selected.inputs, &inputs));
     assert_eq!(selected.outputs.len(), 2);
-    assert!(
-        selected
-            .outputs
-            .iter()
-            .any(|output| output.is_account() && *output.as_account().account_id() == account_id)
-    );
+    assert!(selected
+        .outputs
+        .iter()
+        .any(|output| output.is_account() && *output.as_account().account_id() == account_id));
 }
 
 #[test]
@@ -733,12 +725,10 @@ fn nft_sender() {
 
     // Sender + another for amount
     assert_eq!(selected.inputs.len(), 2);
-    assert!(
-        selected
-            .inputs
-            .iter()
-            .any(|input| input.output.is_nft() && *input.output.as_nft().nft_id() == nft_id_1)
-    );
+    assert!(selected
+        .inputs
+        .iter()
+        .any(|input| input.output.is_nft() && *input.output.as_nft().nft_id() == nft_id_1));
     // Provided output + nft
     assert_eq!(selected.outputs.len(), 2);
     assert!(selected.outputs.contains(&inputs[2].output));
@@ -791,12 +781,10 @@ fn nft_sender_zero_id() {
 
     assert!(unsorted_eq(&selected.inputs, &inputs));
     assert_eq!(selected.outputs.len(), 2);
-    assert!(
-        selected
-            .outputs
-            .iter()
-            .any(|output| output.is_nft() && *output.as_nft().nft_id() == nft_id)
-    );
+    assert!(selected
+        .outputs
+        .iter()
+        .any(|output| output.is_nft() && *output.as_nft().nft_id() == nft_id));
 }
 
 #[test]

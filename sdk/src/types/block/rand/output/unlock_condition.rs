@@ -45,6 +45,19 @@ pub fn rand_governor_address_unlock_condition_different_from(account_id: &Accoun
     address.into()
 }
 
+/// Generates a random [`AddressUnlockCondition`] that is different from `account_id`.
+pub fn rand_address_unlock_condition_different_from_account_id(account_id: &AccountId) -> AddressUnlockCondition {
+    let mut address = rand_address();
+
+    if let Address::Account(mut account_address) = &mut address {
+        while account_address.account_id() == account_id {
+            account_address = rand_account_address();
+        }
+    }
+
+    address.into()
+}
+
 /// Generates a random [`AddressUnlockCondition`] that is different from `nft_id`.
 pub fn rand_address_unlock_condition_different_from(nft_id: &NftId) -> AddressUnlockCondition {
     let mut address = rand_address();

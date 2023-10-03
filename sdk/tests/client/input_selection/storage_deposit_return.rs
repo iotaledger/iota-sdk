@@ -317,18 +317,14 @@ fn two_sdrucs_to_different_addresses_both_needed() {
     assert!(unsorted_eq(&selected.inputs, &inputs));
     assert_eq!(selected.outputs.len(), 3);
     assert!(selected.outputs.contains(&outputs[0]));
-    assert!(
-        selected
-            .outputs
-            .iter()
-            .any(|output| { is_remainder_or_return(output, 1_000_000, BECH32_ADDRESS_ED25519_1, None) })
-    );
-    assert!(
-        selected
-            .outputs
-            .iter()
-            .any(|output| { is_remainder_or_return(output, 1_000_000, BECH32_ADDRESS_ED25519_2, None) })
-    );
+    assert!(selected
+        .outputs
+        .iter()
+        .any(|output| { is_remainder_or_return(output, 1_000_000, BECH32_ADDRESS_ED25519_1, None) }));
+    assert!(selected
+        .outputs
+        .iter()
+        .any(|output| { is_remainder_or_return(output, 1_000_000, BECH32_ADDRESS_ED25519_2, None) }));
 }
 
 #[test]
@@ -507,7 +503,6 @@ fn sdruc_required_non_ed25519_in_address_unlock() {
             1_000_000,
             account_id_1,
             BECH32_ADDRESS_ED25519_0,
-            BECH32_ADDRESS_ED25519_0,
             None,
             None,
             None,
@@ -569,7 +564,6 @@ fn useless_sdruc_non_ed25519_in_address_unlock() {
         Account(
             1_000_000,
             account_id_1,
-            BECH32_ADDRESS_ED25519_0,
             BECH32_ADDRESS_ED25519_0,
             None,
             None,
