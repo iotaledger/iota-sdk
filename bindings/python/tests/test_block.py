@@ -13,7 +13,7 @@ def test_basic_block_with_tagged_data_payload():
             "0x9858e80fa0b37b6d9397e23d1f58ce53955a9be1aa8020c0d0e11672996c6db9"],
         "weakParents": [],
         "shallowLikeParents": [],
-        "burnedMana": "180500",
+        "maxBurnedMana": "180500",
         "payload": {
             "type": 5,
             "tag": "0x484f524e4554205370616d6d6572",
@@ -44,7 +44,7 @@ def test_block_wrapper_with_tagged_data_payload():
             "shallowLikeParents": [
                 "0x163007217803006078040b0f51507d3572355a457839095e572f125500401b7d220c772b56165a12"
             ],
-            "burnedMana": "180500",
+            "maxBurnedMana": "180500",
             "payload": {
                 "type": 5,
                 "tag": "0x68656c6c6f20776f726c64",
@@ -78,7 +78,7 @@ def test_basic_block_with_tx_payload():
                           "0xc3f20eb06ce8be091579e2fbe6c109d108983fb0eff2c768e98c61e6fe71b4b7"],
         "weakParents": [],
         "shallowLikeParents": [],
-        "burnedMana": "180500",
+        "maxBurnedMana": "180500",
         "payload": {"type": 6,
                     "essence": {"type": 1,
                                 "networkId": "1856588631910923207",
@@ -259,7 +259,7 @@ def test_basic_block_with_tx_payload_with_tagged_data_payload():
                           "0xedbd8bd428bcff342de0656e368a881022dd353b51f272ed40c604c86915d97d"],
         "weakParents": [],
         "shallowLikeParents": [],
-        "burnedMana": "180500",
+        "maxBurnedMana": "180500",
         "payload": {"type": 6,
                     "essence": {"type": 1,
                                 "networkId": "1856588631910923207",
