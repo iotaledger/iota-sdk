@@ -8,7 +8,7 @@ use crypto::Error as CryptoError;
 use prefix_hex::Error as HexError;
 use primitive_types::U256;
 
-use super::{address::CapabilitiesCount, slot::EpochIndex};
+use super::slot::EpochIndex;
 use crate::types::block::{
     context_input::RewardContextInputIndex,
     input::UtxoInput,
@@ -80,7 +80,7 @@ pub enum Error {
     InvalidInputCount(<InputCount as TryFrom<usize>>::Error),
     InvalidInputOutputIndex(<OutputIndex as TryFrom<u16>>::Error),
     InvalidBech32Hrp(String),
-    InvalidAddressCapabilitiesCount(<CapabilitiesCount as TryFrom<u8>>::Error),
+    InvalidAddressCapabilitiesCount(<u8 as TryFrom<usize>>::Error),
     InvalidBlockWrapperLength(usize),
     InvalidStateMetadataLength(<StateMetadataLength as TryFrom<usize>>::Error),
     InvalidManaValue(u64),

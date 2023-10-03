@@ -19,7 +19,7 @@ pub use self::{
     ed25519::Ed25519Address,
     implicit_account_creation::ImplicitAccountCreationAddress,
     nft::NftAddress,
-    restricted::{AddressCapabilities, AddressCapabilityFlag, CapabilitiesCount, RestrictedAddress},
+    restricted::{AddressCapabilities, AddressCapabilityFlag, RestrictedAddress},
 };
 use crate::types::block::{
     output::{Output, OutputId},
@@ -47,7 +47,7 @@ pub enum Address {
     /// An implicit account creation address.
     #[packable(tag = ImplicitAccountCreationAddress::KIND)]
     ImplicitAccountCreation(ImplicitAccountCreationAddress),
-    /// A Restricted address.
+    /// An address with restricted capabilities.
     #[packable(tag = RestrictedAddress::KIND)]
     #[from(ignore)]
     Restricted(Box<RestrictedAddress>),

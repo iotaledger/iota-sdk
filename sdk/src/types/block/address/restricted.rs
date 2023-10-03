@@ -2,19 +2,16 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use derive_more::Deref;
-use getset::{CopyGetters, Getters};
-use packable::{bounded::BoundedU8, error::UnpackErrorExt, Packable, PackableExt};
+use getset::Getters;
+use packable::{error::UnpackErrorExt, prefix::BoxedSlicePrefix, Packable, PackableExt};
 
 use super::Address;
 use crate::types::block::Error;
 
-pub type CapabilitiesCount = BoundedU8<0, 1>;
-
-#[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Getters, CopyGetters, Packable)]
+#[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Getters, Packable)]
+#[getset(get = "pub")]
 pub struct RestrictedAddress {
-    #[getset(get = "pub")]
     address: Address,
-    #[getset(get_copy = "pub")]
     allowed_capabilities: AddressCapabilities,
 }
 
@@ -113,7 +110,7 @@ impl AddressCapabilityFlag {
         }
     }
 
-    pub fn iter() -> impl Iterator<Item = (usize, Self)> {
+    pub fn all() -> impl Iterator<Item = Self> {
         [
             Self::NativeTokens,
             Self::Mana,
@@ -125,20 +122,51 @@ impl AddressCapabilityFlag {
             Self::DelegationOutputs,
         ]
         .into_iter()
-        .map(|f| (f.index(), f))
     }
 }
 
-#[derive(Copy, Clone, Debug, Default, Eq, PartialEq, Ord, PartialOrd, Hash, Deref)]
+#[derive(Clone, Debug, Default, Eq, PartialEq, Ord, PartialOrd, Hash, Deref)]
 #[repr(transparent)]
-pub struct AddressCapabilities([u8; 1]);
+pub struct AddressCapabilities(BoxedSlicePrefix<u8, u8>);
 
 impl AddressCapabilities {
-    pub const NONE: Self = Self([0]);
-    pub const ALL: Self = Self([u8::MAX]);
-    pub const LENGTH: usize = 1;
+    pub fn all() -> Self {
+        let mut res = Self::default();
+        res.set_all();
+        res
+    }
+
+    pub fn none() -> Self {
+        Self::default()
+    }
+
+    pub fn is_all(&self) -> bool {
+        AddressCapabilityFlag::all().all(|flag| self.has_capability(flag))
+    }
+
+    pub fn is_none(&self) -> bool {
+        self.0.iter().all(|b| 0.eq(b))
+    }
+
+    pub fn set_all(&mut self) -> &mut Self {
+        for flag in AddressCapabilityFlag::all() {
+            self.add_capability(flag);
+        }
+        self
+    }
+
+    pub fn set_none(&mut self) -> &mut Self {
+        *self = Default::default();
+        self
+    }
 
     pub fn add_capability(&mut self, flag: AddressCapabilityFlag) -> &mut Self {
+        if self.0.len() <= flag.index() {
+            let mut v = Box::<[_]>::from(self.0.clone()).into_vec();
+            v.resize(flag.index() + 1, 0);
+            // Unwrap: safe because the indexes are within u8 bounds
+            self.0 = v.into_boxed_slice().try_into().unwrap();
+        }
         self.0[flag.index()] |= flag.as_byte();
         self
     }
@@ -161,20 +189,23 @@ impl AddressCapabilities {
     }
 
     pub fn has_capability(&self, flag: AddressCapabilityFlag) -> bool {
-        self.0[flag.index()] & flag.as_byte() == flag.as_byte()
+        self.0
+            .get(flag.index())
+            .map(|byte| byte & flag.as_byte() == flag.as_byte())
+            .unwrap_or_default()
     }
 
     pub fn has_capabilities(&self, flags: impl IntoIterator<Item = AddressCapabilityFlag>) -> bool {
         flags.into_iter().all(|flag| self.has_capability(flag))
     }
 
-    pub fn split(self) -> impl Iterator<Item = AddressCapabilityFlag> {
+    pub fn split<'a>(&'a self) -> impl Iterator<Item = AddressCapabilityFlag> + 'a {
         self.0
-            .into_iter()
+            .iter()
             .enumerate()
-            .map(|(i, byte)| {
-                AddressCapabilityFlag::iter()
-                    .filter_map(move |(idx, f)| (i == idx && byte & f.as_byte() == f.as_byte()).then_some(f))
+            .map(|(idx, byte)| {
+                AddressCapabilityFlag::all()
+                    .filter_map(move |f| (idx == f.index() && byte & f.as_byte() == f.as_byte()).then_some(f))
             })
             .flatten()
     }
@@ -191,8 +222,7 @@ impl Packable for AddressCapabilities {
     type UnpackVisitor = ();
 
     fn pack<P: packable::packer::Packer>(&self, packer: &mut P) -> Result<(), P::Error> {
-        if self == &Self::NONE {
-            (self.0.len() as u8).pack(packer)?;
+        if !self.is_none() {
             self.0.pack(packer)?;
         } else {
             0_u8.pack(packer)?;
@@ -204,9 +234,15 @@ impl Packable for AddressCapabilities {
         unpacker: &mut U,
         visitor: &Self::UnpackVisitor,
     ) -> Result<Self, packable::error::UnpackError<Self::UnpackError, U::Error>> {
-        CapabilitiesCount::unpack::<_, VERIFY>(unpacker, visitor)
-            .map_packable_err(Error::InvalidAddressCapabilitiesCount)?;
-        Ok(Self(<[u8; 1]>::unpack::<_, VERIFY>(unpacker, visitor).coerce()?))
+        use packable::prefix::UnpackPrefixError;
+        Ok(Self(
+            BoxedSlicePrefix::unpack::<_, VERIFY>(unpacker, visitor)
+                // TODO: not sure if this is the best way to do this
+                .map_packable_err(|e| match e {
+                    UnpackPrefixError::Item(i) | UnpackPrefixError::Prefix(i) => i,
+                })
+                .coerce()?,
+        ))
     }
 }
 
@@ -225,7 +261,7 @@ pub(crate) mod dto {
         pub address: Address,
         // TODO: is this format right?
         #[serde(with = "prefix_hex_bytes")]
-        pub allowed_capabilities: [u8; 1],
+        pub allowed_capabilities: Box<[u8]>,
     }
 
     impl core::ops::Deref for RestrictedAddressDto {
@@ -241,7 +277,7 @@ pub(crate) mod dto {
             Self {
                 kind: RestrictedAddress::KIND,
                 address: value.address.clone(),
-                allowed_capabilities: *value.allowed_capabilities,
+                allowed_capabilities: value.allowed_capabilities.iter().copied().collect(),
             }
         }
     }
@@ -250,7 +286,12 @@ pub(crate) mod dto {
         type Error = Error;
 
         fn try_from(value: RestrictedAddressDto) -> Result<Self, Self::Error> {
-            Ok(Self::new(value.address)?.with_allowed_capabilities(AddressCapabilities(value.allowed_capabilities)))
+            Ok(Self::new(value.address)?.with_allowed_capabilities(AddressCapabilities(
+                value
+                    .allowed_capabilities
+                    .try_into()
+                    .map_err(Error::InvalidAddressCapabilitiesCount)?,
+            )))
         }
     }
 

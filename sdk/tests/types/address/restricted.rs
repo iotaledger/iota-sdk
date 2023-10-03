@@ -10,16 +10,19 @@ use packable::PackableExt;
 #[test]
 fn capabilities() {
     use AddressCapabilityFlag as Flag;
-    let address = RestrictedAddress::new(rand_ed25519_address())
-        .unwrap()
-        .with_allowed_capabilities(AddressCapabilities::NONE);
-    let mut capabilities = address.allowed_capabilities();
+    let address = RestrictedAddress::new(rand_ed25519_address()).unwrap();
+    let mut capabilities = address.allowed_capabilities().clone();
 
     assert!(!capabilities.has_capability(Flag::NativeTokens));
     capabilities.add_capability(Flag::NativeTokens);
     assert!(capabilities.has_capabilities([Flag::NativeTokens]));
-    assert!(!capabilities.has_capabilities(AddressCapabilities::ALL.split()));
-    assert_ne!(capabilities, AddressCapabilities::NONE);
+    assert!(!capabilities.has_capabilities(AddressCapabilities::all().split()));
+    assert!(!capabilities.is_none());
+    assert!(!capabilities.is_all());
+    capabilities.set_all();
+    assert!(capabilities.is_all());
+    assert!(capabilities.has_capabilities(Flag::all()));
+    capabilities.set_none();
 
     assert!(!capabilities.has_capability(Flag::Mana));
     capabilities.set_capabilities([Flag::Mana, Flag::DelegationOutputs]);
@@ -57,13 +60,13 @@ fn restricted_ed25519() {
     );
 
     // Restricted Ed25519 Address (Every Capability Allowed)
-    address.set_allowed_capabilities(AddressCapabilities::ALL);
+    address.set_allowed_capabilities(AddressCapabilities::all());
     assert_eq!(
         address.clone().to_bech32_unchecked("iota"),
         "iota19qqwlhq39mlzv2esf08n0xexcvd66q5lv9hw8mz25c695dnwfj0y8gcplupydhwt"
     );
 
-    address.set_allowed_capabilities(AddressCapabilities::NONE);
+    address.set_allowed_capabilities(AddressCapabilities::none());
     assert_eq!(
         address.clone().to_bech32_unchecked("iota"),
         "iota19qqwlhq39mlzv2esf08n0xexcvd66q5lv9hw8mz25c695dnwfj0y8gcq3l9hek"
@@ -99,13 +102,13 @@ fn restricted_account() {
     );
 
     // Restricted Account Address (Every Capability Allowed)
-    address.set_allowed_capabilities(AddressCapabilities::ALL);
+    address.set_allowed_capabilities(AddressCapabilities::all());
     assert_eq!(
         address.clone().to_bech32_unchecked("iota"),
         "iota19qy0rsq3ld2d7jjwtvr5vffklwkvw7dlsrxytcpmcdqssdjc0d80exqplurds6sq"
     );
 
-    address.set_allowed_capabilities(AddressCapabilities::NONE);
+    address.set_allowed_capabilities(AddressCapabilities::none());
     assert_eq!(
         address.clone().to_bech32_unchecked("iota"),
         "iota19qy0rsq3ld2d7jjwtvr5vffklwkvw7dlsrxytcpmcdqssdjc0d80exqqdyjudm"
@@ -141,13 +144,13 @@ fn restricted_nft() {
     );
 
     // Restricted NFT Address (Every Capability Allowed)
-    address.set_allowed_capabilities(AddressCapabilities::ALL);
+    address.set_allowed_capabilities(AddressCapabilities::all());
     assert_eq!(
         address.clone().to_bech32_unchecked("iota"),
         "iota19qgvw2n94efawzue54lhycmml5w4afa6526t5z2unzdkvlfc2kqg0kcpluts738a"
     );
 
-    address.set_allowed_capabilities(AddressCapabilities::NONE);
+    address.set_allowed_capabilities(AddressCapabilities::none());
     assert_eq!(
         address.clone().to_bech32_unchecked("iota"),
         "iota19qgvw2n94efawzue54lhycmml5w4afa6526t5z2unzdkvlfc2kqg0kcqek0lex"
