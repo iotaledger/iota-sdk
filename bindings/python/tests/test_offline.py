@@ -32,7 +32,7 @@ def test_mnemonic_address_generation():
         assert test['bech32_address'] == generated_address[0]
 
 
-@pytest.mark.skip(reason="temporarily skipped")
+@pytest.mark.skip(reason="https://github.com/iotaledger/iota-sdk/issues/1387")
 def test_sign_verify_ed25519():
     secret_manager = MnemonicSecretManager(
         "acoustic trophy damage hint search taste love bicycle foster cradle brown govern endless depend situate athlete pudding blame question genius transfer van random vast")

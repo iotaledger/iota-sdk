@@ -6,7 +6,7 @@ import pytest
 import shutil
 
 
-@pytest.mark.skip(reason="temporarily skipped")
+@pytest.mark.skip(reason="https://github.com/iotaledger/iota-sdk/issues/1387")
 def test_address_generation_iota():
     db_path = './test_address_generation_iota'
     shutil.rmtree(db_path, ignore_errors=True)
@@ -28,7 +28,7 @@ def test_address_generation_iota():
     shutil.rmtree(db_path, ignore_errors=True)
 
 
-@pytest.mark.skip(reason="temporarily skipped")
+@pytest.mark.skip(reason="https://github.com/iotaledger/iota-sdk/issues/1387")
 def test_address_generation_shimmer():
     db_path = './test_address_generation_shimmer'
     shutil.rmtree(db_path, ignore_errors=True)

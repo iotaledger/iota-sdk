@@ -8,7 +8,7 @@ import unittest
 
 
 class WalletDestroy(unittest.TestCase):
-    @pytest.mark.skip(reason="temporarily skipped")
+    @pytest.mark.skip(reason="https://github.com/iotaledger/iota-sdk/issues/1387")
     def test_wallet_destroy(self):
         db_path = './test_wallet_destroy'
         shutil.rmtree(db_path, ignore_errors=True)
