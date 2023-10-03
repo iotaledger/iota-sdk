@@ -63,7 +63,7 @@ fn transaction_id() {
       "essence":{
         "type":2,
         "networkId":"3650798313638353144",
-        "creationSlot":"28",
+        "creationSlot":28,
         "contextInputs":[],
         "inputs":[
           {

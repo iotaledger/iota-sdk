@@ -139,7 +139,7 @@ fn dto_mismatch_version() {
         "issuerId": "0x0000000000000000000000000000000000000000000000000000000000000000",
         "block": {
             "type":1,
-            "strongParents": [ "0x417c5700320912627b604d4c376a5a1663634b09703538570b1d52440b3e474639490b100a6f3608" ],
+            "strongParents": [ "0x417c5700320912627b604d4c376a5a1663634b09703538570b1d52440b3e474639490b10" ],
             "weakParents": [],
             "shallowLikeParents": [],
             "highestSupportedVersion": 3,
@@ -180,7 +180,7 @@ fn dto_mismatch_network_id() {
         "issuerId": "0x0000000000000000000000000000000000000000000000000000000000000000",
         "block": {
             "type":1,
-            "strongParents": [ "0x417c5700320912627b604d4c376a5a1663634b09703538570b1d52440b3e474639490b100a6f3608" ],
+            "strongParents": [ "0x417c5700320912627b604d4c376a5a1663634b09703538570b1d52440b3e474639490b10" ],
             "weakParents": [],
             "shallowLikeParents": [],
             "highestSupportedVersion": 3,
