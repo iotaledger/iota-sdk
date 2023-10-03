@@ -524,7 +524,6 @@ fn merge_unlocks(
     // Assuming inputs_data is ordered by address type
     for (current_block_index, input) in prepared_transaction_data.inputs_data.iter().enumerate() {
         // Get the address that is required to unlock the input
-        let TransactionEssence::Regular(regular) = &prepared_transaction_data.essence;
         let (input_address, _) = input
             .output
             .required_and_unlocked_address(slot_index, input.output_metadata.output_id())?;

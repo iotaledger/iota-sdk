@@ -239,7 +239,6 @@ impl InputSelection {
     // Inputs need to be sorted before signing, because the reference unlock conditions can only reference a lower index
     pub(crate) fn sort_input_signing_data(
         mut inputs: Vec<InputSigningData>,
-        outputs: &[Output],
         slot_index: SlotIndex,
     ) -> Result<Vec<InputSigningData>, Error> {
         // initially sort by output to make it deterministic
@@ -376,7 +375,7 @@ impl InputSelection {
         self.validate_transitions()?;
 
         Ok(Selected {
-            inputs: Self::sort_input_signing_data(self.selected_inputs, &self.outputs, self.slot_index)?,
+            inputs: Self::sort_input_signing_data(self.selected_inputs, self.slot_index)?,
             outputs: self.outputs,
             remainder,
         })

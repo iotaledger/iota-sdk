@@ -349,16 +349,6 @@ name = "destroy_account_output"
 path = "examples/how_tos/account/destroy.rs"
 required-features = ["wallet", "stronghold"]
 
-[[example]]
-name = "state_transition"
-path = "examples/how_tos/account/state_transition.rs"
-required-features = ["wallet", "stronghold"]
-
-[[example]]
-name = "governance_transition"
-path = "examples/how_tos/account/governance_transition.rs"
-required-features = ["wallet", "stronghold"]
-
 # Outputs
 
 [[example]]

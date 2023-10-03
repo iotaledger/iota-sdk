@@ -952,7 +952,7 @@ async fn print_address(account: &Account, address: &Bip44Address) -> Result<(), 
                 // Output might be associated with the address, but can't be unlocked by it, so we check that here.
                 let (required_address, _) = output_data
                     .output
-                    .required_and_unlocked_address(slot_index, output_id, None)?;
+                    .required_and_unlocked_address(slot_index, output_id)?;
 
                 if address.address().as_ref() == &required_address {
                     if let Some(nts) = output_data.output.native_tokens() {

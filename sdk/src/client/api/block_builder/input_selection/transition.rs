@@ -55,7 +55,7 @@ impl InputSelection {
         // Remove potential sender feature because it will not be needed anymore as it only needs to be verified once.
         let features = input.features().iter().filter(|feature| !feature.is_sender()).cloned();
 
-        let mut builder = AccountOutputBuilder::from(input)
+        let builder = AccountOutputBuilder::from(input)
             .with_account_id(account_id)
             .with_foundry_counter(u32::max(highest_foundry_serial_number, input.foundry_counter()))
             .with_features(features);

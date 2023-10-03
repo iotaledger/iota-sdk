@@ -8,7 +8,6 @@ use packable::{
     bounded::BoundedU16,
     error::{UnpackError, UnpackErrorExt},
     packer::Packer,
-    prefix::BoxedSlicePrefix,
     unpacker::Unpacker,
     Packable,
 };
@@ -457,8 +456,8 @@ impl AccountOutput {
     pub(crate) fn transition_inner(
         current_state: &Self,
         next_state: &Self,
-        input_chains: &HashMap<ChainId, &Output>,
-        outputs: &[Output],
+        _input_chains: &HashMap<ChainId, &Output>,
+        _outputs: &[Output],
     ) -> Result<(), StateTransitionError> {
         if current_state.immutable_features != next_state.immutable_features {
             return Err(StateTransitionError::MutatedImmutableField);
@@ -580,8 +579,6 @@ impl Packable for AccountOutput {
 
         let native_tokens = NativeTokens::unpack::<_, VERIFY>(unpacker, &())?;
         let account_id = AccountId::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
-        let state_metadata = BoxedSlicePrefix::<u8, StateMetadataLength>::unpack::<_, VERIFY>(unpacker, &())
-            .map_packable_err(|err| Error::InvalidStateMetadataLength(err.into_prefix_err().into()))?;
 
         let foundry_counter = u32::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
 
@@ -732,7 +729,6 @@ pub(crate) mod dto {
             mana: u64,
             native_tokens: Option<Vec<NativeToken>>,
             account_id: &AccountId,
-            state_metadata: Option<Vec<u8>>,
             foundry_counter: Option<u32>,
             unlock_conditions: Vec<UnlockConditionDto>,
             features: Option<Vec<Feature>>,
@@ -813,7 +809,6 @@ mod tests {
             output.mana(),
             Some(output.native_tokens().to_vec()),
             output.account_id(),
-            output.state_metadata().to_owned().into(),
             output.foundry_counter().into(),
             output.unlock_conditions().iter().map(Into::into).collect(),
             Some(output.features().to_vec()),
@@ -834,7 +829,6 @@ mod tests {
                 builder.mana,
                 Some(builder.native_tokens.iter().copied().collect()),
                 &builder.account_id,
-                builder.state_metadata.to_owned().into(),
                 builder.foundry_counter,
                 builder.unlock_conditions.iter().map(Into::into).collect(),
                 Some(builder.features.iter().cloned().collect()),

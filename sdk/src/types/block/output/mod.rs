@@ -358,7 +358,7 @@ impl Output {
                 *output.unlock_conditions().locked_address(output.address(), slot_index),
                 None,
             )),
-            Self::Anchor(output) => todo!(),
+            Self::Anchor(_) => todo!(),
         }
     }
 

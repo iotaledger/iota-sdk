@@ -44,7 +44,6 @@ async fn main() -> Result<()> {
 
     // Account id needs to be null the first time
     let account_output = AccountOutputBuilder::new_with_minimum_storage_deposit(rent_structure, AccountId::null())
-        .with_state_metadata(metadata)
         .add_feature(SenderFeature::new(address))
         .add_feature(MetadataFeature::new(metadata)?)
         .add_immutable_feature(IssuerFeature::new(address))

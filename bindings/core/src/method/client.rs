@@ -38,8 +38,6 @@ pub enum ClientMethod {
         mana: u64,
         native_tokens: Option<Vec<NativeToken>>,
         account_id: AccountId,
-        state_index: Option<u32>,
-        state_metadata: Option<String>,
         foundry_counter: Option<u32>,
         unlock_conditions: Vec<UnlockConditionDto>,
         features: Option<Vec<Feature>>,

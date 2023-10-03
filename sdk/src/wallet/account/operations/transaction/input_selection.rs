@@ -76,8 +76,6 @@ where
             &account_details,
             account_details.unspent_outputs.values(),
             slot_index,
-            &outputs,
-            burn,
             custom_inputs.as_ref(),
             mandatory_inputs.as_ref(),
         )?;
@@ -227,8 +225,6 @@ fn filter_inputs(
     account: &AccountDetails,
     available_outputs: Values<'_, OutputId, OutputData>,
     slot_index: SlotIndex,
-    outputs: &[Output],
-    burn: Option<&Burn>,
     custom_inputs: Option<&HashSet<OutputId>>,
     mandatory_inputs: Option<&HashSet<OutputId>>,
 ) -> crate::wallet::Result<Vec<InputSigningData>> {
