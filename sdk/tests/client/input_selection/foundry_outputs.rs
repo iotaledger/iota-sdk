@@ -11,8 +11,8 @@ use iota_sdk::{
     types::block::{
         address::{AccountAddress, Address},
         output::{
-            unlock_condition::{GovernorAddressUnlockCondition, StateControllerAddressUnlockCondition},
-            AccountId, AccountOutputBuilder, FoundryId, Output, SimpleTokenScheme, TokenId,
+            unlock_condition::AddressUnlockCondition, AccountId, AccountOutputBuilder, FoundryId, Output,
+            SimpleTokenScheme, TokenId,
         },
         protocol::protocol_parameters,
         rand::output::rand_output_metadata,
@@ -226,10 +226,7 @@ fn melt_native_tokens() {
         ),
     ]);
     let account_output = AccountOutputBuilder::new_with_amount(1_000_000, account_id_1)
-        .add_unlock_condition(StateControllerAddressUnlockCondition::new(
-            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-        ))
-        .add_unlock_condition(GovernorAddressUnlockCondition::new(
+        .add_unlock_condition(AddressUnlockCondition::new(
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         ))
         .with_foundry_counter(1)
@@ -464,10 +461,7 @@ fn simple_foundry_transition_basic_not_needed() {
         ),
     ]);
     let account_output = AccountOutputBuilder::new_with_amount(2_000_000, account_id_1)
-        .add_unlock_condition(StateControllerAddressUnlockCondition::new(
-            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-        ))
-        .add_unlock_condition(GovernorAddressUnlockCondition::new(
+        .add_unlock_condition(AddressUnlockCondition::new(
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         ))
         .with_foundry_counter(1)
@@ -534,10 +528,7 @@ fn simple_foundry_transition_basic_not_needed_with_remainder() {
         ),
     ]);
     let account_output = AccountOutputBuilder::new_with_amount(2_000_000, account_id_1)
-        .add_unlock_condition(StateControllerAddressUnlockCondition::new(
-            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-        ))
-        .add_unlock_condition(GovernorAddressUnlockCondition::new(
+        .add_unlock_condition(AddressUnlockCondition::new(
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         ))
         .with_foundry_counter(1)
@@ -679,10 +670,7 @@ fn mint_and_burn_at_the_same_time() {
         Some(vec![(&token_id.to_string(), 100)]),
     )]);
     let account_output = AccountOutputBuilder::new_with_amount(2_000_000, account_id_1)
-        .add_unlock_condition(StateControllerAddressUnlockCondition::new(
-            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-        ))
-        .add_unlock_condition(GovernorAddressUnlockCondition::new(
+        .add_unlock_condition(AddressUnlockCondition::new(
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         ))
         .with_foundry_counter(1)
@@ -735,10 +723,7 @@ fn take_amount_from_account_and_foundry_to_fund_basic() {
         ),
     ]);
     let account_output = AccountOutputBuilder::new_with_amount(2_000_000, account_id_1)
-        .add_unlock_condition(StateControllerAddressUnlockCondition::new(
-            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-        ))
-        .add_unlock_condition(GovernorAddressUnlockCondition::new(
+        .add_unlock_condition(AddressUnlockCondition::new(
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         ))
         .with_foundry_counter(1)
@@ -942,10 +927,7 @@ fn foundry_in_outputs_and_required() {
         None,
     )]);
     let account_output = AccountOutputBuilder::new_with_amount(1_251_500, account_id_2)
-        .add_unlock_condition(StateControllerAddressUnlockCondition::new(
-            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-        ))
-        .add_unlock_condition(GovernorAddressUnlockCondition::new(
+        .add_unlock_condition(AddressUnlockCondition::new(
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         ))
         .with_foundry_counter(1)

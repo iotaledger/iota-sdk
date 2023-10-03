@@ -20,30 +20,12 @@ impl InputSelection {
     // Checks if an available input can unlock a given ED25519 address.
     // In case an account input is selected, also tells if it needs to be state or governance transitioned.
     fn available_has_ed25519_address(&self, input: &InputSigningData, address: &Address) -> bool {
-        // TODO remove?
-        if input.output.is_account() {
-            // PANIC: safe to unwrap as outputs without unlock conditions have been filtered out already.
-            let unlock_conditions = input.output.unlock_conditions().unwrap();
+        let (required_address, _) = input
+            .output
+            .required_and_unlocked_address(self.slot_index, input.output_id())
+            .unwrap();
 
-            // PANIC: safe to unwrap as accounts have a state controller address.
-            if unlock_conditions.state_controller_address().unwrap().address() == address {
-                return self.addresses.contains(address);
-            }
-
-            // PANIC: safe to unwrap as accounts have a governor address.
-            if unlock_conditions.governor_address().unwrap().address() == address {
-                return self.addresses.contains(address);
-            }
-
-            false
-        } else {
-            let (required_address, _) = input
-                .output
-                .required_and_unlocked_address(self.slot_index, input.output_id())
-                .unwrap();
-
-            &required_address == address
-        }
+        &required_address == address
     }
 
     /// Fulfills an ed25519 sender requirement by selecting an available input that unlocks its address.

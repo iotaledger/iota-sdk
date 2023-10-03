@@ -9,10 +9,7 @@ use iota_sdk::types::{
         rand::output::{
             feature::{rand_issuer_feature, rand_metadata_feature, rand_sender_feature},
             rand_account_id, rand_account_output,
-            unlock_condition::{
-                rand_address_unlock_condition_different_from_account_id,
-                rand_state_controller_address_unlock_condition_different_from,
-            },
+            unlock_condition::rand_address_unlock_condition_different_from_account_id,
         },
     },
     ValidationParams,
@@ -60,9 +57,6 @@ fn builder() {
 
     let output = builder
         .with_minimum_storage_deposit(protocol_parameters.rent_structure())
-        .add_unlock_condition(rand_state_controller_address_unlock_condition_different_from(
-            &account_id,
-        ))
         .add_unlock_condition(rand_address_unlock_condition_different_from_account_id(&account_id))
         .with_features([Feature::from(metadata.clone()), sender_1.into()])
         .with_immutable_features([Feature::from(metadata.clone()), issuer_1.into()])

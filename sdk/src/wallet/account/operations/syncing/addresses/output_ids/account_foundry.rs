@@ -26,6 +26,7 @@ impl<S: 'static + SecretManage> Account<S>
 where
     crate::wallet::Error: From<S::Error>,
 {
+    // TODO
     /// Returns output ids of account outputs
     pub(crate) async fn get_account_and_foundry_output_ids(
         &self,
