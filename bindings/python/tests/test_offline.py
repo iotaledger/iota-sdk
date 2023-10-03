@@ -14,7 +14,6 @@ with open('../../sdk/tests/client/fixtures/test_vectors.json') as json_file:
 client = Client()
 
 
-@pytest.mark.skip(reason="temporarily skipped")
 def test_mnemonic_address_generation():
     mnemonic_address_test_cases = tv['general']['address_generations']
 

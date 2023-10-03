@@ -107,7 +107,7 @@ def test_basic_block_with_tx_payload():
 
 
 # FIXME: use proper serialized format of 2.0 block with tx payload
-@pytest.mark.skip(reason="temporarily skipped until 2.0 blocks in use")
+@pytest.mark.skip(reason="temporarily skipped")
 def test_basic_block_with_tx_payload_all_output_types():
     block_dict = {
         "type": 0,
@@ -249,7 +249,7 @@ def test_basic_block_with_tx_payload_all_output_types():
 
 
 # FIXME: use proper serialized format of 2.0 block with tx payload
-@pytest.mark.skip(reason="temporarily skipped until 2.0 blocks in use")
+@pytest.mark.skip(reason="temporarily skipped")
 def test_basic_block_with_tx_payload_with_tagged_data_payload():
     block_dict = {
         "type": 0,

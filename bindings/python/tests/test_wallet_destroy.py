@@ -41,7 +41,6 @@ class WalletDestroy(unittest.TestCase):
             0].address
         shutil.rmtree(db_path, ignore_errors=True)
 
-    @pytest.mark.skip(reason="temporarily skipped")
     def test_wallet_destroy_error(self):
         db_path = './test_wallet_destroy_error'
         shutil.rmtree(db_path, ignore_errors=True)
