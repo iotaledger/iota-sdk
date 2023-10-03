@@ -66,9 +66,9 @@ impl core::fmt::Display for RestrictedAddress {
 pub enum AddressCapabilityFlag {
     NativeTokens,
     Mana,
-    TimelockedOutputs,
-    ExpiringOutputs,
-    StorageDepositOutputs,
+    OutputsWithTimelock,
+    OutputsWithExpiration,
+    OutputsWithStorageDeposit,
     AccountOutputs,
     NftOutputs,
     DelegationOutputs,
@@ -77,9 +77,9 @@ pub enum AddressCapabilityFlag {
 impl AddressCapabilityFlag {
     const NATIVE_TOKENS: u8 = 0b00000001;
     const MANA: u8 = 0b00000010;
-    const TIMELOCKED_OUTPUTS: u8 = 0b00000100;
-    const EXPIRING_OUTPUTS: u8 = 0b00001000;
-    const STORAGE_DEPOSIT_OUTPUTS: u8 = 0b00010000;
+    const OUTPUTS_WITH_TIMELOCK: u8 = 0b00000100;
+    const OUTPUTS_WITH_EXPIRATION: u8 = 0b00001000;
+    const OUTPUTS_WITH_STORAGE_DEPOSIT: u8 = 0b00010000;
     const ACCOUNT_OUTPUTS: u8 = 0b00100000;
     const NFT_OUTPUTS: u8 = 0b01000000;
     const DELEGATION_OUTPUTS: u8 = 0b10000000;
@@ -88,9 +88,9 @@ impl AddressCapabilityFlag {
         match self {
             AddressCapabilityFlag::NativeTokens => AddressCapabilityFlag::NATIVE_TOKENS,
             AddressCapabilityFlag::Mana => AddressCapabilityFlag::MANA,
-            AddressCapabilityFlag::TimelockedOutputs => AddressCapabilityFlag::TIMELOCKED_OUTPUTS,
-            AddressCapabilityFlag::ExpiringOutputs => AddressCapabilityFlag::EXPIRING_OUTPUTS,
-            AddressCapabilityFlag::StorageDepositOutputs => AddressCapabilityFlag::STORAGE_DEPOSIT_OUTPUTS,
+            AddressCapabilityFlag::OutputsWithTimelock => AddressCapabilityFlag::OUTPUTS_WITH_TIMELOCK,
+            AddressCapabilityFlag::OutputsWithExpiration => AddressCapabilityFlag::OUTPUTS_WITH_EXPIRATION,
+            AddressCapabilityFlag::OutputsWithStorageDeposit => AddressCapabilityFlag::OUTPUTS_WITH_STORAGE_DEPOSIT,
             AddressCapabilityFlag::AccountOutputs => AddressCapabilityFlag::ACCOUNT_OUTPUTS,
             AddressCapabilityFlag::NftOutputs => AddressCapabilityFlag::NFT_OUTPUTS,
             AddressCapabilityFlag::DelegationOutputs => AddressCapabilityFlag::DELEGATION_OUTPUTS,
@@ -101,9 +101,9 @@ impl AddressCapabilityFlag {
         match self {
             AddressCapabilityFlag::NativeTokens
             | AddressCapabilityFlag::Mana
-            | AddressCapabilityFlag::TimelockedOutputs
-            | AddressCapabilityFlag::ExpiringOutputs
-            | AddressCapabilityFlag::StorageDepositOutputs
+            | AddressCapabilityFlag::OutputsWithTimelock
+            | AddressCapabilityFlag::OutputsWithExpiration
+            | AddressCapabilityFlag::OutputsWithStorageDeposit
             | AddressCapabilityFlag::AccountOutputs
             | AddressCapabilityFlag::NftOutputs
             | AddressCapabilityFlag::DelegationOutputs => 0,
@@ -114,9 +114,9 @@ impl AddressCapabilityFlag {
         [
             Self::NativeTokens,
             Self::Mana,
-            Self::TimelockedOutputs,
-            Self::ExpiringOutputs,
-            Self::StorageDepositOutputs,
+            Self::OutputsWithTimelock,
+            Self::OutputsWithExpiration,
+            Self::OutputsWithStorageDeposit,
             Self::AccountOutputs,
             Self::NftOutputs,
             Self::DelegationOutputs,
