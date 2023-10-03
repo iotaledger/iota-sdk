@@ -501,6 +501,8 @@ pub(crate) mod dto {
         pub inputs_commitment: String,
         pub outputs: Vec<OutputDto>,
         pub allotments: Vec<ManaAllotmentDto>,
+        // TODO: what does the API want?
+        pub capabilities: u8,
         #[serde(default, skip_serializing_if = "Option::is_none")]
         pub payload: Option<PayloadDto>,
     }
@@ -516,6 +518,7 @@ pub(crate) mod dto {
                 inputs_commitment: value.inputs_commitment().to_string(),
                 outputs: value.outputs().iter().map(Into::into).collect(),
                 allotments: value.mana_allotments().iter().map(Into::into).collect(),
+                capabilities: value.capabilities().0,
                 payload: match value.payload() {
                     Some(p @ Payload::TaggedData(_)) => Some(p.into()),
                     Some(_) => unimplemented!(),
@@ -550,7 +553,8 @@ pub(crate) mod dto {
                 .with_context_inputs(dto.context_inputs)
                 .with_inputs(dto.inputs)
                 .with_outputs(outputs)
-                .with_mana_allotments(mana_allotments);
+                .with_mana_allotments(mana_allotments)
+                .with_capabilities(dto.capabilities);
 
             builder = if let Some(p) = dto.payload {
                 if let PayloadDto::TaggedData(i) = p {
