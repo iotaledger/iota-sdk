@@ -21,7 +21,7 @@ pub use self::{
     basic::{BasicBlock, BasicBlockBuilder},
     parent::Parents,
     validation::{ValidationBlock, ValidationBlockBuilder},
-    wrapper::{BlockBuilder, BlockHeader, BlockWrapper},
+    wrapper::{BlockHeader, BlockWrapper, BlockWrapperBuilder},
 };
 use crate::types::block::{
     protocol::{ProtocolParameters, ProtocolParametersHash},

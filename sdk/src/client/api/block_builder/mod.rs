@@ -8,9 +8,9 @@ pub use self::transaction::verify_semantic;
 use crate::{
     client::{ClientInner, Result},
     types::block::{
-        core::{basic, BasicBlockBuilder, BlockBuilder, BlockWrapper},
+        core::{basic, BlockWrapper, BlockWrapperBuilder},
         payload::Payload,
-        IssuerId,
+        Block, IssuerId,
     },
 };
 
@@ -21,7 +21,7 @@ impl ClientInner {
         issuing_time: Option<u64>,
         strong_parents: Option<basic::StrongParents>,
         payload: Option<Payload>,
-    ) -> Result<BlockBuilder<BasicBlockBuilder>> {
+    ) -> Result<BlockWrapperBuilder> {
         let issuance = self.get_issuance().await?;
         let strong_parents = strong_parents.unwrap_or(issuance.strong_parents()?);
 
@@ -40,18 +40,18 @@ impl ClientInner {
 
         let protocol_params = self.get_protocol_parameters().await?;
 
-        Ok(BlockWrapper::build_basic(
+        Ok(BlockWrapper::build(
             protocol_params.version(),
             protocol_params.network_id(),
             issuance.commitment.id(),
             issuance.latest_finalized_slot,
             issuer_id,
-            strong_parents,
-            0, // TODO: burned mana calculation
+            Block::build_basic(strong_parents, 0) // TODO: burned mana calculation
+                .with_weak_parents(issuance.weak_parents()?)
+                .with_shallow_like_parents(issuance.shallow_like_parents()?)
+                .with_payload(payload)
+                .finish_block()?,
         )
-        .with_issuing_time(issuing_time)
-        .with_weak_parents(issuance.weak_parents()?)
-        .with_shallow_like_parents(issuance.shallow_like_parents()?)
-        .with_payload(payload))
+        .with_issuing_time(issuing_time))
     }
 }

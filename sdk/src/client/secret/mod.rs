@@ -53,7 +53,7 @@ use crate::{
     },
     types::block::{
         address::{Address, Ed25519Address},
-        core::{BasicBlockBuilder, BlockBuilder, ValidationBlockBuilder},
+        core::BlockWrapperBuilder,
         output::Output,
         payload::{transaction::TransactionEssence, TransactionPayload},
         signature::{Ed25519Signature, Signature},
@@ -617,22 +617,7 @@ pub trait SignBlockExt {
 }
 
 #[async_trait]
-impl SignBlockExt for BlockBuilder<BasicBlockBuilder> {
-    async fn sign_ed25519<S: SecretManage>(
-        self,
-        secret_manager: &S,
-        chain: Bip44,
-    ) -> crate::client::Result<BlockWrapper>
-    where
-        crate::client::Error: From<S::Error>,
-    {
-        let msg = self.signing_input();
-        Ok(self.finish(secret_manager.sign_ed25519(&msg, chain).await?)?)
-    }
-}
-
-#[async_trait]
-impl SignBlockExt for BlockBuilder<ValidationBlockBuilder> {
+impl SignBlockExt for BlockWrapperBuilder {
     async fn sign_ed25519<S: SecretManage>(
         self,
         secret_manager: &S,

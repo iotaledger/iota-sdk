@@ -1,9 +1,6 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use alloc::vec::Vec;
-
-use crypto::hashes::{blake2b::Blake2b256, Digest};
 use packable::{
     error::{UnpackError, UnpackErrorExt},
     packer::Packer,
@@ -11,11 +8,9 @@ use packable::{
     Packable,
 };
 
-use super::{BlockBuilder, BlockWrapper};
 use crate::types::block::{
     core::{parent::verify_parents_sets, Block, Parents},
     protocol::{ProtocolParameters, ProtocolParametersHash},
-    signature::Ed25519Signature,
     Error,
 };
 
@@ -84,24 +79,6 @@ impl ValidationBlockBuilder {
         self
     }
 
-    // TODO: It's bothersome that this is duplicated code
-    pub(crate) fn pack_block<P: Packer>(&self, packer: &mut P) -> Result<(), P::Error> {
-        ValidationBlock::KIND.pack(packer)?;
-        self.strong_parents.pack(packer)?;
-        self.weak_parents.pack(packer)?;
-        self.shallow_like_parents.pack(packer)?;
-        self.highest_supported_version.pack(packer)?;
-        self.protocol_parameters_hash.pack(packer)?;
-
-        Ok(())
-    }
-
-    pub(crate) fn hash(&self) -> [u8; 32] {
-        let mut bytes = Vec::new();
-        self.pack_block(&mut bytes).unwrap();
-        Blake2b256::digest(bytes).into()
-    }
-
     /// Finishes the builder into a [`ValidationBlock`].
     pub fn finish(self) -> Result<ValidationBlock, Error> {
         verify_parents_sets(&self.strong_parents, &self.weak_parents, &self.shallow_like_parents)?;
@@ -118,63 +95,6 @@ impl ValidationBlockBuilder {
     /// Finishes the builder into a [`Block`].
     pub fn finish_block(self) -> Result<Block, Error> {
         Ok(Block::from(self.finish()?))
-    }
-}
-
-impl BlockBuilder<ValidationBlockBuilder> {
-    /// Adds strong parents to a [`ValidationBlockBuilder`].
-    #[inline(always)]
-    pub fn with_strong_parents(mut self, strong_parents: impl Into<StrongParents>) -> Self {
-        self.block = self.block.with_strong_parents(strong_parents);
-        self
-    }
-
-    /// Adds weak parents to a [`ValidationBlockBuilder`].
-    #[inline(always)]
-    pub fn with_weak_parents(mut self, weak_parents: impl Into<WeakParents>) -> Self {
-        self.block = self.block.with_weak_parents(weak_parents);
-        self
-    }
-
-    /// Adds shallow like parents to a [`ValidationBlockBuilder`].
-    #[inline(always)]
-    pub fn with_shallow_like_parents(mut self, shallow_like_parents: impl Into<ShallowLikeParents>) -> Self {
-        self.block = self.block.with_shallow_like_parents(shallow_like_parents);
-        self
-    }
-
-    /// Adds a highest supported version to a [`ValidationBlockBuilder`].
-    #[inline(always)]
-    pub fn with_highest_supported_version(mut self, highest_supported_version: u8) -> Self {
-        self.block = self.block.with_highest_supported_version(highest_supported_version);
-        self
-    }
-
-    /// Adds a protocol parameter hash to a [`ValidationBlockBuilder`].
-    #[inline(always)]
-    pub fn with_protocol_parameters_hash(mut self, protocol_parameters_hash: ProtocolParametersHash) -> Self {
-        self.block = self.block.with_protocol_parameters_hash(protocol_parameters_hash);
-        self
-    }
-
-    /// Get the signing input that can be used to generate an
-    /// [`Ed25519Signature`](crate::types::block::signature::Ed25519Signature) for the resulting block.
-    pub fn signing_input(&self) -> Vec<u8> {
-        [self.header_hash(), self.block.hash()].concat()
-    }
-
-    pub fn finish(self, signature: Ed25519Signature) -> Result<BlockWrapper, Error> {
-        Ok(BlockWrapper::new(
-            self.protocol_version,
-            self.network_id,
-            // TODO provide a sensible default
-            self.issuing_time.ok_or(Error::InvalidField("issuing time"))?,
-            self.slot_commitment_id,
-            self.latest_finalized_slot,
-            self.issuer_id,
-            self.block.finish_block()?,
-            signature,
-        ))
     }
 }
 

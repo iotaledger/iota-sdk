@@ -12,19 +12,18 @@ use packable::{
     Packable, PackableExt,
 };
 
-use super::{BasicBlockBuilder, ValidationBlockBuilder};
 use crate::types::block::{
     block_id::{BlockHash, BlockId},
-    core::{basic, validation, BasicBlock, ValidationBlock},
+    core::{BasicBlock, ValidationBlock},
     protocol::ProtocolParameters,
-    signature::Signature,
+    signature::{Ed25519Signature, Signature},
     slot::{SlotCommitmentId, SlotIndex},
     Block, Error, IssuerId,
 };
 
 /// Represent the object that nodes gossip around the network.
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct BlockBuilder<B> {
+pub struct BlockWrapperBuilder {
     /// Protocol version of the network to which this block belongs.
     pub(crate) protocol_version: u8,
     /// The identifier of the network to which this block belongs.
@@ -38,17 +37,17 @@ pub struct BlockBuilder<B> {
     /// The identifier of the account that issued this block.
     pub(crate) issuer_id: IssuerId,
     /// The inner block.
-    pub(crate) block: B,
+    pub(crate) block: Block,
 }
 
-impl<B> BlockBuilder<B> {
+impl BlockWrapperBuilder {
     pub fn new(
         protocol_version: u8,
         network_id: u64,
         slot_commitment_id: SlotCommitmentId,
         latest_finalized_slot: SlotIndex,
         issuer_id: IssuerId,
-        block: B,
+        block: Block,
     ) -> Self {
         Self {
             protocol_version,
@@ -105,7 +104,7 @@ impl<B> BlockBuilder<B> {
 
     /// Updates the block.
     #[inline(always)]
-    pub fn with_block(mut self, block: impl Into<B>) -> Self {
+    pub fn with_block(mut self, block: impl Into<Block>) -> Self {
         self.block = block.into();
         self
     }
@@ -124,6 +123,26 @@ impl<B> BlockBuilder<B> {
         .pack(&mut SlicePacker::new(&mut bytes))
         .unwrap();
         Blake2b256::digest(bytes).into()
+    }
+
+    /// Get the signing input that can be used to generate an
+    /// [`Ed25519Signature`](crate::types::block::signature::Ed25519Signature) for the resulting block.
+    pub fn signing_input(&self) -> Vec<u8> {
+        [self.header_hash(), self.block.hash()].concat()
+    }
+
+    pub fn finish(self, signature: Ed25519Signature) -> Result<BlockWrapper, Error> {
+        Ok(BlockWrapper::new(
+            self.protocol_version,
+            self.network_id,
+            // TODO provide a sensible default
+            self.issuing_time.ok_or(Error::InvalidField("issuing time"))?,
+            self.slot_commitment_id,
+            self.latest_finalized_slot,
+            self.issuer_id,
+            self.block,
+            signature,
+        ))
     }
 }
 
@@ -262,45 +281,23 @@ impl BlockWrapper {
         }
     }
 
-    /// Creates a new basic [`BlockBuilder`].
+    /// Creates a new [`BlockWrapperBuilder`].
     #[inline(always)]
-    pub fn build_basic(
+    pub fn build(
         protocol_version: u8,
         network_id: u64,
         slot_commitment_id: SlotCommitmentId,
         latest_finalized_slot: SlotIndex,
         issuer_id: IssuerId,
-        strong_parents: basic::StrongParents,
-        burned_mana: u64,
-    ) -> BlockBuilder<BasicBlockBuilder> {
-        BlockBuilder::new(
+        block: Block,
+    ) -> BlockWrapperBuilder {
+        BlockWrapperBuilder::new(
             protocol_version,
             network_id,
             slot_commitment_id,
             latest_finalized_slot,
             issuer_id,
-            BasicBlockBuilder::new(strong_parents, burned_mana),
-        )
-    }
-
-    /// Creates a new validation [`BlockBuilder`].
-    #[inline(always)]
-    pub fn build_validation(
-        protocol_parameters: ProtocolParameters,
-        slot_commitment_id: SlotCommitmentId,
-        latest_finalized_slot: SlotIndex,
-        issuer_id: IssuerId,
-        strong_parents: validation::StrongParents,
-        highest_supported_version: u8,
-    ) -> BlockBuilder<ValidationBlockBuilder> {
-        let protocol_hash = protocol_parameters.hash();
-        BlockBuilder::new(
-            protocol_parameters.version(),
-            protocol_parameters.network_id(),
-            slot_commitment_id,
-            latest_finalized_slot,
-            issuer_id,
-            ValidationBlockBuilder::new(strong_parents, highest_supported_version, protocol_hash),
+            block,
         )
     }
 
