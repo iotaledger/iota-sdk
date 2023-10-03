@@ -182,7 +182,7 @@ class RestrictedAddress extends Address {
     }
 
     toString(): string {
-        var hex = this.address.toString();
+        let hex = this.address.toString();
         if (this.allowed_capabilities.some((c) => c != 0)) {
             var cap = Buffer.from(
                 this.allowed_capabilities.buffer,
