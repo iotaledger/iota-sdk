@@ -4,7 +4,7 @@
 from __future__ import annotations
 from dataclasses import dataclass
 from typing import Optional, List
-from iota_sdk.types.address import AddressUnion
+from iota_sdk.types.address import Address
 from iota_sdk.types.output import OutputUnion
 from iota_sdk.types.output_metadata import OutputMetadata
 from iota_sdk.types.essence import RegularTransactionEssence
@@ -39,7 +39,7 @@ class RemainderData:
         chain: The BIP44 chain for the remainder address.
     """
     output: OutputUnion
-    address: AddressUnion
+    address: Address
     chain: Optional[Bip44] = None
 
 

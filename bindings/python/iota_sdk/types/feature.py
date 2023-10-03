@@ -5,7 +5,7 @@ from enum import IntEnum
 from typing import Dict, List, TypeAlias, Union, Any
 from dataclasses import dataclass, field
 from dataclasses_json import config
-from iota_sdk.types.address import AddressUnion, deserialize_address
+from iota_sdk.types.address import Address, deserialize_address
 from iota_sdk.types.common import EpochIndex, HexStr, json, SlotIndex
 
 
@@ -43,7 +43,7 @@ class SenderFeature(Feature):
     Attributes:
         address: A given sender address.
     """
-    address: AddressUnion = field(
+    address: Address = field(
         metadata=config(
             decoder=deserialize_address
         ))
@@ -60,7 +60,7 @@ class IssuerFeature(Feature):
     Attributes:
         address: A given issuer address.
     """
-    address: AddressUnion = field(
+    address: Address = field(
         metadata=config(
             decoder=deserialize_address
         ))

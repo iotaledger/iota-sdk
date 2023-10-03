@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, List
 
 from dacite import from_dict
 from iota_sdk.types.signature import Ed25519Signature
-from iota_sdk.types.address import Address, AddressType, Ed25519Address, AccountAddress, NFTAddress
+from iota_sdk.types.address import Address, deserialize_address
 from iota_sdk.types.common import HexStr
 from iota_sdk.types.output_id import OutputId
 from iota_sdk.types.output import Output
@@ -75,15 +75,7 @@ class Utils():
             'address': address
         })
 
-        address_type = AddressType(response['type'])
-
-        if address_type == AddressType.ED25519:
-            return from_dict(Ed25519Address, response)
-        if address_type == AddressType.ACCOUNT:
-            return from_dict(AccountAddress, response)
-        if address_type == AddressType.NFT:
-            return from_dict(NFTAddress, response)
-        return from_dict(Address, response)
+        return deserialize_address(response)
 
     @staticmethod
     def is_address_valid(address: str) -> bool:

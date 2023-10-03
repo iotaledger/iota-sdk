@@ -5,7 +5,7 @@ from enum import IntEnum
 from dataclasses import dataclass, field
 from typing import Dict, List, TypeAlias, Union, Any
 from dataclasses_json import config
-from iota_sdk.types.address import AddressUnion, AccountAddress
+from iota_sdk.types.address import Address, AccountAddress
 from iota_sdk.types.common import json
 from iota_sdk.types.address import deserialize_address
 
@@ -47,7 +47,7 @@ class AddressUnlockCondition(UnlockCondition):
     Args:
         address: An address unlocked with a private key.
     """
-    address: AddressUnion = field(
+    address: Address = field(
         metadata=config(
             decoder=deserialize_address
         ))
@@ -66,7 +66,7 @@ class StorageDepositReturnUnlockCondition(UnlockCondition):
         return_address: The address to return the amount to.
     """
     amount: str
-    return_address: AddressUnion = field(
+    return_address: Address = field(
         metadata=config(
             decoder=deserialize_address
         ))
@@ -97,7 +97,7 @@ class ExpirationUnlockCondition(UnlockCondition):
         return_address: The return address if the output was not claimed in time.
     """
     unix_time: int
-    return_address: AddressUnion = field(
+    return_address: Address = field(
         metadata=config(
             decoder=deserialize_address
         ))
@@ -114,7 +114,7 @@ class StateControllerAddressUnlockCondition(UnlockCondition):
     Args:
         address: The state controller address that owns the output.
     """
-    address: AddressUnion = field(
+    address: Address = field(
         metadata=config(
             decoder=deserialize_address
         ))
@@ -129,7 +129,7 @@ class GovernorAddressUnlockCondition(UnlockCondition):
     Args:
         address: The governor address that owns the output.
     """
-    address: AddressUnion = field(
+    address: Address = field(
         metadata=config(
             decoder=deserialize_address
         ))
