@@ -5,7 +5,6 @@ from __future__ import annotations
 from json import dumps, loads
 from typing import TYPE_CHECKING, List
 
-from dacite import from_dict
 from iota_sdk.types.signature import Ed25519Signature
 from iota_sdk.types.address import Address, deserialize_address
 from iota_sdk.types.common import HexStr
