@@ -62,7 +62,6 @@ fn params_serde_hash() {
           "increaseThreshold":800000,
           "decreaseThreshold":500000,
           "schedulerRate":100000,
-          "minMana":"1",
           "maxBufferSize":1000,
           "maxValidationBufferSize":100
         },
