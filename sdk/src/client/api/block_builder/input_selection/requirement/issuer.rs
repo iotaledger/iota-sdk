@@ -2,18 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use super::{Error, InputSelection, Requirement};
-use crate::{
-    client::secret::types::InputSigningData,
-    types::block::{address::Address, output::AccountTransition},
-};
+use crate::{client::secret::types::InputSigningData, types::block::address::Address};
 
 impl InputSelection {
     /// Fulfills an issuer requirement by fulfilling the equivalent sender requirement.
     /// Potentially converts the error for a more accurate one.
-    pub(crate) fn fulfill_issuer_requirement(
-        &mut self,
-        address: Address,
-    ) -> Result<Vec<(InputSigningData, Option<AccountTransition>)>, Error> {
+    pub(crate) fn fulfill_issuer_requirement(&mut self, address: Address) -> Result<Vec<InputSigningData>, Error> {
         log::debug!("Treating {address:?} issuer requirement as a sender requirement");
 
         match self.fulfill_sender_requirement(address) {

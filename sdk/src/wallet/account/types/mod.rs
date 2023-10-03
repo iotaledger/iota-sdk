@@ -22,7 +22,7 @@ use crate::{
         api::core::response::OutputWithMetadataResponse,
         block::{
             address::Address,
-            output::{dto::OutputDto, AccountTransition, Output, OutputId, OutputMetadata},
+            output::{dto::OutputDto, Output, OutputId, OutputMetadata},
             payload::transaction::{dto::TransactionPayloadDto, TransactionId, TransactionPayload},
             slot::SlotIndex,
             BlockId, Error as BlockError,
@@ -57,11 +57,9 @@ impl OutputData {
         &self,
         account: &AccountDetails,
         slot_index: SlotIndex,
-        account_transition: Option<AccountTransition>,
     ) -> crate::wallet::Result<Option<InputSigningData>> {
         let (unlock_address, _unlocked_account_or_nft_address) =
-            self.output
-                .required_and_unlocked_address(slot_index, &self.output_id, account_transition)?;
+            self.output.required_and_unlocked_address(slot_index, &self.output_id)?;
 
         let chain = if unlock_address == self.address {
             self.chain

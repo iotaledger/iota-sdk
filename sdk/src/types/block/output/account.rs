@@ -57,37 +57,6 @@ impl From<AccountId> for Address {
     }
 }
 
-/// Types of account transition.
-#[derive(Copy, Clone, Debug, Eq, PartialEq)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub enum AccountTransition {
-    /// State transition.
-    State,
-    /// Governance transition.
-    Governance,
-}
-
-impl AccountTransition {
-    /// Checks whether the account transition is a state one.
-    pub fn is_state(&self) -> bool {
-        matches!(self, Self::State)
-    }
-
-    /// Checks whether the account transition is a governance one.
-    pub fn is_governance(&self) -> bool {
-        matches!(self, Self::Governance)
-    }
-}
-
-impl core::fmt::Display for AccountTransition {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        match self {
-            Self::State => write!(f, "state"),
-            Self::Governance => write!(f, "governance"),
-        }
-    }
-}
-
 ///
 #[derive(Clone)]
 #[must_use]
@@ -96,7 +65,6 @@ pub struct AccountOutputBuilder {
     mana: u64,
     native_tokens: BTreeSet<NativeToken>,
     account_id: AccountId,
-    state_index: Option<u32>,
     state_metadata: Vec<u8>,
     foundry_counter: Option<u32>,
     unlock_conditions: BTreeSet<UnlockCondition>,
@@ -122,7 +90,6 @@ impl AccountOutputBuilder {
             mana: Default::default(),
             native_tokens: BTreeSet::new(),
             account_id,
-            state_index: None,
             state_metadata: Vec::new(),
             foundry_counter: None,
             unlock_conditions: BTreeSet::new(),
@@ -170,13 +137,6 @@ impl AccountOutputBuilder {
     #[inline(always)]
     pub fn with_account_id(mut self, account_id: AccountId) -> Self {
         self.account_id = account_id;
-        self
-    }
-
-    ///
-    #[inline(always)]
-    pub fn with_state_index(mut self, state_index: impl Into<Option<u32>>) -> Self {
-        self.state_index = state_index.into();
         self
     }
 
@@ -280,7 +240,6 @@ impl AccountOutputBuilder {
 
     ///
     pub fn finish(self) -> Result<AccountOutput, Error> {
-        let state_index = self.state_index.unwrap_or(0);
         let foundry_counter = self.foundry_counter.unwrap_or(0);
 
         let state_metadata = self
@@ -289,7 +248,7 @@ impl AccountOutputBuilder {
             .try_into()
             .map_err(Error::InvalidStateMetadataLength)?;
 
-        verify_index_counter(&self.account_id, state_index, foundry_counter)?;
+        verify_index_counter(&self.account_id, foundry_counter)?;
 
         let unlock_conditions = UnlockConditions::from_set(self.unlock_conditions)?;
 
@@ -308,7 +267,6 @@ impl AccountOutputBuilder {
             mana: self.mana,
             native_tokens: NativeTokens::from_set(self.native_tokens)?,
             account_id: self.account_id,
-            state_index,
             state_metadata,
             foundry_counter,
             unlock_conditions,
@@ -355,7 +313,6 @@ impl From<&AccountOutput> for AccountOutputBuilder {
             mana: output.mana,
             native_tokens: output.native_tokens.iter().copied().collect(),
             account_id: output.account_id,
-            state_index: Some(output.state_index),
             state_metadata: output.state_metadata.to_vec(),
             foundry_counter: Some(output.foundry_counter),
             unlock_conditions: output.unlock_conditions.iter().cloned().collect(),
@@ -377,8 +334,6 @@ pub struct AccountOutput {
     native_tokens: NativeTokens,
     // Unique identifier of the account.
     account_id: AccountId,
-    // A counter that must increase by 1 every time the account is state transitioned.
-    state_index: u32,
     // Metadata that can only be changed by the state controller.
     state_metadata: BoxedSlicePrefix<u8, StateMetadataLength>,
     // A counter that denotes the number of foundries created by this account.
@@ -396,8 +351,7 @@ impl AccountOutput {
     /// Maximum possible length in bytes of the state metadata.
     pub const STATE_METADATA_LENGTH_MAX: u16 = 8192;
     /// The set of allowed [`UnlockCondition`]s for an [`AccountOutput`].
-    pub const ALLOWED_UNLOCK_CONDITIONS: UnlockConditionFlags =
-        UnlockConditionFlags::STATE_CONTROLLER_ADDRESS.union(UnlockConditionFlags::GOVERNOR_ADDRESS);
+    pub const ALLOWED_UNLOCK_CONDITIONS: UnlockConditionFlags = UnlockConditionFlags::ADDRESS;
     /// The set of allowed [`Feature`]s for an [`AccountOutput`].
     pub const ALLOWED_FEATURES: FeatureFlags = FeatureFlags::SENDER.union(FeatureFlags::METADATA);
     /// The set of allowed immutable [`Feature`]s for an [`AccountOutput`].
@@ -450,12 +404,6 @@ impl AccountOutput {
 
     ///
     #[inline(always)]
-    pub fn state_index(&self) -> u32 {
-        self.state_index
-    }
-
-    ///
-    #[inline(always)]
     pub fn state_metadata(&self) -> &[u8] {
         &self.state_metadata
     }
@@ -486,20 +434,10 @@ impl AccountOutput {
 
     ///
     #[inline(always)]
-    pub fn state_controller_address(&self) -> &Address {
-        // An AccountOutput must have a StateControllerAddressUnlockCondition.
+    pub fn address(&self) -> &Address {
+        // An AccountOutput must have a, AddressUnlockCondition.
         self.unlock_conditions
-            .state_controller_address()
-            .map(|unlock_condition| unlock_condition.address())
-            .unwrap()
-    }
-
-    ///
-    #[inline(always)]
-    pub fn governor_address(&self) -> &Address {
-        // An AccountOutput must have a GovernorAddressUnlockCondition.
-        self.unlock_conditions
-            .governor_address()
+            .address()
             .map(|unlock_condition| unlock_condition.address())
             .unwrap()
     }
@@ -523,30 +461,19 @@ impl AccountOutput {
         inputs: &[(&OutputId, &Output)],
         context: &mut ValidationContext<'_>,
     ) -> Result<(), TransactionFailureReason> {
+        self.unlock_conditions()
+            .locked_address(self.address(), context.essence.creation_slot())
+            .unlock(unlock, inputs, context)?;
+
         let account_id = if self.account_id().is_null() {
             AccountId::from(output_id)
         } else {
             *self.account_id()
         };
-        let next_state = context.output_chains.get(&ChainId::from(account_id));
 
-        match next_state {
-            Some(Output::Account(next_state)) => {
-                if self.state_index() == next_state.state_index() {
-                    self.governor_address().unlock(unlock, inputs, context)?;
-                } else {
-                    self.state_controller_address().unlock(unlock, inputs, context)?;
-                    // Only a state transition can be used to consider the account address for output unlocks and
-                    // sender/issuer validations.
-                    context
-                        .unlocked_addresses
-                        .insert(Address::from(AccountAddress::from(account_id)));
-                }
-            }
-            None => self.governor_address().unlock(unlock, inputs, context)?,
-            // The next state can only be an account output since it is identified by an account chain identifier.
-            Some(_) => unreachable!(),
-        };
+        context
+            .unlocked_addresses
+            .insert(Address::from(AccountAddress::from(account_id)));
 
         Ok(())
     }
@@ -562,57 +489,55 @@ impl AccountOutput {
             return Err(StateTransitionError::MutatedImmutableField);
         }
 
-        if next_state.state_index == current_state.state_index + 1 {
-            // State transition.
-            if current_state.state_controller_address() != next_state.state_controller_address()
-                || current_state.governor_address() != next_state.governor_address()
-                || current_state.features.metadata() != next_state.features.metadata()
-            {
-                return Err(StateTransitionError::MutatedFieldWithoutRights);
-            }
+        // TODO
+        // if next_state.state_index == current_state.state_index + 1 {
+        //     // State transition.
+        //     if current_state.features.metadata() != next_state.features.metadata() {
+        //         return Err(StateTransitionError::MutatedFieldWithoutRights);
+        //     }
 
-            let created_foundries = outputs.iter().filter_map(|output| {
-                if let Output::Foundry(foundry) = output {
-                    if foundry.account_address().account_id() == &next_state.account_id
-                        && !input_chains.contains_key(&foundry.chain_id())
-                    {
-                        Some(foundry)
-                    } else {
-                        None
-                    }
-                } else {
-                    None
-                }
-            });
+        //     let created_foundries = outputs.iter().filter_map(|output| {
+        //         if let Output::Foundry(foundry) = output {
+        //             if foundry.account_address().account_id() == &next_state.account_id
+        //                 && !input_chains.contains_key(&foundry.chain_id())
+        //             {
+        //                 Some(foundry)
+        //             } else {
+        //                 None
+        //             }
+        //         } else {
+        //             None
+        //         }
+        //     });
 
-            let mut created_foundries_count = 0;
+        //     let mut created_foundries_count = 0;
 
-            for foundry in created_foundries {
-                created_foundries_count += 1;
+        //     for foundry in created_foundries {
+        //         created_foundries_count += 1;
 
-                if foundry.serial_number() != current_state.foundry_counter + created_foundries_count {
-                    return Err(StateTransitionError::UnsortedCreatedFoundries);
-                }
-            }
+        //         if foundry.serial_number() != current_state.foundry_counter + created_foundries_count {
+        //             return Err(StateTransitionError::UnsortedCreatedFoundries);
+        //         }
+        //     }
 
-            if current_state.foundry_counter + created_foundries_count != next_state.foundry_counter {
-                return Err(StateTransitionError::InconsistentCreatedFoundriesCount);
-            }
-        } else if next_state.state_index == current_state.state_index {
-            // Governance transition.
-            if current_state.amount != next_state.amount
-                || current_state.native_tokens != next_state.native_tokens
-                || current_state.state_metadata != next_state.state_metadata
-                || current_state.foundry_counter != next_state.foundry_counter
-            {
-                return Err(StateTransitionError::MutatedFieldWithoutRights);
-            }
-        } else {
-            return Err(StateTransitionError::UnsupportedStateIndexOperation {
-                current_state: current_state.state_index,
-                next_state: next_state.state_index,
-            });
-        }
+        //     if current_state.foundry_counter + created_foundries_count != next_state.foundry_counter {
+        //         return Err(StateTransitionError::InconsistentCreatedFoundriesCount);
+        //     }
+        // } else if next_state.state_index == current_state.state_index {
+        //     // Governance transition.
+        //     if current_state.amount != next_state.amount
+        //         || current_state.native_tokens != next_state.native_tokens
+        //         || current_state.state_metadata != next_state.state_metadata
+        //         || current_state.foundry_counter != next_state.foundry_counter
+        //     {
+        //         return Err(StateTransitionError::MutatedFieldWithoutRights);
+        //     }
+        // } else {
+        //     return Err(StateTransitionError::UnsupportedStateIndexOperation {
+        //         current_state: current_state.state_index,
+        //         next_state: next_state.state_index,
+        //     });
+        // }
 
         Ok(())
     }
@@ -660,7 +585,6 @@ impl Packable for AccountOutput {
         self.mana.pack(packer)?;
         self.native_tokens.pack(packer)?;
         self.account_id.pack(packer)?;
-        self.state_index.pack(packer)?;
         self.state_metadata.pack(packer)?;
         self.foundry_counter.pack(packer)?;
         self.unlock_conditions.pack(packer)?;
@@ -682,14 +606,13 @@ impl Packable for AccountOutput {
 
         let native_tokens = NativeTokens::unpack::<_, VERIFY>(unpacker, &())?;
         let account_id = AccountId::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
-        let state_index = u32::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
         let state_metadata = BoxedSlicePrefix::<u8, StateMetadataLength>::unpack::<_, VERIFY>(unpacker, &())
             .map_packable_err(|err| Error::InvalidStateMetadataLength(err.into_prefix_err().into()))?;
 
         let foundry_counter = u32::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
 
         if VERIFY {
-            verify_index_counter(&account_id, state_index, foundry_counter).map_err(UnpackError::Packable)?;
+            verify_index_counter(&account_id, foundry_counter).map_err(UnpackError::Packable)?;
         }
 
         let unlock_conditions = UnlockConditions::unpack::<_, VERIFY>(unpacker, visitor)?;
@@ -716,7 +639,6 @@ impl Packable for AccountOutput {
             mana,
             native_tokens,
             account_id,
-            state_index,
             state_metadata,
             foundry_counter,
             unlock_conditions,
@@ -727,8 +649,8 @@ impl Packable for AccountOutput {
 }
 
 #[inline]
-fn verify_index_counter(account_id: &AccountId, state_index: u32, foundry_counter: u32) -> Result<(), Error> {
-    if account_id.is_null() && (state_index != 0 || foundry_counter != 0) {
+fn verify_index_counter(account_id: &AccountId, foundry_counter: u32) -> Result<(), Error> {
+    if account_id.is_null() && foundry_counter != 0 {
         Err(Error::NonZeroStateIndexOrFoundryCounter)
     } else {
         Ok(())
@@ -787,7 +709,6 @@ pub(crate) mod dto {
         #[serde(skip_serializing_if = "Vec::is_empty", default)]
         pub native_tokens: Vec<NativeToken>,
         pub account_id: AccountId,
-        pub state_index: u32,
         #[serde(skip_serializing_if = "<[_]>::is_empty", default, with = "prefix_hex_bytes")]
         pub state_metadata: Box<[u8]>,
         pub foundry_counter: u32,
@@ -806,7 +727,6 @@ pub(crate) mod dto {
                 mana: value.mana(),
                 native_tokens: value.native_tokens().to_vec(),
                 account_id: *value.account_id(),
-                state_index: value.state_index(),
                 state_metadata: value.state_metadata().into(),
                 foundry_counter: value.foundry_counter(),
                 unlock_conditions: value.unlock_conditions().iter().map(Into::into).collect::<_>(),
@@ -823,7 +743,6 @@ pub(crate) mod dto {
         fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
             let mut builder = AccountOutputBuilder::new_with_amount(dto.amount, dto.account_id)
                 .with_mana(dto.mana)
-                .with_state_index(dto.state_index)
                 .with_foundry_counter(dto.foundry_counter)
                 .with_native_tokens(dto.native_tokens)
                 .with_features(dto.features)
@@ -845,7 +764,6 @@ pub(crate) mod dto {
             mana: u64,
             native_tokens: Option<Vec<NativeToken>>,
             account_id: &AccountId,
-            state_index: Option<u32>,
             state_metadata: Option<Vec<u8>>,
             foundry_counter: Option<u32>,
             unlock_conditions: Vec<UnlockConditionDto>,
@@ -864,10 +782,6 @@ pub(crate) mod dto {
 
             if let Some(native_tokens) = native_tokens {
                 builder = builder.with_native_tokens(native_tokens);
-            }
-
-            if let Some(state_index) = state_index {
-                builder = builder.with_state_index(state_index);
             }
 
             if let Some(state_metadata) = state_metadata {
@@ -935,7 +849,6 @@ mod tests {
             output.mana(),
             Some(output.native_tokens().to_vec()),
             output.account_id(),
-            output.state_index().into(),
             output.state_metadata().to_owned().into(),
             output.foundry_counter().into(),
             output.unlock_conditions().iter().map(Into::into).collect(),
@@ -957,7 +870,6 @@ mod tests {
                 builder.mana,
                 Some(builder.native_tokens.iter().copied().collect()),
                 &builder.account_id,
-                builder.state_index,
                 builder.state_metadata.to_owned().into(),
                 builder.foundry_counter,
                 builder.unlock_conditions.iter().map(Into::into).collect(),

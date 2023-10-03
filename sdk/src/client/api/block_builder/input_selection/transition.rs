@@ -8,8 +8,8 @@ use super::{
 use crate::{
     client::secret::types::InputSigningData,
     types::block::output::{
-        AccountOutput, AccountOutputBuilder, AccountTransition, ChainId, FoundryOutput, FoundryOutputBuilder,
-        NftOutput, NftOutputBuilder, Output, OutputId,
+        AccountOutput, AccountOutputBuilder, ChainId, FoundryOutput, FoundryOutputBuilder, NftOutput, NftOutputBuilder,
+        Output, OutputId,
     },
 };
 
@@ -19,7 +19,6 @@ impl InputSelection {
         &mut self,
         input: &AccountOutput,
         output_id: &OutputId,
-        account_transition: AccountTransition,
     ) -> Result<Option<Output>, Error> {
         let account_id = input.account_id_non_null(output_id);
 
@@ -67,10 +66,9 @@ impl InputSelection {
 
         let output = builder.finish_output(self.protocol_parameters.token_supply())?;
 
-        self.automatically_transitioned
-            .insert(ChainId::from(account_id), Some(account_transition));
+        self.automatically_transitioned.insert(ChainId::from(account_id));
 
-        log::debug!("Automatic {account_transition} transition of {output_id:?}/{account_id:?}");
+        log::debug!("Automatic transition of {output_id:?}/{account_id:?}");
 
         Ok(Some(output))
     }
@@ -108,7 +106,7 @@ impl InputSelection {
             .with_features(features)
             .finish_output(self.protocol_parameters.token_supply())?;
 
-        self.automatically_transitioned.insert(ChainId::from(nft_id), None);
+        self.automatically_transitioned.insert(ChainId::from(nft_id));
 
         log::debug!("Automatic transition of {output_id:?}/{nft_id:?}");
 
@@ -146,7 +144,7 @@ impl InputSelection {
 
         let output = FoundryOutputBuilder::from(input).finish_output(self.protocol_parameters.token_supply())?;
 
-        self.automatically_transitioned.insert(ChainId::from(foundry_id), None);
+        self.automatically_transitioned.insert(ChainId::from(foundry_id));
 
         log::debug!("Automatic transition of {output_id:?}/{foundry_id:?}");
 
@@ -155,17 +153,9 @@ impl InputSelection {
 
     /// Transitions an input by creating a new output if required.
     /// If no `account_transition` is provided, assumes a state transition.
-    pub(crate) fn transition_input(
-        &mut self,
-        input: &InputSigningData,
-        account_transition: Option<AccountTransition>,
-    ) -> Result<Option<Output>, Error> {
+    pub(crate) fn transition_input(&mut self, input: &InputSigningData) -> Result<Option<Output>, Error> {
         match &input.output {
-            Output::Account(account_input) => self.transition_account_input(
-                account_input,
-                input.output_id(),
-                account_transition.unwrap_or(AccountTransition::State),
-            ),
+            Output::Account(account_input) => self.transition_account_input(account_input, input.output_id()),
             Output::Nft(nft_input) => self.transition_nft_input(nft_input, input.output_id()),
             Output::Foundry(foundry_input) => self.transition_foundry_input(foundry_input, input.output_id()),
             _ => Ok(None),

@@ -43,7 +43,7 @@ pub(crate) use self::{
     unlock_condition::AddressUnlockCondition,
 };
 pub use self::{
-    account::{AccountId, AccountOutput, AccountOutputBuilder, AccountTransition},
+    account::{AccountId, AccountOutput, AccountOutputBuilder},
     anchor::{AnchorId, AnchorOutput, AnchorTransition},
     basic::{BasicOutput, BasicOutputBuilder},
     chain_id::ChainId,
@@ -339,24 +339,16 @@ impl Output {
         &self,
         slot_index: SlotIndex,
         output_id: &OutputId,
-        account_transition: Option<AccountTransition>,
     ) -> Result<(Address, Option<Address>), Error> {
         match self {
             Self::Basic(output) => Ok((
                 *output.unlock_conditions().locked_address(output.address(), slot_index),
                 None,
             )),
-            Self::Account(output) => {
-                if account_transition.unwrap_or(AccountTransition::State) == AccountTransition::State {
-                    // Account address is only unlocked if it's a state transition
-                    Ok((
-                        *output.state_controller_address(),
-                        Some(Address::Account(output.account_address(output_id))),
-                    ))
-                } else {
-                    Ok((*output.governor_address(), None))
-                }
-            }
+            Self::Account(output) => Ok((
+                *output.unlock_conditions().locked_address(output.address(), slot_index),
+                Some(Address::Account(output.account_address(output_id))),
+            )),
             Self::Foundry(output) => Ok((Address::Account(*output.account_address()), None)),
             Self::Nft(output) => Ok((
                 *output.unlock_conditions().locked_address(output.address(), slot_index),
@@ -366,17 +358,7 @@ impl Output {
                 *output.unlock_conditions().locked_address(output.address(), slot_index),
                 None,
             )),
-            Self::Anchor(output) => {
-                if account_transition.unwrap_or(AccountTransition::State) == AccountTransition::State {
-                    // Account address is only unlocked if it's a state transition
-                    Ok((
-                        *output.state_controller_address(),
-                        Some(Address::Anchor(output.anchor_address(output_id))),
-                    ))
-                } else {
-                    Ok((*output.governor_address(), None))
-                }
-            }
+            Self::Anchor(output) => todo!(),
         }
     }
 

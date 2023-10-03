@@ -17,7 +17,7 @@ use crate::{
     client::secret::types::InputSigningData,
     types::block::{
         address::Address,
-        output::{AccountId, AccountTransition, ChainId, Features, FoundryId, NftId, Output},
+        output::{AccountId, ChainId, Features, FoundryId, NftId, Output},
     },
 };
 
@@ -32,8 +32,8 @@ pub enum Requirement {
     Ed25519(Address),
     /// Foundry requirement.
     Foundry(FoundryId),
-    /// Account requirement and whether it needs to be state transitioned (true) or not (false).
-    Account(AccountId, AccountTransition),
+    /// Account requirement.
+    Account(AccountId),
     /// Nft requirement.
     Nft(NftId),
     /// Native tokens requirement.
@@ -45,10 +45,7 @@ pub enum Requirement {
 impl InputSelection {
     /// Fulfills a requirement by selecting the appropriate available inputs.
     /// Returns the selected inputs and an optional new requirement.
-    pub(crate) fn fulfill_requirement(
-        &mut self,
-        requirement: Requirement,
-    ) -> Result<Vec<(InputSigningData, Option<AccountTransition>)>, Error> {
+    pub(crate) fn fulfill_requirement(&mut self, requirement: Requirement) -> Result<Vec<InputSigningData>, Error> {
         log::debug!("Fulfilling requirement {requirement:?}");
 
         match requirement {
@@ -56,9 +53,7 @@ impl InputSelection {
             Requirement::Issuer(address) => self.fulfill_issuer_requirement(address),
             Requirement::Ed25519(address) => self.fulfill_ed25519_requirement(address),
             Requirement::Foundry(foundry_id) => self.fulfill_foundry_requirement(foundry_id),
-            Requirement::Account(account_id, account_transition) => {
-                self.fulfill_account_requirement(account_id, account_transition)
-            }
+            Requirement::Account(account_id) => self.fulfill_account_requirement(account_id),
             Requirement::Nft(nft_id) => self.fulfill_nft_requirement(nft_id),
             Requirement::NativeTokens => self.fulfill_native_tokens_requirement(),
             Requirement::Amount => self.fulfill_amount_requirement(),
@@ -77,8 +72,7 @@ impl InputSelection {
                     let is_created = account_output.account_id().is_null();
 
                     if !is_created {
-                        let requirement =
-                            Requirement::Account(*account_output.account_id(), AccountTransition::Governance);
+                        let requirement = Requirement::Account(*account_output.account_id());
                         log::debug!("Adding {requirement:?} from output");
                         self.requirements.push(requirement);
                     }
@@ -115,8 +109,7 @@ impl InputSelection {
                         self.requirements.push(requirement);
                     }
 
-                    let requirement =
-                        Requirement::Account(*foundry_output.account_address().account_id(), AccountTransition::State);
+                    let requirement = Requirement::Account(*foundry_output.account_address().account_id());
                     log::debug!("Adding {requirement:?} from output");
                     self.requirements.push(requirement);
 
@@ -155,7 +148,7 @@ impl InputSelection {
                     return Err(Error::BurnAndTransition(ChainId::from(*account_id)));
                 }
 
-                let requirement = Requirement::Account(*account_id, AccountTransition::Governance);
+                let requirement = Requirement::Account(*account_id);
                 log::debug!("Adding {requirement:?} from burn");
                 self.requirements.push(requirement);
             }

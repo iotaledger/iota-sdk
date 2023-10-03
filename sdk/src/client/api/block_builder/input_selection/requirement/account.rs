@@ -4,7 +4,7 @@
 use super::{Error, InputSelection, Requirement};
 use crate::{
     client::{api::input_selection::Burn, secret::types::InputSigningData},
-    types::block::output::{AccountId, AccountTransition, Output, OutputId},
+    types::block::output::{AccountId, Output, OutputId},
 };
 
 pub(crate) fn is_account_transition<'a>(
@@ -62,8 +62,7 @@ impl InputSelection {
     pub(crate) fn fulfill_account_requirement(
         &mut self,
         account_id: AccountId,
-        account_transition: AccountTransition,
-    ) -> Result<Vec<(InputSigningData, Option<AccountTransition>)>, Error> {
+    ) -> Result<Vec<InputSigningData>, Error> {
         // Check that the account is not burned when a state transition is required.
         if account_transition.is_state()
             && self
@@ -71,10 +70,7 @@ impl InputSelection {
                 .as_ref()
                 .map_or(false, |burn| burn.accounts.contains(&account_id))
         {
-            return Err(Error::UnfulfillableRequirement(Requirement::Account(
-                account_id,
-                account_transition,
-            )));
+            return Err(Error::UnfulfillableRequirement(Requirement::Account(account_id)));
         }
 
         let selected_input = self
@@ -86,7 +82,7 @@ impl InputSelection {
         // be performed.
         if !account_transition.is_state() && selected_input.is_some() {
             log::debug!(
-                "{account_id:?}/{account_transition:?} requirement already fulfilled by {:?}",
+                "{account_id:?} requirement already fulfilled by {:?}",
                 selected_input.unwrap().output_id()
             );
             return Ok(Vec::new());
@@ -99,10 +95,7 @@ impl InputSelection {
 
         // If the account was not already selected and it not available, the requirement can't be fulfilled.
         if selected_input.is_none() && available_index.is_none() {
-            return Err(Error::UnfulfillableRequirement(Requirement::Account(
-                account_id,
-                account_transition,
-            )));
+            return Err(Error::UnfulfillableRequirement(Requirement::Account(account_id)));
         }
 
         // If a state transition is not required, we can simply select the account.
@@ -116,7 +109,7 @@ impl InputSelection {
             );
 
             // PANIC: safe to unwrap as it's been checked that it can't be None when a state transition is not required.
-            return Ok(vec![(input, None)]);
+            return Ok(vec![input]);
         }
 
         // At this point, a state transition is required so we need to verify that an account output describing a
@@ -128,26 +121,20 @@ impl InputSelection {
         if is_account_transition(&input.output, *input.output_id(), &self.outputs, self.burn.as_ref())
             == Some(AccountTransition::Governance)
         {
-            return Err(Error::UnfulfillableRequirement(Requirement::Account(
-                account_id,
-                account_transition,
-            )));
+            return Err(Error::UnfulfillableRequirement(Requirement::Account(account_id)));
         }
 
         if let Some(available_index) = available_index {
             // Remove the output from the available inputs, swap to make it O(1).
             let input = self.available_inputs.swap_remove(available_index);
 
-            log::debug!(
-                "{account_id:?}/{account_transition:?} requirement fulfilled by {:?}",
-                input.output_id()
-            );
+            log::debug!("{account_id:?} requirement fulfilled by {:?}", input.output_id());
 
-            return Ok(vec![(input, None)]);
+            return Ok(vec![input]);
         }
 
         log::debug!(
-            "{account_id:?}/{account_transition:?} requirement already fulfilled by {:?}",
+            "{account_id:?} requirement already fulfilled by {:?}",
             selected_input.unwrap().output_id()
         );
 
