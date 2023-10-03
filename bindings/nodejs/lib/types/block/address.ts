@@ -15,6 +15,10 @@ enum AddressType {
     Account = 8,
     /** An NFT address. */
     Nft = 16,
+    /** An implicit account creation address. */
+    ImplicitAccountCreation = 24,
+    /** An address with restricted capabilities. */
+    Restricted = 40,
 }
 
 /**
@@ -51,6 +55,16 @@ abstract class Address {
             ) as any as AccountAddress;
         } else if (data.type == AddressType.Nft) {
             return plainToInstance(NftAddress, data) as any as NftAddress;
+        } else if (data.type == AddressType.ImplicitAccountCreation) {
+            return plainToInstance(
+                ImplicitAccountCreationAddress,
+                data,
+            ) as any as ImplicitAccountCreationAddress;
+        } else if (data.type == AddressType.Restricted) {
+            return plainToInstance(
+                RestrictedAddress,
+                data,
+            ) as any as RestrictedAddress;
         }
         throw new Error('Invalid JSON');
     }
@@ -97,6 +111,7 @@ class AccountAddress extends Address {
         return this.accountId;
     }
 }
+
 /**
  * An NFT address.
  */
@@ -118,12 +133,81 @@ class NftAddress extends Address {
     }
 }
 
+/**
+ * An implicit account creation address.
+ */
+class ImplicitAccountCreationAddress extends Address {
+    /**
+     * The Ed25519 address.
+     */
+    readonly address: Ed25519Address;
+    /**
+     * @param address An Ed25519 address.
+     */
+    constructor(address: Ed25519Address) {
+        super(AddressType.ImplicitAccountCreation);
+        this.address = address;
+    }
+
+    toString(): string {
+        return this.address.toString();
+    }
+}
+
+/**
+ * An address with restricted capabilities.
+ */
+class RestrictedAddress extends Address {
+    /**
+     * The inner address.
+     */
+    readonly address: Address;
+    /**
+     * The allowed capabilities bitflags.
+     */
+    allowed_capabilities: Uint8Array = new Uint8Array();
+    /**
+     * @param address An address.
+     */
+    constructor(address: Address) {
+        super(AddressType.Nft);
+        this.address = address;
+    }
+
+    withAllowedCapabilities(
+        allowed_capabilities: Uint8Array,
+    ): RestrictedAddress {
+        this.allowed_capabilities = allowed_capabilities;
+        return this;
+    }
+
+    toString(): string {
+        var hex = this.address.toString();
+        if (this.allowed_capabilities.some((c) => c != 0)) {
+            var cap = Buffer.from(
+                this.allowed_capabilities.buffer,
+                this.allowed_capabilities.byteOffset,
+                this.allowed_capabilities.byteLength,
+            ).toString('hex');
+            hex += this.allowed_capabilities.length.toString(16) + cap;
+        } else {
+            hex += '00';
+        }
+        return hex;
+    }
+}
+
 const AddressDiscriminator = {
     property: 'type',
     subTypes: [
         { value: Ed25519Address, name: AddressType.Ed25519 as any },
         { value: AccountAddress, name: AddressType.Account as any },
         { value: NftAddress, name: AddressType.Nft as any },
+        {
+            value: ImplicitAccountCreationAddress,
+            name: AddressType.ImplicitAccountCreation as any,
+        },
+        { value: RestrictedAddress, name: AddressType.Restricted as any },
     ],
 };
 
