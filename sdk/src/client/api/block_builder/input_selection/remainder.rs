@@ -5,7 +5,6 @@ use crypto::keys::bip44::Bip44;
 
 use super::{
     requirement::{
-        account::is_account_transition,
         amount::amount_sums,
         native_tokens::{get_minted_and_melted_native_tokens, get_native_tokens, get_native_tokens_diff},
     },
@@ -27,12 +26,6 @@ impl InputSelection {
         }
 
         for input in &self.selected_inputs {
-            let account_transition = is_account_transition(
-                &input.output,
-                *input.output_id(),
-                self.outputs.as_slice(),
-                self.burn.as_ref(),
-            );
             // PANIC: safe to unwrap as outputs with no address have been filtered out already.
             let required_address = input
                 .output

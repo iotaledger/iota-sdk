@@ -13,7 +13,6 @@ use core::ops::Deref;
 use std::collections::HashSet;
 
 use packable::PackableExt;
-pub(crate) use requirement::is_account_transition;
 
 pub use self::{burn::Burn, error::Error, requirement::Requirement};
 use crate::{
@@ -58,23 +57,13 @@ pub struct Selected {
 
 impl InputSelection {
     fn required_account_nft_addresses(&self, input: &InputSigningData) -> Result<Option<Requirement>, Error> {
-        let account_transition =
-            is_account_transition(&input.output, *input.output_id(), &self.outputs, self.burn.as_ref());
         let required_address = input
             .output
             .required_and_unlocked_address(self.slot_index, input.output_id())?
             .0;
 
         match required_address {
-            Address::Ed25519(_) => {
-                if account_transition.is_some() {
-                    // Only add the requirement if the output is an account because other types of output have been
-                    // filtered by address already.
-                    Ok(Some(Requirement::Ed25519(required_address)))
-                } else {
-                    Ok(None)
-                }
-            }
+            Address::Ed25519(_) => Ok(None),
             Address::Account(account_address) => Ok(Some(Requirement::Account(*account_address.account_id()))),
             Address::Nft(nft_address) => Ok(Some(Requirement::Nft(*nft_address.nft_id()))),
             Address::Anchor(_) => todo!(),
@@ -260,12 +249,6 @@ impl InputSelection {
         // filter for ed25519 address first
         let (mut sorted_inputs, account_nft_address_inputs): (Vec<InputSigningData>, Vec<InputSigningData>) =
             inputs.into_iter().partition(|input_signing_data| {
-                let account_transition = is_account_transition(
-                    &input_signing_data.output,
-                    *input_signing_data.output_id(),
-                    outputs,
-                    None,
-                );
                 let (input_address, _) = input_signing_data
                     .output
                     .required_and_unlocked_address(slot_index, input_signing_data.output_id())
@@ -276,7 +259,6 @@ impl InputSelection {
             });
 
         for input in account_nft_address_inputs {
-            let account_transition = is_account_transition(&input.output, *input.output_id(), outputs, None);
             let (input_address, _) = input
                 .output
                 .required_and_unlocked_address(slot_index, input.output_id())?;
@@ -318,12 +300,6 @@ impl InputSelection {
                     if let Some(account_or_nft_address) = account_or_nft_address {
                         // Check for existing outputs for this address, and insert before
                         match sorted_inputs.iter().position(|input_signing_data| {
-                            let account_transition = is_account_transition(
-                                &input_signing_data.output,
-                                *input_signing_data.output_id(),
-                                outputs,
-                                None,
-                            );
                             let (input_address, _) = input_signing_data
                                 .output
                                 .required_and_unlocked_address(slot_index, input.output_id())

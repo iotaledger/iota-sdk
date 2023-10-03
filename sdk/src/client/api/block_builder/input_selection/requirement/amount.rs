@@ -221,18 +221,12 @@ impl InputSelection {
     }
 
     fn reduce_funds_of_chains(&mut self, amount_selection: &mut AmountSelection) -> Result<(), Error> {
-        // Only consider automatically transitioned outputs, except for account governance transitions.
+        // Only consider automatically transitioned outputs.
         let outputs = self.outputs.iter_mut().filter(|output| {
             output
                 .chain_id()
                 .as_ref()
-                .map(|chain_id| {
-                    self.automatically_transitioned
-                        .get(chain_id)
-                        .map_or(false, |account_transition| {
-                            account_transition.map_or(true, |account_transition| account_transition.is_state())
-                        })
-                })
+                .map(|chain_id| self.automatically_transitioned.contains(chain_id))
                 .unwrap_or(false)
         });
 
@@ -386,12 +380,7 @@ impl InputSelection {
         let mut inputs = self
             .available_inputs
             .iter()
-            .filter(|input| match &input.output {
-                Output::Basic(_) => false,
-                // If account, we are only interested in state transitions as governance can't move funds.
-                Output::Account(account) => self.addresses.contains(account.state_controller_address()),
-                _ => true,
-            })
+            .filter(|input| !input.output.is_basic())
             .peekable();
 
         if inputs.peek().is_some() {

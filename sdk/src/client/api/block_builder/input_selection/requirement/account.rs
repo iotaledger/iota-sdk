@@ -3,40 +3,9 @@
 
 use super::{Error, InputSelection, Requirement};
 use crate::{
-    client::{api::input_selection::Burn, secret::types::InputSigningData},
+    client::secret::types::InputSigningData,
     types::block::output::{AccountId, Output, OutputId},
 };
-
-pub(crate) fn is_account_transition<'a>(
-    input: &Output,
-    input_id: OutputId,
-    outputs: &[Output],
-    burn: impl Into<Option<&'a Burn>>,
-) -> Option<AccountTransition> {
-    if let Output::Account(account_input) = &input {
-        let account_id = account_input.account_id_non_null(&input_id);
-        // Checks if the account exists in the outputs and gets the transition type.
-        for output in outputs.iter() {
-            if let Output::Account(account_output) = output {
-                if *account_output.account_id() == account_id {
-                    if account_output.state_index() == account_input.state_index() {
-                        // Governance transition.
-                        return Some(AccountTransition::Governance);
-                    } else {
-                        // State transition.
-                        return Some(AccountTransition::State);
-                    }
-                }
-            }
-        }
-        if let Some(burn) = burn.into() {
-            if burn.accounts().contains(&account_id) {
-                return Some(AccountTransition::Governance);
-            }
-        }
-    }
-    None
-}
 
 /// Checks if an output is an account with a given non null account ID.
 /// Calling it with a null account ID may lead to undefined behavior.

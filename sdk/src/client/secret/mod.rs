@@ -45,8 +45,7 @@ use crate::client::secret::types::StrongholdDto;
 use crate::{
     client::{
         api::{
-            input_selection::{is_account_transition, Error as InputSelectionError},
-            transaction::validate_transaction_payload_length,
+            input_selection::Error as InputSelectionError, transaction::validate_transaction_payload_length,
             verify_semantic, PreparedTransactionData,
         },
         Error,
@@ -515,8 +514,6 @@ where
     // Assuming inputs_data is ordered by address type
     for (current_block_index, input) in prepared_transaction_data.inputs_data.iter().enumerate() {
         // Get the address that is required to unlock the input
-        let TransactionEssence::Regular(regular) = &prepared_transaction_data.essence;
-        let account_transition = is_account_transition(&input.output, *input.output_id(), regular.outputs(), None);
         let (input_address, _) = input
             .output
             .required_and_unlocked_address(slot_index, input.output_metadata.output_id())?;

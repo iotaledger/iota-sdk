@@ -60,10 +60,6 @@ impl InputSelection {
             .with_foundry_counter(u32::max(highest_foundry_serial_number, input.foundry_counter()))
             .with_features(features);
 
-        if account_transition.is_state() {
-            builder = builder.with_state_index(input.state_index() + 1)
-        };
-
         let output = builder.finish_output(self.protocol_parameters.token_supply())?;
 
         self.automatically_transitioned.insert(ChainId::from(account_id));

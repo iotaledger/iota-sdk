@@ -22,7 +22,6 @@ use tokio::sync::Mutex;
 use super::{GenerateAddressOptions, SecretManage, SecretManagerConfig};
 use crate::{
     client::secret::{
-        is_account_transition,
         types::{LedgerApp, LedgerDeviceType},
         LedgerNanoStatus, PreparedTransactionData,
     },
@@ -526,7 +525,6 @@ fn merge_unlocks(
     for (current_block_index, input) in prepared_transaction_data.inputs_data.iter().enumerate() {
         // Get the address that is required to unlock the input
         let TransactionEssence::Regular(regular) = &prepared_transaction_data.essence;
-        let account_transition = is_account_transition(&input.output, *input.output_id(), regular.outputs(), None);
         let (input_address, _) = input
             .output
             .required_and_unlocked_address(slot_index, input.output_metadata.output_id())?;
