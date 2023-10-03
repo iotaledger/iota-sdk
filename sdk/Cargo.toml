@@ -875,10 +875,3 @@ required-features = ["wallet", "storage"]
 name = "migrate_stronghold_snapshot_v2_to_v3"
 path = "examples/wallet/migrate_stronghold_snapshot_v2_to_v3.rs"
 required-features = ["stronghold"]
-
-# EVM
-
-[[example]]
-name = "send_base_token_to_evm"
-path = "examples/how_tos/evm/send_base_token_to_evm.rs"
-required-features = ["wallet"]
