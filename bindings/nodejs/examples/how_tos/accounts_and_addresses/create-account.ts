@@ -12,16 +12,22 @@ require('dotenv').config({ path: '.env' });
 // This example creates a new database and account.
 async function run() {
     initLogger();
-        for(const envVar of ['NODE_URL','STRONGHOLD_PASSWORD','STRONGHOLD_SNAPSHOT_PATH','MNEMONIC','WALLET_DB_PATH'])
-    if (!(envVar in process.env)) {
-        throw new Error(`.env ${envVar} is undefined, see .env.example`);
-    }
-        if(process.env.NODE_URL && process.env.MNEMONIC ){
+    for (const envVar of [
+        'NODE_URL',
+        'STRONGHOLD_PASSWORD',
+        'STRONGHOLD_SNAPSHOT_PATH',
+        'MNEMONIC',
+        'WALLET_DB_PATH',
+    ])
+        if (!(envVar in process.env)) {
+            throw new Error(`.env ${envVar} is undefined, see .env.example`);
+        }
+
     try {
         const walletOptions: WalletOptions = {
             storagePath: process.env.WALLET_DB_PATH,
             clientOptions: {
-                nodes: [process.env.NODE_URL],
+                nodes: [process.env.NODE_URL as string],
             },
             coinType: CoinType.Shimmer,
             secretManager: {
@@ -37,7 +43,7 @@ async function run() {
         // A mnemonic can be generated with `Utils.generateMnemonic()`.
         // Store the mnemonic in the Stronghold snapshot, this needs to be done only the first time.
         // The mnemonic can't be retrieved from the Stronghold file, so make a backup in a secure place!
-        await wallet.storeMnemonic(process.env.MNEMONIC);
+        await wallet.storeMnemonic(process.env.MNEMONIC as string);
 
         // Create a new account
         const account = await wallet.createAccount({
@@ -48,5 +54,5 @@ async function run() {
         console.error('Error: ', error);
     }
 }
-}
+
 run().then(() => process.exit());

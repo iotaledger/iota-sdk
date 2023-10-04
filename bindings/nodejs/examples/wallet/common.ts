@@ -8,15 +8,21 @@ require('dotenv').config({ path: '.env' });
 
 async function getUnlockedWallet() {
     initLogger();
-        for(const envVar of ['NODE_URL','STRONGHOLD_PASSWORD','STRONGHOLD_SNAPSHOT_PATH','MNEMONIC','WALLET_DB_PATH'])
-    if (!(envVar in process.env)) {
-        throw new Error(`.env ${envVar} is undefined, see .env.example`);
-    }
-   if(process.env.NODE_URL){
+    for (const envVar of [
+        'NODE_URL',
+        'STRONGHOLD_PASSWORD',
+        'STRONGHOLD_SNAPSHOT_PATH',
+        'MNEMONIC',
+        'WALLET_DB_PATH',
+    ])
+        if (!(envVar in process.env)) {
+            throw new Error(`.env ${envVar} is undefined, see .env.example`);
+        }
+
     const walletOptions: WalletOptions = {
         storagePath: process.env.WALLET_DB_PATH,
         clientOptions: {
-            nodes: [process.env.NODE_URL],
+            nodes: [process.env.NODE_URL as string],
         },
         coinType: CoinType.Shimmer,
         secretManager: {
@@ -29,7 +35,6 @@ async function getUnlockedWallet() {
     const wallet = new Wallet(walletOptions);
 
     return wallet;
-   }
 }
 
 export { getUnlockedWallet };

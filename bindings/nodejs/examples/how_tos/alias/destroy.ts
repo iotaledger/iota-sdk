@@ -12,11 +12,15 @@ require('dotenv').config({ path: '.env' });
 // In this example we destroy alias.
 async function run() {
     initLogger();
-        for(const envVar of ['FAUCET_URL','WALLET_DB_PATH','STRONGHOLD_PASSWORD'])
-    if (!(envVar in process.env)) {
-        throw new Error(`.env ${envVar} is undefined, see .env.example`);
-    }
-   
+    for (const envVar of [
+        'FAUCET_URL',
+        'WALLET_DB_PATH',
+        'STRONGHOLD_PASSWORD',
+    ])
+        if (!(envVar in process.env)) {
+            throw new Error(`.env ${envVar} is undefined, see .env.example`);
+        }
+
     try {
         // Create the wallet
         const wallet = new Wallet({
@@ -42,9 +46,10 @@ async function run() {
         );
 
         // To sign a transaction we need to unlock stronghold.
-        if(process.env.STRONGHOLD_PASSWORD){
-            await wallet.setStrongholdPassword(process.env.STRONGHOLD_PASSWORD);
-        }
+
+        await wallet.setStrongholdPassword(
+            process.env.STRONGHOLD_PASSWORD as string,
+        );
 
         console.log('Sending the destroy-alias transaction...');
 

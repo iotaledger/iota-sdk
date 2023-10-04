@@ -16,18 +16,17 @@ async function run() {
         levelFilter: 'debug',
         targetExclusions: ['h2', 'hyper', 'rustls'],
     });
-        for(const envVar of ['NODE_URL','STRONGHOLD_PASSWORD'] )
-    if (!(envVar in process.env)) {
-        throw new Error(`.env ${envVar} is undefined, see .env.example`);
-    }
-    
+    for (const envVar of ['NODE_URL', 'STRONGHOLD_PASSWORD'])
+        if (!(envVar in process.env)) {
+            throw new Error(`.env ${envVar} is undefined, see .env.example`);
+        }
+
     migrateDbChrysalisToStardust(walletDbPath, 'password');
 
-    if(process.env.NODE_URL){
     const walletOptions: WalletOptions = {
         storagePath: walletDbPath,
         clientOptions: {
-            nodes: [process.env.NODE_URL],
+            nodes: [process.env.NODE_URL as string],
         },
         secretManager: {
             stronghold: {
@@ -46,5 +45,5 @@ async function run() {
     const historicChrysalisData = await wallet.getChrysalisData();
     console.log(historicChrysalisData);
 }
-}
+
 run().then(() => process.exit());

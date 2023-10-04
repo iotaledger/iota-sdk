@@ -24,13 +24,13 @@ async function run() {
     initLogger();
 
     try {
-        for(const envVar of ['STRONGHOLD_PASSWORD','MNEMONIC'])
-        if (!(envVar in process.env)) {
-            throw new Error(
-                `.env ${envVar} is undefined, see .env.example`,
-            );
-        }
-        
+        for (const envVar of ['STRONGHOLD_PASSWORD', 'MNEMONIC'])
+            if (!(envVar in process.env)) {
+                throw new Error(
+                    `.env ${envVar} is undefined, see .env.example`,
+                );
+            }
+
         const secretManager = new SecretManager({
             stronghold: {
                 password: process.env.STRONGHOLD_PASSWORD,
@@ -41,9 +41,8 @@ async function run() {
         // A mnemonic can be generated with `Utils.generateMnemonic()`.
         // Store the mnemonic in the Stronghold snapshot, this needs to be done only the first time.
         // The mnemonic can't be retrieved from the Stronghold file, so make a backup in a secure place!
-        if(process.env.MNEMONIC){
-            await secretManager.storeMnemonic(process.env.MNEMONIC);
-        }
+
+        await secretManager.storeMnemonic(process.env.MNEMONIC as string);
 
         const bip44Chain = {
             coinType: CoinType.Ether,

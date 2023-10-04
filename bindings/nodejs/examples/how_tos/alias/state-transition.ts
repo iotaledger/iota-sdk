@@ -14,11 +14,15 @@ const NEW_STATE_METADATA = 'updated state metadata 1';
 // In this example we will update the state metadata of an alias output.
 async function run() {
     initLogger();
-        for(const envVar of ['FAUCET_URL','WALLET_DB_PATH','STRONGHOLD_PASSWORD'])
-    if (!(envVar in process.env)) {
-        throw new Error(`.env ${envVar} is undefined, see .env.example`);
-    }
-    
+    for (const envVar of [
+        'FAUCET_URL',
+        'WALLET_DB_PATH',
+        'STRONGHOLD_PASSWORD',
+    ])
+        if (!(envVar in process.env)) {
+            throw new Error(`.env ${envVar} is undefined, see .env.example`);
+        }
+
     try {
         // Create the wallet
         const wallet = new Wallet({
@@ -58,9 +62,10 @@ async function run() {
             immutableFeatures: aliasOutput.immutableFeatures,
             features: aliasOutput.features,
         });
-        if(process.env.STRONGHOLD_PASSWORD){
-            await wallet.setStrongholdPassword(process.env.STRONGHOLD_PASSWORD);
-        }
+
+        await wallet.setStrongholdPassword(
+            process.env.STRONGHOLD_PASSWORD as string,
+        );
 
         console.log('Sending transaction...');
 

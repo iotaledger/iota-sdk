@@ -15,11 +15,11 @@ require('dotenv').config({ path: '.env' });
 
 // This example listens to wallet events.
 async function run() {
-        for(const envVar of ['NODE_URL','STRONGHOLD_PASSWORD'])
-    if (!(envVar in process.env)) {
-        throw new Error(`.env ${envVar} is undefined, see .env.example`);
-    }
-    
+    for (const envVar of ['NODE_URL', 'STRONGHOLD_PASSWORD'])
+        if (!(envVar in process.env)) {
+            throw new Error(`.env ${envVar} is undefined, see .env.example`);
+        }
+
     try {
         // Create the wallet
         const wallet = await getUnlockedWallet();
