@@ -6,9 +6,8 @@ from dataclasses import dataclass, field
 from typing import Dict, List, TypeAlias, Union, Any
 from dataclasses_json import config
 from iota_sdk.types.address import AddressUnion, AccountAddress
-from iota_sdk.types.common import json
+from iota_sdk.types.common import json, SlotIndex
 from iota_sdk.types.address import deserialize_address
-
 
 class UnlockConditionType(IntEnum):
     """Unlock condition variants.
@@ -79,9 +78,9 @@ class StorageDepositReturnUnlockCondition(UnlockCondition):
 class TimelockUnlockCondition(UnlockCondition):
     """A timelock unlock condition.
     Args:
-        unix_time: The Unix timestamp marking the end of the timelock.
+        slot_index: The slot index that determines when the associated output expires.
     """
-    unix_time: int
+    slot_index: SlotIndex
     type: int = field(
         default_factory=lambda: int(
             UnlockConditionType.Timelock),
@@ -93,10 +92,10 @@ class TimelockUnlockCondition(UnlockCondition):
 class ExpirationUnlockCondition(UnlockCondition):
     """An expiration unlock condition.
     Args:
-        unix_time: Unix timestamp marking the expiration of the claim.
+        slot_index: The slot index that determines when the associated output expires.
         return_address: The return address if the output was not claimed in time.
     """
-    unix_time: int
+    slot_index: SlotIndex
     return_address: AddressUnion = field(
         metadata=config(
             decoder=deserialize_address
