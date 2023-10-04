@@ -12,7 +12,6 @@ import {
     Wallet,
     AddressUnlockCondition,
     AliasAddress,
-    INativeToken,
 } from '@iota/sdk';
 import {
     prepareMetadata
@@ -47,10 +46,6 @@ async function run() {
     });
 
     const account = await wallet.getAccount('Alice');
-
-    // Sync new outputs from the node.
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const _syncBalance = await account.sync();
 
     // After syncing the balance can also be computed with the local data
     const balance = await account.getBalance();
