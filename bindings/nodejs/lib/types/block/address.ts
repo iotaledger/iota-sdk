@@ -184,7 +184,7 @@ class RestrictedAddress extends Address {
     toString(): string {
         let hex = this.address.toString();
         if (this.allowed_capabilities.some((c) => c != 0)) {
-            let cap = Buffer.from(
+            const cap = Buffer.from(
                 this.allowed_capabilities.buffer,
                 this.allowed_capabilities.byteOffset,
                 this.allowed_capabilities.byteLength,
