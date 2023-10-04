@@ -114,8 +114,6 @@ def test_output():
         "mana": "168200",
         "amount": "168200",
         "accountId": "0x8d073d15074834785046d9cacec7ac4d672dcb6dad342624a936f3c4334520f1",
-        "stateIndex": 4,
-        "stateMetadata": "0x14bd8ce73814dfe5d6f30f65a11bfd6d0b9e5d29c90aff9d71ec4b3d3a2984386a312295fc8b79cd",
         "foundryCounter": 0,
         "unlockConditions": [
             {
@@ -151,8 +149,6 @@ def test_output():
         "mana": "55100",
         "amount": "55100",
         "accountId": "0x5380cce0ac342b8fa3e9c4f46d5b473ee9e824f0017fe43682dca77e6b875354",
-        "stateIndex": 2,
-        "stateMetadata": "0x",
         "foundryCounter": 1,
         "unlockConditions": [
             {

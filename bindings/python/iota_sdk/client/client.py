@@ -203,8 +203,6 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
             'amount': amount,
             'mana': mana,
             'nativeTokens': native_tokens,
-            'stateIndex': state_index,
-            'stateMetadata': state_metadata,
             'foundryCounter': foundry_counter,
             'features': features,
             'immutableFeatures': immutable_features

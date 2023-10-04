@@ -51,7 +51,7 @@ def test_block():
                                 "type": 0, "transactionId": "0x6f23b39ebe433f8b522d2e4360186cd3e6b21baf46c0a591c801161e505330b4", "transactionOutputIndex": 1}, {
                                     "type": 0, "transactionId": "0x6f23b39ebe433f8b522d2e4360186cd3e6b21baf46c0a591c801161e505330b4", "transactionOutputIndex": 2}], "inputsCommitment": "0xb6913235037feeeb74ea54ca0354bd7daee95e5a4fc65b67c960e5f0df6a339f", "outputs": [
                                         {
-                                            "type": 4, "amount": "1000000", "accountId": "0xf90a577f1bae4587fdb00752a847b3a2a9d623743993e9e7abdd0440a004caee", "stateIndex": 2, "foundryCounter": 1, "unlockConditions": [
+                                            "type": 4, "amount": "1000000", "accountId": "0xf90a577f1bae4587fdb00752a847b3a2a9d623743993e9e7abdd0440a004caee", "foundryCounter": 1, "unlockConditions": [
                                                 {
                                                     "type": 4, "address": {
                                                         "type": 0, "pubKeyHash": "0x7ffec9e1233204d9c6dce6812b1539ee96af691ca2e4d9065daa85907d33e5d3"}}, {

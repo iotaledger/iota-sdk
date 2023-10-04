@@ -38,7 +38,6 @@ async function run() {
         const accountOutput = await client.buildAccountOutput({
             accountId:
                 '0x0000000000000000000000000000000000000000000000000000000000000000',
-            stateMetadata: utf8ToHex('hello'),
             unlockConditions: [
                 new StateControllerAddressUnlockCondition(
                     new Ed25519Address(hexAddress),

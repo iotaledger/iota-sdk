@@ -178,38 +178,14 @@ abstract class ImmutableFeaturesOutput extends CommonOutput {
 }
 
 /**
- * Base class for state metadata outputs.
- */
-abstract class StateMetadataOutput extends ImmutableFeaturesOutput {
-    readonly stateMetadata?: HexEncodedString;
-
-    /**
-     * @param type The type of output.
-     * @param amount The amount of the output.
-     * @param unlockConditions The unlock conditions for the output.
-     */
-    constructor(
-        type: OutputType,
-        amount: u64,
-        unlockConditions: UnlockCondition[],
-    ) {
-        super(type, amount, unlockConditions);
-    }
-}
-
-/**
  * An Account output.
  */
-class AccountOutput extends StateMetadataOutput {
+class AccountOutput extends ImmutableFeaturesOutput {
     /**
      * Unique identifier of the account, which is the BLAKE2b-256 hash of the Output ID that created it.
      * Unless its a newly created account, then the id is zeroed.
      */
     readonly accountId: HexEncodedString;
-    /**
-     * A counter that must increase by 1 every time the account output is state transitioned.
-     */
-    readonly stateIndex: number;
     /**
      * A counter that denotes the number of foundries created by this account output.
      */
@@ -223,7 +199,6 @@ class AccountOutput extends StateMetadataOutput {
      * @param amount The amount of the output.
      * @param mana The amount of stored mana.
      * @param accountId The account ID as hex-encoded string.
-     * @param stateIndex A counter that must increase by 1 every time the account output is state transitioned.
      * @param foundryCounter A counter that denotes the number of foundries created by this account output.
      * @param unlockConditions The unlock conditions of the output.
      */
@@ -231,13 +206,11 @@ class AccountOutput extends StateMetadataOutput {
         amount: u64,
         mana: u64,
         accountId: HexEncodedString,
-        stateIndex: number,
         foundryCounter: number,
         unlockConditions: UnlockCondition[],
     ) {
         super(OutputType.Account, amount, unlockConditions);
         this.accountId = accountId;
-        this.stateIndex = stateIndex;
         this.foundryCounter = foundryCounter;
         this.mana = mana;
     }
