@@ -9,15 +9,17 @@ use futures::{future::try_join_all, FutureExt};
 
 use self::stronghold_snapshot::read_data_from_stronghold_snapshot;
 #[cfg(feature = "storage")]
-use crate::wallet::WalletBuilder;
+use crate::{
+    client::storage::StorageAdapter,
+    wallet::{migration::chrysalis::CHRYSALIS_STORAGE_KEY, WalletBuilder},
+};
 use crate::{
     client::{
         secret::{stronghold::StrongholdSecretManager, SecretManager, SecretManagerConfig, SecretManagerDto},
-        storage::StorageAdapter,
         utils::Password,
     },
     types::block::address::Hrp,
-    wallet::{storage::constants::CHRYSALIS_STORAGE_KEY, Account, Wallet},
+    wallet::{Account, Wallet},
 };
 
 impl Wallet {
@@ -82,9 +84,8 @@ impl Wallet {
             return Err(crate::wallet::Error::Backup("backup path doesn't exist"));
         }
 
-        let mut accounts = self.accounts.write().await;
         // We don't want to overwrite possible existing accounts
-        if !accounts.is_empty() {
+        if !self.accounts.read().await.is_empty() {
             return Err(crate::wallet::Error::Backup(
                 "can't restore backup when there are already accounts",
             ));
@@ -103,7 +104,10 @@ impl Wallet {
             .password(stronghold_password.clone())
             .build(backup_path.clone())?;
 
-        let (read_client_options, read_coin_type, read_secret_manager, read_accounts, chrysalis_data) =
+        #[cfg_attr(not(feature = "storage"), allow(unused))]
+        let chrysalis_data = stronghold_snapshot::migrate_snapshot_from_chrysalis_to_stardust(&new_stronghold).await?;
+
+        let (read_client_options, read_coin_type, read_secret_manager, read_accounts) =
             read_data_from_stronghold_snapshot::<SecretManager>(&new_stronghold).await?;
 
         // If the coin type is not matching the current one, then the addresses in the accounts will also not be
@@ -155,6 +159,8 @@ impl Wallet {
                 self.set_client_options(read_client_options).await?;
             }
         }
+
+        let mut accounts = self.accounts.write().await;
 
         if !ignore_backup_values {
             if let Some(read_accounts) = read_accounts {
@@ -280,7 +286,10 @@ impl Wallet<StrongholdSecretManager> {
             .password(stronghold_password.clone())
             .build(backup_path.clone())?;
 
-        let (read_client_options, read_coin_type, read_secret_manager, read_accounts, chrysalis_data) =
+        #[cfg_attr(not(feature = "storage"), allow(unused))]
+        let chrysalis_data = stronghold_snapshot::migrate_snapshot_from_chrysalis_to_stardust(&new_stronghold).await?;
+
+        let (read_client_options, read_coin_type, read_secret_manager, read_accounts) =
             read_data_from_stronghold_snapshot::<StrongholdSecretManager>(&new_stronghold).await?;
 
         // If the coin type is not matching the current one, then the addresses in the accounts will also not be

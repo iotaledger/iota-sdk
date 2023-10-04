@@ -160,6 +160,17 @@ impl Output {
         }
     }
 
+    /// Returns the output kind of an [`Output`] as a string.
+    pub fn kind_str(&self) -> &str {
+        match self {
+            Self::Alias(_) => "Alias",
+            Self::Basic(_) => "Basic",
+            Self::Foundry(_) => "Foundry",
+            Self::Nft(_) => "Nft",
+            Self::Treasury(_) => "Treasury",
+        }
+    }
+
     /// Returns the amount of an [`Output`].
     pub fn amount(&self) -> u64 {
         match self {
@@ -456,7 +467,7 @@ impl Packable for Output {
             AliasOutput::KIND => Self::from(AliasOutput::unpack::<_, VERIFY>(unpacker, visitor).coerce()?),
             FoundryOutput::KIND => Self::from(FoundryOutput::unpack::<_, VERIFY>(unpacker, visitor).coerce()?),
             NftOutput::KIND => Self::from(NftOutput::unpack::<_, VERIFY>(unpacker, visitor).coerce()?),
-            k => return Err(Error::InvalidOutputKind(k)).map_err(UnpackError::Packable),
+            k => return Err(UnpackError::Packable(Error::InvalidOutputKind(k))),
         })
     }
 }

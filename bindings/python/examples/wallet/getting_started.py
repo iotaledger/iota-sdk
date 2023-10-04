@@ -1,9 +1,12 @@
 # Copyright 2023 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
-from iota_sdk import Wallet, StrongholdSecretManager, CoinType, ClientOptions, Utils
-from dotenv import load_dotenv
 import os
+
+from dotenv import load_dotenv
+
+from iota_sdk import (ClientOptions, CoinType, StrongholdSecretManager, Utils,
+                      Wallet)
 
 load_dotenv()
 

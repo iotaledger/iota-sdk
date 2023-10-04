@@ -132,7 +132,7 @@ impl Packable for Payload {
                 Self::from(TreasuryTransactionPayload::unpack::<_, VERIFY>(unpacker, visitor).coerce()?)
             }
             TaggedDataPayload::KIND => Self::from(TaggedDataPayload::unpack::<_, VERIFY>(unpacker, &()).coerce()?),
-            k => return Err(Error::InvalidPayloadKind(k)).map_err(UnpackError::Packable),
+            k => return Err(UnpackError::Packable(Error::InvalidPayloadKind(k))),
         })
     }
 }

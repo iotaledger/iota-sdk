@@ -8,14 +8,9 @@ load_dotenv()
 
 # In this example we will update the state controller of an alias output.
 
-if 'WALLET_DB_PATH' not in os.environ:
-    raise Exception(".env WALLET_DB_PATH is undefined, see .env.example")
-
-if 'STRONGHOLD_PASSWORD' not in os.environ:
-    raise Exception(".env STRONGHOLD_PASSWORD is undefined, see .env.example")
-
-if 'EXPLORER_URL' not in os.environ:
-    raise Exception(".env EXPLORER_URL is undefined, see .env.example")
+for env_var in ['WALLET_DB_PATH', 'STRONGHOLD_PASSWORD', 'EXPLORER_URL']:
+    if env_var not in os.environ:
+        raise Exception(f".env {env_var} is undefined, see .env.example")
 
 wallet = Wallet(os.environ['WALLET_DB_PATH'])
 
@@ -44,10 +39,12 @@ alias_output = alias_output_data.output
 
 
 def update_state_controller(unlock_condition):
+    """
+    Replace the address in the StateControllerAddressUnlockCondition
+    """
     if unlock_condition.type == UnlockConditionType.StateControllerAddress:
         return StateControllerAddressUnlockCondition(new_state_controller)
-    else:
-        return unlock_condition
+    return unlock_condition
 
 
 updated_unlock_conditions = list(map(

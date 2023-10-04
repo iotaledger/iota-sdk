@@ -1,6 +1,8 @@
-from iota_sdk import Wallet
-from dotenv import load_dotenv
 import os
+
+from dotenv import load_dotenv
+
+from iota_sdk import Wallet
 
 load_dotenv()
 
@@ -22,7 +24,7 @@ response = account.sync()
 # Only the unspent outputs in the account
 output_ids = account.claimable_outputs('All')
 
-print(f'Available outputs to claim:')
+print('Available outputs to claim:')
 for output_id in output_ids:
     print(f'{output_id}')
 

@@ -288,7 +288,7 @@ impl Packable for UnlockCondition {
             ImmutableAliasAddressUnlockCondition::KIND => {
                 Self::from(ImmutableAliasAddressUnlockCondition::unpack::<_, VERIFY>(unpacker, &()).coerce()?)
             }
-            k => return Err(Error::InvalidOutputKind(k)).map_err(UnpackError::Packable),
+            k => return Err(UnpackError::Packable(Error::InvalidOutputKind(k))),
         })
     }
 }

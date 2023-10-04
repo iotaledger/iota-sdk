@@ -1,6 +1,9 @@
-from iota_sdk import Client, StrongholdSecretManager, SecretManager, Bip44, CoinType, Utils, utf8_to_hex
-from dotenv import load_dotenv
 import os
+
+from dotenv import load_dotenv
+
+from iota_sdk import (Bip44, CoinType, SecretManager, StrongholdSecretManager,
+                      utf8_to_hex)
 
 load_dotenv()
 
@@ -11,11 +14,9 @@ ACCOUNT_INDEX = 0
 INTERNAL_ADDRESS = False
 ADDRESS_INDEX = 0
 
-if 'MNEMONIC' not in os.environ:
-    raise Exception(".env MNEMONIC is undefined, see .env.example")
-
-if 'STRONGHOLD_PASSWORD' not in os.environ:
-    raise Exception(".env STRONGHOLD_PASSWORD is undefined, see .env.example")
+for env_var in ['MNEMONIC', 'STRONGHOLD_PASSWORD']:
+    if env_var not in os.environ:
+        raise Exception(f'.env {env_var} is undefined, see .env.example')
 
 secret_manager = SecretManager(StrongholdSecretManager(
     "sign_secp256k1_ecdsa.stronghold", os.environ['STRONGHOLD_PASSWORD']))

@@ -9,6 +9,9 @@ import {
     TokenSchemeType,
     Output,
     IRent,
+    OutputId,
+    NftId,
+    Bech32Address,
 } from '../../';
 import { AliasId } from '../../block/id';
 
@@ -26,7 +29,7 @@ export interface __MnemonicToHexSeedMethod__ {
 export interface __ComputeAliasIdMethod__ {
     name: 'computeAliasId';
     data: {
-        outputId: string;
+        outputId: OutputId;
     };
 }
 
@@ -49,7 +52,7 @@ export interface __ComputeInputsCommitmentMethod__ {
 export interface __ComputeNftIdMethod__ {
     name: 'computeNftId';
     data: {
-        outputId: string;
+        outputId: OutputId;
     };
 }
 
@@ -81,7 +84,7 @@ export interface __ComputeTokenIdMethod__ {
 export interface __ParseBech32AddressMethod__ {
     name: 'parseBech32Address';
     data: {
-        address: string;
+        address: Bech32Address;
     };
 }
 
@@ -109,14 +112,14 @@ export interface __TransactionIdMethod__ {
 export interface __Bech32ToHexMethod__ {
     name: 'bech32ToHex';
     data: {
-        bech32: string;
+        bech32: Bech32Address;
     };
 }
 
 export interface __HexToBech32Method__ {
     name: 'hexToBech32';
     data: {
-        hex: string;
+        hex: HexEncodedString;
         bech32Hrp?: string;
     };
 }
@@ -124,7 +127,7 @@ export interface __HexToBech32Method__ {
 export interface __AliasIdToBech32Method__ {
     name: 'aliasIdToBech32';
     data: {
-        aliasId: string;
+        aliasId: AliasId;
         bech32Hrp?: string;
     };
 }
@@ -132,7 +135,7 @@ export interface __AliasIdToBech32Method__ {
 export interface __NftIdToBech32Method__ {
     name: 'nftIdToBech32';
     data: {
-        nftId: string;
+        nftId: NftId;
         bech32Hrp?: string;
     };
 }
@@ -140,7 +143,7 @@ export interface __NftIdToBech32Method__ {
 export interface __HexPublicKeyToBech32AddressMethod__ {
     name: 'hexPublicKeyToBech32Address';
     data: {
-        hex: string;
+        hex: HexEncodedString;
         bech32Hrp?: string;
     };
 }
@@ -192,6 +195,13 @@ export type __FaucetMethod__ = {
 export interface __OutputIdToUtxoInput__ {
     name: 'outputIdToUtxoInput';
     data: {
-        outputId: string;
+        outputId: OutputId;
+    };
+}
+
+export interface __OutputHexBytes__ {
+    name: 'outputHexBytes';
+    data: {
+        output: Output;
     };
 }

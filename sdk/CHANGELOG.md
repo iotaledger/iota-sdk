@@ -19,6 +19,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security -->
 
+## 1.1.1 - 2023-MM-DD
+
+### Fixed
+
+- Update protocol params and addresses with correct bech32 HRP in `Wallet::set_client_options()`;
+
+## 1.1.0 - 2023-09-29
+
+Stable release.
+
+## 1.1.0-rc.0 - 2023-09-25
+
+### Added
+
+- `Wallet::get_or_create_account` convenience method;
+- `Output::kind_str()` method;
+- `ConflictReason` display implementation with an explanation of the conflict;
+- `TokenScheme` methods `is_simple` and `as_simple`;
+- `Irc27Metadata` and `Irc30Metadata` helpers;
+- `Client::output_ids()` method;
+- `QueryParameter::UnlockableByAddress` variant;
+
+### Changed
+
+- `StrongholdAdapterBuilder` updated to be slightly more ergonomic;
+- `Wallet::{set_stronghold_password, change_stronghold_password, set_stronghold_password_clear_interval, store_mnemonic}` return an `Err` instead of `Ok` in case of a non-stronghold secret manager; 
+
 ## 1.0.4 - 2023-MM-DD
 
 ### Changed
@@ -29,6 +56,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Format of `milestoneIndex` query parameter of `ClientInner::event_status`;
 - Don't error if custom remainder address is provided with ledger nano;
+- `migrate_db_chrysalis_to_stardust()` when ledger nano was used as signer type;
 
 ## 1.0.3 - 2023-09-07
 

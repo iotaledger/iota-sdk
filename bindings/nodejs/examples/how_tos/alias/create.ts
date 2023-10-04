@@ -39,10 +39,7 @@ async function run() {
         // May want to ensure the account is synced before sending a transaction.
         let balance = await account.sync();
 
-        console.log(
-            `Aliases BEFORE (${balance.aliases.length}):\n`,
-            balance.aliases,
-        );
+        console.log(`Aliases BEFORE:\n`, balance.aliases);
 
         // To sign a transaction we need to unlock stronghold.
         await wallet.setStrongholdPassword(process.env.STRONGHOLD_PASSWORD);
@@ -50,9 +47,7 @@ async function run() {
         console.log('Sending the create-alias transaction...');
 
         // Create an alias
-        const transaction = await account
-            .prepareCreateAliasOutput()
-            .then((prepared) => prepared.send());
+        const transaction = await account.createAliasOutput();
 
         console.log(`Transaction sent: ${transaction.transactionId}`);
 
@@ -61,14 +56,11 @@ async function run() {
             transaction.transactionId,
         );
         console.log(
-            `Transaction included: ${process.env.EXPLORER_URL}/block/${blockId}`,
+            `Block included: ${process.env.EXPLORER_URL}/block/${blockId}`,
         );
 
         balance = await account.sync();
-        console.log(
-            `Aliases AFTER (${balance.aliases.length}):\n`,
-            balance.aliases,
-        );
+        console.log(`Aliases AFTER:\n`, balance.aliases);
     } catch (error) {
         console.log('Error: ', error);
     }

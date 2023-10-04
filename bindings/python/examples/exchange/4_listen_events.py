@@ -3,11 +3,14 @@
 
 # This example listens to the NewOutput event.
 
-from iota_sdk import Wallet, SyncOptions, WalletEventType
-from dotenv import load_dotenv
 import json
 import os
+import sys
 import time
+
+from dotenv import load_dotenv
+
+from iota_sdk import SyncOptions, Wallet, WalletEventType
 
 # This example uses secrets in environment variables for simplicity which
 # should not be done in production.
@@ -24,11 +27,13 @@ received_event = False
 
 
 def callback(event):
+    """Callback function for the event listener"""
     event_dict = json.loads(event)
     print('AccountIndex:', event_dict["accountIndex"])
     print('Event:', event_dict["event"])
 
     # Exit after receiving an event.
+    # pylint: disable=global-statement
     global received_event
     received_event = True
 
@@ -47,7 +52,7 @@ print('Send funds to:', addresses[0].address)
 # Sync every 5 seconds until the faucet transaction gets confirmed.
 for _ in range(100):
     if received_event:
-        exit()
+        sys.exit()
     time.sleep(5)
 
     # Sync to detect new outputs

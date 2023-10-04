@@ -49,12 +49,7 @@ async fn main() -> Result<()> {
     println!("{:?}", wallet.get_ledger_nano_status().await?);
 
     // Get or create a new account
-    let account = if let Ok(account) = wallet.get_account(ACCOUNT_ALIAS).await {
-        account
-    } else {
-        println!("Creating account '{ACCOUNT_ALIAS}'");
-        wallet.create_account().with_alias(ACCOUNT_ALIAS).finish().await?
-    };
+    let account = wallet.get_or_create_account(ACCOUNT_ALIAS).await?;
 
     println!("Generating {NUM_ADDRESSES_TO_GENERATE} addresses...");
     let now = tokio::time::Instant::now();
