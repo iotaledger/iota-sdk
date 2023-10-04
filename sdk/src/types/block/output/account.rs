@@ -37,6 +37,8 @@ impl_id!(pub AccountId, 32, "Unique identifier of an account, which is the BLAKE
 
 #[cfg(feature = "serde")]
 string_serde_impl!(AccountId);
+#[cfg(feature = "json")]
+string_json_impl!(AccountId);
 
 impl From<&OutputId> for AccountId {
     fn from(output_id: &OutputId) -> Self {

@@ -18,6 +18,8 @@ impl_id!(pub TokenId, 38, "Unique identifiers of native tokens. The TokenId of n
 
 #[cfg(feature = "serde")]
 string_serde_impl!(TokenId);
+#[cfg(feature = "json")]
+string_json_impl!(TokenId);
 
 impl From<FoundryId> for TokenId {
     fn from(foundry_id: FoundryId) -> Self {

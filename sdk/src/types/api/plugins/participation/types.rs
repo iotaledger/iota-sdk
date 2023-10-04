@@ -12,6 +12,8 @@ use getset::Getters;
 use hashbrown::HashMap;
 use packable::PackableExt;
 
+#[cfg(feature = "json")]
+use crate::types::block::string_json_impl;
 #[cfg(feature = "serde")]
 use crate::types::block::string_serde_impl;
 use crate::types::{api::plugins::participation::error::Error, block::impl_id};
@@ -56,6 +58,8 @@ pub struct ParticipationEvent {
 impl_id!(pub ParticipationEventId, 32, "A participation event id.");
 #[cfg(feature = "serde")]
 string_serde_impl!(ParticipationEventId);
+#[cfg(feature = "json")]
+string_json_impl!(ParticipationEventId);
 
 /// Information about a voting or staking event.
 #[derive(Debug, Clone, Eq, PartialEq, Getters)]

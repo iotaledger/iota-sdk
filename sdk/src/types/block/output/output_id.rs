@@ -67,6 +67,8 @@ impl OutputId {
 
 #[cfg(feature = "serde")]
 string_serde_impl!(OutputId);
+#[cfg(feature = "json")]
+string_json_impl!(OutputId);
 
 impl TryFrom<[u8; Self::LENGTH]> for OutputId {
     type Error = Error;

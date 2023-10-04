@@ -121,6 +121,29 @@ impl From<SlotIndex> for u64 {
 #[cfg(feature = "serde")]
 string_serde_impl!(SlotIndex);
 
+#[cfg(feature = "json")]
+mod json {
+    use super::*;
+    use crate::utils::json::{FromJson, ToJson};
+
+    impl ToJson for SlotIndex {
+        fn to_json(&self) -> ::json::JsonValue {
+            self.0.to_json()
+        }
+    }
+
+    impl FromJson for SlotIndex {
+        type Error = <u64 as FromJson>::Error;
+
+        fn from_non_null_json(value: ::json::JsonValue) -> Result<Self, crate::utils::json::JsonError<Self::Error>>
+        where
+            Self: Sized,
+        {
+            Ok(Self::new(u64::from_json(value)?))
+        }
+    }
+}
+
 #[cfg(test)]
 mod test {
     use crate::types::block::protocol::ProtocolParameters;

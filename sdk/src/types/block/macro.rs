@@ -146,6 +146,33 @@ macro_rules! string_serde_impl {
 #[cfg(feature = "serde")]
 pub(crate) use string_serde_impl;
 
+#[macro_export]
+#[cfg(feature = "json")]
+macro_rules! string_json_impl {
+    ($type:ty) => {
+        impl $crate::utils::json::ToJson for $type {
+            fn to_json(&self) -> json::JsonValue {
+                self.to_string().into()
+            }
+        }
+
+        impl $crate::utils::json::FromJson for $type {
+            type Error = $crate::types::block::Error;
+
+            fn from_non_null_json(value: json::JsonValue) -> Result<Self, $crate::utils::json::JsonError<Self::Error>> {
+                core::str::FromStr::from_str(
+                    value
+                        .as_str()
+                        .ok_or_else(|| json::Error::WrongType(value.to_string()))?,
+                )
+                .map_err($crate::utils::json::JsonError::Conversion)
+            }
+        }
+    };
+}
+#[cfg(feature = "json")]
+pub(crate) use string_json_impl;
+
 /// Convenience macro to work around the fact the `[bitflags]` crate does not yet support iterating over the
 /// individual flags. This macro essentially creates the `[bitflags]` and puts the individual flags into an associated
 /// constant `pub const ALL_FLAGS: &'static []`.

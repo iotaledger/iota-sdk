@@ -5,3 +5,5 @@ impl_id!(pub RootsId, 32, "The digest of multiple sparse merkle tree roots of a 
 
 #[cfg(feature = "serde")]
 string_serde_impl!(RootsId);
+#[cfg(feature = "json")]
+string_json_impl!(RootsId);

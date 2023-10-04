@@ -335,3 +335,5 @@ impl_id!(
 
 #[cfg(feature = "serde")]
 string_serde_impl!(ProtocolParametersHash);
+#[cfg(feature = "json")]
+string_json_impl!(ProtocolParametersHash);

@@ -210,3 +210,39 @@ impl From<&Self> for Address {
         *value
     }
 }
+
+#[cfg(feature = "json")]
+mod json {
+    use super::*;
+    use crate::utils::json::{FromJson, ToJson};
+
+    impl ToJson for Address {
+        fn to_json(&self) -> ::json::JsonValue {
+            match self {
+                Address::Ed25519(a) => a.to_json(),
+                Address::Account(a) => a.to_json(),
+                Address::Nft(a) => a.to_json(),
+            }
+        }
+    }
+
+    impl FromJson for Address {
+        type Error = Error;
+
+        fn from_non_null_json(value: ::json::JsonValue) -> Result<Self, crate::utils::json::JsonError<Self::Error>>
+        where
+            Self: Sized,
+        {
+            Ok(match value["type"].as_u8() {
+                Some(Ed25519Address::KIND) => Ed25519Address::from_json(value)?.into(),
+                Some(AccountAddress::KIND) => AccountAddress::from_json(value)?.into(),
+                Some(NftAddress::KIND) => NftAddress::from_json(value)?.into(),
+                _ => {
+                    return Err(
+                        ::json::Error::WrongType(alloc::format!("invalid address type: {}", value["type"])).into(),
+                    );
+                }
+            })
+        }
+    }
+}

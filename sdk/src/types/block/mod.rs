@@ -41,6 +41,8 @@ pub mod slot;
 pub mod unlock;
 
 pub(crate) use r#macro::create_bitflags;
+#[cfg(feature = "json")]
+pub(crate) use r#macro::string_json_impl;
 #[cfg(feature = "serde")]
 pub(crate) use r#macro::{impl_id, string_serde_impl};
 

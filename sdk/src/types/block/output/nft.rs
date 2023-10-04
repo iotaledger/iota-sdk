@@ -34,6 +34,8 @@ impl_id!(pub NftId, 32, "Unique identifier of an NFT, which is the BLAKE2b-256 h
 
 #[cfg(feature = "serde")]
 string_serde_impl!(NftId);
+#[cfg(feature = "json")]
+string_json_impl!(NftId);
 
 impl From<&OutputId> for NftId {
     fn from(output_id: &OutputId) -> Self {

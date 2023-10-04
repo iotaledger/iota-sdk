@@ -96,6 +96,29 @@ impl PartialEq<u64> for EpochIndex {
 #[cfg(feature = "serde")]
 string_serde_impl!(EpochIndex);
 
+#[cfg(feature = "json")]
+mod json {
+    use super::*;
+    use crate::utils::json::{FromJson, ToJson};
+
+    impl ToJson for EpochIndex {
+        fn to_json(&self) -> ::json::JsonValue {
+            self.0.to_json()
+        }
+    }
+
+    impl FromJson for EpochIndex {
+        type Error = <u64 as FromJson>::Error;
+
+        fn from_non_null_json(value: ::json::JsonValue) -> Result<Self, crate::utils::json::JsonError<Self::Error>>
+        where
+            Self: Sized,
+        {
+            Ok(Self::new(u64::from_json(value)?))
+        }
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::*;

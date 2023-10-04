@@ -80,3 +80,42 @@ pub(crate) mod dto {
 
     impl_serde_typed_dto!(Ed25519Address, Ed25519AddressDto, "ed25519 address");
 }
+
+#[cfg(feature = "json")]
+mod json {
+    use super::*;
+    use crate::utils::json::{FromJson, ToJson};
+
+    impl ToJson for Ed25519Address {
+        fn to_json(&self) -> ::json::JsonValue {
+            crate::json! ({
+                "type": Ed25519Address::KIND,
+                "pubKeyHash": self.to_string()
+            })
+        }
+    }
+
+    impl FromJson for Ed25519Address {
+        type Error = Error;
+
+        fn from_non_null_json(value: ::json::JsonValue) -> Result<Self, crate::utils::json::JsonError<Self::Error>>
+        where
+            Self: Sized,
+        {
+            if value["type"] != Self::KIND {
+                return Err(::json::Error::WrongType(alloc::format!(
+                    "invalid ed25519 address type: expected {}, found {}",
+                    Self::KIND,
+                    value["type"]
+                ))
+                .into());
+            }
+            Ok(Self::from_str(
+                value["pubKeyHash"]
+                    .as_str()
+                    .ok_or_else(|| ::json::Error::WrongType(value.to_string()))?,
+            )
+            .map_err(crate::utils::json::JsonError::Conversion)?)
+        }
+    }
+}

@@ -9,3 +9,5 @@ impl_id!(
 
 #[cfg(feature = "serde")]
 string_serde_impl!(TransactionId);
+#[cfg(feature = "json")]
+string_json_impl!(TransactionId);

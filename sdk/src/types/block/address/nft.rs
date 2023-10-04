@@ -89,3 +89,37 @@ pub(crate) mod dto {
 
     impl_serde_typed_dto!(NftAddress, NftAddressDto, "nft address");
 }
+
+#[cfg(feature = "json")]
+mod json {
+    use super::*;
+    use crate::utils::json::{FromJson, ToJson};
+
+    impl ToJson for NftAddress {
+        fn to_json(&self) -> ::json::JsonValue {
+            crate::json! ({
+                "type": NftAddress::KIND,
+                "nftId": self.0
+            })
+        }
+    }
+
+    impl FromJson for NftAddress {
+        type Error = Error;
+
+        fn from_non_null_json(mut value: ::json::JsonValue) -> Result<Self, crate::utils::json::JsonError<Self::Error>>
+        where
+            Self: Sized,
+        {
+            if value["type"] != Self::KIND {
+                return Err(::json::Error::WrongType(alloc::format!(
+                    "invalid nft address type: expected {}, found {}",
+                    Self::KIND,
+                    value["type"]
+                ))
+                .into());
+            }
+            Ok(Self::new(NftId::from_json(value["nftId"].take())?))
+        }
+    }
+}

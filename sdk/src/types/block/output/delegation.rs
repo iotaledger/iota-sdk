@@ -34,6 +34,8 @@ impl_id!(pub DelegationId, 32, "Unique identifier of the Delegation Output, whic
 
 #[cfg(feature = "serde")]
 string_serde_impl!(DelegationId);
+#[cfg(feature = "json")]
+string_json_impl!(DelegationId);
 
 impl From<&OutputId> for DelegationId {
     fn from(output_id: &OutputId) -> Self {

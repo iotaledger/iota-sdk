@@ -5,3 +5,5 @@ impl_id!(pub SlotCommitmentId, 40, "Identifier of a slot commitment.");
 
 #[cfg(feature = "serde")]
 string_serde_impl!(SlotCommitmentId);
+#[cfg(feature = "json")]
+string_json_impl!(SlotCommitmentId);

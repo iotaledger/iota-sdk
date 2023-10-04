@@ -65,6 +65,7 @@ futures = { version = "0.3.28", default-features = false, features = [
 instant = { version = "0.1.12", default-features = false, optional = true }
 iota-ledger-nano = { version = "1.0.0-alpha.5", default-features = false, optional = true }
 iota_stronghold = { version = "2.0.0", default-features = false, optional = true }
+json = { version = "0.12.4", default-features = false, optional = true }
 log = { version = "0.4.20", default-features = false, optional = true }
 once_cell = { version = "1.18.0", default-features = false, optional = true }
 rand = { version = "0.8.5", default-features = false, features = [

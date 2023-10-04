@@ -37,6 +37,8 @@ impl_id!(pub FoundryId, 38, "Defines the unique identifier of a foundry.");
 
 #[cfg(feature = "serde")]
 string_serde_impl!(FoundryId);
+#[cfg(feature = "json")]
+string_json_impl!(FoundryId);
 
 impl From<TokenId> for FoundryId {
     fn from(token_id: TokenId) -> Self {

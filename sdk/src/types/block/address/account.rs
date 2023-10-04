@@ -89,3 +89,37 @@ mod dto {
 
     impl_serde_typed_dto!(AccountAddress, AccountAddressDto, "account address");
 }
+
+#[cfg(feature = "json")]
+mod json {
+    use super::*;
+    use crate::utils::json::{FromJson, ToJson};
+
+    impl ToJson for AccountAddress {
+        fn to_json(&self) -> ::json::JsonValue {
+            crate::json! ({
+                "type": AccountAddress::KIND,
+                "accountId": self.0
+            })
+        }
+    }
+
+    impl FromJson for AccountAddress {
+        type Error = Error;
+
+        fn from_non_null_json(mut value: ::json::JsonValue) -> Result<Self, crate::utils::json::JsonError<Self::Error>>
+        where
+            Self: Sized,
+        {
+            if value["type"] != Self::KIND {
+                return Err(::json::Error::WrongType(alloc::format!(
+                    "invalid account address type: expected {}, found {}",
+                    Self::KIND,
+                    value["type"]
+                ))
+                .into());
+            }
+            Ok(Self::new(AccountId::from_json(value["accountId"].take())?))
+        }
+    }
+}

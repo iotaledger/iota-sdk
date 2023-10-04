@@ -172,6 +172,8 @@ pub enum Error {
     DuplicateOutputChain(ChainId),
     InvalidField(&'static str),
     NullDelegationValidatorId,
+    // #[cfg(feature = "json")]
+    // JsonError(json::Error),
 }
 
 #[cfg(feature = "std")]
@@ -373,6 +375,8 @@ impl fmt::Display for Error {
             Self::DuplicateOutputChain(chain_id) => write!(f, "duplicate output chain {chain_id}"),
             Self::InvalidField(field) => write!(f, "invalid field: {field}"),
             Self::NullDelegationValidatorId => write!(f, "null delegation validator ID"),
+            // #[cfg(feature = "json")]
+            // Self::JsonError(e) => e.fmt(f),
         }
     }
 }

@@ -115,3 +115,6 @@ impl core::ops::Deref for BlockId {
 }
 #[cfg(feature = "serde")]
 string_serde_impl!(BlockId);
+
+#[cfg(feature = "json")]
+string_json_impl!(BlockId);
