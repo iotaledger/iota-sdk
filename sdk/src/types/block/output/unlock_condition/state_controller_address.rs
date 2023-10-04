@@ -5,9 +5,8 @@ use derive_more::From;
 
 use crate::types::block::address::Address;
 
-// TODO
 /// Defines the State Controller Address that owns this output, that is, it can unlock it with the proper Unlock in a
-/// transaction that state transitions the account output.
+/// transaction that state transitions the anchor output.
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, From, packable::Packable)]
 pub struct StateControllerAddressUnlockCondition(Address);
 

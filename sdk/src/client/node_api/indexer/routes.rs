@@ -59,10 +59,9 @@ impl ClientInner {
         self.get_output_ids(route, query_parameters, true, false).await
     }
 
-    // TODO
     /// Get account outputs filtered by the given parameters.
     /// GET with query parameter returns all outputIDs that fit these filter criteria.
-    /// Query parameters: "stateController", "governor", "issuer", "sender", "createdBefore", "createdAfter"
+    /// Query parameters: "address", "issuer", "sender", "createdBefore", "createdAfter"
     /// Returns Err(Node(NotFound) if no results are found.
     /// api/indexer/v2/outputs/account
     pub async fn account_output_ids(

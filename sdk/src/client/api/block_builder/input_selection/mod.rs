@@ -207,14 +207,13 @@ impl InputSelection {
 
     fn filter_inputs(&mut self) {
         self.available_inputs.retain(|input| {
-            // Keep account outputs because at this point we do not know if a state or governor address will be
-            // required.
-            // TODO remove ?
-            if input.output.is_account() {
-                return true;
-            }
+            // TODO what about other kinds?
             // Filter out non basic/foundry/nft outputs.
-            else if !input.output.is_basic() && !input.output.is_foundry() && !input.output.is_nft() {
+            if !input.output.is_basic()
+                && !input.output.is_account()
+                && !input.output.is_foundry()
+                && !input.output.is_nft()
+            {
                 return false;
             }
 

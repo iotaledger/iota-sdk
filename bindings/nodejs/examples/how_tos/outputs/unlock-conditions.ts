@@ -12,8 +12,6 @@ import {
     ExpirationUnlockCondition,
     TimelockUnlockCondition,
     SimpleTokenScheme,
-    StateControllerAddressUnlockCondition,
-    GovernorAddressUnlockCondition,
     ImmutableAccountAddressUnlockCondition,
     AccountAddress,
 } from '@iota/sdk';
@@ -77,20 +75,6 @@ async function run() {
                 new ExpirationUnlockCondition(
                     new Ed25519Address(hexAddress),
                     BigInt(1),
-                ),
-            ],
-        });
-
-        // Output with governor and state controller unlock condition
-        const accountOutput = await client.buildAccountOutput({
-            accountId:
-                '0x0000000000000000000000000000000000000000000000000000000000000000',
-            unlockConditions: [
-                new GovernorAddressUnlockCondition(
-                    new Ed25519Address(hexAddress),
-                ),
-                new StateControllerAddressUnlockCondition(
-                    new Ed25519Address(hexAddress),
                 ),
             ],
         });

@@ -40,12 +40,7 @@ async fn main() -> Result<()> {
         .parse::<Bech32Address>()?;
 
     // Get output IDs of account outputs that can be controlled by this address.
-    let output_ids_response = client
-        .account_output_ids([
-            QueryParameter::Governor(address),
-            QueryParameter::StateController(address),
-        ])
-        .await?;
+    let output_ids_response = client.account_output_ids([QueryParameter::Address(address)]).await?;
 
     println!("Account output IDs: {output_ids_response:#?}");
 

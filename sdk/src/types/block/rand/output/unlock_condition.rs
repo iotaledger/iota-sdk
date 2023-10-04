@@ -7,9 +7,9 @@ use crate::types::block::{
         unlock_condition::{
             AddressUnlockCondition, GovernorAddressUnlockCondition, StateControllerAddressUnlockCondition,
         },
-        AccountId, NftId,
+        AccountId, AnchorId, NftId,
     },
-    rand::address::{rand_account_address, rand_address, rand_nft_address},
+    rand::address::{rand_account_address, rand_address, rand_anchor_address, rand_nft_address},
 };
 
 /// Generates a random [`AddressUnlockCondition`].
@@ -19,26 +19,26 @@ pub fn rand_address_unlock_condition() -> AddressUnlockCondition {
 
 /// Generates a random [`StateControllerAddressUnlockCondition`].
 pub fn rand_state_controller_address_unlock_condition_different_from(
-    account_id: &AccountId,
+    anchor_id: &AnchorId,
 ) -> StateControllerAddressUnlockCondition {
     let mut address = rand_address();
 
-    if let Address::Account(mut account_address) = &mut address {
-        while account_address.account_id() == account_id {
-            account_address = rand_account_address();
+    if let Address::Anchor(mut account_address) = &mut address {
+        while account_address.anchor_id() == anchor_id {
+            account_address = rand_anchor_address();
         }
     }
 
     address.into()
 }
 
-/// Generates a random [`GovernorAddressUnlockCondition`] that is different from `account_id`.
-pub fn rand_governor_address_unlock_condition_different_from(account_id: &AccountId) -> GovernorAddressUnlockCondition {
+/// Generates a random [`GovernorAddressUnlockCondition`] that is different from `anchor_id`.
+pub fn rand_governor_address_unlock_condition_different_from(anchor_id: &AnchorId) -> GovernorAddressUnlockCondition {
     let mut address = rand_address();
 
-    if let Address::Account(mut account_address) = &mut address {
-        while account_address.account_id() == account_id {
-            account_address = rand_account_address();
+    if let Address::Anchor(mut account_address) = &mut address {
+        while account_address.anchor_id() == anchor_id {
+            account_address = rand_anchor_address();
         }
     }
 

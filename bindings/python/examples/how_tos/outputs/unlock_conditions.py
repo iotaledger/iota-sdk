@@ -11,8 +11,6 @@ from iota_sdk import (
     SimpleTokenScheme,
     StorageDepositReturnUnlockCondition,
     TimelockUnlockCondition,
-    GovernorAddressUnlockCondition,
-    StateControllerAddressUnlockCondition,
     ImmutableAccountAddressUnlockCondition,
 )
 
@@ -70,20 +68,6 @@ basic_output = client.build_basic_output(
     ],
 )
 outputs.append(basic_output)
-
-# Output with governor and state controller unlock condition
-account_output = client.build_account_output(
-    account_id='0x0000000000000000000000000000000000000000000000000000000000000000',
-    unlock_conditions=[
-        GovernorAddressUnlockCondition(
-            Ed25519Address(hex_address),
-        ),
-        StateControllerAddressUnlockCondition(
-            Ed25519Address(hex_address),
-        ),
-    ],
-)
-outputs.append(account_output)
 
 # Output with immutable account unlock condition
 foundry_output = client.build_foundry_output(

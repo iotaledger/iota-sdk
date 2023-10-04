@@ -10,7 +10,7 @@ from iota_sdk.types.common import HexStr, json
 from iota_sdk.types.feature import deserialize_features, SenderFeature, IssuerFeature, MetadataFeature, TagFeature
 from iota_sdk.types.native_token import NativeToken
 from iota_sdk.types.token_scheme import SimpleTokenScheme
-from iota_sdk.types.unlock_condition import deserialize_unlock_conditions, AddressUnlockCondition, StorageDepositReturnUnlockCondition, TimelockUnlockCondition, ExpirationUnlockCondition, StateControllerAddressUnlockCondition, GovernorAddressUnlockCondition, ImmutableAccountAddressUnlockCondition
+from iota_sdk.types.unlock_condition import deserialize_unlock_conditions, AddressUnlockCondition, StorageDepositReturnUnlockCondition, TimelockUnlockCondition, ExpirationUnlockCondition, ImmutableAccountAddressUnlockCondition
 
 
 class OutputType(IntEnum):
@@ -106,8 +106,8 @@ class AccountOutput(Output):
     account_id: HexStr
     state_index: int
     foundry_counter: int
-    unlock_conditions: List[Union[StateControllerAddressUnlockCondition,
-                                  GovernorAddressUnlockCondition]] = field(
+    unlock_conditions: List[Union[AddressUnlockCondition,
+                                  ]] = field(
         metadata=config(
             decoder=deserialize_unlock_conditions
         ))

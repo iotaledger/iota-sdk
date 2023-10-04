@@ -5,12 +5,11 @@ import {
     Client,
     initLogger,
     Utils,
-    StateControllerAddressUnlockCondition,
     MetadataFeature,
     SenderFeature,
     Ed25519Address,
     IssuerFeature,
-    GovernorAddressUnlockCondition,
+    AddressUnlockCondition,
     utf8ToHex,
 } from '@iota/sdk';
 require('dotenv').config({ path: '.env' });
@@ -39,12 +38,7 @@ async function run() {
             accountId:
                 '0x0000000000000000000000000000000000000000000000000000000000000000',
             unlockConditions: [
-                new StateControllerAddressUnlockCondition(
-                    new Ed25519Address(hexAddress),
-                ),
-                new GovernorAddressUnlockCondition(
-                    new Ed25519Address(hexAddress),
-                ),
+                new AddressUnlockCondition(new Ed25519Address(hexAddress)),
             ],
             features: [
                 new SenderFeature(new Ed25519Address(hexAddress)),

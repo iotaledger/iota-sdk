@@ -247,8 +247,7 @@ pub(crate) fn verify_query_parameters_account_outputs(
 ) -> Result<QueryParameters> {
     verify_query_parameters!(
         query_parameters,
-        QueryParameter::StateController,
-        QueryParameter::Governor,
+        QueryParameter::Address,
         QueryParameter::Issuer,
         QueryParameter::Sender,
         QueryParameter::HasNativeTokens,

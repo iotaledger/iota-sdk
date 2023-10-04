@@ -43,13 +43,7 @@ where
         {
             output_ids.extend(
                 client
-                    .account_output_ids([QueryParameter::Governor(bech32_address)])
-                    .await?
-                    .items,
-            );
-            output_ids.extend(
-                client
-                    .account_output_ids([QueryParameter::StateController(bech32_address)])
+                    .account_output_ids([QueryParameter::Address(bech32_address)])
                     .await?
                     .items,
             );
@@ -58,24 +52,12 @@ where
         #[cfg(not(target_family = "wasm"))]
         {
             let tasks = [
-                // Get outputs where the address is in the governor address unlock condition
+                // Get outputs where the address is in the address unlock condition
                 async move {
                     let client = client.clone();
                     task::spawn(async move {
                         client
-                            .account_output_ids([QueryParameter::Governor(bech32_address)])
-                            .await
-                            .map_err(From::from)
-                    })
-                    .await
-                }
-                .boxed(),
-                // Get outputs where the address is in the state controller unlock condition
-                async move {
-                    let client = client.clone();
-                    task::spawn(async move {
-                        client
-                            .account_output_ids([QueryParameter::StateController(bech32_address)])
+                            .account_output_ids([QueryParameter::Address(bech32_address)])
                             .await
                             .map_err(From::from)
                     })
