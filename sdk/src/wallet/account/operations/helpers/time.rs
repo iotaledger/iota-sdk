@@ -10,10 +10,9 @@ use crate::{
     wallet::account::types::OutputData,
 };
 
-// Check if an output can be unlocked by one of the account addresses at the current time
+// Check if an output can be unlocked by the wallet address at the current time
 pub(crate) fn can_output_be_unlocked_now(
     wallet_address: &Address,
-    account_and_nft_addresses: &[Address],
     output_data: &OutputData,
     slot_index: SlotIndex,
     account_transition: Option<AccountTransition>,
@@ -28,8 +27,7 @@ pub(crate) fn can_output_be_unlocked_now(
         .output
         .required_and_unlocked_address(slot_index, &output_data.output_id, account_transition)?;
 
-    Ok(wallet_address == &required_unlock_address
-        || account_and_nft_addresses.iter().any(|a| *a == required_unlock_address))
+    Ok(wallet_address == &required_unlock_address)
 }
 
 // Check if an output can be unlocked by one of the account addresses at the current time and at any

@@ -98,7 +98,7 @@ where
                 return Ok(false);
             }
 
-            can_output_be_unlocked_now(wallet_address, &[], output_data, slot_index, None)?
+            can_output_be_unlocked_now(wallet_address, output_data, slot_index, None)?
         } else {
             false
         })
@@ -158,7 +158,7 @@ where
             None => {
                 #[cfg(feature = "ledger_nano")]
                 {
-                    use crate::wallet::account::SecretManager;
+                    use crate::client::secret::SecretManager;
                     let secret_manager = self.inner.secret_manager.read().await;
                     if secret_manager
                         .downcast::<LedgerSecretManager>()
@@ -198,7 +198,7 @@ where
 
         #[cfg(feature = "ledger_nano")]
         let max_inputs = {
-            use crate::wallet::account::SecretManager;
+            use crate::client::secret::SecretManager;
             let secret_manager = self.inner.secret_manager.read().await;
             if let Some(ledger) = secret_manager.downcast::<LedgerSecretManager>().or_else(|| {
                 secret_manager.downcast::<SecretManager>().and_then(|s| {

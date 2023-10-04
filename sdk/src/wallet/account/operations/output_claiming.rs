@@ -69,8 +69,6 @@ where
                             // We use the addresses with unspent outputs, because other addresses of the
                             // account without unspent outputs can't be related to this output
                             wallet_data.address.inner(),
-                            // outputs controlled by an account or nft are currently not considered
-                            &[],
                             output_data,
                             slot_index,
                             // Not relevant without account addresses

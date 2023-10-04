@@ -583,18 +583,21 @@ impl From<&WalletData> for WalletDataDto {
 fn serialize() {
     use core::str::FromStr;
 
-    use crate::types::block::{
-        address::{Address, Ed25519Address},
-        input::{Input, UtxoInput},
-        output::{unlock_condition::AddressUnlockCondition, BasicOutput, InputsCommitment, Output},
-        payload::{
-            transaction::{RegularTransactionEssence, TransactionId},
-            TransactionPayload,
+    use crate::{
+        types::block::{
+            address::{Address, Ed25519Address},
+            input::{Input, UtxoInput},
+            output::{unlock_condition::AddressUnlockCondition, BasicOutput, InputsCommitment, Output},
+            payload::{
+                transaction::{RegularTransactionEssence, TransactionId},
+                TransactionPayload,
+            },
+            protocol::ProtocolParameters,
+            rand::mana::rand_mana_allotment,
+            signature::{Ed25519Signature, Signature},
+            unlock::{ReferenceUnlock, SignatureUnlock, Unlock, Unlocks},
         },
-        protocol::ProtocolParameters,
-        rand::mana::rand_mana_allotment,
-        signature::{Ed25519Signature, Signature},
-        unlock::{ReferenceUnlock, SignatureUnlock, Unlock, Unlocks},
+        wallet::account::types::InclusionState,
     };
 
     const TRANSACTION_ID: &str = "0x24a1f46bdb6b2bf38f1c59f73cdd4ae5b418804bb231d76d06fbf246498d5883";
