@@ -9,6 +9,7 @@ from iota_sdk.types.address import AddressUnion, AccountAddress
 from iota_sdk.types.common import json, SlotIndex
 from iota_sdk.types.address import deserialize_address
 
+
 class UnlockConditionType(IntEnum):
     """Unlock condition variants.
 
