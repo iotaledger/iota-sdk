@@ -3,10 +3,10 @@
 
 from __future__ import annotations
 from dataclasses import dataclass, field
-from typing import List, Optional, Union
+from typing import List, Optional
 from iota_sdk.types.block.block import Block, BlockType
 from iota_sdk.types.common import HexStr, json
-from iota_sdk.types.payload import TaggedDataPayload, TransactionPayload
+from iota_sdk.types.payload import PayloadUnion
 
 
 @json
@@ -26,8 +26,7 @@ class BasicBlock(Block):
     weak_parents: List[HexStr]
     shallow_like_parents: List[HexStr]
     max_burned_mana: str
-    payload: Optional[Union[TaggedDataPayload,
-                      TransactionPayload]] = None
+    payload: Optional[PayloadUnion] = None
     type: int = field(
         default_factory=lambda: BlockType.Basic,
         init=False)

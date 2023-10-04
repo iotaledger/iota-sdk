@@ -3,13 +3,15 @@
 
 from __future__ import annotations
 from dataclasses import dataclass
-from typing import Union
+from typing import TypeAlias, Union
 from iota_sdk.types.block.basic import BasicBlock
 from iota_sdk.types.block.validation import ValidationBlock
 from iota_sdk.types.common import HexStr, json, SlotIndex
 from iota_sdk.types.node_info import ProtocolParameters
-from iota_sdk.types.signature import Ed25519Signature
+from iota_sdk.types.signature import SignatureUnion
 from iota_sdk.utils import Utils
+
+BlockUnion: TypeAlias = Union[BasicBlock, ValidationBlock]
 
 
 @json
@@ -34,8 +36,8 @@ class BlockWrapper:
     slot_commitment_id: HexStr
     latest_finalized_slot: SlotIndex
     issuer_id: HexStr
-    block: Union[BasicBlock, ValidationBlock]
-    signature: Union[Ed25519Signature]
+    block: BlockUnion
+    signature: SignatureUnion
 
     def id(self, params: ProtocolParameters) -> HexStr:
         """Returns the block ID as a hexadecimal string.
