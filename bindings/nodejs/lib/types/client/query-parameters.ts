@@ -39,7 +39,6 @@ export type FoundryQueryParameter = AliasAddress | CommonQueryParameters;
 /** Query parameters for filtering Nft Outputs */
 export type NftQueryParameter =
     | Address
-    | AliasAddress
     | HasStorageDepositReturn
     | StorageDepositReturnAddress
     | HasTimelock
