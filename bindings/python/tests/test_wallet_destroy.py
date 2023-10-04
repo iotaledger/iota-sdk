@@ -2,11 +2,13 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from iota_sdk import Wallet, MnemonicSecretManager, CoinType, ClientOptions, WalletError
+import pytest
 import shutil
 import unittest
 
 
 class WalletDestroy(unittest.TestCase):
+    @pytest.mark.skip(reason="https://github.com/iotaledger/iota-sdk/issues/1387")
     def test_wallet_destroy(self):
         db_path = './test_wallet_destroy'
         shutil.rmtree(db_path, ignore_errors=True)
