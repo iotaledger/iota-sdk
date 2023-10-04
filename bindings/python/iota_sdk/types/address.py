@@ -26,15 +26,7 @@ class AddressType(IntEnum):
 
 @json
 @dataclass
-class BaseAddress():
-    """Base class for addresses.
-    """
-    type: int
-
-
-@json
-@dataclass
-class Ed25519Address(BaseAddress):
+class Ed25519Address:
     """Represents an Ed25519 address.
     Attributes:
         pub_key_hash: The hex encoded Ed25519 public key hash.
@@ -48,7 +40,7 @@ class Ed25519Address(BaseAddress):
 
 @json
 @dataclass
-class AccountAddress(BaseAddress):
+class AccountAddress:
     """Represents an Account address.
     Attributes:
         account_id: The hex encoded account id.
@@ -62,7 +54,7 @@ class AccountAddress(BaseAddress):
 
 @json
 @dataclass
-class NFTAddress(BaseAddress):
+class NFTAddress:
     """Represents an NFT address.
     Attributes:
         nft_id: The hex encoded NFT id.
@@ -73,7 +65,7 @@ class NFTAddress(BaseAddress):
 
 @json
 @dataclass
-class ImplicitAccountCreationAddress(BaseAddress):
+class ImplicitAccountCreationAddress:
     """Represents an implicit account creation address that can be used to transition an account.
     Attributes:
         address: The hex encoded Ed25519 Address.
@@ -85,13 +77,14 @@ class ImplicitAccountCreationAddress(BaseAddress):
 
 @json
 @dataclass
-class RestrictedAddress(BaseAddress):
+class RestrictedAddress:
     """Represents an address with restricted capabilities.
     Attributes:
         address: The hex encoded Ed25519 Address.
         allowed_capabilities: The allowed capabilities bitflags.
     """
-    address: BaseAddress
+    address: Union[Ed25519Address, AccountAddress,
+                   NFTAddress, ImplicitAccountCreationAddress]
     allowed_capabilities: bytes
     type: int = field(default_factory=lambda: int(
         AddressType.RESTRICTED), init=False)

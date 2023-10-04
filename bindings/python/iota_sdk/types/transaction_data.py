@@ -5,9 +5,9 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Optional, List
 from iota_sdk.types.address import Address
-from iota_sdk.types.output import OutputUnion
+from iota_sdk.types.output import Output
 from iota_sdk.types.output_metadata import OutputMetadata
-from iota_sdk.types.essence import RegularTransactionEssence
+from iota_sdk.types.essence import TransactionEssence
 from iota_sdk.types.payload import TransactionPayload
 from iota_sdk.types.signature import Bip44
 from iota_sdk.types.common import json
@@ -23,7 +23,7 @@ class InputSigningData:
         output_metadata: The output metadata.
         chain: The BIP44 chain for the address to unlock the output.
     """
-    output: OutputUnion
+    output: Output
     output_metadata: OutputMetadata
     chain: Optional[Bip44] = None
 
@@ -38,7 +38,7 @@ class RemainderData:
         address: The remainder address.
         chain: The BIP44 chain for the remainder address.
     """
-    output: OutputUnion
+    output: Output
     address: Address
     chain: Optional[Bip44] = None
 
@@ -53,7 +53,7 @@ class PreparedTransactionData:
         inputs_data: Data about the inputs which is required for signing.
         remainder: Data about a remainder.
     """
-    essence: RegularTransactionEssence
+    essence: TransactionEssence
     inputs_data: List[InputSigningData]
     remainder: Optional[RemainderData] = None
 
