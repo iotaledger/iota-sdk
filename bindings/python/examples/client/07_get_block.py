@@ -22,5 +22,5 @@ metadata = client.get_block_metadata(block_ids[0])
 print(f'Block metadata: {json.dumps(asdict(metadata), indent=4)}')
 
 # Request the block by its id
-block = client.get_block_data(block_ids[0])
+block = client.get_block(block_ids[0])
 print(f'Block: {json.dumps(asdict(block), indent=4)}')
