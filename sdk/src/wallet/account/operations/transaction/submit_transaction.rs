@@ -6,7 +6,7 @@ use crypto::keys::bip44::Bip44;
 #[cfg(feature = "events")]
 use crate::wallet::events::types::{TransactionProgressEvent, WalletEvent};
 use crate::{
-    client::secret::{SecretManage, SignBlockExt},
+    client::secret::{SecretManage, SignBlock},
     types::block::{payload::Payload, BlockId},
     wallet::account::{operations::transaction::TransactionPayload, Account},
 };

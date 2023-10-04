@@ -13,7 +13,7 @@ use iota_sdk::{
         constants::IOTA_COIN_TYPE,
         node_api::indexer::query_parameters::QueryParameter,
         request_funds_from_faucet,
-        secret::{SecretManager, SignBlockExt},
+        secret::{SecretManager, SignBlock},
         Client,
     },
     types::block::{

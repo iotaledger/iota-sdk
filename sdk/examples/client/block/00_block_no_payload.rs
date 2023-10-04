@@ -11,7 +11,7 @@
 use crypto::keys::bip44::Bip44;
 use iota_sdk::client::{
     constants::IOTA_COIN_TYPE,
-    secret::{SecretManager, SignBlockExt},
+    secret::{SecretManager, SignBlock},
     Client, Result,
 };
 

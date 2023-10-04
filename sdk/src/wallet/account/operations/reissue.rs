@@ -5,7 +5,7 @@ use crypto::keys::bip44::Bip44;
 
 use crate::{
     client::{
-        secret::{SecretManage, SignBlockExt},
+        secret::{SecretManage, SignBlock},
         Error as ClientError,
     },
     types::{

@@ -606,7 +606,7 @@ where
 }
 
 #[async_trait]
-pub trait SignBlockExt {
+pub trait SignBlock {
     async fn sign_ed25519<S: SecretManage>(
         self,
         secret_manager: &S,
@@ -617,7 +617,7 @@ pub trait SignBlockExt {
 }
 
 #[async_trait]
-impl SignBlockExt for BlockWrapperBuilder {
+impl SignBlock for BlockWrapperBuilder {
     async fn sign_ed25519<S: SecretManage>(
         self,
         secret_manager: &S,

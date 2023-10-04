@@ -6,7 +6,7 @@ use iota_sdk::client::mqtt::{MqttPayload, Topic};
 use iota_sdk::{
     client::{
         request_funds_from_faucet,
-        secret::{SecretManager, SignBlockExt},
+        secret::{SecretManager, SignBlock},
         Client,
     },
     types::{
