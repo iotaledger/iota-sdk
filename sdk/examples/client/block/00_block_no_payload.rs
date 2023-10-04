@@ -29,7 +29,7 @@ async fn main() -> Result<()> {
 
     // Create and send the block.
     let block = client
-        .unsigned_basic_block_builder(todo!("issuer id"), todo!("issuing time"), None, None)
+        .basic_block_builder(todo!("issuer id"), todo!("issuing time"), None, None)
         .await?
         .sign_ed25519(&secret_manager, Bip44::new(IOTA_COIN_TYPE))
         .await?;

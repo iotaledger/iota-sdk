@@ -61,7 +61,7 @@ where
                 Some(block_id) => block_id,
                 None => self
                     .client()
-                    .unsigned_basic_block_builder(
+                    .basic_block_builder(
                         todo!("issuer id"),
                         todo!("issuing time"),
                         None,
@@ -114,7 +114,7 @@ where
                     if index == block_ids_len - 1 && should_reissue {
                         let reissued_block = self
                             .client()
-                            .unsigned_basic_block_builder(
+                            .basic_block_builder(
                                 todo!("issuer id"),
                                 todo!("issuing time"),
                                 None,

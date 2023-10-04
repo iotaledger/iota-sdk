@@ -34,7 +34,7 @@ async fn setup_tagged_data_block(secret_manager: &SecretManager) -> BlockId {
     let protocol_params = client.get_protocol_parameters().await.unwrap();
 
     client
-        .unsigned_basic_block_builder(
+        .basic_block_builder(
             todo!("issuer id"),
             todo!("issuing time"),
             None,

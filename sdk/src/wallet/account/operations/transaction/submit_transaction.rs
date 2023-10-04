@@ -27,7 +27,7 @@ where
 
         let block = self
             .client()
-            .unsigned_basic_block_builder(
+            .basic_block_builder(
                 todo!("issuer id"),
                 todo!("issuing time"),
                 None,

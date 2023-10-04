@@ -33,7 +33,7 @@ async fn main() -> Result<()> {
 
     // Create and send the block with custom parents.
     let block = client
-        .unsigned_basic_block_builder(
+        .basic_block_builder(
             todo!("issuer id"),
             todo!("issuing time"),
             Some(issuance.strong_parents()?),

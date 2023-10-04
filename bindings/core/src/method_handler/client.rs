@@ -177,7 +177,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         ClientMethod::GetProtocolParameters => Response::ProtocolParameters(client.get_protocol_parameters().await?),
         ClientMethod::PostBlockPayload { payload } => {
             let block = client
-                .unsigned_basic_block_builder(
+                .basic_block_builder(
                     todo!("issuer id"),
                     todo!("issuing time"),
                     None,

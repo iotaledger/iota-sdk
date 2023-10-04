@@ -15,7 +15,7 @@ use crate::{
 };
 
 impl ClientInner {
-    pub async fn unsigned_basic_block_builder(
+    pub async fn basic_block_builder(
         &self,
         issuer_id: IssuerId,
         issuing_time: Option<u64>,

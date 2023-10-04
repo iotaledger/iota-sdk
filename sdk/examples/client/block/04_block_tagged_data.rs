@@ -32,7 +32,7 @@ async fn main() -> Result<()> {
 
     // Create and send the block with tag and data.
     let block = client
-        .unsigned_basic_block_builder(
+        .basic_block_builder(
             todo!("issuer id"),
             todo!("issuing time"),
             None,
