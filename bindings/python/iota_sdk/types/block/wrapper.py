@@ -3,11 +3,11 @@
 
 from __future__ import annotations
 from dataclasses import dataclass
+from typing import TypeAlias, Union
+from iota_sdk.utils import Utils
 from iota_sdk.types.common import HexStr, json, SlotIndex
 from iota_sdk.types.node_info import ProtocolParameters
 from iota_sdk.types.signature import Signature
-from iota_sdk.utils import Utils
-from typing import TypeAlias, Union
 from iota_sdk.types.block.basic import BasicBlock
 from iota_sdk.types.block.validation import ValidationBlock
 
