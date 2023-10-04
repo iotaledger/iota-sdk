@@ -4,11 +4,7 @@
 #[cfg(feature = "mqtt")]
 use iota_sdk::client::mqtt::{MqttPayload, Topic};
 use iota_sdk::{
-    client::{
-        request_funds_from_faucet,
-        secret::{SecretManager, SignBlock},
-        Client,
-    },
+    client::{request_funds_from_faucet, secret::SecretManager, Client},
     types::{
         api::core::response::OutputWithMetadataResponse,
         block::{
@@ -177,7 +173,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         ClientMethod::GetProtocolParameters => Response::ProtocolParameters(client.get_protocol_parameters().await?),
         ClientMethod::PostBlockPayload { payload } => {
             let block = client
-                .basic_block_builder(
+                .build_basic_block::<SecretManager>(
                     todo!("issuer id"),
                     todo!("issuing time"),
                     None,
@@ -185,9 +181,9 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
                         payload,
                         &client.get_protocol_parameters().await?,
                     )?),
+                    todo!("secret manager"),
+                    todo!("chain"),
                 )
-                .await?
-                .sign_ed25519::<SecretManager>(todo!("secret manager"), todo!("chain"))
                 .await?;
 
             let block_id = client.block_id(&block).await?;

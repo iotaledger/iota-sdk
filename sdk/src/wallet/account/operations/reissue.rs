@@ -4,10 +4,7 @@
 use crypto::keys::bip44::Bip44;
 
 use crate::{
-    client::{
-        secret::{SecretManage, SignBlock},
-        Error as ClientError,
-    },
+    client::{secret::SecretManage, Error as ClientError},
     types::{
         api::core::response::{BlockState, TransactionState},
         block::{
@@ -61,14 +58,11 @@ where
                 Some(block_id) => block_id,
                 None => self
                     .client()
-                    .basic_block_builder(
+                    .build_basic_block(
                         todo!("issuer id"),
                         todo!("issuing time"),
                         None,
                         Some(Payload::Transaction(Box::new(transaction.payload.clone()))),
-                    )
-                    .await?
-                    .sign_ed25519(
                         &*self.get_secret_manager().read().await,
                         Bip44::new(self.wallet.coin_type()),
                     )
@@ -114,14 +108,11 @@ where
                     if index == block_ids_len - 1 && should_reissue {
                         let reissued_block = self
                             .client()
-                            .basic_block_builder(
+                            .build_basic_block(
                                 todo!("issuer id"),
                                 todo!("issuing time"),
                                 None,
                                 Some(Payload::Transaction(Box::new(transaction.payload.clone()))),
-                            )
-                            .await?
-                            .sign_ed25519(
                                 &*self.get_secret_manager().read().await,
                                 Bip44::new(self.wallet.coin_type()),
                             )

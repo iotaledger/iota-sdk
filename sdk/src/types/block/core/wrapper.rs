@@ -16,7 +16,7 @@ use crate::types::block::{
     block_id::{BlockHash, BlockId},
     core::{BasicBlock, ValidationBlock},
     protocol::ProtocolParameters,
-    signature::{Ed25519Signature, Signature},
+    signature::Signature,
     slot::{SlotCommitmentId, SlotIndex},
     Block, Error, IssuerId,
 };
@@ -55,7 +55,7 @@ impl BlockWrapperBuilder {
         [self.header.hash(), self.block.hash()].concat()
     }
 
-    pub fn finish(self, signature: Ed25519Signature) -> Result<BlockWrapper, Error> {
+    pub fn finish(self, signature: impl Into<Signature>) -> Result<BlockWrapper, Error> {
         Ok(BlockWrapper::new(self.header, self.block, signature))
     }
 }
