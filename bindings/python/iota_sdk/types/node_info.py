@@ -117,7 +117,6 @@ class CongestionControlParameters:
         increase_threshold: The threshold for increasing the reference Mana cost.
         decrease_threshold: The threshold for decreasing the reference Mana cost.
         scheduler_rate: The rate at which the scheduler runs in workscore units per second.
-        min_mana: The minimum amount of Mana that an account must have to have a block scheduled.
         max_buffer_size: The maximum size of the buffer in the scheduler.
         max_validation_buffer_size: The maximum number of blocks in the validation buffer.
     """
@@ -127,7 +126,6 @@ class CongestionControlParameters:
     increase_threshold: int
     decrease_threshold: int
     scheduler_rate: int
-    min_mana: str
     max_buffer_size: int
     max_validation_buffer_size: int
 
