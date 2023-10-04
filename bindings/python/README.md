@@ -34,15 +34,16 @@ Python binding to the [iota-sdk library](/README.md).
 
 2. (optional) Create a virtual environment and use it. On Linux and macOS, you can run the following commands:
 
-   '''bash
-   python3 -m venv iota_sdk_venv
-   source iota_sdk_venv/bin/activate
-   '''
+   ```bash
+   python3 -m venv env
+   source env/bin/activate
+   ```
 
    If you are using Windows, you should run the following instead:
 
    ```bash
-   .\iota_sdk_venv\Scripts\activate`
+   python3 -m venv env
+   .\env\Scripts\activate`
    ```
 
 3. Install the required dependencies and build the wheel by running the following commands:
