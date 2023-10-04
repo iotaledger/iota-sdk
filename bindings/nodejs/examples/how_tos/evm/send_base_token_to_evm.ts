@@ -20,7 +20,7 @@ import {
 require('dotenv').config({ path: '.env' });
 
 // Run with command:
-// yarn run-example ./how_tos/outputs/unlock-conditions.ts
+// yarn run-example ./how_tos/evm/send_base_token_to_evm.ts
 
 const amount = 1000000;
 const gas = 10000;
@@ -55,11 +55,9 @@ async function run() {
 
     const bigAmount: bigint = BigInt(amount);
     const bigGas: bigint = BigInt(gas);
-    // console.log('amounts:', bigAmount, bigGas);
 
     try {
         const addresses = await account.addresses();
-        // console.log('address selected:', addresses[0].address);
         const hexAddress = Utils.bech32ToHex(
             addresses[0].address,
         );
@@ -70,16 +68,13 @@ async function run() {
         const addressUnlockCondition: UnlockCondition = new AddressUnlockCondition(new AliasAddress(aliasHexAddress))
 
         const addressFeature = new SenderFeature(new Ed25519Address(hexAddress));
-        // console.log('addressFeature:', addressFeature);
 
         const metadata = await prepareMetadata(
             toEVMAddress,
             bigAmount,
             bigGas
         );
-        // console.log('metadata:', metadata);
         const metadataFeature = new MetadataFeature(metadata);
-        // console.log('metadataFeature:', metadataFeature);
 
         // Basic Output with Metadata
         const basicOutput = await client.buildBasicOutput({
