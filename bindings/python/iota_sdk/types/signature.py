@@ -1,7 +1,7 @@
 # Copyright 2023 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
-from typing import TypeAlias, Union
+from typing import TypeAlias
 from dataclasses import dataclass, field
 from iota_sdk.types.common import HexStr, CoinType, json
 
