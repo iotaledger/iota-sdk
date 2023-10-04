@@ -25,6 +25,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Added `SeedSecretManager` to `SecretManagerType`;
 
+### Removed
+
+- `AliasAddress` from `NftQueryParameter`;
+
 ## 1.1.0 - 2023-09-29
 
 ### Changed
