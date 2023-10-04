@@ -77,7 +77,8 @@ class NftUnlock:
     type: int = field(default_factory=lambda: int(UnlockType.Nft), init=False)
 
 
-def deserialize_unlock(d: Dict[str, Any]) -> Union[SignatureUnlock, ReferenceUnlock, AccountUnlock, NftUnlock]:
+def deserialize_unlock(d: Dict[str, Any]) -> Union[SignatureUnlock,
+                                                   ReferenceUnlock, AccountUnlock, NftUnlock]:
     """
     Takes a dictionary as input and returns an instance of a specific class based on the value of the 'type' key in the dictionary.
 
