@@ -359,7 +359,8 @@ impl DelegationOutput {
 
     // Transition, just without full ValidationContext.
     pub(crate) fn transition_inner(current_state: &Self, next_state: &Self) -> Result<(), StateTransitionError> {
-        if !current_state.delegation_id.is_null() || next_state.delegation_id().is_null() {
+        #[allow(clippy::nonminimal_bool)]
+        if !(current_state.delegation_id.is_null() && !next_state.delegation_id().is_null()) {
             return Err(StateTransitionError::NonDelayedClaimingTransition);
         }
 

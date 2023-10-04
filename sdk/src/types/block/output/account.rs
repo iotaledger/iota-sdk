@@ -25,6 +25,7 @@ use crate::types::{
             NativeTokens, Output, OutputBuilderAmount, OutputId, Rent, RentStructure, StateTransitionError,
             StateTransitionVerifier,
         },
+        payload::transaction::TransactionCapabilityFlag,
         protocol::ProtocolParameters,
         semantic::{TransactionFailureReason, ValidationContext},
         unlock::Unlock,
@@ -646,7 +647,15 @@ impl StateTransitionVerifier for AccountOutput {
         )
     }
 
-    fn destruction(_current_state: &Self, _context: &ValidationContext<'_>) -> Result<(), StateTransitionError> {
+    fn destruction(_current_state: &Self, context: &ValidationContext<'_>) -> Result<(), StateTransitionError> {
+        if context
+            .essence
+            .capabilities()
+            .has_capability(TransactionCapabilityFlag::DestroyAccountOutputs)
+        {
+            // TODO: is this correct?
+            return Err(StateTransitionError::UnsupportedStateTransition);
+        }
         Ok(())
     }
 }

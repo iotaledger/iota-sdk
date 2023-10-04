@@ -268,45 +268,6 @@ pub fn semantic_validation(
             ),
         };
 
-        if let Output::Account(consumed) = consumed_output {
-            let match_fn = |created_output: &Output| matches!(created_output, Output::Account(created) if created.account_id() == consumed.account_id());
-            if !context.essence.outputs().iter().any(match_fn)
-                && !context
-                    .essence
-                    .capabilities()
-                    .has_capability(TransactionCapabilityFlag::DestroyAccountOutputs)
-            {
-                // TODO: better failure reason incoming?
-                return Ok(Some(TransactionFailureReason::SemanticValidationFailed));
-            }
-        }
-
-        if let Output::Foundry(consumed) = consumed_output {
-            let match_fn = |created_output: &Output| matches!(created_output, Output::Foundry(created) if created.id() == consumed.id());
-            if !context.essence.outputs().iter().any(match_fn)
-                && !context
-                    .essence
-                    .capabilities()
-                    .has_capability(TransactionCapabilityFlag::DestroyFoundryOutputs)
-            {
-                // TODO: better failure reason incoming?
-                return Ok(Some(TransactionFailureReason::SemanticValidationFailed));
-            }
-        }
-
-        if let Output::Nft(consumed) = consumed_output {
-            let match_fn = |created_output: &Output| matches!(created_output, Output::Nft(created) if created.nft_id() == consumed.nft_id());
-            if !context.essence.outputs().iter().any(match_fn)
-                && !context
-                    .essence
-                    .capabilities()
-                    .has_capability(TransactionCapabilityFlag::DestroyNftOutputs)
-            {
-                // TODO: better failure reason incoming?
-                return Ok(Some(TransactionFailureReason::SemanticValidationFailed));
-            }
-        }
-
         if let Err(conflict) = conflict {
             return Ok(Some(conflict));
         }
@@ -450,16 +411,6 @@ pub fn semantic_validation(
     // Validation of input native tokens.
     for (token_id, _input_amount) in context.input_native_tokens.iter() {
         native_token_ids.insert(token_id);
-
-        if !context.output_native_tokens.contains_key(token_id)
-            && context
-                .essence
-                .capabilities()
-                .has_capability(TransactionCapabilityFlag::BurnNativeTokens)
-        {
-            // TODO: better failure reason incoming?
-            return Ok(Some(TransactionFailureReason::SemanticValidationFailed));
-        }
     }
 
     // Validation of output native tokens.

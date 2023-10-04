@@ -25,6 +25,7 @@ use crate::types::{
             NativeTokens, Output, OutputBuilderAmount, OutputId, Rent, RentStructure, StateTransitionError,
             StateTransitionVerifier, TokenId, TokenScheme,
         },
+        payload::transaction::{TransactionCapabilities, TransactionCapabilityFlag},
         protocol::ProtocolParameters,
         semantic::{TransactionFailureReason, ValidationContext},
         unlock::Unlock,
@@ -457,6 +458,7 @@ impl FoundryOutput {
         next_state: &Self,
         input_native_tokens: &BTreeMap<TokenId, U256>,
         output_native_tokens: &BTreeMap<TokenId, U256>,
+        capabilities: TransactionCapabilities,
     ) -> Result<(), StateTransitionError> {
         if current_state.account_address() != next_state.account_address()
             || current_state.serial_number != next_state.serial_number
@@ -509,6 +511,11 @@ impl FoundryOutput {
             }
             Ordering::Greater => {
                 // Melt / Burn
+
+                if capabilities.has_capability(TransactionCapabilityFlag::BurnNativeTokens) {
+                    // TODO: is this correct?
+                    return Err(StateTransitionError::UnsupportedStateTransition);
+                }
 
                 if current_token_scheme.melted_tokens() != next_token_scheme.melted_tokens()
                     && current_token_scheme.minted_tokens() != next_token_scheme.minted_tokens()
@@ -574,10 +581,20 @@ impl StateTransitionVerifier for FoundryOutput {
             next_state,
             &context.input_native_tokens,
             &context.output_native_tokens,
+            context.essence.capabilities(),
         )
     }
 
     fn destruction(current_state: &Self, context: &ValidationContext<'_>) -> Result<(), StateTransitionError> {
+        if context
+            .essence
+            .capabilities()
+            .has_capability(TransactionCapabilityFlag::DestroyFoundryOutputs)
+        {
+            // TODO: is this correct?
+            return Err(StateTransitionError::UnsupportedStateTransition);
+        }
+
         let token_id = current_state.token_id();
         let input_tokens = context.input_native_tokens.get(&token_id).copied().unwrap_or_default();
         let TokenScheme::Simple(ref current_token_scheme) = current_state.token_scheme;
