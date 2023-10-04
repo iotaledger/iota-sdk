@@ -3,7 +3,6 @@
 
 use alloc::vec::Vec;
 
-use super::signature::rand_sign_ed25519;
 use crate::types::block::{
     core::{
         basic::{self, BasicBlockBuilder},
@@ -16,6 +15,7 @@ use crate::types::block::{
         number::rand_number,
         parents::rand_strong_parents,
         payload::rand_payload_for_block,
+        signature::rand_sign_ed25519,
         slot::{rand_slot_commitment_id, rand_slot_index},
     },
     Block, BlockId,
