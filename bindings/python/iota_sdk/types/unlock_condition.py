@@ -33,15 +33,7 @@ class UnlockConditionType(IntEnum):
 
 @json
 @dataclass
-class BaseUnlockCondition():
-    """Base class for unlock conditions.
-    """
-    type: int
-
-
-@json
-@dataclass
-class AddressUnlockCondition(BaseUnlockCondition):
+class AddressUnlockCondition:
     """An address unlock condition.
 
     Args:
@@ -59,7 +51,7 @@ class AddressUnlockCondition(BaseUnlockCondition):
 
 @json
 @dataclass
-class StorageDepositReturnUnlockCondition(BaseUnlockCondition):
+class StorageDepositReturnUnlockCondition:
     """A storage-deposit-return unlock condition.
     Args:
         amount: The amount of base coins the consuming transaction must deposit to `return_address`.
@@ -76,7 +68,7 @@ class StorageDepositReturnUnlockCondition(BaseUnlockCondition):
 
 @json
 @dataclass
-class TimelockUnlockCondition(BaseUnlockCondition):
+class TimelockUnlockCondition:
     """A timelock unlock condition.
     Args:
         unix_time: The Unix timestamp marking the end of the timelock.
@@ -90,7 +82,7 @@ class TimelockUnlockCondition(BaseUnlockCondition):
 
 @json
 @dataclass
-class ExpirationUnlockCondition(BaseUnlockCondition):
+class ExpirationUnlockCondition:
     """An expiration unlock condition.
     Args:
         unix_time: Unix timestamp marking the expiration of the claim.
@@ -109,7 +101,7 @@ class ExpirationUnlockCondition(BaseUnlockCondition):
 
 @json
 @dataclass
-class StateControllerAddressUnlockCondition(BaseUnlockCondition):
+class StateControllerAddressUnlockCondition:
     """A state controller address unlock condition.
     Args:
         address: The state controller address that owns the output.
@@ -124,7 +116,7 @@ class StateControllerAddressUnlockCondition(BaseUnlockCondition):
 
 @json
 @dataclass
-class GovernorAddressUnlockCondition(BaseUnlockCondition):
+class GovernorAddressUnlockCondition:
     """A governor address unlock condition.
     Args:
         address: The governor address that owns the output.
@@ -139,7 +131,7 @@ class GovernorAddressUnlockCondition(BaseUnlockCondition):
 
 @json
 @dataclass
-class ImmutableAccountAddressUnlockCondition(BaseUnlockCondition):
+class ImmutableAccountAddressUnlockCondition:
     """An immutable account address unlock condition.
     Args:
         address: The permanent account address that owns this output.

@@ -8,15 +8,7 @@ from iota_sdk.types.common import HexStr, json
 
 @json
 @dataclass
-class BaseTokenScheme():
-    """Base class of a token scheme.
-    """
-    type: int
-
-
-@json
-@dataclass
-class SimpleTokenScheme(BaseTokenScheme):
+class SimpleTokenScheme:
     """A simple token scheme.
 
     Attributes:

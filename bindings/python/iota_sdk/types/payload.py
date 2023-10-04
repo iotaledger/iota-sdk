@@ -23,15 +23,7 @@ class PayloadType(IntEnum):
 
 @json
 @dataclass
-class BasePayload():
-    """Initialize a Payload.
-    """
-    type: int
-
-
-@json
-@dataclass
-class TaggedDataPayload(BasePayload):
+class TaggedDataPayload:
     """A tagged data payload.
 
     Attributes:
@@ -48,7 +40,7 @@ class TaggedDataPayload(BasePayload):
 
 @json
 @dataclass
-class TransactionPayload(BasePayload):
+class TransactionPayload:
     """A transaction payload.
 
     Attributes:

@@ -8,15 +8,7 @@ from iota_sdk.types.common import HexStr, CoinType, json
 
 @json
 @dataclass
-class BaseSignature():
-    """Base class of a signature.
-    """
-    type: int
-
-
-@json
-@dataclass
-class Ed25519Signature(BaseSignature):
+class Ed25519Signature:
     """An Ed25519 signature.
 
     Attributes:

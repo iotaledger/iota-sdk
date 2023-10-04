@@ -18,15 +18,7 @@ class ContextInputType(IntEnum):
 
 @json
 @dataclass
-class BaseContextInput():
-    """Base class for context inputs.
-    """
-    type: int
-
-
-@json
-@dataclass
-class CommitmentContextInput(BaseContextInput):
+class CommitmentContextInput:
     """A Commitment Context Input allows referencing a commitment to a certain slot.
 
     Attributes:
@@ -42,7 +34,7 @@ class CommitmentContextInput(BaseContextInput):
 
 @json
 @dataclass
-class BlockIssuanceCreditContextInput(BaseContextInput):
+class BlockIssuanceCreditContextInput:
     """A Block Issuance Credit (BIC) Context Input provides the VM with context for the value of
     the BIC vector of a specific slot.
 
@@ -59,7 +51,7 @@ class BlockIssuanceCreditContextInput(BaseContextInput):
 
 @json
 @dataclass
-class RewardContextInput(BaseContextInput):
+class RewardContextInput:
     """A Reward Context Input indicates which transaction Input is claiming Mana rewards.
 
     Attributes:

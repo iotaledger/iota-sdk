@@ -29,15 +29,7 @@ class EssenceType(IntEnum):
 
 @json
 @dataclass
-class BaseTransactionEssence:
-    """Base class of Transaction essence
-    """
-    type: int
-
-
-@json
-@dataclass
-class RegularTransactionEssence(BaseTransactionEssence):
+class RegularTransactionEssence:
     """Describes the essence data making up a transaction by defining its inputs, outputs, and an optional payload.
 
     Attributes:

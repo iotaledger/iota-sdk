@@ -21,12 +21,4 @@ class BlockType(IntEnum):
     Validation = 1
 
 
-@json
-@dataclass
-class BaseBlock:
-    """Base class for blocks.
-    """
-    type: int
-
-
 Block: TypeAlias = Union[BasicBlock, ValidationBlock]

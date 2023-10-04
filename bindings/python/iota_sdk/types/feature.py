@@ -30,15 +30,7 @@ class FeatureType(IntEnum):
 
 @json
 @dataclass
-class BaseFeature():
-    """Base class of a feature.
-    """
-    type: int
-
-
-@json
-@dataclass
-class SenderFeature(BaseFeature):
+class SenderFeature:
     """Identifies the validated sender of an output.
     Attributes:
         address: A given sender address.
@@ -55,7 +47,7 @@ class SenderFeature(BaseFeature):
 
 @json
 @dataclass
-class IssuerFeature(BaseFeature):
+class IssuerFeature:
     """Identifies the validated issuer of the UTXO state machine.
     Attributes:
         address: A given issuer address.
@@ -72,7 +64,7 @@ class IssuerFeature(BaseFeature):
 
 @json
 @dataclass
-class MetadataFeature(BaseFeature):
+class MetadataFeature:
     """Defines metadata, arbitrary binary data, that will be stored in the output.
     Attributes:
         data: Some hex encoded metadata.
@@ -86,7 +78,7 @@ class MetadataFeature(BaseFeature):
 
 @json
 @dataclass
-class TagFeature(BaseFeature):
+class TagFeature:
     """Makes it possible to tag outputs with an index, so they can be retrieved through an indexer API.
     Attributes:
         tag: A hex encoded tag used to index the output.
@@ -97,7 +89,7 @@ class TagFeature(BaseFeature):
 
 @json
 @dataclass
-class BlockIssuerFeature(BaseFeature):
+class BlockIssuerFeature:
     """Contains the public keys to verify block signatures and allows for unbonding the issuer deposit.
     Attributes:
         expiry_slot: The slot index at which the Block Issuer Feature expires and can be removed.
@@ -114,7 +106,7 @@ class BlockIssuerFeature(BaseFeature):
 
 @json
 @dataclass
-class StakingFeature(BaseFeature):
+class StakingFeature:
     """Stakes IOTA coins to become eligible for committee selection, validate the network and receive Mana rewards.
     Attributes:
         staked_amount: The amount of IOTA coins that are locked and staked in the containing account.

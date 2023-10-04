@@ -31,15 +31,7 @@ class OutputType(IntEnum):
 
 @json
 @dataclass
-class BaseOutput():
-    """An output in a UTXO ledger.
-    """
-    type: int
-
-
-@json
-@dataclass
-class BasicOutput(BaseOutput):
+class BasicOutput:
     """Describes a basic output.
     Attributes:
         amount :
@@ -75,7 +67,7 @@ class BasicOutput(BaseOutput):
 
 @json
 @dataclass
-class AccountOutput(BaseOutput):
+class AccountOutput:
     """Describes an account output.
     Attributes:
         amount :
@@ -131,7 +123,7 @@ class AccountOutput(BaseOutput):
 
 @json
 @dataclass
-class FoundryOutput(BaseOutput):
+class FoundryOutput:
     """Describes a foundry output.
     Attributes:
         amount :
@@ -172,7 +164,7 @@ class FoundryOutput(BaseOutput):
 
 @json
 @dataclass
-class NftOutput(BaseOutput):
+class NftOutput:
     """Describes an NFT output.
     Attributes:
         amount :
@@ -216,7 +208,7 @@ class NftOutput(BaseOutput):
 
 @json
 @dataclass
-class DelegationOutput(BaseOutput):
+class DelegationOutput:
     """Describes a delegation output.
     Attributes:
         type :
