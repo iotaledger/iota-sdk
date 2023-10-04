@@ -22,15 +22,7 @@ class AddressType(IntEnum):
 
 @json
 @dataclass
-class Address():
-    """Base class for addresses.
-    """
-    type: int
-
-
-@json
-@dataclass
-class Ed25519Address(Address):
+class Ed25519Address:
     """Represents an Ed25519 address.
     Attributes:
         pub_key_hash: The hex encoded Ed25519 public key hash.
@@ -44,7 +36,7 @@ class Ed25519Address(Address):
 
 @json
 @dataclass
-class AccountAddress(Address):
+class AccountAddress:
     """Represents an Account address.
     Attributes:
         account_id: The hex encoded account id.
@@ -58,7 +50,7 @@ class AccountAddress(Address):
 
 @json
 @dataclass
-class NFTAddress(Address):
+class NFTAddress:
     """Represents an NFT address.
     Attributes:
         nft_id: The hex encoded NFT id.
@@ -78,10 +70,10 @@ class AddressWithUnspentOutputs():
     output_ids: bool
 
 
-AddressUnion: TypeAlias = Union[Ed25519Address, AccountAddress, NFTAddress]
+Address: TypeAlias = Union[Ed25519Address, AccountAddress, NFTAddress]
 
 
-def deserialize_address(d: Dict[str, Any]) -> AddressUnion:
+def deserialize_address(d: Dict[str, Any]) -> Address:
     """
     Takes a dictionary as input and returns an instance of a specific class based on the value of the 'type' key in the dictionary.
 
@@ -99,7 +91,7 @@ def deserialize_address(d: Dict[str, Any]) -> AddressUnion:
 
 
 def deserialize_addresses(
-        dicts: List[Dict[str, Any]]) -> List[AddressUnion]:
+        dicts: List[Dict[str, Any]]) -> List[Address]:
     """
     Takes a list of dictionaries as input and returns a list with specific instances of a classes based on the value of the 'type' key in the dictionary.
 
