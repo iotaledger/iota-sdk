@@ -23,14 +23,12 @@ class BlockMetadata:
     block_id: HexStr
     # TODO: verify if really optional:
     # https://github.com/iotaledger/tips-draft/pull/24/files#r1293426314
-    block_state: Optional[BlockState]
-    tx_state: Optional[TransactionState]
-    block_failure_reason: Optional[BlockFailureReason]
-    tx_failure_reason: Optional[TransactionFailureReason]
+    block_state: Optional[BlockState] = None
+    tx_state: Optional[TransactionState] = None
+    block_failure_reason: Optional[BlockFailureReason] = None
+    tx_failure_reason: Optional[TransactionFailureReason] = None
 
 
-@json
-@dataclass
 class BlockState(Enum):
     """Describes the state of a block.
 
@@ -48,8 +46,6 @@ class BlockState(Enum):
     Failed = 4
 
 
-@json
-@dataclass
 class TransactionState(Enum):
     """Describes the state of a transaction.
 
@@ -65,8 +61,6 @@ class TransactionState(Enum):
     Failed = 3
 
 
-@json
-@dataclass
 class BlockFailureReason(IntEnum):
     """Describes the reason of a block failure.
 
