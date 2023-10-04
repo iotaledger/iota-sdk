@@ -21,7 +21,7 @@ use crate::types::block::{
     Block, Error, IssuerId,
 };
 
-/// Represent the object that nodes gossip around the network.
+/// Builder for a [`BlockWrapper`].
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct BlockWrapperBuilder {
     /// Protocol version of the network to which this block belongs.
@@ -52,11 +52,11 @@ impl BlockWrapperBuilder {
         Self {
             protocol_version,
             network_id,
+            issuing_time: Default::default(),
             slot_commitment_id,
             latest_finalized_slot,
             issuer_id,
             block,
-            issuing_time: Default::default(),
         }
     }
 
