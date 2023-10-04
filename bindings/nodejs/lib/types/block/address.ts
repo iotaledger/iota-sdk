@@ -165,7 +165,7 @@ class RestrictedAddress extends Address {
     /**
      * The allowed capabilities bitflags.
      */
-    allowed_capabilities: Uint8Array = new Uint8Array();
+    private allowed_capabilities: HexEncodedString = '00';
     /**
      * @param address An address.
      */
@@ -174,26 +174,33 @@ class RestrictedAddress extends Address {
         this.address = address;
     }
 
+    setAllowedCapabilities(allowed_capabilities: Uint8Array) {
+        if (allowed_capabilities.some((c) => c != 0)) {
+            this.allowed_capabilities =
+                allowed_capabilities.length.toString(16) +
+                Buffer.from(
+                    allowed_capabilities.buffer,
+                    allowed_capabilities.byteOffset,
+                    allowed_capabilities.byteLength,
+                ).toString('hex');
+        } else {
+            this.allowed_capabilities = '00';
+        }
+    }
+
     withAllowedCapabilities(
         allowed_capabilities: Uint8Array,
     ): RestrictedAddress {
-        this.allowed_capabilities = allowed_capabilities;
+        this.setAllowedCapabilities(allowed_capabilities);
         return this;
     }
 
+    getAllowedCapabilities(): Uint8Array {
+        return Uint8Array.from(Buffer.from(this.allowed_capabilities, 'hex'));
+    }
+
     toString(): string {
-        let hex = this.address.toString();
-        if (this.allowed_capabilities.some((c) => c != 0)) {
-            const cap = Buffer.from(
-                this.allowed_capabilities.buffer,
-                this.allowed_capabilities.byteOffset,
-                this.allowed_capabilities.byteLength,
-            ).toString('hex');
-            hex += this.allowed_capabilities.length.toString(16) + cap;
-        } else {
-            hex += '00';
-        }
-        return hex;
+        return this.address.toString() + this.allowed_capabilities;
     }
 }
 
