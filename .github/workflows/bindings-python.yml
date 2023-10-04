@@ -121,7 +121,6 @@ jobs:
         working-directory: bindings/python
         run: tox -e lint-examples
 
-      # TODO temporarily disabled https://github.com/iotaledger/iota-sdk/issues/647
-      # - name: Run tests
-      #   working-directory: bindings/python
-      #   run: tox
+      - name: Run tests
+        working-directory: bindings/python
+        run: tox

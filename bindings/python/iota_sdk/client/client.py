@@ -13,7 +13,7 @@ from iota_sdk.client._node_indexer_api import NodeIndexerAPI
 from iota_sdk.client._high_level_api import HighLevelAPI
 from iota_sdk.client._utils import ClientUtils
 from iota_sdk.secret_manager.secret_manager import LedgerNanoSecretManager, MnemonicSecretManager, StrongholdSecretManager, SeedSecretManager
-from iota_sdk.types.block import Block
+from iota_sdk.types.block.wrapper import BlockWrapper
 from iota_sdk.types.common import HexStr, Node
 from iota_sdk.types.feature import Feature
 from iota_sdk.types.native_token import NativeToken
@@ -394,7 +394,8 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
             'preparedTransactionData': prepared_transaction_data
         }))
 
-    def submit_payload(self, payload: Payload) -> List[Union[HexStr, Block]]:
+    def submit_payload(
+            self, payload: Payload) -> List[Union[HexStr, BlockWrapper]]:
         """Submit a payload in a block.
 
         Args:
@@ -406,7 +407,7 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         result = self._call_method('postBlockPayload', {
             'payload': payload.to_dict()
         })
-        result[1] = Block.from_dict(result[1])
+        result[1] = BlockWrapper.from_dict(result[1])
         return result
 
     def listen_mqtt(self, topics: List[str], handler):
