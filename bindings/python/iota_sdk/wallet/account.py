@@ -16,7 +16,7 @@ from iota_sdk.types.filter_options import FilterOptions
 from iota_sdk.types.native_token import NativeToken
 from iota_sdk.types.output_data import OutputData
 from iota_sdk.types.output_id import OutputId
-from iota_sdk.types.output import BasicOutput, NftOutput, Output, deserialize_output
+from iota_sdk.types.output import BasicOutput, NftOutput, BaseOutput, deserialize_output
 from iota_sdk.types.output_params import OutputParams
 from iota_sdk.types.transaction_data import PreparedTransactionData, SignedTransactionData
 from iota_sdk.types.send_params import CreateAccountOutputParams, CreateNativeTokenParams, MintNftParams, SendNativeTokensParams, SendNftParams, SendParams
@@ -413,13 +413,13 @@ class Account:
         return PreparedTransaction(self, prepared)
 
     def send_transaction(
-            self, outputs: List[Output], options: Optional[TransactionOptions] = None) -> Transaction:
+            self, outputs: List[BaseOutput], options: Optional[TransactionOptions] = None) -> Transaction:
         """Send a transaction.
         """
         return self.prepare_transaction(outputs, options).send()
 
     def prepare_transaction(
-            self, outputs: List[Output], options: Optional[TransactionOptions] = None) -> PreparedTransaction:
+            self, outputs: List[BaseOutput], options: Optional[TransactionOptions] = None) -> PreparedTransaction:
         """Prepare transaction.
         """
         prepared = self._call_account_method(
@@ -575,7 +575,7 @@ class Account:
         ))
 
     def send_outputs(
-            self, outputs: List[Output], options: Optional[TransactionOptions] = None) -> Transaction:
+            self, outputs: List[BaseOutput], options: Optional[TransactionOptions] = None) -> Transaction:
         """Send outputs in a transaction.
         """
         return Transaction.from_dict(self._call_account_method(

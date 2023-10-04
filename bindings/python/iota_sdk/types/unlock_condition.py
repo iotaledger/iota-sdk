@@ -5,7 +5,7 @@ from enum import IntEnum
 from dataclasses import dataclass, field
 from typing import Dict, List, TypeAlias, Union, Any
 from dataclasses_json import config
-from iota_sdk.types.address import AddressUnion, AccountAddress
+from iota_sdk.types.address import Address, AccountAddress
 from iota_sdk.types.common import json
 from iota_sdk.types.address import deserialize_address
 
@@ -33,7 +33,7 @@ class UnlockConditionType(IntEnum):
 
 @json
 @dataclass
-class UnlockCondition():
+class BaseUnlockCondition():
     """Base class for unlock conditions.
     """
     type: int
@@ -41,13 +41,13 @@ class UnlockCondition():
 
 @json
 @dataclass
-class AddressUnlockCondition(UnlockCondition):
+class AddressUnlockCondition(BaseUnlockCondition):
     """An address unlock condition.
 
     Args:
         address: An address unlocked with a private key.
     """
-    address: AddressUnion = field(
+    address: Address = field(
         metadata=config(
             decoder=deserialize_address
         ))
@@ -59,14 +59,14 @@ class AddressUnlockCondition(UnlockCondition):
 
 @json
 @dataclass
-class StorageDepositReturnUnlockCondition(UnlockCondition):
+class StorageDepositReturnUnlockCondition(BaseUnlockCondition):
     """A storage-deposit-return unlock condition.
     Args:
         amount: The amount of base coins the consuming transaction must deposit to `return_address`.
         return_address: The address to return the amount to.
     """
     amount: str
-    return_address: AddressUnion = field(
+    return_address: Address = field(
         metadata=config(
             decoder=deserialize_address
         ))
@@ -76,7 +76,7 @@ class StorageDepositReturnUnlockCondition(UnlockCondition):
 
 @json
 @dataclass
-class TimelockUnlockCondition(UnlockCondition):
+class TimelockUnlockCondition(BaseUnlockCondition):
     """A timelock unlock condition.
     Args:
         unix_time: The Unix timestamp marking the end of the timelock.
@@ -90,14 +90,14 @@ class TimelockUnlockCondition(UnlockCondition):
 
 @json
 @dataclass
-class ExpirationUnlockCondition(UnlockCondition):
+class ExpirationUnlockCondition(BaseUnlockCondition):
     """An expiration unlock condition.
     Args:
         unix_time: Unix timestamp marking the expiration of the claim.
         return_address: The return address if the output was not claimed in time.
     """
     unix_time: int
-    return_address: AddressUnion = field(
+    return_address: Address = field(
         metadata=config(
             decoder=deserialize_address
         ))
@@ -109,12 +109,12 @@ class ExpirationUnlockCondition(UnlockCondition):
 
 @json
 @dataclass
-class StateControllerAddressUnlockCondition(UnlockCondition):
+class StateControllerAddressUnlockCondition(BaseUnlockCondition):
     """A state controller address unlock condition.
     Args:
         address: The state controller address that owns the output.
     """
-    address: AddressUnion = field(
+    address: Address = field(
         metadata=config(
             decoder=deserialize_address
         ))
@@ -124,12 +124,12 @@ class StateControllerAddressUnlockCondition(UnlockCondition):
 
 @json
 @dataclass
-class GovernorAddressUnlockCondition(UnlockCondition):
+class GovernorAddressUnlockCondition(BaseUnlockCondition):
     """A governor address unlock condition.
     Args:
         address: The governor address that owns the output.
     """
-    address: AddressUnion = field(
+    address: Address = field(
         metadata=config(
             decoder=deserialize_address
         ))
@@ -139,7 +139,7 @@ class GovernorAddressUnlockCondition(UnlockCondition):
 
 @json
 @dataclass
-class ImmutableAccountAddressUnlockCondition(UnlockCondition):
+class ImmutableAccountAddressUnlockCondition(BaseUnlockCondition):
     """An immutable account address unlock condition.
     Args:
         address: The permanent account address that owns this output.
@@ -149,11 +149,11 @@ class ImmutableAccountAddressUnlockCondition(UnlockCondition):
         UnlockConditionType.ImmutableAccountAddress), init=False)
 
 
-UnlockConditionUnion: TypeAlias = Union[AddressUnlockCondition, StorageDepositReturnUnlockCondition, TimelockUnlockCondition,
-                                        ExpirationUnlockCondition, StateControllerAddressUnlockCondition, GovernorAddressUnlockCondition, ImmutableAccountAddressUnlockCondition]
+UnlockCondition: TypeAlias = Union[AddressUnlockCondition, StorageDepositReturnUnlockCondition, TimelockUnlockCondition,
+                                   ExpirationUnlockCondition, StateControllerAddressUnlockCondition, GovernorAddressUnlockCondition, ImmutableAccountAddressUnlockCondition]
 
 
-def deserialize_unlock_condition(d: Dict[str, Any]) -> UnlockConditionUnion:
+def deserialize_unlock_condition(d: Dict[str, Any]) -> UnlockCondition:
     """
     Takes a dictionary as input and returns an instance of a specific class based on the value of the 'type' key in the dictionary.
 
@@ -180,7 +180,7 @@ def deserialize_unlock_condition(d: Dict[str, Any]) -> UnlockConditionUnion:
 
 
 def deserialize_unlock_conditions(
-        dicts: List[Dict[str, Any]]) -> List[UnlockConditionUnion]:
+        dicts: List[Dict[str, Any]]) -> List[UnlockCondition]:
     """
     Takes a list of dictionaries as input and returns a list with specific instances of a classes based on the value of the 'type' key in the dictionary.
 

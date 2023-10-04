@@ -10,12 +10,12 @@ from dataclasses import dataclass, field
 from iota_sdk.types.common import HexStr, json, SlotIndex
 from iota_sdk.types.mana import ManaAllotment
 from iota_sdk.types.input import UtxoInput
-from iota_sdk.types.context_input import ContextInputUnion
-from iota_sdk.types.output import OutputUnion
+from iota_sdk.types.context_input import ContextInput
+from iota_sdk.types.output import Output
 
 # Required to prevent circular import
 if TYPE_CHECKING:
-    from iota_sdk.types.payload import Payload
+    from iota_sdk.types.payload import BasePayload
 
 
 class EssenceType(IntEnum):
@@ -55,10 +55,10 @@ class RegularTransactionEssence(TransactionEssence):
     creation_slot: SlotIndex
     inputs: List[UtxoInput]
     inputs_commitment: HexStr
-    outputs: List[OutputUnion]
-    context_inputs: Optional[List[ContextInputUnion]] = None
+    outputs: List[Output]
+    context_inputs: Optional[List[ContextInput]] = None
     allotments: Optional[List[ManaAllotment]] = None
-    payload: Optional[Payload] = None
+    payload: Optional[BasePayload] = None
     type: int = field(
         default_factory=lambda: EssenceType.RegularTransactionEssence,
         init=False)

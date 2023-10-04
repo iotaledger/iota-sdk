@@ -31,7 +31,7 @@ class OutputType(IntEnum):
 
 @json
 @dataclass
-class Output():
+class BaseOutput():
     """An output in a UTXO ledger.
     """
     type: int
@@ -39,7 +39,7 @@ class Output():
 
 @json
 @dataclass
-class BasicOutput(Output):
+class BasicOutput(BaseOutput):
     """Describes a basic output.
     Attributes:
         amount :
@@ -75,7 +75,7 @@ class BasicOutput(Output):
 
 @json
 @dataclass
-class AccountOutput(Output):
+class AccountOutput(BaseOutput):
     """Describes an account output.
     Attributes:
         amount :
@@ -131,7 +131,7 @@ class AccountOutput(Output):
 
 @json
 @dataclass
-class FoundryOutput(Output):
+class FoundryOutput(BaseOutput):
     """Describes a foundry output.
     Attributes:
         amount :
@@ -172,7 +172,7 @@ class FoundryOutput(Output):
 
 @json
 @dataclass
-class NftOutput(Output):
+class NftOutput(BaseOutput):
     """Describes an NFT output.
     Attributes:
         amount :
@@ -216,7 +216,7 @@ class NftOutput(Output):
 
 @json
 @dataclass
-class DelegationOutput(Output):
+class DelegationOutput(BaseOutput):
     """Describes a delegation output.
     Attributes:
         type :
@@ -227,11 +227,11 @@ class DelegationOutput(Output):
         OutputType.Delegation), init=False)
 
 
-OutputUnion: TypeAlias = Union[BasicOutput, AccountOutput,
-                               FoundryOutput, NftOutput, DelegationOutput]
+Output: TypeAlias = Union[BasicOutput, AccountOutput,
+                          FoundryOutput, NftOutput, DelegationOutput]
 
 
-def deserialize_output(d: Dict[str, Any]) -> OutputUnion:
+def deserialize_output(d: Dict[str, Any]) -> Output:
     """
     Takes a dictionary as input and returns an instance of a specific class based on the value of the 'type' key in the dictionary.
 
@@ -252,7 +252,7 @@ def deserialize_output(d: Dict[str, Any]) -> OutputUnion:
     raise Exception(f'invalid output type: {output_type}')
 
 
-def deserialize_outputs(dicts: List[Dict[str, Any]]) -> List[OutputUnion]:
+def deserialize_outputs(dicts: List[Dict[str, Any]]) -> List[Output]:
     """
     Takes a list of dictionaries as input and returns a list with specific instances of a classes based on the value of the 'type' key in the dictionary.
 

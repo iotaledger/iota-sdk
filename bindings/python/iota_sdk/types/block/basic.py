@@ -4,14 +4,14 @@
 from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import List, Optional
-from iota_sdk.types.block.block import Block, BlockType
+from iota_sdk.types.block.block import BaseBlock, BlockType
 from iota_sdk.types.common import HexStr, json
-from iota_sdk.types.payload import PayloadUnion
+from iota_sdk.types.payload import Payload
 
 
 @json
 @dataclass
-class BasicBlock(Block):
+class BasicBlock(BaseBlock):
     """A `BasicBlock` is the most common type of block used to issue various kinds of payloads such as transactions
     at the cost of burning Mana.
 
@@ -26,7 +26,7 @@ class BasicBlock(Block):
     weak_parents: List[HexStr]
     shallow_like_parents: List[HexStr]
     max_burned_mana: str
-    payload: Optional[PayloadUnion] = None
+    payload: Optional[Payload] = None
     type: int = field(
         default_factory=lambda: BlockType.Basic,
         init=False)

@@ -23,7 +23,7 @@ class PayloadType(IntEnum):
 
 @json
 @dataclass
-class Payload():
+class BasePayload():
     """Initialize a Payload.
     """
     type: int
@@ -31,7 +31,7 @@ class Payload():
 
 @json
 @dataclass
-class TaggedDataPayload(Payload):
+class TaggedDataPayload(BasePayload):
     """A tagged data payload.
 
     Attributes:
@@ -48,7 +48,7 @@ class TaggedDataPayload(Payload):
 
 @json
 @dataclass
-class TransactionPayload(Payload):
+class TransactionPayload(BasePayload):
     """A transaction payload.
 
     Attributes:
@@ -63,10 +63,10 @@ class TransactionPayload(Payload):
         init=False)
 
 
-PayloadUnion: TypeAlias = Union[TaggedDataPayload, TransactionPayload]
+Payload: TypeAlias = Union[TaggedDataPayload, TransactionPayload]
 
 
-def deserialize_payload(d: Dict[str, Any]) -> PayloadUnion:
+def deserialize_payload(d: Dict[str, Any]) -> Payload:
     """
     Takes a dictionary as input and returns an instance of a specific class based on the value of the 'type' key in the dictionary.
 
@@ -82,7 +82,7 @@ def deserialize_payload(d: Dict[str, Any]) -> PayloadUnion:
 
 
 def deserialize_payloads(
-        dicts: List[Dict[str, Any]]) -> List[PayloadUnion]:
+        dicts: List[Dict[str, Any]]) -> List[Payload]:
     """
     Takes a list of dictionaries as input and returns a list with specific instances of a classes based on the value of the 'type' key in the dictionary.
 

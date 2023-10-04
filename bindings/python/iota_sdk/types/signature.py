@@ -8,7 +8,7 @@ from iota_sdk.types.common import HexStr, CoinType, json
 
 @json
 @dataclass
-class Signature():
+class BaseSignature():
     """Base class of a signature.
     """
     type: int
@@ -16,7 +16,7 @@ class Signature():
 
 @json
 @dataclass
-class Ed25519Signature(Signature):
+class Ed25519Signature(BaseSignature):
     """An Ed25519 signature.
 
     Attributes:
@@ -29,7 +29,7 @@ class Ed25519Signature(Signature):
     type: int = field(default_factory=lambda: 0, init=False)
 
 
-SignatureUnion: TypeAlias = Union[Ed25519Signature]
+Signature: TypeAlias = Ed25519Signature
 
 
 @json

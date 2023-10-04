@@ -15,13 +15,13 @@ from iota_sdk.client._utils import ClientUtils
 from iota_sdk.secret_manager.secret_manager import LedgerNanoSecretManager, MnemonicSecretManager, StrongholdSecretManager, SeedSecretManager
 from iota_sdk.types.block.wrapper import BlockWrapper
 from iota_sdk.types.common import HexStr, Node
-from iota_sdk.types.feature import Feature
+from iota_sdk.types.feature import BaseFeature
 from iota_sdk.types.native_token import NativeToken
 from iota_sdk.types.network_info import NetworkInfo
 from iota_sdk.types.output import AccountOutput, BasicOutput, FoundryOutput, NftOutput, deserialize_output
-from iota_sdk.types.payload import Payload, TransactionPayload
+from iota_sdk.types.payload import BasePayload, TransactionPayload
 from iota_sdk.types.token_scheme import SimpleTokenScheme
-from iota_sdk.types.unlock_condition import UnlockCondition
+from iota_sdk.types.unlock_condition import BaseUnlockCondition
 from iota_sdk.types.transaction_data import PreparedTransactionData
 
 
@@ -151,15 +151,15 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
 
     def build_account_output(self,
                              account_id: HexStr,
-                             unlock_conditions: List[UnlockCondition],
+                             unlock_conditions: List[BaseUnlockCondition],
                              amount: Optional[int] = None,
                              mana: Optional[int] = None,
                              native_tokens: Optional[List[NativeToken]] = None,
                              state_index: Optional[int] = None,
                              state_metadata: Optional[str] = None,
                              foundry_counter: Optional[int] = None,
-                             features: Optional[List[Feature]] = None,
-                             immutable_features: Optional[List[Feature]] = None) -> AccountOutput:
+                             features: Optional[List[BaseFeature]] = None,
+                             immutable_features: Optional[List[BaseFeature]] = None) -> AccountOutput:
         """Build an AccountOutput.
 
         Args:
@@ -211,11 +211,11 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         }))
 
     def build_basic_output(self,
-                           unlock_conditions: List[UnlockCondition],
+                           unlock_conditions: List[BaseUnlockCondition],
                            amount: Optional[int] = None,
                            mana: Optional[int] = None,
                            native_tokens: Optional[List[NativeToken]] = None,
-                           features: Optional[List[Feature]] = None) -> BasicOutput:
+                           features: Optional[List[BaseFeature]] = None) -> BasicOutput:
         """Build a BasicOutput.
 
         Args:
@@ -256,11 +256,11 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
     def build_foundry_output(self,
                              serial_number: int,
                              token_scheme: SimpleTokenScheme,
-                             unlock_conditions: List[UnlockCondition],
+                             unlock_conditions: List[BaseUnlockCondition],
                              amount: Optional[int] = None,
                              native_tokens: Optional[List[NativeToken]] = None,
-                             features: Optional[List[Feature]] = None,
-                             immutable_features: Optional[List[Feature]] = None) -> FoundryOutput:
+                             features: Optional[List[BaseFeature]] = None,
+                             immutable_features: Optional[List[BaseFeature]] = None) -> FoundryOutput:
         """Build a FoundryOutput.
 
         Args:
@@ -304,12 +304,12 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
 
     def build_nft_output(self,
                          nft_id: HexStr,
-                         unlock_conditions: List[UnlockCondition],
+                         unlock_conditions: List[BaseUnlockCondition],
                          amount: Optional[int] = None,
                          mana: Optional[int] = None,
                          native_tokens: Optional[List[NativeToken]] = None,
-                         features: Optional[List[Feature]] = None,
-                         immutable_features: Optional[List[Feature]] = None) -> NftOutput:
+                         features: Optional[List[BaseFeature]] = None,
+                         immutable_features: Optional[List[BaseFeature]] = None) -> NftOutput:
         """Build an NftOutput.
 
         Args:
@@ -395,7 +395,7 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         }))
 
     def submit_payload(
-            self, payload: Payload) -> List[Union[HexStr, BlockWrapper]]:
+            self, payload: BasePayload) -> List[Union[HexStr, BlockWrapper]]:
         """Submit a payload in a block.
 
         Args:

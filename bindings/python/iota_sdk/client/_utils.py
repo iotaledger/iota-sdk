@@ -5,7 +5,7 @@ from typing import Optional
 from abc import ABCMeta, abstractmethod
 
 from iota_sdk.types.common import HexStr
-from iota_sdk.types.output import Output
+from iota_sdk.types.output import BaseOutput
 
 
 class ClientUtils(metaclass=ABCMeta):
@@ -49,7 +49,7 @@ class ClientUtils(metaclass=ABCMeta):
             'bech32Hrp': bech32_hrp
         })
 
-    def minimum_required_storage_deposit(self, output: Output) -> int:
+    def minimum_required_storage_deposit(self, output: BaseOutput) -> int:
         """Minimum required storage deposit.
         """
         return int(self._call_method(

@@ -4,13 +4,13 @@
 from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import List
-from iota_sdk.types.block.block import Block, BlockType
+from iota_sdk.types.block.block import BaseBlock, BlockType
 from iota_sdk.types.common import HexStr, json
 
 
 @json
 @dataclass
-class ValidationBlock(Block):
+class ValidationBlock(BaseBlock):
     """A Validation Block is a special type of block used by validators to secure the network. It is recognized by the
     Congestion Control of the IOTA 2.0 protocol and can be issued without burning Mana within the constraints of the
     allowed validator throughput. It is allowed to reference more parent blocks than a normal Basic Block.
