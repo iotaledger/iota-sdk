@@ -25,7 +25,7 @@ export class Converter {
      */
     public static bytesToHex(
         array: ArrayLike<number>,
-        includePrefix: boolean = false,
+        includePrefix = false,
         startIndex?: number,
         length?: number | undefined,
         reverse?: boolean,
