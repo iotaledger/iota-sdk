@@ -84,7 +84,7 @@ async function run() {
 
         const nftOutput = nftOutputData.output as NftOutput;
 
-        // Basic Output with Metadata
+        // NFT Output with Metadata
         const nftOutputSend = await client.buildNftOutput({
             nftId: nftId,
             unlockConditions: [
