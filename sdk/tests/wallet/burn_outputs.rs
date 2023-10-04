@@ -19,7 +19,7 @@ async fn mint_and_burn_nft() -> Result<()> {
     let storage_path = "test-storage/mint_and_burn_outputs";
     setup(storage_path)?;
 
-    let wallet = make_wallet(storage_path, None, None, None).await?;
+    let wallet = make_wallet(storage_path, None, None).await?;
     request_funds(&wallet).await?;
 
     let nft_options = [MintNftParams::new()
@@ -59,8 +59,8 @@ async fn mint_and_burn_expired_nft() -> Result<()> {
     let storage_path = "test-storage/mint_and_burn_expired_nft";
     setup(storage_path)?;
 
-    let wallet_0 = make_wallet(storage_path, None, None, None).await?;
-    let wallet_1 = make_wallet(storage_path, None, None, None).await?;
+    let wallet_0 = make_wallet(storage_path, None, None).await?;
+    let wallet_1 = make_wallet(storage_path, None, None).await?;
     request_funds(&wallet_0).await?;
 
     let token_supply = wallet_0.client().get_token_supply().await?;
@@ -100,7 +100,7 @@ async fn create_and_melt_native_token() -> Result<()> {
     let storage_path = "test-storage/create_and_melt_native_token";
     setup(storage_path)?;
 
-    let wallet = make_wallet(storage_path, None, None, None).await?;
+    let wallet = make_wallet(storage_path, None, None).await?;
     request_funds(&wallet).await?;
 
     // First create an account output, this needs to be done only once, because an account can have many foundry outputs
@@ -229,7 +229,7 @@ async fn create_and_burn_native_tokens() -> Result<()> {
     let storage_path = "test-storage/create_and_burn_native_tokens";
     setup(storage_path)?;
 
-    let wallet = make_wallet(storage_path, None, None, None).await?;
+    let wallet = make_wallet(storage_path, None, None).await?;
 
     request_funds(&wallet).await?;
 
@@ -276,7 +276,7 @@ async fn mint_and_burn_nft_with_account() -> Result<()> {
     let storage_path = "test-storage/mint_and_burn_nft_with_account";
     setup(storage_path)?;
 
-    let wallet = make_wallet(storage_path, None, None, None).await?;
+    let wallet = make_wallet(storage_path, None, None).await?;
     request_funds(&wallet).await?;
 
     let tx = wallet.create_account_output(None, None).await?;

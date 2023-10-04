@@ -12,7 +12,7 @@ use iota_sdk::{
         utils::Password,
     },
     crypto::keys::bip44::Bip44,
-    types::block::address::{Bech32Address, Hrp},
+    types::block::address::Bech32Address,
     wallet::{ClientOptions, Wallet},
 };
 use log::LevelFilter;
@@ -249,7 +249,12 @@ pub async fn init_command(
     secret_manager.store_mnemonic(mnemonic).await?;
     let secret_manager = SecretManager::Stronghold(secret_manager);
 
-    let alias = get_alias("New wallet alias").await?;
+    let alias = if get_decision("Do you want to assign an alias to your wallet?")? {
+        Some(get_alias("New wallet alias").await?)
+    } else {
+        None
+    };
+
     let address = init_params
         .address
         .map(|addr| Bech32Address::from_str(&addr))

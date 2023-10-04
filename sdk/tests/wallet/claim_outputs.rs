@@ -23,8 +23,8 @@ async fn claim_2_basic_micro_outputs() -> Result<()> {
     setup(storage_path_0)?;
     setup(storage_path_1)?;
 
-    let wallet_0 = make_wallet(storage_path_0, None, None, None).await?;
-    let wallet_1 = make_wallet(storage_path_1, None, None, None).await?;
+    let wallet_0 = make_wallet(storage_path_0, None, None).await?;
+    let wallet_1 = make_wallet(storage_path_1, None, None).await?;
 
     request_funds(&wallet_0).await?;
     request_funds(&wallet_1).await?;
@@ -80,8 +80,8 @@ async fn claim_1_of_2_basic_outputs() -> Result<()> {
     setup(storage_path_0)?;
     setup(storage_path_1)?;
 
-    let wallet_0 = make_wallet(storage_path_0, None, None, None).await?;
-    let wallet_1 = make_wallet(storage_path_0, None, None, None).await?;
+    let wallet_0 = make_wallet(storage_path_0, None, None).await?;
+    let wallet_1 = make_wallet(storage_path_0, None, None).await?;
 
     request_funds(&wallet_0).await?;
     request_funds(&wallet_1).await?;
@@ -137,8 +137,8 @@ async fn claim_2_basic_outputs_no_outputs_in_claim_account() -> Result<()> {
     setup(storage_path_0)?;
     setup(storage_path_1)?;
 
-    let wallet_0 = make_wallet(storage_path_0, None, None, None).await?;
-    let wallet_1 = make_wallet(storage_path_1, None, None, None).await?;
+    let wallet_0 = make_wallet(storage_path_0, None, None).await?;
+    let wallet_1 = make_wallet(storage_path_1, None, None).await?;
 
     request_funds(&wallet_0).await?;
 
@@ -194,8 +194,8 @@ async fn claim_2_native_tokens() -> Result<()> {
     setup(storage_path_0)?;
     setup(storage_path_1)?;
 
-    let wallet_0 = make_wallet(storage_path_0, None, None, None).await?;
-    let wallet_1 = make_wallet(storage_path_1, None, None, None).await?;
+    let wallet_0 = make_wallet(storage_path_0, None, None).await?;
+    let wallet_1 = make_wallet(storage_path_1, None, None).await?;
 
     request_funds(&wallet_0).await?;
     request_funds(&wallet_1).await?;
@@ -294,8 +294,8 @@ async fn claim_2_native_tokens_no_outputs_in_claim_account() -> Result<()> {
     setup(storage_path_0)?;
     setup(storage_path_1)?;
 
-    let wallet_0 = make_wallet(storage_path_0, None, None, None).await?;
-    let wallet_1 = make_wallet(storage_path_1, None, None, None).await?;
+    let wallet_0 = make_wallet(storage_path_0, None, None).await?;
+    let wallet_1 = make_wallet(storage_path_1, None, None).await?;
 
     request_funds(&wallet_0).await?;
 
@@ -410,8 +410,8 @@ async fn claim_2_nft_outputs() -> Result<()> {
     setup(storage_path_0)?;
     setup(storage_path_1)?;
 
-    let wallet_0 = make_wallet(storage_path_0, None, None, None).await?;
-    let wallet_1 = make_wallet(storage_path_1, None, None, None).await?;
+    let wallet_0 = make_wallet(storage_path_0, None, None).await?;
+    let wallet_1 = make_wallet(storage_path_1, None, None).await?;
 
     request_funds(&wallet_0).await?;
     request_funds(&wallet_1).await?;
@@ -473,8 +473,8 @@ async fn claim_2_nft_outputs_no_outputs_in_claim_account() -> Result<()> {
     setup(storage_path_0)?;
     setup(storage_path_1)?;
 
-    let wallet_0 = make_wallet(storage_path_0, None, None, None).await?;
-    let wallet_1 = make_wallet(storage_path_1, None, None, None).await?;
+    let wallet_0 = make_wallet(storage_path_0, None, None).await?;
+    let wallet_1 = make_wallet(storage_path_1, None, None).await?;
 
     request_funds(&wallet_0).await?;
 
@@ -535,8 +535,8 @@ async fn claim_basic_micro_output_error() -> Result<()> {
     setup(storage_path_0)?;
     setup(storage_path_1)?;
 
-    let wallet_0 = make_wallet(storage_path_0, None, None, None).await?;
-    let wallet_1 = make_wallet(storage_path_1, None, None, None).await?;
+    let wallet_0 = make_wallet(storage_path_0, None, None).await?;
+    let wallet_1 = make_wallet(storage_path_1, None, None).await?;
 
     request_funds(&wallet_0).await?;
 

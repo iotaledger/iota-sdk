@@ -29,7 +29,7 @@ async fn update_client_options() -> Result<()> {
     let storage_path = "test-storage/update_client_options";
     setup(storage_path)?;
 
-    let wallet = make_wallet(storage_path, None, Some(NODE_OTHER), None).await?;
+    let wallet = make_wallet(storage_path, None, Some(NODE_OTHER)).await?;
 
     let node_dto_old = NodeDto::Node(Node::from(Url::parse(NODE_OTHER).unwrap()));
     let node_dto_new = NodeDto::Node(Node::from(Url::parse(NODE_LOCAL).unwrap()));
@@ -48,7 +48,7 @@ async fn update_client_options() -> Result<()> {
 
     // The client options are also updated in the database and available the next time
     drop(wallet);
-    let wallet = make_wallet(storage_path, None, None, None).await?;
+    let wallet = make_wallet(storage_path, None, None).await?;
     let client_options = wallet.client_options().await;
     assert!(client_options.node_manager_builder.nodes.contains(&node_dto_new));
     assert!(!client_options.node_manager_builder.nodes.contains(&node_dto_old));
@@ -62,13 +62,13 @@ async fn different_seed() -> Result<()> {
     let storage_path = "test-storage/different_seed";
     setup(storage_path)?;
 
-    let wallet = make_wallet(storage_path, None, None, "Alice").await?;
+    let wallet = make_wallet(storage_path, None, None).await?;
 
     drop(wallet);
 
     // Recreate Wallet with a different mnemonic
     // Generating a new wallet needs to return an error, because the seed from the secret_manager is different
-    assert!(make_wallet(storage_path, None, None, "Bob").await.is_err());
+    assert!(make_wallet(storage_path, None, None).await.is_err());
 
     tear_down(storage_path)
 }
@@ -83,7 +83,7 @@ async fn changed_coin_type() -> Result<()> {
 
     let mnemonic = Mnemonic::from(DEFAULT_MNEMONIC.to_owned());
 
-    let wallet = make_wallet(storage_path, Some(mnemonic.clone()), None, "Alice").await?;
+    let wallet = make_wallet(storage_path, Some(mnemonic.clone()), None).await?;
 
     drop(wallet);
 
@@ -96,17 +96,15 @@ async fn changed_coin_type() -> Result<()> {
         .finish()
         .await;
 
-    // TODO: enable again
-
-    // // Building the wallet with another coin type needs to return an error, because a different coin type was used in
-    // // the existing account
-    // assert!(matches!(
-    //     err,
-    //     Err(Error::InvalidCoinType {
-    //         new_coin_type: IOTA_COIN_TYPE,
-    //         existing_coin_type: SHIMMER_COIN_TYPE
-    //     })
-    // ));
+    // Building the wallet with another coin type needs to return an error, because a different coin type was used in
+    // the existing account
+    assert!(matches!(
+        err,
+        Err(Error::CoinTypeMismatch {
+            new_coin_type: IOTA_COIN_TYPE,
+            old_coin_type: SHIMMER_COIN_TYPE
+        })
+    ));
 
     // Building the wallet with the same coin type still works
     assert!(
@@ -129,13 +127,7 @@ async fn shimmer_coin_type() -> Result<()> {
     let storage_path = "test-storage/shimmer_coin_type";
     setup(storage_path)?;
 
-    let wallet = make_wallet(
-        storage_path,
-        Some(Mnemonic::from(DEFAULT_MNEMONIC.to_owned())),
-        None,
-        None,
-    )
-    .await?;
+    let wallet = make_wallet(storage_path, Some(Mnemonic::from(DEFAULT_MNEMONIC.to_owned())), None).await?;
 
     // Creating a new account with providing a coin type will use the Shimmer coin type with shimmer testnet bech32 hrp
     assert_eq!(
@@ -183,7 +175,7 @@ async fn update_node_auth() -> Result<()> {
     let storage_path = "test-storage/update_node_auth";
     setup(storage_path)?;
 
-    let wallet = make_wallet(storage_path, None, Some(NODE_OTHER), None).await?;
+    let wallet = make_wallet(storage_path, None, Some(NODE_OTHER)).await?;
 
     let node_auth = iota_sdk::client::node_manager::node::NodeAuth {
         jwt: Some("jwt".to_string()),

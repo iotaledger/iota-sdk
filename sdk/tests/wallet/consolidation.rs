@@ -13,8 +13,8 @@ async fn consolidation() -> Result<()> {
     setup(storage_path_0)?;
     setup(storage_path_1)?;
 
-    let wallet_0 = make_wallet(storage_path_0, None, None, None).await?;
-    let wallet_1 = make_wallet(storage_path_1, None, None, None).await?;
+    let wallet_0 = make_wallet(storage_path_0, None, None).await?;
+    let wallet_1 = make_wallet(storage_path_1, None, None).await?;
 
     request_funds(&wallet_0).await?;
 

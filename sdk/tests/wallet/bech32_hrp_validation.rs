@@ -15,7 +15,7 @@ async fn bech32_hrp_send_amount() -> Result<()> {
     let storage_path = "test-storage/bech32_hrp_send_amount";
     setup(storage_path)?;
 
-    let wallet = make_wallet(storage_path, None, None, None).await?;
+    let wallet = make_wallet(storage_path, None, None).await?;
 
     let error = wallet
         .send_with_params(
@@ -50,7 +50,7 @@ async fn bech32_hrp_prepare_output() -> Result<()> {
     let storage_path = "test-storage/bech32_hrp_prepare_output";
     setup(storage_path)?;
 
-    let wallet = make_wallet(storage_path, None, None, None).await?;
+    let wallet = make_wallet(storage_path, None, None).await?;
 
     let error = wallet
         .prepare_output(

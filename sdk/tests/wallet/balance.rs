@@ -99,9 +99,9 @@ async fn balance_expiration() -> Result<()> {
     setup(storage_path_1)?;
     setup(storage_path_2)?;
 
-    let wallet_0 = make_wallet(storage_path_0, None, None, None).await?;
-    let wallet_1 = make_wallet(storage_path_1, None, None, None).await?;
-    let wallet_2 = make_wallet(storage_path_2, None, None, None).await?;
+    let wallet_0 = make_wallet(storage_path_0, None, None).await?;
+    let wallet_1 = make_wallet(storage_path_1, None, None).await?;
+    let wallet_2 = make_wallet(storage_path_2, None, None).await?;
 
     request_funds(&wallet_0).await?;
 
@@ -182,8 +182,8 @@ async fn balance_transfer() -> Result<()> {
     setup(storage_path_0)?;
     setup(storage_path_1)?;
 
-    let wallet_0 = make_wallet(storage_path_0, None, None, None).await?;
-    let wallet_1 = make_wallet(storage_path_1, None, None, None).await?;
+    let wallet_0 = make_wallet(storage_path_0, None, None).await?;
+    let wallet_1 = make_wallet(storage_path_1, None, None).await?;
 
     request_funds(&wallet_0).await?;
 
@@ -229,7 +229,7 @@ async fn balance_voting_power() -> Result<()> {
     let storage_path = "test-storage/balance_voting_power";
     setup(storage_path)?;
 
-    let wallet = make_wallet(storage_path, None, None, None).await?;
+    let wallet = make_wallet(storage_path, None, None).await?;
 
     request_funds(&wallet).await?;
 

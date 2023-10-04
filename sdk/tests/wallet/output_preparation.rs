@@ -23,7 +23,7 @@ async fn output_preparation() -> Result<()> {
     let storage_path = "test-storage/output_preparation";
     setup(storage_path)?;
 
-    let wallet = make_wallet(storage_path, None, None, None).await?;
+    let wallet = make_wallet(storage_path, None, None).await?;
     request_funds(&wallet).await?;
 
     let recipient_address_bech32 = String::from("rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu");
@@ -429,7 +429,7 @@ async fn output_preparation_sdr() -> Result<()> {
     let storage_path = "test-storage/output_preparation_sdr";
     setup(storage_path)?;
 
-    let wallet = make_wallet(storage_path, None, None, None).await?;
+    let wallet = make_wallet(storage_path, None, None).await?;
     request_funds(&wallet).await?;
 
     let rent_structure = wallet.client().get_rent_structure().await?;
@@ -540,7 +540,7 @@ async fn prepare_nft_output_features_update() -> Result<()> {
     let storage_path = "test-storage/prepare_nft_output_features_update";
     setup(storage_path)?;
 
-    let wallet = make_wallet(storage_path, None, None, None).await?;
+    let wallet = make_wallet(storage_path, None, None).await?;
     request_funds(&wallet).await?;
     let wallet_address = wallet.address().await;
 
@@ -608,8 +608,8 @@ async fn prepare_output_remainder_dust() -> Result<()> {
     setup(storage_path_0)?;
     setup(storage_path_1)?;
 
-    let wallet_0 = make_wallet(storage_path_0, None, None, None).await?;
-    let wallet_1 = make_wallet(storage_path_1, None, None, None).await?;
+    let wallet_0 = make_wallet(storage_path_0, None, None).await?;
+    let wallet_1 = make_wallet(storage_path_1, None, None).await?;
     request_funds(&wallet_0).await?;
     request_funds(&wallet_1).await?;
 
@@ -750,11 +750,11 @@ async fn prepare_output_only_single_nft() -> Result<()> {
     setup(storage_path_0)?;
     setup(storage_path_1)?;
 
-    let wallet_0 = make_wallet(storage_path_0, None, None, None).await?;
+    let wallet_0 = make_wallet(storage_path_0, None, None).await?;
     request_funds(&wallet_0).await?;
 
     // Create second wallet without funds, so it only gets the NFT
-    let wallet_1 = make_wallet(storage_path_1, None, None, None).await?;
+    let wallet_1 = make_wallet(storage_path_1, None, None).await?;
 
     let wallet_0_address = wallet_0.address().await;
     let wallet_1_address = wallet_1.address().await;
@@ -815,7 +815,7 @@ async fn prepare_existing_nft_output_gift() -> Result<()> {
     let storage_path = "test-storage/prepare_existing_nft_output_gift";
     setup(storage_path)?;
 
-    let wallet = make_wallet(storage_path, None, None, None).await?;
+    let wallet = make_wallet(storage_path, None, None).await?;
     request_funds(&wallet).await?;
     let address = wallet.address().await;
 

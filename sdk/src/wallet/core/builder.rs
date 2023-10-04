@@ -85,8 +85,8 @@ where
     }
 
     /// Set the alias of the wallet.
-    pub fn with_alias(mut self, alias: impl Into<String>) -> Self {
-        self.alias = Some(alias.into());
+    pub fn with_alias(mut self, alias: impl Into<Option<String>>) -> Self {
+        self.alias = alias.into();
         self
     }
 
@@ -147,17 +147,9 @@ where
             if self.bip_path.is_none() {
                 return Err(crate::wallet::Error::MissingParameter("bip_path"));
             }
-            if self.alias.is_none() {
-                return Err(crate::wallet::Error::MissingParameter("alias"));
-            }
             if self.client_options.is_none() {
                 return Err(crate::wallet::Error::MissingParameter("client_options"));
             }
-
-            // // TODO: consider not requiring a secret manager
-            // if self.secret_manager.is_none() {
-            //     return Err(crate::wallet::Error::MissingParameter("secret_manager"));
-            // }
         }
 
         #[cfg(all(feature = "rocksdb", feature = "storage"))]
@@ -214,38 +206,22 @@ where
             let alias = loaded_wallet_builder
                 .as_ref()
                 .and_then(|builder| builder.alias.clone())
-                .ok_or(crate::wallet::Error::MissingParameter("alias"))?;
+                .unwrap_or_else(|| storage_options.path().to_string_lossy().to_string());
 
             self.alias = Some(alias);
         }
         // Panic: can be safely unwrapped now
         let alias = self.alias.as_ref().unwrap().clone();
 
-        let bech32_hrp = self
-            .client_options
-            .as_ref()
-            .unwrap()
-            .network_info
-            .protocol_parameters
-            .bech32_hrp;
-
         // May use a previously stored wallet address if it wasn't provided
         if self.address.is_none() {
-            let address = loaded_wallet_builder.as_ref().and_then(|builder| builder.address);
-
-            self.address = address;
+            self.address = loaded_wallet_builder.as_ref().and_then(|builder| builder.address);
         }
 
         // May create a default Ed25519 wallet address if there's a secret manager.
         if self.address.is_none() {
             if self.secret_manager.is_some() {
-                let secret_manager = &**self.secret_manager.as_ref().unwrap();
-                let bip_path = *self.bip_path.as_ref().unwrap();
-                // TODO: remove
-                // let coin_type = bip_path.coin_type;
-                // let account_index = bip_path.account;
-                let address = self.create_default_wallet_address(bech32_hrp, bip_path).await?;
-
+                let address = self.create_default_wallet_address().await?;
                 self.address = Some(address);
             } else {
                 return Err(crate::wallet::Error::MissingParameter("address"));
@@ -271,8 +247,6 @@ where
                 }
             }
         }
-
-        // TODO: check address against the BIP account index and address index
 
         // Store the wallet builder (for convenience reasons)
         #[cfg(feature = "storage")]
@@ -327,13 +301,18 @@ where
     }
 
     /// Generate the wallet address.
-    pub(crate) async fn create_default_wallet_address(
-        &self,
-        hrp: Hrp,
-        bip_path: Bip44,
-    ) -> crate::wallet::Result<Bech32Address> {
+    pub(crate) async fn create_default_wallet_address(&self) -> crate::wallet::Result<Bech32Address> {
+        let bech32_hrp = self
+            .client_options
+            .as_ref()
+            .unwrap()
+            .network_info
+            .protocol_parameters
+            .bech32_hrp;
+        let bip_path = self.bip_path.as_ref().unwrap();
+
         Ok(Bech32Address::new(
-            hrp,
+            bech32_hrp,
             Address::Ed25519(
                 self.secret_manager
                     .as_ref()

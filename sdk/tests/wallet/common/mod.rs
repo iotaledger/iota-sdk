@@ -27,14 +27,9 @@ pub use self::constants::*;
 ///
 /// Returns:
 ///
-/// An Wallet
+/// A Wallet
 #[allow(dead_code, unused_variables)]
-pub(crate) async fn make_wallet(
-    storage_path: &str,
-    mnemonic: Option<Mnemonic>,
-    node: Option<&str>,
-    alias: impl Into<Option<&'static str>>,
-) -> Result<Wallet> {
+pub(crate) async fn make_wallet(storage_path: &str, mnemonic: Option<Mnemonic>, node: Option<&str>) -> Result<Wallet> {
     let client_options = ClientOptions::new().with_node(node.unwrap_or(NODE_LOCAL))?;
     let secret_manager =
         MnemonicSecretManager::try_from_mnemonic(mnemonic.unwrap_or(Client::generate_mnemonic().unwrap()))?;
@@ -45,9 +40,7 @@ pub(crate) async fn make_wallet(
         .with_client_options(client_options)
         .with_bip_path(Bip44::new(SHIMMER_COIN_TYPE));
 
-    if let Some(alias) = alias.into() {
-        wallet_builder = wallet_builder.with_alias(alias);
-    }
+    wallet_builder = wallet_builder.with_alias(storage_path);
 
     #[cfg(feature = "storage")]
     {

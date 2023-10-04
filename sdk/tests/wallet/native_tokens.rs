@@ -14,7 +14,7 @@ async fn create_and_mint_native_token() -> Result<()> {
     let storage_path = "test-storage/create_and_mint_native_token";
     setup(storage_path)?;
 
-    let wallet = make_wallet(storage_path, None, None, None).await?;
+    let wallet = make_wallet(storage_path, None, None).await?;
 
     request_funds(&wallet).await?;
 
@@ -75,7 +75,7 @@ async fn native_token_foundry_metadata() -> Result<()> {
     let storage_path = "test-storage/native_token_foundry_metadata";
     setup(storage_path)?;
 
-    let wallet = make_wallet(storage_path, None, None, None).await?;
+    let wallet = make_wallet(storage_path, None, None).await?;
 
     request_funds(&wallet).await?;
 
