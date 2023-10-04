@@ -1,6 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use alloc::vec::Vec;
 use core::mem::size_of;
 
 use crypto::hashes::{blake2b::Blake2b256, Digest};
