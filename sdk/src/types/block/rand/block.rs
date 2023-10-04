@@ -7,7 +7,7 @@ use super::signature::rand_sign_ed25519;
 use crate::types::block::{
     core::{
         basic::{self, BasicBlockBuilder},
-        BlockWrapper, BlockWrapperBuilder,
+        BlockHeader, BlockWrapper, BlockWrapperBuilder,
     },
     protocol::ProtocolParameters,
     rand::{
@@ -49,14 +49,16 @@ pub fn rand_basic_block_builder_with_strong_parents(strong_parents: basic::Stron
 /// Generates a random block wrapper with given block.
 pub fn rand_block_wrapper_with_block(protocol_params: ProtocolParameters, block: Block) -> BlockWrapper {
     BlockWrapper::build(
-        protocol_params.version(),
-        protocol_params.network_id(),
-        rand_slot_commitment_id(),
-        rand_slot_index(),
-        rand_issuer_id(),
+        BlockHeader::new(
+            protocol_params.version(),
+            protocol_params.network_id(),
+            rand_number(),
+            rand_slot_commitment_id(),
+            rand_slot_index(),
+            rand_issuer_id(),
+        ),
         block,
     )
-    .with_issuing_time(rand_number::<u64>())
     .sign_random()
 }
 

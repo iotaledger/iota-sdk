@@ -8,7 +8,7 @@ pub use self::transaction::verify_semantic;
 use crate::{
     client::{ClientInner, Result},
     types::block::{
-        core::{basic, BlockWrapper, BlockWrapperBuilder},
+        core::{basic, BlockHeader, BlockWrapper, BlockWrapperBuilder},
         payload::Payload,
         Block, IssuerId,
     },
@@ -41,17 +41,19 @@ impl ClientInner {
         let protocol_params = self.get_protocol_parameters().await?;
 
         Ok(BlockWrapper::build(
-            protocol_params.version(),
-            protocol_params.network_id(),
-            issuance.commitment.id(),
-            issuance.latest_finalized_slot,
-            issuer_id,
+            BlockHeader::new(
+                protocol_params.version(),
+                protocol_params.network_id(),
+                issuing_time,
+                issuance.commitment.id(),
+                issuance.latest_finalized_slot,
+                issuer_id,
+            ),
             Block::build_basic(strong_parents, 0) // TODO: burned mana calculation
                 .with_weak_parents(issuance.weak_parents()?)
                 .with_shallow_like_parents(issuance.shallow_like_parents()?)
                 .with_payload(payload)
                 .finish_block()?,
-        )
-        .with_issuing_time(issuing_time))
+        ))
     }
 }

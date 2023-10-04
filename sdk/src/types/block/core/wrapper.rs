@@ -24,125 +24,39 @@ use crate::types::block::{
 /// Builder for a [`BlockWrapper`].
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct BlockWrapperBuilder {
-    /// Protocol version of the network to which this block belongs.
-    pub(crate) protocol_version: u8,
-    /// The identifier of the network to which this block belongs.
-    pub(crate) network_id: u64,
-    /// The time at which the block was issued. It is a Unix timestamp in nanoseconds.
-    pub(crate) issuing_time: Option<u64>,
-    /// The identifier of the slot to which this block commits.
-    pub(crate) slot_commitment_id: SlotCommitmentId,
-    /// The slot index of the latest finalized slot.
-    pub(crate) latest_finalized_slot: SlotIndex,
-    /// The identifier of the account that issued this block.
-    pub(crate) issuer_id: IssuerId,
+    /// The block header.
+    pub(crate) header: BlockHeader,
     /// The inner block.
     pub(crate) block: Block,
 }
 
 impl BlockWrapperBuilder {
-    pub fn new(
-        protocol_version: u8,
-        network_id: u64,
-        slot_commitment_id: SlotCommitmentId,
-        latest_finalized_slot: SlotIndex,
-        issuer_id: IssuerId,
-        block: Block,
-    ) -> Self {
-        Self {
-            protocol_version,
-            network_id,
-            issuing_time: Default::default(),
-            slot_commitment_id,
-            latest_finalized_slot,
-            issuer_id,
-            block,
-        }
+    pub fn new(header: BlockHeader, block: Block) -> Self {
+        Self { header, block }
     }
 
-    /// Updates protocol version.
+    /// Updates the block header.
     #[inline(always)]
-    pub fn with_protocol_version(mut self, protocol_version: u8) -> Self {
-        self.protocol_version = protocol_version;
-        self
-    }
-
-    /// Updates network id
-    #[inline(always)]
-    pub fn with_network_id(mut self, network_id: u64) -> Self {
-        self.network_id = network_id;
-        self
-    }
-
-    /// Adds issuing time.
-    #[inline(always)]
-    pub fn with_issuing_time(mut self, issuing_time: impl Into<Option<u64>>) -> Self {
-        self.issuing_time = issuing_time.into();
-        self
-    }
-
-    /// Updates the slot commitment id.
-    #[inline(always)]
-    pub fn with_slot_commitment_id(mut self, slot_commitment_id: impl Into<SlotCommitmentId>) -> Self {
-        self.slot_commitment_id = slot_commitment_id.into();
-        self
-    }
-
-    /// Updates the latest finalized slot.
-    #[inline(always)]
-    pub fn with_latest_finalized_slot(mut self, latest_finalized_slot: impl Into<SlotIndex>) -> Self {
-        self.latest_finalized_slot = latest_finalized_slot.into();
-        self
-    }
-
-    /// Updates the issuer id.
-    #[inline(always)]
-    pub fn with_issuer_id(mut self, issuer_id: impl Into<IssuerId>) -> Self {
-        self.issuer_id = issuer_id.into();
+    pub fn with_block_header(mut self, header: BlockHeader) -> Self {
+        self.header = header;
         self
     }
 
     /// Updates the block.
     #[inline(always)]
-    pub fn with_block(mut self, block: impl Into<Block>) -> Self {
-        self.block = block.into();
+    pub fn with_block(mut self, block: Block) -> Self {
+        self.block = block;
         self
-    }
-
-    pub(crate) fn header_hash(&self) -> [u8; 32] {
-        let mut bytes = [0u8; BlockHeader::LENGTH];
-        BlockHeader {
-            protocol_version: self.protocol_version,
-            network_id: self.network_id,
-            // TODO: what do here
-            issuing_time: self.issuing_time.expect("issuing time not set"),
-            slot_commitment_id: self.slot_commitment_id,
-            latest_finalized_slot: self.latest_finalized_slot,
-            issuer_id: self.issuer_id,
-        }
-        .pack(&mut SlicePacker::new(&mut bytes))
-        .unwrap();
-        Blake2b256::digest(bytes).into()
     }
 
     /// Get the signing input that can be used to generate an
     /// [`Ed25519Signature`](crate::types::block::signature::Ed25519Signature) for the resulting block.
     pub fn signing_input(&self) -> Vec<u8> {
-        [self.header_hash(), self.block.hash()].concat()
+        [self.header.hash(), self.block.hash()].concat()
     }
 
     pub fn finish(self, signature: Ed25519Signature) -> Result<BlockWrapper, Error> {
-        Ok(BlockWrapper::new(
-            self.protocol_version,
-            self.network_id,
-            // TODO provide a sensible default
-            self.issuing_time.ok_or(Error::InvalidField("issuing time"))?,
-            self.slot_commitment_id,
-            self.latest_finalized_slot,
-            self.issuer_id,
-            self.block,
-            signature,
-        ))
+        Ok(BlockWrapper::new(self.header, self.block, signature))
     }
 }
 
@@ -154,11 +68,11 @@ pub struct BlockHeader {
     /// The identifier of the network to which this block belongs.
     network_id: u64,
     /// The time at which the block was issued. It is a Unix timestamp in nanoseconds.
-    pub(crate) issuing_time: u64,
+    issuing_time: u64,
     /// The identifier of the slot to which this block commits.
-    pub(crate) slot_commitment_id: SlotCommitmentId,
+    slot_commitment_id: SlotCommitmentId,
     /// The slot index of the latest finalized slot.
-    pub(crate) latest_finalized_slot: SlotIndex,
+    latest_finalized_slot: SlotIndex,
     /// The identifier of the account that issued this block.
     issuer_id: IssuerId,
 }
@@ -167,6 +81,24 @@ impl BlockHeader {
     /// The length of the block header.
     pub const LENGTH: usize =
         size_of::<u8>() + 2 * size_of::<u64>() + SlotCommitmentId::LENGTH + size_of::<SlotIndex>() + IssuerId::LENGTH;
+
+    pub fn new(
+        protocol_version: u8,
+        network_id: u64,
+        issuing_time: u64,
+        slot_commitment_id: SlotCommitmentId,
+        latest_finalized_slot: SlotIndex,
+        issuer_id: IssuerId,
+    ) -> Self {
+        Self {
+            protocol_version,
+            network_id,
+            issuing_time,
+            slot_commitment_id,
+            latest_finalized_slot,
+            issuer_id,
+        }
+    }
 
     pub(crate) fn hash(&self) -> [u8; 32] {
         let mut bytes = [0u8; Self::LENGTH];
@@ -253,25 +185,7 @@ impl BlockWrapper {
 
     /// Creates a new [`BlockWrapper`].
     #[inline(always)]
-    pub fn new(
-        protocol_version: u8,
-        network_id: u64,
-        issuing_time: u64,
-        slot_commitment_id: SlotCommitmentId,
-        latest_finalized_slot: SlotIndex,
-        issuer_id: IssuerId,
-        block: impl Into<Block>,
-        signature: impl Into<Signature>,
-    ) -> Self {
-        let header = BlockHeader {
-            protocol_version,
-            network_id,
-            issuing_time,
-            slot_commitment_id,
-            latest_finalized_slot,
-            issuer_id,
-        };
-        let block = block.into();
+    pub fn new(header: BlockHeader, block: Block, signature: impl Into<Signature>) -> Self {
         let signature = signature.into();
 
         Self {
@@ -283,22 +197,8 @@ impl BlockWrapper {
 
     /// Creates a new [`BlockWrapperBuilder`].
     #[inline(always)]
-    pub fn build(
-        protocol_version: u8,
-        network_id: u64,
-        slot_commitment_id: SlotCommitmentId,
-        latest_finalized_slot: SlotIndex,
-        issuer_id: IssuerId,
-        block: Block,
-    ) -> BlockWrapperBuilder {
-        BlockWrapperBuilder::new(
-            protocol_version,
-            network_id,
-            slot_commitment_id,
-            latest_finalized_slot,
-            issuer_id,
-            block,
-        )
+    pub fn build(header: BlockHeader, block: Block) -> BlockWrapperBuilder {
+        BlockWrapperBuilder::new(header, block)
     }
 
     /// Returns the protocol version of a [`BlockWrapper`].
@@ -498,12 +398,14 @@ pub(crate) mod dto {
             }
 
             Ok(Self::new(
-                dto.protocol_version,
-                dto.network_id,
-                dto.issuing_time,
-                dto.slot_commitment_id,
-                dto.latest_finalized_slot,
-                dto.issuer_id,
+                BlockHeader::new(
+                    dto.protocol_version,
+                    dto.network_id,
+                    dto.issuing_time,
+                    dto.slot_commitment_id,
+                    dto.latest_finalized_slot,
+                    dto.issuer_id,
+                ),
                 Block::try_from_dto_with_params_inner(dto.block, params)?,
                 dto.signature,
             ))
