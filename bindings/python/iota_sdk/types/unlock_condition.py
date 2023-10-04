@@ -179,7 +179,8 @@ def deserialize_unlock_condition(d: Dict[str, Any]) -> UnlockConditionUnion:
     raise Exception(f'invalid unlock condition type: {uc_type}')
 
 
-def deserialize_unlock_conditions(dicts: List[Dict[str, Any]]) -> List[UnlockConditionUnion]:
+def deserialize_unlock_conditions(
+        dicts: List[Dict[str, Any]]) -> List[UnlockConditionUnion]:
     """
     Takes a list of dictionaries as input and returns a list with specific instances of a classes based on the value of the 'type' key in the dictionary.
 
