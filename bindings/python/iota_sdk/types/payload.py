@@ -6,7 +6,7 @@ from enum import IntEnum
 from typing import Any, Dict, List, TypeAlias, Union
 from dataclasses import dataclass, field
 from iota_sdk.types.common import HexStr, json
-from iota_sdk.types.essence import RegularTransactionEssence
+from iota_sdk.types.essence import TransactionEssence
 from iota_sdk.types.unlock import SignatureUnlock, ReferenceUnlock
 
 
@@ -55,7 +55,7 @@ class TransactionPayload(BasePayload):
         essence: The transaction essence.
         unlocks: The unlocks of the transaction.
     """
-    essence: RegularTransactionEssence
+    essence: TransactionEssence
     unlocks: List[Union[SignatureUnlock, ReferenceUnlock]]
     type: int = field(
         default_factory=lambda: int(

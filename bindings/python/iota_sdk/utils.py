@@ -11,7 +11,7 @@ from iota_sdk.types.common import HexStr
 from iota_sdk.types.essence import TransactionEssence
 from iota_sdk.types.node_info import ProtocolParameters
 from iota_sdk.types.output_id import OutputId
-from iota_sdk.types.output import BaseOutput
+from iota_sdk.types.output import Output
 from iota_sdk.external import call_utils_method
 
 # Required to prevent circular import
@@ -120,7 +120,7 @@ class Utils():
         })
 
     @staticmethod
-    def compute_inputs_commitment(inputs: List[BaseOutput]) -> HexStr:
+    def compute_inputs_commitment(inputs: List[Output]) -> HexStr:
         """Compute the input commitment from the output objects that are used as inputs to fund the transaction.
         """
         return _call_method('computeInputsCommitment', {

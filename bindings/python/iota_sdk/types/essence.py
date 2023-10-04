@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 from enum import IntEnum
-from typing import TYPE_CHECKING, Optional, List
+from typing import TYPE_CHECKING, Optional, List, TypeAlias
 
 from dataclasses import dataclass, field
 
@@ -15,7 +15,7 @@ from iota_sdk.types.output import Output
 
 # Required to prevent circular import
 if TYPE_CHECKING:
-    from iota_sdk.types.payload import BasePayload
+    from iota_sdk.types.payload import Payload
 
 
 class EssenceType(IntEnum):
@@ -29,7 +29,7 @@ class EssenceType(IntEnum):
 
 @json
 @dataclass
-class TransactionEssence:
+class BaseTransactionEssence:
     """Base class of Transaction essence
     """
     type: int
@@ -37,7 +37,7 @@ class TransactionEssence:
 
 @json
 @dataclass
-class RegularTransactionEssence(TransactionEssence):
+class RegularTransactionEssence(BaseTransactionEssence):
     """Describes the essence data making up a transaction by defining its inputs, outputs, and an optional payload.
 
     Attributes:
@@ -58,7 +58,10 @@ class RegularTransactionEssence(TransactionEssence):
     outputs: List[Output]
     context_inputs: Optional[List[ContextInput]] = None
     allotments: Optional[List[ManaAllotment]] = None
-    payload: Optional[BasePayload] = None
+    payload: Optional[Payload] = None
     type: int = field(
         default_factory=lambda: EssenceType.RegularTransactionEssence,
         init=False)
+
+
+TransactionEssence: TypeAlias = RegularTransactionEssence
