@@ -49,9 +49,6 @@ async function run() {
     const balance = await account.getBalance();
     console.log('Balance::', balance.baseCoin);
 
-    const bigAmount: bigint = BigInt(amount);
-    const bigGas: bigint = BigInt(gas);
-
     try {
         const addresses = await account.addresses();
         const hexAddress = Utils.bech32ToHex(
@@ -67,8 +64,8 @@ async function run() {
 
         const metadata = await prepareMetadata(
             toEVMAddress,
-            bigAmount,
-            bigGas
+            BigInt(amount),
+            BigInt(gas)
         );
         const metadataFeature = new MetadataFeature(metadata);
 
