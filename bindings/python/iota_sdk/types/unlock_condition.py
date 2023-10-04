@@ -93,7 +93,7 @@ class TimelockUnlockCondition(UnlockCondition):
 class ExpirationUnlockCondition(UnlockCondition):
     """An expiration unlock condition.
     Args:
-        slot_index: Before this slot index, Address Unlock Condition is allowed to unlock the output, 
+        slot_index: Before this slot index, Address Unlock Condition is allowed to unlock the output,
                     after that only the address defined in Return Address.
         return_address: The return address if the output was not claimed in time.
     """
