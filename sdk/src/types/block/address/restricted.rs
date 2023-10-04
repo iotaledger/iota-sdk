@@ -61,16 +61,25 @@ impl core::fmt::Display for RestrictedAddress {
     }
 }
 
+/// All possible capabilities that an [`Address`] can have.
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
 #[non_exhaustive]
 pub enum AddressCapabilityFlag {
+    /// Can receive Outputs with Native Tokens.
     NativeTokens,
+    /// Can receive Outputs with Mana.
     Mana,
+    /// Can receive Outputs with a Timelock Unlock Condition.
     OutputsWithTimelock,
+    /// Can receive Outputs with an Expiration Unlock Condition.
     OutputsWithExpiration,
+    /// Can receive Outputs with a Storage Deposit Return Unlock Condition.
     OutputsWithStorageDeposit,
+    /// Can receive Account Outputs.
     AccountOutputs,
+    /// Can receive NFT Outputs.
     NftOutputs,
+    /// Can receive Delegation Outputs.
     DelegationOutputs,
 }
 
@@ -84,6 +93,7 @@ impl AddressCapabilityFlag {
     const NFT_OUTPUTS: u8 = 0b01000000;
     const DELEGATION_OUTPUTS: u8 = 0b10000000;
 
+    /// Converts the flag into the byte representation.
     pub fn as_byte(&self) -> u8 {
         match self {
             Self::NativeTokens => Self::NATIVE_TOKENS,
@@ -97,6 +107,7 @@ impl AddressCapabilityFlag {
         }
     }
 
+    /// Returns the index in [`AddressCapabilities`] to which this flag is applied.
     pub fn index(&self) -> usize {
         match self {
             Self::NativeTokens
@@ -110,6 +121,7 @@ impl AddressCapabilityFlag {
         }
     }
 
+    /// Returns an iterator over all flags.
     pub fn all() -> impl Iterator<Item = Self> {
         [
             Self::NativeTokens,
@@ -125,29 +137,39 @@ impl AddressCapabilityFlag {
     }
 }
 
+/// A list of bitflags that represent the capabilities of an [`Address`].
+/// If an output is created by a transaction with an
+/// [`UnlockCondition`](crate::types::block::output::UnlockCondition) containing a [`RestrictedAddress`], the
+/// transaction is valid only if the specified conditions, corresponding to the [`AddressCapabilityFlag`]s, hold for
+/// that output.
 #[derive(Clone, Debug, Default, Eq, PartialEq, Ord, PartialOrd, Hash, Deref)]
 #[repr(transparent)]
 pub struct AddressCapabilities(BoxedSlicePrefix<u8, u8>);
 
 impl AddressCapabilities {
+    /// Returns an [`AddressCapabilities`] with every possible flag enabled.
     pub fn all() -> Self {
         let mut res = Self::default();
         res.set_all();
         res
     }
 
+    /// Returns an [`AddressCapabilities`] with every possible flag disabled.
     pub fn none() -> Self {
         Self::default()
     }
 
+    /// Returns whether every possible [`AddressCapabilityFlag`] is enabled.
     pub fn is_all(&self) -> bool {
         AddressCapabilityFlag::all().all(|flag| self.has_capability(flag))
     }
 
+    /// Returns whether every possible [`AddressCapabilityFlag`] is disabled.
     pub fn is_none(&self) -> bool {
         self.0.iter().all(|b| 0.eq(b))
     }
 
+    /// Enables every possible [`AddressCapabilityFlag`].
     pub fn set_all(&mut self) -> &mut Self {
         for flag in AddressCapabilityFlag::all() {
             self.add_capability(flag);
@@ -155,11 +177,13 @@ impl AddressCapabilities {
         self
     }
 
+    /// Disabled every possible [`AddressCapabilityFlag`].
     pub fn set_none(&mut self) -> &mut Self {
         *self = Default::default();
         self
     }
 
+    /// Enables a given [`AddressCapabilityFlag`].
     pub fn add_capability(&mut self, flag: AddressCapabilityFlag) -> &mut Self {
         if self.0.len() <= flag.index() {
             let mut v = Box::<[_]>::from(self.0.clone()).into_vec();
@@ -171,6 +195,7 @@ impl AddressCapabilities {
         self
     }
 
+    /// Enables a given set of [`AddressCapabilityFlag`]s.
     pub fn add_capabilities(&mut self, flags: impl IntoIterator<Item = AddressCapabilityFlag>) -> &mut Self {
         for flag in flags {
             self.add_capability(flag);
@@ -178,16 +203,19 @@ impl AddressCapabilities {
         self
     }
 
+    /// Enables a given set of [`AddressCapabilityFlag`]s.
     pub fn with_capabilities(mut self, flags: impl IntoIterator<Item = AddressCapabilityFlag>) -> Self {
         self.add_capabilities(flags);
         self
     }
 
+    /// Enables a given set of [`AddressCapabilityFlag`]s.
     pub fn set_capabilities(&mut self, flags: impl IntoIterator<Item = AddressCapabilityFlag>) -> &mut Self {
         *self = Self::default().with_capabilities(flags);
         self
     }
 
+    /// Returns whether a given [`AddressCapabilityFlag`] is enabled.
     pub fn has_capability(&self, flag: AddressCapabilityFlag) -> bool {
         self.0
             .get(flag.index())
@@ -195,11 +223,13 @@ impl AddressCapabilities {
             .unwrap_or_default()
     }
 
+    /// Returns whether a given set of [`AddressCapabilityFlag`]s are enabled.
     pub fn has_capabilities(&self, flags: impl IntoIterator<Item = AddressCapabilityFlag>) -> bool {
         flags.into_iter().all(|flag| self.has_capability(flag))
     }
 
-    pub fn split(&self) -> impl Iterator<Item = AddressCapabilityFlag> + '_ {
+    /// Returns an iterator over all enabled [`AddressCapabilityFlag`]s.
+    pub fn capabilities_iter(&self) -> impl Iterator<Item = AddressCapabilityFlag> + '_ {
         self.0.iter().enumerate().flat_map(|(idx, byte)| {
             AddressCapabilityFlag::all().filter(move |f| (idx == f.index() && byte & f.as_byte() == f.as_byte()))
         })
@@ -254,7 +284,6 @@ pub(crate) mod dto {
         #[serde(rename = "type")]
         kind: u8,
         pub address: Address,
-        // TODO: is this format right?
         #[serde(with = "prefix_hex_bytes")]
         pub allowed_capabilities: Box<[u8]>,
     }

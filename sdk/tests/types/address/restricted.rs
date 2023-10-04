@@ -16,7 +16,7 @@ fn capabilities() {
     assert!(!capabilities.has_capability(Flag::NativeTokens));
     capabilities.add_capability(Flag::NativeTokens);
     assert!(capabilities.has_capabilities([Flag::NativeTokens]));
-    assert!(!capabilities.has_capabilities(AddressCapabilities::all().split()));
+    assert!(!capabilities.has_capabilities(AddressCapabilities::all().capabilities_iter()));
     assert!(!capabilities.is_none());
     assert!(!capabilities.is_all());
     capabilities.set_all();
