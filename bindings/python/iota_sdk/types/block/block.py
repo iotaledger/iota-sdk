@@ -3,9 +3,6 @@
 
 from __future__ import annotations
 from enum import IntEnum
-from typing import TypeAlias, Union
-from iota_sdk.types.block.basic import BasicBlock
-from iota_sdk.types.block.validation import ValidationBlock
 
 
 class BlockType(IntEnum):
@@ -17,6 +14,3 @@ class BlockType(IntEnum):
     """
     Basic = 0
     Validation = 1
-
-
-Block: TypeAlias = Union[BasicBlock, ValidationBlock]

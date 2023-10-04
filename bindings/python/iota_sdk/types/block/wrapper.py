@@ -7,7 +7,9 @@ from iota_sdk.types.common import HexStr, json, SlotIndex
 from iota_sdk.types.node_info import ProtocolParameters
 from iota_sdk.types.signature import Signature
 from iota_sdk.utils import Utils
-from iota_sdk.types.block.block import Block
+from typing import TypeAlias, Union
+from iota_sdk.types.block.basic import BasicBlock
+from iota_sdk.types.block.validation import ValidationBlock
 
 
 @json
@@ -39,3 +41,6 @@ class BlockWrapper:
         """Returns the block ID as a hexadecimal string.
         """
         return Utils.block_id(self, params)
+
+
+Block: TypeAlias = Union[BasicBlock, ValidationBlock]
