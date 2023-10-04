@@ -3,9 +3,7 @@
 
 from __future__ import annotations
 from enum import IntEnum
-from dataclasses import dataclass
 from typing import TypeAlias, Union
-from iota_sdk.types.common import json
 from iota_sdk.types.block.basic import BasicBlock
 from iota_sdk.types.block.validation import ValidationBlock
 
