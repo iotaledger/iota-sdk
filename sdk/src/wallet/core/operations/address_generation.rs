@@ -1,11 +1,9 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use std::sync::atomic::Ordering;
-
 use crate::{
     client::secret::{GenerateAddressOptions, SecretManage, SecretManager},
-    types::block::address::{Ed25519Address, Hrp},
+    types::block::address::Ed25519Address,
     wallet::Wallet,
 };
 #[cfg(all(feature = "events", feature = "ledger_nano"))]

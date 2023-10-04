@@ -111,6 +111,7 @@ where
 
         let addresses_to_sync = vec![wallet_address_with_unspent_outputs];
 
+        // TODO: remove `addresses_with_unspent_outputs`
         let (addresses_with_unspent_outputs, spent_or_not_synced_output_ids, outputs_data): (
             Vec<AddressWithUnspentOutputs>,
             Vec<OutputId>,
@@ -157,9 +158,8 @@ where
             self.request_and_store_foundry_outputs(native_token_foundry_ids).await?;
         }
 
-        // Updates account with balances, output ids, outputs
-        self.update(outputs_data, spent_or_unsynced_output_metadata_map, options)
-            .await
+        // Updates wallet with balances, output ids, outputs
+        self.update(outputs_data, spent_or_unsynced_output_metadata_map).await
     }
 
     // First request all outputs directly related to the wallet address, then for each nft and account output we got,

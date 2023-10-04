@@ -70,6 +70,8 @@ where
             }
         }
 
+        // TODO: more readable than `map_or`?
+        #[allow(clippy::option_if_let_else)]
         let remainder_address = match &options {
             Some(options) => {
                 match &options.remainder_value_strategy {

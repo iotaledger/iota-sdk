@@ -1,7 +1,6 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use futures::{StreamExt, TryStreamExt};
 use zeroize::Zeroizing;
 
 use crate::{
@@ -61,11 +60,6 @@ impl StorageManager {
     pub(crate) async fn save_wallet_data(&mut self, wallet_data: &WalletData) -> crate::wallet::Result<()> {
         self.set(&format!("{WALLET_DATA_KEY}"), &WalletDataDto::from(wallet_data))
             .await
-    }
-
-    // TODO: remove fn?
-    pub(crate) async fn remove_wallet_data(&mut self) -> crate::wallet::Result<()> {
-        self.delete(&format!("{WALLET_DATA_KEY}")).await
     }
 
     pub(crate) async fn set_default_sync_options(&self, sync_options: &SyncOptions) -> crate::wallet::Result<()> {
@@ -128,22 +122,19 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn save_remove_account() {
+    async fn save_load_wallet_data() {
         let mut storage_manager = StorageManager::new(Memory::default(), None).await.unwrap();
         assert!(storage_manager.load_wallet_data().await.unwrap().is_none());
 
-        let account_details = WalletData::mock();
+        let wallet_data = WalletData::mock();
 
-        storage_manager.save_wallet_data(&account_details).await.unwrap();
+        storage_manager.save_wallet_data(&wallet_data).await.unwrap();
         let wallet = storage_manager.load_wallet_data().await.unwrap();
         assert!(matches!(wallet, Some(data) if data.alias == "Alice"));
-
-        storage_manager.remove_wallet_data().await.unwrap();
-        assert!(storage_manager.load_wallet_data().await.unwrap().is_none());
     }
 
     #[tokio::test]
-    async fn save_get_wallet_data() {
+    async fn save_load_wallet_builder() {
         let storage_manager = StorageManager::new(Memory::default(), None).await.unwrap();
         assert!(
             WalletBuilder::<SecretManager>::load(&storage_manager)

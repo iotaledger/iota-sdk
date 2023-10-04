@@ -5,15 +5,11 @@ use primitive_types::U256;
 
 use crate::{
     client::secret::SecretManage,
-    types::block::{
-        address::Bech32Address,
-        output::{unlock_condition::UnlockCondition, FoundryId, NativeTokensBuilder, Output, Rent},
-        ConvertTo,
-    },
+    types::block::output::{unlock_condition::UnlockCondition, FoundryId, NativeTokensBuilder, Output, Rent},
     wallet::{
         account::{
             operations::helpers::time::can_output_be_unlocked_forever_from_now_on,
-            types::{AddressWithUnspentOutputs, Balance, NativeTokensBalance},
+            types::{Balance, NativeTokensBalance},
             OutputsToClaim,
         },
         core::WalletData,

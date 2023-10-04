@@ -3,7 +3,6 @@
 
 use std::fmt::Debug;
 
-use crypto::keys::bip44::Bip44;
 use serde::{
     ser::{SerializeMap, Serializer},
     Serialize,

@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 use crate::{
     client::{api::PreparedTransactionData, secret::SecretManage},
     types::block::{
-        address::{Bech32Address, ToBech32Ext},
+        address::Bech32Address,
         output::{
             feature::{IssuerFeature, MetadataFeature, SenderFeature, TagFeature},
             unlock_condition::AddressUnlockCondition,
@@ -17,7 +17,7 @@ use crate::{
     },
     wallet::{
         account::{operations::transaction::Transaction, TransactionOptions},
-        Error as WalletError, Wallet,
+        Wallet,
     },
 };
 

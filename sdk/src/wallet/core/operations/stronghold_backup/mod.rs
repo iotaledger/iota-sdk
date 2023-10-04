@@ -3,9 +3,7 @@
 
 pub(crate) mod stronghold_snapshot;
 
-use std::{fs, path::PathBuf, sync::atomic::Ordering};
-
-use futures::{future::try_join_all, FutureExt};
+use std::{fs, path::PathBuf};
 
 use self::stronghold_snapshot::read_wallet_data_from_stronghold_snapshot;
 #[cfg(feature = "storage")]
@@ -16,10 +14,7 @@ use crate::{
         utils::Password,
     },
     types::block::address::Hrp,
-    wallet::{
-        core::{Bip44, WalletInner},
-        Wallet,
-    },
+    wallet::Wallet,
 };
 
 impl Wallet {

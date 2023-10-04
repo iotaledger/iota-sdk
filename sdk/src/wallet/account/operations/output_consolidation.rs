@@ -34,7 +34,7 @@ use crate::wallet::{
         constants::DEFAULT_OUTPUT_CONSOLIDATION_THRESHOLD,
         operations::{helpers::time::can_output_be_unlocked_now, output_claiming::get_new_native_token_count},
         types::{OutputData, Transaction},
-        AddressWithUnspentOutputs, TransactionOptions,
+        TransactionOptions,
     },
     Result,
 };

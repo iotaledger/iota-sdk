@@ -285,6 +285,8 @@ where
     ) -> crate::wallet::Result<Address> {
         let transaction_options = transaction_options.into();
 
+        // TODO: more readable than `map_or`?
+        #[allow(clippy::option_if_let_else)]
         let remainder_address = match &transaction_options {
             Some(options) => {
                 match &options.remainder_value_strategy {

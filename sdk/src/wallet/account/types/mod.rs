@@ -10,7 +10,7 @@ pub mod participation;
 use std::str::FromStr;
 
 use crypto::keys::bip44::Bip44;
-use serde::{Deserialize, Deserializer, Serialize};
+use serde::{Deserialize, Serialize};
 
 pub use self::{
     address::{AddressWithUnspentOutputs, Bip44Address},

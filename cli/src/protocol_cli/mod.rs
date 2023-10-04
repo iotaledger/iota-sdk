@@ -30,7 +30,7 @@ use iota_sdk::{
 };
 use rustyline::{error::ReadlineError, history::MemHistory, Config, Editor};
 
-use self::completer::{ProtocolCommandCompleter, ProtocolPromptHelper};
+use self::completer::ProtocolPromptHelper;
 use crate::{
     error::Error,
     helper::{bytes_from_hex_or_file, to_utc_date_time},

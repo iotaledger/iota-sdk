@@ -1,8 +1,6 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use std::sync::atomic::Ordering;
-
 use crate::{
     client::{secret::SecretManagerConfig, storage::StorageAdapter, stronghold::StrongholdAdapter},
     types::TryFromDto,

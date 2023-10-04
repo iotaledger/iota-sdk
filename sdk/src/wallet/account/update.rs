@@ -7,11 +7,7 @@ use crate::{
     client::secret::SecretManage,
     types::block::output::{OutputId, OutputMetadata},
     wallet::{
-        account::{
-            operations::syncing::options::SyncOptions,
-            types::{address::AddressWithUnspentOutputs, InclusionState, OutputData, Transaction},
-            Bip44Address,
-        },
+        account::types::{InclusionState, OutputData, Transaction},
         Wallet,
     },
 };
@@ -42,7 +38,6 @@ where
         &self,
         unspent_outputs: Vec<OutputData>,
         spent_or_unsynced_output_metadata_map: HashMap<OutputId, Option<OutputMetadata>>,
-        options: &SyncOptions,
     ) -> crate::wallet::Result<()> {
         log::debug!("[SYNC] Update wallet with new synced transactions");
 
@@ -120,7 +115,7 @@ where
 
         #[cfg(feature = "storage")]
         {
-            log::debug!("[SYNC] storing account {} with new synced data", wallet_data.alias);
+            log::debug!("[SYNC] storing wallet {} with new synced data", wallet_data.alias);
             self.save(Some(&wallet_data)).await?;
         }
         Ok(())
@@ -182,7 +177,7 @@ where
         #[cfg(feature = "storage")]
         {
             log::debug!(
-                "[SYNC] storing account {} with new synced transactions",
+                "[SYNC] storing wallet {} with new synced transactions",
                 wallet_data.alias
             );
             self.save(Some(&wallet_data)).await?;

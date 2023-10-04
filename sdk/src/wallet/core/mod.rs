@@ -6,23 +6,19 @@ pub(crate) mod operations;
 
 use std::{
     collections::{HashMap, HashSet},
-    sync::{
-        atomic::{AtomicU32, AtomicUsize},
-        Arc,
-    },
+    sync::{atomic::AtomicUsize, Arc},
 };
 
 use crypto::keys::{
     bip39::{Mnemonic, MnemonicRef},
     bip44::Bip44,
 };
-use getset::Setters;
 use serde::{Deserialize, Serialize};
 use tokio::sync::{Mutex, RwLock};
 
 pub use self::builder::WalletBuilder;
 use super::account::{
-    types::{AddressWithUnspentOutputs, Bip44Address, OutputData, Transaction, TransactionDto},
+    types::{OutputData, Transaction, TransactionDto},
     FilterOptions, OutputDataDto,
 };
 #[cfg(feature = "events")]
@@ -39,19 +35,13 @@ use crate::{
     },
     types::{
         block::{
-            address::{Address, Bech32Address, Hrp, ToBech32Ext},
+            address::{Bech32Address, Hrp},
             output::{dto::FoundryOutputDto, AccountId, FoundryId, FoundryOutput, NftId, Output, OutputId, TokenId},
             payload::transaction::TransactionId,
         },
         TryFromDto,
     },
-    wallet::{
-        account::{
-            operations::syncing::SyncOptions,
-            types::{Balance, InclusionState},
-        },
-        Result,
-    },
+    wallet::{account::operations::syncing::SyncOptions, Result},
 };
 
 /// The wallet, used to ... TODO

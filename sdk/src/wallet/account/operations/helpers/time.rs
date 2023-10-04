@@ -7,7 +7,7 @@ use crate::{
         output::{AccountTransition, Output},
         slot::SlotIndex,
     },
-    wallet::account::types::{AddressWithUnspentOutputs, OutputData},
+    wallet::account::types::OutputData,
 };
 
 // Check if an output can be unlocked by one of the account addresses at the current time

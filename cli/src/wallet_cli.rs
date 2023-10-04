@@ -266,7 +266,7 @@ pub async fn init_command(
         .with_storage_path(storage_path.to_str().expect("invalid unicode"))
         .with_bip_path(Bip44::new(init_params.coin_type))
         .with_address(address)
-        .with_alias(alias)
+        .with_alias(alias.as_ref().map(|alias| alias.as_str()))
         .finish()
         .await?)
 }

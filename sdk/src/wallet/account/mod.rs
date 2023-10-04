@@ -10,22 +10,13 @@ pub mod types;
 /// Methods to update the wallet state.
 pub(crate) mod update;
 
-use std::{
-    collections::{HashMap, HashSet},
-    ops::Deref,
-    sync::Arc,
-};
+use std::collections::HashSet;
 
-use getset::{Getters, Setters};
 use serde::{Deserialize, Serialize};
-use tokio::sync::{Mutex, RwLock};
 
 #[cfg(feature = "participation")]
 pub use self::operations::participation::{AccountParticipationOverview, ParticipationEventWithNodes};
-use self::types::{
-    address::{AddressWithUnspentOutputs, Bip44Address},
-    Balance, OutputData, Transaction, TransactionDto,
-};
+use self::types::{address::AddressWithUnspentOutputs, Balance, OutputData, Transaction};
 pub use self::{
     operations::{
         output_claiming::OutputsToClaim,
@@ -51,21 +42,15 @@ pub use self::{
     },
     types::OutputDataDto,
 };
-use super::{core::WalletInner, Wallet};
 use crate::{
-    client::{
-        secret::{SecretManage, SecretManager},
-        Client,
-    },
     types::{
         api::core::response::OutputWithMetadataResponse,
         block::{
-            output::{dto::FoundryOutputDto, AccountId, FoundryId, FoundryOutput, NftId, Output, OutputId, TokenId},
+            output::{AccountId, FoundryId, NftId},
             payload::{transaction::TransactionId, TransactionPayload},
         },
-        TryFromDto,
     },
-    wallet::{account::types::InclusionState, Result},
+    wallet::account::types::InclusionState,
 };
 
 /// Options to filter outputs

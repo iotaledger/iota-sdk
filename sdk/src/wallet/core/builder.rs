@@ -1,14 +1,10 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use std::sync::{
-    atomic::{AtomicU32, AtomicUsize},
-    Arc,
-};
 #[cfg(feature = "storage")]
-use std::{collections::HashSet, sync::atomic::Ordering};
+use std::collections::HashSet;
+use std::sync::{atomic::AtomicUsize, Arc};
 
-use futures::{future::try_join_all, FutureExt};
 use serde::Serialize;
 use tokio::sync::{Mutex, RwLock};
 
@@ -21,10 +17,7 @@ use crate::wallet::storage::adapter::memory::Memory;
 use crate::wallet::storage::{StorageManager, StorageOptions};
 use crate::{
     client::secret::{GenerateAddressOptions, SecretManage, SecretManager},
-    types::block::{
-        address::{AccountAddress, Address, Bech32Address, Hrp, ToBech32Ext},
-        output::AccountId,
-    },
+    types::block::address::{Address, Bech32Address},
     wallet::{
         account::SyncOptions,
         core::{Bip44, WalletData, WalletInner},
@@ -85,8 +78,8 @@ where
     }
 
     /// Set the alias of the wallet.
-    pub fn with_alias(mut self, alias: impl Into<Option<String>>) -> Self {
-        self.alias = alias.into();
+    pub fn with_alias<'a>(mut self, alias: impl Into<Option<&'a str>>) -> Self {
+        self.alias = alias.into().map(|alias| alias.to_string());
         self
     }
 

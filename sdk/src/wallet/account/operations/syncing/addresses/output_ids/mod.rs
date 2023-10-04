@@ -13,10 +13,7 @@ use instant::Instant;
 
 use crate::{
     client::{node_api::indexer::QueryParameter, secret::SecretManage},
-    types::block::{
-        address::{Address, Bech32Address},
-        output::OutputId,
-    },
+    types::block::{address::Bech32Address, output::OutputId},
     wallet::{
         account::{
             constants::PARALLEL_REQUESTS_AMOUNT, operations::syncing::SyncOptions,
