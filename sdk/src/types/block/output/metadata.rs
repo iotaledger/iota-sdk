@@ -164,3 +164,53 @@ mod dto {
         }
     }
 }
+
+#[cfg(feature = "json")]
+mod json {
+    use super::*;
+    use crate::{
+        types::block::Error,
+        utils::json::{FromJson, JsonExt, ToJson, Value},
+    };
+
+    impl ToJson for OutputMetadata {
+        fn to_json(&self) -> Value {
+            let mut res = crate::json!({
+                "blockId": self.block_id,
+                "transactionId": self.transaction_id(),
+                "outputIndex": self.output_index(),
+                "isSpent": self.is_spent,
+                "latestCommitmentId": self.latest_commitment_id,
+            });
+            if let Some(commitment_id_spent) = self.commitment_id_spent {
+                res["commitmentIdSpent"] = commitment_id_spent.to_json();
+            }
+            if let Some(transaction_id_spent) = self.transaction_id_spent {
+                res["transactionIdSpent"] = transaction_id_spent.to_json();
+            }
+            if let Some(included_commitment_id) = self.included_commitment_id {
+                res["includedCommitmentId"] = included_commitment_id.to_json();
+            }
+            res
+        }
+    }
+
+    impl FromJson for OutputMetadata {
+        type Error = Error;
+
+        fn from_non_null_json(mut value: Value) -> Result<Self, Self::Error>
+        where
+            Self: Sized,
+        {
+            Ok(Self {
+                block_id: value["blockId"].take_value()?,
+                output_id: value["outputId"].take_value()?,
+                is_spent: value["isSpent"].to_bool()?,
+                commitment_id_spent: value["commitmentIdSpent"].take_value()?,
+                transaction_id_spent: value["transactionIdSpent"].take_value()?,
+                included_commitment_id: value["includedCommitmentId"].take_value()?,
+                latest_commitment_id: value["latestCommitmentId"].take_value()?,
+            })
+        }
+    }
+}

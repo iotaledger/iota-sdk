@@ -47,3 +47,29 @@ impl core::fmt::Debug for InputsCommitment {
         write!(f, "InputsCommitment({self})")
     }
 }
+
+#[cfg(feature = "json")]
+mod json {
+    use super::*;
+    use crate::{
+        types::block::Error,
+        utils::json::{FromJson, JsonExt, ToJson, Value},
+    };
+
+    impl ToJson for InputsCommitment {
+        fn to_json(&self) -> Value {
+            self.0.to_json()
+        }
+    }
+
+    impl FromJson for InputsCommitment {
+        type Error = Error;
+
+        fn from_non_null_json(mut value: Value) -> Result<Self, Self::Error>
+        where
+            Self: Sized,
+        {
+            Ok(Self(value.take_array()?))
+        }
+    }
+}

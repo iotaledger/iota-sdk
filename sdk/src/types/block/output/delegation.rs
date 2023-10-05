@@ -469,11 +469,8 @@ fn verify_unlock_conditions<const VERIFY: bool>(unlock_conditions: &UnlockCondit
     }
 }
 
-#[cfg(feature = "serde")]
 pub(crate) mod dto {
     use alloc::vec::Vec;
-
-    use serde::{Deserialize, Serialize};
 
     use super::*;
     use crate::{
@@ -487,19 +484,23 @@ pub(crate) mod dto {
         utils::serde::string,
     };
 
-    #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-    #[serde(rename_all = "camelCase")]
+    #[derive(Clone, Debug, Eq, PartialEq)]
+    #[cfg_attr(
+        feature = "serde",
+        derive(serde::Serialize, serde::Deserialize),
+        serde(rename_all = "camelCase")
+    )]
     pub struct DelegationOutputDto {
-        #[serde(rename = "type")]
+        #[cfg_attr(feature = "serde", serde(rename = "type"))]
         pub kind: u8,
-        #[serde(with = "string")]
+        #[cfg_attr(feature = "serde", serde(with = "string"))]
         pub amount: u64,
-        #[serde(with = "string")]
+        #[cfg_attr(feature = "serde", serde(with = "string"))]
         pub delegated_amount: u64,
         pub delegation_id: DelegationId,
         pub validator_address: AccountAddress,
-        start_epoch: EpochIndex,
-        end_epoch: EpochIndex,
+        pub start_epoch: EpochIndex,
+        pub end_epoch: EpochIndex,
         pub unlock_conditions: Vec<UnlockConditionDto>,
     }
 
@@ -581,6 +582,56 @@ pub(crate) mod dto {
             builder = builder.with_unlock_conditions(unlock_conditions);
 
             builder.finish_with_params(params)
+        }
+    }
+}
+
+#[cfg(feature = "json")]
+mod json {
+    use super::*;
+    use crate::{
+        types::block::Error,
+        utils::json::{FromJson, JsonExt, ToJson, Value},
+    };
+
+    impl ToJson for DelegationOutput {
+        fn to_json(&self) -> Value {
+            crate::json! ({
+                "type": Self::KIND,
+                "amount": self.amount(),
+                "delegatedAmount": self.delegated_amount(),
+                "delegationId": self.delegation_id(),
+                "validatorAddress": self.validator_address(),
+                "startEpoch": self.start_epoch(),
+                "endEpoch": self.end_epoch(),
+                "unlockConditions": self.unlock_conditions().to_vec(),
+            })
+        }
+    }
+
+    impl FromJson for dto::DelegationOutputDto {
+        type Error = Error;
+
+        fn from_non_null_json(mut value: Value) -> Result<Self, Self::Error>
+        where
+            Self: Sized,
+        {
+            if value["type"] != DelegationOutput::KIND {
+                return Err(Error::invalid_type::<DelegationOutput>(
+                    DelegationOutput::KIND,
+                    &value["type"],
+                ));
+            }
+            Ok(Self {
+                kind: DelegationOutput::KIND,
+                amount: value["amount"].to_u64()?,
+                delegated_amount: value["delegatedAmount"].to_u64()?,
+                delegation_id: value["delegationId"].take_value()?,
+                validator_address: value["validatorAddress"].take_value()?,
+                start_epoch: value["startEpoch"].take_value()?,
+                end_epoch: value["endEpoch"].take_value()?,
+                unlock_conditions: value["unlockCondition"].take_vec()?,
+            })
         }
     }
 }

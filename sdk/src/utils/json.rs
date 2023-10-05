@@ -108,6 +108,17 @@ pub trait JsonExt: Clone {
 
     fn to_u64(&self) -> Result<u64, Error>;
 
+    fn to_array<T: FromJson, const N: usize>(&self) -> Result<[T; N], T::Error>
+    where
+        T::Error: From<Error>,
+    {
+        self.clone().take_array()
+    }
+
+    fn take_array<T: FromJson, const N: usize>(&mut self) -> Result<[T; N], T::Error>
+    where
+        T::Error: From<Error>;
+
     fn to_vec<T: FromJson>(&self) -> Result<Vec<T>, T::Error>
     where
         T::Error: From<Error>,
@@ -155,9 +166,21 @@ impl JsonExt for Value {
     }
 
     fn to_u64(&self) -> Result<u64, Error> {
-        self.to_str()?
-            .parse()
-            .map_err(|_| Error::wrong_type::<u64>(self.to_string()))
+        self.to_str()?.parse().map_err(|_| Error::wrong_type::<u64>(self))
+    }
+
+    fn take_array<T: FromJson, const N: usize>(&mut self) -> Result<[T; N], T::Error>
+    where
+        T::Error: From<Error>,
+    {
+        if self.is_array() && self.len() == N {
+            let Ok(r) = self.take_vec::<T>()?.try_into() else {
+                unreachable!()
+            };
+            Ok(r)
+        } else {
+            Err(Error::wrong_type::<[T; N]>(self).into())
+        }
     }
 
     fn take_vec<T: FromJson>(&mut self) -> Result<Vec<T>, T::Error>
@@ -169,7 +192,7 @@ impl JsonExt for Value {
                 .into_iter()
                 .map(FromJson::from_json)
                 .collect::<Result<Vec<_>, T::Error>>())?,
-            _ => Err(Error::wrong_type::<Vec<T>>(self).into()),
+            v => Err(Error::wrong_type::<Vec<T>>(v).into()),
         }
     }
 
@@ -292,9 +315,11 @@ impl FromJson for U256 {
     where
         Self: Sized,
     {
-        Ok(U256::from(
-            <[u8; 32]>::try_from(value.take_vec::<u8>()?).map_err(|_| Error::wrong_type::<U256>(value.to_string()))?,
-        ))
+        let bytes = value.take_vec::<u8>()?;
+        match <[u8; 32]>::try_from(bytes) {
+            Ok(r) => Ok(r.into()),
+            Err(bytes) => Err(Error::wrong_type::<U256>(format!("{:?}", bytes))),
+        }
     }
 }
 

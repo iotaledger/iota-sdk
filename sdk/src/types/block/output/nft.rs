@@ -536,11 +536,8 @@ fn verify_unlock_conditions(unlock_conditions: &UnlockConditions, nft_id: &NftId
     verify_allowed_unlock_conditions(unlock_conditions, NftOutput::ALLOWED_UNLOCK_CONDITIONS)
 }
 
-#[cfg(feature = "serde")]
 pub(crate) mod dto {
     use alloc::vec::Vec;
-
-    use serde::{Deserialize, Serialize};
 
     use super::*;
     use crate::{
@@ -551,22 +548,26 @@ pub(crate) mod dto {
         utils::serde::string,
     };
 
-    #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-    #[serde(rename_all = "camelCase")]
+    #[derive(Clone, Debug, Eq, PartialEq)]
+    #[cfg_attr(
+        feature = "serde",
+        derive(serde::Serialize, serde::Deserialize),
+        serde(rename_all = "camelCase")
+    )]
     pub struct NftOutputDto {
-        #[serde(rename = "type")]
+        #[cfg_attr(feature = "serde", serde(rename = "type"))]
         pub kind: u8,
-        #[serde(with = "string")]
+        #[cfg_attr(feature = "serde", serde(with = "string"))]
         pub amount: u64,
-        #[serde(with = "string")]
+        #[cfg_attr(feature = "serde", serde(with = "string"))]
         pub mana: u64,
-        #[serde(skip_serializing_if = "Vec::is_empty", default)]
+        #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Vec::is_empty", default))]
         pub native_tokens: Vec<NativeToken>,
         pub nft_id: NftId,
         pub unlock_conditions: Vec<UnlockConditionDto>,
-        #[serde(skip_serializing_if = "Vec::is_empty", default)]
+        #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Vec::is_empty", default))]
         pub features: Vec<Feature>,
-        #[serde(skip_serializing_if = "Vec::is_empty", default)]
+        #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Vec::is_empty", default))]
         pub immutable_features: Vec<Feature>,
     }
 
@@ -646,6 +647,60 @@ pub(crate) mod dto {
             }
 
             builder.finish_with_params(params)
+        }
+    }
+}
+
+#[cfg(feature = "json")]
+mod json {
+    use super::*;
+    use crate::{
+        types::block::Error,
+        utils::json::{FromJson, JsonExt, ToJson, Value},
+    };
+
+    impl ToJson for NftOutput {
+        fn to_json(&self) -> Value {
+            let mut res = crate::json! ({
+                "type": Self::KIND,
+                "amount": self.amount(),
+                "mana": self.mana(),
+                "nftId": self.nft_id(),
+                "unlockConditions": self.unlock_conditions().to_vec(),
+            });
+            if !self.native_tokens().is_empty() {
+                res["nativeTokens"] = self.native_tokens().to_vec().to_json();
+            }
+            if !self.features().is_empty() {
+                res["features"] = self.features().to_vec().to_json();
+            }
+            if !self.immutable_features().is_empty() {
+                res["immutableFeatures"] = self.immutable_features().to_vec().to_json();
+            }
+            res
+        }
+    }
+
+    impl FromJson for dto::NftOutputDto {
+        type Error = Error;
+
+        fn from_non_null_json(mut value: Value) -> Result<Self, Self::Error>
+        where
+            Self: Sized,
+        {
+            if value["type"] != NftOutput::KIND {
+                return Err(Error::invalid_type::<NftOutput>(NftOutput::KIND, &value["type"]));
+            }
+            Ok(Self {
+                kind: NftOutput::KIND,
+                amount: value["amount"].to_u64()?,
+                mana: value["mana"].to_u64()?,
+                native_tokens: value["nativeTokens"].take_opt_or_default()?,
+                nft_id: value["nftId"].take_value()?,
+                unlock_conditions: value["unlockCondition"].take_vec()?,
+                features: value["features"].take_opt_or_default()?,
+                immutable_features: value["immutableFeatures"].take_opt_or_default()?,
+            })
         }
     }
 }

@@ -517,11 +517,9 @@ fn minimum_storage_deposit(address: &Address, rent_structure: RentStructure, tok
         .amount()
 }
 
-#[cfg(feature = "serde")]
 pub mod dto {
     use alloc::format;
 
-    use serde::{Deserialize, Serialize, Serializer};
     use serde_json::Value;
 
     use super::*;
@@ -569,7 +567,8 @@ pub mod dto {
         }
     }
 
-    impl<'de> Deserialize<'de> for OutputDto {
+    #[cfg(feature = "serde")]
+    impl<'de> serde::Deserialize<'de> for OutputDto {
         fn deserialize<D: serde::Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
             let value = Value::deserialize(d)?;
             Ok(
@@ -605,12 +604,13 @@ pub mod dto {
         }
     }
 
-    impl Serialize for OutputDto {
+    #[cfg(feature = "serde")]
+    impl serde::Serialize for OutputDto {
         fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
         where
-            S: Serializer,
+            S: serde::Serializer,
         {
-            #[derive(Serialize)]
+            #[derive(serde::Serialize)]
             #[serde(untagged)]
             enum OutputDto_<'a> {
                 T2(&'a BasicOutputDto),
@@ -619,7 +619,7 @@ pub mod dto {
                 T5(&'a NftOutputDto),
                 T6(&'a DelegationOutputDto),
             }
-            #[derive(Serialize)]
+            #[derive(serde::Serialize)]
             struct TypedOutput<'a> {
                 #[serde(flatten)]
                 output: OutputDto_<'a>,
@@ -642,6 +642,56 @@ pub mod dto {
                 },
             };
             output.serialize(serializer)
+        }
+    }
+}
+
+#[cfg(feature = "json")]
+mod json {
+    use super::*;
+    use crate::utils::json::{FromJson, ToJson, Value};
+
+    impl ToJson for Output {
+        fn to_json(&self) -> Value {
+            match self {
+                Self::Basic(o) => o.to_json(),
+                Self::Account(o) => o.to_json(),
+                Self::Foundry(o) => o.to_json(),
+                Self::Nft(o) => o.to_json(),
+                Self::Delegation(o) => o.to_json(),
+            }
+        }
+    }
+
+    impl FromJson for dto::OutputDto {
+        type Error = Error;
+
+        fn from_non_null_json(value: Value) -> Result<Self, Self::Error>
+        where
+            Self: Sized,
+        {
+            Ok(match value["type"].as_u8() {
+                Some(BasicOutput::KIND) => dto::BasicOutputDto::from_json(value)?.into(),
+                Some(AccountOutput::KIND) => dto::AccountOutputDto::from_json(value)?.into(),
+                Some(FoundryOutput::KIND) => dto::FoundryOutputDto::from_json(value)?.into(),
+                Some(NftOutput::KIND) => dto::NftOutputDto::from_json(value)?.into(),
+                Some(DelegationOutput::KIND) => dto::DelegationOutputDto::from_json(value)?.into(),
+                _ => {
+                    return Err(Error::invalid_type::<Self>(
+                        format!(
+                            "one of {:?}",
+                            [
+                                BasicOutput::KIND,
+                                AccountOutput::KIND,
+                                FoundryOutput::KIND,
+                                NftOutput::KIND,
+                                DelegationOutput::KIND,
+                            ]
+                        ),
+                        &value["type"],
+                    ));
+                }
+            })
         }
     }
 }
