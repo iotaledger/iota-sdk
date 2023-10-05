@@ -314,3 +314,88 @@ mod dto {
 
     impl_serde_typed_dto!(BlockIssuerFeature, BlockIssuerFeatureDto, "block issuer feature");
 }
+
+#[cfg(feature = "json")]
+mod json {
+    use super::*;
+    use crate::utils::json::{FromJson, JsonExt, ToJson, Value};
+
+    impl ToJson for Ed25519BlockIssuerKey {
+        fn to_json(&self) -> Value {
+            crate::json! ({
+                "type": Self::KIND,
+                "publicKey": prefix_hex::encode(self.0.as_slice())
+            })
+        }
+    }
+
+    impl FromJson for Ed25519BlockIssuerKey {
+        type Error = Error;
+
+        fn from_non_null_json(value: Value) -> Result<Self, Self::Error>
+        where
+            Self: Sized,
+        {
+            if value["type"] != Self::KIND {
+                return Err(Error::invalid_type::<Self>(Self::KIND, &value["type"]));
+            }
+            Self::try_from_bytes(
+                prefix_hex::decode(value["publicKey"].to_str()?).map_err(|_| Error::InvalidField("publicKey"))?,
+            )
+        }
+    }
+
+    impl ToJson for BlockIssuerKey {
+        fn to_json(&self) -> Value {
+            match self {
+                Self::Ed25519(a) => a.to_json(),
+            }
+        }
+    }
+
+    impl FromJson for BlockIssuerKey {
+        type Error = Error;
+
+        fn from_non_null_json(value: Value) -> Result<Self, Self::Error>
+        where
+            Self: Sized,
+        {
+            Ok(match value["type"].as_u8() {
+                Some(Ed25519BlockIssuerKey::KIND) => Ed25519BlockIssuerKey::from_json(value)?.into(),
+                _ => {
+                    return Err(Error::invalid_type::<Self>(
+                        format!("one of {:?}", [Ed25519BlockIssuerKey::KIND]),
+                        &value["type"],
+                    ));
+                }
+            })
+        }
+    }
+
+    impl ToJson for BlockIssuerFeature {
+        fn to_json(&self) -> Value {
+            crate::json! ({
+                "type": Self::KIND,
+                "expirySlot": self.expiry_slot,
+                "blockIssuerKeys": self.block_issuer_keys.to_vec()
+            })
+        }
+    }
+
+    impl FromJson for BlockIssuerFeature {
+        type Error = Error;
+
+        fn from_non_null_json(mut value: Value) -> Result<Self, Self::Error>
+        where
+            Self: Sized,
+        {
+            if value["type"] != Self::KIND {
+                return Err(Error::invalid_type::<Self>(Self::KIND, &value["type"]));
+            }
+            Self::new(
+                value["expirySlot"].take_value::<SlotIndex>()?,
+                value["blockIssuerKeys"].take_vec::<BlockIssuerKey>()?,
+            )
+        }
+    }
+}

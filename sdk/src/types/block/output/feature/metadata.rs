@@ -459,3 +459,35 @@ pub(crate) mod dto {
 
     impl_serde_typed_dto!(MetadataFeature, MetadataFeatureDto<'_>, "metadata feature");
 }
+
+#[cfg(feature = "json")]
+mod json {
+    use super::*;
+    use crate::{
+        types::block::Error,
+        utils::json::{FromJson, JsonExt, ToJson, Value},
+    };
+
+    impl ToJson for MetadataFeature {
+        fn to_json(&self) -> Value {
+            crate::json! ({
+                "type": Self::KIND,
+                "data": self.to_string(),
+            })
+        }
+    }
+
+    impl FromJson for MetadataFeature {
+        type Error = Error;
+
+        fn from_non_null_json(value: Value) -> Result<Self, Self::Error>
+        where
+            Self: Sized,
+        {
+            if value["type"] != Self::KIND {
+                return Err(Error::invalid_type::<Self>(Self::KIND, &value["type"]));
+            }
+            Self::from_str(value["data"].to_str()?)
+        }
+    }
+}

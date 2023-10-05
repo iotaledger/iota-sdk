@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 pub use json::JsonValue as Value;
+use primitive_types::U256;
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum Error {
@@ -73,11 +74,81 @@ where
         Self: Sized;
 }
 
-pub trait TakeValue {
+macro_rules! def_ext_fns {
+    ($($type:ty, $to_fn:ident),+$(,)?) => {
+        $(
+            fn $to_fn(&self) -> Result<$type, Error>;
+        )+
+    };
+}
+
+macro_rules! impl_ext_fns {
+    ($($type:ty, $to_fn:ident, $as_fn:ident),+$(,)?) => {
+        $(
+            fn $to_fn(&self) -> Result<$type, Error> {
+                self.$as_fn().ok_or_else(|| Error::wrong_type::<$type>(self))
+            }
+        )+
+    };
+}
+
+pub trait JsonExt {
+    def_ext_fns! {
+        &str, to_str,
+        u8, to_u8,
+        u16, to_u16,
+        u32, to_u32,
+        u64, to_u64,
+        bool, to_bool,
+    }
+
+    fn to_vec<T: FromJson>(&self) -> Result<Vec<T>, T::Error>
+    where
+        T::Error: From<Error>;
+
+    fn take_vec<T: FromJson>(&mut self) -> Result<Vec<T>, T::Error>
+    where
+        T::Error: From<Error>;
+
+    fn to_value<T: FromJson>(&self) -> Result<T, T::Error>;
+
     fn take_value<T: FromJson>(&mut self) -> Result<T, T::Error>;
 }
 
-impl TakeValue for Value {
+impl JsonExt for Value {
+    impl_ext_fns! {
+        &str, to_str, as_str,
+        u8, to_u8, as_u8,
+        u16, to_u16, as_u16,
+        u32, to_u32, as_u32,
+        u64, to_u64, as_u64,
+        bool, to_bool, as_bool,
+    }
+
+    fn to_vec<T: FromJson>(&self) -> Result<Vec<T>, T::Error>
+    where
+        T::Error: From<Error>,
+    {
+        self.clone().take_vec()
+    }
+
+    fn take_vec<T: FromJson>(&mut self) -> Result<Vec<T>, T::Error>
+    where
+        T::Error: From<Error>,
+    {
+        match self.take() {
+            Value::Array(a) => Ok(a
+                .into_iter()
+                .map(FromJson::from_json)
+                .collect::<Result<Vec<_>, T::Error>>())?,
+            _ => Err(Error::wrong_type::<Vec<T>>(self).into()),
+        }
+    }
+
+    fn to_value<T: FromJson>(&self) -> Result<T, T::Error> {
+        self.clone().take_value()
+    }
+
     fn take_value<T: FromJson>(&mut self) -> Result<T, T::Error> {
         T::from_json(self.take())
     }
@@ -152,6 +223,25 @@ impl_json_via!(u32, as_u32);
 impl_json_via!(u64, as_u64);
 impl_json_via!(bool, as_bool);
 
+impl ToJson for U256 {
+    fn to_json(&self) -> Value {
+        <[u8; 32]>::from(*self).to_json()
+    }
+}
+
+impl FromJson for U256 {
+    type Error = Error;
+
+    fn from_non_null_json(mut value: Value) -> Result<Self, Self::Error>
+    where
+        Self: Sized,
+    {
+        Ok(U256::from(
+            <[u8; 32]>::try_from(value.take_vec::<u8>()?).map_err(|_| Error::wrong_type::<U256>(value.to_string()))?,
+        ))
+    }
+}
+
 macro_rules! impl_json_array {
     ($type:ty) => {
         impl<T: ToJson> ToJson for $type {
@@ -183,6 +273,12 @@ macro_rules! impl_json_array {
 }
 impl_json_array!(alloc::vec::Vec<T>);
 impl_json_array!(alloc::boxed::Box<[T]>);
+
+impl<T: ToJson, const N: usize> ToJson for [T; N] {
+    fn to_json(&self) -> Value {
+        Value::Array(self.iter().map(ToJson::to_json).collect())
+    }
+}
 
 impl<T: FromJson, const N: usize> FromJson for [T; N]
 where

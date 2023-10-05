@@ -158,3 +158,41 @@ pub(crate) mod dto {
 
     impl_serde_typed_dto!(SimpleTokenScheme, SimpleTokenSchemeDto, "simple token scheme");
 }
+
+#[cfg(feature = "json")]
+mod json {
+    use super::*;
+    use crate::{
+        types::block::Error,
+        utils::json::{FromJson, JsonExt, ToJson, Value},
+    };
+
+    impl ToJson for SimpleTokenScheme {
+        fn to_json(&self) -> Value {
+            crate::json! ({
+                "type": Self::KIND,
+                "mintedTokens": self.minted_tokens,
+                "meltedTokens": self.melted_tokens,
+                "maximumSupply": self.maximum_supply,
+            })
+        }
+    }
+
+    impl FromJson for SimpleTokenScheme {
+        type Error = Error;
+
+        fn from_non_null_json(mut value: Value) -> Result<Self, Self::Error>
+        where
+            Self: Sized,
+        {
+            if value["type"] != Self::KIND {
+                return Err(Error::invalid_type::<Self>(Self::KIND, &value["type"]));
+            }
+            Self::new(
+                value["mintedTokens"].take_value::<U256>()?,
+                value["meltedTokens"].take_value::<U256>()?,
+                value["maximumSupply"].take_value::<U256>()?,
+            )
+        }
+    }
+}

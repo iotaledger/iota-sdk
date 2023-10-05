@@ -101,3 +101,49 @@ pub(crate) mod dto {
 
     impl_serde_typed_dto!(StakingFeature, StakingFeatureDto, "staking feature");
 }
+
+#[cfg(feature = "json")]
+mod json {
+    use super::*;
+    use crate::{
+        types::block::Error,
+        utils::json::{FromJson, JsonExt, ToJson, Value},
+    };
+
+    impl ToJson for StakingFeature {
+        fn to_json(&self) -> Value {
+            crate::json! ({
+                "type": Self::KIND,
+                "stakedAmount": self.staked_amount.to_string(),
+                "fixedCost": self.fixed_cost.to_string(),
+                "startEpoch": self.start_epoch,
+                "endEpoch": self.end_epoch,
+            })
+        }
+    }
+
+    impl FromJson for StakingFeature {
+        type Error = Error;
+
+        fn from_non_null_json(mut value: Value) -> Result<Self, Self::Error>
+        where
+            Self: Sized,
+        {
+            if value["type"] != Self::KIND {
+                return Err(Error::invalid_type::<Self>(Self::KIND, &value["type"]));
+            }
+            Ok(Self::new(
+                value["stakedAmount"]
+                    .to_str()?
+                    .parse()
+                    .map_err(|_| Error::InvalidField("stakedAmount"))?,
+                value["fixedCost"]
+                    .to_str()?
+                    .parse()
+                    .map_err(|_| Error::InvalidField("fixedCost"))?,
+                value["startEpoch"].take_value::<EpochIndex>()?,
+                value["endEpoch"].take_value::<EpochIndex>()?,
+            ))
+        }
+    }
+}

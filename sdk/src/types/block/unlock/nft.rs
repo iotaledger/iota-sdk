@@ -73,7 +73,7 @@ pub(crate) mod dto {
 #[cfg(feature = "json")]
 mod json {
     use super::*;
-    use crate::utils::json::{FromJson, TakeValue, ToJson, Value};
+    use crate::utils::json::{FromJson, JsonExt, ToJson, Value};
 
     impl ToJson for NftUnlock {
         fn to_json(&self) -> Value {

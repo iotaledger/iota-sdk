@@ -63,7 +63,7 @@ mod json {
     use super::*;
     use crate::{
         types::block::Error,
-        utils::json::{FromJson, TakeValue, ToJson, Value},
+        utils::json::{FromJson, JsonExt, ToJson, Value},
     };
 
     impl ToJson for SignatureUnlock {

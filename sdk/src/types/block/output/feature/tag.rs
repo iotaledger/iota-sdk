@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use alloc::{boxed::Box, vec::Vec};
-use core::ops::RangeInclusive;
+use core::{ops::RangeInclusive, str::FromStr};
 
 use packable::{bounded::BoundedU8, prefix::BoxedSlicePrefix};
 
@@ -54,6 +54,14 @@ impl TagFeature {
     }
 }
 
+impl FromStr for TagFeature {
+    type Err = Error;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Self::new(prefix_hex::decode::<Vec<u8>>(s).map_err(Error::Hex)?)
+    }
+}
+
 impl core::fmt::Display for TagFeature {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         write!(f, "{}", prefix_hex::encode(self.tag()))
@@ -99,4 +107,36 @@ pub(crate) mod dto {
     }
 
     impl_serde_typed_dto!(TagFeature, TagFeatureDto<'_>, "tag feature");
+}
+
+#[cfg(feature = "json")]
+mod json {
+    use super::*;
+    use crate::{
+        types::block::Error,
+        utils::json::{FromJson, JsonExt, ToJson, Value},
+    };
+
+    impl ToJson for TagFeature {
+        fn to_json(&self) -> Value {
+            crate::json! ({
+                "type": Self::KIND,
+                "tag": self.to_string(),
+            })
+        }
+    }
+
+    impl FromJson for TagFeature {
+        type Error = Error;
+
+        fn from_non_null_json(value: Value) -> Result<Self, Self::Error>
+        where
+            Self: Sized,
+        {
+            if value["type"] != Self::KIND {
+                return Err(Error::invalid_type::<Self>(Self::KIND, &value["type"]));
+            }
+            Self::from_str(value["tag"].to_str()?)
+        }
+    }
 }

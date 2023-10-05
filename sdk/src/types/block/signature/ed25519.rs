@@ -174,7 +174,7 @@ mod json {
     use super::*;
     use crate::{
         types::block::Error,
-        utils::json::{FromJson, ToJson, Value},
+        utils::json::{FromJson, JsonExt, ToJson, Value},
     };
 
     impl ToJson for Ed25519Signature {
@@ -198,10 +198,8 @@ mod json {
                 return Err(Error::invalid_type::<Self>(Self::KIND, &value["type"]));
             }
             Self::try_from_bytes(
-                prefix_hex::decode(&String::from_json(value["publicKey"].take())?)
-                    .map_err(|_| Error::InvalidField("publicKey"))?,
-                prefix_hex::decode(&String::from_json(value["signature"].take())?)
-                    .map_err(|_| Error::InvalidField("publicKey"))?,
+                prefix_hex::decode(value["publicKey"].to_str()?).map_err(|_| Error::InvalidField("publicKey"))?,
+                prefix_hex::decode(value["signature"].to_str()?).map_err(|_| Error::InvalidField("publicKey"))?,
             )
         }
     }

@@ -93,7 +93,7 @@ mod dto {
 #[cfg(feature = "json")]
 mod json {
     use super::*;
-    use crate::utils::json::{FromJson, TakeValue, ToJson, Value};
+    use crate::utils::json::{FromJson, JsonExt, ToJson, Value};
 
     impl ToJson for AccountAddress {
         fn to_json(&self) -> Value {

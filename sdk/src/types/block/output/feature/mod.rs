@@ -335,6 +335,59 @@ pub(crate) fn verify_allowed_features(features: &Features, allowed_features: Fea
     Ok(())
 }
 
+#[cfg(feature = "json")]
+mod json {
+    use super::*;
+    use crate::utils::json::{FromJson, ToJson, Value};
+
+    impl ToJson for Feature {
+        fn to_json(&self) -> Value {
+            match self {
+                Self::Sender(f) => f.to_json(),
+                Self::Issuer(f) => f.to_json(),
+                Self::Metadata(f) => f.to_json(),
+                Self::Tag(f) => f.to_json(),
+                Self::BlockIssuer(f) => f.to_json(),
+                Self::Staking(f) => f.to_json(),
+            }
+        }
+    }
+
+    impl FromJson for Feature {
+        type Error = Error;
+
+        fn from_non_null_json(value: Value) -> Result<Self, Self::Error>
+        where
+            Self: Sized,
+        {
+            Ok(match value["type"].as_u8() {
+                Some(SenderFeature::KIND) => SenderFeature::from_json(value)?.into(),
+                Some(IssuerFeature::KIND) => IssuerFeature::from_json(value)?.into(),
+                Some(MetadataFeature::KIND) => MetadataFeature::from_json(value)?.into(),
+                Some(TagFeature::KIND) => TagFeature::from_json(value)?.into(),
+                Some(BlockIssuerFeature::KIND) => BlockIssuerFeature::from_json(value)?.into(),
+                Some(StakingFeature::KIND) => StakingFeature::from_json(value)?.into(),
+                _ => {
+                    return Err(Error::invalid_type::<Self>(
+                        format!(
+                            "one of {:?}",
+                            [
+                                SenderFeature::KIND,
+                                IssuerFeature::KIND,
+                                MetadataFeature::KIND,
+                                TagFeature::KIND,
+                                BlockIssuerFeature::KIND,
+                                StakingFeature::KIND,
+                            ]
+                        ),
+                        &value["type"],
+                    ));
+                }
+            })
+        }
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::*;

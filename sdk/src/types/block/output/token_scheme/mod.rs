@@ -45,3 +45,36 @@ impl TokenScheme {
         scheme
     }
 }
+
+#[cfg(feature = "json")]
+mod json {
+    use super::*;
+    use crate::utils::json::{FromJson, ToJson, Value};
+
+    impl ToJson for TokenScheme {
+        fn to_json(&self) -> Value {
+            match self {
+                Self::Simple(f) => f.to_json(),
+            }
+        }
+    }
+
+    impl FromJson for TokenScheme {
+        type Error = Error;
+
+        fn from_non_null_json(value: Value) -> Result<Self, Self::Error>
+        where
+            Self: Sized,
+        {
+            Ok(match value["type"].as_u8() {
+                Some(SimpleTokenScheme::KIND) => SimpleTokenScheme::from_json(value)?.into(),
+                _ => {
+                    return Err(Error::invalid_type::<Self>(
+                        format!("one of {:?}", [SimpleTokenScheme::KIND]),
+                        &value["type"],
+                    ));
+                }
+            })
+        }
+    }
+}
