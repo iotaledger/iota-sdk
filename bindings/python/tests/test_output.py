@@ -2,8 +2,8 @@
 # Copyright 2023 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
-from iota_sdk import BasicOutput, AliasOutput, FoundryOutput, NftOutput, IssuerFeature, MetadataFeature
 from dacite import from_dict
+from iota_sdk import BasicOutput, AliasOutput, FoundryOutput, NftOutput, IssuerFeature, MetadataFeature
 
 
 def test_feature():

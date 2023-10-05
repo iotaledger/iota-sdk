@@ -117,6 +117,11 @@ jobs:
         working-directory: bindings/python
         run: tox -e lint-examples
 
+      - name: Run linter for tests
+        if: ${{ startsWith(matrix.os, 'ubuntu-latest') }}
+        working-directory: bindings/python
+        run: tox -e lint-tests
+
       - name: Run tests
         working-directory: bindings/python
         run: tox
