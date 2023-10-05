@@ -11,6 +11,7 @@ use crate::{
 impl<S: 'static + SecretManage> Wallet<S>
 where
     crate::wallet::Error: From<S::Error>,
+    crate::client::Error: From<S::Error>,
 {
     /// Find accounts with unspent outputs.
     ///
