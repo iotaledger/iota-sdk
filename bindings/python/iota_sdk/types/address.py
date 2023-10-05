@@ -90,6 +90,10 @@ class RestrictedAddress:
         AddressType.RESTRICTED), init=False)
 
     def with_allowed_capabilities(self, allowed_capabilities: bytes):
+        """Sets the allowed capabilities from a byte array.
+        Attributes:
+            allowed_capabilities: The allowed capabilities bitflags.
+        """
         self.allowed_capabilities = '0x00' + allowed_capabilities.hex()
 
 
