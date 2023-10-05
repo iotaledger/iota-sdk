@@ -98,6 +98,18 @@ impl ValidationBlockBuilder {
     }
 }
 
+impl From<ValidationBlock> for ValidationBlockBuilder {
+    fn from(value: ValidationBlock) -> Self {
+        Self {
+            strong_parents: value.strong_parents,
+            weak_parents: value.weak_parents,
+            shallow_like_parents: value.shallow_like_parents,
+            highest_supported_version: value.highest_supported_version,
+            protocol_parameters_hash: value.protocol_parameters_hash,
+        }
+    }
+}
+
 /// A Validation Block is a special type of block used by validators to secure the network. It is recognized by the
 /// Congestion Control of the IOTA 2.0 protocol and can be issued without burning Mana within the constraints of the
 /// allowed validator throughput. It is allowed to reference more parent blocks than a normal Basic Block.
