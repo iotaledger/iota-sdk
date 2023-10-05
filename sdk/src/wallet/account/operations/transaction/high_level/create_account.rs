@@ -38,6 +38,7 @@ pub struct CreateAccountParams {
 impl<S: 'static + SecretManage> Account<S>
 where
     crate::wallet::Error: From<S::Error>,
+    crate::client::Error: From<S::Error>,
 {
     /// Creates an account output.
     /// ```ignore
