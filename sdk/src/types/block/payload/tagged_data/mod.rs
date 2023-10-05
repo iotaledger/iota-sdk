@@ -31,7 +31,7 @@ pub struct TaggedDataPayload {
 
 impl TaggedDataPayload {
     /// The payload kind of a [`TaggedDataPayload`].
-    pub const KIND: u8 = 5;
+    pub const KIND: u8 = 0;
     /// Valid lengths for the tag.
     pub const TAG_LENGTH_RANGE: RangeInclusive<u8> = 0..=64;
     /// Valid lengths for the data.
