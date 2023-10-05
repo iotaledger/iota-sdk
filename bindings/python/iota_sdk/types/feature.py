@@ -5,7 +5,7 @@ from enum import IntEnum
 from typing import Dict, List, TypeAlias, Union, Any
 from dataclasses import dataclass, field
 from dataclasses_json import config
-from iota_sdk.types.address import AddressUnion, deserialize_address
+from iota_sdk.types.address import Address, deserialize_address
 from iota_sdk.types.common import EpochIndex, HexStr, json, SlotIndex
 
 
@@ -30,20 +30,12 @@ class FeatureType(IntEnum):
 
 @json
 @dataclass
-class Feature():
-    """Base class of a feature.
-    """
-    type: int
-
-
-@json
-@dataclass
-class SenderFeature(Feature):
+class SenderFeature:
     """Identifies the validated sender of an output.
     Attributes:
         address: A given sender address.
     """
-    address: AddressUnion = field(
+    address: Address = field(
         metadata=config(
             decoder=deserialize_address
         ))
@@ -55,12 +47,12 @@ class SenderFeature(Feature):
 
 @json
 @dataclass
-class IssuerFeature(Feature):
+class IssuerFeature:
     """Identifies the validated issuer of the UTXO state machine.
     Attributes:
         address: A given issuer address.
     """
-    address: AddressUnion = field(
+    address: Address = field(
         metadata=config(
             decoder=deserialize_address
         ))
@@ -72,7 +64,7 @@ class IssuerFeature(Feature):
 
 @json
 @dataclass
-class MetadataFeature(Feature):
+class MetadataFeature:
     """Defines metadata, arbitrary binary data, that will be stored in the output.
     Attributes:
         data: Some hex encoded metadata.
@@ -86,7 +78,7 @@ class MetadataFeature(Feature):
 
 @json
 @dataclass
-class TagFeature(Feature):
+class TagFeature:
     """Makes it possible to tag outputs with an index, so they can be retrieved through an indexer API.
     Attributes:
         tag: A hex encoded tag used to index the output.
@@ -97,7 +89,7 @@ class TagFeature(Feature):
 
 @json
 @dataclass
-class BlockIssuerFeature(Feature):
+class BlockIssuerFeature:
     """Contains the public keys to verify block signatures and allows for unbonding the issuer deposit.
     Attributes:
         expiry_slot: The slot index at which the Block Issuer Feature expires and can be removed.
@@ -114,7 +106,7 @@ class BlockIssuerFeature(Feature):
 
 @json
 @dataclass
-class StakingFeature(Feature):
+class StakingFeature:
     """Stakes IOTA coins to become eligible for committee selection, validate the network and receive Mana rewards.
     Attributes:
         staked_amount: The amount of IOTA coins that are locked and staked in the containing account.
@@ -132,11 +124,11 @@ class StakingFeature(Feature):
         init=False)
 
 
-FeatureUnion: TypeAlias = Union[SenderFeature, IssuerFeature,
-                                MetadataFeature, TagFeature, BlockIssuerFeature, StakingFeature]
+Feature: TypeAlias = Union[SenderFeature, IssuerFeature,
+                           MetadataFeature, TagFeature, BlockIssuerFeature, StakingFeature]
 
 
-def deserialize_feature(d: Dict[str, Any]) -> FeatureUnion:
+def deserialize_feature(d: Dict[str, Any]) -> Feature:
     """
     Takes a dictionary as input and returns an instance of a specific class based on the value of the 'type' key in the dictionary.
 
@@ -159,7 +151,7 @@ def deserialize_feature(d: Dict[str, Any]) -> FeatureUnion:
     raise Exception(f'invalid feature type: {feature_type}')
 
 
-def deserialize_features(dicts: List[Dict[str, Any]]) -> List[FeatureUnion]:
+def deserialize_features(dicts: List[Dict[str, Any]]) -> List[Feature]:
     """
     Takes a list of dictionaries as input and returns a list with specific instances of a classes based on the value of the 'type' key in the dictionary.
 
