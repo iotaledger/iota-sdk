@@ -105,3 +105,39 @@ pub(crate) mod dto {
         "expiration unlock condition"
     );
 }
+
+#[cfg(feature = "json")]
+mod json {
+    use super::*;
+    use crate::{
+        types::block::Error,
+        utils::json::{FromJson, JsonExt, ToJson, Value},
+    };
+
+    impl ToJson for ExpirationUnlockCondition {
+        fn to_json(&self) -> Value {
+            crate::json! ({
+                "type": Self::KIND,
+                "returnAddress": self.return_address(),
+                "slotIndex": self.slot_index,
+            })
+        }
+    }
+
+    impl FromJson for ExpirationUnlockCondition {
+        type Error = Error;
+
+        fn from_non_null_json(mut value: Value) -> Result<Self, Self::Error>
+        where
+            Self: Sized,
+        {
+            if value["type"] != Self::KIND {
+                return Err(Error::invalid_type::<Self>(Self::KIND, &value["type"]));
+            }
+            Self::new(
+                value["returnAddress"].take_value::<Address>()?,
+                value["slotIndex"].take_value::<SlotIndex>()?,
+            )
+        }
+    }
+}

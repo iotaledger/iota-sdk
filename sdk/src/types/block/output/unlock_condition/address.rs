@@ -60,3 +60,35 @@ pub(crate) mod dto {
         "address unlock condition"
     );
 }
+
+#[cfg(feature = "json")]
+mod json {
+    use super::*;
+    use crate::{
+        types::block::Error,
+        utils::json::{FromJson, JsonExt, ToJson, Value},
+    };
+
+    impl ToJson for AddressUnlockCondition {
+        fn to_json(&self) -> Value {
+            crate::json! ({
+                "type": Self::KIND,
+                "address": self.0,
+            })
+        }
+    }
+
+    impl FromJson for AddressUnlockCondition {
+        type Error = Error;
+
+        fn from_non_null_json(mut value: Value) -> Result<Self, Self::Error>
+        where
+            Self: Sized,
+        {
+            if value["type"] != Self::KIND {
+                return Err(Error::invalid_type::<Self>(Self::KIND, &value["type"]));
+            }
+            Ok(Self::new(value["address"].take_value::<Address>()?))
+        }
+    }
+}

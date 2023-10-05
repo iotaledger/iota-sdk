@@ -77,3 +77,35 @@ pub(crate) mod dto {
         "timelock unlock condition"
     );
 }
+
+#[cfg(feature = "json")]
+mod json {
+    use super::*;
+    use crate::{
+        types::block::Error,
+        utils::json::{FromJson, JsonExt, ToJson, Value},
+    };
+
+    impl ToJson for TimelockUnlockCondition {
+        fn to_json(&self) -> Value {
+            crate::json! ({
+                "type": Self::KIND,
+                "slotIndex": self.0,
+            })
+        }
+    }
+
+    impl FromJson for TimelockUnlockCondition {
+        type Error = Error;
+
+        fn from_non_null_json(mut value: Value) -> Result<Self, Self::Error>
+        where
+            Self: Sized,
+        {
+            if value["type"] != Self::KIND {
+                return Err(Error::invalid_type::<Self>(Self::KIND, &value["type"]));
+            }
+            Self::new(value["slotIndex"].take_value::<SlotIndex>()?)
+        }
+    }
+}

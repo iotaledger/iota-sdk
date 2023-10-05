@@ -477,6 +477,68 @@ pub(crate) fn verify_allowed_unlock_conditions(
     Ok(())
 }
 
+#[cfg(feature = "json")]
+mod json {
+    use super::*;
+    use crate::utils::json::{FromJson, ToJson, Value};
+
+    impl ToJson for UnlockCondition {
+        fn to_json(&self) -> Value {
+            match self {
+                Self::Address(u) => u.to_json(),
+                Self::StorageDepositReturn(u) => u.to_json(),
+                Self::Timelock(u) => u.to_json(),
+                Self::Expiration(u) => u.to_json(),
+                Self::StateControllerAddress(u) => u.to_json(),
+                Self::GovernorAddress(u) => u.to_json(),
+                Self::ImmutableAccountAddress(u) => u.to_json(),
+            }
+        }
+    }
+
+    impl FromJson for UnlockCondition {
+        type Error = Error;
+
+        fn from_non_null_json(value: Value) -> Result<Self, Self::Error>
+        where
+            Self: Sized,
+        {
+            Ok(match value["type"].as_u8() {
+                Some(AddressUnlockCondition::KIND) => AddressUnlockCondition::from_json(value)?.into(),
+                Some(StorageDepositReturnUnlockCondition::KIND) => {
+                    StorageDepositReturnUnlockCondition::from_json(value)?.into()
+                }
+                Some(TimelockUnlockCondition::KIND) => TimelockUnlockCondition::from_json(value)?.into(),
+                Some(ExpirationUnlockCondition::KIND) => ExpirationUnlockCondition::from_json(value)?.into(),
+                Some(StateControllerAddressUnlockCondition::KIND) => {
+                    StateControllerAddressUnlockCondition::from_json(value)?.into()
+                }
+                Some(GovernorAddressUnlockCondition::KIND) => GovernorAddressUnlockCondition::from_json(value)?.into(),
+                Some(ImmutableAccountAddressUnlockCondition::KIND) => {
+                    ImmutableAccountAddressUnlockCondition::from_json(value)?.into()
+                }
+                _ => {
+                    return Err(Error::invalid_type::<Self>(
+                        format!(
+                            "one of {:?}",
+                            [
+                                AddressUnlockCondition::KIND,
+                                StorageDepositReturnUnlockCondition::KIND,
+                                TimelockUnlockCondition::KIND,
+                                ExpirationUnlockCondition::KIND,
+                                StateControllerAddressUnlockCondition::KIND,
+                                GovernorAddressUnlockCondition::KIND,
+                                ImmutableAccountAddressUnlockCondition::KIND,
+                            ]
+                        ),
+                        &value["type"],
+                    ));
+                }
+            })
+        }
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::*;

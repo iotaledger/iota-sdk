@@ -130,3 +130,42 @@ pub(crate) mod dto {
         }
     }
 }
+
+#[cfg(feature = "json")]
+mod json {
+    use super::*;
+    use crate::{
+        types::block::Error,
+        utils::json::{FromJson, JsonExt, ToJson, Value},
+    };
+
+    impl ToJson for StorageDepositReturnUnlockCondition {
+        fn to_json(&self) -> Value {
+            crate::json! ({
+                "type": Self::KIND,
+                "returnAddress": self.return_address(),
+                "amount": self.amount.to_string(),
+            })
+        }
+    }
+
+    impl FromJson for StorageDepositReturnUnlockCondition {
+        type Error = Error;
+
+        fn from_non_null_json(mut value: Value) -> Result<Self, Self::Error>
+        where
+            Self: Sized,
+        {
+            if value["type"] != Self::KIND {
+                return Err(Error::invalid_type::<Self>(Self::KIND, &value["type"]));
+            }
+            Ok(Self {
+                return_address: value["returnAddress"].take_value()?,
+                amount: value["amount"]
+                    .to_str()?
+                    .parse()
+                    .map_err(|_| Error::InvalidField("amount"))?,
+            })
+        }
+    }
+}
