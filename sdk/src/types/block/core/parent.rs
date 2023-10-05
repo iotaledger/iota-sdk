@@ -47,6 +47,11 @@ impl<const MIN: u8, const MAX: u8> Parents<MIN, MAX> {
     pub fn from_vec(parents: Vec<BlockId>) -> Result<Self, Error> {
         let mut set = BTreeSet::new();
         for t in parents {
+            if let Some(last) = set.last() {
+                if t.lt(last) {
+                    return Err(Error::ParentsNotUniqueSorted);
+                }
+            }
             if !set.insert(t) {
                 return Err(Error::ParentsNotUniqueSorted);
             }

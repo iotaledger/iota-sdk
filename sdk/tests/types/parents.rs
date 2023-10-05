@@ -67,9 +67,9 @@ fn new_not_sorted() {
     let inner = rand_block_ids(8);
     let reversed = inner.iter().copied().rev().collect::<Vec<_>>();
 
-    let parents = basic::StrongParents::from_vec(reversed).unwrap();
+    let parents = basic::StrongParents::from_vec(reversed);
 
-    assert_eq!(parents.as_set(), &inner);
+    assert!(matches!(parents, Err(Error::ParentsNotUniqueSorted)));
 }
 
 #[test]
@@ -77,9 +77,9 @@ fn new_not_unique() {
     let inner = rand_block_ids(7);
     let non_unique = inner.iter().chain(&inner).copied().collect::<Vec<_>>();
 
-    let parents = basic::StrongParents::from_vec(non_unique).unwrap();
+    let parents = basic::StrongParents::from_vec(non_unique);
 
-    assert_eq!(parents.as_set(), &inner);
+    assert!(matches!(parents, Err(Error::ParentsNotUniqueSorted)));
 }
 
 #[test]
@@ -152,7 +152,7 @@ fn unpack_invalid_not_sorted() {
     assert!(matches!(
         parents,
         Err(UnpackError::Packable(Error::ParentsNotUniqueSorted))
-    ),);
+    ));
 }
 
 #[test]
@@ -167,5 +167,5 @@ fn unpack_invalid_not_unique() {
     assert!(matches!(
         parents,
         Err(UnpackError::Packable(Error::ParentsNotUniqueSorted))
-    ),);
+    ));
 }
