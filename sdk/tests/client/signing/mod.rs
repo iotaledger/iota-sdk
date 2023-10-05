@@ -48,25 +48,21 @@ async fn all_combined() -> Result<()> {
 
     let protocol_parameters = protocol_parameters();
 
-    let mut ed25519_bech32_addresses = secret_manager
+    let ed25519_bech32_addresses = secret_manager
         .generate_ed25519_addresses(
             GetAddressesOptions::default()
                 .with_coin_type(SHIMMER_COIN_TYPE)
                 .with_range(0..3),
         )
-        .await?
-        .into_iter();
-    let ed25519_bech32_address_0 = ed25519_bech32_addresses
-        .next()
-        .unwrap()
+        .await?;
+    let ed25519_bech32_address_0 = ed25519_bech32_addresses[0]
+        .clone()
         .to_bech32(SHIMMER_TESTNET_BECH32_HRP);
-    let ed25519_bech32_address_1 = ed25519_bech32_addresses
-        .next()
-        .unwrap()
+    let ed25519_bech32_address_1 = ed25519_bech32_addresses[1]
+        .clone()
         .to_bech32(SHIMMER_TESTNET_BECH32_HRP);
-    let ed25519_bech32_address_2 = ed25519_bech32_addresses
-        .next()
-        .unwrap()
+    let ed25519_bech32_address_2 = ed25519_bech32_addresses[2]
+        .clone()
         .to_bech32(SHIMMER_TESTNET_BECH32_HRP);
 
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1)?;

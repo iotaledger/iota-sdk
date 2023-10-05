@@ -58,12 +58,8 @@ async fn bech32_hrp_prepare_output() -> Result<()> {
     let error = account
         .prepare_output(
             OutputParams {
-                recipient_address: account
-                    .addresses()
-                    .await
-                    .into_iter()
-                    .next()
-                    .unwrap()
+                recipient_address: account.addresses().await[0]
+                    .clone()
                     .into_bech32()
                     .into_inner()
                     .to_bech32_unchecked("wronghrp"),

@@ -69,25 +69,11 @@ async fn mint_and_burn_expired_nft() -> Result<()> {
     let outputs = [NftOutputBuilder::new_with_amount(amount, NftId::null())
         .with_unlock_conditions([
             UnlockCondition::Address(AddressUnlockCondition::new(
-                account_0
-                    .addresses()
-                    .await
-                    .into_iter()
-                    .next()
-                    .unwrap()
-                    .into_bech32()
-                    .into_inner(),
+                account_0.addresses().await[0].clone().into_bech32().into_inner(),
             )),
             // immediately expired to account_1
             UnlockCondition::Expiration(ExpirationUnlockCondition::new(
-                account_1
-                    .addresses()
-                    .await
-                    .into_iter()
-                    .next()
-                    .unwrap()
-                    .into_bech32()
-                    .into_inner(),
+                account_1.addresses().await[0].clone().into_bech32().into_inner(),
                 1,
             )?),
         ])

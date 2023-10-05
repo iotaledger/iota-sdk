@@ -158,14 +158,7 @@ async fn balance_expiration() -> Result<()> {
     let outputs = [BasicOutputBuilder::new_with_amount(1_000_000)
         // Send to account 1 with expiration to account 2, both have no amount yet
         .with_unlock_conditions([AddressUnlockCondition::new(
-            account_1
-                .addresses()
-                .await
-                .into_iter()
-                .next()
-                .unwrap()
-                .into_bech32()
-                .clone(),
+            account_1.addresses().await[0].clone().into_bech32(),
         )])
         .finish_output(token_supply)?];
     let _tx = account_2.send_outputs(outputs, None).await?;
