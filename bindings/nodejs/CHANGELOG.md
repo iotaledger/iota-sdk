@@ -21,10 +21,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## 1.1.1 - 2023-MM-DD
 
+### Added
+
+- `UnlockableByAddress` to `AliasQueryParameter, NftQueryParameter, QueryParameter`;
+
 ### Fixed
 
 - Added `SeedSecretManager` to `SecretManagerType`;
-- Added `UnlockableByAddress` to `AliasQueryParameter, NftQueryParameter, QueryParameter`;
 
 ### Removed
 
