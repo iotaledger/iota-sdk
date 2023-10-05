@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 from dataclasses import dataclass, field
+from dataclasses_json import config
 from typing import List, Optional
 from iota_sdk.types.block.block import BlockType
 from iota_sdk.types.common import HexStr, json
@@ -25,7 +26,9 @@ class BasicBlock:
     strong_parents: List[HexStr]
     weak_parents: List[HexStr]
     shallow_like_parents: List[HexStr]
-    max_burned_mana: str
+    max_burned_mana: int = field(metadata=config(
+        encoder=str
+    ))
     payload: Optional[Payload] = None
     type: int = field(
         default_factory=lambda: BlockType.Basic,
