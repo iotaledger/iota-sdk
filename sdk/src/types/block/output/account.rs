@@ -47,7 +47,11 @@ impl From<&OutputId> for AccountId {
 impl AccountId {
     ///
     pub fn or_from_output_id(self, output_id: &OutputId) -> Self {
-        if self.is_null() { Self::from(output_id) } else { self }
+        if self.is_null() {
+            Self::from(output_id)
+        } else {
+            self
+        }
     }
 }
 
@@ -392,7 +396,7 @@ pub struct AccountOutput {
 
 impl AccountOutput {
     /// The [`Output`](crate::types::block::output::Output) kind of an [`AccountOutput`].
-    pub const KIND: u8 = 4;
+    pub const KIND: u8 = 1;
     /// Maximum possible length in bytes of the state metadata.
     pub const STATE_METADATA_LENGTH_MAX: u16 = 8192;
     /// The set of allowed [`UnlockCondition`]s for an [`AccountOutput`].
