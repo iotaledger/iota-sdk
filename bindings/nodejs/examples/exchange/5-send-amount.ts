@@ -19,7 +19,7 @@ async function run() {
         ])
             if (!(envVar in process.env)) {
                 throw new Error(
-                    '.env WALLET_DB_PATH is undefined, see .env.example',
+                    `.env ${envVar} is undefined, see .env.example`,
                 );
             }
 
