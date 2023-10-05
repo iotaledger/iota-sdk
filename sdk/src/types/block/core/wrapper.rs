@@ -50,8 +50,8 @@ impl BlockWrapperBuilder {
         self
     }
 
-    /// Get the signing input that can be used to generate an
-    /// [`Ed25519Signature`](crate::types::block::signature::Ed25519Signature) for the resulting block.
+    /// Get the signing input that can be used to generate a [`Signature`](crate::types::block::signature::Signature)
+    /// for the resulting block.
     pub fn signing_input(&self) -> Vec<u8> {
         [self.header.hash(), self.block.hash()].concat()
     }
