@@ -63,7 +63,7 @@ async fn main() -> Result<()> {
 async fn write_addresses_to_file(account: &Account) -> Result<()> {
     use tokio::io::AsyncWriteExt;
 
-    let addresses = account.addresses().await?;
+    let addresses = account.addresses().await;
     let json = serde_json::to_string_pretty(&addresses)?;
     let mut file = tokio::io::BufWriter::new(tokio::fs::File::create(ADDRESSES_FILE_PATH).await?);
     println!("example.addresses.json:\n{json}");

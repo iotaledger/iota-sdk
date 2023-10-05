@@ -304,7 +304,7 @@ where
             Some(address) => address,
             None => {
                 self.addresses()
-                    .await?
+                    .await
                     .into_iter()
                     .next()
                     .ok_or(crate::wallet::Error::FailedToGetRemainder)?

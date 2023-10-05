@@ -142,7 +142,7 @@ where
         let rent_structure = self.client().get_rent_structure().await?;
         let token_supply = self.client().get_token_supply().await?;
 
-        let account_addresses = self.addresses().await?;
+        let account_addresses = self.addresses().await;
         let default_return_address = account_addresses
             .into_iter()
             .next()

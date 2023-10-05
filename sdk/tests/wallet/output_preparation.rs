@@ -542,7 +542,7 @@ async fn prepare_nft_output_features_update() -> Result<()> {
 
     let wallet = make_wallet(storage_path, None, None).await?;
     let accounts = &create_accounts_with_funds(&wallet, 1).await?;
-    let addresses = accounts[0].addresses().await?;
+    let addresses = accounts[0].addresses().await;
     let address = addresses[0].address();
 
     let nft_options = [MintNftParams::new()
@@ -589,7 +589,7 @@ async fn prepare_nft_output_features_update() -> Result<()> {
         nft.address(),
         accounts[0]
             .addresses()
-            .await?
+            .await
             .into_iter()
             .next()
             .unwrap()
@@ -607,7 +607,7 @@ async fn prepare_nft_output_features_update() -> Result<()> {
         nft.immutable_features().issuer().unwrap().address(),
         accounts[0]
             .addresses()
-            .await?
+            .await
             .into_iter()
             .next()
             .unwrap()
@@ -627,7 +627,7 @@ async fn prepare_output_remainder_dust() -> Result<()> {
     let wallet = make_wallet(storage_path, None, None).await?;
     let accounts = &create_accounts_with_funds(&wallet, 2).await?;
     let account = &accounts[0];
-    let addresses = &accounts[1].addresses().await?;
+    let addresses = &accounts[1].addresses().await;
     let address = addresses[0].address();
 
     let rent_structure = account.client().get_rent_structure().await?;
@@ -766,9 +766,9 @@ async fn prepare_output_only_single_nft() -> Result<()> {
     let account_0 = &create_accounts_with_funds(&wallet, 1).await?[0];
     // Create second account without funds, so it only gets the NFT
     let account_1 = wallet.create_account().finish().await?;
-    let addresses = &account_0.addresses().await?;
+    let addresses = &account_0.addresses().await;
     let account_0_address = addresses[0].address();
-    let addresses = &account_1.addresses().await?;
+    let addresses = &account_1.addresses().await;
     let account_1_address = addresses[0].address();
 
     // Send NFT to second account
@@ -829,7 +829,7 @@ async fn prepare_existing_nft_output_gift() -> Result<()> {
 
     let wallet = make_wallet(storage_path, None, None).await?;
     let accounts = &create_accounts_with_funds(&wallet, 1).await?;
-    let addresses = accounts[0].addresses().await?;
+    let addresses = accounts[0].addresses().await;
     let address = addresses[0].address();
 
     let nft_options = [MintNftParams::new()
@@ -878,7 +878,7 @@ async fn prepare_existing_nft_output_gift() -> Result<()> {
         nft.address(),
         accounts[0]
             .addresses()
-            .await?
+            .await
             .into_iter()
             .next()
             .unwrap()
@@ -894,7 +894,7 @@ async fn prepare_existing_nft_output_gift() -> Result<()> {
         nft.immutable_features().issuer().unwrap().address(),
         accounts[0]
             .addresses()
-            .await?
+            .await
             .into_iter()
             .next()
             .unwrap()

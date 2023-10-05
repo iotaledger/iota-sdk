@@ -35,7 +35,7 @@ async fn main() -> Result<()> {
 
     let account_addresses = account
         .addresses()
-        .await?
+        .await
         .into_iter()
         .map(|a| a.into_bech32())
         .collect::<Vec<Bech32Address>>();

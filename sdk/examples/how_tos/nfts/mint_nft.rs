@@ -48,7 +48,7 @@ async fn main() -> Result<()> {
     account.sync(None).await?;
 
     // We send from the first address in the account.
-    let sender_address = account.first_address_bech32().await.unwrap();
+    let sender_address = account.first_address_bech32().await;
 
     // Set the stronghold password
     wallet

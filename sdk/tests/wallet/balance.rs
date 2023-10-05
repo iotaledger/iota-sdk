@@ -103,15 +103,13 @@ async fn balance_expiration() -> Result<()> {
     let outputs = [BasicOutputBuilder::new_with_amount(1_000_000)
         // Send to account 1 with expiration to account 2, both have no amount yet
         .with_unlock_conditions([
-            UnlockCondition::Address(AddressUnlockCondition::new(
-                account_1.first_address_bech32().await.unwrap(),
-            )),
+            UnlockCondition::Address(AddressUnlockCondition::new(account_1.first_address_bech32().await)),
             UnlockCondition::Expiration(ExpirationUnlockCondition::new(
-                account_2.first_address_bech32().await.unwrap(),
+                account_2.first_address_bech32().await,
                 account_0.client().get_slot_index().await? + slots_until_expired,
             )?),
         ])
-        .with_features([SenderFeature::new(account_0.first_address_bech32().await.unwrap())])
+        .with_features([SenderFeature::new(account_0.first_address_bech32().await)])
         .finish_output(token_supply)?];
 
     let balance_before_tx = account_0.balance().await?;
@@ -162,7 +160,7 @@ async fn balance_expiration() -> Result<()> {
         .with_unlock_conditions([AddressUnlockCondition::new(
             account_1
                 .addresses()
-                .await?
+                .await
                 .into_iter()
                 .next()
                 .unwrap()

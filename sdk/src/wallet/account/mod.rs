@@ -290,20 +290,18 @@ impl AccountInner {
     }
 
     /// Returns all addresses of the account
-    pub async fn addresses(&self) -> Result<Vec<Bip44Address>> {
+    pub async fn addresses(&self) -> Vec<Bip44Address> {
         let account_details = self.details().await;
         let mut all_addresses = account_details.public_addresses().clone();
         all_addresses.extend(account_details.internal_addresses().clone());
-        Ok(all_addresses.to_vec())
+
+        all_addresses.to_vec()
     }
 
     /// Returns the first address of the account as bech32
-    pub async fn first_address_bech32(&self) -> Option<Bech32Address> {
-        self.addresses()
-            .await
-            .ok()
-            .and_then(|addresses| addresses.into_iter().next())
-            .map(|a| a.into_bech32())
+    pub async fn first_address_bech32(&self) -> Bech32Address {
+        // PANIC: indexing is fine as one address is always generated during account creation.
+        self.addresses().await[0].clone().into_bech32()
     }
 
     /// Returns all public addresses of the account

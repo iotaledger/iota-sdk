@@ -23,7 +23,7 @@ async fn mint_and_burn_nft() -> Result<()> {
     let account = &create_accounts_with_funds(&wallet, 1).await?[0];
 
     let nft_options = [MintNftParams::new()
-        .with_address(account.first_address_bech32().await.unwrap())
+        .with_address(account.first_address_bech32().await)
         .with_metadata(b"some nft metadata".to_vec())
         .with_immutable_metadata(b"some immutable nft metadata".to_vec())];
 
@@ -71,7 +71,7 @@ async fn mint_and_burn_expired_nft() -> Result<()> {
             UnlockCondition::Address(AddressUnlockCondition::new(
                 account_0
                     .addresses()
-                    .await?
+                    .await
                     .into_iter()
                     .next()
                     .unwrap()
@@ -82,7 +82,7 @@ async fn mint_and_burn_expired_nft() -> Result<()> {
             UnlockCondition::Expiration(ExpirationUnlockCondition::new(
                 account_1
                     .addresses()
-                    .await?
+                    .await
                     .into_iter()
                     .next()
                     .unwrap()

@@ -56,7 +56,7 @@ async fn sync_only_most_basic_outputs() -> Result<()> {
     let account_0 = &create_accounts_with_funds(&wallet, 1).await?[0];
     let account_1 = wallet.create_account().finish().await?;
 
-    let account_1_address = account_1.first_address_bech32().await.unwrap();
+    let account_1_address = account_1.first_address_bech32().await;
 
     let token_supply = account_0.client().get_token_supply().await?;
     // Only one basic output without further unlock conditions
@@ -162,7 +162,7 @@ async fn sync_incoming_transactions() -> Result<()> {
     let account_0 = &create_accounts_with_funds(&wallet, 1).await?[0];
     let account_1 = wallet.create_account().finish().await?;
 
-    let account_1_address = account_1.first_address_bech32().await.unwrap();
+    let account_1_address = account_1.first_address_bech32().await;
 
     let token_supply = account_0.client().get_token_supply().await?;
 
@@ -213,7 +213,7 @@ async fn background_syncing() -> Result<()> {
 
     iota_sdk::client::request_funds_from_faucet(
         crate::wallet::common::FAUCET_URL,
-        &account.first_address_bech32().await.unwrap(),
+        &account.first_address_bech32().await,
     )
     .await?;
 

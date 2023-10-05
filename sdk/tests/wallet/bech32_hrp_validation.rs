@@ -23,7 +23,7 @@ async fn bech32_hrp_send_amount() -> Result<()> {
         .send_with_params(
             [SendParams::new(
                 1_000_000,
-                Bech32Address::try_new("wronghrp", account.first_address_bech32().await.unwrap())?,
+                Bech32Address::try_new("wronghrp", account.first_address_bech32().await)?,
             )?],
             None,
         )
@@ -60,7 +60,7 @@ async fn bech32_hrp_prepare_output() -> Result<()> {
             OutputParams {
                 recipient_address: account
                     .addresses()
-                    .await?
+                    .await
                     .into_iter()
                     .next()
                     .unwrap()

@@ -284,7 +284,7 @@ impl FromStr for TransactionSelector {
 
 /// `addresses` command
 pub async fn addresses_command(account: &Account) -> Result<(), Error> {
-    let addresses = account.addresses().await?;
+    let addresses = account.addresses().await;
 
     if addresses.is_empty() {
         println_log_info!("No addresses found");
@@ -547,7 +547,7 @@ pub async fn faucet_command(
     let address = if let Some(address) = address {
         address
     } else {
-        match account.addresses().await?.into_iter().rev().next() {
+        match account.addresses().await.into_iter().rev().next() {
             Some(address) => address.into_bech32(),
             None => return Err(Error::NoAddressForFaucet),
         }

@@ -47,7 +47,7 @@ async fn main() -> Result<()> {
         .await?;
     let account = wallet.get_or_create_account(ACCOUNT_ALIAS).await?;
 
-    let recv_address = account.first_address_bech32().await.unwrap();
+    let recv_address = account.first_address_bech32().await;
     println!("Recv address: {}", recv_address);
 
     // Ensure there are enough available funds for spamming.

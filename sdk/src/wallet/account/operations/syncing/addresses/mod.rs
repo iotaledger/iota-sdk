@@ -24,7 +24,7 @@ where
     ) -> crate::wallet::Result<Vec<AddressWithUnspentOutputs>> {
         log::debug!("[SYNC] get_addresses_to_sync");
 
-        let mut addresses_before_syncing = self.addresses().await?;
+        let mut addresses_before_syncing = self.addresses().await;
 
         // If custom addresses are provided check if they are in the account and only use them
         if !options.addresses.is_empty() {
