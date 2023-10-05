@@ -98,7 +98,7 @@ mod json {
     impl ToJson for NftAddress {
         fn to_json(&self) -> Value {
             crate::json! ({
-                "type": NftAddress::KIND,
+                "type": Self::KIND,
                 "nftId": self.0
             })
         }

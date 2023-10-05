@@ -83,3 +83,39 @@ pub(crate) mod dto {
 
     impl_serde_typed_dto!(UtxoInput, UtxoInputDto, "UTXO input");
 }
+
+#[cfg(feature = "json")]
+mod json {
+    use super::*;
+    use crate::{
+        types::block::Error,
+        utils::json::{FromJson, TakeValue, ToJson, Value},
+    };
+
+    impl ToJson for UtxoInput {
+        fn to_json(&self) -> Value {
+            crate::json! ({
+                "type": Self::KIND,
+                "transactionId": self.output_id().transaction_id(),
+                "transactionOutputIndex": self.output_id().index()
+            })
+        }
+    }
+
+    impl FromJson for UtxoInput {
+        type Error = Error;
+
+        fn from_non_null_json(mut value: Value) -> Result<Self, Self::Error>
+        where
+            Self: Sized,
+        {
+            if value["type"] != Self::KIND {
+                return Err(Error::invalid_type::<Self>(Self::KIND, &value["type"]));
+            }
+            Self::new(
+                value["transactionId"].take_value()?,
+                value["transactionOutputIndex"].take_value()?,
+            )
+        }
+    }
+}

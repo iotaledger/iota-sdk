@@ -40,6 +40,12 @@ pub trait ToJson {
     fn to_json(&self) -> Value;
 }
 
+impl<T: ToJson> ToJson for &T {
+    fn to_json(&self) -> Value {
+        ToJson::to_json(*self)
+    }
+}
+
 impl ToJson for Value {
     fn to_json(&self) -> Value {
         self.clone()

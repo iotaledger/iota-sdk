@@ -98,7 +98,7 @@ mod json {
     impl ToJson for AccountAddress {
         fn to_json(&self) -> Value {
             crate::json! ({
-                "type": AccountAddress::KIND,
+                "type": Self::KIND,
                 "accountId": self.0
             })
         }

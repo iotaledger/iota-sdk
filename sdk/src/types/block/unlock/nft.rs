@@ -78,7 +78,7 @@ mod json {
     impl ToJson for NftUnlock {
         fn to_json(&self) -> Value {
             crate::json! ({
-                "type": NftUnlock::KIND,
+                "type": Self::KIND,
                 "reference": self.index()
             })
         }

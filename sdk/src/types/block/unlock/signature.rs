@@ -69,7 +69,7 @@ mod json {
     impl ToJson for SignatureUnlock {
         fn to_json(&self) -> Value {
             crate::json! ({
-                "type": SignatureUnlock::KIND,
+                "type": Self::KIND,
                 "signature": self.0
             })
         }

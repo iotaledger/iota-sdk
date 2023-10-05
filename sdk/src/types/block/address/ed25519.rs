@@ -89,7 +89,7 @@ mod json {
     impl ToJson for Ed25519Address {
         fn to_json(&self) -> Value {
             crate::json! ({
-                "type": Ed25519Address::KIND,
+                "type": Self::KIND,
                 "pubKeyHash": self.to_string()
             })
         }

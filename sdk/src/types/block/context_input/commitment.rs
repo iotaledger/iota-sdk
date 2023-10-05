@@ -71,7 +71,7 @@ mod json {
     impl ToJson for CommitmentContextInput {
         fn to_json(&self) -> Value {
             crate::json! ({
-                "type": CommitmentContextInput::KIND,
+                "type": Self::KIND,
                 "commitmentId": self.0
             })
         }

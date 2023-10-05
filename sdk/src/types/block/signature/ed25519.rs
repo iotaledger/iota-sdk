@@ -197,12 +197,12 @@ mod json {
             if value["type"] != Self::KIND {
                 return Err(Error::invalid_type::<Self>(Self::KIND, &value["type"]));
             }
-            Ok(Self::try_from_bytes(
+            Self::try_from_bytes(
                 prefix_hex::decode(&String::from_json(value["publicKey"].take())?)
                     .map_err(|_| Error::InvalidField("publicKey"))?,
                 prefix_hex::decode(&String::from_json(value["signature"].take())?)
                     .map_err(|_| Error::InvalidField("publicKey"))?,
-            )?)
+            )
         }
     }
 }

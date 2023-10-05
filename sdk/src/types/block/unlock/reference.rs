@@ -75,7 +75,7 @@ mod json {
     impl ToJson for ReferenceUnlock {
         fn to_json(&self) -> Value {
             crate::json! ({
-                "type": ReferenceUnlock::KIND,
+                "type": Self::KIND,
                 "reference": self.index()
             })
         }

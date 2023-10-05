@@ -77,7 +77,7 @@ mod json {
     impl ToJson for AccountUnlock {
         fn to_json(&self) -> Value {
             crate::json! ({
-                "type": AccountUnlock::KIND,
+                "type": Self::KIND,
                 "reference": self.index()
             })
         }

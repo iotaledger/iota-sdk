@@ -74,7 +74,7 @@ mod json {
     impl ToJson for BlockIssuanceCreditContextInput {
         fn to_json(&self) -> Value {
             crate::json! ({
-                "type": BlockIssuanceCreditContextInput::KIND,
+                "type": Self::KIND,
                 "accountId": self.0
             })
         }

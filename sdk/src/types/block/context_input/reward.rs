@@ -80,7 +80,7 @@ mod json {
     impl ToJson for RewardContextInput {
         fn to_json(&self) -> Value {
             crate::json! ({
-                "type": RewardContextInput::KIND,
+                "type": Self::KIND,
                 "index": self.index()
             })
         }
