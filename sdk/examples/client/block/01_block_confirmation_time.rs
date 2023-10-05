@@ -8,8 +8,9 @@
 //! cargo run --release --example block_confirmation_time
 //! ```
 
+use crypto::keys::bip44::Bip44;
 use iota_sdk::{
-    client::{Client, Result},
+    client::{constants::IOTA_COIN_TYPE, secret::SecretManager, Client, Result},
     types::api::core::response::BlockState,
 };
 
@@ -23,14 +24,17 @@ async fn main() -> Result<()> {
     // Create a node client.
     let client = Client::builder().with_node(&node_url)?.finish().await?;
 
+    let secret_manager = SecretManager::try_from_mnemonic(std::env::var("MNEMONIC").unwrap())?;
+
     // Create and send a block.
     let block = client
-        .finish_basic_block_builder(
+        .build_basic_block(
             todo!("issuer id"),
-            todo!("block signature"),
             todo!("issuing time"),
             None,
             None,
+            &secret_manager,
+            Bip44::new(IOTA_COIN_TYPE),
         )
         .await?;
     let block_id = client.block_id(&block).await?;
