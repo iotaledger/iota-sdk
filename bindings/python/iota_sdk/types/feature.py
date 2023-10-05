@@ -6,6 +6,7 @@ from typing import Dict, List, TypeAlias, Union, Any
 from dataclasses import dataclass, field
 from dataclasses_json import config
 from iota_sdk.types.address import Address, deserialize_address
+from iota_sdk.types.block_issuer_key import BlockIssuerKey
 from iota_sdk.types.common import EpochIndex, HexStr, json, SlotIndex
 
 
@@ -93,11 +94,10 @@ class BlockIssuerFeature:
     """Contains the public keys to verify block signatures and allows for unbonding the issuer deposit.
     Attributes:
         expiry_slot: The slot index at which the Block Issuer Feature expires and can be removed.
-        public_keys: The Block Issuer Keys.
+        block_issuer_keys: The Block Issuer Keys.
     """
     expiry_slot: SlotIndex
-    # TODO Replace with a list of PublicKey types
-    public_keys: List[HexStr]
+    block_issuer_keys: List[BlockIssuerKey]
     type: int = field(
         default_factory=lambda: int(
             FeatureType.BlockIssuer),
