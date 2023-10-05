@@ -23,7 +23,6 @@ async function run() {
         const account = await wallet.getAccount('Alice');
 
         // To create an address we need to unlock stronghold.
-
         await wallet.setStrongholdPassword(
             process.env.STRONGHOLD_PASSWORD as string,
         );

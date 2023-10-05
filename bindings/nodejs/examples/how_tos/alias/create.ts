@@ -40,7 +40,6 @@ async function run() {
         console.log(`Aliases BEFORE:\n`, balance.aliases);
 
         // To sign a transaction we need to unlock stronghold.
-
         await wallet.setStrongholdPassword(
             process.env.STRONGHOLD_PASSWORD as string,
         );

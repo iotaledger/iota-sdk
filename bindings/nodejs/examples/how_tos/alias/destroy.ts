@@ -46,7 +46,6 @@ async function run() {
         );
 
         // To sign a transaction we need to unlock stronghold.
-
         await wallet.setStrongholdPassword(
             process.env.STRONGHOLD_PASSWORD as string,
         );
