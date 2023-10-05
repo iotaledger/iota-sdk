@@ -41,7 +41,7 @@ pub trait ToJson {
     fn to_json(&self) -> Value;
 }
 
-impl<T: ToJson> ToJson for &T {
+impl<T: ToJson + ?Sized> ToJson for &T {
     fn to_json(&self) -> Value {
         ToJson::to_json(*self)
     }
@@ -205,6 +205,15 @@ impl JsonExt for Value {
     }
 }
 
+impl<T: ToJson> ToJson for Option<T> {
+    fn to_json(&self) -> Value {
+        match self {
+            Some(t) => t.to_json(),
+            None => Value::Null,
+        }
+    }
+}
+
 impl<T: FromJson> FromJson for Option<T> {
     type Error = T::Error;
 
@@ -354,6 +363,12 @@ macro_rules! impl_json_array {
 }
 impl_json_array!(alloc::vec::Vec<T>);
 impl_json_array!(alloc::boxed::Box<[T]>);
+
+impl<T: ToJson> ToJson for [T] {
+    fn to_json(&self) -> Value {
+        Value::Array(self.iter().map(ToJson::to_json).collect())
+    }
+}
 
 impl<T: ToJson, const N: usize> ToJson for [T; N] {
     fn to_json(&self) -> Value {

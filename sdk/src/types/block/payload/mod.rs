@@ -172,17 +172,14 @@ impl Packable for OptionalPayload {
     }
 }
 
-#[cfg(feature = "serde")]
 pub mod dto {
-    use serde::{Deserialize, Serialize};
-
     pub use super::transaction::dto::TransactionPayloadDto;
     use super::*;
     use crate::types::{block::Error, TryFromDto, ValidationParams};
 
     /// Describes all the different payload types.
-    #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-    #[serde(untagged)]
+    #[derive(Clone, Debug, Eq, PartialEq)]
+    #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize), serde(untagged))]
     pub enum PayloadDto {
         Transaction(Box<TransactionPayloadDto>),
         TaggedData(Box<TaggedDataPayload>),
@@ -218,6 +215,41 @@ pub mod dto {
                     Self::from(TransactionPayload::try_from_dto_with_params_inner(*p, params)?)
                 }
                 PayloadDto::TaggedData(p) => Self::from(*p),
+            })
+        }
+    }
+}
+
+#[cfg(feature = "json")]
+mod json {
+    use super::*;
+    use crate::utils::json::{FromJson, ToJson, Value};
+
+    impl ToJson for Payload {
+        fn to_json(&self) -> Value {
+            match self {
+                Self::Transaction(p) => p.to_json(),
+                Self::TaggedData(p) => p.to_json(),
+            }
+        }
+    }
+
+    impl FromJson for dto::PayloadDto {
+        type Error = Error;
+
+        fn from_non_null_json(value: Value) -> Result<Self, Self::Error>
+        where
+            Self: Sized,
+        {
+            Ok(match value["type"].as_u32() {
+                Some(TransactionPayload::KIND) => dto::TransactionPayloadDto::from_json(value)?.into(),
+                Some(TaggedDataPayload::KIND) => TaggedDataPayload::from_json(value)?.into(),
+                _ => {
+                    return Err(Error::invalid_type::<Self>(
+                        format!("one of {:?}", [TransactionPayload::KIND, TaggedDataPayload::KIND]),
+                        &value["type"],
+                    ));
+                }
             })
         }
     }

@@ -69,7 +69,6 @@ impl core::fmt::Debug for TaggedDataPayload {
     }
 }
 
-#[cfg(feature = "serde")]
 pub mod dto {
     use serde::{Deserialize, Serialize};
 
@@ -77,13 +76,20 @@ pub mod dto {
     use crate::{types::block::Error, utils::serde::prefix_hex_bytes};
 
     /// The payload type to define a tagged data payload.
-    #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+    #[derive(Clone, Debug, Eq, PartialEq)]
+    #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
     struct TaggedDataPayloadDto {
-        #[serde(rename = "type")]
+        #[cfg_attr(feature = "serde", serde(rename = "type"))]
         kind: u32,
-        #[serde(skip_serializing_if = "<[_]>::is_empty", default, with = "prefix_hex_bytes")]
+        #[cfg_attr(
+            feature = "serde",
+            serde(skip_serializing_if = "<[_]>::is_empty", default, with = "prefix_hex_bytes")
+        )]
         tag: Box<[u8]>,
-        #[serde(skip_serializing_if = "<[_]>::is_empty", default, with = "prefix_hex_bytes")]
+        #[cfg_attr(
+            feature = "serde",
+            serde(skip_serializing_if = "<[_]>::is_empty", default, with = "prefix_hex_bytes")
+        )]
         data: Box<[u8]>,
     }
 
@@ -106,4 +112,45 @@ pub mod dto {
     }
 
     impl_serde_typed_dto!(TaggedDataPayload, TaggedDataPayloadDto, "tagged data payload");
+}
+
+#[cfg(feature = "json")]
+mod json {
+    use super::*;
+    use crate::{
+        types::block::Error,
+        utils::json::{FromJson, JsonExt, ToJson, Value},
+    };
+
+    impl ToJson for TaggedDataPayload {
+        fn to_json(&self) -> Value {
+            let mut res = crate::json! ({
+                "type": Self::KIND,
+            });
+            if !self.tag().is_empty() {
+                res["tag"] = self.tag().to_json();
+            }
+            if !self.data().is_empty() {
+                res["data"] = self.data().to_json();
+            }
+            res
+        }
+    }
+
+    impl FromJson for TaggedDataPayload {
+        type Error = Error;
+
+        fn from_non_null_json(mut value: Value) -> Result<Self, Self::Error>
+        where
+            Self: Sized,
+        {
+            if value["type"] != Self::KIND {
+                return Err(Error::invalid_type::<Self>(Self::KIND, &value["type"]));
+            }
+            Self::new(
+                value["tag"].take_opt_or_default::<Box<[u8]>>()?,
+                value["data"].take_opt_or_default::<Box<[u8]>>()?,
+            )
+        }
+    }
 }

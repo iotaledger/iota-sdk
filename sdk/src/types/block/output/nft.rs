@@ -666,16 +666,16 @@ mod json {
                 "amount": self.amount(),
                 "mana": self.mana(),
                 "nftId": self.nft_id(),
-                "unlockConditions": self.unlock_conditions().to_vec(),
+                "unlockConditions": ***self.unlock_conditions(),
             });
             if !self.native_tokens().is_empty() {
-                res["nativeTokens"] = self.native_tokens().to_vec().to_json();
+                res["nativeTokens"] = self.native_tokens().to_json();
             }
             if !self.features().is_empty() {
-                res["features"] = self.features().to_vec().to_json();
+                res["features"] = self.features().to_json();
             }
             if !self.immutable_features().is_empty() {
-                res["immutableFeatures"] = self.immutable_features().to_vec().to_json();
+                res["immutableFeatures"] = self.immutable_features().to_json();
             }
             res
         }

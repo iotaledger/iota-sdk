@@ -69,18 +69,19 @@ impl Packable for ManaAllotment {
     }
 }
 
-#[cfg(feature = "serde")]
 pub(super) mod dto {
-    use serde::{Deserialize, Serialize};
-
     use super::*;
     use crate::{types::TryFromDto, utils::serde::string};
 
-    #[derive(Copy, Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-    #[serde(rename_all = "camelCase")]
+    #[derive(Copy, Clone, Debug, Eq, PartialEq)]
+    #[cfg_attr(
+        feature = "serde",
+        derive(serde::Serialize, serde::Deserialize),
+        serde(rename_all = "camelCase")
+    )]
     pub struct ManaAllotmentDto {
         pub account_id: AccountId,
-        #[serde(with = "string")]
+        #[cfg_attr(feature = "serde", serde(with = "string"))]
         pub mana: u64,
     }
 
@@ -107,6 +108,38 @@ pub(super) mod dto {
                     account_id: dto.account_id,
                     mana: dto.mana,
                 }
+            })
+        }
+    }
+}
+
+#[cfg(feature = "json")]
+mod json {
+    use super::*;
+    use crate::{
+        types::block::Error,
+        utils::json::{FromJson, JsonExt, ToJson, Value},
+    };
+
+    impl ToJson for ManaAllotment {
+        fn to_json(&self) -> Value {
+            crate::json! ({
+                "accountId": self.account_id(),
+                "mana": self.mana(),
+            })
+        }
+    }
+
+    impl FromJson for dto::ManaAllotmentDto {
+        type Error = Error;
+
+        fn from_non_null_json(mut value: Value) -> Result<Self, Self::Error>
+        where
+            Self: Sized,
+        {
+            Ok(Self {
+                account_id: value["accountId"].take_value()?,
+                mana: value["mana"].to_u64()?,
             })
         }
     }

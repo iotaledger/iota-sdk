@@ -604,7 +604,7 @@ mod json {
                 "validatorAddress": self.validator_address(),
                 "startEpoch": self.start_epoch(),
                 "endEpoch": self.end_epoch(),
-                "unlockConditions": self.unlock_conditions().to_vec(),
+                "unlockConditions": self.unlock_conditions().to_json(),
             })
         }
     }

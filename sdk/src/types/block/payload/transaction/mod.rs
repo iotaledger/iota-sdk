@@ -93,11 +93,8 @@ fn verify_essence_unlocks(essence: &RegularTransactionEssence, unlocks: &Unlocks
     Ok(())
 }
 
-#[cfg(feature = "serde")]
 pub mod dto {
     use alloc::vec::Vec;
-
-    use serde::{Deserialize, Serialize};
 
     pub use super::essence::dto::{RegularTransactionEssenceDto, TransactionEssenceDto};
     use super::*;
@@ -107,9 +104,10 @@ pub mod dto {
     };
 
     /// The payload type to define a value transaction.
-    #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+    #[derive(Clone, Debug, Eq, PartialEq)]
+    #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
     pub struct TransactionPayloadDto {
-        #[serde(rename = "type")]
+        #[cfg_attr(feature = "serde", serde(rename = "type"))]
         pub kind: u32,
         pub essence: TransactionEssenceDto,
         pub unlocks: Vec<Unlock>,
@@ -135,6 +133,46 @@ pub mod dto {
             let TransactionEssence::Regular(essence) =
                 TransactionEssence::try_from_dto_with_params_inner(dto.essence, params)?;
             Self::new(essence, Unlocks::new(dto.unlocks)?)
+        }
+    }
+}
+
+#[cfg(feature = "json")]
+mod json {
+    use super::*;
+    use crate::{
+        types::block::Error,
+        utils::json::{FromJson, JsonExt, ToJson, Value},
+    };
+
+    impl ToJson for TransactionPayload {
+        fn to_json(&self) -> Value {
+            crate::json! ({
+                "type": Self::KIND,
+                "essence": self.essence(),
+                "unlocks": ***self.unlocks(),
+            })
+        }
+    }
+
+    impl FromJson for dto::TransactionPayloadDto {
+        type Error = Error;
+
+        fn from_non_null_json(mut value: Value) -> Result<Self, Self::Error>
+        where
+            Self: Sized,
+        {
+            if value["type"] != TransactionPayload::KIND {
+                return Err(Error::invalid_type::<TransactionPayload>(
+                    TransactionPayload::KIND,
+                    &value["type"],
+                ));
+            }
+            Ok(Self {
+                kind: TransactionPayload::KIND,
+                essence: value["essence"].take_value()?,
+                unlocks: value["unlocks"].take_value()?,
+            })
         }
     }
 }

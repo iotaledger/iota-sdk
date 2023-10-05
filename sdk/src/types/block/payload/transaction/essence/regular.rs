@@ -419,12 +419,9 @@ fn verify_payload_packable<const VERIFY: bool>(
     Ok(())
 }
 
-#[cfg(feature = "serde")]
 pub(crate) mod dto {
     use alloc::string::{String, ToString};
     use core::str::FromStr;
-
-    use serde::{Deserialize, Serialize};
 
     use super::*;
     use crate::types::{
@@ -433,10 +430,14 @@ pub(crate) mod dto {
     };
 
     /// Describes the essence data making up a transaction by defining its inputs and outputs and an optional payload.
-    #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-    #[serde(rename_all = "camelCase")]
+    #[derive(Clone, Debug, Eq, PartialEq)]
+    #[cfg_attr(
+        feature = "serde",
+        derive(serde::Serialize, serde::Deserialize),
+        serde(rename_all = "camelCase")
+    )]
     pub struct RegularTransactionEssenceDto {
-        #[serde(rename = "type")]
+        #[cfg_attr(feature = "serde", serde(rename = "type"))]
         pub kind: u8,
         pub network_id: String,
         pub creation_slot: SlotIndex,
@@ -445,7 +446,7 @@ pub(crate) mod dto {
         pub inputs_commitment: String,
         pub outputs: Vec<OutputDto>,
         pub allotments: Vec<ManaAllotmentDto>,
-        #[serde(default, skip_serializing_if = "Option::is_none")]
+        #[cfg_attr(feature = "serde", serde(default, skip_serializing_if = "Option::is_none"))]
         pub payload: Option<PayloadDto>,
     }
 
@@ -509,6 +510,61 @@ pub(crate) mod dto {
             };
 
             builder.finish_with_params(params).map_err(Into::into)
+        }
+    }
+}
+
+#[cfg(feature = "json")]
+mod json {
+    use super::*;
+    use crate::{
+        types::block::Error,
+        utils::json::{FromJson, JsonExt, ToJson, Value},
+    };
+
+    impl ToJson for RegularTransactionEssence {
+        fn to_json(&self) -> Value {
+            let mut res = crate::json! ({
+                "type": Self::KIND,
+                "networkId": self.network_id(),
+                "creationSlot": self.creation_slot(),
+                "contextInputs": self.context_inputs(),
+                "inputs": self.inputs(),
+                "inputsCommitment": self.inputs_commitment(),
+                "outputs": self.outputs(),
+                "allotments": self.mana_allotments(),
+            });
+            if let Some(payload) = self.payload() {
+                res["payload"] = payload.to_json();
+            }
+            res
+        }
+    }
+
+    impl FromJson for dto::RegularTransactionEssenceDto {
+        type Error = Error;
+
+        fn from_non_null_json(mut value: Value) -> Result<Self, Self::Error>
+        where
+            Self: Sized,
+        {
+            if value["type"] != RegularTransactionEssence::KIND {
+                return Err(Error::invalid_type::<RegularTransactionEssence>(
+                    RegularTransactionEssence::KIND,
+                    &value["type"],
+                ));
+            }
+            Ok(Self {
+                kind: RegularTransactionEssence::KIND,
+                network_id: value["networkId"].take_value()?,
+                creation_slot: value["creationSlot"].take_value()?,
+                context_inputs: value["contextInputs"].take_value()?,
+                inputs: value["inputs"].take_value()?,
+                inputs_commitment: value["inputsCommitment"].take_value()?,
+                outputs: value["outputs"].take_value()?,
+                allotments: value["allotments"].take_value()?,
+                payload: value["payload"].take_value()?,
+            })
         }
     }
 }

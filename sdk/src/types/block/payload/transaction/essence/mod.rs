@@ -47,17 +47,14 @@ impl TransactionEssence {
     }
 }
 
-#[cfg(feature = "serde")]
 pub(crate) mod dto {
-    use serde::{Deserialize, Serialize};
-
     pub use super::regular::dto::RegularTransactionEssenceDto;
     use super::*;
     use crate::types::{block::Error, TryFromDto, ValidationParams};
 
     /// Describes all the different essence types.
-    #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize, From)]
-    #[serde(untagged)]
+    #[derive(Clone, Debug, Eq, PartialEq, From)]
+    #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize), serde(untagged))]
     pub enum TransactionEssenceDto {
         Regular(RegularTransactionEssenceDto),
     }
@@ -82,6 +79,39 @@ pub(crate) mod dto {
                     RegularTransactionEssence::try_from_dto_with_params_inner(r, params)?,
                 )),
             }
+        }
+    }
+}
+
+#[cfg(feature = "json")]
+mod json {
+    use super::*;
+    use crate::utils::json::{FromJson, ToJson, Value};
+
+    impl ToJson for TransactionEssence {
+        fn to_json(&self) -> Value {
+            match self {
+                Self::Regular(e) => e.to_json(),
+            }
+        }
+    }
+
+    impl FromJson for dto::TransactionEssenceDto {
+        type Error = Error;
+
+        fn from_non_null_json(value: Value) -> Result<Self, Self::Error>
+        where
+            Self: Sized,
+        {
+            Ok(match value["type"].as_u8() {
+                Some(RegularTransactionEssence::KIND) => dto::RegularTransactionEssenceDto::from_json(value)?.into(),
+                _ => {
+                    return Err(Error::invalid_type::<Self>(
+                        format!("one of {:?}", [RegularTransactionEssence::KIND]),
+                        &value["type"],
+                    ));
+                }
+            })
         }
     }
 }
