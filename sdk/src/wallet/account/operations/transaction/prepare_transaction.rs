@@ -23,6 +23,7 @@ use crate::{
 impl<S: 'static + SecretManage> Account<S>
 where
     crate::wallet::Error: From<S::Error>,
+    crate::client::Error: From<S::Error>,
 {
     /// Get inputs and build the transaction essence
     pub async fn prepare_transaction(
