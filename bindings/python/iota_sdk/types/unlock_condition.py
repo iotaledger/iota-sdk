@@ -69,9 +69,9 @@ class StorageDepositReturnUnlockCondition:
 @json
 @dataclass
 class TimelockUnlockCondition:
-    """A timelock unlock condition.
+    """Defines a slot index until which the output can not be unlocked.
     Args:
-        slot_index: The slot index that determines when the associated output expires.
+        slot_index: Slot index starting from which the output can be consumed.
     """
     slot_index: SlotIndex
     type: int = field(
@@ -83,7 +83,7 @@ class TimelockUnlockCondition:
 @json
 @dataclass
 class ExpirationUnlockCondition:
-    """An expiration unlock condition.
+    """Defines a slot index until which only Address, defined in Address Unlock Condition, is allowed to unlock the output. After the slot index is reached/passed, only Return Address can unlock it.
     Args:
         slot_index: Before this slot index, Address Unlock Condition is allowed to unlock the output,
                     after that only the address defined in Return Address.
