@@ -6,10 +6,11 @@ mod indexer;
 #[cfg(feature = "mqtt")]
 mod mqtt;
 
+use crypto::keys::bip44::Bip44;
 use iota_sdk::{
     client::{
-        api::GetAddressesOptions, node_api::indexer::query_parameters::QueryParameter, request_funds_from_faucet,
-        secret::SecretManager, Client,
+        api::GetAddressesOptions, constants::IOTA_COIN_TYPE, node_api::indexer::query_parameters::QueryParameter,
+        request_funds_from_faucet, secret::SecretManager, Client,
     },
     types::block::{
         payload::{tagged_data::TaggedDataPayload, transaction::TransactionId, Payload},
@@ -23,22 +24,25 @@ use crate::client::common::{setup_client_with_node_health_ignored, FAUCET_URL};
 const DEFAULT_DEVELOPMENT_SEED: &str = "0x256a818b2aac458941f7274985a410e57fb750f3a3a67969ece5bd9ae7eef5b2";
 
 // Sends a tagged data block to the node to test against it.
-async fn setup_tagged_data_block() -> BlockId {
+async fn setup_tagged_data_block(secret_manager: &SecretManager) -> BlockId {
     let client = setup_client_with_node_health_ignored().await;
-    let block = client
-        .finish_basic_block_builder(
+
+    let protocol_params = client.get_protocol_parameters().await.unwrap();
+
+    client
+        .build_basic_block(
             todo!("issuer id"),
-            todo!("block signature"),
             todo!("issuing time"),
             None,
             Some(Payload::TaggedData(Box::new(
                 TaggedDataPayload::new(b"Hello".to_vec(), b"Tangle".to_vec()).unwrap(),
             ))),
+            secret_manager,
+            Bip44::new(IOTA_COIN_TYPE),
         )
         .await
-        .unwrap();
-
-    client.block_id(&block).await.unwrap()
+        .unwrap()
+        .id(&protocol_params)
 }
 
 pub fn setup_secret_manager() -> SecretManager {
