@@ -137,11 +137,9 @@ impl Packable for Block {
     }
 }
 
-#[cfg(feature = "serde")]
 pub(crate) mod dto {
     use alloc::format;
 
-    use serde::{Deserialize, Serialize};
     use serde_json::Value;
 
     use super::*;
@@ -169,7 +167,8 @@ pub(crate) mod dto {
         }
     }
 
-    impl<'de> Deserialize<'de> for BlockDto {
+    #[cfg(feature = "serde")]
+    impl<'de> serde::Deserialize<'de> for BlockDto {
         fn deserialize<D: serde::Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
             let value = Value::deserialize(d)?;
             Ok(
@@ -193,18 +192,19 @@ pub(crate) mod dto {
         }
     }
 
-    impl Serialize for BlockDto {
+    #[cfg(feature = "serde")]
+    impl serde::Serialize for BlockDto {
         fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
         where
             S: serde::Serializer,
         {
-            #[derive(Serialize)]
+            #[derive(serde::Serialize)]
             #[serde(untagged)]
             enum BlockTypeDto_<'a> {
                 T0(&'a BasicBlockDto),
                 T1(&'a ValidationBlockDto),
             }
-            #[derive(Serialize)]
+            #[derive(serde::Serialize)]
             struct TypedBlock<'a> {
                 #[serde(flatten)]
                 kind: BlockTypeDto_<'a>,
@@ -239,6 +239,41 @@ pub(crate) mod dto {
                 BlockDto::Validation(validation) => {
                     Ok(ValidationBlock::try_from_dto_with_params_inner(validation, params)?.into())
                 }
+            }
+        }
+    }
+
+    #[cfg(feature = "json")]
+    mod json {
+        use super::*;
+        use crate::utils::json::{FromJson, ToJson, Value};
+
+        impl ToJson for Block {
+            fn to_json(&self) -> Value {
+                match self {
+                    Self::Basic(b) => b.to_json(),
+                    Self::Validation(b) => b.to_json(),
+                }
+            }
+        }
+
+        impl FromJson for dto::BlockDto {
+            type Error = Error;
+
+            fn from_non_null_json(value: Value) -> Result<Self, Self::Error>
+            where
+                Self: Sized,
+            {
+                Ok(match value["type"].as_u8() {
+                    Some(BasicBlock::KIND) => dto::BasicBlockDto::from_json(value)?.into(),
+                    Some(ValidationBlock::KIND) => dto::ValidationBlockDto::from_json(value)?.into(),
+                    _ => {
+                        return Err(Error::invalid_type::<Self>(
+                            format!("one of {:?}", [BasicBlock::KIND, ValidationBlock::KIND]),
+                            &value["type"],
+                        ));
+                    }
+                })
             }
         }
     }

@@ -666,7 +666,7 @@ mod json {
                 "amount": self.amount(),
                 "mana": self.mana(),
                 "nftId": self.nft_id(),
-                "unlockConditions": ***self.unlock_conditions(),
+                "unlockConditions": self.unlock_conditions().as_list(),
             });
             if !self.native_tokens().is_empty() {
                 res["nativeTokens"] = self.native_tokens().to_json();

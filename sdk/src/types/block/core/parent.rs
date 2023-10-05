@@ -54,6 +54,11 @@ impl<const MIN: u8, const MAX: u8> Parents<MIN, MAX> {
         ))
     }
 
+    /// Returns the underlying list
+    pub fn as_list(&self) -> &[BlockId] {
+        self
+    }
+
     /// Returns the unique, ordered set of parents.
     pub fn to_set(&self) -> BTreeSet<BlockId> {
         self.0.iter().copied().collect()

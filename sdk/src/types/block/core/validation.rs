@@ -207,11 +207,8 @@ fn validate_protocol_params_hash(hash: &ProtocolParametersHash, params: &Protoco
     Ok(())
 }
 
-#[cfg(feature = "serde")]
 pub(crate) mod dto {
     use alloc::collections::BTreeSet;
-
-    use serde::{Deserialize, Serialize};
 
     use super::*;
     use crate::types::{
@@ -219,10 +216,14 @@ pub(crate) mod dto {
         TryFromDto, ValidationParams,
     };
 
-    #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-    #[serde(rename_all = "camelCase")]
+    #[derive(Clone, Debug, Eq, PartialEq)]
+    #[cfg_attr(
+        feature = "serde",
+        derive(serde::Serialize, serde::Deserialize),
+        serde(rename_all = "camelCase")
+    )]
     pub struct ValidationBlockDto {
-        #[serde(rename = "type")]
+        #[cfg_attr(feature = "serde", serde(rename = "type"))]
         pub kind: u8,
         pub strong_parents: BTreeSet<BlockId>,
         pub weak_parents: BTreeSet<BlockId>,
@@ -263,6 +264,52 @@ pub(crate) mod dto {
             .with_weak_parents(WeakParents::from_set(dto.weak_parents)?)
             .with_shallow_like_parents(ShallowLikeParents::from_set(dto.shallow_like_parents)?)
             .finish()
+        }
+    }
+}
+
+#[cfg(feature = "json")]
+mod json {
+    use super::*;
+    use crate::{
+        types::block::Error,
+        utils::json::{FromJson, JsonExt, ToJson, Value},
+    };
+
+    impl ToJson for ValidationBlock {
+        fn to_json(&self) -> Value {
+            crate::json! ({
+                "type": Self::KIND,
+                "strongParents": self.strong_parents().as_list(),
+                "weakParents": self.weak_parents().as_list(),
+                "shallowLikeParents": self.shallow_like_parents().as_list(),
+                "highestSupportedVersion": self.highest_supported_version,
+                "protocolParametersHash": self.protocol_parameters_hash,
+            })
+        }
+    }
+
+    impl FromJson for dto::ValidationBlockDto {
+        type Error = Error;
+
+        fn from_non_null_json(mut value: Value) -> Result<Self, Self::Error>
+        where
+            Self: Sized,
+        {
+            if value["type"] != ValidationBlock::KIND {
+                return Err(Error::invalid_type::<ValidationBlock>(
+                    ValidationBlock::KIND,
+                    &value["type"],
+                ));
+            }
+            Ok(Self {
+                kind: ValidationBlock::KIND,
+                strong_parents: StrongParents::from_vec(value["strongParents"].take_vec()?)?.to_set(),
+                weak_parents: WeakParents::from_vec(value["weakParents"].take_vec()?)?.to_set(),
+                shallow_like_parents: ShallowLikeParents::from_vec(value["shallowLikeParents"].take_vec()?)?.to_set(),
+                highest_supported_version: value["shallowLikeParents"].to_u8()?,
+                protocol_parameters_hash: value["shallowLikeParents"].take_value()?,
+            })
         }
     }
 }

@@ -185,11 +185,8 @@ impl Packable for BasicBlock {
     }
 }
 
-#[cfg(feature = "serde")]
 pub(crate) mod dto {
     use alloc::collections::BTreeSet;
-
-    use serde::{Deserialize, Serialize};
 
     use super::*;
     use crate::types::{
@@ -197,17 +194,21 @@ pub(crate) mod dto {
         TryFromDto, ValidationParams,
     };
 
-    #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-    #[serde(rename_all = "camelCase")]
+    #[derive(Clone, Debug, Eq, PartialEq)]
+    #[cfg_attr(
+        feature = "serde",
+        derive(serde::Serialize, serde::Deserialize),
+        serde(rename_all = "camelCase")
+    )]
     pub struct BasicBlockDto {
-        #[serde(rename = "type")]
+        #[cfg_attr(feature = "serde", serde(rename = "type"))]
         pub kind: u8,
         pub strong_parents: BTreeSet<BlockId>,
         pub weak_parents: BTreeSet<BlockId>,
         pub shallow_like_parents: BTreeSet<BlockId>,
-        #[serde(default, skip_serializing_if = "Option::is_none")]
+        #[cfg_attr(feature = "serde", serde(default, skip_serializing_if = "Option::is_none"))]
         pub payload: Option<PayloadDto>,
-        #[serde(with = "crate::utils::serde::string")]
+        #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
         pub max_burned_mana: u64,
     }
 
@@ -240,6 +241,53 @@ pub(crate) mod dto {
                         .transpose()?,
                 )
                 .finish()
+        }
+    }
+}
+
+#[cfg(feature = "json")]
+mod json {
+    use super::*;
+    use crate::{
+        types::block::Error,
+        utils::json::{FromJson, JsonExt, ToJson, Value},
+    };
+
+    impl ToJson for BasicBlock {
+        fn to_json(&self) -> Value {
+            let mut res = crate::json! ({
+                "type": Self::KIND,
+                "strongParents": self.strong_parents().as_list(),
+                "weakParents": self.weak_parents().as_list(),
+                "shallowLikeParents": self.shallow_like_parents().as_list(),
+                "payload": self.payload.as_ref(),
+                "maxBurnedMana": self.max_burned_mana,
+            });
+            if let Some(payload) = self.payload() {
+                res["payload"] = payload.to_json();
+            }
+            res
+        }
+    }
+
+    impl FromJson for dto::BasicBlockDto {
+        type Error = Error;
+
+        fn from_non_null_json(mut value: Value) -> Result<Self, Self::Error>
+        where
+            Self: Sized,
+        {
+            if value["type"] != BasicBlock::KIND {
+                return Err(Error::invalid_type::<BasicBlock>(BasicBlock::KIND, &value["type"]));
+            }
+            Ok(Self {
+                kind: BasicBlock::KIND,
+                strong_parents: StrongParents::from_vec(value["strongParents"].take_vec()?)?.to_set(),
+                weak_parents: WeakParents::from_vec(value["weakParents"].take_vec()?)?.to_set(),
+                shallow_like_parents: ShallowLikeParents::from_vec(value["shallowLikeParents"].take_vec()?)?.to_set(),
+                payload: value["payload"].take_value()?,
+                max_burned_mana: value["maxBurnedMana"].take_value()?,
+            })
         }
     }
 }

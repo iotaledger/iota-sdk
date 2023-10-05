@@ -470,7 +470,7 @@ mod json {
                 "type": Self::KIND,
                 "amount": self.amount(),
                 "mana": self.mana(),
-                "unlockConditions": ***self.unlock_conditions(),
+                "unlockConditions": self.unlock_conditions().as_list(),
             });
             if !self.native_tokens().is_empty() {
                 res["nativeTokens"] = self.native_tokens().to_json();

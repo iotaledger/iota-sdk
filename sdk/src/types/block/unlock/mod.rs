@@ -107,6 +107,11 @@ impl Unlocks {
             None => None,
         }
     }
+
+    /// Returns the underlying list
+    pub fn as_list(&self) -> &[Unlock] {
+        self
+    }
 }
 
 fn verify_unlocks<const VERIFY: bool>(unlocks: &[Unlock], _: &()) -> Result<(), Error> {

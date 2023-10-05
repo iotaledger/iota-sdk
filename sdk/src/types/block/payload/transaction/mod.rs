@@ -150,7 +150,7 @@ mod json {
             crate::json! ({
                 "type": Self::KIND,
                 "essence": self.essence(),
-                "unlocks": ***self.unlocks(),
+                "unlocks": self.unlocks().as_list(),
             })
         }
     }

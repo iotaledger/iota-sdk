@@ -442,6 +442,11 @@ impl UnlockConditions {
         self.expiration()
             .map_or(false, |expiration| slot_index >= expiration.slot_index())
     }
+
+    /// Returns the underlying list
+    pub fn as_list(&self) -> &[UnlockCondition] {
+        self
+    }
 }
 
 #[inline]
