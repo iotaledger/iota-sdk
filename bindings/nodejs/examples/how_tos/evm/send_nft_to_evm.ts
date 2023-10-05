@@ -32,8 +32,6 @@ const chainAddress = 'rms1pr75wa5xuepg2hew44vnr28wz5h6n6x99zptk2g68sp2wuu2karywg
 async function run() {
     initLogger();
 
-    const client = new Client({});
-
     if (!process.env.STRONGHOLD_PASSWORD) {
         throw new Error(
             '.env STRONGHOLD_PASSWORD is undefined, see .env.example',
@@ -51,9 +49,6 @@ async function run() {
     console.log('nft balance:', balance.nfts.length);
     const nftId = balance.nfts[0]; // First NFT Available
 
-    const bigAmount: bigint = BigInt(amount);
-    const bigGas: bigint = BigInt(gas);
-
     try {
         const addresses = await account.addresses();
         const hexAddress = Utils.bech32ToHex(
@@ -69,8 +64,8 @@ async function run() {
 
         const metadata = await prepareMetadata(
             toEVMAddress,
-            bigAmount,
-            bigGas
+            BigInt(amount),
+            BigInt(gas)
         );
         const metadataFeature = new MetadataFeature(metadata);
 
@@ -80,6 +75,7 @@ async function run() {
 
         const nftOutput = nftOutputData.output as NftOutput;
 
+        const client = await wallet.getClient();
         // NFT Output with Metadata
         const nftOutputSend = await client.buildNftOutput({
             nftId: nftId,

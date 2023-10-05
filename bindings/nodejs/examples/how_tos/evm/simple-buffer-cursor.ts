@@ -27,7 +27,7 @@ export class SimpleBufferCursor {
     return value;
   }
 
-  readUInt64LE(): BigInt {
+  readUInt64LE(): bigint {
     const value = this._buffer.readBigUInt64LE(this._traverse);
     this._traverse += 8;
 
@@ -97,7 +97,7 @@ export class SimpleBufferCursor {
     this._buffer = Buffer.concat([this._buffer, bytes]);
   }
 
-  writeUInt64SpecialEncoding(value: BigInt): void {
+  writeUInt64SpecialEncoding(value: bigint): void {
     this.writeBytes(size64Encode(value.valueOf()))
   }
 

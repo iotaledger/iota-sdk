@@ -1,7 +1,7 @@
 import { SimpleBufferCursor } from './simple-buffer-cursor';
 
 function hexToBytes(hex: any) {
-    for (var bytes = [], c = 0; c < hex.length; c += 2)
+    for (let bytes = [], c = 0; c < hex.length; c += 2)
         bytes.push(parseInt(hex.substr(c, 2), 16));
     return Buffer.from(bytes);
 }
@@ -33,6 +33,5 @@ export async function prepareMetadata(evmAddress: string, amount: bigint, gas: b
     // see https://github.com/iotaledger/wasp/blob/12845adea4fc097813a30a061853af4a43407d3c/packages/isc/assets.go#L348-L356 
     metadata.writeUInt8(128); // 0x80 flag meaning there are native tokens in the allowance
     metadata.writeUInt64SpecialEncoding(amount - gas); // IOTA amount to send
-    // console.log(metadata.buffer.toString('hex'))
     return '0x' + metadata.buffer.toString('hex');
 }
