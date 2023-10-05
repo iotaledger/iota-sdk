@@ -93,7 +93,7 @@ pub(crate) mod dto {
 #[cfg(feature = "json")]
 mod json {
     use super::*;
-    use crate::utils::json::{FromJson, ToJson, Value};
+    use crate::utils::json::{FromJson, TakeValue, ToJson, Value};
 
     impl ToJson for NftAddress {
         fn to_json(&self) -> Value {
@@ -114,7 +114,7 @@ mod json {
             if value["type"] != Self::KIND {
                 return Err(Error::invalid_type::<Self>(Self::KIND, &value["type"]));
             }
-            Ok(Self::new(NftId::from_json(value["nftId"].take())?))
+            Ok(Self::new(value["nftId"].take_value()?))
         }
     }
 }

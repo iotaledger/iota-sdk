@@ -65,7 +65,7 @@ mod json {
     use super::*;
     use crate::{
         types::block::Error,
-        utils::json::{FromJson, ToJson, Value},
+        utils::json::{FromJson, TakeValue, ToJson, Value},
     };
 
     impl ToJson for CommitmentContextInput {
@@ -87,7 +87,7 @@ mod json {
             if value["type"] != Self::KIND {
                 return Err(Error::invalid_type::<Self>(Self::KIND, &value["type"]));
             }
-            Ok(Self::new(SlotCommitmentId::from_json(value["commitmentId"].take())?))
+            Ok(Self::new(value["commitmentId"].take_value()?))
         }
     }
 }

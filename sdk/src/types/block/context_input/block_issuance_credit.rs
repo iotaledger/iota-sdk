@@ -68,7 +68,7 @@ mod json {
     use super::*;
     use crate::{
         types::block::Error,
-        utils::json::{FromJson, ToJson, Value},
+        utils::json::{FromJson, TakeValue, ToJson, Value},
     };
 
     impl ToJson for BlockIssuanceCreditContextInput {
@@ -90,7 +90,7 @@ mod json {
             if value["type"] != Self::KIND {
                 return Err(Error::invalid_type::<Self>(Self::KIND, &value["type"]));
             }
-            Ok(Self::new(AccountId::from_json(value["accountId"].take())?))
+            Ok(Self::new(value["accountId"].take_value()?))
         }
     }
 }

@@ -66,3 +66,32 @@ pub(crate) mod dto {
 
     impl_serde_typed_dto!(ReferenceUnlock, ReferenceUnlockDto, "reference unlock");
 }
+
+#[cfg(feature = "json")]
+mod json {
+    use super::*;
+    use crate::utils::json::{FromJson, TakeValue, ToJson, Value};
+
+    impl ToJson for ReferenceUnlock {
+        fn to_json(&self) -> Value {
+            crate::json! ({
+                "type": ReferenceUnlock::KIND,
+                "reference": self.index()
+            })
+        }
+    }
+
+    impl FromJson for ReferenceUnlock {
+        type Error = Error;
+
+        fn from_non_null_json(mut value: Value) -> Result<Self, Self::Error>
+        where
+            Self: Sized,
+        {
+            if value["type"] != Self::KIND {
+                return Err(Error::invalid_type::<Self>(Self::KIND, &value["type"]));
+            }
+            Self::new(value["reference"].take_value()?)
+        }
+    }
+}

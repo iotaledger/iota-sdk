@@ -99,3 +99,40 @@ impl SlotCommitment {
         SlotCommitmentId::from(bytes)
     }
 }
+
+#[cfg(feature = "json")]
+mod json {
+    use super::*;
+    use crate::utils::json::{FromJson, TakeValue, ToJson, Value};
+
+    impl ToJson for SlotCommitment {
+        fn to_json(&self) -> Value {
+            crate::json!({
+                "protocolVersion": self.protocol_version,
+                "index": self.index,
+                "previousSlotCommitmentId": self.previous_slot_commitment_id,
+                "rootsId": self.roots_id,
+                "cumulativeWeight": self.cumulative_weight,
+                "referenceManaCost": self.reference_mana_cost,
+            })
+        }
+    }
+
+    impl FromJson for SlotCommitment {
+        type Error = crate::types::block::Error;
+
+        fn from_non_null_json(mut value: Value) -> Result<Self, Self::Error>
+        where
+            Self: Sized,
+        {
+            Ok(Self::new(
+                value["protocolVersion"].take_value()?,
+                value["index"].take_value()?,
+                value["previousSlotCommitmentId"].take_value()?,
+                value["rootsId"].take_value()?,
+                value["cumulativeWeight"].take_value()?,
+                value["referenceManaCost"].take_value()?,
+            ))
+        }
+    }
+}

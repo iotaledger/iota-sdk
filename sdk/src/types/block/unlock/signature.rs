@@ -57,3 +57,35 @@ pub(crate) mod dto {
 
     impl_serde_typed_dto!(SignatureUnlock, SignatureUnlockDto, "signature unlock");
 }
+
+#[cfg(feature = "json")]
+mod json {
+    use super::*;
+    use crate::{
+        types::block::Error,
+        utils::json::{FromJson, TakeValue, ToJson, Value},
+    };
+
+    impl ToJson for SignatureUnlock {
+        fn to_json(&self) -> Value {
+            crate::json! ({
+                "type": SignatureUnlock::KIND,
+                "signature": self.0
+            })
+        }
+    }
+
+    impl FromJson for SignatureUnlock {
+        type Error = Error;
+
+        fn from_non_null_json(mut value: Value) -> Result<Self, Self::Error>
+        where
+            Self: Sized,
+        {
+            if value["type"] != Self::KIND {
+                return Err(Error::invalid_type::<Self>(Self::KIND, &value["type"]));
+            }
+            Ok(Self::new(value["signature"].take_value()?))
+        }
+    }
+}

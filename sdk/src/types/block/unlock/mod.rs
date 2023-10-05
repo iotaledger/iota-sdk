@@ -144,3 +144,50 @@ fn verify_unlocks<const VERIFY: bool>(unlocks: &[Unlock], _: &()) -> Result<(), 
 
     Ok(())
 }
+
+#[cfg(feature = "json")]
+mod json {
+    use super::*;
+    use crate::utils::json::{FromJson, ToJson, Value};
+
+    impl ToJson for Unlock {
+        fn to_json(&self) -> Value {
+            match self {
+                Self::Signature(u) => u.to_json(),
+                Self::Reference(u) => u.to_json(),
+                Self::Account(u) => u.to_json(),
+                Self::Nft(u) => u.to_json(),
+            }
+        }
+    }
+
+    impl FromJson for Unlock {
+        type Error = Error;
+
+        fn from_non_null_json(value: Value) -> Result<Self, Self::Error>
+        where
+            Self: Sized,
+        {
+            Ok(match value["type"].as_u8() {
+                Some(SignatureUnlock::KIND) => SignatureUnlock::from_json(value)?.into(),
+                Some(ReferenceUnlock::KIND) => ReferenceUnlock::from_json(value)?.into(),
+                Some(AccountUnlock::KIND) => AccountUnlock::from_json(value)?.into(),
+                Some(NftUnlock::KIND) => NftUnlock::from_json(value)?.into(),
+                _ => {
+                    return Err(Error::invalid_type::<Self>(
+                        format!(
+                            "one of {:?}",
+                            [
+                                SignatureUnlock::KIND,
+                                ReferenceUnlock::KIND,
+                                AccountUnlock::KIND,
+                                NftUnlock::KIND
+                            ]
+                        ),
+                        &value["type"],
+                    ));
+                }
+            })
+        }
+    }
+}

@@ -67,6 +67,16 @@ where
         Self: Sized;
 }
 
+pub trait TakeValue {
+    fn take_value<T: FromJson>(&mut self) -> Result<T, T::Error>;
+}
+
+impl TakeValue for Value {
+    fn take_value<T: FromJson>(&mut self) -> Result<T, T::Error> {
+        T::from_json(self.take())
+    }
+}
+
 impl<T: FromJson> FromJson for Option<T> {
     type Error = T::Error;
 

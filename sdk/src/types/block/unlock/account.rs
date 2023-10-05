@@ -68,3 +68,32 @@ mod dto {
 
     impl_serde_typed_dto!(AccountUnlock, AccountUnlockDto, "account unlock");
 }
+
+#[cfg(feature = "json")]
+mod json {
+    use super::*;
+    use crate::utils::json::{FromJson, TakeValue, ToJson, Value};
+
+    impl ToJson for AccountUnlock {
+        fn to_json(&self) -> Value {
+            crate::json! ({
+                "type": AccountUnlock::KIND,
+                "reference": self.index()
+            })
+        }
+    }
+
+    impl FromJson for AccountUnlock {
+        type Error = Error;
+
+        fn from_non_null_json(mut value: Value) -> Result<Self, Self::Error>
+        where
+            Self: Sized,
+        {
+            if value["type"] != Self::KIND {
+                return Err(Error::invalid_type::<Self>(Self::KIND, &value["type"]));
+            }
+            Self::new(value["reference"].take_value()?)
+        }
+    }
+}

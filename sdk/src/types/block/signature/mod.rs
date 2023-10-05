@@ -51,3 +51,36 @@ impl Signature {
         sig
     }
 }
+
+#[cfg(feature = "json")]
+mod json {
+    use super::*;
+    use crate::utils::json::{FromJson, ToJson, Value};
+
+    impl ToJson for Signature {
+        fn to_json(&self) -> Value {
+            match self {
+                Self::Ed25519(i) => i.to_json(),
+            }
+        }
+    }
+
+    impl FromJson for Signature {
+        type Error = Error;
+
+        fn from_non_null_json(value: Value) -> Result<Self, Self::Error>
+        where
+            Self: Sized,
+        {
+            Ok(match value["type"].as_u8() {
+                Some(Ed25519Signature::KIND) => Ed25519Signature::from_json(value)?.into(),
+                _ => {
+                    return Err(Error::invalid_type::<Self>(
+                        format!("one of {:?}", [Ed25519Signature::KIND]),
+                        &value["type"],
+                    ));
+                }
+            })
+        }
+    }
+}
