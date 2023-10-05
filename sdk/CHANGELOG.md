@@ -25,6 +25,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `QueryParameter::UnlockableByAddress` to allowed query parameters for `Client::{alias_output_ids(), basic_output_ids(), nft_output_ids()}`;
 
+### Changed
+
+- Use `QueryParameter::UnlockableByAddress` for syncing also without default SyncOptions;
+
 ### Fixed
 
 - Update protocol params and addresses with correct bech32 HRP in `Wallet::set_client_options()`;
