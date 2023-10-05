@@ -85,9 +85,12 @@ class RestrictedAddress:
     """
     address: Union[Ed25519Address, AccountAddress,
                    NFTAddress, ImplicitAccountCreationAddress]
-    allowed_capabilities: bytes
+    allowed_capabilities: HexStr = field(default='0x00', init=False)
     type: int = field(default_factory=lambda: int(
         AddressType.RESTRICTED), init=False)
+
+    def with_allowed_capabilities(self, allowed_capabilities: bytes):
+        self.allowed_capabilities = '0x00' + allowed_capabilities.hex()
 
 
 @json
