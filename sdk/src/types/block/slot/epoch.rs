@@ -99,10 +99,10 @@ string_serde_impl!(EpochIndex);
 #[cfg(feature = "json")]
 mod json {
     use super::*;
-    use crate::utils::json::{FromJson, ToJson};
+    use crate::utils::json::{FromJson, ToJson, Value};
 
     impl ToJson for EpochIndex {
-        fn to_json(&self) -> ::json::JsonValue {
+        fn to_json(&self) -> Value {
             self.0.to_json()
         }
     }
@@ -110,7 +110,7 @@ mod json {
     impl FromJson for EpochIndex {
         type Error = <u64 as FromJson>::Error;
 
-        fn from_non_null_json(value: ::json::JsonValue) -> Result<Self, crate::utils::json::JsonError<Self::Error>>
+        fn from_non_null_json(value: Value) -> Result<Self, Self::Error>
         where
             Self: Sized,
         {

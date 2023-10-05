@@ -1,73 +1,68 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use json::JsonValue;
+pub use json::JsonValue as Value;
 
 #[derive(Debug, PartialEq, Eq)]
-pub enum JsonError<T> {
-    Conversion(T),
+pub enum Error {
     WrongArraySize { expected: usize, found: usize },
     MissingValue,
-    Json(json::JsonError),
+    WrongType { expected: String, found: String },
 }
 
-impl<T> JsonError<T> {
-    pub fn map<U, F: Fn(T) -> U>(self, f: F) -> JsonError<U> {
-        match self {
-            Self::Conversion(t) => JsonError::Conversion(f(t)),
-            Self::WrongArraySize { expected, found } => JsonError::WrongArraySize { expected, found },
-            Self::MissingValue => JsonError::MissingValue,
-            Self::Json(e) => JsonError::Json(e),
+impl Error {
+    pub fn wrong_type<E>(found: impl alloc::string::ToString) -> Self {
+        Self::WrongType {
+            expected: core::any::type_name::<E>().to_owned(),
+            found: found.to_string(),
         }
     }
 }
 
-impl<T> From<json::JsonError> for JsonError<T> {
-    fn from(value: json::JsonError) -> Self {
-        Self::Json(value)
-    }
-}
-
 #[cfg(feature = "std")]
-impl<T: core::fmt::Debug + core::fmt::Display> std::error::Error for JsonError<T> {}
+impl std::error::Error for Error {}
 
-impl<T: core::fmt::Display> core::fmt::Display for JsonError<T> {
+impl core::fmt::Display for Error {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         match self {
-            Self::Conversion(e) => write!(f, "conversion error: {e}"),
             Self::WrongArraySize { expected, found } => {
                 write!(f, "wrong array size: expected {expected}, found {found}")
             }
             Self::MissingValue => write!(f, "missing value"),
-            Self::Json(e) => e.fmt(f),
+            Self::WrongType { expected, found } => {
+                write!(f, "wrong type: expected {expected}, found {found}")
+            }
         }
     }
 }
 
 pub trait ToJson {
-    fn to_json(&self) -> JsonValue;
+    fn to_json(&self) -> Value;
 }
 
-impl ToJson for JsonValue {
-    fn to_json(&self) -> JsonValue {
+impl ToJson for Value {
+    fn to_json(&self) -> Value {
         self.clone()
     }
 }
 
-pub trait FromJson {
+pub trait FromJson
+where
+    Self::Error: From<Error>,
+{
     type Error;
 
-    fn from_json(value: JsonValue) -> Result<Self, JsonError<Self::Error>>
+    fn from_json(value: Value) -> Result<Self, Self::Error>
     where
         Self: Sized,
     {
         if value.is_null() {
-            return Err(JsonError::MissingValue);
+            return Err(Error::MissingValue.into());
         }
         Self::from_non_null_json(value)
     }
 
-    fn from_non_null_json(value: JsonValue) -> Result<Self, JsonError<Self::Error>>
+    fn from_non_null_json(value: Value) -> Result<Self, Self::Error>
     where
         Self: Sized;
 }
@@ -75,7 +70,7 @@ pub trait FromJson {
 impl<T: FromJson> FromJson for Option<T> {
     type Error = T::Error;
 
-    fn from_json(value: JsonValue) -> Result<Self, JsonError<Self::Error>>
+    fn from_json(value: Value) -> Result<Self, Self::Error>
     where
         Self: Sized,
     {
@@ -86,7 +81,7 @@ impl<T: FromJson> FromJson for Option<T> {
         })
     }
 
-    fn from_non_null_json(value: JsonValue) -> Result<Self, JsonError<Self::Error>>
+    fn from_non_null_json(value: Value) -> Result<Self, Self::Error>
     where
         Self: Sized,
     {
@@ -95,22 +90,22 @@ impl<T: FromJson> FromJson for Option<T> {
 }
 
 impl ToJson for String {
-    fn to_json(&self) -> JsonValue {
+    fn to_json(&self) -> Value {
         self.clone().into()
     }
 }
 
 impl FromJson for String {
-    type Error = json::Error;
+    type Error = Error;
 
-    fn from_non_null_json(value: JsonValue) -> Result<Self, JsonError<Self::Error>>
+    fn from_non_null_json(value: Value) -> Result<Self, Self::Error>
     where
         Self: Sized,
     {
-        if let JsonValue::String(s) = value {
+        if let Value::String(s) = value {
             Ok(s)
         } else {
-            Err(json::Error::WrongType(value.to_string()).into())
+            Err(Error::wrong_type::<String>(value))
         }
     }
 }
@@ -118,21 +113,19 @@ impl FromJson for String {
 macro_rules! impl_json_via {
     ($type:ty, $fn:ident) => {
         impl ToJson for $type {
-            fn to_json(&self) -> JsonValue {
+            fn to_json(&self) -> Value {
                 (*self).into()
             }
         }
 
         impl FromJson for $type {
-            type Error = json::Error;
+            type Error = Error;
 
-            fn from_non_null_json(value: JsonValue) -> Result<Self, JsonError<Self::Error>>
+            fn from_non_null_json(value: Value) -> Result<Self, Self::Error>
             where
                 Self: Sized,
             {
-                Ok(value
-                    .$fn()
-                    .ok_or_else(|| json::Error::WrongType(value.to_string()))?)
+                Ok(value.$fn().ok_or_else(|| Error::wrong_type::<$type>(value))?)
             }
         }
     };
@@ -146,22 +139,27 @@ impl_json_via!(bool, as_bool);
 macro_rules! impl_json_array {
     ($type:ty) => {
         impl<T: ToJson> ToJson for $type {
-            fn to_json(&self) -> JsonValue {
-                JsonValue::Array(self.iter().map(ToJson::to_json).collect())
+            fn to_json(&self) -> Value {
+                Value::Array(self.iter().map(ToJson::to_json).collect())
             }
         }
 
-        impl<T: FromJson> FromJson for $type {
+        impl<T: FromJson> FromJson for $type
+        where
+            T::Error: From<Error>,
+        {
             type Error = T::Error;
 
-            fn from_non_null_json(value: JsonValue) -> Result<Self, JsonError<Self::Error>>
+            fn from_non_null_json(value: Value) -> Result<Self, Self::Error>
             where
                 Self: Sized,
             {
-                if let JsonValue::Array(s) = value {
-                    Ok(s.into_iter().map(FromJson::from_json).collect::<Result<_, _>>()?)
+                if let Value::Array(s) = value {
+                    Ok(s.into_iter()
+                        .map(FromJson::from_json)
+                        .collect::<Result<_, T::Error>>()?)
                 } else {
-                    Err(json::Error::WrongType(value.to_string()).into())
+                    Err(Error::wrong_type::<T>(value).into())
                 }
             }
         }
@@ -170,24 +168,27 @@ macro_rules! impl_json_array {
 impl_json_array!(alloc::vec::Vec<T>);
 impl_json_array!(alloc::boxed::Box<[T]>);
 
-impl<T: FromJson, const N: usize> FromJson for [T; N] {
+impl<T: FromJson, const N: usize> FromJson for [T; N]
+where
+    T::Error: From<Error>,
+{
     type Error = T::Error;
 
-    fn from_non_null_json(value: JsonValue) -> Result<Self, JsonError<Self::Error>>
+    fn from_non_null_json(value: Value) -> Result<Self, Self::Error>
     where
         Self: Sized,
     {
-        if let JsonValue::Array(s) = value {
+        if let Value::Array(s) = value {
             Ok(s.into_iter()
-                .map(FromJson::from_non_null_json)
+                .map(FromJson::from_json)
                 .collect::<Result<Vec<T>, _>>()?
                 .try_into()
-                .map_err(|e: Vec<T>| JsonError::WrongArraySize {
+                .map_err(|e: Vec<T>| Error::WrongArraySize {
                     expected: N,
                     found: e.len(),
                 })?)
         } else {
-            Err(json::Error::WrongType(value.to_string()).into())
+            Err(Error::wrong_type::<T>(value).into())
         }
     }
 }

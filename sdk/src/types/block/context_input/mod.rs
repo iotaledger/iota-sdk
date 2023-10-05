@@ -105,6 +105,52 @@ impl ContextInput {
     }
 }
 
+#[cfg(feature = "json")]
+mod json {
+    use super::*;
+    use crate::utils::json::{FromJson, ToJson, Value};
+
+    impl ToJson for ContextInput {
+        fn to_json(&self) -> Value {
+            match self {
+                Self::Commitment(i) => i.to_json(),
+                Self::BlockIssuanceCredit(i) => i.to_json(),
+                Self::Reward(i) => i.to_json(),
+            }
+        }
+    }
+
+    impl FromJson for ContextInput {
+        type Error = Error;
+
+        fn from_non_null_json(value: Value) -> Result<Self, Self::Error>
+        where
+            Self: Sized,
+        {
+            Ok(match value["type"].as_u8() {
+                Some(CommitmentContextInput::KIND) => CommitmentContextInput::from_json(value)?.into(),
+                Some(BlockIssuanceCreditContextInput::KIND) => {
+                    BlockIssuanceCreditContextInput::from_json(value)?.into()
+                }
+                Some(RewardContextInput::KIND) => RewardContextInput::from_json(value)?.into(),
+                _ => {
+                    return Err(Error::invalid_type::<Self>(
+                        format!(
+                            "one of {:?}",
+                            [
+                                CommitmentContextInput::KIND,
+                                BlockIssuanceCreditContextInput::KIND,
+                                RewardContextInput::KIND
+                            ]
+                        ),
+                        &value["type"],
+                    ));
+                }
+            })
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
 

@@ -84,10 +84,10 @@ pub(crate) mod dto {
 #[cfg(feature = "json")]
 mod json {
     use super::*;
-    use crate::utils::json::{FromJson, ToJson};
+    use crate::utils::json::{FromJson, ToJson, Value};
 
     impl ToJson for Ed25519Address {
-        fn to_json(&self) -> ::json::JsonValue {
+        fn to_json(&self) -> Value {
             crate::json! ({
                 "type": Ed25519Address::KIND,
                 "pubKeyHash": self.to_string()
@@ -98,24 +98,14 @@ mod json {
     impl FromJson for Ed25519Address {
         type Error = Error;
 
-        fn from_non_null_json(value: ::json::JsonValue) -> Result<Self, crate::utils::json::JsonError<Self::Error>>
+        fn from_non_null_json(mut value: Value) -> Result<Self, Self::Error>
         where
             Self: Sized,
         {
             if value["type"] != Self::KIND {
-                return Err(::json::Error::WrongType(alloc::format!(
-                    "invalid ed25519 address type: expected {}, found {}",
-                    Self::KIND,
-                    value["type"]
-                ))
-                .into());
+                return Err(Error::invalid_type::<Self>(Self::KIND, &value["type"]));
             }
-            Ok(Self::from_str(
-                value["pubKeyHash"]
-                    .as_str()
-                    .ok_or_else(|| ::json::Error::WrongType(value.to_string()))?,
-            )
-            .map_err(crate::utils::json::JsonError::Conversion)?)
+            Ok(Self::from_str(&String::from_json(value["pubKeyHash"].take())?)?)
         }
     }
 }

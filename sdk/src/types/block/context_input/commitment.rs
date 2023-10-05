@@ -59,3 +59,35 @@ mod dto {
         "commitment context input"
     );
 }
+
+#[cfg(feature = "json")]
+mod json {
+    use super::*;
+    use crate::{
+        types::block::Error,
+        utils::json::{FromJson, ToJson, Value},
+    };
+
+    impl ToJson for CommitmentContextInput {
+        fn to_json(&self) -> Value {
+            crate::json! ({
+                "type": CommitmentContextInput::KIND,
+                "commitmentId": self.0
+            })
+        }
+    }
+
+    impl FromJson for CommitmentContextInput {
+        type Error = Error;
+
+        fn from_non_null_json(mut value: Value) -> Result<Self, Self::Error>
+        where
+            Self: Sized,
+        {
+            if value["type"] != Self::KIND {
+                return Err(Error::invalid_type::<Self>(Self::KIND, &value["type"]));
+            }
+            Ok(Self::new(SlotCommitmentId::from_json(value["commitmentId"].take())?))
+        }
+    }
+}

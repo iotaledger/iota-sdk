@@ -159,13 +159,12 @@ macro_rules! string_json_impl {
         impl $crate::utils::json::FromJson for $type {
             type Error = $crate::types::block::Error;
 
-            fn from_non_null_json(value: json::JsonValue) -> Result<Self, $crate::utils::json::JsonError<Self::Error>> {
+            fn from_non_null_json(value: json::JsonValue) -> Result<Self, Self::Error> {
                 core::str::FromStr::from_str(
                     value
                         .as_str()
-                        .ok_or_else(|| json::Error::WrongType(value.to_string()))?,
+                        .ok_or_else(|| $crate::utils::json::Error::wrong_type::<$type>(&value))?,
                 )
-                .map_err($crate::utils::json::JsonError::Conversion)
             }
         }
     };

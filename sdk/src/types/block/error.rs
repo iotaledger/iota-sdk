@@ -172,8 +172,13 @@ pub enum Error {
     DuplicateOutputChain(ChainId),
     InvalidField(&'static str),
     NullDelegationValidatorId,
-    // #[cfg(feature = "json")]
-    // JsonError(json::Error),
+    InvalidType {
+        name: String,
+        expected: String,
+        found: String,
+    },
+    #[cfg(feature = "json")]
+    Json(crate::utils::json::Error),
 }
 
 #[cfg(feature = "std")]
@@ -375,8 +380,21 @@ impl fmt::Display for Error {
             Self::DuplicateOutputChain(chain_id) => write!(f, "duplicate output chain {chain_id}"),
             Self::InvalidField(field) => write!(f, "invalid field: {field}"),
             Self::NullDelegationValidatorId => write!(f, "null delegation validator ID"),
-            // #[cfg(feature = "json")]
-            // Self::JsonError(e) => e.fmt(f),
+            Self::InvalidType { name, expected, found } => {
+                write!(f, "invalid {name} type: expected {expected}, found {found}")
+            }
+            #[cfg(feature = "json")]
+            Self::Json(e) => e.fmt(f),
+        }
+    }
+}
+
+impl Error {
+    pub fn invalid_type<T>(expected: impl alloc::string::ToString, found: impl alloc::string::ToString) -> Self {
+        Self::InvalidType {
+            name: core::any::type_name::<T>().to_owned(),
+            expected: expected.to_string(),
+            found: found.to_string(),
         }
     }
 }
@@ -390,5 +408,12 @@ impl From<CryptoError> for Error {
 impl From<Infallible> for Error {
     fn from(error: Infallible) -> Self {
         match error {}
+    }
+}
+
+#[cfg(feature = "json")]
+impl From<crate::utils::json::Error> for Error {
+    fn from(value: crate::utils::json::Error) -> Self {
+        Self::Json(value)
     }
 }

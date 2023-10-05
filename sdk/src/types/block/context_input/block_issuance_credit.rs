@@ -62,3 +62,35 @@ mod dto {
         "block issuance credit context input"
     );
 }
+
+#[cfg(feature = "json")]
+mod json {
+    use super::*;
+    use crate::{
+        types::block::Error,
+        utils::json::{FromJson, ToJson, Value},
+    };
+
+    impl ToJson for BlockIssuanceCreditContextInput {
+        fn to_json(&self) -> Value {
+            crate::json! ({
+                "type": BlockIssuanceCreditContextInput::KIND,
+                "accountId": self.0
+            })
+        }
+    }
+
+    impl FromJson for BlockIssuanceCreditContextInput {
+        type Error = Error;
+
+        fn from_non_null_json(mut value: Value) -> Result<Self, Self::Error>
+        where
+            Self: Sized,
+        {
+            if value["type"] != Self::KIND {
+                return Err(Error::invalid_type::<Self>(Self::KIND, &value["type"]));
+            }
+            Ok(Self::new(AccountId::from_json(value["accountId"].take())?))
+        }
+    }
+}

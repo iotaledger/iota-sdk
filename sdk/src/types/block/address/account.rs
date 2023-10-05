@@ -93,10 +93,10 @@ mod dto {
 #[cfg(feature = "json")]
 mod json {
     use super::*;
-    use crate::utils::json::{FromJson, ToJson};
+    use crate::utils::json::{FromJson, ToJson, Value};
 
     impl ToJson for AccountAddress {
-        fn to_json(&self) -> ::json::JsonValue {
+        fn to_json(&self) -> Value {
             crate::json! ({
                 "type": AccountAddress::KIND,
                 "accountId": self.0
@@ -107,17 +107,12 @@ mod json {
     impl FromJson for AccountAddress {
         type Error = Error;
 
-        fn from_non_null_json(mut value: ::json::JsonValue) -> Result<Self, crate::utils::json::JsonError<Self::Error>>
+        fn from_non_null_json(mut value: Value) -> Result<Self, Self::Error>
         where
             Self: Sized,
         {
             if value["type"] != Self::KIND {
-                return Err(::json::Error::WrongType(alloc::format!(
-                    "invalid account address type: expected {}, found {}",
-                    Self::KIND,
-                    value["type"]
-                ))
-                .into());
+                return Err(Error::invalid_type::<Self>(Self::KIND, &value["type"]));
             }
             Ok(Self::new(AccountId::from_json(value["accountId"].take())?))
         }
