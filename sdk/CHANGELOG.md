@@ -23,7 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Added `QueryParameter::UnlockableByAddress` to allowed query paramaters for `Client::{alias_output_ids(), basic_output_ids(), nft_output_ids()}`;
+- `QueryParameter::UnlockableByAddress` to allowed query parameters for `Client::{alias_output_ids(), basic_output_ids(), nft_output_ids()}`;
 
 ### Fixed
 
