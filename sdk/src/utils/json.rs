@@ -92,29 +92,42 @@ macro_rules! impl_ext_fns {
     };
 }
 
-pub trait JsonExt {
+pub trait JsonExt: Clone {
     def_ext_fns! {
         &str, to_str,
-        u8, to_u8,
-        u16, to_u16,
-        u32, to_u32,
-        u64, to_u64,
+        u8,   to_u8,
+        u16,  to_u16,
+        u32,  to_u32,
+        // u64, to_u64,
+        i8,   to_i8,
+        i16,  to_i16,
+        i32,  to_i32,
+        i64,  to_i64,
         bool, to_bool,
     }
 
+    fn to_u64(&self) -> Result<u64, Error>;
+
     fn to_vec<T: FromJson>(&self) -> Result<Vec<T>, T::Error>
     where
-        T::Error: From<Error>;
+        T::Error: From<Error>,
+    {
+        self.clone().take_vec()
+    }
 
     fn take_vec<T: FromJson>(&mut self) -> Result<Vec<T>, T::Error>
     where
         T::Error: From<Error>;
 
-    fn to_value<T: FromJson>(&self) -> Result<T, T::Error>;
+    fn to_value<T: FromJson>(&self) -> Result<T, T::Error> {
+        self.clone().take_value()
+    }
 
     fn take_value<T: FromJson>(&mut self) -> Result<T, T::Error>;
 
-    fn to_opt<T: FromJson>(&self) -> Result<Option<T>, T::Error>;
+    fn to_opt<T: FromJson>(&self) -> Result<Option<T>, T::Error> {
+        self.clone().take_opt()
+    }
 
     fn to_opt_or_default<T: FromJson + Default>(&self) -> Result<T, T::Error> {
         Ok(self.to_opt::<T>()?.unwrap_or_default())
@@ -129,19 +142,22 @@ pub trait JsonExt {
 
 impl JsonExt for Value {
     impl_ext_fns! {
-        &str, to_str, as_str,
-        u8, to_u8, as_u8,
-        u16, to_u16, as_u16,
-        u32, to_u32, as_u32,
-        u64, to_u64, as_u64,
+        &str, to_str,  as_str,
+        u8,   to_u8,   as_u8,
+        u16,  to_u16,  as_u16,
+        u32,  to_u32,  as_u32,
+        // u64, to_u64, as_u64,
+        i8,   to_i8,   as_i8,
+        i16,  to_i16,  as_i16,
+        i32,  to_i32,  as_i32,
+        i64,  to_i64,  as_i64,
         bool, to_bool, as_bool,
     }
 
-    fn to_vec<T: FromJson>(&self) -> Result<Vec<T>, T::Error>
-    where
-        T::Error: From<Error>,
-    {
-        self.clone().take_vec()
+    fn to_u64(&self) -> Result<u64, Error> {
+        self.to_str()?
+            .parse()
+            .map_err(|_| Error::wrong_type::<u64>(self.to_string()))
     }
 
     fn take_vec<T: FromJson>(&mut self) -> Result<Vec<T>, T::Error>
@@ -157,16 +173,8 @@ impl JsonExt for Value {
         }
     }
 
-    fn to_value<T: FromJson>(&self) -> Result<T, T::Error> {
-        self.clone().take_value()
-    }
-
     fn take_value<T: FromJson>(&mut self) -> Result<T, T::Error> {
         T::from_json(self.take())
-    }
-
-    fn to_opt<T: FromJson>(&self) -> Result<Option<T>, T::Error> {
-        self.clone().take_opt()
     }
 
     fn take_opt<T: FromJson>(&mut self) -> Result<Option<T>, T::Error> {
@@ -218,30 +226,58 @@ impl FromJson for String {
 }
 
 macro_rules! impl_json_via {
-    ($type:ty, $fn:ident) => {
-        impl ToJson for $type {
-            fn to_json(&self) -> Value {
-                (*self).into()
+    ($($type:ty, $fn:ident),+$(,)?) => {
+        $(
+            impl ToJson for $type {
+                fn to_json(&self) -> Value {
+                    (*self).into()
+                }
             }
-        }
 
-        impl FromJson for $type {
-            type Error = Error;
+            impl FromJson for $type {
+                type Error = Error;
 
-            fn from_non_null_json(value: Value) -> Result<Self, Self::Error>
-            where
-                Self: Sized,
-            {
-                Ok(value.$fn().ok_or_else(|| Error::wrong_type::<$type>(value))?)
+                fn from_non_null_json(value: Value) -> Result<Self, Self::Error>
+                where
+                    Self: Sized,
+                {
+                    value.$fn()
+                }
             }
-        }
+        )+
     };
 }
-impl_json_via!(u8, as_u8);
-impl_json_via!(u16, as_u16);
-impl_json_via!(u32, as_u32);
-impl_json_via!(u64, as_u64);
-impl_json_via!(bool, as_bool);
+#[rustfmt::skip]
+impl_json_via!(
+    u8,   to_u8, 
+    u16,  to_u16, 
+    u32,  to_u32, 
+    // u64, to_u64,
+    i8,   to_i8, 
+    i16,  to_i16, 
+    i32,  to_i32,
+    i64,  to_i64, 
+    bool, to_bool
+);
+
+// Special impls for u64 which cannot fit into json values
+
+impl ToJson for u64 {
+    fn to_json(&self) -> Value {
+        self.to_string().into()
+    }
+}
+
+impl FromJson for u64 {
+    type Error = Error;
+
+    fn from_non_null_json(value: Value) -> Result<Self, Self::Error>
+    where
+        Self: Sized,
+    {
+        value.to_u64()
+    }
+}
 
 impl ToJson for U256 {
     fn to_json(&self) -> Value {

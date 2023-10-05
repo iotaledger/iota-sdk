@@ -354,11 +354,8 @@ fn verify_features_packable<const VERIFY: bool>(features: &Features, _: &Protoco
     verify_features::<VERIFY>(features)
 }
 
-#[cfg(feature = "serde")]
 pub(crate) mod dto {
     use alloc::vec::Vec;
-
-    use serde::{Deserialize, Serialize};
 
     use super::*;
     use crate::{
@@ -369,19 +366,23 @@ pub(crate) mod dto {
         utils::serde::string,
     };
 
-    #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-    #[serde(rename_all = "camelCase")]
+    #[derive(Clone, Debug, Eq, PartialEq)]
+    #[cfg_attr(
+        feature = "serde",
+        derive(serde::Serialize, serde::Deserialize),
+        serde(rename_all = "camelCase")
+    )]
     pub struct BasicOutputDto {
-        #[serde(rename = "type")]
+        #[cfg_attr(feature = "serde", serde(rename = "type"))]
         pub kind: u8,
-        #[serde(with = "string")]
+        #[cfg_attr(feature = "serde", serde(with = "string"))]
         pub amount: u64,
-        #[serde(with = "string")]
+        #[cfg_attr(feature = "serde", serde(with = "string"))]
         pub mana: u64,
-        #[serde(skip_serializing_if = "Vec::is_empty", default)]
+        #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Vec::is_empty", default))]
         pub native_tokens: Vec<NativeToken>,
         pub unlock_conditions: Vec<UnlockConditionDto>,
-        #[serde(skip_serializing_if = "Vec::is_empty", default)]
+        #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Vec::is_empty", default))]
         pub features: Vec<Feature>,
     }
 
@@ -451,6 +452,54 @@ pub(crate) mod dto {
             }
 
             builder.finish_with_params(params)
+        }
+    }
+}
+
+#[cfg(feature = "json")]
+mod json {
+    use super::*;
+    use crate::{
+        types::block::Error,
+        utils::json::{FromJson, JsonExt, ToJson, Value},
+    };
+
+    impl ToJson for BasicOutput {
+        fn to_json(&self) -> Value {
+            let mut res = crate::json! ({
+                "type": Self::KIND,
+                "amount": self.amount(),
+                "mana": self.mana(),
+                "unlockConditions": self.unlock_conditions().to_vec(),
+            });
+            if !self.native_tokens().is_empty() {
+                res["nativeTokens"] = self.native_tokens().to_vec().to_json();
+            }
+            if !self.features().is_empty() {
+                res["features"] = self.features().to_vec().to_json();
+            }
+            res
+        }
+    }
+
+    impl FromJson for dto::BasicOutputDto {
+        type Error = Error;
+
+        fn from_non_null_json(mut value: Value) -> Result<Self, Self::Error>
+        where
+            Self: Sized,
+        {
+            if value["type"] != BasicOutput::KIND {
+                return Err(Error::invalid_type::<BasicOutput>(BasicOutput::KIND, &value["type"]));
+            }
+            Ok(Self {
+                kind: BasicOutput::KIND,
+                amount: value["amount"].to_u64()?,
+                mana: value["mana"].to_u64()?,
+                native_tokens: value["nativeTokens"].take_opt_or_default()?,
+                unlock_conditions: value["unlockCondition"].take_vec()?,
+                features: value["features"].take_opt_or_default()?,
+            })
         }
     }
 }

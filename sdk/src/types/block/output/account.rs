@@ -917,8 +917,8 @@ mod json {
         fn to_json(&self) -> Value {
             let mut res = crate::json! ({
                 "type": Self::KIND,
-                "amount": self.amount().to_string(),
-                "mana": self.mana().to_string(),
+                "amount": self.amount(),
+                "mana": self.mana(),
                 "accountId": *self.account_id(),
                 "stateIndex": self.state_index(),
                 "foundryCounter": self.foundry_counter(),
@@ -955,14 +955,8 @@ mod json {
             }
             Ok(Self {
                 kind: AccountOutput::KIND,
-                amount: value["amount"]
-                    .to_str()?
-                    .parse()
-                    .map_err(|_| Error::InvalidField("amount"))?,
-                mana: value["mana"]
-                    .to_str()?
-                    .parse()
-                    .map_err(|_| Error::InvalidField("mana"))?,
+                amount: value["amount"].to_u64()?,
+                mana: value["mana"].to_u64()?,
                 native_tokens: value["nativeTokens"].take_opt_or_default()?,
                 account_id: value["accountId"].take_value()?,
                 state_index: value["stateIndex"].to_u32()?,
