@@ -4,6 +4,7 @@
 pub(crate) mod builder;
 pub(crate) mod operations;
 
+use core::sync::atomic::Ordering;
 use std::sync::{
     atomic::{AtomicU32, AtomicUsize},
     Arc,
@@ -149,12 +150,17 @@ impl Wallet {
 }
 
 impl WalletInner {
-    /// Get the [SecretManager]
+    /// Gets the coin type.
+    pub fn coin_type(&self) -> u32 {
+        self.coin_type.load(Ordering::Relaxed)
+    }
+
+    /// Gets the secret manager.
     pub fn get_secret_manager(&self) -> &Arc<RwLock<Box<dyn DynSecretManagerConfig>>> {
         &self.secret_manager
     }
 
-    /// Listen to wallet events, empty vec will listen to all events
+    /// Listens to wallet events, empty vec will listen to all events.
     #[cfg(feature = "events")]
     #[cfg_attr(docsrs, doc(cfg(feature = "events")))]
     pub async fn listen<F, I: IntoIterator<Item = WalletEventType> + Send>(&self, events: I, handler: F)
@@ -166,7 +172,8 @@ impl WalletInner {
         emitter.on(events, handler);
     }
 
-    /// Remove wallet event listeners, empty vec will remove all listeners
+    /// Removes wallet event listeners.
+    /// NOTE: An empty list will remove all listeners.
     #[cfg(feature = "events")]
     #[cfg_attr(docsrs, doc(cfg(feature = "events")))]
     pub async fn clear_listeners<I: IntoIterator<Item = WalletEventType> + Send>(&self, events: I)
@@ -182,7 +189,7 @@ impl WalletInner {
         Ok(Client::generate_mnemonic()?)
     }
 
-    /// Verify that a &str is a valid mnemonic.
+    /// Verifies that a &str is a valid mnemonic.
     pub fn verify_mnemonic(&self, mnemonic: &MnemonicRef) -> crate::wallet::Result<()> {
         verify_mnemonic(mnemonic)?;
         Ok(())
