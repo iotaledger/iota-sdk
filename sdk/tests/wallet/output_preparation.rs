@@ -587,14 +587,7 @@ async fn prepare_nft_output_features_update() -> Result<()> {
     assert_eq!(nft.amount(), 1_000_000);
     assert_eq!(
         nft.address(),
-        accounts[0]
-            .addresses()
-            .await
-            .into_iter()
-            .next()
-            .unwrap()
-            .into_bech32()
-            .as_ref()
+        accounts[0].addresses().await[0].clone().into_bech32().as_ref()
     );
     assert!(nft.features().sender().is_none());
     assert!(nft.features().tag().is_none());
@@ -605,14 +598,7 @@ async fn prepare_nft_output_features_update() -> Result<()> {
     );
     assert_eq!(
         nft.immutable_features().issuer().unwrap().address(),
-        accounts[0]
-            .addresses()
-            .await
-            .into_iter()
-            .next()
-            .unwrap()
-            .into_bech32()
-            .as_ref()
+        accounts[0].addresses().await[0].clone().into_bech32().as_ref()
     );
 
     tear_down(storage_path)
@@ -876,14 +862,7 @@ async fn prepare_existing_nft_output_gift() -> Result<()> {
     assert_eq!(nft.amount(), 52300);
     assert_eq!(
         nft.address(),
-        accounts[0]
-            .addresses()
-            .await
-            .into_iter()
-            .next()
-            .unwrap()
-            .into_bech32()
-            .as_ref()
+        accounts[0].addresses().await[0].clone().into_bech32().as_ref()
     );
     assert!(nft.features().is_empty());
     assert_eq!(
@@ -892,14 +871,7 @@ async fn prepare_existing_nft_output_gift() -> Result<()> {
     );
     assert_eq!(
         nft.immutable_features().issuer().unwrap().address(),
-        accounts[0]
-            .addresses()
-            .await
-            .into_iter()
-            .next()
-            .unwrap()
-            .into_bech32()
-            .as_ref()
+        accounts[0].addresses().await[0].clone().into_bech32().as_ref()
     );
 
     tear_down(storage_path)

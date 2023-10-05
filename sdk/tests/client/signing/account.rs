@@ -44,10 +44,8 @@ async fn sign_account_state_transition() -> Result<()> {
                 .with_coin_type(SHIMMER_COIN_TYPE)
                 .with_range(0..1),
         )
-        .await?
-        .into_iter()
-        .next()
-        .unwrap()
+        .await?[0]
+        .clone()
         .to_bech32(SHIMMER_TESTNET_BECH32_HRP);
     let bech32_address_1 = &secret_manager
         .generate_ed25519_addresses(
@@ -55,10 +53,8 @@ async fn sign_account_state_transition() -> Result<()> {
                 .with_coin_type(SHIMMER_COIN_TYPE)
                 .with_range(1..2),
         )
-        .await?
-        .into_iter()
-        .next()
-        .unwrap()
+        .await?[0]
+        .clone()
         .to_bech32(SHIMMER_TESTNET_BECH32_HRP);
 
     let protocol_parameters = protocol_parameters();
