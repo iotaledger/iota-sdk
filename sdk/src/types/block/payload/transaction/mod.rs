@@ -25,7 +25,7 @@ pub struct TransactionPayload {
 
 impl TransactionPayload {
     /// The payload kind of a [`TransactionPayload`].
-    pub const KIND: u32 = 6;
+    pub const KIND: u8 = 6;
 
     /// Creates a new [`TransactionPayload`].
     pub fn new(essence: RegularTransactionEssence, unlocks: Unlocks) -> Result<Self, Error> {
@@ -110,7 +110,7 @@ pub mod dto {
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
     pub struct TransactionPayloadDto {
         #[serde(rename = "type")]
-        pub kind: u32,
+        pub kind: u8,
         pub essence: TransactionEssenceDto,
         pub unlocks: Vec<Unlock>,
     }
