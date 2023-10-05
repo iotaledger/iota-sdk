@@ -518,12 +518,11 @@ pub(crate) mod dto {
         }
     }
 
-    impl TryFromDto for DelegationOutput {
-        type Dto = DelegationOutputDto;
+    impl TryFromDto<DelegationOutputDto> for DelegationOutput {
         type Error = Error;
 
         fn try_from_dto_with_params_inner(
-            dto: Self::Dto,
+            dto: DelegationOutputDto,
             params: crate::types::ValidationParams<'_>,
         ) -> Result<Self, Self::Error> {
             let mut builder = DelegationOutputBuilder::new_with_amount(

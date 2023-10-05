@@ -131,12 +131,11 @@ impl From<&OutputData> for OutputDataDto {
     }
 }
 
-impl TryFromDto for OutputData {
-    type Dto = OutputDataDto;
+impl TryFromDto<OutputDataDto> for OutputData {
     type Error = BlockError;
 
     fn try_from_dto_with_params_inner(
-        dto: Self::Dto,
+        dto: OutputDataDto,
         params: crate::types::ValidationParams<'_>,
     ) -> Result<Self, Self::Error> {
         Ok(Self {
@@ -214,12 +213,11 @@ impl From<&Transaction> for TransactionDto {
     }
 }
 
-impl TryFromDto for Transaction {
-    type Dto = TransactionDto;
+impl TryFromDto<TransactionDto> for Transaction {
     type Error = BlockError;
 
     fn try_from_dto_with_params_inner(
-        dto: Self::Dto,
+        dto: TransactionDto,
         params: crate::types::ValidationParams<'_>,
     ) -> Result<Self, Self::Error> {
         Ok(Self {

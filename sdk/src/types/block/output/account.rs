@@ -761,11 +761,8 @@ fn verify_unlock_conditions(unlock_conditions: &UnlockConditions, account_id: &A
     verify_allowed_unlock_conditions(unlock_conditions, AccountOutput::ALLOWED_UNLOCK_CONDITIONS)
 }
 
-#[cfg(feature = "serde")]
 pub(crate) mod dto {
     use alloc::boxed::Box;
-
-    use serde::{Deserialize, Serialize};
 
     use super::*;
     use crate::{
@@ -777,26 +774,33 @@ pub(crate) mod dto {
     };
 
     /// Describes an account in the ledger that can be controlled by the state and governance controllers.
-    #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-    #[serde(rename_all = "camelCase")]
+    #[derive(Clone, Debug, Eq, PartialEq)]
+    #[cfg_attr(
+        feature = "serde",
+        derive(serde::Serialize, serde::Deserialize),
+        serde(rename_all = "camelCase")
+    )]
     pub struct AccountOutputDto {
-        #[serde(rename = "type")]
+        #[cfg_attr(feature = "serde", serde(rename = "type"))]
         pub kind: u8,
-        #[serde(with = "string")]
+        #[cfg_attr(feature = "serde", serde(with = "string"))]
         pub amount: u64,
-        #[serde(with = "string")]
+        #[cfg_attr(feature = "serde", serde(with = "string"))]
         pub mana: u64,
-        #[serde(skip_serializing_if = "Vec::is_empty", default)]
+        #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Vec::is_empty", default))]
         pub native_tokens: Vec<NativeToken>,
         pub account_id: AccountId,
         pub state_index: u32,
-        #[serde(skip_serializing_if = "<[_]>::is_empty", default, with = "prefix_hex_bytes")]
+        #[cfg_attr(
+            feature = "serde",
+            serde(skip_serializing_if = "<[_]>::is_empty", default, with = "prefix_hex_bytes")
+        )]
         pub state_metadata: Box<[u8]>,
         pub foundry_counter: u32,
         pub unlock_conditions: Vec<UnlockConditionDto>,
-        #[serde(skip_serializing_if = "Vec::is_empty", default)]
+        #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Vec::is_empty", default))]
         pub features: Vec<Feature>,
-        #[serde(skip_serializing_if = "Vec::is_empty", default)]
+        #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Vec::is_empty", default))]
         pub immutable_features: Vec<Feature>,
     }
 
@@ -818,11 +822,13 @@ pub(crate) mod dto {
         }
     }
 
-    impl TryFromDto for AccountOutput {
-        type Dto = AccountOutputDto;
+    impl TryFromDto<AccountOutputDto> for AccountOutput {
         type Error = Error;
 
-        fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
+        fn try_from_dto_with_params_inner(
+            dto: AccountOutputDto,
+            params: ValidationParams<'_>,
+        ) -> Result<Self, Self::Error> {
             let mut builder = AccountOutputBuilder::new_with_amount(dto.amount, dto.account_id)
                 .with_mana(dto.mana)
                 .with_state_index(dto.state_index)
@@ -895,6 +901,81 @@ pub(crate) mod dto {
             }
 
             builder.finish_with_params(params)
+        }
+    }
+}
+
+#[cfg(feature = "json")]
+mod json {
+    use super::*;
+    use crate::{
+        types::block::Error,
+        utils::json::{FromJson, JsonExt, ToJson, Value},
+    };
+
+    impl ToJson for AccountOutput {
+        fn to_json(&self) -> Value {
+            let mut res = crate::json! ({
+                "type": Self::KIND,
+                "amount": self.amount().to_string(),
+                "mana": self.mana().to_string(),
+                "accountId": *self.account_id(),
+                "stateIndex": self.state_index(),
+                "foundryCounter": self.foundry_counter(),
+                "unlockConditions": self.unlock_conditions().to_vec(),
+            });
+            if !self.native_tokens().is_empty() {
+                res["nativeTokens"] = self.native_tokens().to_vec().to_json();
+            }
+            if !self.state_metadata().is_empty() {
+                res["stateMetadata"] = self.state_metadata().to_vec().to_json();
+            }
+            if !self.features().is_empty() {
+                res["features"] = self.features().to_vec().to_json();
+            }
+            if !self.immutable_features().is_empty() {
+                res["immutableFeatures"] = self.immutable_features().to_vec().to_json();
+            }
+            res
+        }
+    }
+
+    impl FromJson for dto::AccountOutputDto {
+        type Error = Error;
+
+        fn from_non_null_json(mut value: Value) -> Result<Self, Self::Error>
+        where
+            Self: Sized,
+        {
+            if value["type"] != AccountOutput::KIND {
+                return Err(Error::invalid_type::<AccountOutput>(
+                    AccountOutput::KIND,
+                    &value["type"],
+                ));
+            }
+            Ok(Self {
+                kind: AccountOutput::KIND,
+                amount: value["amount"]
+                    .to_str()?
+                    .parse()
+                    .map_err(|_| Error::InvalidField("amount"))?,
+                mana: value["mana"]
+                    .to_str()?
+                    .parse()
+                    .map_err(|_| Error::InvalidField("mana"))?,
+                native_tokens: value["nativeTokens"].take_opt_or_default()?,
+                account_id: value["accountId"].take_value()?,
+                state_index: value["stateIndex"].to_u32()?,
+                state_metadata: value["stateMetadata"]
+                    .take_opt::<String>()?
+                    .map(|s| prefix_hex::decode(s).map_err(|_| Error::InvalidField("stateMetadata")))
+                    .transpose()?
+                    .unwrap_or_default(),
+                foundry_counter: value["foundryCounter"].to_u32()?,
+                unlock_conditions: value["unlockCondition"].take_vec()?,
+                features: value["features"].take_opt_or_default()?,
+                immutable_features: value["immutableFeatures"].take_opt_or_default()?,
+            })
         }
     }
 }

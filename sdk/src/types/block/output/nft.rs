@@ -585,11 +585,13 @@ pub(crate) mod dto {
         }
     }
 
-    impl TryFromDto for NftOutput {
-        type Dto = NftOutputDto;
+    impl TryFromDto<NftOutputDto> for NftOutput {
         type Error = Error;
 
-        fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
+        fn try_from_dto_with_params_inner(
+            dto: NftOutputDto,
+            params: ValidationParams<'_>,
+        ) -> Result<Self, Self::Error> {
             let mut builder = NftOutputBuilder::new_with_amount(dto.amount, dto.nft_id)
                 .with_mana(dto.mana)
                 .with_native_tokens(dto.native_tokens)

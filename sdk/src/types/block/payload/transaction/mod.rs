@@ -125,11 +125,13 @@ pub mod dto {
         }
     }
 
-    impl TryFromDto for TransactionPayload {
-        type Dto = TransactionPayloadDto;
+    impl TryFromDto<TransactionPayloadDto> for TransactionPayload {
         type Error = Error;
 
-        fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
+        fn try_from_dto_with_params_inner(
+            dto: TransactionPayloadDto,
+            params: ValidationParams<'_>,
+        ) -> Result<Self, Self::Error> {
             let TransactionEssence::Regular(essence) =
                 TransactionEssence::try_from_dto_with_params_inner(dto.essence, params)?;
             Self::new(essence, Unlocks::new(dto.unlocks)?)

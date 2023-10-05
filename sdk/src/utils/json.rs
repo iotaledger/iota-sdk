@@ -113,6 +113,18 @@ pub trait JsonExt {
     fn to_value<T: FromJson>(&self) -> Result<T, T::Error>;
 
     fn take_value<T: FromJson>(&mut self) -> Result<T, T::Error>;
+
+    fn to_opt<T: FromJson>(&self) -> Result<Option<T>, T::Error>;
+
+    fn to_opt_or_default<T: FromJson + Default>(&self) -> Result<T, T::Error> {
+        Ok(self.to_opt::<T>()?.unwrap_or_default())
+    }
+
+    fn take_opt<T: FromJson>(&mut self) -> Result<Option<T>, T::Error>;
+
+    fn take_opt_or_default<T: FromJson + Default>(&mut self) -> Result<T, T::Error> {
+        Ok(self.take_opt::<T>()?.unwrap_or_default())
+    }
 }
 
 impl JsonExt for Value {
@@ -151,6 +163,14 @@ impl JsonExt for Value {
 
     fn take_value<T: FromJson>(&mut self) -> Result<T, T::Error> {
         T::from_json(self.take())
+    }
+
+    fn to_opt<T: FromJson>(&self) -> Result<Option<T>, T::Error> {
+        self.clone().take_opt()
+    }
+
+    fn take_opt<T: FromJson>(&mut self) -> Result<Option<T>, T::Error> {
+        Option::from_json(self.take())
     }
 }
 

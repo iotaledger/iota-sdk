@@ -496,7 +496,7 @@ mod json {
         }
     }
 
-    impl FromJson for UnlockCondition {
+    impl FromJson for dto::UnlockConditionDto {
         type Error = Error;
 
         fn from_non_null_json(value: Value) -> Result<Self, Self::Error>
@@ -506,7 +506,7 @@ mod json {
             Ok(match value["type"].as_u8() {
                 Some(AddressUnlockCondition::KIND) => AddressUnlockCondition::from_json(value)?.into(),
                 Some(StorageDepositReturnUnlockCondition::KIND) => {
-                    StorageDepositReturnUnlockCondition::from_json(value)?.into()
+                    dto::StorageDepositReturnUnlockConditionDto::from_json(value)?.into()
                 }
                 Some(TimelockUnlockCondition::KIND) => TimelockUnlockCondition::from_json(value)?.into(),
                 Some(ExpirationUnlockCondition::KIND) => ExpirationUnlockCondition::from_json(value)?.into(),
@@ -560,16 +560,13 @@ mod test {
     }
 }
 
-#[cfg(feature = "serde")]
 pub mod dto {
-    use serde::{Deserialize, Serialize};
-
     pub use self::storage_deposit_return::dto::StorageDepositReturnUnlockConditionDto;
     use super::*;
     use crate::types::{block::Error, TryFromDto, ValidationParams};
 
-    #[derive(Clone, Debug, Eq, PartialEq, From, Serialize, Deserialize)]
-    #[serde(untagged)]
+    #[derive(Clone, Debug, Eq, PartialEq, From)]
+    #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize), serde(untagged))]
     pub enum UnlockConditionDto {
         /// An address unlock condition.
         Address(AddressUnlockCondition),
@@ -601,11 +598,13 @@ pub mod dto {
         }
     }
 
-    impl TryFromDto for UnlockCondition {
-        type Dto = UnlockConditionDto;
+    impl TryFromDto<UnlockConditionDto> for UnlockCondition {
         type Error = Error;
 
-        fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
+        fn try_from_dto_with_params_inner(
+            dto: UnlockConditionDto,
+            params: ValidationParams<'_>,
+        ) -> Result<Self, Self::Error> {
             Ok(match dto {
                 UnlockConditionDto::Address(v) => Self::Address(v),
                 UnlockConditionDto::StorageDepositReturn(v) => Self::StorageDepositReturn(

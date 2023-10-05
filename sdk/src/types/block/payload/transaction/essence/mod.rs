@@ -70,11 +70,13 @@ pub(crate) mod dto {
         }
     }
 
-    impl TryFromDto for TransactionEssence {
-        type Dto = TransactionEssenceDto;
+    impl TryFromDto<TransactionEssenceDto> for TransactionEssence {
         type Error = Error;
 
-        fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
+        fn try_from_dto_with_params_inner(
+            dto: TransactionEssenceDto,
+            params: ValidationParams<'_>,
+        ) -> Result<Self, Self::Error> {
             match dto {
                 TransactionEssenceDto::Regular(r) => Ok(Self::Regular(
                     RegularTransactionEssence::try_from_dto_with_params_inner(r, params)?,

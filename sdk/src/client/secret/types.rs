@@ -167,11 +167,13 @@ pub struct InputSigningDataDto {
     pub chain: Option<Bip44>,
 }
 
-impl TryFromDto for InputSigningData {
-    type Dto = InputSigningDataDto;
+impl TryFromDto<InputSigningDataDto> for InputSigningData {
     type Error = crate::client::Error;
 
-    fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
+    fn try_from_dto_with_params_inner(
+        dto: InputSigningDataDto,
+        params: ValidationParams<'_>,
+    ) -> Result<Self, Self::Error> {
         Ok(Self {
             output: Output::try_from_dto_with_params_inner(dto.output, params)?,
             output_metadata: dto.output_metadata,

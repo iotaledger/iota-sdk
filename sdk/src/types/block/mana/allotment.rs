@@ -93,12 +93,11 @@ pub(super) mod dto {
         }
     }
 
-    impl TryFromDto for ManaAllotment {
-        type Dto = ManaAllotmentDto;
+    impl TryFromDto<ManaAllotmentDto> for ManaAllotment {
         type Error = Error;
 
         fn try_from_dto_with_params_inner(
-            dto: Self::Dto,
+            dto: ManaAllotmentDto,
             params: crate::types::ValidationParams<'_>,
         ) -> Result<Self, Self::Error> {
             Ok(if let Some(params) = params.protocol_parameters() {

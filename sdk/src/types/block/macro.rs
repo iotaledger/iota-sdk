@@ -151,7 +151,7 @@ pub(crate) use string_serde_impl;
 macro_rules! string_json_impl {
     ($type:ty) => {
         impl $crate::utils::json::ToJson for $type {
-            fn to_json(&self) -> json::JsonValue {
+            fn to_json(&self) -> $crate::utils::json::Value {
                 self.to_string().into()
             }
         }
@@ -159,7 +159,7 @@ macro_rules! string_json_impl {
         impl $crate::utils::json::FromJson for $type {
             type Error = $crate::types::block::Error;
 
-            fn from_non_null_json(value: json::JsonValue) -> Result<Self, Self::Error> {
+            fn from_non_null_json(value: $crate::utils::json::Value) -> Result<Self, Self::Error> {
                 core::str::FromStr::from_str($crate::utils::json::JsonExt::to_str(&value)?)
             }
         }

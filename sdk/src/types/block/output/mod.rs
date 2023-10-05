@@ -553,11 +553,10 @@ pub mod dto {
         }
     }
 
-    impl TryFromDto for Output {
-        type Dto = OutputDto;
+    impl TryFromDto<OutputDto> for Output {
         type Error = Error;
 
-        fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
+        fn try_from_dto_with_params_inner(dto: OutputDto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
             Ok(match dto {
                 OutputDto::Basic(o) => Self::Basic(BasicOutput::try_from_dto_with_params_inner(o, params)?),
                 OutputDto::Account(o) => Self::Account(AccountOutput::try_from_dto_with_params_inner(o, params)?),

@@ -469,11 +469,13 @@ pub(crate) mod dto {
         }
     }
 
-    impl TryFromDto for RegularTransactionEssence {
-        type Dto = RegularTransactionEssenceDto;
+    impl TryFromDto<RegularTransactionEssenceDto> for RegularTransactionEssence {
         type Error = Error;
 
-        fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
+        fn try_from_dto_with_params_inner(
+            dto: RegularTransactionEssenceDto,
+            params: ValidationParams<'_>,
+        ) -> Result<Self, Self::Error> {
             let network_id = dto
                 .network_id
                 .parse::<u64>()

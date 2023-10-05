@@ -257,3 +257,32 @@ fn verify_unique_sorted<const VERIFY: bool>(native_tokens: &[NativeToken], _: &(
         Ok(())
     }
 }
+
+#[cfg(feature = "json")]
+mod json {
+    use super::*;
+    use crate::{
+        types::block::Error,
+        utils::json::{FromJson, JsonExt, ToJson, Value},
+    };
+
+    impl ToJson for NativeToken {
+        fn to_json(&self) -> Value {
+            crate::json! ({
+                "id": self.token_id,
+                "amount": self.amount
+            })
+        }
+    }
+
+    impl FromJson for NativeToken {
+        type Error = Error;
+
+        fn from_non_null_json(mut value: Value) -> Result<Self, Self::Error>
+        where
+            Self: Sized,
+        {
+            Self::new(value["id"].take_value()?, value["amount"].take_value::<U256>()?)
+        }
+    }
+}

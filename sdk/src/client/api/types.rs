@@ -57,11 +57,13 @@ impl From<&PreparedTransactionData> for PreparedTransactionDataDto {
     }
 }
 
-impl TryFromDto for PreparedTransactionData {
-    type Dto = PreparedTransactionDataDto;
+impl TryFromDto<PreparedTransactionDataDto> for PreparedTransactionData {
     type Error = Error;
 
-    fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
+    fn try_from_dto_with_params_inner(
+        dto: PreparedTransactionDataDto,
+        params: ValidationParams<'_>,
+    ) -> Result<Self, Self::Error> {
         Ok(Self {
             essence: TransactionEssence::try_from_dto_with_params(dto.essence, &params)
                 .map_err(|_| Error::InvalidField("essence"))?,
@@ -110,11 +112,13 @@ impl From<&SignedTransactionData> for SignedTransactionDataDto {
     }
 }
 
-impl TryFromDto for SignedTransactionData {
-    type Dto = SignedTransactionDataDto;
+impl TryFromDto<SignedTransactionDataDto> for SignedTransactionData {
     type Error = Error;
 
-    fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
+    fn try_from_dto_with_params_inner(
+        dto: SignedTransactionDataDto,
+        params: ValidationParams<'_>,
+    ) -> Result<Self, Self::Error> {
         Ok(Self {
             transaction_payload: TransactionPayload::try_from_dto_with_params(dto.transaction_payload, &params)
                 .map_err(|_| Error::InvalidField("transaction_payload"))?,
@@ -151,11 +155,13 @@ pub struct RemainderDataDto {
     pub address: Address,
 }
 
-impl TryFromDto for RemainderData {
-    type Dto = RemainderDataDto;
+impl TryFromDto<RemainderDataDto> for RemainderData {
     type Error = Error;
 
-    fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
+    fn try_from_dto_with_params_inner(
+        dto: RemainderDataDto,
+        params: ValidationParams<'_>,
+    ) -> Result<Self, Self::Error> {
         Ok(Self {
             output: Output::try_from_dto_with_params_inner(dto.output, params)?,
             chain: dto.chain,

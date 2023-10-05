@@ -331,11 +331,13 @@ pub(crate) mod dto {
         }
     }
 
-    impl TryFromDto for BlockWrapper {
-        type Dto = BlockWrapperDto;
+    impl TryFromDto<BlockWrapperDto> for BlockWrapper {
         type Error = Error;
 
-        fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
+        fn try_from_dto_with_params_inner(
+            dto: BlockWrapperDto,
+            params: ValidationParams<'_>,
+        ) -> Result<Self, Self::Error> {
             if let Some(protocol_params) = params.protocol_parameters() {
                 if dto.protocol_version != protocol_params.version() {
                     return Err(Error::ProtocolVersionMismatch {

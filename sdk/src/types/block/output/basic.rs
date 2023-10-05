@@ -398,11 +398,13 @@ pub(crate) mod dto {
         }
     }
 
-    impl TryFromDto for BasicOutput {
-        type Dto = BasicOutputDto;
+    impl TryFromDto<BasicOutputDto> for BasicOutput {
         type Error = Error;
 
-        fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
+        fn try_from_dto_with_params_inner(
+            dto: BasicOutputDto,
+            params: ValidationParams<'_>,
+        ) -> Result<Self, Self::Error> {
             let mut builder = BasicOutputBuilder::new_with_amount(dto.amount)
                 .with_native_tokens(dto.native_tokens)
                 .with_mana(dto.mana)

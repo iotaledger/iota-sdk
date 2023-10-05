@@ -58,11 +58,8 @@ fn verify_amount_packable<const VERIFY: bool>(
     verify_amount::<VERIFY>(*amount, protocol_parameters.token_supply())
 }
 
-#[cfg(feature = "serde")]
 pub(crate) mod dto {
     use alloc::format;
-
-    use serde::{Deserialize, Serialize};
 
     use super::*;
     use crate::{
@@ -70,20 +67,26 @@ pub(crate) mod dto {
         utils::serde::string,
     };
 
-    #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-    #[serde(rename_all = "camelCase")]
+    #[derive(Clone, Debug, Eq, PartialEq)]
+    #[cfg_attr(
+        feature = "serde",
+        derive(serde::Serialize, serde::Deserialize),
+        serde(rename_all = "camelCase")
+    )]
     pub struct StorageDepositReturnUnlockConditionDto {
-        #[serde(rename = "type", deserialize_with = "deserialize_kind")]
+        #[cfg_attr(feature = "serde", serde(rename = "type", deserialize_with = "deserialize_kind"))]
         pub kind: u8,
         pub return_address: Address,
-        #[serde(with = "string")]
+        #[cfg_attr(feature = "serde", serde(with = "string"))]
         pub amount: u64,
     }
 
+    #[cfg(feature = "serde")]
     fn deserialize_kind<'de, D>(d: D) -> Result<u8, D::Error>
     where
         D: serde::Deserializer<'de>,
     {
+        use serde::Deserialize;
         let kind = u8::deserialize(d)?;
         if kind != StorageDepositReturnUnlockCondition::KIND {
             return Err(serde::de::Error::custom(format!(
@@ -105,11 +108,13 @@ pub(crate) mod dto {
         }
     }
 
-    impl TryFromDto for StorageDepositReturnUnlockCondition {
-        type Dto = StorageDepositReturnUnlockConditionDto;
+    impl TryFromDto<StorageDepositReturnUnlockConditionDto> for StorageDepositReturnUnlockCondition {
         type Error = Error;
 
-        fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
+        fn try_from_dto_with_params_inner(
+            dto: StorageDepositReturnUnlockConditionDto,
+            params: ValidationParams<'_>,
+        ) -> Result<Self, Self::Error> {
             Ok(if let Some(token_supply) = params.token_supply() {
                 Self::new(dto.return_address, dto.amount, token_supply)?
             } else {
@@ -121,7 +126,8 @@ pub(crate) mod dto {
         }
     }
 
-    impl Serialize for StorageDepositReturnUnlockCondition {
+    #[cfg(feature = "serde")]
+    impl serde::Serialize for StorageDepositReturnUnlockCondition {
         fn serialize<S>(&self, s: S) -> Result<S::Ok, S::Error>
         where
             S: serde::Serializer,
@@ -149,17 +155,21 @@ mod json {
         }
     }
 
-    impl FromJson for StorageDepositReturnUnlockCondition {
+    impl FromJson for dto::StorageDepositReturnUnlockConditionDto {
         type Error = Error;
 
         fn from_non_null_json(mut value: Value) -> Result<Self, Self::Error>
         where
             Self: Sized,
         {
-            if value["type"] != Self::KIND {
-                return Err(Error::invalid_type::<Self>(Self::KIND, &value["type"]));
+            if value["type"] != StorageDepositReturnUnlockCondition::KIND {
+                return Err(Error::invalid_type::<StorageDepositReturnUnlockCondition>(
+                    StorageDepositReturnUnlockCondition::KIND,
+                    &value["type"],
+                ));
             }
             Ok(Self {
+                kind: StorageDepositReturnUnlockCondition::KIND,
                 return_address: value["returnAddress"].take_value()?,
                 amount: value["amount"]
                     .to_str()?

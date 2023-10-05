@@ -499,12 +499,11 @@ pub struct AccountDetailsDto {
     pub native_token_foundries: HashMap<FoundryId, FoundryOutputDto>,
 }
 
-impl TryFromDto for AccountDetails {
-    type Dto = AccountDetailsDto;
+impl TryFromDto<AccountDetailsDto> for AccountDetails {
     type Error = crate::wallet::Error;
 
     fn try_from_dto_with_params_inner(
-        dto: Self::Dto,
+        dto: AccountDetailsDto,
         params: crate::types::ValidationParams<'_>,
     ) -> core::result::Result<Self, Self::Error> {
         Ok(Self {

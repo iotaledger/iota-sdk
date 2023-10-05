@@ -209,11 +209,10 @@ pub mod dto {
         }
     }
 
-    impl TryFromDto for Payload {
-        type Dto = PayloadDto;
+    impl TryFromDto<PayloadDto> for Payload {
         type Error = Error;
 
-        fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
+        fn try_from_dto_with_params_inner(dto: PayloadDto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
             Ok(match dto {
                 PayloadDto::Transaction(p) => {
                     Self::from(TransactionPayload::try_from_dto_with_params_inner(*p, params)?)

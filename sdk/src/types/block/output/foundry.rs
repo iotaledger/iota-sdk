@@ -715,11 +715,13 @@ pub(crate) mod dto {
         }
     }
 
-    impl TryFromDto for FoundryOutput {
-        type Dto = FoundryOutputDto;
+    impl TryFromDto<FoundryOutputDto> for FoundryOutput {
         type Error = Error;
 
-        fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
+        fn try_from_dto_with_params_inner(
+            dto: FoundryOutputDto,
+            params: ValidationParams<'_>,
+        ) -> Result<Self, Self::Error> {
             let mut builder = FoundryOutputBuilder::new_with_amount(dto.amount, dto.serial_number, dto.token_scheme);
 
             for t in dto.native_tokens {

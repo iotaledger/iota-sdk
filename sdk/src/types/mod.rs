@@ -127,20 +127,19 @@ impl<'a> From<&'a ValidationParams<'a>> for ValidationParams<'a> {
     }
 }
 
-pub trait TryFromDto: Sized {
-    type Dto;
+pub trait TryFromDto<D>: Sized {
     type Error;
 
-    fn try_from_dto(dto: Self::Dto) -> Result<Self, Self::Error> {
+    fn try_from_dto(dto: D) -> Result<Self, Self::Error> {
         Self::try_from_dto_with_params(dto, ValidationParams::default())
     }
 
     fn try_from_dto_with_params<'a>(
-        dto: Self::Dto,
+        dto: D,
         params: impl Into<ValidationParams<'a>> + Send,
     ) -> Result<Self, Self::Error> {
         Self::try_from_dto_with_params_inner(dto, params.into())
     }
 
-    fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error>;
+    fn try_from_dto_with_params_inner(dto: D, params: ValidationParams<'_>) -> Result<Self, Self::Error>;
 }
