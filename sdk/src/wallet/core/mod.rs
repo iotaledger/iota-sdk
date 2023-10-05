@@ -4,6 +4,7 @@
 pub(crate) mod builder;
 pub(crate) mod operations;
 
+use core::sync::atomic::Ordering;
 use std::sync::{
     atomic::{AtomicU32, AtomicUsize},
     Arc,
@@ -88,6 +89,7 @@ pub struct WalletInner<S: SecretManage = SecretManager> {
 impl<S: 'static + SecretManage> Wallet<S>
 where
     crate::wallet::Error: From<S::Error>,
+    crate::client::Error: From<S::Error>,
 {
     /// Get all accounts
     pub async fn get_accounts(&self) -> crate::wallet::Result<Vec<Account<S>>> {
@@ -167,6 +169,10 @@ where
 }
 
 impl<S: SecretManage> WalletInner<S> {
+    pub fn coin_type(&self) -> u32 {
+        self.coin_type.load(Ordering::Relaxed)
+    }
+
     /// Get the [SecretManager]
     pub fn get_secret_manager(&self) -> &Arc<RwLock<S>> {
         &self.secret_manager

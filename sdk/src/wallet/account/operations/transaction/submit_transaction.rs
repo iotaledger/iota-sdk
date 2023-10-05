@@ -1,6 +1,8 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use crypto::keys::bip44::Bip44;
+
 #[cfg(feature = "events")]
 use crate::wallet::events::types::{TransactionProgressEvent, WalletEvent};
 use crate::{
@@ -12,6 +14,7 @@ use crate::{
 impl<S: 'static + SecretManage> Account<S>
 where
     crate::wallet::Error: From<S::Error>,
+    crate::client::Error: From<S::Error>,
 {
     /// Submits a payload in a block
     pub(crate) async fn submit_transaction_payload(
@@ -24,12 +27,13 @@ where
 
         let block = self
             .client()
-            .finish_basic_block_builder(
+            .build_basic_block(
                 todo!("issuer id"),
-                todo!("block signature"),
                 todo!("issuing time"),
                 None,
                 Some(Payload::from(transaction_payload)),
+                &*self.get_secret_manager().read().await,
+                Bip44::new(self.wallet.coin_type()),
             )
             .await?;
 
