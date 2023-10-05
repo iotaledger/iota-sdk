@@ -501,6 +501,20 @@ mod json {
         }
     }
 
+    impl ToJson for dto::UnlockConditionDto {
+        fn to_json(&self) -> Value {
+            match self {
+                Self::Address(u) => u.to_json(),
+                Self::StorageDepositReturn(u) => u.to_json(),
+                Self::Timelock(u) => u.to_json(),
+                Self::Expiration(u) => u.to_json(),
+                Self::StateControllerAddress(u) => u.to_json(),
+                Self::GovernorAddress(u) => u.to_json(),
+                Self::ImmutableAccountAddress(u) => u.to_json(),
+            }
+        }
+    }
+
     impl FromJson for dto::UnlockConditionDto {
         type Error = Error;
 
@@ -571,7 +585,11 @@ pub mod dto {
     use crate::types::{block::Error, TryFromDto, ValidationParams};
 
     #[derive(Clone, Debug, Eq, PartialEq, From)]
-    #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize), serde(untagged))]
+    #[cfg_attr(
+        feature = "serde_types",
+        derive(serde::Serialize, serde::Deserialize),
+        serde(untagged)
+    )]
     pub enum UnlockConditionDto {
         /// An address unlock condition.
         Address(AddressUnlockCondition),

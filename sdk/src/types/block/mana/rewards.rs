@@ -8,7 +8,7 @@ use crate::types::block::{slot::EpochIndex, Error};
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Packable, CopyGetters)]
 #[cfg_attr(
-    feature = "serde",
+    feature = "serde_types",
     derive(serde::Serialize, serde::Deserialize),
     serde(rename_all = "camelCase")
 )]
@@ -22,12 +22,12 @@ pub struct RewardsParameters {
     /// The length of the bootstrapping phase in epochs.
     bootstrapping_duration: EpochIndex,
     /// The coefficient used for calculation of initial rewards.
-    #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
+    #[cfg_attr(feature = "serde_types", serde(with = "crate::utils::serde::string"))]
     mana_share_coefficient: u64,
     /// The exponent used for calculation of the initial reward.
     decay_balancing_constant_exponent: u8,
     /// An integer approximation which is calculated using the `decay_balancing_constant_exponent`.
-    #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
+    #[cfg_attr(feature = "serde_types", serde(with = "crate::utils::serde::string"))]
     decay_balancing_constant: u64,
     /// The exponent used for shifting operation during the pool rewards calculations.
     pool_coefficient_exponent: u8,

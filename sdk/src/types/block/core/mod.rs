@@ -167,7 +167,7 @@ pub(crate) mod dto {
         }
     }
 
-    #[cfg(feature = "serde")]
+    #[cfg(feature = "serde_types")]
     impl<'de> serde::Deserialize<'de> for BlockDto {
         fn deserialize<D: serde::Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
             let value = Value::deserialize(d)?;
@@ -192,7 +192,7 @@ pub(crate) mod dto {
         }
     }
 
-    #[cfg(feature = "serde")]
+    #[cfg(feature = "serde_types")]
     impl serde::Serialize for BlockDto {
         fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
         where

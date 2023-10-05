@@ -19,20 +19,20 @@ use crate::types::block::{helper::network_name_to_id, output::RentStructure, Con
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Packable, Getters, CopyGetters)]
 #[packable(unpack_error = Error)]
 #[cfg_attr(
-    feature = "serde",
+    feature = "serde_types",
     derive(serde::Serialize, serde::Deserialize),
     serde(rename_all = "camelCase")
 )]
 #[getset(get_copy = "pub")]
 pub struct ProtocolParameters {
     /// The layout type.
-    #[cfg_attr(feature = "serde", serde(rename = "type"))]
+    #[cfg_attr(feature = "serde_types", serde(rename = "type"))]
     pub(crate) kind: u8,
     /// The version of the protocol running.
     pub(crate) version: u8,
     /// The human friendly name of the network.
     #[packable(unpack_error_with = |err| Error::InvalidNetworkName(err.into_item_err()))]
-    #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string_prefix"))]
+    #[cfg_attr(feature = "serde_types", serde(with = "crate::utils::serde::string_prefix"))]
     #[getset(skip)]
     pub(crate) network_name: StringPrefix<u8>,
     /// The HRP prefix used for Bech32 addresses in the network.
@@ -42,10 +42,10 @@ pub struct ProtocolParameters {
     /// The work score structure used by the node/network.
     pub(crate) work_score_structure: WorkScoreStructure,
     /// TokenSupply defines the current token supply on the network.
-    #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
+    #[cfg_attr(feature = "serde_types", serde(with = "crate::utils::serde::string"))]
     pub(crate) token_supply: u64,
     /// Genesis timestamp at which the slots start to count.
-    #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
+    #[cfg_attr(feature = "serde_types", serde(with = "crate::utils::serde::string"))]
     pub(crate) genesis_unix_timestamp: u64,
     /// Duration of each slot in seconds.
     pub(crate) slot_duration_in_seconds: u8,
@@ -55,27 +55,27 @@ pub struct ProtocolParameters {
     #[getset(skip)]
     pub(crate) mana_structure: ManaStructure,
     /// The unbonding period in epochs before an account can stop staking.
-    #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
+    #[cfg_attr(feature = "serde_types", serde(with = "crate::utils::serde::string"))]
     pub(crate) staking_unbonding_period: u64,
     /// The number of validation blocks that each validator should issue each slot.
     pub(crate) validation_blocks_per_slot: u16,
     /// The number of epochs worth of Mana that a node is punished with for each additional validation block it issues.
-    #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
+    #[cfg_attr(feature = "serde_types", serde(with = "crate::utils::serde::string"))]
     pub(crate) punishment_epochs: u64,
     /// Liveness Threshold is used by tip-selection to determine if a block is eligible by evaluating issuingTimes and
     /// commitments in its past-cone to Accepted Tangle Time and lastCommittedSlot respectively.
-    #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
+    #[cfg_attr(feature = "serde_types", serde(with = "crate::utils::serde::string"))]
     pub(crate) liveness_threshold: u64,
     /// Minimum age relative to the accepted tangle time slot index that a slot can be committed.
-    #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
+    #[cfg_attr(feature = "serde_types", serde(with = "crate::utils::serde::string"))]
     pub(crate) min_committable_age: u64,
     /// Maximum age for a slot commitment to be included in a block relative to the slot index of the block issuing
     /// time.
-    #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
+    #[cfg_attr(feature = "serde_types", serde(with = "crate::utils::serde::string"))]
     pub(crate) max_committable_age: u64,
     /// Epoch Nearing Threshold is used by the epoch orchestrator to detect the slot that should trigger a new
     /// committee selection for the next and upcoming epoch.
-    #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
+    #[cfg_attr(feature = "serde_types", serde(with = "crate::utils::serde::string"))]
     pub(crate) epoch_nearing_threshold: u64,
     /// Parameters used to calculate the Reference Mana Cost (RMC).
     pub(crate) congestion_control_parameters: CongestionControlParameters,
@@ -184,7 +184,7 @@ impl ProtocolParameters {
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Packable, CopyGetters)]
 #[cfg_attr(
-    feature = "serde",
+    feature = "serde_types",
     derive(serde::Serialize, serde::Deserialize),
     serde(rename_all = "camelCase")
 )]
@@ -239,7 +239,7 @@ impl Default for WorkScoreStructure {
 /// Defines the parameters used to calculate the Reference Mana Cost (RMC).
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Packable, CopyGetters)]
 #[cfg_attr(
-    feature = "serde",
+    feature = "serde_types",
     derive(serde::Serialize, serde::Deserialize),
     serde(rename_all = "camelCase")
 )]
@@ -247,13 +247,13 @@ impl Default for WorkScoreStructure {
 #[getset(get_copy = "pub")]
 pub struct CongestionControlParameters {
     /// Minimum value of the reference Mana cost.
-    #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
+    #[cfg_attr(feature = "serde_types", serde(with = "crate::utils::serde::string"))]
     min_reference_mana_cost: u64,
     /// Increase step size of the RMC.
-    #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
+    #[cfg_attr(feature = "serde_types", serde(with = "crate::utils::serde::string"))]
     increase: u64,
     /// Decrease step size of the RMC.
-    #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
+    #[cfg_attr(feature = "serde_types", serde(with = "crate::utils::serde::string"))]
     decrease: u64,
     /// Threshold for increasing the RMC.
     increase_threshold: u32,
@@ -285,7 +285,7 @@ impl Default for CongestionControlParameters {
 /// Defines the parameters used to signal a protocol parameters upgrade.
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Packable, CopyGetters)]
 #[cfg_attr(
-    feature = "serde",
+    feature = "serde_types",
     derive(serde::Serialize, serde::Deserialize),
     serde(rename_all = "camelCase")
 )]
@@ -333,7 +333,7 @@ impl_id!(
     "The hash of the protocol parameters."
 );
 
-#[cfg(feature = "serde")]
+#[cfg(feature = "serde_types")]
 string_serde_impl!(ProtocolParametersHash);
 #[cfg(feature = "json")]
 string_json_impl!(ProtocolParametersHash);

@@ -196,19 +196,19 @@ pub(crate) mod dto {
 
     #[derive(Clone, Debug, Eq, PartialEq)]
     #[cfg_attr(
-        feature = "serde",
+        feature = "serde_types",
         derive(serde::Serialize, serde::Deserialize),
         serde(rename_all = "camelCase")
     )]
     pub struct BasicBlockDto {
-        #[cfg_attr(feature = "serde", serde(rename = "type"))]
+        #[cfg_attr(feature = "serde_types", serde(rename = "type"))]
         pub kind: u8,
         pub strong_parents: BTreeSet<BlockId>,
         pub weak_parents: BTreeSet<BlockId>,
         pub shallow_like_parents: BTreeSet<BlockId>,
-        #[cfg_attr(feature = "serde", serde(default, skip_serializing_if = "Option::is_none"))]
+        #[cfg_attr(feature = "serde_types", serde(default, skip_serializing_if = "Option::is_none"))]
         pub payload: Option<PayloadDto>,
-        #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
+        #[cfg_attr(feature = "serde_types", serde(with = "crate::utils::serde::string"))]
         pub max_burned_mana: u64,
     }
 

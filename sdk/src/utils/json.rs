@@ -1,6 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use crypto::keys::bip44::Bip44;
 pub use json::JsonValue as Value;
 use primitive_types::U256;
 
@@ -9,12 +10,20 @@ pub enum Error {
     WrongArraySize { expected: usize, found: usize },
     MissingValue,
     WrongType { expected: String, found: String },
+    InvalidKey { expected: String, found: String },
 }
 
 impl Error {
     pub fn wrong_type<E>(found: impl alloc::string::ToString) -> Self {
         Self::WrongType {
             expected: core::any::type_name::<E>().to_owned(),
+            found: found.to_string(),
+        }
+    }
+
+    pub fn invalid_key<K>(found: impl alloc::string::ToString) -> Self {
+        Self::InvalidKey {
+            expected: core::any::type_name::<K>().to_owned(),
             found: found.to_string(),
         }
     }
@@ -33,6 +42,9 @@ impl core::fmt::Display for Error {
             Self::WrongType { expected, found } => {
                 write!(f, "wrong type: expected {expected}, found {found}")
             }
+            Self::InvalidKey { expected, found } => {
+                write!(f, "invalid key: expected {expected}, found {found}")
+            }
         }
     }
 }
@@ -44,6 +56,12 @@ pub trait ToJson {
 impl<T: ToJson + ?Sized> ToJson for &T {
     fn to_json(&self) -> Value {
         ToJson::to_json(*self)
+    }
+}
+
+impl ToJson for str {
+    fn to_json(&self) -> Value {
+        self.to_owned().to_json()
     }
 }
 
@@ -92,21 +110,31 @@ macro_rules! impl_ext_fns {
     };
 }
 
+macro_rules! impl_ext_str_fns {
+    ($($type:ty, $to_fn:ident),+$(,)?) => {
+        $(
+            fn $to_fn(&self) -> Result<$type, Error> {
+                self.to_str()?.parse().map_err(|_| Error::wrong_type::<$type>(self))
+            }
+        )+
+    };
+}
+
 pub trait JsonExt: Clone {
     def_ext_fns! {
         &str, to_str,
         u8,   to_u8,
         u16,  to_u16,
         u32,  to_u32,
-        // u64, to_u64,
+        u64,  to_u64,
+        u128, to_u128,
         i8,   to_i8,
         i16,  to_i16,
         i32,  to_i32,
         i64,  to_i64,
+        i128, to_i128,
         bool, to_bool,
     }
-
-    fn to_u64(&self) -> Result<u64, Error>;
 
     fn to_array<T: FromJson, const N: usize>(&self) -> Result<[T; N], T::Error>
     where
@@ -157,7 +185,6 @@ impl JsonExt for Value {
         u8,   to_u8,   as_u8,
         u16,  to_u16,  as_u16,
         u32,  to_u32,  as_u32,
-        // u64, to_u64, as_u64,
         i8,   to_i8,   as_i8,
         i16,  to_i16,  as_i16,
         i32,  to_i32,  as_i32,
@@ -165,8 +192,10 @@ impl JsonExt for Value {
         bool, to_bool, as_bool,
     }
 
-    fn to_u64(&self) -> Result<u64, Error> {
-        self.to_str()?.parse().map_err(|_| Error::wrong_type::<u64>(self))
+    impl_ext_str_fns! {
+        u64,  to_u64,
+        u128, to_u128,
+        i128, to_i128,
     }
 
     fn take_array<T: FromJson, const N: usize>(&mut self) -> Result<[T; N], T::Error>
@@ -294,22 +323,33 @@ impl_json_via!(
 
 // Special impls for u64 which cannot fit into json values
 
-impl ToJson for u64 {
-    fn to_json(&self) -> Value {
-        self.to_string().into()
-    }
-}
+macro_rules! impl_json_via_str {
+    ($($type:ty, $fn:ident),+$(,)?) => {
+        $(
+            impl ToJson for $type {
+                fn to_json(&self) -> Value {
+                    self.to_string().into()
+                }
+            }
 
-impl FromJson for u64 {
-    type Error = Error;
+            impl FromJson for $type {
+                type Error = Error;
 
-    fn from_non_null_json(value: Value) -> Result<Self, Self::Error>
-    where
-        Self: Sized,
-    {
-        value.to_u64()
-    }
+                fn from_non_null_json(value: Value) -> Result<Self, Self::Error>
+                where
+                    Self: Sized,
+                {
+                    value.$fn()
+                }
+            }
+        )+
+    };
 }
+#[rustfmt::skip]
+impl_json_via_str!(
+    u64,  to_u64,
+    u128, to_u128,
+);
 
 impl ToJson for U256 {
     fn to_json(&self) -> Value {
@@ -370,6 +410,97 @@ impl<T: ToJson> ToJson for [T] {
     }
 }
 
+#[cfg(feature = "std")]
+impl<T: ToJson> ToJson for std::collections::HashSet<T> {
+    fn to_json(&self) -> Value {
+        Value::Array(self.iter().map(ToJson::to_json).collect())
+    }
+}
+
+#[cfg(feature = "std")]
+impl<T: FromJson + Eq + core::hash::Hash> FromJson for std::collections::HashSet<T>
+where
+    T::Error: From<Error>,
+{
+    type Error = T::Error;
+
+    fn from_non_null_json(value: Value) -> Result<Self, Self::Error>
+    where
+        Self: Sized,
+    {
+        if let Value::Array(s) = value {
+            Ok(s.into_iter()
+                .map(FromJson::from_json)
+                .collect::<Result<_, T::Error>>()?)
+        } else {
+            Err(Error::wrong_type::<T>(value).into())
+        }
+    }
+}
+
+impl<T: ToJson> ToJson for alloc::collections::BTreeSet<T> {
+    fn to_json(&self) -> Value {
+        Value::Array(self.iter().map(ToJson::to_json).collect())
+    }
+}
+
+impl<T: FromJson + Eq + Ord + core::hash::Hash> FromJson for alloc::collections::BTreeSet<T>
+where
+    T::Error: From<Error>,
+{
+    type Error = T::Error;
+
+    fn from_non_null_json(value: Value) -> Result<Self, Self::Error>
+    where
+        Self: Sized,
+    {
+        if let Value::Array(s) = value {
+            Ok(s.into_iter()
+                .map(FromJson::from_json)
+                .collect::<Result<_, T::Error>>()?)
+        } else {
+            Err(Error::wrong_type::<T>(value).into())
+        }
+    }
+}
+
+#[cfg(feature = "std")]
+impl<K: ToString, V: ToJson> ToJson for std::collections::HashMap<K, V> {
+    fn to_json(&self) -> Value {
+        let mut obj = json::object::Object::new();
+        for (k, v) in self {
+            obj.insert(&k.to_string(), v.to_json());
+        }
+        Value::Object(obj)
+    }
+}
+
+#[cfg(feature = "std")]
+impl<K: core::str::FromStr + Eq + core::hash::Hash, V: FromJson> FromJson for std::collections::HashMap<K, V>
+where
+    V::Error: From<Error>,
+{
+    type Error = V::Error;
+
+    fn from_non_null_json(value: Value) -> Result<Self, Self::Error>
+    where
+        Self: Sized,
+    {
+        if let Value::Object(mut obj) = value {
+            let mut res = Self::default();
+            for (k, v) in obj.iter_mut() {
+                res.insert(
+                    K::from_str(k).map_err(|_| Error::invalid_key::<K>(k))?,
+                    v.take_value::<V>()?,
+                );
+            }
+            Ok(res)
+        } else {
+            Err(Error::wrong_type::<Self>(value).into())
+        }
+    }
+}
+
 impl<T: ToJson, const N: usize> ToJson for [T; N] {
     fn to_json(&self) -> Value {
         Value::Array(self.iter().map(ToJson::to_json).collect())
@@ -396,8 +527,35 @@ where
                     found: e.len(),
                 })?)
         } else {
-            Err(Error::wrong_type::<T>(value).into())
+            Err(Error::wrong_type::<[T; N]>(value).into())
         }
+    }
+}
+
+impl ToJson for Bip44 {
+    fn to_json(&self) -> Value {
+        crate::json!({
+            "coin_type": self.coin_type,
+            "account": self.account,
+            "change": self.change,
+            "address_index": self.address_index,
+        })
+    }
+}
+
+impl FromJson for Bip44 {
+    type Error = Error;
+
+    fn from_non_null_json(value: Value) -> Result<Self, Self::Error>
+    where
+        Self: Sized,
+    {
+        Ok(Self {
+            coin_type: value["coin_type"].to_u32()?,
+            account: value["account"].to_u32()?,
+            change: value["change"].to_u32()?,
+            address_index: value["address_index"].to_u32()?,
+        })
     }
 }
 

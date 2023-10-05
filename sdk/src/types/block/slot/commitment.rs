@@ -10,7 +10,7 @@ use crate::types::block::slot::{RootsId, SlotCommitmentId, SlotIndex};
 /// It is linked to the commitment of the previous slot, which forms a commitment chain.
 #[derive(Clone, Debug, Eq, PartialEq, Hash, derive_more::From, Packable)]
 #[cfg_attr(
-    feature = "serde",
+    feature = "serde_types",
     derive(serde::Serialize, serde::Deserialize),
     serde(rename_all = "camelCase")
 )]
@@ -21,17 +21,17 @@ pub struct SlotCommitment {
     /// It is calculated based on genesis timestamp and the duration of a slot.
     index: SlotIndex,
     /// The commitment ID of the previous slot.
-    #[cfg_attr(feature = "serde", serde(rename = "previousCommitmentId"))]
+    #[cfg_attr(feature = "serde_types", serde(rename = "previousCommitmentId"))]
     previous_slot_commitment_id: SlotCommitmentId,
     /// The digest of multiple sparse merkle tree roots of this slot.
     roots_id: RootsId,
     /// The sum of previous slot commitment cumulative weight and weight of issuers of accepted blocks within this
     /// slot. It is just an indication of "committed into" this slot, and can not strictly be used for evaluating
     /// the switching of a chain.
-    #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
+    #[cfg_attr(feature = "serde_types", serde(with = "crate::utils::serde::string"))]
     cumulative_weight: u64,
     /// Reference Mana Cost (RMC) to be used in the slot with index at `index + Max Committable Age`.
-    #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
+    #[cfg_attr(feature = "serde_types", serde(with = "crate::utils::serde::string"))]
     reference_mana_cost: u64,
 }
 

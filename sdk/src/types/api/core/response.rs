@@ -492,3 +492,32 @@ pub struct UtxoChangesResponse {
     pub created_outputs: Vec<OutputId>,
     pub consumed_outputs: Vec<OutputId>,
 }
+
+#[cfg(feature = "json")]
+mod json {
+    use super::*;
+    use crate::utils::json::{FromJson, JsonExt, ToJson, Value};
+
+    impl ToJson for OutputWithMetadataResponse {
+        fn to_json(&self) -> Value {
+            crate::json!({
+                "metadata": self.metadata,
+                "output": self.output,
+            })
+        }
+    }
+
+    impl FromJson for OutputWithMetadataResponse {
+        type Error = crate::types::block::Error;
+
+        fn from_non_null_json(mut value: Value) -> core::result::Result<Self, Self::Error>
+        where
+            Self: Sized,
+        {
+            Ok(Self {
+                metadata: value["metadata"].take_value()?,
+                output: value["output"].take_value()?,
+            })
+        }
+    }
+}

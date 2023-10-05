@@ -64,3 +64,61 @@ impl AddressWithUnspentOutputs {
         self.address
     }
 }
+
+#[cfg(feature = "json")]
+mod json {
+    use super::*;
+    use crate::utils::json::{FromJson, JsonExt, ToJson, Value};
+
+    impl ToJson for Bip44Address {
+        fn to_json(&self) -> Value {
+            crate::json!({
+                "address": self.address(),
+                "keyIndex": self.key_index(),
+                "internal": self.internal(),
+            })
+        }
+    }
+
+    impl FromJson for Bip44Address {
+        type Error = crate::types::block::Error;
+
+        fn from_non_null_json(mut value: Value) -> core::result::Result<Self, Self::Error>
+        where
+            Self: Sized,
+        {
+            Ok(Self {
+                address: value["address"].take_value()?,
+                key_index: value["keyIndex"].to_u32()?,
+                internal: value["internal"].to_bool()?,
+            })
+        }
+    }
+
+    impl ToJson for AddressWithUnspentOutputs {
+        fn to_json(&self) -> Value {
+            crate::json!({
+                "address": self.address(),
+                "keyIndex": self.key_index(),
+                "internal": self.internal(),
+                "outputIds": self.output_ids()
+            })
+        }
+    }
+
+    impl FromJson for AddressWithUnspentOutputs {
+        type Error = crate::types::block::Error;
+
+        fn from_non_null_json(mut value: Value) -> core::result::Result<Self, Self::Error>
+        where
+            Self: Sized,
+        {
+            Ok(Self {
+                address: value["address"].take_value()?,
+                key_index: value["keyIndex"].to_u32()?,
+                internal: value["internal"].to_bool()?,
+                output_ids: value["outputIds"].take_vec()?,
+            })
+        }
+    }
+}

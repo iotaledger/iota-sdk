@@ -26,7 +26,11 @@ use crate::types::block::{
 #[derive(Clone, Copy, Eq, PartialEq, Ord, PartialOrd, Hash, From, packable::Packable)]
 #[packable(tag_type = u8, with_error = Error::InvalidAddressKind)]
 #[packable(unpack_error = Error)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize), serde(untagged))]
+#[cfg_attr(
+    feature = "serde_types",
+    derive(serde::Serialize, serde::Deserialize),
+    serde(untagged)
+)]
 pub enum Address {
     /// An Ed25519 address.
     #[packable(tag = Ed25519Address::KIND)]

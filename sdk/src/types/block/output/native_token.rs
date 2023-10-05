@@ -16,7 +16,7 @@ use crate::types::block::{output::foundry::FoundryId, Error};
 
 impl_id!(pub TokenId, 38, "Unique identifiers of native tokens. The TokenId of native tokens minted by a specific foundry is the same as the FoundryId.");
 
-#[cfg(feature = "serde")]
+#[cfg(feature = "serde_types")]
 string_serde_impl!(TokenId);
 #[cfg(feature = "json")]
 string_json_impl!(TokenId);
@@ -29,11 +29,11 @@ impl From<FoundryId> for TokenId {
 
 ///
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Hash, Packable)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serde_types", derive(serde::Serialize, serde::Deserialize))]
 #[packable(unpack_error = Error)]
 pub struct NativeToken {
     // Identifier of the native token.
-    #[cfg_attr(feature = "serde", serde(rename = "id"))]
+    #[cfg_attr(feature = "serde_types", serde(rename = "id"))]
     token_id: TokenId,
     // Amount of native tokens.
     #[packable(verify_with = verify_amount)]
@@ -165,7 +165,7 @@ pub(crate) type NativeTokenCount = BoundedU8<0, { NativeTokens::COUNT_MAX }>;
 
 ///
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Deref, Packable)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serde_types", derive(serde::Serialize, serde::Deserialize))]
 #[packable(unpack_error = Error, with = |e| e.unwrap_item_err_or_else(|p| Error::InvalidNativeTokenCount(p.into())))]
 pub struct NativeTokens(
     #[packable(verify_with = verify_unique_sorted)] BoxedSlicePrefix<NativeToken, NativeTokenCount>,

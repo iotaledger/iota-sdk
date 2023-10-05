@@ -126,7 +126,7 @@ impl Packable for Ed25519Signature {
     }
 }
 
-#[cfg(feature = "serde")]
+#[cfg(feature = "serde_types")]
 pub(crate) mod dto {
     use alloc::string::String;
 

@@ -368,21 +368,21 @@ pub(crate) mod dto {
 
     #[derive(Clone, Debug, Eq, PartialEq)]
     #[cfg_attr(
-        feature = "serde",
+        feature = "serde_types",
         derive(serde::Serialize, serde::Deserialize),
         serde(rename_all = "camelCase")
     )]
     pub struct BasicOutputDto {
-        #[cfg_attr(feature = "serde", serde(rename = "type"))]
+        #[cfg_attr(feature = "serde_types", serde(rename = "type"))]
         pub kind: u8,
-        #[cfg_attr(feature = "serde", serde(with = "string"))]
+        #[cfg_attr(feature = "serde_types", serde(with = "string"))]
         pub amount: u64,
-        #[cfg_attr(feature = "serde", serde(with = "string"))]
+        #[cfg_attr(feature = "serde_types", serde(with = "string"))]
         pub mana: u64,
-        #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Vec::is_empty", default))]
+        #[cfg_attr(feature = "serde_types", serde(skip_serializing_if = "Vec::is_empty", default))]
         pub native_tokens: Vec<NativeToken>,
         pub unlock_conditions: Vec<UnlockConditionDto>,
-        #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Vec::is_empty", default))]
+        #[cfg_attr(feature = "serde_types", serde(skip_serializing_if = "Vec::is_empty", default))]
         pub features: Vec<Feature>,
     }
 
@@ -477,6 +477,24 @@ mod json {
             }
             if !self.features().is_empty() {
                 res["features"] = self.features().to_json();
+            }
+            res
+        }
+    }
+
+    impl ToJson for dto::BasicOutputDto {
+        fn to_json(&self) -> Value {
+            let mut res = crate::json! ({
+                "type": BasicOutput::KIND,
+                "amount": self.amount,
+                "mana": self.mana,
+                "unlockConditions": self.unlock_conditions,
+            });
+            if !self.native_tokens.is_empty() {
+                res["nativeTokens"] = self.native_tokens.to_json();
+            }
+            if !self.features.is_empty() {
+                res["features"] = self.features.to_json();
             }
             res
         }

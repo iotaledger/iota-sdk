@@ -105,9 +105,9 @@ pub mod dto {
 
     /// The payload type to define a value transaction.
     #[derive(Clone, Debug, Eq, PartialEq)]
-    #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+    #[cfg_attr(feature = "serde_types", derive(serde::Serialize, serde::Deserialize))]
     pub struct TransactionPayloadDto {
-        #[cfg_attr(feature = "serde", serde(rename = "type"))]
+        #[cfg_attr(feature = "serde_types", serde(rename = "type"))]
         pub kind: u32,
         pub essence: TransactionEssenceDto,
         pub unlocks: Vec<Unlock>,

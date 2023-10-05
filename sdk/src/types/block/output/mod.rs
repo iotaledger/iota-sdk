@@ -567,7 +567,7 @@ pub mod dto {
         }
     }
 
-    #[cfg(feature = "serde")]
+    #[cfg(feature = "serde_types")]
     impl<'de> serde::Deserialize<'de> for OutputDto {
         fn deserialize<D: serde::Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
             let value = Value::deserialize(d)?;
@@ -604,7 +604,7 @@ pub mod dto {
         }
     }
 
-    #[cfg(feature = "serde")]
+    #[cfg(feature = "serde_types")]
     impl serde::Serialize for OutputDto {
         fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
         where
@@ -652,6 +652,18 @@ mod json {
     use crate::utils::json::{FromJson, ToJson, Value};
 
     impl ToJson for Output {
+        fn to_json(&self) -> Value {
+            match self {
+                Self::Basic(o) => o.to_json(),
+                Self::Account(o) => o.to_json(),
+                Self::Foundry(o) => o.to_json(),
+                Self::Nft(o) => o.to_json(),
+                Self::Delegation(o) => o.to_json(),
+            }
+        }
+    }
+
+    impl ToJson for dto::OutputDto {
         fn to_json(&self) -> Value {
             match self {
                 Self::Basic(o) => o.to_json(),

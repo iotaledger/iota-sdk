@@ -432,12 +432,12 @@ pub(crate) mod dto {
     /// Describes the essence data making up a transaction by defining its inputs and outputs and an optional payload.
     #[derive(Clone, Debug, Eq, PartialEq)]
     #[cfg_attr(
-        feature = "serde",
+        feature = "serde_types",
         derive(serde::Serialize, serde::Deserialize),
         serde(rename_all = "camelCase")
     )]
     pub struct RegularTransactionEssenceDto {
-        #[cfg_attr(feature = "serde", serde(rename = "type"))]
+        #[cfg_attr(feature = "serde_types", serde(rename = "type"))]
         pub kind: u8,
         pub network_id: String,
         pub creation_slot: SlotIndex,
@@ -446,7 +446,7 @@ pub(crate) mod dto {
         pub inputs_commitment: String,
         pub outputs: Vec<OutputDto>,
         pub allotments: Vec<ManaAllotmentDto>,
-        #[cfg_attr(feature = "serde", serde(default, skip_serializing_if = "Option::is_none"))]
+        #[cfg_attr(feature = "serde_types", serde(default, skip_serializing_if = "Option::is_none"))]
         pub payload: Option<PayloadDto>,
     }
 

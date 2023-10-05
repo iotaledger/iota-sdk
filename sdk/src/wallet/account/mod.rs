@@ -467,8 +467,12 @@ pub(crate) fn build_transaction_from_payload_and_inputs(
 }
 
 /// Dto for an Account.
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Clone, Debug, PartialEq, Eq)]
+#[cfg_attr(
+    feature = "serde_types",
+    derive(serde::Serialize, serde::Deserialize),
+    serde(rename_all = "camelCase")
+)]
 pub struct AccountDetailsDto {
     /// The account index
     pub index: u32,
@@ -581,6 +585,57 @@ impl From<&AccountDetails> for AccountDetailsDto {
                 .iter()
                 .map(|(id, foundry)| (*id, FoundryOutputDto::from(foundry)))
                 .collect(),
+        }
+    }
+}
+
+#[cfg(feature = "json")]
+mod json {
+    use super::*;
+    use crate::utils::json::{FromJson, JsonExt, ToJson, Value};
+
+    impl ToJson for AccountDetails {
+        fn to_json(&self) -> Value {
+            crate::json!({
+                "index": self.index(),
+                "coinType": self.coin_type(),
+                "alias": self.alias(),
+                "publicAddresses": self.public_addresses(),
+                "internalAddresses": self.internal_addresses(),
+                "addressesWithUnspentOutputs": self.addresses_with_unspent_outputs(),
+                "outputs": self.outputs(),
+                "lockedOutputs": self.locked_outputs(),
+                "unspentOutputs": self.unspent_outputs(),
+                "transactions": self.transactions(),
+                "pendingTransactions": self.pending_transactions(),
+                "incomingTransactions": self.incoming_transactions(),
+                "nativeTokenFoundries": self.native_token_foundries()
+            })
+        }
+    }
+
+    impl FromJson for AccountDetailsDto {
+        type Error = crate::types::block::Error;
+
+        fn from_non_null_json(mut value: Value) -> core::result::Result<Self, Self::Error>
+        where
+            Self: Sized,
+        {
+            Ok(Self {
+                index: value["index"].to_u32()?,
+                coin_type: value["coinType"].to_u32()?,
+                alias: value["alias"].take_value()?,
+                public_addresses: value["publicAddresses"].take_value()?,
+                internal_addresses: value["internalAddresses"].take_value()?,
+                addresses_with_unspent_outputs: value["addressesWithUnspentOutputs"].take_value()?,
+                outputs: value["outputs"].take_value()?,
+                locked_outputs: value["lockedOutputs"].take_value()?,
+                unspent_outputs: value["unspentOutputs"].take_value()?,
+                transactions: value["transactions"].take_value()?,
+                pending_transactions: value["pendingTransactions"].take_value()?,
+                incoming_transactions: value["incomingTransactions"].take_value()?,
+                native_token_foundries: value["nativeTokenFoundries"].take_value()?,
+            })
         }
     }
 }

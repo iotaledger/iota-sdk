@@ -179,7 +179,11 @@ pub mod dto {
 
     /// Describes all the different payload types.
     #[derive(Clone, Debug, Eq, PartialEq)]
-    #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize), serde(untagged))]
+    #[cfg_attr(
+        feature = "serde_types",
+        derive(serde::Serialize, serde::Deserialize),
+        serde(untagged)
+    )]
     pub enum PayloadDto {
         Transaction(Box<TransactionPayloadDto>),
         TaggedData(Box<TaggedDataPayload>),

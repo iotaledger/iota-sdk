@@ -77,17 +77,17 @@ pub mod dto {
 
     /// The payload type to define a tagged data payload.
     #[derive(Clone, Debug, Eq, PartialEq)]
-    #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+    #[cfg_attr(feature = "serde_types", derive(serde::Serialize, serde::Deserialize))]
     struct TaggedDataPayloadDto {
-        #[cfg_attr(feature = "serde", serde(rename = "type"))]
+        #[cfg_attr(feature = "serde_types", serde(rename = "type"))]
         kind: u32,
         #[cfg_attr(
-            feature = "serde",
+            feature = "serde_types",
             serde(skip_serializing_if = "<[_]>::is_empty", default, with = "prefix_hex_bytes")
         )]
         tag: Box<[u8]>,
         #[cfg_attr(
-            feature = "serde",
+            feature = "serde_types",
             serde(skip_serializing_if = "<[_]>::is_empty", default, with = "prefix_hex_bytes")
         )]
         data: Box<[u8]>,

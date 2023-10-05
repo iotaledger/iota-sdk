@@ -16,7 +16,7 @@ use crate::types::{
 /// EventsResponse defines the response of a GET RouteParticipationEvents REST API call.
 #[derive(Debug, Clone, Eq, PartialEq)]
 #[cfg_attr(
-    feature = "serde",
+    feature = "serde_types",
     derive(serde::Serialize, serde::Deserialize),
     serde(rename_all = "camelCase")
 )]
@@ -28,7 +28,7 @@ pub struct EventsResponse {
 /// TrackedParticipation holds the information for each tracked participation.
 #[derive(Debug, Clone, Eq, PartialEq)]
 #[cfg_attr(
-    feature = "serde",
+    feature = "serde_types",
     derive(serde::Serialize, serde::Deserialize),
     serde(rename_all = "camelCase")
 )]
@@ -47,7 +47,7 @@ pub struct TrackedParticipation {
 
 /// OutputStatusResponse defines the response of a GET RouteOutputStatus REST API call.
 #[derive(Debug, Clone, Eq, PartialEq)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serde_types", derive(serde::Serialize, serde::Deserialize))]
 pub struct OutputStatusResponse {
     /// Participations holds the participations that were created in the output.
     pub participations: HashMap<ParticipationEventId, TrackedParticipation>,
@@ -55,7 +55,7 @@ pub struct OutputStatusResponse {
 
 /// AddressOutputsResponse defines the response of a GET RouteAddressBech32Outputs REST API call.
 #[derive(Debug, Clone, Eq, PartialEq)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serde_types", derive(serde::Serialize, serde::Deserialize))]
 pub struct AddressOutputsResponse {
     /// Outputs is a map of output status per output_id.
     pub outputs: HashMap<OutputId, OutputStatusResponse>,

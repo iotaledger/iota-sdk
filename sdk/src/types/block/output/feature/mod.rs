@@ -34,7 +34,11 @@ use crate::types::block::{create_bitflags, Error};
 #[derive(Clone, Eq, PartialEq, Hash, From, Packable)]
 #[packable(unpack_error = Error)]
 #[packable(tag_type = u8, with_error = Error::InvalidFeatureKind)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize), serde(untagged))]
+#[cfg_attr(
+    feature = "serde_types",
+    derive(serde::Serialize, serde::Deserialize),
+    serde(untagged)
+)]
 pub enum Feature {
     /// A sender feature.
     #[packable(tag = SenderFeature::KIND)]

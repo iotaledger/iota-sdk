@@ -12,7 +12,7 @@ use derive_more::Deref;
 use iterator_sorted::is_unique_sorted;
 use packable::{bounded::BoundedU16, prefix::BoxedSlicePrefix, Packable};
 
-#[cfg(feature = "serde")]
+#[cfg(feature = "serde_types")]
 pub use self::allotment::dto::ManaAllotmentDto;
 pub use self::{allotment::ManaAllotment, rewards::RewardsParameters, structure::ManaStructure};
 use super::{output::AccountId, protocol::ProtocolParameters, Error};

@@ -5,6 +5,7 @@
 use iota_sdk::{
     client::node_manager::node::Node,
     types::api::plugins::participation::types::{ParticipationEventId, ParticipationEventType},
+    utils::json::{FromJson, JsonExt, ToJson, Value},
     wallet::account::types::participation::ParticipationEventRegistrationOptions,
 };
 use iota_sdk::{

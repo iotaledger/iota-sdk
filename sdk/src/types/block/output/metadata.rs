@@ -96,7 +96,7 @@ impl OutputMetadata {
     }
 }
 
-#[cfg(feature = "serde")]
+#[cfg(feature = "serde_types")]
 mod dto {
     use serde::{Deserialize, Serialize};
 

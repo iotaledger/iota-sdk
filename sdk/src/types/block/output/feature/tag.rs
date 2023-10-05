@@ -74,7 +74,7 @@ impl core::fmt::Debug for TagFeature {
     }
 }
 
-#[cfg(feature = "serde")]
+#[cfg(feature = "serde_types")]
 pub(crate) mod dto {
     use alloc::borrow::Cow;
 

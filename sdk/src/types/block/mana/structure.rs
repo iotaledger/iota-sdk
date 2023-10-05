@@ -8,7 +8,7 @@ use crate::types::block::{slot::EpochIndex, Error};
 
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Packable, CopyGetters)]
 #[cfg_attr(
-    feature = "serde",
+    feature = "serde_types",
     derive(serde::Serialize, serde::Deserialize),
     serde(rename_all = "camelCase")
 )]
@@ -23,7 +23,7 @@ pub struct ManaStructure {
     pub(crate) generation_rate_exponent: u8,
     /// A lookup table of epoch index diff to mana decay factor.
     #[packable(unpack_error_with = |_| Error::InvalidManaDecayFactors)]
-    #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::boxed_slice_prefix"))]
+    #[cfg_attr(feature = "serde_types", serde(with = "crate::utils::serde::boxed_slice_prefix"))]
     #[getset(skip)]
     pub(crate) decay_factors: BoxedSlicePrefix<u32, u16>,
     /// The scaling of `decay_factors` expressed as an exponent of 2.

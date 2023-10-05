@@ -19,7 +19,11 @@ use packable::{
 use crate::types::block::{slot::SlotIndex, Error};
 
 #[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, From, packable::Packable)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize), serde(untagged))]
+#[cfg_attr(
+    feature = "serde_types",
+    derive(serde::Serialize, serde::Deserialize),
+    serde(untagged)
+)]
 #[packable(unpack_error = Error)]
 #[packable(tag_type = u8, with_error = Error::InvalidBlockIssuerKeyKind)]
 pub enum BlockIssuerKey {
@@ -60,7 +64,7 @@ impl BlockIssuerKey {
 /// An Ed25519 block issuer key.
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Deref, AsRef, From)]
 #[as_ref(forward)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serde_types", derive(serde::Serialize, serde::Deserialize))]
 pub struct Ed25519BlockIssuerKey(ed25519::PublicKey);
 
 impl Ed25519BlockIssuerKey {
@@ -221,7 +225,7 @@ impl BlockIssuerFeature {
     }
 }
 
-#[cfg(feature = "serde")]
+#[cfg(feature = "serde_types")]
 mod dto {
     use alloc::{string::String, vec::Vec};
 

@@ -28,7 +28,7 @@ impl StateControllerAddressUnlockCondition {
     }
 }
 
-#[cfg(feature = "serde")]
+#[cfg(feature = "serde_types")]
 pub(crate) mod dto {
     use serde::{Deserialize, Serialize};
 

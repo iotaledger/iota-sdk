@@ -54,7 +54,11 @@ pub(crate) mod dto {
 
     /// Describes all the different essence types.
     #[derive(Clone, Debug, Eq, PartialEq, From)]
-    #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize), serde(untagged))]
+    #[cfg_attr(
+        feature = "serde_types",
+        derive(serde::Serialize, serde::Deserialize),
+        serde(untagged)
+    )]
     pub enum TransactionEssenceDto {
         Regular(RegularTransactionEssenceDto),
     }

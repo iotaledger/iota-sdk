@@ -218,12 +218,12 @@ pub(crate) mod dto {
 
     #[derive(Clone, Debug, Eq, PartialEq)]
     #[cfg_attr(
-        feature = "serde",
+        feature = "serde_types",
         derive(serde::Serialize, serde::Deserialize),
         serde(rename_all = "camelCase")
     )]
     pub struct ValidationBlockDto {
-        #[cfg_attr(feature = "serde", serde(rename = "type"))]
+        #[cfg_attr(feature = "serde_types", serde(rename = "type"))]
         pub kind: u8,
         pub strong_parents: BTreeSet<BlockId>,
         pub weak_parents: BTreeSet<BlockId>,

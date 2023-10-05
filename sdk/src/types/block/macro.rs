@@ -99,12 +99,12 @@ macro_rules! impl_id {
         }
     };
 }
-#[cfg(feature = "serde")]
+#[cfg(feature = "serde_types")]
 pub(crate) use impl_id;
 
 /// Convenience macro to serialize types to string via serde.
 #[macro_export]
-#[cfg(feature = "serde")]
+#[cfg(feature = "serde_types")]
 macro_rules! string_serde_impl {
     ($type:ty) => {
         impl serde::Serialize for $type {
@@ -143,7 +143,7 @@ macro_rules! string_serde_impl {
         }
     };
 }
-#[cfg(feature = "serde")]
+#[cfg(feature = "serde_types")]
 pub(crate) use string_serde_impl;
 
 #[macro_export]

@@ -69,19 +69,22 @@ pub(crate) mod dto {
 
     #[derive(Clone, Debug, Eq, PartialEq)]
     #[cfg_attr(
-        feature = "serde",
+        feature = "serde_types",
         derive(serde::Serialize, serde::Deserialize),
         serde(rename_all = "camelCase")
     )]
     pub struct StorageDepositReturnUnlockConditionDto {
-        #[cfg_attr(feature = "serde", serde(rename = "type", deserialize_with = "deserialize_kind"))]
+        #[cfg_attr(
+            feature = "serde_types",
+            serde(rename = "type", deserialize_with = "deserialize_kind")
+        )]
         pub kind: u8,
         pub return_address: Address,
-        #[cfg_attr(feature = "serde", serde(with = "string"))]
+        #[cfg_attr(feature = "serde_types", serde(with = "string"))]
         pub amount: u64,
     }
 
-    #[cfg(feature = "serde")]
+    #[cfg(feature = "serde_types")]
     fn deserialize_kind<'de, D>(d: D) -> Result<u8, D::Error>
     where
         D: serde::Deserializer<'de>,
@@ -126,7 +129,7 @@ pub(crate) mod dto {
         }
     }
 
-    #[cfg(feature = "serde")]
+    #[cfg(feature = "serde_types")]
     impl serde::Serialize for StorageDepositReturnUnlockCondition {
         fn serialize<S>(&self, s: S) -> Result<S::Ok, S::Error>
         where
@@ -150,7 +153,17 @@ mod json {
             crate::json! ({
                 "type": Self::KIND,
                 "returnAddress": self.return_address(),
-                "amount": self.amount.to_string(),
+                "amount": self.amount,
+            })
+        }
+    }
+
+    impl ToJson for dto::StorageDepositReturnUnlockConditionDto {
+        fn to_json(&self) -> Value {
+            crate::json! ({
+                "type": StorageDepositReturnUnlockCondition::KIND,
+                "returnAddress": self.return_address,
+                "amount": self.amount,
             })
         }
     }

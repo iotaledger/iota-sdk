@@ -7,7 +7,7 @@ impl_id!(
     "Identifier of a block issuer."
 );
 
-#[cfg(feature = "serde")]
+#[cfg(feature = "serde_types")]
 string_serde_impl!(IssuerId);
 #[cfg(feature = "json")]
 string_json_impl!(IssuerId);

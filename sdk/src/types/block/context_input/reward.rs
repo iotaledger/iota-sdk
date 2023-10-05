@@ -35,7 +35,7 @@ impl core::fmt::Display for RewardContextInput {
     }
 }
 
-#[cfg(feature = "serde")]
+#[cfg(feature = "serde_types")]
 mod dto {
     use serde::{Deserialize, Serialize};
 

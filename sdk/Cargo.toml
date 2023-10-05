@@ -152,6 +152,7 @@ serde = [
     "zeroize?/serde",
     "dep:serde_repr",
 ]
+serde_types = ["serde"]
 std = [
     "packable/std",
     "prefix-hex/std",

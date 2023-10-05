@@ -64,7 +64,7 @@ fn verify_slot_index<const VERIFY: bool>(slot_index: &SlotIndex, _: &()) -> Resu
     }
 }
 
-#[cfg(feature = "serde")]
+#[cfg(feature = "serde_types")]
 pub(crate) mod dto {
     use serde::{Deserialize, Serialize};
 

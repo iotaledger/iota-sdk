@@ -75,13 +75,13 @@ pub(super) mod dto {
 
     #[derive(Copy, Clone, Debug, Eq, PartialEq)]
     #[cfg_attr(
-        feature = "serde",
+        feature = "serde_types",
         derive(serde::Serialize, serde::Deserialize),
         serde(rename_all = "camelCase")
     )]
     pub struct ManaAllotmentDto {
         pub account_id: AccountId,
-        #[cfg_attr(feature = "serde", serde(with = "string"))]
+        #[cfg_attr(feature = "serde_types", serde(with = "string"))]
         pub mana: u64,
     }
 

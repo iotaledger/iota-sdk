@@ -19,7 +19,7 @@ use crate::types::block::{BlockId, Error};
 /// * lexicographically sorted;
 /// * unique;
 #[derive(Clone, Debug, Eq, PartialEq, Deref, Packable)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serde_types", derive(serde::Serialize, serde::Deserialize))]
 #[deref(forward)]
 #[packable(unpack_error = Error, with = |_| Error::InvalidParentCount)]
 pub struct Parents<const MIN: u8, const MAX: u8>(

@@ -348,3 +348,114 @@ impl core::fmt::Display for AccountIdentifier {
         }
     }
 }
+
+#[cfg(feature = "json")]
+mod json {
+    use super::*;
+    use crate::utils::json::{FromJson, JsonExt, ToJson, Value};
+
+    impl ToJson for OutputData {
+        fn to_json(&self) -> Value {
+            crate::json!({
+                "outputId": self.output_id,
+                "metadata": self.metadata,
+                "output": self.output,
+                "isSpent": self.is_spent,
+                "address": self.address,
+                "networkId": self.network_id,
+                "remainder": self.remainder,
+                "chain": self.chain,
+            })
+        }
+    }
+
+    impl FromJson for OutputDataDto {
+        type Error = crate::types::block::Error;
+
+        fn from_non_null_json(mut value: Value) -> core::result::Result<Self, Self::Error>
+        where
+            Self: Sized,
+        {
+            Ok(Self {
+                output_id: value["outputId"].take_value()?,
+                metadata: value["metadata"].take_value()?,
+                output: value["output"].take_value()?,
+                is_spent: value["isSpent"].take_value()?,
+                address: value["address"].take_value()?,
+                network_id: value["networkId"].take_value()?,
+                remainder: value["remainder"].take_value()?,
+                chain: value["chain"].take_value()?,
+            })
+        }
+    }
+
+    impl ToJson for Transaction {
+        fn to_json(&self) -> Value {
+            crate::json!({
+                "payload": self.payload,
+                "blockId": self.block_id,
+                "inclusionState": self.inclusion_state,
+                "timestamp": self.timestamp,
+                "transactionId": self.transaction_id,
+                "networkId": self.network_id,
+                "incoming": self.incoming,
+                "note": self.note,
+                "inputs": self.inputs
+            })
+        }
+    }
+
+    impl FromJson for TransactionDto {
+        type Error = crate::types::block::Error;
+
+        fn from_non_null_json(mut value: Value) -> core::result::Result<Self, Self::Error>
+        where
+            Self: Sized,
+        {
+            Ok(Self {
+                payload: value["payload"].take_value()?,
+                block_id: value["blockId"].take_value()?,
+                inclusion_state: value["inclusionState"].take_value()?,
+                timestamp: value["timestamp"].take_value()?,
+                transaction_id: value["transactionId"].take_value()?,
+                network_id: value["networkId"].take_value()?,
+                incoming: value["incoming"].take_value()?,
+                note: value["note"].take_value()?,
+                inputs: value["inputs"].take_value()?,
+            })
+        }
+    }
+
+    impl ToJson for InclusionState {
+        fn to_json(&self) -> Value {
+            crate::json!(match self {
+                InclusionState::Pending => "Pending",
+                InclusionState::Confirmed => "Confirmed",
+                InclusionState::Conflicting => "Conflicting",
+                InclusionState::UnknownPruned => "UnknownPruned",
+            })
+        }
+    }
+
+    impl FromJson for InclusionState {
+        type Error = crate::types::block::Error;
+
+        fn from_non_null_json(mut value: Value) -> core::result::Result<Self, Self::Error>
+        where
+            Self: Sized,
+        {
+            Ok(match value.to_str()? {
+                "Pending" => Self::Pending,
+                "Confirmed" => Self::Confirmed,
+                "Conflicting" => Self::Conflicting,
+                "UnknownPruned" => Self::UnknownPruned,
+                _ => {
+                    return Err(Self::Error::invalid_type::<InclusionState>(
+                        format!("one of {:?}", ["Pending", "Confirmed", "Conflicting", "UnknownPruned"]),
+                        &value,
+                    ));
+                }
+            })
+        }
+    }
+}

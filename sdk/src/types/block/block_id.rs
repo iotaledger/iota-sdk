@@ -113,7 +113,7 @@ impl core::ops::Deref for BlockId {
         unsafe { core::mem::transmute::<_, &[u8; Self::LENGTH]>(self) }
     }
 }
-#[cfg(feature = "serde")]
+#[cfg(feature = "serde_types")]
 string_serde_impl!(BlockId);
 
 #[cfg(feature = "json")]

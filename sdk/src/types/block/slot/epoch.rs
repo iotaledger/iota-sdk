@@ -93,7 +93,7 @@ impl PartialEq<u64> for EpochIndex {
     }
 }
 
-#[cfg(feature = "serde")]
+#[cfg(feature = "serde_types")]
 string_serde_impl!(EpochIndex);
 
 #[cfg(feature = "json")]

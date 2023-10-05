@@ -9,7 +9,7 @@ use crate::types::block::output::Output;
 
 /// Represents a commitment to transaction inputs.
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Ord, PartialOrd, From, Deref, packable::Packable)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serde_types", derive(serde::Serialize, serde::Deserialize))]
 pub struct InputsCommitment([u8; Self::LENGTH]);
 
 impl InputsCommitment {

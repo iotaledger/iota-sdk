@@ -118,7 +118,7 @@ impl From<SlotIndex> for u64 {
     }
 }
 
-#[cfg(feature = "serde")]
+#[cfg(feature = "serde_types")]
 string_serde_impl!(SlotIndex);
 
 #[cfg(feature = "json")]

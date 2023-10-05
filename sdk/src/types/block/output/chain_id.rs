@@ -7,7 +7,7 @@ use crate::types::block::output::{AccountId, DelegationId, FoundryId, NftId, Out
 
 ///
 #[derive(Clone, Copy, Eq, Hash, PartialEq, Ord, PartialOrd, From)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serde_types", derive(serde::Serialize, serde::Deserialize))]
 pub enum ChainId {
     ///
     Account(AccountId),

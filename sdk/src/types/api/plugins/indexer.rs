@@ -12,7 +12,7 @@ use crate::types::block::output::OutputId;
 /// Returns the output_ids for the provided query parameters.
 #[derive(Clone, Debug, Eq, PartialEq)]
 #[cfg_attr(
-    feature = "serde",
+    feature = "serde_types",
     derive(serde::Serialize, serde::Deserialize),
     serde(rename_all = "camelCase")
 )]

@@ -65,7 +65,7 @@ impl OutputId {
     }
 }
 
-#[cfg(feature = "serde")]
+#[cfg(feature = "serde_types")]
 string_serde_impl!(OutputId);
 #[cfg(feature = "json")]
 string_json_impl!(OutputId);

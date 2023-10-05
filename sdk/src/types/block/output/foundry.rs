@@ -35,7 +35,7 @@ use crate::types::{
 
 impl_id!(pub FoundryId, 38, "Defines the unique identifier of a foundry.");
 
-#[cfg(feature = "serde")]
+#[cfg(feature = "serde_types")]
 string_serde_impl!(FoundryId);
 #[cfg(feature = "json")]
 string_json_impl!(FoundryId);
@@ -681,23 +681,23 @@ pub(crate) mod dto {
 
     #[derive(Clone, Debug, Eq, PartialEq)]
     #[cfg_attr(
-        feature = "serde",
+        feature = "serde_types",
         derive(serde::Serialize, serde::Deserialize),
         serde(rename_all = "camelCase")
     )]
     pub struct FoundryOutputDto {
-        #[cfg_attr(feature = "serde", serde(rename = "type"))]
+        #[cfg_attr(feature = "serde_types", serde(rename = "type"))]
         pub kind: u8,
-        #[cfg_attr(feature = "serde", serde(with = "string"))]
+        #[cfg_attr(feature = "serde_types", serde(with = "string"))]
         pub amount: u64,
-        #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Vec::is_empty", default))]
+        #[cfg_attr(feature = "serde_types", serde(skip_serializing_if = "Vec::is_empty", default))]
         pub native_tokens: Vec<NativeToken>,
         pub serial_number: u32,
         pub token_scheme: TokenScheme,
         pub unlock_conditions: Vec<UnlockConditionDto>,
-        #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Vec::is_empty", default))]
+        #[cfg_attr(feature = "serde_types", serde(skip_serializing_if = "Vec::is_empty", default))]
         pub features: Vec<Feature>,
-        #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Vec::is_empty", default))]
+        #[cfg_attr(feature = "serde_types", serde(skip_serializing_if = "Vec::is_empty", default))]
         pub immutable_features: Vec<Feature>,
     }
 
@@ -816,6 +816,28 @@ mod json {
             }
             if !self.immutable_features().is_empty() {
                 res["immutableFeatures"] = self.immutable_features().to_json();
+            }
+            res
+        }
+    }
+
+    impl ToJson for dto::FoundryOutputDto {
+        fn to_json(&self) -> Value {
+            let mut res = crate::json! ({
+                "type": FoundryOutput::KIND,
+                "amount": self.amount,
+                "serialNumber": self.serial_number,
+                "tokenScheme": self.token_scheme,
+                "unlockConditions": self.unlock_conditions,
+            });
+            if !self.native_tokens.is_empty() {
+                res["nativeTokens"] = self.native_tokens.to_json();
+            }
+            if !self.features.is_empty() {
+                res["features"] = self.features.to_json();
+            }
+            if !self.immutable_features.is_empty() {
+                res["immutableFeatures"] = self.immutable_features.to_json();
             }
             res
         }

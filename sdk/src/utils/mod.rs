@@ -3,5 +3,5 @@
 
 #[cfg(feature = "json")]
 pub mod json;
-#[cfg(feature = "serde")]
+#[cfg(feature = "serde_types")]
 pub mod serde;

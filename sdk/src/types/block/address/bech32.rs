@@ -133,7 +133,7 @@ impl PartialEq<str> for Hrp {
     }
 }
 
-#[cfg(feature = "serde")]
+#[cfg(feature = "serde_types")]
 string_serde_impl!(Hrp);
 #[cfg(feature = "json")]
 string_json_impl!(Hrp);
@@ -257,7 +257,7 @@ impl<T: core::borrow::Borrow<Bech32Address>> From<T> for Address {
     }
 }
 
-#[cfg(feature = "serde")]
+#[cfg(feature = "serde_types")]
 string_serde_impl!(Bech32Address);
 #[cfg(feature = "json")]
 string_json_impl!(Bech32Address);

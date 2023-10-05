@@ -14,7 +14,7 @@ use packable::PackableExt;
 
 #[cfg(feature = "json")]
 use crate::types::block::string_json_impl;
-#[cfg(feature = "serde")]
+#[cfg(feature = "serde_types")]
 use crate::types::block::string_serde_impl;
 use crate::types::{api::plugins::participation::error::Error, block::impl_id};
 
@@ -27,7 +27,7 @@ mod participation_event_type {
     /// Possible participation event types.
     #[derive(Debug, Clone, Eq, PartialEq)]
     #[cfg_attr(
-        feature = "serde",
+        feature = "serde_types",
         derive(serde_repr::Serialize_repr, serde_repr::Deserialize_repr),
         serde(untagged)
     )]
@@ -44,7 +44,7 @@ pub use participation_event_type::*;
 /// Wrapper interface containing a participation event ID and the corresponding event data.
 #[derive(Debug, Clone, Eq, PartialEq)]
 #[cfg_attr(
-    feature = "serde",
+    feature = "serde_types",
     derive(serde::Serialize, serde::Deserialize),
     serde(rename_all = "camelCase")
 )]
@@ -56,7 +56,7 @@ pub struct ParticipationEvent {
 }
 
 impl_id!(pub ParticipationEventId, 32, "A participation event id.");
-#[cfg(feature = "serde")]
+#[cfg(feature = "serde_types")]
 string_serde_impl!(ParticipationEventId);
 #[cfg(feature = "json")]
 string_json_impl!(ParticipationEventId);
@@ -64,7 +64,7 @@ string_json_impl!(ParticipationEventId);
 /// Information about a voting or staking event.
 #[derive(Debug, Clone, Eq, PartialEq, Getters)]
 #[cfg_attr(
-    feature = "serde",
+    feature = "serde_types",
     derive(serde::Serialize, serde::Deserialize),
     serde(rename_all = "camelCase")
 )]
@@ -80,7 +80,11 @@ pub struct ParticipationEventData {
 
 /// Event payload types.
 #[derive(Debug, Clone, Eq, PartialEq)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize), serde(untagged))]
+#[cfg_attr(
+    feature = "serde_types",
+    derive(serde::Serialize, serde::Deserialize),
+    serde(untagged)
+)]
 pub enum ParticipationEventPayload {
     /// Voting payload.
     VotingEventPayload(VotingEventPayload),
@@ -91,7 +95,7 @@ pub enum ParticipationEventPayload {
 /// Payload for a voting event.
 #[derive(Debug, Clone, Eq, PartialEq, Getters)]
 #[cfg_attr(
-    feature = "serde",
+    feature = "serde_types",
     derive(serde::Serialize, serde::Deserialize),
     serde(rename_all = "camelCase")
 )]
@@ -105,7 +109,7 @@ pub struct VotingEventPayload {
 /// Question for a voting event.
 #[derive(Debug, Clone, Eq, PartialEq, Getters)]
 #[cfg_attr(
-    feature = "serde",
+    feature = "serde_types",
     derive(serde::Serialize, serde::Deserialize),
     serde(rename_all = "camelCase")
 )]
@@ -119,7 +123,7 @@ pub struct Question {
 /// Answer in a voting event.
 #[derive(Debug, Clone, Eq, PartialEq, Getters)]
 #[cfg_attr(
-    feature = "serde",
+    feature = "serde_types",
     derive(serde::Serialize, serde::Deserialize),
     serde(rename_all = "camelCase")
 )]
@@ -133,7 +137,7 @@ pub struct Answer {
 /// Payload for a staking event.
 #[derive(Debug, Clone, Eq, PartialEq, Getters)]
 #[cfg_attr(
-    feature = "serde",
+    feature = "serde_types",
     derive(serde::Serialize, serde::Deserialize),
     serde(rename_all = "camelCase")
 )]
@@ -152,7 +156,7 @@ pub struct StakingEventPayload {
 /// Event status.
 #[derive(Debug, Clone, Eq, PartialEq, Getters)]
 #[cfg_attr(
-    feature = "serde",
+    feature = "serde_types",
     derive(serde::Serialize, serde::Deserialize),
     serde(rename_all = "camelCase")
 )]
@@ -166,7 +170,7 @@ pub struct ParticipationEventStatus {
 
 /// Question status.
 #[derive(Debug, Clone, Eq, PartialEq, Getters)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serde_types", derive(serde::Serialize, serde::Deserialize))]
 #[getset(get = "pub")]
 pub struct QuestionStatus {
     answers: Vec<AnswerStatus>,
@@ -174,7 +178,7 @@ pub struct QuestionStatus {
 
 /// Answer status.
 #[derive(Debug, Clone, Eq, PartialEq, Getters)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serde_types", derive(serde::Serialize, serde::Deserialize))]
 #[getset(get = "pub")]
 pub struct AnswerStatus {
     value: u8,
@@ -185,7 +189,7 @@ pub struct AnswerStatus {
 /// Staking rewards for an address.
 #[derive(Debug, Clone, Eq, PartialEq)]
 #[cfg_attr(
-    feature = "serde",
+    feature = "serde_types",
     derive(serde::Serialize, serde::Deserialize),
     serde(rename_all = "camelCase")
 )]
@@ -199,7 +203,7 @@ pub struct AddressStakingStatus {
 /// Staking rewards for an address.
 #[derive(Debug, Clone, Eq, PartialEq)]
 #[cfg_attr(
-    feature = "serde",
+    feature = "serde_types",
     derive(serde::Serialize, serde::Deserialize),
     serde(rename_all = "camelCase")
 )]
@@ -215,7 +219,7 @@ pub struct StakingStatus {
 /// Participation information.
 #[derive(Debug, Clone, Eq, PartialEq)]
 #[cfg_attr(
-    feature = "serde",
+    feature = "serde_types",
     derive(serde::Serialize, serde::Deserialize),
     serde(rename_all = "camelCase")
 )]
@@ -229,7 +233,7 @@ pub struct Participation {
 /// Participations information.
 /// <https://github.com/iota-community/treasury/blob/main/specifications/hornet-participation-plugin.md#structure-of-the-participation>
 #[derive(Debug, Clone, Eq, PartialEq)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serde_types", derive(serde::Serialize, serde::Deserialize))]
 pub struct Participations {
     /// Multiple participations that happen at the same time.
     pub participations: Vec<Participation>,

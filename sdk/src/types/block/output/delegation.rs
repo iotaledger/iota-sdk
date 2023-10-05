@@ -32,7 +32,7 @@ use crate::types::{
 
 impl_id!(pub DelegationId, 32, "Unique identifier of the Delegation Output, which is the BLAKE2b-256 hash of the Output ID that created it.");
 
-#[cfg(feature = "serde")]
+#[cfg(feature = "serde_types")]
 string_serde_impl!(DelegationId);
 #[cfg(feature = "json")]
 string_json_impl!(DelegationId);
@@ -486,16 +486,16 @@ pub(crate) mod dto {
 
     #[derive(Clone, Debug, Eq, PartialEq)]
     #[cfg_attr(
-        feature = "serde",
+        feature = "serde_types",
         derive(serde::Serialize, serde::Deserialize),
         serde(rename_all = "camelCase")
     )]
     pub struct DelegationOutputDto {
-        #[cfg_attr(feature = "serde", serde(rename = "type"))]
+        #[cfg_attr(feature = "serde_types", serde(rename = "type"))]
         pub kind: u8,
-        #[cfg_attr(feature = "serde", serde(with = "string"))]
+        #[cfg_attr(feature = "serde_types", serde(with = "string"))]
         pub amount: u64,
-        #[cfg_attr(feature = "serde", serde(with = "string"))]
+        #[cfg_attr(feature = "serde_types", serde(with = "string"))]
         pub delegated_amount: u64,
         pub delegation_id: DelegationId,
         pub validator_address: AccountAddress,
@@ -604,7 +604,22 @@ mod json {
                 "validatorAddress": self.validator_address(),
                 "startEpoch": self.start_epoch(),
                 "endEpoch": self.end_epoch(),
-                "unlockConditions": self.unlock_conditions().to_json(),
+                "unlockConditions": self.unlock_conditions().as_list(),
+            })
+        }
+    }
+
+    impl ToJson for dto::DelegationOutputDto {
+        fn to_json(&self) -> Value {
+            crate::json! ({
+                "type": DelegationOutput::KIND,
+                "amount": self.amount,
+                "delegatedAmount": self.delegated_amount,
+                "delegationId": self.delegation_id,
+                "validatorAddress": self.validator_address,
+                "startEpoch": self.start_epoch,
+                "endEpoch": self.end_epoch,
+                "unlockConditions": self.unlock_conditions,
             })
         }
     }
