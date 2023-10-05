@@ -103,7 +103,7 @@ fn pack_unpack_valid() {
 //           "signature":{
 //             "type":0,
 //             "publicKey":"0x803361fe1effc899dca7f931d8ad07c01ba23aaa93f986adb04d4c17cf6368d8",
-//             
+//
 // "signature":"
 // 0xccddbac3aaac413e0193e16da3449f30c183d0e7eaa7f303dc12ae0dbc9fb890e449a52f9056e7d952ea796fd3e5645f60d9eb98ed91cb3261720fb528d2a105"
 //           }
