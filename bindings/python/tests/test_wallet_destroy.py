@@ -1,9 +1,9 @@
 # Copyright 2023 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
-from iota_sdk import Wallet, MnemonicSecretManager, CoinType, ClientOptions, WalletError
 import shutil
 import unittest
+from iota_sdk import Wallet, MnemonicSecretManager, CoinType, ClientOptions, WalletError
 
 
 class WalletDestroy(unittest.TestCase):
