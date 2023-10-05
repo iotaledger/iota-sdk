@@ -21,7 +21,7 @@ async function run() {
         'WALLET_DB_PATH',
         'STRONGHOLD_PASSWORD',
     ])
-        if (!process.env.FAUCET_URL) {
+        if (!(envVar in process.env)) {
             throw new Error(`.env ${envVar} is undefined, see .env.example`);
         }
 
