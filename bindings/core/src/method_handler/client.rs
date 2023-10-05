@@ -9,7 +9,8 @@ use iota_sdk::{
         api::core::response::OutputWithMetadataResponse,
         block::{
             output::{
-                dto::OutputDto, AccountOutput, BasicOutput, FoundryOutput, NftOutput, Output, OutputBuilderAmount, Rent,
+                dto::OutputDto, AccountOutput, BasicOutput, FoundryOutput, NftOutput, Output, OutputBuilderAmount,
+                StorageScore,
             },
             payload::Payload,
             BlockWrapper, BlockWrapperDto,
@@ -297,7 +298,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
             let output = Output::try_from_dto_with_params(output, client.get_token_supply().await?)?;
             let rent_structure = client.get_rent_structure().await?;
 
-            let minimum_storage_deposit = output.rent_cost(rent_structure);
+            let minimum_storage_deposit = output.storage_score(rent_structure);
 
             Response::MinimumRequiredStorageDeposit(minimum_storage_deposit.to_string())
         }

@@ -15,13 +15,18 @@ use crate::types::block::{
     BlockId, Error,
 };
 
-const DEFAULT_BYTE_COST: u32 = 100;
-const DEFAULT_BYTE_COST_FACTOR_KEY: u8 = 10;
-const DEFAULT_BYTE_COST_FACTOR_DATA: u8 = 1;
 // TODO: fill in the real values
-const DEFAULT_BYTE_COST_FACTOR_DELEGATION: u8 = 1;
-const DEFAULT_BYTE_COST_FACTOR_STAKING_FEATURE: u8 = 1;
-const DEFAULT_BYTE_COST_FACTOR_BLOCK_ISSUER_KEY: u8 = 1;
+const DEFAULT_STORAGE_COST: u32 = 100;
+const DEFAULT_STORAGE_SCORE_FACTOR_DATA: StorageScoreFactor = 1;
+const DEFAULT_STORAGE_SCORE_OFFSET_OUTPUT: StorageScoreOffset = 1;
+const DEFAULT_STORAGE_SCORE_OFFSET_ED25519_BLOCK_ISSUER_KEY: StorageScoreOffset = 1;
+const DEFAULT_STORAGE_SCORE_STAKING_FEATURE: StorageScoreOffset = 1;
+const DEFAULT_STORAGE_SCORE_OFFSET_DELEGATION: StorageScoreOffset = 1;
+
+// Defines the type of the storage score factor.
+type StorageScoreFactor = u8;
+// Defines the type of storage score.
+type StorageScoreOffset = u64;
 
 /// Specifies the current parameters for the byte cost computation.
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Packable)]
@@ -31,29 +36,30 @@ const DEFAULT_BYTE_COST_FACTOR_BLOCK_ISSUER_KEY: u8 = 1;
     serde(rename_all = "camelCase")
 )]
 pub struct RentStructure {
-    /// Cost in tokens per virtual byte.
-    v_byte_cost: u32,
-    /// The weight factor used for data fields in the outputs.
-    v_byte_factor_data: u8,
-    /// The weight factor used for key fields in the outputs.
-    v_byte_factor_key: u8,
-    /// The weight factor used for block issuer key fields in the outputs.
-    v_byte_factor_block_issuer_key: u8,
-    /// The weight factor used for staking fields in the outputs.
-    v_byte_factor_staking_feature: u8,
-    /// The weight factor used for delegation fields in the outputs.
-    v_byte_factor_delegation: u8,
+    // TODO: what actual primitive type is their `BaseToken` type def?
+    /// Defines the number of IOTA tokens required per unit of storage score.
+    storage_cost: u32,
+    /// Defines the factor to be used for data only fields.
+    storage_score_factor_data: StorageScoreFactor,
+    /// Defines the offset to be used for key/lookup generating fields.
+    storage_score_offset_output: StorageScoreOffset,
+    /// Defines the offset to be used for block issuer feature public keys.
+    storage_score_offset_ed25519_block_issuer_key: StorageScoreOffset,
+    /// Defines the offset to be used for staking feature.
+    storage_score_offset_staking_feature: StorageScoreOffset,
+    /// Defines the offset to be used for delegation output.
+    storage_score_offset_delegation: StorageScoreOffset,
 }
 
 impl Default for RentStructure {
     fn default() -> Self {
         Self {
-            v_byte_cost: DEFAULT_BYTE_COST,
-            v_byte_factor_data: DEFAULT_BYTE_COST_FACTOR_DATA,
-            v_byte_factor_key: DEFAULT_BYTE_COST_FACTOR_KEY,
-            v_byte_factor_block_issuer_key: DEFAULT_BYTE_COST_FACTOR_BLOCK_ISSUER_KEY,
-            v_byte_factor_staking_feature: DEFAULT_BYTE_COST_FACTOR_STAKING_FEATURE,
-            v_byte_factor_delegation: DEFAULT_BYTE_COST_FACTOR_DELEGATION,
+            storage_cost: DEFAULT_STORAGE_COST,
+            storage_score_factor_data: DEFAULT_STORAGE_SCORE_FACTOR_DATA,
+            storage_score_offset_output: DEFAULT_STORAGE_SCORE_OFFSET_OUTPUT,
+            storage_score_offset_ed25519_block_issuer_key: DEFAULT_STORAGE_SCORE_OFFSET_ED25519_BLOCK_ISSUER_KEY,
+            storage_score_offset_staking_feature: DEFAULT_STORAGE_SCORE_STAKING_FEATURE,
+            storage_score_offset_delegation: DEFAULT_STORAGE_SCORE_OFFSET_DELEGATION,
         }
     }
 }
@@ -61,115 +67,122 @@ impl Default for RentStructure {
 impl RentStructure {
     /// Creates a new [`RentStructure`].
     pub fn new(
-        byte_cost: u32,
-        byte_factor_data: u8,
-        byte_factor_key: u8,
-        byte_factor_block_issuer_key: u8,
-        byte_factor_staking_feature: u8,
-        byte_factor_delegation: u8,
+        storage_cost: u32,
+        storage_score_factor_data: StorageScoreFactor,
+        storage_score_offset_output: StorageScoreOffset,
+        storage_score_offset_ed25519_block_issuer_key: StorageScoreOffset,
+        storage_score_offset_staking_feature: StorageScoreOffset,
+        storage_score_offset_delegation: StorageScoreOffset,
     ) -> Self {
         Self {
-            v_byte_cost: byte_cost,
-            v_byte_factor_data: byte_factor_data,
-            v_byte_factor_key: byte_factor_key,
-            v_byte_factor_block_issuer_key: byte_factor_block_issuer_key,
-            v_byte_factor_staking_feature: byte_factor_staking_feature,
-            v_byte_factor_delegation: byte_factor_delegation,
+            storage_cost,
+            storage_score_factor_data,
+            storage_score_offset_output: storage_score_offset_output,
+            storage_score_offset_ed25519_block_issuer_key: storage_score_offset_ed25519_block_issuer_key,
+            storage_score_offset_staking_feature: storage_score_offset_staking_feature,
+            storage_score_offset_delegation: storage_score_offset_delegation,
         }
     }
 
-    /// Sets the byte cost for the storage deposit.
-    pub fn with_byte_cost(mut self, byte_cost: u32) -> Self {
-        self.v_byte_cost = byte_cost;
+    /// Sets the storage cost for the storage deposit.
+    pub fn with_storage_cost(mut self, storage_cost: u32) -> Self {
+        self.storage_cost = storage_cost;
         self
     }
 
-    /// Sets the virtual byte weight for the data fields.
-    pub fn with_byte_factor_data(mut self, byte_factor_data: u8) -> Self {
-        self.v_byte_factor_data = byte_factor_data;
+    /// Sets the storage score factor for the data fields.
+    pub fn with_storage_score_factor_data(mut self, storage_score_factor_data: StorageScoreFactor) -> Self {
+        self.storage_score_factor_data = storage_score_factor_data;
         self
     }
 
-    /// Sets the virtual byte weight for the key fields.
-    pub fn with_byte_factor_key(mut self, byte_factor_key: u8) -> Self {
-        self.v_byte_factor_key = byte_factor_key;
+    /// Sets the TODO.
+    pub fn with_storage_score_offset_output(mut self, storage_score_offset_output: StorageScoreOffset) -> Self {
+        self.storage_score_offset_output = storage_score_offset_output;
         self
     }
 
-    /// Sets the virtual byte weight for the block issuer key fields.
-    pub fn with_byte_factor_block_issuer_key(mut self, byte_factor_block_issuer_key: u8) -> Self {
-        self.v_byte_factor_block_issuer_key = byte_factor_block_issuer_key;
+    /// Sets the TODO.
+    pub fn with_storage_score_offset_ed25519_block_issuer_key(
+        mut self,
+        storage_score_offset_ed25519_block_issuer_key: StorageScoreOffset,
+    ) -> Self {
+        self.storage_score_offset_ed25519_block_issuer_key = storage_score_offset_ed25519_block_issuer_key;
         self
     }
 
-    /// Sets the virtual byte weight for the staking fields.
-    pub fn with_byte_factor_staking_feature(mut self, byte_factor_staking_feature: u8) -> Self {
-        self.v_byte_factor_staking_feature = byte_factor_staking_feature;
+    /// Sets the TODO for the staking fields.
+    pub fn with_storage_score_offset_staking_feature(
+        mut self,
+        storage_score_offset_staking_feature: StorageScoreOffset,
+    ) -> Self {
+        self.storage_score_offset_staking_feature = storage_score_offset_staking_feature;
         self
     }
 
-    /// Sets the virtual byte weight for the delegation fields.
-    pub fn with_byte_factor_delegation(mut self, byte_factor_delegation: u8) -> Self {
-        self.v_byte_factor_delegation = byte_factor_delegation;
+    /// Sets the TODO for the delegation fields.
+    pub fn with_storage_score_offset_delegation(mut self, storage_score_offset_delegation: StorageScoreOffset) -> Self {
+        self.storage_score_offset_delegation = storage_score_offset_delegation;
         self
     }
 
-    /// Returns the byte cost of the [`RentStructure`].
-    pub const fn byte_cost(&self) -> u32 {
-        self.v_byte_cost
+    /// Returns the TODO of the [`RentStructure`].
+    pub const fn storage_cost(&self) -> u32 {
+        self.storage_cost
     }
 
-    /// Returns the byte factor data of the [`RentStructure`].
-    pub const fn byte_factor_data(&self) -> u8 {
-        self.v_byte_factor_data
+    /// Returns the TODO of the [`RentStructure`].
+    pub const fn storage_score_factor_data(&self) -> StorageScoreFactor {
+        self.storage_score_factor_data
     }
 
-    /// Returns the byte factor key of the [`RentStructure`].
-    pub const fn byte_factor_key(&self) -> u8 {
-        self.v_byte_factor_key
+    /// Returns the TODO of the [`RentStructure`].
+    pub const fn storage_score_offset_output(&self) -> StorageScoreOffset {
+        self.storage_score_offset_output
     }
 
-    /// Returns the block issuer key byte factor of the [`RentStructure`].
-    pub const fn byte_factor_block_issuer_key(&self) -> u8 {
-        self.v_byte_factor_block_issuer_key
+    /// Returns the TODO the [`RentStructure`].
+    pub const fn storage_score_offset_ed25519_block_issuer_key(&self) -> StorageScoreOffset {
+        self.storage_score_offset_ed25519_block_issuer_key
     }
 
-    /// Returns the staking byte factor of the [`RentStructure`].
-    pub const fn byte_factor_staking_feature(&self) -> u8 {
-        self.v_byte_factor_staking_feature
+    /// Returns the TODO the [`RentStructure`].
+    pub const fn storage_score_offset_staking_feature(&self) -> StorageScoreOffset {
+        self.storage_score_offset_staking_feature
     }
 
-    /// Returns the delegation byte factor of the [`RentStructure`].
-    pub const fn byte_factor_delegation(&self) -> u8 {
-        self.v_byte_factor_delegation
+    /// Returns the TODO the [`RentStructure`].
+    pub const fn storage_score_offset_delegation(&self) -> StorageScoreOffset {
+        self.storage_score_offset_delegation
     }
 }
 
-/// A trait to facilitate the computation of the byte cost of block outputs, which is central to dust protection.
-pub trait Rent {
+/// A trait to facilitate the computation of the storage score of block outputs, which is central to dust protection.
+pub trait StorageScore {
     /// Computes the byte offset given a [`RentStructure`].
     fn byte_offset(&self, rent_structure: RentStructure) -> u32 {
+        // TODO: verify this
         // The ID of the output.
-        size_of::<OutputId>() as u32 * rent_structure.v_byte_factor_key as u32
+        size_of::<OutputId>() as u32 * rent_structure.storage_score_offset_output as u32
         // The ID of the block in which the transaction payload that created this output was included.
-            + size_of::<BlockId>() as u32 * rent_structure.v_byte_factor_data as u32
+            + size_of::<BlockId>() as u32 * rent_structure.storage_score_factor_data as u32
             // The index of the slot in which the transaction that created it was booked.
-            + size_of::<SlotIndex>() as u32 * rent_structure.v_byte_factor_data as u32
+            + size_of::<SlotIndex>() as u32 * rent_structure.storage_score_factor_data as u32
             // The index of the slot in which the transaction was created.
-            + size_of::<SlotIndex>() as u32 * rent_structure.v_byte_factor_data as u32
+            + size_of::<SlotIndex>() as u32 * rent_structure.storage_score_factor_data as u32
     }
 
     /// Different fields in a type lead to different storage requirements for the ledger state.
     fn weighted_bytes(&self, config: RentStructure) -> u64;
 
-    /// Computes the rent cost given a [`RentStructure`].
-    fn rent_cost(&self, rent_structure: RentStructure) -> u64 {
-        rent_structure.v_byte_cost as u64
+    /// Computes the storage score given a [`RentStructure`].
+    fn storage_score(&self, rent_structure: RentStructure) -> u64 {
+        rent_structure.storage_cost as u64
             * (self.weighted_bytes(rent_structure) + self.byte_offset(rent_structure) as u64)
     }
 }
 
-impl<T: Rent, const N: usize> Rent for [T; N] {
+impl<T: StorageScore, const N: usize> StorageScore for [T; N] {
     fn weighted_bytes(&self, config: RentStructure) -> u64 {
         self.iter().map(|elem| elem.weighted_bytes(config)).sum()
     }
@@ -219,6 +232,9 @@ impl MinimumStorageDepositBasicOutput {
     }
 
     pub fn finish(self) -> Result<u64, Error> {
-        Ok(self.builder.finish_output(self.token_supply)?.rent_cost(self.config))
+        Ok(self
+            .builder
+            .finish_output(self.token_supply)?
+            .storage_score(self.config))
     }
 }

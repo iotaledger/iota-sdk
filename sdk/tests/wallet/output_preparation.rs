@@ -6,7 +6,7 @@ use std::str::FromStr;
 use iota_sdk::{
     types::block::{
         address::{Address, Bech32Address, ToBech32Ext},
-        output::{MinimumStorageDepositBasicOutput, NativeToken, NftId, Output, Rent, TokenId},
+        output::{MinimumStorageDepositBasicOutput, NativeToken, NftId, Output, StorageScore, TokenId},
         slot::SlotIndex,
     },
     wallet::{
@@ -409,7 +409,7 @@ async fn output_preparation() -> Result<()> {
         )
         .await?;
     let rent_structure = wallet.client().get_rent_structure().await?;
-    let minimum_storage_deposit = output.rent_cost(rent_structure);
+    let minimum_storage_deposit = output.storage_score(rent_structure);
     assert_eq!(output.amount(), minimum_storage_deposit);
     assert_eq!(output.amount(), 187900);
     let sdr = output.unlock_conditions().unwrap().storage_deposit_return().unwrap();
@@ -850,7 +850,7 @@ async fn prepare_existing_nft_output_gift() -> Result<()> {
         .clone();
 
     let rent_structure = wallet.client().get_rent_structure().await?;
-    let minimum_storage_deposit = Output::Nft(nft.clone()).rent_cost(rent_structure);
+    let minimum_storage_deposit = Output::Nft(nft.clone()).storage_score(rent_structure);
     assert_eq!(nft.amount(), minimum_storage_deposit);
 
     assert_eq!(nft.amount(), 52300);

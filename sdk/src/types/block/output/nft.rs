@@ -19,8 +19,8 @@ use crate::types::{
                 verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions,
             },
             verify_output_amount_min, verify_output_amount_packable, verify_output_amount_supply, ChainId, NativeToken,
-            NativeTokens, Output, OutputBuilderAmount, OutputId, Rent, RentStructure, StateTransitionError,
-            StateTransitionVerifier,
+            NativeTokens, Output, OutputBuilderAmount, OutputId, RentStructure, StateTransitionError,
+            StateTransitionVerifier, StorageScore,
         },
         protocol::ProtocolParameters,
         semantic::{TransactionFailureReason, ValidationContext},
@@ -244,7 +244,7 @@ impl NftOutputBuilder {
         output.amount = match self.amount {
             OutputBuilderAmount::Amount(amount) => amount,
             OutputBuilderAmount::MinimumStorageDeposit(rent_structure) => {
-                Output::Nft(output.clone()).rent_cost(rent_structure)
+                Output::Nft(output.clone()).storage_score(rent_structure)
             }
         };
 

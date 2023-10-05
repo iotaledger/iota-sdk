@@ -10,7 +10,7 @@
 // };
 
 // fn output_in_range(output: Output, range: std::ops::RangeInclusive<u64>) {
-//     let cost = output.rent_cost(Default::default());
+//     let cost = output.storage_score(Default::default());
 //     assert!(range.contains(&cost), "{output:#?} has a required byte cost of {cost}");
 // }
 

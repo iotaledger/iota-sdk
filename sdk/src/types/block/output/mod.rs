@@ -53,7 +53,7 @@ pub use self::{
     native_token::{NativeToken, NativeTokens, NativeTokensBuilder, TokenId},
     nft::{NftId, NftOutput, NftOutputBuilder},
     output_id::OutputId,
-    rent::{MinimumStorageDepositBasicOutput, Rent, RentStructure},
+    rent::{MinimumStorageDepositBasicOutput, RentStructure, StorageScore},
     state_transition::{StateTransitionError, StateTransitionVerifier},
     token_scheme::{SimpleTokenScheme, TokenScheme},
     unlock_condition::{UnlockCondition, UnlockConditions},
@@ -384,7 +384,7 @@ impl Output {
     /// If there is a [`StorageDepositReturnUnlockCondition`](unlock_condition::StorageDepositReturnUnlockCondition),
     /// its amount is also checked.
     pub fn verify_storage_deposit(&self, rent_structure: RentStructure, token_supply: u64) -> Result<(), Error> {
-        let required_output_amount = self.rent_cost(rent_structure);
+        let required_output_amount = self.storage_score(rent_structure);
 
         if self.amount() < required_output_amount {
             return Err(Error::InsufficientStorageDepositAmount {
@@ -468,9 +468,9 @@ impl Packable for Output {
     }
 }
 
-impl Rent for Output {
+impl StorageScore for Output {
     fn weighted_bytes(&self, rent_structure: RentStructure) -> u64 {
-        self.packed_len() as u64 * rent_structure.byte_factor_data() as u64
+        self.packed_len() as u64 * rent_structure.storage_score_factor_data() as u64
     }
 }
 

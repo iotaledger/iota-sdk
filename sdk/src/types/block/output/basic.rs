@@ -14,7 +14,7 @@ use crate::types::{
                 verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions,
             },
             verify_output_amount_min, verify_output_amount_packable, verify_output_amount_supply, NativeToken,
-            NativeTokens, Output, OutputBuilderAmount, OutputId, Rent, RentStructure,
+            NativeTokens, Output, OutputBuilderAmount, OutputId, RentStructure, StorageScore,
         },
         protocol::ProtocolParameters,
         semantic::{TransactionFailureReason, ValidationContext},
@@ -172,7 +172,7 @@ impl BasicOutputBuilder {
         output.amount = match self.amount {
             OutputBuilderAmount::Amount(amount) => amount,
             OutputBuilderAmount::MinimumStorageDeposit(rent_structure) => {
-                Output::Basic(output.clone()).rent_cost(rent_structure)
+                Output::Basic(output.clone()).storage_score(rent_structure)
             }
         };
 
