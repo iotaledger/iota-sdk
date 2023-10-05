@@ -83,7 +83,7 @@ class TimelockUnlockCondition:
 @json
 @dataclass
 class ExpirationUnlockCondition:
-    """Defines a slot index until which only Address, defined in Address Unlock Condition, is allowed to unlock the output. After the slot index is reached/passed, only Return Address can unlock it.
+    """Defines a slot index until which only the Address defined in the Address Unlock Condition is allowed to unlock the output. After the slot index is reached/passed, only the Return Address can unlock it.
     Args:
         slot_index: Before this slot index, Address Unlock Condition is allowed to unlock the output,
                     after that only the address defined in Return Address.
