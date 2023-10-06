@@ -35,10 +35,10 @@ class Features():
 class Unlocks():
     """Unlocks for OutputParams.
     """
-    expiration_unix_time: Optional[int] = field(default=None, metadata=config(
+    expiration_slot_index: Optional[int] = field(default=None, metadata=config(
         encoder=opt_int_encoder
     ))
-    timelock_unix_time: Optional[int] = field(default=None, metadata=config(
+    timelock_slot_index: Optional[int] = field(default=None, metadata=config(
         encoder=opt_int_encoder
     ))
 

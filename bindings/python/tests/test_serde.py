@@ -26,21 +26,21 @@ def test_feature():
 
 def test_unlocks():
     unlocks_dict = {
-        "expirationUnixTime": "1",
-        "timelockUnixTime": "2"
+        "expirationSlotIndex": "1",
+        "timelockSlotIndex": "2"
     }
 
     unlocks = Unlocks.from_dict(unlocks_dict)
-    assert unlocks.expiration_unix_time == 1
-    assert unlocks.timelock_unix_time == 2
+    assert unlocks.expiration_slot_index == 1
+    assert unlocks.timelock_slot_index == 2
     assert unlocks.to_dict() == unlocks_dict
 
     opt_unlocks_dict = {
-        "expirationUnixTime": "1"
+        "expirationSlotIndex": "1"
     }
 
     opt_unlocks = Unlocks.from_dict(opt_unlocks_dict)
-    assert opt_unlocks.timelock_unix_time is None
+    assert opt_unlocks.timelock_slot_index is None
     assert opt_unlocks.to_dict() == opt_unlocks_dict
 
 

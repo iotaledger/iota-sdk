@@ -237,12 +237,8 @@ class ProtocolParameters:
         encoder=str
     ))
     validation_blocks_per_slot: int
-    punishment_epochs: int = field(metadata=config(
-        encoder=str
-    ))
-    liveness_threshold: int = field(metadata=config(
-        encoder=str
-    ))
+    punishment_epochs: int
+    liveness_threshold: int
     min_committable_age: int = field(metadata=config(
         encoder=str
     ))

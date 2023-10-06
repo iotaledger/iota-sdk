@@ -13,7 +13,7 @@ client = Client(nodes=[node_url])
 
 ADDRESS = 'rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy'
 query_parameters = NodeIndexerAPI.QueryParameters(
-    ADDRESS,
+    address=ADDRESS,
     has_expiration=False,
     has_timelock=False,
     has_storage_deposit_return=False
