@@ -209,7 +209,7 @@ impl StorageScore for Feature {
             Self::Metadata(metadata) => metadata.storage_score(rent_struct),
             Self::Tag(tag) => tag.storage_score(rent_struct),
             Self::BlockIssuer(block_issuer) => block_issuer.storage_score(rent_struct),
-            Self::Staking(staking) => staking.storage_score(rent_struct)
+            Self::Staking(staking) => staking.storage_score(rent_struct),
         }
     }
 }

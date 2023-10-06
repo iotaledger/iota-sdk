@@ -3,7 +3,11 @@
 
 use derive_more::From;
 
-use crate::types::block::address::Address;
+use super::ImmutableAccountAddressUnlockCondition;
+use crate::types::block::{
+    address::Address,
+    rent::{RentStructure, StorageScore},
+};
 
 /// Defines the State Controller Address that owns this output, that is, it can unlock it with the proper Unlock in a
 /// transaction that state transitions the account output.
@@ -25,6 +29,12 @@ impl StateControllerAddressUnlockCondition {
     #[inline(always)]
     pub fn address(&self) -> &Address {
         &self.0
+    }
+}
+
+impl StorageScore for StateControllerAddressUnlockCondition {
+    fn storage_score(&self, rent_struct: RentStructure) -> u64 {
+        self.0.storage_score(rent_struct)
     }
 }
 

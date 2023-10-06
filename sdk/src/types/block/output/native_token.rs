@@ -79,7 +79,7 @@ impl Ord for NativeToken {
 
 impl StorageScore for NativeToken {
     fn storage_score(&self, rent_struct: RentStructure) -> u64 {
-        todo!("native token score")
+        0
     }
 }
 

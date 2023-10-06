@@ -3,7 +3,10 @@
 
 use derive_more::From;
 
-use crate::types::block::{address::Address, rent::{RentStructure, StorageScore}};
+use crate::types::block::{
+    address::Address,
+    rent::{RentStructure, StorageScore},
+};
 
 /// Identifies the validated sender of an output.
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, From, packable::Packable)]
@@ -28,7 +31,7 @@ impl SenderFeature {
 
 impl StorageScore for SenderFeature {
     fn storage_score(&self, rent_struct: RentStructure) -> u64 {
-        // TODO: In iota.go you can specify a closure f(rent_struct) -> u64 for this feature 
+        // TODO: In iota.go you can specify a closure f(rent_struct) -> u64 for this feature
         // which immediately returns, hence overrides the default storage score.
         self.0.storage_score(rent_struct)
     }

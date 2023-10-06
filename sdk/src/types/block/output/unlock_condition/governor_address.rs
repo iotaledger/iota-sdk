@@ -3,7 +3,10 @@
 
 use derive_more::From;
 
-use crate::types::block::address::Address;
+use crate::types::block::{
+    address::Address,
+    rent::{RentStructure, StorageScore},
+};
 
 /// Defines the Governor Address that owns this output, that is, it can unlock it with the proper Unlock in a
 /// transaction that governance transitions the account output.
@@ -25,6 +28,12 @@ impl GovernorAddressUnlockCondition {
     #[inline(always)]
     pub fn address(&self) -> &Address {
         &self.0
+    }
+}
+
+impl StorageScore for GovernorAddressUnlockCondition {
+    fn storage_score(&self, rent_struct: RentStructure) -> u64 {
+        self.0.storage_score(rent_struct)
     }
 }
 

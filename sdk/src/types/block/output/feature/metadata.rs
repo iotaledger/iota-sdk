@@ -6,7 +6,10 @@ use core::{ops::RangeInclusive, str::FromStr};
 
 use packable::{bounded::BoundedU16, prefix::BoxedSlicePrefix};
 
-use crate::types::block::{Error, rent::{StorageScore, RentStructure}};
+use crate::types::block::{
+    rent::{RentStructure, StorageScore},
+    Error,
+};
 
 pub(crate) type MetadataFeatureLength =
     BoundedU16<{ *MetadataFeature::LENGTH_RANGE.start() }, { *MetadataFeature::LENGTH_RANGE.end() }>;

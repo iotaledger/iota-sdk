@@ -85,7 +85,19 @@ impl core::fmt::Debug for UnlockCondition {
 
 impl StorageScore for UnlockCondition {
     fn storage_score(&self, rent_struct: RentStructure) -> u64 {
-        todo!("unlock condition score")
+        match self {
+            Self::Address(address) => address.storage_score(rent_struct),
+            Self::StorageDepositReturn(storage_deposit_return) => storage_deposit_return.storage_score(rent_struct),
+            Self::Timelock(timelock) => timelock.storage_score(rent_struct),
+            Self::Expiration(expiration) => expiration.storage_score(rent_struct),
+            Self::StateControllerAddress(state_controller_address) => {
+                state_controller_address.storage_score(rent_struct)
+            }
+            Self::GovernorAddress(governor_address) => governor_address.storage_score(rent_struct),
+            Self::ImmutableAccountAddress(immutable_account_address) => {
+                immutable_account_address.storage_score(rent_struct)
+            }
+        }
     }
 }
 
