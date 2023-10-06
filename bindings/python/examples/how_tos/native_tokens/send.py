@@ -15,7 +15,8 @@ account = wallet.get_account('Alice')
 # Sync account with the node
 balance = account.sync()
 
-token = [native_balance for native_balance in balance.native_tokens if native_balance.available >= 10][0]
+token = [native_balance for native_balance in balance.native_tokens if int(
+    native_balance.available, 0) >= 10][0]
 print(f'Balance before sending: {token.available}')
 
 if 'STRONGHOLD_PASSWORD' not in os.environ:
@@ -40,6 +41,6 @@ block_id = account.reissue_transaction_until_included(
 print(f'Block included: {os.environ["EXPLORER_URL"]}/block/{block_id}')
 
 balance = account.sync()
-available_balance = [
-    native_balance for native_balance in balance.native_tokens if native_balance.token_id == token.token_id][0].available
+available_balance = int(
+    [native_balance for native_balance in balance.native_tokens if native_balance.token_id == token.token_id][0].available, 0)
 print(f'Balance after sending: {available_balance}')
