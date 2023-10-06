@@ -95,6 +95,18 @@ impl BasicBlockBuilder {
     }
 }
 
+impl From<BasicBlock> for BasicBlockBuilder {
+    fn from(value: BasicBlock) -> Self {
+        Self {
+            strong_parents: value.strong_parents,
+            weak_parents: value.weak_parents,
+            shallow_like_parents: value.shallow_like_parents,
+            payload: value.payload,
+            max_burned_mana: value.max_burned_mana,
+        }
+    }
+}
+
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct BasicBlock {
     /// Blocks that are strongly directly approved.
