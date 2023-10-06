@@ -59,7 +59,7 @@ pub use self::{
 use super::{
     address::Ed25519Address,
     protocol::ProtocolParameters,
-    rent::{RentParameters, StorageCost},
+    rent::{RentParameters, StorageScore},
     BlockId,
 };
 use crate::types::block::{address::Address, semantic::ValidationContext, slot::SlotIndex, Error};
@@ -387,7 +387,7 @@ impl Output {
     /// If there is a [`StorageDepositReturnUnlockCondition`](unlock_condition::StorageDepositReturnUnlockCondition),
     /// its amount is also checked.
     pub fn verify_storage_deposit(&self, rent_params: RentParameters, token_supply: u64) -> Result<(), Error> {
-        let required_output_amount = self.storage_cost(rent_params);
+        let required_output_amount = self.rent_cost(rent_params);
 
         if self.amount() < required_output_amount {
             return Err(Error::InsufficientStorageDepositAmount {
@@ -513,16 +513,24 @@ fn minimum_storage_deposit(address: &Address, rent_parameters: RentParameters, t
         .amount()
 }
 
-impl StorageCost for Output {
-    fn offset_score(&self, rent_params: RentParameters) -> u64 {
-        // included output id, block id, and slot booked data size
-        rent_params.storage_score_offset_output()
-            + (size_of::<OutputId>() as u64 + size_of::<BlockId>() as u64 + size_of::<SlotIndex>() as u64)
-                * rent_params.storage_score_factor_data() as u64
-    }
+fn storage_score_offset_output(rent_params: RentParameters) -> u64 {
+    // included output id, block id, and slot booked data size
+    rent_params.storage_score_offset_output()
+        + rent_params.storage_score_factor_data() as u64
+            * (size_of::<OutputId>() as u64 + size_of::<BlockId>() as u64 + size_of::<SlotIndex>() as u64)
+}
 
+impl StorageScore for Output {
     fn score(&self, rent_params: RentParameters) -> u64 {
-        self.packed_len() as u64 * rent_params.storage_score_factor_data() as u64
+        // +1 score for the output kind
+        rent_params.storage_score_factor_data() as u64 * size_of::<u8>() as u64
+            + match self {
+                Self::Basic(basic) => basic.score(rent_params),
+                Self::Account(account) => account.score(rent_params),
+                Self::Foundry(foundry) => foundry.score(rent_params),
+                Self::Nft(nft) => nft.score(rent_params),
+                Self::Delegation(delegation) => delegation.score(rent_params),
+            }
     }
 }
 
@@ -573,7 +581,7 @@ impl MinimumStorageDepositBasicOutput {
         Ok(self
             .builder
             .finish_output(self.token_supply)?
-            .storage_cost(self.rent_params))
+            .rent_cost(self.rent_params))
     }
 }
 #[cfg(feature = "serde")]

@@ -30,7 +30,7 @@ pub use self::{
     state_controller_address::StateControllerAddressUnlockCondition,
     storage_deposit_return::StorageDepositReturnUnlockCondition, timelock::TimelockUnlockCondition,
 };
-use crate::types::block::{address::Address, create_bitflags, protocol::ProtocolParameters, slot::SlotIndex, Error};
+use crate::types::block::{address::Address, create_bitflags, protocol::ProtocolParameters, slot::SlotIndex, Error, rent::StorageScore};
 
 ///
 #[derive(Clone, Eq, PartialEq, Hash, From)]
@@ -441,6 +441,12 @@ impl UnlockConditions {
 
         self.expiration()
             .map_or(false, |expiration| slot_index >= expiration.slot_index())
+    }
+}
+
+impl StorageScore for UnlockConditions {
+    fn score(&self, rent_params: crate::types::block::rent::RentParameters) -> u64 {
+        todo!()
     }
 }
 

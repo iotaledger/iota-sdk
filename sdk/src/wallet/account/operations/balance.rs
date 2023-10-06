@@ -8,7 +8,7 @@ use crate::{
     types::block::{
         address::Bech32Address,
         output::{unlock_condition::UnlockCondition, FoundryId, NativeTokensBuilder, Output},
-        rent::StorageCost,
+        rent::StorageScore,
         ConvertTo,
     },
     wallet::{
@@ -89,7 +89,7 @@ where
                     }
 
                     let output = &data.output;
-                    let rent = output.storage_cost(rent_params);
+                    let rent = output.rent_cost(rent_params);
 
                     // Add account and foundry outputs here because they can't have a
                     // [`StorageDepositReturnUnlockCondition`] or time related unlock conditions

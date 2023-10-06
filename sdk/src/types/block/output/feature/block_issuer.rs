@@ -17,7 +17,7 @@ use packable::{
 };
 
 use crate::types::block::{
-    rent::{RentParameters, StorageCost},
+    rent::{RentParameters, StorageScore},
     slot::SlotIndex,
     Error,
 };
@@ -61,12 +61,7 @@ impl BlockIssuerKey {
     }
 }
 
-impl StorageCost for BlockIssuerKey {
-    fn offset_score(&self, rent_params: RentParameters) -> u64 {
-        // TODO: ??
-        0
-    }
-
+impl StorageScore for BlockIssuerKey {
     fn score(&self, rent_params: RentParameters) -> u64 {
         match self {
             Self::Ed25519(key) => key.score(rent_params),
@@ -116,7 +111,7 @@ impl Packable for Ed25519BlockIssuerKey {
     }
 }
 
-impl StorageCost for Ed25519BlockIssuerKey {
+impl StorageScore for Ed25519BlockIssuerKey {
     fn score(&self, rent_params: RentParameters) -> u64 {
         rent_params.storage_score_offset_ed25519_block_issuer_key()
     }
@@ -204,7 +199,7 @@ impl BlockIssuerKeys {
     }
 }
 
-impl StorageCost for BlockIssuerKeys {
+impl StorageScore for BlockIssuerKeys {
     fn score(&self, rent_params: RentParameters) -> u64 {
         (*self).iter().map(|key| key.score(rent_params)).sum()
     }

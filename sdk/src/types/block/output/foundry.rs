@@ -8,7 +8,7 @@ use packable::{
     error::{UnpackError, UnpackErrorExt},
     packer::{Packer, SlicePacker},
     unpacker::Unpacker,
-    Packable,
+    Packable, PackableExt,
 };
 use primitive_types::U256;
 
@@ -26,13 +26,15 @@ use crate::types::{
             TokenId, TokenScheme,
         },
         protocol::ProtocolParameters,
-        rent::{RentParameters, StorageCost},
+        rent::{RentParameters, StorageScore},
         semantic::{TransactionFailureReason, ValidationContext},
         unlock::Unlock,
         Error,
     },
     ValidationParams,
 };
+
+use super::storage_score_offset_output;
 
 impl_id!(pub FoundryId, 38, "Defines the unique identifier of a foundry.");
 
@@ -284,7 +286,7 @@ impl FoundryOutputBuilder {
         output.amount = match self.amount {
             OutputBuilderAmount::Amount(amount) => amount,
             OutputBuilderAmount::MinimumStorageDeposit(rent_params) => {
-                Output::Foundry(output.clone()).storage_cost(rent_params)
+                Output::Foundry(output.clone()).rent_cost(rent_params)
             }
         };
 
@@ -655,6 +657,18 @@ impl Packable for FoundryOutput {
             features,
             immutable_features,
         })
+    }
+}
+
+impl StorageScore for FoundryOutput {
+    fn score(&self, rent_params: RentParameters) -> u64 {
+        storage_score_offset_output(rent_params)
+            + self.packed_len() as u64 * rent_params.storage_score_factor_data() as u64
+            + self.native_tokens().score(rent_params)
+            + self.token_scheme().score(rent_params)
+            + self.unlock_conditions().score(rent_params)
+            + self.features().score(rent_params)
+            + self.immutable_features().score(rent_params)
     }
 }
 

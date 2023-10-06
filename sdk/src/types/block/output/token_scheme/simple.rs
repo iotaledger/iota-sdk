@@ -9,7 +9,7 @@ use packable::{
 };
 use primitive_types::U256;
 
-use crate::types::block::Error;
+use crate::types::block::{Error, rent::{StorageScore, RentParameters}};
 
 ///
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
@@ -100,6 +100,12 @@ impl Packable for SimpleTokenScheme {
             melted_tokens,
             maximum_supply,
         })
+    }
+}
+
+impl StorageScore for SimpleTokenScheme {
+    fn score(&self, rent_params: RentParameters) -> u64 {
+        0
     }
 }
 

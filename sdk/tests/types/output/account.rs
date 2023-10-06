@@ -14,7 +14,7 @@ use iota_sdk::types::{
                 rand_state_controller_address_unlock_condition_different_from,
             },
         },
-        rent::StorageCost,
+        rent::StorageScore,
     },
     ValidationParams,
 };
@@ -84,7 +84,7 @@ fn builder() {
 
     assert_eq!(
         output.amount(),
-        Output::Account(output.clone()).storage_cost(protocol_parameters.rent_parameters())
+        Output::Account(output.clone()).rent_cost(protocol_parameters.rent_parameters())
     );
     assert_eq!(output.features().metadata(), Some(&metadata));
     assert_eq!(output.features().sender(), Some(&sender_1));

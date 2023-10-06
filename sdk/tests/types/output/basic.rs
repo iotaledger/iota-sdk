@@ -13,7 +13,7 @@ use iota_sdk::types::{
                 unlock_condition::rand_address_unlock_condition,
             },
         },
-        rent::StorageCost,
+        rent::StorageScore,
     },
     ValidationParams,
 };
@@ -59,7 +59,7 @@ fn builder() {
 
     assert_eq!(
         output.amount(),
-        Output::Basic(output.clone()).storage_cost(protocol_parameters.rent_parameters())
+        Output::Basic(output.clone()).rent_cost(protocol_parameters.rent_parameters())
     );
     assert_eq!(output.features().metadata(), Some(&metadata));
     assert_eq!(output.features().sender(), Some(&sender_1));

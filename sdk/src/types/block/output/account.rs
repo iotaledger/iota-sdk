@@ -10,7 +10,7 @@ use packable::{
     packer::Packer,
     prefix::BoxedSlicePrefix,
     unpacker::Unpacker,
-    Packable,
+    Packable, PackableExt,
 };
 
 use crate::types::{
@@ -25,13 +25,15 @@ use crate::types::{
             NativeTokens, Output, OutputBuilderAmount, OutputId, StateTransitionError, StateTransitionVerifier,
         },
         protocol::ProtocolParameters,
-        rent::{RentParameters, StorageCost},
+        rent::{RentParameters, StorageScore},
         semantic::{TransactionFailureReason, ValidationContext},
         unlock::Unlock,
         Error,
     },
     ValidationParams,
 };
+
+use super::storage_score_offset_output;
 
 impl_id!(pub AccountId, 32, "Unique identifier of an account, which is the BLAKE2b-256 hash of the Output ID that created it.");
 
@@ -319,7 +321,7 @@ impl AccountOutputBuilder {
         output.amount = match self.amount {
             OutputBuilderAmount::Amount(amount) => amount,
             OutputBuilderAmount::MinimumStorageDeposit(rent_params) => {
-                Output::Account(output.clone()).storage_cost(rent_params)
+                Output::Account(output.clone()).rent_cost(rent_params)
             }
         };
 
@@ -723,6 +725,17 @@ impl Packable for AccountOutput {
             features,
             immutable_features,
         })
+    }
+}
+
+impl StorageScore for AccountOutput {
+    fn score(&self, rent_params: RentParameters) -> u64 {
+        storage_score_offset_output(rent_params)
+            + self.packed_len() as u64 * rent_params.storage_score_factor_data() as u64
+            + self.native_tokens().score(rent_params)
+            + self.unlock_conditions().score(rent_params)
+            + self.features().score(rent_params)
+            + self.immutable_features().score(rent_params)
     }
 }
 

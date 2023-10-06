@@ -3,7 +3,10 @@
 
 use derive_more::From;
 
-use crate::types::block::address::Address;
+use crate::types::block::{
+    address::Address,
+    rent::{RentParameters, StorageScore},
+};
 
 /// Identifies the validated issuer of the UTXO state machine.
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, From, packable::Packable)]
@@ -23,6 +26,13 @@ impl IssuerFeature {
     #[inline(always)]
     pub fn address(&self) -> &Address {
         &self.0
+    }
+}
+
+impl StorageScore for IssuerFeature {
+    fn score(&self, rent_params: RentParameters) -> u64 {
+        // self.0.score(rent_params)
+        todo!()
     }
 }
 

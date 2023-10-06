@@ -17,7 +17,7 @@ pub use self::{
 use crate::{
     types::block::{
         output::{Output, OutputId},
-        rent::{RentParameters, RentStructure, StorageCost},
+        rent::{RentParameters, RentStructure, StorageScore},
         semantic::{TransactionFailureReason, ValidationContext},
         signature::Signature,
         unlock::Unlock,

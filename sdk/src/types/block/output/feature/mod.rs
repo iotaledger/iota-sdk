@@ -28,7 +28,7 @@ pub use self::{
     staking::StakingFeature,
     tag::TagFeature,
 };
-use crate::types::block::{create_bitflags, Error};
+use crate::types::block::{create_bitflags, Error, rent::StorageScore};
 
 ///
 #[derive(Clone, Eq, PartialEq, Hash, From, Packable)]
@@ -310,6 +310,12 @@ impl Features {
     /// Gets a reference to a [`StakingFeature`], if any.
     pub fn staking(&self) -> Option<&StakingFeature> {
         self.get(StakingFeature::KIND).map(Feature::as_staking)
+    }
+}
+
+impl StorageScore for Features {
+    fn score(&self, rent_params: crate::types::block::rent::RentParameters) -> u64 {
+        todo!()
     }
 }
 

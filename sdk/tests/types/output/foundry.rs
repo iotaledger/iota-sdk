@@ -11,7 +11,7 @@ use iota_sdk::types::block::{
         address::rand_account_address,
         output::{feature::rand_metadata_feature, rand_foundry_output, rand_token_scheme},
     },
-    rent::StorageCost,
+    rent::StorageScore,
 };
 use packable::PackableExt;
 
@@ -59,7 +59,7 @@ fn builder() {
 
     assert_eq!(
         output.amount(),
-        Output::Foundry(output).storage_cost(protocol_parameters.rent_parameters())
+        Output::Foundry(output).rent_cost(protocol_parameters.rent_parameters())
     );
 }
 

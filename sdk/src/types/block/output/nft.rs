@@ -7,7 +7,7 @@ use packable::{
     error::{UnpackError, UnpackErrorExt},
     packer::Packer,
     unpacker::Unpacker,
-    Packable,
+    Packable, PackableExt,
 };
 
 use crate::types::{
@@ -20,7 +20,7 @@ use crate::types::{
             },
             verify_output_amount_min, verify_output_amount_packable, verify_output_amount_supply, ChainId, NativeToken,
             NativeTokens, Output, OutputBuilderAmount, OutputId, RentParameters, StateTransitionError,
-            StateTransitionVerifier, StorageCost,
+            StateTransitionVerifier, StorageScore,
         },
         protocol::ProtocolParameters,
         semantic::{TransactionFailureReason, ValidationContext},
@@ -29,6 +29,8 @@ use crate::types::{
     },
     ValidationParams,
 };
+
+use super::storage_score_offset_output;
 
 impl_id!(pub NftId, 32, "Unique identifier of an NFT, which is the BLAKE2b-256 hash of the Output ID that created it.");
 
@@ -244,7 +246,7 @@ impl NftOutputBuilder {
         output.amount = match self.amount {
             OutputBuilderAmount::Amount(amount) => amount,
             OutputBuilderAmount::MinimumStorageDeposit(rent_params) => {
-                Output::Nft(output.clone()).storage_cost(rent_params)
+                Output::Nft(output.clone()).rent_cost(rent_params)
             }
         };
 
@@ -517,6 +519,17 @@ impl Packable for NftOutput {
             features,
             immutable_features,
         })
+    }
+}
+
+impl StorageScore for NftOutput {
+    fn score(&self, rent_params: RentParameters) -> u64 {
+        storage_score_offset_output(rent_params)
+            + self.packed_len() as u64 * rent_params.storage_score_factor_data() as u64
+            + self.native_tokens().score(rent_params)
+            + self.unlock_conditions().score(rent_params)
+            + self.features().score(rent_params)
+            + self.immutable_features().score(rent_params)
     }
 }
 

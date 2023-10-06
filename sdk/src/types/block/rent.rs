@@ -172,26 +172,18 @@ impl RentParameters {
 }
 
 /// A trait to facilitate the rent cost computation for block outputs, which is central to dust protection.
-pub trait StorageCost {
-    /// Computes the offset storage score given a [`RentParameters`]. Defaults to 0.
-    fn offset_score(&self, rent_params: RentParameters) -> u64 {
-        0
-    }
-
+pub trait StorageScore {
     /// Computes the storage score given a [`RentParameters`]. Different fields in a type lead to different storage
     /// requirements for the ledger state.
     fn score(&self, rent_params: RentParameters) -> u64;
 
     /// Computes the storage cost given a [`RentParameters`].
-    fn storage_cost(&self, rent_params: RentParameters) -> u64 {
-        rent_params.storage_cost as u64 * (self.offset_score(rent_params) + self.score(rent_params))
+    fn rent_cost(&self, rent_params: RentParameters) -> u64 {
+        rent_params.storage_cost as u64 * self.score(rent_params)
     }
 }
 
-impl<T: StorageCost, const N: usize> StorageCost for [T; N] {
-    fn offset_score(&self, rent_params: RentParameters) -> u64 {
-        self.get(0).expect("zero sized array").score(rent_params)
-    }
+impl<T: StorageScore, const N: usize> StorageScore for [T; N] {
     fn score(&self, rent_params: RentParameters) -> u64 {
         self.iter().map(|elem| elem.score(rent_params)).sum()
     }

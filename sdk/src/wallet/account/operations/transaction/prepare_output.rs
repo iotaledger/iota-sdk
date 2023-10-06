@@ -16,7 +16,7 @@ use crate::{
             BasicOutputBuilder, MinimumStorageDepositBasicOutput, NativeToken, NftId, NftOutputBuilder, Output,
             UnlockCondition,
         },
-        rent::{RentParameters, StorageCost},
+        rent::{RentParameters, StorageScore},
         slot::SlotIndex,
         Error,
     },
@@ -115,7 +115,7 @@ where
         let min_storage_deposit_basic_output =
             MinimumStorageDepositBasicOutput::new(rent_params, token_supply).finish()?;
 
-        let min_required_storage_deposit = first_output.storage_cost(rent_params);
+        let min_required_storage_deposit = first_output.rent_cost(rent_params);
 
         if params.amount > min_required_storage_deposit {
             second_output_builder = second_output_builder.with_amount(params.amount);
@@ -177,7 +177,7 @@ where
         // If we're sending an existing NFT, its minimum required storage deposit is not part of the available base_coin
         // balance, so we add it here
         if let Some(existing_nft_output_data) = existing_nft_output_data {
-            available_base_coin += existing_nft_output_data.output.storage_cost(rent_params);
+            available_base_coin += existing_nft_output_data.output.rent_cost(rent_params);
         }
 
         if final_amount > available_base_coin {

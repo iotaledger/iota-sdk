@@ -12,7 +12,7 @@ use iterator_sorted::is_unique_sorted;
 use packable::{bounded::BoundedU8, prefix::BoxedSlicePrefix, Packable};
 use primitive_types::U256;
 
-use crate::types::block::{output::foundry::FoundryId, Error};
+use crate::types::block::{output::foundry::FoundryId, Error, rent::StorageScore};
 
 impl_id!(pub TokenId, 38, "Unique identifiers of native tokens. The TokenId of native tokens minted by a specific foundry is the same as the FoundryId.");
 
@@ -244,6 +244,12 @@ impl NativeTokens {
         self.0
             .binary_search_by_key(token_id, |native_token| native_token.token_id)
             .map_or(None, |index| Some(&self.0[index]))
+    }
+}
+
+impl StorageScore for NativeTokens {
+    fn score(&self, rent_params: crate::types::block::rent::RentParameters) -> u64 {
+        todo!()
     }
 }
 

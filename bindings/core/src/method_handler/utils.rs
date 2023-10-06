@@ -10,7 +10,7 @@ use iota_sdk::{
             input::UtxoInput,
             output::{AccountId, FoundryId, InputsCommitment, NftId, Output, OutputId, TokenId},
             payload::{transaction::TransactionEssence, TransactionPayload},
-            rent::StorageCost,
+            rent::StorageScore,
             BlockWrapper,
         },
         TryFromDto,
@@ -81,7 +81,7 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
         }
         UtilsMethod::ComputeStorageDeposit { output, rent } => {
             let out = Output::try_from_dto(output)?;
-            Response::MinimumRequiredStorageDeposit(out.storage_cost(rent).to_string())
+            Response::MinimumRequiredStorageDeposit(out.rent_cost(rent).to_string())
         }
         UtilsMethod::VerifyMnemonic { mnemonic } => {
             let mnemonic = Mnemonic::from(mnemonic);

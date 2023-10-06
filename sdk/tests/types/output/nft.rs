@@ -12,7 +12,7 @@ use iota_sdk::types::block::{
             unlock_condition::rand_address_unlock_condition,
         },
     },
-    rent::StorageCost,
+    rent::StorageScore,
 };
 use packable::PackableExt;
 
@@ -60,7 +60,7 @@ fn builder() {
 
     assert_eq!(
         output.amount(),
-        Output::Nft(output).storage_cost(protocol_parameters.rent_parameters())
+        Output::Nft(output).rent_cost(protocol_parameters.rent_parameters())
     );
 }
 

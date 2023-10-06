@@ -7,7 +7,7 @@ use packable::{
     error::{UnpackError, UnpackErrorExt},
     packer::Packer,
     unpacker::Unpacker,
-    Packable,
+    Packable, PackableExt,
 };
 
 use crate::types::{
@@ -22,7 +22,7 @@ use crate::types::{
             OutputBuilderAmount, OutputId, StateTransitionError, StateTransitionVerifier,
         },
         protocol::ProtocolParameters,
-        rent::{RentParameters, StorageCost},
+        rent::{RentParameters, StorageScore},
         semantic::{TransactionFailureReason, ValidationContext},
         slot::EpochIndex,
         unlock::Unlock,
@@ -30,6 +30,8 @@ use crate::types::{
     },
     ValidationParams,
 };
+
+use super::storage_score_offset_output;
 
 impl_id!(pub DelegationId, 32, "Unique identifier of the Delegation Output, which is the BLAKE2b-256 hash of the Output ID that created it.");
 
@@ -196,7 +198,7 @@ impl DelegationOutputBuilder {
         output.amount = match self.amount {
             OutputBuilderAmount::Amount(amount) => amount,
             OutputBuilderAmount::MinimumStorageDeposit(rent_params) => {
-                Output::Delegation(output.clone()).storage_cost(rent_params)
+                Output::Delegation(output.clone()).rent_cost(rent_params)
             }
         };
 
@@ -453,6 +455,15 @@ impl Packable for DelegationOutput {
             end_epoch,
             unlock_conditions,
         })
+    }
+}
+
+impl StorageScore for DelegationOutput {
+    fn score(&self, rent_params: RentParameters) -> u64 {
+        storage_score_offset_output(rent_params)
+            + rent_params.storage_score_offset_delegation()
+            + self.packed_len() as u64 * rent_params.storage_score_factor_data() as u64
+            + self.unlock_conditions().score(rent_params)
     }
 }
 

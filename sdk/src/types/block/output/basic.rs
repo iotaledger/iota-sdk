@@ -3,8 +3,9 @@
 
 use alloc::collections::BTreeSet;
 
-use packable::Packable;
+use packable::{Packable, PackableExt};
 
+use super::storage_score_offset_output;
 use crate::types::{
     block::{
         address::Address,
@@ -17,7 +18,7 @@ use crate::types::{
             NativeTokens, Output, OutputBuilderAmount, OutputId,
         },
         protocol::ProtocolParameters,
-        rent::{RentParameters, StorageCost},
+        rent::{RentParameters, StorageScore},
         semantic::{TransactionFailureReason, ValidationContext},
         unlock::Unlock,
         Error,
@@ -173,7 +174,7 @@ impl BasicOutputBuilder {
         output.amount = match self.amount {
             OutputBuilderAmount::Amount(amount) => amount,
             OutputBuilderAmount::MinimumStorageDeposit(rent_params) => {
-                Output::Basic(output.clone()).storage_cost(rent_params)
+                Output::Basic(output.clone()).rent_cost(rent_params)
             }
         };
 
@@ -321,6 +322,16 @@ impl BasicOutput {
         }
 
         None
+    }
+}
+
+impl StorageScore for BasicOutput {
+    fn score(&self, rent_params: RentParameters) -> u64 {
+        storage_score_offset_output(rent_params)
+            + self.packed_len() as u64 * rent_params.storage_score_factor_data() as u64
+            + self.native_tokens().score(rent_params)
+            + self.unlock_conditions().score(rent_params)
+            + self.features().score(rent_params)
     }
 }
 
