@@ -72,6 +72,7 @@ async fn write_signed_transaction_to_file(
     let mut file = tokio::io::BufWriter::new(tokio::fs::File::create(path).await.expect("failed to create file"));
     println!("{json}");
     file.write_all(json.as_bytes()).await.expect("failed to write file");
+    file.flush().await.expect("failed to flush output stream");
 
     Ok(())
 }
