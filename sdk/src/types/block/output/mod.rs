@@ -521,15 +521,15 @@ fn storage_score_offset_output(rent_struct: RentStructure) -> u64 {
 }
 
 impl StorageScore for Output {
-    fn score(&self, rent_struct: RentStructure) -> u64 {
+    fn storage_score(&self, rent_struct: RentStructure) -> u64 {
         // +1 score for the output kind
         rent_struct.storage_score_factor_data() as u64 * size_of::<u8>() as u64
             + match self {
-                Self::Basic(basic) => basic.score(rent_struct),
-                Self::Account(account) => account.score(rent_struct),
-                Self::Foundry(foundry) => foundry.score(rent_struct),
-                Self::Nft(nft) => nft.score(rent_struct),
-                Self::Delegation(delegation) => delegation.score(rent_struct),
+                Self::Basic(basic) => basic.storage_score(rent_struct),
+                Self::Account(account) => account.storage_score(rent_struct),
+                Self::Foundry(foundry) => foundry.storage_score(rent_struct),
+                Self::Nft(nft) => nft.storage_score(rent_struct),
+                Self::Delegation(delegation) => delegation.storage_score(rent_struct),
             }
     }
 }

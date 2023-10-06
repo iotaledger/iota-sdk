@@ -202,7 +202,7 @@ impl Feature {
 }
 
 impl StorageScore for Feature {
-    fn score(&self, rent_struct: RentStructure) -> u64 {
+    fn storage_score(&self, rent_struct: RentStructure) -> u64 {
         match self {
             Self::Sender(sender) => todo!(),
             Self::Issuer(issuer) => todo!(),
@@ -331,8 +331,8 @@ impl Features {
 }
 
 impl StorageScore for Features {
-    fn score(&self, rent_struct: RentStructure) -> u64 {
-        self.0.iter().map(|f| f.score(rent_struct)).sum()
+    fn storage_score(&self, rent_struct: RentStructure) -> u64 {
+        self.0.iter().map(|f| f.storage_score(rent_struct)).sum()
     }
 }
 

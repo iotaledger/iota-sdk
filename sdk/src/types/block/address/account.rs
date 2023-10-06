@@ -62,7 +62,7 @@ impl core::fmt::Debug for AccountAddress {
 }
 
 impl StorageScore for AccountAddress {
-    fn score(&self, _rent_struct: RentStructure) -> u64 {
+    fn storage_score(&self, _rent_struct: RentStructure) -> u64 {
         0
     }
 }

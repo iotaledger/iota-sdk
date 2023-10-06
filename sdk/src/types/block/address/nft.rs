@@ -62,7 +62,7 @@ impl core::fmt::Debug for NftAddress {
 }
 
 impl StorageScore for NftAddress {
-    fn score(&self, _rent_struct: RentStructure) -> u64 {
+    fn storage_score(&self, _rent_struct: RentStructure) -> u64 {
         0
     }
 }

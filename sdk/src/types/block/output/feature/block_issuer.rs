@@ -62,9 +62,9 @@ impl BlockIssuerKey {
 }
 
 impl StorageScore for BlockIssuerKey {
-    fn score(&self, rent_struct: RentStructure) -> u64 {
+    fn storage_score(&self, rent_struct: RentStructure) -> u64 {
         match self {
-            Self::Ed25519(key) => key.score(rent_struct),
+            Self::Ed25519(key) => key.storage_score(rent_struct),
         }
     }
 }
@@ -118,7 +118,7 @@ impl Packable for Ed25519BlockIssuerKey {
 }
 
 impl StorageScore for Ed25519BlockIssuerKey {
-    fn score(&self, rent_struct: RentStructure) -> u64 {
+    fn storage_score(&self, rent_struct: RentStructure) -> u64 {
         rent_struct.storage_score_offset_ed25519_block_issuer_key()
     }
 }
@@ -206,8 +206,8 @@ impl BlockIssuerKeys {
 }
 
 impl StorageScore for BlockIssuerKeys {
-    fn score(&self, rent_struct: RentStructure) -> u64 {
-        (*self).iter().map(|key| key.score(rent_struct)).sum()
+    fn storage_score(&self, rent_struct: RentStructure) -> u64 {
+        (*self).iter().map(|key| key.storage_score(rent_struct)).sum()
     }
 }
 

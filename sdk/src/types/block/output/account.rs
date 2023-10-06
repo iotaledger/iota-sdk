@@ -745,13 +745,13 @@ impl Packable for AccountOutput {
 }
 
 impl StorageScore for AccountOutput {
-    fn score(&self, rent_struct: RentStructure) -> u64 {
+    fn storage_score(&self, rent_struct: RentStructure) -> u64 {
         storage_score_offset_output(rent_struct)
             + self.packed_len() as u64 * rent_struct.storage_score_factor_data() as u64
-            + self.native_tokens().score(rent_struct)
-            + self.unlock_conditions().score(rent_struct)
-            + self.features().score(rent_struct)
-            + self.immutable_features().score(rent_struct)
+            + self.native_tokens().storage_score(rent_struct)
+            + self.unlock_conditions().storage_score(rent_struct)
+            + self.features().storage_score(rent_struct)
+            + self.immutable_features().storage_score(rent_struct)
     }
 }
 

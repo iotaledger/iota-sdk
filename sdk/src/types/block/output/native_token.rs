@@ -78,7 +78,7 @@ impl Ord for NativeToken {
 }
 
 impl StorageScore for NativeToken {
-    fn score(&self, rent_struct: RentStructure) -> u64 {
+    fn storage_score(&self, rent_struct: RentStructure) -> u64 {
         todo!("native token score")
     }
 }
@@ -258,8 +258,8 @@ impl NativeTokens {
 }
 
 impl StorageScore for NativeTokens {
-    fn score(&self, rent_struct: RentStructure) -> u64 {
-        self.0.iter().map(|nt| nt.score(rent_struct)).sum()
+    fn storage_score(&self, rent_struct: RentStructure) -> u64 {
+        self.0.iter().map(|nt| nt.storage_score(rent_struct)).sum()
     }
 }
 

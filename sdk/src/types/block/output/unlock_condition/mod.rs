@@ -84,7 +84,7 @@ impl core::fmt::Debug for UnlockCondition {
 }
 
 impl StorageScore for UnlockCondition {
-    fn score(&self, rent_struct: RentStructure) -> u64 {
+    fn storage_score(&self, rent_struct: RentStructure) -> u64 {
         todo!("unlock condition score")
     }
 }
@@ -458,8 +458,8 @@ impl UnlockConditions {
 }
 
 impl StorageScore for UnlockConditions {
-    fn score(&self, rent_struct: RentStructure) -> u64 {
-        self.0.iter().map(|uc| uc.score(rent_struct)).sum()
+    fn storage_score(&self, rent_struct: RentStructure) -> u64 {
+        self.0.iter().map(|uc| uc.storage_score(rent_struct)).sum()
     }
 }
 

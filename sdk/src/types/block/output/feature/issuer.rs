@@ -30,8 +30,8 @@ impl IssuerFeature {
 }
 
 impl StorageScore for IssuerFeature {
-    fn score(&self, rent_struct: RentStructure) -> u64 {
-        self.0.score(rent_struct)
+    fn storage_score(&self, rent_struct: RentStructure) -> u64 {
+        self.0.storage_score(rent_struct)
     }
 }
 

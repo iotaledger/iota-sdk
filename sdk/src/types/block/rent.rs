@@ -45,12 +45,12 @@ impl RentStructure {
         // set the storage score offset for implicit account creation addresses as
         // the difference between the storage score of the dummy account and the storage
         // score of the dummy basic output minus the storage score of the dummy address.
-        let dummy_basic_output_score = BasicOutput::dummy().score(rent_structure);
-        let dummy_address_score = Ed25519Address::dummy().score(rent_structure);
+        let dummy_basic_output_score = BasicOutput::dummy().storage_score(rent_structure);
+        let dummy_address_score = Ed25519Address::dummy().storage_score(rent_structure);
         let basic_score_without_address = dummy_basic_output_score
             .checked_sub(dummy_address_score)
             .expect("underflow");
-        let dummy_account_output_score = AccountOutput::dummy().score(rent_structure);
+        let dummy_account_output_score = AccountOutput::dummy().storage_score(rent_structure);
 
         rent_structure.storage_score_offset_implicit_account_creation_address = dummy_account_output_score
             .checked_sub(basic_score_without_address)
@@ -207,16 +207,16 @@ impl RentParameters {
 pub trait StorageScore {
     /// Computes the storage score given a [`RentStructure`]. Different fields in a type lead to different storage
     /// requirements for the ledger state.
-    fn score(&self, rent_struct: RentStructure) -> u64;
+    fn storage_score(&self, rent_struct: RentStructure) -> u64;
 
     /// Computes the rent cost given a [`RentStructure`].
     fn rent_cost(&self, rent_struct: RentStructure) -> u64 {
-        rent_struct.storage_cost as u64 * self.score(rent_struct)
+        rent_struct.storage_cost as u64 * self.storage_score(rent_struct)
     }
 }
 
 impl<T: StorageScore, const N: usize> StorageScore for [T; N] {
-    fn score(&self, rent_struct: RentStructure) -> u64 {
-        self.iter().map(|elem| elem.score(rent_struct)).sum()
+    fn storage_score(&self, rent_struct: RentStructure) -> u64 {
+        self.iter().map(|elem| elem.storage_score(rent_struct)).sum()
     }
 }

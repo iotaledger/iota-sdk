@@ -458,11 +458,11 @@ impl Packable for DelegationOutput {
 }
 
 impl StorageScore for DelegationOutput {
-    fn score(&self, rent_struct: RentStructure) -> u64 {
+    fn storage_score(&self, rent_struct: RentStructure) -> u64 {
         storage_score_offset_output(rent_struct)
             + rent_struct.storage_score_offset_delegation()
             + self.packed_len() as u64 * rent_struct.storage_score_factor_data() as u64
-            + self.unlock_conditions().score(rent_struct)
+            + self.unlock_conditions().storage_score(rent_struct)
     }
 }
 

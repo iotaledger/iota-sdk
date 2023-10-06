@@ -55,7 +55,7 @@ impl core::fmt::Debug for Ed25519Address {
 }
 
 impl StorageScore for Ed25519Address {
-    fn score(&self, _rent_struct: RentStructure) -> u64 {
+    fn storage_score(&self, _rent_struct: RentStructure) -> u64 {
         0
     }
 }

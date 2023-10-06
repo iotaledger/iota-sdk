@@ -107,7 +107,7 @@ impl Packable for SimpleTokenScheme {
 }
 
 impl StorageScore for SimpleTokenScheme {
-    fn score(&self, rent_struct: RentStructure) -> u64 {
+    fn storage_score(&self, rent_struct: RentStructure) -> u64 {
         0
     }
 }
