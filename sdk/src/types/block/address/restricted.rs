@@ -1,6 +1,8 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use alloc::boxed::Box;
+
 use derive_more::Deref;
 use getset::Getters;
 use packable::{error::UnpackErrorExt, prefix::BoxedSlicePrefix, Packable, PackableExt};
@@ -21,7 +23,7 @@ impl RestrictedAddress {
 
     /// Creates a new [`RestrictedAddress`] address from an [`Address`] with default allowed capabilities.
     #[inline(always)]
-    pub fn new(address: impl Into<Address> + Send) -> Result<Self, Error> {
+    pub fn new(address: impl Into<Address>) -> Result<Self, Error> {
         let address = address.into();
         if matches!(address, Address::Restricted(_)) {
             return Err(Error::InvalidAddressKind(Self::KIND));
@@ -66,15 +68,15 @@ impl core::fmt::Display for RestrictedAddress {
 #[non_exhaustive]
 pub enum AddressCapabilityFlag {
     /// Can receive Outputs with Native Tokens.
-    NativeTokens,
+    OutputsWithNativeTokens,
     /// Can receive Outputs with Mana.
-    Mana,
+    OutputsWithMana,
     /// Can receive Outputs with a Timelock Unlock Condition.
     OutputsWithTimelock,
     /// Can receive Outputs with an Expiration Unlock Condition.
     OutputsWithExpiration,
     /// Can receive Outputs with a Storage Deposit Return Unlock Condition.
-    OutputsWithStorageDeposit,
+    OutputsWithStorageDepositReturn,
     /// Can receive Account Outputs.
     AccountOutputs,
     /// Can receive NFT Outputs.
@@ -84,11 +86,11 @@ pub enum AddressCapabilityFlag {
 }
 
 impl AddressCapabilityFlag {
-    const NATIVE_TOKENS: u8 = 0b00000001;
-    const MANA: u8 = 0b00000010;
+    const OUTPUTS_WITH_NATIVE_TOKENS: u8 = 0b00000001;
+    const OUTPUTS_WITH_MANA: u8 = 0b00000010;
     const OUTPUTS_WITH_TIMELOCK: u8 = 0b00000100;
     const OUTPUTS_WITH_EXPIRATION: u8 = 0b00001000;
-    const OUTPUTS_WITH_STORAGE_DEPOSIT: u8 = 0b00010000;
+    const OUTPUTS_WITH_STORAGE_DEPOSIT_RETURN: u8 = 0b00010000;
     const ACCOUNT_OUTPUTS: u8 = 0b00100000;
     const NFT_OUTPUTS: u8 = 0b01000000;
     const DELEGATION_OUTPUTS: u8 = 0b10000000;
@@ -96,11 +98,11 @@ impl AddressCapabilityFlag {
     /// Converts the flag into the byte representation.
     pub fn as_byte(&self) -> u8 {
         match self {
-            Self::NativeTokens => Self::NATIVE_TOKENS,
-            Self::Mana => Self::MANA,
+            Self::OutputsWithNativeTokens => Self::OUTPUTS_WITH_NATIVE_TOKENS,
+            Self::OutputsWithMana => Self::OUTPUTS_WITH_MANA,
             Self::OutputsWithTimelock => Self::OUTPUTS_WITH_TIMELOCK,
             Self::OutputsWithExpiration => Self::OUTPUTS_WITH_EXPIRATION,
-            Self::OutputsWithStorageDeposit => Self::OUTPUTS_WITH_STORAGE_DEPOSIT,
+            Self::OutputsWithStorageDepositReturn => Self::OUTPUTS_WITH_STORAGE_DEPOSIT_RETURN,
             Self::AccountOutputs => Self::ACCOUNT_OUTPUTS,
             Self::NftOutputs => Self::NFT_OUTPUTS,
             Self::DelegationOutputs => Self::DELEGATION_OUTPUTS,
@@ -110,11 +112,11 @@ impl AddressCapabilityFlag {
     /// Returns the index in [`AddressCapabilities`] to which this flag is applied.
     pub fn index(&self) -> usize {
         match self {
-            Self::NativeTokens
-            | Self::Mana
+            Self::OutputsWithNativeTokens
+            | Self::OutputsWithMana
             | Self::OutputsWithTimelock
             | Self::OutputsWithExpiration
-            | Self::OutputsWithStorageDeposit
+            | Self::OutputsWithStorageDepositReturn
             | Self::AccountOutputs
             | Self::NftOutputs
             | Self::DelegationOutputs => 0,
@@ -124,11 +126,11 @@ impl AddressCapabilityFlag {
     /// Returns an iterator over all flags.
     pub fn all() -> impl Iterator<Item = Self> {
         [
-            Self::NativeTokens,
-            Self::Mana,
+            Self::OutputsWithNativeTokens,
+            Self::OutputsWithMana,
             Self::OutputsWithTimelock,
             Self::OutputsWithExpiration,
-            Self::OutputsWithStorageDeposit,
+            Self::OutputsWithStorageDepositReturn,
             Self::AccountOutputs,
             Self::NftOutputs,
             Self::DelegationOutputs,
@@ -273,6 +275,8 @@ impl Packable for AddressCapabilities {
 
 #[cfg(feature = "serde")]
 pub(crate) mod dto {
+    use alloc::boxed::Box;
+
     use serde::{Deserialize, Serialize};
 
     use super::*;

@@ -13,9 +13,9 @@ fn capabilities() {
     let address = RestrictedAddress::new(rand_ed25519_address()).unwrap();
     let mut capabilities = address.allowed_capabilities().clone();
 
-    assert!(!capabilities.has_capability(Flag::NativeTokens));
-    capabilities.add_capability(Flag::NativeTokens);
-    assert!(capabilities.has_capabilities([Flag::NativeTokens]));
+    assert!(!capabilities.has_capability(Flag::OutputsWithNativeTokens));
+    capabilities.add_capability(Flag::OutputsWithNativeTokens);
+    assert!(capabilities.has_capabilities([Flag::OutputsWithNativeTokens]));
     assert!(!capabilities.has_capabilities(AddressCapabilities::all().capabilities_iter()));
     assert!(!capabilities.is_none());
     assert!(!capabilities.is_all());
@@ -24,12 +24,16 @@ fn capabilities() {
     assert!(capabilities.has_capabilities(Flag::all()));
     capabilities.set_none();
 
-    assert!(!capabilities.has_capability(Flag::Mana));
-    capabilities.set_capabilities([Flag::Mana, Flag::DelegationOutputs]);
-    assert!(capabilities.has_capability(Flag::Mana));
-    assert!(capabilities.has_capabilities([Flag::Mana, Flag::DelegationOutputs]));
-    assert!(!capabilities.has_capability(Flag::NativeTokens));
-    assert!(!capabilities.has_capabilities([Flag::Mana, Flag::DelegationOutputs, Flag::NativeTokens]));
+    assert!(!capabilities.has_capability(Flag::OutputsWithMana));
+    capabilities.set_capabilities([Flag::OutputsWithMana, Flag::DelegationOutputs]);
+    assert!(capabilities.has_capability(Flag::OutputsWithMana));
+    assert!(capabilities.has_capabilities([Flag::OutputsWithMana, Flag::DelegationOutputs]));
+    assert!(!capabilities.has_capability(Flag::OutputsWithNativeTokens));
+    assert!(!capabilities.has_capabilities([
+        Flag::OutputsWithMana,
+        Flag::DelegationOutputs,
+        Flag::OutputsWithNativeTokens
+    ]));
 }
 
 #[test]
@@ -73,7 +77,7 @@ fn restricted_ed25519() {
     );
 
     // Restricted Ed25519 Address (Can receive Native Tokens)
-    address.set_allowed_capabilities([AddressCapabilityFlag::NativeTokens]);
+    address.set_allowed_capabilities([AddressCapabilityFlag::OutputsWithNativeTokens]);
     assert_eq!(
         address.clone().to_bech32_unchecked("iota"),
         "iota19qqwlhq39mlzv2esf08n0xexcvd66q5lv9hw8mz25c695dnwfj0y8gcpqytmqxr4"
@@ -115,7 +119,7 @@ fn restricted_account() {
     );
 
     // Restricted Account Address (Can receive Native Tokens)
-    address.set_allowed_capabilities([AddressCapabilityFlag::NativeTokens]);
+    address.set_allowed_capabilities([AddressCapabilityFlag::OutputsWithNativeTokens]);
     assert_eq!(
         address.clone().to_bech32_unchecked("iota"),
         "iota19qy0rsq3ld2d7jjwtvr5vffklwkvw7dlsrxytcpmcdqssdjc0d80exqpqyfjata7"
@@ -157,7 +161,7 @@ fn restricted_nft() {
     );
 
     // Restricted NFT Address (Can receive Native Tokens)
-    address.set_allowed_capabilities([AddressCapabilityFlag::NativeTokens]);
+    address.set_allowed_capabilities([AddressCapabilityFlag::OutputsWithNativeTokens]);
     assert_eq!(
         address.clone().to_bech32_unchecked("iota"),
         "iota19qgvw2n94efawzue54lhycmml5w4afa6526t5z2unzdkvlfc2kqg0kcpqyp0nq2r"

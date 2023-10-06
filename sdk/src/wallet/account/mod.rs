@@ -300,8 +300,8 @@ impl AccountInner {
 
     /// Returns the first address of the account as bech32
     pub async fn first_address_bech32(&self) -> Bech32Address {
-        // PANIC: indexing is fine as one address is always generated during account creation.
-        self.addresses().await[0].clone().into_bech32()
+        // PANIC: unwrap is fine as one address is always generated during account creation.
+        self.addresses().await.into_iter().next().unwrap().into_bech32()
     }
 
     /// Returns all public addresses of the account
