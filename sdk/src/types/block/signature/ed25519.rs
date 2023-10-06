@@ -190,7 +190,7 @@ mod json {
     impl FromJson for Ed25519Signature {
         type Error = Error;
 
-        fn from_non_null_json(mut value: Value) -> Result<Self, Self::Error>
+        fn from_non_null_json(value: Value) -> Result<Self, Self::Error>
         where
             Self: Sized,
         {

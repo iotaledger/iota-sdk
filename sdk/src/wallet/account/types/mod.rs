@@ -440,7 +440,7 @@ mod json {
     impl FromJson for InclusionState {
         type Error = crate::types::block::Error;
 
-        fn from_non_null_json(mut value: Value) -> core::result::Result<Self, Self::Error>
+        fn from_non_null_json(value: Value) -> core::result::Result<Self, Self::Error>
         where
             Self: Sized,
         {

@@ -1,53 +1,16 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+mod array;
+mod error;
+mod map;
+mod set;
+
 use crypto::keys::bip44::Bip44;
 pub use json::JsonValue as Value;
 use primitive_types::U256;
 
-#[derive(Debug, PartialEq, Eq)]
-pub enum Error {
-    WrongArraySize { expected: usize, found: usize },
-    MissingValue,
-    WrongType { expected: String, found: String },
-    InvalidKey { expected: String, found: String },
-}
-
-impl Error {
-    pub fn wrong_type<E>(found: impl alloc::string::ToString) -> Self {
-        Self::WrongType {
-            expected: core::any::type_name::<E>().to_owned(),
-            found: found.to_string(),
-        }
-    }
-
-    pub fn invalid_key<K>(found: impl alloc::string::ToString) -> Self {
-        Self::InvalidKey {
-            expected: core::any::type_name::<K>().to_owned(),
-            found: found.to_string(),
-        }
-    }
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for Error {}
-
-impl core::fmt::Display for Error {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        match self {
-            Self::WrongArraySize { expected, found } => {
-                write!(f, "wrong array size: expected {expected}, found {found}")
-            }
-            Self::MissingValue => write!(f, "missing value"),
-            Self::WrongType { expected, found } => {
-                write!(f, "wrong type: expected {expected}, found {found}")
-            }
-            Self::InvalidKey { expected, found } => {
-                write!(f, "invalid key: expected {expected}, found {found}")
-            }
-        }
-    }
-}
+pub use self::error::Error;
 
 pub trait ToJson {
     fn to_json(&self) -> Value;
@@ -82,7 +45,7 @@ where
         Self: Sized,
     {
         if value.is_null() {
-            return Err(Error::MissingValue.into());
+            return Err(Error::missing_value::<Self>().into());
         }
         Self::from_non_null_json(value)
     }
@@ -110,6 +73,23 @@ macro_rules! impl_ext_fns {
     };
 }
 
+macro_rules! impl_ext_maybe_str_fns {
+    ($($type:ty, $to_fn:ident, $as_fn:ident),+$(,)?) => {
+        $(
+            fn $to_fn(&self) -> Result<$type, Error> {
+                match self.to_str() {
+                    Ok(s) => {
+                        s.parse().map_err(|_| Error::wrong_type::<$type>(self))
+                    }
+                    Err(_) => {
+                        self.$as_fn().ok_or_else(|| Error::wrong_type::<$type>(self))
+                    }
+                }
+            }
+        )+
+    };
+}
+
 macro_rules! impl_ext_str_fns {
     ($($type:ty, $to_fn:ident),+$(,)?) => {
         $(
@@ -122,18 +102,20 @@ macro_rules! impl_ext_str_fns {
 
 pub trait JsonExt: Clone {
     def_ext_fns! {
-        &str, to_str,
-        u8,   to_u8,
-        u16,  to_u16,
-        u32,  to_u32,
-        u64,  to_u64,
-        u128, to_u128,
-        i8,   to_i8,
-        i16,  to_i16,
-        i32,  to_i32,
-        i64,  to_i64,
-        i128, to_i128,
-        bool, to_bool,
+        &str,  to_str,
+        u8,    to_u8,
+        u16,   to_u16,
+        u32,   to_u32,
+        u64,   to_u64,
+        u128,  to_u128,
+        usize, to_usize,
+        i8,    to_i8,
+        i16,   to_i16,
+        i32,   to_i32,
+        i64,   to_i64,
+        i128,  to_i128,
+        isize, to_isize,
+        bool,  to_bool,
     }
 
     fn to_array<T: FromJson, const N: usize>(&self) -> Result<[T; N], T::Error>
@@ -180,20 +162,28 @@ pub trait JsonExt: Clone {
 }
 
 impl JsonExt for Value {
+    // These types are expected to be numbers
     impl_ext_fns! {
-        &str, to_str,  as_str,
-        u8,   to_u8,   as_u8,
-        u16,  to_u16,  as_u16,
-        u32,  to_u32,  as_u32,
-        i8,   to_i8,   as_i8,
-        i16,  to_i16,  as_i16,
-        i32,  to_i32,  as_i32,
-        i64,  to_i64,  as_i64,
-        bool, to_bool, as_bool,
+        &str,  to_str,   as_str,
+        u8,    to_u8,    as_u8,
+        u16,   to_u16,   as_u16,
+        u32,   to_u32,   as_u32,
+        i8,    to_i8,    as_i8,
+        i16,   to_i16,   as_i16,
+        i32,   to_i32,   as_i32,
+        i64,   to_i64,   as_i64,
+        bool,  to_bool,  as_bool,
     }
 
+    // These types can be created from strings OR numbers
+    impl_ext_maybe_str_fns! {
+        u64,  to_u64, as_u64,
+        usize, to_usize, as_usize,
+        isize, to_isize, as_isize,
+    }
+
+    // These types can only be created from strings
     impl_ext_str_fns! {
-        u64,  to_u64,
         u128, to_u128,
         i128, to_i128,
     }
@@ -310,15 +300,16 @@ macro_rules! impl_json_via {
 }
 #[rustfmt::skip]
 impl_json_via!(
-    u8,   to_u8, 
-    u16,  to_u16, 
-    u32,  to_u32, 
-    // u64, to_u64,
-    i8,   to_i8, 
-    i16,  to_i16, 
-    i32,  to_i32,
-    i64,  to_i64, 
-    bool, to_bool
+    u8,    to_u8, 
+    u16,   to_u16, 
+    u32,   to_u32, 
+    usize, to_usize,
+    i8,    to_i8, 
+    i16,   to_i16, 
+    i32,   to_i32,
+    i64,   to_i64,
+    isize, to_isize,
+    bool,  to_bool
 );
 
 // Special impls for u64 which cannot fit into json values
@@ -349,6 +340,7 @@ macro_rules! impl_json_via_str {
 impl_json_via_str!(
     u64,  to_u64,
     u128, to_u128,
+    i128, to_i128,
 );
 
 impl ToJson for U256 {
@@ -368,166 +360,6 @@ impl FromJson for U256 {
         match <[u8; 32]>::try_from(bytes) {
             Ok(r) => Ok(r.into()),
             Err(bytes) => Err(Error::wrong_type::<U256>(format!("{:?}", bytes))),
-        }
-    }
-}
-
-macro_rules! impl_json_array {
-    ($type:ty) => {
-        impl<T: ToJson> ToJson for $type {
-            fn to_json(&self) -> Value {
-                Value::Array(self.iter().map(ToJson::to_json).collect())
-            }
-        }
-
-        impl<T: FromJson> FromJson for $type
-        where
-            T::Error: From<Error>,
-        {
-            type Error = T::Error;
-
-            fn from_non_null_json(value: Value) -> Result<Self, Self::Error>
-            where
-                Self: Sized,
-            {
-                if let Value::Array(s) = value {
-                    Ok(s.into_iter()
-                        .map(FromJson::from_json)
-                        .collect::<Result<_, T::Error>>()?)
-                } else {
-                    Err(Error::wrong_type::<T>(value).into())
-                }
-            }
-        }
-    };
-}
-impl_json_array!(alloc::vec::Vec<T>);
-impl_json_array!(alloc::boxed::Box<[T]>);
-
-impl<T: ToJson> ToJson for [T] {
-    fn to_json(&self) -> Value {
-        Value::Array(self.iter().map(ToJson::to_json).collect())
-    }
-}
-
-#[cfg(feature = "std")]
-impl<T: ToJson> ToJson for std::collections::HashSet<T> {
-    fn to_json(&self) -> Value {
-        Value::Array(self.iter().map(ToJson::to_json).collect())
-    }
-}
-
-#[cfg(feature = "std")]
-impl<T: FromJson + Eq + core::hash::Hash> FromJson for std::collections::HashSet<T>
-where
-    T::Error: From<Error>,
-{
-    type Error = T::Error;
-
-    fn from_non_null_json(value: Value) -> Result<Self, Self::Error>
-    where
-        Self: Sized,
-    {
-        if let Value::Array(s) = value {
-            Ok(s.into_iter()
-                .map(FromJson::from_json)
-                .collect::<Result<_, T::Error>>()?)
-        } else {
-            Err(Error::wrong_type::<T>(value).into())
-        }
-    }
-}
-
-impl<T: ToJson> ToJson for alloc::collections::BTreeSet<T> {
-    fn to_json(&self) -> Value {
-        Value::Array(self.iter().map(ToJson::to_json).collect())
-    }
-}
-
-impl<T: FromJson + Eq + Ord + core::hash::Hash> FromJson for alloc::collections::BTreeSet<T>
-where
-    T::Error: From<Error>,
-{
-    type Error = T::Error;
-
-    fn from_non_null_json(value: Value) -> Result<Self, Self::Error>
-    where
-        Self: Sized,
-    {
-        if let Value::Array(s) = value {
-            Ok(s.into_iter()
-                .map(FromJson::from_json)
-                .collect::<Result<_, T::Error>>()?)
-        } else {
-            Err(Error::wrong_type::<T>(value).into())
-        }
-    }
-}
-
-#[cfg(feature = "std")]
-impl<K: ToString, V: ToJson> ToJson for std::collections::HashMap<K, V> {
-    fn to_json(&self) -> Value {
-        let mut obj = json::object::Object::new();
-        for (k, v) in self {
-            obj.insert(&k.to_string(), v.to_json());
-        }
-        Value::Object(obj)
-    }
-}
-
-#[cfg(feature = "std")]
-impl<K: core::str::FromStr + Eq + core::hash::Hash, V: FromJson> FromJson for std::collections::HashMap<K, V>
-where
-    V::Error: From<Error>,
-{
-    type Error = V::Error;
-
-    fn from_non_null_json(value: Value) -> Result<Self, Self::Error>
-    where
-        Self: Sized,
-    {
-        if let Value::Object(mut obj) = value {
-            let mut res = Self::default();
-            for (k, v) in obj.iter_mut() {
-                res.insert(
-                    K::from_str(k).map_err(|_| Error::invalid_key::<K>(k))?,
-                    v.take_value::<V>()?,
-                );
-            }
-            Ok(res)
-        } else {
-            Err(Error::wrong_type::<Self>(value).into())
-        }
-    }
-}
-
-impl<T: ToJson, const N: usize> ToJson for [T; N] {
-    fn to_json(&self) -> Value {
-        Value::Array(self.iter().map(ToJson::to_json).collect())
-    }
-}
-
-impl<T: FromJson, const N: usize> FromJson for [T; N]
-where
-    T::Error: From<Error>,
-{
-    type Error = T::Error;
-
-    fn from_non_null_json(value: Value) -> Result<Self, Self::Error>
-    where
-        Self: Sized,
-    {
-        if let Value::Array(s) = value {
-            Ok(s.into_iter()
-                .map(FromJson::from_json)
-                .collect::<Result<Vec<T>, _>>()?
-                .try_into()
-                .map_err(|e: Vec<T>| Error::WrongArraySize {
-                    expected: N,
-                    found: e.len(),
-                })?)
-        } else {
-            Err(Error::wrong_type::<[T; N]>(value).into())
         }
     }
 }
@@ -794,4 +626,297 @@ macro_rules! json_unexpected {
 #[doc(hidden)]
 macro_rules! json_expect_expr_comma {
     ($e:expr , $($tt:tt)*) => {};
+}
+
+#[cfg(test)]
+mod test {
+    use alloc::collections::{BTreeMap, BTreeSet};
+    use std::collections::{HashMap, HashSet};
+
+    use super::{
+        array::ArrayError,
+        set::{OrderedSetError, SetError},
+        *,
+    };
+
+    #[derive(Debug, Eq, PartialEq)]
+    struct JsonUnsigned {
+        u8: u8,
+        u16: u16,
+        u32: u32,
+        u64: u64,
+        u128: u128,
+        usize: usize,
+    }
+
+    impl ToJson for JsonUnsigned {
+        fn to_json(&self) -> Value {
+            json!({
+                "u8": self.u8,
+                "u16": self.u16,
+                "u32": self.u32,
+                "u64": self.u64,
+                "u128": self.u128,
+                "usize": self.usize,
+            })
+        }
+    }
+
+    impl FromJson for JsonUnsigned {
+        type Error = Error;
+
+        fn from_non_null_json(mut value: Value) -> Result<Self, Self::Error>
+        where
+            Self: Sized,
+        {
+            Ok(Self {
+                u8: value["u8"].take_value()?,
+                u16: value["u16"].take_value()?,
+                u32: value["u32"].take_value()?,
+                u64: value["u64"].take_value()?,
+                u128: value["u128"].take_value()?,
+                usize: value["usize"].take_value()?,
+            })
+        }
+    }
+
+    #[derive(Debug, Eq, PartialEq)]
+    struct JsonSigned {
+        i8: i8,
+        i16: i16,
+        i32: i32,
+        i64: i64,
+        i128: i128,
+        isize: isize,
+    }
+
+    impl ToJson for JsonSigned {
+        fn to_json(&self) -> Value {
+            json!({
+                "i8": self.i8,
+                "i16": self.i16,
+                "i32": self.i32,
+                "i64": self.i64,
+                "i128": self.i128,
+                "isize": self.isize
+            })
+        }
+    }
+
+    impl FromJson for JsonSigned {
+        type Error = Error;
+
+        fn from_non_null_json(mut value: Value) -> Result<Self, Self::Error>
+        where
+            Self: Sized,
+        {
+            Ok(Self {
+                i8: value["i8"].take_value()?,
+                i16: value["i16"].take_value()?,
+                i32: value["i32"].take_value()?,
+                i64: value["i64"].take_value()?,
+                i128: value["i128"].take_value()?,
+                isize: value["isize"].take_value()?,
+            })
+        }
+    }
+
+    #[derive(Debug, Eq, PartialEq)]
+    struct JsonArrays {
+        array: [usize; 9],
+        vec: Vec<usize>,
+        boxed: Box<[usize]>,
+        set: HashSet<usize>,
+        ordered_set: BTreeSet<usize>,
+    }
+
+    impl ToJson for JsonArrays {
+        fn to_json(&self) -> Value {
+            json!({
+                "array": self.array,
+                "vec": self.vec,
+                "boxed": self.boxed,
+                "set": self.set,
+                "ordered_set": self.ordered_set,
+            })
+        }
+    }
+
+    impl FromJson for JsonArrays {
+        type Error = Error;
+
+        fn from_non_null_json(mut value: Value) -> Result<Self, Self::Error>
+        where
+            Self: Sized,
+        {
+            Ok(Self {
+                array: value["array"].take_value()?,
+                vec: value["vec"].take_value()?,
+                boxed: value["boxed"].take_value()?,
+                set: value["set"].take_value()?,
+                ordered_set: value["ordered_set"].take_value()?,
+            })
+        }
+    }
+
+    #[derive(Debug, Eq, PartialEq)]
+    struct JsonTest {
+        signed: JsonSigned,
+        unsigned: JsonUnsigned,
+        optional: Option<String>,
+        arrays: JsonArrays,
+        map: HashMap<usize, String>,
+        ordered_map: BTreeMap<usize, String>,
+    }
+
+    impl ToJson for JsonTest {
+        fn to_json(&self) -> Value {
+            json!({
+                "signed": self.signed,
+                "unsigned": self.unsigned,
+                "optional": self.optional,
+                "arrays": self.arrays,
+                "map": self.map,
+                "ordered_map": self.ordered_map,
+            })
+        }
+    }
+
+    impl FromJson for JsonTest {
+        type Error = Error;
+
+        fn from_non_null_json(mut value: Value) -> Result<Self, Self::Error>
+        where
+            Self: Sized,
+        {
+            Ok(Self {
+                signed: value["signed"].take_value()?,
+                unsigned: value["unsigned"].take_value()?,
+                optional: value["optional"].take_value()?,
+                arrays: value["arrays"].take_value()?,
+                map: value["map"].take_value()?,
+                ordered_map: value["ordered_map"].take_value()?,
+            })
+        }
+    }
+
+    #[test]
+    fn test_json_valid() {
+        let data = json!({
+            "signed": {
+                "i8": 5,
+                "i16": -6,
+                "i32": 7,
+                "i64": -8,
+                "i128": "9",
+                "isize": "-10",
+            },
+            "unsigned": {
+                "u8": 5,
+                "u16": 6,
+                "u32": 7,
+                "u64": 8,
+                "u128": "9",
+                "usize": 10,
+            },
+            "optional": null,
+            "arrays": {
+                "array": [2, 1, 2, 1, 2, 1, 2, 1, 2],
+                "vec": [1, 2, 3, 4, 5, 4, 3, 2, 1],
+                "boxed": [5, 4, 3, 2, 1, 2, 3, 4, 5],
+                "set": [5, 4, 3, 2, 1],
+                "ordered_set": [1, 2, 3, 4, 5],
+            },
+            "map": {
+                "3": "three",
+                "1": "one",
+                "2": "two",
+                "5": "five",
+                "4": "four",
+            },
+            "ordered_map": {
+                "1": "one",
+                "2": "two",
+                "3": "three",
+                "4": "four",
+                "5": "five",
+            }
+        });
+
+        let test_val = data.to_value::<JsonTest>().unwrap();
+        let test_val_2 = test_val.to_json().to_value::<JsonTest>().unwrap();
+        assert_eq!(test_val, test_val_2);
+    }
+
+    #[test]
+    fn test_out_of_range() {
+        // The macro will use ToJson which converts 128 to a string
+        let data = json!(u128::MAX);
+        data.to_value::<u128>().unwrap();
+
+        // The parse fn will not
+        let data = json::parse(&u128::MAX.to_string()).unwrap();
+        assert!(
+            matches!(data.to_value::<u128>(), Err(Error::WrongType { expected, found }) if expected == "&str" && found == "3.402823669209384634e38")
+        );
+    }
+
+    #[test]
+    fn test_missing() {
+        let data = json!(null);
+        data.to_value::<Option<String>>().unwrap();
+        assert!(matches!(data.to_value::<String>(), Err(Error::MissingValue(v)) if v == "alloc::string::String"));
+    }
+
+    #[test]
+    fn test_arrays() {
+        let data = json!([2, 1, 3, 5, 4]);
+        data.to_value::<[usize; 5]>().unwrap();
+        data.to_value::<Vec<usize>>().unwrap();
+        data.to_value::<Box<[usize]>>().unwrap();
+        data.to_value::<HashSet<usize>>().unwrap();
+        assert!(
+            matches!(data.to_value::<BTreeSet<usize>>(), Err(Error::OrderedSet(OrderedSetError::Unordered(v))) if v == "1")
+        );
+        assert!(
+            matches!(data.to_value::<[usize; 6]>(), Err(Error::Array(ArrayError::WrongSize { expected, found })) if expected == 6 && found == 5)
+        );
+        let data = json!([2, 2, 3, 5, 4]);
+        data.to_value::<[usize; 5]>().unwrap();
+        data.to_value::<Vec<usize>>().unwrap();
+        data.to_value::<Box<[usize]>>().unwrap();
+        assert!(matches!(data.to_value::<HashSet<usize>>(), Err(Error::Set(SetError::Duplicate(v))) if v == "2"));
+        assert!(matches!(data.to_value::<BTreeSet<usize>>(), Err(Error::Set(SetError::Duplicate(v))) if v == "2"));
+    }
+
+    #[test]
+    fn test_objects() {
+        let data = json!({
+            "3": "three",
+            "1": "one",
+            "2": "two",
+            "5": "five",
+            "4": "four",
+        });
+        data.to_value::<HashMap<String, String>>().unwrap();
+        data.to_value::<HashMap<usize, String>>().unwrap();
+        assert!(
+            matches!(data.to_value::<BTreeMap<String, String>>(), Err(Error::OrderedSet(OrderedSetError::Unordered(v))) if v == "1")
+        );
+        assert!(
+            matches!(data.to_value::<BTreeMap<usize, String>>(), Err(Error::OrderedSet(OrderedSetError::Unordered(v))) if v == "1")
+        );
+
+        let data = json!({
+            "1": "one",
+            "2": "two",
+            "3": "three",
+            "4": "four",
+            "5": "five",
+        });
+        data.to_value::<HashMap<String, String>>().unwrap();
+        data.to_value::<HashMap<usize, String>>().unwrap();
+        data.to_value::<BTreeMap<String, String>>().unwrap();
+        data.to_value::<BTreeMap<usize, String>>().unwrap();
+    }
 }
