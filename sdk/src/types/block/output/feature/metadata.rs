@@ -6,7 +6,7 @@ use core::{ops::RangeInclusive, str::FromStr};
 
 use packable::{bounded::BoundedU16, prefix::BoxedSlicePrefix};
 
-use crate::types::block::Error;
+use crate::types::block::{Error, rent::{StorageScore, RentStructure}};
 
 pub(crate) type MetadataFeatureLength =
     BoundedU16<{ *MetadataFeature::LENGTH_RANGE.start() }, { *MetadataFeature::LENGTH_RANGE.end() }>;
@@ -94,6 +94,12 @@ impl core::fmt::Display for MetadataFeature {
 impl core::fmt::Debug for MetadataFeature {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         write!(f, "MetadataFeature({self})")
+    }
+}
+
+impl StorageScore for MetadataFeature {
+    fn storage_score(&self, rent_struct: RentStructure) -> u64 {
+        0
     }
 }
 

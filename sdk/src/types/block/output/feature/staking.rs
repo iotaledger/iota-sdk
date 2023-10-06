@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use crate::types::block::slot::EpochIndex;
+use crate::types::block::{slot::EpochIndex, rent::{RentStructure, StorageScore}};
 
 /// Stakes coins to become eligible for committee selection, validate the network and receive Mana rewards.
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, packable::Packable)]
@@ -53,6 +53,14 @@ impl StakingFeature {
     /// Returns the end epoch of the [`StakingFeature`].
     pub fn end_epoch(&self) -> EpochIndex {
         self.end_epoch
+    }
+}
+
+impl StorageScore for StakingFeature {
+    fn storage_score(&self, rent_struct: RentStructure) -> u64 {
+        // TODO: In iota.go you can specify a closure f(rent_struct) -> u64 for this feature 
+        // which immediately returns, hence overrides the default storage score.
+        rent_struct.storage_score_offset_staking_feature()
     }
 }
 

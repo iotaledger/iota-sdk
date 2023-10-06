@@ -251,6 +251,12 @@ impl BlockIssuerFeature {
     }
 }
 
+impl StorageScore for BlockIssuerFeature {
+    fn storage_score(&self, rent_struct: RentStructure) -> u64 {
+        self.block_issuer_keys.storage_score(rent_struct)
+    }
+}
+
 #[cfg(feature = "serde")]
 mod dto {
     use alloc::{string::String, vec::Vec};

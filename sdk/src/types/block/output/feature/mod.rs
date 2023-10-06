@@ -204,12 +204,12 @@ impl Feature {
 impl StorageScore for Feature {
     fn storage_score(&self, rent_struct: RentStructure) -> u64 {
         match self {
-            Self::Sender(sender) => todo!(),
-            Self::Issuer(issuer) => todo!(),
-            Self::Metadata(metadata) => todo!(),
-            Self::Tag(tag) => todo!(),
-            Self::BlockIssuer(block_issuer) => todo!(),
-            Self::Staking(staking) => todo!(),
+            Self::Sender(sender) => sender.storage_score(rent_struct),
+            Self::Issuer(issuer) => issuer.storage_score(rent_struct),
+            Self::Metadata(metadata) => metadata.storage_score(rent_struct),
+            Self::Tag(tag) => tag.storage_score(rent_struct),
+            Self::BlockIssuer(block_issuer) => block_issuer.storage_score(rent_struct),
+            Self::Staking(staking) => staking.storage_score(rent_struct)
         }
     }
 }

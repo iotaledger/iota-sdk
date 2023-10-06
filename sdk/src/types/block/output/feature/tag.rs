@@ -6,7 +6,7 @@ use core::ops::RangeInclusive;
 
 use packable::{bounded::BoundedU8, prefix::BoxedSlicePrefix};
 
-use crate::types::block::Error;
+use crate::types::block::{Error, rent::{StorageScore, RentStructure}};
 
 pub(crate) type TagFeatureLength =
     BoundedU8<{ *TagFeature::LENGTH_RANGE.start() }, { *TagFeature::LENGTH_RANGE.end() }>;
@@ -63,6 +63,14 @@ impl core::fmt::Display for TagFeature {
 impl core::fmt::Debug for TagFeature {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         write!(f, "TagFeature({self})")
+    }
+}
+
+impl StorageScore for TagFeature {
+    fn storage_score(&self, _rent_struct: RentStructure) -> u64 {
+        // TODO: In iota.go you can specify a closure f(rent_struct) -> u64 for this feature 
+        // which immediately returns, hence overrides the default storage score.
+        0
     }
 }
 
