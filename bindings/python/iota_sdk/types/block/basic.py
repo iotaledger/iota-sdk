@@ -3,8 +3,8 @@
 
 from __future__ import annotations
 from dataclasses import dataclass, field
-from dataclasses_json import config
 from typing import List, Optional
+from dataclasses_json import config
 from iota_sdk.types.block.block import BlockType
 from iota_sdk.types.common import HexStr, json
 from iota_sdk.types.payload import Payload
