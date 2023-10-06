@@ -55,7 +55,7 @@ impl From<TaggedDataPayload> for Payload {
 
 impl Payload {
     /// Returns the payload kind of a `Payload`.
-    pub fn kind(&self) -> u32 {
+    pub fn kind(&self) -> u8 {
         match self {
             Self::Transaction(_) => TransactionPayload::KIND,
             Self::TaggedData(_) => TaggedDataPayload::KIND,
@@ -86,7 +86,7 @@ impl Packable for Payload {
         unpacker: &mut U,
         visitor: &Self::UnpackVisitor,
     ) -> Result<Self, UnpackError<Self::UnpackError, U::Error>> {
-        Ok(match u32::unpack::<_, VERIFY>(unpacker, &()).coerce()? {
+        Ok(match u8::unpack::<_, VERIFY>(unpacker, &()).coerce()? {
             TransactionPayload::KIND => {
                 Self::from(TransactionPayload::unpack::<_, VERIFY>(unpacker, visitor).coerce()?)
             }
