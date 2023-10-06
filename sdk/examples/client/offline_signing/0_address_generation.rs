@@ -46,6 +46,7 @@ async fn write_address_to_file(path: impl AsRef<std::path::Path>, address: &[Bec
     println!("{json}");
 
     file.write_all(json.as_bytes()).await.expect("failed to write to file");
+    file.flush().await.expect("failed to flush output stream");
 
     Ok(())
 }
