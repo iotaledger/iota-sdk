@@ -151,7 +151,7 @@ fn build_invalid_payload_kind() {
         .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
         .finish_with_params(&protocol_parameters);
 
-    assert!(matches!(essence, Err(Error::InvalidPayloadKind(6))));
+    assert!(matches!(essence, Err(Error::InvalidPayloadKind(1))));
 }
 
 #[test]

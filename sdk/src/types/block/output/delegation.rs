@@ -277,7 +277,7 @@ pub struct DelegationOutput {
 
 impl DelegationOutput {
     /// The [`Output`](crate::types::block::output::Output) kind of a [`DelegationOutput`].
-    pub const KIND: u8 = 7;
+    pub const KIND: u8 = 4;
     /// The set of allowed [`UnlockCondition`]s for a [`DelegationOutput`].
     pub const ALLOWED_UNLOCK_CONDITIONS: UnlockConditionFlags = UnlockConditionFlags::ADDRESS;
 
