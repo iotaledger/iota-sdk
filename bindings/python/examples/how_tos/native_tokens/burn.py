@@ -38,6 +38,6 @@ block_id = account.reissue_transaction_until_included(
 print(f'Block included: {os.environ["EXPLORER_URL"]}/block/{block_id}')
 
 balance = account.sync()
-available_balance = int(
-    [native_balance for native_balance in balance.native_tokens if native_balance.token_id == token.token_id][0].available, 0)
+available_balance = [
+    native_balance for native_balance in balance.native_tokens if native_balance.token_id == token.token_id][0].available
 print(f'Balance after burning: {available_balance}')

@@ -39,11 +39,11 @@ print(
 account_output = account_output_data.output
 updated_account_output = wallet.get_client().build_account_output(
     account_id,
-    unlock_conditions=account_output.unlockConditions,
-    state_index=int(account_output.stateIndex) + 1,
+    unlock_conditions=account_output.unlock_conditions,
+    state_index=account_output.state_index + 1,
     state_metadata=utf8_to_hex(NEW_STATE_METADATA),
-    foundry_counter=account_output.foundryCounter,
-    immutable_features=account_output.immutableFeatures,
+    foundry_counter=account_output.foundry_counter,
+    immutable_features=account_output.immutable_features,
     features=account_output.features,
 )
 
@@ -51,9 +51,9 @@ wallet.set_stronghold_password(os.environ["STRONGHOLD_PASSWORD"])
 
 print('Sending transaction...')
 transaction = account.send_outputs([updated_account_output])
-print(f'Transaction sent: {transaction.transactionId}')
+print(f'Transaction sent: {transaction.transaction_id}')
 
 # Wait for transaction to get included
 blockId = account.reissue_transaction_until_included(
-    transaction.transactionId)
+    transaction.transaction_id)
 print(f'Block included: {os.environ["EXPLORER_URL"]}/block/{blockId}')

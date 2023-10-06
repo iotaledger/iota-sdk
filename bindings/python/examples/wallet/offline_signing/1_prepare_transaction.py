@@ -23,7 +23,7 @@ RECV_ADDRESS = "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu"
 SEND_AMOUNT = 1_000_000
 
 
-params = [SendParams(RECV_ADDRESS, str(SEND_AMOUNT))]
+params = [SendParams(address=RECV_ADDRESS, amount=SEND_AMOUNT)]
 
 # Recovers addresses from example `0_address_generation`.
 addresses_data = json.load(open(ADDRESSES_FILE_PATH, "r", encoding="utf-8"))
