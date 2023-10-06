@@ -38,7 +38,7 @@ Python binding to the [iota-sdk library](/README.md).
 
    ```bash
    python3 -m venv env
-   .\env\Scripts\activate`
+   .\env\Scripts\activate
    ```
 
 2. Install the IOTA-SDK using pip:
@@ -72,7 +72,7 @@ Python binding to the [iota-sdk library](/README.md).
 
    ```bash
    python3 -m venv env
-   .\env\Scripts\activate`
+   .\env\Scripts\activate
    ```
 
 3. Install the required dependencies and build the wheel by running the following commands:
