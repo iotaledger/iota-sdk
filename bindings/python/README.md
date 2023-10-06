@@ -8,7 +8,7 @@ Python binding to the [iota-sdk library](/README.md).
   - [Table of contents](#table-of-contents)
   - [Requirements](#requirements)
   - [Getting Started](#getting-started)
-    - [Install the IOTA SDK via pip](#install-the-iota-sdk-via-pip)
+    - [Install the IOTA SDK via pip](#install-iota-sdk-via-pip)
     - [Install the IOTA SDK](#install-the-iota-sdk)
   - [Client](#client-usage)
   - [Wallet](#wallet-usage)
