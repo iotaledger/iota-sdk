@@ -170,7 +170,7 @@ class RestrictedAddress extends Address {
      * @param address An address.
      */
     constructor(address: Address) {
-        super(AddressType.Nft);
+        super(AddressType.Restricted);
         this.address = address;
     }
 
