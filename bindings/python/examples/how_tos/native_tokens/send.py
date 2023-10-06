@@ -17,7 +17,7 @@ balance = account.sync()
 
 token = [native_balance for native_balance in balance.native_tokens if int(
     native_balance.available, 0) >= 10][0]
-print(f'Balance before sending: {token.available}')
+print(f'Balance before sending: {int(token.available, 0)}')
 
 if 'STRONGHOLD_PASSWORD' not in os.environ:
     raise Exception(".env STRONGHOLD_PASSWORD is undefined, see .env.example")
