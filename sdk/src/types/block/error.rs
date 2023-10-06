@@ -96,7 +96,7 @@ pub enum Error {
     // https://github.com/iotaledger/iota-sdk/issues/647
     // InvalidParentCount(<BoundedU8 as TryFrom<usize>>::Error),
     InvalidParentCount,
-    InvalidPayloadKind(u32),
+    InvalidPayloadKind(u8),
     InvalidPayloadLength {
         expected: usize,
         actual: usize,
