@@ -73,7 +73,7 @@ where
         // Check if the outputs have enough amount to cover the storage deposit
         for output in &outputs {
             output.verify_storage_deposit(
-                protocol_parameters.rent_parameters(),
+                protocol_parameters.rent_parameters().into(),
                 protocol_parameters.token_supply(),
             )?;
         }

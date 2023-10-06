@@ -5,10 +5,10 @@ use alloc::collections::BTreeSet;
 
 use packable::{Packable, PackableExt};
 
-use super::storage_score_offset_output;
+use super::{storage_score_offset_output, AddressUnlockCondition};
 use crate::types::{
     block::{
-        address::Address,
+        address::{Address, Ed25519Address},
         output::{
             feature::{verify_allowed_features, Feature, FeatureFlags, Features},
             unlock_condition::{
@@ -18,7 +18,7 @@ use crate::types::{
             NativeTokens, Output, OutputBuilderAmount, OutputId,
         },
         protocol::ProtocolParameters,
-        rent::{RentParameters, StorageScore},
+        rent::{RentParameters, RentStructure, StorageScore},
         semantic::{TransactionFailureReason, ValidationContext},
         unlock::Unlock,
         Error,
@@ -47,8 +47,8 @@ impl BasicOutputBuilder {
     /// Creates an [`BasicOutputBuilder`] with a provided rent structure.
     /// The amount will be set to the minimum storage deposit.
     #[inline(always)]
-    pub fn new_with_minimum_storage_deposit(rent_params: RentParameters) -> Self {
-        Self::new(OutputBuilderAmount::MinimumStorageDeposit(rent_params))
+    pub fn new_with_minimum_storage_deposit(rent_struct: RentStructure) -> Self {
+        Self::new(OutputBuilderAmount::MinimumStorageDeposit(rent_struct))
     }
 
     fn new(amount: OutputBuilderAmount) -> Self {
@@ -70,8 +70,8 @@ impl BasicOutputBuilder {
 
     /// Sets the amount to the minimum storage deposit.
     #[inline(always)]
-    pub fn with_minimum_storage_deposit(mut self, rent_params: RentParameters) -> Self {
-        self.amount = OutputBuilderAmount::MinimumStorageDeposit(rent_params);
+    pub fn with_minimum_storage_deposit(mut self, rent_struct: RentStructure) -> Self {
+        self.amount = OutputBuilderAmount::MinimumStorageDeposit(rent_struct);
         self
     }
 
@@ -173,8 +173,8 @@ impl BasicOutputBuilder {
 
         output.amount = match self.amount {
             OutputBuilderAmount::Amount(amount) => amount,
-            OutputBuilderAmount::MinimumStorageDeposit(rent_params) => {
-                Output::Basic(output.clone()).rent_cost(rent_params)
+            OutputBuilderAmount::MinimumStorageDeposit(rent_struct) => {
+                Output::Basic(output.clone()).rent_cost(rent_struct)
             }
         };
 
@@ -255,8 +255,8 @@ impl BasicOutput {
     /// Creates a new [`BasicOutputBuilder`] with a provided rent structure.
     /// The amount will be set to the minimum storage deposit.
     #[inline(always)]
-    pub fn build_with_minimum_storage_deposit(rent_params: RentParameters) -> BasicOutputBuilder {
-        BasicOutputBuilder::new_with_minimum_storage_deposit(rent_params)
+    pub fn build_with_minimum_storage_deposit(rent_struct: RentStructure) -> BasicOutputBuilder {
+        BasicOutputBuilder::new_with_minimum_storage_deposit(rent_struct)
     }
 
     ///
@@ -323,15 +323,23 @@ impl BasicOutput {
 
         None
     }
+
+    /// Creates a dummy [`BasicOutput`] used to calculate a storage score for implicit account addresses.
+    pub(crate) fn dummy() -> Self {
+        BasicOutputBuilder::new_with_amount(0)
+            .add_unlock_condition(AddressUnlockCondition::new(Ed25519Address::dummy()))
+            .finish()
+            .unwrap()
+    }
 }
 
 impl StorageScore for BasicOutput {
-    fn score(&self, rent_params: RentParameters) -> u64 {
-        storage_score_offset_output(rent_params)
-            + self.packed_len() as u64 * rent_params.storage_score_factor_data() as u64
-            + self.native_tokens().score(rent_params)
-            + self.unlock_conditions().score(rent_params)
-            + self.features().score(rent_params)
+    fn score(&self, rent_struct: RentStructure) -> u64 {
+        storage_score_offset_output(rent_struct)
+            + self.packed_len() as u64 * rent_struct.storage_score_factor_data() as u64
+            + self.native_tokens().score(rent_struct)
+            + self.unlock_conditions().score(rent_struct)
+            + self.features().score(rent_struct)
     }
 }
 
@@ -440,8 +448,8 @@ pub(crate) mod dto {
             let params = params.into();
             let mut builder = match amount {
                 OutputBuilderAmount::Amount(amount) => BasicOutputBuilder::new_with_amount(amount),
-                OutputBuilderAmount::MinimumStorageDeposit(rent_params) => {
-                    BasicOutputBuilder::new_with_minimum_storage_deposit(rent_params)
+                OutputBuilderAmount::MinimumStorageDeposit(rent_struct) => {
+                    BasicOutputBuilder::new_with_minimum_storage_deposit(rent_struct)
                 }
             }
             .with_mana(mana);
@@ -529,7 +537,7 @@ mod tests {
             .with_features(rand_allowed_features(BasicOutput::ALLOWED_FEATURES));
         test_split_dto(builder);
 
-        let builder = BasicOutput::build_with_minimum_storage_deposit(protocol_parameters.rent_parameters())
+        let builder = BasicOutput::build_with_minimum_storage_deposit(protocol_parameters.rent_parameters().into())
             .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000).unwrap())
             .add_unlock_condition(address)
             .with_features(rand_allowed_features(BasicOutput::ALLOWED_FEATURES));

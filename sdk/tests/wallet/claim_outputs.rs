@@ -127,11 +127,11 @@ async fn claim_2_basic_outputs_no_outputs_in_claim_account() -> Result<()> {
     let account_1 = wallet.create_account().finish().await?;
 
     let token_supply = account_0.client().get_token_supply().await?;
-    let rent_params = account_0.client().get_rent_parameters().await?;
+    let rent_struct = account_0.client().get_rent_parameters().await?.into();
     // TODO more fitting value
     let expiration_slot = account_0.client().get_slot_index().await? + 86400;
 
-    let output = BasicOutputBuilder::new_with_minimum_storage_deposit(rent_params)
+    let output = BasicOutputBuilder::new_with_minimum_storage_deposit(rent_struct)
         .add_unlock_condition(AddressUnlockCondition::new(
             *account_1.addresses().await?[0].address().as_ref(),
         ))
@@ -322,13 +322,13 @@ async fn claim_2_native_tokens_no_outputs_in_claim_account() -> Result<()> {
         .await?;
     account_0.sync(None).await?;
 
-    let rent_params = account_0.client().get_rent_parameters().await?;
+    let rent_strcut = account_0.client().get_rent_parameters().await?.into();
     let token_supply = account_0.client().get_token_supply().await?;
 
     let tx = account_0
         .send_outputs(
             [
-                BasicOutputBuilder::new_with_minimum_storage_deposit(rent_params)
+                BasicOutputBuilder::new_with_minimum_storage_deposit(rent_strcut)
                     .add_unlock_condition(AddressUnlockCondition::new(
                         *account_1.addresses().await?[0].address().as_ref(),
                     ))
@@ -338,7 +338,7 @@ async fn claim_2_native_tokens_no_outputs_in_claim_account() -> Result<()> {
                     )?)
                     .add_native_token(NativeToken::new(create_tx_0.token_id, native_token_amount)?)
                     .finish_output(token_supply)?,
-                BasicOutputBuilder::new_with_minimum_storage_deposit(rent_params)
+                BasicOutputBuilder::new_with_minimum_storage_deposit(rent_strcut)
                     .add_unlock_condition(AddressUnlockCondition::new(
                         *account_1.addresses().await?[0].address().as_ref(),
                     ))

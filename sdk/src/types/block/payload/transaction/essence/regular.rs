@@ -14,6 +14,7 @@ use crate::types::{
         output::{InputsCommitment, NativeTokens, Output, OUTPUT_COUNT_RANGE},
         payload::{OptionalPayload, Payload},
         protocol::ProtocolParameters,
+        rent::RentStructure,
         slot::SlotIndex,
         Error,
     },
@@ -395,7 +396,7 @@ fn verify_outputs<const VERIFY: bool>(outputs: &[Output], visitor: &ProtocolPara
                 }
             }
 
-            output.verify_storage_deposit(visitor.rent_parameters(), visitor.token_supply())?;
+            output.verify_storage_deposit(visitor.rent_parameters().into(), visitor.token_supply())?;
         }
     }
 

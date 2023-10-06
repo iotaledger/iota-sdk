@@ -5,7 +5,11 @@ use core::str::FromStr;
 
 use derive_more::{AsRef, Deref, From};
 
-use crate::types::block::{output::AccountId, Error};
+use crate::types::block::{
+    output::AccountId,
+    rent::{RentStructure, StorageScore},
+    Error,
+};
 
 /// An account address.
 #[derive(Clone, Copy, Eq, PartialEq, Ord, PartialOrd, Hash, From, AsRef, Deref, packable::Packable)]
@@ -54,6 +58,12 @@ impl core::fmt::Display for AccountAddress {
 impl core::fmt::Debug for AccountAddress {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         write!(f, "AccountAddress({self})")
+    }
+}
+
+impl StorageScore for AccountAddress {
+    fn score(&self, _rent_struct: RentStructure) -> u64 {
+        0
     }
 }
 

@@ -72,7 +72,7 @@ fn builder() {
     let metadata = rand_metadata_feature();
 
     let output = builder
-        .with_minimum_storage_deposit(protocol_parameters.rent_parameters())
+        .with_minimum_storage_deposit(protocol_parameters.rent_parameters().into())
         .add_unlock_condition(rand_state_controller_address_unlock_condition_different_from(
             &account_id,
         ))
@@ -84,7 +84,7 @@ fn builder() {
 
     assert_eq!(
         output.amount(),
-        Output::Account(output.clone()).rent_cost(protocol_parameters.rent_parameters())
+        Output::Account(output.clone()).rent_cost(protocol_parameters.rent_parameters().into())
     );
     assert_eq!(output.features().metadata(), Some(&metadata));
     assert_eq!(output.features().sender(), Some(&sender_1));

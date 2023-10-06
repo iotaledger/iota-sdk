@@ -6,7 +6,10 @@ use core::str::FromStr;
 use crypto::signatures::ed25519::PublicKey;
 use derive_more::{AsRef, Deref, From};
 
-use crate::types::block::Error;
+use crate::types::block::{
+    rent::{RentStructure, StorageScore},
+    Error,
+};
 
 /// An Ed25519 address.
 #[derive(Clone, Copy, Eq, PartialEq, Ord, PartialOrd, Hash, From, AsRef, Deref, packable::Packable)]
@@ -23,6 +26,11 @@ impl Ed25519Address {
     #[inline(always)]
     pub fn new(address: [u8; Self::LENGTH]) -> Self {
         Self::from(address)
+    }
+
+    /// Creates a dummy [`Ed25519Address`] used to calculate a storage score for implicit account addresses.
+    pub(crate) fn dummy() -> Self {
+        Self([0; Self::LENGTH])
     }
 }
 
@@ -43,6 +51,12 @@ impl core::fmt::Display for Ed25519Address {
 impl core::fmt::Debug for Ed25519Address {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         write!(f, "Ed25519Address({self})")
+    }
+}
+
+impl StorageScore for Ed25519Address {
+    fn score(&self, _rent_struct: RentStructure) -> u64 {
+        0
     }
 }
 

@@ -16,7 +16,7 @@ use crate::{
             BasicOutputBuilder, MinimumStorageDepositBasicOutput, NativeToken, NftId, NftOutputBuilder, Output,
             UnlockCondition,
         },
-        rent::{RentParameters, StorageScore},
+        rent::{RentParameters, RentStructure, StorageScore},
         slot::SlotIndex,
         Error,
     },
@@ -47,12 +47,12 @@ where
 
         self.client().bech32_hrp_matches(params.recipient_address.hrp()).await?;
 
-        let rent_params = self.client().get_rent_parameters().await?;
+        let rent_struct = self.client().get_rent_parameters().await?.into();
 
         let nft_id = params.assets.as_ref().and_then(|a| a.nft_id);
 
         let (mut first_output_builder, existing_nft_output_data) = self
-            .create_initial_output_builder(params.recipient_address, nft_id, rent_params)
+            .create_initial_output_builder(params.recipient_address, nft_id, rent_struct)
             .await?;
 
         if let Some(assets) = &params.assets {
@@ -103,7 +103,7 @@ where
 
         // Build output with minimum required storage deposit so we can use the amount in the next step
         let first_output = first_output_builder
-            .with_minimum_storage_deposit(rent_params)
+            .with_minimum_storage_deposit(rent_struct)
             .finish_output(token_supply)?;
 
         let mut second_output_builder = if nft_id.is_some() {
@@ -113,9 +113,9 @@ where
         };
 
         let min_storage_deposit_basic_output =
-            MinimumStorageDepositBasicOutput::new(rent_params, token_supply).finish()?;
+            MinimumStorageDepositBasicOutput::new(rent_struct, token_supply).finish()?;
 
-        let min_required_storage_deposit = first_output.rent_cost(rent_params);
+        let min_required_storage_deposit = first_output.rent_cost(rent_struct);
 
         if params.amount > min_required_storage_deposit {
             second_output_builder = second_output_builder.with_amount(params.amount);
@@ -147,7 +147,7 @@ where
                 // need to check the min required storage deposit again
                 let min_storage_deposit_new_amount = second_output_builder
                     .clone()
-                    .with_minimum_storage_deposit(rent_params)
+                    .with_minimum_storage_deposit(rent_struct)
                     .finish_output(token_supply)?
                     .amount();
 
@@ -177,7 +177,7 @@ where
         // If we're sending an existing NFT, its minimum required storage deposit is not part of the available base_coin
         // balance, so we add it here
         if let Some(existing_nft_output_data) = existing_nft_output_data {
-            available_base_coin += existing_nft_output_data.output.rent_cost(rent_params);
+            available_base_coin += existing_nft_output_data.output.rent_cost(rent_struct);
         }
 
         if final_amount > available_base_coin {
@@ -237,13 +237,13 @@ where
         &self,
         recipient_address: Bech32Address,
         nft_id: Option<NftId>,
-        rent_params: RentParameters,
+        rent_struct: RentStructure,
     ) -> crate::wallet::Result<(OutputBuilder, Option<OutputData>)> {
         let (mut first_output_builder, existing_nft_output_data) = if let Some(nft_id) = &nft_id {
             if nft_id.is_null() {
                 // Mint a new NFT output
                 (
-                    OutputBuilder::Nft(NftOutputBuilder::new_with_minimum_storage_deposit(rent_params, *nft_id)),
+                    OutputBuilder::Nft(NftOutputBuilder::new_with_minimum_storage_deposit(rent_struct, *nft_id)),
                     None,
                 )
             } else {
@@ -264,7 +264,7 @@ where
             }
         } else {
             (
-                OutputBuilder::Basic(BasicOutputBuilder::new_with_minimum_storage_deposit(rent_params)),
+                OutputBuilder::Basic(BasicOutputBuilder::new_with_minimum_storage_deposit(rent_struct)),
                 None,
             )
         };
@@ -427,13 +427,13 @@ impl OutputBuilder {
         }
         self
     }
-    fn with_minimum_storage_deposit(mut self, rent_params: RentParameters) -> Self {
+    fn with_minimum_storage_deposit(mut self, rent_struct: RentStructure) -> Self {
         match self {
             Self::Basic(b) => {
-                self = Self::Basic(b.with_minimum_storage_deposit(rent_params));
+                self = Self::Basic(b.with_minimum_storage_deposit(rent_struct));
             }
             Self::Nft(b) => {
-                self = Self::Nft(b.with_minimum_storage_deposit(rent_params));
+                self = Self::Nft(b.with_minimum_storage_deposit(rent_struct));
             }
         }
         self

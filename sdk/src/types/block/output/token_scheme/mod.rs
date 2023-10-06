@@ -4,7 +4,10 @@
 mod simple;
 
 pub use self::simple::SimpleTokenScheme;
-use crate::types::block::{Error, rent::{StorageScore, RentParameters}};
+use crate::types::block::{
+    rent::{RentParameters, RentStructure, StorageScore},
+    Error,
+};
 
 ///
 #[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, derive_more::From, packable::Packable)]
@@ -47,9 +50,9 @@ impl TokenScheme {
 }
 
 impl StorageScore for TokenScheme {
-    fn score(&self, rent_params: RentParameters) -> u64 {
+    fn score(&self, rent_struct: RentStructure) -> u64 {
         match self {
-            Self::Simple(simple) => simple.score(rent_params)
+            Self::Simple(simple) => simple.score(rent_struct),
         }
     }
 }

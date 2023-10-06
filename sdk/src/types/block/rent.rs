@@ -5,6 +5,7 @@ use core::{mem::size_of, ops::Deref};
 
 use packable::Packable;
 
+use super::output::{AccountOutput, BasicOutput};
 use crate::types::block::{
     address::{Address, Ed25519Address},
     output::{
@@ -26,11 +27,36 @@ const DEFAULT_STORAGE_SCORE_OFFSET_DELEGATION: StorageScoreOffset = 100;
 type StorageScoreFactor = u8;
 type StorageScoreOffset = u64;
 
-// Includes the rent parameters and the additional factors/offsets computed from these parameters.  #[derive(Copy,
-// Clone, Debug, Eq, PartialEq)]
+// Includes the rent parameters and the additional factors/offsets computed from these parameters.
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub struct RentStructure {
     rent_parameters: RentParameters,
     storage_score_offset_implicit_account_creation_address: u64,
+}
+
+impl RentStructure {
+    /// Creates a new [`RentStructure`]. Computes the score offset for implicit account creation addresses.
+    pub fn new(rent_parameters: RentParameters) -> Self {
+        let mut rent_structure = Self {
+            rent_parameters,
+            storage_score_offset_implicit_account_creation_address: 0,
+        };
+
+        // set the storage score offset for implicit account creation addresses as
+        // the difference between the storage score of the dummy account and the storage
+        // score of the dummy basic output minus the storage score of the dummy address.
+        let dummy_basic_output_score = BasicOutput::dummy().score(rent_structure);
+        let dummy_address_score = Ed25519Address::dummy().score(rent_structure);
+        let basic_score_without_address = dummy_basic_output_score
+            .checked_sub(dummy_address_score)
+            .expect("underflow");
+        let dummy_account_output_score = AccountOutput::dummy().score(rent_structure);
+
+        rent_structure.storage_score_offset_implicit_account_creation_address = dummy_account_output_score
+            .checked_sub(basic_score_without_address)
+            .expect("underflow");
+        rent_structure
+    }
 }
 
 impl Deref for RentStructure {
@@ -38,6 +64,12 @@ impl Deref for RentStructure {
 
     fn deref(&self) -> &Self::Target {
         &self.rent_parameters
+    }
+}
+
+impl From<RentParameters> for RentStructure {
+    fn from(rent_parameters: RentParameters) -> Self {
+        Self::new(rent_parameters)
     }
 }
 
@@ -171,20 +203,20 @@ impl RentParameters {
     }
 }
 
-/// A trait to facilitate the rent cost computation for block outputs, which is central to dust protection.
+/// A trait to facilitate the rent cost computation for implementing types, which is central to dust protection.
 pub trait StorageScore {
-    /// Computes the storage score given a [`RentParameters`]. Different fields in a type lead to different storage
+    /// Computes the storage score given a [`RentStructure`]. Different fields in a type lead to different storage
     /// requirements for the ledger state.
-    fn score(&self, rent_params: RentParameters) -> u64;
+    fn score(&self, rent_struct: RentStructure) -> u64;
 
-    /// Computes the storage cost given a [`RentParameters`].
-    fn rent_cost(&self, rent_params: RentParameters) -> u64 {
-        rent_params.storage_cost as u64 * self.score(rent_params)
+    /// Computes the rent cost given a [`RentStructure`].
+    fn rent_cost(&self, rent_struct: RentStructure) -> u64 {
+        rent_struct.storage_cost as u64 * self.score(rent_struct)
     }
 }
 
 impl<T: StorageScore, const N: usize> StorageScore for [T; N] {
-    fn score(&self, rent_params: RentParameters) -> u64 {
-        self.iter().map(|elem| elem.score(rent_params)).sum()
+    fn score(&self, rent_struct: RentStructure) -> u64 {
+        self.iter().map(|elem| elem.score(rent_struct)).sum()
     }
 }

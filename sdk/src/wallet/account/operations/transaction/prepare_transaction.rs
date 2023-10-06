@@ -34,12 +34,12 @@ where
         let options = options.into();
         let outputs = outputs.into();
         let prepare_transaction_start_time = Instant::now();
-        let rent_params = self.client().get_rent_parameters().await?;
+        let rent_struct = self.client().get_rent_parameters().await?.into();
         let token_supply = self.client().get_token_supply().await?;
 
         // Check if the outputs have enough amount to cover the storage deposit
         for output in &outputs {
-            output.verify_storage_deposit(rent_params, token_supply)?;
+            output.verify_storage_deposit(rent_struct, token_supply)?;
         }
 
         let is_burn_present = options.as_ref().map(|options| options.burn.is_some()).unwrap_or(false);

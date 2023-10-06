@@ -1198,7 +1198,7 @@ fn changed_immutable_metadata() {
     let metadata = [1, 2, 3];
 
     let nft_output =
-        NftOutputBuilder::new_with_minimum_storage_deposit(protocol_parameters.rent_parameters(), nft_id_1)
+        NftOutputBuilder::new_with_minimum_storage_deposit(protocol_parameters.rent_parameters().into(), nft_id_1)
             .with_immutable_features(MetadataFeature::try_from(metadata))
             .add_unlock_condition(AddressUnlockCondition::new(
                 Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
@@ -1224,7 +1224,7 @@ fn changed_immutable_metadata() {
 
     // New nft output with changed immutable metadata feature
     let updated_nft_output = NftOutputBuilder::from(nft_output.as_nft())
-        .with_minimum_storage_deposit(protocol_parameters.rent_parameters())
+        .with_minimum_storage_deposit(protocol_parameters.rent_parameters().into())
         .with_immutable_features(MetadataFeature::try_from(metadata))
         .finish_output(protocol_parameters.token_supply())
         .unwrap();

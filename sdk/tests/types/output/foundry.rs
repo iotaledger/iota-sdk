@@ -52,14 +52,14 @@ fn builder() {
     assert!(output.immutable_features().is_empty());
 
     let output = builder
-        .with_minimum_storage_deposit(protocol_parameters.rent_parameters())
+        .with_minimum_storage_deposit(protocol_parameters.rent_parameters().into())
         .add_unlock_condition(ImmutableAccountAddressUnlockCondition::new(rand_account_address()))
         .finish_with_params(&protocol_parameters)
         .unwrap();
 
     assert_eq!(
         output.amount(),
-        Output::Foundry(output).rent_cost(protocol_parameters.rent_parameters())
+        Output::Foundry(output).rent_cost(protocol_parameters.rent_parameters().into())
     );
 }
 

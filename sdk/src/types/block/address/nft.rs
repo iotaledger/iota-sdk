@@ -5,7 +5,11 @@ use core::str::FromStr;
 
 use derive_more::{AsRef, Deref, From};
 
-use crate::types::block::{output::NftId, Error};
+use crate::types::block::{
+    output::NftId,
+    rent::{RentStructure, StorageScore},
+    Error,
+};
 
 /// An NFT address.
 #[derive(Clone, Copy, Eq, PartialEq, Ord, PartialOrd, Hash, From, AsRef, Deref, packable::Packable)]
@@ -54,6 +58,12 @@ impl core::fmt::Display for NftAddress {
 impl core::fmt::Debug for NftAddress {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         write!(f, "NftAddress({self})")
+    }
+}
+
+impl StorageScore for NftAddress {
+    fn score(&self, _rent_struct: RentStructure) -> u64 {
+        0
     }
 }
 

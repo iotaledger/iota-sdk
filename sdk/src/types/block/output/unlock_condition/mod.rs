@@ -30,7 +30,14 @@ pub use self::{
     state_controller_address::StateControllerAddressUnlockCondition,
     storage_deposit_return::StorageDepositReturnUnlockCondition, timelock::TimelockUnlockCondition,
 };
-use crate::types::block::{address::Address, create_bitflags, protocol::ProtocolParameters, slot::SlotIndex, Error, rent::StorageScore};
+use crate::types::block::{
+    address::Address,
+    create_bitflags,
+    protocol::ProtocolParameters,
+    rent::{RentStructure, StorageScore},
+    slot::SlotIndex,
+    Error,
+};
 
 ///
 #[derive(Clone, Eq, PartialEq, Hash, From)]
@@ -65,14 +72,20 @@ impl Ord for UnlockCondition {
 impl core::fmt::Debug for UnlockCondition {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         match self {
-            Self::Address(unlock_condition) => unlock_condition.fmt(f),
-            Self::StorageDepositReturn(unlock_condition) => unlock_condition.fmt(f),
-            Self::Timelock(unlock_condition) => unlock_condition.fmt(f),
-            Self::Expiration(unlock_condition) => unlock_condition.fmt(f),
-            Self::StateControllerAddress(unlock_condition) => unlock_condition.fmt(f),
-            Self::GovernorAddress(unlock_condition) => unlock_condition.fmt(f),
-            Self::ImmutableAccountAddress(unlock_condition) => unlock_condition.fmt(f),
+            Self::Address(address) => address.fmt(f),
+            Self::StorageDepositReturn(storage_deposit_return) => storage_deposit_return.fmt(f),
+            Self::Timelock(timelock) => timelock.fmt(f),
+            Self::Expiration(expiration) => expiration.fmt(f),
+            Self::StateControllerAddress(state_controller_address) => state_controller_address.fmt(f),
+            Self::GovernorAddress(governor_address) => governor_address.fmt(f),
+            Self::ImmutableAccountAddress(immutable_account_address) => immutable_account_address.fmt(f),
         }
+    }
+}
+
+impl StorageScore for UnlockCondition {
+    fn score(&self, rent_struct: RentStructure) -> u64 {
+        todo!("unlock condition score")
     }
 }
 
@@ -445,8 +458,8 @@ impl UnlockConditions {
 }
 
 impl StorageScore for UnlockConditions {
-    fn score(&self, rent_params: crate::types::block::rent::RentParameters) -> u64 {
-        todo!()
+    fn score(&self, rent_struct: RentStructure) -> u64 {
+        self.0.iter().map(|uc| uc.score(rent_struct)).sum()
     }
 }
 

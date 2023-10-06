@@ -13,9 +13,14 @@ use packable::{
     Packable, PackableExt,
 };
 
+use super::{
+    feature::{BlockIssuerFeature, BlockIssuerKey, BlockIssuerKeys, Ed25519BlockIssuerKey},
+    storage_score_offset_output,
+    unlock_condition::{GovernorAddressUnlockCondition, StateControllerAddressUnlockCondition},
+};
 use crate::types::{
     block::{
-        address::{AccountAddress, Address},
+        address::{AccountAddress, Address, Ed25519Address},
         output::{
             feature::{verify_allowed_features, Feature, FeatureFlags, Features},
             unlock_condition::{
@@ -25,15 +30,13 @@ use crate::types::{
             NativeTokens, Output, OutputBuilderAmount, OutputId, StateTransitionError, StateTransitionVerifier,
         },
         protocol::ProtocolParameters,
-        rent::{RentParameters, StorageScore},
+        rent::{RentParameters, RentStructure, StorageScore},
         semantic::{TransactionFailureReason, ValidationContext},
         unlock::Unlock,
         Error,
     },
     ValidationParams,
 };
-
-use super::storage_score_offset_output;
 
 impl_id!(pub AccountId, 32, "Unique identifier of an account, which is the BLAKE2b-256 hash of the Output ID that created it.");
 
@@ -114,8 +117,8 @@ impl AccountOutputBuilder {
 
     /// Creates an [`AccountOutputBuilder`] with a provided rent structure.
     /// The amount will be set to the minimum storage deposit.
-    pub fn new_with_minimum_storage_deposit(rent_params: RentParameters, account_id: AccountId) -> Self {
-        Self::new(OutputBuilderAmount::MinimumStorageDeposit(rent_params), account_id)
+    pub fn new_with_minimum_storage_deposit(rent_struct: RentStructure, account_id: AccountId) -> Self {
+        Self::new(OutputBuilderAmount::MinimumStorageDeposit(rent_struct), account_id)
     }
 
     fn new(amount: OutputBuilderAmount, account_id: AccountId) -> Self {
@@ -142,8 +145,8 @@ impl AccountOutputBuilder {
 
     /// Sets the amount to the minimum storage deposit.
     #[inline(always)]
-    pub fn with_minimum_storage_deposit(mut self, rent_params: RentParameters) -> Self {
-        self.amount = OutputBuilderAmount::MinimumStorageDeposit(rent_params);
+    pub fn with_minimum_storage_deposit(mut self, rent_struct: RentStructure) -> Self {
+        self.amount = OutputBuilderAmount::MinimumStorageDeposit(rent_struct);
         self
     }
 
@@ -320,8 +323,8 @@ impl AccountOutputBuilder {
 
         output.amount = match self.amount {
             OutputBuilderAmount::Amount(amount) => amount,
-            OutputBuilderAmount::MinimumStorageDeposit(rent_params) => {
-                Output::Account(output.clone()).rent_cost(rent_params)
+            OutputBuilderAmount::MinimumStorageDeposit(rent_struct) => {
+                Output::Account(output.clone()).rent_cost(rent_struct)
             }
         };
 
@@ -415,10 +418,10 @@ impl AccountOutput {
     /// The amount will be set to the minimum storage deposit.
     #[inline(always)]
     pub fn build_with_minimum_storage_deposit(
-        rent_params: RentParameters,
+        rent_struct: RentStructure,
         account_id: AccountId,
     ) -> AccountOutputBuilder {
-        AccountOutputBuilder::new_with_minimum_storage_deposit(rent_params, account_id)
+        AccountOutputBuilder::new_with_minimum_storage_deposit(rent_struct, account_id)
     }
 
     ///
@@ -618,6 +621,19 @@ impl AccountOutput {
 
         Ok(())
     }
+
+    /// Creates a dummy [`AccountOutput`] used to calculate a storage score for implicit account addresses.
+    pub(crate) fn dummy() -> Self {
+        // Unwrap: cannot fail for provided dummy data.
+        AccountOutputBuilder::new_with_amount(0, AccountId::null())
+            .add_unlock_condition(GovernorAddressUnlockCondition::new(Ed25519Address::dummy()))
+            .add_unlock_condition(StateControllerAddressUnlockCondition::new(Ed25519Address::dummy()))
+            .add_feature(
+                BlockIssuerFeature::new(0, vec![BlockIssuerKey::Ed25519(Ed25519BlockIssuerKey::dummy())]).unwrap(),
+            )
+            .finish()
+            .unwrap()
+    }
 }
 
 impl StateTransitionVerifier for AccountOutput {
@@ -729,13 +745,13 @@ impl Packable for AccountOutput {
 }
 
 impl StorageScore for AccountOutput {
-    fn score(&self, rent_params: RentParameters) -> u64 {
-        storage_score_offset_output(rent_params)
-            + self.packed_len() as u64 * rent_params.storage_score_factor_data() as u64
-            + self.native_tokens().score(rent_params)
-            + self.unlock_conditions().score(rent_params)
-            + self.features().score(rent_params)
-            + self.immutable_features().score(rent_params)
+    fn score(&self, rent_struct: RentStructure) -> u64 {
+        storage_score_offset_output(rent_struct)
+            + self.packed_len() as u64 * rent_struct.storage_score_factor_data() as u64
+            + self.native_tokens().score(rent_struct)
+            + self.unlock_conditions().score(rent_struct)
+            + self.features().score(rent_struct)
+            + self.immutable_features().score(rent_struct)
     }
 }
 
@@ -869,8 +885,8 @@ pub(crate) mod dto {
             let params = params.into();
             let mut builder = match amount {
                 OutputBuilderAmount::Amount(amount) => AccountOutputBuilder::new_with_amount(amount, *account_id),
-                OutputBuilderAmount::MinimumStorageDeposit(rent_params) => {
-                    AccountOutputBuilder::new_with_minimum_storage_deposit(rent_params, *account_id)
+                OutputBuilderAmount::MinimumStorageDeposit(rent_struct) => {
+                    AccountOutputBuilder::new_with_minimum_storage_deposit(rent_struct, *account_id)
                 }
             }
             .with_mana(mana);
@@ -991,7 +1007,7 @@ mod tests {
         test_split_dto(builder);
 
         let builder =
-            AccountOutput::build_with_minimum_storage_deposit(protocol_parameters.rent_parameters(), account_id)
+            AccountOutput::build_with_minimum_storage_deposit(protocol_parameters.rent_parameters().into(), account_id)
                 .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000).unwrap())
                 .add_unlock_condition(gov_address)
                 .add_unlock_condition(state_address)

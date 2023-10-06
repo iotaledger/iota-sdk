@@ -15,6 +15,7 @@ use crate::{
             },
             BasicOutputBuilder, MinimumStorageDepositBasicOutput, NativeToken, NativeTokens, TokenId,
         },
+        rent::RentStructure,
         slot::SlotIndex,
         ConvertTo,
     },
@@ -129,7 +130,7 @@ where
         I::IntoIter: Send,
     {
         log::debug!("[TRANSACTION] prepare_send_native_tokens");
-        let rent_params = self.client().get_rent_parameters().await?;
+        let rent_struct = self.client().get_rent_parameters().await?.into();
         let token_supply = self.client().get_token_supply().await?;
 
         let account_addresses = self.addresses().await?;
@@ -171,7 +172,7 @@ where
             // get minimum required amount for such an output, so we don't lock more than required
             // We have to check it for every output individually, because different address types and amount of
             // different native tokens require a different storage deposit
-            let storage_deposit_amount = MinimumStorageDepositBasicOutput::new(rent_params, token_supply)
+            let storage_deposit_amount = MinimumStorageDepositBasicOutput::new(rent_struct, token_supply)
                 .with_native_tokens(native_tokens.clone())
                 .with_storage_deposit_return()?
                 .with_expiration()?

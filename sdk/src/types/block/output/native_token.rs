@@ -12,7 +12,11 @@ use iterator_sorted::is_unique_sorted;
 use packable::{bounded::BoundedU8, prefix::BoxedSlicePrefix, Packable};
 use primitive_types::U256;
 
-use crate::types::block::{output::foundry::FoundryId, Error, rent::StorageScore};
+use crate::types::block::{
+    output::foundry::FoundryId,
+    rent::{RentStructure, StorageScore},
+    Error,
+};
 
 impl_id!(pub TokenId, 38, "Unique identifiers of native tokens. The TokenId of native tokens minted by a specific foundry is the same as the FoundryId.");
 
@@ -70,6 +74,12 @@ impl PartialOrd for NativeToken {
 impl Ord for NativeToken {
     fn cmp(&self, other: &Self) -> core::cmp::Ordering {
         self.token_id.cmp(&other.token_id)
+    }
+}
+
+impl StorageScore for NativeToken {
+    fn score(&self, rent_struct: RentStructure) -> u64 {
+        todo!("native token score")
     }
 }
 
@@ -248,8 +258,8 @@ impl NativeTokens {
 }
 
 impl StorageScore for NativeTokens {
-    fn score(&self, rent_params: crate::types::block::rent::RentParameters) -> u64 {
-        todo!()
+    fn score(&self, rent_struct: RentStructure) -> u64 {
+        self.0.iter().map(|nt| nt.score(rent_struct)).sum()
     }
 }
 

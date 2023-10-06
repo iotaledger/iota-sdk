@@ -28,7 +28,11 @@ pub use self::{
     staking::StakingFeature,
     tag::TagFeature,
 };
-use crate::types::block::{create_bitflags, Error, rent::StorageScore};
+use crate::types::block::{
+    create_bitflags,
+    rent::{RentStructure, StorageScore},
+    Error,
+};
 
 ///
 #[derive(Clone, Eq, PartialEq, Hash, From, Packable)]
@@ -197,6 +201,19 @@ impl Feature {
     }
 }
 
+impl StorageScore for Feature {
+    fn score(&self, rent_struct: RentStructure) -> u64 {
+        match self {
+            Self::Sender(sender) => todo!(),
+            Self::Issuer(issuer) => todo!(),
+            Self::Metadata(metadata) => todo!(),
+            Self::Tag(tag) => todo!(),
+            Self::BlockIssuer(block_issuer) => todo!(),
+            Self::Staking(staking) => todo!(),
+        }
+    }
+}
+
 create_bitflags!(
     /// A bitflags-based representation of the set of active [`Feature`]s.
     pub FeatureFlags,
@@ -314,8 +331,8 @@ impl Features {
 }
 
 impl StorageScore for Features {
-    fn score(&self, rent_params: crate::types::block::rent::RentParameters) -> u64 {
-        todo!()
+    fn score(&self, rent_struct: RentStructure) -> u64 {
+        self.0.iter().map(|f| f.score(rent_struct)).sum()
     }
 }
 

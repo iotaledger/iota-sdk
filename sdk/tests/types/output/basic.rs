@@ -51,7 +51,7 @@ fn builder() {
     let metadata = rand_metadata_feature();
 
     let output = builder
-        .with_minimum_storage_deposit(protocol_parameters.rent_parameters())
+        .with_minimum_storage_deposit(protocol_parameters.rent_parameters().into())
         .add_unlock_condition(rand_address_unlock_condition())
         .with_features([Feature::from(metadata.clone()), sender_1.into()])
         .finish_with_params(ValidationParams::default().with_protocol_parameters(protocol_parameters.clone()))
@@ -59,7 +59,7 @@ fn builder() {
 
     assert_eq!(
         output.amount(),
-        Output::Basic(output.clone()).rent_cost(protocol_parameters.rent_parameters())
+        Output::Basic(output.clone()).rent_cost(protocol_parameters.rent_parameters().into())
     );
     assert_eq!(output.features().metadata(), Some(&metadata));
     assert_eq!(output.features().sender(), Some(&sender_1));

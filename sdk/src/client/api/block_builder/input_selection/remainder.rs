@@ -16,6 +16,7 @@ use crate::{
     types::block::{
         address::{Address, Ed25519Address},
         output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder, NativeTokensBuilder, Output},
+        rent::RentStructure,
     },
 };
 
@@ -65,7 +66,7 @@ impl InputSelection {
         let native_tokens_remainder = native_tokens_diff.is_some();
 
         let mut remainder_builder =
-            BasicOutputBuilder::new_with_minimum_storage_deposit(self.protocol_parameters.rent_parameters())
+            BasicOutputBuilder::new_with_minimum_storage_deposit(self.protocol_parameters.rent_parameters().into())
                 .add_unlock_condition(AddressUnlockCondition::new(Address::from(Ed25519Address::from(
                     [0; 32],
                 ))));
@@ -144,7 +145,7 @@ impl InputSelection {
         log::debug!("Created remainder output of {diff} for {remainder_address:?}");
 
         remainder.verify_storage_deposit(
-            self.protocol_parameters.rent_parameters(),
+            self.protocol_parameters.rent_parameters().into(),
             self.protocol_parameters.token_supply(),
         )?;
 

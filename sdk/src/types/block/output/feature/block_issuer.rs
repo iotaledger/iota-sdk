@@ -17,7 +17,7 @@ use packable::{
 };
 
 use crate::types::block::{
-    rent::{RentParameters, StorageScore},
+    rent::{RentParameters, RentStructure, StorageScore},
     slot::SlotIndex,
     Error,
 };
@@ -62,9 +62,9 @@ impl BlockIssuerKey {
 }
 
 impl StorageScore for BlockIssuerKey {
-    fn score(&self, rent_params: RentParameters) -> u64 {
+    fn score(&self, rent_struct: RentStructure) -> u64 {
         match self {
-            Self::Ed25519(key) => key.score(rent_params),
+            Self::Ed25519(key) => key.score(rent_struct),
         }
     }
 }
@@ -84,6 +84,12 @@ impl Ed25519BlockIssuerKey {
     /// Creates a new [`Ed25519BlockIssuerKey`] from bytes.
     pub fn try_from_bytes(bytes: [u8; Self::PUBLIC_KEY_LENGTH]) -> Result<Self, Error> {
         Ok(Self(ed25519::PublicKey::try_from_bytes(bytes)?))
+    }
+
+    /// Creates a dummy [`Ed25519BlockIssuerKey`] used to calculate a storage score for implicit account addresses.
+    pub(crate) fn dummy() -> Self {
+        // Unwrap: we provide a valid byte array
+        Self(ed25519::PublicKey::try_from_bytes([0; Self::PUBLIC_KEY_LENGTH]).unwrap())
     }
 }
 
@@ -112,8 +118,8 @@ impl Packable for Ed25519BlockIssuerKey {
 }
 
 impl StorageScore for Ed25519BlockIssuerKey {
-    fn score(&self, rent_params: RentParameters) -> u64 {
-        rent_params.storage_score_offset_ed25519_block_issuer_key()
+    fn score(&self, rent_struct: RentStructure) -> u64 {
+        rent_struct.storage_score_offset_ed25519_block_issuer_key()
     }
 }
 
@@ -200,8 +206,8 @@ impl BlockIssuerKeys {
 }
 
 impl StorageScore for BlockIssuerKeys {
-    fn score(&self, rent_params: RentParameters) -> u64 {
-        (*self).iter().map(|key| key.score(rent_params)).sum()
+    fn score(&self, rent_struct: RentStructure) -> u64 {
+        (*self).iter().map(|key| key.score(rent_struct)).sum()
     }
 }
 

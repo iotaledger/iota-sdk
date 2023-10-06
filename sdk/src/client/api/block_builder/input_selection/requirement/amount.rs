@@ -13,7 +13,7 @@ use crate::{
             unlock_condition::StorageDepositReturnUnlockCondition, AccountOutputBuilder, AccountTransition,
             FoundryOutputBuilder, NftOutputBuilder, Output, OutputId,
         },
-        rent::StorageScore,
+        rent::{RentStructure, StorageScore},
         slot::SlotIndex,
     },
 };
@@ -241,7 +241,7 @@ impl InputSelection {
         for output in outputs {
             let diff = amount_selection.missing_amount();
             let amount = output.amount();
-            let rent = output.rent_cost(self.protocol_parameters.rent_parameters());
+            let rent = output.rent_cost(self.protocol_parameters.rent_parameters().into());
 
             let new_amount = if amount >= diff + rent { amount - diff } else { rent };
 

@@ -215,19 +215,13 @@ impl From<&Self> for Address {
     }
 }
 
-/// A trait to facilitate the rent cost computation for addresses, which is central to dust protection.
-pub trait AddressStorageCost {
-    /// Computes the storage score of an address given a [`RentStructure`].
-    fn storage_cost(&self, rent_structure: RentStructure) -> u64;
-}
-
-impl AddressStorageCost for Address {
-    fn storage_cost(&self, rent_structure: RentStructure) -> u64 {
+impl StorageScore for Address {
+    fn score(&self, rent_struct: RentStructure) -> u64 {
         match self {
-            Self::Account(_) | Self::Ed25519(_) | Self::Nft(_) => 0,
-            // TODO: implicit account address and restricted address
-            // Address::ImplicitAccountCreation(_) =>
-            // rent_stucture.storage_score_offset_implicit_account_creation_address
+            Self::Account(account) => account.score(rent_struct),
+            Self::Ed25519(ed25519) => ed25519.score(rent_struct),
+            Self::Nft(nft) => nft.score(rent_struct),
+            // TODO: other address types once merged
         }
     }
 }
