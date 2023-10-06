@@ -16,7 +16,11 @@ use packable::{
     Packable,
 };
 
-use crate::types::block::{slot::SlotIndex, Error};
+use crate::types::block::{
+    rent::{RentParameters, StorageCost},
+    slot::SlotIndex,
+    Error,
+};
 
 #[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, From, packable::Packable)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize), serde(untagged))]
@@ -54,6 +58,19 @@ impl BlockIssuerKey {
     pub fn as_ed25519(&self) -> &Ed25519BlockIssuerKey {
         let Self::Ed25519(key) = self;
         key
+    }
+}
+
+impl StorageCost for BlockIssuerKey {
+    fn offset_score(&self, rent_params: RentParameters) -> u64 {
+        // TODO: ??
+        0
+    }
+
+    fn score(&self, rent_params: RentParameters) -> u64 {
+        match self {
+            Self::Ed25519(key) => key.score(rent_params),
+        }
     }
 }
 
@@ -96,6 +113,12 @@ impl Packable for Ed25519BlockIssuerKey {
     ) -> Result<Self, UnpackError<Self::UnpackError, U::Error>> {
         Self::try_from_bytes(<[u8; Self::PUBLIC_KEY_LENGTH]>::unpack::<_, VERIFY>(unpacker, visitor).coerce()?)
             .map_err(UnpackError::Packable)
+    }
+}
+
+impl StorageCost for Ed25519BlockIssuerKey {
+    fn score(&self, rent_params: RentParameters) -> u64 {
+        rent_params.storage_score_offset_ed25519_block_issuer_key()
     }
 }
 
@@ -178,6 +201,12 @@ impl BlockIssuerKeys {
 
         // We don't need to verify the block issuer keys here, because they are already verified by the BTreeSet.
         Ok(Self(block_issuer_keys))
+    }
+}
+
+impl StorageCost for BlockIssuerKeys {
+    fn score(&self, rent_params: RentParameters) -> u64 {
+        (*self).iter().map(|key| key.score(rent_params)).sum()
     }
 }
 

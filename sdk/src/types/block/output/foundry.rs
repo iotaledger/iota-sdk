@@ -22,10 +22,11 @@ use crate::types::{
                 verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions,
             },
             verify_output_amount_min, verify_output_amount_packable, verify_output_amount_supply, ChainId, NativeToken,
-            NativeTokens, Output, OutputBuilderAmount, OutputId, RentStructure, StateTransitionError,
-            StateTransitionVerifier, StorageScore, TokenId, TokenScheme,
+            NativeTokens, Output, OutputBuilderAmount, OutputId, StateTransitionError, StateTransitionVerifier,
+            TokenId, TokenScheme,
         },
         protocol::ProtocolParameters,
+        rent::{RentParameters, StorageCost},
         semantic::{TransactionFailureReason, ValidationContext},
         unlock::Unlock,
         Error,
@@ -103,12 +104,12 @@ impl FoundryOutputBuilder {
     /// Creates a [`FoundryOutputBuilder`] with a provided rent structure.
     /// The amount will be set to the minimum storage deposit.
     pub fn new_with_minimum_storage_deposit(
-        rent_structure: RentStructure,
+        rent_params: RentParameters,
         serial_number: u32,
         token_scheme: TokenScheme,
     ) -> Self {
         Self::new(
-            OutputBuilderAmount::MinimumStorageDeposit(rent_structure),
+            OutputBuilderAmount::MinimumStorageDeposit(rent_params),
             serial_number,
             token_scheme,
         )
@@ -135,8 +136,8 @@ impl FoundryOutputBuilder {
 
     /// Sets the amount to the minimum storage deposit.
     #[inline(always)]
-    pub fn with_minimum_storage_deposit(mut self, rent_structure: RentStructure) -> Self {
-        self.amount = OutputBuilderAmount::MinimumStorageDeposit(rent_structure);
+    pub fn with_minimum_storage_deposit(mut self, rent_params: RentParameters) -> Self {
+        self.amount = OutputBuilderAmount::MinimumStorageDeposit(rent_params);
         self
     }
 
@@ -282,8 +283,8 @@ impl FoundryOutputBuilder {
 
         output.amount = match self.amount {
             OutputBuilderAmount::Amount(amount) => amount,
-            OutputBuilderAmount::MinimumStorageDeposit(rent_structure) => {
-                Output::Foundry(output.clone()).storage_score(rent_structure)
+            OutputBuilderAmount::MinimumStorageDeposit(rent_params) => {
+                Output::Foundry(output.clone()).storage_cost(rent_params)
             }
         };
 
@@ -365,11 +366,11 @@ impl FoundryOutput {
     /// The amount will be set to the minimum storage deposit.
     #[inline(always)]
     pub fn build_with_minimum_storage_deposit(
-        rent_structure: RentStructure,
+        rent_params: RentParameters,
         serial_number: u32,
         token_scheme: TokenScheme,
     ) -> FoundryOutputBuilder {
-        FoundryOutputBuilder::new_with_minimum_storage_deposit(rent_structure, serial_number, token_scheme)
+        FoundryOutputBuilder::new_with_minimum_storage_deposit(rent_params, serial_number, token_scheme)
     }
 
     ///
@@ -758,8 +759,8 @@ pub(crate) mod dto {
                 OutputBuilderAmount::Amount(amount) => {
                     FoundryOutputBuilder::new_with_amount(amount, serial_number, token_scheme)
                 }
-                OutputBuilderAmount::MinimumStorageDeposit(rent_structure) => {
-                    FoundryOutputBuilder::new_with_minimum_storage_deposit(rent_structure, serial_number, token_scheme)
+                OutputBuilderAmount::MinimumStorageDeposit(rent_params) => {
+                    FoundryOutputBuilder::new_with_minimum_storage_deposit(rent_params, serial_number, token_scheme)
                 }
             };
 
@@ -846,7 +847,7 @@ mod tests {
         test_split_dto(builder);
 
         let builder = FoundryOutput::build_with_minimum_storage_deposit(
-            protocol_parameters.rent_structure(),
+            protocol_parameters.rent_parameters(),
             123,
             rand_token_scheme(),
         )

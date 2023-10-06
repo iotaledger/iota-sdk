@@ -4,13 +4,14 @@
 use iota_sdk::types::block::{
     output::{
         unlock_condition::ImmutableAccountAddressUnlockCondition, FoundryId, FoundryOutput, NativeToken, Output,
-        SimpleTokenScheme, StorageScore, TokenId,
+        SimpleTokenScheme, TokenId,
     },
     protocol::protocol_parameters,
     rand::{
         address::rand_account_address,
         output::{feature::rand_metadata_feature, rand_foundry_output, rand_token_scheme},
     },
+    rent::StorageCost,
 };
 use packable::PackableExt;
 
@@ -51,14 +52,14 @@ fn builder() {
     assert!(output.immutable_features().is_empty());
 
     let output = builder
-        .with_minimum_storage_deposit(protocol_parameters.rent_structure())
+        .with_minimum_storage_deposit(protocol_parameters.rent_parameters())
         .add_unlock_condition(ImmutableAccountAddressUnlockCondition::new(rand_account_address()))
         .finish_with_params(&protocol_parameters)
         .unwrap();
 
     assert_eq!(
         output.amount(),
-        Output::Foundry(output).storage_score(protocol_parameters.rent_structure())
+        Output::Foundry(output).storage_cost(protocol_parameters.rent_parameters())
     );
 }
 

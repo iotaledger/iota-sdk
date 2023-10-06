@@ -7,7 +7,8 @@ use crate::{
     client::secret::SecretManage,
     types::block::{
         address::Bech32Address,
-        output::{unlock_condition::UnlockCondition, FoundryId, NativeTokensBuilder, Output, StorageScore},
+        output::{unlock_condition::UnlockCondition, FoundryId, NativeTokensBuilder, Output},
+        rent::StorageCost,
         ConvertTo,
     },
     wallet::{
@@ -62,7 +63,7 @@ where
         account_details: &AccountDetails,
     ) -> Result<Balance> {
         let network_id = self.client().get_network_id().await?;
-        let rent_structure = self.client().get_rent_structure().await?;
+        let rent_params = self.client().get_rent_parameters().await?;
         let mut balance = Balance::default();
         let mut total_rent_amount = 0;
         let mut total_native_tokens = NativeTokensBuilder::default();
@@ -88,7 +89,7 @@ where
                     }
 
                     let output = &data.output;
-                    let rent = output.storage_score(rent_structure);
+                    let rent = output.storage_cost(rent_params);
 
                     // Add account and foundry outputs here because they can't have a
                     // [`StorageDepositReturnUnlockCondition`] or time related unlock conditions

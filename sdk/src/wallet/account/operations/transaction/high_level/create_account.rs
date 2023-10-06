@@ -74,7 +74,7 @@ where
         options: impl Into<Option<TransactionOptions>> + Send,
     ) -> crate::wallet::Result<PreparedTransactionData> {
         log::debug!("[TRANSACTION] prepare_create_account_output");
-        let rent_structure = self.client().get_rent_structure().await?;
+        let rent_params = self.client().get_rent_parameters().await?;
         let token_supply = self.client().get_token_supply().await?;
 
         let controller_address = match params.as_ref().and_then(|options| options.address.as_ref()) {
@@ -93,7 +93,7 @@ where
         };
 
         let mut account_output_builder =
-            AccountOutputBuilder::new_with_minimum_storage_deposit(rent_structure, AccountId::null())
+            AccountOutputBuilder::new_with_minimum_storage_deposit(rent_params, AccountId::null())
                 .with_state_index(0)
                 .with_foundry_counter(0)
                 .add_unlock_condition(StateControllerAddressUnlockCondition::new(controller_address))

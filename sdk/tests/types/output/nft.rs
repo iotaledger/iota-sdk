@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use iota_sdk::types::block::{
-    output::{FoundryId, NativeToken, NftId, NftOutput, Output, SimpleTokenScheme, StorageScore, TokenId},
+    output::{FoundryId, NativeToken, NftId, NftOutput, Output, SimpleTokenScheme, TokenId},
     protocol::protocol_parameters,
     rand::{
         address::rand_account_address,
@@ -12,6 +12,7 @@ use iota_sdk::types::block::{
             unlock_condition::rand_address_unlock_condition,
         },
     },
+    rent::StorageCost,
 };
 use packable::PackableExt;
 
@@ -52,14 +53,14 @@ fn builder() {
     assert!(output.immutable_features().is_empty());
 
     let output = builder
-        .with_minimum_storage_deposit(protocol_parameters.rent_structure())
+        .with_minimum_storage_deposit(protocol_parameters.rent_parameters())
         .add_unlock_condition(rand_address_unlock_condition())
         .finish_with_params(protocol_parameters.token_supply())
         .unwrap();
 
     assert_eq!(
         output.amount(),
-        Output::Nft(output).storage_score(protocol_parameters.rent_structure())
+        Output::Nft(output).storage_cost(protocol_parameters.rent_parameters())
     );
 }
 

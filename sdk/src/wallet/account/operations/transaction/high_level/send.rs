@@ -139,7 +139,7 @@ where
     {
         log::debug!("[TRANSACTION] prepare_send");
         let options = options.into();
-        let rent_structure = self.client().get_rent_structure().await?;
+        let rent_params = self.client().get_rent_parameters().await?;
         let token_supply = self.client().get_token_supply().await?;
 
         let account_addresses = self.addresses().await?;
@@ -170,7 +170,7 @@ where
                 .unwrap_or(default_return_address.address);
 
             // Get the minimum required amount for an output assuming it does not need a storage deposit.
-            let output = BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)
+            let output = BasicOutputBuilder::new_with_minimum_storage_deposit(rent_params)
                 .add_unlock_condition(AddressUnlockCondition::new(address))
                 .finish_output(token_supply)?;
 
@@ -187,7 +187,7 @@ where
                     });
 
                 // Since it does need a storage deposit, calculate how much that should be
-                let storage_deposit_amount = MinimumStorageDepositBasicOutput::new(rent_structure, token_supply)
+                let storage_deposit_amount = MinimumStorageDepositBasicOutput::new(rent_params, token_supply)
                     .with_storage_deposit_return()?
                     .with_expiration()?
                     .finish()?;

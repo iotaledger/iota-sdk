@@ -7,7 +7,6 @@ mod inputs_commitment;
 mod metadata;
 mod native_token;
 mod output_id;
-mod rent;
 mod state_transition;
 mod token_scheme;
 
@@ -24,7 +23,7 @@ pub mod nft;
 ///
 pub mod unlock_condition;
 
-use core::ops::RangeInclusive;
+use core::{mem::size_of, ops::RangeInclusive};
 
 use derive_more::From;
 use packable::{
@@ -39,7 +38,7 @@ pub(crate) use self::{
     feature::{MetadataFeatureLength, TagFeatureLength},
     native_token::NativeTokenCount,
     output_id::OutputIndex,
-    unlock_condition::AddressUnlockCondition,
+    unlock_condition::{AddressUnlockCondition, ExpirationUnlockCondition, StorageDepositReturnUnlockCondition},
 };
 pub use self::{
     account::{AccountId, AccountOutput, AccountOutputBuilder, AccountTransition},
@@ -53,12 +52,16 @@ pub use self::{
     native_token::{NativeToken, NativeTokens, NativeTokensBuilder, TokenId},
     nft::{NftId, NftOutput, NftOutputBuilder},
     output_id::OutputId,
-    rent::{MinimumStorageDepositBasicOutput, RentStructure, StorageScore},
     state_transition::{StateTransitionError, StateTransitionVerifier},
     token_scheme::{SimpleTokenScheme, TokenScheme},
     unlock_condition::{UnlockCondition, UnlockConditions},
 };
-use super::protocol::ProtocolParameters;
+use super::{
+    address::Ed25519Address,
+    protocol::ProtocolParameters,
+    rent::{RentParameters, StorageCost},
+    BlockId,
+};
 use crate::types::block::{address::Address, semantic::ValidationContext, slot::SlotIndex, Error};
 
 /// The maximum number of outputs of a transaction.
@@ -73,7 +76,7 @@ pub const OUTPUT_INDEX_RANGE: RangeInclusive<u16> = 0..=OUTPUT_INDEX_MAX; // [0.
 #[derive(Copy, Clone)]
 pub enum OutputBuilderAmount {
     Amount(u64),
-    MinimumStorageDeposit(RentStructure),
+    MinimumStorageDeposit(RentParameters),
 }
 
 /// Contains the generic [`Output`] with associated [`OutputMetadata`].
@@ -380,11 +383,11 @@ impl Output {
     }
 
     /// Verifies if a valid storage deposit was made. Each [`Output`] has to have an amount that covers its associated
-    /// byte cost, given by [`RentStructure`].
+    /// storage score, given by [`RentParameters`].
     /// If there is a [`StorageDepositReturnUnlockCondition`](unlock_condition::StorageDepositReturnUnlockCondition),
     /// its amount is also checked.
-    pub fn verify_storage_deposit(&self, rent_structure: RentStructure, token_supply: u64) -> Result<(), Error> {
-        let required_output_amount = self.storage_score(rent_structure);
+    pub fn verify_storage_deposit(&self, rent_params: RentParameters, token_supply: u64) -> Result<(), Error> {
+        let required_output_amount = self.storage_cost(rent_params);
 
         if self.amount() < required_output_amount {
             return Err(Error::InsufficientStorageDepositAmount {
@@ -406,8 +409,7 @@ impl Output {
                 });
             }
 
-            let minimum_deposit =
-                minimum_storage_deposit(return_condition.return_address(), rent_structure, token_supply);
+            let minimum_deposit = minimum_storage_deposit(return_condition.return_address(), rent_params, token_supply);
 
             // `Minimum Storage Deposit` ≤ `Return Amount`
             if return_condition.amount() < minimum_deposit {
@@ -468,12 +470,6 @@ impl Packable for Output {
     }
 }
 
-impl StorageScore for Output {
-    fn weighted_bytes(&self, rent_structure: RentStructure) -> u64 {
-        self.packed_len() as u64 * rent_structure.storage_score_factor_data() as u64
-    }
-}
-
 pub(crate) fn verify_output_amount_min(amount: u64) -> Result<(), Error> {
     if amount < Output::AMOUNT_MIN {
         Err(Error::InvalidOutputAmount(amount))
@@ -507,16 +503,79 @@ pub(crate) fn verify_output_amount_packable<const VERIFY: bool>(
 
 /// Computes the minimum amount that a storage deposit has to match to allow creating a return [`Output`] back to the
 /// sender [`Address`].
-fn minimum_storage_deposit(address: &Address, rent_structure: RentStructure, token_supply: u64) -> u64 {
+fn minimum_storage_deposit(address: &Address, rent_parameters: RentParameters, token_supply: u64) -> u64 {
     // PANIC: This can never fail because the amount will always be within the valid range. Also, the actual value is
     // not important, we are only interested in the storage requirements of the type.
-    BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)
+    BasicOutputBuilder::new_with_minimum_storage_deposit(rent_parameters)
         .add_unlock_condition(AddressUnlockCondition::new(*address))
         .finish_with_params(token_supply)
         .unwrap()
         .amount()
 }
 
+impl StorageCost for Output {
+    fn offset_score(&self, rent_params: RentParameters) -> u64 {
+        // included output id, block id, and slot booked data size
+        rent_params.storage_score_offset_output()
+            + (size_of::<OutputId>() as u64 + size_of::<BlockId>() as u64 + size_of::<SlotIndex>() as u64)
+                * rent_params.storage_score_factor_data() as u64
+    }
+
+    fn score(&self, rent_params: RentParameters) -> u64 {
+        self.packed_len() as u64 * rent_params.storage_score_factor_data() as u64
+    }
+}
+
+pub struct MinimumStorageDepositBasicOutput {
+    rent_params: RentParameters,
+    token_supply: u64,
+    builder: BasicOutputBuilder,
+}
+
+impl MinimumStorageDepositBasicOutput {
+    pub fn new(rent_params: RentParameters, token_supply: u64) -> Self {
+        Self {
+            rent_params,
+            token_supply,
+            builder: BasicOutputBuilder::new_with_amount(Output::AMOUNT_MIN).add_unlock_condition(
+                AddressUnlockCondition::new(Address::from(Ed25519Address::from([0; Ed25519Address::LENGTH]))),
+            ),
+        }
+    }
+
+    pub fn with_native_tokens(mut self, native_tokens: impl Into<Option<NativeTokens>>) -> Self {
+        if let Some(native_tokens) = native_tokens.into() {
+            self.builder = self.builder.with_native_tokens(native_tokens);
+        }
+        self
+    }
+
+    pub fn with_storage_deposit_return(mut self) -> Result<Self, Error> {
+        self.builder = self
+            .builder
+            .add_unlock_condition(StorageDepositReturnUnlockCondition::new(
+                Address::from(Ed25519Address::from([0; Ed25519Address::LENGTH])),
+                Output::AMOUNT_MIN,
+                self.token_supply,
+            )?);
+        Ok(self)
+    }
+
+    pub fn with_expiration(mut self) -> Result<Self, Error> {
+        self.builder = self.builder.add_unlock_condition(ExpirationUnlockCondition::new(
+            Address::from(Ed25519Address::from([0; Ed25519Address::LENGTH])),
+            1,
+        )?);
+        Ok(self)
+    }
+
+    pub fn finish(self) -> Result<u64, Error> {
+        Ok(self
+            .builder
+            .finish_output(self.token_supply)?
+            .storage_cost(self.rent_params))
+    }
+}
 #[cfg(feature = "serde")]
 pub mod dto {
     use alloc::format;

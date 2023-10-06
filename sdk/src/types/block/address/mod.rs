@@ -14,12 +14,16 @@ pub use self::{
     ed25519::Ed25519Address,
     nft::NftAddress,
 };
-use crate::types::block::{
-    output::{Output, OutputId},
-    semantic::{TransactionFailureReason, ValidationContext},
-    signature::Signature,
-    unlock::Unlock,
-    ConvertTo, Error,
+use crate::{
+    types::block::{
+        output::{Output, OutputId},
+        rent::{RentParameters, RentStructure, StorageCost},
+        semantic::{TransactionFailureReason, ValidationContext},
+        signature::Signature,
+        unlock::Unlock,
+        ConvertTo, Error,
+    },
+    wallet::storage::Storage,
 };
 
 /// A generic address supporting different address kinds.
@@ -208,5 +212,22 @@ impl<T: Into<Address>> ToBech32Ext for T {
 impl From<&Self> for Address {
     fn from(value: &Self) -> Self {
         *value
+    }
+}
+
+/// A trait to facilitate the rent cost computation for addresses, which is central to dust protection.
+pub trait AddressStorageCost {
+    /// Computes the storage score of an address given a [`RentStructure`].
+    fn storage_cost(&self, rent_structure: RentStructure) -> u64;
+}
+
+impl AddressStorageCost for Address {
+    fn storage_cost(&self, rent_structure: RentStructure) -> u64 {
+        match self {
+            Self::Account(_) | Self::Ed25519(_) | Self::Nft(_) => 0,
+            // TODO: implicit account address and restricted address
+            // Address::ImplicitAccountCreation(_) =>
+            // rent_stucture.storage_score_offset_implicit_account_creation_address
+        }
     }
 }

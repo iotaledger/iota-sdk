@@ -160,7 +160,7 @@ where
         I::IntoIter: Send,
     {
         log::debug!("[TRANSACTION] prepare_mint_nfts");
-        let rent_structure = self.client().get_rent_structure().await?;
+        let rent_params = self.client().get_rent_parameters().await?;
         let token_supply = self.client().get_token_supply().await?;
         let account_addresses = self.addresses().await?;
         let mut outputs = Vec::new();
@@ -189,7 +189,7 @@ where
             };
 
             // NftId needs to be set to 0 for the creation
-            let mut nft_builder = NftOutputBuilder::new_with_minimum_storage_deposit(rent_structure, NftId::null())
+            let mut nft_builder = NftOutputBuilder::new_with_minimum_storage_deposit(rent_params, NftId::null())
                 // Address which will own the nft
                 .add_unlock_condition(AddressUnlockCondition::new(address));
 

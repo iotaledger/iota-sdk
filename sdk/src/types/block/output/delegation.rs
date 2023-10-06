@@ -19,9 +19,10 @@ use crate::types::{
                 verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions,
             },
             verify_output_amount_min, verify_output_amount_packable, verify_output_amount_supply, Output,
-            OutputBuilderAmount, OutputId, RentStructure, StateTransitionError, StateTransitionVerifier, StorageScore,
+            OutputBuilderAmount, OutputId, StateTransitionError, StateTransitionVerifier,
         },
         protocol::ProtocolParameters,
+        rent::{RentParameters, StorageCost},
         semantic::{TransactionFailureReason, ValidationContext},
         slot::EpochIndex,
         unlock::Unlock,
@@ -79,13 +80,13 @@ impl DelegationOutputBuilder {
     /// Creates a [`DelegationOutputBuilder`] with a provided rent structure.
     /// The amount will be set to the minimum storage deposit.
     pub fn new_with_minimum_storage_deposit(
-        rent_structure: RentStructure,
+        rent_params: RentParameters,
         delegated_amount: u64,
         delegation_id: DelegationId,
         validator_address: AccountAddress,
     ) -> Self {
         Self::new(
-            OutputBuilderAmount::MinimumStorageDeposit(rent_structure),
+            OutputBuilderAmount::MinimumStorageDeposit(rent_params),
             delegated_amount,
             delegation_id,
             validator_address,
@@ -116,8 +117,8 @@ impl DelegationOutputBuilder {
     }
 
     /// Sets the amount to the minimum storage deposit.
-    pub fn with_minimum_storage_deposit(mut self, rent_structure: RentStructure) -> Self {
-        self.amount = OutputBuilderAmount::MinimumStorageDeposit(rent_structure);
+    pub fn with_minimum_storage_deposit(mut self, rent_params: RentParameters) -> Self {
+        self.amount = OutputBuilderAmount::MinimumStorageDeposit(rent_params);
         self
     }
 
@@ -194,8 +195,8 @@ impl DelegationOutputBuilder {
 
         output.amount = match self.amount {
             OutputBuilderAmount::Amount(amount) => amount,
-            OutputBuilderAmount::MinimumStorageDeposit(rent_structure) => {
-                Output::Delegation(output.clone()).storage_score(rent_structure)
+            OutputBuilderAmount::MinimumStorageDeposit(rent_params) => {
+                Output::Delegation(output.clone()).storage_cost(rent_params)
             }
         };
 
@@ -276,13 +277,13 @@ impl DelegationOutput {
     /// Creates a new [`DelegationOutputBuilder`] with a provided rent structure.
     /// The amount will be set to the minimum storage deposit.
     pub fn build_with_minimum_storage_deposit(
-        rent_structure: RentStructure,
+        rent_params: RentParameters,
         delegated_amount: u64,
         delegation_id: DelegationId,
         validator_address: AccountAddress,
     ) -> DelegationOutputBuilder {
         DelegationOutputBuilder::new_with_minimum_storage_deposit(
-            rent_structure,
+            rent_params,
             delegated_amount,
             delegation_id,
             validator_address,
@@ -561,9 +562,9 @@ pub(crate) mod dto {
                     *delegation_id,
                     *validator_address,
                 ),
-                OutputBuilderAmount::MinimumStorageDeposit(rent_structure) => {
+                OutputBuilderAmount::MinimumStorageDeposit(rent_params) => {
                     DelegationOutputBuilder::new_with_minimum_storage_deposit(
-                        rent_structure,
+                        rent_params,
                         delegated_amount,
                         *delegation_id,
                         *validator_address,

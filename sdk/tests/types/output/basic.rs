@@ -3,7 +3,7 @@
 
 use iota_sdk::types::{
     block::{
-        output::{BasicOutput, Feature, FoundryId, NativeToken, Output, SimpleTokenScheme, StorageScore, TokenId},
+        output::{BasicOutput, Feature, FoundryId, NativeToken, Output, SimpleTokenScheme, TokenId},
         protocol::protocol_parameters,
         rand::{
             address::rand_account_address,
@@ -13,6 +13,7 @@ use iota_sdk::types::{
                 unlock_condition::rand_address_unlock_condition,
             },
         },
+        rent::StorageCost,
     },
     ValidationParams,
 };
@@ -50,7 +51,7 @@ fn builder() {
     let metadata = rand_metadata_feature();
 
     let output = builder
-        .with_minimum_storage_deposit(protocol_parameters.rent_structure())
+        .with_minimum_storage_deposit(protocol_parameters.rent_parameters())
         .add_unlock_condition(rand_address_unlock_condition())
         .with_features([Feature::from(metadata.clone()), sender_1.into()])
         .finish_with_params(ValidationParams::default().with_protocol_parameters(protocol_parameters.clone()))
@@ -58,7 +59,7 @@ fn builder() {
 
     assert_eq!(
         output.amount(),
-        Output::Basic(output.clone()).storage_score(protocol_parameters.rent_structure())
+        Output::Basic(output.clone()).storage_cost(protocol_parameters.rent_parameters())
     );
     assert_eq!(output.features().metadata(), Some(&metadata));
     assert_eq!(output.features().sender(), Some(&sender_1));

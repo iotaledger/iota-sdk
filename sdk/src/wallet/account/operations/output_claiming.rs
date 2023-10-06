@@ -203,7 +203,7 @@ where
         log::debug!("[OUTPUT_CLAIMING] claim_outputs_internal");
 
         let slot_index = self.client().get_slot_index().await?;
-        let rent_structure = self.client().get_rent_structure().await?;
+        let rent_params = self.client().get_rent_parameters().await?;
         let token_supply = self.client().get_token_supply().await?;
 
         let account_details = self.details().await;
@@ -276,7 +276,7 @@ where
                         .finish_output(token_supply)?
                 } else {
                     NftOutputBuilder::from(nft_output)
-                        .with_minimum_storage_deposit(rent_structure)
+                        .with_minimum_storage_deposit(rent_params)
                         .with_nft_id(nft_output.nft_id_non_null(&output_data.output_id))
                         .with_unlock_conditions([AddressUnlockCondition::new(first_account_address.address.inner)])
                         // Set native tokens empty, we will collect them from all inputs later
@@ -301,7 +301,7 @@ where
             required_amount_for_nfts
         } else {
             required_amount_for_nfts
-                + MinimumStorageDepositBasicOutput::new(rent_structure, token_supply)
+                + MinimumStorageDepositBasicOutput::new(rent_params, token_supply)
                     .with_native_tokens(option_native_token)
                     .finish()?
         };
@@ -321,7 +321,7 @@ where
                 // Recalculate every time, because new inputs can also add more native tokens, which would increase
                 // the required storage deposit
                 required_amount = required_amount_for_nfts
-                    + MinimumStorageDepositBasicOutput::new(rent_structure, token_supply)
+                    + MinimumStorageDepositBasicOutput::new(rent_params, token_supply)
                         .with_native_tokens(option_native_token)
                         .finish()?;
 

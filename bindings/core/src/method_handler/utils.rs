@@ -8,8 +8,9 @@ use iota_sdk::{
         block::{
             address::{AccountAddress, Address, ToBech32Ext},
             input::UtxoInput,
-            output::{AccountId, FoundryId, InputsCommitment, NftId, Output, OutputId, StorageScore, TokenId},
+            output::{AccountId, FoundryId, InputsCommitment, NftId, Output, OutputId, TokenId},
             payload::{transaction::TransactionEssence, TransactionPayload},
+            rent::StorageCost,
             BlockWrapper,
         },
         TryFromDto,
@@ -80,7 +81,7 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
         }
         UtilsMethod::ComputeStorageDeposit { output, rent } => {
             let out = Output::try_from_dto(output)?;
-            Response::MinimumRequiredStorageDeposit(out.storage_score(rent).to_string())
+            Response::MinimumRequiredStorageDeposit(out.storage_cost(rent).to_string())
         }
         UtilsMethod::VerifyMnemonic { mnemonic } => {
             let mnemonic = Mnemonic::from(mnemonic);

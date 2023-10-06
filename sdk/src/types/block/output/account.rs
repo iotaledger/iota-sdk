@@ -22,10 +22,10 @@ use crate::types::{
                 verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions,
             },
             verify_output_amount_min, verify_output_amount_packable, verify_output_amount_supply, ChainId, NativeToken,
-            NativeTokens, Output, OutputBuilderAmount, OutputId, RentStructure, StateTransitionError,
-            StateTransitionVerifier, StorageScore,
+            NativeTokens, Output, OutputBuilderAmount, OutputId, StateTransitionError, StateTransitionVerifier,
         },
         protocol::ProtocolParameters,
+        rent::{RentParameters, StorageCost},
         semantic::{TransactionFailureReason, ValidationContext},
         unlock::Unlock,
         Error,
@@ -112,8 +112,8 @@ impl AccountOutputBuilder {
 
     /// Creates an [`AccountOutputBuilder`] with a provided rent structure.
     /// The amount will be set to the minimum storage deposit.
-    pub fn new_with_minimum_storage_deposit(rent_structure: RentStructure, account_id: AccountId) -> Self {
-        Self::new(OutputBuilderAmount::MinimumStorageDeposit(rent_structure), account_id)
+    pub fn new_with_minimum_storage_deposit(rent_params: RentParameters, account_id: AccountId) -> Self {
+        Self::new(OutputBuilderAmount::MinimumStorageDeposit(rent_params), account_id)
     }
 
     fn new(amount: OutputBuilderAmount, account_id: AccountId) -> Self {
@@ -140,8 +140,8 @@ impl AccountOutputBuilder {
 
     /// Sets the amount to the minimum storage deposit.
     #[inline(always)]
-    pub fn with_minimum_storage_deposit(mut self, rent_structure: RentStructure) -> Self {
-        self.amount = OutputBuilderAmount::MinimumStorageDeposit(rent_structure);
+    pub fn with_minimum_storage_deposit(mut self, rent_params: RentParameters) -> Self {
+        self.amount = OutputBuilderAmount::MinimumStorageDeposit(rent_params);
         self
     }
 
@@ -318,8 +318,8 @@ impl AccountOutputBuilder {
 
         output.amount = match self.amount {
             OutputBuilderAmount::Amount(amount) => amount,
-            OutputBuilderAmount::MinimumStorageDeposit(rent_structure) => {
-                Output::Account(output.clone()).storage_score(rent_structure)
+            OutputBuilderAmount::MinimumStorageDeposit(rent_params) => {
+                Output::Account(output.clone()).storage_cost(rent_params)
             }
         };
 
@@ -413,10 +413,10 @@ impl AccountOutput {
     /// The amount will be set to the minimum storage deposit.
     #[inline(always)]
     pub fn build_with_minimum_storage_deposit(
-        rent_structure: RentStructure,
+        rent_params: RentParameters,
         account_id: AccountId,
     ) -> AccountOutputBuilder {
-        AccountOutputBuilder::new_with_minimum_storage_deposit(rent_structure, account_id)
+        AccountOutputBuilder::new_with_minimum_storage_deposit(rent_params, account_id)
     }
 
     ///
@@ -856,8 +856,8 @@ pub(crate) mod dto {
             let params = params.into();
             let mut builder = match amount {
                 OutputBuilderAmount::Amount(amount) => AccountOutputBuilder::new_with_amount(amount, *account_id),
-                OutputBuilderAmount::MinimumStorageDeposit(rent_structure) => {
-                    AccountOutputBuilder::new_with_minimum_storage_deposit(rent_structure, *account_id)
+                OutputBuilderAmount::MinimumStorageDeposit(rent_params) => {
+                    AccountOutputBuilder::new_with_minimum_storage_deposit(rent_params, *account_id)
                 }
             }
             .with_mana(mana);
@@ -978,7 +978,7 @@ mod tests {
         test_split_dto(builder);
 
         let builder =
-            AccountOutput::build_with_minimum_storage_deposit(protocol_parameters.rent_structure(), account_id)
+            AccountOutput::build_with_minimum_storage_deposit(protocol_parameters.rent_parameters(), account_id)
                 .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000).unwrap())
                 .add_unlock_condition(gov_address)
                 .add_unlock_condition(state_address)
