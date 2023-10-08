@@ -52,7 +52,7 @@ impl BlockHeader {
 }
 
 impl WorkScore for BlockHeader {
-    fn workscore(&self, workscore_structure: WorkScoreStructure) -> u32 {
+    fn work_score(&self, workscore_structure: WorkScoreStructure) -> u32 {
         // The work score of a block header is `0`.
         0
     }
@@ -254,11 +254,11 @@ impl BlockWrapper {
 }
 
 impl WorkScore for BlockWrapper {
-    fn workscore(&self, workscore_structure: WorkScoreStructure) -> u32 {
+    fn work_score(&self, workscore_structure: WorkScoreStructure) -> u32 {
         let mut score = workscore_structure.data_kilobyte * self.packed_len() as u32 / 1024;
-        score += self.header.workscore(workscore_structure);
-        score += self.block.workscore(workscore_structure);
-        score += self.signature.workscore(workscore_structure);
+        score += self.header.work_score(workscore_structure);
+        score += self.block.work_score(workscore_structure);
+        score += self.signature.work_score(workscore_structure);
         score
     }
 }

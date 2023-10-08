@@ -64,7 +64,7 @@ impl TaggedDataPayload {
 }
 
 impl WorkScore for TaggedDataPayload {
-    fn workscore(&self, workscore_structure: WorkScoreStructure) -> u32 {
+    fn work_score(&self, workscore_structure: WorkScoreStructure) -> u32 {
         // The work score of a tagged data payload is `0`.
         0
     }

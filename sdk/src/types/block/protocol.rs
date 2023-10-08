@@ -226,7 +226,7 @@ impl Default for WorkScoreStructure {
 
 /// A trait to facilitate the computation of the work score of a block, which is central to mana cost calculation.
 pub trait WorkScore {
-    fn workscore(&self, workscore_structure: WorkScoreStructure) -> u32;
+    fn work_score(&self, workscore_structure: WorkScoreStructure) -> u32;
 }
 
 /// Defines the parameters used to calculate the Reference Mana Cost (RMC).

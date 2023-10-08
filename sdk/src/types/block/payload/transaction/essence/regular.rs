@@ -275,7 +275,7 @@ impl RegularTransactionEssence {
 }
 
 impl WorkScore for RegularTransactionEssence {
-    fn workscore(&self, workscore_structure: WorkScoreStructure) -> u32 {
+    fn work_score(&self, workscore_structure: WorkScoreStructure) -> u32 {
         let mut score = self.inputs().len() as u32 * workscore_structure.input;
         score += self.context_inputs().len() as u32 * workscore_structure.context_input;
         for output in self.outputs() {

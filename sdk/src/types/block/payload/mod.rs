@@ -65,10 +65,10 @@ impl Payload {
 }
 
 impl WorkScore for Payload {
-    fn workscore(&self, workscore_structure: WorkScoreStructure) -> u32 {
+    fn work_score(&self, workscore_structure: WorkScoreStructure) -> u32 {
         match self {
-            Self::Transaction(transaction_payload) => transaction_payload.workscore(workscore_structure),
-            Self::TaggedData(tagged_data_payload) => tagged_data_payload.workscore(workscore_structure),
+            Self::Transaction(transaction_payload) => transaction_payload.work_score(workscore_structure),
+            Self::TaggedData(tagged_data_payload) => tagged_data_payload.work_score(workscore_structure),
         }
     }
 }

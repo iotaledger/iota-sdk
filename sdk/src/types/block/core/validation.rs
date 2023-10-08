@@ -147,7 +147,7 @@ impl ValidationBlock {
 }
 
 impl WorkScore for ValidationBlock {
-    fn workscore(&self, workscore_structure: WorkScoreStructure) -> u32 {
+    fn work_score(&self, workscore_structure: WorkScoreStructure) -> u32 {
         // The work score of a validation block is `0`.
         0
     }
