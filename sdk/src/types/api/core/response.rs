@@ -1,14 +1,19 @@
 // Copyright 2020-2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use alloc::{boxed::Box, collections::BTreeMap, string::String, vec::Vec};
+use alloc::{
+    boxed::Box,
+    collections::{BTreeMap, BTreeSet},
+    string::String,
+    vec::Vec,
+};
 
 use serde::{Deserialize, Serialize};
 
 use crate::{
     types::block::{
+        core::Parents,
         output::{dto::OutputDto, AccountId, OutputId, OutputMetadata, OutputWithMetadata},
-        parent::{ShallowLikeParents, StrongParents, WeakParents},
         protocol::ProtocolParameters,
         semantic::TransactionFailureReason,
         slot::{EpochIndex, SlotCommitment, SlotCommitmentId, SlotIndex},
@@ -206,10 +211,10 @@ pub struct ManaRewardsResponse {
 pub struct CommitteeResponse {
     /// The epoch index of the committee.
     pub epoch_index: EpochIndex,
-    /// The total amount of delegated and staked IOTA tokens in the selected committee.
+    /// The total amount of delegated and staked IOTA coins in the selected committee.
     #[serde(with = "string")]
     pub total_stake: u64,
-    /// The total amount of staked IOTA tokens in the selected committee.
+    /// The total amount of staked IOTA coins in the selected committee.
     #[serde(with = "string")]
     pub total_validator_stake: u64,
     /// The validators of the committee.
@@ -262,15 +267,33 @@ pub struct ValidatorResponse {
 #[serde(rename_all = "camelCase")]
 pub struct IssuanceBlockHeaderResponse {
     /// Blocks that are strongly directly approved.
-    pub strong_parents: StrongParents,
+    pub strong_parents: BTreeSet<BlockId>,
     /// Blocks that are weakly directly approved.
-    pub weak_parents: WeakParents,
+    pub weak_parents: BTreeSet<BlockId>,
     /// Blocks that are directly referenced to adjust opinion.
-    pub shallow_like_parents: ShallowLikeParents,
+    pub shallow_like_parents: BTreeSet<BlockId>,
     /// The slot index of the latest finalized slot.
     pub latest_finalized_slot: SlotIndex,
     /// The most recent slot commitment.
     pub commitment: SlotCommitment,
+}
+
+impl IssuanceBlockHeaderResponse {
+    pub fn strong_parents<const MIN: u8, const MAX: u8>(
+        &self,
+    ) -> Result<Parents<MIN, MAX>, crate::types::block::Error> {
+        Parents::from_set(self.strong_parents.clone())
+    }
+
+    pub fn weak_parents<const MIN: u8, const MAX: u8>(&self) -> Result<Parents<MIN, MAX>, crate::types::block::Error> {
+        Parents::from_set(self.weak_parents.clone())
+    }
+
+    pub fn shallow_like_parents<const MIN: u8, const MAX: u8>(
+        &self,
+    ) -> Result<Parents<MIN, MAX>, crate::types::block::Error> {
+        Parents::from_set(self.shallow_like_parents.clone())
+    }
 }
 
 /// Response of GET /api/core/v3/accounts/{accountId}/congestion.

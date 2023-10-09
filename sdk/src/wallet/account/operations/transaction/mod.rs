@@ -33,6 +33,7 @@ use crate::{
 impl<S: 'static + SecretManage> Account<S>
 where
     crate::wallet::Error: From<S::Error>,
+    crate::client::Error: From<S::Error>,
 {
     /// Sends a transaction by specifying its outputs.
     ///
@@ -174,7 +175,7 @@ where
             payload: signed_transaction_data.transaction_payload,
             block_id,
             network_id,
-            timestamp: crate::utils::unix_timestamp_now().as_millis(),
+            timestamp: crate::client::unix_timestamp_now().as_millis(),
             inclusion_state: InclusionState::Pending,
             incoming: false,
             note: options.and_then(|o| o.note),

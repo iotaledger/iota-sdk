@@ -4,38 +4,36 @@
 pub mod input_selection;
 pub mod transaction;
 
+use crypto::keys::bip44::Bip44;
+
 pub use self::transaction::verify_semantic;
 use crate::{
-    client::{ClientInner, Result},
-    types::{
-        api::core::response::IssuanceBlockHeaderResponse,
-        block::{
-            core::{Block, BlockWrapper},
-            parent::StrongParents,
-            payload::Payload,
-            signature::Ed25519Signature,
-            IssuerId,
-        },
+    client::{
+        secret::{SecretManage, SignBlock},
+        ClientInner, Result,
+    },
+    types::block::{
+        core::{basic, BlockHeader, BlockWrapper},
+        payload::Payload,
+        Block, IssuerId,
     },
 };
 
 impl ClientInner {
-    pub async fn finish_basic_block_builder(
+    pub async fn build_basic_block<S: SecretManage>(
         &self,
         issuer_id: IssuerId,
-        signature: Ed25519Signature,
         issuing_time: Option<u64>,
-        strong_parents: Option<StrongParents>,
+        strong_parents: Option<basic::StrongParents>,
         payload: Option<Payload>,
-    ) -> Result<BlockWrapper> {
-        let IssuanceBlockHeaderResponse {
-            strong_parents: default_strong_parents,
-            weak_parents,
-            shallow_like_parents,
-            latest_finalized_slot,
-            commitment,
-        } = self.get_issuance().await?;
-        let strong_parents = strong_parents.unwrap_or(default_strong_parents);
+        secret_manager: &S,
+        chain: Bip44,
+    ) -> Result<BlockWrapper>
+    where
+        crate::client::Error: From<S::Error>,
+    {
+        let issuance = self.get_issuance().await?;
+        let strong_parents = strong_parents.unwrap_or(issuance.strong_parents()?);
 
         let issuing_time = issuing_time.unwrap_or_else(|| {
             #[cfg(feature = "std")]
@@ -50,19 +48,24 @@ impl ClientInner {
             issuing_time
         });
 
-        Ok(BlockWrapper::new(
-            &self.get_protocol_parameters().await?,
-            issuing_time,
-            commitment.id(),
-            latest_finalized_slot,
-            issuer_id,
-            // TODO correct value for burned_mana
-            Block::build_basic(strong_parents, 0)
-                .with_weak_parents(weak_parents)
-                .with_shallow_like_parents(shallow_like_parents)
+        let protocol_params = self.get_protocol_parameters().await?;
+
+        Ok(BlockWrapper::build(
+            BlockHeader::new(
+                protocol_params.version(),
+                protocol_params.network_id(),
+                issuing_time,
+                issuance.commitment.id(),
+                issuance.latest_finalized_slot,
+                issuer_id,
+            ),
+            Block::build_basic(strong_parents, 0) // TODO: burned mana calculation
+                .with_weak_parents(issuance.weak_parents()?)
+                .with_shallow_like_parents(issuance.shallow_like_parents()?)
                 .with_payload(payload)
                 .finish_block()?,
-            signature,
-        ))
+        )
+        .sign_ed25519(secret_manager, chain)
+        .await?)
     }
 }

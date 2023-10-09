@@ -34,5 +34,5 @@ export class BasicBlock extends Block {
      * The amount of mana the Account identified by IssuerID is at most
      * willing to burn for this block.
      */
-    readonly burnedMana!: u64;
+    readonly maxBurnedMana!: u64;
 }

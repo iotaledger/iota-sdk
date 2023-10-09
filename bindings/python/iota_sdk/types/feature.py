@@ -2,13 +2,11 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from enum import IntEnum
-from typing import Union
-
+from typing import Dict, List, TypeAlias, Union, Any
 from dataclasses import dataclass, field
-from typing import List
-
-from iota_sdk.types.address import Ed25519Address, AccountAddress, NFTAddress
-from iota_sdk.types.common import HexStr, json
+from dataclasses_json import config
+from iota_sdk.types.address import Address, deserialize_address
+from iota_sdk.types.common import EpochIndex, HexStr, json, SlotIndex
 
 
 class FeatureType(IntEnum):
@@ -32,20 +30,15 @@ class FeatureType(IntEnum):
 
 @json
 @dataclass
-class Feature():
-    """Base class of a feature.
-    """
-    type: int
-
-
-@json
-@dataclass
-class SenderFeature(Feature):
+class SenderFeature:
     """Identifies the validated sender of an output.
     Attributes:
         address: A given sender address.
     """
-    address: Union[Ed25519Address, AccountAddress, NFTAddress]
+    address: Address = field(
+        metadata=config(
+            decoder=deserialize_address
+        ))
     type: int = field(
         default_factory=lambda: int(
             FeatureType.Sender),
@@ -54,12 +47,15 @@ class SenderFeature(Feature):
 
 @json
 @dataclass
-class IssuerFeature(Feature):
+class IssuerFeature:
     """Identifies the validated issuer of the UTXO state machine.
     Attributes:
         address: A given issuer address.
     """
-    address: Union[Ed25519Address, AccountAddress, NFTAddress]
+    address: Address = field(
+        metadata=config(
+            decoder=deserialize_address
+        ))
     type: int = field(
         default_factory=lambda: int(
             FeatureType.Issuer),
@@ -68,7 +64,7 @@ class IssuerFeature(Feature):
 
 @json
 @dataclass
-class MetadataFeature(Feature):
+class MetadataFeature:
     """Defines metadata, arbitrary binary data, that will be stored in the output.
     Attributes:
         data: Some hex encoded metadata.
@@ -82,7 +78,7 @@ class MetadataFeature(Feature):
 
 @json
 @dataclass
-class TagFeature(Feature):
+class TagFeature:
     """Makes it possible to tag outputs with an index, so they can be retrieved through an indexer API.
     Attributes:
         tag: A hex encoded tag used to index the output.
@@ -93,14 +89,13 @@ class TagFeature(Feature):
 
 @json
 @dataclass
-class BlockIssuer(Feature):
+class BlockIssuerFeature:
     """Contains the public keys to verify block signatures and allows for unbonding the issuer deposit.
     Attributes:
         expiry_slot: The slot index at which the Block Issuer Feature expires and can be removed.
         public_keys: The Block Issuer Keys.
     """
-    # TODO Replace with a proper SlotIndex type
-    expiry_slot: str
+    expiry_slot: SlotIndex
     # TODO Replace with a list of PublicKey types
     public_keys: List[HexStr]
     type: int = field(
@@ -111,7 +106,7 @@ class BlockIssuer(Feature):
 
 @json
 @dataclass
-class StakingFeature(Feature):
+class StakingFeature:
     """Stakes IOTA coins to become eligible for committee selection, validate the network and receive Mana rewards.
     Attributes:
         staked_amount: The amount of IOTA coins that are locked and staked in the containing account.
@@ -121,11 +116,46 @@ class StakingFeature(Feature):
     """
     staked_amount: str
     fixed_cost: str
-    # TODO Replace with an EpochIndex type
-    start_epoch: HexStr
-    # TODO Replace with an EpochIndex type
-    end_epoch: HexStr
+    start_epoch: EpochIndex
+    end_epoch: EpochIndex
     type: int = field(
         default_factory=lambda: int(
             FeatureType.Staking),
         init=False)
+
+
+Feature: TypeAlias = Union[SenderFeature, IssuerFeature,
+                           MetadataFeature, TagFeature, BlockIssuerFeature, StakingFeature]
+
+
+def deserialize_feature(d: Dict[str, Any]) -> Feature:
+    """
+    Takes a dictionary as input and returns an instance of a specific class based on the value of the 'type' key in the dictionary.
+
+    Arguments:
+    * `d`: A dictionary that is expected to have a key called 'type' which specifies the type of the returned value.
+    """
+    feature_type = d['type']
+    if feature_type == FeatureType.Sender:
+        return SenderFeature.from_dict(d)
+    if feature_type == FeatureType.Issuer:
+        return IssuerFeature.from_dict(d)
+    if feature_type == FeatureType.Metadata:
+        return MetadataFeature.from_dict(d)
+    if feature_type == FeatureType.Tag:
+        return TagFeature.from_dict(d)
+    if feature_type == FeatureType.BlockIssuer:
+        return BlockIssuerFeature.from_dict(d)
+    if feature_type == FeatureType.Staking:
+        return StakingFeature.from_dict(d)
+    raise Exception(f'invalid feature type: {feature_type}')
+
+
+def deserialize_features(dicts: List[Dict[str, Any]]) -> List[Feature]:
+    """
+    Takes a list of dictionaries as input and returns a list with specific instances of a classes based on the value of the 'type' key in the dictionary.
+
+    Arguments:
+    * `dicts`: A list of dictionaries that are expected to have a key called 'type' which specifies the type of the returned value.
+    """
+    return list(map(deserialize_feature, dicts))

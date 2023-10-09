@@ -2,20 +2,13 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from dataclasses import dataclass, field
+from typing import TypeAlias
 from iota_sdk.types.common import HexStr, json
 
 
 @json
 @dataclass
-class TokenScheme():
-    """Base class of a token scheme.
-    """
-    type: int
-
-
-@json
-@dataclass
-class SimpleTokenScheme(TokenScheme):
+class SimpleTokenScheme:
     """A simple token scheme.
 
     Attributes:
@@ -31,6 +24,9 @@ class SimpleTokenScheme(TokenScheme):
 
     @staticmethod
     def to_dict_custom(config):
+        """
+        The function converts integer values in the config to hexadecimal strings.
+        """
 
         if isinstance(config['mintedTokens'], int):
             config['mintedTokens'] = str(hex(config['mintedTokens']))
@@ -40,3 +36,6 @@ class SimpleTokenScheme(TokenScheme):
             config['maximumSupply'] = str(hex(config['maximumSupply']))
 
         return config
+
+
+TokenScheme: TypeAlias = SimpleTokenScheme

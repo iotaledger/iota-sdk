@@ -8,6 +8,7 @@ import { u64 } from '../../utils/type-aliases';
 import { plainToInstance, Type } from 'class-transformer';
 import { Block, BlockType } from './block';
 import { BasicBlock } from './basic';
+import { ValidationBlock } from './validation';
 import { BlockDiscriminator } from './';
 
 /**
@@ -90,6 +91,27 @@ class BlockWrapper {
             return this.block as unknown as BasicBlock;
         } else {
             throw new Error('invalid downcast of non-BasicBlock');
+        }
+    }
+
+    /**
+     * Checks whether the block is a `ValidationBlock`.
+     * @returns true if it is, otherwise false
+     */
+    isValidation(): boolean {
+        return this.block.type === BlockType.Validation;
+    }
+
+    /**
+     * Gets the block as an actual `ValidationBlock`.
+     * NOTE: Will throw an error if the block is not a `ValidationBlock`.
+     * @returns The block
+     */
+    asValidation(): ValidationBlock {
+        if (this.isValidation()) {
+            return this.block as unknown as ValidationBlock;
+        } else {
+            throw new Error('invalid downcast of non-ValidationBlock');
         }
     }
 }

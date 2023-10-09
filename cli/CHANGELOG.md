@@ -27,6 +27,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `addresses` now additionally prints the hex version of the address;
 - `outputs`, `unspent-outputs` print a list that includes number and type of the output;
 - `Account::switch` command to allow changing accounts quickly;
+- UX improvements (Ctrl+l, TAB completion/suggestions and more) during interactive account management;
+- `WalletCommand::SetPow` command;
 
 ### Changed
 
@@ -36,6 +38,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `print_wallet_help` changed to `WalletCli::print_help`;
 - `print_account_help` changed to `AccountCli::print_help`;
 - `AccountCommand::Addresses` now prints an overview that includes NTs, NFTs, Aliases and Foundries;
+
+## 1.0.1 - 2023-MM-DD
+
+### Fixed
+
+- Potential bug in the addresses command;
 
 ## 1.0.0 - 2023-07-27
 

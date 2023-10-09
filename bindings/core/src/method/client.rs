@@ -205,6 +205,12 @@ pub enum ClientMethod {
     //////////////////////////////////////////////////////////////////////
     // Node indexer API
     //////////////////////////////////////////////////////////////////////
+    /// Fetch alias/basic/NFT/foundry output IDs
+    #[serde(rename_all = "camelCase")]
+    OutputIds {
+        /// Query parameters for output requests
+        query_parameters: Vec<QueryParameter>,
+    },
     /// Fetch basic output IDs
     #[serde(rename_all = "camelCase")]
     BasicOutputIds {

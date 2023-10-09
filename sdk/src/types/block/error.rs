@@ -96,7 +96,7 @@ pub enum Error {
     // https://github.com/iotaledger/iota-sdk/issues/647
     // InvalidParentCount(<BoundedU8 as TryFrom<usize>>::Error),
     InvalidParentCount,
-    InvalidPayloadKind(u32),
+    InvalidPayloadKind(u8),
     InvalidPayloadLength {
         expected: usize,
         actual: usize,
@@ -171,6 +171,7 @@ pub enum Error {
     UnsupportedOutputKind(u8),
     DuplicateOutputChain(ChainId),
     InvalidField(&'static str),
+    NullDelegationValidatorId,
 }
 
 #[cfg(feature = "std")]
@@ -371,6 +372,7 @@ impl fmt::Display for Error {
             Self::UnsupportedOutputKind(k) => write!(f, "unsupported output kind: {k}"),
             Self::DuplicateOutputChain(chain_id) => write!(f, "duplicate output chain {chain_id}"),
             Self::InvalidField(field) => write!(f, "invalid field: {field}"),
+            Self::NullDelegationValidatorId => write!(f, "null delegation validator ID"),
         }
     }
 }

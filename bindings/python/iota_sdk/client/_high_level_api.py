@@ -3,12 +3,11 @@
 
 from typing import List, Optional
 from dataclasses import dataclass
-from dacite import from_dict
-from iota_sdk.types.block import Block
-from iota_sdk.types.common import HexStr, json
-from iota_sdk.types.output import OutputWithMetadata
+from abc import ABCMeta, abstractmethod
+from iota_sdk.types.block.wrapper import BlockWrapper
+from iota_sdk.types.common import CoinType, HexStr, json
+from iota_sdk.types.output_metadata import OutputWithMetadata
 from iota_sdk.types.output_id import OutputId
-from iota_sdk.types.common import CoinType
 
 
 @json
@@ -56,9 +55,13 @@ class GenerateAddressesOptions():
     options: Optional[GenerateAddressOptions] = None
 
 
-class HighLevelAPI():
+class HighLevelAPI(metaclass=ABCMeta):
     """High level API.
     """
+
+    @abstractmethod
+    def _call_method(self, name, data=None):
+        return {}
 
     def get_outputs(
             self, output_ids: List[OutputId]) -> List[OutputWithMetadata]:
@@ -91,7 +94,7 @@ class HighLevelAPI():
         })
         return [OutputWithMetadata.from_dict(o) for o in outputs]
 
-    def find_blocks(self, block_ids: List[HexStr]) -> List[Block]:
+    def find_blocks(self, block_ids: List[HexStr]) -> List[BlockWrapper]:
         """Find all blocks by provided block IDs.
 
         Args:
@@ -103,7 +106,7 @@ class HighLevelAPI():
         blocks = self._call_method('findBlocks', {
             'blockIds': block_ids
         })
-        return [Block.from_dict(block) for block in blocks]
+        return [BlockWrapper.from_dict(block) for block in blocks]
 
     def find_inputs(self, addresses: List[str], amount: int):
         """Function to find inputs from addresses for a provided amount(useful for offline signing).

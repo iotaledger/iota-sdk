@@ -8,8 +8,9 @@
 //! cargo run --release --example block_custom_payload
 //! ```
 
+use crypto::keys::bip44::Bip44;
 use iota_sdk::{
-    client::{Client, Result},
+    client::{constants::IOTA_COIN_TYPE, secret::SecretManager, Client, Result},
     types::block::payload::{Payload, TaggedDataPayload},
 };
 
@@ -23,17 +24,20 @@ async fn main() -> Result<()> {
     // Create a node client.
     let client = Client::builder().with_node(&node_url)?.finish().await?;
 
+    let secret_manager = SecretManager::try_from_mnemonic(std::env::var("MNEMONIC").unwrap())?;
+
     // Create a custom payload.
     let tagged_data_payload = TaggedDataPayload::new(*b"Your tag", *b"Your data")?;
 
     // Create and send the block with the custom payload.
     let block = client
-        .finish_basic_block_builder(
+        .build_basic_block(
             todo!("issuer id"),
-            todo!("block signature"),
             todo!("issuing time"),
             None,
             Some(Payload::from(tagged_data_payload)),
+            &secret_manager,
+            Bip44::new(IOTA_COIN_TYPE),
         )
         .await?;
 
@@ -42,7 +46,7 @@ async fn main() -> Result<()> {
     println!(
         "Block with custom payload sent: {}/block/{}",
         std::env::var("EXPLORER_URL").unwrap(),
-        block.id()
+        client.block_id(&block).await?
     );
 
     Ok(())

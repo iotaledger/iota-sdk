@@ -2,15 +2,15 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from __future__ import annotations
-from dataclasses import dataclass, field
 from enum import IntEnum
-from typing import Dict, Optional, List, Union
-
+from typing import Dict, Optional, List, TypeAlias, Union, Any
+from dataclasses import dataclass, field
+from dataclasses_json import config
 from iota_sdk.types.common import HexStr, json
-from iota_sdk.types.feature import SenderFeature, IssuerFeature, MetadataFeature, TagFeature
+from iota_sdk.types.feature import deserialize_features, SenderFeature, IssuerFeature, MetadataFeature, TagFeature
 from iota_sdk.types.native_token import NativeToken
 from iota_sdk.types.token_scheme import SimpleTokenScheme
-from iota_sdk.types.unlock_condition import AddressUnlockCondition, StorageDepositReturnUnlockCondition, TimelockUnlockCondition, ExpirationUnlockCondition, StateControllerAddressUnlockCondition, GovernorAddressUnlockCondition, ImmutableAccountAddressUnlockCondition
+from iota_sdk.types.unlock_condition import deserialize_unlock_conditions, AddressUnlockCondition, StorageDepositReturnUnlockCondition, TimelockUnlockCondition, ExpirationUnlockCondition, StateControllerAddressUnlockCondition, GovernorAddressUnlockCondition, ImmutableAccountAddressUnlockCondition
 
 
 class OutputType(IntEnum):
@@ -26,19 +26,12 @@ class OutputType(IntEnum):
     Account = 4
     Foundry = 5
     Nft = 6
+    Delegation = 7
 
 
 @json
 @dataclass
-class Output():
-    """An output in a UTXO ledger.
-    """
-    type: int
-
-
-@json
-@dataclass
-class BasicOutput(Output):
+class BasicOutput:
     """Describes a basic output.
     Attributes:
         amount :
@@ -56,11 +49,16 @@ class BasicOutput(Output):
     """
     amount: str
     mana: str
-    unlockConditions: List[Union[AddressUnlockCondition, ExpirationUnlockCondition, StorageDepositReturnUnlockCondition,
-                           TimelockUnlockCondition]]
+    unlock_conditions: List[Union[AddressUnlockCondition, ExpirationUnlockCondition, StorageDepositReturnUnlockCondition,
+                                  TimelockUnlockCondition]] = field(metadata=config(
+                                                                    decoder=deserialize_unlock_conditions
+                                                                    ))
     features: Optional[List[Union[SenderFeature,
-                            MetadataFeature, TagFeature]]] = None
-    nativeTokens: Optional[List[NativeToken]] = None
+                            MetadataFeature, TagFeature]]] = field(default=None,
+                                                                   metadata=config(
+                                                                       decoder=deserialize_features
+                                                                   ))
+    native_tokens: Optional[List[NativeToken]] = None
     type: int = field(
         default_factory=lambda: int(
             OutputType.Basic),
@@ -69,7 +67,7 @@ class BasicOutput(Output):
 
 @json
 @dataclass
-class AccountOutput(Output):
+class AccountOutput:
     """Describes an account output.
     Attributes:
         amount :
@@ -98,14 +96,23 @@ class AccountOutput(Output):
     amount: str
     mana: str
     account_id: HexStr
-    stateIndex: int
+    state_index: int
     foundry_counter: int
     unlock_conditions: List[Union[StateControllerAddressUnlockCondition,
-                                  GovernorAddressUnlockCondition]]
+                                  GovernorAddressUnlockCondition]] = field(
+        metadata=config(
+            decoder=deserialize_unlock_conditions
+        ))
     features: Optional[List[Union[SenderFeature,
-                            MetadataFeature]]] = None
+                            MetadataFeature]]] = field(default=None,
+                                                       metadata=config(
+                                                           decoder=deserialize_features
+                                                       ))
     immutable_features: Optional[List[Union[IssuerFeature,
-                                            MetadataFeature]]] = None
+                                            MetadataFeature]]] = field(default=None,
+                                                                       metadata=config(
+                                                                           decoder=deserialize_features
+                                                                       ))
     state_metadata: Optional[HexStr] = None
     native_tokens: Optional[List[NativeToken]] = None
     type: int = field(
@@ -116,7 +123,7 @@ class AccountOutput(Output):
 
 @json
 @dataclass
-class FoundryOutput(Output):
+class FoundryOutput:
     """Describes a foundry output.
     Attributes:
         amount :
@@ -140,8 +147,14 @@ class FoundryOutput(Output):
     serial_number: int
     token_scheme: SimpleTokenScheme
     unlock_conditions: List[ImmutableAccountAddressUnlockCondition]
-    features: Optional[List[MetadataFeature]] = None
-    immutable_features: Optional[List[MetadataFeature]] = None
+    features: Optional[List[MetadataFeature]] = field(default=None,
+                                                      metadata=config(
+                                                          decoder=deserialize_features
+                                                      ))
+    immutable_features: Optional[List[MetadataFeature]] = field(default=None,
+                                                                metadata=config(
+                                                                    decoder=deserialize_features
+                                                                ))
     native_tokens: Optional[List[NativeToken]] = None
     type: int = field(
         default_factory=lambda: int(
@@ -151,7 +164,7 @@ class FoundryOutput(Output):
 
 @json
 @dataclass
-class NftOutput(Output):
+class NftOutput:
     """Describes an NFT output.
     Attributes:
         amount :
@@ -175,85 +188,67 @@ class NftOutput(Output):
     mana: str
     nft_id: HexStr
     unlock_conditions: List[Union[AddressUnlockCondition, ExpirationUnlockCondition,
-                                  StorageDepositReturnUnlockCondition, TimelockUnlockCondition]]
+                                  StorageDepositReturnUnlockCondition, TimelockUnlockCondition]] = field(
+        metadata=config(
+            decoder=deserialize_unlock_conditions
+        ))
     features: Optional[List[Union[SenderFeature,
-                            MetadataFeature, TagFeature]]] = None
+                            MetadataFeature, TagFeature]]] = field(default=None,
+                                                                   metadata=config(
+                                                                       decoder=deserialize_features
+                                                                   ))
     immutable_features: Optional[List[Union[
-        IssuerFeature, MetadataFeature]]] = None
+        IssuerFeature, MetadataFeature]]] = field(default=None,
+                                                  metadata=config(
+                                                      decoder=deserialize_features
+                                                  ))
     native_tokens: Optional[List[NativeToken]] = None
     type: int = field(default_factory=lambda: int(OutputType.Nft), init=False)
 
 
 @json
 @dataclass
-class OutputMetadata:
-    """Metadata about an output.
-
+class DelegationOutput:
+    """Describes a delegation output.
     Attributes:
-        block_id: The ID of the block in which the output appeared in.
-        transaction_id: The ID of the transaction in which the output was created.
-        output_index: The index of the output within the corresponding transaction.
-        is_spent: Whether the output is already spent.
-        milestone_index_booked: The index of the milestone which booked/created the output.
-        milestone_timestamp_booked: The timestamp of the milestone which booked/created the output.
-        ledger_index: The current ledger index.
-        milestone_index_spent: The index of the milestone which spent the output.
-        milestone_timestamp_spent: The timestamp of the milestone which spent the output.
-        transaction_id_spent: The ID of the transaction that spent the output.
+        type :
+            The type of output.
     """
-    block_id: HexStr
-    transaction_id: HexStr
-    output_index: int
-    is_spent: bool
-    milestone_index_booked: int
-    milestone_timestamp_booked: int
-    ledger_index: int
-    milestone_index_spent: Optional[int] = None
-    milestone_timestamp_spent: Optional[int] = None
-    transaction_id_spent: Optional[HexStr] = None
+    # TODO fields done in #1174
+    type: int = field(default_factory=lambda: int(
+        OutputType.Delegation), init=False)
 
 
-@json
-@dataclass
-class OutputWithMetadata:
-    """An output with its metadata.
+Output: TypeAlias = Union[BasicOutput, AccountOutput,
+                          FoundryOutput, NftOutput, DelegationOutput]
 
-    Attributes:
-        metadata: The `OutputMetadata` object that belongs to `output`.
-        output: An `Output` object.
+
+def deserialize_output(d: Dict[str, Any]) -> Output:
     """
+    Takes a dictionary as input and returns an instance of a specific class based on the value of the 'type' key in the dictionary.
 
-    metadata: OutputMetadata
-    output: Union[AccountOutput, FoundryOutput, NftOutput, BasicOutput]
-
-    @classmethod
-    def from_dict(cls, dict: Dict) -> OutputWithMetadata:
-        obj = cls.__new__(cls)
-        super(OutputWithMetadata, obj).__init__()
-        for k, v in dict.items():
-            setattr(obj, k, v)
-        return obj
-
-    def as_dict(self):
-        config = dict()
-
-        config['metadata'] = self.metadata.__dict__
-        config['output'] = self.output.as_dict()
-
-        return config
-
-
-def output_from_dict(
-        output: Dict[str, any]) -> Union[BasicOutput, AccountOutput, FoundryOutput, NftOutput, Output]:
-    output_type = OutputType(output['type'])
-
+    Arguments:
+    * `d`: A dictionary that is expected to have a key called 'type' which specifies the type of the returned value.
+    """
+    output_type = dict['type']
     if output_type == OutputType.Basic:
-        return BasicOutput.from_dict(output)
+        return BasicOutput.from_dict(d)
     if output_type == OutputType.Account:
-        return AccountOutput.from_dict(output)
+        return AccountOutput.from_dict(d)
     if output_type == OutputType.Foundry:
-        return FoundryOutput.from_dict(output)
+        return FoundryOutput.from_dict(d)
     if output_type == OutputType.Nft:
-        return NftOutput.from_dict(output)
+        return NftOutput.from_dict(d)
+    if output_type == OutputType.Delegation:
+        return DelegationOutput.from_dict(d)
+    raise Exception(f'invalid output type: {output_type}')
 
-    return Output.from_dict(output)
+
+def deserialize_outputs(dicts: List[Dict[str, Any]]) -> List[Output]:
+    """
+    Takes a list of dictionaries as input and returns a list with specific instances of a classes based on the value of the 'type' key in the dictionary.
+
+    Arguments:
+    * `dicts`: A list of dictionaries that are expected to have a key called 'type' which specifies the type of the returned value.
+    """
+    return list(map(deserialize_output, dicts))

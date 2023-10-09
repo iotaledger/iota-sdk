@@ -7,19 +7,18 @@ from typing import Any, Dict, List, Optional, Union
 import humps
 from dacite import from_dict
 
-import iota_sdk
-from iota_sdk import call_client_method, listen_mqtt
+from iota_sdk.external import create_client, call_client_method, listen_mqtt
 from iota_sdk.client._node_core_api import NodeCoreAPI
 from iota_sdk.client._node_indexer_api import NodeIndexerAPI
 from iota_sdk.client._high_level_api import HighLevelAPI
 from iota_sdk.client._utils import ClientUtils
 from iota_sdk.secret_manager.secret_manager import LedgerNanoSecretManager, MnemonicSecretManager, StrongholdSecretManager, SeedSecretManager
-from iota_sdk.types.block import Block
+from iota_sdk.types.block.wrapper import BlockWrapper
 from iota_sdk.types.common import HexStr, Node
 from iota_sdk.types.feature import Feature
 from iota_sdk.types.native_token import NativeToken
 from iota_sdk.types.network_info import NetworkInfo
-from iota_sdk.types.output import AccountOutput, BasicOutput, FoundryOutput, NftOutput, output_from_dict
+from iota_sdk.types.output import AccountOutput, BasicOutput, FoundryOutput, NftOutput, deserialize_output
 from iota_sdk.types.payload import Payload, TransactionPayload
 from iota_sdk.types.token_scheme import SimpleTokenScheme
 from iota_sdk.types.unlock_condition import UnlockCondition
@@ -28,7 +27,6 @@ from iota_sdk.types.transaction_data import PreparedTransactionData
 
 class ClientError(Exception):
     """Represents a client error."""
-    pass
 
 
 class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
@@ -116,7 +114,7 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
 
         # Create the message handler
         if client_handle is None:
-            self.handle = iota_sdk.create_client(client_config_str)
+            self.handle = create_client(client_config_str)
         else:
             self.handle = client_handle
 
@@ -199,7 +197,7 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         if mana:
             mana = str(mana)
 
-        return output_from_dict(self._call_method('buildAccountOutput', {
+        return deserialize_output(self._call_method('buildAccountOutput', {
             'accountId': account_id,
             'unlockConditions': unlock_conditions,
             'amount': amount,
@@ -247,7 +245,7 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         if mana:
             mana = str(mana)
 
-        return output_from_dict(self._call_method('buildBasicOutput', {
+        return deserialize_output(self._call_method('buildBasicOutput', {
             'unlockConditions': unlock_conditions,
             'amount': amount,
             'mana': mana,
@@ -294,7 +292,7 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         if amount:
             amount = str(amount)
 
-        return output_from_dict(self._call_method('buildFoundryOutput', {
+        return deserialize_output(self._call_method('buildFoundryOutput', {
             'serialNumber': serial_number,
             'tokenScheme': token_scheme.to_dict(),
             'unlockConditions': unlock_conditions,
@@ -346,7 +344,7 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         if mana:
             mana = str(mana)
 
-        return output_from_dict(self._call_method('buildNftOutput', {
+        return deserialize_output(self._call_method('buildNftOutput', {
             'nftId': nft_id,
             'unlockConditions': unlock_conditions,
             'amount': amount,
@@ -383,7 +381,7 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
 
     def sign_transaction(
             self,
-            secret_manager: Union[LedgerNanoSecretManager | MnemonicSecretManager | SeedSecretManager | StrongholdSecretManager],
+            secret_manager: Union[LedgerNanoSecretManager, MnemonicSecretManager, SeedSecretManager, StrongholdSecretManager],
             prepared_transaction_data: PreparedTransactionData) -> TransactionPayload:
         """Sign a transaction.
 
@@ -396,7 +394,8 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
             'preparedTransactionData': prepared_transaction_data
         }))
 
-    def submit_payload(self, payload: Payload) -> List[Union[HexStr, Block]]:
+    def submit_payload(
+            self, payload: Payload) -> List[Union[HexStr, BlockWrapper]]:
         """Submit a payload in a block.
 
         Args:
@@ -408,7 +407,7 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         result = self._call_method('postBlockPayload', {
             'payload': payload.to_dict()
         })
-        result[1] = Block.from_dict(result[1])
+        result[1] = BlockWrapper.from_dict(result[1])
         return result
 
     def listen_mqtt(self, topics: List[str], handler):

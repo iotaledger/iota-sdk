@@ -11,7 +11,7 @@ jobs:
     strategy:
       matrix:
         os: [macos-latest, ubuntu-latest, windows-latest]
-        python-version: ["3.8", "3.9", "3.10", "3.11"]
+        python-version: ["3.10", "3.11"]
 
     steps:
       - uses: actions/checkout@v3
@@ -105,11 +105,7 @@ jobs:
       matrix:
         os: [ubuntu-latest]
         docker-container:
-          [
-            "python:3.9.12-slim-bullseye",
-            "python:3.10.10-slim-bullseye",
-            "python:3.11.1-slim-bullseye",
-          ]
+          ["python:3.10.10-slim-bullseye", "python:3.11.1-slim-bullseye"]
 
     steps:
       - name: Checkout
@@ -130,7 +126,7 @@ jobs:
             pip install -r requirements-dev.txt 
             pip install patchelf
             pip install maturin
-            maturin build --out ../../../dist --profile=production
+            maturin build --out ../../dist --profile=production
 
       - name: Upload wheels
         uses: actions/upload-artifact@v3

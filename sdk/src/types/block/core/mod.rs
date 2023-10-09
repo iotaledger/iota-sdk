@@ -1,8 +1,9 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-mod basic;
-mod validation;
+pub mod basic;
+mod parent;
+pub mod validation;
 mod wrapper;
 
 use alloc::boxed::Box;
@@ -18,12 +19,12 @@ use packable::{
 
 pub use self::{
     basic::{BasicBlock, BasicBlockBuilder},
+    parent::Parents,
     validation::{ValidationBlock, ValidationBlockBuilder},
-    wrapper::BlockWrapper,
+    wrapper::{BlockHeader, BlockWrapper, BlockWrapperBuilder},
 };
 use super::protocol::WorkScore;
 use crate::types::block::{
-    parent::{ShallowLikeParents, StrongParents, WeakParents},
     protocol::{ProtocolParameters, ProtocolParametersHash, WorkScoreStructure},
     Error,
 };
@@ -46,6 +47,30 @@ impl From<ValidationBlock> for Block {
     }
 }
 
+impl TryFrom<Block> for BasicBlockBuilder {
+    type Error = Error;
+
+    fn try_from(value: Block) -> Result<Self, Self::Error> {
+        if let Block::Basic(block) = value {
+            Ok((*block).into())
+        } else {
+            Err(Error::InvalidBlockKind(value.kind()))
+        }
+    }
+}
+
+impl TryFrom<Block> for ValidationBlockBuilder {
+    type Error = Error;
+
+    fn try_from(value: Block) -> Result<Self, Self::Error> {
+        if let Block::Validation(block) = value {
+            Ok((*block).into())
+        } else {
+            Err(Error::InvalidBlockKind(value.kind()))
+        }
+    }
+}
+
 impl Block {
     /// Return the block kind of a [`Block`].
     pub fn kind(&self) -> u8 {
@@ -57,14 +82,14 @@ impl Block {
 
     /// Creates a new [`BasicBlockBuilder`].
     #[inline(always)]
-    pub fn build_basic(strong_parents: StrongParents, burned_mana: u64) -> BasicBlockBuilder {
-        BasicBlockBuilder::new(strong_parents, burned_mana)
+    pub fn build_basic(strong_parents: self::basic::StrongParents, max_burned_mana: u64) -> BasicBlockBuilder {
+        BasicBlockBuilder::new(strong_parents, max_burned_mana)
     }
 
     /// Creates a new [`ValidationBlockBuilder`].
     #[inline(always)]
     pub fn build_validation(
-        strong_parents: StrongParents,
+        strong_parents: self::validation::StrongParents,
         highest_supported_version: u8,
         protocol_parameters_hash: ProtocolParametersHash,
     ) -> ValidationBlockBuilder {
@@ -144,24 +169,6 @@ impl Packable for Block {
             k => return Err(Error::InvalidBlockKind(k)).map_err(UnpackError::Packable),
         })
     }
-}
-
-pub(crate) fn verify_parents(
-    strong_parents: &StrongParents,
-    weak_parents: &WeakParents,
-    shallow_like_parents: &ShallowLikeParents,
-) -> Result<(), Error> {
-    let (strong_parents, weak_parents, shallow_like_parents) = (
-        strong_parents.to_set(),
-        weak_parents.to_set(),
-        shallow_like_parents.to_set(),
-    );
-
-    if !weak_parents.is_disjoint(&strong_parents) || !weak_parents.is_disjoint(&shallow_like_parents) {
-        return Err(Error::NonDisjointParents);
-    }
-
-    Ok(())
 }
 
 #[cfg(feature = "serde")]

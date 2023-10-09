@@ -73,6 +73,7 @@ impl ConsolidationParams {
 impl<S: 'static + SecretManage> Account<S>
 where
     crate::wallet::Error: From<S::Error>,
+    crate::client::Error: From<S::Error>,
 {
     fn should_consolidate_output(
         &self,
@@ -150,6 +151,7 @@ where
 
         drop(account_details);
 
+        #[allow(clippy::option_if_let_else)]
         let output_threshold = match params.output_threshold {
             Some(t) => t,
             None => {

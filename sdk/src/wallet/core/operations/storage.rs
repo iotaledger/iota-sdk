@@ -3,7 +3,6 @@
 
 #[cfg(feature = "storage")]
 mod storage_stub {
-
     use async_trait::async_trait;
 
     use crate::{

@@ -1,16 +1,19 @@
 // Copyright 2020-2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use iota_sdk::types::block::{
-    helper::network_name_to_id,
-    payload::Payload,
-    protocol::{protocol_parameters, ProtocolParameters},
-    rand::{
-        block::{rand_basic_block_builder_with_strong_parents, rand_block_wrapper, rand_block_wrapper_with_block},
-        parents::rand_strong_parents,
-        payload::rand_tagged_data_payload,
+use iota_sdk::types::{
+    block::{
+        helper::network_name_to_id,
+        payload::Payload,
+        protocol::{protocol_parameters, ProtocolParameters},
+        rand::{
+            block::{rand_basic_block_builder_with_strong_parents, rand_block_wrapper, rand_block_wrapper_with_block},
+            parents::rand_strong_parents,
+            payload::rand_tagged_data_payload,
+        },
+        BlockWrapper, BlockWrapperDto,
     },
-    BlockWrapper, BlockWrapperDto,
+    TryFromDto,
 };
 use packable::PackableExt;
 
@@ -89,7 +92,7 @@ use packable::PackableExt;
 #[test]
 fn pack_unpack_valid() {
     let protocol_parameters = protocol_parameters();
-    let block = rand_block_wrapper(&protocol_parameters);
+    let block = rand_block_wrapper(protocol_parameters.clone());
     let packed_block = block.pack_to_vec();
 
     assert_eq!(packed_block.len(), block.packed_len());
@@ -105,17 +108,15 @@ fn getters() {
     let parents = rand_strong_parents();
     let payload = Payload::from(rand_tagged_data_payload());
 
-    let block = rand_block_wrapper_with_block(
-        &protocol_parameters,
-        rand_basic_block_builder_with_strong_parents(parents.clone())
-            .with_payload(payload.clone())
-            .finish()
-            .unwrap(),
-    );
+    let block = rand_basic_block_builder_with_strong_parents(parents.clone())
+        .with_payload(payload.clone())
+        .finish_block()
+        .unwrap();
+    let wrapper = rand_block_wrapper_with_block(protocol_parameters.clone(), block);
 
-    assert_eq!(block.protocol_version(), protocol_parameters.version());
-    assert_eq!(*block.as_basic().strong_parents(), parents);
-    assert_eq!(*block.as_basic().payload().as_ref().unwrap(), &payload);
+    assert_eq!(wrapper.protocol_version(), protocol_parameters.version());
+    assert_eq!(*wrapper.as_basic().strong_parents(), parents);
+    assert_eq!(*wrapper.as_basic().payload().as_ref().unwrap(), &payload);
 }
 
 #[test]
@@ -123,7 +124,7 @@ fn dto_mismatch_version() {
     let protocol_parameters = ProtocolParameters::default();
     let protocol_parameters_hash = protocol_parameters.hash();
     let slot_index = 11_u64;
-    let issuing_time = protocol_parameters.genesis_unix_timestamp() as u64
+    let issuing_time = protocol_parameters.genesis_unix_timestamp()
         + (slot_index - 1) * protocol_parameters.slot_duration_in_seconds() as u64;
     let network_id = protocol_parameters.network_id();
     let protocol_version = 4;
@@ -149,7 +150,7 @@ fn dto_mismatch_version() {
         }
     });
     let block_dto = serde_json::from_value::<BlockWrapperDto>(block_dto_json).unwrap();
-    let block_res = BlockWrapper::try_from_dto(block_dto, protocol_parameters.clone());
+    let block_res = BlockWrapper::try_from_dto_with_params(block_dto, &protocol_parameters);
 
     assert_eq!(
         block_res,
@@ -165,7 +166,7 @@ fn dto_mismatch_network_id() {
     let protocol_parameters = ProtocolParameters::default();
     let protocol_parameters_hash = protocol_parameters.hash();
     let slot_index = 11_u64;
-    let issuing_time = protocol_parameters.genesis_unix_timestamp() as u64
+    let issuing_time = protocol_parameters.genesis_unix_timestamp()
         + (slot_index - 1) * protocol_parameters.slot_duration_in_seconds() as u64;
     let network_id = network_name_to_id("invalid-network");
     let block_dto_json = serde_json::json!({
@@ -190,7 +191,7 @@ fn dto_mismatch_network_id() {
         }
     });
     let block_dto = serde_json::from_value::<BlockWrapperDto>(block_dto_json).unwrap();
-    let block_res = BlockWrapper::try_from_dto(block_dto, protocol_parameters.clone());
+    let block_res = BlockWrapper::try_from_dto_with_params(block_dto, &protocol_parameters);
 
     assert_eq!(
         block_res,

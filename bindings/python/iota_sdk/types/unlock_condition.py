@@ -2,12 +2,12 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from enum import IntEnum
-
 from dataclasses import dataclass, field
-from typing import Union
-
-from iota_sdk.types.address import Ed25519Address, AccountAddress, NFTAddress
+from typing import Dict, List, TypeAlias, Union, Any
+from dataclasses_json import config
+from iota_sdk.types.address import Address, AccountAddress
 from iota_sdk.types.common import json
+from iota_sdk.types.address import deserialize_address
 
 
 class UnlockConditionType(IntEnum):
@@ -33,20 +33,16 @@ class UnlockConditionType(IntEnum):
 
 @json
 @dataclass
-class UnlockCondition():
-    """Base class for unlock conditions.
-    """
-    type: int
-
-
-@dataclass
-class AddressUnlockCondition(UnlockCondition):
+class AddressUnlockCondition:
     """An address unlock condition.
 
     Args:
         address: An address unlocked with a private key.
     """
-    address: Union[Ed25519Address, AccountAddress, NFTAddress]
+    address: Address = field(
+        metadata=config(
+            decoder=deserialize_address
+        ))
     type: int = field(
         default_factory=lambda: int(
             UnlockConditionType.Address),
@@ -55,21 +51,24 @@ class AddressUnlockCondition(UnlockCondition):
 
 @json
 @dataclass
-class StorageDepositReturnUnlockCondition(UnlockCondition):
+class StorageDepositReturnUnlockCondition:
     """A storage-deposit-return unlock condition.
     Args:
         amount: The amount of base coins the consuming transaction must deposit to `return_address`.
         return_address: The address to return the amount to.
     """
     amount: str
-    returnAddress: Union[Ed25519Address, AccountAddress, NFTAddress]
+    return_address: Address = field(
+        metadata=config(
+            decoder=deserialize_address
+        ))
     type: int = field(default_factory=lambda: int(
         UnlockConditionType.StorageDepositReturn), init=False)
 
 
 @json
 @dataclass
-class TimelockUnlockCondition(UnlockCondition):
+class TimelockUnlockCondition:
     """A timelock unlock condition.
     Args:
         unix_time: The Unix timestamp marking the end of the timelock.
@@ -83,14 +82,17 @@ class TimelockUnlockCondition(UnlockCondition):
 
 @json
 @dataclass
-class ExpirationUnlockCondition(UnlockCondition):
+class ExpirationUnlockCondition:
     """An expiration unlock condition.
     Args:
         unix_time: Unix timestamp marking the expiration of the claim.
         return_address: The return address if the output was not claimed in time.
     """
-    unixTime: int
-    returnAddress: Union[Ed25519Address, AccountAddress, NFTAddress]
+    unix_time: int
+    return_address: Address = field(
+        metadata=config(
+            decoder=deserialize_address
+        ))
     type: int = field(
         default_factory=lambda: int(
             UnlockConditionType.Expiration),
@@ -99,31 +101,37 @@ class ExpirationUnlockCondition(UnlockCondition):
 
 @json
 @dataclass
-class StateControllerAddressUnlockCondition(UnlockCondition):
+class StateControllerAddressUnlockCondition:
     """A state controller address unlock condition.
     Args:
         address: The state controller address that owns the output.
     """
-    address: Union[Ed25519Address, AccountAddress, NFTAddress]
+    address: Address = field(
+        metadata=config(
+            decoder=deserialize_address
+        ))
     type: int = field(default_factory=lambda: int(
         UnlockConditionType.StateControllerAddress), init=False)
 
 
 @json
 @dataclass
-class GovernorAddressUnlockCondition(UnlockCondition):
+class GovernorAddressUnlockCondition:
     """A governor address unlock condition.
     Args:
         address: The governor address that owns the output.
     """
-    address: Union[Ed25519Address, AccountAddress, NFTAddress]
+    address: Address = field(
+        metadata=config(
+            decoder=deserialize_address
+        ))
     type: int = field(default_factory=lambda: int(
         UnlockConditionType.GovernorAddress), init=False)
 
 
 @json
 @dataclass
-class ImmutableAccountAddressUnlockCondition(UnlockCondition):
+class ImmutableAccountAddressUnlockCondition:
     """An immutable account address unlock condition.
     Args:
         address: The permanent account address that owns this output.
@@ -131,3 +139,44 @@ class ImmutableAccountAddressUnlockCondition(UnlockCondition):
     address: AccountAddress
     type: int = field(default_factory=lambda: int(
         UnlockConditionType.ImmutableAccountAddress), init=False)
+
+
+UnlockCondition: TypeAlias = Union[AddressUnlockCondition, StorageDepositReturnUnlockCondition, TimelockUnlockCondition,
+                                   ExpirationUnlockCondition, StateControllerAddressUnlockCondition, GovernorAddressUnlockCondition, ImmutableAccountAddressUnlockCondition]
+
+
+def deserialize_unlock_condition(d: Dict[str, Any]) -> UnlockCondition:
+    """
+    Takes a dictionary as input and returns an instance of a specific class based on the value of the 'type' key in the dictionary.
+
+    Arguments:
+    * `d`: A dictionary that is expected to have a key called 'type' which specifies the type of the returned value.
+    """
+    # pylint: disable=too-many-return-statements
+    uc_type = d['type']
+    if uc_type == UnlockConditionType.Address:
+        return AddressUnlockCondition.from_dict(d)
+    if uc_type == UnlockConditionType.StorageDepositReturn:
+        return StorageDepositReturnUnlockCondition.from_dict(d)
+    if uc_type == UnlockConditionType.Timelock:
+        return TimelockUnlockCondition.from_dict(d)
+    if uc_type == UnlockConditionType.Expiration:
+        return ExpirationUnlockCondition.from_dict(d)
+    if uc_type == UnlockConditionType.StateControllerAddress:
+        return StateControllerAddressUnlockCondition.from_dict(d)
+    if uc_type == UnlockConditionType.GovernorAddress:
+        return GovernorAddressUnlockCondition.from_dict(d)
+    if uc_type == UnlockConditionType.ImmutableAccountAddress:
+        return ImmutableAccountAddressUnlockCondition.from_dict(d)
+    raise Exception(f'invalid unlock condition type: {uc_type}')
+
+
+def deserialize_unlock_conditions(
+        dicts: List[Dict[str, Any]]) -> List[UnlockCondition]:
+    """
+    Takes a list of dictionaries as input and returns a list with specific instances of a classes based on the value of the 'type' key in the dictionary.
+
+    Arguments:
+    * `dicts`: A list of dictionaries that are expected to have a key called 'type' which specifies the type of the returned value.
+    """
+    return list(map(deserialize_unlock_condition, dicts))

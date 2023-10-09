@@ -1,6 +1,8 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use crypto::keys::bip44::Bip44;
+
 use crate::{
     client::{secret::SecretManage, Error as ClientError},
     types::{
@@ -22,6 +24,7 @@ const DEFAULT_REISSUE_UNTIL_INCLUDED_MAX_AMOUNT: u64 = 40;
 impl<S: 'static + SecretManage> Account<S>
 where
     Error: From<S::Error>,
+    crate::client::Error: From<S::Error>,
 {
     /// Reissues a transaction sent from the account for a provided transaction id until it's
     /// included (referenced by a milestone). Returns the included block id.
@@ -33,6 +36,7 @@ where
     ) -> crate::wallet::Result<BlockId> {
         log::debug!("[reissue_transaction_until_included]");
 
+        let protocol_parameters = self.client().get_protocol_parameters().await?;
         let transaction = self.details().await.transactions.get(transaction_id).cloned();
 
         if let Some(transaction) = transaction {
@@ -54,15 +58,16 @@ where
                 Some(block_id) => block_id,
                 None => self
                     .client()
-                    .finish_basic_block_builder(
+                    .build_basic_block(
                         todo!("issuer id"),
-                        todo!("block signature"),
                         todo!("issuing time"),
                         None,
                         Some(Payload::Transaction(Box::new(transaction.payload.clone()))),
+                        &*self.get_secret_manager().read().await,
+                        Bip44::new(self.wallet.coin_type()),
                     )
                     .await?
-                    .id(),
+                    .id(&protocol_parameters),
             };
 
             // Attachments of the Block to check inclusion state
@@ -103,15 +108,16 @@ where
                     if index == block_ids_len - 1 && should_reissue {
                         let reissued_block = self
                             .client()
-                            .finish_basic_block_builder(
+                            .build_basic_block(
                                 todo!("issuer id"),
-                                todo!("block signature"),
                                 todo!("issuing time"),
                                 None,
                                 Some(Payload::Transaction(Box::new(transaction.payload.clone()))),
+                                &*self.get_secret_manager().read().await,
+                                Bip44::new(self.wallet.coin_type()),
                             )
                             .await?;
-                        block_ids.push(reissued_block.id());
+                        block_ids.push(reissued_block.id(&protocol_parameters));
                     }
                 }
                 // After we checked all our reissued blocks, check if the transaction got reissued in another block
@@ -127,7 +133,7 @@ where
                             e
                         }
                     })?;
-                    return Ok(included_block.id());
+                    return Ok(included_block.id(&protocol_parameters));
                 }
             }
             Err(ClientError::TangleInclusion(first_block_id.to_string()).into())

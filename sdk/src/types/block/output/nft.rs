@@ -19,7 +19,7 @@ use crate::types::{
                 verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions,
             },
             verify_output_amount_min, verify_output_amount_packable, verify_output_amount_supply, ChainId, NativeToken,
-            NativeTokens, NftId, Output, OutputBuilderAmount, OutputId, Rent, RentStructure, StateTransitionError,
+            NativeTokens, Output, OutputBuilderAmount, OutputId, Rent, RentStructure, StateTransitionError,
             StateTransitionVerifier,
         },
         protocol::ProtocolParameters,
@@ -29,6 +29,30 @@ use crate::types::{
     },
     ValidationParams,
 };
+
+impl_id!(pub NftId, 32, "Unique identifier of an NFT, which is the BLAKE2b-256 hash of the Output ID that created it.");
+
+#[cfg(feature = "serde")]
+string_serde_impl!(NftId);
+
+impl From<&OutputId> for NftId {
+    fn from(output_id: &OutputId) -> Self {
+        Self::from(output_id.hash())
+    }
+}
+
+impl NftId {
+    ///
+    pub fn or_from_output_id(self, output_id: &OutputId) -> Self {
+        if self.is_null() { Self::from(output_id) } else { self }
+    }
+}
+
+impl From<NftId> for Address {
+    fn from(value: NftId) -> Self {
+        Self::Nft(NftAddress::new(value))
+    }
+}
 
 /// Builder for an [`NftOutput`].
 #[derive(Clone)]
@@ -263,7 +287,7 @@ impl From<&NftOutput> for NftOutputBuilder {
 /// Describes an NFT output, a globally unique token with metadata attached.
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct NftOutput {
-    /// Amount of IOTA tokens to deposit with this output.
+    /// Amount of IOTA coins to deposit with this output.
     amount: u64,
     /// Amount of stored Mana held by this output.
     mana: u64,
@@ -281,7 +305,7 @@ pub struct NftOutput {
 
 impl NftOutput {
     /// The [`Output`](crate::types::block::output::Output) kind of an [`NftOutput`].
-    pub const KIND: u8 = 6;
+    pub const KIND: u8 = 3;
     /// The set of allowed [`UnlockCondition`]s for an [`NftOutput`].
     pub const ALLOWED_UNLOCK_CONDITIONS: UnlockConditionFlags = UnlockConditionFlags::ADDRESS
         .union(UnlockConditionFlags::STORAGE_DEPOSIT_RETURN)

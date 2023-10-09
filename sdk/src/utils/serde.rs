@@ -192,7 +192,7 @@ pub mod boxed_slice_prefix {
         T: Serialize,
     {
         let mut seq = serializer.serialize_seq(Some(value.len()))?;
-        for e in value.into_iter() {
+        for e in value.iter() {
             seq.serialize_element(e)?;
         }
         seq.end()

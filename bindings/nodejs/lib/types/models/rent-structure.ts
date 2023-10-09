@@ -25,4 +25,8 @@ export interface RentStructure {
      * Defines the factor to be used for staking feature.
      */
     vByteFactorStakingFeature: number;
+    /**
+     * Defines the factor to be used for delegation output.
+     */
+    vByteFactorDelegation: number;
 }

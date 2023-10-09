@@ -9,11 +9,14 @@ use packable::{
 };
 
 use crate::types::block::{
-    core::{verify_parents, Block},
-    parent::{ShallowLikeParents, StrongParents, WeakParents},
+    core::{parent::verify_parents_sets, Block, Parents},
     protocol::{ProtocolParameters, ProtocolParametersHash, WorkScore, WorkScoreStructure},
     Error,
 };
+
+pub type StrongParents = Parents<1, 50>;
+pub type WeakParents = Parents<0, 50>;
+pub type ShallowLikeParents = Parents<0, 50>;
 
 /// A builder for a [`ValidationBlock`].
 pub struct ValidationBlockBuilder {
@@ -78,7 +81,7 @@ impl ValidationBlockBuilder {
 
     /// Finishes the builder into a [`ValidationBlock`].
     pub fn finish(self) -> Result<ValidationBlock, Error> {
-        verify_parents(&self.strong_parents, &self.weak_parents, &self.shallow_like_parents)?;
+        verify_parents_sets(&self.strong_parents, &self.weak_parents, &self.shallow_like_parents)?;
 
         Ok(ValidationBlock {
             strong_parents: self.strong_parents,
@@ -92,6 +95,18 @@ impl ValidationBlockBuilder {
     /// Finishes the builder into a [`Block`].
     pub fn finish_block(self) -> Result<Block, Error> {
         Ok(Block::from(self.finish()?))
+    }
+}
+
+impl From<ValidationBlock> for ValidationBlockBuilder {
+    fn from(value: ValidationBlock) -> Self {
+        Self {
+            strong_parents: value.strong_parents,
+            weak_parents: value.weak_parents,
+            shallow_like_parents: value.shallow_like_parents,
+            highest_supported_version: value.highest_supported_version,
+            protocol_parameters_hash: value.protocol_parameters_hash,
+        }
     }
 }
 
@@ -176,7 +191,8 @@ impl Packable for ValidationBlock {
         let shallow_like_parents = ShallowLikeParents::unpack::<_, VERIFY>(unpacker, &())?;
 
         if VERIFY {
-            verify_parents(&strong_parents, &weak_parents, &shallow_like_parents).map_err(UnpackError::Packable)?;
+            verify_parents_sets(&strong_parents, &weak_parents, &shallow_like_parents)
+                .map_err(UnpackError::Packable)?;
         }
 
         let highest_supported_version = u8::unpack::<_, VERIFY>(unpacker, &()).coerce()?;

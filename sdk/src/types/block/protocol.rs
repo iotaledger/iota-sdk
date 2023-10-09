@@ -10,8 +10,8 @@ use packable::{prefix::StringPrefix, Packable, PackableExt};
 
 use super::{
     address::Hrp,
-    mana::ManaStructure,
-    slot::{EpochIndex, SlotIndex},
+    mana::{ManaStructure, RewardsParameters},
+    slot::SlotIndex,
 };
 use crate::types::block::{helper::network_name_to_id, output::RentStructure, ConvertTo, Error, PROTOCOL_VERSION};
 
@@ -55,24 +55,34 @@ pub struct ProtocolParameters {
     #[getset(skip)]
     pub(crate) mana_structure: ManaStructure,
     /// The unbonding period in epochs before an account can stop staking.
-    pub(crate) staking_unbonding_period: EpochIndex,
+    #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
+    pub(crate) staking_unbonding_period: u64,
     /// The number of validation blocks that each validator should issue each slot.
     pub(crate) validation_blocks_per_slot: u16,
-    /// The slot index used by tip-selection to determine if a block is eligible by evaluating issuing times
-    /// and commitments in its past-cone against accepted tangle time and last committed slot respectively.
-    pub(crate) liveness_threshold: SlotIndex,
+    /// The number of epochs worth of Mana that a node is punished with for each additional validation block it issues.
+    #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
+    pub(crate) punishment_epochs: u64,
+    /// Liveness Threshold is used by tip-selection to determine if a block is eligible by evaluating issuingTimes and
+    /// commitments in its past-cone to Accepted Tangle Time and lastCommittedSlot respectively.
+    #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
+    pub(crate) liveness_threshold: u64,
     /// Minimum age relative to the accepted tangle time slot index that a slot can be committed.
-    pub(crate) min_committable_age: SlotIndex,
+    #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
+    pub(crate) min_committable_age: u64,
     /// Maximum age for a slot commitment to be included in a block relative to the slot index of the block issuing
     /// time.
-    pub(crate) max_committable_age: SlotIndex,
-    /// The slot index used by the epoch orchestrator to detect the slot that should trigger a new
+    #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
+    pub(crate) max_committable_age: u64,
+    /// Epoch Nearing Threshold is used by the epoch orchestrator to detect the slot that should trigger a new
     /// committee selection for the next and upcoming epoch.
-    pub(crate) epoch_nearing_threshold: SlotIndex,
+    #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
+    pub(crate) epoch_nearing_threshold: u64,
     /// Parameters used to calculate the Reference Mana Cost (RMC).
     pub(crate) congestion_control_parameters: CongestionControlParameters,
     /// Defines the parameters used to signal a protocol parameters upgrade.
     pub(crate) version_signaling: VersionSignalingParameters,
+    /// Defines the parameters used for reward calculation.
+    pub(crate) rewards_parameters: RewardsParameters,
 }
 
 // This implementation is required to make [`ProtocolParameters`] a [`Packable`] visitor.
@@ -95,16 +105,18 @@ impl Default for ProtocolParameters {
             token_supply: 1_813_620_509_061_365,
             genesis_unix_timestamp: 1582328545,
             slot_duration_in_seconds: 10,
-            epoch_nearing_threshold: 20.into(),
+            epoch_nearing_threshold: 20,
             slots_per_epoch_exponent: Default::default(),
             mana_structure: Default::default(),
-            staking_unbonding_period: 10.into(),
+            staking_unbonding_period: 10,
             validation_blocks_per_slot: 10,
-            liveness_threshold: 5.into(),
-            min_committable_age: 10.into(),
-            max_committable_age: 20.into(),
+            punishment_epochs: 9,
+            liveness_threshold: 5,
+            min_committable_age: 10,
+            max_committable_age: 20,
             congestion_control_parameters: Default::default(),
             version_signaling: Default::default(),
+            rewards_parameters: Default::default(),
         }
     }
 }
@@ -120,7 +132,7 @@ impl ProtocolParameters {
         token_supply: u64,
         genesis_unix_timestamp: u64,
         slot_duration_in_seconds: u8,
-        epoch_nearing_threshold: impl Into<SlotIndex>,
+        epoch_nearing_threshold: u64,
     ) -> Result<Self, Error> {
         Ok(Self {
             version,
@@ -130,7 +142,7 @@ impl ProtocolParameters {
             token_supply,
             genesis_unix_timestamp,
             slot_duration_in_seconds,
-            epoch_nearing_threshold: epoch_nearing_threshold.into(),
+            epoch_nearing_threshold,
             ..Default::default()
         })
     }
@@ -179,8 +191,8 @@ impl ProtocolParameters {
 #[packable(unpack_error = Error)]
 #[getset(get_copy = "pub")]
 pub struct WorkScoreStructure {
-    /// Modifier for network traffic per kilobyte.
-    pub(crate) data_kilobyte: u32,
+    /// Modifier for network traffic per byte.
+    pub(crate) data_byte: u32,
     /// Modifier for work done to process a block.
     pub(crate) block: u32,
     /// Modifier for slashing when there are insufficient strong tips.
@@ -208,7 +220,7 @@ pub struct WorkScoreStructure {
 impl Default for WorkScoreStructure {
     fn default() -> Self {
         Self {
-            data_kilobyte: 0,
+            data_byte: 0,
             block: 100,
             missing_parent: 500,
             input: 20,
@@ -239,9 +251,9 @@ pub trait WorkScore {
 #[packable(unpack_error = Error)]
 #[getset(get_copy = "pub")]
 pub struct CongestionControlParameters {
-    /// Minimum value of the RMC.
+    /// Minimum value of the reference Mana cost.
     #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
-    rmc_min: u64,
+    min_reference_mana_cost: u64,
     /// Increase step size of the RMC.
     #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
     increase: u64,
@@ -254,24 +266,23 @@ pub struct CongestionControlParameters {
     decrease_threshold: u32,
     /// Rate at which the scheduler runs (in workscore units per second).
     scheduler_rate: u32,
-    /// Minimum amount of Mana that an account must have to schedule a block.
-    #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
-    min_mana: u64,
-    /// Maximum size of the buffer. TODO what buffer?
+    /// Maximum size of the buffer in the scheduler.
     max_buffer_size: u32,
+    /// Maximum number of blocks in the validation buffer.
+    max_validation_buffer_size: u32,
 }
 
 impl Default for CongestionControlParameters {
     fn default() -> Self {
         Self {
-            rmc_min: 500,
+            min_reference_mana_cost: 500,
             increase: 500,
             decrease: 500,
             increase_threshold: 800000,
             decrease_threshold: 500000,
             scheduler_rate: 100000,
-            min_mana: 1,
             max_buffer_size: 3276800,
+            max_validation_buffer_size: 100,
         }
     }
 }
