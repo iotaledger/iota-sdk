@@ -117,32 +117,26 @@ export interface RewardsParameters {
      * per slot during its epoch duties.
      */
     validationBlocksPerSlot: number;
-
     /**
      * Profit Margin Exponent is used for shift operation for calculation of profit margin.
      */
     profitMarginExponent: number;
-
     /**
      * The length in epochs of the bootstrapping phase.
      */
     bootstrappingDuration: number;
-
     /**
      * Mana Share Coefficient is the coefficient used for calculation of initial rewards.
      */
     manaShareCoefficient: number;
-
     /**
      * Decay Balancing Constant Exponent is the exponent used for calculation of the initial reward.
      */
     decayBalancingConstantExponent: number;
-
     /**
      * Decay Balancing Constant is an integer approximation calculated based on chosen DecayBalancingConstantExponent.
      */
     decayBalancingConstant: number;
-
     /**
      * Pool Coefficient Exponent is the exponent used for shifting operation
      * in the pool rewards calculations.
