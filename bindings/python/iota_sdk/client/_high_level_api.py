@@ -44,14 +44,15 @@ class GenerateAddressesOptions():
 
     Attributes:
         coinType: The type of coin.
-        addr_range: The range of addresses to generate.
+        range: The range of addresses to generate.
         bech32Hrp: The bech32 HRP (human readable part) to use.
         accountIndex: An account index.
         options: An instance of `GenerateAddressOptions`.
     """
 
+    # pylint: disable=redefined-builtin
     def __init__(self, coinType: CoinType,
-                 addr_range: Range,
+                 range: Range,
                  bech32Hrp: str,
                  accountIndex: Optional[int] = None,
                  options: Optional[GenerateAddressOptions] = None):
@@ -59,13 +60,13 @@ class GenerateAddressesOptions():
 
         Args:
             coinType: The type of coin.
-            addr_range: The range of addresses to generate.
+            range: The range of addresses to generate.
             bech32Hrp: The bech32 HRP (human readable part) to use.
             accountIndex: An account index.
             options: An instance of `GenerateAddressOptions`.
         """
         self.coinType = coinType
-        self.addr_range = addr_range
+        self.range = range
         self.bech32Hrp = bech32Hrp
         self.accountIndex = accountIndex
         self.options = options
