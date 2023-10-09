@@ -486,18 +486,6 @@ impl WorkScore for Output {
     }
 }
 
-impl<T: WorkScore, const N: usize> WorkScore for [T; N] {
-    fn work_score(&self, work_score_params: WorkScoreStructure) -> u32 {
-        self.as_slice().work_score(work_score_params)
-    }
-}
-
-impl<T: WorkScore> WorkScore for [T] {
-    fn work_score(&self, work_score_params: WorkScoreStructure) -> u32 {
-        self.iter().map(|o| o.work_score(work_score_params)).sum()
-    }
-}
-
 pub(crate) fn verify_output_amount_min(amount: u64) -> Result<(), Error> {
     if amount < Output::AMOUNT_MIN {
         Err(Error::InvalidOutputAmount(amount))
