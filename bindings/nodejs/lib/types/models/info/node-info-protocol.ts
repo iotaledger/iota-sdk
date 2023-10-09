@@ -128,7 +128,7 @@ export interface RewardsParameters {
     /**
      * Mana Share Coefficient is the coefficient used for calculation of initial rewards.
      */
-    manaShareCoefficient: number;
+    manaShareCoefficient: u64;
     /**
      * Decay Balancing Constant Exponent is the exponent used for calculation of the initial reward.
      */
@@ -136,7 +136,7 @@ export interface RewardsParameters {
     /**
      * Decay Balancing Constant is an integer approximation calculated based on chosen DecayBalancingConstantExponent.
      */
-    decayBalancingConstant: number;
+    decayBalancingConstant: u64;
     /**
      * Pool Coefficient Exponent is the exponent used for shifting operation
      * in the pool rewards calculations.
