@@ -30,3 +30,6 @@ address.json
 .DS_Store
 book
 .venv*
+
+# Temporary documentation
+/docs

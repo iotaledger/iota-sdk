@@ -1,0 +1,25 @@
+name: Build and upload API docs
+
+on:
+  push:
+    branches: [develop, staging]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Build python docs
+        run: |
+          cd bindings/python
+          pip install -r requirements-dev.txt
+          PYTHONPATH=. pydoc-markdown
+          cd - 
+      - name: Build nodejs docs
+        run: |
+          cd bindings/nodejs
+          # The SDK still uses yarn classic: https://github.com/iotaledger/iota-sdk/issues/433
+          yarn set version classic
+          yarn
+          yarn create-api-docs --out ../../docs/references/nodejs
+          cd -
