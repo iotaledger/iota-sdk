@@ -58,7 +58,7 @@ pub use self::{
     token_scheme::{SimpleTokenScheme, TokenScheme},
     unlock_condition::{UnlockCondition, UnlockConditions},
 };
-use super::protocol::ProtocolParameters;
+use super::protocol::{ProtocolParameters, WorkScore, WorkScoreStructure};
 use crate::types::block::{address::Address, semantic::ValidationContext, slot::SlotIndex, Error};
 
 /// The maximum number of outputs of a transaction.
@@ -471,6 +471,30 @@ impl Packable for Output {
 impl Rent for Output {
     fn weighted_bytes(&self, rent_structure: RentStructure) -> u64 {
         self.packed_len() as u64 * rent_structure.byte_factor_data() as u64
+    }
+}
+
+impl WorkScore for Output {
+    fn work_score(&self, work_score_params: WorkScoreStructure) -> u32 {
+        match self {
+            Self::Basic(basic) => basic.work_score(work_score_params),
+            Self::Account(account) => account.work_score(work_score_params),
+            Self::Foundry(foundry) => foundry.work_score(work_score_params),
+            Self::Nft(nft) => nft.work_score(work_score_params),
+            Self::Delegation(delegation) => delegation.work_score(work_score_params),
+        }
+    }
+}
+
+impl<T: WorkScore, const N: usize> WorkScore for [T; N] {
+    fn work_score(&self, work_score_params: WorkScoreStructure) -> u32 {
+        self.as_slice().work_score(work_score_params)
+    }
+}
+
+impl<T: WorkScore> WorkScore for [T] {
+    fn work_score(&self, work_score_params: WorkScoreStructure) -> u32 {
+        self.iter().map(|o| o.work_score(work_score_params)).sum()
     }
 }
 

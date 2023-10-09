@@ -28,7 +28,11 @@ pub use self::{
     staking::StakingFeature,
     tag::TagFeature,
 };
-use crate::types::block::{create_bitflags, Error};
+use crate::types::block::{
+    create_bitflags,
+    protocol::{WorkScore, WorkScoreStructure},
+    Error,
+};
 
 ///
 #[derive(Clone, Eq, PartialEq, Hash, From, Packable)]
@@ -310,6 +314,20 @@ impl Features {
     /// Gets a reference to a [`StakingFeature`], if any.
     pub fn staking(&self) -> Option<&StakingFeature> {
         self.get(StakingFeature::KIND).map(Feature::as_staking)
+    }
+}
+
+impl WorkScore for Features {
+    fn work_score(&self, work_score_params: WorkScoreStructure) -> u32 {
+        let features_score = self
+            .iter()
+            .map(|f| match f {
+                Feature::BlockIssuer(_) => work_score_params.block_issuer,
+                Feature::Staking(_) => work_score_params.staking,
+                _ => 0,
+            })
+            .sum::<u32>();
+        features_score
     }
 }
 

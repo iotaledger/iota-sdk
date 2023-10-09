@@ -25,7 +25,7 @@ use crate::types::{
             NativeTokens, Output, OutputBuilderAmount, OutputId, Rent, RentStructure, StateTransitionError,
             StateTransitionVerifier, TokenId, TokenScheme,
         },
-        protocol::ProtocolParameters,
+        protocol::{ProtocolParameters, WorkScore, WorkScoreStructure},
         semantic::{TransactionFailureReason, ValidationContext},
         unlock::Unlock,
         Error,
@@ -595,6 +595,20 @@ impl StateTransitionVerifier for FoundryOutput {
         }
 
         Ok(())
+    }
+}
+
+impl WorkScore for FoundryOutput {
+    fn work_score(&self, work_score_params: WorkScoreStructure) -> u32 {
+        let native_token_score = self.native_tokens().work_score(work_score_params);
+        let features_score = self.features().work_score(work_score_params);
+        let immutable_features_score = self.immutable_features().work_score(work_score_params);
+        let token_scheme_score = self
+            .token_scheme()
+            .is_simple()
+            .then_some(work_score_params.native_token)
+            .unwrap_or(0);
+        work_score_params.output + native_token_score + features_score + immutable_features_score + token_scheme_score
     }
 }
 

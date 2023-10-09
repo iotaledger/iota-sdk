@@ -21,7 +21,7 @@ use crate::types::{
             verify_output_amount_min, verify_output_amount_packable, verify_output_amount_supply, Output,
             OutputBuilderAmount, OutputId, Rent, RentStructure, StateTransitionError, StateTransitionVerifier,
         },
-        protocol::ProtocolParameters,
+        protocol::{ProtocolParameters, WorkScore, WorkScoreStructure},
         semantic::{TransactionFailureReason, ValidationContext},
         slot::EpochIndex,
         unlock::Unlock,
@@ -402,6 +402,12 @@ impl StateTransitionVerifier for DelegationOutput {
     fn destruction(_current_state: &Self, _context: &ValidationContext<'_>) -> Result<(), StateTransitionError> {
         // TODO handle mana rewards
         Ok(())
+    }
+}
+
+impl WorkScore for DelegationOutput {
+    fn work_score(&self, work_score_params: WorkScoreStructure) -> u32 {
+        work_score_params.output
     }
 }
 

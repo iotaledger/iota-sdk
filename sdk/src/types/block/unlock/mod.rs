@@ -14,6 +14,7 @@ use hashbrown::HashSet;
 use packable::{bounded::BoundedU16, prefix::BoxedSlicePrefix, Packable};
 
 pub use self::{account::AccountUnlock, nft::NftUnlock, reference::ReferenceUnlock, signature::SignatureUnlock};
+use super::protocol::{WorkScore, WorkScoreStructure};
 use crate::types::block::{
     input::{INPUT_COUNT_MAX, INPUT_COUNT_RANGE, INPUT_INDEX_MAX},
     Error,
@@ -106,6 +107,16 @@ impl Unlocks {
             Some(unlock) => Some(unlock),
             None => None,
         }
+    }
+}
+
+impl WorkScore for Unlocks {
+    fn work_score(&self, work_score_params: WorkScoreStructure) -> u32 {
+        let signature_score = self
+            .iter()
+            .filter_map(|u| matches!(u, Unlock::Signature(_)).then_some(work_score_params.signature_ed25519))
+            .sum::<u32>();
+        signature_score
     }
 }
 

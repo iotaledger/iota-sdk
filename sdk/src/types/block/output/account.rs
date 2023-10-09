@@ -25,7 +25,7 @@ use crate::types::{
             NativeTokens, Output, OutputBuilderAmount, OutputId, Rent, RentStructure, StateTransitionError,
             StateTransitionVerifier,
         },
-        protocol::ProtocolParameters,
+        protocol::{ProtocolParameters, WorkScore, WorkScoreStructure},
         semantic::{TransactionFailureReason, ValidationContext},
         unlock::Unlock,
         Error,
@@ -648,6 +648,15 @@ impl StateTransitionVerifier for AccountOutput {
 
     fn destruction(_current_state: &Self, _context: &ValidationContext<'_>) -> Result<(), StateTransitionError> {
         Ok(())
+    }
+}
+
+impl WorkScore for AccountOutput {
+    fn work_score(&self, work_score_params: WorkScoreStructure) -> u32 {
+        let native_token_score = self.native_tokens().work_score(work_score_params);
+        let features_score = self.features().work_score(work_score_params);
+        let immutable_features_score = self.immutable_features().work_score(work_score_params);
+        work_score_params.output + native_token_score + features_score + immutable_features_score
     }
 }
 

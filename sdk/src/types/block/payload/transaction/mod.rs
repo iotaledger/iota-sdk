@@ -60,14 +60,11 @@ impl TransactionPayload {
 }
 
 impl WorkScore for TransactionPayload {
-    fn work_score(&self, workscore_structure: WorkScoreStructure) -> u32 {
-        let mut score = self.essence().work_score(workscore_structure);
-        for unlock in self.unlocks.iter() {
-            if matches!(unlock, Unlock::Signature(_)) {
-                score += workscore_structure.signature_ed25519;
-            }
-        }
-        score
+    fn work_score(&self, work_score_params: WorkScoreStructure) -> u32 {
+        let size_score = self.packed_len() as u32 * work_score_params.data_byte;
+        let essence_score = self.essence().work_score(work_score_params);
+        let unlocks_score = self.unlocks().work_score(work_score_params);
+        size_score + essence_score + unlocks_score
     }
 }
 

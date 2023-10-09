@@ -9,7 +9,7 @@ use core::ops::RangeInclusive;
 use packable::{
     bounded::{BoundedU32, BoundedU8},
     prefix::BoxedSlicePrefix,
-    Packable,
+    Packable, PackableExt,
 };
 
 use crate::types::block::{
@@ -64,9 +64,9 @@ impl TaggedDataPayload {
 }
 
 impl WorkScore for TaggedDataPayload {
-    fn work_score(&self, workscore_structure: WorkScoreStructure) -> u32 {
-        // The work score of a tagged data payload is `0`.
-        0
+    fn work_score(&self, work_score_params: WorkScoreStructure) -> u32 {
+        let size_score = self.packed_len() as u32 * work_score_params.data_byte;
+        size_score
     }
 }
 

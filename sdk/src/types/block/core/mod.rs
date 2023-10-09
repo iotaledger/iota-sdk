@@ -132,10 +132,10 @@ impl Block {
 }
 
 impl WorkScore for Block {
-    fn work_score(&self, workscore_structure: WorkScoreStructure) -> u32 {
+    fn work_score(&self, work_score_struct: WorkScoreStructure) -> u32 {
         match self {
-            Self::Basic(basic) => basic.work_score(workscore_structure),
-            Self::Validation(validation) => validation.work_score(workscore_structure),
+            Self::Basic(basic) => basic.work_score(work_score_struct),
+            Self::Validation(validation) => validation.work_score(work_score_struct),
         }
     }
 }

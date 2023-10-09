@@ -275,29 +275,12 @@ impl RegularTransactionEssence {
 }
 
 impl WorkScore for RegularTransactionEssence {
-    fn work_score(&self, workscore_structure: WorkScoreStructure) -> u32 {
-        let mut score = self.inputs().len() as u32 * workscore_structure.input;
-        score += self.context_inputs().len() as u32 * workscore_structure.context_input;
-        for output in self.outputs() {
-            score += workscore_structure.output;
-            if let Some(nts) = output.native_tokens() {
-                score += nts.len() as u32 * workscore_structure.native_token;
-            }
-            if matches!(output, Output::Foundry(foundry) if foundry.token_scheme().is_simple()) {
-                score += workscore_structure.native_token
-            }
-            if let Some(features) = output.features() {
-                for feature in features.iter() {
-                    score += match feature {
-                        Feature::BlockIssuer(_) => workscore_structure.block_issuer,
-                        Feature::Staking(_) => workscore_structure.staking,
-                        _ => 0,
-                    }
-                }
-            }
-        }
-        score += self.mana_allotments().len() as u32 * workscore_structure.allotment;
-        score
+    fn work_score(&self, work_score_params: WorkScoreStructure) -> u32 {
+        let input_score = self.inputs().len() as u32 * work_score_params.input;
+        let context_input_score = self.context_inputs().len() as u32 * work_score_params.context_input;
+        let outputs_score = self.outputs().work_score(work_score_params);
+        let allotment_score = self.mana_allotments().len() as u32 * work_score_params.allotment;
+        input_score + context_input_score + outputs_score + allotment_score
     }
 }
 

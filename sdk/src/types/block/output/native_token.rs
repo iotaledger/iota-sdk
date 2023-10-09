@@ -12,7 +12,11 @@ use iterator_sorted::is_unique_sorted;
 use packable::{bounded::BoundedU8, prefix::BoxedSlicePrefix, Packable};
 use primitive_types::U256;
 
-use crate::types::block::{output::foundry::FoundryId, Error};
+use crate::types::block::{
+    output::foundry::FoundryId,
+    protocol::{WorkScore, WorkScoreStructure},
+    Error,
+};
 
 impl_id!(pub TokenId, 38, "Unique identifiers of native tokens. The TokenId of native tokens minted by a specific foundry is the same as the FoundryId.");
 
@@ -244,6 +248,13 @@ impl NativeTokens {
         self.0
             .binary_search_by_key(token_id, |native_token| native_token.token_id)
             .map_or(None, |index| Some(&self.0[index]))
+    }
+}
+
+// TODO: should we also impl `WorkScore` for `NativeToken` for plain consistency?
+impl WorkScore for NativeTokens {
+    fn work_score(&self, work_score_params: WorkScoreStructure) -> u32 {
+        self.len() as u32 * work_score_params.native_token
     }
 }
 
