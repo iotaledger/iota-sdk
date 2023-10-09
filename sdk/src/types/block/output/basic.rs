@@ -325,9 +325,9 @@ impl BasicOutput {
 
 impl WorkScore for BasicOutput {
     fn work_score(&self, work_score_params: WorkScoreStructure) -> u32 {
-        let native_token_score = self.native_tokens().work_score(work_score_params);
+        let native_tokens_score = self.native_tokens().work_score(work_score_params);
         let features_score = self.features().work_score(work_score_params);
-        work_score_params.output + native_token_score + features_score
+        work_score_params.output + native_tokens_score + features_score
     }
 }
 
