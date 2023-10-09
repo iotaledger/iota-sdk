@@ -161,13 +161,6 @@ impl ValidationBlock {
     }
 }
 
-impl WorkScore for ValidationBlock {
-    fn work_score(&self, _: WorkScoreStructure) -> u32 {
-        // The work score of a validation block is `0`.
-        0
-    }
-}
-
 impl Packable for ValidationBlock {
     type UnpackError = Error;
     type UnpackVisitor = ProtocolParameters;

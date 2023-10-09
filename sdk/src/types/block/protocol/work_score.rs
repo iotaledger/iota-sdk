@@ -4,7 +4,7 @@
 use getset::CopyGetters;
 use packable::Packable;
 
-use crate::types::block::{Error, mana::compute_necessary_mana_amount};
+use crate::types::block::Error;
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Packable, CopyGetters)]
 #[cfg_attr(
@@ -62,12 +62,12 @@ impl Default for WorkScoreStructure {
 
 /// A trait to facilitate the computation of the work score of a block, which is central to mana cost calculation.
 pub trait WorkScore {
-    /// Returns the work score.
+    /// Returns its work score.
     fn work_score(&self, work_score_params: WorkScoreStructure) -> u32;
 
-    /// Calculates the Mana cost.
-    fn mana_cost(&self, work_score_params: WorkScoreStructure) -> u64 {
-        compute_necessary_mana_amount(self.work_score(work_score_params))
+    /// Returns the Mana cost given its work score.
+    fn mana_cost(&self, work_score_params: WorkScoreStructure, reference_mana_cost: u64) -> u64 {
+        reference_mana_cost * self.work_score(work_score_params) as u64
     }
 }
 

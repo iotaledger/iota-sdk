@@ -109,13 +109,6 @@ impl BlockHeader {
     }
 }
 
-impl WorkScore for BlockHeader {
-    fn work_score(&self, _: WorkScoreStructure) -> u32 {
-        // The work score of a block header is `0`.
-        0
-    }
-}
-
 impl Packable for BlockHeader {
     type UnpackError = Error;
     type UnpackVisitor = ProtocolParameters;
@@ -298,12 +291,10 @@ impl BlockWrapper {
 }
 
 impl WorkScore for BlockWrapper {
-    fn work_score(&self, work_score_struct: WorkScoreStructure) -> u32 {
-        let mut score = work_score_struct.data_byte * self.packed_len() as u32 / 1024;
-        score += self.header.work_score(work_score_struct);
-        score += self.block.work_score(work_score_struct);
-        score += self.signature.work_score(work_score_struct);
-        score
+    fn work_score(&self, work_score_params: WorkScoreStructure) -> u32 {
+        let block_score = self.block.work_score(work_score_params);
+        let signature_score = self.signature.work_score(work_score_params);
+        block_score + signature_score
     }
 }
 
