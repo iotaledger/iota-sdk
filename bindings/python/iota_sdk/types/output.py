@@ -231,7 +231,7 @@ class DelegationOutput:
     validator_address: HexStr
     start_epoch: EpochIndex
     end_epoch: EpochIndex
-    unlock_conditions: List[Union[UnlockCondition]]
+    unlock_conditions: List[UnlockCondition]
     type: int = field(default_factory=lambda: int(
         OutputType.Delegation), init=False)
 
