@@ -41,7 +41,7 @@ class Block:
         return from_dict(Block, block_dict)
 
     def id(self) -> HexStr:
-        """Rreturns the block ID as a hexadecimal string.
+        """Returns the block ID as a hexadecimal string.
         """
         return Utils.block_id(self)
 
