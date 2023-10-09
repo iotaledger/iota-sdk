@@ -62,9 +62,9 @@ class Burn:
         The function `as_dict` converts an object's attributes into a dictionary, excluding any
         attributes with a value of `None`, and converts a list of `nativeTokens` objects into a
         dictionary with the `id` as the key and the `amount` as the value.
-        
+
         Returns:
-        
+
         a dictionary representation of the object's attributes.
         """
         config = {k: v for k, v in self.__dict__.items() if v is not None}
