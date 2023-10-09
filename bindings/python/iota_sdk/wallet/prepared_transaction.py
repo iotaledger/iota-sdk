@@ -2,10 +2,10 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from __future__ import annotations
+from typing import TYPE_CHECKING, Dict, Union
+from dacite import from_dict
 from iota_sdk.types.transaction import Transaction
 from iota_sdk.types.transaction_data import PreparedTransactionData
-from dacite import from_dict
-from typing import TYPE_CHECKING, Dict, Union
 # Required to prevent circular import
 if TYPE_CHECKING:
     from iota_sdk.wallet.wallet import Account

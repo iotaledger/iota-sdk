@@ -3,8 +3,8 @@
 
 from dataclasses import dataclass
 from typing import Dict, Optional
-import humps
 from abc import ABCMeta, abstractmethod
+import humps
 
 from iota_sdk.types.common import HexStr
 from iota_sdk.types.output_id import OutputId

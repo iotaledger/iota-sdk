@@ -4,10 +4,10 @@
 from __future__ import annotations
 from dataclasses import dataclass
 from typing import Dict, List, Optional
+from enum import Enum
 from iota_sdk.types.common import HexStr
 from iota_sdk.types.output import OutputWithMetadata
 from iota_sdk.types.payload import TransactionPayload
-from enum import Enum
 
 
 class InclusionState(str, Enum):
@@ -51,9 +51,9 @@ class Transaction:
     blockId: Optional[HexStr] = None
 
     @classmethod
-    def from_dict(cls, dict: Dict) -> Transaction:
+    def from_dict(cls, data_dict: Dict) -> Transaction:
         obj = cls.__new__(cls)
         super(Transaction, obj).__init__()
-        for k, v in dict.items():
+        for k, v in data_dict.items():
             setattr(obj, k, v)
         return obj

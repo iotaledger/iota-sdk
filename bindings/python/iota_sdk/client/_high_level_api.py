@@ -1,13 +1,14 @@
 # Copyright 2023 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
-from typing import List, Optional
-from dataclasses import dataclass
+from typing import List, Optional, Union
 from abc import ABCMeta, abstractmethod
+from dacite import from_dict
 from iota_sdk.types.block import Block
 from iota_sdk.types.common import CoinType, HexStr
 from iota_sdk.types.output import OutputWithMetadata
 from iota_sdk.types.output_id import OutputId
+from iota_sdk.secret_manager.secret_manager import LedgerNanoSecretManager, MnemonicSecretManager, StrongholdSecretManager, SeedSecretManager
 
 
 class Range:
@@ -43,14 +44,14 @@ class GenerateAddressesOptions():
 
     Attributes:
         coinType: The type of coin.
-        range: The range of addresses to generate.
+        addr_range: The range of addresses to generate.
         bech32Hrp: The bech32 HRP (human readable part) to use.
         accountIndex: An account index.
         options: An instance of `GenerateAddressOptions`.
     """
 
     def __init__(self, coinType: CoinType,
-                 range: range,
+                 addr_range: Range,
                  bech32Hrp: str,
                  accountIndex: Optional[int] = None,
                  options: Optional[GenerateAddressOptions] = None):
@@ -58,13 +59,13 @@ class GenerateAddressesOptions():
 
         Args:
             coinType: The type of coin.
-            range: The range of addresses to generate.
+            addr_range: The range of addresses to generate.
             bech32Hrp: The bech32 HRP (human readable part) to use.
             accountIndex: An account index.
             options: An instance of `GenerateAddressOptions`.
         """
         self.coinType = coinType
-        self.range = Range(range.start, range.stop)
+        self.addr_range = addr_range
         self.bech32Hrp = bech32Hrp
         self.accountIndex = accountIndex
         self.options = options

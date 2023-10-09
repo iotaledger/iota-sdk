@@ -20,7 +20,7 @@ class ClientUtils(metaclass=ABCMeta):
         """Transforms a hex encoded address to a bech32 encoded address.
         """
         return self._call_method('hexToBech32', {
-            'hex': hex,
+            'hex': hex_str,
             'bech32Hrp': bech32_hrp
         })
 
@@ -41,11 +41,11 @@ class ClientUtils(metaclass=ABCMeta):
         })
 
     def hex_public_key_to_bech32_address(
-            self, hex: HexStr, bech32_hrp: Optional[str] = None) -> str:
+            self, hex_str: HexStr, bech32_hrp: Optional[str] = None) -> str:
         """Transforms a hex encoded public key to a bech32 encoded address.
         """
         return self._call_method('hexPublicKeyToBech32Address', {
-            'hex': hex,
+            'hex': hex_str,
             'bech32Hrp': bech32_hrp
         })
 

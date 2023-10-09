@@ -31,6 +31,7 @@ class SimpleTokenScheme(TokenScheme):
         """
         The function converts integer values in the config to hexadecimal strings.
         """
+        config = dict(self.__dict__)
 
         if isinstance(config['mintedTokens'], int):
             config['mintedTokens'] = str(hex(config['mintedTokens']))

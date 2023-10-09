@@ -36,6 +36,7 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         handle: The handle to the inner client object.
     """
 
+    # pylint: disable=unused-argument
     def __init__(
         self,
         nodes: Optional[Union[str, List[str]]] = None,
@@ -159,8 +160,7 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
 
         if "payload" in json_response:
             return json_response['payload']
-        else:
-            return response
+        return response
 
     def get_handle(self):
         """Get the client handle.
@@ -357,6 +357,7 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
             'immutableFeatures': immutable_features
         }))
 
+    # pylint: disable=unused-argument
     def build_and_post_block(self,
                              secret_manager: Optional[Union[LedgerNanoSecretManager, MnemonicSecretManager,
                                                       SeedSecretManager, StrongholdSecretManager]] = None,

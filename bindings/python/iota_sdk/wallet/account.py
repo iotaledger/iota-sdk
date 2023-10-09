@@ -1,6 +1,9 @@
 # Copyright 2023 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
+from typing import List, Optional, Union
+from dataclasses import dataclass
+from dacite import from_dict
 from iota_sdk.wallet.common import _call_method_routine
 from iota_sdk.wallet.prepared_transaction import PreparedTransaction, PreparedCreateTokenTransaction
 from iota_sdk.wallet.sync_options import SyncOptions
@@ -19,9 +22,6 @@ from iota_sdk.types.send_params import CreateAliasOutputParams, CreateNativeToke
 from iota_sdk.types.transaction import Transaction
 from iota_sdk.types.transaction_options import TransactionOptions
 from iota_sdk.types.consolidation_params import ConsolidationParams
-from typing import List, Optional, Union
-from dacite import from_dict
-from dataclasses import dataclass
 
 
 @dataclass

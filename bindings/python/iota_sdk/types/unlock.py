@@ -4,7 +4,6 @@
 from __future__ import annotations
 from dataclasses import dataclass, field
 from enum import IntEnum
-from typing import Optional
 from iota_sdk.types.signature import Ed25519Signature
 
 

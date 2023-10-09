@@ -220,7 +220,6 @@ class DelegationOutput(Output):
     type: int = field(default_factory=lambda: int(OutputType.Delegation), init=False)
 
 
-@json
 @dataclass
 class OutputMetadata:
     """Metadata about an output.
@@ -249,10 +248,10 @@ class OutputMetadata:
     transactionIdSpent: Optional[HexStr] = None
 
     @classmethod
-    def from_dict(cls, dict: Dict) -> OutputMetadata:
+    def from_dict(cls, data_dict: Dict) -> OutputMetadata:
         obj = cls.__new__(cls)
         super(OutputMetadata, obj).__init__()
-        for k, v in dict.items():
+        for k, v in data_dict.items():
             setattr(obj, k, v)
         return obj
 

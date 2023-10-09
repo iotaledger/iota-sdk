@@ -4,11 +4,11 @@
 from __future__ import annotations
 from dataclasses import dataclass
 from typing import List, Optional, Union, Dict
-from dacite import from_dict
-from iota_sdk.types.common import HexStr, json
-from iota_sdk.types.payload import TaggedDataPayload, TransactionPayload
-from iota_sdk.utils import Utils
 from enum import Enum
+from dacite import from_dict
+from iota_sdk.types.common import HexStr
+from iota_sdk.types.payload import TaggedDataPayload, TransactionPayload, MilestonePayload
+from iota_sdk.utils import Utils
 
 
 @dataclass
@@ -86,20 +86,20 @@ class ConflictReason(Enum):
         invalidChainState (12): The chain state is invalid.
         semanticValidationFailed (255): The semantic validation failed.
     """
-    none = 0,
-    inputUTXOAlreadySpent = 1,
-    inputUTXOAlreadySpentInThisMilestone = 2,
-    inputUTXONotFound = 3,
-    inputOutputSumMismatch = 4,
-    invalidSignature = 5,
-    invalidTimelock = 6,
-    invalidNativeTokens = 7,
-    returnAmountMismatch = 8,
-    invalidInputUnlock = 9,
-    invalidInputsCommitment = 10,
-    invalidSender = 11,
-    invalidChainState = 12,
-    semanticValidationFailed = 255,
+    none = 0
+    inputUTXOAlreadySpent = 1
+    inputUTXOAlreadySpentInThisMilestone = 2
+    inputUTXONotFound = 3
+    inputOutputSumMismatch = 4
+    invalidSignature = 5
+    invalidTimelock = 6
+    invalidNativeTokens = 7
+    returnAmountMismatch = 8
+    invalidInputUnlock = 9
+    invalidInputsCommitment = 10
+    invalidSender = 11
+    invalidChainState = 12
+    semanticValidationFailed = 255
 
 
 CONFLICT_REASON_STRINGS = {

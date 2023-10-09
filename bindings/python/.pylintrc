@@ -8,7 +8,10 @@ disable=missing-module-docstring,
 	fixme, # TODOS 
 	too-many-instance-attributes,
 	too-many-arguments,
-	too-few-public-methods
+	too-many-public-methods,
+	too-few-public-methods,
+	too-many-locals,
+	missing-function-docstring
 
 [TYPECHECK]
 generated-members=from_dict,to_dict,to_json # Made from @json
