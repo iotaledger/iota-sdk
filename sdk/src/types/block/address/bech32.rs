@@ -128,7 +128,7 @@ impl FromStr for Bech32Address {
     type Err = Error;
 
     fn from_str(address: &str) -> Result<Self, Self::Err> {
-        match ::bech32::decode(address) {
+        match bech32::decode(address) {
             Ok((hrp, bytes)) => Address::unpack_verified(bytes.as_slice(), &())
                 .map_err(|_| Error::InvalidAddress)
                 .map(|address| Self {
