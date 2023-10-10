@@ -5,7 +5,7 @@ use derive_more::From;
 
 use crate::types::block::{
     address::Address,
-    rent::{RentParameters, RentStructure, StorageScore},
+    protocol::{RentParameters, RentStructure, StorageScore},
 };
 
 /// Identifies the validated issuer of the UTXO state machine.

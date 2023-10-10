@@ -5,12 +5,11 @@ use core::{mem::size_of, ops::Deref};
 
 use packable::Packable;
 
-use super::output::{AccountOutput, BasicOutput};
 use crate::types::block::{
     address::{Address, Ed25519Address},
     output::{
         unlock_condition::{AddressUnlockCondition, ExpirationUnlockCondition, StorageDepositReturnUnlockCondition},
-        BasicOutputBuilder, NativeTokens, Output, OutputId,
+        AccountOutput, BasicOutput, BasicOutputBuilder, NativeTokens, Output, OutputId,
     },
     slot::SlotIndex,
     BlockId, Error,
@@ -130,25 +129,25 @@ impl RentParameters {
         }
     }
 
-    /// Sets the storage cost for the storage deposit.
+    /// Sets the storage cost per unit of storage score.
     pub fn with_storage_cost(mut self, storage_cost: u64) -> Self {
         self.storage_cost = storage_cost;
         self
     }
 
-    /// Sets the storage score factor for the data fields.
+    /// Sets the storage score factor for data fields.
     pub fn with_storage_score_factor_data(mut self, storage_score_factor_data: StorageScoreFactor) -> Self {
         self.storage_score_factor_data = storage_score_factor_data;
         self
     }
 
-    /// Sets the TODO.
+    /// Sets the storage score offset per output.
     pub fn with_storage_score_offset_output(mut self, storage_score_offset_output: StorageScoreOffset) -> Self {
         self.storage_score_offset_output = storage_score_offset_output;
         self
     }
 
-    /// Sets the TODO.
+    /// Sets the storage score offset for Ed25519 block issuer key fields.
     pub fn with_storage_score_offset_ed25519_block_issuer_key(
         mut self,
         storage_score_offset_ed25519_block_issuer_key: StorageScoreOffset,
@@ -157,7 +156,7 @@ impl RentParameters {
         self
     }
 
-    /// Sets the TODO for the staking fields.
+    /// Sets the storage score offset for staking fields.
     pub fn with_storage_score_offset_staking_feature(
         mut self,
         storage_score_offset_staking_feature: StorageScoreOffset,
@@ -166,38 +165,38 @@ impl RentParameters {
         self
     }
 
-    /// Sets the TODO for the delegation fields.
+    /// Sets the storage score offset for delegation fields.
     pub fn with_storage_score_offset_delegation(mut self, storage_score_offset_delegation: StorageScoreOffset) -> Self {
         self.storage_score_offset_delegation = storage_score_offset_delegation;
         self
     }
 
-    /// Returns the TODO of the [`RentParameters`].
+    /// Returns the storage cost per unit of storage score.
     pub const fn storage_cost(&self) -> u64 {
         self.storage_cost
     }
 
-    /// Returns the TODO of the [`RentParameters`].
+    /// Returns the storage score factor for data fields.
     pub const fn storage_score_factor_data(&self) -> StorageScoreFactor {
         self.storage_score_factor_data
     }
 
-    /// Returns the TODO of the [`RentParameters`].
+    /// Returns the storage score offset per output.
     pub const fn storage_score_offset_output(&self) -> StorageScoreOffset {
         self.storage_score_offset_output
     }
 
-    /// Returns the TODO the [`RentParameters`].
+    /// Returns the storage score offset for Ed25519 block issuer key fields.
     pub const fn storage_score_offset_ed25519_block_issuer_key(&self) -> StorageScoreOffset {
         self.storage_score_offset_ed25519_block_issuer_key
     }
 
-    /// Returns the TODO the [`RentParameters`].
+    /// Returns the storage score offset for staking fields.
     pub const fn storage_score_offset_staking_feature(&self) -> StorageScoreOffset {
         self.storage_score_offset_staking_feature
     }
 
-    /// Returns the TODO the [`RentParameters`].
+    /// Returns the storage score offset for delegation fields.
     pub const fn storage_score_offset_delegation(&self) -> StorageScoreOffset {
         self.storage_score_offset_delegation
     }

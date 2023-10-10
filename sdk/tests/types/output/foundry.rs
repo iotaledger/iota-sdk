@@ -6,12 +6,11 @@ use iota_sdk::types::block::{
         unlock_condition::ImmutableAccountAddressUnlockCondition, FoundryId, FoundryOutput, NativeToken, Output,
         SimpleTokenScheme, TokenId,
     },
-    protocol::protocol_parameters,
+    protocol::{protocol_parameters, StorageScore},
     rand::{
         address::rand_account_address,
         output::{feature::rand_metadata_feature, rand_foundry_output, rand_token_scheme},
     },
-    rent::StorageScore,
 };
 use packable::PackableExt;
 

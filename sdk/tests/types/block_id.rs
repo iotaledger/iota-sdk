@@ -5,8 +5,9 @@ use core::str::FromStr;
 
 use iota_sdk::types::{
     block::{
-        protocol::ProtocolParameters, rand::bytes::rand_bytes_array, rent::RentParameters, BlockHash, BlockId,
-        BlockWrapper, BlockWrapperDto,
+        protocol::{ProtocolParameters, RentParameters},
+        rand::bytes::rand_bytes_array,
+        BlockHash, BlockId, BlockWrapper, BlockWrapperDto,
     },
     TryFromDto,
 };

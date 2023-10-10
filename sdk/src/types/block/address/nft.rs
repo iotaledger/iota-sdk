@@ -7,7 +7,7 @@ use derive_more::{AsRef, Deref, From};
 
 use crate::types::block::{
     output::NftId,
-    rent::{RentStructure, StorageScore},
+    protocol::{RentStructure, StorageScore},
     Error,
 };
 

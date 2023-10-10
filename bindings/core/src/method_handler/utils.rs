@@ -10,7 +10,7 @@ use iota_sdk::{
             input::UtxoInput,
             output::{AccountId, FoundryId, InputsCommitment, NftId, Output, OutputId, TokenId},
             payload::{transaction::TransactionEssence, TransactionPayload},
-            rent::StorageScore,
+            protocol::StorageScore,
             BlockWrapper,
         },
         TryFromDto,

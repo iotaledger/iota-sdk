@@ -58,8 +58,7 @@ pub use self::{
 };
 use super::{
     address::Ed25519Address,
-    protocol::ProtocolParameters,
-    rent::{RentStructure, StorageScore},
+    protocol::{ProtocolParameters, RentStructure, StorageScore},
     BlockId,
 };
 use crate::types::block::{address::Address, semantic::ValidationContext, slot::SlotIndex, Error};

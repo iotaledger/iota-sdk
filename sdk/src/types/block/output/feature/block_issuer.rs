@@ -17,7 +17,7 @@ use packable::{
 };
 
 use crate::types::block::{
-    rent::{RentParameters, RentStructure, StorageScore},
+    protocol::{RentParameters, RentStructure, StorageScore},
     slot::SlotIndex,
     Error,
 };

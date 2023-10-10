@@ -13,7 +13,7 @@ use crate::{
             unlock_condition::StorageDepositReturnUnlockCondition, AccountOutputBuilder, AccountTransition,
             FoundryOutputBuilder, NftOutputBuilder, Output, OutputId,
         },
-        rent::{RentStructure, StorageScore},
+        protocol::{RentStructure, StorageScore},
         slot::SlotIndex,
     },
 };

@@ -30,7 +30,7 @@ pub use self::{
 };
 use crate::types::block::{
     create_bitflags,
-    rent::{RentStructure, StorageScore},
+    protocol::{RentStructure, StorageScore},
     Error,
 };
 

@@ -14,7 +14,7 @@ use crate::{
             },
             BasicOutputBuilder, MinimumStorageDepositBasicOutput,
         },
-        rent::RentStructure,
+        protocol::RentStructure,
         slot::SlotIndex,
         ConvertTo,
     },

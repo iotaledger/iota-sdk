@@ -24,7 +24,10 @@ use crate::{
         node_manager::NodeManager,
         Error,
     },
-    types::block::{address::Hrp, protocol::ProtocolParameters, rent::RentParameters},
+    types::block::{
+        address::Hrp,
+        protocol::{ProtocolParameters, RentParameters},
+    },
 };
 
 /// An IOTA node client.

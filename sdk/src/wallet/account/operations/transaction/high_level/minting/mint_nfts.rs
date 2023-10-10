@@ -13,7 +13,7 @@ use crate::{
             unlock_condition::AddressUnlockCondition,
             NftId, NftOutputBuilder,
         },
-        rent::RentStructure,
+        protocol::RentStructure,
         ConvertTo,
     },
     wallet::{

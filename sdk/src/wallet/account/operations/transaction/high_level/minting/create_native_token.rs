@@ -15,7 +15,7 @@ use crate::{
             feature::MetadataFeature, unlock_condition::ImmutableAccountAddressUnlockCondition, AccountId,
             AccountOutputBuilder, FoundryId, FoundryOutputBuilder, Output, SimpleTokenScheme, TokenId, TokenScheme,
         },
-        rent::RentStructure,
+        protocol::RentStructure,
     },
     wallet::account::{
         types::{Transaction, TransactionDto},

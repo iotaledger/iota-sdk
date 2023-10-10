@@ -4,8 +4,7 @@
 use crate::types::block::{
     address::Address,
     output::verify_output_amount,
-    protocol::ProtocolParameters,
-    rent::{RentStructure, StorageScore},
+    protocol::{ProtocolParameters, RentStructure, StorageScore},
     Error,
 };
 

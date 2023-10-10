@@ -7,7 +7,7 @@ use crypto::signatures::ed25519::PublicKey;
 use derive_more::{AsRef, Deref, From};
 
 use crate::types::block::{
-    rent::{RentStructure, StorageScore},
+    protocol::{RentStructure, StorageScore},
     Error,
 };
 

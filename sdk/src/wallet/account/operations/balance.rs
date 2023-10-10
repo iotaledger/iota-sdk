@@ -8,7 +8,7 @@ use crate::{
     types::block::{
         address::Bech32Address,
         output::{unlock_condition::UnlockCondition, FoundryId, NativeTokensBuilder, Output},
-        rent::{RentStructure, StorageScore},
+        protocol::{RentStructure, StorageScore},
         ConvertTo,
     },
     wallet::{

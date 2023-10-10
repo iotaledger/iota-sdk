@@ -12,7 +12,7 @@ use iota_sdk::{
                 dto::OutputDto, AccountOutput, BasicOutput, FoundryOutput, NftOutput, Output, OutputBuilderAmount,
             },
             payload::Payload,
-            rent::{RentStructure, StorageScore},
+            protocol::{RentStructure, StorageScore},
             BlockWrapper, BlockWrapperDto,
         },
         TryFromDto,

@@ -5,7 +5,7 @@ use derive_more::From;
 
 use crate::types::block::{
     address::AccountAddress,
-    rent::{RentStructure, StorageScore},
+    protocol::{RentStructure, StorageScore},
 };
 
 /// Defines the permanent [`AccountAddress`] that owns this output.

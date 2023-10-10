@@ -15,7 +15,7 @@ use crate::{
             },
             BasicOutputBuilder, MinimumStorageDepositBasicOutput, NativeToken, NativeTokens, TokenId,
         },
-        rent::RentStructure,
+        protocol::RentStructure,
         slot::SlotIndex,
         ConvertTo,
     },

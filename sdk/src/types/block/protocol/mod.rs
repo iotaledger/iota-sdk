@@ -1,19 +1,22 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+mod storage_score;
+
 use alloc::string::String;
 use core::borrow::Borrow;
 
 use crypto::hashes::{blake2b::Blake2b256, Digest};
 use getset::{CopyGetters, Getters};
 use packable::{prefix::StringPrefix, Packable, PackableExt};
+pub use storage_score::*;
 
 use super::{
     address::Hrp,
     mana::{ManaStructure, RewardsParameters},
     slot::SlotIndex,
 };
-use crate::types::block::{helper::network_name_to_id, rent::RentParameters, ConvertTo, Error, PROTOCOL_VERSION};
+use crate::types::block::{helper::network_name_to_id, ConvertTo, Error, PROTOCOL_VERSION};
 
 /// Defines the parameters of the protocol at a particular version.
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Packable, Getters, CopyGetters)]
@@ -318,7 +321,7 @@ pub fn protocol_parameters() -> ProtocolParameters {
         2,
         "testnet",
         "rms",
-        crate::types::block::rent::RentParameters::new(500, 1, 10, 1, 1, 1),
+        crate::types::block::protocol::RentParameters::new(500, 1, 10, 1, 1, 1),
         1_813_620_509_061_365,
         1582328545,
         10,

@@ -5,7 +5,7 @@ use derive_more::From;
 
 use crate::types::block::{
     address::Address,
-    rent::{RentStructure, StorageScore},
+    protocol::{RentStructure, StorageScore},
 };
 
 /// Defines the Address that owns this output, that is, it can unlock it with the proper Unlock in a transaction.

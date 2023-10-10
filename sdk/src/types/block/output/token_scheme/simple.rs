@@ -10,7 +10,7 @@ use packable::{
 use primitive_types::U256;
 
 use crate::types::block::{
-    rent::{RentParameters, RentStructure, StorageScore},
+    protocol::{RentParameters, RentStructure, StorageScore},
     Error,
 };
 

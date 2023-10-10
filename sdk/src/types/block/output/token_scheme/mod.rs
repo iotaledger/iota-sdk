@@ -5,7 +5,7 @@ mod simple;
 
 pub use self::simple::SimpleTokenScheme;
 use crate::types::block::{
-    rent::{RentParameters, RentStructure, StorageScore},
+    protocol::{RentParameters, RentStructure, StorageScore},
     Error,
 };
 

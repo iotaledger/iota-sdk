@@ -14,7 +14,7 @@ use crate::{
             BasicOutputBuilder, MinimumStorageDepositBasicOutput, NativeTokens, NativeTokensBuilder, NftOutputBuilder,
             Output, OutputId,
         },
-        rent::RentStructure,
+        protocol::RentStructure,
         slot::SlotIndex,
     },
     wallet::account::{

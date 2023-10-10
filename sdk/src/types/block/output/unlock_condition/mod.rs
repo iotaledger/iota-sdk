@@ -33,8 +33,7 @@ pub use self::{
 use crate::types::block::{
     address::Address,
     create_bitflags,
-    protocol::ProtocolParameters,
-    rent::{RentStructure, StorageScore},
+    protocol::{ProtocolParameters, RentStructure, StorageScore},
     slot::SlotIndex,
     Error,
 };

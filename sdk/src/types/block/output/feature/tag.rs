@@ -7,7 +7,7 @@ use core::ops::RangeInclusive;
 use packable::{bounded::BoundedU8, prefix::BoxedSlicePrefix};
 
 use crate::types::block::{
-    rent::{RentStructure, StorageScore},
+    protocol::{RentStructure, StorageScore},
     Error,
 };
 

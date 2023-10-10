@@ -4,7 +4,7 @@
 use derive_more::From;
 
 use crate::types::block::{
-    rent::{RentStructure, StorageScore},
+    protocol::{RentStructure, StorageScore},
     slot::SlotIndex,
     Error,
 };

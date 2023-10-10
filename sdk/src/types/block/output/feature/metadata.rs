@@ -7,7 +7,7 @@ use core::{ops::RangeInclusive, str::FromStr};
 use packable::{bounded::BoundedU16, prefix::BoxedSlicePrefix};
 
 use crate::types::block::{
-    rent::{RentStructure, StorageScore},
+    protocol::{RentStructure, StorageScore},
     Error,
 };
 

@@ -16,7 +16,7 @@ use crate::{
     types::block::{
         address::{Address, Ed25519Address},
         output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder, NativeTokensBuilder, Output},
-        rent::RentStructure,
+        protocol::RentStructure,
     },
 };
 

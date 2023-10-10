@@ -7,7 +7,7 @@ use derive_more::{AsRef, Deref, From};
 
 use crate::types::block::{
     output::AccountId,
-    rent::{RentStructure, StorageScore},
+    protocol::{RentStructure, StorageScore},
     Error,
 };
 

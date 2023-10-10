@@ -5,7 +5,7 @@ use iota_sdk::types::{
     block::{
         address::AccountAddress,
         output::{AccountOutput, Feature, FoundryId, NativeToken, Output, SimpleTokenScheme, TokenId},
-        protocol::protocol_parameters,
+        protocol::{protocol_parameters, StorageScore},
         rand::output::{
             feature::{rand_issuer_feature, rand_metadata_feature, rand_sender_feature},
             rand_account_id, rand_account_output,
@@ -14,7 +14,6 @@ use iota_sdk::types::{
                 rand_state_controller_address_unlock_condition_different_from,
             },
         },
-        rent::StorageScore,
     },
     ValidationParams,
 };

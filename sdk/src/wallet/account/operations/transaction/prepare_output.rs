@@ -16,7 +16,7 @@ use crate::{
             BasicOutputBuilder, MinimumStorageDepositBasicOutput, NativeToken, NftId, NftOutputBuilder, Output,
             UnlockCondition,
         },
-        rent::{RentParameters, RentStructure, StorageScore},
+        protocol::{RentParameters, RentStructure, StorageScore},
         slot::SlotIndex,
         Error,
     },

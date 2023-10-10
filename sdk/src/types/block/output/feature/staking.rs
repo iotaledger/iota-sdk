@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use crate::types::block::{
-    rent::{RentStructure, StorageScore},
+    protocol::{RentStructure, StorageScore},
     slot::EpochIndex,
 };
 

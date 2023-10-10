@@ -3,7 +3,7 @@
 
 use iota_sdk::types::block::{
     output::{FoundryId, NativeToken, NftId, NftOutput, Output, SimpleTokenScheme, TokenId},
-    protocol::protocol_parameters,
+    protocol::{protocol_parameters, StorageScore},
     rand::{
         address::rand_account_address,
         output::{
@@ -12,7 +12,6 @@ use iota_sdk::types::block::{
             unlock_condition::rand_address_unlock_condition,
         },
     },
-    rent::StorageScore,
 };
 use packable::PackableExt;
 

@@ -14,7 +14,7 @@ use primitive_types::U256;
 
 use crate::types::block::{
     output::foundry::FoundryId,
-    rent::{RentStructure, StorageScore},
+    protocol::{RentStructure, StorageScore},
     Error,
 };
 

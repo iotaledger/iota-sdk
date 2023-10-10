@@ -7,7 +7,7 @@ use iota_sdk::{
     types::block::{
         address::{Address, Bech32Address, ToBech32Ext},
         output::{MinimumStorageDepositBasicOutput, NativeToken, NftId, Output, TokenId},
-        rent::StorageScore,
+        protocol::StorageScore,
         slot::SlotIndex,
     },
     wallet::{
