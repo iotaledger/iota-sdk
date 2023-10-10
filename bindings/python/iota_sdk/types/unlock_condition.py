@@ -73,7 +73,7 @@ class StorageDepositReturnUnlockCondition:
 class TimelockUnlockCondition:
     """Defines a slot index until which the output can not be unlocked.
     Args:
-        slot_index: Slot index starting from which the output can be consumed.
+        slot_index: Slot index that defines when the output can be consumed.
     """
     slot_index: SlotIndex
     type: int = field(
