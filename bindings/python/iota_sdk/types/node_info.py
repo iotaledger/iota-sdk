@@ -2,8 +2,9 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from __future__ import annotations
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import List, Optional
+from dataclasses_json import config
 from iota_sdk.types.common import EpochIndex, HexStr, json, SlotIndex
 
 
@@ -25,10 +26,18 @@ class NodeInfoStatus:
         pruning_epoch: The index of the epoch before which the tangle history is pruned.
     """
     is_healthy: bool
-    accepted_tangle_time: str
-    relative_accepted_tangle_time: str
-    confirmed_tangle_time: str
-    relative_confirmed_tangle_time: str
+    accepted_tangle_time: int = field(metadata=config(
+        encoder=str
+    ))
+    relative_accepted_tangle_time: int = field(metadata=config(
+        encoder=str
+    ))
+    confirmed_tangle_time: int = field(metadata=config(
+        encoder=str
+    ))
+    relative_confirmed_tangle_time: int = field(metadata=config(
+        encoder=str
+    ))
     latest_commitment_id: HexStr
     latest_finalized_slot: SlotIndex
     latest_accepted_block_slot: SlotIndex
@@ -46,9 +55,15 @@ class NodeInfoMetrics:
         confirmed_blocks_per_second: The current rate of confirmed blocks per second.
         confirmation_rate: The ratio of confirmed blocks to new blocks of the last confirmed slot.
     """
-    blocks_per_second: float
-    confirmed_blocks_per_second: float
-    confirmation_rate: float
+    blocks_per_second: float = field(metadata=config(
+        encoder=str
+    ))
+    confirmed_blocks_per_second: float = field(metadata=config(
+        encoder=str
+    ))
+    confirmation_rate: float = field(metadata=config(
+        encoder=str
+    ))
 
 
 @json
@@ -120,9 +135,15 @@ class CongestionControlParameters:
         max_buffer_size: The maximum size of the buffer in the scheduler.
         max_validation_buffer_size: The maximum number of blocks in the validation buffer.
     """
-    min_reference_mana_cost: str
-    increase: str
-    decrease: str
+    min_reference_mana_cost: int = field(metadata=config(
+        encoder=str
+    ))
+    increase: int = field(metadata=config(
+        encoder=str
+    ))
+    decrease: int = field(metadata=config(
+        encoder=str
+    ))
     increase_threshold: int
     decrease_threshold: int
     scheduler_rate: int
@@ -203,18 +224,30 @@ class ProtocolParameters:
     bech32_hrp: str
     rent_structure: RentStructure
     work_score_structure: WorkScoreStructure
-    token_supply: str
-    genesis_unix_timestamp: str
+    token_supply: int = field(metadata=config(
+        encoder=str
+    ))
+    genesis_unix_timestamp: int = field(metadata=config(
+        encoder=str
+    ))
     slot_duration_in_seconds: int
     slots_per_epoch_exponent: int
     mana_structure: ManaStructure
-    staking_unbonding_period: str
+    staking_unbonding_period: int = field(metadata=config(
+        encoder=str
+    ))
     validation_blocks_per_slot: int
-    punishment_epochs: str
-    liveness_threshold: str
-    min_committable_age: str
-    max_committable_age: str
-    epoch_nearing_threshold: str
+    punishment_epochs: int
+    liveness_threshold: int
+    min_committable_age: int = field(metadata=config(
+        encoder=str
+    ))
+    max_committable_age: int = field(metadata=config(
+        encoder=str
+    ))
+    epoch_nearing_threshold: int = field(metadata=config(
+        encoder=str
+    ))
     congestion_control_parameters: CongestionControlParameters
     version_signaling: VersionSignaling
 
