@@ -56,7 +56,7 @@ where
             .public_addresses()
             .iter()
             .chain(account_details.internal_addresses().iter())
-            .map(|address| *address.address.as_ref())
+            .map(|address| address.address.as_ref().clone())
             .collect::<Vec<_>>();
 
         // Prevent consuming the voting output if not actually wanted

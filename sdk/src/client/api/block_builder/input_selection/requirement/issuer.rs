@@ -12,14 +12,14 @@ impl InputSelection {
     /// Potentially converts the error for a more accurate one.
     pub(crate) fn fulfill_issuer_requirement(
         &mut self,
-        address: Address,
+        address: &Address,
     ) -> Result<Vec<(InputSigningData, Option<AccountTransition>)>, Error> {
         log::debug!("Treating {address:?} issuer requirement as a sender requirement");
 
         match self.fulfill_sender_requirement(address) {
             Ok(res) => Ok(res),
             Err(Error::UnfulfillableRequirement(Requirement::Sender(_))) => {
-                Err(Error::UnfulfillableRequirement(Requirement::Issuer(address)))
+                Err(Error::UnfulfillableRequirement(Requirement::Issuer(address.clone())))
             }
             Err(e) => Err(e),
         }

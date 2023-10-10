@@ -21,7 +21,7 @@ async fn main() -> Result<()> {
         .await?;
     let account = wallet.get_account("Alice").await?;
 
-    for address in account.addresses().await? {
+    for address in account.addresses().await {
         println!("{}", address.address());
     }
 
