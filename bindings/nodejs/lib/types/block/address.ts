@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { plainToInstance } from 'class-transformer';
+import { plainToInstance, Type } from 'class-transformer';
 import { HexEncodedString } from '../utils';
 import { AccountId, NftId } from './id';
 
@@ -154,6 +154,19 @@ class ImplicitAccountCreationAddress extends Address {
     }
 }
 
+const RestrictedAddressDiscriminator = {
+    property: 'type',
+    subTypes: [
+        { value: Ed25519Address, name: AddressType.Ed25519 as any },
+        { value: AccountAddress, name: AddressType.Account as any },
+        { value: NftAddress, name: AddressType.Nft as any },
+        {
+            value: ImplicitAccountCreationAddress,
+            name: AddressType.ImplicitAccountCreation as any,
+        },
+    ],
+};
+
 /**
  * An address with restricted capabilities.
  */
@@ -161,6 +174,9 @@ class RestrictedAddress extends Address {
     /**
      * The inner address.
      */
+    @Type(() => Address, {
+        discriminator: RestrictedAddressDiscriminator,
+    })
     readonly address: Address;
     /**
      * The allowed capabilities bitflags.
