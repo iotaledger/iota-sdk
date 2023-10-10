@@ -18,16 +18,15 @@ use packable::{
 use crate::types::block::{address::Address, ConvertTo, Error};
 
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Deref)]
+#[repr(transparent)]
 pub struct Hrp(pub(crate) bech32::Hrp);
 
 impl core::fmt::Debug for Hrp {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_tuple("Hrp")
-            .field(&self.0)
-            // FIXME
-            // .field("display", &self.to_string())
-            // .field("inner", &prefix_hex::encode(&self.inner[..self.len as usize]))
-            // .field("len", &self.len)
+        f.debug_struct("Hrp")
+            .field("display", &self.0.to_string())
+            .field("bytes", &prefix_hex::encode(self.0.byte_iter().collect::<Vec<_>>()))
+            .field("len", &self.0.len())
             .finish()
     }
 }
@@ -35,19 +34,6 @@ impl core::fmt::Debug for Hrp {
 impl Hrp {
     /// Convert a string to an Hrp without checking validity.
     pub const fn from_str_unchecked(hrp: &str) -> Self {
-        // TODO: remove
-        // let len = hrp.len();
-        // let mut bytes = [0; 83];
-        // let hrp = hrp.as_bytes();
-        // let mut i = 0;
-        // while i < len {
-        //     bytes[i] = hrp[i];
-        //     i += 1;
-        // }
-        // Self {
-        //     inner: bytes,
-        //     len: len as _,
-        // }
         Self(bech32::Hrp::parse_unchecked(hrp))
     }
 }
@@ -64,13 +50,7 @@ impl FromStr for Hrp {
 
 impl core::fmt::Display for Hrp {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        // FIXME
-        // let hrp_str = self.inner[..self.len as usize]
-        //     .iter()
-        //     .map(|b| *b as char)
-        //     .collect::<String>();
-        // f.write_str(&hrp_str)
-        todo!("display")
+        self.0.fmt(f)
     }
 }
 
@@ -81,9 +61,7 @@ impl Packable for Hrp {
     #[inline]
     fn pack<P: Packer>(&self, packer: &mut P) -> Result<(), P::Error> {
         (self.len() as u8).pack(packer)?;
-        // TODO: remove
-        // packer.pack_bytes(&self.inner[..self.len()])?;
-        packer.pack_bytes(&self.0.byte_iter().collect::<Vec<u8>>());
+        packer.pack_bytes(&self.0.byte_iter().collect::<Vec<_>>());
 
         Ok(())
     }
@@ -93,23 +71,16 @@ impl Packable for Hrp {
         unpacker: &mut U,
         visitor: &Self::UnpackVisitor,
     ) -> Result<Self, UnpackError<Self::UnpackError, U::Error>> {
-        // FIXME
-        // let len = u8::unpack::<_, VERIFY>(unpacker, visitor).coerce()?;
+        let len = u8::unpack::<_, VERIFY>(unpacker, visitor).coerce()? as usize;
 
-        // if len > 83 {
-        //     return Err(UnpackError::Packable(Error::InvalidBech32Hrp(
-        //         "hrp len above 83".to_string(),
-        //     )));
-        // }
+        let mut bytes = alloc::vec![0u8; len];
+        unpacker.unpack_bytes(&mut bytes)?;
 
-        // let mut bytes = alloc::vec![0u8; len as usize];
-        // unpacker.unpack_bytes(&mut bytes)?;
+        let hrp = bytes.into_iter().map(|b| b as char).collect::<String>();
 
-        // let mut inner = [0; 83];
-        // inner[..len as usize].copy_from_slice(&bytes);
-
-        // Ok(Self { inner, len })
-        todo!("unpack")
+        Ok(Self(bech32::Hrp::parse(&hrp).map_err(|e| {
+            UnpackError::Packable(Error::InvalidBech32Hrp(e.to_string()))
+        })?))
     }
 }
 
@@ -158,17 +129,12 @@ impl FromStr for Bech32Address {
 
     fn from_str(address: &str) -> Result<Self, Self::Err> {
         match ::bech32::decode(address) {
-            Ok((hrp, bytes)) => {
-                // TODO: remove
-                // let hrp = hrp.parse()?;
-                // let bytes = Vec::<u8>::from_base32(&data).map_err(|_| Error::InvalidAddress)?;
-                Address::unpack_verified(bytes.as_slice(), &())
-                    .map_err(|_| Error::InvalidAddress)
-                    .map(|address| Self {
-                        hrp: Hrp(hrp),
-                        inner: address,
-                    })
-            }
+            Ok((hrp, bytes)) => Address::unpack_verified(bytes.as_slice(), &())
+                .map_err(|_| Error::InvalidAddress)
+                .map(|address| Self {
+                    hrp: Hrp(hrp),
+                    inner: address,
+                }),
             Err(_) => Err(Error::InvalidAddress),
         }
     }
@@ -214,19 +180,11 @@ impl Bech32Address {
 
 impl core::fmt::Display for Bech32Address {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        // FIXME
-        // write!(
-        //     f,
-        //     "{}",
-        //     ::bech32::encode(
-        //         self.hrp.0,
-        //         // TODO: remove
-        //         // self.inner.pack_to_vec().to_base32(),
-        //         &self.inner.pack_to_vec(),
-        //     )
-        //     .unwrap()
-        // )
-        todo!()
+        write!(
+            f,
+            "{}",
+            bech32::encode::<bech32::Bech32>(self.hrp.0, &self.inner.pack_to_vec(),).unwrap()
+        )
     }
 }
 
