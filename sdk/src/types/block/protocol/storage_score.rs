@@ -8,8 +8,13 @@ use packable::Packable;
 use crate::types::block::{
     address::{Address, Ed25519Address},
     output::{
-        unlock_condition::{AddressUnlockCondition, ExpirationUnlockCondition, StorageDepositReturnUnlockCondition},
-        AccountOutput, BasicOutput, BasicOutputBuilder, NativeTokens, Output, OutputId,
+        feature::{BlockIssuerFeature, BlockIssuerKey, Ed25519BlockIssuerKey},
+        unlock_condition::{
+            AddressUnlockCondition, ExpirationUnlockCondition, GovernorAddressUnlockCondition,
+            StateControllerAddressUnlockCondition, StorageDepositReturnUnlockCondition,
+        },
+        AccountId, AccountOutput, AccountOutputBuilder, BasicOutput, BasicOutputBuilder, NativeTokens, Output,
+        OutputId,
     },
     slot::SlotIndex,
     BlockId, Error,
@@ -36,25 +41,42 @@ pub struct RentStructure {
 impl RentStructure {
     /// Creates a new [`RentStructure`]. Computes the score offset for implicit account creation addresses.
     pub fn new(rent_parameters: RentParameters) -> Self {
-        let mut rent_structure = Self {
+        let mut rent_struct = Self {
             rent_parameters,
             storage_score_offset_implicit_account_creation_address: 0,
         };
 
-        // set the storage score offset for implicit account creation addresses as
+        // TODO: check TIP for changes!
+        // Set the storage score offset for implicit account creation addresses as
         // the difference between the storage score of the dummy account and the storage
         // score of the dummy basic output minus the storage score of the dummy address.
-        let dummy_basic_output_score = BasicOutput::dummy().storage_score(rent_structure);
-        let dummy_address_score = Ed25519Address::dummy().storage_score(rent_structure);
-        let basic_score_without_address = dummy_basic_output_score
-            .checked_sub(dummy_address_score)
-            .expect("underflow");
-        let dummy_account_output_score = AccountOutput::dummy().storage_score(rent_structure);
 
-        rent_structure.storage_score_offset_implicit_account_creation_address = dummy_account_output_score
+        // Unwrap: cannot fail for provided dummy data.
+        let basic_output_score = BasicOutputBuilder::new_with_amount(0)
+            .add_unlock_condition(AddressUnlockCondition::new(Ed25519Address::null()))
+            .finish()
+            .unwrap()
+            .storage_score(rent_struct);
+        let ed25519_address_score = Ed25519Address::null().storage_score(rent_struct);
+        // Unwrap: should never underflow.
+        let basic_score_without_address = basic_output_score
+            .checked_sub(ed25519_address_score)
+            .expect("underflow");
+        // Unwrap: cannot fail for provided dummy data.
+        let account_output_score = AccountOutputBuilder::new_with_amount(0, AccountId::null())
+            .add_unlock_condition(GovernorAddressUnlockCondition::new(Ed25519Address::null()))
+            .add_unlock_condition(StateControllerAddressUnlockCondition::new(Ed25519Address::null()))
+            .add_feature(
+                BlockIssuerFeature::new(0, vec![BlockIssuerKey::Ed25519(Ed25519BlockIssuerKey::null())]).unwrap(),
+            )
+            .finish()
+            .unwrap()
+            .storage_score(rent_struct);
+        // Unwrap: should never underflow.
+        rent_struct.storage_score_offset_implicit_account_creation_address = account_output_score
             .checked_sub(basic_score_without_address)
             .expect("underflow");
-        rent_structure
+        rent_struct
     }
 }
 

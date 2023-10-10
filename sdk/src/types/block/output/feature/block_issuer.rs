@@ -87,7 +87,7 @@ impl Ed25519BlockIssuerKey {
     }
 
     /// Creates a dummy [`Ed25519BlockIssuerKey`] used to calculate a storage score for implicit account addresses.
-    pub(crate) fn dummy() -> Self {
+    pub(crate) fn null() -> Self {
         // Unwrap: we provide a valid byte array
         Self(ed25519::PublicKey::try_from_bytes([0; Self::PUBLIC_KEY_LENGTH]).unwrap())
     }

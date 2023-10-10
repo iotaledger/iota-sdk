@@ -322,14 +322,6 @@ impl BasicOutput {
 
         None
     }
-
-    /// Creates a dummy [`BasicOutput`] used to calculate a storage score for implicit account addresses.
-    pub(crate) fn dummy() -> Self {
-        BasicOutputBuilder::new_with_amount(0)
-            .add_unlock_condition(AddressUnlockCondition::new(Ed25519Address::dummy()))
-            .finish()
-            .unwrap()
-    }
 }
 
 impl StorageScore for BasicOutput {

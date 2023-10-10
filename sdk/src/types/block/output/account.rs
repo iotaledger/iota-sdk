@@ -620,19 +620,6 @@ impl AccountOutput {
 
         Ok(())
     }
-
-    /// Creates a dummy [`AccountOutput`] used to calculate a storage score for implicit account addresses.
-    pub(crate) fn dummy() -> Self {
-        // Unwrap: cannot fail for provided dummy data.
-        AccountOutputBuilder::new_with_amount(0, AccountId::null())
-            .add_unlock_condition(GovernorAddressUnlockCondition::new(Ed25519Address::dummy()))
-            .add_unlock_condition(StateControllerAddressUnlockCondition::new(Ed25519Address::dummy()))
-            .add_feature(
-                BlockIssuerFeature::new(0, vec![BlockIssuerKey::Ed25519(Ed25519BlockIssuerKey::dummy())]).unwrap(),
-            )
-            .finish()
-            .unwrap()
-    }
 }
 
 impl StateTransitionVerifier for AccountOutput {

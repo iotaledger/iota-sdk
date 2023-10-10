@@ -28,8 +28,9 @@ impl Ed25519Address {
         Self::from(address)
     }
 
-    /// Creates a dummy [`Ed25519Address`] used to calculate a storage score for implicit account addresses.
-    pub(crate) fn dummy() -> Self {
+    /// Creates an empty [`Ed25519Address`].
+    /// This is used internally to calculate a storage score for implicit account addresses.
+    pub(crate) fn null() -> Self {
         Self([0; Self::LENGTH])
     }
 }
@@ -55,7 +56,8 @@ impl core::fmt::Debug for Ed25519Address {
 }
 
 impl StorageScore for Ed25519Address {
-    fn storage_score(&self, _rent_struct: RentStructure) -> u64 {
+    fn storage_score(&self, rent_struct: RentStructure) -> u64 {
+        // TODO: wait for TIP for this to change?!
         0
     }
 }
