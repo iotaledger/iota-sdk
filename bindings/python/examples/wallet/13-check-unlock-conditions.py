@@ -17,7 +17,7 @@ accountAddresses = account.addresses()
 
 # using prepare_output
 output = account.prepare_output(OutputParams(
-    accountAddresses[0].address, "1000000"))
+    accountAddresses[0].address, 1000000))
 
 
 def hexAddress(address):

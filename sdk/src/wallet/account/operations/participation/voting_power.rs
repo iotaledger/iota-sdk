@@ -80,7 +80,8 @@ where
                     .add_unlock_condition(AddressUnlockCondition::new(
                         self.public_addresses()
                             .await
-                            .first()
+                            .into_iter()
+                            .next()
                             .expect("account needs to have a public address")
                             .address
                             .inner,

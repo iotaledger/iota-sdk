@@ -5,6 +5,7 @@ mod account;
 mod bech32;
 mod ed25519;
 mod nft;
+mod restricted;
 
 use core::str::FromStr;
 
