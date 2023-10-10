@@ -100,7 +100,7 @@ async fn backup_and_restore() -> Result<()> {
 
     // Get account
     let recovered_account = restore_wallet.get_account("Alice").await?;
-    assert_eq!(account.addresses().await?, recovered_account.addresses().await?);
+    assert_eq!(account.addresses().await, recovered_account.addresses().await);
 
     // secret manager is the same
     assert_eq!(
@@ -182,7 +182,7 @@ async fn backup_and_restore_mnemonic_secret_manager() -> Result<()> {
 
     // Get account
     let recovered_account = restore_wallet.get_account("Alice").await?;
-    assert_eq!(account.addresses().await?, recovered_account.addresses().await?);
+    assert_eq!(account.addresses().await, recovered_account.addresses().await);
 
     // secret manager is the same
     assert_eq!(
@@ -264,7 +264,7 @@ async fn backup_and_restore_different_coin_type() -> Result<()> {
     assert_eq!(new_account.details().await.coin_type(), &IOTA_COIN_TYPE);
     // secret manager is the same
     assert_eq!(
-        new_account.addresses().await?[0].address(),
+        new_account.first_address_bech32().await,
         "smr1qrpwecegav7eh0z363ca69laxej64rrt4e3u0rtycyuh0mam3vq3ulygj9p"
     );
 
@@ -346,8 +346,8 @@ async fn backup_and_restore_same_coin_type() -> Result<()> {
 
     // addresses are still there
     assert_eq!(
-        restored_accounts[0].addresses().await?,
-        account_before_backup.addresses().await?
+        restored_accounts[0].addresses().await,
+        account_before_backup.addresses().await
     );
 
     // compare client options, they are not restored
@@ -425,8 +425,8 @@ async fn backup_and_restore_different_coin_type_dont_ignore() -> Result<()> {
     // No accounts restored, because the coin type was different
     let restored_account = restore_wallet.get_account("Alice").await?;
     assert_eq!(
-        account.addresses().await?[0].address(),
-        restored_account.addresses().await?[0].address(),
+        account.first_address_bech32().await,
+        restored_account.first_address_bech32().await,
     );
 
     // Restored coin type is used
@@ -434,7 +434,7 @@ async fn backup_and_restore_different_coin_type_dont_ignore() -> Result<()> {
     assert_eq!(new_account.details().await.coin_type(), &SHIMMER_COIN_TYPE);
     // secret manager is restored
     assert_eq!(
-        new_account.addresses().await?[0].address(),
+        new_account.first_address_bech32().await,
         "smr1qzvjvjyqxgfx4f0m3xhn2rj24e03dwsmjz082735y3wx88v2gudu2afedhu"
     );
 
