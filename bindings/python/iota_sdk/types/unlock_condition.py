@@ -6,7 +6,7 @@ from dataclasses import dataclass, field
 from typing import Dict, List, TypeAlias, Union, Any
 from dataclasses_json import config
 from iota_sdk.types.address import Address, AccountAddress
-from iota_sdk.types.common import json
+from iota_sdk.types.common import json, SlotIndex
 from iota_sdk.types.address import deserialize_address
 
 
@@ -71,11 +71,11 @@ class StorageDepositReturnUnlockCondition:
 @json
 @dataclass
 class TimelockUnlockCondition:
-    """A timelock unlock condition.
+    """Defines a slot index until which the output can not be unlocked.
     Args:
-        unix_time: The Unix timestamp marking the end of the timelock.
+        slot_index: Slot index that defines when the output can be consumed.
     """
-    unix_time: int
+    slot_index: SlotIndex
     type: int = field(
         default_factory=lambda: int(
             UnlockConditionType.Timelock),
@@ -85,12 +85,13 @@ class TimelockUnlockCondition:
 @json
 @dataclass
 class ExpirationUnlockCondition:
-    """An expiration unlock condition.
+    """Defines a slot index until which only the Address defined in the Address Unlock Condition is allowed to unlock the output. After the slot index is reached/passed, only the Return Address can unlock it.
     Args:
-        unix_time: Unix timestamp marking the expiration of the claim.
+        slot_index: Before this slot index, Address Unlock Condition is allowed to unlock the output,
+                    after that only the address defined in Return Address.
         return_address: The return address if the output was not claimed in time.
     """
-    unix_time: int
+    slot_index: SlotIndex
     return_address: Address = field(
         metadata=config(
             decoder=deserialize_address

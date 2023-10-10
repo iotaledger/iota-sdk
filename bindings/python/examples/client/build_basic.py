@@ -62,7 +62,7 @@ basic_output = client.build_basic_output(
         address_unlock_condition,
         ExpirationUnlockCondition(
             return_address=Ed25519Address(hex_address),
-            unix_time=1
+            slot_index=1
         )
     ],
     amount=1000000,
