@@ -191,6 +191,29 @@ class ManaStructure:
 
 @json
 @dataclass
+class RewardsParameters:
+    """Rewards Parameters defines the parameters that are used to calculate Mana rewards.
+
+    Attributes:
+        validator_blocks_per_slot: The number of validation blocks that should be issued by a selected validator per slot during its epoch duties.
+        profit_margin_exponent: Used for shift operation during calculation of profit margin.
+        bootstrapping_duration: The length of the bootstrapping phase in epochs.
+        mana_share_coefficient: The coefficient used for calculation of initial rewards.
+        decay_balancing_constant_exponent: The exponent used for calculation of the initial reward.
+        decay_balancing_constant: An integer approximation which is calculated using the `decay_balancing_constant_exponent`.
+        pool_coefficient_exponent: The exponent used for shifting operation during the pool rewards calculations.
+    """
+    validator_blocks_per_slot: int
+    profit_margin_exponent: int
+    bootstrapping_duration: int
+    mana_share_coefficient: int
+    decay_balancing_constant_exponent: int
+    decay_balancing_constant: int
+    pool_coefficient_exponent: int
+
+
+@json
+@dataclass
 class ProtocolParameters:
     """The protocol parameters.
 
@@ -217,6 +240,7 @@ class ProtocolParameters:
         epoch_nearing_threshold: Determine the slot that should trigger a new committee selection for the next and upcoming epoch.
         congestion_control_parameters: Congestion Control Parameters defines the parameters used to calculate the Reference Mana Cost (RMC).
         version_signaling: The version signaling parameters.
+        rewards_parameters: Rewards Parameters defines the parameters that are used to calculate Mana rewards.
     """
     type: int
     version: int
@@ -250,6 +274,7 @@ class ProtocolParameters:
     ))
     congestion_control_parameters: CongestionControlParameters
     version_signaling: VersionSignaling
+    rewards_parameters: RewardsParameters
 
 
 @json
