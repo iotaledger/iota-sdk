@@ -3,8 +3,8 @@
 
 from typing import NewType, Optional
 from enum import IntEnum
-from dataclasses import dataclass
-from dataclasses_json import DataClassJsonMixin, dataclass_json, LetterCase, Undefined
+from dataclasses import dataclass, field
+from dataclasses_json import DataClassJsonMixin, dataclass_json, LetterCase, Undefined, config
 
 HexStr = NewType("HexStr", str)
 EpochIndex = NewType("EpochIndex", int)
@@ -91,6 +91,17 @@ class Node():
         return encoded
 
 
+def opt_int_encoder(value):
+    """Transforms int to string if Optional is not None
+
+     Attributes:
+            value: The optional int
+    """
+    if value is not None:
+        return str(value)
+    return None
+
+
 @json
 @dataclass
 class AddressAndAmount():
@@ -100,14 +111,7 @@ class AddressAndAmount():
             amount: The base coin amount to send.
             address: The receive address.
     """
-    amount: int
+    amount: int = field(metadata=config(
+        encoder=str
+    ))
     address: str
-
-    @staticmethod
-    def _to_dict_custom(config):
-        config = super().to_dict()
-
-        if 'amount' in config:
-            config['amount'] = str(config['amount'])
-
-        return config

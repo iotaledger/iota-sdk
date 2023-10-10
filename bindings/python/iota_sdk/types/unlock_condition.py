@@ -57,7 +57,9 @@ class StorageDepositReturnUnlockCondition:
         amount: The amount of base coins the consuming transaction must deposit to `return_address`.
         return_address: The address to return the amount to.
     """
-    amount: str
+    amount: int = field(metadata=config(
+        encoder=str
+    ))
     return_address: Address = field(
         metadata=config(
             decoder=deserialize_address
