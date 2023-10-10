@@ -168,7 +168,7 @@ class ExpirationUnlockCondition extends UnlockCondition {
     })
     readonly returnAddress: Address;
     /**
-     * Before this slot index, Address Unlock Condition is allowed to unlock the output, after that only the address defined in Return Address.
+     * Before this slot index, the Address Unlock Condition is allowed to unlock the output, after that only the address defined in Return Address can.
      */
     readonly slotIndex: SlotIndex;
 
