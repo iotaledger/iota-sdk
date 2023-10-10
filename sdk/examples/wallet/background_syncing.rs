@@ -35,7 +35,7 @@ async fn main() -> Result<()> {
 
     // Get or create new account
     let account = wallet.get_or_create_account("Alice").await?;
-    let addresses = account.addresses().await?;
+    let addresses = account.addresses().await;
 
     // Manually sync to ensure we have the correct funds to start with
     let balance = account.sync(None).await?;

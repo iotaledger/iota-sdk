@@ -19,7 +19,7 @@ use crate::types::block::{address::Address, ConvertTo, Error};
 
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Deref)]
 #[repr(transparent)]
-pub struct Hrp(pub(crate) bech32::Hrp);
+pub struct Hrp(bech32::Hrp);
 
 impl core::fmt::Debug for Hrp {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
@@ -43,7 +43,7 @@ impl FromStr for Hrp {
 
     fn from_str(hrp: &str) -> Result<Self, Self::Err> {
         Ok(Self(
-            bech32::Hrp::parse(hrp).map_err(|_| Error::InvalidBech32Hrp(hrp.to_string()))?,
+            bech32::Hrp::parse(hrp).map_err(|e| Error::InvalidBech32Hrp(format!("{hrp}: {e}")))?,
         ))
     }
 }
@@ -60,7 +60,7 @@ impl Packable for Hrp {
 
     #[inline]
     fn pack<P: Packer>(&self, packer: &mut P) -> Result<(), P::Error> {
-        (self.len() as u8).pack(packer)?;
+        (self.0.len() as u8).pack(packer)?;
         packer.pack_bytes(&self.0.byte_iter().collect::<Vec<_>>());
 
         Ok(())
@@ -116,7 +116,7 @@ impl<T: AsRef<str> + Send> ConvertTo<Hrp> for T {
 }
 
 /// An address and its network type.
-#[derive(Copy, Clone, Eq, PartialEq, Hash, AsRef, Deref, Ord, PartialOrd)]
+#[derive(Clone, Eq, PartialEq, Hash, AsRef, Deref, Ord, PartialOrd)]
 pub struct Bech32Address {
     pub(crate) hrp: Hrp,
     #[as_ref]
@@ -214,7 +214,7 @@ impl PartialEq<str> for Bech32Address {
 
 impl<T: core::borrow::Borrow<Bech32Address>> From<T> for Address {
     fn from(value: T) -> Self {
-        value.borrow().inner
+        value.borrow().inner.clone()
     }
 }
 

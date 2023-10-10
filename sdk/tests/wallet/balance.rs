@@ -103,15 +103,13 @@ async fn balance_expiration() -> Result<()> {
     let outputs = [BasicOutputBuilder::new_with_amount(1_000_000)
         // Send to account 1 with expiration to account 2, both have no amount yet
         .with_unlock_conditions([
-            UnlockCondition::Address(AddressUnlockCondition::new(
-                *account_1.addresses().await?[0].address().as_ref(),
-            )),
+            UnlockCondition::Address(AddressUnlockCondition::new(account_1.first_address_bech32().await)),
             UnlockCondition::Expiration(ExpirationUnlockCondition::new(
-                *account_2.addresses().await?[0].address().as_ref(),
+                account_2.first_address_bech32().await,
                 account_0.client().get_slot_index().await? + slots_until_expired,
             )?),
         ])
-        .with_features([SenderFeature::new(*account_0.addresses().await?[0].address().as_ref())])
+        .with_features([SenderFeature::new(account_0.first_address_bech32().await)])
         .finish_output(token_supply)?];
 
     let balance_before_tx = account_0.balance().await?;
@@ -160,7 +158,7 @@ async fn balance_expiration() -> Result<()> {
     let outputs = [BasicOutputBuilder::new_with_amount(1_000_000)
         // Send to account 1 with expiration to account 2, both have no amount yet
         .with_unlock_conditions([AddressUnlockCondition::new(
-            *account_1.addresses().await?[0].address().as_ref(),
+            account_1.addresses().await[0].clone().into_bech32(),
         )])
         .finish_output(token_supply)?];
     let _tx = account_2.send_outputs(outputs, None).await?;
@@ -182,7 +180,7 @@ async fn addresses_balance() -> Result<()> {
     let acc_1_addr = &account_1.generate_ed25519_addresses(1, None).await?[0];
 
     let balance_0 = account_0
-        .addresses_balance(addresses_0.iter().map(|a| a.address()).collect())
+        .addresses_balance(addresses_0.iter().map(|a| a.address().clone()).collect())
         .await?;
     let balance_0_sync = account_0.balance().await?;
     let to_send = balance_0.base_coin().available();
@@ -196,10 +194,10 @@ async fn addresses_balance() -> Result<()> {
     assert_eq!(balance_1.base_coin().available(), 0);
 
     // Send to 1
-    let tx = account_0.send(to_send, acc_1_addr.address(), None).await?;
+    let tx = account_0.send(to_send, acc_1_addr.address().clone(), None).await?;
     // Balance should update without sync
     let balance_0 = account_0
-        .addresses_balance(addresses_0.iter().map(|a| a.address()).collect())
+        .addresses_balance(addresses_0.iter().map(|a| a.address().clone()).collect())
         .await?;
     let balance_0_sync = account_0.balance().await?;
     assert_eq!(balance_0.base_coin().available(), 0);
@@ -211,7 +209,7 @@ async fn addresses_balance() -> Result<()> {
     account_1.sync(None).await?;
 
     // Balance should have transferred entirely
-    let balance_1 = account_1.addresses_balance(vec![acc_1_addr.address()]).await?;
+    let balance_1 = account_1.addresses_balance(vec![acc_1_addr.address().clone()]).await?;
     let balance_1_sync = account_1.balance().await?;
     assert!(balance_1.base_coin().available() > 0);
     assert_eq!(balance_1, balance_1_sync);
@@ -219,19 +217,23 @@ async fn addresses_balance() -> Result<()> {
     // Internal transfer on account 1
     let acc_1_addr_2 = &account_1.generate_ed25519_addresses(1, None).await?[0];
 
-    let tx = account_1.send(to_send / 2, acc_1_addr_2.address(), None).await?;
+    let tx = account_1
+        .send(to_send / 2, acc_1_addr_2.address().clone(), None)
+        .await?;
     account_1
         .reissue_transaction_until_included(&tx.transaction_id, None, None)
         .await?;
     let balance_1_sync = account_1.sync(None).await?;
 
     // Check the new address
-    let balance_1 = account_1.addresses_balance(vec![acc_1_addr_2.address()]).await?;
+    let balance_1 = account_1
+        .addresses_balance(vec![acc_1_addr_2.address().clone()])
+        .await?;
     assert_eq!(to_send / 2, balance_1.base_coin().available());
 
     // Check old and new together
     let balance_1_total = account_1
-        .addresses_balance(vec![acc_1_addr.address(), acc_1_addr_2.address()])
+        .addresses_balance(vec![acc_1_addr.address().clone(), acc_1_addr_2.address().clone()])
         .await?;
     assert_eq!(balance_1_total, balance_1_sync);
 
