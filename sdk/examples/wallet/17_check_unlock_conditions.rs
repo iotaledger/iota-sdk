@@ -36,15 +36,15 @@ async fn main() -> Result<()> {
 
     let account_addresses = account
         .addresses()
-        .await?
+        .await
         .into_iter()
-        .map(|a| *a.address())
+        .map(|a| a.into_bech32())
         .collect::<Vec<Bech32Address>>();
 
     println!("ADDRESSES:\n{:#?}", account_addresses);
 
     let output = BasicOutputBuilder::new_with_amount(AMOUNT)
-        .add_unlock_condition(AddressUnlockCondition::new(*account_addresses[0].as_ref()))
+        .add_unlock_condition(AddressUnlockCondition::new(account_addresses[0].as_ref().clone()))
         .finish_output(account.client().get_token_supply().await?)?;
 
     let controlled_by_account = if let [UnlockCondition::Address(address_unlock_condition)] = output

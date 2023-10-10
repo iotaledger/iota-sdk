@@ -48,13 +48,13 @@ impl Account {
             let mut output_ids = Vec::new();
             output_ids.extend(
                 self.client()
-                    .basic_output_ids([QueryParameter::Address(bech32_address)])
+                    .basic_output_ids([QueryParameter::Address(bech32_address.clone())])
                     .await?
                     .items,
             );
             output_ids.extend(
                 self.client()
-                    .basic_output_ids([QueryParameter::StorageDepositReturnAddress(bech32_address)])
+                    .basic_output_ids([QueryParameter::StorageDepositReturnAddress(bech32_address.clone())])
                     .await?
                     .items,
             );
@@ -73,7 +73,8 @@ impl Account {
             let client = self.client();
             let tasks = [
                 // Get basic outputs
-                async move {
+                async {
+                    let bech32_address = bech32_address.clone();
                     let client = client.clone();
                     tokio::spawn(async move {
                         client
@@ -85,7 +86,8 @@ impl Account {
                 }
                 .boxed(),
                 // Get outputs where the address is in the storage deposit return unlock condition
-                async move {
+                async {
+                    let bech32_address = bech32_address.clone();
                     let client = client.clone();
                     tokio::spawn(async move {
                         client
@@ -97,7 +99,8 @@ impl Account {
                 }
                 .boxed(),
                 // Get outputs where the address is in an expired expiration unlock condition
-                async move {
+                async {
+                    let bech32_address = bech32_address.clone();
                     let client = client.clone();
                     tokio::spawn(async move {
                         client

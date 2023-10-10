@@ -63,7 +63,7 @@ async fn main() -> Result<()> {
             MintNftParams::new()
                 .with_immutable_metadata(get_immutable_metadata(index).to_bytes())
                 // The NFT address from the NFT we minted in mint_issuer_nft example
-                .with_issuer(issuer)
+                .with_issuer(issuer.clone())
         })
         .collect::<Vec<_>>();
 

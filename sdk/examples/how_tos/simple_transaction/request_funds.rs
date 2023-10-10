@@ -31,7 +31,7 @@ async fn main() -> Result<()> {
     let balance = account.sync(None).await?;
     println!("Account synced");
 
-    let addresses = account.addresses().await?;
+    let addresses = account.addresses().await;
 
     let funds_before = balance.base_coin().available();
     println!("Current available funds: {funds_before}");

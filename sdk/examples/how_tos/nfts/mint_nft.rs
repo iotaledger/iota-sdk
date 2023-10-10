@@ -49,7 +49,7 @@ async fn main() -> Result<()> {
     account.sync(None).await?;
 
     // We send from the first address in the account.
-    let sender_address = *account.addresses().await?[0].address();
+    let sender_address = account.first_address_bech32().await;
 
     // Set the stronghold password
     wallet
@@ -67,10 +67,10 @@ async fn main() -> Result<()> {
 
     let nft_params = [MintNftParams::new()
         .try_with_address(NFT1_OWNER_ADDRESS)?
-        .try_with_sender(sender_address)?
+        .try_with_sender(sender_address.clone())?
         .with_metadata(NFT1_METADATA.as_bytes().to_vec())
         .with_tag(NFT1_TAG.as_bytes().to_vec())
-        .try_with_issuer(sender_address)?
+        .try_with_issuer(sender_address.clone())?
         .with_immutable_metadata(metadata.to_bytes())];
 
     let transaction = account.mint_nfts(nft_params, None).await?;
@@ -92,8 +92,8 @@ async fn main() -> Result<()> {
     let outputs = [
         // address of the owner of the NFT
         NftOutputBuilder::new_with_amount(NFT2_AMOUNT, NftId::null())
-            .add_unlock_condition(AddressUnlockCondition::new(sender_address))
-            .add_feature(SenderFeature::new(sender_address))
+            .add_unlock_condition(AddressUnlockCondition::new(sender_address.clone()))
+            .add_feature(SenderFeature::new(sender_address.clone()))
             .add_immutable_feature(IssuerFeature::new(sender_address))
             .finish_output(token_supply)?,
     ];

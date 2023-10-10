@@ -139,8 +139,11 @@ impl Account {
         let rent_structure = self.client().get_rent_structure().await?;
         let token_supply = self.client().get_token_supply().await?;
 
-        let account_addresses = self.addresses().await?;
-        let default_return_address = account_addresses.first().ok_or(Error::FailedToGetRemainder)?;
+        let account_addresses = self.addresses().await;
+        let default_return_address = account_addresses
+            .into_iter()
+            .next()
+            .ok_or(Error::FailedToGetRemainder)?;
 
         let slot_index = self.client().get_slot_index().await?;
 
@@ -164,7 +167,7 @@ impl Account {
                     Ok::<_, Error>(return_address)
                 })
                 .transpose()?
-                .unwrap_or(default_return_address.address);
+                .unwrap_or_else(|| default_return_address.address.clone());
 
             // Get the minimum required amount for an output assuming it does not need a storage deposit.
             let output = BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)
@@ -205,7 +208,7 @@ impl Account {
                             // We send the storage_deposit_amount back to the sender, so only the additional amount is
                             // sent
                             StorageDepositReturnUnlockCondition::new(
-                                return_address,
+                                return_address.clone(),
                                 storage_deposit_amount,
                                 token_supply,
                             )?,

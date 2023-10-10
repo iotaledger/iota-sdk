@@ -84,8 +84,8 @@ async fn print_accounts(wallet: &Wallet) -> Result<()> {
 }
 
 async fn generate_addresses(account: &Account, max: usize) -> Result<()> {
-    if account.addresses().await?.len() < max {
-        let num_addresses_to_generate = max - account.addresses().await?.len();
+    if account.addresses().await.len() < max {
+        let num_addresses_to_generate = max - account.addresses().await.len();
         println!("Generating {num_addresses_to_generate} addresses ...");
         let now = tokio::time::Instant::now();
         account
@@ -97,7 +97,7 @@ async fn generate_addresses(account: &Account, max: usize) -> Result<()> {
 }
 
 async fn print_addresses(account: &Account) -> Result<()> {
-    let addresses = account.addresses().await?;
+    let addresses = account.addresses().await;
     println!("{}'s addresses:", account.alias().await);
     for address in addresses {
         println!("- {}", address.address());

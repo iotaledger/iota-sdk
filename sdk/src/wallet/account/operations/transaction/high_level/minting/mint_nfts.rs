@@ -159,7 +159,7 @@ impl Account {
         log::debug!("[TRANSACTION] prepare_mint_nfts");
         let rent_structure = self.client().get_rent_structure().await?;
         let token_supply = self.client().get_token_supply().await?;
-        let account_addresses = self.addresses().await?;
+        let account_addresses = self.addresses().await;
         let mut outputs = Vec::new();
 
         for MintNftParams {
@@ -177,12 +177,11 @@ impl Account {
                     address
                 }
                 // todo other error message
-                None => {
-                    account_addresses
-                        .first()
-                        .ok_or(WalletError::FailedToGetRemainder)?
-                        .address
-                }
+                None => account_addresses
+                    .first()
+                    .ok_or(WalletError::FailedToGetRemainder)?
+                    .address
+                    .clone(),
             };
 
             // NftId needs to be set to 0 for the creation

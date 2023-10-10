@@ -83,15 +83,15 @@ impl Account {
                                 account_index,
                                 WalletEvent::TransactionProgress(
                                     TransactionProgressEvent::GeneratingRemainderDepositAddress(AddressData {
-                                        address: remainder_address.address,
+                                        address: remainder_address.address.clone(),
                                     }),
                                 ),
                             )
                             .await;
                         }
-                        Some(remainder_address.address().inner)
+                        Some(remainder_address.address.inner)
                     }
-                    RemainderValueStrategy::CustomAddress(address) => Some(*address),
+                    RemainderValueStrategy::CustomAddress(address) => Some(address.clone()),
                 }
             }
             None => None,

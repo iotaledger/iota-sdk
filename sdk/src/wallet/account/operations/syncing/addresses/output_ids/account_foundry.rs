@@ -39,7 +39,7 @@ impl Account {
         {
             output_ids.extend(
                 client
-                    .account_output_ids([QueryParameter::Governor(bech32_address)])
+                    .account_output_ids([QueryParameter::Governor(bech32_address.clone())])
                     .await?
                     .items,
             );
@@ -55,7 +55,8 @@ impl Account {
         {
             let tasks = [
                 // Get outputs where the address is in the governor address unlock condition
-                async move {
+                async {
+                    let bech32_address = bech32_address.clone();
                     let client = client.clone();
                     task::spawn(async move {
                         client
@@ -67,7 +68,8 @@ impl Account {
                 }
                 .boxed(),
                 // Get outputs where the address is in the state controller unlock condition
-                async move {
+                async {
+                    let bech32_address = bech32_address.clone();
                     let client = client.clone();
                     task::spawn(async move {
                         client

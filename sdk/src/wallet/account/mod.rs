@@ -59,6 +59,7 @@ use crate::{
     types::{
         api::core::response::OutputWithMetadataResponse,
         block::{
+            address::Bech32Address,
             output::{dto::FoundryOutputDto, AccountId, FoundryId, FoundryOutput, NftId, Output, OutputId, TokenId},
             payload::{transaction::TransactionId, TransactionPayload},
         },
@@ -283,11 +284,18 @@ impl AccountInner {
     }
 
     /// Returns all addresses of the account
-    pub async fn addresses(&self) -> Result<Vec<Bip44Address>> {
+    pub async fn addresses(&self) -> Vec<Bip44Address> {
         let account_details = self.details().await;
         let mut all_addresses = account_details.public_addresses().clone();
         all_addresses.extend(account_details.internal_addresses().clone());
-        Ok(all_addresses.to_vec())
+
+        all_addresses.to_vec()
+    }
+
+    /// Returns the first address of the account as bech32
+    pub async fn first_address_bech32(&self) -> Bech32Address {
+        // PANIC: unwrap is fine as one address is always generated during account creation.
+        self.addresses().await.into_iter().next().unwrap().into_bech32()
     }
 
     /// Returns all public addresses of the account
