@@ -231,7 +231,7 @@ class DelegationOutput:
     validator_address: HexStr
     start_epoch: EpochIndex
     end_epoch: EpochIndex
-    unlock_conditions: List[UnlockCondition] = field(metadata=config(
+    unlock_conditions: List[AddressUnlockCondition] = field(metadata=config(
         decoder=deserialize_unlock_conditions
     ))
     type: int = field(default_factory=lambda: int(
