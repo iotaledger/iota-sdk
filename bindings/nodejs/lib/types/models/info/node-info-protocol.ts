@@ -134,7 +134,7 @@ export interface RewardsParameters {
      */
     decayBalancingConstantExponent: number;
     /**
-     * Decay Balancing Constant is an integer approximation calculated based on chosen DecayBalancingConstantExponent.
+     * Decay Balancing Constant is an integer approximation calculated based on chosen Decay Balancing Constant Exponent.
      */
     decayBalancingConstant: u64;
     /**
