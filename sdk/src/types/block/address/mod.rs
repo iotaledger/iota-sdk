@@ -216,11 +216,11 @@ impl From<&Self> for Address {
 }
 
 impl StorageScore for Address {
-    fn storage_score(&self, rent_struct: RentStructure) -> u64 {
+    fn storage_score(&self, rent_structure: RentStructure) -> u64 {
         match self {
-            Self::Account(account) => account.storage_score(rent_struct),
-            Self::Ed25519(ed25519) => ed25519.storage_score(rent_struct),
-            Self::Nft(nft) => nft.storage_score(rent_struct),
+            Self::Account(account) => account.storage_score(rent_structure),
+            Self::Ed25519(ed25519) => ed25519.storage_score(rent_structure),
+            Self::Nft(nft) => nft.storage_score(rent_structure),
             // TODO: other address types once merged
         }
     }

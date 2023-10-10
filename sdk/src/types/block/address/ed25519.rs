@@ -56,7 +56,7 @@ impl core::fmt::Debug for Ed25519Address {
 }
 
 impl StorageScore for Ed25519Address {
-    fn storage_score(&self, rent_struct: RentStructure) -> u64 {
+    fn storage_score(&self, rent_structure: RentStructure) -> u64 {
         // TODO: wait for TIP for this to change?!
         0
     }

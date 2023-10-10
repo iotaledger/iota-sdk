@@ -71,7 +71,7 @@ impl core::fmt::Debug for TagFeature {
 
 impl StorageScore for TagFeature {
     fn storage_score(&self, _rent_struct: RentStructure) -> u64 {
-        // TODO: In iota.go you can specify a closure f(rent_struct) -> u64 for this feature
+        // TODO: In iota.go you can specify a closure f(rent_structure) -> u64 for this feature
         // which immediately returns, hence overrides the default storage score.
         0
     }

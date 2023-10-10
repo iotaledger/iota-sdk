@@ -385,8 +385,8 @@ impl Output {
     /// storage score, given by [`RentParameters`].
     /// If there is a [`StorageDepositReturnUnlockCondition`](unlock_condition::StorageDepositReturnUnlockCondition),
     /// its amount is also checked.
-    pub fn verify_storage_deposit(&self, rent_struct: RentStructure, token_supply: u64) -> Result<(), Error> {
-        let required_output_amount = self.rent_cost(rent_struct);
+    pub fn verify_storage_deposit(&self, rent_structure: RentStructure, token_supply: u64) -> Result<(), Error> {
+        let required_output_amount = self.rent_cost(rent_structure);
 
         if self.amount() < required_output_amount {
             return Err(Error::InsufficientStorageDepositAmount {
@@ -408,7 +408,8 @@ impl Output {
                 });
             }
 
-            let minimum_deposit = minimum_storage_deposit(return_condition.return_address(), rent_struct, token_supply);
+            let minimum_deposit =
+                minimum_storage_deposit(return_condition.return_address(), rent_structure, token_supply);
 
             // `Minimum Storage Deposit` ≤ `Return Amount`
             if return_condition.amount() < minimum_deposit {
@@ -502,47 +503,47 @@ pub(crate) fn verify_output_amount_packable<const VERIFY: bool>(
 
 /// Computes the minimum amount that a storage deposit has to match to allow creating a return [`Output`] back to the
 /// sender [`Address`].
-fn minimum_storage_deposit(address: &Address, rent_struct: RentStructure, token_supply: u64) -> u64 {
+fn minimum_storage_deposit(address: &Address, rent_structure: RentStructure, token_supply: u64) -> u64 {
     // PANIC: This can never fail because the amount will always be within the valid range. Also, the actual value is
     // not important, we are only interested in the storage requirements of the type.
-    BasicOutputBuilder::new_with_minimum_storage_deposit(rent_struct)
+    BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)
         .add_unlock_condition(AddressUnlockCondition::new(*address))
         .finish_with_params(token_supply)
         .unwrap()
         .amount()
 }
 
-fn storage_score_offset_output(rent_struct: RentStructure) -> u64 {
+fn storage_score_offset_output(rent_structure: RentStructure) -> u64 {
     // included output id, block id, and slot booked data size
-    rent_struct.storage_score_offset_output()
-        + rent_struct.storage_score_factor_data() as u64
+    rent_structure.storage_score_offset_output()
+        + rent_structure.storage_score_factor_data() as u64
             * (size_of::<OutputId>() as u64 + size_of::<BlockId>() as u64 + size_of::<SlotIndex>() as u64)
 }
 
 impl StorageScore for Output {
-    fn storage_score(&self, rent_struct: RentStructure) -> u64 {
+    fn storage_score(&self, rent_structure: RentStructure) -> u64 {
         // +1 score for the output kind
-        rent_struct.storage_score_factor_data() as u64 * size_of::<u8>() as u64
+        rent_structure.storage_score_factor_data() as u64 * size_of::<u8>() as u64
             + match self {
-                Self::Basic(basic) => basic.storage_score(rent_struct),
-                Self::Account(account) => account.storage_score(rent_struct),
-                Self::Foundry(foundry) => foundry.storage_score(rent_struct),
-                Self::Nft(nft) => nft.storage_score(rent_struct),
-                Self::Delegation(delegation) => delegation.storage_score(rent_struct),
+                Self::Basic(basic) => basic.storage_score(rent_structure),
+                Self::Account(account) => account.storage_score(rent_structure),
+                Self::Foundry(foundry) => foundry.storage_score(rent_structure),
+                Self::Nft(nft) => nft.storage_score(rent_structure),
+                Self::Delegation(delegation) => delegation.storage_score(rent_structure),
             }
     }
 }
 
 pub struct MinimumStorageDepositBasicOutput {
-    rent_struct: RentStructure,
+    rent_structure: RentStructure,
     token_supply: u64,
     builder: BasicOutputBuilder,
 }
 
 impl MinimumStorageDepositBasicOutput {
-    pub fn new(rent_struct: RentStructure, token_supply: u64) -> Self {
+    pub fn new(rent_structure: RentStructure, token_supply: u64) -> Self {
         Self {
-            rent_struct,
+            rent_structure,
             token_supply,
             builder: BasicOutputBuilder::new_with_amount(Output::AMOUNT_MIN).add_unlock_condition(
                 AddressUnlockCondition::new(Address::from(Ed25519Address::from([0; Ed25519Address::LENGTH]))),
@@ -580,7 +581,7 @@ impl MinimumStorageDepositBasicOutput {
         Ok(self
             .builder
             .finish_output(self.token_supply)?
-            .rent_cost(self.rent_struct))
+            .rent_cost(self.rent_structure))
     }
 }
 #[cfg(feature = "serde")]

@@ -101,7 +101,7 @@ impl core::fmt::Debug for MetadataFeature {
 }
 
 impl StorageScore for MetadataFeature {
-    fn storage_score(&self, rent_struct: RentStructure) -> u64 {
+    fn storage_score(&self, rent_structure: RentStructure) -> u64 {
         0
     }
 }

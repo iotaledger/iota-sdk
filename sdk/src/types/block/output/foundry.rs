@@ -104,12 +104,12 @@ impl FoundryOutputBuilder {
     /// Creates a [`FoundryOutputBuilder`] with a provided rent structure.
     /// The amount will be set to the minimum storage deposit.
     pub fn new_with_minimum_storage_deposit(
-        rent_struct: RentStructure,
+        rent_structure: RentStructure,
         serial_number: u32,
         token_scheme: TokenScheme,
     ) -> Self {
         Self::new(
-            OutputBuilderAmount::MinimumStorageDeposit(rent_struct),
+            OutputBuilderAmount::MinimumStorageDeposit(rent_structure),
             serial_number,
             token_scheme,
         )
@@ -136,8 +136,8 @@ impl FoundryOutputBuilder {
 
     /// Sets the amount to the minimum storage deposit.
     #[inline(always)]
-    pub fn with_minimum_storage_deposit(mut self, rent_struct: RentStructure) -> Self {
-        self.amount = OutputBuilderAmount::MinimumStorageDeposit(rent_struct);
+    pub fn with_minimum_storage_deposit(mut self, rent_structure: RentStructure) -> Self {
+        self.amount = OutputBuilderAmount::MinimumStorageDeposit(rent_structure);
         self
     }
 
@@ -283,8 +283,8 @@ impl FoundryOutputBuilder {
 
         output.amount = match self.amount {
             OutputBuilderAmount::Amount(amount) => amount,
-            OutputBuilderAmount::MinimumStorageDeposit(rent_struct) => {
-                Output::Foundry(output.clone()).rent_cost(rent_struct)
+            OutputBuilderAmount::MinimumStorageDeposit(rent_structure) => {
+                Output::Foundry(output.clone()).rent_cost(rent_structure)
             }
         };
 
@@ -366,11 +366,11 @@ impl FoundryOutput {
     /// The amount will be set to the minimum storage deposit.
     #[inline(always)]
     pub fn build_with_minimum_storage_deposit(
-        rent_struct: RentStructure,
+        rent_structure: RentStructure,
         serial_number: u32,
         token_scheme: TokenScheme,
     ) -> FoundryOutputBuilder {
-        FoundryOutputBuilder::new_with_minimum_storage_deposit(rent_struct, serial_number, token_scheme)
+        FoundryOutputBuilder::new_with_minimum_storage_deposit(rent_structure, serial_number, token_scheme)
     }
 
     ///
@@ -659,14 +659,14 @@ impl Packable for FoundryOutput {
 }
 
 impl StorageScore for FoundryOutput {
-    fn storage_score(&self, rent_struct: RentStructure) -> u64 {
-        storage_score_offset_output(rent_struct)
-            + self.packed_len() as u64 * rent_struct.storage_score_factor_data() as u64
-            + self.native_tokens().storage_score(rent_struct)
-            + self.token_scheme().storage_score(rent_struct)
-            + self.unlock_conditions().storage_score(rent_struct)
-            + self.features().storage_score(rent_struct)
-            + self.immutable_features().storage_score(rent_struct)
+    fn storage_score(&self, rent_structure: RentStructure) -> u64 {
+        storage_score_offset_output(rent_structure)
+            + self.packed_len() as u64 * rent_structure.storage_score_factor_data() as u64
+            + self.native_tokens().storage_score(rent_structure)
+            + self.token_scheme().storage_score(rent_structure)
+            + self.unlock_conditions().storage_score(rent_structure)
+            + self.features().storage_score(rent_structure)
+            + self.immutable_features().storage_score(rent_structure)
     }
 }
 
@@ -771,8 +771,8 @@ pub(crate) mod dto {
                 OutputBuilderAmount::Amount(amount) => {
                     FoundryOutputBuilder::new_with_amount(amount, serial_number, token_scheme)
                 }
-                OutputBuilderAmount::MinimumStorageDeposit(rent_struct) => {
-                    FoundryOutputBuilder::new_with_minimum_storage_deposit(rent_struct, serial_number, token_scheme)
+                OutputBuilderAmount::MinimumStorageDeposit(rent_structure) => {
+                    FoundryOutputBuilder::new_with_minimum_storage_deposit(rent_structure, serial_number, token_scheme)
                 }
             };
 

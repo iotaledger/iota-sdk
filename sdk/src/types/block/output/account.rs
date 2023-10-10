@@ -116,8 +116,8 @@ impl AccountOutputBuilder {
 
     /// Creates an [`AccountOutputBuilder`] with a provided rent structure.
     /// The amount will be set to the minimum storage deposit.
-    pub fn new_with_minimum_storage_deposit(rent_struct: RentStructure, account_id: AccountId) -> Self {
-        Self::new(OutputBuilderAmount::MinimumStorageDeposit(rent_struct), account_id)
+    pub fn new_with_minimum_storage_deposit(rent_structure: RentStructure, account_id: AccountId) -> Self {
+        Self::new(OutputBuilderAmount::MinimumStorageDeposit(rent_structure), account_id)
     }
 
     fn new(amount: OutputBuilderAmount, account_id: AccountId) -> Self {
@@ -144,8 +144,8 @@ impl AccountOutputBuilder {
 
     /// Sets the amount to the minimum storage deposit.
     #[inline(always)]
-    pub fn with_minimum_storage_deposit(mut self, rent_struct: RentStructure) -> Self {
-        self.amount = OutputBuilderAmount::MinimumStorageDeposit(rent_struct);
+    pub fn with_minimum_storage_deposit(mut self, rent_structure: RentStructure) -> Self {
+        self.amount = OutputBuilderAmount::MinimumStorageDeposit(rent_structure);
         self
     }
 
@@ -322,8 +322,8 @@ impl AccountOutputBuilder {
 
         output.amount = match self.amount {
             OutputBuilderAmount::Amount(amount) => amount,
-            OutputBuilderAmount::MinimumStorageDeposit(rent_struct) => {
-                Output::Account(output.clone()).rent_cost(rent_struct)
+            OutputBuilderAmount::MinimumStorageDeposit(rent_structure) => {
+                Output::Account(output.clone()).rent_cost(rent_structure)
             }
         };
 
@@ -417,10 +417,10 @@ impl AccountOutput {
     /// The amount will be set to the minimum storage deposit.
     #[inline(always)]
     pub fn build_with_minimum_storage_deposit(
-        rent_struct: RentStructure,
+        rent_structure: RentStructure,
         account_id: AccountId,
     ) -> AccountOutputBuilder {
-        AccountOutputBuilder::new_with_minimum_storage_deposit(rent_struct, account_id)
+        AccountOutputBuilder::new_with_minimum_storage_deposit(rent_structure, account_id)
     }
 
     ///
@@ -731,13 +731,13 @@ impl Packable for AccountOutput {
 }
 
 impl StorageScore for AccountOutput {
-    fn storage_score(&self, rent_struct: RentStructure) -> u64 {
-        storage_score_offset_output(rent_struct)
-            + self.packed_len() as u64 * rent_struct.storage_score_factor_data() as u64
-            + self.native_tokens().storage_score(rent_struct)
-            + self.unlock_conditions().storage_score(rent_struct)
-            + self.features().storage_score(rent_struct)
-            + self.immutable_features().storage_score(rent_struct)
+    fn storage_score(&self, rent_structure: RentStructure) -> u64 {
+        storage_score_offset_output(rent_structure)
+            + self.packed_len() as u64 * rent_structure.storage_score_factor_data() as u64
+            + self.native_tokens().storage_score(rent_structure)
+            + self.unlock_conditions().storage_score(rent_structure)
+            + self.features().storage_score(rent_structure)
+            + self.immutable_features().storage_score(rent_structure)
     }
 }
 
@@ -871,8 +871,8 @@ pub(crate) mod dto {
             let params = params.into();
             let mut builder = match amount {
                 OutputBuilderAmount::Amount(amount) => AccountOutputBuilder::new_with_amount(amount, *account_id),
-                OutputBuilderAmount::MinimumStorageDeposit(rent_struct) => {
-                    AccountOutputBuilder::new_with_minimum_storage_deposit(rent_struct, *account_id)
+                OutputBuilderAmount::MinimumStorageDeposit(rent_structure) => {
+                    AccountOutputBuilder::new_with_minimum_storage_deposit(rent_structure, *account_id)
                 }
             }
             .with_mana(mana);

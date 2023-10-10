@@ -60,10 +60,10 @@ impl StakingFeature {
 }
 
 impl StorageScore for StakingFeature {
-    fn storage_score(&self, rent_struct: RentStructure) -> u64 {
-        // TODO: In iota.go you can specify a closure f(rent_struct) -> u64 for this feature
+    fn storage_score(&self, rent_structure: RentStructure) -> u64 {
+        // TODO: In iota.go you can specify a closure f(rent_structure) -> u64 for this feature
         // which immediately returns, hence overrides the default storage score.
-        rent_struct.storage_score_offset_staking_feature()
+        rent_structure.storage_score_offset_staking_feature()
     }
 }
 

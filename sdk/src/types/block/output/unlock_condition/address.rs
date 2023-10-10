@@ -30,8 +30,8 @@ impl AddressUnlockCondition {
 }
 
 impl StorageScore for AddressUnlockCondition {
-    fn storage_score(&self, rent_struct: RentStructure) -> u64 {
-        self.0.storage_score(rent_struct)
+    fn storage_score(&self, rent_structure: RentStructure) -> u64 {
+        self.0.storage_score(rent_structure)
     }
 }
 

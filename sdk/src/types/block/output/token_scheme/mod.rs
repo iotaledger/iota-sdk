@@ -50,9 +50,9 @@ impl TokenScheme {
 }
 
 impl StorageScore for TokenScheme {
-    fn storage_score(&self, rent_struct: RentStructure) -> u64 {
+    fn storage_score(&self, rent_structure: RentStructure) -> u64 {
         match self {
-            Self::Simple(simple) => simple.storage_score(rent_struct),
+            Self::Simple(simple) => simple.storage_score(rent_structure),
         }
     }
 }

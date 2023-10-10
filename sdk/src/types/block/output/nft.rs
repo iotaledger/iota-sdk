@@ -76,8 +76,8 @@ impl NftOutputBuilder {
 
     /// Creates an [`NftOutputBuilder`] with a provided rent structure.
     /// The amount will be set to the minimum storage deposit.
-    pub fn new_with_minimum_storage_deposit(rent_struct: RentStructure, nft_id: NftId) -> Self {
-        Self::new(OutputBuilderAmount::MinimumStorageDeposit(rent_struct), nft_id)
+    pub fn new_with_minimum_storage_deposit(rent_structure: RentStructure, nft_id: NftId) -> Self {
+        Self::new(OutputBuilderAmount::MinimumStorageDeposit(rent_structure), nft_id)
     }
 
     fn new(amount: OutputBuilderAmount, nft_id: NftId) -> Self {
@@ -101,8 +101,8 @@ impl NftOutputBuilder {
 
     /// Sets the amount to the minimum storage deposit.
     #[inline(always)]
-    pub fn with_minimum_storage_deposit(mut self, rent_struct: RentStructure) -> Self {
-        self.amount = OutputBuilderAmount::MinimumStorageDeposit(rent_struct);
+    pub fn with_minimum_storage_deposit(mut self, rent_structure: RentStructure) -> Self {
+        self.amount = OutputBuilderAmount::MinimumStorageDeposit(rent_structure);
         self
     }
 
@@ -244,8 +244,8 @@ impl NftOutputBuilder {
 
         output.amount = match self.amount {
             OutputBuilderAmount::Amount(amount) => amount,
-            OutputBuilderAmount::MinimumStorageDeposit(rent_struct) => {
-                Output::Nft(output.clone()).rent_cost(rent_struct)
+            OutputBuilderAmount::MinimumStorageDeposit(rent_structure) => {
+                Output::Nft(output.clone()).rent_cost(rent_structure)
             }
         };
 
@@ -328,8 +328,8 @@ impl NftOutput {
     /// Creates a new [`NftOutputBuilder`] with a provided rent structure.
     /// The amount will be set to the minimum storage deposit.
     #[inline(always)]
-    pub fn build_with_minimum_storage_deposit(rent_struct: RentStructure, nft_id: NftId) -> NftOutputBuilder {
-        NftOutputBuilder::new_with_minimum_storage_deposit(rent_struct, nft_id)
+    pub fn build_with_minimum_storage_deposit(rent_structure: RentStructure, nft_id: NftId) -> NftOutputBuilder {
+        NftOutputBuilder::new_with_minimum_storage_deposit(rent_structure, nft_id)
     }
 
     ///
@@ -522,13 +522,13 @@ impl Packable for NftOutput {
 }
 
 impl StorageScore for NftOutput {
-    fn storage_score(&self, rent_struct: RentStructure) -> u64 {
-        storage_score_offset_output(rent_struct)
-            + self.packed_len() as u64 * rent_struct.storage_score_factor_data() as u64
-            + self.native_tokens().storage_score(rent_struct)
-            + self.unlock_conditions().storage_score(rent_struct)
-            + self.features().storage_score(rent_struct)
-            + self.immutable_features().storage_score(rent_struct)
+    fn storage_score(&self, rent_structure: RentStructure) -> u64 {
+        storage_score_offset_output(rent_structure)
+            + self.packed_len() as u64 * rent_structure.storage_score_factor_data() as u64
+            + self.native_tokens().storage_score(rent_structure)
+            + self.unlock_conditions().storage_score(rent_structure)
+            + self.features().storage_score(rent_structure)
+            + self.immutable_features().storage_score(rent_structure)
     }
 }
 
@@ -629,8 +629,8 @@ pub(crate) mod dto {
             let params = params.into();
             let mut builder = match amount {
                 OutputBuilderAmount::Amount(amount) => NftOutputBuilder::new_with_amount(amount, *nft_id),
-                OutputBuilderAmount::MinimumStorageDeposit(rent_struct) => {
-                    NftOutputBuilder::new_with_minimum_storage_deposit(rent_struct, *nft_id)
+                OutputBuilderAmount::MinimumStorageDeposit(rent_structure) => {
+                    NftOutputBuilder::new_with_minimum_storage_deposit(rent_structure, *nft_id)
                 }
             }
             .with_mana(mana);

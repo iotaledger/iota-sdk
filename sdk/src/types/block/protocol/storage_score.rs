@@ -41,7 +41,7 @@ pub struct RentStructure {
 impl RentStructure {
     /// Creates a new [`RentStructure`]. Computes the score offset for implicit account creation addresses.
     pub fn new(rent_parameters: RentParameters) -> Self {
-        let mut rent_struct = Self {
+        let mut rent_structure = Self {
             rent_parameters,
             storage_score_offset_implicit_account_creation_address: 0,
         };
@@ -56,8 +56,8 @@ impl RentStructure {
             .add_unlock_condition(AddressUnlockCondition::new(Ed25519Address::null()))
             .finish()
             .unwrap()
-            .storage_score(rent_struct);
-        let ed25519_address_score = Ed25519Address::null().storage_score(rent_struct);
+            .storage_score(rent_structure);
+        let ed25519_address_score = Ed25519Address::null().storage_score(rent_structure);
         // Unwrap: should never underflow.
         let basic_score_without_address = basic_output_score
             .checked_sub(ed25519_address_score)
@@ -71,12 +71,12 @@ impl RentStructure {
             )
             .finish()
             .unwrap()
-            .storage_score(rent_struct);
+            .storage_score(rent_structure);
         // Unwrap: should never underflow.
-        rent_struct.storage_score_offset_implicit_account_creation_address = account_output_score
+        rent_structure.storage_score_offset_implicit_account_creation_address = account_output_score
             .checked_sub(basic_score_without_address)
             .expect("underflow");
-        rent_struct
+        rent_structure
     }
 }
 
@@ -228,16 +228,16 @@ impl RentParameters {
 pub trait StorageScore {
     /// Computes the storage score given a [`RentStructure`]. Different fields in a type lead to different storage
     /// requirements for the ledger state.
-    fn storage_score(&self, rent_struct: RentStructure) -> u64;
+    fn storage_score(&self, rent_structure: RentStructure) -> u64;
 
     /// Computes the rent cost given a [`RentStructure`].
-    fn rent_cost(&self, rent_struct: RentStructure) -> u64 {
-        rent_struct.storage_cost as u64 * self.storage_score(rent_struct)
+    fn rent_cost(&self, rent_structure: RentStructure) -> u64 {
+        rent_structure.storage_cost as u64 * self.storage_score(rent_structure)
     }
 }
 
 impl<T: StorageScore, const N: usize> StorageScore for [T; N] {
-    fn storage_score(&self, rent_struct: RentStructure) -> u64 {
-        self.iter().map(|elem| elem.storage_score(rent_struct)).sum()
+    fn storage_score(&self, rent_structure: RentStructure) -> u64 {
+        self.iter().map(|elem| elem.storage_score(rent_structure)).sum()
     }
 }

@@ -202,14 +202,14 @@ impl Feature {
 }
 
 impl StorageScore for Feature {
-    fn storage_score(&self, rent_struct: RentStructure) -> u64 {
+    fn storage_score(&self, rent_structure: RentStructure) -> u64 {
         match self {
-            Self::Sender(sender) => sender.storage_score(rent_struct),
-            Self::Issuer(issuer) => issuer.storage_score(rent_struct),
-            Self::Metadata(metadata) => metadata.storage_score(rent_struct),
-            Self::Tag(tag) => tag.storage_score(rent_struct),
-            Self::BlockIssuer(block_issuer) => block_issuer.storage_score(rent_struct),
-            Self::Staking(staking) => staking.storage_score(rent_struct),
+            Self::Sender(sender) => sender.storage_score(rent_structure),
+            Self::Issuer(issuer) => issuer.storage_score(rent_structure),
+            Self::Metadata(metadata) => metadata.storage_score(rent_structure),
+            Self::Tag(tag) => tag.storage_score(rent_structure),
+            Self::BlockIssuer(block_issuer) => block_issuer.storage_score(rent_structure),
+            Self::Staking(staking) => staking.storage_score(rent_structure),
         }
     }
 }
@@ -331,8 +331,8 @@ impl Features {
 }
 
 impl StorageScore for Features {
-    fn storage_score(&self, rent_struct: RentStructure) -> u64 {
-        self.0.iter().map(|f| f.storage_score(rent_struct)).sum()
+    fn storage_score(&self, rent_structure: RentStructure) -> u64 {
+        self.0.iter().map(|f| f.storage_score(rent_structure)).sum()
     }
 }
 

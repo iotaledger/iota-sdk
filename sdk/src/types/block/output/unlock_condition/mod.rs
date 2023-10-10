@@ -83,18 +83,18 @@ impl core::fmt::Debug for UnlockCondition {
 }
 
 impl StorageScore for UnlockCondition {
-    fn storage_score(&self, rent_struct: RentStructure) -> u64 {
+    fn storage_score(&self, rent_structure: RentStructure) -> u64 {
         match self {
-            Self::Address(address) => address.storage_score(rent_struct),
-            Self::StorageDepositReturn(storage_deposit_return) => storage_deposit_return.storage_score(rent_struct),
-            Self::Timelock(timelock) => timelock.storage_score(rent_struct),
-            Self::Expiration(expiration) => expiration.storage_score(rent_struct),
+            Self::Address(address) => address.storage_score(rent_structure),
+            Self::StorageDepositReturn(storage_deposit_return) => storage_deposit_return.storage_score(rent_structure),
+            Self::Timelock(timelock) => timelock.storage_score(rent_structure),
+            Self::Expiration(expiration) => expiration.storage_score(rent_structure),
             Self::StateControllerAddress(state_controller_address) => {
-                state_controller_address.storage_score(rent_struct)
+                state_controller_address.storage_score(rent_structure)
             }
-            Self::GovernorAddress(governor_address) => governor_address.storage_score(rent_struct),
+            Self::GovernorAddress(governor_address) => governor_address.storage_score(rent_structure),
             Self::ImmutableAccountAddress(immutable_account_address) => {
-                immutable_account_address.storage_score(rent_struct)
+                immutable_account_address.storage_score(rent_structure)
             }
         }
     }
@@ -469,8 +469,8 @@ impl UnlockConditions {
 }
 
 impl StorageScore for UnlockConditions {
-    fn storage_score(&self, rent_struct: RentStructure) -> u64 {
-        self.0.iter().map(|uc| uc.storage_score(rent_struct)).sum()
+    fn storage_score(&self, rent_structure: RentStructure) -> u64 {
+        self.0.iter().map(|uc| uc.storage_score(rent_structure)).sum()
     }
 }
 

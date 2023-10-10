@@ -409,8 +409,8 @@ async fn output_preparation() -> Result<()> {
             None,
         )
         .await?;
-    let rent_struct = wallet.client().get_rent_parameters().await?.into();
-    let minimum_storage_deposit = output.rent_cost(rent_struct);
+    let rent_structure = wallet.client().get_rent_parameters().await?.into();
+    let minimum_storage_deposit = output.rent_cost(rent_structure);
     assert_eq!(output.amount(), minimum_storage_deposit);
     assert_eq!(output.amount(), 187900);
     let sdr = output.unlock_conditions().unwrap().storage_deposit_return().unwrap();
@@ -433,7 +433,7 @@ async fn output_preparation_sdr() -> Result<()> {
     let wallet = make_wallet(storage_path, None, None).await?;
     let account = &create_accounts_with_funds(&wallet, 1).await?[0];
 
-    let rent_struct = account.client().get_rent_parameters().await?.into();
+    let rent_structure = account.client().get_rent_parameters().await?.into();
     let token_supply = account.client().get_token_supply().await?;
 
     let recipient_address_bech32 = String::from("rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu");
@@ -455,7 +455,7 @@ async fn output_preparation_sdr() -> Result<()> {
         )
         .await?;
     // Check if the output has enough amount to cover the storage deposit
-    output.verify_storage_deposit(rent_struct, token_supply)?;
+    output.verify_storage_deposit(rent_structure, token_supply)?;
     assert_eq!(output.amount(), 50601);
     // address and sdr unlock condition
     assert_eq!(output.unlock_conditions().unwrap().len(), 2);
@@ -476,7 +476,7 @@ async fn output_preparation_sdr() -> Result<()> {
         )
         .await?;
     // Check if the output has enough amount to cover the storage deposit
-    output.verify_storage_deposit(rent_struct, token_supply)?;
+    output.verify_storage_deposit(rent_structure, token_supply)?;
     assert_eq!(output.amount(), 85199);
     // address and sdr unlock condition
     assert_eq!(output.unlock_conditions().unwrap().len(), 2);
@@ -501,7 +501,7 @@ async fn output_preparation_sdr() -> Result<()> {
         )
         .await?;
     // Check if the output has enough amount to cover the storage deposit
-    output.verify_storage_deposit(rent_struct, token_supply)?;
+    output.verify_storage_deposit(rent_structure, token_supply)?;
     assert_eq!(output.amount(), 85199);
     // address and sdr unlock condition
     assert_eq!(output.unlock_conditions().unwrap().len(), 2);
@@ -526,7 +526,7 @@ async fn output_preparation_sdr() -> Result<()> {
         )
         .await?;
     // Check if the output has enough amount to cover the storage deposit
-    output.verify_storage_deposit(rent_struct, token_supply)?;
+    output.verify_storage_deposit(rent_structure, token_supply)?;
     // The additional 1 amount will be added, because the storage deposit should be gifted and not returned
     assert_eq!(output.amount(), 42600);
     // storage deposit gifted, only address unlock condition
@@ -614,11 +614,12 @@ async fn prepare_output_remainder_dust() -> Result<()> {
     let addresses = &accounts[1].addresses().await?;
     let address = addresses[0].address();
 
-    let rent_struct = account.client().get_rent_parameters().await?.into();
+    let rent_structure = account.client().get_rent_parameters().await?.into();
     let token_supply = account.client().get_token_supply().await?;
 
     let balance = account.sync(None).await?;
-    let minimum_required_storage_deposit = MinimumStorageDepositBasicOutput::new(rent_struct, token_supply).finish()?;
+    let minimum_required_storage_deposit =
+        MinimumStorageDepositBasicOutput::new(rent_structure, token_supply).finish()?;
 
     // Send away most balance so we can test with leaving dust
     let output = account
@@ -659,7 +660,7 @@ async fn prepare_output_remainder_dust() -> Result<()> {
         .await?;
 
     // Check if the output has enough amount to cover the storage deposit
-    output.verify_storage_deposit(rent_struct, token_supply)?;
+    output.verify_storage_deposit(rent_structure, token_supply)?;
     // The left over 21299 is too small to keep, so we donate it
     assert_eq!(output.amount(), balance.base_coin().available());
     // storage deposit gifted, only address unlock condition
@@ -703,7 +704,7 @@ async fn prepare_output_remainder_dust() -> Result<()> {
         .await?;
 
     // Check if the output has enough amount to cover the storage deposit
-    output.verify_storage_deposit(rent_struct, token_supply)?;
+    output.verify_storage_deposit(rent_structure, token_supply)?;
     // We use excess if leftover is too small, so amount == all available balance
     assert_eq!(output.amount(), 63900);
     // storage deposit gifted, only address unlock condition
@@ -727,7 +728,7 @@ async fn prepare_output_remainder_dust() -> Result<()> {
         .await?;
 
     // Check if the output has enough amount to cover the storage deposit
-    output.verify_storage_deposit(rent_struct, token_supply)?;
+    output.verify_storage_deposit(rent_structure, token_supply)?;
     // We use excess if leftover is too small, so amount == all available balance
     assert_eq!(output.amount(), 63900);
     // storage deposit returned, address and SDR unlock condition
@@ -849,8 +850,8 @@ async fn prepare_existing_nft_output_gift() -> Result<()> {
         .as_nft()
         .clone();
 
-    let rent_struct = wallet.client().get_rent_parameters().await?.into();
-    let minimum_storage_deposit = Output::Nft(nft.clone()).rent_cost(rent_struct);
+    let rent_structure = wallet.client().get_rent_parameters().await?.into();
+    let minimum_storage_deposit = Output::Nft(nft.clone()).rent_cost(rent_structure);
     assert_eq!(nft.amount(), minimum_storage_deposit);
 
     assert_eq!(nft.amount(), 52300);
