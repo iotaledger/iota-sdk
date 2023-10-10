@@ -8,7 +8,8 @@
 //! cargo run --release --example block_custom_parents
 //! ```
 
-use iota_sdk::client::{Client, Result};
+use crypto::keys::bip44::Bip44;
+use iota_sdk::client::{constants::IOTA_COIN_TYPE, secret::SecretManager, Client, Result};
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -20,18 +21,21 @@ async fn main() -> Result<()> {
     // Create a node client.
     let client = Client::builder().with_node(&node_url)?.finish().await?;
 
+    let secret_manager = SecretManager::try_from_mnemonic(std::env::var("MNEMONIC").unwrap())?;
+
     // Use issuance as custom parents.
     let issuance = client.get_issuance().await?;
     println!("Issuance:\n{issuance:#?}");
 
     // Create and send the block with custom parents.
     let block = client
-        .finish_basic_block_builder(
+        .build_basic_block(
             todo!("issuer id"),
-            todo!("block signature"),
             todo!("issuing time"),
             Some(issuance.strong_parents()?),
             None,
+            &secret_manager,
+            Bip44::new(IOTA_COIN_TYPE),
         )
         .await?;
 

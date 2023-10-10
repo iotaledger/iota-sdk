@@ -23,6 +23,7 @@ use crate::{
 impl<S: 'static + SecretManage> Account<S>
 where
     Error: From<S::Error>,
+    crate::client::Error: From<S::Error>,
 {
     /// Get the balance of the account.
     pub async fn balance(&self) -> Result<Balance> {

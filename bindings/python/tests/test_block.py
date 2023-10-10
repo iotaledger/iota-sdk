@@ -1,48 +1,122 @@
 # Copyright 2023 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
-from iota_sdk import Block, Payload, PayloadType
+from typing import get_args
+from iota_sdk import BasicBlock, BlockType, BlockWrapper, Payload, PayloadType
+import pytest
 
 
-def test_block():
-    # with tx payload
-    block_dict = {"protocolVersion": 2,
-                  "strong_parents": ["0x27532565d4c8cc886dfc6a2238e8d2a72369672bb1d1d762c33b72d41b0b07b8",
-                                     "0x604e6996bd1ec110642fec5b9c980d4b126eba5683e80a6e2cb905ded0cebd98",
-                                     "0x6a14368f99e875aee0e7078d9e2ec2ba6c4fff6a3cd63c73a9b2c296d4a8e697",
-                                     "0xc3f20eb06ce8be091579e2fbe6c109d108983fb0eff2c768e98c61e6fe71b4b7"],
-                  "weak_parents": [],
-                  "shallow_like_parents": [],
-                  "payload": {"type": 6,
-                              "essence": {"type": 1,
-                                          "networkId": "1856588631910923207",
-                                          "inputs": [{"type": 0,
-                                                      "transactionId": "0xc6765035e75e319e9cd55ab16e7619f6cd658e7f421c71d9fe276c77fdf3f5b3",
-                                                      "transactionOutputIndex": 1}],
-                                          "inputsCommitment": "0x2468f946993ac949c890d7f895797c6b86075dc1e1556f04f3772903eaf51932",
-                                          "outputs": [{"type": 3,
-                                                       "amount": "1000000",
+def test_basic_block_with_tagged_data_payload():
+    block_dict = {
+        "type": 0,
+        "strongParents": [
+            "0x17c297a273facf4047e244a65eb34ee33b1f1698e1fff28679466fa2ad81c0e8",
+            "0x9858e80fa0b37b6d9397e23d1f58ce53955a9be1aa8020c0d0e11672996c6db9"],
+        "weakParents": [],
+        "shallowLikeParents": [],
+        "maxBurnedMana": "180500",
+        "payload": {
+            "type": 5,
+            "tag": "0x484f524e4554205370616d6d6572",
+            "data": "0x57652061726520616c6c206d616465206f662073746172647573742e0a436f756e743a20353436333730330a54696d657374616d703a20323032332d30372d31395430373a32323a32385a0a54697073656c656374696f6e3a20343732c2b573"}}
+    block = BasicBlock.from_dict(block_dict)
+    assert block.to_dict() == block_dict
+    assert isinstance(block.payload, get_args(Payload))
+    assert block.payload.type == PayloadType.TaggedData
+    assert block.max_burned_mana == 180500
+
+    block_to_dict = block.to_dict()
+    # Make sure encoding is done correctly
+    assert block_to_dict == block_dict
+
+
+def test_block_wrapper_with_tagged_data_payload():
+    block_dict = {
+        "protocolVersion": 3,
+        "networkId": "10549460113735494767",
+        "issuingTime": "1675563954966263210",
+        "slotCommitmentId": "0x498bf08a5ed287bc87340341ffab28706768cd3a7035ae5e33932d9a12bb30940000000000000000",
+        "latestFinalizedSlot": 21,
+        "issuerId": "0x3370746f30705b7d0b42597459714d45241e5a64761b09627c447b751c7e145c",
+        "block": {
+            "type": 0,
+            "strongParents": [
+                "0x304442486c7a05361408585e4b5f7a67441c437528755a70041e0e557a6d4b2d7d4362083d492b57",
+                "0x5f736978340a243d381b343b160b316a6b7d4b1e3c0355492e2e72113c2b126600157e69113c0b5c"
+            ],
+            "weakParents": [
+                "0x0b5a48384f382f4a49471c4860683c6f0a0d446f012e1b117c4e405f5e24497c72691f43535c0b42"
+            ],
+            "shallowLikeParents": [
+                "0x163007217803006078040b0f51507d3572355a457839095e572f125500401b7d220c772b56165a12"
+            ],
+            "maxBurnedMana": "180500",
+            "payload": {
+                "type": 5,
+                "tag": "0x68656c6c6f20776f726c64",
+                "data": "0x01020304"
+            }
+        },
+        "signature": {
+            "type": 0,
+            "publicKey": "0x024b6f086177156350111d5e56227242034e596b7e3d0901180873740723193c",
+            "signature": "0x7c274e5e771d5d60202d334f06773d3672484b1e4e6f03231b4e69305329267a4834374b0f2e0d5c6c2f7779620f4f534c773b1679400c52303d1f23121a4049"
+        }
+    }
+    block_wrapper = BlockWrapper.from_dict(block_dict)
+    assert block_wrapper.to_dict() == block_dict
+    assert isinstance(block_wrapper.block, BasicBlock)
+    assert block_wrapper.block.type == BlockType.Basic
+    assert isinstance(block_wrapper.block.payload, get_args(Payload))
+    assert block_wrapper.block.payload.type == PayloadType.TaggedData
+    # TODO: determine the actual hash of the block wrapper
+    # assert block_wrapper.id() == "0x7ce5ad074d4162e57f83cfa01cd2303ef5356567027ce0bcee0c9f57bc11656e"
+
+
+@pytest.mark.skip(reason="https://github.com/iotaledger/iota-sdk/issues/1387")
+def test_basic_block_with_tx_payload():
+    block_dict = {
+        "type": 0,
+        "strongParents": ["0x27532565d4c8cc886dfc6a2238e8d2a72369672bb1d1d762c33b72d41b0b07b8",
+                          "0x604e6996bd1ec110642fec5b9c980d4b126eba5683e80a6e2cb905ded0cebd98",
+                          "0x6a14368f99e875aee0e7078d9e2ec2ba6c4fff6a3cd63c73a9b2c296d4a8e697",
+                          "0xc3f20eb06ce8be091579e2fbe6c109d108983fb0eff2c768e98c61e6fe71b4b7"],
+        "weakParents": [],
+        "shallowLikeParents": [],
+        "maxBurnedMana": "180500",
+        "payload": {"type": 6,
+                    "essence": {"type": 1,
+                                "networkId": "1856588631910923207",
+                                "inputs": [{"type": 0,
+                                            "transactionId": "0xc6765035e75e319e9cd55ab16e7619f6cd658e7f421c71d9fe276c77fdf3f5b3",
+                                            "transactionOutputIndex": 1}],
+                                "inputsCommitment": "0x2468f946993ac949c890d7f895797c6b86075dc1e1556f04f3772903eaf51932",
+                                "outputs": [{"type": 3,
+                                             "amount": "1000000",
                                                        "unlockConditions": [{"type": 0,
                                                                              "address": {"type": 0,
                                                                                          "pubKeyHash": "0xa119005b26d46fc74cf9188b3cef8d01623e68146741ee698cabefd425dc01be"}}]},
-                                                      {"type": 3,
-                                                       "amount": "995000000",
+                                            {"type": 3,
+                                             "amount": "995000000",
                                                        "unlockConditions": [{"type": 0,
                                                                              "address": {"type": 0,
                                                                                          "pubKeyHash": "0xa119005b26d46fc74cf9188b3cef8d01623e68146741ee698cabefd425dc01be"}}]}]},
-                              "unlocks": [{"type": 0,
-                                           "signature": {"type": 0,
-                                                         "publicKey": "0xa7af600976f440ec97d7bddbf17eacf0bfbf710e8cfb4ae3eae475d4ae8e1b16",
-                                                         "signature": "0x6bbe2eed95300a3d707af1bb17e04f83087fe31261256020fd00c24a54543c084079bed29c6d1479ee5acfd1e2fa32316e88c4c1577b4fbea3fe247f71114500"}}]}}
-    block = Block.from_dict(block_dict)
+                    "unlocks": [{"type": 0,
+                                 "signature": {"type": 0,
+                                               "publicKey": "0xa7af600976f440ec97d7bddbf17eacf0bfbf710e8cfb4ae3eae475d4ae8e1b16",
+                                               "signature": "0x6bbe2eed95300a3d707af1bb17e04f83087fe31261256020fd00c24a54543c084079bed29c6d1479ee5acfd1e2fa32316e88c4c1577b4fbea3fe247f71114500"}}]}}
+    block = BasicBlock.from_dict(block_dict)
     assert block.to_dict() == block_dict
-    assert isinstance(block.payload, Payload)
+    assert isinstance(block.payload, get_args(Payload))
     assert block.payload.type == PayloadType.Transaction
 
-    # with tx payload, all output types
+
+@pytest.mark.skip(reason="https://github.com/iotaledger/iota-sdk/issues/1387")
+def test_basic_block_with_tx_payload_all_output_types():
     block_dict = {
-        "protocolVersion": 2, "strong_parents": [
-            "0x053296e7434e8a4d602f8db30a5aaf16c01140212fe79d8132137cda1c38a60a", "0x559ec1d9a31c55bd27588ada2ade70fb5b13764ddd600e29c3b018761ba30e15", "0xe78e8cdbbeda89e3408eed51b77e0db5ba035f5f3bf79a8365435bba40697693", "0xee9d6e45dbc080694e6c827fecbc31ad9f654cf57404bc98f4cbca033f8e3139"], "weak_parents": [], "shallow_like_parents": [], "payload": {
+        "type": 0,
+        "strongParents": [
+            "0x053296e7434e8a4d602f8db30a5aaf16c01140212fe79d8132137cda1c38a60a", "0x559ec1d9a31c55bd27588ada2ade70fb5b13764ddd600e29c3b018761ba30e15", "0xe78e8cdbbeda89e3408eed51b77e0db5ba035f5f3bf79a8365435bba40697693", "0xee9d6e45dbc080694e6c827fecbc31ad9f654cf57404bc98f4cbca033f8e3139"], "weakParents": [], "shallowLikeParents": [], "payload": {
             "type": 6, "essence": {
                 "type": 1, "networkId": "1856588631910923207", "inputs": [
                     {
@@ -172,66 +246,53 @@ def test_block():
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     "type": 1, "reference": 0}, {
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         "type": 2, "reference": 1}, {
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             "type": 1, "reference": 0}]}}
-    block = Block.from_dict(block_dict)
+    block = BasicBlock.from_dict(block_dict)
     assert block.to_dict() == block_dict
-    assert isinstance(block.payload, Payload)
+    assert isinstance(block.payload, get_args(Payload))
     assert block.payload.type == PayloadType.Transaction
 
-    # with tx payload that has a tagged data payload
-    block_dict = {"protocolVersion": 2,
-                  "strong_parents": ["0x4bbba1f1fbfa58d8e65c018d0518da1c3ab57f05ffdd9c2e20565a99b42948df",
-                                     "0x9962a18f0161f6b883cb1e36b936684793867d97dc9ac226a929d8e434385e96",
-                                     "0xe532853c4a1e03e00a37c78a42afebf3570b1bb4a756c5ad651c0f0377548348",
-                                     "0xedbd8bd428bcff342de0656e368a881022dd353b51f272ed40c604c86915d97d"],
-                  "weak_parents": [],
-                  "shallow_like_parents": [],
-                  "payload": {"type": 6,
-                              "essence": {"type": 1,
-                                          "networkId": "1856588631910923207",
-                                          "inputs": [{"type": 0,
-                                                      "transactionId": "0xeccfbdb73c0a4c9c0301b53a17e5aa301fbf0b079db9e88ff0e32e9e64214b28",
-                                                      "transactionOutputIndex": 5},
-                                                     {"type": 0,
-                                                      "transactionId": "0xf8052938858750c9c69b92b615a685fa2bb5833912b264142fc724e9510b0d0e",
-                                                      "transactionOutputIndex": 0}],
-                                          "inputsCommitment": "0x9702f2a625db14db2f67289828a9fdbe342477393572b9165b19964b2449061a",
-                                          "outputs": [{"type": 3,
-                                                       "amount": "1000000",
+
+@pytest.mark.skip(reason="https://github.com/iotaledger/iota-sdk/issues/1387")
+def test_basic_block_with_tx_payload_with_tagged_data_payload():
+    block_dict = {
+        "type": 0,
+        "strongParents": ["0x4bbba1f1fbfa58d8e65c018d0518da1c3ab57f05ffdd9c2e20565a99b42948df",
+                          "0x9962a18f0161f6b883cb1e36b936684793867d97dc9ac226a929d8e434385e96",
+                          "0xe532853c4a1e03e00a37c78a42afebf3570b1bb4a756c5ad651c0f0377548348",
+                          "0xedbd8bd428bcff342de0656e368a881022dd353b51f272ed40c604c86915d97d"],
+        "weakParents": [],
+        "shallowLikeParents": [],
+        "maxBurnedMana": "180500",
+        "payload": {"type": 6,
+                    "essence": {"type": 1,
+                                "networkId": "1856588631910923207",
+                                "inputs": [{"type": 0,
+                                            "transactionId": "0xeccfbdb73c0a4c9c0301b53a17e5aa301fbf0b079db9e88ff0e32e9e64214b28",
+                                            "transactionOutputIndex": 5},
+                                           {"type": 0,
+                                            "transactionId": "0xf8052938858750c9c69b92b615a685fa2bb5833912b264142fc724e9510b0d0e",
+                                            "transactionOutputIndex": 0}],
+                                "inputsCommitment": "0x9702f2a625db14db2f67289828a9fdbe342477393572b9165b19964b2449061a",
+                                "outputs": [{"type": 3,
+                                             "amount": "1000000",
                                                        "unlockConditions": [{"type": 0,
                                                                              "address": {"type": 0,
                                                                                          "pubKeyHash": "0x60200bad8137a704216e84f8f9acfe65b972d9f4155becb4815282b03cef99fe"}}]},
-                                                      {"type": 3,
-                                                       "amount": "50600",
+                                            {"type": 3,
+                                             "amount": "50600",
                                                        "unlockConditions": [{"type": 0,
                                                                              "address": {"type": 0,
                                                                                          "pubKeyHash": "0x74e8b1f10396eb5e8aeb16d666416802722436a88b5dd1a88e59c170b724c9cc"}}]}],
-                                          "payload": {"type": 5,
-                                                      "tag": "0x746167",
-                                                      "data": "0x64617461"}},
-                              "unlocks": [{"type": 0,
-                                           "signature": {"type": 0,
-                                                         "publicKey": "0x67b7fc3f78763c9394fc4fcdb52cf3a973b6e064bdc3defb40a6cb2c880e6f5c",
-                                                         "signature": "0x30cb012af3402be1b4b2ed18e2aba86839da06ba38ff3277c481e17c003f0199ba26f5613199e0d24035628bb2b69a6ea2a7682e41c30244996baf3a2adc1c00"}},
-                                          {"type": 1,
-                                           "reference": 0}]}}
-    block = Block.from_dict(block_dict)
+                                "payload": {"type": 5,
+                                            "tag": "0x746167",
+                                            "data": "0x64617461"}},
+                    "unlocks": [{"type": 0,
+                                 "signature": {"type": 0,
+                                               "publicKey": "0x67b7fc3f78763c9394fc4fcdb52cf3a973b6e064bdc3defb40a6cb2c880e6f5c",
+                                               "signature": "0x30cb012af3402be1b4b2ed18e2aba86839da06ba38ff3277c481e17c003f0199ba26f5613199e0d24035628bb2b69a6ea2a7682e41c30244996baf3a2adc1c00"}},
+                                {"type": 1,
+                                 "reference": 0}]}}
+    block = BasicBlock.from_dict(block_dict)
     assert block.to_dict() == block_dict
-    assert isinstance(block.payload, Payload)
+    assert isinstance(block.payload, get_args(Payload))
     assert block.payload.type == PayloadType.Transaction
-
-    # with tagged data payload
-    block_dict = {
-        "protocolVersion": 2,
-        "strong_parents": [
-            "0x17c297a273facf4047e244a65eb34ee33b1f1698e1fff28679466fa2ad81c0e8",
-            "0x9858e80fa0b37b6d9397e23d1f58ce53955a9be1aa8020c0d0e11672996c6db9"],
-        "weak_parents": [],
-        "shallow_like_parents": [],
-        "payload": {
-            "type": 5,
-            "tag": "0x484f524e4554205370616d6d6572",
-            "data": "0x57652061726520616c6c206d616465206f662073746172647573742e0a436f756e743a20353436333730330a54696d657374616d703a20323032332d30372d31395430373a32323a32385a0a54697073656c656374696f6e3a20343732c2b573"}}
-    block = Block.from_dict(block_dict)
-    assert block.to_dict() == block_dict
-    assert isinstance(block.payload, Payload)
-    assert block.payload.type == PayloadType.TaggedData

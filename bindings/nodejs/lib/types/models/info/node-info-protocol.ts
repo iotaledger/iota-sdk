@@ -222,10 +222,6 @@ export interface CongestionControlParameters {
      */
     schedulerRate: number;
     /**
-     * The minimum amount of Mana that an account must have to have a block scheduled.
-     */
-    minMana: u64;
-    /**
      * The maximum size of the buffer.
      */
     maxBufferSize: number;

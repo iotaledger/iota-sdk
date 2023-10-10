@@ -255,9 +255,6 @@ pub struct CongestionControlParameters {
     decrease_threshold: u32,
     /// Rate at which the scheduler runs (in workscore units per second).
     scheduler_rate: u32,
-    /// Minimum amount of Mana that an account must have to schedule a block.
-    #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
-    min_mana: u64,
     /// Maximum size of the buffer in the scheduler.
     max_buffer_size: u32,
     /// Maximum number of blocks in the validation buffer.
@@ -273,7 +270,6 @@ impl Default for CongestionControlParameters {
             increase_threshold: 800000,
             decrease_threshold: 500000,
             scheduler_rate: 100000,
-            min_mana: 1,
             max_buffer_size: 3276800,
             max_validation_buffer_size: 100,
         }
