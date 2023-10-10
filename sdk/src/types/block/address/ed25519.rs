@@ -3,13 +3,17 @@
 
 use core::str::FromStr;
 
-use crypto::signatures::ed25519::PublicKey;
+use crypto::{
+    hashes::{blake2b::Blake2b256, Digest},
+    signatures::ed25519::PublicKey,
+};
 use derive_more::{AsRef, Deref, From};
+use packable::Packable;
 
 use crate::types::block::Error;
 
 /// An Ed25519 address.
-#[derive(Clone, Copy, Eq, PartialEq, Ord, PartialOrd, Hash, From, AsRef, Deref, packable::Packable)]
+#[derive(Clone, Copy, Eq, PartialEq, Ord, PartialOrd, Hash, From, AsRef, Deref, Packable)]
 #[as_ref(forward)]
 pub struct Ed25519Address([u8; Self::LENGTH]);
 
@@ -23,6 +27,11 @@ impl Ed25519Address {
     #[inline(always)]
     pub fn new(address: [u8; Self::LENGTH]) -> Self {
         Self::from(address)
+    }
+
+    /// Creates a new [`Ed25519Address`] from the bytes of a [`PublicKey`].
+    pub fn from_public_key_bytes(public_key_bytes: [u8; PublicKey::LENGTH]) -> Result<Self, Error> {
+        Ok(Self::new(Blake2b256::digest(public_key_bytes).try_into()?))
     }
 }
 
@@ -53,7 +62,6 @@ pub(crate) mod dto {
     use super::*;
     use crate::utils::serde::prefix_hex_bytes;
 
-    /// Describes an Ed25519 address.
     #[derive(Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
     struct Ed25519AddressDto {

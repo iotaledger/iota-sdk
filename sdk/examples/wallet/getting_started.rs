@@ -49,7 +49,7 @@ async fn main() -> Result<()> {
         .finish()
         .await?;
 
-    let first_address = &account.addresses().await?[0];
+    let first_address = &account.addresses().await[0];
     println!("{}", first_address.address());
 
     Ok(())

@@ -18,9 +18,11 @@ use packable::{
 
 use crate::types::block::{address::Address, ConvertTo, Error};
 
+const HRP_MAX: u8 = 83;
+
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct Hrp {
-    inner: [u8; 83],
+    inner: [u8; HRP_MAX as usize],
     len: u8,
 }
 
@@ -38,7 +40,7 @@ impl Hrp {
     /// Convert a string to an Hrp without checking validity.
     pub const fn from_str_unchecked(hrp: &str) -> Self {
         let len = hrp.len();
-        let mut bytes = [0; 83];
+        let mut bytes = [0; HRP_MAX as usize];
         let hrp = hrp.as_bytes();
         let mut i = 0;
         while i < len {
@@ -57,8 +59,8 @@ impl FromStr for Hrp {
 
     fn from_str(hrp: &str) -> Result<Self, Self::Err> {
         let len = hrp.len();
-        if hrp.is_ascii() && len <= 83 {
-            let mut bytes = [0; 83];
+        if hrp.is_ascii() && len <= HRP_MAX as usize {
+            let mut bytes = [0; HRP_MAX as usize];
             bytes[..len].copy_from_slice(hrp.as_bytes());
             Ok(Self {
                 inner: bytes,
@@ -99,7 +101,7 @@ impl Packable for Hrp {
     ) -> Result<Self, UnpackError<Self::UnpackError, U::Error>> {
         let len = u8::unpack::<_, VERIFY>(unpacker, visitor).coerce()?;
 
-        if len > 83 {
+        if len > HRP_MAX {
             return Err(UnpackError::Packable(Error::InvalidBech32Hrp(
                 "hrp len above 83".to_string(),
             )));
@@ -147,7 +149,7 @@ impl<T: AsRef<str> + Send> ConvertTo<Hrp> for T {
 }
 
 /// An address and its network type.
-#[derive(Copy, Clone, Eq, PartialEq, Hash, AsRef, Deref, Ord, PartialOrd)]
+#[derive(Clone, Eq, PartialEq, Hash, AsRef, Deref, Ord, PartialOrd)]
 pub struct Bech32Address {
     pub(crate) hrp: Hrp,
     #[as_ref]
@@ -251,7 +253,7 @@ impl PartialEq<str> for Bech32Address {
 
 impl<T: core::borrow::Borrow<Bech32Address>> From<T> for Address {
     fn from(value: T) -> Self {
-        value.borrow().inner
+        value.borrow().inner.clone()
     }
 }
 
