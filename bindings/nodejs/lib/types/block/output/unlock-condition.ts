@@ -156,8 +156,8 @@ class TimelockUnlockCondition extends UnlockCondition {
 }
 
 /**
- * Defines an expiration slot index. Before the slot index is reached, only the Address defined in the Address
- * Unlock Condition is allowed to unlock the output. Afterward, only the Return Address can unlock it.
+ * Defines a slot index until which only the Address defined in the Address Unlock Condition is allowed to unlock the output.
+ * After the slot index is reached/passed, only the Return Address can unlock it.
  */
 class ExpirationUnlockCondition extends UnlockCondition {
     /**
@@ -168,8 +168,7 @@ class ExpirationUnlockCondition extends UnlockCondition {
     })
     readonly returnAddress: Address;
     /**
-     * Before this slot index, the condition is allowed to unlock the output,
-     * after that only the address defined in return address.
+     * Before this slot index, the Address Unlock Condition is allowed to unlock the output, after that only the address defined in Return Address can.
      */
     readonly slotIndex: SlotIndex;
 
