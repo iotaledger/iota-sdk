@@ -217,7 +217,7 @@ class DelegationOutput:
         delegation_id: Unique identifier of the Delegation Output
         validator_address: The Account Address of the validator to which this output is delegating.
         start_epoch: The index of the first epoch for which this output delegates.
-        end_epoch: 	The index of the last epoch for which this output delegates.
+        end_epoch: The index of the last epoch for which this output delegates.
         unlock_conditions: Define how the output can be unlocked in a transaction.
         type: The type of output.
     """
@@ -231,7 +231,9 @@ class DelegationOutput:
     validator_address: HexStr
     start_epoch: EpochIndex
     end_epoch: EpochIndex
-    unlock_conditions: List[UnlockCondition]
+    unlock_conditions: List[UnlockCondition] = field(metadata=config(
+        decoder=deserialize_unlock_conditions
+    ))
     type: int = field(default_factory=lambda: int(
         OutputType.Delegation), init=False)
 
