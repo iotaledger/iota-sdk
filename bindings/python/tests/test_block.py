@@ -23,6 +23,11 @@ def test_basic_block_with_tagged_data_payload():
     assert block.to_dict() == block_dict
     assert isinstance(block.payload, get_args(Payload))
     assert block.payload.type == PayloadType.TaggedData
+    assert block.max_burned_mana == 180500
+
+    block_to_dict = block.to_dict()
+    # Make sure encoding is done correctly
+    assert block_to_dict == block_dict
 
 
 def test_block_wrapper_with_tagged_data_payload():

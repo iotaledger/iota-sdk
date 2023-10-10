@@ -47,7 +47,7 @@ async fn main() -> Result<()> {
 
     let _ = ensure_enough_addresses(&account, ADDRESSES_TO_SPLIT_FUNDS).await?;
 
-    let addresses = account.addresses().await?;
+    let addresses = account.addresses().await;
     println!("Total address count: {}", addresses.len());
 
     sync_print_balance(&account).await?;
@@ -120,12 +120,12 @@ async fn sync_print_balance(account: &Account) -> Result<()> {
 
 async fn ensure_enough_addresses(account: &Account, limit: usize) -> Result<Vec<Bip44Address>> {
     let alias = account.alias().await;
-    if account.addresses().await?.len() < limit {
-        let num_addresses_to_generate = limit - account.addresses().await?.len();
+    if account.addresses().await.len() < limit {
+        let num_addresses_to_generate = limit - account.addresses().await.len();
         println!("Generating {num_addresses_to_generate} addresses for account '{alias}'...");
         account
             .generate_ed25519_addresses(num_addresses_to_generate as u32, None)
             .await?;
     }
-    account.addresses().await
+    Ok(account.addresses().await)
 }

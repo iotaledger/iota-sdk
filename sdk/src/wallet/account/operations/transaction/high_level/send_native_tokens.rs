@@ -133,8 +133,11 @@ where
         let rent_structure = self.client().get_rent_structure().await?;
         let token_supply = self.client().get_token_supply().await?;
 
-        let account_addresses = self.addresses().await?;
-        let default_return_address = account_addresses.first().ok_or(Error::FailedToGetRemainder)?;
+        let account_addresses = self.addresses().await;
+        let default_return_address = account_addresses
+            .into_iter()
+            .next()
+            .ok_or(Error::FailedToGetRemainder)?;
 
         let slot_index = self.client().get_slot_index().await?;
 
@@ -158,7 +161,7 @@ where
                     Ok::<_, Error>(addr)
                 })
                 .transpose()?
-                .unwrap_or(default_return_address.address);
+                .unwrap_or_else(|| default_return_address.address.clone());
 
             let native_tokens = NativeTokens::from_vec(
                 native_tokens
@@ -190,7 +193,11 @@ where
                     .add_unlock_condition(
                         // We send the full storage_deposit_amount back to the sender, so only the native tokens are
                         // sent
-                        StorageDepositReturnUnlockCondition::new(return_address, storage_deposit_amount, token_supply)?,
+                        StorageDepositReturnUnlockCondition::new(
+                            return_address.clone(),
+                            storage_deposit_amount,
+                            token_supply,
+                        )?,
                     )
                     .add_unlock_condition(ExpirationUnlockCondition::new(return_address, expiration_slot_index)?)
                     .finish_output(token_supply)?,

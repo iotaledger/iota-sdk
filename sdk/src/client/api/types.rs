@@ -168,7 +168,7 @@ impl From<&RemainderData> for RemainderDataDto {
         Self {
             output: OutputDto::from(&remainder.output),
             chain: remainder.chain,
-            address: remainder.address,
+            address: remainder.address.clone(),
         }
     }
 }

@@ -18,10 +18,7 @@ async fn send_amount() -> Result<()> {
 
     let amount = 1_000_000;
     let tx = account_0
-        .send_with_params(
-            [SendParams::new(amount, *account_1.addresses().await?[0].address())?],
-            None,
-        )
+        .send_with_params([SendParams::new(amount, account_1.first_address_bech32().await)?], None)
         .await?;
 
     account_0
@@ -51,7 +48,7 @@ async fn send_amount_127_outputs() -> Result<()> {
             vec![
                 SendParams::new(
                     amount,
-                    *account_1.addresses().await?[0].address(),
+                    account_1.first_address_bech32().await,
                 )?;
                 // Only 127, because we need one remainder
                 127
@@ -85,7 +82,7 @@ async fn send_amount_custom_input() -> Result<()> {
     let amount = 1_000_000;
     let tx = account_0
         .send_with_params(
-            vec![SendParams::new(amount, *account_1.addresses().await?[0].address())?; 10],
+            vec![SendParams::new(amount, account_1.first_address_bech32().await)?; 10],
             None,
         )
         .await?;
@@ -101,7 +98,7 @@ async fn send_amount_custom_input() -> Result<()> {
     let custom_input = &account_1.unspent_outputs(None).await?[5];
     let tx = account_1
         .send_with_params(
-            [SendParams::new(amount, *account_0.addresses().await?[0].address())?],
+            [SendParams::new(amount, account_0.first_address_bech32().await)?],
             Some(TransactionOptions {
                 custom_inputs: Some(vec![custom_input.output_id]),
                 ..Default::default()
@@ -125,7 +122,7 @@ async fn send_nft() -> Result<()> {
     let accounts = &create_accounts_with_funds(&wallet, 2).await?;
 
     let nft_options = [MintNftParams::new()
-        .with_address(*accounts[0].addresses().await?[0].address())
+        .with_address(accounts[0].first_address_bech32().await)
         .with_metadata(b"some nft metadata".to_vec())
         .with_immutable_metadata(b"some immutable nft metadata".to_vec())];
 
@@ -138,10 +135,7 @@ async fn send_nft() -> Result<()> {
     // Send to account 1
     let transaction = accounts[0]
         .send_nft(
-            [SendNftParams::new(
-                *accounts[1].addresses().await?[0].address(),
-                nft_id,
-            )?],
+            [SendNftParams::new(accounts[1].first_address_bech32().await, nft_id)?],
             None,
         )
         .await
@@ -171,7 +165,7 @@ async fn send_with_note() -> Result<()> {
     let amount = 1_000_000;
     let tx = account_0
         .send_with_params(
-            [SendParams::new(amount, *account_1.addresses().await?[0].address())?],
+            [SendParams::new(amount, account_1.first_address_bech32().await)?],
             Some(TransactionOptions {
                 note: Some(String::from("send_with_note")),
                 ..Default::default()
@@ -207,7 +201,7 @@ async fn conflicting_transaction() -> Result<()> {
         .send_with_params(
             [SendParams::new(
                 1_000_000,
-                *wallet_0_account.addresses().await?[0].address(),
+                wallet_0_account.first_address_bech32().await,
             )?],
             None,
         )
@@ -222,7 +216,7 @@ async fn conflicting_transaction() -> Result<()> {
                 // Something in the transaction must be different than in the first one, otherwise it will be the same
                 // one
                 2_000_000,
-                *wallet_0_account.addresses().await?[0].address(),
+                wallet_0_account.first_address_bech32().await,
             )?],
             None,
         )
@@ -289,10 +283,7 @@ async fn prepare_transaction_ledger() -> Result<()> {
         .await;
 
     let tx = account_0
-        .send_with_params(
-            [SendParams::new(amount, *account_1.addresses().await?[0].address())?],
-            None,
-        )
+        .send_with_params([SendParams::new(amount, account_1.first_address_bech32().await)?], None)
         .await?;
 
     let data = receiver.recv().await.expect("never recieved event");
