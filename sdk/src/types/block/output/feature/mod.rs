@@ -319,15 +319,14 @@ impl Features {
 
 impl WorkScore for Features {
     fn work_score(&self, work_score_params: WorkScoreStructure) -> u32 {
-        let features_score = self
+        self
             .iter()
             .map(|f| match f {
                 Feature::BlockIssuer(_) => work_score_params.block_issuer,
                 Feature::Staking(_) => work_score_params.staking,
                 _ => 0,
             })
-            .sum::<u32>();
-        features_score
+            .sum::<u32>()
     }
 }
 
