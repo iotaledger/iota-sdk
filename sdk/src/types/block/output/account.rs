@@ -986,8 +986,8 @@ mod tests {
 
         let builder = AccountOutput::build_with_amount(100, account_id)
             .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000).unwrap())
-            .add_unlock_condition(gov_address)
-            .add_unlock_condition(state_address)
+            .add_unlock_condition(gov_address.clone())
+            .add_unlock_condition(state_address.clone())
             .with_features(rand_allowed_features(AccountOutput::ALLOWED_FEATURES))
             .with_immutable_features(rand_allowed_features(AccountOutput::ALLOWED_IMMUTABLE_FEATURES));
         test_split_dto(builder);

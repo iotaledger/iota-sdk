@@ -29,10 +29,10 @@ fn builder() {
 
     let mut builder = NftOutput::build_with_amount(amount, NftId::null())
         .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000).unwrap())
-        .add_unlock_condition(address_1)
+        .add_unlock_condition(address_1.clone())
         .add_feature(sender_1)
-        .replace_feature(sender_2)
-        .replace_immutable_feature(issuer_1)
+        .replace_feature(sender_2.clone())
+        .replace_immutable_feature(issuer_1.clone())
         .add_immutable_feature(issuer_2);
 
     let output = builder.clone().finish().unwrap();
@@ -45,7 +45,7 @@ fn builder() {
         .clear_unlock_conditions()
         .clear_features()
         .clear_immutable_features()
-        .replace_unlock_condition(address_2);
+        .replace_unlock_condition(address_2.clone());
     let output = builder.clone().finish().unwrap();
     assert_eq!(output.unlock_conditions().address(), Some(&address_2));
     assert!(output.features().is_empty());

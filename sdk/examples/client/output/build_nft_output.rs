@@ -57,8 +57,8 @@ async fn main() -> Result<()> {
 
     // NftId needs to be null the first time
     let nft_output = NftOutputBuilder::new_with_minimum_storage_deposit(rent_structure, NftId::null())
-        .add_unlock_condition(AddressUnlockCondition::new(address))
-        .add_feature(SenderFeature::new(address))
+        .add_unlock_condition(AddressUnlockCondition::new(address.clone()))
+        .add_feature(SenderFeature::new(address.clone()))
         .add_feature(MetadataFeature::new(MUTABLE_METADATA)?)
         .add_feature(TagFeature::new(TAG)?)
         .add_immutable_feature(IssuerFeature::new(address))

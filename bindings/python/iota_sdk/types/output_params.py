@@ -2,10 +2,11 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from __future__ import annotations
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import Enum
 from typing import List, Optional
-from iota_sdk.types.common import HexStr, json
+from dataclasses_json import config
+from iota_sdk.types.common import HexStr, json, opt_int_encoder
 from iota_sdk.types.native_token import NativeToken
 
 
@@ -34,8 +35,12 @@ class Features():
 class Unlocks():
     """Unlocks for OutputParams.
     """
-    expiration_unix_time: Optional[int] = None
-    timelock_unix_time: Optional[int] = None
+    expiration_slot_index: Optional[int] = field(default=None, metadata=config(
+        encoder=opt_int_encoder
+    ))
+    timelock_slot_index: Optional[int] = field(default=None, metadata=config(
+        encoder=opt_int_encoder
+    ))
 
 
 class ReturnStrategy(str, Enum):
@@ -60,7 +65,9 @@ class OutputParams():
     """Params for `Account.prepare_output()`.
     """
     recipient_address: str
-    amount: str
+    amount: int = field(metadata=config(
+        encoder=str
+    ))
     assets: Optional[Assets] = None
     features: Optional[Features] = None
     unlocks: Optional[Unlocks] = None

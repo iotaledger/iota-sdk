@@ -3,7 +3,8 @@
 
 from __future__ import annotations
 from typing import Any, Dict, List, Optional
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from dataclasses_json import config
 from iota_sdk.types.common import HexStr, AddressAndAmount, json
 from iota_sdk.client._high_level_api import Range
 from iota_sdk.types.burn import Burn
@@ -16,8 +17,12 @@ from iota_sdk.types.input import UtxoInput
 class BlockBuilderOptions:
     """Options to build a block.
     """
-    total: str
-    available: str
+    total: int = field(metadata=config(
+        encoder=str
+    ))
+    available: int = field(metadata=config(
+        encoder=str
+    ))
     coin_type: Optional[int] = None
     account_index: Optional[int] = None
     initial_address_index: Optional[int] = None

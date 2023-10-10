@@ -4,15 +4,22 @@
 mod account;
 mod bech32;
 mod ed25519;
+mod implicit_account_creation;
 mod nft;
+mod restricted;
+
+use alloc::boxed::Box;
 
 use derive_more::From;
+use packable::Packable;
 
 pub use self::{
     account::AccountAddress,
     bech32::{Bech32Address, Hrp},
     ed25519::Ed25519Address,
+    implicit_account_creation::ImplicitAccountCreationAddress,
     nft::NftAddress,
+    restricted::{AddressCapabilities, AddressCapabilityFlag, RestrictedAddress},
 };
 use crate::{
     types::block::{
@@ -27,7 +34,7 @@ use crate::{
 };
 
 /// A generic address supporting different address kinds.
-#[derive(Clone, Copy, Eq, PartialEq, Ord, PartialOrd, Hash, From, packable::Packable)]
+#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, From, Packable)]
 #[packable(tag_type = u8, with_error = Error::InvalidAddressKind)]
 #[packable(unpack_error = Error)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize), serde(untagged))]
@@ -41,6 +48,19 @@ pub enum Address {
     /// An NFT address.
     #[packable(tag = NftAddress::KIND)]
     Nft(NftAddress),
+    /// An implicit account creation address.
+    #[packable(tag = ImplicitAccountCreationAddress::KIND)]
+    ImplicitAccountCreation(ImplicitAccountCreationAddress),
+    /// An address with restricted capabilities.
+    #[packable(tag = RestrictedAddress::KIND)]
+    #[from(ignore)]
+    Restricted(Box<RestrictedAddress>),
+}
+
+impl From<RestrictedAddress> for Address {
+    fn from(value: RestrictedAddress) -> Self {
+        Self::Restricted(value.into())
+    }
 }
 
 impl core::fmt::Debug for Address {
@@ -49,6 +69,8 @@ impl core::fmt::Debug for Address {
             Self::Ed25519(address) => address.fmt(f),
             Self::Account(address) => address.fmt(f),
             Self::Nft(address) => address.fmt(f),
+            Self::ImplicitAccountCreation(address) => address.fmt(f),
+            Self::Restricted(address) => address.fmt(f),
         }
     }
 }
@@ -60,6 +82,8 @@ impl Address {
             Self::Ed25519(_) => Ed25519Address::KIND,
             Self::Account(_) => AccountAddress::KIND,
             Self::Nft(_) => NftAddress::KIND,
+            Self::ImplicitAccountCreation(_) => ImplicitAccountCreationAddress::KIND,
+            Self::Restricted(_) => RestrictedAddress::KIND,
         }
     }
 
@@ -138,7 +162,7 @@ impl Address {
                     return Err(TransactionFailureReason::InvalidUnlockBlockSignature);
                 }
 
-                context.unlocked_addresses.insert(*self);
+                context.unlocked_addresses.insert(self.clone());
             }
             (Self::Ed25519(_ed25519_address), Unlock::Reference(_unlock)) => {
                 // TODO actually check that it was unlocked by the same signature.
@@ -192,26 +216,16 @@ pub trait ToBech32Ext: Sized {
 }
 
 impl<T: Into<Address>> ToBech32Ext for T {
-    /// Try to encode this address to a bech32 string with the given Human Readable Part as prefix.
     fn try_to_bech32(self, hrp: impl ConvertTo<Hrp>) -> Result<Bech32Address, Error> {
         Bech32Address::try_new(hrp, self)
     }
 
-    /// Encodes this address to a bech32 string with the given Human Readable Part as prefix.
     fn to_bech32(self, hrp: Hrp) -> Bech32Address {
         Bech32Address::new(hrp, self)
     }
 
-    /// Encodes this address to a bech32 string with the given Human Readable Part as prefix without checking
-    /// validity.
     fn to_bech32_unchecked(self, hrp: impl ConvertTo<Hrp>) -> Bech32Address {
         Bech32Address::new(hrp.convert_unchecked(), self)
-    }
-}
-
-impl From<&Self> for Address {
-    fn from(value: &Self) -> Self {
-        *value
     }
 }
 
@@ -221,7 +235,8 @@ impl StorageScore for Address {
             Self::Account(account) => account.storage_score(rent_structure),
             Self::Ed25519(ed25519) => ed25519.storage_score(rent_structure),
             Self::Nft(nft) => nft.storage_score(rent_structure),
-            // TODO: other address types once merged
+            Self::ImplicitAccountCreation(implicit) => implicit.storage_score(rent_structure),
+            Self::Restricted(restricted) => restricted.storage_score(rent_structure),
         }
     }
 }

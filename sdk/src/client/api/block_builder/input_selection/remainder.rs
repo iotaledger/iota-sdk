@@ -24,7 +24,7 @@ impl InputSelection {
     // Gets the remainder address from configuration of finds one from the inputs.
     fn get_remainder_address(&self) -> Option<(Address, Option<Bip44>)> {
         if self.remainder_address.is_some() {
-            return self.remainder_address.map(|address| (address, None));
+            return self.remainder_address.as_ref().map(|address| (address.clone(), None));
         }
 
         for input in &self.selected_inputs {
@@ -96,7 +96,7 @@ impl InputSelection {
             if amount > output_sdr_amount {
                 let diff = amount - output_sdr_amount;
                 let srd_output = BasicOutputBuilder::new_with_amount(diff)
-                    .with_unlock_conditions([AddressUnlockCondition::new(address)])
+                    .with_unlock_conditions([AddressUnlockCondition::new(address.clone())])
                     .finish_output(self.protocol_parameters.token_supply())?;
 
                 // TODO verify_storage_deposit ?
@@ -133,7 +133,8 @@ impl InputSelection {
         let diff = inputs_sum - outputs_sum;
         let mut remainder_builder = BasicOutputBuilder::new_with_amount(diff);
 
-        remainder_builder = remainder_builder.add_unlock_condition(AddressUnlockCondition::new(remainder_address));
+        remainder_builder =
+            remainder_builder.add_unlock_condition(AddressUnlockCondition::new(remainder_address.clone()));
 
         if let Some(native_tokens) = native_tokens_diff {
             log::debug!("Adding {native_tokens:?} to remainder output for {remainder_address:?}");
