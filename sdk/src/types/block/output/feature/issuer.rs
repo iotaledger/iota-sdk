@@ -6,7 +6,7 @@ use derive_more::From;
 use crate::types::block::address::Address;
 
 /// Identifies the validated issuer of the UTXO state machine.
-#[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, From, packable::Packable)]
+#[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, From, packable::Packable)]
 pub struct IssuerFeature(pub(crate) Address);
 
 impl IssuerFeature {
@@ -43,7 +43,7 @@ pub(crate) mod dto {
         fn from(value: &IssuerFeature) -> Self {
             Self {
                 kind: IssuerFeature::KIND,
-                address: value.0,
+                address: value.0.clone(),
             }
         }
     }
