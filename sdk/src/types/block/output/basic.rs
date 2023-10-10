@@ -178,11 +178,11 @@ impl BasicOutputBuilder {
                 if amount < rent_cost {
                     // Get the projected rent cost of the return output
                     let return_rent_cost = Self::new_with_amount(0)
-                        .add_unlock_condition(AddressUnlockCondition::new(return_address))
+                        .add_unlock_condition(AddressUnlockCondition::new(return_address.clone()))
                         .rent_cost(rent_structure);
                     // Add a temporary storage deposit unlock condition so the new rent requirement can be calculated
                     self = self.add_unlock_condition(StorageDepositReturnUnlockCondition::new(
-                        return_address,
+                        return_address.clone(),
                         1,
                         token_supply,
                     )?);
@@ -627,7 +627,7 @@ mod tests {
 
         let builder = BasicOutput::build_with_amount(100)
             .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000).unwrap())
-            .add_unlock_condition(address)
+            .add_unlock_condition(address.clone())
             .with_features(rand_allowed_features(BasicOutput::ALLOWED_FEATURES));
         test_split_dto(builder);
 
@@ -644,7 +644,7 @@ mod tests {
         let address_unlock = rand_address_unlock_condition();
         let return_address = rand_address();
 
-        let builder_1 = BasicOutput::build_with_amount(1).add_unlock_condition(address_unlock);
+        let builder_1 = BasicOutput::build_with_amount(1).add_unlock_condition(address_unlock.clone());
 
         let builder_2 = BasicOutput::build_with_minimum_amount(protocol_parameters.rent_structure())
             .add_unlock_condition(address_unlock);
@@ -663,7 +663,7 @@ mod tests {
 
         let builder_1 = builder_1
             .with_sufficient_storage_deposit(
-                return_address,
+                return_address.clone(),
                 protocol_parameters.rent_structure(),
                 protocol_parameters.token_supply(),
             )

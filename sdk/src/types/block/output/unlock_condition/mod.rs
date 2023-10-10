@@ -543,12 +543,12 @@ pub mod dto {
     impl From<&UnlockCondition> for UnlockConditionDto {
         fn from(value: &UnlockCondition) -> Self {
             match value {
-                UnlockCondition::Address(v) => Self::Address(*v),
+                UnlockCondition::Address(v) => Self::Address(v.clone()),
                 UnlockCondition::StorageDepositReturn(v) => Self::StorageDepositReturn(v.into()),
                 UnlockCondition::Timelock(v) => Self::Timelock(*v),
-                UnlockCondition::Expiration(v) => Self::Expiration(*v),
-                UnlockCondition::StateControllerAddress(v) => Self::StateControllerAddress(*v),
-                UnlockCondition::GovernorAddress(v) => Self::GovernorAddress(*v),
+                UnlockCondition::Expiration(v) => Self::Expiration(v.clone()),
+                UnlockCondition::StateControllerAddress(v) => Self::StateControllerAddress(v.clone()),
+                UnlockCondition::GovernorAddress(v) => Self::GovernorAddress(v.clone()),
                 UnlockCondition::ImmutableAccountAddress(v) => Self::ImmutableAccountAddress(*v),
             }
         }

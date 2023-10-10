@@ -43,7 +43,7 @@ async fn main() -> Result<()> {
     let token_scheme = TokenScheme::Simple(SimpleTokenScheme::new(50, 0, 100)?);
 
     let basic_output_builder = BasicOutputBuilder::new_with_minimum_amount(rent_structure)
-        .add_unlock_condition(AddressUnlockCondition::new(address));
+        .add_unlock_condition(AddressUnlockCondition::new(address.clone()));
     let account_output_builder = AccountOutputBuilder::new_with_minimum_amount(rent_structure, AccountId::null());
     let foundry_output_builder = FoundryOutputBuilder::new_with_minimum_amount(rent_structure, 1, token_scheme);
 
@@ -54,7 +54,7 @@ async fn main() -> Result<()> {
         basic_output_builder
             .clone()
             .add_unlock_condition(StorageDepositReturnUnlockCondition::new(
-                address,
+                address.clone(),
                 1000000,
                 token_supply,
             )?)
@@ -66,11 +66,11 @@ async fn main() -> Result<()> {
             .finish_output(token_supply)?,
         // with expiration unlock condition
         basic_output_builder
-            .add_unlock_condition(ExpirationUnlockCondition::new(address, 1)?)
+            .add_unlock_condition(ExpirationUnlockCondition::new(address.clone(), 1)?)
             .finish_output(token_supply)?,
         // with governor and state controller unlock condition
         account_output_builder
-            .add_unlock_condition(GovernorAddressUnlockCondition::new(address))
+            .add_unlock_condition(GovernorAddressUnlockCondition::new(address.clone()))
             .add_unlock_condition(StateControllerAddressUnlockCondition::new(address))
             .finish_output(token_supply)?,
         // with immutable account unlock condition

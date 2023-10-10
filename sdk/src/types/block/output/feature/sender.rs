@@ -9,7 +9,7 @@ use crate::types::block::{
 };
 
 /// Identifies the validated sender of an output.
-#[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, From, packable::Packable)]
+#[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, From, packable::Packable)]
 pub struct SenderFeature(pub(crate) Address);
 
 impl SenderFeature {
@@ -56,7 +56,7 @@ mod dto {
         fn from(value: &SenderFeature) -> Self {
             Self {
                 kind: SenderFeature::KIND,
-                address: value.0,
+                address: value.0.clone(),
             }
         }
     }

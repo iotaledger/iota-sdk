@@ -12,7 +12,7 @@ use crate::types::block::{
 
 /// Defines an expiration slot index. Before the slot index is reached, only the Address defined in the Address
 /// Unlock Condition is allowed to unlock the output. Afterward, only the Return Address can unlock it.
-#[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, From, packable::Packable)]
+#[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, From, packable::Packable)]
 pub struct ExpirationUnlockCondition {
     // The address that can unlock the expired output.
     return_address: Address,
@@ -101,7 +101,7 @@ pub(crate) mod dto {
         fn from(value: &ExpirationUnlockCondition) -> Self {
             Self {
                 kind: ExpirationUnlockCondition::KIND,
-                return_address: *value.return_address(),
+                return_address: value.return_address().clone(),
                 slot_index: value.slot_index(),
             }
         }

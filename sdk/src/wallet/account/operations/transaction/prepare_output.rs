@@ -136,7 +136,7 @@ where
             if return_strategy == ReturnStrategy::Return {
                 second_output_builder =
                     second_output_builder.add_unlock_condition(StorageDepositReturnUnlockCondition::new(
-                        remainder_address,
+                        remainder_address.clone(),
                         // Return minimum storage deposit
                         min_storage_deposit_basic_output,
                         token_supply,
@@ -158,7 +158,7 @@ where
                     // Add the additional amount to the SDR
                     second_output_builder =
                         second_output_builder.replace_unlock_condition(StorageDepositReturnUnlockCondition::new(
-                            remainder_address,
+                            remainder_address.clone(),
                             // Return minimum storage deposit
                             min_storage_deposit_basic_output + additional_required_amount,
                             token_supply,
@@ -292,9 +292,9 @@ where
                     }
                     RemainderValueStrategy::ChangeAddress => {
                         let remainder_address = self.generate_remainder_address().await?;
-                        Some(remainder_address.address().inner)
+                        Some(remainder_address.address.inner)
                     }
-                    RemainderValueStrategy::CustomAddress(address) => Some(*address),
+                    RemainderValueStrategy::CustomAddress(address) => Some(address.clone()),
                 }
             }
             None => None,
@@ -303,10 +303,11 @@ where
             Some(address) => address,
             None => {
                 self.addresses()
-                    .await?
-                    .first()
+                    .await
+                    .into_iter()
+                    .next()
                     .ok_or(crate::wallet::Error::FailedToGetRemainder)?
-                    .address()
+                    .address
                     .inner
             }
         };
