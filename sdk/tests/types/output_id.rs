@@ -3,7 +3,11 @@
 
 use core::str::FromStr;
 
-use iota_sdk::types::block::{output::OutputId, payload::transaction::TransactionId, Error};
+use iota_sdk::types::block::{
+    output::OutputId,
+    payload::transaction::{TransactionHash, TransactionId},
+    Error,
+};
 use packable::{bounded::InvalidBoundedU16, error::UnpackError, PackableExt};
 
 const TRANSACTION_ID: &str = "0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c649";
@@ -30,7 +34,7 @@ fn new_valid() {
 #[test]
 fn null() {
     assert_eq!(
-        format!("{:?}", OutputId::null()),
+        format!("{:?}", TransactionHash::null().with_slot_index(0).with_output_index(0)),
         "OutputId(0x00000000000000000000000000000000000000000000000000000000000000000000)"
     );
 }

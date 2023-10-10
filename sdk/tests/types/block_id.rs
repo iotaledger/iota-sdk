@@ -5,8 +5,8 @@ use core::str::FromStr;
 
 use iota_sdk::types::{
     block::{
-        output::RentStructure, protocol::ProtocolParameters, rand::bytes::rand_bytes_array, BlockHash, BlockId,
-        BlockWrapper, BlockWrapperDto,
+        output::RentStructure, protocol::ProtocolParameters, rand::bytes::rand_bytes_array, slot::SlotIndex, BlockHash,
+        BlockId, BlockWrapper, BlockWrapperDto,
     },
     TryFromDto,
 };
@@ -59,7 +59,7 @@ fn pack_unpack_valid() {
 #[test]
 fn memory_layout() {
     let block_hash = BlockHash::new(rand_bytes_array());
-    let slot_index = 12345.into();
+    let slot_index = SlotIndex::new(12345);
     let block_id = block_hash.with_slot_index(slot_index);
     assert_eq!(slot_index, block_id.slot_index());
     let memory_layout =

@@ -12,7 +12,7 @@ use packable::{error::UnpackError, packer::Packer, unpacker::Unpacker, Packable,
 pub(crate) use self::essence::{ContextInputCount, InputCount, OutputCount};
 pub use self::{
     essence::{RegularTransactionEssence, RegularTransactionEssenceBuilder, TransactionEssence},
-    transaction_id::TransactionId,
+    transaction_id::{TransactionHash, TransactionId},
 };
 use crate::types::block::{protocol::ProtocolParameters, unlock::Unlocks, Error};
 
@@ -51,7 +51,7 @@ impl TransactionPayload {
         hasher.update(Self::KIND.to_le_bytes());
         hasher.update(self.pack_to_vec());
 
-        TransactionId::new(hasher.finalize().into())
+        TransactionHash::new(hasher.finalize().into()).with_slot_index(self.essence.creation_slot())
     }
 }
 

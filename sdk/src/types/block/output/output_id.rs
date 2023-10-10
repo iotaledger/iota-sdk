@@ -43,15 +43,6 @@ impl OutputId {
         self.index.get()
     }
 
-    /// Creates a null [`OutputId`].
-    pub fn null() -> Self {
-        Self {
-            transaction_id: TransactionId::null(),
-            // Unwrap is fine because index is already known and valid.
-            index: 0u16.try_into().unwrap(),
-        }
-    }
-
     /// Splits an [`OutputId`] into its [`TransactionId`] and index.
     #[inline(always)]
     pub fn split(self) -> (TransactionId, u16) {
@@ -76,7 +67,7 @@ impl TryFrom<[u8; Self::LENGTH]> for OutputId {
 
         Self::new(
             // Unwrap is fine because size is already known and valid.
-            From::<[u8; TransactionId::LENGTH]>::from(transaction_id.try_into().unwrap()),
+            TransactionId::new(transaction_id.try_into().unwrap()),
             // Unwrap is fine because size is already known and valid.
             u16::from_le_bytes(index.try_into().unwrap()),
         )

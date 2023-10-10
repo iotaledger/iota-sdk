@@ -115,7 +115,7 @@ impl StorageManager {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{types::block::payload::transaction::TransactionId, wallet::storage::adapter::memory::Memory};
+    use crate::{types::block::payload::transaction::TransactionHash, wallet::storage::adapter::memory::Memory};
 
     #[tokio::test]
     async fn insert_get_remove_participation_event() {
@@ -155,7 +155,10 @@ mod tests {
         );
 
         let outputs_participation = std::iter::once((
-            OutputId::new(TransactionId::new([3; 32]), 0).unwrap(),
+            TransactionHash::new([3; 32])
+                .with_slot_index(0)
+                .with_output_index(0)
+                .unwrap(),
             OutputStatusResponse::mock(),
         ))
         .collect::<HashMap<_, _>>();

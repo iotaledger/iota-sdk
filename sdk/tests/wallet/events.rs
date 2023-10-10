@@ -6,8 +6,8 @@ use iota_sdk::{
     types::block::{
         address::{Address, Bech32Address, Ed25519Address},
         input::{Input, UtxoInput},
-        output::{unlock_condition::AddressUnlockCondition, BasicOutput, Output, OutputId},
-        payload::transaction::{RegularTransactionEssence, TransactionEssence, TransactionId},
+        output::{unlock_condition::AddressUnlockCondition, BasicOutput, Output},
+        payload::transaction::{RegularTransactionEssence, TransactionEssence, TransactionHash, TransactionId},
         protocol::protocol_parameters,
         rand::{
             mana::rand_mana_allotment,
@@ -44,7 +44,7 @@ fn wallet_events_serde() {
     }));
 
     let output_data_dto = OutputDataDto::from(&OutputData {
-        output_id: OutputId::null(),
+        output_id: TransactionHash::null().with_slot_index(0).with_output_index(0).unwrap(),
         metadata: rand_output_metadata(),
         output: Output::from(rand_basic_output(1_813_620_509_061_365)),
         is_spent: false,
@@ -65,7 +65,7 @@ fn wallet_events_serde() {
     })));
 
     assert_serde_eq(WalletEvent::TransactionInclusion(TransactionInclusionEvent {
-        transaction_id: TransactionId::null(),
+        transaction_id: TransactionHash::null().with_slot_index(0),
         inclusion_state: InclusionState::Conflicting,
     }));
 
