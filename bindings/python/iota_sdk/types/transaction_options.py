@@ -42,9 +42,9 @@ class RemainderValueStrategy(Enum):
     ChangeAddress = None
     ReuseAddress = None
 
-    def to_dict(self):
+    def _to_dict_custom(self):
         """
-        The function `to_dict` returns a dictionary with the strategy name and its corresponding value.
+        The function `_to_dict_custom` returns a dictionary with the strategy name and its corresponding value.
 
         Returns:
 
@@ -85,8 +85,3 @@ class TransactionOptions():
         self.burn = burn
         self.note = note
         self.allow_micro_amount = allow_micro_amount
-
-    def as_dict(self):
-        """The function `as_dict` returns a dictionary representation of an object's attributes.
-        """
-        return dict(self.__dict__)

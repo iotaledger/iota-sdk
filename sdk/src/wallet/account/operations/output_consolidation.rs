@@ -254,7 +254,7 @@ where
                 params
                     .target_address
                     .map(|bech32| bech32.into_inner())
-                    .unwrap_or(outputs_to_consolidate[0].address),
+                    .unwrap_or_else(|| outputs_to_consolidate[0].address.clone()),
             ))
             .with_native_tokens(total_native_tokens.finish()?)
             .finish_output(token_supply)?];
