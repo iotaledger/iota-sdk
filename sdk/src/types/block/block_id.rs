@@ -16,7 +16,7 @@ impl BlockHash {
 }
 
 /// A block identifier.
-#[derive(Clone, Copy, Eq, PartialEq, Hash, Ord, PartialOrd, Debug, packable::Packable)]
+#[derive(Clone, Copy, Eq, PartialEq, Hash, Ord, PartialOrd, packable::Packable)]
 #[packable(unpack_error = Error)]
 #[repr(C)]
 pub struct BlockId {
@@ -26,7 +26,7 @@ pub struct BlockId {
 
 impl BlockId {
     /// The length of a [`BlockId`]
-    pub const LENGTH: usize = 40;
+    pub const LENGTH: usize = BlockHash::LENGTH + core::mem::size_of::<SlotIndex>();
 
     pub fn new(bytes: [u8; Self::LENGTH]) -> Self {
         unsafe { core::mem::transmute(bytes) }
@@ -64,6 +64,15 @@ impl core::str::FromStr for BlockId {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         Ok(Self::new(prefix_hex::decode(s).map_err(Error::Hex)?))
+    }
+}
+
+impl core::fmt::Debug for BlockId {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("BlockId")
+            .field("hash", &self.hash)
+            .field("slot_index", &self.slot_index())
+            .finish()
     }
 }
 
