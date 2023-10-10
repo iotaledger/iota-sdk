@@ -7,7 +7,7 @@ use crate::types::block::address::Address;
 
 /// Defines the Governor Address that owns this output, that is, it can unlock it with the proper Unlock in a
 /// transaction that governance transitions the account output.
-#[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, From, packable::Packable)]
+#[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, From, packable::Packable)]
 pub struct GovernorAddressUnlockCondition(Address);
 
 impl GovernorAddressUnlockCondition {
@@ -45,7 +45,7 @@ pub(crate) mod dto {
         fn from(value: &GovernorAddressUnlockCondition) -> Self {
             Self {
                 kind: GovernorAddressUnlockCondition::KIND,
-                address: value.0,
+                address: value.0.clone(),
             }
         }
     }

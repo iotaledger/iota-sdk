@@ -79,7 +79,7 @@ fn bech32() {
 #[test]
 fn bech32_roundtrip() {
     let address = Address::from(Ed25519Address::from_str(ED25519_ADDRESS).unwrap());
-    let bech32 = address.to_bech32_unchecked("rms").to_string();
+    let bech32 = address.clone().to_bech32_unchecked("rms").to_string();
 
     assert_eq!(
         Bech32Address::try_from_str(bech32),
