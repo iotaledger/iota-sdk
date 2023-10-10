@@ -4,14 +4,15 @@
 from __future__ import annotations
 from json import dumps, loads
 from typing import TYPE_CHECKING, List
-
 from dacite import from_dict
+
 from iota_sdk.types.signature import Ed25519Signature
 from iota_sdk.types.address import Address, AddressType, Ed25519Address, AliasAddress, NFTAddress
 from iota_sdk.types.common import HexStr
 from iota_sdk.types.output_id import OutputId
 from iota_sdk.types.output import Output
 from iota_sdk.external import call_utils_method
+from iota_sdk.types.payload import TransactionPayload
 
 # Required to prevent circular import
 if TYPE_CHECKING:
@@ -176,6 +177,14 @@ class Utils():
         """
         return _call_method('blockId', {
             'block': block.as_dict()
+        })
+
+    @staticmethod
+    def transaction_id(transaction_payload: TransactionPayload) -> HexStr:
+        """ Compute the transaction ID (Blake2b256 hash of the provided transaction payload) of a transaction payload.
+        """
+        return _call_method('transactionId', {
+            'payload': transaction_payload.as_dict()
         })
 
     @staticmethod
