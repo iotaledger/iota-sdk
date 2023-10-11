@@ -54,7 +54,7 @@ impl ManaStructure {
         (1 << self.bits_count) - 1
     }
 
-    pub fn decay(&self, mana: u64, epoch_delta: u64) -> u64 {
+    pub fn decay(&self, mana: u64, epoch_delta: u32) -> u64 {
         if mana == 0 || epoch_delta == 0 {
             return mana;
         }
@@ -67,7 +67,7 @@ impl ManaStructure {
         let mut remaining_epochs = epoch_delta;
 
         while remaining_epochs > 0 {
-            let epochs_to_decay = remaining_epochs.min(self.decay_factors().len() as u64);
+            let epochs_to_decay = remaining_epochs.min(self.decay_factors().len() as u32);
             remaining_epochs -= epochs_to_decay;
 
             // Unwrap: Safe because the index is at most the length

@@ -41,7 +41,7 @@ use super::EpochIndex;
     packable::Packable,
 )]
 #[repr(transparent)]
-pub struct SlotIndex(pub u64);
+pub struct SlotIndex(pub u32);
 
 impl SlotIndex {
     /// Gets the [`EpochIndex`] of this slot.
@@ -58,7 +58,7 @@ impl SlotIndex {
     pub fn from_timestamp(timestamp: u64, genesis_unix_timestamp: u64, slot_duration_in_seconds: u8) -> Self {
         timestamp
             .checked_sub(genesis_unix_timestamp)
-            .map(|elapsed| (elapsed / slot_duration_in_seconds as u64) + 1)
+            .map(|elapsed| ((elapsed / slot_duration_in_seconds as u64) + 1) as u32)
             .unwrap_or_default()
             .into()
     }
@@ -68,46 +68,46 @@ impl SlotIndex {
     pub fn to_timestamp(self, genesis_unix_timestamp: u64, slot_duration_in_seconds: u8) -> u64 {
         self.0
             .checked_sub(1)
-            .map(|adjusted_slot| (adjusted_slot * slot_duration_in_seconds as u64) + genesis_unix_timestamp)
+            .map(|adjusted_slot| (adjusted_slot as u64 * slot_duration_in_seconds as u64) + genesis_unix_timestamp)
             .unwrap_or_default()
     }
 }
 
-impl PartialEq<u64> for SlotIndex {
-    fn eq(&self, other: &u64) -> bool {
+impl PartialEq<u32> for SlotIndex {
+    fn eq(&self, other: &u32) -> bool {
         self.0 == *other
     }
 }
 
-impl core::ops::Add<u64> for SlotIndex {
+impl core::ops::Add<u32> for SlotIndex {
     type Output = Self;
 
-    fn add(self, other: u64) -> Self {
+    fn add(self, other: u32) -> Self {
         Self(self.0 + other)
     }
 }
 
-impl core::ops::AddAssign<u64> for SlotIndex {
-    fn add_assign(&mut self, other: u64) {
+impl core::ops::AddAssign<u32> for SlotIndex {
+    fn add_assign(&mut self, other: u32) {
         self.0 += other;
     }
 }
 
-impl core::ops::Sub<u64> for SlotIndex {
+impl core::ops::Sub<u32> for SlotIndex {
     type Output = Self;
 
-    fn sub(self, other: u64) -> Self {
+    fn sub(self, other: u32) -> Self {
         Self(self.0 - other)
     }
 }
 
-impl core::ops::SubAssign<u64> for SlotIndex {
-    fn sub_assign(&mut self, other: u64) {
+impl core::ops::SubAssign<u32> for SlotIndex {
+    fn sub_assign(&mut self, other: u32) {
         self.0 -= other;
     }
 }
 
-impl From<SlotIndex> for u64 {
+impl From<SlotIndex> for u32 {
     fn from(slot_index: SlotIndex) -> Self {
         *slot_index
     }

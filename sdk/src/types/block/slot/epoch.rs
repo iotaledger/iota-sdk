@@ -51,7 +51,7 @@ use super::SlotIndex;
     packable::Packable,
 )]
 #[repr(transparent)]
-pub struct EpochIndex(pub u64);
+pub struct EpochIndex(pub u32);
 
 impl EpochIndex {
     /// Gets the range of slots this epoch contains.
@@ -75,42 +75,42 @@ impl EpochIndex {
     }
 }
 
-impl From<EpochIndex> for u64 {
+impl From<EpochIndex> for u32 {
     fn from(epoch_index: EpochIndex) -> Self {
         *epoch_index
     }
 }
 
-impl PartialEq<u64> for EpochIndex {
-    fn eq(&self, other: &u64) -> bool {
+impl PartialEq<u32> for EpochIndex {
+    fn eq(&self, other: &u32) -> bool {
         self.0 == *other
     }
 }
 
-impl core::ops::Add<u64> for EpochIndex {
+impl core::ops::Add<u32> for EpochIndex {
     type Output = Self;
 
-    fn add(self, other: u64) -> Self {
+    fn add(self, other: u32) -> Self {
         Self(self.0 + other)
     }
 }
 
-impl core::ops::AddAssign<u64> for EpochIndex {
-    fn add_assign(&mut self, other: u64) {
+impl core::ops::AddAssign<u32> for EpochIndex {
+    fn add_assign(&mut self, other: u32) {
         self.0 += other;
     }
 }
 
-impl core::ops::Sub<u64> for EpochIndex {
+impl core::ops::Sub<u32> for EpochIndex {
     type Output = Self;
 
-    fn sub(self, other: u64) -> Self {
+    fn sub(self, other: u32) -> Self {
         Self(self.0 - other)
     }
 }
 
-impl core::ops::SubAssign<u64> for EpochIndex {
-    fn sub_assign(&mut self, other: u64) {
+impl core::ops::SubAssign<u32> for EpochIndex {
+    fn sub_assign(&mut self, other: u32) {
         self.0 -= other;
     }
 }
