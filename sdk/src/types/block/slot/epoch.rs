@@ -35,11 +35,11 @@ use crate::types::block::Error;
     Copy, Clone, Debug, Default, Eq, PartialEq, Ord, PartialOrd, Hash, From, Deref, Display, FromStr, packable::Packable,
 )]
 #[repr(transparent)]
-pub struct EpochIndex(u64);
+pub struct EpochIndex(u32);
 
 impl EpochIndex {
     /// Creates a new [`EpochIndex`].
-    pub fn new(index: u64) -> Self {
+    pub fn new(index: u32) -> Self {
         Self::from(index)
     }
 
@@ -81,14 +81,14 @@ impl EpochIndex {
     }
 }
 
-impl From<EpochIndex> for u64 {
+impl From<EpochIndex> for u32 {
     fn from(epoch_index: EpochIndex) -> Self {
         *epoch_index
     }
 }
 
-impl PartialEq<u64> for EpochIndex {
-    fn eq(&self, other: &u64) -> bool {
+impl PartialEq<u32> for EpochIndex {
+    fn eq(&self, other: &u32) -> bool {
         self.0 == *other
     }
 }
