@@ -771,7 +771,7 @@ async fn prepare_output_only_single_nft() -> Result<()> {
     let balance = account_1.sync(None).await?;
     assert_eq!(balance.nfts().len(), 1);
 
-    let nft_data = &account_1.unspent_outputs(None).await?[0];
+    let nft_data = &account_1.unspent_outputs(None).await[0];
     let nft_id = *balance.nfts().first().unwrap();
     // Send NFT back to first account
     let output = account_1

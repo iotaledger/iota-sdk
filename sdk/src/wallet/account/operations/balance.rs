@@ -69,7 +69,7 @@ where
         let mut total_native_tokens = NativeTokensBuilder::default();
 
         #[cfg(feature = "participation")]
-        let voting_output = self.get_voting_output().await?;
+        let voting_output = self.get_voting_output().await;
 
         for address_with_unspent_outputs in addresses_with_unspent_outputs {
             #[cfg(feature = "participation")]

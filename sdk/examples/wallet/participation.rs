@@ -146,7 +146,7 @@ async fn main() -> Result<()> {
     println!("Account synced");
     println!("New voting power: {}", balance.base_coin().voting_power());
 
-    let voting_output = account.get_voting_output().await?.unwrap();
+    let voting_output = account.get_voting_output().await.unwrap();
     println!("Voting output:\n{:#?}", voting_output.output);
 
     ////////////////////////////////////////////////
@@ -226,7 +226,7 @@ async fn main() -> Result<()> {
     // destroy voting output
     ////////////////////////////////////////////////
 
-    let voting_output = account.get_voting_output().await?.unwrap();
+    let voting_output = account.get_voting_output().await.unwrap();
     println!("Voting output: {:?}", voting_output.output);
 
     // Decrease full amount, there should be no voting output afterwards
@@ -246,7 +246,7 @@ async fn main() -> Result<()> {
     account.sync(None).await?;
     println!("Account synced");
 
-    assert!(account.get_voting_output().await.is_err());
+    assert!(account.get_voting_output().await.is_none());
 
     Ok(())
 }

@@ -131,7 +131,7 @@ async fn sync_only_most_basic_outputs() -> Result<()> {
     assert_eq!(balance.potentially_locked_outputs().len(), 0);
     assert_eq!(balance.nfts().len(), 0);
     assert_eq!(balance.accounts().len(), 0);
-    let unspent_outputs = account_1.unspent_outputs(None).await?;
+    let unspent_outputs = account_1.unspent_outputs(None).await;
     assert_eq!(unspent_outputs.len(), 1);
     unspent_outputs.into_iter().for_each(|output_data| {
         assert!(output_data.output.is_basic());

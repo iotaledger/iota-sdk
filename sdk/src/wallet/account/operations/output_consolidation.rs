@@ -126,7 +126,7 @@ where
     pub async fn prepare_consolidate_outputs(&self, params: ConsolidationParams) -> Result<PreparedTransactionData> {
         log::debug!("[OUTPUT_CONSOLIDATION] prepare consolidating outputs if needed");
         #[cfg(feature = "participation")]
-        let voting_output = self.get_voting_output().await?;
+        let voting_output = self.get_voting_output().await;
         let slot_index = self.client().get_slot_index().await?;
         let token_supply = self.client().get_token_supply().await?;
         let mut outputs_to_consolidate = Vec::new();

@@ -26,12 +26,11 @@ where
     crate::client::Error: From<S::Error>,
 {
     /// Returns an account's total voting power (voting or NOT voting).
-    pub async fn get_voting_power(&self) -> Result<u64> {
-        Ok(self
-            .get_voting_output()
-            .await?
+    pub async fn get_voting_power(&self) -> u64 {
+        self.get_voting_output()
+            .await
             // If no voting output exists, return 0
-            .map_or(0, |v| v.output.amount()))
+            .map_or(0, |v| v.output.amount())
     }
 
     /// Designates a given amount of tokens towards an account's "voting power" by creating a
@@ -55,7 +54,7 @@ where
     pub async fn prepare_increase_voting_power(&self, amount: u64) -> Result<PreparedTransactionData> {
         let token_supply = self.client().get_token_supply().await?;
 
-        let (new_output, tx_options) = match self.get_voting_output().await? {
+        let (new_output, tx_options) = match self.get_voting_output().await {
             Some(current_output_data) => {
                 let output = current_output_data.output.as_basic();
 
@@ -116,7 +115,7 @@ where
         let token_supply = self.client().get_token_supply().await?;
         let current_output_data = self
             .get_voting_output()
-            .await?
+            .await
             .ok_or_else(|| crate::wallet::Error::Voting("No unspent voting output found".to_string()))?;
         let output = current_output_data.output.as_basic();
 

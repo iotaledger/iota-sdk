@@ -89,7 +89,7 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
         }
         #[cfg(feature = "participation")]
         AccountMethod::GetVotingPower => {
-            let voting_power = account.get_voting_power().await?;
+            let voting_power = account.get_voting_power().await;
             Response::VotingPower(voting_power.to_string())
         }
         AccountMethod::IncomingTransactions => {
@@ -97,7 +97,7 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
             Response::Transactions(transactions.iter().map(TransactionDto::from).collect())
         }
         AccountMethod::Outputs { filter_options } => {
-            let outputs = account.outputs(filter_options).await?;
+            let outputs = account.outputs(filter_options).await;
             Response::OutputsData(outputs.iter().map(OutputDataDto::from).collect())
         }
         AccountMethod::PendingTransactions => {
@@ -284,7 +284,7 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
             Response::Transactions(transactions.iter().map(TransactionDto::from).collect())
         }
         AccountMethod::UnspentOutputs { filter_options } => {
-            let outputs = account.unspent_outputs(filter_options).await?;
+            let outputs = account.unspent_outputs(filter_options).await;
             Response::OutputsData(outputs.iter().map(OutputDataDto::from).collect())
         }
     };

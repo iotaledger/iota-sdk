@@ -26,13 +26,13 @@ async fn main() -> Result<()> {
 
     // Print output ids
     println!("Output ids:");
-    for output in account.outputs(None).await? {
+    for output in account.outputs(None).await {
         println!("{}", output.output_id);
     }
 
     // Print unspent output ids
     println!("Unspent output ids:");
-    for output in account.unspent_outputs(None).await? {
+    for output in account.unspent_outputs(None).await {
         println!("{}", output.output_id);
     }
 

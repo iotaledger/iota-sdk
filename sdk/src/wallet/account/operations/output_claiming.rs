@@ -131,7 +131,7 @@ where
     pub(crate) async fn get_basic_outputs_for_additional_inputs(&self) -> crate::wallet::Result<Vec<OutputData>> {
         log::debug!("[OUTPUT_CLAIMING] get_basic_outputs_for_additional_inputs");
         #[cfg(feature = "participation")]
-        let voting_output = self.get_voting_output().await?;
+        let voting_output = self.get_voting_output().await;
         let account_details = self.details().await;
 
         // Get basic outputs only with AddressUnlockCondition and no other unlock condition

@@ -314,11 +314,12 @@ impl AccountInner {
         Ok(self.details().await.addresses_with_unspent_outputs().to_vec())
     }
 
+    // TODO: why was this returning a `Result` despite nothing actually possible to fail?
     fn filter_outputs<'a>(
         &self,
         outputs: impl Iterator<Item = &'a OutputData>,
         filter: impl Into<Option<FilterOptions>>,
-    ) -> Result<Vec<OutputData>> {
+    ) -> Vec<OutputData> {
         let filter = filter.into();
 
         if let Some(filter) = filter {
@@ -380,50 +381,53 @@ impl AccountInner {
                 }
             }
 
-            Ok(filtered_outputs)
+            filtered_outputs
         } else {
-            Ok(outputs.cloned().collect())
+            outputs.cloned().collect()
         }
     }
 
     /// Returns outputs of the account
-    pub async fn outputs(&self, filter: impl Into<Option<FilterOptions>> + Send) -> Result<Vec<OutputData>> {
+    pub async fn outputs(&self, filter: impl Into<Option<FilterOptions>> + Send) -> Vec<OutputData> {
         self.filter_outputs(self.details().await.outputs.values(), filter)
     }
 
     /// Returns unspent outputs of the account
-    pub async fn unspent_outputs(&self, filter: impl Into<Option<FilterOptions>> + Send) -> Result<Vec<OutputData>> {
+    pub async fn unspent_outputs(&self, filter: impl Into<Option<FilterOptions>> + Send) -> Vec<OutputData> {
         self.filter_outputs(self.details().await.unspent_outputs.values(), filter)
     }
 
     /// Gets the unspent account output matching the given ID.
-    pub async fn unspent_account_output(&self, account_id: &AccountId) -> Result<Option<OutputData>> {
+    pub async fn unspent_account_output(&self, account_id: &AccountId) -> Option<OutputData> {
         self.unspent_outputs(FilterOptions {
             account_ids: Some([*account_id].into()),
             ..Default::default()
         })
         .await
-        .map(|res| res.get(0).cloned())
+        .get(0)
+        .cloned()
     }
 
     /// Gets the unspent foundry output matching the given ID.
-    pub async fn unspent_foundry_output(&self, foundry_id: &FoundryId) -> Result<Option<OutputData>> {
+    pub async fn unspent_foundry_output(&self, foundry_id: &FoundryId) -> Option<OutputData> {
         self.unspent_outputs(FilterOptions {
             foundry_ids: Some([*foundry_id].into()),
             ..Default::default()
         })
         .await
-        .map(|res| res.get(0).cloned())
+        .get(0)
+        .cloned()
     }
 
     /// Gets the unspent nft output matching the given ID.
-    pub async fn unspent_nft_output(&self, nft_id: &NftId) -> Result<Option<OutputData>> {
+    pub async fn unspent_nft_output(&self, nft_id: &NftId) -> Option<OutputData> {
         self.unspent_outputs(FilterOptions {
             nft_ids: Some([*nft_id].into()),
             ..Default::default()
         })
         .await
-        .map(|res| res.get(0).cloned())
+        .get(0)
+        .cloned()
     }
 
     /// Returns all incoming transactions of the account

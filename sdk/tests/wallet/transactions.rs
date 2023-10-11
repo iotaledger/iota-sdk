@@ -95,7 +95,7 @@ async fn send_amount_custom_input() -> Result<()> {
     assert_eq!(balance.base_coin().available(), 10 * amount);
 
     // Send back with custom provided input
-    let custom_input = &account_1.unspent_outputs(None).await?[5];
+    let custom_input = &account_1.unspent_outputs(None).await[5];
     let tx = account_1
         .send_with_params(
             [SendParams::new(amount, account_0.first_address_bech32().await)?],

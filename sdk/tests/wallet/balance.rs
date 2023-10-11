@@ -266,7 +266,7 @@ async fn balance_voting_power() -> Result<()> {
     let balance = account.sync(None).await?;
     assert_eq!(balance.base_coin().total(), faucet_amount);
     assert_eq!(balance.base_coin().available(), faucet_amount - voting_power);
-    let account_voting_power = account.get_voting_power().await?;
+    let account_voting_power = account.get_voting_power().await;
     assert_eq!(account_voting_power, voting_power);
 
     // Increase voting power to total amount
@@ -277,7 +277,7 @@ async fn balance_voting_power() -> Result<()> {
     let balance = account.sync(None).await?;
     assert_eq!(balance.base_coin().total(), faucet_amount);
     assert_eq!(balance.base_coin().available(), 0);
-    let account_voting_power = account.get_voting_power().await?;
+    let account_voting_power = account.get_voting_power().await;
     assert_eq!(account_voting_power, faucet_amount);
 
     tear_down(storage_path)

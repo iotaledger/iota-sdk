@@ -43,7 +43,7 @@ async fn main() -> Result<()> {
 
     let account_output_data = account
         .unspent_account_output(account_id)
-        .await?
+        .await
         .expect("account not found in unspent outputs");
     println!(
         "Account '{account_id}' found in unspent output: '{}'",

@@ -60,7 +60,7 @@ async fn main() -> Result<()> {
             output_types: Some(vec![BasicOutput::KIND]),
             ..Default::default()
         })
-        .await?
+        .await
         .iter()
         .filter(|data| data.output.amount() >= SEND_AMOUNT)
         .count();

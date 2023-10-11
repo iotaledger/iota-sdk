@@ -67,7 +67,7 @@ where
 
         let voting_output = self
             .get_voting_output()
-            .await?
+            .await
             .ok_or_else(|| crate::wallet::Error::Voting("No unspent voting output found".to_string()))?;
         let output = voting_output.output.as_basic();
 
@@ -143,7 +143,7 @@ where
     pub async fn prepare_stop_participating(&self, event_id: ParticipationEventId) -> Result<PreparedTransactionData> {
         let voting_output = self
             .get_voting_output()
-            .await?
+            .await
             .ok_or_else(|| crate::wallet::Error::Voting("No unspent voting output found".to_string()))?;
         let output = voting_output.output.as_basic();
 

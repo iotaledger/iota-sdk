@@ -36,7 +36,7 @@ where
         log::debug!("[TRANSACTION] select_inputs");
         // Voting output needs to be requested before to prevent a deadlock
         #[cfg(feature = "participation")]
-        let voting_output = self.get_voting_output().await?;
+        let voting_output = self.get_voting_output().await;
         // lock so the same inputs can't be selected in multiple transactions
         let mut account_details = self.details_mut().await;
         let protocol_parameters = self.client().get_protocol_parameters().await?;

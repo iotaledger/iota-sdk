@@ -167,7 +167,7 @@ pub async fn account_prompt_internal(
                         }
                         AccountCommand::NewAddress => new_address_command(account).await,
                         AccountCommand::NodeInfo => node_info_command(account).await,
-                        AccountCommand::Output { output_id } => output_command(account, output_id).await,
+                        AccountCommand::Output { selector } => output_command(account, selector).await,
                         AccountCommand::Outputs => outputs_command(account).await,
                         AccountCommand::Send {
                             address,
