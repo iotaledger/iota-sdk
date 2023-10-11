@@ -6,7 +6,6 @@
 mod address;
 mod block_builder;
 mod high_level;
-mod mana;
 mod types;
 
 pub use self::{address::*, block_builder::*, types::*};

@@ -13,5 +13,5 @@ pub fn rand_slot_commitment_id() -> SlotCommitmentId {
 
 /// Generates a random slot index.
 pub fn rand_slot_index() -> SlotIndex {
-    SlotIndex::new(rand_number())
+    SlotIndex(rand_number())
 }
