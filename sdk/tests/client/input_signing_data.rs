@@ -38,12 +38,9 @@ fn input_signing_data_conversion() {
     let input_signing_data = InputSigningData {
         output,
         output_metadata: OutputMetadata::new(
-            BlockId::from_str("0xedf5f572c58ddf4b4f9567d82bf96689cc68b730df796d822b4b9fb643f5efda0000000000000000")
+            BlockId::from_str("0xedf5f572c58ddf4b4f9567d82bf96689cc68b730df796d822b4b9fb643f5efda00000000").unwrap(),
+            OutputId::from_str("0xbce525324af12eda02bf7927e92cea3a8e8322d0f41966271443e6c3b245a440000000000000")
                 .unwrap(),
-            OutputId::from_str(
-                "0xbce525324af12eda02bf7927e92cea3a8e8322d0f41966271443e6c3b245a44000000000000000000000",
-            )
-            .unwrap(),
             false,
             Some(
                 SlotCommitmentId::from_str(
@@ -52,10 +49,8 @@ fn input_signing_data_conversion() {
                 .unwrap(),
             ),
             Some(
-                TransactionId::from_str(
-                    "0x24a1f46bdb6b2bf38f1c59f73cdd4ae5b418804bb231d76d06fbf246498d58830000000000000000",
-                )
-                .unwrap(),
+                TransactionId::from_str("0x24a1f46bdb6b2bf38f1c59f73cdd4ae5b418804bb231d76d06fbf246498d588300000000")
+                    .unwrap(),
             ),
             Some(
                 SlotCommitmentId::from_str(
@@ -94,12 +89,12 @@ fn input_signing_data_conversion() {
             ]
         },
         "outputMetadata": {
-            "blockId": "0xedf5f572c58ddf4b4f9567d82bf96689cc68b730df796d822b4b9fb643f5efda0000000000000000",
-            "transactionId": "0xbce525324af12eda02bf7927e92cea3a8e8322d0f41966271443e6c3b245a4400000000000000000",
+            "blockId": "0xedf5f572c58ddf4b4f9567d82bf96689cc68b730df796d822b4b9fb643f5efda00000000",
+            "transactionId": "0xbce525324af12eda02bf7927e92cea3a8e8322d0f41966271443e6c3b245a44000000000",
             "outputIndex": 0,
             "isSpent": false,
             "commitmentIdSpent": "0xedf5f572c58ddf4b4f9567d82bf96689cc68b730df796d822b4b9fb643f5efda4f9567d82bf96689",
-            "transactionIdSpent": "0x24a1f46bdb6b2bf38f1c59f73cdd4ae5b418804bb231d76d06fbf246498d58830000000000000000",
+            "transactionIdSpent": "0x24a1f46bdb6b2bf38f1c59f73cdd4ae5b418804bb231d76d06fbf246498d588300000000",
             "includedCommitmentId": "0xedf5f572c58ddf4b4f9567d82bf96689cc68b730df796d822b4b9fb643f5efda4f9567d82bf96689",
             "latestCommitmentId": "0xedf5f572c58ddf4b4f9567d82bf96689cc68b730df796d822b4b9fb643f5efda4f9567d82bf96689"},
             "chain": {

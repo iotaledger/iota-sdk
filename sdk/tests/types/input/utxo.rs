@@ -6,10 +6,11 @@ use core::str::FromStr;
 use iota_sdk::types::block::{
     input::{Input, UtxoInput},
     output::OutputId,
+    payload::transaction::TransactionId,
 };
 use packable::PackableExt;
 
-const OUTPUT_ID: &str = "0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c64900000000000000002a00";
+const OUTPUT_ID: &str = "0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c649000000002a00";
 
 #[test]
 fn kind() {
@@ -60,7 +61,7 @@ fn from_str_to_str() {
 fn debug() {
     assert_eq!(
         format!("{:?}", UtxoInput::from_str(OUTPUT_ID).unwrap()),
-        "UtxoInput(0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c64900000000000000002a00)"
+        "UtxoInput(0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c649000000002a00)"
     );
 }
 
@@ -80,9 +81,12 @@ fn packed_len() {
         UtxoInput::new(*output_id.transaction_id(), output_id.index())
             .unwrap()
             .packed_len(),
-        40 + 2
+        TransactionId::LENGTH + core::mem::size_of::<u16>()
     );
-    assert_eq!(output_id.pack_to_vec().len(), 40 + 2);
+    assert_eq!(
+        output_id.pack_to_vec().len(),
+        TransactionId::LENGTH + core::mem::size_of::<u16>()
+    );
 }
 
 #[test]

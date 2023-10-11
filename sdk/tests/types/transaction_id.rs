@@ -12,7 +12,7 @@ use iota_sdk::types::{
 };
 use packable::PackableExt;
 
-const TRANSACTION_ID: &str = "0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c6490000000000000000";
+const TRANSACTION_ID: &str = "0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c64900000000";
 
 #[test]
 fn debug_impl() {
@@ -39,8 +39,8 @@ fn from_to_str() {
 fn packed_len() {
     let transaction_id = TransactionId::from_str(TRANSACTION_ID).unwrap();
 
-    assert_eq!(transaction_id.packed_len(), 40);
-    assert_eq!(transaction_id.pack_to_vec().len(), 40);
+    assert_eq!(transaction_id.packed_len(), TransactionId::LENGTH);
+    assert_eq!(transaction_id.pack_to_vec().len(), TransactionId::LENGTH);
 }
 
 #[test]
