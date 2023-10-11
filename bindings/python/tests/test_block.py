@@ -1,6 +1,7 @@
 # Copyright 2023 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
+from typing import get_args
 from iota_sdk import BasicBlock, BlockType, BlockWrapper, Payload, PayloadType
 import pytest
 
@@ -20,8 +21,13 @@ def test_basic_block_with_tagged_data_payload():
             "data": "0x57652061726520616c6c206d616465206f662073746172647573742e0a436f756e743a20353436333730330a54696d657374616d703a20323032332d30372d31395430373a32323a32385a0a54697073656c656374696f6e3a20343732c2b573"}}
     block = BasicBlock.from_dict(block_dict)
     assert block.to_dict() == block_dict
-    assert isinstance(block.payload, Payload)
+    assert isinstance(block.payload, get_args(Payload))
     assert block.payload.type == PayloadType.TaggedData
+    assert block.max_burned_mana == 180500
+
+    block_to_dict = block.to_dict()
+    # Make sure encoding is done correctly
+    assert block_to_dict == block_dict
 
 
 def test_block_wrapper_with_tagged_data_payload():
@@ -61,7 +67,7 @@ def test_block_wrapper_with_tagged_data_payload():
     assert block_wrapper.to_dict() == block_dict
     assert isinstance(block_wrapper.block, BasicBlock)
     assert block_wrapper.block.type == BlockType.Basic
-    assert isinstance(block_wrapper.block.payload, Payload)
+    assert isinstance(block_wrapper.block.payload, get_args(Payload))
     assert block_wrapper.block.payload.type == PayloadType.TaggedData
     # TODO: determine the actual hash of the block wrapper
     # assert block_wrapper.id() == "0x7ce5ad074d4162e57f83cfa01cd2303ef5356567027ce0bcee0c9f57bc11656e"
@@ -101,7 +107,7 @@ def test_basic_block_with_tx_payload():
                                                "signature": "0x6bbe2eed95300a3d707af1bb17e04f83087fe31261256020fd00c24a54543c084079bed29c6d1479ee5acfd1e2fa32316e88c4c1577b4fbea3fe247f71114500"}}]}}
     block = BasicBlock.from_dict(block_dict)
     assert block.to_dict() == block_dict
-    assert isinstance(block.payload, Payload)
+    assert isinstance(block.payload, get_args(Payload))
     assert block.payload.type == PayloadType.Transaction
 
 
@@ -168,12 +174,12 @@ def test_basic_block_with_tx_payload_all_output_types():
                                                                                                                                                                                                                                     "type": 0, "address": {
                                                                                                                                                                                                                                         "type": 0, "pubKeyHash": "0x7ffec9e1233204d9c6dce6812b1539ee96af691ca2e4d9065daa85907d33e5d3"}}, {
                                                                                                                                                                                                                                             "type": 3, "returnAddress": {
-                                                                                                                                                                                                                                                "type": 0, "pubKeyHash": "0x7ffec9e1233204d9c6dce6812b1539ee96af691ca2e4d9065daa85907d33e5d3"}, "unixTime": 1}]}, {
+                                                                                                                                                                                                                                                "type": 0, "pubKeyHash": "0x7ffec9e1233204d9c6dce6812b1539ee96af691ca2e4d9065daa85907d33e5d3"}, "slotIndex": 1}]}, {
                                                                                                                                                                                                                                                     "type": 3, "amount": "1000000", "unlockConditions": [
                                                                                                                                                                                                                                                         {
                                                                                                                                                                                                                                                             "type": 0, "address": {
                                                                                                                                                                                                                                                                 "type": 0, "pubKeyHash": "0x7ffec9e1233204d9c6dce6812b1539ee96af691ca2e4d9065daa85907d33e5d3"}}, {
-                                                                                                                                                                                                                                                                    "type": 2, "unixTime": 1}]}, {
+                                                                                                                                                                                                                                                                    "type": 2, "slotIndex": 1}]}, {
                                                                                                                                                                                                                                                                         "type": 3, "amount": "5578452198", "nativeTokens": [
                                                                                                                                                                                                                                                                             {
                                                                                                                                                                                                                                                                                 "id": "0x080021bcfa2252a500348f73c939722d65c0354eab33b753ab09bc80a7f592c9a40100000000", "amount": "0x41"}, {
@@ -242,7 +248,7 @@ def test_basic_block_with_tx_payload_all_output_types():
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             "type": 1, "reference": 0}]}}
     block = BasicBlock.from_dict(block_dict)
     assert block.to_dict() == block_dict
-    assert isinstance(block.payload, Payload)
+    assert isinstance(block.payload, get_args(Payload))
     assert block.payload.type == PayloadType.Transaction
 
 
@@ -288,5 +294,5 @@ def test_basic_block_with_tx_payload_with_tagged_data_payload():
                                  "reference": 0}]}}
     block = BasicBlock.from_dict(block_dict)
     assert block.to_dict() == block_dict
-    assert isinstance(block.payload, Payload)
+    assert isinstance(block.payload, get_args(Payload))
     assert block.payload.type == PayloadType.Transaction

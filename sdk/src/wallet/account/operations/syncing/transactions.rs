@@ -21,6 +21,7 @@ use crate::{
 impl<S: 'static + SecretManage> Account<S>
 where
     crate::wallet::Error: From<S::Error>,
+    crate::client::Error: From<S::Error>,
 {
     /// Sync transactions and reissue them if unconfirmed. Returns the transaction with updated metadata and spent
     /// output ids that don't need to be locked anymore

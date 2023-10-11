@@ -23,6 +23,7 @@ use crate::{
 impl<S: 'static + SecretManage> Account<S>
 where
     Error: From<S::Error>,
+    crate::client::Error: From<S::Error>,
 {
     /// Get the balance of the account.
     pub async fn balance(&self) -> Result<Balance> {
@@ -163,7 +164,7 @@ where
                                 // if we have multiple unlock conditions for basic or nft outputs, then we might can't
                                 // spend the balance at the moment or in the future
 
-                                let account_addresses = self.addresses().await?;
+                                let account_addresses = self.addresses().await;
                                 let slot_index = self.client().get_slot_index().await?;
                                 let is_claimable =
                                     self.claimable_outputs(OutputsToClaim::All).await?.contains(output_id);

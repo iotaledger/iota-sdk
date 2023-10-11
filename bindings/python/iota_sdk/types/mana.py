@@ -1,7 +1,8 @@
 # Copyright 2023 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from dataclasses_json import config
 from iota_sdk.types.common import HexStr, json
 
 
@@ -16,4 +17,6 @@ class ManaAllotment:
         mana: The alloted amount of mana.
     """
     account_id: HexStr
-    mana: str
+    mana: int = field(metadata=config(
+        encoder=str
+    ))

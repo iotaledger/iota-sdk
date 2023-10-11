@@ -47,7 +47,7 @@ async fn main() -> Result<()> {
         .await?;
     let account = wallet.get_or_create_account(ACCOUNT_ALIAS).await?;
 
-    let recv_address = *account.addresses().await?[0].address();
+    let recv_address = account.first_address_bech32().await;
     println!("Recv address: {}", recv_address);
 
     // Ensure there are enough available funds for spamming.
@@ -71,7 +71,7 @@ async fn main() -> Result<()> {
         println!("Creating unspent outputs...");
 
         let transaction = account
-            .send_with_params(vec![SendParams::new(SEND_AMOUNT, recv_address)?; 127], None)
+            .send_with_params(vec![SendParams::new(SEND_AMOUNT, recv_address.clone())?; 127], None)
             .await?;
         wait_for_inclusion(&transaction.transaction_id, &account).await?;
 
@@ -87,6 +87,7 @@ async fn main() -> Result<()> {
 
         for n in 0..num_simultaneous_txs {
             let account_clone = account.clone();
+            let recv_address = recv_address.clone();
 
             tasks.spawn(async move {
                 println!("Thread {n}: sending {SEND_AMOUNT} coins to own address");

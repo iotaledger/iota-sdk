@@ -58,7 +58,7 @@ fn transaction() {
     let payload: Payload = tx_payload.into();
     let packed = payload.pack_to_vec();
 
-    assert_eq!(payload.kind(), 6);
+    assert_eq!(payload.kind(), 1);
     assert_eq!(payload.packed_len(), packed.len());
     assert!(matches!(payload, Payload::Transaction(_)));
     assert_eq!(
@@ -116,7 +116,7 @@ fn tagged_data() {
 
     let packed = payload.pack_to_vec();
 
-    assert_eq!(payload.kind(), 5);
+    assert_eq!(payload.kind(), 0);
     assert_eq!(payload.packed_len(), packed.len());
     assert!(matches!(payload, Payload::TaggedData(_)));
 }

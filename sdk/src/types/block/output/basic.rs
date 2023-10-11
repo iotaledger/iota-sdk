@@ -232,7 +232,7 @@ pub struct BasicOutput {
 
 impl BasicOutput {
     /// The [`Output`](crate::types::block::output::Output) kind of an [`BasicOutput`].
-    pub const KIND: u8 = 3;
+    pub const KIND: u8 = 0;
 
     /// The set of allowed [`UnlockCondition`]s for an [`BasicOutput`].
     const ALLOWED_UNLOCK_CONDITIONS: UnlockConditionFlags = UnlockConditionFlags::ADDRESS
@@ -513,7 +513,7 @@ mod tests {
 
         let builder = BasicOutput::build_with_amount(100)
             .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000).unwrap())
-            .add_unlock_condition(address)
+            .add_unlock_condition(address.clone())
             .with_features(rand_allowed_features(BasicOutput::ALLOWED_FEATURES));
         test_split_dto(builder);
 
