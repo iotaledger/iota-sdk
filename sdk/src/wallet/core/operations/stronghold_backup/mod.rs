@@ -81,14 +81,6 @@ impl Wallet {
 
         let mut wallet_data = self.data.write().await;
 
-        // TODO: Is there a way to ensure that the user can't mess up?
-        // We don't want to overwrite possible existing accounts
-        // if !wallet_data.is_empty() {
-        //     return Err(crate::wallet::Error::Backup(
-        //         "can't restore backup when there are already accounts",
-        //     ));
-        // }
-
         let mut secret_manager = self.secret_manager.as_ref().write().await;
         // Get the current snapshot path if set
         let new_snapshot_path = if let SecretManager::Stronghold(stronghold) = &mut *secret_manager {

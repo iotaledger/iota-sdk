@@ -44,25 +44,6 @@ pub enum WalletMethod {
         /// BIP44 addresses.
         addresses: Option<Vec<Bip44Address>>,
     },
-    
-    // TODO: remove
-    // /// Read account.
-    // /// Expected response: [`Account`](crate::Response::Account)
-    // #[serde(rename_all = "camelCase")]
-    // GetAccount { account_id: AccountIdentifier },
-
-    // TODO: change to `GetAccountIndex`
-    // /// Return the account indexes.
-    // /// Expected response: [`AccountIndexes`](crate::Response::AccountIndexes)
-    // GetAccountIndexes,
-
-
-    // TODO: remove
-    // /// Read accounts.
-    // /// Expected response: [`Accounts`](crate::Response::Accounts)
-    // GetAccounts,
-
-
     /// Consume an account method.
     /// Returns [`Response`](crate::Response)
     #[serde(rename_all = "camelCase")]

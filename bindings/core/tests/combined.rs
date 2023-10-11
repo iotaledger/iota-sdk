@@ -219,7 +219,7 @@ async fn client_from_wallet() -> Result<()> {
 
     // TODO reenable
     // // Send ClientMethod via the client from the wallet
-    // let response = wallet.get_accounts().await?[0]
+    // let response = wallet
     //     .client()
     //     .call_method(ClientMethod::GetHealth)
     //     .await;

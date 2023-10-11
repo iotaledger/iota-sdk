@@ -41,39 +41,6 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
                 Err(e) => return Err(e.into()),
             }
         }
-        WalletMethod::GetAccount { account_id } => {
-            todo!("remove")
-
-            // let account = wallet.get_account(account_id.clone()).await?;
-            // let account = account.details().await;
-            // Response::Account(WalletDataDto::from(&*account))
-        }
-
-
-        // TODO: remove
-        WalletMethod::GetAccountIndexes => {
-            todo!("remove")
-
-            // let accounts = wallet.get_accounts().await?;
-            // let mut account_indexes = Vec::with_capacity(accounts.len());
-            // for account in accounts.iter() {
-            //     account_indexes.push(*account.details().await.index());
-            // }
-            // Response::AccountIndexes(account_indexes)
-        }
-
-        WalletMethod::GetAccounts => {
-            todo!("remove")
-            // let accounts = wallet.get_accounts().await?;
-            // let mut account_dtos = Vec::with_capacity(accounts.len());
-            // for account in accounts {
-            //     let account = account.details().await;
-            //     account_dtos.push(WalletDataDto::from(&*account));
-            // }
-            // Response::Accounts(account_dtos)
-        }
-
-
         WalletMethod::CallMethod { account_id, method } => {
             let account = wallet.get_account(account_id).await?;
             call_account_method_internal(&account, method).await?

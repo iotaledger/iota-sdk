@@ -110,14 +110,13 @@ where
             key_index: 0,
         };
 
-        let addresses_to_sync = vec![wallet_address_with_unspent_outputs];
+        let address_to_sync = vec![wallet_address_with_unspent_outputs];
 
-        // TODO: remove `addresses_with_unspent_outputs`
         let (addresses_with_unspent_outputs, spent_or_not_synced_output_ids, outputs_data): (
             Vec<AddressWithUnspentOutputs>,
             Vec<OutputId>,
             Vec<OutputData>,
-        ) = self.request_outputs_recursively(addresses_to_sync, options).await?;
+        ) = self.request_outputs_recursively(address_to_sync, options).await?;
 
         // Request possible spent outputs
         log::debug!("[SYNC] spent_or_not_synced_outputs: {spent_or_not_synced_output_ids:?}");
@@ -262,8 +261,6 @@ where
         // synced afterwards, so we filter these unspent outputs here. Maybe the spent_or_not_synced_output_ids can be
         // calculated more efficient in the future, by comparing the new and old outputs only at this point. Then this
         // retain isn't needed anymore.
-
-        // TODO: change
 
         let unspent_output_ids: HashSet<OutputId> = HashSet::from_iter(outputs_data.iter().map(|o| o.output_id));
         spent_or_not_synced_output_ids.retain(|o| !unspent_output_ids.contains(o));
