@@ -29,6 +29,7 @@ use crate::{
 impl<S: 'static + SecretManage> Wallet<S>
 where
     crate::wallet::Error: From<S::Error>,
+    crate::client::Error: From<S::Error>,
 {
     /// Prepare a basic or NFT output for sending
     /// If the amount is below the minimum required storage deposit, by default the remaining amount will automatically
@@ -135,7 +136,7 @@ where
             if return_strategy == ReturnStrategy::Return {
                 second_output_builder =
                     second_output_builder.add_unlock_condition(StorageDepositReturnUnlockCondition::new(
-                        remainder_address,
+                        remainder_address.clone(),
                         // Return minimum storage deposit
                         min_storage_deposit_basic_output,
                         token_supply,
@@ -157,7 +158,7 @@ where
                     // Add the additional amount to the SDR
                     second_output_builder =
                         second_output_builder.replace_unlock_condition(StorageDepositReturnUnlockCondition::new(
-                            remainder_address,
+                            remainder_address.clone(),
                             // Return minimum storage deposit
                             min_storage_deposit_basic_output + additional_required_amount,
                             token_supply,
@@ -294,7 +295,7 @@ where
                         // select_inputs will select an address from the inputs if it's none
                         None
                     }
-                    RemainderValueStrategy::CustomAddress(address) => Some(*address),
+                    RemainderValueStrategy::CustomAddress(address) => Some(address.clone()),
                 }
             }
             None => None,

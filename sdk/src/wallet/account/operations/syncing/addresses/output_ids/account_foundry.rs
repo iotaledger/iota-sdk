@@ -22,6 +22,7 @@ use crate::{
 impl<S: 'static + SecretManage> Wallet<S>
 where
     crate::wallet::Error: From<S::Error>,
+    crate::client::Error: From<S::Error>,
 {
     /// Returns output ids of account outputs
     pub(crate) async fn get_account_and_foundry_output_ids(
@@ -39,7 +40,7 @@ where
         {
             output_ids.extend(
                 client
-                    .account_output_ids([QueryParameter::Governor(bech32_address)])
+                    .account_output_ids([QueryParameter::Governor(bech32_address.clone())])
                     .await?
                     .items,
             );
@@ -55,7 +56,8 @@ where
         {
             let tasks = [
                 // Get outputs where the address is in the governor address unlock condition
-                async move {
+                async {
+                    let bech32_address = bech32_address.clone();
                     let client = client.clone();
                     task::spawn(async move {
                         client
@@ -67,7 +69,8 @@ where
                 }
                 .boxed(),
                 // Get outputs where the address is in the state controller unlock condition
-                async move {
+                async {
+                    let bech32_address = bech32_address.clone();
                     let client = client.clone();
                     task::spawn(async move {
                         client

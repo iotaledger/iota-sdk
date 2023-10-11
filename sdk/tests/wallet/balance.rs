@@ -211,10 +211,9 @@ async fn balance_transfer() -> Result<()> {
     wallet_0
         .reissue_transaction_until_included(&tx.transaction_id, None, None)
         .await?;
-    wallet_1.sync(None).await?;
 
     // Balance should have transferred entirely
-    let balance_1_sync = wallet_1.balance().await?;
+    let balance_1_sync = wallet_1.sync(None).await?;
     assert!(balance_1.base_coin().available() > 0);
 
     tear_down(storage_path_0)?;

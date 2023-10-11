@@ -38,6 +38,7 @@ pub enum OutputsToClaim {
 impl<S: 'static + SecretManage> Wallet<S>
 where
     crate::wallet::Error: From<S::Error>,
+    crate::client::Error: From<S::Error>,
 {
     /// Get basic and nft outputs that have
     /// [`ExpirationUnlockCondition`](crate::types::block::output::unlock_condition::ExpirationUnlockCondition),
@@ -254,7 +255,9 @@ where
                 available_amount += output_data.output.amount() - sdr.amount();
 
                 // Insert for return output
-                *required_address_returns.entry(*sdr.return_address()).or_default() += sdr.amount();
+                *required_address_returns
+                    .entry(sdr.return_address().clone())
+                    .or_default() += sdr.amount();
             } else {
                 available_amount += output_data.output.amount();
             }
@@ -268,13 +271,13 @@ where
                     // deposit for the remaining amount and possible NTs
                     NftOutputBuilder::from(nft_output)
                         .with_nft_id(nft_output.nft_id_non_null(&output_data.output_id))
-                        .with_unlock_conditions([AddressUnlockCondition::new(wallet_address)])
+                        .with_unlock_conditions([AddressUnlockCondition::new(wallet_address.clone())])
                         .finish_output(token_supply)?
                 } else {
                     NftOutputBuilder::from(nft_output)
                         .with_minimum_storage_deposit(rent_structure)
                         .with_nft_id(nft_output.nft_id_non_null(&output_data.output_id))
-                        .with_unlock_conditions([AddressUnlockCondition::new(wallet_address)])
+                        .with_unlock_conditions([AddressUnlockCondition::new(wallet_address.clone())])
                         // Set native tokens empty, we will collect them from all inputs later
                         .with_native_tokens([])
                         .finish_output(token_supply)?

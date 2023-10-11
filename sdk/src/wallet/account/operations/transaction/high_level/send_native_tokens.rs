@@ -80,6 +80,7 @@ impl SendNativeTokensParams {
 impl<S: 'static + SecretManage> Wallet<S>
 where
     crate::wallet::Error: From<S::Error>,
+    crate::client::Error: From<S::Error>,
 {
     /// Sends native tokens in basic outputs with a [`StorageDepositReturnUnlockCondition`] and an
     /// [`ExpirationUnlockCondition`], so that the storage deposit is returned to the sender and the sender gets access
@@ -131,6 +132,7 @@ where
         let token_supply = self.client().get_token_supply().await?;
 
         let wallet_address = self.address().await;
+        // TODO: not needed anymore?
         let default_return_address = wallet_address.to_bech32(self.client().get_bech32_hrp().await?);
 
         let slot_index = self.client().get_slot_index().await?;
@@ -155,7 +157,7 @@ where
                     Ok::<_, Error>(addr)
                 })
                 .transpose()?
-                .unwrap_or(default_return_address);
+                .unwrap_or_else(|| default_return_address.clone());
 
             let native_tokens = NativeTokens::from_vec(
                 native_tokens
@@ -187,7 +189,11 @@ where
                     .add_unlock_condition(
                         // We send the full storage_deposit_amount back to the sender, so only the native tokens are
                         // sent
-                        StorageDepositReturnUnlockCondition::new(return_address, storage_deposit_amount, token_supply)?,
+                        StorageDepositReturnUnlockCondition::new(
+                            return_address.clone(),
+                            storage_deposit_amount,
+                            token_supply,
+                        )?,
                     )
                     .add_unlock_condition(ExpirationUnlockCondition::new(return_address, expiration_slot_index)?)
                     .finish_output(token_supply)?,

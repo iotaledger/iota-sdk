@@ -13,13 +13,14 @@ use crate::{
             OutputsToClaim,
         },
         core::WalletData,
-        Error, Result, Wallet,
+        Result, Wallet,
     },
 };
 
 impl<S: 'static + SecretManage> Wallet<S>
 where
-    Error: From<S::Error>,
+    crate::wallet::Error: From<S::Error>,
+    crate::client::Error: From<S::Error>,
 {
     /// Get the balance of the wallet.
     pub async fn balance(&self) -> Result<Balance> {

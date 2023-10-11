@@ -116,7 +116,7 @@ impl From<&OutputData> for OutputDataDto {
             metadata: value.metadata,
             output: OutputDto::from(&value.output),
             is_spent: value.is_spent,
-            address: value.address,
+            address: value.address.clone(),
             network_id: value.network_id.to_string(),
             remainder: value.remainder,
             chain: value.chain,

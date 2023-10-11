@@ -89,7 +89,7 @@ async fn main() -> Result<()> {
         println!("Creating unspent outputs...");
 
         let transaction = wallet
-            .send_with_params(vec![SendParams::new(SEND_AMOUNT, recv_address)?; 127], None)
+            .send_with_params(vec![SendParams::new(SEND_AMOUNT, recv_address.clone())?; 127], None)
             .await?;
         wait_for_inclusion(&transaction.transaction_id, &wallet).await?;
 
@@ -104,6 +104,7 @@ async fn main() -> Result<()> {
         let mut tasks = tokio::task::JoinSet::<std::result::Result<(), (usize, iota_sdk::wallet::Error)>>::new();
 
         for n in 0..num_simultaneous_txs {
+            let recv_address_clone = recv_address.clone();
             let account_clone = wallet.clone();
 
             tasks.spawn(async move {
@@ -111,7 +112,7 @@ async fn main() -> Result<()> {
 
                 let thread_timer = tokio::time::Instant::now();
                 let transaction = account_clone
-                    .send(SEND_AMOUNT, recv_address, None)
+                    .send(SEND_AMOUNT, recv_address_clone, None)
                     .await
                     .map_err(|err| (n, err))?;
                 let elapsed = thread_timer.elapsed();

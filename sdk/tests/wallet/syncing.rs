@@ -56,19 +56,19 @@ async fn sync_only_most_basic_outputs() -> Result<()> {
     let account_0 = &request_funds(&wallet, 1).await?[0];
     let account_1 = wallet.create_account().finish().await?;
 
-    let account_1_address = *account_1.addresses().await?[0].address().as_ref();
+    let account_1_address = account_1.first_address_bech32().await;
 
     let token_supply = account_0.client().get_token_supply().await?;
     // Only one basic output without further unlock conditions
     let outputs = [
         BasicOutputBuilder::new_with_amount(1_000_000)
-            .with_unlock_conditions([AddressUnlockCondition::new(account_1_address)])
+            .with_unlock_conditions([AddressUnlockCondition::new(account_1_address.clone())])
             .finish_output(token_supply)?,
         BasicOutputBuilder::new_with_amount(1_000_000)
             .with_unlock_conditions([
-                UnlockCondition::Address(AddressUnlockCondition::new(account_1_address)),
+                UnlockCondition::Address(AddressUnlockCondition::new(account_1_address.clone())),
                 UnlockCondition::Expiration(ExpirationUnlockCondition::new(
-                    account_1_address,
+                    account_1_address.clone(),
                     // Already expired
                     account_0.client().get_slot_index().await? - 5000,
                 )?),
@@ -76,9 +76,9 @@ async fn sync_only_most_basic_outputs() -> Result<()> {
             .finish_output(token_supply)?,
         BasicOutputBuilder::new_with_amount(1_000_000)
             .with_unlock_conditions([
-                UnlockCondition::Address(AddressUnlockCondition::new(account_1_address)),
+                UnlockCondition::Address(AddressUnlockCondition::new(account_1_address.clone())),
                 UnlockCondition::Expiration(ExpirationUnlockCondition::new(
-                    account_1_address,
+                    account_1_address.clone(),
                     // Not expired
                     account_0.client().get_slot_index().await? + 5000,
                 )?),
@@ -86,30 +86,32 @@ async fn sync_only_most_basic_outputs() -> Result<()> {
             .finish_output(token_supply)?,
         BasicOutputBuilder::new_with_amount(1_000_000)
             .with_unlock_conditions([
-                UnlockCondition::Address(AddressUnlockCondition::new(account_1_address)),
+                UnlockCondition::Address(AddressUnlockCondition::new(account_1_address.clone())),
                 UnlockCondition::StorageDepositReturn(StorageDepositReturnUnlockCondition::new(
-                    account_1_address,
+                    account_1_address.clone(),
                     1_000_000,
                     token_supply,
                 )?),
             ])
             .finish_output(token_supply)?,
         NftOutputBuilder::new_with_amount(1_000_000, NftId::null())
-            .with_unlock_conditions([AddressUnlockCondition::new(account_1_address)])
+            .with_unlock_conditions([AddressUnlockCondition::new(account_1_address.clone())])
             .finish_output(token_supply)?,
         NftOutputBuilder::new_with_amount(1_000_000, NftId::null())
             .with_unlock_conditions([
-                UnlockCondition::Address(AddressUnlockCondition::new(account_1_address)),
+                UnlockCondition::Address(AddressUnlockCondition::new(account_1_address.clone())),
                 UnlockCondition::Expiration(ExpirationUnlockCondition::new(
-                    account_1_address,
+                    account_1_address.clone(),
                     account_0.client().get_slot_index().await? + 5000,
                 )?),
             ])
             .finish_output(token_supply)?,
         AccountOutputBuilder::new_with_amount(1_000_000, AccountId::null())
             .with_unlock_conditions([
-                UnlockCondition::StateControllerAddress(StateControllerAddressUnlockCondition::new(account_1_address)),
-                UnlockCondition::GovernorAddress(GovernorAddressUnlockCondition::new(account_1_address)),
+                UnlockCondition::StateControllerAddress(StateControllerAddressUnlockCondition::new(
+                    account_1_address.clone(),
+                )),
+                UnlockCondition::GovernorAddress(GovernorAddressUnlockCondition::new(account_1_address.clone())),
             ])
             .finish_output(token_supply)?,
     ];
@@ -135,14 +137,14 @@ async fn sync_only_most_basic_outputs() -> Result<()> {
         assert!(output_data.output.is_basic());
         assert_eq!(output_data.output.unlock_conditions().unwrap().len(), 1);
         assert_eq!(
-            *output_data
+            output_data
                 .output
                 .unlock_conditions()
                 .unwrap()
                 .address()
                 .unwrap()
                 .address(),
-            account_1_address
+            account_1_address.as_ref()
         );
     });
 
@@ -160,13 +162,13 @@ async fn sync_incoming_transactions() -> Result<()> {
     let account_0 = &request_funds(&wallet, 1).await?[0];
     let account_1 = wallet.create_account().finish().await?;
 
-    let account_1_address = *account_1.addresses().await?[0].address().as_ref();
+    let account_1_address = account_1.first_address_bech32().await;
 
     let token_supply = account_0.client().get_token_supply().await?;
 
     let outputs = [
         BasicOutputBuilder::new_with_amount(750_000)
-            .with_unlock_conditions([AddressUnlockCondition::new(account_1_address)])
+            .with_unlock_conditions([AddressUnlockCondition::new(account_1_address.clone())])
             .finish_output(token_supply)?,
         BasicOutputBuilder::new_with_amount(250_000)
             .with_unlock_conditions([AddressUnlockCondition::new(account_1_address)])
@@ -211,7 +213,7 @@ async fn background_syncing() -> Result<()> {
 
     iota_sdk::client::request_funds_from_faucet(
         crate::wallet::common::FAUCET_URL,
-        account.addresses().await?[0].address(),
+        &account.first_address_bech32().await,
     )
     .await?;
 

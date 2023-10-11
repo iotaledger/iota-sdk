@@ -29,6 +29,7 @@ use crate::{
 impl<S: 'static + SecretManage> Wallet<S>
 where
     crate::wallet::Error: From<S::Error>,
+    crate::client::Error: From<S::Error>,
 {
     /// Set the fallback SyncOptions for account syncing.
     /// If storage is enabled, will persist during restarts.
@@ -173,7 +174,7 @@ where
         // Cache the account and nft address with the related ed2559 address, so we can update the account address with
         // the new output ids
 
-        let mut new_account_and_nft_addresses = HashMap::new();
+        let mut new_account_and_nft_addresses: HashMap<Address, Address> = HashMap::new();
         let mut spent_or_not_synced_output_ids = Vec::new();
         let mut addresses_with_unspent_outputs = Vec::new();
         let mut outputs_data = Vec::new();
@@ -203,7 +204,10 @@ where
                 let mut new_outputs_data = Vec::new();
                 for (account_or_nft_address, ed25519_address) in &new_account_and_nft_addresses {
                     let output_ids = self
-                        .get_output_ids_for_address(Bech32Address::new(bech32_hrp, *account_or_nft_address), options)
+                        .get_output_ids_for_address(
+                            Bech32Address::new(bech32_hrp, account_or_nft_address.clone()),
+                            options,
+                        )
                         .await?;
 
                     // Update address with unspent outputs
@@ -211,7 +215,7 @@ where
                         .iter_mut()
                         .find(|a| a.address.inner() == ed25519_address)
                         .ok_or_else(|| {
-                            crate::wallet::Error::WalletAddressMismatch(ed25519_address.to_bech32(bech32_hrp))
+                            crate::wallet::Error::WalletAddressMismatch(ed25519_address.clone().to_bech32(bech32_hrp))
                         })?;
                     address_with_unspent_outputs.output_ids.extend(output_ids.clone());
 
@@ -231,8 +235,8 @@ where
             new_account_and_nft_addresses.clear();
 
             // Add new account and nft addresses
-            for output_data in new_outputs_data.iter() {
-                match &output_data.output {
+            for output_data in new_outputs_data {
+                match output_data.output {
                     Output::Account(account_output) => {
                         let account_address =
                             AccountAddress::from(account_output.account_id_non_null(&output_data.output_id));

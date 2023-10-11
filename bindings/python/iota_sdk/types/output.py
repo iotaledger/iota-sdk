@@ -47,8 +47,12 @@ class BasicOutput:
         type :
             The type of output.
     """
-    amount: str
-    mana: str
+    amount: int = field(metadata=config(
+        encoder=str
+    ))
+    mana: int = field(metadata=config(
+        encoder=str
+    ))
     unlock_conditions: List[Union[AddressUnlockCondition, ExpirationUnlockCondition, StorageDepositReturnUnlockCondition,
                                   TimelockUnlockCondition]] = field(metadata=config(
                                                                     decoder=deserialize_unlock_conditions
@@ -93,8 +97,12 @@ class AccountOutput:
         type :
             The type of output.
     """
-    amount: str
-    mana: str
+    amount: int = field(metadata=config(
+        encoder=str
+    ))
+    mana: int = field(metadata=config(
+        encoder=str
+    ))
     account_id: HexStr
     state_index: int
     foundry_counter: int
@@ -143,7 +151,9 @@ class FoundryOutput:
         type :
             The type of output.
     """
-    amount: str
+    amount: int = field(metadata=config(
+        encoder=str
+    ))
     serial_number: int
     token_scheme: SimpleTokenScheme
     unlock_conditions: List[ImmutableAccountAddressUnlockCondition]
@@ -184,8 +194,12 @@ class NftOutput:
         type :
             The type of output.
     """
-    amount: str
-    mana: str
+    amount: int = field(metadata=config(
+        encoder=str
+    ))
+    mana: int = field(metadata=config(
+        encoder=str
+    ))
     nft_id: HexStr
     unlock_conditions: List[Union[AddressUnlockCondition, ExpirationUnlockCondition,
                                   StorageDepositReturnUnlockCondition, TimelockUnlockCondition]] = field(

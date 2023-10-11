@@ -26,7 +26,7 @@ fn debug() {
 fn ctors() {
     let ed25519_address = ED25519_ADDRESS.parse::<Ed25519Address>().unwrap();
     let address = Address::Ed25519(ed25519_address);
-    let bech32_address = Bech32Address::try_new("rms", address).unwrap();
+    let bech32_address = Bech32Address::try_new("rms", address.clone()).unwrap();
     assert_eq!(bech32_address.inner(), &address);
     assert_eq!(bech32_address.hrp(), "rms");
 

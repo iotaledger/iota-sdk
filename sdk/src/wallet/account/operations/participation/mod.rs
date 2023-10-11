@@ -49,6 +49,7 @@ pub struct ParticipationEventWithNodes {
 impl<S: 'static + SecretManage> Wallet<S>
 where
     crate::wallet::Error: From<S::Error>,
+    crate::client::Error: From<S::Error>,
 {
     /// Calculates the voting overview of an account. If event_ids are provided, only return outputs and tracked
     /// participations for them.

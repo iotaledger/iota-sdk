@@ -23,6 +23,7 @@ use crate::{
 impl<S: 'static + SecretManage> Wallet<S>
 where
     crate::wallet::Error: From<S::Error>,
+    crate::client::Error: From<S::Error>,
 {
     /// Set the alias for the wallet.
     pub async fn set_alias(&self, alias: &str) -> crate::wallet::Result<()> {

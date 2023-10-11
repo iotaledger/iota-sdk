@@ -21,7 +21,7 @@ pub use self::{
     basic::{BasicBlock, BasicBlockBuilder},
     parent::Parents,
     validation::{ValidationBlock, ValidationBlockBuilder},
-    wrapper::{BlockHeader, BlockWrapper},
+    wrapper::{BlockHeader, BlockWrapper, BlockWrapperBuilder},
 };
 use crate::types::block::{
     protocol::{ProtocolParameters, ProtocolParametersHash},
@@ -43,6 +43,30 @@ impl From<BasicBlock> for Block {
 impl From<ValidationBlock> for Block {
     fn from(value: ValidationBlock) -> Self {
         Self::Validation(value.into())
+    }
+}
+
+impl TryFrom<Block> for BasicBlockBuilder {
+    type Error = Error;
+
+    fn try_from(value: Block) -> Result<Self, Self::Error> {
+        if let Block::Basic(block) = value {
+            Ok((*block).into())
+        } else {
+            Err(Error::InvalidBlockKind(value.kind()))
+        }
+    }
+}
+
+impl TryFrom<Block> for ValidationBlockBuilder {
+    type Error = Error;
+
+    fn try_from(value: Block) -> Result<Self, Self::Error> {
+        if let Block::Validation(block) = value {
+            Ok((*block).into())
+        } else {
+            Err(Error::InvalidBlockKind(value.kind()))
+        }
     }
 }
 

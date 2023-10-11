@@ -12,6 +12,7 @@ use crate::{
 impl<S: 'static + SecretManage> Wallet<S>
 where
     crate::wallet::Error: From<S::Error>,
+    crate::client::Error: From<S::Error>,
 {
     pub(crate) async fn request_and_store_foundry_outputs(
         &self,

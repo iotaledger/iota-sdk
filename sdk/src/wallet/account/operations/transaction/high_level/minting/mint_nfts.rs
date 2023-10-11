@@ -112,6 +112,7 @@ impl MintNftParams {
 impl<S: 'static + SecretManage> Wallet<S>
 where
     crate::wallet::Error: From<S::Error>,
+    crate::client::Error: From<S::Error>,
 {
     /// Mints NFTs.
     ///
@@ -179,7 +180,7 @@ where
                     self.client().bech32_hrp_matches(address.hrp()).await?;
                     address.inner().clone()
                 }
-                None => wallet_address,
+                None => wallet_address.clone(),
             };
 
             // NftId needs to be set to 0 for the creation

@@ -14,6 +14,7 @@ use crate::{
 impl<S: 'static + SecretManage> Wallet<S>
 where
     crate::wallet::Error: From<S::Error>,
+    crate::client::Error: From<S::Error>,
 {
     /// Get outputs from addresses
     pub(crate) async fn get_outputs_from_address_output_ids(

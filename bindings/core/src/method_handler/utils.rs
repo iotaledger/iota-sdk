@@ -30,7 +30,7 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
         UtilsMethod::HexPublicKeyToBech32Address { hex, bech32_hrp } => {
             Response::Bech32Address(hex_public_key_to_bech32_address(&hex, bech32_hrp)?)
         }
-        UtilsMethod::ParseBech32Address { address } => Response::ParsedBech32Address(Address::from(address.inner())),
+        UtilsMethod::ParseBech32Address { address } => Response::ParsedBech32Address(address.into_inner()),
         UtilsMethod::IsAddressValid { address } => Response::Bool(Address::is_valid_bech32(&address)),
         UtilsMethod::GenerateMnemonic => Response::GeneratedMnemonic(Client::generate_mnemonic()?.to_string()),
         UtilsMethod::MnemonicToHexSeed { mnemonic } => {

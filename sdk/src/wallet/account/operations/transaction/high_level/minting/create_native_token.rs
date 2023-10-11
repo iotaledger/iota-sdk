@@ -91,6 +91,7 @@ impl From<&PreparedCreateNativeTokenTransaction> for PreparedCreateNativeTokenTr
 impl<S: 'static + SecretManage> Wallet<S>
 where
     crate::wallet::Error: From<S::Error>,
+    crate::client::Error: From<S::Error>,
 {
     /// Creates a new foundry output with minted native tokens.
     ///

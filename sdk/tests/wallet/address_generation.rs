@@ -135,7 +135,7 @@ async fn wallet_address_generation_ledger() -> Result<()> {
         .listen([WalletEventType::LedgerAddressGeneration], move |event| {
             if let WalletEvent::LedgerAddressGeneration(address) = event {
                 sender
-                    .try_send(address.address)
+                    .try_send(address.address.clone())
                     .expect("too many LedgerAddressGeneration events");
             } else {
                 panic!("expected LedgerAddressGeneration event")
@@ -164,7 +164,7 @@ async fn wallet_address_generation_ledger() -> Result<()> {
             .recv()
             .await
             .expect("never received event")
-            .inner()
+            .into_inner()
             .to_bech32_unchecked("smr"),
         // Address generated with bip32 path: [44, 4218, 0, 0, 0].
         // This address was generated with a MnemonicSecretManager and the ledger simulator mnemonic.

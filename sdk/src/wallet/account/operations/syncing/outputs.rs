@@ -24,6 +24,7 @@ use crate::{
 impl<S: 'static + SecretManage> Wallet<S>
 where
     crate::wallet::Error: From<S::Error>,
+    crate::client::Error: From<S::Error>,
 {
     /// Convert OutputWithMetadataResponse to OutputData with the network_id added
     pub(crate) async fn output_response_to_output_data(
@@ -58,7 +59,7 @@ where
                     metadata: *output_with_meta.metadata(),
                     output: output_with_meta.output().clone(),
                     is_spent: output_with_meta.metadata().is_spent(),
-                    address: associated_address.address.inner,
+                    address: associated_address.address.inner.clone(),
                     network_id,
                     remainder,
                     chain: Some(chain),

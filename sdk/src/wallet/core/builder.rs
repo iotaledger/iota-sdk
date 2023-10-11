@@ -125,6 +125,7 @@ where
 impl<S: 'static + SecretManage> WalletBuilder<S>
 where
     crate::wallet::Error: From<S::Error>,
+    crate::client::Error: From<S::Error>,
     Self: SaveLoadWallet,
 {
     /// Builds the wallet.
@@ -208,7 +209,9 @@ where
 
         // May use a previously stored wallet address if it wasn't provided
         if self.address.is_none() {
-            self.address = loaded_wallet_builder.as_ref().and_then(|builder| builder.address);
+            self.address = loaded_wallet_builder
+                .as_ref()
+                .and_then(|builder| builder.address.clone());
         }
 
         // May create a default Ed25519 wallet address if there's a secret manager.

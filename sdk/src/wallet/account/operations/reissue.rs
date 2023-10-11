@@ -1,6 +1,8 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use crypto::keys::bip44::Bip44;
+
 use crate::{
     client::{secret::SecretManage, Error as ClientError},
     types::{
@@ -19,6 +21,7 @@ const DEFAULT_REISSUE_UNTIL_INCLUDED_MAX_AMOUNT: u64 = 40;
 impl<S: 'static + SecretManage> Wallet<S>
 where
     Error: From<S::Error>,
+    crate::client::Error: From<S::Error>,
 {
     /// Reissues a transaction sent from the account for a provided transaction id until it's
     /// included (referenced by a milestone). Returns the included block id.
@@ -52,12 +55,13 @@ where
                 Some(block_id) => block_id,
                 None => self
                     .client()
-                    .finish_basic_block_builder(
+                    .build_basic_block(
                         todo!("issuer id"),
-                        todo!("block signature"),
                         todo!("issuing time"),
                         None,
                         Some(Payload::Transaction(Box::new(transaction.payload.clone()))),
+                        &*self.get_secret_manager().read().await,
+                        Bip44::new(self.coin_type().await),
                     )
                     .await?
                     .id(&protocol_parameters),
@@ -101,12 +105,13 @@ where
                     if index == block_ids_len - 1 && should_reissue {
                         let reissued_block = self
                             .client()
-                            .finish_basic_block_builder(
+                            .build_basic_block(
                                 todo!("issuer id"),
-                                todo!("block signature"),
                                 todo!("issuing time"),
                                 None,
                                 Some(Payload::Transaction(Box::new(transaction.payload.clone()))),
+                                &*self.get_secret_manager().read().await,
+                                Bip44::new(self.coin_type().await),
                             )
                             .await?;
                         block_ids.push(reissued_block.id(&protocol_parameters));

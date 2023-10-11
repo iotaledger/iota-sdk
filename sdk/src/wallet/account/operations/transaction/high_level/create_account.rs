@@ -41,6 +41,7 @@ pub struct CreateAccountParams {
 impl<S: 'static + SecretManage> Wallet<S>
 where
     crate::wallet::Error: From<S::Error>,
+    crate::client::Error: From<S::Error>,
 {
     /// Creates an account output.
     /// ```ignore
@@ -83,16 +84,16 @@ where
         let controller_address = match params.as_ref().and_then(|options| options.address.as_ref()) {
             Some(bech32_address) => {
                 self.client().bech32_hrp_matches(bech32_address.hrp()).await?;
-                *bech32_address.inner()
+                bech32_address.inner().clone()
             }
-            None => *self.address().await.inner(),
+            None => self.address().await.inner().clone(),
         };
 
         let mut account_output_builder =
             AccountOutputBuilder::new_with_minimum_storage_deposit(rent_structure, AccountId::null())
                 .with_state_index(0)
                 .with_foundry_counter(0)
-                .add_unlock_condition(StateControllerAddressUnlockCondition::new(controller_address))
+                .add_unlock_condition(StateControllerAddressUnlockCondition::new(controller_address.clone()))
                 .add_unlock_condition(GovernorAddressUnlockCondition::new(controller_address));
         if let Some(CreateAccountParams {
             immutable_metadata,

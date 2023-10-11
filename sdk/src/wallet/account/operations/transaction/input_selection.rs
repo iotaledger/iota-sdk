@@ -25,6 +25,7 @@ use crate::{
 impl<S: 'static + SecretManage> Wallet<S>
 where
     crate::wallet::Error: From<S::Error>,
+    crate::client::Error: From<S::Error>,
 {
     /// Selects inputs for a transaction and locks them in the account, so they don't get used again
     pub(crate) async fn select_inputs(
@@ -91,7 +92,7 @@ where
             let mut input_selection = InputSelection::new(
                 available_outputs_signing_data,
                 outputs,
-                Some(wallet_data.address.into_inner()),
+                Some(wallet_data.address.clone().into_inner()),
                 protocol_parameters.clone(),
             )
             .with_required_inputs(custom_inputs)
@@ -126,7 +127,7 @@ where
             let mut input_selection = InputSelection::new(
                 available_outputs_signing_data,
                 outputs,
-                Some(wallet_data.address.into_inner()),
+                Some(wallet_data.address.clone().into_inner()),
                 protocol_parameters.clone(),
             )
             .with_required_inputs(mandatory_inputs)
@@ -158,7 +159,7 @@ where
         let mut input_selection = InputSelection::new(
             available_outputs_signing_data,
             outputs,
-            Some(wallet_data.address.into_inner()),
+            Some(wallet_data.address.clone().into_inner()),
             protocol_parameters.clone(),
         )
         .with_forbidden_inputs(forbidden_inputs);

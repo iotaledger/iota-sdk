@@ -106,7 +106,7 @@ pub struct WalletData {
     pub(crate) bip_path: Bip44,
     /// The wallet address.
     pub(crate) address: Bech32Address,
-    /// The wallet alias.
+    /// The wallet alias. Defaults to the storage path if available.
     pub(crate) alias: String,
     /// Outputs
     // stored separated from the wallet for performance?
@@ -157,6 +157,7 @@ impl WalletData {
 impl<S: 'static + SecretManage> Wallet<S>
 where
     crate::wallet::Error: From<S::Error>,
+    crate::client::Error: From<S::Error>,
 {
     /// Create a new wallet.
     pub(crate) async fn new(inner: Arc<WalletInner<S>>, data: WalletData) -> Result<Self> {
@@ -232,11 +233,6 @@ where
         self.inner.emit(wallet_event).await
     }
 
-    // TODO: why no access to those methods?
-    // }
-
-    // impl Wallet {
-
     pub async fn data(&self) -> tokio::sync::RwLockReadGuard<'_, WalletData> {
         self.data.read().await
     }
@@ -252,12 +248,17 @@ where
 
     /// Get the wallet address.
     pub async fn address(&self) -> Bech32Address {
-        self.data().await.address
+        self.data().await.address.clone()
     }
 
     /// Get the wallet's configured Bech32 HRP.
     pub async fn bech32_hrp(&self) -> Hrp {
         self.data().await.address.hrp
+    }
+
+    /// Get the wallet's configured coin type.
+    pub async fn coin_type(&self) -> u32 {
+        self.data().await.bip_path.coin_type
     }
 
     /// Get the [`OutputData`] of an output stored in the wallet.
@@ -412,6 +413,7 @@ where
         transactions
     }
 }
+
 impl<S: SecretManage> WalletInner<S> {
     /// Get the [SecretManager]
     pub fn get_secret_manager(&self) -> &Arc<RwLock<S>> {
@@ -546,7 +548,7 @@ impl From<&WalletData> for WalletDataDto {
     fn from(value: &WalletData) -> Self {
         Self {
             bip_path: value.bip_path,
-            address: value.address,
+            address: value.address.clone(),
             alias: value.alias.clone(),
             outputs: value
                 .outputs

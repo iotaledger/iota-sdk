@@ -30,6 +30,7 @@ impl<S: 'static + SecretManage> Wallet<S> {
 
 impl<S: 'static + SecretManage> Wallet<S>
 where
+    crate::client::Error: From<S::Error>,
     crate::wallet::Error: From<S::Error>,
     WalletBuilder<S>: SaveLoadWallet,
 {
