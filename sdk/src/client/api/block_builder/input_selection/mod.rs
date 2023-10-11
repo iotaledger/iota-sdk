@@ -500,7 +500,7 @@ impl InputSelection {
                             foundry_output,
                             input_native_tokens_builder.deref(),
                             output_native_tokens_builder.deref(),
-                            Default::default(),
+                            &Default::default(),
                         ) {
                             log::debug!("validate_transitions error {err:?}");
                             return Err(Error::UnfulfillableRequirement(Requirement::Foundry(

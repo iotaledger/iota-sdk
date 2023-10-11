@@ -458,7 +458,7 @@ impl FoundryOutput {
         next_state: &Self,
         input_native_tokens: &BTreeMap<TokenId, U256>,
         output_native_tokens: &BTreeMap<TokenId, U256>,
-        capabilities: TransactionCapabilities,
+        capabilities: &TransactionCapabilities,
     ) -> Result<(), StateTransitionError> {
         if current_state.account_address() != next_state.account_address()
             || current_state.serial_number != next_state.serial_number

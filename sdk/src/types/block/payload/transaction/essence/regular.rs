@@ -3,12 +3,12 @@
 
 use alloc::{collections::BTreeSet, vec::Vec};
 
-use derive_more::Deref;
 use hashbrown::HashSet;
 use packable::{bounded::BoundedU16, prefix::BoxedSlicePrefix, Packable};
 
 use crate::types::{
     block::{
+        capabilities::{Capabilities, CapabilityFlag},
         context_input::{ContextInput, CONTEXT_INPUT_COUNT_RANGE},
         input::{Input, INPUT_COUNT_RANGE},
         mana::{verify_mana_allotments_sum, ManaAllotment, ManaAllotments},
@@ -112,8 +112,8 @@ impl RegularTransactionEssenceBuilder {
         self
     }
 
-    pub fn with_capabilities(mut self, capabilities: impl Into<TransactionCapabilities>) -> Self {
-        self.capabilities = capabilities.into();
+    pub fn with_capabilities(mut self, capabilities: TransactionCapabilities) -> Self {
+        self.capabilities = capabilities;
         self
     }
 
@@ -278,8 +278,8 @@ impl RegularTransactionEssence {
         &self.allotments
     }
 
-    pub fn capabilities(&self) -> TransactionCapabilities {
-        self.capabilities
+    pub fn capabilities(&self) -> &TransactionCapabilities {
+        &self.capabilities
     }
 
     /// Returns the optional payload of a [`RegularTransactionEssence`].
@@ -435,17 +435,46 @@ fn verify_payload_packable<const VERIFY: bool>(
 
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
 #[non_exhaustive]
-#[repr(u8)]
 pub enum TransactionCapabilityFlag {
-    BurnNativeTokens = 0b00000001,
-    BurnMana = 0b00000010,
-    DestroyAccountOutputs = 0b00000100,
-    DestroyFoundryOutputs = 0b00001000,
-    DestroyNftOutputs = 0b00010000,
+    BurnNativeTokens,
+    BurnMana,
+    DestroyAccountOutputs,
+    DestroyFoundryOutputs,
+    DestroyNftOutputs,
 }
 
 impl TransactionCapabilityFlag {
-    pub fn all() -> impl Iterator<Item = Self> {
+    const BURN_NATIVE_TOKENS: u8 = 0b00000001;
+    const BURN_MANA: u8 = 0b00000010;
+    const DESTROY_ACCOUNT_OUTPUTS: u8 = 0b00000100;
+    const DESTROY_FOUNDRY_OUTPUTS: u8 = 0b00001000;
+    const DESTROY_NFT_OUTPUTS: u8 = 0b00010000;
+}
+
+impl CapabilityFlag for TransactionCapabilityFlag {
+    type Iterator = core::array::IntoIter<Self, 5>;
+
+    fn as_byte(&self) -> u8 {
+        match self {
+            Self::BurnNativeTokens => Self::BURN_NATIVE_TOKENS,
+            Self::BurnMana => Self::BURN_MANA,
+            Self::DestroyAccountOutputs => Self::DESTROY_ACCOUNT_OUTPUTS,
+            Self::DestroyFoundryOutputs => Self::DESTROY_FOUNDRY_OUTPUTS,
+            Self::DestroyNftOutputs => Self::DESTROY_NFT_OUTPUTS,
+        }
+    }
+
+    fn index(&self) -> usize {
+        match self {
+            Self::BurnNativeTokens
+            | Self::BurnMana
+            | Self::DestroyAccountOutputs
+            | Self::DestroyFoundryOutputs
+            | Self::DestroyNftOutputs => 0,
+        }
+    }
+
+    fn all() -> Self::Iterator {
         [
             Self::BurnNativeTokens,
             Self::BurnMana,
@@ -457,74 +486,7 @@ impl TransactionCapabilityFlag {
     }
 }
 
-#[derive(Copy, Clone, Debug, Default, Eq, PartialEq, Ord, PartialOrd, Hash, Deref, Packable)]
-#[repr(transparent)]
-pub struct TransactionCapabilities(u8);
-
-impl TransactionCapabilities {
-    pub const NONE: Self = Self(0);
-    pub const ALL: Self = Self(0b00011111);
-
-    pub fn is_all(&self) -> bool {
-        Self::ALL.eq(self)
-    }
-
-    pub fn is_none(&self) -> bool {
-        Self::NONE.eq(self)
-    }
-
-    pub fn set_all(&mut self) -> &mut Self {
-        *self = Self::ALL;
-        self
-    }
-
-    pub fn set_none(&mut self) -> &mut Self {
-        *self = Self::NONE;
-        self
-    }
-
-    pub fn add_capability(&mut self, flag: TransactionCapabilityFlag) -> &mut Self {
-        self.0 |= flag as u8;
-        self
-    }
-
-    pub fn add_capabilities(&mut self, flags: impl IntoIterator<Item = TransactionCapabilityFlag>) -> &mut Self {
-        for flag in flags {
-            self.add_capability(flag);
-        }
-        self
-    }
-
-    pub fn with_capabilities(mut self, flags: impl IntoIterator<Item = TransactionCapabilityFlag>) -> Self {
-        for flag in flags {
-            self.add_capability(flag);
-        }
-        self
-    }
-
-    pub fn set_capabilities(&mut self, flags: impl IntoIterator<Item = TransactionCapabilityFlag>) -> &mut Self {
-        *self = Self::default().with_capabilities(flags);
-        self
-    }
-
-    pub fn has_capability(&self, flag: TransactionCapabilityFlag) -> bool {
-        self.0 & flag as u8 == flag as u8
-    }
-
-    pub fn has_capabilities(&self, flags: impl IntoIterator<Item = TransactionCapabilityFlag>) -> bool {
-        flags.into_iter().all(|flag| self.has_capability(flag))
-    }
-
-    pub fn split(self) -> impl Iterator<Item = TransactionCapabilityFlag> {
-        TransactionCapabilityFlag::all().filter(move |f| self.has_capability(*f))
-    }
-}
-
-impl<I: IntoIterator<Item = TransactionCapabilityFlag>> From<I> for TransactionCapabilities {
-    fn from(value: I) -> Self {
-        Self::default().with_capabilities(value)
-    }
-}
+pub type TransactionCapabilities = Capabilities<TransactionCapabilityFlag>;
 
 #[cfg(feature = "serde")]
 pub(crate) mod dto {
@@ -534,9 +496,12 @@ pub(crate) mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;
-    use crate::types::{
-        block::{mana::ManaAllotmentDto, output::dto::OutputDto, payload::dto::PayloadDto, Error},
-        TryFromDto,
+    use crate::{
+        types::{
+            block::{mana::ManaAllotmentDto, output::dto::OutputDto, payload::dto::PayloadDto, Error},
+            TryFromDto,
+        },
+        utils::serde::prefix_hex_bytes,
     };
 
     /// Describes the essence data making up a transaction by defining its inputs and outputs and an optional payload.
@@ -552,8 +517,8 @@ pub(crate) mod dto {
         pub inputs_commitment: String,
         pub outputs: Vec<OutputDto>,
         pub allotments: Vec<ManaAllotmentDto>,
-        // TODO: what does the API want?
-        pub capabilities: u8,
+        #[serde(with = "prefix_hex_bytes")]
+        pub capabilities: Box<[u8]>,
         #[serde(default, skip_serializing_if = "Option::is_none")]
         pub payload: Option<PayloadDto>,
     }
@@ -569,7 +534,7 @@ pub(crate) mod dto {
                 inputs_commitment: value.inputs_commitment().to_string(),
                 outputs: value.outputs().iter().map(Into::into).collect(),
                 allotments: value.mana_allotments().iter().map(Into::into).collect(),
-                capabilities: value.capabilities().0,
+                capabilities: value.capabilities().iter().copied().collect(),
                 payload: match value.payload() {
                     Some(p @ Payload::TaggedData(_)) => Some(p.into()),
                     Some(_) => unimplemented!(),
@@ -605,7 +570,9 @@ pub(crate) mod dto {
                 .with_inputs(dto.inputs)
                 .with_outputs(outputs)
                 .with_mana_allotments(mana_allotments)
-                .with_capabilities(TransactionCapabilities(dto.capabilities));
+                .with_capabilities(Capabilities::from_bytes(
+                    dto.capabilities.try_into().map_err(Error::InvalidCapabilitiesCount)?,
+                ));
 
             builder = if let Some(p) = dto.payload {
                 if let PayloadDto::TaggedData(i) = p {

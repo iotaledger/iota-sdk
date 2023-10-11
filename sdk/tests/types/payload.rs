@@ -87,7 +87,7 @@ fn transactions_capabilities() {
         .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
         .finish_with_params(&protocol_parameters)
         .unwrap();
-    let mut capabilities = essence.capabilities();
+    let mut capabilities = essence.capabilities().clone();
 
     use TransactionCapabilityFlag as Flag;
 
@@ -104,9 +104,9 @@ fn transactions_capabilities() {
 
     assert!(!capabilities.is_none());
 
-    assert!(!capabilities.has_capabilities(TransactionCapabilities::ALL.split()));
+    assert!(!capabilities.has_capabilities(TransactionCapabilities::all().capabilities_iter()));
     capabilities.set_all();
-    assert!(capabilities.has_capabilities(TransactionCapabilities::ALL.split()));
+    assert!(capabilities.has_capabilities(TransactionCapabilities::all().capabilities_iter()));
     assert!(capabilities.has_capabilities([Flag::DestroyFoundryOutputs, Flag::DestroyNftOutputs]));
 }
 
