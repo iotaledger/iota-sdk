@@ -51,11 +51,6 @@ where
                 'outer: loop {
                     log::debug!("[background_syncing]: syncing wallet");
 
-                    // Check if the process should stop before syncing each account so it stops faster
-                    if wallet.background_syncing_status.load(Ordering::Relaxed) == 2 {
-                        log::debug!("[background_syncing]: stopping");
-                        break 'outer;
-                    }
                     match wallet.sync(options.clone()).await {
                         Ok(_) => {}
                         Err(err) => log::debug!("[background_syncing] error: {}", err),
