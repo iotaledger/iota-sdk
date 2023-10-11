@@ -490,7 +490,10 @@ pub type TransactionCapabilities = Capabilities<TransactionCapabilityFlag>;
 
 #[cfg(feature = "serde")]
 pub(crate) mod dto {
-    use alloc::string::{String, ToString};
+    use alloc::{
+        boxed::Box,
+        string::{String, ToString},
+    };
     use core::str::FromStr;
 
     use serde::{Deserialize, Serialize};
