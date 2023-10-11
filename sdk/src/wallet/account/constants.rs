@@ -17,4 +17,4 @@ pub(crate) const MIN_SYNC_INTERVAL: u128 = 5;
 
 // TODO Used to be one day in seconds, what now ?
 // Default expiration slots for [ExpirationUnlockCondition] when sending native tokens,
-pub(crate) const DEFAULT_EXPIRATION_SLOTS: u64 = 100;
+pub(crate) const DEFAULT_EXPIRATION_SLOTS: u32 = 100;
