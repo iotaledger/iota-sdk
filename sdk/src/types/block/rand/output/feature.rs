@@ -12,6 +12,7 @@ use crate::types::block::{
         address::rand_address,
         bytes::rand_bytes,
         number::{rand_number, rand_number_range},
+        slot::{rand_epoch_index, rand_slot_index},
     },
 };
 
@@ -64,7 +65,7 @@ pub fn rand_block_issuer_keys(len: usize) -> BTreeSet<BlockIssuerKey> {
 /// Generates a random [`BlockIssuerFeature`].
 pub fn rand_block_issuer_feature() -> BlockIssuerFeature {
     BlockIssuerFeature::new(
-        rand_number::<u64>(),
+        rand_slot_index(),
         rand_block_issuer_keys(rand_number_range(
             BlockIssuerKeys::COUNT_MIN as usize..=BlockIssuerKeys::COUNT_MAX as usize,
         )),
@@ -74,7 +75,7 @@ pub fn rand_block_issuer_feature() -> BlockIssuerFeature {
 
 /// Generates a random [`StakingFeature`].
 pub fn rand_staking_feature() -> StakingFeature {
-    StakingFeature::new(rand_number(), rand_number(), rand_number::<u64>(), rand_number::<u64>())
+    StakingFeature::new(rand_number(), rand_number(), rand_epoch_index(), rand_epoch_index())
 }
 
 fn rand_feature_from_flag(flag: &FeatureFlags) -> Feature {
