@@ -9,6 +9,7 @@ import {
     BlockIssuerKeyDiscriminator,
 } from './block-issuer-key';
 import { u64 } from '../../utils/type-aliases';
+import { EpochIndex } from '../../block/slot';
 
 /**
  * All of the feature block types.
@@ -144,17 +145,17 @@ class StakingFeature extends Feature {
     /**
      * The epoch index in which the staking started.
      */
-    readonly startEpoch: u64;
+    readonly startEpoch: EpochIndex;
     /**
      * The epoch index in which the staking ends.
      */
-    readonly endEpoch: u64;
+    readonly endEpoch: EpochIndex;
 
     constructor(
         stakedAmount: u64,
         fixedCost: u64,
-        startEpoch: u64,
-        endEpoch: u64,
+        startEpoch: EpochIndex,
+        endEpoch: EpochIndex,
     ) {
         super(FeatureType.Staking);
         this.stakedAmount = stakedAmount;
