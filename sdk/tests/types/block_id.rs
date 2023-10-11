@@ -6,7 +6,7 @@ use core::str::FromStr;
 use iota_sdk::types::block::{rand::bytes::rand_bytes_array, BlockHash, BlockId};
 use packable::PackableExt;
 
-const BLOCK_ID: &str = "0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c6490000000000000000";
+const BLOCK_ID: &str = "0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c64900000000";
 
 #[test]
 fn debug_impl() {
@@ -33,8 +33,8 @@ fn from_to_str() {
 fn packed_len() {
     let block_id = BlockId::from_str(BLOCK_ID).unwrap();
 
-    assert_eq!(block_id.packed_len(), 40);
-    assert_eq!(block_id.pack_to_vec().len(), 40);
+    assert_eq!(block_id.packed_len(), 36);
+    assert_eq!(block_id.pack_to_vec().len(), 36);
 }
 
 // Validate that a `unpack` ∘ `pack` round-trip results in the original block id.

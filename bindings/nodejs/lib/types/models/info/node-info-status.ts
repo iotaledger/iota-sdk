@@ -1,6 +1,8 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+import { SlotIndex, EpochIndex } from '../../block/slot';
+
 /**
  * Response from the /info endpoint.
  */
@@ -32,17 +34,17 @@ export interface INodeInfoStatus {
     /**
      * The index of latest finalized slot.
      */
-    latestFinalizedSlot: string;
+    latestFinalizedSlot: SlotIndex;
     /**
      * The slot index of the latest accepted block.
      */
-    latestAcceptedBlockSlot?: string;
+    latestAcceptedBlockSlot?: SlotIndex;
     /**
      * The slot index of the latest confirmed block.
      */
-    latestConfirmedBlockSlot?: string;
+    latestConfirmedBlockSlot?: SlotIndex;
     /**
      * The index of the epoch before which the tangle history is pruned.
      */
-    pruningEpoch: string;
+    pruningEpoch: EpochIndex;
 }
