@@ -129,17 +129,14 @@ impl ProtocolParameters {
             slot_index_target.to_epoch_index(slots_per_epoch_exp),
         );
         if epoch_index_created == epoch_index_target {
-            mana_structure.generate_mana(amount, (*slot_index_target - *slot_index_created) as u32)
+            mana_structure.generate_mana(amount, slot_index_target.0 - slot_index_created.0)
         } else if epoch_index_created == epoch_index_target - 1 {
             let slots_before_next_epoch =
                 slot_index_created - (epoch_index_created + 1).first_slot_index(slots_per_epoch_exp);
             let slots_since_epoch_start =
                 slot_index_target - (epoch_index_target - 1).last_slot_index(slots_per_epoch_exp);
-            let mana_decayed = mana_structure.decay(
-                mana_structure.generate_mana(amount, slots_before_next_epoch.0 as u32),
-                1,
-            );
-            let mana_generated = mana_structure.generate_mana(amount, slots_since_epoch_start.0 as u32);
+            let mana_decayed = mana_structure.decay(mana_structure.generate_mana(amount, slots_before_next_epoch.0), 1);
+            let mana_generated = mana_structure.generate_mana(amount, slots_since_epoch_start.0);
             mana_decayed + mana_generated
         } else {
             let c = fixed_point_multiply(
@@ -153,11 +150,11 @@ impl ProtocolParameters {
             let slots_since_epoch_start =
                 slot_index_target - (epoch_index_target - 1).last_slot_index(slots_per_epoch_exp);
             let potential_mana_n = mana_structure.decay(
-                mana_structure.generate_mana(amount, slots_before_next_epoch.0 as u32),
+                mana_structure.generate_mana(amount, slots_before_next_epoch.0),
                 epoch_index_target.0 - epoch_index_created.0,
             );
             let potential_mana_n_1 = mana_structure.decay(c, epoch_index_target.0 - epoch_index_created.0);
-            let potential_mana_0 = c + mana_structure.generate_mana(amount, slots_since_epoch_start.0 as u32)
+            let potential_mana_0 = c + mana_structure.generate_mana(amount, slots_since_epoch_start.0)
                 - (c >> mana_structure.generation_rate_exponent());
             potential_mana_0 - potential_mana_n_1 + potential_mana_n
         }
@@ -188,13 +185,13 @@ fn lower_bits(v: u64) -> u64 {
 fn multiplication_and_shift(mut value_hi: u64, mut value_lo: u64, mult_factor: u32, shift_factor: u8) -> (u64, u64) {
     debug_assert!(shift_factor <= 32);
     // multiply the integer part of value_hi by mult_factor
-    value_hi = value_hi * mult_factor as u64;
+    value_hi *= mult_factor as u64;
 
     // the lower shift_factor bits of the result are extracted and shifted left to form the remainder.
     // value_lo is multiplied by mult_factor and right-shifted by shift_factor bits.
     // the sum of these two values forms the new lower part (value_lo) of the result.
-    value_lo =
-        (lower_n_bits(value_hi, shift_factor) << (32 - shift_factor)) + (value_lo * mult_factor as u64) >> shift_factor;
+    value_lo = (lower_n_bits(value_hi, shift_factor) << (32 - shift_factor))
+        + ((value_lo * mult_factor as u64) >> shift_factor);
 
     // the right-shifted value_hi and the upper 32 bits of value_lo form the new higher part (value_hi) of the
     // result.
