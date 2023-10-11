@@ -206,9 +206,13 @@ class RewardsParameters:
     validator_blocks_per_slot: int
     profit_margin_exponent: int
     bootstrapping_duration: int
-    mana_share_coefficient: int
+    mana_share_coefficient: int = field(metadata=config(
+        encoder=str
+    ))
     decay_balancing_constant_exponent: int
-    decay_balancing_constant: int
+    decay_balancing_constant: int = field(metadata=config(
+        encoder=str
+    ))
     pool_coefficient_exponent: int
 
 
