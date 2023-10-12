@@ -211,6 +211,9 @@ const fn upper_bits(v: u64) -> u64 {
 /// Returns the lower n bits of a u64 value.
 const fn lower_n_bits(v: u64, n: u8) -> u64 {
     debug_assert!(n <= 64);
+    if n == 0 {
+        return 0;
+    }
     v & u64::MAX >> (64 - n)
 }
 
