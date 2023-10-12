@@ -8,9 +8,7 @@ use crate::{
     types::block::output::{unlock_condition::UnlockCondition, FoundryId, NativeTokensBuilder, Output, Rent},
     wallet::{
         core::WalletData,
-        operations::{
-            helpers::time::can_output_be_unlocked_forever_from_now_on, output_claiming::OutputsToClaim,
-        },
+        operations::{helpers::time::can_output_be_unlocked_forever_from_now_on, output_claiming::OutputsToClaim},
         types::{Balance, NativeTokensBalance},
         Result, Wallet,
     },

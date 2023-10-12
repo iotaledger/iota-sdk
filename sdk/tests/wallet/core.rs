@@ -75,7 +75,7 @@ async fn different_seed() -> Result<()> {
 
 #[cfg(feature = "storage")]
 #[tokio::test]
-async fn changed_coin_type() -> Result<()> {
+async fn changed_bip_path() -> Result<()> {
     use iota_sdk::crypto::keys::bip44::Bip44;
 
     let storage_path = "test-storage/changed_coin_type";
@@ -98,13 +98,11 @@ async fn changed_coin_type() -> Result<()> {
 
     // Building the wallet with another coin type needs to return an error, because a different coin type was used in
     // the existing account
-    assert!(matches!(
-        err,
-        Err(Error::CoinTypeMismatch {
-            new_coin_type: IOTA_COIN_TYPE,
-            old_coin_type: SHIMMER_COIN_TYPE
-        })
-    ));
+    let mismatch_err: Result<Wallet> = Err(Error::BipPathMismatch {
+        new_bip_path: Bip44::new(IOTA_COIN_TYPE),
+        old_bip_path: Bip44::new(SHIMMER_COIN_TYPE),
+    });
+    assert!(matches!(err, mismatch_err));
 
     // Building the wallet with the same coin type still works
     assert!(

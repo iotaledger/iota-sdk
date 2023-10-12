@@ -3,6 +3,7 @@
 
 use std::fmt::Debug;
 
+use crypto::keys::bip44::Bip44;
 use serde::{
     ser::{SerializeMap, Serializer},
     Serialize,
@@ -26,8 +27,8 @@ pub enum Error {
     #[error("`{0}`")]
     Client(Box<crate::client::Error>),
     /// BIP44 coin type mismatch
-    #[error("BIP44 coin type mismatch: {new_coin_type}, existing coin type is: {old_coin_type}")]
-    CoinTypeMismatch { new_coin_type: u32, old_coin_type: u32 },
+    #[error("BIP44 mismatch: {new_bip_path:?}, existing bip path is: {old_bip_path:?}")]
+    BipPathMismatch { new_bip_path: Bip44, old_bip_path: Bip44 },
     /// Funds are spread over too many outputs
     #[error("funds are spread over too many outputs {output_count}/{output_count_max}, consolidation required")]
     ConsolidationRequired { output_count: usize, output_count_max: u16 },

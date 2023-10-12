@@ -232,15 +232,13 @@ where
         // The coin type must not change.
         #[cfg(feature = "storage")]
         if let Some(wallet_data) = &wallet_data {
-            let new_coin_type = bip_path.coin_type;
-            let old_coin_type = wallet_data.bip_path.coin_type;
-            if bip_path != wallet_data.bip_path {
-                if new_coin_type != old_coin_type {
-                    return Err(crate::wallet::Error::CoinTypeMismatch {
-                        new_coin_type,
-                        old_coin_type,
-                    });
-                }
+            let new_bip_path = bip_path;
+            let old_bip_path = wallet_data.bip_path;
+            if new_bip_path != old_bip_path {
+                return Err(crate::wallet::Error::BipPathMismatch {
+                    new_bip_path,
+                    old_bip_path,
+                });
             }
         }
 
