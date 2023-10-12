@@ -318,9 +318,9 @@ where
                     .generate_ed25519_addresses(
                         bip_path.coin_type,
                         bip_path.account,
-                        0..1,
+                        bip_path.address_index..bip_path.address_index+1,
                         GenerateAddressOptions {
-                            internal: false,
+                            internal: bip_path.change != 0,
                             ledger_nano_prompt: false,
                         },
                     )
