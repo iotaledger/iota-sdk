@@ -353,7 +353,7 @@ impl StateTransitionVerifier for DelegationOutput {
             current_state,
             next_state,
             context.essence.context_inputs(),
-            todo!("context.protocol_parameters()"),
+            &context.protocol_parameters,
         )
     }
 
