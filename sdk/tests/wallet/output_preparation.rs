@@ -10,7 +10,7 @@ use iota_sdk::{
         slot::SlotIndex,
     },
     wallet::{
-        account::{Assets, Features, OutputParams, ReturnStrategy, StorageDeposit, Unlocks},
+        Assets, Features, OutputParams, ReturnStrategy, StorageDeposit, Unlocks,
         MintNftParams, Result,
     },
 };

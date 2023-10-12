@@ -9,7 +9,7 @@
 //! ```
 
 use iota_sdk::{
-    wallet::{account::SyncOptions, Result},
+    wallet::{SyncOptions, Result},
     Wallet,
 };
 

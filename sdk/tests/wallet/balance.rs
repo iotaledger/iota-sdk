@@ -10,7 +10,7 @@ use iota_sdk::{
             BasicOutputBuilder, UnlockCondition,
         },
     },
-    wallet::{account::types::Balance, Result},
+    wallet::{types::Balance, Result},
 };
 
 use crate::wallet::common::{make_wallet, request_funds, setup, tear_down};

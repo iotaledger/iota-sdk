@@ -10,7 +10,7 @@ use iota_sdk::{
     client::node_api::indexer::query_parameters::QueryParameter,
     types::block::address::{AccountAddress, ToBech32Ext},
     wallet::{
-        account::{AliasSyncOptions, SyncOptions, TransactionOptions},
+        AliasSyncOptions, SyncOptions, TransactionOptions,
         Result,
     },
     Wallet,

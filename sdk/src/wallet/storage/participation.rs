@@ -11,7 +11,7 @@ use crate::{
         block::output::OutputId,
     },
     wallet::{
-        account::operations::participation::ParticipationEventWithNodes,
+        operations::participation::ParticipationEventWithNodes,
         storage::constants::{PARTICIPATION_CACHED_OUTPUTS, PARTICIPATION_EVENTS},
     },
 };

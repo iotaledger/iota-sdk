@@ -7,7 +7,7 @@ use tokio::time::sleep;
 
 use crate::{
     client::secret::SecretManage,
-    wallet::{account::operations::syncing::SyncOptions, Wallet},
+    wallet::{operations::syncing::SyncOptions, Wallet},
 };
 
 /// The default interval for background syncing

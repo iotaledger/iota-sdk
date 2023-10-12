@@ -15,7 +15,7 @@ use iota_sdk::{
         secret::SecretManager,
     },
     crypto::keys::bip44::Bip44,
-    wallet::{account::types::Bip44Address, ClientOptions, Result, SendParams, Wallet},
+    wallet::{types::Bip44Address, ClientOptions, Result, SendParams, Wallet},
 };
 
 const ONLINE_WALLET_DB_PATH: &str = "./examples/wallet/offline_signing/example-online-walletdb";

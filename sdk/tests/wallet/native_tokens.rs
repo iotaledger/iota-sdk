@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use iota_sdk::{
-    wallet::{account::SyncOptions, CreateNativeTokenParams, Result},
+    wallet::{SyncOptions, CreateNativeTokenParams, Result},
     U256,
 };
 

@@ -19,8 +19,8 @@ use crate::{
     client::secret::{GenerateAddressOptions, SecretManage, SecretManager},
     types::block::address::{Address, Bech32Address},
     wallet::{
-        account::SyncOptions,
         core::{Bip44, WalletData, WalletInner},
+        operations::syncing::SyncOptions,
         ClientOptions, Wallet,
     },
 };

@@ -7,7 +7,7 @@ use iota_sdk::{
         BasicOutputBuilder, NativeToken, NftId, NftOutputBuilder, UnlockCondition,
     },
     wallet::{
-        account::{OutputsToClaim, TransactionOptions},
+        OutputsToClaim, TransactionOptions,
         CreateNativeTokenParams, Result, SendNativeTokensParams, SendParams,
     },
     U256,

@@ -7,9 +7,9 @@ use crate::{
     client::storage::StorageAdapter,
     types::TryFromDto,
     wallet::{
-        account::SyncOptions,
         core::{WalletData, WalletDataDto},
         migration::migrate,
+        operations::syncing::SyncOptions,
         storage::{constants::*, DynStorageAdapter, Storage},
     },
 };

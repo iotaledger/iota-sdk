@@ -18,7 +18,7 @@
 
 use iota_sdk::{
     client::node_manager::node::Node,
-    wallet::{account::types::participation::ParticipationEventRegistrationOptions, Result},
+    wallet::{types::participation::ParticipationEventRegistrationOptions, Result},
     Wallet,
 };
 use url::Url;

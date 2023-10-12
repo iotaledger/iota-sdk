@@ -13,7 +13,7 @@ use crate::{
             payload::transaction::{dto::TransactionPayloadDto, TransactionId},
         },
     },
-    wallet::account::types::{InclusionState, OutputDataDto},
+    wallet::types::{InclusionState, OutputDataDto},
 };
 
 #[derive(Clone, Debug, Eq, PartialEq)]

@@ -17,10 +17,6 @@ use serde::{Deserialize, Serialize};
 use tokio::sync::{Mutex, RwLock};
 
 pub use self::builder::WalletBuilder;
-use super::account::{
-    types::{OutputData, Transaction, TransactionDto},
-    FilterOptions, OutputDataDto,
-};
 #[cfg(feature = "events")]
 use crate::wallet::events::{
     types::{WalletEvent, WalletEventType},
@@ -41,10 +37,14 @@ use crate::{
         },
         TryFromDto,
     },
-    wallet::{account::operations::syncing::SyncOptions, Result},
+    wallet::{
+        operations::syncing::SyncOptions,
+        types::{OutputData, OutputDataDto, Transaction, TransactionDto},
+        FilterOptions, Result,
+    },
 };
 
-/// The wallet, used to ... TODO
+/// The stateful wallet used to interact with an IOTA network.
 #[derive(Debug)]
 pub struct Wallet<S: SecretManage = SecretManager> {
     pub(crate) inner: Arc<WalletInner<S>>,
@@ -599,7 +599,7 @@ fn serialize() {
             signature::{Ed25519Signature, Signature},
             unlock::{ReferenceUnlock, SignatureUnlock, Unlock, Unlocks},
         },
-        wallet::account::types::InclusionState,
+        wallet::types::InclusionState,
     };
 
     const TRANSACTION_ID: &str = "0x24a1f46bdb6b2bf38f1c59f73cdd4ae5b418804bb231d76d06fbf246498d5883";

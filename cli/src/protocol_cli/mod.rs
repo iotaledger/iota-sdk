@@ -23,7 +23,7 @@ use iota_sdk::{
         },
     },
     wallet::{
-        account::{ConsolidationParams, OutputsToClaim, TransactionOptions},
+        ConsolidationParams, OutputsToClaim, TransactionOptions,
         CreateNativeTokenParams, MintNftParams, SendNativeTokensParams, SendNftParams, SendParams, Wallet,
     },
     U256,
