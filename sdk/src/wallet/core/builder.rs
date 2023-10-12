@@ -200,7 +200,13 @@ where
             let alias = loaded_wallet_builder
                 .as_ref()
                 .and_then(|builder| builder.alias.clone())
-                .unwrap_or_else(|| storage_options.path().to_string_lossy().to_string());
+                .unwrap_or_else(|| {
+                    #[cfg(feature = "storage")]
+                    let alias = storage_options.path().to_string_lossy().to_string();
+                    #[cfg(not(feature = "storage"))]
+                    let alias = "".to_string();
+                    alias
+                });
 
             self.alias = Some(alias);
         }
@@ -316,7 +322,7 @@ where
                     .generate_ed25519_addresses(
                         bip_path.coin_type,
                         bip_path.account,
-                        bip_path.address_index..bip_path.address_index+1,
+                        bip_path.address_index..bip_path.address_index + 1,
                         GenerateAddressOptions {
                             internal: bip_path.change != 0,
                             ledger_nano_prompt: false,
