@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use alloc::collections::BTreeSet;
-use core::ops::Deref;
 
 use packable::{Packable, PackableExt};
 
@@ -352,36 +351,17 @@ impl DelegationOutput {
             .map(|s| s.as_commitment().commitment_id())
             .ok_or(StateTransitionError::MissingCommitmentContextInput)?;
 
-        let slot_commitment_index = crate::types::block::slot::SlotIndex::new(u32::from_le_bytes(
-            slot_commitment_id.deref()[32..36].try_into().unwrap(),
-        ));
-        let future_bounded_slot = slot_commitment_index + protocol_parameters.min_committable_age;
+        let future_bounded_slot: SlotIndex = slot_commitment_id.slot_index() + protocol_parameters.min_committable_age;
         let future_bounded_epoch = EpochIndex::from_slot_index(
             future_bounded_slot,
             core::iter::once((EpochIndex::new(0), protocol_parameters.slots_per_epoch_exponent)),
         )
         .unwrap();
 
-        // Returns the slot for which to be eligible for the committee selection of epoch n, a potential validator must
-        // issue at least one block between Registration Slot(n)+1. and this slot.
-        fn activity_window_slot(epoch: EpochIndex, protocol_parameters: &ProtocolParameters) -> SlotIndex {
-            epoch_start(epoch, protocol_parameters) - protocol_parameters.epoch_nearing_threshold - 1
-        }
-
-        // Returns the slot at which delegation can happen for the following epoch.
-        fn registration_slot(epoch: EpochIndex, protocol_parameters: &ProtocolParameters) -> SlotIndex {
-            epoch_start(epoch, protocol_parameters)
-                - protocol_parameters.epoch_nearing_threshold
-                - activity_window_slot(epoch, protocol_parameters)
-                - 1
-        }
-
-        // Calculates the start slot of the given epoch.
-        fn epoch_start(epoch_index: EpochIndex, protocol_parameters: &ProtocolParameters) -> SlotIndex {
-            SlotIndex::new(*epoch_index << protocol_parameters.slots_per_epoch_exponent)
-        }
-
-        let registration_slot = registration_slot(future_bounded_epoch, protocol_parameters);
+        let registration_slot = future_bounded_epoch.registration_slot(
+            protocol_parameters.slots_per_epoch_exponent,
+            protocol_parameters.epoch_nearing_threshold,
+        );
 
         let expected_end_epoch = if future_bounded_slot <= registration_slot {
             future_bounded_epoch
