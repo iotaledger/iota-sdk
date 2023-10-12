@@ -11,7 +11,7 @@ pub(crate) const DEFAULT_LEDGER_OUTPUT_CONSOLIDATION_THRESHOLD: usize = 15;
 /// Amount of API request that can be sent in parallel during syncing
 pub(crate) const PARALLEL_REQUESTS_AMOUNT: usize = 500;
 
-/// ms before an account actually syncs with the network, before it just returns the previous syncing result
+/// ms before the wallet actually syncs with the network, before it just returns the previous syncing result
 /// this is done to prevent unnecessary simultaneous synchronizations
 pub(crate) const MIN_SYNC_INTERVAL: u128 = 5;
 

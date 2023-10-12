@@ -1,7 +1,7 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-/// The module to get the accounts balance
+/// The module to get the wallet's balance
 pub(crate) mod balance;
 /// Helper functions
 pub(crate) mod helpers;
@@ -16,7 +16,7 @@ pub(crate) mod output_consolidation;
 pub(crate) mod participation;
 /// The module for reissuing blocks or transactions
 pub(crate) mod reissue;
-/// The module for synchronization of an account
+/// The module for synchronization of the wallet
 pub(crate) mod syncing;
 /// The module for transactions
 pub(crate) mod transaction;

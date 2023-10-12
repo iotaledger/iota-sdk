@@ -39,8 +39,8 @@ pub enum Error {
     /// Block types error
     #[error("{0}")]
     Block(#[from] crate::types::block::Error),
-    /// The wallet account has enough funds, but split on too many outputs
-    #[error("the wallet account has enough funds, but split on too many outputs: {0}, max. is 128, consolidate them")]
+    /// The wallet has enough funds, but split on too many outputs
+    #[error("the wallet has enough funds, but split on too many outputs: {0}, max. is 128, consolidate them")]
     ConsolidationRequired(usize),
     /// Crypto.rs error
     #[error("{0}")]

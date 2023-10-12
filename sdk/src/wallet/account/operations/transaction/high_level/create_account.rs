@@ -24,8 +24,8 @@ use crate::{
 #[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct CreateAccountParams {
-    /// Bech32 encoded address which will control the account. Default will use the first
-    /// ed25519 address of the wallet account
+    /// Bech32 encoded address which will control the account. Default will use the
+    /// ed25519 wallet address
     pub address: Option<Bech32Address>,
     /// Immutable account metadata
     #[serde(default, with = "option_prefix_hex_bytes")]

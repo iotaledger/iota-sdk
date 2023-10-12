@@ -572,8 +572,8 @@ path = "examples/wallet/getting_started.rs"
 required-features = ["stronghold"]
 
 [[example]]
-name = "0_generate_addresses"
-path = "examples/wallet/offline_signing/0_generate_addresses.rs"
+name = "0_generate_address"
+path = "examples/wallet/offline_signing/0_generate_address.rs"
 required-features = ["wallet", "storage", "stronghold"]
 
 [[example]]
