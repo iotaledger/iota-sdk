@@ -352,7 +352,7 @@ impl DelegationOutput {
             .map(|s| s.as_commitment().commitment_id())
             .ok_or(StateTransitionError::MissingCommitmentContextInput)?;
 
-        let slot_commitment_index = crate::types::block::slot::SlotIndex::new(u64::from_le_bytes(
+        let slot_commitment_index = crate::types::block::slot::SlotIndex::new(u32::from_le_bytes(
             slot_commitment_id.deref()[32..36].try_into().unwrap(),
         ));
         let future_bounded_slot = slot_commitment_index + protocol_parameters.min_committable_age;
