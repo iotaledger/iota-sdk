@@ -19,11 +19,6 @@ pub(crate) async fn call_wallet_operation_method_internal(
     method: WalletOperationMethod,
 ) -> Result<Response> {
     let response = match method {
-        // TODO: remove
-        // WalletOperationMethod::AddressesWithUnspentOutputs => {
-        //     let addresses = wallet.unspent_outputs().await?;
-        //     Response::AddressesWithUnspentOutputs(addresses)
-        // }
         WalletOperationMethod::ClaimableOutputs { outputs_to_claim } => {
             let output_ids = wallet.claimable_outputs(outputs_to_claim).await?;
             Response::OutputIds(output_ids)
@@ -36,11 +31,6 @@ pub(crate) async fn call_wallet_operation_method_internal(
         WalletOperationMethod::DeregisterParticipationEvent { event_id } => {
             wallet.deregister_participation_event(&event_id).await?;
             Response::Ok
-        }
-        WalletOperationMethod::GenerateEd25519Addresses { num, options } => {
-            // let address = wallet.generate_ed25519_address(num, options).await?;
-            // Response::GeneratedAccountAddress(address)
-            todo!("generate ed25519 addresses")
         }
         WalletOperationMethod::GetAddress => {
             let address = wallet.address().await;

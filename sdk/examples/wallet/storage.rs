@@ -42,7 +42,6 @@ async fn main() -> Result<()> {
     sync_print_balance(&wallet).await?;
 
     // TODO: remove?
-
     // #[cfg(debug_assertions)]
     // wallet.verify_integrity().await?;
 

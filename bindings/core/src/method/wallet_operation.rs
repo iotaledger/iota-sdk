@@ -44,15 +44,8 @@ pub enum WalletOperationMethod {
     #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
     #[serde(rename_all = "camelCase")]
     DeregisterParticipationEvent { event_id: ParticipationEventId },
-    /// Generate new Ed25519 addresses.
-    /// Expected response: [`GeneratedEd25519Addresses`](crate::Response::GeneratedEd25519Addresses)
-    GenerateEd25519Addresses {
-        num: u32,
-        options: Option<GenerateAddressOptions>,
-    },
     /// Get the wallet address.
-    /// FIXME
-    /// Expected response: [`Addresses`](crate::Response::Addresses)
+    /// Expected response: [`Address`](crate::Response::Address)
     GetAddress,
     /// Get wallet balance information.
     /// Expected response: [`Balance`](crate::Response::Balance)

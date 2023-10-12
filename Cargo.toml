@@ -2,11 +2,11 @@
 resolver = "2"
 members = [
 	"bindings/core",
-	# TODO: issue #???
+	# TODO: issue #1424
 	#"bindings/nodejs",
-	# TODO: issue #???
+	# TODO: issue #1423
 	#"bindings/python",
-	# TODO: issue #???
+	# TODO: issue #1425
 	#"bindings/wasm",
 	"cli",
 	"sdk",

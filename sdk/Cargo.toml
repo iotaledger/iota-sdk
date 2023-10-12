@@ -637,11 +637,6 @@ path = "examples/wallet/logger.rs"
 required-features = ["wallet"]
 
 [[example]]
-name = "recover_accounts"
-path = "examples/wallet/recover_accounts.rs"
-required-features = ["wallet", "storage"]
-
-[[example]]
 name = "spammer"
 path = "examples/wallet/spammer.rs"
 required-features = ["wallet"]
