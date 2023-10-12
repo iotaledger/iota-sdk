@@ -358,7 +358,7 @@ impl DelegationOutput {
         let future_bounded_slot = slot_commitment_index + protocol_parameters.min_committable_age;
         let future_bounded_epoch = EpochIndex::from_slot_index(
             future_bounded_slot,
-            std::iter::once((EpochIndex::new(0), protocol_parameters.slots_per_epoch_exponent)),
+            core::iter::once((EpochIndex::new(0), protocol_parameters.slots_per_epoch_exponent)),
         )
         .unwrap();
 
