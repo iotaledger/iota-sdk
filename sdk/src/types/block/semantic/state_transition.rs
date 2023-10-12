@@ -25,6 +25,7 @@ pub enum StateTransitionError {
     InvalidBlockIssuerTransition,
     IssuerNotUnlocked,
     MissingAccountForFoundry,
+    MissingCommitmentContextInput,
     MutatedFieldWithoutRights,
     MutatedImmutableField,
     NonDelayedClaimingTransition,
@@ -346,9 +347,14 @@ impl StateTransitionVerifier for DelegationOutput {
     fn transition(
         current_state: &Self,
         next_state: &Self,
-        _context: &SemanticValidationContext<'_>,
+        context: &SemanticValidationContext<'_>,
     ) -> Result<(), StateTransitionError> {
-        Self::transition_inner(current_state, next_state)
+        Self::transition_inner(
+            current_state,
+            next_state,
+            context.essence.context_inputs(),
+            todo!("context.protocol_parameters()"),
+        )
     }
 
     fn destruction(

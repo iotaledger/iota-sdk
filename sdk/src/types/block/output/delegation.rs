@@ -2,11 +2,13 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use alloc::collections::BTreeSet;
+use core::ops::Deref;
 
 use packable::{Packable, PackableExt};
 
 use crate::types::block::{
     address::{AccountAddress, Address},
+    context_input::{CommitmentContextInput, ContextInput},
     output::{
         chain_id::ChainId,
         unlock_condition::{
@@ -37,7 +39,11 @@ impl From<&OutputId> for DelegationId {
 
 impl DelegationId {
     pub fn or_from_output_id(self, output_id: &OutputId) -> Self {
-        if self.is_null() { Self::from(output_id) } else { self }
+        if self.is_null() {
+            Self::from(output_id)
+        } else {
+            self
+        }
     }
 }
 
@@ -322,7 +328,12 @@ impl DelegationOutput {
     }
 
     // Transition, just without full SemanticValidationContext.
-    pub(crate) fn transition_inner(current_state: &Self, next_state: &Self) -> Result<(), StateTransitionError> {
+    pub(crate) fn transition_inner(
+        current_state: &Self,
+        next_state: &Self,
+        context_inputs: &[ContextInput],
+        protocol_parameters: &ProtocolParameters,
+    ) -> Result<(), StateTransitionError> {
         #[allow(clippy::nonminimal_bool)]
         if !(current_state.delegation_id.is_null() && !next_state.delegation_id().is_null()) {
             return Err(StateTransitionError::NonDelayedClaimingTransition);
@@ -334,7 +345,54 @@ impl DelegationOutput {
         {
             return Err(StateTransitionError::MutatedImmutableField);
         }
-        // TODO add end_epoch validation rules
+
+        let slot_commitment_id = context_inputs
+            .iter()
+            .find(|i| i.kind() == CommitmentContextInput::KIND)
+            .map(|s| s.as_commitment().commitment_id())
+            .ok_or(StateTransitionError::MissingCommitmentContextInput)?;
+
+        let slot_commitment_index = crate::types::block::slot::SlotIndex::new(u64::from_le_bytes(
+            slot_commitment_id.deref()[32..36].try_into().unwrap(),
+        ));
+        let future_bounded_slot = slot_commitment_index + protocol_parameters.min_committable_age;
+        let future_bounded_epoch = EpochIndex::from_slot_index(
+            future_bounded_slot,
+            std::iter::once((EpochIndex::new(0), protocol_parameters.slots_per_epoch_exponent)),
+        )
+        .unwrap();
+
+        // Returns the slot for which to be eligible for the committee selection of epoch n, a potential validator must
+        // issue at least one block between Registration Slot(n)+1. and this slot.
+        fn activity_window_slot(epoch: EpochIndex, protocol_parameters: &ProtocolParameters) -> SlotIndex {
+            epoch_start(epoch, protocol_parameters) - protocol_parameters.epoch_nearing_threshold - 1
+        }
+
+        // Returns the slot at which delegation can happen for the following epoch.
+        fn registration_slot(epoch: EpochIndex, protocol_parameters: &ProtocolParameters) -> SlotIndex {
+            epoch_start(epoch, protocol_parameters)
+                - protocol_parameters.epoch_nearing_threshold
+                - activity_window_slot(epoch, protocol_parameters)
+                - 1
+        }
+
+        // Calculates the start slot of the given epoch.
+        fn epoch_start(epoch_index: EpochIndex, protocol_parameters: &ProtocolParameters) -> SlotIndex {
+            SlotIndex::new(*epoch_index << protocol_parameters.slots_per_epoch_exponent)
+        }
+
+        let registration_slot = registration_slot(future_bounded_epoch, protocol_parameters);
+
+        let expected_end_epoch = if future_bounded_slot <= registration_slot {
+            future_bounded_epoch
+        } else {
+            EpochIndex::new(*future_bounded_epoch + 1)
+        };
+
+        if next_state.end_epoch != expected_end_epoch {
+            return Err(StateTransitionError::NonDelayedClaimingTransition);
+        }
+
         Ok(())
     }
 }
