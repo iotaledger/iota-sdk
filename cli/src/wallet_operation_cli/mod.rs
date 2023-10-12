@@ -30,7 +30,7 @@ use iota_sdk::{
 };
 use rustyline::{error::ReadlineError, history::MemHistory, Config, Editor};
 
-use self::completer::ProtocolPromptHelper;
+use self::completer::WalletOperationPromptHelper;
 use crate::{
     error::Error,
     helper::{bytes_from_hex_or_file, to_utc_date_time},
@@ -960,7 +960,7 @@ pub async fn prompt(wallet: &Wallet) -> Result<(), Error> {
         .build();
 
     let mut rl = Editor::with_history(config, MemHistory::with_config(config))?;
-    rl.set_helper(Some(ProtocolPromptHelper::default()));
+    rl.set_helper(Some(WalletOperationPromptHelper::default()));
 
     loop {
         match prompt_internal(wallet, &mut rl).await {
@@ -984,7 +984,7 @@ pub enum PromptResponse {
 
 pub async fn prompt_internal(
     wallet: &Wallet,
-    rl: &mut Editor<ProtocolPromptHelper, MemHistory>,
+    rl: &mut Editor<WalletOperationPromptHelper, MemHistory>,
 ) -> Result<PromptResponse, Error> {
     let alias = wallet.alias().await;
     let prompt = format!("Wallet \"{alias}\": ");

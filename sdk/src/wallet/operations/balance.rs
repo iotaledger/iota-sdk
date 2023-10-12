@@ -10,7 +10,6 @@ use crate::{
         core::WalletData,
         operations::{
             helpers::time::can_output_be_unlocked_forever_from_now_on, output_claiming::OutputsToClaim,
-            syncing::SyncOptions,
         },
         types::{Balance, NativeTokensBalance},
         Result, Wallet,

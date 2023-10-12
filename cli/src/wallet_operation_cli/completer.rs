@@ -9,9 +9,9 @@ use rustyline::{
 };
 
 #[derive(Default)]
-pub struct ProtocolCommandCompleter;
+pub struct WalletOperationCompleter;
 
-const PROTOCOL_COMMANDS: &[&str] = &[
+const WALLET_OPERATIONS: &[&str] = &[
     "address",
     "balance",
     "burn-native-token",
@@ -51,7 +51,7 @@ const PROTOCOL_COMMANDS: &[&str] = &[
     "help",
 ];
 
-impl Completer for ProtocolCommandCompleter {
+impl Completer for WalletOperationCompleter {
     type Candidate = &'static str;
 
     fn complete(
@@ -62,7 +62,7 @@ impl Completer for ProtocolCommandCompleter {
     ) -> rustyline::Result<(usize, Vec<Self::Candidate>)> {
         Ok((
             0,
-            PROTOCOL_COMMANDS
+            WALLET_OPERATIONS
                 .iter()
                 .filter_map(|cmd| cmd.starts_with(input).then_some(*cmd))
                 .collect(),
@@ -71,21 +71,21 @@ impl Completer for ProtocolCommandCompleter {
 }
 
 #[derive(Helper, Completer, Hinter, Validator)]
-pub struct ProtocolPromptHelper {
+pub struct WalletOperationPromptHelper {
     #[rustyline(Completer)]
-    completer: ProtocolCommandCompleter,
+    completer: WalletOperationCompleter,
     #[rustyline(Hinter)]
     hinter: HistoryHinter,
     prompt: String,
 }
 
-impl ProtocolPromptHelper {
+impl WalletOperationPromptHelper {
     pub fn set_prompt(&mut self, prompt: String) {
         self.prompt = prompt;
     }
 }
 
-impl Highlighter for ProtocolPromptHelper {
+impl Highlighter for WalletOperationPromptHelper {
     fn highlight_prompt<'b, 's: 'b, 'p: 'b>(&'s self, prompt: &'p str, default: bool) -> Cow<'b, str> {
         if default {
             Cow::Borrowed(&self.prompt)
@@ -99,10 +99,10 @@ impl Highlighter for ProtocolPromptHelper {
     }
 }
 
-impl Default for ProtocolPromptHelper {
+impl Default for WalletOperationPromptHelper {
     fn default() -> Self {
         Self {
-            completer: ProtocolCommandCompleter,
+            completer: WalletOperationCompleter,
             hinter: HistoryHinter {},
             prompt: String::new(),
         }

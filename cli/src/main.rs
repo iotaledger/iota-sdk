@@ -3,8 +3,8 @@
 
 mod error;
 mod helper;
-mod protocol_cli;
 mod wallet_cli;
+mod wallet_operation_cli;
 
 use clap::Parser;
 use fern_logger::{LoggerConfigBuilder, LoggerOutputConfigBuilder};
@@ -49,7 +49,7 @@ fn logger_init(cli: &WalletCli) -> Result<(), Error> {
 
 async fn run(wallet_cli: WalletCli) -> Result<(), Error> {
     if let Some(wallet) = new_wallet(wallet_cli).await? {
-        protocol_cli::prompt(&wallet).await?;
+        wallet_operation_cli::prompt(&wallet).await?;
     }
 
     Ok(())
