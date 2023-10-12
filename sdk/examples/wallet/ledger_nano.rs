@@ -50,7 +50,7 @@ async fn main() -> Result<()> {
 
     println!("Generating address...");
     let now = tokio::time::Instant::now();
-    let address = wallet.generate_ed25519_address(None).await?;
+    let address = wallet.generate_ed25519_address(0, 0, None).await?;
     println!("took: {:.2?}", now.elapsed());
 
     println!("ADDRESS:\n{address:#?}");

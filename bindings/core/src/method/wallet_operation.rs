@@ -5,7 +5,7 @@
 use iota_sdk::{
     client::node_manager::node::Node,
     types::api::plugins::participation::types::{ParticipationEventId, ParticipationEventType},
-    wallet::account::types::participation::ParticipationEventRegistrationOptions,
+    wallet::types::participation::ParticipationEventRegistrationOptions,
 };
 use iota_sdk::{
     client::{
@@ -18,28 +18,18 @@ use iota_sdk::{
         payload::transaction::TransactionId,
     },
     wallet::{
-        account::{
-            ConsolidationParams, CreateAccountParams, CreateNativeTokenParams, FilterOptions, MintNftParams,
-            OutputParams, OutputsToClaim, SyncOptions, TransactionOptions,
-        },
-        SendNativeTokensParams, SendNftParams, SendParams,
+        ConsolidationParams, CreateAccountParams, CreateNativeTokenParams, FilterOptions, MintNftParams, OutputParams,
+        OutputsToClaim, SendNativeTokensParams, SendNftParams, SendParams, SyncOptions, TransactionOptions,
     },
     U256,
 };
 use serde::{Deserialize, Serialize};
 
-/// Each public account method.
+/// Each public wallet operation method.
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(tag = "name", content = "data", rename_all = "camelCase")]
 #[non_exhaustive]
-pub enum WalletMethod {
-    /// List addresses.
-    /// Expected response: [`Addresses`](crate::Response::Addresses)
-    Addresses,
-    /// Returns only addresses of the account with unspent outputs
-    /// Expected response:
-    /// [`AddressesWithUnspentOutputs`](crate::Response::AddressesWithUnspentOutputs)
-    AddressesWithUnspentOutputs,
+pub enum WalletOperationMethod {
     /// Get outputs with additional unlock conditions
     /// Expected response: [`OutputIds`](crate::Response::OutputIds)
     #[serde(rename_all = "camelCase")]
@@ -57,22 +47,26 @@ pub enum WalletMethod {
     /// Generate new Ed25519 addresses.
     /// Expected response: [`GeneratedEd25519Addresses`](crate::Response::GeneratedEd25519Addresses)
     GenerateEd25519Addresses {
-        amount: u32,
+        num: u32,
         options: Option<GenerateAddressOptions>,
     },
-    /// Get account balance information.
+    /// Get the wallet address.
+    /// FIXME
+    /// Expected response: [`Addresses`](crate::Response::Addresses)
+    GetAddress,
+    /// Get wallet balance information.
     /// Expected response: [`Balance`](crate::Response::Balance)
     GetBalance,
     /// Get the [`Output`](iota_sdk::types::block::output::Output) that minted a native token by its TokenId
     /// Expected response: [`Output`](crate::Response::Output)
     #[serde(rename_all = "camelCase")]
     GetFoundryOutput { token_id: TokenId },
-    /// Get the transaction with inputs of an incoming transaction stored in the account
+    /// Get the transaction with inputs of an incoming transaction stored in the wallet
     /// List might not be complete, if the node pruned the data already
     /// Expected response: [`Transaction`](crate::Response::Transaction)
     #[serde(rename_all = "camelCase")]
     GetIncomingTransaction { transaction_id: TransactionId },
-    /// Get the [`OutputData`](iota_sdk::wallet::account::types::OutputData) of an output stored in the account
+    /// Get the [`OutputData`](iota_sdk::wallet::types::OutputData) of an output stored in the wallet
     /// Expected response: [`OutputData`](crate::Response::OutputData)
     #[serde(rename_all = "camelCase")]
     GetOutput { output_id: OutputId },
@@ -99,34 +93,34 @@ pub enum WalletMethod {
     #[cfg(feature = "participation")]
     #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
     GetParticipationEvents,
-    /// Calculates a participation overview for an account. If event_ids are provided, only return outputs and tracked
+    /// Calculates a participation overview for the wallet. If event_ids are provided, only return outputs and tracked
     /// participations for them.
     /// Expected response:
-    /// [`AccountParticipationOverview`](crate::Response::AccountParticipationOverview)
+    /// [`ParticipationOverview`](crate::Response::ParticipationOverview)
     #[cfg(feature = "participation")]
     #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
     #[serde(rename_all = "camelCase")]
     GetParticipationOverview {
         event_ids: Option<Vec<ParticipationEventId>>,
     },
-    /// Get the [`Transaction`](iota_sdk::wallet::account::types::Transaction) of a transaction stored in the account
+    /// Get the [`Transaction`](iota_sdk::wallet::types::Transaction) of a transaction stored in the wallet
     /// Expected response: [`Transaction`](crate::Response::Transaction)
     #[serde(rename_all = "camelCase")]
     GetTransaction { transaction_id: TransactionId },
-    /// Get the account's total voting power (voting or NOT voting).
+    /// Get the wallet's total voting power (voting or NOT voting).
     /// Expected response: [`VotingPower`](crate::Response::VotingPower)
     #[cfg(feature = "participation")]
     #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
     GetVotingPower,
-    /// Returns all incoming transactions of the account
+    /// Returns all incoming transactions of the wallet
     /// Expected response:
     /// [`Transactions`](crate::Response::Transactions)
     IncomingTransactions,
-    /// Returns all outputs of the account
+    /// Returns all outputs of the wallet
     /// Expected response: [`OutputsData`](crate::Response::OutputsData)
     #[serde(rename_all = "camelCase")]
     Outputs { filter_options: Option<FilterOptions> },
-    /// Returns all pending transactions of the account
+    /// Returns all pending transactions of the wallet
     /// Expected response: [`Transactions`](crate::Response::Transactions)
     PendingTransactions,
     /// A generic function that can be used to burn native tokens, nfts, foundries and accounts.
@@ -156,7 +150,7 @@ pub enum WalletMethod {
         params: CreateNativeTokenParams,
         options: Option<TransactionOptions>,
     },
-    /// Reduces an account's "voting power" by a given amount.
+    /// Reduces an wallet's "voting power" by a given amount.
     /// This will stop voting, but the voting data isn't lost and calling `Vote` without parameters will revote.
     /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
     #[cfg(feature = "participation")]
@@ -165,7 +159,7 @@ pub enum WalletMethod {
         #[serde(with = "iota_sdk::utils::serde::string")]
         amount: u64,
     },
-    /// Designates a given amount of tokens towards an account's "voting power" by creating a
+    /// Designates a given amount of tokens towards an wallet's "voting power" by creating a
     /// special output, which is really a basic one with some metadata.
     /// This will stop voting in most cases (if there is a remainder output), but the voting data isn't lost and
     /// calling `Vote` without parameters will revote. Expected response:
@@ -258,7 +252,7 @@ pub enum WalletMethod {
     RegisterParticipationEvents {
         options: ParticipationEventRegistrationOptions,
     },
-    /// Reissues a transaction sent from the account for a provided transaction id until it's
+    /// Reissues a transaction sent from the wallet for a provided transaction id until it's
     /// included (referenced by a milestone). Returns the included block id.
     /// Expected response: [`BlockId`](crate::Response::BlockId)
     #[serde(rename_all = "camelCase")]
@@ -290,14 +284,14 @@ pub enum WalletMethod {
         outputs: Vec<OutputDto>,
         options: Option<TransactionOptions>,
     },
-    /// Set the alias of the account.
+    /// Set the alias of the wallet.
     /// Expected response: [`Ok`](crate::Response::Ok)
     SetAlias { alias: String },
-    /// Set the fallback SyncOptions for account syncing.
+    /// Set the fallback SyncOptions for wallet syncing.
     /// If storage is enabled, will persist during restarts.
     /// Expected response: [`Ok`](crate::Response::Ok)
     SetDefaultSyncOptions { options: SyncOptions },
-    /// Validate the transaction, sign it, submit it to a node and store it in the account.
+    /// Validate the transaction, sign it, submit it to a node and store it in the wallet.
     /// Expected response: [`SentTransaction`](crate::Response::SentTransaction)
     #[serde(rename_all = "camelCase")]
     SignAndSubmitTransaction {
@@ -309,23 +303,23 @@ pub enum WalletMethod {
     SignTransactionEssence {
         prepared_transaction_data: PreparedTransactionDataDto,
     },
-    /// Validate the transaction, submit it to a node and store it in the account.
+    /// Validate the transaction, submit it to a node and store it in the wallet.
     /// Expected response: [`SentTransaction`](crate::Response::SentTransaction)
     #[serde(rename_all = "camelCase")]
     SubmitAndStoreTransaction {
         signed_transaction_data: SignedTransactionDataDto,
     },
-    /// Sync the account by fetching new information from the nodes. Will also reissue pending transactions
+    /// Sync the wallet by fetching new information from the nodes. Will also reissue pending transactions
     /// if necessary. A custom default can be set using SetDefaultSyncOptions.
     /// Expected response: [`Balance`](crate::Response::Balance)
     Sync {
         /// Sync options
         options: Option<SyncOptions>,
     },
-    /// Returns all transaction of the account
+    /// Returns all transactions of the wallet
     /// Expected response: [`Transactions`](crate::Response::Transactions)
     Transactions,
-    /// Returns all unspent outputs of the account
+    /// Returns all unspent outputs of the wallet
     /// Expected response: [`OutputsData`](crate::Response::OutputsData)
     #[serde(rename_all = "camelCase")]
     UnspentOutputs { filter_options: Option<FilterOptions> },

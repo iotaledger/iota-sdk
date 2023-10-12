@@ -12,7 +12,7 @@
 //! ```
 
 use iota_sdk::{
-    wallet::{TransactionOptions, Result},
+    wallet::{Result, TransactionOptions},
     Wallet,
 };
 

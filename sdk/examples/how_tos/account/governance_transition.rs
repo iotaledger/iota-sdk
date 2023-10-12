@@ -54,7 +54,7 @@ async fn main() -> Result<()> {
     );
 
     // Generate a new address, which will be the new state controller
-    let new_state_controller = wallet.generate_ed25519_address(None).await?;
+    let new_state_controller = wallet.generate_ed25519_address(0, 0, None).await?;
 
     let token_supply = wallet.client().get_token_supply().await?;
 

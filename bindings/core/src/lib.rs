@@ -11,6 +11,7 @@ mod response;
 
 use std::fmt::{Formatter, Result as FmtResult};
 
+use crypto::keys::bip44::Bip44;
 use derivative::Derivative;
 use fern_logger::{logger_init, LoggerConfig, LoggerOutputConfigBuilder};
 pub use iota_sdk;
@@ -26,7 +27,7 @@ pub use self::method_handler::listen_mqtt;
 pub use self::method_handler::CallMethod;
 pub use self::{
     error::{Error, Result},
-    method::{WalletMethod, ClientMethod, SecretManagerMethod, UtilsMethod, WalletMethod},
+    method::{ClientMethod, SecretManagerMethod, UtilsMethod, WalletMethod, WalletOperationMethod},
     method_handler::{call_client_method, call_secret_manager_method, call_utils_method, call_wallet_method},
     response::Response,
 };
@@ -43,8 +44,7 @@ pub fn init_logger(config: String) -> std::result::Result<(), fern_logger::Error
 pub struct WalletOptions {
     pub storage_path: Option<String>,
     pub client_options: Option<ClientOptions>,
-    // TODO: replace
-    // pub coin_type: Option<u32>,
+    pub bip_path: Option<Bip44>,
     #[derivative(Debug(format_with = "OmittedDebug::omitted_fmt"))]
     pub secret_manager: Option<SecretManagerDto>,
 }
@@ -60,11 +60,10 @@ impl WalletOptions {
         self
     }
 
-    // TODO: replace
-    // pub fn with_coin_type(mut self, coin_type: impl Into<Option<u32>>) -> Self {
-    //     self.coin_type = coin_type.into();
-    //     self
-    // }
+    pub fn with_bip_path(mut self, bip_path: impl Into<Option<Bip44>>) -> Self {
+        self.bip_path = bip_path.into();
+        self
+    }
 
     pub fn with_secret_manager(mut self, secret_manager: impl Into<Option<SecretManagerDto>>) -> Self {
         self.secret_manager = secret_manager.into();
@@ -74,9 +73,8 @@ impl WalletOptions {
     pub async fn build(self) -> iota_sdk::wallet::Result<Wallet> {
         log::debug!("wallet options: {self:?}");
         let mut builder = Wallet::builder()
-            .with_client_options(self.client_options);
-            // TODO: replace
-            // .with_coin_type(self.coin_type);
+            .with_client_options(self.client_options)
+            .with_bip_path(self.bip_path);
 
         #[cfg(feature = "storage")]
         if let Some(storage_path) = &self.storage_path {

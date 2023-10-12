@@ -6,10 +6,7 @@ use iota_sdk::{
         unlock_condition::{AddressUnlockCondition, ExpirationUnlockCondition},
         BasicOutputBuilder, NativeToken, NftId, NftOutputBuilder, UnlockCondition,
     },
-    wallet::{
-        OutputsToClaim, TransactionOptions,
-        CreateNativeTokenParams, Result, SendNativeTokensParams, SendParams,
-    },
+    wallet::{CreateNativeTokenParams, OutputsToClaim, Result, SendNativeTokensParams, SendParams, TransactionOptions},
     U256,
 };
 

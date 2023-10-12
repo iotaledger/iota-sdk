@@ -4,7 +4,7 @@
 use iota_sdk::{
     client::Error as ClientError,
     types::block::address::{Bech32Address, ToBech32Ext},
-    wallet::{OutputParams, Error, Result, SendParams},
+    wallet::{Error, OutputParams, Result, SendParams},
 };
 
 use crate::wallet::common::{make_wallet, setup, tear_down};

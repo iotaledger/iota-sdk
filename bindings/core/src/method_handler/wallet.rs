@@ -5,46 +5,16 @@ use std::time::Duration;
 
 use iota_sdk::{
     types::block::address::ToBech32Ext,
-    wallet::{core::WalletDataDto, Wallet},
+    wallet::{core::WalletDataDto, Wallet, WalletBuilder},
 };
 
-use super::account::call_account_method_internal;
+use super::wallet_operation::call_wallet_operation_method_internal;
 use crate::{method::WalletMethod, response::Response, Result};
 
 /// Call a wallet method.
 pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletMethod) -> Result<Response> {
     let response = match method {
-        WalletMethod::Create {
-            alias,
-            bech32_hrp,
-            addresses,
-        } => {
-            let mut builder = wallet.create_account();
-
-            if let Some(alias) = alias {
-                builder = builder.with_alias(alias);
-            }
-
-            if let Some(bech32_hrp) = bech32_hrp {
-                builder = builder.with_bech32_hrp(bech32_hrp);
-            }
-
-            if let Some(addresses) = addresses {
-                builder = builder.with_addresses(addresses);
-            }
-
-            match builder.finish().await {
-                Ok(account) => {
-                    let account = account.details().await;
-                    Response::Account(WalletDataDto::from(&*account))
-                }
-                Err(e) => return Err(e.into()),
-            }
-        }
-        WalletMethod::CallMethod { account_id, method } => {
-            let account = wallet.get_account(account_id).await?;
-            call_account_method_internal(&account, method).await?
-        }
+        WalletMethod::CallMethod { method } => call_wallet_operation_method_internal(&wallet, method).await?,
         #[cfg(feature = "stronghold")]
         WalletMethod::Backup { destination, password } => {
             wallet.backup(destination, password).await?;
@@ -69,26 +39,6 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
         WalletMethod::IsStrongholdPasswordAvailable => {
             let is_available = wallet.is_stronghold_password_available().await?;
             Response::Bool(is_available)
-        }
-        WalletMethod::RecoverAccounts {
-            account_start_index,
-            account_gap_limit,
-            address_gap_limit,
-            sync_options,
-        } => {
-            let accounts = wallet
-                .recover_accounts(account_start_index, account_gap_limit, address_gap_limit, sync_options)
-                .await?;
-            let mut account_dtos = Vec::with_capacity(accounts.len());
-            for account in accounts {
-                let account = account.details().await;
-                account_dtos.push(WalletDataDto::from(&*account));
-            }
-            Response::Accounts(account_dtos)
-        }
-        WalletMethod::RemoveLatestAccount => {
-            wallet.remove_latest_account().await?;
-            Response::Ok
         }
         #[cfg(feature = "stronghold")]
         WalletMethod::RestoreBackup {
@@ -128,7 +78,7 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
 
             let bech32_hrp = match bech32_hrp {
                 Some(bech32_hrp) => bech32_hrp,
-                None => wallet.get_bech32_hrp().await?,
+                None => *wallet.address().await.hrp(),
             };
 
             Response::Bech32Address(address.to_bech32(bech32_hrp))

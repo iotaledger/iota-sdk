@@ -9,10 +9,7 @@
 use iota_sdk::{
     client::request_funds_from_faucet,
     types::block::address::{AccountAddress, ToBech32Ext},
-    wallet::{
-        {AliasSyncOptions, SyncOptions},
-        Result,
-    },
+    wallet::{AliasSyncOptions, Result, SyncOptions},
     Wallet,
 };
 

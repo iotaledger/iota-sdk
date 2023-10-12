@@ -6,7 +6,10 @@
 //!
 //! `cargo run --release --all-features --example claim_transaction`
 
-use iota_sdk::{wallet::{Result, OutputsToClaim}, Wallet};
+use iota_sdk::{
+    wallet::{OutputsToClaim, Result},
+    Wallet,
+};
 
 #[tokio::main]
 async fn main() -> Result<()> {

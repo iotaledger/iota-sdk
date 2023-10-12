@@ -42,7 +42,7 @@ async fn wallet_address_generation_mnemonic() -> Result<()> {
     }
     let wallet = wallet_builder.finish().await?;
 
-    let address = wallet.generate_ed25519_address(None).await?;
+    let address = wallet.generate_ed25519_address(0, 0, None).await?;
 
     assert_eq!(
         address.to_bech32_unchecked("smr"),
@@ -82,7 +82,7 @@ async fn wallet_address_generation_stronghold() -> Result<()> {
     }
     let wallet = wallet_builder.finish().await?;
 
-    let address = wallet.generate_ed25519_address(None).await?;
+    let address = wallet.generate_ed25519_address(0, 0, None).await?;
 
     assert_eq!(
         address.to_bech32_unchecked("smr"),
@@ -118,7 +118,7 @@ async fn wallet_address_generation_ledger() -> Result<()> {
     }
     let wallet = wallet_builder.finish().await?;
 
-    let address = wallet.generate_ed25519_address(None).await?;
+    let address = wallet.generate_ed25519_address(0, 0, None).await?;
 
     assert_eq!(
         address.to_bech32_unchecked("smr"),
@@ -144,10 +144,14 @@ async fn wallet_address_generation_ledger() -> Result<()> {
         .await;
 
     let address = wallet
-        .generate_ed25519_address(Some(GenerateAddressOptions {
-            ledger_nano_prompt: true,
-            ..Default::default()
-        }))
+        .generate_ed25519_address(
+            0,
+            0,
+            Some(GenerateAddressOptions {
+                ledger_nano_prompt: true,
+                ..Default::default()
+            }),
+        )
         .await?;
 
     assert_eq!(
@@ -195,7 +199,7 @@ async fn wallet_address_generation_placeholder() -> Result<()> {
     }
     let wallet = wallet_builder.finish().await?;
 
-    if let Err(Error::Client(error)) = wallet.generate_ed25519_address(None).await {
+    if let Err(Error::Client(error)) = wallet.generate_ed25519_address(0, 0, None).await {
         assert!(matches!(*error, ClientError::PlaceholderSecretManager))
     } else {
         panic!("expected PlaceholderSecretManager")

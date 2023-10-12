@@ -21,12 +21,12 @@ impl Wallet {
     /// ```
     pub async fn generate_ed25519_address(
         &self,
+        account_index: u32,
+        address_index: u32,
         options: impl Into<Option<GenerateAddressOptions>> + Send,
     ) -> crate::wallet::Result<Ed25519Address> {
-        let bip_path = self.data().await.bip_path;
-        let coin_type = bip_path.coin_type;
-        let account_index = bip_path.account;
-        let address_index = bip_path.address_index;
+        // TODO: not sure yet whether we also allow this method to generate addresses for different accounts/wallets.
+        let coin_type = self.data().await.bip_path.coin_type;
 
         let address = match &*self.secret_manager.read().await {
             #[cfg(feature = "ledger_nano")]

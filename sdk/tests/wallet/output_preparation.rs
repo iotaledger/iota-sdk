@@ -9,10 +9,7 @@ use iota_sdk::{
         output::{MinimumStorageDepositBasicOutput, NativeToken, NftId, Output, Rent, TokenId},
         slot::SlotIndex,
     },
-    wallet::{
-        Assets, Features, OutputParams, ReturnStrategy, StorageDeposit, Unlocks,
-        MintNftParams, Result,
-    },
+    wallet::{Assets, Features, MintNftParams, OutputParams, Result, ReturnStrategy, StorageDeposit, Unlocks},
 };
 
 use crate::wallet::common::{make_wallet, request_funds, setup, tear_down};

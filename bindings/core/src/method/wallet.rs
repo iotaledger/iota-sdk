@@ -9,19 +9,12 @@ use derivative::Derivative;
 use iota_sdk::wallet::events::types::{WalletEvent, WalletEventType};
 use iota_sdk::{
     client::{node_manager::node::NodeAuth, secret::GenerateAddressOptions},
-    types::block::address::Hrp,
-    wallet::{
-        account::{
-            types::{AccountIdentifier, Bip44Address},
-            SyncOptions,
-        },
-        ClientOptions,
-    },
+    types::block::address::{Bech32Address, Hrp},
+    wallet::{ClientOptions, SyncOptions},
 };
 use serde::{Deserialize, Serialize};
 use url::Url;
 
-use crate::method::account::WalletMethod;
 #[cfg(feature = "stronghold")]
 use crate::OmittedDebug;
 
@@ -31,27 +24,12 @@ use crate::OmittedDebug;
 #[serde(tag = "name", content = "data", rename_all = "camelCase")]
 #[non_exhaustive]
 pub enum WalletMethod {
-    /// Creates an account.
-    /// Expected response: [`Account`](crate::Response::Account)
-    #[serde(rename_all = "camelCase")]
-    Create {
-        /// The wallet index.
-        index: Option<u32>
-        /// The account alias.
-        alias: Option<String>,
-        /// The bech32 HRP.
-        bech32_hrp: Option<Hrp>,
-        /// BIP44 addresses.
-        addresses: Option<Vec<Bip44Address>>,
-    },
     /// Consume an account method.
     /// Returns [`Response`](crate::Response)
     #[serde(rename_all = "camelCase")]
     CallMethod {
-        /// The account identifier.
-        account_id: AccountIdentifier,
-        /// The account method to call.
-        method: WalletMethod,
+        /// The wallet operation method to call.
+        method: super::WalletOperationMethod,
     },
     /// Backup storage. Password must be the current one, when Stronghold is used as SecretManager.
     /// Expected response: [`Ok`](crate::Response::Ok)
@@ -86,21 +64,6 @@ pub enum WalletMethod {
     #[cfg(feature = "stronghold")]
     #[cfg_attr(docsrs, doc(cfg(feature = "stronghold")))]
     IsStrongholdPasswordAvailable,
-    /// Find accounts with unspent outputs
-    /// Expected response: [`Accounts`](crate::Response::Accounts)
-    #[serde(rename_all = "camelCase")]
-    RecoverAccounts {
-        /// The index of the first account to search for.
-        account_start_index: u32,
-        /// The number of accounts to search for, after the last account with unspent outputs.
-        account_gap_limit: u32,
-        /// The number of addresses to search for, after the last address with unspent outputs, in
-        /// each account.
-        address_gap_limit: u32,
-        /// Optional parameter to specify the sync options. The `address_start_index` and `force_syncing`
-        /// fields will be overwritten to skip existing addresses.
-        sync_options: Option<SyncOptions>,
-    },
     /// Restore a backup from a Stronghold file
     /// Replaces client_options, coin_type, secret_manager and accounts. Returns an error if accounts were already
     /// created If Stronghold is used as secret_manager, the existing Stronghold file will be overwritten. If a
@@ -128,9 +91,6 @@ pub enum WalletMethod {
         /// accounts will be restored.
         ignore_if_bech32_mismatch: Option<Hrp>,
     },
-    /// Removes the latest account (account with the largest account index).
-    /// Expected response: [`Ok`](crate::Response::Ok)
-    RemoveLatestAccount,
     /// Updates the client options for all accounts.
     /// Expected response: [`Ok`](crate::Response::Ok)
     #[serde(rename_all = "camelCase")]

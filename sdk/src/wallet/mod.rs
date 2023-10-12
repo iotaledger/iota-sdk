@@ -37,7 +37,7 @@ use std::collections::HashSet;
 use serde::{Deserialize, Serialize};
 
 #[cfg(feature = "participation")]
-pub use self::operations::participation::{AccountParticipationOverview, ParticipationEventWithNodes};
+pub use self::operations::participation::{ParticipationEventWithNodes, ParticipationOverview};
 pub use self::{
     core::{Wallet, WalletBuilder},
     error::Error,

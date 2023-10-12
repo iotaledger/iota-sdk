@@ -30,7 +30,7 @@ use crate::{
 
 /// An object containing an account's entire participation overview.
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct AccountParticipationOverview {
+pub struct ParticipationOverview {
     /// Output participations for events.
     pub participations: HashMap<ParticipationEventId, HashMap<OutputId, TrackedParticipation>>,
 }
@@ -56,7 +56,7 @@ where
     pub async fn get_participation_overview(
         &self,
         event_ids: Option<Vec<ParticipationEventId>>,
-    ) -> Result<AccountParticipationOverview> {
+    ) -> Result<ParticipationOverview> {
         log::debug!("[get_participation_overview]");
         // TODO: Could use the address endpoint in the future when https://github.com/iotaledger/inx-participation/issues/50 is done.
 
@@ -220,7 +220,7 @@ where
                 .await?;
         }
 
-        Ok(AccountParticipationOverview { participations })
+        Ok(ParticipationOverview { participations })
     }
 
     /// Returns the voting output ("PARTICIPATION" tag).

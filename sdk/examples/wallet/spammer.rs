@@ -20,7 +20,7 @@ use iota_sdk::{
         output::BasicOutput,
         payload::transaction::TransactionId,
     },
-    wallet::{FilterOptions, ClientOptions, Result, SendParams, Wallet},
+    wallet::{ClientOptions, FilterOptions, Result, SendParams, Wallet},
 };
 
 // The account alias used in this example.

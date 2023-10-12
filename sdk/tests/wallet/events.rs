@@ -15,11 +15,11 @@ use iota_sdk::{
         },
     },
     wallet::{
-        types::{InclusionState, OutputData, OutputDataDto},
         events::types::{
             AddressData, NewOutputEvent, SpentOutputEvent, TransactionInclusionEvent, TransactionProgressEvent,
             WalletEvent,
         },
+        types::{InclusionState, OutputData, OutputDataDto},
     },
 };
 
