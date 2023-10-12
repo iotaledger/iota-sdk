@@ -9,7 +9,7 @@ use iota_sdk::{
     types::{
         api::plugins::participation::types::ParticipationEventId,
         block::{
-            address::Bech32Address,
+            address::{Bech32Address, ToBech32Ext},
             output::{
                 unlock_condition::AddressUnlockCondition, AliasId, BasicOutputBuilder, FoundryId, NativeToken,
                 NativeTokensBuilder, NftId, Output, OutputId, TokenId,
@@ -916,7 +916,7 @@ pub async fn voting_output_command(account: &Account) -> Result<(), Error> {
 
 async fn print_address(account: &Account, address: &AccountAddress) -> Result<(), Error> {
     let mut log = format!(
-        "Address: {}\n{:<9}{}\n{:<9}{:?}",
+        "Address: {}\n{:<9}{}\n{:<9}{}",
         address.key_index(),
         "Bech32:",
         address.address(),
@@ -938,6 +938,8 @@ async fn print_address(account: &Account, address: &AccountAddress) -> Result<()
     let mut aliases = Vec::new();
     let mut foundries = Vec::new();
 
+    let hrp = address.address().hrp();
+
     if let Some(address) = addresses
         .iter()
         .find(|a| a.key_index() == address.key_index() && a.internal() == address.internal())
@@ -958,9 +960,17 @@ async fn print_address(account: &Account, address: &AccountAddress) -> Result<()
                         native_tokens.add_native_tokens(nts.clone())?;
                     }
                     match &output_data.output {
-                        Output::Nft(nft) => nfts.push(nft.nft_id_non_null(output_id)),
-                        Output::Alias(alias) => aliases.push(alias.alias_id_non_null(output_id)),
-                        Output::Foundry(foundry) => foundries.push(foundry.id()),
+                        Output::Nft(nft) => nfts.push((
+                            nft.nft_id_non_null(output_id),
+                            nft.nft_address(output_id).to_bech32(*hrp),
+                        )),
+                        Output::Alias(alias) => aliases.push((
+                            alias.alias_id_non_null(output_id),
+                            alias.alias_address(output_id).to_bech32(*hrp),
+                        )),
+                        Output::Foundry(foundry) => {
+                            foundries.push((foundry.id(), *foundry.alias_address().to_bech32(*hrp)))
+                        }
                         Output::Basic(_) | Output::Treasury(_) => {}
                     }
                     let unlock_conditions = output_data
