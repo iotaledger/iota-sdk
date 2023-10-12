@@ -195,7 +195,7 @@ class RewardsParameters:
     """Rewards Parameters defines the parameters that are used to calculate Mana rewards.
 
     Attributes:
-        validator_blocks_per_slot: The number of validation blocks that should be issued by a selected validator per slot during its epoch duties.
+        validation_blocks_per_slot: The number of validation blocks that should be issued by a selected validator per slot during its epoch duties.
         profit_margin_exponent: Used for shift operation during calculation of profit margin.
         bootstrapping_duration: The length of the bootstrapping phase in epochs.
         mana_share_coefficient: The coefficient used for calculation of initial rewards.
@@ -203,7 +203,7 @@ class RewardsParameters:
         decay_balancing_constant: An integer approximation which is calculated using the `decay_balancing_constant_exponent`.
         pool_coefficient_exponent: The exponent used for shifting operation during the pool rewards calculations.
     """
-    validator_blocks_per_slot: int
+    validation_blocks_per_slot: int
     profit_margin_exponent: int
     bootstrapping_duration: int
     mana_share_coefficient: int = field(metadata=config(
