@@ -397,7 +397,7 @@ pub fn semantic_validation(
     }
 
     if context.input_mana > context.output_mana
-        && context
+        && !context
             .essence
             .capabilities()
             .has_capability(TransactionCapabilityFlag::BurnMana)
