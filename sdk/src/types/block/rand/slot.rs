@@ -13,10 +13,10 @@ pub fn rand_slot_commitment_id() -> SlotCommitmentId {
 
 /// Generates a random slot index.
 pub fn rand_slot_index() -> SlotIndex {
-    SlotIndex::new(rand_number())
+    SlotIndex(rand_number())
 }
 
 /// Generates a random epoch index.
 pub fn rand_epoch_index() -> EpochIndex {
-    EpochIndex::new(rand_number())
+    EpochIndex(rand_number())
 }

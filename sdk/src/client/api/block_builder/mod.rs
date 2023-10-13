@@ -50,7 +50,7 @@ impl ClientInner {
 
         let protocol_params = self.get_protocol_parameters().await?;
 
-        Ok(BlockWrapper::build(
+        BlockWrapper::build(
             BlockHeader::new(
                 protocol_params.version(),
                 protocol_params.network_id(),
@@ -66,6 +66,6 @@ impl ClientInner {
                 .finish_block()?,
         )
         .sign_ed25519(secret_manager, chain)
-        .await?)
+        .await
     }
 }
