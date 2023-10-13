@@ -11,7 +11,7 @@ use packable::{prefix::StringPrefix, Packable, PackableExt};
 use super::{
     address::Hrp,
     mana::{ManaStructure, RewardsParameters},
-    slot::SlotIndex,
+    slot::{EpochIndex, SlotIndex},
 };
 use crate::types::block::{helper::network_name_to_id, output::RentStructure, ConvertTo, Error, PROTOCOL_VERSION};
 
@@ -168,6 +168,21 @@ impl ProtocolParameters {
             self.genesis_unix_timestamp(),
             self.slot_duration_in_seconds(),
         )
+    }
+
+    /// Gets the first [`SlotIndex`] of a given [`EpochIndex`].
+    pub fn first_slot_of(&self, epoch_index: impl Into<EpochIndex>) -> SlotIndex {
+        epoch_index.into().first_slot_index(self.slots_per_epoch_exponent())
+    }
+
+    /// Gets the last [`SlotIndex`] of a given [`EpochIndex`].
+    pub fn last_slot_of(&self, epoch_index: impl Into<EpochIndex>) -> SlotIndex {
+        epoch_index.into().last_slot_index(self.slots_per_epoch_exponent())
+    }
+
+    /// Gets the [`EpochIndex`] of a given [`SlotIndex`].
+    pub fn epoch_index_of(&self, slot_index: impl Into<SlotIndex>) -> EpochIndex {
+        EpochIndex::from_slot_index(slot_index.into(), self.slots_per_epoch_exponent())
     }
 
     /// Returns the hash of the [`ProtocolParameters`].

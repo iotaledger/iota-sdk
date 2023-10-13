@@ -67,10 +67,10 @@ impl Ed25519BlockIssuerKey {
     /// The block issuer key kind of an [`Ed25519BlockIssuerKey`].
     pub const KIND: u8 = 0;
     /// Length of an ED25519 block issuer key.
-    pub const PUBLIC_KEY_LENGTH: usize = ed25519::PublicKey::LENGTH;
+    pub const LENGTH: usize = ed25519::PublicKey::LENGTH;
 
     /// Creates a new [`Ed25519BlockIssuerKey`] from bytes.
-    pub fn try_from_bytes(bytes: [u8; Self::PUBLIC_KEY_LENGTH]) -> Result<Self, Error> {
+    pub fn try_from_bytes(bytes: [u8; Self::LENGTH]) -> Result<Self, Error> {
         Ok(Self(ed25519::PublicKey::try_from_bytes(bytes)?))
     }
 }
@@ -94,7 +94,7 @@ impl Packable for Ed25519BlockIssuerKey {
         unpacker: &mut U,
         visitor: &Self::UnpackVisitor,
     ) -> Result<Self, UnpackError<Self::UnpackError, U::Error>> {
-        Self::try_from_bytes(<[u8; Self::PUBLIC_KEY_LENGTH]>::unpack::<_, VERIFY>(unpacker, visitor).coerce()?)
+        Self::try_from_bytes(<[u8; Self::LENGTH]>::unpack::<_, VERIFY>(unpacker, visitor).coerce()?)
             .map_err(UnpackError::Packable)
     }
 }
@@ -148,11 +148,11 @@ impl IntoIterator for BlockIssuerKeys {
 }
 
 impl BlockIssuerKeys {
-    /// The minimum number of block_issuer_keys in a [`BlockIssuerFeature`].
+    /// The minimum number of block issuer keys in a [`BlockIssuerFeature`].
     pub const COUNT_MIN: u8 = 1;
-    /// The maximum number of block_issuer_keys in a [`BlockIssuerFeature`].
+    /// The maximum number of block issuer keys in a [`BlockIssuerFeature`].
     pub const COUNT_MAX: u8 = 128;
-    /// The range of valid numbers of block_issuer_keys.
+    /// The range of valid numbers of block issuer keys.
     pub const COUNT_RANGE: RangeInclusive<u8> = Self::COUNT_MIN..=Self::COUNT_MAX; // [1..128]
 
     /// Creates a new [`BlockIssuerKeys`] from a vec.
@@ -186,9 +186,9 @@ impl BlockIssuerKeys {
 #[derive(Clone, Debug, Eq, PartialEq, Hash, packable::Packable)]
 #[packable(unpack_error = Error)]
 pub struct BlockIssuerFeature {
-    /// The slot index at which the Block Issuer Feature expires and can be removed.
+    /// The slot index at which the feature expires and can be removed.
     expiry_slot: SlotIndex,
-    /// The Block Issuer Keys.
+    /// The block issuer keys.
     block_issuer_keys: BlockIssuerKeys,
 }
 
@@ -204,18 +204,19 @@ impl BlockIssuerFeature {
     ) -> Result<Self, Error> {
         let block_issuer_keys =
             BlockIssuerKeys::from_vec(block_issuer_keys.into_iter().collect::<Vec<BlockIssuerKey>>())?;
+
         Ok(Self {
             expiry_slot: expiry_slot.into(),
             block_issuer_keys,
         })
     }
 
-    /// Returns the Slot Index at which the Block Issuer Feature expires and can be removed.
+    /// Returns the expiry slot.
     pub fn expiry_slot(&self) -> SlotIndex {
         self.expiry_slot
     }
 
-    /// Returns the Block Issuer Keys.
+    /// Returns the block issuer keys.
     pub fn block_issuer_keys(&self) -> &[BlockIssuerKey] {
         &self.block_issuer_keys
     }
