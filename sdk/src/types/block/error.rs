@@ -173,10 +173,9 @@ pub enum Error {
     DuplicateOutputChain(ChainId),
     InvalidField(&'static str),
     NullDelegationValidatorId,
+    #[cfg(feature = "std")]
+    Fallback(FallbackError),
 }
-
-#[cfg(feature = "std")]
-impl std::error::Error for Error {}
 
 impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -375,6 +374,7 @@ impl fmt::Display for Error {
             Self::DuplicateOutputChain(chain_id) => write!(f, "duplicate output chain {chain_id}"),
             Self::InvalidField(field) => write!(f, "invalid field: {field}"),
             Self::NullDelegationValidatorId => write!(f, "null delegation validator ID"),
+            Self::Fallback(err) => write!(f, "error: {err}"),
         }
     }
 }
@@ -388,5 +388,29 @@ impl From<CryptoError> for Error {
 impl From<Infallible> for Error {
     fn from(error: Infallible) -> Self {
         match error {}
+    }
+}
+
+#[cfg(feature = "std")]
+impl std::error::Error for Error {}
+
+#[cfg(feature = "std")]
+#[derive(Debug)]
+pub struct FallbackError(pub(crate) Box<dyn std::error::Error + Send + Sync>);
+
+#[cfg(feature = "std")]
+impl PartialEq for FallbackError {
+    fn eq(&self, _: &Self) -> bool {
+        false
+    }
+}
+
+#[cfg(feature = "std")]
+impl Eq for FallbackError {}
+
+#[cfg(feature = "std")]
+impl fmt::Display for FallbackError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        self.0.fmt(f)
     }
 }
