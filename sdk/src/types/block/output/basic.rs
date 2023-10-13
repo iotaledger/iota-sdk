@@ -212,7 +212,13 @@ impl BasicOutputBuilder {
         })
     }
 
-    pub fn min_storage_deposit_amount(&self, rent_structure: RentStructure, token_supply: u64) -> Result<u64, Error> {
+    /// Gets the minimum amount needed to satisfy storage deposit requirements by
+    /// adding a storage deposit return unlock condition if one is needed to cover the current amount.
+    pub(crate) fn min_storage_deposit_amount(
+        &self,
+        rent_structure: RentStructure,
+        token_supply: u64,
+    ) -> Result<u64, Error> {
         Ok(self
             .clone()
             // TODO: Probably not good to use ed25519 always here, even if technically it's the same for now..

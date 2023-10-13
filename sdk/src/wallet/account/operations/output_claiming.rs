@@ -8,7 +8,7 @@ use serde::{Deserialize, Serialize};
 use crate::{
     client::secret::SecretManage,
     types::block::{
-        address::Address,
+        address::{Address, Ed25519Address},
         output::{
             unlock_condition::{AddressUnlockCondition, StorageDepositReturnUnlockCondition},
             BasicOutputBuilder, NativeTokens, NativeTokensBuilder, NftOutputBuilder, Output, OutputId,
@@ -296,19 +296,23 @@ where
             }
         }
 
+        // TODO: rework native tokens
         let option_native_token = if new_native_tokens.is_empty() {
             None
         } else {
             Some(new_native_tokens.clone().finish()?)
         };
 
+        // Check if the new amount is enough for the storage deposit, otherwise increase it with a minimal basic output
+        // amount
         let mut required_amount = if possible_additional_inputs.is_empty() {
             required_amount_for_nfts
         } else {
-            // Get the required amount using a sufficient storage deposit
-            BasicOutputBuilder::new_with_amount(required_amount_for_nfts)
-                .with_native_tokens(option_native_token.into_iter().flatten())
-                .min_storage_deposit_amount(rent_structure, token_supply)?
+            required_amount_for_nfts
+                + BasicOutputBuilder::new_with_minimum_amount(rent_structure)
+                    .add_unlock_condition(AddressUnlockCondition::new(Ed25519Address::null()))
+                    .with_native_tokens(option_native_token.into_iter().flatten())
+                    .amount()
         };
 
         let mut additional_inputs = Vec::new();
@@ -325,9 +329,11 @@ where
                 };
                 // Recalculate every time, because new inputs can also add more native tokens, which would increase
                 // the required storage deposit
-                required_amount = BasicOutputBuilder::new_with_amount(required_amount_for_nfts)
-                    .with_native_tokens(option_native_token.into_iter().flatten())
-                    .min_storage_deposit_amount(rent_structure, token_supply)?;
+                required_amount = required_amount_for_nfts
+                    + BasicOutputBuilder::new_with_minimum_amount(rent_structure)
+                        .add_unlock_condition(AddressUnlockCondition::new(Ed25519Address::null()))
+                        .with_native_tokens(option_native_token.into_iter().flatten())
+                        .amount();
 
                 if available_amount < required_amount {
                     if !additional_inputs_used.contains(&output_data.output_id) {
