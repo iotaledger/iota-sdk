@@ -163,7 +163,7 @@ where
             {
                 results.push(Ok(self
                     .client()
-                    .foundry_output_ids([FoundryQueryParameter::AccountAddress(bech32_address)])
+                    .foundry_output_ids([FoundryOutputsQueryParameter::AccountAddress(bech32_address)])
                     .await?
                     .items))
             }
