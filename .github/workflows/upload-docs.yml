@@ -4,11 +4,31 @@ on:
   release:
     types: [published]
 
+env:
+  GH_TOKEN: ${{ github.token }}
+
+permissions:
+  actions: 'write'
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+
+      - name: Get release language
+        id: get_release_language
+        run: |
+          if [[ ${{ github.ref }} == *"python"* ]]; then
+            echo LANGUAGE="python" >> $GITHUB_OUTPUT
+          fi
+          if [[ ${{ github.ref }} == *"nodejs"* ]]; then
+            echo LANGUAGE="nodejs" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Check if release language is supported
+        if: steps.get_release_language.outputs.LANGUAGE != 'python' && steps.get_release_language.outputs.LANGUAGE != 'nodejs'
+        run: gh run cancel ${{ github.run_id }}
 
       - name: Set up Rust
         uses: ./.github/actions/setup-rust
@@ -26,19 +46,6 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install libudev-dev libusb-1.0-0-dev
-
-      - name: Echo tag
-        run: echo ${{ github.ref }}
-
-      - name: Get release language
-        id: get_release_language
-        run: |
-          if [[ ${{ github.ref }} == *"python"* ]]; then
-            echo LANGUAGE="python" >> $GITHUB_OUTPUT
-          fi
-          if [[ ${{ github.ref }} == *"nodejs"* ]]; then
-            echo LANGUAGE="nodejs" >> $GITHUB_OUTPUT
-          fi
 
       - name: Get release version
         id: get_release_version
