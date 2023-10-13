@@ -177,6 +177,9 @@ pub enum Error {
     Fallback(FallbackError),
 }
 
+#[cfg(feature = "std")]
+impl std::error::Error for Error {}
+
 impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
@@ -390,9 +393,6 @@ impl From<Infallible> for Error {
         match error {}
     }
 }
-
-#[cfg(feature = "std")]
-impl std::error::Error for Error {}
 
 #[cfg(feature = "std")]
 #[derive(Debug)]
