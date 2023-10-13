@@ -44,7 +44,7 @@ fn input_signing_data_conversion() {
             false,
             Some(
                 SlotCommitmentId::from_str(
-                    "0xedf5f572c58ddf4b4f9567d82bf96689cc68b730df796d822b4b9fb643f5efda4f9567d82bf96689",
+                    "0xedf5f572c58ddf4b4f9567d82bf96689cc68b730df796d822b4b9fb643f5efda4f9567d8",
                 )
                 .unwrap(),
             ),
@@ -54,14 +54,12 @@ fn input_signing_data_conversion() {
             ),
             Some(
                 SlotCommitmentId::from_str(
-                    "0xedf5f572c58ddf4b4f9567d82bf96689cc68b730df796d822b4b9fb643f5efda4f9567d82bf96689",
+                    "0xedf5f572c58ddf4b4f9567d82bf96689cc68b730df796d822b4b9fb643f5efda4f9567d8",
                 )
                 .unwrap(),
             ),
-            SlotCommitmentId::from_str(
-                "0xedf5f572c58ddf4b4f9567d82bf96689cc68b730df796d822b4b9fb643f5efda4f9567d82bf96689",
-            )
-            .unwrap(),
+            SlotCommitmentId::from_str("0xedf5f572c58ddf4b4f9567d82bf96689cc68b730df796d822b4b9fb643f5efda4f9567d8")
+                .unwrap(),
         ),
         chain: Some(bip44_chain),
     };
@@ -93,10 +91,10 @@ fn input_signing_data_conversion() {
             "transactionId": "0xbce525324af12eda02bf7927e92cea3a8e8322d0f41966271443e6c3b245a44000000000",
             "outputIndex": 0,
             "isSpent": false,
-            "commitmentIdSpent": "0xedf5f572c58ddf4b4f9567d82bf96689cc68b730df796d822b4b9fb643f5efda4f9567d82bf96689",
+            "commitmentIdSpent": "0xedf5f572c58ddf4b4f9567d82bf96689cc68b730df796d822b4b9fb643f5efda4f9567d8",
             "transactionIdSpent": "0x24a1f46bdb6b2bf38f1c59f73cdd4ae5b418804bb231d76d06fbf246498d588300000000",
-            "includedCommitmentId": "0xedf5f572c58ddf4b4f9567d82bf96689cc68b730df796d822b4b9fb643f5efda4f9567d82bf96689",
-            "latestCommitmentId": "0xedf5f572c58ddf4b4f9567d82bf96689cc68b730df796d822b4b9fb643f5efda4f9567d82bf96689"},
+            "includedCommitmentId": "0xedf5f572c58ddf4b4f9567d82bf96689cc68b730df796d822b4b9fb643f5efda4f9567d8",
+            "latestCommitmentId": "0xedf5f572c58ddf4b4f9567d82bf96689cc68b730df796d822b4b9fb643f5efda4f9567d8"},
             "chain": {
                 "coinType": 4219,
                 "account": 0,
