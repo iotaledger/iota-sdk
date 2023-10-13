@@ -4,7 +4,6 @@
 use derive_more::{Add, AddAssign, Deref, Display, From, FromStr, Sub, SubAssign};
 
 use super::EpochIndex;
-use crate::types::block::Error;
 
 /// The tangle timeline is divided into epochs, and each epoch has a corresponding [`EpochIndex`]. Epochs are further
 /// subdivided into slots, each with a slot index.
@@ -42,20 +41,16 @@ use crate::types::block::Error;
     packable::Packable,
 )]
 #[repr(transparent)]
-pub struct SlotIndex(u32);
+pub struct SlotIndex(pub u32);
 
 impl SlotIndex {
-    /// Creates a new [`SlotIndex`].
-    pub fn new(index: u32) -> Self {
-        Self::from(index)
+    /// Gets the [`EpochIndex`] of this slot.
+    pub fn to_epoch_index(self, slots_per_epoch_exponent: u8) -> EpochIndex {
+        EpochIndex::from_slot_index(self, slots_per_epoch_exponent)
     }
 
-    /// Gets the [`EpochIndex`] of this slot.
-    pub fn to_epoch_index(
-        self,
-        slots_per_epoch_exponent_iter: impl Iterator<Item = (EpochIndex, u8)>,
-    ) -> Result<EpochIndex, Error> {
-        EpochIndex::from_slot_index(self, slots_per_epoch_exponent_iter)
+    pub fn from_epoch_index(epoch_index: EpochIndex, slots_per_epoch_exponent: u8) -> Self {
+        Self(*epoch_index << slots_per_epoch_exponent)
     }
 
     /// Gets the slot index of a unix timestamp.
