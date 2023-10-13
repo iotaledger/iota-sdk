@@ -59,7 +59,7 @@ fn pack_unpack_valid() {
 #[test]
 fn memory_layout() {
     let block_hash = BlockHash::new(rand_bytes_array());
-    let slot_index = SlotIndex::new(12345);
+    let slot_index = SlotIndex(12345);
     let block_id = block_hash.with_slot_index(slot_index);
     assert_eq!(slot_index, block_id.slot_index());
     let memory_layout =

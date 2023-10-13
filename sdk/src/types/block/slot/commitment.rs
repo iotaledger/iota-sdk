@@ -2,13 +2,18 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use crypto::hashes::{blake2b::Blake2b256, Digest};
-use packable::{packer::SlicePacker, Packable, PackableExt};
+use packable::{Packable, PackableExt};
 
-use crate::types::block::slot::{RootsId, SlotCommitmentId, SlotIndex};
+use super::commitment_id::SlotCommitmentHash;
+use crate::types::block::{
+    slot::{RootsId, SlotCommitmentId, SlotIndex},
+    Error,
+};
 
 /// Contains a summary of a slot.
 /// It is linked to the commitment of the previous slot, which forms a commitment chain.
 #[derive(Clone, Debug, Eq, PartialEq, Hash, derive_more::From, Packable)]
+#[packable(unpack_error = Error)]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize, serde::Deserialize),
@@ -87,15 +92,6 @@ impl SlotCommitment {
 
     /// Computes the [`SlotCommitmentId`] of the [`SlotCommitment`].
     pub fn id(&self) -> SlotCommitmentId {
-        let mut bytes = [0u8; SlotCommitmentId::LENGTH];
-        let mut packer = SlicePacker::new(&mut bytes);
-        let content = self.pack_to_vec();
-        let content_hash: [u8; 32] = Blake2b256::digest(content).into();
-
-        // PANIC: packing to an array of bytes can't fail.
-        content_hash.pack(&mut packer).unwrap();
-        self.index.pack(&mut packer).unwrap();
-
-        SlotCommitmentId::from(bytes)
+        SlotCommitmentHash::new(Blake2b256::digest(self.pack_to_vec()).into()).with_slot_index(self.index)
     }
 }
