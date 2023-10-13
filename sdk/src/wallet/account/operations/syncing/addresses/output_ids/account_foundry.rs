@@ -4,7 +4,10 @@
 use std::collections::HashSet;
 
 use crate::{
-    client::{node_api::indexer::query_parameters::QueryParameter, secret::SecretManage},
+    client::{
+        node_api::indexer::query_parameters::{AccountOutputsQueryParameter, FoundryOutputsQueryParameter},
+        secret::SecretManage,
+    },
     types::{
         api::plugins::indexer::OutputIdsResponse,
         block::{
@@ -69,7 +72,7 @@ where
                 let client = self.client().clone();
                 tasks.push(Box::pin(task::spawn(async move {
                     client
-                        .foundry_output_ids([QueryParameter::AccountAddress(account_bech32_address)])
+                        .foundry_output_ids([FoundryOutputsQueryParameter::AccountAddress(account_bech32_address)])
                         .await
                         .map_err(From::from)
                 })));

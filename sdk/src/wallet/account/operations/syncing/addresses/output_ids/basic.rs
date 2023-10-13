@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use crate::{
-    client::{node_api::indexer::query_parameters::QueryParameter, secret::SecretManage},
+    client::{node_api::indexer::query_parameters::BasicOutputsQueryParameter, secret::SecretManage},
     types::block::{address::Bech32Address, output::OutputId, ConvertTo},
     wallet::Account,
 };
@@ -21,10 +21,10 @@ where
         Ok(self
             .client()
             .basic_output_ids([
-                QueryParameter::Address(bech32_address),
-                QueryParameter::HasExpiration(false),
-                QueryParameter::HasTimelock(false),
-                QueryParameter::HasStorageDepositReturn(false),
+                BasicOutputsQueryParameter::Address(bech32_address),
+                BasicOutputsQueryParameter::HasExpiration(false),
+                BasicOutputsQueryParameter::HasTimelock(false),
+                BasicOutputsQueryParameter::HasStorageDepositReturn(false),
             ])
             .await?
             .items)
@@ -37,11 +37,69 @@ where
         bech32_address: impl ConvertTo<Bech32Address>,
     ) -> crate::wallet::Result<Vec<OutputId>> {
         let bech32_address = bech32_address.convert()?;
+        #[cfg(target_family = "wasm")]
+        {
+            let mut output_ids = Vec::new();
+            output_ids.extend(
+                self.client()
+                    .basic_output_ids([QueryParameter::UnlockableByAddress(bech32_address)])
+                    .await?
+                    .items,
+            );
+            output_ids.extend(
+                self.client()
+                    .basic_output_ids([BasicOutputsQueryParameter::StorageDepositReturnAddress(
+                        bech32_address.clone(),
+                    )])
+                    .await?
+                    .items,
+            );
 
-        Ok(self
-            .client()
-            .basic_output_ids([QueryParameter::UnlockableByAddress(bech32_address)])
-            .await?
-            .items)
+            Ok(output_ids)
+        }
+
+        #[cfg(not(target_family = "wasm"))]
+        {
+            let client = self.client();
+            let tasks = [
+                // Get basic outputs
+                async {
+                    let bech32_address = bech32_address.clone();
+                    let client = client.clone();
+                    tokio::spawn(async move {
+                        self.client()
+                            .basic_output_ids([QueryParameter::UnlockableByAddress(bech32_address)])
+                            .await
+                            .map_err(From::from)
+                    })
+                    .await
+                }
+                .boxed(),
+                // Get outputs where the address is in the storage deposit return unlock condition
+                async {
+                    let bech32_address = bech32_address.clone();
+                    let client = client.clone();
+                    tokio::spawn(async move {
+                        client
+                            .basic_output_ids([BasicOutputsQueryParameter::StorageDepositReturnAddress(bech32_address)])
+                            .await
+                            .map_err(From::from)
+                    })
+                    .await
+                }
+                .boxed(),
+            ];
+
+            // Get all results
+            let mut output_ids = HashSet::new();
+            let results: Vec<crate::wallet::Result<OutputIdsResponse>> = futures::future::try_join_all(tasks).await?;
+
+            for res in results {
+                let found_output_ids = res?;
+                output_ids.extend(found_output_ids.items);
+            }
+
+            Ok(output_ids.into_iter().collect())
+        }
     }
 }

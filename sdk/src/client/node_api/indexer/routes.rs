@@ -3,15 +3,13 @@
 
 //! IOTA node indexer routes
 
+use super::query_parameters::{BasicOutputsQueryParameters, OutputsQueryParameters};
 use crate::{
     client::{
-        node_api::indexer::{
-            query_parameters::{
-                verify_query_parameters_account_outputs, verify_query_parameters_basic_outputs,
-                verify_query_parameters_foundry_outputs, verify_query_parameters_nft_outputs,
-                verify_query_parameters_outputs, QueryParameter,
-            },
-            QueryParameters,
+        node_api::indexer::query_parameters::{
+            AccountOutputsQueryParameter, AccountOutputsQueryParameters, BasicOutputsQueryParameter,
+            FoundryOutputsQueryParameter, FoundryOutputsQueryParameters, NftOutputsQueryParameter,
+            NftOutputsQueryParameters, OutputsQueryParameter,
         },
         ClientInner, Error, Result,
     },
@@ -32,13 +30,12 @@ impl ClientInner {
     /// api/indexer/v1/outputs
     pub async fn output_ids(
         &self,
-        query_parameters: impl Into<Vec<QueryParameter>> + Send,
+        query_parameters: impl Into<Vec<OutputsQueryParameter>>,
     ) -> Result<OutputIdsResponse> {
         let route = "api/indexer/v1/outputs";
 
-        let query_parameters = verify_query_parameters_outputs(query_parameters.into())?;
-
-        self.get_output_ids(route, query_parameters, true, false).await
+        self.get_output_ids(route, OutputsQueryParameters::new(query_parameters), true, false)
+            .await
     }
 
     /// Get basic outputs filtered by the given parameters.
@@ -50,13 +47,12 @@ impl ClientInner {
     /// api/indexer/v2/outputs/basic
     pub async fn basic_output_ids(
         &self,
-        query_parameters: impl Into<Vec<QueryParameter>> + Send,
+        query_parameters: impl Into<Vec<BasicOutputsQueryParameter>>,
     ) -> Result<OutputIdsResponse> {
         let route = "api/indexer/v2/outputs/basic";
 
-        let query_parameters = verify_query_parameters_basic_outputs(query_parameters.into())?;
-
-        self.get_output_ids(route, query_parameters, true, false).await
+        self.get_output_ids(route, BasicOutputsQueryParameters::new(query_parameters), true, false)
+            .await
     }
 
     /// Get account outputs filtered by the given parameters.
@@ -66,13 +62,12 @@ impl ClientInner {
     /// api/indexer/v2/outputs/account
     pub async fn account_output_ids(
         &self,
-        query_parameters: impl Into<Vec<QueryParameter>> + Send,
+        query_parameters: impl Into<Vec<AccountOutputsQueryParameter>>,
     ) -> Result<OutputIdsResponse> {
         let route = "api/indexer/v2/outputs/account";
 
-        let query_parameters = verify_query_parameters_account_outputs(query_parameters.into())?;
-
-        self.get_output_ids(route, query_parameters, true, false).await
+        self.get_output_ids(route, AccountOutputsQueryParameters::new(query_parameters), true, false)
+            .await
     }
 
     /// Get account output by its accountID.
@@ -81,7 +76,7 @@ impl ClientInner {
         let route = format!("api/indexer/v2/outputs/account/{account_id}");
 
         Ok(*(self
-            .get_output_ids(&route, QueryParameters::empty(), true, false)
+            .get_output_ids(&route, AccountOutputsQueryParameters::empty(), true, false)
             .await?
             .first()
             .ok_or_else(|| Error::NoOutput(format!("{account_id:?}")))?))
@@ -94,13 +89,12 @@ impl ClientInner {
     /// api/indexer/v2/outputs/foundry
     pub async fn foundry_output_ids(
         &self,
-        query_parameters: impl Into<Vec<QueryParameter>> + Send,
+        query_parameters: impl Into<Vec<FoundryOutputsQueryParameter>>,
     ) -> Result<OutputIdsResponse> {
         let route = "api/indexer/v2/outputs/foundry";
 
-        let query_parameters = verify_query_parameters_foundry_outputs(query_parameters.into())?;
-
-        self.get_output_ids(route, query_parameters, true, false).await
+        self.get_output_ids(route, FoundryOutputsQueryParameters::new(query_parameters), true, false)
+            .await
     }
 
     /// Get foundry output by its foundryID.
@@ -109,7 +103,7 @@ impl ClientInner {
         let route = format!("api/indexer/v2/outputs/foundry/{foundry_id}");
 
         Ok(*(self
-            .get_output_ids(&route, QueryParameters::empty(), true, false)
+            .get_output_ids(&route, FoundryOutputsQueryParameters::empty(), true, false)
             .await?
             .first()
             .ok_or_else(|| Error::NoOutput(format!("{foundry_id:?}")))?))
@@ -123,13 +117,12 @@ impl ClientInner {
     /// api/indexer/v2/outputs/nft
     pub async fn nft_output_ids(
         &self,
-        query_parameters: impl Into<Vec<QueryParameter>> + Send,
+        query_parameters: impl Into<Vec<NftOutputsQueryParameter>>,
     ) -> Result<OutputIdsResponse> {
         let route = "api/indexer/v2/outputs/nft";
 
-        let query_parameters = verify_query_parameters_nft_outputs(query_parameters.into())?;
-
-        self.get_output_ids(route, query_parameters, true, false).await
+        self.get_output_ids(route, NftOutputsQueryParameters::new(query_parameters), true, false)
+            .await
     }
 
     /// Get NFT output by its nftID.
@@ -138,7 +131,7 @@ impl ClientInner {
         let route = format!("api/indexer/v2/outputs/nft/{nft_id}");
 
         Ok(*(self
-            .get_output_ids(&route, QueryParameters::empty(), true, false)
+            .get_output_ids(&route, NftOutputsQueryParameters::empty(), true, false)
             .await?
             .first()
             .ok_or_else(|| Error::NoOutput(format!("{nft_id:?}")))?))

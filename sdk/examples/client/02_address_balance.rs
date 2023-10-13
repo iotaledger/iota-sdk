@@ -11,8 +11,8 @@
 
 use iota_sdk::{
     client::{
-        api::GetAddressesOptions, node_api::indexer::query_parameters::QueryParameter, secret::SecretManager, Client,
-        Result,
+        api::GetAddressesOptions, node_api::indexer::query_parameters::BasicOutputsQueryParameter,
+        secret::SecretManager, Client, Result,
     },
     types::block::output::NativeTokensBuilder,
 };
@@ -44,10 +44,10 @@ async fn main() -> Result<()> {
     // Get output ids of outputs that can be controlled by this address without further unlock constraints
     let output_ids_response = client
         .basic_output_ids([
-            QueryParameter::Address(first_address.clone()),
-            QueryParameter::HasExpiration(false),
-            QueryParameter::HasTimelock(false),
-            QueryParameter::HasStorageDepositReturn(false),
+            BasicOutputsQueryParameter::Address(first_address.clone()),
+            BasicOutputsQueryParameter::HasExpiration(false),
+            BasicOutputsQueryParameter::HasTimelock(false),
+            BasicOutputsQueryParameter::HasStorageDepositReturn(false),
         ])
         .await?;
 

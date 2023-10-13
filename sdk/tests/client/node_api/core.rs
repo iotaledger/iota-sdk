@@ -4,7 +4,10 @@
 // These are E2E test samples, so they are ignored by default.
 
 use iota_sdk::{
-    client::{api::GetAddressesOptions, node_api::indexer::query_parameters::QueryParameter, Client, NodeInfoWrapper},
+    client::{
+        api::GetAddressesOptions, node_api::indexer::query_parameters::BasicOutputsQueryParameter, Client,
+        NodeInfoWrapper,
+    },
     types::{
         api::core::TransactionState,
         block::{
@@ -126,7 +129,7 @@ async fn test_get_address_outputs() {
         .unwrap();
 
     let output_ids_response = client
-        .basic_output_ids([QueryParameter::Address(address)])
+        .basic_output_ids([BasicOutputsQueryParameter::Address(address)])
         .await
         .unwrap();
 

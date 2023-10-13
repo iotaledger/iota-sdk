@@ -8,69 +8,131 @@ use std::fmt;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    client::{node_api::query_tuples_to_query_string, Error, Result},
-    types::block::{address::Bech32Address, slot::SlotIndex},
+    client::node_api::query_tuples_to_query_string,
+    types::block::{address::Bech32Address, output::TokenId, slot::SlotIndex},
 };
 
 // https://github.com/iotaledger/inx-indexer/tree/develop/pkg/indexer
 
+pub trait QueryParameterHelper {
+    /// Converts parameters to a single String.
+    fn to_query_string(&self) -> Option<String>;
+    fn replace_cursor(&mut self, cursor: String);
+}
+
+macro_rules! impl_query_parameters_methods {
+    ($name:ty, $inner_type:ty) => {
+        impl $name {
+            /// Creates a hashset from a provided vec of query parameters.
+            #[must_use]
+            pub fn new(query_parameters: impl Into<Vec<$inner_type>>) -> Self {
+                let mut query_parameters = query_parameters.into();
+                query_parameters.sort_unstable_by_key(<$inner_type>::kind);
+                query_parameters.dedup_by_key(|qp| qp.kind());
+
+                Self(query_parameters)
+            }
+            /// Replaces or inserts an enum variant in the QueryParameters.
+            pub fn replace(&mut self, query_parameter: $inner_type) {
+                match self
+                    .0
+                    .binary_search_by_key(&query_parameter.kind(), <$inner_type>::kind)
+                {
+                    Ok(pos) => self.0[pos] = query_parameter,
+                    Err(pos) => self.0.insert(pos, query_parameter),
+                }
+            }
+            /// Creates new empty QueryParameters.
+            pub fn empty() -> Self {
+                Self(Vec::new())
+            }
+        }
+        impl QueryParameterHelper for $name {
+            /// Converts parameters to a single String.
+            fn to_query_string(&self) -> Option<String> {
+                query_tuples_to_query_string(self.0.iter().map(|q| Some(q.to_query_tuple())))
+            }
+            fn replace_cursor(&mut self, cursor: String) {
+                self.replace(<$inner_type>::Cursor(cursor));
+            }
+        }
+
+        impl fmt::Display for $inner_type {
+            fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+                let query_tuple = self.to_query_tuple();
+                write!(f, "{}={}", query_tuple.0, query_tuple.1)
+            }
+        }
+    };
+}
+
 /// Query parameters for output_id requests.
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct QueryParameters(Vec<QueryParameter>);
+pub struct OutputsQueryParameters(Vec<OutputsQueryParameter>);
 
-impl QueryParameters {
-    /// Creates a hashset from a provided vec of query parameters.
-    #[must_use]
-    pub fn new(query_parameters: impl Into<Vec<QueryParameter>>) -> Self {
-        let mut query_parameters = query_parameters.into();
-        query_parameters.sort_unstable_by_key(QueryParameter::kind);
-        query_parameters.dedup_by_key(|qp| qp.kind());
-
-        Self(query_parameters)
-    }
-
-    /// Creates new empty QueryParameters.
-    pub fn empty() -> Self {
-        Self(Vec::new())
-    }
-
-    /// Replaces or inserts an enum variant in the QueryParameters.
-    pub fn replace(&mut self, query_parameter: QueryParameter) {
-        match self
-            .0
-            .binary_search_by_key(&query_parameter.kind(), QueryParameter::kind)
-        {
-            Ok(pos) => self.0[pos] = query_parameter,
-            Err(pos) => self.0.insert(pos, query_parameter),
-        }
-    }
-
-    /// Returns true if the slice contains an element with the given kind.
-    pub(crate) fn contains(&self, kind: u8) -> bool {
-        self.0.iter().any(|q| q.kind() == kind)
-    }
-
-    // Tests if any query parameter matches a predicate.
-    #[cfg(test)]
-    pub(crate) fn any<F: Fn(&QueryParameter) -> bool>(&self, f: F) -> bool {
-        self.0.iter().any(f)
-    }
-
-    /// Converts parameters to a single String.
-    pub fn to_query_string(&self) -> Option<String> {
-        query_tuples_to_query_string(self.0.iter().map(|q| Some(q.to_query_tuple())))
-    }
-}
+impl_query_parameters_methods!(OutputsQueryParameters, OutputsQueryParameter);
 
 /// Query parameter for output requests.
 #[derive(Debug, Clone, Serialize, Deserialize, Eq, PartialEq)]
 #[serde(rename_all = "camelCase")]
 #[non_exhaustive]
-pub enum QueryParameter {
+pub enum OutputsQueryParameter {
+    /// Returns outputs that were created after a certain slot index.
+    CreatedAfter(SlotIndex),
+    /// Returns outputs that were created before a certain slot index.
+    CreatedBefore(SlotIndex),
+    /// Starts the search from the cursor (confirmationMS+outputId.pageSize).
+    Cursor(String),
+    /// Filters outputs based on the presence of a native token.
+    HasNativeToken(bool),
+    /// Filters outputs based on the presence of a specific native token.
+    NativeToken(TokenId),
+    /// The maximum amount of items returned in one call. If there are more items, a cursor to the next page is
+    /// returned too. The parameter is ignored when pageSize is defined via the cursor parameter.
+    PageSize(usize),
+    /// Returns outputs that are unlockable by the bech32 address.
+    UnlockableByAddress(Bech32Address),
+}
+
+impl OutputsQueryParameter {
+    fn to_query_tuple(&self) -> (&'static str, String) {
+        match self {
+            Self::CreatedAfter(v) => ("createdAfter", v.to_string()),
+            Self::CreatedBefore(v) => ("createdBefore", v.to_string()),
+            Self::Cursor(v) => ("cursor", v.to_string()),
+            Self::HasNativeToken(v) => ("hasNativeToken", v.to_string()),
+            Self::NativeToken(v) => ("nativeToken", v.to_string()),
+            Self::PageSize(v) => ("pageSize", v.to_string()),
+            Self::UnlockableByAddress(v) => ("unlockableByAddress", v.to_string()),
+        }
+    }
+
+    pub(crate) fn kind(&self) -> u8 {
+        match self {
+            Self::CreatedAfter(_) => 0,
+            Self::CreatedBefore(_) => 1,
+            Self::Cursor(_) => 2,
+            Self::HasNativeToken(_) => 3,
+            Self::NativeToken(_) => 4,
+            Self::PageSize(_) => 5,
+            Self::UnlockableByAddress(_) => 6,
+        }
+    }
+}
+
+/// Query parameters for output_id requests.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct BasicOutputsQueryParameters(Vec<BasicOutputsQueryParameter>);
+
+impl_query_parameters_methods!(BasicOutputsQueryParameters, BasicOutputsQueryParameter);
+
+/// Query parameter for output requests.
+#[derive(Debug, Clone, Serialize, Deserialize, Eq, PartialEq)]
+#[serde(rename_all = "camelCase")]
+#[non_exhaustive]
+pub enum BasicOutputsQueryParameter {
     /// Bech32-encoded address that should be searched for.
     Address(Bech32Address),
-    /// Filter foundry outputs based on bech32-encoded address of the controlling account.
-    AccountAddress(Bech32Address),
     /// Returns outputs that were created after a certain slot index.
     CreatedAfter(SlotIndex),
     /// Returns outputs that were created before a certain slot index.
@@ -84,29 +146,21 @@ pub enum QueryParameter {
     ExpiresAfter(SlotIndex),
     /// Returns outputs that expire before a certain slot index.
     ExpiresBefore(SlotIndex),
-    /// Filters outputs based on bech32-encoded governor (governance controller) address.
-    Governor(Bech32Address),
     /// Filters outputs based on the presence of expiration unlock condition.
     HasExpiration(bool),
-    /// Filters outputs based on the presence of native tokens.
-    HasNativeTokens(bool),
+    /// Filters outputs based on the presence of a native token.
+    HasNativeToken(bool),
     /// Filters outputs based on the presence of storage deposit return unlock condition.
     HasStorageDepositReturn(bool),
     /// Filters outputs based on the presence of timelock unlock condition.
     HasTimelock(bool),
-    /// Filters outputs based on bech32-encoded issuer address.
-    Issuer(Bech32Address),
-    /// Filters outputs that have at most a certain number of distinct native tokens.
-    MaxNativeTokenCount(u32),
-    /// Filters outputs that have at least a certain number of distinct native tokens.
-    MinNativeTokenCount(u32),
+    /// Filters outputs based on the presence of a specific native token.
+    NativeToken(TokenId),
     /// The maximum amount of items returned in one call. If there are more items, a cursor to the next page is
     /// returned too. The parameter is ignored when pageSize is defined via the cursor parameter.
     PageSize(usize),
     /// Filters outputs based on the presence of validated Sender (bech32 encoded).
     Sender(Bech32Address),
-    /// Filters outputs based on bech32-encoded state controller address.
-    StateController(Bech32Address),
     /// Filters outputs based on the presence of a specific return address in the storage deposit return unlock
     /// condition.
     StorageDepositReturnAddress(Bech32Address),
@@ -120,28 +174,23 @@ pub enum QueryParameter {
     UnlockableByAddress(Bech32Address),
 }
 
-impl QueryParameter {
+impl BasicOutputsQueryParameter {
     fn to_query_tuple(&self) -> (&'static str, String) {
         match self {
             Self::Address(v) => ("address", v.to_string()),
-            Self::AccountAddress(v) => ("accountAddress", v.to_string()),
             Self::CreatedAfter(v) => ("createdAfter", v.to_string()),
             Self::CreatedBefore(v) => ("createdBefore", v.to_string()),
             Self::Cursor(v) => ("cursor", v.to_string()),
             Self::ExpirationReturnAddress(v) => ("expirationReturnAddress", v.to_string()),
             Self::ExpiresAfter(v) => ("expiresAfter", v.to_string()),
             Self::ExpiresBefore(v) => ("expiresBefore", v.to_string()),
-            Self::Governor(v) => ("governor", v.to_string()),
             Self::HasExpiration(v) => ("hasExpiration", v.to_string()),
-            Self::HasNativeTokens(v) => ("hasNativeTokens", v.to_string()),
+            Self::HasNativeToken(v) => ("hasNativeToken", v.to_string()),
             Self::HasStorageDepositReturn(v) => ("hasStorageDepositReturn", v.to_string()),
             Self::HasTimelock(v) => ("hasTimelock", v.to_string()),
-            Self::Issuer(v) => ("issuer", v.to_string()),
-            Self::MaxNativeTokenCount(v) => ("maxNativeTokenCount", v.to_string()),
-            Self::MinNativeTokenCount(v) => ("minNativeTokenCount", v.to_string()),
+            Self::NativeToken(v) => ("nativeToken", v.to_string()),
             Self::PageSize(v) => ("pageSize", v.to_string()),
             Self::Sender(v) => ("sender", v.to_string()),
-            Self::StateController(v) => ("stateController", v.to_string()),
             Self::StorageDepositReturnAddress(v) => ("storageDepositReturnAddress", v.to_string()),
             Self::Tag(v) => ("tag", v.to_string()),
             Self::TimelockedAfter(v) => ("timelockedAfter", v.to_string()),
@@ -153,163 +202,292 @@ impl QueryParameter {
     pub(crate) fn kind(&self) -> u8 {
         match self {
             Self::Address(_) => 0,
-            Self::AccountAddress(_) => 1,
+            Self::CreatedAfter(_) => 1,
+            Self::CreatedBefore(_) => 2,
+            Self::Cursor(_) => 3,
+            Self::ExpirationReturnAddress(_) => 4,
+            Self::ExpiresAfter(_) => 5,
+            Self::ExpiresBefore(_) => 6,
+            Self::HasExpiration(_) => 7,
+            Self::HasNativeToken(_) => 8,
+            Self::HasStorageDepositReturn(_) => 9,
+            Self::HasTimelock(_) => 10,
+            Self::NativeToken(_) => 11,
+            Self::PageSize(_) => 12,
+            Self::Sender(_) => 13,
+            Self::StorageDepositReturnAddress(_) => 14,
+            Self::Tag(_) => 15,
+            Self::TimelockedAfter(_) => 16,
+            Self::TimelockedBefore(_) => 17,
+            Self::UnlockableByAddress(_) => 18,
+        }
+    }
+}
+
+/// Query parameters for output_id requests.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct NftOutputsQueryParameters(Vec<NftOutputsQueryParameter>);
+
+impl_query_parameters_methods!(NftOutputsQueryParameters, NftOutputsQueryParameter);
+
+/// Query parameter for output requests.
+#[derive(Debug, Clone, Serialize, Deserialize, Eq, PartialEq)]
+#[serde(rename_all = "camelCase")]
+#[non_exhaustive]
+pub enum NftOutputsQueryParameter {
+    /// Bech32-encoded address that should be searched for.
+    Address(Bech32Address),
+    /// Returns outputs that were created after a certain slot index.
+    CreatedAfter(SlotIndex),
+    /// Returns outputs that were created before a certain slot index.
+    CreatedBefore(SlotIndex),
+    /// Starts the search from the cursor (confirmationMS+outputId.pageSize).
+    Cursor(String),
+    /// Filters outputs based on the presence of a specific Bech32-encoded return address in the expiration unlock
+    /// condition.
+    ExpirationReturnAddress(Bech32Address),
+    /// Returns outputs that expire after a certain slot index.
+    ExpiresAfter(SlotIndex),
+    /// Returns outputs that expire before a certain slot index.
+    ExpiresBefore(SlotIndex),
+    /// Filters outputs based on the presence of expiration unlock condition.
+    HasExpiration(bool),
+    /// Filters outputs based on the presence of storage deposit return unlock condition.
+    HasStorageDepositReturn(bool),
+    /// Filters outputs based on the presence of timelock unlock condition.
+    HasTimelock(bool),
+    /// Filters outputs based on bech32-encoded issuer address.
+    Issuer(Bech32Address),
+    /// The maximum amount of items returned in one call. If there are more items, a cursor to the next page is
+    /// returned too. The parameter is ignored when pageSize is defined via the cursor parameter.
+    PageSize(usize),
+    /// Filters outputs based on the presence of validated Sender (bech32 encoded).
+    Sender(Bech32Address),
+    /// Filters outputs based on the presence of a specific return address in the storage deposit return unlock
+    /// condition.
+    StorageDepositReturnAddress(Bech32Address),
+    /// Filters outputs based on matching Tag Block.
+    Tag(String),
+    /// Returns outputs that are timelocked after a certain slot index.
+    TimelockedAfter(SlotIndex),
+    /// Returns outputs that are timelocked before a certain slot index.
+    TimelockedBefore(SlotIndex),
+    /// Returns outputs that are unlockable by the bech32 address.
+    UnlockableByAddress(Bech32Address),
+}
+
+impl NftOutputsQueryParameter {
+    fn to_query_tuple(&self) -> (&'static str, String) {
+        match self {
+            Self::Address(v) => ("address", v.to_string()),
+            Self::CreatedAfter(v) => ("createdAfter", v.to_string()),
+            Self::CreatedBefore(v) => ("createdBefore", v.to_string()),
+            Self::Cursor(v) => ("cursor", v.to_string()),
+            Self::ExpirationReturnAddress(v) => ("expirationReturnAddress", v.to_string()),
+            Self::ExpiresAfter(v) => ("expiresAfter", v.to_string()),
+            Self::ExpiresBefore(v) => ("expiresBefore", v.to_string()),
+            Self::HasExpiration(v) => ("hasExpiration", v.to_string()),
+            Self::HasStorageDepositReturn(v) => ("hasStorageDepositReturn", v.to_string()),
+            Self::HasTimelock(v) => ("hasTimelock", v.to_string()),
+            Self::Issuer(v) => ("issuer", v.to_string()),
+            Self::PageSize(v) => ("pageSize", v.to_string()),
+            Self::Sender(v) => ("sender", v.to_string()),
+            Self::StorageDepositReturnAddress(v) => ("storageDepositReturnAddress", v.to_string()),
+            Self::Tag(v) => ("tag", v.to_string()),
+            Self::TimelockedAfter(v) => ("timelockedAfter", v.to_string()),
+            Self::TimelockedBefore(v) => ("timelockedBefore", v.to_string()),
+            Self::UnlockableByAddress(v) => ("unlockableByAddress", v.to_string()),
+        }
+    }
+
+    pub(crate) fn kind(&self) -> u8 {
+        match self {
+            Self::Address(_) => 0,
+            Self::CreatedAfter(_) => 1,
+            Self::CreatedBefore(_) => 2,
+            Self::Cursor(_) => 3,
+            Self::ExpirationReturnAddress(_) => 4,
+            Self::ExpiresAfter(_) => 5,
+            Self::ExpiresBefore(_) => 6,
+            Self::HasExpiration(_) => 7,
+            Self::HasStorageDepositReturn(_) => 9,
+            Self::HasTimelock(_) => 10,
+            Self::Issuer(_) => 11,
+            Self::PageSize(_) => 12,
+            Self::Sender(_) => 13,
+            Self::StorageDepositReturnAddress(_) => 14,
+            Self::Tag(_) => 15,
+            Self::TimelockedAfter(_) => 16,
+            Self::TimelockedBefore(_) => 17,
+            Self::UnlockableByAddress(_) => 18,
+        }
+    }
+}
+
+/// Query parameters for output_id requests.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct AccountOutputsQueryParameters(Vec<AccountOutputsQueryParameter>);
+
+impl_query_parameters_methods!(AccountOutputsQueryParameters, AccountOutputsQueryParameter);
+
+/// Query parameter for output requests.
+#[derive(Debug, Clone, Serialize, Deserialize, Eq, PartialEq)]
+#[serde(rename_all = "camelCase")]
+#[non_exhaustive]
+pub enum AccountOutputsQueryParameter {
+    /// Returns outputs that were created after a certain slot index.
+    CreatedAfter(SlotIndex),
+    /// Returns outputs that were created before a certain slot index.
+    CreatedBefore(SlotIndex),
+    /// Starts the search from the cursor (confirmationMS+outputId.pageSize).
+    Cursor(String),
+    /// Filters outputs based on bech32-encoded governor (governance controller) address.
+    Governor(Bech32Address),
+    /// Filters outputs based on bech32-encoded issuer address.
+    Issuer(Bech32Address),
+    /// The maximum amount of items returned in one call. If there are more items, a cursor to the next page is
+    /// returned too. The parameter is ignored when pageSize is defined via the cursor parameter.
+    PageSize(usize),
+    /// Filters outputs based on the presence of validated Sender (bech32 encoded).
+    Sender(Bech32Address),
+    /// Filters outputs based on bech32-encoded state controller address.
+    StateController(Bech32Address),
+    /// Returns outputs that are unlockable by the bech32 address.
+    UnlockableByAddress(Bech32Address),
+}
+
+impl AccountOutputsQueryParameter {
+    fn to_query_tuple(&self) -> (&'static str, String) {
+        match self {
+            Self::CreatedAfter(v) => ("createdAfter", v.to_string()),
+            Self::CreatedBefore(v) => ("createdBefore", v.to_string()),
+            Self::Cursor(v) => ("cursor", v.to_string()),
+            Self::Governor(v) => ("governor", v.to_string()),
+            Self::Issuer(v) => ("issuer", v.to_string()),
+            Self::PageSize(v) => ("pageSize", v.to_string()),
+            Self::Sender(v) => ("sender", v.to_string()),
+            Self::StateController(v) => ("stateController", v.to_string()),
+            Self::UnlockableByAddress(v) => ("unlockableByAddress", v.to_string()),
+        }
+    }
+
+    pub(crate) fn kind(&self) -> u8 {
+        match self {
+            Self::CreatedAfter(_) => 0,
+            Self::CreatedBefore(_) => 1,
+            Self::Cursor(_) => 2,
+            Self::Governor(_) => 3,
+            Self::Issuer(_) => 4,
+            Self::PageSize(_) => 5,
+            Self::Sender(_) => 6,
+            Self::StateController(_) => 7,
+            Self::UnlockableByAddress(_) => 8,
+        }
+    }
+}
+
+/// Query parameters for output_id requests.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct FoundryOutputsQueryParameters(Vec<FoundryOutputsQueryParameter>);
+
+impl_query_parameters_methods!(FoundryOutputsQueryParameters, FoundryOutputsQueryParameter);
+
+/// Query parameter for output requests.
+#[derive(Debug, Clone, Serialize, Deserialize, Eq, PartialEq)]
+#[serde(rename_all = "camelCase")]
+#[non_exhaustive]
+pub enum FoundryOutputsQueryParameter {
+    /// Filter foundry outputs based on bech32-encoded address of the controlling account.
+    AccountAddress(Bech32Address),
+    /// Returns outputs that were created after a certain slot index.
+    CreatedAfter(SlotIndex),
+    /// Returns outputs that were created before a certain slot index.
+    CreatedBefore(SlotIndex),
+    /// Starts the search from the cursor (confirmationMS+outputId.pageSize).
+    Cursor(String),
+    /// Filters outputs based on the presence of native token.
+    HasNativeToken(bool),
+    /// Filters outputs based on the presence of a specific native token.
+    NativeToken(TokenId),
+    /// The maximum amount of items returned in one call. If there are more items, a cursor to the next page is
+    /// returned too. The parameter is ignored when pageSize is defined via the cursor parameter.
+    PageSize(usize),
+}
+
+impl FoundryOutputsQueryParameter {
+    fn to_query_tuple(&self) -> (&'static str, String) {
+        match self {
+            Self::AccountAddress(v) => ("accountAddress", v.to_string()),
+            Self::CreatedAfter(v) => ("createdAfter", v.to_string()),
+            Self::CreatedBefore(v) => ("createdBefore", v.to_string()),
+            Self::Cursor(v) => ("cursor", v.to_string()),
+            Self::HasNativeToken(v) => ("hasNativeToken", v.to_string()),
+            Self::NativeToken(v) => ("nativeToken", v.to_string()),
+            Self::PageSize(v) => ("pageSize", v.to_string()),
+        }
+    }
+
+    pub(crate) fn kind(&self) -> u8 {
+        match self {
+            Self::AccountAddress(_) => 0,
+            Self::CreatedAfter(_) => 1,
+            Self::CreatedBefore(_) => 2,
+            Self::Cursor(_) => 3,
+            Self::HasNativeToken(_) => 4,
+            Self::NativeToken(_) => 5,
+            Self::PageSize(_) => 6,
+        }
+    }
+}
+
+/// Query parameters for output_id requests.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct DelegationOutputsQueryParameters(Vec<DelegationOutputsQueryParameter>);
+
+impl_query_parameters_methods!(DelegationOutputsQueryParameters, DelegationOutputsQueryParameter);
+
+/// Query parameter for output requests.
+#[derive(Debug, Clone, Serialize, Deserialize, Eq, PartialEq)]
+#[serde(rename_all = "camelCase")]
+#[non_exhaustive]
+pub enum DelegationOutputsQueryParameter {
+    /// Filter foundry outputs based on bech32-encoded address of the controlling account.
+    Address(Bech32Address),
+    /// Filter foundry outputs based on bech32-encoded address of the validator.
+    Validator(Bech32Address),
+    /// Returns outputs that were created after a certain slot index.
+    CreatedAfter(SlotIndex),
+    /// Returns outputs that were created before a certain slot index.
+    CreatedBefore(SlotIndex),
+    /// Starts the search from the cursor (confirmationMS+outputId.pageSize).
+    Cursor(String),
+    /// The maximum amount of items returned in one call. If there are more items, a cursor to the next page is
+    /// returned too. The parameter is ignored when pageSize is defined via the cursor parameter.
+    PageSize(usize),
+}
+
+impl DelegationOutputsQueryParameter {
+    fn to_query_tuple(&self) -> (&'static str, String) {
+        match self {
+            Self::Address(v) => ("address", v.to_string()),
+            Self::Validator(v) => ("validator", v.to_string()),
+            Self::CreatedAfter(v) => ("createdAfter", v.to_string()),
+            Self::CreatedBefore(v) => ("createdBefore", v.to_string()),
+            Self::Cursor(v) => ("cursor", v.to_string()),
+            Self::PageSize(v) => ("pageSize", v.to_string()),
+        }
+    }
+
+    pub(crate) fn kind(&self) -> u8 {
+        match self {
+            Self::Address(_) => 0,
+            Self::Validator(_) => 1,
             Self::CreatedAfter(_) => 2,
             Self::CreatedBefore(_) => 3,
             Self::Cursor(_) => 4,
-            Self::ExpirationReturnAddress(_) => 5,
-            Self::ExpiresAfter(_) => 6,
-            Self::ExpiresBefore(_) => 7,
-            Self::Governor(_) => 8,
-            Self::HasExpiration(_) => 9,
-            Self::HasNativeTokens(_) => 10,
-            Self::HasStorageDepositReturn(_) => 11,
-            Self::HasTimelock(_) => 12,
-            Self::Issuer(_) => 13,
-            Self::MaxNativeTokenCount(_) => 14,
-            Self::MinNativeTokenCount(_) => 15,
-            Self::PageSize(_) => 16,
-            Self::Sender(_) => 17,
-            Self::StateController(_) => 18,
-            Self::StorageDepositReturnAddress(_) => 19,
-            Self::Tag(_) => 20,
-            Self::TimelockedAfter(_) => 21,
-            Self::TimelockedBefore(_) => 22,
-            Self::UnlockableByAddress(_) => 23,
+            Self::PageSize(_) => 5,
         }
     }
-}
-
-impl fmt::Display for QueryParameter {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let query_tuple = self.to_query_tuple();
-        write!(f, "{}={}", query_tuple.0, query_tuple.1)
-    }
-}
-
-macro_rules! verify_query_parameters {
-    ($query_parameters:ident, $first:path $(, $rest:path)*) => {
-        if let Some(qp) = $query_parameters.iter().find(|qp| {
-            !matches!(qp, $first(_) $(| $rest(_))*)
-        }) {
-            Err(Error::UnsupportedQueryParameter(qp.clone()))
-        } else {
-            Ok(())
-        }
-    };
-}
-
-pub(crate) fn verify_query_parameters_outputs(query_parameters: Vec<QueryParameter>) -> Result<QueryParameters> {
-    verify_query_parameters!(
-        query_parameters,
-        QueryParameter::HasNativeTokens,
-        QueryParameter::MinNativeTokenCount,
-        QueryParameter::MaxNativeTokenCount,
-        QueryParameter::CreatedBefore,
-        QueryParameter::CreatedAfter,
-        QueryParameter::PageSize,
-        QueryParameter::Cursor,
-        QueryParameter::UnlockableByAddress
-    )?;
-
-    Ok(QueryParameters::new(query_parameters))
-}
-
-pub(crate) fn verify_query_parameters_basic_outputs(query_parameters: Vec<QueryParameter>) -> Result<QueryParameters> {
-    verify_query_parameters!(
-        query_parameters,
-        QueryParameter::Address,
-        QueryParameter::HasNativeTokens,
-        QueryParameter::MinNativeTokenCount,
-        QueryParameter::MaxNativeTokenCount,
-        QueryParameter::HasStorageDepositReturn,
-        QueryParameter::StorageDepositReturnAddress,
-        QueryParameter::HasTimelock,
-        QueryParameter::TimelockedBefore,
-        QueryParameter::TimelockedAfter,
-        QueryParameter::HasExpiration,
-        QueryParameter::ExpiresBefore,
-        QueryParameter::ExpiresAfter,
-        QueryParameter::ExpirationReturnAddress,
-        QueryParameter::Sender,
-        QueryParameter::Tag,
-        QueryParameter::CreatedBefore,
-        QueryParameter::CreatedAfter,
-        QueryParameter::PageSize,
-        QueryParameter::Cursor,
-        QueryParameter::UnlockableByAddress
-    )?;
-
-    Ok(QueryParameters::new(query_parameters))
-}
-
-pub(crate) fn verify_query_parameters_account_outputs(
-    query_parameters: Vec<QueryParameter>,
-) -> Result<QueryParameters> {
-    verify_query_parameters!(
-        query_parameters,
-        QueryParameter::StateController,
-        QueryParameter::Governor,
-        QueryParameter::Issuer,
-        QueryParameter::Sender,
-        QueryParameter::HasNativeTokens,
-        QueryParameter::MinNativeTokenCount,
-        QueryParameter::MaxNativeTokenCount,
-        QueryParameter::CreatedBefore,
-        QueryParameter::CreatedAfter,
-        QueryParameter::PageSize,
-        QueryParameter::Cursor,
-        QueryParameter::UnlockableByAddress
-    )?;
-
-    Ok(QueryParameters::new(query_parameters))
-}
-
-pub(crate) fn verify_query_parameters_foundry_outputs(
-    query_parameters: Vec<QueryParameter>,
-) -> Result<QueryParameters> {
-    verify_query_parameters!(
-        query_parameters,
-        QueryParameter::AccountAddress,
-        QueryParameter::HasNativeTokens,
-        QueryParameter::MinNativeTokenCount,
-        QueryParameter::MaxNativeTokenCount,
-        QueryParameter::CreatedBefore,
-        QueryParameter::CreatedAfter,
-        QueryParameter::PageSize,
-        QueryParameter::Cursor
-    )?;
-
-    Ok(QueryParameters::new(query_parameters))
-}
-
-pub(crate) fn verify_query_parameters_nft_outputs(query_parameters: Vec<QueryParameter>) -> Result<QueryParameters> {
-    verify_query_parameters!(
-        query_parameters,
-        QueryParameter::Address,
-        QueryParameter::HasNativeTokens,
-        QueryParameter::MinNativeTokenCount,
-        QueryParameter::MaxNativeTokenCount,
-        QueryParameter::HasStorageDepositReturn,
-        QueryParameter::StorageDepositReturnAddress,
-        QueryParameter::HasTimelock,
-        QueryParameter::TimelockedBefore,
-        QueryParameter::TimelockedAfter,
-        QueryParameter::HasExpiration,
-        QueryParameter::ExpiresBefore,
-        QueryParameter::ExpiresAfter,
-        QueryParameter::ExpirationReturnAddress,
-        QueryParameter::Issuer,
-        QueryParameter::Sender,
-        QueryParameter::Tag,
-        QueryParameter::CreatedBefore,
-        QueryParameter::CreatedAfter,
-        QueryParameter::PageSize,
-        QueryParameter::Cursor,
-        QueryParameter::UnlockableByAddress
-    )?;
-
-    Ok(QueryParameters::new(query_parameters))
 }
 
 #[cfg(test)]
@@ -318,28 +496,34 @@ mod tests {
 
     #[test]
     fn query_parameter() {
-        let address1 = QueryParameter::Address(
+        let address1 = BasicOutputsQueryParameter::Address(
             Bech32Address::try_from_str("atoi1qzt0nhsf38nh6rs4p6zs5knqp6psgha9wsv74uajqgjmwc75ugupx3y7x0r").unwrap(),
         );
-        let address2 = QueryParameter::Address(
+        let address2 = BasicOutputsQueryParameter::Address(
             Bech32Address::try_from_str("atoi1qzt0nhsf38nh6rs4p6zs5knqp6psgha9wsv74uajqgjmwc75ugupx3y7x0r").unwrap(),
         );
-        let address3 = QueryParameter::Address(
+        let address3 = BasicOutputsQueryParameter::Address(
             Bech32Address::try_from_str("atoi1qprxpfvaz2peggq6f8k9cj8zfsxuw69e4nszjyv5kuf8yt70t2847shpjak").unwrap(),
         );
-        let state_controller = QueryParameter::StateController(
+        let state_controller = BasicOutputsQueryParameter::UnlockableByAddress(
             Bech32Address::try_from_str("atoi1qzt0nhsf38nh6rs4p6zs5knqp6psgha9wsv74uajqgjmwc75ugupx3y7x0r").unwrap(),
         );
 
-        let mut query_parameters = QueryParameters::new([address1, address2, state_controller]);
+        let mut query_parameters = BasicOutputsQueryParameters::new([address1, address2, state_controller]);
         // since address1 and address2 are of the same enum variant, we should only have one
         assert!(query_parameters.0.len() == 2);
         // since address2 and address3 are of the same enum variant, we should only have one
         query_parameters.replace(address3);
         assert!(query_parameters.0.len() == 2);
         // Contains address query parameter
-        assert!(query_parameters.any(|param| matches!(param, QueryParameter::Address(_))));
+        assert!(query_parameters
+            .0
+            .iter()
+            .any(|param| matches!(param, BasicOutputsQueryParameter::Address(_))));
         // Contains no cursor query parameter
-        assert!(!query_parameters.any(|param| matches!(param, QueryParameter::Cursor(_))));
+        assert!(!query_parameters
+            .0
+            .iter()
+            .any(|param| matches!(param, BasicOutputsQueryParameter::Cursor(_))));
     }
 }

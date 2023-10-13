@@ -9,8 +9,9 @@ mod mqtt;
 use crypto::keys::bip44::Bip44;
 use iota_sdk::{
     client::{
-        api::GetAddressesOptions, constants::IOTA_COIN_TYPE, node_api::indexer::query_parameters::QueryParameter,
-        request_funds_from_faucet, secret::SecretManager, Client,
+        api::GetAddressesOptions, constants::IOTA_COIN_TYPE,
+        node_api::indexer::query_parameters::BasicOutputsQueryParameter, request_funds_from_faucet,
+        secret::SecretManager, Client,
     },
     types::block::{
         payload::{tagged_data::TaggedDataPayload, transaction::TransactionId, Payload},
@@ -72,10 +73,10 @@ pub async fn setup_transaction_block(client: &Client) -> (BlockId, TransactionId
         tokio::time::sleep(std::time::Duration::from_secs(1)).await;
         let output_ids_response = client
             .basic_output_ids([
-                QueryParameter::Address(addresses[0].clone()),
-                QueryParameter::HasExpiration(false),
-                QueryParameter::HasTimelock(false),
-                QueryParameter::HasStorageDepositReturn(false),
+                BasicOutputsQueryParameter::Address(addresses[0].clone()),
+                BasicOutputsQueryParameter::HasExpiration(false),
+                BasicOutputsQueryParameter::HasTimelock(false),
+                BasicOutputsQueryParameter::HasStorageDepositReturn(false),
             ])
             .await
             .unwrap();
