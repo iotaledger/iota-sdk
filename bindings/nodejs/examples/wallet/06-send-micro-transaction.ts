@@ -20,6 +20,11 @@ const RECV_ADDRESS =
 // yarn run-example ./wallet/06-send-micro-transaction.ts
 async function run() {
     try {
+        for (const envVar of ['EXPLORER_URL']) {
+            if (!(envVar in process.env)) {
+                throw new Error(`.env ${envVar} is undefined, see .env.example`);
+            }
+        }
         // Create the wallet
         const wallet = await getUnlockedWallet();
 

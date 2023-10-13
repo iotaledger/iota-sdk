@@ -13,10 +13,10 @@ require('dotenv').config({ path: '.env' });
 async function run() {
     initLogger();
     try {
-        if (!process.env.STRONGHOLD_PASSWORD) {
-            throw new Error(
-                '.env STRONGHOLD_PASSWORD is undefined, see .env.example',
-            );
+        for (const envVar of ['STRONGHOLD_PASSWORD', 'WALLET_DB_PATH', 'EXPLORER_URL']) {
+            if (!(envVar in process.env)) {
+                throw new Error(`.env ${envVar} is not defined`);
+            }
         }
 
         const wallet = new Wallet({
