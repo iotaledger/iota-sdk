@@ -402,7 +402,7 @@ pub fn semantic_validation(
             .capabilities()
             .has_capability(TransactionCapabilityFlag::BurnMana)
     {
-        // TODO: better failure reason incoming?
+        // TODO: add a variant https://github.com/iotaledger/iota-sdk/issues/1430
         return Ok(Some(TransactionFailureReason::SemanticValidationFailed));
     }
 
