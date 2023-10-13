@@ -175,6 +175,10 @@ pub enum Error {
     DuplicateOutputChain(ChainId),
     InvalidField(&'static str),
     NullDelegationValidatorId,
+    InvalidEpochDelta {
+        created: EpochIndex,
+        target: EpochIndex,
+    },
 }
 
 #[cfg(feature = "std")]
@@ -379,6 +383,9 @@ impl fmt::Display for Error {
             Self::DuplicateOutputChain(chain_id) => write!(f, "duplicate output chain {chain_id}"),
             Self::InvalidField(field) => write!(f, "invalid field: {field}"),
             Self::NullDelegationValidatorId => write!(f, "null delegation validator ID"),
+            Self::InvalidEpochDelta { created, target } => {
+                write!(f, "invalid epoch delta: created {created}, target {target}")
+            }
         }
     }
 }
