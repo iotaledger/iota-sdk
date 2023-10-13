@@ -319,7 +319,9 @@ pub(crate) mod rocksdb {
                 let value_utf8 =
                     String::from_utf8(value.to_vec()).map_err(|_| Error::Migration("invalid utf8".into()))?;
                 // "iota-wallet-key-checksum_value" is never an encrypted value
-                if key_utf8 == "iota-wallet-key-checksum_value" {
+                // "FIRST_LEDGER_ADDRESS" was at some point not re-encrypted with the correct password and should
+                // therefore also be ignored to not return an error
+                if key_utf8 == "iota-wallet-key-checksum_value" || key_utf8 == "FIRST_LEDGER_ADDRESS" {
                     value_utf8
                 } else if let Ok(value) = serde_json::from_str::<Vec<u8>>(&value_utf8) {
                     decrypt_record(value, encryption_key)?
