@@ -12,7 +12,7 @@
 //! ```
 
 use iota_sdk::{
-    client::{node_api::indexer::query_parameters::FoundryOutputsQueryParameter, Client, Result},
+    client::{node_api::indexer::query_parameters::FoundryOutputsQueryParameters, Client, Result},
     types::block::address::Bech32Address,
 };
 
@@ -41,7 +41,7 @@ async fn main() -> Result<()> {
 
     // Get output IDs of foundry outputs that can be controlled by this address.
     let output_ids_response = client
-        .foundry_output_ids([FoundryOutputsQueryParameter::AccountAddress(address)])
+        .foundry_output_ids([FoundryOutputsQueryParameters::AccountAddress(address)])
         .await?;
 
     println!("Foundry output IDs: {output_ids_response:#?}");

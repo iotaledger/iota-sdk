@@ -1,9 +1,14 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use std::collections::HashSet;
+
 use crate::{
-    client::{node_api::indexer::query_parameters::BasicOutputsQueryParameter, secret::SecretManage},
-    types::block::{address::Bech32Address, output::OutputId, ConvertTo},
+    client::{node_api::indexer::query_parameters::BasicOutputsQueryParameters, secret::SecretManage},
+    types::{
+        api::plugins::indexer::OutputIdsResponse,
+        block::{address::Bech32Address, output::OutputId, ConvertTo},
+    },
     wallet::Account,
 };
 
@@ -20,12 +25,13 @@ where
         // Only request basic outputs with `AddressUnlockCondition` only
         Ok(self
             .client()
-            .basic_output_ids([
-                BasicOutputsQueryParameter::Address(bech32_address),
-                BasicOutputsQueryParameter::HasExpiration(false),
-                BasicOutputsQueryParameter::HasTimelock(false),
-                BasicOutputsQueryParameter::HasStorageDepositReturn(false),
-            ])
+            .basic_output_ids(BasicOutputsQueryParameters {
+                address: Some(bech32_address),
+                has_expiration: Some(false),
+                has_timelock: Some(false),
+                has_storage_deposit_return: Some(false),
+                ..Default::default()
+            })
             .await?
             .items)
     }
@@ -42,15 +48,19 @@ where
             let mut output_ids = Vec::new();
             output_ids.extend(
                 self.client()
-                    .basic_output_ids([QueryParameter::UnlockableByAddress(bech32_address)])
+                    .basic_output_ids(BasicOutputsQueryParameters {
+                        unlockable_by_address: Some(bech32_address.clone()),
+                        ..Default::default()
+                    })
                     .await?
                     .items,
             );
             output_ids.extend(
                 self.client()
-                    .basic_output_ids([BasicOutputsQueryParameter::StorageDepositReturnAddress(
-                        bech32_address.clone(),
-                    )])
+                    .basic_output_ids(BasicOutputsQueryParameters {
+                        storage_deposit_return_address: Some(bech32_address.clone()),
+                        ..Default::default()
+                    })
                     .await?
                     .items,
             );
@@ -67,8 +77,11 @@ where
                     let bech32_address = bech32_address.clone();
                     let client = client.clone();
                     tokio::spawn(async move {
-                        self.client()
-                            .basic_output_ids([QueryParameter::UnlockableByAddress(bech32_address)])
+                        client
+                            .basic_output_ids(BasicOutputsQueryParameters {
+                                unlockable_by_address: Some(bech32_address),
+                                ..Default::default()
+                            })
                             .await
                             .map_err(From::from)
                     })
@@ -81,7 +94,10 @@ where
                     let client = client.clone();
                     tokio::spawn(async move {
                         client
-                            .basic_output_ids([BasicOutputsQueryParameter::StorageDepositReturnAddress(bech32_address)])
+                            .basic_output_ids(BasicOutputsQueryParameters {
+                                storage_deposit_return_address: Some(bech32_address),
+                                ..Default::default()
+                            })
                             .await
                             .map_err(From::from)
                     })

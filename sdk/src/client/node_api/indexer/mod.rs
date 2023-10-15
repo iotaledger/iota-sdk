@@ -6,7 +6,7 @@
 pub mod query_parameters;
 pub mod routes;
 
-use self::query_parameters::QueryParameterHelper;
+use self::query_parameters::QueryParameter;
 use crate::{
     client::{ClientInner, Result},
     types::api::plugins::indexer::OutputIdsResponse,
@@ -14,11 +14,11 @@ use crate::{
 
 impl ClientInner {
     /// Get all output ids for a provided URL route and query parameters.
-    /// If a `OutputsQueryParameter::Cursor(_)` is provided, only a single page will be queried.
+    /// If a `OutputsQueryParameters::Cursor(_)` is provided, only a single page will be queried.
     pub async fn get_output_ids(
         &self,
         route: &str,
-        mut query_parameters: impl QueryParameterHelper,
+        mut query_parameters: impl QueryParameter,
         need_quorum: bool,
         prefer_permanode: bool,
     ) -> Result<OutputIdsResponse> {

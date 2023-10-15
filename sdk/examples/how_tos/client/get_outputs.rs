@@ -13,7 +13,7 @@
 //! ```
 
 use iota_sdk::{
-    client::{node_api::indexer::query_parameters::BasicOutputsQueryParameter, Client, Result},
+    client::{node_api::indexer::query_parameters::BasicOutputsQueryParameters, Client, Result},
     types::block::address::Bech32Address,
 };
 
@@ -41,10 +41,10 @@ async fn main() -> Result<()> {
     // Get output IDs of basic outputs that can be controlled by this address without further unlock constraints.
     let output_ids_response = client
         .basic_output_ids([
-            BasicOutputsQueryParameter::Address(address),
-            BasicOutputsQueryParameter::HasExpiration(false),
-            BasicOutputsQueryParameter::HasTimelock(false),
-            BasicOutputsQueryParameter::HasStorageDepositReturn(false),
+            BasicOutputsQueryParameters::Address(address),
+            BasicOutputsQueryParameters::HasExpiration(false),
+            BasicOutputsQueryParameters::HasTimelock(false),
+            BasicOutputsQueryParameters::HasStorageDepositReturn(false),
         ])
         .await?;
 

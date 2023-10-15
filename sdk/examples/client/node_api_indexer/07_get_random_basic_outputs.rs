@@ -11,7 +11,7 @@
 //! cargo run --release --example node_api_indexer_get_random_basic_outputs [NODE_URL]
 //! ```
 
-use iota_sdk::client::{node_api::indexer::query_parameters::BasicOutputsQueryParameter, Client, Result};
+use iota_sdk::client::{node_api::indexer::query_parameters::BasicOutputsQueryParameters, Client, Result};
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -28,7 +28,7 @@ async fn main() -> Result<()> {
 
     // Get a single page with random output IDs by providing only `QueryParameter::Cursor(_)`.
     let output_ids_response = client
-        .basic_output_ids([BasicOutputsQueryParameter::Cursor(String::new())])
+        .basic_output_ids([BasicOutputsQueryParameters::Cursor(String::new())])
         .await?;
 
     println!("Basic output IDs from first page {output_ids_response:#?}");

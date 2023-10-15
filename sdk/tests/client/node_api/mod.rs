@@ -10,7 +10,7 @@ use crypto::keys::bip44::Bip44;
 use iota_sdk::{
     client::{
         api::GetAddressesOptions, constants::IOTA_COIN_TYPE,
-        node_api::indexer::query_parameters::BasicOutputsQueryParameter, request_funds_from_faucet,
+        node_api::indexer::query_parameters::BasicOutputsQueryParameters, request_funds_from_faucet,
         secret::SecretManager, Client,
     },
     types::block::{
@@ -73,10 +73,10 @@ pub async fn setup_transaction_block(client: &Client) -> (BlockId, TransactionId
         tokio::time::sleep(std::time::Duration::from_secs(1)).await;
         let output_ids_response = client
             .basic_output_ids([
-                BasicOutputsQueryParameter::Address(addresses[0].clone()),
-                BasicOutputsQueryParameter::HasExpiration(false),
-                BasicOutputsQueryParameter::HasTimelock(false),
-                BasicOutputsQueryParameter::HasStorageDepositReturn(false),
+                BasicOutputsQueryParameters::Address(addresses[0].clone()),
+                BasicOutputsQueryParameters::HasExpiration(false),
+                BasicOutputsQueryParameters::HasTimelock(false),
+                BasicOutputsQueryParameters::HasStorageDepositReturn(false),
             ])
             .await
             .unwrap();
