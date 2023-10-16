@@ -122,6 +122,7 @@ impl<Flag> Default for Capabilities<Flag> {
         }
     }
 }
+
 impl<Flag> Clone for Capabilities<Flag> {
     fn clone(&self) -> Self {
         Self {
@@ -130,22 +131,27 @@ impl<Flag> Clone for Capabilities<Flag> {
         }
     }
 }
+
 impl<Flag> PartialEq for Capabilities<Flag> {
     fn eq(&self, other: &Self) -> bool {
         self.bytes == other.bytes
     }
 }
+
 impl<Flag> Eq for Capabilities<Flag> {}
+
 impl<Flag> PartialOrd for Capabilities<Flag> {
     fn partial_cmp(&self, other: &Self) -> Option<core::cmp::Ordering> {
         self.bytes.partial_cmp(&other.bytes)
     }
 }
+
 impl<Flag> Ord for Capabilities<Flag> {
     fn cmp(&self, other: &Self) -> core::cmp::Ordering {
         self.bytes.cmp(&other.bytes)
     }
 }
+
 impl<Flag> core::hash::Hash for Capabilities<Flag> {
     fn hash<H: core::hash::Hasher>(&self, state: &mut H) {
         self.bytes.hash(state);
