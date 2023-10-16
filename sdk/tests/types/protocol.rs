@@ -72,7 +72,7 @@
 //           "activationOffset":7
 //         },
 //         "rewardsParameters":{
-//           "validatorBlocksPerSlot":10,
+//           "validationBlocksPerSlot":10,
 //           "profitMarginExponent":8,
 //           "bootstrappingDuration":"1154",
 //           "manaShareCoefficient":"2",
