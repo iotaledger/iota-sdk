@@ -74,10 +74,9 @@ impl Packable for Hrp {
         let mut bytes = alloc::vec![0u8; len];
         unpacker.unpack_bytes(&mut bytes)?;
 
-        let hrp = bytes.into_iter().map(|b| b as char).collect::<String>();
-
         Ok(Self(
-            bech32::Hrp::parse(&hrp).map_err(|e| UnpackError::Packable(Error::InvalidBech32Hrp(e)))?,
+            bech32::Hrp::parse(&String::from_utf8_lossy(&bytes))
+                .map_err(|e| UnpackError::Packable(Error::InvalidBech32Hrp(e)))?,
         ))
     }
 }

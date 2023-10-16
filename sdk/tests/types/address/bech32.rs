@@ -59,6 +59,13 @@ fn hrp_pack_unpack() {
 }
 
 #[test]
+fn invalid_hrp_unpack() {
+    let packed_hrp = vec![32, 32, 32]; // invalid HRP: "   "
+
+    assert!(Hrp::unpack_verified(packed_hrp.as_slice(), &()).is_err());
+}
+
+#[test]
 fn bech32_into_inner() {
     let address = Address::try_from_bech32(ED25519_BECH32).unwrap();
     let bech32_address = Bech32Address::from_str(ED25519_BECH32).unwrap();
