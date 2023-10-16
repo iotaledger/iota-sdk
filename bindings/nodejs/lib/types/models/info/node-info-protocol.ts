@@ -103,6 +103,46 @@ export interface ProtocolParameters {
      * The parameters used by signaling protocol parameters upgrade.
      */
     versionSignaling: VersionSignalingParameters;
+    /**
+     * Rewards Parameters defines the parameters that are used to calculate Mana rewards.
+     */
+    rewardsParameters: RewardsParameters;
+}
+
+/**
+ * Rewards Parameters defines the parameters that are used to calculate Mana rewards.
+ */
+export interface RewardsParameters {
+    /**
+     * The number of validation blocks that should be issued by a selected validator
+     * per slot during its epoch duties.
+     */
+    validationBlocksPerSlot: number;
+    /**
+     * Profit Margin Exponent is used for shift operation for calculation of profit margin.
+     */
+    profitMarginExponent: number;
+    /**
+     * The length in epochs of the bootstrapping phase.
+     */
+    bootstrappingDuration: number;
+    /**
+     * Mana Share Coefficient is the coefficient used for calculation of initial rewards.
+     */
+    manaShareCoefficient: u64;
+    /**
+     * Decay Balancing Constant Exponent is the exponent used for calculation of the initial reward.
+     */
+    decayBalancingConstantExponent: number;
+    /**
+     * Decay Balancing Constant is an integer approximation calculated based on chosen Decay Balancing Constant Exponent.
+     */
+    decayBalancingConstant: u64;
+    /**
+     * Pool Coefficient Exponent is the exponent used for shifting operation
+     * in the pool rewards calculations.
+     */
+    poolCoefficientExponent: number;
 }
 
 /**
