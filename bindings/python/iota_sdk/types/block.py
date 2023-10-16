@@ -31,7 +31,7 @@ class Block:
     @classmethod
     def from_dict(cls, block_dict: Dict) -> Block:
         """
-        The function `from_dict` takes a dictionary that contains the data needed to
+        Takes a dictionary that contains the data needed to
         create an instance of the `Block` class.
 
         Returns:

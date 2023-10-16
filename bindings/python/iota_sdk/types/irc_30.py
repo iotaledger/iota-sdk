@@ -35,8 +35,7 @@ class Irc30Metadata:
     @staticmethod
     def from_dict(metadata_dict: dict):
         """
-        The function `from_dict` takes a dictionary as input and returns an instance of the
-        `Irc30Metadata` class.
+        Takes as input and returns an instance of the `Irc30Metadata` class.
         """
         return from_dict(Irc30Metadata, metadata_dict)
 
