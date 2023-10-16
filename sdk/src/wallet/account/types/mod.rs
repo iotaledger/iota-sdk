@@ -57,8 +57,8 @@ impl OutputData {
         &self,
         account: &AccountDetails,
         slot_index: SlotIndex,
-        min_committable_age: u64,
-        max_committable_age: u64,
+        min_committable_age: u32,
+        max_committable_age: u32,
         account_transition: Option<AccountTransition>,
     ) -> crate::wallet::Result<Option<InputSigningData>> {
         let required_address = self

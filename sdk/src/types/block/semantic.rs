@@ -302,7 +302,7 @@ pub fn semantic_validation(
                     if let Some(storage_deposit_return) = unlock_conditions.storage_deposit_return() {
                         let amount = context
                             .storage_deposit_returns
-                            .entry(*storage_deposit_return.return_address())
+                            .entry(storage_deposit_return.return_address().clone())
                             .or_default();
 
                         *amount = amount

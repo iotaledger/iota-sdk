@@ -322,9 +322,9 @@ impl Output {
                 Some(
                     if account_transition.unwrap_or(AccountTransition::State) == AccountTransition::State {
                         // Account address is only unlocked if it's a state transition
-                        *output.state_controller_address()
+                        output.state_controller_address().clone()
                     } else {
-                        *output.governor_address()
+                        output.governor_address().clone()
                     },
                 )
             }
@@ -336,7 +336,7 @@ impl Output {
             Self::Delegation(output) => output
                 .unlock_conditions()
                 .locked_address(output.address(), slot_index, min_committable_age, max_committable_age)
-                .copied(),
+                .cloned(),
         }
     }
 
