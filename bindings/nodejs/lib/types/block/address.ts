@@ -160,10 +160,6 @@ const RestrictedAddressDiscriminator = {
         { value: Ed25519Address, name: AddressType.Ed25519 as any },
         { value: AccountAddress, name: AddressType.Account as any },
         { value: NftAddress, name: AddressType.Nft as any },
-        {
-            value: ImplicitAccountCreationAddress,
-            name: AddressType.ImplicitAccountCreation as any,
-        },
     ],
 };
 
