@@ -20,7 +20,7 @@ use iota_sdk::{
     },
     wallet::{
         account::{
-            types::{AccountAddress, AccountIdentifier},
+            types::{AccountAddress, AccountIdentifier, OutputData},
             Account, ConsolidationParams, OutputsToClaim, SyncOptions, TransactionOptions,
         },
         CreateNativeTokenParams, MintNftParams, SendNativeTokensParams, SendNftParams, SendParams,
@@ -689,32 +689,7 @@ pub async fn output_command(account: &Account, selector: OutputSelector) -> Resu
 
 /// `outputs` command
 pub async fn outputs_command(account: &Account) -> Result<(), Error> {
-    let mut outputs = account.outputs(None).await?;
-    outputs.sort_by(|a, b| {
-        a.metadata
-            .milestone_timestamp_booked()
-            .cmp(&b.metadata.milestone_timestamp_booked())
-    });
-
-    if outputs.is_empty() {
-        println_log_info!("No outputs found");
-    } else {
-        println_log_info!("Outputs:");
-        for (i, output_data) in outputs.into_iter().rev().enumerate() {
-            let booked_time = to_utc_date_time(output_data.metadata.milestone_timestamp_booked() as u128 * 1000)?;
-            let formatted_time = booked_time.format("%Y-%m-%d %H:%M:%S").to_string();
-
-            println_log_info!(
-                "{:<5}{}\t{}\t{}",
-                i,
-                &output_data.output_id,
-                output_data.output.kind_str(),
-                formatted_time
-            );
-        }
-    }
-
-    Ok(())
+    print_outputs(account.outputs(None).await?, "Outputs:").await
 }
 
 // `send` command
@@ -871,18 +846,7 @@ pub async fn transactions_command(account: &Account, show_details: bool) -> Resu
 
 /// `unspent-outputs` command
 pub async fn unspent_outputs_command(account: &Account) -> Result<(), Error> {
-    let outputs = account.unspent_outputs(None).await?;
-
-    if outputs.is_empty() {
-        println_log_info!("No outputs found");
-    } else {
-        println_log_info!("Unspent outputs:");
-        for (i, output_data) in outputs.into_iter().enumerate() {
-            println_log_info!("{}\t{}\t{}", i, &output_data.output_id, output_data.output.kind_str());
-        }
-    }
-
-    Ok(())
+    print_outputs(account.unspent_outputs(None).await?, "Unspent outputs:").await
 }
 
 pub async fn vote_command(account: &Account, event_id: ParticipationEventId, answers: Vec<u8>) -> Result<(), Error> {
@@ -1035,6 +999,34 @@ async fn print_address(account: &Account, address: &AccountAddress) -> Result<()
     );
 
     println_log_info!("{log}");
+
+    Ok(())
+}
+
+async fn print_outputs(mut outputs: Vec<OutputData>, title: &str) -> Result<(), Error> {
+    outputs.sort_by(|a, b| {
+        a.metadata
+            .milestone_timestamp_booked()
+            .cmp(&b.metadata.milestone_timestamp_booked())
+    });
+
+    if outputs.is_empty() {
+        println_log_info!("No outputs found");
+    } else {
+        println_log_info!("{title}");
+        for (i, output_data) in outputs.into_iter().rev().enumerate() {
+            let booked_time = to_utc_date_time(output_data.metadata.milestone_timestamp_booked() as u128 * 1000)?;
+            let formatted_time = booked_time.format("%Y-%m-%d %H:%M:%S").to_string();
+
+            println_log_info!(
+                "{:<5}{}\t{}\t{}",
+                i,
+                &output_data.output_id,
+                output_data.output.kind_str(),
+                formatted_time
+            );
+        }
+    }
 
     Ok(())
 }
