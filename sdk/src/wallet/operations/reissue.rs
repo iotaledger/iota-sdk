@@ -61,7 +61,7 @@ where
                         None,
                         Some(Payload::Transaction(Box::new(transaction.payload.clone()))),
                         &*self.get_secret_manager().read().await,
-                        Bip44::new(self.coin_type().await),
+                        self.bip_path().await,
                     )
                     .await?
                     .id(&protocol_parameters),
@@ -111,7 +111,7 @@ where
                                 None,
                                 Some(Payload::Transaction(Box::new(transaction.payload.clone()))),
                                 &*self.get_secret_manager().read().await,
-                                Bip44::new(self.coin_type().await),
+                                self.bip_path().await,
                             )
                             .await?;
                         block_ids.push(reissued_block.id(&protocol_parameters));

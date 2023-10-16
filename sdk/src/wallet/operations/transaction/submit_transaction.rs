@@ -31,7 +31,7 @@ where
                 None,
                 Some(Payload::from(transaction_payload)),
                 &*self.get_secret_manager().read().await,
-                Bip44::new(self.coin_type().await),
+                self.bip_path().await,
             )
             .await?;
 

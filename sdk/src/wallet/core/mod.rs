@@ -256,9 +256,9 @@ where
         self.data().await.address.hrp
     }
 
-    /// Get the wallet's configured coin type.
-    pub async fn coin_type(&self) -> u32 {
-        self.data().await.bip_path.coin_type
+    /// Get the wallet's configured bip path.
+    pub async fn bip_path(&self) -> Bip44 {
+        self.data().await.bip_path
     }
 
     /// Get the [`OutputData`] of an output stored in the wallet.

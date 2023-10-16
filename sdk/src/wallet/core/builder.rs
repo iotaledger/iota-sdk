@@ -235,7 +235,7 @@ where
         #[cfg(feature = "storage")]
         let mut wallet_data = storage_manager.load_wallet_data().await?;
 
-        // The coin type must not change.
+        // The bip path must not change.
         #[cfg(feature = "storage")]
         if let Some(wallet_data) = &wallet_data {
             let new_bip_path = bip_path;
