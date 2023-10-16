@@ -8,10 +8,7 @@ use rustyline::{
     completion::Completer, highlight::Highlighter, hint::HistoryHinter, Completer, Context, Helper, Hinter, Validator,
 };
 
-#[derive(Default)]
-pub struct WalletOperationCompleter;
-
-const WALLET_OPERATIONS: &[&str] = &[
+const WALLET_COMMANDS: &[&str] = &[
     "address",
     "balance",
     "burn-native-token",
@@ -51,7 +48,10 @@ const WALLET_OPERATIONS: &[&str] = &[
     "help",
 ];
 
-impl Completer for WalletOperationCompleter {
+#[derive(Default)]
+pub struct WalletCommandCompleter;
+
+impl Completer for WalletCommandCompleter {
     type Candidate = &'static str;
 
     fn complete(
@@ -62,7 +62,7 @@ impl Completer for WalletOperationCompleter {
     ) -> rustyline::Result<(usize, Vec<Self::Candidate>)> {
         Ok((
             0,
-            WALLET_OPERATIONS
+            WALLET_COMMANDS
                 .iter()
                 .filter_map(|cmd| cmd.starts_with(input).then_some(*cmd))
                 .collect(),
@@ -71,21 +71,21 @@ impl Completer for WalletOperationCompleter {
 }
 
 #[derive(Helper, Completer, Hinter, Validator)]
-pub struct WalletOperationPromptHelper {
+pub struct WalletCommandHelper {
     #[rustyline(Completer)]
-    completer: WalletOperationCompleter,
+    completer: WalletCommandCompleter,
     #[rustyline(Hinter)]
     hinter: HistoryHinter,
     prompt: String,
 }
 
-impl WalletOperationPromptHelper {
+impl WalletCommandHelper {
     pub fn set_prompt(&mut self, prompt: String) {
         self.prompt = prompt;
     }
 }
 
-impl Highlighter for WalletOperationPromptHelper {
+impl Highlighter for WalletCommandHelper {
     fn highlight_prompt<'b, 's: 'b, 'p: 'b>(&'s self, prompt: &'p str, default: bool) -> Cow<'b, str> {
         if default {
             Cow::Borrowed(&self.prompt)
@@ -99,10 +99,10 @@ impl Highlighter for WalletOperationPromptHelper {
     }
 }
 
-impl Default for WalletOperationPromptHelper {
+impl Default for WalletCommandHelper {
     fn default() -> Self {
         Self {
-            completer: WalletOperationCompleter,
+            completer: WalletCommandCompleter,
             hinter: HistoryHinter {},
             prompt: String::new(),
         }

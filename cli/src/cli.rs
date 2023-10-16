@@ -33,7 +33,7 @@ const DEFAULT_WALLET_DATABASE_PATH: &str = "./stardust-cli-wallet-db";
 
 #[derive(Debug, Clone, Parser)]
 #[command(author, version, about, long_about = None, propagate_version = true)]
-pub struct WalletCli {
+pub struct Cli {
     /// Set the path to the wallet database.
     #[arg(long, value_name = "PATH", env = "WALLET_DATABASE_PATH", default_value = DEFAULT_WALLET_DATABASE_PATH)]
     pub wallet_db_path: String,
@@ -44,10 +44,10 @@ pub struct WalletCli {
     #[arg(short, long, default_value = DEFAULT_LOG_LEVEL)]
     pub log_level: LevelFilter,
     #[command(subcommand)]
-    pub command: Option<WalletCommand>,
+    pub command: Option<CliCommand>,
 }
 
-impl WalletCli {
+impl Cli {
     pub fn print_help() -> Result<(), Error> {
         Self::command().bin_name("wallet").print_help()?;
         Ok(())
@@ -83,7 +83,7 @@ impl Default for InitParameters {
 }
 
 #[derive(Debug, Clone, Subcommand)]
-pub enum WalletCommand {
+pub enum CliCommand {
     /// Create a stronghold backup file.
     Backup {
         /// Path of the created stronghold backup file.
@@ -123,48 +123,48 @@ pub enum WalletCommand {
     Sync,
 }
 
-pub async fn new_wallet(cli: WalletCli) -> Result<Option<Wallet>, Error> {
+pub async fn new_wallet(cli: Cli) -> Result<Option<Wallet>, Error> {
     let storage_path = Path::new(&cli.wallet_db_path);
     let snapshot_path = Path::new(&cli.stronghold_snapshot_path);
 
     Ok(if let Some(command) = cli.command {
         match command {
-            WalletCommand::Backup { backup_path } => {
+            CliCommand::Backup { backup_path } => {
                 backup_command(storage_path, snapshot_path, std::path::Path::new(&backup_path)).await?;
                 None
             }
-            WalletCommand::ChangePassword => {
+            CliCommand::ChangePassword => {
                 let wallet = change_password_command(storage_path, snapshot_path).await?;
                 Some(wallet)
             }
-            WalletCommand::Init(init_parameters) => {
+            CliCommand::Init(init_parameters) => {
                 let wallet = init_command(storage_path, snapshot_path, init_parameters).await?;
                 Some(wallet)
             }
-            WalletCommand::MigrateStrongholdSnapshotV2ToV3 { path } => {
+            CliCommand::MigrateStrongholdSnapshotV2ToV3 { path } => {
                 migrate_stronghold_snapshot_v2_to_v3_command(path).await?;
                 None
             }
-            WalletCommand::Mnemonic {
+            CliCommand::Mnemonic {
                 output_file_name,
                 output_stdout,
             } => {
                 mnemonic_command(output_file_name, output_stdout).await?;
                 None
             }
-            WalletCommand::NodeInfo => {
+            CliCommand::NodeInfo => {
                 node_info_command(storage_path).await?;
                 None
             }
-            WalletCommand::Restore { backup_path } => {
+            CliCommand::Restore { backup_path } => {
                 let wallet = restore_command(storage_path, snapshot_path, std::path::Path::new(&backup_path)).await?;
                 Some(wallet)
             }
-            WalletCommand::SetNodeUrl { url } => {
+            CliCommand::SetNodeUrl { url } => {
                 let wallet = set_node_url_command(storage_path, snapshot_path, url).await?;
                 Some(wallet)
             }
-            WalletCommand::Sync => {
+            CliCommand::Sync => {
                 let wallet = sync_command(storage_path, snapshot_path).await?;
                 Some(wallet)
             }
@@ -183,7 +183,7 @@ pub async fn new_wallet(cli: WalletCli) -> Result<Option<Wallet>, Error> {
                     println_log_info!("Created new wallet.");
                     Some(wallet)
                 } else {
-                    WalletCli::print_help()?;
+                    Cli::print_help()?;
                     None
                 }
             }
