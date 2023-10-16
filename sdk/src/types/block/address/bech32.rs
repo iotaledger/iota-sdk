@@ -42,7 +42,7 @@ impl FromStr for Hrp {
     type Err = Error;
 
     fn from_str(hrp: &str) -> Result<Self, Self::Err> {
-        Ok(Self(bech32::Hrp::parse(hrp).map_err(Error::InvalidBech32Hrp)?))
+        Ok(Self(bech32::Hrp::parse(hrp)?))
     }
 }
 

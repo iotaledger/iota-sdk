@@ -387,6 +387,12 @@ impl fmt::Display for Error {
     }
 }
 
+impl From<Bech32HrpError> for Error {
+    fn from(error: Bech32HrpError) -> Self {
+        Self::InvalidBech32Hrp(error)
+    }
+}
+
 impl From<CryptoError> for Error {
     fn from(error: CryptoError) -> Self {
         Self::Crypto(error)
