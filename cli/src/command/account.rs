@@ -669,7 +669,11 @@ pub async fn output_command(account: &Account, selector: OutputSelector) -> Resu
         OutputSelector::Id(id) => account.get_output(&id).await,
         OutputSelector::Index(index) => {
             let mut outputs = account.outputs(None).await?;
-            outputs.sort_by(|a, b| a.output_id.cmp(&b.output_id));
+            outputs.sort_by(|a, b| {
+                a.metadata
+                    .milestone_timestamp_booked()
+                    .cmp(&b.metadata.milestone_timestamp_booked())
+            });
             outputs.into_iter().nth(index)
         }
     };
@@ -685,16 +689,31 @@ pub async fn output_command(account: &Account, selector: OutputSelector) -> Resu
 
 /// `outputs` command
 pub async fn outputs_command(account: &Account) -> Result<(), Error> {
-    let outputs = account.outputs(None).await?;
+    let mut outputs = account.outputs(None).await?;
+    outputs.sort_by(|a, b| {
+        a.metadata
+            .milestone_timestamp_booked()
+            .cmp(&b.metadata.milestone_timestamp_booked())
+    });
 
     if outputs.is_empty() {
         println_log_info!("No outputs found");
     } else {
         println_log_info!("Outputs:");
         for (i, output_data) in outputs.into_iter().enumerate() {
-            println_log_info!("{}\t{}\t{}", i, &output_data.output_id, output_data.output.kind_str());
+            let booked_time = to_utc_date_time(output_data.metadata.milestone_timestamp_booked().into())?;
+            let formatted_time = booked_time.format("%Y-%m-%d %H:%M:%S").to_string();
+
+            println_log_info!(
+                "{:<5}{}\t{}\t{}",
+                i,
+                &output_data.output_id,
+                output_data.output.kind_str(),
+                formatted_time
+            );
         }
     }
+
     Ok(())
 }
 
