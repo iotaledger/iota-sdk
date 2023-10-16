@@ -54,7 +54,10 @@ async fn main() -> Result<()> {
     // Find first output unlockable by the account address
     let input = *account
         .client()
-        .basic_output_ids([BasicOutputsQueryParameters::Address(account_address)])
+        .basic_output_ids(BasicOutputsQueryParameters {
+            address: Some(account_address),
+            ..Default::default()
+        })
         .await?
         .items
         .first()

@@ -129,7 +129,10 @@ async fn test_get_address_outputs() {
         .unwrap();
 
     let output_ids_response = client
-        .basic_output_ids([BasicOutputsQueryParameters::Address(address)])
+        .basic_output_ids(BasicOutputsQueryParameters {
+            address: Some(address),
+            ..Default::default()
+        })
         .await
         .unwrap();
 

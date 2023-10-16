@@ -29,7 +29,7 @@ impl ClientInner {
         };
 
         let query_string = query_parameters.to_query_string();
-        // Return early with only a single page if a `QueryParameter::Cursor(_)` is provided.
+        // Return early with only a single page if an empty string is provided as cursor.
         let return_early = query_string
             .map(|s| s.contains("cursor=&") || s.ends_with("cursor="))
             .unwrap_or(false);

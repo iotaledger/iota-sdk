@@ -26,9 +26,12 @@ async fn main() -> Result<()> {
     // Create a node client.
     let client = Client::builder().with_node(&node_url)?.finish().await?;
 
-    // Get a single page with random output IDs by providing only `QueryParameter::Cursor(_)`.
+    // Get a single page with random output IDs by providing only an empty string as cursor.
     let output_ids_response = client
-        .basic_output_ids([BasicOutputsQueryParameters::Cursor(String::new())])
+        .basic_output_ids(BasicOutputsQueryParameters {
+            cursor: Some(String::new()),
+            ..Default::default()
+        })
         .await?;
 
     println!("Basic output IDs from first page {output_ids_response:#?}");

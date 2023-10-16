@@ -257,14 +257,14 @@ mod tests {
             ..Default::default()
         };
         assert_eq!(
-            empty_basic_outputs_query_parameters.to_query_string(),
-            Some("address=atoi1qzt0nhsf38nh6rs4p6zs5knqp6psgha9wsv74uajqgjmwc75ugupx3y7x0r&cursor=")
+            basic_outputs_query_parameters.to_query_string(),
+            Some("address=atoi1qzt0nhsf38nh6rs4p6zs5knqp6psgha9wsv74uajqgjmwc75ugupx3y7x0r&cursor=".into())
         );
 
         basic_outputs_query_parameters.replace_cursor("newCursor".into());
         assert_eq!(
-            empty_basic_outputs_query_parameters.to_query_string(),
-            Some("address=atoi1qzt0nhsf38nh6rs4p6zs5knqp6psgha9wsv74uajqgjmwc75ugupx3y7x0r&cursor=newCursor")
+            basic_outputs_query_parameters.to_query_string(),
+            Some("address=atoi1qzt0nhsf38nh6rs4p6zs5knqp6psgha9wsv74uajqgjmwc75ugupx3y7x0r&cursor=newCursor".into())
         );
     }
 }

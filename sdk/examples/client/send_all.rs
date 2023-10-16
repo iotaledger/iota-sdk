@@ -41,12 +41,12 @@ async fn main() -> Result<()> {
 
     // Get output ids of outputs that can be controlled by this address without further unlock constraints
     let output_ids_response = client
-        .basic_output_ids([
-            QueryParameter::Address(address),
-            QueryParameter::HasExpiration(false),
-            QueryParameter::HasTimelock(false),
-            QueryParameter::HasStorageDepositReturn(false),
-        ])
+        .basic_output_ids(BasicOutputsQueryParameters{address: Some(address),
+            has_expiration: Some(false),
+            has_timelock: Some(false),
+            has_storage_deposit_return: Some(false),
+            ..Default::default()
+})
         .await?;
 
     // Get the outputs by their id

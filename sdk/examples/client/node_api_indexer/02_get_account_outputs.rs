@@ -41,10 +41,11 @@ async fn main() -> Result<()> {
 
     // Get output IDs of account outputs that can be controlled by this address.
     let output_ids_response = client
-        .account_output_ids([
-            AccountOutputsQueryParameters::Governor(address.clone()),
-            AccountOutputsQueryParameters::StateController(address),
-        ])
+        .account_output_ids(AccountOutputsQueryParameters {
+            governor: Some(address.clone()),
+            state_controller: Some(address),
+            ..Default::default()
+        })
         .await?;
 
     println!("Account output IDs: {output_ids_response:#?}");

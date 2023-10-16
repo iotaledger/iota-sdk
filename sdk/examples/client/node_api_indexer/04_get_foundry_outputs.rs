@@ -41,7 +41,10 @@ async fn main() -> Result<()> {
 
     // Get output IDs of foundry outputs that can be controlled by this address.
     let output_ids_response = client
-        .foundry_output_ids([FoundryOutputsQueryParameters::AccountAddress(address)])
+        .foundry_output_ids(FoundryOutputsQueryParameters {
+            account_address: Some(address),
+            ..Default::default()
+        })
         .await?;
 
     println!("Foundry output IDs: {output_ids_response:#?}");

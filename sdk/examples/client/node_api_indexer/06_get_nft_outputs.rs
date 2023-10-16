@@ -41,12 +41,13 @@ async fn main() -> Result<()> {
 
     // Get output IDs of NFT outputs that can be controlled by this address without further unlock constraints.
     let output_ids_response = client
-        .nft_output_ids([
-            NftOutputsQueryParameters::Address(address),
-            NftOutputsQueryParameters::HasExpiration(false),
-            NftOutputsQueryParameters::HasTimelock(false),
-            NftOutputsQueryParameters::HasStorageDepositReturn(false),
-        ])
+        .nft_output_ids(NftOutputsQueryParameters {
+            address: Some(address),
+            has_expiration: Some(false),
+            has_timelock: Some(false),
+            has_storage_deposit_return: Some(false),
+            ..Default::default()
+        })
         .await?;
 
     println!("NFT output IDs {output_ids_response:#?}");
