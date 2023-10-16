@@ -191,7 +191,8 @@ impl ProtocolParameters {
                 epoch_delta,
             );
             let potential_mana_n_1 = mana_structure.decay(c, epoch_delta - 1);
-            let potential_mana_0 = c + mana_structure.generate_mana(amount, slots_since_epoch_start.0);
+            let potential_mana_0 = c + mana_structure.generate_mana(amount, slots_since_epoch_start.0)
+                - (c >> mana_structure.decay_factors_exponent());
             potential_mana_0 - potential_mana_n_1 + potential_mana_n
         })
     }
