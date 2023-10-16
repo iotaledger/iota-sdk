@@ -23,7 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- `Account::claim_outputs()` if an input have less amount than min storage deposit;
+- `Account::claim_outputs()` if an input has less amount than min storage deposit;
 
 ## 1.1.1 - 2023-10-11
 
