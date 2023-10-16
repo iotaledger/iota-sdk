@@ -512,7 +512,7 @@ impl FoundryOutput {
             Ordering::Greater => {
                 // Melt / Burn
 
-                if capabilities.has_capability(TransactionCapabilityFlag::BurnNativeTokens) {
+                if !capabilities.has_capability(TransactionCapabilityFlag::BurnNativeTokens) {
                     // TODO: add a variant https://github.com/iotaledger/iota-sdk/issues/1430
                     return Err(StateTransitionError::UnsupportedStateTransition);
                 }
