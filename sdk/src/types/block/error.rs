@@ -51,7 +51,7 @@ pub enum Error {
     InvalidStorageDepositAmount(u64),
     /// Invalid transaction failure reason byte.
     InvalidTransactionFailureReason(u8),
-    InvalidWalletIndex(<UnlockIndex as TryFrom<u16>>::Error),
+    InvalidAccountIndex(<UnlockIndex as TryFrom<u16>>::Error),
     // The above is used by `Packable` to denote out-of-range values. The following denotes the actual amount.
     InsufficientStorageDepositAmount {
         amount: u64,
@@ -211,7 +211,7 @@ impl fmt::Display for Error {
             }
             Self::InvalidAddress => write!(f, "invalid address provided"),
             Self::InvalidAddressKind(k) => write!(f, "invalid address kind: {k}"),
-            Self::InvalidWalletIndex(index) => write!(f, "invalid account index: {index}"),
+            Self::InvalidAccountIndex(index) => write!(f, "invalid account index: {index}"),
             Self::InvalidBech32Hrp(err) => write!(f, "invalid bech32 hrp: {err}"),
             Self::InvalidAddressCapabilitiesCount(e) => write!(f, "invalid capabilities count: {e}"),
             Self::InvalidBlockKind(k) => write!(f, "invalid block kind: {k}"),
