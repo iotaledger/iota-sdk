@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use alloc::{
-    format,
     string::{String, ToString},
     vec::Vec,
 };
@@ -43,9 +42,7 @@ impl FromStr for Hrp {
     type Err = Error;
 
     fn from_str(hrp: &str) -> Result<Self, Self::Err> {
-        Ok(Self(
-            bech32::Hrp::parse(hrp).map_err(|e| Error::InvalidBech32Hrp(format!("{hrp}: {e}")))?,
-        ))
+        Ok(Self(bech32::Hrp::parse(hrp).map_err(Error::InvalidBech32Hrp)?))
     }
 }
 
@@ -79,9 +76,9 @@ impl Packable for Hrp {
 
         let hrp = bytes.into_iter().map(|b| b as char).collect::<String>();
 
-        Ok(Self(bech32::Hrp::parse(&hrp).map_err(|e| {
-            UnpackError::Packable(Error::InvalidBech32Hrp(e.to_string()))
-        })?))
+        Ok(Self(
+            bech32::Hrp::parse(&hrp).map_err(|e| UnpackError::Packable(Error::InvalidBech32Hrp(e)))?,
+        ))
     }
 }
 
