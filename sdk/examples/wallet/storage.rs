@@ -45,7 +45,7 @@ async fn main() -> Result<()> {
         .map(|address| address.into_bech32())
         .collect::<Vec<_>>();
 
-    println!("Total address count:\n{:?}", account.addresses().await?.len());
+    println!("Total address count:\n{:?}", account.addresses().await.len());
     println!("ADDRESSES:\n{bech32_addresses:#?}");
 
     sync_print_balance(&account).await?;
@@ -59,14 +59,14 @@ async fn main() -> Result<()> {
 
 async fn generate_max_addresses(account: &Account, max: usize) -> Result<Vec<Bip44Address>> {
     let alias = account.alias().await;
-    if account.addresses().await?.len() < max {
-        let num_addresses_to_generate = max - account.addresses().await?.len();
+    if account.addresses().await.len() < max {
+        let num_addresses_to_generate = max - account.addresses().await.len();
         println!("Generating {num_addresses_to_generate} addresses for account '{alias}'...");
         account
             .generate_ed25519_addresses(num_addresses_to_generate as u32, None)
             .await?;
     }
-    account.addresses().await
+    Ok(account.addresses().await)
 }
 
 async fn sync_print_balance(account: &Account) -> Result<()> {

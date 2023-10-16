@@ -336,7 +336,7 @@ pub fn semantic_validation(
         let (amount, created_native_tokens, features) = match created_output {
             Output::Basic(output) => {
                 if let Some(address) = output.simple_deposit_address() {
-                    let amount = context.simple_deposits.entry(*address).or_default();
+                    let amount = context.simple_deposits.entry(address.clone()).or_default();
 
                     *amount = amount
                         .checked_add(output.amount())

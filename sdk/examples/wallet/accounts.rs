@@ -88,7 +88,7 @@ async fn main() -> Result<()> {
 
     println!("New available funds: {}", balance.base_coin().available());
 
-    let addresses = account2.addresses().await?;
+    let addresses = account2.addresses().await;
     println!("Number of addresses in {alias2}'s account: {}", addresses.len());
     println!("{alias2}'s base coin balance:\n{:#?}", balance.base_coin());
 

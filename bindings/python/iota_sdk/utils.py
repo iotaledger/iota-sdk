@@ -5,17 +5,18 @@ from __future__ import annotations
 from json import dumps, loads
 from typing import TYPE_CHECKING, List
 
-from dacite import from_dict
 from iota_sdk.types.signature import Ed25519Signature
-from iota_sdk.types.address import Address, AddressType, Ed25519Address, AccountAddress, NFTAddress
+from iota_sdk.types.address import Address, deserialize_address
 from iota_sdk.types.common import HexStr
+from iota_sdk.types.essence import TransactionEssence
+from iota_sdk.types.node_info import ProtocolParameters
 from iota_sdk.types.output_id import OutputId
 from iota_sdk.types.output import Output
 from iota_sdk.external import call_utils_method
 
 # Required to prevent circular import
 if TYPE_CHECKING:
-    from iota_sdk.types.block import Block
+    from iota_sdk.types.block.wrapper import BlockWrapper
 
 
 class Utils():
@@ -75,15 +76,7 @@ class Utils():
             'address': address
         })
 
-        address_type = AddressType(response['type'])
-
-        if address_type == AddressType.ED25519:
-            return from_dict(Ed25519Address, response)
-        if address_type == AddressType.ACCOUNT:
-            return from_dict(AccountAddress, response)
-        if address_type == AddressType.NFT:
-            return from_dict(NFTAddress, response)
-        return from_dict(Address, response)
+        deserialize_address(response)
 
     @staticmethod
     def is_address_valid(address: str) -> bool:
@@ -172,19 +165,20 @@ class Utils():
         })
 
     @staticmethod
-    def block_id(block: Block) -> HexStr:
+    def block_id(block: BlockWrapper, params: ProtocolParameters) -> HexStr:
         """ Return a block ID (Blake2b256 hash of block bytes) from a block.
         """
         return _call_method('blockId', {
-            'block': block.to_dict()
+            'block': block.to_dict(),
+            'protocol_parameters': params.to_dict(),
         })
 
     @staticmethod
-    def hash_transaction_essence(essence) -> HexStr:
+    def hash_transaction_essence(essence: TransactionEssence) -> HexStr:
         """ Compute the hash of a transaction essence.
         """
         return _call_method('hashTransactionEssence', {
-            'essence': essence
+            'essence': essence.to_dict(),
         })
 
     @staticmethod

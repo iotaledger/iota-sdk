@@ -11,7 +11,7 @@ use packable::{prefix::StringPrefix, Packable, PackableExt};
 use super::{
     address::Hrp,
     mana::{ManaStructure, RewardsParameters},
-    slot::SlotIndex,
+    slot::{EpochIndex, SlotIndex},
 };
 use crate::types::block::{helper::network_name_to_id, output::RentStructure, ConvertTo, Error, PROTOCOL_VERSION};
 
@@ -55,28 +55,22 @@ pub struct ProtocolParameters {
     #[getset(skip)]
     pub(crate) mana_structure: ManaStructure,
     /// The unbonding period in epochs before an account can stop staking.
-    #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
-    pub(crate) staking_unbonding_period: u64,
+    pub(crate) staking_unbonding_period: u32,
     /// The number of validation blocks that each validator should issue each slot.
     pub(crate) validation_blocks_per_slot: u16,
     /// The number of epochs worth of Mana that a node is punished with for each additional validation block it issues.
-    #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
-    pub(crate) punishment_epochs: u64,
+    pub(crate) punishment_epochs: u32,
     /// Liveness Threshold is used by tip-selection to determine if a block is eligible by evaluating issuingTimes and
     /// commitments in its past-cone to Accepted Tangle Time and lastCommittedSlot respectively.
-    #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
-    pub(crate) liveness_threshold: u64,
+    pub(crate) liveness_threshold: u32,
     /// Minimum age relative to the accepted tangle time slot index that a slot can be committed.
-    #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
-    pub(crate) min_committable_age: u64,
+    pub(crate) min_committable_age: u32,
     /// Maximum age for a slot commitment to be included in a block relative to the slot index of the block issuing
     /// time.
-    #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
-    pub(crate) max_committable_age: u64,
+    pub(crate) max_committable_age: u32,
     /// Epoch Nearing Threshold is used by the epoch orchestrator to detect the slot that should trigger a new
     /// committee selection for the next and upcoming epoch.
-    #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
-    pub(crate) epoch_nearing_threshold: u64,
+    pub(crate) epoch_nearing_threshold: u32,
     /// Parameters used to calculate the Reference Mana Cost (RMC).
     pub(crate) congestion_control_parameters: CongestionControlParameters,
     /// Defines the parameters used to signal a protocol parameters upgrade.
@@ -132,7 +126,7 @@ impl ProtocolParameters {
         token_supply: u64,
         genesis_unix_timestamp: u64,
         slot_duration_in_seconds: u8,
-        epoch_nearing_threshold: u64,
+        epoch_nearing_threshold: u32,
     ) -> Result<Self, Error> {
         Ok(Self {
             version,
@@ -163,8 +157,8 @@ impl ProtocolParameters {
     }
 
     /// Returns the slots per epoch of the [`ProtocolParameters`].
-    pub fn slots_per_epoch(&self) -> u64 {
-        2_u64.pow(self.slots_per_epoch_exponent() as u32)
+    pub fn slots_per_epoch(&self) -> u32 {
+        2_u32.pow(self.slots_per_epoch_exponent() as u32)
     }
 
     /// Gets a [`SlotIndex`] from a unix timestamp.
@@ -174,6 +168,21 @@ impl ProtocolParameters {
             self.genesis_unix_timestamp(),
             self.slot_duration_in_seconds(),
         )
+    }
+
+    /// Gets the first [`SlotIndex`] of a given [`EpochIndex`].
+    pub fn first_slot_of(&self, epoch_index: impl Into<EpochIndex>) -> SlotIndex {
+        epoch_index.into().first_slot_index(self.slots_per_epoch_exponent())
+    }
+
+    /// Gets the last [`SlotIndex`] of a given [`EpochIndex`].
+    pub fn last_slot_of(&self, epoch_index: impl Into<EpochIndex>) -> SlotIndex {
+        epoch_index.into().last_slot_index(self.slots_per_epoch_exponent())
+    }
+
+    /// Gets the [`EpochIndex`] of a given [`SlotIndex`].
+    pub fn epoch_index_of(&self, slot_index: impl Into<SlotIndex>) -> EpochIndex {
+        EpochIndex::from_slot_index(slot_index.into(), self.slots_per_epoch_exponent())
     }
 
     /// Returns the hash of the [`ProtocolParameters`].
@@ -261,9 +270,6 @@ pub struct CongestionControlParameters {
     decrease_threshold: u32,
     /// Rate at which the scheduler runs (in workscore units per second).
     scheduler_rate: u32,
-    /// Minimum amount of Mana that an account must have to schedule a block.
-    #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
-    min_mana: u64,
     /// Maximum size of the buffer in the scheduler.
     max_buffer_size: u32,
     /// Maximum number of blocks in the validation buffer.
@@ -279,7 +285,6 @@ impl Default for CongestionControlParameters {
             increase_threshold: 800000,
             decrease_threshold: 500000,
             scheduler_rate: 100000,
-            min_mana: 1,
             max_buffer_size: 3276800,
             max_validation_buffer_size: 100,
         }

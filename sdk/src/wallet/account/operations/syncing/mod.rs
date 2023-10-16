@@ -26,6 +26,7 @@ use crate::{
 impl<S: 'static + SecretManage> Account<S>
 where
     crate::wallet::Error: From<S::Error>,
+    crate::client::Error: From<S::Error>,
 {
     /// Set the fallback SyncOptions for account syncing.
     /// If storage is enabled, will persist during restarts.
@@ -186,7 +187,9 @@ where
                 let bech32_hrp = self.client().get_bech32_hrp().await?;
                 let mut new_outputs_data = Vec::new();
                 for (account_or_nft_address, ed25519_address) in new_account_and_nft_addresses {
-                    let output_ids = self.get_output_ids_for_address(account_or_nft_address, options).await?;
+                    let output_ids = self
+                        .get_output_ids_for_address(&account_or_nft_address, options)
+                        .await?;
 
                     // Update address with unspent outputs
                     let address_with_unspent_outputs = addresses_with_unspent_outputs
@@ -212,8 +215,8 @@ where
             // Clear, so we only get new addresses
             new_account_and_nft_addresses = HashMap::new();
             // Add new account and nft addresses
-            for output_data in new_outputs_data.iter() {
-                match &output_data.output {
+            for output_data in new_outputs_data {
+                match output_data.output {
                     Output::Account(account_output) => {
                         let account_address =
                             AccountAddress::from(account_output.account_id_non_null(&output_data.output_id));

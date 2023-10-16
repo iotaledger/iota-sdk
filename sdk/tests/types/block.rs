@@ -92,7 +92,7 @@ use packable::PackableExt;
 #[test]
 fn pack_unpack_valid() {
     let protocol_parameters = protocol_parameters();
-    let block = rand_block_wrapper(&protocol_parameters);
+    let block = rand_block_wrapper(protocol_parameters.clone());
     let packed_block = block.pack_to_vec();
 
     assert_eq!(packed_block.len(), block.packed_len());
@@ -108,17 +108,15 @@ fn getters() {
     let parents = rand_strong_parents();
     let payload = Payload::from(rand_tagged_data_payload());
 
-    let block = rand_block_wrapper_with_block(
-        &protocol_parameters,
-        rand_basic_block_builder_with_strong_parents(parents.clone())
-            .with_payload(payload.clone())
-            .finish()
-            .unwrap(),
-    );
+    let block = rand_basic_block_builder_with_strong_parents(parents.clone())
+        .with_payload(payload.clone())
+        .finish_block()
+        .unwrap();
+    let wrapper = rand_block_wrapper_with_block(protocol_parameters.clone(), block);
 
-    assert_eq!(block.protocol_version(), protocol_parameters.version());
-    assert_eq!(*block.as_basic().strong_parents(), parents);
-    assert_eq!(*block.as_basic().payload().as_ref().unwrap(), &payload);
+    assert_eq!(wrapper.protocol_version(), protocol_parameters.version());
+    assert_eq!(*wrapper.as_basic().strong_parents(), parents);
+    assert_eq!(*wrapper.as_basic().payload().as_ref().unwrap(), &payload);
 }
 
 #[test]
@@ -139,7 +137,7 @@ fn dto_mismatch_version() {
         "issuerId": "0x0000000000000000000000000000000000000000000000000000000000000000",
         "block": {
             "type":1,
-            "strongParents": [ "0x417c5700320912627b604d4c376a5a1663634b09703538570b1d52440b3e474639490b100a6f3608" ],
+            "strongParents": [ "0x417c5700320912627b604d4c376a5a1663634b09703538570b1d52440b3e474639490b10" ],
             "weakParents": [],
             "shallowLikeParents": [],
             "highestSupportedVersion": 3,
@@ -180,7 +178,7 @@ fn dto_mismatch_network_id() {
         "issuerId": "0x0000000000000000000000000000000000000000000000000000000000000000",
         "block": {
             "type":1,
-            "strongParents": [ "0x417c5700320912627b604d4c376a5a1663634b09703538570b1d52440b3e474639490b100a6f3608" ],
+            "strongParents": [ "0x417c5700320912627b604d4c376a5a1663634b09703538570b1d52440b3e474639490b10" ],
             "weakParents": [],
             "shallowLikeParents": [],
             "highestSupportedVersion": 3,

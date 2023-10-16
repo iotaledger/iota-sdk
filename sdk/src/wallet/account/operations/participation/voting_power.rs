@@ -23,6 +23,7 @@ use crate::{
 impl<S: 'static + SecretManage> Account<S>
 where
     crate::wallet::Error: From<S::Error>,
+    crate::client::Error: From<S::Error>,
 {
     /// Returns an account's total voting power (voting or NOT voting).
     pub async fn get_voting_power(&self) -> Result<u64> {
@@ -79,7 +80,8 @@ where
                     .add_unlock_condition(AddressUnlockCondition::new(
                         self.public_addresses()
                             .await
-                            .first()
+                            .into_iter()
+                            .next()
                             .expect("account needs to have a public address")
                             .address
                             .inner,

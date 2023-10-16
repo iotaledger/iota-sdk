@@ -3,17 +3,15 @@
 
 from __future__ import annotations
 from enum import IntEnum
-from typing import TYPE_CHECKING, Optional, List, Union
+from typing import TYPE_CHECKING, Optional, List, TypeAlias
 
 from dataclasses import dataclass, field
 
 from iota_sdk.types.common import HexStr, json, SlotIndex
 from iota_sdk.types.mana import ManaAllotment
-# TODO: Add missing output types in #1174
-# pylint: disable=no-name-in-module
-from iota_sdk.types.output import BasicOutput, AccountOutput, FoundryOutput, NftOutput, DelegationOutput
 from iota_sdk.types.input import UtxoInput
-from iota_sdk.types.context_input import CommitmentContextInput, BlockIssuanceCreditContextInput, RewardContextInput
+from iota_sdk.types.context_input import ContextInput
+from iota_sdk.types.output import Output
 
 # Required to prevent circular import
 if TYPE_CHECKING:
@@ -31,15 +29,7 @@ class EssenceType(IntEnum):
 
 @json
 @dataclass
-class TransactionEssence:
-    """Base class of Transaction essence
-    """
-    type: int
-
-
-@json
-@dataclass
-class RegularTransactionEssence(TransactionEssence):
+class RegularTransactionEssence:
     """Describes the essence data making up a transaction by defining its inputs, outputs, and an optional payload.
 
     Attributes:
@@ -57,12 +47,13 @@ class RegularTransactionEssence(TransactionEssence):
     creation_slot: SlotIndex
     inputs: List[UtxoInput]
     inputs_commitment: HexStr
-    outputs: List[Union[BasicOutput, AccountOutput,
-                        FoundryOutput, NftOutput, DelegationOutput]]
-    context_inputs: Optional[List[Union[CommitmentContextInput,
-                                        BlockIssuanceCreditContextInput, RewardContextInput]]] = None
+    outputs: List[Output]
+    context_inputs: Optional[List[ContextInput]] = None
     allotments: Optional[List[ManaAllotment]] = None
     payload: Optional[Payload] = None
     type: int = field(
         default_factory=lambda: EssenceType.RegularTransactionEssence,
         init=False)
+
+
+TransactionEssence: TypeAlias = RegularTransactionEssence

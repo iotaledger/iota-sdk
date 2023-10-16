@@ -1,6 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use alloc::vec::Vec;
 use core::mem::size_of;
 
 use crypto::hashes::{blake2b::Blake2b256, Digest};
@@ -20,6 +21,45 @@ use crate::types::block::{
     slot::{SlotCommitmentId, SlotIndex},
     Block, Error, IssuerId,
 };
+
+/// Builder for a [`BlockWrapper`].
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct BlockWrapperBuilder {
+    /// The block header.
+    pub(crate) header: BlockHeader,
+    /// The inner block.
+    pub(crate) block: Block,
+}
+
+impl BlockWrapperBuilder {
+    pub fn new(header: BlockHeader, block: Block) -> Self {
+        Self { header, block }
+    }
+
+    /// Updates the block header.
+    #[inline(always)]
+    pub fn with_block_header(mut self, header: BlockHeader) -> Self {
+        self.header = header;
+        self
+    }
+
+    /// Updates the block.
+    #[inline(always)]
+    pub fn with_block(mut self, block: Block) -> Self {
+        self.block = block;
+        self
+    }
+
+    /// Get the signing input that can be used to generate a [`Signature`](crate::types::block::signature::Signature)
+    /// for the resulting block.
+    pub fn signing_input(&self) -> Vec<u8> {
+        [self.header.hash(), self.block.hash()].concat()
+    }
+
+    pub fn finish(self, signature: impl Into<Signature>) -> Result<BlockWrapper, Error> {
+        Ok(BlockWrapper::new(self.header, self.block, signature))
+    }
+}
 
 #[derive(Clone, Debug, Eq, PartialEq, CopyGetters)]
 #[getset(get_copy = "pub")]
@@ -42,6 +82,24 @@ impl BlockHeader {
     /// The length of the block header.
     pub const LENGTH: usize =
         size_of::<u8>() + 2 * size_of::<u64>() + SlotCommitmentId::LENGTH + size_of::<SlotIndex>() + IssuerId::LENGTH;
+
+    pub fn new(
+        protocol_version: u8,
+        network_id: u64,
+        issuing_time: u64,
+        slot_commitment_id: SlotCommitmentId,
+        latest_finalized_slot: SlotIndex,
+        issuer_id: IssuerId,
+    ) -> Self {
+        Self {
+            protocol_version,
+            network_id,
+            issuing_time,
+            slot_commitment_id,
+            latest_finalized_slot,
+            issuer_id,
+        }
+    }
 
     pub(crate) fn hash(&self) -> [u8; 32] {
         let mut bytes = [0u8; Self::LENGTH];
@@ -128,25 +186,7 @@ impl BlockWrapper {
 
     /// Creates a new [`BlockWrapper`].
     #[inline(always)]
-    pub fn new(
-        protocol_version: u8,
-        network_id: u64,
-        issuing_time: u64,
-        slot_commitment_id: SlotCommitmentId,
-        latest_finalized_slot: SlotIndex,
-        issuer_id: IssuerId,
-        block: impl Into<Block>,
-        signature: impl Into<Signature>,
-    ) -> Self {
-        let header = BlockHeader {
-            protocol_version,
-            network_id,
-            issuing_time,
-            slot_commitment_id,
-            latest_finalized_slot,
-            issuer_id,
-        };
-        let block = block.into();
+    pub fn new(header: BlockHeader, block: Block, signature: impl Into<Signature>) -> Self {
         let signature = signature.into();
 
         Self {
@@ -154,6 +194,12 @@ impl BlockWrapper {
             block,
             signature,
         }
+    }
+
+    /// Creates a new [`BlockWrapperBuilder`].
+    #[inline(always)]
+    pub fn build(header: BlockHeader, block: Block) -> BlockWrapperBuilder {
+        BlockWrapperBuilder::new(header, block)
     }
 
     /// Returns the protocol version of a [`BlockWrapper`].
@@ -353,12 +399,14 @@ pub(crate) mod dto {
             }
 
             Ok(Self::new(
-                dto.protocol_version,
-                dto.network_id,
-                dto.issuing_time,
-                dto.slot_commitment_id,
-                dto.latest_finalized_slot,
-                dto.issuer_id,
+                BlockHeader::new(
+                    dto.protocol_version,
+                    dto.network_id,
+                    dto.issuing_time,
+                    dto.slot_commitment_id,
+                    dto.latest_finalized_slot,
+                    dto.issuer_id,
+                ),
                 Block::try_from_dto_with_params_inner(dto.block, params)?,
                 dto.signature,
             ))

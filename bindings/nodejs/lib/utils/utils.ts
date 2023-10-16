@@ -5,7 +5,6 @@ import { callUtilsMethod } from '../bindings';
 import {
     Address,
     HexEncodedString,
-    Block,
     Ed25519Signature,
     TransactionEssence,
     TransactionPayload,
@@ -15,6 +14,8 @@ import {
     RentStructure,
     OutputId,
     u64,
+    BlockWrapper,
+    ProtocolParameters,
 } from '../types';
 import {
     AccountId,
@@ -196,19 +197,18 @@ export class Utils {
      * Compute the block ID (Blake2b256 hash of the block bytes) of a block.
      *
      * @param block A block.
+     * @param params The network protocol parameters.
      * @returns The corresponding block ID.
      */
-    static blockId(block: Block): BlockId {
+    static blockId(block: BlockWrapper, params: ProtocolParameters): BlockId {
         return callUtilsMethod({
             name: 'blockId',
             data: {
                 block,
+                params,
             },
         });
     }
-
-    /**
-
 
     /**
      * Compute the transaction ID (Blake2b256 hash of the provided transaction payload) of a transaction payload.

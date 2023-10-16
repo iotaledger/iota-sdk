@@ -39,6 +39,7 @@ async fn single_ed25519_unlock() -> Result<()> {
                 .with_range(0..1),
         )
         .await?[0]
+        .clone()
         .to_bech32(SHIMMER_TESTNET_BECH32_HRP);
 
     let protocol_parameters = protocol_parameters();
@@ -118,6 +119,7 @@ async fn ed25519_reference_unlocks() -> Result<()> {
                 .with_range(0..1),
         )
         .await?[0]
+        .clone()
         .to_bech32(SHIMMER_TESTNET_BECH32_HRP);
 
     let protocol_parameters = protocol_parameters();
@@ -231,6 +233,7 @@ async fn two_signature_unlocks() -> Result<()> {
                 .with_range(0..1),
         )
         .await?[0]
+        .clone()
         .to_bech32(SHIMMER_TESTNET_BECH32_HRP);
     let bech32_address_1 = &secret_manager
         .generate_ed25519_addresses(
@@ -239,6 +242,7 @@ async fn two_signature_unlocks() -> Result<()> {
                 .with_range(1..2),
         )
         .await?[0]
+        .clone()
         .to_bech32(SHIMMER_TESTNET_BECH32_HRP);
 
     let protocol_parameters = protocol_parameters();

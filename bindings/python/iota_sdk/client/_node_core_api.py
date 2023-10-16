@@ -1,14 +1,15 @@
 # Copyright 2023 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
-from typing import List, Union
+from typing import List, Optional, Union
 from abc import ABCMeta, abstractmethod
 from dacite import from_dict
 
-from iota_sdk.types.block import Block, BlockMetadata
+from iota_sdk.types.block.wrapper import BlockWrapper
+from iota_sdk.types.block.metadata import BlockMetadata
 from iota_sdk.types.common import HexStr
 from iota_sdk.types.node_info import NodeInfo, NodeInfoWrapper
-from iota_sdk.types.output import OutputWithMetadata, OutputMetadata
+from iota_sdk.types.output_metadata import OutputWithMetadata, OutputMetadata
 from iota_sdk.types.output_id import OutputId
 
 
@@ -57,7 +58,7 @@ class NodeCoreAPI(metaclass=ABCMeta):
         """
         return self._call_method('getTips')
 
-    def post_block(self, block: Block) -> HexStr:
+    def post_block(self, block: BlockWrapper) -> HexStr:
         """Post a block.
 
         Args:
@@ -70,10 +71,10 @@ class NodeCoreAPI(metaclass=ABCMeta):
             'block': block.__dict__
         })
 
-    def get_block_data(self, block_id: HexStr) -> Block:
+    def get_block(self, block_id: HexStr) -> BlockWrapper:
         """Get the block corresponding to the given block id.
         """
-        return Block.from_dict(self._call_method('getBlock', {
+        return BlockWrapper.from_dict(self._call_method('getBlock', {
             'blockId': block_id
         }))
 
@@ -127,13 +128,13 @@ class NodeCoreAPI(metaclass=ABCMeta):
             'outputId': output_id_str
         }))
 
-    def get_included_block(self, transaction_id: HexStr) -> Block:
+    def get_included_block(self, transaction_id: HexStr) -> BlockWrapper:
         """Returns the included block of the given transaction.
 
         Returns:
             The included block.
         """
-        return Block.from_dict(self._call_method('getIncludedBlock', {
+        return BlockWrapper.from_dict(self._call_method('getIncludedBlock', {
             'transactionId': transaction_id
         }))
 
@@ -149,7 +150,7 @@ class NodeCoreAPI(metaclass=ABCMeta):
         }))
 
     def call_plugin_route(self, base_plugin_path: str, method: str,
-                          endpoint: str, query_params: [str] = None, request: str = None):
+                          endpoint: str, query_params: Optional[List[str]] = None, request: Optional[str] = None):
         """Extension method which provides request methods for plugins.
 
         Args:

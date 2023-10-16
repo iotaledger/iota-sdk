@@ -21,7 +21,7 @@ pub use self::{
     basic::{BasicBlock, BasicBlockBuilder},
     parent::Parents,
     validation::{ValidationBlock, ValidationBlockBuilder},
-    wrapper::{BlockHeader, BlockWrapper},
+    wrapper::{BlockHeader, BlockWrapper, BlockWrapperBuilder},
 };
 use crate::types::block::{
     protocol::{ProtocolParameters, ProtocolParametersHash},
@@ -46,6 +46,30 @@ impl From<ValidationBlock> for Block {
     }
 }
 
+impl TryFrom<Block> for BasicBlockBuilder {
+    type Error = Error;
+
+    fn try_from(value: Block) -> Result<Self, Self::Error> {
+        if let Block::Basic(block) = value {
+            Ok((*block).into())
+        } else {
+            Err(Error::InvalidBlockKind(value.kind()))
+        }
+    }
+}
+
+impl TryFrom<Block> for ValidationBlockBuilder {
+    type Error = Error;
+
+    fn try_from(value: Block) -> Result<Self, Self::Error> {
+        if let Block::Validation(block) = value {
+            Ok((*block).into())
+        } else {
+            Err(Error::InvalidBlockKind(value.kind()))
+        }
+    }
+}
+
 impl Block {
     /// Return the block kind of a [`Block`].
     pub fn kind(&self) -> u8 {
@@ -57,8 +81,8 @@ impl Block {
 
     /// Creates a new [`BasicBlockBuilder`].
     #[inline(always)]
-    pub fn build_basic(strong_parents: self::basic::StrongParents, burned_mana: u64) -> BasicBlockBuilder {
-        BasicBlockBuilder::new(strong_parents, burned_mana)
+    pub fn build_basic(strong_parents: self::basic::StrongParents, max_burned_mana: u64) -> BasicBlockBuilder {
+        BasicBlockBuilder::new(strong_parents, max_burned_mana)
     }
 
     /// Creates a new [`ValidationBlockBuilder`].

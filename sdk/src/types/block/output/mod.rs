@@ -317,7 +317,7 @@ impl Output {
             Self::Basic(output) => output
                 .unlock_conditions()
                 .locked_address(output.address(), slot_index, min_committable_age, max_committable_age)
-                .copied(),
+                .cloned(),
             Self::Account(output) => {
                 Some(
                     if account_transition.unwrap_or(AccountTransition::State) == AccountTransition::State {
@@ -332,7 +332,7 @@ impl Output {
             Self::Nft(output) => output
                 .unlock_conditions()
                 .locked_address(output.address(), slot_index, min_committable_age, max_committable_age)
-                .copied(),
+                .cloned(),
             Self::Delegation(output) => output
                 .unlock_conditions()
                 .locked_address(output.address(), slot_index, min_committable_age, max_committable_age)
@@ -533,7 +533,7 @@ fn minimum_storage_deposit(address: &Address, rent_structure: RentStructure, tok
     // PANIC: This can never fail because the amount will always be within the valid range. Also, the actual value is
     // not important, we are only interested in the storage requirements of the type.
     BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)
-        .add_unlock_condition(AddressUnlockCondition::new(*address))
+        .add_unlock_condition(AddressUnlockCondition::new(address.clone()))
         .finish_with_params(token_supply)
         .unwrap()
         .amount()

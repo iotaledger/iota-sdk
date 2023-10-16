@@ -23,6 +23,7 @@ use crate::{
 impl<S: 'static + SecretManage> Account<S>
 where
     crate::wallet::Error: From<S::Error>,
+    crate::client::Error: From<S::Error>,
 {
     /// Get inputs and build the transaction essence
     pub async fn prepare_transaction(
@@ -86,15 +87,15 @@ where
                                 account_index,
                                 WalletEvent::TransactionProgress(
                                     TransactionProgressEvent::GeneratingRemainderDepositAddress(AddressData {
-                                        address: remainder_address.address,
+                                        address: remainder_address.address.clone(),
                                     }),
                                 ),
                             )
                             .await;
                         }
-                        Some(remainder_address.address().inner)
+                        Some(remainder_address.address.inner)
                     }
-                    RemainderValueStrategy::CustomAddress(address) => Some(*address),
+                    RemainderValueStrategy::CustomAddress(address) => Some(address.clone()),
                 }
             }
             None => None,
