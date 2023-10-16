@@ -834,7 +834,7 @@ pub async fn transactions_command(account: &Account, show_details: bool) -> Resu
                 println_log_info!("{:#?}", tx);
             } else {
                 let transaction_time = to_utc_date_time(tx.timestamp)?;
-                let formatted_time = transaction_time.format("%Y-%m-%d %H:%M:%S").to_string();
+                let formatted_time = transaction_time.format("%Y-%m-%d %H:%M:%S UTC").to_string();
 
                 println_log_info!("{:<5}{}\t{}", i, tx.transaction_id, formatted_time);
             }
@@ -1016,10 +1016,10 @@ async fn print_outputs(mut outputs: Vec<OutputData>, title: &str) -> Result<(), 
         println_log_info!("{title}");
         for (i, output_data) in outputs.into_iter().rev().enumerate() {
             let booked_time = to_utc_date_time(output_data.metadata.milestone_timestamp_booked() as u128 * 1000)?;
-            let formatted_time = booked_time.format("%Y-%m-%d %H:%M:%S").to_string();
+            let formatted_time = booked_time.format("%Y-%m-%d %H:%M:%S UTC").to_string();
 
             println_log_info!(
-                "{:<5}{}\t{}\t{}\t{} UTC",
+                "{:<5}{}\t{}\t{}\t{}",
                 i,
                 &output_data.output_id,
                 output_data.output.kind_str(),
