@@ -67,9 +67,9 @@ updated_account_output = wallet.get_client().build_account_output(
 
 print('Sending transaction...')
 transaction = account.send_outputs([updated_account_output])
-print(f'Transaction sent: {transaction.transactionId}')
+print(f'Transaction sent: {transaction.transaction_id}')
 
 # Wait for transaction to get included
 blockId = account.reissue_transaction_until_included(
-    transaction.transactionId)
+    transaction.transaction_id)
 print(f'Block included: {os.environ["EXPLORER_URL"]}/block/{blockId}')

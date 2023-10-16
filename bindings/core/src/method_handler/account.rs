@@ -17,7 +17,7 @@ use crate::{method::AccountMethod, Response, Result};
 pub(crate) async fn call_account_method_internal(account: &Account, method: AccountMethod) -> Result<Response> {
     let response = match method {
         AccountMethod::Addresses => {
-            let addresses = account.addresses().await?;
+            let addresses = account.addresses().await;
             Response::Addresses(addresses)
         }
         AccountMethod::AddressesWithUnspentOutputs => {

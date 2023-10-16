@@ -2,8 +2,9 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from __future__ import annotations
-from dataclasses import dataclass
-from typing import Optional, List
+from dataclasses import dataclass, field
+from typing import Optional, List, Dict
+from dataclasses_json import config
 from iota_sdk.types.common import HexStr, json
 from iota_sdk.types.native_token import NativeToken
 
@@ -22,7 +23,9 @@ class SendParams():
         expiration is needed but not provided, it will default to one day.
     """
     address: str
-    amount: str
+    amount: int = field(metadata=config(
+        encoder=str
+    ))
     return_address: Optional[str] = None
     expiration: Optional[int] = None
 
@@ -74,11 +77,11 @@ class CreateNativeTokenParams():
     account_id: Optional[str] = None
 
     @staticmethod
-    def _to_dict_custom(config):
-        config['circulatingSupply'] = hex(config['circulatingSupply'])
-        config['maximumSupply'] = hex(config['maximumSupply'])
+    def _to_dict_custom(cfg: Dict[str, any]) -> Dict[str, any]:
+        cfg['circulatingSupply'] = hex(cfg['circulatingSupply'])
+        cfg['maximumSupply'] = hex(cfg['maximumSupply'])
 
-        return config
+        return cfg
 
 
 @json

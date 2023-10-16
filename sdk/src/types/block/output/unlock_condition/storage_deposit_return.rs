@@ -4,7 +4,7 @@
 use crate::types::block::{address::Address, output::verify_output_amount, protocol::ProtocolParameters, Error};
 
 /// Defines the amount of IOTAs used as storage deposit that have to be returned to the return [`Address`].
-#[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, packable::Packable)]
+#[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, packable::Packable)]
 #[packable(unpack_visitor = ProtocolParameters)]
 pub struct StorageDepositReturnUnlockCondition {
     // The [`Address`] to return the amount to.
@@ -99,7 +99,7 @@ pub(crate) mod dto {
         fn from(value: &StorageDepositReturnUnlockCondition) -> Self {
             Self {
                 kind: StorageDepositReturnUnlockCondition::KIND,
-                return_address: value.return_address,
+                return_address: value.return_address.clone(),
                 amount: value.amount,
             }
         }

@@ -31,7 +31,7 @@ pub struct TaggedDataPayload {
 
 impl TaggedDataPayload {
     /// The payload kind of a [`TaggedDataPayload`].
-    pub const KIND: u32 = 5;
+    pub const KIND: u8 = 0;
     /// Valid lengths for the tag.
     pub const TAG_LENGTH_RANGE: RangeInclusive<u8> = 0..=64;
     /// Valid lengths for the data.
@@ -80,7 +80,7 @@ pub mod dto {
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
     struct TaggedDataPayloadDto {
         #[serde(rename = "type")]
-        kind: u32,
+        kind: u8,
         #[serde(skip_serializing_if = "<[_]>::is_empty", default, with = "prefix_hex_bytes")]
         tag: Box<[u8]>,
         #[serde(skip_serializing_if = "<[_]>::is_empty", default, with = "prefix_hex_bytes")]

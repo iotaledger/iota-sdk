@@ -3,7 +3,8 @@
 
 from __future__ import annotations
 from typing import List, Optional
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from dataclasses_json import config
 from iota_sdk.types.common import HexStr, json
 
 
@@ -16,8 +17,12 @@ class BaseCoinBalance:
         total: The total balance.
         available: The available amount of the total balance.
     """
-    total: str
-    available: str
+    total: int = field(metadata=config(
+        encoder=str
+    ))
+    available: int = field(metadata=config(
+        encoder=str
+    ))
 
 
 @json
@@ -31,10 +36,18 @@ class RequiredStorageDeposit:
         foundry: The required amount for foundry outputs.
         nft: The required amount for nft outputs.
     """
-    account: str
-    basic: str
-    foundry: str
-    nft: str
+    account: int = field(metadata=config(
+        encoder=str
+    ))
+    basic: int = field(metadata=config(
+        encoder=str
+    ))
+    foundry: int = field(metadata=config(
+        encoder=str
+    ))
+    nft: int = field(metadata=config(
+        encoder=str
+    ))
 
 
 @json

@@ -454,7 +454,7 @@ class Account:
             }
         ))
 
-    def send(self, amount: str, address: str,
+    def send(self, amount: int, address: str,
              options: Optional[TransactionOptions] = None) -> Transaction:
         """Send base coins.
         """
@@ -472,7 +472,7 @@ class Account:
         """
         return Transaction.from_dict(self._call_account_method(
             'sendWithParams', {
-                'params': params,
+                'params': [param.to_dict() for param in params],
                 'options': options
             }
         ))

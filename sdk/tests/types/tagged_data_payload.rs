@@ -14,7 +14,7 @@ use packable::{
 
 #[test]
 fn kind() {
-    assert_eq!(TaggedDataPayload::KIND, 5);
+    assert_eq!(TaggedDataPayload::KIND, 0);
 }
 
 #[test]

@@ -33,11 +33,11 @@ fn builder() {
     let amount = 500_000;
 
     let mut builder = AccountOutput::build_with_amount(amount, account_id)
-        .add_unlock_condition(gov_address_1)
-        .add_unlock_condition(state_address_1)
-        .add_feature(sender_1)
-        .replace_feature(sender_2)
-        .replace_immutable_feature(issuer_1)
+        .add_unlock_condition(gov_address_1.clone())
+        .add_unlock_condition(state_address_1.clone())
+        .add_feature(sender_1.clone())
+        .replace_feature(sender_2.clone())
+        .replace_immutable_feature(issuer_1.clone())
         .add_immutable_feature(issuer_2);
 
     let output = builder.clone().finish().unwrap();
@@ -54,8 +54,8 @@ fn builder() {
         .clear_unlock_conditions()
         .clear_features()
         .clear_immutable_features()
-        .replace_unlock_condition(gov_address_2)
-        .replace_unlock_condition(state_address_2);
+        .replace_unlock_condition(gov_address_2.clone())
+        .replace_unlock_condition(state_address_2.clone());
     let output = builder.clone().finish().unwrap();
     assert_eq!(output.unlock_conditions().governor_address(), Some(&gov_address_2));
     assert_eq!(
@@ -73,8 +73,8 @@ fn builder() {
             &account_id,
         ))
         .add_unlock_condition(rand_governor_address_unlock_condition_different_from(&account_id))
-        .with_features([Feature::from(metadata.clone()), sender_1.into()])
-        .with_immutable_features([Feature::from(metadata.clone()), issuer_1.into()])
+        .with_features([Feature::from(metadata.clone()), sender_1.clone().into()])
+        .with_immutable_features([Feature::from(metadata.clone()), issuer_1.clone().into()])
         .finish_with_params(ValidationParams::default().with_protocol_parameters(protocol_parameters.clone()))
         .unwrap();
 
