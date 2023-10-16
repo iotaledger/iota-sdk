@@ -1,6 +1,7 @@
 // Copyright 2020-2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use alloc::string::ToString;
 use core::str::FromStr;
 
 use crypto::hashes::{blake2b::Blake2b256, Digest};

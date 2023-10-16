@@ -171,7 +171,7 @@ macro_rules! impl_id_with_slot {
         impl core::fmt::Debug for $id_name {
             fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
                 f.debug_struct(core::stringify!($id_name))
-                    .field("id", &self.to_string())
+                    .field("id", &alloc::string::ToString::to_string(self))
                     .field("slot_index", &self.slot_index())
                     .finish()
             }
