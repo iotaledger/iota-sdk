@@ -1019,10 +1019,11 @@ async fn print_outputs(mut outputs: Vec<OutputData>, title: &str) -> Result<(), 
             let formatted_time = booked_time.format("%Y-%m-%d %H:%M:%S").to_string();
 
             println_log_info!(
-                "{:<5}{}\t{}\t{}",
+                "{:<5}{}\t{}\t{}\t{} UTC",
                 i,
                 &output_data.output_id,
                 output_data.output.kind_str(),
+                if output_data.is_spent { "spent" } else { "unspent" },
                 formatted_time
             );
         }
