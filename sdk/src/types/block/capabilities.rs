@@ -29,7 +29,7 @@ impl<Flag> Capabilities<Flag> {
         Self::default()
     }
 
-    /// Returns whether every possible [`AddressCapabilityFlag`] is disabled.
+    /// Returns whether every possible flag is disabled.
     pub fn is_none(&self) -> bool {
         self.iter().all(|b| 0.eq(b))
     }
@@ -43,12 +43,12 @@ impl<Flag: CapabilityFlag> Capabilities<Flag> {
         res
     }
 
-    /// Returns whether every possible [`AddressCapabilityFlag`] is enabled.
+    /// Returns whether every possible flag is enabled.
     pub fn is_all(&self) -> bool {
         Flag::all().all(|flag| self.has_capability(flag))
     }
 
-    /// Enables every possible [`AddressCapabilityFlag`].
+    /// Enables every possible flag.
     pub fn set_all(&mut self) -> &mut Self {
         for flag in Flag::all() {
             self.add_capability(flag);
@@ -56,13 +56,13 @@ impl<Flag: CapabilityFlag> Capabilities<Flag> {
         self
     }
 
-    /// Disabled every possible [`AddressCapabilityFlag`].
+    /// Disabled every possible flag.
     pub fn set_none(&mut self) -> &mut Self {
         *self = Default::default();
         self
     }
 
-    /// Enables a given [`AddressCapabilityFlag`].
+    /// Enables a given flag.
     pub fn add_capability(&mut self, flag: Flag) -> &mut Self {
         if self.bytes.len() <= flag.index() {
             let mut v = Box::<[_]>::from(self.bytes.clone()).into_vec();
@@ -88,7 +88,7 @@ impl<Flag: CapabilityFlag> Capabilities<Flag> {
         self
     }
 
-    /// Enables a given set of flags.
+    /// Overwrites the flags with a given set of flags.
     pub fn set_capabilities(&mut self, flags: impl IntoIterator<Item = Flag>) -> &mut Self {
         *self = Self::default().with_capabilities(flags);
         self
