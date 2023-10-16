@@ -177,7 +177,7 @@ class RestrictedAddress extends Address {
     /**
      * The allowed capabilities bitflags.
      */
-    private allowed_capabilities: HexEncodedString = '0x00';
+    private allowedCapabilities: HexEncodedString = '0x00';
     /**
      * @param address An address.
      */
@@ -186,34 +186,34 @@ class RestrictedAddress extends Address {
         this.address = address;
     }
 
-    setAllowedCapabilities(allowed_capabilities: Uint8Array) {
-        if (allowed_capabilities.some((c) => c != 0)) {
-            this.allowed_capabilities =
+    setAllowedCapabilities(allowedCapabilities: Uint8Array) {
+        if (allowedCapabilities.some((c) => c != 0)) {
+            this.allowedCapabilities =
                 '0x' +
-                allowed_capabilities.length.toString(16) +
+                allowedCapabilities.length.toString(16) +
                 Buffer.from(
-                    allowed_capabilities.buffer,
-                    allowed_capabilities.byteOffset,
-                    allowed_capabilities.byteLength,
+                    allowedCapabilities.buffer,
+                    allowedCapabilities.byteOffset,
+                    allowedCapabilities.byteLength,
                 ).toString('hex');
         } else {
-            this.allowed_capabilities = '0x00';
+            this.allowedCapabilities = '0x00';
         }
     }
 
     withAllowedCapabilities(
-        allowed_capabilities: Uint8Array,
+        allowedCapabilities: Uint8Array,
     ): RestrictedAddress {
-        this.setAllowedCapabilities(allowed_capabilities);
+        this.setAllowedCapabilities(allowedCapabilities);
         return this;
     }
 
     getAllowedCapabilities(): Uint8Array {
-        return Uint8Array.from(Buffer.from(this.allowed_capabilities, 'hex'));
+        return Uint8Array.from(Buffer.from(this.allowedCapabilities, 'hex'));
     }
 
     toString(): string {
-        return this.address.toString() + this.allowed_capabilities.substring(2);
+        return this.address.toString() + this.allowedCapabilities.substring(2);
     }
 }
 
