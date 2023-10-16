@@ -14,7 +14,7 @@ use crate::{
 
 impl ClientInner {
     /// Get all output ids for a provided URL route and query parameters.
-    /// If a `OutputsQueryParameters::Cursor(_)` is provided, only a single page will be queried.
+    /// If an empty cursor is provided, only a single page will be queried.
     pub async fn get_output_ids(
         &self,
         route: &str,
