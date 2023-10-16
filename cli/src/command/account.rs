@@ -157,8 +157,9 @@ pub enum AccountCommand {
     NodeInfo,
     /// Display an output.
     Output {
-        /// Output ID to be displayed.
-        output_id: String,
+        /// Selector for output.
+        /// Either by ID (e.g. 0xbce525324af12eda02bf7927e92cea3a8e8322d0f41966271443e6c3b245a4400000) or index.
+        selector: OutputSelector,
     },
     /// List all outputs.
     Outputs,
@@ -270,6 +271,25 @@ pub enum TransactionSelector {
 }
 
 impl FromStr for TransactionSelector {
+    type Err = Error;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Ok(if let Ok(index) = s.parse() {
+            Self::Index(index)
+        } else {
+            Self::Id(s.parse()?)
+        })
+    }
+}
+
+/// Select by output ID or list index
+#[derive(Debug, Copy, Clone)]
+pub enum OutputSelector {
+    Id(OutputId),
+    Index(usize),
+}
+
+impl FromStr for OutputSelector {
     type Err = Error;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
@@ -644,8 +664,15 @@ pub async fn node_info_command(account: &Account) -> Result<(), Error> {
 }
 
 /// `output` command
-pub async fn output_command(account: &Account, output_id: String) -> Result<(), Error> {
-    let output = account.get_output(&OutputId::from_str(&output_id)?).await;
+pub async fn output_command(account: &Account, selector: OutputSelector) -> Result<(), Error> {
+    let output = match selector {
+        OutputSelector::Id(id) => account.get_output(&id).await,
+        OutputSelector::Index(index) => {
+            let mut outputs = account.outputs(None).await?;
+            outputs.sort_by(|a, b| a.output_id.cmp(&b.output_id));
+            outputs.into_iter().nth(index)
+        }
+    };
 
     if let Some(output) = output {
         println_log_info!("{output:#?}");
