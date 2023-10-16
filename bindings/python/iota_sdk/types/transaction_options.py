@@ -30,12 +30,8 @@ class RemainderValueStrategyCustomAddress:
 
     def as_dict(self):
         """
-        The function `as_dict` returns a dictionary with the strategy name and its corresponding value.
-
-        Returns:
-
-        a dictionary with two key-value pairs. The "strategy" key is assigned the value of self.name,
-        and the "value" key is assigned the first element of self.value.
+        Returns a dictionary with two key-value pairs. The "strategy" key is assigned "CustomAddress",
+        and the "value" key is assigned __dict__ of this instance.
         """
         return dict({"strategy": "CustomAddress", "value": self.__dict__})
 
@@ -52,7 +48,7 @@ class RemainderValueStrategy(Enum):
 
     def as_dict(self):
         """
-        The function `to_dict` returns a dictionary with the strategy name and its corresponding value.
+        Returns a dictionary with the strategy name and its corresponding value.
 
         Returns:
 
@@ -93,6 +89,6 @@ class TransactionOptions():
         self.allow_micro_amount = allow_micro_amount
 
     def as_dict(self):
-        """The function `as_dict` returns a dictionary representation of an object's attributes.
+        """Returns a dictionary representation of an object's attributes.
         """
         return dict(self.__dict__)

@@ -283,7 +283,7 @@ class OutputWithMetadata:
 def output_from_dict(
         output: Dict[str, any]) -> Union[TreasuryOutput, BasicOutput, AliasOutput, FoundryOutput, NftOutput, Output]:
     """
-    The function `output_from_dict` takes a dictionary as input and returns an instance of a specific
+    Takes a dictionary as input and returns an instance of a specific
     output class based on the value of the 'type' key in the dictionary.
 
     Arguments:

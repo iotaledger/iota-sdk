@@ -21,7 +21,7 @@ class NodeCoreAPI(metaclass=ABCMeta):
     @abstractmethod
     def _call_method(self, name, data=None):
         """
-        The function `_call_method` sends a message to the Rust library and returns the response.
+        Sends a message to the Rust library and returns the response.
         It is abstract here as its implementation is located in `client.py`, which is a composite class.
 
         Arguments:

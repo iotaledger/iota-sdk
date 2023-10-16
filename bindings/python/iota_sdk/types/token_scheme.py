@@ -29,7 +29,7 @@ class SimpleTokenScheme(TokenScheme):
 
     def as_dict(self):
         """
-        The function converts integer values in the config to hexadecimal strings.
+        Converts all integer values in the config to hexadecimal strings.
         """
         config = dict(self.__dict__)
 

@@ -30,10 +30,7 @@ class PreparedTransaction:
         self.prepared_transaction_data_dto = prepared_transaction_data
 
     def prepared_transaction_data(self) -> PreparedTransactionData:
-        """The function returns the prepared transaction data.
-
-        Returns:
-            The method prepared_transaction_data() is returning an object of type PreparedTransaction
+        """Returns the prepared transaction data.
         """
         return self.prepared_transaction_data_dto if isinstance(
             self.prepared_transaction_data_dto, PreparedTransactionData) else from_dict(PreparedTransactionData, self.prepared_transaction_data_dto)
@@ -66,7 +63,6 @@ class PreparedTransaction:
 class PreparedCreateTokenTransaction(PreparedTransaction):
 
     """A prepared transaction for creating a native token.
-    The function returns the token_id as a string.
 
     Returns: The token id of the PreparedCreateTokenTransaction.
     """
@@ -77,7 +73,7 @@ class PreparedCreateTokenTransaction(PreparedTransaction):
         return self.prepared_transaction_data_dto["tokenId"]
 
     def prepared_transaction_data(self):
-        """The function returns the prepared transaction data.
+        """Returns the prepared transaction data.
         """
         return from_dict(PreparedTransactionData,
                          self.prepared_transaction_data_dto["transaction"])
