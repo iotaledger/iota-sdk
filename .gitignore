@@ -32,4 +32,4 @@ book
 .venv*
 
 # Temporary documentation
-/docs
+docs
