@@ -586,7 +586,7 @@ impl StateTransitionVerifier for FoundryOutput {
     }
 
     fn destruction(current_state: &Self, context: &ValidationContext<'_>) -> Result<(), StateTransitionError> {
-        if context
+        if !context
             .essence
             .capabilities()
             .has_capability(TransactionCapabilityFlag::DestroyFoundryOutputs)

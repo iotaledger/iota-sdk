@@ -648,7 +648,7 @@ impl StateTransitionVerifier for AccountOutput {
     }
 
     fn destruction(_current_state: &Self, context: &ValidationContext<'_>) -> Result<(), StateTransitionError> {
-        if context
+        if !context
             .essence
             .capabilities()
             .has_capability(TransactionCapabilityFlag::DestroyAccountOutputs)
