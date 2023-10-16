@@ -10,9 +10,7 @@ use crate::{
     types::block::{
         address::Bech32Address,
         input::INPUT_COUNT_MAX,
-        output::{
-            unlock_condition::AddressUnlockCondition, BasicOutputBuilder, NativeTokens, NativeTokensBuilder, Output,
-        },
+        output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder, NativeTokensBuilder, Output},
         slot::SlotIndex,
     },
 };
@@ -31,7 +29,7 @@ use crate::wallet::account::constants::DEFAULT_LEDGER_OUTPUT_CONSOLIDATION_THRES
 use crate::wallet::{
     account::{
         constants::DEFAULT_OUTPUT_CONSOLIDATION_THRESHOLD,
-        operations::{helpers::time::can_output_be_unlocked_now, output_claiming::get_new_native_token_count},
+        operations::helpers::time::can_output_be_unlocked_now,
         types::{OutputData, Transaction},
         Account, AddressWithUnspentOutputs, TransactionOptions,
     },
@@ -241,13 +239,8 @@ where
         let mut total_native_tokens = NativeTokensBuilder::new();
 
         for output_data in outputs_to_consolidate.iter().take(max_inputs.into()) {
-            if let Some(native_tokens) = output_data.output.native_tokens() {
-                // Skip output if the max native tokens count would be exceeded
-                if get_new_native_token_count(&total_native_tokens, native_tokens)? > NativeTokens::COUNT_MAX.into() {
-                    log::debug!("[OUTPUT_CONSOLIDATION] skipping output to not exceed the max native tokens count");
-                    continue;
-                }
-                total_native_tokens.add_native_tokens(native_tokens.clone())?;
+            if let Some(native_token) = output_data.output.native_token() {
+                total_native_tokens.add_native_token(native_token.clone())?;
             };
             total_amount += output_data.output.amount();
 

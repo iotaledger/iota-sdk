@@ -11,8 +11,8 @@ use crate::{
         address::Address,
         output::{
             unlock_condition::{AddressUnlockCondition, StorageDepositReturnUnlockCondition},
-            BasicOutputBuilder, MinimumStorageDepositBasicOutput, NativeTokens, NativeTokensBuilder, NftOutputBuilder,
-            Output, OutputId,
+            BasicOutputBuilder, MinimumStorageDepositBasicOutput, NativeTokensBuilder, NftOutputBuilder, Output,
+            OutputId,
         },
         slot::SlotIndex,
     },
@@ -249,13 +249,8 @@ where
         let mut new_native_tokens = NativeTokensBuilder::new();
         // check native tokens
         for output_data in &outputs_to_claim {
-            if let Some(native_tokens) = output_data.output.native_tokens() {
-                // Skip output if the max native tokens count would be exceeded
-                if get_new_native_token_count(&new_native_tokens, native_tokens)? > NativeTokens::COUNT_MAX.into() {
-                    log::debug!("[OUTPUT_CLAIMING] skipping output to not exceed the max native tokens count");
-                    continue;
-                }
-                new_native_tokens.add_native_tokens(native_tokens.clone())?;
+            if let Some(native_token) = output_data.output.native_token() {
+                new_native_tokens.add_native_token(native_token.clone())?;
             }
             if let Some(sdr) = sdr_not_expired(&output_data.output, slot_index) {
                 // for own output subtract the return amount
@@ -332,22 +327,13 @@ where
                 // the required storage deposit
                 required_amount = required_amount_for_nfts
                     + MinimumStorageDepositBasicOutput::new(rent_structure, token_supply)
-                        .with_native_tokens(option_native_token)
+                        .with_native_token(option_native_token)
                         .finish()?;
 
                 if available_amount < required_amount {
                     if !additional_inputs_used.contains(&output_data.output_id) {
-                        if let Some(native_tokens) = output_data.output.native_tokens() {
-                            // Skip input if the max native tokens count would be exceeded
-                            if get_new_native_token_count(&new_native_tokens, native_tokens)?
-                                > NativeTokens::COUNT_MAX.into()
-                            {
-                                log::debug!(
-                                    "[OUTPUT_CLAIMING] skipping input to not exceed the max native tokens count"
-                                );
-                                continue;
-                            }
-                            new_native_tokens.add_native_tokens(native_tokens.clone())?;
+                        if let Some(native_token) = output_data.output.native_token() {
+                            new_native_tokens.add_native_token(native_token.clone())?;
                         }
                         available_amount += output_data.output.amount();
                         additional_inputs.push(output_data.output_id);
@@ -429,16 +415,4 @@ pub(crate) fn sdr_not_expired(output: &Output, slot_index: SlotIndex) -> Option<
             (!expired).then_some(sdr)
         })
     })
-}
-
-// Helper function to calculate the native token count without duplicates, when new native tokens are added
-// Might be possible to refactor the sections where it's used to remove the clones
-pub(crate) fn get_new_native_token_count(
-    native_tokens_builder: &NativeTokensBuilder,
-    native_tokens: &NativeTokens,
-) -> crate::wallet::Result<usize> {
-    // Clone to get the new native token count without actually modifying it
-    let mut native_tokens_count = native_tokens_builder.clone();
-    native_tokens_count.add_native_tokens(native_tokens.clone())?;
-    Ok(native_tokens_count.len())
 }
