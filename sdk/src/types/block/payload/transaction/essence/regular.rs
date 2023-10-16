@@ -82,15 +82,15 @@ impl RegularTransactionEssenceBuilder {
         self
     }
 
-    /// Adds [`ManaAllotment`]s to a [`RegularTransactionEssenceBuilder`].
-    pub fn with_mana_allotments(mut self, allotments: impl IntoIterator<Item = ManaAllotment>) -> Self {
-        self.allotments = allotments.into_iter().collect();
-        self
-    }
-
     /// Adds an output to a [`RegularTransactionEssenceBuilder`].
     pub fn add_output(mut self, output: Output) -> Self {
         self.outputs.push(output);
+        self
+    }
+
+    /// Adds [`ManaAllotment`]s to a [`RegularTransactionEssenceBuilder`].
+    pub fn with_mana_allotments(mut self, allotments: impl IntoIterator<Item = ManaAllotment>) -> Self {
+        self.allotments = allotments.into_iter().collect();
         self
     }
 
@@ -106,14 +106,14 @@ impl RegularTransactionEssenceBuilder {
         self
     }
 
-    /// Adds a payload to a [`RegularTransactionEssenceBuilder`].
-    pub fn with_payload(mut self, payload: impl Into<OptionalPayload>) -> Self {
-        self.payload = payload.into();
+    pub fn with_capabilities(mut self, capabilities: TransactionCapabilities) -> Self {
+        self.capabilities = capabilities;
         self
     }
 
-    pub fn with_capabilities(mut self, capabilities: TransactionCapabilities) -> Self {
-        self.capabilities = capabilities;
+    /// Adds a payload to a [`RegularTransactionEssenceBuilder`].
+    pub fn with_payload(mut self, payload: impl Into<OptionalPayload>) -> Self {
+        self.payload = payload.into();
         self
     }
 
