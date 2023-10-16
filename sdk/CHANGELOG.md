@@ -19,7 +19,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security -->
 
-## 1.1.1 - 2023-MM-DD
+## 1.1.2 - 2023-MM-DD
+
+### Fixed
+
+- `Account::claim_outputs()` if an input has less amount than min storage deposit;
+
+## 1.1.1 - 2023-10-11
 
 ### Added
 
@@ -32,6 +38,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Update protocol params and addresses with correct bech32 HRP in `Wallet::set_client_options()`;
+- `migrate_db_chrysalis_to_stardust()` for some ledger nano wallets;
 
 ## 1.1.0 - 2023-09-29
 
