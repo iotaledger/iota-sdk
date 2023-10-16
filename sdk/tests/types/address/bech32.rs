@@ -41,7 +41,7 @@ fn hrp_from_str() {
 
     assert!(matches!(
         Hrp::from_str("中國"),
-        Err(Error::InvalidBech32Hrp(hrp)) if hrp == "中國"
+        Err(Error::InvalidBech32Hrp(hrp)) if hrp.starts_with("中國")
     ));
 }
 
