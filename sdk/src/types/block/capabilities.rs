@@ -5,7 +5,11 @@ use alloc::boxed::Box;
 use core::marker::PhantomData;
 
 use derive_more::Deref;
-use packable::{error::UnpackErrorExt, prefix::BoxedSlicePrefix, Packable};
+use packable::{
+    error::UnpackErrorExt,
+    prefix::{BoxedSlicePrefix, UnpackPrefixError},
+    Packable,
+};
 
 /// A list of bitflags that represent capabilities.
 #[derive(Debug, Deref)]
@@ -181,10 +185,8 @@ impl<Flag: 'static> Packable for Capabilities<Flag> {
         unpacker: &mut U,
         visitor: &Self::UnpackVisitor,
     ) -> Result<Self, packable::error::UnpackError<Self::UnpackError, U::Error>> {
-        use packable::prefix::UnpackPrefixError;
         Ok(Self::from_bytes(
             BoxedSlicePrefix::unpack::<_, VERIFY>(unpacker, visitor)
-                // TODO: not sure if this is the best way to do this
                 .map_packable_err(|e| match e {
                     UnpackPrefixError::Item(i) | UnpackPrefixError::Prefix(i) => i,
                 })
