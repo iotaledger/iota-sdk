@@ -18,7 +18,14 @@ const OUTPUT_ID_INVALID_INDEX: &str = "0x52fdfc072182654f163f5f0f9a621d729566c74
 fn debug_impl() {
     assert_eq!(
         format!("{:?}", OutputId::from_str(OUTPUT_ID).unwrap()),
-        "OutputId(0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c649000000002a00)"
+        "OutputId { \
+            id: \"0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c649000000002a00\", \
+            transaction_id: TransactionId { \
+                id: \"0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c64900000000\", \
+                slot_index: SlotIndex(0) \
+            }, \
+            output_index: BoundedU16(42) \
+        }"
     );
 }
 
@@ -35,10 +42,10 @@ fn new_valid() {
 fn null() {
     assert_eq!(
         format!(
-            "{:?}",
+            "{}",
             TransactionHash::null().with_slot_index(0).with_output_index(0).unwrap()
         ),
-        "OutputId(0x0000000000000000000000000000000000000000000000000000000000000000000000000000)"
+        "0x0000000000000000000000000000000000000000000000000000000000000000000000000000"
     );
 }
 

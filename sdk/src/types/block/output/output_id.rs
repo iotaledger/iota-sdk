@@ -94,6 +94,10 @@ impl core::fmt::Display for OutputId {
 
 impl core::fmt::Debug for OutputId {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        write!(f, "OutputId({self})")
+        f.debug_struct("OutputId")
+            .field("id", &self.to_string())
+            .field("transaction_id", &self.transaction_id)
+            .field("output_index", &self.index)
+            .finish()
     }
 }
