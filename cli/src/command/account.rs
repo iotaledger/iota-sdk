@@ -674,7 +674,7 @@ pub async fn output_command(account: &Account, selector: OutputSelector) -> Resu
                     .milestone_timestamp_booked()
                     .cmp(&b.metadata.milestone_timestamp_booked())
             });
-            outputs.into_iter().nth(index)
+            outputs.into_iter().rev().nth(index)
         }
     };
 
@@ -700,7 +700,7 @@ pub async fn outputs_command(account: &Account) -> Result<(), Error> {
         println_log_info!("No outputs found");
     } else {
         println_log_info!("Outputs:");
-        for (i, output_data) in outputs.into_iter().enumerate() {
+        for (i, output_data) in outputs.into_iter().rev().enumerate() {
             let booked_time = to_utc_date_time(output_data.metadata.milestone_timestamp_booked().into())?;
             let formatted_time = booked_time.format("%Y-%m-%d %H:%M:%S").to_string();
 
@@ -833,7 +833,7 @@ pub async fn transaction_command(account: &Account, selector: TransactionSelecto
         TransactionSelector::Id(id) => transactions.into_iter().find(|tx| tx.transaction_id == id),
         TransactionSelector::Index(index) => {
             transactions.sort_by(|a, b| a.timestamp.cmp(&b.timestamp));
-            transactions.into_iter().nth(index)
+            transactions.into_iter().rev().nth(index)
         }
     };
 
