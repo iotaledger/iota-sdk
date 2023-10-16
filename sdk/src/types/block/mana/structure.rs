@@ -54,14 +54,10 @@ impl ManaStructure {
         (1 << self.bits_count) - 1
     }
 
-    fn decay(&self, mana: u64, epoch_delta: u32) -> u64 {
+    fn decay(&self, mut mana: u64, epoch_delta: u32) -> u64 {
         if mana == 0 || epoch_delta == 0 || self.decay_factors().is_empty() {
             return mana;
         }
-
-        // split the value into two u64 variables to prevent overflowing
-        let mut mana_hi = upper_bits(mana);
-        let mut mana_lo = lower_bits(mana);
 
         // we keep applying the lookup table factors as long as n epochs are left
         let mut remaining_epochs = epoch_delta;
@@ -73,13 +69,11 @@ impl ManaStructure {
             // Unwrap: Safe because the index is at most the length
             let decay_factor = self.decay_factor_at(epochs_to_decay - 1).unwrap();
 
-            // apply the decay using fixed-point arithmetics.
-            (mana_hi, mana_lo) =
-                multiplication_and_shift(mana_hi, mana_lo, decay_factor, self.decay_factors_exponent());
+            // apply the decay using fixed-point arithmetics
+            mana = fixed_point_multiply(mana, decay_factor, self.decay_factors_exponent());
         }
 
-        // combine both u64 variables to get the actual value
-        mana_hi << 32 | mana_lo
+        mana
     }
 
     fn generate_mana(&self, amount: u64, slot_delta: u32) -> u64 {
@@ -178,83 +172,34 @@ impl ProtocolParameters {
             mana_structure.generate_mana(amount, slot_index_target.0 - slot_index_created.0)
         } else if epoch_index_target == epoch_index_created + 1 {
             let slots_before_next_epoch = self.first_slot_of(epoch_index_created + 1) - slot_index_created;
-            let slots_since_epoch_start = slot_index_target - self.last_slot_of(epoch_index_target - 1);
+            let slots_since_epoch_start = slot_index_target - self.first_slot_of(epoch_index_target);
             let mana_decayed = mana_structure.decay(mana_structure.generate_mana(amount, slots_before_next_epoch.0), 1);
             let mana_generated = mana_structure.generate_mana(amount, slots_since_epoch_start.0);
             mana_decayed + mana_generated
         } else {
             let c = fixed_point_multiply(
                 amount,
-                mana_structure.decay_factor_epochs_sum(),
+                mana_structure.decay_factor_epochs_sum() * mana_structure.generation_rate() as u32,
                 mana_structure.decay_factor_epochs_sum_exponent() + mana_structure.generation_rate_exponent()
                     - self.slots_per_epoch_exponent(),
             );
+            let epoch_delta = epoch_index_target.0 - epoch_index_created.0;
             let slots_before_next_epoch = self.first_slot_of(epoch_index_created + 1) - slot_index_created;
-            let slots_since_epoch_start = slot_index_target - self.last_slot_of(epoch_index_target - 1);
+            let slots_since_epoch_start = slot_index_target - self.first_slot_of(epoch_index_target);
             let potential_mana_n = mana_structure.decay(
                 mana_structure.generate_mana(amount, slots_before_next_epoch.0),
-                epoch_index_target.0 - epoch_index_created.0,
+                epoch_delta,
             );
-            let potential_mana_n_1 = mana_structure.decay(c, epoch_index_target.0 - epoch_index_created.0);
-            let potential_mana_0 = c + mana_structure.generate_mana(amount, slots_since_epoch_start.0)
-                - (c >> mana_structure.generation_rate_exponent());
+            let potential_mana_n_1 = mana_structure.decay(c, epoch_delta - 1);
+            let potential_mana_0 = c + mana_structure.generate_mana(amount, slots_since_epoch_start.0);
             potential_mana_0 - potential_mana_n_1 + potential_mana_n
         })
     }
 }
 
-/// Returns the upper 32 bits of a u64 value.
-const fn upper_bits(v: u64) -> u64 {
-    v >> 32
-}
-
-/// Returns the lower n bits of a u64 value.
-const fn lower_n_bits(v: u64, n: u8) -> u64 {
-    debug_assert!(n <= 64);
-    if n == 0 {
-        return 0;
-    }
-    v & u64::MAX >> (64 - n)
-}
-
-/// Returns the lower 32 bits of a u64 value.
-const fn lower_bits(v: u64) -> u64 {
-    v & 0xFFFFFFFF
-}
-
-/// Returns the result of the multiplication ((value_hi << 32 + value_lo) * mult_factor) >> shift_factor
-/// (where mult_factor is a uint32, value_hi and value_lo are uint64 smaller than 2^32, and 0 <= shift_factor <=
-/// 32), using only uint64 multiplication functions, without overflowing. The returned result is split
-/// in 2 factors: value_hi and value_lo, one containing the upper 32 bits of the result and the other
-/// containing the lower 32 bits.
-fn multiplication_and_shift(mut value_hi: u64, mut value_lo: u64, mult_factor: u32, shift_factor: u8) -> (u64, u64) {
-    debug_assert!(shift_factor <= 32);
-    // multiply the integer part of value_hi by mult_factor
-    value_hi *= mult_factor as u64;
-
-    // the lower shift_factor bits of the result are extracted and shifted left to form the remainder.
-    // value_lo is multiplied by mult_factor and right-shifted by shift_factor bits.
-    // the sum of these two values forms the new lower part (value_lo) of the result.
-    value_lo = (lower_n_bits(value_hi, shift_factor) << (32 - shift_factor))
-        + ((value_lo * mult_factor as u64) >> shift_factor);
-
-    // the right-shifted value_hi and the upper 32 bits of value_lo form the new higher part (value_hi) of the
-    // result.
-    value_hi = (value_hi >> shift_factor) + upper_bits(value_lo);
-
-    // the lower 32 bits of value_lo form the new lower part of the result.
-    value_lo = lower_bits(value_lo);
-
-    // return the result as a fixed-point number composed of two 64-bit integers
-    (value_hi, value_lo)
-}
-
-/// Wrapper for [`multiplication_and_shift`] that splits and re-combines the given value.
-fn fixed_point_multiply(value: u64, mult_factor: u32, shift_factor: u8) -> u64 {
-    let value_hi = upper_bits(value);
-    let value_lo = lower_bits(value);
-    let (amount_hi, amount_lo) = multiplication_and_shift(value_hi, value_lo, mult_factor, shift_factor);
-    amount_hi << 32 | amount_lo
+/// Perform a multiplication and shift.
+const fn fixed_point_multiply(value: u64, mult_factor: u32, shift_factor: u8) -> u64 {
+    ((value as u128 * mult_factor as u128) >> shift_factor) as u64
 }
 
 #[cfg(test)]
@@ -268,7 +213,6 @@ mod test {
     fn params() -> &'static ProtocolParameters {
         use once_cell::sync::Lazy;
         static PARAMS: Lazy<ProtocolParameters> = Lazy::new(|| {
-            // TODO: these params are clearly wrong as the calculation fails due to shifting > 32 bits
             let mut params = ProtocolParameters {
                 slots_per_epoch_exponent: 13,
                 slot_duration_in_seconds: 10,
@@ -282,12 +226,11 @@ mod test {
                 },
                 ..Default::default()
             };
-            // TODO: Just use the generated values from go
             params.mana_structure.decay_factors = {
                 let epochs_per_year = ((365_u64 * 24 * 60 * 60) as f64 / params.slot_duration_in_seconds() as f64)
                     / params.slots_per_epoch() as f64;
                 let beta_per_epoch_index = BETA_PER_YEAR / epochs_per_year;
-                (1..epochs_per_year.floor() as usize)
+                (1..=epochs_per_year.floor() as usize)
                     .map(|epoch| {
                         ((-beta_per_epoch_index * epoch as f64).exp()
                             * 2_f64.powf(params.mana_structure().decay_factors_exponent() as _))
@@ -301,7 +244,7 @@ mod test {
                 let delta = params.slots_per_epoch() as f64 * params.slot_duration_in_seconds() as f64
                     / (365_u64 * 24 * 60 * 60) as f64;
                 (((-BETA_PER_YEAR * delta).exp() / (1. - (-BETA_PER_YEAR * delta).exp()))
-                    * 2_f64.powf(params.mana_structure().decay_factor_epochs_sum_exponent() as _))
+                    * (params.mana_structure().decay_factor_epochs_sum_exponent() as f64).exp2())
                 .floor() as u32
             };
             params
@@ -345,38 +288,37 @@ mod test {
         );
     }
 
-    // TODO: Re-enable the commented tests once the test data is sorted out
-    // #[test]
-    // fn test_mana_decay_lookup_len_delta() {
-    //     assert_eq!(
-    //         params().mana_with_decay(
-    //             u64::MAX,
-    //             params().first_slot_of(1),
-    //             params().first_slot_of(params().mana_structure().decay_factors().len() as u32 + 1)
-    //         ),
-    //         Ok(13228672242897911807)
-    //     );
-    // }
+    #[test]
+    fn test_mana_decay_lookup_len_delta() {
+        assert_eq!(
+            params().mana_with_decay(
+                u64::MAX,
+                params().first_slot_of(1),
+                params().first_slot_of(params().mana_structure().decay_factors().len() as u32 + 1)
+            ),
+            Ok(13228672242897911807)
+        );
+    }
 
-    // #[test]
-    // fn test_mana_decay_lookup_len_delta_multiple() {
-    //     assert_eq!(
-    //         params().mana_with_decay(
-    //             u64::MAX,
-    //             params().first_slot_of(1),
-    //             params().first_slot_of(3 * params().mana_structure().decay_factors().len() as u32 + 1)
-    //         ),
-    //         Ok(6803138682699798504)
-    //     );
-    // }
+    #[test]
+    fn test_mana_decay_lookup_len_delta_multiple() {
+        assert_eq!(
+            params().mana_with_decay(
+                u64::MAX,
+                params().first_slot_of(1),
+                params().first_slot_of(3 * params().mana_structure().decay_factors().len() as u32 + 1)
+            ),
+            Ok(6803138682699798504)
+        );
+    }
 
-    // #[test]
-    // fn test_mana_decay_max_mana() {
-    //     assert_eq!(
-    //         params().mana_with_decay(u64::MAX, params().first_slot_of(1), params().first_slot_of(401)),
-    //         Ok(13046663022640287317)
-    //     );
-    // }
+    #[test]
+    fn test_mana_decay_max_mana() {
+        assert_eq!(
+            params().mana_with_decay(u64::MAX, params().first_slot_of(1), params().first_slot_of(401)),
+            Ok(13046663022640287317)
+        );
+    }
 
     #[test]
     fn test_potential_mana_no_delta() {
@@ -386,13 +328,13 @@ mod test {
         );
     }
 
-    // #[test]
-    // fn test_potential_mana_no_mana() {
-    //     assert_eq!(
-    //         params().potential_mana(0, params().first_slot_of(1), params().first_slot_of(400)),
-    //         Ok(0)
-    //     );
-    // }
+    #[test]
+    fn test_potential_mana_no_mana() {
+        assert_eq!(
+            params().potential_mana(0, params().first_slot_of(1), params().first_slot_of(400)),
+            Ok(0)
+        );
+    }
 
     #[test]
     fn test_potential_mana_negative_delta() {
@@ -405,11 +347,12 @@ mod test {
         );
     }
 
+    // TODO: Uncomment when iota.go fixes their calculation + test data
     // #[test]
     // fn test_potential_mana_lookup_len_delta() {
     //     assert_eq!(
     //         params().potential_mana(
-    //             u64::MAX,
+    //             i64::MAX as u64,
     //             params().first_slot_of(1),
     //             params().first_slot_of(params().mana_structure().decay_factors().len() as u32 + 1)
     //         ),
@@ -421,7 +364,7 @@ mod test {
     // fn test_potential_mana_lookup_len_delta_multiple() {
     //     assert_eq!(
     //         params().potential_mana(
-    //             u64::MAX,
+    //             i64::MAX as u64,
     //             params().first_slot_of(1),
     //             params().first_slot_of(3 * params().mana_structure().decay_factors().len() as u32 + 1)
     //         ),
@@ -429,26 +372,26 @@ mod test {
     //     );
     // }
 
-    // #[test]
-    // fn test_potential_mana_same_epoch() {
-    //     assert_eq!(
-    //         params().potential_mana(u64::MAX, params().first_slot_of(1), params().last_slot_of(1)),
-    //         Ok(562881233944575)
-    //     );
-    // }
+    #[test]
+    fn test_potential_mana_same_epoch() {
+        assert_eq!(
+            params().potential_mana(i64::MAX as u64, params().first_slot_of(1), params().last_slot_of(1)),
+            Ok(562881233944575)
+        );
+    }
 
-    // #[test]
-    // fn test_potential_mana_one_epoch() {
-    //     assert_eq!(
-    //         params().potential_mana(u64::MAX, params().first_slot_of(1), params().last_slot_of(2)),
-    //         Ok(1125343946211326)
-    //     );
-    // }
+    #[test]
+    fn test_potential_mana_one_epoch() {
+        assert_eq!(
+            params().potential_mana(i64::MAX as u64, params().first_slot_of(1), params().last_slot_of(2)),
+            Ok(1125343946211326)
+        );
+    }
 
     // #[test]
     // fn test_potential_mana_several_epochs() {
     //     assert_eq!(
-    //         params().potential_mana(u64::MAX, params().first_slot_of(1), params().last_slot_of(3)),
+    //         params().potential_mana(i64::MAX as u64, params().first_slot_of(1), params().last_slot_of(3)),
     //         Ok(1687319975062367)
     //     );
     // }
@@ -456,7 +399,7 @@ mod test {
     // #[test]
     // fn test_potential_mana_max_mana() {
     //     assert_eq!(
-    //         params().potential_mana(u64::MAX, params().first_slot_of(1), params().first_slot_of(401)),
+    //         params().potential_mana(i64::MAX as u64, params().first_slot_of(1), params().first_slot_of(401)),
     //         Ok(190239292158065300)
     //     );
     // }
