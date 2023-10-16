@@ -23,7 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- `AccountCommand::Output` now accepts either an index or an ID;
+- `AccountCommand::Output` now accepts either a list index or an `OutputId`;
 - `output` and `outputs` now order outputs by their corresponding booked milestone timestamp;
 
 ### Fixed
