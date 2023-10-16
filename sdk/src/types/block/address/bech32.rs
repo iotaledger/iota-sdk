@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use alloc::{
+    format,
     string::{String, ToString},
     vec::Vec,
 };
