@@ -512,11 +512,6 @@ impl FoundryOutput {
             Ordering::Greater => {
                 // Melt / Burn
 
-                if !capabilities.has_capability(TransactionCapabilityFlag::BurnNativeTokens) {
-                    // TODO: add a variant https://github.com/iotaledger/iota-sdk/issues/1430
-                    return Err(StateTransitionError::UnsupportedStateTransition);
-                }
-
                 if current_token_scheme.melted_tokens() != next_token_scheme.melted_tokens()
                     && current_token_scheme.minted_tokens() != next_token_scheme.minted_tokens()
                 {
@@ -530,6 +525,13 @@ impl FoundryOutput {
 
                 if melted_diff > token_diff {
                     return Err(StateTransitionError::InconsistentNativeTokensMeltBurn);
+                }
+
+                let burned_diff = token_diff - melted_diff;
+
+                if !burned_diff.is_zero() && !capabilities.has_capability(TransactionCapabilityFlag::BurnNativeTokens) {
+                    // TODO: add a variant https://github.com/iotaledger/iota-sdk/issues/1430
+                    return Err(StateTransitionError::UnsupportedStateTransition);
                 }
             }
         }
