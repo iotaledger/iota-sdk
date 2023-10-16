@@ -701,7 +701,7 @@ pub async fn outputs_command(account: &Account) -> Result<(), Error> {
     } else {
         println_log_info!("Outputs:");
         for (i, output_data) in outputs.into_iter().rev().enumerate() {
-            let booked_time = to_utc_date_time(output_data.metadata.milestone_timestamp_booked().into())?;
+            let booked_time = to_utc_date_time(output_data.metadata.milestone_timestamp_booked() as u128 * 1000)?;
             let formatted_time = booked_time.format("%Y-%m-%d %H:%M:%S").to_string();
 
             println_log_info!(
