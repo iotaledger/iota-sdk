@@ -1024,10 +1024,10 @@ async fn print_outputs(mut outputs: Vec<OutputData>, title: &str) -> Result<(), 
     Ok(())
 }
 
-fn output_booked_timestamp_and_output_id(a: &OutputData, b: &OutputData) -> std::cmp::Ordering {
+fn outputs_ordering(a: &OutputData, b: &OutputData) -> std::cmp::Ordering {
     (b.metadata.milestone_timestamp_booked(), a.output_id).cmp(&(a.metadata.milestone_timestamp_booked(), b.output_id))
 }
 
-fn transaction_timestamp(a: &Transaction, b: &Transaction) -> std::cmp::Ordering {
+fn transactions_ordering(a: &Transaction, b: &Transaction) -> std::cmp::Ordering {
     b.timestamp.cmp(&a.timestamp)
 }
