@@ -27,7 +27,7 @@ pub use self::method_handler::listen_mqtt;
 pub use self::method_handler::CallMethod;
 pub use self::{
     error::{Error, Result},
-    method::{ClientMethod, SecretManagerMethod, UtilsMethod, WalletMethod, WalletOperationMethod},
+    method::{ClientMethod, SecretManagerMethod, UtilsMethod, WalletMethod, WalletCommandMethod},
     method_handler::{call_client_method, call_secret_manager_method, call_utils_method, call_wallet_method},
     response::Response,
 };

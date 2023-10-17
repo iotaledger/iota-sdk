@@ -29,7 +29,7 @@ pub enum WalletMethod {
     #[serde(rename_all = "camelCase")]
     CallMethod {
         /// The wallet operation method to call.
-        method: super::WalletOperationMethod,
+        method: super::WalletCommandMethod,
     },
     /// Backup storage. Password must be the current one, when Stronghold is used as SecretManager.
     /// Expected response: [`Ok`](crate::Response::Ok)

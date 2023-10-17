@@ -5,9 +5,9 @@ mod client;
 mod secret_manager;
 mod utils;
 mod wallet;
-mod wallet_operation;
+mod wallet_command;
 
 pub use self::{
     client::ClientMethod, secret_manager::SecretManagerMethod, utils::UtilsMethod, wallet::WalletMethod,
-    wallet_operation::WalletOperationMethod,
+    wallet_command::WalletCommandMethod,
 };
