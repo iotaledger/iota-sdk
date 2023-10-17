@@ -669,7 +669,7 @@ pub async fn output_command(account: &Account, selector: OutputSelector) -> Resu
         OutputSelector::Id(id) => account.get_output(&id).await,
         OutputSelector::Index(index) => {
             let mut outputs = account.outputs(None).await?;
-            outputs.sort_unstable_by(output_booked_timestamp_and_output_id);
+            outputs.sort_unstable_by(outputs_ordering);
             outputs.into_iter().nth(index)
         }
     };
@@ -803,7 +803,7 @@ pub async fn transaction_command(account: &Account, selector: TransactionSelecto
     let transaction = match selector {
         TransactionSelector::Id(id) => transactions.into_iter().find(|tx| tx.transaction_id == id),
         TransactionSelector::Index(index) => {
-            transactions.sort_unstable_by(transaction_timestamp);
+            transactions.sort_unstable_by(transactions_ordering);
             transactions.into_iter().nth(index)
         }
     };
@@ -820,7 +820,7 @@ pub async fn transaction_command(account: &Account, selector: TransactionSelecto
 /// `transactions` command
 pub async fn transactions_command(account: &Account, show_details: bool) -> Result<(), Error> {
     let mut transactions = account.transactions().await;
-    transactions.sort_unstable_by(transaction_timestamp);
+    transactions.sort_unstable_by(transactions_ordering);
 
     if transactions.is_empty() {
         println_log_info!("No transactions found");
@@ -1004,7 +1004,7 @@ async fn print_outputs(mut outputs: Vec<OutputData>, title: &str) -> Result<(), 
         println_log_info!("No outputs found");
     } else {
         println_log_info!("{title}");
-        outputs.sort_unstable_by(output_booked_timestamp_and_output_id);
+        outputs.sort_unstable_by(outputs_ordering);
 
         for (i, output_data) in outputs.into_iter().enumerate() {
             let booked_time = to_utc_date_time(output_data.metadata.milestone_timestamp_booked() as u128 * 1000)?;
