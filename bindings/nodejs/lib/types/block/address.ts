@@ -140,16 +140,19 @@ class ImplicitAccountCreationAddress extends Address {
     /**
      * The Ed25519 address.
      */
-    @Expose({ name: 'pubKeyHash' })
     @Transform(({ value }) => new Ed25519Address(value), { toClassOnly: true })
     @Transform(({ value }) => value.toString(), { toPlainOnly: true })
-    readonly address: Ed25519Address;
+    private pubKeyHash: Ed25519Address;
     /**
      * @param address An Ed25519 address.
      */
     constructor(address: Ed25519Address) {
         super(AddressType.ImplicitAccountCreation);
-        this.address = address;
+        this.pubKeyHash = address;
+    }
+
+    address(): Ed25519Address {
+        return this.pubKeyHash;
     }
 
     toString(): string {
