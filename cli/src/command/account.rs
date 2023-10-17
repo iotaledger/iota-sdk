@@ -669,12 +669,13 @@ pub async fn output_command(account: &Account, selector: OutputSelector) -> Resu
         OutputSelector::Id(id) => account.get_output(&id).await,
         OutputSelector::Index(index) => {
             let mut outputs = account.outputs(None).await?;
+            outputs.sort_by(|a, b| a.output_id.cmp(&b.output_id));
             outputs.sort_by(|a, b| {
-                a.metadata
+                b.metadata
                     .milestone_timestamp_booked()
-                    .cmp(&b.metadata.milestone_timestamp_booked())
+                    .cmp(&a.metadata.milestone_timestamp_booked())
             });
-            outputs.into_iter().rev().nth(index)
+            outputs.into_iter().nth(index)
         }
     };
 
@@ -807,8 +808,8 @@ pub async fn transaction_command(account: &Account, selector: TransactionSelecto
     let transaction = match selector {
         TransactionSelector::Id(id) => transactions.into_iter().find(|tx| tx.transaction_id == id),
         TransactionSelector::Index(index) => {
-            transactions.sort_by(|a, b| a.timestamp.cmp(&b.timestamp));
-            transactions.into_iter().rev().nth(index)
+            transactions.sort_by(|a, b| b.timestamp.cmp(&a.timestamp));
+            transactions.into_iter().nth(index)
         }
     };
 
@@ -829,7 +830,7 @@ pub async fn transactions_command(account: &Account, show_details: bool) -> Resu
     if transactions.is_empty() {
         println_log_info!("No transactions found");
     } else {
-        for (i, tx) in transactions.into_iter().rev().enumerate() {
+        for (i, tx) in transactions.into_iter().enumerate() {
             if show_details {
                 println_log_info!("{:#?}", tx);
             } else {
@@ -1014,7 +1015,7 @@ async fn print_outputs(mut outputs: Vec<OutputData>, title: &str) -> Result<(), 
         println_log_info!("No outputs found");
     } else {
         println_log_info!("{title}");
-        for (i, output_data) in outputs.into_iter().rev().enumerate() {
+        for (i, output_data) in outputs.into_iter().enumerate() {
             let booked_time = to_utc_date_time(output_data.metadata.milestone_timestamp_booked() as u128 * 1000)?;
             let formatted_time = booked_time.format("%Y-%m-%d %H:%M:%S UTC").to_string();
 
