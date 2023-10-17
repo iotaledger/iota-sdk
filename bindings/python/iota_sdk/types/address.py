@@ -4,6 +4,7 @@
 from enum import IntEnum
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, TypeAlias, Union
+from dacite import from_dict
 from iota_sdk.types.common import HexStr, json
 
 
@@ -73,6 +74,23 @@ class ImplicitAccountCreationAddress:
     address: Ed25519Address
     type: int = field(default_factory=lambda: int(
         AddressType.IMPLICIT_ACCOUNT_CREATION), init=False)
+
+    @staticmethod
+    def to_dict_custom(addr_dict: dict) -> dict:
+        """
+        Converts an implicit account creation address to the dictionary representation.
+        """
+        if 'address' in addr_dict:
+            address = addr_dict.pop('address')
+            addr_dict['pubKeyHash'] = address.pop('pubKeyHash')
+        return addr_dict
+
+    @staticmethod
+    def from_dict(addr_dict: dict):
+        """
+        Creates an implicit account creation address from a dictionary representation.
+        """
+        return ImplicitAccountCreationAddress(Ed25519Address(addr_dict['pubKeyHash']))
 
 
 @json
