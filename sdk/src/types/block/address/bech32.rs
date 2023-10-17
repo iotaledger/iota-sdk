@@ -59,6 +59,7 @@ impl Packable for Hrp {
     #[inline]
     fn pack<P: Packer>(&self, packer: &mut P) -> Result<(), P::Error> {
         (self.0.len() as u8).pack(packer)?;
+        // TODO revisit when/if bech32 adds a way to get the bytes without iteration to avoid collecting
         packer.pack_bytes(&self.0.byte_iter().collect::<Vec<_>>())?;
 
         Ok(())
