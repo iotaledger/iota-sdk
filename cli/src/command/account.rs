@@ -20,7 +20,7 @@ use iota_sdk::{
     },
     wallet::{
         account::{
-            types::{AccountAddress, AccountIdentifier, OutputData},
+            types::{AccountAddress, AccountIdentifier, OutputData, Transaction},
             Account, ConsolidationParams, OutputsToClaim, SyncOptions, TransactionOptions,
         },
         CreateNativeTokenParams, MintNftParams, SendNativeTokensParams, SendNftParams, SendParams,
@@ -669,10 +669,7 @@ pub async fn output_command(account: &Account, selector: OutputSelector) -> Resu
         OutputSelector::Id(id) => account.get_output(&id).await,
         OutputSelector::Index(index) => {
             let mut outputs = account.outputs(None).await?;
-            outputs.sort_by(|a, b| {
-                (b.metadata.milestone_timestamp_booked(), a.output_id)
-                    .cmp(&(a.metadata.milestone_index_booked(), b.output_id))
-            });
+            outputs.sort_unstable_by(output_booked_timestamp_and_output_id);
             outputs.into_iter().nth(index)
         }
     };
@@ -806,7 +803,7 @@ pub async fn transaction_command(account: &Account, selector: TransactionSelecto
     let transaction = match selector {
         TransactionSelector::Id(id) => transactions.into_iter().find(|tx| tx.transaction_id == id),
         TransactionSelector::Index(index) => {
-            transactions.sort_by(|a, b| b.timestamp.cmp(&a.timestamp));
+            transactions.sort_unstable_by(transaction_timestamp);
             transactions.into_iter().nth(index)
         }
     };
@@ -823,7 +820,7 @@ pub async fn transaction_command(account: &Account, selector: TransactionSelecto
 /// `transactions` command
 pub async fn transactions_command(account: &Account, show_details: bool) -> Result<(), Error> {
     let mut transactions = account.transactions().await;
-    transactions.sort_by(|a, b| a.timestamp.cmp(&b.timestamp));
+    transactions.sort_unstable_by(transaction_timestamp);
 
     if transactions.is_empty() {
         println_log_info!("No transactions found");
@@ -1007,10 +1004,7 @@ async fn print_outputs(mut outputs: Vec<OutputData>, title: &str) -> Result<(), 
         println_log_info!("No outputs found");
     } else {
         println_log_info!("{title}");
-        outputs.sort_by(|a, b| {
-            (b.metadata.milestone_timestamp_booked(), a.output_id)
-                .cmp(&(a.metadata.milestone_timestamp_booked(), b.output_id))
-        });
+        outputs.sort_unstable_by(output_booked_timestamp_and_output_id);
 
         for (i, output_data) in outputs.into_iter().enumerate() {
             let booked_time = to_utc_date_time(output_data.metadata.milestone_timestamp_booked() as u128 * 1000)?;
@@ -1028,4 +1022,12 @@ async fn print_outputs(mut outputs: Vec<OutputData>, title: &str) -> Result<(), 
     }
 
     Ok(())
+}
+
+fn output_booked_timestamp_and_output_id(a: &OutputData, b: &OutputData) -> std::cmp::Ordering {
+    (b.metadata.milestone_timestamp_booked(), a.output_id).cmp(&(a.metadata.milestone_timestamp_booked(), b.output_id))
+}
+
+fn transaction_timestamp(a: &Transaction, b: &Transaction) -> std::cmp::Ordering {
+    b.timestamp.cmp(&a.timestamp)
 }
