@@ -44,7 +44,7 @@ impl BlockIssuerKey {
         }
     }
 
-    def_is_as_opt!(BlockIssuerKey => Ed25519);
+    def_is_as_opt!(BlockIssuerKey: Ed25519);
 }
 
 /// An Ed25519 block issuer key.

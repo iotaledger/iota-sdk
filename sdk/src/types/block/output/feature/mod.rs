@@ -106,7 +106,7 @@ impl Feature {
         }
     }
 
-    def_is_as_opt!(Feature => Sender, Issuer, Metadata, Tag, BlockIssuer, Staking);
+    def_is_as_opt!(Feature: Sender, Issuer, Metadata, Tag, BlockIssuer, Staking);
 }
 
 create_bitflags!(

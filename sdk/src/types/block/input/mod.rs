@@ -46,5 +46,5 @@ impl Input {
         }
     }
 
-    def_is_as_opt!(Input => Utxo);
+    def_is_as_opt!(Input: Utxo);
 }

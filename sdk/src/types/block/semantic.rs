@@ -7,10 +7,9 @@ use core::fmt;
 use hashbrown::{HashMap, HashSet};
 use primitive_types::U256;
 
-use super::{address::AddressCapabilityFlag, output::UnlockCondition};
 use crate::types::block::{
-    address::Address,
-    output::{ChainId, FoundryId, InputsCommitment, NativeTokens, Output, OutputId, TokenId},
+    address::{Address, AddressCapabilityFlag},
+    output::{ChainId, FoundryId, InputsCommitment, NativeTokens, Output, OutputId, TokenId, UnlockCondition},
     payload::transaction::{RegularTransactionEssence, TransactionEssence, TransactionId},
     unlock::Unlocks,
     Error,
