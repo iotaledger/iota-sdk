@@ -1023,8 +1023,8 @@ async fn print_outputs(mut outputs: Vec<OutputData>, title: &str) -> Result<(), 
                 i,
                 &output_data.output_id,
                 output_data.output.kind_str(),
-                if output_data.is_spent { "spent" } else { "unspent" },
-                formatted_time
+                formatted_time,
+                if output_data.is_spent { "Spent" } else { "Unspent" },
             );
         }
     }
