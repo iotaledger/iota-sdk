@@ -23,6 +23,11 @@ def test_basic_block_with_tagged_data_payload():
     assert block.to_dict() == block_dict
     assert isinstance(block.payload, get_args(Payload))
     assert block.payload.type == PayloadType.TaggedData
+    assert block.max_burned_mana == 180500
+
+    block_to_dict = block.to_dict()
+    # Make sure encoding is done correctly
+    assert block_to_dict == block_dict
 
 
 def test_block_wrapper_with_tagged_data_payload():
@@ -169,12 +174,12 @@ def test_basic_block_with_tx_payload_all_output_types():
                                                                                                                                                                                                                                     "type": 0, "address": {
                                                                                                                                                                                                                                         "type": 0, "pubKeyHash": "0x7ffec9e1233204d9c6dce6812b1539ee96af691ca2e4d9065daa85907d33e5d3"}}, {
                                                                                                                                                                                                                                             "type": 3, "returnAddress": {
-                                                                                                                                                                                                                                                "type": 0, "pubKeyHash": "0x7ffec9e1233204d9c6dce6812b1539ee96af691ca2e4d9065daa85907d33e5d3"}, "unixTime": 1}]}, {
+                                                                                                                                                                                                                                                "type": 0, "pubKeyHash": "0x7ffec9e1233204d9c6dce6812b1539ee96af691ca2e4d9065daa85907d33e5d3"}, "slotIndex": 1}]}, {
                                                                                                                                                                                                                                                     "type": 3, "amount": "1000000", "unlockConditions": [
                                                                                                                                                                                                                                                         {
                                                                                                                                                                                                                                                             "type": 0, "address": {
                                                                                                                                                                                                                                                                 "type": 0, "pubKeyHash": "0x7ffec9e1233204d9c6dce6812b1539ee96af691ca2e4d9065daa85907d33e5d3"}}, {
-                                                                                                                                                                                                                                                                    "type": 2, "unixTime": 1}]}, {
+                                                                                                                                                                                                                                                                    "type": 2, "slotIndex": 1}]}, {
                                                                                                                                                                                                                                                                         "type": 3, "amount": "5578452198", "nativeTokens": [
                                                                                                                                                                                                                                                                             {
                                                                                                                                                                                                                                                                                 "id": "0x080021bcfa2252a500348f73c939722d65c0354eab33b753ab09bc80a7f592c9a40100000000", "amount": "0x41"}, {

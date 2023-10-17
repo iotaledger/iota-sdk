@@ -8,7 +8,15 @@ import { u64 } from '../..';
  * To calculate the slot index of a timestamp, `genesisTimestamp` and the duration of a slot are needed.
  * The slot index of timestamp `ts` is `(ts - genesisTimestamp)/duration + 1`.
  */
-type SlotIndex = u64;
+type SlotIndex = number;
+
+/**
+ * The tangle timeline is divided into epochs, and each epoch has a corresponding epoch index.
+ * Epochs are further subdivided into slots, each with a `SlotIndex.
+ * To calculate the epoch index of a timestamp, `slotsPerEpochExponent` and `slotDurationInSeconds` are needed.
+ * An epoch consists of `2^slotsPerEpochExponent` slots.
+ */
+type EpochIndex = number;
 
 /**
  * Identifier of a slot commitment
@@ -59,4 +67,4 @@ class SlotCommitment {
     }
 }
 
-export { SlotCommitment, SlotIndex, SlotCommitmentId, RootsId };
+export { SlotCommitment, SlotIndex, EpochIndex, SlotCommitmentId, RootsId };

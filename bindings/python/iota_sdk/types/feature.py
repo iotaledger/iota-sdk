@@ -114,8 +114,12 @@ class StakingFeature:
         start_epoch: The epoch index in which the staking started.
         end_epoch: The epoch index in which the staking ends.
     """
-    staked_amount: str
-    fixed_cost: str
+    staked_amount: int = field(metadata=config(
+        encoder=str
+    ))
+    fixed_cost: int = field(metadata=config(
+        encoder=str
+    ))
     start_epoch: EpochIndex
     end_epoch: EpochIndex
     type: int = field(
