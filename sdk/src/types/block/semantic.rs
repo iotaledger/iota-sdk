@@ -7,6 +7,7 @@ use core::fmt;
 use hashbrown::{HashMap, HashSet};
 use primitive_types::U256;
 
+use super::{address::AddressCapabilityFlag, output::UnlockCondition};
 use crate::types::block::{
     address::Address,
     output::{ChainId, FoundryId, InputsCommitment, NativeTokens, Output, OutputId, TokenId},
@@ -326,6 +327,82 @@ pub fn semantic_validation(
             Output::Nft(output) => (output.amount(), Some(output.native_tokens()), Some(output.features())),
             Output::Delegation(output) => (output.amount(), None, None),
         };
+
+        if let Some(unlock_conditions) = created_output.unlock_conditions() {
+            // Check the possibly restricted address-containing conditions
+            let addresses = unlock_conditions
+                .iter()
+                .filter_map(|uc| match uc {
+                    UnlockCondition::Address(uc) => Some(uc.address()),
+                    UnlockCondition::Expiration(uc) => Some(uc.return_address()),
+                    UnlockCondition::StateControllerAddress(uc) => Some(uc.address()),
+                    UnlockCondition::GovernorAddress(uc) => Some(uc.address()),
+                    _ => None,
+                })
+                .filter_map(Address::as_restricted_opt);
+            for address in addresses {
+                if created_output.native_tokens().map(|t| t.len()).unwrap_or_default() > 0
+                    && !address
+                        .allowed_capabilities()
+                        .has_capability(AddressCapabilityFlag::OutputsWithNativeTokens)
+                {
+                    // TODO: add a variant https://github.com/iotaledger/iota-sdk/issues/1430
+                    return Ok(Some(TransactionFailureReason::SemanticValidationFailed));
+                }
+
+                if created_output.mana() > 0
+                    && !address
+                        .allowed_capabilities()
+                        .has_capability(AddressCapabilityFlag::OutputsWithMana)
+                {
+                    // TODO: add a variant https://github.com/iotaledger/iota-sdk/issues/1430
+                    return Ok(Some(TransactionFailureReason::SemanticValidationFailed));
+                }
+
+                if unlock_conditions.timelock().is_some()
+                    && !address
+                        .allowed_capabilities()
+                        .has_capability(AddressCapabilityFlag::OutputsWithTimelock)
+                {
+                    // TODO: add a variant https://github.com/iotaledger/iota-sdk/issues/1430
+                    return Ok(Some(TransactionFailureReason::SemanticValidationFailed));
+                }
+
+                if unlock_conditions.expiration().is_some()
+                    && !address
+                        .allowed_capabilities()
+                        .has_capability(AddressCapabilityFlag::OutputsWithExpiration)
+                {
+                    // TODO: add a variant https://github.com/iotaledger/iota-sdk/issues/1430
+                    return Ok(Some(TransactionFailureReason::SemanticValidationFailed));
+                }
+
+                if unlock_conditions.storage_deposit_return().is_some()
+                    && !address
+                        .allowed_capabilities()
+                        .has_capability(AddressCapabilityFlag::OutputsWithStorageDepositReturn)
+                {
+                    // TODO: add a variant https://github.com/iotaledger/iota-sdk/issues/1430
+                    return Ok(Some(TransactionFailureReason::SemanticValidationFailed));
+                }
+
+                if match &created_output {
+                    Output::Account(_) => !address
+                        .allowed_capabilities()
+                        .has_capability(AddressCapabilityFlag::AccountOutputs),
+                    Output::Nft(_) => !address
+                        .allowed_capabilities()
+                        .has_capability(AddressCapabilityFlag::NftOutputs),
+                    Output::Delegation(_) => !address
+                        .allowed_capabilities()
+                        .has_capability(AddressCapabilityFlag::DelegationOutputs),
+                    _ => false,
+                } {
+                    // TODO: add a variant https://github.com/iotaledger/iota-sdk/issues/1430
+                    return Ok(Some(TransactionFailureReason::SemanticValidationFailed));
+                }
+            }
+        }
 
         if let Some(sender) = features.and_then(|f| f.sender()) {
             if !context.unlocked_addresses.contains(sender.address()) {

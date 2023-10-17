@@ -71,6 +71,36 @@ impl core::fmt::Debug for Address {
     }
 }
 
+macro_rules! def_is_as_opt {
+    ($name:ident) => {
+        paste::paste! {
+            #[doc = "Checks whether the address is a(n) [`" [<$name Address>] "`]."]
+            pub fn [<is_ $name:snake>](&self) -> bool {
+                matches!(self, Self::$name(_))
+            }
+
+            #[doc = "Gets the address as an actual [`" [<$name Address>] "`]."]
+            #[doc = "PANIC: do not call on a non-" [<$name>] " address."]
+            pub fn [<as_ $name:snake>](&self) -> &[<$name Address>] {
+                if let Self::$name(address) = self {
+                    address
+                } else {
+                    panic!("{} called on a non-{} address", stringify!([<as_ $name>]), stringify!([<$name>]));
+                }
+            }
+
+            #[doc = "Gets the address as an actual [`" [<$name Address>] "`], if it is one."]
+            pub fn [<as_ $name:snake _opt>](&self) -> Option<&[<$name Address>]> {
+                if let Self::$name(address) = self {
+                    Some(address)
+                } else {
+                    None
+                }
+            }
+        }
+    };
+}
+
 impl Address {
     /// Returns the address kind of an [`Address`].
     pub fn kind(&self) -> u8 {
@@ -83,50 +113,11 @@ impl Address {
         }
     }
 
-    /// Checks whether the address is an [`Ed25519Address`].
-    pub fn is_ed25519(&self) -> bool {
-        matches!(self, Self::Ed25519(_))
-    }
-
-    /// Gets the address as an actual [`Ed25519Address`].
-    /// PANIC: do not call on a non-ed25519 address.
-    pub fn as_ed25519(&self) -> &Ed25519Address {
-        if let Self::Ed25519(address) = self {
-            address
-        } else {
-            panic!("as_ed25519 called on a non-ed25519 address");
-        }
-    }
-
-    /// Checks whether the address is an [`AccountAddress`].
-    pub fn is_account(&self) -> bool {
-        matches!(self, Self::Account(_))
-    }
-
-    /// Gets the address as an actual [`AccountAddress`].
-    /// PANIC: do not call on a non-account address.
-    pub fn as_account(&self) -> &AccountAddress {
-        if let Self::Account(address) = self {
-            address
-        } else {
-            panic!("as_account called on a non-account address");
-        }
-    }
-
-    /// Checks whether the address is an [`NftAddress`].
-    pub fn is_nft(&self) -> bool {
-        matches!(self, Self::Nft(_))
-    }
-
-    /// Gets the address as an actual [`NftAddress`].
-    /// PANIC: do not call on a non-nft address.
-    pub fn as_nft(&self) -> &NftAddress {
-        if let Self::Nft(address) = self {
-            address
-        } else {
-            panic!("as_nft called on a non-nft address");
-        }
-    }
+    def_is_as_opt!(Ed25519);
+    def_is_as_opt!(Account);
+    def_is_as_opt!(Nft);
+    def_is_as_opt!(ImplicitAccountCreation);
+    def_is_as_opt!(Restricted);
 
     /// Tries to create an [`Address`] from a bech32 encoded string.
     pub fn try_from_bech32(address: impl AsRef<str>) -> Result<Self, Error> {

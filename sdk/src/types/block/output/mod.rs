@@ -174,6 +174,17 @@ impl Output {
         }
     }
 
+    /// Returns the mana of an [`Output`].
+    pub fn mana(&self) -> u64 {
+        match self {
+            Self::Basic(output) => output.mana(),
+            Self::Account(output) => output.mana(),
+            Self::Foundry(_) => 0,
+            Self::Nft(output) => output.mana(),
+            Self::Delegation(_) => 0,
+        }
+    }
+
     /// Returns the native tokens of an [`Output`], if any.
     pub fn native_tokens(&self) -> Option<&NativeTokens> {
         match self {
