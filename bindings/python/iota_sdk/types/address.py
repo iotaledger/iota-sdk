@@ -154,7 +154,7 @@ def deserialize_address(d: Dict[str, Any]) -> Address:
 def deserialize_addresses(
         dicts: List[Dict[str, Any]]) -> List[Address]:
     """
-    Takes a list of dictionaries as input and returns a list with specific instances of a classes based on the value of the 'type' key in the dictionary.
+    Takes a list of dictionaries as input and returns a list with specific instances of classes based on the value of the 'type' key in the dictionary.
 
     Arguments:
     * `dicts`: A list of dictionaries that are expected to have a key called 'type' which specifies the type of the returned value.
