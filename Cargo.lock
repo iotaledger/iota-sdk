@@ -242,9 +242,9 @@ checksum = "2dabbe35f96fb9507f7330793dc490461b2962659ac5d427181e451a623751d1"
 
 [[package]]
 name = "bech32"
-version = "0.9.1"
+version = "0.10.0-beta"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d86b93f97252c47b41663388e6d155714a9d0c398b99f1005cbc5f978b29f445"
+checksum = "98f7eed2b2781a6f0b5c903471d48e15f56fb4e1165df8a9a2337fd1a59d45ea"
 
 [[package]]
 name = "bincode"
@@ -1592,7 +1592,7 @@ version = "1.0.3"
 dependencies = [
  "anymap",
  "async-trait",
- "bech32 0.9.1",
+ "bech32 0.10.0-beta",
  "bitflags 2.4.0",
  "bs58",
  "derive_more",

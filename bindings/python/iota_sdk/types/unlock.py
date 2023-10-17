@@ -100,7 +100,7 @@ def deserialize_unlock(d: Dict[str, Any]) -> Union[SignatureUnlock,
 def deserialize_unlocks(dicts: List[Dict[str, Any]]) -> List[Union[SignatureUnlock,
                                                                    ReferenceUnlock, AccountUnlock, NftUnlock]]:
     """
-    Takes a list of dictionaries as input and returns a list with specific instances of a classes based on the value of the 'type' key in the dictionary.
+    Takes a list of dictionaries as input and returns a list with specific instances of classes based on the value of the 'type' key in the dictionary.
 
     Arguments:
     * `dicts`: A list of dictionaries that are expected to have a key called 'type' which specifies the type of the returned value.

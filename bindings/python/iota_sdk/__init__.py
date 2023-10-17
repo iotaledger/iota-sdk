@@ -18,6 +18,7 @@ from .types.block.metadata import *
 from .types.block.wrapper import *
 from .types.block.validation import *
 from .types.block_builder_options import *
+from .types.block_issuer_key import *
 from .types.burn import *
 from .types.client_options import *
 from .types.common import *
