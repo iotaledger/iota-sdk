@@ -23,8 +23,9 @@ use crate::{
         input::INPUT_COUNT_RANGE,
         output::{
             AccountOutput, AccountTransition, ChainId, FoundryOutput, NativeTokensBuilder, NftOutput, Output, OutputId,
-            OUTPUT_COUNT_RANGE,
+            TokenId, OUTPUT_COUNT_RANGE,
         },
+        payload::transaction::{TransactionCapabilities, TransactionCapabilityFlag},
         protocol::ProtocolParameters,
         slot::SlotIndex,
     },
@@ -487,20 +488,32 @@ impl InputSelection {
                     }
                 }
                 Output::Foundry(foundry_output) => {
+                    let foundry_id = foundry_output.id();
                     let foundry_input = input_foundries.iter().find(|i| {
                         if let Output::Foundry(foundry_input) = &i.output {
-                            foundry_output.id() == foundry_input.id()
+                            foundry_id == foundry_input.id()
                         } else {
                             false
                         }
                     });
                     if let Some(foundry_input) = foundry_input {
+                        let token_id = TokenId::from(foundry_id);
+                        let mut capabilities = TransactionCapabilities::default();
+                        // TODO is this really the right approach?
+                        if self
+                            .burn
+                            .as_ref()
+                            .map(|burn| burn.native_tokens.contains_key(&token_id))
+                            .unwrap_or_default()
+                        {
+                            capabilities.add_capability(TransactionCapabilityFlag::BurnNativeTokens);
+                        }
                         if let Err(err) = FoundryOutput::transition_inner(
                             foundry_input.output.as_foundry(),
                             foundry_output,
                             input_native_tokens_builder.deref(),
                             output_native_tokens_builder.deref(),
-                            &Default::default(),
+                            &capabilities,
                         ) {
                             log::debug!("validate_transitions error {err:?}");
                             return Err(Error::UnfulfillableRequirement(Requirement::Foundry(
