@@ -1,7 +1,7 @@
 // Copyright 2020-2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use std::{cmp::Ordering, str::FromStr};
+use std::str::FromStr;
 
 use clap::{CommandFactory, Parser, Subcommand};
 use iota_sdk::{
@@ -670,14 +670,8 @@ pub async fn output_command(account: &Account, selector: OutputSelector) -> Resu
         OutputSelector::Index(index) => {
             let mut outputs = account.outputs(None).await?;
             outputs.sort_by(|a, b| {
-                let cmp = b
-                    .metadata
-                    .milestone_index_booked()
-                    .cmp(&a.metadata.milestone_timestamp_booked());
-                match cmp {
-                    Ordering::Equal => a.output_id.cmp(&b.output_id),
-                    _ => cmp,
-                }
+                (b.metadata.milestone_timestamp_booked(), a.output_id)
+                    .cmp(&(a.metadata.milestone_index_booked(), b.output_id))
             });
             outputs.into_iter().nth(index)
         }
@@ -1014,14 +1008,8 @@ async fn print_outputs(mut outputs: Vec<OutputData>, title: &str) -> Result<(), 
     } else {
         println_log_info!("{title}");
         outputs.sort_by(|a, b| {
-            let cmp = b
-                .metadata
-                .milestone_index_booked()
-                .cmp(&a.metadata.milestone_timestamp_booked());
-            match cmp {
-                Ordering::Equal => a.output_id.cmp(&b.output_id),
-                _ => cmp,
-            }
+            (b.metadata.milestone_timestamp_booked(), a.output_id)
+                .cmp(&(a.metadata.milestone_index_booked(), b.output_id))
         });
 
         for (i, output_data) in outputs.into_iter().enumerate() {
