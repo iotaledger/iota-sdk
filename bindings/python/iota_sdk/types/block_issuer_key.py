@@ -19,7 +19,7 @@ class BlockIssuerKeyType(IntEnum):
 @json
 @dataclass
 class Ed25519BlockIssuerKey:
-    """An Ed25519 block issuer key.
+    """A Block Issuer Key backed by an Ed25519 Public Key.
     Attributes:
         public_key: The hex encoded Ed25519 public key.
     """
