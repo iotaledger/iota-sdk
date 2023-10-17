@@ -17,7 +17,7 @@ use packable::{
 };
 
 use crate::types::block::{
-    output::{Rent, RentBuilder},
+    output::{RentParameters, StorageScore},
     slot::SlotIndex,
     Error,
 };
@@ -61,6 +61,14 @@ impl BlockIssuerKey {
     }
 }
 
+impl StorageScore for BlockIssuerKey {
+    fn storage_score(&self, params: RentParameters) -> u64 {
+        match self {
+            BlockIssuerKey::Ed25519(e) => e.storage_score(params),
+        }
+    }
+}
+
 /// An Ed25519 block issuer key.
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Deref, AsRef, From)]
 #[as_ref(forward)]
@@ -76,6 +84,18 @@ impl Ed25519BlockIssuerKey {
     /// Creates a new [`Ed25519BlockIssuerKey`] from bytes.
     pub fn try_from_bytes(bytes: [u8; Self::LENGTH]) -> Result<Self, Error> {
         Ok(Self(ed25519::PublicKey::try_from_bytes(bytes)?))
+    }
+
+    /// Creates a dummy [`Ed25519BlockIssuerKey`] used to calculate a storage score for implicit account addresses.
+    pub(crate) fn null() -> Self {
+        // Unwrap: we provide a valid byte array
+        Self::try_from_bytes([0; Self::LENGTH]).unwrap()
+    }
+}
+
+impl StorageScore for Ed25519BlockIssuerKey {
+    fn storage_score(&self, params: RentParameters) -> u64 {
+        params.storage_score_offset_ed25519_block_issuer_key()
     }
 }
 
@@ -185,6 +205,12 @@ impl BlockIssuerKeys {
     }
 }
 
+impl StorageScore for BlockIssuerKeys {
+    fn storage_score(&self, params: RentParameters) -> u64 {
+        self.iter().map(|b| b.storage_score(params)).sum::<u64>()
+    }
+}
+
 /// This feature defines the block issuer keys with which a signature from the containing
 /// account's Block Issuance Credit can be verified in order to burn Mana.
 #[derive(Clone, Debug, Eq, PartialEq, Hash, packable::Packable)]
@@ -226,15 +252,9 @@ impl BlockIssuerFeature {
     }
 }
 
-impl Rent for BlockIssuerFeature {
-    fn build_weighted_bytes(&self, builder: RentBuilder) -> RentBuilder {
-        builder
-            // Feature Type
-            .data_field::<u8>()
-            // Expiry Slot
-            .data_field::<SlotIndex>()
-            // Block Issuer Keys
-            .packable_block_issuer_key_field(&self.block_issuer_keys)
+impl StorageScore for BlockIssuerFeature {
+    fn storage_score(&self, params: RentParameters) -> u64 {
+        self.block_issuer_keys.storage_score(params)
     }
 }
 

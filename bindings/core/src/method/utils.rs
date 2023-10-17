@@ -4,7 +4,7 @@
 use derivative::Derivative;
 use iota_sdk::types::block::{
     address::{Bech32Address, Hrp},
-    output::{dto::OutputDto, AccountId, NftId, OutputId, RentStructure},
+    output::{dto::OutputDto, AccountId, NftId, OutputId, RentParameters},
     payload::transaction::{
         dto::{TransactionEssenceDto, TransactionPayloadDto},
         TransactionId,
@@ -131,7 +131,7 @@ pub enum UtilsMethod {
     /// Computes the input commitment from the output objects that are used as inputs to fund the transaction.
     ComputeInputsCommitment { inputs: Vec<OutputDto> },
     /// Computes the required storage deposit of an output.
-    ComputeStorageDeposit { output: OutputDto, rent: RentStructure },
+    ComputeStorageDeposit { output: OutputDto, rent: RentParameters },
     /// Checks if the given mnemonic is valid.
     /// Expected response: [`Ok`](crate::Response::Ok)
     VerifyMnemonic {

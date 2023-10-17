@@ -32,11 +32,11 @@ async fn main() -> Result<()> {
     let client = Client::builder().with_node(&node_url)?.finish().await?;
 
     let token_supply = client.get_token_supply().await?;
-    let rent_structure = client.get_rent_structure().await?;
+    let rent_parameters = client.get_rent_parameters().await?;
 
     let address = Address::try_from_bech32("rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy")?;
 
-    let nft_output_builder = NftOutputBuilder::new_with_minimum_amount(rent_structure, NftId::null())
+    let nft_output_builder = NftOutputBuilder::new_with_minimum_amount(rent_parameters, NftId::null())
         .add_unlock_condition(AddressUnlockCondition::new(address.clone()));
 
     let outputs = [

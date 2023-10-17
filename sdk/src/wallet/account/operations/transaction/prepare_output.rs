@@ -13,7 +13,8 @@ use crate::{
                 AddressUnlockCondition, ExpirationUnlockCondition, StorageDepositReturnUnlockCondition,
                 TimelockUnlockCondition,
             },
-            BasicOutputBuilder, NativeToken, NftId, NftOutputBuilder, Output, Rent, RentStructure, UnlockCondition,
+            BasicOutputBuilder, NativeToken, NftId, NftOutputBuilder, Output, RentParameters, StorageScore,
+            UnlockCondition,
         },
         slot::SlotIndex,
         Error,
@@ -46,12 +47,12 @@ where
 
         self.client().bech32_hrp_matches(params.recipient_address.hrp()).await?;
 
-        let rent_structure = self.client().get_rent_structure().await?;
+        let rent_parameters = self.client().get_rent_parameters().await?;
 
         let nft_id = params.assets.as_ref().and_then(|a| a.nft_id);
 
         let (mut first_output_builder, existing_nft_output_data) = self
-            .create_initial_output_builder(params.recipient_address, nft_id, rent_structure)
+            .create_initial_output_builder(params.recipient_address, nft_id, rent_parameters)
             .await?;
 
         if let Some(assets) = &params.assets {
@@ -102,7 +103,7 @@ where
 
         // Build output with minimum required storage deposit so we can use the amount in the next step
         let first_output = first_output_builder
-            .with_minimum_amount(rent_structure)
+            .with_minimum_amount(rent_parameters)
             .finish_output(token_supply)?;
 
         let mut second_output_builder = if nft_id.is_some() {
@@ -112,11 +113,11 @@ where
         };
 
         // TODO: Probably not good to use ed25519 always here, even if technically it's the same for now..
-        let min_storage_deposit_basic_output = BasicOutputBuilder::new_with_minimum_amount(rent_structure)
+        let min_storage_deposit_basic_output = BasicOutputBuilder::new_with_minimum_amount(rent_parameters)
             .add_unlock_condition(AddressUnlockCondition::new(Ed25519Address::null()))
             .amount();
 
-        let min_required_storage_deposit = first_output.rent_cost(rent_structure);
+        let min_required_storage_deposit = first_output.min_deposit(rent_parameters);
 
         if params.amount > min_required_storage_deposit {
             second_output_builder = second_output_builder.with_amount(params.amount);
@@ -148,7 +149,7 @@ where
                 // need to check the min required storage deposit again
                 let min_storage_deposit_new_amount = second_output_builder
                     .clone()
-                    .with_minimum_amount(rent_structure)
+                    .with_minimum_amount(rent_parameters)
                     .finish_output(token_supply)?
                     .amount();
 
@@ -178,7 +179,7 @@ where
         // If we're sending an existing NFT, its minimum required storage deposit is not part of the available base_coin
         // balance, so we add it here
         if let Some(existing_nft_output_data) = existing_nft_output_data {
-            available_base_coin += existing_nft_output_data.output.rent_cost(rent_structure);
+            available_base_coin += existing_nft_output_data.output.min_deposit(rent_parameters);
         }
 
         if final_amount > available_base_coin {
@@ -238,13 +239,13 @@ where
         &self,
         recipient_address: Bech32Address,
         nft_id: Option<NftId>,
-        rent_structure: RentStructure,
+        rent_parameters: RentParameters,
     ) -> crate::wallet::Result<(OutputBuilder, Option<OutputData>)> {
         let (mut first_output_builder, existing_nft_output_data) = if let Some(nft_id) = &nft_id {
             if nft_id.is_null() {
                 // Mint a new NFT output
                 (
-                    OutputBuilder::Nft(NftOutputBuilder::new_with_minimum_amount(rent_structure, *nft_id)),
+                    OutputBuilder::Nft(NftOutputBuilder::new_with_minimum_amount(rent_parameters, *nft_id)),
                     None,
                 )
             } else {
@@ -265,7 +266,7 @@ where
             }
         } else {
             (
-                OutputBuilder::Basic(BasicOutputBuilder::new_with_minimum_amount(rent_structure)),
+                OutputBuilder::Basic(BasicOutputBuilder::new_with_minimum_amount(rent_parameters)),
                 None,
             )
         };
@@ -429,13 +430,13 @@ impl OutputBuilder {
         }
         self
     }
-    fn with_minimum_amount(mut self, rent_structure: RentStructure) -> Self {
+    fn with_minimum_amount(mut self, rent_parameters: RentParameters) -> Self {
         match self {
             Self::Basic(b) => {
-                self = Self::Basic(b.with_minimum_amount(rent_structure));
+                self = Self::Basic(b.with_minimum_amount(rent_parameters));
             }
             Self::Nft(b) => {
-                self = Self::Nft(b.with_minimum_amount(rent_structure));
+                self = Self::Nft(b.with_minimum_amount(rent_parameters));
             }
         }
         self

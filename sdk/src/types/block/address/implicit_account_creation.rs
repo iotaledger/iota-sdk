@@ -4,7 +4,10 @@
 use derive_more::{AsRef, Deref, Display, From, FromStr};
 use packable::Packable;
 
-use crate::types::block::address::Ed25519Address;
+use crate::types::block::{
+    address::Ed25519Address,
+    output::{RentParameters, StorageScore},
+};
 
 /// An implicit account creation address that can be used to transition an account.
 #[derive(Copy, Clone, Debug, Display, Eq, PartialEq, Ord, PartialOrd, Hash, FromStr, AsRef, Deref, From, Packable)]
@@ -21,6 +24,12 @@ impl ImplicitAccountCreationAddress {
     #[inline(always)]
     pub fn new(address: [u8; Self::LENGTH]) -> Self {
         Self(Ed25519Address::new(address))
+    }
+}
+
+impl StorageScore for ImplicitAccountCreationAddress {
+    fn storage_score(&self, params: RentParameters) -> u64 {
+        params.storage_score_offset_implicit_account_creation_address()
     }
 }
 

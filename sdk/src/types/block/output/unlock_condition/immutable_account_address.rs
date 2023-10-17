@@ -5,7 +5,7 @@ use derive_more::From;
 
 use crate::types::block::{
     address::AccountAddress,
-    output::{rent::RentBuilder, Rent},
+    output::{RentParameters, StorageScore},
 };
 
 /// Defines the permanent [`AccountAddress`] that owns this output.
@@ -29,13 +29,9 @@ impl ImmutableAccountAddressUnlockCondition {
     }
 }
 
-impl Rent for ImmutableAccountAddressUnlockCondition {
-    fn build_weighted_bytes(&self, builder: RentBuilder) -> RentBuilder {
-        builder
-            // Kind
-            .data_field::<u8>()
-            // Address
-            .data_field::<AccountAddress>()
+impl StorageScore for ImmutableAccountAddressUnlockCondition {
+    fn storage_score(&self, params: RentParameters) -> u64 {
+        self.address().storage_score(params)
     }
 }
 

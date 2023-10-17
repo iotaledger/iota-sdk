@@ -10,7 +10,7 @@ use crate::{
         address::Bech32Address,
         output::{
             unlock_condition::{AddressUnlockCondition, ExpirationUnlockCondition},
-            BasicOutputBuilder, Rent,
+            BasicOutputBuilder, StorageScore,
         },
         slot::SlotIndex,
         ConvertTo,
@@ -138,7 +138,7 @@ where
     {
         log::debug!("[TRANSACTION] prepare_send");
         let options = options.into();
-        let rent_structure = self.client().get_rent_structure().await?;
+        let rent_parameters = self.client().get_rent_parameters().await?;
         let token_supply = self.client().get_token_supply().await?;
 
         let account_addresses = self.addresses().await;
@@ -175,7 +175,7 @@ where
             let output =
                 BasicOutputBuilder::new_with_amount(amount).add_unlock_condition(AddressUnlockCondition::new(address));
 
-            if amount >= output.rent_cost(rent_structure) {
+            if amount >= output.min_deposit(rent_parameters) {
                 outputs.push(output.finish_output(token_supply)?)
             } else {
                 let expiration_slot_index = expiration
@@ -189,7 +189,7 @@ where
                         return_address.clone(),
                         expiration_slot_index,
                     )?)
-                    .with_sufficient_storage_deposit(return_address, rent_structure, token_supply)?
+                    .with_sufficient_storage_deposit(return_address, rent_parameters, token_supply)?
                     .finish_output(token_supply)?;
 
                 if !options.as_ref().map(|o| o.allow_micro_amount).unwrap_or_default() {

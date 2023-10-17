@@ -1197,7 +1197,7 @@ fn changed_immutable_metadata() {
     #[cfg(not(feature = "irc_27"))]
     let metadata = [1, 2, 3];
 
-    let nft_output = NftOutputBuilder::new_with_minimum_amount(protocol_parameters.rent_structure(), nft_id_1)
+    let nft_output = NftOutputBuilder::new_with_minimum_amount(protocol_parameters.rent_parameters(), nft_id_1)
         .with_immutable_features(MetadataFeature::try_from(metadata))
         .add_unlock_condition(AddressUnlockCondition::new(
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
@@ -1223,7 +1223,7 @@ fn changed_immutable_metadata() {
 
     // New nft output with changed immutable metadata feature
     let updated_nft_output = NftOutputBuilder::from(nft_output.as_nft())
-        .with_minimum_amount(protocol_parameters.rent_structure())
+        .with_minimum_amount(protocol_parameters.rent_parameters())
         .with_immutable_features(MetadataFeature::try_from(metadata))
         .finish_output(protocol_parameters.token_supply())
         .unwrap();

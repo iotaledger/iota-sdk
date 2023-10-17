@@ -8,11 +8,10 @@ use packable::{
     error::{UnpackError, UnpackErrorExt},
     packer::{Packer, SlicePacker},
     unpacker::Unpacker,
-    Packable,
+    Packable, PackableExt,
 };
 use primitive_types::U256;
 
-use super::RentBuilder;
 use crate::types::{
     block::{
         address::{AccountAddress, Address},
@@ -23,8 +22,8 @@ use crate::types::{
                 verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions,
             },
             verify_output_amount_min, verify_output_amount_packable, verify_output_amount_supply, ChainId, NativeToken,
-            NativeTokens, Output, OutputBuilderAmount, OutputId, Rent, RentStructure, StateTransitionError,
-            StateTransitionVerifier, TokenId, TokenScheme,
+            NativeTokens, Output, OutputBuilderAmount, OutputId, RentParameters, StateTransitionError,
+            StateTransitionVerifier, StorageScore, TokenId, TokenScheme,
         },
         protocol::ProtocolParameters,
         semantic::{TransactionFailureReason, ValidationContext},
@@ -104,12 +103,12 @@ impl FoundryOutputBuilder {
     /// Creates a [`FoundryOutputBuilder`] with a provided rent structure.
     /// The amount will be set to the rent cost of the resulting output.
     pub fn new_with_minimum_amount(
-        rent_structure: RentStructure,
+        rent_parameters: RentParameters,
         serial_number: u32,
         token_scheme: TokenScheme,
     ) -> Self {
         Self::new(
-            OutputBuilderAmount::RentCost(rent_structure),
+            OutputBuilderAmount::RentCost(rent_parameters),
             serial_number,
             token_scheme,
         )
@@ -136,8 +135,8 @@ impl FoundryOutputBuilder {
 
     /// Sets the amount to the rent cost.
     #[inline(always)]
-    pub fn with_minimum_amount(mut self, rent_structure: RentStructure) -> Self {
-        self.amount = OutputBuilderAmount::RentCost(rent_structure);
+    pub fn with_minimum_amount(mut self, rent_parameters: RentParameters) -> Self {
+        self.amount = OutputBuilderAmount::RentCost(rent_parameters);
         self
     }
 
@@ -261,7 +260,7 @@ impl FoundryOutputBuilder {
 
         let amount = match self.amount {
             OutputBuilderAmount::Amount(amount) => amount,
-            OutputBuilderAmount::RentCost(rent_structure) => self.rent_cost(rent_structure),
+            OutputBuilderAmount::RentCost(rent_parameters) => self.min_deposit(rent_parameters),
         };
         verify_output_amount_min(amount)?;
 
@@ -308,29 +307,9 @@ impl FoundryOutputBuilder {
     }
 }
 
-impl Rent for FoundryOutputBuilder {
-    fn build_weighted_bytes(&self, builder: RentBuilder) -> RentBuilder {
-        Output::byte_offset(builder)
-            // Kind
-            .data_field::<u8>()
-            // Amount
-            .data_field::<u64>()
-            // Native Tokens
-            .data_field::<u8>()
-            .iter_field(&self.native_tokens)
-            // Serial Number
-            .data_field::<u32>()
-            // Token Scheme
-            .data_field::<TokenScheme>()
-            // Unlock Conditions
-            .data_field::<u8>()
-            .iter_field(&self.unlock_conditions)
-            // Features
-            .data_field::<u8>()
-            .iter_field(&self.features)
-            // Immutable Features
-            .data_field::<u8>()
-            .iter_field(&self.immutable_features)
+impl StorageScore for FoundryOutputBuilder {
+    fn storage_score(&self, params: RentParameters) -> u64 {
+        self.clone().finish().unwrap().storage_score(params)
     }
 }
 
@@ -387,11 +366,11 @@ impl FoundryOutput {
     /// The amount will be set to the rent cost of the resulting output.
     #[inline(always)]
     pub fn build_with_minimum_amount(
-        rent_structure: RentStructure,
+        rent_parameters: RentParameters,
         serial_number: u32,
         token_scheme: TokenScheme,
     ) -> FoundryOutputBuilder {
-        FoundryOutputBuilder::new_with_minimum_amount(rent_structure, serial_number, token_scheme)
+        FoundryOutputBuilder::new_with_minimum_amount(rent_parameters, serial_number, token_scheme)
     }
 
     ///
@@ -553,25 +532,11 @@ impl FoundryOutput {
     }
 }
 
-impl Rent for FoundryOutput {
-    fn build_weighted_bytes(&self, builder: RentBuilder) -> RentBuilder {
-        Output::byte_offset(builder)
-            // Kind
-            .data_field::<u8>()
-            // Amount
-            .data_field::<u64>()
-            // Native Tokens
-            .packable_data_field(&self.native_tokens)
-            // Serial Number
-            .data_field::<u32>()
-            // Token Scheme
-            .data_field::<TokenScheme>()
-            // Unlock Conditions
-            .packable_data_field(&self.unlock_conditions)
-            // Features
-            .packable_data_field(&self.features)
-            // Immutable Features
-            .packable_data_field(&self.immutable_features)
+impl StorageScore for FoundryOutput {
+    fn storage_score(&self, params: RentParameters) -> u64 {
+        params.storage_score_offset_output()
+            + self.packed_len() as u64 * params.storage_score_factor_data() as u64
+            + self.unlock_conditions.storage_score(params)
     }
 }
 
@@ -802,8 +767,8 @@ pub(crate) mod dto {
                 OutputBuilderAmount::Amount(amount) => {
                     FoundryOutputBuilder::new_with_amount(amount, serial_number, token_scheme)
                 }
-                OutputBuilderAmount::RentCost(rent_structure) => {
-                    FoundryOutputBuilder::new_with_minimum_amount(rent_structure, serial_number, token_scheme)
+                OutputBuilderAmount::RentCost(rent_parameters) => {
+                    FoundryOutputBuilder::new_with_minimum_amount(rent_parameters, serial_number, token_scheme)
                 }
             };
 
@@ -890,7 +855,7 @@ mod tests {
         test_split_dto(builder);
 
         let builder =
-            FoundryOutput::build_with_minimum_amount(protocol_parameters.rent_structure(), 123, rand_token_scheme())
+            FoundryOutput::build_with_minimum_amount(protocol_parameters.rent_parameters(), 123, rand_token_scheme())
                 .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000).unwrap())
                 .add_unlock_condition(ImmutableAccountAddressUnlockCondition::new(rand_account_address()))
                 .add_immutable_feature(rand_metadata_feature())

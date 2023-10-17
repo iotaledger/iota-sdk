@@ -3,11 +3,7 @@
 
 use derive_more::From;
 
-use crate::types::block::{
-    output::{rent::RentBuilder, Rent},
-    slot::SlotIndex,
-    Error,
-};
+use crate::types::block::{output::StorageScore, slot::SlotIndex, Error};
 
 /// Defines a slot index until which the output can not be unlocked.
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, From, packable::Packable)]
@@ -35,15 +31,7 @@ impl TimelockUnlockCondition {
     }
 }
 
-impl Rent for TimelockUnlockCondition {
-    fn build_weighted_bytes(&self, builder: RentBuilder) -> RentBuilder {
-        builder
-            // Kind
-            .data_field::<u8>()
-            // Slot index
-            .data_field::<SlotIndex>()
-    }
-}
+impl StorageScore for TimelockUnlockCondition {}
 
 #[inline]
 fn verify_slot_index<const VERIFY: bool>(slot_index: &SlotIndex, _: &()) -> Result<(), Error> {

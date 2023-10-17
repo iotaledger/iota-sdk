@@ -53,12 +53,12 @@ pub use self::{
     native_token::{NativeToken, NativeTokens, NativeTokensBuilder, TokenId},
     nft::{NftId, NftOutput, NftOutputBuilder},
     output_id::OutputId,
-    rent::{Rent, RentBuilder, RentStructure},
+    rent::{RentParameters, StorageScore},
     state_transition::{StateTransitionError, StateTransitionVerifier},
     token_scheme::{SimpleTokenScheme, TokenScheme},
     unlock_condition::{UnlockCondition, UnlockConditions},
 };
-use super::{protocol::ProtocolParameters, BlockId};
+use super::protocol::ProtocolParameters;
 use crate::types::block::{address::Address, semantic::ValidationContext, slot::SlotIndex, Error};
 
 /// The maximum number of outputs of a transaction.
@@ -73,7 +73,7 @@ pub const OUTPUT_INDEX_RANGE: RangeInclusive<u16> = 0..=OUTPUT_INDEX_MAX; // [0.
 #[derive(Copy, Clone)]
 pub enum OutputBuilderAmount {
     Amount(u64),
-    RentCost(RentStructure),
+    RentCost(RentParameters),
 }
 
 /// Contains the generic [`Output`] with associated [`OutputMetadata`].
@@ -389,11 +389,11 @@ impl Output {
     }
 
     /// Verifies if a valid storage deposit was made. Each [`Output`] has to have an amount that covers its associated
-    /// byte cost, given by [`RentStructure`].
+    /// byte cost, given by [`RentParameters`].
     /// If there is a [`StorageDepositReturnUnlockCondition`](unlock_condition::StorageDepositReturnUnlockCondition),
     /// its amount is also checked.
-    pub fn verify_storage_deposit(&self, rent_structure: RentStructure, token_supply: u64) -> Result<(), Error> {
-        let required_output_amount = self.rent_cost(rent_structure);
+    pub fn verify_storage_deposit(&self, rent_parameters: RentParameters, token_supply: u64) -> Result<(), Error> {
+        let required_output_amount = self.min_deposit(rent_parameters);
 
         if self.amount() < required_output_amount {
             return Err(Error::InsufficientStorageDepositAmount {
@@ -416,7 +416,7 @@ impl Output {
             }
 
             let minimum_deposit =
-                minimum_storage_deposit(return_condition.return_address(), rent_structure, token_supply);
+                minimum_storage_deposit(return_condition.return_address(), rent_parameters, token_supply);
 
             // `Minimum Storage Deposit` ≤ `Return Amount`
             if return_condition.amount() < minimum_deposit {
@@ -477,28 +477,14 @@ impl Packable for Output {
     }
 }
 
-impl Output {
-    pub(crate) const fn byte_offset(builder: RentBuilder) -> RentBuilder {
-        builder
-            // The ID of the output.
-            .key_field::<OutputId>()
-            // The ID of the block in which the transaction payload that created this output was included.
-            .data_field::<BlockId>()
-            // The index of the slot in which the transaction that created it was booked.
-            .data_field::<SlotIndex>()
-            // The index of the slot in which the transaction was created.
-            .data_field::<SlotIndex>()
-    }
-}
-
-impl Rent for Output {
-    fn build_weighted_bytes(&self, builder: RentBuilder) -> RentBuilder {
+impl StorageScore for Output {
+    fn storage_score(&self, params: RentParameters) -> u64 {
         match self {
-            Self::Basic(o) => o.build_weighted_bytes(builder),
-            Self::Account(o) => o.build_weighted_bytes(builder),
-            Self::Foundry(o) => o.build_weighted_bytes(builder),
-            Self::Nft(o) => o.build_weighted_bytes(builder),
-            Self::Delegation(o) => o.build_weighted_bytes(builder),
+            Self::Basic(o) => o.storage_score(params),
+            Self::Account(o) => o.storage_score(params),
+            Self::Foundry(o) => o.storage_score(params),
+            Self::Nft(o) => o.storage_score(params),
+            Self::Delegation(o) => o.storage_score(params),
         }
     }
 }
@@ -536,10 +522,10 @@ pub(crate) fn verify_output_amount_packable<const VERIFY: bool>(
 
 /// Computes the minimum amount that a storage deposit has to match to allow creating a return [`Output`] back to the
 /// sender [`Address`].
-fn minimum_storage_deposit(address: &Address, rent_structure: RentStructure, token_supply: u64) -> u64 {
+fn minimum_storage_deposit(address: &Address, rent_parameters: RentParameters, token_supply: u64) -> u64 {
     // PANIC: This can never fail because the amount will always be within the valid range. Also, the actual value is
     // not important, we are only interested in the storage requirements of the type.
-    BasicOutputBuilder::new_with_minimum_amount(rent_structure)
+    BasicOutputBuilder::new_with_minimum_amount(rent_parameters)
         .add_unlock_condition(AddressUnlockCondition::new(address.clone()))
         .finish_with_params(token_supply)
         .unwrap()

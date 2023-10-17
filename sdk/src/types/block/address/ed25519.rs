@@ -10,7 +10,7 @@ use crypto::{
 use derive_more::{AsRef, Deref, From};
 use packable::Packable;
 
-use crate::types::block::Error;
+use crate::types::block::{output::StorageScore, Error};
 
 /// An Ed25519 address.
 #[derive(Clone, Copy, Eq, PartialEq, Ord, PartialOrd, Hash, From, AsRef, Deref, Packable)]
@@ -38,6 +38,8 @@ impl Ed25519Address {
         Ok(Self::new(Blake2b256::digest(public_key_bytes).try_into()?))
     }
 }
+
+impl StorageScore for Ed25519Address {}
 
 impl FromStr for Ed25519Address {
     type Err = Error;

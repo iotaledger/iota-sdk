@@ -21,6 +21,7 @@ pub use self::{
     nft::NftAddress,
     restricted::{AddressCapabilities, AddressCapabilityFlag, RestrictedAddress},
 };
+use super::output::StorageScore;
 use crate::types::block::{
     output::{Output, OutputId},
     semantic::{TransactionFailureReason, ValidationContext},
@@ -196,6 +197,18 @@ impl Address {
         }
 
         Ok(())
+    }
+}
+
+impl StorageScore for Address {
+    fn storage_score(&self, params: super::output::RentParameters) -> u64 {
+        match self {
+            Address::Ed25519(a) => a.storage_score(params),
+            Address::Account(a) => a.storage_score(params),
+            Address::Nft(a) => a.storage_score(params),
+            Address::ImplicitAccountCreation(a) => a.storage_score(params),
+            Address::Restricted(a) => a.storage_score(params),
+        }
     }
 }
 

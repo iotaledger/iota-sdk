@@ -3,10 +3,7 @@
 
 use derive_more::From;
 
-use crate::types::block::{
-    address::Address,
-    output::{rent::RentBuilder, Rent},
-};
+use crate::types::block::{address::Address, output::StorageScore};
 
 /// Identifies the validated issuer of the UTXO state machine.
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, From, packable::Packable)]
@@ -29,15 +26,7 @@ impl IssuerFeature {
     }
 }
 
-impl Rent for IssuerFeature {
-    fn build_weighted_bytes(&self, builder: RentBuilder) -> RentBuilder {
-        builder
-            // Feature Type
-            .data_field::<u8>()
-            // Address
-            .packable_data_field(&self.0)
-    }
-}
+impl StorageScore for IssuerFeature {}
 
 #[cfg(feature = "serde")]
 mod dto {

@@ -4,7 +4,7 @@
 use iota_sdk::types::{
     block::{
         address::AccountAddress,
-        output::{AccountOutput, Feature, FoundryId, NativeToken, Output, Rent, SimpleTokenScheme, TokenId},
+        output::{AccountOutput, Feature, FoundryId, NativeToken, Output, SimpleTokenScheme, StorageScore, TokenId},
         protocol::protocol_parameters,
         rand::output::{
             feature::{rand_issuer_feature, rand_metadata_feature, rand_sender_feature},
@@ -71,7 +71,7 @@ fn builder() {
     let metadata = rand_metadata_feature();
 
     let output = builder
-        .with_minimum_amount(protocol_parameters.rent_structure())
+        .with_minimum_amount(protocol_parameters.rent_parameters())
         .add_unlock_condition(rand_state_controller_address_unlock_condition_different_from(
             &account_id,
         ))
@@ -83,7 +83,7 @@ fn builder() {
 
     assert_eq!(
         output.amount(),
-        Output::Account(output.clone()).rent_cost(protocol_parameters.rent_structure())
+        Output::Account(output.clone()).min_deposit(protocol_parameters.rent_parameters())
     );
     assert_eq!(output.features().metadata(), Some(&metadata));
     assert_eq!(output.features().sender(), Some(&sender_1));

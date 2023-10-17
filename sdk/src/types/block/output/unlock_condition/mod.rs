@@ -30,7 +30,7 @@ pub use self::{
     state_controller_address::StateControllerAddressUnlockCondition,
     storage_deposit_return::StorageDepositReturnUnlockCondition, timelock::TimelockUnlockCondition,
 };
-use super::{Rent, RentBuilder};
+use super::{RentParameters, StorageScore};
 use crate::types::block::{address::Address, create_bitflags, protocol::ProtocolParameters, slot::SlotIndex, Error};
 
 ///
@@ -63,16 +63,16 @@ impl Ord for UnlockCondition {
     }
 }
 
-impl Rent for UnlockCondition {
-    fn build_weighted_bytes(&self, builder: RentBuilder) -> RentBuilder {
+impl StorageScore for UnlockCondition {
+    fn storage_score(&self, params: RentParameters) -> u64 {
         match self {
-            Self::Address(uc) => uc.build_weighted_bytes(builder),
-            Self::StorageDepositReturn(uc) => uc.build_weighted_bytes(builder),
-            Self::Timelock(uc) => uc.build_weighted_bytes(builder),
-            Self::Expiration(uc) => uc.build_weighted_bytes(builder),
-            Self::StateControllerAddress(uc) => uc.build_weighted_bytes(builder),
-            Self::GovernorAddress(uc) => uc.build_weighted_bytes(builder),
-            Self::ImmutableAccountAddress(uc) => uc.build_weighted_bytes(builder),
+            Self::Address(uc) => uc.storage_score(params),
+            Self::StorageDepositReturn(uc) => uc.storage_score(params),
+            Self::Timelock(uc) => uc.storage_score(params),
+            Self::Expiration(uc) => uc.storage_score(params),
+            Self::StateControllerAddress(uc) => uc.storage_score(params),
+            Self::GovernorAddress(uc) => uc.storage_score(params),
+            Self::ImmutableAccountAddress(uc) => uc.storage_score(params),
         }
     }
 }
@@ -456,6 +456,12 @@ impl UnlockConditions {
 
         self.expiration()
             .map_or(false, |expiration| slot_index >= expiration.slot_index())
+    }
+}
+
+impl StorageScore for UnlockConditions {
+    fn storage_score(&self, params: RentParameters) -> u64 {
+        self.iter().map(|uc| uc.storage_score(params)).sum::<u64>()
     }
 }
 

@@ -4,7 +4,7 @@
 use crate::types::block::{
     address::Address,
     output::{
-        rent::{Rent, RentBuilder},
+        rent::{RentParameters, StorageScore},
         verify_output_amount,
     },
     protocol::ProtocolParameters,
@@ -51,15 +51,9 @@ impl StorageDepositReturnUnlockCondition {
     }
 }
 
-impl Rent for StorageDepositReturnUnlockCondition {
-    fn build_weighted_bytes(&self, builder: RentBuilder) -> RentBuilder {
-        builder
-            // Kind
-            .data_field::<u8>()
-            // Return address
-            .packable_data_field(&self.return_address)
-            // Return amount
-            .data_field::<u64>()
+impl StorageScore for StorageDepositReturnUnlockCondition {
+    fn storage_score(&self, params: RentParameters) -> u64 {
+        self.return_address().storage_score(params)
     }
 }
 

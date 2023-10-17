@@ -8,7 +8,7 @@ use getset::Getters;
 use packable::{error::UnpackErrorExt, prefix::BoxedSlicePrefix, Packable, PackableExt};
 
 use super::Address;
-use crate::types::block::Error;
+use crate::types::block::{output::StorageScore, Error};
 
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Getters, Packable)]
 #[getset(get = "pub")]
@@ -48,6 +48,8 @@ impl RestrictedAddress {
         self
     }
 }
+
+impl StorageScore for RestrictedAddress {}
 
 impl TryFrom<Address> for RestrictedAddress {
     type Error = Error;

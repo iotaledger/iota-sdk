@@ -35,7 +35,7 @@ async fn main() -> Result<()> {
         .await?;
 
     let token_supply = client.get_token_supply().await?;
-    let rent_structure = client.get_rent_structure().await?;
+    let rent_parameters = client.get_rent_parameters().await?;
 
     let address = std::env::args()
         .nth(1)
@@ -56,7 +56,7 @@ async fn main() -> Result<()> {
     .to_string();
 
     // NftId needs to be null the first time
-    let nft_output = NftOutputBuilder::new_with_minimum_amount(rent_structure, NftId::null())
+    let nft_output = NftOutputBuilder::new_with_minimum_amount(rent_parameters, NftId::null())
         .add_unlock_condition(AddressUnlockCondition::new(address.clone()))
         .add_feature(SenderFeature::new(address.clone()))
         .add_feature(MetadataFeature::new(MUTABLE_METADATA)?)

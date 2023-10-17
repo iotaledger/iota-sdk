@@ -5,7 +5,7 @@ use derive_more::From;
 
 use crate::types::block::{
     address::Address,
-    output::{rent::RentBuilder, Rent},
+    output::{RentParameters, StorageScore},
     slot::SlotIndex,
     Error,
 };
@@ -60,15 +60,9 @@ impl ExpirationUnlockCondition {
     }
 }
 
-impl Rent for ExpirationUnlockCondition {
-    fn build_weighted_bytes(&self, builder: RentBuilder) -> RentBuilder {
-        builder
-            // Kind
-            .data_field::<u8>()
-            // Return address
-            .packable_data_field(&self.return_address)
-            // Slot index
-            .data_field::<SlotIndex>()
+impl StorageScore for ExpirationUnlockCondition {
+    fn storage_score(&self, params: RentParameters) -> u64 {
+        self.return_address().storage_score(params)
     }
 }
 

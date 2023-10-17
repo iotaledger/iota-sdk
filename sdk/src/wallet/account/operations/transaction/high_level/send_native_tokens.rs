@@ -128,7 +128,7 @@ where
         I::IntoIter: Send,
     {
         log::debug!("[TRANSACTION] prepare_send_native_tokens");
-        let rent_structure = self.client().get_rent_structure().await?;
+        let rent_parameters = self.client().get_rent_parameters().await?;
         let token_supply = self.client().get_token_supply().await?;
 
         let account_addresses = self.addresses().await;
@@ -183,7 +183,7 @@ where
                         return_address.clone(),
                         expiration_slot_index,
                     )?)
-                    .with_sufficient_storage_deposit(return_address, rent_structure, token_supply)?
+                    .with_sufficient_storage_deposit(return_address, rent_parameters, token_supply)?
                     .finish_output(token_supply)?,
             )
         }

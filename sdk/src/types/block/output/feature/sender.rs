@@ -5,7 +5,7 @@ use derive_more::From;
 
 use crate::types::block::{
     address::Address,
-    output::{rent::RentBuilder, Rent},
+    output::{rent::RentParameters, StorageScore},
 };
 
 /// Identifies the validated sender of an output.
@@ -29,13 +29,9 @@ impl SenderFeature {
     }
 }
 
-impl Rent for SenderFeature {
-    fn build_weighted_bytes(&self, builder: RentBuilder) -> RentBuilder {
-        builder
-            // Feature Type
-            .data_field::<u8>()
-            // Address
-            .packable_data_field(&self.0)
+impl StorageScore for SenderFeature {
+    fn storage_score(&self, params: RentParameters) -> u64 {
+        self.address().storage_score(params)
     }
 }
 

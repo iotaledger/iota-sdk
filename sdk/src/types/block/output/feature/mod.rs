@@ -28,7 +28,7 @@ pub use self::{
     staking::StakingFeature,
     tag::TagFeature,
 };
-use super::{Rent, RentBuilder};
+use super::{RentParameters, StorageScore};
 use crate::types::block::{create_bitflags, Error};
 
 ///
@@ -69,15 +69,15 @@ impl Ord for Feature {
     }
 }
 
-impl Rent for Feature {
-    fn build_weighted_bytes(&self, builder: RentBuilder) -> RentBuilder {
+impl StorageScore for Feature {
+    fn storage_score(&self, params: RentParameters) -> u64 {
         match self {
-            Self::Sender(f) => f.build_weighted_bytes(builder),
-            Self::Issuer(f) => f.build_weighted_bytes(builder),
-            Self::Metadata(f) => f.build_weighted_bytes(builder),
-            Self::Tag(f) => f.build_weighted_bytes(builder),
-            Self::BlockIssuer(f) => f.build_weighted_bytes(builder),
-            Self::Staking(f) => f.build_weighted_bytes(builder),
+            Self::Sender(f) => f.storage_score(params),
+            Self::Issuer(f) => f.storage_score(params),
+            Self::Metadata(f) => f.storage_score(params),
+            Self::Tag(f) => f.storage_score(params),
+            Self::BlockIssuer(f) => f.storage_score(params),
+            Self::Staking(f) => f.storage_score(params),
         }
     }
 }
@@ -324,6 +324,12 @@ impl Features {
     /// Gets a reference to a [`StakingFeature`], if any.
     pub fn staking(&self) -> Option<&StakingFeature> {
         self.get(StakingFeature::KIND).map(Feature::as_staking)
+    }
+}
+
+impl StorageScore for Features {
+    fn storage_score(&self, params: RentParameters) -> u64 {
+        self.iter().map(|f| f.storage_score(params)).sum::<u64>()
     }
 }
 

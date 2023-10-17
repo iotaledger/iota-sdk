@@ -5,7 +5,7 @@ use core::str::FromStr;
 
 use iota_sdk::types::{
     block::{
-        output::RentStructure, protocol::ProtocolParameters, rand::bytes::rand_bytes_array, BlockHash, BlockId,
+        output::RentParameters, protocol::ProtocolParameters, rand::bytes::rand_bytes_array, BlockHash, BlockId,
         BlockWrapper, BlockWrapperDto,
     },
     TryFromDto,
@@ -68,7 +68,7 @@ fn memory_layout() {
 }
 
 fn protocol_parameters() -> ProtocolParameters {
-    ProtocolParameters::new(3, "test", "rms", RentStructure::default(), 0, 1695275822, 10, 0).unwrap()
+    ProtocolParameters::new(3, "test", "rms", RentParameters::default(), 0, 1695275822, 10, 0).unwrap()
 }
 
 // TODO
