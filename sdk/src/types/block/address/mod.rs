@@ -71,36 +71,6 @@ impl core::fmt::Debug for Address {
     }
 }
 
-macro_rules! def_is_as_opt {
-    ($name:ident) => {
-        paste::paste! {
-            #[doc = "Checks whether the address is a(n) [`" [<$name Address>] "`]."]
-            pub fn [<is_ $name:snake>](&self) -> bool {
-                matches!(self, Self::$name(_))
-            }
-
-            #[doc = "Gets the address as an actual [`" [<$name Address>] "`]."]
-            #[doc = "PANIC: do not call on a non-" [<$name>] " address."]
-            pub fn [<as_ $name:snake>](&self) -> &[<$name Address>] {
-                if let Self::$name(address) = self {
-                    address
-                } else {
-                    panic!("{} called on a non-{} address", stringify!([<as_ $name>]), stringify!([<$name>]));
-                }
-            }
-
-            #[doc = "Gets the address as an actual [`" [<$name Address>] "`], if it is one."]
-            pub fn [<as_ $name:snake _opt>](&self) -> Option<&[<$name Address>]> {
-                if let Self::$name(address) = self {
-                    Some(address)
-                } else {
-                    None
-                }
-            }
-        }
-    };
-}
-
 impl Address {
     /// Returns the address kind of an [`Address`].
     pub fn kind(&self) -> u8 {
@@ -113,11 +83,7 @@ impl Address {
         }
     }
 
-    def_is_as_opt!(Ed25519);
-    def_is_as_opt!(Account);
-    def_is_as_opt!(Nft);
-    def_is_as_opt!(ImplicitAccountCreation);
-    def_is_as_opt!(Restricted);
+    def_is_as_opt!(Address => Ed25519, Account, Nft, ImplicitAccountCreation, Restricted);
 
     /// Tries to create an [`Address`] from a bech32 encoded string.
     pub fn try_from_bech32(address: impl AsRef<str>) -> Result<Self, Error> {
