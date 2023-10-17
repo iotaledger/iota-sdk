@@ -23,9 +23,9 @@ use crate::{
         input::INPUT_COUNT_RANGE,
         output::{
             AccountOutput, AccountTransition, ChainId, FoundryOutput, NativeTokensBuilder, NftOutput, Output, OutputId,
-            TokenId, OUTPUT_COUNT_RANGE,
+            OUTPUT_COUNT_RANGE,
         },
-        payload::transaction::{TransactionCapabilities, TransactionCapabilityFlag},
+        payload::transaction::TransactionCapabilities,
         protocol::ProtocolParameters,
         slot::SlotIndex,
     },
@@ -497,23 +497,14 @@ impl InputSelection {
                         }
                     });
                     if let Some(foundry_input) = foundry_input {
-                        let token_id = TokenId::from(foundry_id);
-                        let mut capabilities = TransactionCapabilities::default();
-                        // TODO is this really the right approach?
-                        if self
-                            .burn
-                            .as_ref()
-                            .map(|burn| burn.native_tokens.contains_key(&token_id))
-                            .unwrap_or_default()
-                        {
-                            capabilities.add_capability(TransactionCapabilityFlag::BurnNativeTokens);
-                        }
                         if let Err(err) = FoundryOutput::transition_inner(
                             foundry_input.output.as_foundry(),
                             foundry_output,
                             input_native_tokens_builder.deref(),
                             output_native_tokens_builder.deref(),
-                            &capabilities,
+                            // We use `all` capabilities here because this transition may be burning
+                            // native tokens, and validation will fail without the capability.
+                            &TransactionCapabilities::all(),
                         ) {
                             log::debug!("validate_transitions error {err:?}");
                             return Err(Error::UnfulfillableRequirement(Requirement::Foundry(
