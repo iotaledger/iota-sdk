@@ -1009,7 +1009,7 @@ async fn print_outputs(mut outputs: Vec<OutputData>, title: &str) -> Result<(), 
         println_log_info!("{title}");
         outputs.sort_by(|a, b| {
             (b.metadata.milestone_timestamp_booked(), a.output_id)
-                .cmp(&(a.metadata.milestone_index_booked(), b.output_id))
+                .cmp(&(a.metadata.milestone_timestamp_booked(), b.output_id))
         });
 
         for (i, output_data) in outputs.into_iter().enumerate() {
