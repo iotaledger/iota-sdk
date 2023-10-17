@@ -7,7 +7,7 @@ impl_id!(pub SlotCommitmentId, 40, "Identifier of a slot commitment.");
 
 impl SlotCommitmentId {
     pub fn index(&self) -> SlotIndex {
-        // PANIC: taking the last 8 bytes of 40 bytes is safe.
+        // PANIC: taking the last 8 bytes of an array of more than 8 bytes is safe.
         u32::from_le_bytes(
             self.0[Self::LENGTH - core::mem::size_of::<SlotIndex>()..]
                 .try_into()
