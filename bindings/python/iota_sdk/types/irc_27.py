@@ -3,7 +3,7 @@
 
 import json
 from dataclasses import dataclass, field, asdict
-from typing import Optional, List, Any
+from typing import Optional, List, Any, Dict
 from dacite import from_dict
 from iota_sdk import utf8_to_hex, MetadataFeature
 
@@ -50,7 +50,7 @@ class Irc27Metadata:
     uri: str
     name: str
     collectionName: Optional[str] = None
-    royalties: dict[str, float] = field(default_factory=dict)
+    royalties: Dict[str, float] = field(default_factory=dict)
     issuerName: Optional[str] = None
     description: Optional[str] = None
     attributes: List[Attribute] = field(default_factory=list)

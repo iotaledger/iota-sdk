@@ -113,6 +113,8 @@ class NodeIndexerAPI(metaclass=ABCMeta):
         unlockable_by_address: Optional[str] = None
 
         def as_dict(self):
+            """Converts this object to a dict.
+            """
             return humps.camelize(
                 [{k: v} for k, v in self.__dict__.items() if v is not None])
 

@@ -26,6 +26,8 @@ class Address():
     type: int
 
     def as_dict(self):
+        """Converts this object to a dict.
+        """
         return {k: v for k, v in self.__dict__.items() if v is not None}
 
 

@@ -29,6 +29,8 @@ class Unlock:
     type: int
 
     def as_dict(self):
+        """Converts this object to a dict.
+        """
         config = {k: v for k, v in self.__dict__.items() if v is not None}
 
         if 'signature' in config:

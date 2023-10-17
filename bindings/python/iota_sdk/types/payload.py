@@ -54,6 +54,8 @@ class RegularTransactionEssence(TransactionEssence):
     type: int = field(default_factory=lambda: 1, init=False)
 
     def as_dict(self):
+        """Converts this object to a dict.
+        """
         config = {k: v for k, v in self.__dict__.items() if v is not None}
 
         if 'payload' in config:
@@ -75,6 +77,8 @@ class Payload():
     type: int
 
     def as_dict(self):
+        """Converts this object to a dict.
+        """
         config = {k: v for k, v in self.__dict__.items() if v is not None}
 
         if 'essence' in config:
@@ -126,6 +130,8 @@ class MilestonePayload(Payload):
 
     @classmethod
     def from_dict(cls, milestone_dict) -> MilestonePayload:
+        """Converts a dict to a MilestonePayload
+        """
         return from_dict(MilestonePayload, milestone_dict)
 
 

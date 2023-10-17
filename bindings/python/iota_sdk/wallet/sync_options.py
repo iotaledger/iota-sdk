@@ -132,4 +132,6 @@ class SyncOptions():
         self.syncNativeTokenFoundries = sync_native_token_foundries
 
     def as_dict(self):
+        """Converts this object to a dict.
+        """
         return dict(self.__dict__)

@@ -29,9 +29,7 @@ class RemainderValueStrategyCustomAddress:
         self.used = used
 
     def as_dict(self):
-        """
-        Returns a dictionary with two key-value pairs. The "strategy" key is assigned "CustomAddress",
-        and the "value" key is assigned __dict__ of this instance.
+        """Converts this object to a dict.
         """
         return dict({"strategy": "CustomAddress", "value": self.__dict__})
 
@@ -47,13 +45,7 @@ class RemainderValueStrategy(Enum):
     ReuseAddress = None
 
     def as_dict(self):
-        """
-        Returns a dictionary with the strategy name and its corresponding value.
-
-        Returns:
-
-        a dictionary with two key-value pairs. The "strategy" key is assigned the value of self.name,
-        and the "value" key is assigned the first element of self.value.
+        """Converts this object to a dict.
         """
         return dict({"strategy": self.name, "value": self.value[0]})
 
@@ -89,6 +81,6 @@ class TransactionOptions():
         self.allow_micro_amount = allow_micro_amount
 
     def as_dict(self):
-        """Returns a dictionary representation of an object's attributes.
+        """Converts this object to a dict.
         """
         return dict(self.__dict__)

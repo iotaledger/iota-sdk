@@ -10,8 +10,7 @@ disable=missing-module-docstring,
 	too-many-arguments,
 	too-many-public-methods,
 	too-few-public-methods,
-	too-many-locals,
-	missing-function-docstring # TODO Remove when merge to 2.0
+	too-many-locals
 
 [TYPECHECK]
 generated-members=from_dict,to_dict,to_json # Made from @json

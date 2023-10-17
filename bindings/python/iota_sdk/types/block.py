@@ -46,6 +46,8 @@ class Block:
         return Utils.block_id(self)
 
     def as_dict(self):
+        """Converts this object to a dict.
+        """
         config = {k: v for k, v in self.__dict__.items() if v is not None}
 
         if 'payload' in config:
@@ -147,6 +149,8 @@ class BlockMetadata:
 
     @classmethod
     def from_dict(cls, block_metadata_dict: Dict) -> BlockMetadata:
+        """Converts a dict to a BlockMetadata
+        """
         obj = cls.__new__(cls)
         super(BlockMetadata, obj).__init__()
         for k, v in block_metadata_dict.items():

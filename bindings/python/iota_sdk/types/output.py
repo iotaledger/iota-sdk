@@ -37,6 +37,8 @@ class Output():
     type: int
 
     def as_dict(self):
+        """Converts this object to a dict.
+        """
         config = {k: v for k, v in self.__dict__.items() if v is not None}
 
         if 'unlockConditions' in config:
@@ -237,6 +239,8 @@ class OutputMetadata:
 
     @classmethod
     def from_dict(cls, data_dict: Dict) -> OutputMetadata:
+        """Converts a dict to a OutputMetadata
+        """
         obj = cls.__new__(cls)
         super(OutputMetadata, obj).__init__()
         for k, v in data_dict.items():
@@ -244,6 +248,8 @@ class OutputMetadata:
         return obj
 
     def as_dict(self):
+        """Converts this object to a dict.
+        """
         return {k: v for k, v in self.__dict__.items() if v is not None}
 
 
@@ -270,7 +276,7 @@ class OutputWithMetadata:
         return obj
 
     def as_dict(self):
-        """Returns a dictionary representation of OutputWithMetadata, with the fields metadata and output.
+        """Converts this object to a dict.
         """
         config = {}
 

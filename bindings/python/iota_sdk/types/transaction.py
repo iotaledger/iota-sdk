@@ -52,6 +52,8 @@ class Transaction:
 
     @classmethod
     def from_dict(cls, data_dict: Dict) -> Transaction:
+        """Converts a dict to a Transaction
+        """
         obj = cls.__new__(cls)
         super(Transaction, obj).__init__()
         for k, v in data_dict.items():

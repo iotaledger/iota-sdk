@@ -30,6 +30,8 @@ class Feature():
     type: int
 
     def as_dict(self):
+        """Converts this object to a dict.
+        """
         res = {k: v for k, v in self.__dict__.items() if v is not None}
         if 'address' in res:
             res['address'] = res['address'].as_dict()

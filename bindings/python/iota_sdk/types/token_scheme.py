@@ -28,8 +28,7 @@ class SimpleTokenScheme(TokenScheme):
     type: int = field(default_factory=lambda: 0, init=False)
 
     def as_dict(self):
-        """
-        Converts all integer values in the config to hexadecimal strings.
+        """Converts this object to a dict.
         """
         config = dict(self.__dict__)
 
