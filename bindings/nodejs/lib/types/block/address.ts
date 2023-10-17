@@ -140,6 +140,7 @@ class ImplicitAccountCreationAddress extends Address {
     /**
      * The Ed25519 address.
      */
+    @Type(() => Ed25519Address)
     readonly address: Ed25519Address;
     /**
      * @param address An Ed25519 address.
