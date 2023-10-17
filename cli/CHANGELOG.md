@@ -21,16 +21,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## 1.2.0 - 2023-xx-xx
 
+### Added
+
+- `outputs` and `unspent_outputs` now print a list of outputs ordered by their corresponding booked milestone timestamp;
+- `outputs` and `unspent_outputs` now include spent/unspent information;
+
 ### Changed
 
 - `AccountCommand::Output` now accepts either a list index or an `OutputId`;
-- `output`, `outputs`, and `unspent_outputs` now order outputs by their corresponding booked milestone timestamp;
-- `outputs` and `unspent_outputs` now include spent/unspent information;
-- `outputs` and `transactions` now add the suffix `UTC` to the formatted date string;
+- `transactions` now adds the suffix `UTC` to the generated formatted date string;
 
 ### Fixed
 
-- `transaction` and `transactions` index transactions in reversed order;
+- `transaction` and `transactions` indexed transactions in opposite order;
 
 ## 1.1.0 - 2023-09-29
 
