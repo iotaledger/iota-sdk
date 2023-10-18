@@ -83,9 +83,12 @@ pub enum AddressCapabilityFlag {
     NftOutputs,
     /// Can receive Delegation Outputs.
     DelegationOutputs,
+    /// Can receive Anchor Outputs.
+    AnchorOutputs,
 }
 
 impl AddressCapabilityFlag {
+    // Byte 0
     const OUTPUTS_WITH_NATIVE_TOKENS: u8 = 0b00000001;
     const OUTPUTS_WITH_MANA: u8 = 0b00000010;
     const OUTPUTS_WITH_TIMELOCK: u8 = 0b00000100;
@@ -94,6 +97,8 @@ impl AddressCapabilityFlag {
     const ACCOUNT_OUTPUTS: u8 = 0b00100000;
     const NFT_OUTPUTS: u8 = 0b01000000;
     const DELEGATION_OUTPUTS: u8 = 0b10000000;
+    // Byte 1
+    const ANCHOR_OUTPUTS: u8 = 0b10000000;
 
     /// Converts the flag into the byte representation.
     pub fn as_byte(&self) -> u8 {
@@ -106,6 +111,7 @@ impl AddressCapabilityFlag {
             Self::AccountOutputs => Self::ACCOUNT_OUTPUTS,
             Self::NftOutputs => Self::NFT_OUTPUTS,
             Self::DelegationOutputs => Self::DELEGATION_OUTPUTS,
+            Self::AnchorOutputs => Self::ANCHOR_OUTPUTS,
         }
     }
 
@@ -120,6 +126,7 @@ impl AddressCapabilityFlag {
             | Self::AccountOutputs
             | Self::NftOutputs
             | Self::DelegationOutputs => 0,
+            Self::AnchorOutputs => 1,
         }
     }
 
@@ -134,6 +141,7 @@ impl AddressCapabilityFlag {
             Self::AccountOutputs,
             Self::NftOutputs,
             Self::DelegationOutputs,
+            Self::AnchorOutputs,
         ]
         .into_iter()
     }
