@@ -70,6 +70,8 @@ impl Payload {
             Self::CandidacyAnnouncement(_) => CandidacyAnnouncementPayload::KIND,
         }
     }
+
+    def_is_as_opt!(Payload: Transaction, TaggedData);
 }
 
 impl Packable for Payload {
