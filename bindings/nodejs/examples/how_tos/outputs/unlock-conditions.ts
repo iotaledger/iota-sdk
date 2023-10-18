@@ -64,7 +64,7 @@ async function run() {
         const basicOutputWithTimelock = await client.buildBasicOutput({
             unlockConditions: [
                 addressUnlockCondition,
-                new TimelockUnlockCondition(BigInt(1)),
+                new TimelockUnlockCondition(1),
             ],
         });
 
@@ -74,7 +74,7 @@ async function run() {
                 addressUnlockCondition,
                 new ExpirationUnlockCondition(
                     new Ed25519Address(hexAddress),
-                    BigInt(1),
+                    1,
                 ),
             ],
         });

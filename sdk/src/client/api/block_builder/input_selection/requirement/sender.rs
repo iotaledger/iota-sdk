@@ -6,7 +6,7 @@ use crate::{client::secret::types::InputSigningData, types::block::address::Addr
 
 impl InputSelection {
     /// Fulfills a sender requirement by selecting an available input that unlocks its address.
-    pub(crate) fn fulfill_sender_requirement(&mut self, address: Address) -> Result<Vec<InputSigningData>, Error> {
+    pub(crate) fn fulfill_sender_requirement(&mut self, address: &Address) -> Result<Vec<InputSigningData>, Error> {
         match address {
             Address::Ed25519(_) => {
                 log::debug!("Treating {address:?} sender requirement as an ed25519 requirement");
@@ -14,7 +14,7 @@ impl InputSelection {
                 match self.fulfill_ed25519_requirement(address) {
                     Ok(res) => Ok(res),
                     Err(Error::UnfulfillableRequirement(Requirement::Ed25519(_))) => {
-                        Err(Error::UnfulfillableRequirement(Requirement::Sender(address)))
+                        Err(Error::UnfulfillableRequirement(Requirement::Sender(address.clone())))
                     }
                     Err(e) => Err(e),
                 }
@@ -26,7 +26,7 @@ impl InputSelection {
                 match self.fulfill_account_requirement(account_address.into_account_id()) {
                     Ok(res) => Ok(res),
                     Err(Error::UnfulfillableRequirement(Requirement::Account(_))) => {
-                        Err(Error::UnfulfillableRequirement(Requirement::Sender(address)))
+                        Err(Error::UnfulfillableRequirement(Requirement::Sender(address.clone())))
                     }
                     Err(e) => Err(e),
                 }
@@ -37,12 +37,13 @@ impl InputSelection {
                 match self.fulfill_nft_requirement(nft_address.into_nft_id()) {
                     Ok(res) => Ok(res),
                     Err(Error::UnfulfillableRequirement(Requirement::Nft(_))) => {
-                        Err(Error::UnfulfillableRequirement(Requirement::Sender(address)))
+                        Err(Error::UnfulfillableRequirement(Requirement::Sender(address.clone())))
                     }
                     Err(e) => Err(e),
                 }
             }
             Address::Anchor(_) => todo!(),
+            _ => todo!("What do we do here?"),
         }
     }
 }

@@ -342,20 +342,32 @@ impl Output {
     ) -> Result<(Address, Option<Address>), Error> {
         match self {
             Self::Basic(output) => Ok((
-                *output.unlock_conditions().locked_address(output.address(), slot_index),
+                output
+                    .unlock_conditions()
+                    .locked_address(output.address(), slot_index)
+                    .clone(),
                 None,
             )),
             Self::Account(output) => Ok((
-                *output.unlock_conditions().locked_address(output.address(), slot_index),
+                output
+                    .unlock_conditions()
+                    .locked_address(output.address(), slot_index)
+                    .clone(),
                 Some(Address::Account(output.account_address(output_id))),
             )),
             Self::Foundry(output) => Ok((Address::Account(*output.account_address()), None)),
             Self::Nft(output) => Ok((
-                *output.unlock_conditions().locked_address(output.address(), slot_index),
+                output
+                    .unlock_conditions()
+                    .locked_address(output.address(), slot_index)
+                    .clone(),
                 Some(Address::Nft(output.nft_address(output_id))),
             )),
             Self::Delegation(output) => Ok((
-                *output.unlock_conditions().locked_address(output.address(), slot_index),
+                output
+                    .unlock_conditions()
+                    .locked_address(output.address(), slot_index)
+                    .clone(),
                 None,
             )),
             Self::Anchor(_) => todo!(),
@@ -537,7 +549,7 @@ fn minimum_storage_deposit(address: &Address, rent_structure: RentStructure, tok
     // PANIC: This can never fail because the amount will always be within the valid range. Also, the actual value is
     // not important, we are only interested in the storage requirements of the type.
     BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)
-        .add_unlock_condition(AddressUnlockCondition::new(*address))
+        .add_unlock_condition(AddressUnlockCondition::new(address.clone()))
         .finish_with_params(token_supply)
         .unwrap()
         .amount()

@@ -283,7 +283,7 @@ pub fn semantic_validation(
             if let Some(storage_deposit_return) = unlock_conditions.storage_deposit_return() {
                 let amount = context
                     .storage_deposit_returns
-                    .entry(*storage_deposit_return.return_address())
+                    .entry(storage_deposit_return.return_address().clone())
                     .or_default();
 
                 *amount = amount
@@ -313,7 +313,7 @@ pub fn semantic_validation(
         let (amount, created_native_tokens, features) = match created_output {
             Output::Basic(output) => {
                 if let Some(address) = output.simple_deposit_address() {
-                    let amount = context.simple_deposits.entry(*address).or_default();
+                    let amount = context.simple_deposits.entry(address.clone()).or_default();
 
                     *amount = amount
                         .checked_add(output.amount())

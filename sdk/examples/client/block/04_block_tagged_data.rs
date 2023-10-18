@@ -8,8 +8,9 @@
 //! cargo run --release --example block_tagged_data [TAG] [DATA]
 //! ```
 
+use crypto::keys::bip44::Bip44;
 use iota_sdk::{
-    client::{Client, Result},
+    client::{constants::IOTA_COIN_TYPE, secret::SecretManager, Client, Result},
     types::block::payload::{Payload, TaggedDataPayload},
 };
 
@@ -23,11 +24,12 @@ async fn main() -> Result<()> {
     // Create a node client.
     let client = Client::builder().with_node(&node_url)?.finish().await?;
 
+    let secret_manager = SecretManager::try_from_mnemonic(std::env::var("MNEMONIC").unwrap())?;
+
     // Create and send the block with tag and data.
     let block = client
-        .finish_basic_block_builder(
+        .build_basic_block(
             todo!("issuer id"),
-            todo!("block signature"),
             todo!("issuing time"),
             None,
             Some(Payload::TaggedData(Box::new(
@@ -43,6 +45,8 @@ async fn main() -> Result<()> {
                 )
                 .unwrap(),
             ))),
+            &secret_manager,
+            Bip44::new(IOTA_COIN_TYPE),
         )
         .await?;
 

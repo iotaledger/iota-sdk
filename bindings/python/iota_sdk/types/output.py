@@ -6,7 +6,7 @@ from enum import IntEnum
 from typing import Dict, Optional, List, TypeAlias, Union, Any
 from dataclasses import dataclass, field
 from dataclasses_json import config
-from iota_sdk.types.common import HexStr, json
+from iota_sdk.types.common import HexStr, json, EpochIndex
 from iota_sdk.types.feature import deserialize_features, SenderFeature, IssuerFeature, MetadataFeature, TagFeature
 from iota_sdk.types.native_token import NativeToken
 from iota_sdk.types.token_scheme import SimpleTokenScheme
@@ -21,6 +21,7 @@ class OutputType(IntEnum):
         Account (4): An account output.
         Foundry (5): A foundry output.
         Nft (6): An NFT output.
+        Delegation (7): A delegation output.
     """
     Basic = 3
     Account = 4
@@ -31,15 +32,7 @@ class OutputType(IntEnum):
 
 @json
 @dataclass
-class Output():
-    """An output in a UTXO ledger.
-    """
-    type: int
-
-
-@json
-@dataclass
-class BasicOutput(Output):
+class BasicOutput:
     """Describes a basic output.
     Attributes:
         amount :
@@ -55,8 +48,12 @@ class BasicOutput(Output):
         type :
             The type of output.
     """
-    amount: str
-    mana: str
+    amount: int = field(metadata=config(
+        encoder=str
+    ))
+    mana: int = field(metadata=config(
+        encoder=str
+    ))
     unlock_conditions: List[Union[AddressUnlockCondition, ExpirationUnlockCondition, StorageDepositReturnUnlockCondition,
                                   TimelockUnlockCondition]] = field(metadata=config(
                                                                     decoder=deserialize_unlock_conditions
@@ -75,7 +72,7 @@ class BasicOutput(Output):
 
 @json
 @dataclass
-class AccountOutput(Output):
+class AccountOutput:
     """Describes an account output.
     Attributes:
         amount :
@@ -101,8 +98,12 @@ class AccountOutput(Output):
         type :
             The type of output.
     """
-    amount: str
-    mana: str
+    amount: int = field(metadata=config(
+        encoder=str
+    ))
+    mana: int = field(metadata=config(
+        encoder=str
+    ))
     account_id: HexStr
     state_index: int
     foundry_counter: int
@@ -131,7 +132,7 @@ class AccountOutput(Output):
 
 @json
 @dataclass
-class FoundryOutput(Output):
+class FoundryOutput:
     """Describes a foundry output.
     Attributes:
         amount :
@@ -151,7 +152,9 @@ class FoundryOutput(Output):
         type :
             The type of output.
     """
-    amount: str
+    amount: int = field(metadata=config(
+        encoder=str
+    ))
     serial_number: int
     token_scheme: SimpleTokenScheme
     unlock_conditions: List[ImmutableAccountAddressUnlockCondition]
@@ -172,7 +175,7 @@ class FoundryOutput(Output):
 
 @json
 @dataclass
-class NftOutput(Output):
+class NftOutput:
     """Describes an NFT output.
     Attributes:
         amount :
@@ -192,8 +195,12 @@ class NftOutput(Output):
         type :
             The type of output.
     """
-    amount: str
-    mana: str
+    amount: int = field(metadata=config(
+        encoder=str
+    ))
+    mana: int = field(metadata=config(
+        encoder=str
+    ))
     nft_id: HexStr
     unlock_conditions: List[Union[AddressUnlockCondition, ExpirationUnlockCondition,
                                   StorageDepositReturnUnlockCondition, TimelockUnlockCondition]] = field(
@@ -216,22 +223,40 @@ class NftOutput(Output):
 
 @json
 @dataclass
-class DelegationOutput(Output):
-    """Describes a delegation output.
+class DelegationOutput:
+    """An output which delegates its contained IOTA coins as voting power to a validator.
     Attributes:
-        type :
-            The type of output.
+        amount: The amount of IOTA coins held by the output.
+        delegated_amount: The amount of delegated IOTA coins.
+        delegation_id: Unique identifier of the Delegation Output
+        validator_address: The Account Address of the validator to which this output is delegating.
+        start_epoch: The index of the first epoch for which this output delegates.
+        end_epoch: The index of the last epoch for which this output delegates.
+        unlock_conditions: Define how the output can be unlocked in a transaction.
+        type: The type of output.
     """
-    # TODO fields done in #1174
+    amount: int = field(metadata=config(
+        encoder=str
+    ))
+    delegated_amount: int = field(metadata=config(
+        encoder=str
+    ))
+    delegation_id: HexStr
+    validator_address: HexStr
+    start_epoch: EpochIndex
+    end_epoch: EpochIndex
+    unlock_conditions: List[AddressUnlockCondition] = field(metadata=config(
+        decoder=deserialize_unlock_conditions
+    ))
     type: int = field(default_factory=lambda: int(
         OutputType.Delegation), init=False)
 
 
-OutputUnion: TypeAlias = Union[BasicOutput, AccountOutput,
-                               FoundryOutput, NftOutput, DelegationOutput]
+Output: TypeAlias = Union[BasicOutput, AccountOutput,
+                          FoundryOutput, NftOutput, DelegationOutput]
 
 
-def deserialize_output(d: Dict[str, Any]) -> OutputUnion:
+def deserialize_output(d: Dict[str, Any]) -> Output:
     """
     Takes a dictionary as input and returns an instance of a specific class based on the value of the 'type' key in the dictionary.
 
@@ -252,9 +277,9 @@ def deserialize_output(d: Dict[str, Any]) -> OutputUnion:
     raise Exception(f'invalid output type: {output_type}')
 
 
-def deserialize_outputs(dicts: List[Dict[str, Any]]) -> List[OutputUnion]:
+def deserialize_outputs(dicts: List[Dict[str, Any]]) -> List[Output]:
     """
-    Takes a list of dictionaries as input and returns a list with specific instances of a classes based on the value of the 'type' key in the dictionary.
+    Takes a list of dictionaries as input and returns a list with specific instances of classes based on the value of the 'type' key in the dictionary.
 
     Arguments:
     * `dicts`: A list of dictionaries that are expected to have a key called 'type' which specifies the type of the returned value.

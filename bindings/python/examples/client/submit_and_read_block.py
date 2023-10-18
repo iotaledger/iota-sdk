@@ -11,7 +11,7 @@
 # Make sure you have first installed it with `pip install iota_sdk`
 import os
 from dotenv import load_dotenv
-from iota_sdk import Client, hex_to_utf8, utf8_to_hex, TaggedDataPayload
+from iota_sdk import BasicBlock, Client, hex_to_utf8, utf8_to_hex, TaggedDataPayload
 
 load_dotenv()
 
@@ -82,15 +82,18 @@ print(f'  {block}')
 metadata = client.get_block_metadata(block_id)
 
 # Get the whole block
-block = client.get_block_data(block_id)
-payload_out = block.payload
-tag_hex_out = block.payload.tag
-message_hex_out = block.payload.data
+block = client.get_block(block_id).block
+if isinstance(block, BasicBlock):
+    payload_out = block.payload
+    tag_hex_out = block.payload.tag
+    message_hex_out = block.payload.data
 
-# Unpackage the payload (from hex to text)
-message_out = hex_to_utf8(message_hex_out)
-print('\nYour message, read from the Shimmer network:')
-print(f'  {message_out}')
+    # Unpackage the payload (from hex to text)
+    message_out = hex_to_utf8(message_hex_out)
+    print('\nYour message, read from the Shimmer network:')
+    print(f'  {message_out}')
+else:
+    raise ValueError("block must be an instance of BasicBlock")
 
 # Or see the message online, with the testnet explorer.
 print(

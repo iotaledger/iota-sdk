@@ -29,12 +29,12 @@ impl InputSelection {
     }
 
     /// Fulfills an ed25519 sender requirement by selecting an available input that unlocks its address.
-    pub(crate) fn fulfill_ed25519_requirement(&mut self, address: Address) -> Result<Vec<InputSigningData>, Error> {
+    pub(crate) fn fulfill_ed25519_requirement(&mut self, address: &Address) -> Result<Vec<InputSigningData>, Error> {
         // Checks if the requirement is already fulfilled.
         if let Some(input) = self
             .selected_inputs
             .iter()
-            .find(|input| self.selected_unlocks_ed25519_address(input, &address))
+            .find(|input| self.selected_unlocks_ed25519_address(input, address))
         {
             log::debug!(
                 "{address:?} sender requirement already fulfilled by {:?}",
@@ -48,14 +48,14 @@ impl InputSelection {
             .available_inputs
             .iter()
             .enumerate()
-            .find(|(_, input)| input.output.is_basic() && self.available_has_ed25519_address(input, &address))
+            .find(|(_, input)| input.output.is_basic() && self.available_has_ed25519_address(input, address))
         {
             Some(index)
         } else {
             // Otherwise, checks if the requirement can be fulfilled by a non-basic output.
             self.available_inputs.iter().enumerate().find_map(|(index, input)| {
                 if !input.output.is_basic() {
-                    if self.available_has_ed25519_address(input, &address) {
+                    if self.available_has_ed25519_address(input, address) {
                         Some(index)
                     } else {
                         None
@@ -75,7 +75,7 @@ impl InputSelection {
 
                 Ok(vec![input])
             }
-            None => Err(Error::UnfulfillableRequirement(Requirement::Ed25519(address))),
+            None => Err(Error::UnfulfillableRequirement(Requirement::Ed25519(address.clone()))),
         }
     }
 }

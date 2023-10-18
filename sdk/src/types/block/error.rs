@@ -4,6 +4,7 @@
 use alloc::string::{FromUtf8Error, String};
 use core::{convert::Infallible, fmt};
 
+use bech32::primitives::hrp::Error as Bech32HrpError;
 use crypto::Error as CryptoError;
 use prefix_hex::Error as HexError;
 use primitive_types::U256;
@@ -79,7 +80,8 @@ pub enum Error {
     InvalidInputKind(u8),
     InvalidInputCount(<InputCount as TryFrom<usize>>::Error),
     InvalidInputOutputIndex(<OutputIndex as TryFrom<u16>>::Error),
-    InvalidBech32Hrp(String),
+    InvalidBech32Hrp(Bech32HrpError),
+    InvalidAddressCapabilitiesCount(<u8 as TryFrom<usize>>::Error),
     InvalidBlockWrapperLength(usize),
     InvalidStateMetadataLength(<StateMetadataLength as TryFrom<usize>>::Error),
     InvalidManaValue(u64),
@@ -96,7 +98,7 @@ pub enum Error {
     // https://github.com/iotaledger/iota-sdk/issues/647
     // InvalidParentCount(<BoundedU8 as TryFrom<usize>>::Error),
     InvalidParentCount,
-    InvalidPayloadKind(u32),
+    InvalidPayloadKind(u8),
     InvalidPayloadLength {
         expected: usize,
         actual: usize,
@@ -175,6 +177,10 @@ pub enum Error {
     DuplicateOutputChain(ChainId),
     InvalidField(&'static str),
     NullDelegationValidatorId,
+    InvalidEpochDelta {
+        created: EpochIndex,
+        target: EpochIndex,
+    },
 }
 
 #[cfg(feature = "std")]
@@ -214,7 +220,8 @@ impl fmt::Display for Error {
             Self::InvalidAddress => write!(f, "invalid address provided"),
             Self::InvalidAddressKind(k) => write!(f, "invalid address kind: {k}"),
             Self::InvalidAccountIndex(index) => write!(f, "invalid account index: {index}"),
-            Self::InvalidBech32Hrp(err) => write!(f, "invalid bech32 hrp: {err}"),
+            Self::InvalidBech32Hrp(e) => write!(f, "invalid bech32 hrp: {e}"),
+            Self::InvalidAddressCapabilitiesCount(e) => write!(f, "invalid capabilities count: {e}"),
             Self::InvalidBlockKind(k) => write!(f, "invalid block kind: {k}"),
             Self::InvalidRewardInputIndex(idx) => write!(f, "invalid reward input index: {idx}"),
             Self::InvalidStorageDepositAmount(amount) => {
@@ -382,7 +389,16 @@ impl fmt::Display for Error {
             Self::DuplicateOutputChain(chain_id) => write!(f, "duplicate output chain {chain_id}"),
             Self::InvalidField(field) => write!(f, "invalid field: {field}"),
             Self::NullDelegationValidatorId => write!(f, "null delegation validator ID"),
+            Self::InvalidEpochDelta { created, target } => {
+                write!(f, "invalid epoch delta: created {created}, target {target}")
+            }
         }
+    }
+}
+
+impl From<Bech32HrpError> for Error {
+    fn from(error: Bech32HrpError) -> Self {
+        Self::InvalidBech32Hrp(error)
     }
 }
 

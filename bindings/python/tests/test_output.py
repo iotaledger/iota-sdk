@@ -1,4 +1,3 @@
-
 # Copyright 2023 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
@@ -75,7 +74,7 @@ def test_output():
                     "type": 0,
                     "pubKeyHash": "0x8f463f0c57b86cf52cc69542fb43a2ec87f83b9c47493cce04c1a4616716bed0"
                 },
-                "unixTime": 1659119101
+                "slotIndex": 1659119101
             }
         ]
     }
@@ -102,7 +101,7 @@ def test_output():
             },
             {
                 "type": 2,
-                "unixTime": 1661850262
+                "slotIndex": 1661850262
             }
         ]
     }

@@ -67,6 +67,7 @@ impl InputSelection {
             Address::Account(account_address) => Ok(Some(Requirement::Account(*account_address.account_id()))),
             Address::Nft(nft_address) => Ok(Some(Requirement::Nft(*nft_address.nft_id()))),
             Address::Anchor(_) => todo!(),
+            _ => todo!("What do we do here?"),
         }
     }
 

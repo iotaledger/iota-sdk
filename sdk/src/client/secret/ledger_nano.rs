@@ -540,6 +540,7 @@ fn merge_unlocks(
                 }
                 Address::Nft(_nft) => merged_unlocks.push(Unlock::Nft(NftUnlock::new(*block_index as u16)?)),
                 Address::Anchor(_) => todo!(),
+                _ => todo!("What do we do here?"),
             },
             None => {
                 // We can only sign ed25519 addresses and block_indexes needs to contain the account or nft
@@ -613,7 +614,7 @@ mod tests {
             .unwrap();
 
         assert_eq!(
-            addresses[0].to_bech32_unchecked("atoi").to_string(),
+            addresses[0].clone().to_bech32_unchecked("atoi").to_string(),
             "atoi1qqdnv60ryxynaeyu8paq3lp9rkll7d7d92vpumz88fdj4l0pn5mru50gvd8"
         );
     }

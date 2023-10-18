@@ -13,6 +13,7 @@ import { HexEncodedString, hexToBigInt, u64 } from '../../utils';
 import { TokenScheme, TokenSchemeDiscriminator } from './token-scheme';
 import { INativeToken } from '../../models';
 import { AccountId, DelegationId } from '../id';
+import { EpochIndex } from '../../block/slot';
 
 export type OutputId = string;
 
@@ -300,11 +301,11 @@ class DelegationOutput extends Output {
     /**
      * The index of the first epoch for which this output delegates.
      */
-    readonly startEpoch: u64;
+    readonly startEpoch: EpochIndex;
     /**
      * The index of the last epoch for which this output delegates.
      */
-    readonly endEpoch: u64;
+    readonly endEpoch: EpochIndex;
     /**
      * The unlock conditions for the output.
      */
@@ -327,8 +328,8 @@ class DelegationOutput extends Output {
         delegatedAmount: u64,
         delegationId: DelegationId,
         validatorId: AccountId,
-        startEpoch: u64,
-        endEpoch: u64,
+        startEpoch: EpochIndex,
+        endEpoch: EpochIndex,
         unlockConditions: UnlockCondition[],
     ) {
         super(OutputType.Delegation, amount);

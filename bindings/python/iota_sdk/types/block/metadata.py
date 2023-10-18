@@ -2,66 +2,82 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from __future__ import annotations
-from enum import Enum
+from enum import Enum, IntEnum
 from dataclasses import dataclass
-from typing import List, Optional, Union, Dict
-from dacite import from_dict
+from typing import Optional
 from iota_sdk.types.common import HexStr, json
-from iota_sdk.types.payload import TaggedDataPayload, TransactionPayload
-from iota_sdk.utils import Utils
 
 
 @json
 @dataclass
-class Block:
-    """Represent the object that nodes gossip around the network.
+class BlockMetadata:
+    """Represents the metadata of a block.
+    Response of GET /api/core/v3/blocks/{blockId}/metadata.
 
     Attributes:
-        protocol_version: The protocol version with which this block was issued.
-        strong_parents: Blocks that are strongly directly approved.
-        weak_parents: Blocks that are weakly directly approved.
-        shallow_like_parents: Blocks that are directly referenced to adjust opinion.
-        max_burned_mana: The amount of Mana the Account identified by the IssuerId is at most willing to burn for this block.
-        payload: The optional payload of this block.
+        block_state: The block state.
+        tx_state: The transaction state.
+        block_failure_reason: The block failure reason.
+        tx_failure_reason: The transaction failure reason.
     """
-
-    protocol_version: int
-    strong_parents: List[HexStr]
-    weak_parents: List[HexStr]
-    shallow_like_parents: List[HexStr]
-    max_burned_mana: str
-    payload: Optional[Union[TaggedDataPayload,
-                      TransactionPayload]] = None
-
-    @classmethod
-    def from_dict(cls, block_dict: Dict) -> Block:
-        """
-        The function `from_dict` takes a dictionary that contains the data needed to
-        create an instance of the `Block` class.
-
-        Returns:
-
-        An instance of the `Block` class.
-        """
-        return from_dict(Block, block_dict)
-
-    def id(self) -> HexStr:
-        """Rreturns the block ID as a hexadecimal string.
-        """
-        return Utils.block_id(self)
+    block_id: HexStr
+    # TODO: verify if really optional:
+    # https://github.com/iotaledger/tips-draft/pull/24/files#r1293426314
+    block_state: Optional[BlockState] = None
+    tx_state: Optional[TransactionState] = None
+    block_failure_reason: Optional[BlockFailureReason] = None
+    tx_failure_reason: Optional[TransactionFailureReason] = None
 
 
-class LedgerInclusionState(str, Enum):
-    """Represents whether a block is included in the ledger.
+class BlockState(Enum):
+    """Describes the state of a block.
 
     Attributes:
-        noTransaction: The block does not contain a transaction.
-        included: The block contains an included transaction.
-        conflicting: The block contains a conflicting transaction.
+        Pending: Stored but not confirmed.
+        Confirmed: Confirmed with the first level of knowledge.
+        Finalized: Included and can no longer be reverted.
+        Rejected: Rejected by the node, and user should reissue payload if it contains one.
+        Failed: Not successfully issued due to failure reason.
     """
-    noTransaction = 'noTransaction'
-    included = 'included'
-    conflicting = 'conflicting'
+    Pending = 0
+    Confirmed = 1
+    Finalized = 2
+    Rejected = 3
+    Failed = 4
+
+
+class TransactionState(Enum):
+    """Describes the state of a transaction.
+
+    Attributes:
+        Pending: Stored but not confirmed.
+        Confirmed: Confirmed with the first level of knowledge.
+        Finalized: Included and can no longer be reverted.
+        Failed: The block is not successfully issued due to failure reason.
+    """
+    Pending = 0
+    Confirmed = 1
+    Finalized = 2
+    Failed = 3
+
+
+class BlockFailureReason(IntEnum):
+    """Describes the reason of a block failure.
+
+    Attributes:
+        TooOldToIssue (1): The block is too old to issue.
+        ParentTooOld (2): One of the block's parents is too old.
+        ParentDoesNotExist (3): One of the block's parents does not exist.
+        ParentInvalid (4): One of the block's parents is invalid.
+        DroppedDueToCongestion (5): The block is dropped due to congestion.
+        Invalid (6): The block is invalid.
+    """
+    TooOldToIssue = 1
+    ParentTooOld = 2
+    ParentDoesNotExist = 3
+    ParentInvalid = 4
+    DroppedDueToCongestion = 5
+    Invalid = 6
 
 
 class TransactionFailureReason(Enum):
@@ -139,34 +155,3 @@ class TransactionFailureReason(Enum):
             21: "Failed to claim delegation reward.",
             255: "The semantic validation failed for a reason not covered by the previous variants."
         }[self.value]
-
-
-@json
-@dataclass
-class BlockMetadata:
-    """Block Metadata.
-
-    Attributes:
-        block_id: The id of the block.
-        strong_parents: Blocks that are strongly directly approved.
-        weak_parents: Blocks that are weakly directly approved.
-        shallow_like_parents: Blocks that are directly referenced to adjust opinion.
-        is_solid: Whether the block is solid.
-        referenced_by_milestone_index: The milestone index referencing the block.
-        milestone_index: The milestone index if the block contains a milestone payload.
-        ledger_inclusion_state: The ledger inclusion state of the block.
-        conflict_reason: The optional conflict reason of the block.
-        should_promote: Whether the block should be promoted.
-        should_reattach: Whether the block should be reattached.
-    """
-    block_id: HexStr
-    strong_parents: List[HexStr]
-    weak_parents: List[HexStr]
-    shallow_like_parents: List[HexStr]
-    is_solid: bool
-    referenced_by_milestone_index: Optional[int] = None
-    milestone_index: Optional[int] = None
-    ledger_inclusion_state: Optional[LedgerInclusionState] = None
-    conflict_reason: Optional[TransactionFailureReason] = None
-    should_promote: Optional[bool] = None
-    should_reattach: Optional[bool] = None

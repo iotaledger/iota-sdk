@@ -34,7 +34,7 @@ pub struct BlockId {
 
 impl BlockId {
     /// The length of a [`BlockId`]
-    pub const LENGTH: usize = 40;
+    pub const LENGTH: usize = 36;
 
     pub fn new(bytes: [u8; Self::LENGTH]) -> Self {
         unsafe { core::mem::transmute(bytes) }

@@ -148,7 +148,7 @@ fn build_invalid_payload_kind() {
         .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
         .finish_with_params(&protocol_parameters);
 
-    assert!(matches!(essence, Err(Error::InvalidPayloadKind(6))));
+    assert!(matches!(essence, Err(Error::InvalidPayloadKind(1))));
 }
 
 #[test]
@@ -344,7 +344,7 @@ fn duplicate_output_nft() {
     let address = Address::from(Ed25519Address::new(bytes));
     let amount = 1_000_000;
     let basic = BasicOutput::build_with_amount(amount)
-        .add_unlock_condition(AddressUnlockCondition::new(address))
+        .add_unlock_condition(AddressUnlockCondition::new(address.clone()))
         .finish_output(protocol_parameters.token_supply())
         .unwrap();
     let nft_id = NftId::from(bytes);
@@ -375,7 +375,7 @@ fn duplicate_output_nft_null() {
     let address = Address::from(Ed25519Address::new(bytes));
     let amount = 1_000_000;
     let basic = BasicOutput::build_with_amount(amount)
-        .add_unlock_condition(AddressUnlockCondition::new(address))
+        .add_unlock_condition(AddressUnlockCondition::new(address.clone()))
         .finish_output(protocol_parameters.token_supply())
         .unwrap();
     let nft_id = NftId::null();
@@ -403,12 +403,12 @@ fn duplicate_output_account() {
     let address = Address::from(Ed25519Address::new(bytes));
     let amount = 1_000_000;
     let basic = BasicOutput::build_with_amount(amount)
-        .add_unlock_condition(AddressUnlockCondition::new(address))
+        .add_unlock_condition(AddressUnlockCondition::new(address.clone()))
         .finish_output(protocol_parameters.token_supply())
         .unwrap();
     let account_id = AccountId::from(bytes);
     let account = AccountOutput::build_with_amount(1_000_000, account_id)
-        .add_unlock_condition(AddressUnlockCondition::new(address))
+        .add_unlock_condition(AddressUnlockCondition::new(address.clone()))
         .finish_output(protocol_parameters.token_supply())
         .unwrap();
 

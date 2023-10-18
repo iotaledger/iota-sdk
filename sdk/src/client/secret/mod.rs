@@ -52,10 +52,12 @@ use crate::{
     },
     types::block::{
         address::{Address, Ed25519Address},
+        core::BlockWrapperBuilder,
         output::Output,
         payload::{transaction::TransactionEssence, TransactionPayload},
         signature::{Ed25519Signature, Signature},
         unlock::{AccountUnlock, NftUnlock, ReferenceUnlock, SignatureUnlock, Unlock, Unlocks},
+        BlockWrapper,
     },
 };
 
@@ -528,6 +530,7 @@ where
                 }
                 Address::Nft(_nft) => blocks.push(Unlock::Nft(NftUnlock::new(*block_index as u16)?)),
                 Address::Anchor(_) => todo!(),
+                _ => todo!("What do we do here?"),
             },
             None => {
                 // We can only sign ed25519 addresses and block_indexes needs to contain the account or nft
@@ -597,4 +600,30 @@ where
     }
 
     Ok(tx_payload)
+}
+
+#[async_trait]
+pub trait SignBlock {
+    async fn sign_ed25519<S: SecretManage>(
+        self,
+        secret_manager: &S,
+        chain: Bip44,
+    ) -> crate::client::Result<BlockWrapper>
+    where
+        crate::client::Error: From<S::Error>;
+}
+
+#[async_trait]
+impl SignBlock for BlockWrapperBuilder {
+    async fn sign_ed25519<S: SecretManage>(
+        self,
+        secret_manager: &S,
+        chain: Bip44,
+    ) -> crate::client::Result<BlockWrapper>
+    where
+        crate::client::Error: From<S::Error>,
+    {
+        let msg = self.signing_input();
+        Ok(self.finish(secret_manager.sign_ed25519(&msg, chain).await?)?)
+    }
 }

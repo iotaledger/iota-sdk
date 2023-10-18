@@ -31,10 +31,10 @@ fn builder() {
 
     let mut builder = AccountOutput::build_with_amount(amount, account_id)
         .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000).unwrap())
-        .add_unlock_condition(address_1)
-        .add_feature(sender_1)
-        .replace_feature(sender_2)
-        .replace_immutable_feature(issuer_1)
+        .add_unlock_condition(address_1.clone())
+        .add_feature(sender_1.clone())
+        .replace_feature(sender_2.clone())
+        .replace_immutable_feature(issuer_1.clone())
         .add_immutable_feature(issuer_2);
 
     let output = builder.clone().finish().unwrap();
@@ -47,7 +47,7 @@ fn builder() {
         .clear_unlock_conditions()
         .clear_features()
         .clear_immutable_features()
-        .replace_unlock_condition(address_2);
+        .replace_unlock_condition(address_2.clone());
     let output = builder.clone().finish().unwrap();
     assert_eq!(output.unlock_conditions().address(), Some(&address_2));
     assert!(output.features().is_empty());
@@ -58,8 +58,8 @@ fn builder() {
     let output = builder
         .with_minimum_storage_deposit(protocol_parameters.rent_structure())
         .add_unlock_condition(rand_address_unlock_condition_different_from_account_id(&account_id))
-        .with_features([Feature::from(metadata.clone()), sender_1.into()])
-        .with_immutable_features([Feature::from(metadata.clone()), issuer_1.into()])
+        .with_features([Feature::from(metadata.clone()), sender_1.clone().into()])
+        .with_immutable_features([Feature::from(metadata.clone()), issuer_1.clone().into()])
         .finish_with_params(ValidationParams::default().with_protocol_parameters(protocol_parameters.clone()))
         .unwrap();
 
