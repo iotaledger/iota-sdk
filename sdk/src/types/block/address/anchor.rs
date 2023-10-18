@@ -14,8 +14,7 @@ pub struct AnchorAddress(AnchorId);
 
 impl AnchorAddress {
     /// The [`Address`](crate::types::block::address::Address) kind of an [`AnchorAddress`].
-    /// TODO
-    pub const KIND: u8 = 255;
+    pub const KIND: u8 = 48;
     /// The length of an [`AnchorAddress`].
     pub const LENGTH: usize = AnchorId::LENGTH;
 
