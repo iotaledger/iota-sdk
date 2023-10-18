@@ -4,7 +4,6 @@
 from enum import IntEnum
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, TypeAlias, Union
-from dacite import from_dict
 from iota_sdk.types.common import HexStr, json
 
 
