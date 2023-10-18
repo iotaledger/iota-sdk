@@ -214,6 +214,7 @@ impl Address {
                     return Err(TransactionFailureReason::InvalidInputUnlock);
                 }
             }
+            (Self::Anchor(_), Unlock::Anchor(_)) => todo!(),
             _ => return Err(TransactionFailureReason::InvalidInputUnlock),
         }
 

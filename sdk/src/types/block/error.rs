@@ -48,6 +48,7 @@ pub enum Error {
     InvalidAddress,
     InvalidAddressKind(u8),
     InvalidAccountIndex(<UnlockIndex as TryFrom<u16>>::Error),
+    InvalidAnchorIndex(<UnlockIndex as TryFrom<u16>>::Error),
     InvalidBlockKind(u8),
     InvalidRewardInputIndex(<RewardContextInputIndex as TryFrom<u16>>::Error),
     InvalidStorageDepositAmount(u64),
@@ -130,6 +131,7 @@ pub enum Error {
     InvalidUnlockReference(u16),
     InvalidUnlockAccount(u16),
     InvalidUnlockNft(u16),
+    InvalidUnlockAnchor(u16),
     InvalidUnlockConditionCount(<UnlockConditionCount as TryFrom<usize>>::Error),
     InvalidUnlockConditionKind(u8),
     InvalidFoundryZeroSerialNumber,
@@ -220,6 +222,7 @@ impl fmt::Display for Error {
             Self::InvalidAddress => write!(f, "invalid address provided"),
             Self::InvalidAddressKind(k) => write!(f, "invalid address kind: {k}"),
             Self::InvalidAccountIndex(index) => write!(f, "invalid account index: {index}"),
+            Self::InvalidAnchorIndex(index) => write!(f, "invalid anchor index: {index}"),
             Self::InvalidBech32Hrp(e) => write!(f, "invalid bech32 hrp: {e}"),
             Self::InvalidAddressCapabilitiesCount(e) => write!(f, "invalid capabilities count: {e}"),
             Self::InvalidBlockKind(k) => write!(f, "invalid block kind: {k}"),
@@ -321,6 +324,9 @@ impl fmt::Display for Error {
             }
             Self::InvalidUnlockNft(index) => {
                 write!(f, "invalid unlock nft: {index}")
+            }
+            Self::InvalidUnlockAnchor(index) => {
+                write!(f, "invalid unlock anchor: {index}")
             }
             Self::InvalidUnlockConditionCount(count) => write!(f, "invalid unlock condition count: {count}"),
             Self::InvalidUnlockConditionKind(k) => write!(f, "invalid unlock condition kind: {k}"),
