@@ -17,17 +17,17 @@ class OutputType(IntEnum):
     """Output types.
 
     Attributes:
-        Basic (3): A basic output.
-        Account (4): An account output.
-        Foundry (5): A foundry output.
-        Nft (6): An NFT output.
-        Delegation (7): A delegation output.
+        Basic (0): A basic output.
+        Account (1): An account output.
+        Foundry (2): A foundry output.
+        Nft (3): An NFT output.
+        Delegation (4): A delegation output.
     """
-    Basic = 3
-    Account = 4
-    Foundry = 5
-    Nft = 6
-    Delegation = 7
+    Basic = 0
+    Account = 1
+    Foundry = 2
+    Nft = 3
+    Delegation = 4
 
 
 @json
