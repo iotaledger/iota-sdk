@@ -8,7 +8,7 @@ use primitive_types::U256;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    types::block::output::{feature::MetadataFeature, AccountId, FoundryId, NftId, OutputId, TokenId},
+    types::block::output::{feature::MetadataFeature, AccountId, DelegationId, FoundryId, NftId, OutputId, TokenId},
     utils::serde::string,
 };
 
@@ -30,6 +30,8 @@ pub struct Balance {
     pub(crate) foundries: Vec<FoundryId>,
     /// Nfts
     pub(crate) nfts: Vec<NftId>,
+    /// Delegations
+    pub(crate) delegations: Vec<DelegationId>,
     /// Outputs with multiple unlock conditions and if they can currently be spent or not. If there is a
     /// [`TimelockUnlockCondition`](crate::types::block::output::unlock_condition::TimelockUnlockCondition) or
     /// [`ExpirationUnlockCondition`](crate::types::block::output::unlock_condition::ExpirationUnlockCondition) this
@@ -57,6 +59,7 @@ impl std::ops::AddAssign for Balance {
         self.accounts.extend(rhs.accounts);
         self.foundries.extend(rhs.foundries);
         self.nfts.extend(rhs.nfts);
+        self.delegations.extend(rhs.delegations);
     }
 }
 
@@ -99,6 +102,8 @@ pub struct RequiredStorageDeposit {
     pub(crate) foundry: u64,
     #[serde(with = "crate::utils::serde::string")]
     pub(crate) nft: u64,
+    #[serde(with = "string")]
+    pub(crate) delegation: u64,
 }
 
 impl std::ops::AddAssign for RequiredStorageDeposit {
@@ -107,6 +112,7 @@ impl std::ops::AddAssign for RequiredStorageDeposit {
         self.account += rhs.account;
         self.foundry += rhs.foundry;
         self.nft += rhs.nft;
+        self.delegation += rhs.delegation;
     }
 }
 
@@ -199,6 +205,9 @@ impl Balance {
         let foundries = std::iter::repeat_with(|| FoundryId::from(rand_bytes_array()))
             .take(rand::thread_rng().gen_range(0..10))
             .collect::<Vec<_>>();
+        let delegations = std::iter::repeat_with(|| DelegationId::from(rand_bytes_array()))
+            .take(rand::thread_rng().gen_range(0..10))
+            .collect::<Vec<_>>();
 
         Self {
             base_coin: BaseCoinBalance {
@@ -212,11 +221,13 @@ impl Balance {
                 account: total / 16,
                 foundry: total / 4,
                 nft: total / 2,
+                delegation: total / 16,
             },
             native_tokens,
             accounts,
             foundries,
             nfts,
+            delegations,
             ..Default::default()
         }
     }
