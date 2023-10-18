@@ -26,7 +26,7 @@ def test_feature():
 
 def test_output():
     basic_output_dict = {
-        "type": 3,
+        "type": 0,
         "mana": "999500700",
         "amount": "999500700",
         "unlockConditions": [
@@ -43,7 +43,7 @@ def test_output():
     assert basic_output.to_dict() == basic_output_dict
 
     basic_output_dict = {
-        "type": 3,
+        "type": 0,
         "mana": "57600",
         "amount": "57600",
         "nativeTokens": [
@@ -82,7 +82,7 @@ def test_output():
     assert basic_output.to_dict() == basic_output_dict
 
     basic_output_dict = {
-        "type": 3,
+        "type": 0,
         "mana": "50100",
         "amount": "50100",
         "nativeTokens": [
@@ -109,7 +109,7 @@ def test_output():
     assert basic_output.to_dict() == basic_output_dict
 
     account_output_dict = {
-        "type": 4,
+        "type": 1,
         "mana": "168200",
         "amount": "168200",
         "accountId": "0x8d073d15074834785046d9cacec7ac4d672dcb6dad342624a936f3c4334520f1",
@@ -146,7 +146,7 @@ def test_output():
     assert account_output.to_dict() == account_output_dict
 
     account_output_dict = {
-        "type": 4,
+        "type": 1,
         "mana": "55100",
         "amount": "55100",
         "accountId": "0x5380cce0ac342b8fa3e9c4f46d5b473ee9e824f0017fe43682dca77e6b875354",
@@ -187,7 +187,7 @@ def test_output():
     assert account_output.to_dict() == account_output_dict
 
     foundry_output_dict = {
-        "type": 5,
+        "type": 2,
         "amount": "54700",
         "serialNumber": 1,
         "tokenScheme": {
@@ -216,7 +216,7 @@ def test_output():
     assert foundry_output.to_dict() == foundry_output_dict
 
     nft_output_dict = {
-        "type": 6,
+        "type": 3,
         "mana": "47800",
         "amount": "47800",
         "nftId": "0x90e84936bd0cffd1595d2a58f63b1a8d0d3e333ed893950a5f3f0043c6e59ec1",

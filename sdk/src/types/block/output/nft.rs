@@ -22,6 +22,7 @@ use crate::types::{
             NativeTokens, Output, OutputBuilderAmount, OutputId, RentParameters, StateTransitionError,
             StateTransitionVerifier, StorageScore,
         },
+        payload::transaction::TransactionCapabilityFlag,
         protocol::ProtocolParameters,
         semantic::{TransactionFailureReason, ValidationContext},
         unlock::Unlock,
@@ -465,7 +466,15 @@ impl StateTransitionVerifier for NftOutput {
         Self::transition_inner(current_state, next_state)
     }
 
-    fn destruction(_current_state: &Self, _context: &ValidationContext<'_>) -> Result<(), StateTransitionError> {
+    fn destruction(_current_state: &Self, context: &ValidationContext<'_>) -> Result<(), StateTransitionError> {
+        if !context
+            .essence
+            .capabilities()
+            .has_capability(TransactionCapabilityFlag::DestroyNftOutputs)
+        {
+            // TODO: add a variant https://github.com/iotaledger/iota-sdk/issues/1430
+            return Err(StateTransitionError::UnsupportedStateTransition);
+        }
         Ok(())
     }
 }
