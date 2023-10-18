@@ -21,9 +21,8 @@ pub use self::{
     nft::NftAddress,
     restricted::{AddressCapabilities, AddressCapabilityFlag, RestrictedAddress},
 };
-use super::output::StorageScore;
 use crate::types::block::{
-    output::{Output, OutputId},
+    output::{Output, OutputId, StorageScore},
     semantic::{TransactionFailureReason, ValidationContext},
     signature::Signature,
     unlock::Unlock,
