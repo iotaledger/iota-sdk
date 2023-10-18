@@ -75,7 +75,7 @@ pub async fn account_prompt_internal(
     }
 
     let input = rl.readline(&prompt);
-    
+
     match input {
         Ok(command) => {
             match command.trim() {
