@@ -47,6 +47,11 @@ impl RestrictedAddress {
         self.allowed_capabilities = allowed_capabilities.into();
         self
     }
+
+    /// Returns whether a given [`AddressCapabilityFlag`] is enabled.
+    pub fn has_capability(&self, flag: AddressCapabilityFlag) -> bool {
+        self.allowed_capabilities.has_capability(flag)
+    }
 }
 
 impl TryFrom<Address> for RestrictedAddress {
