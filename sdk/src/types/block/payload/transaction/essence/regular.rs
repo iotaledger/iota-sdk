@@ -442,6 +442,7 @@ pub enum TransactionCapabilityFlag {
     DestroyAccountOutputs,
     DestroyFoundryOutputs,
     DestroyNftOutputs,
+    DestroyAnchorOutputs,
 }
 
 impl TransactionCapabilityFlag {
@@ -450,10 +451,11 @@ impl TransactionCapabilityFlag {
     const DESTROY_ACCOUNT_OUTPUTS: u8 = 0b00000100;
     const DESTROY_FOUNDRY_OUTPUTS: u8 = 0b00001000;
     const DESTROY_NFT_OUTPUTS: u8 = 0b00010000;
+    const DESTROY_ANCHOR_OUTPUTS: u8 = 0b00100000;
 }
 
 impl CapabilityFlag for TransactionCapabilityFlag {
-    type Iterator = core::array::IntoIter<Self, 5>;
+    type Iterator = core::array::IntoIter<Self, 6>;
 
     fn as_byte(&self) -> u8 {
         match self {
@@ -462,6 +464,7 @@ impl CapabilityFlag for TransactionCapabilityFlag {
             Self::DestroyAccountOutputs => Self::DESTROY_ACCOUNT_OUTPUTS,
             Self::DestroyFoundryOutputs => Self::DESTROY_FOUNDRY_OUTPUTS,
             Self::DestroyNftOutputs => Self::DESTROY_NFT_OUTPUTS,
+            Self::DestroyAnchorOutputs => Self::DESTROY_ANCHOR_OUTPUTS,
         }
     }
 
@@ -471,7 +474,8 @@ impl CapabilityFlag for TransactionCapabilityFlag {
             | Self::BurnMana
             | Self::DestroyAccountOutputs
             | Self::DestroyFoundryOutputs
-            | Self::DestroyNftOutputs => 0,
+            | Self::DestroyNftOutputs
+            | Self::DestroyAnchorOutputs => 0,
         }
     }
 
@@ -482,6 +486,7 @@ impl CapabilityFlag for TransactionCapabilityFlag {
             Self::DestroyAccountOutputs,
             Self::DestroyFoundryOutputs,
             Self::DestroyNftOutputs,
+            Self::DestroyAnchorOutputs,
         ]
         .into_iter()
     }
