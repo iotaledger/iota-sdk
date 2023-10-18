@@ -54,7 +54,7 @@ fn pack_unpack_valid() {
     );
 }
 
-// TODO
+// TODO: re-enable when source is updated
 // #[test]
 // fn transaction_id() {
 //     // Test from https://github.com/iotaledger/tips-draft/blob/tip46/tips/TIP-0046/tip-0046.md#transaction-id
