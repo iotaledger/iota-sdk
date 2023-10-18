@@ -137,9 +137,6 @@ class NftAddress extends Address {
  * An implicit account creation address.
  */
 class ImplicitAccountCreationAddress extends Address {
-    /**
-     * The Ed25519 address.
-     */
     private pubKeyHash: HexEncodedString;
     /**
      * @param address An Ed25519 address.
@@ -213,7 +210,9 @@ class RestrictedAddress extends Address {
     }
 
     getAllowedCapabilities(): Uint8Array {
-        return Uint8Array.from(Buffer.from(this.allowedCapabilities, 'hex'));
+        return Uint8Array.from(
+            Buffer.from(this.allowedCapabilities.substring(2), 'hex'),
+        );
     }
 
     toString(): string {
