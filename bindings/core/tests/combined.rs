@@ -5,7 +5,7 @@ use std::collections::BTreeMap;
 
 use crypto::keys::bip44::Bip44;
 use iota_sdk::client::{constants::SHIMMER_COIN_TYPE, secret::SecretManagerDto, ClientBuilder};
-use iota_sdk_bindings_core::{CallMethod, Response, Result, WalletMethod, WalletCommandMethod, WalletOptions};
+use iota_sdk_bindings_core::{CallMethod, Response, Result, WalletCommandMethod, WalletMethod, WalletOptions};
 
 #[tokio::test]
 async fn create_wallet() -> Result<()> {
