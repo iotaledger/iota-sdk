@@ -190,6 +190,7 @@ impl Output {
             Self::Foundry(_) => 0,
             Self::Nft(output) => output.mana(),
             Self::Delegation(_) => 0,
+            Self::Anchor(output) => output.mana(),
         }
     }
 

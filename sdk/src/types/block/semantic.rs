@@ -402,6 +402,7 @@ pub fn semantic_validation(
                     Output::Account(_) => !address.has_capability(AddressCapabilityFlag::AccountOutputs),
                     Output::Nft(_) => !address.has_capability(AddressCapabilityFlag::NftOutputs),
                     Output::Delegation(_) => !address.has_capability(AddressCapabilityFlag::DelegationOutputs),
+                    // TODO do we really want to handle it?
                     Output::Anchor(_) => !address.has_capability(AddressCapabilityFlag::AnchorOutputs),
                     _ => false,
                 } {
