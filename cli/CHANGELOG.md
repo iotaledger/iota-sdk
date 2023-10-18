@@ -23,7 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- `outputs` and `unspent_outputs` now print a list of outputs ordered by their corresponding booked milestone timestamp;
+- `outputs` and `unspent_outputs` now print the booked milestone timestamps and sort by them;
 - `outputs` and `unspent_outputs` now include spent/unspent information;
 
 ### Changed
