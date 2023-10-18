@@ -11,7 +11,10 @@ use packable::{error::UnpackError, packer::Packer, unpacker::Unpacker, Packable,
 
 pub(crate) use self::essence::{ContextInputCount, InputCount, OutputCount};
 pub use self::{
-    essence::{RegularTransactionEssence, RegularTransactionEssenceBuilder, TransactionEssence},
+    essence::{
+        RegularTransactionEssence, RegularTransactionEssenceBuilder, TransactionCapabilities,
+        TransactionCapabilityFlag, TransactionEssence,
+    },
     transaction_id::TransactionId,
 };
 use crate::types::block::{protocol::ProtocolParameters, unlock::Unlocks, Error};
