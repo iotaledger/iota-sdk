@@ -25,11 +25,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `outputs` and `unspent_outputs` now print the booked milestone timestamps and sort by them;
 - `outputs` and `unspent_outputs` now include spent/unspent information;
+- `transactions` now adds the suffix `UTC` to the generated formatted date string;
 
 ### Changed
 
 - `AccountCommand::Output` now accepts either a list index or an `OutputId`;
-- `transactions` now adds the suffix `UTC` to the generated formatted date string;
 
 ### Fixed
 
