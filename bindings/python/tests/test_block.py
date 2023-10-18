@@ -16,7 +16,7 @@ def test_basic_block_with_tagged_data_payload():
         "shallowLikeParents": [],
         "maxBurnedMana": "180500",
         "payload": {
-            "type": 5,
+            "type": 0,
             "tag": "0x484f524e4554205370616d6d6572",
             "data": "0x57652061726520616c6c206d616465206f662073746172647573742e0a436f756e743a20353436333730330a54696d657374616d703a20323032332d30372d31395430373a32323a32385a0a54697073656c656374696f6e3a20343732c2b573"}}
     block = BasicBlock.from_dict(block_dict)
@@ -52,7 +52,7 @@ def test_block_wrapper_with_tagged_data_payload():
             ],
             "maxBurnedMana": "180500",
             "payload": {
-                "type": 5,
+                "type": 0,
                 "tag": "0x68656c6c6f20776f726c64",
                 "data": "0x01020304"
             }
@@ -84,7 +84,7 @@ def test_basic_block_with_tx_payload():
         "weakParents": [],
         "shallowLikeParents": [],
         "maxBurnedMana": "180500",
-        "payload": {"type": 6,
+        "payload": {"type": 1,
                     "essence": {"type": 1,
                                 "networkId": "1856588631910923207",
                                 "inputs": [{"type": 0,
@@ -117,7 +117,7 @@ def test_basic_block_with_tx_payload_all_output_types():
         "type": 0,
         "strongParents": [
             "0x053296e7434e8a4d602f8db30a5aaf16c01140212fe79d8132137cda1c38a60a", "0x559ec1d9a31c55bd27588ada2ade70fb5b13764ddd600e29c3b018761ba30e15", "0xe78e8cdbbeda89e3408eed51b77e0db5ba035f5f3bf79a8365435bba40697693", "0xee9d6e45dbc080694e6c827fecbc31ad9f654cf57404bc98f4cbca033f8e3139"], "weakParents": [], "shallowLikeParents": [], "payload": {
-            "type": 6, "essence": {
+            "type": 1, "essence": {
                 "type": 1, "networkId": "1856588631910923207", "inputs": [
                     {
                         "type": 0, "transactionId": "0xa49f5a764c3fe22f702b5b238a75a648faae1863f61c14fac51ba58d26acb823", "transactionOutputIndex": 9}, {
@@ -263,7 +263,7 @@ def test_basic_block_with_tx_payload_with_tagged_data_payload():
         "weakParents": [],
         "shallowLikeParents": [],
         "maxBurnedMana": "180500",
-        "payload": {"type": 6,
+        "payload": {"type": 1,
                     "essence": {"type": 1,
                                 "networkId": "1856588631910923207",
                                 "inputs": [{"type": 0,

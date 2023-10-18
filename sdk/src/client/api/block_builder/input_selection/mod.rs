@@ -23,6 +23,7 @@ use crate::{
         output::{
             AccountOutput, ChainId, FoundryOutput, NativeTokensBuilder, NftOutput, Output, OutputId, OUTPUT_COUNT_RANGE,
         },
+        payload::transaction::TransactionCapabilities,
         protocol::ProtocolParameters,
         slot::SlotIndex,
     },
@@ -447,9 +448,10 @@ impl InputSelection {
                     }
                 }
                 Output::Foundry(foundry_output) => {
+                    let foundry_id = foundry_output.id();
                     let foundry_input = input_foundries.iter().find(|i| {
                         if let Output::Foundry(foundry_input) = &i.output {
-                            foundry_output.id() == foundry_input.id()
+                            foundry_id == foundry_input.id()
                         } else {
                             false
                         }
@@ -460,6 +462,9 @@ impl InputSelection {
                             foundry_output,
                             input_native_tokens_builder.deref(),
                             output_native_tokens_builder.deref(),
+                            // We use `all` capabilities here because this transition may be burning
+                            // native tokens, and validation will fail without the capability.
+                            &TransactionCapabilities::all(),
                         ) {
                             log::debug!("validate_transitions error {err:?}");
                             return Err(Error::UnfulfillableRequirement(Requirement::Foundry(

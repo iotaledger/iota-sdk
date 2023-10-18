@@ -22,15 +22,15 @@ export type OutputId = string;
  */
 enum OutputType {
     /** A Basic output. */
-    Basic = 3,
+    Basic = 0,
     /** An Account output. */
-    Account = 4,
+    Account = 1,
     /** A Foundry output. */
-    Foundry = 5,
+    Foundry = 2,
     /** An NFT output. */
-    Nft = 6,
+    Nft = 3,
     /** A Delegation output. */
-    Delegation = 7,
+    Delegation = 4,
 }
 
 /**

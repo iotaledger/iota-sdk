@@ -14,11 +14,11 @@ class PayloadType(IntEnum):
     """Block payload types.
 
     Attributes:
-        TaggedData (5): A tagged data payload.
-        Transaction (6): A transaction payload.
+        TaggedData (0): A tagged data payload.
+        Transaction (1): A transaction payload.
     """
-    TaggedData = 5
-    Transaction = 6
+    TaggedData = 0
+    Transaction = 1
 
 
 @json

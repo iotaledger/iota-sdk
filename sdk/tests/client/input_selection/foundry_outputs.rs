@@ -935,3 +935,71 @@ fn foundry_in_outputs_and_required() {
         }
     });
 }
+
+#[test]
+fn melt_and_burn_native_tokens() {
+    let protocol_parameters = protocol_parameters();
+    let account_id = AccountId::from_str(ACCOUNT_ID_1).unwrap();
+    let foundry_id = FoundryId::build(&AccountAddress::from(account_id), 1, SimpleTokenScheme::KIND);
+    let token_id = TokenId::from(foundry_id);
+
+    let mut inputs = build_inputs([
+        Basic(1_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
+        Foundry(
+            1_000_000,
+            account_id,
+            1,
+            SimpleTokenScheme::new(1000, 0, 1000).unwrap(),
+            Some(vec![(&token_id.to_string(), 1000)]),
+        ),
+    ]);
+    let account_output = AccountOutputBuilder::new_with_amount(1_000_000, account_id)
+        .add_unlock_condition(StateControllerAddressUnlockCondition::new(
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+        ))
+        .add_unlock_condition(GovernorAddressUnlockCondition::new(
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+        ))
+        .with_foundry_counter(1)
+        .finish_output(protocol_parameters.token_supply())
+        .unwrap();
+    inputs.push(InputSigningData {
+        output: account_output,
+        output_metadata: rand_output_metadata(),
+        chain: None,
+    });
+    let outputs = build_outputs([Foundry(
+        1_000_000,
+        account_id,
+        1,
+        // Melt 123 native tokens
+        SimpleTokenScheme::new(1000, 123, 1000).unwrap(),
+        None,
+    )]);
+
+    let selected = InputSelection::new(
+        inputs.clone(),
+        outputs,
+        addresses([BECH32_ADDRESS_ED25519_0]),
+        protocol_parameters,
+    )
+    // Burn 456 native tokens
+    .with_burn(Burn::new().add_native_token(token_id, 456))
+    .select()
+    .unwrap();
+
+    assert!(unsorted_eq(&selected.inputs, &inputs));
+    // Account next state + foundry + basic output with native tokens
+    assert_eq!(selected.outputs.len(), 3);
+    // Account state index is increased
+    selected.outputs.iter().for_each(|output| {
+        if let Output::Account(account_output) = &output {
+            // Input account has index 0, output should have index 1
+            assert_eq!(account_output.state_index(), 1);
+        }
+        if let Output::Basic(basic_output) = &output {
+            // Basic output remainder has the remaining native tokens
+            assert_eq!(basic_output.native_tokens().first().unwrap().amount().as_u32(), 421);
+        }
+    });
+}
