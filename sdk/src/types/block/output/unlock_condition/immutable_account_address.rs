@@ -5,7 +5,7 @@ use derive_more::From;
 
 use crate::types::block::{
     address::AccountAddress,
-    output::{RentParameters, StorageScore},
+    output::{StorageScore, StorageScoreParameters},
 };
 
 /// Defines the permanent [`AccountAddress`] that owns this output.
@@ -30,7 +30,7 @@ impl ImmutableAccountAddressUnlockCondition {
 }
 
 impl StorageScore for ImmutableAccountAddressUnlockCondition {
-    fn storage_score(&self, params: RentParameters) -> u64 {
+    fn storage_score(&self, params: StorageScoreParameters) -> u64 {
         self.address().storage_score(params)
     }
 }

@@ -19,7 +19,8 @@ use crate::types::{
                 verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions,
             },
             verify_output_amount_min, verify_output_amount_packable, verify_output_amount_supply, Output,
-            OutputBuilderAmount, OutputId, RentParameters, StateTransitionError, StateTransitionVerifier, StorageScore,
+            OutputBuilderAmount, OutputId, StateTransitionError, StateTransitionVerifier, StorageScore,
+            StorageScoreParameters,
         },
         protocol::ProtocolParameters,
         semantic::{TransactionFailureReason, ValidationContext},
@@ -76,16 +77,16 @@ impl DelegationOutputBuilder {
         )
     }
 
-    /// Creates a [`DelegationOutputBuilder`] with a provided rent structure.
-    /// The amount will be set to the rent cost of the resulting output.
+    /// Creates a [`DelegationOutputBuilder`] with a provided storage score structure.
+    /// The amount will be set to the storage cost of the resulting output.
     pub fn new_with_minimum_amount(
-        rent_parameters: RentParameters,
+        params: StorageScoreParameters,
         delegated_amount: u64,
         delegation_id: DelegationId,
         validator_address: AccountAddress,
     ) -> Self {
         Self::new(
-            OutputBuilderAmount::RentCost(rent_parameters),
+            OutputBuilderAmount::StorageCost(params),
             delegated_amount,
             delegation_id,
             validator_address,
@@ -115,9 +116,9 @@ impl DelegationOutputBuilder {
         self
     }
 
-    /// Sets the amount to the rent cost.
-    pub fn with_minimum_amount(mut self, rent_parameters: RentParameters) -> Self {
-        self.amount = OutputBuilderAmount::RentCost(rent_parameters);
+    /// Sets the amount to the storage cost.
+    pub fn with_minimum_amount(mut self, params: StorageScoreParameters) -> Self {
+        self.amount = OutputBuilderAmount::StorageCost(params);
         self
     }
 
@@ -176,7 +177,7 @@ impl DelegationOutputBuilder {
     pub fn finish(self) -> Result<DelegationOutput, Error> {
         let amount = match self.amount {
             OutputBuilderAmount::Amount(amount) => amount,
-            OutputBuilderAmount::RentCost(rent_parameters) => self.rent_cost(rent_parameters),
+            OutputBuilderAmount::StorageCost(params) => self.storage_cost(params),
         };
         verify_output_amount_min(amount)?;
         if self.validator_address.is_null() {
@@ -219,7 +220,7 @@ impl DelegationOutputBuilder {
 }
 
 impl StorageScore for DelegationOutputBuilder {
-    fn storage_score(&self, params: RentParameters) -> u64 {
+    fn storage_score(&self, params: StorageScoreParameters) -> u64 {
         self.clone().finish().unwrap().storage_score(params)
     }
 }
@@ -273,20 +274,15 @@ impl DelegationOutput {
         DelegationOutputBuilder::new_with_amount(amount, delegated_amount, delegation_id, validator_address)
     }
 
-    /// Creates a new [`DelegationOutputBuilder`] with a provided rent structure.
+    /// Creates a new [`DelegationOutputBuilder`] with a provided storage score structure.
     /// The amount will be set to the minimum storage deposit.
     pub fn build_with_minimum_amount(
-        rent_parameters: RentParameters,
+        params: StorageScoreParameters,
         delegated_amount: u64,
         delegation_id: DelegationId,
         validator_address: AccountAddress,
     ) -> DelegationOutputBuilder {
-        DelegationOutputBuilder::new_with_minimum_amount(
-            rent_parameters,
-            delegated_amount,
-            delegation_id,
-            validator_address,
-        )
+        DelegationOutputBuilder::new_with_minimum_amount(params, delegated_amount, delegation_id, validator_address)
     }
 
     /// Returns the amount of the [`DelegationOutput`].
@@ -407,10 +403,10 @@ impl StateTransitionVerifier for DelegationOutput {
 }
 
 impl StorageScore for DelegationOutput {
-    fn storage_score(&self, params: RentParameters) -> u64 {
-        params.storage_score_offset_output()
-            + self.packed_len() as u64 * params.storage_score_factor_data() as u64
-            + params.storage_score_offset_delegation()
+    fn storage_score(&self, params: StorageScoreParameters) -> u64 {
+        params.output_offset()
+            + self.packed_len() as u64 * params.data_factor() as u64
+            + params.delegation_offset()
             + self.unlock_conditions.storage_score(params)
     }
 }
@@ -571,8 +567,8 @@ pub(crate) mod dto {
                     *delegation_id,
                     *validator_address,
                 ),
-                OutputBuilderAmount::RentCost(rent_parameters) => DelegationOutputBuilder::new_with_minimum_amount(
-                    rent_parameters,
+                OutputBuilderAmount::StorageCost(params) => DelegationOutputBuilder::new_with_minimum_amount(
+                    params,
                     delegated_amount,
                     *delegation_id,
                     *validator_address,

@@ -13,7 +13,9 @@ use super::{
     mana::{ManaStructure, RewardsParameters},
     slot::{EpochIndex, SlotIndex},
 };
-use crate::types::block::{helper::network_name_to_id, output::RentParameters, ConvertTo, Error, PROTOCOL_VERSION};
+use crate::types::block::{
+    helper::network_name_to_id, output::StorageScoreParameters, ConvertTo, Error, PROTOCOL_VERSION,
+};
 
 /// Defines the parameters of the protocol at a particular version.
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Packable, Getters, CopyGetters)]
@@ -37,8 +39,8 @@ pub struct ProtocolParameters {
     pub(crate) network_name: StringPrefix<u8>,
     /// The HRP prefix used for Bech32 addresses in the network.
     pub(crate) bech32_hrp: Hrp,
-    /// The rent structure used by given node/network.
-    pub(crate) rent_parameters: RentParameters,
+    /// The storage store parameters used by given node/network.
+    pub(crate) storage_score_parameters: StorageScoreParameters,
     /// The work score structure used by the node/network.
     pub(crate) work_score_structure: WorkScoreStructure,
     /// TokenSupply defines the current token supply on the network.
@@ -94,7 +96,7 @@ impl Default for ProtocolParameters {
             // Unwrap: Known to be valid
             network_name: String::from("iota-core-testnet").try_into().unwrap(),
             bech32_hrp: Hrp::from_str_unchecked("smr"),
-            rent_parameters: Default::default(),
+            storage_score_parameters: Default::default(),
             work_score_structure: Default::default(),
             token_supply: 1_813_620_509_061_365,
             genesis_unix_timestamp: 1582328545,
@@ -122,7 +124,7 @@ impl ProtocolParameters {
         version: u8,
         network_name: impl Into<String>,
         bech32_hrp: impl ConvertTo<Hrp>,
-        rent_parameters: RentParameters,
+        params: StorageScoreParameters,
         token_supply: u64,
         genesis_unix_timestamp: u64,
         slot_duration_in_seconds: u8,
@@ -132,7 +134,7 @@ impl ProtocolParameters {
             version,
             network_name: <StringPrefix<u8>>::try_from(network_name.into()).map_err(Error::InvalidStringPrefix)?,
             bech32_hrp: bech32_hrp.convert()?,
-            rent_parameters,
+            storage_score_parameters: params,
             token_supply,
             genesis_unix_timestamp,
             slot_duration_in_seconds,
@@ -327,7 +329,7 @@ pub fn protocol_parameters() -> ProtocolParameters {
         2,
         "testnet",
         "rms",
-        crate::types::block::output::RentParameters::new(500, 1, 10, 1, 1, 1),
+        crate::types::block::output::StorageScoreParameters::new(500, 1, 10, 1, 1, 1),
         1_813_620_509_061_365,
         1582328545,
         10,

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use crate::types::block::{
-    output::{RentParameters, StorageScore},
+    output::{StorageScore, StorageScoreParameters},
     slot::EpochIndex,
 };
 
@@ -60,8 +60,8 @@ impl StakingFeature {
 }
 
 impl StorageScore for StakingFeature {
-    fn storage_score(&self, params: RentParameters) -> u64 {
-        params.storage_score_offset_staking_feature()
+    fn storage_score(&self, params: StorageScoreParameters) -> u64 {
+        params.staking_feature_offset()
     }
 }
 

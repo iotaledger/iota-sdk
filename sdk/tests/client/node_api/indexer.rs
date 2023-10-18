@@ -32,7 +32,7 @@
 //         .await?[0];
 
 //     let alias_output =
-//         AliasOutputBuilder::new_with_minimum_storage_deposit(*protocol_parameters.rent_parameters(), AliasId::null())
+//         AliasOutputBuilder::new_with_minimum_storage_deposit(*protocol_parameters.params(), AliasId::null())
 //             .with_state_metadata([1, 2, 3])
 //             .add_unlock_condition(StateControllerAddressUnlockCondition::new(address))
 //             .add_unlock_condition(GovernorAddressUnlockCondition::new(address))
@@ -64,7 +64,7 @@
 //         .await?[0];
 
 //     let nft_output =
-//         NftOutputBuilder::new_with_minimum_storage_deposit(*protocol_parameters.rent_parameters(), NftId::null())
+//         NftOutputBuilder::new_with_minimum_storage_deposit(*protocol_parameters.params(), NftId::null())
 //             .with_unlock_conditions([UnlockCondition::Address(AddressUnlockCondition::new(address))])
 //             .finish_output(protocol_parameters.token_supply())?;
 
@@ -94,7 +94,7 @@
 //         .await?[0];
 
 //     let alias_output_0 =
-//         AliasOutputBuilder::new_with_minimum_storage_deposit(*protocol_parameters.rent_parameters(), AliasId::null())
+//         AliasOutputBuilder::new_with_minimum_storage_deposit(*protocol_parameters.params(), AliasId::null())
 //             .with_state_metadata([1, 2, 3])
 //             .add_unlock_condition(StateControllerAddressUnlockCondition::new(address))
 //             .add_unlock_condition(GovernorAddressUnlockCondition::new(address))
@@ -122,7 +122,7 @@
 //     );
 
 //     let foundry_output = FoundryOutputBuilder::new_with_minimum_storage_deposit(
-//         *protocol_parameters.rent_parameters(),
+//         *protocol_parameters.params(),
 //         alias_output_0.as_alias().foundry_counter() + 1,
 //         TokenScheme::Simple(SimpleTokenScheme::new(100, 0, 500)?),
 //     )

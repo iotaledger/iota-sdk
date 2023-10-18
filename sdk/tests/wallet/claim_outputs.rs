@@ -127,11 +127,11 @@ async fn claim_2_basic_outputs_no_outputs_in_claim_account() -> Result<()> {
     let account_1 = wallet.create_account().finish().await?;
 
     let token_supply = account_0.client().get_token_supply().await?;
-    let rent_parameters = account_0.client().get_rent_parameters().await?;
+    let params = account_0.client().get_storage_score_parameters().await?;
     // TODO more fitting value
     let expiration_slot = account_0.client().get_slot_index().await? + 86400;
 
-    let output = BasicOutputBuilder::new_with_minimum_amount(rent_parameters)
+    let output = BasicOutputBuilder::new_with_minimum_amount(params)
         .add_unlock_condition(AddressUnlockCondition::new(account_1.first_address_bech32().await))
         .add_unlock_condition(ExpirationUnlockCondition::new(
             account_0.first_address_bech32().await,
@@ -320,13 +320,13 @@ async fn claim_2_native_tokens_no_outputs_in_claim_account() -> Result<()> {
         .await?;
     account_0.sync(None).await?;
 
-    let rent_parameters = account_0.client().get_rent_parameters().await?;
+    let params = account_0.client().get_storage_score_parameters().await?;
     let token_supply = account_0.client().get_token_supply().await?;
 
     let tx = account_0
         .send_outputs(
             [
-                BasicOutputBuilder::new_with_minimum_amount(rent_parameters)
+                BasicOutputBuilder::new_with_minimum_amount(params)
                     .add_unlock_condition(AddressUnlockCondition::new(account_1.first_address_bech32().await))
                     .add_unlock_condition(ExpirationUnlockCondition::new(
                         account_0.first_address_bech32().await,
@@ -334,7 +334,7 @@ async fn claim_2_native_tokens_no_outputs_in_claim_account() -> Result<()> {
                     )?)
                     .add_native_token(NativeToken::new(create_tx_0.token_id, native_token_amount)?)
                     .finish_output(token_supply)?,
-                BasicOutputBuilder::new_with_minimum_amount(rent_parameters)
+                BasicOutputBuilder::new_with_minimum_amount(params)
                     .add_unlock_condition(AddressUnlockCondition::new(account_1.first_address_bech32().await))
                     .add_unlock_condition(ExpirationUnlockCondition::new(
                         account_0.first_address_bech32().await,

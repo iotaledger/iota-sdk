@@ -17,7 +17,7 @@ use packable::{
 };
 
 use crate::types::block::{
-    output::{RentParameters, StorageScore},
+    output::{StorageScore, StorageScoreParameters},
     slot::SlotIndex,
     Error,
 };
@@ -62,7 +62,7 @@ impl BlockIssuerKey {
 }
 
 impl StorageScore for BlockIssuerKey {
-    fn storage_score(&self, params: RentParameters) -> u64 {
+    fn storage_score(&self, params: StorageScoreParameters) -> u64 {
         match self {
             BlockIssuerKey::Ed25519(e) => e.storage_score(params),
         }
@@ -94,8 +94,8 @@ impl Ed25519BlockIssuerKey {
 }
 
 impl StorageScore for Ed25519BlockIssuerKey {
-    fn storage_score(&self, params: RentParameters) -> u64 {
-        params.storage_score_offset_ed25519_block_issuer_key()
+    fn storage_score(&self, params: StorageScoreParameters) -> u64 {
+        params.ed25519_block_issuer_key_offset()
     }
 }
 
@@ -206,7 +206,7 @@ impl BlockIssuerKeys {
 }
 
 impl StorageScore for BlockIssuerKeys {
-    fn storage_score(&self, params: RentParameters) -> u64 {
+    fn storage_score(&self, params: StorageScoreParameters) -> u64 {
         self.iter().map(|b| b.storage_score(params)).sum::<u64>()
     }
 }
@@ -253,7 +253,7 @@ impl BlockIssuerFeature {
 }
 
 impl StorageScore for BlockIssuerFeature {
-    fn storage_score(&self, params: RentParameters) -> u64 {
+    fn storage_score(&self, params: StorageScoreParameters) -> u64 {
         self.block_issuer_keys.storage_score(params)
     }
 }

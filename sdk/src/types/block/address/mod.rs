@@ -201,7 +201,7 @@ impl Address {
 }
 
 impl StorageScore for Address {
-    fn storage_score(&self, params: super::output::RentParameters) -> u64 {
+    fn storage_score(&self, params: super::output::StorageScoreParameters) -> u64 {
         match self {
             Address::Ed25519(a) => a.storage_score(params),
             Address::Account(a) => a.storage_score(params),

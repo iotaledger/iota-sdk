@@ -51,12 +51,12 @@ async fn main() -> Result<()> {
     );
 
     let token_supply = account.client().get_token_supply().await?;
-    let rent_parameters = account.client().get_rent_parameters().await?;
+    let params = account.client().get_storage_score_parameters().await?;
 
     let account_output = account_output_data.output.as_account();
     let updated_account_output = AccountOutputBuilder::from(account_output)
         // Minimum required amount will change if the new metadata has a different size, so we will update it
-        .with_minimum_amount(rent_parameters)
+        .with_minimum_amount(params)
         .with_state_metadata(NEW_STATE_METADATA.as_bytes().to_vec())
         .with_state_index(account_output.state_index() + 1)
         .finish_output(token_supply)?;

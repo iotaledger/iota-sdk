@@ -72,7 +72,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
                 if let Some(amount) = amount {
                     OutputBuilderAmount::Amount(amount)
                 } else {
-                    OutputBuilderAmount::RentCost(client.get_rent_parameters().await?)
+                    OutputBuilderAmount::StorageCost(client.get_storage_score_parameters().await?)
                 },
                 mana,
                 native_tokens,
@@ -99,7 +99,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
                 if let Some(amount) = amount {
                     OutputBuilderAmount::Amount(amount)
                 } else {
-                    OutputBuilderAmount::RentCost(client.get_rent_parameters().await?)
+                    OutputBuilderAmount::StorageCost(client.get_storage_score_parameters().await?)
                 },
                 mana,
                 native_tokens,
@@ -123,7 +123,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
                 if let Some(amount) = amount {
                     OutputBuilderAmount::Amount(amount)
                 } else {
-                    OutputBuilderAmount::RentCost(client.get_rent_parameters().await?)
+                    OutputBuilderAmount::StorageCost(client.get_storage_score_parameters().await?)
                 },
                 native_tokens,
                 serial_number,
@@ -149,7 +149,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
                 if let Some(amount) = amount {
                     OutputBuilderAmount::Amount(amount)
                 } else {
-                    OutputBuilderAmount::RentCost(client.get_rent_parameters().await?)
+                    OutputBuilderAmount::StorageCost(client.get_storage_score_parameters().await?)
                 },
                 mana,
                 native_tokens,
@@ -297,9 +297,9 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         }
         ClientMethod::MinimumRequiredStorageDeposit { output } => {
             let output = Output::try_from_dto_with_params(output, client.get_token_supply().await?)?;
-            let rent_parameters = client.get_rent_parameters().await?;
+            let params = client.get_storage_score_parameters().await?;
 
-            let minimum_storage_deposit = output.rent_cost(rent_parameters);
+            let minimum_storage_deposit = output.storage_cost(params);
 
             Response::MinimumRequiredStorageDeposit(minimum_storage_deposit.to_string())
         }

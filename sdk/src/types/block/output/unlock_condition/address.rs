@@ -5,7 +5,7 @@ use derive_more::From;
 
 use crate::types::block::{
     address::Address,
-    output::{rent::RentParameters, StorageScore},
+    output::{storage_score::StorageScoreParameters, StorageScore},
 };
 
 /// Defines the Address that owns this output, that is, it can unlock it with the proper Unlock in a transaction.
@@ -30,7 +30,7 @@ impl AddressUnlockCondition {
 }
 
 impl StorageScore for AddressUnlockCondition {
-    fn storage_score(&self, params: RentParameters) -> u64 {
+    fn storage_score(&self, params: StorageScoreParameters) -> u64 {
         self.address().storage_score(params)
     }
 }

@@ -22,8 +22,8 @@ use crate::types::{
                 verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions,
             },
             verify_output_amount_min, verify_output_amount_packable, verify_output_amount_supply, ChainId, NativeToken,
-            NativeTokens, Output, OutputBuilderAmount, OutputId, RentParameters, StateTransitionError,
-            StateTransitionVerifier, StorageScore, TokenId, TokenScheme,
+            NativeTokens, Output, OutputBuilderAmount, OutputId, StateTransitionError, StateTransitionVerifier,
+            StorageScore, StorageScoreParameters, TokenId, TokenScheme,
         },
         payload::transaction::{TransactionCapabilities, TransactionCapabilityFlag},
         protocol::ProtocolParameters,
@@ -101,18 +101,14 @@ impl FoundryOutputBuilder {
         Self::new(OutputBuilderAmount::Amount(amount), serial_number, token_scheme)
     }
 
-    /// Creates a [`FoundryOutputBuilder`] with a provided rent structure.
-    /// The amount will be set to the rent cost of the resulting output.
+    /// Creates a [`FoundryOutputBuilder`] with a provided storage score structure.
+    /// The amount will be set to the storage cost of the resulting output.
     pub fn new_with_minimum_amount(
-        rent_parameters: RentParameters,
+        params: StorageScoreParameters,
         serial_number: u32,
         token_scheme: TokenScheme,
     ) -> Self {
-        Self::new(
-            OutputBuilderAmount::RentCost(rent_parameters),
-            serial_number,
-            token_scheme,
-        )
+        Self::new(OutputBuilderAmount::StorageCost(params), serial_number, token_scheme)
     }
 
     fn new(amount: OutputBuilderAmount, serial_number: u32, token_scheme: TokenScheme) -> Self {
@@ -134,10 +130,10 @@ impl FoundryOutputBuilder {
         self
     }
 
-    /// Sets the amount to the rent cost.
+    /// Sets the amount to the storage cost.
     #[inline(always)]
-    pub fn with_minimum_amount(mut self, rent_parameters: RentParameters) -> Self {
-        self.amount = OutputBuilderAmount::RentCost(rent_parameters);
+    pub fn with_minimum_amount(mut self, params: StorageScoreParameters) -> Self {
+        self.amount = OutputBuilderAmount::StorageCost(params);
         self
     }
 
@@ -261,7 +257,7 @@ impl FoundryOutputBuilder {
 
         let amount = match self.amount {
             OutputBuilderAmount::Amount(amount) => amount,
-            OutputBuilderAmount::RentCost(rent_parameters) => self.rent_cost(rent_parameters),
+            OutputBuilderAmount::StorageCost(params) => self.storage_cost(params),
         };
         verify_output_amount_min(amount)?;
 
@@ -309,7 +305,7 @@ impl FoundryOutputBuilder {
 }
 
 impl StorageScore for FoundryOutputBuilder {
-    fn storage_score(&self, params: RentParameters) -> u64 {
+    fn storage_score(&self, params: StorageScoreParameters) -> u64 {
         self.clone().finish().unwrap().storage_score(params)
     }
 }
@@ -363,15 +359,15 @@ impl FoundryOutput {
         FoundryOutputBuilder::new_with_amount(amount, serial_number, token_scheme)
     }
 
-    /// Creates a new [`FoundryOutputBuilder`] with a provided rent structure.
-    /// The amount will be set to the rent cost of the resulting output.
+    /// Creates a new [`FoundryOutputBuilder`] with a provided storage score structure.
+    /// The amount will be set to the storage cost of the resulting output.
     #[inline(always)]
     pub fn build_with_minimum_amount(
-        rent_parameters: RentParameters,
+        params: StorageScoreParameters,
         serial_number: u32,
         token_scheme: TokenScheme,
     ) -> FoundryOutputBuilder {
-        FoundryOutputBuilder::new_with_minimum_amount(rent_parameters, serial_number, token_scheme)
+        FoundryOutputBuilder::new_with_minimum_amount(params, serial_number, token_scheme)
     }
 
     ///
@@ -542,9 +538,9 @@ impl FoundryOutput {
 }
 
 impl StorageScore for FoundryOutput {
-    fn storage_score(&self, params: RentParameters) -> u64 {
-        params.storage_score_offset_output()
-            + self.packed_len() as u64 * params.storage_score_factor_data() as u64
+    fn storage_score(&self, params: StorageScoreParameters) -> u64 {
+        params.output_offset()
+            + self.packed_len() as u64 * params.data_factor() as u64
             + self.unlock_conditions.storage_score(params)
     }
 }
@@ -786,8 +782,8 @@ pub(crate) mod dto {
                 OutputBuilderAmount::Amount(amount) => {
                     FoundryOutputBuilder::new_with_amount(amount, serial_number, token_scheme)
                 }
-                OutputBuilderAmount::RentCost(rent_parameters) => {
-                    FoundryOutputBuilder::new_with_minimum_amount(rent_parameters, serial_number, token_scheme)
+                OutputBuilderAmount::StorageCost(params) => {
+                    FoundryOutputBuilder::new_with_minimum_amount(params, serial_number, token_scheme)
                 }
             };
 
@@ -873,12 +869,15 @@ mod tests {
             .with_features(rand_allowed_features(FoundryOutput::ALLOWED_FEATURES));
         test_split_dto(builder);
 
-        let builder =
-            FoundryOutput::build_with_minimum_amount(protocol_parameters.rent_parameters(), 123, rand_token_scheme())
-                .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000).unwrap())
-                .add_unlock_condition(ImmutableAccountAddressUnlockCondition::new(rand_account_address()))
-                .add_immutable_feature(rand_metadata_feature())
-                .with_features(rand_allowed_features(FoundryOutput::ALLOWED_FEATURES));
+        let builder = FoundryOutput::build_with_minimum_amount(
+            protocol_parameters.storage_score_parameters(),
+            123,
+            rand_token_scheme(),
+        )
+        .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000).unwrap())
+        .add_unlock_condition(ImmutableAccountAddressUnlockCondition::new(rand_account_address()))
+        .add_immutable_feature(rand_metadata_feature())
+        .with_features(rand_allowed_features(FoundryOutput::ALLOWED_FEATURES));
         test_split_dto(builder);
     }
 }

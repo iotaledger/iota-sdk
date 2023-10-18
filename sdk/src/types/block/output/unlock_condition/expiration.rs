@@ -5,7 +5,7 @@ use derive_more::From;
 
 use crate::types::block::{
     address::Address,
-    output::{RentParameters, StorageScore},
+    output::{StorageScore, StorageScoreParameters},
     slot::SlotIndex,
     Error,
 };
@@ -61,7 +61,7 @@ impl ExpirationUnlockCondition {
 }
 
 impl StorageScore for ExpirationUnlockCondition {
-    fn storage_score(&self, params: RentParameters) -> u64 {
+    fn storage_score(&self, params: StorageScoreParameters) -> u64 {
         self.return_address().storage_score(params)
     }
 }

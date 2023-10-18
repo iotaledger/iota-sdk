@@ -5,7 +5,7 @@ use derive_more::From;
 
 use crate::types::block::{
     address::Address,
-    output::{RentParameters, StorageScore},
+    output::{StorageScore, StorageScoreParameters},
 };
 
 /// Defines the Governor Address that owns this output, that is, it can unlock it with the proper Unlock in a
@@ -32,7 +32,7 @@ impl GovernorAddressUnlockCondition {
 }
 
 impl StorageScore for GovernorAddressUnlockCondition {
-    fn storage_score(&self, params: RentParameters) -> u64 {
+    fn storage_score(&self, params: StorageScoreParameters) -> u64 {
         self.address().storage_score(params)
     }
 }

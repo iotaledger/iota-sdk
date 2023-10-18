@@ -28,7 +28,7 @@ pub use self::{
     staking::StakingFeature,
     tag::TagFeature,
 };
-use super::{RentParameters, StorageScore};
+use super::{StorageScore, StorageScoreParameters};
 use crate::types::block::{create_bitflags, Error};
 
 ///
@@ -70,7 +70,7 @@ impl Ord for Feature {
 }
 
 impl StorageScore for Feature {
-    fn storage_score(&self, params: RentParameters) -> u64 {
+    fn storage_score(&self, params: StorageScoreParameters) -> u64 {
         match self {
             Self::Sender(f) => f.storage_score(params),
             Self::Issuer(f) => f.storage_score(params),
@@ -328,7 +328,7 @@ impl Features {
 }
 
 impl StorageScore for Features {
-    fn storage_score(&self, params: RentParameters) -> u64 {
+    fn storage_score(&self, params: StorageScoreParameters) -> u64 {
         self.iter().map(|f| f.storage_score(params)).sum::<u64>()
     }
 }

@@ -240,11 +240,15 @@ impl InputSelection {
         for output in outputs {
             let diff = amount_selection.missing_amount();
             let amount = output.amount();
-            let rent = output.rent_cost(self.protocol_parameters.rent_parameters());
+            let storage_cost = output.storage_cost(self.protocol_parameters.storage_score_parameters());
 
-            let new_amount = if amount >= diff + rent { amount - diff } else { rent };
+            let new_amount = if amount >= diff + storage_cost {
+                amount - diff
+            } else {
+                storage_cost
+            };
 
-            // TODO check that new_amount is enough for the rent
+            // TODO check that new_amount is enough for the storage cost
 
             // PANIC: unwrap is fine as non-chain outputs have been filtered out already.
             log::debug!(

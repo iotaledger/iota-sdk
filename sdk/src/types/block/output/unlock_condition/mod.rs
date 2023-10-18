@@ -30,7 +30,7 @@ pub use self::{
     state_controller_address::StateControllerAddressUnlockCondition,
     storage_deposit_return::StorageDepositReturnUnlockCondition, timelock::TimelockUnlockCondition,
 };
-use super::{RentParameters, StorageScore};
+use super::{StorageScore, StorageScoreParameters};
 use crate::types::block::{address::Address, create_bitflags, protocol::ProtocolParameters, slot::SlotIndex, Error};
 
 ///
@@ -64,7 +64,7 @@ impl Ord for UnlockCondition {
 }
 
 impl StorageScore for UnlockCondition {
-    fn storage_score(&self, params: RentParameters) -> u64 {
+    fn storage_score(&self, params: StorageScoreParameters) -> u64 {
         match self {
             Self::Address(uc) => uc.storage_score(params),
             Self::StorageDepositReturn(uc) => uc.storage_score(params),
@@ -460,7 +460,7 @@ impl UnlockConditions {
 }
 
 impl StorageScore for UnlockConditions {
-    fn storage_score(&self, params: RentParameters) -> u64 {
+    fn storage_score(&self, params: StorageScoreParameters) -> u64 {
         self.iter().map(|uc| uc.storage_score(params)).sum::<u64>()
     }
 }

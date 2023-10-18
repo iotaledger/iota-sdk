@@ -5,7 +5,7 @@ use derive_more::From;
 
 use crate::types::block::{
     address::Address,
-    output::{rent::RentParameters, StorageScore},
+    output::{storage_score::StorageScoreParameters, StorageScore},
 };
 
 /// Identifies the validated sender of an output.
@@ -30,7 +30,7 @@ impl SenderFeature {
 }
 
 impl StorageScore for SenderFeature {
-    fn storage_score(&self, params: RentParameters) -> u64 {
+    fn storage_score(&self, params: StorageScoreParameters) -> u64 {
         self.address().storage_score(params)
     }
 }

@@ -35,7 +35,7 @@ async fn main() -> Result<()> {
         .await?;
 
     let token_supply = client.get_token_supply().await?;
-    let rent_parameters = client.get_rent_parameters().await?;
+    let params = client.get_storage_score_parameters().await?;
 
     let address = std::env::args()
         .nth(1)
@@ -43,7 +43,7 @@ async fn main() -> Result<()> {
     let address = Address::try_from_bech32(address)?;
 
     // Account id needs to be null the first time
-    let account_output = AccountOutputBuilder::new_with_minimum_amount(rent_parameters, AccountId::null())
+    let account_output = AccountOutputBuilder::new_with_minimum_amount(params, AccountId::null())
         .with_state_metadata(metadata)
         .add_feature(SenderFeature::new(address.clone()))
         .add_feature(MetadataFeature::new(metadata)?)

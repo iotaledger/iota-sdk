@@ -63,7 +63,7 @@ fn memory_layout() {
 
 // TODO: re-enable below tests when source is updated
 // fn protocol_parameters() -> ProtocolParameters {
-//     ProtocolParameters::new(3, "test", "rms", RentParameters::default(), 0, 1695275822, 10, 0).unwrap()
+//     ProtocolParameters::new(3, "test", "rms", StorageScoreParameters::default(), 0, 1695275822, 10, 0).unwrap()
 // }
 
 // #[test]

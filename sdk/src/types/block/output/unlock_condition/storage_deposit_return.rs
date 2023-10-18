@@ -4,7 +4,7 @@
 use crate::types::block::{
     address::Address,
     output::{
-        rent::{RentParameters, StorageScore},
+        storage_score::{StorageScore, StorageScoreParameters},
         verify_output_amount,
     },
     protocol::ProtocolParameters,
@@ -52,7 +52,7 @@ impl StorageDepositReturnUnlockCondition {
 }
 
 impl StorageScore for StorageDepositReturnUnlockCondition {
-    fn storage_score(&self, params: RentParameters) -> u64 {
+    fn storage_score(&self, params: StorageScoreParameters) -> u64 {
         self.return_address().storage_score(params)
     }
 }

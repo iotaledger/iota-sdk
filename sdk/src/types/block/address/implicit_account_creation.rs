@@ -6,7 +6,7 @@ use packable::Packable;
 
 use crate::types::block::{
     address::Ed25519Address,
-    output::{RentParameters, StorageScore},
+    output::{StorageScore, StorageScoreParameters},
 };
 
 /// An implicit account creation address that can be used to transition an account.
@@ -28,8 +28,8 @@ impl ImplicitAccountCreationAddress {
 }
 
 impl StorageScore for ImplicitAccountCreationAddress {
-    fn storage_score(&self, params: RentParameters) -> u64 {
-        params.storage_score_offset_implicit_account_creation_address()
+    fn storage_score(&self, params: StorageScoreParameters) -> u64 {
+        params.implicit_account_creation_address_offset()
     }
 }
 
