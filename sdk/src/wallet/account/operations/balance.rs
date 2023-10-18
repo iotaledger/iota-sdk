@@ -222,9 +222,7 @@ where
                                         if output.is_basic() {
                                             balance.required_storage_deposit.basic += storage_cost;
                                             // Amount for basic outputs isn't added to total_storage_cost if there
-                                            // aren't native tokens, since
-                                            // we can spend it without
-                                            // burning.
+                                            // aren't native tokens, since we can spend it without burning.
                                             if output
                                                 .native_tokens()
                                                 .map(|native_tokens| !native_tokens.is_empty())
