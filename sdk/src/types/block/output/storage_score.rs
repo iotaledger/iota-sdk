@@ -152,9 +152,7 @@ impl StorageScoreParameters {
         let account_output_score = AccountOutputBuilder::new_with_amount(0, AccountId::null())
             .add_unlock_condition(GovernorAddressUnlockCondition::new(null_address))
             .add_unlock_condition(StateControllerAddressUnlockCondition::new(null_address))
-            .add_feature(
-                BlockIssuerFeature::new(0, vec![BlockIssuerKey::Ed25519(Ed25519BlockIssuerKey::null())]).unwrap(),
-            )
+            .add_feature(BlockIssuerFeature::new(0, [BlockIssuerKey::Ed25519(Ed25519BlockIssuerKey::null())]).unwrap())
             .storage_score(*self);
         account_output_score - basic_score_without_address
     }
