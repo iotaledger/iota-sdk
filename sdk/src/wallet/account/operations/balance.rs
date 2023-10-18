@@ -89,7 +89,7 @@ where
                     }
 
                     let output = &data.output;
-                    let rent = output.min_deposit(rent_parameters);
+                    let rent = output.rent_cost(rent_parameters);
 
                     // Add account and foundry outputs here because they can't have a
                     // [`StorageDepositReturnUnlockCondition`] or time related unlock conditions

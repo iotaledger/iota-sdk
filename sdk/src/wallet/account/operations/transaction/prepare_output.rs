@@ -117,7 +117,7 @@ where
             .add_unlock_condition(AddressUnlockCondition::new(Ed25519Address::null()))
             .amount();
 
-        let min_required_storage_deposit = first_output.min_deposit(rent_parameters);
+        let min_required_storage_deposit = first_output.rent_cost(rent_parameters);
 
         if params.amount > min_required_storage_deposit {
             second_output_builder = second_output_builder.with_amount(params.amount);
@@ -179,7 +179,7 @@ where
         // If we're sending an existing NFT, its minimum required storage deposit is not part of the available base_coin
         // balance, so we add it here
         if let Some(existing_nft_output_data) = existing_nft_output_data {
-            available_base_coin += existing_nft_output_data.output.min_deposit(rent_parameters);
+            available_base_coin += existing_nft_output_data.output.rent_cost(rent_parameters);
         }
 
         if final_amount > available_base_coin {

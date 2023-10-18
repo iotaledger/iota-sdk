@@ -393,7 +393,7 @@ impl Output {
     /// If there is a [`StorageDepositReturnUnlockCondition`](unlock_condition::StorageDepositReturnUnlockCondition),
     /// its amount is also checked.
     pub fn verify_storage_deposit(&self, rent_parameters: RentParameters, token_supply: u64) -> Result<(), Error> {
-        let required_output_amount = self.min_deposit(rent_parameters);
+        let required_output_amount = self.rent_cost(rent_parameters);
 
         if self.amount() < required_output_amount {
             return Err(Error::InsufficientStorageDepositAmount {

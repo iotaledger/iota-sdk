@@ -64,7 +64,7 @@ impl BasicOutputBuilder {
     pub fn amount(&self) -> u64 {
         match self.amount {
             OutputBuilderAmount::Amount(amount) => amount,
-            OutputBuilderAmount::RentCost(rent_parameters) => self.min_deposit(rent_parameters),
+            OutputBuilderAmount::RentCost(rent_parameters) => self.rent_cost(rent_parameters),
         }
     }
 
@@ -173,13 +173,13 @@ impl BasicOutputBuilder {
             OutputBuilderAmount::Amount(amount) => {
                 let return_address = return_address.into();
                 // Get the current rent requirement
-                let rent_cost = self.min_deposit(rent_parameters);
+                let rent_cost = self.rent_cost(rent_parameters);
                 // Check whether we already have enough funds to cover it
                 if amount < rent_cost {
                     // Get the projected rent cost of the return output
                     let return_rent_cost = Self::new_with_amount(0)
                         .add_unlock_condition(AddressUnlockCondition::new(return_address.clone()))
-                        .min_deposit(rent_parameters);
+                        .rent_cost(rent_parameters);
                     // Add a temporary storage deposit unlock condition so the new rent requirement can be calculated
                     self = self.add_unlock_condition(StorageDepositReturnUnlockCondition::new(
                         return_address.clone(),
@@ -187,7 +187,7 @@ impl BasicOutputBuilder {
                         token_supply,
                     )?);
                     // Get the rent cost of the output with the added storage deposit return unlock condition
-                    let rent_cost_with_sdruc = self.min_deposit(rent_parameters);
+                    let rent_cost_with_sdruc = self.rent_cost(rent_parameters);
                     // If the return rent cost and amount are less than the required min
                     let (amount, sdruc_amount) = if rent_cost_with_sdruc >= return_rent_cost + amount {
                         // Then sending rent_cost_with_sdruc covers both minimum requirements
@@ -216,7 +216,7 @@ impl BasicOutputBuilder {
     pub fn finish(self) -> Result<BasicOutput, Error> {
         let amount = match self.amount {
             OutputBuilderAmount::Amount(amount) => amount,
-            OutputBuilderAmount::RentCost(rent_parameters) => self.min_deposit(rent_parameters),
+            OutputBuilderAmount::RentCost(rent_parameters) => self.rent_cost(rent_parameters),
         };
         verify_output_amount_min(amount)?;
 
@@ -247,7 +247,7 @@ impl BasicOutputBuilder {
         }
 
         if let Some(params) = params.protocol_parameters() {
-            let rent_cost = output.min_deposit(params.rent_parameters());
+            let rent_cost = output.rent_cost(params.rent_parameters());
             if output.amount < rent_cost {
                 return Err(Error::InsufficientStorageDepositAmount {
                     amount: output.amount,
@@ -617,14 +617,14 @@ mod tests {
             .add_unlock_condition(address_unlock);
 
         assert_eq!(
-            builder_1.min_deposit(protocol_parameters.rent_parameters()),
+            builder_1.rent_cost(protocol_parameters.rent_parameters()),
             builder_2.amount()
         );
         assert_eq!(
             builder_1.clone().finish_output(&protocol_parameters),
             Err(Error::InsufficientStorageDepositAmount {
                 amount: 1,
-                required: builder_1.min_deposit(protocol_parameters.rent_parameters())
+                required: builder_1.rent_cost(protocol_parameters.rent_parameters())
             })
         );
 
@@ -639,7 +639,7 @@ mod tests {
         let sdruc_cost =
             StorageDepositReturnUnlockCondition::new(return_address, 1, protocol_parameters.token_supply())
                 .unwrap()
-                .min_deposit(protocol_parameters.rent_parameters());
+                .rent_cost(protocol_parameters.rent_parameters());
 
         assert_eq!(builder_1.amount(), builder_2.amount() + sdruc_cost);
     }

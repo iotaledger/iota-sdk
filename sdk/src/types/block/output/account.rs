@@ -282,7 +282,7 @@ impl AccountOutputBuilder {
     pub fn finish(self) -> Result<AccountOutput, Error> {
         let amount = match self.amount {
             OutputBuilderAmount::Amount(amount) => amount,
-            OutputBuilderAmount::RentCost(rent_parameters) => self.min_deposit(rent_parameters),
+            OutputBuilderAmount::RentCost(rent_parameters) => self.rent_cost(rent_parameters),
         };
         verify_output_amount_min(amount)?;
 

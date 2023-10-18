@@ -299,7 +299,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
             let output = Output::try_from_dto_with_params(output, client.get_token_supply().await?)?;
             let rent_parameters = client.get_rent_parameters().await?;
 
-            let minimum_storage_deposit = output.min_deposit(rent_parameters);
+            let minimum_storage_deposit = output.rent_cost(rent_parameters);
 
             Response::MinimumRequiredStorageDeposit(minimum_storage_deposit.to_string())
         }

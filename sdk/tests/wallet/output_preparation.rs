@@ -411,7 +411,7 @@ async fn output_preparation() -> Result<()> {
         )
         .await?;
     let rent_parameters = wallet.client().get_rent_parameters().await?;
-    let minimum_storage_deposit = output.min_deposit(rent_parameters);
+    let minimum_storage_deposit = output.rent_cost(rent_parameters);
     assert_eq!(output.amount(), minimum_storage_deposit);
     assert_eq!(output.amount(), 187900);
     let sdr = output.unlock_conditions().unwrap().storage_deposit_return().unwrap();
@@ -624,7 +624,7 @@ async fn prepare_output_remainder_dust() -> Result<()> {
     let balance = account.sync(None).await?;
     let minimum_required_storage_deposit = BasicOutputBuilder::new_with_amount(0)
         .add_unlock_condition(AddressUnlockCondition::new(address))
-        .min_deposit(rent_parameters);
+        .rent_cost(rent_parameters);
 
     // Send away most balance so we can test with leaving dust
     let output = account
@@ -859,7 +859,7 @@ async fn prepare_existing_nft_output_gift() -> Result<()> {
         .clone();
 
     let rent_parameters = wallet.client().get_rent_parameters().await?;
-    let minimum_storage_deposit = nft.min_deposit(rent_parameters);
+    let minimum_storage_deposit = nft.rent_cost(rent_parameters);
     assert_eq!(nft.amount(), minimum_storage_deposit);
 
     assert_eq!(nft.amount(), 52300);

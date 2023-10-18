@@ -83,7 +83,7 @@ fn builder() {
 
     assert_eq!(
         output.amount(),
-        Output::Account(output.clone()).min_deposit(protocol_parameters.rent_parameters())
+        Output::Account(output.clone()).rent_cost(protocol_parameters.rent_parameters())
     );
     assert_eq!(output.features().metadata(), Some(&metadata));
     assert_eq!(output.features().sender(), Some(&sender_1));

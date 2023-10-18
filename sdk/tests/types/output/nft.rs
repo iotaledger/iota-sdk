@@ -59,7 +59,7 @@ fn builder() {
 
     assert_eq!(
         output.amount(),
-        Output::Nft(output).min_deposit(protocol_parameters.rent_parameters())
+        Output::Nft(output).rent_cost(protocol_parameters.rent_parameters())
     );
 }
 

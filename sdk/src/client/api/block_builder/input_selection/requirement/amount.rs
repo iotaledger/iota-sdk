@@ -240,7 +240,7 @@ impl InputSelection {
         for output in outputs {
             let diff = amount_selection.missing_amount();
             let amount = output.amount();
-            let rent = output.min_deposit(self.protocol_parameters.rent_parameters());
+            let rent = output.rent_cost(self.protocol_parameters.rent_parameters());
 
             let new_amount = if amount >= diff + rent { amount - diff } else { rent };
 

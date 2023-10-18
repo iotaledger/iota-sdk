@@ -175,7 +175,7 @@ where
             let output =
                 BasicOutputBuilder::new_with_amount(amount).add_unlock_condition(AddressUnlockCondition::new(address));
 
-            if amount >= output.min_deposit(rent_parameters) {
+            if amount >= output.rent_cost(rent_parameters) {
                 outputs.push(output.finish_output(token_supply)?)
             } else {
                 let expiration_slot_index = expiration

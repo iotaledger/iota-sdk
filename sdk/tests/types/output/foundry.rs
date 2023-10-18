@@ -58,7 +58,7 @@ fn builder() {
 
     assert_eq!(
         output.amount(),
-        Output::Foundry(output).min_deposit(protocol_parameters.rent_parameters())
+        Output::Foundry(output).rent_cost(protocol_parameters.rent_parameters())
     );
 }
 

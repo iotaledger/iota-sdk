@@ -167,8 +167,8 @@ pub trait StorageScore {
         0
     }
 
-    /// Computes the minimum deposit of this instance given [`RentParameters`].
-    fn min_deposit(&self, params: RentParameters) -> u64 {
+    /// Computes the rent cost of this instance given [`RentParameters`].
+    fn rent_cost(&self, params: RentParameters) -> u64 {
         params.storage_cost() * self.storage_score(params)
     }
 }
