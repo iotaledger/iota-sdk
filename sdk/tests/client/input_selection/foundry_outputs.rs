@@ -954,10 +954,7 @@ fn melt_and_burn_native_tokens() {
         ),
     ]);
     let account_output = AccountOutputBuilder::new_with_amount(1_000_000, account_id)
-        .add_unlock_condition(StateControllerAddressUnlockCondition::new(
-            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-        ))
-        .add_unlock_condition(GovernorAddressUnlockCondition::new(
+        .add_unlock_condition(AddressUnlockCondition::new(
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         ))
         .with_foundry_counter(1)
@@ -993,10 +990,6 @@ fn melt_and_burn_native_tokens() {
     assert_eq!(selected.outputs.len(), 3);
     // Account state index is increased
     selected.outputs.iter().for_each(|output| {
-        if let Output::Account(account_output) = &output {
-            // Input account has index 0, output should have index 1
-            assert_eq!(account_output.state_index(), 1);
-        }
         if let Output::Basic(basic_output) = &output {
             // Basic output remainder has the remaining native tokens
             assert_eq!(basic_output.native_tokens().first().unwrap().amount().as_u32(), 421);
