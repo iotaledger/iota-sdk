@@ -25,7 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `outputs` and `unspent_outputs` print the booked milestone timestamps and sort by them;
 - `outputs` and `unspent_outputs` include spent/unspent information;
-- `transactions` now adds the suffix `UTC` to the generated formatted date string;
+- `UTC` suffix to the formatted date of `transactions`;
 
 ### Changed
 
