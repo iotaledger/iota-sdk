@@ -8,7 +8,9 @@ use derive_more::From;
 use packable::PackableExt;
 
 pub(crate) use self::regular::{ContextInputCount, InputCount, OutputCount};
-pub use self::regular::{RegularTransactionEssence, RegularTransactionEssenceBuilder};
+pub use self::regular::{
+    RegularTransactionEssence, RegularTransactionEssenceBuilder, TransactionCapabilities, TransactionCapabilityFlag,
+};
 use crate::types::block::Error;
 
 /// A generic essence that can represent different types defining transaction essences.
