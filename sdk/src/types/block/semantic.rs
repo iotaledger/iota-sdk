@@ -341,60 +341,42 @@ pub fn semantic_validation(
                 .filter_map(Address::as_restricted_opt);
             for address in addresses {
                 if created_output.native_tokens().map(|t| t.len()).unwrap_or_default() > 0
-                    && !address
-                        .allowed_capabilities()
-                        .has_capability(AddressCapabilityFlag::OutputsWithNativeTokens)
+                    && !address.has_capability(AddressCapabilityFlag::OutputsWithNativeTokens)
                 {
                     // TODO: add a variant https://github.com/iotaledger/iota-sdk/issues/1430
                     return Ok(Some(TransactionFailureReason::SemanticValidationFailed));
                 }
 
-                if created_output.mana() > 0
-                    && !address
-                        .allowed_capabilities()
-                        .has_capability(AddressCapabilityFlag::OutputsWithMana)
-                {
+                if created_output.mana() > 0 && !address.has_capability(AddressCapabilityFlag::OutputsWithMana) {
                     // TODO: add a variant https://github.com/iotaledger/iota-sdk/issues/1430
                     return Ok(Some(TransactionFailureReason::SemanticValidationFailed));
                 }
 
                 if unlock_conditions.timelock().is_some()
-                    && !address
-                        .allowed_capabilities()
-                        .has_capability(AddressCapabilityFlag::OutputsWithTimelock)
+                    && !address.has_capability(AddressCapabilityFlag::OutputsWithTimelock)
                 {
                     // TODO: add a variant https://github.com/iotaledger/iota-sdk/issues/1430
                     return Ok(Some(TransactionFailureReason::SemanticValidationFailed));
                 }
 
                 if unlock_conditions.expiration().is_some()
-                    && !address
-                        .allowed_capabilities()
-                        .has_capability(AddressCapabilityFlag::OutputsWithExpiration)
+                    && !address.has_capability(AddressCapabilityFlag::OutputsWithExpiration)
                 {
                     // TODO: add a variant https://github.com/iotaledger/iota-sdk/issues/1430
                     return Ok(Some(TransactionFailureReason::SemanticValidationFailed));
                 }
 
                 if unlock_conditions.storage_deposit_return().is_some()
-                    && !address
-                        .allowed_capabilities()
-                        .has_capability(AddressCapabilityFlag::OutputsWithStorageDepositReturn)
+                    && !address.has_capability(AddressCapabilityFlag::OutputsWithStorageDepositReturn)
                 {
                     // TODO: add a variant https://github.com/iotaledger/iota-sdk/issues/1430
                     return Ok(Some(TransactionFailureReason::SemanticValidationFailed));
                 }
 
                 if match &created_output {
-                    Output::Account(_) => !address
-                        .allowed_capabilities()
-                        .has_capability(AddressCapabilityFlag::AccountOutputs),
-                    Output::Nft(_) => !address
-                        .allowed_capabilities()
-                        .has_capability(AddressCapabilityFlag::NftOutputs),
-                    Output::Delegation(_) => !address
-                        .allowed_capabilities()
-                        .has_capability(AddressCapabilityFlag::DelegationOutputs),
+                    Output::Account(_) => !address.has_capability(AddressCapabilityFlag::AccountOutputs),
+                    Output::Nft(_) => !address.has_capability(AddressCapabilityFlag::NftOutputs),
+                    Output::Delegation(_) => !address.has_capability(AddressCapabilityFlag::DelegationOutputs),
                     _ => false,
                 } {
                     // TODO: add a variant https://github.com/iotaledger/iota-sdk/issues/1430
