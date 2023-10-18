@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { plainToInstance, Type, Transform, Expose } from 'class-transformer';
+import { plainToInstance, Type } from 'class-transformer';
 import { HexEncodedString } from '../utils';
 import { AccountId, NftId } from './id';
 
@@ -140,19 +140,17 @@ class ImplicitAccountCreationAddress extends Address {
     /**
      * The Ed25519 address.
      */
-    @Transform(({ value }) => new Ed25519Address(value), { toClassOnly: true })
-    @Transform(({ value }) => value.toString(), { toPlainOnly: true })
-    private pubKeyHash: Ed25519Address;
+    private pubKeyHash: HexEncodedString;
     /**
      * @param address An Ed25519 address.
      */
     constructor(address: Ed25519Address) {
         super(AddressType.ImplicitAccountCreation);
-        this.pubKeyHash = address;
+        this.pubKeyHash = address.pubKeyHash;
     }
 
     address(): Ed25519Address {
-        return this.pubKeyHash;
+        return new Ed25519Address(this.pubKeyHash);
     }
 
     toString(): string {
