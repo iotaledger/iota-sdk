@@ -587,135 +587,96 @@ impl From<&AccountDetails> for AccountDetailsDto {
     }
 }
 
-#[test]
-fn serialize() {
+#[cfg(test)]
+mod test {
     use core::str::FromStr;
 
+    use pretty_assertions::assert_eq;
+
+    use super::*;
     use crate::types::block::{
         address::{Address, Ed25519Address},
         input::{Input, UtxoInput},
-        output::{unlock_condition::AddressUnlockCondition, BasicOutput, InputsCommitment, Output},
-        payload::{
-            transaction::{RegularTransactionEssence, TransactionEssence, TransactionId},
-            TransactionPayload,
-        },
+        output::{AddressUnlockCondition, BasicOutput, InputsCommitment, RentStructure},
+        payload::transaction::RegularTransactionEssence,
         protocol::ProtocolParameters,
         signature::{Ed25519Signature, Signature},
         unlock::{ReferenceUnlock, SignatureUnlock, Unlock, Unlocks},
     };
 
-    const TRANSACTION_ID: &str = "0x24a1f46bdb6b2bf38f1c59f73cdd4ae5b418804bb231d76d06fbf246498d5883";
-    const ED25519_ADDRESS: &str = "0xe594f9a895c0e0a6760dd12cffc2c3d1e1cbf7269b328091f96ce3d0dd550b75";
-    const ED25519_PUBLIC_KEY: &str = "0x1da5ddd11ba3f961acab68fafee3177d039875eaa94ac5fdbff8b53f0c50bfb9";
-    const ED25519_SIGNATURE: &str = "0xc6a40edf9a089f42c18f4ebccb35fe4b578d93b879e99b87f63573324a710d3456b03fb6d1fcc027e6401cbd9581f790ee3ed7a3f68e9c225fcb9f1cd7b7110d";
+    #[test]
+    fn serialize() {
+        const TRANSACTION_ID: &str = "0x24a1f46bdb6b2bf38f1c59f73cdd4ae5b418804bb231d76d06fbf246498d5883";
+        const ED25519_ADDRESS: &str = "0xe594f9a895c0e0a6760dd12cffc2c3d1e1cbf7269b328091f96ce3d0dd550b75";
+        const ED25519_PUBLIC_KEY: &str = "0x1da5ddd11ba3f961acab68fafee3177d039875eaa94ac5fdbff8b53f0c50bfb9";
+        const ED25519_SIGNATURE: &str = "0xc6a40edf9a089f42c18f4ebccb35fe4b578d93b879e99b87f63573324a710d3456b03fb6d1fcc027e6401cbd9581f790ee3ed7a3f68e9c225fcb9f1cd7b7110d";
 
-    let protocol_parameters = ProtocolParameters::new(
-        2,
-        String::from("testnet"),
-        "rms",
-        1500,
-        15,
-        crate::types::block::output::RentStructure::new(500, 10, 1),
-        1_813_620_509_061_365,
-    )
-    .unwrap();
+        let protocol_parameters = ProtocolParameters::new(
+            2,
+            String::from("testnet"),
+            "rms",
+            1500,
+            15,
+            RentStructure::new(500, 10, 1),
+            1_813_620_509_061_365,
+        )
+        .unwrap();
 
-    let transaction_id = TransactionId::new(prefix_hex::decode(TRANSACTION_ID).unwrap());
-    let input1 = Input::Utxo(UtxoInput::new(transaction_id, 0).unwrap());
-    let input2 = Input::Utxo(UtxoInput::new(transaction_id, 1).unwrap());
-    let bytes: [u8; 32] = prefix_hex::decode(ED25519_ADDRESS).unwrap();
-    let address = Address::from(Ed25519Address::new(bytes));
-    let amount = 1_000_000;
-    let output = Output::Basic(
-        BasicOutput::build_with_amount(amount)
-            .add_unlock_condition(AddressUnlockCondition::new(address))
-            .finish_with_params(protocol_parameters.clone())
+        let transaction_id = TransactionId::new(prefix_hex::decode(TRANSACTION_ID).unwrap());
+        let input1 = Input::Utxo(UtxoInput::new(transaction_id, 0).unwrap());
+        let input2 = Input::Utxo(UtxoInput::new(transaction_id, 1).unwrap());
+        let bytes: [u8; 32] = prefix_hex::decode(ED25519_ADDRESS).unwrap();
+        let address = Address::from(Ed25519Address::new(bytes));
+        let amount = 1_000_000;
+        let output = Output::Basic(
+            BasicOutput::build_with_amount(amount)
+                .add_unlock_condition(AddressUnlockCondition::new(address))
+                .finish_with_params(protocol_parameters.clone())
+                .unwrap(),
+        );
+        let essence = TransactionEssence::Regular(
+            RegularTransactionEssence::builder(protocol_parameters.network_id(), InputsCommitment::from([0u8; 32]))
+                .with_inputs([input1, input2])
+                .add_output(output)
+                .finish_with_params(protocol_parameters)
+                .unwrap(),
+        );
+
+        let pub_key_bytes = prefix_hex::decode(ED25519_PUBLIC_KEY).unwrap();
+        let sig_bytes = prefix_hex::decode(ED25519_SIGNATURE).unwrap();
+        let signature = Ed25519Signature::try_from_bytes(pub_key_bytes, sig_bytes).unwrap();
+        let sig_unlock = Unlock::Signature(SignatureUnlock::from(Signature::from(signature)));
+        let ref_unlock = Unlock::Reference(ReferenceUnlock::new(0).unwrap());
+        let unlocks = Unlocks::new([sig_unlock, ref_unlock]).unwrap();
+
+        let tx_payload = TransactionPayload::new(essence, unlocks).unwrap();
+
+        let incoming_transaction = Transaction {
+            transaction_id: TransactionId::from_str(
+                "0x131fc4cb8f315ae36ae3bf6a4e4b3486d5f17581288f1217410da3e0700d195a",
+            )
             .unwrap(),
-    );
-    let essence = TransactionEssence::Regular(
-        RegularTransactionEssence::builder(protocol_parameters.network_id(), InputsCommitment::from([0u8; 32]))
-            .with_inputs([input1, input2])
-            .add_output(output)
-            .finish_with_params(protocol_parameters)
-            .unwrap(),
-    );
+            payload: tx_payload,
+            block_id: None,
+            network_id: 0,
+            timestamp: 0,
+            inclusion_state: InclusionState::Pending,
+            incoming: false,
+            note: None,
+            inputs: Vec::new(),
+        };
 
-    let pub_key_bytes = prefix_hex::decode(ED25519_PUBLIC_KEY).unwrap();
-    let sig_bytes = prefix_hex::decode(ED25519_SIGNATURE).unwrap();
-    let signature = Ed25519Signature::try_from_bytes(pub_key_bytes, sig_bytes).unwrap();
-    let sig_unlock = Unlock::Signature(SignatureUnlock::from(Signature::from(signature)));
-    let ref_unlock = Unlock::Reference(ReferenceUnlock::new(0).unwrap());
-    let unlocks = Unlocks::new([sig_unlock, ref_unlock]).unwrap();
+        let mut incoming_transactions = HashMap::new();
+        incoming_transactions.insert(
+            TransactionId::from_str("0x131fc4cb8f315ae36ae3bf6a4e4b3486d5f17581288f1217410da3e0700d195a").unwrap(),
+            incoming_transaction,
+        );
 
-    let tx_payload = TransactionPayload::new(essence, unlocks).unwrap();
-
-    let incoming_transaction = Transaction {
-        transaction_id: TransactionId::from_str("0x131fc4cb8f315ae36ae3bf6a4e4b3486d5f17581288f1217410da3e0700d195a")
-            .unwrap(),
-        payload: tx_payload,
-        block_id: None,
-        network_id: 0,
-        timestamp: 0,
-        inclusion_state: InclusionState::Pending,
-        incoming: false,
-        note: None,
-        inputs: Vec::new(),
-    };
-
-    let mut incoming_transactions = HashMap::new();
-    incoming_transactions.insert(
-        TransactionId::from_str("0x131fc4cb8f315ae36ae3bf6a4e4b3486d5f17581288f1217410da3e0700d195a").unwrap(),
-        incoming_transaction,
-    );
-
-    let account = AccountDetails {
-        index: 0,
-        coin_type: 4218,
-        alias: "0".to_string(),
-        public_addresses: Vec::new(),
-        internal_addresses: Vec::new(),
-        addresses_with_unspent_outputs: Vec::new(),
-        outputs: HashMap::new(),
-        locked_outputs: HashSet::new(),
-        unspent_outputs: HashMap::new(),
-        transactions: HashMap::new(),
-        pending_transactions: HashSet::new(),
-        incoming_transactions,
-        inaccessible_incoming_transactions: HashSet::new(),
-        native_token_foundries: HashMap::new(),
-    };
-
-    let deser_account = AccountDetails::try_from_dto(
-        serde_json::from_str::<AccountDetailsDto>(&serde_json::to_string(&AccountDetailsDto::from(&account)).unwrap())
-            .unwrap(),
-    )
-    .unwrap();
-
-    assert_eq!(account, deser_account);
-}
-
-#[cfg(test)]
-impl AccountDetails {
-    /// Returns a mock of this type with the following values:
-    /// index: 0, coin_type: 4218, alias: "Alice", public_addresses: contains a single public account address
-    /// (rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy), all other fields are set to their Rust
-    /// defaults.
-    #[cfg(feature = "storage")]
-    pub(crate) fn mock() -> Self {
-        use core::str::FromStr;
-        Self {
+        let account = AccountDetails {
             index: 0,
             coin_type: 4218,
-            alias: "Alice".to_string(),
-            public_addresses: vec![AccountAddress {
-                address: crate::types::block::address::Bech32Address::from_str(
-                    "rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy",
-                )
-                .unwrap(),
-                key_index: 0,
-                internal: false,
-                used: false,
-            }],
+            alias: "0".to_string(),
+            public_addresses: Vec::new(),
             internal_addresses: Vec::new(),
             addresses_with_unspent_outputs: Vec::new(),
             outputs: HashMap::new(),
@@ -723,9 +684,53 @@ impl AccountDetails {
             unspent_outputs: HashMap::new(),
             transactions: HashMap::new(),
             pending_transactions: HashSet::new(),
-            incoming_transactions: HashMap::new(),
+            incoming_transactions,
             inaccessible_incoming_transactions: HashSet::new(),
             native_token_foundries: HashMap::new(),
+        };
+
+        let deser_account = AccountDetails::try_from_dto(
+            serde_json::from_str::<AccountDetailsDto>(
+                &serde_json::to_string(&AccountDetailsDto::from(&account)).unwrap(),
+            )
+            .unwrap(),
+        )
+        .unwrap();
+
+        assert_eq!(account, deser_account);
+    }
+
+    impl AccountDetails {
+        /// Returns a mock of this type with the following values:
+        /// index: 0, coin_type: 4218, alias: "Alice", public_addresses: contains a single public account address
+        /// (rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy), all other fields are set to their Rust
+        /// defaults.
+        #[cfg(feature = "storage")]
+        pub(crate) fn mock() -> Self {
+            Self {
+                index: 0,
+                coin_type: 4218,
+                alias: "Alice".to_string(),
+                public_addresses: vec![AccountAddress {
+                    address: crate::types::block::address::Bech32Address::from_str(
+                        "rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy",
+                    )
+                    .unwrap(),
+                    key_index: 0,
+                    internal: false,
+                    used: false,
+                }],
+                internal_addresses: Vec::new(),
+                addresses_with_unspent_outputs: Vec::new(),
+                outputs: HashMap::new(),
+                locked_outputs: HashSet::new(),
+                unspent_outputs: HashMap::new(),
+                transactions: HashMap::new(),
+                pending_transactions: HashSet::new(),
+                incoming_transactions: HashMap::new(),
+                inaccessible_incoming_transactions: HashSet::new(),
+                native_token_foundries: HashMap::new(),
+            }
         }
     }
 }

@@ -758,6 +758,7 @@ pub(crate) mod dto {
 #[cfg(test)]
 mod tests {
     use packable::PackableExt;
+    use pretty_assertions::assert_eq;
 
     use super::*;
     use crate::types::{

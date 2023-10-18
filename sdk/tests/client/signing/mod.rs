@@ -31,6 +31,7 @@ use iota_sdk::{
         unlock::{SignatureUnlock, Unlock},
     },
 };
+use pretty_assertions::assert_eq;
 
 use crate::client::{
     build_inputs, build_outputs,

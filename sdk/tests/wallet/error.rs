@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use iota_sdk::wallet::Error;
+use pretty_assertions::assert_eq;
 
 #[test]
 fn stringified_error() {

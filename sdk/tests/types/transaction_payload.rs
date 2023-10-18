@@ -13,6 +13,7 @@ use iota_sdk::types::block::{
     Error,
 };
 use packable::PackableExt;
+use pretty_assertions::assert_eq;
 
 const TRANSACTION_ID: &str = "0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c649";
 const ED25519_ADDRESS: &str = "0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c649";
