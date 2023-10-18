@@ -59,50 +59,7 @@ impl ContextInput {
         }
     }
 
-    /// Checks whether the context input is a [`CommitmentContextInput`].
-    pub fn is_commitment(&self) -> bool {
-        matches!(self, Self::Commitment(_))
-    }
-
-    /// Gets the input as an actual [`CommitmentContextInput`].
-    /// PANIC: do not call on a non-commitment context input.
-    pub fn as_commitment(&self) -> &CommitmentContextInput {
-        if let Self::Commitment(input) = self {
-            input
-        } else {
-            panic!("invalid downcast of non-CommitmentContextInput");
-        }
-    }
-
-    /// Checks whether the context input is a [`BlockIssuanceCreditContextInput`].
-    pub fn is_block_issuance_credit(&self) -> bool {
-        matches!(self, Self::BlockIssuanceCredit(_))
-    }
-
-    /// Gets the input as an actual [`BlockIssuanceCreditContextInput`].
-    /// PANIC: do not call on a non-block-issuance-credit context input.
-    pub fn as_block_issuance_credit(&self) -> &BlockIssuanceCreditContextInput {
-        if let Self::BlockIssuanceCredit(input) = self {
-            input
-        } else {
-            panic!("invalid downcast of non-BlockIssuanceCreditContextInput");
-        }
-    }
-
-    /// Checks whether the context input is a [`RewardContextInput`].
-    pub fn is_reward(&self) -> bool {
-        matches!(self, Self::Reward(_))
-    }
-
-    /// Gets the input as an actual [`RewardContextInput`].
-    /// PANIC: do not call on a non-reward context input.
-    pub fn as_reward(&self) -> &RewardContextInput {
-        if let Self::Reward(input) = self {
-            input
-        } else {
-            panic!("invalid downcast of non-RewardContextInput");
-        }
-    }
+    def_is_as_opt!(ContextInput: Commitment, BlockIssuanceCredit, Reward);
 }
 
 #[cfg(test)]

@@ -200,3 +200,38 @@ macro_rules! impl_serde_typed_dto {
         }
     };
 }
+
+#[macro_export]
+macro_rules! def_is_as_opt {
+    ($type:ty: $($name:ident),+$(,)?) => {
+        paste::paste! {
+            $(
+                #[doc = "Checks whether the " [<$type:snake>] " is a(n) [`" [<$name $type>] "`]."]
+                pub fn [<is_ $name:snake>](&self) -> bool {
+                    matches!(self, Self::$name(_))
+                }
+
+                #[doc = "Gets the " [<$type:snake>] " as an actual [`" [<$name $type>] "`]."]
+                #[doc = "PANIC: do not call on a non-" [<$name>] " " [<$type:snake>] "."]
+                pub fn [<as_ $name:snake>](&self) -> &[<$name $type>] {
+                    #[allow(irrefutable_let_patterns)]
+                    if let Self::$name(v) = self {
+                        v
+                    } else {
+                        panic!("{} called on a non-{} {}", stringify!([<as_ $name:snake>]), stringify!([<$name>]), stringify!($type:snake));
+                    }
+                }
+
+                #[doc = "Gets the " [<$type:snake>] " as an actual [`" [<$name $type>] "`], if it is one."]
+                pub fn [<as_ $name:snake _opt>](&self) -> Option<&[<$name $type>]> {
+                    #[allow(irrefutable_let_patterns)]
+                    if let Self::$name(v) = self {
+                        Some(v)
+                    } else {
+                        None
+                    }
+                }
+            )+
+        }
+    };
+}

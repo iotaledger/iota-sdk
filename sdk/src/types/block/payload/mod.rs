@@ -61,6 +61,8 @@ impl Payload {
             Self::TaggedData(_) => TaggedDataPayload::KIND,
         }
     }
+
+    def_is_as_opt!(Payload: Transaction, TaggedData);
 }
 
 impl Packable for Payload {
