@@ -5,16 +5,19 @@ use std::pin::Pin;
 
 use futures::Future;
 use iota_sdk::{
-    client::{secret::SecretManager, Client},
+    client::{
+        secret::{DowncastSecretManager, SecretManage},
+        Client,
+    },
     wallet::Wallet,
 };
-use tokio::sync::RwLock;
 
 use crate::{
-    method::{ClientMethod, SecretManagerMethod, WalletMethod},
+    method::{ClientMethod, ClientSecretMethod, SecretManagerMethod, WalletMethod},
     method_handler::{
-        client::call_client_method_internal, secret_manager::call_secret_manager_method_internal,
-        utils::call_utils_method_internal, wallet::call_wallet_method_internal,
+        client::call_client_method_internal, client_secret::call_client_secret_method_internal,
+        secret_manager::call_secret_manager_method_internal, utils::call_utils_method_internal,
+        wallet::call_wallet_method_internal,
     },
     panic::{convert_async_panics, convert_panics},
     response::Response,
@@ -78,10 +81,13 @@ pub fn call_utils_method(method: UtilsMethod) -> Response {
 }
 
 /// Call a secret manager method.
-pub async fn call_secret_manager_method(
-    secret_manager: &RwLock<SecretManager>,
+pub async fn call_secret_manager_method<S: SecretManage + DowncastSecretManager>(
+    secret_manager: &S,
     method: SecretManagerMethod,
-) -> Response {
+) -> Response
+where
+    iota_sdk::client::Error: From<S::Error>,
+{
     log::debug!("Secret manager method: {method:?}");
     let result =
         convert_async_panics(|| async { call_secret_manager_method_internal(secret_manager, method).await }).await;
@@ -89,5 +95,25 @@ pub async fn call_secret_manager_method(
     let response = result.unwrap_or_else(Response::Error);
 
     log::debug!("Secret manager response: {response:?}");
+    response
+}
+
+/// Call a client + secret manager method.
+pub async fn call_client_secret_method<S: SecretManage>(
+    client: &Client,
+    secret_manager: &S,
+    method: ClientSecretMethod,
+) -> Response
+where
+    iota_sdk::client::Error: From<S::Error>,
+{
+    log::debug!("Client method: {method:?}");
+    let result =
+        convert_async_panics(|| async { call_client_secret_method_internal(client, secret_manager, method).await })
+            .await;
+
+    let response = result.unwrap_or_else(Response::Error);
+
+    log::debug!("Client response: {response:?}");
     response
 }

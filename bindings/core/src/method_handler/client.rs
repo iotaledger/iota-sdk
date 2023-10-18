@@ -4,14 +4,13 @@
 #[cfg(feature = "mqtt")]
 use iota_sdk::client::mqtt::{MqttPayload, Topic};
 use iota_sdk::{
-    client::{request_funds_from_faucet, secret::SecretManager, Client},
+    client::{request_funds_from_faucet, Client},
     types::{
         api::core::response::OutputWithMetadataResponse,
         block::{
             output::{
                 dto::OutputDto, AccountOutput, BasicOutput, FoundryOutput, NftOutput, Output, OutputBuilderAmount, Rent,
             },
-            payload::Payload,
             BlockWrapper, BlockWrapperDto,
         },
         TryFromDto,
@@ -171,25 +170,6 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         ClientMethod::GetNetworkId => Response::NetworkId(client.get_network_id().await?.to_string()),
         ClientMethod::GetBech32Hrp => Response::Bech32Hrp(client.get_bech32_hrp().await?),
         ClientMethod::GetProtocolParameters => Response::ProtocolParameters(client.get_protocol_parameters().await?),
-        ClientMethod::PostBlockPayload { payload } => {
-            let block = client
-                .build_basic_block::<SecretManager>(
-                    todo!("issuer id"),
-                    todo!("issuing time"),
-                    None,
-                    Some(Payload::try_from_dto_with_params(
-                        payload,
-                        &client.get_protocol_parameters().await?,
-                    )?),
-                    todo!("secret manager"),
-                    todo!("chain"),
-                )
-                .await?;
-
-            let block_id = client.block_id(&block).await?;
-
-            Response::BlockIdWithBlock(block_id, BlockWrapperDto::from(&block))
-        }
         #[cfg(not(target_family = "wasm"))]
         ClientMethod::UnhealthyNodes => Response::UnhealthyNodes(client.unhealthy_nodes().await.into_iter().collect()),
         ClientMethod::GetHealth { url } => Response::Bool(client.get_health(&url).await?),

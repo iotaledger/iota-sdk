@@ -27,13 +27,13 @@ macro_rules! impl_id {
             $vis const LENGTH: usize = $length;
 
             #[doc = concat!("Creates a new [`", stringify!($ty),"`].")]
-            $vis fn new(bytes: [u8; $name::LENGTH]) -> Self {
-                Self::from(bytes)
+            $vis const fn new(bytes: [u8; $name::LENGTH]) -> Self {
+                Self(bytes)
             }
 
             #[doc = concat!("Creates a null [`", stringify!($ty),"`].")]
-            pub fn null() -> Self {
-                Self::from([0u8; $name::LENGTH])
+            pub const fn null() -> Self {
+                Self([0u8; $name::LENGTH])
             }
 
             #[doc = concat!("Checks if the [`", stringify!($ty),"`] is null.")]

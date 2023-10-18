@@ -45,7 +45,10 @@ pub fn call_secret_manager_method_async(
     let promise: js_sys::Promise = future_to_promise(async move {
         let method: SecretManagerMethod = serde_json::from_str(&method).map_err(|err| err.to_string())?;
 
-        let response = call_secret_manager_method(&secret_manager, method).await;
+        let response = {
+            let secret_manager = secret_manager.read().await;
+            call_secret_manager_method(&*secret_manager, method).await
+        };
         let ser = JsValue::from(serde_json::to_string(&response).map_err(|err| err.to_string())?);
         match response {
             Response::Error(_) | Response::Panic(_) => Err(ser),

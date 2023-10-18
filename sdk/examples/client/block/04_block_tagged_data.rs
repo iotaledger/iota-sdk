@@ -11,7 +11,10 @@
 use crypto::keys::bip44::Bip44;
 use iota_sdk::{
     client::{constants::IOTA_COIN_TYPE, secret::SecretManager, Client, Result},
-    types::block::payload::{Payload, TaggedDataPayload},
+    types::block::{
+        payload::{Payload, TaggedDataPayload},
+        IssuerId,
+    },
 };
 
 #[tokio::main]
@@ -20,6 +23,7 @@ async fn main() -> Result<()> {
     dotenvy::dotenv().ok();
 
     let node_url = std::env::var("NODE_URL").unwrap();
+    let issuer_id = std::env::var("ISSUER_ID").unwrap().parse::<IssuerId>().unwrap();
 
     // Create a node client.
     let client = Client::builder().with_node(&node_url)?.finish().await?;
@@ -29,8 +33,8 @@ async fn main() -> Result<()> {
     // Create and send the block with tag and data.
     let block = client
         .build_basic_block(
-            todo!("issuer id"),
-            todo!("issuing time"),
+            issuer_id,
+            None,
             None,
             Some(Payload::TaggedData(Box::new(
                 TaggedDataPayload::new(

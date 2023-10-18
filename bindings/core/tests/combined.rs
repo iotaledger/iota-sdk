@@ -3,11 +3,26 @@
 
 use std::collections::BTreeMap;
 
+use crypto::keys::bip44::Bip44;
 use iota_sdk::{
-    client::{constants::SHIMMER_COIN_TYPE, secret::SecretManagerDto, ClientBuilder},
+    client::{
+        constants::{IOTA_COIN_TYPE, SHIMMER_COIN_TYPE},
+        secret::{mnemonic::MnemonicSecretManager, SecretManagerDto},
+        ClientBuilder,
+    },
+    types::{
+        block::{
+            payload::{dto::PayloadDto, Payload, TaggedDataPayload},
+            BlockDto, BlockWrapper, IssuerId,
+        },
+        TryFromDto,
+    },
     wallet::account::types::AccountIdentifier,
 };
-use iota_sdk_bindings_core::{AccountMethod, CallMethod, Response, Result, WalletMethod, WalletOptions};
+use iota_sdk_bindings_core::{
+    call_client_secret_method, AccountMethod, CallMethod, ClientSecretMethod, Response, Result, WalletMethod,
+    WalletOptions,
+};
 
 #[tokio::test]
 async fn create_account() -> Result<()> {
@@ -230,5 +245,55 @@ async fn client_from_wallet() -> Result<()> {
     // }
 
     std::fs::remove_dir_all(storage_path).ok();
+    Ok(())
+}
+
+#[tokio::test]
+async fn post_block() -> Result<()> {
+    let storage_path = "test-storage/client_from_wallet";
+    std::fs::remove_dir_all(storage_path).ok();
+
+    let secret_manager = MnemonicSecretManager::try_from_mnemonic(
+        "about solution utility exist rail budget vacuum major survey clerk pave ankle wealth gym gossip still medal expect strong rely amazing inspire lazy lunar",
+    ).unwrap();
+    let client = ClientBuilder::default()
+        .with_nodes(&["http://localhost:14265"])
+        .unwrap()
+        .finish()
+        .await
+        .unwrap();
+
+    let payload = PayloadDto::from(&Payload::from(
+        TaggedDataPayload::new("Hello".as_bytes(), "Tangle".as_bytes()).unwrap(),
+    ));
+
+    let response = call_client_secret_method(
+        &client,
+        &secret_manager,
+        ClientSecretMethod::PostBasicBlockPayload {
+            issuer_id: IssuerId::null(),
+            strong_parents: None,
+            payload: payload.clone(),
+            chain: Bip44::new(IOTA_COIN_TYPE),
+        },
+    )
+    .await;
+
+    match response {
+        Response::BlockIdWithBlock(block_id, block) => {
+            match &block.block {
+                BlockDto::Basic(b) => assert_eq!(b.payload, Some(payload)),
+                BlockDto::Validation(v) => panic!("unexpected block {v:?}"),
+            }
+            assert_eq!(
+                block_id,
+                BlockWrapper::try_from_dto(block)
+                    .unwrap()
+                    .id(&client.get_protocol_parameters().await.unwrap())
+            );
+        }
+        _ => panic!("unexpected response {response:?}"),
+    }
+
     Ok(())
 }

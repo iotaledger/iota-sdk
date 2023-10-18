@@ -12,7 +12,7 @@ use iota_sdk::{
             dto::OutputDto, feature::Feature, unlock_condition::dto::UnlockConditionDto, AccountId, FoundryId,
             NativeToken, NftId, OutputId, TokenScheme,
         },
-        payload::{dto::PayloadDto, transaction::TransactionId},
+        payload::transaction::TransactionId,
         BlockId, BlockWrapperDto,
     },
     utils::serde::{option_string, string},
@@ -121,11 +121,6 @@ pub enum ClientMethod {
         endpoint: String,
         query_params: Vec<String>,
         request_object: Option<String>,
-    },
-    /// Build a block containing the specified payload and post it to the network.
-    PostBlockPayload {
-        /// The payload to send
-        payload: PayloadDto,
     },
     //////////////////////////////////////////////////////////////////////
     // Node core API
