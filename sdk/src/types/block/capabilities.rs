@@ -60,7 +60,7 @@ impl<Flag: CapabilityFlag> Capabilities<Flag> {
         self
     }
 
-    /// Disabled every possible flag.
+    /// Disables every possible flag.
     pub fn set_none(&mut self) -> &mut Self {
         *self = Default::default();
         self
