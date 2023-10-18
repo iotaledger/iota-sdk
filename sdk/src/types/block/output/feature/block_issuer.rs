@@ -48,17 +48,7 @@ impl BlockIssuerKey {
         }
     }
 
-    /// Checks whether the block issuer key is an [`Ed25519BlockIssuerKey`].
-    pub fn is_ed25519(&self) -> bool {
-        matches!(self, Self::Ed25519(_))
-    }
-
-    /// Gets the block issuer key as an actual [`Ed25519BlockIssuerKey`].
-    /// NOTE: Will panic if the block issuer key is not a [`Ed25519BlockIssuerKey`].
-    pub fn as_ed25519(&self) -> &Ed25519BlockIssuerKey {
-        let Self::Ed25519(key) = self;
-        key
-    }
+    def_is_as_opt!(BlockIssuerKey: Ed25519);
 }
 
 impl StorageScore for BlockIssuerKey {

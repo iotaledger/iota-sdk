@@ -282,6 +282,11 @@ impl RegularTransactionEssence {
         &self.capabilities
     }
 
+    /// Returns whether a given [`TransactionCapabilityFlag`] is enabled.
+    pub fn has_capability(&self, flag: TransactionCapabilityFlag) -> bool {
+        self.capabilities.has_capability(flag)
+    }
+
     /// Returns the optional payload of a [`RegularTransactionEssence`].
     pub fn payload(&self) -> Option<&Payload> {
         self.payload.as_ref()

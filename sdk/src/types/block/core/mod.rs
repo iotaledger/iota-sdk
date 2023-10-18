@@ -95,35 +95,7 @@ impl Block {
         ValidationBlockBuilder::new(strong_parents, highest_supported_version, protocol_parameters_hash)
     }
 
-    /// Checks whether the block is a [`BasicBlock`].
-    pub fn is_basic(&self) -> bool {
-        matches!(self, Self::Basic(_))
-    }
-
-    /// Gets the block as an actual [`BasicBlock`].
-    /// NOTE: Will panic if the block is not a [`BasicBlock`].
-    pub fn as_basic(&self) -> &BasicBlock {
-        if let Self::Basic(block) = self {
-            block
-        } else {
-            panic!("invalid downcast of non-BasicBlock");
-        }
-    }
-
-    /// Checks whether the block is a [`ValidationBlock`].
-    pub fn is_validation(&self) -> bool {
-        matches!(self, Self::Validation(_))
-    }
-
-    /// Gets the block as an actual [`ValidationBlock`].
-    /// NOTE: Will panic if the block is not a [`ValidationBlock`].
-    pub fn as_validation(&self) -> &ValidationBlock {
-        if let Self::Validation(block) = self {
-            block
-        } else {
-            panic!("invalid downcast of non-ValidationBlock");
-        }
-    }
+    def_is_as_opt!(Block: Basic, Validation);
 
     pub(crate) fn hash(&self) -> [u8; 32] {
         Blake2b256::digest(self.pack_to_vec()).into()

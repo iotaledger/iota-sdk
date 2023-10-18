@@ -469,7 +469,6 @@ impl StateTransitionVerifier for NftOutput {
     fn destruction(_current_state: &Self, context: &ValidationContext<'_>) -> Result<(), StateTransitionError> {
         if !context
             .essence
-            .capabilities()
             .has_capability(TransactionCapabilityFlag::DestroyNftOutputs)
         {
             // TODO: add a variant https://github.com/iotaledger/iota-sdk/issues/1430

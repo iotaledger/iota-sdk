@@ -118,110 +118,15 @@ impl UnlockCondition {
         }
     }
 
-    /// Checks whether the unlock condition is an [`AddressUnlockCondition`].
-    pub fn is_address(&self) -> bool {
-        matches!(self, Self::Address(_))
-    }
-
-    /// Gets the unlock condition as an actual [`AddressUnlockCondition`].
-    /// NOTE: Will panic if the unlock condition is not an [`AddressUnlockCondition`].
-    pub fn as_address(&self) -> &AddressUnlockCondition {
-        if let Self::Address(unlock_condition) = self {
-            unlock_condition
-        } else {
-            panic!("invalid downcast of non-AddressUnlockCondition");
-        }
-    }
-
-    /// Checks whether the unlock condition is a [`StorageDepositReturnUnlockCondition`].
-    pub fn is_storage_deposit_return(&self) -> bool {
-        matches!(self, Self::StorageDepositReturn(_))
-    }
-
-    /// Gets the unlock condition as an actual [`StorageDepositReturnUnlockCondition`].
-    /// NOTE: Will panic if the unlock condition is not a [`StorageDepositReturnUnlockCondition`].
-    pub fn as_storage_deposit_return(&self) -> &StorageDepositReturnUnlockCondition {
-        if let Self::StorageDepositReturn(unlock_condition) = self {
-            unlock_condition
-        } else {
-            panic!("invalid downcast of non-StorageDepositReturnUnlockCondition");
-        }
-    }
-
-    /// Checks whether the unlock condition is a [`TimelockUnlockCondition`].
-    pub fn is_timelock(&self) -> bool {
-        matches!(self, Self::Timelock(_))
-    }
-
-    /// Gets the unlock condition as an actual [`TimelockUnlockCondition`].
-    /// NOTE: Will panic if the unlock condition is not a [`TimelockUnlockCondition`].
-    pub fn as_timelock(&self) -> &TimelockUnlockCondition {
-        if let Self::Timelock(unlock_condition) = self {
-            unlock_condition
-        } else {
-            panic!("invalid downcast of non-TimelockUnlockCondition");
-        }
-    }
-
-    /// Checks whether the unlock condition is an [`ExpirationUnlockCondition`].
-    pub fn is_expiration(&self) -> bool {
-        matches!(self, Self::Expiration(_))
-    }
-
-    /// Gets the unlock condition as an actual [`ExpirationUnlockCondition`].
-    /// NOTE: Will panic if the unlock condition is not an [`ExpirationUnlockCondition`].
-    pub fn as_expiration(&self) -> &ExpirationUnlockCondition {
-        if let Self::Expiration(unlock_condition) = self {
-            unlock_condition
-        } else {
-            panic!("invalid downcast of non-ExpirationUnlockCondition");
-        }
-    }
-
-    /// Checks whether the unlock condition is a [`StateControllerAddressUnlockCondition`].
-    pub fn is_state_controller_address(&self) -> bool {
-        matches!(self, Self::StateControllerAddress(_))
-    }
-
-    /// Gets the unlock condition as an actual [`StateControllerAddressUnlockCondition`].
-    /// NOTE: Will panic if the unlock condition is not a [`StateControllerAddressUnlockCondition`].
-    pub fn as_state_controller_address(&self) -> &StateControllerAddressUnlockCondition {
-        if let Self::StateControllerAddress(unlock_condition) = self {
-            unlock_condition
-        } else {
-            panic!("invalid downcast of non-StateControllerAddressUnlockCondition");
-        }
-    }
-
-    /// Checks whether the unlock condition is a [`GovernorAddressUnlockCondition`].
-    pub fn is_governor_address(&self) -> bool {
-        matches!(self, Self::GovernorAddress(_))
-    }
-
-    /// Gets the unlock condition as an actual [`GovernorAddressUnlockCondition`].
-    /// NOTE: Will panic if the unlock condition is not a [`GovernorAddressUnlockCondition`].
-    pub fn as_governor_address(&self) -> &GovernorAddressUnlockCondition {
-        if let Self::GovernorAddress(unlock_condition) = self {
-            unlock_condition
-        } else {
-            panic!("invalid downcast of non-GovernorAddressUnlockCondition");
-        }
-    }
-
-    /// Checks whether the unlock condition is an [`ImmutableAccountAddressUnlockCondition`].
-    pub fn is_immutable_account_address(&self) -> bool {
-        matches!(self, Self::ImmutableAccountAddress(_))
-    }
-
-    /// Gets the unlock condition as an actual [`ImmutableAccountAddressUnlockCondition`].
-    /// NOTE: Will panic if the unlock condition is not an [`ImmutableAccountAddressUnlockCondition`].
-    pub fn as_immutable_account_address(&self) -> &ImmutableAccountAddressUnlockCondition {
-        if let Self::ImmutableAccountAddress(unlock_condition) = self {
-            unlock_condition
-        } else {
-            panic!("invalid downcast of non-ImmutableAccountAddressUnlockCondition");
-        }
-    }
+    def_is_as_opt!(UnlockCondition:
+        Address,
+        StorageDepositReturn,
+        Timelock,
+        Expiration,
+        StateControllerAddress,
+        GovernorAddress,
+        ImmutableAccountAddress
+    );
 }
 
 create_bitflags!(
