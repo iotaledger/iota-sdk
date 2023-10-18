@@ -234,7 +234,7 @@ mod test {
                 (1..=epochs_per_year.floor() as usize)
                     .map(|epoch| {
                         ((-beta_per_epoch_index * epoch as f64).exp()
-                            * 2_f64.powf(params.mana_structure().decay_factors_exponent() as _))
+                            * (params.mana_structure().decay_factors_exponent() as f64).exp2())
                         .floor() as u32
                     })
                     .collect::<Box<[_]>>()
