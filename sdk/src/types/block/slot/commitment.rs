@@ -4,9 +4,8 @@
 use crypto::hashes::{blake2b::Blake2b256, Digest};
 use packable::{Packable, PackableExt};
 
-use super::commitment_id::SlotCommitmentHash;
 use crate::types::block::{
-    slot::{RootsId, SlotCommitmentId, SlotIndex},
+    slot::{commitment_id::SlotCommitmentHash, RootsId, SlotCommitmentId, SlotIndex},
     Error,
 };
 
