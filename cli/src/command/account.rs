@@ -922,12 +922,14 @@ pub async fn voting_output_command(account: &Account) -> Result<(), Error> {
 
 async fn print_address(account: &Account, address: &AccountAddress) -> Result<(), Error> {
     let mut log = format!(
-        "Address: {}\n{:<9}{}\n{:<9}{}",
+        "Address: {}\n{:<9}{}\n{:<9}{}\n{:<9}{}",
         address.key_index(),
         "Bech32:",
         address.address(),
         "Hex:",
-        address.address().inner()
+        address.address().inner(),
+        "Type:",
+        address.address().kind_str(),
     );
 
     if *address.internal() {

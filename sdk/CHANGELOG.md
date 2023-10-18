@@ -21,6 +21,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## 1.1.2 - 2023-MM-DD
 
+### Added
+
+- `Address::kind_str` method;
+
 ### Fixed
 
 - `Account::claim_outputs()` if an input has less amount than min storage deposit;

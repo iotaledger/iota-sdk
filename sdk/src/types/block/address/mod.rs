@@ -68,6 +68,15 @@ impl Address {
         }
     }
 
+    /// Returns the address kind of an [`Address`] as a string.
+    pub fn kind_str(&self) -> &str {
+        match self {
+            Self::Ed25519(_) => "Ed25519",
+            Self::Alias(_) => "Alias",
+            Self::Nft(_) => "Nft",
+        }
+    }
+
     /// Checks whether the address is an [`Ed25519Address`].
     pub fn is_ed25519(&self) -> bool {
         matches!(self, Self::Ed25519(_))
