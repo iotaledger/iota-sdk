@@ -78,6 +78,7 @@ pub async fn account_prompt_internal(
     match input {
         Ok(command) => {
             match command.as_str() {
+                "" => {}
                 "h" | "help" => AccountCli::print_help()?,
                 "c" | "clear" => {
                     // Clear console
