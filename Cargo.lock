@@ -1599,6 +1599,7 @@ dependencies = [
  "num_cpus",
  "once_cell",
  "packable",
+ "paste",
  "prefix-hex",
  "primitive-types",
  "rand",

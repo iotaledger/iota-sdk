@@ -3,6 +3,7 @@
 
 use iota_sdk::types::block::{
     address::{Address, AddressCapabilities, AddressCapabilityFlag, Ed25519Address, RestrictedAddress, ToBech32Ext},
+    capabilities::CapabilityFlag,
     rand::address::rand_ed25519_address,
 };
 use packable::PackableExt;
