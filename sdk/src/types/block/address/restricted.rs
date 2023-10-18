@@ -98,7 +98,7 @@ impl AddressCapabilityFlag {
     const NFT_OUTPUTS: u8 = 0b01000000;
     const DELEGATION_OUTPUTS: u8 = 0b10000000;
     // Byte 1
-    const ANCHOR_OUTPUTS: u8 = 0b10000000;
+    const ANCHOR_OUTPUTS: u8 = 0b00000001;
 
     /// Converts the flag into the byte representation.
     pub fn as_byte(&self) -> u8 {
