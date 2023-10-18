@@ -90,50 +90,7 @@ impl Address {
         }
     }
 
-    /// Checks whether the address is an [`Ed25519Address`].
-    pub fn is_ed25519(&self) -> bool {
-        matches!(self, Self::Ed25519(_))
-    }
-
-    /// Gets the address as an actual [`Ed25519Address`].
-    /// PANIC: do not call on a non-ed25519 address.
-    pub fn as_ed25519(&self) -> &Ed25519Address {
-        if let Self::Ed25519(address) = self {
-            address
-        } else {
-            panic!("as_ed25519 called on a non-ed25519 address");
-        }
-    }
-
-    /// Checks whether the address is an [`AccountAddress`].
-    pub fn is_account(&self) -> bool {
-        matches!(self, Self::Account(_))
-    }
-
-    /// Gets the address as an actual [`AccountAddress`].
-    /// PANIC: do not call on a non-account address.
-    pub fn as_account(&self) -> &AccountAddress {
-        if let Self::Account(address) = self {
-            address
-        } else {
-            panic!("as_account called on a non-account address");
-        }
-    }
-
-    /// Checks whether the address is an [`NftAddress`].
-    pub fn is_nft(&self) -> bool {
-        matches!(self, Self::Nft(_))
-    }
-
-    /// Gets the address as an actual [`NftAddress`].
-    /// PANIC: do not call on a non-nft address.
-    pub fn as_nft(&self) -> &NftAddress {
-        if let Self::Nft(address) = self {
-            address
-        } else {
-            panic!("as_nft called on a non-nft address");
-        }
-    }
+    def_is_as_opt!(Address: Ed25519, Account, Nft, ImplicitAccountCreation, Restricted);
 
     /// Checks whether the address is an [`AnchorAddress`].
     pub fn is_anchor(&self) -> bool {

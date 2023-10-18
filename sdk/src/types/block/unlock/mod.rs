@@ -87,6 +87,8 @@ impl Unlock {
             Self::Anchor(_) => AnchorUnlock::KIND,
         }
     }
+
+    def_is_as_opt!(Unlock: Signature, Reference, Account, Nft);
 }
 
 pub(crate) type UnlockCount = BoundedU16<{ *UNLOCK_COUNT_RANGE.start() }, { *UNLOCK_COUNT_RANGE.end() }>;

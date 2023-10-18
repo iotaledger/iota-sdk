@@ -36,17 +36,7 @@ impl TransactionEssence {
         Blake2b256::digest(self.pack_to_vec()).into()
     }
 
-    /// Checks whether the essence is a [`RegularTransactionEssence`].
-    pub fn is_regular(&self) -> bool {
-        matches!(self, Self::Regular(_))
-    }
-
-    /// Gets the essence as an actual [`RegularTransactionEssence`].
-    /// PANIC: do not call on a non-regular essence.
-    pub fn as_regular(&self) -> &RegularTransactionEssence {
-        let Self::Regular(essence) = self;
-        essence
-    }
+    def_is_as_opt!(TransactionEssence: Regular);
 }
 
 #[cfg(feature = "serde")]

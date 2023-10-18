@@ -182,6 +182,17 @@ impl Output {
         }
     }
 
+    /// Returns the mana of an [`Output`].
+    pub fn mana(&self) -> u64 {
+        match self {
+            Self::Basic(output) => output.mana(),
+            Self::Account(output) => output.mana(),
+            Self::Foundry(_) => 0,
+            Self::Nft(output) => output.mana(),
+            Self::Delegation(_) => 0,
+        }
+    }
+
     /// Returns the native tokens of an [`Output`], if any.
     pub fn native_tokens(&self) -> Option<&NativeTokens> {
         match self {
@@ -242,80 +253,7 @@ impl Output {
         }
     }
 
-    /// Checks whether the output is a [`BasicOutput`].
-    pub fn is_basic(&self) -> bool {
-        matches!(self, Self::Basic(_))
-    }
-
-    /// Gets the output as an actual [`BasicOutput`].
-    /// NOTE: Will panic if the output is not a [`BasicOutput`].
-    pub fn as_basic(&self) -> &BasicOutput {
-        if let Self::Basic(output) = self {
-            output
-        } else {
-            panic!("invalid downcast of non-BasicOutput");
-        }
-    }
-
-    /// Checks whether the output is an [`AccountOutput`].
-    pub fn is_account(&self) -> bool {
-        matches!(self, Self::Account(_))
-    }
-
-    /// Gets the output as an actual [`AccountOutput`].
-    /// NOTE: Will panic if the output is not a [`AccountOutput`].
-    pub fn as_account(&self) -> &AccountOutput {
-        if let Self::Account(output) = self {
-            output
-        } else {
-            panic!("invalid downcast of non-AccountOutput");
-        }
-    }
-
-    /// Checks whether the output is a [`FoundryOutput`].
-    pub fn is_foundry(&self) -> bool {
-        matches!(self, Self::Foundry(_))
-    }
-
-    /// Gets the output as an actual [`FoundryOutput`].
-    /// NOTE: Will panic if the output is not a [`FoundryOutput`].
-    pub fn as_foundry(&self) -> &FoundryOutput {
-        if let Self::Foundry(output) = self {
-            output
-        } else {
-            panic!("invalid downcast of non-FoundryOutput");
-        }
-    }
-
-    /// Checks whether the output is an [`NftOutput`].
-    pub fn is_nft(&self) -> bool {
-        matches!(self, Self::Nft(_))
-    }
-
-    /// Gets the output as an actual [`NftOutput`].
-    /// NOTE: Will panic if the output is not a [`NftOutput`].
-    pub fn as_nft(&self) -> &NftOutput {
-        if let Self::Nft(output) = self {
-            output
-        } else {
-            panic!("invalid downcast of non-NftOutput");
-        }
-    }
-
-    /// Checks whether the output is a [`DelegationOutput`].
-    pub fn is_delegation(&self) -> bool {
-        matches!(self, Self::Delegation(_))
-    }
-
-    /// Gets the output as an actual [`DelegationOutput`].
-    /// NOTE: Will panic if the output is not a [`DelegationOutput`].
-    pub fn as_delegation(&self) -> &DelegationOutput {
-        if let Self::Delegation(output) = self {
-            output
-        } else {
-            panic!("invalid downcast of non-DelegationOutput");
-        }
-    }
+    def_is_as_opt!(Output: Basic, Account, Foundry, Nft, Delegation);
 
     /// Checks whether the output is a [`AnchorOutput`].
     pub fn is_anchor(&self) -> bool {
