@@ -80,7 +80,7 @@ where
             .filter(|output_data| {
                 is_valid_participation_output(&output_data.output)
                 // Check that the metadata exists, because otherwise we aren't participating for anything
-                    && output_data.output.features().and_then(|f| f.metadata()).is_some()
+                    && output_data.output.metadata_feature().is_some()
                     // Don't add spent cached outputs, we have their data already and it can't change anymore
                     && !spent_cached_outputs.contains_key(&output_data.output_id)
             })
@@ -90,7 +90,7 @@ where
         let mut spent_outputs = HashSet::new();
         for output_data in participation_outputs {
             // PANIC: the filter already checks that the metadata exists.
-            let metadata = output_data.output.features().and_then(|f| f.metadata()).unwrap();
+            let metadata = output_data.output.metadata_feature().unwrap();
             if let Ok(participations) = Participations::from_bytes(&mut metadata.data()) {
                 for participation in participations.participations {
                     // Skip events that aren't in `event_ids` if not None

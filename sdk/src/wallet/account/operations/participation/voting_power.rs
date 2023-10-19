@@ -8,7 +8,6 @@ use crate::{
         block::{
             output::{
                 feature::{MetadataFeature, TagFeature},
-                unlock_condition::AddressUnlockCondition,
                 BasicOutput, BasicOutputBuilder, Output,
             },
             payload::TaggedDataPayload,
@@ -76,18 +75,18 @@ where
                 )
             }
             None => (
-                BasicOutputBuilder::new_with_amount(amount)
-                    .add_unlock_condition(AddressUnlockCondition::new(
-                        self.public_addresses()
-                            .await
-                            .into_iter()
-                            .next()
-                            .expect("account needs to have a public address")
-                            .address
-                            .inner,
-                    ))
-                    .add_feature(TagFeature::new(PARTICIPATION_TAG)?)
-                    .finish_output(token_supply)?,
+                BasicOutputBuilder::new_with_amount(
+                    amount,
+                    self.public_addresses()
+                        .await
+                        .into_iter()
+                        .next()
+                        .expect("account needs to have a public address")
+                        .address
+                        .inner,
+                )
+                .with_tag_feature(TagFeature::new(PARTICIPATION_TAG)?)
+                .finish_output(token_supply)?,
                 None,
             ),
         };
@@ -158,7 +157,7 @@ where
         token_supply: u64,
     ) -> Result<(Output, TaggedDataPayload)> {
         let mut output_builder = BasicOutputBuilder::from(output).with_amount(amount);
-        let mut participation_bytes = output.features().metadata().map(|m| m.data()).unwrap_or(&[]);
+        let mut participation_bytes = output.metadata_feature().as_ref().map(|m| m.data()).unwrap_or(&[]);
 
         let participation_bytes = if let Ok(mut participations) = Participations::from_bytes(&mut participation_bytes) {
             // Remove ended participations.
@@ -166,7 +165,7 @@ where
 
             let participation_bytes = participations.to_bytes()?;
 
-            output_builder = output_builder.replace_feature(MetadataFeature::new(participation_bytes.clone())?);
+            output_builder = output_builder.with_metadata_feature(MetadataFeature::new(participation_bytes.clone())?);
 
             participation_bytes
         } else {

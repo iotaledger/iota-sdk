@@ -10,9 +10,7 @@ use crate::{
     types::block::{
         address::Bech32Address,
         output::{
-            unlock_condition::{
-                AddressUnlockCondition, ExpirationUnlockCondition, StorageDepositReturnUnlockCondition,
-            },
+            unlock_condition::{ExpirationUnlockCondition, StorageDepositReturnUnlockCondition},
             BasicOutputBuilder, MinimumStorageDepositBasicOutput, NativeToken, NativeTokens, TokenId,
         },
         slot::SlotIndex,
@@ -187,10 +185,9 @@ where
                 });
 
             outputs.push(
-                BasicOutputBuilder::new_with_amount(storage_deposit_amount)
+                BasicOutputBuilder::new_with_amount(storage_deposit_amount, address)
                     .with_native_tokens(native_tokens)
-                    .add_unlock_condition(AddressUnlockCondition::new(address))
-                    .add_unlock_condition(
+                    .with_storage_deposit_return_unlock_condition(
                         // We send the full storage_deposit_amount back to the sender, so only the native tokens are
                         // sent
                         StorageDepositReturnUnlockCondition::new(
@@ -199,7 +196,10 @@ where
                             token_supply,
                         )?,
                     )
-                    .add_unlock_condition(ExpirationUnlockCondition::new(return_address, expiration_slot_index)?)
+                    .with_expiration_unlock_condition(ExpirationUnlockCondition::new(
+                        return_address,
+                        expiration_slot_index,
+                    )?)
                     .finish_output(token_supply)?,
             )
         }

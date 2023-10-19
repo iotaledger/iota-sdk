@@ -9,7 +9,9 @@ use primitive_types::U256;
 
 use crate::types::block::{
     address::{Address, AddressCapabilityFlag},
-    output::{ChainId, FoundryId, InputsCommitment, NativeTokens, Output, OutputId, TokenId, UnlockCondition},
+    output::{
+        ChainId, Features, FoundryId, InputsCommitment, NativeTokens, Output, OutputId, TokenId, UnlockCondition,
+    },
     payload::transaction::{RegularTransactionEssence, TransactionCapabilityFlag, TransactionEssence, TransactionId},
     unlock::Unlocks,
     Error,
@@ -232,7 +234,7 @@ pub fn semantic_validation(
     for ((output_id, consumed_output), unlock) in inputs.iter().zip(unlocks.iter()) {
         let (conflict, amount, mana, consumed_native_tokens, unlock_conditions) = match consumed_output {
             Output::Basic(output) => (
-                output.unlock(output_id, unlock, inputs, &mut context),
+                output.unlock(unlock, inputs, &mut context),
                 output.amount(),
                 output.mana(),
                 Some(output.native_tokens()),
@@ -243,28 +245,28 @@ pub fn semantic_validation(
                 output.amount(),
                 output.mana(),
                 Some(output.native_tokens()),
-                output.unlock_conditions(),
+                output.unlock_conditions().clone(),
             ),
             Output::Foundry(output) => (
                 output.unlock(output_id, unlock, inputs, &mut context),
                 output.amount(),
                 0,
                 Some(output.native_tokens()),
-                output.unlock_conditions(),
+                output.unlock_conditions().clone(),
             ),
             Output::Nft(output) => (
                 output.unlock(output_id, unlock, inputs, &mut context),
                 output.amount(),
                 output.mana(),
                 Some(output.native_tokens()),
-                output.unlock_conditions(),
+                output.unlock_conditions().clone(),
             ),
             Output::Delegation(output) => (
                 output.unlock(output_id, unlock, inputs, &mut context),
                 output.amount(),
                 0,
                 None,
-                output.unlock_conditions(),
+                output.unlock_conditions().clone(),
             ),
         };
 
@@ -333,19 +335,19 @@ pub fn semantic_validation(
                 output.amount(),
                 output.mana(),
                 Some(output.native_tokens()),
-                Some(output.features()),
+                Some(output.features().clone()),
             ),
             Output::Foundry(output) => (
                 output.amount(),
                 0,
                 Some(output.native_tokens()),
-                Some(output.features()),
+                Some(output.features().clone()),
             ),
             Output::Nft(output) => (
                 output.amount(),
                 output.mana(),
                 Some(output.native_tokens()),
-                Some(output.features()),
+                Some(output.features().clone()),
             ),
             Output::Delegation(output) => (output.amount(), 0, None, None),
         };
@@ -408,7 +410,7 @@ pub fn semantic_validation(
             }
         }
 
-        if let Some(sender) = features.and_then(|f| f.sender()) {
+        if let Some(sender) = features.as_ref().and_then(Features::sender) {
             if !context.unlocked_addresses.contains(sender.address()) {
                 return Ok(Some(TransactionFailureReason::SenderNotUnlocked));
             }

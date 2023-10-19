@@ -9,10 +9,7 @@
 use iota_sdk::{
     types::block::{
         address::Bech32Address,
-        output::{
-            unlock_condition::{AddressUnlockCondition, TimelockUnlockCondition},
-            BasicOutputBuilder,
-        },
+        output::{unlock_condition::TimelockUnlockCondition, BasicOutputBuilder},
         slot::SlotIndex,
     },
     wallet::Result,
@@ -41,12 +38,12 @@ async fn main() -> Result<()> {
         // TODO better time-based UX ?
         // Create an output with amount 1_000_000 and a timelock of 1000 slots.
         let slot_index = SlotIndex::from(1000);
-        let basic_output = BasicOutputBuilder::new_with_amount(1_000_000)
-            .add_unlock_condition(AddressUnlockCondition::new(Bech32Address::try_from_str(
-                "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu",
-            )?))
-            .add_unlock_condition(TimelockUnlockCondition::new(slot_index)?)
-            .finish_output(account.client().get_token_supply().await?)?;
+        let basic_output = BasicOutputBuilder::new_with_amount(
+            1_000_000,
+            Bech32Address::try_from_str("rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu")?,
+        )
+        .with_timelock_unlock_condition(TimelockUnlockCondition::new(slot_index)?)
+        .finish_output(account.client().get_token_supply().await?)?;
 
         let transaction = account.send_outputs(vec![basic_output], None).await?;
         println!("Transaction sent: {}", transaction.transaction_id);

@@ -58,6 +58,13 @@ pub use self::{
     token_scheme::{SimpleTokenScheme, TokenScheme},
     unlock_condition::{UnlockCondition, UnlockConditions},
 };
+use self::{
+    feature::{BlockIssuerFeature, IssuerFeature, MetadataFeature, SenderFeature, StakingFeature, TagFeature},
+    unlock_condition::{
+        ExpirationUnlockCondition, GovernorAddressUnlockCondition, ImmutableAccountAddressUnlockCondition,
+        StateControllerAddressUnlockCondition, StorageDepositReturnUnlockCondition, TimelockUnlockCondition,
+    },
+};
 use super::protocol::ProtocolParameters;
 use crate::types::block::{address::Address, semantic::ValidationContext, slot::SlotIndex, Error};
 
@@ -197,23 +204,155 @@ impl Output {
     }
 
     /// Returns the unlock conditions of an [`Output`], if any.
-    pub fn unlock_conditions(&self) -> Option<&UnlockConditions> {
+    pub fn unlock_conditions(&self) -> Option<UnlockConditions> {
         match self {
             Self::Basic(output) => Some(output.unlock_conditions()),
-            Self::Account(output) => Some(output.unlock_conditions()),
-            Self::Foundry(output) => Some(output.unlock_conditions()),
-            Self::Nft(output) => Some(output.unlock_conditions()),
-            Self::Delegation(output) => Some(output.unlock_conditions()),
+            // TODO: temporary clones
+            Self::Account(output) => Some(output.unlock_conditions().clone()),
+            Self::Foundry(output) => Some(output.unlock_conditions().clone()),
+            Self::Nft(output) => Some(output.unlock_conditions().clone()),
+            Self::Delegation(output) => Some(output.unlock_conditions().clone()),
+        }
+    }
+
+    pub fn address_unlock_condition(&self) -> Option<&AddressUnlockCondition> {
+        match self {
+            Output::Basic(o) => Some(o.address_unlock_condition()),
+            Output::Account(_) => todo!(),
+            Output::Foundry(_) => todo!(),
+            Output::Nft(_) => todo!(),
+            Output::Delegation(_) => todo!(),
+        }
+    }
+
+    pub fn storage_deposit_return_unlock_condition(&self) -> Option<&StorageDepositReturnUnlockCondition> {
+        match self {
+            Output::Basic(o) => o.storage_deposit_return_unlock_condition(),
+            Output::Account(_) => todo!(),
+            Output::Foundry(_) => todo!(),
+            Output::Nft(_) => todo!(),
+            Output::Delegation(_) => todo!(),
+        }
+    }
+
+    pub fn expiration_unlock_condition(&self) -> Option<&ExpirationUnlockCondition> {
+        match self {
+            Output::Basic(o) => o.expiration_unlock_condition(),
+            Output::Account(_) => todo!(),
+            Output::Foundry(_) => todo!(),
+            Output::Nft(_) => todo!(),
+            Output::Delegation(_) => todo!(),
+        }
+    }
+
+    pub fn timelock_unlock_condition(&self) -> Option<&TimelockUnlockCondition> {
+        match self {
+            Output::Basic(o) => o.timelock_unlock_condition(),
+            Output::Account(_) => todo!(),
+            Output::Foundry(_) => todo!(),
+            Output::Nft(_) => todo!(),
+            Output::Delegation(_) => todo!(),
+        }
+    }
+
+    pub fn state_controller_address_unlock_condition(&self) -> Option<&StateControllerAddressUnlockCondition> {
+        match self {
+            Output::Basic(_) => None,
+            Output::Account(_) => todo!(),
+            Output::Foundry(_) => todo!(),
+            Output::Nft(_) => todo!(),
+            Output::Delegation(_) => todo!(),
+        }
+    }
+
+    pub fn governor_address_unlock_condition(&self) -> Option<&GovernorAddressUnlockCondition> {
+        match self {
+            Output::Basic(_) => None,
+            Output::Account(_) => todo!(),
+            Output::Foundry(_) => todo!(),
+            Output::Nft(_) => todo!(),
+            Output::Delegation(_) => todo!(),
+        }
+    }
+
+    pub fn immutable_account_address_unlock_condition(&self) -> Option<&ImmutableAccountAddressUnlockCondition> {
+        match self {
+            Output::Basic(_) => None,
+            Output::Account(_) => todo!(),
+            Output::Foundry(_) => todo!(),
+            Output::Nft(_) => todo!(),
+            Output::Delegation(_) => todo!(),
+        }
+    }
+
+    pub fn sender_feature(&self) -> Option<&SenderFeature> {
+        match self {
+            Output::Basic(o) => o.sender_feature(),
+            Output::Account(_) => todo!(),
+            Output::Foundry(_) => todo!(),
+            Output::Nft(_) => todo!(),
+            Output::Delegation(_) => todo!(),
+        }
+    }
+
+    pub fn metadata_feature(&self) -> Option<&MetadataFeature> {
+        match self {
+            Output::Basic(o) => o.metadata_feature(),
+            Output::Account(_) => todo!(),
+            Output::Foundry(_) => todo!(),
+            Output::Nft(_) => todo!(),
+            Output::Delegation(_) => todo!(),
+        }
+    }
+
+    pub fn tag_feature(&self) -> Option<&TagFeature> {
+        match self {
+            Output::Basic(o) => o.tag_feature(),
+            Output::Account(_) => todo!(),
+            Output::Foundry(_) => todo!(),
+            Output::Nft(_) => todo!(),
+            Output::Delegation(_) => todo!(),
+        }
+    }
+
+    pub fn issuer_feature(&self) -> Option<&IssuerFeature> {
+        match self {
+            Output::Basic(_) => None,
+            Output::Account(_) => todo!(),
+            Output::Foundry(_) => todo!(),
+            Output::Nft(_) => todo!(),
+            Output::Delegation(_) => todo!(),
+        }
+    }
+
+    pub fn block_issuer_feature(&self) -> Option<&BlockIssuerFeature> {
+        match self {
+            Output::Basic(_) => None,
+            Output::Account(_) => todo!(),
+            Output::Foundry(_) => todo!(),
+            Output::Nft(_) => todo!(),
+            Output::Delegation(_) => todo!(),
+        }
+    }
+
+    pub fn staking_feature(&self) -> Option<&StakingFeature> {
+        match self {
+            Output::Basic(_) => None,
+            Output::Account(_) => todo!(),
+            Output::Foundry(_) => todo!(),
+            Output::Nft(_) => todo!(),
+            Output::Delegation(_) => todo!(),
         }
     }
 
     /// Returns the features of an [`Output`], if any.
-    pub fn features(&self) -> Option<&Features> {
+    pub fn features(&self) -> Option<Features> {
         match self {
             Self::Basic(output) => Some(output.features()),
-            Self::Account(output) => Some(output.features()),
-            Self::Foundry(output) => Some(output.features()),
-            Self::Nft(output) => Some(output.features()),
+            // TODO: temporary clones
+            Self::Account(output) => Some(output.features().clone()),
+            Self::Foundry(output) => Some(output.features().clone()),
+            Self::Nft(output) => Some(output.features().clone()),
             Self::Delegation(_) => None,
         }
     }
@@ -288,6 +427,42 @@ impl Output {
         }
     }
 
+    /// Returns the address to be unlocked.
+    #[inline(always)]
+    pub fn locked_address<'a>(&'a self, address: &'a Address, slot_index: SlotIndex) -> &'a Address {
+        match self {
+            Output::Basic(o) => o.locked_address(address, slot_index),
+            Output::Account(_) => todo!(),
+            Output::Foundry(_) => todo!(),
+            Output::Nft(_) => todo!(),
+            Output::Delegation(_) => todo!(),
+        }
+    }
+
+    /// Returns whether a time lock exists and is still relevant.
+    #[inline(always)]
+    pub fn is_time_locked(&self, slot_index: impl Into<SlotIndex>) -> bool {
+        match self {
+            Output::Basic(o) => o.is_time_locked(slot_index),
+            Output::Account(_) => todo!(),
+            Output::Foundry(_) => todo!(),
+            Output::Nft(_) => todo!(),
+            Output::Delegation(_) => todo!(),
+        }
+    }
+
+    /// Returns whether an expiration exists and is expired.
+    #[inline(always)]
+    pub fn is_expired(&self, slot_index: impl Into<SlotIndex>) -> bool {
+        match self {
+            Output::Basic(o) => o.is_expired(slot_index),
+            Output::Account(_) => todo!(),
+            Output::Foundry(_) => todo!(),
+            Output::Nft(_) => todo!(),
+            Output::Delegation(_) => todo!(),
+        }
+    }
+
     ///
     pub fn verify_state_transition(
         current_state: Option<&Self>,
@@ -340,10 +515,7 @@ impl Output {
             });
         }
 
-        if let Some(return_condition) = self
-            .unlock_conditions()
-            .and_then(UnlockConditions::storage_deposit_return)
-        {
+        if let Some(return_condition) = self.storage_deposit_return_unlock_condition() {
             // We can't return more tokens than were originally contained in the output.
             // `Return Amount` ≤ `Amount`.
             if return_condition.amount() > self.amount() {
@@ -457,8 +629,7 @@ pub(crate) fn verify_output_amount_packable<const VERIFY: bool>(
 fn minimum_storage_deposit(address: &Address, rent_structure: RentStructure, token_supply: u64) -> u64 {
     // PANIC: This can never fail because the amount will always be within the valid range. Also, the actual value is
     // not important, we are only interested in the storage requirements of the type.
-    BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)
-        .add_unlock_condition(AddressUnlockCondition::new(address.clone()))
+    BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure, address.clone())
         .finish_with_params(token_supply)
         .unwrap()
         .amount()

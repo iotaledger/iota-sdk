@@ -3,7 +3,7 @@
 
 use iota_sdk::types::{
     block::{
-        output::{BasicOutput, Feature, FoundryId, NativeToken, Output, Rent, SimpleTokenScheme, TokenId},
+        output::{BasicOutput, FoundryId, NativeToken, Output, Rent, SimpleTokenScheme, TokenId},
         protocol::protocol_parameters,
         rand::{
             address::rand_account_address,
@@ -28,11 +28,10 @@ fn builder() {
     let sender_2 = rand_sender_feature();
     let amount = 500_000;
 
-    let mut builder = BasicOutput::build_with_amount(amount)
+    let mut builder = BasicOutput::build_with_amount(amount, address_1.address().clone())
         .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000).unwrap())
-        .add_unlock_condition(address_1.clone())
-        .add_feature(sender_1.clone())
-        .replace_feature(sender_2.clone());
+        .with_sender_feature(sender_1.clone())
+        .with_sender_feature(sender_2.clone());
 
     let output = builder.clone().finish().unwrap();
     assert_eq!(output.amount(), amount);
@@ -42,7 +41,7 @@ fn builder() {
     builder = builder
         .clear_unlock_conditions()
         .clear_features()
-        .replace_unlock_condition(address_2.clone());
+        .with_address_unlock_condition(address_2.clone());
     let output = builder.clone().finish().unwrap();
     assert_eq!(output.unlock_conditions().address(), Some(&address_2));
     assert!(output.features().is_empty());
@@ -51,8 +50,9 @@ fn builder() {
 
     let output = builder
         .with_minimum_storage_deposit(protocol_parameters.rent_structure())
-        .add_unlock_condition(rand_address_unlock_condition())
-        .with_features([Feature::from(metadata.clone()), sender_1.clone().into()])
+        .with_address_unlock_condition(rand_address_unlock_condition())
+        .with_metadata_feature(metadata.clone())
+        .with_sender_feature(sender_1.clone())
         .finish_with_params(ValidationParams::default().with_protocol_parameters(protocol_parameters.clone()))
         .unwrap();
 

@@ -237,7 +237,7 @@ fn verify_unique_sorted<const VERIFY: bool>(features: &[Feature], _: &()) -> Res
 pub(crate) fn verify_allowed_features(features: &Features, allowed_features: FeatureFlags) -> Result<(), Error> {
     for (index, feature) in features.iter().enumerate() {
         if !allowed_features.contains(feature.flag()) {
-            return Err(Error::UnallowedFeature {
+            return Err(Error::DisallowedFeature {
                 index,
                 kind: feature.kind(),
             });

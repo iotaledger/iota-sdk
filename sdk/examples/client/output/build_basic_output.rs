@@ -15,8 +15,7 @@ use iota_sdk::{
         output::{
             feature::{MetadataFeature, SenderFeature, TagFeature},
             unlock_condition::{
-                AddressUnlockCondition, ExpirationUnlockCondition, StorageDepositReturnUnlockCondition,
-                TimelockUnlockCondition,
+                ExpirationUnlockCondition, StorageDepositReturnUnlockCondition, TimelockUnlockCondition,
             },
             BasicOutputBuilder,
         },
@@ -43,8 +42,7 @@ async fn main() -> Result<()> {
         .unwrap_or("rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy".to_string());
     let address = Address::try_from_bech32(address)?;
 
-    let basic_output_builder = BasicOutputBuilder::new_with_amount(1_000_000)
-        .add_unlock_condition(AddressUnlockCondition::new(address.clone()));
+    let basic_output_builder = BasicOutputBuilder::new_with_amount(1_000_000, address.clone());
 
     let outputs = [
         // most simple output
@@ -52,12 +50,12 @@ async fn main() -> Result<()> {
         // with metadata feature block
         basic_output_builder
             .clone()
-            .add_feature(MetadataFeature::new(METADATA)?)
+            .with_metadata_feature(MetadataFeature::new(METADATA)?)
             .finish_output(token_supply)?,
         // with storage deposit return
         basic_output_builder
             .clone()
-            .add_unlock_condition(StorageDepositReturnUnlockCondition::new(
+            .with_storage_deposit_return_unlock_condition(StorageDepositReturnUnlockCondition::new(
                 address.clone(),
                 1_000_000,
                 token_supply,
@@ -66,21 +64,21 @@ async fn main() -> Result<()> {
         // with expiration
         basic_output_builder
             .clone()
-            .add_unlock_condition(ExpirationUnlockCondition::new(address.clone(), 1)?)
+            .with_expiration_unlock_condition(ExpirationUnlockCondition::new(address.clone(), 1)?)
             .finish_output(token_supply)?,
         // with timelock
         basic_output_builder
             .clone()
-            .add_unlock_condition(TimelockUnlockCondition::new(1)?)
+            .with_timelock_unlock_condition(TimelockUnlockCondition::new(1)?)
             .finish_output(token_supply)?,
         // with tag feature
         basic_output_builder
             .clone()
-            .add_feature(TagFeature::new(METADATA)?)
+            .with_tag_feature(TagFeature::new(METADATA)?)
             .finish_output(token_supply)?,
         // with sender feature
         basic_output_builder
-            .add_feature(SenderFeature::new(address))
+            .with_sender_feature(SenderFeature::new(address))
             .finish_output(token_supply)?,
     ];
 

@@ -10,7 +10,9 @@ pub mod unlock_condition;
 
 use primitive_types::U256;
 
+use self::feature::{rand_metadata_feature, rand_sender_feature, rand_tag_feature};
 pub use self::metadata::rand_output_metadata;
+use super::address::rand_address;
 use crate::types::block::{
     output::{
         unlock_condition::ImmutableAccountAddressUnlockCondition, AccountId, AccountOutput, BasicOutput, FoundryOutput,
@@ -23,8 +25,7 @@ use crate::types::block::{
         output::{
             feature::rand_allowed_features,
             unlock_condition::{
-                rand_address_unlock_condition, rand_address_unlock_condition_different_from,
-                rand_governor_address_unlock_condition_different_from,
+                rand_address_unlock_condition_different_from, rand_governor_address_unlock_condition_different_from,
                 rand_state_controller_address_unlock_condition_different_from,
             },
         },
@@ -40,9 +41,10 @@ pub fn rand_output_id() -> OutputId {
 /// Generates a random [`BasicOutput`](BasicOutput).
 pub fn rand_basic_output(token_supply: u64) -> BasicOutput {
     // TODO: Add `NativeTokens`
-    BasicOutput::build_with_amount(rand_number_range(Output::AMOUNT_MIN..token_supply))
-        .with_features(rand_allowed_features(BasicOutput::ALLOWED_FEATURES))
-        .add_unlock_condition(rand_address_unlock_condition())
+    BasicOutput::build_with_amount(rand_number_range(Output::AMOUNT_MIN..token_supply), rand_address())
+        .with_sender_feature(rand_sender_feature())
+        .with_metadata_feature(rand_metadata_feature())
+        .with_tag_feature(rand_tag_feature())
         .finish_with_params(token_supply)
         .unwrap()
 }

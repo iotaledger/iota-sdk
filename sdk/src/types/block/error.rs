@@ -163,11 +163,11 @@ pub enum Error {
     StorageDepositReturnOverflow,
     TimelockUnlockConditionZero,
     TooManyCommitmentInputs,
-    UnallowedFeature {
+    DisallowedFeature {
         index: usize,
         kind: u8,
     },
-    UnallowedUnlockCondition {
+    DisallowedUnlockCondition {
         index: usize,
         kind: u8,
     },
@@ -373,10 +373,10 @@ impl fmt::Display for Error {
                 )
             }
             Self::TooManyCommitmentInputs => write!(f, "too many commitment inputs"),
-            Self::UnallowedFeature { index, kind } => {
+            Self::DisallowedFeature { index, kind } => {
                 write!(f, "unallowed feature at index {index} with kind {kind}")
             }
-            Self::UnallowedUnlockCondition { index, kind } => {
+            Self::DisallowedUnlockCondition { index, kind } => {
                 write!(f, "unallowed unlock condition at index {index} with kind {kind}")
             }
             Self::UnlockConditionsNotUniqueSorted => write!(f, "unlock conditions are not unique and/or sorted"),

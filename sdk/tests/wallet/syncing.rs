@@ -61,38 +61,27 @@ async fn sync_only_most_basic_outputs() -> Result<()> {
     let token_supply = account_0.client().get_token_supply().await?;
     // Only one basic output without further unlock conditions
     let outputs = [
-        BasicOutputBuilder::new_with_amount(1_000_000)
-            .with_unlock_conditions([AddressUnlockCondition::new(account_1_address.clone())])
+        BasicOutputBuilder::new_with_amount(1_000_000, account_1_address.clone()).finish_output(token_supply)?,
+        BasicOutputBuilder::new_with_amount(1_000_000, account_1_address.clone())
+            .with_expiration_unlock_condition(ExpirationUnlockCondition::new(
+                account_1_address.clone(),
+                // Already expired
+                account_0.client().get_slot_index().await? - 5000,
+            )?)
             .finish_output(token_supply)?,
-        BasicOutputBuilder::new_with_amount(1_000_000)
-            .with_unlock_conditions([
-                UnlockCondition::Address(AddressUnlockCondition::new(account_1_address.clone())),
-                UnlockCondition::Expiration(ExpirationUnlockCondition::new(
-                    account_1_address.clone(),
-                    // Already expired
-                    account_0.client().get_slot_index().await? - 5000,
-                )?),
-            ])
+        BasicOutputBuilder::new_with_amount(1_000_000, account_1_address.clone())
+            .with_expiration_unlock_condition(ExpirationUnlockCondition::new(
+                account_1_address.clone(),
+                // Not expired
+                account_0.client().get_slot_index().await? + 5000,
+            )?)
             .finish_output(token_supply)?,
-        BasicOutputBuilder::new_with_amount(1_000_000)
-            .with_unlock_conditions([
-                UnlockCondition::Address(AddressUnlockCondition::new(account_1_address.clone())),
-                UnlockCondition::Expiration(ExpirationUnlockCondition::new(
-                    account_1_address.clone(),
-                    // Not expired
-                    account_0.client().get_slot_index().await? + 5000,
-                )?),
-            ])
-            .finish_output(token_supply)?,
-        BasicOutputBuilder::new_with_amount(1_000_000)
-            .with_unlock_conditions([
-                UnlockCondition::Address(AddressUnlockCondition::new(account_1_address.clone())),
-                UnlockCondition::StorageDepositReturn(StorageDepositReturnUnlockCondition::new(
-                    account_1_address.clone(),
-                    1_000_000,
-                    token_supply,
-                )?),
-            ])
+        BasicOutputBuilder::new_with_amount(1_000_000, account_1_address.clone())
+            .with_storage_deposit_return_unlock_condition(StorageDepositReturnUnlockCondition::new(
+                account_1_address.clone(),
+                1_000_000,
+                token_supply,
+            )?)
             .finish_output(token_supply)?,
         NftOutputBuilder::new_with_amount(1_000_000, NftId::null())
             .with_unlock_conditions([AddressUnlockCondition::new(account_1_address.clone())])
@@ -167,12 +156,8 @@ async fn sync_incoming_transactions() -> Result<()> {
     let token_supply = account_0.client().get_token_supply().await?;
 
     let outputs = [
-        BasicOutputBuilder::new_with_amount(750_000)
-            .with_unlock_conditions([AddressUnlockCondition::new(account_1_address.clone())])
-            .finish_output(token_supply)?,
-        BasicOutputBuilder::new_with_amount(250_000)
-            .with_unlock_conditions([AddressUnlockCondition::new(account_1_address)])
-            .finish_output(token_supply)?,
+        BasicOutputBuilder::new_with_amount(750_000, account_1_address.clone()).finish_output(token_supply)?,
+        BasicOutputBuilder::new_with_amount(250_000, account_1_address).finish_output(token_supply)?,
     ];
 
     let tx = account_0.send_outputs(outputs, None).await?;

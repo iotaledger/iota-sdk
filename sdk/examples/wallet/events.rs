@@ -14,10 +14,7 @@ use iota_sdk::{
         constants::SHIMMER_COIN_TYPE,
         secret::{mnemonic::MnemonicSecretManager, SecretManager},
     },
-    types::block::{
-        address::Address,
-        output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder},
-    },
+    types::block::{address::Address, output::BasicOutputBuilder},
     wallet::{ClientOptions, Result, Wallet},
 };
 
@@ -56,9 +53,10 @@ async fn main() -> Result<()> {
     println!("Balance BEFORE:\n{:#?}", balance.base_coin());
 
     // send transaction
-    let outputs = [BasicOutputBuilder::new_with_amount(SEND_AMOUNT)
-        .add_unlock_condition(AddressUnlockCondition::new(Address::try_from_bech32(RECV_ADDRESS)?))
-        .finish_output(account.client().get_token_supply().await?)?];
+    let outputs = [
+        BasicOutputBuilder::new_with_amount(SEND_AMOUNT, Address::try_from_bech32(RECV_ADDRESS)?)
+            .finish_output(account.client().get_token_supply().await?)?,
+    ];
 
     let transaction = account.send_outputs(outputs, None).await?;
     println!("Transaction sent: {}", transaction.transaction_id);

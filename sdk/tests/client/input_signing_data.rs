@@ -12,7 +12,7 @@ use iota_sdk::{
     types::{
         block::{
             address::Address,
-            output::{unlock_condition::AddressUnlockCondition, BasicOutput, OutputId, OutputMetadata},
+            output::{BasicOutput, OutputId, OutputMetadata},
             payload::transaction::TransactionId,
             protocol::protocol_parameters,
             slot::SlotCommitmentId,
@@ -28,12 +28,12 @@ fn input_signing_data_conversion() {
 
     let bip44_chain = Bip44::new(SHIMMER_COIN_TYPE);
 
-    let output = BasicOutput::build_with_amount(1_000_000)
-        .add_unlock_condition(AddressUnlockCondition::new(
-            Address::try_from_bech32("rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy").unwrap(),
-        ))
-        .finish_output(protocol_parameters.token_supply())
-        .unwrap();
+    let output = BasicOutput::build_with_amount(
+        1_000_000,
+        Address::try_from_bech32("rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy").unwrap(),
+    )
+    .finish_output(protocol_parameters.token_supply())
+    .unwrap();
 
     let input_signing_data = InputSigningData {
         output,

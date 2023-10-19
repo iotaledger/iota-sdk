@@ -366,20 +366,19 @@ where
         }
 
         for (return_address, return_amount) in required_address_returns {
-            outputs_to_send.push(
-                BasicOutputBuilder::new_with_amount(return_amount)
-                    .add_unlock_condition(AddressUnlockCondition::new(return_address))
-                    .finish_output(token_supply)?,
-            );
+            outputs_to_send
+                .push(BasicOutputBuilder::new_with_amount(return_amount, return_address).finish_output(token_supply)?);
         }
 
         // Create output with claimed values
         if available_amount - required_amount_for_nfts > 0 {
             outputs_to_send.push(
-                BasicOutputBuilder::new_with_amount(available_amount - required_amount_for_nfts)
-                    .add_unlock_condition(AddressUnlockCondition::new(first_account_address.address.inner.clone()))
-                    .with_native_tokens(new_native_tokens.finish()?)
-                    .finish_output(token_supply)?,
+                BasicOutputBuilder::new_with_amount(
+                    available_amount - required_amount_for_nfts,
+                    first_account_address.address.inner.clone(),
+                )
+                .with_native_tokens(new_native_tokens.finish()?)
+                .finish_output(token_supply)?,
             );
         } else if !new_native_tokens.finish()?.is_empty() {
             return Err(crate::client::api::input_selection::Error::InsufficientAmount {
@@ -416,15 +415,13 @@ where
 
 /// Get the `StorageDepositReturnUnlockCondition`, if not expired
 pub(crate) fn sdr_not_expired(output: &Output, slot_index: SlotIndex) -> Option<&StorageDepositReturnUnlockCondition> {
-    output.unlock_conditions().and_then(|unlock_conditions| {
-        unlock_conditions.storage_deposit_return().and_then(|sdr| {
-            let expired = unlock_conditions
-                .expiration()
-                .map_or(false, |expiration| slot_index >= expiration.slot_index());
+    output.storage_deposit_return_unlock_condition().and_then(|sdr| {
+        let expired = output
+            .expiration_unlock_condition()
+            .map_or(false, |expiration| slot_index >= expiration.slot_index());
 
-            // We only have to send the storage deposit return back if the output is not expired
-            (!expired).then_some(sdr)
-        })
+        // We only have to send the storage deposit return back if the output is not expired
+        (!expired).then_some(sdr)
     })
 }
 

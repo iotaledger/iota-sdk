@@ -47,7 +47,7 @@ async fn output_preparation() -> Result<()> {
     assert_eq!(output.amount(), 46800);
     // address and sdr unlock condition
     assert_eq!(output.unlock_conditions().unwrap().len(), 2);
-    let sdr = output.unlock_conditions().unwrap().storage_deposit_return().unwrap();
+    let sdr = output.storage_deposit_return_unlock_condition().unwrap();
     assert_eq!(sdr.amount(), 46300);
 
     let output = account
@@ -189,7 +189,7 @@ async fn output_preparation() -> Result<()> {
         )
         .await?;
     assert_eq!(output.amount(), 49000);
-    let sdr = output.unlock_conditions().unwrap().storage_deposit_return().unwrap();
+    let sdr = output.storage_deposit_return_unlock_condition().unwrap();
     assert_eq!(sdr.amount(), 48999);
 
     // address and storage deposit unlock condition, because of the metadata feature block, 213000 is not enough for the
@@ -412,7 +412,7 @@ async fn output_preparation() -> Result<()> {
     let minimum_storage_deposit = output.rent_cost(rent_structure);
     assert_eq!(output.amount(), minimum_storage_deposit);
     assert_eq!(output.amount(), 187900);
-    let sdr = output.unlock_conditions().unwrap().storage_deposit_return().unwrap();
+    let sdr = output.storage_deposit_return_unlock_condition().unwrap();
     assert_eq!(sdr.amount(), 145300);
     // address and storage deposit unlock condition, because of the metadata feature block, 42600 is not enough for the
     // required storage deposit
@@ -458,7 +458,7 @@ async fn output_preparation_sdr() -> Result<()> {
     assert_eq!(output.amount(), 50601);
     // address and sdr unlock condition
     assert_eq!(output.unlock_conditions().unwrap().len(), 2);
-    let sdr = output.unlock_conditions().unwrap().storage_deposit_return().unwrap();
+    let sdr = output.storage_deposit_return_unlock_condition().unwrap();
     assert_eq!(sdr.amount(), 42600);
 
     let output = account
@@ -479,7 +479,7 @@ async fn output_preparation_sdr() -> Result<()> {
     assert_eq!(output.amount(), 85199);
     // address and sdr unlock condition
     assert_eq!(output.unlock_conditions().unwrap().len(), 2);
-    let sdr = output.unlock_conditions().unwrap().storage_deposit_return().unwrap();
+    let sdr = output.storage_deposit_return_unlock_condition().unwrap();
     assert_eq!(sdr.amount(), 42600);
 
     // ReturnStrategy::Return provided
@@ -504,7 +504,7 @@ async fn output_preparation_sdr() -> Result<()> {
     assert_eq!(output.amount(), 85199);
     // address and sdr unlock condition
     assert_eq!(output.unlock_conditions().unwrap().len(), 2);
-    let sdr = output.unlock_conditions().unwrap().storage_deposit_return().unwrap();
+    let sdr = output.storage_deposit_return_unlock_condition().unwrap();
     assert_eq!(sdr.amount(), 42600);
 
     // ReturnStrategy::Gift provided
@@ -736,7 +736,7 @@ async fn prepare_output_remainder_dust() -> Result<()> {
     // storage deposit returned, address and SDR unlock condition
     assert_eq!(output.unlock_conditions().unwrap().len(), 2);
     // We have ReturnStrategy::Return, so leftover amount gets returned
-    let sdr = output.unlock_conditions().unwrap().storage_deposit_return().unwrap();
+    let sdr = output.storage_deposit_return_unlock_condition().unwrap();
     assert_eq!(sdr.amount(), 63900 - 100);
 
     tear_down(storage_path)

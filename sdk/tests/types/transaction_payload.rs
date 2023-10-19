@@ -4,7 +4,7 @@
 use iota_sdk::types::block::{
     address::{Address, Ed25519Address},
     input::{Input, UtxoInput},
-    output::{unlock_condition::AddressUnlockCondition, BasicOutput, Output},
+    output::{BasicOutput, Output},
     payload::transaction::{RegularTransactionEssence, TransactionId, TransactionPayload},
     protocol::protocol_parameters,
     rand::{mana::rand_mana_allotment, output::rand_inputs_commitment},
@@ -36,8 +36,7 @@ fn builder_no_essence_too_few_unlocks() {
     let address = Address::from(Ed25519Address::new(bytes));
     let amount = 1_000_000;
     let output = Output::Basic(
-        BasicOutput::build_with_amount(amount)
-            .add_unlock_condition(AddressUnlockCondition::new(address))
+        BasicOutput::build_with_amount(amount, address)
             .finish_with_params(protocol_parameters.token_supply())
             .unwrap(),
     );
@@ -72,8 +71,7 @@ fn builder_no_essence_too_many_unlocks() {
     let address = Address::from(Ed25519Address::new(bytes));
     let amount = 1_000_000;
     let output = Output::Basic(
-        BasicOutput::build_with_amount(amount)
-            .add_unlock_condition(AddressUnlockCondition::new(address))
+        BasicOutput::build_with_amount(amount, address)
             .finish_with_params(protocol_parameters.token_supply())
             .unwrap(),
     );
@@ -111,8 +109,7 @@ fn pack_unpack_valid() {
     let address = Address::from(Ed25519Address::new(bytes));
     let amount = 1_000_000;
     let output = Output::Basic(
-        BasicOutput::build_with_amount(amount)
-            .add_unlock_condition(AddressUnlockCondition::new(address))
+        BasicOutput::build_with_amount(amount, address)
             .finish_with_params(protocol_parameters.token_supply())
             .unwrap(),
     );
@@ -152,8 +149,7 @@ fn getters() {
     let address = Address::from(Ed25519Address::new(bytes));
     let amount = 1_000_000;
     let output = Output::Basic(
-        BasicOutput::build_with_amount(amount)
-            .add_unlock_condition(AddressUnlockCondition::new(address))
+        BasicOutput::build_with_amount(amount, address)
             .finish_with_params(protocol_parameters.token_supply())
             .unwrap(),
     );

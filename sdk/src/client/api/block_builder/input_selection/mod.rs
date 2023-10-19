@@ -237,10 +237,7 @@ impl InputSelection {
                 return false;
             }
 
-            // PANIC: safe to unwrap as non basic/account/foundry/nft outputs are already filtered out.
-            let unlock_conditions = input.output.unlock_conditions().unwrap();
-
-            if unlock_conditions.is_time_locked(self.slot_index) {
+            if input.output.is_time_locked(self.slot_index) {
                 return false;
             }
 

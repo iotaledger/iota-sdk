@@ -10,9 +10,7 @@ use crate::{
     types::block::{
         address::Bech32Address,
         input::INPUT_COUNT_MAX,
-        output::{
-            unlock_condition::AddressUnlockCondition, BasicOutputBuilder, NativeTokens, NativeTokensBuilder, Output,
-        },
+        output::{BasicOutputBuilder, NativeTokens, NativeTokensBuilder, Output},
         slot::SlotIndex,
     },
 };
@@ -249,15 +247,15 @@ where
             custom_inputs.push(output_data.output_id);
         }
 
-        let consolidation_output = [BasicOutputBuilder::new_with_amount(total_amount)
-            .add_unlock_condition(AddressUnlockCondition::new(
-                params
-                    .target_address
-                    .map(|bech32| bech32.into_inner())
-                    .unwrap_or_else(|| outputs_to_consolidate[0].address.clone()),
-            ))
-            .with_native_tokens(total_native_tokens.finish()?)
-            .finish_output(token_supply)?];
+        let consolidation_output = [BasicOutputBuilder::new_with_amount(
+            total_amount,
+            params
+                .target_address
+                .map(|bech32| bech32.into_inner())
+                .unwrap_or_else(|| outputs_to_consolidate[0].address.clone()),
+        )
+        .with_native_tokens(total_native_tokens.finish()?)
+        .finish_output(token_supply)?];
 
         let options = Some(TransactionOptions {
             custom_inputs: Some(custom_inputs),

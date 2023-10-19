@@ -48,8 +48,7 @@ fn build_valid() {
     let address = Address::from(Ed25519Address::new(bytes));
     let amount = 1_000_000;
     let output = Output::Basic(
-        BasicOutput::build_with_amount(amount)
-            .add_unlock_condition(AddressUnlockCondition::new(address))
+        BasicOutput::build_with_amount(amount, address)
             .finish_with_params(protocol_parameters.token_supply())
             .unwrap(),
     );
@@ -73,8 +72,7 @@ fn build_valid_with_payload() {
     let address = Address::from(Ed25519Address::new(bytes));
     let amount = 1_000_000;
     let output = Output::Basic(
-        BasicOutput::build_with_amount(amount)
-            .add_unlock_condition(AddressUnlockCondition::new(address))
+        BasicOutput::build_with_amount(amount, address)
             .finish_with_params(protocol_parameters.token_supply())
             .unwrap(),
     );
@@ -99,8 +97,7 @@ fn build_valid_add_inputs_outputs() {
     let address = Address::from(Ed25519Address::new(bytes));
     let amount = 1_000_000;
     let output = Output::Basic(
-        BasicOutput::build_with_amount(amount)
-            .add_unlock_condition(AddressUnlockCondition::new(address))
+        BasicOutput::build_with_amount(amount, address)
             .finish_with_params(protocol_parameters.token_supply())
             .unwrap(),
     );
@@ -125,8 +122,7 @@ fn build_invalid_payload_kind() {
     let address = Address::from(Ed25519Address::new(bytes));
     let amount = 1_000_000;
     let output = Output::Basic(
-        BasicOutput::build_with_amount(amount)
-            .add_unlock_condition(AddressUnlockCondition::new(address))
+        BasicOutput::build_with_amount(amount, address)
             .finish_with_params(protocol_parameters.token_supply())
             .unwrap(),
     );
@@ -164,8 +160,7 @@ fn build_invalid_input_count_low() {
     let address = Address::from(Ed25519Address::new(bytes));
     let amount = 1_000_000;
     let output = Output::Basic(
-        BasicOutput::build_with_amount(amount)
-            .add_unlock_condition(AddressUnlockCondition::new(address))
+        BasicOutput::build_with_amount(amount, address)
             .finish_with_params(protocol_parameters.token_supply())
             .unwrap(),
     );
@@ -190,8 +185,7 @@ fn build_invalid_input_count_high() {
     let address = Address::from(Ed25519Address::new(bytes));
     let amount = 1_000_000;
     let output = Output::Basic(
-        BasicOutput::build_with_amount(amount)
-            .add_unlock_condition(AddressUnlockCondition::new(address))
+        BasicOutput::build_with_amount(amount, address)
             .finish_with_params(protocol_parameters.token_supply())
             .unwrap(),
     );
@@ -234,8 +228,7 @@ fn build_invalid_output_count_high() {
     let address = Address::from(Ed25519Address::new(bytes));
     let amount = 1_000_000;
     let output = Output::Basic(
-        BasicOutput::build_with_amount(amount)
-            .add_unlock_condition(AddressUnlockCondition::new(address))
+        BasicOutput::build_with_amount(amount, address)
             .finish_with_params(protocol_parameters.token_supply())
             .unwrap(),
     );
@@ -261,8 +254,7 @@ fn build_invalid_duplicate_utxo() {
     let address = Address::from(Ed25519Address::new(bytes));
     let amount = 1_000_000;
     let output = Output::Basic(
-        BasicOutput::build_with_amount(amount)
-            .add_unlock_condition(AddressUnlockCondition::new(address))
+        BasicOutput::build_with_amount(amount, address)
             .finish_with_params(protocol_parameters.token_supply())
             .unwrap(),
     );
@@ -286,8 +278,7 @@ fn build_invalid_accumulated_output() {
     let address1 = Address::from(Ed25519Address::new(bytes1));
     let amount1 = protocol_parameters.token_supply() - 1_000_000;
     let output1 = Output::Basic(
-        BasicOutput::build_with_amount(amount1)
-            .add_unlock_condition(AddressUnlockCondition::new(address1))
+        BasicOutput::build_with_amount(amount1, address1)
             .finish_with_params(protocol_parameters.token_supply())
             .unwrap(),
     );
@@ -296,8 +287,7 @@ fn build_invalid_accumulated_output() {
     let address2 = Address::from(Ed25519Address::new(bytes2));
     let amount2 = 2_000_000;
     let output2 = Output::Basic(
-        BasicOutput::build_with_amount(amount2)
-            .add_unlock_condition(AddressUnlockCondition::new(address2))
+        BasicOutput::build_with_amount(amount2, address2)
             .finish_with_params(protocol_parameters.token_supply())
             .unwrap(),
     );
@@ -321,8 +311,7 @@ fn getters() {
     let address = Address::from(Ed25519Address::new(bytes));
     let amount = 1_000_000;
     let outputs = [Output::Basic(
-        BasicOutput::build_with_amount(amount)
-            .add_unlock_condition(AddressUnlockCondition::new(address))
+        BasicOutput::build_with_amount(amount, address)
             .finish_with_params(protocol_parameters.token_supply())
             .unwrap(),
     )];
@@ -349,8 +338,7 @@ fn duplicate_output_nft() {
     let bytes: [u8; 32] = prefix_hex::decode(ED25519_ADDRESS_1).unwrap();
     let address = Address::from(Ed25519Address::new(bytes));
     let amount = 1_000_000;
-    let basic = BasicOutput::build_with_amount(amount)
-        .add_unlock_condition(AddressUnlockCondition::new(address.clone()))
+    let basic = BasicOutput::build_with_amount(amount, address.clone())
         .finish_output(protocol_parameters.token_supply())
         .unwrap();
     let nft_id = NftId::from(bytes);
@@ -380,8 +368,7 @@ fn duplicate_output_nft_null() {
     let bytes: [u8; 32] = prefix_hex::decode(ED25519_ADDRESS_1).unwrap();
     let address = Address::from(Ed25519Address::new(bytes));
     let amount = 1_000_000;
-    let basic = BasicOutput::build_with_amount(amount)
-        .add_unlock_condition(AddressUnlockCondition::new(address.clone()))
+    let basic = BasicOutput::build_with_amount(amount, address.clone())
         .finish_output(protocol_parameters.token_supply())
         .unwrap();
     let nft_id = NftId::null();
@@ -408,8 +395,7 @@ fn duplicate_output_account() {
     let bytes: [u8; 32] = prefix_hex::decode(ED25519_ADDRESS_1).unwrap();
     let address = Address::from(Ed25519Address::new(bytes));
     let amount = 1_000_000;
-    let basic = BasicOutput::build_with_amount(amount)
-        .add_unlock_condition(AddressUnlockCondition::new(address.clone()))
+    let basic = BasicOutput::build_with_amount(amount, address.clone())
         .finish_output(protocol_parameters.token_supply())
         .unwrap();
     let account_id = AccountId::from(bytes);
@@ -440,8 +426,7 @@ fn duplicate_output_foundry() {
     let bytes: [u8; 32] = prefix_hex::decode(ED25519_ADDRESS_1).unwrap();
     let address = Address::from(Ed25519Address::new(bytes));
     let amount = 1_000_000;
-    let basic = BasicOutput::build_with_amount(amount)
-        .add_unlock_condition(AddressUnlockCondition::new(address))
+    let basic = BasicOutput::build_with_amount(amount, address)
         .finish_output(protocol_parameters.token_supply())
         .unwrap();
     let account_id = AccountId::from(bytes);
@@ -477,8 +462,7 @@ fn transactions_capabilities() {
     let address = Address::from(Ed25519Address::new(prefix_hex::decode(ED25519_ADDRESS_1).unwrap()));
     let amount = 1_000_000;
     let output = Output::Basic(
-        BasicOutput::build_with_amount(amount)
-            .add_unlock_condition(AddressUnlockCondition::new(address))
+        BasicOutput::build_with_amount(amount, address)
             .finish_with_params(&protocol_parameters)
             .unwrap(),
     );

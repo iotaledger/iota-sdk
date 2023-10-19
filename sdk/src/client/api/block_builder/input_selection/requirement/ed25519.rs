@@ -41,16 +41,19 @@ impl InputSelection {
         address: &Address,
     ) -> (bool, Option<AccountTransition>) {
         if input.output.is_account() {
-            // PANIC: safe to unwrap as outputs without unlock conditions have been filtered out already.
-            let unlock_conditions = input.output.unlock_conditions().unwrap();
-
             // PANIC: safe to unwrap as accounts have a state controller address.
-            if unlock_conditions.state_controller_address().unwrap().address() == address {
+            if input
+                .output
+                .state_controller_address_unlock_condition()
+                .unwrap()
+                .address()
+                == address
+            {
                 return (self.addresses.contains(address), Some(AccountTransition::State));
             }
 
             // PANIC: safe to unwrap as accounts have a governor address.
-            if unlock_conditions.governor_address().unwrap().address() == address {
+            if input.output.governor_address_unlock_condition().unwrap().address() == address {
                 return (self.addresses.contains(address), Some(AccountTransition::Governance));
             }
 

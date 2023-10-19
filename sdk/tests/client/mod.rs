@@ -106,8 +106,7 @@ fn build_basic_output(
     timelock: Option<u32>,
     expiration: Option<(Bech32Address, u32)>,
 ) -> Output {
-    let mut builder =
-        BasicOutputBuilder::new_with_amount(amount).add_unlock_condition(AddressUnlockCondition::new(bech32_address));
+    let mut builder = BasicOutputBuilder::new_with_amount(amount, bech32_address);
 
     if let Some(native_tokens) = native_tokens {
         builder = builder.with_native_tokens(
@@ -118,20 +117,21 @@ fn build_basic_output(
     }
 
     if let Some(bech32_sender) = bech32_sender {
-        builder = builder.add_feature(SenderFeature::new(bech32_sender));
+        builder = builder.with_sender_feature(SenderFeature::new(bech32_sender));
     }
 
     if let Some((address, amount)) = sdruc {
-        builder = builder
-            .add_unlock_condition(StorageDepositReturnUnlockCondition::new(address, amount, TOKEN_SUPPLY).unwrap());
+        builder = builder.with_storage_deposit_return_unlock_condition(
+            StorageDepositReturnUnlockCondition::new(address, amount, TOKEN_SUPPLY).unwrap(),
+        );
     }
 
     if let Some(timelock) = timelock {
-        builder = builder.add_unlock_condition(TimelockUnlockCondition::new(timelock).unwrap());
+        builder = builder.with_timelock_unlock_condition(TimelockUnlockCondition::new(timelock).unwrap());
     }
 
     if let Some((address, timestamp)) = expiration {
-        builder = builder.add_unlock_condition(ExpirationUnlockCondition::new(address, timestamp).unwrap());
+        builder = builder.with_expiration_unlock_condition(ExpirationUnlockCondition::new(address, timestamp).unwrap());
     }
 
     builder.finish_output(TOKEN_SUPPLY).unwrap()

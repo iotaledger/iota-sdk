@@ -131,13 +131,13 @@ async fn claim_2_basic_outputs_no_outputs_in_claim_account() -> Result<()> {
     // TODO more fitting value
     let expiration_slot = account_0.client().get_slot_index().await? + 86400;
 
-    let output = BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)
-        .add_unlock_condition(AddressUnlockCondition::new(account_1.first_address_bech32().await))
-        .add_unlock_condition(ExpirationUnlockCondition::new(
-            account_0.first_address_bech32().await,
-            expiration_slot,
-        )?)
-        .finish_output(token_supply)?;
+    let output =
+        BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure, account_1.first_address_bech32().await)
+            .with_expiration_unlock_condition(ExpirationUnlockCondition::new(
+                account_0.first_address_bech32().await,
+                expiration_slot,
+            )?)
+            .finish_output(token_supply)?;
     let amount = output.amount();
 
     let outputs = vec![output; 2];
@@ -326,22 +326,26 @@ async fn claim_2_native_tokens_no_outputs_in_claim_account() -> Result<()> {
     let tx = account_0
         .send_outputs(
             [
-                BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)
-                    .add_unlock_condition(AddressUnlockCondition::new(account_1.first_address_bech32().await))
-                    .add_unlock_condition(ExpirationUnlockCondition::new(
-                        account_0.first_address_bech32().await,
-                        account_0.client().get_slot_index().await? + 5000,
-                    )?)
-                    .add_native_token(NativeToken::new(create_tx_0.token_id, native_token_amount)?)
-                    .finish_output(token_supply)?,
-                BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)
-                    .add_unlock_condition(AddressUnlockCondition::new(account_1.first_address_bech32().await))
-                    .add_unlock_condition(ExpirationUnlockCondition::new(
-                        account_0.first_address_bech32().await,
-                        account_0.client().get_slot_index().await? + 5000,
-                    )?)
-                    .add_native_token(NativeToken::new(create_tx_1.token_id, native_token_amount)?)
-                    .finish_output(token_supply)?,
+                BasicOutputBuilder::new_with_minimum_storage_deposit(
+                    rent_structure,
+                    account_1.first_address_bech32().await,
+                )
+                .with_expiration_unlock_condition(ExpirationUnlockCondition::new(
+                    account_0.first_address_bech32().await,
+                    account_0.client().get_slot_index().await? + 5000,
+                )?)
+                .add_native_token(NativeToken::new(create_tx_0.token_id, native_token_amount)?)
+                .finish_output(token_supply)?,
+                BasicOutputBuilder::new_with_minimum_storage_deposit(
+                    rent_structure,
+                    account_1.first_address_bech32().await,
+                )
+                .with_expiration_unlock_condition(ExpirationUnlockCondition::new(
+                    account_0.first_address_bech32().await,
+                    account_0.client().get_slot_index().await? + 5000,
+                )?)
+                .add_native_token(NativeToken::new(create_tx_1.token_id, native_token_amount)?)
+                .finish_output(token_supply)?,
             ],
             None,
         )

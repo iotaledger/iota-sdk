@@ -11,8 +11,8 @@ use iota_sdk::{
         block::{
             address::Bech32Address,
             output::{
-                unlock_condition::AddressUnlockCondition, AccountId, BasicOutputBuilder, FoundryId, NativeToken,
-                NativeTokensBuilder, NftId, Output, OutputId, TokenId,
+                AccountId, BasicOutputBuilder, FoundryId, NativeToken, NativeTokensBuilder, NftId, Output, OutputId,
+                TokenId,
             },
             payload::transaction::TransactionId,
             slot::SlotIndex,
@@ -726,13 +726,14 @@ pub async fn send_native_token_command(
 
         account.client().bech32_hrp_matches(address.hrp()).await?;
 
-        let outputs = [BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)
-            .add_unlock_condition(AddressUnlockCondition::new(address))
-            .with_native_tokens([NativeToken::new(
-                TokenId::from_str(&token_id)?,
-                U256::from_dec_str(&amount).map_err(|e| Error::Miscellaneous(e.to_string()))?,
-            )?])
-            .finish_output(token_supply)?];
+        let outputs = [
+            BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure, address)
+                .with_native_tokens([NativeToken::new(
+                    TokenId::from_str(&token_id)?,
+                    U256::from_dec_str(&amount).map_err(|e| Error::Miscellaneous(e.to_string()))?,
+                )?])
+                .finish_output(token_supply)?,
+        ];
 
         account.send_outputs(outputs, None).await?
     } else {

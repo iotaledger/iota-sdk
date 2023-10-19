@@ -8,7 +8,7 @@ use crate::{
         block::{
             output::{
                 feature::{MetadataFeature, TagFeature},
-                BasicOutputBuilder, Feature,
+                BasicOutputBuilder,
             },
             payload::TaggedDataPayload,
         },
@@ -104,10 +104,8 @@ where
         .to_bytes()?;
 
         let new_output = BasicOutputBuilder::from(output)
-            .with_features([
-                Feature::Tag(TagFeature::new(PARTICIPATION_TAG)?),
-                Feature::Metadata(MetadataFeature::new(participation_bytes.clone())?),
-            ])
+            .with_tag_feature(TagFeature::new(PARTICIPATION_TAG)?)
+            .with_metadata_feature(MetadataFeature::new(participation_bytes.clone())?)
             .finish_output(self.client().get_token_supply().await?)?;
 
         self.prepare_transaction(
@@ -176,10 +174,8 @@ where
         .to_bytes()?;
 
         let new_output = BasicOutputBuilder::from(output)
-            .with_features([
-                Feature::Tag(TagFeature::new(PARTICIPATION_TAG)?),
-                Feature::Metadata(MetadataFeature::new(participation_bytes.clone())?),
-            ])
+            .with_tag_feature(TagFeature::new(PARTICIPATION_TAG)?)
+            .with_metadata_feature(MetadataFeature::new(participation_bytes.clone())?)
             .finish_output(self.client().get_token_supply().await?)?;
 
         self.prepare_transaction(

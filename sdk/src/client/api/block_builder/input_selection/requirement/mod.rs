@@ -126,7 +126,7 @@ impl InputSelection {
             };
 
             // Add a sender requirement if the sender feature is present.
-            if let Some(sender) = output.features().and_then(Features::sender) {
+            if let Some(sender) = output.sender_feature() {
                 let requirement = Requirement::Sender(sender.address().clone());
                 log::debug!("Adding {requirement:?} from output");
                 self.requirements.push(requirement);

@@ -2,11 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use iota_sdk::{
-    types::block::output::{
-        feature::SenderFeature,
-        unlock_condition::{AddressUnlockCondition, ExpirationUnlockCondition},
-        BasicOutputBuilder, UnlockCondition,
-    },
+    types::block::output::{feature::SenderFeature, unlock_condition::ExpirationUnlockCondition, BasicOutputBuilder},
     wallet::{account::types::Balance, Result},
 };
 
@@ -100,17 +96,16 @@ async fn balance_expiration() -> Result<()> {
 
     let slots_until_expired = 20;
     let token_supply = account_0.client().get_token_supply().await?;
-    let outputs = [BasicOutputBuilder::new_with_amount(1_000_000)
-        // Send to account 1 with expiration to account 2, both have no amount yet
-        .with_unlock_conditions([
-            UnlockCondition::Address(AddressUnlockCondition::new(account_1.first_address_bech32().await)),
-            UnlockCondition::Expiration(ExpirationUnlockCondition::new(
+    let outputs = [
+        BasicOutputBuilder::new_with_amount(1_000_000, account_1.first_address_bech32().await)
+            // Send to account 1 with expiration to account 2, both have no amount yet
+            .with_expiration_unlock_condition(ExpirationUnlockCondition::new(
                 account_2.first_address_bech32().await,
                 account_0.client().get_slot_index().await? + slots_until_expired,
-            )?),
-        ])
-        .with_features([SenderFeature::new(account_0.first_address_bech32().await)])
-        .finish_output(token_supply)?];
+            )?)
+            .with_sender_feature(SenderFeature::new(account_0.first_address_bech32().await))
+            .finish_output(token_supply)?,
+    ];
 
     let balance_before_tx = account_0.balance().await?;
     let tx = account_0.send_outputs(outputs, None).await?;
@@ -155,12 +150,11 @@ async fn balance_expiration() -> Result<()> {
     assert_eq!(balance.base_coin().available(), 1_000_000);
 
     // It's possible to send the expired output
-    let outputs = [BasicOutputBuilder::new_with_amount(1_000_000)
+    let outputs = [
         // Send to account 1 with expiration to account 2, both have no amount yet
-        .with_unlock_conditions([AddressUnlockCondition::new(
-            account_1.addresses().await[0].clone().into_bech32(),
-        )])
-        .finish_output(token_supply)?];
+        BasicOutputBuilder::new_with_amount(1_000_000, account_1.addresses().await[0].clone().into_bech32())
+            .finish_output(token_supply)?,
+    ];
     let _tx = account_2.send_outputs(outputs, None).await?;
 
     tear_down(storage_path)

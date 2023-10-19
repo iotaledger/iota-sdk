@@ -8,7 +8,7 @@ use packable::Packable;
 use crate::types::block::{
     address::{Address, Ed25519Address},
     output::{
-        unlock_condition::{AddressUnlockCondition, ExpirationUnlockCondition, StorageDepositReturnUnlockCondition},
+        unlock_condition::{ExpirationUnlockCondition, StorageDepositReturnUnlockCondition},
         BasicOutputBuilder, NativeTokens, Output, OutputId,
     },
     slot::SlotIndex,
@@ -186,8 +186,9 @@ impl MinimumStorageDepositBasicOutput {
         Self {
             config,
             token_supply,
-            builder: BasicOutputBuilder::new_with_amount(Output::AMOUNT_MIN).add_unlock_condition(
-                AddressUnlockCondition::new(Address::from(Ed25519Address::from([0; Ed25519Address::LENGTH]))),
+            builder: BasicOutputBuilder::new_with_amount(
+                Output::AMOUNT_MIN,
+                Ed25519Address::from([0; Ed25519Address::LENGTH]),
             ),
         }
     }
@@ -200,21 +201,23 @@ impl MinimumStorageDepositBasicOutput {
     }
 
     pub fn with_storage_deposit_return(mut self) -> Result<Self, Error> {
-        self.builder = self
-            .builder
-            .add_unlock_condition(StorageDepositReturnUnlockCondition::new(
-                Address::from(Ed25519Address::from([0; Ed25519Address::LENGTH])),
-                Output::AMOUNT_MIN,
-                self.token_supply,
-            )?);
+        self.builder =
+            self.builder
+                .with_storage_deposit_return_unlock_condition(StorageDepositReturnUnlockCondition::new(
+                    Address::from(Ed25519Address::from([0; Ed25519Address::LENGTH])),
+                    Output::AMOUNT_MIN,
+                    self.token_supply,
+                )?);
         Ok(self)
     }
 
     pub fn with_expiration(mut self) -> Result<Self, Error> {
-        self.builder = self.builder.add_unlock_condition(ExpirationUnlockCondition::new(
-            Address::from(Ed25519Address::from([0; Ed25519Address::LENGTH])),
-            1,
-        )?);
+        self.builder = self
+            .builder
+            .with_expiration_unlock_condition(ExpirationUnlockCondition::new(
+                Address::from(Ed25519Address::from([0; Ed25519Address::LENGTH])),
+                1,
+            )?);
         Ok(self)
     }
 

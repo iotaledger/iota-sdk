@@ -16,7 +16,7 @@ use iota_sdk::{
         constants::SHIMMER_COIN_TYPE,
         secret::{mnemonic::MnemonicSecretManager, SecretManager},
     },
-    types::block::output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder},
+    types::block::output::BasicOutputBuilder,
     wallet::{account::types::Bip44Address, Account, ClientOptions, Result, Wallet},
 };
 
@@ -65,8 +65,7 @@ async fn main() -> Result<()> {
         let outputs_per_transaction = addresses_chunk
             .into_iter()
             .map(|a| {
-                BasicOutputBuilder::new_with_amount(SEND_AMOUNT)
-                    .add_unlock_condition(AddressUnlockCondition::new(a.address()))
+                BasicOutputBuilder::new_with_amount(SEND_AMOUNT, a.address())
                     .finish_output(token_supply)
                     .unwrap()
             })

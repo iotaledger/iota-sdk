@@ -372,7 +372,7 @@ pub(crate) fn verify_allowed_unlock_conditions(
 ) -> Result<(), Error> {
     for (index, unlock_condition) in unlock_conditions.iter().enumerate() {
         if !allowed_unlock_conditions.contains(unlock_condition.flag()) {
-            return Err(Error::UnallowedUnlockCondition {
+            return Err(Error::DisallowedUnlockCondition {
                 index,
                 kind: unlock_condition.kind(),
             });

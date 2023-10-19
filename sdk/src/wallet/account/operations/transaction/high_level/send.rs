@@ -9,9 +9,7 @@ use crate::{
     types::block::{
         address::Bech32Address,
         output::{
-            unlock_condition::{
-                AddressUnlockCondition, ExpirationUnlockCondition, StorageDepositReturnUnlockCondition,
-            },
+            unlock_condition::{ExpirationUnlockCondition, StorageDepositReturnUnlockCondition},
             BasicOutputBuilder, MinimumStorageDepositBasicOutput,
         },
         slot::SlotIndex,
@@ -174,8 +172,7 @@ where
                 .unwrap_or_else(|| default_return_address.address.clone());
 
             // Get the minimum required amount for an output assuming it does not need a storage deposit.
-            let output = BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)
-                .add_unlock_condition(AddressUnlockCondition::new(address))
+            let output = BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure, address)
                 .finish_output(token_supply)?;
 
             if amount >= output.amount() {
@@ -208,7 +205,7 @@ where
                     // address_and_amount.amount
                     BasicOutputBuilder::from(output.as_basic())
                         .with_amount(amount + storage_deposit_amount)
-                        .add_unlock_condition(
+                        .with_storage_deposit_return_unlock_condition(
                             // We send the storage_deposit_amount back to the sender, so only the additional amount is
                             // sent
                             StorageDepositReturnUnlockCondition::new(
@@ -217,7 +214,10 @@ where
                                 token_supply,
                             )?,
                         )
-                        .add_unlock_condition(ExpirationUnlockCondition::new(return_address, expiration_slot_index)?)
+                        .with_expiration_unlock_condition(ExpirationUnlockCondition::new(
+                            return_address,
+                            expiration_slot_index,
+                        )?)
                         .finish_output(token_supply)?,
                 )
             }

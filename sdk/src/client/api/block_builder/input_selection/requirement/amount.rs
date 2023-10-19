@@ -22,12 +22,9 @@ pub(crate) fn sdruc_not_expired(
     output: &Output,
     slot_index: SlotIndex,
 ) -> Option<&StorageDepositReturnUnlockCondition> {
-    // PANIC: safe to unwrap as outputs without unlock conditions have been filtered out already.
-    let unlock_conditions = output.unlock_conditions().unwrap();
-
-    unlock_conditions.storage_deposit_return().and_then(|sdr| {
-        let expired = unlock_conditions
-            .expiration()
+    output.storage_deposit_return_unlock_condition().and_then(|sdr| {
+        let expired = output
+            .expiration_unlock_condition()
             .map_or(false, |expiration| slot_index >= expiration.slot_index());
 
         // We only have to send the storage deposit return back if the output is not expired
