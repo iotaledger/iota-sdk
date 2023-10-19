@@ -254,22 +254,7 @@ impl Output {
         }
     }
 
-    def_is_as_opt!(Output: Basic, Account, Foundry, Nft, Delegation);
-
-    /// Checks whether the output is a [`AnchorOutput`].
-    pub fn is_anchor(&self) -> bool {
-        matches!(self, Self::Anchor(_))
-    }
-
-    /// Gets the output as an actual [`AnchorOutput`].
-    /// NOTE: Will panic if the output is not a [`AnchorOutput`].
-    pub fn as_anchor(&self) -> &AnchorOutput {
-        if let Self::Anchor(output) = self {
-            output
-        } else {
-            panic!("invalid downcast of non-AnchorOutput");
-        }
-    }
+    def_is_as_opt!(Output: Basic, Account, Foundry, Nft, Delegation, Anchor);
 
     /// Returns the address that is required to unlock this [`Output`] and the account or nft address that gets
     /// unlocked by it, if it's an account or nft.
