@@ -937,9 +937,11 @@ async fn print_address(account: &Account, address: &Bip44Address) -> Result<(), 
     let mut output_ids: &[OutputId] = &[];
     let mut amount = 0;
     let mut native_tokens = NativeTokensBuilder::new();
-    let mut nfts = Vec::new();
     let mut accounts = Vec::new();
     let mut foundries = Vec::new();
+    let mut nfts = Vec::new();
+    let mut delegations = Vec::new();
+    let mut anchors = Vec::new();
 
     if let Some(address) = addresses
         .iter()
@@ -959,16 +961,14 @@ async fn print_address(account: &Account, address: &Bip44Address) -> Result<(), 
                         native_tokens.add_native_tokens(nts.clone())?;
                     }
                     match &output_data.output {
-                        Output::Nft(nft) => nfts.push(nft.nft_id_non_null(output_id)),
+                        Output::Basic(_) => {}
                         Output::Account(account) => accounts.push(account.account_id_non_null(output_id)),
                         Output::Foundry(foundry) => foundries.push(foundry.id()),
-                        Output::Basic(_) => {}
-                        Output::Delegation(_) => {
-                            // TODO do we want to log them?
+                        Output::Nft(nft) => nfts.push(nft.nft_id_non_null(output_id)),
+                        Output::Delegation(delegation) => {
+                            delegations.push(delegation.delegation_id_non_null(output_id))
                         }
-                        Output::Anchor(_) => {
-                            // TODO do we want to log them?
-                        }
+                        Output::Anchor(anchor) => anchors.push(anchor.anchor_id_non_null(output_id)),
                     }
                     let unlock_conditions = output_data
                         .output
@@ -986,13 +986,15 @@ async fn print_address(account: &Account, address: &Bip44Address) -> Result<(), 
     }
 
     log = format!(
-        "{log}\n Outputs: {:#?}\n Base coin amount: {}\n Native Tokens: {:?}\n NFTs: {:?}\n Accounts: {:?}\n Foundries: {:?}\n",
+        "{log}\n Outputs: {:#?}\n Base coin amount: {}\n Native Tokens: {:?}\n Accounts: {:?}\n Foundries: {:?}\n NFTs: {:?}\n Delegations: {:?}\n Anchors: {:?}\n",
         output_ids,
         amount,
         native_tokens.finish_vec()?,
-        nfts,
         accounts,
         foundries,
+        nfts,
+        delegations,
+        anchors
     );
 
     println_log_info!("{log}");
