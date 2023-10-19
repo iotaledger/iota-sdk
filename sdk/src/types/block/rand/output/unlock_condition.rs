@@ -17,7 +17,7 @@ pub fn rand_address_unlock_condition() -> AddressUnlockCondition {
     rand_address().into()
 }
 
-/// Generates a random [`StateControllerAddressUnlockCondition`].
+/// Generates a random [`StateControllerAddressUnlockCondition`] that is different from `anchor_id`.
 pub fn rand_state_controller_address_unlock_condition_different_from(
     anchor_id: &AnchorId,
 ) -> StateControllerAddressUnlockCondition {
