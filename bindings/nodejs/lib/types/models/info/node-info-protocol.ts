@@ -114,11 +114,6 @@ export interface ProtocolParameters {
  */
 export interface RewardsParameters {
     /**
-     * The number of validation blocks that should be issued by a selected validator
-     * per slot during its epoch duties.
-     */
-    validationBlocksPerSlot: number;
-    /**
      * Profit Margin Exponent is used for shift operation for calculation of profit margin.
      */
     profitMarginExponent: number;
