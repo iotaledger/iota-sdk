@@ -6,7 +6,7 @@
 use iota_sdk::{
     client::{api::GetAddressesOptions, node_api::indexer::query_parameters::QueryParameter, Client, NodeInfoWrapper},
     types::{
-        api::core::response::TransactionState,
+        api::core::TransactionState,
         block::{
             output::{Output, OutputId},
             BlockWrapper,
