@@ -27,6 +27,7 @@ pub fn rand_anchor_address() -> AnchorAddress {
     AnchorAddress::new(AnchorId::from(rand_bytes_array()))
 }
 
+// TODO handle all address kinds
 /// Generates a random address.
 pub fn rand_address() -> Address {
     match rand_number::<u64>() % 3 {
