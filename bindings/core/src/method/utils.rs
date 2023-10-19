@@ -133,7 +133,7 @@ pub enum UtilsMethod {
     /// Computes the required storage deposit of an output.
     ComputeStorageDeposit {
         output: OutputDto,
-        storage_params: StorageScoreParameters,
+        storage_score_parameters: StorageScoreParameters,
     },
     /// Checks if the given mnemonic is valid.
     /// Expected response: [`Ok`](crate::Response::Ok)

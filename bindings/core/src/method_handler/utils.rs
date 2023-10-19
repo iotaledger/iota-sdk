@@ -78,7 +78,10 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
                 .collect::<Result<Vec<Output>>>()?;
             Response::Hash(InputsCommitment::new(inputs.iter()).to_string())
         }
-        UtilsMethod::ComputeStorageDeposit { output, storage_params } => {
+        UtilsMethod::ComputeStorageDeposit {
+            output,
+            storage_score_parameters: storage_params,
+        } => {
             let out = Output::try_from_dto(output)?;
             Response::MinimumRequiredStorageDeposit(out.storage_cost(storage_params).to_string())
         }

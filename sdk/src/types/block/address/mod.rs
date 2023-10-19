@@ -22,7 +22,7 @@ pub use self::{
     restricted::{AddressCapabilities, AddressCapabilityFlag, RestrictedAddress},
 };
 use crate::types::block::{
-    output::{Output, OutputId, StorageScore},
+    output::{Output, OutputId, StorageScore, StorageScoreParameters},
     semantic::{TransactionFailureReason, ValidationContext},
     signature::Signature,
     unlock::Unlock,
@@ -157,7 +157,7 @@ impl Address {
 }
 
 impl StorageScore for Address {
-    fn storage_score(&self, params: super::output::StorageScoreParameters) -> u64 {
+    fn storage_score(&self, params: StorageScoreParameters) -> u64 {
         match self {
             Address::Ed25519(a) => a.storage_score(params),
             Address::Account(a) => a.storage_score(params),

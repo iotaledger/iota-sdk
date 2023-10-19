@@ -30,8 +30,14 @@ pub use self::{
     state_controller_address::StateControllerAddressUnlockCondition,
     storage_deposit_return::StorageDepositReturnUnlockCondition, timelock::TimelockUnlockCondition,
 };
-use super::{StorageScore, StorageScoreParameters};
-use crate::types::block::{address::Address, create_bitflags, protocol::ProtocolParameters, slot::SlotIndex, Error};
+use crate::types::block::{
+    address::Address,
+    create_bitflags,
+    output::{StorageScore, StorageScoreParameters},
+    protocol::ProtocolParameters,
+    slot::SlotIndex,
+    Error,
+};
 
 ///
 #[derive(Clone, Eq, PartialEq, Hash, From)]

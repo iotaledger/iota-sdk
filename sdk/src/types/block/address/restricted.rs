@@ -7,7 +7,7 @@ use packable::{Packable, PackableExt};
 use super::Address;
 use crate::types::block::{
     capabilities::{Capabilities, CapabilityFlag},
-    output::StorageScore,
+    output::{StorageScore, StorageScoreParameters},
     Error,
 };
 
@@ -55,7 +55,11 @@ impl RestrictedAddress {
     }
 }
 
-impl StorageScore for RestrictedAddress {}
+impl StorageScore for RestrictedAddress {
+    fn storage_score(&self, params: StorageScoreParameters) -> u64 {
+        self.address.storage_score(params)
+    }
+}
 
 impl TryFrom<Address> for RestrictedAddress {
     type Error = Error;

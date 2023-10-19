@@ -3,13 +3,12 @@
 
 use packable::Packable;
 
-use super::OutputId;
 use crate::types::block::{
     address::Ed25519Address,
     output::{
         feature::{BlockIssuerFeature, BlockIssuerKey, Ed25519BlockIssuerKey},
         unlock_condition::{GovernorAddressUnlockCondition, StateControllerAddressUnlockCondition},
-        AccountId, AccountOutputBuilder, AddressUnlockCondition, BasicOutputBuilder,
+        AccountId, AccountOutputBuilder, AddressUnlockCondition, BasicOutputBuilder, OutputId,
     },
     slot::SlotIndex,
     BlockId,

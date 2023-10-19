@@ -29,7 +29,7 @@ impl ImplicitAccountCreationAddress {
 
 impl StorageScore for ImplicitAccountCreationAddress {
     fn storage_score(&self, params: StorageScoreParameters) -> u64 {
-        params.implicit_account_creation_address_offset()
+        params.implicit_account_creation_address_offset() + self.0.storage_score(params)
     }
 }
 
