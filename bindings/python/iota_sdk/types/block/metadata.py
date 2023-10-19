@@ -16,17 +16,15 @@ class BlockMetadata:
 
     Attributes:
         block_state: The block state.
-        tx_state: The transaction state.
+        transaction_state: The transaction state.
         block_failure_reason: The block failure reason.
-        tx_failure_reason: The transaction failure reason.
+        transaction_failure_reason: The transaction failure reason.
     """
     block_id: HexStr
-    # TODO: verify if really optional:
-    # https://github.com/iotaledger/tips-draft/pull/24/files#r1293426314
-    block_state: Optional[BlockState] = None
-    tx_state: Optional[TransactionState] = None
+    block_state: BlockState
+    transaction_state: Optional[TransactionState] = None
     block_failure_reason: Optional[BlockFailureReason] = None
-    tx_failure_reason: Optional[TransactionFailureReason] = None
+    transaction_failure_reason: Optional[TransactionFailureReason] = None
 
 
 class BlockState(Enum):

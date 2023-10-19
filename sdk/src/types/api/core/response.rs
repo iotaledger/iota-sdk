@@ -391,15 +391,13 @@ pub enum BlockFailureReason {
 #[serde(rename_all = "camelCase")]
 pub struct BlockMetadataResponse {
     pub block_id: BlockId,
-    // TODO: verify if really optional: https://github.com/iotaledger/tips-draft/pull/24/files#r1293426314
+    pub block_state: BlockState,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub block_state: Option<BlockState>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub tx_state: Option<TransactionState>,
+    pub transaction_state: Option<TransactionState>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub block_failure_reason: Option<BlockFailureReason>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub tx_failure_reason: Option<TransactionFailureReason>,
+    pub transaction_failure_reason: Option<TransactionFailureReason>,
 }
 
 /// Response of GET /api/core/v3/outputs/{output_id}.

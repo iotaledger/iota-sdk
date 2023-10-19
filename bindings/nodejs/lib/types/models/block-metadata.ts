@@ -17,11 +17,11 @@ export interface IBlockMetadata {
     /**
      * The block state.
      */
-    blockState?: BlockState;
+    blockState: BlockState;
     /**
      * The transaction state.
      */
-    txState?: TransactionState;
+    transactionState?: TransactionState;
     /**
      * The block failure reason.
      */
@@ -29,5 +29,5 @@ export interface IBlockMetadata {
     /**
      * The transaction failure reason.
      */
-    txFailureReason?: TransactionFailureReason;
+    transactionFailureReason?: TransactionFailureReason;
 }

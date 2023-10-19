@@ -89,7 +89,7 @@ where
                 let mut failed = false;
                 for (index, block_id) in block_ids.clone().iter().enumerate() {
                     let block_metadata = self.client().get_block_metadata(block_id).await?;
-                    if let Some(transaction_state) = block_metadata.tx_state {
+                    if let Some(transaction_state) = block_metadata.transaction_state {
                         match transaction_state {
                             // TODO: find out what to do with TransactionState::Confirmed
                             TransactionState::Finalized => return Ok(*block_id),
@@ -102,10 +102,7 @@ where
                         };
                     }
                     // Only reissue latest attachment of the block
-                    let should_reissue = block_metadata
-                        .block_state
-                        .map_or(false, |block_state| block_state == BlockState::Rejected);
-                    if index == block_ids_len - 1 && should_reissue {
+                    if index == block_ids_len - 1 && block_metadata.block_state == BlockState::Rejected {
                         let reissued_block = self
                             .client()
                             .build_basic_block(
