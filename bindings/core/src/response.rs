@@ -15,7 +15,7 @@ use iota_sdk::{
     },
     types::{
         api::{
-            core::response::{
+            core::{
                 BlockMetadataResponse, InfoResponse as NodeInfo, IssuanceBlockHeaderResponse,
                 OutputWithMetadataResponse, PeerResponse,
             },
