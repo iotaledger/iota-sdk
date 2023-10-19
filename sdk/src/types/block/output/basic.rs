@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use alloc::collections::BTreeSet;
+use core::mem::size_of;
 
 use packable::{Packable, PackableExt};
 
@@ -263,11 +264,36 @@ impl BasicOutputBuilder {
     pub fn finish_output<'a>(self, params: impl Into<ValidationParams<'a>> + Send) -> Result<Output, Error> {
         Ok(Output::Basic(self.finish_with_params(params)?))
     }
+
+    fn stored_len(&self) -> usize {
+        // Type
+        size_of::<u8>()
+            // Amount
+            + size_of::<u64>()
+            // Mana
+            + size_of::<u64>()
+            // Native Tokens
+            + size_of::<u8>()
+            + self.native_tokens.iter().map(|nt| nt.packed_len()).sum::<usize>()
+            // Unlock Conditions
+            + size_of::<u8>()
+            + self.unlock_conditions.iter().map(|uc| uc.packed_len()).sum::<usize>()
+            // Features
+            + size_of::<u8>()
+            + self.features.iter().map(|uc| uc.packed_len()).sum::<usize>()
+    }
 }
 
 impl StorageScore for BasicOutputBuilder {
     fn storage_score(&self, params: StorageScoreParameters) -> u64 {
-        self.clone().finish().unwrap().storage_score(params)
+        params.output_offset()
+            + self.stored_len() as u64 * params.data_factor() as u64
+            + self
+                .unlock_conditions
+                .iter()
+                .map(|uc| uc.storage_score(params))
+                .sum::<u64>()
+            + self.features.iter().map(|uc| uc.storage_score(params)).sum::<u64>()
     }
 }
 
@@ -394,13 +420,32 @@ impl BasicOutput {
 
         None
     }
+
+    fn stored_len(&self) -> usize {
+        // Type
+        size_of::<u8>()
+            // Amount
+            + size_of::<u64>()
+            // Mana
+            + size_of::<u64>()
+            // Native Tokens
+            + size_of::<u8>()
+            + self.native_tokens.iter().map(|nt| nt.packed_len()).sum::<usize>()
+            // Unlock Conditions
+            + size_of::<u8>()
+            + self.unlock_conditions.iter().map(|uc| uc.packed_len()).sum::<usize>()
+            // Features
+            + size_of::<u8>()
+            + self.features.iter().map(|uc| uc.packed_len()).sum::<usize>()
+    }
 }
 
 impl StorageScore for BasicOutput {
     fn storage_score(&self, params: StorageScoreParameters) -> u64 {
         params.output_offset()
-            + self.packed_len() as u64 * params.data_factor() as u64
+            + self.stored_len() as u64 * params.data_factor() as u64
             + self.unlock_conditions.storage_score(params)
+            + self.features.storage_score(params)
     }
 }
 

@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use alloc::collections::BTreeSet;
+use core::mem::size_of;
 
 use packable::{
     error::{UnpackError, UnpackErrorExt},
@@ -217,11 +218,36 @@ impl DelegationOutputBuilder {
     pub fn finish_output(self, token_supply: u64) -> Result<Output, Error> {
         Ok(Output::Delegation(self.finish_with_params(token_supply)?))
     }
+
+    fn stored_len(&self) -> usize {
+        // Type
+        size_of::<u8>()
+            // Amount
+            + size_of::<u64>()
+            // Delegated Amount
+            + size_of::<u64>()
+            // DelegationId
+            + DelegationId::LENGTH
+            // Account Address
+            + AccountAddress::LENGTH
+            // Start/End Epoch
+            + 2 * size_of::<EpochIndex>()
+            // Unlock Conditions
+            + size_of::<u8>()
+            + self.unlock_conditions.iter().map(|uc| uc.packed_len()).sum::<usize>()
+    }
 }
 
 impl StorageScore for DelegationOutputBuilder {
     fn storage_score(&self, params: StorageScoreParameters) -> u64 {
-        self.clone().finish().unwrap().storage_score(params)
+        params.output_offset()
+            + self.stored_len() as u64 * params.data_factor() as u64
+            + params.delegation_offset()
+            + self
+                .unlock_conditions
+                .iter()
+                .map(|uc| uc.storage_score(params))
+                .sum::<u64>()
     }
 }
 
@@ -369,6 +395,24 @@ impl DelegationOutput {
         // TODO add end_epoch validation rules
         Ok(())
     }
+
+    fn stored_len(&self) -> usize {
+        // Type
+        size_of::<u8>()
+            // Amount
+            + size_of::<u64>()
+            // Delegated Amount
+            + size_of::<u64>()
+            // DelegationId
+            + DelegationId::LENGTH
+            // Account Address
+            + AccountAddress::LENGTH
+            // Start/End Epoch
+            + 2 * size_of::<EpochIndex>()
+            // Unlock Conditions
+            + size_of::<u8>()
+            + self.unlock_conditions.iter().map(|uc| uc.packed_len()).sum::<usize>()
+    }
 }
 
 impl StateTransitionVerifier for DelegationOutput {
@@ -405,7 +449,7 @@ impl StateTransitionVerifier for DelegationOutput {
 impl StorageScore for DelegationOutput {
     fn storage_score(&self, params: StorageScoreParameters) -> u64 {
         params.output_offset()
-            + self.packed_len() as u64 * params.data_factor() as u64
+            + self.stored_len() as u64 * params.data_factor() as u64
             + params.delegation_offset()
             + self.unlock_conditions.storage_score(params)
     }
