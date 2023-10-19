@@ -111,7 +111,6 @@
 
 //     let alias_output_1 = AliasOutputBuilder::from(alias_output_0.as_alias())
 //         .with_alias_id(alias_id)
-//         .with_state_index(alias_output_0.as_alias().state_index() + 1)
 //         .with_foundry_counter(alias_output_0.as_alias().foundry_counter() + 1)
 //         .finish_output(protocol_parameters.token_supply())?;
 

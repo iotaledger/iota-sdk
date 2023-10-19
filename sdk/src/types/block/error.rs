@@ -156,8 +156,6 @@ pub enum Error {
     },
     BlockIssuerKeysNotUniqueSorted,
     RemainingBytesAfterBlock,
-    // TODO remove?
-    SelfControlledAccountOutput(AccountId),
     SelfControlledAnchorOutput(AnchorId),
     SelfDepositAccount(AccountId),
     SelfDepositNft(NftId),
@@ -362,9 +360,6 @@ impl fmt::Display for Error {
             Self::BlockIssuerKeysNotUniqueSorted => write!(f, "block issuer keys are not unique and/or sorted"),
             Self::RemainingBytesAfterBlock => {
                 write!(f, "remaining bytes after block")
-            }
-            Self::SelfControlledAccountOutput(account_id) => {
-                write!(f, "self controlled account output, account ID {account_id}")
             }
             Self::SelfControlledAnchorOutput(anchor_id) => {
                 write!(f, "self controlled anchor output, anchor ID {anchor_id}")

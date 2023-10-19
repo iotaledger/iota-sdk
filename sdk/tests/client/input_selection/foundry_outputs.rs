@@ -98,13 +98,6 @@ fn missing_input_account_for_foundry() {
 //     assert!(unsorted_eq(&selected.inputs, &inputs));
 //     // Account next state + foundry
 //     assert_eq!(selected.outputs.len(), 2);
-//     // Account state index is increased
-//     selected.outputs.iter().for_each(|output| {
-//         if let Output::Account(account_output) = &output {
-//             // Input account has index 0, output should have index 1
-//             assert_eq!(account_output.state_index(), 1);
-//         }
-//     });
 // }
 
 #[test]

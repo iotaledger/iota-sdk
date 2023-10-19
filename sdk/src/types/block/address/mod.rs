@@ -90,22 +90,7 @@ impl Address {
         }
     }
 
-    def_is_as_opt!(Address: Ed25519, Account, Nft, ImplicitAccountCreation, Restricted);
-
-    /// Checks whether the address is an [`AnchorAddress`].
-    pub fn is_anchor(&self) -> bool {
-        matches!(self, Self::Anchor(_))
-    }
-
-    /// Gets the address as an actual [`AnchorAddress`].
-    /// PANIC: do not call on a non-anchor address.
-    pub fn as_anchor(&self) -> &AnchorAddress {
-        if let Self::Anchor(address) = self {
-            address
-        } else {
-            panic!("as_anchor called on a non-anchor address");
-        }
-    }
+    def_is_as_opt!(Address: Ed25519, Account, Nft, ImplicitAccountCreation, Restricted, Anchor);
 
     /// Tries to create an [`Address`] from a bech32 encoded string.
     pub fn try_from_bech32(address: impl AsRef<str>) -> Result<Self, Error> {
