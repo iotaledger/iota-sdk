@@ -3,6 +3,7 @@
 
 use packable::Packable;
 
+use super::OutputId;
 use crate::types::block::{
     address::Ed25519Address,
     output::{
@@ -10,11 +11,13 @@ use crate::types::block::{
         unlock_condition::{GovernorAddressUnlockCondition, StateControllerAddressUnlockCondition},
         AccountId, AccountOutputBuilder, AddressUnlockCondition, BasicOutputBuilder,
     },
+    slot::SlotIndex,
+    BlockId,
 };
 
 const DEFAULT_STORAGE_COST: u64 = 500;
 const DEFAULT_FACTOR_DATA: u8 = 1;
-const DEFAULT_OFFSET_OUTPUT: u64 = 10;
+const DEFAULT_OFFSET_OUTPUT_OVERHEAD: u64 = 10;
 const DEFAULT_OFFSET_ED25519_BLOCK_ISSUER_KEY: u64 = 50;
 const DEFAULT_OFFSET_STAKING_FEATURE: u64 = 100;
 const DEFAULT_OFFSET_DELEGATION: u64 = 100;
@@ -33,8 +36,8 @@ pub struct StorageScoreParameters {
     storage_cost: u64,
     /// Defines the factor to be used for data only fields.
     factor_data: u8,
-    /// Defines the offset to be used for key/lookup generating fields.
-    offset_output: u64,
+    /// Defines the offset to be applied to all outputs for the overhead of handling them in storage.
+    offset_output_overhead: u64,
     /// Defines the offset to be used for block issuer feature public keys.
     offset_ed25519_block_issuer_key: u64,
     /// Defines the offset to be used for staking feature.
@@ -48,7 +51,7 @@ impl Default for StorageScoreParameters {
         Self {
             storage_cost: DEFAULT_STORAGE_COST,
             factor_data: DEFAULT_FACTOR_DATA,
-            offset_output: DEFAULT_OFFSET_OUTPUT,
+            offset_output_overhead: DEFAULT_OFFSET_OUTPUT_OVERHEAD,
             offset_ed25519_block_issuer_key: DEFAULT_OFFSET_ED25519_BLOCK_ISSUER_KEY,
             offset_staking_feature: DEFAULT_OFFSET_STAKING_FEATURE,
             offset_delegation: DEFAULT_OFFSET_DELEGATION,
@@ -60,19 +63,19 @@ impl StorageScoreParameters {
     /// Creates a new [`StorageScoreParameters`].
     pub fn new(
         storage_cost: u64,
-        factor_data: u8,
-        offset_output: u64,
-        offset_ed25519_block_issuer_key: u64,
-        offset_staking_feature: u64,
-        offset_delegation: u64,
+        data_factor: u8,
+        output_overhead_offset: u64,
+        ed25519_block_issuer_key_offset: u64,
+        staking_feature_offset: u64,
+        delegation_offset: u64,
     ) -> Self {
         Self {
             storage_cost,
-            factor_data,
-            offset_output,
-            offset_ed25519_block_issuer_key,
-            offset_staking_feature,
-            offset_delegation,
+            factor_data: data_factor,
+            offset_output_overhead: output_overhead_offset,
+            offset_ed25519_block_issuer_key: ed25519_block_issuer_key_offset,
+            offset_staking_feature: staking_feature_offset,
+            offset_delegation: delegation_offset,
         }
     }
 
@@ -88,9 +91,9 @@ impl StorageScoreParameters {
         self
     }
 
-    /// Sets the storage score offset per output.
-    pub fn with_output_offset(mut self, offset: u64) -> Self {
-        self.offset_output = offset;
+    /// Sets the storage score offset overhead per output.
+    pub fn with_output_overhead_offset(mut self, offset: u64) -> Self {
+        self.offset_output_overhead = offset;
         self
     }
 
@@ -122,9 +125,9 @@ impl StorageScoreParameters {
         self.factor_data
     }
 
-    /// Returns the storage score offset per output.
-    pub fn output_offset(&self) -> u64 {
-        self.offset_output
+    /// Returns the storage score offset overhead per output.
+    pub fn output_overhead_offset(&self) -> u64 {
+        self.offset_output_overhead
     }
 
     /// Returns the storage score offset for Ed25519 block issuer key fields.
@@ -142,6 +145,14 @@ impl StorageScoreParameters {
         self.offset_delegation
     }
 
+    /// Returns the storage score offset per output.
+    pub fn output_offset(&self) -> u64 {
+        self.output_overhead_offset()
+            + (self.data_factor() as usize * (OutputId::LENGTH + BlockId::LENGTH + core::mem::size_of::<SlotIndex>()))
+                as u64
+    }
+
+    /// Returns the storage score offset for implicit account creation address fields.
     pub fn implicit_account_creation_address_offset(&self) -> u64 {
         let null_address = Ed25519Address::null();
         let basic_output_score = BasicOutputBuilder::new_with_amount(0)
