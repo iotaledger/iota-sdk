@@ -964,7 +964,6 @@ async fn print_address(account: &Account, address: &AccountAddress) -> Result<()
     let mut native_tokens = NativeTokensBuilder::new();
     let mut nfts = Vec::new();
     let mut aliases = Vec::new();
-    let mut foundries = Vec::new();
 
     let hrp = address.address().hrp();
 
@@ -996,10 +995,7 @@ async fn print_address(account: &Account, address: &AccountAddress) -> Result<()
                             alias.alias_id_non_null(output_id),
                             alias.alias_address(output_id).to_bech32(*hrp),
                         )),
-                        Output::Foundry(foundry) => {
-                            foundries.push((foundry.id(), *foundry.alias_address().to_bech32(*hrp)))
-                        }
-                        Output::Basic(_) | Output::Treasury(_) => {}
+                        Output::Basic(_) | Output::Foundry(_) | Output::Treasury(_) => {}
                     }
                     let unlock_conditions = output_data
                         .output
@@ -1037,19 +1033,13 @@ async fn print_address(account: &Account, address: &AccountAddress) -> Result<()
 
     formatted_string.push_str("\nNFTs:");
     for (id, bech32) in nfts.into_iter() {
-        formatted_string.push_str(&format!(
-            "{0}{1:<12}{id}{0}{2:<12}{bech32}",
-            "\n  ", "Id/Address:", "Bech32:"
-        ));
+        formatted_string.push_str(&format!("{0}{1:<8}{id}{0}{2:<8}{bech32}", "\n  ", "Id:", "Bech32:"));
     }
     formatted_string.push_str("\n");
 
     formatted_string.push_str("\nAliases:");
     for (id, bech32) in aliases.into_iter() {
-        formatted_string.push_str(&format!(
-            "{0}{1:<12}{id}{0}{2:<12}{bech32}",
-            "\n  ", "Id/Address:", "Bech32:"
-        ));
+        formatted_string.push_str(&format!("{0}{1:<8}{id}{0}{2:<8}{bech32}", "\n  ", "Id:", "Bech32:"));
     }
     formatted_string.push_str("\n");
 
