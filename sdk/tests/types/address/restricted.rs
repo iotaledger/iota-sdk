@@ -64,12 +64,13 @@ fn restricted_ed25519() {
         "iota19qqwlhq39mlzv2esf08n0xexcvd66q5lv9hw8mz25c695dnwfj0y8gcq3l9hek"
     );
 
-    // Restricted Ed25519 Address (Every Capability Allowed)
-    address.set_allowed_capabilities(AddressCapabilities::all());
-    assert_eq!(
-        address.clone().to_bech32_unchecked("iota"),
-        "iota19qqwlhq39mlzv2esf08n0xexcvd66q5lv9hw8mz25c695dnwfj0y8gcplupydhwt"
-    );
+    // TODO reenable when TIP is updated
+    // // Restricted Ed25519 Address (Every Capability Allowed)
+    // address.set_allowed_capabilities(AddressCapabilities::all());
+    // assert_eq!(
+    //     address.clone().to_bech32_unchecked("iota"),
+    //     "iota19qqwlhq39mlzv2esf08n0xexcvd66q5lv9hw8mz25c695dnwfj0y8gcplupydhwt"
+    // );
 
     address.set_allowed_capabilities(AddressCapabilities::none());
     assert_eq!(
@@ -106,12 +107,13 @@ fn restricted_account() {
         "iota19qy0rsq3ld2d7jjwtvr5vffklwkvw7dlsrxytcpmcdqssdjc0d80exqqdyjudm"
     );
 
-    // Restricted Account Address (Every Capability Allowed)
-    address.set_allowed_capabilities(AddressCapabilities::all());
-    assert_eq!(
-        address.clone().to_bech32_unchecked("iota"),
-        "iota19qy0rsq3ld2d7jjwtvr5vffklwkvw7dlsrxytcpmcdqssdjc0d80exqplurds6sq"
-    );
+    // TODO reenable when TIP is updated
+    // // Restricted Account Address (Every Capability Allowed)
+    // address.set_allowed_capabilities(AddressCapabilities::all());
+    // assert_eq!(
+    //     address.clone().to_bech32_unchecked("iota"),
+    //     "iota19qy0rsq3ld2d7jjwtvr5vffklwkvw7dlsrxytcpmcdqssdjc0d80exqplurds6sq"
+    // );
 
     address.set_allowed_capabilities(AddressCapabilities::none());
     assert_eq!(
@@ -148,12 +150,13 @@ fn restricted_nft() {
         "iota19qgvw2n94efawzue54lhycmml5w4afa6526t5z2unzdkvlfc2kqg0kcqek0lex"
     );
 
-    // Restricted NFT Address (Every Capability Allowed)
-    address.set_allowed_capabilities(AddressCapabilities::all());
-    assert_eq!(
-        address.clone().to_bech32_unchecked("iota"),
-        "iota19qgvw2n94efawzue54lhycmml5w4afa6526t5z2unzdkvlfc2kqg0kcpluts738a"
-    );
+    // TODO reenable when TIP is updated
+    // // Restricted NFT Address (Every Capability Allowed)
+    // address.set_allowed_capabilities(AddressCapabilities::all());
+    // assert_eq!(
+    //     address.clone().to_bech32_unchecked("iota"),
+    //     "iota19qgvw2n94efawzue54lhycmml5w4afa6526t5z2unzdkvlfc2kqg0kcpluts738a"
+    // );
 
     address.set_allowed_capabilities(AddressCapabilities::none());
     assert_eq!(
