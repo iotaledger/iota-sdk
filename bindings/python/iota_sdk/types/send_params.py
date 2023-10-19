@@ -114,9 +114,7 @@ class CreateAccountOutputParams():
         address: A Bech32 encoded address which will control the account. Default will use the first address of the account.
         immutable_metadata: Immutable account metadata.
         metadata: Account metadata.
-        state_metadata: Account state metadata.
     """
     address: str
     immutable_metadata: Optional[str] = None
     metadata: Optional[str] = None
-    state_metadata: Optional[str] = None

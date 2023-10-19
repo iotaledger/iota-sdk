@@ -116,19 +116,12 @@ def test_output():
         "foundryCounter": 0,
         "unlockConditions": [
             {
-                "type": 4,
+                "type": 0,
                 "address": {
                     "type": 0,
                     "pubKeyHash": "0x1f964c683db3072db2ad26ec4b4bee69fb4224755e65566e284fc2aac057edbc"
                 }
             },
-            {
-                "type": 5,
-                "address": {
-                    "type": 0,
-                    "pubKeyHash": "0x1f964c683db3072db2ad26ec4b4bee69fb4224755e65566e284fc2aac057edbc"
-                }
-            }
         ],
         "features": [
             {
@@ -151,19 +144,12 @@ def test_output():
         "foundryCounter": 1,
         "unlockConditions": [
             {
-                "type": 4,
+                "type": 0,
                 "address": {
                     "type": 0,
                     "pubKeyHash": "0xc5976c01059227e9246686f138b29d13c3a85efd8a2154729dce23a3dfd52119"
                 }
             },
-            {
-                "type": 5,
-                "address": {
-                    "type": 0,
-                    "pubKeyHash": "0xc5976c01059227e9246686f138b29d13c3a85efd8a2154729dce23a3dfd52119"
-                }
-            }
         ],
         "immutableFeatures": [
             {

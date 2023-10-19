@@ -19,7 +19,6 @@ hexAddress = Utils.bech32_to_hex(
     'rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy')
 
 account_id = '0x0000000000000000000000000000000000000000000000000000000000000000'
-state_metadata = data = utf8_to_hex('Hello, World!')
 unlock_conditions = [
     AddressUnlockCondition(Ed25519Address(hexAddress)),
 ]
@@ -35,7 +34,6 @@ immutable_features = [
 # Build account output
 account_output = client.build_account_output(
     account_id=account_id,
-    state_metadata=state_metadata,
     unlock_conditions=unlock_conditions,
     features=features,
     immutable_features=immutable_features

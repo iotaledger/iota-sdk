@@ -155,8 +155,6 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
                              amount: Optional[int] = None,
                              mana: Optional[int] = None,
                              native_tokens: Optional[List[NativeToken]] = None,
-                             state_index: Optional[int] = None,
-                             state_metadata: Optional[str] = None,
                              foundry_counter: Optional[int] = None,
                              features: Optional[List[Feature]] = None,
                              immutable_features: Optional[List[Feature]] = None) -> AccountOutput:
@@ -168,8 +166,6 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
             amount: The amount of base coins in the new output.
             mana: Amount of stored Mana held by this output.
             native_tokens: Native tokens added to the new output.
-            state_index: A counter that must increase by 1 every time the account is state transitioned.
-            state_metadata: Metadata that can only be changed by the state controller.
             foundry_counter: A counter that denotes the number of foundries created by this account output.
             features: A list of features.
             immutable_features: A list of immutable features.
