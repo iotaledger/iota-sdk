@@ -15,8 +15,6 @@ use crate::types::block::{slot::EpochIndex, Error};
 #[packable(unpack_error = Error)]
 #[getset(get_copy = "pub")]
 pub struct RewardsParameters {
-    /// The number of validation blocks that should be issued by a selected validator per slot during its epoch duties.
-    validator_blocks_per_slot: u8,
     /// Used for shift operation during calculation of profit margin.
     profit_margin_exponent: u8,
     /// The length of the bootstrapping phase in epochs.
@@ -37,7 +35,6 @@ impl Default for RewardsParameters {
     fn default() -> Self {
         // TODO: use actual values
         Self {
-            validator_blocks_per_slot: Default::default(),
             profit_margin_exponent: Default::default(),
             bootstrapping_duration: Default::default(),
             mana_share_coefficient: Default::default(),

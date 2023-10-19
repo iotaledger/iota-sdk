@@ -6,9 +6,11 @@
  */
 enum PayloadType {
     /** A tagged data payload. */
-    TaggedData = 5,
+    TaggedData = 0,
     /** A transaction payload. */
-    Transaction = 6,
+    Transaction = 1,
+    /** A candidacy announcement payload. */
+    CandidacyAnnouncement = 2,
 }
 
 /**

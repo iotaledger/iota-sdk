@@ -3,13 +3,7 @@
 
 use core::str::FromStr;
 
-use iota_sdk::types::{
-    block::{
-        output::RentStructure, protocol::ProtocolParameters, rand::bytes::rand_bytes_array, BlockHash, BlockId,
-        BlockWrapper, BlockWrapperDto,
-    },
-    TryFromDto,
-};
+use iota_sdk::types::block::{rand::bytes::rand_bytes_array, BlockHash, BlockId};
 use packable::PackableExt;
 
 const BLOCK_ID: &str = "0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c64900000000";
@@ -67,11 +61,11 @@ fn memory_layout() {
     assert_eq!(block_id.as_ref(), memory_layout);
 }
 
-fn protocol_parameters() -> ProtocolParameters {
-    ProtocolParameters::new(3, "test", "rms", RentStructure::default(), 0, 1695275822, 10, 0).unwrap()
-}
+// TODO: re-enable below tests when source is updated
+// fn protocol_parameters() -> ProtocolParameters {
+//     ProtocolParameters::new(3, "test", "rms", RentStructure::default(), 0, 1695275822, 10, 0).unwrap()
+// }
 
-// TODO
 // #[test]
 // fn basic_block_id_tagged_data_payload() {
 //     // Test from https://github.com/iotaledger/tips-draft/blob/tip46/tips/TIP-0046/tip-0046.md#basic-block-id-tagged-data-payload
@@ -144,7 +138,6 @@ fn protocol_parameters() -> ProtocolParameters {
 //     );
 // }
 
-// TODO
 // #[test]
 // fn basic_block_id_transaction_payload() {
 //     // Test from https://github.com/iotaledger/tips-draft/blob/tip46/tips/TIP-0046/tip-0046.md#basic-block-id-transaction-payload
@@ -200,6 +193,7 @@ fn protocol_parameters() -> ProtocolParameters {
 //               }
 //             ],
 //             "allotments": [],
+//             "capabilities": 0,
 //             "payload": {
 //               "type": 5,
 //               "tag": "0x1d7b3e11697264111e130b0e",
@@ -245,13 +239,13 @@ fn protocol_parameters() -> ProtocolParameters {
 // 105, 17, 60, 11, 92, 1,             11, 90, 72, 56, 79, 56, 47, 74, 73, 71, 28, 72, 96, 104, 60, 111, 10, 13, 68,
 // 111, 1, 46, 27, 17, 124, 78,             64, 95, 94, 36, 73, 124, 114, 105, 31, 67, 83, 92, 11, 66, 1, 22, 48, 7, 33,
 // 120, 3, 0, 96, 120, 4, 11, 15,             81, 80, 125, 53, 114, 53, 90, 69, 120, 57, 9, 94, 87, 47, 18, 85, 0, 64,
-// 27, 125, 34, 12, 119, 43, 86, 22,             90, 18, 31, 1, 0, 0, 6, 0, 0, 0, 2, 248, 88, 2, 55, 185, 61, 170, 50,
+// 27, 125, 34, 12, 119, 43, 86, 22,             90, 18, 32, 1, 0, 0, 6, 0, 0, 0, 2, 248, 88, 2, 55, 185, 61, 170, 50,
 // 28, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,             0, 36, 255, 155, 48, 56, 80, 111, 177, 180, 6, 48, 106, 73, 96, 1,
 // 195, 226, 78, 43, 224, 124, 131, 131,             23, 146, 43, 242, 29, 104, 106, 7, 143, 10, 0, 183, 12, 111, 134,
 // 161, 234, 3, 165, 154, 113, 215, 61, 205,             7, 226, 8, 43, 189, 240, 206, 151, 31, 170, 33, 116, 131, 72,
 // 188, 162, 47, 176, 35, 1, 0, 3, 16, 39, 0, 0,             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 217, 248,
 // 68, 88, 40, 109, 196, 28, 211, 71, 137, 222, 197,             102, 205, 9, 108, 244, 125, 233, 145, 170, 54, 169,
-// 122, 235, 250, 234, 20, 18, 143, 109, 0, 0, 0, 33, 0,             0, 0, 5, 0, 0, 0, 12, 29, 123, 62, 17, 105, 114,
+// 122, 235, 250, 234, 20, 18, 143, 109, 0, 0, 0, 0, 33,             0, 0, 0, 5, 0, 0, 0, 12, 29, 123, 62, 17, 105, 114,
 // 100, 17, 30, 19, 11, 14, 12, 0, 0, 0, 29, 123, 62, 17,             105, 114, 100, 17, 30, 19, 11, 14, 1, 0, 0, 0,
 // 128, 51, 97, 254, 30, 255, 200, 153, 220, 167, 249, 49, 216,             173, 7, 192, 27, 162, 58, 170, 147, 249,
 // 134, 173, 176, 77, 76, 23, 207, 99, 104, 216, 204, 221, 186, 195,             170, 172, 65, 62, 1, 147, 225, 109,
@@ -268,7 +262,7 @@ fn protocol_parameters() -> ProtocolParameters {
 
 //     assert_eq!(
 //         block_id,
-//         "0x22215ad9e912989a4886d48a7147b23b753c251861cd0ed14649a11cd85028f60200000000000000"
+//         "0x95f37c6a1e838133726aaefa8c33a65204bfe811000542f593a6b0b997bc78d90200000000000000"
 //     );
 // }
 
