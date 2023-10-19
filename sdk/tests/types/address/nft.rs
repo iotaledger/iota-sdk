@@ -12,6 +12,7 @@ use iota_sdk::types::block::{
     Error,
 };
 use packable::PackableExt;
+use pretty_assertions::assert_eq;
 
 const NFT_ID: &str = "0xa9ede98a7f0223fa7a49fbc586f7a88bb4f0d152f282b19bcebd05c9e8a02370";
 const NFT_BECH32: &str = "rms1zz57m6v20upz87n6f8autphh4z9mfux32teg9vvme67stj0g5q3hqd6l53z";

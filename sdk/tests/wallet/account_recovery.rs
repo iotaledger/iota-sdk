@@ -14,6 +14,7 @@ use iota_sdk::{
     },
     wallet::Result,
 };
+use pretty_assertions::assert_eq;
 
 use crate::wallet::common::{make_wallet, setup, tear_down};
 

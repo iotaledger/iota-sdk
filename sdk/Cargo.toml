@@ -126,6 +126,7 @@ wasm-bindgen-futures = { version = "0.4.37", default-features = false, optional 
 
 [dev-dependencies]
 iota-sdk = { path = ".", default-features = false, features = ["rand"] }
+pretty_assertions = { version = "1.4.0", default-features = false, features = [ "alloc" ] }
 
 dotenvy = { version = "0.15.7", default-features = false }
 fern-logger = { version = "0.5.0", default-features = false }

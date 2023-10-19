@@ -594,6 +594,8 @@ fn merge_unlocks(
 
 #[cfg(test)]
 mod tests {
+    use pretty_assertions::assert_eq;
+
     use super::*;
     use crate::{
         client::{api::GetAddressesOptions, constants::IOTA_COIN_TYPE, secret::SecretManager},

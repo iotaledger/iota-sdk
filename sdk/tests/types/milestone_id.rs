@@ -5,6 +5,7 @@ use core::str::FromStr;
 
 use iota_sdk::types::block::payload::milestone::MilestoneId;
 use packable::PackableExt;
+use pretty_assertions::assert_eq;
 
 const MILESTONE_ID: &str = "0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c649";
 

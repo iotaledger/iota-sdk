@@ -3,6 +3,7 @@
 
 pub use iota_sdk::types::block::payload::milestone::MilestoneIndex;
 pub use packable::PackableExt;
+use pretty_assertions::assert_eq;
 
 #[test]
 fn debug_impl() {
