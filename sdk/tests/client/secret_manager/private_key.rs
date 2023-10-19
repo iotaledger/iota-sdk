@@ -7,6 +7,7 @@ use iota_sdk::client::{
     secret::{private_key::PrivateKeySecretManager, SecretManager},
     Result,
 };
+use pretty_assertions::assert_eq;
 
 #[tokio::test]
 async fn private_key_secret_manager_hex() -> Result<()> {

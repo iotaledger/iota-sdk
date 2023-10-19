@@ -18,6 +18,7 @@ use iota_sdk::{
     types::block::address::ToBech32Ext,
     wallet::{ClientOptions, Error, Result, Wallet},
 };
+use pretty_assertions::assert_eq;
 
 use crate::wallet::common::{setup, tear_down, DEFAULT_MNEMONIC, NODE_LOCAL};
 

@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use iota_sdk::wallet::Result;
+use pretty_assertions::assert_eq;
 #[cfg(feature = "stronghold")]
 use {
     iota_sdk::client::{

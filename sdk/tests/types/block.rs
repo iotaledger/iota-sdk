@@ -17,6 +17,7 @@ use iota_sdk::{
     },
 };
 use packable::{error::UnpackError, PackableExt};
+use pretty_assertions::assert_eq;
 
 #[test]
 fn default_finish_zero_nonce() {
