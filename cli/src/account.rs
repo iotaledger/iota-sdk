@@ -96,7 +96,7 @@ pub async fn account_prompt_internal(
                 }
                 _ => {
                     // Prepend `Account: ` so the parsing will be correct
-                    let command = format!("Account: {}", command);
+                    let command = format!("Account: {command}");
                     let account_cli = match AccountCli::try_parse_from(command.split_whitespace()) {
                         Ok(account_cli) => account_cli,
                         Err(err) => {
