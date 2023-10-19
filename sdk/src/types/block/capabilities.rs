@@ -146,7 +146,7 @@ impl<Flag> Eq for Capabilities<Flag> {}
 
 impl<Flag> PartialOrd for Capabilities<Flag> {
     fn partial_cmp(&self, other: &Self) -> Option<core::cmp::Ordering> {
-        self.bytes.partial_cmp(&other.bytes)
+        Some(self.cmp(&other))
     }
 }
 
