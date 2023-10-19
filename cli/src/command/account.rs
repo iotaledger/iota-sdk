@@ -47,6 +47,11 @@ impl AccountCli {
 #[derive(Debug, Subcommand)]
 #[allow(clippy::large_enum_variant)]
 pub enum AccountCommand {
+    /// Show the details of an address.
+    Address {
+        // TODO: #<issue_number> AddressSelector
+        index: usize,
+    },
     /// List the account addresses.
     Addresses,
     /// Print the account balance.
@@ -301,6 +306,19 @@ impl FromStr for OutputSelector {
     }
 }
 
+/// `address` command
+pub async fn address_command(account: &Account, index: usize) -> Result<(), Error> {
+    let addresses = account.addresses().await?;
+
+    if let Some(address) = addresses.get(index) {
+        print_address(account, address).await?;
+    } else {
+        println_log_info!("No address found");
+    }
+
+    Ok(())
+}
+
 /// `addresses` command
 pub async fn addresses_command(account: &Account) -> Result<(), Error> {
     let addresses = account.addresses().await?;
@@ -308,8 +326,8 @@ pub async fn addresses_command(account: &Account) -> Result<(), Error> {
     if addresses.is_empty() {
         println_log_info!("No addresses found");
     } else {
-        for address in addresses {
-            print_address(account, &address).await?;
+        for (i, addr) in addresses.into_iter().enumerate() {
+            println_log_info!("{:<5}{}\t{}", i, addr.address(), addr.address().kind_str(),);
         }
     }
 
@@ -921,8 +939,10 @@ pub async fn voting_output_command(account: &Account) -> Result<(), Error> {
 }
 
 async fn print_address(account: &Account, address: &AccountAddress) -> Result<(), Error> {
-    let mut log = format!(
-        "Address: {}\n{:<9}{}\n{:<9}{}\n{:<9}{}",
+    let mut formatted_string = String::from("Address:");
+    formatted_string.push_str(&format!(
+        "{0}Key Index: {1}{0}{2:<11}{3}{0}{4:<11}{5}{0}{6:<11}{7}\n",
+        "\n  ",
         address.key_index(),
         "Bech32:",
         address.address(),
@@ -930,16 +950,16 @@ async fn print_address(account: &Account, address: &AccountAddress) -> Result<()
         address.address().inner(),
         "Type:",
         address.address().kind_str(),
-    );
+    ));
 
     if *address.internal() {
-        log = format!("{log}\nChange address");
+        formatted_string.push_str("\nChange address");
     }
 
     let addresses = account.addresses_with_unspent_outputs().await?;
     let current_time = iota_sdk::utils::unix_timestamp_now().as_secs() as u32;
 
-    let mut output_ids: &[OutputId] = &[];
+    let mut outputs: Vec<(OutputId, String)> = Vec::new();
     let mut amount = 0;
     let mut native_tokens = NativeTokensBuilder::new();
     let mut nfts = Vec::new();
@@ -952,10 +972,10 @@ async fn print_address(account: &Account, address: &AccountAddress) -> Result<()
         .iter()
         .find(|a| a.key_index() == address.key_index() && a.internal() == address.internal())
     {
-        output_ids = address.output_ids().as_slice();
-
-        for output_id in output_ids {
+        for output_id in address.output_ids().iter() {
             if let Some(output_data) = account.get_output(output_id).await {
+                outputs.push((*output_id, output_data.output.kind_str().to_string()));
+
                 // Output might be associated with the address, but can't be unlocked by it, so we check that here.
                 // Panic: cannot fail for outputs belonging to an account.
                 let (required_address, _) = output_data
@@ -996,17 +1016,44 @@ async fn print_address(account: &Account, address: &AccountAddress) -> Result<()
         }
     }
 
-    log = format!(
-        "{log}\nOutputs: {:#?}\nBase coin amount: {}\nNative Tokens: {:#?}\nNFTs: {:#?}\nAliases: {:#?}\nFoundries: {:#?}\n",
-        output_ids,
-        amount,
-        native_tokens.finish_vec()?,
-        nfts,
-        aliases,
-        foundries,
-    );
+    formatted_string.push_str("\nOutputs:");
+    for (id, kind) in outputs {
+        formatted_string.push_str(&format!("{0}{1:<6}{id}{0}{2:<6}{kind}", "\n  ", "Id:", "Type:"));
+    }
+    formatted_string.push_str("\n");
 
-    println_log_info!("{log}");
+    formatted_string.push_str("\nBase Tokens:");
+    formatted_string.push_str(&format!("{0}{1:<8}{2}\n", "\n  ", "Amount:", amount));
+
+    formatted_string.push_str("\nNative Tokens:");
+    for (id, amount) in native_tokens
+        .finish_vec()?
+        .into_iter()
+        .map(|nt| (*nt.token_id(), nt.amount().to_string()))
+    {
+        formatted_string.push_str(&format!("{0}{1:<8}{id}{0}{2:<8}{amount}", "\n  ", "Id:", "Amount:"));
+    }
+    formatted_string.push_str("\n");
+
+    formatted_string.push_str("\nNFTs:");
+    for (id, bech32) in nfts.into_iter() {
+        formatted_string.push_str(&format!(
+            "{0}{1:<12}{id}{0}{2:<12}{bech32}",
+            "\n  ", "Id/Address:", "Bech32:"
+        ));
+    }
+    formatted_string.push_str("\n");
+
+    formatted_string.push_str("\nAliases:");
+    for (id, bech32) in aliases.into_iter() {
+        formatted_string.push_str(&format!(
+            "{0}{1:<12}{id}{0}{2:<12}{bech32}",
+            "\n  ", "Id/Address:", "Bech32:"
+        ));
+    }
+    formatted_string.push_str("\n");
+
+    println_log_info!("{formatted_string}");
 
     Ok(())
 }
