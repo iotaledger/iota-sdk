@@ -22,9 +22,9 @@ pub type Result<T> = std::result::Result<T, Error>;
 /// Error type of the iota client crate.
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
-    /// Block dtos error
-    #[error("{0}")]
-    ApiTypes(#[from] crate::types::api::core::error::Error),
+    // /// Block dtos error
+    // #[error("{0}")]
+    // ApiTypes(#[from] crate::types::api::core::error::Error),
     /// Invalid bech32 HRP, should match the one from the used network
     #[error("invalid bech32 hrp for the connected network: {provided}, expected: {expected}")]
     Bech32HrpMismatch {
