@@ -60,7 +60,7 @@ use crate::{
         Client,
     },
     types::{
-        api::core::response::OutputWithMetadataResponse,
+        api::core::OutputWithMetadataResponse,
         block::{
             address::Bech32Address,
             output::{dto::FoundryOutputDto, AccountId, FoundryId, FoundryOutput, NftId, Output, OutputId, TokenId},

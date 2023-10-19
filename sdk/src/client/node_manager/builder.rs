@@ -22,7 +22,7 @@ use crate::{
             NodeManager,
         },
     },
-    types::api::core::response::InfoResponse,
+    types::api::core::InfoResponse,
 };
 
 /// Node manager builder
