@@ -10,6 +10,7 @@ use iota_sdk::{
         output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder},
     },
 };
+use pretty_assertions::assert_eq;
 
 use crate::client::common::create_client_and_secret_manager_with_funds;
 

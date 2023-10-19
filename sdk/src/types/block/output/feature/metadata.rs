@@ -261,6 +261,8 @@ pub(crate) mod irc_27 {
 
     #[cfg(test)]
     mod test {
+        use pretty_assertions::assert_eq;
+
         use super::*;
         use crate::types::block::{address::ToBech32Ext, rand::address::rand_address};
 

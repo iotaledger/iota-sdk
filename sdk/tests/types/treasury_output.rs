@@ -3,6 +3,7 @@
 
 use iota_sdk::types::block::{output::TreasuryOutput, protocol::protocol_parameters, Error};
 use packable::{error::UnpackError, PackableExt};
+use pretty_assertions::assert_eq;
 
 #[test]
 fn kind() {

@@ -3,6 +3,7 @@
 
 use iota_sdk::types::block::{payload::milestone::option::TailTransactionHash, Error};
 use packable::{error::UnpackError, PackableExt};
+use pretty_assertions::assert_eq;
 
 const HASH_TRYTES: &str = "TZTXLMTAURX9DYQICXZEUMCDBPNXVOHNBBZDSSVCNCTWKSMUALAYPMHUCKGOGSTBUHSQIMSY9HQEP9AXJ";
 const HASH_BYTES: [u8; 49] = [
