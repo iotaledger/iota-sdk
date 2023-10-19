@@ -3,7 +3,9 @@
 
 import type { TransactionFailureReason } from './transaction-failure-reason';
 import type { HexEncodedString } from '../utils/hex-encoding';
-import type { LedgerInclusionState } from './ledger-inclusion-state';
+import { BlockState, TransactionState } from './state';
+import { BlockFailureReason } from './block-failure-reason';
+
 /**
  * Response from the metadata endpoint.
  */
@@ -13,35 +15,19 @@ export interface IBlockMetadata {
      */
     blockId: HexEncodedString;
     /**
-     * The parent block ids.
+     * The block state.
      */
-    parents: HexEncodedString[];
+    blockState?: BlockState;
     /**
-     * Is the block solid.
+     * The transaction state.
      */
-    isSolid: boolean;
+    txState?: TransactionState;
     /**
-     * Is the block referenced by a milestone.
+     * The block failure reason.
      */
-    referencedByMilestoneIndex?: number;
-    /**
-     * Is this block a valid milestone.
-     */
-    milestoneIndex?: number;
-    /**
-     * The ledger inclusion state.
-     */
-    ledgerInclusionState?: LedgerInclusionState;
+    blockFailureReason?: BlockFailureReason;
     /**
      * The transaction failure reason.
      */
-    transactionFailureReason?: TransactionFailureReason;
-    /**
-     * Should the block be promoted.
-     */
-    shouldPromote?: boolean;
-    /**
-     * Should the block be reattached.
-     */
-    shouldReattach?: boolean;
+    txFailureReason?: TransactionFailureReason;
 }
