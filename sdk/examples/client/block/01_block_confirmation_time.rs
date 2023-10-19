@@ -11,7 +11,7 @@
 use crypto::keys::bip44::Bip44;
 use iota_sdk::{
     client::{constants::IOTA_COIN_TYPE, secret::SecretManager, Client, Result},
-    types::api::core::response::BlockState,
+    types::api::core::BlockState,
 };
 
 #[tokio::main]
