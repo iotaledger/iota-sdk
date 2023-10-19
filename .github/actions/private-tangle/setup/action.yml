@@ -29,9 +29,10 @@ runs:
 
     - name: Setup private tangle
       shell: bash
+      # setup-go sets the PATH for the correct version, but sudo uses a different PATH by default
       run: |
         # Start Tangle
-        sudo ./run.sh
+        sudo env "PATH=$PATH" ./run.sh
       working-directory: iota-core/tools/docker-network
 
     - name: Wait for tangle to start
