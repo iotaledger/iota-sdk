@@ -390,6 +390,7 @@ impl InputSelection {
         let mut input_chains_foundries = hashbrown::HashMap::new();
         let mut input_foundries = Vec::new();
         let mut input_nfts = Vec::new();
+
         for input in &self.selected_inputs {
             if let Some(native_tokens) = input.output.native_tokens() {
                 input_native_tokens_builder.add_native_tokens(native_tokens.clone())?;

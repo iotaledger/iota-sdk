@@ -739,7 +739,7 @@ fn take_amount_from_account_and_foundry_to_fund_basic() {
 fn create_native_token_but_burn_account() {
     let protocol_parameters = protocol_parameters();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
-    let foundry_id = FoundryId::build(&AccountAddress::from(account_id_1), 0, SimpleTokenScheme::KIND);
+    let foundry_id = FoundryId::build(&AccountAddress::from(account_id_1), 1, SimpleTokenScheme::KIND);
     let token_id = TokenId::from(foundry_id);
 
     let inputs = build_inputs([
@@ -769,18 +769,29 @@ fn create_native_token_but_burn_account() {
     )]);
 
     let selected = InputSelection::new(
-        inputs,
-        outputs,
+        inputs.clone(),
+        outputs.clone(),
         addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
     .with_burn(Burn::new().add_account(account_id_1))
-    .select();
+    .select()
+    .unwrap();
 
-    assert!(matches!(
-        selected,
-        Err(Error::UnfulfillableRequirement(Requirement::Account(account_id))) if account_id == account_id_1
-    ));
+    assert!(unsorted_eq(&selected.inputs, &inputs));
+    // One output should be added for the remainder.
+    assert_eq!(selected.outputs.len(), 2);
+    assert!(selected.outputs.contains(&outputs[0]));
+    selected.outputs.iter().for_each(|output| {
+        if !outputs.contains(output) {
+            assert!(is_remainder_or_return(
+                output,
+                2_000_000,
+                BECH32_ADDRESS_ED25519_0,
+                None,
+            ));
+        }
+    });
 }
 
 #[test]

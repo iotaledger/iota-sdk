@@ -1049,7 +1049,7 @@ fn take_amount_from_account_to_fund_basic() {
 }
 
 #[test]
-fn account_burn_should_not_validate_account_sender() {
+fn account_burn_should_validate_account_sender() {
     let protocol_parameters = protocol_parameters();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
@@ -1077,22 +1077,33 @@ fn account_burn_should_not_validate_account_sender() {
     )]);
 
     let selected = InputSelection::new(
-        inputs,
-        outputs,
+        inputs.clone(),
+        outputs.clone(),
         addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
     .with_burn(Burn::new().add_account(account_id_1))
-    .select();
+    .select()
+    .unwrap();
 
-    assert!(matches!(
-        selected,
-        Err(Error::UnfulfillableRequirement(Requirement::Sender(sender))) if sender == Address::try_from_bech32(BECH32_ADDRESS_ACCOUNT_1).unwrap()
-    ));
+    assert!(unsorted_eq(&selected.inputs, &inputs));
+    // One output should be added for the remainder.
+    assert_eq!(selected.outputs.len(), 2);
+    assert!(selected.outputs.contains(&outputs[0]));
+    selected.outputs.iter().for_each(|output| {
+        if !outputs.contains(output) {
+            assert!(is_remainder_or_return(
+                output,
+                1_000_000,
+                BECH32_ADDRESS_ED25519_0,
+                None,
+            ));
+        }
+    });
 }
 
 #[test]
-fn account_burn_should_not_validate_account_address() {
+fn account_burn_should_validate_account_address() {
     let protocol_parameters = protocol_parameters();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
@@ -1120,18 +1131,29 @@ fn account_burn_should_not_validate_account_address() {
     )]);
 
     let selected = InputSelection::new(
-        inputs,
-        outputs,
+        inputs.clone(),
+        outputs.clone(),
         addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
     .with_burn(Burn::new().add_account(account_id_1))
-    .select();
+    .select()
+    .unwrap();
 
-    assert!(matches!(
-        selected,
-        Err(Error::UnfulfillableRequirement(Requirement::Account(account_id))) if account_id == account_id_1
-    ));
+    assert!(unsorted_eq(&selected.inputs, &inputs));
+    // One output should be added for the remainder.
+    assert_eq!(selected.outputs.len(), 2);
+    assert!(selected.outputs.contains(&outputs[0]));
+    selected.outputs.iter().for_each(|output| {
+        if !outputs.contains(output) {
+            assert!(is_remainder_or_return(
+                output,
+                1_000_000,
+                BECH32_ADDRESS_ED25519_0,
+                None,
+            ));
+        }
+    });
 }
 
 #[test]
@@ -1177,7 +1199,7 @@ fn transitioned_zero_account_id_no_longer_is_zero() {
             assert_eq!(output.amount(), 1_000_000);
             assert_eq!(output.as_account().native_tokens().len(), 0);
             assert_ne!(*output.as_account().account_id(), account_id_0);
-            assert_eq!(output.as_account().unlock_conditions().len(), 2);
+            assert_eq!(output.as_account().unlock_conditions().len(), 1);
             assert_eq!(output.as_account().features().len(), 0);
             assert_eq!(output.as_account().immutable_features().len(), 0);
             assert_eq!(

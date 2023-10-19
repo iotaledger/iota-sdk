@@ -895,7 +895,7 @@ fn burn_foundry_and_its_account() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        outputs,
+        outputs.clone(),
         addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
@@ -904,10 +904,23 @@ fn burn_foundry_and_its_account() {
             .add_foundry(inputs[0].output.as_foundry().id())
             .add_account(account_id_1),
     )
-    .select();
+    .select()
+    .unwrap();
 
-    assert!(matches!(
-        selected,
-        Err(Error::UnfulfillableRequirement(Requirement::Account(account_id))) if account_id == account_id_1
-    ));
+    assert_eq!(selected.inputs.len(), 2);
+    assert!(selected.inputs.contains(&inputs[0]));
+    assert!(selected.inputs.contains(&inputs[1]));
+    // One output should be added for the remainder.
+    assert_eq!(selected.outputs.len(), 2);
+    assert!(selected.outputs.contains(&outputs[0]));
+    selected.outputs.iter().for_each(|output| {
+        if !outputs.contains(output) {
+            assert!(is_remainder_or_return(
+                output,
+                1_500_000,
+                BECH32_ADDRESS_ED25519_0,
+                None,
+            ));
+        }
+    });
 }
