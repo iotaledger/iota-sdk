@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { plainToInstance } from 'class-transformer';
+import { plainToInstance, Type } from 'class-transformer';
 import { HexEncodedString } from '../utils';
 import { AccountId, NftId } from './id';
 
@@ -15,6 +15,10 @@ enum AddressType {
     Account = 8,
     /** An NFT address. */
     Nft = 16,
+    /** An implicit account creation address. */
+    ImplicitAccountCreation = 24,
+    /** An address with restricted capabilities. */
+    Restricted = 40,
 }
 
 /**
@@ -51,6 +55,16 @@ abstract class Address {
             ) as any as AccountAddress;
         } else if (data.type == AddressType.Nft) {
             return plainToInstance(NftAddress, data) as any as NftAddress;
+        } else if (data.type == AddressType.ImplicitAccountCreation) {
+            return plainToInstance(
+                ImplicitAccountCreationAddress,
+                data,
+            ) as any as ImplicitAccountCreationAddress;
+        } else if (data.type == AddressType.Restricted) {
+            return plainToInstance(
+                RestrictedAddress,
+                data,
+            ) as any as RestrictedAddress;
         }
         throw new Error('Invalid JSON');
     }
@@ -97,6 +111,7 @@ class AccountAddress extends Address {
         return this.accountId;
     }
 }
+
 /**
  * An NFT address.
  */
@@ -118,12 +133,104 @@ class NftAddress extends Address {
     }
 }
 
+/**
+ * An implicit account creation address.
+ */
+class ImplicitAccountCreationAddress extends Address {
+    private pubKeyHash: HexEncodedString;
+    /**
+     * @param address An Ed25519 address.
+     */
+    constructor(address: Ed25519Address) {
+        super(AddressType.ImplicitAccountCreation);
+        this.pubKeyHash = address.pubKeyHash;
+    }
+
+    address(): Ed25519Address {
+        return new Ed25519Address(this.pubKeyHash);
+    }
+
+    toString(): string {
+        return this.address.toString();
+    }
+}
+
+const RestrictedAddressDiscriminator = {
+    property: 'type',
+    subTypes: [
+        { value: Ed25519Address, name: AddressType.Ed25519 as any },
+        { value: AccountAddress, name: AddressType.Account as any },
+        { value: NftAddress, name: AddressType.Nft as any },
+    ],
+};
+
+/**
+ * An address with restricted capabilities.
+ */
+class RestrictedAddress extends Address {
+    /**
+     * The inner address.
+     */
+    @Type(() => Address, {
+        discriminator: RestrictedAddressDiscriminator,
+    })
+    readonly address: Address;
+    /**
+     * The allowed capabilities bitflags.
+     */
+    private allowedCapabilities: HexEncodedString = '0x00';
+    /**
+     * @param address An address.
+     */
+    constructor(address: Address) {
+        super(AddressType.Restricted);
+        this.address = address;
+    }
+
+    setAllowedCapabilities(allowedCapabilities: Uint8Array) {
+        if (allowedCapabilities.some((c) => c != 0)) {
+            this.allowedCapabilities =
+                '0x' +
+                allowedCapabilities.length.toString(16) +
+                Buffer.from(
+                    allowedCapabilities.buffer,
+                    allowedCapabilities.byteOffset,
+                    allowedCapabilities.byteLength,
+                ).toString('hex');
+        } else {
+            this.allowedCapabilities = '0x00';
+        }
+    }
+
+    withAllowedCapabilities(
+        allowedCapabilities: Uint8Array,
+    ): RestrictedAddress {
+        this.setAllowedCapabilities(allowedCapabilities);
+        return this;
+    }
+
+    getAllowedCapabilities(): Uint8Array {
+        return Uint8Array.from(
+            Buffer.from(this.allowedCapabilities.substring(2), 'hex'),
+        );
+    }
+
+    toString(): string {
+        return this.address.toString() + this.allowedCapabilities.substring(2);
+    }
+}
+
 const AddressDiscriminator = {
     property: 'type',
     subTypes: [
         { value: Ed25519Address, name: AddressType.Ed25519 as any },
         { value: AccountAddress, name: AddressType.Account as any },
         { value: NftAddress, name: AddressType.Nft as any },
+        {
+            value: ImplicitAccountCreationAddress,
+            name: AddressType.ImplicitAccountCreation as any,
+        },
+        { value: RestrictedAddress, name: AddressType.Restricted as any },
     ],
 };
 
