@@ -34,6 +34,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - `transaction` and `transactions` indexed transactions in opposite order;
+- Enter was showing the helper message;
+- Earlier trim of the input so that pre-commands (`help`, `clear`, `accounts`, ...) work even with leading/trailing spaces;
 
 ## 1.1.0 - 2023-09-29
 
