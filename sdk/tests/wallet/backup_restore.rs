@@ -12,6 +12,7 @@ use iota_sdk::{
     },
     wallet::{ClientOptions, Result, Wallet},
 };
+use pretty_assertions::assert_eq;
 use url::Url;
 
 use crate::wallet::common::{setup, tear_down, NODE_LOCAL, NODE_OTHER};

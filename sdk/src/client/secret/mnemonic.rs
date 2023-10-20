@@ -155,6 +155,8 @@ impl MnemonicSecretManager {
 
 #[cfg(test)]
 mod tests {
+    use pretty_assertions::assert_eq;
+
     use super::*;
     use crate::types::block::address::ToBech32Ext;
 

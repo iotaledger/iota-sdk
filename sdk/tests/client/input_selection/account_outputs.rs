@@ -18,6 +18,7 @@ use iota_sdk::{
         rand::output::rand_output_metadata,
     },
 };
+use pretty_assertions::{assert_eq, assert_ne};
 
 use crate::client::{
     addresses, build_inputs, build_outputs, is_remainder_or_return, unsorted_eq,

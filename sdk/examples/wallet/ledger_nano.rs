@@ -4,7 +4,7 @@
 //! In this example we will create addresses with a ledger nano hardware wallet.
 //!
 //! To use the ledger nano simulator
-//! * clone https://github.com/iotaledger/ledger-shimmer-app,
+//! * clone https://github.com/iotaledger/ledger-iota-app,
 //! * run `git submodule init && git submodule update --recursive`,
 //! * run `./build.sh -m nanos|nanox|nanosplus -s`, and
 //! * use `true` in `LedgerSecretManager::new(true)`.

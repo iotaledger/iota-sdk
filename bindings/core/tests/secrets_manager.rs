@@ -5,6 +5,7 @@ use std::sync::Arc;
 
 use iota_sdk::client::{api::GetAddressesOptions, constants::ETHER_COIN_TYPE, secret::SecretManager};
 use iota_sdk_bindings_core::{call_secret_manager_method, Response, Result, SecretManagerMethod};
+use pretty_assertions::assert_eq;
 use tokio::sync::RwLock;
 
 #[tokio::test]

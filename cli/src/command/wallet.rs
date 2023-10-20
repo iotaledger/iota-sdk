@@ -239,19 +239,27 @@ pub async fn node_info_command(storage_path: &Path) -> Result<Wallet, Error> {
 pub async fn restore_command(storage_path: &Path, snapshot_path: &Path, backup_path: &Path) -> Result<Wallet, Error> {
     check_file_exists(backup_path).await?;
 
-    let password = get_password("Stronghold password", false)?;
-    let secret_manager = SecretManager::Stronghold(
-        StrongholdSecretManager::builder()
-            .password(password.clone())
-            .build(snapshot_path)?,
-    );
-    let wallet = Wallet::builder()
+    let mut builder = Wallet::builder();
+    if check_file_exists(snapshot_path).await.is_ok() {
+        println!(
+            "Detected a stronghold file at {}. Enter password to unlock:",
+            snapshot_path.to_str().unwrap()
+        );
+        let password = get_password("Stronghold password", false)?;
+        let secret_manager = SecretManager::Stronghold(
+            StrongholdSecretManager::builder()
+                .password(password.clone())
+                .build(snapshot_path)?,
+        );
+        builder = builder.with_secret_manager(secret_manager);
+    }
+    let wallet = builder
         .load_storage::<SecretManager>(storage_path)
         .await?
-        .with_secret_manager(secret_manager)
         .finish()
         .await?;
 
+    let password = get_password("Stronghold backup password", false)?;
     wallet
         .restore_backup::<SecretManager>(backup_path.into(), password, None, None)
         .await?;

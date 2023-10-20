@@ -78,7 +78,8 @@ pub async fn account_prompt_internal(
 
     match input {
         Ok(command) => {
-            match command.as_str() {
+            match command.trim() {
+                "" => {}
                 "h" | "help" => AccountCli::print_help()?,
                 "c" | "clear" => {
                     // Clear console
@@ -95,7 +96,7 @@ pub async fn account_prompt_internal(
                 }
                 _ => {
                     // Prepend `Account: ` so the parsing will be correct
-                    let command = format!("Account: {}", command.trim());
+                    let command = format!("Account: {command}");
                     let account_cli = match AccountCli::try_parse_from(command.split_whitespace()) {
                         Ok(account_cli) => account_cli,
                         Err(err) => {
@@ -167,7 +168,7 @@ pub async fn account_prompt_internal(
                         }
                         AccountCommand::NewAddress => new_address_command(account).await,
                         AccountCommand::NodeInfo => node_info_command(account).await,
-                        AccountCommand::Output { output_id } => output_command(account, output_id).await,
+                        AccountCommand::Output { selector } => output_command(account, selector).await,
                         AccountCommand::Outputs => outputs_command(account).await,
                         AccountCommand::Send {
                             address,

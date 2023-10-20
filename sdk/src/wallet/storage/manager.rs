@@ -133,6 +133,7 @@ impl StorageAdapter for StorageManager {
 
 #[cfg(test)]
 mod tests {
+    use pretty_assertions::assert_eq;
     use serde::{Deserialize, Serialize};
 
     use super::*;

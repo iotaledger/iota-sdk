@@ -4,3 +4,4 @@
 export * from './bridge';
 export * from './hex-encoding';
 export * from './type-aliases';
+export * from './numeric';

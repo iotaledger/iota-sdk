@@ -1,6 +1,7 @@
 // Copyright 2021-2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
-import { Feature, HexEncodedString } from '../..';
+
+import { AccountId, Feature, HexEncodedString } from '../..';
 import type { BasicOutputBuilderParams } from './basic-output-params';
 
 /**
@@ -10,7 +11,7 @@ export interface AccountOutputBuilderParams extends BasicOutputBuilderParams {
     /**
      * Unique identifier of an account, which is the BLAKE2b-256 hash of the Output ID that created it.
      */
-    accountId: HexEncodedString;
+    accountId: AccountId;
     /**
      * A counter that must increase by 1 every time the account output is state transitioned.
      */
