@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from __future__ import annotations  # Allow reference to Burn in Burn class
-from typing import List, Optional, Dict, Any
+from typing import List, Optional
 from dataclasses import dataclass
 from iota_sdk.types.native_token import NativeToken
 from iota_sdk.types.common import HexStr, json

@@ -76,6 +76,9 @@ class Node():
     disabled: Optional[bool] = None
 
     def to_dict(self):
+        """Custom dict conversion.
+        """
+
         res = {
             'url': self.url,
             'disabled': self.disabled
