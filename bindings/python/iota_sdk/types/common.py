@@ -80,15 +80,15 @@ class Node():
             'url': self.url,
             'disabled': self.disabled
         }
-        if not self.jwt == None or not self.username == None or not self.password == None:
+        if not self.jwt is None or not self.username is None or not self.password is None:
             auth = res['auth'] = {}
-            if not self.jwt == None:
+            if not self.jwt is None:
                 auth['jwt'] = self.jwt
-            if not self.username == None or not self.password == None:
+            if not self.username is None or not self.password is None:
                 basic_auth = auth['basicAuthNamePwd'] = []
-                if not self.username == None:
+                if not self.username is None:
                     basic_auth.append(self.username)
-                if not self.password == None:
+                if not self.password is None:
                     basic_auth.append(self.password)
 
         return res
