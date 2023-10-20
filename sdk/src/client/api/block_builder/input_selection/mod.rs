@@ -210,7 +210,7 @@ impl InputSelection {
     fn filter_inputs(&mut self) {
         self.available_inputs.retain(|input| {
             // TODO what about other kinds?
-            // Filter out non basic/foundry/nft outputs.
+            // Filter out non account/basic/foundry/nft outputs.
             if !input.output.is_basic()
                 && !input.output.is_account()
                 && !input.output.is_foundry()
