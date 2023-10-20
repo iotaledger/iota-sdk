@@ -13,6 +13,7 @@ use iota_sdk::types::block::{
     address::{AccountAddress, Address, Ed25519Address, NftAddress},
     Error,
 };
+use pretty_assertions::assert_eq;
 
 const ED25519_ADDRESS: &str = "0xebe40a263480190dcd7939447ee01aefa73d6f3cc33c90ef7bf905abf8728655";
 const ALIAS_ID: &str = "0xe9ba80ad1561e437b663a1f1efbfabd544b0d7da7bb33e0a62e99b20ee450bee";

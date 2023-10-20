@@ -42,24 +42,25 @@ describe.skip('Main examples', () => {
         expect(mnemonic).toBeDefined();
     });
 
-    it('generates addresses', async () => {
-        const addresses = await new SecretManager(
-            secretManager,
-        ).generateEd25519Addresses({
-            accountIndex: 0,
-            range: {
-                start: 0,
-                end: 5,
-            },
-            bech32Hrp: 'rms',
-        });
+    // TODO
+    // it('generates addresses', async () => {
+    //     const addresses = await new SecretManager(
+    //         secretManager,
+    //     ).generateEd25519Addresses({
+    //         accountIndex: 0,
+    //         range: {
+    //             start: 0,
+    //             end: 5,
+    //         },
+    //         bech32Hrp: 'rms',
+    //     });
 
-        expect(addresses.length).toBe(5);
+    //     expect(addresses.length).toBe(5);
 
-        addresses.forEach((address) => {
-            expect(address).toBeValidAddress();
-        });
-    });
+    //     addresses.forEach((address) => {
+    //         expect(address).toBeValidAddress();
+    //     });
+    // });
 
     it('gets address outputs', async () => {
         const outputIdsResponse = await client.basicOutputIds([

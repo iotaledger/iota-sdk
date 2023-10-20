@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use iota_sdk::types::block::{address::ToBech32Ext, payload::Payload};
+use pretty_assertions::assert_eq;
 
 use crate::client::{common::setup_client_with_node_health_ignored, node_api::setup_transaction_block};
 

@@ -21,8 +21,8 @@ use iota_sdk::{
     },
     wallet::{
         account::{
-            types::{AccountIdentifier, Bip44Address},
-            Account, ConsolidationParams, OutputsToClaim, TransactionOptions,
+            types::{AccountIdentifier, Bip44Address, OutputData, Transaction},
+            Account, ConsolidationParams, OutputsToClaim, SyncOptions, TransactionOptions,
         },
         CreateNativeTokenParams, MintNftParams, SendNativeTokensParams, SendNftParams, SendParams,
     },
@@ -158,8 +158,9 @@ pub enum AccountCommand {
     NodeInfo,
     /// Display an output.
     Output {
-        /// Output ID to be displayed.
-        output_id: String,
+        /// Selector for output.
+        /// Either by ID (e.g. 0xbce525324af12eda02bf7927e92cea3a8e8322d0f41966271443e6c3b245a4400000) or index.
+        selector: OutputSelector,
     },
     /// List all outputs.
     Outputs,
@@ -271,6 +272,25 @@ pub enum TransactionSelector {
 }
 
 impl FromStr for TransactionSelector {
+    type Err = Error;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Ok(if let Ok(index) = s.parse() {
+            Self::Index(index)
+        } else {
+            Self::Id(s.parse()?)
+        })
+    }
+}
+
+/// Select by output ID or list index
+#[derive(Debug, Copy, Clone)]
+pub enum OutputSelector {
+    Id(OutputId),
+    Index(usize),
+}
+
+impl FromStr for OutputSelector {
     type Err = Error;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
@@ -652,8 +672,15 @@ pub async fn node_info_command(account: &Account) -> Result<(), Error> {
 }
 
 /// `output` command
-pub async fn output_command(account: &Account, output_id: String) -> Result<(), Error> {
-    let output = account.get_output(&OutputId::from_str(&output_id)?).await;
+pub async fn output_command(account: &Account, selector: OutputSelector) -> Result<(), Error> {
+    let output = match selector {
+        OutputSelector::Id(id) => account.get_output(&id).await,
+        OutputSelector::Index(index) => {
+            let mut outputs = account.outputs(None).await?;
+            outputs.sort_unstable_by(outputs_ordering);
+            outputs.into_iter().nth(index)
+        }
+    };
 
     if let Some(output) = output {
         println_log_info!("{output:#?}");
@@ -666,17 +693,7 @@ pub async fn output_command(account: &Account, output_id: String) -> Result<(), 
 
 /// `outputs` command
 pub async fn outputs_command(account: &Account) -> Result<(), Error> {
-    let outputs = account.outputs(None).await?;
-
-    if outputs.is_empty() {
-        println_log_info!("No outputs found");
-    } else {
-        println_log_info!("Outputs:");
-        for (i, output_data) in outputs.into_iter().enumerate() {
-            println_log_info!("{}\t{}\t{}", i, &output_data.output_id, output_data.output.kind_str());
-        }
-    }
-    Ok(())
+    print_outputs(account.outputs(None).await?, "Outputs:").await
 }
 
 // `send` command
@@ -776,7 +793,12 @@ pub async fn send_nft_command(
 
 // `sync` command
 pub async fn sync_command(account: &Account) -> Result<(), Error> {
-    let balance = account.sync(None).await?;
+    let balance = account
+        .sync(Some(SyncOptions {
+            sync_native_token_foundries: true,
+            ..Default::default()
+        }))
+        .await?;
     println_log_info!("Synced.");
     println_log_info!("{balance:#?}");
 
@@ -789,7 +811,7 @@ pub async fn transaction_command(account: &Account, selector: TransactionSelecto
     let transaction = match selector {
         TransactionSelector::Id(id) => transactions.into_iter().find(|tx| tx.transaction_id == id),
         TransactionSelector::Index(index) => {
-            transactions.sort_by(|a, b| a.timestamp.cmp(&b.timestamp));
+            transactions.sort_unstable_by(transactions_ordering);
             transactions.into_iter().nth(index)
         }
     };
@@ -806,17 +828,17 @@ pub async fn transaction_command(account: &Account, selector: TransactionSelecto
 /// `transactions` command
 pub async fn transactions_command(account: &Account, show_details: bool) -> Result<(), Error> {
     let mut transactions = account.transactions().await;
-    transactions.sort_by(|a, b| a.timestamp.cmp(&b.timestamp));
+    transactions.sort_unstable_by(transactions_ordering);
 
     if transactions.is_empty() {
         println_log_info!("No transactions found");
     } else {
-        for (i, tx) in transactions.into_iter().rev().enumerate() {
+        for (i, tx) in transactions.into_iter().enumerate() {
             if show_details {
                 println_log_info!("{:#?}", tx);
             } else {
                 let transaction_time = to_utc_date_time(tx.timestamp)?;
-                let formatted_time = transaction_time.format("%Y-%m-%d %H:%M:%S").to_string();
+                let formatted_time = transaction_time.format("%Y-%m-%d %H:%M:%S UTC").to_string();
 
                 println_log_info!("{:<5}{}\t{}", i, tx.transaction_id, formatted_time);
             }
@@ -828,18 +850,7 @@ pub async fn transactions_command(account: &Account, show_details: bool) -> Resu
 
 /// `unspent-outputs` command
 pub async fn unspent_outputs_command(account: &Account) -> Result<(), Error> {
-    let outputs = account.unspent_outputs(None).await?;
-
-    if outputs.is_empty() {
-        println_log_info!("No outputs found");
-    } else {
-        println_log_info!("Unspent outputs:");
-        for (i, output_data) in outputs.into_iter().enumerate() {
-            println_log_info!("{}\t{}\t{}", i, &output_data.output_id, output_data.output.kind_str());
-        }
-    }
-
-    Ok(())
+    print_outputs(account.unspent_outputs(None).await?, "Unspent outputs:").await
 }
 
 pub async fn vote_command(account: &Account, event_id: ParticipationEventId, answers: Vec<u8>) -> Result<(), Error> {
@@ -919,7 +930,7 @@ pub async fn voting_output_command(account: &Account) -> Result<(), Error> {
 
 async fn print_address(account: &Account, address: &Bip44Address) -> Result<(), Error> {
     let mut log = format!(
-        "Address {}:\n {:<10}{}\n {:<10}{:?}",
+        "Address: {}\n{:<9}{}\n{:<9}{:?}",
         address.key_index(),
         "Bech32:",
         address.address(),
@@ -983,7 +994,7 @@ async fn print_address(account: &Account, address: &Bip44Address) -> Result<(), 
     }
 
     log = format!(
-        "{log}\n Outputs: {:#?}\n Base coin amount: {}\n Native Tokens: {:?}\n NFTs: {:?}\n Accounts: {:?}\n Foundries: {:?}\n",
+        "{log}\nOutputs: {:#?}\nBase coin amount: {}\nNative Tokens: {:#?}\nNFTs: {:#?}\nAccounts: {:#?}\nFoundries: {:#?}\n",
         output_ids,
         amount,
         native_tokens.finish_vec()?,
@@ -995,4 +1006,33 @@ async fn print_address(account: &Account, address: &Bip44Address) -> Result<(), 
     println_log_info!("{log}");
 
     Ok(())
+}
+
+async fn print_outputs(mut outputs: Vec<OutputData>, title: &str) -> Result<(), Error> {
+    if outputs.is_empty() {
+        println_log_info!("No outputs found");
+    } else {
+        println_log_info!("{title}");
+        outputs.sort_unstable_by(outputs_ordering);
+
+        for (i, output_data) in outputs.into_iter().enumerate() {
+            println_log_info!(
+                "{:<5}{}\t{}\t{}",
+                i,
+                &output_data.output_id,
+                output_data.output.kind_str(),
+                if output_data.is_spent { "Spent" } else { "Unspent" },
+            );
+        }
+    }
+
+    Ok(())
+}
+
+fn outputs_ordering(a: &OutputData, b: &OutputData) -> std::cmp::Ordering {
+    a.output_id.cmp(&b.output_id)
+}
+
+fn transactions_ordering(a: &Transaction, b: &Transaction) -> std::cmp::Ordering {
+    b.timestamp.cmp(&a.timestamp)
 }

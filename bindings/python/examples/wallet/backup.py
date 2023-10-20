@@ -14,17 +14,15 @@ client_options = ClientOptions(nodes=[node_url])
 # Shimmer coin type
 coin_type = CoinType.SHIMMER
 
-if 'STRONGHOLD_PASSWORD' not in os.environ:
-    raise Exception(".env STRONGHOLD_PASSWORD is undefined, see .env.example")
+for env_var in ['STRONGHOLD_PASSWORD', 'MNEMONIC']:
+    if env_var not in os.environ:
+        raise Exception(f'.env {env_var} is undefined, see .env.example')
 
 secret_manager = StrongholdSecretManager(
     os.environ['STRONGHOLD_SNAPSHOT_PATH'], os.environ['STRONGHOLD_PASSWORD'])
 
 wallet = Wallet('./backup-database', client_options,
                 coin_type, secret_manager)
-
-if 'MNEMONIC' not in os.environ:
-    raise Exception(".env MNEMONIC is undefined, see .env.example")
 
 # Store the mnemonic in the Stronghold snapshot, this only needs to be
 # done once.

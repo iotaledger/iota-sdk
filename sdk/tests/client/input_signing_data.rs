@@ -21,6 +21,7 @@ use iota_sdk::{
         TryFromDto,
     },
 };
+use pretty_assertions::assert_eq;
 
 #[test]
 fn input_signing_data_conversion() {
