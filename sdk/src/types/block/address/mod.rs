@@ -6,7 +6,7 @@ mod bech32;
 mod ed25519;
 mod nft;
 
-use derive_more::{From, Display};
+use derive_more::{Display, From};
 
 pub use self::{
     alias::AliasAddress,

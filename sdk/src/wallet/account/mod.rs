@@ -62,6 +62,7 @@ use crate::{
     types::{
         api::core::response::OutputWithMetadataResponse,
         block::{
+            address::Bech32Address,
             output::{dto::FoundryOutputDto, AliasId, FoundryId, FoundryOutput, NftId, Output, OutputId, TokenId},
             payload::{
                 transaction::{TransactionEssence, TransactionId},
@@ -89,6 +90,8 @@ pub struct FilterOptions {
     pub foundry_ids: Option<HashSet<FoundryId>>,
     /// Return all nft outputs matching these IDs.
     pub nft_ids: Option<HashSet<NftId>>,
+    /// Return all outputs matching this address.
+    pub address: Option<Bech32Address>,
 }
 
 /// Details of an account.
@@ -364,6 +367,12 @@ impl AccountInner {
 
                 if let Some(output_types) = &filter.output_types {
                     if !output_types.contains(&output.output.kind()) {
+                        continue;
+                    }
+                }
+
+                if let Some(address) = &filter.address {
+                    if &output.address != address.inner() {
                         continue;
                     }
                 }

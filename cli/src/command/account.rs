@@ -20,8 +20,8 @@ use iota_sdk::{
     },
     wallet::{
         account::{
-            types::{AccountAddress, AccountIdentifier, OutputData, Transaction},
-            Account, ConsolidationParams, OutputsToClaim, SyncOptions, TransactionOptions,
+            types::{AccountIdentifier, OutputData, Transaction},
+            Account, ConsolidationParams, FilterOptions, OutputsToClaim, SyncOptions, TransactionOptions,
         },
         CreateNativeTokenParams, MintNftParams, SendNativeTokensParams, SendNftParams, SendParams,
     },
@@ -49,8 +49,9 @@ impl AccountCli {
 pub enum AccountCommand {
     /// Show the details of an address.
     Address {
-        // TODO: #<issue_number> AddressSelector
-        index: usize,
+        /// Selector for address.
+        /// Either by address (e.g. rms1qqtj7pvnl3lj9n9n6e9lc47mfutjfhjyprmprxtzz2g0uck8tr3gurtp7tq) or index.
+        selector: AddressSelector,
     },
     /// List the account addresses.
     Addresses,
@@ -306,15 +307,41 @@ impl FromStr for OutputSelector {
     }
 }
 
-/// `address` command
-pub async fn address_command(account: &Account, index: usize) -> Result<(), Error> {
-    let addresses = account.addresses().await?;
+/// Select by Bech32 address or list index
+#[derive(Debug, Copy, Clone)]
+pub enum AddressSelector {
+    // TODO: change to AccountAddress? (Note that AccountAddress isn't Copy)
+    Address(Bech32Address),
+    Index(usize),
+}
 
-    if let Some(address) = addresses.get(index) {
-        print_address(account, address).await?;
-    } else {
-        println_log_info!("No address found");
+impl FromStr for AddressSelector {
+    type Err = Error;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Ok(if let Ok(index) = s.parse() {
+            Self::Index(index)
+        } else {
+            Self::Address(s.parse()?)
+        })
     }
+}
+
+/// `address` command
+pub async fn address_command(account: &Account, selector: AddressSelector) -> Result<(), Error> {
+    match selector {
+        AddressSelector::Address(address) => {
+            print_address(account, &address).await?;
+        }
+        AddressSelector::Index(index) => {
+            let addresses = account.addresses().await?;
+            if let Some(address) = addresses.get(index) {
+                print_address(account, address.address()).await?;
+            } else {
+                println_log_info!("No address found at index {index}");
+            }
+        }
+    };
 
     Ok(())
 }
@@ -667,7 +694,7 @@ pub async fn mint_nft_command(
 pub async fn new_address_command(account: &Account) -> Result<(), Error> {
     let address = account.generate_ed25519_addresses(1, None).await?;
 
-    print_address(account, &address[0]).await?;
+    print_address(account, &address[0].address()).await?;
 
     Ok(())
 }
@@ -938,25 +965,26 @@ pub async fn voting_output_command(account: &Account) -> Result<(), Error> {
     Ok(())
 }
 
-async fn print_address(account: &Account, address: &AccountAddress) -> Result<(), Error> {
+// TODO: display AccountAddress infos (key_index, change_address, etc) in the `addresses` command generated list?
+async fn print_address(account: &Account, address: &Bech32Address) -> Result<(), Error> {
     let mut formatted_string = String::from("Address:");
     formatted_string.push_str(&format!(
-        "{0}Key Index: {1}{0}{2:<11}{3}{0}{4:<11}{5}{0}{6:<11}{7}\n",
+        "{0}{1:<11}{2}{0}{3:<11}{4}{0}{5:<11}{6}\n",
         "\n  ",
-        address.key_index(),
         "Bech32:",
-        address.address(),
+        address,
         "Hex:",
-        address.address().inner(),
+        address.inner(),
         "Type:",
-        address.address().kind_str(),
+        address.inner().kind_str(),
     ));
 
-    if *address.internal() {
-        formatted_string.push_str("\nChange address");
-    }
-
-    let addresses = account.addresses_with_unspent_outputs().await?;
+    let unspent_output_ids = account
+        .unspent_outputs(FilterOptions {
+            address: Some(*address),
+            ..Default::default()
+        })
+        .await?;
     let current_time = iota_sdk::utils::unix_timestamp_now().as_secs() as u32;
 
     let mut outputs: Vec<(OutputId, String)> = Vec::new();
@@ -965,50 +993,45 @@ async fn print_address(account: &Account, address: &AccountAddress) -> Result<()
     let mut nfts = Vec::new();
     let mut aliases = Vec::new();
 
-    let hrp = address.address().hrp();
+    let hrp = address.hrp();
 
-    if let Some(address) = addresses
-        .iter()
-        .find(|a| a.key_index() == address.key_index() && a.internal() == address.internal())
-    {
-        for output_id in address.output_ids().iter() {
-            if let Some(output_data) = account.get_output(output_id).await {
-                outputs.push((*output_id, output_data.output.kind_str().to_string()));
+    for output_data in unspent_output_ids.iter() {
+        let output_id = &output_data.output_id;
 
-                // Output might be associated with the address, but can't be unlocked by it, so we check that here.
-                // Panic: cannot fail for outputs belonging to an account.
-                let (required_address, _) = output_data
-                    .output
-                    .required_and_unlocked_address(current_time, output_id, None)
-                    .unwrap();
+        outputs.push((*output_id, output_data.output.kind_str().to_string()));
 
-                if address.address().as_ref() == &required_address {
-                    if let Some(nts) = output_data.output.native_tokens() {
-                        native_tokens.add_native_tokens(nts.clone())?;
-                    }
-                    match &output_data.output {
-                        Output::Nft(nft) => nfts.push((
-                            nft.nft_id_non_null(output_id),
-                            nft.nft_address(output_id).to_bech32(*hrp),
-                        )),
-                        Output::Alias(alias) => aliases.push((
-                            alias.alias_id_non_null(output_id),
-                            alias.alias_address(output_id).to_bech32(*hrp),
-                        )),
-                        Output::Basic(_) | Output::Foundry(_) | Output::Treasury(_) => {}
-                    }
-                    let unlock_conditions = output_data
-                        .output
-                        .unlock_conditions()
-                        .expect("output must have unlock conditions");
-                    let sdr_amount = unlock_conditions
-                        .storage_deposit_return()
-                        .map(|sdr| sdr.amount())
-                        .unwrap_or(0);
+        // Output might be associated with the address, but can't be unlocked by it, so we check that here.
+        // Panic: cannot fail for outputs belonging to an account.
+        let (required_address, _) = output_data
+            .output
+            .required_and_unlocked_address(current_time, output_id, None)
+            .unwrap();
 
-                    amount += output_data.output.amount() - sdr_amount;
-                }
+        if address.inner() == &required_address {
+            if let Some(nts) = output_data.output.native_tokens() {
+                native_tokens.add_native_tokens(nts.clone())?;
             }
+            match &output_data.output {
+                Output::Nft(nft) => nfts.push((
+                    nft.nft_id_non_null(output_id),
+                    nft.nft_address(output_id).to_bech32(*hrp),
+                )),
+                Output::Alias(alias) => aliases.push((
+                    alias.alias_id_non_null(output_id),
+                    alias.alias_address(output_id).to_bech32(*hrp),
+                )),
+                Output::Basic(_) | Output::Foundry(_) | Output::Treasury(_) => {}
+            }
+            let unlock_conditions = output_data
+                .output
+                .unlock_conditions()
+                .expect("output must have unlock conditions");
+            let sdr_amount = unlock_conditions
+                .storage_deposit_return()
+                .map(|sdr| sdr.amount())
+                .unwrap_or(0);
+
+            amount += output_data.output.amount() - sdr_amount;
         }
     }
 

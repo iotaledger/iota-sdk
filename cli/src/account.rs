@@ -106,7 +106,7 @@ pub async fn account_prompt_internal(
                         }
                     };
                     match account_cli.command {
-                        AccountCommand::Address { index } => address_command(account, index).await,
+                        AccountCommand::Address { selector } => address_command(account, selector).await,
                         AccountCommand::Addresses => addresses_command(account).await,
                         AccountCommand::Balance { addresses } => balance_command(account, addresses).await,
                         AccountCommand::BurnNativeToken { token_id, amount } => {
