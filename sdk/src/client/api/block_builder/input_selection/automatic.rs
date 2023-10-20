@@ -61,7 +61,7 @@ impl<'a> ClientBlockBuilder<'a> {
     }
 
     /// Searches inputs for provided outputs, by requesting the outputs from the account addresses or for
-    /// alias/foundry/nft outputs get the latest state with their alias/nft id. Forwards to [try_select_inputs()].
+    /// alias/foundry/nft outputs get the latest state with their alias/nft id. Forwards to input selection.
     pub(crate) async fn get_inputs(&self, protocol_parameters: &ProtocolParameters) -> Result<Selected> {
         log::debug!("[get_inputs]");
 
