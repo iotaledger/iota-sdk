@@ -13,31 +13,33 @@ use packable::{
     Packable,
 };
 
-use crate::{
-    impl_id,
-    types::{
-        block::{
-            address::{AccountAddress, Address},
-            output::{
-                feature::{verify_allowed_features, Feature, FeatureFlags, Features},
-                unlock_condition::{
-                    verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions,
-                },
-                verify_output_amount_min, verify_output_amount_packable, verify_output_amount_supply, ChainId,
-                NativeToken, NativeTokens, Output, OutputBuilderAmount, OutputId, Rent, RentStructure,
-                StateTransitionError, StateTransitionVerifier,
+use crate::types::{
+    block::{
+        address::{AccountAddress, Address},
+        output::{
+            feature::{verify_allowed_features, Feature, FeatureFlags, Features},
+            unlock_condition::{
+                verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions,
             },
-            payload::transaction::TransactionCapabilityFlag,
-            protocol::ProtocolParameters,
-            semantic::{TransactionFailureReason, ValidationContext},
-            unlock::Unlock,
-            Error,
+            verify_output_amount_min, verify_output_amount_packable, verify_output_amount_supply, ChainId, NativeToken,
+            NativeTokens, Output, OutputBuilderAmount, OutputId, Rent, RentStructure, StateTransitionError,
+            StateTransitionVerifier,
         },
-        ValidationParams,
+        payload::transaction::TransactionCapabilityFlag,
+        protocol::ProtocolParameters,
+        semantic::{TransactionFailureReason, ValidationContext},
+        unlock::Unlock,
+        Error,
     },
+    ValidationParams,
 };
 
-impl_id!(pub Account, 32);
+crate::impl_id!(
+    /// A unique identifier of an account.
+    pub AccountId {
+        pub const LENGTH: usize = 32;
+    }
+);
 
 impl From<&OutputId> for AccountId {
     fn from(output_id: &OutputId) -> Self {

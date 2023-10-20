@@ -3,11 +3,13 @@
 
 use crate::types::block::{output::OutputId, Error};
 
-crate::impl_id_with_slot!(
-    @explicit_docs
-    pub Transaction, 32,
-    "A [`TransactionPayload`] identifier.",
-    "The hash of a [`TransactionPayload`]."
+crate::impl_id!(
+    /// The hash of a [`TransactionPayload`](crate::types::block::TransactionPayload).
+    pub TransactionHash {
+        pub const LENGTH: usize = 32;
+    }
+    /// A [`TransactionPayload`](crate::types::block::TransactionPayload) identifier.
+    pub TransactionId;
 );
 
 impl TransactionId {

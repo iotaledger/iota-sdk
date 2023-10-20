@@ -13,10 +13,7 @@ use super::{
     mana::{ManaStructure, RewardsParameters},
     slot::{EpochIndex, SlotIndex},
 };
-use crate::{
-    impl_id,
-    types::block::{helper::network_name_to_id, output::RentStructure, ConvertTo, Error, PROTOCOL_VERSION},
-};
+use crate::types::block::{helper::network_name_to_id, output::RentStructure, ConvertTo, Error, PROTOCOL_VERSION};
 
 /// Defines the parameters of the protocol at a particular version.
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Packable, Getters, CopyGetters)]
@@ -339,4 +336,9 @@ pub fn protocol_parameters() -> ProtocolParameters {
     .unwrap()
 }
 
-impl_id!(@explicit_doc pub ProtocolParametersHash, 32, "The hash of a [`ProtocolParameters`]");
+crate::impl_id!(
+    /// The hash of a [`ProtocolParameters`].
+    pub ProtocolParametersHash {
+        pub const LENGTH: usize = 32;
+    }
+);

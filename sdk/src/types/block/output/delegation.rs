@@ -10,30 +10,33 @@ use packable::{
     Packable,
 };
 
-use crate::{
-    impl_id,
-    types::{
-        block::{
-            address::{AccountAddress, Address},
-            output::{
-                chain_id::ChainId,
-                unlock_condition::{
-                    verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions,
-                },
-                verify_output_amount_min, verify_output_amount_packable, verify_output_amount_supply, Output,
-                OutputBuilderAmount, OutputId, Rent, RentStructure, StateTransitionError, StateTransitionVerifier,
+use crate::types::{
+    block::{
+        address::{AccountAddress, Address},
+        output::{
+            chain_id::ChainId,
+            unlock_condition::{
+                verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions,
             },
-            protocol::ProtocolParameters,
-            semantic::{TransactionFailureReason, ValidationContext},
-            slot::EpochIndex,
-            unlock::Unlock,
-            Error,
+            verify_output_amount_min, verify_output_amount_packable, verify_output_amount_supply, Output,
+            OutputBuilderAmount, OutputId, Rent, RentStructure, StateTransitionError, StateTransitionVerifier,
         },
-        ValidationParams,
+        protocol::ProtocolParameters,
+        semantic::{TransactionFailureReason, ValidationContext},
+        slot::EpochIndex,
+        unlock::Unlock,
+        Error,
     },
+    ValidationParams,
 };
 
-impl_id!(pub Delegation, 32);
+crate::impl_id!(
+    /// Unique identifier of the [`DelegationOutput`](crate::types::block::output::DelegationOutput),
+    /// which is the BLAKE2b-256 hash of the [`OutputId`](crate::types::block::output::OutputId) that created it.
+    pub DelegationId {
+        pub const LENGTH: usize = 32;
+    }
+);
 
 impl From<&OutputId> for DelegationId {
     fn from(output_id: &OutputId) -> Self {

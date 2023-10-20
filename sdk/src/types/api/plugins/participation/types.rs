@@ -51,7 +51,12 @@ pub struct ParticipationEvent {
     pub data: ParticipationEventData,
 }
 
-impl_id!(pub ParticipationEvent, 32);
+impl_id!(
+    /// A participation event id.
+    pub ParticipationEventId {
+        pub const LENGTH: usize = 32;
+    }
+);
 
 /// Information about a voting or staking event.
 #[derive(Debug, Clone, Eq, PartialEq, Getters)]
