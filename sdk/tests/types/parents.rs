@@ -10,6 +10,7 @@ use iota_sdk::types::block::{
     BlockId, Error,
 };
 use packable::{error::UnpackError, prefix::VecPrefix, PackableExt};
+use pretty_assertions::assert_eq;
 
 #[test]
 fn len() {

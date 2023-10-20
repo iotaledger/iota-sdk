@@ -16,6 +16,7 @@ use iota_sdk::{
     types::block::address::Bech32Address,
     wallet::{ClientOptions, Result, Wallet},
 };
+use pretty_assertions::assert_eq;
 use url::Url;
 
 #[cfg(feature = "storage")]

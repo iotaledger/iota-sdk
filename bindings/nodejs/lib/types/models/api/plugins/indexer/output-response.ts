@@ -1,7 +1,9 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+import { NumericString } from '../../../../utils';
 import type { HexEncodedString } from '../../../../utils/hex-encoding';
+
 /**
  * Details of an outputs response from the indexer plugin.
  */
@@ -13,7 +15,7 @@ export interface IOutputsResponse {
     /**
      * The maximum count of results that are returned by the node.
      */
-    pageSize: string;
+    pageSize: NumericString;
     /**
      * The cursor to use for getting the next results.
      */

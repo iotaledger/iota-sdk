@@ -249,6 +249,8 @@ pub(crate) fn verify_allowed_features(features: &Features, allowed_features: Fea
 
 #[cfg(test)]
 mod test {
+    use pretty_assertions::assert_eq;
+
     use super::*;
 
     #[test]

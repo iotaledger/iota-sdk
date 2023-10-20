@@ -28,7 +28,7 @@ export class UnitsHelper {
      * Format the value in the best units.
      * @param value The value to format.
      * @param decimalPlaces The number of decimal places to display.
-     * @returns The formated value.
+     * @returns The formatted value.
      */
     public static formatBest(value: number, decimalPlaces = 2): string {
         return UnitsHelper.formatUnits(
@@ -43,7 +43,7 @@ export class UnitsHelper {
      * @param value The value to format.
      * @param magnitude The magnitude to format with.
      * @param decimalPlaces The number of decimal places to display.
-     * @returns The formated value.
+     * @returns The formatted value.
      */
     public static formatUnits(
         value: number,

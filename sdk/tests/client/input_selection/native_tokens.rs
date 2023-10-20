@@ -7,6 +7,7 @@ use iota_sdk::{
     client::api::input_selection::{Burn, Error, InputSelection},
     types::block::{output::TokenId, protocol::protocol_parameters},
 };
+use pretty_assertions::assert_eq;
 use primitive_types::U256;
 
 use crate::client::{
