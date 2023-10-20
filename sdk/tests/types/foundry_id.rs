@@ -7,6 +7,7 @@ use iota_sdk::types::block::{
     address::AccountAddress,
     output::{AccountId, FoundryId, SimpleTokenScheme, TokenScheme},
 };
+use pretty_assertions::assert_eq;
 
 #[test]
 fn getters() {

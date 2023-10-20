@@ -8,7 +8,9 @@ use derive_more::From;
 use packable::PackableExt;
 
 pub(crate) use self::regular::{ContextInputCount, InputCount, OutputCount};
-pub use self::regular::{RegularTransactionEssence, RegularTransactionEssenceBuilder};
+pub use self::regular::{
+    RegularTransactionEssence, RegularTransactionEssenceBuilder, TransactionCapabilities, TransactionCapabilityFlag,
+};
 use crate::types::block::Error;
 
 /// A generic essence that can represent different types defining transaction essences.
@@ -34,17 +36,7 @@ impl TransactionEssence {
         Blake2b256::digest(self.pack_to_vec()).into()
     }
 
-    /// Checks whether the essence is a [`RegularTransactionEssence`].
-    pub fn is_regular(&self) -> bool {
-        matches!(self, Self::Regular(_))
-    }
-
-    /// Gets the essence as an actual [`RegularTransactionEssence`].
-    /// PANIC: do not call on a non-regular essence.
-    pub fn as_regular(&self) -> &RegularTransactionEssence {
-        let Self::Regular(essence) = self;
-        essence
-    }
+    def_is_as_opt!(TransactionEssence: Regular);
 }
 
 #[cfg(feature = "serde")]

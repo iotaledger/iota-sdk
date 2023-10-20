@@ -15,7 +15,7 @@ use crate::{
         Client, ClientInner, Result,
     },
     types::{
-        api::core::response::{
+        api::core::{
             BlockMetadataResponse, CommitteeResponse, CongestionResponse, InfoResponse, IssuanceBlockHeaderResponse,
             ManaRewardsResponse, PeerResponse, RoutesResponse, SubmitBlockResponse, UtxoChangesResponse,
             ValidatorResponse, ValidatorsResponse,

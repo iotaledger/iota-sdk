@@ -6,6 +6,7 @@ use iota_sdk::{
     types::block::address::{Bech32Address, ToBech32Ext},
     wallet::{account::OutputParams, Error, Result, SendParams},
 };
+use pretty_assertions::assert_eq;
 
 use crate::wallet::common::{make_wallet, setup, tear_down};
 

@@ -1,7 +1,13 @@
 // Copyright 2021-2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { UnlockCondition, Feature, INativeToken, u64 } from '../..';
+import {
+    UnlockCondition,
+    Feature,
+    INativeToken,
+    NumericString,
+    u64,
+} from '../..';
 
 /**
  * Options for building a Basic Output
@@ -10,7 +16,7 @@ export interface BasicOutputBuilderParams {
     /**
      * If not provided, minimum storage deposit will be used
      */
-    amount?: u64 | string;
+    amount?: u64 | NumericString;
     /**
      * The native tokens to be held by the output.
      */

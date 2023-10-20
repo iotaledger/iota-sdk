@@ -8,6 +8,7 @@ use packable::{bounded::BoundedU16, prefix::BoxedSlicePrefix, Packable};
 
 use crate::types::{
     block::{
+        capabilities::{Capabilities, CapabilityFlag},
         context_input::{ContextInput, CONTEXT_INPUT_COUNT_RANGE},
         input::{Input, INPUT_COUNT_RANGE},
         mana::{verify_mana_allotments_sum, ManaAllotment, ManaAllotments},
@@ -30,6 +31,7 @@ pub struct RegularTransactionEssenceBuilder {
     inputs_commitment: InputsCommitment,
     outputs: Vec<Output>,
     allotments: BTreeSet<ManaAllotment>,
+    capabilities: TransactionCapabilities,
     payload: OptionalPayload,
     creation_slot: Option<SlotIndex>,
 }
@@ -44,6 +46,7 @@ impl RegularTransactionEssenceBuilder {
             inputs_commitment,
             outputs: Vec::new(),
             allotments: BTreeSet::new(),
+            capabilities: Default::default(),
             payload: OptionalPayload::default(),
             creation_slot: None,
         }
@@ -79,15 +82,15 @@ impl RegularTransactionEssenceBuilder {
         self
     }
 
-    /// Adds [`ManaAllotment`]s to a [`RegularTransactionEssenceBuilder`].
-    pub fn with_mana_allotments(mut self, allotments: impl IntoIterator<Item = ManaAllotment>) -> Self {
-        self.allotments = allotments.into_iter().collect();
-        self
-    }
-
     /// Adds an output to a [`RegularTransactionEssenceBuilder`].
     pub fn add_output(mut self, output: Output) -> Self {
         self.outputs.push(output);
+        self
+    }
+
+    /// Adds [`ManaAllotment`]s to a [`RegularTransactionEssenceBuilder`].
+    pub fn with_mana_allotments(mut self, allotments: impl IntoIterator<Item = ManaAllotment>) -> Self {
+        self.allotments = allotments.into_iter().collect();
         self
     }
 
@@ -100,6 +103,11 @@ impl RegularTransactionEssenceBuilder {
     /// Replaces a [`ManaAllotment`] of the [`RegularTransactionEssenceBuilder`] with a new one, or adds it.
     pub fn replace_mana_allotment(mut self, allotment: ManaAllotment) -> Self {
         self.allotments.replace(allotment);
+        self
+    }
+
+    pub fn with_capabilities(mut self, capabilities: TransactionCapabilities) -> Self {
+        self.capabilities = capabilities;
         self
     }
 
@@ -182,6 +190,7 @@ impl RegularTransactionEssenceBuilder {
             inputs_commitment: self.inputs_commitment,
             outputs,
             allotments,
+            capabilities: self.capabilities,
             payload: self.payload,
         })
     }
@@ -220,6 +229,7 @@ pub struct RegularTransactionEssence {
     #[packable(unpack_error_with = |e| e.unwrap_item_err_or_else(|p| Error::InvalidOutputCount(p.into())))]
     outputs: BoxedSlicePrefix<Output, OutputCount>,
     allotments: ManaAllotments,
+    capabilities: TransactionCapabilities,
     #[packable(verify_with = verify_payload_packable)]
     payload: OptionalPayload,
 }
@@ -266,6 +276,15 @@ impl RegularTransactionEssence {
     /// Returns the [`ManaAllotment`]s of a [`RegularTransactionEssence`].
     pub fn mana_allotments(&self) -> &[ManaAllotment] {
         &self.allotments
+    }
+
+    pub fn capabilities(&self) -> &TransactionCapabilities {
+        &self.capabilities
+    }
+
+    /// Returns whether a given [`TransactionCapabilityFlag`] is enabled.
+    pub fn has_capability(&self, flag: TransactionCapabilityFlag) -> bool {
+        self.capabilities.has_capability(flag)
     }
 
     /// Returns the optional payload of a [`RegularTransactionEssence`].
@@ -420,17 +439,78 @@ fn verify_payload_packable<const VERIFY: bool>(
     Ok(())
 }
 
+#[derive(Copy, Clone, Eq, PartialEq, Debug)]
+#[non_exhaustive]
+pub enum TransactionCapabilityFlag {
+    BurnNativeTokens,
+    BurnMana,
+    DestroyAccountOutputs,
+    DestroyFoundryOutputs,
+    DestroyNftOutputs,
+}
+
+impl TransactionCapabilityFlag {
+    const BURN_NATIVE_TOKENS: u8 = 0b00000001;
+    const BURN_MANA: u8 = 0b00000010;
+    const DESTROY_ACCOUNT_OUTPUTS: u8 = 0b00000100;
+    const DESTROY_FOUNDRY_OUTPUTS: u8 = 0b00001000;
+    const DESTROY_NFT_OUTPUTS: u8 = 0b00010000;
+}
+
+impl CapabilityFlag for TransactionCapabilityFlag {
+    type Iterator = core::array::IntoIter<Self, 5>;
+
+    fn as_byte(&self) -> u8 {
+        match self {
+            Self::BurnNativeTokens => Self::BURN_NATIVE_TOKENS,
+            Self::BurnMana => Self::BURN_MANA,
+            Self::DestroyAccountOutputs => Self::DESTROY_ACCOUNT_OUTPUTS,
+            Self::DestroyFoundryOutputs => Self::DESTROY_FOUNDRY_OUTPUTS,
+            Self::DestroyNftOutputs => Self::DESTROY_NFT_OUTPUTS,
+        }
+    }
+
+    fn index(&self) -> usize {
+        match self {
+            Self::BurnNativeTokens
+            | Self::BurnMana
+            | Self::DestroyAccountOutputs
+            | Self::DestroyFoundryOutputs
+            | Self::DestroyNftOutputs => 0,
+        }
+    }
+
+    fn all() -> Self::Iterator {
+        [
+            Self::BurnNativeTokens,
+            Self::BurnMana,
+            Self::DestroyAccountOutputs,
+            Self::DestroyFoundryOutputs,
+            Self::DestroyNftOutputs,
+        ]
+        .into_iter()
+    }
+}
+
+pub type TransactionCapabilities = Capabilities<TransactionCapabilityFlag>;
+
 #[cfg(feature = "serde")]
 pub(crate) mod dto {
-    use alloc::string::{String, ToString};
+    use alloc::{
+        boxed::Box,
+        string::{String, ToString},
+    };
     use core::str::FromStr;
 
     use serde::{Deserialize, Serialize};
 
     use super::*;
-    use crate::types::{
-        block::{mana::ManaAllotmentDto, output::dto::OutputDto, payload::dto::PayloadDto, Error},
-        TryFromDto,
+    use crate::{
+        types::{
+            block::{mana::ManaAllotmentDto, output::dto::OutputDto, payload::dto::PayloadDto, Error},
+            TryFromDto,
+        },
+        utils::serde::prefix_hex_bytes,
     };
 
     /// Describes the essence data making up a transaction by defining its inputs and outputs and an optional payload.
@@ -446,6 +526,8 @@ pub(crate) mod dto {
         pub inputs_commitment: String,
         pub outputs: Vec<OutputDto>,
         pub allotments: Vec<ManaAllotmentDto>,
+        #[serde(with = "prefix_hex_bytes")]
+        pub capabilities: Box<[u8]>,
         #[serde(default, skip_serializing_if = "Option::is_none")]
         pub payload: Option<PayloadDto>,
     }
@@ -461,6 +543,7 @@ pub(crate) mod dto {
                 inputs_commitment: value.inputs_commitment().to_string(),
                 outputs: value.outputs().iter().map(Into::into).collect(),
                 allotments: value.mana_allotments().iter().map(Into::into).collect(),
+                capabilities: value.capabilities().iter().copied().collect(),
                 payload: match value.payload() {
                     Some(p @ Payload::TaggedData(_)) => Some(p.into()),
                     Some(_) => unimplemented!(),
@@ -495,7 +578,10 @@ pub(crate) mod dto {
                 .with_context_inputs(dto.context_inputs)
                 .with_inputs(dto.inputs)
                 .with_outputs(outputs)
-                .with_mana_allotments(mana_allotments);
+                .with_mana_allotments(mana_allotments)
+                .with_capabilities(Capabilities::from_bytes(
+                    dto.capabilities.try_into().map_err(Error::InvalidCapabilitiesCount)?,
+                ));
 
             builder = if let Some(p) = dto.payload {
                 if let PayloadDto::TaggedData(i) = p {

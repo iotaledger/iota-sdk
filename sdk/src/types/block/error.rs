@@ -4,6 +4,7 @@
 use alloc::string::{FromUtf8Error, String};
 use core::{convert::Infallible, fmt};
 
+use bech32::primitives::hrp::Error as Bech32HrpError;
 use crypto::Error as CryptoError;
 use prefix_hex::Error as HexError;
 use primitive_types::U256;
@@ -30,8 +31,10 @@ use crate::types::block::{
 pub enum Error {
     ManaAllotmentsNotUniqueSorted,
     ConsumedAmountOverflow,
+    ConsumedManaOverflow,
     ConsumedNativeTokensAmountOverflow,
     CreatedAmountOverflow,
+    CreatedManaOverflow,
     CreatedNativeTokensAmountOverflow,
     Crypto(CryptoError),
     DuplicateBicAccountId(AccountId),
@@ -79,8 +82,8 @@ pub enum Error {
     InvalidInputKind(u8),
     InvalidInputCount(<InputCount as TryFrom<usize>>::Error),
     InvalidInputOutputIndex(<OutputIndex as TryFrom<u16>>::Error),
-    InvalidBech32Hrp(String),
-    InvalidAddressCapabilitiesCount(<u8 as TryFrom<usize>>::Error),
+    InvalidBech32Hrp(Bech32HrpError),
+    InvalidCapabilitiesCount(<u8 as TryFrom<usize>>::Error),
     InvalidBlockWrapperLength(usize),
     InvalidStateMetadataLength(<StateMetadataLength as TryFrom<usize>>::Error),
     InvalidManaValue(u64),
@@ -187,8 +190,10 @@ impl fmt::Display for Error {
         match self {
             Self::ManaAllotmentsNotUniqueSorted => write!(f, "mana allotments are not unique and/or sorted"),
             Self::ConsumedAmountOverflow => write!(f, "consumed amount overflow"),
+            Self::ConsumedManaOverflow => write!(f, "consumed mana overflow"),
             Self::ConsumedNativeTokensAmountOverflow => write!(f, "consumed native tokens amount overflow"),
             Self::CreatedAmountOverflow => write!(f, "created amount overflow"),
+            Self::CreatedManaOverflow => write!(f, "created mana overflow"),
             Self::CreatedNativeTokensAmountOverflow => write!(f, "created native tokens amount overflow"),
             Self::Crypto(e) => write!(f, "cryptographic error: {e}"),
             Self::DuplicateBicAccountId(account_id) => write!(f, "duplicate BIC account id: {account_id}"),
@@ -216,8 +221,8 @@ impl fmt::Display for Error {
             Self::InvalidAddress => write!(f, "invalid address provided"),
             Self::InvalidAddressKind(k) => write!(f, "invalid address kind: {k}"),
             Self::InvalidAccountIndex(index) => write!(f, "invalid account index: {index}"),
-            Self::InvalidBech32Hrp(err) => write!(f, "invalid bech32 hrp: {err}"),
-            Self::InvalidAddressCapabilitiesCount(e) => write!(f, "invalid capabilities count: {e}"),
+            Self::InvalidBech32Hrp(e) => write!(f, "invalid bech32 hrp: {e}"),
+            Self::InvalidCapabilitiesCount(e) => write!(f, "invalid capabilities count: {e}"),
             Self::InvalidBlockKind(k) => write!(f, "invalid block kind: {k}"),
             Self::InvalidRewardInputIndex(idx) => write!(f, "invalid reward input index: {idx}"),
             Self::InvalidStorageDepositAmount(amount) => {
@@ -383,6 +388,12 @@ impl fmt::Display for Error {
                 write!(f, "invalid epoch delta: created {created}, target {target}")
             }
         }
+    }
+}
+
+impl From<Bech32HrpError> for Error {
+    fn from(error: Bech32HrpError) -> Self {
+        Self::InvalidBech32Hrp(error)
     }
 }
 

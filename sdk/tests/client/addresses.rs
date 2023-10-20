@@ -15,6 +15,7 @@ use iota_sdk::{
     },
     types::block::address::{Address, Hrp},
 };
+use pretty_assertions::assert_eq;
 use serde::{Deserialize, Serialize};
 
 #[tokio::test]

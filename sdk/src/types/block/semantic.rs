@@ -8,9 +8,9 @@ use hashbrown::{HashMap, HashSet};
 use primitive_types::U256;
 
 use crate::types::block::{
-    address::Address,
-    output::{ChainId, FoundryId, InputsCommitment, NativeTokens, Output, OutputId, TokenId},
-    payload::transaction::{RegularTransactionEssence, TransactionEssence, TransactionId},
+    address::{Address, AddressCapabilityFlag},
+    output::{ChainId, FoundryId, InputsCommitment, NativeTokens, Output, OutputId, TokenId, UnlockCondition},
+    payload::transaction::{RegularTransactionEssence, TransactionCapabilityFlag, TransactionEssence, TransactionId},
     protocol::ProtocolParameters,
     unlock::Unlocks,
     Error,
@@ -153,34 +153,24 @@ impl TryFrom<u8> for TransactionFailureReason {
 
 ///
 pub struct ValidationContext<'a> {
-    ///
-    pub protocol_parameters: ProtocolParameters,
-    ///
-    pub essence: &'a RegularTransactionEssence,
-    ///
-    pub essence_hash: [u8; 32],
-    ///
-    pub inputs_commitment: InputsCommitment,
-    ///
-    pub unlocks: &'a Unlocks,
-    ///
-    pub input_amount: u64,
-    ///
-    pub input_native_tokens: BTreeMap<TokenId, U256>,
-    ///
-    pub input_chains: HashMap<ChainId, &'a Output>,
-    ///
-    pub output_amount: u64,
-    ///
-    pub output_native_tokens: BTreeMap<TokenId, U256>,
-    ///
-    pub output_chains: HashMap<ChainId, &'a Output>,
-    ///
-    pub unlocked_addresses: HashSet<Address>,
-    ///
-    pub storage_deposit_returns: HashMap<Address, u64>,
-    ///
-    pub simple_deposits: HashMap<Address, u64>,
+    pub(crate) protocol_parameters: ProtocolParameters,
+    pub(crate) essence: &'a RegularTransactionEssence,
+    pub(crate) essence_hash: [u8; 32],
+    pub(crate) inputs_commitment: InputsCommitment,
+    // TODO
+    #[allow(dead_code)]
+    pub(crate) unlocks: &'a Unlocks,
+    pub(crate) input_amount: u64,
+    pub(crate) input_mana: u64,
+    pub(crate) input_native_tokens: BTreeMap<TokenId, U256>,
+    pub(crate) input_chains: HashMap<ChainId, &'a Output>,
+    pub(crate) output_amount: u64,
+    pub(crate) output_mana: u64,
+    pub(crate) output_native_tokens: BTreeMap<TokenId, U256>,
+    pub(crate) output_chains: HashMap<ChainId, &'a Output>,
+    pub(crate) unlocked_addresses: HashSet<Address>,
+    pub(crate) storage_deposit_returns: HashMap<Address, u64>,
+    pub(crate) simple_deposits: HashMap<Address, u64>,
 }
 
 impl<'a> ValidationContext<'a> {
@@ -199,6 +189,7 @@ impl<'a> ValidationContext<'a> {
             essence_hash: TransactionEssence::from(essence.clone()).hash(),
             inputs_commitment: InputsCommitment::new(inputs.clone().map(|(_, output)| output)),
             input_amount: 0,
+            input_mana: 0,
             input_native_tokens: BTreeMap::<TokenId, U256>::new(),
             input_chains: inputs
                 .filter_map(|(output_id, input)| {
@@ -208,6 +199,7 @@ impl<'a> ValidationContext<'a> {
                 })
                 .collect(),
             output_amount: 0,
+            output_mana: 0,
             output_native_tokens: BTreeMap::<TokenId, U256>::new(),
             output_chains: essence
                 .outputs()
@@ -242,34 +234,39 @@ pub fn semantic_validation(
 
     // Validation of inputs.
     for ((output_id, consumed_output), unlock) in inputs.iter().zip(unlocks.iter()) {
-        let (conflict, amount, consumed_native_tokens, unlock_conditions) = match consumed_output {
+        let (conflict, amount, mana, consumed_native_tokens, unlock_conditions) = match consumed_output {
             Output::Basic(output) => (
                 output.unlock(output_id, unlock, inputs, &mut context),
                 output.amount(),
+                output.mana(),
                 Some(output.native_tokens()),
                 output.unlock_conditions(),
             ),
             Output::Account(output) => (
                 output.unlock(output_id, unlock, inputs, &mut context),
                 output.amount(),
+                output.mana(),
                 Some(output.native_tokens()),
                 output.unlock_conditions(),
             ),
             Output::Foundry(output) => (
                 output.unlock(output_id, unlock, inputs, &mut context),
                 output.amount(),
+                0,
                 Some(output.native_tokens()),
                 output.unlock_conditions(),
             ),
             Output::Nft(output) => (
                 output.unlock(output_id, unlock, inputs, &mut context),
                 output.amount(),
+                output.mana(),
                 Some(output.native_tokens()),
                 output.unlock_conditions(),
             ),
             Output::Delegation(output) => (
                 output.unlock(output_id, unlock, inputs, &mut context),
                 output.amount(),
+                0,
                 None,
                 output.unlock_conditions(),
             ),
@@ -320,6 +317,11 @@ pub fn semantic_validation(
             .checked_add(amount)
             .ok_or(Error::ConsumedAmountOverflow)?;
 
+        context.input_mana = context
+            .input_mana
+            .checked_add(mana)
+            .ok_or(Error::ConsumedManaOverflow)?;
+
         if let Some(consumed_native_tokens) = consumed_native_tokens {
             for native_token in consumed_native_tokens.iter() {
                 let native_token_amount = context.input_native_tokens.entry(*native_token.token_id()).or_default();
@@ -333,7 +335,7 @@ pub fn semantic_validation(
 
     // Validation of outputs.
     for created_output in context.essence.outputs() {
-        let (amount, created_native_tokens, features) = match created_output {
+        let (amount, mana, created_native_tokens, features) = match created_output {
             Output::Basic(output) => {
                 if let Some(address) = output.simple_deposit_address() {
                     let amount = context.simple_deposits.entry(address.clone()).or_default();
@@ -343,13 +345,91 @@ pub fn semantic_validation(
                         .ok_or(Error::CreatedAmountOverflow)?;
                 }
 
-                (output.amount(), Some(output.native_tokens()), Some(output.features()))
+                (
+                    output.amount(),
+                    output.mana(),
+                    Some(output.native_tokens()),
+                    Some(output.features()),
+                )
             }
-            Output::Account(output) => (output.amount(), Some(output.native_tokens()), Some(output.features())),
-            Output::Foundry(output) => (output.amount(), Some(output.native_tokens()), Some(output.features())),
-            Output::Nft(output) => (output.amount(), Some(output.native_tokens()), Some(output.features())),
-            Output::Delegation(output) => (output.amount(), None, None),
+            Output::Account(output) => (
+                output.amount(),
+                output.mana(),
+                Some(output.native_tokens()),
+                Some(output.features()),
+            ),
+            Output::Foundry(output) => (
+                output.amount(),
+                0,
+                Some(output.native_tokens()),
+                Some(output.features()),
+            ),
+            Output::Nft(output) => (
+                output.amount(),
+                output.mana(),
+                Some(output.native_tokens()),
+                Some(output.features()),
+            ),
+            Output::Delegation(output) => (output.amount(), 0, None, None),
         };
+
+        if let Some(unlock_conditions) = created_output.unlock_conditions() {
+            // Check the possibly restricted address-containing conditions
+            let addresses = unlock_conditions
+                .iter()
+                .filter_map(|uc| match uc {
+                    UnlockCondition::Address(uc) => Some(uc.address()),
+                    UnlockCondition::Expiration(uc) => Some(uc.return_address()),
+                    UnlockCondition::StateControllerAddress(uc) => Some(uc.address()),
+                    UnlockCondition::GovernorAddress(uc) => Some(uc.address()),
+                    _ => None,
+                })
+                .filter_map(Address::as_restricted_opt);
+            for address in addresses {
+                if created_output.native_tokens().map(|t| t.len()).unwrap_or_default() > 0
+                    && !address.has_capability(AddressCapabilityFlag::OutputsWithNativeTokens)
+                {
+                    // TODO: add a variant https://github.com/iotaledger/iota-sdk/issues/1430
+                    return Ok(Some(TransactionFailureReason::SemanticValidationFailed));
+                }
+
+                if created_output.mana() > 0 && !address.has_capability(AddressCapabilityFlag::OutputsWithMana) {
+                    // TODO: add a variant https://github.com/iotaledger/iota-sdk/issues/1430
+                    return Ok(Some(TransactionFailureReason::SemanticValidationFailed));
+                }
+
+                if unlock_conditions.timelock().is_some()
+                    && !address.has_capability(AddressCapabilityFlag::OutputsWithTimelock)
+                {
+                    // TODO: add a variant https://github.com/iotaledger/iota-sdk/issues/1430
+                    return Ok(Some(TransactionFailureReason::SemanticValidationFailed));
+                }
+
+                if unlock_conditions.expiration().is_some()
+                    && !address.has_capability(AddressCapabilityFlag::OutputsWithExpiration)
+                {
+                    // TODO: add a variant https://github.com/iotaledger/iota-sdk/issues/1430
+                    return Ok(Some(TransactionFailureReason::SemanticValidationFailed));
+                }
+
+                if unlock_conditions.storage_deposit_return().is_some()
+                    && !address.has_capability(AddressCapabilityFlag::OutputsWithStorageDepositReturn)
+                {
+                    // TODO: add a variant https://github.com/iotaledger/iota-sdk/issues/1430
+                    return Ok(Some(TransactionFailureReason::SemanticValidationFailed));
+                }
+
+                if match &created_output {
+                    Output::Account(_) => !address.has_capability(AddressCapabilityFlag::AccountOutputs),
+                    Output::Nft(_) => !address.has_capability(AddressCapabilityFlag::NftOutputs),
+                    Output::Delegation(_) => !address.has_capability(AddressCapabilityFlag::DelegationOutputs),
+                    _ => false,
+                } {
+                    // TODO: add a variant https://github.com/iotaledger/iota-sdk/issues/1430
+                    return Ok(Some(TransactionFailureReason::SemanticValidationFailed));
+                }
+            }
+        }
 
         if let Some(sender) = features.and_then(|f| f.sender()) {
             if !context.unlocked_addresses.contains(sender.address()) {
@@ -361,6 +441,11 @@ pub fn semantic_validation(
             .output_amount
             .checked_add(amount)
             .ok_or(Error::CreatedAmountOverflow)?;
+
+        context.output_mana = context
+            .output_mana
+            .checked_add(mana)
+            .ok_or(Error::CreatedManaOverflow)?;
 
         if let Some(created_native_tokens) = created_native_tokens {
             for native_token in created_native_tokens.iter() {
@@ -390,6 +475,12 @@ pub fn semantic_validation(
     // Validation of amounts.
     if context.input_amount != context.output_amount {
         return Ok(Some(TransactionFailureReason::SumInputsOutputsAmountMismatch));
+    }
+
+    if context.input_mana > context.output_mana && !context.essence.has_capability(TransactionCapabilityFlag::BurnMana)
+    {
+        // TODO: add a variant https://github.com/iotaledger/iota-sdk/issues/1430
+        return Ok(Some(TransactionFailureReason::SemanticValidationFailed));
     }
 
     let mut native_token_ids = HashSet::new();

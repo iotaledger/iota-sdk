@@ -17,17 +17,17 @@ class OutputType(IntEnum):
     """Output types.
 
     Attributes:
-        Basic (3): A basic output.
-        Account (4): An account output.
-        Foundry (5): A foundry output.
-        Nft (6): An NFT output.
-        Delegation (7): A delegation output.
+        Basic (0): A basic output.
+        Account (1): An account output.
+        Foundry (2): A foundry output.
+        Nft (3): An NFT output.
+        Delegation (4): A delegation output.
     """
-    Basic = 3
-    Account = 4
-    Foundry = 5
-    Nft = 6
-    Delegation = 7
+    Basic = 0
+    Account = 1
+    Foundry = 2
+    Nft = 3
+    Delegation = 4
 
 
 @json
@@ -279,7 +279,7 @@ def deserialize_output(d: Dict[str, Any]) -> Output:
 
 def deserialize_outputs(dicts: List[Dict[str, Any]]) -> List[Output]:
     """
-    Takes a list of dictionaries as input and returns a list with specific instances of a classes based on the value of the 'type' key in the dictionary.
+    Takes a list of dictionaries as input and returns a list with specific instances of classes based on the value of the 'type' key in the dictionary.
 
     Arguments:
     * `dicts`: A list of dictionaries that are expected to have a key called 'type' which specifies the type of the returned value.

@@ -13,7 +13,10 @@ use iota_sdk::types::block::{
         Output, SimpleTokenScheme, TokenId, TokenScheme,
     },
     payload::{
-        transaction::{RegularTransactionEssence, TransactionId, TransactionPayload},
+        transaction::{
+            RegularTransactionEssence, TransactionCapabilities, TransactionCapabilityFlag, TransactionId,
+            TransactionPayload,
+        },
         Payload,
     },
     protocol::protocol_parameters,
@@ -23,6 +26,7 @@ use iota_sdk::types::block::{
     Error,
 };
 use packable::bounded::TryIntoBoundedU16Error;
+use pretty_assertions::assert_eq;
 
 const TRANSACTION_ID: &str = "0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c649";
 const ED25519_ADDRESS_1: &str = "0xd56da1eb7726ed482dfe9d457cf548c2ae2a6ce3e053dbf82f11223be476adb9";
@@ -463,4 +467,47 @@ fn duplicate_output_foundry() {
         essence,
         Err(Error::DuplicateOutputChain(ChainId::Foundry(foundry_id_0))) if foundry_id_0 == foundry_id
     ));
+}
+
+#[test]
+fn transactions_capabilities() {
+    let protocol_parameters = protocol_parameters();
+    let transaction_id = TransactionId::new(prefix_hex::decode(TRANSACTION_ID).unwrap());
+    let input1 = Input::Utxo(UtxoInput::new(transaction_id, 0).unwrap());
+    let input2 = Input::Utxo(UtxoInput::new(transaction_id, 1).unwrap());
+    let address = Address::from(Ed25519Address::new(prefix_hex::decode(ED25519_ADDRESS_1).unwrap()));
+    let amount = 1_000_000;
+    let output = Output::Basic(
+        BasicOutput::build_with_amount(amount)
+            .add_unlock_condition(AddressUnlockCondition::new(address))
+            .finish_with_params(&protocol_parameters)
+            .unwrap(),
+    );
+    let essence = RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
+        .with_inputs(vec![input1, input2])
+        .add_output(output)
+        .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
+        .finish_with_params(&protocol_parameters)
+        .unwrap();
+    let mut capabilities = essence.capabilities().clone();
+
+    use TransactionCapabilityFlag as Flag;
+
+    assert!(capabilities.is_none());
+
+    assert!(!capabilities.has_capability(Flag::BurnNativeTokens));
+    capabilities.add_capability(Flag::BurnNativeTokens);
+    assert!(capabilities.has_capabilities([Flag::BurnNativeTokens]));
+
+    assert!(!capabilities.has_capability(Flag::BurnMana));
+    capabilities.set_capabilities([Flag::BurnMana, Flag::DestroyAccountOutputs]);
+    assert!(capabilities.has_capabilities([Flag::BurnMana, Flag::DestroyAccountOutputs]));
+    assert!(!capabilities.has_capability(Flag::BurnNativeTokens));
+
+    assert!(!capabilities.is_none());
+
+    assert!(!capabilities.has_capabilities(TransactionCapabilities::all().capabilities_iter()));
+    capabilities.set_all();
+    assert!(capabilities.has_capabilities(TransactionCapabilities::all().capabilities_iter()));
+    assert!(capabilities.has_capabilities([Flag::DestroyFoundryOutputs, Flag::DestroyNftOutputs]));
 }

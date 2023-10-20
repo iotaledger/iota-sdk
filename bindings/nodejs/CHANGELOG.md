@@ -19,13 +19,64 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security -->
 
-## 1.1.0 - 2023-MM-DD
+## 1.1.1 - 2023-10-11
+
+### Added
+
+- `UnlockableByAddress` to `AliasQueryParameter, NftQueryParameter, QueryParameter`;
+
+### Fixed
+
+- Added `SeedSecretManager` to `SecretManagerType`;
+- `migrateDbChrysalisToStardust()` for some ledger nano wallets;
+
+### Removed
+
+- `AliasAddress` from `NftQueryParameter`;
+
+## 1.1.0 - 2023-09-29
+
+### Changed
+
+- More type hints;
+
+## 1.1.0-rc.2 - 2023-09-28
+
+Changes from the 1.0 track.
+
+## 1.1.0-rc.1 - 2023-09-26
+
+### Fixed
+
+- Import of bindings through types;
+
+## 1.1.0-rc.0 - 2023-09-25
 
 ### Added
 
 - `Account::{burn(), consolidateOutputs(), createAliasOutput(), meltNativeToken(), mintNativeToken(), createNativeToken(), mintNfts(), sendTransaction(), sendNativeTokens(), sendNft()}` methods;
 - `Client::outputIds()` method;
 - `GenericQueryParameter, UnlockableByAddress` types;
+- `Irc27Metadata` and `Irc30Metadata` helpers;
+- `Utils::outputHexBytes`;
+- `PrivateKeySecretManager`;
+
+## 1.0.13 - 2023-09-28
+
+### Fixed
+
+- `migrateDbChrysalisToStardust()` when ledger nano was used as signer type;
+
+## 1.0.12 - 2023-09-25
+
+### Changed
+
+- Made `TransactionOptions.allowMicroAmount` optional;
+
+### Fixed
+
+- Parsing of `RegularTransactionEssence.payload`;
+- Don't error if custom remainder address is provided with ledger nano;
 
 ## 1.0.11 - 2023-09-14
 
@@ -181,7 +232,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `callPluginRoute` to Client to fetch data from custom node plugins;
 - `computeTokenId `, `computeOutputId`, `computeInputsCommitment` and `computeStorageDeposit` to Utils;
 - Type alias for Ids which were previously just `HexEncodedString`;
-- List of `ConfictReason` explanations matching the enum;
+- List of `ConflictReason` explanations matching the enum;
 - `units-helper` class for IOTA units conversion;
 - `Client::destroy` to close an open handle;
 

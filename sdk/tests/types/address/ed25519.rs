@@ -5,6 +5,7 @@ use core::str::FromStr;
 
 use iota_sdk::types::block::address::{Address, Bech32Address, Ed25519Address, ToBech32Ext};
 use packable::PackableExt;
+use pretty_assertions::assert_eq;
 use serde_json::json;
 
 const ED25519_ADDRESS: &str = "0xebe40a263480190dcd7939447ee01aefa73d6f3cc33c90ef7bf905abf8728655";

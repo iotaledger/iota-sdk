@@ -11,6 +11,7 @@ use iota_sdk::types::{
     TryFromDto,
 };
 use packable::PackableExt;
+use pretty_assertions::assert_eq;
 
 const TRANSACTION_ID: &str = "0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c649";
 
@@ -54,7 +55,7 @@ fn pack_unpack_valid() {
     );
 }
 
-// TODO
+// TODO: re-enable when source is updated
 // #[test]
 // fn transaction_id() {
 //     // Test from https://github.com/iotaledger/tips-draft/blob/tip46/tips/TIP-0046/tip-0046.md#transaction-id

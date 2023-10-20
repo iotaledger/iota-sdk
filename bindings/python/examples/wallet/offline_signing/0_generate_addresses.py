@@ -21,17 +21,15 @@ ADDRESSES_FILE_PATH = "./wallet/offline_signing/example.addresses.json"
 node_url = os.environ.get('NODE_URL', 'https://api.testnet.shimmer.network')
 offline_client_options = ClientOptions()
 
-if 'STRONGHOLD_PASSWORD' not in os.environ:
-    raise Exception(".env STRONGHOLD_PASSWORD is undefined, see .env.example")
+for env_var in ['STRONGHOLD_PASSWORD', 'MNEMONIC']:
+    if env_var not in os.environ:
+        raise Exception(f'.env {env_var} is undefined, see .env.example')
 
 secret_manager = StrongholdSecretManager(
     STRONGHOLD_SNAPSHOT_PATH, os.environ['STRONGHOLD_PASSWORD'])
 
 wallet = Wallet(OFFLINE_WALLET_DB_PATH, offline_client_options,
                 CoinType.IOTA, secret_manager)
-
-if 'MNEMONIC' not in os.environ:
-    raise Exception(".env MNEMONIC is undefined, see .env.example")
 
 # Store the mnemonic in the Stronghold snapshot, this only needs to be
 # done once

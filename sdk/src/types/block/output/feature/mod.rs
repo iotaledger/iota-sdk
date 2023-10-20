@@ -106,95 +106,7 @@ impl Feature {
         }
     }
 
-    /// Checks whether the feature is a [`SenderFeature`].
-    pub fn is_sender(&self) -> bool {
-        matches!(self, Self::Sender(_))
-    }
-
-    /// Gets the feature as an actual [`SenderFeature`].
-    /// NOTE: Will panic if the feature is not a [`SenderFeature`].
-    pub fn as_sender(&self) -> &SenderFeature {
-        if let Self::Sender(feature) = self {
-            feature
-        } else {
-            panic!("invalid downcast of non-SenderFeature");
-        }
-    }
-
-    /// Checks whether the feature is an [`IssuerFeature`].
-    pub fn is_issuer(&self) -> bool {
-        matches!(self, Self::Issuer(_))
-    }
-
-    /// Gets the feature as an actual [`IssuerFeature`].
-    /// NOTE: Will panic if the feature is not an [`IssuerFeature`].
-    pub fn as_issuer(&self) -> &IssuerFeature {
-        if let Self::Issuer(feature) = self {
-            feature
-        } else {
-            panic!("invalid downcast of non-IssuerFeature");
-        }
-    }
-
-    /// Checks whether the feature is a [`MetadataFeature`].
-    pub fn is_metadata(&self) -> bool {
-        matches!(self, Self::Metadata(_))
-    }
-
-    /// Gets the feature as an actual [`MetadataFeature`].
-    /// NOTE: Will panic if the feature is not a [`MetadataFeature`].
-    pub fn as_metadata(&self) -> &MetadataFeature {
-        if let Self::Metadata(feature) = self {
-            feature
-        } else {
-            panic!("invalid downcast of non-MetadataFeature");
-        }
-    }
-
-    /// Checks whether the feature is a [`TagFeature`].
-    pub fn is_tag(&self) -> bool {
-        matches!(self, Self::Tag(_))
-    }
-
-    /// Gets the feature as an actual [`TagFeature`].
-    /// NOTE: Will panic if the feature is not a [`TagFeature`].
-    pub fn as_tag(&self) -> &TagFeature {
-        if let Self::Tag(feature) = self {
-            feature
-        } else {
-            panic!("invalid downcast of non-TagFeature");
-        }
-    }
-
-    /// Checks whether the feature is a [`BlockIssuerFeature`].
-    pub fn is_block_issuer(&self) -> bool {
-        matches!(self, Self::BlockIssuer(_))
-    }
-
-    /// Gets the feature as an actual [`BlockIssuerFeature`].
-    /// NOTE: Will panic if the feature is not a [`BlockIssuerFeature`].
-    pub fn as_block_issuer(&self) -> &BlockIssuerFeature {
-        if let Self::BlockIssuer(feature) = self {
-            feature
-        } else {
-            panic!("invalid downcast of non-BlockIssuerFeature");
-        }
-    }
-
-    /// Checks whether the feature is a [`StakingFeature`].
-    pub fn is_staking(&self) -> bool {
-        matches!(self, Self::Staking(_))
-    }
-
-    /// Gets the feature as an actual [`StakingFeature`].
-    /// NOTE: Will panic if the feature is not a [`StakingFeature`].
-    pub fn as_staking(&self) -> &StakingFeature {
-        if let Self::Staking(feature) = self {
-            feature
-        } else {
-            panic!("invalid downcast of non-StakingFeature");
-        }
-    }
+    def_is_as_opt!(Feature: Sender, Issuer, Metadata, Tag, BlockIssuer, Staking);
 }
 
 create_bitflags!(
@@ -337,6 +249,8 @@ pub(crate) fn verify_allowed_features(features: &Features, allowed_features: Fea
 
 #[cfg(test)]
 mod test {
+    use pretty_assertions::assert_eq;
+
     use super::*;
 
     #[test]

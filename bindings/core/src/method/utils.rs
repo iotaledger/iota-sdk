@@ -156,4 +156,7 @@ pub enum UtilsMethod {
     /// Computes the slot commitment id from a slot commitment.
     #[serde(rename_all = "camelCase")]
     ComputeSlotCommitmentId { slot_commitment: SlotCommitment },
+    /// Returns the hex representation of the serialized output bytes.
+    #[serde(rename_all = "camelCase")]
+    OutputHexBytes { output: OutputDto },
 }

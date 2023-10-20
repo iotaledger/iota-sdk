@@ -14,11 +14,13 @@ class PayloadType(IntEnum):
     """Block payload types.
 
     Attributes:
-        TaggedData (5): A tagged data payload.
-        Transaction (6): A transaction payload.
+        TaggedData (0): A tagged data payload.
+        Transaction (1): A transaction payload.
+        CandidacyAnnouncement (2): A candidacy announcement payload.
     """
-    TaggedData = 5
-    Transaction = 6
+    TaggedData = 0
+    Transaction = 1
+    CandidacyAnnouncement = 2
 
 
 @json
@@ -55,7 +57,19 @@ class TransactionPayload:
         init=False)
 
 
-Payload: TypeAlias = Union[TaggedDataPayload, TransactionPayload]
+@json
+@dataclass
+class CandidacyAnnouncementPayload:
+    """A payload which is used to indicate candidacy for committee selection for the next epoch.
+    """
+    type: int = field(
+        default_factory=lambda: int(
+            PayloadType.CandidacyAnnouncement),
+        init=False)
+
+
+Payload: TypeAlias = Union[TaggedDataPayload,
+                           TransactionPayload, CandidacyAnnouncementPayload]
 
 
 def deserialize_payload(d: Dict[str, Any]) -> Payload:
@@ -70,13 +84,15 @@ def deserialize_payload(d: Dict[str, Any]) -> Payload:
         return TaggedDataPayload.from_dict(d)
     if payload_type == PayloadType.Transaction:
         return TransactionPayload.from_dict(d)
+    if payload_type == PayloadType.CandidacyAnnouncement:
+        return CandidacyAnnouncementPayload.from_dict(d)
     raise Exception(f'invalid payload type: {payload_type}')
 
 
 def deserialize_payloads(
         dicts: List[Dict[str, Any]]) -> List[Payload]:
     """
-    Takes a list of dictionaries as input and returns a list with specific instances of a classes based on the value of the 'type' key in the dictionary.
+    Takes a list of dictionaries as input and returns a list with specific instances of classes based on the value of the 'type' key in the dictionary.
 
     Arguments:
     * `dicts`: A list of dictionaries that are expected to have a key called 'type' which specifies the type of the returned value.
