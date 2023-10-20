@@ -12,8 +12,6 @@ use getset::Getters;
 use hashbrown::HashMap;
 use packable::PackableExt;
 
-#[cfg(feature = "serde")]
-use crate::types::block::string_serde_impl;
 use crate::types::{api::plugins::participation::error::Error, block::impl_id};
 
 /// Participation tag.
@@ -53,9 +51,7 @@ pub struct ParticipationEvent {
     pub data: ParticipationEventData,
 }
 
-impl_id!(pub ParticipationEventId, 32, "A participation event id.");
-#[cfg(feature = "serde")]
-string_serde_impl!(ParticipationEventId);
+impl_id!(pub ParticipationEvent, 32);
 
 /// Information about a voting or staking event.
 #[derive(Debug, Clone, Eq, PartialEq, Getters)]

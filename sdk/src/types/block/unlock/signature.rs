@@ -55,5 +55,5 @@ pub(crate) mod dto {
         }
     }
 
-    impl_serde_typed_dto!(SignatureUnlock, SignatureUnlockDto, "signature unlock");
+    crate::impl_serde_typed_dto!(SignatureUnlock, SignatureUnlockDto, "signature unlock");
 }

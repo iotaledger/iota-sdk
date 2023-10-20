@@ -59,7 +59,7 @@ impl ContextInput {
         }
     }
 
-    def_is_as_opt!(ContextInput: Commitment, BlockIssuanceCredit, Reward);
+    crate::def_is_as_opt!(ContextInput: Commitment, BlockIssuanceCredit, Reward);
 }
 
 #[cfg(test)]

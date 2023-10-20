@@ -12,32 +12,32 @@ use packable::{
 };
 use primitive_types::U256;
 
-use crate::types::{
-    block::{
-        address::{AccountAddress, Address},
-        output::{
-            account::AccountId,
-            feature::{verify_allowed_features, Feature, FeatureFlags, Features},
-            unlock_condition::{
-                verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions,
+use crate::{
+    impl_id,
+    types::{
+        block::{
+            address::{AccountAddress, Address},
+            output::{
+                account::AccountId,
+                feature::{verify_allowed_features, Feature, FeatureFlags, Features},
+                unlock_condition::{
+                    verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions,
+                },
+                verify_output_amount_min, verify_output_amount_packable, verify_output_amount_supply, ChainId,
+                NativeToken, NativeTokens, Output, OutputBuilderAmount, OutputId, Rent, RentStructure,
+                StateTransitionError, StateTransitionVerifier, TokenId, TokenScheme,
             },
-            verify_output_amount_min, verify_output_amount_packable, verify_output_amount_supply, ChainId, NativeToken,
-            NativeTokens, Output, OutputBuilderAmount, OutputId, Rent, RentStructure, StateTransitionError,
-            StateTransitionVerifier, TokenId, TokenScheme,
+            payload::transaction::{TransactionCapabilities, TransactionCapabilityFlag},
+            protocol::ProtocolParameters,
+            semantic::{TransactionFailureReason, ValidationContext},
+            unlock::Unlock,
+            Error,
         },
-        payload::transaction::{TransactionCapabilities, TransactionCapabilityFlag},
-        protocol::ProtocolParameters,
-        semantic::{TransactionFailureReason, ValidationContext},
-        unlock::Unlock,
-        Error,
+        ValidationParams,
     },
-    ValidationParams,
 };
 
-impl_id!(pub FoundryId, 38, "Defines the unique identifier of a foundry.");
-
-#[cfg(feature = "serde")]
-string_serde_impl!(FoundryId);
+impl_id!(pub Foundry, 38);
 
 impl From<TokenId> for FoundryId {
     fn from(token_id: TokenId) -> Self {

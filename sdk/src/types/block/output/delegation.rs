@@ -10,30 +10,30 @@ use packable::{
     Packable,
 };
 
-use crate::types::{
-    block::{
-        address::{AccountAddress, Address},
-        output::{
-            chain_id::ChainId,
-            unlock_condition::{
-                verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions,
+use crate::{
+    impl_id,
+    types::{
+        block::{
+            address::{AccountAddress, Address},
+            output::{
+                chain_id::ChainId,
+                unlock_condition::{
+                    verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions,
+                },
+                verify_output_amount_min, verify_output_amount_packable, verify_output_amount_supply, Output,
+                OutputBuilderAmount, OutputId, Rent, RentStructure, StateTransitionError, StateTransitionVerifier,
             },
-            verify_output_amount_min, verify_output_amount_packable, verify_output_amount_supply, Output,
-            OutputBuilderAmount, OutputId, Rent, RentStructure, StateTransitionError, StateTransitionVerifier,
+            protocol::ProtocolParameters,
+            semantic::{TransactionFailureReason, ValidationContext},
+            slot::EpochIndex,
+            unlock::Unlock,
+            Error,
         },
-        protocol::ProtocolParameters,
-        semantic::{TransactionFailureReason, ValidationContext},
-        slot::EpochIndex,
-        unlock::Unlock,
-        Error,
+        ValidationParams,
     },
-    ValidationParams,
 };
 
-impl_id!(pub DelegationId, 32, "Unique identifier of the Delegation Output, which is the BLAKE2b-256 hash of the Output ID that created it.");
-
-#[cfg(feature = "serde")]
-string_serde_impl!(DelegationId);
+impl_id!(pub Delegation, 32);
 
 impl From<&OutputId> for DelegationId {
     fn from(output_id: &OutputId) -> Self {

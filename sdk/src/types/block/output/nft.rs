@@ -10,31 +10,31 @@ use packable::{
     Packable,
 };
 
-use crate::types::{
-    block::{
-        address::{Address, NftAddress},
-        output::{
-            feature::{verify_allowed_features, Feature, FeatureFlags, Features},
-            unlock_condition::{
-                verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions,
+use crate::{
+    impl_id,
+    types::{
+        block::{
+            address::{Address, NftAddress},
+            output::{
+                feature::{verify_allowed_features, Feature, FeatureFlags, Features},
+                unlock_condition::{
+                    verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions,
+                },
+                verify_output_amount_min, verify_output_amount_packable, verify_output_amount_supply, ChainId,
+                NativeToken, NativeTokens, Output, OutputBuilderAmount, OutputId, Rent, RentStructure,
+                StateTransitionError, StateTransitionVerifier,
             },
-            verify_output_amount_min, verify_output_amount_packable, verify_output_amount_supply, ChainId, NativeToken,
-            NativeTokens, Output, OutputBuilderAmount, OutputId, Rent, RentStructure, StateTransitionError,
-            StateTransitionVerifier,
+            payload::transaction::TransactionCapabilityFlag,
+            protocol::ProtocolParameters,
+            semantic::{TransactionFailureReason, ValidationContext},
+            unlock::Unlock,
+            Error,
         },
-        payload::transaction::TransactionCapabilityFlag,
-        protocol::ProtocolParameters,
-        semantic::{TransactionFailureReason, ValidationContext},
-        unlock::Unlock,
-        Error,
+        ValidationParams,
     },
-    ValidationParams,
 };
 
-impl_id!(pub NftId, 32, "Unique identifier of an NFT, which is the BLAKE2b-256 hash of the Output ID that created it.");
-
-#[cfg(feature = "serde")]
-string_serde_impl!(NftId);
+impl_id!(pub Nft, 32);
 
 impl From<&OutputId> for NftId {
     fn from(output_id: &OutputId) -> Self {
