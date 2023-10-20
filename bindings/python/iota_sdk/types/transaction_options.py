@@ -27,9 +27,16 @@ class RemainderValueStrategyCustomAddress:
     internal: bool
     used: bool
 
-    @staticmethod
-    def _to_dict_custom(config: Dict[str, any]) -> Dict[str, any]:
-        return dict({"strategy": "CustomAddress", "value": config})
+    def to_dict(self) -> dict:
+        return {
+            'strategy': 'CustomAddress',
+            'value': {
+                'address': self.address,
+                'keyIndex': self.key_index,
+                'internal': self.internal,
+                'used': self.used
+            }
+        }
 
 
 class RemainderValueStrategy(Enum):
@@ -42,16 +49,11 @@ class RemainderValueStrategy(Enum):
     ChangeAddress = None
     ReuseAddress = None
 
-    def _to_dict_custom(self):
-        """
-        The function `_to_dict_custom` returns a dictionary with the strategy name and its corresponding value.
-
-        Returns:
-
-        a dictionary with two key-value pairs. The "strategy" key is assigned the value of self.name,
-        and the "value" key is assigned the first element of self.value.
-        """
-        return dict({"strategy": self.name, "value": self.value[0]})
+    def to_dict(self):
+        return {
+            'strategy': self.name,
+            'value': self.value[0]
+        }
 
 
 @json
