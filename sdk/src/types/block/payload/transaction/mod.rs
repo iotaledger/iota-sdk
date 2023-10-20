@@ -54,7 +54,7 @@ impl TransactionPayload {
         hasher.update(Self::KIND.to_le_bytes());
         hasher.update(self.pack_to_vec());
 
-        TransactionHash::new(hasher.finalize().into()).with_slot_index(self.essence.creation_slot())
+        TransactionHash::new(hasher.finalize().into()).into_transaction_id(self.essence.creation_slot())
     }
 }
 

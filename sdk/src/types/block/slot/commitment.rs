@@ -91,6 +91,6 @@ impl SlotCommitment {
 
     /// Computes the [`SlotCommitmentId`] of the [`SlotCommitment`].
     pub fn id(&self) -> SlotCommitmentId {
-        SlotCommitmentHash::new(Blake2b256::digest(self.pack_to_vec()).into()).with_slot_index(self.index)
+        SlotCommitmentHash::new(Blake2b256::digest(self.pack_to_vec()).into()).into_slot_commitment_id(self.index)
     }
 }

@@ -44,7 +44,10 @@ fn null() {
     assert_eq!(
         format!(
             "{}",
-            TransactionHash::null().with_slot_index(0).with_output_index(0).unwrap()
+            TransactionHash::null()
+                .into_transaction_id(0)
+                .with_output_index(0)
+                .unwrap()
         ),
         "0x0000000000000000000000000000000000000000000000000000000000000000000000000000"
     );

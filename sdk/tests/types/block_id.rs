@@ -53,7 +53,7 @@ fn pack_unpack_valid() {
 fn memory_layout() {
     let block_hash = BlockHash::new(rand_bytes_array());
     let slot_index = SlotIndex(12345);
-    let block_id = block_hash.with_slot_index(slot_index);
+    let block_id = block_hash.into_block_id(slot_index);
     assert_eq!(slot_index, block_id.slot_index());
     let memory_layout =
         <[u8; BlockId::LENGTH]>::try_from([block_hash.as_ref(), &slot_index.to_le_bytes()].concat()).unwrap();

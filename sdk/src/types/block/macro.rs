@@ -111,11 +111,13 @@ macro_rules! impl_id {
         string_serde_impl!($hash_name);
 
         $(
-            impl $hash_name {
-                pub fn with_slot_index(self, slot_index: impl Into<$crate::types::block::slot::SlotIndex>) -> $id_name {
-                    $id_name {
-                        hash: self,
-                        slot_index: slot_index.into().to_le_bytes(),
+            paste::paste!{
+                impl $hash_name {
+                    pub fn [<into_ $id_name:snake>](self, slot_index: impl Into<$crate::types::block::slot::SlotIndex>) -> $id_name {
+                        $id_name {
+                            hash: self,
+                            slot_index: slot_index.into().to_le_bytes(),
+                        }
                     }
                 }
             }

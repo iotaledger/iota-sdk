@@ -158,7 +158,7 @@ mod tests {
 
         let outputs_participation = std::iter::once((
             TransactionHash::new([3; 32])
-                .with_slot_index(0)
+                .into_transaction_id(0)
                 .with_output_index(0)
                 .unwrap(),
             OutputStatusResponse::mock(),
