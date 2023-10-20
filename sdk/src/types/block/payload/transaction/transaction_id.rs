@@ -4,11 +4,11 @@
 use crate::types::block::{output::OutputId, Error};
 
 crate::impl_id!(
-    /// The hash of a [`TransactionPayload`](crate::types::block::TransactionPayload).
+    /// The hash of a [`TransactionPayload`](crate::types::block::payload::TransactionPayload).
     pub TransactionHash {
         pub const LENGTH: usize = 32;
     }
-    /// A [`TransactionPayload`](crate::types::block::TransactionPayload) identifier.
+    /// A [`TransactionPayload`](crate::types::block::payload::TransactionPayload) identifier.
     pub TransactionId;
 );
 
