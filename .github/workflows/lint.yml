@@ -119,6 +119,25 @@ jobs:
       - name: Run cargo-license-template
         run: cargo ci-license
 
+  check-docs:
+    name: Check Documentation
+    runs-on: ubuntu-latest
+    env:
+      RUSTDOCFLAGS: -D warnings
+
+    steps:
+      - name: Checkout the Source Code
+        uses: actions/checkout@v3
+
+      - name: Set up Rust
+        uses: ./.github/actions/setup-rust
+        with:
+          toolchain: nightly
+          components: rustfmt
+
+      - name: Run cargo-doc
+        run: cargo ci-doc
+
   audit:
     name: Perform Security Audit
     runs-on: ubuntu-latest
