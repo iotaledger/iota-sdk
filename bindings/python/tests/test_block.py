@@ -5,6 +5,7 @@ import pytest
 from typing import get_args
 from iota_sdk import BasicBlock, BlockType, BlockWrapper, Payload, PayloadType
 
+
 def test_basic_block_with_tagged_data_payload():
     block_dict = {
         "type": 0,
