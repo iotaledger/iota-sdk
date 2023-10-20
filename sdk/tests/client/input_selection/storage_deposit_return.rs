@@ -7,6 +7,7 @@ use iota_sdk::{
     client::api::input_selection::{Error, InputSelection},
     types::block::{output::AccountId, protocol::protocol_parameters},
 };
+use pretty_assertions::assert_eq;
 
 use crate::client::{
     addresses, build_inputs, build_outputs, is_remainder_or_return, unsorted_eq,

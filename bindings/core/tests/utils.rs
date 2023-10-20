@@ -3,6 +3,7 @@
 
 use iota_sdk::types::block::address::{Bech32Address, Hrp};
 use iota_sdk_bindings_core::{call_utils_method, Response, Result, UtilsMethod};
+use pretty_assertions::assert_eq;
 
 #[tokio::test]
 async fn utils() -> Result<()> {

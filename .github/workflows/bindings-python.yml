@@ -2,7 +2,7 @@ name: Python bindings checks
 
 on:
   push:
-    branches: [develop, production, "2.0"]
+    branches: [develop, staging, "2.0"]
     paths:
       - ".github/actions/**"
       - "**.rs" # Include all rust files
@@ -15,7 +15,7 @@ on:
       - "bindings/python/**"
       - ".github/workflows/bindings-python.yml"
   pull_request:
-    branches: [develop, production, "2.0"]
+    branches: [develop, staging, "2.0"]
     paths:
       - ".github/actions/**"
       - "**.rs" # Include all rust files
@@ -120,6 +120,11 @@ jobs:
         if: ${{ startsWith(matrix.os, 'ubuntu-latest') }}
         working-directory: bindings/python
         run: tox -e lint-examples
+
+      - name: Run linter for tests
+        if: ${{ startsWith(matrix.os, 'ubuntu-latest') }}
+        working-directory: bindings/python
+        run: tox -e lint-tests
 
       - name: Run tests
         working-directory: bindings/python

@@ -104,7 +104,7 @@ impl Packable for Payload {
             }
             TaggedDataPayload::KIND => Self::from(TaggedDataPayload::unpack::<_, VERIFY>(unpacker, &()).coerce()?),
             CandidacyAnnouncementPayload::KIND => Self::from(CandidacyAnnouncementPayload),
-            k => return Err(Error::InvalidPayloadKind(k)).map_err(UnpackError::Packable),
+            k => return Err(UnpackError::Packable(Error::InvalidPayloadKind(k))),
         })
     }
 }

@@ -3,9 +3,6 @@
 
 use std::collections::HashSet;
 
-#[cfg(not(target_family = "wasm"))]
-use futures::FutureExt;
-
 use crate::{
     client::{node_api::indexer::query_parameters::QueryParameter, secret::SecretManage},
     types::{
@@ -32,46 +29,14 @@ where
         bech32_address: impl ConvertTo<Bech32Address>,
         sync_options: &SyncOptions,
     ) -> crate::wallet::Result<Vec<OutputId>> {
-        log::debug!("[SYNC] get_account_and_foundry_output_ids");
-        let client = self.client();
+        log::debug!("[SYNC] get_alias_and_foundry_output_ids");
         let bech32_address = bech32_address.convert()?;
 
-        let mut output_ids = HashSet::new();
-
-        #[cfg(target_family = "wasm")]
-        {
-            output_ids.extend(
-                client
-                    .account_output_ids([QueryParameter::Address(bech32_address)])
-                    .await?
-                    .items,
-            );
-        }
-
-        #[cfg(not(target_family = "wasm"))]
-        {
-            let tasks = [
-                // Get outputs where the address is in the address unlock condition
-                async move {
-                    let client = client.clone();
-                    task::spawn(async move {
-                        client
-                            .account_output_ids([QueryParameter::Address(bech32_address)])
-                            .await
-                            .map_err(From::from)
-                    })
-                    .await
-                }
-                .boxed(),
-            ];
-
-            let results: Vec<crate::wallet::Result<OutputIdsResponse>> = futures::future::try_join_all(tasks).await?;
-
-            for res in results {
-                let found_output_ids = res?;
-                output_ids.extend(found_output_ids.items);
-            }
-        }
+        let mut output_ids = self
+            .client()
+            .account_output_ids([QueryParameter::UnlockableByAddress(bech32_address)])
+            .await?
+            .items;
 
         // Get all results
         if sync_options.alias.foundry_outputs {
@@ -85,11 +50,11 @@ where
     /// Returns output ids of foundries controlled by the provided accounts
     pub(crate) async fn get_foundry_output_ids(
         &self,
-        account_output_ids: &HashSet<OutputId>,
+        account_output_ids: &[OutputId],
     ) -> crate::wallet::Result<Vec<OutputId>> {
         log::debug!("[SYNC] get_foundry_output_ids");
         // Get account outputs, so we can then get the foundry outputs with the account addresses
-        let account_outputs_with_meta = self.get_outputs(account_output_ids.iter().copied().collect()).await?;
+        let account_outputs_with_meta = self.get_outputs(account_output_ids.to_vec()).await?;
 
         let bech32_hrp = self.client().get_bech32_hrp().await?;
 

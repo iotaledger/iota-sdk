@@ -9,13 +9,13 @@ import { Feature, FeatureDiscriminator } from './feature';
 
 // Temp solution for not double parsing JSON
 import { plainToInstance, Type } from 'class-transformer';
-import { HexEncodedString, hexToBigInt, u64 } from '../../utils';
+import { HexEncodedString, hexToBigInt, NumericString, u64 } from '../../utils';
 import { TokenScheme, TokenSchemeDiscriminator } from './token-scheme';
 import { INativeToken } from '../../models';
 import { AccountId, DelegationId } from '../id';
 import { EpochIndex } from '../../block/slot';
 
-export type OutputId = string;
+export type OutputId = HexEncodedString;
 
 /**
  * All of the output types.
@@ -37,8 +37,7 @@ enum OutputType {
  * The base class for outputs.
  */
 abstract class Output {
-    // Getter transforms it into a proper number
-    amount: string;
+    readonly amount: NumericString;
 
     /**
      * The type of output.
@@ -49,7 +48,7 @@ abstract class Output {
      * @param type The type of output.
      * @param amount The amount of the output as big-integer or string.
      */
-    constructor(type: OutputType, amount: u64 | string) {
+    constructor(type: OutputType, amount: u64 | NumericString) {
         this.type = type;
         if (typeof amount == 'bigint') {
             this.amount = amount.toString(10);
