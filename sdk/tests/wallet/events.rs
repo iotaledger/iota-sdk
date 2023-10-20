@@ -47,7 +47,7 @@ fn wallet_events_serde() {
     let output_data_dto = OutputDataDto::from(&OutputData {
         output_id: TransactionHash::null()
             .into_transaction_id(0)
-            .with_output_index(0)
+            .into_output_id(0)
             .unwrap(),
         metadata: rand_output_metadata(),
         output: Output::from(rand_basic_output(1_813_620_509_061_365)),

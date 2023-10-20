@@ -14,7 +14,7 @@ crate::impl_id!(
 
 impl TransactionId {
     /// Creates an [`OutputId`] from this [`TransactionId`] and an output index.
-    pub fn with_output_index(self, index: u16) -> Result<OutputId, Error> {
+    pub fn into_output_id(self, index: u16) -> Result<OutputId, Error> {
         OutputId::new(self, index)
     }
 }

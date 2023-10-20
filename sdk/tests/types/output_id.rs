@@ -46,7 +46,7 @@ fn null() {
             "{}",
             TransactionHash::null()
                 .into_transaction_id(0)
-                .with_output_index(0)
+                .into_output_id(0)
                 .unwrap()
         ),
         "0x0000000000000000000000000000000000000000000000000000000000000000000000000000"
