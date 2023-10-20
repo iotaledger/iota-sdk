@@ -11,7 +11,7 @@
 //                 AddressUnlockCondition, GovernorAddressUnlockCondition, ImmutableAliasAddressUnlockCondition,
 //                 StateControllerAddressUnlockCondition, UnlockCondition,
 //             },
-//             AliasId, AliasOutputBuilder, FoundryId, FoundryOutputBuilder, NftId, NftOutputBuilder, SimpleTokenScheme,
+//             AliasId, AccountOutputBuilder, FoundryId, FoundryOutputBuilder, NftId, NftOutputBuilder, SimpleTokenScheme,
 //             TokenScheme,
 //         },
 //     },
@@ -32,7 +32,7 @@
 //         .await?[0];
 
 //     let alias_output =
-//         AliasOutputBuilder::new_with_minimum_storage_deposit(*protocol_parameters.rent_structure(), AliasId::null())
+//         AccountOutputBuilder::new_with_minimum_storage_deposit(*protocol_parameters.rent_structure(), AliasId::null())
 //             .with_state_metadata([1, 2, 3])
 //             .add_unlock_condition(StateControllerAddressUnlockCondition::new(address))
 //             .add_unlock_condition(GovernorAddressUnlockCondition::new(address))
@@ -94,7 +94,7 @@
 //         .await?[0];
 
 //     let alias_output_0 =
-//         AliasOutputBuilder::new_with_minimum_storage_deposit(*protocol_parameters.rent_structure(), AliasId::null())
+//         AccountOutputBuilder::new_with_minimum_storage_deposit(*protocol_parameters.rent_structure(), AliasId::null())
 //             .with_state_metadata([1, 2, 3])
 //             .add_unlock_condition(StateControllerAddressUnlockCondition::new(address))
 //             .add_unlock_condition(GovernorAddressUnlockCondition::new(address))
@@ -109,7 +109,7 @@
 
 //     let alias_id = AliasId::from(&get_alias_output_id(block.payload().unwrap())?);
 
-//     let alias_output_1 = AliasOutputBuilder::from(alias_output_0.as_alias())
+//     let alias_output_1 = AccountOutputBuilder::from(alias_output_0.as_alias())
 //         .with_alias_id(alias_id)
 //         .with_state_index(alias_output_0.as_alias().state_index() + 1)
 //         .with_foundry_counter(alias_output_0.as_alias().foundry_counter() + 1)

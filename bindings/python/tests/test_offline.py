@@ -2,8 +2,8 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import json
-import pytest
 import unittest
+import pytest
 from iota_sdk import BasicBlock, Client, MnemonicSecretManager, Utils, SecretManager, OutputId, hex_to_utf8, utf8_to_hex, Bip44, CoinType, Irc27Metadata, Irc30Metadata
 
 

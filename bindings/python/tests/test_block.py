@@ -1,10 +1,9 @@
 # Copyright 2023 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
+import pytest
 from typing import get_args
 from iota_sdk import BasicBlock, BlockType, BlockWrapper, Payload, PayloadType
-import pytest
-
 
 def test_basic_block_with_tagged_data_payload():
     block_dict = {
