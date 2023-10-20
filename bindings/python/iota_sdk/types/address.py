@@ -75,7 +75,7 @@ class ImplicitAccountCreationAddress:
         AddressType.IMPLICIT_ACCOUNT_CREATION), init=False)
 
     @staticmethod
-    def to_dict_custom(addr_dict: dict) -> dict:
+    def _to_dict_custom(addr_dict: dict) -> dict:
         """
         Converts an implicit account creation address to the dictionary representation.
         """
