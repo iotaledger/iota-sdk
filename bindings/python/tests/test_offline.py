@@ -1,14 +1,15 @@
 # Copyright 2023 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
-from iota_sdk import BasicBlock, Client, MnemonicSecretManager, Utils, SecretManager, OutputId, hex_to_utf8, utf8_to_hex, Bip44, CoinType, Irc27Metadata, Irc30Metadata
 import json
 import pytest
 import unittest
+from iota_sdk import BasicBlock, Client, MnemonicSecretManager, Utils, SecretManager, OutputId, hex_to_utf8, utf8_to_hex, Bip44, CoinType, Irc27Metadata, Irc30Metadata
+
 
 # Read the test vector
-tv = dict()
-with open('../../sdk/tests/client/fixtures/test_vectors.json') as json_file:
+tv = {}
+with open('../../sdk/tests/client/fixtures/test_vectors.json', "r", encoding="utf-8") as json_file:
     tv = json.load(json_file)
 
 client = Client()
@@ -58,13 +59,13 @@ class TestTypes(unittest.TestCase):
         transaction_id = '0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c649'
         output_index = 42
         output_id = OutputId(transaction_id, output_index)
-        assert output_id.__repr__(
-        ) == '0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c6492a00'
+        assert repr(
+            output_id) == '0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c6492a00'
 
         new_output_id = OutputId.from_string(
             '0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c6492a00')
-        assert new_output_id.__repr__(
-        ) == '0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c6492a00'
+        assert repr(
+            new_output_id) == '0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c6492a00'
         assert new_output_id.transaction_id == transaction_id
         assert new_output_id.output_index == output_index
 

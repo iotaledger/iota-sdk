@@ -8,14 +8,9 @@ load_dotenv()
 
 # In this example we will update the state controller of an account output.
 
-if 'WALLET_DB_PATH' not in os.environ:
-    raise Exception(".env WALLET_DB_PATH is undefined, see .env.example")
-
-if 'STRONGHOLD_PASSWORD' not in os.environ:
-    raise Exception(".env STRONGHOLD_PASSWORD is undefined, see .env.example")
-
-if 'EXPLORER_URL' not in os.environ:
-    raise Exception(".env EXPLORER_URL is undefined, see .env.example")
+for env_var in ['WALLET_DB_PATH', 'STRONGHOLD_PASSWORD', 'EXPLORER_URL']:
+    if env_var not in os.environ:
+        raise Exception(f".env {env_var} is undefined, see .env.example")
 
 wallet = Wallet(os.environ['WALLET_DB_PATH'])
 

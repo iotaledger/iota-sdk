@@ -349,7 +349,7 @@ pub fn semantic_validation(
                 })
                 .filter_map(Address::as_restricted_opt);
             for address in addresses {
-                if created_output.native_tokens().map(|t| t.len()).unwrap_or_default() > 0
+                if created_output.native_token().is_some()
                     && !address.has_capability(AddressCapabilityFlag::OutputsWithNativeTokens)
                 {
                     // TODO: add a variant https://github.com/iotaledger/iota-sdk/issues/1430
