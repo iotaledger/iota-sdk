@@ -215,7 +215,7 @@ impl Packable for UnlockCondition {
             ImmutableAccountAddressUnlockCondition::KIND => {
                 Self::from(ImmutableAccountAddressUnlockCondition::unpack::<_, VERIFY>(unpacker, &()).coerce()?)
             }
-            k => return Err(Error::InvalidOutputKind(k)).map_err(UnpackError::Packable),
+            k => return Err(UnpackError::Packable(Error::InvalidOutputKind(k))),
         })
     }
 }
@@ -411,6 +411,8 @@ pub(crate) fn verify_allowed_unlock_conditions(
 
 #[cfg(test)]
 mod test {
+    use pretty_assertions::assert_eq;
+
     use super::*;
 
     #[test]

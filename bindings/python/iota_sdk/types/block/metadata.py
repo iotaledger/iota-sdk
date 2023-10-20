@@ -16,17 +16,15 @@ class BlockMetadata:
 
     Attributes:
         block_state: The block state.
-        tx_state: The transaction state.
+        transaction_state: The transaction state.
         block_failure_reason: The block failure reason.
-        tx_failure_reason: The transaction failure reason.
+        transaction_failure_reason: The transaction failure reason.
     """
     block_id: HexStr
-    # TODO: verify if really optional:
-    # https://github.com/iotaledger/tips-draft/pull/24/files#r1293426314
-    block_state: Optional[BlockState] = None
-    tx_state: Optional[TransactionState] = None
+    block_state: BlockState
+    transaction_state: Optional[TransactionState] = None
     block_failure_reason: Optional[BlockFailureReason] = None
-    tx_failure_reason: Optional[TransactionFailureReason] = None
+    transaction_failure_reason: Optional[TransactionFailureReason] = None
 
 
 class BlockState(Enum):
@@ -69,15 +67,29 @@ class BlockFailureReason(IntEnum):
         ParentTooOld (2): One of the block's parents is too old.
         ParentDoesNotExist (3): One of the block's parents does not exist.
         ParentInvalid (4): One of the block's parents is invalid.
-        DroppedDueToCongestion (5): The block is dropped due to congestion.
-        Invalid (6): The block is invalid.
+        IssuerAccountNotFound (5): The block's issuer account could not be found.
+        VersionInvalid (6): The block's protocol version is invalid.
+        ManaCostCalculationFailed (7): The mana cost could not be calculated.
+        BurnedInsufficientMana (8): The block's issuer account burned insufficient Mana for a block.
+        AccountInvalid (9): The account is invalid.
+        SignatureInvalid (10): The block's signature is invalid.
+        DroppedDueToCongestion (11): The block is dropped due to congestion.
+        PayloadInvalid (12): The block payload is invalid.
+        Invalid (255): The block is invalid.
     """
     TooOldToIssue = 1
     ParentTooOld = 2
     ParentDoesNotExist = 3
     ParentInvalid = 4
-    DroppedDueToCongestion = 5
-    Invalid = 6
+    IssuerAccountNotFound = 5
+    VersionInvalid = 6
+    ManaCostCalculationFailed = 7
+    BurnedInsufficientMana = 8
+    AccountInvalid = 9
+    SignatureInvalid = 10
+    DroppedDueToCongestion = 11
+    PayloadInvalid = 12
+    Invalid = 255
 
 
 class TransactionFailureReason(Enum):

@@ -495,6 +495,8 @@ impl StrongholdAdapter {
 mod tests {
     use std::path::Path;
 
+    use pretty_assertions::assert_eq;
+
     use super::*;
     use crate::{
         client::constants::{ETHER_COIN_TYPE, IOTA_COIN_TYPE},

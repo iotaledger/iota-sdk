@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 // TODO uncomment
-
 // use iota_sdk::{
 //     client::{api::GetAddressesOptions, Result},
 //     types::block::{
@@ -17,6 +16,7 @@
 //         },
 //     },
 // };
+// use pretty_assertions::assert_eq;
 
 // use super::{get_alias_output_id, get_foundry_output_id, get_nft_output_id};
 // use crate::client::common::create_client_and_secret_manager_with_funds;
