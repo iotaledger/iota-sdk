@@ -3,6 +3,7 @@
 
 use iota_sdk::types::block::{rand::signature::rand_signature, unlock::SignatureUnlock, Error};
 use packable::{error::UnpackError, PackableExt};
+use pretty_assertions::assert_eq;
 
 #[test]
 fn unlock_kind() {

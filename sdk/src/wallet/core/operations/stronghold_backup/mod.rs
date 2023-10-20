@@ -81,9 +81,8 @@ impl Wallet {
             return Err(crate::wallet::Error::Backup("backup path doesn't exist"));
         }
 
-        let mut accounts = self.accounts.write().await;
         // We don't want to overwrite possible existing accounts
-        if !accounts.is_empty() {
+        if !self.accounts.read().await.is_empty() {
             return Err(crate::wallet::Error::Backup(
                 "can't restore backup when there are already accounts",
             ));
@@ -154,6 +153,8 @@ impl Wallet {
                 self.set_client_options(read_client_options).await?;
             }
         }
+
+        let mut accounts = self.accounts.write().await;
 
         if !ignore_backup_values {
             if let Some(read_accounts) = read_accounts {

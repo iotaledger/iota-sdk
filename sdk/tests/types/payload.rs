@@ -15,6 +15,7 @@ use iota_sdk::types::block::{
     unlock::{ReferenceUnlock, SignatureUnlock, Unlock, Unlocks},
 };
 use packable::PackableExt;
+use pretty_assertions::assert_eq;
 
 const TRANSACTION_ID: &str = "0x24a1f46bdb6b2bf38f1c59f73cdd4ae5b418804bb231d76d06fbf246498d5883";
 const ED25519_ADDRESS: &str = "0xe594f9a895c0e0a6760dd12cffc2c3d1e1cbf7269b328091f96ce3d0dd550b75";

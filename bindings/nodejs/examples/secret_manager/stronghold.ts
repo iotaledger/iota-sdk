@@ -12,13 +12,10 @@ async function run() {
     initLogger();
 
     try {
-        if (!process.env.STRONGHOLD_PASSWORD) {
-            throw new Error(
-                '.env stronghold password is undefined, see .env.example',
-            );
-        }
-        if (!process.env.MNEMONIC) {
-            throw new Error('.env MNEMONIC is undefined, see .env.example');
+        for (const envVar of ['MNEMONIC', 'STRONGHOLD_PASSWORD']) {
+            if (!(envVar in process.env)) {
+                throw new Error(`.env ${envVar} is not defined`);
+            }
         }
         const strongholdSecretManager = new SecretManager({
             stronghold: {
@@ -30,7 +27,9 @@ async function run() {
         // A mnemonic can be generated with `Utils.generateMnemonic()`.
         // Store the mnemonic in the Stronghold snapshot, this needs to be done only the first time.
         // The mnemonic can't be retrieved from the Stronghold file, so make a backup in a secure place!
-        await strongholdSecretManager.storeMnemonic(process.env.MNEMONIC);
+        await strongholdSecretManager.storeMnemonic(
+            process.env.MNEMONIC as string,
+        );
 
         const address = await strongholdSecretManager.generateEd25519Addresses({
             accountIndex: 0,

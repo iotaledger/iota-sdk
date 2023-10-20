@@ -16,17 +16,15 @@ const v3Path = './v3.stronghold';
 // yarn run-example wallet/migrate-stronghold-snapshot-v2-to-v3.ts
 
 async function run() {
-    if (!process.env.WALLET_DB_PATH) {
-        throw new Error('.env WALLET_DB_PATH is undefined, see .env.example');
-    }
-    if (!process.env.NODE_URL) {
-        throw new Error('.env NODE_URL is undefined, see .env.example');
-    }
+    for (const envVar of ['NODE_URL', 'STRONGHOLD_PASSWORD'])
+        if (!(envVar in process.env)) {
+            throw new Error(`.env ${envVar} is undefined, see .env.example`);
+        }
 
     let walletOptions: WalletOptions = {
         storagePath: process.env.WALLET_DB_PATH,
         clientOptions: {
-            nodes: [process.env.NODE_URL],
+            nodes: [process.env.NODE_URL as string],
         },
         coinType: CoinType.Shimmer,
         secretManager: {
@@ -56,7 +54,7 @@ async function run() {
     walletOptions = {
         storagePath: process.env.WALLET_DB_PATH,
         clientOptions: {
-            nodes: [process.env.NODE_URL],
+            nodes: [process.env.NODE_URL as string],
         },
         coinType: CoinType.Shimmer,
         secretManager: {

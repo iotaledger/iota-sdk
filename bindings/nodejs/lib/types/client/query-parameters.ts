@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { SlotIndex } from '../block/slot';
+import { Bech32Address } from '../block';
 
 /**
  * Query parameter for filtering output requests
@@ -23,6 +24,7 @@ export type QueryParameter =
     | Issuer
     | StateController
     | Governor
+    | UnlockableByAddress
     | CommonQueryParameters;
 
 /** Query parameters for filtering Account Outputs */
@@ -31,6 +33,7 @@ export type AccountQueryParameter =
     | Governor
     | Issuer
     | Sender
+    | UnlockableByAddress
     | CommonQueryParameters;
 
 /** Query parameters for filtering Foundry Outputs */
@@ -39,7 +42,6 @@ export type FoundryQueryParameter = AccountAddress | CommonQueryParameters;
 /** Query parameters for filtering Nft Outputs */
 export type NftQueryParameter =
     | Address
-    | AccountAddress
     | HasStorageDepositReturn
     | StorageDepositReturnAddress
     | HasTimelock
@@ -52,6 +54,7 @@ export type NftQueryParameter =
     | Issuer
     | Sender
     | Tag
+    | UnlockableByAddress
     | CommonQueryParameters;
 
 /** Shared query parameters*/
@@ -77,11 +80,11 @@ export type GenericQueryParameter =
 
 /** Bech32-encoded address that should be searched for. */
 interface Address {
-    address: string;
+    address: Bech32Address;
 }
 /** Filter foundry outputs based on bech32-encoded address of the controlling account. */
 interface AccountAddress {
-    accountAddress: string;
+    accountAddress: Bech32Address;
 }
 /** Filters outputs based on the presence of storage deposit return unlock condition. */
 interface HasStorageDepositReturn {
@@ -91,7 +94,7 @@ interface HasStorageDepositReturn {
  * in the storage deposit return unlock condition.
  */
 interface StorageDepositReturnAddress {
-    storageDepositReturnAddress: string;
+    storageDepositReturnAddress: Bech32Address;
 }
 /** Filters outputs based on the presence of timelock unlock condition. */
 interface HasTimelock {
@@ -134,7 +137,7 @@ interface ExpiresAfter {
  * address in the expiration unlock condition.
  * */
 interface ExpirationReturnAddress {
-    expirationReturnAddress: string;
+    expirationReturnAddress: Bech32Address;
 }
 /** Filter for a certain sender */
 interface Sender {
@@ -162,11 +165,11 @@ interface Issuer {
 }
 /** Filter outputs based on bech32-encoded state controller address. */
 interface StateController {
-    stateController: string;
+    stateController: Bech32Address;
 }
 /** Filter outputs based on bech32-encoded governor (governance controller) address. */
 interface Governor {
-    governor: string;
+    governor: Bech32Address;
 }
 /** Define the page size for the results. */
 interface PageSize {
@@ -174,5 +177,5 @@ interface PageSize {
 }
 /** Returns outputs that are unlockable by the bech32 address. */
 interface UnlockableByAddress {
-    unlockableByAddress: string;
+    unlockableByAddress: Bech32Address;
 }

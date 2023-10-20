@@ -8,6 +8,7 @@ use iota_sdk::types::block::{
     Error,
 };
 use packable::PackableExt;
+use pretty_assertions::assert_eq;
 
 const ED25519_ADDRESS: &str = "0xebe40a263480190dcd7939447ee01aefa73d6f3cc33c90ef7bf905abf8728655";
 const ED25519_BECH32: &str = "rms1qr47gz3xxjqpjrwd0yu5glhqrth6w0t08npney8000ust2lcw2r92j5a8rt";

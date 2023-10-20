@@ -3,6 +3,7 @@
 
 use iota_sdk::types::block::{unlock::ReferenceUnlock, Error};
 use packable::{bounded::InvalidBoundedU16, error::UnpackError, PackableExt};
+use pretty_assertions::assert_eq;
 
 #[test]
 fn kind() {
