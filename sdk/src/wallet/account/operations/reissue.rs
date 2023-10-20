@@ -6,7 +6,7 @@ use crypto::keys::bip44::Bip44;
 use crate::{
     client::{secret::SecretManage, Error as ClientError},
     types::{
-        api::core::response::{BlockState, TransactionState},
+        api::core::{BlockState, TransactionState},
         block::{
             payload::{transaction::TransactionId, Payload},
             BlockId,

@@ -4,7 +4,7 @@
 use crate::{
     client::{secret::SecretManage, unix_timestamp_now},
     types::{
-        api::core::response::TransactionState,
+        api::core::TransactionState,
         block::{input::Input, output::OutputId, BlockId},
     },
     wallet::account::{

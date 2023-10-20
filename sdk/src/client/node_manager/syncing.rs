@@ -3,7 +3,7 @@
 
 #[cfg(not(target_family = "wasm"))]
 use {
-    crate::types::api::core::response::InfoResponse,
+    crate::types::api::core::InfoResponse,
     crate::types::block::PROTOCOL_VERSION,
     std::{collections::HashSet, time::Duration},
     tokio::time::sleep,
