@@ -244,6 +244,15 @@ where
         let mut available_amount = 0;
         let mut required_amount_for_nfts = 0;
         let mut new_native_tokens = NativeTokensBuilder::new();
+
+        // There can be outputs with less amount than min required storage deposit, so we have to check that we
+        // have enough amount to create a new basic output
+        let enough_amount_for_basic_output = possible_additional_inputs
+            .iter()
+            .map(|i| i.output.amount())
+            .sum::<u64>()
+            >= MinimumStorageDepositBasicOutput::new(rent_structure, token_supply).finish()?;
+
         // check native tokens
         for output_data in &outputs_to_claim {
             if let Some(native_tokens) = output_data.output.native_tokens() {
@@ -270,7 +279,7 @@ where
                 // build new output with same amount, nft_id, immutable/feature blocks and native tokens, just
                 // updated address unlock conditions
 
-                let nft_output = if possible_additional_inputs.is_empty() {
+                let nft_output = if !enough_amount_for_basic_output {
                     // Only update address and nft id if we have no additional inputs which can provide the storage
                     // deposit for the remaining amount and possible NTs
                     NftOutputBuilder::from(nft_output)
@@ -304,7 +313,7 @@ where
         };
 
         // Check if the new amount is enough for the storage deposit, otherwise increase it to this
-        let mut required_amount = if possible_additional_inputs.is_empty() {
+        let mut required_amount = if !enough_amount_for_basic_output {
             required_amount_for_nfts
         } else {
             required_amount_for_nfts

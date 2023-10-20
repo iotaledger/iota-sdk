@@ -1,6 +1,8 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use pretty_assertions::assert_eq;
+
 use crate::client::common::setup_client_with_node_health_ignored;
 
 #[ignore]

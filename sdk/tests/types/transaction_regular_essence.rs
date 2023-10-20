@@ -26,6 +26,7 @@ use iota_sdk::types::block::{
     Error,
 };
 use packable::bounded::TryIntoBoundedU16Error;
+use pretty_assertions::assert_eq;
 
 const TRANSACTION_ID: &str = "0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c649";
 const ED25519_ADDRESS_1: &str = "0xd56da1eb7726ed482dfe9d457cf548c2ae2a6ce3e053dbf82f11223be476adb9";
