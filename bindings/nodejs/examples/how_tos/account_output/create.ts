@@ -47,7 +47,7 @@ async function run() {
         console.log('Sending the create-account transaction...');
 
         // Create an account output
-        const transaction = await account.createAliasOutput();
+        const transaction = await account.createAccountOutput();
 
         console.log(`Transaction sent: ${transaction.transactionId}`);
 
