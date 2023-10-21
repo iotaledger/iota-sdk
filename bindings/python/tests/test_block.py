@@ -1,8 +1,8 @@
 # Copyright 2023 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
-import pytest
 from typing import get_args
+import pytest
 from iota_sdk import BasicBlock, BlockType, BlockWrapper, Payload, PayloadType
 
 
