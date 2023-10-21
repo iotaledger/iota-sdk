@@ -41,7 +41,7 @@ async fn main() -> Result<()> {
         .sign_transaction_essence(&prepared_transaction_data)
         .await?;
 
-    let signed_transaction = TransactionPayload::new(prepared_transaction_data.essence.as_regular().clone(), unlocks)?;
+    let signed_transaction = TransactionPayload::new(prepared_transaction_data.essence.clone(), unlocks)?;
 
     validate_transaction_payload_length(&signed_transaction)?;
 

@@ -3,8 +3,9 @@
 
 use alloc::{collections::BTreeSet, vec::Vec};
 
+use crypto::hashes::{blake2b::Blake2b256, Digest};
 use hashbrown::HashSet;
-use packable::{bounded::BoundedU16, prefix::BoxedSlicePrefix, Packable};
+use packable::{bounded::BoundedU16, prefix::BoxedSlicePrefix, Packable, PackableExt};
 
 use crate::types::{
     block::{
@@ -280,6 +281,11 @@ impl RegularTransactionEssence {
     /// Returns the optional payload of a [`RegularTransactionEssence`].
     pub fn payload(&self) -> Option<&Payload> {
         self.payload.as_ref()
+    }
+
+    /// Return the Blake2b hash of an [`TransactionEssence`].
+    pub fn hash(&self) -> [u8; 32] {
+        Blake2b256::digest(self.pack_to_vec()).into()
     }
 }
 

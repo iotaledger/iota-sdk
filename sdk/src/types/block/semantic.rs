@@ -10,7 +10,7 @@ use primitive_types::U256;
 use crate::types::block::{
     address::{Address, AddressCapabilityFlag},
     output::{ChainId, FoundryId, NativeTokens, Output, OutputId, TokenId, UnlockCondition},
-    payload::transaction::{RegularTransactionEssence, TransactionCapabilityFlag, TransactionEssence, TransactionId},
+    payload::transaction::{RegularTransactionEssence, TransactionCapabilityFlag, TransactionId},
     unlock::Unlocks,
     Error,
 };
@@ -178,7 +178,7 @@ impl<'a> ValidationContext<'a> {
         Self {
             essence,
             unlocks,
-            essence_hash: TransactionEssence::from(essence.clone()).hash(),
+            essence_hash: RegularTransactionEssence::from(essence.clone()).hash(),
             input_amount: 0,
             input_mana: 0,
             input_native_tokens: BTreeMap::<TokenId, U256>::new(),

@@ -29,7 +29,7 @@ use crate::{
     types::block::{
         address::{AccountAddress, Address, Ed25519Address, NftAddress},
         output::Output,
-        payload::transaction::{TransactionEssence, TransactionPayload},
+        payload::transaction::TransactionPayload,
         signature::{Ed25519Signature, Signature},
         unlock::{AccountUnlock, NftUnlock, ReferenceUnlock, SignatureUnlock, Unlock, Unlocks},
     },
@@ -316,36 +316,32 @@ impl SecretManage for LedgerSecretManager {
 
             let mut remainder_index = 0u16;
             if let Some(remainder_address) = remainder_address {
-                match &prepared_transaction.essence {
-                    TransactionEssence::Regular(essence) => {
-                        // find the index of the remainder in the essence
-                        // this has to be done because outputs in essences are sorted
-                        // lexically and therefore the remainder is not always the last output.
-                        // The index within the essence and the bip32 index will be validated
-                        // by the hardware wallet.
-                        // The outputs in the essence already are sorted
-                        // at this place, so we can rely on their order and don't have to sort it again.
-                        'essence_outputs: for output in essence.outputs().iter() {
-                            if let Output::Basic(s) = output {
-                                if let Some(address) = s.unlock_conditions().address() {
-                                    if *remainder_address == *address.address() {
-                                        break 'essence_outputs;
-                                    }
-                                }
-                            } else {
-                                log::debug!("[LEDGER] unsupported output");
-                                return Err(Error::MiscError.into());
+                // find the index of the remainder in the essence
+                // this has to be done because outputs in essences are sorted
+                // lexically and therefore the remainder is not always the last output.
+                // The index within the essence and the bip32 index will be validated
+                // by the hardware wallet.
+                // The outputs in the essence already are sorted
+                // at this place, so we can rely on their order and don't have to sort it again.
+                'essence_outputs: for output in prepared_transaction.essence.outputs().iter() {
+                    if let Output::Basic(s) = output {
+                        if let Some(address) = s.unlock_conditions().address() {
+                            if *remainder_address == *address.address() {
+                                break 'essence_outputs;
                             }
-
-                            remainder_index += 1;
                         }
-
-                        // was index found?
-                        if remainder_index as usize == essence.outputs().len() {
-                            log::debug!("[LEDGER] remainder_index not found");
-                            return Err(Error::MiscError.into());
-                        }
+                    } else {
+                        log::debug!("[LEDGER] unsupported output");
+                        return Err(Error::MiscError.into());
                     }
+
+                    remainder_index += 1;
+                }
+
+                // was index found?
+                if remainder_index as usize == prepared_transaction.essence.outputs().len() {
+                    log::debug!("[LEDGER] remainder_index not found");
+                    return Err(Error::MiscError.into());
                 }
             }
 
@@ -431,9 +427,8 @@ impl SecretManagerConfig for LedgerSecretManager {
 /// If criteria are not met, blind signing is needed.
 /// This method finds out if we have to switch to blind signing mode.
 pub fn needs_blind_signing(prepared_transaction: &PreparedTransactionData, buffer_size: usize) -> bool {
-    let TransactionEssence::Regular(essence) = &prepared_transaction.essence;
-
-    if !essence
+    if !prepared_transaction
+        .essence
         .outputs()
         .iter()
         .all(|output| matches!(output, Output::Basic(o) if o.simple_deposit_address().is_some()))
@@ -518,8 +513,7 @@ fn merge_unlocks(
     prepared_transaction_data: &PreparedTransactionData,
     mut unlocks: impl Iterator<Item = Unlock>,
 ) -> Result<Vec<Unlock>, Error> {
-    let TransactionEssence::Regular(essence) = &prepared_transaction_data.essence;
-    let slot_index = essence.creation_slot();
+    let slot_index = prepared_transaction_data.essence.creation_slot();
     // The hashed_essence gets signed
     let hashed_essence = prepared_transaction_data.essence.hash();
 
@@ -529,8 +523,12 @@ fn merge_unlocks(
     // Assuming inputs_data is ordered by address type
     for (current_block_index, input) in prepared_transaction_data.inputs_data.iter().enumerate() {
         // Get the address that is required to unlock the input
-        let TransactionEssence::Regular(regular) = &prepared_transaction_data.essence;
-        let account_transition = is_account_transition(&input.output, *input.output_id(), regular.outputs(), None);
+        let account_transition = is_account_transition(
+            &input.output,
+            *input.output_id(),
+            prepared_transaction_data.essence.outputs(),
+            None,
+        );
         let (input_address, _) = input.output.required_and_unlocked_address(
             slot_index,
             input.output_metadata.output_id(),

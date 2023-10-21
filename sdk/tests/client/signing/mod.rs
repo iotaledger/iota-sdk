@@ -22,10 +22,7 @@ use iota_sdk::{
         address::{AccountAddress, Address, NftAddress, ToBech32Ext},
         input::{Input, UtxoInput},
         output::{AccountId, NftId},
-        payload::{
-            transaction::{RegularTransactionEssence, TransactionEssence},
-            TransactionPayload,
-        },
+        payload::{transaction::RegularTransactionEssence, TransactionPayload},
         protocol::protocol_parameters,
         rand::mana::rand_mana_allotment,
         slot::SlotIndex,
@@ -377,20 +374,18 @@ async fn all_combined() -> Result<()> {
     .select()
     .unwrap();
 
-    let essence = TransactionEssence::Regular(
-        RegularTransactionEssence::builder(protocol_parameters.network_id())
-            .with_inputs(
-                selected
-                    .inputs
-                    .iter()
-                    .map(|i| Input::Utxo(UtxoInput::from(*i.output_metadata.output_id())))
-                    .collect::<Vec<_>>(),
-            )
-            .with_outputs(outputs)
-            .with_creation_slot(slot_index)
-            .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
-            .finish_with_params(protocol_parameters)?,
-    );
+    let essence = RegularTransactionEssence::builder(protocol_parameters.network_id())
+        .with_inputs(
+            selected
+                .inputs
+                .iter()
+                .map(|i| Input::Utxo(UtxoInput::from(*i.output_metadata.output_id())))
+                .collect::<Vec<_>>(),
+        )
+        .with_outputs(outputs)
+        .with_creation_slot(slot_index)
+        .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
+        .finish_with_params(protocol_parameters)?;
 
     let prepared_transaction_data = PreparedTransactionData {
         essence,
@@ -480,7 +475,7 @@ async fn all_combined() -> Result<()> {
         _ => panic!("Invalid unlock 14"),
     }
 
-    let tx_payload = TransactionPayload::new(prepared_transaction_data.essence.as_regular().clone(), unlocks)?;
+    let tx_payload = TransactionPayload::new(prepared_transaction_data.essence.clone(), unlocks)?;
 
     validate_transaction_payload_length(&tx_payload)?;
 

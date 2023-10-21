@@ -16,7 +16,6 @@ mod protocol;
 mod rent;
 mod slot;
 mod tagged_data_payload;
-mod transaction_essence;
 mod transaction_id;
 mod transaction_payload;
 mod transaction_regular_essence;

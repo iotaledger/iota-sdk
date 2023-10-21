@@ -13,7 +13,7 @@ use crate::{
     },
     types::block::{
         input::{Input, UtxoInput},
-        payload::transaction::{RegularTransactionEssence, TransactionEssence},
+        payload::transaction::RegularTransactionEssence,
     },
     wallet::account::{operations::transaction::TransactionOptions, Account},
 };
@@ -57,8 +57,6 @@ where
         let essence = essence_builder.finish_with_params(protocol_parameters)?;
 
         validate_regular_transaction_essence_length(&essence)?;
-
-        let essence = TransactionEssence::Regular(essence);
 
         let prepared_transaction_data = PreparedTransactionData {
             essence,

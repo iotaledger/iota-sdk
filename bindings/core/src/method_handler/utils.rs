@@ -9,7 +9,7 @@ use iota_sdk::{
             address::{AccountAddress, Address, ToBech32Ext},
             input::UtxoInput,
             output::{AccountId, FoundryId, NftId, Output, OutputId, Rent, TokenId},
-            payload::{transaction::TransactionEssence, TransactionPayload},
+            payload::{transaction::RegularTransactionEssence, TransactionPayload},
             BlockWrapper,
         },
         TryFromDto,
@@ -69,9 +69,9 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
             let foundry_id = FoundryId::build(&AccountAddress::new(account_id), serial_number, token_scheme_type);
             Response::TokenId(TokenId::from(foundry_id))
         }
-        UtilsMethod::HashTransactionEssence { essence } => {
-            Response::Hash(prefix_hex::encode(TransactionEssence::try_from_dto(essence)?.hash()))
-        }
+        UtilsMethod::HashTransactionEssence { essence } => Response::Hash(prefix_hex::encode(
+            RegularTransactionEssence::try_from_dto(essence)?.hash(),
+        )),
         UtilsMethod::ComputeStorageDeposit { output, rent } => {
             let out = Output::try_from_dto(output)?;
             Response::MinimumRequiredStorageDeposit(out.rent_cost(rent).to_string())

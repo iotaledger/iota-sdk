@@ -55,7 +55,7 @@ use crate::{
         address::{Address, Ed25519Address},
         core::BlockWrapperBuilder,
         output::Output,
-        payload::{transaction::TransactionEssence, TransactionPayload},
+        payload::TransactionPayload,
         signature::{Ed25519Signature, Signature},
         unlock::{AccountUnlock, NftUnlock, ReferenceUnlock, SignatureUnlock, Unlock, Unlocks},
         BlockWrapper,
@@ -511,14 +511,17 @@ where
     let hashed_essence = prepared_transaction_data.essence.hash();
     let mut blocks = Vec::new();
     let mut block_indexes = HashMap::<Address, usize>::new();
-    let TransactionEssence::Regular(essence) = &prepared_transaction_data.essence;
-    let slot_index = essence.creation_slot();
+    let slot_index = prepared_transaction_data.essence.creation_slot();
 
     // Assuming inputs_data is ordered by address type
     for (current_block_index, input) in prepared_transaction_data.inputs_data.iter().enumerate() {
         // Get the address that is required to unlock the input
-        let TransactionEssence::Regular(regular) = &prepared_transaction_data.essence;
-        let account_transition = is_account_transition(&input.output, *input.output_id(), regular.outputs(), None);
+        let account_transition = is_account_transition(
+            &input.output,
+            *input.output_id(),
+            prepared_transaction_data.essence.outputs(),
+            None,
+        );
         let (input_address, _) = input.output.required_and_unlocked_address(
             slot_index,
             input.output_metadata.output_id(),
@@ -588,9 +591,7 @@ where
         .await?;
 
     let PreparedTransactionData {
-        essence: TransactionEssence::Regular(essence),
-        inputs_data,
-        ..
+        essence, inputs_data, ..
     } = prepared_transaction_data;
     let tx_payload = TransactionPayload::new(essence, unlocks)?;
 

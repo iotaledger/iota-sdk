@@ -3,17 +3,16 @@
 
 //! Module describing the transaction payload.
 
-mod essence;
+mod regular;
 mod transaction_id;
 
 use crypto::hashes::{blake2b::Blake2b256, Digest};
 use packable::{error::UnpackError, packer::Packer, unpacker::Unpacker, Packable, PackableExt};
 
-pub(crate) use self::essence::{ContextInputCount, InputCount, OutputCount};
+pub(crate) use self::regular::{ContextInputCount, InputCount, OutputCount};
 pub use self::{
-    essence::{
-        RegularTransactionEssence, RegularTransactionEssenceBuilder, TransactionCapabilities,
-        TransactionCapabilityFlag, TransactionEssence,
+    regular::{
+        RegularTransactionEssence, RegularTransactionEssenceBuilder, TransactionCapabilities, TransactionCapabilityFlag,
     },
     transaction_id::TransactionId,
 };
@@ -74,7 +73,7 @@ impl Packable for TransactionPayload {
         unpacker: &mut U,
         visitor: &Self::UnpackVisitor,
     ) -> Result<Self, UnpackError<Self::UnpackError, U::Error>> {
-        let TransactionEssence::Regular(essence) = TransactionEssence::unpack::<_, VERIFY>(unpacker, visitor)?;
+        let essence = RegularTransactionEssence::unpack::<_, VERIFY>(unpacker, visitor)?;
         let unlocks = Unlocks::unpack::<_, VERIFY>(unpacker, &())?;
 
         if VERIFY {
@@ -102,7 +101,7 @@ pub mod dto {
 
     use serde::{Deserialize, Serialize};
 
-    pub use super::essence::dto::{RegularTransactionEssenceDto, TransactionEssenceDto};
+    pub use super::regular::dto::RegularTransactionEssenceDto;
     use super::*;
     use crate::types::{
         block::{unlock::Unlock, Error},
@@ -114,7 +113,7 @@ pub mod dto {
     pub struct TransactionPayloadDto {
         #[serde(rename = "type")]
         pub kind: u8,
-        pub essence: TransactionEssenceDto,
+        pub essence: RegularTransactionEssenceDto,
         pub unlocks: Vec<Unlock>,
     }
 
@@ -122,7 +121,7 @@ pub mod dto {
         fn from(value: &TransactionPayload) -> Self {
             Self {
                 kind: TransactionPayload::KIND,
-                essence: TransactionEssenceDto::Regular(value.essence().into()),
+                essence: value.essence().into(),
                 unlocks: value.unlocks().to_vec(),
             }
         }
@@ -133,8 +132,7 @@ pub mod dto {
         type Error = Error;
 
         fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
-            let TransactionEssence::Regular(essence) =
-                TransactionEssence::try_from_dto_with_params_inner(dto.essence, params)?;
+            let essence = RegularTransactionEssence::try_from_dto_with_params_inner(dto.essence, params)?;
             Self::new(essence, Unlocks::new(dto.unlocks)?)
         }
     }

@@ -18,10 +18,7 @@ use iota_sdk::{
         address::{Address, NftAddress, ToBech32Ext},
         input::{Input, UtxoInput},
         output::NftId,
-        payload::{
-            transaction::{RegularTransactionEssence, TransactionEssence},
-            TransactionPayload,
-        },
+        payload::{transaction::RegularTransactionEssence, TransactionPayload},
         protocol::protocol_parameters,
         rand::mana::rand_mana_allotment,
         unlock::{SignatureUnlock, Unlock},
@@ -111,18 +108,16 @@ async fn nft_reference_unlocks() -> Result<()> {
         ),
     ]);
 
-    let essence = TransactionEssence::Regular(
-        RegularTransactionEssence::builder(protocol_parameters.network_id())
-            .with_inputs(
-                inputs
-                    .iter()
-                    .map(|i| Input::Utxo(UtxoInput::from(*i.output_metadata.output_id())))
-                    .collect::<Vec<_>>(),
-            )
-            .with_outputs(outputs)
-            .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
-            .finish_with_params(protocol_parameters)?,
-    );
+    let essence = RegularTransactionEssence::builder(protocol_parameters.network_id())
+        .with_inputs(
+            inputs
+                .iter()
+                .map(|i| Input::Utxo(UtxoInput::from(*i.output_metadata.output_id())))
+                .collect::<Vec<_>>(),
+        )
+        .with_outputs(outputs)
+        .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
+        .finish_with_params(protocol_parameters)?;
 
     let prepared_transaction_data = PreparedTransactionData {
         essence,
@@ -149,7 +144,7 @@ async fn nft_reference_unlocks() -> Result<()> {
         _ => panic!("Invalid unlock"),
     }
 
-    let tx_payload = TransactionPayload::new(prepared_transaction_data.essence.as_regular().clone(), unlocks)?;
+    let tx_payload = TransactionPayload::new(prepared_transaction_data.essence.clone(), unlocks)?;
 
     validate_transaction_payload_length(&tx_payload)?;
 

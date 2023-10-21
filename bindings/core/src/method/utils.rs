@@ -6,7 +6,7 @@ use iota_sdk::types::block::{
     address::{Bech32Address, Hrp},
     output::{dto::OutputDto, AccountId, NftId, OutputId, RentStructure},
     payload::transaction::{
-        dto::{TransactionEssenceDto, TransactionPayloadDto},
+        dto::{RegularTransactionEssenceDto, TransactionPayloadDto},
         TransactionId,
     },
     protocol::ProtocolParameters,
@@ -126,7 +126,7 @@ pub enum UtilsMethod {
     /// Computes the hash of a transaction essence.
     HashTransactionEssence {
         /// The transaction essence
-        essence: TransactionEssenceDto,
+        essence: RegularTransactionEssenceDto,
     },
     /// Computes the required storage deposit of an output.
     ComputeStorageDeposit { output: OutputDto, rent: RentStructure },
