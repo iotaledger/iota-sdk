@@ -14,10 +14,12 @@ use {
 use crate::wallet::events::types::{TransactionProgressEvent, WalletEvent};
 use crate::{
     client::{
-        api::{transaction::validate_transaction_payload_length, PreparedTransactionData, SignedTransactionData},
+        api::{
+            transaction::validate_signed_transaction_payload_length, PreparedTransactionData, SignedTransactionData,
+        },
         secret::SecretManage,
     },
-    wallet::account::{operations::transaction::TransactionPayload, Account},
+    wallet::account::{operations::transaction::SignedTransactionPayload, Account},
 };
 
 impl<S: 'static + SecretManage> Account<S>
@@ -90,11 +92,11 @@ where
                 return Err(err.into());
             }
         };
-        let transaction_payload = TransactionPayload::new(prepared_transaction_data.essence.clone(), unlocks)?;
+        let transaction_payload = SignedTransactionPayload::new(prepared_transaction_data.essence.clone(), unlocks)?;
 
         log::debug!("[TRANSACTION] signed transaction: {:?}", transaction_payload);
 
-        validate_transaction_payload_length(&transaction_payload)?;
+        validate_signed_transaction_payload_length(&transaction_payload)?;
 
         Ok(SignedTransactionData {
             transaction_payload,

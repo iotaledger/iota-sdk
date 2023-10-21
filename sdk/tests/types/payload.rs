@@ -6,7 +6,7 @@ use iota_sdk::types::block::{
     input::{Input, UtxoInput},
     output::{unlock_condition::AddressUnlockCondition, BasicOutput, Output},
     payload::{
-        signed_transaction::{RegularTransactionEssence, TransactionId, TransactionPayload},
+        signed_transaction::{RegularTransactionEssence, SignedTransactionPayload, TransactionId},
         Payload, TaggedDataPayload,
     },
     protocol::protocol_parameters,
@@ -51,14 +51,14 @@ fn transaction() {
     let ref_unlock = Unlock::from(ReferenceUnlock::new(0).unwrap());
     let unlocks = Unlocks::new(vec![sig_unlock, ref_unlock]).unwrap();
 
-    let tx_payload = TransactionPayload::new(essence, unlocks).unwrap();
+    let tx_payload = SignedTransactionPayload::new(essence, unlocks).unwrap();
 
     let payload: Payload = tx_payload.into();
     let packed = payload.pack_to_vec();
 
     assert_eq!(payload.kind(), 1);
     assert_eq!(payload.packed_len(), packed.len());
-    assert!(matches!(payload, Payload::Transaction(_)));
+    assert!(matches!(payload, Payload::SignedTransaction(_)));
     assert_eq!(
         payload,
         PackableExt::unpack_verified(packed.as_slice(), &protocol_parameters).unwrap()

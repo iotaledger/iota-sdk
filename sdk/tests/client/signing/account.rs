@@ -7,7 +7,7 @@ use crypto::keys::bip44::Bip44;
 use iota_sdk::{
     client::{
         api::{
-            transaction::validate_transaction_payload_length, verify_semantic, GetAddressesOptions,
+            transaction::validate_signed_transaction_payload_length, verify_semantic, GetAddressesOptions,
             PreparedTransactionData,
         },
         constants::{SHIMMER_COIN_TYPE, SHIMMER_TESTNET_BECH32_HRP},
@@ -18,7 +18,7 @@ use iota_sdk::{
         address::{AccountAddress, Address, ToBech32Ext},
         input::{Input, UtxoInput},
         output::AccountId,
-        payload::{signed_transaction::RegularTransactionEssence, TransactionPayload},
+        payload::{signed_transaction::RegularTransactionEssence, SignedTransactionPayload},
         protocol::protocol_parameters,
         rand::mana::rand_mana_allotment,
         unlock::{SignatureUnlock, Unlock},
@@ -106,9 +106,9 @@ async fn sign_account_state_transition() -> Result<()> {
     assert_eq!(unlocks.len(), 1);
     assert_eq!((*unlocks).get(0).unwrap().kind(), SignatureUnlock::KIND);
 
-    let tx_payload = TransactionPayload::new(prepared_transaction_data.essence.clone(), unlocks)?;
+    let tx_payload = SignedTransactionPayload::new(prepared_transaction_data.essence.clone(), unlocks)?;
 
-    validate_transaction_payload_length(&tx_payload)?;
+    validate_signed_transaction_payload_length(&tx_payload)?;
 
     let conflict = verify_semantic(&prepared_transaction_data.inputs_data, &tx_payload)?;
 
@@ -193,9 +193,9 @@ async fn sign_account_governance_transition() -> Result<()> {
     assert_eq!(unlocks.len(), 1);
     assert_eq!((*unlocks).get(0).unwrap().kind(), SignatureUnlock::KIND);
 
-    let tx_payload = TransactionPayload::new(prepared_transaction_data.essence.clone(), unlocks)?;
+    let tx_payload = SignedTransactionPayload::new(prepared_transaction_data.essence.clone(), unlocks)?;
 
-    validate_transaction_payload_length(&tx_payload)?;
+    validate_signed_transaction_payload_length(&tx_payload)?;
 
     let conflict = verify_semantic(&prepared_transaction_data.inputs_data, &tx_payload)?;
 
@@ -328,9 +328,9 @@ async fn account_reference_unlocks() -> Result<()> {
         _ => panic!("Invalid unlock"),
     }
 
-    let tx_payload = TransactionPayload::new(prepared_transaction_data.essence.clone(), unlocks)?;
+    let tx_payload = SignedTransactionPayload::new(prepared_transaction_data.essence.clone(), unlocks)?;
 
-    validate_transaction_payload_length(&tx_payload)?;
+    validate_signed_transaction_payload_length(&tx_payload)?;
 
     let conflict = verify_semantic(&prepared_transaction_data.inputs_data, &tx_payload)?;
 

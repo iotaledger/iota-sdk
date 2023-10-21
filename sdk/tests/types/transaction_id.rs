@@ -5,7 +5,7 @@ use core::str::FromStr;
 
 use iota_sdk::types::{
     block::payload::{
-        signed_transaction::{dto::TransactionPayloadDto, TransactionId, TransactionPayload},
+        signed_transaction::{dto::SignedTransactionPayloadDto, SignedTransactionPayload, TransactionId},
         Payload,
     },
     TryFromDto,
@@ -112,9 +112,10 @@ fn pack_unpack_valid() {
 //       ]
 //     });
 
-//     let transaction_payload_dto = serde_json::from_value::<TransactionPayloadDto>(transaction_payload_json).unwrap();
-//     let transaction_payload = TransactionPayload::try_from_dto(transaction_payload_dto).unwrap();
-//     let transaction_payload_bytes = Payload::from(transaction_payload.clone()).pack_to_vec();
+//     let transaction_payload_dto =
+// serde_json::from_value::<SignedTransactionPayloadDto>(transaction_payload_json).unwrap();     let transaction_payload
+// = SignedTransactionPayload::try_from_dto(transaction_payload_dto).unwrap();     let transaction_payload_bytes =
+// Payload::from(transaction_payload.clone()).pack_to_vec();
 
 //     assert_eq!(
 //         transaction_payload_bytes,

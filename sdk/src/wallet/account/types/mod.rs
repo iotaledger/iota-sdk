@@ -23,7 +23,7 @@ use crate::{
         block::{
             address::Address,
             output::{dto::OutputDto, AccountTransition, Output, OutputId, OutputMetadata},
-            payload::signed_transaction::{dto::TransactionPayloadDto, TransactionId, TransactionPayload},
+            payload::signed_transaction::{dto::SignedTransactionPayloadDto, SignedTransactionPayload, TransactionId},
             slot::SlotIndex,
             BlockId, Error as BlockError,
         },
@@ -158,7 +158,7 @@ impl TryFromDto for OutputData {
 /// A transaction with metadata
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Transaction {
-    pub payload: TransactionPayload,
+    pub payload: SignedTransactionPayload,
     pub block_id: Option<BlockId>,
     pub inclusion_state: InclusionState,
     // Transaction creation time
@@ -180,7 +180,7 @@ pub struct Transaction {
 #[serde(rename_all = "camelCase")]
 pub struct TransactionDto {
     /// The transaction payload
-    pub payload: TransactionPayloadDto,
+    pub payload: SignedTransactionPayloadDto,
     /// BlockId when it got sent to the Tangle
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub block_id: Option<BlockId>,
@@ -201,7 +201,7 @@ pub struct TransactionDto {
 impl From<&Transaction> for TransactionDto {
     fn from(value: &Transaction) -> Self {
         Self {
-            payload: TransactionPayloadDto::from(&value.payload),
+            payload: SignedTransactionPayloadDto::from(&value.payload),
             block_id: value.block_id,
             inclusion_state: value.inclusion_state,
             timestamp: value.timestamp.to_string(),
@@ -223,7 +223,7 @@ impl TryFromDto for Transaction {
         params: crate::types::ValidationParams<'_>,
     ) -> Result<Self, Self::Error> {
         Ok(Self {
-            payload: TransactionPayload::try_from_dto_with_params(dto.payload, params)?,
+            payload: SignedTransactionPayload::try_from_dto_with_params(dto.payload, params)?,
             block_id: dto.block_id,
             inclusion_state: dto.inclusion_state,
             timestamp: dto

@@ -25,7 +25,7 @@ use iota_sdk::{
             address::{Address, Bech32Address, Hrp},
             input::UtxoInput,
             output::{dto::OutputDto, AccountId, FoundryId, NftId, OutputId, OutputMetadata, TokenId},
-            payload::{dto::TransactionPayloadDto, signed_transaction::TransactionId},
+            payload::{dto::SignedTransactionPayloadDto, signed_transaction::TransactionId},
             protocol::ProtocolParameters,
             signature::Ed25519Signature,
             slot::SlotCommitmentId,
@@ -77,7 +77,7 @@ pub enum Response {
     ProtocolParameters(ProtocolParameters),
     /// Response for:
     /// - [`SignTransaction`](crate::method::SecretManagerMethod::SignTransaction)
-    SignedTransaction(TransactionPayloadDto),
+    SignedTransaction(SignedTransactionPayloadDto),
     /// Response for:
     /// - [`SignatureUnlock`](crate::method::SecretManagerMethod::SignatureUnlock)
     SignatureUnlock(Unlock),

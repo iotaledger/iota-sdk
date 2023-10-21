@@ -46,7 +46,7 @@ use crate::{
     client::{
         api::{
             input_selection::{is_account_transition, Error as InputSelectionError},
-            transaction::validate_transaction_payload_length,
+            transaction::validate_signed_transaction_payload_length,
             verify_semantic, PreparedTransactionData,
         },
         Error,
@@ -55,7 +55,7 @@ use crate::{
         address::{Address, Ed25519Address},
         core::BlockWrapperBuilder,
         output::Output,
-        payload::TransactionPayload,
+        payload::SignedTransactionPayload,
         signature::{Ed25519Signature, Signature},
         unlock::{AccountUnlock, NftUnlock, ReferenceUnlock, SignatureUnlock, Unlock, Unlocks},
         BlockWrapper,
@@ -112,7 +112,7 @@ pub trait SecretManage: Send + Sync {
     async fn sign_transaction(
         &self,
         prepared_transaction_data: PreparedTransactionData,
-    ) -> Result<TransactionPayload, Self::Error>;
+    ) -> Result<SignedTransactionPayload, Self::Error>;
 }
 
 pub trait SecretManagerConfig: SecretManage {
@@ -427,7 +427,7 @@ impl SecretManage for SecretManager {
     async fn sign_transaction(
         &self,
         prepared_transaction_data: PreparedTransactionData,
-    ) -> Result<TransactionPayload, Self::Error> {
+    ) -> Result<SignedTransactionPayload, Self::Error> {
         match self {
             #[cfg(feature = "stronghold")]
             Self::Stronghold(secret_manager) => Ok(secret_manager.sign_transaction(prepared_transaction_data).await?),
@@ -580,7 +580,7 @@ where
 pub(crate) async fn default_sign_transaction<M: SecretManage>(
     secret_manager: &M,
     prepared_transaction_data: PreparedTransactionData,
-) -> crate::client::Result<TransactionPayload>
+) -> crate::client::Result<SignedTransactionPayload>
 where
     crate::client::Error: From<M::Error>,
 {
@@ -593,9 +593,9 @@ where
     let PreparedTransactionData {
         essence, inputs_data, ..
     } = prepared_transaction_data;
-    let tx_payload = TransactionPayload::new(essence, unlocks)?;
+    let tx_payload = SignedTransactionPayload::new(essence, unlocks)?;
 
-    validate_transaction_payload_length(&tx_payload)?;
+    validate_signed_transaction_payload_length(&tx_payload)?;
 
     let conflict = verify_semantic(&inputs_data, &tx_payload)?;
 

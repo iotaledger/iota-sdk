@@ -14,8 +14,8 @@ use iota_sdk::types::block::{
     },
     payload::{
         signed_transaction::{
-            RegularTransactionEssence, TransactionCapabilities, TransactionCapabilityFlag, TransactionId,
-            TransactionPayload,
+            RegularTransactionEssence, SignedTransactionPayload, TransactionCapabilities, TransactionCapabilityFlag,
+            TransactionId,
         },
         Payload,
     },
@@ -141,7 +141,7 @@ fn build_invalid_payload_kind() {
     let ref_unlock = Unlock::from(ReferenceUnlock::new(0).unwrap());
     let unlocks = Unlocks::new([sig_unlock, ref_unlock]).unwrap();
 
-    let tx_payload = TransactionPayload::new(essence, unlocks).unwrap();
+    let tx_payload = SignedTransactionPayload::new(essence, unlocks).unwrap();
 
     let essence = RegularTransactionEssence::builder(protocol_parameters.network_id())
         .with_inputs(vec![input1, input2])

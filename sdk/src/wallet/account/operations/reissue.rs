@@ -62,7 +62,7 @@ where
                         todo!("issuer id"),
                         todo!("issuing time"),
                         None,
-                        Some(Payload::Transaction(Box::new(transaction.payload.clone()))),
+                        Some(Payload::SignedTransaction(Box::new(transaction.payload.clone()))),
                         &*self.get_secret_manager().read().await,
                         Bip44::new(self.wallet.coin_type()),
                     )
@@ -109,7 +109,7 @@ where
                                 todo!("issuer id"),
                                 todo!("issuing time"),
                                 None,
-                                Some(Payload::Transaction(Box::new(transaction.payload.clone()))),
+                                Some(Payload::SignedTransaction(Box::new(transaction.payload.clone()))),
                                 &*self.get_secret_manager().read().await,
                                 Bip44::new(self.wallet.coin_type()),
                             )

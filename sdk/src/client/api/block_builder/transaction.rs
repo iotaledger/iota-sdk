@@ -9,7 +9,7 @@ use crate::{
     client::{secret::types::InputSigningData, Error, Result},
     types::block::{
         output::{Output, OutputId},
-        payload::signed_transaction::{RegularTransactionEssence, TransactionPayload},
+        payload::signed_transaction::{RegularTransactionEssence, SignedTransactionPayload},
         semantic::{semantic_validation, TransactionFailureReason, ValidationContext},
         signature::Ed25519Signature,
         BlockId, BlockWrapper,
@@ -28,7 +28,7 @@ const REFERENCE_ACCOUNT_NFT_UNLOCK_LENGTH: usize = 1 + 2;
 /// Verifies the semantic of a prepared transaction.
 pub fn verify_semantic(
     input_signing_data: &[InputSigningData],
-    transaction: &TransactionPayload,
+    transaction: &SignedTransactionPayload,
 ) -> crate::client::Result<Option<TransactionFailureReason>> {
     let transaction_id = transaction.id();
     let inputs = input_signing_data
@@ -46,12 +46,12 @@ pub fn verify_semantic(
     Ok(semantic_validation(context, inputs.as_slice(), transaction.unlocks())?)
 }
 
-/// Verifies that the transaction payload doesn't exceed the block size limit with 8 parents.
-pub fn validate_transaction_payload_length(transaction_payload: &TransactionPayload) -> Result<()> {
-    let transaction_payload_bytes = transaction_payload.pack_to_vec();
-    if transaction_payload_bytes.len() > MAX_TX_LENGTH_FOR_BLOCK_WITH_8_PARENTS {
-        return Err(Error::InvalidTransactionPayloadLength {
-            length: transaction_payload_bytes.len(),
+/// Verifies that the signed transaction payload doesn't exceed the block size limit with 8 parents.
+pub fn validate_signed_transaction_payload_length(signed_transaction_payload: &SignedTransactionPayload) -> Result<()> {
+    let signed_transaction_payload_bytes = signed_transaction_payload.pack_to_vec();
+    if signed_transaction_payload_bytes.len() > MAX_TX_LENGTH_FOR_BLOCK_WITH_8_PARENTS {
+        return Err(Error::InvalidSignedTransactionPayloadLength {
+            length: signed_transaction_payload_bytes.len(),
             max_length: MAX_TX_LENGTH_FOR_BLOCK_WITH_8_PARENTS,
         });
     }

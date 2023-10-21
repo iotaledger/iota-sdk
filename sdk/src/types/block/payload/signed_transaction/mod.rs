@@ -18,35 +18,35 @@ pub use self::{
 };
 use crate::types::block::{protocol::ProtocolParameters, unlock::Unlocks, Error};
 
-/// A transaction to move funds.
+/// A signed transaction to move funds.
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct TransactionPayload {
+pub struct SignedTransactionPayload {
     essence: RegularTransactionEssence,
     unlocks: Unlocks,
 }
 
-impl TransactionPayload {
-    /// The payload kind of a [`TransactionPayload`].
+impl SignedTransactionPayload {
+    /// The payload kind of a [`SignedTransactionPayload`].
     pub const KIND: u8 = 1;
 
-    /// Creates a new [`TransactionPayload`].
+    /// Creates a new [`SignedTransactionPayload`].
     pub fn new(essence: RegularTransactionEssence, unlocks: Unlocks) -> Result<Self, Error> {
         verify_essence_unlocks(&essence, &unlocks)?;
 
         Ok(Self { essence, unlocks })
     }
 
-    /// Return the essence of a [`TransactionPayload`].
+    /// Return the essence of a [`SignedTransactionPayload`].
     pub fn essence(&self) -> &RegularTransactionEssence {
         &self.essence
     }
 
-    /// Return unlocks of a [`TransactionPayload`].
+    /// Return unlocks of a [`SignedTransactionPayload`].
     pub fn unlocks(&self) -> &Unlocks {
         &self.unlocks
     }
 
-    /// Computes the identifier of a [`TransactionPayload`].
+    /// Computes the identifier of a [`SignedTransactionPayload`].
     pub fn id(&self) -> TransactionId {
         let mut hasher = Blake2b256::new();
 
@@ -57,7 +57,7 @@ impl TransactionPayload {
     }
 }
 
-impl Packable for TransactionPayload {
+impl Packable for SignedTransactionPayload {
     type UnpackError = Error;
     type UnpackVisitor = ProtocolParameters;
 
@@ -107,27 +107,26 @@ pub mod dto {
         TryFromDto, ValidationParams,
     };
 
-    /// The payload type to define a value transaction.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-    pub struct TransactionPayloadDto {
+    pub struct SignedTransactionPayloadDto {
         #[serde(rename = "type")]
         pub kind: u8,
         pub essence: RegularTransactionEssenceDto,
         pub unlocks: Vec<Unlock>,
     }
 
-    impl From<&TransactionPayload> for TransactionPayloadDto {
-        fn from(value: &TransactionPayload) -> Self {
+    impl From<&SignedTransactionPayload> for SignedTransactionPayloadDto {
+        fn from(value: &SignedTransactionPayload) -> Self {
             Self {
-                kind: TransactionPayload::KIND,
+                kind: SignedTransactionPayload::KIND,
                 essence: value.essence().into(),
                 unlocks: value.unlocks().to_vec(),
             }
         }
     }
 
-    impl TryFromDto for TransactionPayload {
-        type Dto = TransactionPayloadDto;
+    impl TryFromDto for SignedTransactionPayload {
+        type Dto = SignedTransactionPayloadDto;
         type Error = Error;
 
         fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {

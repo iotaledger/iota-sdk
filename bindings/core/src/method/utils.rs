@@ -6,7 +6,7 @@ use iota_sdk::types::block::{
     address::{Bech32Address, Hrp},
     output::{dto::OutputDto, AccountId, NftId, OutputId, RentStructure},
     payload::signed_transaction::{
-        dto::{RegularTransactionEssenceDto, TransactionPayloadDto},
+        dto::{RegularTransactionEssenceDto, SignedTransactionPayloadDto},
         TransactionId,
     },
     protocol::ProtocolParameters,
@@ -90,7 +90,7 @@ pub enum UtilsMethod {
     /// Returns the transaction ID (Blake2b256 hash of the provided transaction payload)
     TransactionId {
         /// Transaction Payload
-        payload: TransactionPayloadDto,
+        payload: SignedTransactionPayloadDto,
     },
     /// Computes the account ID
     #[serde(rename_all = "camelCase")]

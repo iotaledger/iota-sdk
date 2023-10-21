@@ -9,7 +9,7 @@ use iota_sdk::{
             address::{AccountAddress, Address, ToBech32Ext},
             input::UtxoInput,
             output::{AccountId, FoundryId, NftId, Output, OutputId, Rent, TokenId},
-            payload::{signed_transaction::RegularTransactionEssence, TransactionPayload},
+            payload::{signed_transaction::RegularTransactionEssence, SignedTransactionPayload},
             BlockWrapper,
         },
         TryFromDto,
@@ -46,7 +46,7 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
             Response::BlockId(block.id(&protocol_parameters))
         }
         UtilsMethod::TransactionId { payload } => {
-            let payload = TransactionPayload::try_from_dto(payload)?;
+            let payload = SignedTransactionPayload::try_from_dto(payload)?;
             Response::TransactionId(payload.id())
         }
         UtilsMethod::ComputeAccountId { output_id } => Response::AccountId(AccountId::from(&output_id)),

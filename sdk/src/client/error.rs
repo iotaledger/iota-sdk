@@ -64,9 +64,9 @@ pub enum Error {
         /// The max supported length.
         max_length: usize,
     },
-    /// The transaction payload is too large
-    #[error("the transaction payload is too large. Its length is {length}, max length is {max_length}")]
-    InvalidTransactionPayloadLength {
+    /// The signed transaction payload is too large
+    #[error("the signed transaction payload is too large. Its length is {length}, max length is {max_length}")]
+    InvalidSignedTransactionPayloadLength {
         /// The found length.
         length: usize,
         /// The max length.

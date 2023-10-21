@@ -10,7 +10,7 @@ use crate::{
         api::core::OutputWithMetadataResponse,
         block::{
             address::Bech32Address,
-            payload::signed_transaction::{dto::TransactionPayloadDto, TransactionId},
+            payload::signed_transaction::{dto::SignedTransactionPayloadDto, TransactionId},
         },
     },
     wallet::account::types::{InclusionState, OutputDataDto},
@@ -187,7 +187,7 @@ pub struct NewOutputEvent {
     pub output: OutputDataDto,
     /// The transaction that created the output. Might be pruned and not available.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub transaction: Option<TransactionPayloadDto>,
+    pub transaction: Option<SignedTransactionPayloadDto>,
     /// The inputs for the transaction that created the output. Might be pruned and not available.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub transaction_inputs: Option<Vec<OutputWithMetadataResponse>>,

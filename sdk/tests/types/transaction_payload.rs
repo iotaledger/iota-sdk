@@ -5,7 +5,7 @@ use iota_sdk::types::block::{
     address::{Address, Ed25519Address},
     input::{Input, UtxoInput},
     output::{unlock_condition::AddressUnlockCondition, BasicOutput, Output},
-    payload::signed_transaction::{RegularTransactionEssence, TransactionId, TransactionPayload},
+    payload::signed_transaction::{RegularTransactionEssence, SignedTransactionPayload, TransactionId},
     protocol::protocol_parameters,
     rand::mana::rand_mana_allotment,
     signature::{Ed25519Signature, Signature},
@@ -22,10 +22,10 @@ const ED25519_SIGNATURE: &str = "0xc6a40edf9a089f42c18f4ebccb35fe4b578d93b879e99
 
 #[test]
 fn kind() {
-    assert_eq!(TransactionPayload::KIND, 1);
+    assert_eq!(SignedTransactionPayload::KIND, 1);
 }
 
-// Validate that attempting to construct a `TransactionPayload` with too few unlocks is an error.
+// Validate that attempting to construct a `SignedTransactionPayload` with too few unlocks is an error.
 #[test]
 fn builder_no_essence_too_few_unlocks() {
     let protocol_parameters = protocol_parameters();
@@ -57,12 +57,12 @@ fn builder_no_essence_too_few_unlocks() {
     let unlocks = Unlocks::new([sig_unlock]).unwrap();
 
     assert!(matches!(
-            TransactionPayload::new(essence, unlocks),
+            SignedTransactionPayload::new(essence, unlocks),
             Err(Error::InputUnlockCountMismatch{input_count, unlock_count})
             if input_count == 2 && unlock_count == 1));
 }
 
-// Validate that attempting to construct a `TransactionPayload` with too many unlocks is an error.
+// Validate that attempting to construct a `SignedTransactionPayload` with too many unlocks is an error.
 #[test]
 fn builder_no_essence_too_many_unlocks() {
     let protocol_parameters = protocol_parameters();
@@ -95,7 +95,7 @@ fn builder_no_essence_too_many_unlocks() {
     let unlocks = Unlocks::new([sig_unlock, ref_unlock]).unwrap();
 
     assert!(matches!(
-            TransactionPayload::new(essence, unlocks),
+            SignedTransactionPayload::new(essence, unlocks),
             Err(Error::InputUnlockCountMismatch{input_count, unlock_count})
             if input_count == 1 && unlock_count == 2));
 }
@@ -132,7 +132,7 @@ fn pack_unpack_valid() {
     let ref_unlock = Unlock::from(ReferenceUnlock::new(0).unwrap());
     let unlocks = Unlocks::new([sig_unlock, ref_unlock]).unwrap();
 
-    let tx_payload = TransactionPayload::new(essence, unlocks).unwrap();
+    let tx_payload = SignedTransactionPayload::new(essence, unlocks).unwrap();
     let packed_tx_payload = tx_payload.pack_to_vec();
 
     assert_eq!(packed_tx_payload.len(), tx_payload.packed_len());
@@ -173,7 +173,7 @@ fn getters() {
     let ref_unlock = Unlock::from(ReferenceUnlock::new(0).unwrap());
     let unlocks = Unlocks::new([sig_unlock, ref_unlock]).unwrap();
 
-    let tx_payload = TransactionPayload::new(essence.clone(), unlocks.clone()).unwrap();
+    let tx_payload = SignedTransactionPayload::new(essence.clone(), unlocks.clone()).unwrap();
 
     assert_eq!(*tx_payload.essence(), essence);
     assert_eq!(*tx_payload.unlocks(), unlocks);

@@ -64,7 +64,7 @@ use crate::{
         block::{
             address::Bech32Address,
             output::{dto::FoundryOutputDto, AccountId, FoundryId, FoundryOutput, NftId, Output, OutputId, TokenId},
-            payload::{signed_transaction::TransactionId, TransactionPayload},
+            payload::{signed_transaction::TransactionId, SignedTransactionPayload},
         },
         TryFromDto,
     },
@@ -453,7 +453,7 @@ impl AccountInner {
 
 pub(crate) fn build_transaction_from_payload_and_inputs(
     tx_id: TransactionId,
-    tx_payload: TransactionPayload,
+    tx_payload: SignedTransactionPayload,
     inputs: Vec<OutputWithMetadataResponse>,
 ) -> crate::wallet::Result<Transaction> {
     Ok(Transaction {
@@ -605,7 +605,7 @@ mod test {
         address::{Address, Ed25519Address},
         input::{Input, UtxoInput},
         output::{AddressUnlockCondition, BasicOutput, Output},
-        payload::signed_transaction::{RegularTransactionEssence, TransactionId, TransactionPayload},
+        payload::signed_transaction::{RegularTransactionEssence, SignedTransactionPayload, TransactionId},
         protocol::ProtocolParameters,
         rand::mana::rand_mana_allotment,
         signature::{Ed25519Signature, Signature},
@@ -657,7 +657,7 @@ mod test {
         let ref_unlock = Unlock::from(ReferenceUnlock::new(0).unwrap());
         let unlocks = Unlocks::new([sig_unlock, ref_unlock]).unwrap();
 
-        let tx_payload = TransactionPayload::new(essence, unlocks).unwrap();
+        let tx_payload = SignedTransactionPayload::new(essence, unlocks).unwrap();
 
         let incoming_transaction = Transaction {
             transaction_id: TransactionId::from_str(
