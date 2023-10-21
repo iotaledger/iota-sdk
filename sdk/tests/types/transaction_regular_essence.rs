@@ -35,11 +35,6 @@ const ED25519_PUBLIC_KEY: &str = "0x1da5ddd11ba3f961acab68fafee3177d039875eaa94a
 const ED25519_SIGNATURE: &str = "0xc6a40edf9a089f42c18f4ebccb35fe4b578d93b879e99b87f63573324a710d3456b03fb6d1fcc027e6401cbd9581f790ee3ed7a3f68e9c225fcb9f1cd7b7110d";
 
 #[test]
-fn kind() {
-    assert_eq!(RegularTransactionEssence::KIND, 2);
-}
-
-#[test]
 fn build_valid() {
     let protocol_parameters = protocol_parameters();
     let transaction_id = TransactionId::new(prefix_hex::decode(TRANSACTION_ID).unwrap());

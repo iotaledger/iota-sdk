@@ -231,9 +231,6 @@ pub struct RegularTransactionEssence {
 }
 
 impl RegularTransactionEssence {
-    /// The essence kind of a [`RegularTransactionEssence`].
-    pub const KIND: u8 = 2;
-
     /// Creates a new [`RegularTransactionEssenceBuilder`] to build a [`RegularTransactionEssence`].
     pub fn builder(network_id: u64) -> RegularTransactionEssenceBuilder {
         RegularTransactionEssenceBuilder::new(network_id)
@@ -511,8 +508,6 @@ pub(crate) mod dto {
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
     pub struct RegularTransactionEssenceDto {
-        #[serde(rename = "type")]
-        pub kind: u8,
         pub network_id: String,
         pub creation_slot: SlotIndex,
         pub context_inputs: Vec<ContextInput>,
@@ -528,7 +523,6 @@ pub(crate) mod dto {
     impl From<&RegularTransactionEssence> for RegularTransactionEssenceDto {
         fn from(value: &RegularTransactionEssence) -> Self {
             Self {
-                kind: RegularTransactionEssence::KIND,
                 network_id: value.network_id().to_string(),
                 creation_slot: value.creation_slot(),
                 context_inputs: value.context_inputs().to_vec(),
