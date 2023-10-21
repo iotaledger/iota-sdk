@@ -8,7 +8,7 @@ use iota_sdk::{
         block::{
             address::{AccountAddress, Address, ToBech32Ext},
             input::UtxoInput,
-            output::{AccountId, FoundryId, InputsCommitment, NftId, Output, OutputId, Rent, TokenId},
+            output::{AccountId, FoundryId, NftId, Output, OutputId, Rent, TokenId},
             payload::{transaction::TransactionEssence, TransactionPayload},
             BlockWrapper,
         },
@@ -71,13 +71,6 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
         }
         UtilsMethod::HashTransactionEssence { essence } => {
             Response::Hash(prefix_hex::encode(TransactionEssence::try_from_dto(essence)?.hash()))
-        }
-        UtilsMethod::ComputeInputsCommitment { inputs } => {
-            let inputs = inputs
-                .into_iter()
-                .map(|o| Ok(Output::try_from_dto(o)?))
-                .collect::<Result<Vec<Output>>>()?;
-            Response::Hash(InputsCommitment::new(inputs.iter()).to_string())
         }
         UtilsMethod::ComputeStorageDeposit { output, rent } => {
             let out = Output::try_from_dto(output)?;

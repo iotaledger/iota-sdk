@@ -12,7 +12,7 @@ use crate::types::{
         context_input::{ContextInput, CONTEXT_INPUT_COUNT_RANGE},
         input::{Input, INPUT_COUNT_RANGE},
         mana::{verify_mana_allotments_sum, ManaAllotment, ManaAllotments},
-        output::{InputsCommitment, NativeTokens, Output, OUTPUT_COUNT_RANGE},
+        output::{NativeTokens, Output, OUTPUT_COUNT_RANGE},
         payload::{OptionalPayload, Payload},
         protocol::ProtocolParameters,
         slot::SlotIndex,
@@ -28,7 +28,6 @@ pub struct RegularTransactionEssenceBuilder {
     network_id: u64,
     context_inputs: Vec<ContextInput>,
     inputs: Vec<Input>,
-    inputs_commitment: InputsCommitment,
     outputs: Vec<Output>,
     allotments: BTreeSet<ManaAllotment>,
     capabilities: TransactionCapabilities,
@@ -38,12 +37,11 @@ pub struct RegularTransactionEssenceBuilder {
 
 impl RegularTransactionEssenceBuilder {
     /// Creates a new [`RegularTransactionEssenceBuilder`].
-    pub fn new(network_id: u64, inputs_commitment: InputsCommitment) -> Self {
+    pub fn new(network_id: u64) -> Self {
         Self {
             network_id,
             context_inputs: Vec::new(),
             inputs: Vec::new(),
-            inputs_commitment,
             outputs: Vec::new(),
             allotments: BTreeSet::new(),
             capabilities: Default::default(),
@@ -187,7 +185,6 @@ impl RegularTransactionEssenceBuilder {
             creation_slot,
             context_inputs,
             inputs,
-            inputs_commitment: self.inputs_commitment,
             outputs,
             allotments,
             capabilities: self.capabilities,
@@ -223,8 +220,6 @@ pub struct RegularTransactionEssence {
     #[packable(verify_with = verify_inputs_packable)]
     #[packable(unpack_error_with = |e| e.unwrap_item_err_or_else(|p| Error::InvalidInputCount(p.into())))]
     inputs: BoxedSlicePrefix<Input, InputCount>,
-    /// BLAKE2b-256 hash of the serialized outputs referenced in inputs by their OutputId.
-    inputs_commitment: InputsCommitment,
     #[packable(verify_with = verify_outputs)]
     #[packable(unpack_error_with = |e| e.unwrap_item_err_or_else(|p| Error::InvalidOutputCount(p.into())))]
     outputs: BoxedSlicePrefix<Output, OutputCount>,
@@ -239,8 +234,8 @@ impl RegularTransactionEssence {
     pub const KIND: u8 = 2;
 
     /// Creates a new [`RegularTransactionEssenceBuilder`] to build a [`RegularTransactionEssence`].
-    pub fn builder(network_id: u64, inputs_commitment: InputsCommitment) -> RegularTransactionEssenceBuilder {
-        RegularTransactionEssenceBuilder::new(network_id, inputs_commitment)
+    pub fn builder(network_id: u64) -> RegularTransactionEssenceBuilder {
+        RegularTransactionEssenceBuilder::new(network_id)
     }
 
     /// Returns the network ID of a [`RegularTransactionEssence`].
@@ -261,11 +256,6 @@ impl RegularTransactionEssence {
     /// Returns the inputs of a [`RegularTransactionEssence`].
     pub fn inputs(&self) -> &[Input] {
         &self.inputs
-    }
-
-    /// Returns the inputs commitment of a [`RegularTransactionEssence`].
-    pub fn inputs_commitment(&self) -> &InputsCommitment {
-        &self.inputs_commitment
     }
 
     /// Returns the outputs of a [`RegularTransactionEssence`].
@@ -499,7 +489,6 @@ pub(crate) mod dto {
         boxed::Box,
         string::{String, ToString},
     };
-    use core::str::FromStr;
 
     use serde::{Deserialize, Serialize};
 
@@ -522,7 +511,6 @@ pub(crate) mod dto {
         pub creation_slot: SlotIndex,
         pub context_inputs: Vec<ContextInput>,
         pub inputs: Vec<Input>,
-        pub inputs_commitment: String,
         pub outputs: Vec<OutputDto>,
         pub allotments: Vec<ManaAllotmentDto>,
         #[serde(with = "prefix_hex_bytes")]
@@ -539,7 +527,6 @@ pub(crate) mod dto {
                 creation_slot: value.creation_slot(),
                 context_inputs: value.context_inputs().to_vec(),
                 inputs: value.inputs().to_vec(),
-                inputs_commitment: value.inputs_commitment().to_string(),
                 outputs: value.outputs().iter().map(Into::into).collect(),
                 allotments: value.mana_allotments().iter().map(Into::into).collect(),
                 capabilities: value.capabilities().iter().copied().collect(),
@@ -572,7 +559,7 @@ pub(crate) mod dto {
                 .map(|o| ManaAllotment::try_from_dto_with_params(o, &params))
                 .collect::<Result<Vec<ManaAllotment>, Error>>()?;
 
-            let mut builder = Self::builder(network_id, InputsCommitment::from_str(&dto.inputs_commitment)?)
+            let mut builder = Self::builder(network_id)
                 .with_creation_slot(dto.creation_slot)
                 .with_context_inputs(dto.context_inputs)
                 .with_inputs(dto.inputs)

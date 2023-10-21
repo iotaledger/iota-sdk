@@ -128,8 +128,6 @@ pub enum UtilsMethod {
         /// The transaction essence
         essence: TransactionEssenceDto,
     },
-    /// Computes the input commitment from the output objects that are used as inputs to fund the transaction.
-    ComputeInputsCommitment { inputs: Vec<OutputDto> },
     /// Computes the required storage deposit of an output.
     ComputeStorageDeposit { output: OutputDto, rent: RentStructure },
     /// Checks if the given mnemonic is valid.

@@ -11,7 +11,7 @@ use iota_sdk::{
         protocol::protocol_parameters,
         rand::{
             mana::rand_mana_allotment,
-            output::{rand_basic_output, rand_inputs_commitment, rand_output_metadata},
+            output::{rand_basic_output, rand_output_metadata},
         },
     },
     wallet::{
@@ -96,7 +96,7 @@ fn wallet_events_serde() {
                 .unwrap(),
         );
         let essence = TransactionEssence::Regular(
-            RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
+            RegularTransactionEssence::builder(protocol_parameters.network_id())
                 .with_inputs(vec![input1, input2])
                 .add_output(output)
                 .add_mana_allotment(rand_mana_allotment(&protocol_parameters))

@@ -13,7 +13,6 @@ use crate::{
     },
     types::block::{
         input::{Input, UtxoInput},
-        output::{InputsCommitment, Output},
         payload::transaction::{RegularTransactionEssence, TransactionEssence},
     },
     wallet::account::{operations::transaction::TransactionOptions, Account},
@@ -45,16 +44,10 @@ where
 
         // Build transaction essence
 
-        let input_outputs = inputs_for_signing
-            .iter()
-            .map(|i| i.output.clone())
-            .collect::<Vec<Output>>();
-        let inputs_commitment = InputsCommitment::new(input_outputs.iter());
         // TODO: Add an appropriate mana allotment here for this account
-        let mut essence_builder =
-            RegularTransactionEssence::builder(protocol_parameters.network_id(), inputs_commitment)
-                .with_inputs(inputs_for_essence)
-                .with_outputs(selected_transaction_data.outputs);
+        let mut essence_builder = RegularTransactionEssence::builder(protocol_parameters.network_id())
+            .with_inputs(inputs_for_essence)
+            .with_outputs(selected_transaction_data.outputs);
 
         // Optional add a tagged payload
         if let Some(options) = options.into() {

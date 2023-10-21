@@ -20,7 +20,7 @@ use iota_sdk::types::block::{
         Payload,
     },
     protocol::protocol_parameters,
-    rand::{mana::rand_mana_allotment, output::rand_inputs_commitment, payload::rand_tagged_data_payload},
+    rand::{mana::rand_mana_allotment, payload::rand_tagged_data_payload},
     signature::{Ed25519Signature, Signature},
     unlock::{ReferenceUnlock, SignatureUnlock, Unlock, Unlocks},
     Error,
@@ -55,7 +55,7 @@ fn build_valid() {
             .unwrap(),
     );
 
-    let essence = RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
+    let essence = RegularTransactionEssence::builder(protocol_parameters.network_id())
         .with_inputs([input1, input2])
         .add_output(output)
         .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
@@ -80,7 +80,7 @@ fn build_valid_with_payload() {
             .unwrap(),
     );
 
-    let essence = RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
+    let essence = RegularTransactionEssence::builder(protocol_parameters.network_id())
         .with_inputs([input1, input2])
         .add_output(output)
         .with_payload(rand_tagged_data_payload())
@@ -106,7 +106,7 @@ fn build_valid_add_inputs_outputs() {
             .unwrap(),
     );
 
-    let essence = RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
+    let essence = RegularTransactionEssence::builder(protocol_parameters.network_id())
         .with_inputs([input1, input2])
         .add_output(output)
         .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
@@ -131,7 +131,7 @@ fn build_invalid_payload_kind() {
             .finish_with_params(protocol_parameters.token_supply())
             .unwrap(),
     );
-    let essence = RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
+    let essence = RegularTransactionEssence::builder(protocol_parameters.network_id())
         .with_inputs([input1.clone(), input2.clone()])
         .add_output(output.clone())
         .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
@@ -148,7 +148,7 @@ fn build_invalid_payload_kind() {
 
     let tx_payload = TransactionPayload::new(essence, unlocks).unwrap();
 
-    let essence = RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
+    let essence = RegularTransactionEssence::builder(protocol_parameters.network_id())
         .with_inputs(vec![input1, input2])
         .add_output(output)
         .with_payload(tx_payload)
@@ -171,7 +171,7 @@ fn build_invalid_input_count_low() {
             .unwrap(),
     );
 
-    let essence = RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
+    let essence = RegularTransactionEssence::builder(protocol_parameters.network_id())
         .add_output(output)
         .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
         .finish_with_params(&protocol_parameters);
@@ -197,7 +197,7 @@ fn build_invalid_input_count_high() {
             .unwrap(),
     );
 
-    let essence = RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
+    let essence = RegularTransactionEssence::builder(protocol_parameters.network_id())
         .with_inputs(vec![input; 129])
         .add_output(output)
         .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
@@ -215,7 +215,7 @@ fn build_invalid_output_count_low() {
     let transaction_id = TransactionId::new(prefix_hex::decode(TRANSACTION_ID).unwrap());
     let input = Input::Utxo(UtxoInput::new(transaction_id, 0).unwrap());
 
-    let essence = RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
+    let essence = RegularTransactionEssence::builder(protocol_parameters.network_id())
         .add_input(input)
         .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
         .finish_with_params(&protocol_parameters);
@@ -241,7 +241,7 @@ fn build_invalid_output_count_high() {
             .unwrap(),
     );
 
-    let essence = RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
+    let essence = RegularTransactionEssence::builder(protocol_parameters.network_id())
         .add_input(input)
         .with_outputs(vec![output; 129])
         .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
@@ -268,7 +268,7 @@ fn build_invalid_duplicate_utxo() {
             .unwrap(),
     );
 
-    let essence = RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
+    let essence = RegularTransactionEssence::builder(protocol_parameters.network_id())
         .with_inputs(vec![input; 2])
         .add_output(output)
         .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
@@ -303,7 +303,7 @@ fn build_invalid_accumulated_output() {
             .unwrap(),
     );
 
-    let essence = RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
+    let essence = RegularTransactionEssence::builder(protocol_parameters.network_id())
         .add_input(input)
         .with_outputs([output1, output2])
         .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
@@ -329,7 +329,7 @@ fn getters() {
     )];
     let payload = Payload::from(rand_tagged_data_payload());
 
-    let essence = RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
+    let essence = RegularTransactionEssence::builder(protocol_parameters.network_id())
         .with_inputs([input1, input2])
         .with_outputs(outputs.clone())
         .with_payload(payload.clone())
@@ -360,7 +360,7 @@ fn duplicate_output_nft() {
         .finish_output(protocol_parameters.token_supply())
         .unwrap();
 
-    let essence = RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
+    let essence = RegularTransactionEssence::builder(protocol_parameters.network_id())
         .with_inputs([input1, input2])
         .with_outputs([basic, nft.clone(), nft])
         .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
@@ -391,7 +391,7 @@ fn duplicate_output_nft_null() {
         .finish_output(protocol_parameters.token_supply())
         .unwrap();
 
-    let essence = RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
+    let essence = RegularTransactionEssence::builder(protocol_parameters.network_id())
         .with_inputs([input1, input2])
         .with_outputs([basic, nft.clone(), nft])
         .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
@@ -420,7 +420,7 @@ fn duplicate_output_account() {
         .finish_output(protocol_parameters.token_supply())
         .unwrap();
 
-    let essence = RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
+    let essence = RegularTransactionEssence::builder(protocol_parameters.network_id())
         .with_inputs([input1, input2])
         .with_outputs([basic, account.clone(), account])
         .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
@@ -457,7 +457,7 @@ fn duplicate_output_foundry() {
         .finish_output(protocol_parameters.token_supply())
         .unwrap();
 
-    let essence = RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
+    let essence = RegularTransactionEssence::builder(protocol_parameters.network_id())
         .with_inputs([input1, input2])
         .with_outputs([basic, foundry.clone(), foundry])
         .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
@@ -483,7 +483,7 @@ fn transactions_capabilities() {
             .finish_with_params(&protocol_parameters)
             .unwrap(),
     );
-    let essence = RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
+    let essence = RegularTransactionEssence::builder(protocol_parameters.network_id())
         .with_inputs(vec![input1, input2])
         .add_output(output)
         .add_mana_allotment(rand_mana_allotment(&protocol_parameters))

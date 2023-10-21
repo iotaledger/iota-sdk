@@ -3,7 +3,6 @@
 
 mod chain_id;
 mod delegation;
-mod inputs_commitment;
 mod metadata;
 mod native_token;
 mod output_id;
@@ -48,7 +47,6 @@ pub use self::{
     delegation::{DelegationId, DelegationOutput, DelegationOutputBuilder},
     feature::{Feature, Features},
     foundry::{FoundryId, FoundryOutput, FoundryOutputBuilder},
-    inputs_commitment::InputsCommitment,
     metadata::OutputMetadata,
     native_token::{NativeToken, NativeTokens, NativeTokensBuilder, TokenId},
     nft::{NftId, NftOutput, NftOutputBuilder},

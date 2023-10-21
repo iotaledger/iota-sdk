@@ -9,7 +9,7 @@ use primitive_types::U256;
 
 use crate::types::block::{
     address::{Address, AddressCapabilityFlag},
-    output::{ChainId, FoundryId, InputsCommitment, NativeTokens, Output, OutputId, TokenId, UnlockCondition},
+    output::{ChainId, FoundryId, NativeTokens, Output, OutputId, TokenId, UnlockCondition},
     payload::transaction::{RegularTransactionEssence, TransactionCapabilityFlag, TransactionEssence, TransactionId},
     unlock::Unlocks,
     Error,
@@ -22,6 +22,7 @@ use crate::types::block::{
 #[packable(unpack_error = Error)]
 #[packable(tag_type = u8, with_error = Error::InvalidTransactionFailureReason)]
 #[non_exhaustive]
+// TODO adjust values
 pub enum TransactionFailureReason {
     /// The referenced UTXO was already spent.
     InputUtxoAlreadySpent = 1,
@@ -44,8 +45,6 @@ pub enum TransactionFailureReason {
     StorageDepositReturnUnfulfilled = 9,
     /// An input unlock was invalid.
     InvalidInputUnlock = 10,
-    /// The inputs commitment is invalid.
-    InvalidInputsCommitment = 11,
     /// The output contains a Sender with an ident (address) which is not unlocked.
     SenderNotUnlocked = 12,
     /// The chain state transition is invalid.
@@ -91,7 +90,6 @@ impl fmt::Display for TransactionFailureReason {
                 "The return amount in a transaction is not fulfilled by the output side."
             ),
             Self::InvalidInputUnlock => write!(f, "An input unlock was invalid."),
-            Self::InvalidInputsCommitment => write!(f, "The inputs commitment is invalid."),
             Self::SenderNotUnlocked => write!(
                 f,
                 "The output contains a Sender with an ident (address) which is not unlocked."
@@ -133,7 +131,6 @@ impl TryFrom<u8> for TransactionFailureReason {
             8 => Self::InvalidNativeTokens,
             9 => Self::StorageDepositReturnUnfulfilled,
             10 => Self::InvalidInputUnlock,
-            11 => Self::InvalidInputsCommitment,
             12 => Self::SenderNotUnlocked,
             13 => Self::InvalidChainStateTransition,
             14 => Self::InvalidTransactionIssuingTime,
@@ -154,7 +151,6 @@ impl TryFrom<u8> for TransactionFailureReason {
 pub struct ValidationContext<'a> {
     pub(crate) essence: &'a RegularTransactionEssence,
     pub(crate) essence_hash: [u8; 32],
-    pub(crate) inputs_commitment: InputsCommitment,
     // TODO
     #[allow(dead_code)]
     pub(crate) unlocks: &'a Unlocks,
@@ -183,7 +179,6 @@ impl<'a> ValidationContext<'a> {
             essence,
             unlocks,
             essence_hash: TransactionEssence::from(essence.clone()).hash(),
-            inputs_commitment: InputsCommitment::new(inputs.clone().map(|(_, output)| output)),
             input_amount: 0,
             input_mana: 0,
             input_native_tokens: BTreeMap::<TokenId, U256>::new(),
@@ -223,11 +218,6 @@ pub fn semantic_validation(
     inputs: &[(&OutputId, &Output)],
     unlocks: &Unlocks,
 ) -> Result<Option<TransactionFailureReason>, Error> {
-    // Validation of the inputs commitment.
-    if context.essence.inputs_commitment() != &context.inputs_commitment {
-        return Ok(Some(TransactionFailureReason::InvalidInputsCommitment));
-    }
-
     // Validation of inputs.
     for ((output_id, consumed_output), unlock) in inputs.iter().zip(unlocks.iter()) {
         let (conflict, amount, mana, consumed_native_tokens, unlock_conditions) = match consumed_output {

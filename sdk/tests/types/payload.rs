@@ -10,7 +10,7 @@ use iota_sdk::types::block::{
         Payload, TaggedDataPayload,
     },
     protocol::protocol_parameters,
-    rand::{bytes::rand_bytes, mana::rand_mana_allotment, output::rand_inputs_commitment},
+    rand::{bytes::rand_bytes, mana::rand_mana_allotment},
     signature::{Ed25519Signature, Signature},
     unlock::{ReferenceUnlock, SignatureUnlock, Unlock, Unlocks},
 };
@@ -37,7 +37,7 @@ fn transaction() {
             .finish_with_params(&protocol_parameters)
             .unwrap(),
     );
-    let essence = RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
+    let essence = RegularTransactionEssence::builder(protocol_parameters.network_id())
         .with_inputs(vec![input1, input2])
         .add_output(output)
         .add_mana_allotment(rand_mana_allotment(&protocol_parameters))

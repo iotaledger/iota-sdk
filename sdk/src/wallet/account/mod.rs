@@ -604,7 +604,7 @@ mod test {
     use crate::types::block::{
         address::{Address, Ed25519Address},
         input::{Input, UtxoInput},
-        output::{AddressUnlockCondition, BasicOutput, InputsCommitment, Output, RentStructure},
+        output::{AddressUnlockCondition, BasicOutput, Output},
         payload::transaction::{RegularTransactionEssence, TransactionId, TransactionPayload},
         protocol::ProtocolParameters,
         rand::mana::rand_mana_allotment,
@@ -643,13 +643,12 @@ mod test {
                 .finish_with_params(protocol_parameters.clone())
                 .unwrap(),
         );
-        let essence =
-            RegularTransactionEssence::builder(protocol_parameters.network_id(), InputsCommitment::from([0u8; 32]))
-                .with_inputs([input1, input2])
-                .add_output(output)
-                .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
-                .finish_with_params(protocol_parameters)
-                .unwrap();
+        let essence = RegularTransactionEssence::builder(protocol_parameters.network_id())
+            .with_inputs([input1, input2])
+            .add_output(output)
+            .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
+            .finish_with_params(protocol_parameters)
+            .unwrap();
 
         let pub_key_bytes = prefix_hex::decode(ED25519_PUBLIC_KEY).unwrap();
         let sig_bytes = prefix_hex::decode(ED25519_SIGNATURE).unwrap();

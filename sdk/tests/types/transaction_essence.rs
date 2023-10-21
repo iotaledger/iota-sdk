@@ -7,7 +7,7 @@ use iota_sdk::types::block::{
     output::{unlock_condition::AddressUnlockCondition, BasicOutput, Output},
     payload::transaction::{RegularTransactionEssence, TransactionEssence, TransactionId},
     protocol::protocol_parameters,
-    rand::{mana::rand_mana_allotment, output::rand_inputs_commitment},
+    rand::mana::rand_mana_allotment,
     Error,
 };
 use packable::{error::UnpackError, PackableExt};
@@ -32,7 +32,7 @@ fn essence_kind() {
             .unwrap(),
     );
     let essence = TransactionEssence::Regular(
-        RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
+        RegularTransactionEssence::builder(protocol_parameters.network_id())
             .with_inputs([input1, input2])
             .add_output(output)
             .add_mana_allotment(rand_mana_allotment(&protocol_parameters))

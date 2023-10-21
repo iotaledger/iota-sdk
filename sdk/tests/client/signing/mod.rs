@@ -21,7 +21,7 @@ use iota_sdk::{
     types::block::{
         address::{AccountAddress, Address, NftAddress, ToBech32Ext},
         input::{Input, UtxoInput},
-        output::{AccountId, InputsCommitment, NftId},
+        output::{AccountId, NftId},
         payload::{
             transaction::{RegularTransactionEssence, TransactionEssence},
             TransactionPayload,
@@ -378,21 +378,18 @@ async fn all_combined() -> Result<()> {
     .unwrap();
 
     let essence = TransactionEssence::Regular(
-        RegularTransactionEssence::builder(
-            protocol_parameters.network_id(),
-            InputsCommitment::new(selected.inputs.iter().map(|i| &i.output)),
-        )
-        .with_inputs(
-            selected
-                .inputs
-                .iter()
-                .map(|i| Input::Utxo(UtxoInput::from(*i.output_metadata.output_id())))
-                .collect::<Vec<_>>(),
-        )
-        .with_outputs(outputs)
-        .with_creation_slot(slot_index)
-        .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
-        .finish_with_params(protocol_parameters)?,
+        RegularTransactionEssence::builder(protocol_parameters.network_id())
+            .with_inputs(
+                selected
+                    .inputs
+                    .iter()
+                    .map(|i| Input::Utxo(UtxoInput::from(*i.output_metadata.output_id())))
+                    .collect::<Vec<_>>(),
+            )
+            .with_outputs(outputs)
+            .with_creation_slot(slot_index)
+            .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
+            .finish_with_params(protocol_parameters)?,
     );
 
     let prepared_transaction_data = PreparedTransactionData {

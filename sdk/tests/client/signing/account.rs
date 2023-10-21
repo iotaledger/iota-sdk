@@ -17,7 +17,7 @@ use iota_sdk::{
     types::block::{
         address::{AccountAddress, Address, ToBech32Ext},
         input::{Input, UtxoInput},
-        output::{AccountId, InputsCommitment},
+        output::AccountId,
         payload::{
             transaction::{RegularTransactionEssence, TransactionEssence},
             TransactionPayload,
@@ -86,19 +86,16 @@ async fn sign_account_state_transition() -> Result<()> {
     )]);
 
     let essence = TransactionEssence::Regular(
-        RegularTransactionEssence::builder(
-            protocol_parameters.network_id(),
-            InputsCommitment::new(inputs.iter().map(|i| &i.output)),
-        )
-        .with_inputs(
-            inputs
-                .iter()
-                .map(|i| Input::Utxo(UtxoInput::from(*i.output_metadata.output_id())))
-                .collect::<Vec<_>>(),
-        )
-        .with_outputs(outputs)
-        .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
-        .finish_with_params(protocol_parameters)?,
+        RegularTransactionEssence::builder(protocol_parameters.network_id())
+            .with_inputs(
+                inputs
+                    .iter()
+                    .map(|i| Input::Utxo(UtxoInput::from(*i.output_metadata.output_id())))
+                    .collect::<Vec<_>>(),
+            )
+            .with_outputs(outputs)
+            .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
+            .finish_with_params(protocol_parameters)?,
     );
 
     let prepared_transaction_data = PreparedTransactionData {
@@ -178,19 +175,16 @@ async fn sign_account_governance_transition() -> Result<()> {
     )]);
 
     let essence = TransactionEssence::Regular(
-        RegularTransactionEssence::builder(
-            protocol_parameters.network_id(),
-            InputsCommitment::new(inputs.iter().map(|i| &i.output)),
-        )
-        .with_inputs(
-            inputs
-                .iter()
-                .map(|i| Input::Utxo(UtxoInput::from(*i.output_metadata.output_id())))
-                .collect::<Vec<_>>(),
-        )
-        .with_outputs(outputs)
-        .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
-        .finish_with_params(protocol_parameters)?,
+        RegularTransactionEssence::builder(protocol_parameters.network_id())
+            .with_inputs(
+                inputs
+                    .iter()
+                    .map(|i| Input::Utxo(UtxoInput::from(*i.output_metadata.output_id())))
+                    .collect::<Vec<_>>(),
+            )
+            .with_outputs(outputs)
+            .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
+            .finish_with_params(protocol_parameters)?,
     );
 
     let prepared_transaction_data = PreparedTransactionData {
@@ -306,23 +300,16 @@ async fn account_reference_unlocks() -> Result<()> {
     ]);
 
     let essence = TransactionEssence::Regular(
-        RegularTransactionEssence::builder(
-            protocol_parameters.network_id(),
-            InputsCommitment::new(
+        RegularTransactionEssence::builder(protocol_parameters.network_id())
+            .with_inputs(
                 inputs
                     .iter()
-                    .map(|i: &iota_sdk::client::secret::types::InputSigningData| &i.output),
-            ),
-        )
-        .with_inputs(
-            inputs
-                .iter()
-                .map(|i| Input::Utxo(UtxoInput::from(*i.output_metadata.output_id())))
-                .collect::<Vec<_>>(),
-        )
-        .with_outputs(outputs)
-        .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
-        .finish_with_params(protocol_parameters)?,
+                    .map(|i| Input::Utxo(UtxoInput::from(*i.output_metadata.output_id())))
+                    .collect::<Vec<_>>(),
+            )
+            .with_outputs(outputs)
+            .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
+            .finish_with_params(protocol_parameters)?,
     );
 
     let prepared_transaction_data = PreparedTransactionData {
