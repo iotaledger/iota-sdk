@@ -64,7 +64,7 @@ use crate::{
         block::{
             address::Bech32Address,
             output::{dto::FoundryOutputDto, AccountId, FoundryId, FoundryOutput, NftId, Output, OutputId, TokenId},
-            payload::{transaction::TransactionId, TransactionPayload},
+            payload::{signed_transaction::TransactionId, TransactionPayload},
         },
         TryFromDto,
     },
@@ -605,7 +605,7 @@ mod test {
         address::{Address, Ed25519Address},
         input::{Input, UtxoInput},
         output::{AddressUnlockCondition, BasicOutput, Output},
-        payload::transaction::{RegularTransactionEssence, TransactionId, TransactionPayload},
+        payload::signed_transaction::{RegularTransactionEssence, TransactionId, TransactionPayload},
         protocol::ProtocolParameters,
         rand::mana::rand_mana_allotment,
         signature::{Ed25519Signature, Signature},

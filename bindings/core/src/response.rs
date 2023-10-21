@@ -25,7 +25,7 @@ use iota_sdk::{
             address::{Address, Bech32Address, Hrp},
             input::UtxoInput,
             output::{dto::OutputDto, AccountId, FoundryId, NftId, OutputId, OutputMetadata, TokenId},
-            payload::{dto::TransactionPayloadDto, transaction::TransactionId},
+            payload::{dto::TransactionPayloadDto, signed_transaction::TransactionId},
             protocol::ProtocolParameters,
             signature::Ed25519Signature,
             slot::SlotCommitmentId,

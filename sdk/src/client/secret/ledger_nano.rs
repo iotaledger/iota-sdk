@@ -29,7 +29,7 @@ use crate::{
     types::block::{
         address::{AccountAddress, Address, Ed25519Address, NftAddress},
         output::Output,
-        payload::transaction::TransactionPayload,
+        payload::signed_transaction::TransactionPayload,
         signature::{Ed25519Signature, Signature},
         unlock::{AccountUnlock, NftUnlock, ReferenceUnlock, SignatureUnlock, Unlock, Unlocks},
     },

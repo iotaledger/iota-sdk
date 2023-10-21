@@ -5,7 +5,7 @@ use core::str::FromStr;
 
 use iota_sdk::types::{
     block::payload::{
-        transaction::{dto::TransactionPayloadDto, TransactionId, TransactionPayload},
+        signed_transaction::{dto::TransactionPayloadDto, TransactionId, TransactionPayload},
         Payload,
     },
     TryFromDto,

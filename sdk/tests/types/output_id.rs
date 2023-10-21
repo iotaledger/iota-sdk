@@ -3,7 +3,7 @@
 
 use core::str::FromStr;
 
-use iota_sdk::types::block::{output::OutputId, payload::transaction::TransactionId, Error};
+use iota_sdk::types::block::{output::OutputId, payload::signed_transaction::TransactionId, Error};
 use packable::{bounded::InvalidBoundedU16, error::UnpackError, PackableExt};
 use pretty_assertions::assert_eq;
 

@@ -7,7 +7,7 @@ use iota_sdk::{
         address::{Address, Bech32Address, Ed25519Address},
         input::{Input, UtxoInput},
         output::{unlock_condition::AddressUnlockCondition, BasicOutput, Output, OutputId},
-        payload::transaction::{RegularTransactionEssence, TransactionId},
+        payload::signed_transaction::{RegularTransactionEssence, TransactionId},
         protocol::protocol_parameters,
         rand::{
             mana::rand_mana_allotment,

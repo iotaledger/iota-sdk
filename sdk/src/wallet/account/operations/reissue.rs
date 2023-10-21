@@ -8,7 +8,7 @@ use crate::{
     types::{
         api::core::{BlockState, TransactionState},
         block::{
-            payload::{transaction::TransactionId, Payload},
+            payload::{signed_transaction::TransactionId, Payload},
             BlockId,
         },
     },

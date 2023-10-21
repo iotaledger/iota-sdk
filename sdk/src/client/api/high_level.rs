@@ -18,7 +18,7 @@ use crate::{
         core::{BasicBlock, Block, BlockWrapper},
         input::{Input, UtxoInput, INPUT_COUNT_MAX},
         output::OutputWithMetadata,
-        payload::{transaction::TransactionId, Payload},
+        payload::{signed_transaction::TransactionId, Payload},
         slot::SlotIndex,
         BlockId,
     },

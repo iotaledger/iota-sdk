@@ -15,7 +15,7 @@ use iota_sdk::{
     types::block::{
         address::Bech32Address,
         output::{dto::OutputDto, OutputId, TokenId},
-        payload::transaction::TransactionId,
+        payload::signed_transaction::TransactionId,
     },
     wallet::{
         account::{

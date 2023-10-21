@@ -23,7 +23,7 @@ use crate::{
         block::{
             address::Address,
             output::{dto::OutputDto, AccountTransition, Output, OutputId, OutputMetadata},
-            payload::transaction::{dto::TransactionPayloadDto, TransactionId, TransactionPayload},
+            payload::signed_transaction::{dto::TransactionPayloadDto, TransactionId, TransactionPayload},
             slot::SlotIndex,
             BlockId, Error as BlockError,
         },

@@ -13,7 +13,7 @@ use iota_sdk::{
         request_funds_from_faucet, secret::SecretManager, Client,
     },
     types::block::{
-        payload::{tagged_data::TaggedDataPayload, transaction::TransactionId, Payload},
+        payload::{signed_transaction::TransactionId, tagged_data::TaggedDataPayload, Payload},
         BlockId,
     },
 };

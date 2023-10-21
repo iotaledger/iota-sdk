@@ -6,7 +6,7 @@ use iota_sdk::types::block::{
     input::{Input, UtxoInput},
     output::{unlock_condition::AddressUnlockCondition, BasicOutput, Output},
     payload::{
-        transaction::{RegularTransactionEssence, TransactionId, TransactionPayload},
+        signed_transaction::{RegularTransactionEssence, TransactionId, TransactionPayload},
         Payload, TaggedDataPayload,
     },
     protocol::protocol_parameters,

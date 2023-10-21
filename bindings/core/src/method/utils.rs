@@ -5,7 +5,7 @@ use derivative::Derivative;
 use iota_sdk::types::block::{
     address::{Bech32Address, Hrp},
     output::{dto::OutputDto, AccountId, NftId, OutputId, RentStructure},
-    payload::transaction::{
+    payload::signed_transaction::{
         dto::{RegularTransactionEssenceDto, TransactionPayloadDto},
         TransactionId,
     },

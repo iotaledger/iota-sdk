@@ -18,7 +18,7 @@ use iota_sdk::{
         address::{AccountAddress, Address, ToBech32Ext},
         input::{Input, UtxoInput},
         output::AccountId,
-        payload::{transaction::RegularTransactionEssence, TransactionPayload},
+        payload::{signed_transaction::RegularTransactionEssence, TransactionPayload},
         protocol::protocol_parameters,
         rand::mana::rand_mana_allotment,
         unlock::{SignatureUnlock, Unlock},

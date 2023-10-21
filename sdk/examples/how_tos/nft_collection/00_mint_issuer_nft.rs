@@ -17,7 +17,7 @@
 use iota_sdk::{
     types::block::{
         output::{NftId, Output, OutputId},
-        payload::transaction::TransactionId,
+        payload::signed_transaction::TransactionId,
     },
     wallet::{Account, MintNftParams, Result},
     Wallet,

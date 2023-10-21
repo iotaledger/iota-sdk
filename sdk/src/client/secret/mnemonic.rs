@@ -20,7 +20,8 @@ use super::{GenerateAddressOptions, SecretManage};
 use crate::{
     client::{api::PreparedTransactionData, Client, Error},
     types::block::{
-        address::Ed25519Address, payload::transaction::TransactionPayload, signature::Ed25519Signature, unlock::Unlocks,
+        address::Ed25519Address, payload::signed_transaction::TransactionPayload, signature::Ed25519Signature,
+        unlock::Unlocks,
     },
 };
 

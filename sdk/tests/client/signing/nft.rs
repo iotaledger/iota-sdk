@@ -18,7 +18,7 @@ use iota_sdk::{
         address::{Address, NftAddress, ToBech32Ext},
         input::{Input, UtxoInput},
         output::NftId,
-        payload::{transaction::RegularTransactionEssence, TransactionPayload},
+        payload::{signed_transaction::RegularTransactionEssence, TransactionPayload},
         protocol::protocol_parameters,
         rand::mana::rand_mana_allotment,
         unlock::{SignatureUnlock, Unlock},

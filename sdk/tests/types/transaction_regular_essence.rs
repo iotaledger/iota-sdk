@@ -13,7 +13,7 @@ use iota_sdk::types::block::{
         Output, SimpleTokenScheme, TokenId, TokenScheme,
     },
     payload::{
-        transaction::{
+        signed_transaction::{
             RegularTransactionEssence, TransactionCapabilities, TransactionCapabilityFlag, TransactionId,
             TransactionPayload,
         },

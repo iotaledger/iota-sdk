@@ -6,7 +6,7 @@ use core::str::FromStr;
 use crypto::hashes::{blake2b::Blake2b256, Digest};
 use packable::{bounded::BoundedU16, PackableExt};
 
-use crate::types::block::{output::OUTPUT_INDEX_RANGE, payload::transaction::TransactionId, Error};
+use crate::types::block::{output::OUTPUT_INDEX_RANGE, payload::signed_transaction::TransactionId, Error};
 
 pub(crate) type OutputIndex = BoundedU16<{ *OUTPUT_INDEX_RANGE.start() }, { *OUTPUT_INDEX_RANGE.end() }>;
 

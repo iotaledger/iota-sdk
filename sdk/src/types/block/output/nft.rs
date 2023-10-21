@@ -22,7 +22,7 @@ use crate::types::{
             NativeTokens, Output, OutputBuilderAmount, OutputId, Rent, RentStructure, StateTransitionError,
             StateTransitionVerifier,
         },
-        payload::transaction::TransactionCapabilityFlag,
+        payload::signed_transaction::TransactionCapabilityFlag,
         protocol::ProtocolParameters,
         semantic::{TransactionFailureReason, ValidationContext},
         unlock::Unlock,

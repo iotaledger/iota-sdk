@@ -21,7 +21,7 @@ use crate::{
         api::core::OutputWithMetadataResponse,
         block::{
             output::{dto::OutputDto, Output},
-            payload::transaction::TransactionPayload,
+            payload::signed_transaction::TransactionPayload,
         },
     },
     wallet::account::{

@@ -117,7 +117,7 @@ mod tests {
     use pretty_assertions::assert_eq;
 
     use super::*;
-    use crate::{types::block::payload::transaction::TransactionId, wallet::storage::adapter::memory::Memory};
+    use crate::{types::block::payload::signed_transaction::TransactionId, wallet::storage::adapter::memory::Memory};
 
     #[tokio::test]
     async fn insert_get_remove_participation_event() {

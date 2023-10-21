@@ -4,8 +4,8 @@
 //! The payload module defines the core data types for representing block payloads.
 
 pub mod candidacy_announcement;
+pub mod signed_transaction;
 pub mod tagged_data;
-pub mod transaction;
 
 use alloc::boxed::Box;
 use core::ops::Deref;
@@ -19,12 +19,12 @@ use packable::{
 };
 
 pub use self::{
-    candidacy_announcement::CandidacyAnnouncementPayload, tagged_data::TaggedDataPayload,
-    transaction::TransactionPayload,
+    candidacy_announcement::CandidacyAnnouncementPayload, signed_transaction::TransactionPayload,
+    tagged_data::TaggedDataPayload,
 };
 pub(crate) use self::{
+    signed_transaction::{ContextInputCount, InputCount, OutputCount},
     tagged_data::{TagLength, TaggedDataLength},
-    transaction::{ContextInputCount, InputCount, OutputCount},
 };
 use crate::types::block::{protocol::ProtocolParameters, Error};
 
@@ -189,7 +189,7 @@ impl Packable for OptionalPayload {
 pub mod dto {
     use serde::{Deserialize, Serialize};
 
-    pub use super::transaction::dto::TransactionPayloadDto;
+    pub use super::signed_transaction::dto::TransactionPayloadDto;
     use super::*;
     use crate::types::{block::Error, TryFromDto, ValidationParams};
 

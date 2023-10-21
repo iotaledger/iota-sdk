@@ -5,7 +5,7 @@ use iota_sdk::types::block::{
     address::{Address, Ed25519Address},
     input::{Input, UtxoInput},
     output::{unlock_condition::AddressUnlockCondition, BasicOutput, Output},
-    payload::transaction::{RegularTransactionEssence, TransactionId, TransactionPayload},
+    payload::signed_transaction::{RegularTransactionEssence, TransactionId, TransactionPayload},
     protocol::protocol_parameters,
     rand::mana::rand_mana_allotment,
     signature::{Ed25519Signature, Signature},

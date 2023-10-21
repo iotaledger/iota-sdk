@@ -13,7 +13,7 @@ use iota_sdk::{
         block::{
             address::Address,
             output::{unlock_condition::AddressUnlockCondition, BasicOutput, OutputId, OutputMetadata},
-            payload::transaction::TransactionId,
+            payload::signed_transaction::TransactionId,
             protocol::protocol_parameters,
             slot::SlotCommitmentId,
             BlockId,

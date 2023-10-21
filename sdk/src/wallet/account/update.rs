@@ -14,7 +14,7 @@ use crate::{
 };
 #[cfg(feature = "events")]
 use crate::{
-    types::{api::core::OutputWithMetadataResponse, block::payload::transaction::dto::TransactionPayloadDto},
+    types::{api::core::OutputWithMetadataResponse, block::payload::signed_transaction::dto::TransactionPayloadDto},
     wallet::{
         account::types::OutputDataDto,
         events::types::{NewOutputEvent, SpentOutputEvent, TransactionInclusionEvent, WalletEvent},

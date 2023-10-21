@@ -9,7 +9,7 @@ use crate::{
     client::{secret::types::InputSigningData, Error, Result},
     types::block::{
         output::{Output, OutputId},
-        payload::transaction::{RegularTransactionEssence, TransactionPayload},
+        payload::signed_transaction::{RegularTransactionEssence, TransactionPayload},
         semantic::{semantic_validation, TransactionFailureReason, ValidationContext},
         signature::Ed25519Signature,
         BlockId, BlockWrapper,

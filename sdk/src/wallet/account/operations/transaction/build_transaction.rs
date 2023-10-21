@@ -13,7 +13,7 @@ use crate::{
     },
     types::block::{
         input::{Input, UtxoInput},
-        payload::transaction::RegularTransactionEssence,
+        payload::signed_transaction::RegularTransactionEssence,
     },
     wallet::account::{operations::transaction::TransactionOptions, Account},
 };

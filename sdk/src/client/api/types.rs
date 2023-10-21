@@ -11,7 +11,7 @@ use crate::{
             address::Address,
             output::{dto::OutputDto, Output},
             payload::{
-                transaction::{
+                signed_transaction::{
                     dto::{RegularTransactionEssenceDto, TransactionPayloadDto},
                     RegularTransactionEssence,
                 },

@@ -12,7 +12,7 @@ use crate::{
             core::{BasicBlock, Block},
             input::Input,
             output::{OutputId, OutputWithMetadata},
-            payload::{transaction::TransactionId, Payload, TransactionPayload},
+            payload::{signed_transaction::TransactionId, Payload, TransactionPayload},
         },
     },
     wallet::{

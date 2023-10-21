@@ -9,7 +9,7 @@ use iota_sdk::{
             address::{AccountAddress, Address, ToBech32Ext},
             input::UtxoInput,
             output::{AccountId, FoundryId, NftId, Output, OutputId, Rent, TokenId},
-            payload::{transaction::RegularTransactionEssence, TransactionPayload},
+            payload::{signed_transaction::RegularTransactionEssence, TransactionPayload},
             BlockWrapper,
         },
         TryFromDto,

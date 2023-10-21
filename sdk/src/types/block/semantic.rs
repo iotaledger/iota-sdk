@@ -10,7 +10,7 @@ use primitive_types::U256;
 use crate::types::block::{
     address::{Address, AddressCapabilityFlag},
     output::{ChainId, FoundryId, NativeTokens, Output, OutputId, TokenId, UnlockCondition},
-    payload::transaction::{RegularTransactionEssence, TransactionCapabilityFlag, TransactionId},
+    payload::signed_transaction::{RegularTransactionEssence, TransactionCapabilityFlag, TransactionId},
     unlock::Unlocks,
     Error,
 };

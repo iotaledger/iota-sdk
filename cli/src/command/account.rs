@@ -14,7 +14,7 @@ use iota_sdk::{
                 unlock_condition::AddressUnlockCondition, AccountId, BasicOutputBuilder, FoundryId, NativeToken,
                 NativeTokensBuilder, NftId, Output, OutputId, TokenId,
             },
-            payload::transaction::TransactionId,
+            payload::signed_transaction::TransactionId,
             slot::SlotIndex,
             ConvertTo,
         },
