@@ -37,7 +37,7 @@ fn transaction() {
             .finish_with_params(&protocol_parameters)
             .unwrap(),
     );
-    let essence = Transaction::builder(protocol_parameters.network_id())
+    let transaction = Transaction::builder(protocol_parameters.network_id())
         .with_inputs(vec![input1, input2])
         .add_output(output)
         .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
@@ -51,7 +51,7 @@ fn transaction() {
     let ref_unlock = Unlock::from(ReferenceUnlock::new(0).unwrap());
     let unlocks = Unlocks::new(vec![sig_unlock, ref_unlock]).unwrap();
 
-    let tx_payload = SignedTransactionPayload::new(essence, unlocks).unwrap();
+    let tx_payload = SignedTransactionPayload::new(transaction, unlocks).unwrap();
 
     let payload: Payload = tx_payload.into();
     let packed = payload.pack_to_vec();

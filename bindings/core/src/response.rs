@@ -305,7 +305,7 @@ pub enum Response {
     /// - [`Transactions`](crate::method::AccountMethod::Transactions),
     Transactions(Vec<TransactionWithMetadataDto>),
     /// Response for:
-    /// - [`SignTransactionEssence`](crate::method::AccountMethod::SignTransactionEssence)
+    /// - [`SignTransaction`](crate::method::AccountMethod::SignTransaction)
     SignedTransactionData(SignedTransactionDataDto),
     /// Response for:
     /// - [`GenerateEd25519Addresses`](crate::method::AccountMethod::GenerateEd25519Addresses)

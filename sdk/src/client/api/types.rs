@@ -24,8 +24,6 @@ use crate::{
     utils::serde::bip44::option_bip44,
 };
 
-// TODO remove all essence occurrences
-
 /// Helper struct for offline signing
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct PreparedTransactionData {
@@ -97,7 +95,7 @@ pub struct SignedTransactionData {
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SignedTransactionDataDto {
-    /// Transaction essence
+    /// Transaction payload
     pub transaction_payload: SignedTransactionPayloadDto,
     /// Required address information for signing
     pub inputs_data: Vec<InputSigningDataDto>,

@@ -86,7 +86,7 @@ impl SecretManage for PrivateKeySecretManager {
         &self,
         prepared_transaction_data: &PreparedTransactionData,
     ) -> Result<Unlocks, Self::Error> {
-        super::default_sign_transaction_essence(self, prepared_transaction_data).await
+        super::default_transaction_unlocks(self, prepared_transaction_data).await
     }
 
     async fn sign_transaction(

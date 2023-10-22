@@ -123,10 +123,10 @@ pub enum UtilsMethod {
         serial_number: u32,
         token_scheme_type: u8,
     },
-    /// Computes the hash of a transaction essence.
-    HashTransactionEssence {
-        /// The transaction essence
-        essence: TransactionDto,
+    /// Computes the hash of a transaction.
+    HashTransaction {
+        /// The transaction.
+        transaction: TransactionDto,
     },
     /// Computes the required storage deposit of an output.
     ComputeStorageDeposit { output: OutputDto, rent: RentStructure },

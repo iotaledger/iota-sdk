@@ -260,7 +260,7 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
                 .await?;
             Response::SentTransaction(TransactionWithMetadataDto::from(&transaction))
         }
-        AccountMethod::SignTransactionEssence {
+        AccountMethod::SignTransaction {
             prepared_transaction_data,
         } => {
             let signed_transaction_data = account

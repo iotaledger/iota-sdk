@@ -69,8 +69,8 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
             let foundry_id = FoundryId::build(&AccountAddress::new(account_id), serial_number, token_scheme_type);
             Response::TokenId(TokenId::from(foundry_id))
         }
-        UtilsMethod::HashTransactionEssence { essence } => {
-            Response::Hash(prefix_hex::encode(Transaction::try_from_dto(essence)?.hash()))
+        UtilsMethod::HashTransaction { transaction } => {
+            Response::Hash(prefix_hex::encode(Transaction::try_from_dto(transaction)?.hash()))
         }
         UtilsMethod::ComputeStorageDeposit { output, rent } => {
             let out = Output::try_from_dto(output)?;

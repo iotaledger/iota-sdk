@@ -203,7 +203,7 @@ pub(crate) type ContextInputCount =
 pub(crate) type InputCount = BoundedU16<{ *INPUT_COUNT_RANGE.start() }, { *INPUT_COUNT_RANGE.end() }>;
 pub(crate) type OutputCount = BoundedU16<{ *OUTPUT_COUNT_RANGE.start() }, { *OUTPUT_COUNT_RANGE.end() }>;
 
-/// A transaction regular essence consuming inputs, creating outputs and carrying an optional payload.
+/// A transaction consuming inputs, creating outputs and carrying an optional payload.
 #[derive(Clone, Debug, Eq, PartialEq, Packable)]
 #[packable(unpack_error = Error)]
 #[packable(unpack_visitor = ProtocolParameters)]
@@ -278,7 +278,7 @@ impl Transaction {
         &self.outputs
     }
 
-    /// Return the Blake2b hash of an [`TransactionEssence`].
+    /// Return the Blake2b hash of an [`Transaction`].
     pub fn hash(&self) -> [u8; 32] {
         Blake2b256::digest(self.pack_to_vec()).into()
     }
@@ -502,7 +502,6 @@ pub(crate) mod dto {
         utils::serde::prefix_hex_bytes,
     };
 
-    /// Describes the essence data making up a transaction by defining its inputs and outputs and an optional payload.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
     pub struct TransactionDto {

@@ -409,7 +409,7 @@ impl NftOutput {
         context: &mut ValidationContext<'_>,
     ) -> Result<(), TransactionFailureReason> {
         self.unlock_conditions()
-            .locked_address(self.address(), context.essence.creation_slot())
+            .locked_address(self.address(), context.transaction.creation_slot())
             .unlock(unlock, inputs, context)?;
 
         let nft_id = if self.nft_id().is_null() {
@@ -459,7 +459,7 @@ impl StateTransitionVerifier for NftOutput {
 
     fn destruction(_current_state: &Self, context: &ValidationContext<'_>) -> Result<(), StateTransitionError> {
         if !context
-            .essence
+            .transaction
             .has_capability(TransactionCapabilityFlag::DestroyNftOutputs)
         {
             // TODO: add a variant https://github.com/iotaledger/iota-sdk/issues/1430

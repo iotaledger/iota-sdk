@@ -583,13 +583,13 @@ impl StateTransitionVerifier for FoundryOutput {
             next_state,
             &context.input_native_tokens,
             &context.output_native_tokens,
-            context.essence.capabilities(),
+            context.transaction.capabilities(),
         )
     }
 
     fn destruction(current_state: &Self, context: &ValidationContext<'_>) -> Result<(), StateTransitionError> {
         if !context
-            .essence
+            .transaction
             .has_capability(TransactionCapabilityFlag::DestroyFoundryOutputs)
         {
             // TODO: add a variant https://github.com/iotaledger/iota-sdk/issues/1430

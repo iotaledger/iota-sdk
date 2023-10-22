@@ -111,7 +111,7 @@ impl Address {
 
                 let Signature::Ed25519(signature) = unlock.signature();
 
-                if signature.is_valid(&context.essence_hash, ed25519_address).is_err() {
+                if signature.is_valid(&context.transaction_hash, ed25519_address).is_err() {
                     return Err(TransactionFailureReason::InvalidUnlockBlockSignature);
                 }
 

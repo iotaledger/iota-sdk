@@ -149,8 +149,8 @@ impl TryFrom<u8> for TransactionFailureReason {
 
 ///
 pub struct ValidationContext<'a> {
-    pub(crate) essence: &'a Transaction,
-    pub(crate) essence_hash: [u8; 32],
+    pub(crate) transaction: &'a Transaction,
+    pub(crate) transaction_hash: [u8; 32],
     // TODO
     #[allow(dead_code)]
     pub(crate) unlocks: &'a Unlocks,
@@ -171,14 +171,15 @@ impl<'a> ValidationContext<'a> {
     ///
     pub fn new(
         transaction_id: &TransactionId,
-        essence: &'a Transaction,
+        transaction: &'a Transaction,
         inputs: impl Iterator<Item = (&'a OutputId, &'a Output)> + Clone,
         unlocks: &'a Unlocks,
     ) -> Self {
         Self {
-            essence,
+            transaction,
             unlocks,
-            essence_hash: Transaction::from(essence.clone()).hash(),
+            // TODO still needed ?
+            transaction_hash: Transaction::from(transaction.clone()).hash(),
             input_amount: 0,
             input_mana: 0,
             input_native_tokens: BTreeMap::<TokenId, U256>::new(),
@@ -192,7 +193,7 @@ impl<'a> ValidationContext<'a> {
             output_amount: 0,
             output_mana: 0,
             output_native_tokens: BTreeMap::<TokenId, U256>::new(),
-            output_chains: essence
+            output_chains: transaction
                 .outputs()
                 .iter()
                 .enumerate()
@@ -262,11 +263,11 @@ pub fn semantic_validation(
             return Ok(Some(conflict));
         }
 
-        if unlock_conditions.is_time_locked(context.essence.creation_slot()) {
+        if unlock_conditions.is_time_locked(context.transaction.creation_slot()) {
             return Ok(Some(TransactionFailureReason::TimelockNotExpired));
         }
 
-        if !unlock_conditions.is_expired(context.essence.creation_slot()) {
+        if !unlock_conditions.is_expired(context.transaction.creation_slot()) {
             if let Some(storage_deposit_return) = unlock_conditions.storage_deposit_return() {
                 let amount = context
                     .storage_deposit_returns
@@ -301,7 +302,7 @@ pub fn semantic_validation(
     }
 
     // Validation of outputs.
-    for created_output in context.essence.outputs() {
+    for created_output in context.transaction.outputs() {
         let (amount, mana, created_native_tokens, features) = match created_output {
             Output::Basic(output) => {
                 if let Some(address) = output.simple_deposit_address() {
@@ -444,7 +445,8 @@ pub fn semantic_validation(
         return Ok(Some(TransactionFailureReason::SumInputsOutputsAmountMismatch));
     }
 
-    if context.input_mana > context.output_mana && !context.essence.has_capability(TransactionCapabilityFlag::BurnMana)
+    if context.input_mana > context.output_mana
+        && !context.transaction.has_capability(TransactionCapabilityFlag::BurnMana)
     {
         // TODO: add a variant https://github.com/iotaledger/iota-sdk/issues/1430
         return Ok(Some(TransactionFailureReason::SemanticValidationFailed));

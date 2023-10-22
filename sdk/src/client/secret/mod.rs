@@ -498,7 +498,7 @@ impl SecretManager {
     }
 }
 
-pub(crate) async fn default_sign_transaction_essence<M: SecretManage>(
+pub(crate) async fn default_transaction_unlocks<M: SecretManage>(
     secret_manager: &M,
     prepared_transaction_data: &PreparedTransactionData,
 ) -> crate::client::Result<Unlocks>
