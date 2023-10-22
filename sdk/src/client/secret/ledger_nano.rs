@@ -237,7 +237,7 @@ impl SecretManage for LedgerSecretManager {
         Err(Error::UnsupportedOperation.into())
     }
 
-    async fn sign_transaction_essence(
+    async fn transaction_unlocks(
         &self,
         prepared_transaction: &PreparedTransactionData,
     ) -> Result<Unlocks, <Self as SecretManage>::Error> {
@@ -270,8 +270,8 @@ impl SecretManage for LedgerSecretManager {
         let bip32_account = account_index.harden().into();
 
         // pack essence and hash into vec
-        let essence_bytes = prepared_transaction.essence.pack_to_vec();
-        let essence_hash = prepared_transaction.essence.hash().to_vec();
+        let essence_bytes = prepared_transaction.transaction.pack_to_vec();
+        let essence_hash = prepared_transaction.transaction.hash().to_vec();
 
         // lock the mutex to prevent multiple simultaneous requests to a ledger
         let lock = self.mutex.lock().await;
@@ -323,7 +323,7 @@ impl SecretManage for LedgerSecretManager {
                 // by the hardware wallet.
                 // The outputs in the essence already are sorted
                 // at this place, so we can rely on their order and don't have to sort it again.
-                'essence_outputs: for output in prepared_transaction.essence.outputs().iter() {
+                'essence_outputs: for output in prepared_transaction.transaction.outputs().iter() {
                     if let Output::Basic(s) = output {
                         if let Some(address) = s.unlock_conditions().address() {
                             if *remainder_address == *address.address() {
@@ -339,7 +339,7 @@ impl SecretManage for LedgerSecretManager {
                 }
 
                 // was index found?
-                if remainder_index as usize == prepared_transaction.essence.outputs().len() {
+                if remainder_index as usize == prepared_transaction.transaction.outputs().len() {
                     log::debug!("[LEDGER] remainder_index not found");
                     return Err(Error::MiscError.into());
                 }
@@ -428,7 +428,7 @@ impl SecretManagerConfig for LedgerSecretManager {
 /// This method finds out if we have to switch to blind signing mode.
 pub fn needs_blind_signing(prepared_transaction: &PreparedTransactionData, buffer_size: usize) -> bool {
     if !prepared_transaction
-        .essence
+        .transaction
         .outputs()
         .iter()
         .all(|output| matches!(output, Output::Basic(o) if o.simple_deposit_address().is_some()))
@@ -436,9 +436,9 @@ pub fn needs_blind_signing(prepared_transaction: &PreparedTransactionData, buffe
         return true;
     }
 
-    // check if essence + bip32 indices fit into the buffer of the device
+    // check if transaction + bip32 indices fit into the buffer of the device
     let total_size = LedgerBIP32Index::default().packed_len() * prepared_transaction.inputs_data.len()
-        + prepared_transaction.essence.packed_len();
+        + prepared_transaction.transaction.packed_len();
 
     // return true if too large
     total_size > buffer_size
@@ -513,9 +513,9 @@ fn merge_unlocks(
     prepared_transaction_data: &PreparedTransactionData,
     mut unlocks: impl Iterator<Item = Unlock>,
 ) -> Result<Vec<Unlock>, Error> {
-    let slot_index = prepared_transaction_data.essence.creation_slot();
-    // The hashed_essence gets signed
-    let hashed_essence = prepared_transaction_data.essence.hash();
+    let slot_index = prepared_transaction_data.transaction.creation_slot();
+    // The hashed_transaction gets signed
+    let hashed_transaction = prepared_transaction_data.transaction.hash();
 
     let mut merged_unlocks = Vec::new();
     let mut block_indexes = HashMap::<Address, usize>::new();
@@ -526,7 +526,7 @@ fn merge_unlocks(
         let account_transition = is_account_transition(
             &input.output,
             *input.output_id(),
-            prepared_transaction_data.essence.outputs(),
+            prepared_transaction_data.transaction.outputs(),
             None,
         );
         let (input_address, _) = input.output.required_and_unlocked_address(
@@ -564,7 +564,7 @@ fn merge_unlocks(
                         Address::Ed25519(ed25519_address) => ed25519_address,
                         _ => return Err(Error::MissingInputWithEd25519Address),
                     };
-                    ed25519_signature.is_valid(&hashed_essence, &ed25519_address)?;
+                    ed25519_signature.is_valid(&hashed_transaction, &ed25519_address)?;
                 }
 
                 merged_unlocks.push(unlock);

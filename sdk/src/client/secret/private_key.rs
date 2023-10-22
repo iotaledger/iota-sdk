@@ -82,7 +82,7 @@ impl SecretManage for PrivateKeySecretManager {
         Err(Error::SecretManagerMismatch)
     }
 
-    async fn sign_transaction_essence(
+    async fn transaction_unlocks(
         &self,
         prepared_transaction_data: &PreparedTransactionData,
     ) -> Result<Unlocks, Self::Error> {

@@ -49,13 +49,13 @@ fn build_valid() {
             .unwrap(),
     );
 
-    let essence = Transaction::builder(protocol_parameters.network_id())
+    let transaction = Transaction::builder(protocol_parameters.network_id())
         .with_inputs([input1, input2])
         .add_output(output)
         .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
         .finish_with_params(&protocol_parameters);
 
-    assert!(essence.is_ok());
+    assert!(transaction.is_ok());
 }
 
 #[test]
@@ -74,14 +74,14 @@ fn build_valid_with_payload() {
             .unwrap(),
     );
 
-    let essence = Transaction::builder(protocol_parameters.network_id())
+    let transaction = Transaction::builder(protocol_parameters.network_id())
         .with_inputs([input1, input2])
         .add_output(output)
         .with_payload(rand_tagged_data_payload())
         .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
         .finish_with_params(&protocol_parameters);
 
-    assert!(essence.is_ok());
+    assert!(transaction.is_ok());
 }
 
 #[test]
@@ -100,19 +100,19 @@ fn build_valid_add_inputs_outputs() {
             .unwrap(),
     );
 
-    let essence = Transaction::builder(protocol_parameters.network_id())
+    let transaction = Transaction::builder(protocol_parameters.network_id())
         .with_inputs([input1, input2])
         .add_output(output)
         .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
         .finish_with_params(&protocol_parameters);
 
-    assert!(essence.is_ok());
+    assert!(transaction.is_ok());
 }
 
 #[test]
 fn build_invalid_payload_kind() {
     let protocol_parameters = protocol_parameters();
-    // Construct a transaction essence with two inputs and one output.
+    // Construct a transaction with two inputs and one output.
     let transaction_id = TransactionId::new(prefix_hex::decode(TRANSACTION_ID).unwrap());
     let input1 = Input::Utxo(UtxoInput::new(transaction_id, 0).unwrap());
     let input2 = Input::Utxo(UtxoInput::new(transaction_id, 1).unwrap());
@@ -125,7 +125,7 @@ fn build_invalid_payload_kind() {
             .finish_with_params(protocol_parameters.token_supply())
             .unwrap(),
     );
-    let essence = Transaction::builder(protocol_parameters.network_id())
+    let transaction = Transaction::builder(protocol_parameters.network_id())
         .with_inputs([input1.clone(), input2.clone()])
         .add_output(output.clone())
         .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
@@ -140,16 +140,16 @@ fn build_invalid_payload_kind() {
     let ref_unlock = Unlock::from(ReferenceUnlock::new(0).unwrap());
     let unlocks = Unlocks::new([sig_unlock, ref_unlock]).unwrap();
 
-    let tx_payload = SignedTransactionPayload::new(essence, unlocks).unwrap();
+    let tx_payload = SignedTransactionPayload::new(transaction, unlocks).unwrap();
 
-    let essence = Transaction::builder(protocol_parameters.network_id())
+    let transaction = Transaction::builder(protocol_parameters.network_id())
         .with_inputs(vec![input1, input2])
         .add_output(output)
         .with_payload(tx_payload)
         .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
         .finish_with_params(&protocol_parameters);
 
-    assert!(matches!(essence, Err(Error::InvalidPayloadKind(1))));
+    assert!(matches!(transaction, Err(Error::InvalidPayloadKind(1))));
 }
 
 #[test]
@@ -165,13 +165,13 @@ fn build_invalid_input_count_low() {
             .unwrap(),
     );
 
-    let essence = Transaction::builder(protocol_parameters.network_id())
+    let transaction = Transaction::builder(protocol_parameters.network_id())
         .add_output(output)
         .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
         .finish_with_params(&protocol_parameters);
 
     assert!(matches!(
-        essence,
+        transaction,
         Err(Error::InvalidInputCount(TryIntoBoundedU16Error::Invalid(0)))
     ));
 }
@@ -191,14 +191,14 @@ fn build_invalid_input_count_high() {
             .unwrap(),
     );
 
-    let essence = Transaction::builder(protocol_parameters.network_id())
+    let transaction = Transaction::builder(protocol_parameters.network_id())
         .with_inputs(vec![input; 129])
         .add_output(output)
         .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
         .finish_with_params(&protocol_parameters);
 
     assert!(matches!(
-        essence,
+        transaction,
         Err(Error::InvalidInputCount(TryIntoBoundedU16Error::Invalid(129)))
     ));
 }
@@ -209,13 +209,13 @@ fn build_invalid_output_count_low() {
     let transaction_id = TransactionId::new(prefix_hex::decode(TRANSACTION_ID).unwrap());
     let input = Input::Utxo(UtxoInput::new(transaction_id, 0).unwrap());
 
-    let essence = Transaction::builder(protocol_parameters.network_id())
+    let transaction = Transaction::builder(protocol_parameters.network_id())
         .add_input(input)
         .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
         .finish_with_params(&protocol_parameters);
 
     assert!(matches!(
-        essence,
+        transaction,
         Err(Error::InvalidOutputCount(TryIntoBoundedU16Error::Invalid(0)))
     ));
 }
@@ -235,14 +235,14 @@ fn build_invalid_output_count_high() {
             .unwrap(),
     );
 
-    let essence = Transaction::builder(protocol_parameters.network_id())
+    let transaction = Transaction::builder(protocol_parameters.network_id())
         .add_input(input)
         .with_outputs(vec![output; 129])
         .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
         .finish_with_params(&protocol_parameters);
 
     assert!(matches!(
-        essence,
+        transaction,
         Err(Error::InvalidOutputCount(TryIntoBoundedU16Error::Invalid(129)))
     ));
 }
@@ -262,13 +262,13 @@ fn build_invalid_duplicate_utxo() {
             .unwrap(),
     );
 
-    let essence = Transaction::builder(protocol_parameters.network_id())
+    let transaction = Transaction::builder(protocol_parameters.network_id())
         .with_inputs(vec![input; 2])
         .add_output(output)
         .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
         .finish_with_params(&protocol_parameters);
 
-    assert!(matches!(essence, Err(Error::DuplicateUtxo(_))));
+    assert!(matches!(transaction, Err(Error::DuplicateUtxo(_))));
 }
 
 #[test]
@@ -297,13 +297,13 @@ fn build_invalid_accumulated_output() {
             .unwrap(),
     );
 
-    let essence = Transaction::builder(protocol_parameters.network_id())
+    let transaction = Transaction::builder(protocol_parameters.network_id())
         .add_input(input)
         .with_outputs([output1, output2])
         .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
         .finish_with_params(&protocol_parameters);
 
-    assert!(matches!(essence, Err(Error::InvalidTransactionAmountSum(_))));
+    assert!(matches!(transaction, Err(Error::InvalidTransactionAmountSum(_))));
 }
 
 #[test]
@@ -323,7 +323,7 @@ fn getters() {
     )];
     let payload = Payload::from(rand_tagged_data_payload());
 
-    let essence = Transaction::builder(protocol_parameters.network_id())
+    let transaction = Transaction::builder(protocol_parameters.network_id())
         .with_inputs([input1, input2])
         .with_outputs(outputs.clone())
         .with_payload(payload.clone())
@@ -331,8 +331,8 @@ fn getters() {
         .finish_with_params(&protocol_parameters)
         .unwrap();
 
-    assert_eq!(essence.outputs(), outputs.as_slice());
-    assert_eq!(essence.payload().unwrap(), &payload);
+    assert_eq!(transaction.outputs(), outputs.as_slice());
+    assert_eq!(transaction.payload().unwrap(), &payload);
 }
 
 #[test]
@@ -354,14 +354,14 @@ fn duplicate_output_nft() {
         .finish_output(protocol_parameters.token_supply())
         .unwrap();
 
-    let essence = Transaction::builder(protocol_parameters.network_id())
+    let transaction = Transaction::builder(protocol_parameters.network_id())
         .with_inputs([input1, input2])
         .with_outputs([basic, nft.clone(), nft])
         .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
         .finish_with_params(&protocol_parameters);
 
     assert!(matches!(
-        essence,
+        transaction,
         Err(Error::DuplicateOutputChain(ChainId::Nft(nft_id_0))) if nft_id_0 == nft_id
     ));
 }
@@ -385,13 +385,13 @@ fn duplicate_output_nft_null() {
         .finish_output(protocol_parameters.token_supply())
         .unwrap();
 
-    let essence = Transaction::builder(protocol_parameters.network_id())
+    let transaction = Transaction::builder(protocol_parameters.network_id())
         .with_inputs([input1, input2])
         .with_outputs([basic, nft.clone(), nft])
         .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
         .finish_with_params(&protocol_parameters);
 
-    assert!(essence.is_ok());
+    assert!(transaction.is_ok());
 }
 
 #[test]
@@ -414,14 +414,14 @@ fn duplicate_output_account() {
         .finish_output(protocol_parameters.token_supply())
         .unwrap();
 
-    let essence = Transaction::builder(protocol_parameters.network_id())
+    let transaction = Transaction::builder(protocol_parameters.network_id())
         .with_inputs([input1, input2])
         .with_outputs([basic, account.clone(), account])
         .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
         .finish_with_params(&protocol_parameters);
 
     assert!(matches!(
-        essence,
+        transaction,
         Err(Error::DuplicateOutputChain(ChainId::Account(account_id_0))) if account_id_0 == account_id
     ));
 }
@@ -451,14 +451,14 @@ fn duplicate_output_foundry() {
         .finish_output(protocol_parameters.token_supply())
         .unwrap();
 
-    let essence = Transaction::builder(protocol_parameters.network_id())
+    let transaction = Transaction::builder(protocol_parameters.network_id())
         .with_inputs([input1, input2])
         .with_outputs([basic, foundry.clone(), foundry])
         .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
         .finish_with_params(&protocol_parameters);
 
     assert!(matches!(
-        essence,
+        transaction,
         Err(Error::DuplicateOutputChain(ChainId::Foundry(foundry_id_0))) if foundry_id_0 == foundry_id
     ));
 }
@@ -477,13 +477,13 @@ fn transactions_capabilities() {
             .finish_with_params(&protocol_parameters)
             .unwrap(),
     );
-    let essence = Transaction::builder(protocol_parameters.network_id())
+    let transaction = Transaction::builder(protocol_parameters.network_id())
         .with_inputs(vec![input1, input2])
         .add_output(output)
         .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
         .finish_with_params(&protocol_parameters)
         .unwrap();
-    let mut capabilities = essence.capabilities().clone();
+    let mut capabilities = transaction.capabilities().clone();
 
     use TransactionCapabilityFlag as Flag;
 

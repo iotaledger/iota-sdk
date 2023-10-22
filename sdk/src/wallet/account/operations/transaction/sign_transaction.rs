@@ -27,12 +27,12 @@ where
     crate::wallet::Error: From<S::Error>,
     crate::client::Error: From<S::Error>,
 {
-    /// Signs a transaction essence.
-    pub async fn sign_transaction_essence(
+    /// Signs a transaction.
+    pub async fn sign_transaction(
         &self,
         prepared_transaction_data: &PreparedTransactionData,
     ) -> crate::wallet::Result<SignedTransactionData> {
-        log::debug!("[TRANSACTION] sign_transaction_essence");
+        log::debug!("[TRANSACTION] sign_transaction");
         log::debug!("[TRANSACTION] prepared_transaction_data {prepared_transaction_data:?}");
         #[cfg(feature = "events")]
         self.emit(
@@ -59,8 +59,8 @@ where
                     if needs_blind_signing(prepared_transaction_data, buffer_size) {
                         self.emit(
                             self.details().await.index,
-                            WalletEvent::TransactionProgress(TransactionProgressEvent::PreparedTransactionEssenceHash(
-                                prefix_hex::encode(prepared_transaction_data.essence.hash()),
+                            WalletEvent::TransactionProgress(TransactionProgressEvent::PreparedTransactionHash(
+                                prefix_hex::encode(prepared_transaction_data.transaction.hash()),
                             )),
                         )
                         .await;
@@ -82,7 +82,7 @@ where
             .secret_manager
             .read()
             .await
-            .sign_transaction_essence(prepared_transaction_data)
+            .transaction_unlocks(prepared_transaction_data)
             .await
         {
             Ok(res) => res,
@@ -92,7 +92,8 @@ where
                 return Err(err.into());
             }
         };
-        let transaction_payload = SignedTransactionPayload::new(prepared_transaction_data.essence.clone(), unlocks)?;
+        let transaction_payload =
+            SignedTransactionPayload::new(prepared_transaction_data.transaction.clone(), unlocks)?;
 
         log::debug!("[TRANSACTION] signed transaction: {:?}", transaction_payload);
 

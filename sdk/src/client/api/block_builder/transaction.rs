@@ -58,14 +58,14 @@ pub fn validate_signed_transaction_payload_length(signed_transaction_payload: &S
     Ok(())
 }
 
-/// Verifies that the transaction essence doesn't exceed the block size limit with 8 parents.
+/// Verifies that the transaction doesn't exceed the block size limit with 8 parents.
 /// Assuming one signature unlock and otherwise reference/account/nft unlocks. `validate_transaction_payload_length()`
 /// should later be used to check the length again with the correct unlocks.
-pub fn validate_regular_transaction_essence_length(regular_transaction_essence: &Transaction) -> Result<()> {
-    let regular_transaction_essence_bytes = regular_transaction_essence.pack_to_vec();
+pub fn validate_transaction_length(transaction: &Transaction) -> Result<()> {
+    let transaction_bytes = transaction.pack_to_vec();
 
     // Assuming there is only 1 signature unlock and the rest is reference/account/nft unlocks
-    let reference_account_nft_unlocks_amount = regular_transaction_essence.inputs().len() - 1;
+    let reference_account_nft_unlocks_amount = transaction.inputs().len() - 1;
 
     // Max tx payload length - length for one signature unlock (there might be more unlocks, we check with them
     // later again, when we built the transaction payload)
@@ -73,9 +73,9 @@ pub fn validate_regular_transaction_essence_length(regular_transaction_essence: 
         - SINGLE_UNLOCK_LENGTH
         - (reference_account_nft_unlocks_amount * REFERENCE_ACCOUNT_NFT_UNLOCK_LENGTH);
 
-    if regular_transaction_essence_bytes.len() > max_length {
+    if transaction_bytes.len() > max_length {
         return Err(Error::InvalidTransactionLength {
-            length: regular_transaction_essence_bytes.len(),
+            length: transaction_bytes.len(),
             max_length,
         });
     }

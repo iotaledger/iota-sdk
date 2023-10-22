@@ -103,7 +103,7 @@ where
     ) -> crate::wallet::Result<TransactionWithMetadata> {
         log::debug!("[TRANSACTION] sign_and_submit_transaction");
 
-        let signed_transaction_data = match self.sign_transaction_essence(&prepared_transaction_data).await {
+        let signed_transaction_data = match self.sign_transaction(&prepared_transaction_data).await {
             Ok(res) => res,
             Err(err) => {
                 // unlock outputs so they are available for a new transaction

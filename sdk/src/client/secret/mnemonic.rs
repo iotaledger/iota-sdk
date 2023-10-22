@@ -122,7 +122,7 @@ impl SecretManage for MnemonicSecretManager {
         Ok((public_key, signature))
     }
 
-    async fn sign_transaction_essence(
+    async fn transaction_unlocks(
         &self,
         prepared_transaction_data: &PreparedTransactionData,
     ) -> Result<Unlocks, Self::Error> {

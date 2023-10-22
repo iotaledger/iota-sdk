@@ -264,7 +264,7 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
             prepared_transaction_data,
         } => {
             let signed_transaction_data = account
-                .sign_transaction_essence(&PreparedTransactionData::try_from_dto(prepared_transaction_data)?)
+                .sign_transaction(&PreparedTransactionData::try_from_dto(prepared_transaction_data)?)
                 .await?;
             Response::SignedTransactionData(SignedTransactionDataDto::from(&signed_transaction_data))
         }

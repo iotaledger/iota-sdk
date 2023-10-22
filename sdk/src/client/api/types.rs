@@ -29,8 +29,8 @@ use crate::{
 /// Helper struct for offline signing
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct PreparedTransactionData {
-    /// Transaction essence
-    pub essence: Transaction,
+    /// Transaction
+    pub transaction: Transaction,
     /// Required input information for signing. Inputs need to be ordered by address type
     pub inputs_data: Vec<InputSigningData>,
     /// Optional remainder output information
@@ -41,8 +41,8 @@ pub struct PreparedTransactionData {
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct PreparedTransactionDataDto {
-    /// Transaction essence
-    pub essence: TransactionDto,
+    /// Transaction
+    pub transaction: TransactionDto,
     /// Required address information for signing
     pub inputs_data: Vec<InputSigningDataDto>,
     /// Optional remainder output information
@@ -52,7 +52,7 @@ pub struct PreparedTransactionDataDto {
 impl From<&PreparedTransactionData> for PreparedTransactionDataDto {
     fn from(value: &PreparedTransactionData) -> Self {
         Self {
-            essence: TransactionDto::from(&value.essence),
+            transaction: TransactionDto::from(&value.transaction),
             inputs_data: value.inputs_data.iter().map(InputSigningDataDto::from).collect(),
             remainder: value.remainder.as_ref().map(RemainderDataDto::from),
         }
@@ -65,8 +65,8 @@ impl TryFromDto for PreparedTransactionData {
 
     fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
         Ok(Self {
-            essence: Transaction::try_from_dto_with_params(dto.essence, &params)
-                .map_err(|_| Error::InvalidField("essence"))?,
+            transaction: Transaction::try_from_dto_with_params(dto.transaction, &params)
+                .map_err(|_| Error::InvalidField("transaction"))?,
             inputs_data: dto
                 .inputs_data
                 .into_iter()

@@ -103,8 +103,8 @@ pub trait SecretManage: Send + Sync {
         ))))
     }
 
-    /// Signs a transaction essence.
-    async fn sign_transaction_essence(
+    // TODO better name
+    async fn transaction_unlocks(
         &self,
         prepared_transaction_data: &PreparedTransactionData,
     ) -> Result<Unlocks, Self::Error>;
@@ -402,24 +402,22 @@ impl SecretManage for SecretManager {
         }
     }
 
-    async fn sign_transaction_essence(
+    async fn transaction_unlocks(
         &self,
         prepared_transaction_data: &PreparedTransactionData,
     ) -> Result<Unlocks, Self::Error> {
         match self {
             #[cfg(feature = "stronghold")]
-            Self::Stronghold(secret_manager) => Ok(secret_manager
-                .sign_transaction_essence(prepared_transaction_data)
-                .await?),
-            #[cfg(feature = "ledger_nano")]
-            Self::LedgerNano(secret_manager) => Ok(secret_manager
-                .sign_transaction_essence(prepared_transaction_data)
-                .await?),
-            Self::Mnemonic(secret_manager) => secret_manager.sign_transaction_essence(prepared_transaction_data).await,
-            #[cfg(feature = "private_key_secret_manager")]
-            Self::PrivateKey(secret_manager) => {
-                secret_manager.sign_transaction_essence(prepared_transaction_data).await
+            Self::Stronghold(secret_manager) => {
+                Ok(secret_manager.transaction_unlocks(prepared_transaction_data).await?)
             }
+            #[cfg(feature = "ledger_nano")]
+            Self::LedgerNano(secret_manager) => {
+                Ok(secret_manager.transaction_unlocks(prepared_transaction_data).await?)
+            }
+            Self::Mnemonic(secret_manager) => secret_manager.transaction_unlocks(prepared_transaction_data).await,
+            #[cfg(feature = "private_key_secret_manager")]
+            Self::PrivateKey(secret_manager) => secret_manager.transaction_unlocks(prepared_transaction_data).await,
             Self::Placeholder => Err(Error::PlaceholderSecretManager),
         }
     }
@@ -507,11 +505,11 @@ pub(crate) async fn default_sign_transaction_essence<M: SecretManage>(
 where
     crate::client::Error: From<M::Error>,
 {
-    // The hashed_essence gets signed
-    let hashed_essence = prepared_transaction_data.essence.hash();
+    // The hashed_transaction gets signed
+    let hashed_transaction = prepared_transaction_data.transaction.hash();
     let mut blocks = Vec::new();
     let mut block_indexes = HashMap::<Address, usize>::new();
-    let slot_index = prepared_transaction_data.essence.creation_slot();
+    let slot_index = prepared_transaction_data.transaction.creation_slot();
 
     // Assuming inputs_data is ordered by address type
     for (current_block_index, input) in prepared_transaction_data.inputs_data.iter().enumerate() {
@@ -519,7 +517,7 @@ where
         let account_transition = is_account_transition(
             &input.output,
             *input.output_id(),
-            prepared_transaction_data.essence.outputs(),
+            prepared_transaction_data.transaction.outputs(),
             None,
         );
         let (input_address, _) = input.output.required_and_unlocked_address(
@@ -549,7 +547,7 @@ where
 
                 let chain = input.chain.ok_or(Error::MissingBip32Chain)?;
 
-                let block = secret_manager.signature_unlock(&hashed_essence, chain).await?;
+                let block = secret_manager.signature_unlock(&hashed_transaction, chain).await?;
                 blocks.push(block);
 
                 // Add the ed25519 address to the block_indexes, so it gets referenced if further inputs have
@@ -586,14 +584,14 @@ where
 {
     log::debug!("[sign_transaction] {:?}", prepared_transaction_data);
 
-    let unlocks = secret_manager
-        .sign_transaction_essence(&prepared_transaction_data)
-        .await?;
+    let unlocks = secret_manager.transaction_unlocks(&prepared_transaction_data).await?;
 
     let PreparedTransactionData {
-        essence, inputs_data, ..
+        transaction,
+        inputs_data,
+        ..
     } = prepared_transaction_data;
-    let tx_payload = SignedTransactionPayload::new(essence, unlocks)?;
+    let tx_payload = SignedTransactionPayload::new(transaction, unlocks)?;
 
     validate_signed_transaction_payload_length(&tx_payload)?;
 

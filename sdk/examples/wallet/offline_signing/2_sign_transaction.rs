@@ -38,10 +38,10 @@ async fn main() -> Result<()> {
 
     // Signs prepared transaction offline.
     let unlocks = SecretManager::Stronghold(secret_manager)
-        .sign_transaction_essence(&prepared_transaction_data)
+        .transaction_unlocks(&prepared_transaction_data)
         .await?;
 
-    let signed_transaction = SignedTransactionPayload::new(prepared_transaction_data.essence.clone(), unlocks)?;
+    let signed_transaction = SignedTransactionPayload::new(prepared_transaction_data.transaction.clone(), unlocks)?;
 
     validate_signed_transaction_payload_length(&signed_transaction)?;
 
