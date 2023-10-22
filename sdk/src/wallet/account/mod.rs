@@ -397,7 +397,7 @@ impl AccountInner {
             ..Default::default()
         })
         .await
-        .map(|res| res.get(0).cloned())
+        .map(|res| res.first().cloned())
     }
 
     /// Gets the unspent foundry output matching the given ID.
@@ -407,7 +407,7 @@ impl AccountInner {
             ..Default::default()
         })
         .await
-        .map(|res| res.get(0).cloned())
+        .map(|res| res.first().cloned())
     }
 
     /// Gets the unspent nft output matching the given ID.
@@ -417,7 +417,7 @@ impl AccountInner {
             ..Default::default()
         })
         .await
-        .map(|res| res.get(0).cloned())
+        .map(|res| res.first().cloned())
     }
 
     /// Returns all incoming transactions of the account
