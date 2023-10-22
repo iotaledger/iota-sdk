@@ -8,7 +8,7 @@ use crate::{
     types::block::output::{OutputId, OutputMetadata},
     wallet::account::{
         operations::syncing::options::SyncOptions,
-        types::{address::AddressWithUnspentOutputs, InclusionState, OutputData, Transaction},
+        types::{address::AddressWithUnspentOutputs, InclusionState, OutputData, TransactionWithMetadata},
         Account, Bip44Address,
     },
 };
@@ -160,7 +160,7 @@ where
     /// Update account with newly synced transactions
     pub(crate) async fn update_account_with_transactions(
         &self,
-        updated_transactions: Vec<Transaction>,
+        updated_transactions: Vec<TransactionWithMetadata>,
         spent_output_ids: Vec<OutputId>,
         output_ids_to_unlock: Vec<OutputId>,
     ) -> crate::wallet::Result<()> {

@@ -12,8 +12,8 @@ use crate::{
             output::{dto::OutputDto, Output},
             payload::{
                 signed_transaction::{
-                    dto::{RegularTransactionEssenceDto, SignedTransactionPayloadDto},
-                    RegularTransactionEssence,
+                    dto::{SignedTransactionPayloadDto, TransactionDto},
+                    Transaction,
                 },
                 SignedTransactionPayload,
             },
@@ -30,7 +30,7 @@ use crate::{
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct PreparedTransactionData {
     /// Transaction essence
-    pub essence: RegularTransactionEssence,
+    pub essence: Transaction,
     /// Required input information for signing. Inputs need to be ordered by address type
     pub inputs_data: Vec<InputSigningData>,
     /// Optional remainder output information
@@ -42,7 +42,7 @@ pub struct PreparedTransactionData {
 #[serde(rename_all = "camelCase")]
 pub struct PreparedTransactionDataDto {
     /// Transaction essence
-    pub essence: RegularTransactionEssenceDto,
+    pub essence: TransactionDto,
     /// Required address information for signing
     pub inputs_data: Vec<InputSigningDataDto>,
     /// Optional remainder output information
@@ -52,7 +52,7 @@ pub struct PreparedTransactionDataDto {
 impl From<&PreparedTransactionData> for PreparedTransactionDataDto {
     fn from(value: &PreparedTransactionData) -> Self {
         Self {
-            essence: RegularTransactionEssenceDto::from(&value.essence),
+            essence: TransactionDto::from(&value.essence),
             inputs_data: value.inputs_data.iter().map(InputSigningDataDto::from).collect(),
             remainder: value.remainder.as_ref().map(RemainderDataDto::from),
         }
@@ -65,7 +65,7 @@ impl TryFromDto for PreparedTransactionData {
 
     fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
         Ok(Self {
-            essence: RegularTransactionEssence::try_from_dto_with_params(dto.essence, &params)
+            essence: Transaction::try_from_dto_with_params(dto.essence, &params)
                 .map_err(|_| Error::InvalidField("essence"))?,
             inputs_data: dto
                 .inputs_data

@@ -9,7 +9,7 @@ use crate::{
     client::{secret::types::InputSigningData, Error, Result},
     types::block::{
         output::{Output, OutputId},
-        payload::signed_transaction::{RegularTransactionEssence, SignedTransactionPayload},
+        payload::signed_transaction::{SignedTransactionPayload, Transaction},
         semantic::{semantic_validation, TransactionFailureReason, ValidationContext},
         signature::Ed25519Signature,
         BlockId, BlockWrapper,
@@ -61,9 +61,7 @@ pub fn validate_signed_transaction_payload_length(signed_transaction_payload: &S
 /// Verifies that the transaction essence doesn't exceed the block size limit with 8 parents.
 /// Assuming one signature unlock and otherwise reference/account/nft unlocks. `validate_transaction_payload_length()`
 /// should later be used to check the length again with the correct unlocks.
-pub fn validate_regular_transaction_essence_length(
-    regular_transaction_essence: &RegularTransactionEssence,
-) -> Result<()> {
+pub fn validate_regular_transaction_essence_length(regular_transaction_essence: &Transaction) -> Result<()> {
     let regular_transaction_essence_bytes = regular_transaction_essence.pack_to_vec();
 
     // Assuming there is only 1 signature unlock and the rest is reference/account/nft unlocks
@@ -76,7 +74,7 @@ pub fn validate_regular_transaction_essence_length(
         - (reference_account_nft_unlocks_amount * REFERENCE_ACCOUNT_NFT_UNLOCK_LENGTH);
 
     if regular_transaction_essence_bytes.len() > max_length {
-        return Err(Error::InvalidRegularTransactionEssenceLength {
+        return Err(Error::InvalidTransactionLength {
             length: regular_transaction_essence_bytes.len(),
             max_length,
         });

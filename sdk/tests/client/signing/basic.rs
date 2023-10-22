@@ -15,7 +15,7 @@ use iota_sdk::{
     types::block::{
         address::ToBech32Ext,
         input::{Input, UtxoInput},
-        payload::{signed_transaction::RegularTransactionEssence, SignedTransactionPayload},
+        payload::{signed_transaction::Transaction, SignedTransactionPayload},
         protocol::protocol_parameters,
         rand::mana::rand_mana_allotment,
         unlock::{SignatureUnlock, Unlock},
@@ -63,7 +63,7 @@ async fn single_ed25519_unlock() -> Result<()> {
         Some(Bip44::new(SHIMMER_COIN_TYPE)),
     )]);
 
-    let essence = RegularTransactionEssence::builder(protocol_parameters.network_id())
+    let essence = Transaction::builder(protocol_parameters.network_id())
         .with_inputs(
             inputs
                 .iter()
@@ -160,7 +160,7 @@ async fn ed25519_reference_unlocks() -> Result<()> {
         Some(Bip44::new(SHIMMER_COIN_TYPE)),
     )]);
 
-    let essence = RegularTransactionEssence::builder(protocol_parameters.network_id())
+    let essence = Transaction::builder(protocol_parameters.network_id())
         .with_inputs(
             inputs
                 .iter()
@@ -268,7 +268,7 @@ async fn two_signature_unlocks() -> Result<()> {
         Some(Bip44::new(SHIMMER_COIN_TYPE)),
     )]);
 
-    let essence = RegularTransactionEssence::builder(protocol_parameters.network_id())
+    let essence = Transaction::builder(protocol_parameters.network_id())
         .with_inputs(
             inputs
                 .iter()

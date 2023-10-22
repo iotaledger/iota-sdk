@@ -13,7 +13,7 @@ use crate::{
     },
     types::block::{
         input::{Input, UtxoInput},
-        payload::signed_transaction::RegularTransactionEssence,
+        payload::signed_transaction::Transaction,
     },
     wallet::account::{operations::transaction::TransactionOptions, Account},
 };
@@ -45,7 +45,7 @@ where
         // Build transaction essence
 
         // TODO: Add an appropriate mana allotment here for this account
-        let mut essence_builder = RegularTransactionEssence::builder(protocol_parameters.network_id())
+        let mut essence_builder = Transaction::builder(protocol_parameters.network_id())
             .with_inputs(inputs_for_essence)
             .with_outputs(selected_transaction_data.outputs);
 

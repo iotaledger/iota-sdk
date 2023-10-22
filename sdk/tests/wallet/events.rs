@@ -7,7 +7,7 @@ use iota_sdk::{
         address::{Address, Bech32Address, Ed25519Address},
         input::{Input, UtxoInput},
         output::{unlock_condition::AddressUnlockCondition, BasicOutput, Output, OutputId},
-        payload::signed_transaction::{RegularTransactionEssence, TransactionId},
+        payload::signed_transaction::{Transaction, TransactionId},
         protocol::protocol_parameters,
         rand::{
             mana::rand_mana_allotment,
@@ -95,7 +95,7 @@ fn wallet_events_serde() {
                 .finish_with_params(protocol_parameters.token_supply())
                 .unwrap(),
         );
-        let essence = RegularTransactionEssence::builder(protocol_parameters.network_id())
+        let essence = Transaction::builder(protocol_parameters.network_id())
             .with_inputs(vec![input1, input2])
             .add_output(output)
             .add_mana_allotment(rand_mana_allotment(&protocol_parameters))

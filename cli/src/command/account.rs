@@ -21,7 +21,7 @@ use iota_sdk::{
     },
     wallet::{
         account::{
-            types::{AccountIdentifier, Bip44Address, OutputData, Transaction},
+            types::{AccountIdentifier, Bip44Address, OutputData, TransactionWithMetadata},
             Account, ConsolidationParams, OutputsToClaim, SyncOptions, TransactionOptions,
         },
         CreateNativeTokenParams, MintNftParams, SendNativeTokensParams, SendNftParams, SendParams,
@@ -1033,6 +1033,6 @@ fn outputs_ordering(a: &OutputData, b: &OutputData) -> std::cmp::Ordering {
     a.output_id.cmp(&b.output_id)
 }
 
-fn transactions_ordering(a: &Transaction, b: &Transaction) -> std::cmp::Ordering {
+fn transactions_ordering(a: &TransactionWithMetadata, b: &TransactionWithMetadata) -> std::cmp::Ordering {
     b.timestamp.cmp(&a.timestamp)
 }

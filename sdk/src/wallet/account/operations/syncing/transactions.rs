@@ -8,7 +8,7 @@ use crate::{
         block::{input::Input, output::OutputId, BlockId},
     },
     wallet::account::{
-        types::{InclusionState, Transaction},
+        types::{InclusionState, TransactionWithMetadata},
         Account, AccountDetails,
     },
 };
@@ -214,10 +214,10 @@ where
 
 // Set the outputs as spent so they will not be used as input again
 fn updated_transaction_and_outputs(
-    mut transaction: Transaction,
+    mut transaction: TransactionWithMetadata,
     block_id: Option<BlockId>,
     inclusion_state: InclusionState,
-    updated_transactions: &mut Vec<Transaction>,
+    updated_transactions: &mut Vec<TransactionWithMetadata>,
     spent_output_ids: &mut Vec<OutputId>,
 ) {
     transaction.block_id = block_id;
@@ -234,8 +234,8 @@ fn updated_transaction_and_outputs(
 // confirmed and the created outputs got also already spent and pruned or the inputs got spent in another transaction
 fn process_transaction_with_unknown_state(
     account: &AccountDetails,
-    mut transaction: Transaction,
-    updated_transactions: &mut Vec<Transaction>,
+    mut transaction: TransactionWithMetadata,
+    updated_transactions: &mut Vec<TransactionWithMetadata>,
     output_ids_to_unlock: &mut Vec<OutputId>,
 ) -> crate::wallet::Result<()> {
     let mut all_inputs_spent = true;

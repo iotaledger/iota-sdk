@@ -10,7 +10,7 @@ use primitive_types::U256;
 use crate::types::block::{
     address::{Address, AddressCapabilityFlag},
     output::{ChainId, FoundryId, NativeTokens, Output, OutputId, TokenId, UnlockCondition},
-    payload::signed_transaction::{RegularTransactionEssence, TransactionCapabilityFlag, TransactionId},
+    payload::signed_transaction::{Transaction, TransactionCapabilityFlag, TransactionId},
     unlock::Unlocks,
     Error,
 };
@@ -149,7 +149,7 @@ impl TryFrom<u8> for TransactionFailureReason {
 
 ///
 pub struct ValidationContext<'a> {
-    pub(crate) essence: &'a RegularTransactionEssence,
+    pub(crate) essence: &'a Transaction,
     pub(crate) essence_hash: [u8; 32],
     // TODO
     #[allow(dead_code)]
@@ -171,14 +171,14 @@ impl<'a> ValidationContext<'a> {
     ///
     pub fn new(
         transaction_id: &TransactionId,
-        essence: &'a RegularTransactionEssence,
+        essence: &'a Transaction,
         inputs: impl Iterator<Item = (&'a OutputId, &'a Output)> + Clone,
         unlocks: &'a Unlocks,
     ) -> Self {
         Self {
             essence,
             unlocks,
-            essence_hash: RegularTransactionEssence::from(essence.clone()).hash(),
+            essence_hash: Transaction::from(essence.clone()).hash(),
             input_amount: 0,
             input_mana: 0,
             input_native_tokens: BTreeMap::<TokenId, U256>::new(),

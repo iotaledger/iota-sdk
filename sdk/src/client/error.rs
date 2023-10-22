@@ -57,8 +57,8 @@ pub enum Error {
     #[error("invalid mnemonic {0}")]
     InvalidMnemonic(String),
     /// The transaction essence is too large
-    #[error("the transaction essence is too large. Its length is {length}, max length is {max_length}")]
-    InvalidRegularTransactionEssenceLength {
+    #[error("the transaction is too large. Its length is {length}, max length is {max_length}")]
+    InvalidTransactionLength {
         /// The found length.
         length: usize,
         /// The max supported length.

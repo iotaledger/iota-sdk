@@ -4,7 +4,7 @@
 use crate::{
     client::api::{input_selection::Burn, PreparedTransactionData},
     wallet::{
-        account::{types::Transaction, TransactionOptions},
+        account::{types::TransactionWithMetadata, TransactionOptions},
         Account,
     },
 };
@@ -21,7 +21,7 @@ impl Account {
         &self,
         burn: impl Into<Burn> + Send,
         options: impl Into<Option<TransactionOptions>> + Send,
-    ) -> crate::wallet::Result<Transaction> {
+    ) -> crate::wallet::Result<TransactionWithMetadata> {
         let options = options.into();
         let prepared = self.prepare_burn(burn, options.clone()).await?;
 

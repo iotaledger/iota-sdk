@@ -34,7 +34,7 @@ use iota_sdk::{
         },
     },
     wallet::account::{
-        types::{AddressWithUnspentOutputs, Balance, Bip44Address, OutputDataDto, TransactionDto},
+        types::{AddressWithUnspentOutputs, Balance, Bip44Address, OutputDataDto, TransactionWithMetadataDto},
         AccountDetailsDto, PreparedCreateNativeTokenTransactionDto,
     },
 };
@@ -298,12 +298,12 @@ pub enum Response {
     /// Response for:
     /// - [`GetIncomingTransaction`](crate::method::AccountMethod::GetIncomingTransaction)
     /// - [`GetTransaction`](crate::method::AccountMethod::GetTransaction),
-    Transaction(Option<Box<TransactionDto>>),
+    Transaction(Option<Box<TransactionWithMetadataDto>>),
     /// Response for:
     /// - [`IncomingTransactions`](crate::method::AccountMethod::IncomingTransactions)
     /// - [`PendingTransactions`](crate::method::AccountMethod::PendingTransactions),
     /// - [`Transactions`](crate::method::AccountMethod::Transactions),
-    Transactions(Vec<TransactionDto>),
+    Transactions(Vec<TransactionWithMetadataDto>),
     /// Response for:
     /// - [`SignTransactionEssence`](crate::method::AccountMethod::SignTransactionEssence)
     SignedTransactionData(SignedTransactionDataDto),
@@ -320,7 +320,7 @@ pub enum Response {
     /// - [`SendOutputs`](crate::method::AccountMethod::SendOutputs)
     /// - [`SignAndSubmitTransaction`](crate::method::AccountMethod::SignAndSubmitTransaction)
     /// - [`SubmitAndStoreTransaction`](crate::method::AccountMethod::SubmitAndStoreTransaction)
-    SentTransaction(TransactionDto),
+    SentTransaction(TransactionWithMetadataDto),
     /// Response for:
     /// - [`GetParticipationEvent`](crate::method::AccountMethod::GetParticipationEvent)
     #[cfg(feature = "participation")]

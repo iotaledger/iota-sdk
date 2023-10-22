@@ -157,7 +157,7 @@ impl TryFromDto for OutputData {
 
 /// A transaction with metadata
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct Transaction {
+pub struct TransactionWithMetadata {
     pub payload: SignedTransactionPayload,
     pub block_id: Option<BlockId>,
     pub inclusion_state: InclusionState,
@@ -178,7 +178,7 @@ pub struct Transaction {
 /// Dto for a transaction with metadata
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct TransactionDto {
+pub struct TransactionWithMetadataDto {
     /// The transaction payload
     pub payload: SignedTransactionPayloadDto,
     /// BlockId when it got sent to the Tangle
@@ -198,8 +198,8 @@ pub struct TransactionDto {
     pub inputs: Vec<OutputWithMetadataResponse>,
 }
 
-impl From<&Transaction> for TransactionDto {
-    fn from(value: &Transaction) -> Self {
+impl From<&TransactionWithMetadata> for TransactionWithMetadataDto {
+    fn from(value: &TransactionWithMetadata) -> Self {
         Self {
             payload: SignedTransactionPayloadDto::from(&value.payload),
             block_id: value.block_id,
@@ -214,8 +214,8 @@ impl From<&Transaction> for TransactionDto {
     }
 }
 
-impl TryFromDto for Transaction {
-    type Dto = TransactionDto;
+impl TryFromDto for TransactionWithMetadata {
+    type Dto = TransactionWithMetadataDto;
     type Error = BlockError;
 
     fn try_from_dto_with_params_inner(

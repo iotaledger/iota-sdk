@@ -22,10 +22,10 @@ use crate::types::{
     ValidationParams,
 };
 
-/// A builder to build a [`RegularTransactionEssence`].
+/// A builder to build a [`Transaction`].
 #[derive(Debug, Clone)]
 #[must_use]
-pub struct RegularTransactionEssenceBuilder {
+pub struct TransactionBuilder {
     network_id: u64,
     creation_slot: Option<SlotIndex>,
     context_inputs: Vec<ContextInput>,
@@ -36,8 +36,8 @@ pub struct RegularTransactionEssenceBuilder {
     outputs: Vec<Output>,
 }
 
-impl RegularTransactionEssenceBuilder {
-    /// Creates a new [`RegularTransactionEssenceBuilder`].
+impl TransactionBuilder {
+    /// Creates a new [`TransactionBuilder`].
     pub fn new(network_id: u64) -> Self {
         Self {
             network_id,
@@ -51,43 +51,43 @@ impl RegularTransactionEssenceBuilder {
         }
     }
 
-    /// Adds creation slot to a [`RegularTransactionEssenceBuilder`].
+    /// Adds creation slot to a [`TransactionBuilder`].
     pub fn with_creation_slot(mut self, creation_slot: impl Into<Option<SlotIndex>>) -> Self {
         self.creation_slot = creation_slot.into();
         self
     }
 
-    /// Adds context inputs to a [`RegularTransactionEssenceBuilder`].
+    /// Adds context inputs to a [`TransactionBuilder`].
     pub fn with_context_inputs(mut self, context_inputs: impl Into<Vec<ContextInput>>) -> Self {
         self.context_inputs = context_inputs.into();
         self
     }
 
-    /// Adds inputs to a [`RegularTransactionEssenceBuilder`].
+    /// Adds inputs to a [`TransactionBuilder`].
     pub fn with_inputs(mut self, inputs: impl Into<Vec<Input>>) -> Self {
         self.inputs = inputs.into();
         self
     }
 
-    /// Adds an input to a [`RegularTransactionEssenceBuilder`].
+    /// Adds an input to a [`TransactionBuilder`].
     pub fn add_input(mut self, input: Input) -> Self {
         self.inputs.push(input);
         self
     }
 
-    /// Adds [`ManaAllotment`]s to a [`RegularTransactionEssenceBuilder`].
+    /// Adds [`ManaAllotment`]s to a [`TransactionBuilder`].
     pub fn with_mana_allotments(mut self, allotments: impl IntoIterator<Item = ManaAllotment>) -> Self {
         self.allotments = allotments.into_iter().collect();
         self
     }
 
-    /// Adds a [`ManaAllotment`] to a [`RegularTransactionEssenceBuilder`].
+    /// Adds a [`ManaAllotment`] to a [`TransactionBuilder`].
     pub fn add_mana_allotment(mut self, allotment: ManaAllotment) -> Self {
         self.allotments.insert(allotment);
         self
     }
 
-    /// Replaces a [`ManaAllotment`] of the [`RegularTransactionEssenceBuilder`] with a new one, or adds it.
+    /// Replaces a [`ManaAllotment`] of the [`TransactionBuilder`] with a new one, or adds it.
     pub fn replace_mana_allotment(mut self, allotment: ManaAllotment) -> Self {
         self.allotments.replace(allotment);
         self
@@ -98,29 +98,26 @@ impl RegularTransactionEssenceBuilder {
         self
     }
 
-    /// Adds a payload to a [`RegularTransactionEssenceBuilder`].
+    /// Adds a payload to a [`TransactionBuilder`].
     pub fn with_payload(mut self, payload: impl Into<OptionalPayload>) -> Self {
         self.payload = payload.into();
         self
     }
 
-    /// Adds outputs to a [`RegularTransactionEssenceBuilder`].
+    /// Adds outputs to a [`TransactionBuilder`].
     pub fn with_outputs(mut self, outputs: impl Into<Vec<Output>>) -> Self {
         self.outputs = outputs.into();
         self
     }
 
-    /// Adds an output to a [`RegularTransactionEssenceBuilder`].
+    /// Adds an output to a [`TransactionBuilder`].
     pub fn add_output(mut self, output: Output) -> Self {
         self.outputs.push(output);
         self
     }
 
-    /// Finishes a [`RegularTransactionEssenceBuilder`] into a [`RegularTransactionEssence`].
-    pub fn finish_with_params<'a>(
-        self,
-        params: impl Into<ValidationParams<'a>> + Send,
-    ) -> Result<RegularTransactionEssence, Error> {
+    /// Finishes a [`TransactionBuilder`] into a [`Transaction`].
+    pub fn finish_with_params<'a>(self, params: impl Into<ValidationParams<'a>> + Send) -> Result<Transaction, Error> {
         let params = params.into();
 
         if let Some(protocol_parameters) = params.protocol_parameters() {
@@ -182,7 +179,7 @@ impl RegularTransactionEssenceBuilder {
             verify_outputs::<true>(&outputs, protocol_parameters)?;
         }
 
-        Ok(RegularTransactionEssence {
+        Ok(Transaction {
             network_id: self.network_id,
             creation_slot,
             context_inputs,
@@ -194,9 +191,9 @@ impl RegularTransactionEssenceBuilder {
         })
     }
 
-    /// Finishes a [`RegularTransactionEssenceBuilder`] into a [`RegularTransactionEssence`] without protocol
+    /// Finishes a [`TransactionBuilder`] into a [`Transaction`] without protocol
     /// validation.
-    pub fn finish(self) -> Result<RegularTransactionEssence, Error> {
+    pub fn finish(self) -> Result<Transaction, Error> {
         self.finish_with_params(ValidationParams::default())
     }
 }
@@ -210,7 +207,7 @@ pub(crate) type OutputCount = BoundedU16<{ *OUTPUT_COUNT_RANGE.start() }, { *OUT
 #[derive(Clone, Debug, Eq, PartialEq, Packable)]
 #[packable(unpack_error = Error)]
 #[packable(unpack_visitor = ProtocolParameters)]
-pub struct RegularTransactionEssence {
+pub struct Transaction {
     /// The unique value denoting whether the block was meant for mainnet, testnet, or a private network.
     #[packable(verify_with = verify_network_id)]
     network_id: u64,
@@ -231,33 +228,33 @@ pub struct RegularTransactionEssence {
     outputs: BoxedSlicePrefix<Output, OutputCount>,
 }
 
-impl RegularTransactionEssence {
-    /// Creates a new [`RegularTransactionEssenceBuilder`] to build a [`RegularTransactionEssence`].
-    pub fn builder(network_id: u64) -> RegularTransactionEssenceBuilder {
-        RegularTransactionEssenceBuilder::new(network_id)
+impl Transaction {
+    /// Creates a new [`TransactionBuilder`] to build a [`Transaction`].
+    pub fn builder(network_id: u64) -> TransactionBuilder {
+        TransactionBuilder::new(network_id)
     }
 
-    /// Returns the network ID of a [`RegularTransactionEssence`].
+    /// Returns the network ID of a [`Transaction`].
     pub fn network_id(&self) -> u64 {
         self.network_id
     }
 
-    /// Returns the slot index in which the [`RegularTransactionEssence`] was created.
+    /// Returns the slot index in which the [`Transaction`] was created.
     pub fn creation_slot(&self) -> SlotIndex {
         self.creation_slot
     }
 
-    /// Returns the context inputs of a [`RegularTransactionEssence`].
+    /// Returns the context inputs of a [`Transaction`].
     pub fn context_inputs(&self) -> &[ContextInput] {
         &self.context_inputs
     }
 
-    /// Returns the inputs of a [`RegularTransactionEssence`].
+    /// Returns the inputs of a [`Transaction`].
     pub fn inputs(&self) -> &[Input] {
         &self.inputs
     }
 
-    /// Returns the [`ManaAllotment`]s of a [`RegularTransactionEssence`].
+    /// Returns the [`ManaAllotment`]s of a [`Transaction`].
     pub fn mana_allotments(&self) -> &[ManaAllotment] {
         &self.allotments
     }
@@ -271,12 +268,12 @@ impl RegularTransactionEssence {
         self.capabilities.has_capability(flag)
     }
 
-    /// Returns the optional payload of a [`RegularTransactionEssence`].
+    /// Returns the optional payload of a [`Transaction`].
     pub fn payload(&self) -> Option<&Payload> {
         self.payload.as_ref()
     }
 
-    /// Returns the outputs of a [`RegularTransactionEssence`].
+    /// Returns the outputs of a [`Transaction`].
     pub fn outputs(&self) -> &[Output] {
         &self.outputs
     }
@@ -508,7 +505,7 @@ pub(crate) mod dto {
     /// Describes the essence data making up a transaction by defining its inputs and outputs and an optional payload.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
-    pub struct RegularTransactionEssenceDto {
+    pub struct TransactionDto {
         pub network_id: String,
         pub creation_slot: SlotIndex,
         pub context_inputs: Vec<ContextInput>,
@@ -521,8 +518,8 @@ pub(crate) mod dto {
         pub outputs: Vec<OutputDto>,
     }
 
-    impl From<&RegularTransactionEssence> for RegularTransactionEssenceDto {
-        fn from(value: &RegularTransactionEssence) -> Self {
+    impl From<&Transaction> for TransactionDto {
+        fn from(value: &Transaction) -> Self {
             Self {
                 network_id: value.network_id().to_string(),
                 creation_slot: value.creation_slot(),
@@ -540,8 +537,8 @@ pub(crate) mod dto {
         }
     }
 
-    impl TryFromDto for RegularTransactionEssence {
-        type Dto = RegularTransactionEssenceDto;
+    impl TryFromDto for Transaction {
+        type Dto = TransactionDto;
         type Error = Error;
 
         fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {

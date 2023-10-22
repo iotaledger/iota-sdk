@@ -18,7 +18,7 @@ use iota_sdk::{
         address::{AccountAddress, Address, ToBech32Ext},
         input::{Input, UtxoInput},
         output::AccountId,
-        payload::{signed_transaction::RegularTransactionEssence, SignedTransactionPayload},
+        payload::{signed_transaction::Transaction, SignedTransactionPayload},
         protocol::protocol_parameters,
         rand::mana::rand_mana_allotment,
         unlock::{SignatureUnlock, Unlock},
@@ -82,7 +82,7 @@ async fn sign_account_state_transition() -> Result<()> {
         None,
     )]);
 
-    let essence = RegularTransactionEssence::builder(protocol_parameters.network_id())
+    let essence = Transaction::builder(protocol_parameters.network_id())
         .with_inputs(
             inputs
                 .iter()
@@ -169,7 +169,7 @@ async fn sign_account_governance_transition() -> Result<()> {
         None,
     )]);
 
-    let essence = RegularTransactionEssence::builder(protocol_parameters.network_id())
+    let essence = Transaction::builder(protocol_parameters.network_id())
         .with_inputs(
             inputs
                 .iter()
@@ -292,7 +292,7 @@ async fn account_reference_unlocks() -> Result<()> {
         ),
     ]);
 
-    let essence = RegularTransactionEssence::builder(protocol_parameters.network_id())
+    let essence = Transaction::builder(protocol_parameters.network_id())
         .with_inputs(
             inputs
                 .iter()

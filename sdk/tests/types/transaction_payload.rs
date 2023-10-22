@@ -5,7 +5,7 @@ use iota_sdk::types::block::{
     address::{Address, Ed25519Address},
     input::{Input, UtxoInput},
     output::{unlock_condition::AddressUnlockCondition, BasicOutput, Output},
-    payload::signed_transaction::{RegularTransactionEssence, SignedTransactionPayload, TransactionId},
+    payload::signed_transaction::{SignedTransactionPayload, Transaction, TransactionId},
     protocol::protocol_parameters,
     rand::mana::rand_mana_allotment,
     signature::{Ed25519Signature, Signature},
@@ -42,7 +42,7 @@ fn builder_no_essence_too_few_unlocks() {
             .finish_with_params(protocol_parameters.token_supply())
             .unwrap(),
     );
-    let essence = RegularTransactionEssence::builder(protocol_parameters.network_id())
+    let essence = Transaction::builder(protocol_parameters.network_id())
         .with_inputs([input1, input2])
         .add_output(output)
         .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
@@ -78,7 +78,7 @@ fn builder_no_essence_too_many_unlocks() {
             .finish_with_params(protocol_parameters.token_supply())
             .unwrap(),
     );
-    let essence = RegularTransactionEssence::builder(protocol_parameters.network_id())
+    let essence = Transaction::builder(protocol_parameters.network_id())
         .add_input(input1)
         .add_output(output)
         .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
@@ -117,7 +117,7 @@ fn pack_unpack_valid() {
             .finish_with_params(protocol_parameters.token_supply())
             .unwrap(),
     );
-    let essence = RegularTransactionEssence::builder(protocol_parameters.network_id())
+    let essence = Transaction::builder(protocol_parameters.network_id())
         .with_inputs([input1, input2])
         .add_output(output)
         .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
@@ -158,7 +158,7 @@ fn getters() {
             .finish_with_params(protocol_parameters.token_supply())
             .unwrap(),
     );
-    let essence = RegularTransactionEssence::builder(protocol_parameters.network_id())
+    let essence = Transaction::builder(protocol_parameters.network_id())
         .with_inputs([input1, input2])
         .add_output(output)
         .add_mana_allotment(rand_mana_allotment(&protocol_parameters))

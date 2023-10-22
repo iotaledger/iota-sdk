@@ -3,17 +3,15 @@
 
 //! Module describing the transaction payload.
 
-mod regular;
+mod transaction;
 mod transaction_id;
 
 use crypto::hashes::{blake2b::Blake2b256, Digest};
 use packable::{error::UnpackError, packer::Packer, unpacker::Unpacker, Packable, PackableExt};
 
-pub(crate) use self::regular::{ContextInputCount, InputCount, OutputCount};
+pub(crate) use self::transaction::{ContextInputCount, InputCount, OutputCount};
 pub use self::{
-    regular::{
-        RegularTransactionEssence, RegularTransactionEssenceBuilder, TransactionCapabilities, TransactionCapabilityFlag,
-    },
+    transaction::{Transaction, TransactionBuilder, TransactionCapabilities, TransactionCapabilityFlag},
     transaction_id::TransactionId,
 };
 use crate::types::block::{protocol::ProtocolParameters, unlock::Unlocks, Error};
@@ -21,7 +19,7 @@ use crate::types::block::{protocol::ProtocolParameters, unlock::Unlocks, Error};
 /// A signed transaction to move funds.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct SignedTransactionPayload {
-    essence: RegularTransactionEssence,
+    essence: Transaction,
     unlocks: Unlocks,
 }
 
@@ -30,14 +28,14 @@ impl SignedTransactionPayload {
     pub const KIND: u8 = 1;
 
     /// Creates a new [`SignedTransactionPayload`].
-    pub fn new(essence: RegularTransactionEssence, unlocks: Unlocks) -> Result<Self, Error> {
+    pub fn new(essence: Transaction, unlocks: Unlocks) -> Result<Self, Error> {
         verify_essence_unlocks(&essence, &unlocks)?;
 
         Ok(Self { essence, unlocks })
     }
 
     /// Return the essence of a [`SignedTransactionPayload`].
-    pub fn essence(&self) -> &RegularTransactionEssence {
+    pub fn essence(&self) -> &Transaction {
         &self.essence
     }
 
@@ -72,7 +70,7 @@ impl Packable for SignedTransactionPayload {
         unpacker: &mut U,
         visitor: &Self::UnpackVisitor,
     ) -> Result<Self, UnpackError<Self::UnpackError, U::Error>> {
-        let essence = RegularTransactionEssence::unpack::<_, VERIFY>(unpacker, visitor)?;
+        let essence = Transaction::unpack::<_, VERIFY>(unpacker, visitor)?;
         let unlocks = Unlocks::unpack::<_, VERIFY>(unpacker, &())?;
 
         if VERIFY {
@@ -83,7 +81,7 @@ impl Packable for SignedTransactionPayload {
     }
 }
 
-fn verify_essence_unlocks(essence: &RegularTransactionEssence, unlocks: &Unlocks) -> Result<(), Error> {
+fn verify_essence_unlocks(essence: &Transaction, unlocks: &Unlocks) -> Result<(), Error> {
     if essence.inputs().len() != unlocks.len() {
         return Err(Error::InputUnlockCountMismatch {
             input_count: essence.inputs().len(),
@@ -100,7 +98,7 @@ pub mod dto {
 
     use serde::{Deserialize, Serialize};
 
-    pub use super::regular::dto::RegularTransactionEssenceDto;
+    pub use super::transaction::dto::TransactionDto;
     use super::*;
     use crate::types::{
         block::{unlock::Unlock, Error},
@@ -111,7 +109,7 @@ pub mod dto {
     pub struct SignedTransactionPayloadDto {
         #[serde(rename = "type")]
         pub kind: u8,
-        pub essence: RegularTransactionEssenceDto,
+        pub essence: TransactionDto,
         pub unlocks: Vec<Unlock>,
     }
 
@@ -130,7 +128,7 @@ pub mod dto {
         type Error = Error;
 
         fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
-            let essence = RegularTransactionEssence::try_from_dto_with_params_inner(dto.essence, params)?;
+            let essence = Transaction::try_from_dto_with_params_inner(dto.essence, params)?;
             Self::new(essence, Unlocks::new(dto.unlocks)?)
         }
     }

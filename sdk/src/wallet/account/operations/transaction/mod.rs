@@ -25,7 +25,7 @@ use crate::{
         },
     },
     wallet::account::{
-        types::{InclusionState, Transaction},
+        types::{InclusionState, TransactionWithMetadata},
         Account,
     },
 };
@@ -65,7 +65,7 @@ where
         &self,
         outputs: impl Into<Vec<Output>> + Send,
         options: impl Into<Option<TransactionOptions>> + Send,
-    ) -> crate::wallet::Result<Transaction> {
+    ) -> crate::wallet::Result<TransactionWithMetadata> {
         let outputs = outputs.into();
         // here to check before syncing, how to prevent duplicated verification (also in prepare_transaction())?
         // Checking it also here is good to return earlier if something is invalid
@@ -85,7 +85,7 @@ where
         &self,
         outputs: impl Into<Vec<Output>> + Send,
         options: impl Into<Option<TransactionOptions>> + Send,
-    ) -> crate::wallet::Result<Transaction> {
+    ) -> crate::wallet::Result<TransactionWithMetadata> {
         log::debug!("[TRANSACTION] finish_transaction");
         let options = options.into();
 
@@ -100,7 +100,7 @@ where
         &self,
         prepared_transaction_data: PreparedTransactionData,
         options: impl Into<Option<TransactionOptions>> + Send,
-    ) -> crate::wallet::Result<Transaction> {
+    ) -> crate::wallet::Result<TransactionWithMetadata> {
         log::debug!("[TRANSACTION] sign_and_submit_transaction");
 
         let signed_transaction_data = match self.sign_transaction_essence(&prepared_transaction_data).await {
@@ -121,7 +121,7 @@ where
         &self,
         signed_transaction_data: SignedTransactionData,
         options: impl Into<Option<TransactionOptions>> + Send,
-    ) -> crate::wallet::Result<Transaction> {
+    ) -> crate::wallet::Result<TransactionWithMetadata> {
         log::debug!(
             "[TRANSACTION] submit_and_store_transaction {}",
             signed_transaction_data.transaction_payload.id()
@@ -170,7 +170,7 @@ where
             })
             .collect();
 
-        let transaction = Transaction {
+        let transaction = TransactionWithMetadata {
             transaction_id,
             payload: signed_transaction_data.transaction_payload,
             block_id,

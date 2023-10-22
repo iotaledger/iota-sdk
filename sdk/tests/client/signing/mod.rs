@@ -22,7 +22,7 @@ use iota_sdk::{
         address::{AccountAddress, Address, NftAddress, ToBech32Ext},
         input::{Input, UtxoInput},
         output::{AccountId, NftId},
-        payload::{signed_transaction::RegularTransactionEssence, SignedTransactionPayload},
+        payload::{signed_transaction::Transaction, SignedTransactionPayload},
         protocol::protocol_parameters,
         rand::mana::rand_mana_allotment,
         slot::SlotIndex,
@@ -374,7 +374,7 @@ async fn all_combined() -> Result<()> {
     .select()
     .unwrap();
 
-    let essence = RegularTransactionEssence::builder(protocol_parameters.network_id())
+    let essence = Transaction::builder(protocol_parameters.network_id())
         .with_inputs(
             selected
                 .inputs
