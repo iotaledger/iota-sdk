@@ -19,7 +19,7 @@ use crate::types::block::{protocol::ProtocolParameters, unlock::Unlocks, Error};
 /// A signed transaction to move funds.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct SignedTransactionPayload {
-    essence: Transaction,
+    transaction: Transaction,
     unlocks: Unlocks,
 }
 
@@ -28,15 +28,15 @@ impl SignedTransactionPayload {
     pub const KIND: u8 = 1;
 
     /// Creates a new [`SignedTransactionPayload`].
-    pub fn new(essence: Transaction, unlocks: Unlocks) -> Result<Self, Error> {
-        verify_essence_unlocks(&essence, &unlocks)?;
+    pub fn new(transaction: Transaction, unlocks: Unlocks) -> Result<Self, Error> {
+        verify_transaction_unlocks(&transaction, &unlocks)?;
 
-        Ok(Self { essence, unlocks })
+        Ok(Self { transaction, unlocks })
     }
 
-    /// Return the essence of a [`SignedTransactionPayload`].
-    pub fn essence(&self) -> &Transaction {
-        &self.essence
+    /// Return the transaction of a [`SignedTransactionPayload`].
+    pub fn transaction(&self) -> &Transaction {
+        &self.transaction
     }
 
     /// Return unlocks of a [`SignedTransactionPayload`].
@@ -60,7 +60,7 @@ impl Packable for SignedTransactionPayload {
     type UnpackVisitor = ProtocolParameters;
 
     fn pack<P: Packer>(&self, packer: &mut P) -> Result<(), P::Error> {
-        self.essence.pack(packer)?;
+        self.transaction.pack(packer)?;
         self.unlocks.pack(packer)?;
 
         Ok(())
@@ -70,21 +70,21 @@ impl Packable for SignedTransactionPayload {
         unpacker: &mut U,
         visitor: &Self::UnpackVisitor,
     ) -> Result<Self, UnpackError<Self::UnpackError, U::Error>> {
-        let essence = Transaction::unpack::<_, VERIFY>(unpacker, visitor)?;
+        let transaction = Transaction::unpack::<_, VERIFY>(unpacker, visitor)?;
         let unlocks = Unlocks::unpack::<_, VERIFY>(unpacker, &())?;
 
         if VERIFY {
-            verify_essence_unlocks(&essence, &unlocks).map_err(UnpackError::Packable)?;
+            verify_transaction_unlocks(&transaction, &unlocks).map_err(UnpackError::Packable)?;
         }
 
-        Ok(Self { essence, unlocks })
+        Ok(Self { transaction, unlocks })
     }
 }
 
-fn verify_essence_unlocks(essence: &Transaction, unlocks: &Unlocks) -> Result<(), Error> {
-    if essence.inputs().len() != unlocks.len() {
+fn verify_transaction_unlocks(transaction: &Transaction, unlocks: &Unlocks) -> Result<(), Error> {
+    if transaction.inputs().len() != unlocks.len() {
         return Err(Error::InputUnlockCountMismatch {
-            input_count: essence.inputs().len(),
+            input_count: transaction.inputs().len(),
             unlock_count: unlocks.len(),
         });
     }
@@ -109,7 +109,7 @@ pub mod dto {
     pub struct SignedTransactionPayloadDto {
         #[serde(rename = "type")]
         pub kind: u8,
-        pub essence: TransactionDto,
+        pub transaction: TransactionDto,
         pub unlocks: Vec<Unlock>,
     }
 
@@ -117,7 +117,7 @@ pub mod dto {
         fn from(value: &SignedTransactionPayload) -> Self {
             Self {
                 kind: SignedTransactionPayload::KIND,
-                essence: value.essence().into(),
+                transaction: value.transaction().into(),
                 unlocks: value.unlocks().to_vec(),
             }
         }
@@ -128,8 +128,8 @@ pub mod dto {
         type Error = Error;
 
         fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
-            let essence = Transaction::try_from_dto_with_params_inner(dto.essence, params)?;
-            Self::new(essence, Unlocks::new(dto.unlocks)?)
+            let transaction = Transaction::try_from_dto_with_params_inner(dto.transaction, params)?;
+            Self::new(transaction, Unlocks::new(dto.unlocks)?)
         }
     }
 }

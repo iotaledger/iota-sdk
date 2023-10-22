@@ -38,7 +38,7 @@ pub fn verify_semantic(
 
     let context = ValidationContext::new(
         &transaction_id,
-        transaction.essence(),
+        transaction.transaction(),
         inputs.iter().map(|(id, input)| (*id, *input)),
         transaction.unlocks(),
     );

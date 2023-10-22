@@ -31,7 +31,7 @@ impl Client {
 
         if let Block::Basic(block) = wrapper.block() {
             let inputs = if let Some(Payload::SignedTransaction(t)) = block.payload() {
-                t.essence().inputs()
+                t.transaction().inputs()
             } else {
                 return Err(Error::MissingTransactionPayload);
             };

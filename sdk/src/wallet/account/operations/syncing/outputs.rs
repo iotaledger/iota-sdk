@@ -210,7 +210,7 @@ pub(crate) async fn get_inputs_for_transaction_payload(
     transaction_payload: &SignedTransactionPayload,
 ) -> crate::wallet::Result<Vec<OutputWithMetadata>> {
     let output_ids = transaction_payload
-        .essence()
+        .transaction()
         .inputs()
         .iter()
         .map(|input| {

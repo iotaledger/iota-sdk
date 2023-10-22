@@ -175,6 +175,6 @@ fn getters() {
 
     let tx_payload = SignedTransactionPayload::new(essence.clone(), unlocks.clone()).unwrap();
 
-    assert_eq!(*tx_payload.essence(), essence);
+    assert_eq!(*tx_payload.transaction(), essence);
     assert_eq!(*tx_payload.unlocks(), unlocks);
 }

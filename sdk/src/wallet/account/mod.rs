@@ -467,7 +467,7 @@ pub(crate) fn build_transaction_from_payload_and_inputs(
         //     .and_then(|i| i.metadata.milestone_timestamp_spent.map(|t| t as u128 * 1000))
         //     .unwrap_or_else(|| crate::utils::unix_timestamp_now().as_millis()),
         transaction_id: tx_id,
-        network_id: tx_payload.essence().network_id(),
+        network_id: tx_payload.transaction().network_id(),
         incoming: true,
         note: None,
         inputs,
