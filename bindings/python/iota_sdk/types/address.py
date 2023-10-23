@@ -100,8 +100,7 @@ class RestrictedAddress:
         address: The inner restricted Address.
         allowed_capabilities: The allowed capabilities bitflags.
     """
-    address: Union[Ed25519Address, AccountAddress,
-                   NFTAddress, ImplicitAccountCreationAddress]
+    address: Union[Ed25519Address, AccountAddress, NFTAddress]
     allowed_capabilities: HexStr = field(default='0x00', init=False)
     type: int = field(default_factory=lambda: int(
         AddressType.RESTRICTED), init=False)
