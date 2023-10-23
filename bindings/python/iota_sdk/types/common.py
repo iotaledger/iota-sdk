@@ -30,6 +30,7 @@ def json(cls):
 
     # Override to_dict to remove None values
     def custom_to_dict(self, *args, **kwargs):
+        # pylint: disable=protected-access
         original_dict = self._to_dict(self, *args, **kwargs)
 
         result = {k: v for k, v in original_dict.items() if v is not None}
