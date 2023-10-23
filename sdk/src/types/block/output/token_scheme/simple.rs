@@ -156,5 +156,5 @@ pub(crate) mod dto {
         }
     }
 
-    impl_serde_typed_dto!(SimpleTokenScheme, SimpleTokenSchemeDto, "simple token scheme");
+    crate::impl_serde_typed_dto!(SimpleTokenScheme, SimpleTokenSchemeDto, "simple token scheme");
 }

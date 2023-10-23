@@ -3,19 +3,30 @@
 
 use core::str::FromStr;
 
-use iota_sdk::types::block::{output::OutputId, payload::transaction::TransactionId, Error};
+use iota_sdk::types::block::{
+    output::OutputId,
+    payload::transaction::{TransactionHash, TransactionId},
+    Error,
+};
 use packable::{bounded::InvalidBoundedU16, error::UnpackError, PackableExt};
 use pretty_assertions::assert_eq;
 
-const TRANSACTION_ID: &str = "0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c649";
-const OUTPUT_ID: &str = "0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c6492a00";
-const OUTPUT_ID_INVALID_INDEX: &str = "0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c6498000";
+const TRANSACTION_ID: &str = "0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c64900000000";
+const OUTPUT_ID: &str = "0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c649000000002a00";
+const OUTPUT_ID_INVALID_INDEX: &str = "0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c649000000008000";
 
 #[test]
 fn debug_impl() {
     assert_eq!(
         format!("{:?}", OutputId::from_str(OUTPUT_ID).unwrap()),
-        "OutputId(0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c6492a00)"
+        "OutputId { \
+            id: \"0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c649000000002a00\", \
+            transaction_id: TransactionId { \
+                id: \"0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c64900000000\", \
+                slot_index: SlotIndex(0) \
+            }, \
+            output_index: BoundedU16(42) \
+        }"
     );
 }
 
@@ -31,8 +42,14 @@ fn new_valid() {
 #[test]
 fn null() {
     assert_eq!(
-        format!("{:?}", OutputId::null()),
-        "OutputId(0x00000000000000000000000000000000000000000000000000000000000000000000)"
+        format!(
+            "{}",
+            TransactionHash::null()
+                .into_transaction_id(0)
+                .into_output_id(0)
+                .unwrap()
+        ),
+        "0x0000000000000000000000000000000000000000000000000000000000000000000000000000"
     );
 }
 
@@ -104,8 +121,14 @@ fn from_str_to_str() {
 fn packed_len() {
     let output_id = OutputId::from_str(OUTPUT_ID).unwrap();
 
-    assert_eq!(output_id.packed_len(), 32 + 2);
-    assert_eq!(output_id.pack_to_vec().len(), 32 + 2);
+    assert_eq!(
+        output_id.packed_len(),
+        TransactionId::LENGTH + core::mem::size_of::<u16>()
+    );
+    assert_eq!(
+        output_id.pack_to_vec().len(),
+        TransactionId::LENGTH + core::mem::size_of::<u16>()
+    );
 }
 
 #[test]
@@ -120,7 +143,7 @@ fn pack_unpack_valid() {
 fn pack_unpack_invalid() {
     let bytes = vec![
         82, 253, 252, 7, 33, 130, 101, 79, 22, 63, 95, 15, 154, 98, 29, 114, 149, 102, 199, 77, 16, 3, 124, 77, 123,
-        187, 4, 7, 209, 226, 198, 73, 128, 0,
+        187, 4, 7, 209, 226, 198, 73, 0, 0, 0, 0, 128, 0,
     ];
 
     assert!(matches!(

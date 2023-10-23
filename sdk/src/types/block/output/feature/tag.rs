@@ -98,5 +98,5 @@ pub(crate) mod dto {
         }
     }
 
-    impl_serde_typed_dto!(TagFeature, TagFeatureDto<'_>, "tag feature");
+    crate::impl_serde_typed_dto!(TagFeature, TagFeatureDto<'_>, "tag feature");
 }
