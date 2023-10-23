@@ -3,6 +3,8 @@
 
 use std::collections::HashSet;
 
+use futures::FutureExt;
+
 use crate::{
     client::{node_api::indexer::query_parameters::BasicOutputsQueryParameters, secret::SecretManage},
     types::{
