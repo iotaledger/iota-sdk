@@ -3,6 +3,7 @@
 
 //! Query parameters for output_id requests
 
+use derive_builder::Builder;
 use serde::{Deserialize, Serialize};
 
 use crate::types::block::{address::Bech32Address, output::TokenId, slot::SlotIndex};
@@ -36,7 +37,13 @@ pub trait QueryParameter: Serialize + Send + std::marker::Sync {
 }
 
 macro_rules! impl_query_parameters_methods {
-    ($name:ty) => {
+    ($name:ty, $builder:ty) => {
+        impl $builder {
+            pub fn build(&mut self) -> $name {
+                self.fallible_build()
+                    .expect("builder can't fail, all values are optional")
+            }
+        }
         impl QueryParameter for $name {
             fn replace_cursor(&mut self, cursor: String) {
                 self.cursor.replace(cursor);
@@ -45,11 +52,13 @@ macro_rules! impl_query_parameters_methods {
     };
 }
 
-impl_query_parameters_methods!(OutputsQueryParameters);
+impl_query_parameters_methods!(OutputsQueryParameters, OutputsQueryParametersBuilder);
 
 /// Query parameter for output requests.
 #[derive(Debug, Default, Clone, Serialize, Deserialize, Eq, PartialEq)]
 #[serde(rename_all = "camelCase")]
+#[derive(Builder)]
+#[builder(setter(prefix = "with", strip_option), build_fn(private, name = "fallible_build"))]
 pub struct OutputsQueryParameters {
     /// Returns outputs that were created after a certain slot index.
     pub created_after: Option<SlotIndex>,
@@ -68,11 +77,13 @@ pub struct OutputsQueryParameters {
     pub unlockable_by_address: Option<Bech32Address>,
 }
 
-impl_query_parameters_methods!(BasicOutputsQueryParameters);
+impl_query_parameters_methods!(BasicOutputsQueryParameters, BasicOutputsQueryParametersBuilder);
 
 /// Query parameter for output requests.
 #[derive(Debug, Default, Clone, Serialize, Deserialize, Eq, PartialEq)]
 #[serde(rename_all = "camelCase")]
+#[derive(Builder)]
+#[builder(setter(prefix = "with", strip_option), build_fn(private, name = "fallible_build"))]
 pub struct BasicOutputsQueryParameters {
     /// Returns outputs that were created after a certain slot index.
     pub created_after: Option<SlotIndex>,
@@ -117,11 +128,13 @@ pub struct BasicOutputsQueryParameters {
     pub timelocked_before: Option<SlotIndex>,
 }
 
-impl_query_parameters_methods!(AccountOutputsQueryParameters);
+impl_query_parameters_methods!(AccountOutputsQueryParameters, AccountOutputsQueryParametersBuilder);
 
 /// Query parameter for output requests.
 #[derive(Debug, Default, Clone, Serialize, Deserialize, Eq, PartialEq)]
 #[serde(rename_all = "camelCase")]
+#[derive(Builder)]
+#[builder(setter(prefix = "with", strip_option), build_fn(private, name = "fallible_build"))]
 pub struct AccountOutputsQueryParameters {
     /// Returns outputs that were created after a certain slot index.
     pub created_after: Option<SlotIndex>,
@@ -144,11 +157,13 @@ pub struct AccountOutputsQueryParameters {
     pub state_controller: Option<Bech32Address>,
 }
 
-impl_query_parameters_methods!(NftOutputsQueryParameters);
+impl_query_parameters_methods!(NftOutputsQueryParameters, NftOutputsQueryParametersBuilder);
 
 /// Query parameter for output requests.
 #[derive(Debug, Default, Clone, Serialize, Deserialize, Eq, PartialEq)]
 #[serde(rename_all = "camelCase")]
+#[derive(Builder)]
+#[builder(setter(prefix = "with", strip_option), build_fn(private, name = "fallible_build"))]
 pub struct NftOutputsQueryParameters {
     /// Returns outputs that were created after a certain slot index.
     pub created_after: Option<SlotIndex>,
@@ -191,11 +206,13 @@ pub struct NftOutputsQueryParameters {
     pub timelocked_before: Option<SlotIndex>,
 }
 
-impl_query_parameters_methods!(FoundryOutputsQueryParameters);
+impl_query_parameters_methods!(FoundryOutputsQueryParameters, FoundryOutputsQueryParametersBuilder);
 
 /// Query parameter for output requests.
 #[derive(Debug, Default, Clone, Serialize, Deserialize, Eq, PartialEq)]
 #[serde(rename_all = "camelCase")]
+#[derive(Builder)]
+#[builder(setter(prefix = "with", strip_option), build_fn(private, name = "fallible_build"))]
 pub struct FoundryOutputsQueryParameters {
     /// Returns outputs that were created after a certain slot index.
     pub created_after: Option<SlotIndex>,
@@ -217,6 +234,8 @@ pub struct FoundryOutputsQueryParameters {
 /// Query parameter for output requests.
 #[derive(Debug, Default, Clone, Serialize, Deserialize, Eq, PartialEq)]
 #[serde(rename_all = "camelCase")]
+#[derive(Builder)]
+#[builder(setter(prefix = "with", strip_option), build_fn(private, name = "fallible_build"))]
 pub struct DelegationOutputsQueryParameters {
     /// Returns outputs that were created after a certain slot index.
     pub created_after: Option<SlotIndex>,
