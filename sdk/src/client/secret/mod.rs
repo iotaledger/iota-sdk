@@ -103,7 +103,6 @@ pub trait SecretManage: Send + Sync {
         ))))
     }
 
-    // TODO better name
     async fn transaction_unlocks(
         &self,
         prepared_transaction_data: &PreparedTransactionData,
