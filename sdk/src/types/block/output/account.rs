@@ -457,62 +457,54 @@ impl AccountOutput {
     pub(crate) fn transition_inner(
         current_state: &Self,
         next_state: &Self,
-        _input_chains: &HashMap<ChainId, &Output>,
-        _outputs: &[Output],
+        input_chains: &HashMap<ChainId, &Output>,
+        outputs: &[Output],
     ) -> Result<(), StateTransitionError> {
         if current_state.immutable_features != next_state.immutable_features {
             return Err(StateTransitionError::MutatedImmutableField);
         }
 
-        // TODO
-        // if next_state.state_index == current_state.state_index + 1 {
-        //     // State transition.
-        //     if current_state.features.metadata() != next_state.features.metadata() {
-        //         return Err(StateTransitionError::MutatedFieldWithoutRights);
-        //     }
-
-        //     let created_foundries = outputs.iter().filter_map(|output| {
-        //         if let Output::Foundry(foundry) = output {
-        //             if foundry.account_address().account_id() == &next_state.account_id
-        //                 && !input_chains.contains_key(&foundry.chain_id())
-        //             {
-        //                 Some(foundry)
-        //             } else {
-        //                 None
-        //             }
-        //         } else {
-        //             None
-        //         }
-        //     });
-
-        //     let mut created_foundries_count = 0;
-
-        //     for foundry in created_foundries {
-        //         created_foundries_count += 1;
-
-        //         if foundry.serial_number() != current_state.foundry_counter + created_foundries_count {
-        //             return Err(StateTransitionError::UnsortedCreatedFoundries);
-        //         }
-        //     }
-
-        //     if current_state.foundry_counter + created_foundries_count != next_state.foundry_counter {
-        //         return Err(StateTransitionError::InconsistentCreatedFoundriesCount);
-        //     }
-        // } else if next_state.state_index == current_state.state_index {
-        //     // Governance transition.
-        //     if current_state.amount != next_state.amount
-        //         || current_state.native_tokens != next_state.native_tokens
-        //         || current_state.state_metadata != next_state.state_metadata
-        //         || current_state.foundry_counter != next_state.foundry_counter
-        //     {
-        //         return Err(StateTransitionError::MutatedFieldWithoutRights);
-        //     }
-        // } else {
-        //     return Err(StateTransitionError::UnsupportedStateIndexOperation {
-        //         current_state: current_state.state_index,
-        //         next_state: next_state.state_index,
-        //     });
+        // TODO update when TIP is updated
+        // // Governance transition.
+        // if current_state.amount != next_state.amount
+        //     || current_state.native_tokens != next_state.native_tokens
+        //     || current_state.foundry_counter != next_state.foundry_counter
+        // {
+        //     return Err(StateTransitionError::MutatedFieldWithoutRights);
         // }
+
+        // // State transition.
+        // if current_state.features.metadata() != next_state.features.metadata() {
+        //     return Err(StateTransitionError::MutatedFieldWithoutRights);
+        // }
+
+        let created_foundries = outputs.iter().filter_map(|output| {
+            if let Output::Foundry(foundry) = output {
+                if foundry.account_address().account_id() == &next_state.account_id
+                    && !input_chains.contains_key(&foundry.chain_id())
+                {
+                    Some(foundry)
+                } else {
+                    None
+                }
+            } else {
+                None
+            }
+        });
+
+        let mut created_foundries_count = 0;
+
+        for foundry in created_foundries {
+            created_foundries_count += 1;
+
+            if foundry.serial_number() != current_state.foundry_counter + created_foundries_count {
+                return Err(StateTransitionError::UnsortedCreatedFoundries);
+            }
+        }
+
+        if current_state.foundry_counter + created_foundries_count != next_state.foundry_counter {
+            return Err(StateTransitionError::InconsistentCreatedFoundriesCount);
+        }
 
         Ok(())
     }
