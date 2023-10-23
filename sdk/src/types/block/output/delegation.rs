@@ -438,7 +438,7 @@ impl Packable for DelegationOutput {
         let validator_address = AccountAddress::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
 
         if validator_address.is_null() {
-            return Err(Error::NullDelegationValidatorId).map_err(UnpackError::Packable);
+            return Err(UnpackError::Packable(Error::NullDelegationValidatorId));
         }
 
         let start_epoch = EpochIndex::unpack::<_, VERIFY>(unpacker, &()).coerce()?;

@@ -178,8 +178,7 @@ impl<'a> ValidationContext<'a> {
         Self {
             transaction,
             unlocks,
-            // TODO still needed ?
-            transaction_hash: Transaction::from(transaction.clone()).hash(),
+            transaction_hash: transaction.hash(),
             input_amount: 0,
             input_mana: 0,
             input_native_tokens: BTreeMap::<TokenId, U256>::new(),
