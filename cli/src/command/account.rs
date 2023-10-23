@@ -1016,14 +1016,8 @@ async fn print_address(account: &Account, address: &Bech32Address) -> Result<(),
                 native_tokens.add_native_tokens(nts.clone())?;
             }
             match &output_data.output {
-                Output::Nft(nft) => nfts.push((
-                    nft.nft_id_non_null(&output_id),
-                    nft.nft_address(&output_id).to_bech32(*address.hrp()),
-                )),
-                Output::Alias(alias) => aliases.push((
-                    alias.alias_id_non_null(&output_id),
-                    alias.alias_address(&output_id).to_bech32(*address.hrp()),
-                )),
+                Output::Nft(nft) => nfts.push(nft.nft_id_non_null(&output_id)),
+                Output::Alias(alias) => aliases.push(alias.alias_id_non_null(&output_id)),
                 Output::Basic(_) | Output::Foundry(_) | Output::Treasury(_) => {}
             }
             let unlock_conditions = output_data
@@ -1039,42 +1033,43 @@ async fn print_address(account: &Account, address: &Bech32Address) -> Result<(),
         }
     }
 
-    // base token table
-    formatted_table.push_str("\n\nBase Tokens");
+    // base tokens table
+    formatted_table.push_str("\nBase Tokens");
     formatted_table.push_str(&format!("{0}{1:<8}{2}", "\n  ", "Amount:", amount));
 
     // outputs table
     if outputs.len() > 0 {
-        formatted_table.push_str("\n\nOutputs");
+        formatted_table.push_str("\nOutputs");
         for (id, kind) in outputs {
-            formatted_table.push_str(&format!("{0}{1:<6}{id}{0}{2:<6}{kind}", "\n  ", "Id:", "Type:"));
+            formatted_table.push_str(&format!("{0}{id}\t{kind}", "\n  "));
         }
     }
 
+    // native tokens table
     let native_tokens = native_tokens.finish_vec()?;
     if native_tokens.len() > 0 {
-        formatted_table.push_str("\n\nNative Tokens");
+        formatted_table.push_str("\nNative Tokens");
         for (id, amount) in native_tokens
             .into_iter()
             .map(|nt| (*nt.token_id(), nt.amount().to_string()))
         {
-            formatted_table.push_str(&format!("{0}{1:<8}{id}{0}{2:<8}{amount}", "\n  ", "Id:", "Amount:"));
+            formatted_table.push_str(&format!("{0}{id}{0}Amount: {amount}", "\n  "));
         }
     }
 
     // NFT table
     if nfts.len() > 0 {
-        formatted_table.push_str("\n\nNFTs");
-        for (id, bech32) in nfts.into_iter() {
-            formatted_table.push_str(&format!("{0}{1:<8}{id}{0}{2:<8}{bech32}", "\n  ", "Id:", "Bech32:"));
+        formatted_table.push_str("\nNFTs");
+        for id in nfts.into_iter() {
+            formatted_table.push_str(&format!("{0}{id}", "\n  "));
         }
     }
 
     // Aliases table
     if aliases.len() > 0 {
-        formatted_table.push_str("\n\nAliases");
-        for (id, bech32) in aliases.into_iter() {
-            formatted_table.push_str(&format!("{0}{1:<8}{id}{0}{2:<8}{bech32}", "\n  ", "Id:", "Bech32:"));
+        formatted_table.push_str("\nAliases");
+        for id in aliases.into_iter() {
+            formatted_table.push_str(&format!("{0}{id}", "\n  "));
         }
     }
 
