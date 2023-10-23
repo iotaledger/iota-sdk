@@ -206,5 +206,5 @@ pub(crate) mod dto {
         }
     }
 
-    impl_serde_typed_dto!(RestrictedAddress, RestrictedAddressDto, "restricted address");
+    crate::impl_serde_typed_dto!(RestrictedAddress, RestrictedAddressDto, "restricted address");
 }

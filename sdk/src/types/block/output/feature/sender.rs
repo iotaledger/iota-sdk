@@ -63,5 +63,5 @@ mod dto {
         }
     }
 
-    impl_serde_typed_dto!(SenderFeature, SenderFeatureDto, "sender feature");
+    crate::impl_serde_typed_dto!(SenderFeature, SenderFeatureDto, "sender feature");
 }

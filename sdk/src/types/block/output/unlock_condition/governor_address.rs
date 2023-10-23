@@ -65,7 +65,7 @@ pub(crate) mod dto {
         }
     }
 
-    impl_serde_typed_dto!(
+    crate::impl_serde_typed_dto!(
         GovernorAddressUnlockCondition,
         GovernorAddressUnlockConditionDto,
         "governor address unlock condition"

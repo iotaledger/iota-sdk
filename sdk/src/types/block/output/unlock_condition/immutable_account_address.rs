@@ -63,7 +63,7 @@ mod dto {
         }
     }
 
-    impl_serde_typed_dto!(
+    crate::impl_serde_typed_dto!(
         ImmutableAccountAddressUnlockCondition,
         ImmutableAccountAddressUnlockConditionDto,
         "immutable account adress unlock condition"

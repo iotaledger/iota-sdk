@@ -64,5 +64,5 @@ pub(crate) mod dto {
         }
     }
 
-    impl_serde_typed_dto!(ReferenceUnlock, ReferenceUnlockDto, "reference unlock");
+    crate::impl_serde_typed_dto!(ReferenceUnlock, ReferenceUnlockDto, "reference unlock");
 }

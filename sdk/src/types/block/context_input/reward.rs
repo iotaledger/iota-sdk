@@ -66,5 +66,5 @@ mod dto {
         }
     }
 
-    impl_serde_typed_dto!(RewardContextInput, RewardContextInputDto, "reward context input");
+    crate::impl_serde_typed_dto!(RewardContextInput, RewardContextInputDto, "reward context input");
 }

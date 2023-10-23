@@ -3,7 +3,7 @@
 
 use core::str::FromStr;
 
-use iota_sdk::types::block::{rand::bytes::rand_bytes_array, BlockHash, BlockId};
+use iota_sdk::types::block::{rand::bytes::rand_bytes_array, slot::SlotIndex, BlockHash, BlockId};
 use packable::PackableExt;
 use pretty_assertions::assert_eq;
 
@@ -13,9 +13,7 @@ const BLOCK_ID: &str = "0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb04
 fn debug_impl() {
     assert_eq!(
         format!("{:?}", BlockId::from_str(BLOCK_ID).unwrap()),
-        format!(
-            "BlockId {{ hash: BlockHash(0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c649), slot_index: SlotIndex(0) }}"
-        )
+        r#"BlockId { id: "0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c64900000000", slot_index: SlotIndex(0) }"#
     );
 }
 
@@ -54,8 +52,8 @@ fn pack_unpack_valid() {
 #[test]
 fn memory_layout() {
     let block_hash = BlockHash::new(rand_bytes_array());
-    let slot_index = 12345.into();
-    let block_id = block_hash.with_slot_index(slot_index);
+    let slot_index = SlotIndex(12345);
+    let block_id = block_hash.into_block_id(slot_index);
     assert_eq!(slot_index, block_id.slot_index());
     let memory_layout =
         <[u8; BlockId::LENGTH]>::try_from([block_hash.as_ref(), &slot_index.to_le_bytes()].concat()).unwrap();

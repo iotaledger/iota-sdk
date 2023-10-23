@@ -108,5 +108,5 @@ mod dto {
         }
     }
 
-    impl_serde_typed_dto!(StakingFeature, StakingFeatureDto, "staking feature");
+    crate::impl_serde_typed_dto!(StakingFeature, StakingFeatureDto, "staking feature");
 }
