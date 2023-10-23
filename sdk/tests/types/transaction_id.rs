@@ -13,13 +13,13 @@ use iota_sdk::types::{
 use packable::PackableExt;
 use pretty_assertions::assert_eq;
 
-const TRANSACTION_ID: &str = "0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c649";
+const TRANSACTION_ID: &str = "0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c64900000000";
 
 #[test]
 fn debug_impl() {
     assert_eq!(
         format!("{:?}", TransactionId::from_str(TRANSACTION_ID).unwrap()),
-        "TransactionId(0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c649)"
+        r#"TransactionId { id: "0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c64900000000", slot_index: SlotIndex(0) }"#
     );
 }
 
@@ -40,8 +40,8 @@ fn from_to_str() {
 fn packed_len() {
     let transaction_id = TransactionId::from_str(TRANSACTION_ID).unwrap();
 
-    assert_eq!(transaction_id.packed_len(), 32);
-    assert_eq!(transaction_id.pack_to_vec().len(), 32);
+    assert_eq!(transaction_id.packed_len(), TransactionId::LENGTH);
+    assert_eq!(transaction_id.pack_to_vec().len(), TransactionId::LENGTH);
 }
 
 #[test]

@@ -12,7 +12,7 @@ use packable::{error::UnpackError, packer::Packer, unpacker::Unpacker, Packable,
 pub(crate) use self::transaction::{ContextInputCount, InputCount, OutputCount};
 pub use self::{
     transaction::{Transaction, TransactionBuilder, TransactionCapabilities, TransactionCapabilityFlag},
-    transaction_id::TransactionId,
+    transaction_id::{TransactionHash, TransactionId},
 };
 use crate::types::block::{protocol::ProtocolParameters, unlock::Unlocks, Error};
 
@@ -51,7 +51,7 @@ impl SignedTransactionPayload {
         hasher.update(Self::KIND.to_le_bytes());
         hasher.update(self.pack_to_vec());
 
-        TransactionId::new(hasher.finalize().into())
+        TransactionHash::new(hasher.finalize().into()).into_transaction_id(self.transaction.creation_slot())
     }
 }
 

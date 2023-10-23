@@ -55,7 +55,7 @@ pub(crate) mod dto {
         }
     }
 
-    impl_serde_typed_dto!(
+    crate::impl_serde_typed_dto!(
         ImplicitAccountCreationAddress,
         ImplicitAccountCreationAddressDto,
         "implicit account creation address"

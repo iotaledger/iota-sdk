@@ -30,10 +30,13 @@ use crate::types::{
     ValidationParams,
 };
 
-impl_id!(pub DelegationId, 32, "Unique identifier of the Delegation Output, which is the BLAKE2b-256 hash of the Output ID that created it.");
-
-#[cfg(feature = "serde")]
-string_serde_impl!(DelegationId);
+crate::impl_id!(
+    /// Unique identifier of the [`DelegationOutput`](crate::types::block::output::DelegationOutput),
+    /// which is the BLAKE2b-256 hash of the [`OutputId`](crate::types::block::output::OutputId) that created it.
+    pub DelegationId {
+        pub const LENGTH: usize = 32;
+    }
+);
 
 impl From<&OutputId> for DelegationId {
     fn from(output_id: &OutputId) -> Self {

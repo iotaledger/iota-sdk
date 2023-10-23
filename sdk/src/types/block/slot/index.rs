@@ -114,7 +114,7 @@ impl From<SlotIndex> for u32 {
 }
 
 #[cfg(feature = "serde")]
-string_serde_impl!(SlotIndex);
+crate::string_serde_impl!(SlotIndex);
 
 #[cfg(test)]
 mod test {
