@@ -336,11 +336,9 @@ pub fn protocol_parameters() -> ProtocolParameters {
     .unwrap()
 }
 
-impl_id!(
-    pub ProtocolParametersHash,
-    32,
-    "The hash of the protocol parameters."
+crate::impl_id!(
+    /// The hash of a [`ProtocolParameters`].
+    pub ProtocolParametersHash {
+        pub const LENGTH: usize = 32;
+    }
 );
-
-#[cfg(feature = "serde")]
-string_serde_impl!(ProtocolParametersHash);

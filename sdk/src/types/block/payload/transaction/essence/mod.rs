@@ -36,7 +36,7 @@ impl TransactionEssence {
         Blake2b256::digest(self.pack_to_vec()).into()
     }
 
-    def_is_as_opt!(TransactionEssence: Regular);
+    crate::def_is_as_opt!(TransactionEssence: Regular);
 }
 
 #[cfg(feature = "serde")]

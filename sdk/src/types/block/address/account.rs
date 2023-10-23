@@ -87,5 +87,5 @@ mod dto {
         }
     }
 
-    impl_serde_typed_dto!(AccountAddress, AccountAddressDto, "account address");
+    crate::impl_serde_typed_dto!(AccountAddress, AccountAddressDto, "account address");
 }

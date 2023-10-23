@@ -248,7 +248,7 @@ export class Account {
      * or custom inputs.
      * @returns The transaction.
      */
-    async createAliasOutput(
+    async createAccountOutput(
         params?: AccountOutputParams,
         transactionOptions?: TransactionOptions,
     ): Promise<Transaction> {
