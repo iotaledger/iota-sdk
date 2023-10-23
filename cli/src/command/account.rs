@@ -21,7 +21,7 @@ use iota_sdk::{
     wallet::{
         account::{
             types::{AccountIdentifier, OutputData, Transaction},
-            Account, ConsolidationParams, FilterOptions, OutputsToClaim, SyncOptions, TransactionOptions,
+            Account, ConsolidationParams, OutputsToClaim, SyncOptions, TransactionOptions,
         },
         CreateNativeTokenParams, MintNftParams, SendNativeTokensParams, SendNftParams, SendParams,
     },
@@ -963,11 +963,9 @@ fn print_addresses(mut addresses: Vec<Bech32Address>) -> Result<(), Error> {
     } else {
         addresses.sort_unstable();
 
-        let mut formatted_table = String::new();
         for (i, addr) in addresses.into_iter().enumerate() {
-            formatted_table.push_str(&format!("{:<5}{}\t{}\n", i, addr, addr.kind_str()));
+            println_log_info!("{:<5}{}\t{}", i, addr, addr.kind_str());
         }
-        println_log_info!("{formatted_table}");
     }
 
     Ok(())
@@ -988,11 +986,23 @@ async fn print_address(account: &Account, address: &Bech32Address) -> Result<(),
     ));
 
     let unspent_outputs = account
-        .unspent_outputs(FilterOptions {
-            address: Some(*address),
-            ..Default::default()
+        .unspent_outputs(None)
+        .await?
+        .into_iter()
+        .filter(|data| match &data.output {
+            Output::Basic(basic) => basic.address() == address.inner(),
+            Output::Nft(nft) => {
+                &Address::Nft(nft.nft_address(&data.output_id)) == address.inner() || &data.address == address.inner()
+            }
+            Output::Alias(alias) => {
+                &Address::Alias(alias.alias_address(&data.output_id)) == address.inner()
+                    || &data.address == address.inner()
+            }
+            Output::Foundry(foundry) => &Address::Alias(foundry.alias_address().clone()) == address.inner(),
+            _ => false,
         })
-        .await?;
+        .collect::<Vec<_>>();
+
     let current_time = iota_sdk::utils::unix_timestamp_now().as_secs() as u32;
 
     let mut outputs: Vec<(OutputId, String)> = Vec::new();
@@ -1016,8 +1026,8 @@ async fn print_address(account: &Account, address: &Bech32Address) -> Result<(),
                 native_tokens.add_native_tokens(nts.clone())?;
             }
             match &output_data.output {
-                Output::Nft(nft) => nfts.push(nft.nft_id_non_null(&output_id)),
                 Output::Alias(alias) => aliases.push(alias.alias_id_non_null(&output_id)),
+                Output::Nft(nft) => nfts.push(nft.nft_id_non_null(&output_id)),
                 Output::Basic(_) | Output::Foundry(_) | Output::Treasury(_) => {}
             }
             let unlock_conditions = output_data
