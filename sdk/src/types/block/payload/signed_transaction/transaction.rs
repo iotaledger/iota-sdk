@@ -7,19 +7,22 @@ use crypto::hashes::{blake2b::Blake2b256, Digest};
 use hashbrown::HashSet;
 use packable::{bounded::BoundedU16, prefix::BoxedSlicePrefix, Packable, PackableExt};
 
-use crate::types::{
-    block::{
-        capabilities::{Capabilities, CapabilityFlag},
-        context_input::{ContextInput, CONTEXT_INPUT_COUNT_RANGE},
-        input::{Input, INPUT_COUNT_RANGE},
-        mana::{verify_mana_allotments_sum, ManaAllotment, ManaAllotments},
-        output::{NativeTokens, Output, OUTPUT_COUNT_RANGE},
-        payload::{OptionalPayload, Payload},
-        protocol::ProtocolParameters,
-        slot::SlotIndex,
-        Error,
+use crate::{
+    types::{
+        block::{
+            capabilities::{Capabilities, CapabilityFlag},
+            context_input::{ContextInput, CONTEXT_INPUT_COUNT_RANGE},
+            input::{Input, INPUT_COUNT_RANGE},
+            mana::{verify_mana_allotments_sum, ManaAllotment, ManaAllotments},
+            output::{NativeTokens, Output, OUTPUT_COUNT_RANGE},
+            payload::{OptionalPayload, Payload},
+            protocol::ProtocolParameters,
+            slot::SlotIndex,
+            Error,
+        },
+        ValidationParams,
     },
-    ValidationParams,
+    utils::merkle_hasher,
 };
 
 /// A builder to build a [`Transaction`].
@@ -278,9 +281,22 @@ impl Transaction {
         &self.outputs
     }
 
-    /// Return the Blake2b hash of an [`Transaction`].
-    pub fn hash(&self) -> [u8; 32] {
-        Blake2b256::digest(self.pack_to_vec()).into()
+    /// Returns the transaction commitment.
+    pub fn transaction_commitment(&self) -> [u8; 32] {
+        let mut packer = Vec::new();
+        self.network_id.pack(&mut packer).unwrap();
+        self.creation_slot.pack(&mut packer).unwrap();
+        self.context_inputs.pack(&mut packer).unwrap();
+        self.inputs.pack(&mut packer).unwrap();
+        self.allotments.pack(&mut packer).unwrap();
+        self.capabilities.pack(&mut packer).unwrap();
+        self.payload.pack(&mut packer).unwrap();
+        Blake2b256::digest(packer).into()
+    }
+
+    pub fn output_commitment(&self) -> [u8; 32] {
+        let outputs_serialized = self.outputs.iter().map(|o| o.pack_to_vec()).collect::<Vec<_>>();
+        merkle_hasher::MerkleHasher::<Blake2b256>::digest(&outputs_serialized).into()
     }
 }
 

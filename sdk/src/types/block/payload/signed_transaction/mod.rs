@@ -7,7 +7,7 @@ mod transaction;
 mod transaction_id;
 
 use crypto::hashes::{blake2b::Blake2b256, Digest};
-use packable::{error::UnpackError, packer::Packer, unpacker::Unpacker, Packable, PackableExt};
+use packable::{error::UnpackError, packer::Packer, unpacker::Unpacker, Packable};
 
 pub(crate) use self::transaction::{ContextInputCount, InputCount, OutputCount};
 pub use self::{
@@ -46,12 +46,17 @@ impl SignedTransactionPayload {
 
     /// Computes the identifier of a [`SignedTransactionPayload`].
     pub fn id(&self) -> TransactionId {
-        let mut hasher = Blake2b256::new();
-
-        hasher.update(Self::KIND.to_le_bytes());
-        hasher.update(self.pack_to_vec());
-
-        TransactionHash::new(hasher.finalize().into()).into_transaction_id(self.transaction.creation_slot())
+        TransactionHash::new(
+            Blake2b256::digest(
+                [
+                    self.transaction().transaction_commitment(),
+                    self.transaction().output_commitment(),
+                ]
+                .concat(),
+            )
+            .into(),
+        )
+        .into_transaction_id(self.transaction.creation_slot())
     }
 }
 
