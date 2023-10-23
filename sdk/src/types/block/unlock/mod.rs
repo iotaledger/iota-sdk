@@ -79,7 +79,7 @@ impl Unlock {
         }
     }
 
-    def_is_as_opt!(Unlock: Signature, Reference, Account, Nft);
+    crate::def_is_as_opt!(Unlock: Signature, Reference, Account, Nft);
 }
 
 pub(crate) type UnlockCount = BoundedU16<{ *UNLOCK_COUNT_RANGE.start() }, { *UNLOCK_COUNT_RANGE.end() }>;

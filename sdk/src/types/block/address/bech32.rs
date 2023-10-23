@@ -101,7 +101,7 @@ impl PartialEq<str> for Hrp {
 }
 
 #[cfg(feature = "serde")]
-string_serde_impl!(Hrp);
+crate::string_serde_impl!(Hrp);
 
 impl<T: AsRef<str> + Send> ConvertTo<Hrp> for T {
     fn convert(self) -> Result<Hrp, Error> {
@@ -217,7 +217,7 @@ impl<T: core::borrow::Borrow<Bech32Address>> From<T> for Address {
 }
 
 #[cfg(feature = "serde")]
-string_serde_impl!(Bech32Address);
+crate::string_serde_impl!(Bech32Address);
 
 impl<T: AsRef<str> + Send> ConvertTo<Bech32Address> for T {
     fn convert(self) -> Result<Bech32Address, Error> {

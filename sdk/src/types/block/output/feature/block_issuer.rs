@@ -44,7 +44,7 @@ impl BlockIssuerKey {
         }
     }
 
-    def_is_as_opt!(BlockIssuerKey: Ed25519);
+    crate::def_is_as_opt!(BlockIssuerKey: Ed25519);
 }
 
 /// An Ed25519 block issuer key.
@@ -303,5 +303,5 @@ mod dto {
         }
     }
 
-    impl_serde_typed_dto!(BlockIssuerFeature, BlockIssuerFeatureDto, "block issuer feature");
+    crate::impl_serde_typed_dto!(BlockIssuerFeature, BlockIssuerFeatureDto, "block issuer feature");
 }
