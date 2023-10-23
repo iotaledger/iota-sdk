@@ -103,7 +103,7 @@ impl UnlockCondition {
         }
     }
 
-    def_is_as_opt!(UnlockCondition:
+    crate::def_is_as_opt!(UnlockCondition:
         Address,
         StorageDepositReturn,
         Timelock,

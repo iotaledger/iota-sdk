@@ -116,7 +116,7 @@ impl core::ops::SubAssign<u32> for EpochIndex {
 }
 
 #[cfg(feature = "serde")]
-string_serde_impl!(EpochIndex);
+crate::string_serde_impl!(EpochIndex);
 
 #[cfg(test)]
 mod test {

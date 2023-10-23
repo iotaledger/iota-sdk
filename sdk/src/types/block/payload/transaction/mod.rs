@@ -15,7 +15,7 @@ pub use self::{
         RegularTransactionEssence, RegularTransactionEssenceBuilder, TransactionCapabilities,
         TransactionCapabilityFlag, TransactionEssence,
     },
-    transaction_id::TransactionId,
+    transaction_id::{TransactionHash, TransactionId},
 };
 use crate::types::block::{protocol::ProtocolParameters, unlock::Unlocks, Error};
 
@@ -54,7 +54,7 @@ impl TransactionPayload {
         hasher.update(Self::KIND.to_le_bytes());
         hasher.update(self.pack_to_vec());
 
-        TransactionId::new(hasher.finalize().into())
+        TransactionHash::new(hasher.finalize().into()).into_transaction_id(self.essence.creation_slot())
     }
 }
 

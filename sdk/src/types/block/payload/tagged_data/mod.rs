@@ -105,5 +105,5 @@ pub mod dto {
         }
     }
 
-    impl_serde_typed_dto!(TaggedDataPayload, TaggedDataPayloadDto, "tagged data payload");
+    crate::impl_serde_typed_dto!(TaggedDataPayload, TaggedDataPayloadDto, "tagged data payload");
 }
