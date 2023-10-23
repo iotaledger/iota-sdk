@@ -8,6 +8,7 @@ Python binding to the [iota-sdk library](/README.md).
   - [Table of contents](#table-of-contents)
   - [Requirements](#requirements)
   - [Getting Started](#getting-started)
+    - [Install the IOTA SDK via pip](#install-iota-sdk-via-pip)
     - [Install the IOTA SDK](#install-the-iota-sdk)
   - [Client](#client-usage)
   - [Wallet](#wallet-usage)
@@ -24,6 +25,34 @@ Python binding to the [iota-sdk library](/README.md).
 
 ## Getting Started
 
+### Install IOTA SDK via pip
+
+1. (optional) Create a virtual environment and use it. On Linux and macOS, you can run the following commands:
+
+   ```bash
+   python3 -m venv env
+   source env/bin/activate
+   ```
+
+   If you are using Windows, you should run the following instead:
+
+   ```bash
+   python3 -m venv env
+   .\env\Scripts\activate
+   ```
+
+2. Install the IOTA-SDK using pip:
+
+   ```bash
+   pip install iota-sdk
+   ```
+
+3. (optional) If you want to deactivate the virtual environment, run the following command:
+
+   ```bash
+   deactivate
+   ```
+
 ### Install the IOTA SDK
 
 1. Move to the Python bindings directory:
@@ -34,15 +63,16 @@ Python binding to the [iota-sdk library](/README.md).
 
 2. (optional) Create a virtual environment and use it. On Linux and macOS, you can run the following commands:
 
-   '''bash
-   python3 -m venv iota_sdk_venv
-   source iota_sdk_venv/bin/activate
-   '''
+   ```bash
+   python3 -m venv env
+   source env/bin/activate
+   ```
 
    If you are using Windows, you should run the following instead:
 
    ```bash
-   .\iota_sdk_venv\Scripts\activate`
+   python3 -m venv env
+   .\env\Scripts\activate
    ```
 
 3. Install the required dependencies and build the wheel by running the following commands:

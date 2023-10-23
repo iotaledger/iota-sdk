@@ -19,11 +19,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security -->
 
-## 1.1.1 - 2023-MM-DD
+## 1.1.1 - 2023-10-11
+
+### Added
+
+- `UnlockableByAddress` to `AliasQueryParameter, NftQueryParameter, QueryParameter`;
 
 ### Fixed
 
 - Added `SeedSecretManager` to `SecretManagerType`;
+- `migrateDbChrysalisToStardust()` for some ledger nano wallets;
 
 ### Removed
 

@@ -245,7 +245,8 @@ pub(crate) fn verify_query_parameters_basic_outputs(query_parameters: Vec<QueryP
         QueryParameter::CreatedBefore,
         QueryParameter::CreatedAfter,
         QueryParameter::PageSize,
-        QueryParameter::Cursor
+        QueryParameter::Cursor,
+        QueryParameter::UnlockableByAddress
     )?;
 
     Ok(QueryParameters::new(query_parameters))
@@ -264,7 +265,8 @@ pub(crate) fn verify_query_parameters_alias_outputs(query_parameters: Vec<QueryP
         QueryParameter::CreatedBefore,
         QueryParameter::CreatedAfter,
         QueryParameter::PageSize,
-        QueryParameter::Cursor
+        QueryParameter::Cursor,
+        QueryParameter::UnlockableByAddress
     )?;
 
     Ok(QueryParameters::new(query_parameters))
@@ -310,7 +312,8 @@ pub(crate) fn verify_query_parameters_nft_outputs(query_parameters: Vec<QueryPar
         QueryParameter::CreatedBefore,
         QueryParameter::CreatedAfter,
         QueryParameter::PageSize,
-        QueryParameter::Cursor
+        QueryParameter::Cursor,
+        QueryParameter::UnlockableByAddress
     )?;
 
     Ok(QueryParameters::new(query_parameters))

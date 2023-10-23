@@ -291,7 +291,7 @@ pub struct FoundryOutput {
 }
 
 impl FoundryOutput {
-    /// The [`Output`](crate::types::block::output::Output) kind of a [`FoundryOutput`].
+    /// The [`Output`] kind of a [`FoundryOutput`].
     pub const KIND: u8 = 5;
     /// The set of allowed [`UnlockCondition`]s for a [`FoundryOutput`].
     pub const ALLOWED_UNLOCK_CONDITIONS: UnlockConditionFlags = UnlockConditionFlags::IMMUTABLE_ALIAS_ADDRESS;
@@ -758,6 +758,7 @@ pub(crate) mod dto {
 #[cfg(test)]
 mod tests {
     use packable::PackableExt;
+    use pretty_assertions::assert_eq;
 
     use super::*;
     use crate::types::{

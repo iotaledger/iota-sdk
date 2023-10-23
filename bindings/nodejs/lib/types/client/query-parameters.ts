@@ -23,6 +23,7 @@ export type QueryParameter =
     | Issuer
     | StateController
     | Governor
+    | UnlockableByAddress
     | CommonQueryParameters;
 
 /** Query parameters for filtering Alias Outputs */
@@ -31,6 +32,7 @@ export type AliasQueryParameter =
     | Governor
     | Issuer
     | Sender
+    | UnlockableByAddress
     | CommonQueryParameters;
 
 /** Query parameters for filtering Foundry Outputs */
@@ -51,6 +53,7 @@ export type NftQueryParameter =
     | Issuer
     | Sender
     | Tag
+    | UnlockableByAddress
     | CommonQueryParameters;
 
 /** Shared query parameters*/

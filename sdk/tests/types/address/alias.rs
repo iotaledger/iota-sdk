@@ -12,6 +12,7 @@ use iota_sdk::types::block::{
     Error,
 };
 use packable::PackableExt;
+use pretty_assertions::assert_eq;
 
 const ALIAS_ID: &str = "0xe9ba80ad1561e437b663a1f1efbfabd544b0d7da7bb33e0a62e99b20ee450bee";
 const ALIAS_BECH32: &str = "rms1pr5m4q9dz4s7gdakvwslrmal4025fvxhmfamx0s2vt5ekg8wg597um6lcnn";

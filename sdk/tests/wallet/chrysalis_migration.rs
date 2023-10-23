@@ -13,6 +13,7 @@ use iota_sdk::{
     },
     Wallet,
 };
+use pretty_assertions::assert_eq;
 use zeroize::Zeroizing;
 
 use crate::wallet::common::{setup, tear_down};
