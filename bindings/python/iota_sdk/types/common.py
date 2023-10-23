@@ -15,8 +15,8 @@ def json(cls):
     """Decorator to add to_dict and to_json methods to a dataclass."""
 
     # Store override methods if they exist
-    override_to_dict = getattr(cls, "to_dict", None)
-    override_to_json = getattr(cls, "to_json", None)
+    override_to_dict = cls.to_dict
+    override_to_json = cls.to_json
 
     # Apply the dataclass_json decorator to get the default behavior
     cls = dataclass_json(
@@ -25,13 +25,17 @@ def json(cls):
 
     # Re-apply the original fns if they exist
     if override_to_dict:
-        setattr(cls, "to_dict", override_to_dict)
+        setattr(cls, "_to_dict", override_to_dict)
+    else:
+        setattr(cls, "_to_dict", cls.to_dict)
+
     if override_to_json:
         setattr(cls, "to_json", override_to_json)
 
     # Override to_dict to remove None values
-    def custom_to_dict(cls, *args, **kwargs):
-        original_dict = cls.to_dict(*args, **kwargs)
+    def custom_to_dict(self, *args, **kwargs):
+        original_dict = self._to_dict(self, *args, **kwargs)
+
         result = {k: v for k, v in original_dict.items() if v is not None}
         return result
 
