@@ -86,5 +86,5 @@ pub(crate) mod dto {
         }
     }
 
-    impl_serde_typed_dto!(Ed25519Address, Ed25519AddressDto, "ed25519 address");
+    crate::impl_serde_typed_dto!(Ed25519Address, Ed25519AddressDto, "ed25519 address");
 }

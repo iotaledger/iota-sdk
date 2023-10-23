@@ -95,7 +95,7 @@ impl Block {
         ValidationBlockBuilder::new(strong_parents, highest_supported_version, protocol_parameters_hash)
     }
 
-    def_is_as_opt!(Block: Basic, Validation);
+    crate::def_is_as_opt!(Block: Basic, Validation);
 
     pub(crate) fn hash(&self) -> [u8; 32] {
         Blake2b256::digest(self.pack_to_vec()).into()

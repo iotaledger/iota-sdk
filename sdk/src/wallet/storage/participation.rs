@@ -117,7 +117,7 @@ mod tests {
     use pretty_assertions::assert_eq;
 
     use super::*;
-    use crate::{types::block::payload::transaction::TransactionId, wallet::storage::adapter::memory::Memory};
+    use crate::{types::block::payload::transaction::TransactionHash, wallet::storage::adapter::memory::Memory};
 
     #[tokio::test]
     async fn insert_get_remove_participation_event() {
@@ -157,7 +157,10 @@ mod tests {
         );
 
         let outputs_participation = std::iter::once((
-            OutputId::new(TransactionId::new([3; 32]), 0).unwrap(),
+            TransactionHash::new([3; 32])
+                .into_transaction_id(0)
+                .into_output_id(0)
+                .unwrap(),
             OutputStatusResponse::mock(),
         ))
         .collect::<HashMap<_, _>>();

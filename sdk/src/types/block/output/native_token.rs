@@ -14,10 +14,14 @@ use primitive_types::U256;
 
 use crate::types::block::{output::foundry::FoundryId, Error};
 
-impl_id!(pub TokenId, 38, "Unique identifiers of native tokens. The TokenId of native tokens minted by a specific foundry is the same as the FoundryId.");
-
-#[cfg(feature = "serde")]
-string_serde_impl!(TokenId);
+crate::impl_id!(
+    /// Unique identifier of a [`NativeToken`](crate::types::block::output::NativeToken).
+    /// The TokenId of native tokens minted by a specific foundry is the same as the
+    /// [`FoundryId`](crate::types::block::output::FoundryId).
+    pub TokenId {
+        pub const LENGTH: usize = 38;
+    }
+);
 
 impl From<FoundryId> for TokenId {
     fn from(foundry_id: FoundryId) -> Self {
