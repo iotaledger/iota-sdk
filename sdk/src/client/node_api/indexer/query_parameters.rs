@@ -10,7 +10,7 @@ use crate::types::block::{address::Bech32Address, output::TokenId, slot::SlotInd
 
 // https://github.com/iotaledger/inx-indexer/tree/develop/pkg/indexer
 
-pub trait QueryParameter: Serialize + Send + std::marker::Sync {
+pub trait QueryParameter: Serialize + Send + Sync {
     /// Converts parameters to a single String.
     fn to_query_string(&self) -> Option<String> {
         let value = serde_json::to_value(&self).unwrap();
