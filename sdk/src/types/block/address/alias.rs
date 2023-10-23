@@ -5,7 +5,10 @@ use core::str::FromStr;
 
 use derive_more::{AsRef, Deref, From};
 
-use crate::types::block::{output::AliasId, Error};
+use crate::types::block::{
+    output::{AliasId, OutputId},
+    Error,
+};
 
 /// An alias address.
 #[derive(Clone, Copy, Eq, PartialEq, Ord, PartialOrd, Hash, From, AsRef, Deref, packable::Packable)]
@@ -45,6 +48,12 @@ impl FromStr for AliasAddress {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         Ok(Self::new(AliasId::from_str(s)?))
+    }
+}
+
+impl From<&OutputId> for AliasAddress {
+    fn from(output_id: &OutputId) -> Self {
+        Self(AliasId::from(output_id))
     }
 }
 
