@@ -15,7 +15,7 @@ def json(cls):
     """Decorator to add to_dict and to_json methods to a dataclass."""
 
     # Store override method
-    override_to_dict = cls.to_dict
+    override_to_dict = getattr(cls, "to_dict", None)
 
     # Apply the dataclass_json decorator to get the default behavior
     cls = dataclass_json(
