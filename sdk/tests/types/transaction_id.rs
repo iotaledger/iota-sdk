@@ -64,7 +64,7 @@ fn transaction_id() {
         "type": 1,
         "transaction": {
           "networkId": "14147312347886322761",
-          "creationSlot": "1048576",
+          "creationSlot": 1048576,
           "contextInputs": [
             {
               "type": 0,
