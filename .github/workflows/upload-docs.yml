@@ -32,15 +32,11 @@ jobs:
 
       - name: Set up Rust
         uses: ./.github/actions/setup-rust
-        with:
-          cache-root: bindings/nodejs
 
       - name: Set Up Node.js 18 and Yarn Cache
         uses: actions/setup-node@v3
         with:
           node-version: "18"
-          cache: yarn
-          cache-dependency-path: bindings/nodejs/yarn.lock
 
       - name: Install Required Dependencies (Ubuntu)
         run: |
