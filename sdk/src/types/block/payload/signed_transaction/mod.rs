@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! Module describing the transaction payload.
+//! Module describing the signed transaction payload.
 
 mod transaction;
 mod transaction_id;
