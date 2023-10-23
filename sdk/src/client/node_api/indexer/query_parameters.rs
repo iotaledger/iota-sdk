@@ -9,41 +9,35 @@ use crate::types::block::{address::Bech32Address, output::TokenId, slot::SlotInd
 
 // https://github.com/iotaledger/inx-indexer/tree/develop/pkg/indexer
 
-pub trait QueryParameter {
+pub trait QueryParameter: Serialize + Send + std::marker::Sync {
     /// Converts parameters to a single String.
-    fn to_query_string(&self) -> Option<String>;
+    fn to_query_string(&self) -> Option<String> {
+        let value = serde_json::to_value(&self).unwrap();
+        let mut final_str = String::new();
+        for (field, v) in value.as_object().unwrap().iter() {
+            if !v.is_null() {
+                if let Some(v_str) = v.as_str() {
+                    if !final_str.is_empty() {
+                        final_str.push_str("&");
+                    }
+                    final_str.push_str(&format!("{}={}", field, v_str));
+                }
+                if let Some(v_u64) = v.as_u64() {
+                    if !final_str.is_empty() {
+                        final_str.push_str("&");
+                    }
+                    final_str.push_str(&format!("{}={}", field, v_u64));
+                }
+            }
+        }
+        if final_str.is_empty() { None } else { Some(final_str) }
+    }
     fn replace_cursor(&mut self, cursor: String);
 }
 
 macro_rules! impl_query_parameters_methods {
     ($name:ty) => {
         impl QueryParameter for $name {
-            /// Converts parameters to a single String.
-            fn to_query_string(&self) -> Option<String> {
-                let value = serde_json::to_value(&self).unwrap();
-                let mut final_str = String::new();
-                for (field, v) in value.as_object().unwrap().iter() {
-                    if !v.is_null() {
-                        if let Some(v_str) = v.as_str() {
-                            if !final_str.is_empty() {
-                                final_str.push_str(&"&");
-                            }
-                            final_str.push_str(&format!("{}={}", field, v_str));
-                        }
-                        if let Some(v_u64) = v.as_u64() {
-                            if !final_str.is_empty() {
-                                final_str.push_str(&"&");
-                            }
-                            final_str.push_str(&format!("{}={}", field, v_u64));
-                        }
-                    }
-                }
-                if final_str.is_empty() {
-                    None
-                } else {
-                    Some(final_str)
-                }
-            }
             fn replace_cursor(&mut self, cursor: String) {
                 self.cursor.replace(cursor);
             }
