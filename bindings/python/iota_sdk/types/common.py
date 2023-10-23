@@ -4,7 +4,7 @@
 from typing import NewType, Optional
 from enum import IntEnum
 from dataclasses import dataclass, field
-from dataclasses_json import dataclass_json, LetterCase, Undefined, config
+from dataclasses_json import DataClassJsonMixin, dataclass_json, LetterCase, Undefined, config
 
 HexStr = NewType("HexStr", str)
 EpochIndex = NewType("EpochIndex", int)
@@ -14,23 +14,19 @@ SlotIndex = NewType("SlotIndex", int)
 def json(cls):
     """Decorator to add to_dict and to_json methods to a dataclass."""
 
-    # Store override methods if they exist
+    # Store override method
     override_to_dict = cls.to_dict
-    override_to_json = cls.to_json
 
     # Apply the dataclass_json decorator to get the default behavior
     cls = dataclass_json(
         letter_case=LetterCase.CAMEL,
         undefined=Undefined.RAISE)(cls)
 
-    # Re-apply the original fns if they exist
-    if override_to_dict:
+    # Re-apply the original fn if it exists
+    if override_to_dict is not None:
         setattr(cls, "_to_dict", override_to_dict)
     else:
         setattr(cls, "_to_dict", cls.to_dict)
-
-    if override_to_json:
-        setattr(cls, "to_json", override_to_json)
 
     # Override to_dict to remove None values
     def custom_to_dict(self, *args, **kwargs):
@@ -39,7 +35,12 @@ def json(cls):
         result = {k: v for k, v in original_dict.items() if v is not None}
         return result
 
+    def custom_to_json(self, *args, **kwargs):
+        # Use the custom to_dict method for serialization
+        return DataClassJsonMixin.to_json(self, *args, **kwargs)
+
     setattr(cls, "to_dict", custom_to_dict)
+    setattr(cls, "to_json", custom_to_json)
 
     return cls
 
