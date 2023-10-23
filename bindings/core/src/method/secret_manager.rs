@@ -43,7 +43,7 @@ pub enum SecretManagerMethod {
     SignEd25519 {
         /// The message to sign, hex encoded String
         message: String,
-        /// Chain to sign the hash with
+        /// Chain to sign the message with
         #[serde(with = "Bip44Def")]
         chain: Bip44,
     },
