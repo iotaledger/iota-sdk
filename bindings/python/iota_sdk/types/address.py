@@ -97,7 +97,7 @@ class ImplicitAccountCreationAddress:
 class RestrictedAddress:
     """Represents an address with restricted capabilities.
     Attributes:
-        address: The hex encoded Ed25519 Address.
+        address: The inner restricted Address.
         allowed_capabilities: The allowed capabilities bitflags.
     """
     address: Union[Ed25519Address, AccountAddress,
