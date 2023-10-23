@@ -180,11 +180,8 @@ where
         let mut new_outputs_data = outputs_data.clone();
 
         loop {
-            // Clear, so we only get new addresses
-            new_alias_and_nft_addresses.clear();
-
             // Add new alias and nft addresses
-            for output_data in new_outputs_data.drain(0..) {
+            for output_data in new_outputs_data.drain(..) {
                 match &output_data.output {
                     Output::Alias(alias_output) => {
                         let alias_address = alias_output.alias_address(&output_data.output_id);
@@ -203,13 +200,13 @@ where
                 break;
             }
 
-            for (alias_or_nft_address, ed25519_address) in &new_alias_and_nft_addresses {
+            for (alias_or_nft_address, ed25519_address) in new_alias_and_nft_addresses.drain() {
                 let output_ids = self.get_output_ids_for_address(alias_or_nft_address.clone(), options).await?;
 
                 // Update address with unspent outputs
                 let address_with_unspent_outputs = addresses_with_unspent_outputs
                     .iter_mut()
-                    .find(|a| &a.address.inner == ed25519_address)
+                    .find(|a| a.address.inner == ed25519_address)
                     .ok_or_else(|| {
                         crate::wallet::Error::AddressNotFoundInAccount(ed25519_address.to_bech32(bech32_hrp))
                     })?;
