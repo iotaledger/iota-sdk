@@ -14,14 +14,15 @@ async function run() {
         throw new Error('.env NODE_URL is undefined, see .env.example');
     }
 
-    const json = "{\"type\":24,\"pubKeyHash\":\"0x0000000000000000000000000000000000000000000000000000000000000000\"}"
+    const json =
+        '{"type":24,"pubKeyHash":"0x0000000000000000000000000000000000000000000000000000000000000000"}';
     const addr = Address.parse(JSON.parse(json));
     console.log(addr);
 
     const json_str = JSON.stringify(addr);
-    console.log(json_str)
+    console.log(json_str);
     if (json == json_str) {
-        console.log("EQUAL")
+        console.log('EQUAL');
     }
 }
 
