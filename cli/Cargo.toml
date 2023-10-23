@@ -4,8 +4,11 @@ version = "1.1.0"
 authors = ["IOTA Stiftung"]
 edition = "2021"
 homepage = "https://iota.org"
+repository = "https://github.com/iotaledger/iota-sdk"
 description = "Command line interface wallet application based on the IOTA SDK"
 license = "Apache-2.0"
+keywords = ["iota", "tangle", "sdk", "cli", "wallet"]
+categories = ["cryptography::cryptocurrencies"]
 
 [[bin]]
 name = "wallet"

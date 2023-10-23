@@ -138,7 +138,7 @@ async fn nft_reference_unlocks() -> Result<()> {
         .await?;
 
     assert_eq!(unlocks.len(), 3);
-    assert_eq!((*unlocks).get(0).unwrap().kind(), SignatureUnlock::KIND);
+    assert_eq!((*unlocks).first().unwrap().kind(), SignatureUnlock::KIND);
     match (*unlocks).get(1).unwrap() {
         Unlock::Nft(a) => {
             assert_eq!(a.index(), 0);

@@ -127,7 +127,6 @@ pub trait SecretManagerConfig: SecretManage {
 }
 
 /// Supported secret managers
-
 #[non_exhaustive]
 pub enum SecretManager {
     /// Secret manager that uses [`iota_stronghold`] as the backing storage.

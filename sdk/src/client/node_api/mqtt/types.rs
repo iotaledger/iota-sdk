@@ -20,7 +20,6 @@ type TopicHandler = Box<dyn Fn(&TopicEvent) + Send + Sync>;
 pub(crate) type TopicHandlerMap = HashMap<Topic, Vec<Arc<TopicHandler>>>;
 
 /// An event from a MQTT topic.
-
 #[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
 pub struct TopicEvent {
     /// the MQTT topic.
@@ -30,7 +29,6 @@ pub struct TopicEvent {
 }
 
 /// The payload of an `TopicEvent`.
-
 #[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
 #[non_exhaustive]
 pub enum MqttPayload {
@@ -45,7 +43,6 @@ pub enum MqttPayload {
 }
 
 /// Mqtt events.
-
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum MqttEvent {
     /// Client was connected.
@@ -55,7 +52,6 @@ pub enum MqttEvent {
 }
 
 /// The MQTT broker options.
-
 #[derive(Copy, Debug, Clone, serde::Deserialize, serde::Serialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
 #[must_use]
