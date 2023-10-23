@@ -71,7 +71,7 @@ impl Payload {
         }
     }
 
-    def_is_as_opt!(Payload: Transaction, TaggedData);
+    crate::def_is_as_opt!(Payload: Transaction, TaggedData);
 }
 
 impl Packable for Payload {

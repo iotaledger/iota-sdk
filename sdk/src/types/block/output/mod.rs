@@ -254,7 +254,7 @@ impl Output {
         }
     }
 
-    def_is_as_opt!(Output: Basic, Account, Foundry, Nft, Delegation, Anchor);
+    crate::def_is_as_opt!(Output: Basic, Account, Foundry, Nft, Delegation, Anchor);
 
     /// Returns the address that is required to unlock this [`Output`] and the account or nft address that gets
     /// unlocked by it, if it's an account or nft.

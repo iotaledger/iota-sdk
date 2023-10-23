@@ -71,7 +71,7 @@ pub(crate) mod dto {
         }
     }
 
-    impl_serde_typed_dto!(
+    crate::impl_serde_typed_dto!(
         TimelockUnlockCondition,
         TimelockUnlockConditionDto,
         "timelock unlock condition"

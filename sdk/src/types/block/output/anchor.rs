@@ -34,10 +34,12 @@ use crate::types::{
     ValidationParams,
 };
 
-impl_id!(pub AnchorId, 32, "Unique identifier of an anchor, which is the BLAKE2b-256 hash of the Output ID that created it.");
-
-#[cfg(feature = "serde")]
-string_serde_impl!(AnchorId);
+crate::impl_id!(
+    /// A unique identifier of an anchor.
+    pub AnchorId {
+        pub const LENGTH: usize = 32;
+    }
+);
 
 impl From<&OutputId> for AnchorId {
     fn from(output_id: &OutputId) -> Self {

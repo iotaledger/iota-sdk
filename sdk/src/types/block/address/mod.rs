@@ -90,7 +90,7 @@ impl Address {
         }
     }
 
-    def_is_as_opt!(Address: Ed25519, Account, Nft, ImplicitAccountCreation, Restricted, Anchor);
+    crate::def_is_as_opt!(Address: Ed25519, Account, Nft, ImplicitAccountCreation, Restricted, Anchor);
 
     /// Tries to create an [`Address`] from a bech32 encoded string.
     pub fn try_from_bech32(address: impl AsRef<str>) -> Result<Self, Error> {

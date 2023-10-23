@@ -33,10 +33,12 @@ use crate::types::{
     ValidationParams,
 };
 
-impl_id!(pub AccountId, 32, "Unique identifier of an account, which is the BLAKE2b-256 hash of the Output ID that created it.");
-
-#[cfg(feature = "serde")]
-string_serde_impl!(AccountId);
+crate::impl_id!(
+    /// A unique identifier of an account.
+    pub AccountId {
+        pub const LENGTH: usize = 32;
+    }
+);
 
 impl From<&OutputId> for AccountId {
     fn from(output_id: &OutputId) -> Self {

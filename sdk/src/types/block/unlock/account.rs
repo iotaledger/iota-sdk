@@ -66,5 +66,5 @@ mod dto {
         }
     }
 
-    impl_serde_typed_dto!(AccountUnlock, AccountUnlockDto, "account unlock");
+    crate::impl_serde_typed_dto!(AccountUnlock, AccountUnlockDto, "account unlock");
 }

@@ -86,5 +86,5 @@ mod dto {
         }
     }
 
-    impl_serde_typed_dto!(AnchorAddress, AnchorAddressDto, "anchor address");
+    crate::impl_serde_typed_dto!(AnchorAddress, AnchorAddressDto, "anchor address");
 }
