@@ -215,7 +215,7 @@ pub struct BasicOutput {
 }
 
 impl BasicOutput {
-    /// The [`Output`](crate::types::block::output::Output) kind of an [`BasicOutput`].
+    /// The [`Output`] kind of an [`BasicOutput`].
     pub const KIND: u8 = 3;
 
     /// The set of allowed [`UnlockCondition`]s for an [`BasicOutput`].
@@ -447,6 +447,7 @@ pub(crate) mod dto {
 #[cfg(test)]
 mod tests {
     use packable::PackableExt;
+    use pretty_assertions::assert_eq;
 
     use super::*;
     use crate::types::{

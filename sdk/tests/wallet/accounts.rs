@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use iota_sdk::wallet::Result;
+use pretty_assertions::assert_eq;
 #[cfg(feature = "stronghold")]
 use {
     iota_sdk::client::{
@@ -53,7 +54,7 @@ async fn remove_latest_account() -> Result<()> {
         let accounts = wallet.get_accounts().await.unwrap();
         assert!(accounts.len() == 1);
         assert_eq!(
-            *accounts.get(0).unwrap().details().await.index(),
+            *accounts.first().unwrap().details().await.index(),
             *first_account.details().await.index()
         );
 
@@ -93,7 +94,7 @@ async fn remove_latest_account() -> Result<()> {
     // Check if accounts with `recreated_account_index` exist.
     assert_eq!(accounts.len(), 1);
     assert_eq!(
-        *accounts.get(0).unwrap().details().await.index(),
+        *accounts.first().unwrap().details().await.index(),
         recreated_account_index
     );
 

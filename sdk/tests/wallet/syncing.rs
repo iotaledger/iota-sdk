@@ -11,6 +11,7 @@ use iota_sdk::{
     },
     wallet::{account::SyncOptions, Result},
 };
+use pretty_assertions::assert_eq;
 
 use crate::wallet::common::{create_accounts_with_funds, make_wallet, setup, tear_down};
 

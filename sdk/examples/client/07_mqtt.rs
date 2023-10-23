@@ -23,7 +23,7 @@ async fn main() -> Result<()> {
 
     let address: Bech32Address = std::env::args()
         .nth(2)
-        .unwrap_or("atoi1qzt0nhsf38nh6rs4p6zs5knqp6psgha9wsv74uajqgjmwc75ugupx3y7x0r".to_string())
+        .unwrap_or_else(|| "atoi1qzt0nhsf38nh6rs4p6zs5knqp6psgha9wsv74uajqgjmwc75ugupx3y7x0r".to_string())
         .parse()?;
 
     // Create a node client.

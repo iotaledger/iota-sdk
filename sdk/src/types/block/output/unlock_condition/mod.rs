@@ -474,6 +474,8 @@ pub(crate) fn verify_allowed_unlock_conditions(
 
 #[cfg(test)]
 mod test {
+    use pretty_assertions::assert_eq;
+
     use super::*;
 
     #[test]

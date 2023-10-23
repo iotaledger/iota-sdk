@@ -81,7 +81,7 @@ impl ReceiptMilestoneOption {
         &self.funds
     }
 
-    /// The [`TreasuryTransactionPayload`](crate::types::block::payload::treasury_transaction::TreasuryTransactionPayload) used
+    /// The [`TreasuryTransactionPayload`] used
     /// to fund the funds of a [`ReceiptMilestoneOption`].
     pub fn transaction(&self) -> &TreasuryTransactionPayload {
         if let Payload::TreasuryTransaction(ref transaction) = self.transaction {

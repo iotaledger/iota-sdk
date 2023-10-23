@@ -35,7 +35,7 @@ pub enum Error {
 
 impl From<ClientError> for Error {
     fn from(error: ClientError) -> Self {
-        Error::Client(Box::new(error))
+        Self::Client(Box::new(error))
     }
 }
 

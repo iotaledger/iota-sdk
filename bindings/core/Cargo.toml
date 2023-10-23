@@ -32,6 +32,9 @@ thiserror = { version = "1.0.49", default-features = false }
 tokio = { version = "1.33.0", default-features = false }
 zeroize = { version = "1.6.0", default-features = false }
 
+[dev-dependencies]
+pretty_assertions = { version = "1.4.0", default-features = false, features = [ "alloc" ] }
+
 [features]
 events = ["iota-sdk/events"]
 ledger_nano = ["iota-sdk/ledger_nano"]

@@ -350,7 +350,7 @@ pub struct AliasOutput {
 }
 
 impl AliasOutput {
-    /// The [`Output`](crate::types::block::output::Output) kind of an [`AliasOutput`].
+    /// The [`Output`] kind of an [`AliasOutput`].
     pub const KIND: u8 = 4;
     /// Maximum possible length in bytes of the state metadata.
     pub const STATE_METADATA_LENGTH_MAX: u16 = 8192;
@@ -885,6 +885,7 @@ pub(crate) mod dto {
 #[cfg(test)]
 mod tests {
     use packable::PackableExt;
+    use pretty_assertions::assert_eq;
 
     use super::*;
     use crate::types::{

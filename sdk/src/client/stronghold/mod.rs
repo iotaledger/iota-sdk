@@ -578,6 +578,8 @@ async fn task_key_clear(
 mod tests {
     use std::fs;
 
+    use pretty_assertions::assert_eq;
+
     use super::*;
 
     #[tokio::test]

@@ -19,6 +19,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security -->
 
+## 1.2.0 - 2023-xx-xx
+
+### Added
+
+- `outputs` and `unspent_outputs` print the booked milestone timestamps and sort by them;
+- `outputs` and `unspent_outputs` include spent/unspent information;
+- `UTC` suffix to the formatted date of `transactions`;
+
+### Changed
+
+- `AccountCommand::Output` accepts either a list index or an `OutputId`;
+
+### Fixed
+
+- `transaction` and `transactions` indexed transactions in opposite order;
+- Enter was showing the helper message;
+- Earlier trim of the input so that pre-commands (`help`, `clear`, `accounts`, ...) work even with leading/trailing spaces;
+
 ## 1.1.0 - 2023-09-29
 
 ### Added
