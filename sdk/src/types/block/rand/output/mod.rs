@@ -43,7 +43,7 @@ pub fn rand_treasury_output(token_supply: u64) -> TreasuryOutput {
     TreasuryOutput::new(rand_number_range(0..token_supply), token_supply).unwrap()
 }
 
-/// Generates a random [`BasicOutput`](BasicOutput).
+/// Generates a random [`BasicOutput`].
 pub fn rand_basic_output(token_supply: u64) -> BasicOutput {
     // TODO: Add `NativeTokens`
     BasicOutput::build_with_amount(rand_number_range(Output::AMOUNT_MIN..token_supply))
@@ -53,12 +53,12 @@ pub fn rand_basic_output(token_supply: u64) -> BasicOutput {
         .unwrap()
 }
 
-/// Generates a random [`AliasId`](AliasId).
+/// Generates a random [`AliasId`].
 pub fn rand_alias_id() -> AliasId {
     AliasId::from(rand_bytes_array())
 }
 
-/// Generates a random [`AliasOutput`](AliasOutput).
+/// Generates a random [`AliasOutput`].
 pub fn rand_alias_output(token_supply: u64) -> AliasOutput {
     // We need to make sure that `AliasId` and `Address` don't match.
     let alias_id = rand_alias_id();
@@ -80,7 +80,7 @@ pub fn rand_token_scheme() -> TokenScheme {
     TokenScheme::Simple(SimpleTokenScheme::new(minted, melted, max).unwrap())
 }
 
-/// Generates a random [`FoundryOutput`](FoundryOutput).
+/// Generates a random [`FoundryOutput`].
 pub fn rand_foundry_output(token_supply: u64) -> FoundryOutput {
     FoundryOutput::build_with_amount(
         rand_number_range(Output::AMOUNT_MIN..token_supply),
@@ -93,7 +93,7 @@ pub fn rand_foundry_output(token_supply: u64) -> FoundryOutput {
     .unwrap()
 }
 
-/// Generates a random [`NftOutput`](NftOutput).
+/// Generates a random [`NftOutput`].
 pub fn rand_nft_output(token_supply: u64) -> NftOutput {
     // We need to make sure that `NftId` and `Address` don't match.
     let nft_id = NftId::from(rand_bytes_array());

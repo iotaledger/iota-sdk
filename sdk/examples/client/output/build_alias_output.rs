@@ -25,7 +25,7 @@ async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
-    let metadata = std::env::args().nth(1).unwrap_or("hello".to_string());
+    let metadata = std::env::args().nth(1).unwrap_or_else(|| "hello".to_string());
     let metadata = metadata.as_bytes();
 
     // Create a node client.
@@ -39,7 +39,7 @@ async fn main() -> Result<()> {
 
     let address = std::env::args()
         .nth(1)
-        .unwrap_or("rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy".to_string());
+        .unwrap_or_else(|| "rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy".to_string());
     let address = Address::try_from_bech32(address)?;
 
     // Alias id needs to be null the first time

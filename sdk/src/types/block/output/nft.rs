@@ -262,7 +262,7 @@ pub struct NftOutput {
 }
 
 impl NftOutput {
-    /// The [`Output`](crate::types::block::output::Output) kind of an [`NftOutput`].
+    /// The [`Output`] kind of an [`NftOutput`].
     pub const KIND: u8 = 6;
     /// The set of allowed [`UnlockCondition`]s for an [`NftOutput`].
     pub const ALLOWED_UNLOCK_CONDITIONS: UnlockConditionFlags = UnlockConditionFlags::ADDRESS
@@ -622,6 +622,7 @@ pub(crate) mod dto {
 #[cfg(test)]
 mod tests {
     use packable::PackableExt;
+    use pretty_assertions::assert_eq;
 
     use super::*;
     use crate::types::{

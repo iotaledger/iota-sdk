@@ -5,7 +5,10 @@ use core::str::FromStr;
 
 use derive_more::{AsRef, Deref, From};
 
-use crate::types::block::{output::NftId, Error};
+use crate::types::block::{
+    output::{NftId, OutputId},
+    Error,
+};
 
 /// An NFT address.
 #[derive(Clone, Copy, Eq, PartialEq, Ord, PartialOrd, Hash, From, AsRef, Deref, packable::Packable)]
@@ -45,6 +48,12 @@ impl FromStr for NftAddress {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         Ok(Self::from(NftId::from_str(s)?))
+    }
+}
+
+impl From<&OutputId> for NftAddress {
+    fn from(output_id: &OutputId) -> Self {
+        Self(NftId::from(output_id))
     }
 }
 

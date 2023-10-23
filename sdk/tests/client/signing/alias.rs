@@ -27,6 +27,7 @@ use iota_sdk::{
         unlock::{SignatureUnlock, Unlock},
     },
 };
+use pretty_assertions::assert_eq;
 
 use crate::client::{
     build_inputs, build_outputs,
@@ -108,7 +109,7 @@ async fn sign_alias_state_transition() -> Result<()> {
         .await?;
 
     assert_eq!(unlocks.len(), 1);
-    assert_eq!((*unlocks).get(0).unwrap().kind(), SignatureUnlock::KIND);
+    assert_eq!((*unlocks).first().unwrap().kind(), SignatureUnlock::KIND);
 
     let tx_payload = TransactionPayload::new(prepared_transaction_data.essence.clone(), unlocks)?;
 
@@ -199,7 +200,7 @@ async fn sign_alias_governance_transition() -> Result<()> {
         .await?;
 
     assert_eq!(unlocks.len(), 1);
-    assert_eq!((*unlocks).get(0).unwrap().kind(), SignatureUnlock::KIND);
+    assert_eq!((*unlocks).first().unwrap().kind(), SignatureUnlock::KIND);
 
     let tx_payload = TransactionPayload::new(prepared_transaction_data.essence.clone(), unlocks)?;
 
@@ -329,7 +330,7 @@ async fn alias_reference_unlocks() -> Result<()> {
         .await?;
 
     assert_eq!(unlocks.len(), 3);
-    assert_eq!((*unlocks).get(0).unwrap().kind(), SignatureUnlock::KIND);
+    assert_eq!((*unlocks).first().unwrap().kind(), SignatureUnlock::KIND);
     match (*unlocks).get(1).unwrap() {
         Unlock::Alias(a) => {
             assert_eq!(a.index(), 0);

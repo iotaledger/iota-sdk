@@ -17,6 +17,7 @@ use iota_sdk::{
     types::block::address::Bech32Address,
     wallet::{ClientOptions, Result, Wallet},
 };
+use pretty_assertions::assert_eq;
 
 #[cfg(feature = "storage")]
 use crate::wallet::common::NODE_OTHER;

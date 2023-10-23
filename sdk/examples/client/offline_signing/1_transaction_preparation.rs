@@ -67,7 +67,7 @@ async fn main() -> Result<()> {
     Ok(())
 }
 
-async fn read_addresses_from_file(path: impl AsRef<std::path::Path>) -> Result<Vec<Bech32Address>> {
+async fn read_addresses_from_file(path: impl AsRef<std::path::Path> + Send) -> Result<Vec<Bech32Address>> {
     use tokio::io::AsyncReadExt;
 
     let mut file = tokio::fs::File::open(&path).await.expect("failed to open file");
@@ -78,7 +78,7 @@ async fn read_addresses_from_file(path: impl AsRef<std::path::Path>) -> Result<V
 }
 
 async fn write_prepared_transaction_to_file(
-    path: impl AsRef<std::path::Path>,
+    path: impl AsRef<std::path::Path> + Send,
     prepared_transaction: &PreparedTransactionData,
 ) -> Result<()> {
     use tokio::io::AsyncWriteExt;

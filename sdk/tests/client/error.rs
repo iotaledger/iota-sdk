@@ -5,6 +5,7 @@ use iota_sdk::{
     client::{api::input_selection::Error as IsaError, Error},
     types::block::Error as BlockError,
 };
+use pretty_assertions::assert_eq;
 
 #[test]
 fn stringified_error() {

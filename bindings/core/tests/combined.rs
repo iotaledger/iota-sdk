@@ -8,6 +8,7 @@ use iota_sdk::{
     wallet::account::types::AccountIdentifier,
 };
 use iota_sdk_bindings_core::{AccountMethod, CallMethod, ClientMethod, Response, Result, WalletMethod, WalletOptions};
+use pretty_assertions::assert_eq;
 
 #[tokio::test]
 async fn create_account() -> Result<()> {

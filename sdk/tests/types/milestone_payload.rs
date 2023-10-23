@@ -15,6 +15,7 @@ use iota_sdk::types::block::{
     Error,
 };
 use packable::{bounded::TryIntoBoundedU8Error, PackableExt};
+use pretty_assertions::assert_eq;
 
 #[test]
 fn kind() {

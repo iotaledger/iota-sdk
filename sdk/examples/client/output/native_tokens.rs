@@ -55,9 +55,9 @@ async fn main() -> Result<()> {
         .unwrap();
 
     // Replace with the token ID of native tokens you own.
-    let token_id = std::env::args()
-        .nth(1)
-        .unwrap_or("0x08e68f7616cd4948efebc6a77c4f935eaed770ac53869cba56d104f2b472a8836d0100000000".to_string());
+    let token_id = std::env::args().nth(1).unwrap_or_else(|| {
+        "0x08e68f7616cd4948efebc6a77c4f935eaed770ac53869cba56d104f2b472a8836d0100000000".to_string()
+    });
     let token_id: [u8; 38] = prefix_hex::decode(token_id)?;
 
     let outputs = [
