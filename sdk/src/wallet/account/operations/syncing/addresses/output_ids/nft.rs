@@ -1,16 +1,17 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+#[cfg(not(target_family = "wasm"))]
 use std::collections::HashSet;
 
+#[cfg(not(target_family = "wasm"))]
 use futures::FutureExt;
 
+#[cfg(not(target_family = "wasm"))]
+use crate::types::api::plugins::indexer::OutputIdsResponse;
 use crate::{
     client::{node_api::indexer::query_parameters::NftOutputsQueryParameters, secret::SecretManage},
-    types::{
-        api::plugins::indexer::OutputIdsResponse,
-        block::{address::Bech32Address, output::OutputId, ConvertTo},
-    },
+    types::block::{address::Bech32Address, output::OutputId, ConvertTo},
     wallet::Account,
 };
 
@@ -30,7 +31,7 @@ where
             output_ids.extend(
                 self.client()
                     .nft_output_ids(NftOutputsQueryParameters {
-                        unlockable_by_address: Some(bech32_address),
+                        unlockable_by_address: Some(bech32_address.clone()),
                         ..Default::default()
                     })
                     .await?
