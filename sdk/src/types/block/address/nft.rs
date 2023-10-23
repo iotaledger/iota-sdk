@@ -87,5 +87,5 @@ pub(crate) mod dto {
         }
     }
 
-    impl_serde_typed_dto!(NftAddress, NftAddressDto, "nft address");
+    crate::impl_serde_typed_dto!(NftAddress, NftAddressDto, "nft address");
 }

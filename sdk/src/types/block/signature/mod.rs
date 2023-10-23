@@ -39,5 +39,5 @@ impl Signature {
         }
     }
 
-    def_is_as_opt!(Signature: Ed25519);
+    crate::def_is_as_opt!(Signature: Ed25519);
 }
