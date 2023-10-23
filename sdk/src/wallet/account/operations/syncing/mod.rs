@@ -13,7 +13,7 @@ pub use self::options::SyncOptions;
 use crate::{
     client::secret::SecretManage,
     types::block::{
-        address::{Address, AliasAddress, NftAddress, ToBech32Ext},
+        address::{Address, ToBech32Ext},
         output::{FoundryId, Output, OutputId, OutputMetadata},
     },
     wallet::account::{
@@ -162,66 +162,36 @@ where
         addresses_to_sync: Vec<AddressWithUnspentOutputs>,
         options: &SyncOptions,
     ) -> crate::wallet::Result<(Vec<OutputId>, Vec<AddressWithUnspentOutputs>, Vec<OutputData>)> {
+        // Get outputs for addresses and add them also to the `addresses_with_unspent_outputs`
+        let (addresses_with_output_ids, mut spent_or_not_synced_output_ids) = self
+            .get_output_ids_for_addresses(options, addresses_to_sync.clone())
+            .await?;
+
+        let (mut addresses_with_unspent_outputs, mut outputs_data) = self
+            .get_outputs_from_address_output_ids(addresses_with_output_ids)
+            .await?;
+
         // Cache the alias and nft address with the related ed2559 address, so we can update the account address with
         // the new output ids
         let mut new_alias_and_nft_addresses = HashMap::new();
-        let (mut spent_or_not_synced_output_ids, mut addresses_with_unspent_outputs, mut outputs_data) =
-            (Vec::new(), Vec::new(), Vec::new());
+
+        let bech32_hrp = self.client().get_bech32_hrp().await?;
+
+        let mut new_outputs_data = outputs_data.clone();
 
         loop {
-            let new_outputs_data = if new_alias_and_nft_addresses.is_empty() {
-                // Get outputs for addresses and add them also the the addresses_with_unspent_outputs
-                let (addresses_with_output_ids, spent_or_not_synced_output_ids_inner) = self
-                    .get_output_ids_for_addresses(options, addresses_to_sync.clone())
-                    .await?;
-                spent_or_not_synced_output_ids = spent_or_not_synced_output_ids_inner;
-                // Get outputs for addresses and add them also the the addresses_with_unspent_outputs
-                let (addresses_with_unspent_outputs_inner, outputs_data_inner) = self
-                    .get_outputs_from_address_output_ids(addresses_with_output_ids)
-                    .await?;
-                addresses_with_unspent_outputs = addresses_with_unspent_outputs_inner;
-                outputs_data.extend(outputs_data_inner.clone());
-                outputs_data_inner
-            } else {
-                let bech32_hrp = self.client().get_bech32_hrp().await?;
-                let mut new_outputs_data = Vec::new();
-                for (alias_or_nft_address, ed25519_address) in new_alias_and_nft_addresses {
-                    let output_ids = self.get_output_ids_for_address(alias_or_nft_address, options).await?;
-
-                    // Update address with unspent outputs
-                    let address_with_unspent_outputs = addresses_with_unspent_outputs
-                        .iter_mut()
-                        .find(|a| a.address.inner == ed25519_address)
-                        .ok_or_else(|| {
-                            crate::wallet::Error::AddressNotFoundInAccount(ed25519_address.to_bech32(bech32_hrp))
-                        })?;
-                    address_with_unspent_outputs.output_ids.extend(output_ids.clone());
-
-                    let new_outputs_data_inner = self.get_outputs(output_ids).await?;
-
-                    let outputs_data_inner = self
-                        .output_response_to_output_data(new_outputs_data_inner, address_with_unspent_outputs)
-                        .await?;
-
-                    outputs_data.extend(outputs_data_inner.clone());
-                    new_outputs_data.extend(outputs_data_inner);
-                }
-                new_outputs_data
-            };
-
             // Clear, so we only get new addresses
-            new_alias_and_nft_addresses = HashMap::new();
+            new_alias_and_nft_addresses.clear();
+
             // Add new alias and nft addresses
-            for output_data in new_outputs_data.iter() {
+            for output_data in new_outputs_data.drain(0..) {
                 match &output_data.output {
                     Output::Alias(alias_output) => {
-                        let alias_address = AliasAddress::from(alias_output.alias_id_non_null(&output_data.output_id));
-
+                        let alias_address = alias_output.alias_address(&output_data.output_id);
                         new_alias_and_nft_addresses.insert(Address::Alias(alias_address), output_data.address);
                     }
                     Output::Nft(nft_output) => {
-                        let nft_address = NftAddress::from(nft_output.nft_id_non_null(&output_data.output_id));
-
+                        let nft_address = nft_output.nft_address(&output_data.output_id);
                         new_alias_and_nft_addresses.insert(Address::Nft(nft_address), output_data.address);
                     }
                     _ => {}
@@ -231,6 +201,27 @@ where
             log::debug!("[SYNC] new_alias_and_nft_addresses: {new_alias_and_nft_addresses:?}");
             if new_alias_and_nft_addresses.is_empty() {
                 break;
+            }
+
+            for (alias_or_nft_address, ed25519_address) in &new_alias_and_nft_addresses {
+                let output_ids = self.get_output_ids_for_address(alias_or_nft_address.clone(), options).await?;
+
+                // Update address with unspent outputs
+                let address_with_unspent_outputs = addresses_with_unspent_outputs
+                    .iter_mut()
+                    .find(|a| &a.address.inner == ed25519_address)
+                    .ok_or_else(|| {
+                        crate::wallet::Error::AddressNotFoundInAccount(ed25519_address.to_bech32(bech32_hrp))
+                    })?;
+                address_with_unspent_outputs.output_ids.extend(output_ids.clone());
+
+                let new_outputs_data_inner = self.get_outputs(output_ids).await?;
+                let outputs_data_inner = self
+                    .output_response_to_output_data(new_outputs_data_inner, address_with_unspent_outputs)
+                    .await?;
+
+                outputs_data.extend(outputs_data_inner.clone());
+                new_outputs_data.extend(outputs_data_inner);
             }
         }
 
