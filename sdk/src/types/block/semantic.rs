@@ -22,7 +22,6 @@ use crate::types::block::{
 #[packable(unpack_error = Error)]
 #[packable(tag_type = u8, with_error = Error::InvalidTransactionFailureReason)]
 #[non_exhaustive]
-// TODO adjust values
 pub enum TransactionFailureReason {
     /// The referenced UTXO was already spent.
     InputUtxoAlreadySpent = 1,
@@ -46,25 +45,25 @@ pub enum TransactionFailureReason {
     /// An input unlock was invalid.
     InvalidInputUnlock = 10,
     /// The output contains a Sender with an ident (address) which is not unlocked.
-    SenderNotUnlocked = 12,
+    SenderNotUnlocked = 11,
     /// The chain state transition is invalid.
-    InvalidChainStateTransition = 13,
+    InvalidChainStateTransition = 12,
     /// The referenced input is created after transaction issuing time.
-    InvalidTransactionIssuingTime = 14,
+    InvalidTransactionIssuingTime = 13,
     /// The mana amount is invalid.
-    InvalidManaAmount = 15,
+    InvalidManaAmount = 14,
     /// The Block Issuance Credits amount is invalid.
-    InvalidBlockIssuanceCreditsAmount = 16,
+    InvalidBlockIssuanceCreditsAmount = 15,
     /// Reward Context Input is invalid.
-    InvalidRewardContextInput = 17,
+    InvalidRewardContextInput = 16,
     /// Commitment Context Input is invalid.
-    InvalidCommitmentContextInput = 18,
+    InvalidCommitmentContextInput = 17,
     /// Staking Feature is not provided in account output when claiming rewards.
-    MissingStakingFeature = 19,
+    MissingStakingFeature = 18,
     /// Failed to claim staking reward.
-    FailedToClaimStakingReward = 20,
+    FailedToClaimStakingReward = 19,
     /// Failed to claim delegation reward.
-    FailedToClaimDelegationReward = 21,
+    FailedToClaimDelegationReward = 20,
     /// The semantic validation failed for a reason not covered by the previous variants.
     SemanticValidationFailed = 255,
 }
