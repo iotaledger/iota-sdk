@@ -969,9 +969,9 @@ pub async fn voting_output_command(account: &Account) -> Result<(), Error> {
 
 // TODO: display AccountAddress infos (key_index, change_address, etc) in the `addresses` command generated list?
 async fn print_address(account: &Account, address: &Bech32Address) -> Result<(), Error> {
-    let mut formatted_table = String::from("Address:");
+    let mut formatted_table = String::from("Address");
     formatted_table.push_str(&format!(
-        "{0}{1:<11}{2}{0}{3:<11}{4}{0}{5:<11}{6}\n",
+        "{0}{1:<11}{2}{0}{3:<11}{4}{0}{5:<11}{6}",
         "\n  ",
         "Bech32:",
         address,
@@ -1033,50 +1033,44 @@ async fn print_address(account: &Account, address: &Bech32Address) -> Result<(),
         }
     }
 
-    let mut row_count = 0;
+    // base token table
+    formatted_table.push_str("\n\nBase Tokens");
+    formatted_table.push_str(&format!("{0}{1:<8}{2}", "\n  ", "Amount:", amount));
 
     // outputs table
-    formatted_table.push_str("\nOutputs:");
-    for (id, kind) in outputs {
-        formatted_table.push_str(&format!("{0}{1:<6}{id}{0}{2:<6}{kind}", "\n  ", "Id:", "Type:"));
-        row_count += 1;
+    if outputs.len() > 0 {
+        formatted_table.push_str("\n\nOutputs");
+        for (id, kind) in outputs {
+            formatted_table.push_str(&format!("{0}{1:<6}{id}{0}{2:<6}{kind}", "\n  ", "Id:", "Type:"));
+        }
     }
-    formatted_table.push_str(if row_count == 0 { "\n  None\n" } else { "\n" });
 
-    // base token table
-    formatted_table.push_str("\nBase Tokens:");
-    formatted_table.push_str(&format!("{0}{1:<8}{2}\n", "\n  ", "Amount:", amount));
-
-    formatted_table.push_str("\nNative Tokens:");
-    row_count = 0;
-    for (id, amount) in native_tokens
-        .finish_vec()?
-        .into_iter()
-        .map(|nt| (*nt.token_id(), nt.amount().to_string()))
-    {
-        formatted_table.push_str(&format!("{0}{1:<8}{id}{0}{2:<8}{amount}", "\n  ", "Id:", "Amount:"));
-        row_count += 1;
+    let native_tokens = native_tokens.finish_vec()?;
+    if native_tokens.len() > 0 {
+        formatted_table.push_str("\n\nNative Tokens");
+        for (id, amount) in native_tokens
+            .into_iter()
+            .map(|nt| (*nt.token_id(), nt.amount().to_string()))
+        {
+            formatted_table.push_str(&format!("{0}{1:<8}{id}{0}{2:<8}{amount}", "\n  ", "Id:", "Amount:"));
+        }
     }
-    formatted_table.push_str(if row_count == 0 { "\n  None\n" } else { "\n" });
 
     // NFT table
-    formatted_table.push_str("\nNFTs:");
-    row_count = 0;
-    for (id, bech32) in nfts.into_iter() {
-        formatted_table.push_str(&format!("{0}{1:<8}{id}{0}{2:<8}{bech32}", "\n  ", "Id:", "Bech32:"));
-        row_count += 1;
+    if nfts.len() > 0 {
+        formatted_table.push_str("\n\nNFTs");
+        for (id, bech32) in nfts.into_iter() {
+            formatted_table.push_str(&format!("{0}{1:<8}{id}{0}{2:<8}{bech32}", "\n  ", "Id:", "Bech32:"));
+        }
     }
-    formatted_table.push_str(if row_count == 0 { "\n  None\n" } else { "\n" });
 
     // Aliases table
-    formatted_table.push_str("\nAliases:");
-    row_count = 0;
-    for (id, bech32) in aliases.into_iter() {
-        formatted_table.push_str(&format!("{0}{1:<8}{id}{0}{2:<8}{bech32}", "\n  ", "Id:", "Bech32:"));
-        row_count += 1;
+    if aliases.len() > 0 {
+        formatted_table.push_str("\n\nAliases");
+        for (id, bech32) in aliases.into_iter() {
+            formatted_table.push_str(&format!("{0}{1:<8}{id}{0}{2:<8}{bech32}", "\n  ", "Id:", "Bech32:"));
+        }
     }
-    // NOTE: always make sure this is the last line bc it doesn't add another new-line.
-    formatted_table.push_str(if row_count == 0 { "\n  None" } else { "" });
 
     println_log_info!("{formatted_table}");
 
