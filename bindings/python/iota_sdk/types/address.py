@@ -66,7 +66,7 @@ class NFTAddress:
 @json
 @dataclass
 class ImplicitAccountCreationAddress:
-    """Represents an implicit account creation address that can be used to transition an account.
+    """An implicit account creation address that can be used to convert a Basic Output to an Account Output.
     Attributes:
         address: The hex encoded Ed25519 Address.
     """

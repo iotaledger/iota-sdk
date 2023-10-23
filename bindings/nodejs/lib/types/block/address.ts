@@ -139,7 +139,7 @@ class NftAddress extends Address {
 }
 
 /**
- * An implicit account creation address.
+ * An implicit account creation address that can be used to convert a Basic Output to an Account Output.
  */
 class ImplicitAccountCreationAddress extends Address {
     private pubKeyHash: HexEncodedString;
