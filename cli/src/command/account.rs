@@ -9,7 +9,7 @@ use iota_sdk::{
     types::{
         api::plugins::participation::types::ParticipationEventId,
         block::{
-            address::{Bech32Address, ToBech32Ext},
+            address::{Address, Bech32Address, ToBech32Ext},
             output::{
                 unlock_condition::AddressUnlockCondition, AliasId, BasicOutputBuilder, FoundryId, NativeToken,
                 NativeTokensBuilder, NftId, Output, OutputId, TokenId,
@@ -334,9 +334,9 @@ pub async fn address_command(account: &Account, selector: AddressSelector) -> Re
             print_address(account, &address).await?;
         }
         AddressSelector::Index(index) => {
-            let addresses = account.addresses().await?;
+            let addresses = get_addresses_sorted(account).await?;
             if let Some(address) = addresses.get(index) {
-                print_address(account, address.address()).await?;
+                print_address(account, address).await?;
             } else {
                 println_log_info!("No address found at index {index}");
             }
@@ -348,17 +348,7 @@ pub async fn address_command(account: &Account, selector: AddressSelector) -> Re
 
 /// `addresses` command
 pub async fn addresses_command(account: &Account) -> Result<(), Error> {
-    let addresses = account.addresses().await?;
-
-    if addresses.is_empty() {
-        println_log_info!("No addresses found");
-    } else {
-        let mut formatted_table = String::new();
-        for (i, addr) in addresses.into_iter().enumerate() {
-            formatted_table.push_str(&format!("{:<5}{}\t{}", i, addr.address(), addr.address().kind_str()));
-        }
-        println_log_info!("{formatted_table}");
-    }
+    print_addresses(get_addresses_sorted(account).await?)?;
 
     Ok(())
 }
@@ -967,6 +957,22 @@ pub async fn voting_output_command(account: &Account) -> Result<(), Error> {
     Ok(())
 }
 
+fn print_addresses(mut addresses: Vec<Bech32Address>) -> Result<(), Error> {
+    if addresses.is_empty() {
+        println_log_info!("No addresses found");
+    } else {
+        addresses.sort_unstable();
+
+        let mut formatted_table = String::new();
+        for (i, addr) in addresses.into_iter().enumerate() {
+            formatted_table.push_str(&format!("{:<5}{}\t{}\n", i, addr, addr.kind_str()));
+        }
+        println_log_info!("{formatted_table}");
+    }
+
+    Ok(())
+}
+
 // TODO: display AccountAddress infos (key_index, change_address, etc) in the `addresses` command generated list?
 async fn print_address(account: &Account, address: &Bech32Address) -> Result<(), Error> {
     let mut formatted_table = String::from("Address");
@@ -1108,4 +1114,23 @@ fn outputs_ordering(a: &OutputData, b: &OutputData) -> std::cmp::Ordering {
 
 fn transactions_ordering(a: &Transaction, b: &Transaction) -> std::cmp::Ordering {
     b.timestamp.cmp(&a.timestamp)
+}
+
+async fn get_addresses_sorted(account: &Account) -> Result<Vec<Bech32Address>, Error> {
+    let hrp = account.client().get_bech32_hrp().await?;
+    let mut addresses = account
+        .unspent_outputs(None)
+        .await?
+        .into_iter()
+        .filter_map(|data| match data.output {
+            Output::Alias(alias) => Some(Address::Alias(alias.alias_address(&data.output_id))),
+            Output::Nft(nft) => Some(Address::Nft(nft.nft_address(&data.output_id))),
+            Output::Basic(basic) => Some(basic.address().clone()),
+            _ => None,
+        })
+        .map(|address| address.to_bech32_unchecked(hrp))
+        .collect::<Vec<_>>();
+    addresses.sort_unstable();
+
+    Ok(addresses)
 }
