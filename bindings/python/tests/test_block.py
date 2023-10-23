@@ -2,8 +2,8 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from typing import get_args
-from iota_sdk import BasicBlock, BlockType, BlockWrapper, Payload, PayloadType
 import pytest
+from iota_sdk import BasicBlock, BlockType, BlockWrapper, Payload, PayloadType
 
 
 def test_basic_block_with_tagged_data_payload():
