@@ -40,7 +40,7 @@ async fn main() -> Result<()> {
 
     let address = std::env::args()
         .nth(1)
-        .unwrap_or("rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy".to_string());
+        .unwrap_or_else(|| "rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy".to_string());
     let address = Address::try_from_bech32(address)?;
 
     let basic_output_builder =

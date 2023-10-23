@@ -195,8 +195,8 @@ async fn check_existing_db_2() -> Result<()> {
     if let iota_sdk::types::block::payload::Payload::TaggedData(tagged_data_payload) =
         tx.payload.essence().as_regular().payload().unwrap()
     {
-        assert_eq!(tagged_data_payload.tag(), "Stardust".as_bytes());
-        assert_eq!(tagged_data_payload.data(), "Stardust".as_bytes());
+        assert_eq!(tagged_data_payload.tag(), b"Stardust");
+        assert_eq!(tagged_data_payload.data(), b"Stardust");
     } else {
         panic!("expected tagged data payload")
     }

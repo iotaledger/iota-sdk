@@ -37,7 +37,7 @@ async fn main() -> Result<()> {
     Ok(())
 }
 
-async fn write_address_to_file(path: impl AsRef<std::path::Path>, address: &[Bech32Address]) -> Result<()> {
+async fn write_address_to_file(path: impl AsRef<std::path::Path> + Send, address: &[Bech32Address]) -> Result<()> {
     use tokio::io::AsyncWriteExt;
 
     let json = serde_json::to_string_pretty(&address)?;

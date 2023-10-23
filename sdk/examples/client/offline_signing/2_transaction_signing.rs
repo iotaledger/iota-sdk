@@ -49,7 +49,9 @@ async fn main() -> Result<()> {
     Ok(())
 }
 
-async fn read_prepared_transaction_from_file(path: impl AsRef<std::path::Path>) -> Result<PreparedTransactionData> {
+async fn read_prepared_transaction_from_file(
+    path: impl AsRef<std::path::Path> + Send,
+) -> Result<PreparedTransactionData> {
     use tokio::io::AsyncReadExt;
 
     let mut file = tokio::fs::File::open(&path).await.expect("failed to open file");
@@ -62,7 +64,7 @@ async fn read_prepared_transaction_from_file(path: impl AsRef<std::path::Path>) 
 }
 
 async fn write_signed_transaction_to_file(
-    path: impl AsRef<std::path::Path>,
+    path: impl AsRef<std::path::Path> + Send,
     signed_transaction_data: &SignedTransactionData,
 ) -> Result<()> {
     use tokio::io::AsyncWriteExt;

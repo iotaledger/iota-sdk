@@ -17,7 +17,7 @@ where
 {
     /// Get the addresses that should be synced with the current known unspent output ids
     /// Also adds alias and nft addresses from unspent alias or nft outputs that have no Timelock, Expiration or
-    /// StorageDepositReturn [`UnlockCondition`]
+    /// StorageDepositReturn [`UnlockCondition`](crate::types::block::output::UnlockCondition)
     pub(crate) async fn get_addresses_to_sync(
         &self,
         options: &SyncOptions,

@@ -262,7 +262,7 @@ pub struct NftOutput {
 }
 
 impl NftOutput {
-    /// The [`Output`](crate::types::block::output::Output) kind of an [`NftOutput`].
+    /// The [`Output`] kind of an [`NftOutput`].
     pub const KIND: u8 = 6;
     /// The set of allowed [`UnlockCondition`]s for an [`NftOutput`].
     pub const ALLOWED_UNLOCK_CONDITIONS: UnlockConditionFlags = UnlockConditionFlags::ADDRESS
