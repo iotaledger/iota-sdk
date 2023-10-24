@@ -39,7 +39,7 @@ impl SignedTransactionPayload {
         &self.transaction
     }
 
-    /// Return unlocks of a [`SignedTransactionPayload`].
+    /// Returns unlocks of a [`SignedTransactionPayload`].
     pub fn unlocks(&self) -> &Unlocks {
         &self.unlocks
     }
