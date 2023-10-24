@@ -271,6 +271,7 @@ impl SecretManage for LedgerSecretManager {
 
         // pack transaction and hash into vec
         let transaction_bytes = prepared_transaction.transaction.pack_to_vec();
+        // TODO: Should this be the signing_hash?
         let transaction_hash = prepared_transaction.transaction.hash().to_vec();
 
         // lock the mutex to prevent multiple simultaneous requests to a ledger
@@ -511,6 +512,7 @@ fn merge_unlocks(
 ) -> Result<Vec<Unlock>, Error> {
     let slot_index = prepared_transaction_data.transaction.creation_slot();
     // The transaction_hash gets signed
+    // TODO: Should this be the signing_hash?
     let transaction_hash = prepared_transaction_data.transaction.hash();
 
     let mut merged_unlocks = Vec::new();

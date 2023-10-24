@@ -11,7 +11,7 @@ use packable::{error::UnpackError, packer::Packer, unpacker::Unpacker, Packable}
 pub(crate) use self::transaction::{ContextInputCount, InputCount, OutputCount};
 pub use self::{
     transaction::{Transaction, TransactionBuilder, TransactionCapabilities, TransactionCapabilityFlag},
-    transaction_id::{TransactionHash, TransactionId},
+    transaction_id::{TransactionHash, TransactionId, TransactionSigningHash},
 };
 use crate::types::block::{protocol::ProtocolParameters, unlock::Unlocks, Error};
 

@@ -7,7 +7,6 @@ use crypto::hashes::{blake2b::Blake2b256, Digest};
 use hashbrown::HashSet;
 use packable::{bounded::BoundedU16, prefix::BoxedSlicePrefix, Packable, PackableExt};
 
-use super::TransactionHash;
 use crate::{
     types::{
         block::{
@@ -16,7 +15,10 @@ use crate::{
             input::{Input, INPUT_COUNT_RANGE},
             mana::{verify_mana_allotments_sum, ManaAllotment, ManaAllotments},
             output::{NativeTokens, Output, OUTPUT_COUNT_RANGE},
-            payload::{OptionalPayload, Payload},
+            payload::{
+                signed_transaction::{TransactionHash, TransactionSigningHash},
+                OptionalPayload, Payload,
+            },
             protocol::ProtocolParameters,
             slot::SlotIndex,
             Error,
@@ -280,6 +282,12 @@ impl Transaction {
     /// Returns the outputs of a [`Transaction`].
     pub fn outputs(&self) -> &[Output] {
         &self.outputs
+    }
+
+    /// Return the Blake2b hash of the transaction that can be used to create a
+    /// [`SignedTransactionPayload`](crate::types::block::payload::SignedTransactionPayload).
+    pub fn signing_hash(&self) -> TransactionSigningHash {
+        TransactionSigningHash::new(Blake2b256::digest(self.pack_to_vec()).into())
     }
 
     /// Return the Blake2b hash of the transaction commitment and output commitment.

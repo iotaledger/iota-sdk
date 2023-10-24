@@ -505,7 +505,7 @@ where
     crate::client::Error: From<M::Error>,
 {
     // The transaction_hash gets signed
-    let transaction_hash = prepared_transaction_data.transaction.hash();
+    let transaction_hash = prepared_transaction_data.transaction.signing_hash();
     let mut blocks = Vec::new();
     let mut block_indexes = HashMap::<Address, usize>::new();
     let slot_index = prepared_transaction_data.transaction.creation_slot();

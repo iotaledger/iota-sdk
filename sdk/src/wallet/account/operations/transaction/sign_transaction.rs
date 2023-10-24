@@ -60,6 +60,7 @@ where
                         self.emit(
                             self.details().await.index,
                             WalletEvent::TransactionProgress(TransactionProgressEvent::PreparedTransactionHash(
+                                // TODO: Should this be the signing_hash?
                                 prepared_transaction_data.transaction.hash().to_string(),
                             )),
                         )

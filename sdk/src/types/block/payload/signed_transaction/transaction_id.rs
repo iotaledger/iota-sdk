@@ -4,11 +4,11 @@
 use crate::types::block::{output::OutputId, Error};
 
 crate::impl_id!(
-    /// The hash of a [`TransactionPayload`](crate::types::block::payload::TransactionPayload).
+    /// The hash of a [`Transaction`](crate::types::block::payload::signed_transaction::Transaction).
     pub TransactionHash {
         pub const LENGTH: usize = 32;
     }
-    /// A [`TransactionPayload`](crate::types::block::payload::TransactionPayload) identifier.
+    /// A [`Transaction`](crate::types::block::payload::signed_transaction::Transaction) identifier.
     pub TransactionId;
 );
 
@@ -18,3 +18,11 @@ impl TransactionId {
         OutputId::new(self, index)
     }
 }
+
+crate::impl_id!(
+    /// The hash of a transaction commitment and output commitment which is used to create
+    /// [`SignedTransactionPayload`](crate::types::block::payload::SignedTransactionPayload).
+    pub TransactionSigningHash {
+        pub const LENGTH: usize = 32;
+    }
+);
