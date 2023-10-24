@@ -18,7 +18,7 @@ use crate::{
         core::{BasicBlock, Block, BlockWrapper},
         input::{Input, UtxoInput, INPUT_COUNT_MAX},
         output::OutputWithMetadata,
-        payload::{transaction::TransactionId, Payload},
+        payload::{signed_transaction::TransactionId, Payload},
         slot::SlotIndex,
         BlockId,
     },
@@ -30,8 +30,8 @@ impl Client {
         let wrapper = self.get_included_block(transaction_id).await?;
 
         if let Block::Basic(block) = wrapper.block() {
-            let inputs = if let Some(Payload::Transaction(t)) = block.payload() {
-                t.essence().inputs()
+            let inputs = if let Some(Payload::SignedTransaction(t)) = block.payload() {
+                t.transaction().inputs()
             } else {
                 return Err(Error::MissingTransactionPayload);
             };

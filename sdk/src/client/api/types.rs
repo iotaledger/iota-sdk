@@ -11,11 +11,11 @@ use crate::{
             address::Address,
             output::{dto::OutputDto, Output},
             payload::{
-                transaction::{
-                    dto::{TransactionEssenceDto, TransactionPayloadDto},
-                    TransactionEssence,
+                signed_transaction::{
+                    dto::{SignedTransactionPayloadDto, TransactionDto},
+                    Transaction,
                 },
-                TransactionPayload,
+                SignedTransactionPayload,
             },
             Error,
         },
@@ -27,8 +27,8 @@ use crate::{
 /// Helper struct for offline signing
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct PreparedTransactionData {
-    /// Transaction essence
-    pub essence: TransactionEssence,
+    /// Transaction
+    pub transaction: Transaction,
     /// Required input information for signing. Inputs need to be ordered by address type
     pub inputs_data: Vec<InputSigningData>,
     /// Optional remainder output information
@@ -39,8 +39,8 @@ pub struct PreparedTransactionData {
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct PreparedTransactionDataDto {
-    /// Transaction essence
-    pub essence: TransactionEssenceDto,
+    /// Transaction
+    pub transaction: TransactionDto,
     /// Required address information for signing
     pub inputs_data: Vec<InputSigningDataDto>,
     /// Optional remainder output information
@@ -50,7 +50,7 @@ pub struct PreparedTransactionDataDto {
 impl From<&PreparedTransactionData> for PreparedTransactionDataDto {
     fn from(value: &PreparedTransactionData) -> Self {
         Self {
-            essence: TransactionEssenceDto::from(&value.essence),
+            transaction: TransactionDto::from(&value.transaction),
             inputs_data: value.inputs_data.iter().map(InputSigningDataDto::from).collect(),
             remainder: value.remainder.as_ref().map(RemainderDataDto::from),
         }
@@ -63,8 +63,8 @@ impl TryFromDto for PreparedTransactionData {
 
     fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
         Ok(Self {
-            essence: TransactionEssence::try_from_dto_with_params(dto.essence, &params)
-                .map_err(|_| Error::InvalidField("essence"))?,
+            transaction: Transaction::try_from_dto_with_params(dto.transaction, &params)
+                .map_err(|_| Error::InvalidField("transaction"))?,
             inputs_data: dto
                 .inputs_data
                 .into_iter()
@@ -86,7 +86,7 @@ impl TryFromDto for PreparedTransactionData {
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct SignedTransactionData {
     /// Signed transaction payload
-    pub transaction_payload: TransactionPayload,
+    pub payload: SignedTransactionPayload,
     /// Required address information for signing
     pub inputs_data: Vec<InputSigningData>,
 }
@@ -95,8 +95,8 @@ pub struct SignedTransactionData {
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SignedTransactionDataDto {
-    /// Transaction essence
-    pub transaction_payload: TransactionPayloadDto,
+    /// Signed transaction payload
+    pub payload: SignedTransactionPayloadDto,
     /// Required address information for signing
     pub inputs_data: Vec<InputSigningDataDto>,
 }
@@ -104,7 +104,7 @@ pub struct SignedTransactionDataDto {
 impl From<&SignedTransactionData> for SignedTransactionDataDto {
     fn from(value: &SignedTransactionData) -> Self {
         Self {
-            transaction_payload: TransactionPayloadDto::from(&value.transaction_payload),
+            payload: SignedTransactionPayloadDto::from(&value.payload),
             inputs_data: value.inputs_data.iter().map(InputSigningDataDto::from).collect(),
         }
     }
@@ -116,7 +116,7 @@ impl TryFromDto for SignedTransactionData {
 
     fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
         Ok(Self {
-            transaction_payload: TransactionPayload::try_from_dto_with_params(dto.transaction_payload, &params)
+            payload: SignedTransactionPayload::try_from_dto_with_params(dto.payload, &params)
                 .map_err(|_| Error::InvalidField("transaction_payload"))?,
             inputs_data: dto
                 .inputs_data

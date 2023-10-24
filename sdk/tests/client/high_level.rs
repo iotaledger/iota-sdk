@@ -35,8 +35,8 @@ async fn test_find_inputs() {
     let block = client.get_block(&block_id).await.unwrap();
     let transaction = block.as_basic().payload().unwrap();
 
-    if let Payload::Transaction(transaction) = transaction {
-        let basic_output = transaction.essence().outputs().iter().next().unwrap().as_basic();
+    if let Payload::SignedTransaction(transaction) = transaction {
+        let basic_output = transaction.transaction().outputs().iter().next().unwrap().as_basic();
         let address = basic_output
             .unlock_conditions()
             .address()
