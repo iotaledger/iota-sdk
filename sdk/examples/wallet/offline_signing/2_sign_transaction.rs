@@ -46,7 +46,7 @@ async fn main() -> Result<()> {
     validate_signed_transaction_payload_length(&signed_transaction)?;
 
     let signed_transaction_data = SignedTransactionData {
-        transaction_payload: signed_transaction,
+        payload: signed_transaction,
         inputs_data: prepared_transaction_data.inputs_data,
     };
 

@@ -86,7 +86,7 @@ impl TryFromDto for PreparedTransactionData {
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct SignedTransactionData {
     /// Signed transaction payload
-    pub transaction_payload: SignedTransactionPayload,
+    pub payload: SignedTransactionPayload,
     /// Required address information for signing
     pub inputs_data: Vec<InputSigningData>,
 }
@@ -95,8 +95,8 @@ pub struct SignedTransactionData {
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SignedTransactionDataDto {
-    /// Transaction payload
-    pub transaction_payload: SignedTransactionPayloadDto,
+    /// Signed transaction payload
+    pub payload: SignedTransactionPayloadDto,
     /// Required address information for signing
     pub inputs_data: Vec<InputSigningDataDto>,
 }
@@ -104,7 +104,7 @@ pub struct SignedTransactionDataDto {
 impl From<&SignedTransactionData> for SignedTransactionDataDto {
     fn from(value: &SignedTransactionData) -> Self {
         Self {
-            transaction_payload: SignedTransactionPayloadDto::from(&value.transaction_payload),
+            payload: SignedTransactionPayloadDto::from(&value.payload),
             inputs_data: value.inputs_data.iter().map(InputSigningDataDto::from).collect(),
         }
     }
@@ -116,7 +116,7 @@ impl TryFromDto for SignedTransactionData {
 
     fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
         Ok(Self {
-            transaction_payload: SignedTransactionPayload::try_from_dto_with_params(dto.transaction_payload, &params)
+            payload: SignedTransactionPayload::try_from_dto_with_params(dto.payload, &params)
                 .map_err(|_| Error::InvalidField("transaction_payload"))?,
             inputs_data: dto
                 .inputs_data

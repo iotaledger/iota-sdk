@@ -92,15 +92,14 @@ where
                 return Err(err.into());
             }
         };
-        let transaction_payload =
-            SignedTransactionPayload::new(prepared_transaction_data.transaction.clone(), unlocks)?;
+        let payload = SignedTransactionPayload::new(prepared_transaction_data.transaction.clone(), unlocks)?;
 
-        log::debug!("[TRANSACTION] signed transaction: {:?}", transaction_payload);
+        log::debug!("[TRANSACTION] signed transaction: {:?}", payload);
 
-        validate_signed_transaction_payload_length(&transaction_payload)?;
+        validate_signed_transaction_payload_length(&payload)?;
 
         Ok(SignedTransactionData {
-            transaction_payload,
+            payload,
             inputs_data: prepared_transaction_data.inputs_data.clone(),
         })
     }
