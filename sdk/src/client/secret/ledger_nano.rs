@@ -320,14 +320,14 @@ impl SecretManage for LedgerSecretManager {
                         // Find the index of the remainder in the transaction this has to be done because the remainder
                         // is not always the last output. The index within the transaction and the bip32 index will be
                         // validated by the hardware wallet.
-                        'essence_outputs: for output in essence.outputs().iter() {
+                        for output in essence.outputs().iter() {
                             if !output.is_basic() {
                                 log::debug!("[LEDGER] unsupported output");
                                 return Err(Error::MiscError.into());
                             }
 
                             if remainder_output == output {
-                                break 'essence_outputs;
+                                break;
                             }
 
                             remainder_index += 1;
