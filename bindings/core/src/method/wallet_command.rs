@@ -143,7 +143,7 @@ pub enum WalletCommandMethod {
         params: CreateNativeTokenParams,
         options: Option<TransactionOptions>,
     },
-    /// Reduces an wallet's "voting power" by a given amount.
+    /// Reduces a wallet's "voting power" by a given amount.
     /// This will stop voting, but the voting data isn't lost and calling `Vote` without parameters will revote.
     /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
     #[cfg(feature = "participation")]
@@ -152,7 +152,7 @@ pub enum WalletCommandMethod {
         #[serde(with = "iota_sdk::utils::serde::string")]
         amount: u64,
     },
-    /// Designates a given amount of tokens towards an wallet's "voting power" by creating a
+    /// Designates a given amount of tokens towards a wallet's "voting power" by creating a
     /// special output, which is really a basic one with some metadata.
     /// This will stop voting in most cases (if there is a remainder output), but the voting data isn't lost and
     /// calling `Vote` without parameters will revote. Expected response:

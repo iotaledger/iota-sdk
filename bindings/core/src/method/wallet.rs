@@ -24,7 +24,7 @@ use crate::OmittedDebug;
 #[serde(tag = "name", content = "data", rename_all = "camelCase")]
 #[non_exhaustive]
 pub enum WalletMethod {
-    /// Consume an wallet command method.
+    /// Consume a wallet command method.
     /// Returns [`Response`](crate::Response)
     #[serde(rename_all = "camelCase")]
     CallMethod {
