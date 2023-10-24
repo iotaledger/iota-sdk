@@ -17,7 +17,7 @@ where
         bech32_address: impl ConvertTo<Bech32Address>,
     ) -> crate::client::Result<Vec<OutputId>> {
         let bech32_address = bech32_address.convert()?;
-        // Only request basic outputs with `AddressUnlockCondition` only
+
         Ok(self
             .client()
             .basic_output_ids(BasicOutputQueryParameters::only_address_unlock_condition(
