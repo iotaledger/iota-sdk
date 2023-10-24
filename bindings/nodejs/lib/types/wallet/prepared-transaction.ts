@@ -61,9 +61,7 @@ export class PreparedTransaction {
      * A `Promise` that resolves to a `SignedTransactionData` object.
      */
     public async sign(): Promise<SignedTransactionData> {
-        return this._account.signTransaction(
-            this.preparedTransactionData(),
-        );
+        return this._account.signTransaction(this.preparedTransactionData());
     }
 
     /**

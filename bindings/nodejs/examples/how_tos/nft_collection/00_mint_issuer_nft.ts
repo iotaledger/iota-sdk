@@ -59,24 +59,26 @@ async function run() {
             `Block included: ${process.env.EXPLORER_URL}/block/${blockId}`,
         );
 
-        transaction.payload.transaction.outputs.forEach((output, outputIndex) => {
-            if (output instanceof NftOutput) {
-                const nftOutput = output as NftOutput;
+        transaction.payload.transaction.outputs.forEach(
+            (output, outputIndex) => {
+                if (output instanceof NftOutput) {
+                    const nftOutput = output as NftOutput;
 
-                // New minted NFT id is empty in the output
-                if (
-                    nftOutput.nftId ===
-                    '0x0000000000000000000000000000000000000000000000000000000000000000'
-                ) {
-                    const outputId = Utils.computeOutputId(
-                        transaction.transactionId,
-                        outputIndex,
-                    );
-                    const nftId: NftId = Utils.computeNftId(outputId);
-                    console.log(`New minted NFT id: ${nftId}`);
+                    // New minted NFT id is empty in the output
+                    if (
+                        nftOutput.nftId ===
+                        '0x0000000000000000000000000000000000000000000000000000000000000000'
+                    ) {
+                        const outputId = Utils.computeOutputId(
+                            transaction.transactionId,
+                            outputIndex,
+                        );
+                        const nftId: NftId = Utils.computeNftId(outputId);
+                        console.log(`New minted NFT id: ${nftId}`);
+                    }
                 }
-            }
-        });
+            },
+        );
     } catch (error) {
         console.log('Error: ', error);
     }

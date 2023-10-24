@@ -186,7 +186,9 @@ export class Account {
      * @param outputIds The outputs to claim.
      * @returns The resulting transaction.
      */
-    async claimOutputs(outputIds: OutputId[]): Promise<TransactionWithMetadata> {
+    async claimOutputs(
+        outputIds: OutputId[],
+    ): Promise<TransactionWithMetadata> {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
@@ -196,7 +198,9 @@ export class Account {
                 },
             },
         );
-        const parsed = JSON.parse(response) as Response<TransactionWithMetadata>;
+        const parsed = JSON.parse(
+            response,
+        ) as Response<TransactionWithMetadata>;
         return plainToInstance(TransactionWithMetadata, parsed.payload);
     }
 
@@ -642,7 +646,9 @@ export class Account {
      * @param transactionId The ID of the transaction to get.
      * @returns The transaction.
      */
-    async getTransaction(transactionId: TransactionId): Promise<TransactionWithMetadata> {
+    async getTransaction(
+        transactionId: TransactionId,
+    ): Promise<TransactionWithMetadata> {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
@@ -652,7 +658,9 @@ export class Account {
                 },
             },
         );
-        const parsed = JSON.parse(response) as Response<TransactionWithMetadata>;
+        const parsed = JSON.parse(
+            response,
+        ) as Response<TransactionWithMetadata>;
         return plainToInstance(TransactionWithMetadata, parsed.payload);
     }
 
@@ -675,7 +683,9 @@ export class Account {
                 },
             },
         );
-        const parsed = JSON.parse(response) as Response<TransactionWithMetadata>;
+        const parsed = JSON.parse(
+            response,
+        ) as Response<TransactionWithMetadata>;
         return plainToInstance(TransactionWithMetadata, parsed.payload);
     }
 
@@ -742,7 +752,9 @@ export class Account {
                 name: 'pendingTransactions',
             },
         );
-        const parsed = JSON.parse(response) as Response<TransactionWithMetadata[]>;
+        const parsed = JSON.parse(response) as Response<
+            TransactionWithMetadata[]
+        >;
         return plainToInstance(TransactionWithMetadata, parsed.payload);
     }
 
@@ -758,7 +770,9 @@ export class Account {
                 name: 'incomingTransactions',
             },
         );
-        const parsed = JSON.parse(response) as Response<TransactionWithMetadata[]>;
+        const parsed = JSON.parse(response) as Response<
+            TransactionWithMetadata[]
+        >;
         return plainToInstance(TransactionWithMetadata, parsed.payload);
     }
 
@@ -774,7 +788,9 @@ export class Account {
                 name: 'transactions',
             },
         );
-        const parsed = JSON.parse(response) as Response<TransactionWithMetadata[]>;
+        const parsed = JSON.parse(response) as Response<
+            TransactionWithMetadata[]
+        >;
         return plainToInstance(TransactionWithMetadata, parsed.payload);
     }
 
@@ -1162,7 +1178,9 @@ export class Account {
                 },
             },
         );
-        const parsed = JSON.parse(response) as Response<TransactionWithMetadata>;
+        const parsed = JSON.parse(
+            response,
+        ) as Response<TransactionWithMetadata>;
         return plainToInstance(TransactionWithMetadata, parsed.payload);
     }
 
@@ -1193,7 +1211,9 @@ export class Account {
                 },
             },
         );
-        const parsed = JSON.parse(response) as Response<TransactionWithMetadata>;
+        const parsed = JSON.parse(
+            response,
+        ) as Response<TransactionWithMetadata>;
         return plainToInstance(TransactionWithMetadata, parsed.payload);
     }
 
@@ -1314,7 +1334,9 @@ export class Account {
             },
         );
 
-        const parsed = JSON.parse(response) as Response<TransactionWithMetadata>;
+        const parsed = JSON.parse(
+            response,
+        ) as Response<TransactionWithMetadata>;
         return plainToInstance(TransactionWithMetadata, parsed.payload);
     }
 
@@ -1365,9 +1387,7 @@ export class Account {
                 },
             },
         );
-        const parsed = JSON.parse(
-            response,
-        ) as Response<SignedTransactionData>;
+        const parsed = JSON.parse(response) as Response<SignedTransactionData>;
         return plainToInstance(SignedTransactionData, parsed.payload);
     }
 
@@ -1389,7 +1409,9 @@ export class Account {
                 },
             },
         );
-        const parsed = JSON.parse(response) as Response<TransactionWithMetadata>;
+        const parsed = JSON.parse(
+            response,
+        ) as Response<TransactionWithMetadata>;
         return plainToInstance(TransactionWithMetadata, parsed.payload);
     }
 
@@ -1411,7 +1433,9 @@ export class Account {
                 },
             },
         );
-        const parsed = JSON.parse(response) as Response<TransactionWithMetadata>;
+        const parsed = JSON.parse(
+            response,
+        ) as Response<TransactionWithMetadata>;
         return plainToInstance(TransactionWithMetadata, parsed.payload);
     }
 
