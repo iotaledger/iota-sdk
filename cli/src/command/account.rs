@@ -957,20 +957,6 @@ pub async fn voting_output_command(account: &Account) -> Result<(), Error> {
     Ok(())
 }
 
-fn print_addresses(mut addresses: Vec<Bech32Address>) -> Result<(), Error> {
-    if addresses.is_empty() {
-        println_log_info!("No addresses found");
-    } else {
-        addresses.sort_unstable();
-
-        for (i, addr) in addresses.into_iter().enumerate() {
-            println_log_info!("{:<5}{}\t{}", i, addr, addr.kind_str());
-        }
-    }
-
-    Ok(())
-}
-
 async fn print_address(account: &Account, address: &Bech32Address) -> Result<(), Error> {
     let mut formatted_table = String::from("Address");
     formatted_table.push_str(&format!(
@@ -988,17 +974,15 @@ async fn print_address(account: &Account, address: &Bech32Address) -> Result<(),
         .unspent_outputs(None)
         .await?
         .into_iter()
-        .filter(|data| match &data.output {
-            Output::Basic(basic) => basic.address() == address.inner(),
-            Output::Nft(nft) => {
-                &Address::Nft(nft.nft_address(&data.output_id)) == address.inner() || &data.address == address.inner()
-            }
-            Output::Alias(alias) => {
-                &Address::Alias(alias.alias_address(&data.output_id)) == address.inner()
-                    || &data.address == address.inner()
-            }
-            Output::Foundry(foundry) => &Address::Alias(foundry.alias_address().clone()) == address.inner(),
-            _ => false,
+        .filter(|data| {
+            &data.address == address.inner()
+                || match &data.output {
+                    Output::Basic(basic) => basic.address() == address.inner(),
+                    Output::Nft(nft) => &Address::Nft(nft.nft_address(&data.output_id)) == address.inner(),
+                    Output::Alias(alias) => &Address::Alias(alias.alias_address(&data.output_id)) == address.inner(),
+                    Output::Foundry(foundry) => &Address::Alias(foundry.alias_address().clone()) == address.inner(),
+                    _ => false,
+                }
         })
         .collect::<Vec<_>>();
 
@@ -1083,6 +1067,20 @@ async fn print_address(account: &Account, address: &Bech32Address) -> Result<(),
     }
 
     println_log_info!("{formatted_table}");
+
+    Ok(())
+}
+
+fn print_addresses(mut addresses: Vec<Bech32Address>) -> Result<(), Error> {
+    if addresses.is_empty() {
+        println_log_info!("No addresses found");
+    } else {
+        addresses.sort_unstable();
+
+        for (i, addr) in addresses.into_iter().enumerate() {
+            println_log_info!("{:<5}{}\t{}", i, addr, addr.kind_str());
+        }
+    }
 
     Ok(())
 }
