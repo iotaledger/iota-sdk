@@ -10,7 +10,7 @@ import { Payload, PayloadType } from '../payload';
  */
 class SignedTransactionPayload extends Payload {
     /**
-     * The index name.
+     * The transaction.
      */
     readonly transaction: Transaction;
     /**
