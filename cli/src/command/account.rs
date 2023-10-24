@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use std::str::FromStr;
+use std::{fmt::Write, str::FromStr};
 
 use clap::{CommandFactory, Parser, Subcommand};
 use iota_sdk::{
