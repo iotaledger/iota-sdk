@@ -7,11 +7,10 @@ use core::fmt;
 use hashbrown::{HashMap, HashSet};
 use primitive_types::U256;
 
-use super::payload::signed_transaction::TransactionHash;
 use crate::types::block::{
     address::{Address, AddressCapabilityFlag},
     output::{ChainId, FoundryId, NativeTokens, Output, OutputId, TokenId, UnlockCondition},
-    payload::signed_transaction::{Transaction, TransactionCapabilityFlag, TransactionId},
+    payload::signed_transaction::{Transaction, TransactionCapabilityFlag, TransactionHash, TransactionId},
     unlock::Unlocks,
     Error,
 };
