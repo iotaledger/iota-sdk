@@ -22,7 +22,7 @@ use crate::{
         },
         block::{
             output::{dto::OutputDto, AccountId, Output, OutputId, OutputMetadata},
-            payload::transaction::TransactionId,
+            payload::signed_transaction::TransactionId,
             slot::{EpochIndex, SlotCommitment, SlotCommitmentId, SlotIndex},
             BlockId, BlockWrapper, BlockWrapperDto,
         },

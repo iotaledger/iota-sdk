@@ -21,7 +21,7 @@ use crate::types::{
             verify_output_amount_min, verify_output_amount_packable, verify_output_amount_supply, ChainId, Output,
             OutputBuilderAmount, OutputId, Rent, RentStructure, StateTransitionError, StateTransitionVerifier,
         },
-        payload::transaction::TransactionCapabilityFlag,
+        payload::signed_transaction::TransactionCapabilityFlag,
         protocol::ProtocolParameters,
         semantic::{TransactionFailureReason, ValidationContext},
         unlock::Unlock,
@@ -30,10 +30,13 @@ use crate::types::{
     ValidationParams,
 };
 
-impl_id!(pub NftId, 32, "Unique identifier of an NFT, which is the BLAKE2b-256 hash of the Output ID that created it.");
-
-#[cfg(feature = "serde")]
-string_serde_impl!(NftId);
+crate::impl_id!(
+    /// Unique identifier of the [`NftOutput`](crate::types::block::output::NftOutput),
+    /// which is the BLAKE2b-256 hash of the [`OutputId`](crate::types::block::output::OutputId) that created it.
+    pub NftId {
+        pub const LENGTH: usize = 32;
+    }
+);
 
 impl From<&OutputId> for NftId {
     fn from(output_id: &OutputId) -> Self {
@@ -382,7 +385,7 @@ impl NftOutput {
         context: &mut ValidationContext<'_>,
     ) -> Result<(), TransactionFailureReason> {
         self.unlock_conditions()
-            .locked_address(self.address(), context.essence.creation_slot())
+            .locked_address(self.address(), context.transaction.creation_slot())
             .unlock(unlock, inputs, context)?;
 
         let nft_id = if self.nft_id().is_null() {
@@ -432,7 +435,7 @@ impl StateTransitionVerifier for NftOutput {
 
     fn destruction(_current_state: &Self, context: &ValidationContext<'_>) -> Result<(), StateTransitionError> {
         if !context
-            .essence
+            .transaction
             .has_capability(TransactionCapabilityFlag::DestroyNftOutputs)
         {
             // TODO: add a variant https://github.com/iotaledger/iota-sdk/issues/1430

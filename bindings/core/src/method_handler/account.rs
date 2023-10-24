@@ -9,7 +9,9 @@ use iota_sdk::{
         block::output::{dto::OutputDto, Output},
         TryFromDto,
     },
-    wallet::account::{types::TransactionDto, Account, OutputDataDto, PreparedCreateNativeTokenTransactionDto},
+    wallet::account::{
+        types::TransactionWithMetadataDto, Account, OutputDataDto, PreparedCreateNativeTokenTransactionDto,
+    },
 };
 
 use crate::{method::AccountMethod, Response, Result};
@@ -30,7 +32,7 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
         }
         AccountMethod::ClaimOutputs { output_ids_to_claim } => {
             let transaction = account.claim_outputs(output_ids_to_claim.to_vec()).await?;
-            Response::SentTransaction(TransactionDto::from(&transaction))
+            Response::SentTransaction(TransactionWithMetadataDto::from(&transaction))
         }
         #[cfg(feature = "participation")]
         AccountMethod::DeregisterParticipationEvent { event_id } => {
@@ -51,7 +53,7 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
 
             transaction.map_or_else(
                 || Response::Transaction(None),
-                |transaction| Response::Transaction(Some(Box::new(TransactionDto::from(&transaction)))),
+                |transaction| Response::Transaction(Some(Box::new(TransactionWithMetadataDto::from(&transaction)))),
             )
         }
         AccountMethod::GetOutput { output_id } => {
@@ -85,7 +87,7 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
         }
         AccountMethod::GetTransaction { transaction_id } => {
             let transaction = account.get_transaction(&transaction_id).await;
-            Response::Transaction(transaction.as_ref().map(TransactionDto::from).map(Box::new))
+            Response::Transaction(transaction.as_ref().map(TransactionWithMetadataDto::from).map(Box::new))
         }
         #[cfg(feature = "participation")]
         AccountMethod::GetVotingPower => {
@@ -94,7 +96,7 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
         }
         AccountMethod::IncomingTransactions => {
             let transactions = account.incoming_transactions().await;
-            Response::Transactions(transactions.iter().map(TransactionDto::from).collect())
+            Response::Transactions(transactions.iter().map(TransactionWithMetadataDto::from).collect())
         }
         AccountMethod::Outputs { filter_options } => {
             let outputs = account.outputs(filter_options).await?;
@@ -102,7 +104,7 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
         }
         AccountMethod::PendingTransactions => {
             let transactions = account.pending_transactions().await;
-            Response::Transactions(transactions.iter().map(TransactionDto::from).collect())
+            Response::Transactions(transactions.iter().map(TransactionWithMetadataDto::from).collect())
         }
         AccountMethod::PrepareBurn { burn, options } => {
             let data = account.prepare_burn(burn, options).await?;
@@ -217,11 +219,11 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
             options,
         } => {
             let transaction = account.send(amount, address, options).await?;
-            Response::SentTransaction(TransactionDto::from(&transaction))
+            Response::SentTransaction(TransactionWithMetadataDto::from(&transaction))
         }
         AccountMethod::SendWithParams { params, options } => {
             let transaction = account.send_with_params(params, options).await?;
-            Response::SentTransaction(TransactionDto::from(&transaction))
+            Response::SentTransaction(TransactionWithMetadataDto::from(&transaction))
         }
         AccountMethod::SendOutputs { outputs, options } => {
             let token_supply = account.client().get_token_supply().await?;
@@ -234,7 +236,7 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
                     options,
                 )
                 .await?;
-            Response::SentTransaction(TransactionDto::from(&transaction))
+            Response::SentTransaction(TransactionWithMetadataDto::from(&transaction))
         }
         AccountMethod::SetAlias { alias } => {
             account.set_alias(&alias).await?;
@@ -256,13 +258,13 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
                     None,
                 )
                 .await?;
-            Response::SentTransaction(TransactionDto::from(&transaction))
+            Response::SentTransaction(TransactionWithMetadataDto::from(&transaction))
         }
-        AccountMethod::SignTransactionEssence {
+        AccountMethod::SignTransaction {
             prepared_transaction_data,
         } => {
             let signed_transaction_data = account
-                .sign_transaction_essence(&PreparedTransactionData::try_from_dto(prepared_transaction_data)?)
+                .sign_transaction(&PreparedTransactionData::try_from_dto(prepared_transaction_data)?)
                 .await?;
             Response::SignedTransactionData(SignedTransactionDataDto::from(&signed_transaction_data))
         }
@@ -276,12 +278,12 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
             let transaction = account
                 .submit_and_store_transaction(signed_transaction_data, None)
                 .await?;
-            Response::SentTransaction(TransactionDto::from(&transaction))
+            Response::SentTransaction(TransactionWithMetadataDto::from(&transaction))
         }
         AccountMethod::Sync { options } => Response::Balance(account.sync(options).await?),
         AccountMethod::Transactions => {
             let transactions = account.transactions().await;
-            Response::Transactions(transactions.iter().map(TransactionDto::from).collect())
+            Response::Transactions(transactions.iter().map(TransactionWithMetadataDto::from).collect())
         }
         AccountMethod::UnspentOutputs { filter_options } => {
             let outputs = account.unspent_outputs(filter_options).await?;

@@ -1,12 +1,13 @@
 // Copyright 2020-2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use alloc::string::ToString;
 use core::str::FromStr;
 
 use crypto::hashes::{blake2b::Blake2b256, Digest};
 use packable::{bounded::BoundedU16, PackableExt};
 
-use crate::types::block::{output::OUTPUT_INDEX_RANGE, payload::transaction::TransactionId, Error};
+use crate::types::block::{output::OUTPUT_INDEX_RANGE, payload::signed_transaction::TransactionId, Error};
 
 pub(crate) type OutputIndex = BoundedU16<{ *OUTPUT_INDEX_RANGE.start() }, { *OUTPUT_INDEX_RANGE.end() }>;
 
@@ -21,7 +22,7 @@ pub struct OutputId {
 
 impl OutputId {
     /// The length of a [`OutputId`].
-    pub const LENGTH: usize = TransactionId::LENGTH + core::mem::size_of::<u16>();
+    pub const LENGTH: usize = TransactionId::LENGTH + core::mem::size_of::<OutputIndex>();
 
     /// Creates a new [`OutputId`].
     pub fn new(transaction_id: TransactionId, index: u16) -> Result<Self, Error> {
@@ -43,15 +44,6 @@ impl OutputId {
         self.index.get()
     }
 
-    /// Creates a null [`OutputId`].
-    pub fn null() -> Self {
-        Self {
-            transaction_id: TransactionId::null(),
-            // Unwrap is fine because index is already known and valid.
-            index: 0u16.try_into().unwrap(),
-        }
-    }
-
     /// Splits an [`OutputId`] into its [`TransactionId`] and index.
     #[inline(always)]
     pub fn split(self) -> (TransactionId, u16) {
@@ -66,7 +58,7 @@ impl OutputId {
 }
 
 #[cfg(feature = "serde")]
-string_serde_impl!(OutputId);
+crate::string_serde_impl!(OutputId);
 
 impl TryFrom<[u8; Self::LENGTH]> for OutputId {
     type Error = Error;
@@ -76,7 +68,7 @@ impl TryFrom<[u8; Self::LENGTH]> for OutputId {
 
         Self::new(
             // Unwrap is fine because size is already known and valid.
-            From::<[u8; TransactionId::LENGTH]>::from(transaction_id.try_into().unwrap()),
+            TransactionId::new(transaction_id.try_into().unwrap()),
             // Unwrap is fine because size is already known and valid.
             u16::from_le_bytes(index.try_into().unwrap()),
         )
@@ -103,6 +95,10 @@ impl core::fmt::Display for OutputId {
 
 impl core::fmt::Debug for OutputId {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        write!(f, "OutputId({self})")
+        f.debug_struct("OutputId")
+            .field("id", &self.to_string())
+            .field("transaction_id", &self.transaction_id)
+            .field("output_index", &self.index)
+            .finish()
     }
 }

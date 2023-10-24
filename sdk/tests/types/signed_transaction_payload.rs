@@ -5,9 +5,9 @@ use iota_sdk::types::block::{
     address::{Address, Ed25519Address},
     input::{Input, UtxoInput},
     output::{unlock_condition::AddressUnlockCondition, BasicOutput, Output},
-    payload::transaction::{RegularTransactionEssence, TransactionId, TransactionPayload},
+    payload::signed_transaction::{SignedTransactionPayload, Transaction, TransactionId},
     protocol::protocol_parameters,
-    rand::{mana::rand_mana_allotment, output::rand_inputs_commitment},
+    rand::mana::rand_mana_allotment,
     signature::{Ed25519Signature, Signature},
     unlock::{ReferenceUnlock, SignatureUnlock, Unlock, Unlocks},
     Error,
@@ -15,21 +15,21 @@ use iota_sdk::types::block::{
 use packable::PackableExt;
 use pretty_assertions::assert_eq;
 
-const TRANSACTION_ID: &str = "0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c649";
+const TRANSACTION_ID: &str = "0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c64900000000";
 const ED25519_ADDRESS: &str = "0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c649";
 const ED25519_PUBLIC_KEY: &str = "0x1da5ddd11ba3f961acab68fafee3177d039875eaa94ac5fdbff8b53f0c50bfb9";
 const ED25519_SIGNATURE: &str = "0xc6a40edf9a089f42c18f4ebccb35fe4b578d93b879e99b87f63573324a710d3456b03fb6d1fcc027e6401cbd9581f790ee3ed7a3f68e9c225fcb9f1cd7b7110d";
 
 #[test]
 fn kind() {
-    assert_eq!(TransactionPayload::KIND, 1);
+    assert_eq!(SignedTransactionPayload::KIND, 1);
 }
 
-// Validate that attempting to construct a `TransactionPayload` with too few unlocks is an error.
+// Validate that attempting to construct a `SignedTransactionPayload` with too few unlocks is an error.
 #[test]
-fn builder_no_essence_too_few_unlocks() {
+fn builder_too_few_unlocks() {
     let protocol_parameters = protocol_parameters();
-    // Construct a transaction essence with two inputs and one output.
+    // Construct a transaction with two inputs and one output.
     let transaction_id = TransactionId::new(prefix_hex::decode(TRANSACTION_ID).unwrap());
     let input1 = Input::Utxo(UtxoInput::new(transaction_id, 0).unwrap());
     let input2 = Input::Utxo(UtxoInput::new(transaction_id, 1).unwrap());
@@ -42,7 +42,7 @@ fn builder_no_essence_too_few_unlocks() {
             .finish_with_params(protocol_parameters.token_supply())
             .unwrap(),
     );
-    let essence = RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
+    let transaction = Transaction::builder(protocol_parameters.network_id())
         .with_inputs([input1, input2])
         .add_output(output)
         .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
@@ -57,16 +57,16 @@ fn builder_no_essence_too_few_unlocks() {
     let unlocks = Unlocks::new([sig_unlock]).unwrap();
 
     assert!(matches!(
-            TransactionPayload::new(essence, unlocks),
+            SignedTransactionPayload::new(transaction, unlocks),
             Err(Error::InputUnlockCountMismatch{input_count, unlock_count})
             if input_count == 2 && unlock_count == 1));
 }
 
-// Validate that attempting to construct a `TransactionPayload` with too many unlocks is an error.
+// Validate that attempting to construct a `SignedTransactionPayload` with too many unlocks is an error.
 #[test]
-fn builder_no_essence_too_many_unlocks() {
+fn builder_too_many_unlocks() {
     let protocol_parameters = protocol_parameters();
-    // Construct a transaction essence with one input and one output.
+    // Construct a transaction with one input and one output.
     let transaction_id = TransactionId::new(prefix_hex::decode(TRANSACTION_ID).unwrap());
     let input1 = Input::Utxo(UtxoInput::new(transaction_id, 0).unwrap());
     let bytes: [u8; 32] = prefix_hex::decode(ED25519_ADDRESS).unwrap();
@@ -78,7 +78,7 @@ fn builder_no_essence_too_many_unlocks() {
             .finish_with_params(protocol_parameters.token_supply())
             .unwrap(),
     );
-    let essence = RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
+    let transaction = Transaction::builder(protocol_parameters.network_id())
         .add_input(input1)
         .add_output(output)
         .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
@@ -95,7 +95,7 @@ fn builder_no_essence_too_many_unlocks() {
     let unlocks = Unlocks::new([sig_unlock, ref_unlock]).unwrap();
 
     assert!(matches!(
-            TransactionPayload::new(essence, unlocks),
+            SignedTransactionPayload::new(transaction, unlocks),
             Err(Error::InputUnlockCountMismatch{input_count, unlock_count})
             if input_count == 1 && unlock_count == 2));
 }
@@ -103,7 +103,7 @@ fn builder_no_essence_too_many_unlocks() {
 // Validate that a `unpack` ∘ `pack` round-trip results in the original block.
 #[test]
 fn pack_unpack_valid() {
-    // Construct a transaction essence with two inputs and one output.
+    // Construct a transaction with two inputs and one output.
     let protocol_parameters = protocol_parameters();
     let transaction_id = TransactionId::new(prefix_hex::decode(TRANSACTION_ID).unwrap());
     let input1 = Input::Utxo(UtxoInput::new(transaction_id, 0).unwrap());
@@ -117,7 +117,7 @@ fn pack_unpack_valid() {
             .finish_with_params(protocol_parameters.token_supply())
             .unwrap(),
     );
-    let essence = RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
+    let transaction = Transaction::builder(protocol_parameters.network_id())
         .with_inputs([input1, input2])
         .add_output(output)
         .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
@@ -132,7 +132,7 @@ fn pack_unpack_valid() {
     let ref_unlock = Unlock::from(ReferenceUnlock::new(0).unwrap());
     let unlocks = Unlocks::new([sig_unlock, ref_unlock]).unwrap();
 
-    let tx_payload = TransactionPayload::new(essence, unlocks).unwrap();
+    let tx_payload = SignedTransactionPayload::new(transaction, unlocks).unwrap();
     let packed_tx_payload = tx_payload.pack_to_vec();
 
     assert_eq!(packed_tx_payload.len(), tx_payload.packed_len());
@@ -145,7 +145,7 @@ fn pack_unpack_valid() {
 #[test]
 fn getters() {
     let protocol_parameters = protocol_parameters();
-    // Construct a transaction essence with two inputs and one output.
+    // Construct a transaction with two inputs and one output.
     let transaction_id = TransactionId::new(prefix_hex::decode(TRANSACTION_ID).unwrap());
     let input1 = Input::Utxo(UtxoInput::new(transaction_id, 0).unwrap());
     let input2 = Input::Utxo(UtxoInput::new(transaction_id, 1).unwrap());
@@ -158,7 +158,7 @@ fn getters() {
             .finish_with_params(protocol_parameters.token_supply())
             .unwrap(),
     );
-    let essence = RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
+    let transaction = Transaction::builder(protocol_parameters.network_id())
         .with_inputs([input1, input2])
         .add_output(output)
         .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
@@ -173,8 +173,8 @@ fn getters() {
     let ref_unlock = Unlock::from(ReferenceUnlock::new(0).unwrap());
     let unlocks = Unlocks::new([sig_unlock, ref_unlock]).unwrap();
 
-    let tx_payload = TransactionPayload::new(essence.clone(), unlocks.clone()).unwrap();
+    let tx_payload = SignedTransactionPayload::new(transaction.clone(), unlocks.clone()).unwrap();
 
-    assert_eq!(*tx_payload.essence(), essence);
+    assert_eq!(*tx_payload.transaction(), transaction);
     assert_eq!(*tx_payload.unlocks(), unlocks);
 }

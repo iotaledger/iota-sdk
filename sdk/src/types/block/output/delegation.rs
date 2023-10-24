@@ -30,10 +30,13 @@ use crate::types::{
     ValidationParams,
 };
 
-impl_id!(pub DelegationId, 32, "Unique identifier of the Delegation Output, which is the BLAKE2b-256 hash of the Output ID that created it.");
-
-#[cfg(feature = "serde")]
-string_serde_impl!(DelegationId);
+crate::impl_id!(
+    /// Unique identifier of the [`DelegationOutput`](crate::types::block::output::DelegationOutput),
+    /// which is the BLAKE2b-256 hash of the [`OutputId`](crate::types::block::output::OutputId) that created it.
+    pub DelegationId {
+        pub const LENGTH: usize = 32;
+    }
+);
 
 impl From<&OutputId> for DelegationId {
     fn from(output_id: &OutputId) -> Self {
@@ -353,7 +356,7 @@ impl DelegationOutput {
         context: &mut ValidationContext<'_>,
     ) -> Result<(), TransactionFailureReason> {
         self.unlock_conditions()
-            .locked_address(self.address(), context.essence.creation_slot())
+            .locked_address(self.address(), context.transaction.creation_slot())
             .unlock(unlock, inputs, context)
     }
 
@@ -435,7 +438,7 @@ impl Packable for DelegationOutput {
         let validator_address = AccountAddress::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
 
         if validator_address.is_null() {
-            return Err(Error::NullDelegationValidatorId).map_err(UnpackError::Packable);
+            return Err(UnpackError::Packable(Error::NullDelegationValidatorId));
         }
 
         let start_epoch = EpochIndex::unpack::<_, VERIFY>(unpacker, &()).coerce()?;

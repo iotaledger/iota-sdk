@@ -16,7 +16,7 @@ pub use self::{metadata::rand_output_metadata, native_token::rand_native_token};
 use crate::types::block::{
     output::{
         unlock_condition::ImmutableAccountAddressUnlockCondition, AccountId, AccountOutput, BasicOutput, FoundryOutput,
-        InputsCommitment, NftId, NftOutput, Output, OutputId, SimpleTokenScheme, TokenScheme, OUTPUT_INDEX_RANGE,
+        NftId, NftOutput, Output, OutputId, SimpleTokenScheme, TokenScheme, OUTPUT_INDEX_RANGE,
     },
     rand::{
         address::rand_account_address,
@@ -101,11 +101,6 @@ pub fn rand_nft_output(token_supply: u64) -> NftOutput {
         .add_unlock_condition(rand_address_unlock_condition_different_from(&nft_id))
         .finish_with_params(token_supply)
         .unwrap()
-}
-
-/// Generates a random [`InputsCommitment`].
-pub fn rand_inputs_commitment() -> InputsCommitment {
-    InputsCommitment::from(rand_bytes_array())
 }
 
 /// Generates a random [`Output`].

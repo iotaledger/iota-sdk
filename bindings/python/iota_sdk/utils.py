@@ -13,10 +13,13 @@ from iota_sdk.types.node_info import ProtocolParameters
 from iota_sdk.types.output_id import OutputId
 from iota_sdk.types.output import Output
 from iota_sdk.external import call_utils_method
+from iota_sdk.types.payload import TransactionPayload
 
 # Required to prevent circular import
 if TYPE_CHECKING:
     from iota_sdk.types.block.wrapper import BlockWrapper
+
+# pylint: disable=too-many-public-methods
 
 
 class Utils():
@@ -76,7 +79,7 @@ class Utils():
             'address': address
         })
 
-        deserialize_address(response)
+        return deserialize_address(response)
 
     @staticmethod
     def is_address_valid(address: str) -> bool:

@@ -83,7 +83,7 @@ impl Address {
         }
     }
 
-    def_is_as_opt!(Address: Ed25519, Account, Nft, ImplicitAccountCreation, Restricted);
+    crate::def_is_as_opt!(Address: Ed25519, Account, Nft, ImplicitAccountCreation, Restricted);
 
     /// Tries to create an [`Address`] from a bech32 encoded string.
     pub fn try_from_bech32(address: impl AsRef<str>) -> Result<Self, Error> {
@@ -111,7 +111,7 @@ impl Address {
 
                 let Signature::Ed25519(signature) = unlock.signature();
 
-                if signature.is_valid(&context.essence_hash, ed25519_address).is_err() {
+                if signature.is_valid(&context.transaction_hash, ed25519_address).is_err() {
                     return Err(TransactionFailureReason::InvalidUnlockBlockSignature);
                 }
 

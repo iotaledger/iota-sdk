@@ -7,7 +7,7 @@ use crypto::keys::bip44::Bip44;
 use iota_sdk::{
     client::{
         api::{
-            transaction::validate_transaction_payload_length, verify_semantic, GetAddressesOptions,
+            transaction::validate_signed_transaction_payload_length, verify_semantic, GetAddressesOptions,
             PreparedTransactionData,
         },
         constants::{SHIMMER_COIN_TYPE, SHIMMER_TESTNET_BECH32_HRP},
@@ -17,11 +17,8 @@ use iota_sdk::{
     types::block::{
         address::{AccountAddress, Address, ToBech32Ext},
         input::{Input, UtxoInput},
-        output::{AccountId, InputsCommitment},
-        payload::{
-            transaction::{RegularTransactionEssence, TransactionEssence},
-            TransactionPayload,
-        },
+        output::AccountId,
+        payload::{signed_transaction::Transaction, SignedTransactionPayload},
         protocol::protocol_parameters,
         rand::mana::rand_mana_allotment,
         unlock::{SignatureUnlock, Unlock},
@@ -83,11 +80,7 @@ async fn sign_account_state_transition() -> Result<()> {
         None,
     )]);
 
-    let essence = TransactionEssence::Regular(
-        RegularTransactionEssence::builder(
-            protocol_parameters.network_id(),
-            InputsCommitment::new(inputs.iter().map(|i| &i.output)),
-        )
+    let transaction = Transaction::builder(protocol_parameters.network_id())
         .with_inputs(
             inputs
                 .iter()
@@ -96,25 +89,22 @@ async fn sign_account_state_transition() -> Result<()> {
         )
         .with_outputs(outputs)
         .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
-        .finish_with_params(protocol_parameters)?,
-    );
+        .finish_with_params(protocol_parameters)?;
 
     let prepared_transaction_data = PreparedTransactionData {
-        essence,
+        transaction,
         inputs_data: inputs,
         remainder: None,
     };
 
-    let unlocks = secret_manager
-        .sign_transaction_essence(&prepared_transaction_data)
-        .await?;
+    let unlocks = secret_manager.transaction_unlocks(&prepared_transaction_data).await?;
 
     assert_eq!(unlocks.len(), 1);
     assert_eq!((*unlocks).get(0).unwrap().kind(), SignatureUnlock::KIND);
 
-    let tx_payload = TransactionPayload::new(prepared_transaction_data.essence.as_regular().clone(), unlocks)?;
+    let tx_payload = SignedTransactionPayload::new(prepared_transaction_data.transaction.clone(), unlocks)?;
 
-    validate_transaction_payload_length(&tx_payload)?;
+    validate_signed_transaction_payload_length(&tx_payload)?;
 
     let conflict = verify_semantic(&prepared_transaction_data.inputs_data, &tx_payload)?;
 
@@ -173,11 +163,7 @@ async fn sign_account_governance_transition() -> Result<()> {
         None,
     )]);
 
-    let essence = TransactionEssence::Regular(
-        RegularTransactionEssence::builder(
-            protocol_parameters.network_id(),
-            InputsCommitment::new(inputs.iter().map(|i| &i.output)),
-        )
+    let transaction = Transaction::builder(protocol_parameters.network_id())
         .with_inputs(
             inputs
                 .iter()
@@ -186,25 +172,22 @@ async fn sign_account_governance_transition() -> Result<()> {
         )
         .with_outputs(outputs)
         .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
-        .finish_with_params(protocol_parameters)?,
-    );
+        .finish_with_params(protocol_parameters)?;
 
     let prepared_transaction_data = PreparedTransactionData {
-        essence,
+        transaction,
         inputs_data: inputs,
         remainder: None,
     };
 
-    let unlocks = secret_manager
-        .sign_transaction_essence(&prepared_transaction_data)
-        .await?;
+    let unlocks = secret_manager.transaction_unlocks(&prepared_transaction_data).await?;
 
     assert_eq!(unlocks.len(), 1);
     assert_eq!((*unlocks).get(0).unwrap().kind(), SignatureUnlock::KIND);
 
-    let tx_payload = TransactionPayload::new(prepared_transaction_data.essence.as_regular().clone(), unlocks)?;
+    let tx_payload = SignedTransactionPayload::new(prepared_transaction_data.transaction.clone(), unlocks)?;
 
-    validate_transaction_payload_length(&tx_payload)?;
+    validate_signed_transaction_payload_length(&tx_payload)?;
 
     let conflict = verify_semantic(&prepared_transaction_data.inputs_data, &tx_payload)?;
 
@@ -299,15 +282,7 @@ async fn account_reference_unlocks() -> Result<()> {
         ),
     ]);
 
-    let essence = TransactionEssence::Regular(
-        RegularTransactionEssence::builder(
-            protocol_parameters.network_id(),
-            InputsCommitment::new(
-                inputs
-                    .iter()
-                    .map(|i: &iota_sdk::client::secret::types::InputSigningData| &i.output),
-            ),
-        )
+    let transaction = Transaction::builder(protocol_parameters.network_id())
         .with_inputs(
             inputs
                 .iter()
@@ -316,18 +291,15 @@ async fn account_reference_unlocks() -> Result<()> {
         )
         .with_outputs(outputs)
         .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
-        .finish_with_params(protocol_parameters)?,
-    );
+        .finish_with_params(protocol_parameters)?;
 
     let prepared_transaction_data = PreparedTransactionData {
-        essence,
+        transaction,
         inputs_data: inputs,
         remainder: None,
     };
 
-    let unlocks = secret_manager
-        .sign_transaction_essence(&prepared_transaction_data)
-        .await?;
+    let unlocks = secret_manager.transaction_unlocks(&prepared_transaction_data).await?;
 
     assert_eq!(unlocks.len(), 3);
     assert_eq!((*unlocks).get(0).unwrap().kind(), SignatureUnlock::KIND);
@@ -344,9 +316,9 @@ async fn account_reference_unlocks() -> Result<()> {
         _ => panic!("Invalid unlock"),
     }
 
-    let tx_payload = TransactionPayload::new(prepared_transaction_data.essence.as_regular().clone(), unlocks)?;
+    let tx_payload = SignedTransactionPayload::new(prepared_transaction_data.transaction.clone(), unlocks)?;
 
-    validate_transaction_payload_length(&tx_payload)?;
+    validate_signed_transaction_payload_length(&tx_payload)?;
 
     let conflict = verify_semantic(&prepared_transaction_data.inputs_data, &tx_payload)?;
 

@@ -114,7 +114,7 @@ impl Feature {
         }
     }
 
-    def_is_as_opt!(Feature: Sender, Issuer, Metadata, Tag, NativeToken, BlockIssuer, Staking);
+    crate::def_is_as_opt!(Feature: Sender, Issuer, Metadata, Tag, NativeToken, BlockIssuer, Staking);
 }
 
 create_bitflags!(

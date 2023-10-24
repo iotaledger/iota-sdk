@@ -106,7 +106,6 @@ class TransactionFailureReason(Enum):
         InvalidNativeTokens: The given native tokens are invalid.
         StorageDepositReturnUnfulfilled: The return amount in a transaction is not fulfilled by the output side.
         InvalidInputUnlock: An input unlock was invalid.
-        InvalidInputsCommitment: The inputs commitment is invalid.
         SenderNotUnlocked: The output contains a Sender with an ident (address) which is not unlocked.
         InvalidChainStateTransition: The chain state transition is invalid.
         InvalidTransactionIssuingTime: The referenced input is created after the transaction issuing time.
@@ -129,17 +128,16 @@ class TransactionFailureReason(Enum):
     InvalidNativeTokens = 8
     StorageDepositReturnUnfulfilled = 9
     InvalidInputUnlock = 10
-    InvalidInputsCommitment = 11
-    SenderNotUnlocked = 12
-    InvalidChainStateTransition = 13
-    InvalidTransactionIssuingTime = 14
-    InvalidManaAmount = 15
-    InvalidBlockIssuanceCreditsAmount = 16
-    InvalidRewardContextInput = 17
-    InvalidCommitmentContextInput = 18
-    MissingStakingFeature = 19
-    FailedToClaimStakingReward = 20
-    FailedToClaimDelegationReward = 21
+    SenderNotUnlocked = 11
+    InvalidChainStateTransition = 12
+    InvalidTransactionIssuingTime = 13
+    InvalidManaAmount = 14
+    InvalidBlockIssuanceCreditsAmount = 15
+    InvalidRewardContextInput = 16
+    InvalidCommitmentContextInput = 17
+    MissingStakingFeature = 18
+    FailedToClaimStakingReward = 19
+    FailedToClaimDelegationReward = 20
     SemanticValidationFailed = 255
 
     def __str__(self):
@@ -154,16 +152,15 @@ class TransactionFailureReason(Enum):
             8: "The given native tokens are invalid.",
             9: "The return amount in a transaction is not fulfilled by the output side.",
             10: "An input unlock was invalid.",
-            11: "The inputs commitment is invalid.",
-            12: "The output contains a Sender with an ident (address) which is not unlocked.",
-            13: "The chain state transition is invalid.",
-            14: "The referenced input is created after the transaction issuing time.",
-            15: "The mana amount is invalid.",
-            16: "The Block Issuance Credits amount is invalid.",
-            17: "Reward Context Input is invalid.",
-            18: "Commitment Context Input is invalid.",
-            19: "Staking Feature is not provided in account output when claiming rewards.",
-            20: "Failed to claim staking reward.",
-            21: "Failed to claim delegation reward.",
+            11: "The output contains a Sender with an ident (address) which is not unlocked.",
+            12: "The chain state transition is invalid.",
+            13: "The referenced input is created after the transaction issuing time.",
+            14: "The mana amount is invalid.",
+            15: "The Block Issuance Credits amount is invalid.",
+            16: "Reward Context Input is invalid.",
+            17: "Commitment Context Input is invalid.",
+            18: "Staking Feature is not provided in account output when claiming rewards.",
+            19: "Failed to claim staking reward.",
+            20: "Failed to claim delegation reward.",
             255: "The semantic validation failed for a reason not covered by the previous variants."
         }[self.value]

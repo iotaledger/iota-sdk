@@ -5,7 +5,7 @@ use core::str::FromStr;
 
 use derive_more::From;
 
-use crate::types::block::{output::OutputId, payload::transaction::TransactionId, Error};
+use crate::types::block::{output::OutputId, payload::signed_transaction::TransactionId, Error};
 
 /// Represents an input referencing an output.
 #[derive(Clone, Copy, Eq, PartialEq, Hash, Ord, PartialOrd, From, packable::Packable)]
@@ -81,5 +81,5 @@ pub(crate) mod dto {
         }
     }
 
-    impl_serde_typed_dto!(UtxoInput, UtxoInputDto, "UTXO input");
+    crate::impl_serde_typed_dto!(UtxoInput, UtxoInputDto, "UTXO input");
 }

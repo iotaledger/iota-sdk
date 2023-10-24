@@ -166,5 +166,5 @@ pub(crate) mod dto {
         }
     }
 
-    impl_serde_typed_dto!(Ed25519Signature, Ed25519SignatureDto, "ed25519 signature");
+    crate::impl_serde_typed_dto!(Ed25519Signature, Ed25519SignatureDto, "ed25519 signature");
 }

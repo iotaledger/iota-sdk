@@ -44,13 +44,11 @@ pub(crate) async fn call_secret_manager_method_internal(
             Response::SignedTransaction(transaction.into())
         }
         SecretManagerMethod::SignatureUnlock {
-            transaction_essence_hash,
+            transaction_hash,
             chain,
         } => {
-            let transaction_essence_hash: [u8; 32] = prefix_hex::decode(transaction_essence_hash)?;
-            let unlock: Unlock = secret_manager
-                .signature_unlock(&transaction_essence_hash, chain)
-                .await?;
+            let transaction_hash: [u8; 32] = prefix_hex::decode(transaction_hash)?;
+            let unlock: Unlock = secret_manager.signature_unlock(&transaction_hash, chain).await?;
 
             Response::SignatureUnlock(unlock)
         }
