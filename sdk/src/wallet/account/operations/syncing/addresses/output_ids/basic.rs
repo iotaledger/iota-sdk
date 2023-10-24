@@ -10,7 +10,7 @@ use futures::FutureExt;
 #[cfg(not(target_family = "wasm"))]
 use crate::types::api::plugins::indexer::OutputIdsResponse;
 use crate::{
-    client::{node_api::indexer::query_parameters::BasicOutputsQueryParametersBuilder, secret::SecretManage},
+    client::{node_api::indexer::query_parameters::BasicOutputsQueryParameters, secret::SecretManage},
     types::block::{address::Bech32Address, output::OutputId, ConvertTo},
     wallet::Account,
 };
@@ -28,11 +28,7 @@ where
         // Only request basic outputs with `AddressUnlockCondition` only
         Ok(self
             .client()
-            .basic_output_ids(
-                BasicOutputsQueryParametersBuilder::default()
-                    .only_address_unlock_condition(bech32_address)
-                    .build(),
-            )
+            .basic_output_ids(BasicOutputsQueryParameters::default().only_address_unlock_condition(bech32_address))
             .await?
             .items)
     }
@@ -50,9 +46,7 @@ where
             output_ids.extend(
                 self.client()
                     .basic_output_ids(
-                        BasicOutputsQueryParametersBuilder::default()
-                            .unlockable_by_address(bech32_address.clone())
-                            .build(),
+                        BasicOutputsQueryParameters::default().unlockable_by_address(bech32_address.clone()),
                     )
                     .await?
                     .items,
@@ -60,9 +54,7 @@ where
             output_ids.extend(
                 self.client()
                     .basic_output_ids(
-                        BasicOutputsQueryParametersBuilder::default()
-                            .storage_deposit_return_address(bech32_address.clone())
-                            .build(),
+                        BasicOutputsQueryParameters::default().storage_deposit_return_address(bech32_address.clone()),
                     )
                     .await?
                     .items,
@@ -82,9 +74,7 @@ where
                     tokio::spawn(async move {
                         client
                             .basic_output_ids(
-                                BasicOutputsQueryParametersBuilder::default()
-                                    .unlockable_by_address(bech32_address.clone())
-                                    .build(),
+                                BasicOutputsQueryParameters::default().unlockable_by_address(bech32_address.clone()),
                             )
                             .await
                             .map_err(From::from)
@@ -99,9 +89,8 @@ where
                     tokio::spawn(async move {
                         client
                             .basic_output_ids(
-                                BasicOutputsQueryParametersBuilder::default()
-                                    .storage_deposit_return_address(bech32_address.clone())
-                                    .build(),
+                                BasicOutputsQueryParameters::default()
+                                    .storage_deposit_return_address(bech32_address.clone()),
                             )
                             .await
                             .map_err(From::from)

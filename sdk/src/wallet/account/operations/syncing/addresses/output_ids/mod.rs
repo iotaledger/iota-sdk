@@ -13,7 +13,7 @@ use instant::Instant;
 
 use crate::{
     client::{
-        node_api::indexer::query_parameters::{FoundryOutputsQueryParametersBuilder, OutputsQueryParametersBuilder},
+        node_api::indexer::query_parameters::{FoundryOutputsQueryParameters, OutputsQueryParameters},
         secret::SecretManage,
     },
     types::block::{
@@ -54,11 +54,7 @@ where
         {
             return Ok(self
                 .client()
-                .output_ids(
-                    OutputsQueryParametersBuilder::default()
-                        .unlockable_by_address(bech32_address.clone())
-                        .build(),
-                )
+                .output_ids(OutputsQueryParameters::default().unlockable_by_address(bech32_address.clone()))
                 .await?
                 .items);
         }
@@ -167,11 +163,7 @@ where
             {
                 results.push(Ok(self
                     .client()
-                    .foundry_output_ids(
-                        FoundryOutputsQueryParametersBuilder::default()
-                            .account_address(bech32_address)
-                            .build(),
-                    )
+                    .foundry_output_ids(FoundryOutputsQueryParameters::default().account_address(bech32_address))
                     .await?
                     .items))
             }
@@ -185,9 +177,7 @@ where
                         tokio::spawn(async move {
                             Ok(client
                                 .foundry_output_ids(
-                                    FoundryOutputsQueryParametersBuilder::default()
-                                        .account_address(bech32_address)
-                                        .build(),
+                                    FoundryOutputsQueryParameters::default().account_address(bech32_address),
                                 )
                                 .await?
                                 .items)

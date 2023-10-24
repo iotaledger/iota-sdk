@@ -5,7 +5,7 @@
 
 use iota_sdk::{
     client::{
-        api::GetAddressesOptions, node_api::indexer::query_parameters::BasicOutputsQueryParametersBuilder, Client,
+        api::GetAddressesOptions, node_api::indexer::query_parameters::BasicOutputsQueryParameters, Client,
         NodeInfoWrapper,
     },
     types::{
@@ -129,7 +129,7 @@ async fn test_get_address_outputs() {
         .unwrap();
 
     let output_ids_response = client
-        .basic_output_ids(BasicOutputsQueryParametersBuilder::default().address(address).build())
+        .basic_output_ids(BasicOutputsQueryParameters::default().address(address))
         .await
         .unwrap();
 
