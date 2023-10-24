@@ -3,6 +3,11 @@
 
 use crypto::hashes::{Digest, Output};
 
+/// Leaf domain separation prefix.
+const LEAF_HASH_PREFIX: u8 = 0x00;
+/// Node domain separation prefix.
+const NODE_HASH_PREFIX: u8 = 0x01;
+
 /// A Merkle hasher based on a digest function.
 pub(crate) struct MerkleHasher;
 
@@ -16,6 +21,7 @@ impl MerkleHasher {
     fn leaf<D: Default + Digest>(value: &impl AsRef<[u8]>) -> Output<D> {
         let mut hasher = D::default();
 
+        hasher.update([LEAF_HASH_PREFIX]);
         hasher.update(value);
         hasher.finalize()
     }
@@ -25,6 +31,7 @@ impl MerkleHasher {
         let mut hasher = D::default();
         let (left, right) = values.split_at(largest_power_of_two(values.len() as u32));
 
+        hasher.update([NODE_HASH_PREFIX]);
         hasher.update(Self::digest::<D>(left));
         hasher.update(Self::digest::<D>(right));
         hasher.finalize()
@@ -55,7 +62,6 @@ mod tests {
     use super::*;
     use crate::types::block::BlockId;
 
-    // Value from https://github.com/iotaledger/iota.go/blob/develop/merklehasher/merkle_hasher_test.go
     #[test]
     fn tree() {
         let hashes = [
@@ -75,7 +81,7 @@ mod tests {
 
         assert_eq!(
             prefix_hex::encode(hash),
-            "0x824cfefd6360abc45b9a166035a5f595928de555eeabafb1ca5fdff3b36a1065"
+            "0x4a6ff2aca6a11554b6997cf91c31585d436235e7a45f6b4ea48648d6488f6726"
         )
     }
 }
