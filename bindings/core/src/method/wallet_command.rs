@@ -25,7 +25,7 @@ use iota_sdk::{
 };
 use serde::{Deserialize, Serialize};
 
-/// Each public wallet operation method.
+/// Each public wallet command method.
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(tag = "name", content = "data", rename_all = "camelCase")]
 #[non_exhaustive]

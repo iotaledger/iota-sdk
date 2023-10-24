@@ -24,11 +24,11 @@ use crate::OmittedDebug;
 #[serde(tag = "name", content = "data", rename_all = "camelCase")]
 #[non_exhaustive]
 pub enum WalletMethod {
-    /// Consume an account method.
+    /// Consume an wallet command method.
     /// Returns [`Response`](crate::Response)
     #[serde(rename_all = "camelCase")]
     CallMethod {
-        /// The wallet operation method to call.
+        /// The wallet command method to call.
         method: super::WalletCommandMethod,
     },
     /// Backup storage. Password must be the current one, when Stronghold is used as SecretManager.
