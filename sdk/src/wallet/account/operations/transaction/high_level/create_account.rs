@@ -14,7 +14,7 @@ use crate::{
         },
     },
     utils::serde::option_prefix_hex_bytes,
-    wallet::account::{types::Transaction, Account, OutputData, TransactionOptions},
+    wallet::account::{types::TransactionWithMetadata, Account, OutputData, TransactionOptions},
 };
 
 /// Params `create_account_output()`
@@ -56,7 +56,7 @@ impl Account {
         &self,
         params: Option<CreateAccountParams>,
         options: impl Into<Option<TransactionOptions>> + Send,
-    ) -> crate::wallet::Result<Transaction> {
+    ) -> crate::wallet::Result<TransactionWithMetadata> {
         let options = options.into();
         let prepared_transaction = self.prepare_create_account_output(params, options.clone()).await?;
 

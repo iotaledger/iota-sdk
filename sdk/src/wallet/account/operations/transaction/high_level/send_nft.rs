@@ -11,7 +11,7 @@ use crate::{
         output::{unlock_condition::AddressUnlockCondition, NftId, NftOutputBuilder, Output},
         ConvertTo,
     },
-    wallet::account::{operations::transaction::Transaction, Account, TransactionOptions},
+    wallet::account::{operations::transaction::TransactionWithMetadata, Account, TransactionOptions},
 };
 
 /// Params for `send_nft()`
@@ -66,7 +66,7 @@ impl Account {
         &self,
         params: I,
         options: impl Into<Option<TransactionOptions>> + Send,
-    ) -> crate::wallet::Result<Transaction>
+    ) -> crate::wallet::Result<TransactionWithMetadata>
     where
         I::IntoIter: Send,
     {

@@ -7,14 +7,14 @@ use crypto::keys::bip44::Bip44;
 use crate::wallet::events::types::{TransactionProgressEvent, WalletEvent};
 use crate::{
     types::block::{payload::Payload, BlockId},
-    wallet::account::{operations::transaction::TransactionPayload, Account},
+    wallet::account::{operations::transaction::SignedTransactionPayload, Account},
 };
 
 impl Account {
     /// Submits a payload in a block
     pub(crate) async fn submit_transaction_payload(
         &self,
-        transaction_payload: TransactionPayload,
+        transaction_payload: SignedTransactionPayload,
     ) -> crate::wallet::Result<BlockId> {
         log::debug!("[TRANSACTION] send_payload");
         #[cfg(feature = "events")]

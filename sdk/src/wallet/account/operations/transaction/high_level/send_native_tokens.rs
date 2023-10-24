@@ -20,7 +20,8 @@ use crate::{
     },
     wallet::{
         account::{
-            constants::DEFAULT_EXPIRATION_SLOTS, operations::transaction::Transaction, Account, TransactionOptions,
+            constants::DEFAULT_EXPIRATION_SLOTS, operations::transaction::TransactionWithMetadata, Account,
+            TransactionOptions,
         },
         Error, Result,
     },
@@ -105,7 +106,7 @@ impl Account {
         &self,
         params: I,
         options: impl Into<Option<TransactionOptions>> + Send,
-    ) -> crate::wallet::Result<Transaction>
+    ) -> crate::wallet::Result<TransactionWithMetadata>
     where
         I::IntoIter: Send,
     {

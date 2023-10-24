@@ -16,7 +16,7 @@ use crate::{
         ConvertTo,
     },
     wallet::{
-        account::{operations::transaction::Transaction, Account, TransactionOptions},
+        account::{operations::transaction::TransactionWithMetadata, Account, TransactionOptions},
         Error as WalletError,
     },
 };
@@ -136,7 +136,7 @@ impl Account {
         &self,
         params: I,
         options: impl Into<Option<TransactionOptions>> + Send,
-    ) -> crate::wallet::Result<Transaction>
+    ) -> crate::wallet::Result<TransactionWithMetadata>
     where
         I::IntoIter: Send,
     {

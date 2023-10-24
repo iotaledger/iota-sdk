@@ -9,7 +9,7 @@ use crate::{
         AccountOutputBuilder, FoundryOutputBuilder, Output, SimpleTokenScheme, TokenId, TokenScheme,
     },
     wallet::{
-        account::{types::Transaction, Account, TransactionOptions},
+        account::{types::TransactionWithMetadata, Account, TransactionOptions},
         Error,
     },
 };
@@ -35,7 +35,7 @@ impl Account {
         token_id: TokenId,
         mint_amount: impl Into<U256> + Send,
         options: impl Into<Option<TransactionOptions>> + Send,
-    ) -> crate::wallet::Result<Transaction> {
+    ) -> crate::wallet::Result<TransactionWithMetadata> {
         let options = options.into();
         let prepared = self
             .prepare_mint_native_token(token_id, mint_amount, options.clone())

@@ -26,7 +26,7 @@ use tokio::sync::{Mutex, RwLock};
 pub use self::operations::participation::{AccountParticipationOverview, ParticipationEventWithNodes};
 use self::types::{
     address::{AddressWithUnspentOutputs, Bip44Address},
-    Balance, OutputData, Transaction, TransactionDto,
+    Balance, OutputData, TransactionWithMetadata, TransactionWithMetadataDto,
 };
 pub use self::{
     operations::{
@@ -61,7 +61,7 @@ use crate::{
         block::{
             address::Bech32Address,
             output::{dto::FoundryOutputDto, AccountId, FoundryId, FoundryOutput, NftId, Output, OutputId, TokenId},
-            payload::{transaction::TransactionId, TransactionPayload},
+            payload::{signed_transaction::TransactionId, SignedTransactionPayload},
         },
         TryFromDto,
     },
@@ -117,13 +117,13 @@ pub struct AccountDetails {
     /// Sent transactions
     // stored separated from the account for performance and only the transaction id here? where to add the network id?
     // transactions: HashSet<TransactionId>,
-    transactions: HashMap<TransactionId, Transaction>,
+    transactions: HashMap<TransactionId, TransactionWithMetadata>,
     /// Pending transactions
     // Maybe pending transactions even additionally separated?
     pending_transactions: HashSet<TransactionId>,
     /// Transaction payloads for received outputs with inputs when not pruned before syncing, can be used to determine
     /// the sender address(es)
-    incoming_transactions: HashMap<TransactionId, Transaction>,
+    incoming_transactions: HashMap<TransactionId, TransactionWithMetadata>,
     /// Some incoming transactions can be pruned by the node before we requested them, then this node can never return
     /// it. To avoid useless requests, these transaction ids are stored here and cleared when new client options are
     /// set, because another node might still have them.
@@ -269,13 +269,13 @@ impl AccountInner {
     }
 
     /// Get the [`Transaction`] of a transaction stored in the account
-    pub async fn get_transaction(&self, transaction_id: &TransactionId) -> Option<Transaction> {
+    pub async fn get_transaction(&self, transaction_id: &TransactionId) -> Option<TransactionWithMetadata> {
         self.details().await.transactions().get(transaction_id).cloned()
     }
 
     /// Get the transaction with inputs of an incoming transaction stored in the account
     /// List might not be complete, if the node pruned the data already
-    pub async fn get_incoming_transaction(&self, transaction_id: &TransactionId) -> Option<Transaction> {
+    pub async fn get_incoming_transaction(&self, transaction_id: &TransactionId) -> Option<TransactionWithMetadata> {
         self.details()
             .await
             .incoming_transactions()
@@ -421,17 +421,17 @@ impl AccountInner {
     }
 
     /// Returns all incoming transactions of the account
-    pub async fn incoming_transactions(&self) -> Vec<Transaction> {
+    pub async fn incoming_transactions(&self) -> Vec<TransactionWithMetadata> {
         self.details().await.incoming_transactions.values().cloned().collect()
     }
 
     /// Returns all transactions of the account
-    pub async fn transactions(&self) -> Vec<Transaction> {
+    pub async fn transactions(&self) -> Vec<TransactionWithMetadata> {
         self.details().await.transactions.values().cloned().collect()
     }
 
     /// Returns all pending transactions of the account
-    pub async fn pending_transactions(&self) -> Vec<Transaction> {
+    pub async fn pending_transactions(&self) -> Vec<TransactionWithMetadata> {
         let mut transactions = Vec::new();
         let account_details = self.details().await;
 
@@ -447,10 +447,10 @@ impl AccountInner {
 
 pub(crate) fn build_transaction_from_payload_and_inputs(
     tx_id: TransactionId,
-    tx_payload: TransactionPayload,
+    tx_payload: SignedTransactionPayload,
     inputs: Vec<OutputWithMetadataResponse>,
-) -> crate::wallet::Result<Transaction> {
-    Ok(Transaction {
+) -> crate::wallet::Result<TransactionWithMetadata> {
+    Ok(TransactionWithMetadata {
         payload: tx_payload.clone(),
         block_id: inputs.first().map(|i| *i.metadata.block_id()),
         inclusion_state: InclusionState::Confirmed,
@@ -461,7 +461,7 @@ pub(crate) fn build_transaction_from_payload_and_inputs(
         //     .and_then(|i| i.metadata.milestone_timestamp_spent.map(|t| t as u128 * 1000))
         //     .unwrap_or_else(|| crate::utils::unix_timestamp_now().as_millis()),
         transaction_id: tx_id,
-        network_id: tx_payload.essence().network_id(),
+        network_id: tx_payload.transaction().network_id(),
         incoming: true,
         note: None,
         inputs,
@@ -491,11 +491,11 @@ pub struct AccountDetailsDto {
     /// Unspent outputs
     pub unspent_outputs: HashMap<OutputId, OutputDataDto>,
     /// Sent transactions
-    pub transactions: HashMap<TransactionId, TransactionDto>,
+    pub transactions: HashMap<TransactionId, TransactionWithMetadataDto>,
     /// Pending transactions
     pub pending_transactions: HashSet<TransactionId>,
     /// Incoming transactions
-    pub incoming_transactions: HashMap<TransactionId, TransactionDto>,
+    pub incoming_transactions: HashMap<TransactionId, TransactionWithMetadataDto>,
     /// Foundries for native tokens in outputs
     #[serde(default)]
     pub native_token_foundries: HashMap<FoundryId, FoundryOutputDto>,
@@ -530,13 +530,13 @@ impl TryFromDto for AccountDetails {
             transactions: dto
                 .transactions
                 .into_iter()
-                .map(|(id, o)| Ok((id, Transaction::try_from_dto_with_params(o, &params)?)))
+                .map(|(id, o)| Ok((id, TransactionWithMetadata::try_from_dto_with_params(o, &params)?)))
                 .collect::<crate::wallet::Result<_>>()?,
             pending_transactions: dto.pending_transactions,
             incoming_transactions: dto
                 .incoming_transactions
                 .into_iter()
-                .map(|(id, o)| Ok((id, Transaction::try_from_dto_with_params(o, &params)?)))
+                .map(|(id, o)| Ok((id, TransactionWithMetadata::try_from_dto_with_params(o, &params)?)))
                 .collect::<crate::wallet::Result<_>>()?,
             inaccessible_incoming_transactions: Default::default(),
             native_token_foundries: dto
@@ -571,13 +571,13 @@ impl From<&AccountDetails> for AccountDetailsDto {
             transactions: value
                 .transactions()
                 .iter()
-                .map(|(id, transaction)| (*id, TransactionDto::from(transaction)))
+                .map(|(id, transaction)| (*id, TransactionWithMetadataDto::from(transaction)))
                 .collect(),
             pending_transactions: value.pending_transactions().clone(),
             incoming_transactions: value
                 .incoming_transactions()
                 .iter()
-                .map(|(id, transaction)| (*id, TransactionDto::from(transaction)))
+                .map(|(id, transaction)| (*id, TransactionWithMetadataDto::from(transaction)))
                 .collect(),
             native_token_foundries: value
                 .native_token_foundries()
@@ -598,8 +598,8 @@ mod test {
     use crate::types::block::{
         address::{Address, Ed25519Address},
         input::{Input, UtxoInput},
-        output::{AddressUnlockCondition, BasicOutput, InputsCommitment, Output},
-        payload::transaction::{RegularTransactionEssence, TransactionId, TransactionPayload},
+        output::{AddressUnlockCondition, BasicOutput, Output},
+        payload::signed_transaction::{SignedTransactionPayload, Transaction, TransactionId},
         protocol::ProtocolParameters,
         rand::mana::rand_mana_allotment,
         signature::{Ed25519Signature, Signature},
@@ -637,13 +637,12 @@ mod test {
                 .finish_with_params(protocol_parameters.clone())
                 .unwrap(),
         );
-        let essence =
-            RegularTransactionEssence::builder(protocol_parameters.network_id(), InputsCommitment::from([0u8; 32]))
-                .with_inputs([input1, input2])
-                .add_output(output)
-                .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
-                .finish_with_params(protocol_parameters)
-                .unwrap();
+        let transaction = Transaction::builder(protocol_parameters.network_id())
+            .with_inputs([input1, input2])
+            .add_output(output)
+            .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
+            .finish_with_params(protocol_parameters)
+            .unwrap();
 
         let pub_key_bytes = prefix_hex::decode(ED25519_PUBLIC_KEY).unwrap();
         let sig_bytes = prefix_hex::decode(ED25519_SIGNATURE).unwrap();
@@ -652,9 +651,9 @@ mod test {
         let ref_unlock = Unlock::from(ReferenceUnlock::new(0).unwrap());
         let unlocks = Unlocks::new([sig_unlock, ref_unlock]).unwrap();
 
-        let tx_payload = TransactionPayload::new(essence, unlocks).unwrap();
+        let tx_payload = SignedTransactionPayload::new(transaction, unlocks).unwrap();
 
-        let incoming_transaction = Transaction {
+        let incoming_transaction = TransactionWithMetadata {
             transaction_id: TransactionId::from_str(
                 "0x131fc4cb8f315ae36ae3bf6a4e4b3486d5f17581288f1217410da3e0700d195a00000000",
             )

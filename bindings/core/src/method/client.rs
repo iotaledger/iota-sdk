@@ -12,7 +12,7 @@ use iota_sdk::{
             dto::OutputDto, feature::Feature, unlock_condition::dto::UnlockConditionDto, AccountId, FoundryId,
             NativeToken, NftId, OutputId, TokenScheme,
         },
-        payload::{dto::PayloadDto, transaction::TransactionId},
+        payload::{dto::PayloadDto, signed_transaction::TransactionId},
         BlockId, BlockWrapperDto,
     },
     utils::serde::{option_string, string},

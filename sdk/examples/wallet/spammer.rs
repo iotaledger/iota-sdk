@@ -14,7 +14,7 @@ use iota_sdk::{
         request_funds_from_faucet,
         secret::{mnemonic::MnemonicSecretManager, SecretManager},
     },
-    types::block::{address::Bech32Address, output::BasicOutput, payload::transaction::TransactionId},
+    types::block::{address::Bech32Address, output::BasicOutput, payload::signed_transaction::TransactionId},
     wallet::{account::FilterOptions, Account, ClientOptions, Result, SendParams, Wallet},
 };
 

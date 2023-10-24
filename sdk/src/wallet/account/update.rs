@@ -7,13 +7,15 @@ use crate::{
     types::block::output::{OutputId, OutputMetadata},
     wallet::account::{
         operations::syncing::options::SyncOptions,
-        types::{address::AddressWithUnspentOutputs, InclusionState, OutputData, Transaction},
+        types::{address::AddressWithUnspentOutputs, InclusionState, OutputData, TransactionWithMetadata},
         Account, Bip44Address,
     },
 };
 #[cfg(feature = "events")]
 use crate::{
-    types::{api::core::OutputWithMetadataResponse, block::payload::transaction::dto::TransactionPayloadDto},
+    types::{
+        api::core::OutputWithMetadataResponse, block::payload::signed_transaction::dto::SignedTransactionPayloadDto,
+    },
     wallet::{
         account::types::OutputDataDto,
         events::types::{NewOutputEvent, SpentOutputEvent, TransactionInclusionEvent, WalletEvent},
@@ -118,7 +120,9 @@ impl Account {
                         account_index,
                         WalletEvent::NewOutput(Box::new(NewOutputEvent {
                             output: OutputDataDto::from(&output_data),
-                            transaction: transaction.as_ref().map(|tx| TransactionPayloadDto::from(&tx.payload)),
+                            transaction: transaction
+                                .as_ref()
+                                .map(|tx| SignedTransactionPayloadDto::from(&tx.payload)),
                             transaction_inputs: transaction.as_ref().map(|tx| {
                                 tx.inputs
                                     .clone()
@@ -152,7 +156,7 @@ impl Account {
     /// Update account with newly synced transactions
     pub(crate) async fn update_account_with_transactions(
         &self,
-        updated_transactions: Vec<Transaction>,
+        updated_transactions: Vec<TransactionWithMetadata>,
         spent_output_ids: Vec<OutputId>,
         output_ids_to_unlock: Vec<OutputId>,
     ) -> crate::wallet::Result<()> {
