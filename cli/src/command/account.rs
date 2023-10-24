@@ -1,4 +1,4 @@
-// Copyright 2020-2022 IOTA Stiftung
+// Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
 use std::str::FromStr;
@@ -958,17 +958,11 @@ pub async fn voting_output_command(account: &Account) -> Result<(), Error> {
 }
 
 async fn print_address(account: &Account, address: &Bech32Address) -> Result<(), Error> {
-    let mut formatted_table = String::from("Address");
-    formatted_table.push_str(&format!(
-        "{0}{1:<11}{2}{0}{3:<11}{4}{0}{5:<11}{6}",
-        "\n  ",
-        "Bech32:",
-        address,
-        "Hex:",
-        address.inner(),
-        "Type:",
-        address.inner().kind_str(),
-    ));
+    let mut formatted_table = String::new();
+    writeln!(&mut formatted_table, "Address");
+    writeln!(&mut formatted_table, "{:<11}{}", "Bech32:", address);
+    writeln!(&mut formatted_table, "{:<11}{}", "Hex:", address.inner());
+    writeln!(&mut formatted_table, "{:<11}{}", "Type:", address.inner().kind_str());
 
     let unspent_outputs = account
         .unspent_outputs(None)
@@ -1027,42 +1021,43 @@ async fn print_address(account: &Account, address: &Bech32Address) -> Result<(),
     }
 
     // base tokens table
-    formatted_table.push_str("\nBase Tokens");
-    formatted_table.push_str(&format!("{0}{1:<8}{2}", "\n  ", "Amount:", amount));
+    writeln!(&mut formatted_table, "Base Tokens");
+    writeln!(&mut formatted_table, "{:<8}{}", "Amount:", amount);
 
     // outputs table
     if !outputs.is_empty() {
-        formatted_table.push_str("\nOutputs");
+        writeln!(&mut formatted_table, "Outputs");
         for (id, kind) in outputs {
-            formatted_table.push_str(&format!("{0}{id}\t{kind}", "\n  "));
+            writeln!(&mut formatted_table, "  {kind}\t{id}");
         }
     }
 
     // native tokens table
     let native_tokens = native_tokens.finish_vec()?;
     if !native_tokens.is_empty() {
-        formatted_table.push_str("\nNative Tokens");
+        writeln!(&mut formatted_table, "Native Tokens");
         for (id, amount) in native_tokens
             .into_iter()
             .map(|nt| (*nt.token_id(), nt.amount().to_string()))
         {
-            formatted_table.push_str(&format!("{0}{id}{0}Amount: {amount}", "\n  "));
+            writeln!(&mut formatted_table, "  {id}");
+            writeln!(&mut formatted_table, "  Amount: {amount}");
         }
     }
 
     // NFT table
     if !nfts.is_empty() {
-        formatted_table.push_str("\nNFTs");
+        writeln!(&mut formatted_table, "NFTs");
         for id in nfts.into_iter() {
-            formatted_table.push_str(&format!("{0}{id}", "\n  "));
+            writeln!(&mut formatted_table, "  {id}");
         }
     }
 
     // Aliases table
     if !aliases.is_empty() {
-        formatted_table.push_str("\nAliases");
+        writeln!(&mut formatted_table, "Aliases");
         for id in aliases.into_iter() {
-            formatted_table.push_str(&format!("{0}{id}", "\n  "));
+            writeln!(&mut formatted_table, "  {id}");
         }
     }
 
