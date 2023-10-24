@@ -75,7 +75,7 @@ impl TransactionBuilder {
         self
     }
 
-    /// Adds [`ManaAllotment`]s to a [`TransactionBuilder`].
+    /// Sets [`ManaAllotment`]s to a [`TransactionBuilder`].
     pub fn with_mana_allotments(mut self, allotments: impl IntoIterator<Item = ManaAllotment>) -> Self {
         self.allotments = allotments.into_iter().collect();
         self
