@@ -566,6 +566,11 @@ path = "examples/client/logger.rs"
 required-features = ["client"]
 
 [[example]]
+name = "quorum"
+path = "examples/client/quorum.rs"
+required-features = ["client"]
+
+[[example]]
 name = "stronghold"
 path = "examples/client/stronghold.rs"
 required-features = ["client", "stronghold"]
