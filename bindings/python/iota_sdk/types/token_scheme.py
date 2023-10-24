@@ -23,7 +23,7 @@ class SimpleTokenScheme:
     type: int = field(default_factory=lambda: 0, init=False)
 
     @staticmethod
-    def to_dict_custom(config):
+    def _to_dict_custom(config):
         """
         The function converts integer values in the config to hexadecimal strings.
         """
