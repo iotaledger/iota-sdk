@@ -181,6 +181,7 @@ where
 
         loop {
             // Add new alias and nft addresses
+            #[allow(clippy::iter_with_drain)]
             for output_data in new_outputs_data.drain(..) {
                 match &output_data.output {
                     Output::Alias(alias_output) => {
@@ -201,9 +202,7 @@ where
             }
 
             for (alias_or_nft_address, ed25519_address) in new_alias_and_nft_addresses.drain() {
-                let output_ids = self
-                    .get_output_ids_for_address(alias_or_nft_address.clone(), options)
-                    .await?;
+                let output_ids = self.get_output_ids_for_address(alias_or_nft_address, options).await?;
 
                 // Update address with unspent outputs
                 let address_with_unspent_outputs = addresses_with_unspent_outputs
