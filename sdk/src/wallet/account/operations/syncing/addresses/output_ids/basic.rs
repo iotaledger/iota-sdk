@@ -20,7 +20,9 @@ where
         // Only request basic outputs with `AddressUnlockCondition` only
         Ok(self
             .client()
-            .basic_output_ids(BasicOutputQueryParameters::new().only_address_unlock_condition(bech32_address))
+            .basic_output_ids(BasicOutputQueryParameters::only_address_unlock_condition(
+                bech32_address,
+            ))
             .await?
             .items)
     }
@@ -32,12 +34,11 @@ where
         bech32_address: impl ConvertTo<Bech32Address>,
     ) -> crate::wallet::Result<Vec<OutputId>> {
         let bech32_address = bech32_address.convert()?;
-        let output_ids = self
+
+        Ok(self
             .client()
             .basic_output_ids(BasicOutputQueryParameters::new().unlockable_by_address(bech32_address.clone()))
             .await?
-            .items;
-
-        Ok(output_ids)
+            .items)
     }
 }

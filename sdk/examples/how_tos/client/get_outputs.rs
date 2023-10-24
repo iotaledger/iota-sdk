@@ -40,7 +40,7 @@ async fn main() -> Result<()> {
 
     // Get output IDs of basic outputs that can be controlled by this address without further unlock constraints.
     let output_ids_response = client
-        .basic_output_ids(BasicOutputQueryParameters::new().only_address_unlock_condition(address))
+        .basic_output_ids(BasicOutputQueryParameters::only_address_unlock_condition(address))
         .await?;
 
     println!("First output of query:");

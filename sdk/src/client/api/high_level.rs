@@ -64,9 +64,7 @@ impl Client {
     pub async fn find_inputs(&self, addresses: Vec<Bech32Address>, amount: u64) -> Result<Vec<UtxoInput>> {
         // Get outputs from node and select inputs
         let available_outputs = futures::stream::iter(addresses)
-            .then(|address| {
-                self.basic_output_ids(BasicOutputQueryParameters::new().only_address_unlock_condition(address))
-            })
+            .then(|address| self.basic_output_ids(BasicOutputQueryParameters::only_address_unlock_condition(address)))
             .and_then(|res| async {
                 let items = res.items;
                 self.get_outputs_with_metadata(&items).await

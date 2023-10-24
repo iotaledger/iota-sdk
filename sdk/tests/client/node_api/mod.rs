@@ -72,7 +72,9 @@ pub async fn setup_transaction_block(client: &Client) -> (BlockId, TransactionId
         }
         tokio::time::sleep(std::time::Duration::from_secs(1)).await;
         let output_ids_response = client
-            .basic_output_ids(BasicOutputQueryParameters::new().only_address_unlock_condition(addresses[0].clone()))
+            .basic_output_ids(BasicOutputQueryParameters::only_address_unlock_condition(
+                addresses[0].clone(),
+            ))
             .await
             .unwrap();
 
