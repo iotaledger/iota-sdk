@@ -5,8 +5,6 @@ import {
     MintNftParams,
     NftId,
     NftOutput,
-    RegularTransactionEssence,
-    TransactionPayload,
     utf8ToHex,
     Utils,
     Wallet,
@@ -19,7 +17,7 @@ require('dotenv').config({ path: '.env' });
 // running the `how_tos/accounts_and_addresses/create-account` example!
 //
 // Rename `.env.example` to `.env` first, then run
-// yarn run-example ./how_tos/nfts/00_mint_issuer_nft.ts
+// yarn run-example ./how_tos/nft_collection/00_mint_issuer_nft.ts
 async function run() {
     try {
         if (!process.env.STRONGHOLD_PASSWORD) {
