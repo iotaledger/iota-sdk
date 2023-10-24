@@ -121,13 +121,13 @@ pub struct BasicOutputsQueryParameters {
 impl_query_parameters_methods!(BasicOutputsQueryParameters);
 
 impl BasicOutputsQueryParameters {
-    /// Sets `.address(address).has_expiration(false).has_expiration(false).has_storage_deposit_return(false)` to only
+    /// Sets `.address(address).has_expiration(false).has_storage_deposit_return(false).has_timelock(false)` to only
     /// get outputs that can be unlocked by the address without potential further restrictions.
     pub fn only_address_unlock_condition(self, address: impl Into<Bech32Address>) -> Self {
         self.address(address.into())
             .has_expiration(false)
-            .has_expiration(false)
             .has_storage_deposit_return(false)
+            .has_timelock(false)
     }
 }
 
@@ -208,13 +208,13 @@ pub struct NftOutputsQueryParameters {
 impl_query_parameters_methods!(NftOutputsQueryParameters);
 
 impl NftOutputsQueryParameters {
-    /// Sets `.address(address).has_expiration(false).has_expiration(false).has_storage_deposit_return(false)` to only
+    /// Sets `.address(address).has_expiration(false).has_storage_deposit_return(false).has_timelock(false)` to only
     /// get outputs that can be unlocked by the address without potential further restrictions.
     pub fn only_address_unlock_condition(self, address: impl Into<Bech32Address>) -> Self {
         self.address(address.into())
             .has_expiration(false)
-            .has_expiration(false)
             .has_storage_deposit_return(false)
+            .has_timelock(false)
     }
 }
 
