@@ -237,13 +237,14 @@ class OutputMetadata:
     milestoneTimestampSpent: Optional[int] = None
     transactionIdSpent: Optional[HexStr] = None
 
+    # pylint: disable=redefined-builtin
     @classmethod
-    def from_dict(cls, data_dict: Dict) -> OutputMetadata:
+    def from_dict(cls, dict: Dict) -> OutputMetadata:
         """Converts a dict to a OutputMetadata
         """
         obj = cls.__new__(cls)
         super(OutputMetadata, obj).__init__()
-        for k, v in data_dict.items():
+        for k, v in dict.items():
             setattr(obj, k, v)
         return obj
 
@@ -265,13 +266,14 @@ class OutputWithMetadata:
     metadata: OutputMetadata
     output: Union[AliasOutput, FoundryOutput, NftOutput, BasicOutput]
 
+    # pylint: disable=redefined-builtin
     @classmethod
-    def from_dict(cls, data_dict: Dict) -> OutputWithMetadata:
+    def from_dict(cls, dict: Dict) -> OutputWithMetadata:
         """Creates an output with metadata instance from the dict object.
         """
         obj = cls.__new__(cls)
         super(OutputWithMetadata, obj).__init__()
-        for k, v in data_dict.items():
+        for k, v in dict.items():
             setattr(obj, k, v)
         return obj
 

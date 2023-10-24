@@ -50,12 +50,13 @@ class Transaction:
     note: Optional[str] = None
     blockId: Optional[HexStr] = None
 
+    # pylint: disable=redefined-builtin
     @classmethod
-    def from_dict(cls, data_dict: Dict) -> Transaction:
+    def from_dict(cls, dict: Dict) -> Transaction:
         """Converts a dict to a Transaction
         """
         obj = cls.__new__(cls)
         super(Transaction, obj).__init__()
-        for k, v in data_dict.items():
+        for k, v in dict.items():
             setattr(obj, k, v)
         return obj

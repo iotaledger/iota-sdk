@@ -35,7 +35,7 @@ print('Outputs BEFORE consolidation:')
 for i, output_data in enumerate(outputs):
     print(f'OUTPUT #{i}')
     print(f'- address: #{Utils.hex_to_bech32(output_data.address.pubKeyHash, "rms")}')
-    print(f'- amount: #{output_data.output.amount')
+    print(f'- amount: #{output_data.output.amount}')
     print(f'- native tokens: #{output_data.output.nativeTokens}')
 
 print('Sending consolidation transaction...')
@@ -63,5 +63,5 @@ print('Outputs AFTER consolidation:')
 for i, output_data in enumerate(outputs):
     print(f'OUTPUT #{i}')
     print(f'- address: #{Utils.hex_to_bech32(output_data.address.pubKeyHash, "rms")}')
-    print(f'- amount: #{output_data.output.amount')
+    print(f'- amount: #{output_data.output.amount}')
     print(f'- native tokens: #{output_data.output.nativeTokens}')

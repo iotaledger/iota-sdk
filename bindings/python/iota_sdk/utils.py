@@ -31,12 +31,13 @@ class Utils():
             'bech32': bech32
         })
 
+    # pylint: disable=redefined-builtin
     @staticmethod
-    def hex_to_bech32(address: HexStr, bech32_hrp: str) -> str:
+    def hex_to_bech32(hex: HexStr, bech32_hrp: str) -> str:
         """Convert a hex encoded address to a Bech32 encoded address.
         """
         return _call_method('hexToBech32', {
-            'hex': address,
+            'hex': hex,
             'bech32Hrp': bech32_hrp
         })
 
@@ -58,12 +59,13 @@ class Utils():
             'bech32Hrp': bech32_hrp
         })
 
+    # pylint: disable=redefined-builtin
     @staticmethod
-    def hex_public_key_to_bech32_address(public_key: HexStr, bech32_hrp: str) -> str:
+    def hex_public_key_to_bech32_address(hex: HexStr, bech32_hrp: str) -> str:
         """Convert a hex encoded public key to a Bech32 encoded address.
         """
         return _call_method('hexPublicKeyToBech32Address', {
-            'hex': public_key,
+            'hex': hex,
             'bech32Hrp': bech32_hrp
         })
 

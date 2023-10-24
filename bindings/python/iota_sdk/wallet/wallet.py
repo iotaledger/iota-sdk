@@ -277,8 +277,9 @@ class Wallet():
         """
         return destroy_wallet(self.handle)
 
+    # pylint: disable=redefined-builtin
     @staticmethod
-    def __return_str_or_none(opt_str):
-        if opt_str:
-            return opt_str
+    def __return_str_or_none(str):
+        if str:
+            return str
         return None

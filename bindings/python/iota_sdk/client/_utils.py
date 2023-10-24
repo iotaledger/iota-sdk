@@ -33,11 +33,12 @@ class ClientUtils(metaclass=ABCMeta):
         no payload.
         """
 
-    def hex_to_bech32(self, hex_str: HexStr, bech32_hrp: str) -> str:
+    # pylint: disable=redefined-builtin
+    def hex_to_bech32(self, hex: HexStr, bech32_hrp: str) -> str:
         """Transforms a hex encoded address to a bech32 encoded address.
         """
         return self._call_method('hexToBech32', {
-            'hex': hex_str,
+            'hex': hex,
             'bech32Hrp': bech32_hrp
         })
 
@@ -57,12 +58,13 @@ class ClientUtils(metaclass=ABCMeta):
             'bech32Hrp': bech32_hrp
         })
 
+    # pylint: disable=redefined-builtin
     def hex_public_key_to_bech32_address(
-            self, hex_str: HexStr, bech32_hrp: Optional[str] = None) -> str:
+            self, hex: HexStr, bech32_hrp: Optional[str] = None) -> str:
         """Transforms a hex encoded public key to a bech32 encoded address.
         """
         return self._call_method('hexPublicKeyToBech32Address', {
-            'hex': hex_str,
+            'hex': hex,
             'bech32Hrp': bech32_hrp
         })
 
