@@ -296,26 +296,25 @@ impl SecretManage for LedgerSecretManager {
         } else {
             // figure out the remainder address and bip32 index (if there is one)
             #[allow(clippy::option_if_let_else)]
-            let (remainder_address, remainder_bip32): (Option<&Address>, LedgerBIP32Index) =
-                match &prepared_transaction.remainder {
-                    Some(a) => {
-                        if let Some(chain) = a.chain {
-                            (
-                                Some(&a.address),
-                                LedgerBIP32Index {
-                                    bip32_change: chain.change.harden().into(),
-                                    bip32_index: chain.address_index.harden().into(),
-                                },
-                            )
-                        } else {
-                            (None, LedgerBIP32Index::default())
-                        }
+            let (remainder_output, remainder_bip32) = match &prepared_transaction.remainder {
+                Some(remainder) => {
+                    if let Some(chain) = remainder.chain {
+                        (
+                            Some(&remainder.output),
+                            LedgerBIP32Index {
+                                bip32_change: chain.change.harden().into(),
+                                bip32_index: chain.address_index.harden().into(),
+                            },
+                        )
+                    } else {
+                        (None, LedgerBIP32Index::default())
                     }
-                    None => (None, LedgerBIP32Index::default()),
-                };
+                }
+                None => (None, LedgerBIP32Index::default()),
+            };
 
             let mut remainder_index = 0u16;
-            if let Some(remainder_address) = remainder_address {
+            if let Some(remainder_output) = remainder_output {
                 match &prepared_transaction.essence {
                     TransactionEssence::Regular(essence) => {
                         // find the index of the remainder in the essence
@@ -326,21 +325,19 @@ impl SecretManage for LedgerSecretManager {
                         // The outputs in the essence already are sorted
                         // at this place, so we can rely on their order and don't have to sort it again.
                         'essence_outputs: for output in essence.outputs().iter() {
-                            if let Output::Basic(s) = output {
-                                if let Some(address) = s.unlock_conditions().address() {
-                                    if *remainder_address == *address.address() {
-                                        break 'essence_outputs;
-                                    }
-                                }
-                            } else {
+                            if !output.is_basic() {
                                 log::debug!("[LEDGER] unsupported output");
                                 return Err(Error::MiscError.into());
+                            }
+
+                            if remainder_output == output {
+                                break 'essence_outputs;
                             }
 
                             remainder_index += 1;
                         }
 
-                        // was index found?
+                        // Was index found?
                         if remainder_index as usize == essence.outputs().len() {
                             log::debug!("[LEDGER] remainder_index not found");
                             return Err(Error::MiscError.into());
@@ -355,7 +352,7 @@ impl SecretManage for LedgerSecretManager {
                 "[LEDGER] {:?} {:02x?} {} {} {:?}",
                 input_bip32_indices,
                 essence_bytes,
-                remainder_address.is_some(),
+                remainder_output.is_some(),
                 remainder_index,
                 remainder_bip32
             );
@@ -363,7 +360,7 @@ impl SecretManage for LedgerSecretManager {
                 .prepare_signing(
                     input_bip32_indices,
                     essence_bytes,
-                    remainder_address.is_some(),
+                    remainder_output.is_some(),
                     remainder_index,
                     remainder_bip32,
                 )
