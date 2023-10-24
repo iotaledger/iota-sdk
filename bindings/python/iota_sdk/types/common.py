@@ -14,24 +14,22 @@ SlotIndex = NewType("SlotIndex", int)
 def json(cls):
     """Decorator to add to_dict and to_json methods to a dataclass."""
 
-    # Store override method
-    override_to_dict = getattr(cls, "to_dict", None)
+    # Get potential override method
+    to_dict = getattr(cls, "to_dict", None)
 
     # Apply the dataclass_json decorator to get the default behavior
     cls = dataclass_json(
         letter_case=LetterCase.CAMEL,
         undefined=Undefined.RAISE)(cls)
 
-    # Re-apply the original fn if it exists
-    if override_to_dict is not None:
-        setattr(cls, "_to_dict", override_to_dict)
-    else:
-        setattr(cls, "_to_dict", cls.to_dict)
+    # If no custom one is defined, set the default from dataclass_json
+    if to_dict is None:
+        to_dict = cls.to_dict
 
     # Override to_dict to remove None values
     def custom_to_dict(self, *args, **kwargs):
         # pylint: disable=protected-access
-        original_dict = self._to_dict(self, *args, **kwargs)
+        original_dict = to_dict(self, *args, **kwargs)
 
         result = {k: v for k, v in original_dict.items() if v is not None}
         return result
