@@ -34,7 +34,7 @@ impl SignedTransactionPayload {
         Ok(Self { transaction, unlocks })
     }
 
-    /// Return the transaction of a [`SignedTransactionPayload`].
+    /// Returns the transaction of a [`SignedTransactionPayload`].
     pub fn transaction(&self) -> &Transaction {
         &self.transaction
     }
