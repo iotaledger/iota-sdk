@@ -52,13 +52,10 @@ macro_rules! impl_query_parameters_methods {
     };
 }
 
-impl_query_parameters_methods!(OutputsQueryParameters, OutputsQueryParametersBuilder);
-
 /// Query parameter for output requests.
-#[derive(Debug, Default, Clone, Serialize, Deserialize, Eq, PartialEq)]
+#[derive(Builder, Debug, Default, Clone, Serialize, Deserialize, Eq, PartialEq)]
+#[builder(default, setter(strip_option), build_fn(private, name = "fallible_build"))]
 #[serde(rename_all = "camelCase")]
-#[derive(Builder)]
-#[builder(setter(prefix = "with", strip_option), build_fn(private, name = "fallible_build"))]
 pub struct OutputsQueryParameters {
     /// Returns outputs that were created after a certain slot index.
     pub created_after: Option<SlotIndex>,
@@ -77,13 +74,12 @@ pub struct OutputsQueryParameters {
     pub unlockable_by_address: Option<Bech32Address>,
 }
 
-impl_query_parameters_methods!(BasicOutputsQueryParameters, BasicOutputsQueryParametersBuilder);
+impl_query_parameters_methods!(OutputsQueryParameters, OutputsQueryParametersBuilder);
 
 /// Query parameter for output requests.
-#[derive(Debug, Default, Clone, Serialize, Deserialize, Eq, PartialEq)]
+#[derive(Builder, Debug, Default, Clone, Serialize, Deserialize, Eq, PartialEq)]
+#[builder(default, setter(strip_option), build_fn(private, name = "fallible_build"))]
 #[serde(rename_all = "camelCase")]
-#[derive(Builder)]
-#[builder(setter(prefix = "with", strip_option), build_fn(private, name = "fallible_build"))]
 pub struct BasicOutputsQueryParameters {
     /// Returns outputs that were created after a certain slot index.
     pub created_after: Option<SlotIndex>,
@@ -128,13 +124,23 @@ pub struct BasicOutputsQueryParameters {
     pub timelocked_before: Option<SlotIndex>,
 }
 
-impl_query_parameters_methods!(AccountOutputsQueryParameters, AccountOutputsQueryParametersBuilder);
+impl_query_parameters_methods!(BasicOutputsQueryParameters, BasicOutputsQueryParametersBuilder);
+
+impl BasicOutputsQueryParametersBuilder {
+    /// Sets `.address(address).has_expiration(false).has_expiration(false).has_storage_deposit_return(false)` to only
+    /// get outputs that can be unlocked by the address without potential further restrictions.
+    pub fn only_address_unlock_condition(&mut self, address: impl Into<Bech32Address>) -> &mut Self {
+        self.address(address.into())
+            .has_expiration(false)
+            .has_expiration(false)
+            .has_storage_deposit_return(false)
+    }
+}
 
 /// Query parameter for output requests.
-#[derive(Debug, Default, Clone, Serialize, Deserialize, Eq, PartialEq)]
+#[derive(Builder, Debug, Default, Clone, Serialize, Deserialize, Eq, PartialEq)]
+#[builder(default, setter(strip_option), build_fn(private, name = "fallible_build"))]
 #[serde(rename_all = "camelCase")]
-#[derive(Builder)]
-#[builder(setter(prefix = "with", strip_option), build_fn(private, name = "fallible_build"))]
 pub struct AccountOutputsQueryParameters {
     /// Returns outputs that were created after a certain slot index.
     pub created_after: Option<SlotIndex>,
@@ -157,13 +163,12 @@ pub struct AccountOutputsQueryParameters {
     pub state_controller: Option<Bech32Address>,
 }
 
-impl_query_parameters_methods!(NftOutputsQueryParameters, NftOutputsQueryParametersBuilder);
+impl_query_parameters_methods!(AccountOutputsQueryParameters, AccountOutputsQueryParametersBuilder);
 
 /// Query parameter for output requests.
-#[derive(Debug, Default, Clone, Serialize, Deserialize, Eq, PartialEq)]
+#[derive(Builder, Debug, Default, Clone, Serialize, Deserialize, Eq, PartialEq)]
+#[builder(default, setter(strip_option), build_fn(private, name = "fallible_build"))]
 #[serde(rename_all = "camelCase")]
-#[derive(Builder)]
-#[builder(setter(prefix = "with", strip_option), build_fn(private, name = "fallible_build"))]
 pub struct NftOutputsQueryParameters {
     /// Returns outputs that were created after a certain slot index.
     pub created_after: Option<SlotIndex>,
@@ -206,13 +211,23 @@ pub struct NftOutputsQueryParameters {
     pub timelocked_before: Option<SlotIndex>,
 }
 
-impl_query_parameters_methods!(FoundryOutputsQueryParameters, FoundryOutputsQueryParametersBuilder);
+impl_query_parameters_methods!(NftOutputsQueryParameters, NftOutputsQueryParametersBuilder);
+
+impl NftOutputsQueryParametersBuilder {
+    /// Sets `.address(address).has_expiration(false).has_expiration(false).has_storage_deposit_return(false)` to only
+    /// get outputs that can be unlocked by the address without potential further restrictions.
+    pub fn only_address_unlock_condition(&mut self, address: impl Into<Bech32Address>) -> &mut Self {
+        self.address(address.into())
+            .has_expiration(false)
+            .has_expiration(false)
+            .has_storage_deposit_return(false)
+    }
+}
 
 /// Query parameter for output requests.
-#[derive(Debug, Default, Clone, Serialize, Deserialize, Eq, PartialEq)]
+#[derive(Builder, Debug, Default, Clone, Serialize, Deserialize, Eq, PartialEq)]
+#[builder(default, setter(strip_option), build_fn(private, name = "fallible_build"))]
 #[serde(rename_all = "camelCase")]
-#[derive(Builder)]
-#[builder(setter(prefix = "with", strip_option), build_fn(private, name = "fallible_build"))]
 pub struct FoundryOutputsQueryParameters {
     /// Returns outputs that were created after a certain slot index.
     pub created_after: Option<SlotIndex>,
@@ -230,12 +245,12 @@ pub struct FoundryOutputsQueryParameters {
     /// Filter foundry outputs based on bech32-encoded address of the controlling account.
     pub account_address: Option<Bech32Address>,
 }
+impl_query_parameters_methods!(FoundryOutputsQueryParameters, FoundryOutputsQueryParametersBuilder);
 
 /// Query parameter for output requests.
-#[derive(Debug, Default, Clone, Serialize, Deserialize, Eq, PartialEq)]
+#[derive(Builder, Debug, Default, Clone, Serialize, Deserialize, Eq, PartialEq)]
+#[builder(default, setter(strip_option), build_fn(private, name = "fallible_build"))]
 #[serde(rename_all = "camelCase")]
-#[derive(Builder)]
-#[builder(setter(prefix = "with", strip_option), build_fn(private, name = "fallible_build"))]
 pub struct DelegationOutputsQueryParameters {
     /// Returns outputs that were created after a certain slot index.
     pub created_after: Option<SlotIndex>,
@@ -252,6 +267,11 @@ pub struct DelegationOutputsQueryParameters {
     pub validator: Option<Bech32Address>,
 }
 
+impl_query_parameters_methods!(
+    DelegationOutputsQueryParameters,
+    DelegationOutputsQueryParametersBuilder
+);
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -261,14 +281,13 @@ mod tests {
         let empty_basic_outputs_query_parameters = BasicOutputsQueryParameters::default();
         assert_eq!(empty_basic_outputs_query_parameters.to_query_string(), None);
 
-        let mut basic_outputs_query_parameters = BasicOutputsQueryParameters {
-            address: Some(
+        let mut basic_outputs_query_parameters = BasicOutputsQueryParametersBuilder::default()
+            .address(
                 Bech32Address::try_from_str("atoi1qzt0nhsf38nh6rs4p6zs5knqp6psgha9wsv74uajqgjmwc75ugupx3y7x0r")
                     .unwrap(),
-            ),
-            cursor: Some("".into()),
-            ..Default::default()
-        };
+            )
+            .cursor("".into())
+            .build();
         assert_eq!(
             basic_outputs_query_parameters.to_query_string(),
             Some("address=atoi1qzt0nhsf38nh6rs4p6zs5knqp6psgha9wsv74uajqgjmwc75ugupx3y7x0r&cursor=".into())

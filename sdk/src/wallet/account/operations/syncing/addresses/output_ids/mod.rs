@@ -13,7 +13,7 @@ use instant::Instant;
 
 use crate::{
     client::{
-        node_api::indexer::query_parameters::{FoundryOutputsQueryParameters, OutputsQueryParameters},
+        node_api::indexer::query_parameters::{FoundryOutputsQueryParametersBuilder, OutputsQueryParametersBuilder},
         secret::SecretManage,
     },
     types::block::{
@@ -54,10 +54,11 @@ where
         {
             return Ok(self
                 .client()
-                .output_ids(OutputsQueryParameters {
-                    unlockable_by_address: Some(bech32_address.clone()),
-                    ..Default::default()
-                })
+                .output_ids(
+                    OutputsQueryParametersBuilder::default()
+                        .unlockable_by_address(bech32_address.clone())
+                        .build(),
+                )
                 .await?
                 .items);
         }
@@ -166,10 +167,11 @@ where
             {
                 results.push(Ok(self
                     .client()
-                    .foundry_output_ids(FoundryOutputsQueryParameters {
-                        account_address: Some(bech32_address),
-                        ..Default::default()
-                    })
+                    .foundry_output_ids(
+                        FoundryOutputsQueryParametersBuilder::default()
+                            .account_address(bech32_address)
+                            .build(),
+                    )
                     .await?
                     .items))
             }
@@ -182,10 +184,11 @@ where
                         let client = self.client().clone();
                         tokio::spawn(async move {
                             Ok(client
-                                .foundry_output_ids(FoundryOutputsQueryParameters {
-                                    account_address: Some(bech32_address),
-                                    ..Default::default()
-                                })
+                                .foundry_output_ids(
+                                    FoundryOutputsQueryParametersBuilder::default()
+                                        .account_address(bech32_address)
+                                        .build(),
+                                )
                                 .await?
                                 .items)
                         })

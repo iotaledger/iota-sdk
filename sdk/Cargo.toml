@@ -131,6 +131,7 @@ pretty_assertions = { version = "1.4.0", default-features = false, features = [ 
 dotenvy = { version = "0.15.7", default-features = false }
 fern-logger = { version = "0.5.0", default-features = false }
 num_cpus = { version = "1.16.0", default-features = false }
+once_cell = { version = "1.18.0", default-features = false }
 tokio = { version = "1.33.0", default-features = false, features = [
     "macros",
     "rt",
@@ -659,7 +660,7 @@ required-features = ["wallet", "participation"]
 [[example]]
 name = "logger"
 path = "examples/wallet/logger.rs"
-required-features = ["wallet"]
+required-features = ["wallet", "storage"]
 
 [[example]]
 name = "recover_accounts"

@@ -10,7 +10,7 @@ use futures::FutureExt;
 #[cfg(not(target_family = "wasm"))]
 use crate::types::api::plugins::indexer::OutputIdsResponse;
 use crate::{
-    client::{node_api::indexer::query_parameters::BasicOutputsQueryParameters, secret::SecretManage},
+    client::{node_api::indexer::query_parameters::BasicOutputsQueryParametersBuilder, secret::SecretManage},
     types::block::{address::Bech32Address, output::OutputId, ConvertTo},
     wallet::Account,
 };
@@ -28,13 +28,11 @@ where
         // Only request basic outputs with `AddressUnlockCondition` only
         Ok(self
             .client()
-            .basic_output_ids(BasicOutputsQueryParameters {
-                address: Some(bech32_address),
-                has_expiration: Some(false),
-                has_timelock: Some(false),
-                has_storage_deposit_return: Some(false),
-                ..Default::default()
-            })
+            .basic_output_ids(
+                BasicOutputsQueryParametersBuilder::default()
+                    .only_address_unlock_condition(bech32_address)
+                    .build(),
+            )
             .await?
             .items)
     }
@@ -51,19 +49,21 @@ where
             let mut output_ids = Vec::new();
             output_ids.extend(
                 self.client()
-                    .basic_output_ids(BasicOutputsQueryParameters {
-                        unlockable_by_address: Some(bech32_address.clone()),
-                        ..Default::default()
-                    })
+                    .basic_output_ids(
+                        BasicOutputsQueryParametersBuilder::default()
+                            .unlockable_by_address(bech32_address.clone())
+                            .build(),
+                    )
                     .await?
                     .items,
             );
             output_ids.extend(
                 self.client()
-                    .basic_output_ids(BasicOutputsQueryParameters {
-                        storage_deposit_return_address: Some(bech32_address.clone()),
-                        ..Default::default()
-                    })
+                    .basic_output_ids(
+                        BasicOutputsQueryParametersBuilder::default()
+                            .storage_deposit_return_address(bech32_address.clone())
+                            .build(),
+                    )
                     .await?
                     .items,
             );
@@ -81,10 +81,11 @@ where
                     let client = client.clone();
                     tokio::spawn(async move {
                         client
-                            .basic_output_ids(BasicOutputsQueryParameters {
-                                unlockable_by_address: Some(bech32_address),
-                                ..Default::default()
-                            })
+                            .basic_output_ids(
+                                BasicOutputsQueryParametersBuilder::default()
+                                    .unlockable_by_address(bech32_address.clone())
+                                    .build(),
+                            )
                             .await
                             .map_err(From::from)
                     })
@@ -97,10 +98,11 @@ where
                     let client = client.clone();
                     tokio::spawn(async move {
                         client
-                            .basic_output_ids(BasicOutputsQueryParameters {
-                                storage_deposit_return_address: Some(bech32_address),
-                                ..Default::default()
-                            })
+                            .basic_output_ids(
+                                BasicOutputsQueryParametersBuilder::default()
+                                    .storage_deposit_return_address(bech32_address.clone())
+                                    .build(),
+                            )
                             .await
                             .map_err(From::from)
                     })

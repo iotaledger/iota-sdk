@@ -10,7 +10,7 @@ use futures::FutureExt;
 #[cfg(not(target_family = "wasm"))]
 use crate::types::api::plugins::indexer::OutputIdsResponse;
 use crate::{
-    client::{node_api::indexer::query_parameters::NftOutputsQueryParameters, secret::SecretManage},
+    client::{node_api::indexer::query_parameters::NftOutputsQueryParametersBuilder, secret::SecretManage},
     types::block::{address::Bech32Address, output::OutputId, ConvertTo},
     wallet::Account,
 };
@@ -30,19 +30,21 @@ where
             let mut output_ids = Vec::new();
             output_ids.extend(
                 self.client()
-                    .nft_output_ids(NftOutputsQueryParameters {
-                        unlockable_by_address: Some(bech32_address.clone()),
-                        ..Default::default()
-                    })
+                    .nft_output_ids(
+                        NftOutputsQueryParametersBuilder::default()
+                            .unlockable_by_address(bech32_address.clone())
+                            .build(),
+                    )
                     .await?
                     .items,
             );
             output_ids.extend(
                 self.client()
-                    .nft_output_ids(NftOutputsQueryParameters {
-                        expiration_return_address: Some(bech32_address),
-                        ..Default::default()
-                    })
+                    .nft_output_ids(
+                        NftOutputsQueryParametersBuilder::default()
+                            .storage_deposit_return_address(bech32_address)
+                            .build(),
+                    )
                     .await?
                     .items,
             );
@@ -59,10 +61,11 @@ where
                     tokio::spawn(async move {
                         // Get nft outputs where the address is in the address or expiration unlock condition
                         client
-                            .nft_output_ids(NftOutputsQueryParameters {
-                                unlockable_by_address: Some(bech32_address),
-                                ..Default::default()
-                            })
+                            .nft_output_ids(
+                                NftOutputsQueryParametersBuilder::default()
+                                    .unlockable_by_address(bech32_address.clone())
+                                    .build(),
+                            )
                             .await
                             .map_err(From::from)
                     })
@@ -75,10 +78,11 @@ where
                     tokio::spawn(async move {
                         // Get outputs where the address is in the storage deposit return unlock condition
                         client
-                            .nft_output_ids(NftOutputsQueryParameters {
-                                storage_deposit_return_address: Some(bech32_address),
-                                ..Default::default()
-                            })
+                            .nft_output_ids(
+                                NftOutputsQueryParametersBuilder::default()
+                                    .storage_deposit_return_address(bech32_address)
+                                    .build(),
+                            )
                             .await
                             .map_err(From::from)
                     })
