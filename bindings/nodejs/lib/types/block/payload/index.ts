@@ -5,12 +5,12 @@ import { plainToInstance } from 'class-transformer';
 import { Payload, PayloadType } from './payload';
 import { TaggedDataPayload } from './tagged';
 import { SignedTransactionPayload } from './signed_transaction';
-import { CandidacyAnnouncementPayload } from './candidacy_announcement';
+import { CandidacyAnnouncementPayload } from './candidacy-announcement';
 
 export * from './tagged';
 export * from './signed_transaction';
 export * from './payload';
-export * from './candidacy_announcement';
+export * from './candidacy-announcement';
 
 export const PayloadDiscriminator = {
     property: 'type',

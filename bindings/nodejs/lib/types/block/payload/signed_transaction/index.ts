@@ -3,4 +3,4 @@
 
 export * from './transaction';
 export * from './unlock';
-export * from './signed_transaction';
+export * from './signed-transaction';
