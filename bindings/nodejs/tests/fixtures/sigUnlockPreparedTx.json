@@ -1,6 +1,5 @@
 {
-    "essence": {
-        "type": 1,
+    "transaction": {
         "networkId": "8342982141227064571",
         "inputs": [
             {

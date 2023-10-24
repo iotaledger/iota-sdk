@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Type } from 'class-transformer';
-import { HexEncodedString } from '../../../utils';
 import { ContextInput, ContextInputDiscriminator } from '../../context_input';
 import { Input, InputDiscriminator } from '../../input';
 import { ManaAllotment } from '../../mana-allotment';
@@ -42,17 +41,17 @@ class Transaction {
     })
     readonly inputs: Input[];
 
-    @Type(() => Output, {
-        discriminator: OutputDiscriminator,
-    })
-    readonly outputs: Output[];
-
     readonly allotments: ManaAllotment[];
 
     @Type(() => Payload, {
         discriminator: PayloadDiscriminator,
     })
     readonly payload?: Payload;
+
+    @Type(() => Output, {
+        discriminator: OutputDiscriminator,
+    })
+    readonly outputs: Output[];
 
     /**
      * @param networkId The ID of the network the transaction was issued to.
@@ -66,17 +65,17 @@ class Transaction {
         creationSlot: SlotIndex,
         contextInputs: ContextInput[],
         inputs: Input[],
-        outputs: Output[],
         allotments: ManaAllotment[],
+        outputs: Output[],
         payload?: Payload,
     ) {
         this.networkId = networkId;
         this.creationSlot = creationSlot;
         this.contextInputs = contextInputs;
         this.inputs = inputs;
-        this.outputs = outputs;
         this.allotments = allotments;
         this.payload = payload;
+        this.outputs = outputs;
     }
 }
 
