@@ -33,7 +33,7 @@ import {
     BlockId,
     UnlockCondition,
     Payload,
-    TransactionPayload,
+    SignedTransactionPayload,
     parseBlockWrapper,
     BlockWrapper,
     AccountId,
@@ -246,12 +246,12 @@ export class Client {
      *
      * @param secretManager One of the supported secret managers.
      * @param preparedTransactionData An instance of `PreparedTransactionData`.
-     * @returns The corresponding transaction payload.
+     * @returns The corresponding signed transaction payload.
      */
     async signTransaction(
         secretManager: SecretManagerType,
         preparedTransactionData: PreparedTransactionData,
-    ): Promise<TransactionPayload> {
+    ): Promise<SignedTransactionPayload> {
         const response = await this.methodHandler.callMethod({
             name: 'signTransaction',
             data: {
@@ -260,28 +260,30 @@ export class Client {
             },
         });
 
-        const parsed = JSON.parse(response) as Response<TransactionPayload>;
-        return plainToInstance(TransactionPayload, parsed.payload);
+        const parsed = JSON.parse(
+            response,
+        ) as Response<SignedTransactionPayload>;
+        return plainToInstance(SignedTransactionPayload, parsed.payload);
     }
 
     /**
      * Create a signature unlock using the given secret manager.
      *
      * @param secretManager One of the supported secret managers.
-     * @param transactionEssenceHash The hash of the transaction essence.
+     * @param transactionHash The hash of the transaction.
      * @param chain A BIP44 chain
      * @returns The corresponding unlock condition.
      */
     async signatureUnlock(
         secretManager: SecretManagerType,
-        transactionEssenceHash: HexEncodedString,
+        transactionHash: HexEncodedString,
         chain: Bip44,
     ): Promise<UnlockCondition> {
         const response = await this.methodHandler.callMethod({
             name: 'signatureUnlock',
             data: {
                 secretManager,
-                transactionEssenceHash,
+                transactionHash,
                 chain,
             },
         });

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Type } from 'class-transformer';
-import { Transaction } from './transaction';
+import { TransactionWithMetadata } from './transaction';
 import { PreparedTransactionData } from '../client/prepared-transaction-data';
 
 /** The result of preparing an operation to create a native token. */
@@ -19,6 +19,6 @@ export class CreateNativeTokenTransaction {
     /** The token id of the minted token */
     tokenId!: string;
     /** The transaction which minted the token */
-    @Type(() => Transaction)
-    transaction!: Transaction;
+    @Type(() => TransactionWithMetadata)
+    transaction!: TransactionWithMetadata;
 }
