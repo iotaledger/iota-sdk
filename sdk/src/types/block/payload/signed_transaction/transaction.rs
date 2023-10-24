@@ -51,19 +51,19 @@ impl TransactionBuilder {
         }
     }
 
-    /// Sets creation slot to a [`TransactionBuilder`].
+    /// Sets the creation slot of a [`TransactionBuilder`].
     pub fn with_creation_slot(mut self, creation_slot: impl Into<Option<SlotIndex>>) -> Self {
         self.creation_slot = creation_slot.into();
         self
     }
 
-    /// Sets context inputs to a [`TransactionBuilder`].
+    /// Sets the context inputs of a [`TransactionBuilder`].
     pub fn with_context_inputs(mut self, context_inputs: impl Into<Vec<ContextInput>>) -> Self {
         self.context_inputs = context_inputs.into();
         self
     }
 
-    /// Sets inputs to a [`TransactionBuilder`].
+    /// Sets the inputs of a [`TransactionBuilder`].
     pub fn with_inputs(mut self, inputs: impl Into<Vec<Input>>) -> Self {
         self.inputs = inputs.into();
         self
@@ -75,7 +75,7 @@ impl TransactionBuilder {
         self
     }
 
-    /// Sets [`ManaAllotment`]s to a [`TransactionBuilder`].
+    /// Sets the [`ManaAllotment`]s of a [`TransactionBuilder`].
     pub fn with_mana_allotments(mut self, allotments: impl IntoIterator<Item = ManaAllotment>) -> Self {
         self.allotments = allotments.into_iter().collect();
         self
@@ -98,13 +98,13 @@ impl TransactionBuilder {
         self
     }
 
-    /// Sets a payload to a [`TransactionBuilder`].
+    /// Sets the payload of a [`TransactionBuilder`].
     pub fn with_payload(mut self, payload: impl Into<OptionalPayload>) -> Self {
         self.payload = payload.into();
         self
     }
 
-    /// Sets outputs to a [`TransactionBuilder`].
+    /// Sets the outputs of a [`TransactionBuilder`].
     pub fn with_outputs(mut self, outputs: impl Into<Vec<Output>>) -> Self {
         self.outputs = outputs.into();
         self
