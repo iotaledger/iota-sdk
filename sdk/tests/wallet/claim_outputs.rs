@@ -9,6 +9,7 @@ use iota_sdk::{
     wallet::{CreateNativeTokenParams, OutputsToClaim, Result, SendNativeTokensParams, SendParams, TransactionOptions},
     U256,
 };
+use pretty_assertions::assert_eq;
 
 use crate::wallet::common::{make_wallet, request_funds, setup, tear_down};
 

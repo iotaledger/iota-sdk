@@ -3,7 +3,7 @@
 
 //! IOTA node public participation routes.
 //! <https://github.com/iota-community/treasury/blob/main/specifications/hornet-participation-plugin.md#public-node-endpoints>
-//! <https://github.com/iotaledger/inx-participation/blob/develop/core/participation/routes.go>
+//! <https://github.com/iotaledger/inx-participation/blob/develop/components/participation/routes.go>
 
 use crate::{
     client::{node_api::query_tuples_to_query_string, ClientInner, Result},

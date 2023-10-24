@@ -31,10 +31,13 @@ use crate::types::{
     ValidationParams,
 };
 
-impl_id!(pub NftId, 32, "Unique identifier of an NFT, which is the BLAKE2b-256 hash of the Output ID that created it.");
-
-#[cfg(feature = "serde")]
-string_serde_impl!(NftId);
+crate::impl_id!(
+    /// Unique identifier of the [`NftOutput`](crate::types::block::output::NftOutput),
+    /// which is the BLAKE2b-256 hash of the [`OutputId`](crate::types::block::output::OutputId) that created it.
+    pub NftId {
+        pub const LENGTH: usize = 32;
+    }
+);
 
 impl From<&OutputId> for NftId {
     fn from(output_id: &OutputId) -> Self {
@@ -656,6 +659,7 @@ pub(crate) mod dto {
 
 #[cfg(test)]
 mod tests {
+    use pretty_assertions::assert_eq;
 
     use super::*;
     use crate::types::{

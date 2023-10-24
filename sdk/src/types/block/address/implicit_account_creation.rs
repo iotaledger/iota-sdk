@@ -6,7 +6,9 @@ use packable::Packable;
 
 use crate::types::block::address::Ed25519Address;
 
-/// An implicit account creation address that can be used to transition an account.
+/// An implicit account creation address that can be used to convert a
+/// [`BasicOutput`](crate::types::block::output::BasicOutput) to an
+/// [`AccountOutput`](crate::types::block::output::AccountOutput).
 #[derive(Copy, Clone, Debug, Display, Eq, PartialEq, Ord, PartialOrd, Hash, FromStr, AsRef, Deref, From, Packable)]
 #[as_ref(forward)]
 pub struct ImplicitAccountCreationAddress(Ed25519Address);
@@ -55,7 +57,7 @@ pub(crate) mod dto {
         }
     }
 
-    impl_serde_typed_dto!(
+    crate::impl_serde_typed_dto!(
         ImplicitAccountCreationAddress,
         ImplicitAccountCreationAddressDto,
         "implicit account creation address"

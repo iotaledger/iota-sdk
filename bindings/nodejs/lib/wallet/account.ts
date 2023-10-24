@@ -42,6 +42,14 @@ import {
     PreparedCreateNativeTokenTransaction,
     u64,
     u256,
+    NftId,
+    TokenId,
+    OutputId,
+    AccountId,
+    FoundryId,
+    TransactionId,
+    NumericString,
+    Bech32Address,
 } from '../types';
 import { plainToInstance } from 'class-transformer';
 import { bigIntToHex, hexToBigInt } from '../types/utils/hex-encoding';
@@ -115,7 +123,7 @@ export class Account {
      * @returns The prepared transaction.
      */
     async prepareBurnNativeToken(
-        tokenId: string,
+        tokenId: TokenId,
         burnAmount: u256,
         transactionOptions?: TransactionOptions,
     ): Promise<PreparedTransaction> {
@@ -148,7 +156,7 @@ export class Account {
      * @returns The prepared transaction.
      */
     async prepareBurnNft(
-        nftId: string,
+        nftId: NftId,
         transactionOptions?: TransactionOptions,
     ): Promise<PreparedTransaction> {
         const response = await this.methodHandler.callAccountMethod(
@@ -178,7 +186,7 @@ export class Account {
      * @param outputIds The outputs to claim.
      * @returns The resulting transaction.
      */
-    async claimOutputs(outputIds: string[]): Promise<Transaction> {
+    async claimOutputs(outputIds: OutputId[]): Promise<Transaction> {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
@@ -240,7 +248,7 @@ export class Account {
      * or custom inputs.
      * @returns The transaction.
      */
-    async createAliasOutput(
+    async createAccountOutput(
         params?: AccountOutputParams,
         transactionOptions?: TransactionOptions,
     ): Promise<Transaction> {
@@ -289,7 +297,7 @@ export class Account {
      * @returns The transaction.
      */
     async meltNativeToken(
-        tokenId: string,
+        tokenId: TokenId,
         meltAmount: bigint,
         transactionOptions?: TransactionOptions,
     ): Promise<Transaction> {
@@ -312,7 +320,7 @@ export class Account {
      * @returns The prepared transaction.
      */
     async prepareMeltNativeToken(
-        tokenId: string,
+        tokenId: TokenId,
         meltAmount: u256,
         transactionOptions?: TransactionOptions,
     ): Promise<PreparedTransaction> {
@@ -365,7 +373,7 @@ export class Account {
      * @returns The prepared transaction.
      */
     async prepareDestroyAccount(
-        accountId: string,
+        accountId: AccountId,
         transactionOptions?: TransactionOptions,
     ): Promise<PreparedTransaction> {
         const response = await this.methodHandler.callAccountMethod(
@@ -398,7 +406,7 @@ export class Account {
      * @returns The prepared transaction.
      */
     async prepareDestroyFoundry(
-        foundryId: string,
+        foundryId: FoundryId,
         transactionOptions?: TransactionOptions,
     ): Promise<PreparedTransaction> {
         const response = await this.methodHandler.callAccountMethod(
@@ -499,7 +507,7 @@ export class Account {
      * @param outputId The output to get.
      * @returns The `OutputData`.
      */
-    async getOutput(outputId: string): Promise<OutputData> {
+    async getOutput(outputId: OutputId): Promise<OutputData> {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
@@ -596,7 +604,7 @@ export class Account {
      * @param tokenId The native token ID to get the foundry for.
      * @returns The `FoundryOutput` that minted the token.
      */
-    async getFoundryOutput(tokenId: string): Promise<FoundryOutput> {
+    async getFoundryOutput(tokenId: TokenId): Promise<FoundryOutput> {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
@@ -615,7 +623,7 @@ export class Account {
      * @param outputs The type of outputs to claim.
      * @returns The output IDs of the unlockable outputs.
      */
-    async claimableOutputs(outputs: OutputsToClaim): Promise<string[]> {
+    async claimableOutputs(outputs: OutputsToClaim): Promise<OutputId[]> {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
@@ -634,7 +642,7 @@ export class Account {
      * @param transactionId The ID of the transaction to get.
      * @returns The transaction.
      */
-    async getTransaction(transactionId: string): Promise<Transaction> {
+    async getTransaction(transactionId: TransactionId): Promise<Transaction> {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
@@ -655,7 +663,9 @@ export class Account {
      * @param transactionId The ID of the transaction to get.
      * @returns The transaction.
      */
-    async getIncomingTransaction(transactionId: string): Promise<Transaction> {
+    async getIncomingTransaction(
+        transactionId: TransactionId,
+    ): Promise<Transaction> {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
@@ -809,7 +819,7 @@ export class Account {
      * @returns The minting transaction.
      */
     async mintNativeToken(
-        tokenId: string,
+        tokenId: TokenId,
         mintAmount: bigint,
         transactionOptions?: TransactionOptions,
     ): Promise<Transaction> {
@@ -1134,8 +1144,8 @@ export class Account {
      * @returns The sent transaction.
      */
     async send(
-        amount: u64 | string,
-        address: string,
+        amount: u64 | NumericString,
+        address: Bech32Address,
         transactionOptions?: TransactionOptions,
     ): Promise<Transaction> {
         if (typeof amount === 'bigint') {
@@ -1512,7 +1522,7 @@ export class Account {
      * @returns An instance of `PreparedTransaction`.
      */
     async prepareIncreaseVotingPower(
-        amount: string,
+        amount: NumericString,
     ): Promise<PreparedTransaction> {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
@@ -1539,7 +1549,7 @@ export class Account {
      * @returns An instance of `PreparedTransaction`.
      */
     async prepareDecreaseVotingPower(
-        amount: string,
+        amount: NumericString,
     ): Promise<PreparedTransaction> {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,

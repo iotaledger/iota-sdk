@@ -10,6 +10,7 @@ use iota_sdk::{
         protocol::protocol_parameters,
     },
 };
+use pretty_assertions::assert_eq;
 
 use crate::client::{
     addresses, build_inputs, build_outputs, is_remainder_or_return, unsorted_eq,

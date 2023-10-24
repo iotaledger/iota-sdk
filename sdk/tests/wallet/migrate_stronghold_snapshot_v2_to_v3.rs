@@ -15,6 +15,7 @@ use iota_sdk::{
     crypto::keys::bip44::Bip44,
     wallet::{ClientOptions, Error as WalletError, Wallet},
 };
+use pretty_assertions::assert_eq;
 
 use crate::wallet::common::{setup, tear_down, NODE_LOCAL};
 

@@ -4,7 +4,7 @@
 use crate::{
     client::{secret::SecretManage, unix_timestamp_now},
     types::{
-        api::core::response::TransactionState,
+        api::core::TransactionState,
         block::{input::Input, output::OutputId, BlockId},
     },
     wallet::{
@@ -101,7 +101,7 @@ where
             if let Some(block_id) = transaction.block_id {
                 match self.client().get_block_metadata(&block_id).await {
                     Ok(metadata) => {
-                        if let Some(tx_state) = metadata.tx_state {
+                        if let Some(tx_state) = metadata.transaction_state {
                             match tx_state {
                                 // TODO: Separate TransactionState::Finalized?
                                 TransactionState::Finalized | TransactionState::Confirmed => {

@@ -15,7 +15,7 @@ use iota_sdk::{
     },
     types::{
         api::{
-            core::response::{
+            core::{
                 BlockMetadataResponse, InfoResponse as NodeInfo, IssuanceBlockHeaderResponse,
                 OutputWithMetadataResponse, PeerResponse,
             },
@@ -181,6 +181,8 @@ pub enum Response {
     NodeInfoWrapper(NodeInfoWrapper),
     /// Response for [`Bech32ToHex`](crate::method::UtilsMethod::Bech32ToHex)
     HexAddress(String),
+    /// Response for [`OutputHexBytes`](crate::method::UtilsMethod::OutputHexBytes)
+    HexBytes(String),
     /// Response for [`CallPluginRoute`](crate::method::ClientMethod::CallPluginRoute)
     CustomJson(serde_json::Value),
     /// Response for [`ComputeSlotCommitmentId`](crate::method::UtilsMethod::ComputeSlotCommitmentId)

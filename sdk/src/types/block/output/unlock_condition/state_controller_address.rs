@@ -56,7 +56,7 @@ pub(crate) mod dto {
         }
     }
 
-    impl_serde_typed_dto!(
+    crate::impl_serde_typed_dto!(
         StateControllerAddressUnlockCondition,
         StateControllerAddressUnlockConditionDto,
         "state controller address unlock condition"

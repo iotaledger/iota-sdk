@@ -112,6 +112,8 @@ mod tests {
         },
     };
 
+    use pretty_assertions::assert_eq;
+
     use super::{
         types::{TransactionInclusionEvent, TransactionProgressEvent, WalletEvent, WalletEventType},
         EventEmitter,
@@ -153,7 +155,7 @@ mod tests {
         ));
         emitter.emit(WalletEvent::TransactionInclusion(TransactionInclusionEvent {
             transaction_id: TransactionId::from_str(
-                "0x2289d9981fb23cc5f4f6c2742685eeb480f8476089888aa886a18232bad81989",
+                "0x2289d9981fb23cc5f4f6c2742685eeb480f8476089888aa886a18232bad8198900000000",
             )
             .expect("invalid tx id"),
             inclusion_state: InclusionState::Confirmed,
@@ -176,7 +178,7 @@ mod tests {
         ));
         emitter.emit(WalletEvent::TransactionInclusion(TransactionInclusionEvent {
             transaction_id: TransactionId::from_str(
-                "0x2289d9981fb23cc5f4f6c2742685eeb480f8476089888aa886a18232bad81989",
+                "0x2289d9981fb23cc5f4f6c2742685eeb480f8476089888aa886a18232bad8198900000000",
             )
             .expect("invalid tx id"),
             inclusion_state: InclusionState::Confirmed,

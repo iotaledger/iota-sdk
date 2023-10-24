@@ -13,10 +13,13 @@ from iota_sdk.types.node_info import ProtocolParameters
 from iota_sdk.types.output_id import OutputId
 from iota_sdk.types.output import Output
 from iota_sdk.external import call_utils_method
+from iota_sdk.types.payload import TransactionPayload
 
 # Required to prevent circular import
 if TYPE_CHECKING:
     from iota_sdk.types.block.wrapper import BlockWrapper
+
+# pylint: disable=too-many-public-methods
 
 
 class Utils():
@@ -76,7 +79,7 @@ class Utils():
             'address': address
         })
 
-        deserialize_address(response)
+        return deserialize_address(response)
 
     @staticmethod
     def is_address_valid(address: str) -> bool:
@@ -171,6 +174,14 @@ class Utils():
         return _call_method('blockId', {
             'block': block.to_dict(),
             'protocol_parameters': params.to_dict(),
+        })
+
+    @staticmethod
+    def transaction_id(transaction_payload: TransactionPayload) -> HexStr:
+        """ Compute the transaction ID (Blake2b256 hash of the provided transaction payload) of a transaction payload.
+        """
+        return _call_method('transactionId', {
+            'payload': transaction_payload.as_dict()
         })
 
     @staticmethod

@@ -34,10 +34,13 @@ use crate::types::{
     ValidationParams,
 };
 
-impl_id!(pub FoundryId, 38, "Defines the unique identifier of a foundry.");
-
-#[cfg(feature = "serde")]
-string_serde_impl!(FoundryId);
+crate::impl_id!(
+    /// Unique identifier of the [`FoundryOutput`](crate::types::block::output::FoundryOutput),
+    /// which is the BLAKE2b-256 hash of the [`OutputId`](crate::types::block::output::OutputId) that created it.
+    pub FoundryId {
+        pub const LENGTH: usize = 38;
+    }
+);
 
 impl From<TokenId> for FoundryId {
     fn from(token_id: TokenId) -> Self {
@@ -806,6 +809,7 @@ pub(crate) mod dto {
 
 #[cfg(test)]
 mod tests {
+    use pretty_assertions::assert_eq;
 
     use super::*;
     use crate::types::{

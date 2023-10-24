@@ -1,6 +1,6 @@
 [package]
 name = "iota-sdk"
-version = "1.0.3"
+version = "1.1.1"
 authors = ["IOTA Stiftung"]
 edition = "2021"
 description = "The IOTA SDK provides developers with a seamless experience to develop on IOTA by providing account abstractions and clients to interact with node APIs."
@@ -33,7 +33,7 @@ derive_more = { version = "0.99.17", default-features = false, features = [
     "add_assign",
 ] }
 getset = { version = "0.1.2", default-features = false }
-hashbrown = { version = "0.14.0", default-features = false, features = [
+hashbrown = { version = "0.14.1", default-features = false, features = [
     "ahash",
     "inline-more",
 ] }
@@ -51,7 +51,7 @@ paste = { version = "1.0.14", default-features = false }
 prefix-hex = { version = "0.7.1", default-features = false, features = [
     "primitive-types",
 ] }
-primitive-types = { version = "0.12.1", default-features = false }
+primitive-types = { version = "0.12.2", default-features = false }
 serde = { version = "1.0.188", default-features = false, features = ["derive"] }
 serde_json = { version = "1.0.107", default-features = false, features = [
     "alloc",
@@ -66,28 +66,28 @@ futures = { version = "0.3.28", default-features = false, features = [
     "thread-pool",
 ], optional = true }
 instant = { version = "0.1.12", default-features = false, optional = true }
-iota-ledger-nano = { version = "1.0.0-alpha.5", default-features = false, optional = true }
+iota-ledger-nano = { version = "1.0.0", default-features = false, optional = true }
 iota_stronghold = { version = "2.0.0", default-features = false, optional = true }
 log = { version = "0.4.20", default-features = false, optional = true }
 once_cell = { version = "1.18.0", default-features = false, optional = true }
 rand = { version = "0.8.5", default-features = false, features = [
     "min_const_gen",
 ], optional = true }
-regex = { version = "1.9.5", default-features = false, features = [
+regex = { version = "1.10.0", default-features = false, features = [
     "unicode-perl",
 ], optional = true }
-reqwest = { version = "0.11.20", default-features = false, features = [
+reqwest = { version = "0.11.22", default-features = false, features = [
     "json",
 ], optional = true }
 rocksdb = { version = "0.21.0", default-features = false, features = [
     "lz4",
 ], optional = true }
-rumqttc = { version = "0.22.0", default-features = false, features = [
+rumqttc = { version = "0.23.0", default-features = false, features = [
     "websocket",
 ], optional = true }
 serde_repr = { version = "0.1.16", default-features = false, optional = true }
-thiserror = { version = "1.0.48", default-features = false, optional = true }
-time = { version = "0.3.28", default-features = false, features = [
+thiserror = { version = "1.0.49", default-features = false, optional = true }
+time = { version = "0.3.29", default-features = false, features = [
     "serde",
     "macros",
 ], optional = true }
@@ -99,7 +99,7 @@ zeroize = { version = "1.6.0", default-features = false, features = [
 ], optional = true }
 
 [target.'cfg(not(target_family = "wasm"))'.dependencies]
-tokio = { version = "1.32.0", default-features = false, features = [
+tokio = { version = "1.33.0", default-features = false, features = [
     "macros",
     "rt-multi-thread",
     "time",
@@ -115,7 +115,7 @@ instant = { version = "0.1.12", default-features = false, features = [
     "wasm-bindgen",
 ], optional = true }
 lazy_static = { version = "1.4.0", default-features = false }
-tokio = { version = "1.32.0", default-features = false, features = [
+tokio = { version = "1.33.0", default-features = false, features = [
     "macros",
     "rt",
     "time",
@@ -125,11 +125,12 @@ wasm-bindgen-futures = { version = "0.4.37", default-features = false, optional 
 
 [dev-dependencies]
 iota-sdk = { path = ".", default-features = false, features = ["rand"] }
+pretty_assertions = { version = "1.4.0", default-features = false, features = [ "alloc" ] }
 
 dotenvy = { version = "0.15.7", default-features = false }
 fern-logger = { version = "0.5.0", default-features = false }
 num_cpus = { version = "1.16.0", default-features = false }
-tokio = { version = "1.32.0", default-features = false, features = [
+tokio = { version = "1.33.0", default-features = false, features = [
     "macros",
     "rt",
     "rt-multi-thread",

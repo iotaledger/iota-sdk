@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize, Serializer};
 use crate::{
     client::api::PreparedTransactionDataDto,
     types::{
-        api::core::response::OutputWithMetadataResponse,
+        api::core::OutputWithMetadataResponse,
         block::{
             address::Bech32Address,
             payload::transaction::{dto::TransactionPayloadDto, TransactionId},

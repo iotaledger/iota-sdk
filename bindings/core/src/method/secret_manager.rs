@@ -73,6 +73,8 @@ pub enum SecretManagerMethod {
 
 #[cfg(test)]
 mod test {
+    use pretty_assertions::assert_eq;
+
     #[test]
     fn bip44_deserialization() {
         let signature_unlock_method: super::SecretManagerMethod = serde_json::from_str(

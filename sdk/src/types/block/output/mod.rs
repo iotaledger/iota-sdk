@@ -240,7 +240,7 @@ impl Output {
         }
     }
 
-    def_is_as_opt!(Output: Basic, Account, Foundry, Nft, Delegation);
+    crate::def_is_as_opt!(Output: Basic, Account, Foundry, Nft, Delegation);
 
     /// Returns the address that is required to unlock this [`Output`] and the account or nft address that gets
     /// unlocked by it, if it's an account or nft.
@@ -410,7 +410,7 @@ impl Packable for Output {
             FoundryOutput::KIND => Self::from(FoundryOutput::unpack::<_, VERIFY>(unpacker, visitor).coerce()?),
             NftOutput::KIND => Self::from(NftOutput::unpack::<_, VERIFY>(unpacker, visitor).coerce()?),
             DelegationOutput::KIND => Self::from(DelegationOutput::unpack::<_, VERIFY>(unpacker, visitor).coerce()?),
-            k => return Err(Error::InvalidOutputKind(k)).map_err(UnpackError::Packable),
+            k => return Err(UnpackError::Packable(Error::InvalidOutputKind(k))),
         })
     }
 }

@@ -70,7 +70,7 @@ pub use self::{
 };
 use crate::{
     types::{
-        api::core::response::OutputWithMetadataResponse,
+        api::core::OutputWithMetadataResponse,
         block::{
             output::{AccountId, FoundryId, NftId},
             payload::{transaction::TransactionId, TransactionPayload},

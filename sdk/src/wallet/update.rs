@@ -5,7 +5,10 @@ use std::collections::HashMap;
 
 use crate::{
     client::secret::SecretManage,
-    types::block::output::{OutputId, OutputMetadata},
+    types::{
+        api::core::OutputWithMetadataResponse,
+        block::output::{OutputId, OutputMetadata},
+    },
     wallet::{
         types::{InclusionState, OutputData, Transaction},
         Wallet,
@@ -13,7 +16,7 @@ use crate::{
 };
 #[cfg(feature = "events")]
 use crate::{
-    types::{api::core::response::OutputWithMetadataResponse, block::payload::transaction::dto::TransactionPayloadDto},
+    types::block::payload::transaction::dto::TransactionPayloadDto,
     wallet::{
         events::types::{NewOutputEvent, SpentOutputEvent, TransactionInclusionEvent, WalletEvent},
         types::OutputDataDto,

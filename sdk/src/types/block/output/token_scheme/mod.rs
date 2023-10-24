@@ -33,5 +33,5 @@ impl TokenScheme {
         }
     }
 
-    def_is_as_opt!(TokenScheme: Simple);
+    crate::def_is_as_opt!(TokenScheme: Simple);
 }

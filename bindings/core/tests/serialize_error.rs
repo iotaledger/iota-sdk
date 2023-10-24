@@ -3,6 +3,7 @@
 
 use iota_sdk::{client::Error as ClientError, wallet::Error as WalletError};
 use iota_sdk_bindings_core::Error;
+use pretty_assertions::assert_eq;
 
 #[test]
 fn custom_error_serialization() {

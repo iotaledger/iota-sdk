@@ -1,9 +1,9 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { u64 } from '../../utils';
 import type { RentStructure } from '../rent-structure';
 import { EpochIndex } from '../../block/slot';
+import { u64 } from '../../utils';
 
 /**
  * The Protocol Info.
@@ -113,11 +113,6 @@ export interface ProtocolParameters {
  * Rewards Parameters defines the parameters that are used to calculate Mana rewards.
  */
 export interface RewardsParameters {
-    /**
-     * The number of validation blocks that should be issued by a selected validator
-     * per slot during its epoch duties.
-     */
-    validationBlocksPerSlot: number;
     /**
      * Profit Margin Exponent is used for shift operation for calculation of profit margin.
      */

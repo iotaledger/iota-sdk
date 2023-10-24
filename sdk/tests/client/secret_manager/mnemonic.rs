@@ -4,6 +4,7 @@
 use iota_sdk::client::{
     api::GetAddressesOptions, constants::SHIMMER_TESTNET_BECH32_HRP, secret::SecretManager, Result,
 };
+use pretty_assertions::assert_eq;
 
 #[tokio::test]
 async fn mnemonic_secret_manager() -> Result<()> {

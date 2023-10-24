@@ -3,12 +3,14 @@
 
 //! The payload module defines the core data types for representing block payloads.
 
+pub mod candidacy_announcement;
 pub mod tagged_data;
 pub mod transaction;
 
 use alloc::boxed::Box;
 use core::ops::Deref;
 
+use derive_more::From;
 use packable::{
     error::{UnpackError, UnpackErrorExt},
     packer::Packer,
@@ -16,7 +18,10 @@ use packable::{
     Packable, PackableExt,
 };
 
-pub use self::{tagged_data::TaggedDataPayload, transaction::TransactionPayload};
+pub use self::{
+    candidacy_announcement::CandidacyAnnouncementPayload, tagged_data::TaggedDataPayload,
+    transaction::TransactionPayload,
+};
 pub(crate) use self::{
     tagged_data::{TagLength, TaggedDataLength},
     transaction::{ContextInputCount, InputCount, OutputCount},
@@ -24,12 +29,14 @@ pub(crate) use self::{
 use crate::types::block::{protocol::ProtocolParameters, Error};
 
 /// A generic payload that can represent different types defining block payloads.
-#[derive(Clone, Eq, PartialEq)]
+#[derive(Clone, Eq, PartialEq, From)]
 pub enum Payload {
     /// A transaction payload.
     Transaction(Box<TransactionPayload>),
     /// A tagged data payload.
     TaggedData(Box<TaggedDataPayload>),
+    /// A candidacy announcement payload.
+    CandidacyAnnouncement(CandidacyAnnouncementPayload),
 }
 
 impl core::fmt::Debug for Payload {
@@ -37,6 +44,7 @@ impl core::fmt::Debug for Payload {
         match self {
             Self::Transaction(payload) => payload.fmt(f),
             Self::TaggedData(payload) => payload.fmt(f),
+            Self::CandidacyAnnouncement(payload) => payload.fmt(f),
         }
     }
 }
@@ -59,10 +67,11 @@ impl Payload {
         match self {
             Self::Transaction(_) => TransactionPayload::KIND,
             Self::TaggedData(_) => TaggedDataPayload::KIND,
+            Self::CandidacyAnnouncement(_) => CandidacyAnnouncementPayload::KIND,
         }
     }
 
-    def_is_as_opt!(Payload: Transaction, TaggedData);
+    crate::def_is_as_opt!(Payload: Transaction, TaggedData);
 }
 
 impl Packable for Payload {
@@ -79,6 +88,7 @@ impl Packable for Payload {
                 TaggedDataPayload::KIND.pack(packer)?;
                 tagged_data.pack(packer)
             }
+            Self::CandidacyAnnouncement(_) => CandidacyAnnouncementPayload::KIND.pack(packer),
         }?;
 
         Ok(())
@@ -93,7 +103,8 @@ impl Packable for Payload {
                 Self::from(TransactionPayload::unpack::<_, VERIFY>(unpacker, visitor).coerce()?)
             }
             TaggedDataPayload::KIND => Self::from(TaggedDataPayload::unpack::<_, VERIFY>(unpacker, &()).coerce()?),
-            k => return Err(Error::InvalidPayloadKind(k)).map_err(UnpackError::Packable),
+            CandidacyAnnouncementPayload::KIND => Self::from(CandidacyAnnouncementPayload),
+            k => return Err(UnpackError::Packable(Error::InvalidPayloadKind(k))),
         })
     }
 }
@@ -188,6 +199,7 @@ pub mod dto {
     pub enum PayloadDto {
         Transaction(Box<TransactionPayloadDto>),
         TaggedData(Box<TaggedDataPayload>),
+        CandidacyAnnouncement,
     }
 
     impl From<TransactionPayloadDto> for PayloadDto {
@@ -207,6 +219,7 @@ pub mod dto {
             match value {
                 Payload::Transaction(p) => Self::Transaction(Box::new(TransactionPayloadDto::from(p.as_ref()))),
                 Payload::TaggedData(p) => Self::TaggedData(p.clone()),
+                Payload::CandidacyAnnouncement(_) => Self::CandidacyAnnouncement,
             }
         }
     }
@@ -221,6 +234,7 @@ pub mod dto {
                     Self::from(TransactionPayload::try_from_dto_with_params_inner(*p, params)?)
                 }
                 PayloadDto::TaggedData(p) => Self::from(*p),
+                PayloadDto::CandidacyAnnouncement => Self::from(CandidacyAnnouncementPayload),
             })
         }
     }

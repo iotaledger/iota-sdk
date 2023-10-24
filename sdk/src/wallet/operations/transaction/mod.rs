@@ -18,7 +18,7 @@ use crate::{
         Error,
     },
     types::{
-        api::core::response::OutputWithMetadataResponse,
+        api::core::OutputWithMetadataResponse,
         block::{
             output::{dto::OutputDto, Output},
             payload::transaction::TransactionPayload,

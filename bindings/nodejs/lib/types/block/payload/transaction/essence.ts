@@ -2,14 +2,14 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Type } from 'class-transformer';
-import { PayloadDiscriminator } from '..';
 import { HexEncodedString } from '../../../utils';
 import { ContextInput, ContextInputDiscriminator } from '../../context_input';
 import { Input, InputDiscriminator } from '../../input';
 import { ManaAllotment } from '../../mana-allotment';
 import { Output, OutputDiscriminator } from '../../output';
 import { SlotIndex } from '../../slot';
-import { Payload } from '../payload';
+import { Payload, PayloadType } from '../payload';
+import { TaggedDataPayload } from '../tagged/tagged';
 
 /**
  * All of the essence types.
@@ -37,6 +37,16 @@ abstract class TransactionEssence {
         this.type = type;
     }
 }
+
+/**
+ * PayloadDiscriminator for payloads inside of a TransactionEssence.
+ */
+const PayloadDiscriminator = {
+    property: 'type',
+    subTypes: [
+        { value: TaggedDataPayload, name: PayloadType.TaggedData as any },
+    ],
+};
 
 /**
  * RegularTransactionEssence transaction essence.

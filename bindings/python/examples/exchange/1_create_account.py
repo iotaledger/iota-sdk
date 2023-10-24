@@ -14,17 +14,10 @@ from iota_sdk import (ClientOptions, CoinType, StrongholdSecretManager,
 # should not be done in production.
 load_dotenv()
 
-if 'WALLET_DB_PATH' not in os.environ:
-    raise Exception(".env WALLET_DB_PATH is undefined, see .env.example")
-if 'NODE_URL' not in os.environ:
-    raise Exception(".env NODE_URL is undefined, see .env.example")
-if 'STRONGHOLD_SNAPSHOT_PATH' not in os.environ:
-    raise Exception(
-        ".env STRONGHOLD_SNAPSHOT_PATH is undefined, see .env.example")
-if 'STRONGHOLD_PASSWORD' not in os.environ:
-    raise Exception(".env STRONGHOLD_PASSWORD is undefined, see .env.example")
-if 'MNEMONIC' not in os.environ:
-    raise Exception(".env MNEMONIC is undefined, see .env.example")
+for env_var in ['WALLET_DB_PATH', 'NODE_URL',
+                'STRONGHOLD_SNAPSHOT_PATH', 'STRONGHOLD_PASSWORD', 'MNEMONIC']:
+    if env_var not in os.environ:
+        raise Exception(f'.env {env_var} is undefined, see .env.example')
 
 client_options = ClientOptions(nodes=[os.environ.get('NODE_URL')])
 

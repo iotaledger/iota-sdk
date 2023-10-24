@@ -4,6 +4,7 @@
 use std::str::FromStr;
 
 use iota_sdk::types::api::plugins::participation::types::{Participation, ParticipationEventId, Participations};
+use pretty_assertions::assert_eq;
 
 #[test]
 fn serialize_deserialize() {

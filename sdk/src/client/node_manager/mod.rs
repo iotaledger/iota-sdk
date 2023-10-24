@@ -28,7 +28,7 @@ use crate::{
         error::{Error, Result},
         node_manager::builder::NodeManagerBuilder,
     },
-    types::api::core::response::InfoResponse,
+    types::api::core::InfoResponse,
 };
 
 // The node manager takes care of selecting node(s) for requests until a result is returned or if quorum is enabled it

@@ -106,7 +106,7 @@ impl Feature {
         }
     }
 
-    def_is_as_opt!(Feature: Sender, Issuer, Metadata, Tag, BlockIssuer, Staking);
+    crate::def_is_as_opt!(Feature: Sender, Issuer, Metadata, Tag, BlockIssuer, Staking);
 }
 
 create_bitflags!(
@@ -249,6 +249,8 @@ pub(crate) fn verify_allowed_features(features: &Features, allowed_features: Fea
 
 #[cfg(test)]
 mod test {
+    use pretty_assertions::assert_eq;
+
     use super::*;
 
     #[test]

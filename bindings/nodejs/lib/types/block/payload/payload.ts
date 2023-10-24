@@ -9,6 +9,8 @@ enum PayloadType {
     TaggedData = 0,
     /** A transaction payload. */
     Transaction = 1,
+    /** A candidacy announcement payload. */
+    CandidacyAnnouncement = 2,
 }
 
 /**

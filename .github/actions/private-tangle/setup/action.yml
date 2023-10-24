@@ -21,11 +21,18 @@ runs:
         echo "docker compose -f \$DOCKER_COMPOSE_FILE up -d" >> run.sh
       working-directory: iota-core/tools/docker-network
 
+    # Copied from https://github.com/iotaledger/iota-core/blob/926bf11b5fb6dc46b25482770e0ccf1e048b97c9/.github/workflows/unit-test.yml#L16-L19
+    - uses: actions/setup-go@v4
+      with:
+        go-version-file: 'iota-core/go.mod'
+        cache: false
+
     - name: Setup private tangle
       shell: bash
+      # setup-go sets the PATH for the correct version, but sudo uses a different PATH by default
       run: |
         # Start Tangle
-        sudo ./run.sh
+        sudo env "PATH=$PATH" ./run.sh
       working-directory: iota-core/tools/docker-network
 
     - name: Wait for tangle to start

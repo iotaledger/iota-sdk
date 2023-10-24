@@ -19,7 +19,7 @@ pub use self::{
 use crate::{
     client::secret::types::InputSigningData,
     types::{
-        api::core::response::OutputWithMetadataResponse,
+        api::core::OutputWithMetadataResponse,
         block::{
             address::Address,
             output::{dto::OutputDto, AccountTransition, Output, OutputId, OutputMetadata},
