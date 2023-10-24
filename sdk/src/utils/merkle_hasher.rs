@@ -40,7 +40,7 @@ impl<D: Default + Digest> MerkleHasher<D> {
     }
 
     /// Returns the digest of a list of hashes as an `Output<D>`.
-    pub fn digest<T: AsRef<[u8]>>(value: &[T]) -> Output<D> {
+    pub(crate) fn digest<T: AsRef<[u8]>>(value: &[T]) -> Output<D> {
         match value {
             [] => Self::empty(),
             [leaf] => Self::leaf(leaf),

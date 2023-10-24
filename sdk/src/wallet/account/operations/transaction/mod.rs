@@ -124,20 +124,17 @@ where
     ) -> crate::wallet::Result<TransactionWithMetadata> {
         log::debug!(
             "[TRANSACTION] submit_and_store_transaction {}",
-            signed_transaction_data.transaction_payload.id()
+            signed_transaction_data.payload.id()
         );
         let options = options.into();
 
         // Validate transaction before sending and storing it
-        let conflict = verify_semantic(
-            &signed_transaction_data.inputs_data,
-            &signed_transaction_data.transaction_payload,
-        )?;
+        let conflict = verify_semantic(&signed_transaction_data.inputs_data, &signed_transaction_data.payload)?;
 
         if let Some(conflict) = conflict {
             log::debug!(
                 "[TRANSACTION] conflict: {conflict:?} for {:?}",
-                signed_transaction_data.transaction_payload
+                signed_transaction_data.payload
             );
             // unlock outputs so they are available for a new transaction
             self.unlock_inputs(&signed_transaction_data.inputs_data).await?;
@@ -146,7 +143,7 @@ where
 
         // Ignore errors from sending, we will try to send it again during [`sync_pending_transactions`]
         let block_id = match self
-            .submit_transaction_payload(signed_transaction_data.transaction_payload.clone())
+            .submit_transaction_payload(signed_transaction_data.payload.clone())
             .await
         {
             Ok(block_id) => Some(block_id),
@@ -156,7 +153,7 @@ where
             }
         };
 
-        let transaction_id = signed_transaction_data.transaction_payload.id();
+        let transaction_id = signed_transaction_data.payload.id();
 
         // store transaction payload to account (with db feature also store the account to the db)
         let network_id = self.client().get_network_id().await?;
@@ -172,7 +169,7 @@ where
 
         let transaction = TransactionWithMetadata {
             transaction_id,
-            payload: signed_transaction_data.transaction_payload,
+            payload: signed_transaction_data.payload,
             block_id,
             network_id,
             timestamp: crate::client::unix_timestamp_now().as_millis(),

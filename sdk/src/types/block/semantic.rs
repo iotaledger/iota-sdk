@@ -7,6 +7,7 @@ use core::fmt;
 use hashbrown::{HashMap, HashSet};
 use primitive_types::U256;
 
+use super::payload::signed_transaction::TransactionHash;
 use crate::types::block::{
     address::{Address, AddressCapabilityFlag},
     output::{ChainId, FoundryId, NativeTokens, Output, OutputId, TokenId, UnlockCondition},
@@ -130,16 +131,16 @@ impl TryFrom<u8> for TransactionFailureReason {
             8 => Self::InvalidNativeTokens,
             9 => Self::StorageDepositReturnUnfulfilled,
             10 => Self::InvalidInputUnlock,
-            12 => Self::SenderNotUnlocked,
-            13 => Self::InvalidChainStateTransition,
-            14 => Self::InvalidTransactionIssuingTime,
-            15 => Self::InvalidManaAmount,
-            16 => Self::InvalidBlockIssuanceCreditsAmount,
-            17 => Self::InvalidRewardContextInput,
-            18 => Self::InvalidCommitmentContextInput,
-            19 => Self::MissingStakingFeature,
-            20 => Self::FailedToClaimStakingReward,
-            21 => Self::FailedToClaimDelegationReward,
+            11 => Self::SenderNotUnlocked,
+            12 => Self::InvalidChainStateTransition,
+            13 => Self::InvalidTransactionIssuingTime,
+            14 => Self::InvalidManaAmount,
+            15 => Self::InvalidBlockIssuanceCreditsAmount,
+            16 => Self::InvalidRewardContextInput,
+            17 => Self::InvalidCommitmentContextInput,
+            18 => Self::MissingStakingFeature,
+            19 => Self::FailedToClaimStakingReward,
+            20 => Self::FailedToClaimDelegationReward,
             255 => Self::SemanticValidationFailed,
             x => return Err(Self::Error::InvalidTransactionFailureReason(x)),
         })
@@ -149,7 +150,7 @@ impl TryFrom<u8> for TransactionFailureReason {
 ///
 pub struct ValidationContext<'a> {
     pub(crate) transaction: &'a Transaction,
-    pub(crate) transaction_hash: [u8; 32],
+    pub(crate) transaction_hash: TransactionHash,
     // TODO
     #[allow(dead_code)]
     pub(crate) unlocks: &'a Unlocks,

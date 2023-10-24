@@ -1,7 +1,7 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! Secret manager module enabling address generation and transaction essence signing.
+//! Secret manager module enabling address generation and transaction signing.
 
 /// Module for ledger nano based secret management.
 #[cfg(feature = "ledger_nano")]
@@ -96,10 +96,10 @@ pub trait SecretManage: Send + Sync {
         chain: Bip44,
     ) -> Result<(secp256k1_ecdsa::PublicKey, secp256k1_ecdsa::RecoverableSignature), Self::Error>;
 
-    /// Signs `essence_hash` using the given `chain`, returning an [`Unlock`].
-    async fn signature_unlock(&self, essence_hash: &[u8; 32], chain: Bip44) -> Result<Unlock, Self::Error> {
+    /// Signs `transaction_hash` using the given `chain`, returning an [`Unlock`].
+    async fn signature_unlock(&self, transaction_hash: &[u8; 32], chain: Bip44) -> Result<Unlock, Self::Error> {
         Ok(Unlock::from(SignatureUnlock::new(Signature::from(
-            self.sign_ed25519(essence_hash, chain).await?,
+            self.sign_ed25519(transaction_hash, chain).await?,
         ))))
     }
 
@@ -504,8 +504,8 @@ pub(crate) async fn default_transaction_unlocks<M: SecretManage>(
 where
     crate::client::Error: From<M::Error>,
 {
-    // The hashed_transaction gets signed
-    let hashed_transaction = prepared_transaction_data.transaction.hash();
+    // The transaction_hash gets signed
+    let transaction_hash = prepared_transaction_data.transaction.hash();
     let mut blocks = Vec::new();
     let mut block_indexes = HashMap::<Address, usize>::new();
     let slot_index = prepared_transaction_data.transaction.creation_slot();
@@ -546,7 +546,7 @@ where
 
                 let chain = input.chain.ok_or(Error::MissingBip32Chain)?;
 
-                let block = secret_manager.signature_unlock(&hashed_transaction, chain).await?;
+                let block = secret_manager.signature_unlock(&transaction_hash, chain).await?;
                 blocks.push(block);
 
                 // Add the ed25519 address to the block_indexes, so it gets referenced if further inputs have

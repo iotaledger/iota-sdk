@@ -6,7 +6,6 @@
 mod transaction;
 mod transaction_id;
 
-use crypto::hashes::{blake2b::Blake2b256, Digest};
 use packable::{error::UnpackError, packer::Packer, unpacker::Unpacker, Packable};
 
 pub(crate) use self::transaction::{ContextInputCount, InputCount, OutputCount};
@@ -34,29 +33,21 @@ impl SignedTransactionPayload {
         Ok(Self { transaction, unlocks })
     }
 
-    /// Return the transaction of a [`SignedTransactionPayload`].
+    /// Returns the transaction of a [`SignedTransactionPayload`].
     pub fn transaction(&self) -> &Transaction {
         &self.transaction
     }
 
-    /// Return unlocks of a [`SignedTransactionPayload`].
+    /// Returns unlocks of a [`SignedTransactionPayload`].
     pub fn unlocks(&self) -> &Unlocks {
         &self.unlocks
     }
 
     /// Computes the identifier of a [`SignedTransactionPayload`].
     pub fn id(&self) -> TransactionId {
-        TransactionHash::new(
-            Blake2b256::digest(
-                [
-                    self.transaction().transaction_commitment(),
-                    self.transaction().output_commitment(),
-                ]
-                .concat(),
-            )
-            .into(),
-        )
-        .into_transaction_id(self.transaction.creation_slot())
+        self.transaction()
+            .hash()
+            .into_transaction_id(self.transaction.creation_slot())
     }
 }
 

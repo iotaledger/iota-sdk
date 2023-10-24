@@ -70,7 +70,7 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
             Response::TokenId(TokenId::from(foundry_id))
         }
         UtilsMethod::HashTransaction { transaction } => {
-            Response::Hash(prefix_hex::encode(Transaction::try_from_dto(transaction)?.hash()))
+            Response::Hash(Transaction::try_from_dto(transaction)?.hash().to_string())
         }
         UtilsMethod::ComputeStorageDeposit { output, rent } => {
             let out = Output::try_from_dto(output)?;
