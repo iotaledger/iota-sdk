@@ -65,7 +65,7 @@ impl Client {
         // Get outputs from node and select inputs
         let available_outputs = futures::stream::iter(addresses)
             .then(|address| {
-                self.basic_output_ids(BasicOutputsQueryParameters::default().only_address_unlock_condition(address))
+                self.basic_output_ids(BasicOutputsQueryParameters::new().only_address_unlock_condition(address))
             })
             .and_then(|res| async {
                 let items = res.items;

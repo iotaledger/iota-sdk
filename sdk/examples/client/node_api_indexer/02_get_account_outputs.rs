@@ -41,7 +41,7 @@ async fn main() -> Result<()> {
 
     // Get output IDs of account outputs that can be controlled by this address.
     let output_ids_response = client
-        .account_output_ids(AccountOutputsQueryParameters::default().unlockable_by_address(address))
+        .account_output_ids(AccountOutputsQueryParameters::new().unlockable_by_address(address))
         .await?;
 
     println!("Account output IDs: {output_ids_response:#?}");

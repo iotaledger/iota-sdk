@@ -38,6 +38,11 @@ pub trait QueryParameter: Serialize + Send + Sync {
 
 macro_rules! impl_query_parameters_methods {
     ($name:ty) => {
+        impl $name {
+            pub fn new() -> Self {
+                Self::default()
+            }
+        }
         impl QueryParameter for $name {
             fn replace_cursor(&mut self, cursor: String) {
                 self.cursor.replace(cursor);
@@ -269,10 +274,10 @@ mod tests {
 
     #[test]
     fn query_parameter() {
-        let empty_basic_outputs_query_parameters = BasicOutputsQueryParameters::default();
+        let empty_basic_outputs_query_parameters = BasicOutputsQueryParameters::new();
         assert_eq!(empty_basic_outputs_query_parameters.to_query_string(), None);
 
-        let mut basic_outputs_query_parameters = BasicOutputsQueryParameters::default()
+        let mut basic_outputs_query_parameters = BasicOutputsQueryParameters::new()
             .address(
                 Bech32Address::try_from_str("atoi1qzt0nhsf38nh6rs4p6zs5knqp6psgha9wsv74uajqgjmwc75ugupx3y7x0r")
                     .unwrap(),

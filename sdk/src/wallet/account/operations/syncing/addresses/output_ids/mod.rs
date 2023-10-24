@@ -54,7 +54,7 @@ where
         {
             return Ok(self
                 .client()
-                .output_ids(OutputsQueryParameters::default().unlockable_by_address(bech32_address.clone()))
+                .output_ids(OutputsQueryParameters::new().unlockable_by_address(bech32_address.clone()))
                 .await?
                 .items);
         }
@@ -163,7 +163,7 @@ where
             {
                 results.push(Ok(self
                     .client()
-                    .foundry_output_ids(FoundryOutputsQueryParameters::default().account_address(bech32_address))
+                    .foundry_output_ids(FoundryOutputsQueryParameters::new().account_address(bech32_address))
                     .await?
                     .items))
             }
@@ -177,7 +177,7 @@ where
                         tokio::spawn(async move {
                             Ok(client
                                 .foundry_output_ids(
-                                    FoundryOutputsQueryParameters::default().account_address(bech32_address),
+                                    FoundryOutputsQueryParameters::new().account_address(bech32_address),
                                 )
                                 .await?
                                 .items)

@@ -30,13 +30,13 @@ where
             let mut output_ids = Vec::new();
             output_ids.extend(
                 self.client()
-                    .nft_output_ids(NftOutputsQueryParameters::default().unlockable_by_address(bech32_address.clone()))
+                    .nft_output_ids(NftOutputsQueryParameters::new().unlockable_by_address(bech32_address.clone()))
                     .await?
                     .items,
             );
             output_ids.extend(
                 self.client()
-                    .nft_output_ids(NftOutputsQueryParameters::default().storage_deposit_return_address(bech32_address))
+                    .nft_output_ids(NftOutputsQueryParameters::new().storage_deposit_return_address(bech32_address))
                     .await?
                     .items,
             );
@@ -54,7 +54,7 @@ where
                         // Get nft outputs where the address is in the address or expiration unlock condition
                         client
                             .nft_output_ids(
-                                NftOutputsQueryParameters::default().unlockable_by_address(bech32_address.clone()),
+                                NftOutputsQueryParameters::new().unlockable_by_address(bech32_address.clone()),
                             )
                             .await
                             .map_err(From::from)
@@ -69,7 +69,7 @@ where
                         // Get outputs where the address is in the storage deposit return unlock condition
                         client
                             .nft_output_ids(
-                                NftOutputsQueryParameters::default().storage_deposit_return_address(bech32_address),
+                                NftOutputsQueryParameters::new().storage_deposit_return_address(bech32_address),
                             )
                             .await
                             .map_err(From::from)

@@ -28,7 +28,7 @@ async fn main() -> Result<()> {
 
     // Get a single page with random output IDs by providing only an empty string as cursor.
     let output_ids_response = client
-        .basic_output_ids(BasicOutputsQueryParameters::default().cursor(String::new()))
+        .basic_output_ids(BasicOutputsQueryParameters::new().cursor(String::new()))
         .await?;
 
     println!("Basic output IDs from first page {output_ids_response:#?}");

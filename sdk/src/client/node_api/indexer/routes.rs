@@ -65,7 +65,7 @@ impl ClientInner {
         let route = format!("api/indexer/v2/outputs/account/{account_id}");
 
         Ok(*(self
-            .get_output_ids(&route, AccountOutputsQueryParameters::default(), true, false)
+            .get_output_ids(&route, AccountOutputsQueryParameters::new(), true, false)
             .await?
             .first()
             .ok_or_else(|| Error::NoOutput(format!("{account_id:?}")))?))
@@ -91,7 +91,7 @@ impl ClientInner {
         let route = format!("api/indexer/v2/outputs/foundry/{foundry_id}");
 
         Ok(*(self
-            .get_output_ids(&route, FoundryOutputsQueryParameters::default(), true, false)
+            .get_output_ids(&route, FoundryOutputsQueryParameters::new(), true, false)
             .await?
             .first()
             .ok_or_else(|| Error::NoOutput(format!("{foundry_id:?}")))?))
@@ -115,7 +115,7 @@ impl ClientInner {
         let route = format!("api/indexer/v2/outputs/nft/{nft_id}");
 
         Ok(*(self
-            .get_output_ids(&route, NftOutputsQueryParameters::default(), true, false)
+            .get_output_ids(&route, NftOutputsQueryParameters::new(), true, false)
             .await?
             .first()
             .ok_or_else(|| Error::NoOutput(format!("{nft_id:?}")))?))
