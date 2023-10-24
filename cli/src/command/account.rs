@@ -971,7 +971,6 @@ fn print_addresses(mut addresses: Vec<Bech32Address>) -> Result<(), Error> {
     Ok(())
 }
 
-// TODO: display AccountAddress infos (key_index, change_address, etc) in the `addresses` command generated list?
 async fn print_address(account: &Account, address: &Bech32Address) -> Result<(), Error> {
     let mut formatted_table = String::from("Address");
     formatted_table.push_str(&format!(
