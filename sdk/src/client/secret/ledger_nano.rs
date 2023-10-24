@@ -317,9 +317,9 @@ impl SecretManage for LedgerSecretManager {
             if let Some(remainder_output) = remainder_output {
                 match &prepared_transaction.essence {
                     TransactionEssence::Regular(essence) => {
-                        // Find the index of the remainder in the transaction this has to be done because the remainder
-                        // is not always the last output. The index within the transaction and the bip32 index will be
-                        // validated by the hardware wallet.
+                        // Find the index of the remainder in the transaction because it is not always the last output.
+                        // The index within the transaction and the bip32 index will be validated by the hardware
+                        // wallet.
                         for output in essence.outputs().iter() {
                             if !output.is_basic() {
                                 log::debug!("[LEDGER] unsupported output");
