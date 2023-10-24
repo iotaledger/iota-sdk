@@ -24,7 +24,7 @@ use crate::{
 impl<'a> ClientBlockBuilder<'a> {
     /// If custom inputs are provided we check if they are unspent, get the balance and search the Ed25519 addresses for
     /// them with the provided input_range so we can later sign them.
-    /// Forwards to [try_select_inputs()] with all inputs in `mandatory_inputs`, so they will all be included in the
+    /// Forwards to input selection with all inputs in `mandatory_inputs`, so they will all be included in the
     /// transaction, even if not required for the provided outputs.
     pub(crate) async fn get_custom_inputs(
         &self,

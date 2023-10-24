@@ -324,7 +324,8 @@ impl SecretManagerConfig for StrongholdAdapter {
 
 /// Private methods for the secret manager implementation.
 impl StrongholdAdapter {
-    /// Execute [Procedure::BIP39Recover] in Stronghold to put a mnemonic into the Stronghold vault.
+    /// Execute [BIP39Recover](procedures::BIP39Recover) procedure in Stronghold to put a mnemonic into the Stronghold
+    /// vault.
     async fn bip39_recover(&self, mnemonic: Mnemonic, passphrase: Passphrase, output: Location) -> Result<(), Error> {
         self.stronghold
             .lock()
@@ -339,7 +340,8 @@ impl StrongholdAdapter {
         Ok(())
     }
 
-    /// Execute [Procedure::SLIP10Derive] in Stronghold to derive a SLIP-10 private key in the Stronghold vault.
+    /// Execute [Slip10Derive](procedures::Slip10Derive) procedure in Stronghold to derive a SLIP-10 private key in the
+    /// Stronghold vault.
     async fn slip10_derive(
         &self,
         curve: Curve,
@@ -386,7 +388,7 @@ impl StrongholdAdapter {
         Ok(())
     }
 
-    /// Execute [Procedure::PublicKey] in Stronghold to get an Ed25519 public key from the SLIP-10
+    /// Execute [PublicKey](procedures::PublicKey) procedure in Stronghold to get an Ed25519 public key from the SLIP-10
     /// private key located in `private_key`.
     async fn ed25519_public_key(&self, private_key: Location) -> Result<ed25519::PublicKey, Error> {
         Ok(ed25519::PublicKey::try_from_bytes(
@@ -403,7 +405,8 @@ impl StrongholdAdapter {
         )?)
     }
 
-    /// Execute [Procedure::Ed25519Sign] in Stronghold to sign `msg` with `private_key` stored in the Stronghold vault.
+    /// Execute [Ed25519Sign](procedures::Ed25519Sign) procedure in Stronghold to sign `msg` with `private_key` stored
+    /// in the Stronghold vault.
     async fn ed25519_sign(&self, private_key: Location, msg: &[u8]) -> Result<ed25519::Signature, Error> {
         Ok(ed25519::Signature::from_bytes(
             self.stronghold
@@ -417,8 +420,8 @@ impl StrongholdAdapter {
         ))
     }
 
-    /// Execute [Procedure::Secp256k1EcdsaSign] in Stronghold to sign `msg` with `private_key` stored in the Stronghold
-    /// vault.
+    /// Execute [Secp256k1EcdsaSign](procedures::Secp256k1EcdsaSign) procedure in Stronghold to sign `msg` with
+    /// `private_key` stored in the Stronghold vault.
     async fn secp256k1_ecdsa_sign(
         &self,
         private_key: Location,
@@ -438,7 +441,7 @@ impl StrongholdAdapter {
         )?)
     }
 
-    /// Execute [Procedure::PublicKey] in Stronghold to get a Secp256k1Ecdsa public key from the
+    /// Execute [PublicKey](procedures::PublicKey) procedure in Stronghold to get a Secp256k1Ecdsa public key from the
     /// SLIP-10 private key located in `private_key`.
     async fn secp256k1_ecdsa_public_key(&self, private_key: Location) -> Result<secp256k1_ecdsa::PublicKey, Error> {
         let bytes = self

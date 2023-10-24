@@ -92,7 +92,7 @@ async fn single_ed25519_unlock() -> Result<()> {
         .await?;
 
     assert_eq!(unlocks.len(), 1);
-    assert_eq!((*unlocks).get(0).unwrap().kind(), SignatureUnlock::KIND);
+    assert_eq!((*unlocks).first().unwrap().kind(), SignatureUnlock::KIND);
 
     let tx_payload = TransactionPayload::new(prepared_transaction_data.essence.clone(), unlocks)?;
 
@@ -194,7 +194,7 @@ async fn ed25519_reference_unlocks() -> Result<()> {
         .await?;
 
     assert_eq!(unlocks.len(), 3);
-    assert_eq!((*unlocks).get(0).unwrap().kind(), SignatureUnlock::KIND);
+    assert_eq!((*unlocks).first().unwrap().kind(), SignatureUnlock::KIND);
     match (*unlocks).get(1).unwrap() {
         Unlock::Reference(r) => {
             assert_eq!(r.index(), 0);
@@ -306,7 +306,7 @@ async fn two_signature_unlocks() -> Result<()> {
         .await?;
 
     assert_eq!(unlocks.len(), 2);
-    assert_eq!((*unlocks).get(0).unwrap().kind(), SignatureUnlock::KIND);
+    assert_eq!((*unlocks).first().unwrap().kind(), SignatureUnlock::KIND);
     assert_eq!((*unlocks).get(1).unwrap().kind(), SignatureUnlock::KIND);
 
     let tx_payload = TransactionPayload::new(prepared_transaction_data.essence.clone(), unlocks)?;

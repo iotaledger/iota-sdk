@@ -430,7 +430,11 @@ impl Client {
             }
         }
         let path = "api/core/v2/info";
-        url.set_path(path);
+        if url.path().ends_with('/') {
+            url.set_path(&format!("{}{}", url.path(), path));
+        } else {
+            url.set_path(&format!("{}/{}", url.path(), path));
+        }
 
         let resp: InfoResponse =
             crate::client::node_manager::http_client::HttpClient::new(DEFAULT_USER_AGENT.to_string())
