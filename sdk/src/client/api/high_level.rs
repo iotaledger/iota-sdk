@@ -10,7 +10,7 @@ use crate::{
         api::input_selection::Error as InputSelectionError,
         constants::FIVE_MINUTES_IN_SECONDS,
         error::{Error, Result},
-        node_api::indexer::query_parameters::BasicOutputsQueryParameters,
+        node_api::indexer::query_parameters::BasicOutputQueryParameters,
         unix_timestamp_now, Client,
     },
     types::block::{
@@ -65,7 +65,7 @@ impl Client {
         // Get outputs from node and select inputs
         let available_outputs = futures::stream::iter(addresses)
             .then(|address| {
-                self.basic_output_ids(BasicOutputsQueryParameters::new().only_address_unlock_condition(address))
+                self.basic_output_ids(BasicOutputQueryParameters::new().only_address_unlock_condition(address))
             })
             .and_then(|res| async {
                 let items = res.items;

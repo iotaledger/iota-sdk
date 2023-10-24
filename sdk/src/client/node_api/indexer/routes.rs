@@ -6,8 +6,8 @@
 use crate::{
     client::{
         node_api::indexer::query_parameters::{
-            AccountOutputsQueryParameters, BasicOutputsQueryParameters, FoundryOutputsQueryParameters,
-            NftOutputsQueryParameters, OutputsQueryParameters,
+            AccountOutputQueryParameters, BasicOutputQueryParameters, FoundryOutputQueryParameters,
+            NftOutputQueryParameters, OutputQueryParameters,
         },
         ClientInner, Error, Result,
     },
@@ -26,7 +26,7 @@ impl ClientInner {
     /// "createdBefore", "createdAfter", "cursor", "pageSize".
     /// Returns Err(Node(NotFound) if no results are found.
     /// api/indexer/v1/outputs
-    pub async fn output_ids(&self, query_parameters: OutputsQueryParameters) -> Result<OutputIdsResponse> {
+    pub async fn output_ids(&self, query_parameters: OutputQueryParameters) -> Result<OutputIdsResponse> {
         let route = "api/indexer/v1/outputs";
 
         self.get_output_ids(route, query_parameters, true, false).await
@@ -39,7 +39,7 @@ impl ClientInner {
     /// "timelockedAfter", "sender", "tag", "createdBefore" and "createdAfter".
     /// Returns Err(Node(NotFound) if no results are found.
     /// api/indexer/v2/outputs/basic
-    pub async fn basic_output_ids(&self, query_parameters: BasicOutputsQueryParameters) -> Result<OutputIdsResponse> {
+    pub async fn basic_output_ids(&self, query_parameters: BasicOutputQueryParameters) -> Result<OutputIdsResponse> {
         let route = "api/indexer/v2/outputs/basic";
 
         self.get_output_ids(route, query_parameters, true, false).await
@@ -52,7 +52,7 @@ impl ClientInner {
     /// api/indexer/v2/outputs/account
     pub async fn account_output_ids(
         &self,
-        query_parameters: AccountOutputsQueryParameters,
+        query_parameters: AccountOutputQueryParameters,
     ) -> Result<OutputIdsResponse> {
         let route = "api/indexer/v2/outputs/account";
 
@@ -65,7 +65,7 @@ impl ClientInner {
         let route = format!("api/indexer/v2/outputs/account/{account_id}");
 
         Ok(*(self
-            .get_output_ids(&route, AccountOutputsQueryParameters::new(), true, false)
+            .get_output_ids(&route, AccountOutputQueryParameters::new(), true, false)
             .await?
             .first()
             .ok_or_else(|| Error::NoOutput(format!("{account_id:?}")))?))
@@ -78,7 +78,7 @@ impl ClientInner {
     /// api/indexer/v2/outputs/foundry
     pub async fn foundry_output_ids(
         &self,
-        query_parameters: FoundryOutputsQueryParameters,
+        query_parameters: FoundryOutputQueryParameters,
     ) -> Result<OutputIdsResponse> {
         let route = "api/indexer/v2/outputs/foundry";
 
@@ -91,7 +91,7 @@ impl ClientInner {
         let route = format!("api/indexer/v2/outputs/foundry/{foundry_id}");
 
         Ok(*(self
-            .get_output_ids(&route, FoundryOutputsQueryParameters::new(), true, false)
+            .get_output_ids(&route, FoundryOutputQueryParameters::new(), true, false)
             .await?
             .first()
             .ok_or_else(|| Error::NoOutput(format!("{foundry_id:?}")))?))
@@ -103,7 +103,7 @@ impl ClientInner {
     /// "timelockedAfter", "issuer", "sender", "tag", "createdBefore", "createdAfter"
     /// Returns Err(Node(NotFound) if no results are found.
     /// api/indexer/v2/outputs/nft
-    pub async fn nft_output_ids(&self, query_parameters: NftOutputsQueryParameters) -> Result<OutputIdsResponse> {
+    pub async fn nft_output_ids(&self, query_parameters: NftOutputQueryParameters) -> Result<OutputIdsResponse> {
         let route = "api/indexer/v2/outputs/nft";
 
         self.get_output_ids(route, query_parameters, true, false).await
@@ -115,7 +115,7 @@ impl ClientInner {
         let route = format!("api/indexer/v2/outputs/nft/{nft_id}");
 
         Ok(*(self
-            .get_output_ids(&route, NftOutputsQueryParameters::new(), true, false)
+            .get_output_ids(&route, NftOutputQueryParameters::new(), true, false)
             .await?
             .first()
             .ok_or_else(|| Error::NoOutput(format!("{nft_id:?}")))?))

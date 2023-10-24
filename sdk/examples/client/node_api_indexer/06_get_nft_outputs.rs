@@ -12,7 +12,7 @@
 //! ```
 
 use iota_sdk::{
-    client::{node_api::indexer::query_parameters::NftOutputsQueryParameters, Client, Result},
+    client::{node_api::indexer::query_parameters::NftOutputQueryParameters, Client, Result},
     types::block::address::Bech32Address,
 };
 
@@ -41,7 +41,7 @@ async fn main() -> Result<()> {
 
     // Get output IDs of NFT outputs that can be controlled by this address without further unlock constraints.
     let output_ids_response = client
-        .nft_output_ids(NftOutputsQueryParameters::new().only_address_unlock_condition(address))
+        .nft_output_ids(NftOutputQueryParameters::new().only_address_unlock_condition(address))
         .await?;
 
     println!("NFT output IDs {output_ids_response:#?}");

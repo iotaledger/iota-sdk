@@ -55,7 +55,7 @@ macro_rules! impl_query_parameters_methods {
 #[derive(Setters, Debug, Default, Clone, Serialize, Deserialize, Eq, PartialEq)]
 #[setters(strip_option)]
 #[serde(rename_all = "camelCase")]
-pub struct OutputsQueryParameters {
+pub struct OutputQueryParameters {
     /// Returns outputs that were created after a certain slot index.
     pub created_after: Option<SlotIndex>,
     /// Returns outputs that were created before a certain slot index.
@@ -73,13 +73,13 @@ pub struct OutputsQueryParameters {
     pub unlockable_by_address: Option<Bech32Address>,
 }
 
-impl_query_parameters_methods!(OutputsQueryParameters);
+impl_query_parameters_methods!(OutputQueryParameters);
 
 /// Query parameter for output requests.
 #[derive(Setters, Debug, Default, Clone, Serialize, Deserialize, Eq, PartialEq)]
 #[setters(strip_option)]
 #[serde(rename_all = "camelCase")]
-pub struct BasicOutputsQueryParameters {
+pub struct BasicOutputQueryParameters {
     /// Returns outputs that were created after a certain slot index.
     pub created_after: Option<SlotIndex>,
     /// Returns outputs that were created before a certain slot index.
@@ -123,9 +123,9 @@ pub struct BasicOutputsQueryParameters {
     pub timelocked_before: Option<SlotIndex>,
 }
 
-impl_query_parameters_methods!(BasicOutputsQueryParameters);
+impl_query_parameters_methods!(BasicOutputQueryParameters);
 
-impl BasicOutputsQueryParameters {
+impl BasicOutputQueryParameters {
     /// Sets `.address(address).has_expiration(false).has_storage_deposit_return(false).has_timelock(false)` to only
     /// get outputs that can be unlocked by the address without potential further restrictions.
     pub fn only_address_unlock_condition(self, address: impl Into<Bech32Address>) -> Self {
@@ -140,7 +140,7 @@ impl BasicOutputsQueryParameters {
 #[derive(Setters, Debug, Default, Clone, Serialize, Deserialize, Eq, PartialEq)]
 #[setters(strip_option)]
 #[serde(rename_all = "camelCase")]
-pub struct AccountOutputsQueryParameters {
+pub struct AccountOutputQueryParameters {
     /// Returns outputs that were created after a certain slot index.
     pub created_after: Option<SlotIndex>,
     /// Returns outputs that were created before a certain slot index.
@@ -162,13 +162,13 @@ pub struct AccountOutputsQueryParameters {
     pub state_controller: Option<Bech32Address>,
 }
 
-impl_query_parameters_methods!(AccountOutputsQueryParameters);
+impl_query_parameters_methods!(AccountOutputQueryParameters);
 
 /// Query parameter for output requests.
 #[derive(Setters, Debug, Default, Clone, Serialize, Deserialize, Eq, PartialEq)]
 #[setters(strip_option)]
 #[serde(rename_all = "camelCase")]
-pub struct NftOutputsQueryParameters {
+pub struct NftOutputQueryParameters {
     /// Returns outputs that were created after a certain slot index.
     pub created_after: Option<SlotIndex>,
     /// Returns outputs that were created before a certain slot index.
@@ -210,9 +210,9 @@ pub struct NftOutputsQueryParameters {
     pub timelocked_before: Option<SlotIndex>,
 }
 
-impl_query_parameters_methods!(NftOutputsQueryParameters);
+impl_query_parameters_methods!(NftOutputQueryParameters);
 
-impl NftOutputsQueryParameters {
+impl NftOutputQueryParameters {
     /// Sets `.address(address).has_expiration(false).has_storage_deposit_return(false).has_timelock(false)` to only
     /// get outputs that can be unlocked by the address without potential further restrictions.
     pub fn only_address_unlock_condition(self, address: impl Into<Bech32Address>) -> Self {
@@ -227,7 +227,7 @@ impl NftOutputsQueryParameters {
 #[derive(Setters, Debug, Default, Clone, Serialize, Deserialize, Eq, PartialEq)]
 #[setters(strip_option)]
 #[serde(rename_all = "camelCase")]
-pub struct FoundryOutputsQueryParameters {
+pub struct FoundryOutputQueryParameters {
     /// Returns outputs that were created after a certain slot index.
     pub created_after: Option<SlotIndex>,
     /// Returns outputs that were created before a certain slot index.
@@ -244,13 +244,13 @@ pub struct FoundryOutputsQueryParameters {
     /// Filter foundry outputs based on bech32-encoded address of the controlling account.
     pub account_address: Option<Bech32Address>,
 }
-impl_query_parameters_methods!(FoundryOutputsQueryParameters);
+impl_query_parameters_methods!(FoundryOutputQueryParameters);
 
 /// Query parameter for output requests.
 #[derive(Setters, Debug, Default, Clone, Serialize, Deserialize, Eq, PartialEq)]
 #[setters(strip_option)]
 #[serde(rename_all = "camelCase")]
-pub struct DelegationOutputsQueryParameters {
+pub struct DelegationOutputQueryParameters {
     /// Returns outputs that were created after a certain slot index.
     pub created_after: Option<SlotIndex>,
     /// Returns outputs that were created before a certain slot index.
@@ -266,7 +266,7 @@ pub struct DelegationOutputsQueryParameters {
     pub validator: Option<Bech32Address>,
 }
 
-impl_query_parameters_methods!(DelegationOutputsQueryParameters);
+impl_query_parameters_methods!(DelegationOutputQueryParameters);
 
 #[cfg(test)]
 mod tests {
@@ -274,10 +274,10 @@ mod tests {
 
     #[test]
     fn query_parameter() {
-        let empty_basic_outputs_query_parameters = BasicOutputsQueryParameters::new();
+        let empty_basic_outputs_query_parameters = BasicOutputQueryParameters::new();
         assert_eq!(empty_basic_outputs_query_parameters.to_query_string(), None);
 
-        let mut basic_outputs_query_parameters = BasicOutputsQueryParameters::new()
+        let mut basic_outputs_query_parameters = BasicOutputQueryParameters::new()
             .address(
                 Bech32Address::try_from_str("atoi1qzt0nhsf38nh6rs4p6zs5knqp6psgha9wsv74uajqgjmwc75ugupx3y7x0r")
                     .unwrap(),

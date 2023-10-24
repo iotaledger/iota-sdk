@@ -10,7 +10,7 @@ use futures::FutureExt;
 #[cfg(not(target_family = "wasm"))]
 use crate::types::api::plugins::indexer::OutputIdsResponse;
 use crate::{
-    client::{node_api::indexer::query_parameters::BasicOutputsQueryParameters, secret::SecretManage},
+    client::{node_api::indexer::query_parameters::BasicOutputQueryParameters, secret::SecretManage},
     types::block::{address::Bech32Address, output::OutputId, ConvertTo},
     wallet::Account,
 };
@@ -28,7 +28,7 @@ where
         // Only request basic outputs with `AddressUnlockCondition` only
         Ok(self
             .client()
-            .basic_output_ids(BasicOutputsQueryParameters::new().only_address_unlock_condition(bech32_address))
+            .basic_output_ids(BasicOutputQueryParameters::new().only_address_unlock_condition(bech32_address))
             .await?
             .items)
     }
@@ -45,14 +45,14 @@ where
             let mut output_ids = Vec::new();
             output_ids.extend(
                 self.client()
-                    .basic_output_ids(BasicOutputsQueryParameters::new().unlockable_by_address(bech32_address.clone()))
+                    .basic_output_ids(BasicOutputQueryParameters::new().unlockable_by_address(bech32_address.clone()))
                     .await?
                     .items,
             );
             output_ids.extend(
                 self.client()
                     .basic_output_ids(
-                        BasicOutputsQueryParameters::new().storage_deposit_return_address(bech32_address.clone()),
+                        BasicOutputQueryParameters::new().storage_deposit_return_address(bech32_address.clone()),
                     )
                     .await?
                     .items,
@@ -72,7 +72,7 @@ where
                     tokio::spawn(async move {
                         client
                             .basic_output_ids(
-                                BasicOutputsQueryParameters::new().unlockable_by_address(bech32_address.clone()),
+                                BasicOutputQueryParameters::new().unlockable_by_address(bech32_address.clone()),
                             )
                             .await
                             .map_err(From::from)
@@ -87,7 +87,7 @@ where
                     tokio::spawn(async move {
                         client
                             .basic_output_ids(
-                                BasicOutputsQueryParameters::new()
+                                BasicOutputQueryParameters::new()
                                     .storage_deposit_return_address(bech32_address.clone()),
                             )
                             .await
