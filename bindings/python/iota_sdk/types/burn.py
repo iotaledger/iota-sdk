@@ -58,14 +58,7 @@ class Burn:
         return self
 
     def as_dict(self) -> Dict[str, Any]:
-        """
-        Converts all fields into a dictionary, excluding any
-        attributes with a value of `None`, and converts an optional list of `nativeTokens`
-        objects into a dictionary with the `id` as the key and the `amount` as the value.
-
-        Returns:
-
-        a dictionary representation of the object's attributes.
+        """Converts this object to a dict.
         """
         config = {k: v for k, v in self.__dict__.items() if v is not None}
 
