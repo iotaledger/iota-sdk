@@ -1,8 +1,6 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use std::marker::PhantomData;
-
 use crypto::hashes::{Digest, Output};
 
 /// Leaf domain separation prefix.
@@ -11,16 +9,16 @@ const LEAF_HASH_PREFIX: u8 = 0x00;
 const NODE_HASH_PREFIX: u8 = 0x01;
 
 /// A Merkle hasher based on a digest function.
-pub(crate) struct MerkleHasher<D>(PhantomData<D>);
+pub(crate) struct MerkleHasher;
 
-impl<D: Default + Digest> MerkleHasher<D> {
+impl MerkleHasher {
     /// Returns the digest of the empty hash.
-    fn empty() -> Output<D> {
+    fn empty<D: Default + Digest>() -> Output<D> {
         D::digest([])
     }
 
     /// Returns the digest of a Merkle leaf.
-    fn leaf<T: AsRef<[u8]>>(value: &T) -> Output<D> {
+    fn leaf<D: Default + Digest>(value: &impl AsRef<[u8]>) -> Output<D> {
         let mut hasher = D::default();
 
         hasher.update([LEAF_HASH_PREFIX]);
@@ -29,40 +27,37 @@ impl<D: Default + Digest> MerkleHasher<D> {
     }
 
     /// Returns the digest of a Merkle node.
-    fn node<T: AsRef<[u8]>>(values: &[T]) -> Output<D> {
+    fn node<D: Default + Digest>(values: &[impl AsRef<[u8]>]) -> Output<D> {
         let mut hasher = D::default();
         let (left, right) = values.split_at(largest_power_of_two(values.len() as u32 - 1));
 
         hasher.update([NODE_HASH_PREFIX]);
-        hasher.update(Self::digest(left));
-        hasher.update(Self::digest(right));
+        hasher.update(Self::digest::<D>(left));
+        hasher.update(Self::digest::<D>(right));
         hasher.finalize()
     }
 
     /// Returns the digest of a list of hashes as an `Output<D>`.
-    pub(crate) fn digest<T: AsRef<[u8]>>(value: &[T]) -> Output<D> {
+    pub(crate) fn digest<D: Default + Digest>(value: &[impl AsRef<[u8]>]) -> Output<D> {
         match value {
-            [] => Self::empty(),
-            [leaf] => Self::leaf(leaf),
-            _ => Self::node(value),
+            [] => Self::empty::<D>(),
+            [leaf] => Self::leaf::<D>(leaf),
+            _ => Self::node::<D>(value),
         }
     }
 }
 
 /// Computes the largest power of two less than or equal to `n`.
 fn largest_power_of_two(n: u32) -> usize {
-    debug_assert!(n > 1, "invalid input to `largest_power_of_two`");
+    debug_assert!(n > 0, "invalid input to `largest_power_of_two`");
     1 << (32 - n.leading_zeros() - 1)
 }
 
 #[cfg(test)]
 mod tests {
-    use core::str::FromStr;
-
     use crypto::hashes::blake2b::Blake2b256;
 
     use super::*;
-    use crate::types::block::BlockId;
 
     #[test]
     fn tree() {
@@ -76,10 +71,10 @@ mod tests {
             "0x6bf84c7174cb7476364cc3dbd968b0f7172ed85794bb358b0c3b525da1786f9f",
         ]
         .iter()
-        .map(|hash| BlockId::from_str(hash).unwrap())
+        .map(|hash| prefix_hex::decode::<Vec<_>>(hash).unwrap())
         .collect::<Vec<_>>();
 
-        let hash = MerkleHasher::<Blake2b256>::digest(&hashes).to_vec();
+        let hash = MerkleHasher::digest::<Blake2b256>(&hashes).to_vec();
 
         assert_eq!(
             prefix_hex::encode(hash),

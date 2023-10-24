@@ -307,7 +307,7 @@ impl Transaction {
     /// merkle tree that contains the transaction's serialized outputs as leaves.
     fn output_commitment(&self) -> [u8; 32] {
         let outputs_serialized = self.outputs.iter().map(|o| o.pack_to_vec()).collect::<Vec<_>>();
-        merkle_hasher::MerkleHasher::<Blake2b256>::digest(&outputs_serialized).into()
+        merkle_hasher::MerkleHasher::digest::<Blake2b256>(&outputs_serialized).into()
     }
 }
 
