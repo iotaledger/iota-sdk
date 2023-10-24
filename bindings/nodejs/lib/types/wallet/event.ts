@@ -6,6 +6,7 @@ import { InclusionState } from './transaction';
 import { InputSigningData, Remainder } from '../client';
 import { Transaction, SignedTransactionPayload } from '../block';
 import { OutputResponse } from '../models';
+import { HexEncodedString } from '../utils';
 
 /**
  * A Transaction ID represented as hex-encoded string.
@@ -249,12 +250,12 @@ class PreparedTransactionProgress extends TransactionProgress {
  * A 'prepared transaction hash' progress.
  */
 class PreparedTransactionHashProgress extends TransactionProgress {
-    hash: string;
+    hash: HexEncodedString;
 
     /**
      * @param hash The hash of the transaction.
      */
-    constructor(hash: string) {
+    constructor(hash: HexEncodedString) {
         super(TransactionProgressType.PreparedTransactionHash);
         this.hash = hash;
     }
