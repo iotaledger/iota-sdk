@@ -686,7 +686,7 @@ pub async fn mint_nft_command(
 pub async fn new_address_command(account: &Account) -> Result<(), Error> {
     let address = account.generate_ed25519_addresses(1, None).await?;
 
-    print_address(account, &address[0].address()).await?;
+    print_address(account, address[0].address()).await?;
 
     Ok(())
 }
@@ -980,7 +980,7 @@ async fn print_address(account: &Account, address: &Bech32Address) -> Result<(),
                     Output::Basic(basic) => basic.address() == address.inner(),
                     Output::Nft(nft) => &Address::Nft(nft.nft_address(&data.output_id)) == address.inner(),
                     Output::Alias(alias) => &Address::Alias(alias.alias_address(&data.output_id)) == address.inner(),
-                    Output::Foundry(foundry) => &Address::Alias(foundry.alias_address().clone()) == address.inner(),
+                    Output::Foundry(foundry) => &Address::Alias(*foundry.alias_address()) == address.inner(),
                     _ => false,
                 }
         })
@@ -1031,7 +1031,7 @@ async fn print_address(account: &Account, address: &Bech32Address) -> Result<(),
     formatted_table.push_str(&format!("{0}{1:<8}{2}", "\n  ", "Amount:", amount));
 
     // outputs table
-    if outputs.len() > 0 {
+    if !outputs.is_empty() {
         formatted_table.push_str("\nOutputs");
         for (id, kind) in outputs {
             formatted_table.push_str(&format!("{0}{id}\t{kind}", "\n  "));
@@ -1040,7 +1040,7 @@ async fn print_address(account: &Account, address: &Bech32Address) -> Result<(),
 
     // native tokens table
     let native_tokens = native_tokens.finish_vec()?;
-    if native_tokens.len() > 0 {
+    if !native_tokens.is_empty() {
         formatted_table.push_str("\nNative Tokens");
         for (id, amount) in native_tokens
             .into_iter()
@@ -1051,7 +1051,7 @@ async fn print_address(account: &Account, address: &Bech32Address) -> Result<(),
     }
 
     // NFT table
-    if nfts.len() > 0 {
+    if !nfts.is_empty() {
         formatted_table.push_str("\nNFTs");
         for id in nfts.into_iter() {
             formatted_table.push_str(&format!("{0}{id}", "\n  "));
@@ -1059,7 +1059,7 @@ async fn print_address(account: &Account, address: &Bech32Address) -> Result<(),
     }
 
     // Aliases table
-    if aliases.len() > 0 {
+    if !aliases.is_empty() {
         formatted_table.push_str("\nAliases");
         for id in aliases.into_iter() {
             formatted_table.push_str(&format!("{0}{id}", "\n  "));
@@ -1127,7 +1127,7 @@ async fn get_addresses_sorted(account: &Account) -> Result<Vec<Bech32Address>, E
         .filter_map(|data| match data.output {
             Output::Alias(alias) => Some(Address::Alias(alias.alias_address(&data.output_id))),
             Output::Nft(nft) => Some(Address::Nft(nft.nft_address(&data.output_id))),
-            Output::Basic(basic) => Some(basic.address().clone()),
+            Output::Basic(basic) => Some(*basic.address()),
             _ => None,
         })
         .map(|address| address.to_bech32_unchecked(hrp))
