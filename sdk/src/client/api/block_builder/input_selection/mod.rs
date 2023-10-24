@@ -25,7 +25,7 @@ use crate::{
             AccountOutput, AccountTransition, ChainId, FoundryOutput, NativeTokensBuilder, NftOutput, Output, OutputId,
             OUTPUT_COUNT_RANGE,
         },
-        payload::transaction::TransactionCapabilities,
+        payload::signed_transaction::TransactionCapabilities,
         protocol::ProtocolParameters,
         slot::SlotIndex,
     },

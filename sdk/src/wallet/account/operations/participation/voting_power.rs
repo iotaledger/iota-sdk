@@ -15,7 +15,7 @@ use crate::{
         },
     },
     wallet::{
-        account::{types::Transaction, Account, TransactionOptions},
+        account::{types::TransactionWithMetadata, Account, TransactionOptions},
         Error, Result,
     },
 };
@@ -44,7 +44,7 @@ where
     /// cached event information, checks event milestones in there against latest network milestone).
     /// Prioritizes consuming outputs that are designated for voting but don't have any metadata (only possible if user
     /// increases voting power then increases again immediately after).
-    pub async fn increase_voting_power(&self, amount: u64) -> Result<Transaction> {
+    pub async fn increase_voting_power(&self, amount: u64) -> Result<TransactionWithMetadata> {
         let prepared = self.prepare_increase_voting_power(amount).await?;
 
         self.sign_and_submit_transaction(prepared, None).await
@@ -104,7 +104,7 @@ where
     /// milestones in there against latest network milestone).
     /// Prioritizes consuming outputs that are designated for voting but don't have any metadata (only possible if user
     /// increases voting power then decreases immediately after).
-    pub async fn decrease_voting_power(&self, amount: u64) -> Result<Transaction> {
+    pub async fn decrease_voting_power(&self, amount: u64) -> Result<TransactionWithMetadata> {
         let prepared = self.prepare_decrease_voting_power(amount).await?;
 
         self.sign_and_submit_transaction(prepared, None).await

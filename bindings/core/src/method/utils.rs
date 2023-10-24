@@ -5,8 +5,8 @@ use derivative::Derivative;
 use iota_sdk::types::block::{
     address::{Bech32Address, Hrp},
     output::{dto::OutputDto, AccountId, NftId, OutputId, StorageScoreParameters},
-    payload::transaction::{
-        dto::{TransactionEssenceDto, TransactionPayloadDto},
+    payload::signed_transaction::{
+        dto::{SignedTransactionPayloadDto, TransactionDto},
         TransactionId,
     },
     protocol::ProtocolParameters,
@@ -90,7 +90,7 @@ pub enum UtilsMethod {
     /// Returns the transaction ID (Blake2b256 hash of the provided transaction payload)
     TransactionId {
         /// Transaction Payload
-        payload: TransactionPayloadDto,
+        payload: SignedTransactionPayloadDto,
     },
     /// Computes the account ID
     #[serde(rename_all = "camelCase")]
@@ -123,13 +123,11 @@ pub enum UtilsMethod {
         serial_number: u32,
         token_scheme_type: u8,
     },
-    /// Computes the hash of a transaction essence.
-    HashTransactionEssence {
-        /// The transaction essence
-        essence: TransactionEssenceDto,
+    /// Computes the hash of a transaction.
+    HashTransaction {
+        /// The transaction.
+        transaction: TransactionDto,
     },
-    /// Computes the input commitment from the output objects that are used as inputs to fund the transaction.
-    ComputeInputsCommitment { inputs: Vec<OutputDto> },
     /// Computes the required storage deposit of an output.
     ComputeStorageDeposit {
         output: OutputDto,

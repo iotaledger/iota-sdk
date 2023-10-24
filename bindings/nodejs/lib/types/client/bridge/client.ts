@@ -112,7 +112,7 @@ export interface __SignatureUnlockMethod__ {
     name: 'signatureUnlock';
     data: {
         secretManager: SecretManagerType;
-        transactionEssenceHash: HexEncodedString;
+        transactionHash: HexEncodedString;
         chain: Bip44;
     };
 }

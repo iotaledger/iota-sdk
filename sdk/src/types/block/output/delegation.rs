@@ -378,7 +378,7 @@ impl DelegationOutput {
         context: &mut ValidationContext<'_>,
     ) -> Result<(), TransactionFailureReason> {
         self.unlock_conditions()
-            .locked_address(self.address(), context.essence.creation_slot())
+            .locked_address(self.address(), context.transaction.creation_slot())
             .unlock(unlock, inputs, context)
     }
 
@@ -487,7 +487,7 @@ impl Packable for DelegationOutput {
         let validator_address = AccountAddress::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
 
         if validator_address.is_null() {
-            return Err(Error::NullDelegationValidatorId).map_err(UnpackError::Packable);
+            return Err(UnpackError::Packable(Error::NullDelegationValidatorId));
         }
 
         let start_epoch = EpochIndex::unpack::<_, VERIFY>(unpacker, &()).coerce()?;

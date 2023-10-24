@@ -9,7 +9,9 @@ use crate::types::block::{
     output::{StorageScore, StorageScoreParameters},
 };
 
-/// An implicit account creation address that can be used to transition an account.
+/// An implicit account creation address that can be used to convert a
+/// [`BasicOutput`](crate::types::block::output::BasicOutput) to an
+/// [`AccountOutput`](crate::types::block::output::AccountOutput).
 #[derive(Copy, Clone, Debug, Display, Eq, PartialEq, Ord, PartialOrd, Hash, FromStr, AsRef, Deref, From, Packable)]
 #[as_ref(forward)]
 pub struct ImplicitAccountCreationAddress(Ed25519Address);
