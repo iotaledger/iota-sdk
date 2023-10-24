@@ -4,7 +4,6 @@
 mod anchor;
 mod chain_id;
 mod delegation;
-mod inputs_commitment;
 mod metadata;
 mod native_token;
 mod output_id;
@@ -50,7 +49,6 @@ pub use self::{
     delegation::{DelegationId, DelegationOutput, DelegationOutputBuilder},
     feature::{Feature, Features},
     foundry::{FoundryId, FoundryOutput, FoundryOutputBuilder},
-    inputs_commitment::InputsCommitment,
     metadata::OutputMetadata,
     native_token::{NativeToken, NativeTokens, NativeTokensBuilder, TokenId},
     nft::{NftId, NftOutput, NftOutputBuilder},
@@ -583,12 +581,12 @@ pub mod dto {
             #[derive(Serialize)]
             #[serde(untagged)]
             enum OutputDto_<'a> {
-                T2(&'a BasicOutputDto),
-                T3(&'a AccountOutputDto),
-                T4(&'a FoundryOutputDto),
-                T5(&'a NftOutputDto),
-                T6(&'a DelegationOutputDto),
-                T7(&'a AnchorOutputDto),
+                T0(&'a BasicOutputDto),
+                T1(&'a AccountOutputDto),
+                T2(&'a FoundryOutputDto),
+                T3(&'a NftOutputDto),
+                T4(&'a DelegationOutputDto),
+                T5(&'a AnchorOutputDto),
             }
             #[derive(Serialize)]
             struct TypedOutput<'a> {
@@ -597,22 +595,22 @@ pub mod dto {
             }
             let output = match self {
                 Self::Basic(o) => TypedOutput {
-                    output: OutputDto_::T2(o),
+                    output: OutputDto_::T0(o),
                 },
                 Self::Account(o) => TypedOutput {
-                    output: OutputDto_::T3(o),
+                    output: OutputDto_::T1(o),
                 },
                 Self::Foundry(o) => TypedOutput {
-                    output: OutputDto_::T4(o),
+                    output: OutputDto_::T2(o),
                 },
                 Self::Nft(o) => TypedOutput {
-                    output: OutputDto_::T5(o),
+                    output: OutputDto_::T3(o),
                 },
                 Self::Delegation(o) => TypedOutput {
-                    output: OutputDto_::T6(o),
+                    output: OutputDto_::T4(o),
                 },
                 Self::Anchor(o) => TypedOutput {
-                    output: OutputDto_::T7(o),
+                    output: OutputDto_::T5(o),
                 },
             };
             output.serialize(serializer)

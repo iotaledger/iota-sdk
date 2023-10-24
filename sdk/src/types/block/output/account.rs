@@ -24,7 +24,7 @@ use crate::types::{
             NativeTokens, Output, OutputBuilderAmount, OutputId, Rent, RentStructure, StateTransitionError,
             StateTransitionVerifier,
         },
-        payload::transaction::TransactionCapabilityFlag,
+        payload::signed_transaction::TransactionCapabilityFlag,
         protocol::ProtocolParameters,
         semantic::{TransactionFailureReason, ValidationContext},
         unlock::Unlock,
@@ -439,7 +439,7 @@ impl AccountOutput {
         context: &mut ValidationContext<'_>,
     ) -> Result<(), TransactionFailureReason> {
         self.unlock_conditions()
-            .locked_address(self.address(), context.essence.creation_slot())
+            .locked_address(self.address(), context.transaction.creation_slot())
             .unlock(unlock, inputs, context)?;
 
         let account_id = if self.account_id().is_null() {
@@ -536,13 +536,13 @@ impl StateTransitionVerifier for AccountOutput {
             current_state,
             next_state,
             &context.input_chains,
-            context.essence.outputs(),
+            context.transaction.outputs(),
         )
     }
 
     fn destruction(_current_state: &Self, context: &ValidationContext<'_>) -> Result<(), StateTransitionError> {
         if !context
-            .essence
+            .transaction
             .has_capability(TransactionCapabilityFlag::DestroyAccountOutputs)
         {
             // TODO: add a variant https://github.com/iotaledger/iota-sdk/issues/1430

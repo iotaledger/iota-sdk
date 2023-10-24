@@ -79,7 +79,7 @@ class Utils():
             'address': address
         })
 
-        deserialize_address(response)
+        return deserialize_address(response)
 
     @staticmethod
     def is_address_valid(address: str) -> bool:

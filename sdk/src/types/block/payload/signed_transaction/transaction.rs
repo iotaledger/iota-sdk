@@ -3,8 +3,9 @@
 
 use alloc::{collections::BTreeSet, vec::Vec};
 
+use crypto::hashes::{blake2b::Blake2b256, Digest};
 use hashbrown::HashSet;
-use packable::{bounded::BoundedU16, prefix::BoxedSlicePrefix, Packable};
+use packable::{bounded::BoundedU16, prefix::BoxedSlicePrefix, Packable, PackableExt};
 
 use crate::types::{
     block::{
@@ -12,7 +13,7 @@ use crate::types::{
         context_input::{ContextInput, CONTEXT_INPUT_COUNT_RANGE},
         input::{Input, INPUT_COUNT_RANGE},
         mana::{verify_mana_allotments_sum, ManaAllotment, ManaAllotments},
-        output::{InputsCommitment, NativeTokens, Output, OUTPUT_COUNT_RANGE},
+        output::{NativeTokens, Output, OUTPUT_COUNT_RANGE},
         payload::{OptionalPayload, Payload},
         protocol::ProtocolParameters,
         slot::SlotIndex,
@@ -21,86 +22,72 @@ use crate::types::{
     ValidationParams,
 };
 
-/// A builder to build a [`RegularTransactionEssence`].
+/// A builder to build a [`Transaction`].
 #[derive(Debug, Clone)]
 #[must_use]
-pub struct RegularTransactionEssenceBuilder {
+pub struct TransactionBuilder {
     network_id: u64,
+    creation_slot: Option<SlotIndex>,
     context_inputs: Vec<ContextInput>,
     inputs: Vec<Input>,
-    inputs_commitment: InputsCommitment,
-    outputs: Vec<Output>,
     allotments: BTreeSet<ManaAllotment>,
     capabilities: TransactionCapabilities,
     payload: OptionalPayload,
-    creation_slot: Option<SlotIndex>,
+    outputs: Vec<Output>,
 }
 
-impl RegularTransactionEssenceBuilder {
-    /// Creates a new [`RegularTransactionEssenceBuilder`].
-    pub fn new(network_id: u64, inputs_commitment: InputsCommitment) -> Self {
+impl TransactionBuilder {
+    /// Creates a new [`TransactionBuilder`].
+    pub fn new(network_id: u64) -> Self {
         Self {
             network_id,
+            creation_slot: None,
             context_inputs: Vec::new(),
             inputs: Vec::new(),
-            inputs_commitment,
-            outputs: Vec::new(),
             allotments: BTreeSet::new(),
             capabilities: Default::default(),
             payload: OptionalPayload::default(),
-            creation_slot: None,
+            outputs: Vec::new(),
         }
     }
 
-    /// Adds creation slot to a [`RegularTransactionEssenceBuilder`].
+    /// Sets the creation slot of a [`TransactionBuilder`].
     pub fn with_creation_slot(mut self, creation_slot: impl Into<Option<SlotIndex>>) -> Self {
         self.creation_slot = creation_slot.into();
         self
     }
 
-    /// Adds context inputs to a [`RegularTransactionEssenceBuilder`].
+    /// Sets the context inputs of a [`TransactionBuilder`].
     pub fn with_context_inputs(mut self, context_inputs: impl Into<Vec<ContextInput>>) -> Self {
         self.context_inputs = context_inputs.into();
         self
     }
 
-    /// Adds inputs to a [`RegularTransactionEssenceBuilder`].
+    /// Sets the inputs of a [`TransactionBuilder`].
     pub fn with_inputs(mut self, inputs: impl Into<Vec<Input>>) -> Self {
         self.inputs = inputs.into();
         self
     }
 
-    /// Adds an input to a [`RegularTransactionEssenceBuilder`].
+    /// Adds an input to a [`TransactionBuilder`].
     pub fn add_input(mut self, input: Input) -> Self {
         self.inputs.push(input);
         self
     }
 
-    /// Adds outputs to a [`RegularTransactionEssenceBuilder`].
-    pub fn with_outputs(mut self, outputs: impl Into<Vec<Output>>) -> Self {
-        self.outputs = outputs.into();
-        self
-    }
-
-    /// Adds an output to a [`RegularTransactionEssenceBuilder`].
-    pub fn add_output(mut self, output: Output) -> Self {
-        self.outputs.push(output);
-        self
-    }
-
-    /// Adds [`ManaAllotment`]s to a [`RegularTransactionEssenceBuilder`].
+    /// Sets the [`ManaAllotment`]s of a [`TransactionBuilder`].
     pub fn with_mana_allotments(mut self, allotments: impl IntoIterator<Item = ManaAllotment>) -> Self {
         self.allotments = allotments.into_iter().collect();
         self
     }
 
-    /// Adds a [`ManaAllotment`] to a [`RegularTransactionEssenceBuilder`].
+    /// Adds a [`ManaAllotment`] to a [`TransactionBuilder`].
     pub fn add_mana_allotment(mut self, allotment: ManaAllotment) -> Self {
         self.allotments.insert(allotment);
         self
     }
 
-    /// Replaces a [`ManaAllotment`] of the [`RegularTransactionEssenceBuilder`] with a new one, or adds it.
+    /// Replaces a [`ManaAllotment`] of the [`TransactionBuilder`] with a new one, or adds it.
     pub fn replace_mana_allotment(mut self, allotment: ManaAllotment) -> Self {
         self.allotments.replace(allotment);
         self
@@ -111,18 +98,28 @@ impl RegularTransactionEssenceBuilder {
         self
     }
 
-    /// Adds a payload to a [`RegularTransactionEssenceBuilder`].
+    /// Sets the payload of a [`TransactionBuilder`].
     pub fn with_payload(mut self, payload: impl Into<OptionalPayload>) -> Self {
         self.payload = payload.into();
         self
     }
 
-    /// Finishes a [`RegularTransactionEssenceBuilder`] into a [`RegularTransactionEssence`].
-    pub fn finish_with_params<'a>(
-        self,
-        params: impl Into<ValidationParams<'a>> + Send,
-    ) -> Result<RegularTransactionEssence, Error> {
+    /// Sets the outputs of a [`TransactionBuilder`].
+    pub fn with_outputs(mut self, outputs: impl Into<Vec<Output>>) -> Self {
+        self.outputs = outputs.into();
+        self
+    }
+
+    /// Adds an output to a [`TransactionBuilder`].
+    pub fn add_output(mut self, output: Output) -> Self {
+        self.outputs.push(output);
+        self
+    }
+
+    /// Finishes a [`TransactionBuilder`] into a [`Transaction`].
+    pub fn finish_with_params<'a>(self, params: impl Into<ValidationParams<'a>> + Send) -> Result<Transaction, Error> {
         let params = params.into();
+
         if let Some(protocol_parameters) = params.protocol_parameters() {
             if self.network_id != protocol_parameters.network_id() {
                 return Err(Error::NetworkIdMismatch {
@@ -131,38 +128,6 @@ impl RegularTransactionEssenceBuilder {
                 });
             }
         }
-
-        let context_inputs: BoxedSlicePrefix<ContextInput, ContextInputCount> = self
-            .context_inputs
-            .into_boxed_slice()
-            .try_into()
-            .map_err(Error::InvalidContextInputCount)?;
-
-        let inputs: BoxedSlicePrefix<Input, InputCount> = self
-            .inputs
-            .into_boxed_slice()
-            .try_into()
-            .map_err(Error::InvalidInputCount)?;
-
-        verify_inputs(&inputs)?;
-
-        let outputs: BoxedSlicePrefix<Output, OutputCount> = self
-            .outputs
-            .into_boxed_slice()
-            .try_into()
-            .map_err(Error::InvalidOutputCount)?;
-
-        if let Some(protocol_parameters) = params.protocol_parameters() {
-            verify_outputs::<true>(&outputs, protocol_parameters)?;
-        }
-
-        let allotments = ManaAllotments::from_set(self.allotments)?;
-
-        if let Some(protocol_parameters) = params.protocol_parameters() {
-            verify_mana_allotments_sum(allotments.iter(), protocol_parameters)?;
-        }
-
-        verify_payload(&self.payload)?;
 
         let creation_slot = self
             .creation_slot
@@ -182,22 +147,53 @@ impl RegularTransactionEssenceBuilder {
             })
             .ok_or(Error::InvalidField("creation slot"))?;
 
-        Ok(RegularTransactionEssence {
+        let context_inputs: BoxedSlicePrefix<ContextInput, ContextInputCount> = self
+            .context_inputs
+            .into_boxed_slice()
+            .try_into()
+            .map_err(Error::InvalidContextInputCount)?;
+
+        let inputs: BoxedSlicePrefix<Input, InputCount> = self
+            .inputs
+            .into_boxed_slice()
+            .try_into()
+            .map_err(Error::InvalidInputCount)?;
+
+        verify_inputs(&inputs)?;
+
+        let allotments = ManaAllotments::from_set(self.allotments)?;
+
+        if let Some(protocol_parameters) = params.protocol_parameters() {
+            verify_mana_allotments_sum(allotments.iter(), protocol_parameters)?;
+        }
+
+        verify_payload(&self.payload)?;
+
+        let outputs: BoxedSlicePrefix<Output, OutputCount> = self
+            .outputs
+            .into_boxed_slice()
+            .try_into()
+            .map_err(Error::InvalidOutputCount)?;
+
+        if let Some(protocol_parameters) = params.protocol_parameters() {
+            verify_outputs::<true>(&outputs, protocol_parameters)?;
+        }
+
+        Ok(Transaction {
             network_id: self.network_id,
             creation_slot,
             context_inputs,
             inputs,
-            inputs_commitment: self.inputs_commitment,
-            outputs,
             allotments,
             capabilities: self.capabilities,
             payload: self.payload,
+            outputs,
         })
     }
 
-    /// Finishes a [`RegularTransactionEssenceBuilder`] into a [`RegularTransactionEssence`] without protocol
+    /// Finishes a [`TransactionBuilder`] into a [`Transaction`] without protocol
     /// validation.
-    pub fn finish(self) -> Result<RegularTransactionEssence, Error> {
+    pub fn finish(self) -> Result<Transaction, Error> {
         self.finish_with_params(ValidationParams::default())
     }
 }
@@ -207,11 +203,11 @@ pub(crate) type ContextInputCount =
 pub(crate) type InputCount = BoundedU16<{ *INPUT_COUNT_RANGE.start() }, { *INPUT_COUNT_RANGE.end() }>;
 pub(crate) type OutputCount = BoundedU16<{ *OUTPUT_COUNT_RANGE.start() }, { *OUTPUT_COUNT_RANGE.end() }>;
 
-/// A transaction regular essence consuming inputs, creating outputs and carrying an optional payload.
+/// A transaction consuming inputs, creating outputs and carrying an optional payload.
 #[derive(Clone, Debug, Eq, PartialEq, Packable)]
 #[packable(unpack_error = Error)]
 #[packable(unpack_visitor = ProtocolParameters)]
-pub struct RegularTransactionEssence {
+pub struct Transaction {
     /// The unique value denoting whether the block was meant for mainnet, testnet, or a private network.
     #[packable(verify_with = verify_network_id)]
     network_id: u64,
@@ -223,57 +219,42 @@ pub struct RegularTransactionEssence {
     #[packable(verify_with = verify_inputs_packable)]
     #[packable(unpack_error_with = |e| e.unwrap_item_err_or_else(|p| Error::InvalidInputCount(p.into())))]
     inputs: BoxedSlicePrefix<Input, InputCount>,
-    /// BLAKE2b-256 hash of the serialized outputs referenced in inputs by their OutputId.
-    inputs_commitment: InputsCommitment,
-    #[packable(verify_with = verify_outputs)]
-    #[packable(unpack_error_with = |e| e.unwrap_item_err_or_else(|p| Error::InvalidOutputCount(p.into())))]
-    outputs: BoxedSlicePrefix<Output, OutputCount>,
     allotments: ManaAllotments,
     capabilities: TransactionCapabilities,
     #[packable(verify_with = verify_payload_packable)]
     payload: OptionalPayload,
+    #[packable(verify_with = verify_outputs)]
+    #[packable(unpack_error_with = |e| e.unwrap_item_err_or_else(|p| Error::InvalidOutputCount(p.into())))]
+    outputs: BoxedSlicePrefix<Output, OutputCount>,
 }
 
-impl RegularTransactionEssence {
-    /// The essence kind of a [`RegularTransactionEssence`].
-    pub const KIND: u8 = 2;
-
-    /// Creates a new [`RegularTransactionEssenceBuilder`] to build a [`RegularTransactionEssence`].
-    pub fn builder(network_id: u64, inputs_commitment: InputsCommitment) -> RegularTransactionEssenceBuilder {
-        RegularTransactionEssenceBuilder::new(network_id, inputs_commitment)
+impl Transaction {
+    /// Creates a new [`TransactionBuilder`] to build a [`Transaction`].
+    pub fn builder(network_id: u64) -> TransactionBuilder {
+        TransactionBuilder::new(network_id)
     }
 
-    /// Returns the network ID of a [`RegularTransactionEssence`].
+    /// Returns the network ID of a [`Transaction`].
     pub fn network_id(&self) -> u64 {
         self.network_id
     }
 
-    /// Returns the slot index in which the [`RegularTransactionEssence`] was created.
+    /// Returns the slot index in which the [`Transaction`] was created.
     pub fn creation_slot(&self) -> SlotIndex {
         self.creation_slot
     }
 
-    /// Returns the context inputs of a [`RegularTransactionEssence`].
+    /// Returns the context inputs of a [`Transaction`].
     pub fn context_inputs(&self) -> &[ContextInput] {
         &self.context_inputs
     }
 
-    /// Returns the inputs of a [`RegularTransactionEssence`].
+    /// Returns the inputs of a [`Transaction`].
     pub fn inputs(&self) -> &[Input] {
         &self.inputs
     }
 
-    /// Returns the inputs commitment of a [`RegularTransactionEssence`].
-    pub fn inputs_commitment(&self) -> &InputsCommitment {
-        &self.inputs_commitment
-    }
-
-    /// Returns the outputs of a [`RegularTransactionEssence`].
-    pub fn outputs(&self) -> &[Output] {
-        &self.outputs
-    }
-
-    /// Returns the [`ManaAllotment`]s of a [`RegularTransactionEssence`].
+    /// Returns the [`ManaAllotment`]s of a [`Transaction`].
     pub fn mana_allotments(&self) -> &[ManaAllotment] {
         &self.allotments
     }
@@ -287,9 +268,19 @@ impl RegularTransactionEssence {
         self.capabilities.has_capability(flag)
     }
 
-    /// Returns the optional payload of a [`RegularTransactionEssence`].
+    /// Returns the optional payload of a [`Transaction`].
     pub fn payload(&self) -> Option<&Payload> {
         self.payload.as_ref()
+    }
+
+    /// Returns the outputs of a [`Transaction`].
+    pub fn outputs(&self) -> &[Output] {
+        &self.outputs
+    }
+
+    /// Return the Blake2b hash of an [`Transaction`].
+    pub fn hash(&self) -> [u8; 32] {
+        Blake2b256::digest(self.pack_to_vec()).into()
     }
 }
 
@@ -374,6 +365,23 @@ fn verify_inputs_packable<const VERIFY: bool>(inputs: &[Input], _visitor: &Proto
     Ok(())
 }
 
+fn verify_payload(payload: &OptionalPayload) -> Result<(), Error> {
+    match &payload.0 {
+        Some(Payload::TaggedData(_)) | None => Ok(()),
+        Some(payload) => Err(Error::InvalidPayloadKind(payload.kind())),
+    }
+}
+
+fn verify_payload_packable<const VERIFY: bool>(
+    payload: &OptionalPayload,
+    _visitor: &ProtocolParameters,
+) -> Result<(), Error> {
+    if VERIFY {
+        verify_payload(payload)?;
+    }
+    Ok(())
+}
+
 fn verify_outputs<const VERIFY: bool>(outputs: &[Output], visitor: &ProtocolParameters) -> Result<(), Error> {
     if VERIFY {
         let mut amount_sum: u64 = 0;
@@ -419,23 +427,6 @@ fn verify_outputs<const VERIFY: bool>(outputs: &[Output], visitor: &ProtocolPara
         }
     }
 
-    Ok(())
-}
-
-fn verify_payload(payload: &OptionalPayload) -> Result<(), Error> {
-    match &payload.0 {
-        Some(Payload::TaggedData(_)) | None => Ok(()),
-        Some(payload) => Err(Error::InvalidPayloadKind(payload.kind())),
-    }
-}
-
-fn verify_payload_packable<const VERIFY: bool>(
-    payload: &OptionalPayload,
-    _visitor: &ProtocolParameters,
-) -> Result<(), Error> {
-    if VERIFY {
-        verify_payload(payload)?;
-    }
     Ok(())
 }
 
@@ -505,7 +496,6 @@ pub(crate) mod dto {
         boxed::Box,
         string::{String, ToString},
     };
-    use core::str::FromStr;
 
     use serde::{Deserialize, Serialize};
 
@@ -518,35 +508,28 @@ pub(crate) mod dto {
         utils::serde::prefix_hex_bytes,
     };
 
-    /// Describes the essence data making up a transaction by defining its inputs and outputs and an optional payload.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
-    pub struct RegularTransactionEssenceDto {
-        #[serde(rename = "type")]
-        pub kind: u8,
+    pub struct TransactionDto {
         pub network_id: String,
         pub creation_slot: SlotIndex,
         pub context_inputs: Vec<ContextInput>,
         pub inputs: Vec<Input>,
-        pub inputs_commitment: String,
-        pub outputs: Vec<OutputDto>,
         pub allotments: Vec<ManaAllotmentDto>,
         #[serde(with = "prefix_hex_bytes")]
         pub capabilities: Box<[u8]>,
         #[serde(default, skip_serializing_if = "Option::is_none")]
         pub payload: Option<PayloadDto>,
+        pub outputs: Vec<OutputDto>,
     }
 
-    impl From<&RegularTransactionEssence> for RegularTransactionEssenceDto {
-        fn from(value: &RegularTransactionEssence) -> Self {
+    impl From<&Transaction> for TransactionDto {
+        fn from(value: &Transaction) -> Self {
             Self {
-                kind: RegularTransactionEssence::KIND,
                 network_id: value.network_id().to_string(),
                 creation_slot: value.creation_slot(),
                 context_inputs: value.context_inputs().to_vec(),
                 inputs: value.inputs().to_vec(),
-                inputs_commitment: value.inputs_commitment().to_string(),
-                outputs: value.outputs().iter().map(Into::into).collect(),
                 allotments: value.mana_allotments().iter().map(Into::into).collect(),
                 capabilities: value.capabilities().iter().copied().collect(),
                 payload: match value.payload() {
@@ -554,12 +537,13 @@ pub(crate) mod dto {
                     Some(_) => unimplemented!(),
                     None => None,
                 },
+                outputs: value.outputs().iter().map(Into::into).collect(),
             }
         }
     }
 
-    impl TryFromDto for RegularTransactionEssence {
-        type Dto = RegularTransactionEssenceDto;
+    impl TryFromDto for Transaction {
+        type Dto = TransactionDto;
         type Error = Error;
 
         fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
@@ -567,26 +551,26 @@ pub(crate) mod dto {
                 .network_id
                 .parse::<u64>()
                 .map_err(|_| Error::InvalidField("network_id"))?;
-            let outputs = dto
-                .outputs
-                .into_iter()
-                .map(|o| Output::try_from_dto_with_params(o, &params))
-                .collect::<Result<Vec<Output>, Error>>()?;
             let mana_allotments = dto
                 .allotments
                 .into_iter()
                 .map(|o| ManaAllotment::try_from_dto_with_params(o, &params))
                 .collect::<Result<Vec<ManaAllotment>, Error>>()?;
+            let outputs = dto
+                .outputs
+                .into_iter()
+                .map(|o| Output::try_from_dto_with_params(o, &params))
+                .collect::<Result<Vec<Output>, Error>>()?;
 
-            let mut builder = Self::builder(network_id, InputsCommitment::from_str(&dto.inputs_commitment)?)
+            let mut builder = Self::builder(network_id)
                 .with_creation_slot(dto.creation_slot)
                 .with_context_inputs(dto.context_inputs)
                 .with_inputs(dto.inputs)
-                .with_outputs(outputs)
                 .with_mana_allotments(mana_allotments)
                 .with_capabilities(Capabilities::from_bytes(
                     dto.capabilities.try_into().map_err(Error::InvalidCapabilitiesCount)?,
-                ));
+                ))
+                .with_outputs(outputs);
 
             builder = if let Some(p) = dto.payload {
                 if let PayloadDto::TaggedData(i) = p {

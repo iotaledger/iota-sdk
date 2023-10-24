@@ -185,10 +185,10 @@ async fn sync_incoming_transactions() -> Result<()> {
     assert_eq!(incoming_transactions.len(), 1);
     let incoming_tx = account_1.get_incoming_transaction(&tx.transaction_id).await.unwrap();
     assert_eq!(incoming_tx.inputs.len(), 1);
-    let essence = incoming_tx.payload.essence();
+    let transaction = incoming_tx.payload.transaction();
 
     // 2 created outputs plus remainder
-    assert_eq!(essence.outputs().len(), 3);
+    assert_eq!(transaction.outputs().len(), 3);
 
     tear_down(storage_path)
 }

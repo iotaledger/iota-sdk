@@ -25,7 +25,7 @@ use iota_sdk::{
             address::{Address, Bech32Address, Hrp},
             input::UtxoInput,
             output::{dto::OutputDto, AccountId, FoundryId, NftId, OutputId, OutputMetadata, TokenId},
-            payload::{dto::TransactionPayloadDto, transaction::TransactionId},
+            payload::{dto::SignedTransactionPayloadDto, signed_transaction::TransactionId},
             protocol::ProtocolParameters,
             signature::Ed25519Signature,
             slot::SlotCommitmentId,
@@ -34,7 +34,7 @@ use iota_sdk::{
         },
     },
     wallet::account::{
-        types::{AddressWithUnspentOutputs, Balance, Bip44Address, OutputDataDto, TransactionDto},
+        types::{AddressWithUnspentOutputs, Balance, Bip44Address, OutputDataDto, TransactionWithMetadataDto},
         AccountDetailsDto, PreparedCreateNativeTokenTransactionDto,
     },
 };
@@ -77,7 +77,7 @@ pub enum Response {
     ProtocolParameters(ProtocolParameters),
     /// Response for:
     /// - [`SignTransaction`](crate::method::SecretManagerMethod::SignTransaction)
-    SignedTransaction(TransactionPayloadDto),
+    SignedTransaction(SignedTransactionPayloadDto),
     /// Response for:
     /// - [`SignatureUnlock`](crate::method::SecretManagerMethod::SignatureUnlock)
     SignatureUnlock(Unlock),
@@ -173,7 +173,7 @@ pub enum Response {
     /// - [`ComputeFoundryId`](crate::method::UtilsMethod::ComputeFoundryId)
     FoundryId(FoundryId),
     /// Response for:
-    /// - [`HashTransactionEssence`](crate::method::UtilsMethod::HashTransactionEssence)
+    /// - [`HashTransaction`](crate::method::UtilsMethod::HashTransaction)
     /// - [`ComputeInputsCommitment`](crate::method::UtilsMethod::ComputeInputsCommitment)
     Hash(String),
     /// Response for [`GetNodeInfo`](crate::method::ClientMethod::GetNodeInfo)
@@ -298,14 +298,14 @@ pub enum Response {
     /// Response for:
     /// - [`GetIncomingTransaction`](crate::method::AccountMethod::GetIncomingTransaction)
     /// - [`GetTransaction`](crate::method::AccountMethod::GetTransaction),
-    Transaction(Option<Box<TransactionDto>>),
+    Transaction(Option<Box<TransactionWithMetadataDto>>),
     /// Response for:
     /// - [`IncomingTransactions`](crate::method::AccountMethod::IncomingTransactions)
     /// - [`PendingTransactions`](crate::method::AccountMethod::PendingTransactions),
     /// - [`Transactions`](crate::method::AccountMethod::Transactions),
-    Transactions(Vec<TransactionDto>),
+    Transactions(Vec<TransactionWithMetadataDto>),
     /// Response for:
-    /// - [`SignTransactionEssence`](crate::method::AccountMethod::SignTransactionEssence)
+    /// - [`SignTransaction`](crate::method::AccountMethod::SignTransaction)
     SignedTransactionData(SignedTransactionDataDto),
     /// Response for:
     /// - [`GenerateEd25519Addresses`](crate::method::AccountMethod::GenerateEd25519Addresses)
@@ -320,7 +320,7 @@ pub enum Response {
     /// - [`SendOutputs`](crate::method::AccountMethod::SendOutputs)
     /// - [`SignAndSubmitTransaction`](crate::method::AccountMethod::SignAndSubmitTransaction)
     /// - [`SubmitAndStoreTransaction`](crate::method::AccountMethod::SubmitAndStoreTransaction)
-    SentTransaction(TransactionDto),
+    SentTransaction(TransactionWithMetadataDto),
     /// Response for:
     /// - [`GetParticipationEvent`](crate::method::AccountMethod::GetParticipationEvent)
     #[cfg(feature = "participation")]

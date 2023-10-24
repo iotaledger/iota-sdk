@@ -25,7 +25,7 @@ use crate::types::{
             NativeTokens, Output, OutputBuilderAmount, OutputId, Rent, RentStructure, StateTransitionError,
             StateTransitionVerifier,
         },
-        payload::transaction::TransactionCapabilityFlag,
+        payload::signed_transaction::TransactionCapabilityFlag,
         protocol::ProtocolParameters,
         semantic::{TransactionFailureReason, ValidationContext},
         unlock::Unlock,
@@ -594,13 +594,13 @@ impl StateTransitionVerifier for AnchorOutput {
             current_state,
             next_state,
             &context.input_chains,
-            context.essence.outputs(),
+            context.transaction.outputs(),
         )
     }
 
     fn destruction(_current_state: &Self, context: &ValidationContext<'_>) -> Result<(), StateTransitionError> {
         if !context
-            .essence
+            .transaction
             .capabilities()
             .has_capability(TransactionCapabilityFlag::DestroyAnchorOutputs)
         {

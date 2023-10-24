@@ -9,8 +9,8 @@ use primitive_types::U256;
 
 use crate::types::block::{
     address::{Address, AddressCapabilityFlag},
-    output::{ChainId, FoundryId, InputsCommitment, NativeTokens, Output, OutputId, TokenId, UnlockCondition},
-    payload::transaction::{RegularTransactionEssence, TransactionCapabilityFlag, TransactionEssence, TransactionId},
+    output::{ChainId, FoundryId, NativeTokens, Output, OutputId, TokenId, UnlockCondition},
+    payload::signed_transaction::{Transaction, TransactionCapabilityFlag, TransactionId},
     unlock::Unlocks,
     Error,
 };
@@ -44,28 +44,26 @@ pub enum TransactionFailureReason {
     StorageDepositReturnUnfulfilled = 9,
     /// An input unlock was invalid.
     InvalidInputUnlock = 10,
-    /// The inputs commitment is invalid.
-    InvalidInputsCommitment = 11,
     /// The output contains a Sender with an ident (address) which is not unlocked.
-    SenderNotUnlocked = 12,
+    SenderNotUnlocked = 11,
     /// The chain state transition is invalid.
-    InvalidChainStateTransition = 13,
+    InvalidChainStateTransition = 12,
     /// The referenced input is created after transaction issuing time.
-    InvalidTransactionIssuingTime = 14,
+    InvalidTransactionIssuingTime = 13,
     /// The mana amount is invalid.
-    InvalidManaAmount = 15,
+    InvalidManaAmount = 14,
     /// The Block Issuance Credits amount is invalid.
-    InvalidBlockIssuanceCreditsAmount = 16,
+    InvalidBlockIssuanceCreditsAmount = 15,
     /// Reward Context Input is invalid.
-    InvalidRewardContextInput = 17,
+    InvalidRewardContextInput = 16,
     /// Commitment Context Input is invalid.
-    InvalidCommitmentContextInput = 18,
+    InvalidCommitmentContextInput = 17,
     /// Staking Feature is not provided in account output when claiming rewards.
-    MissingStakingFeature = 19,
+    MissingStakingFeature = 18,
     /// Failed to claim staking reward.
-    FailedToClaimStakingReward = 20,
+    FailedToClaimStakingReward = 19,
     /// Failed to claim delegation reward.
-    FailedToClaimDelegationReward = 21,
+    FailedToClaimDelegationReward = 20,
     /// The semantic validation failed for a reason not covered by the previous variants.
     SemanticValidationFailed = 255,
 }
@@ -91,7 +89,6 @@ impl fmt::Display for TransactionFailureReason {
                 "The return amount in a transaction is not fulfilled by the output side."
             ),
             Self::InvalidInputUnlock => write!(f, "An input unlock was invalid."),
-            Self::InvalidInputsCommitment => write!(f, "The inputs commitment is invalid."),
             Self::SenderNotUnlocked => write!(
                 f,
                 "The output contains a Sender with an ident (address) which is not unlocked."
@@ -133,17 +130,16 @@ impl TryFrom<u8> for TransactionFailureReason {
             8 => Self::InvalidNativeTokens,
             9 => Self::StorageDepositReturnUnfulfilled,
             10 => Self::InvalidInputUnlock,
-            11 => Self::InvalidInputsCommitment,
-            12 => Self::SenderNotUnlocked,
-            13 => Self::InvalidChainStateTransition,
-            14 => Self::InvalidTransactionIssuingTime,
-            15 => Self::InvalidManaAmount,
-            16 => Self::InvalidBlockIssuanceCreditsAmount,
-            17 => Self::InvalidRewardContextInput,
-            18 => Self::InvalidCommitmentContextInput,
-            19 => Self::MissingStakingFeature,
-            20 => Self::FailedToClaimStakingReward,
-            21 => Self::FailedToClaimDelegationReward,
+            11 => Self::SenderNotUnlocked,
+            12 => Self::InvalidChainStateTransition,
+            13 => Self::InvalidTransactionIssuingTime,
+            14 => Self::InvalidManaAmount,
+            15 => Self::InvalidBlockIssuanceCreditsAmount,
+            16 => Self::InvalidRewardContextInput,
+            17 => Self::InvalidCommitmentContextInput,
+            18 => Self::MissingStakingFeature,
+            19 => Self::FailedToClaimStakingReward,
+            20 => Self::FailedToClaimDelegationReward,
             255 => Self::SemanticValidationFailed,
             x => return Err(Self::Error::InvalidTransactionFailureReason(x)),
         })
@@ -152,9 +148,8 @@ impl TryFrom<u8> for TransactionFailureReason {
 
 ///
 pub struct ValidationContext<'a> {
-    pub(crate) essence: &'a RegularTransactionEssence,
-    pub(crate) essence_hash: [u8; 32],
-    pub(crate) inputs_commitment: InputsCommitment,
+    pub(crate) transaction: &'a Transaction,
+    pub(crate) transaction_hash: [u8; 32],
     // TODO
     #[allow(dead_code)]
     pub(crate) unlocks: &'a Unlocks,
@@ -175,15 +170,14 @@ impl<'a> ValidationContext<'a> {
     ///
     pub fn new(
         transaction_id: &TransactionId,
-        essence: &'a RegularTransactionEssence,
+        transaction: &'a Transaction,
         inputs: impl Iterator<Item = (&'a OutputId, &'a Output)> + Clone,
         unlocks: &'a Unlocks,
     ) -> Self {
         Self {
-            essence,
+            transaction,
             unlocks,
-            essence_hash: TransactionEssence::from(essence.clone()).hash(),
-            inputs_commitment: InputsCommitment::new(inputs.clone().map(|(_, output)| output)),
+            transaction_hash: transaction.hash(),
             input_amount: 0,
             input_mana: 0,
             input_native_tokens: BTreeMap::<TokenId, U256>::new(),
@@ -197,7 +191,7 @@ impl<'a> ValidationContext<'a> {
             output_amount: 0,
             output_mana: 0,
             output_native_tokens: BTreeMap::<TokenId, U256>::new(),
-            output_chains: essence
+            output_chains: transaction
                 .outputs()
                 .iter()
                 .enumerate()
@@ -223,11 +217,6 @@ pub fn semantic_validation(
     inputs: &[(&OutputId, &Output)],
     unlocks: &Unlocks,
 ) -> Result<Option<TransactionFailureReason>, Error> {
-    // Validation of the inputs commitment.
-    if context.essence.inputs_commitment() != &context.inputs_commitment {
-        return Ok(Some(TransactionFailureReason::InvalidInputsCommitment));
-    }
-
     // Validation of inputs.
     for ((output_id, consumed_output), unlock) in inputs.iter().zip(unlocks.iter()) {
         let (conflict, amount, mana, consumed_native_tokens, unlock_conditions) = match consumed_output {
@@ -273,11 +262,11 @@ pub fn semantic_validation(
             return Ok(Some(conflict));
         }
 
-        if unlock_conditions.is_time_locked(context.essence.creation_slot()) {
+        if unlock_conditions.is_time_locked(context.transaction.creation_slot()) {
             return Ok(Some(TransactionFailureReason::TimelockNotExpired));
         }
 
-        if !unlock_conditions.is_expired(context.essence.creation_slot()) {
+        if !unlock_conditions.is_expired(context.transaction.creation_slot()) {
             if let Some(storage_deposit_return) = unlock_conditions.storage_deposit_return() {
                 let amount = context
                     .storage_deposit_returns
@@ -312,7 +301,7 @@ pub fn semantic_validation(
     }
 
     // Validation of outputs.
-    for created_output in context.essence.outputs() {
+    for created_output in context.transaction.outputs() {
         let (amount, mana, created_native_tokens, features) = match created_output {
             Output::Basic(output) => {
                 if let Some(address) = output.simple_deposit_address() {
@@ -458,7 +447,8 @@ pub fn semantic_validation(
         return Ok(Some(TransactionFailureReason::SumInputsOutputsAmountMismatch));
     }
 
-    if context.input_mana > context.output_mana && !context.essence.has_capability(TransactionCapabilityFlag::BurnMana)
+    if context.input_mana > context.output_mana
+        && !context.transaction.has_capability(TransactionCapabilityFlag::BurnMana)
     {
         // TODO: add a variant https://github.com/iotaledger/iota-sdk/issues/1430
         return Ok(Some(TransactionFailureReason::SemanticValidationFailed));
