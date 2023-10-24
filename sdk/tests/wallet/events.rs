@@ -7,11 +7,11 @@ use iota_sdk::{
         address::{Address, Bech32Address, Ed25519Address},
         input::{Input, UtxoInput},
         output::{unlock_condition::AddressUnlockCondition, BasicOutput, Output},
-        payload::transaction::{RegularTransactionEssence, TransactionEssence, TransactionHash, TransactionId},
+        payload::signed_transaction::{Transaction, TransactionHash, TransactionId},
         protocol::protocol_parameters,
         rand::{
             mana::rand_mana_allotment,
-            output::{rand_basic_output, rand_inputs_commitment, rand_output_metadata},
+            output::{rand_basic_output, rand_output_metadata},
         },
     },
     wallet::{
@@ -98,18 +98,16 @@ fn wallet_events_serde() {
                 .finish_with_params(protocol_parameters.token_supply())
                 .unwrap(),
         );
-        let essence = TransactionEssence::Regular(
-            RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
-                .with_inputs(vec![input1, input2])
-                .add_output(output)
-                .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
-                .finish_with_params(&protocol_parameters)
-                .unwrap(),
-        );
+        let transaction = Transaction::builder(protocol_parameters.network_id())
+            .with_inputs(vec![input1, input2])
+            .add_output(output)
+            .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
+            .finish_with_params(&protocol_parameters)
+            .unwrap();
 
         assert_serde_eq(WalletEvent::TransactionProgress(
             TransactionProgressEvent::PreparedTransaction(Box::new(PreparedTransactionDataDto {
-                essence: (&essence).into(),
+                transaction: (&transaction).into(),
                 inputs_data: Vec::new(),
                 remainder: None,
             })),
@@ -117,7 +115,7 @@ fn wallet_events_serde() {
     }
 
     assert_serde_eq(WalletEvent::TransactionProgress(
-        TransactionProgressEvent::PreparedTransactionEssenceHash(ED25519_ADDRESS.to_string()),
+        TransactionProgressEvent::PreparedTransactionHash(ED25519_ADDRESS.to_string()),
     ));
 
     assert_serde_eq(WalletEvent::TransactionProgress(

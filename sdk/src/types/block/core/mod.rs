@@ -128,7 +128,7 @@ impl Packable for Block {
         Ok(match u8::unpack::<_, VERIFY>(unpacker, &()).coerce()? {
             BasicBlock::KIND => Self::from(BasicBlock::unpack::<_, VERIFY>(unpacker, visitor).coerce()?),
             ValidationBlock::KIND => Self::from(ValidationBlock::unpack::<_, VERIFY>(unpacker, visitor).coerce()?),
-            k => return Err(Error::InvalidBlockKind(k)).map_err(UnpackError::Packable),
+            k => return Err(UnpackError::Packable(Error::InvalidBlockKind(k))),
         })
     }
 }
