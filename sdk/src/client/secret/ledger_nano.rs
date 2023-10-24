@@ -294,7 +294,7 @@ impl SecretManage for LedgerSecretManager {
                 .prepare_blind_signing(input_bip32_indices, essence_hash)
                 .map_err(Error::from)?;
         } else {
-            // figure out the remainder address and bip32 index (if there is one)
+            // figure out the remainder output and bip32 index (if there is one)
             #[allow(clippy::option_if_let_else)]
             let (remainder_output, remainder_bip32) = match &prepared_transaction.remainder {
                 Some(remainder) => {
