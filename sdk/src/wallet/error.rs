@@ -9,7 +9,7 @@ use serde::{
     Serialize,
 };
 
-use crate::types::block::{address::Bech32Address, payload::transaction::TransactionId};
+use crate::types::block::{address::Bech32Address, payload::signed_transaction::TransactionId};
 
 /// The wallet error type.
 #[derive(Debug, thiserror::Error)]

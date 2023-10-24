@@ -13,7 +13,7 @@ use crate::{
             payload::TaggedDataPayload,
         },
     },
-    wallet::{operations::transaction::TransactionOptions, types::Transaction, Result, Wallet},
+    wallet::{operations::transaction::TransactionOptions, types::TransactionWithMetadata, Result, Wallet},
 };
 
 impl<S: 'static + SecretManage> Wallet<S>
@@ -38,7 +38,7 @@ where
         &self,
         event_id: impl Into<Option<ParticipationEventId>> + Send,
         answers: impl Into<Option<Vec<u8>>> + Send,
-    ) -> Result<Transaction> {
+    ) -> Result<TransactionWithMetadata> {
         let prepared = self.prepare_vote(event_id, answers).await?;
 
         self.sign_and_submit_transaction(prepared, None).await
@@ -129,7 +129,7 @@ where
     /// Removes metadata for any event that has expired (use event IDs to get cached event information, checks event
     /// milestones in there against latest network milestone).
     /// If NOT already voting for this event, throws an error.
-    pub async fn stop_participating(&self, event_id: ParticipationEventId) -> Result<Transaction> {
+    pub async fn stop_participating(&self, event_id: ParticipationEventId) -> Result<TransactionWithMetadata> {
         let prepared = self.prepare_stop_participating(event_id).await?;
 
         self.sign_and_submit_transaction(prepared, None).await

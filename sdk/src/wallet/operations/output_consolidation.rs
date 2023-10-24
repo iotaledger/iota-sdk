@@ -15,7 +15,15 @@ use crate::{
         },
         slot::SlotIndex,
     },
-    wallet::{operations::transaction::TransactionOptions, Wallet},
+    wallet::{
+        constants::DEFAULT_OUTPUT_CONSOLIDATION_THRESHOLD,
+        operations::{
+            helpers::time::can_output_be_unlocked_now, output_claiming::get_new_native_token_count,
+            transaction::TransactionOptions,
+        },
+        types::{OutputData, TransactionWithMetadata},
+        Result, Wallet,
+    },
 };
 
 // Constants for the calculation of the amount of inputs we can use with a ledger nano
@@ -29,12 +37,6 @@ const MIN_OUTPUT_SIZE_IN_ESSENCE: usize = 46;
 
 #[cfg(feature = "ledger_nano")]
 use crate::wallet::constants::DEFAULT_LEDGER_OUTPUT_CONSOLIDATION_THRESHOLD;
-use crate::wallet::{
-    constants::DEFAULT_OUTPUT_CONSOLIDATION_THRESHOLD,
-    operations::{helpers::time::can_output_be_unlocked_now, output_claiming::get_new_native_token_count},
-    types::{OutputData, Transaction},
-    Result,
-};
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -106,7 +108,7 @@ where
     /// address or to an own address again if the output amount is >= the output_threshold. When `force`
     /// is set to `true`, the threshold is ignored. Only consolidates the amount of outputs that fit into a single
     /// transaction.
-    pub async fn consolidate_outputs(&self, params: ConsolidationParams) -> Result<Transaction> {
+    pub async fn consolidate_outputs(&self, params: ConsolidationParams) -> Result<TransactionWithMetadata> {
         let prepared_transaction = self.prepare_consolidate_outputs(params).await?;
         let consolidation_tx = self.sign_and_submit_transaction(prepared_transaction, None).await?;
 

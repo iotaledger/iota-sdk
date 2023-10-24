@@ -12,7 +12,7 @@ use crate::{
             core::{BasicBlock, Block},
             input::Input,
             output::{OutputId, OutputWithMetadata},
-            payload::{transaction::TransactionId, Payload, TransactionPayload},
+            payload::{signed_transaction::TransactionId, Payload, SignedTransactionPayload},
         },
     },
     wallet::{
@@ -146,7 +146,7 @@ where
                             match client.get_included_block(&transaction_id).await {
                                 Ok(wrapper) => {
                                     if let Block::Basic(block) = wrapper.block() {
-                                        if let Some(Payload::Transaction(transaction_payload)) = block.payload() {
+                                        if let Some(Payload::SignedTransaction(transaction_payload)) = block.payload() {
                                             let inputs_with_meta =
                                                 get_inputs_for_transaction_payload(&client, transaction_payload)
                                                     .await?;
@@ -206,10 +206,10 @@ where
 // Try to fetch the inputs of the transaction
 pub(crate) async fn get_inputs_for_transaction_payload(
     client: &Client,
-    transaction_payload: &TransactionPayload,
+    transaction_payload: &SignedTransactionPayload,
 ) -> crate::wallet::Result<Vec<OutputWithMetadata>> {
     let output_ids = transaction_payload
-        .essence()
+        .transaction()
         .inputs()
         .iter()
         .map(|input| {

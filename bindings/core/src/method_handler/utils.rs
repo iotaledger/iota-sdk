@@ -8,8 +8,8 @@ use iota_sdk::{
         block::{
             address::{AccountAddress, Address, ToBech32Ext},
             input::UtxoInput,
-            output::{AccountId, FoundryId, InputsCommitment, NftId, Output, OutputId, Rent, TokenId},
-            payload::{transaction::TransactionEssence, TransactionPayload},
+            output::{AccountId, FoundryId, NftId, Output, OutputId, Rent, TokenId},
+            payload::{signed_transaction::Transaction, SignedTransactionPayload},
             BlockWrapper,
         },
         TryFromDto,
@@ -46,7 +46,7 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
             Response::BlockId(block.id(&protocol_parameters))
         }
         UtilsMethod::TransactionId { payload } => {
-            let payload = TransactionPayload::try_from_dto(payload)?;
+            let payload = SignedTransactionPayload::try_from_dto(payload)?;
             Response::TransactionId(payload.id())
         }
         UtilsMethod::ComputeAccountId { output_id } => Response::AccountId(AccountId::from(&output_id)),
@@ -69,15 +69,8 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
             let foundry_id = FoundryId::build(&AccountAddress::new(account_id), serial_number, token_scheme_type);
             Response::TokenId(TokenId::from(foundry_id))
         }
-        UtilsMethod::HashTransactionEssence { essence } => {
-            Response::Hash(prefix_hex::encode(TransactionEssence::try_from_dto(essence)?.hash()))
-        }
-        UtilsMethod::ComputeInputsCommitment { inputs } => {
-            let inputs = inputs
-                .into_iter()
-                .map(|o| Ok(Output::try_from_dto(o)?))
-                .collect::<Result<Vec<Output>>>()?;
-            Response::Hash(InputsCommitment::new(inputs.iter()).to_string())
+        UtilsMethod::HashTransaction { transaction } => {
+            Response::Hash(prefix_hex::encode(Transaction::try_from_dto(transaction)?.hash()))
         }
         UtilsMethod::ComputeStorageDeposit { output, rent } => {
             let out = Output::try_from_dto(output)?;

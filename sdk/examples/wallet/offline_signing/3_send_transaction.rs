@@ -14,7 +14,7 @@ use iota_sdk::{
         secret::SecretManager,
         Client,
     },
-    types::{block::payload::transaction::TransactionId, TryFromDto},
+    types::{block::payload::signed_transaction::TransactionId, TryFromDto},
     wallet::Result,
     Wallet,
 };

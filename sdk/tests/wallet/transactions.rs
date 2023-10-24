@@ -289,7 +289,7 @@ async fn prepare_transaction_ledger() -> Result<()> {
 
     let data = receiver.recv().await.expect("never recieved event");
     // TODO put it back
-    // assert_eq!(data.essence, tx.payload.essence().into());
+    // assert_eq!(data.transaction, tx.payload.transaction().into());
     for (sign, input) in data.inputs_data.iter().zip(tx.inputs) {
         assert_eq!(sign.output, input.output);
         assert_eq!(sign.output_metadata, input.metadata);

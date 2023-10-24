@@ -8,7 +8,7 @@ use crate::{
     types::{
         api::core::{BlockState, TransactionState},
         block::{
-            payload::{transaction::TransactionId, Payload},
+            payload::{signed_transaction::TransactionId, Payload},
             BlockId,
         },
     },
@@ -59,7 +59,7 @@ where
                         todo!("issuer id"),
                         todo!("issuing time"),
                         None,
-                        Some(Payload::Transaction(Box::new(transaction.payload.clone()))),
+                        Some(Payload::SignedTransaction(Box::new(transaction.payload.clone()))),
                         &*self.get_secret_manager().read().await,
                         self.bip_path().await,
                     )
@@ -106,7 +106,7 @@ where
                                 todo!("issuer id"),
                                 todo!("issuing time"),
                                 None,
-                                Some(Payload::Transaction(Box::new(transaction.payload.clone()))),
+                                Some(Payload::SignedTransaction(Box::new(transaction.payload.clone()))),
                                 &*self.get_secret_manager().read().await,
                                 self.bip_path().await,
                             )

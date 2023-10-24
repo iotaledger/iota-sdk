@@ -18,7 +18,7 @@ use crate::{
     },
     wallet::{
         operations::transaction::TransactionOptions,
-        types::{Transaction, TransactionDto},
+        types::{TransactionWithMetadata, TransactionWithMetadataDto},
         Wallet,
     },
 };
@@ -42,7 +42,7 @@ pub struct CreateNativeTokenParams {
 #[derive(Debug)]
 pub struct CreateNativeTokenTransaction {
     pub token_id: TokenId,
-    pub transaction: Transaction,
+    pub transaction: TransactionWithMetadata,
 }
 
 /// Dto for NativeTokenTransaction
@@ -50,14 +50,14 @@ pub struct CreateNativeTokenTransaction {
 #[serde(rename_all = "camelCase")]
 pub struct CreateNativeTokenTransactionDto {
     pub token_id: TokenId,
-    pub transaction: TransactionDto,
+    pub transaction: TransactionWithMetadataDto,
 }
 
 impl From<&CreateNativeTokenTransaction> for CreateNativeTokenTransactionDto {
     fn from(value: &CreateNativeTokenTransaction) -> Self {
         Self {
             token_id: value.token_id,
-            transaction: TransactionDto::from(&value.transaction),
+            transaction: TransactionWithMetadataDto::from(&value.transaction),
         }
     }
 }

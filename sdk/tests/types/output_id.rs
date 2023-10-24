@@ -5,7 +5,7 @@ use core::str::FromStr;
 
 use iota_sdk::types::block::{
     output::OutputId,
-    payload::transaction::{TransactionHash, TransactionId},
+    payload::signed_transaction::{TransactionHash, TransactionId},
     Error,
 };
 use packable::{bounded::InvalidBoundedU16, error::UnpackError, PackableExt};

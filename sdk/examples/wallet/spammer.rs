@@ -18,7 +18,7 @@ use iota_sdk::{
     types::block::{
         address::{Address, Bech32Address, Hrp},
         output::BasicOutput,
-        payload::transaction::TransactionId,
+        payload::signed_transaction::TransactionId,
     },
     wallet::{ClientOptions, FilterOptions, Result, SendParams, Wallet},
 };

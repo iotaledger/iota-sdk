@@ -8,7 +8,7 @@ use crate::wallet::events::types::{TransactionProgressEvent, WalletEvent};
 use crate::{
     client::secret::SecretManage,
     types::block::{payload::Payload, BlockId},
-    wallet::{operations::transaction::TransactionPayload, Wallet},
+    wallet::{operations::transaction::SignedTransactionPayload, Wallet},
 };
 
 impl<S: 'static + SecretManage> Wallet<S>
@@ -19,7 +19,7 @@ where
     /// Submits a payload in a block
     pub(crate) async fn submit_transaction_payload(
         &self,
-        transaction_payload: TransactionPayload,
+        transaction_payload: SignedTransactionPayload,
     ) -> crate::wallet::Result<BlockId> {
         log::debug!("[TRANSACTION] send_payload");
 

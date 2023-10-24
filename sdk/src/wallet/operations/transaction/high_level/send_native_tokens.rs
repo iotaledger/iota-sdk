@@ -19,8 +19,9 @@ use crate::{
         ConvertTo,
     },
     wallet::{
-        constants::DEFAULT_EXPIRATION_SLOTS, operations::transaction::TransactionOptions, types::Transaction, Error,
-        Result, Wallet,
+        constants::DEFAULT_EXPIRATION_SLOTS,
+        operations::transaction::{TransactionOptions, TransactionWithMetadata},
+        Error, Result, Wallet,
     },
 };
 
@@ -107,7 +108,7 @@ where
         &self,
         params: I,
         options: impl Into<Option<TransactionOptions>> + Send,
-    ) -> crate::wallet::Result<Transaction>
+    ) -> crate::wallet::Result<TransactionWithMetadata>
     where
         I::IntoIter: Send,
     {

@@ -10,13 +10,13 @@ use crate::{
         block::output::{OutputId, OutputMetadata},
     },
     wallet::{
-        types::{InclusionState, OutputData, Transaction},
+        types::{InclusionState, OutputData, TransactionWithMetadata},
         Wallet,
     },
 };
 #[cfg(feature = "events")]
 use crate::{
-    types::block::payload::transaction::dto::TransactionPayloadDto,
+    types::block::payload::signed_transaction::dto::SignedTransactionPayloadDto,
     wallet::{
         events::types::{NewOutputEvent, SpentOutputEvent, TransactionInclusionEvent, WalletEvent},
         types::OutputDataDto,
@@ -100,7 +100,9 @@ where
                         .get(output_data.output_id.transaction_id());
                     self.emit(WalletEvent::NewOutput(Box::new(NewOutputEvent {
                         output: OutputDataDto::from(&output_data),
-                        transaction: transaction.as_ref().map(|tx| TransactionPayloadDto::from(&tx.payload)),
+                        transaction: transaction
+                            .as_ref()
+                            .map(|tx| SignedTransactionPayloadDto::from(&tx.payload)),
                         transaction_inputs: transaction.as_ref().map(|tx| {
                             tx.inputs
                                 .clone()
@@ -128,7 +130,7 @@ where
     /// Update wallet with newly synced transactions.
     pub(crate) async fn update_with_transactions(
         &self,
-        updated_transactions: Vec<Transaction>,
+        updated_transactions: Vec<TransactionWithMetadata>,
         spent_output_ids: Vec<OutputId>,
         output_ids_to_unlock: Vec<OutputId>,
     ) -> crate::wallet::Result<()> {

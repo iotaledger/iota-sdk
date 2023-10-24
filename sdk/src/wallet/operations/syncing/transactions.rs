@@ -9,7 +9,7 @@ use crate::{
     },
     wallet::{
         core::WalletData,
-        types::{InclusionState, Transaction},
+        types::{InclusionState, TransactionWithMetadata},
         Wallet,
     },
 };
@@ -89,7 +89,7 @@ where
 
             // Check if the inputs of the transaction are still unspent
             let mut input_got_spent = false;
-            for input in transaction.payload.essence().inputs() {
+            for input in transaction.payload.transaction().inputs() {
                 let Input::Utxo(input) = input;
                 if let Some(input) = account_details.outputs.get(input.output_id()) {
                     if input.is_spent {
@@ -215,16 +215,16 @@ where
 
 // Set the outputs as spent so they will not be used as input again
 fn updated_transaction_and_outputs(
-    mut transaction: Transaction,
+    mut transaction: TransactionWithMetadata,
     block_id: Option<BlockId>,
     inclusion_state: InclusionState,
-    updated_transactions: &mut Vec<Transaction>,
+    updated_transactions: &mut Vec<TransactionWithMetadata>,
     spent_output_ids: &mut Vec<OutputId>,
 ) {
     transaction.block_id = block_id;
     transaction.inclusion_state = inclusion_state;
     // get spent inputs
-    for input in transaction.payload.essence().inputs() {
+    for input in transaction.payload.transaction().inputs() {
         let Input::Utxo(input) = input;
         spent_output_ids.push(*input.output_id());
     }
@@ -234,15 +234,15 @@ fn updated_transaction_and_outputs(
 // When a transaction got pruned, the inputs and outputs are also not available, then this could mean that it was
 // confirmed and the created outputs got also already spent and pruned or the inputs got spent in another transaction
 fn process_transaction_with_unknown_state(
-    account: &WalletData,
-    mut transaction: Transaction,
-    updated_transactions: &mut Vec<Transaction>,
+    wallet_data: &WalletData,
+    mut transaction: TransactionWithMetadata,
+    updated_transactions: &mut Vec<TransactionWithMetadata>,
     output_ids_to_unlock: &mut Vec<OutputId>,
 ) -> crate::wallet::Result<()> {
     let mut all_inputs_spent = true;
-    for input in transaction.payload.essence().inputs() {
+    for input in transaction.payload.transaction().inputs() {
         let Input::Utxo(input) = input;
-        if let Some(output_data) = account.outputs.get(input.output_id()) {
+        if let Some(output_data) = wallet_data.outputs.get(input.output_id()) {
             if !output_data.metadata.is_spent() {
                 // unspent output needs to be made available again
                 output_ids_to_unlock.push(*input.output_id());

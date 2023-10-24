@@ -17,13 +17,13 @@ use iota_sdk::{
                 unlock_condition::AddressUnlockCondition, AccountId, BasicOutputBuilder, FoundryId, NativeToken,
                 NativeTokensBuilder, NftId, Output, OutputId, TokenId,
             },
-            payload::transaction::TransactionId,
+            payload::signed_transaction::TransactionId,
             slot::SlotIndex,
             ConvertTo,
         },
     },
     wallet::{
-        types::{OutputData, Transaction},
+        types::{OutputData, TransactionWithMetadata},
         ConsolidationParams, CreateNativeTokenParams, MintNftParams, OutputsToClaim, SendNativeTokensParams,
         SendNftParams, SendParams, SyncOptions, TransactionOptions, Wallet,
     },
@@ -1177,6 +1177,6 @@ fn outputs_ordering(a: &OutputData, b: &OutputData) -> std::cmp::Ordering {
     a.output_id.cmp(&b.output_id)
 }
 
-fn transactions_ordering(a: &Transaction, b: &Transaction) -> std::cmp::Ordering {
+fn transactions_ordering(a: &TransactionWithMetadata, b: &TransactionWithMetadata) -> std::cmp::Ordering {
     b.timestamp.cmp(&a.timestamp)
 }

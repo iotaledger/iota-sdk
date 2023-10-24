@@ -14,10 +14,12 @@ use {
 use crate::wallet::events::types::{TransactionProgressEvent, WalletEvent};
 use crate::{
     client::{
-        api::{transaction::validate_transaction_payload_length, PreparedTransactionData, SignedTransactionData},
+        api::{
+            transaction::validate_signed_transaction_payload_length, PreparedTransactionData, SignedTransactionData,
+        },
         secret::SecretManage,
     },
-    wallet::{operations::transaction::TransactionPayload, Wallet},
+    wallet::{operations::transaction::SignedTransactionPayload, Wallet},
 };
 
 impl<S: 'static + SecretManage> Wallet<S>
@@ -25,12 +27,12 @@ where
     crate::wallet::Error: From<S::Error>,
     crate::client::Error: From<S::Error>,
 {
-    /// Signs a transaction essence.
-    pub async fn sign_transaction_essence(
+    /// Signs a transaction.
+    pub async fn sign_transaction(
         &self,
         prepared_transaction_data: &PreparedTransactionData,
     ) -> crate::wallet::Result<SignedTransactionData> {
-        log::debug!("[TRANSACTION] sign_transaction_essence");
+        log::debug!("[TRANSACTION] sign_transaction");
         log::debug!("[TRANSACTION] prepared_transaction_data {prepared_transaction_data:?}");
         #[cfg(feature = "events")]
         self.emit(WalletEvent::TransactionProgress(
@@ -55,8 +57,8 @@ where
                 if let Some(buffer_size) = ledger_nano_status.buffer_size() {
                     if needs_blind_signing(prepared_transaction_data, buffer_size) {
                         self.emit(WalletEvent::TransactionProgress(
-                            TransactionProgressEvent::PreparedTransactionEssenceHash(prefix_hex::encode(
-                                prepared_transaction_data.essence.hash(),
+                            TransactionProgressEvent::PreparedTransactionHash(prefix_hex::encode(
+                                prepared_transaction_data.transaction.hash(),
                             )),
                         ))
                         .await;
@@ -76,7 +78,7 @@ where
             .secret_manager
             .read()
             .await
-            .sign_transaction_essence(prepared_transaction_data)
+            .transaction_unlocks(prepared_transaction_data)
             .await
         {
             Ok(res) => res,
@@ -86,15 +88,14 @@ where
                 return Err(err.into());
             }
         };
-        let transaction_payload =
-            TransactionPayload::new(prepared_transaction_data.essence.as_regular().clone(), unlocks)?;
+        let payload = SignedTransactionPayload::new(prepared_transaction_data.transaction.clone(), unlocks)?;
 
-        log::debug!("[TRANSACTION] signed transaction: {:?}", transaction_payload);
+        log::debug!("[TRANSACTION] signed transaction: {:?}", payload);
 
-        validate_transaction_payload_length(&transaction_payload)?;
+        validate_signed_transaction_payload_length(&payload)?;
 
         Ok(SignedTransactionData {
-            transaction_payload,
+            payload,
             inputs_data: prepared_transaction_data.inputs_data.clone(),
         })
     }

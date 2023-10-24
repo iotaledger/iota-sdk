@@ -8,7 +8,7 @@ use crate::{
     types::block::output::{
         AccountOutputBuilder, FoundryOutputBuilder, Output, SimpleTokenScheme, TokenId, TokenScheme,
     },
-    wallet::{operations::transaction::TransactionOptions, types::Transaction, Error, Wallet},
+    wallet::{operations::transaction::TransactionOptions, types::TransactionWithMetadata, Error, Wallet},
 };
 
 impl<S: 'static + SecretManage> Wallet<S>
@@ -36,7 +36,7 @@ where
         token_id: TokenId,
         mint_amount: impl Into<U256> + Send,
         options: impl Into<Option<TransactionOptions>> + Send,
-    ) -> crate::wallet::Result<Transaction> {
+    ) -> crate::wallet::Result<TransactionWithMetadata> {
         let options = options.into();
         let prepared = self
             .prepare_mint_native_token(token_id, mint_amount, options.clone())

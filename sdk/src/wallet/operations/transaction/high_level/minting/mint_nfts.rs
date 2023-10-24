@@ -15,7 +15,10 @@ use crate::{
         },
         ConvertTo,
     },
-    wallet::{operations::transaction::TransactionOptions, types::Transaction, Wallet},
+    wallet::{
+        operations::transaction::{TransactionOptions, TransactionWithMetadata},
+        Wallet,
+    },
 };
 
 /// Address and NFT for `send_nft()`.
@@ -137,7 +140,7 @@ where
         &self,
         params: I,
         options: impl Into<Option<TransactionOptions>> + Send,
-    ) -> crate::wallet::Result<Transaction>
+    ) -> crate::wallet::Result<TransactionWithMetadata>
     where
         I::IntoIter: Send,
     {

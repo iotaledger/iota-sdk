@@ -9,7 +9,7 @@ use iota_sdk::{
         block::output::{dto::OutputDto, Output},
         TryFromDto,
     },
-    wallet::{types::TransactionDto, OutputDataDto, PreparedCreateNativeTokenTransactionDto, Wallet},
+    wallet::{types::TransactionWithMetadataDto, OutputDataDto, PreparedCreateNativeTokenTransactionDto, Wallet},
 };
 
 use crate::{method::WalletCommandMethod, Response, Result};
@@ -25,7 +25,7 @@ pub(crate) async fn call_wallet_operation_method_internal(
         }
         WalletCommandMethod::ClaimOutputs { output_ids_to_claim } => {
             let transaction = wallet.claim_outputs(output_ids_to_claim.to_vec()).await?;
-            Response::SentTransaction(TransactionDto::from(&transaction))
+            Response::SentTransaction(TransactionWithMetadataDto::from(&transaction))
         }
         #[cfg(feature = "participation")]
         WalletCommandMethod::DeregisterParticipationEvent { event_id } => {
@@ -46,7 +46,7 @@ pub(crate) async fn call_wallet_operation_method_internal(
 
             transaction.map_or_else(
                 || Response::Transaction(None),
-                |transaction| Response::Transaction(Some(Box::new(TransactionDto::from(&transaction)))),
+                |transaction| Response::Transaction(Some(Box::new(TransactionWithMetadataDto::from(&transaction)))),
             )
         }
         WalletCommandMethod::GetOutput { output_id } => {
@@ -80,7 +80,7 @@ pub(crate) async fn call_wallet_operation_method_internal(
         }
         WalletCommandMethod::GetTransaction { transaction_id } => {
             let transaction = wallet.get_transaction(&transaction_id).await;
-            Response::Transaction(transaction.as_ref().map(TransactionDto::from).map(Box::new))
+            Response::Transaction(transaction.as_ref().map(TransactionWithMetadataDto::from).map(Box::new))
         }
         #[cfg(feature = "participation")]
         WalletCommandMethod::GetVotingPower => {
@@ -89,7 +89,7 @@ pub(crate) async fn call_wallet_operation_method_internal(
         }
         WalletCommandMethod::IncomingTransactions => {
             let transactions = wallet.incoming_transactions().await;
-            Response::Transactions(transactions.iter().map(TransactionDto::from).collect())
+            Response::Transactions(transactions.iter().map(TransactionWithMetadataDto::from).collect())
         }
         WalletCommandMethod::Outputs { filter_options } => {
             let outputs = wallet.outputs(filter_options).await?;
@@ -97,7 +97,7 @@ pub(crate) async fn call_wallet_operation_method_internal(
         }
         WalletCommandMethod::PendingTransactions => {
             let transactions = wallet.pending_transactions().await;
-            Response::Transactions(transactions.iter().map(TransactionDto::from).collect())
+            Response::Transactions(transactions.iter().map(TransactionWithMetadataDto::from).collect())
         }
         WalletCommandMethod::PrepareBurn { burn, options } => {
             let data = wallet.prepare_burn(burn, options).await?;
@@ -208,11 +208,11 @@ pub(crate) async fn call_wallet_operation_method_internal(
             options,
         } => {
             let transaction = wallet.send(amount, address, options).await?;
-            Response::SentTransaction(TransactionDto::from(&transaction))
+            Response::SentTransaction(TransactionWithMetadataDto::from(&transaction))
         }
         WalletCommandMethod::SendWithParams { params, options } => {
             let transaction = wallet.send_with_params(params, options).await?;
-            Response::SentTransaction(TransactionDto::from(&transaction))
+            Response::SentTransaction(TransactionWithMetadataDto::from(&transaction))
         }
         WalletCommandMethod::SendOutputs { outputs, options } => {
             let token_supply = wallet.client().get_token_supply().await?;
@@ -225,7 +225,7 @@ pub(crate) async fn call_wallet_operation_method_internal(
                     options,
                 )
                 .await?;
-            Response::SentTransaction(TransactionDto::from(&transaction))
+            Response::SentTransaction(TransactionWithMetadataDto::from(&transaction))
         }
         WalletCommandMethod::SetAlias { alias } => {
             wallet.set_alias(&alias).await?;
@@ -247,13 +247,13 @@ pub(crate) async fn call_wallet_operation_method_internal(
                     None,
                 )
                 .await?;
-            Response::SentTransaction(TransactionDto::from(&transaction))
+            Response::SentTransaction(TransactionWithMetadataDto::from(&transaction))
         }
-        WalletCommandMethod::SignTransactionEssence {
+        WalletCommandMethod::SignTransaction {
             prepared_transaction_data,
         } => {
             let signed_transaction_data = wallet
-                .sign_transaction_essence(&PreparedTransactionData::try_from_dto(prepared_transaction_data)?)
+                .sign_transaction(&PreparedTransactionData::try_from_dto(prepared_transaction_data)?)
                 .await?;
             Response::SignedTransactionData(SignedTransactionDataDto::from(&signed_transaction_data))
         }
@@ -267,12 +267,12 @@ pub(crate) async fn call_wallet_operation_method_internal(
             let transaction = wallet
                 .submit_and_store_transaction(signed_transaction_data, None)
                 .await?;
-            Response::SentTransaction(TransactionDto::from(&transaction))
+            Response::SentTransaction(TransactionWithMetadataDto::from(&transaction))
         }
         WalletCommandMethod::Sync { options } => Response::Balance(wallet.sync(options).await?),
         WalletCommandMethod::Transactions => {
             let transactions = wallet.transactions().await;
-            Response::Transactions(transactions.iter().map(TransactionDto::from).collect())
+            Response::Transactions(transactions.iter().map(TransactionWithMetadataDto::from).collect())
         }
         WalletCommandMethod::UnspentOutputs { filter_options } => {
             let outputs = wallet.unspent_outputs(filter_options).await?;
