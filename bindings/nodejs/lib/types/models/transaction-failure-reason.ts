@@ -58,59 +58,54 @@ export enum TransactionFailureReason {
     invalidInputUnlock = 10,
 
     /**
-     * The inputs commitment is invalid.
-     */
-    invalidInputsCommitment = 11,
-
-    /**
      * The output contains a Sender with an ident (address) which is not unlocked.
      */
-    senderNotUnlocked = 12,
+    senderNotUnlocked = 11,
 
     /**
      * The chain state transition is invalid.
      */
-    invalidChainStateTransition = 13,
+    invalidChainStateTransition = 12,
 
     /**
      * The referenced input is created after transaction issuing time.
      */
-    invalidTransactionIssuingTime = 14,
+    invalidTransactionIssuingTime = 13,
 
     /**
      * The mana amount is invalid.
      */
-    invalidManaAmount = 15,
+    invalidManaAmount = 14,
 
     /**
      * The Block Issuance Credits amount is invalid.
      */
-    invalidBlockIssuanceCreditsAmount = 16,
+    invalidBlockIssuanceCreditsAmount = 15,
 
     /**
      * Reward Context Input is invalid.
      */
-    invalidRewardContextInput = 17,
+    invalidRewardContextInput = 16,
 
     /**
      * Commitment Context Input is invalid.
      */
-    invalidCommitmentContextInput = 18,
+    invalidCommitmentContextInput = 17,
 
     /**
      * Staking Feature is not provided in account output when claiming rewards.
      */
-    missingStakingFeature = 19,
+    missingStakingFeature = 18,
 
     /**
      * Failed to claim staking reward.
      */
-    failedToClaimStakingReward = 20,
+    failedToClaimStakingReward = 19,
 
     /**
      * Failed to claim delegation reward.
      */
-    failedToClaimDelegationReward = 21,
+    failedToClaimDelegationReward = 20,
 
     /**
      * The semantic validation failed for a reason not covered by the previous variants.
@@ -144,8 +139,6 @@ export const TRANSACTION_FAILURE_REASON_STRINGS: {
         'The return amount in a transaction is not fulfilled by the output side.',
     [TransactionFailureReason.invalidInputUnlock]:
         'An input unlock was invalid.',
-    [TransactionFailureReason.invalidInputsCommitment]:
-        'The inputs commitment is invalid.',
     [TransactionFailureReason.senderNotUnlocked]:
         'The output contains a Sender with an ident (address) which is not unlocked.',
     [TransactionFailureReason.invalidChainStateTransition]:

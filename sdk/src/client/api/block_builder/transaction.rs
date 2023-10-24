@@ -9,7 +9,7 @@ use crate::{
     client::{secret::types::InputSigningData, Error, Result},
     types::block::{
         output::{Output, OutputId},
-        payload::transaction::{RegularTransactionEssence, TransactionPayload},
+        payload::signed_transaction::{SignedTransactionPayload, Transaction},
         semantic::{semantic_validation, TransactionFailureReason, ValidationContext},
         signature::Ed25519Signature,
         BlockId, BlockWrapper,
@@ -28,7 +28,7 @@ const REFERENCE_ACCOUNT_NFT_UNLOCK_LENGTH: usize = 1 + 2;
 /// Verifies the semantic of a prepared transaction.
 pub fn verify_semantic(
     input_signing_data: &[InputSigningData],
-    transaction: &TransactionPayload,
+    transaction: &SignedTransactionPayload,
 ) -> crate::client::Result<Option<TransactionFailureReason>> {
     let transaction_id = transaction.id();
     let inputs = input_signing_data
@@ -38,7 +38,7 @@ pub fn verify_semantic(
 
     let context = ValidationContext::new(
         &transaction_id,
-        transaction.essence(),
+        transaction.transaction(),
         inputs.iter().map(|(id, input)| (*id, *input)),
         transaction.unlocks(),
     );
@@ -46,28 +46,26 @@ pub fn verify_semantic(
     Ok(semantic_validation(context, inputs.as_slice(), transaction.unlocks())?)
 }
 
-/// Verifies that the transaction payload doesn't exceed the block size limit with 8 parents.
-pub fn validate_transaction_payload_length(transaction_payload: &TransactionPayload) -> Result<()> {
-    let transaction_payload_bytes = transaction_payload.pack_to_vec();
-    if transaction_payload_bytes.len() > MAX_TX_LENGTH_FOR_BLOCK_WITH_8_PARENTS {
-        return Err(Error::InvalidTransactionPayloadLength {
-            length: transaction_payload_bytes.len(),
+/// Verifies that the signed transaction payload doesn't exceed the block size limit with 8 parents.
+pub fn validate_signed_transaction_payload_length(signed_transaction_payload: &SignedTransactionPayload) -> Result<()> {
+    let signed_transaction_payload_bytes = signed_transaction_payload.pack_to_vec();
+    if signed_transaction_payload_bytes.len() > MAX_TX_LENGTH_FOR_BLOCK_WITH_8_PARENTS {
+        return Err(Error::InvalidSignedTransactionPayloadLength {
+            length: signed_transaction_payload_bytes.len(),
             max_length: MAX_TX_LENGTH_FOR_BLOCK_WITH_8_PARENTS,
         });
     }
     Ok(())
 }
 
-/// Verifies that the transaction essence doesn't exceed the block size limit with 8 parents.
+/// Verifies that the transaction doesn't exceed the block size limit with 8 parents.
 /// Assuming one signature unlock and otherwise reference/account/nft unlocks. `validate_transaction_payload_length()`
 /// should later be used to check the length again with the correct unlocks.
-pub fn validate_regular_transaction_essence_length(
-    regular_transaction_essence: &RegularTransactionEssence,
-) -> Result<()> {
-    let regular_transaction_essence_bytes = regular_transaction_essence.pack_to_vec();
+pub fn validate_transaction_length(transaction: &Transaction) -> Result<()> {
+    let transaction_bytes = transaction.pack_to_vec();
 
     // Assuming there is only 1 signature unlock and the rest is reference/account/nft unlocks
-    let reference_account_nft_unlocks_amount = regular_transaction_essence.inputs().len() - 1;
+    let reference_account_nft_unlocks_amount = transaction.inputs().len() - 1;
 
     // Max tx payload length - length for one signature unlock (there might be more unlocks, we check with them
     // later again, when we built the transaction payload)
@@ -75,9 +73,9 @@ pub fn validate_regular_transaction_essence_length(
         - SINGLE_UNLOCK_LENGTH
         - (reference_account_nft_unlocks_amount * REFERENCE_ACCOUNT_NFT_UNLOCK_LENGTH);
 
-    if regular_transaction_essence_bytes.len() > max_length {
-        return Err(Error::InvalidRegularTransactionEssenceLength {
-            length: regular_transaction_essence_bytes.len(),
+    if transaction_bytes.len() > max_length {
+        return Err(Error::InvalidTransactionLength {
+            length: transaction_bytes.len(),
             max_length,
         });
     }

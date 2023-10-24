@@ -11,7 +11,7 @@ use crypto::keys::bip44::Bip44;
 use iota_sdk::{
     client::{
         api::{
-            input_selection::InputSelection, transaction::validate_transaction_payload_length, verify_semantic,
+            input_selection::InputSelection, transaction::validate_signed_transaction_payload_length, verify_semantic,
             GetAddressesOptions, PreparedTransactionData,
         },
         constants::{SHIMMER_COIN_TYPE, SHIMMER_TESTNET_BECH32_HRP},
@@ -21,11 +21,8 @@ use iota_sdk::{
     types::block::{
         address::{AccountAddress, Address, NftAddress, ToBech32Ext},
         input::{Input, UtxoInput},
-        output::{AccountId, InputsCommitment, NftId},
-        payload::{
-            transaction::{RegularTransactionEssence, TransactionEssence},
-            TransactionPayload,
-        },
+        output::{AccountId, NftId},
+        payload::{signed_transaction::Transaction, SignedTransactionPayload},
         protocol::protocol_parameters,
         rand::mana::rand_mana_allotment,
         slot::SlotIndex,
@@ -377,11 +374,7 @@ async fn all_combined() -> Result<()> {
     .select()
     .unwrap();
 
-    let essence = TransactionEssence::Regular(
-        RegularTransactionEssence::builder(
-            protocol_parameters.network_id(),
-            InputsCommitment::new(selected.inputs.iter().map(|i| &i.output)),
-        )
+    let transaction = Transaction::builder(protocol_parameters.network_id())
         .with_inputs(
             selected
                 .inputs
@@ -392,18 +385,15 @@ async fn all_combined() -> Result<()> {
         .with_outputs(outputs)
         .with_creation_slot(slot_index)
         .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
-        .finish_with_params(protocol_parameters)?,
-    );
+        .finish_with_params(protocol_parameters)?;
 
     let prepared_transaction_data = PreparedTransactionData {
-        essence,
+        transaction,
         inputs_data: selected.inputs,
         remainder: None,
     };
 
-    let unlocks = secret_manager
-        .sign_transaction_essence(&prepared_transaction_data)
-        .await?;
+    let unlocks = secret_manager.transaction_unlocks(&prepared_transaction_data).await?;
 
     assert_eq!(unlocks.len(), 15);
     assert_eq!((*unlocks).get(0).unwrap().kind(), SignatureUnlock::KIND);
@@ -483,9 +473,9 @@ async fn all_combined() -> Result<()> {
         _ => panic!("Invalid unlock 14"),
     }
 
-    let tx_payload = TransactionPayload::new(prepared_transaction_data.essence.as_regular().clone(), unlocks)?;
+    let tx_payload = SignedTransactionPayload::new(prepared_transaction_data.transaction.clone(), unlocks)?;
 
-    validate_transaction_payload_length(&tx_payload)?;
+    validate_signed_transaction_payload_length(&tx_payload)?;
 
     let conflict = verify_semantic(&prepared_transaction_data.inputs_data, &tx_payload)?;
 

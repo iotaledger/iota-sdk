@@ -20,7 +20,8 @@ use crate::{
     utils::serde::string,
     wallet::{
         account::{
-            constants::DEFAULT_EXPIRATION_SLOTS, operations::transaction::Transaction, Account, TransactionOptions,
+            constants::DEFAULT_EXPIRATION_SLOTS, operations::transaction::TransactionWithMetadata, Account,
+            TransactionOptions,
         },
         Error,
     },
@@ -92,7 +93,7 @@ where
         amount: u64,
         address: impl ConvertTo<Bech32Address>,
         options: impl Into<Option<TransactionOptions>> + Send,
-    ) -> crate::wallet::Result<Transaction> {
+    ) -> crate::wallet::Result<TransactionWithMetadata> {
         let params = [SendParams::new(amount, address)?];
         self.send_with_params(params, options).await
     }
@@ -118,7 +119,7 @@ where
         &self,
         params: I,
         options: impl Into<Option<TransactionOptions>> + Send,
-    ) -> crate::wallet::Result<Transaction>
+    ) -> crate::wallet::Result<TransactionWithMetadata>
     where
         I::IntoIter: Send,
     {

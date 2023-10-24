@@ -6,7 +6,6 @@ import type {
     __ComputeTokenIdMethod__,
     __ComputeNftIdMethod__,
     __ComputeFoundryIdMethod__,
-    __ComputeInputsCommitmentMethod__,
     __ComputeStorageDepositMethod__,
     __ParseBech32AddressMethod__,
     __BlockIdMethod__,
@@ -17,7 +16,7 @@ import type {
     __NftIdToBech32Method__,
     __HexPublicKeyToBech32AddressMethod__,
     __IsAddressValidMethod__,
-    __HashTransactionEssenceMethod__,
+    __HashTransactionMethod__,
     __VerifyEd25519SignatureMethod__,
     __VerifySecp256k1EcdsaSignatureMethod__,
     __VerifyMnemonicMethod__,
@@ -35,7 +34,6 @@ export type __UtilsMethods__ =
     | __ComputeFoundryIdMethod__
     | __ComputeOutputIdMethod__
     | __ComputeTokenIdMethod__
-    | __ComputeInputsCommitmentMethod__
     | __ComputeStorageDepositMethod__
     | __ParseBech32AddressMethod__
     | __BlockIdMethod__
@@ -46,7 +44,7 @@ export type __UtilsMethods__ =
     | __NftIdToBech32Method__
     | __HexPublicKeyToBech32AddressMethod__
     | __IsAddressValidMethod__
-    | __HashTransactionEssenceMethod__
+    | __HashTransactionMethod__
     | __VerifyEd25519SignatureMethod__
     | __VerifySecp256k1EcdsaSignatureMethod__
     | __VerifyMnemonicMethod__

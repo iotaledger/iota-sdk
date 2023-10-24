@@ -4,8 +4,9 @@
 import type { OutputData } from './output';
 import { InclusionState } from './transaction';
 import { InputSigningData, Remainder } from '../client';
-import { TransactionEssence, TransactionPayload } from '../block';
+import { Transaction, SignedTransactionPayload } from '../block';
 import { OutputResponse } from '../models';
+import { HexEncodedString } from '../utils';
 
 /**
  * A Transaction ID represented as hex-encoded string.
@@ -96,7 +97,7 @@ class LedgerAddressGenerationWalletEvent extends WalletEvent {
  */
 class NewOutputWalletEvent extends WalletEvent {
     output: OutputData;
-    transaction?: TransactionPayload;
+    transaction?: SignedTransactionPayload;
     transactionInputs?: OutputResponse[];
 
     /**
@@ -106,7 +107,7 @@ class NewOutputWalletEvent extends WalletEvent {
      */
     constructor(
         output: OutputData,
-        transaction?: TransactionPayload,
+        transaction?: SignedTransactionPayload,
         transactionInputs?: OutputResponse[],
     ) {
         super(WalletEventType.NewOutput);
@@ -159,8 +160,8 @@ enum TransactionProgressType {
     GeneratingRemainderDepositAddress = 1,
     /** Prepared transaction. */
     PreparedTransaction = 2,
-    /** Prepared transaction essence hash hex encoded, required for blindsigning with a Ledger Nano. */
-    PreparedTransactionEssenceHash = 3,
+    /** Prepared transaction hash hex encoded, required for blindsigning with a Ledger Nano. */
+    PreparedTransactionHash = 3,
     /** Signing the transaction. */
     SigningTransaction = 4,
     /** Broadcasting. */
@@ -224,38 +225,38 @@ class GeneratingRemainderDepositAddressProgress extends TransactionProgress {
  * A 'prepared transaction' progress.
  */
 class PreparedTransactionProgress extends TransactionProgress {
-    essence: TransactionEssence;
+    transaction: Transaction;
     inputsData: InputSigningData[];
     remainder?: Remainder;
 
     /**
-     * @param essence The essence of the prepared transaction.
+     * @param transaction The prepared transaction.
      * @param inputsData Input signing parameters.
      * @param remainder Remainder output parameters.
      */
     constructor(
-        essence: TransactionEssence,
+        transaction: Transaction,
         inputsData: InputSigningData[],
         remainder?: Remainder,
     ) {
         super(TransactionProgressType.PreparedTransaction);
-        this.essence = essence;
+        this.transaction = transaction;
         this.inputsData = inputsData;
         this.remainder = remainder;
     }
 }
 
 /**
- * A 'prepared transaction essence hash' progress.
+ * A 'prepared transaction hash' progress.
  */
-class PreparedTransactionEssenceHashProgress extends TransactionProgress {
-    hash: string;
+class PreparedTransactionHashProgress extends TransactionProgress {
+    hash: HexEncodedString;
 
     /**
-     * @param hash The hash of the transaction essence.
+     * @param hash The hash of the transaction.
      */
-    constructor(hash: string) {
-        super(TransactionProgressType.PreparedTransactionEssenceHash);
+    constructor(hash: HexEncodedString) {
+        super(TransactionProgressType.PreparedTransactionHash);
         this.hash = hash;
     }
 }
@@ -292,7 +293,7 @@ export {
     SelectingInputsProgress,
     GeneratingRemainderDepositAddressProgress,
     PreparedTransactionProgress,
-    PreparedTransactionEssenceHashProgress,
+    PreparedTransactionHashProgress,
     SigningTransactionProgress,
     BroadcastingProgress,
     TransactionProgressType,

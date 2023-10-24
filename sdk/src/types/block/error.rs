@@ -70,7 +70,6 @@ pub enum Error {
     },
     InvalidContextInputKind(u8),
     InvalidContextInputCount(<ContextInputCount as TryFrom<usize>>::Error),
-    InvalidEssenceKind(u8),
     InvalidFeatureCount(<FeatureCount as TryFrom<usize>>::Error),
     InvalidFeatureKind(u8),
     InvalidFoundryOutputSupply {
@@ -249,7 +248,6 @@ impl fmt::Display for Error {
             ),
             Self::InvalidContextInputCount(count) => write!(f, "invalid context input count: {count}"),
             Self::InvalidContextInputKind(k) => write!(f, "invalid context input kind: {k}"),
-            Self::InvalidEssenceKind(k) => write!(f, "invalid essence kind: {k}"),
             Self::InvalidFeatureCount(count) => write!(f, "invalid feature count: {count}"),
             Self::InvalidFeatureKind(k) => write!(f, "invalid feature kind: {k}"),
             Self::InvalidFoundryOutputSupply { minted, melted, max } => write!(
