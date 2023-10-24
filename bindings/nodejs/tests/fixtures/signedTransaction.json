@@ -10,7 +10,6 @@
                 "transactionOutputIndex": 1
             }
         ],
-        "inputsCommitment": "0xf027c155a58527f1e3d2c0e93ffe101edcc6cc58d7ce7ec0bea0cdbfb08f73ef",
         "outputs": [
             {
                 "type": 3,

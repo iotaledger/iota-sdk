@@ -20,7 +20,7 @@ import {
     OutputData,
     OutputParams,
     OutputsToClaim,
-    Transaction,
+    TransactionWithMetadata,
     TransactionOptions,
     ParticipationOverview,
     ParticipationEventId,
@@ -29,7 +29,7 @@ import {
     ParticipationEventWithNodes,
     ParticipationEventRegistrationOptions,
     ParticipationEventMap,
-    SignedTransactionEssence,
+    SignedTransactionData,
     PreparedTransaction,
     PreparedCreateNativeTokenTransactionData,
     ConsolidationParams,
@@ -79,7 +79,7 @@ export class Account {
     async burn(
         burn: Burn,
         transactionOptions?: TransactionOptions,
-    ): Promise<Transaction> {
+    ): Promise<TransactionWithMetadata> {
         return (await this.prepareBurn(burn, transactionOptions)).send();
     }
 
@@ -186,7 +186,7 @@ export class Account {
      * @param outputIds The outputs to claim.
      * @returns The resulting transaction.
      */
-    async claimOutputs(outputIds: OutputId[]): Promise<Transaction> {
+    async claimOutputs(outputIds: OutputId[]): Promise<TransactionWithMetadata> {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
@@ -196,8 +196,8 @@ export class Account {
                 },
             },
         );
-        const parsed = JSON.parse(response) as Response<Transaction>;
-        return plainToInstance(Transaction, parsed.payload);
+        const parsed = JSON.parse(response) as Response<TransactionWithMetadata>;
+        return plainToInstance(TransactionWithMetadata, parsed.payload);
     }
 
     /**
@@ -209,7 +209,7 @@ export class Account {
      */
     async consolidateOutputs(
         params: ConsolidationParams,
-    ): Promise<Transaction> {
+    ): Promise<TransactionWithMetadata> {
         return (await this.prepareConsolidateOutputs(params)).send();
     }
 
@@ -251,7 +251,7 @@ export class Account {
     async createAccountOutput(
         params?: AccountOutputParams,
         transactionOptions?: TransactionOptions,
-    ): Promise<Transaction> {
+    ): Promise<TransactionWithMetadata> {
         return (
             await this.prepareCreateAccountOutput(params, transactionOptions)
         ).send();
@@ -300,7 +300,7 @@ export class Account {
         tokenId: TokenId,
         meltAmount: bigint,
         transactionOptions?: TransactionOptions,
-    ): Promise<Transaction> {
+    ): Promise<TransactionWithMetadata> {
         return (
             await this.prepareMeltNativeToken(
                 tokenId,
@@ -642,7 +642,7 @@ export class Account {
      * @param transactionId The ID of the transaction to get.
      * @returns The transaction.
      */
-    async getTransaction(transactionId: TransactionId): Promise<Transaction> {
+    async getTransaction(transactionId: TransactionId): Promise<TransactionWithMetadata> {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
@@ -652,8 +652,8 @@ export class Account {
                 },
             },
         );
-        const parsed = JSON.parse(response) as Response<Transaction>;
-        return plainToInstance(Transaction, parsed.payload);
+        const parsed = JSON.parse(response) as Response<TransactionWithMetadata>;
+        return plainToInstance(TransactionWithMetadata, parsed.payload);
     }
 
     /**
@@ -665,7 +665,7 @@ export class Account {
      */
     async getIncomingTransaction(
         transactionId: TransactionId,
-    ): Promise<Transaction> {
+    ): Promise<TransactionWithMetadata> {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
@@ -675,8 +675,8 @@ export class Account {
                 },
             },
         );
-        const parsed = JSON.parse(response) as Response<Transaction>;
-        return plainToInstance(Transaction, parsed.payload);
+        const parsed = JSON.parse(response) as Response<TransactionWithMetadata>;
+        return plainToInstance(TransactionWithMetadata, parsed.payload);
     }
 
     /**
@@ -735,15 +735,15 @@ export class Account {
      *
      * @returns The transactions.
      */
-    async pendingTransactions(): Promise<Transaction[]> {
+    async pendingTransactions(): Promise<TransactionWithMetadata[]> {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
                 name: 'pendingTransactions',
             },
         );
-        const parsed = JSON.parse(response) as Response<Transaction[]>;
-        return plainToInstance(Transaction, parsed.payload);
+        const parsed = JSON.parse(response) as Response<TransactionWithMetadata[]>;
+        return plainToInstance(TransactionWithMetadata, parsed.payload);
     }
 
     /**
@@ -751,15 +751,15 @@ export class Account {
      *
      * @returns The incoming transactions with their inputs.
      */
-    async incomingTransactions(): Promise<Transaction[]> {
+    async incomingTransactions(): Promise<TransactionWithMetadata[]> {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
                 name: 'incomingTransactions',
             },
         );
-        const parsed = JSON.parse(response) as Response<Transaction[]>;
-        return plainToInstance(Transaction, parsed.payload);
+        const parsed = JSON.parse(response) as Response<TransactionWithMetadata[]>;
+        return plainToInstance(TransactionWithMetadata, parsed.payload);
     }
 
     /**
@@ -767,15 +767,15 @@ export class Account {
      *
      * @returns The transactions.
      */
-    async transactions(): Promise<Transaction[]> {
+    async transactions(): Promise<TransactionWithMetadata[]> {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
                 name: 'transactions',
             },
         );
-        const parsed = JSON.parse(response) as Response<Transaction[]>;
-        return plainToInstance(Transaction, parsed.payload);
+        const parsed = JSON.parse(response) as Response<TransactionWithMetadata[]>;
+        return plainToInstance(TransactionWithMetadata, parsed.payload);
     }
 
     /**
@@ -822,7 +822,7 @@ export class Account {
         tokenId: TokenId,
         mintAmount: bigint,
         transactionOptions?: TransactionOptions,
-    ): Promise<Transaction> {
+    ): Promise<TransactionWithMetadata> {
         return (
             await this.prepareMintNativeToken(
                 tokenId,
@@ -878,7 +878,7 @@ export class Account {
     async createNativeToken(
         params: CreateNativeTokenParams,
         transactionOptions?: TransactionOptions,
-    ): Promise<Transaction> {
+    ): Promise<TransactionWithMetadata> {
         return (
             await this.prepareCreateNativeToken(params, transactionOptions)
         ).send();
@@ -936,7 +936,7 @@ export class Account {
     async mintNfts(
         params: MintNftParams[],
         transactionOptions?: TransactionOptions,
-    ): Promise<Transaction> {
+    ): Promise<TransactionWithMetadata> {
         return (await this.prepareMintNfts(params, transactionOptions)).send();
     }
 
@@ -1055,7 +1055,7 @@ export class Account {
     async sendTransaction(
         outputs: Output[],
         options?: TransactionOptions,
-    ): Promise<Transaction> {
+    ): Promise<TransactionWithMetadata> {
         return (await this.prepareTransaction(outputs, options)).send();
     }
 
@@ -1147,7 +1147,7 @@ export class Account {
         amount: u64 | NumericString,
         address: Bech32Address,
         transactionOptions?: TransactionOptions,
-    ): Promise<Transaction> {
+    ): Promise<TransactionWithMetadata> {
         if (typeof amount === 'bigint') {
             amount = amount.toString(10);
         }
@@ -1162,8 +1162,8 @@ export class Account {
                 },
             },
         );
-        const parsed = JSON.parse(response) as Response<Transaction>;
-        return plainToInstance(Transaction, parsed.payload);
+        const parsed = JSON.parse(response) as Response<TransactionWithMetadata>;
+        return plainToInstance(TransactionWithMetadata, parsed.payload);
     }
 
     /**
@@ -1177,7 +1177,7 @@ export class Account {
     async sendWithParams(
         params: SendParams[],
         transactionOptions?: TransactionOptions,
-    ): Promise<Transaction> {
+    ): Promise<TransactionWithMetadata> {
         for (let i = 0; i < params.length; i++) {
             if (typeof params[i].amount === 'bigint') {
                 params[i].amount = params[i].amount.toString(10);
@@ -1193,8 +1193,8 @@ export class Account {
                 },
             },
         );
-        const parsed = JSON.parse(response) as Response<Transaction>;
-        return plainToInstance(Transaction, parsed.payload);
+        const parsed = JSON.parse(response) as Response<TransactionWithMetadata>;
+        return plainToInstance(TransactionWithMetadata, parsed.payload);
     }
 
     /**
@@ -1208,7 +1208,7 @@ export class Account {
     async sendNativeTokens(
         params: SendNativeTokensParams[],
         transactionOptions?: TransactionOptions,
-    ): Promise<Transaction> {
+    ): Promise<TransactionWithMetadata> {
         return (
             await this.prepareSendNativeTokens(params, transactionOptions)
         ).send();
@@ -1256,7 +1256,7 @@ export class Account {
     async sendNft(
         params: SendNftParams[],
         transactionOptions?: TransactionOptions,
-    ): Promise<Transaction> {
+    ): Promise<TransactionWithMetadata> {
         return (await this.prepareSendNft(params, transactionOptions)).send();
     }
 
@@ -1302,7 +1302,7 @@ export class Account {
     async sendOutputs(
         outputs: Output[],
         transactionOptions?: TransactionOptions,
-    ): Promise<Transaction> {
+    ): Promise<TransactionWithMetadata> {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
@@ -1314,8 +1314,8 @@ export class Account {
             },
         );
 
-        const parsed = JSON.parse(response) as Response<Transaction>;
-        return plainToInstance(Transaction, parsed.payload);
+        const parsed = JSON.parse(response) as Response<TransactionWithMetadata>;
+        return plainToInstance(TransactionWithMetadata, parsed.payload);
     }
 
     /**
@@ -1351,15 +1351,15 @@ export class Account {
      * Sign a prepared transaction, useful for offline signing.
      *
      * @param preparedTransactionData The prepared transaction data to sign.
-     * @returns The signed transaction essence.
+     * @returns The signed transaction.
      */
-    async signTransactionEssence(
+    async signTransaction(
         preparedTransactionData: PreparedTransactionData,
-    ): Promise<SignedTransactionEssence> {
+    ): Promise<SignedTransactionData> {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
-                name: 'signTransactionEssence',
+                name: 'signTransaction',
                 data: {
                     preparedTransactionData,
                 },
@@ -1367,8 +1367,8 @@ export class Account {
         );
         const parsed = JSON.parse(
             response,
-        ) as Response<SignedTransactionEssence>;
-        return plainToInstance(SignedTransactionEssence, parsed.payload);
+        ) as Response<SignedTransactionData>;
+        return plainToInstance(SignedTransactionData, parsed.payload);
     }
 
     /**
@@ -1379,7 +1379,7 @@ export class Account {
      */
     async signAndSubmitTransaction(
         preparedTransactionData: PreparedTransactionData,
-    ): Promise<Transaction> {
+    ): Promise<TransactionWithMetadata> {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
@@ -1389,8 +1389,8 @@ export class Account {
                 },
             },
         );
-        const parsed = JSON.parse(response) as Response<Transaction>;
-        return plainToInstance(Transaction, parsed.payload);
+        const parsed = JSON.parse(response) as Response<TransactionWithMetadata>;
+        return plainToInstance(TransactionWithMetadata, parsed.payload);
     }
 
     /**
@@ -1400,8 +1400,8 @@ export class Account {
      * @returns The sent transaction.
      */
     async submitAndStoreTransaction(
-        signedTransactionData: SignedTransactionEssence,
-    ): Promise<Transaction> {
+        signedTransactionData: SignedTransactionData,
+    ): Promise<TransactionWithMetadata> {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
@@ -1411,8 +1411,8 @@ export class Account {
                 },
             },
         );
-        const parsed = JSON.parse(response) as Response<Transaction>;
-        return plainToInstance(Transaction, parsed.payload);
+        const parsed = JSON.parse(response) as Response<TransactionWithMetadata>;
+        return plainToInstance(TransactionWithMetadata, parsed.payload);
     }
 
     /**

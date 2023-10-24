@@ -59,10 +59,7 @@ async function run() {
             `Block included: ${process.env.EXPLORER_URL}/block/${blockId}`,
         );
 
-        const essence: RegularTransactionEssence = (
-            transaction.payload as TransactionPayload
-        ).essence as RegularTransactionEssence;
-        essence.outputs.forEach((output, outputIndex) => {
+        transaction.payload.transaction.outputs.forEach((output, outputIndex) => {
             if (output instanceof NftOutput) {
                 const nftOutput = output as NftOutput;
 
