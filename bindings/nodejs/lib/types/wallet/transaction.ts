@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Type } from 'class-transformer';
-import { TransactionPayload } from '../block/payload/transaction';
+import { SignedTransactionPayload } from '../block/payload/signed_transaction';
 import { OutputResponse } from '../models/api';
 
 /** Possible InclusionStates of transactions sent with the wallet */
@@ -18,10 +18,10 @@ export enum InclusionState {
 }
 
 /** A Transaction with metadata */
-export class Transaction {
+export class TransactionWithMetadata {
     /** The transaction payload */
-    @Type(() => TransactionPayload)
-    payload!: TransactionPayload;
+    @Type(() => SignedTransactionPayload)
+    payload!: SignedTransactionPayload;
     /** The block id in which the transaction payload was included */
     blockId?: string;
     /** The inclusion state of the transaction */

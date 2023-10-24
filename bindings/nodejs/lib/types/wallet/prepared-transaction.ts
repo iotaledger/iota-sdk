@@ -4,8 +4,8 @@
 import {
     Account,
     PreparedTransactionData,
-    SignedTransactionEssence,
-    Transaction,
+    SignedTransactionData,
+    TransactionWithMetadata,
 } from '../..';
 
 /**
@@ -45,25 +45,23 @@ export class PreparedTransaction {
      *
      * Returns:
      *
-     * The `send()` method is returning a `Promise` that resolves to a `Transaction` object after it
+     * The `send()` method is returning a `Promise` that resolves to a `TransactionWithMetadata` object after it
      * has been signed and submitted.
      */
-    public async send(): Promise<Transaction> {
+    public async send(): Promise<TransactionWithMetadata> {
         return this.signAndSubmitTransaction();
     }
 
     /**
-     * This function signs a prepared transaction essence using the account's private key and returns
-     * the signed transaction essence.
+     * This function signs a prepared transaction using the account's private key and returns
+     * the signed transaction.
      *
      * Returns:
      *
-     * A `Promise` that resolves to a `SignedTransactionEssence` object.
+     * A `Promise` that resolves to a `SignedTransactionData` object.
      */
-    public async sign(): Promise<SignedTransactionEssence> {
-        return this._account.signTransactionEssence(
-            this.preparedTransactionData(),
-        );
+    public async sign(): Promise<SignedTransactionData> {
+        return this._account.signTransaction(this.preparedTransactionData());
     }
 
     /**
@@ -71,9 +69,9 @@ export class PreparedTransaction {
      *
      * Returns:
      *
-     * A Promise that resolves to a Transaction object.
+     * A Promise that resolves to a TransactionWithMetadata object.
      */
-    public async signAndSubmitTransaction(): Promise<Transaction> {
+    public async signAndSubmitTransaction(): Promise<TransactionWithMetadata> {
         return this._account.signAndSubmitTransaction(
             this.preparedTransactionData(),
         );
