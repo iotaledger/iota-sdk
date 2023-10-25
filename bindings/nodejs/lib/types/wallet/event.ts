@@ -249,7 +249,7 @@ class PreparedTransactionProgress extends TransactionProgress {
 /**
  * A 'prepared transaction hash' progress.
  */
-class PreparedTransactionHashProgress extends TransactionProgress {
+class PreparedTransactionSigningHashProgress extends TransactionProgress {
     hash: HexEncodedString;
 
     /**
@@ -293,7 +293,7 @@ export {
     SelectingInputsProgress,
     GeneratingRemainderDepositAddressProgress,
     PreparedTransactionProgress,
-    PreparedTransactionHashProgress,
+    PreparedTransactionSigningHashProgress,
     SigningTransactionProgress,
     BroadcastingProgress,
     TransactionProgressType,

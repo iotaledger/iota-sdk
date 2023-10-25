@@ -504,7 +504,6 @@ pub(crate) async fn default_transaction_unlocks<M: SecretManage>(
 where
     crate::client::Error: From<M::Error>,
 {
-    // The transaction_hash gets signed
     let transaction_signing_hash = prepared_transaction_data.transaction.signing_hash();
     let mut blocks = Vec::new();
     let mut block_indexes = HashMap::<Address, usize>::new();

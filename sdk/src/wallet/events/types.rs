@@ -283,7 +283,7 @@ impl Serialize for TransactionProgressEvent {
 impl<'de> Deserialize<'de> for TransactionProgressEvent {
     fn deserialize<D: serde::Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
         #[derive(Deserialize)]
-        struct PreparedTransactionHash_ {
+        struct PreparedTransactionSigningHash_ {
             signing_hash: String,
         }
 
@@ -303,7 +303,7 @@ impl<'de> Deserialize<'de> for TransactionProgressEvent {
                     |e| serde::de::Error::custom(format!("cannot deserialize PreparedTransactionDataDto: {e}")),
                 )?)),
                 3 => Self::PreparedTransactionSigningHash(
-                    PreparedTransactionHash_::deserialize(value)
+                    PreparedTransactionSigningHash_::deserialize(value)
                         .map_err(|e| {
                             serde::de::Error::custom(format!("cannot deserialize PreparedTransactionHash: {e}"))
                         })?

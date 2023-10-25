@@ -124,7 +124,7 @@ pub enum UtilsMethod {
         token_scheme_type: u8,
     },
     /// Computes the hash of a transaction.
-    HashTransaction {
+    TransactionSigningHash {
         /// The transaction.
         transaction: TransactionDto,
     },
