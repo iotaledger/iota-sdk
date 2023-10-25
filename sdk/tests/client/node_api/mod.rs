@@ -17,7 +17,7 @@ use iota_sdk::{
         Client,
     },
     types::block::{
-        payload::{tagged_data::TaggedDataPayload, transaction::TransactionId, Payload},
+        payload::{signed_transaction::TransactionId, tagged_data::TaggedDataPayload, Payload},
         BlockId, IssuerId,
     },
 };
@@ -94,10 +94,13 @@ pub async fn setup_transaction_block(client: &Client) -> (BlockId, TransactionId
 
     let block = client.get_block(&block_id).await.unwrap();
 
-    let transaction_id = match block.as_basic().payload() {
-        Some(Payload::Transaction(t)) => t.id(),
-        _ => unreachable!(),
-    };
+    let transaction_id = block
+        .as_basic()
+        .payload()
+        .unwrap()
+        .as_signed_transaction()
+        .transaction()
+        .id();
 
     (block_id, transaction_id)
 }
@@ -108,12 +111,12 @@ pub async fn setup_transaction_block(client: &Client) -> (BlockId, TransactionId
 // fn get_alias_output_id(payload: &Payload) -> Result<OutputId> {
 //     match payload {
 //         Payload::Transaction(tx_payload) => {
-//             for (index, output) in tx_payload.essence().as_regular().outputs().iter().enumerate() {
+//             for (index, output) in tx_payload.transaction().as_regular().outputs().iter().enumerate() {
 //                 if let Output::Alias(_alias_output) = output {
 //                     return Ok(OutputId::new(tx_payload.id(), index.try_into().unwrap())?);
 //                 }
 //             }
-//             panic!("No alias output in transaction essence")
+//             panic!("No alias output in transaction")
 //         }
 //         _ => panic!("No tx payload"),
 //     }
@@ -123,12 +126,12 @@ pub async fn setup_transaction_block(client: &Client) -> (BlockId, TransactionId
 // fn get_foundry_output_id(payload: &Payload) -> Result<OutputId> {
 //     match payload {
 //         Payload::Transaction(tx_payload) => {
-//             for (index, output) in tx_payload.essence().as_regular().outputs().iter().enumerate() {
+//             for (index, output) in tx_payload.transaction().as_regular().outputs().iter().enumerate() {
 //                 if let Output::Foundry(_foundry_output) = output {
 //                     return Ok(OutputId::new(tx_payload.id(), index.try_into().unwrap())?);
 //                 }
 //             }
-//             panic!("No foundry output in transaction essence")
+//             panic!("No foundry output in transaction")
 //         }
 //         _ => panic!("No tx payload"),
 //     }
@@ -138,12 +141,12 @@ pub async fn setup_transaction_block(client: &Client) -> (BlockId, TransactionId
 // fn get_nft_output_id(payload: &Payload) -> Result<OutputId> {
 //     match payload {
 //         Payload::Transaction(tx_payload) => {
-//             for (index, output) in tx_payload.essence().as_regular().outputs().iter().enumerate() {
+//             for (index, output) in tx_payload.transaction().as_regular().outputs().iter().enumerate() {
 //                 if let Output::Nft(_nft_output) = output {
 //                     return Ok(OutputId::new(tx_payload.id(), index.try_into().unwrap())?);
 //                 }
 //             }
-//             panic!("No nft output in transaction essence")
+//             panic!("No nft output in transaction")
 //         }
 //         _ => panic!("No tx payload"),
 //     }

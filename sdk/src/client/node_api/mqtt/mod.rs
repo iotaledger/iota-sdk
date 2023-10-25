@@ -104,8 +104,9 @@ async fn set_mqtt_client(client: &Client) -> Result<(), Error> {
                 mqtt_options
             };
             let (_, mut connection) = AsyncClient::new(mqtt_options.clone(), 10);
-            connection
-                .set_network_options(*NetworkOptions::new().set_connection_timeout(broker_options.timeout.as_secs()));
+            let mut network_options = NetworkOptions::new();
+            network_options.set_connection_timeout(broker_options.timeout.as_secs());
+            connection.set_network_options(network_options);
             // poll the event loop until we find a ConnAck event,
             // which means that the mqtt client is ready to be used on this host
             // if the event loop returns an error, we check the next node

@@ -23,6 +23,7 @@ use iota_sdk_bindings_core::{
     call_client_method, call_secret_manager_method, AccountMethod, CallMethod, ClientMethod, Response, Result,
     SecretManagerMethod, WalletMethod, WalletOptions,
 };
+use pretty_assertions::assert_eq;
 
 #[tokio::test]
 async fn create_account() -> Result<()> {

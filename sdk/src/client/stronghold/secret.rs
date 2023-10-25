@@ -36,7 +36,8 @@ use crate::{
         stronghold::Error,
     },
     types::block::{
-        address::Ed25519Address, payload::transaction::TransactionPayload, signature::Ed25519Signature, unlock::Unlocks,
+        address::Ed25519Address, payload::signed_transaction::SignedTransactionPayload, signature::Ed25519Signature,
+        unlock::Unlocks,
     },
 };
 
@@ -280,17 +281,17 @@ impl SecretManage for StrongholdAdapter {
         Ok((public_key, signature))
     }
 
-    async fn sign_transaction_essence(
+    async fn transaction_unlocks(
         &self,
         prepared_transaction_data: &PreparedTransactionData,
     ) -> Result<Unlocks, Self::Error> {
-        crate::client::secret::default_sign_transaction_essence(self, prepared_transaction_data).await
+        crate::client::secret::default_transaction_unlocks(self, prepared_transaction_data).await
     }
 
     async fn sign_transaction(
         &self,
         prepared_transaction_data: PreparedTransactionData,
-    ) -> Result<TransactionPayload, Self::Error> {
+    ) -> Result<SignedTransactionPayload, Self::Error> {
         crate::client::secret::default_sign_transaction(self, prepared_transaction_data).await
     }
 }
@@ -494,6 +495,8 @@ impl StrongholdAdapter {
 #[cfg(test)]
 mod tests {
     use std::path::Path;
+
+    use pretty_assertions::assert_eq;
 
     use super::*;
     use crate::{

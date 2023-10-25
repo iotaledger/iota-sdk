@@ -113,11 +113,13 @@ mod tests {
         },
     };
 
+    use pretty_assertions::assert_eq;
+
     use super::{
         types::{TransactionInclusionEvent, TransactionProgressEvent, WalletEvent, WalletEventType},
         EventEmitter,
     };
-    use crate::{types::block::payload::transaction::TransactionId, wallet::account::types::InclusionState};
+    use crate::{types::block::payload::signed_transaction::TransactionId, wallet::account::types::InclusionState};
 
     #[test]
     fn events() {
@@ -157,7 +159,7 @@ mod tests {
             0,
             WalletEvent::TransactionInclusion(TransactionInclusionEvent {
                 transaction_id: TransactionId::from_str(
-                    "0x2289d9981fb23cc5f4f6c2742685eeb480f8476089888aa886a18232bad81989",
+                    "0x2289d9981fb23cc5f4f6c2742685eeb480f8476089888aa886a18232bad8198900000000",
                 )
                 .expect("invalid tx id"),
                 inclusion_state: InclusionState::Confirmed,
@@ -184,7 +186,7 @@ mod tests {
             0,
             WalletEvent::TransactionInclusion(TransactionInclusionEvent {
                 transaction_id: TransactionId::from_str(
-                    "0x2289d9981fb23cc5f4f6c2742685eeb480f8476089888aa886a18232bad81989",
+                    "0x2289d9981fb23cc5f4f6c2742685eeb480f8476089888aa886a18232bad8198900000000",
                 )
                 .expect("invalid tx id"),
                 inclusion_state: InclusionState::Confirmed,

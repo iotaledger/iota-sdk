@@ -13,10 +13,9 @@ from iota_sdk import Wallet
 # should not be done in production.
 load_dotenv()
 
-if 'WALLET_DB_PATH' not in os.environ:
-    raise Exception(".env WALLET_DB_PATH is undefined, see .env.example")
-if 'STRONGHOLD_PASSWORD' not in os.environ:
-    raise Exception(".env STRONGHOLD_PASSWORD is undefined, see .env.example")
+for env_var in ['WALLET_DB_PATH', 'STRONGHOLD_PASSWORD']:
+    if env_var not in os.environ:
+        raise Exception(f'.env {env_var} is undefined, see .env.example')
 
 wallet = Wallet(os.environ.get('WALLET_DB_PATH'))
 

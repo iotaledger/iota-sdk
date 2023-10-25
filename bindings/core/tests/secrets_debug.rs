@@ -3,6 +3,7 @@
 
 use iota_sdk::client::secret::SecretManagerDto;
 use iota_sdk_bindings_core::{Response, UtilsMethod, WalletOptions};
+use pretty_assertions::assert_eq;
 
 #[test]
 fn method_interface_secrets_debug() {

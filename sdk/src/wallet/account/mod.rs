@@ -26,7 +26,7 @@ use tokio::sync::{Mutex, RwLock};
 pub use self::operations::participation::{AccountParticipationOverview, ParticipationEventWithNodes};
 use self::types::{
     address::{AddressWithUnspentOutputs, Bip44Address},
-    Balance, OutputData, Transaction, TransactionDto,
+    Balance, OutputData, TransactionWithMetadata, TransactionWithMetadataDto,
 };
 pub use self::{
     operations::{
@@ -60,11 +60,11 @@ use crate::{
         Client,
     },
     types::{
-        api::core::response::OutputWithMetadataResponse,
+        api::core::OutputWithMetadataResponse,
         block::{
             address::Bech32Address,
             output::{dto::FoundryOutputDto, AccountId, FoundryId, FoundryOutput, NftId, Output, OutputId, TokenId},
-            payload::{transaction::TransactionId, TransactionPayload},
+            payload::{signed_transaction::TransactionId, SignedTransactionPayload},
         },
         TryFromDto,
     },
@@ -120,13 +120,13 @@ pub struct AccountDetails {
     /// Sent transactions
     // stored separated from the account for performance and only the transaction id here? where to add the network id?
     // transactions: HashSet<TransactionId>,
-    transactions: HashMap<TransactionId, Transaction>,
+    transactions: HashMap<TransactionId, TransactionWithMetadata>,
     /// Pending transactions
     // Maybe pending transactions even additionally separated?
     pending_transactions: HashSet<TransactionId>,
     /// Transaction payloads for received outputs with inputs when not pruned before syncing, can be used to determine
     /// the sender address(es)
-    incoming_transactions: HashMap<TransactionId, Transaction>,
+    incoming_transactions: HashMap<TransactionId, TransactionWithMetadata>,
     /// Some incoming transactions can be pruned by the node before we requested them, then this node can never return
     /// it. To avoid useless requests, these transaction ids are stored here and cleared when new client options are
     /// set, because another node might still have them.
@@ -275,13 +275,13 @@ impl AccountInner {
     }
 
     /// Get the [`Transaction`] of a transaction stored in the account
-    pub async fn get_transaction(&self, transaction_id: &TransactionId) -> Option<Transaction> {
+    pub async fn get_transaction(&self, transaction_id: &TransactionId) -> Option<TransactionWithMetadata> {
         self.details().await.transactions().get(transaction_id).cloned()
     }
 
     /// Get the transaction with inputs of an incoming transaction stored in the account
     /// List might not be complete, if the node pruned the data already
-    pub async fn get_incoming_transaction(&self, transaction_id: &TransactionId) -> Option<Transaction> {
+    pub async fn get_incoming_transaction(&self, transaction_id: &TransactionId) -> Option<TransactionWithMetadata> {
         self.details()
             .await
             .incoming_transactions()
@@ -427,17 +427,17 @@ impl AccountInner {
     }
 
     /// Returns all incoming transactions of the account
-    pub async fn incoming_transactions(&self) -> Vec<Transaction> {
+    pub async fn incoming_transactions(&self) -> Vec<TransactionWithMetadata> {
         self.details().await.incoming_transactions.values().cloned().collect()
     }
 
     /// Returns all transactions of the account
-    pub async fn transactions(&self) -> Vec<Transaction> {
+    pub async fn transactions(&self) -> Vec<TransactionWithMetadata> {
         self.details().await.transactions.values().cloned().collect()
     }
 
     /// Returns all pending transactions of the account
-    pub async fn pending_transactions(&self) -> Vec<Transaction> {
+    pub async fn pending_transactions(&self) -> Vec<TransactionWithMetadata> {
         let mut transactions = Vec::new();
         let account_details = self.details().await;
 
@@ -453,10 +453,10 @@ impl AccountInner {
 
 pub(crate) fn build_transaction_from_payload_and_inputs(
     tx_id: TransactionId,
-    tx_payload: TransactionPayload,
+    tx_payload: SignedTransactionPayload,
     inputs: Vec<OutputWithMetadataResponse>,
-) -> crate::wallet::Result<Transaction> {
-    Ok(Transaction {
+) -> crate::wallet::Result<TransactionWithMetadata> {
+    Ok(TransactionWithMetadata {
         payload: tx_payload.clone(),
         block_id: inputs.first().map(|i| *i.metadata.block_id()),
         inclusion_state: InclusionState::Confirmed,
@@ -467,7 +467,7 @@ pub(crate) fn build_transaction_from_payload_and_inputs(
         //     .and_then(|i| i.metadata.milestone_timestamp_spent.map(|t| t as u128 * 1000))
         //     .unwrap_or_else(|| crate::utils::unix_timestamp_now().as_millis()),
         transaction_id: tx_id,
-        network_id: tx_payload.essence().network_id(),
+        network_id: tx_payload.transaction().network_id(),
         incoming: true,
         note: None,
         inputs,
@@ -497,11 +497,11 @@ pub struct AccountDetailsDto {
     /// Unspent outputs
     pub unspent_outputs: HashMap<OutputId, OutputDataDto>,
     /// Sent transactions
-    pub transactions: HashMap<TransactionId, TransactionDto>,
+    pub transactions: HashMap<TransactionId, TransactionWithMetadataDto>,
     /// Pending transactions
     pub pending_transactions: HashSet<TransactionId>,
     /// Incoming transactions
-    pub incoming_transactions: HashMap<TransactionId, TransactionDto>,
+    pub incoming_transactions: HashMap<TransactionId, TransactionWithMetadataDto>,
     /// Foundries for native tokens in outputs
     #[serde(default)]
     pub native_token_foundries: HashMap<FoundryId, FoundryOutputDto>,
@@ -536,13 +536,13 @@ impl TryFromDto for AccountDetails {
             transactions: dto
                 .transactions
                 .into_iter()
-                .map(|(id, o)| Ok((id, Transaction::try_from_dto_with_params(o, &params)?)))
+                .map(|(id, o)| Ok((id, TransactionWithMetadata::try_from_dto_with_params(o, &params)?)))
                 .collect::<crate::wallet::Result<_>>()?,
             pending_transactions: dto.pending_transactions,
             incoming_transactions: dto
                 .incoming_transactions
                 .into_iter()
-                .map(|(id, o)| Ok((id, Transaction::try_from_dto_with_params(o, &params)?)))
+                .map(|(id, o)| Ok((id, TransactionWithMetadata::try_from_dto_with_params(o, &params)?)))
                 .collect::<crate::wallet::Result<_>>()?,
             inaccessible_incoming_transactions: Default::default(),
             native_token_foundries: dto
@@ -577,13 +577,13 @@ impl From<&AccountDetails> for AccountDetailsDto {
             transactions: value
                 .transactions()
                 .iter()
-                .map(|(id, transaction)| (*id, TransactionDto::from(transaction)))
+                .map(|(id, transaction)| (*id, TransactionWithMetadataDto::from(transaction)))
                 .collect(),
             pending_transactions: value.pending_transactions().clone(),
             incoming_transactions: value
                 .incoming_transactions()
                 .iter()
-                .map(|(id, transaction)| (*id, TransactionDto::from(transaction)))
+                .map(|(id, transaction)| (*id, TransactionWithMetadataDto::from(transaction)))
                 .collect(),
             native_token_foundries: value
                 .native_token_foundries()
@@ -594,125 +594,94 @@ impl From<&AccountDetails> for AccountDetailsDto {
     }
 }
 
-#[test]
-fn serialize() {
+#[cfg(test)]
+mod test {
     use core::str::FromStr;
 
+    use pretty_assertions::assert_eq;
+
+    use super::*;
     use crate::types::block::{
         address::{Address, Ed25519Address},
         input::{Input, UtxoInput},
-        output::{unlock_condition::AddressUnlockCondition, BasicOutput, InputsCommitment, Output},
-        payload::{
-            transaction::{RegularTransactionEssence, TransactionId},
-            TransactionPayload,
-        },
+        output::{AddressUnlockCondition, BasicOutput, Output},
+        payload::signed_transaction::{SignedTransactionPayload, Transaction, TransactionId},
         protocol::ProtocolParameters,
         rand::mana::rand_mana_allotment,
         signature::{Ed25519Signature, Signature},
         unlock::{ReferenceUnlock, SignatureUnlock, Unlock, Unlocks},
     };
 
-    const TRANSACTION_ID: &str = "0x24a1f46bdb6b2bf38f1c59f73cdd4ae5b418804bb231d76d06fbf246498d5883";
+    const TRANSACTION_ID: &str = "0x24a1f46bdb6b2bf38f1c59f73cdd4ae5b418804bb231d76d06fbf246498d588300000000";
     const ED25519_ADDRESS: &str = "0xe594f9a895c0e0a6760dd12cffc2c3d1e1cbf7269b328091f96ce3d0dd550b75";
     const ED25519_PUBLIC_KEY: &str = "0x1da5ddd11ba3f961acab68fafee3177d039875eaa94ac5fdbff8b53f0c50bfb9";
     const ED25519_SIGNATURE: &str = "0xc6a40edf9a089f42c18f4ebccb35fe4b578d93b879e99b87f63573324a710d3456b03fb6d1fcc027e6401cbd9581f790ee3ed7a3f68e9c225fcb9f1cd7b7110d";
 
-    let protocol_parameters = ProtocolParameters::new(
-        2,
-        "testnet",
-        "rms",
-        crate::types::block::output::RentStructure::new(500, 1, 10, 1, 1, 1),
-        1_813_620_509_061_365,
-        1582328545,
-        10,
-        20,
-    )
-    .unwrap();
+    #[test]
+    fn serialize() {
+        let protocol_parameters = ProtocolParameters::new(
+            2,
+            "testnet",
+            "rms",
+            crate::types::block::output::RentStructure::new(500, 1, 10, 1, 1, 1),
+            1_813_620_509_061_365,
+            1582328545,
+            10,
+            20,
+        )
+        .unwrap();
 
-    let transaction_id = TransactionId::new(prefix_hex::decode(TRANSACTION_ID).unwrap());
-    let input1 = Input::Utxo(UtxoInput::new(transaction_id, 0).unwrap());
-    let input2 = Input::Utxo(UtxoInput::new(transaction_id, 1).unwrap());
-    let bytes: [u8; 32] = prefix_hex::decode(ED25519_ADDRESS).unwrap();
-    let address = Address::from(Ed25519Address::new(bytes));
-    let amount = 1_000_000;
-    let output = Output::Basic(
-        BasicOutput::build_with_amount(amount)
-            .add_unlock_condition(AddressUnlockCondition::new(address))
-            .finish_with_params(protocol_parameters.clone())
-            .unwrap(),
-    );
-    let essence =
-        RegularTransactionEssence::builder(protocol_parameters.network_id(), InputsCommitment::from([0u8; 32]))
+        let transaction_id = TransactionId::new(prefix_hex::decode(TRANSACTION_ID).unwrap());
+        let input1 = Input::Utxo(UtxoInput::new(transaction_id, 0).unwrap());
+        let input2 = Input::Utxo(UtxoInput::new(transaction_id, 1).unwrap());
+        let bytes: [u8; 32] = prefix_hex::decode(ED25519_ADDRESS).unwrap();
+        let address = Address::from(Ed25519Address::new(bytes));
+        let amount = 1_000_000;
+        let output = Output::Basic(
+            BasicOutput::build_with_amount(amount)
+                .add_unlock_condition(AddressUnlockCondition::new(address))
+                .finish_with_params(protocol_parameters.clone())
+                .unwrap(),
+        );
+        let transaction = Transaction::builder(protocol_parameters.network_id())
             .with_inputs([input1, input2])
             .add_output(output)
             .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
             .finish_with_params(protocol_parameters)
             .unwrap();
 
-    let pub_key_bytes = prefix_hex::decode(ED25519_PUBLIC_KEY).unwrap();
-    let sig_bytes = prefix_hex::decode(ED25519_SIGNATURE).unwrap();
-    let signature = Ed25519Signature::try_from_bytes(pub_key_bytes, sig_bytes).unwrap();
-    let sig_unlock = Unlock::from(SignatureUnlock::from(Signature::from(signature)));
-    let ref_unlock = Unlock::from(ReferenceUnlock::new(0).unwrap());
-    let unlocks = Unlocks::new([sig_unlock, ref_unlock]).unwrap();
+        let pub_key_bytes = prefix_hex::decode(ED25519_PUBLIC_KEY).unwrap();
+        let sig_bytes = prefix_hex::decode(ED25519_SIGNATURE).unwrap();
+        let signature = Ed25519Signature::try_from_bytes(pub_key_bytes, sig_bytes).unwrap();
+        let sig_unlock = Unlock::from(SignatureUnlock::from(Signature::from(signature)));
+        let ref_unlock = Unlock::from(ReferenceUnlock::new(0).unwrap());
+        let unlocks = Unlocks::new([sig_unlock, ref_unlock]).unwrap();
 
-    let tx_payload = TransactionPayload::new(essence, unlocks).unwrap();
+        let tx_payload = SignedTransactionPayload::new(transaction, unlocks).unwrap();
 
-    let incoming_transaction = Transaction {
-        transaction_id: TransactionId::from_str("0x131fc4cb8f315ae36ae3bf6a4e4b3486d5f17581288f1217410da3e0700d195a")
+        let incoming_transaction = TransactionWithMetadata {
+            transaction_id: TransactionId::from_str(
+                "0x131fc4cb8f315ae36ae3bf6a4e4b3486d5f17581288f1217410da3e0700d195a00000000",
+            )
             .unwrap(),
-        payload: tx_payload,
-        block_id: None,
-        network_id: 0,
-        timestamp: 0,
-        inclusion_state: InclusionState::Pending,
-        incoming: false,
-        note: None,
-        inputs: Vec::new(),
-    };
+            payload: tx_payload,
+            block_id: None,
+            network_id: 0,
+            timestamp: 0,
+            inclusion_state: InclusionState::Pending,
+            incoming: false,
+            note: None,
+            inputs: Vec::new(),
+        };
 
-    let mut incoming_transactions = HashMap::new();
-    incoming_transactions.insert(
-        TransactionId::from_str("0x131fc4cb8f315ae36ae3bf6a4e4b3486d5f17581288f1217410da3e0700d195a").unwrap(),
-        incoming_transaction,
-    );
+        let mut incoming_transactions = HashMap::new();
+        incoming_transactions.insert(
+            TransactionId::from_str("0x131fc4cb8f315ae36ae3bf6a4e4b3486d5f17581288f1217410da3e0700d195a00000000")
+                .unwrap(),
+            incoming_transaction,
+        );
 
-    let account = AccountDetails {
-        index: 0,
-        coin_type: 4218,
-        alias: "0".to_string(),
-        public_addresses: Vec::new(),
-        internal_addresses: Vec::new(),
-        addresses_with_unspent_outputs: Vec::new(),
-        outputs: HashMap::new(),
-        locked_outputs: HashSet::new(),
-        unspent_outputs: HashMap::new(),
-        transactions: HashMap::new(),
-        pending_transactions: HashSet::new(),
-        incoming_transactions,
-        inaccessible_incoming_transactions: HashSet::new(),
-        native_token_foundries: HashMap::new(),
-    };
-
-    let deser_account = AccountDetails::try_from_dto(
-        serde_json::from_str::<AccountDetailsDto>(&serde_json::to_string(&AccountDetailsDto::from(&account)).unwrap())
-            .unwrap(),
-    )
-    .unwrap();
-
-    assert_eq!(account, deser_account);
-}
-
-#[cfg(test)]
-impl AccountDetails {
-    /// Returns a mock of this type with the following values:
-    /// index: 0, coin_type: 4218, alias: "Alice", public_addresses: contains a single public account address
-    /// (rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy), all other fields are set to their Rust
-    /// defaults.
-    #[cfg(feature = "storage")]
-    pub(crate) fn mock() -> Self {
-        use core::str::FromStr;
-        Self {
+        let account = AccountDetails {
             index: 0,
             coin_type: 4218,
             alias: "Alice".to_string(),
@@ -731,9 +700,52 @@ impl AccountDetails {
             unspent_outputs: HashMap::new(),
             transactions: HashMap::new(),
             pending_transactions: HashSet::new(),
-            incoming_transactions: HashMap::new(),
+            incoming_transactions,
             inaccessible_incoming_transactions: HashSet::new(),
             native_token_foundries: HashMap::new(),
+        };
+
+        let deser_account = AccountDetails::try_from_dto(
+            serde_json::from_str::<AccountDetailsDto>(
+                &serde_json::to_string(&AccountDetailsDto::from(&account)).unwrap(),
+            )
+            .unwrap(),
+        )
+        .unwrap();
+
+        assert_eq!(account, deser_account);
+    }
+
+    impl AccountDetails {
+        /// Returns a mock of this type with the following values:
+        /// index: 0, coin_type: 4218, alias: "Alice", public_addresses: contains a single public account address
+        /// (rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy), all other fields are set to their Rust
+        /// defaults.
+        #[cfg(feature = "storage")]
+        pub(crate) fn mock() -> Self {
+            Self {
+                index: 0,
+                coin_type: 4218,
+                alias: "Alice".to_string(),
+                public_addresses: vec![Bip44Address {
+                    address: crate::types::block::address::Bech32Address::from_str(
+                        "rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy",
+                    )
+                    .unwrap(),
+                    key_index: 0,
+                    internal: false,
+                }],
+                internal_addresses: Vec::new(),
+                addresses_with_unspent_outputs: Vec::new(),
+                outputs: HashMap::new(),
+                locked_outputs: HashSet::new(),
+                unspent_outputs: HashMap::new(),
+                transactions: HashMap::new(),
+                pending_transactions: HashSet::new(),
+                incoming_transactions: HashMap::new(),
+                inaccessible_incoming_transactions: HashSet::new(),
+                native_token_foundries: HashMap::new(),
+            }
         }
     }
 }

@@ -25,7 +25,7 @@ use crate::types::{
             NativeTokens, Output, OutputBuilderAmount, OutputId, Rent, RentStructure, StateTransitionError,
             StateTransitionVerifier,
         },
-        payload::transaction::TransactionCapabilityFlag,
+        payload::signed_transaction::TransactionCapabilityFlag,
         protocol::ProtocolParameters,
         semantic::{TransactionFailureReason, ValidationContext},
         unlock::Unlock,
@@ -34,10 +34,12 @@ use crate::types::{
     ValidationParams,
 };
 
-impl_id!(pub AccountId, 32, "Unique identifier of an account, which is the BLAKE2b-256 hash of the Output ID that created it.");
-
-#[cfg(feature = "serde")]
-string_serde_impl!(AccountId);
+crate::impl_id!(
+    /// A unique identifier of an account.
+    pub AccountId {
+        pub const LENGTH: usize = 32;
+    }
+);
 
 impl From<&OutputId> for AccountId {
     fn from(output_id: &OutputId) -> Self {
@@ -643,13 +645,13 @@ impl StateTransitionVerifier for AccountOutput {
             current_state,
             next_state,
             &context.input_chains,
-            context.essence.outputs(),
+            context.transaction.outputs(),
         )
     }
 
     fn destruction(_current_state: &Self, context: &ValidationContext<'_>) -> Result<(), StateTransitionError> {
         if !context
-            .essence
+            .transaction
             .has_capability(TransactionCapabilityFlag::DestroyAccountOutputs)
         {
             // TODO: add a variant https://github.com/iotaledger/iota-sdk/issues/1430
@@ -907,6 +909,7 @@ pub(crate) mod dto {
 
 #[cfg(test)]
 mod tests {
+    use pretty_assertions::assert_eq;
 
     use super::*;
     use crate::types::{

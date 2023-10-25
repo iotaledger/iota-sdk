@@ -3,7 +3,6 @@
 
 mod chain_id;
 mod delegation;
-mod inputs_commitment;
 mod metadata;
 mod native_token;
 mod output_id;
@@ -48,7 +47,6 @@ pub use self::{
     delegation::{DelegationId, DelegationOutput, DelegationOutputBuilder},
     feature::{Feature, Features},
     foundry::{FoundryId, FoundryOutput, FoundryOutputBuilder},
-    inputs_commitment::InputsCommitment,
     metadata::OutputMetadata,
     native_token::{NativeToken, NativeTokens, NativeTokensBuilder, TokenId},
     nft::{NftId, NftOutput, NftOutputBuilder},
@@ -240,7 +238,7 @@ impl Output {
         }
     }
 
-    def_is_as_opt!(Output: Basic, Account, Foundry, Nft, Delegation);
+    crate::def_is_as_opt!(Output: Basic, Account, Foundry, Nft, Delegation);
 
     /// Returns the address that is required to unlock this [`Output`] and the account or nft address that gets
     /// unlocked by it, if it's an account or nft.
@@ -410,7 +408,7 @@ impl Packable for Output {
             FoundryOutput::KIND => Self::from(FoundryOutput::unpack::<_, VERIFY>(unpacker, visitor).coerce()?),
             NftOutput::KIND => Self::from(NftOutput::unpack::<_, VERIFY>(unpacker, visitor).coerce()?),
             DelegationOutput::KIND => Self::from(DelegationOutput::unpack::<_, VERIFY>(unpacker, visitor).coerce()?),
-            k => return Err(Error::InvalidOutputKind(k)).map_err(UnpackError::Packable),
+            k => return Err(UnpackError::Packable(Error::InvalidOutputKind(k))),
         })
     }
 }
@@ -561,11 +559,11 @@ pub mod dto {
             #[derive(Serialize)]
             #[serde(untagged)]
             enum OutputDto_<'a> {
-                T2(&'a BasicOutputDto),
-                T3(&'a AccountOutputDto),
-                T4(&'a FoundryOutputDto),
-                T5(&'a NftOutputDto),
-                T6(&'a DelegationOutputDto),
+                T0(&'a BasicOutputDto),
+                T1(&'a AccountOutputDto),
+                T2(&'a FoundryOutputDto),
+                T3(&'a NftOutputDto),
+                T4(&'a DelegationOutputDto),
             }
             #[derive(Serialize)]
             struct TypedOutput<'a> {
@@ -574,19 +572,19 @@ pub mod dto {
             }
             let output = match self {
                 Self::Basic(o) => TypedOutput {
-                    output: OutputDto_::T2(o),
+                    output: OutputDto_::T0(o),
                 },
                 Self::Account(o) => TypedOutput {
-                    output: OutputDto_::T3(o),
+                    output: OutputDto_::T1(o),
                 },
                 Self::Foundry(o) => TypedOutput {
-                    output: OutputDto_::T4(o),
+                    output: OutputDto_::T2(o),
                 },
                 Self::Nft(o) => TypedOutput {
-                    output: OutputDto_::T5(o),
+                    output: OutputDto_::T3(o),
                 },
                 Self::Delegation(o) => TypedOutput {
-                    output: OutputDto_::T6(o),
+                    output: OutputDto_::T4(o),
                 },
             };
             output.serialize(serializer)

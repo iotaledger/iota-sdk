@@ -11,7 +11,7 @@ use crate::types::block::{
 pub fn rand_mana_allotment(params: &ProtocolParameters) -> ManaAllotment {
     ManaAllotment::new(
         rand_account_id(),
-        rand_number_range(0..params.mana_structure().max_mana()),
+        rand_number_range(0..params.mana_parameters().max_mana()),
         params,
     )
     .unwrap()

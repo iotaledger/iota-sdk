@@ -18,7 +18,7 @@ use iota_sdk::{
     types::block::{
         address::{Bech32Address, NftAddress},
         output::{feature::Irc27Metadata, NftId},
-        payload::transaction::TransactionId,
+        payload::signed_transaction::TransactionId,
     },
     wallet::{Account, MintNftParams, Result},
     Wallet,

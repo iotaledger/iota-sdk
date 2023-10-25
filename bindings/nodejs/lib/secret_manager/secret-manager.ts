@@ -15,7 +15,7 @@ import {
 import {
     Ed25519Signature,
     HexEncodedString,
-    TransactionPayload,
+    SignedTransactionPayload,
     Unlock,
     Response,
 } from '../types';
@@ -60,7 +60,7 @@ export class SecretManager {
      */
     async generateEvmAddresses(
         generateAddressesOptions: IGenerateAddressesOptions,
-    ): Promise<string[]> {
+    ): Promise<HexEncodedString[]> {
         const response = await this.methodHandler.callMethod({
             name: 'generateEvmAddresses',
             data: {
@@ -95,7 +95,7 @@ export class SecretManager {
      */
     async signTransaction(
         preparedTransactionData: PreparedTransactionData,
-    ): Promise<TransactionPayload> {
+    ): Promise<SignedTransactionPayload> {
         const response = await this.methodHandler.callMethod({
             name: 'signTransaction',
             data: {
@@ -103,25 +103,27 @@ export class SecretManager {
             },
         });
 
-        const parsed = JSON.parse(response) as Response<TransactionPayload>;
-        return plainToInstance(TransactionPayload, parsed.payload);
+        const parsed = JSON.parse(
+            response,
+        ) as Response<SignedTransactionPayload>;
+        return plainToInstance(SignedTransactionPayload, parsed.payload);
     }
 
     /**
      * Create a signature unlock using the provided `secretManager`.
      *
-     * @param transactionEssenceHash The hash of the transaction essence.
+     * @param transactionSigningHash The signing hash of the transaction.
      * @param chain A BIP44 chain.
      * @returns The corresponding unlock.
      */
     async signatureUnlock(
-        transactionEssenceHash: HexEncodedString,
+        transactionSigningHash: HexEncodedString,
         chain: Bip44,
     ): Promise<Unlock> {
         const response = await this.methodHandler.callMethod({
             name: 'signatureUnlock',
             data: {
-                transactionEssenceHash,
+                transactionSigningHash,
                 chain,
             },
         });

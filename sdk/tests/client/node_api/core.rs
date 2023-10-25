@@ -6,7 +6,7 @@
 use iota_sdk::{
     client::{api::GetAddressesOptions, node_api::indexer::query_parameters::QueryParameter, Client, NodeInfoWrapper},
     types::{
-        api::core::response::TransactionState,
+        api::core::TransactionState,
         block::{
             output::{Output, OutputId},
             SignedBlock,
@@ -14,6 +14,7 @@ use iota_sdk::{
     },
 };
 use packable::PackableExt;
+use pretty_assertions::assert_eq;
 
 use super::{setup_secret_manager, setup_tagged_data_block, setup_transaction_block};
 use crate::client::common::{setup_client_with_node_health_ignored, NODE_LOCAL};
@@ -237,7 +238,7 @@ async fn test_get_included_block_metadata() {
     let metadata_response = client.get_included_block_metadata(&transaction_id).await.unwrap();
 
     assert_eq!(metadata_response.block_id, block_id);
-    assert_eq!(metadata_response.tx_state, Some(TransactionState::Finalized));
+    assert_eq!(metadata_response.transaction_state, Some(TransactionState::Finalized));
 
     println!("{metadata_response:#?}");
 }

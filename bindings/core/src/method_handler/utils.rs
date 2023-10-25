@@ -8,13 +8,14 @@ use iota_sdk::{
         block::{
             address::{AccountAddress, Address, ToBech32Ext},
             input::UtxoInput,
-            output::{AccountId, FoundryId, InputsCommitment, NftId, Output, OutputId, Rent, TokenId},
-            payload::{transaction::TransactionEssence, TransactionPayload},
+            output::{AccountId, FoundryId, NftId, Output, OutputId, Rent, TokenId},
+            payload::{signed_transaction::Transaction, SignedTransactionPayload},
             SignedBlock,
         },
         TryFromDto,
     },
 };
+use packable::PackableExt;
 
 use crate::{method::UtilsMethod, response::Response, Result};
 
@@ -45,8 +46,8 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
             Response::BlockId(block.id(&protocol_parameters))
         }
         UtilsMethod::TransactionId { payload } => {
-            let payload = TransactionPayload::try_from_dto(payload)?;
-            Response::TransactionId(payload.id())
+            let payload = SignedTransactionPayload::try_from_dto(payload)?;
+            Response::TransactionId(payload.transaction().id())
         }
         UtilsMethod::ComputeAccountId { output_id } => Response::AccountId(AccountId::from(&output_id)),
         UtilsMethod::ComputeFoundryId {
@@ -68,15 +69,8 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
             let foundry_id = FoundryId::build(&AccountAddress::new(account_id), serial_number, token_scheme_type);
             Response::TokenId(TokenId::from(foundry_id))
         }
-        UtilsMethod::HashTransactionEssence { essence } => {
-            Response::Hash(prefix_hex::encode(TransactionEssence::try_from_dto(essence)?.hash()))
-        }
-        UtilsMethod::ComputeInputsCommitment { inputs } => {
-            let inputs = inputs
-                .into_iter()
-                .map(|o| Ok(Output::try_from_dto(o)?))
-                .collect::<Result<Vec<Output>>>()?;
-            Response::Hash(InputsCommitment::new(inputs.iter()).to_string())
+        UtilsMethod::TransactionSigningHash { transaction } => {
+            Response::Hash(Transaction::try_from_dto(transaction)?.signing_hash().to_string())
         }
         UtilsMethod::ComputeStorageDeposit { output, rent } => {
             let out = Output::try_from_dto(output)?;
@@ -107,6 +101,10 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
         }
         UtilsMethod::OutputIdToUtxoInput { output_id } => Response::Input(UtxoInput::from(output_id)),
         UtilsMethod::ComputeSlotCommitmentId { slot_commitment } => Response::SlotCommitmentId(slot_commitment.id()),
+        UtilsMethod::OutputHexBytes { output } => {
+            let output = Output::try_from_dto(output)?;
+            Response::HexBytes(prefix_hex::encode(output.pack_to_vec()))
+        }
     };
     Ok(response)
 }

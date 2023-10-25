@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use iota_sdk::wallet::{account::TransactionOptions, MintNftParams, Result, SendNftParams, SendParams};
+use pretty_assertions::assert_eq;
 
 use crate::wallet::common::{create_accounts_with_funds, make_wallet, setup, tear_down};
 
@@ -288,7 +289,7 @@ async fn prepare_transaction_ledger() -> Result<()> {
 
     let data = receiver.recv().await.expect("never recieved event");
     // TODO put it back
-    // assert_eq!(data.essence, tx.payload.essence().into());
+    // assert_eq!(data.transaction, tx.payload.transaction().into());
     for (sign, input) in data.inputs_data.iter().zip(tx.inputs) {
         assert_eq!(sign.output, input.output);
         assert_eq!(sign.output_metadata, input.metadata);

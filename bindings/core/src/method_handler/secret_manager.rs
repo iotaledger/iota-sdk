@@ -87,12 +87,12 @@ where
                 .await?,
         )),
         SecretManagerMethod::SignatureUnlock {
-            transaction_essence_hash,
+            transaction_signing_hash,
             chain,
         } => {
-            let transaction_essence_hash: [u8; 32] = prefix_hex::decode(transaction_essence_hash)?;
+            let transaction_signing_hash: [u8; 32] = prefix_hex::decode(transaction_signing_hash)?;
             let unlock: Unlock = secret_manager
-                .signature_unlock(&transaction_essence_hash, chain)
+                .signature_unlock(&transaction_signing_hash, chain)
                 .await
                 .map_err(iota_sdk::client::Error::from)?;
 

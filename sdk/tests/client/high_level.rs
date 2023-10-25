@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use iota_sdk::types::block::{address::ToBech32Ext, payload::Payload};
+use pretty_assertions::assert_eq;
 
 use crate::client::{common::setup_client_with_node_health_ignored, node_api::setup_transaction_block};
 
@@ -34,8 +35,8 @@ async fn test_find_inputs() {
     let block = client.get_block(&block_id).await.unwrap();
     let transaction = block.as_basic().payload().unwrap();
 
-    if let Payload::Transaction(transaction) = transaction {
-        let basic_output = transaction.essence().outputs().iter().next().unwrap().as_basic();
+    if let Payload::SignedTransaction(transaction) = transaction {
+        let basic_output = transaction.transaction().outputs().iter().next().unwrap().as_basic();
         let address = basic_output
             .unlock_conditions()
             .address()

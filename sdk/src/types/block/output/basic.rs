@@ -305,7 +305,7 @@ impl BasicOutput {
         context: &mut ValidationContext<'_>,
     ) -> Result<(), TransactionFailureReason> {
         self.unlock_conditions()
-            .locked_address(self.address(), context.essence.creation_slot())
+            .locked_address(self.address(), context.transaction.creation_slot())
             .unlock(unlock, inputs, context)
     }
 
@@ -455,6 +455,7 @@ pub(crate) mod dto {
 
 #[cfg(test)]
 mod tests {
+    use pretty_assertions::assert_eq;
 
     use super::*;
     use crate::types::{

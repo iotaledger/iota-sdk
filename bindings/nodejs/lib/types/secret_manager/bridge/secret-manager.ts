@@ -30,7 +30,7 @@ export interface __SignTransactionMethod__ {
 export interface __SignatureUnlockMethod__ {
     name: 'signatureUnlock';
     data: {
-        transactionEssenceHash: HexEncodedString;
+        transactionSigningHash: HexEncodedString;
         chain: Bip44;
     };
 }

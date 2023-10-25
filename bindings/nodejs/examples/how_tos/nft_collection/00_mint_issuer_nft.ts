@@ -5,8 +5,6 @@ import {
     MintNftParams,
     NftId,
     NftOutput,
-    RegularTransactionEssence,
-    TransactionPayload,
     utf8ToHex,
     Utils,
     Wallet,
@@ -19,7 +17,7 @@ require('dotenv').config({ path: '.env' });
 // running the `how_tos/accounts_and_addresses/create-account` example!
 //
 // Rename `.env.example` to `.env` first, then run
-// yarn run-example ./how_tos/nfts/00_mint_issuer_nft.ts
+// yarn run-example ./how_tos/nft_collection/00_mint_issuer_nft.ts
 async function run() {
     try {
         if (!process.env.STRONGHOLD_PASSWORD) {
@@ -59,27 +57,26 @@ async function run() {
             `Block included: ${process.env.EXPLORER_URL}/block/${blockId}`,
         );
 
-        const essence: RegularTransactionEssence = (
-            transaction.payload as TransactionPayload
-        ).essence as RegularTransactionEssence;
-        essence.outputs.forEach((output, outputIndex) => {
-            if (output instanceof NftOutput) {
-                const nftOutput = output as NftOutput;
+        transaction.payload.transaction.outputs.forEach(
+            (output, outputIndex) => {
+                if (output instanceof NftOutput) {
+                    const nftOutput = output as NftOutput;
 
-                // New minted NFT id is empty in the output
-                if (
-                    nftOutput.nftId ===
-                    '0x0000000000000000000000000000000000000000000000000000000000000000'
-                ) {
-                    const outputId = Utils.computeOutputId(
-                        transaction.transactionId,
-                        outputIndex,
-                    );
-                    const nftId: NftId = Utils.computeNftId(outputId);
-                    console.log(`New minted NFT id: ${nftId}`);
+                    // New minted NFT id is empty in the output
+                    if (
+                        nftOutput.nftId ===
+                        '0x0000000000000000000000000000000000000000000000000000000000000000'
+                    ) {
+                        const outputId = Utils.computeOutputId(
+                            transaction.transactionId,
+                            outputIndex,
+                        );
+                        const nftId: NftId = Utils.computeNftId(outputId);
+                        console.log(`New minted NFT id: ${nftId}`);
+                    }
                 }
-            }
-        });
+            },
+        );
     } catch (error) {
         console.log('Error: ', error);
     }

@@ -11,6 +11,7 @@ use packable::{
     error::UnpackError,
     PackableExt,
 };
+use pretty_assertions::assert_eq;
 
 #[test]
 fn kind() {

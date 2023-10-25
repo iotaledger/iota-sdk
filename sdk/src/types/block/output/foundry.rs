@@ -25,7 +25,7 @@ use crate::types::{
             NativeTokens, Output, OutputBuilderAmount, OutputId, Rent, RentStructure, StateTransitionError,
             StateTransitionVerifier, TokenId, TokenScheme,
         },
-        payload::transaction::{TransactionCapabilities, TransactionCapabilityFlag},
+        payload::signed_transaction::{TransactionCapabilities, TransactionCapabilityFlag},
         protocol::ProtocolParameters,
         semantic::{TransactionFailureReason, ValidationContext},
         unlock::Unlock,
@@ -34,10 +34,13 @@ use crate::types::{
     ValidationParams,
 };
 
-impl_id!(pub FoundryId, 38, "Defines the unique identifier of a foundry.");
-
-#[cfg(feature = "serde")]
-string_serde_impl!(FoundryId);
+crate::impl_id!(
+    /// Unique identifier of the [`FoundryOutput`](crate::types::block::output::FoundryOutput),
+    /// which is the BLAKE2b-256 hash of the [`OutputId`](crate::types::block::output::OutputId) that created it.
+    pub FoundryId {
+        pub const LENGTH: usize = 38;
+    }
+);
 
 impl From<TokenId> for FoundryId {
     fn from(token_id: TokenId) -> Self {
@@ -583,13 +586,13 @@ impl StateTransitionVerifier for FoundryOutput {
             next_state,
             &context.input_native_tokens,
             &context.output_native_tokens,
-            context.essence.capabilities(),
+            context.transaction.capabilities(),
         )
     }
 
     fn destruction(current_state: &Self, context: &ValidationContext<'_>) -> Result<(), StateTransitionError> {
         if !context
-            .essence
+            .transaction
             .has_capability(TransactionCapabilityFlag::DestroyFoundryOutputs)
         {
             // TODO: add a variant https://github.com/iotaledger/iota-sdk/issues/1430
@@ -806,6 +809,7 @@ pub(crate) mod dto {
 
 #[cfg(test)]
 mod tests {
+    use pretty_assertions::assert_eq;
 
     use super::*;
     use crate::types::{

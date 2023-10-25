@@ -22,20 +22,5 @@ class SimpleTokenScheme:
     maximum_supply: HexStr
     type: int = field(default_factory=lambda: 0, init=False)
 
-    @staticmethod
-    def to_dict_custom(config):
-        """
-        The function converts integer values in the config to hexadecimal strings.
-        """
-
-        if isinstance(config['mintedTokens'], int):
-            config['mintedTokens'] = str(hex(config['mintedTokens']))
-        if isinstance(config['meltedTokens'], int):
-            config['meltedTokens'] = str(hex(config['meltedTokens']))
-        if isinstance(config['maximumSupply'], int):
-            config['maximumSupply'] = str(hex(config['maximumSupply']))
-
-        return config
-
 
 TokenScheme: TypeAlias = SimpleTokenScheme

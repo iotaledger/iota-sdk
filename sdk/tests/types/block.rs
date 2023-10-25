@@ -16,6 +16,7 @@ use iota_sdk::types::{
     TryFromDto,
 };
 use packable::PackableExt;
+use pretty_assertions::assert_eq;
 
 // TODO reenable tests
 // #[test]
@@ -132,8 +133,8 @@ fn dto_mismatch_version() {
         "protocolVersion": protocol_version,
         "networkId": network_id.to_string(),
         "issuingTime": issuing_time.to_string(),
-        "slotCommitmentId": "0x8633b2eb1845fdecf12ee6c5e789c3cf1f0d0bbb3cee65cb5fb2757e995b5cd70000000000000000",
-        "latestFinalizedSlot": "0",
+        "slotCommitmentId": "0x8633b2eb1845fdecf12ee6c5e789c3cf1f0d0bbb3cee65cb5fb2757e995b5cd700000000",
+        "latestFinalizedSlot": 0,
         "issuerId": "0x0000000000000000000000000000000000000000000000000000000000000000",
         "block": {
             "type":1,
@@ -173,8 +174,8 @@ fn dto_mismatch_network_id() {
         "protocolVersion": 3,
         "networkId": network_id.to_string(),
         "issuingTime": issuing_time.to_string(),
-        "slotCommitmentId": "0x8633b2eb1845fdecf12ee6c5e789c3cf1f0d0bbb3cee65cb5fb2757e995b5cd70000000000000000",
-        "latestFinalizedSlot": "0",
+        "slotCommitmentId": "0x8633b2eb1845fdecf12ee6c5e789c3cf1f0d0bbb3cee65cb5fb2757e995b5cd700000000",
+        "latestFinalizedSlot": 0,
         "issuerId": "0x0000000000000000000000000000000000000000000000000000000000000000",
         "block": {
             "type":1,
