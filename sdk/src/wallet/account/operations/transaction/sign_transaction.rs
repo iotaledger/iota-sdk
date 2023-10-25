@@ -59,9 +59,8 @@ where
                     if needs_blind_signing(prepared_transaction_data, buffer_size) {
                         self.emit(
                             self.details().await.index,
-                            WalletEvent::TransactionProgress(TransactionProgressEvent::PreparedTransactionHash(
-                                // TODO: Should this be the signing_hash?
-                                prepared_transaction_data.transaction.hash().to_string(),
+                            WalletEvent::TransactionProgress(TransactionProgressEvent::PreparedTransactionSigningHash(
+                                prepared_transaction_data.transaction.signing_hash().to_string(),
                             )),
                         )
                         .await;

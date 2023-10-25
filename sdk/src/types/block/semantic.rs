@@ -7,11 +7,10 @@ use core::fmt;
 use hashbrown::{HashMap, HashSet};
 use primitive_types::U256;
 
-use super::payload::signed_transaction::TransactionSigningHash;
 use crate::types::block::{
     address::{Address, AddressCapabilityFlag},
     output::{ChainId, FoundryId, NativeTokens, Output, OutputId, TokenId, UnlockCondition},
-    payload::signed_transaction::{Transaction, TransactionCapabilityFlag, TransactionId},
+    payload::signed_transaction::{Transaction, TransactionCapabilityFlag, TransactionId, TransactionSigningHash},
     unlock::Unlocks,
     Error,
 };
@@ -150,7 +149,7 @@ impl TryFrom<u8> for TransactionFailureReason {
 ///
 pub struct ValidationContext<'a> {
     pub(crate) transaction: &'a Transaction,
-    pub(crate) transaction_hash: TransactionSigningHash,
+    pub(crate) transaction_signing_hash: TransactionSigningHash,
     // TODO
     #[allow(dead_code)]
     pub(crate) unlocks: &'a Unlocks,
@@ -178,7 +177,7 @@ impl<'a> ValidationContext<'a> {
         Self {
             transaction,
             unlocks,
-            transaction_hash: transaction.signing_hash(),
+            transaction_signing_hash: transaction.signing_hash(),
             input_amount: 0,
             input_mana: 0,
             input_native_tokens: BTreeMap::<TokenId, U256>::new(),

@@ -160,8 +160,8 @@ enum TransactionProgressType {
     GeneratingRemainderDepositAddress = 1,
     /** Prepared transaction. */
     PreparedTransaction = 2,
-    /** Prepared transaction hash hex encoded, required for blindsigning with a Ledger Nano. */
-    PreparedTransactionHash = 3,
+    /** Prepared transaction signing hash hex encoded, required for blindsigning with a Ledger Nano. */
+    PreparedTransactionSigningHash = 3,
     /** Signing the transaction. */
     SigningTransaction = 4,
     /** Broadcasting. */
@@ -256,7 +256,7 @@ class PreparedTransactionHashProgress extends TransactionProgress {
      * @param hash The hash of the transaction.
      */
     constructor(hash: HexEncodedString) {
-        super(TransactionProgressType.PreparedTransactionHash);
+        super(TransactionProgressType.PreparedTransactionSigningHash);
         this.hash = hash;
     }
 }

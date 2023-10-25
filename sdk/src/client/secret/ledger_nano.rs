@@ -271,8 +271,7 @@ impl SecretManage for LedgerSecretManager {
 
         // pack transaction and hash into vec
         let transaction_bytes = prepared_transaction.transaction.pack_to_vec();
-        // TODO: Should this be the signing_hash?
-        let transaction_hash = prepared_transaction.transaction.hash().to_vec();
+        let transaction_signing_hash = prepared_transaction.transaction.signing_hash().to_vec();
 
         // lock the mutex to prevent multiple simultaneous requests to a ledger
         let lock = self.mutex.lock().await;
@@ -290,9 +289,9 @@ impl SecretManage for LedgerSecretManager {
         if blind_signing {
             // prepare signing
             log::debug!("[LEDGER] prepare_blind_signing");
-            log::debug!("[LEDGER] {:?} {:?}", input_bip32_indices, transaction_hash);
+            log::debug!("[LEDGER] {:?} {:?}", input_bip32_indices, transaction_signing_hash);
             ledger
-                .prepare_blind_signing(input_bip32_indices, transaction_hash)
+                .prepare_blind_signing(input_bip32_indices, transaction_signing_hash)
                 .map_err(Error::from)?;
         } else {
             // figure out the remainder address and bip32 index (if there is one)

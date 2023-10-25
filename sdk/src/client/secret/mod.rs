@@ -505,7 +505,7 @@ where
     crate::client::Error: From<M::Error>,
 {
     // The transaction_hash gets signed
-    let transaction_hash = prepared_transaction_data.transaction.signing_hash();
+    let transaction_signing_hash = prepared_transaction_data.transaction.signing_hash();
     let mut blocks = Vec::new();
     let mut block_indexes = HashMap::<Address, usize>::new();
     let slot_index = prepared_transaction_data.transaction.creation_slot();
@@ -546,7 +546,9 @@ where
 
                 let chain = input.chain.ok_or(Error::MissingBip32Chain)?;
 
-                let block = secret_manager.signature_unlock(&transaction_hash, chain).await?;
+                let block = secret_manager
+                    .signature_unlock(&transaction_signing_hash, chain)
+                    .await?;
                 blocks.push(block);
 
                 // Add the ed25519 address to the block_indexes, so it gets referenced if further inputs have

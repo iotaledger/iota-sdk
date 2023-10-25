@@ -216,7 +216,7 @@ pub enum TransactionProgressEvent {
     /// Prepared transaction.
     PreparedTransaction(Box<PreparedTransactionDataDto>),
     /// Prepared transaction hash hex encoded, required for blindsigning with a ledger nano
-    PreparedTransactionHash(String),
+    PreparedTransactionSigningHash(String),
     /// Signing the transaction.
     SigningTransaction,
     /// Broadcasting.
@@ -263,7 +263,7 @@ impl Serialize for TransactionProgressEvent {
                 kind: 2,
                 event: TransactionProgressEvent_::T2(e),
             },
-            Self::PreparedTransactionHash(e) => TypedTransactionProgressEvent_ {
+            Self::PreparedTransactionSigningHash(e) => TypedTransactionProgressEvent_ {
                 kind: 3,
                 event: TransactionProgressEvent_::T3(PreparedTransactionHash_ { hash: e }),
             },
@@ -302,7 +302,7 @@ impl<'de> Deserialize<'de> for TransactionProgressEvent {
                 2 => Self::PreparedTransaction(Box::new(PreparedTransactionDataDto::deserialize(value).map_err(
                     |e| serde::de::Error::custom(format!("cannot deserialize PreparedTransactionDataDto: {e}")),
                 )?)),
-                3 => Self::PreparedTransactionHash(
+                3 => Self::PreparedTransactionSigningHash(
                     PreparedTransactionHash_::deserialize(value)
                         .map_err(|e| {
                             serde::de::Error::custom(format!("cannot deserialize PreparedTransactionHash: {e}"))
