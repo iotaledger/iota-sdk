@@ -10,11 +10,8 @@
 # Import the python iota client
 # Make sure you have first installed it with `pip install iota_sdk`
 import os
-from bindings.python.iota_sdk.secret_manager.secret_manager import MnemonicSecretManager, SecretManager
-from bindings.python.iota_sdk.types.common import CoinType
-from bindings.python.iota_sdk.types.signature import Bip44
 from dotenv import load_dotenv
-from iota_sdk import BasicBlock, Client, hex_to_utf8, utf8_to_hex, TaggedDataPayload
+from iota_sdk import BasicBlock, Bip44, Client, CoinType, hex_to_utf8, utf8_to_hex, TaggedDataPayload, MnemonicSecretManager, SecretManager
 
 load_dotenv()
 

@@ -110,6 +110,7 @@ pub enum Response {
     /// Response for:
     /// - [`GetBlock`](crate::method::ClientMethod::GetBlock)
     /// - [`GetIncludedBlock`](crate::method::ClientMethod::GetIncludedBlock)
+    /// - [`SignBlock`](crate::method::SecretManagerMethod::SignBlock)
     SignedBlock(SignedBlockDto),
     /// Response for:
     /// - [`GetBlockMetadata`](crate::method::ClientMethod::GetBlockMetadata)

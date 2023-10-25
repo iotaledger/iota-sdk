@@ -4,7 +4,7 @@
 from typing import List, Optional
 from dataclasses import dataclass
 from abc import ABCMeta, abstractmethod
-from bindings.python.iota_sdk.types.block.signed_block import SignedBlock
+from iota_sdk.types.block.signed_block import SignedBlock
 from iota_sdk.types.common import CoinType, HexStr, json
 from iota_sdk.types.output_metadata import OutputWithMetadata
 from iota_sdk.types.output_id import OutputId

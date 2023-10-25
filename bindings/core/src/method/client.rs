@@ -123,6 +123,7 @@ pub enum ClientMethod {
         query_params: Vec<String>,
         request_object: Option<String>,
     },
+    #[serde(rename_all = "camelCase")]
     BuildBasicBlock {
         /// The issuer's ID.
         issuer_id: IssuerId,
@@ -130,7 +131,8 @@ pub enum ClientMethod {
         #[serde(default)]
         strong_parents: Option<basic::StrongParents>,
         /// The block payload.
-        payload: PayloadDto,
+        #[serde(default)]
+        payload: Option<PayloadDto>,
     },
     //////////////////////////////////////////////////////////////////////
     // Node core API
@@ -336,6 +338,7 @@ pub enum ClientMethod {
         address: Bech32Address,
     },
     /// Returns a block ID from a block
+    #[serde(rename_all = "camelCase")]
     BlockId {
         /// Block
         signed_block: SignedBlockDto,

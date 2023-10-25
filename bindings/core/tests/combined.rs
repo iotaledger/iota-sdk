@@ -274,7 +274,7 @@ async fn build_and_sign_block() -> Result<()> {
         ClientMethod::BuildBasicBlock {
             issuer_id: IssuerId::null(),
             strong_parents: None,
-            payload: payload.clone(),
+            payload: Some(payload.clone()),
         },
     )
     .await;

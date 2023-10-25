@@ -1,9 +1,6 @@
 import os
-from bindings.python.iota_sdk.secret_manager.secret_manager import MnemonicSecretManager, SecretManager
-from bindings.python.iota_sdk.types.common import CoinType
-from bindings.python.iota_sdk.types.signature import Bip44
 from dotenv import load_dotenv
-from iota_sdk import Client, TaggedDataPayload, utf8_to_hex
+from iota_sdk import Bip44, Client, CoinType, TaggedDataPayload, utf8_to_hex, MnemonicSecretManager, SecretManager
 
 load_dotenv()
 

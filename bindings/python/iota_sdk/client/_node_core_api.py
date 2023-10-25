@@ -5,7 +5,7 @@ from typing import List, Optional, Union
 from abc import ABCMeta, abstractmethod
 from dacite import from_dict
 
-from bindings.python.iota_sdk.types.block.signed_block import SignedBlock
+from iota_sdk.types.block.signed_block import SignedBlock
 from iota_sdk.types.block.metadata import BlockMetadata
 from iota_sdk.types.common import HexStr
 from iota_sdk.types.node_info import NodeInfo, NodeInfoWrapper

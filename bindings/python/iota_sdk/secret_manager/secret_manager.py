@@ -3,11 +3,11 @@
 
 from json import dumps, loads
 from typing import Optional, Union
-from bindings.python.iota_sdk.types.block.signed_block import SignedBlock, UnsignedBlock
 from dacite import from_dict
 import humps
 
 from iota_sdk.external import create_secret_manager, call_secret_manager_method
+from iota_sdk.types.block.signed_block import SignedBlock, UnsignedBlock
 from iota_sdk.types.common import HexStr
 from iota_sdk.types.signature import Ed25519Signature, Bip44
 from iota_sdk.types.transaction_data import PreparedTransactionData

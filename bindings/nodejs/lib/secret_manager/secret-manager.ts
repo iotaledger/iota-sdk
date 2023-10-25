@@ -117,7 +117,7 @@ export class SecretManager {
      *
      * @param unsignedBlock An unsigned block.
      * @param chain A BIP44 chain.
-     * @returns The corresponding transaction payload.
+     * @returns The signed block.
      */
     async signBlock(
         unsignedBlock: UnsignedBlock,

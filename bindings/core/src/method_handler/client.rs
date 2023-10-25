@@ -165,19 +165,21 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
             issuer_id,
             strong_parents,
             payload,
-        } => Response::UnsignedBlock(UnsignedBlockDto::from(
-            &client
-                .build_basic_block(
-                    issuer_id,
-                    None,
-                    strong_parents,
-                    Some(Payload::try_from_dto_with_params(
-                        payload,
-                        &client.get_protocol_parameters().await?,
-                    )?),
-                )
-                .await?,
-        )),
+        } => {
+            let payload = if let Some(payload) = payload {
+                Some(Payload::try_from_dto_with_params(
+                    payload,
+                    &client.get_protocol_parameters().await?,
+                )?)
+            } else {
+                None
+            };
+            Response::UnsignedBlock(UnsignedBlockDto::from(
+                &client
+                    .build_basic_block(issuer_id, None, strong_parents, payload)
+                    .await?,
+            ))
+        }
         #[cfg(feature = "mqtt")]
         ClientMethod::ClearListeners { topics } => {
             client.unsubscribe(topics).await?;
