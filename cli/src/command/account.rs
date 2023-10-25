@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use std::{fmt::Write, str::FromStr};
+use std::str::FromStr;
 
 use clap::{CommandFactory, Parser, Subcommand};
 use iota_sdk::{
@@ -958,11 +958,10 @@ pub async fn voting_output_command(account: &Account) -> Result<(), Error> {
 }
 
 async fn print_address(account: &Account, address: &Bech32Address) -> Result<(), Error> {
-    let mut formatted_table = String::new();
-    writeln!(&mut formatted_table, "Address");
-    writeln!(&mut formatted_table, "{:<11}{}", "Bech32:", address);
-    writeln!(&mut formatted_table, "{:<11}{}", "Hex:", address.inner());
-    writeln!(&mut formatted_table, "{:<11}{}", "Type:", address.inner().kind_str());
+    println_log_info!("Address");
+    println_log_info!("{:<11}{}", "Bech32:", address);
+    println_log_info!("{:<11}{}", "Hex:", address.inner());
+    println_log_info!("{:<11}{}", "Type:", address.inner().kind_str());
 
     let unspent_outputs = account
         .unspent_outputs(None)
@@ -1021,47 +1020,45 @@ async fn print_address(account: &Account, address: &Bech32Address) -> Result<(),
     }
 
     // base tokens table
-    writeln!(&mut formatted_table, "Base Tokens");
-    writeln!(&mut formatted_table, "{:<8}{}", "Amount:", amount);
+    println_log_info!("Base Tokens");
+    println_log_info!("{:<8}{}", "Amount:", amount);
 
     // outputs table
     if !outputs.is_empty() {
-        writeln!(&mut formatted_table, "Outputs");
+        println_log_info!("Outputs");
         for (id, kind) in outputs {
-            writeln!(&mut formatted_table, "  {kind}\t{id}");
+            println_log_info!("  {kind}\t{id}");
         }
     }
 
     // native tokens table
     let native_tokens = native_tokens.finish_vec()?;
     if !native_tokens.is_empty() {
-        writeln!(&mut formatted_table, "Native Tokens");
+        println_log_info!("Native Tokens");
         for (id, amount) in native_tokens
             .into_iter()
             .map(|nt| (*nt.token_id(), nt.amount().to_string()))
         {
-            writeln!(&mut formatted_table, "  {id}");
-            writeln!(&mut formatted_table, "  Amount: {amount}");
+            println_log_info!("  {id}");
+            println_log_info!("  Amount: {amount}");
         }
     }
 
     // NFT table
     if !nfts.is_empty() {
-        writeln!(&mut formatted_table, "NFTs");
+        println_log_info!("NFTs");
         for id in nfts.into_iter() {
-            writeln!(&mut formatted_table, "  {id}");
+            println_log_info!("  {id}");
         }
     }
 
     // Aliases table
     if !aliases.is_empty() {
-        writeln!(&mut formatted_table, "Aliases");
+        println_log_info!("Aliases");
         for id in aliases.into_iter() {
-            writeln!(&mut formatted_table, "  {id}");
+            println_log_info!("  {id}");
         }
     }
-
-    println_log_info!("{formatted_table}");
 
     Ok(())
 }
