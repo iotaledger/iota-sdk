@@ -250,14 +250,14 @@ class PreparedTransactionProgress extends TransactionProgress {
  * A 'prepared transaction hash' progress.
  */
 class PreparedTransactionSigningHashProgress extends TransactionProgress {
-    signing_hash: HexEncodedString;
+    signingHash: HexEncodedString;
 
     /**
      * @param signing_hash The signing hash of the transaction.
      */
-    constructor(signing_hash: HexEncodedString) {
+    constructor(signingHash: HexEncodedString) {
         super(TransactionProgressType.PreparedTransactionSigningHash);
-        this.signing_hash = signing_hash;
+        this.signingHash = signingHash;
     }
 }
 

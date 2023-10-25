@@ -229,6 +229,7 @@ impl Serialize for TransactionProgressEvent {
         S: Serializer,
     {
         #[derive(Serialize)]
+        #[serde(rename_all = "camelCase")]
         struct PreparedTransactionSigningHash_<'a> {
             signing_hash: &'a str,
         }
@@ -283,6 +284,7 @@ impl Serialize for TransactionProgressEvent {
 impl<'de> Deserialize<'de> for TransactionProgressEvent {
     fn deserialize<D: serde::Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
         #[derive(Deserialize)]
+        #[serde(rename_all = "camelCase")]
         struct PreparedTransactionSigningHash_ {
             signing_hash: String,
         }
