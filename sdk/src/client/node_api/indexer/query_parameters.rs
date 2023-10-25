@@ -14,25 +14,32 @@ pub trait QueryParameter: Serialize + Send + Sync {
     /// Converts parameters to a single String.
     fn to_query_string(&self) -> Option<String> {
         let value = serde_json::to_value(&self).unwrap();
-        let mut final_str = String::new();
+        let mut query_string = String::new();
+
         for (field, v) in value.as_object().unwrap().iter() {
             if !v.is_null() {
                 if let Some(v_str) = v.as_str() {
-                    if !final_str.is_empty() {
-                        final_str.push_str("&");
+                    if !query_string.is_empty() {
+                        query_string.push_str("&");
                     }
-                    final_str.push_str(&format!("{}={}", field, v_str));
+                    query_string.push_str(&format!("{}={}", field, v_str));
                 }
                 if let Some(v_u64) = v.as_u64() {
-                    if !final_str.is_empty() {
-                        final_str.push_str("&");
+                    if !query_string.is_empty() {
+                        query_string.push_str("&");
                     }
-                    final_str.push_str(&format!("{}={}", field, v_u64));
+                    query_string.push_str(&format!("{}={}", field, v_u64));
                 }
             }
         }
-        if final_str.is_empty() { None } else { Some(final_str) }
+
+        if query_string.is_empty() {
+            None
+        } else {
+            Some(query_string)
+        }
     }
+
     fn replace_cursor(&mut self, cursor: String);
 }
 
@@ -43,6 +50,7 @@ macro_rules! impl_query_parameters_methods {
                 Self::default()
             }
         }
+
         impl QueryParameter for $name {
             fn replace_cursor(&mut self, cursor: String) {
                 self.cursor.replace(cursor);
@@ -51,7 +59,7 @@ macro_rules! impl_query_parameters_methods {
     };
 }
 
-/// Query parameter for output requests.
+/// Query parameters for output requests.
 #[derive(Setters, Debug, Default, Clone, Serialize, Deserialize, Eq, PartialEq)]
 #[setters(strip_option)]
 #[serde(rename_all = "camelCase")]
@@ -75,7 +83,7 @@ pub struct OutputQueryParameters {
 
 impl_query_parameters_methods!(OutputQueryParameters);
 
-/// Query parameter for output requests.
+/// Query parameters for basic output requests.
 #[derive(Setters, Debug, Default, Clone, Serialize, Deserialize, Eq, PartialEq)]
 #[setters(strip_option)]
 #[serde(rename_all = "camelCase")]
@@ -137,7 +145,7 @@ impl BasicOutputQueryParameters {
     }
 }
 
-/// Query parameter for output requests.
+/// Query parameters for account output requests.
 #[derive(Setters, Debug, Default, Clone, Serialize, Deserialize, Eq, PartialEq)]
 #[setters(strip_option)]
 #[serde(rename_all = "camelCase")]
@@ -165,7 +173,7 @@ pub struct AccountOutputQueryParameters {
 
 impl_query_parameters_methods!(AccountOutputQueryParameters);
 
-/// Query parameter for output requests.
+/// Query parameters for nft output requests.
 #[derive(Setters, Debug, Default, Clone, Serialize, Deserialize, Eq, PartialEq)]
 #[setters(strip_option)]
 #[serde(rename_all = "camelCase")]
@@ -225,7 +233,7 @@ impl NftOutputQueryParameters {
     }
 }
 
-/// Query parameter for output requests.
+/// Query parameters for foundry output requests.
 #[derive(Setters, Debug, Default, Clone, Serialize, Deserialize, Eq, PartialEq)]
 #[setters(strip_option)]
 #[serde(rename_all = "camelCase")]
@@ -248,7 +256,7 @@ pub struct FoundryOutputQueryParameters {
 }
 impl_query_parameters_methods!(FoundryOutputQueryParameters);
 
-/// Query parameter for output requests.
+/// Query parameters for delegation output requests.
 #[derive(Setters, Debug, Default, Clone, Serialize, Deserialize, Eq, PartialEq)]
 #[setters(strip_option)]
 #[serde(rename_all = "camelCase")]
