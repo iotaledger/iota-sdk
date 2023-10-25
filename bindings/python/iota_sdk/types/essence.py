@@ -41,6 +41,7 @@ class RegularTransactionEssence:
         outputs: The outputs that are created by the Transaction Payload
         context_inputs: The inputs that provide additional contextual information for the execution of a transaction.
         allotments: The allotments of Mana which which will be added upon commitment of the slot.
+        capabilities: The capability bitflags of the transaction.
         payload: An optional tagged data payload
     """
     network_id: str
@@ -50,10 +51,18 @@ class RegularTransactionEssence:
     outputs: List[Output]
     context_inputs: Optional[List[ContextInput]] = None
     allotments: Optional[List[ManaAllotment]] = None
+    capabilities: HexStr = field(default='0x00', init=False)
     payload: Optional[Payload] = None
     type: int = field(
         default_factory=lambda: EssenceType.RegularTransactionEssence,
         init=False)
+
+    def with_capabilities(self, capabilities: bytes):
+        """Sets the transaction capabilities from a byte array.
+        Attributes:
+            capabilities: The transaction capabilities bitflags.
+        """
+        self.capabilities = hex(len(capabilities)) + capabilities.hex()
 
 
 TransactionEssence: TypeAlias = RegularTransactionEssence
