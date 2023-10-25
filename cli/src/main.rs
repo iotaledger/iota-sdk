@@ -36,7 +36,7 @@ fn logger_init(cli: &WalletCli) -> Result<(), Error> {
     let archive = LoggerOutputConfigBuilder::default()
         .name("archive.log")
         .level_filter(cli.log_level)
-        .target_exclusions(&["rustls"])
+        .target_exclusions(&["rustls", "rustyline"])
         .color_enabled(false);
     let config = LoggerConfigBuilder::default().with_output(archive).finish();
 
