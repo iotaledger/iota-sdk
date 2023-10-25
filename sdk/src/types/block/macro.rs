@@ -36,13 +36,13 @@ macro_rules! impl_id {
             $len_vis const LENGTH: usize = $length;
 
             #[doc = core::concat!("Creates a new [`", core::stringify!($hash_name), "`].")]
-            $hash_vis const fn new(bytes: [u8; $hash_name::LENGTH]) -> Self {
+            $hash_vis const fn new(bytes: [u8; Self::LENGTH]) -> Self {
                 Self(bytes)
             }
 
             #[doc = core::concat!("Creates a null [`", core::stringify!($hash_name), "`].")]
             $hash_vis const fn null() -> Self {
-                Self([0u8; $hash_name::LENGTH])
+                Self([0u8; Self::LENGTH])
             }
 
             #[doc = core::concat!("Checks if the [`", core::stringify!($hash_name), "`] is null.")]

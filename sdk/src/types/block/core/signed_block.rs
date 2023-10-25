@@ -314,25 +314,25 @@ impl Packable for SignedBlock {
 
         let signature = Signature::unpack::<_, VERIFY>(unpacker, &())?;
 
-        let wrapper = Self {
+        let signed_block = Self {
             header,
             block,
             signature,
         };
 
         if VERIFY {
-            let wrapper_len = if let (Some(start), Some(end)) = (start_opt, unpacker.read_bytes()) {
+            let signed_block_len = if let (Some(start), Some(end)) = (start_opt, unpacker.read_bytes()) {
                 end - start
             } else {
-                wrapper.packed_len()
+                signed_block.packed_len()
             };
 
-            if wrapper_len > Self::LENGTH_MAX {
-                return Err(UnpackError::Packable(Error::InvalidSignedBlockLength(wrapper_len)));
+            if signed_block_len > Self::LENGTH_MAX {
+                return Err(UnpackError::Packable(Error::InvalidSignedBlockLength(signed_block_len)));
             }
         }
 
-        Ok(wrapper)
+        Ok(signed_block)
     }
 }
 

@@ -47,7 +47,7 @@ pub(crate) use self::r#macro::*;
 pub use self::{
     block_id::{BlockHash, BlockId},
     convert::ConvertTo,
-    core::{Block, SignedBlock},
+    core::{Block, SignedBlock, UnsignedBlock},
     error::Error,
     issuer_id::IssuerId,
 };
