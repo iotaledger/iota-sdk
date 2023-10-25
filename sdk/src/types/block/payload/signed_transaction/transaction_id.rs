@@ -4,7 +4,8 @@
 use crate::types::block::{output::OutputId, Error};
 
 crate::impl_id!(
-    /// The hash of a [`Transaction`](crate::types::block::payload::signed_transaction::Transaction).
+    /// The hash of a transaction commitment and output commitment which is used to create a
+    /// [`SignedTransactionPayload`](crate::types::block::payload::SignedTransactionPayload).
     pub TransactionHash {
         pub const LENGTH: usize = 32;
     }
@@ -20,8 +21,7 @@ impl TransactionId {
 }
 
 crate::impl_id!(
-    /// The hash of a transaction commitment and output commitment which is used to create
-    /// [`SignedTransactionPayload`](crate::types::block::payload::SignedTransactionPayload).
+    /// The hash of a [`Transaction`](crate::types::block::payload::signed_transaction::Transaction).
     pub TransactionSigningHash {
         pub const LENGTH: usize = 32;
     }
