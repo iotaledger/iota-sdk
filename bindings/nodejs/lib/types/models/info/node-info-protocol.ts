@@ -66,7 +66,7 @@ export interface ProtocolParameters {
     /**
      * The parameters used by mana calculation.
      */
-    manaStructure: ManaStructure;
+    manaParameters: ManaParameters;
     /**
      * The unbonding period in epochs before an account can stop staking.
      */
@@ -187,9 +187,9 @@ export interface WorkScoreParameters {
 }
 
 /**
- * Mana Structure defines the parameters used by mana calculation.
+ * ManaParameters defines the parameters used by mana calculation.
  */
-export interface ManaStructure {
+export interface ManaParameters {
     /**
      * The number of bits used to represent Mana.
      */

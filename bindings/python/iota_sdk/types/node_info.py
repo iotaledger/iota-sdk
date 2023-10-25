@@ -164,8 +164,8 @@ class VersionSignaling:
 
 @json
 @dataclass
-class ManaStructure:
-    """Mana Structure defines the parameters used by mana calculation.
+class ManaParameters:
+    """ManaParameters defines the parameters used by mana calculation.
 
     Attributes:
         bits_count: The number of bits used to represent Mana.
@@ -228,7 +228,7 @@ class ProtocolParameters:
         genesis_unix_timestamp: The genesis timestamp at which the slots start to count.
         slot_duration_in_seconds: The duration of a slot, in seconds.
         slots_per_epoch_exponent: The number of slots in an epoch expressed as an exponent of 2.
-        mana_structure: Mana Structure defines the parameters used by mana calculation.
+        mana_parameters: ManaParameters defines the parameters used by mana calculation.
         staking_unbonding_period: The unbonding period in epochs before an account can stop staking.
         validation_blocks_per_slot: Validation Blocks Per Slot is the number of validation blocks that each validator should issue each slot.
         punishment_epochs: The number of epochs worth of Mana that a node is punished with for each additional validation block it issues.
@@ -254,7 +254,7 @@ class ProtocolParameters:
     ))
     slot_duration_in_seconds: int
     slots_per_epoch_exponent: int
-    mana_structure: ManaStructure
+    mana_parameters: ManaParameters
     staking_unbonding_period: int = field(metadata=config(
         encoder=str
     ))
