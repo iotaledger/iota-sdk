@@ -70,6 +70,8 @@ where
         #[cfg(feature = "participation")]
         let voting_output = self.get_voting_output().await?;
 
+        let claimable_outputs = self.claimable_outputs(OutputsToClaim::All).await?;
+
         for address_with_unspent_outputs in addresses_with_unspent_outputs {
             #[cfg(feature = "participation")]
             {
@@ -165,8 +167,7 @@ where
 
                                 let account_addresses = self.addresses().await?;
                                 let local_time = self.client().get_time_checked().await?;
-                                let is_claimable =
-                                    self.claimable_outputs(OutputsToClaim::All).await?.contains(output_id);
+                                let is_claimable = claimable_outputs.contains(output_id);
 
                                 // For outputs that are expired or have a timelock unlock condition, but no expiration
                                 // unlock condition and we then can unlock them, then

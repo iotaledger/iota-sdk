@@ -30,6 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Account::claim_outputs()` if an input has less amount than min storage deposit;
 - URLs aren't truncated after the hostname anymore;
 - Ledger nano potentially failing to identify the correct remainder output;
+- Slow syncing with many claimable outputs;
 
 ## 1.1.1 - 2023-10-11
 
