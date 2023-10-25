@@ -44,7 +44,7 @@ class Transaction {
 
     readonly allotments: ManaAllotment[];
 
-    private capabilities: HexEncodedString = '0x00';
+    private capabilities: HexEncodedString = '0x';
 
     @Type(() => Payload, {
         discriminator: PayloadDiscriminator,
@@ -85,14 +85,13 @@ class Transaction {
         if (capabilities.some((c) => c != 0)) {
             this.capabilities =
                 '0x' +
-                capabilities.length.toString(16) +
                 Buffer.from(
                     capabilities.buffer,
                     capabilities.byteOffset,
                     capabilities.byteLength,
                 ).toString('hex');
         } else {
-            this.capabilities = '0x00';
+            this.capabilities = '0x';
         }
     }
 

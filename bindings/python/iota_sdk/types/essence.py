@@ -51,7 +51,7 @@ class RegularTransactionEssence:
     outputs: List[Output]
     context_inputs: Optional[List[ContextInput]] = None
     allotments: Optional[List[ManaAllotment]] = None
-    capabilities: HexStr = field(default='0x00', init=False)
+    capabilities: HexStr = field(default='0x', init=False)
     payload: Optional[Payload] = None
     type: int = field(
         default_factory=lambda: EssenceType.RegularTransactionEssence,
@@ -62,7 +62,7 @@ class RegularTransactionEssence:
         Attributes:
             capabilities: The transaction capabilities bitflags.
         """
-        self.capabilities = hex(len(capabilities)) + capabilities.hex()
+        self.capabilities = '0x' + capabilities.hex()
 
 
 TransactionEssence: TypeAlias = RegularTransactionEssence
