@@ -74,15 +74,14 @@ class ImplicitAccountCreationAddress:
     type: int = field(default_factory=lambda: int(
         AddressType.IMPLICIT_ACCOUNT_CREATION), init=False)
 
-    @staticmethod
-    def _to_dict_custom(addr_dict: dict) -> dict:
+    def to_dict(self) -> dict:
         """
         Converts an implicit account creation address to the dictionary representation.
         """
-        if 'address' in addr_dict:
-            address = addr_dict.pop('address')
-            addr_dict['pubKeyHash'] = address.pop('pubKeyHash')
-        return addr_dict
+        return {
+            "type": self.type,
+            "pubKeyHash": self.address.pub_key_hash
+        }
 
     @staticmethod
     def from_dict(addr_dict: dict):
