@@ -4,10 +4,7 @@
 import { Type } from 'class-transformer';
 import { Address, AddressDiscriminator } from '../block/address';
 import { Output, OutputDiscriminator } from '../block/output/output';
-import {
-    TransactionEssence,
-    TransactionEssenceDiscriminator,
-} from '../block/payload/transaction/essence';
+import { Transaction } from '../block/payload/signed_transaction';
 import { IOutputMetadataResponse } from '../models/api';
 import { Bip44 } from '../secret_manager';
 
@@ -16,12 +13,9 @@ import { Bip44 } from '../secret_manager';
  */
 export class PreparedTransactionData {
     /**
-     * Transaction essence
+     * Transaction
      */
-    @Type(() => TransactionEssence, {
-        discriminator: TransactionEssenceDiscriminator,
-    })
-    essence!: TransactionEssence;
+    transaction!: Transaction;
     /**
      * Required address information for signing
      */

@@ -120,8 +120,10 @@ where
                                 TransactionState::Failed => {
                                     // try to get the included block, because maybe only this attachment is
                                     // conflicting because it got confirmed in another block
-                                    if let Ok(included_block) =
-                                        self.client().get_included_block(&transaction.payload.id()).await
+                                    if let Ok(included_block) = self
+                                        .client()
+                                        .get_included_block(&transaction.payload.transaction().id())
+                                        .await
                                     {
                                         confirmed_unknown_output = true;
                                         updated_transaction_and_outputs(

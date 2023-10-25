@@ -185,10 +185,10 @@ class Utils():
         })
 
     @staticmethod
-    def hash_transaction_essence(essence: TransactionEssence) -> HexStr:
-        """ Compute the hash of a transaction essence.
+    def transaction_signing_hash(essence: TransactionEssence) -> HexStr:
+        """ Compute the signing hash of a transaction.
         """
-        return _call_method('hashTransactionEssence', {
+        return _call_method('transactionSigningHash', {
             'essence': essence.to_dict(),
         })
 
