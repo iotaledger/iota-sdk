@@ -1,9 +1,9 @@
 # Copyright 2023 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
-from iota_sdk.types.common import HexStr
 from dataclasses import dataclass, field
 from enum import IntEnum
+from iota_sdk.types.common import HexStr
 
 
 class AddressType(IntEnum):
@@ -26,6 +26,8 @@ class Address():
     type: int
 
     def as_dict(self):
+        """Converts this object to a dict.
+        """
         return {k: v for k, v in self.__dict__.items() if v is not None}
 
 

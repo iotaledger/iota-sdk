@@ -1,11 +1,11 @@
 # Copyright 2023 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
+from enum import Enum
+from typing import Optional, List, Union
 from iota_sdk.types.burn import Burn
 from iota_sdk.types.output_id import OutputId
 from iota_sdk.types.payload import TaggedDataPayload
-from enum import Enum
-from typing import Optional, List, Union
 
 
 class RemainderValueStrategyCustomAddress:
@@ -29,6 +29,8 @@ class RemainderValueStrategyCustomAddress:
         self.used = used
 
     def as_dict(self):
+        """Converts this object to a dict.
+        """
         return dict({"strategy": "CustomAddress", "value": self.__dict__})
 
 
@@ -39,10 +41,12 @@ class RemainderValueStrategy(Enum):
         ChangeAddress: Allows to move the remainder value to a change address.
         ReuseAddress: Allows to keep the remainder value on the source address.
     """
-    ChangeAddress = None,
-    ReuseAddress = None,
+    ChangeAddress = None
+    ReuseAddress = None
 
     def as_dict(self):
+        """Converts this object to a dict.
+        """
         return dict({"strategy": self.name, "value": self.value[0]})
 
 
@@ -77,4 +81,6 @@ class TransactionOptions():
         self.allow_micro_amount = allow_micro_amount
 
     def as_dict(self):
+        """Converts this object to a dict.
+        """
         return dict(self.__dict__)

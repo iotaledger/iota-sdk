@@ -26,6 +26,8 @@ class SendParams():
     expiration: Optional[int] = None
 
     def as_dict(self):
+        """Converts this object to a dict.
+        """
         config = {k: v for k, v in self.__dict__.items() if v is not None}
 
         config['amount'] = str(config['amount'])
@@ -49,6 +51,8 @@ class SendNativeTokensParams():
     expiration: Optional[int] = None
 
     def as_dict(self):
+        """Converts this object to a dict.
+        """
         return {k: v for k, v in self.__dict__.items() if v is not None}
 
 
@@ -80,6 +84,8 @@ class CreateNativeTokenParams():
     aliasId: Optional[str] = None
 
     def as_dict(self):
+        """Converts this object to a dict.
+        """
         config = {k: v for k, v in self.__dict__.items() if v is not None}
 
         config['circulatingSupply'] = hex(config['circulatingSupply'])

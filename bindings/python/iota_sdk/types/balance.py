@@ -73,7 +73,9 @@ class Balance:
     potentiallyLockedOutputs: dict[HexStr, bool]
 
     def as_dict(self):
-        config = {k: v for k, v in self.__dict__.items()}
+        """Converts this object to a dict.
+        """
+        config = self.__dict__
 
         config['baseCoin'] = config['baseCoin'].__dict__
         config['requiredStorageDeposit'] = config['requiredStorageDeposit'].__dict__

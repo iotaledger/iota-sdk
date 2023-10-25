@@ -58,6 +58,8 @@ class Burn:
         return self
 
     def as_dict(self) -> Dict[str, Any]:
+        """Converts this object to a dict.
+        """
         config = {k: v for k, v in self.__dict__.items() if v is not None}
 
         if "nativeTokens" in config:

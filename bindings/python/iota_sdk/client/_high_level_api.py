@@ -1,14 +1,14 @@
 # Copyright 2023 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
-from iota_sdk.secret_manager.secret_manager import LedgerNanoSecretManager, MnemonicSecretManager, StrongholdSecretManager, SeedSecretManager
+from typing import List, Optional, Union
+from abc import ABCMeta, abstractmethod
+from dacite import from_dict
 from iota_sdk.types.block import Block
-from iota_sdk.types.common import HexStr
+from iota_sdk.types.common import CoinType, HexStr
 from iota_sdk.types.output import OutputWithMetadata
 from iota_sdk.types.output_id import OutputId
-from iota_sdk.types.common import CoinType
-from typing import List, Optional, Union
-from dacite import from_dict
+from iota_sdk.secret_manager.secret_manager import LedgerNanoSecretManager, MnemonicSecretManager, StrongholdSecretManager, SeedSecretManager
 
 
 class Range:
@@ -50,8 +50,9 @@ class GenerateAddressesOptions():
         options: An instance of `GenerateAddressOptions`.
     """
 
+    # pylint: disable=redefined-builtin
     def __init__(self, coinType: CoinType,
-                 range: range,
+                 range: Range,
                  bech32Hrp: str,
                  accountIndex: Optional[int] = None,
                  options: Optional[GenerateAddressOptions] = None):
@@ -65,12 +66,14 @@ class GenerateAddressesOptions():
             options: An instance of `GenerateAddressOptions`.
         """
         self.coinType = coinType
-        self.range = Range(range.start, range.stop)
+        self.range = range
         self.bech32Hrp = bech32Hrp
         self.accountIndex = accountIndex
         self.options = options
 
     def as_dict(self):
+        """Converts this object to a dict.
+        """
         config = {k: v for k, v in self.__dict__.items() if v is not None}
 
         config["range"] = config["range"].__dict__
@@ -79,9 +82,30 @@ class GenerateAddressesOptions():
         return config
 
 
-class HighLevelAPI():
+class HighLevelAPI(metaclass=ABCMeta):
     """High level API.
     """
+
+    @abstractmethod
+    def _call_method(self, name, data=None):
+        """
+        Sends a message to the Rust library and returns the response.
+        It is abstract here as its implementation is located in `client.py`, which is a composite class.
+
+        Arguments:
+
+        * `name`: The `name` parameter is a string that represents the name of the method to be called.
+        It is used to identify the specific method to be executed in the Rust library.
+        * `data`: The `data` parameter is an optional parameter that represents additional data to be
+        sent along with the method call. It is a dictionary that contains key-value pairs of data. If
+        the `data` parameter is provided, it will be included in the `message` dictionary as the 'data'
+        key.
+
+        Returns:
+
+        The method returns either the payload from the JSON response or the entire response if there is
+        no payload.
+        """
 
     def get_outputs(
             self, output_ids: List[OutputId]) -> List[OutputWithMetadata]:

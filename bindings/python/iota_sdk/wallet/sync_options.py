@@ -1,3 +1,6 @@
+# Copyright 2023 IOTA Stiftung
+# SPDX-License-Identifier: Apache-2.0
+
 from typing import List, Optional
 
 
@@ -129,4 +132,6 @@ class SyncOptions():
         self.syncNativeTokenFoundries = sync_native_token_foundries
 
     def as_dict(self):
+        """Converts this object to a dict.
+        """
         return dict(self.__dict__)

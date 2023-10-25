@@ -1,10 +1,10 @@
 # Copyright 2023 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
-from iota_sdk.types.address import Ed25519Address, AliasAddress, NFTAddress
 from enum import IntEnum
 from dataclasses import dataclass, field
 from typing import Union
+from iota_sdk.types.address import Ed25519Address, AliasAddress, NFTAddress
 
 
 class UnlockConditionType(IntEnum):
@@ -35,6 +35,8 @@ class UnlockCondition():
     type: int
 
     def as_dict(self):
+        """Converts this object to a dict.
+        """
         config = {k: v for k, v in self.__dict__.items() if v is not None}
 
         if 'amount' in config:

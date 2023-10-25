@@ -24,6 +24,8 @@ class InputSigningData:
     chain: Optional[Bip44] = None
 
     def as_dict(self):
+        """Converts this object to a dict.
+        """
         config = {k: v for k, v in self.__dict__.items() if v is not None}
 
         config['output'] = config['output'].as_dict()
@@ -48,6 +50,8 @@ class RemainderData:
     chain: Optional[Bip44] = None
 
     def as_dict(self):
+        """Converts this object to a dict.
+        """
         config = {k: v for k, v in self.__dict__.items() if v is not None}
 
         config['output'] = config['output'].as_dict()
@@ -72,6 +76,8 @@ class PreparedTransactionData:
     remainder: Optional[RemainderData] = None
 
     def as_dict(self):
+        """Converts this object to a dict.
+        """
         config = {k: v for k, v in self.__dict__.items() if v is not None}
 
         config['essence'] = config['essence'].as_dict()
@@ -97,6 +103,8 @@ class SignedTransactionData:
     inputsData: List[InputSigningData]
 
     def as_dict(self):
+        """Converts this object to a dict.
+        """
         config = {k: v for k, v in self.__dict__.items() if v is not None}
 
         config['transactionPayload'] = config['transactionPayload'].as_dict()

@@ -1,6 +1,10 @@
 # Copyright 2023 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
+from typing import List, Union
+from abc import ABCMeta, abstractmethod
+from dacite import from_dict
+
 from iota_sdk.types.block import Block, BlockMetadata
 from iota_sdk.types.common import HexStr
 from iota_sdk.types.node_info import NodeInfo, NodeInfoWrapper
@@ -8,13 +12,32 @@ from iota_sdk.types.output import OutputWithMetadata, OutputMetadata
 from iota_sdk.types.output_id import OutputId
 from iota_sdk.types.payload import MilestonePayload
 from iota_sdk.types.utxo_changes import UtxoChanges
-from typing import List, Union
-from dacite import from_dict
 
 
-class NodeCoreAPI():
+class NodeCoreAPI(metaclass=ABCMeta):
     """Node core API.
     """
+
+    @abstractmethod
+    def _call_method(self, name, data=None):
+        """
+        Sends a message to the Rust library and returns the response.
+        It is abstract here as its implementation is located in `client.py`, which is a composite class.
+
+        Arguments:
+
+        * `name`: The `name` parameter is a string that represents the name of the method to be called.
+        It is used to identify the specific method to be executed in the Rust library.
+        * `data`: The `data` parameter is an optional parameter that represents additional data to be
+        sent along with the method call. It is a dictionary that contains key-value pairs of data. If
+        the `data` parameter is provided, it will be included in the `message` dictionary as the 'data'
+        key.
+
+        Returns:
+
+        The method returns either the payload from the JSON response or the entire response if there is
+        no payload.
+        """
 
     def get_health(self, url: str):
         """ Get node health.
