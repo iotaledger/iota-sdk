@@ -39,6 +39,9 @@ import {
     AccountId,
     NftId,
     FoundryId,
+    IssuerId,
+    UnsignedBlock,
+    parseUnsignedBlock,
 } from '../types/block';
 import { HexEncodedString } from '../utils';
 import {
@@ -292,21 +295,28 @@ export class Client {
     }
 
     /**
-     * Submit a payload in a block.
+     * Build an unsigned block.
      *
+     * @param issuerId The identifier of the block issuer account.
      * @param payload The payload to post.
+     * @param strongParents Optional strong parents to use for the block.
      * @returns The block ID followed by the block containing the payload.
      */
-    async postBlockPayload(payload: Payload): Promise<[BlockId, SignedBlock]> {
+    async buildBasicBlock(
+        issuerId: IssuerId,
+        payload: Payload,
+        strongParents?: [BlockId],
+    ): Promise<UnsignedBlock> {
         const response = await this.methodHandler.callMethod({
-            name: 'postBlockPayload',
+            name: 'buildBasicBlock',
             data: {
+                issuerId,
+                strongParents,
                 payload,
             },
         });
-        const parsed = JSON.parse(response) as Response<[BlockId, SignedBlock]>;
-        const block = parseSignedBlock(parsed.payload[1]);
-        return [parsed.payload[0], block];
+        const parsed = JSON.parse(response) as Response<UnsignedBlock>;
+        return parseUnsignedBlock(parsed.payload);
     }
 
     /**

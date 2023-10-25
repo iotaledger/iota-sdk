@@ -10,6 +10,7 @@ import type {
     Block,
     BlockId,
     FoundryId,
+    IssuerId,
     NftId,
     Output,
     OutputId,
@@ -117,9 +118,11 @@ export interface __SignatureUnlockMethod__ {
     };
 }
 
-export interface __PostBlockPayloadMethod__ {
-    name: 'postBlockPayload';
+export interface __BuildBasicBlockMethod__ {
+    name: 'buildBasicBlock';
     data: {
+        issuerId: IssuerId;
+        parents?: [BlockId];
         payload: Payload;
     };
 }
