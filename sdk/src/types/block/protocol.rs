@@ -204,8 +204,6 @@ pub struct WorkScoreParameters {
     data_byte: u32,
     /// Modifier for work done to process a block.
     block: u32,
-    /// Modifier for slashing when there are insufficient strong tips.
-    missing_parent: u32,
     /// Modifier for loading UTXOs and performing mana calculations.
     input: u32,
     /// Modifier for loading and checking the context input.
@@ -222,8 +220,6 @@ pub struct WorkScoreParameters {
     allotment: u32,
     /// Modifier for the block signature check.
     signature_ed25519: u32,
-    /// The minimum count of strong parents in a basic block.
-    min_strong_parents_threshold: u8,
 }
 
 impl Default for WorkScoreParameters {
@@ -231,7 +227,6 @@ impl Default for WorkScoreParameters {
         Self {
             data_byte: 0,
             block: 100,
-            missing_parent: 500,
             input: 20,
             context_input: 20,
             output: 20,
@@ -240,7 +235,6 @@ impl Default for WorkScoreParameters {
             block_issuer: 100,
             allotment: 100,
             signature_ed25519: 200,
-            min_strong_parents_threshold: 4,
         }
     }
 }

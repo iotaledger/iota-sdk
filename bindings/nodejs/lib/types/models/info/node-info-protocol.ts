@@ -153,10 +153,6 @@ export interface WorkScoreParameters {
      */
     block: number;
     /**
-     * MissingParent is used for slashing if there are not enough strong tips.
-     */
-    missingParent: number;
-    /**
      * Input accounts for loading the UTXO from the database and performing the mana calculations.
      */
     input: number;
@@ -188,10 +184,6 @@ export interface WorkScoreParameters {
      * SignatureEd25519 accounts for an Ed25519 signature check.
      */
     signatureEd25519: number;
-    /**
-     * MinStrongParentsThreshold is the minimum amount of strong parents in a basic block, otherwise the issuer gets slashed.
-     */
-    minStrongParentsThreshold: number;
 }
 
 /**

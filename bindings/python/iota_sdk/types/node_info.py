@@ -95,7 +95,6 @@ class WorkScoreParameters:
     Attributes:
         data_byte: Data_kibibyte accounts for the network traffic per kibibyte.
         block: Block accounts for work done to process a block in the node software.
-        missing_parent: Missing_parent is used to multiply for each missing parent if there are not enough strong ones.
         input: Input accounts for loading the UTXO from the database and performing the mana calculations.
         context_input: Context_input accounts for loading and checking the context input.
         output: Output accounts for storing the UTXO in the database.
@@ -104,11 +103,9 @@ class WorkScoreParameters:
         block_issuer: BlockIssuer accounts for the existence of a block issuer feature in the output.
         allotment: Allotment accounts for accessing the account-based ledger to transform the mana to block issuance credits.
         signature_ed25519: SignatureEd25519 accounts for an Ed25519 signature check.
-        min_strong_parents_threshold: MinStrongParentsThreshold is the minimum amount of strong parents in a basic block, otherwise, the issuer gets slashed.
     """
     data_byte: int
     block: int
-    missing_parent: int
     input: int
     context_input: int
     output: int
@@ -117,7 +114,6 @@ class WorkScoreParameters:
     block_issuer: int
     allotment: int
     signature_ed25519: int
-    min_strong_parents_threshold: int
 
 
 @json

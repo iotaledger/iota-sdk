@@ -25,7 +25,6 @@
 //         "workScoreParameters":{
 //           "dataByte":0,
 //           "block":1,
-//           "missingParent":0,
 //           "input":0,
 //           "contextInput":0,
 //           "output":0,
@@ -34,7 +33,6 @@
 //           "blockIssuer":0,
 //           "allotment":0,
 //           "signatureEd25519":0,
-//           "minStrongParentsThreshold":0
 //         },
 //         "tokenSupply":"2779530283277761",
 //         "genesisUnixTimestamp":"1695275822",
