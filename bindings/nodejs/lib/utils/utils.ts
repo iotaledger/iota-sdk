@@ -318,14 +318,14 @@ export class Utils {
     }
 
     /**
-     * Compute the hash of a transaction.
+     * Compute the signing hash of a transaction.
      *
      * @param transaction A transaction.
-     * @returns The hash of the transaction as a hex-encoded string.
+     * @returns The signing hash of the transaction as a hex-encoded string.
      */
-    static hashTransaction(transaction: Transaction): HexEncodedString {
+    static transactionSigningHash(transaction: Transaction): HexEncodedString {
         return callUtilsMethod({
-            name: 'hashTransaction',
+            name: 'transactionSigningHash',
             data: {
                 transaction,
             },

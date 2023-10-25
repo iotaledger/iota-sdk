@@ -143,8 +143,8 @@ export interface __IsAddressValidMethod__ {
     };
 }
 
-export interface __HashTransactionMethod__ {
-    name: 'hashTransaction';
+export interface __TransactionSigningHashMethod__ {
+    name: 'transactionSigningHash';
     data: {
         transaction: Transaction;
     };

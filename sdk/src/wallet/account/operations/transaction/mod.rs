@@ -124,7 +124,7 @@ where
     ) -> crate::wallet::Result<TransactionWithMetadata> {
         log::debug!(
             "[TRANSACTION] submit_and_store_transaction {}",
-            signed_transaction_data.payload.id()
+            signed_transaction_data.payload.transaction().id()
         );
         let options = options.into();
 
@@ -153,7 +153,7 @@ where
             }
         };
 
-        let transaction_id = signed_transaction_data.payload.id();
+        let transaction_id = signed_transaction_data.payload.transaction().id();
 
         // store transaction payload to account (with db feature also store the account to the db)
         let network_id = self.client().get_network_id().await?;
