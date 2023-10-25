@@ -118,6 +118,8 @@ impl core::ops::SubAssign<u32> for EpochIndex {
 
 #[cfg(test)]
 mod test {
+    use pretty_assertions::assert_eq;
+
     use super::*;
     use crate::types::block::protocol::ProtocolParameters;
 
