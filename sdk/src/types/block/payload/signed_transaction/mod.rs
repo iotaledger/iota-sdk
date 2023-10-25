@@ -42,13 +42,6 @@ impl SignedTransactionPayload {
     pub fn unlocks(&self) -> &Unlocks {
         &self.unlocks
     }
-
-    /// Computes the identifier of a [`SignedTransactionPayload`].
-    pub fn id(&self) -> TransactionId {
-        self.transaction()
-            .hash()
-            .into_transaction_id(self.transaction.creation_slot())
-    }
 }
 
 impl Packable for SignedTransactionPayload {

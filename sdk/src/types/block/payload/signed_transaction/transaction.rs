@@ -16,7 +16,7 @@ use crate::{
             mana::{verify_mana_allotments_sum, ManaAllotment, ManaAllotments},
             output::{NativeTokens, Output, OUTPUT_COUNT_RANGE},
             payload::{
-                signed_transaction::{TransactionHash, TransactionSigningHash},
+                signed_transaction::{TransactionHash, TransactionId, TransactionSigningHash},
                 OptionalPayload, Payload,
             },
             protocol::ProtocolParameters,
@@ -291,7 +291,7 @@ impl Transaction {
     }
 
     /// Return the Blake2b hash of the transaction commitment and output commitment.
-    pub fn hash(&self) -> TransactionHash {
+    fn hash(&self) -> TransactionHash {
         TransactionHash::new(
             Blake2b256::digest([self.transaction_commitment(), self.output_commitment()].concat()).into(),
         )
@@ -316,6 +316,11 @@ impl Transaction {
     fn output_commitment(&self) -> [u8; 32] {
         let outputs_serialized = self.outputs.iter().map(|o| o.pack_to_vec()).collect::<Vec<_>>();
         merkle_hasher::MerkleHasher::digest::<Blake2b256>(&outputs_serialized).into()
+    }
+
+    /// Computes the identifier of a [`Transaction`].
+    pub fn id(&self) -> TransactionId {
+        self.hash().into_transaction_id(self.creation_slot())
     }
 }
 

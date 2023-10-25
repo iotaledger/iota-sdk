@@ -511,8 +511,7 @@ fn merge_unlocks(
 ) -> Result<Vec<Unlock>, Error> {
     let slot_index = prepared_transaction_data.transaction.creation_slot();
     // The transaction_hash gets signed
-    // TODO: Should this be the signing_hash?
-    let transaction_hash = prepared_transaction_data.transaction.hash();
+    let transaction_signing_hash = prepared_transaction_data.transaction.signing_hash();
 
     let mut merged_unlocks = Vec::new();
     let mut block_indexes = HashMap::<Address, usize>::new();
@@ -561,7 +560,7 @@ fn merge_unlocks(
                         Address::Ed25519(ed25519_address) => ed25519_address,
                         _ => return Err(Error::MissingInputWithEd25519Address),
                     };
-                    ed25519_signature.is_valid(transaction_hash.as_ref(), &ed25519_address)?;
+                    ed25519_signature.is_valid(transaction_signing_hash.as_ref(), &ed25519_address)?;
                 }
 
                 merged_unlocks.push(unlock);
