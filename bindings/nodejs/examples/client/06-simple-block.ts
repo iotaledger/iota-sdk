@@ -1,7 +1,14 @@
 // Copyright 2021-2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { Client, initLogger, TaggedDataPayload, utf8ToHex } from '@iota/sdk';
+import {
+    CoinType,
+    Client,
+    initLogger,
+    TaggedDataPayload,
+    utf8ToHex,
+    SecretManager,
+} from '@iota/sdk';
 require('dotenv').config({ path: '.env' });
 
 // Run with command:
@@ -14,21 +21,44 @@ async function run() {
         throw new Error('.env NODE_URL is undefined, see .env.example');
     }
 
+    if (!process.env.MNEMONIC) {
+        throw new Error('.env MNEMONIC is undefined, see .env.example');
+    }
+    const mnemonicSecretManager = {
+        mnemonic: process.env.MNEMONIC,
+    };
+
+    const secretManager = new SecretManager(mnemonicSecretManager);
+
     const client = new Client({
         // Insert your node URL in the .env.
         nodes: [process.env.NODE_URL],
     });
 
+    const issuerId = process.env.ISSUER_ID
+        ? process.env.ISSUER_ID
+        : '0x0000000000000000000000000000000000000000000000000000000000000000';
+
+    const chain = {
+        coinType: CoinType.Iota,
+        account: 0,
+        change: 0,
+        addressIndex: 0,
+    };
+
     try {
         // Create block with no payload
         // TODO: have a way in the bindings to send an empty block https://github.com/iotaledger/iota-sdk/issues/647
-        const blockIdAndBlock = await client.postBlockPayload(
+        const unsignedBlock = await client.buildBasicBlock(
+            issuerId,
             new TaggedDataPayload(utf8ToHex('Hello'), utf8ToHex('Tangle')),
         );
-        console.log('Block:', blockIdAndBlock, '\n');
+        const signedBlock = await secretManager.signBlock(unsignedBlock, chain);
+        const blockId = await client.postBlock(signedBlock);
+        console.log('Block:', signedBlock, '\n');
 
         console.log(
-            `Empty block sent: ${process.env.EXPLORER_URL}/block/${blockIdAndBlock[0]}`,
+            `Empty block sent: ${process.env.EXPLORER_URL}/block/${blockId}`,
         );
     } catch (error) {
         console.error('Error: ', error);
