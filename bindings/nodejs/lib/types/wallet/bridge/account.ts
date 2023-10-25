@@ -11,7 +11,7 @@ import type {
 import type { Burn, INode, PreparedTransactionData } from '../../client';
 import type { OutputParams } from '../output-params';
 import type { OutputsToClaim } from '../output';
-import type { SignedTransactionEssence } from '../signed-transaction-essence';
+import type { SignedTransactionData } from '../signed-transaction-data';
 import type {
     AccountOutputParams,
     CreateNativeTokenParams,
@@ -280,8 +280,8 @@ export type __SetDefaultSyncOptionsMethod__ = {
     };
 };
 
-export type __SignTransactionEssenceMethod__ = {
-    name: 'signTransactionEssence';
+export type __SignTransactionMethod__ = {
+    name: 'signTransaction';
     data: {
         preparedTransactionData: PreparedTransactionData;
     };
@@ -297,7 +297,7 @@ export type __SignAndSubmitTransactionMethod__ = {
 export type __SubmitAndStoreTransactionMethod__ = {
     name: 'submitAndStoreTransaction';
     data: {
-        signedTransactionData: SignedTransactionEssence;
+        signedTransactionData: SignedTransactionData;
     };
 };
 
