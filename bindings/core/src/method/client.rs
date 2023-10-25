@@ -126,6 +126,8 @@ pub enum ClientMethod {
     BuildBasicBlock {
         /// The issuer's ID.
         issuer_id: IssuerId,
+        /// Optional strong parents for the block.
+        #[serde(default)]
         strong_parents: Option<basic::StrongParents>,
         /// The block payload.
         payload: PayloadDto,

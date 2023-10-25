@@ -11,6 +11,8 @@
 # Make sure you have first installed it with `pip install iota_sdk`
 import os
 from bindings.python.iota_sdk.secret_manager.secret_manager import MnemonicSecretManager, SecretManager
+from bindings.python.iota_sdk.types.common import CoinType
+from bindings.python.iota_sdk.types.signature import Bip44
 from dotenv import load_dotenv
 from iota_sdk import BasicBlock, Client, hex_to_utf8, utf8_to_hex, TaggedDataPayload
 
@@ -62,6 +64,8 @@ print(f'  message converted to hex: {message_hex}')
 # A block must be built, to which the payload is attached.
 # The submit_payload function handles this task.
 
+chain = Bip44(CoinType.IOTA)
+
 # Create and post a block with a tagged data payload
 # The client returns your block data (blockIdAndBlock)
 unsigned_block = client.build_basic_block(
@@ -69,7 +73,7 @@ unsigned_block = client.build_basic_block(
     TaggedDataPayload(
         utf8_to_hex("tag"),
         utf8_to_hex("data")))
-signed_block = secret_manager.sign_block(unsigned_block)
+signed_block = secret_manager.sign_block(unsigned_block, chain)
 block_id = client.post_block(signed_block)
 
 print('\nThe block ID for your submitted block is:')
