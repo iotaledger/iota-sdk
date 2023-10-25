@@ -270,7 +270,7 @@ export class Client {
      * Create a signature unlock using the given secret manager.
      *
      * @param secretManager One of the supported secret managers.
-     * @param transactionSigningHash The hash of the transaction.
+     * @param transactionSigningHash The signing hash of the transaction.
      * @param chain A BIP44 chain
      * @returns The corresponding unlock condition.
      */
