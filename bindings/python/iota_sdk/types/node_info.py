@@ -89,13 +89,12 @@ class RentStructure:
 
 @json
 @dataclass
-class WorkScoreStructure:
-    """Work structure lists the Work Score of each type, it is used to denote the computation costs of processing an object.
+class WorkScoreParameters:
+    """Work Score Parameters lists the work score of each type, it is used to denote the computation costs of processing an object.
 
     Attributes:
         data_byte: Data_kibibyte accounts for the network traffic per kibibyte.
         block: Block accounts for work done to process a block in the node software.
-        missing_parent: Missing_parent is used to multiply for each missing parent if there are not enough strong ones.
         input: Input accounts for loading the UTXO from the database and performing the mana calculations.
         context_input: Context_input accounts for loading and checking the context input.
         output: Output accounts for storing the UTXO in the database.
@@ -104,11 +103,9 @@ class WorkScoreStructure:
         block_issuer: BlockIssuer accounts for the existence of a block issuer feature in the output.
         allotment: Allotment accounts for accessing the account-based ledger to transform the mana to block issuance credits.
         signature_ed25519: SignatureEd25519 accounts for an Ed25519 signature check.
-        min_strong_parents_threshold: MinStrongParentsThreshold is the minimum amount of strong parents in a basic block, otherwise, the issuer gets slashed.
     """
     data_byte: int
     block: int
-    missing_parent: int
     input: int
     context_input: int
     output: int
@@ -117,7 +114,6 @@ class WorkScoreStructure:
     block_issuer: int
     allotment: int
     signature_ed25519: int
-    min_strong_parents_threshold: int
 
 
 @json
@@ -227,7 +223,7 @@ class ProtocolParameters:
                     Value `iota` indicates that the node supports mainnet addresses.
                     Value `atoi` indicates that the node supports testnet addresses.
         rent_structure: The rent structure used by a given node/network.
-        work_score_structure: Work structure lists the Work Score of each type, it is used to denote the computation costs of processing an object.
+        work_score_parameters: Work Score Parameters lists the work score of each type, it is used to denote the computation costs of processing an object.
         token_supply: Current supply of the base token. Plain string encoded number.
         genesis_unix_timestamp: The genesis timestamp at which the slots start to count.
         slot_duration_in_seconds: The duration of a slot, in seconds.
@@ -249,7 +245,7 @@ class ProtocolParameters:
     network_name: str
     bech32_hrp: str
     rent_structure: RentStructure
-    work_score_structure: WorkScoreStructure
+    work_score_parameters: WorkScoreParameters
     token_supply: int = field(metadata=config(
         encoder=str
     ))

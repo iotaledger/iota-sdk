@@ -44,9 +44,9 @@ export interface ProtocolParameters {
      */
     rentStructure: RentStructure;
     /**
-     * Work structure lists the Work Score of each type, it is used to denote the computation costs of processing an object.
+     * Work Score Parameters lists the work score of each type, it is used to denote the computation costs of processing an object.
      */
-    workScoreStructure: WorkScoreStructure;
+    workScoreParameters: WorkScoreParameters;
     /**
      * Current supply of base token.
      */
@@ -141,9 +141,9 @@ export interface RewardsParameters {
 }
 
 /**
- * Work structure lists the Work Score of each type, it is used to denote the computation costs of processing an object.
+ * Work Score Parameters lists the work score of each type, it is used to denote the computation costs of processing an object.
  */
-export interface WorkScoreStructure {
+export interface WorkScoreParameters {
     /**
      * DataByte accounts for the network traffic per kibibyte.
      */
@@ -152,10 +152,6 @@ export interface WorkScoreStructure {
      * Block accounts for work done to process a block in the node software.
      */
     block: number;
-    /**
-     * MissingParent is used for slashing if there are not enough strong tips.
-     */
-    missingParent: number;
     /**
      * Input accounts for loading the UTXO from the database and performing the mana calculations.
      */
@@ -188,10 +184,6 @@ export interface WorkScoreStructure {
      * SignatureEd25519 accounts for an Ed25519 signature check.
      */
     signatureEd25519: number;
-    /**
-     * MinStrongParentsThreshold is the minimum amount of strong parents in a basic block, otherwise the issuer gets slashed.
-     */
-    minStrongParentsThreshold: number;
 }
 
 /**
