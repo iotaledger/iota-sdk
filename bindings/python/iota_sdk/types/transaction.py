@@ -4,10 +4,10 @@
 from __future__ import annotations
 from dataclasses import dataclass
 from typing import Dict, List, Optional
+from enum import Enum
 from iota_sdk.types.common import HexStr
 from iota_sdk.types.output import OutputWithMetadata
 from iota_sdk.types.payload import TransactionPayload
-from enum import Enum
 
 
 class InclusionState(str, Enum):
@@ -50,8 +50,11 @@ class Transaction:
     note: Optional[str] = None
     blockId: Optional[HexStr] = None
 
+    # pylint: disable=redefined-builtin
     @classmethod
     def from_dict(cls, dict: Dict) -> Transaction:
+        """Converts a dict to a Transaction
+        """
         obj = cls.__new__(cls)
         super(Transaction, obj).__init__()
         for k, v in dict.items():

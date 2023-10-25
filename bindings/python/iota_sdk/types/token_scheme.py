@@ -28,6 +28,8 @@ class SimpleTokenScheme(TokenScheme):
     type: int = field(default_factory=lambda: 0, init=False)
 
     def as_dict(self):
+        """Converts this object to a dict.
+        """
         config = dict(self.__dict__)
 
         if isinstance(config['mintedTokens'], int):

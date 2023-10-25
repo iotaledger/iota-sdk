@@ -2,16 +2,17 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from __future__ import annotations
-from iota_sdk import call_utils_method
+from json import dumps, loads
+from typing import TYPE_CHECKING, List
+from dacite import from_dict
+
 from iota_sdk.types.signature import Ed25519Signature
 from iota_sdk.types.address import Address, AddressType, Ed25519Address, AliasAddress, NFTAddress
 from iota_sdk.types.common import HexStr
 from iota_sdk.types.output_id import OutputId
 from iota_sdk.types.output import Output
+from iota_sdk.external import call_utils_method
 from iota_sdk.types.payload import TransactionPayload
-from json import dumps, loads
-from typing import TYPE_CHECKING, List
-from dacite import from_dict
 
 # Required to prevent circular import
 if TYPE_CHECKING:
@@ -30,6 +31,7 @@ class Utils():
             'bech32': bech32
         })
 
+    # pylint: disable=redefined-builtin
     @staticmethod
     def hex_to_bech32(hex: HexStr, bech32_hrp: str) -> str:
         """Convert a hex encoded address to a Bech32 encoded address.
@@ -57,6 +59,7 @@ class Utils():
             'bech32Hrp': bech32_hrp
         })
 
+    # pylint: disable=redefined-builtin
     @staticmethod
     def hex_public_key_to_bech32_address(hex: HexStr, bech32_hrp: str) -> str:
         """Convert a hex encoded public key to a Bech32 encoded address.
@@ -82,6 +85,7 @@ class Utils():
             return from_dict(AliasAddress, response)
         if address_type == AddressType.NFT:
             return from_dict(NFTAddress, response)
+        return from_dict(Address, response)
 
     @staticmethod
     def is_address_valid(address: str) -> bool:
@@ -217,7 +221,6 @@ class Utils():
 
 class UtilsError(Exception):
     """A utils error."""
-    pass
 
 
 def _call_method(name: str, data=None):
@@ -241,5 +244,4 @@ def _call_method(name: str, data=None):
 
     if "payload" in json_response:
         return json_response['payload']
-    else:
-        return response
+    return response

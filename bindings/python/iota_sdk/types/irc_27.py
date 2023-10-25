@@ -2,10 +2,10 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import json
-from iota_sdk import utf8_to_hex, MetadataFeature
-from dataclasses import dataclass, field
-from typing import Optional, List, Any
+from dataclasses import dataclass, field, asdict
+from typing import Optional, List, Any, Dict
 from dacite import from_dict
+from iota_sdk import utf8_to_hex, MetadataFeature
 
 
 @dataclass
@@ -50,17 +50,24 @@ class Irc27Metadata:
     uri: str
     name: str
     collectionName: Optional[str] = None
-    royalties: dict[str, float] = field(default_factory=dict)
+    royalties: Dict[str, float] = field(default_factory=dict)
     issuerName: Optional[str] = None
     description: Optional[str] = None
     attributes: List[Attribute] = field(default_factory=list)
 
     @staticmethod
     def from_dict(metadata_dict: dict):
+        """
+        Takes a dictionary as input and returns an instance of the `Irc27Metadata` class.
+        """
         return from_dict(Irc27Metadata, metadata_dict)
 
     def as_hex(self):
-        utf8_to_hex(json.dumps(self.as_dict(), separators=(",", ":")))
+        """Turns this schema into a hex encoded string
+        """
+        utf8_to_hex(json.dumps(asdict(self), separators=(",", ":")))
 
     def as_feature(self):
+        """Turns this schema into a MetadataFeature type
+        """
         MetadataFeature(self.as_hex())

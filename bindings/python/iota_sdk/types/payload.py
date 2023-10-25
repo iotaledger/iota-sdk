@@ -2,15 +2,15 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from __future__ import annotations
+from dataclasses import dataclass, field
+from enum import IntEnum
+from typing import Any, Optional, List, Union
+from dacite import from_dict
 from iota_sdk.types.common import HexStr
 from iota_sdk.types.output import BasicOutput, AliasOutput, FoundryOutput, NftOutput
 from iota_sdk.types.input import UtxoInput
 from iota_sdk.types.signature import Ed25519Signature
 from iota_sdk.types.unlock import SignatureUnlock, ReferenceUnlock
-from dacite import from_dict
-from dataclasses import dataclass, field
-from enum import IntEnum
-from typing import Any, Optional, List, Union
 
 
 class PayloadType(IntEnum):
@@ -30,11 +30,22 @@ class PayloadType(IntEnum):
 
 @dataclass
 class TransactionEssence:
+    """ Base essence class
+    """
     type: int
 
 
 @dataclass
 class RegularTransactionEssence(TransactionEssence):
+    """Describes the essence data making up a transaction by defining its inputs, outputs, and an optional payload.
+
+    Attributes:
+        networkId: The unique value denoting whether the block was meant for mainnet, shimmer, testnet, or a private network.
+        inputsCommitment: BLAKE2b-256 hash serving as a commitment to the serialized outputs referenced by Inputs.
+        inputs: The inputs to consume in order to fund the outputs of the Transaction Payload.
+        outputs: The outputs that are created by the Transaction Payload
+        payload: An optional tagged data payload
+    """
     networkId: str
     inputsCommitment: HexStr
     inputs: List[UtxoInput]
@@ -43,6 +54,8 @@ class RegularTransactionEssence(TransactionEssence):
     type: int = field(default_factory=lambda: 1, init=False)
 
     def as_dict(self):
+        """Converts this object to a dict.
+        """
         config = {k: v for k, v in self.__dict__.items() if v is not None}
 
         if 'payload' in config:
@@ -64,6 +77,8 @@ class Payload():
     type: int
 
     def as_dict(self):
+        """Converts this object to a dict.
+        """
         config = {k: v for k, v in self.__dict__.items() if v is not None}
 
         if 'essence' in config:
@@ -115,6 +130,8 @@ class MilestonePayload(Payload):
 
     @classmethod
     def from_dict(cls, milestone_dict) -> MilestonePayload:
+        """Converts a dict to a MilestonePayload
+        """
         return from_dict(MilestonePayload, milestone_dict)
 
 

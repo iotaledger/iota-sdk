@@ -1,15 +1,16 @@
 # Copyright 2023 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
-from iota_sdk import create_secret_manager, call_secret_manager_method
+from json import dumps, loads
+from typing import Optional, Union
+from dacite import from_dict
+import humps
+
+from iota_sdk.external import create_secret_manager, call_secret_manager_method
 from iota_sdk.types.common import HexStr
 from iota_sdk.types.signature import Ed25519Signature, Bip44
 from iota_sdk.types.transaction_data import PreparedTransactionData
 from iota_sdk.types.payload import TransactionPayload
-from json import dumps, loads
-import humps
-from typing import Optional, Union
-from dacite import from_dict
 
 
 class LedgerNanoSecretManager(dict):
@@ -71,6 +72,9 @@ class StrongholdSecretManager(dict):
             snapshot_path, password))
 
     class Inner(dict):
+        """Inner storage for stronghold configuration information.
+        """
+
         def __init__(self, snapshot_path, password):
             dict.__init__(self, password=password, snapshotPath=snapshot_path)
 
@@ -78,10 +82,12 @@ class StrongholdSecretManager(dict):
 class SecretManagerError(Exception):
     """Secret manager error.
     """
-    pass
 
 
 class SecretManager():
+    """Secret manager wrapper.
+    """
+
     def __init__(self, secret_manager: Optional[Union[LedgerNanoSecretManager, MnemonicSecretManager,
                  SeedSecretManager, StrongholdSecretManager]] = None, secret_manager_handle=None):
         """Initialize a secret manager.
@@ -117,9 +123,9 @@ class SecretManager():
 
         if "payload" in json_response:
             return json_response['payload']
-        else:
-            return response
+        return response
 
+    # pylint: disable=unused-argument
     def generate_ed25519_addresses(self,
                                    account_index: Optional[int] = None,
                                    start: Optional[int] = None,
@@ -173,6 +179,7 @@ class SecretManager():
             'options': options
         })
 
+    # pylint: disable=unused-argument
     def generate_evm_addresses(self,
                                account_index: Optional[int] = None,
                                start: Optional[int] = None,

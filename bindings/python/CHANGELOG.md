@@ -26,6 +26,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Utils:transaction_id()`;
 - `py.typed` file to the package;
 
+### Fixed
+
+- `Range` type instead of `range` method in `GenerateAddressesOptions` init;
+- `Dict` type instead of `dict` method in `Irc27Metadata` init;
+
 ## 1.1.0 - 2023-09-29
 
 Stable release.
