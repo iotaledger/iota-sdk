@@ -3,8 +3,8 @@
 
 pub mod basic;
 mod parent;
+mod signed_block;
 pub mod validation;
-mod wrapper;
 
 use alloc::boxed::Box;
 
@@ -20,8 +20,8 @@ use packable::{
 pub use self::{
     basic::{BasicBlock, BasicBlockBuilder},
     parent::Parents,
+    signed_block::{BlockHeader, SignedBlock, UnsignedBlock},
     validation::{ValidationBlock, ValidationBlockBuilder},
-    wrapper::{BlockHeader, BlockWrapper, BlockWrapperBuilder},
 };
 use crate::types::block::{
     protocol::{ProtocolParameters, ProtocolParametersHash},
@@ -141,7 +141,7 @@ pub(crate) mod dto {
     use serde_json::Value;
 
     use super::*;
-    pub use crate::types::block::core::wrapper::dto::BlockWrapperDto;
+    pub use crate::types::block::core::signed_block::dto::{SignedBlockDto, UnsignedBlockDto};
     use crate::types::{
         block::core::{basic::dto::BasicBlockDto, validation::dto::ValidationBlockDto},
         TryFromDto, ValidationParams,

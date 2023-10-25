@@ -9,12 +9,12 @@ import { plainToInstance, Type } from 'class-transformer';
 import { Block, BlockType } from './block';
 import { BasicBlock } from './basic';
 import { ValidationBlock } from './validation';
-import { BlockDiscriminator } from './';
+import { BlockDiscriminator } from '.';
 
 /**
  * Represent the object that nodes gossip around the network.
  */
-class BlockWrapper {
+class SignedBlock {
     /**
      * Protocol version of the block.
      */
@@ -116,8 +116,8 @@ class BlockWrapper {
     }
 }
 
-function parseBlockWrapper(data: any): BlockWrapper {
-    return plainToInstance(BlockWrapper, data) as any as BlockWrapper;
+function parseSignedBlock(data: any): SignedBlock {
+    return plainToInstance(SignedBlock, data) as any as SignedBlock;
 }
 
-export { BlockWrapper, parseBlockWrapper };
+export { SignedBlock, parseSignedBlock };

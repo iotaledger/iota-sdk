@@ -10,7 +10,11 @@
 
 use crypto::keys::bip44::Bip44;
 use iota_sdk::{
-    client::{constants::IOTA_COIN_TYPE, secret::SecretManager, Client, Result},
+    client::{
+        constants::IOTA_COIN_TYPE,
+        secret::{SecretManager, SignBlock},
+        Client, Result,
+    },
     types::block::IssuerId,
 };
 
@@ -29,7 +33,9 @@ async fn main() -> Result<()> {
 
     // Create and send the block.
     let block = client
-        .build_basic_block(issuer_id, None, None, None, &secret_manager, Bip44::new(IOTA_COIN_TYPE))
+        .build_basic_block(issuer_id, None, None, None)
+        .await?
+        .sign_ed25519(&secret_manager, Bip44::new(IOTA_COIN_TYPE))
         .await?;
 
     println!("{block:#?}");

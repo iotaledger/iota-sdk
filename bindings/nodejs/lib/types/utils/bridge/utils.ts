@@ -7,7 +7,7 @@ import {
     TokenSchemeType,
     Output,
     RentStructure,
-    BlockWrapper,
+    SignedBlock,
     ProtocolParameters,
 } from '../../';
 import { AccountId } from '../../block/id';
@@ -89,7 +89,7 @@ export interface __ParseBech32AddressMethod__ {
 export interface __BlockIdMethod__ {
     name: 'blockId';
     data: {
-        block: BlockWrapper;
+        block: SignedBlock;
         params: ProtocolParameters;
     };
 }

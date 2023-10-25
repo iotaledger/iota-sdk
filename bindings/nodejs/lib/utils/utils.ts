@@ -14,7 +14,7 @@ import {
     RentStructure,
     OutputId,
     u64,
-    BlockWrapper,
+    SignedBlock,
     ProtocolParameters,
 } from '../types';
 import {
@@ -200,7 +200,7 @@ export class Utils {
      * @param params The network protocol parameters.
      * @returns The corresponding block ID.
      */
-    static blockId(block: BlockWrapper, params: ProtocolParameters): BlockId {
+    static blockId(block: SignedBlock, params: ProtocolParameters): BlockId {
         return callUtilsMethod({
             name: 'blockId',
             data: {

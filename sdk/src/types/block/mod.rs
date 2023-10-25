@@ -47,11 +47,11 @@ pub(crate) use r#macro::create_bitflags;
 pub(crate) use r#macro::{impl_id, string_serde_impl};
 
 #[cfg(feature = "serde")]
-pub use self::core::dto::{BlockDto, BlockWrapperDto};
+pub use self::core::dto::{BlockDto, SignedBlockDto, UnsignedBlockDto};
 pub use self::{
     block_id::{BlockHash, BlockId},
     convert::ConvertTo,
-    core::{Block, BlockWrapper},
+    core::{Block, SignedBlock},
     error::Error,
     issuer_id::IssuerId,
 };

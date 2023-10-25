@@ -6,10 +6,11 @@ use iota_sdk::{
         api::{GetAddressesOptions, PreparedTransactionData},
         secret::{
             ledger_nano::LedgerSecretManager, stronghold::StrongholdSecretManager, DowncastSecretManager, SecretManage,
+            SignBlock,
         },
     },
     types::{
-        block::{address::ToBech32Ext, unlock::Unlock},
+        block::{address::ToBech32Ext, core::UnsignedBlock, unlock::Unlock, SignedBlockDto},
         TryFromDto,
     },
 };
@@ -80,6 +81,11 @@ where
                 .map_err(iota_sdk::client::Error::from)?;
             Response::SignedTransaction(transaction.into())
         }
+        SecretManagerMethod::SignBlock { unsigned_block, chain } => Response::SignedBlock(SignedBlockDto::from(
+            &UnsignedBlock::try_from_dto(unsigned_block)?
+                .sign_ed25519(secret_manager, chain)
+                .await?,
+        )),
         SecretManagerMethod::SignatureUnlock {
             transaction_essence_hash,
             chain,

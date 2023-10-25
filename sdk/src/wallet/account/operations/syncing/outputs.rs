@@ -141,8 +141,8 @@ where
                         futures::future::try_join_all(transaction_ids.iter().map(|transaction_id| async {
                             let transaction_id = *transaction_id;
                             match client.get_included_block(&transaction_id).await {
-                                Ok(wrapper) => {
-                                    if let Block::Basic(block) = wrapper.block() {
+                                Ok(signed_block) => {
+                                    if let Block::Basic(block) = signed_block.block() {
                                         if let Some(Payload::Transaction(transaction_payload)) = block.payload() {
                                             let inputs_with_meta =
                                                 get_inputs_for_transaction_payload(&client, transaction_payload)
@@ -165,7 +165,7 @@ where
                                     } else {
                                         Err(ClientError::UnexpectedBlockKind {
                                             expected: BasicBlock::KIND,
-                                            actual: wrapper.block().kind(),
+                                            actual: signed_block.block().kind(),
                                         }
                                         .into())
                                     }

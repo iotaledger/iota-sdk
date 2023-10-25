@@ -15,9 +15,9 @@ from iota_sdk.types.block.validation import ValidationBlock
 
 @json
 @dataclass
-class BlockWrapper:
-    """A block wrapper type that can hold either a `BasicBlock` or a `ValidationBlock`.
-    Shared data is stored alongside such a block in the `BlockHeader` and `Signature` fields.
+class SignedBlock:
+    """A signed block type that can hold either a `BasicBlock` or a `ValidationBlock`.
+    Shared data is stored alongside such a block in the header fields.
 
     Attributes:
         protocol_version: Protocol version of the network to which this block belongs.

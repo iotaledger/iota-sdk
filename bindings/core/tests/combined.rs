@@ -13,15 +13,15 @@ use iota_sdk::{
     types::{
         block::{
             payload::{dto::PayloadDto, Payload, TaggedDataPayload},
-            BlockDto, BlockWrapper, IssuerId,
+            BlockDto, IssuerId, SignedBlock,
         },
         TryFromDto,
     },
     wallet::account::types::AccountIdentifier,
 };
 use iota_sdk_bindings_core::{
-    call_client_secret_method, AccountMethod, CallMethod, ClientSecretMethod, Response, Result, WalletMethod,
-    WalletOptions,
+    call_client_method, call_secret_manager_method, AccountMethod, CallMethod, ClientMethod, Response, Result,
+    SecretManagerMethod, WalletMethod, WalletOptions,
 };
 
 #[tokio::test]
@@ -249,8 +249,8 @@ async fn client_from_wallet() -> Result<()> {
 }
 
 #[tokio::test]
-async fn post_block() -> Result<()> {
-    let storage_path = "test-storage/client_from_wallet";
+async fn build_and_sign_block() -> Result<()> {
+    let storage_path = "test-storage/build_and_sign_block";
     std::fs::remove_dir_all(storage_path).ok();
 
     let secret_manager = MnemonicSecretManager::try_from_mnemonic(
@@ -267,33 +267,69 @@ async fn post_block() -> Result<()> {
         TaggedDataPayload::new("Hello".as_bytes(), "Tangle".as_bytes()).unwrap(),
     ));
 
-    let response = call_client_secret_method(
+    // Get an unsigned block
+    let response = call_client_method(
         &client,
-        &secret_manager,
-        ClientSecretMethod::PostBasicBlockPayload {
+        ClientMethod::BuildBasicBlock {
             issuer_id: IssuerId::null(),
             strong_parents: None,
             payload: payload.clone(),
+        },
+    )
+    .await;
+
+    let unsigned_block = match response {
+        Response::UnsignedBlock(unsigned_block) => {
+            match &unsigned_block.block {
+                BlockDto::Basic(b) => assert_eq!(b.payload.as_ref(), Some(&payload)),
+                BlockDto::Validation(v) => panic!("unexpected block {v:?}"),
+            }
+            unsigned_block
+        }
+        _ => panic!("unexpected response {response:?}"),
+    };
+
+    // Sign the block using the secret manager
+    let response = call_secret_manager_method(
+        &secret_manager,
+        SecretManagerMethod::SignBlock {
+            unsigned_block,
             chain: Bip44::new(IOTA_COIN_TYPE),
         },
     )
     .await;
 
-    match response {
-        Response::BlockIdWithBlock(block_id, block) => {
+    let signed_block = match response {
+        Response::SignedBlock(block) => {
             match &block.block {
-                BlockDto::Basic(b) => assert_eq!(b.payload, Some(payload)),
+                BlockDto::Basic(b) => assert_eq!(b.payload.as_ref(), Some(&payload)),
                 BlockDto::Validation(v) => panic!("unexpected block {v:?}"),
             }
+            block
+        }
+        _ => panic!("unexpected response {response:?}"),
+    };
+
+    // Get the block ID
+    let response = call_client_method(
+        &client,
+        ClientMethod::BlockId {
+            signed_block: signed_block.clone(),
+        },
+    )
+    .await;
+
+    match response {
+        Response::BlockId(block_id) => {
             assert_eq!(
                 block_id,
-                BlockWrapper::try_from_dto(block)
+                SignedBlock::try_from_dto(signed_block)
                     .unwrap()
                     .id(&client.get_protocol_parameters().await.unwrap())
             );
         }
         _ => panic!("unexpected response {response:?}"),
-    }
+    };
 
     Ok(())
 }

@@ -8,12 +8,13 @@ use iota_sdk::{
     client::{node_api::indexer::query_parameters::QueryParameter, node_manager::node::NodeAuth},
     types::block::{
         address::{Bech32Address, Hrp},
+        core::basic,
         output::{
             dto::OutputDto, feature::Feature, unlock_condition::dto::UnlockConditionDto, AccountId, FoundryId,
             NativeToken, NftId, OutputId, TokenScheme,
         },
-        payload::transaction::TransactionId,
-        BlockId, BlockWrapperDto,
+        payload::{dto::PayloadDto, transaction::TransactionId},
+        BlockId, IssuerId, SignedBlockDto,
     },
     utils::serde::{option_string, string},
 };
@@ -122,6 +123,13 @@ pub enum ClientMethod {
         query_params: Vec<String>,
         request_object: Option<String>,
     },
+    BuildBasicBlock {
+        /// The issuer's ID.
+        issuer_id: IssuerId,
+        strong_parents: Option<basic::StrongParents>,
+        /// The block payload.
+        payload: PayloadDto,
+    },
     //////////////////////////////////////////////////////////////////////
     // Node core API
     //////////////////////////////////////////////////////////////////////
@@ -146,7 +154,7 @@ pub enum ClientMethod {
     /// Post block (JSON)
     PostBlock {
         /// Block
-        block: BlockWrapperDto,
+        block: SignedBlockDto,
     },
     /// Post block (raw)
     #[serde(rename_all = "camelCase")]
@@ -328,6 +336,6 @@ pub enum ClientMethod {
     /// Returns a block ID from a block
     BlockId {
         /// Block
-        block: BlockWrapperDto,
+        signed_block: SignedBlockDto,
     },
 }

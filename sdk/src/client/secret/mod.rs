@@ -53,12 +53,12 @@ use crate::{
     },
     types::block::{
         address::{Address, Ed25519Address},
-        core::BlockWrapperBuilder,
+        core::UnsignedBlock,
         output::Output,
         payload::{transaction::TransactionEssence, TransactionPayload},
         signature::{Ed25519Signature, Signature},
         unlock::{AccountUnlock, NftUnlock, ReferenceUnlock, SignatureUnlock, Unlock, Unlocks},
-        BlockWrapper,
+        SignedBlock,
     },
 };
 
@@ -612,18 +612,14 @@ pub trait SignBlock {
         self,
         secret_manager: &S,
         chain: Bip44,
-    ) -> crate::client::Result<BlockWrapper>
+    ) -> crate::client::Result<SignedBlock>
     where
         crate::client::Error: From<S::Error>;
 }
 
 #[async_trait]
-impl SignBlock for BlockWrapperBuilder {
-    async fn sign_ed25519<S: SecretManage>(
-        self,
-        secret_manager: &S,
-        chain: Bip44,
-    ) -> crate::client::Result<BlockWrapper>
+impl SignBlock for UnsignedBlock {
+    async fn sign_ed25519<S: SecretManage>(self, secret_manager: &S, chain: Bip44) -> crate::client::Result<SignedBlock>
     where
         crate::client::Error: From<S::Error>,
     {

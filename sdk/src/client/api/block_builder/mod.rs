@@ -4,34 +4,24 @@
 pub mod input_selection;
 pub mod transaction;
 
-use crypto::keys::bip44::Bip44;
-
 pub use self::transaction::verify_semantic;
 use crate::{
-    client::{
-        secret::{SecretManage, SignBlock},
-        ClientInner, Result,
-    },
+    client::{ClientInner, Result},
     types::block::{
-        core::{basic, BlockHeader, BlockWrapper},
+        core::{basic, BlockHeader, UnsignedBlock},
         payload::Payload,
         Block, IssuerId,
     },
 };
 
 impl ClientInner {
-    pub async fn build_basic_block<S: SecretManage>(
+    pub async fn build_basic_block(
         &self,
         issuer_id: IssuerId,
         issuing_time: Option<u64>,
         strong_parents: Option<basic::StrongParents>,
         payload: Option<Payload>,
-        secret_manager: &S,
-        chain: Bip44,
-    ) -> Result<BlockWrapper>
-    where
-        crate::client::Error: From<S::Error>,
-    {
+    ) -> Result<UnsignedBlock> {
         let issuance = self.get_issuance().await?;
         let strong_parents = strong_parents.unwrap_or(issuance.strong_parents()?);
 
@@ -50,7 +40,7 @@ impl ClientInner {
 
         let protocol_params = self.get_protocol_parameters().await?;
 
-        BlockWrapper::build(
+        Ok(UnsignedBlock::new(
             BlockHeader::new(
                 protocol_params.version(),
                 protocol_params.network_id(),
@@ -64,8 +54,6 @@ impl ClientInner {
                 .with_shallow_like_parents(issuance.shallow_like_parents()?)
                 .with_payload(payload)
                 .finish_block()?,
-        )
-        .sign_ed25519(secret_manager, chain)
-        .await
+        ))
     }
 }
