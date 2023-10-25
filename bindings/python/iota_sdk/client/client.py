@@ -13,7 +13,7 @@ from iota_sdk.client._node_indexer_api import NodeIndexerAPI
 from iota_sdk.client._high_level_api import HighLevelAPI
 from iota_sdk.client._utils import ClientUtils
 from iota_sdk.secret_manager.secret_manager import LedgerNanoSecretManager, MnemonicSecretManager, StrongholdSecretManager, SeedSecretManager
-from bindings.python.iota_sdk.types.block.signed_block import SignedBlock
+from bindings.python.iota_sdk.types.block.signed_block import UnsignedBlock
 from iota_sdk.types.common import HexStr, Node
 from iota_sdk.types.feature import Feature
 from iota_sdk.types.native_token import NativeToken
@@ -394,21 +394,28 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
             'preparedTransactionData': prepared_transaction_data
         }))
 
-    def submit_payload(
-            self, payload: Payload) -> List[Union[HexStr, SignedBlock]]:
-        """Submit a payload in a block.
+    def build_basic_block(
+        self,
+        issuer_id: HexStr,
+        payload: Payload,
+        strong_parents: Optional[List[HexStr]]
+    ) -> UnsignedBlock:
+        """Build a basic block.
 
         Args:
-            payload : The payload to submit.
+            issuer_id: The identifier of the block issuer account.
+            payload: The payload to submit.
+            strong_parents: Optional strong parents for the block.
 
         Returns:
-            List of HexStr or Block.
+            An unsigned block.
         """
-        result = self._call_method('postBlockPayload', {
-            'payload': payload.to_dict()
+        result = self._call_method('buildBasicBlock', {
+            'issuerId': issuer_id,
+            'payload': payload.to_dict(),
+            'strongParents': strong_parents
         })
-        result[1] = SignedBlock.from_dict(result[1])
-        return result
+        return UnsignedBlock.from_dict(result)
 
     def listen_mqtt(self, topics: List[str], handler):
         """Listen to MQTT events.

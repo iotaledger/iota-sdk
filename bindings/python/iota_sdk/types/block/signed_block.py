@@ -48,4 +48,32 @@ class SignedBlock:
         return Utils.block_id(self, params)
 
 
+@json
+@dataclass
+class UnsignedBlock:
+    """An unsigned block type that can hold either a `BasicBlock` or a `ValidationBlock`.
+    Shared data is stored alongside such a block in the header fields.
+
+    Attributes:
+        protocol_version: Protocol version of the network to which this block belongs.
+        network_id: The identifier of the network to which this block belongs.
+        issuing_time: The time at which the block was issued. It is a Unix timestamp in nanoseconds.
+        slot_commitment_id: The identifier of the slot to which this block commits.
+        latest_finalized_slot: The slot index of the latest finalized slot.
+        issuer_id: The identifier of the account that issued this block.
+        block: Holds either a `BasicBlock` or a `ValidationBlock`.
+    """
+    protocol_version: int
+    network_id: int = field(metadata=config(
+        encoder=str
+    ))
+    issuing_time: int = field(metadata=config(
+        encoder=str
+    ))
+    slot_commitment_id: HexStr
+    latest_finalized_slot: SlotIndex
+    issuer_id: HexStr
+    block: Block
+
+
 Block: TypeAlias = Union[BasicBlock, ValidationBlock]

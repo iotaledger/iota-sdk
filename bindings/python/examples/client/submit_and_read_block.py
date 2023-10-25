@@ -10,12 +10,20 @@
 # Import the python iota client
 # Make sure you have first installed it with `pip install iota_sdk`
 import os
+from bindings.python.iota_sdk.secret_manager.secret_manager import MnemonicSecretManager, SecretManager
 from dotenv import load_dotenv
 from iota_sdk import BasicBlock, Client, hex_to_utf8, utf8_to_hex, TaggedDataPayload
 
 load_dotenv()
 
 node_url = os.environ.get('NODE_URL', 'https://api.testnet.shimmer.network')
+issuer_id = os.environ.get(
+    'ISSUER_ID', '0x0000000000000000000000000000000000000000000000000000000000000000')
+
+if 'MNEMONIC' not in os.environ:
+    raise Exception(".env MNEMONIC is undefined, see .env.example")
+
+secret_manager = SecretManager(MnemonicSecretManager(os.environ['MNEMONIC']))
 
 # Create a Client instance
 client = Client(nodes=[node_url])
@@ -56,19 +64,19 @@ print(f'  message converted to hex: {message_hex}')
 
 # Create and post a block with a tagged data payload
 # The client returns your block data (blockIdAndBlock)
-blockIdAndBlock = client.submit_payload(
+unsigned_block = client.build_basic_block(
+    issuer_id,
     TaggedDataPayload(
         utf8_to_hex("tag"),
         utf8_to_hex("data")))
-
-block_id = blockIdAndBlock[0]
-block = blockIdAndBlock[1]
+signed_block = secret_manager.sign_block(unsigned_block)
+block_id = client.post_block(signed_block)
 
 print('\nThe block ID for your submitted block is:')
 print(f'  {block_id}')
 
 print('\nMetadata for your submitted block is:')
-print(f'  {block}')
+print(f'  {signed_block}')
 
 ########################################################
 # Step 3: Use the block ID to read the payload back
