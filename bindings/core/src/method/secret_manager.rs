@@ -63,6 +63,7 @@ pub enum SecretManagerMethod {
         prepared_transaction_data: PreparedTransactionDataDto,
     },
     // Sign a block.
+    #[serde(rename_all = "camelCase")]
     SignBlock {
         unsigned_block: UnsignedBlockDto,
         /// Chain to sign the essence hash with
