@@ -123,8 +123,8 @@ pub enum UtilsMethod {
         serial_number: u32,
         token_scheme_type: u8,
     },
-    /// Computes the hash of a transaction.
-    HashTransaction {
+    /// Computes the signing hash of a transaction.
+    TransactionSigningHash {
         /// The transaction.
         transaction: TransactionDto,
     },

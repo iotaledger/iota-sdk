@@ -6,13 +6,12 @@
 mod transaction;
 mod transaction_id;
 
-use crypto::hashes::{blake2b::Blake2b256, Digest};
-use packable::{error::UnpackError, packer::Packer, unpacker::Unpacker, Packable, PackableExt};
+use packable::{error::UnpackError, packer::Packer, unpacker::Unpacker, Packable};
 
 pub(crate) use self::transaction::{ContextInputCount, InputCount, OutputCount};
 pub use self::{
     transaction::{Transaction, TransactionBuilder, TransactionCapabilities, TransactionCapabilityFlag},
-    transaction_id::{TransactionHash, TransactionId},
+    transaction_id::{TransactionHash, TransactionId, TransactionSigningHash},
 };
 use crate::types::block::{protocol::ProtocolParameters, unlock::Unlocks, Error};
 
@@ -42,16 +41,6 @@ impl SignedTransactionPayload {
     /// Returns unlocks of a [`SignedTransactionPayload`].
     pub fn unlocks(&self) -> &Unlocks {
         &self.unlocks
-    }
-
-    /// Computes the identifier of a [`SignedTransactionPayload`].
-    pub fn id(&self) -> TransactionId {
-        let mut hasher = Blake2b256::new();
-
-        hasher.update(Self::KIND.to_le_bytes());
-        hasher.update(self.pack_to_vec());
-
-        TransactionHash::new(hasher.finalize().into()).into_transaction_id(self.transaction.creation_slot())
     }
 }
 

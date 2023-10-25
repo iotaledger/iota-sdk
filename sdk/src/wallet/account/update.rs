@@ -171,7 +171,7 @@ where
         for transaction in updated_transactions {
             match transaction.inclusion_state {
                 InclusionState::Confirmed | InclusionState::Conflicting | InclusionState::UnknownPruned => {
-                    let transaction_id = transaction.payload.id();
+                    let transaction_id = transaction.payload.transaction().id();
                     account_details.pending_transactions.remove(&transaction_id);
                     log::debug!(
                         "[SYNC] inclusion_state of {transaction_id} changed to {:?}",
@@ -193,7 +193,7 @@ where
             }
             account_details
                 .transactions
-                .insert(transaction.payload.id(), transaction.clone());
+                .insert(transaction.payload.transaction().id(), transaction.clone());
         }
 
         for output_to_unlock in &spent_output_ids {

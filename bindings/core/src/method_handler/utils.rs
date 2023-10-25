@@ -47,7 +47,7 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
         }
         UtilsMethod::TransactionId { payload } => {
             let payload = SignedTransactionPayload::try_from_dto(payload)?;
-            Response::TransactionId(payload.id())
+            Response::TransactionId(payload.transaction().id())
         }
         UtilsMethod::ComputeAccountId { output_id } => Response::AccountId(AccountId::from(&output_id)),
         UtilsMethod::ComputeFoundryId {
@@ -69,8 +69,8 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
             let foundry_id = FoundryId::build(&AccountAddress::new(account_id), serial_number, token_scheme_type);
             Response::TokenId(TokenId::from(foundry_id))
         }
-        UtilsMethod::HashTransaction { transaction } => {
-            Response::Hash(prefix_hex::encode(Transaction::try_from_dto(transaction)?.hash()))
+        UtilsMethod::TransactionSigningHash { transaction } => {
+            Response::Hash(Transaction::try_from_dto(transaction)?.signing_hash().to_string())
         }
         UtilsMethod::ComputeStorageDeposit {
             output,
