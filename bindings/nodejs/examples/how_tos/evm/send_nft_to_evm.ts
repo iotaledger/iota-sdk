@@ -99,10 +99,6 @@ async function run() {
             transaction.transactionId,
         );
         console.log(`Block sent: ${process.env.EXPLORER_URL}/block/${blockId}`);
-
-        // Right now this token even though sent to L2 evm won't really show up anywhere.
-        // The foundry owner needs to register it and then the ERC20 wrapper would work only for foundry owner.
-        // Ref: https://wiki.iota.org/wasp-evm/reference/core-contracts/evm#registererc20nativetoken
     } catch (error) {
         console.error('Error: ', error);
     }
