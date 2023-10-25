@@ -270,20 +270,20 @@ export class Client {
      * Create a signature unlock using the given secret manager.
      *
      * @param secretManager One of the supported secret managers.
-     * @param transactionHash The hash of the transaction.
+     * @param transactionSigningHash The hash of the transaction.
      * @param chain A BIP44 chain
      * @returns The corresponding unlock condition.
      */
     async signatureUnlock(
         secretManager: SecretManagerType,
-        transactionHash: HexEncodedString,
+        transactionSigningHash: HexEncodedString,
         chain: Bip44,
     ): Promise<UnlockCondition> {
         const response = await this.methodHandler.callMethod({
             name: 'signatureUnlock',
             data: {
                 secretManager,
-                transactionHash,
+                transactionSigningHash,
                 chain,
             },
         });

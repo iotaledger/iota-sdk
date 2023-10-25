@@ -96,10 +96,10 @@ pub trait SecretManage: Send + Sync {
         chain: Bip44,
     ) -> Result<(secp256k1_ecdsa::PublicKey, secp256k1_ecdsa::RecoverableSignature), Self::Error>;
 
-    /// Signs `transaction_hash` using the given `chain`, returning an [`Unlock`].
-    async fn signature_unlock(&self, transaction_hash: &[u8; 32], chain: Bip44) -> Result<Unlock, Self::Error> {
+    /// Signs `transaction_signing_hash` using the given `chain`, returning an [`Unlock`].
+    async fn signature_unlock(&self, transaction_signing_hash: &[u8; 32], chain: Bip44) -> Result<Unlock, Self::Error> {
         Ok(Unlock::from(SignatureUnlock::new(Signature::from(
-            self.sign_ed25519(transaction_hash, chain).await?,
+            self.sign_ed25519(transaction_signing_hash, chain).await?,
         ))))
     }
 

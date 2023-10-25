@@ -277,14 +277,14 @@ class SecretManager():
             'preparedTransactionData': prepared_transaction_data.to_dict()
         }))
 
-    def signature_unlock(self, transaction_essence_hash: HexStr, chain: Bip44):
-        """Sign a transaction essence hash.
+    def signature_unlock(self, transaction_signing_hash: HexStr, chain: Bip44):
+        """Sign a transaction hash.
 
         Args:
-            transaction_essence_hash: The transaction essence hash to sign.
+            transaction_signing_hash: The transaction hash to sign.
             chain: The chain to sign with.
         """
         return self._call_method('signatureUnlock', {
-            'transactionEssenceHash': transaction_essence_hash,
+            'transactionSigningHash': transaction_signing_hash,
             'chain': chain.__dict__,
         })
