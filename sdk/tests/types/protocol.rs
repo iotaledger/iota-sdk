@@ -40,7 +40,7 @@
 //         "genesisUnixTimestamp":"1695275822",
 //         "slotDurationInSeconds":10,
 //         "slotsPerEpochExponent":13,
-//         "manaStructure":{
+//         "manaParameters":{
 //           "bitsCount":63,
 //           "generationRate":1,
 //           "generationRateExponent":17,
