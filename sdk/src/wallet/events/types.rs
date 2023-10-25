@@ -229,8 +229,8 @@ impl Serialize for TransactionProgressEvent {
         S: Serializer,
     {
         #[derive(Serialize)]
-        struct PreparedTransactionHash_<'a> {
-            hash: &'a str,
+        struct PreparedTransactionSigningHash_<'a> {
+            signing_hash: &'a str,
         }
 
         #[derive(Serialize)]
@@ -239,7 +239,7 @@ impl Serialize for TransactionProgressEvent {
             T0,
             T1(&'a AddressData),
             T2(&'a PreparedTransactionDataDto),
-            T3(PreparedTransactionHash_<'a>),
+            T3(PreparedTransactionSigningHash_<'a>),
             T4,
             T5,
         }
@@ -265,7 +265,7 @@ impl Serialize for TransactionProgressEvent {
             },
             Self::PreparedTransactionSigningHash(e) => TypedTransactionProgressEvent_ {
                 kind: 3,
-                event: TransactionProgressEvent_::T3(PreparedTransactionHash_ { hash: e }),
+                event: TransactionProgressEvent_::T3(PreparedTransactionSigningHash_ { signing_hash: e }),
             },
             Self::SigningTransaction => TypedTransactionProgressEvent_ {
                 kind: 4,
