@@ -22,7 +22,7 @@
 //           "vByteFactorStakingFeature":0,
 //           "vByteFactorDelegation":0
 //         },
-//         "workScoreStructure":{
+//         "workScoreParameters":{
 //           "dataByte":0,
 //           "block":1,
 //           "missingParent":0,

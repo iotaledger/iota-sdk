@@ -39,8 +39,8 @@ pub struct ProtocolParameters {
     pub(crate) bech32_hrp: Hrp,
     /// The rent structure used by given node/network.
     pub(crate) rent_structure: RentStructure,
-    /// The work score structure used by the node/network.
-    pub(crate) work_score_structure: WorkScoreStructure,
+    /// The work score parameters used by the node/network.
+    pub(crate) work_score_parameters: WorkScoreParameters,
     /// TokenSupply defines the current token supply on the network.
     #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
     pub(crate) token_supply: u64,
@@ -95,7 +95,7 @@ impl Default for ProtocolParameters {
             network_name: String::from("iota-core-testnet").try_into().unwrap(),
             bech32_hrp: Hrp::from_str_unchecked("smr"),
             rent_structure: Default::default(),
-            work_score_structure: Default::default(),
+            work_score_parameters: Default::default(),
             token_supply: 1_813_620_509_061_365,
             genesis_unix_timestamp: 1582328545,
             slot_duration_in_seconds: 10,
@@ -199,7 +199,7 @@ impl ProtocolParameters {
 )]
 #[packable(unpack_error = Error)]
 #[getset(get_copy = "pub")]
-pub struct WorkScoreStructure {
+pub struct WorkScoreParameters {
     /// Modifier for network traffic per byte.
     data_byte: u32,
     /// Modifier for work done to process a block.
@@ -226,7 +226,7 @@ pub struct WorkScoreStructure {
     min_strong_parents_threshold: u8,
 }
 
-impl Default for WorkScoreStructure {
+impl Default for WorkScoreParameters {
     fn default() -> Self {
         Self {
             data_byte: 0,

@@ -89,8 +89,8 @@ class RentStructure:
 
 @json
 @dataclass
-class WorkScoreStructure:
-    """Work structure lists the Work Score of each type, it is used to denote the computation costs of processing an object.
+class WorkScoreParameters:
+    """Work Score Parameters lists the work score of each type, it is used to denote the computation costs of processing an object.
 
     Attributes:
         data_byte: Data_kibibyte accounts for the network traffic per kibibyte.
@@ -227,7 +227,7 @@ class ProtocolParameters:
                     Value `iota` indicates that the node supports mainnet addresses.
                     Value `atoi` indicates that the node supports testnet addresses.
         rent_structure: The rent structure used by a given node/network.
-        work_score_structure: Work structure lists the Work Score of each type, it is used to denote the computation costs of processing an object.
+        work_score_parameters: Work Score Parameters lists the work score of each type, it is used to denote the computation costs of processing an object.
         token_supply: Current supply of the base token. Plain string encoded number.
         genesis_unix_timestamp: The genesis timestamp at which the slots start to count.
         slot_duration_in_seconds: The duration of a slot, in seconds.
@@ -249,7 +249,7 @@ class ProtocolParameters:
     network_name: str
     bech32_hrp: str
     rent_structure: RentStructure
-    work_score_structure: WorkScoreStructure
+    work_score_parameters: WorkScoreParameters
     token_supply: int = field(metadata=config(
         encoder=str
     ))

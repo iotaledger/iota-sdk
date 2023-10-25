@@ -44,9 +44,9 @@ export interface ProtocolParameters {
      */
     rentStructure: RentStructure;
     /**
-     * Work structure lists the Work Score of each type, it is used to denote the computation costs of processing an object.
+     * Work Score Parameters lists the work score of each type, it is used to denote the computation costs of processing an object.
      */
-    workScoreStructure: WorkScoreStructure;
+    workScoreParameters: WorkScoreParameters;
     /**
      * Current supply of base token.
      */
@@ -141,9 +141,9 @@ export interface RewardsParameters {
 }
 
 /**
- * Work structure lists the Work Score of each type, it is used to denote the computation costs of processing an object.
+ * Work Score Parameters lists the work score of each type, it is used to denote the computation costs of processing an object.
  */
-export interface WorkScoreStructure {
+export interface WorkScoreParameters {
     /**
      * DataByte accounts for the network traffic per kibibyte.
      */
