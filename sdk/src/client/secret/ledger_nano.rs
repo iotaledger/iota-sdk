@@ -269,7 +269,6 @@ impl SecretManage for LedgerSecretManager {
 
         let bip32_account = account_index.harden().into();
 
-        // pack transaction and hash into vec
         let transaction_bytes = prepared_transaction.transaction.pack_to_vec();
         let transaction_signing_hash = prepared_transaction.transaction.signing_hash().to_vec();
 

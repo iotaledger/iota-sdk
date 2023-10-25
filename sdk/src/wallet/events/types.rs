@@ -305,7 +305,7 @@ impl<'de> Deserialize<'de> for TransactionProgressEvent {
                 3 => Self::PreparedTransactionSigningHash(
                     PreparedTransactionSigningHash_::deserialize(value)
                         .map_err(|e| {
-                            serde::de::Error::custom(format!("cannot deserialize PreparedTransactionHash: {e}"))
+                            serde::de::Error::custom(format!("cannot deserialize PreparedTransactionSigningHash: {e}"))
                         })?
                         .signing_hash,
                 ),
