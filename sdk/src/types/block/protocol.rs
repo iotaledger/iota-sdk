@@ -10,7 +10,7 @@ use packable::{prefix::StringPrefix, Packable, PackableExt};
 
 use super::{
     address::Hrp,
-    mana::{ManaStructure, RewardsParameters},
+    mana::{ManaParameters, RewardsParameters},
     slot::{EpochIndex, SlotIndex},
 };
 use crate::types::block::{helper::network_name_to_id, output::RentStructure, ConvertTo, Error, PROTOCOL_VERSION};
@@ -53,7 +53,7 @@ pub struct ProtocolParameters {
     pub(crate) slots_per_epoch_exponent: u8,
     /// The parameters used for mana calculations.
     #[getset(skip)]
-    pub(crate) mana_structure: ManaStructure,
+    pub(crate) mana_structure: ManaParameters,
     /// The unbonding period in epochs before an account can stop staking.
     pub(crate) staking_unbonding_period: u32,
     /// The number of validation blocks that each validator should issue each slot.
@@ -152,7 +152,7 @@ impl ProtocolParameters {
     }
 
     /// Returns the parameters used for mana calculations.
-    pub fn mana_structure(&self) -> &ManaStructure {
+    pub fn mana_structure(&self) -> &ManaParameters {
         &self.mana_structure
     }
 

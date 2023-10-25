@@ -14,7 +14,7 @@ use packable::{bounded::BoundedU16, prefix::BoxedSlicePrefix, Packable};
 
 #[cfg(feature = "serde")]
 pub use self::allotment::dto::ManaAllotmentDto;
-pub use self::{allotment::ManaAllotment, rewards::RewardsParameters, structure::ManaStructure};
+pub use self::{allotment::ManaAllotment, rewards::RewardsParameters, structure::ManaParameters};
 use super::{output::AccountId, protocol::ProtocolParameters, Error};
 
 pub(crate) type ManaAllotmentCount =
