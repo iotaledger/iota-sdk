@@ -253,7 +253,7 @@ class PreparedTransactionSigningHashProgress extends TransactionProgress {
     signingHash: HexEncodedString;
 
     /**
-     * @param signing_hash The signing hash of the transaction.
+     * @param signingHash The signing hash of the transaction.
      */
     constructor(signingHash: HexEncodedString) {
         super(TransactionProgressType.PreparedTransactionSigningHash);
