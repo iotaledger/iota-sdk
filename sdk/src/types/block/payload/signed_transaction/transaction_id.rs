@@ -21,7 +21,7 @@ impl TransactionId {
 }
 
 crate::impl_id!(
-    /// The hash of a [`Transaction`](crate::types::block::payload::signed_transaction::Transaction).
+    /// The signing hash of a [`Transaction`](crate::types::block::payload::signed_transaction::Transaction).
     pub TransactionSigningHash {
         pub const LENGTH: usize = 32;
     }
