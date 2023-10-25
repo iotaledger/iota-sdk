@@ -33,8 +33,8 @@ pub enum SecretManagerMethod {
     /// Create a single Signature Unlock.
     #[serde(rename_all = "camelCase")]
     SignatureUnlock {
-        /// Transaction Hash
-        transaction_hash: String,
+        /// Transaction signing hash
+        transaction_signing_hash: String,
         /// Chain to sign the hash with
         #[serde(with = "Bip44Def")]
         chain: Bip44,
@@ -78,7 +78,7 @@ mod test {
     #[test]
     fn bip44_deserialization() {
         let signature_unlock_method: super::SecretManagerMethod = serde_json::from_str(
-            r#"{"name": "signatureUnlock", "data": {"transactionHash": "txhash", "chain": {"addressIndex": 1}}}"#,
+            r#"{"name": "signatureUnlock", "data": {"transactionSigningHash": "txhash", "chain": {"addressIndex": 1}}}"#,
         )
         .unwrap();
 
@@ -87,7 +87,7 @@ mod test {
             serde_json::json!({
                 "name": "signatureUnlock",
                 "data": {
-                    "transactionHash": "txhash",
+                    "transactionSigningHash": "txhash",
                     "chain": {
                         "coinType": 4218,
                         "account": 0,
