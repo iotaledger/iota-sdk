@@ -53,7 +53,7 @@ pub struct ProtocolParameters {
     pub(crate) slots_per_epoch_exponent: u8,
     /// The parameters used for mana calculations.
     #[getset(skip)]
-    pub(crate) mana_structure: ManaParameters,
+    pub(crate) mana_parameters: ManaParameters,
     /// The unbonding period in epochs before an account can stop staking.
     pub(crate) staking_unbonding_period: u32,
     /// The number of validation blocks that each validator should issue each slot.
@@ -101,7 +101,7 @@ impl Default for ProtocolParameters {
             slot_duration_in_seconds: 10,
             epoch_nearing_threshold: 20,
             slots_per_epoch_exponent: Default::default(),
-            mana_structure: Default::default(),
+            mana_parameters: Default::default(),
             staking_unbonding_period: 10,
             validation_blocks_per_slot: 10,
             punishment_epochs: 9,
@@ -152,8 +152,8 @@ impl ProtocolParameters {
     }
 
     /// Returns the parameters used for mana calculations.
-    pub fn mana_structure(&self) -> &ManaParameters {
-        &self.mana_structure
+    pub fn mana_parameters(&self) -> &ManaParameters {
+        &self.mana_parameters
     }
 
     /// Returns the slots per epoch of the [`ProtocolParameters`].
