@@ -25,9 +25,9 @@ impl ClientInner {
     /// Query parameters: "hasNativeTokens", "minNativeTokenCount", "maxNativeTokenCount", "unlockableByAddress",
     /// "createdBefore", "createdAfter", "cursor", "pageSize".
     /// Returns Err(Node(NotFound) if no results are found.
-    /// api/indexer/v1/outputs
+    /// api/indexer/v2/outputs
     pub async fn output_ids(&self, query_parameters: OutputQueryParameters) -> Result<OutputIdsResponse> {
-        let route = "api/indexer/v1/outputs";
+        let route = "api/indexer/v2/outputs";
 
         self.get_output_ids(route, query_parameters, true, false).await
     }
