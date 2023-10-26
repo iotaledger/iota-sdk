@@ -7,6 +7,7 @@ use iota_sdk::types::block::{
     rand::address::rand_ed25519_address,
 };
 use packable::PackableExt;
+use pretty_assertions::assert_eq;
 
 #[test]
 fn capabilities() {
