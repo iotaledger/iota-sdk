@@ -11,8 +11,8 @@ use iota_sdk::{
         block::{
             address::{Address, Bech32Address, ToBech32Ext},
             output::{
-                unlock_condition::AddressUnlockCondition, AliasId, BasicOutputBuilder, FoundryId, NativeToken,
-                NativeTokensBuilder, NftId, Output, OutputId, TokenId,
+                unlock_condition::AddressUnlockCondition, AliasId, AliasOutput, BasicOutputBuilder, FoundryId,
+                NativeToken, NativeTokensBuilder, NftId, NftOutput, Output, OutputId, TokenId,
             },
             payload::transaction::TransactionId,
             ConvertTo,
@@ -21,7 +21,7 @@ use iota_sdk::{
     wallet::{
         account::{
             types::{AccountIdentifier, OutputData, Transaction},
-            Account, ConsolidationParams, OutputsToClaim, SyncOptions, TransactionOptions,
+            Account, ConsolidationParams, FilterOptions, OutputsToClaim, SyncOptions, TransactionOptions,
         },
         CreateNativeTokenParams, MintNftParams, SendNativeTokensParams, SendNftParams, SendParams,
     },
@@ -1119,7 +1119,10 @@ async fn get_addresses_sorted(account: &Account) -> Result<Vec<Bech32Address>, E
         .map(|address| address.address().clone())
         .chain(
             account
-                .unspent_outputs(None)
+                .unspent_outputs(FilterOptions {
+                    output_types: Some(vec![AliasOutput::KIND, NftOutput::KIND]),
+                    ..Default::default()
+                })
                 .await?
                 .into_iter()
                 .filter_map(|data| match data.output {
