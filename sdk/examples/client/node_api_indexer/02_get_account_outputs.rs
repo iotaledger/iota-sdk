@@ -12,7 +12,7 @@
 //! ```
 
 use iota_sdk::{
-    client::{node_api::indexer::query_parameters::QueryParameter, Client, Result},
+    client::{node_api::indexer::query_parameters::AccountOutputQueryParameters, Client, Result},
     types::block::address::Bech32Address,
 };
 
@@ -40,7 +40,9 @@ async fn main() -> Result<()> {
         .parse::<Bech32Address>()?;
 
     // Get output IDs of account outputs that can be controlled by this address.
-    let output_ids_response = client.account_output_ids([QueryParameter::Address(address)]).await?;
+    let output_ids_response = client
+        .account_output_ids(AccountOutputQueryParameters::new().unlockable_by_address(address))
+        .await?;
 
     println!("Account output IDs: {output_ids_response:#?}");
 

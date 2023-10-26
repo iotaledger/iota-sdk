@@ -58,6 +58,7 @@ mod tests {
     use core::str::FromStr;
 
     use crypto::hashes::blake2b::Blake2b256;
+    use pretty_assertions::assert_eq;
 
     use super::*;
     use crate::types::block::BlockId;
