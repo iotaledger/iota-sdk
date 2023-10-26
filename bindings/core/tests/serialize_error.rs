@@ -12,10 +12,9 @@ fn custom_error_serialization() {
         serde_json::to_string(&error).unwrap(),
         "{\"type\":\"client\",\"error\":\"no healthy node available\"}"
     );
-    // TODO: re-enable with an existing `WalletError`
-    // let error = Error::Wallet(WalletError::AccountNotFound("Alice".to_string()));
-    // assert_eq!(
-    //     serde_json::to_string(&error).unwrap(),
-    //     "{\"type\":\"wallet\",\"error\":\"account Alice not found\"}"
-    // );
+    let error = Error::Wallet(WalletError::MissingBipPath);
+    assert_eq!(
+        serde_json::to_string(&error).unwrap(),
+        "{\"type\":\"wallet\",\"error\":\"missing BIP path\"}"
+    );
 }
