@@ -18,9 +18,7 @@ async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
-    let alias = "Alice";
     let wallet = Wallet::builder()
-        .with_alias(alias)
         .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
         .finish()
         .await?;
@@ -60,7 +58,7 @@ async fn main() -> Result<()> {
         let accounts_after = balance.accounts();
         println!("Accounts AFTER destroying:\n{accounts_after:#?}",);
     } else {
-        println!("No Account available in account '{alias}'");
+        println!("No Account available");
     }
 
     Ok(())

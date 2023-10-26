@@ -20,7 +20,6 @@ async fn main() -> Result<()> {
 
     let wallet = Wallet::builder()
         .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
-        .with_alias("Alice")
         .finish()
         .await?;
 

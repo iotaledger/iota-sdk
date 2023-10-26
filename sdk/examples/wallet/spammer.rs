@@ -23,8 +23,6 @@ use iota_sdk::{
     wallet::{ClientOptions, FilterOptions, Result, SendParams, Wallet},
 };
 
-// The account alias used in this example.
-const ACCOUNT_ALIAS: &str = "spammer";
 // The number of spamming rounds.
 const NUM_ROUNDS: usize = 1000;
 // The amount to send in each transaction
@@ -61,7 +59,6 @@ async fn main() -> Result<()> {
         .with_client_options(client_options)
         .with_bip_path(bip_path)
         .with_address(address)
-        .with_alias(ACCOUNT_ALIAS)
         .finish()
         .await?;
 

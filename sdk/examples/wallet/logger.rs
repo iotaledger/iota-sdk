@@ -40,7 +40,6 @@ async fn main() -> Result<()> {
         .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
         .with_client_options(client_options)
         .with_bip_path(Bip44::new(SHIMMER_COIN_TYPE))
-        .with_alias("Alice")
         .finish()
         .await?;
 

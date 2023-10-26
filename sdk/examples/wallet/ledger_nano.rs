@@ -23,8 +23,6 @@ use iota_sdk::{
     wallet::{ClientOptions, Result, Wallet},
 };
 
-// The account alias used in this example
-const ALIAS: &str = "ledger";
 // The address to send coins to
 const RECV_ADDRESS: &str = "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu";
 // The amount of base coins we'll send
@@ -42,7 +40,6 @@ async fn main() -> Result<()> {
         .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
         .with_client_options(client_options)
         .with_bip_path(Bip44::new(SHIMMER_COIN_TYPE))
-        .with_alias(ALIAS)
         .finish()
         .await?;
 

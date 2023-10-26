@@ -201,6 +201,8 @@ where
                 .as_ref()
                 .and_then(|builder| builder.alias.clone())
                 .unwrap_or_else(|| {
+                    // TODO: I'm not sure we should use anything from the filesystem for the wallet since it can be
+                    // moved. So just default to ""?
                     #[cfg(feature = "storage")]
                     let alias = storage_options.path().to_string_lossy().to_string();
                     #[cfg(not(feature = "storage"))]

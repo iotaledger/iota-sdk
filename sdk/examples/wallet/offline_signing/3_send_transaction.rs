@@ -31,7 +31,6 @@ async fn main() -> Result<()> {
     let wallet = Wallet::builder()
         .with_storage_path(ONLINE_WALLET_DB_PATH)
         .with_secret_manager(SecretManager::Placeholder)
-        .with_alias("Alice")
         .finish()
         .await?;
 
