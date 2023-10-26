@@ -147,7 +147,7 @@ impl TryFrom<u8> for TransactionFailureReason {
 }
 
 ///
-pub struct ValidationContext<'a> {
+pub struct SemanticValidationContext<'a> {
     pub(crate) transaction: &'a Transaction,
     pub(crate) transaction_signing_hash: TransactionSigningHash,
     // TODO
@@ -166,7 +166,7 @@ pub struct ValidationContext<'a> {
     pub(crate) simple_deposits: HashMap<Address, u64>,
 }
 
-impl<'a> ValidationContext<'a> {
+impl<'a> SemanticValidationContext<'a> {
     ///
     pub fn new(
         transaction_id: &TransactionId,
@@ -213,12 +213,11 @@ impl<'a> ValidationContext<'a> {
 
 ///
 pub fn semantic_validation(
-    mut context: ValidationContext<'_>,
+    mut context: SemanticValidationContext<'_>,
     inputs: &[(&OutputId, &Output)],
-    unlocks: &Unlocks,
 ) -> Result<Option<TransactionFailureReason>, Error> {
     // Validation of inputs.
-    for ((output_id, consumed_output), unlock) in inputs.iter().zip(unlocks.iter()) {
+    for ((output_id, consumed_output), unlock) in inputs.iter().zip(context.unlocks.iter()) {
         let (conflict, amount, mana, consumed_native_tokens, unlock_conditions) = match consumed_output {
             Output::Basic(output) => (
                 output.unlock(output_id, unlock, inputs, &mut context),

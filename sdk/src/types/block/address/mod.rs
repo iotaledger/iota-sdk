@@ -23,7 +23,7 @@ pub use self::{
 };
 use crate::types::block::{
     output::{Output, OutputId},
-    semantic::{TransactionFailureReason, ValidationContext},
+    semantic::{SemanticValidationContext, TransactionFailureReason},
     signature::Signature,
     unlock::Unlock,
     ConvertTo, Error,
@@ -101,7 +101,7 @@ impl Address {
         &self,
         unlock: &Unlock,
         inputs: &[(&OutputId, &Output)],
-        context: &mut ValidationContext<'_>,
+        context: &mut SemanticValidationContext<'_>,
     ) -> Result<(), TransactionFailureReason> {
         match (self, unlock) {
             (Self::Ed25519(ed25519_address), Unlock::Signature(unlock)) => {
