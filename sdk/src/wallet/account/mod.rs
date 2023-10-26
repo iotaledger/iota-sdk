@@ -294,9 +294,7 @@ impl AccountInner {
     /// Returns all addresses of the account
     pub async fn addresses(&self) -> Result<Vec<AccountAddress>> {
         let account_details = self.details().await;
-        let mut all_addresses = account_details.public_addresses().clone();
-        all_addresses.extend(account_details.internal_addresses().clone());
-        Ok(all_addresses.to_vec())
+        Ok(account_details.addresses())
     }
 
     /// Returns all public addresses of the account
@@ -442,6 +440,15 @@ impl AccountInner {
         }
 
         transactions
+    }
+}
+
+impl AccountDetails {
+    /// Returns all addresses of the account
+    pub(crate) fn addresses(&self) -> Vec<AccountAddress> {
+        let mut all_addresses = self.public_addresses().clone();
+        all_addresses.extend(self.internal_addresses().clone());
+        all_addresses.to_vec()
     }
 }
 

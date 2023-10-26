@@ -71,8 +71,7 @@ where
         #[cfg(feature = "participation")]
         let voting_output = account_details.get_voting_output()?;
 
-        let mut account_addresses = account_details.public_addresses().clone();
-        account_addresses.extend(account_details.internal_addresses().clone());
+        let account_addresses = account_details.addresses();
 
         let claimable_outputs = account_details.claimable_outputs(OutputsToClaim::All, local_time)?;
 
