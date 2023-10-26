@@ -43,7 +43,6 @@ async fn main() -> Result<()> {
     let client_options = ClientOptions::new().with_node(&std::env::var("NODE_URL").unwrap())?;
     let secret_manager = MnemonicSecretManager::try_from_mnemonic(std::env::var("MNEMONIC").unwrap())?;
 
-    // TODO: in this case we can just let the builder generate the wallet address ... so remove?
     let bip_path = Bip44::new(SHIMMER_COIN_TYPE);
     let address = Bech32Address::new(
         Hrp::from_str_unchecked("smr"),
