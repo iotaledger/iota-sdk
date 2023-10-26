@@ -10,7 +10,7 @@ use crate::{
     types::block::{
         output::{Output, OutputId},
         payload::signed_transaction::{SignedTransactionPayload, Transaction},
-        semantic::{semantic_validation, SemanticValidationContext, TransactionFailureReason},
+        semantic::{SemanticValidationContext, TransactionFailureReason},
         signature::Ed25519Signature,
         BlockId, BlockWrapper,
     },
@@ -37,13 +37,13 @@ pub fn verify_semantic(
         .collect::<Vec<(&OutputId, &Output)>>();
 
     let context = SemanticValidationContext::new(
-        &transaction_id,
         transaction_payload.transaction(),
+        &transaction_id,
         &inputs,
         transaction_payload.unlocks(),
     );
 
-    Ok(semantic_validation(context)?)
+    Ok(context.validate()?)
 }
 
 /// Verifies that the signed transaction payload doesn't exceed the block size limit with 8 parents.
