@@ -1116,7 +1116,7 @@ async fn get_addresses_sorted(account: &Account) -> Result<Vec<Bech32Address>, E
         .addresses()
         .await?
         .iter()
-        .map(|address| address.address().clone())
+        .map(|address| *address.address())
         .chain(
             account
                 .unspent_outputs(FilterOptions {
