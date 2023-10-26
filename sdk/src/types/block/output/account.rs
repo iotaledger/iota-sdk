@@ -645,7 +645,6 @@ fn verify_unlock_conditions(unlock_conditions: &UnlockConditions, account_id: &A
 
 #[cfg(feature = "serde")]
 pub(crate) mod dto {
-
     use serde::{Deserialize, Serialize};
 
     use super::*;
