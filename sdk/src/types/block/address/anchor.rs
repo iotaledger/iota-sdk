@@ -5,7 +5,10 @@ use core::str::FromStr;
 
 use derive_more::{AsRef, Deref, From};
 
-use crate::types::block::{output::AnchorId, Error};
+use crate::types::block::{
+    output::{AnchorId, OutputId},
+    Error,
+};
 
 /// An anchor address.
 #[derive(Clone, Copy, Eq, PartialEq, Ord, PartialOrd, Hash, From, AsRef, Deref, packable::Packable)]
@@ -42,6 +45,12 @@ impl FromStr for AnchorAddress {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         Ok(Self::new(AnchorId::from_str(s)?))
+    }
+}
+
+impl From<&OutputId> for AnchorAddress {
+    fn from(output_id: &OutputId) -> Self {
+        Self(AnchorId::from(output_id))
     }
 }
 
