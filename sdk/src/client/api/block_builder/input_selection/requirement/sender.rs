@@ -42,8 +42,7 @@ impl InputSelection {
                     Err(e) => Err(e),
                 }
             }
-            Address::Anchor(_) => todo!(),
-            _ => todo!("What do we do here?"),
+            _ => Err(Error::UnsupportedAddressType(address.kind())),
         }
     }
 }
