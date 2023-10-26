@@ -961,25 +961,10 @@ async fn print_address(account: &Account, address: &Bech32Address) -> Result<(),
     println_log_info!("{:<11}{}", "Hex:", address.inner());
     println_log_info!("{:<11}{}", "Type:", address.inner().kind_str());
 
-    let unspent_outputs = account
-        .unspent_outputs(None)
-        .await?
-        .into_iter()
-        .filter(|data| {
-            &data.address == address.inner()
-                || match &data.output {
-                    Output::Basic(basic) => basic.address() == address.inner(),
-                    Output::Nft(nft) => &Address::Nft(nft.nft_address(&data.output_id)) == address.inner(),
-                    Output::Alias(alias) => &Address::Alias(alias.alias_address(&data.output_id)) == address.inner(),
-                    Output::Foundry(foundry) => &Address::Alias(*foundry.alias_address()) == address.inner(),
-                    _ => false,
-                }
-        })
-        .collect::<Vec<_>>();
-
+    let unspent_outputs = account.unspent_outputs(None).await?;
     let current_time = iota_sdk::utils::unix_timestamp_now().as_secs() as u32;
 
-    let mut outputs: Vec<(OutputId, String)> = Vec::new();
+    let mut outputs = Vec::new();
     let mut amount = 0;
     let mut native_tokens = NativeTokensBuilder::new();
     let mut nfts = Vec::new();
@@ -988,7 +973,6 @@ async fn print_address(account: &Account, address: &Bech32Address) -> Result<(),
     for (output_id, output_data) in unspent_outputs.into_iter().map(|data| (data.output_id, data)) {
         outputs.push((output_id, output_data.output.kind_str().to_string()));
 
-        // Output might be associated with the address, but can't be unlocked by it, so we check that here.
         // Panic: cannot fail for outputs belonging to an account.
         let (required_address, _) = output_data
             .output
@@ -1004,11 +988,10 @@ async fn print_address(account: &Account, address: &Bech32Address) -> Result<(),
                 Output::Nft(nft) => nfts.push(nft.nft_id_non_null(&output_id)),
                 Output::Basic(_) | Output::Foundry(_) | Output::Treasury(_) => {}
             }
-            let unlock_conditions = output_data
+            let sdr_amount = output_data
                 .output
                 .unlock_conditions()
-                .expect("output must have unlock conditions");
-            let sdr_amount = unlock_conditions
+                .unwrap()
                 .storage_deposit_return()
                 .map(|sdr| sdr.amount())
                 .unwrap_or(0);
