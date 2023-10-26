@@ -112,7 +112,6 @@ async fn changed_bip_path() -> Result<()> {
                 mnemonic,
             )?))
             .with_storage_path(storage_path)
-            .with_alias("Bob")
             .finish()
             .await
             .is_ok()
