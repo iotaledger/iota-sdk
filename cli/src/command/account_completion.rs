@@ -13,6 +13,7 @@ pub struct AccountCompleter;
 
 const ACCOUNT_COMMANDS: &[&str] = &[
     "accounts",
+    "address",
     "addresses",
     "balance",
     "burn-native-token",
