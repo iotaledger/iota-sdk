@@ -971,8 +971,6 @@ async fn print_address(account: &Account, address: &Bech32Address) -> Result<(),
     let mut aliases = Vec::new();
 
     for (output_id, output_data) in unspent_outputs.into_iter().map(|data| (data.output_id, data)) {
-        outputs.push((output_id, output_data.output.kind_str().to_string()));
-
         // Panic: cannot fail for outputs belonging to an account.
         let (required_address, _) = output_data
             .output
@@ -980,14 +978,18 @@ async fn print_address(account: &Account, address: &Bech32Address) -> Result<(),
             .unwrap();
 
         if address.inner() == &required_address {
+            outputs.push((output_id, output_data.output.kind_str().to_string()));
+
             if let Some(nts) = output_data.output.native_tokens() {
                 native_tokens.add_native_tokens(nts.clone())?;
             }
+
             match &output_data.output {
                 Output::Alias(alias) => aliases.push(alias.alias_id_non_null(&output_id)),
                 Output::Nft(nft) => nfts.push(nft.nft_id_non_null(&output_id)),
                 Output::Basic(_) | Output::Foundry(_) | Output::Treasury(_) => {}
             }
+
             let sdr_amount = output_data
                 .output
                 .unlock_conditions()
