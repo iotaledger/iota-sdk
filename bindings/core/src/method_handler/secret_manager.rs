@@ -1,13 +1,14 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+#[cfg(feature = "ledger_nano")]
+use iota_sdk::client::secret::ledger_nano::LedgerSecretManager;
+#[cfg(feature = "stronghold")]
+use iota_sdk::client::secret::stronghold::StrongholdSecretManager;
 use iota_sdk::{
     client::{
         api::{GetAddressesOptions, PreparedTransactionData},
-        secret::{
-            ledger_nano::LedgerSecretManager, stronghold::StrongholdSecretManager, DowncastSecretManager, SecretManage,
-            SignBlock,
-        },
+        secret::{DowncastSecretManager, SecretManage, SignBlock},
     },
     types::{
         block::{address::ToBech32Ext, core::UnsignedBlock, unlock::Unlock, SignedBlockDto},
