@@ -17,7 +17,7 @@ from iota_sdk.types.payload import TransactionPayload
 
 # Required to prevent circular import
 if TYPE_CHECKING:
-    from bindings.python.iota_sdk.types.block.signed_block import SignedBlock
+    from iota_sdk.types.block.signed_block import SignedBlock
 
 # pylint: disable=too-many-public-methods
 
