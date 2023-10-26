@@ -36,7 +36,7 @@ async fn main() -> Result<()> {
     println!("Issuance:\n{issuance:#?}");
 
     // Create and send the block with custom parents.
-    // TODO set Some(issuance.strong_parents()?
+    // TODO build block with custom parents, but without `build_basic_block()`
     let block = client
         .build_basic_block(issuer_id, None)
         .await?
