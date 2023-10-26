@@ -10,7 +10,7 @@ use crate::{
         api::input_selection::Error as InputSelectionError,
         constants::FIVE_MINUTES_IN_SECONDS,
         error::{Error, Result},
-        node_api::indexer::query_parameters::QueryParameter,
+        node_api::indexer::query_parameters::BasicOutputQueryParameters,
         unix_timestamp_now, Client,
     },
     types::block::{
@@ -64,14 +64,7 @@ impl Client {
     pub async fn find_inputs(&self, addresses: Vec<Bech32Address>, amount: u64) -> Result<Vec<UtxoInput>> {
         // Get outputs from node and select inputs
         let available_outputs = futures::stream::iter(addresses)
-            .then(|address| {
-                self.basic_output_ids([
-                    QueryParameter::Address(address),
-                    QueryParameter::HasExpiration(false),
-                    QueryParameter::HasTimelock(false),
-                    QueryParameter::HasStorageDepositReturn(false),
-                ])
-            })
+            .then(|address| self.basic_output_ids(BasicOutputQueryParameters::only_address_unlock_condition(address)))
             .and_then(|res| async {
                 let items = res.items;
                 self.get_outputs_with_metadata(&items).await

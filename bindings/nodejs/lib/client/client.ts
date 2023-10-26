@@ -868,7 +868,7 @@ export class Client {
     /**
      * Extension method which provides request methods for plugins.
      *
-     * @param basePluginPath The base path for the plugin eg indexer/v1/ .
+     * @param basePluginPath The base path for the plugin eg indexer/v2/ .
      * @param method The http method.
      * @param endpoint The path for the plugin request.
      * @param queryParams Additional query params for the request.

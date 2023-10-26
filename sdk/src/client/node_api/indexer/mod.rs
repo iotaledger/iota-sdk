@@ -6,7 +6,7 @@
 pub mod query_parameters;
 pub mod routes;
 
-pub(crate) use self::query_parameters::{QueryParameter, QueryParameters};
+use self::query_parameters::QueryParameter;
 use crate::{
     client::{ClientInner, Result},
     types::api::plugins::indexer::OutputIdsResponse,
@@ -14,11 +14,11 @@ use crate::{
 
 impl ClientInner {
     /// Get all output ids for a provided URL route and query parameters.
-    /// If a `QueryParameter::Cursor(_)` is provided, only a single page will be queried.
+    /// If an empty cursor is provided, only a single page will be queried.
     pub async fn get_output_ids(
         &self,
         route: &str,
-        mut query_parameters: QueryParameters,
+        mut query_parameters: impl QueryParameter,
         need_quorum: bool,
         prefer_permanode: bool,
     ) -> Result<OutputIdsResponse> {
@@ -28,8 +28,11 @@ impl ClientInner {
             items: Vec::new(),
         };
 
-        // Return early with only a single page if a `QueryParameter::Cursor(_)` is provided.
-        let return_early = query_parameters.contains(QueryParameter::Cursor(String::new()).kind());
+        let query_string = query_parameters.to_query_string();
+        // Return early with only a single page if an empty string is provided as cursor.
+        let return_early = query_string
+            .map(|s| s.contains("cursor=&") || s.ends_with("cursor="))
+            .unwrap_or(false);
 
         while let Some(cursor) = {
             let output_ids_response = self
@@ -51,7 +54,7 @@ impl ClientInner {
 
             &merged_output_ids_response.cursor
         } {
-            query_parameters.replace(QueryParameter::Cursor(cursor.to_string()));
+            query_parameters.replace_cursor(cursor.to_string());
         }
 
         Ok(merged_output_ids_response)
