@@ -957,9 +957,11 @@ pub async fn voting_output_command(account: &Account) -> Result<(), Error> {
 }
 
 async fn print_address(account: &Account, address: &Bech32Address) -> Result<(), Error> {
-    println_log_info!("{:<11}{}", "Bech32:", address);
-    println_log_info!("{:<11}{}", "Hex:", address.inner());
-    println_log_info!("{:<11}{}", "Type:", address.inner().kind_str());
+    let mut formatted_string = String::new();
+
+    formatted_string.push_str(&format!("{:<11}{}\n", "Bech32:", address));
+    formatted_string.push_str(&format!("{:<11}{}\n", "Hex:", address.inner()));
+    formatted_string.push_str(&format!("{:<11}{}\n", "Type:", address.inner().kind_str()));
 
     let unspent_outputs = account.unspent_outputs(None).await?;
     let current_time = iota_sdk::utils::unix_timestamp_now().as_secs() as u32;
@@ -1004,43 +1006,45 @@ async fn print_address(account: &Account, address: &Bech32Address) -> Result<(),
     }
 
     // Coins table
-    println_log_info!("{:<11}{}", "Coins:", amount);
+    formatted_string.push_str(&format!("{:<11}{}\n", "Coins:", amount));
 
     // Outputs table
     if !outputs.is_empty() {
-        println_log_info!("Outputs:");
+        formatted_string.push_str("Outputs:\n");
         for (id, kind) in outputs {
-            println_log_info!("  {id}\t{kind}");
+            formatted_string.push_str(&format!("  {id}\t{kind}\n"));
         }
     }
 
     // Native tokens table
     let native_tokens = native_tokens.finish_vec()?;
     if !native_tokens.is_empty() {
-        println_log_info!("Native Tokens:");
+        formatted_string.push_str("Native Tokens:\n");
         for (id, amount) in native_tokens
             .into_iter()
             .map(|nt| (*nt.token_id(), nt.amount().to_string()))
         {
-            println_log_info!("  {id}\t{amount}");
+            formatted_string.push_str(&format!("  {id}\t{amount}\n"));
         }
     }
 
     // NFT table
     if !nfts.is_empty() {
-        println_log_info!("NFTs:");
+        formatted_string.push_str("NFTs:\n");
         for id in nfts.into_iter() {
-            println_log_info!("  {id}");
+            formatted_string.push_str(&format!("  {id}\n"));
         }
     }
 
     // Aliases table
     if !aliases.is_empty() {
-        println_log_info!("Aliases:");
+        formatted_string.push_str("Aliases:\n");
         for id in aliases.into_iter() {
-            println_log_info!("  {id}");
+            formatted_string.push_str(&format!("  {id}\n"));
         }
     }
+
+    println_log_info!("{formatted_string}");
 
     Ok(())
 }
