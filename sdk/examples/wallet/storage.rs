@@ -40,7 +40,6 @@ async fn main() -> Result<()> {
 
     sync_print_balance(&wallet).await?;
 
-
     println!("Example finished successfully");
     Ok(())
 }

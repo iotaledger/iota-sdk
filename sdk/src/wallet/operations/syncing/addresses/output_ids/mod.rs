@@ -12,8 +12,14 @@ use futures::FutureExt;
 use instant::Instant;
 
 use crate::{
-    client::{node_api::indexer::QueryParameter, secret::SecretManage},
-    types::block::{address::Bech32Address, output::OutputId},
+    client::{
+        node_api::indexer::query_parameters::{FoundryOutputQueryParameters, OutputQueryParameters},
+        secret::SecretManage,
+    },
+    types::block::{
+        address::{Address, Bech32Address},
+        output::OutputId,
+    },
     wallet::{
         constants::PARALLEL_REQUESTS_AMOUNT, operations::syncing::SyncOptions,
         types::address::AddressWithUnspentOutputs, Wallet,
@@ -47,7 +53,7 @@ where
         {
             return Ok(self
                 .client()
-                .output_ids([QueryParameter::UnlockableByAddress(address.clone())])
+                .output_ids(OutputQueryParameters::new().unlockable_by_address(address.clone()))
                 .await?
                 .items);
         }
@@ -153,7 +159,7 @@ where
             {
                 results.push(Ok(self
                     .client()
-                    .foundry_output_ids([QueryParameter::AccountAddress(address.clone())])
+                    .foundry_output_ids(FoundryOutputQueryParameters::new().account_address(address))
                     .await?
                     .items))
             }
@@ -166,7 +172,7 @@ where
                         let client = self.client().clone();
                         tokio::spawn(async move {
                             Ok(client
-                                .foundry_output_ids([QueryParameter::AccountAddress(bech32_address)])
+                                .foundry_output_ids(FoundryOutputQueryParameters::new().account_address(bech32_address))
                                 .await?
                                 .items)
                         })

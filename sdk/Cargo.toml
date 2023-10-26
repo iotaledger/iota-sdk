@@ -32,6 +32,7 @@ derive_more = { version = "0.99.17", default-features = false, features = [
     "add",
     "add_assign",
 ] }
+derive_setters = { version = "0.1.6", default-features = false }
 getset = { version = "0.1.2", default-features = false }
 hashbrown = { version = "0.14.1", default-features = false, features = [
     "ahash",
@@ -130,6 +131,7 @@ pretty_assertions = { version = "1.4.0", default-features = false, features = [ 
 dotenvy = { version = "0.15.7", default-features = false }
 fern-logger = { version = "0.5.0", default-features = false }
 num_cpus = { version = "1.16.0", default-features = false }
+once_cell = { version = "1.18.0", default-features = false }
 tokio = { version = "1.33.0", default-features = false, features = [
     "macros",
     "rt",
@@ -549,6 +551,11 @@ path = "examples/client/logger.rs"
 required-features = ["client"]
 
 [[example]]
+name = "quorum"
+path = "examples/client/quorum.rs"
+required-features = ["client"]
+
+[[example]]
 name = "stronghold"
 path = "examples/client/stronghold.rs"
 required-features = ["client", "stronghold"]
@@ -638,7 +645,7 @@ required-features = ["wallet", "participation"]
 [[example]]
 name = "logger"
 path = "examples/wallet/logger.rs"
-required-features = ["wallet"]
+required-features = ["wallet", "storage"]
 
 [[example]]
 name = "spammer"
