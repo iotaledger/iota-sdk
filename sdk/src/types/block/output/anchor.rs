@@ -358,21 +358,22 @@ pub(crate) type StateMetadataLength = BoundedU16<0, { AnchorOutput::STATE_METADA
 /// Describes an anchor in the ledger that can be controlled by the state and governance controllers.
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct AnchorOutput {
-    // Amount of IOTA coins held by the output.
+    /// Amount of IOTA coins held by the output.
     amount: u64,
     mana: u64,
-    // Native tokens held by the output.
+    /// Native tokens held by the output.
     native_tokens: NativeTokens,
-    // Unique identifier of the anchor.
+    /// Unique identifier of the anchor.
     anchor_id: AnchorId,
-    // A counter that must increase by 1 every time the anchor is state transitioned.
+    /// A counter that must increase by 1 every time the anchor is state transitioned.
     state_index: u32,
-    // Metadata that can only be changed by the state controller.
+    /// Metadata that can only be changed by the state controller.
     state_metadata: BoxedSlicePrefix<u8, StateMetadataLength>,
+    /// Define how the output can be unlocked in a transaction.
     unlock_conditions: UnlockConditions,
-    //
+    /// Features of the output.
     features: Features,
-    //
+    /// Immutable features of the output.
     immutable_features: Features,
 }
 
