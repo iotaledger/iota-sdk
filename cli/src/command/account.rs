@@ -1113,17 +1113,24 @@ fn transactions_ordering(a: &Transaction, b: &Transaction) -> std::cmp::Ordering
 async fn get_addresses_sorted(account: &Account) -> Result<Vec<Bech32Address>, Error> {
     let hrp = account.client().get_bech32_hrp().await?;
     let mut addresses = account
-        .unspent_outputs(None)
+        .addresses()
         .await?
-        .into_iter()
-        .filter_map(|data| match data.output {
-            Output::Alias(alias) => Some(Address::Alias(alias.alias_address(&data.output_id))),
-            Output::Nft(nft) => Some(Address::Nft(nft.nft_address(&data.output_id))),
-            Output::Basic(basic) => Some(*basic.address()),
-            _ => None,
-        })
-        .map(|address| address.to_bech32_unchecked(hrp))
+        .iter()
+        .map(|address| address.address().clone())
+        .chain(
+            account
+                .unspent_outputs(None)
+                .await?
+                .into_iter()
+                .filter_map(|data| match data.output {
+                    Output::Alias(alias) => Some(Address::Alias(alias.alias_address(&data.output_id))),
+                    Output::Nft(nft) => Some(Address::Nft(nft.nft_address(&data.output_id))),
+                    _ => None,
+                })
+                .map(|address| address.to_bech32_unchecked(hrp)),
+        )
         .collect::<Vec<_>>();
+
     addresses.sort_unstable();
 
     Ok(addresses)
