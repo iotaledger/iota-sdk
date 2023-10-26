@@ -69,9 +69,11 @@ where
         let mut total_native_tokens = NativeTokensBuilder::default();
 
         #[cfg(feature = "participation")]
-        let voting_output = self.get_voting_output().await?;
+        let voting_output = account_details.get_voting_output()?;
 
-        let account_addresses = self.addresses().await?;
+        let mut account_addresses = account_details.public_addresses().clone();
+        account_addresses.extend(account_details.internal_addresses().clone());
+
         let claimable_outputs = account_details.claimable_outputs(OutputsToClaim::All, local_time)?;
 
         for address_with_unspent_outputs in addresses_with_unspent_outputs {
