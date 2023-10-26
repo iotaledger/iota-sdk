@@ -352,7 +352,7 @@ impl StateTransitionVerifier for DelegationOutput {
         Self::transition_inner(
             current_state,
             next_state,
-            context.essence.context_inputs(),
+            context.transaction.context_inputs(),
             &context.protocol_parameters,
         )
     }

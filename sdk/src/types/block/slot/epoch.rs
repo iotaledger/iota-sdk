@@ -77,7 +77,7 @@ impl EpochIndex {
 
     /// Calculates the start slot of the given epoch.
     pub fn epoch_start(&self, slots_per_epoch_exponent: u8) -> SlotIndex {
-        SlotIndex::new(self.0 << slots_per_epoch_exponent)
+        SlotIndex(self.0 << slots_per_epoch_exponent)
     }
 
     /// Returns the slot for which to be eligible for the committee selection of epoch n, a potential validator must
