@@ -134,7 +134,6 @@ where
     /// unlocked now and also get basic outputs with only an [`AddressUnlockCondition`] unlock condition, for
     /// additional inputs
     pub async fn claimable_outputs(&self, outputs_to_claim: OutputsToClaim) -> crate::wallet::Result<Vec<OutputId>> {
-        log::debug!("[OUTPUT_CLAIMING] claimable_outputs");
         let account_details = self.details().await;
 
         let local_time = self.client().get_time_checked().await?;

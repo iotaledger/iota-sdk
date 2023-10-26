@@ -231,7 +231,6 @@ where
     ///
     /// If multiple outputs with this tag exist, the one with the largest amount will be returned.
     pub async fn get_voting_output(&self) -> Result<Option<OutputData>> {
-        log::debug!("[get_voting_output]");
         self.details().await.get_voting_output()
     }
 
@@ -302,6 +301,7 @@ impl AccountDetails {
     ///
     /// If multiple outputs with this tag exist, the one with the largest amount will be returned.
     pub(crate) fn get_voting_output(&self) -> Result<Option<OutputData>> {
+        log::debug!("[get_voting_output]");
         Ok(self
             .unspent_outputs
             .values()
