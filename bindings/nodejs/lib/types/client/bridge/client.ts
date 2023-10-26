@@ -122,8 +122,7 @@ export interface __BuildBasicBlockMethod__ {
     name: 'buildBasicBlock';
     data: {
         issuerId: IssuerId;
-        parents?: [BlockId];
-        payload: Payload;
+        payload?: Payload;
     };
 }
 

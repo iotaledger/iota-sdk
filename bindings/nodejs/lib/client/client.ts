@@ -299,19 +299,16 @@ export class Client {
      *
      * @param issuerId The identifier of the block issuer account.
      * @param payload The payload to post.
-     * @param strongParents Optional strong parents to use for the block.
      * @returns The block ID followed by the block containing the payload.
      */
     async buildBasicBlock(
         issuerId: IssuerId,
-        payload: Payload,
-        strongParents?: [BlockId],
+        payload?: Payload,
     ): Promise<UnsignedBlock> {
         const response = await this.methodHandler.callMethod({
             name: 'buildBasicBlock',
             data: {
                 issuerId,
-                strongParents,
                 payload,
             },
         });

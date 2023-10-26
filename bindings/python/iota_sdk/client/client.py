@@ -397,23 +397,22 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
     def build_basic_block(
         self,
         issuer_id: HexStr,
-        payload: Payload,
-        strong_parents: Optional[List[HexStr]]
+        payload: Optional[Payload] = None,
     ) -> UnsignedBlock:
         """Build a basic block.
 
         Args:
             issuer_id: The identifier of the block issuer account.
             payload: The payload to submit.
-            strong_parents: Optional strong parents for the block.
 
         Returns:
             An unsigned block.
         """
+        if payload is not None:
+            payload = payload.to_dict()
         result = self._call_method('buildBasicBlock', {
             'issuerId': issuer_id,
-            'payload': payload.to_dict(),
-            'strongParents': strong_parents
+            'payload': payload,
         })
         return UnsignedBlock.from_dict(result)
 
