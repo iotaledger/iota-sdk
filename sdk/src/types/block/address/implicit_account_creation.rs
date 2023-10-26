@@ -15,7 +15,7 @@ pub struct ImplicitAccountCreationAddress(Ed25519Address);
 
 impl ImplicitAccountCreationAddress {
     /// The [`Address`](crate::types::block::address::Address) kind of an [`ImplicitAccountCreationAddress`].
-    pub const KIND: u8 = 24;
+    pub const KIND: u8 = 32;
     /// The length of an [`ImplicitAccountCreationAddress`].
     pub const LENGTH: usize = Ed25519Address::LENGTH;
 

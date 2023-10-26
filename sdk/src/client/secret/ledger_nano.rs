@@ -524,11 +524,11 @@ fn merge_unlocks(
         match block_indexes.get(&input_address) {
             // If we already have an [Unlock] for this address, add a [Unlock] based on the address type
             Some(block_index) => match input_address {
-                Address::Account(_account) => {
-                    merged_unlocks.push(Unlock::Account(AccountUnlock::new(*block_index as u16)?))
-                }
                 Address::Ed25519(_ed25519) => {
                     merged_unlocks.push(Unlock::Reference(ReferenceUnlock::new(*block_index as u16)?));
+                }
+                Address::Account(_account) => {
+                    merged_unlocks.push(Unlock::Account(AccountUnlock::new(*block_index as u16)?))
                 }
                 Address::Nft(_nft) => merged_unlocks.push(Unlock::Nft(NftUnlock::new(*block_index as u16)?)),
                 Address::Anchor(_) => todo!(),

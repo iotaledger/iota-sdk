@@ -46,6 +46,9 @@ pub enum Address {
     /// An NFT address.
     #[packable(tag = NftAddress::KIND)]
     Nft(NftAddress),
+    /// An anchor address.
+    #[packable(tag = AnchorAddress::KIND)]
+    Anchor(AnchorAddress),
     /// An implicit account creation address.
     #[packable(tag = ImplicitAccountCreationAddress::KIND)]
     ImplicitAccountCreation(ImplicitAccountCreationAddress),
@@ -53,9 +56,6 @@ pub enum Address {
     #[packable(tag = RestrictedAddress::KIND)]
     #[from(ignore)]
     Restricted(Box<RestrictedAddress>),
-    /// An anchor address.
-    #[packable(tag = AnchorAddress::KIND)]
-    Anchor(AnchorAddress),
 }
 
 impl From<RestrictedAddress> for Address {
@@ -70,9 +70,9 @@ impl core::fmt::Debug for Address {
             Self::Ed25519(address) => address.fmt(f),
             Self::Account(address) => address.fmt(f),
             Self::Nft(address) => address.fmt(f),
+            Self::Anchor(address) => address.fmt(f),
             Self::ImplicitAccountCreation(address) => address.fmt(f),
             Self::Restricted(address) => address.fmt(f),
-            Self::Anchor(address) => address.fmt(f),
         }
     }
 }
@@ -84,13 +84,13 @@ impl Address {
             Self::Ed25519(_) => Ed25519Address::KIND,
             Self::Account(_) => AccountAddress::KIND,
             Self::Nft(_) => NftAddress::KIND,
+            Self::Anchor(_) => AnchorAddress::KIND,
             Self::ImplicitAccountCreation(_) => ImplicitAccountCreationAddress::KIND,
             Self::Restricted(_) => RestrictedAddress::KIND,
-            Self::Anchor(_) => AnchorAddress::KIND,
         }
     }
 
-    crate::def_is_as_opt!(Address: Ed25519, Account, Nft, ImplicitAccountCreation, Restricted, Anchor);
+    crate::def_is_as_opt!(Address: Ed25519, Account, Nft, Anchor, ImplicitAccountCreation, Restricted);
 
     /// Tries to create an [`Address`] from a bech32 encoded string.
     pub fn try_from_bech32(address: impl AsRef<str>) -> Result<Self, Error> {
