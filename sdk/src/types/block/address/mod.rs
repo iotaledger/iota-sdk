@@ -22,7 +22,7 @@ pub use self::{
     restricted::{AddressCapabilities, AddressCapabilityFlag, RestrictedAddress},
 };
 use crate::types::block::{
-    output::{Output, OutputId},
+    output::Output,
     semantic::{SemanticValidationContext, TransactionFailureReason},
     signature::Signature,
     unlock::Unlock,
@@ -100,7 +100,6 @@ impl Address {
     pub fn unlock(
         &self,
         unlock: &Unlock,
-        inputs: &[(&OutputId, &Output)],
         context: &mut SemanticValidationContext<'_>,
     ) -> Result<(), TransactionFailureReason> {
         match (self, unlock) {
@@ -128,7 +127,7 @@ impl Address {
             }
             (Self::Account(account_address), Unlock::Account(unlock)) => {
                 // PANIC: indexing is fine as it is already syntactically verified that indexes reference below.
-                if let (output_id, Output::Account(account_output)) = inputs[unlock.index() as usize] {
+                if let (output_id, Output::Account(account_output)) = context.inputs[unlock.index() as usize] {
                     if &account_output.account_id_non_null(output_id) != account_address.account_id() {
                         return Err(TransactionFailureReason::InvalidInputUnlock);
                     }
@@ -141,7 +140,7 @@ impl Address {
             }
             (Self::Nft(nft_address), Unlock::Nft(unlock)) => {
                 // PANIC: indexing is fine as it is already syntactically verified that indexes reference below.
-                if let (output_id, Output::Nft(nft_output)) = inputs[unlock.index() as usize] {
+                if let (output_id, Output::Nft(nft_output)) = context.inputs[unlock.index() as usize] {
                     if &nft_output.nft_id_non_null(output_id) != nft_address.nft_id() {
                         return Err(TransactionFailureReason::InvalidInputUnlock);
                     }

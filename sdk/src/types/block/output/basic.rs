@@ -301,12 +301,11 @@ impl BasicOutput {
         &self,
         _output_id: &OutputId,
         unlock: &Unlock,
-        inputs: &[(&OutputId, &Output)],
         context: &mut SemanticValidationContext<'_>,
     ) -> Result<(), TransactionFailureReason> {
         self.unlock_conditions()
             .locked_address(self.address(), context.transaction.creation_slot())
-            .unlock(unlock, inputs, context)
+            .unlock(unlock, context)
     }
 
     /// Returns the address of the unlock conditions if the output is a simple deposit.

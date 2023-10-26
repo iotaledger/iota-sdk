@@ -449,10 +449,9 @@ impl FoundryOutput {
         &self,
         _output_id: &OutputId,
         unlock: &Unlock,
-        inputs: &[(&OutputId, &Output)],
         context: &mut SemanticValidationContext<'_>,
     ) -> Result<(), TransactionFailureReason> {
-        Address::from(*self.account_address()).unlock(unlock, inputs, context)
+        Address::from(*self.account_address()).unlock(unlock, context)
     }
 
     // Transition, just without full SemanticValidationContext

@@ -46,11 +46,7 @@ impl From<&OutputId> for DelegationId {
 
 impl DelegationId {
     pub fn or_from_output_id(self, output_id: &OutputId) -> Self {
-        if self.is_null() {
-            Self::from(output_id)
-        } else {
-            self
-        }
+        if self.is_null() { Self::from(output_id) } else { self }
     }
 }
 
@@ -356,12 +352,11 @@ impl DelegationOutput {
         &self,
         _output_id: &OutputId,
         unlock: &Unlock,
-        inputs: &[(&OutputId, &Output)],
         context: &mut SemanticValidationContext<'_>,
     ) -> Result<(), TransactionFailureReason> {
         self.unlock_conditions()
             .locked_address(self.address(), context.transaction.creation_slot())
-            .unlock(unlock, inputs, context)
+            .unlock(unlock, context)
     }
 
     // Transition, just without full SemanticValidationContext.

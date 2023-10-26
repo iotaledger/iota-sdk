@@ -150,8 +150,7 @@ impl TryFrom<u8> for TransactionFailureReason {
 pub struct SemanticValidationContext<'a> {
     pub(crate) transaction: &'a Transaction,
     pub(crate) transaction_signing_hash: TransactionSigningHash,
-    // TODO
-    #[allow(dead_code)]
+    pub(crate) inputs: &'a [(&'a OutputId, &'a Output)],
     pub(crate) unlocks: &'a Unlocks,
     pub(crate) input_amount: u64,
     pub(crate) input_mana: u64,
@@ -171,21 +170,23 @@ impl<'a> SemanticValidationContext<'a> {
     pub fn new(
         transaction_id: &TransactionId,
         transaction: &'a Transaction,
-        inputs: impl Iterator<Item = (&'a OutputId, &'a Output)> + Clone,
+        inputs: &'a [(&'a OutputId, &'a Output)],
         unlocks: &'a Unlocks,
     ) -> Self {
         Self {
             transaction,
-            unlocks,
             transaction_signing_hash: transaction.signing_hash(),
+            inputs,
+            unlocks,
             input_amount: 0,
             input_mana: 0,
             input_native_tokens: BTreeMap::<TokenId, U256>::new(),
             input_chains: inputs
+                .iter()
                 .filter_map(|(output_id, input)| {
                     input
                         .chain_id()
-                        .map(|chain_id| (chain_id.or_from_output_id(output_id), input))
+                        .map(|chain_id| (chain_id.or_from_output_id(output_id), *input))
                 })
                 .collect(),
             output_amount: 0,
@@ -214,41 +215,40 @@ impl<'a> SemanticValidationContext<'a> {
 ///
 pub fn semantic_validation(
     mut context: SemanticValidationContext<'_>,
-    inputs: &[(&OutputId, &Output)],
 ) -> Result<Option<TransactionFailureReason>, Error> {
     // Validation of inputs.
-    for ((output_id, consumed_output), unlock) in inputs.iter().zip(context.unlocks.iter()) {
+    for ((output_id, consumed_output), unlock) in context.inputs.iter().zip(context.unlocks.iter()) {
         let (conflict, amount, mana, consumed_native_tokens, unlock_conditions) = match consumed_output {
             Output::Basic(output) => (
-                output.unlock(output_id, unlock, inputs, &mut context),
+                output.unlock(output_id, unlock, &mut context),
                 output.amount(),
                 output.mana(),
                 Some(output.native_tokens()),
                 output.unlock_conditions(),
             ),
             Output::Account(output) => (
-                output.unlock(output_id, unlock, inputs, &mut context),
+                output.unlock(output_id, unlock, &mut context),
                 output.amount(),
                 output.mana(),
                 Some(output.native_tokens()),
                 output.unlock_conditions(),
             ),
             Output::Foundry(output) => (
-                output.unlock(output_id, unlock, inputs, &mut context),
+                output.unlock(output_id, unlock, &mut context),
                 output.amount(),
                 0,
                 Some(output.native_tokens()),
                 output.unlock_conditions(),
             ),
             Output::Nft(output) => (
-                output.unlock(output_id, unlock, inputs, &mut context),
+                output.unlock(output_id, unlock, &mut context),
                 output.amount(),
                 output.mana(),
                 Some(output.native_tokens()),
                 output.unlock_conditions(),
             ),
             Output::Delegation(output) => (
-                output.unlock(output_id, unlock, inputs, &mut context),
+                output.unlock(output_id, unlock, &mut context),
                 output.amount(),
                 0,
                 None,

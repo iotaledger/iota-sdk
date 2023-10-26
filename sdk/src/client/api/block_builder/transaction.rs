@@ -39,11 +39,11 @@ pub fn verify_semantic(
     let context = SemanticValidationContext::new(
         &transaction_id,
         transaction_payload.transaction(),
-        inputs.iter().map(|(id, input)| (*id, *input)),
+        &inputs,
         transaction_payload.unlocks(),
     );
 
-    Ok(semantic_validation(context, inputs.as_slice())?)
+    Ok(semantic_validation(context)?)
 }
 
 /// Verifies that the signed transaction payload doesn't exceed the block size limit with 8 parents.
