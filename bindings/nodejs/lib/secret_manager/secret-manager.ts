@@ -112,18 +112,18 @@ export class SecretManager {
     /**
      * Create a signature unlock using the provided `secretManager`.
      *
-     * @param transactionHash The hash of the transaction.
+     * @param transactionSigningHash The signing hash of the transaction.
      * @param chain A BIP44 chain.
      * @returns The corresponding unlock.
      */
     async signatureUnlock(
-        transactionHash: HexEncodedString,
+        transactionSigningHash: HexEncodedString,
         chain: Bip44,
     ): Promise<Unlock> {
         const response = await this.methodHandler.callMethod({
             name: 'signatureUnlock',
             data: {
-                transactionHash,
+                transactionSigningHash,
                 chain,
             },
         });

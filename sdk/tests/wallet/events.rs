@@ -115,7 +115,7 @@ fn wallet_events_serde() {
     }
 
     assert_serde_eq(WalletEvent::TransactionProgress(
-        TransactionProgressEvent::PreparedTransactionHash(ED25519_ADDRESS.to_string()),
+        TransactionProgressEvent::PreparedTransactionSigningHash(ED25519_ADDRESS.to_string()),
     ));
 
     assert_serde_eq(WalletEvent::TransactionProgress(

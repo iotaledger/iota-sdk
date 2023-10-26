@@ -116,6 +116,8 @@ impl From<SlotIndex> for u32 {
 
 #[cfg(test)]
 mod test {
+    use pretty_assertions::assert_eq;
+
     use crate::types::block::protocol::ProtocolParameters;
 
     #[test]

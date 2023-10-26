@@ -118,7 +118,6 @@ pub enum Error {
     InvalidTaggedDataLength(<TaggedDataLength as TryFrom<usize>>::Error),
     InvalidTagFeatureLength(<TagFeatureLength as TryFrom<usize>>::Error),
     InvalidTagLength(<TagLength as TryFrom<usize>>::Error),
-    InvalidTailTransactionHash,
     InvalidTokenSchemeKind(u8),
     InvalidTransactionAmountSum(u128),
     InvalidTransactionNativeTokensCount(u16),
@@ -301,7 +300,6 @@ impl fmt::Display for Error {
             Self::InvalidTagLength(length) => {
                 write!(f, "invalid tag length {length}")
             }
-            Self::InvalidTailTransactionHash => write!(f, "invalid tail transaction hash"),
             Self::InvalidTokenSchemeKind(k) => write!(f, "invalid token scheme kind {k}"),
             Self::InvalidTransactionAmountSum(value) => write!(f, "invalid transaction amount sum: {value}"),
             Self::InvalidTransactionNativeTokensCount(count) => {

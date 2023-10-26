@@ -57,9 +57,9 @@ where
                 if let Some(buffer_size) = ledger_nano_status.buffer_size() {
                     if needs_blind_signing(prepared_transaction_data, buffer_size) {
                         self.emit(WalletEvent::TransactionProgress(
-                            TransactionProgressEvent::PreparedTransactionHash(prefix_hex::encode(
-                                prepared_transaction_data.transaction.hash(),
-                            )),
+                            TransactionProgressEvent::PreparedTransactionSigningHash(
+                                prepared_transaction_data.transaction.signing_hash().to_string(),
+                            ),
                         ))
                         .await;
                     } else {
