@@ -57,8 +57,6 @@ async fn wallet_address_generation_mnemonic() -> Result<()> {
 #[cfg(feature = "stronghold")]
 #[tokio::test]
 async fn wallet_address_generation_stronghold() -> Result<()> {
-    use iota_sdk::crypto::keys::bip44::Bip44;
-
     let storage_path = "test-storage/wallet_address_generation_stronghold";
     setup(storage_path)?;
 
@@ -98,8 +96,6 @@ async fn wallet_address_generation_stronghold() -> Result<()> {
 #[cfg(all(feature = "ledger_nano", feature = "events"))]
 #[ignore = "requires ledger nano instance"]
 async fn wallet_address_generation_ledger() -> Result<()> {
-    use iota_sdk::crypto::keys::bip44::Bip44;
-
     let storage_path = "test-storage/wallet_address_generation_ledger";
     setup(storage_path)?;
 
