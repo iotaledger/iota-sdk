@@ -133,7 +133,6 @@ where
         let token_supply = self.client().get_token_supply().await?;
 
         let wallet_address = self.address().await;
-        // TODO: not needed anymore?
         let default_return_address = wallet_address.to_bech32(self.client().get_bech32_hrp().await?);
 
         let slot_index = self.client().get_slot_index().await?;

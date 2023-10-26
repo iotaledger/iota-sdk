@@ -63,6 +63,7 @@ pub struct InitParameters {
     /// Set the node to connect to with this wallet.
     #[arg(short, long, value_name = "URL", env = "NODE_URL", default_value = DEFAULT_NODE_URL)]
     pub node_url: String,
+    // TODO: replace with BIP path
     /// Coin type, SHIMMER_COIN_TYPE (4219) if not provided.
     #[arg(short, long, default_value_t = SHIMMER_COIN_TYPE)]
     pub coin_type: u32,

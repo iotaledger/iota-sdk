@@ -138,9 +138,6 @@ where
         // would be created with an empty parameter which just leads to errors later
         #[cfg(feature = "storage")]
         if !storage_options.path.is_dir() {
-            if self.bip_path.is_none() {
-                return Err(crate::wallet::Error::MissingParameter("bip_path"));
-            }
             if self.client_options.is_none() {
                 return Err(crate::wallet::Error::MissingParameter("client_options"));
             }
@@ -185,15 +182,8 @@ where
 
         // May use a previously stored BIP path if it wasn't provided
         if self.bip_path.is_none() {
-            let bip_path = loaded_wallet_builder
-                .as_ref()
-                .and_then(|builder| builder.bip_path)
-                .ok_or(crate::wallet::Error::MissingParameter("bip_path"))?;
-
-            self.bip_path = Some(bip_path);
+            self.bip_path = loaded_wallet_builder.as_ref().and_then(|builder| builder.bip_path);
         }
-        // Panic: can be safely unwrapped now
-        let bip_path = self.bip_path.as_ref().unwrap().clone();
 
         // May use a previously stored wallet alias if it wasn't provided
         if self.alias.is_none() {
@@ -201,8 +191,8 @@ where
                 .as_ref()
                 .and_then(|builder| builder.alias.clone())
                 .unwrap_or_else(|| {
-                    // TODO: I'm not sure we should use anything from the filesystem for the wallet since it can be
-                    // moved. So just default to ""?
+                    // TODO #1279: I'm not sure we should use anything from the filesystem for the wallet since it can
+                    // be moved. So just default to ""?
                     #[cfg(feature = "storage")]
                     let alias = storage_options.path().to_string_lossy().to_string();
                     #[cfg(not(feature = "storage"))]
@@ -240,7 +230,7 @@ where
         // The bip path must not change.
         #[cfg(feature = "storage")]
         if let Some(wallet_data) = &wallet_data {
-            let new_bip_path = bip_path;
+            let new_bip_path = self.bip_path;
             let old_bip_path = wallet_data.bip_path;
             if new_bip_path != old_bip_path {
                 return Err(crate::wallet::Error::BipPathMismatch {
@@ -286,7 +276,7 @@ where
             #[cfg(feature = "storage")]
             storage_manager: tokio::sync::RwLock::new(storage_manager),
         };
-        let wallet_data = WalletData::new(bip_path, address, alias);
+        let wallet_data = WalletData::new(self.bip_path, address, alias);
 
         let wallet = Wallet {
             inner: Arc::new(wallet_inner),
@@ -338,9 +328,9 @@ where
     #[cfg(feature = "storage")]
     pub(crate) async fn from_wallet(wallet: &Wallet<S>) -> Self {
         Self {
-            bip_path: Some(wallet.data().await.bip_path.clone()),
-            address: Some(wallet.data().await.address.clone()),
-            alias: Some(wallet.data().await.alias.clone()),
+            bip_path: wallet.bip_path().await,
+            address: Some(wallet.address().await),
+            alias: Some(wallet.alias().await),
             client_options: Some(wallet.client_options().await),
             storage_options: Some(wallet.storage_options.clone()),
             secret_manager: Some(wallet.secret_manager.clone()),

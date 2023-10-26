@@ -12,7 +12,6 @@ use crate::{
 };
 
 pub(crate) const CLIENT_OPTIONS_KEY: &str = "client_options";
-pub(crate) const COIN_TYPE_KEY: &str = "coin_type";
 pub(crate) const SECRET_MANAGER_KEY: &str = "secret_manager";
 pub(crate) const WALLET_DATA_KEY: &str = "wallet_data";
 
@@ -29,9 +28,6 @@ impl<S: 'static + SecretManagerConfig> Wallet<S> {
         let client_options = self.client_options().await;
         stronghold.set(CLIENT_OPTIONS_KEY, &client_options).await?;
 
-        let coin_type = self.data.read().await.bip_path.coin_type;
-        stronghold.set_bytes(COIN_TYPE_KEY, &coin_type.to_le_bytes()).await?;
-
         if let Some(secret_manager_dto) = self.secret_manager.read().await.to_config() {
             stronghold.set(SECRET_MANAGER_KEY, &secret_manager_dto).await?;
         }
@@ -45,30 +41,26 @@ impl<S: 'static + SecretManagerConfig> Wallet<S> {
 
 pub(crate) async fn read_wallet_data_from_stronghold_snapshot<S: 'static + SecretManagerConfig>(
     stronghold: &StrongholdAdapter,
-) -> crate::wallet::Result<(
-    Option<ClientOptions>,
-    Option<u32>,
-    Option<S::Config>,
-    Option<WalletData>,
-)> {
+) -> crate::wallet::Result<(Option<ClientOptions>, Option<S::Config>, Option<WalletData>)> {
     migrate(stronghold).await?;
 
     // Get client_options
     let client_options = stronghold.get(CLIENT_OPTIONS_KEY).await?;
 
-    // Get coin_type
-    let coin_type_bytes = stronghold.get_bytes(COIN_TYPE_KEY).await?;
-    let coin_type = if let Some(coin_type_bytes) = coin_type_bytes {
-        let coin_type = u32::from_le_bytes(
-            coin_type_bytes
-                .try_into()
-                .map_err(|_| WalletError::Backup("invalid coin_type"))?,
-        );
-        log::debug!("[restore_backup] restored coin_type: {coin_type}");
-        Some(coin_type)
-    } else {
-        None
-    };
+    // TODO #1279: remove
+    // // Get coin_type
+    // let coin_type_bytes = stronghold.get_bytes(COIN_TYPE_KEY).await?;
+    // let coin_type = if let Some(coin_type_bytes) = coin_type_bytes {
+    //     let coin_type = u32::from_le_bytes(
+    //         coin_type_bytes
+    //             .try_into()
+    //             .map_err(|_| WalletError::Backup("invalid coin_type"))?,
+    //     );
+    //     log::debug!("[restore_backup] restored coin_type: {coin_type}");
+    //     Some(coin_type)
+    // } else {
+    //     None
+    // };
 
     // Get secret_manager
     let restored_secret_manager = stronghold.get(SECRET_MANAGER_KEY).await?;
@@ -80,5 +72,5 @@ pub(crate) async fn read_wallet_data_from_stronghold_snapshot<S: 'static + Secre
         .map(|dto| WalletData::try_from_dto(dto))
         .transpose()?;
 
-    Ok((client_options, coin_type, restored_secret_manager, restored_wallet_data))
+    Ok((client_options, restored_secret_manager, restored_wallet_data))
 }

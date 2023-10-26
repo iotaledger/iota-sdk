@@ -67,9 +67,9 @@ impl OutputData {
             self.chain
         } else if let Address::Ed25519(_) = unlock_address {
             if wallet_data.address.inner() == &unlock_address {
-                // TODO: make sure that `wallet_data.address` and `wallet_data.bip_path` are never conflicting?
-                // Should wallet.address be a Bip44Address?
-                Some(wallet_data.bip_path)
+                // TODO #1279: do we need a check to make sure that `wallet_data.address` and `wallet_data.bip_path` are
+                // never conflicting?
+                wallet_data.bip_path
             } else {
                 return Ok(None);
             }

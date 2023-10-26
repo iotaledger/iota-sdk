@@ -8,7 +8,7 @@ use crate::wallet::events::types::{TransactionProgressEvent, WalletEvent};
 use crate::{
     client::secret::SecretManage,
     types::block::{payload::Payload, BlockId},
-    wallet::{operations::transaction::SignedTransactionPayload, Wallet},
+    wallet::{operations::transaction::SignedTransactionPayload, Error, Wallet},
 };
 
 impl<S: 'static + SecretManage> Wallet<S>
@@ -31,7 +31,7 @@ where
                 None,
                 Some(Payload::from(transaction_payload)),
                 &*self.get_secret_manager().read().await,
-                self.bip_path().await,
+                self.bip_path().await.ok_or(Error::MissingBipPath)?,
             )
             .await?;
 

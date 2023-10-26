@@ -4,7 +4,7 @@
 use crate::{
     client::secret::{GenerateAddressOptions, SecretManage, SecretManager},
     types::block::address::Ed25519Address,
-    wallet::Wallet,
+    wallet::{Error, Wallet},
 };
 #[cfg(all(feature = "events", feature = "ledger_nano"))]
 use crate::{
@@ -25,8 +25,9 @@ impl Wallet {
         address_index: u32,
         options: impl Into<Option<GenerateAddressOptions>> + Send,
     ) -> crate::wallet::Result<Ed25519Address> {
-        // TODO: not sure yet whether we also allow this method to generate addresses for different accounts/wallets.
-        let coin_type = self.data().await.bip_path.coin_type;
+        // TODO #1279: not sure yet whether we also should allow this method to generate addresses for different bip
+        // paths.
+        let coin_type = self.bip_path().await.ok_or(Error::MissingBipPath)?.coin_type;
 
         let address = match &*self.secret_manager.read().await {
             #[cfg(feature = "ledger_nano")]

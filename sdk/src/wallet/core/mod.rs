@@ -104,7 +104,7 @@ pub struct WalletInner<S: SecretManage = SecretManager> {
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct WalletData {
     /// The wallet BIP44 path.
-    pub(crate) bip_path: Bip44,
+    pub(crate) bip_path: Option<Bip44>,
     /// The wallet address.
     pub(crate) address: Bech32Address,
     /// The wallet alias. Defaults to the storage path if available.
@@ -138,7 +138,7 @@ pub struct WalletData {
 }
 
 impl WalletData {
-    pub(crate) fn new(bip_path: Bip44, address: Bech32Address, alias: String) -> Self {
+    pub(crate) fn new(bip_path: Option<Bip44>, address: Bech32Address, alias: String) -> Self {
         Self {
             bip_path,
             address,
@@ -258,7 +258,7 @@ where
     }
 
     /// Get the wallet's configured bip path.
-    pub async fn bip_path(&self) -> Bip44 {
+    pub async fn bip_path(&self) -> Option<Bip44> {
         self.data().await.bip_path
     }
 
@@ -479,7 +479,7 @@ impl<S: SecretManage> Drop for Wallet<S> {
 #[serde(rename_all = "camelCase")]
 pub struct WalletDataDto {
     /// The BIP44 path of the wallet.
-    pub bip_path: Bip44,
+    pub bip_path: Option<Bip44>,
     /// The wallet address.
     pub address: Bech32Address,
     /// The wallet alias.
@@ -673,7 +673,7 @@ mod test {
         );
 
         let wallet_data = WalletData {
-            bip_path: Bip44::new(4218),
+            bip_path: Some(Bip44::new(4218)),
             address: crate::types::block::address::Bech32Address::from_str(
                 "rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy",
             )
@@ -706,7 +706,7 @@ mod test {
         #[cfg(feature = "storage")]
         pub(crate) fn mock() -> Self {
             Self {
-                bip_path: Bip44::new(4218),
+                bip_path: Some(Bip44::new(4218)),
                 address: crate::types::block::address::Bech32Address::from_str(
                     "rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy",
                 )

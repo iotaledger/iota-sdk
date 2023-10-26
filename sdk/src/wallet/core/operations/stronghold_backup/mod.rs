@@ -56,11 +56,11 @@ impl Wallet {
     }
 
     /// Restore a backup from a Stronghold file
-    /// Replaces client_options, coin_type, secret_manager and accounts. Returns an error if accounts were already
+    /// Replaces client_options, bip_path, secret_manager and accounts. Returns an error if accounts were already
     /// created If Stronghold is used as secret_manager, the existing Stronghold file will be overwritten. If a
     /// mnemonic was stored, it will be gone.
-    /// if ignore_if_coin_type_mismatch.is_some(), client options will not be restored
-    /// if ignore_if_coin_type_mismatch == Some(true), client options coin type and accounts will not be restored if the
+    /// if ignore_if_bip_path_mismatch.is_some(), client options will not be restored
+    /// if ignore_if_bip_path_mismatch == Some(true), client options coin type and accounts will not be restored if the
     /// coin type doesn't match
     /// if ignore_if_bech32_hrp_mismatch == Some("rms"), but addresses have something different like "smr", no accounts
     /// will be restored.
@@ -68,7 +68,7 @@ impl Wallet {
         &self,
         backup_path: PathBuf,
         stronghold_password: impl Into<Password> + Send,
-        ignore_if_coin_type_mismatch: Option<bool>,
+        ignore_if_bip_path_mismatch: Option<bool>,
         ignore_if_bech32_hrp_mismatch: Option<Hrp>,
     ) -> crate::wallet::Result<()> {
         let stronghold_password = stronghold_password.into();
@@ -94,25 +94,23 @@ impl Wallet {
             .password(stronghold_password.clone())
             .build(backup_path.clone())?;
 
-        let (read_client_options, read_coin_type, read_secret_manager, read_wallet_data) =
+        let (read_client_options, read_secret_manager, read_wallet_data) =
             read_wallet_data_from_stronghold_snapshot::<SecretManager>(&new_stronghold).await?;
 
-        let bip_path = self.data().await.bip_path;
+        let read_bip_path = read_wallet_data.as_ref().and_then(|data| data.bip_path);
 
-        // If the coin type is not matching the current one, then the addresses in the accounts will also not be
-        // correct, so we will not restore them
-        let ignore_backup_values = ignore_if_coin_type_mismatch.map_or(false, |ignore| {
+        // If the bip path is not matching the current one, we may ignore the backup
+        let ignore_backup_values = ignore_if_bip_path_mismatch.map_or(false, |ignore| {
             if ignore {
-                read_coin_type.map_or(true, |read_coin_type| bip_path.coin_type != read_coin_type)
+                // TODO: #1279 okay that if both are none we always load the backup values?
+                wallet_data.bip_path != read_bip_path
             } else {
                 false
             }
         });
 
         if !ignore_backup_values {
-            if let Some(read_coin_type) = read_coin_type {
-                (*wallet_data).bip_path = (*wallet_data).bip_path.with_coin_type(read_coin_type);
-            }
+            (*wallet_data).bip_path = read_bip_path;
         }
 
         if let Some(mut read_secret_manager) = read_secret_manager {
@@ -141,7 +139,7 @@ impl Wallet {
         // drop secret manager, otherwise we get a deadlock in set_client_options() (there inside of
         drop(secret_manager);
 
-        if ignore_if_coin_type_mismatch.is_none() {
+        if ignore_if_bip_path_mismatch.is_none() {
             if let Some(read_client_options) = read_client_options {
                 self.set_client_options(read_client_options).await?;
             }
@@ -210,19 +208,19 @@ impl Wallet<StrongholdSecretManager> {
     }
 
     /// Restore a backup from a Stronghold file
-    /// Replaces client_options, coin_type, secret_manager and accounts. Returns an error if accounts were already
+    /// Replaces client_options, bip path, secret_manager and wallet. Returns an error if accounts were already
     /// created If Stronghold is used as secret_manager, the existing Stronghold file will be overwritten. If a
     /// mnemonic was stored, it will be gone.
-    /// if ignore_if_coin_type_mismatch.is_some(), client options will not be restored
-    /// if ignore_if_coin_type_mismatch == Some(true), client options coin type and accounts will not be restored if the
-    /// coin type doesn't match
+    /// if ignore_if_bip_path_mismatch.is_some(), client options will not be restored
+    /// if ignore_if_bip_path_mismatch == Some(true), client options bip path and wallet will not be restored if the
+    /// bip path doesn't match
     /// if ignore_if_bech32_hrp_mismatch == Some("rms"), but addresses have something different like "smr", no accounts
     /// will be restored.
     pub async fn restore_backup(
         &self,
         backup_path: PathBuf,
         stronghold_password: impl Into<Password> + Send,
-        ignore_if_coin_type_mismatch: Option<bool>,
+        ignore_if_bip_path_mismatch: Option<bool>,
         ignore_if_bech32_hrp_mismatch: Option<Hrp>,
     ) -> crate::wallet::Result<()> {
         let stronghold_password = stronghold_password.into();
@@ -236,7 +234,7 @@ impl Wallet<StrongholdSecretManager> {
         // Will be replaced by the restored wallet data
         let mut wallet_data = self.data_mut().await;
 
-        // TODO: Is there a way to ensure that the user can't mess up?
+        // TODO #1279: Is there a way to ensure that the user can't mess up?
         // We don't want to overwrite possible existing accounts
         // if !wallet_data.is_empty() {
         //     return Err(crate::wallet::Error::Backup(
@@ -253,25 +251,23 @@ impl Wallet<StrongholdSecretManager> {
             .password(stronghold_password.clone())
             .build(backup_path.clone())?;
 
-        let (read_client_options, read_coin_type, read_secret_manager, read_wallet_data) =
+        let (read_client_options, read_secret_manager, read_wallet_data) =
             read_wallet_data_from_stronghold_snapshot::<StrongholdSecretManager>(&new_stronghold).await?;
 
-        let bip_path = self.data().await.bip_path;
+        let read_bip_path = read_wallet_data.as_ref().and_then(|data| data.bip_path);
 
-        // If the coin type is not matching the current one, then the addresses in the accounts will also not be
-        // correct, so we will not restore them
-        let ignore_backup_values = ignore_if_coin_type_mismatch.map_or(false, |ignore| {
+        // If the bip path is not matching the current one, we may ignore the backup
+        let ignore_backup_values = ignore_if_bip_path_mismatch.map_or(false, |ignore| {
             if ignore {
-                read_coin_type.map_or(true, |read_coin_type| bip_path.coin_type != read_coin_type)
+                // TODO: #1279 okay that if both are none we always load the backup values?
+                wallet_data.bip_path != read_bip_path
             } else {
                 false
             }
         });
 
         if !ignore_backup_values {
-            if let Some(read_coin_type) = read_coin_type {
-                (*wallet_data).bip_path = (*wallet_data).bip_path.with_coin_type(read_coin_type);
-            }
+            (*wallet_data).bip_path = read_bip_path;
         }
 
         if let Some(mut read_secret_manager) = read_secret_manager {
@@ -292,7 +288,7 @@ impl Wallet<StrongholdSecretManager> {
         drop(secret_manager);
 
         // Update Wallet with read data
-        if ignore_if_coin_type_mismatch.is_none() {
+        if ignore_if_bip_path_mismatch.is_none() {
             if let Some(read_client_options) = read_client_options {
                 // If the nodes are from the same network as the current client options, then extend it
                 self.set_client_options(read_client_options).await?;

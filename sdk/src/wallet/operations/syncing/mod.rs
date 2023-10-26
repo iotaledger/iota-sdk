@@ -194,11 +194,8 @@ where
                 outputs_data.extend(outputs_data_inner.clone());
                 outputs_data_inner
             } else {
-                // TODO: why did we call this inside of the loop? Once should be enough, no?
-                // let bech32_hrp = self.client().get_bech32_hrp().await?;
-
                 let mut new_outputs_data = Vec::new();
-                for (account_or_nft_address, ed25519_address) in &new_account_and_nft_addresses {
+                for (account_or_nft_address, output_address) in &new_account_and_nft_addresses {
                     let output_ids = self
                         .get_output_ids_for_address(
                             Bech32Address::new(bech32_hrp, account_or_nft_address.clone()),
@@ -209,16 +206,16 @@ where
                     // Update address with unspent outputs
                     let address_with_unspent_outputs = addresses_with_unspent_outputs
                         .iter_mut()
-                        .find(|a| a.address.inner() == ed25519_address)
+                        .find(|address| address.address.inner() == output_address)
                         .ok_or_else(|| {
-                            crate::wallet::Error::WalletAddressMismatch(ed25519_address.clone().to_bech32(bech32_hrp))
+                            crate::wallet::Error::WalletAddressMismatch(output_address.clone().to_bech32(bech32_hrp))
                         })?;
                     address_with_unspent_outputs.output_ids.extend(output_ids.clone());
 
                     let new_outputs_data_inner = self.get_outputs(output_ids).await?;
 
                     let outputs_data_inner = self
-                        .output_response_to_output_data(new_outputs_data_inner, address_with_unspent_outputs)
+                        .output_response_to_output_data(new_outputs_data_inner, &address_with_unspent_outputs)
                         .await?;
 
                     outputs_data.extend(outputs_data_inner.clone());

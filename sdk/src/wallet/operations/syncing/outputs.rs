@@ -31,7 +31,6 @@ where
     pub(crate) async fn output_response_to_output_data(
         &self,
         outputs_with_meta: Vec<OutputWithMetadata>,
-        // TODO: can be simplified since associated_address == wallet address?
         associated_address: &AddressWithUnspentOutputs,
     ) -> crate::wallet::Result<Vec<OutputData>> {
         log::debug!("[SYNC] convert output_responses");
@@ -49,11 +48,15 @@ where
                     .get(output_with_meta.metadata().transaction_id())
                     .map_or(false, |tx| !tx.incoming);
 
-                // BIP 44 (HD wallets) and 4218 is the registered index for IOTA https://github.com/satoshilabs/slips/blob/master/slip-0044.md
-                let chain = Bip44::new(wallet_data.bip_path.coin_type)
-                    .with_account(wallet_data.bip_path.account)
-                    .with_change(associated_address.internal as _)
-                    .with_address_index(associated_address.key_index);
+                let chain = wallet_data.bip_path.map_or(None, |bip_path| {
+                    // BIP 44 (HD wallets) and 4218 is the registered index for IOTA https://github.com/satoshilabs/slips/blob/master/slip-0044.md
+                    Some(
+                        Bip44::new(bip_path.coin_type)
+                            .with_account(bip_path.account)
+                            .with_change(associated_address.internal as _)
+                            .with_address_index(associated_address.key_index),
+                    )
+                });
 
                 OutputData {
                     output_id: output_with_meta.metadata().output_id().to_owned(),
@@ -63,7 +66,7 @@ where
                     address: associated_address.address.inner.clone(),
                     network_id,
                     remainder,
-                    chain: Some(chain),
+                    chain,
                 }
             })
             .collect())

@@ -91,7 +91,7 @@ async fn backup_and_restore() -> Result<()> {
     // Validate restored data
 
     // Restored coin type is used
-    assert_eq!(restored_wallet.bip_path().await.coin_type, SHIMMER_COIN_TYPE);
+    assert_eq!(restored_wallet.bip_path().await.unwrap().coin_type, SHIMMER_COIN_TYPE);
 
     // compare restored client options
     let client_options = restored_wallet.client_options().await;

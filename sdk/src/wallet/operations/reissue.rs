@@ -61,7 +61,7 @@ where
                         None,
                         Some(Payload::SignedTransaction(Box::new(transaction.payload.clone()))),
                         &*self.get_secret_manager().read().await,
-                        self.bip_path().await,
+                        self.bip_path().await.ok_or(Error::MissingBipPath)?,
                     )
                     .await?
                     .id(&protocol_parameters),
@@ -108,7 +108,7 @@ where
                                 None,
                                 Some(Payload::SignedTransaction(Box::new(transaction.payload.clone()))),
                                 &*self.get_secret_manager().read().await,
-                                self.bip_path().await,
+                                self.bip_path().await.ok_or(Error::MissingBipPath)?,
                             )
                             .await?;
                         block_ids.push(reissued_block.id(&protocol_parameters));

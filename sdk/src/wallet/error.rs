@@ -28,7 +28,10 @@ pub enum Error {
     Client(Box<crate::client::Error>),
     /// BIP44 coin type mismatch
     #[error("BIP44 mismatch: {new_bip_path:?}, existing bip path is: {old_bip_path:?}")]
-    BipPathMismatch { new_bip_path: Bip44, old_bip_path: Bip44 },
+    BipPathMismatch {
+        new_bip_path: Option<Bip44>,
+        old_bip_path: Option<Bip44>,
+    },
     /// Funds are spread over too many outputs
     #[error("funds are spread over too many outputs {output_count}/{output_count_max}, consolidation required")]
     ConsolidationRequired { output_count: usize, output_count_max: u16 },
@@ -64,6 +67,9 @@ pub enum Error {
     /// Minting failed
     #[error("minting failed {0}")]
     MintingFailed(String),
+    /// Missing BIP path.
+    #[error("missing BIP path")]
+    MissingBipPath,
     /// Missing parameter.
     #[error("missing parameter: {0}")]
     MissingParameter(&'static str),
