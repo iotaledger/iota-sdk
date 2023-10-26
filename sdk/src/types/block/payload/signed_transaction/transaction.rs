@@ -7,19 +7,25 @@ use crypto::hashes::{blake2b::Blake2b256, Digest};
 use hashbrown::HashSet;
 use packable::{bounded::BoundedU16, prefix::BoxedSlicePrefix, Packable, PackableExt};
 
-use crate::types::{
-    block::{
-        capabilities::{Capabilities, CapabilityFlag},
-        context_input::{ContextInput, CONTEXT_INPUT_COUNT_RANGE},
-        input::{Input, INPUT_COUNT_RANGE},
-        mana::{verify_mana_allotments_sum, ManaAllotment, ManaAllotments},
-        output::{Output, OUTPUT_COUNT_RANGE},
-        payload::{OptionalPayload, Payload},
-        protocol::ProtocolParameters,
-        slot::SlotIndex,
-        Error,
+use crate::{
+    types::{
+        block::{
+            capabilities::{Capabilities, CapabilityFlag},
+            context_input::{ContextInput, CONTEXT_INPUT_COUNT_RANGE},
+            input::{Input, INPUT_COUNT_RANGE},
+            mana::{verify_mana_allotments_sum, ManaAllotment, ManaAllotments},
+            output::{Output, OUTPUT_COUNT_RANGE},
+            payload::{
+                signed_transaction::{TransactionHash, TransactionId, TransactionSigningHash},
+                OptionalPayload, Payload,
+            },
+            protocol::ProtocolParameters,
+            slot::SlotIndex,
+            Error,
+        },
+        ValidationParams,
     },
-    ValidationParams,
+    utils::merkle_hasher,
 };
 
 /// A builder to build a [`Transaction`].
@@ -278,9 +284,43 @@ impl Transaction {
         &self.outputs
     }
 
-    /// Return the Blake2b hash of an [`Transaction`].
-    pub fn hash(&self) -> [u8; 32] {
-        Blake2b256::digest(self.pack_to_vec()).into()
+    /// Return the Blake2b hash of the transaction that can be used to create a
+    /// [`SignedTransactionPayload`](crate::types::block::payload::SignedTransactionPayload).
+    pub fn signing_hash(&self) -> TransactionSigningHash {
+        TransactionSigningHash::new(Blake2b256::digest(self.pack_to_vec()).into())
+    }
+
+    /// Return the Blake2b hash of the transaction commitment and output commitment.
+    fn hash(&self) -> TransactionHash {
+        TransactionHash::new(
+            Blake2b256::digest([self.transaction_commitment(), self.output_commitment()].concat()).into(),
+        )
+    }
+
+    /// Returns the transaction commitment.
+    /// I.E. The hash of the serialized transaction excluding the outputs.
+    fn transaction_commitment(&self) -> [u8; 32] {
+        let mut packer = Vec::new();
+        self.network_id.pack(&mut packer).unwrap();
+        self.creation_slot.pack(&mut packer).unwrap();
+        self.context_inputs.pack(&mut packer).unwrap();
+        self.inputs.pack(&mut packer).unwrap();
+        self.allotments.pack(&mut packer).unwrap();
+        self.capabilities.pack(&mut packer).unwrap();
+        self.payload.pack(&mut packer).unwrap();
+        Blake2b256::digest(packer).into()
+    }
+
+    /// Returns the transaction's output commitment, which is the root of the
+    /// merkle tree that contains the transaction's serialized outputs as leaves.
+    fn output_commitment(&self) -> [u8; 32] {
+        let outputs_serialized = self.outputs.iter().map(|o| o.pack_to_vec()).collect::<Vec<_>>();
+        merkle_hasher::MerkleHasher::digest::<Blake2b256>(&outputs_serialized).into()
+    }
+
+    /// Computes the identifier of a [`Transaction`].
+    pub fn id(&self) -> TransactionId {
+        self.hash().into_transaction_id(self.creation_slot())
     }
 }
 

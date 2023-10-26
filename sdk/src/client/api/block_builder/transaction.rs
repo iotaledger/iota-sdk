@@ -28,9 +28,9 @@ const REFERENCE_ACCOUNT_NFT_UNLOCK_LENGTH: usize = 1 + 2;
 /// Verifies the semantic of a prepared transaction.
 pub fn verify_semantic(
     input_signing_data: &[InputSigningData],
-    transaction: &SignedTransactionPayload,
+    transaction_payload: &SignedTransactionPayload,
 ) -> crate::client::Result<Option<TransactionFailureReason>> {
-    let transaction_id = transaction.id();
+    let transaction_id = transaction_payload.transaction().id();
     let inputs = input_signing_data
         .iter()
         .map(|input| (input.output_id(), &input.output))
@@ -38,12 +38,16 @@ pub fn verify_semantic(
 
     let context = ValidationContext::new(
         &transaction_id,
-        transaction.transaction(),
+        transaction_payload.transaction(),
         inputs.iter().map(|(id, input)| (*id, *input)),
-        transaction.unlocks(),
+        transaction_payload.unlocks(),
     );
 
-    Ok(semantic_validation(context, inputs.as_slice(), transaction.unlocks())?)
+    Ok(semantic_validation(
+        context,
+        inputs.as_slice(),
+        transaction_payload.unlocks(),
+    )?)
 }
 
 /// Verifies that the signed transaction payload doesn't exceed the block size limit with 8 parents.

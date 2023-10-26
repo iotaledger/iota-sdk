@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 mod allotment;
+mod parameters;
 mod rewards;
-mod structure;
 
 use alloc::{boxed::Box, collections::BTreeSet, vec::Vec};
 use core::ops::RangeInclusive;
@@ -14,7 +14,7 @@ use packable::{bounded::BoundedU16, prefix::BoxedSlicePrefix, Packable};
 
 #[cfg(feature = "serde")]
 pub use self::allotment::dto::ManaAllotmentDto;
-pub use self::{allotment::ManaAllotment, rewards::RewardsParameters, structure::ManaStructure};
+pub use self::{allotment::ManaAllotment, parameters::ManaParameters, rewards::RewardsParameters};
 use super::{output::AccountId, protocol::ProtocolParameters, Error};
 
 pub(crate) type ManaAllotmentCount =
@@ -91,7 +91,7 @@ pub(crate) fn verify_mana_allotments_sum<'a>(
     protocol_params: &ProtocolParameters,
 ) -> Result<(), Error> {
     let mut mana_sum: u64 = 0;
-    let max_mana = protocol_params.mana_structure().max_mana();
+    let max_mana = protocol_params.mana_parameters().max_mana();
 
     for ManaAllotment { mana, .. } in allotments {
         mana_sum = mana_sum.checked_add(*mana).ok_or(Error::InvalidManaAllotmentSum {

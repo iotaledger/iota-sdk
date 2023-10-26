@@ -11,7 +11,7 @@ export * from './output-params';
 export * from './participation';
 export * from './prepared-create-token-transaction';
 export * from './prepared-transaction';
-export * from './signed-transaction-essence';
+export * from './signed-transaction-data';
 export * from './transaction';
 export * from './transaction-options';
 export * from './prepared-create-token-transaction-data';
