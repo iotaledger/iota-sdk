@@ -63,6 +63,7 @@ where
     ) -> Result<Balance> {
         let network_id = self.client().get_network_id().await?;
         let rent_structure = self.client().get_rent_structure().await?;
+        let local_time = self.client().get_time_checked().await?;
         let mut balance = Balance::default();
         let mut total_rent_amount = 0;
         let mut total_native_tokens = NativeTokensBuilder::default();
@@ -70,7 +71,8 @@ where
         #[cfg(feature = "participation")]
         let voting_output = self.get_voting_output().await?;
 
-        let claimable_outputs = self.claimable_outputs(OutputsToClaim::All).await?;
+        let account_addresses = self.addresses().await?;
+        let claimable_outputs = account_details.claimable_outputs(OutputsToClaim::All, local_time)?;
 
         for address_with_unspent_outputs in addresses_with_unspent_outputs {
             #[cfg(feature = "participation")]
@@ -165,8 +167,6 @@ where
                                 // if we have multiple unlock conditions for basic or nft outputs, then we might can't
                                 // spend the balance at the moment or in the future
 
-                                let account_addresses = self.addresses().await?;
-                                let local_time = self.client().get_time_checked().await?;
                                 let is_claimable = claimable_outputs.contains(output_id);
 
                                 // For outputs that are expired or have a timelock unlock condition, but no expiration
