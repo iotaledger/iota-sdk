@@ -5,7 +5,13 @@ use derivative::Derivative;
 #[cfg(feature = "mqtt")]
 use iota_sdk::client::mqtt::Topic;
 use iota_sdk::{
-    client::{node_api::indexer::query_parameters::QueryParameter, node_manager::node::NodeAuth},
+    client::{
+        node_api::indexer::query_parameters::{
+            AccountOutputQueryParameters, BasicOutputQueryParameters, FoundryOutputQueryParameters,
+            NftOutputQueryParameters, OutputQueryParameters,
+        },
+        node_manager::node::NodeAuth,
+    },
     types::block::{
         address::{Bech32Address, Hrp},
         output::{
@@ -209,19 +215,19 @@ pub enum ClientMethod {
     #[serde(rename_all = "camelCase")]
     OutputIds {
         /// Query parameters for output requests
-        query_parameters: Vec<QueryParameter>,
+        query_parameters: OutputQueryParameters,
     },
     /// Fetch basic output IDs
     #[serde(rename_all = "camelCase")]
     BasicOutputIds {
         /// Query parameters for output requests
-        query_parameters: Vec<QueryParameter>,
+        query_parameters: BasicOutputQueryParameters,
     },
     /// Fetch account output IDs
     #[serde(rename_all = "camelCase")]
     AccountOutputIds {
         /// Query parameters for output requests
-        query_parameters: Vec<QueryParameter>,
+        query_parameters: AccountOutputQueryParameters,
     },
     /// Fetch account output ID
     #[serde(rename_all = "camelCase")]
@@ -233,7 +239,7 @@ pub enum ClientMethod {
     #[serde(rename_all = "camelCase")]
     NftOutputIds {
         /// Query parameters for output requests
-        query_parameters: Vec<QueryParameter>,
+        query_parameters: NftOutputQueryParameters,
     },
     /// Fetch NFT output ID
     #[serde(rename_all = "camelCase")]
@@ -245,7 +251,7 @@ pub enum ClientMethod {
     #[serde(rename_all = "camelCase")]
     FoundryOutputIds {
         /// Query parameters for output requests
-        query_parameters: Vec<QueryParameter>,
+        query_parameters: FoundryOutputQueryParameters,
     },
     /// Fetch foundry Output ID
     #[serde(rename_all = "camelCase")]
