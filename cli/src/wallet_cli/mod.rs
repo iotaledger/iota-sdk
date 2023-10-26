@@ -948,6 +948,9 @@ async fn print_wallet_address(wallet: &Wallet) -> Result<(), Error> {
         }
     }
 
+    let bip_path = wallet.bip_path().await;
+    log = format!("{log}\nBIP path: {bip_path:?}");
+
     log = format!(
         "{log}\nOutputs: {:#?}\nBase coin amount: {}\nNative Tokens: {:#?}\nNFTs: {:#?}\nAccounts: {:#?}\nFoundries: {:#?}\n",
         output_ids,

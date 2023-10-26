@@ -63,11 +63,10 @@ pub struct InitParameters {
     /// Set the node to connect to with this wallet.
     #[arg(short, long, value_name = "URL", env = "NODE_URL", default_value = DEFAULT_NODE_URL)]
     pub node_url: String,
-    // TODO: replace with BIP path
-    /// Coin type, SHIMMER_COIN_TYPE (4219) if not provided.
-    #[arg(short, long, default_value_t = SHIMMER_COIN_TYPE)]
-    pub coin_type: u32,
-    /// Bech32 wallet address
+    /// Set the BIP path, `4219/0/0/0` if not provided.
+    #[arg(short, long, value_parser = parse_bip_path)]
+    pub bip_path: Option<Bip44>,
+    /// Set the Bech32-encoded wallet address.
     #[arg(short, long)]
     pub address: Option<String>,
 }
@@ -77,10 +76,35 @@ impl Default for InitParameters {
         Self {
             mnemonic_file_path: None,
             node_url: DEFAULT_NODE_URL.to_string(),
-            coin_type: SHIMMER_COIN_TYPE,
+            bip_path: Some(Bip44::new(SHIMMER_COIN_TYPE)),
             address: None,
         }
     }
+}
+
+fn parse_bip_path(arg: &str) -> Result<Bip44, String> {
+    let mut bip_path_enc = Vec::with_capacity(4);
+    for p in arg.split_terminator('/').map(|p| p.trim()) {
+        match p.parse::<u32>() {
+            Ok(value) => bip_path_enc.push(value),
+            Err(_) => {
+                return Err(format!("cannot parse BIP path: {p}"));
+            }
+        }
+    }
+
+    if bip_path_enc.len() != 4 {
+        return Err(
+            "invalid BIP path format. Expected: `coin_type/account_index/change_address/address_index`".to_string(),
+        );
+    }
+
+    let bip_path = Bip44::new(bip_path_enc[0])
+        .with_account(bip_path_enc[1])
+        .with_change(bip_path_enc[2])
+        .with_address_index(bip_path_enc[3]);
+
+    Ok(bip_path)
 }
 
 #[derive(Debug, Clone, Subcommand)]
@@ -265,7 +289,7 @@ pub async fn init_command(
         .with_secret_manager(secret_manager)
         .with_client_options(ClientOptions::new().with_node(init_params.node_url.as_str())?)
         .with_storage_path(storage_path.to_str().expect("invalid unicode"))
-        .with_bip_path(Bip44::new(init_params.coin_type))
+        .with_bip_path(init_params.bip_path)
         .with_address(address)
         .with_alias(alias.as_ref().map(|alias| alias.as_str()))
         .finish()
