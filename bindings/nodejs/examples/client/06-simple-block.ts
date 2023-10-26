@@ -40,7 +40,7 @@ async function run() {
         : '0x0000000000000000000000000000000000000000000000000000000000000000';
 
     const chain = {
-        coinType: CoinType.Iota,
+        coinType: CoinType.IOTA,
         account: 0,
         change: 0,
         addressIndex: 0,

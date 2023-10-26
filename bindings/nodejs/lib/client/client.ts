@@ -29,7 +29,6 @@ import {
     FoundryOutput,
     NftOutput,
     Output,
-    Block,
     BlockId,
     UnlockCondition,
     Payload,
@@ -178,7 +177,7 @@ export class Client {
      * @param block The block to post.
      * @returns The block ID once the block has been posted.
      */
-    async postBlock(block: Block): Promise<BlockId> {
+    async postBlock(block: SignedBlock): Promise<BlockId> {
         const response = await this.methodHandler.callMethod({
             name: 'postBlock',
             data: {
@@ -416,7 +415,7 @@ export class Client {
      * @param block The block.
      * @returns The ID of the posted block.
      */
-    async postBlockRaw(block: Block): Promise<BlockId> {
+    async postBlockRaw(block: SignedBlock): Promise<BlockId> {
         const response = await this.methodHandler.callMethod({
             name: 'postBlockRaw',
             data: {
