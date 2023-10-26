@@ -13,20 +13,20 @@ use crate::types::block::{address::Bech32Address, output::TokenId, slot::SlotInd
 pub trait QueryParameter: Serialize + Send + Sync {
     /// Converts parameters to a single String.
     fn to_query_string(&self) -> Option<String> {
-        let value = serde_json::to_value(&self).unwrap();
+        let value = serde_json::to_value(self).unwrap();
         let mut query_string = String::new();
 
         for (field, v) in value.as_object().unwrap().iter() {
             if !v.is_null() {
                 if let Some(v_str) = v.as_str() {
                     if !query_string.is_empty() {
-                        query_string.push_str("&");
+                        query_string.push('&');
                     }
                     query_string.push_str(&format!("{}={}", field, v_str));
                 }
                 if let Some(v_u64) = v.as_u64() {
                     if !query_string.is_empty() {
-                        query_string.push_str("&");
+                        query_string.push('&');
                     }
                     query_string.push_str(&format!("{}={}", field, v_u64));
                 }
