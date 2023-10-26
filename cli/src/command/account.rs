@@ -958,7 +958,6 @@ pub async fn voting_output_command(account: &Account) -> Result<(), Error> {
 }
 
 async fn print_address(account: &Account, address: &Bech32Address) -> Result<(), Error> {
-    println_log_info!("Address");
     println_log_info!("{:<11}{}", "Bech32:", address);
     println_log_info!("{:<11}{}", "Hex:", address.inner());
     println_log_info!("{:<11}{}", "Type:", address.inner().kind_str());
@@ -1019,22 +1018,21 @@ async fn print_address(account: &Account, address: &Bech32Address) -> Result<(),
         }
     }
 
-    // base tokens table
-    println_log_info!("Base Tokens");
-    println_log_info!("{:<8}{}", "Amount:", amount);
+    // Coins table
+    println_log_info!("{:<11}{}", "Coins:", amount);
 
-    // outputs table
+    // Outputs table
     if !outputs.is_empty() {
-        println_log_info!("Outputs");
+        println_log_info!("Outputs:");
         for (id, kind) in outputs {
-            println_log_info!("  {kind}\t{id}");
+            println_log_info!("  {id}\t{kind}");
         }
     }
 
-    // native tokens table
+    // Native tokens table
     let native_tokens = native_tokens.finish_vec()?;
     if !native_tokens.is_empty() {
-        println_log_info!("Native Tokens");
+        println_log_info!("Native Tokens:");
         for (id, amount) in native_tokens
             .into_iter()
             .map(|nt| (*nt.token_id(), nt.amount().to_string()))
@@ -1046,7 +1044,7 @@ async fn print_address(account: &Account, address: &Bech32Address) -> Result<(),
 
     // NFT table
     if !nfts.is_empty() {
-        println_log_info!("NFTs");
+        println_log_info!("NFTs:");
         for id in nfts.into_iter() {
             println_log_info!("  {id}");
         }
@@ -1054,7 +1052,7 @@ async fn print_address(account: &Account, address: &Bech32Address) -> Result<(),
 
     // Aliases table
     if !aliases.is_empty() {
-        println_log_info!("Aliases");
+        println_log_info!("Aliases:");
         for id in aliases.into_iter() {
             println_log_info!("  {id}");
         }
