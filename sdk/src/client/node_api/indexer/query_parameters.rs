@@ -68,7 +68,7 @@ pub struct OutputQueryParameters {
     created_after: Option<SlotIndex>,
     /// Returns outputs that were created before a certain slot index.
     created_before: Option<SlotIndex>,
-    /// Starts the search from the cursor (confirmationMS+outputId.pageSize).
+    /// Starts the search from the cursor (createdSlotIndex+outputId.pageSize).
     cursor: Option<String>,
     /// Filters outputs based on the presence of a native token.
     has_native_token: Option<bool>,
@@ -92,7 +92,7 @@ pub struct BasicOutputQueryParameters {
     created_after: Option<SlotIndex>,
     /// Returns outputs that were created before a certain slot index.
     created_before: Option<SlotIndex>,
-    /// Starts the search from the cursor (confirmationMS+outputId.pageSize).
+    /// Starts the search from the cursor (createdSlotIndex+outputId.pageSize).
     cursor: Option<String>,
     /// Filters outputs based on the presence of a native token.
     has_native_token: Option<bool>,
@@ -154,7 +154,7 @@ pub struct AccountOutputQueryParameters {
     created_after: Option<SlotIndex>,
     /// Returns outputs that were created before a certain slot index.
     created_before: Option<SlotIndex>,
-    /// Starts the search from the cursor (confirmationMS+outputId.pageSize).
+    /// Starts the search from the cursor (createdSlotIndex+outputId.pageSize).
     cursor: Option<String>,
     /// The maximum amount of items returned in one call. If there are more items, a cursor to the next page is
     /// returned too. The parameter is ignored when pageSize is defined via the cursor parameter.
@@ -182,7 +182,7 @@ pub struct NftOutputQueryParameters {
     created_after: Option<SlotIndex>,
     /// Returns outputs that were created before a certain slot index.
     created_before: Option<SlotIndex>,
-    /// Starts the search from the cursor (confirmationMS+outputId.pageSize).
+    /// Starts the search from the cursor (createdSlotIndex+outputId.pageSize).
     cursor: Option<String>,
     /// The maximum amount of items returned in one call. If there are more items, a cursor to the next page is
     /// returned too. The parameter is ignored when pageSize is defined via the cursor parameter.
@@ -242,7 +242,7 @@ pub struct FoundryOutputQueryParameters {
     created_after: Option<SlotIndex>,
     /// Returns outputs that were created before a certain slot index.
     created_before: Option<SlotIndex>,
-    /// Starts the search from the cursor (confirmationMS+outputId.pageSize).
+    /// Starts the search from the cursor (createdSlotIndex+outputId.pageSize).
     cursor: Option<String>,
     /// Filters outputs based on the presence of a native token.
     has_native_token: Option<bool>,
@@ -254,6 +254,7 @@ pub struct FoundryOutputQueryParameters {
     /// Filter foundry outputs based on bech32-encoded address of the controlling account.
     account_address: Option<Bech32Address>,
 }
+
 impl_query_parameters_methods!(FoundryOutputQueryParameters);
 
 /// Query parameters for delegation output requests.
@@ -265,7 +266,7 @@ pub struct DelegationOutputQueryParameters {
     created_after: Option<SlotIndex>,
     /// Returns outputs that were created before a certain slot index.
     created_before: Option<SlotIndex>,
-    /// Starts the search from the cursor (confirmationMS+outputId.pageSize).
+    /// Starts the search from the cursor (createdSlotIndex+outputId.pageSize).
     cursor: Option<String>,
     /// The maximum amount of items returned in one call. If there are more items, a cursor to the next page is
     /// returned too. The parameter is ignored when pageSize is defined via the cursor parameter.
