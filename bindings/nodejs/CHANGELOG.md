@@ -19,6 +19,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security -->
 
+## 1.1.2 - 2023-10-26
+
+### Fixed
+
+- Slow syncing with many claimable outputs;
+- Potential deadlock in syncing;
+
 ## 1.1.1 - 2023-10-11
 
 ### Added
