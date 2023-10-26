@@ -970,23 +970,24 @@ async fn print_address(account: &Account, address: &Bech32Address) -> Result<(),
     let mut nfts = Vec::new();
     let mut aliases = Vec::new();
 
-    for (output_id, output_data) in unspent_outputs.into_iter().map(|data| (data.output_id, data)) {
+    for output_data in unspent_outputs.into_iter() {
         // Panic: cannot fail for outputs belonging to an account.
-        let (required_address, _) = output_data
+        let required_address = output_data
             .output
-            .required_and_unlocked_address(current_time, &output_id, None)
-            .unwrap();
+            .required_and_unlocked_address(current_time, &output_data.output_id, None)
+            .unwrap()
+            .0;
 
         if address.inner() == &required_address {
-            outputs.push((output_id, output_data.output.kind_str().to_string()));
+            outputs.push((output_data.output_id, output_data.output.kind_str().to_string()));
 
             if let Some(nts) = output_data.output.native_tokens() {
                 native_tokens.add_native_tokens(nts.clone())?;
             }
 
             match &output_data.output {
-                Output::Alias(alias) => aliases.push(alias.alias_id_non_null(&output_id)),
-                Output::Nft(nft) => nfts.push(nft.nft_id_non_null(&output_id)),
+                Output::Alias(alias) => aliases.push(alias.alias_id_non_null(&output_data.output_id)),
+                Output::Nft(nft) => nfts.push(nft.nft_id_non_null(&output_data.output_id)),
                 Output::Basic(_) | Output::Foundry(_) | Output::Treasury(_) => {}
             }
 
@@ -1021,8 +1022,7 @@ async fn print_address(account: &Account, address: &Bech32Address) -> Result<(),
             .into_iter()
             .map(|nt| (*nt.token_id(), nt.amount().to_string()))
         {
-            println_log_info!("  {id}");
-            println_log_info!("  Amount: {amount}");
+            println_log_info!("  {id}\t{amount}");
         }
     }
 
@@ -1097,8 +1097,8 @@ async fn get_addresses_sorted(account: &Account) -> Result<Vec<Bech32Address>, E
     let mut addresses = account
         .addresses()
         .await?
-        .iter()
-        .map(|address| *address.address())
+        .into_iter()
+        .map(|address| address.into_bech32())
         .chain(
             account
                 .unspent_outputs(FilterOptions {
