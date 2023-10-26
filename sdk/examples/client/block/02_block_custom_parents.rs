@@ -36,8 +36,9 @@ async fn main() -> Result<()> {
     println!("Issuance:\n{issuance:#?}");
 
     // Create and send the block with custom parents.
+    // TODO set Some(issuance.strong_parents()?
     let block = client
-        .build_basic_block(issuer_id, None, Some(issuance.strong_parents()?), None)
+        .build_basic_block(issuer_id, None)
         .await?
         .sign_ed25519(&secret_manager, Bip44::new(IOTA_COIN_TYPE))
         .await?;

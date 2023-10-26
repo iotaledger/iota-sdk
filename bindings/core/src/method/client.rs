@@ -8,7 +8,6 @@ use iota_sdk::{
     client::{node_api::indexer::query_parameters::QueryParameter, node_manager::node::NodeAuth},
     types::block::{
         address::{Bech32Address, Hrp},
-        core::basic,
         output::{
             dto::OutputDto, feature::Feature, unlock_condition::dto::UnlockConditionDto, AccountId, FoundryId,
             NativeToken, NftId, OutputId, TokenScheme,
@@ -127,9 +126,6 @@ pub enum ClientMethod {
     BuildBasicBlock {
         /// The issuer's ID.
         issuer_id: IssuerId,
-        /// Optional strong parents for the block.
-        #[serde(default)]
-        strong_parents: Option<basic::StrongParents>,
         /// The block payload.
         #[serde(default)]
         payload: Option<PayloadDto>,

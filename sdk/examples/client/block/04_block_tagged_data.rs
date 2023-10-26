@@ -38,8 +38,6 @@ async fn main() -> Result<()> {
     let block = client
         .build_basic_block(
             issuer_id,
-            None,
-            None,
             Some(Payload::TaggedData(Box::new(
                 TaggedDataPayload::new(
                     std::env::args()

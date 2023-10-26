@@ -39,7 +39,7 @@ async fn main() -> Result<()> {
 
     // Create and send the block with the custom payload.
     let block = client
-        .build_basic_block(issuer_id, None, None, Some(Payload::from(tagged_data_payload)))
+        .build_basic_block(issuer_id, Some(Payload::from(tagged_data_payload)))
         .await?
         .sign_ed25519(&secret_manager, Bip44::new(IOTA_COIN_TYPE))
         .await?;

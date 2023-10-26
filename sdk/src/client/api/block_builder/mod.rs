@@ -8,24 +8,17 @@ pub use self::transaction::verify_semantic;
 use crate::{
     client::{ClientInner, Result},
     types::block::{
-        core::{basic, BlockHeader, UnsignedBlock},
+        core::{BlockHeader, UnsignedBlock},
         payload::Payload,
         Block, IssuerId,
     },
 };
 
 impl ClientInner {
-    pub async fn build_basic_block(
-        &self,
-        issuer_id: IssuerId,
-        issuing_time: Option<u64>,
-        strong_parents: Option<basic::StrongParents>,
-        payload: Option<Payload>,
-    ) -> Result<UnsignedBlock> {
+    pub async fn build_basic_block(&self, issuer_id: IssuerId, payload: Option<Payload>) -> Result<UnsignedBlock> {
         let issuance = self.get_issuance().await?;
-        let strong_parents = strong_parents.unwrap_or(issuance.strong_parents()?);
 
-        let issuing_time = issuing_time.unwrap_or_else(|| {
+        let issuing_time = {
             #[cfg(feature = "std")]
             let issuing_time = std::time::SystemTime::now()
                 .duration_since(std::time::UNIX_EPOCH)
@@ -36,7 +29,7 @@ impl ClientInner {
             #[cfg(not(feature = "std"))]
             let issuing_time = 0;
             issuing_time
-        });
+        };
 
         let protocol_params = self.get_protocol_parameters().await?;
 
@@ -49,7 +42,8 @@ impl ClientInner {
                 issuance.latest_finalized_slot,
                 issuer_id,
             ),
-            Block::build_basic(strong_parents, 0) // TODO: burned mana calculation
+            // TODO: burned mana calculation
+            Block::build_basic(issuance.strong_parents()?, 0)
                 .with_weak_parents(issuance.weak_parents()?)
                 .with_shallow_like_parents(issuance.shallow_like_parents()?)
                 .with_payload(payload)

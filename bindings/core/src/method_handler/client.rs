@@ -161,11 +161,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
 
             Response::Output(OutputDto::from(&output))
         }
-        ClientMethod::BuildBasicBlock {
-            issuer_id,
-            strong_parents,
-            payload,
-        } => {
+        ClientMethod::BuildBasicBlock { issuer_id, payload } => {
             let payload = if let Some(payload) = payload {
                 Some(Payload::try_from_dto_with_params(
                     payload,
@@ -175,9 +171,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
                 None
             };
             Response::UnsignedBlock(UnsignedBlockDto::from(
-                &client
-                    .build_basic_block(issuer_id, None, strong_parents, payload)
-                    .await?,
+                &client.build_basic_block(issuer_id, payload).await?,
             ))
         }
         #[cfg(feature = "mqtt")]

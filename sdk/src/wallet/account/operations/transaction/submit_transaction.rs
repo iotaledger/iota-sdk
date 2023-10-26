@@ -27,12 +27,7 @@ where
 
         let block = self
             .client()
-            .build_basic_block(
-                todo!("issuer id"),
-                todo!("issuing time"),
-                None,
-                Some(Payload::from(transaction_payload)),
-            )
+            .build_basic_block(todo!("issuer id"), Some(Payload::from(transaction_payload)))
             .await?
             .sign_ed25519(
                 &*self.get_secret_manager().read().await,

@@ -63,8 +63,6 @@ where
                     .client()
                     .build_basic_block(
                         todo!("issuer id"),
-                        todo!("issuing time"),
-                        None,
                         Some(Payload::SignedTransaction(Box::new(transaction.payload.clone()))),
                     )
                     .await?
@@ -113,8 +111,6 @@ where
                             .client()
                             .build_basic_block(
                                 todo!("issuer id"),
-                                todo!("issuing time"),
-                                None,
                                 Some(Payload::SignedTransaction(Box::new(transaction.payload.clone()))),
                             )
                             .await?

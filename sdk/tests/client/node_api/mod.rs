@@ -36,8 +36,6 @@ async fn setup_tagged_data_block(secret_manager: &SecretManager) -> BlockId {
     client
         .build_basic_block(
             IssuerId::null(),
-            None,
-            None,
             Some(Payload::TaggedData(Box::new(
                 TaggedDataPayload::new(b"Hello".to_vec(), b"Tangle".to_vec()).unwrap(),
             ))),
