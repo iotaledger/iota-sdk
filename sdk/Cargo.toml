@@ -26,6 +26,7 @@ derive_more = { version = "0.99.17", default-features = false, features = [
     "as_ref",
     "deref",
     "deref_mut",
+    "display"
 ] }
 getset = { version = "0.1.2", default-features = false }
 hashbrown = { version = "0.14.1", default-features = false, features = [
