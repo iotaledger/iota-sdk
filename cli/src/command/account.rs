@@ -310,7 +310,6 @@ impl FromStr for OutputSelector {
 /// Select by Bech32 address or list index
 #[derive(Debug, Copy, Clone)]
 pub enum AddressSelector {
-    // TODO: change to AccountAddress? (Note that AccountAddress isn't Copy)
     Address(Bech32Address),
     Index(usize),
 }
