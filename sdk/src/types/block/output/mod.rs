@@ -292,7 +292,7 @@ impl Output {
                     .clone(),
                 None,
             )),
-            Self::Anchor(_) => todo!(),
+            Self::Anchor(_) => Err(Error::UnsupportedOutputKind(AnchorOutput::KIND)),
         }
     }
 
