@@ -49,7 +49,11 @@ impl From<&OutputId> for AccountId {
 impl AccountId {
     ///
     pub fn or_from_output_id(self, output_id: &OutputId) -> Self {
-        if self.is_null() { Self::from(output_id) } else { self }
+        if self.is_null() {
+            Self::from(output_id)
+        } else {
+            self
+        }
     }
 }
 
@@ -412,7 +416,7 @@ impl AccountOutput {
     ///
     #[inline(always)]
     pub fn address(&self) -> &Address {
-        // An AccountOutput must have a, AddressUnlockCondition.
+        // An AccountOutput must have an AddressUnlockCondition.
         self.unlock_conditions
             .address()
             .map(|unlock_condition| unlock_condition.address())
