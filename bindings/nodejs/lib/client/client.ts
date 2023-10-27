@@ -270,20 +270,20 @@ export class Client {
      * Create a signature unlock using the given secret manager.
      *
      * @param secretManager One of the supported secret managers.
-     * @param transactionHash The hash of the transaction.
+     * @param transactionSigningHash The signing hash of the transaction.
      * @param chain A BIP44 chain
      * @returns The corresponding unlock condition.
      */
     async signatureUnlock(
         secretManager: SecretManagerType,
-        transactionHash: HexEncodedString,
+        transactionSigningHash: HexEncodedString,
         chain: Bip44,
     ): Promise<UnlockCondition> {
         const response = await this.methodHandler.callMethod({
             name: 'signatureUnlock',
             data: {
                 secretManager,
-                transactionHash,
+                transactionSigningHash,
                 chain,
             },
         });
@@ -865,7 +865,7 @@ export class Client {
     /**
      * Extension method which provides request methods for plugins.
      *
-     * @param basePluginPath The base path for the plugin eg indexer/v1/ .
+     * @param basePluginPath The base path for the plugin eg indexer/v2/ .
      * @param method The http method.
      * @param endpoint The path for the plugin request.
      * @param queryParams Additional query params for the request.

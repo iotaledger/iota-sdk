@@ -27,7 +27,7 @@ async function run() {
 
         // Call our "custom" indexer plugin
         const outputId = await client.callPluginRoute(
-            'api/indexer/v1/',
+            'api/indexer/v2/',
             'GET',
             route,
             undefined,

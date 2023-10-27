@@ -96,10 +96,10 @@ pub trait SecretManage: Send + Sync {
         chain: Bip44,
     ) -> Result<(secp256k1_ecdsa::PublicKey, secp256k1_ecdsa::RecoverableSignature), Self::Error>;
 
-    /// Signs `transaction_hash` using the given `chain`, returning an [`Unlock`].
-    async fn signature_unlock(&self, transaction_hash: &[u8; 32], chain: Bip44) -> Result<Unlock, Self::Error> {
+    /// Signs `transaction_signing_hash` using the given `chain`, returning an [`Unlock`].
+    async fn signature_unlock(&self, transaction_signing_hash: &[u8; 32], chain: Bip44) -> Result<Unlock, Self::Error> {
         Ok(Unlock::from(SignatureUnlock::new(Signature::from(
-            self.sign_ed25519(transaction_hash, chain).await?,
+            self.sign_ed25519(transaction_signing_hash, chain).await?,
         ))))
     }
 
@@ -504,8 +504,7 @@ pub(crate) async fn default_transaction_unlocks<M: SecretManage>(
 where
     crate::client::Error: From<M::Error>,
 {
-    // The transaction_hash gets signed
-    let transaction_hash = prepared_transaction_data.transaction.hash();
+    let transaction_signing_hash = prepared_transaction_data.transaction.signing_hash();
     let mut blocks = Vec::new();
     let mut block_indexes = HashMap::<Address, usize>::new();
     let slot_index = prepared_transaction_data.transaction.creation_slot();
@@ -546,7 +545,9 @@ where
 
                 let chain = input.chain.ok_or(Error::MissingBip32Chain)?;
 
-                let block = secret_manager.signature_unlock(&transaction_hash, chain).await?;
+                let block = secret_manager
+                    .signature_unlock(&transaction_signing_hash, chain)
+                    .await?;
                 blocks.push(block);
 
                 // Add the ed25519 address to the block_indexes, so it gets referenced if further inputs have
