@@ -20,7 +20,7 @@ require('dotenv').config({ path: '.env' });
 // Run with command:
 // yarn run-example ./how_tos/outputs/unlock-conditions.ts
 
-// Build ouputs with all unlock conditions
+// Build outputs with all unlock conditions
 async function run() {
     initLogger();
 
@@ -97,7 +97,6 @@ async function run() {
                     basicOutputWithStorageReturn,
                     basicOutputWithTimelock,
                     basicOutputWithExpiration,
-                    accountOutput,
                     foundryOutput,
                 ],
                 null,

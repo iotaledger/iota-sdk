@@ -19,7 +19,7 @@ require('dotenv').config({ path: '.env' });
 // Run with command:
 // yarn run-example ./how_tos/outputs/features.ts
 
-// Build ouputs with all features
+// Build outputs with all features
 async function run() {
     initLogger();
 
