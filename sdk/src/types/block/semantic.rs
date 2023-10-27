@@ -9,7 +9,7 @@ use primitive_types::U256;
 
 use crate::types::block::{
     address::{Address, AddressCapabilityFlag},
-    output::{ChainId, FoundryId, NativeTokens, Output, OutputId, TokenId, UnlockCondition},
+    output::{AnchorOutput, ChainId, FoundryId, NativeTokens, Output, OutputId, TokenId, UnlockCondition},
     payload::signed_transaction::{Transaction, TransactionCapabilityFlag, TransactionId, TransactionSigningHash},
     unlock::Unlocks,
     Error,
@@ -255,7 +255,7 @@ pub fn semantic_validation(
                 None,
                 output.unlock_conditions(),
             ),
-            Output::Anchor(_) => todo!(),
+            Output::Anchor(_) => return Err(Error::UnsupportedOutputKind(AnchorOutput::KIND)),
         };
 
         if let Err(conflict) = conflict {
@@ -338,7 +338,7 @@ pub fn semantic_validation(
                 Some(output.features()),
             ),
             Output::Delegation(output) => (output.amount(), 0, None, None),
-            Output::Anchor(_) => todo!(),
+            Output::Anchor(_) => return Err(Error::UnsupportedOutputKind(AnchorOutput::KIND)),
         };
 
         if let Some(unlock_conditions) = created_output.unlock_conditions() {
@@ -353,6 +353,7 @@ pub fn semantic_validation(
                     _ => None,
                 })
                 .filter_map(Address::as_restricted_opt);
+
             for address in addresses {
                 if created_output.native_tokens().map(|t| t.len()).unwrap_or_default() > 0
                     && !address.has_capability(AddressCapabilityFlag::OutputsWithNativeTokens)
@@ -391,7 +392,6 @@ pub fn semantic_validation(
                     Output::Account(_) => !address.has_capability(AddressCapabilityFlag::AccountOutputs),
                     Output::Nft(_) => !address.has_capability(AddressCapabilityFlag::NftOutputs),
                     Output::Delegation(_) => !address.has_capability(AddressCapabilityFlag::DelegationOutputs),
-                    // TODO do we really want to handle it?
                     Output::Anchor(_) => !address.has_capability(AddressCapabilityFlag::AnchorOutputs),
                     _ => false,
                 } {
