@@ -102,7 +102,7 @@ pub struct RequiredStorageDeposit {
     pub(crate) foundry: u64,
     #[serde(with = "crate::utils::serde::string")]
     pub(crate) nft: u64,
-    #[serde(with = "string")]
+    #[serde(with = "crate::utils::serde::string")]
     pub(crate) delegation: u64,
 }
 
