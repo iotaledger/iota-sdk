@@ -3,7 +3,7 @@
 
 use core::str::FromStr;
 
-use derive_more::{AsRef, Deref, From};
+use derive_more::{AsRef, Deref, Display, From};
 
 use crate::types::block::{
     output::{AnchorId, OutputId},
@@ -11,7 +11,7 @@ use crate::types::block::{
 };
 
 /// An anchor address.
-#[derive(Clone, Copy, Eq, PartialEq, Ord, PartialOrd, Hash, From, AsRef, Deref, packable::Packable)]
+#[derive(Clone, Copy, Eq, PartialEq, Ord, PartialOrd, Hash, From, AsRef, Deref, Display, packable::Packable)]
 #[as_ref(forward)]
 pub struct AnchorAddress(AnchorId);
 
@@ -51,12 +51,6 @@ impl FromStr for AnchorAddress {
 impl From<&OutputId> for AnchorAddress {
     fn from(output_id: &OutputId) -> Self {
         Self(AnchorId::from(output_id))
-    }
-}
-
-impl core::fmt::Display for AnchorAddress {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        write!(f, "{}", self.0)
     }
 }
 

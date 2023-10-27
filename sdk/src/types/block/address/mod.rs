@@ -11,7 +11,7 @@ mod restricted;
 
 use alloc::boxed::Box;
 
-use derive_more::From;
+use derive_more::{Display, From};
 use packable::Packable;
 
 pub use self::{
@@ -32,7 +32,7 @@ use crate::types::block::{
 };
 
 /// A generic address supporting different address kinds.
-#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, From, Packable)]
+#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, From, Display, Packable)]
 #[packable(tag_type = u8, with_error = Error::InvalidAddressKind)]
 #[packable(unpack_error = Error)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize), serde(untagged))]
