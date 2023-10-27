@@ -846,90 +846,84 @@ pub(crate) mod dto {
     }
 }
 
-// #[cfg(test)]
-// mod tests {
+#[cfg(test)]
+mod tests {
 
-//     use super::*;
-//     use crate::types::{
-//         block::{
-//             output::{dto::OutputDto, FoundryId, SimpleTokenScheme, TokenId},
-//             protocol::protocol_parameters,
-//             rand::{
-//                 address::rand_anchor_address,
-//                 output::{
-//                     feature::rand_allowed_features,
-//                     rand_account_output, rand_anchor_id,
-//                     unlock_condition::{
-//                         rand_governor_address_unlock_condition_different_from,
-//                         rand_state_controller_address_unlock_condition_different_from,
-//                     },
-//                 },
-//             },
-//         },
-//         TryFromDto,
-//     };
+    use super::*;
+    use crate::types::{
+        block::{
+            output::dto::OutputDto,
+            protocol::protocol_parameters,
+            rand::output::{
+                feature::rand_allowed_features,
+                rand_anchor_id, rand_anchor_output,
+                unlock_condition::{
+                    rand_governor_address_unlock_condition_different_from,
+                    rand_state_controller_address_unlock_condition_different_from,
+                },
+            },
+        },
+        TryFromDto,
+    };
 
-//     #[test]
-//     fn to_from_dto() {
-//         let protocol_parameters = protocol_parameters();
-//         let output = rand_account_output(protocol_parameters.token_supply());
-//         let dto = OutputDto::Account((&output).into());
-//         let output_unver = Output::try_from_dto(dto.clone()).unwrap();
-//         assert_eq!(&output, output_unver.as_account());
-//         let output_ver = Output::try_from_dto_with_params(dto, &protocol_parameters).unwrap();
-//         assert_eq!(&output, output_ver.as_account());
+    #[test]
+    fn to_from_dto() {
+        let protocol_parameters = protocol_parameters();
+        let output = rand_anchor_output(protocol_parameters.token_supply());
+        let dto = OutputDto::Anchor((&output).into());
+        let output_unver = Output::try_from_dto(dto.clone()).unwrap();
+        assert_eq!(&output, output_unver.as_anchor());
+        let output_ver = Output::try_from_dto_with_params(dto, &protocol_parameters).unwrap();
+        assert_eq!(&output, output_ver.as_anchor());
 
-//         let output_split = AnchorOutput::try_from_dtos(
-//             OutputBuilderAmount::Amount(output.amount()),
-//             output.mana(),
-//             Some(output.native_tokens().to_vec()),
-//             output.anchor_id(),
-//             output.state_index().into(),
-//             output.state_metadata().to_owned().into(),
-//             output.unlock_conditions().iter().map(Into::into).collect(),
-//             Some(output.features().to_vec()),
-//             Some(output.immutable_features().to_vec()),
-//             &protocol_parameters,
-//         )
-//         .unwrap();
-//         assert_eq!(output, output_split);
+        let output_split = AnchorOutput::try_from_dtos(
+            OutputBuilderAmount::Amount(output.amount()),
+            output.mana(),
+            Some(output.native_tokens().to_vec()),
+            output.anchor_id(),
+            output.state_index().into(),
+            output.state_metadata().to_owned().into(),
+            output.unlock_conditions().iter().map(Into::into).collect(),
+            Some(output.features().to_vec()),
+            Some(output.immutable_features().to_vec()),
+            &protocol_parameters,
+        )
+        .unwrap();
+        assert_eq!(output, output_split);
 
-//         let anchor_id = rand_anchor_id();
-//         let foundry_id = FoundryId::build(&rand_anchor_address(), 0, SimpleTokenScheme::KIND);
-//         let gov_address = rand_governor_address_unlock_condition_different_from(&anchor_id);
-//         let state_address = rand_state_controller_address_unlock_condition_different_from(&anchor_id);
+        let anchor_id = rand_anchor_id();
+        let gov_address = rand_governor_address_unlock_condition_different_from(&anchor_id);
+        let state_address = rand_state_controller_address_unlock_condition_different_from(&anchor_id);
 
-//         let test_split_dto = |builder: AnchorOutputBuilder| {
-//             let output_split = AnchorOutput::try_from_dtos(
-//                 builder.amount,
-//                 builder.mana,
-//                 Some(builder.native_tokens.iter().copied().collect()),
-//                 &builder.anchor_id,
-//                 builder.state_index,
-//                 builder.state_metadata.to_owned().into(),
-//                 builder.unlock_conditions.iter().map(Into::into).collect(),
-//                 Some(builder.features.iter().cloned().collect()),
-//                 Some(builder.immutable_features.iter().cloned().collect()),
-//                 &protocol_parameters,
-//             )
-//             .unwrap();
-//             assert_eq!(builder.finish_with_params(&protocol_parameters).unwrap(), output_split);
-//         };
+        let test_split_dto = |builder: AnchorOutputBuilder| {
+            let output_split = AnchorOutput::try_from_dtos(
+                builder.amount,
+                builder.mana,
+                Some(builder.native_tokens.iter().copied().collect()),
+                &builder.anchor_id,
+                builder.state_index,
+                builder.state_metadata.to_owned().into(),
+                builder.unlock_conditions.iter().map(Into::into).collect(),
+                Some(builder.features.iter().cloned().collect()),
+                Some(builder.immutable_features.iter().cloned().collect()),
+                &protocol_parameters,
+            )
+            .unwrap();
+            assert_eq!(builder.finish_with_params(&protocol_parameters).unwrap(), output_split);
+        };
 
-//         let builder = AnchorOutput::build_with_amount(100, anchor_id)
-//             .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000).unwrap())
-//             .add_unlock_condition(gov_address)
-//             .add_unlock_condition(state_address)
-//             .with_features(rand_allowed_features(AnchorOutput::ALLOWED_FEATURES))
-//             .with_immutable_features(rand_allowed_features(AnchorOutput::ALLOWED_IMMUTABLE_FEATURES));
-//         test_split_dto(builder);
+        let builder = AnchorOutput::build_with_amount(100, anchor_id)
+            .add_unlock_condition(gov_address.clone())
+            .add_unlock_condition(state_address.clone())
+            .with_features(rand_allowed_features(AnchorOutput::ALLOWED_FEATURES))
+            .with_immutable_features(rand_allowed_features(AnchorOutput::ALLOWED_IMMUTABLE_FEATURES));
+        test_split_dto(builder);
 
-//         let builder = AnchorOutput::build_with_minimum_storage_deposit(protocol_parameters.rent_structure(),
-// anchor_id)             .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000).unwrap())
-//             .add_unlock_condition(gov_address)
-//             .add_unlock_condition(state_address)
-//             .with_features(rand_allowed_features(AnchorOutput::ALLOWED_FEATURES))
-//             .with_immutable_features(rand_allowed_features(AnchorOutput::ALLOWED_IMMUTABLE_FEATURES));
-//         test_split_dto(builder);
-//     }
-// }
+        let builder = AnchorOutput::build_with_minimum_storage_deposit(protocol_parameters.rent_structure(), anchor_id)
+            .add_unlock_condition(gov_address)
+            .add_unlock_condition(state_address)
+            .with_features(rand_allowed_features(AnchorOutput::ALLOWED_FEATURES))
+            .with_immutable_features(rand_allowed_features(AnchorOutput::ALLOWED_IMMUTABLE_FEATURES));
+        test_split_dto(builder);
+    }
+}
