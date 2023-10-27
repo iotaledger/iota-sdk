@@ -50,7 +50,11 @@ impl From<&OutputId> for AnchorId {
 impl AnchorId {
     ///
     pub fn or_from_output_id(self, output_id: &OutputId) -> Self {
-        if self.is_null() { Self::from(output_id) } else { self }
+        if self.is_null() {
+            Self::from(output_id)
+        } else {
+            self
+        }
     }
 }
 
@@ -502,7 +506,6 @@ impl AnchorOutput {
         &self,
         output_id: &OutputId,
         unlock: &Unlock,
-        inputs: &[(&OutputId, &Output)],
         context: &mut SemanticValidationContext<'_>,
     ) -> Result<(), TransactionFailureReason> {
         let anchor_id = if self.anchor_id().is_null() {
