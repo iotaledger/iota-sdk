@@ -21,7 +21,7 @@ use crate::{
         address::{Address, Bech32Address, Ed25519Address, Hrp, ToBech32Ext},
         output::{AccountId, NftId},
         payload::TaggedDataPayload,
-        BlockId, BlockWrapper, ConvertTo,
+        BlockId, ConvertTo, SignedBlock,
     },
 };
 
@@ -190,7 +190,7 @@ impl Client {
         Ok((Self::tag_to_utf8(payload)?, Self::data_to_utf8(payload)?))
     }
 
-    pub async fn block_id(&self, block: &BlockWrapper) -> Result<BlockId> {
+    pub async fn block_id(&self, block: &SignedBlock) -> Result<BlockId> {
         Ok(block.id(&self.get_protocol_parameters().await?))
     }
 }

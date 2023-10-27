@@ -7,9 +7,10 @@ import type {
 } from '../../secret_manager/secret-manager';
 import type {
     AccountId,
-    Block,
+    SignedBlock,
     BlockId,
     FoundryId,
+    IssuerId,
     NftId,
     Output,
     OutputId,
@@ -66,7 +67,7 @@ export interface __GetOutputsMethod__ {
 export interface __PostBlockMethod__ {
     name: 'postBlock';
     data: {
-        block: Block;
+        block: SignedBlock;
     };
 }
 
@@ -117,10 +118,11 @@ export interface __SignatureUnlockMethod__ {
     };
 }
 
-export interface __PostBlockPayloadMethod__ {
-    name: 'postBlockPayload';
+export interface __BuildBasicBlockMethod__ {
+    name: 'buildBasicBlock';
     data: {
-        payload: Payload;
+        issuerId: IssuerId;
+        payload?: Payload;
     };
 }
 
@@ -162,7 +164,7 @@ export interface __GetPeersMethod__ {
 export interface __PostBlockRawMethod__ {
     name: 'postBlockRaw';
     data: {
-        block: Block;
+        block: SignedBlock;
     };
 }
 
