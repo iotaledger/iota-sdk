@@ -30,7 +30,7 @@ pub fn rand_anchor_address() -> AnchorAddress {
 // TODO handle all address kinds
 /// Generates a random address.
 pub fn rand_address() -> Address {
-    match rand_number::<u64>() % 3 {
+    match rand_number::<u64>() % 4 {
         0 => rand_ed25519_address().into(),
         1 => rand_account_address().into(),
         2 => rand_nft_address().into(),
