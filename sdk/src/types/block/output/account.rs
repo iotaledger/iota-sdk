@@ -27,7 +27,7 @@ use crate::types::{
         },
         payload::signed_transaction::TransactionCapabilityFlag,
         protocol::ProtocolParameters,
-        semantic::{TransactionFailureReason, ValidationContext},
+        semantic::{SemanticValidationContext, TransactionFailureReason},
         unlock::Unlock,
         Error,
     },
@@ -523,8 +523,7 @@ impl AccountOutput {
         &self,
         output_id: &OutputId,
         unlock: &Unlock,
-        inputs: &[(&OutputId, &Output)],
-        context: &mut ValidationContext<'_>,
+        context: &mut SemanticValidationContext<'_>,
     ) -> Result<(), TransactionFailureReason> {
         let account_id = if self.account_id().is_null() {
             AccountId::from(output_id)
@@ -536,9 +535,9 @@ impl AccountOutput {
         match next_state {
             Some(Output::Account(next_state)) => {
                 if self.state_index() == next_state.state_index() {
-                    self.governor_address().unlock(unlock, inputs, context)?;
+                    self.governor_address().unlock(unlock, context)?;
                 } else {
-                    self.state_controller_address().unlock(unlock, inputs, context)?;
+                    self.state_controller_address().unlock(unlock, context)?;
                     // Only a state transition can be used to consider the account address for output unlocks and
                     // sender/issuer validations.
                     context
@@ -546,7 +545,7 @@ impl AccountOutput {
                         .insert(Address::from(AccountAddress::from(account_id)));
                 }
             }
-            None => self.governor_address().unlock(unlock, inputs, context)?,
+            None => self.governor_address().unlock(unlock, context)?,
             // The next state can only be an account output since it is identified by an account chain identifier.
             Some(_) => unreachable!(),
         };
@@ -554,7 +553,7 @@ impl AccountOutput {
         Ok(())
     }
 
-    // Transition, just without full ValidationContext
+    // Transition, just without full SemanticValidationContext
     pub(crate) fn transition_inner(
         current_state: &Self,
         next_state: &Self,
@@ -622,7 +621,7 @@ impl AccountOutput {
 }
 
 impl StateTransitionVerifier for AccountOutput {
-    fn creation(next_state: &Self, context: &ValidationContext<'_>) -> Result<(), StateTransitionError> {
+    fn creation(next_state: &Self, context: &SemanticValidationContext<'_>) -> Result<(), StateTransitionError> {
         if !next_state.account_id.is_null() {
             return Err(StateTransitionError::NonZeroCreatedId);
         }
@@ -639,7 +638,7 @@ impl StateTransitionVerifier for AccountOutput {
     fn transition(
         current_state: &Self,
         next_state: &Self,
-        context: &ValidationContext<'_>,
+        context: &SemanticValidationContext<'_>,
     ) -> Result<(), StateTransitionError> {
         Self::transition_inner(
             current_state,
@@ -649,7 +648,7 @@ impl StateTransitionVerifier for AccountOutput {
         )
     }
 
-    fn destruction(_current_state: &Self, context: &ValidationContext<'_>) -> Result<(), StateTransitionError> {
+    fn destruction(_current_state: &Self, context: &SemanticValidationContext<'_>) -> Result<(), StateTransitionError> {
         if !context
             .transaction
             .has_capability(TransactionCapabilityFlag::DestroyAccountOutputs)

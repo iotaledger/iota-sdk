@@ -27,7 +27,7 @@ use crate::types::{
         },
         payload::signed_transaction::{TransactionCapabilities, TransactionCapabilityFlag},
         protocol::ProtocolParameters,
-        semantic::{TransactionFailureReason, ValidationContext},
+        semantic::{SemanticValidationContext, TransactionFailureReason},
         unlock::Unlock,
         Error,
     },
@@ -449,13 +449,12 @@ impl FoundryOutput {
         &self,
         _output_id: &OutputId,
         unlock: &Unlock,
-        inputs: &[(&OutputId, &Output)],
-        context: &mut ValidationContext<'_>,
+        context: &mut SemanticValidationContext<'_>,
     ) -> Result<(), TransactionFailureReason> {
-        Address::from(*self.account_address()).unlock(unlock, inputs, context)
+        Address::from(*self.account_address()).unlock(unlock, context)
     }
 
-    // Transition, just without full ValidationContext
+    // Transition, just without full SemanticValidationContext
     pub(crate) fn transition_inner(
         current_state: &Self,
         next_state: &Self,
@@ -544,7 +543,7 @@ impl FoundryOutput {
 }
 
 impl StateTransitionVerifier for FoundryOutput {
-    fn creation(next_state: &Self, context: &ValidationContext<'_>) -> Result<(), StateTransitionError> {
+    fn creation(next_state: &Self, context: &SemanticValidationContext<'_>) -> Result<(), StateTransitionError> {
         let account_chain_id = ChainId::from(*next_state.account_address().account_id());
 
         if let (Some(Output::Account(input_account)), Some(Output::Account(output_account))) = (
@@ -579,7 +578,7 @@ impl StateTransitionVerifier for FoundryOutput {
     fn transition(
         current_state: &Self,
         next_state: &Self,
-        context: &ValidationContext<'_>,
+        context: &SemanticValidationContext<'_>,
     ) -> Result<(), StateTransitionError> {
         Self::transition_inner(
             current_state,
@@ -590,7 +589,7 @@ impl StateTransitionVerifier for FoundryOutput {
         )
     }
 
-    fn destruction(current_state: &Self, context: &ValidationContext<'_>) -> Result<(), StateTransitionError> {
+    fn destruction(current_state: &Self, context: &SemanticValidationContext<'_>) -> Result<(), StateTransitionError> {
         if !context
             .transaction
             .has_capability(TransactionCapabilityFlag::DestroyFoundryOutputs)
