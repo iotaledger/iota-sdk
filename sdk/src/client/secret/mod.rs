@@ -51,13 +51,13 @@ use crate::{
         Error,
     },
     types::block::{
-        address::{Address, Ed25519Address},
+        address::{Address, AnchorAddress, Ed25519Address},
         core::BlockWrapperBuilder,
         output::Output,
         payload::SignedTransactionPayload,
         signature::{Ed25519Signature, Signature},
         unlock::{AccountUnlock, NftUnlock, ReferenceUnlock, SignatureUnlock, Unlock, Unlocks},
-        BlockWrapper,
+        BlockWrapper, Error as BlockError,
     },
 };
 
@@ -524,7 +524,7 @@ where
                 }
                 Address::Account(_account) => blocks.push(Unlock::Account(AccountUnlock::new(*block_index as u16)?)),
                 Address::Nft(_nft) => blocks.push(Unlock::Nft(NftUnlock::new(*block_index as u16)?)),
-                Address::Anchor(_) => todo!(),
+                Address::Anchor(_) => Err(BlockError::UnsupportedAddressKind(AnchorAddress::KIND))?,
                 _ => todo!("What do we do here?"),
             },
             None => {

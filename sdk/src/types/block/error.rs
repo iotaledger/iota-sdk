@@ -174,6 +174,8 @@ pub enum Error {
     },
     UnlockConditionsNotUniqueSorted,
     UnsupportedOutputKind(u8),
+    // TODO use Address::kind_str when available in 2.0 ?
+    UnsupportedAddressKind(u8),
     DuplicateOutputChain(ChainId),
     InvalidField(&'static str),
     NullDelegationValidatorId,
@@ -387,6 +389,7 @@ impl fmt::Display for Error {
             }
             Self::UnlockConditionsNotUniqueSorted => write!(f, "unlock conditions are not unique and/or sorted"),
             Self::UnsupportedOutputKind(k) => write!(f, "unsupported output kind: {k}"),
+            Self::UnsupportedAddressKind(k) => write!(f, "unsupported address kind: {k}"),
             Self::DuplicateOutputChain(chain_id) => write!(f, "duplicate output chain {chain_id}"),
             Self::InvalidField(field) => write!(f, "invalid field: {field}"),
             Self::NullDelegationValidatorId => write!(f, "null delegation validator ID"),
