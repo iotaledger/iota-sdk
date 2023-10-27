@@ -102,25 +102,25 @@ class AccountOutput:
     ))
     account_id: HexStr
     foundry_counter: int
-    unlock_conditions: List[AddressUnlockCondition]] = field(
-        metadata = config(
+    unlock_conditions: List[AddressUnlockCondition] = field(
+        metadata=config(
             decoder=deserialize_unlock_conditions
         ))
     features: Optional[List[Union[SenderFeature,
                             MetadataFeature]]] = field(default=None,
-                                                       metadata = config(
+                                                       metadata=config(
                                                            decoder=deserialize_features
                                                        ))
     immutable_features: Optional[List[Union[IssuerFeature,
                                             MetadataFeature]]] = field(default=None,
-                                                                       metadata = config(
+                                                                       metadata=config(
                                                                            decoder=deserialize_features
                                                                        ))
     native_tokens: Optional[List[NativeToken]] = None
     type: int = field(
-        default_factory = lambda: int(
+        default_factory=lambda: int(
             OutputType.Account),
-        init = False)
+        init=False)
 
 
 @ json
@@ -152,18 +152,18 @@ class FoundryOutput:
     token_scheme: SimpleTokenScheme
     unlock_conditions: List[ImmutableAccountAddressUnlockCondition]
     features: Optional[List[MetadataFeature]] = field(default=None,
-                                                      metadata = config(
+                                                      metadata=config(
                                                           decoder=deserialize_features
                                                       ))
     immutable_features: Optional[List[MetadataFeature]] = field(default=None,
-                                                                metadata = config(
+                                                                metadata=config(
                                                                     decoder=deserialize_features
                                                                 ))
     native_tokens: Optional[List[NativeToken]] = None
     type: int = field(
-        default_factory = lambda: int(
+        default_factory=lambda: int(
             OutputType.Foundry),
-        init = False)
+        init=False)
 
 
 @ json
@@ -197,12 +197,12 @@ class NftOutput:
     nft_id: HexStr
     unlock_conditions: List[Union[AddressUnlockCondition, ExpirationUnlockCondition,
                                   StorageDepositReturnUnlockCondition, TimelockUnlockCondition]] = field(
-        metadata = config(
+        metadata=config(
             decoder=deserialize_unlock_conditions
         ))
     features: Optional[List[Union[SenderFeature,
                             MetadataFeature, TagFeature]]] = field(default=None,
-                                                                   metadata = config(
+                                                                   metadata=config(
                                                                        decoder=deserialize_features
                                                                    ))
     immutable_features: Optional[List[Union[
