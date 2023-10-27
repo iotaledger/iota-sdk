@@ -26,11 +26,12 @@ use crate::{
         LedgerNanoStatus, PreparedTransactionData,
     },
     types::block::{
-        address::{AccountAddress, Address, Ed25519Address, NftAddress},
+        address::{AccountAddress, Address, AnchorAddress, Ed25519Address, NftAddress},
         output::Output,
         payload::signed_transaction::SignedTransactionPayload,
         signature::{Ed25519Signature, Signature},
         unlock::{AccountUnlock, NftUnlock, ReferenceUnlock, SignatureUnlock, Unlock, Unlocks},
+        Error as BlockError,
     },
 };
 
@@ -531,7 +532,7 @@ fn merge_unlocks(
                     merged_unlocks.push(Unlock::Account(AccountUnlock::new(*block_index as u16)?))
                 }
                 Address::Nft(_nft) => merged_unlocks.push(Unlock::Nft(NftUnlock::new(*block_index as u16)?)),
-                Address::Anchor(_) => todo!(),
+                Address::Anchor(_) => Err(BlockError::UnsupportedAddressKind(AnchorAddress::KIND))?,
                 _ => todo!("What do we do here?"),
             },
             None => {
