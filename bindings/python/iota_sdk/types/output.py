@@ -123,8 +123,8 @@ class AccountOutput:
         init=False)
 
 
-@ json
-@ dataclass
+@json
+@dataclass
 class FoundryOutput:
     """Describes a foundry output.
     Attributes:
@@ -166,8 +166,8 @@ class FoundryOutput:
         init=False)
 
 
-@ json
-@ dataclass
+@json
+@dataclass
 class NftOutput:
     """Describes an NFT output.
     Attributes:
