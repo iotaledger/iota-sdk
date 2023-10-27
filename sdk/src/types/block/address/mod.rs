@@ -159,7 +159,8 @@ impl Address {
                     return Err(TransactionFailureReason::InvalidInputUnlock);
                 }
             }
-            (Self::Anchor(_), Unlock::Anchor(_)) => todo!(),
+            // TODO maybe shouldn't be a semantic error but this function currently returns a TransactionFailureReason.
+            (Self::Anchor(_), _) => return Err(TransactionFailureReason::SemanticValidationFailed),
             _ => return Err(TransactionFailureReason::InvalidInputUnlock),
         }
 
