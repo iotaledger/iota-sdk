@@ -18,7 +18,7 @@ pub use self::{burn::Burn, error::Error, requirement::Requirement};
 use crate::{
     client::{api::types::RemainderData, secret::types::InputSigningData},
     types::block::{
-        address::{AccountAddress, Address, NftAddress},
+        address::{AccountAddress, Address, AnchorAddress, NftAddress},
         input::INPUT_COUNT_RANGE,
         output::{
             AccountOutput, ChainId, FoundryOutput, NativeTokensBuilder, NftOutput, Output, OutputId, OUTPUT_COUNT_RANGE,
@@ -67,7 +67,7 @@ impl InputSelection {
             Address::Ed25519(_) => Ok(None),
             Address::Account(account_address) => Ok(Some(Requirement::Account(*account_address.account_id()))),
             Address::Nft(nft_address) => Ok(Some(Requirement::Nft(*nft_address.nft_id()))),
-            Address::Anchor(_) => todo!(),
+            Address::Anchor(_) => Err(Error::UnsupportedAddressType(AnchorAddress::KIND)),
             _ => todo!("What do we do here?"),
         }
     }
@@ -210,7 +210,7 @@ impl InputSelection {
     fn filter_inputs(&mut self) {
         self.available_inputs.retain(|input| {
             // TODO what about other kinds?
-            // Filter out non account/basic/foundry/nft outputs.
+            // Filter out non basic/account/foundry/nft outputs.
             if !input.output.is_basic()
                 && !input.output.is_account()
                 && !input.output.is_foundry()
