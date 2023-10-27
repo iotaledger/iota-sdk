@@ -476,18 +476,18 @@ pub enum TransactionCapabilityFlag {
     BurnNativeTokens,
     BurnMana,
     DestroyAccountOutputs,
+    DestroyAnchorOutputs,
     DestroyFoundryOutputs,
     DestroyNftOutputs,
-    DestroyAnchorOutputs,
 }
 
 impl TransactionCapabilityFlag {
     const BURN_NATIVE_TOKENS: u8 = 0b00000001;
     const BURN_MANA: u8 = 0b00000010;
     const DESTROY_ACCOUNT_OUTPUTS: u8 = 0b00000100;
-    const DESTROY_FOUNDRY_OUTPUTS: u8 = 0b00001000;
-    const DESTROY_NFT_OUTPUTS: u8 = 0b00010000;
-    const DESTROY_ANCHOR_OUTPUTS: u8 = 0b00100000;
+    const DESTROY_ANCHOR_OUTPUTS: u8 = 0b00001000;
+    const DESTROY_FOUNDRY_OUTPUTS: u8 = 0b00010000;
+    const DESTROY_NFT_OUTPUTS: u8 = 0b00100000;
 }
 
 impl CapabilityFlag for TransactionCapabilityFlag {
@@ -498,9 +498,9 @@ impl CapabilityFlag for TransactionCapabilityFlag {
             Self::BurnNativeTokens => Self::BURN_NATIVE_TOKENS,
             Self::BurnMana => Self::BURN_MANA,
             Self::DestroyAccountOutputs => Self::DESTROY_ACCOUNT_OUTPUTS,
+            Self::DestroyAnchorOutputs => Self::DESTROY_ANCHOR_OUTPUTS,
             Self::DestroyFoundryOutputs => Self::DESTROY_FOUNDRY_OUTPUTS,
             Self::DestroyNftOutputs => Self::DESTROY_NFT_OUTPUTS,
-            Self::DestroyAnchorOutputs => Self::DESTROY_ANCHOR_OUTPUTS,
         }
     }
 
@@ -509,9 +509,9 @@ impl CapabilityFlag for TransactionCapabilityFlag {
             Self::BurnNativeTokens
             | Self::BurnMana
             | Self::DestroyAccountOutputs
+            | Self::DestroyAnchorOutputs
             | Self::DestroyFoundryOutputs
-            | Self::DestroyNftOutputs
-            | Self::DestroyAnchorOutputs => 0,
+            | Self::DestroyNftOutputs => 0,
         }
     }
 
@@ -520,9 +520,9 @@ impl CapabilityFlag for TransactionCapabilityFlag {
             Self::BurnNativeTokens,
             Self::BurnMana,
             Self::DestroyAccountOutputs,
+            Self::DestroyAnchorOutputs,
             Self::DestroyFoundryOutputs,
             Self::DestroyNftOutputs,
-            Self::DestroyAnchorOutputs,
         ]
         .into_iter()
     }
