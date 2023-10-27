@@ -9,13 +9,16 @@ mod mqtt;
 use crypto::keys::bip44::Bip44;
 use iota_sdk::{
     client::{
-        api::GetAddressesOptions, constants::IOTA_COIN_TYPE,
-        node_api::indexer::query_parameters::BasicOutputQueryParameters, request_funds_from_faucet,
-        secret::SecretManager, Client,
+        api::GetAddressesOptions,
+        constants::IOTA_COIN_TYPE,
+        node_api::indexer::query_parameters::BasicOutputQueryParameters,
+        request_funds_from_faucet,
+        secret::{SecretManager, SignBlock},
+        Client,
     },
     types::block::{
         payload::{signed_transaction::TransactionId, tagged_data::TaggedDataPayload, Payload},
-        BlockId,
+        BlockId, IssuerId,
     },
 };
 
@@ -32,15 +35,14 @@ async fn setup_tagged_data_block(secret_manager: &SecretManager) -> BlockId {
 
     client
         .build_basic_block(
-            todo!("issuer id"),
-            todo!("issuing time"),
-            None,
+            IssuerId::null(),
             Some(Payload::TaggedData(Box::new(
                 TaggedDataPayload::new(b"Hello".to_vec(), b"Tangle".to_vec()).unwrap(),
             ))),
-            secret_manager,
-            Bip44::new(IOTA_COIN_TYPE),
         )
+        .await
+        .unwrap()
+        .sign_ed25519(secret_manager, Bip44::new(IOTA_COIN_TYPE))
         .await
         .unwrap()
         .id(&protocol_params)

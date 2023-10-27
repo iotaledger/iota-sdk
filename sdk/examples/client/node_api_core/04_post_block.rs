@@ -9,7 +9,14 @@
 //! ```
 
 use crypto::keys::bip44::Bip44;
-use iota_sdk::client::{constants::IOTA_COIN_TYPE, secret::SecretManager, Client, Result};
+use iota_sdk::{
+    client::{
+        constants::IOTA_COIN_TYPE,
+        secret::{SecretManager, SignBlock},
+        Client, Result,
+    },
+    types::block::IssuerId,
+};
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -20,6 +27,7 @@ async fn main() -> Result<()> {
     let node_url = std::env::args()
         .nth(1)
         .unwrap_or_else(|| std::env::var("NODE_URL").unwrap());
+    let issuer_id = std::env::var("ISSUER_ID").unwrap().parse::<IssuerId>().unwrap();
 
     // Create a node client.
     let client = Client::builder().with_node(&node_url)?.finish().await?;
@@ -28,14 +36,9 @@ async fn main() -> Result<()> {
 
     // Create the block.
     let block = client
-        .build_basic_block(
-            todo!("issuer id"),
-            todo!("issuing time"),
-            None,
-            None,
-            &secret_manager,
-            Bip44::new(IOTA_COIN_TYPE),
-        )
+        .build_basic_block(issuer_id, None)
+        .await?
+        .sign_ed25519(&secret_manager, Bip44::new(IOTA_COIN_TYPE))
         .await?;
     // Post the block.
     let block_id = client.post_block(&block).await?;

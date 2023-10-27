@@ -6,7 +6,7 @@ use alloc::vec::Vec;
 use crate::types::block::{
     core::{
         basic::{self, BasicBlockBuilder},
-        BlockHeader, BlockWrapper, BlockWrapperBuilder,
+        BlockHeader, SignedBlock, UnsignedBlock,
     },
     protocol::ProtocolParameters,
     rand::{
@@ -46,9 +46,9 @@ pub fn rand_basic_block_builder_with_strong_parents(strong_parents: basic::Stron
     Block::build_basic(strong_parents, rand_number())
 }
 
-/// Generates a random block wrapper with given block.
-pub fn rand_block_wrapper_with_block(protocol_params: ProtocolParameters, block: Block) -> BlockWrapper {
-    BlockWrapper::build(
+/// Generates a random signed block with given block.
+pub fn rand_signed_block_with_block(protocol_params: ProtocolParameters, block: Block) -> SignedBlock {
+    SignedBlock::build(
         BlockHeader::new(
             protocol_params.version(),
             protocol_params.network_id(),
@@ -62,25 +62,25 @@ pub fn rand_block_wrapper_with_block(protocol_params: ProtocolParameters, block:
     .sign_random()
 }
 
-/// Generates a random block wrapper with given strong parents.
-pub fn rand_block_wrapper_with_strong_parents(
+/// Generates a random signed block with given strong parents.
+pub fn rand_signed_block_with_strong_parents(
     protocol_params: ProtocolParameters,
     strong_parents: basic::StrongParents,
-) -> BlockWrapper {
-    rand_block_wrapper_with_block(protocol_params, rand_basic_block_with_strong_parents(strong_parents))
+) -> SignedBlock {
+    rand_signed_block_with_block(protocol_params, rand_basic_block_with_strong_parents(strong_parents))
 }
 
-/// Generates a random block wrapper.
-pub fn rand_block_wrapper(protocol_params: ProtocolParameters) -> BlockWrapper {
-    rand_block_wrapper_with_strong_parents(protocol_params, rand_strong_parents())
+/// Generates a random signed block.
+pub fn rand_signed_block(protocol_params: ProtocolParameters) -> SignedBlock {
+    rand_signed_block_with_strong_parents(protocol_params, rand_strong_parents())
 }
 
 pub trait SignBlockRandom {
-    fn sign_random(self) -> BlockWrapper;
+    fn sign_random(self) -> SignedBlock;
 }
 
-impl SignBlockRandom for BlockWrapperBuilder {
-    fn sign_random(self) -> BlockWrapper {
+impl SignBlockRandom for UnsignedBlock {
+    fn sign_random(self) -> SignedBlock {
         let signing_input = self.signing_input();
         self.finish(rand_sign_ed25519(&signing_input)).unwrap()
     }
