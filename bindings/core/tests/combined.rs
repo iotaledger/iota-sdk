@@ -256,8 +256,8 @@ async fn client_from_wallet() -> Result<()> {
 //     std::fs::remove_dir_all(storage_path).ok();
 
 //     let secret_manager = MnemonicSecretManager::try_from_mnemonic(
-//         "about solution utility exist rail budget vacuum major survey clerk pave ankle wealth gym gossip still medal expect strong rely amazing inspire lazy lunar",
-//     ).unwrap();
+//         "about solution utility exist rail budget vacuum major survey clerk pave ankle wealth gym gossip still medal
+// expect strong rely amazing inspire lazy lunar",     ).unwrap();
 //     let client = ClientBuilder::default()
 //         .with_nodes(&["http://localhost:14265"])
 //         .unwrap()
