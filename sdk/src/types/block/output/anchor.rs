@@ -27,7 +27,7 @@ use crate::types::{
         },
         payload::signed_transaction::TransactionCapabilityFlag,
         protocol::ProtocolParameters,
-        semantic::{TransactionFailureReason, ValidationContext},
+        semantic::{SemanticValidationContext, TransactionFailureReason},
         unlock::Unlock,
         Error,
     },
@@ -50,11 +50,7 @@ impl From<&OutputId> for AnchorId {
 impl AnchorId {
     ///
     pub fn or_from_output_id(self, output_id: &OutputId) -> Self {
-        if self.is_null() {
-            Self::from(output_id)
-        } else {
-            self
-        }
+        if self.is_null() { Self::from(output_id) } else { self }
     }
 }
 
@@ -507,7 +503,7 @@ impl AnchorOutput {
         output_id: &OutputId,
         unlock: &Unlock,
         inputs: &[(&OutputId, &Output)],
-        context: &mut ValidationContext<'_>,
+        context: &mut SemanticValidationContext<'_>,
     ) -> Result<(), TransactionFailureReason> {
         let anchor_id = if self.anchor_id().is_null() {
             AnchorId::from(output_id)
@@ -519,9 +515,9 @@ impl AnchorOutput {
         match next_state {
             Some(Output::Anchor(next_state)) => {
                 if self.state_index() == next_state.state_index() {
-                    self.governor_address().unlock(unlock, inputs, context)?;
+                    self.governor_address().unlock(unlock, context)?;
                 } else {
-                    self.state_controller_address().unlock(unlock, inputs, context)?;
+                    self.state_controller_address().unlock(unlock, context)?;
                     // Only a state transition can be used to consider the anchor address for output unlocks and
                     // sender/issuer validations.
                     context
@@ -529,7 +525,7 @@ impl AnchorOutput {
                         .insert(Address::from(AnchorAddress::from(anchor_id)));
                 }
             }
-            None => self.governor_address().unlock(unlock, inputs, context)?,
+            None => self.governor_address().unlock(unlock, context)?,
             // The next state can only be an anchor output since it is identified by an anchor chain identifier.
             Some(_) => unreachable!(),
         };
@@ -576,7 +572,7 @@ impl AnchorOutput {
 }
 
 impl StateTransitionVerifier for AnchorOutput {
-    fn creation(next_state: &Self, context: &ValidationContext<'_>) -> Result<(), StateTransitionError> {
+    fn creation(next_state: &Self, context: &SemanticValidationContext<'_>) -> Result<(), StateTransitionError> {
         if !next_state.anchor_id.is_null() {
             return Err(StateTransitionError::NonZeroCreatedId);
         }
@@ -593,7 +589,7 @@ impl StateTransitionVerifier for AnchorOutput {
     fn transition(
         current_state: &Self,
         next_state: &Self,
-        context: &ValidationContext<'_>,
+        context: &SemanticValidationContext<'_>,
     ) -> Result<(), StateTransitionError> {
         Self::transition_inner(
             current_state,
@@ -603,7 +599,7 @@ impl StateTransitionVerifier for AnchorOutput {
         )
     }
 
-    fn destruction(_current_state: &Self, context: &ValidationContext<'_>) -> Result<(), StateTransitionError> {
+    fn destruction(_current_state: &Self, context: &SemanticValidationContext<'_>) -> Result<(), StateTransitionError> {
         if !context
             .transaction
             .capabilities()

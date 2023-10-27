@@ -22,7 +22,7 @@ use crate::types::{
             OutputBuilderAmount, OutputId, Rent, RentStructure, StateTransitionError, StateTransitionVerifier,
         },
         protocol::ProtocolParameters,
-        semantic::{TransactionFailureReason, ValidationContext},
+        semantic::{SemanticValidationContext, TransactionFailureReason},
         slot::EpochIndex,
         unlock::Unlock,
         Error,
@@ -352,15 +352,14 @@ impl DelegationOutput {
         &self,
         _output_id: &OutputId,
         unlock: &Unlock,
-        inputs: &[(&OutputId, &Output)],
-        context: &mut ValidationContext<'_>,
+        context: &mut SemanticValidationContext<'_>,
     ) -> Result<(), TransactionFailureReason> {
         self.unlock_conditions()
             .locked_address(self.address(), context.transaction.creation_slot())
-            .unlock(unlock, inputs, context)
+            .unlock(unlock, context)
     }
 
-    // Transition, just without full ValidationContext.
+    // Transition, just without full SemanticValidationContext.
     pub(crate) fn transition_inner(current_state: &Self, next_state: &Self) -> Result<(), StateTransitionError> {
         #[allow(clippy::nonminimal_bool)]
         if !(current_state.delegation_id.is_null() && !next_state.delegation_id().is_null()) {
@@ -379,7 +378,7 @@ impl DelegationOutput {
 }
 
 impl StateTransitionVerifier for DelegationOutput {
-    fn creation(next_state: &Self, _context: &ValidationContext<'_>) -> Result<(), StateTransitionError> {
+    fn creation(next_state: &Self, _context: &SemanticValidationContext<'_>) -> Result<(), StateTransitionError> {
         if !next_state.delegation_id.is_null() {
             return Err(StateTransitionError::NonZeroCreatedId);
         }
@@ -398,12 +397,15 @@ impl StateTransitionVerifier for DelegationOutput {
     fn transition(
         current_state: &Self,
         next_state: &Self,
-        _context: &ValidationContext<'_>,
+        _context: &SemanticValidationContext<'_>,
     ) -> Result<(), StateTransitionError> {
         Self::transition_inner(current_state, next_state)
     }
 
-    fn destruction(_current_state: &Self, _context: &ValidationContext<'_>) -> Result<(), StateTransitionError> {
+    fn destruction(
+        _current_state: &Self,
+        _context: &SemanticValidationContext<'_>,
+    ) -> Result<(), StateTransitionError> {
         // TODO handle mana rewards
         Ok(())
     }

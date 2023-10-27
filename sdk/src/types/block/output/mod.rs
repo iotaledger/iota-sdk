@@ -59,7 +59,7 @@ pub use self::{
     unlock_condition::{UnlockCondition, UnlockConditions},
 };
 use super::protocol::ProtocolParameters;
-use crate::types::block::{address::Address, semantic::ValidationContext, slot::SlotIndex, Error};
+use crate::types::block::{address::Address, semantic::SemanticValidationContext, slot::SlotIndex, Error};
 
 /// The maximum number of outputs of a transaction.
 pub const OUTPUT_COUNT_MAX: u16 = 128;
@@ -300,7 +300,7 @@ impl Output {
     pub fn verify_state_transition(
         current_state: Option<&Self>,
         next_state: Option<&Self>,
-        context: &ValidationContext<'_>,
+        context: &SemanticValidationContext<'_>,
     ) -> Result<(), StateTransitionError> {
         match (current_state, next_state) {
             // Creations.
