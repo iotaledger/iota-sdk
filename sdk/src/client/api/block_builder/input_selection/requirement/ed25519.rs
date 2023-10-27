@@ -54,15 +54,7 @@ impl InputSelection {
         } else {
             // Otherwise, checks if the requirement can be fulfilled by a non-basic output.
             self.available_inputs.iter().enumerate().find_map(|(index, input)| {
-                if !input.output.is_basic() {
-                    if self.available_has_ed25519_address(input, address) {
-                        Some(index)
-                    } else {
-                        None
-                    }
-                } else {
-                    None
-                }
+                (!input.output.is_basic() && self.available_has_ed25519_address(input, address)).then_some(index)
             })
         };
 
