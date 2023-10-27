@@ -435,12 +435,8 @@ impl<'a> SemanticValidationContext<'a> {
             return Ok(Some(TransactionFailureReason::SemanticValidationFailed));
         }
 
-        let mut native_token_ids = HashSet::new();
-
         // Validation of input native tokens.
-        for (token_id, _input_amount) in self.input_native_tokens.iter() {
-            native_token_ids.insert(token_id);
-        }
+        let mut native_token_ids = self.input_native_tokens.keys().collect::<HashSet<_>>();
 
         // Validation of output native tokens.
         for (token_id, output_amount) in self.output_native_tokens.iter() {
