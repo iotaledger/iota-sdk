@@ -112,9 +112,8 @@ where
             unreachable!("We checked if it's an foundry output before")
         };
 
-        // Create the next account output with the same data, just updated state_index
-        let new_account_output_builder =
-            AccountOutputBuilder::from(&account_output).with_state_index(account_output.state_index() + 1);
+        // Create the next account output with the same data.
+        let new_account_output_builder = AccountOutputBuilder::from(&account_output);
 
         // Create next foundry output with minted native tokens
 

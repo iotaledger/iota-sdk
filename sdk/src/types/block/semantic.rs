@@ -9,7 +9,7 @@ use primitive_types::U256;
 
 use crate::types::block::{
     address::{Address, AddressCapabilityFlag},
-    output::{ChainId, FoundryId, NativeTokens, Output, OutputId, TokenId, UnlockCondition},
+    output::{AnchorOutput, ChainId, FoundryId, NativeTokens, Output, OutputId, TokenId, UnlockCondition},
     payload::signed_transaction::{Transaction, TransactionCapabilityFlag, TransactionId, TransactionSigningHash},
     unlock::Unlocks,
     Error,
@@ -251,6 +251,7 @@ impl<'a> SemanticValidationContext<'a> {
                     None,
                     output.unlock_conditions(),
                 ),
+                Output::Anchor(_) => return Err(Error::UnsupportedOutputKind(AnchorOutput::KIND)),
             };
 
             if let Err(conflict) = conflict {
@@ -330,6 +331,7 @@ impl<'a> SemanticValidationContext<'a> {
                     Some(output.features()),
                 ),
                 Output::Delegation(output) => (output.amount(), 0, None, None),
+                Output::Anchor(_) => return Err(Error::UnsupportedOutputKind(AnchorOutput::KIND)),
             };
 
             if let Some(unlock_conditions) = created_output.unlock_conditions() {
@@ -382,6 +384,7 @@ impl<'a> SemanticValidationContext<'a> {
                         Output::Account(_) => !address.has_capability(AddressCapabilityFlag::AccountOutputs),
                         Output::Nft(_) => !address.has_capability(AddressCapabilityFlag::NftOutputs),
                         Output::Delegation(_) => !address.has_capability(AddressCapabilityFlag::DelegationOutputs),
+                        Output::Anchor(_) => !address.has_capability(AddressCapabilityFlag::AnchorOutputs),
                         _ => false,
                     } {
                         // TODO: add a variant https://github.com/iotaledger/iota-sdk/issues/1430

@@ -13,8 +13,9 @@ use primitive_types::U256;
 pub use self::metadata::rand_output_metadata;
 use crate::types::block::{
     output::{
-        unlock_condition::ImmutableAccountAddressUnlockCondition, AccountId, AccountOutput, BasicOutput, FoundryOutput,
-        NftId, NftOutput, Output, OutputId, SimpleTokenScheme, TokenScheme, OUTPUT_INDEX_RANGE,
+        unlock_condition::ImmutableAccountAddressUnlockCondition, AccountId, AccountOutput, AnchorId, AnchorOutput,
+        BasicOutput, FoundryOutput, NftId, NftOutput, Output, OutputId, SimpleTokenScheme, TokenScheme,
+        OUTPUT_INDEX_RANGE,
     },
     rand::{
         address::rand_account_address,
@@ -24,6 +25,7 @@ use crate::types::block::{
             feature::rand_allowed_features,
             unlock_condition::{
                 rand_address_unlock_condition, rand_address_unlock_condition_different_from,
+                rand_address_unlock_condition_different_from_account_id,
                 rand_governor_address_unlock_condition_different_from,
                 rand_state_controller_address_unlock_condition_different_from,
             },
@@ -52,6 +54,11 @@ pub fn rand_account_id() -> AccountId {
     AccountId::from(rand_bytes_array())
 }
 
+/// Generates a random [`AnchorId`](AnchorId).
+pub fn rand_anchor_id() -> AnchorId {
+    AnchorId::from(rand_bytes_array())
+}
+
 /// Generates a random [`AccountOutput`](AccountOutput).
 pub fn rand_account_output(token_supply: u64) -> AccountOutput {
     // We need to make sure that `AccountId` and `Address` don't match.
@@ -59,10 +66,25 @@ pub fn rand_account_output(token_supply: u64) -> AccountOutput {
 
     AccountOutput::build_with_amount(rand_number_range(Output::AMOUNT_MIN..token_supply), account_id)
         .with_features(rand_allowed_features(AccountOutput::ALLOWED_FEATURES))
+        .add_unlock_condition(rand_address_unlock_condition_different_from_account_id(&account_id))
+        .finish_with_params(token_supply)
+        .unwrap()
+}
+
+/// Generates a random [`AnchorOutput`](AnchorOutput).
+pub fn rand_anchor_output(token_supply: u64) -> AnchorOutput {
+    // We need to make sure that `AnchorId` and `Address` don't match.
+    let anchor_id = rand_anchor_id();
+
+    AnchorOutput::build_with_amount(rand_number_range(Output::AMOUNT_MIN..token_supply), anchor_id)
+        .with_features(rand_allowed_features(AnchorOutput::ALLOWED_FEATURES))
         .add_unlock_condition(rand_state_controller_address_unlock_condition_different_from(
-            &account_id,
+            &anchor_id,
         ))
-        .add_unlock_condition(rand_governor_address_unlock_condition_different_from(&account_id))
+        .add_unlock_condition(rand_governor_address_unlock_condition_different_from(&anchor_id))
+        .add_unlock_condition(rand_state_controller_address_unlock_condition_different_from(
+            &anchor_id,
+        ))
         .finish_with_params(token_supply)
         .unwrap()
 }

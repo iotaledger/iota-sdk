@@ -2,17 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use super::{Error, InputSelection, Requirement};
-use crate::{
-    client::secret::types::InputSigningData,
-    types::block::{address::Address, output::AccountTransition},
-};
+use crate::{client::secret::types::InputSigningData, types::block::address::Address};
 
 impl InputSelection {
     /// Fulfills a sender requirement by selecting an available input that unlocks its address.
-    pub(crate) fn fulfill_sender_requirement(
-        &mut self,
-        address: &Address,
-    ) -> Result<Vec<(InputSigningData, Option<AccountTransition>)>, Error> {
+    pub(crate) fn fulfill_sender_requirement(&mut self, address: &Address) -> Result<Vec<InputSigningData>, Error> {
         match address {
             Address::Ed25519(_) => {
                 log::debug!("Treating {address:?} sender requirement as an ed25519 requirement");
@@ -29,9 +23,9 @@ impl InputSelection {
                 log::debug!("Treating {address:?} sender requirement as an account requirement");
 
                 // A state transition is required to unlock the account address.
-                match self.fulfill_account_requirement(account_address.into_account_id(), AccountTransition::State) {
+                match self.fulfill_account_requirement(account_address.into_account_id()) {
                     Ok(res) => Ok(res),
-                    Err(Error::UnfulfillableRequirement(Requirement::Account(_, _))) => {
+                    Err(Error::UnfulfillableRequirement(Requirement::Account(_))) => {
                         Err(Error::UnfulfillableRequirement(Requirement::Sender(address.clone())))
                     }
                     Err(e) => Err(e),
@@ -48,7 +42,7 @@ impl InputSelection {
                     Err(e) => Err(e),
                 }
             }
-            _ => todo!("What do we do here?"),
+            _ => Err(Error::UnsupportedAddressType(address.kind())),
         }
     }
 }
