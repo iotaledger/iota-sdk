@@ -32,6 +32,8 @@ import type {
     __HexPublicKeyToBech32AddressMethod__,
     __AccountOutputIdsMethod__,
     __AccountOutputIdMethod__,
+    __AnchorOutputIdsMethod__,
+    __AnchorOutputIdMethod__,
     __DelegationOutputIdsMethod__,
     __DelegationOutputIdMethod__,
     __FoundryOutputIdsMethod__,
@@ -84,6 +86,8 @@ export type __ClientMethods__ =
     | __HexPublicKeyToBech32AddressMethod__
     | __AccountOutputIdsMethod__
     | __AccountOutputIdMethod__
+    | __AnchorOutputIdsMethod__
+    | __AnchorOutputIdMethod__
     | __DelegationOutputIdsMethod__
     | __DelegationOutputIdMethod__
     | __FoundryOutputIdsMethod__

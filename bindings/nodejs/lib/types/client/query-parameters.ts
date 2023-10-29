@@ -35,6 +35,10 @@ export type AccountQueryParameter =
     | UnlockableByAddress
     | CommonQueryParameters;
 
+/** Query parameters for filtering Anchor Outputs */
+// TODO https://github.com/iotaledger/iota-sdk/issues/1503
+export type AnchorQueryParameter = any;
+
 /** Query parameters for filtering Delegation Outputs */
 // TODO https://github.com/iotaledger/iota-sdk/issues/1503
 export type DelegationQueryParameter = any;

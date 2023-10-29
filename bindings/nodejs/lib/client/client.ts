@@ -16,6 +16,7 @@ import {
     FoundryQueryParameter,
     NftQueryParameter,
     AccountQueryParameter,
+    AnchorQueryParameter,
     GenericQueryParameter,
     DelegationQueryParameter,
 } from '../types/client';
@@ -37,6 +38,7 @@ import {
     parseSignedBlock,
     SignedBlock,
     AccountId,
+    AnchorId,
     NftId,
     FoundryId,
     DelegationId,
@@ -599,6 +601,42 @@ export class Client {
             name: 'accountOutputId',
             data: {
                 accountId,
+            },
+        });
+
+        return JSON.parse(response).payload;
+    }
+
+    /**
+     * Get the corresponding output IDs given a list of anchor query parameters.
+     *
+     * @param queryParameters An array of `AnchorQueryParameter`s.
+     * @returns A paginated query response of corresponding output IDs.
+     */
+    async anchorOutputIds(
+        queryParameters: AnchorQueryParameter[],
+    ): Promise<IOutputsResponse> {
+        const response = await this.methodHandler.callMethod({
+            name: 'anchorOutputIds',
+            data: {
+                queryParameters,
+            },
+        });
+
+        return JSON.parse(response).payload;
+    }
+
+    /**
+     * Get the corresponding output ID from an anchor ID.
+     *
+     * @param anchorId An anchor ID.
+     * @returns The corresponding output ID.
+     */
+    async anchorOutputId(anchorId: AnchorId): Promise<OutputId> {
+        const response = await this.methodHandler.callMethod({
+            name: 'anchorOutputId',
+            data: {
+                anchorId,
             },
         });
 

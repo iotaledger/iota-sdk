@@ -11,6 +11,7 @@ import type {
     BlockId,
     FoundryId,
     IssuerId,
+    AnchorId,
     NftId,
     DelegationId,
     Output,
@@ -20,6 +21,7 @@ import type {
 import type { PreparedTransactionData } from '../prepared-transaction-data';
 import type {
     AccountQueryParameter,
+    AnchorQueryParameter,
     FoundryQueryParameter,
     GenericQueryParameter,
     NftQueryParameter,
@@ -234,6 +236,20 @@ export interface __AccountOutputIdMethod__ {
     name: 'accountOutputId';
     data: {
         accountId: AccountId;
+    };
+}
+
+export interface __AnchorOutputIdsMethod__ {
+    name: 'anchorOutputIds';
+    data: {
+        queryParameters: AnchorQueryParameter[];
+    };
+}
+
+export interface __AnchorOutputIdMethod__ {
+    name: 'anchorOutputId';
+    data: {
+        anchorId: AnchorId;
     };
 }
 

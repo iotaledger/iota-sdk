@@ -172,8 +172,33 @@ class NodeIndexerAPI(metaclass=ABCMeta):
             'accountId': account_id
         }))
 
-        def delegation_output_ids(
-                self, query_parameters: QueryParameters) -> OutputIdsResponse:
+    def anchor_output_ids(
+            self, query_parameters: QueryParameters) -> OutputIdsResponse:
+        """Fetch anchor output IDs from the given query parameters.
+
+        Returns:
+            The corresponding output IDs of the anchor outputs.
+        """
+
+        query_parameters_camelized = query_parameters.to_dict()
+
+        response = self._call_method('anchorOutputIds', {
+            'queryParameters': query_parameters_camelized,
+        })
+        return OutputIdsResponse(response)
+
+    def anchor_output_id(self, anchor_id: HexStr) -> OutputId:
+        """Fetch anchor output ID from the given anchor ID.
+
+        Returns:
+            The output ID of the anchor output.
+        """
+        return OutputId.from_string(self._call_method('anchorOutputId', {
+            'anchorId': anchor_id
+        }))
+
+    def delegation_output_ids(
+            self, query_parameters: QueryParameters) -> OutputIdsResponse:
         """Fetch delegation output IDs from the given query parameters.
 
         Returns:
