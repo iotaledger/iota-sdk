@@ -68,6 +68,7 @@ impl InputSelection {
             Address::Account(account_address) => Ok(Some(Requirement::Account(*account_address.account_id()))),
             Address::Nft(nft_address) => Ok(Some(Requirement::Nft(*nft_address.nft_id()))),
             Address::Anchor(_) => Err(Error::UnsupportedAddressType(AnchorAddress::KIND)),
+            Address::Restricted(_) => Ok(None),
             _ => todo!("What do we do here?"),
         }
     }
@@ -226,13 +227,17 @@ impl InputSelection {
                 return false;
             }
 
-            let required_address = input
+            let mut required_address = input
                 .output
                 // Account transition is irrelevant here as we keep accounts anyway.
                 .required_and_unlocked_address(self.slot_index, input.output_id())
                 // PANIC: safe to unwrap as non basic/account/foundry/nft outputs are already filtered out.
                 .unwrap()
                 .0;
+
+            if let Address::Restricted(address) = required_address {
+                required_address = address.address().clone();
+            }
 
             self.addresses.contains(&required_address)
         })
