@@ -227,7 +227,7 @@ impl InputSelection {
                 return false;
             }
 
-            let mut required_address = input
+            let required_address = input
                 .output
                 // Account transition is irrelevant here as we keep accounts anyway.
                 .required_and_unlocked_address(self.slot_index, input.output_id())
@@ -236,10 +236,10 @@ impl InputSelection {
                 .0;
 
             if let Address::Restricted(address) = required_address {
-                required_address = address.address().clone();
+                self.addresses.contains(address.address())
+            } else {
+                self.addresses.contains(&required_address)
             }
-
-            self.addresses.contains(&required_address)
         })
     }
 
