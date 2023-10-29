@@ -239,11 +239,11 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
             Response::OutputIdsResponse(client.anchor_output_ids(query_parameters).await?)
         }
         ClientMethod::AnchorOutputId { anchor_id } => Response::OutputId(client.anchor_output_id(anchor_id).await?),
-        ClientMethod::DelegationOutputId { delegation_id } => {
-            Response::OutputId(client.delegation_output_id(delegation_id).await?)
-        }
         ClientMethod::DelegationOutputIds { query_parameters } => {
             Response::OutputIdsResponse(client.delegation_output_ids(query_parameters).await?)
+        }
+        ClientMethod::DelegationOutputId { delegation_id } => {
+            Response::OutputId(client.delegation_output_id(delegation_id).await?)
         }
         ClientMethod::FoundryOutputIds { query_parameters } => {
             Response::OutputIdsResponse(client.foundry_output_ids(query_parameters).await?)
