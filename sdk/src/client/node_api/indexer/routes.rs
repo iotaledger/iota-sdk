@@ -1,7 +1,7 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! IOTA node indexer routes
+//! IOTA node indexer routes.
 
 use crate::{
     client::{
@@ -22,8 +22,6 @@ use crate::{
 impl ClientInner {
     /// Get basic, alias, nft and foundry outputs filtered by the given parameters.
     /// GET with query parameter returns all outputIDs that fit these filter criteria.
-    /// Query parameters: "hasNativeTokens", "minNativeTokenCount", "maxNativeTokenCount", "unlockableByAddress",
-    /// "createdBefore", "createdAfter", "cursor", "pageSize".
     /// Returns Err(Node(NotFound) if no results are found.
     /// api/indexer/v2/outputs
     pub async fn output_ids(&self, query_parameters: OutputQueryParameters) -> Result<OutputIdsResponse> {
@@ -34,9 +32,6 @@ impl ClientInner {
 
     /// Get basic outputs filtered by the given parameters.
     /// GET with query parameter returns all outputIDs that fit these filter criteria.
-    /// Query parameters: "address", "hasStorageDepositReturn", "storageDepositReturnAddress",
-    /// "hasExpiration", "expiresBefore", "expiresAfter", "hasTimelock", "timelockedBefore",
-    /// "timelockedAfter", "sender", "tag", "createdBefore" and "createdAfter".
     /// Returns Err(Node(NotFound) if no results are found.
     /// api/indexer/v2/outputs/basic
     pub async fn basic_output_ids(&self, query_parameters: BasicOutputQueryParameters) -> Result<OutputIdsResponse> {
@@ -47,7 +42,6 @@ impl ClientInner {
 
     /// Get account outputs filtered by the given parameters.
     /// GET with query parameter returns all outputIDs that fit these filter criteria.
-    /// Query parameters: "address", "issuer", "sender", "createdBefore", "createdAfter"
     /// Returns Err(Node(NotFound) if no results are found.
     /// api/indexer/v2/outputs/account
     pub async fn account_output_ids(
@@ -73,7 +67,6 @@ impl ClientInner {
 
     /// Get foundry outputs filtered by the given parameters.
     /// GET with query parameter returns all outputIDs that fit these filter criteria.
-    /// Query parameters: "address", "createdBefore", "createdAfter"
     /// Returns Err(Node(NotFound) if no results are found.
     /// api/indexer/v2/outputs/foundry
     pub async fn foundry_output_ids(
@@ -98,9 +91,6 @@ impl ClientInner {
     }
 
     /// Get NFT outputs filtered by the given parameters.
-    /// Query parameters: "address", "hasStorageDepositReturn", "storageDepositReturnAddress",
-    /// "hasExpiration", "expiresBefore", "expiresAfter", "hasTimelock", "timelockedBefore",
-    /// "timelockedAfter", "issuer", "sender", "tag", "createdBefore", "createdAfter"
     /// Returns Err(Node(NotFound) if no results are found.
     /// api/indexer/v2/outputs/nft
     pub async fn nft_output_ids(&self, query_parameters: NftOutputQueryParameters) -> Result<OutputIdsResponse> {
