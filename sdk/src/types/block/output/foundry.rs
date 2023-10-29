@@ -532,8 +532,7 @@ impl FoundryOutput {
                 let burned_diff = token_diff - melted_diff;
 
                 if !burned_diff.is_zero() && !capabilities.has_capability(TransactionCapabilityFlag::BurnNativeTokens) {
-                    // TODO: add a variant https://github.com/iotaledger/iota-sdk/issues/1430
-                    return Err(StateTransitionError::UnsupportedStateTransition);
+                    return Err(TransactionFailureReason::TransactionCapabilityManaBurningNotAllowed)?;
                 }
             }
         }
@@ -594,8 +593,7 @@ impl StateTransitionVerifier for FoundryOutput {
             .transaction
             .has_capability(TransactionCapabilityFlag::DestroyFoundryOutputs)
         {
-            // TODO: add a variant https://github.com/iotaledger/iota-sdk/issues/1430
-            return Err(StateTransitionError::UnsupportedStateTransition);
+            return Err(TransactionFailureReason::TransactionCapabilityFoundryDestructionNotAllowed)?;
         }
 
         let token_id = current_state.token_id();

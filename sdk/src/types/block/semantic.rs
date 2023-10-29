@@ -9,7 +9,10 @@ use primitive_types::U256;
 
 use crate::types::block::{
     address::{Address, AddressCapabilityFlag},
-    output::{AnchorOutput, ChainId, FoundryId, NativeTokens, Output, OutputId, TokenId, UnlockCondition},
+    output::{
+        AnchorOutput, ChainId, FoundryId, NativeTokens, Output, OutputId, StateTransitionError, TokenId,
+        UnlockCondition,
+    },
     payload::signed_transaction::{Transaction, TransactionCapabilityFlag, TransactionId, TransactionSigningHash},
     unlock::Unlocks,
     Error,
@@ -502,23 +505,29 @@ impl<'a> SemanticValidationContext<'a> {
 
         // Validation of state transitions and destructions.
         for (chain_id, current_state) in self.input_chains.iter() {
-            if Output::verify_state_transition(
+            match Output::verify_state_transition(
                 Some(current_state),
                 self.output_chains.get(chain_id).map(core::ops::Deref::deref),
                 &self,
-            )
-            .is_err()
-            {
-                return Ok(Some(TransactionFailureReason::InvalidChainStateTransition));
+            ) {
+                Err(StateTransitionError::TransactionFailure(f)) => return Ok(Some(f)),
+                Err(_) => {
+                    return Ok(Some(TransactionFailureReason::InvalidChainStateTransition));
+                }
+                _ => {}
             }
         }
 
         // Validation of state creations.
         for (chain_id, next_state) in self.output_chains.iter() {
-            if self.input_chains.get(chain_id).is_none()
-                && Output::verify_state_transition(None, Some(next_state), &self).is_err()
-            {
-                return Ok(Some(TransactionFailureReason::InvalidChainStateTransition));
+            if self.input_chains.get(chain_id).is_none() {
+                match Output::verify_state_transition(None, Some(next_state), &self) {
+                    Err(StateTransitionError::TransactionFailure(f)) => return Ok(Some(f)),
+                    Err(_) => {
+                        return Ok(Some(TransactionFailureReason::InvalidChainStateTransition));
+                    }
+                    _ => {}
+                }
             }
         }
 
