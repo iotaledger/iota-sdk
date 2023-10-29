@@ -64,6 +64,18 @@ pub enum TransactionFailureReason {
     FailedToClaimStakingReward = 19,
     /// Failed to claim delegation reward.
     FailedToClaimDelegationReward = 20,
+    /// Burning of native tokens is not allowed in the transaction capabilities.
+    TransactionCapabilityNativeTokenBurningNotAllowed = 21,
+    /// Burning of mana is not allowed in the transaction capabilities.
+    TransactionCapabilityManaBurningNotAllowed = 22,
+    /// Destruction of accounts is not allowed in the transaction capabilities.
+    TransactionCapabilityAccountDestructionNotAllowed = 23,
+    /// Destruction of anchors is not allowed in the transaction capabilities.
+    TransactionCapabilityAnchorDestructionNotAllowed = 24,
+    /// Destruction of foundries is not allowed in the transaction capabilities.
+    TransactionCapabilityFoundryDestructionNotAllowed = 25,
+    /// Destruction of nfts is not allowed in the transaction capabilities.
+    TransactionCapabilityNftDestructionNotAllowed = 26,
     /// The semantic validation failed for a reason not covered by the previous variants.
     SemanticValidationFailed = 255,
 }
@@ -107,6 +119,28 @@ impl fmt::Display for TransactionFailureReason {
             ),
             Self::FailedToClaimStakingReward => write!(f, "Failed to claim staking reward."),
             Self::FailedToClaimDelegationReward => write!(f, "Failed to claim delegation reward."),
+            Self::TransactionCapabilityNativeTokenBurningNotAllowed => write!(
+                f,
+                "Burning of native tokens is not allowed in the transaction capabilities."
+            ),
+            Self::TransactionCapabilityManaBurningNotAllowed => {
+                write!(f, "Burning of mana is not allowed in the transaction capabilities.")
+            }
+            Self::TransactionCapabilityAccountDestructionNotAllowed => write!(
+                f,
+                "Destruction of accounts is not allowed in the transaction capabilities."
+            ),
+            Self::TransactionCapabilityAnchorDestructionNotAllowed => write!(
+                f,
+                "Destruction of anchors is not allowed in the transaction capabilities."
+            ),
+            Self::TransactionCapabilityFoundryDestructionNotAllowed => write!(
+                f,
+                "Destruction of foundries is not allowed in the transaction capabilities."
+            ),
+            Self::TransactionCapabilityNftDestructionNotAllowed => {
+                write!(f, "Destruction of nfts is not allowed in the transaction capabilities.")
+            }
             Self::SemanticValidationFailed => write!(
                 f,
                 "The semantic validation failed for a reason not covered by the previous variants."
@@ -140,6 +174,12 @@ impl TryFrom<u8> for TransactionFailureReason {
             18 => Self::MissingStakingFeature,
             19 => Self::FailedToClaimStakingReward,
             20 => Self::FailedToClaimDelegationReward,
+            21 => Self::TransactionCapabilityNativeTokenBurningNotAllowed,
+            22 => Self::TransactionCapabilityManaBurningNotAllowed,
+            23 => Self::TransactionCapabilityAccountDestructionNotAllowed,
+            24 => Self::TransactionCapabilityAnchorDestructionNotAllowed,
+            25 => Self::TransactionCapabilityFoundryDestructionNotAllowed,
+            26 => Self::TransactionCapabilityNftDestructionNotAllowed,
             255 => Self::SemanticValidationFailed,
             x => return Err(Self::Error::InvalidTransactionFailureReason(x)),
         })
