@@ -20,7 +20,7 @@ describe.skip('UTXO methods', () => {
     it('gets accounts output IDs', async () => {
         const accountsOutputIds = await client.accountOutputIds([
             {
-                stateController:
+                address:
                     'rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy',
             },
         ]);

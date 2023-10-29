@@ -14,7 +14,7 @@ import type {
     __GetBlockMetadataMethod__,
     __FindInputsMethod__,
     __SignTransactionMethod__,
-    __PostBlockPayloadMethod__,
+    __BuildBasicBlockMethod__,
     __GetNodeMethod__,
     __GetNetworkIdMethod__,
     __GetBech32HrpMethod__,
@@ -64,7 +64,7 @@ export type __ClientMethods__ =
     | __FindInputsMethod__
     | __SignTransactionMethod__
     | __SignatureUnlockMethod__
-    | __PostBlockPayloadMethod__
+    | __BuildBasicBlockMethod__
     | __GetNodeMethod__
     | __GetNetworkIdMethod__
     | __GetBech32HrpMethod__

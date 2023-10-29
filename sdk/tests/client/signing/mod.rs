@@ -83,8 +83,6 @@ async fn all_combined() -> Result<()> {
         Account(
             1_000_000,
             account_id_1,
-            0,
-            &nft_1_bech32_address.to_string(),
             &nft_1_bech32_address.to_string(),
             None,
             None,
@@ -94,9 +92,7 @@ async fn all_combined() -> Result<()> {
         Account(
             1_000_000,
             account_id_2,
-            0,
             &ed25519_bech32_address_0.to_string(),
-            &ed25519_bech32_address_1.to_string(),
             None,
             None,
             None,
@@ -283,8 +279,6 @@ async fn all_combined() -> Result<()> {
         Account(
             1_000_000,
             account_id_1,
-            1,
-            &nft_1_bech32_address.to_string(),
             &nft_1_bech32_address.to_string(),
             None,
             None,
@@ -294,9 +288,7 @@ async fn all_combined() -> Result<()> {
         Account(
             1_000_000,
             account_id_2,
-            1,
             &ed25519_bech32_address_0.to_string(),
-            &ed25519_bech32_address_1.to_string(),
             None,
             None,
             None,

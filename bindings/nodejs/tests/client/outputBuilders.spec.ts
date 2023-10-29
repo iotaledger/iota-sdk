@@ -5,7 +5,7 @@ import { describe, it } from '@jest/globals';
 import 'reflect-metadata';
 import 'dotenv/config';
 
-import { AddressUnlockCondition, AccountAddress, Client, SecretManager, Ed25519Address, GovernorAddressUnlockCondition, ImmutableAccountAddressUnlockCondition, SimpleTokenScheme, StateControllerAddressUnlockCondition, Utils } from '../../';
+import { AddressUnlockCondition, AccountAddress, Client, SecretManager, Ed25519Address, ImmutableAccountAddressUnlockCondition, SimpleTokenScheme, Utils } from '../../';
 import '../customMatchers';
 
 const client = new Client({
@@ -62,10 +62,7 @@ describe.skip('Output builder methods', () => {
         const accountOutput = await client.buildAccountOutput({
             accountId,
             unlockConditions: [
-                new StateControllerAddressUnlockCondition(
-                    new Ed25519Address(hexAddress),
-                ),
-                new GovernorAddressUnlockCondition(
+                new AddressUnlockCondition(
                     new Ed25519Address(hexAddress),
                 ),
             ],

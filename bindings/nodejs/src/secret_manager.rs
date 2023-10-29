@@ -42,7 +42,10 @@ impl SecretManagerMethodHandler {
     async fn call_method(&self, method: String) -> (String, bool) {
         match serde_json::from_str::<SecretManagerMethod>(&method) {
             Ok(method) => {
-                let res = rust_call_secret_manager_method(&self.secret_manager, method).await;
+                let res = {
+                    let secret_manager = self.secret_manager.read().await;
+                    rust_call_secret_manager_method(&*secret_manager, method).await
+                };
                 let mut is_err = matches!(res, Response::Error(_) | Response::Panic(_));
 
                 let msg = match serde_json::to_string(&res) {

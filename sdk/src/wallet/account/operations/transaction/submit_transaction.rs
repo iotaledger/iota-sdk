@@ -6,7 +6,7 @@ use crypto::keys::bip44::Bip44;
 #[cfg(feature = "events")]
 use crate::wallet::events::types::{TransactionProgressEvent, WalletEvent};
 use crate::{
-    client::secret::SecretManage,
+    client::secret::{SecretManage, SignBlock},
     types::block::{payload::Payload, BlockId},
     wallet::account::{operations::transaction::SignedTransactionPayload, Account},
 };
@@ -27,11 +27,9 @@ where
 
         let block = self
             .client()
-            .build_basic_block(
-                todo!("issuer id"),
-                todo!("issuing time"),
-                None,
-                Some(Payload::from(transaction_payload)),
+            .build_basic_block(todo!("issuer id"), Some(Payload::from(transaction_payload)))
+            .await?
+            .sign_ed25519(
                 &*self.get_secret_manager().read().await,
                 Bip44::new(self.wallet.coin_type()),
             )
