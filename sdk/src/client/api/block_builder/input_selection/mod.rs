@@ -235,8 +235,8 @@ impl InputSelection {
                 .unwrap()
                 .0;
 
-            if let Address::Restricted(address) = required_address {
-                self.addresses.contains(address.address())
+            if let Address::Restricted(restricted_address) = required_address {
+                self.addresses.contains(restricted_address.address())
             } else {
                 self.addresses.contains(&required_address)
             }
