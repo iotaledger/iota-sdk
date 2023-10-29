@@ -170,6 +170,80 @@ pub struct AccountOutputQueryParameters {
 
 impl_query_parameters_methods!(AccountOutputQueryParameters);
 
+/// Query parameters for anchor output requests.
+#[derive(Setters, Debug, Default, Clone, Serialize, Deserialize, Eq, PartialEq)]
+#[setters(strip_option)]
+#[serde(rename_all = "camelCase")]
+pub struct AnchorOutputQueryParameters {
+    /// Returns outputs that were created after a certain slot index.
+    created_after: Option<SlotIndex>,
+    /// Returns outputs that were created before a certain slot index.
+    created_before: Option<SlotIndex>,
+    /// Starts the search from the cursor (createdSlotIndex+outputId.pageSize).
+    cursor: Option<String>,
+    /// The maximum amount of items returned in one call. If there are more items, a cursor to the next page is
+    /// returned too. The parameter is ignored when pageSize is defined via the cursor parameter.
+    page_size: Option<usize>,
+    /// Returns outputs that are unlockable by the bech32 address.
+    unlockable_by_address: Option<Bech32Address>,
+    /// Filters outputs based on the presence of validated Sender (bech32 encoded).
+    sender: Option<Bech32Address>,
+    /// Filters outputs based on bech32-encoded issuer address.
+    issuer: Option<Bech32Address>,
+    /// Filters outputs based on bech32-encoded governor (governance controller) address.
+    governor: Option<Bech32Address>,
+    /// Filters outputs based on bech32-encoded state controller address.
+    state_controller: Option<Bech32Address>,
+}
+
+impl_query_parameters_methods!(AnchorOutputQueryParameters);
+
+/// Query parameters for delegation output requests.
+#[derive(Setters, Debug, Default, Clone, Serialize, Deserialize, Eq, PartialEq)]
+#[setters(strip_option)]
+#[serde(rename_all = "camelCase")]
+pub struct DelegationOutputQueryParameters {
+    /// Returns outputs that were created after a certain slot index.
+    created_after: Option<SlotIndex>,
+    /// Returns outputs that were created before a certain slot index.
+    created_before: Option<SlotIndex>,
+    /// Starts the search from the cursor (createdSlotIndex+outputId.pageSize).
+    cursor: Option<String>,
+    /// The maximum amount of items returned in one call. If there are more items, a cursor to the next page is
+    /// returned too. The parameter is ignored when pageSize is defined via the cursor parameter.
+    page_size: Option<usize>,
+    /// Bech32-encoded address that should be searched for.
+    address: Option<Bech32Address>,
+    /// Filter foundry outputs based on bech32-encoded address of the validator.
+    validator: Option<Bech32Address>,
+}
+
+impl_query_parameters_methods!(DelegationOutputQueryParameters);
+
+/// Query parameters for foundry output requests.
+#[derive(Setters, Debug, Default, Clone, Serialize, Deserialize, Eq, PartialEq)]
+#[setters(strip_option)]
+#[serde(rename_all = "camelCase")]
+pub struct FoundryOutputQueryParameters {
+    /// Returns outputs that were created after a certain slot index.
+    created_after: Option<SlotIndex>,
+    /// Returns outputs that were created before a certain slot index.
+    created_before: Option<SlotIndex>,
+    /// Starts the search from the cursor (createdSlotIndex+outputId.pageSize).
+    cursor: Option<String>,
+    /// Filters outputs based on the presence of a native token.
+    has_native_token: Option<bool>,
+    /// Filters outputs based on the presence of a specific native token.
+    native_token: Option<TokenId>,
+    /// The maximum amount of items returned in one call. If there are more items, a cursor to the next page is
+    /// returned too. The parameter is ignored when pageSize is defined via the cursor parameter.
+    page_size: Option<usize>,
+    /// Filter foundry outputs based on bech32-encoded address of the controlling account.
+    account_address: Option<Bech32Address>,
+}
+
+impl_query_parameters_methods!(FoundryOutputQueryParameters);
+
 /// Query parameters for nft output requests.
 #[derive(Setters, Debug, Default, Clone, Serialize, Deserialize, Eq, PartialEq)]
 #[setters(strip_option)]
@@ -229,52 +303,6 @@ impl NftOutputQueryParameters {
             .has_timelock(false)
     }
 }
-
-/// Query parameters for foundry output requests.
-#[derive(Setters, Debug, Default, Clone, Serialize, Deserialize, Eq, PartialEq)]
-#[setters(strip_option)]
-#[serde(rename_all = "camelCase")]
-pub struct FoundryOutputQueryParameters {
-    /// Returns outputs that were created after a certain slot index.
-    created_after: Option<SlotIndex>,
-    /// Returns outputs that were created before a certain slot index.
-    created_before: Option<SlotIndex>,
-    /// Starts the search from the cursor (createdSlotIndex+outputId.pageSize).
-    cursor: Option<String>,
-    /// Filters outputs based on the presence of a native token.
-    has_native_token: Option<bool>,
-    /// Filters outputs based on the presence of a specific native token.
-    native_token: Option<TokenId>,
-    /// The maximum amount of items returned in one call. If there are more items, a cursor to the next page is
-    /// returned too. The parameter is ignored when pageSize is defined via the cursor parameter.
-    page_size: Option<usize>,
-    /// Filter foundry outputs based on bech32-encoded address of the controlling account.
-    account_address: Option<Bech32Address>,
-}
-
-impl_query_parameters_methods!(FoundryOutputQueryParameters);
-
-/// Query parameters for delegation output requests.
-#[derive(Setters, Debug, Default, Clone, Serialize, Deserialize, Eq, PartialEq)]
-#[setters(strip_option)]
-#[serde(rename_all = "camelCase")]
-pub struct DelegationOutputQueryParameters {
-    /// Returns outputs that were created after a certain slot index.
-    created_after: Option<SlotIndex>,
-    /// Returns outputs that were created before a certain slot index.
-    created_before: Option<SlotIndex>,
-    /// Starts the search from the cursor (createdSlotIndex+outputId.pageSize).
-    cursor: Option<String>,
-    /// The maximum amount of items returned in one call. If there are more items, a cursor to the next page is
-    /// returned too. The parameter is ignored when pageSize is defined via the cursor parameter.
-    page_size: Option<usize>,
-    /// Bech32-encoded address that should be searched for.
-    address: Option<Bech32Address>,
-    /// Filter foundry outputs based on bech32-encoded address of the validator.
-    validator: Option<Bech32Address>,
-}
-
-impl_query_parameters_methods!(DelegationOutputQueryParameters);
 
 #[cfg(test)]
 mod tests {
