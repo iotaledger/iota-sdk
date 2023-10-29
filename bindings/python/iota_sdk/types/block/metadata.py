@@ -116,6 +116,12 @@ class TransactionFailureReason(Enum):
         MissingStakingFeature: Staking Feature is not provided in account output when claiming rewards.
         FailedToClaimStakingReward: Failed to claim staking reward.
         FailedToClaimDelegationReward: Failed to claim delegation reward.
+        TransactionCapabilityNativeTokenBurningNotAllowed: Burning of native tokens is not allowed in the transaction capabilities.
+        TransactionCapabilityManaBurningNotAllowed: Burning of mana is not allowed in the transaction capabilities.
+        TransactionCapabilityAccountDestructionNotAllowed: Destruction of accounts is not allowed in the transaction capabilities.
+        TransactionCapabilityAnchorDestructionNotAllowed: Destruction of anchors is not allowed in the transaction capabilities.
+        TransactionCapabilityFoundryDestructionNotAllowed: Destruction of foundries is not allowed in the transaction capabilities.
+        TransactionCapabilityNftDestructionNotAllowed: Destruction of nfts is not allowed in the transaction capabilities.
         SemanticValidationFailed: The semantic validation failed for a reason not covered by the previous variants.
     """
     InputUtxoAlreadySpent = 1
@@ -138,6 +144,12 @@ class TransactionFailureReason(Enum):
     MissingStakingFeature = 18
     FailedToClaimStakingReward = 19
     FailedToClaimDelegationReward = 20
+    TransactionCapabilityNativeTokenBurningNotAllowed = 21
+    TransactionCapabilityManaBurningNotAllowed = 22
+    TransactionCapabilityAccountDestructionNotAllowed = 23
+    TransactionCapabilityAnchorDestructionNotAllowed = 24
+    TransactionCapabilityFoundryDestructionNotAllowed = 25
+    TransactionCapabilityNftDestructionNotAllowed = 26
     SemanticValidationFailed = 255
 
     def __str__(self):
@@ -162,5 +174,11 @@ class TransactionFailureReason(Enum):
             18: "Staking Feature is not provided in account output when claiming rewards.",
             19: "Failed to claim staking reward.",
             20: "Failed to claim delegation reward.",
+            21: "Burning of native tokens is not allowed in the transaction capabilities.",
+            22: "Burning of mana is not allowed in the transaction capabilities.",
+            23: "Destruction of accounts is not allowed in the transaction capabilities.",
+            24: "Destruction of anchors is not allowed in the transaction capabilities.",
+            25: "Destruction of foundries is not allowed in the transaction capabilities.",
+            26: "Destruction of nfts is not allowed in the transaction capabilities.",
             255: "The semantic validation failed for a reason not covered by the previous variants."
         }[self.value]
