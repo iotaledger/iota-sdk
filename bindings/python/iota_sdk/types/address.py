@@ -100,16 +100,16 @@ class RestrictedAddress:
         allowed_capabilities: The allowed capabilities bitflags.
     """
     address: Union[Ed25519Address, AccountAddress, NFTAddress]
-    allowed_capabilities: HexStr = field(default='0x00', init=False)
+    allowed_capabilities: HexStr = field(default='0x', init=False)
     type: int = field(default_factory=lambda: int(
         AddressType.RESTRICTED), init=False)
 
-    def with_allowed_capabilities(self, allowed_capabilities: bytes):
+    def with_allowed_capabilities(self, capabilities: bytes):
         """Sets the allowed capabilities from a byte array.
         Attributes:
-            allowed_capabilities: The allowed capabilities bitflags.
+            capabilities: The allowed capabilities bitflags.
         """
-        self.allowed_capabilities = '0x00' + allowed_capabilities.hex()
+        self.allowed_capabilities = '0x' + capabilities.hex()
 
 
 @json
