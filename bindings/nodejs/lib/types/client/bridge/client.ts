@@ -12,6 +12,7 @@ import type {
     FoundryId,
     IssuerId,
     NftId,
+    DelegationId,
     Output,
     OutputId,
     Payload,
@@ -23,6 +24,7 @@ import type {
     GenericQueryParameter,
     NftQueryParameter,
     QueryParameter,
+    DelegationQueryParameter,
 } from '../query-parameters';
 import type { IAuth } from '../network';
 import type { BasicOutputBuilderParams } from '../output_builder_params/basic-output-params';
@@ -235,17 +237,17 @@ export interface __AccountOutputIdMethod__ {
     };
 }
 
-export interface __NftOutputIdsMethod__ {
-    name: 'nftOutputIds';
+export interface __DelegationOutputIdsMethod__ {
+    name: 'delegationOutputIds';
     data: {
-        queryParameters: NftQueryParameter[];
+        queryParameters: DelegationQueryParameter[];
     };
 }
 
-export interface __NftOutputIdMethod__ {
-    name: 'nftOutputId';
+export interface __DelegationOutputIdMethod__ {
+    name: 'delegationOutputId';
     data: {
-        nftId: NftId;
+        delegationId: DelegationId;
     };
 }
 
@@ -260,6 +262,20 @@ export interface __FoundryOutputIdMethod__ {
     name: 'foundryOutputId';
     data: {
         foundryId: FoundryId;
+    };
+}
+
+export interface __NftOutputIdsMethod__ {
+    name: 'nftOutputIds';
+    data: {
+        queryParameters: NftQueryParameter[];
+    };
+}
+
+export interface __NftOutputIdMethod__ {
+    name: 'nftOutputId';
+    data: {
+        nftId: NftId;
     };
 }
 

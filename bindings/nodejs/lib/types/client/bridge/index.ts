@@ -32,10 +32,12 @@ import type {
     __HexPublicKeyToBech32AddressMethod__,
     __AccountOutputIdsMethod__,
     __AccountOutputIdMethod__,
-    __NftOutputIdsMethod__,
-    __NftOutputIdMethod__,
+    __DelegationOutputIdsMethod__,
+    __DelegationOutputIdMethod__,
     __FoundryOutputIdsMethod__,
     __FoundryOutputIdMethod__,
+    __NftOutputIdsMethod__,
+    __NftOutputIdMethod__,
     __GetOutputsIgnoreErrorsMethod__,
     __FindBlocksMethod__,
     __UnhealthyNodesMethod__,
@@ -82,10 +84,12 @@ export type __ClientMethods__ =
     | __HexPublicKeyToBech32AddressMethod__
     | __AccountOutputIdsMethod__
     | __AccountOutputIdMethod__
-    | __NftOutputIdsMethod__
-    | __NftOutputIdMethod__
+    | __DelegationOutputIdsMethod__
+    | __DelegationOutputIdMethod__
     | __FoundryOutputIdsMethod__
     | __FoundryOutputIdMethod__
+    | __NftOutputIdsMethod__
+    | __NftOutputIdMethod__
     | __GetOutputsIgnoreErrorsMethod__
     | __FindBlocksMethod__
     | __UnhealthyNodesMethod__

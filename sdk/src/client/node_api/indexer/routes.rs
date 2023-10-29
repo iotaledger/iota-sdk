@@ -6,18 +6,16 @@
 use crate::{
     client::{
         node_api::indexer::query_parameters::{
-            AccountOutputQueryParameters, BasicOutputQueryParameters, FoundryOutputQueryParameters,
-            NftOutputQueryParameters, OutputQueryParameters,
+            AccountOutputQueryParameters, BasicOutputQueryParameters, DelegationOutputQueryParameters,
+            FoundryOutputQueryParameters, NftOutputQueryParameters, OutputQueryParameters,
         },
         ClientInner, Error, Result,
     },
     types::{
         api::plugins::indexer::OutputIdsResponse,
-        block::output::{AccountId, FoundryId, NftId, OutputId},
+        block::output::{AccountId, DelegationId, FoundryId, NftId, OutputId},
     },
 };
-
-// hornet: https://github.com/gohornet/hornet/blob/develop/plugins/indexer/routes.go
 
 impl ClientInner {
     /// Get basic, alias, nft and foundry outputs filtered by the given parameters.
@@ -38,6 +36,31 @@ impl ClientInner {
         let route = "api/indexer/v2/outputs/basic";
 
         self.get_output_ids(route, query_parameters, true, false).await
+    }
+
+    /// Get delegation outputs filtered by the given parameters.
+    /// GET with query parameter returns all outputIDs that fit these filter criteria.
+    /// Returns Err(Node(NotFound) if no results are found.
+    /// api/indexer/v2/outputs/delegation
+    pub async fn delegation_output_ids(
+        &self,
+        query_parameters: DelegationOutputQueryParameters,
+    ) -> Result<OutputIdsResponse> {
+        let route = "api/indexer/v2/outputs/delegation";
+
+        self.get_output_ids(route, query_parameters, true, false).await
+    }
+
+    /// Get delegation output by its delegationID.
+    /// api/indexer/v2/outputs/delegation/:{DelegationId}
+    pub async fn delegation_output_id(&self, delegation_id: DelegationId) -> Result<OutputId> {
+        let route = format!("api/indexer/v2/outputs/delegation/{delegation_id}");
+
+        Ok(*(self
+            .get_output_ids(&route, DelegationOutputQueryParameters::new(), true, false)
+            .await?
+            .first()
+            .ok_or_else(|| Error::NoOutput(format!("{delegation_id:?}")))?))
     }
 
     /// Get account outputs filtered by the given parameters.

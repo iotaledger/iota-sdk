@@ -172,29 +172,29 @@ class NodeIndexerAPI(metaclass=ABCMeta):
             'accountId': account_id
         }))
 
-    def nft_output_ids(
-            self, query_parameters: QueryParameters) -> OutputIdsResponse:
-        """Fetch NFT output IDs from the given query parameters.
+        def delegation_output_ids(
+                self, query_parameters: QueryParameters) -> OutputIdsResponse:
+        """Fetch delegation output IDs from the given query parameters.
 
         Returns:
-            The corresponding output IDs of the NFT outputs.
+            The corresponding output IDs of the delegation outputs.
         """
 
         query_parameters_camelized = query_parameters.to_dict()
 
-        response = self._call_method('nftOutputIds', {
+        response = self._call_method('delegationOutputIds', {
             'queryParameters': query_parameters_camelized,
         })
         return OutputIdsResponse(response)
 
-    def nft_output_id(self, nft_id: HexStr) -> OutputId:
-        """Fetch NFT output ID from the given NFT ID.
+    def delegation_output_id(self, delegation_id: HexStr) -> OutputId:
+        """Fetch delegation output ID from the given delegation ID.
 
         Returns:
-            The output ID of the NFT output.
+            The output ID of the delegation output.
         """
-        return OutputId.from_string(self._call_method('nftOutputId', {
-            'nftId': nft_id
+        return OutputId.from_string(self._call_method('delegationOutputId', {
+            'delegationId': delegation_id
         }))
 
     def foundry_output_ids(
@@ -220,4 +220,29 @@ class NodeIndexerAPI(metaclass=ABCMeta):
         """
         return OutputId.from_string(self._call_method('foundryOutputId', {
             'foundryId': foundry_id
+        }))
+
+    def nft_output_ids(
+            self, query_parameters: QueryParameters) -> OutputIdsResponse:
+        """Fetch NFT output IDs from the given query parameters.
+
+        Returns:
+            The corresponding output IDs of the NFT outputs.
+        """
+
+        query_parameters_camelized = query_parameters.to_dict()
+
+        response = self._call_method('nftOutputIds', {
+            'queryParameters': query_parameters_camelized,
+        })
+        return OutputIdsResponse(response)
+
+    def nft_output_id(self, nft_id: HexStr) -> OutputId:
+        """Fetch NFT output ID from the given NFT ID.
+
+        Returns:
+            The output ID of the NFT output.
+        """
+        return OutputId.from_string(self._call_method('nftOutputId', {
+            'nftId': nft_id
         }))

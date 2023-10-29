@@ -17,6 +17,7 @@ import {
     NftQueryParameter,
     AccountQueryParameter,
     GenericQueryParameter,
+    DelegationQueryParameter,
 } from '../types/client';
 import type { INodeInfoWrapper } from '../types/client/nodeInfo';
 import {
@@ -38,6 +39,7 @@ import {
     AccountId,
     NftId,
     FoundryId,
+    DelegationId,
     IssuerId,
     UnsignedBlock,
     parseUnsignedBlock,
@@ -604,16 +606,16 @@ export class Client {
     }
 
     /**
-     * Get the corresponding output IDs given a list of NFT query parameters.
+     * Get the corresponding output IDs given a list of delegation query parameters.
      *
-     * @param queryParameters An array of `NftQueryParameter`s.
+     * @param queryParameters An array of `DelegationQueryParameter`s.
      * @returns A paginated query response of corresponding output IDs.
      */
-    async nftOutputIds(
-        queryParameters: NftQueryParameter[],
+    async delegationOutputIds(
+        queryParameters: DelegationQueryParameter[],
     ): Promise<IOutputsResponse> {
         const response = await this.methodHandler.callMethod({
-            name: 'nftOutputIds',
+            name: 'delegationOutputIds',
             data: {
                 queryParameters,
             },
@@ -623,16 +625,16 @@ export class Client {
     }
 
     /**
-     * Get the corresponding output ID from an NFT ID.
+     * Get the corresponding output ID from an delegation ID.
      *
-     * @param nftId An NFT ID.
+     * @param delegationId A delegation ID.
      * @returns The corresponding output ID.
      */
-    async nftOutputId(nftId: NftId): Promise<OutputId> {
+    async delegationOutputId(delegationId: DelegationId): Promise<OutputId> {
         const response = await this.methodHandler.callMethod({
-            name: 'nftOutputId',
+            name: 'delegationOutputId',
             data: {
-                nftId,
+                delegationId,
             },
         });
 
@@ -669,6 +671,42 @@ export class Client {
             name: 'foundryOutputId',
             data: {
                 foundryId,
+            },
+        });
+
+        return JSON.parse(response).payload;
+    }
+
+    /**
+     * Get the corresponding output IDs given a list of NFT query parameters.
+     *
+     * @param queryParameters An array of `NftQueryParameter`s.
+     * @returns A paginated query response of corresponding output IDs.
+     */
+    async nftOutputIds(
+        queryParameters: NftQueryParameter[],
+    ): Promise<IOutputsResponse> {
+        const response = await this.methodHandler.callMethod({
+            name: 'nftOutputIds',
+            data: {
+                queryParameters,
+            },
+        });
+
+        return JSON.parse(response).payload;
+    }
+
+    /**
+     * Get the corresponding output ID from an NFT ID.
+     *
+     * @param nftId An NFT ID.
+     * @returns The corresponding output ID.
+     */
+    async nftOutputId(nftId: NftId): Promise<OutputId> {
+        const response = await this.methodHandler.callMethod({
+            name: 'nftOutputId',
+            data: {
+                nftId,
             },
         });
 

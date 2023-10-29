@@ -7,16 +7,16 @@ use iota_sdk::client::mqtt::Topic;
 use iota_sdk::{
     client::{
         node_api::indexer::query_parameters::{
-            AccountOutputQueryParameters, BasicOutputQueryParameters, FoundryOutputQueryParameters,
-            NftOutputQueryParameters, OutputQueryParameters,
+            AccountOutputQueryParameters, BasicOutputQueryParameters, DelegationOutputQueryParameters,
+            FoundryOutputQueryParameters, NftOutputQueryParameters, OutputQueryParameters,
         },
         node_manager::node::NodeAuth,
     },
     types::block::{
         address::{Bech32Address, Hrp},
         output::{
-            dto::OutputDto, feature::Feature, unlock_condition::dto::UnlockConditionDto, AccountId, FoundryId,
-            NativeToken, NftId, OutputId, TokenScheme,
+            dto::OutputDto, feature::Feature, unlock_condition::dto::UnlockConditionDto, AccountId, DelegationId,
+            FoundryId, NativeToken, NftId, OutputId, TokenScheme,
         },
         payload::{dto::PayloadDto, signed_transaction::TransactionId},
         BlockId, IssuerId, SignedBlockDto,
@@ -236,17 +236,17 @@ pub enum ClientMethod {
         /// Account id
         account_id: AccountId,
     },
-    /// Fetch NFT output IDs
+    /// Fetch delegation output IDs
     #[serde(rename_all = "camelCase")]
-    NftOutputIds {
+    DelegationOutputIds {
         /// Query parameters for output requests
-        query_parameters: NftOutputQueryParameters,
+        query_parameters: DelegationOutputQueryParameters,
     },
-    /// Fetch NFT output ID
+    /// Fetch delegation output ID
     #[serde(rename_all = "camelCase")]
-    NftOutputId {
-        /// NFT ID
-        nft_id: NftId,
+    DelegationOutputId {
+        /// Delegation id
+        delegation_id: DelegationId,
     },
     /// Fetch foundry Output IDs
     #[serde(rename_all = "camelCase")]
@@ -259,6 +259,18 @@ pub enum ClientMethod {
     FoundryOutputId {
         /// Foundry ID
         foundry_id: FoundryId,
+    },
+    /// Fetch NFT output IDs
+    #[serde(rename_all = "camelCase")]
+    NftOutputIds {
+        /// Query parameters for output requests
+        query_parameters: NftOutputQueryParameters,
+    },
+    /// Fetch NFT output ID
+    #[serde(rename_all = "camelCase")]
+    NftOutputId {
+        /// NFT ID
+        nft_id: NftId,
     },
 
     //////////////////////////////////////////////////////////////////////

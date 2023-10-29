@@ -234,15 +234,21 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         ClientMethod::AccountOutputIds { query_parameters } => {
             Response::OutputIdsResponse(client.account_output_ids(query_parameters).await?)
         }
-        ClientMethod::AccountOutputId { account_id } => Response::OutputId(client.account_output_id(account_id).await?),
-        ClientMethod::NftOutputIds { query_parameters } => {
-            Response::OutputIdsResponse(client.nft_output_ids(query_parameters).await?)
+        ClientMethod::DelegationOutputId { delegation_id } => {
+            Response::OutputId(client.delegation_output_id(delegation_id).await?)
         }
-        ClientMethod::NftOutputId { nft_id } => Response::OutputId(client.nft_output_id(nft_id).await?),
+        ClientMethod::DelegationOutputIds { query_parameters } => {
+            Response::OutputIdsResponse(client.delegation_output_ids(query_parameters).await?)
+        }
+        ClientMethod::AccountOutputId { account_id } => Response::OutputId(client.account_output_id(account_id).await?),
         ClientMethod::FoundryOutputIds { query_parameters } => {
             Response::OutputIdsResponse(client.foundry_output_ids(query_parameters).await?)
         }
         ClientMethod::FoundryOutputId { foundry_id } => Response::OutputId(client.foundry_output_id(foundry_id).await?),
+        ClientMethod::NftOutputIds { query_parameters } => {
+            Response::OutputIdsResponse(client.nft_output_ids(query_parameters).await?)
+        }
+        ClientMethod::NftOutputId { nft_id } => Response::OutputId(client.nft_output_id(nft_id).await?),
         ClientMethod::GetOutputs { output_ids } => {
             let outputs_response = client
                 .get_outputs_with_metadata(&output_ids)
