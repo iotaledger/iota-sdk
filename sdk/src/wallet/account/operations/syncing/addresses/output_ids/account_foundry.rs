@@ -37,7 +37,7 @@ where
 
         let mut output_ids = self
             .client()
-            .account_output_ids(AccountOutputQueryParameters::new().unlockable_by_address(bech32_address))
+            .account_output_ids(AccountOutputQueryParameters::new().address(bech32_address))
             .await?
             .items;
 
