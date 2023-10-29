@@ -108,6 +108,36 @@ export enum TransactionFailureReason {
     failedToClaimDelegationReward = 20,
 
     /**
+     * Burning of native tokens is not allowed in the transaction capabilities.
+     */
+    TransactionCapabilityNativeTokenBurningNotAllowed = 21,
+
+    /**
+     * Burning of mana is not allowed in the transaction capabilities.
+     */
+    TransactionCapabilityManaBurningNotAllowed = 22,
+
+    /**
+     * Destruction of accounts is not allowed in the transaction capabilities.
+     */
+    TransactionCapabilityAccountDestructionNotAllowed = 23,
+
+    /**
+     * Destruction of anchors is not allowed in the transaction capabilities.
+     */
+    TransactionCapabilityAnchorDestructionNotAllowed = 24,
+
+    /**
+     * Destruction of foundries is not allowed in the transaction capabilities.
+     */
+    TransactionCapabilityFoundryDestructionNotAllowed = 25,
+
+    /**
+     * Destruction of nfts is not allowed in the transaction capabilities.
+     */
+    TransactionCapabilityNftDestructionNotAllowed = 26,
+
+    /**
      * The semantic validation failed for a reason not covered by the previous variants.
      */
     semanticValidationFailed = 255,
@@ -158,6 +188,18 @@ export const TRANSACTION_FAILURE_REASON_STRINGS: {
         'Failed to claim staking reward.',
     [TransactionFailureReason.failedToClaimDelegationReward]:
         'Failed to claim delegation reward.',
+    [TransactionFailureReason.TransactionCapabilityNativeTokenBurningNotAllowed]:
+        'Burning of native tokens is not allowed in the transaction capabilities.',
+    [TransactionFailureReason.TransactionCapabilityManaBurningNotAllowed]:
+        'Burning of mana is not allowed in the transaction capabilities.',
+    [TransactionFailureReason.TransactionCapabilityAccountDestructionNotAllowed]:
+        'Destruction of accounts is not allowed in the transaction capabilities.',
+    [TransactionFailureReason.TransactionCapabilityAnchorDestructionNotAllowed]:
+        'Destruction of anchors is not allowed in the transaction capabilities.',
+    [TransactionFailureReason.TransactionCapabilityFoundryDestructionNotAllowed]:
+        'Destruction of foundries is not allowed in the transaction capabilities.',
+    [TransactionFailureReason.TransactionCapabilityNftDestructionNotAllowed]:
+        'Destruction of nfts is not allowed in the transaction capabilities.',
     [TransactionFailureReason.semanticValidationFailed]:
         'The semantic validation failed for a reason not covered by the previous variants.',
 };
