@@ -255,7 +255,7 @@ class AnchorOutput extends StateMetadataOutput {
      */
     readonly anchorId: AnchorId;
     /**
-     * A counter that must increase by 1 every time the account output is state transitioned.
+     * A counter that must increase by 1 every time the anchor output is state transitioned.
      */
     readonly stateIndex: number;
     /**
@@ -267,7 +267,7 @@ class AnchorOutput extends StateMetadataOutput {
      * @param amount The amount of the output.
      * @param mana The amount of stored mana.
      * @param anchorId The anchor ID as hex-encoded string.
-     * @param stateIndex A counter that must increase by 1 every time the account output is state transitioned.
+     * @param stateIndex A counter that must increase by 1 every time the anchor output is state transitioned.
      * @param unlockConditions The unlock conditions of the output.
      */
     constructor(
