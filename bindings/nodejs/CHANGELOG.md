@@ -19,6 +19,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security -->
 
+## 1.1.4 - 2023-MM-DD
+
+### Fixed
+
+- `StateMetadataOutput`'s constructor not setting the `stateMetadata` field;
+
 ## 1.1.3 - 2023-10-27
 
 ### Fixed
