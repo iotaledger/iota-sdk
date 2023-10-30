@@ -9,6 +9,11 @@ import { HexEncodedString } from '../utils';
 export type AccountId = HexEncodedString;
 
 /**
+ * An Anchor ID represented as hex-encoded string.
+ */
+export type AnchorId = HexEncodedString;
+
+/**
  * An NFT ID represented as hex-encoded string.
  */
 export type NftId = HexEncodedString;
