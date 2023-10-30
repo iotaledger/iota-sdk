@@ -111,7 +111,7 @@ pub(crate) fn build_transaction_from_payload_and_inputs(
         block_id: inputs.first().map(|i| *i.metadata.block_id()),
         inclusion_state: InclusionState::Confirmed,
         timestamp: 0,
-        // TODO check if we keep a timestamp in Transaction since milestone_timestamp_spent is gone
+        // TODO use slot index since milestone_timestamp_spent is gone
         // inputs
         //     .first()
         //     .and_then(|i| i.metadata.milestone_timestamp_spent.map(|t| t as u128 * 1000))
