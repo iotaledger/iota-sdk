@@ -305,7 +305,7 @@ class DelegationOutput:
 
 
 Output: TypeAlias = Union[BasicOutput, AccountOutput,
-                          FoundryOutput, NftOutput, DelegationOutput]
+                          FoundryOutput, NftOutput, DelegationOutput, AnchorOutput]
 
 
 def deserialize_output(d: Dict[str, Any]) -> Output:
