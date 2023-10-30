@@ -464,8 +464,7 @@ impl StateTransitionVerifier for NftOutput {
             .transaction
             .has_capability(TransactionCapabilityFlag::DestroyNftOutputs)
         {
-            // TODO: add a variant https://github.com/iotaledger/iota-sdk/issues/1430
-            return Err(StateTransitionError::UnsupportedStateTransition);
+            return Err(TransactionFailureReason::TransactionCapabilityNftDestructionNotAllowed)?;
         }
         Ok(())
     }

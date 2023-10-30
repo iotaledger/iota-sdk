@@ -604,8 +604,7 @@ impl StateTransitionVerifier for AnchorOutput {
             .capabilities()
             .has_capability(TransactionCapabilityFlag::DestroyAnchorOutputs)
         {
-            // TODO: add a variant https://github.com/iotaledger/iota-sdk/issues/1430
-            return Err(StateTransitionError::UnsupportedStateTransition);
+            return Err(TransactionFailureReason::TransactionCapabilityAccountDestructionNotAllowed)?;
         }
         Ok(())
     }

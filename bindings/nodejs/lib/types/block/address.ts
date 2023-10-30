@@ -3,7 +3,7 @@
 
 import { plainToInstance, Type } from 'class-transformer';
 import { HexEncodedString } from '../utils';
-import { AccountId, NftId } from './id';
+import { AccountId, AnchorId, NftId } from './id';
 
 /**
  * An address prepended by its network type.
@@ -22,6 +22,8 @@ enum AddressType {
     Nft = 16,
     /** An implicit account creation address. */
     ImplicitAccountCreation = 24,
+    /** An Anchor address. */
+    Anchor = 28,
     /** An address with restricted capabilities. */
     Restricted = 40,
 }
@@ -65,6 +67,8 @@ abstract class Address {
                 ImplicitAccountCreationAddress,
                 data,
             ) as any as ImplicitAccountCreationAddress;
+        } else if (data.type == AddressType.Anchor) {
+            return plainToInstance(AnchorAddress, data) as any as AnchorAddress;
         } else if (data.type == AddressType.Restricted) {
             return plainToInstance(
                 RestrictedAddress,
@@ -160,6 +164,27 @@ class ImplicitAccountCreationAddress extends Address {
     }
 }
 
+/**
+ * An Anchor address.
+ */
+class AnchorAddress extends Address {
+    /**
+     * The anchor ID.
+     */
+    readonly anchorId: AnchorId;
+    /**
+     * @param address An anchor address as anchor ID.
+     */
+    constructor(address: AnchorId) {
+        super(AddressType.Anchor);
+        this.anchorId = address;
+    }
+
+    toString(): string {
+        return this.anchorId;
+    }
+}
+
 const RestrictedAddressDiscriminator = {
     property: 'type',
     subTypes: [
@@ -234,6 +259,7 @@ const AddressDiscriminator = {
             value: ImplicitAccountCreationAddress,
             name: AddressType.ImplicitAccountCreation as any,
         },
+        { value: AnchorAddress, name: AddressType.Anchor as any },
         { value: RestrictedAddress, name: AddressType.Restricted as any },
     ],
 };
@@ -246,4 +272,5 @@ export {
     Ed25519Address,
     AccountAddress,
     NftAddress,
+    AnchorAddress,
 };

@@ -68,6 +68,7 @@ impl InputSelection {
             Address::Account(account_address) => Ok(Some(Requirement::Account(*account_address.account_id()))),
             Address::Nft(nft_address) => Ok(Some(Requirement::Nft(*nft_address.nft_id()))),
             Address::Anchor(_) => Err(Error::UnsupportedAddressType(AnchorAddress::KIND)),
+            Address::Restricted(_) => Ok(None),
             _ => todo!("What do we do here?"),
         }
     }
@@ -234,7 +235,11 @@ impl InputSelection {
                 .unwrap()
                 .0;
 
-            self.addresses.contains(&required_address)
+            if let Address::Restricted(restricted_address) = required_address {
+                self.addresses.contains(restricted_address.address())
+            } else {
+                self.addresses.contains(&required_address)
+            }
         })
     }
 
