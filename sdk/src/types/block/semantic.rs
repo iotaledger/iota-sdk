@@ -9,7 +9,10 @@ use primitive_types::U256;
 
 use crate::types::block::{
     address::{Address, AddressCapabilityFlag},
-    output::{AnchorOutput, ChainId, FoundryId, NativeTokens, Output, OutputId, TokenId, UnlockCondition},
+    output::{
+        AnchorOutput, ChainId, FoundryId, NativeTokens, Output, OutputId, StateTransitionError, TokenId,
+        UnlockCondition,
+    },
     payload::signed_transaction::{Transaction, TransactionCapabilityFlag, TransactionId, TransactionSigningHash},
     unlock::Unlocks,
     Error,
@@ -64,6 +67,18 @@ pub enum TransactionFailureReason {
     FailedToClaimStakingReward = 19,
     /// Failed to claim delegation reward.
     FailedToClaimDelegationReward = 20,
+    /// Burning of native tokens is not allowed in the transaction capabilities.
+    TransactionCapabilityNativeTokenBurningNotAllowed = 21,
+    /// Burning of mana is not allowed in the transaction capabilities.
+    TransactionCapabilityManaBurningNotAllowed = 22,
+    /// Destruction of accounts is not allowed in the transaction capabilities.
+    TransactionCapabilityAccountDestructionNotAllowed = 23,
+    /// Destruction of anchors is not allowed in the transaction capabilities.
+    TransactionCapabilityAnchorDestructionNotAllowed = 24,
+    /// Destruction of foundries is not allowed in the transaction capabilities.
+    TransactionCapabilityFoundryDestructionNotAllowed = 25,
+    /// Destruction of nfts is not allowed in the transaction capabilities.
+    TransactionCapabilityNftDestructionNotAllowed = 26,
     /// The semantic validation failed for a reason not covered by the previous variants.
     SemanticValidationFailed = 255,
 }
@@ -107,6 +122,28 @@ impl fmt::Display for TransactionFailureReason {
             ),
             Self::FailedToClaimStakingReward => write!(f, "Failed to claim staking reward."),
             Self::FailedToClaimDelegationReward => write!(f, "Failed to claim delegation reward."),
+            Self::TransactionCapabilityNativeTokenBurningNotAllowed => write!(
+                f,
+                "Burning of native tokens is not allowed in the transaction capabilities."
+            ),
+            Self::TransactionCapabilityManaBurningNotAllowed => {
+                write!(f, "Burning of mana is not allowed in the transaction capabilities.")
+            }
+            Self::TransactionCapabilityAccountDestructionNotAllowed => write!(
+                f,
+                "Destruction of accounts is not allowed in the transaction capabilities."
+            ),
+            Self::TransactionCapabilityAnchorDestructionNotAllowed => write!(
+                f,
+                "Destruction of anchors is not allowed in the transaction capabilities."
+            ),
+            Self::TransactionCapabilityFoundryDestructionNotAllowed => write!(
+                f,
+                "Destruction of foundries is not allowed in the transaction capabilities."
+            ),
+            Self::TransactionCapabilityNftDestructionNotAllowed => {
+                write!(f, "Destruction of nfts is not allowed in the transaction capabilities.")
+            }
             Self::SemanticValidationFailed => write!(
                 f,
                 "The semantic validation failed for a reason not covered by the previous variants."
@@ -140,6 +177,12 @@ impl TryFrom<u8> for TransactionFailureReason {
             18 => Self::MissingStakingFeature,
             19 => Self::FailedToClaimStakingReward,
             20 => Self::FailedToClaimDelegationReward,
+            21 => Self::TransactionCapabilityNativeTokenBurningNotAllowed,
+            22 => Self::TransactionCapabilityManaBurningNotAllowed,
+            23 => Self::TransactionCapabilityAccountDestructionNotAllowed,
+            24 => Self::TransactionCapabilityAnchorDestructionNotAllowed,
+            25 => Self::TransactionCapabilityFoundryDestructionNotAllowed,
+            26 => Self::TransactionCapabilityNftDestructionNotAllowed,
             255 => Self::SemanticValidationFailed,
             x => return Err(Self::Error::InvalidTransactionFailureReason(x)),
         })
@@ -462,23 +505,29 @@ impl<'a> SemanticValidationContext<'a> {
 
         // Validation of state transitions and destructions.
         for (chain_id, current_state) in self.input_chains.iter() {
-            if Output::verify_state_transition(
+            match Output::verify_state_transition(
                 Some(current_state),
                 self.output_chains.get(chain_id).map(core::ops::Deref::deref),
                 &self,
-            )
-            .is_err()
-            {
-                return Ok(Some(TransactionFailureReason::InvalidChainStateTransition));
+            ) {
+                Err(StateTransitionError::TransactionFailure(f)) => return Ok(Some(f)),
+                Err(_) => {
+                    return Ok(Some(TransactionFailureReason::InvalidChainStateTransition));
+                }
+                _ => {}
             }
         }
 
         // Validation of state creations.
         for (chain_id, next_state) in self.output_chains.iter() {
-            if self.input_chains.get(chain_id).is_none()
-                && Output::verify_state_transition(None, Some(next_state), &self).is_err()
-            {
-                return Ok(Some(TransactionFailureReason::InvalidChainStateTransition));
+            if self.input_chains.get(chain_id).is_none() {
+                match Output::verify_state_transition(None, Some(next_state), &self) {
+                    Err(StateTransitionError::TransactionFailure(f)) => return Ok(Some(f)),
+                    Err(_) => {
+                        return Ok(Some(TransactionFailureReason::InvalidChainStateTransition));
+                    }
+                    _ => {}
+                }
             }
         }
 
