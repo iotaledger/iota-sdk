@@ -10,6 +10,8 @@ use iota_sdk_bindings_core::{
 };
 use neon::prelude::*;
 
+use crate::binding_glue;
+
 type JsCallback = Root<JsFunction<JsObject>>;
 
 pub type SharedClientMethodHandler = Arc<RwLock<Option<ClientMethodHandler>>>;
@@ -79,44 +81,12 @@ pub fn destroy_client(mut cx: FunctionContext) -> JsResult<JsUndefined> {
 }
 
 pub fn call_client_method(mut cx: FunctionContext) -> JsResult<JsUndefined> {
-    match cx.argument::<JsBox<SharedClientMethodHandler>>(1)?.read() {
-        Ok(lock) => {
-            let method_handler = lock.clone();
-            let method = cx.argument::<JsString>(0)?;
-            let method = method.value(&mut cx);
-            let callback = cx.argument::<JsFunction>(2)?.root(&mut cx);
-            if let Some(method_handler) = method_handler {
-                crate::RUNTIME.spawn(async move {
-                    let (response, is_error) = method_handler.call_method(method).await;
-                    method_handler.channel.send(move |mut cx| {
-                        let cb = callback.into_inner(&mut cx);
-                        let this = cx.undefined();
-
-                        let args = [
-                            if is_error {
-                                cx.error(response.clone())?.upcast::<JsValue>()
-                            } else {
-                                cx.undefined().upcast::<JsValue>()
-                            },
-                            cx.string(response).upcast::<JsValue>(),
-                        ];
-
-                        cb.call(&mut cx, this, args)?;
-                        Ok(())
-                    });
-                });
-
-                Ok(cx.undefined())
-            } else {
-                // Notify that the client was destroyed
-                cx.throw_error(
-                    serde_json::to_string(&Response::Panic("Client was destroyed".to_string()))
-                        .expect("json to string error"),
-                )
-            }
-        }
-        Err(e) => cx.throw_error(serde_json::to_string(&Response::Panic(e.to_string())).expect("json to string error")),
-    }
+    let method_handler = cx.argument::<JsBox<SharedClientMethodHandler>>(1);
+    let method = cx.argument::<JsString>(0)?;
+    let method = method.value(&mut cx);
+    let callback = cx.argument::<JsFunction>(2)?.root(&mut cx);
+    
+    binding_glue!(cx, method, method_handler, callback, "Client")
 }
 
 // MQTT

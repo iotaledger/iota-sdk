@@ -33,8 +33,6 @@ extern "C" {
     pub type ArrayString;
 }
 
-
-
 #[macro_export]
 macro_rules! binding_glue {
     ($method:ident, $method_handler:ident, $name:expr, $code:expr) => {

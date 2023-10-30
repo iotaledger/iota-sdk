@@ -1,6 +1,6 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
-
+#![feature(async_closure)]
 mod client;
 mod secret_manager;
 mod wallet;
@@ -67,4 +67,66 @@ fn main(mut cx: ModuleContext) -> NeonResult<()> {
     cx.export_function("listenWallet", wallet::listen_wallet)?;
 
     Ok(())
+}
+
+#[macro_export]
+macro_rules! binding_glue {
+    ($cx:ident, $method:ident, $method_handler:ident, $callback:ident, $name:expr) => {
+        match $method_handler?.read() {
+            Ok(handler) => {
+                if let Some(inner) = handler.clone() {
+                    crate::RUNTIME.spawn(async move {
+                        let (response, is_error) = inner.call_method($method).await;
+                        inner.channel.send(move |mut cx| {
+                            let cb = $callback.into_inner(&mut cx);
+                            let this = cx.undefined();
+                    
+                            let args = [
+                                if is_error {
+                                    cx.error(response.clone())?.upcast::<JsValue>()
+                                } else {
+                                    cx.undefined().upcast::<JsValue>()
+                                },
+                                cx.string(response).upcast::<JsValue>(),
+                            ];
+                    
+                            cb.call(&mut cx, this, args)?;
+                            Ok(())
+                        });
+                    }); 
+                    Ok($cx.undefined())
+                } else {
+                    $cx.throw_error(
+                        serde_json::to_string(&Response::Panic(format!("{} was destroyed", $name)))
+                            .expect("json to string error"),
+                    )
+                }
+            },
+            Err(e) => $cx.throw_error(serde_json::to_string(&Response::Panic(e.to_string())).expect("json to string error")),
+        }
+    };
+}
+
+
+
+#[macro_export]
+macro_rules! binding_glue1 {
+    ($cx:ident, $method:ident, $method_handler:ident, $callback:ident, $name:expr, $code:expr) => {
+        match $method_handler?.read() {
+            Ok(handler) => {
+                if let Some(inner) = handler.clone() {
+                    crate::RUNTIME.spawn(async move {
+                        $code(inner).await;
+                    }); 
+                    Ok($cx.undefined())
+                } else {
+                    $cx.throw_error(
+                        serde_json::to_string(&Response::Panic(format!("{} was destroyed", $name)))
+                            .expect("json to string error"),
+                    )
+                }
+            },
+            Err(e) => $cx.throw_error(serde_json::to_string(&Response::Panic(e.to_string())).expect("json to string error")),
+        }
+    };
 }
