@@ -55,7 +55,7 @@ async function run() {
                 Utils.hexToBech32(address.toString(), 'rms'),
                 output.getAmount(),
                 output instanceof CommonOutput
-                    ? (output as CommonOutput).getNativeTokens()
+                    ? (output as CommonOutput).getNativeToken() ?? []
                     : [],
             );
         });
@@ -93,7 +93,7 @@ async function run() {
                 Utils.hexToBech32(address.toString(), 'rms'),
                 output.getAmount(),
                 output instanceof CommonOutput
-                    ? (output as CommonOutput).getNativeTokens()
+                    ? (output as CommonOutput).getNativeToken()
                     : undefined,
             );
         });
