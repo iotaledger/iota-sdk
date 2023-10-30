@@ -45,7 +45,7 @@ async fn main() -> Result<()> {
         .await?;
 
     wallet.sync(None).await?;
-    println!("Account synced!");
+    println!("Wallet synced!");
 
     // Set the stronghold password
     wallet

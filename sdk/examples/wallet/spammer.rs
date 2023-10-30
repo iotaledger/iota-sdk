@@ -138,13 +138,13 @@ async fn main() -> Result<()> {
         if error_state.is_err() {
             // Sync when getting an error, because that's probably when no outputs are available anymore
             let mut balance = wallet.sync(None).await?;
-            println!("Account synced");
+            println!("Wallet synced");
 
             while balance.base_coin().available() == 0 {
                 println!("No funds available");
                 tokio::time::sleep(std::time::Duration::from_secs(2)).await;
                 balance = wallet.sync(None).await?;
-                println!("Account synced");
+                println!("Wallet synced");
             }
         }
 

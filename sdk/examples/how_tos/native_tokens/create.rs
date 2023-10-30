@@ -57,7 +57,7 @@ async fn main() -> Result<()> {
         );
 
         wallet.sync(None).await?;
-        println!("Account synced");
+        println!("Wallet synced");
     }
 
     let metadata =
@@ -88,7 +88,7 @@ async fn main() -> Result<()> {
 
     // Ensure the account is synced after creating the native token.
     wallet.sync(None).await?;
-    println!("Account synced");
+    println!("Wallet synced");
 
     Ok(())
 }

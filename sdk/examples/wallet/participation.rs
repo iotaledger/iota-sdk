@@ -119,7 +119,7 @@ async fn main() -> Result<()> {
     }
 
     let balance = wallet.sync(None).await?;
-    println!("Account synced");
+    println!("Wallet synced");
 
     ////////////////////////////////////////////////
     // create voting output or increase voting power
@@ -142,7 +142,7 @@ async fn main() -> Result<()> {
     );
 
     let balance = wallet.sync(None).await?;
-    println!("Account synced");
+    println!("Wallet synced");
     println!("New voting power: {}", balance.base_coin().voting_power());
 
     let voting_output = wallet.get_voting_output().await?.unwrap();
@@ -167,7 +167,7 @@ async fn main() -> Result<()> {
     );
 
     let balance = wallet.sync(None).await?;
-    println!("Account synced");
+    println!("Wallet synced");
     println!("New voting power: {}", balance.base_coin().voting_power());
 
     ////////////////////////////////////////////////
@@ -192,7 +192,7 @@ async fn main() -> Result<()> {
     );
 
     wallet.sync(None).await?;
-    println!("Account synced");
+    println!("Wallet synced");
 
     ////////////////////////////////////////////////
     // get voting overview
@@ -219,7 +219,7 @@ async fn main() -> Result<()> {
     );
 
     wallet.sync(None).await?;
-    println!("Account synced");
+    println!("Wallet synced");
 
     ////////////////////////////////////////////////
     // destroy voting output
@@ -243,7 +243,7 @@ async fn main() -> Result<()> {
     );
 
     wallet.sync(None).await?;
-    println!("Account synced");
+    println!("Wallet synced");
 
     assert!(wallet.get_voting_output().await.is_err());
 
