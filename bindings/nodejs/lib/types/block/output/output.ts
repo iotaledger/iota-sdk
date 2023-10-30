@@ -220,7 +220,7 @@ abstract class StateMetadataOutput extends ImmutableFeaturesOutput /*implements 
         type: OutputType,
         amount: bigint,
         unlockConditions: UnlockCondition[],
-        stateMetadata?: HexEncodedString
+        stateMetadata?: HexEncodedString,
     ) {
         super(type, amount, unlockConditions);
         this.stateMetadata = stateMetadata;
@@ -265,7 +265,7 @@ class AliasOutput extends StateMetadataOutput /*implements IAliasOutput*/ {
         aliasId: HexEncodedString,
         stateIndex: number,
         foundryCounter: number,
-        stateMetadata?: HexEncodedString
+        stateMetadata?: HexEncodedString,
     ) {
         super(OutputType.Alias, amount, unlockConditions, stateMetadata);
         this.aliasId = aliasId;
