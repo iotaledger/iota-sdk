@@ -205,19 +205,25 @@ abstract class ImmutableFeaturesOutput extends CommonOutput {
  * Base class for state metadata outputs.
  */
 abstract class StateMetadataOutput extends ImmutableFeaturesOutput /*implements IBasicOutput*/ {
+    /**
+     * Metadata that can only be changed by the state controller.
+     */
     readonly stateMetadata?: HexEncodedString;
 
     /**
      * @param type The type of output.
      * @param amount The amount of the output.
      * @param unlockConditions The unlock conditions for the output.
+     * @param stateMetadata Metadata that can only be changed by the state controller.
      */
     constructor(
         type: OutputType,
         amount: bigint,
         unlockConditions: UnlockCondition[],
+        stateMetadata?: HexEncodedString
     ) {
         super(type, amount, unlockConditions);
+        this.stateMetadata = stateMetadata;
     }
     /**
      * Metadata that can only be changed by the state controller.
@@ -251,6 +257,7 @@ class AliasOutput extends StateMetadataOutput /*implements IAliasOutput*/ {
      * @param aliasId The Alias ID as hex-encoded string.
      * @param stateIndex A counter that must increase by 1 every time the alias is state transitioned.
      * @param foundryCounter A counter that denotes the number of foundries created by this alias account.
+     * @param stateMetadata Metadata that can only be changed by the state controller.
      */
     constructor(
         unlockConditions: UnlockCondition[],
@@ -258,8 +265,9 @@ class AliasOutput extends StateMetadataOutput /*implements IAliasOutput*/ {
         aliasId: HexEncodedString,
         stateIndex: number,
         foundryCounter: number,
+        stateMetadata?: HexEncodedString
     ) {
-        super(OutputType.Alias, amount, unlockConditions);
+        super(OutputType.Alias, amount, unlockConditions, stateMetadata);
         this.aliasId = aliasId;
         this.stateIndex = stateIndex;
         this.foundryCounter = foundryCounter;
