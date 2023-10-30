@@ -14,17 +14,17 @@ use iota_sdk_bindings_core::{
 use tokio::sync::mpsc::{unbounded_channel, UnboundedReceiver, UnboundedSender};
 use wasm_bindgen::{prelude::wasm_bindgen, JsError, JsValue};
 
-use crate::{client::ClientMethodHandler, secret_manager::SecretManagerMethodHandler};
+use crate::{client::ClientMethodHandler, secret_manager::SecretManagerMethodHandler, binding_glue};
 
 /// The Wallet method handler.
 #[wasm_bindgen(js_name = WalletMethodHandler)]
 pub struct WalletMethodHandler {
-    wallet: Arc<RwLock<Option<Wallet>>>,
+    inner: Arc<RwLock<Option<Wallet>>>,
 }
 
 macro_rules! wallet_pre {
     ($method_handler:ident) => {
-        match $method_handler.wallet.read() {
+        match $method_handler.inner.read() {
             Ok(handler) => {
                 if let Some(wallet) = handler.clone() {
                     Ok(wallet)
@@ -60,13 +60,13 @@ pub fn create_wallet(options: String) -> Result<WalletMethodHandler, JsError> {
         })?;
 
     Ok(WalletMethodHandler {
-        wallet: Arc::new(RwLock::new(Some(wallet_method_handler))),
+        inner: Arc::new(RwLock::new(Some(wallet_method_handler))),
     })
 }
 
 #[wasm_bindgen(js_name = destroyWallet)]
 pub fn destroy_wallet(method_handler: &WalletMethodHandler) -> Result<(), JsError> {
-    match method_handler.wallet.write() {
+    match method_handler.inner.write() {
         Ok(mut lock) => *lock = None,
         Err(e) => {
             return Err(JsError::new(
@@ -99,17 +99,7 @@ pub fn get_secret_manager(method_handler: &WalletMethodHandler) -> Result<Secret
 /// Returns an error if the response itself is an error or panic.
 #[wasm_bindgen(js_name = callWalletMethodAsync)]
 pub async fn call_wallet_method_async(method: String, method_handler: &WalletMethodHandler) -> Result<String, JsError> {
-    let wallet = wallet_pre!(method_handler)?;
-    let method: WalletMethod = serde_json::from_str(&method).map_err(|err| JsError::new(&err.to_string()))?;
-
-    let response = call_wallet_method(&wallet, method).await;
-    match response {
-        Response::Error(e) => Err(JsError::new(
-            &serde_json::to_string(&Response::Panic(e.to_string())).expect("json to string error"),
-        )),
-        Response::Panic(p) => Err(JsError::new(&p)),
-        _ => Ok(serde_json::to_string(&response).map_err(|e| JsError::new(&e.to_string()))?),
-    }
+    binding_glue!(method, method_handler, "Client", call_wallet_method)
 }
 
 /// It takes a list of event types, registers a callback function, and then listens for events of those
