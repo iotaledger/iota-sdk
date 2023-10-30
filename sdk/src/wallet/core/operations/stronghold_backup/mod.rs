@@ -34,7 +34,7 @@ impl Wallet {
             // Backup with existing stronghold
             SecretManager::Stronghold(stronghold) => {
                 stronghold.set_password(stronghold_password).await?;
-                self.store_wallet_data_to_stronghold(stronghold).await?;
+                self.store_data_to_stronghold(stronghold).await?;
                 // Write snapshot to backup path
                 stronghold.write_stronghold_snapshot(Some(&backup_path)).await?;
             }
@@ -45,7 +45,7 @@ impl Wallet {
                     .password(stronghold_password)
                     .build(backup_path)?;
 
-                self.store_wallet_data_to_stronghold(&backup_stronghold).await?;
+                self.store_data_to_stronghold(&backup_stronghold).await?;
 
                 // Write snapshot to backup path
                 backup_stronghold.write_stronghold_snapshot(None).await?;
@@ -199,7 +199,7 @@ impl Wallet<StrongholdSecretManager> {
 
         secret_manager.set_password(stronghold_password).await?;
 
-        self.store_wallet_data_to_stronghold(&secret_manager).await?;
+        self.store_data_to_stronghold(&secret_manager).await?;
 
         // Write snapshot to backup path
         secret_manager.write_stronghold_snapshot(Some(&backup_path)).await?;

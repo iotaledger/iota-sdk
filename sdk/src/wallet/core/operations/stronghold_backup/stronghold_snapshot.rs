@@ -16,10 +16,7 @@ pub(crate) const SECRET_MANAGER_KEY: &str = "secret_manager";
 pub(crate) const WALLET_DATA_KEY: &str = "wallet_data";
 
 impl<S: 'static + SecretManagerConfig> Wallet<S> {
-    pub(crate) async fn store_wallet_data_to_stronghold(
-        &self,
-        stronghold: &StrongholdAdapter,
-    ) -> crate::wallet::Result<()> {
+    pub(crate) async fn store_data_to_stronghold(&self, stronghold: &StrongholdAdapter) -> crate::wallet::Result<()> {
         // Set migration version
         stronghold
             .set(MIGRATION_VERSION_KEY, &latest_backup_migration_version())
