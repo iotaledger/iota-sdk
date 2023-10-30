@@ -1,0 +1,73 @@
+{
+    "type": 0,
+    "version": 3,
+    "networkName": "TestJungle",
+    "bech32Hrp": "tgl",
+    "storageScoreParameters": {
+      "storageCost": "0",
+      "factorData": 0,
+      "offsetOutputOverhead": "0",
+      "offsetEd25519BlockIssuerKey": "0",
+      "offsetStakingFeature": "0",
+      "offsetDelegation": "0"
+    },
+    "workScoreParameters": {
+      "dataByte": 0,
+      "block": 1,
+      "input": 0,
+      "contextInput": 0,
+      "output": 0,
+      "nativeToken": 0,
+      "staking": 0,
+      "blockIssuer": 0,
+      "allotment": 0,
+      "signatureEd25519": 0
+    },
+    "manaParameters": {
+      "bitsCount": 63,
+      "generationRate": 1,
+      "generationRateExponent": 17,
+      "decayFactors": [
+        10,
+        20
+      ],
+      "decayFactorsExponent": 32,
+      "decayFactorEpochsSum": 2420916375,
+      "decayFactorEpochsSumExponent": 21
+    },
+    "tokenSupply": "2779530283277761",
+    "genesisUnixTimestamp": "1695275822",
+    "slotDurationInSeconds": 10,
+    "slotsPerEpochExponent": 13,
+    "stakingUnbondingPeriod": 10,
+    "validationBlocksPerSlot": 10,
+    "punishmentEpochs": 10,
+    "livenessThresholdLowerBound": 15,
+    "livenessThresholdUpperBound": 30,
+    "minCommittableAge": 10,
+    "maxCommittableAge": 20,
+    "epochNearingThreshold": 24,
+    "congestionControlParameters": {
+      "minReferenceManaCost": "1",
+      "increase": "0",
+      "decrease": "0",
+      "increaseThreshold": 800000,
+      "decreaseThreshold": 500000,
+      "schedulerRate": 100000,
+      "maxBufferSize": 1000,
+      "maxValidationBufferSize": 100
+    },
+    "versionSignaling": {
+      "windowSize": 7,
+      "windowTargetRatio": 5,
+      "activationOffset": 7
+    },
+    "rewardsParameters": {
+      "profitMarginExponent": 8,
+      "bootstrappingDuration": 1154,
+      "manaShareCoefficient": "2",
+      "decayBalancingConstantExponent": 8,
+      "decayBalancingConstant": "1",
+      "poolCoefficientExponent": 31
+    }
+  }
