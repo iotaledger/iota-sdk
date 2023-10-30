@@ -17,11 +17,13 @@ class UnlockType(IntEnum):
         Reference (1): An unlock which must reference a previous unlock which unlocks also the input at the same index as this Reference Unlock.
         Account (2): An unlock which must reference a previous unlock which unlocks the account that the input is locked to.
         Nft (3): An unlock which must reference a previous unlock which unlocks the NFT that the input is locked to.
+        Anchor (4): An unlock which must reference a previous unlock which unlocks the anchor that the input is locked to.
     """
     Signature = 0
     Reference = 1
     Account = 2
     Nft = 3
+    Anchor = 4
 
 
 @json
@@ -77,8 +79,23 @@ class NftUnlock:
     type: int = field(default_factory=lambda: int(UnlockType.Nft), init=False)
 
 
-def deserialize_unlock(d: Dict[str, Any]) -> Union[SignatureUnlock,
-                                                   ReferenceUnlock, AccountUnlock, NftUnlock]:
+@json
+@dataclass
+class AnchorUnlock:
+    """An unlock which must reference a previous unlock which unlocks the anchor that the input is locked to.
+    """
+    reference: int
+    type: int = field(
+        default_factory=lambda: int(
+            UnlockType.Anchor),
+        init=False)
+
+
+Unlock: TypeAlias = Union[SignatureUnlock,
+                          ReferenceUnlock, AccountUnlock, NftUnlock, AnchorUnlock]
+
+
+def deserialize_unlock(d: Dict[str, Any]) -> Unlock:
     """
     Takes a dictionary as input and returns an instance of a specific class based on the value of the 'type' key in the dictionary.
 
@@ -94,11 +111,12 @@ def deserialize_unlock(d: Dict[str, Any]) -> Union[SignatureUnlock,
         return AccountUnlock.from_dict(d)
     if unlock_type == UnlockType.Nft:
         return NftUnlock.from_dict(d)
+    if unlock_type == UnlockType.Anchor:
+        return AnchorUnlock.from_dict(d)
     raise Exception(f'invalid unlock type: {unlock_type}')
 
 
-def deserialize_unlocks(dicts: List[Dict[str, Any]]) -> List[Union[SignatureUnlock,
-                                                                   ReferenceUnlock, AccountUnlock, NftUnlock]]:
+def deserialize_unlocks(dicts: List[Dict[str, Any]]) -> List[Unlock]:
     """
     Takes a list of dictionaries as input and returns a list with specific instances of classes based on the value of the 'type' key in the dictionary.
 
