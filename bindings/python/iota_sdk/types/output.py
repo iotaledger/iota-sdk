@@ -22,7 +22,7 @@ class OutputType(IntEnum):
         Foundry (2): A foundry output.
         Nft (3): An NFT output.
         Delegation (4): A delegation output.
-        Anchor (5): A delegation output.
+        Anchor (5): An anchor output.
     """
     Basic = 0
     Account = 1
