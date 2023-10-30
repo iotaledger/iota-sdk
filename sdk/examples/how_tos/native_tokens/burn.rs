@@ -37,7 +37,7 @@ async fn main() -> Result<()> {
         .finish()
         .await?;
 
-    // May want to ensure the account is synced before sending a transaction.
+    // May want to ensure the wallet is synced before sending a transaction.
     let balance = wallet.sync(None).await?;
 
     // Take the given token id, or use a default.

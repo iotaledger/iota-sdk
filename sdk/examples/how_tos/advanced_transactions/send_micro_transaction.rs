@@ -32,7 +32,7 @@ async fn main() -> Result<()> {
         .finish()
         .await?;
 
-    // May want to ensure the account is synced before sending a transaction.
+    // May want to ensure the wallet is synced before sending a transaction.
     wallet.sync(None).await?;
 
     // Set the stronghold password

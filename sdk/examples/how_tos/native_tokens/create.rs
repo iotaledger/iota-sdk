@@ -86,7 +86,7 @@ async fn main() -> Result<()> {
     );
     println!("Created token: {}", transaction.token_id);
 
-    // Ensure the account is synced after creating the native token.
+    // Ensure the wallet is synced after creating the native token.
     wallet.sync(None).await?;
     println!("Wallet synced");
 

@@ -31,7 +31,7 @@ async fn main() -> Result<()> {
         .finish()
         .await?;
 
-    // May want to ensure the account is synced before sending a transaction.
+    // May want to ensure the wallet is synced before sending a transaction.
     let balance = wallet.sync(None).await?;
 
     // Find first foundry and corresponding token id

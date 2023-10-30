@@ -355,7 +355,7 @@ async fn backup_and_restore() -> Result<()> {
 
 //     // Validate restored data
 
-//     // The account is restored, because the coin type is the same
+//     // The wallet is restored, because the coin type is the same
 //     let restored_accounts = restore_wallet.get_accounts().await?;
 //     assert_eq!(restored_accounts.len(), 1);
 

@@ -41,7 +41,7 @@ async fn main() -> Result<()> {
         .finish()
         .await?;
 
-    // Ensure the account is synced after minting.
+    // Ensure the wallet is synced after minting.
     wallet.sync(None).await?;
 
     // We send from the wallet address.
@@ -108,7 +108,7 @@ async fn main() -> Result<()> {
     );
     println!("Minted NFT 2");
 
-    // Ensure the account is synced after minting.
+    // Ensure the wallet is synced after minting.
     wallet.sync(None).await?;
 
     Ok(())

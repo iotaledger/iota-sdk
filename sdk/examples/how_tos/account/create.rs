@@ -25,7 +25,7 @@ async fn main() -> Result<()> {
         .finish()
         .await?;
 
-    // May want to ensure the account is synced before sending a transaction.
+    // May want to ensure the wallet is synced before sending a transaction.
     let balance = wallet.sync(None).await?;
     println!("Accounts BEFORE:\n{:#?}", balance.accounts());
 
