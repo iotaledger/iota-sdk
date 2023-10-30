@@ -517,8 +517,7 @@ impl StateTransitionVerifier for AccountOutput {
             .transaction
             .has_capability(TransactionCapabilityFlag::DestroyAccountOutputs)
         {
-            // TODO: add a variant https://github.com/iotaledger/iota-sdk/issues/1430
-            return Err(StateTransitionError::UnsupportedStateTransition);
+            return Err(TransactionFailureReason::TransactionCapabilityAccountDestructionNotAllowed)?;
         }
         Ok(())
     }
