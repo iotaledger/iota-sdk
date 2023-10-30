@@ -19,7 +19,6 @@ async fn main() -> Result<()> {
     dotenvy::dotenv().ok();
 
     // Create the wallet
-    let alias = "Alice";
     let wallet = Wallet::builder()
         .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
         .finish()
@@ -57,7 +56,7 @@ async fn main() -> Result<()> {
         let nfts_after = balance.nfts();
         println!("Balance after burning:\n{nfts_after:#?}",);
     } else {
-        println!("No NFT available in account '{alias}'");
+        println!("No NFT available in the wallet");
     }
 
     Ok(())

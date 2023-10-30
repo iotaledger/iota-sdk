@@ -32,7 +32,6 @@ async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
-    let alias = "Alice";
     let wallet = Wallet::builder()
         .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
         .finish()
@@ -84,7 +83,7 @@ async fn main() -> Result<()> {
         }
     } else {
         println!(
-            "Native token '{token_id}' doesn't exist or there's not at least '{MIN_AVAILABLE_AMOUNT}' tokens of it in account '{alias}'"
+            "Native token '{token_id}' doesn't exist or there's not at least '{MIN_AVAILABLE_AMOUNT}' tokens of it in the wallet"
         );
     }
 

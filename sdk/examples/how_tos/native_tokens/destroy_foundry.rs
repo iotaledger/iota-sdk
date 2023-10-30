@@ -19,7 +19,6 @@ async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
-    let alias = "Alice";
     let wallet = Wallet::builder()
         .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
         .finish()
@@ -94,7 +93,7 @@ async fn main() -> Result<()> {
         let foundry_count = balance.foundries().len();
         println!("Foundries after destroying: {foundry_count}");
     } else {
-        println!("No Foundry available in account '{alias}'");
+        println!("No Foundry available in the wallet");
     }
 
     Ok(())
