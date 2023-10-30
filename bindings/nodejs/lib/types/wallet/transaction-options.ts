@@ -102,6 +102,4 @@ export interface AccountOutputParams {
     immutableMetadata?: HexEncodedString;
     /** Hex encoded bytes */
     metadata?: HexEncodedString;
-    /** Hex encoded bytes */
-    stateMetadata?: HexEncodedString;
 }

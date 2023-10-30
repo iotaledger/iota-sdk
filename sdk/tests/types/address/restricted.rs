@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use iota_sdk::types::block::{
-    address::{Address, AddressCapabilities, AddressCapabilityFlag, Ed25519Address, RestrictedAddress, ToBech32Ext},
+    address::{Address, AddressCapabilities, AddressCapabilityFlag, RestrictedAddress, ToBech32Ext},
     capabilities::CapabilityFlag,
     rand::address::rand_ed25519_address,
 };
@@ -40,132 +40,180 @@ fn capabilities() {
 
 #[test]
 fn restricted_ed25519() {
-    // Test from https://github.com/iotaledger/tips-draft/blob/tip50/tips/TIP-0050/tip-0050.md#bech32-strings
-    let address = Ed25519Address::from_public_key_bytes(
-        hex::decode("6f1581709bb7b1ef030d210db18e3b0ba1c776fba65d8cdaad05415142d189f8")
-            .unwrap()
-            .try_into()
-            .unwrap(),
+    // Test from https://github.com/iotaledger/tips/blob/tip50/tips/TIP-0050/tip-0050.md#bech32-strings
+
+    // Ed25519 Address (Plain)
+    let address = Address::unpack_verified(
+        prefix_hex::decode::<Vec<_>>("0x00efdc112efe262b304bcf379b26c31bad029f616ee3ec4aa6345a366e4c9e43a3").unwrap(),
+        &(),
     )
     .unwrap();
     assert_eq!(
-        hex::encode(address),
-        "efdc112efe262b304bcf379b26c31bad029f616ee3ec4aa6345a366e4c9e43a3"
-    );
-    // Ed25519 Address (Plain)
-    assert_eq!(
-        address.to_bech32_unchecked("iota"),
+        address.clone().to_bech32_unchecked("iota"),
         "iota1qrhacyfwlcnzkvzteumekfkrrwks98mpdm37cj4xx3drvmjvnep6xqgyzyx"
     );
 
     // Restricted Ed25519 Address (Every Capability Disallowed)
     let mut address = RestrictedAddress::new(address).unwrap();
     assert_eq!(
+        prefix_hex::encode(Address::from(address.clone()).pack_to_vec()),
+        "0x3000efdc112efe262b304bcf379b26c31bad029f616ee3ec4aa6345a366e4c9e43a300"
+    );
+    assert_eq!(
         address.clone().to_bech32_unchecked("iota"),
-        "iota19qqwlhq39mlzv2esf08n0xexcvd66q5lv9hw8mz25c695dnwfj0y8gcq3l9hek"
+        "iota1xqqwlhq39mlzv2esf08n0xexcvd66q5lv9hw8mz25c695dnwfj0y8gcq8mnjgf"
     );
 
     // Restricted Ed25519 Address (Every Capability Allowed)
     address.set_allowed_capabilities(AddressCapabilities::all());
     assert_eq!(
-        address.clone().to_bech32_unchecked("iota"),
-        "iota19qqwlhq39mlzv2esf08n0xexcvd66q5lv9hw8mz25c695dnwfj0y8gcplupydhwt"
+        prefix_hex::encode(Address::from(address.clone()).pack_to_vec()),
+        "0x3000efdc112efe262b304bcf379b26c31bad029f616ee3ec4aa6345a366e4c9e43a302ff01"
     );
-
-    address.set_allowed_capabilities(AddressCapabilities::none());
     assert_eq!(
         address.clone().to_bech32_unchecked("iota"),
-        "iota19qqwlhq39mlzv2esf08n0xexcvd66q5lv9hw8mz25c695dnwfj0y8gcq3l9hek"
+        "iota1xqqwlhq39mlzv2esf08n0xexcvd66q5lv9hw8mz25c695dnwfj0y8gczluqs97eene"
+    );
+
+    // Restricted Ed25519 Address (Every Capability Disallowed Reset)
+    address.set_allowed_capabilities(AddressCapabilities::none());
+    assert_eq!(
+        prefix_hex::encode(Address::from(address.clone()).pack_to_vec()),
+        "0x3000efdc112efe262b304bcf379b26c31bad029f616ee3ec4aa6345a366e4c9e43a300"
+    );
+    assert_eq!(
+        address.clone().to_bech32_unchecked("iota"),
+        "iota1xqqwlhq39mlzv2esf08n0xexcvd66q5lv9hw8mz25c695dnwfj0y8gcq8mnjgf"
     );
 
     // Restricted Ed25519 Address (Can receive Native Tokens)
     address.set_allowed_capabilities([AddressCapabilityFlag::OutputsWithNativeTokens]);
     assert_eq!(
+        prefix_hex::encode(Address::from(address.clone()).pack_to_vec()),
+        "0x3000efdc112efe262b304bcf379b26c31bad029f616ee3ec4aa6345a366e4c9e43a30101"
+    );
+    assert_eq!(
         address.clone().to_bech32_unchecked("iota"),
-        "iota19qqwlhq39mlzv2esf08n0xexcvd66q5lv9hw8mz25c695dnwfj0y8gcpqytmqxr4"
+        "iota1xqqwlhq39mlzv2esf08n0xexcvd66q5lv9hw8mz25c695dnwfj0y8gcpqyla70tq"
     );
 }
 
 #[test]
 fn restricted_account() {
-    // Test from https://github.com/iotaledger/tips-draft/blob/tip50/tips/TIP-0050/tip-0050.md#bech32-strings
+    // Test from https://github.com/iotaledger/tips/blob/tip50/tips/TIP-0050/tip-0050.md#bech32-strings
+
+    // Account Address (Plain)
     let address = Address::unpack_verified(
-        hex::decode("08f1c011fb54df4a4e5b07462536fbacc779bf80cc45e03bc3410836587b4efc98").unwrap(),
+        prefix_hex::decode::<Vec<_>>("0x0860441c013b400f402c317833366f48730610296a09243636343e7b1b7e115409").unwrap(),
         &(),
     )
     .unwrap();
-    // Account Address (Plain)
     assert_eq!(
         address.clone().to_bech32_unchecked("iota"),
-        "iota1prcuqy0m2n055njmqarz2dhm4nrhn0uqe3z7qw7rgyyrvkrmfm7fsnwyxu6"
+        "iota1ppsyg8qp8dqq7spvx9urxdn0fpesvypfdgyjgd3kxsl8kxm7z92qj2lln86"
     );
 
     // Restricted Account Address (Every Capability Disallowed)
     let mut address = RestrictedAddress::new(address).unwrap();
     assert_eq!(
+        prefix_hex::encode(Address::from(address.clone()).pack_to_vec()),
+        "0x300860441c013b400f402c317833366f48730610296a09243636343e7b1b7e11540900"
+    );
+    assert_eq!(
         address.clone().to_bech32_unchecked("iota"),
-        "iota19qy0rsq3ld2d7jjwtvr5vffklwkvw7dlsrxytcpmcdqssdjc0d80exqqdyjudm"
+        "iota1xqyxq3quqya5qr6q9schsvekday8xpss994qjfpkxc6ru7cm0cg4gzgq9nu0d0"
     );
 
     // Restricted Account Address (Every Capability Allowed)
     address.set_allowed_capabilities(AddressCapabilities::all());
     assert_eq!(
-        address.clone().to_bech32_unchecked("iota"),
-        "iota19qy0rsq3ld2d7jjwtvr5vffklwkvw7dlsrxytcpmcdqssdjc0d80exqplurds6sq"
+        prefix_hex::encode(Address::from(address.clone()).pack_to_vec()),
+        "0x300860441c013b400f402c317833366f48730610296a09243636343e7b1b7e11540902ff01"
     );
-
-    address.set_allowed_capabilities(AddressCapabilities::none());
     assert_eq!(
         address.clone().to_bech32_unchecked("iota"),
-        "iota19qy0rsq3ld2d7jjwtvr5vffklwkvw7dlsrxytcpmcdqssdjc0d80exqqdyjudm"
+        "iota1xqyxq3quqya5qr6q9schsvekday8xpss994qjfpkxc6ru7cm0cg4gzgzluqs9xmye3"
+    );
+
+    // Restricted Account Address (Every Capability Disallowed Reset)
+    address.set_allowed_capabilities(AddressCapabilities::none());
+    assert_eq!(
+        prefix_hex::encode(Address::from(address.clone()).pack_to_vec()),
+        "0x300860441c013b400f402c317833366f48730610296a09243636343e7b1b7e11540900"
+    );
+    assert_eq!(
+        address.clone().to_bech32_unchecked("iota"),
+        "iota1xqyxq3quqya5qr6q9schsvekday8xpss994qjfpkxc6ru7cm0cg4gzgq9nu0d0"
     );
 
     // Restricted Account Address (Can receive Native Tokens)
     address.set_allowed_capabilities([AddressCapabilityFlag::OutputsWithNativeTokens]);
     assert_eq!(
+        prefix_hex::encode(Address::from(address.clone()).pack_to_vec()),
+        "0x300860441c013b400f402c317833366f48730610296a09243636343e7b1b7e1154090101"
+    );
+    assert_eq!(
         address.clone().to_bech32_unchecked("iota"),
-        "iota19qy0rsq3ld2d7jjwtvr5vffklwkvw7dlsrxytcpmcdqssdjc0d80exqpqyfjata7"
+        "iota1xqyxq3quqya5qr6q9schsvekday8xpss994qjfpkxc6ru7cm0cg4gzgpqys8pcr3"
     );
 }
 
 #[test]
 fn restricted_nft() {
-    // Test from https://github.com/iotaledger/tips-draft/blob/tip50/tips/TIP-0050/tip-0050.md#bech32-strings
+    // Test from https://github.com/iotaledger/tips/blob/tip50/tips/TIP-0050/tip-0050.md#bech32-strings
+
+    // NFT Address (Plain)
     let address = Address::unpack_verified(
-        hex::decode("10c72a65ae53d70b99a57f72637bfd1d5ea7baa2b4ba095c989b667d38558087db").unwrap(),
+        prefix_hex::decode::<Vec<_>>("0x10140f39267a343f0d650a751250445e40600d133522085d210a2b5f3f69445139").unwrap(),
         &(),
     )
     .unwrap();
-    // NFT Address (Plain)
     assert_eq!(
         address.clone().to_bech32_unchecked("iota"),
-        "iota1zrrj5edw20tshxd90aexx7lar4020w4zkjaqjhycndn86wz4szrak44cs6h"
+        "iota1zq2q7wfx0g6r7rt9pf63y5zyteqxqrgnx53qshfppg4470mfg3gnjfmvts0"
     );
 
     // Restricted NFT Address (Every Capability Disallowed)
     let mut address = RestrictedAddress::new(address).unwrap();
     assert_eq!(
+        prefix_hex::encode(Address::from(address.clone()).pack_to_vec()),
+        "0x3010140f39267a343f0d650a751250445e40600d133522085d210a2b5f3f6944513900"
+    );
+    assert_eq!(
         address.clone().to_bech32_unchecked("iota"),
-        "iota19qgvw2n94efawzue54lhycmml5w4afa6526t5z2unzdkvlfc2kqg0kcqek0lex"
+        "iota1xqgpgreeyearg0cdv5982yjsg30yqcqdzv6jyzzayy9zkheld9z9zwgqjt4fkk"
     );
 
     // Restricted NFT Address (Every Capability Allowed)
     address.set_allowed_capabilities(AddressCapabilities::all());
     assert_eq!(
-        address.clone().to_bech32_unchecked("iota"),
-        "iota19qgvw2n94efawzue54lhycmml5w4afa6526t5z2unzdkvlfc2kqg0kcpluts738a"
+        prefix_hex::encode(Address::from(address.clone()).pack_to_vec()),
+        "0x3010140f39267a343f0d650a751250445e40600d133522085d210a2b5f3f6944513902ff01"
     );
-
-    address.set_allowed_capabilities(AddressCapabilities::none());
     assert_eq!(
         address.clone().to_bech32_unchecked("iota"),
-        "iota19qgvw2n94efawzue54lhycmml5w4afa6526t5z2unzdkvlfc2kqg0kcqek0lex"
+        "iota1xqgpgreeyearg0cdv5982yjsg30yqcqdzv6jyzzayy9zkheld9z9zwgzluqs3ctnc5"
+    );
+
+    // Restricted NFT Address (Every Capability Disallowed Reset)
+    address.set_allowed_capabilities(AddressCapabilities::none());
+    assert_eq!(
+        prefix_hex::encode(Address::from(address.clone()).pack_to_vec()),
+        "0x3010140f39267a343f0d650a751250445e40600d133522085d210a2b5f3f6944513900"
+    );
+    assert_eq!(
+        address.clone().to_bech32_unchecked("iota"),
+        "iota1xqgpgreeyearg0cdv5982yjsg30yqcqdzv6jyzzayy9zkheld9z9zwgqjt4fkk"
     );
 
     // Restricted NFT Address (Can receive Native Tokens)
     address.set_allowed_capabilities([AddressCapabilityFlag::OutputsWithNativeTokens]);
     assert_eq!(
+        prefix_hex::encode(Address::from(address.clone()).pack_to_vec()),
+        "0x3010140f39267a343f0d650a751250445e40600d133522085d210a2b5f3f694451390101"
+    );
+    assert_eq!(
         address.clone().to_bech32_unchecked("iota"),
-        "iota19qgvw2n94efawzue54lhycmml5w4afa6526t5z2unzdkvlfc2kqg0kcpqyp0nq2r"
+        "iota1xqgpgreeyearg0cdv5982yjsg30yqcqdzv6jyzzayy9zkheld9z9zwgpqysq5lyk"
     );
 }

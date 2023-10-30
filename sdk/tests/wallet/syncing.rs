@@ -3,10 +3,7 @@
 
 use iota_sdk::{
     types::block::output::{
-        unlock_condition::{
-            AddressUnlockCondition, ExpirationUnlockCondition, GovernorAddressUnlockCondition,
-            StateControllerAddressUnlockCondition, StorageDepositReturnUnlockCondition,
-        },
+        unlock_condition::{AddressUnlockCondition, ExpirationUnlockCondition, StorageDepositReturnUnlockCondition},
         AccountId, AccountOutputBuilder, BasicOutputBuilder, NftId, NftOutputBuilder, UnlockCondition,
     },
     wallet::{account::SyncOptions, Result},
@@ -108,12 +105,9 @@ async fn sync_only_most_basic_outputs() -> Result<()> {
             ])
             .finish_output(token_supply)?,
         AccountOutputBuilder::new_with_amount(1_000_000, AccountId::null())
-            .with_unlock_conditions([
-                UnlockCondition::StateControllerAddress(StateControllerAddressUnlockCondition::new(
-                    account_1_address.clone(),
-                )),
-                UnlockCondition::GovernorAddress(GovernorAddressUnlockCondition::new(account_1_address.clone())),
-            ])
+            .with_unlock_conditions([UnlockCondition::Address(AddressUnlockCondition::new(
+                account_1_address.clone(),
+            ))])
             .finish_output(token_supply)?,
     ];
 

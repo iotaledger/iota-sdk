@@ -4,7 +4,7 @@
 use super::{Error, InputSelection, Requirement};
 use crate::{
     client::secret::types::InputSigningData,
-    types::block::output::{AccountTransition, NftId, Output, OutputId},
+    types::block::output::{NftId, Output, OutputId},
 };
 
 /// Checks if an output is an nft with a given nft ID.
@@ -31,10 +31,7 @@ pub(crate) fn is_nft_with_id_non_null(output: &Output, nft_id: &NftId) -> bool {
 
 impl InputSelection {
     /// Fulfills an nft requirement by selecting the appropriate nft from the available inputs.
-    pub(crate) fn fulfill_nft_requirement(
-        &mut self,
-        nft_id: NftId,
-    ) -> Result<Vec<(InputSigningData, Option<AccountTransition>)>, Error> {
+    pub(crate) fn fulfill_nft_requirement(&mut self, nft_id: NftId) -> Result<Vec<InputSigningData>, Error> {
         // Check if the requirement is already fulfilled.
         if let Some(input) = self
             .selected_inputs
@@ -56,6 +53,6 @@ impl InputSelection {
 
         log::debug!("{nft_id:?} requirement fulfilled by {:?}", input.output_id());
 
-        Ok(vec![(input, None)])
+        Ok(vec![input])
     }
 }

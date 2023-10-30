@@ -165,10 +165,8 @@ pub struct AccountOutputQueryParameters {
     sender: Option<Bech32Address>,
     /// Filters outputs based on bech32-encoded issuer address.
     issuer: Option<Bech32Address>,
-    /// Filters outputs based on bech32-encoded governor (governance controller) address.
-    governor: Option<Bech32Address>,
-    /// Filters outputs based on bech32-encoded state controller address.
-    state_controller: Option<Bech32Address>,
+    /// Bech32-encoded address that should be searched for.
+    address: Option<Bech32Address>,
 }
 
 impl_query_parameters_methods!(AccountOutputQueryParameters);
