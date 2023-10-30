@@ -320,7 +320,7 @@ where
                     _ => {}
                 }
 
-                // TODO check if we can still filter since milestone_timestamp_booked is gone
+                // TODO filter based on slot index
                 // if let Some(lower_bound_booked_timestamp) = filter.lower_bound_booked_timestamp {
                 //     if output.metadata.milestone_timestamp_booked() < lower_bound_booked_timestamp {
                 //         continue;
