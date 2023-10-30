@@ -10,7 +10,7 @@ from iota_sdk.types.common import HexStr, json, EpochIndex
 from iota_sdk.types.feature import deserialize_features, SenderFeature, IssuerFeature, MetadataFeature, TagFeature
 from iota_sdk.types.native_token import NativeToken
 from iota_sdk.types.token_scheme import SimpleTokenScheme
-from iota_sdk.types.unlock_condition import deserialize_unlock_conditions, AddressUnlockCondition, StorageDepositReturnUnlockCondition, TimelockUnlockCondition, ExpirationUnlockCondition, StateControllerAddressUnlockCondition, GovernorAddressUnlockCondition, ImmutableAccountAddressUnlockCondition
+from iota_sdk.types.unlock_condition import deserialize_unlock_conditions, AddressUnlockCondition, StorageDepositReturnUnlockCondition, TimelockUnlockCondition, ExpirationUnlockCondition, ImmutableAccountAddressUnlockCondition
 
 
 class OutputType(IntEnum):
@@ -83,10 +83,6 @@ class AccountOutput:
             The conditions to unlock the output.
         account_id :
             The account ID if it's an account output.
-        state_index :
-            A counter that must increase by 1 every time the account is state transitioned.
-        state_metadata :
-            Metadata that can only be changed by the state controller.
         foundry_counter :
             A counter that denotes the number of foundries created by this account output.
         features :
@@ -105,10 +101,8 @@ class AccountOutput:
         encoder=str
     ))
     account_id: HexStr
-    state_index: int
     foundry_counter: int
-    unlock_conditions: List[Union[StateControllerAddressUnlockCondition,
-                                  GovernorAddressUnlockCondition]] = field(
+    unlock_conditions: List[AddressUnlockCondition] = field(
         metadata=config(
             decoder=deserialize_unlock_conditions
         ))
@@ -122,7 +116,6 @@ class AccountOutput:
                                                                        metadata=config(
                                                                            decoder=deserialize_features
                                                                        ))
-    state_metadata: Optional[HexStr] = None
     native_tokens: Optional[List[NativeToken]] = None
     type: int = field(
         default_factory=lambda: int(

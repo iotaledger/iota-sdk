@@ -71,8 +71,6 @@ where
                             wallet_data.address.inner(),
                             output_data,
                             slot_index,
-                            // Not relevant without account addresses
-                            None,
                         )?
                     {
                         match outputs_to_claim {

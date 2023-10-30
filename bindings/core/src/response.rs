@@ -30,7 +30,7 @@ use iota_sdk::{
             signature::Ed25519Signature,
             slot::SlotCommitmentId,
             unlock::Unlock,
-            BlockId, BlockWrapperDto,
+            BlockId, SignedBlockDto, UnsignedBlockDto,
         },
     },
     wallet::{
@@ -106,12 +106,13 @@ pub enum Response {
     /// - [`GetIssuance`](crate::method::ClientMethod::GetIssuance)
     Issuance(IssuanceBlockHeaderResponse),
     /// Response for:
+    /// - [`BuildBasicBlock`](crate::method::ClientMethod::BuildBasicBlock)
+    UnsignedBlock(UnsignedBlockDto),
+    /// Response for:
     /// - [`GetBlock`](crate::method::ClientMethod::GetBlock)
     /// - [`GetIncludedBlock`](crate::method::ClientMethod::GetIncludedBlock)
-    Block(BlockWrapperDto),
-    /// Response for:
-    /// - [`PostBlockPayload`](crate::method::ClientMethod::PostBlockPayload)
-    BlockIdWithBlock(BlockId, BlockWrapperDto),
+    /// - [`SignBlock`](crate::method::SecretManagerMethod::SignBlock)
+    SignedBlock(SignedBlockDto),
     /// Response for:
     /// - [`GetBlockMetadata`](crate::method::ClientMethod::GetBlockMetadata)
     BlockMetadata(BlockMetadataResponse),
@@ -142,7 +143,7 @@ pub enum Response {
     OutputIdsResponse(OutputIdsResponse),
     /// Response for:
     /// - [`FindBlocks`](crate::method::ClientMethod::FindBlocks)
-    Blocks(Vec<BlockWrapperDto>),
+    Blocks(Vec<SignedBlockDto>),
     /// Response for:
     /// - [`FindInputs`](crate::method::ClientMethod::FindInputs)
     Inputs(Vec<UtxoInput>),

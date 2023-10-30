@@ -17,7 +17,7 @@ use crate::types::block::{
     output::{
         feature::{BlockIssuerKeyCount, FeatureCount},
         unlock_condition::UnlockConditionCount,
-        AccountId, ChainId, MetadataFeatureLength, NativeTokenCount, NftId, OutputIndex, StateMetadataLength,
+        AccountId, AnchorId, ChainId, MetadataFeatureLength, NativeTokenCount, NftId, OutputIndex, StateMetadataLength,
         TagFeatureLength,
     },
     payload::{ContextInputCount, InputCount, OutputCount, TagLength, TaggedDataLength},
@@ -49,12 +49,13 @@ pub enum Error {
     },
     InvalidAddress,
     InvalidAddressKind(u8),
+    InvalidAccountIndex(<UnlockIndex as TryFrom<u16>>::Error),
+    InvalidAnchorIndex(<UnlockIndex as TryFrom<u16>>::Error),
     InvalidBlockKind(u8),
     InvalidRewardInputIndex(<RewardContextInputIndex as TryFrom<u16>>::Error),
     InvalidStorageDepositAmount(u64),
     /// Invalid transaction failure reason byte.
     InvalidTransactionFailureReason(u8),
-    InvalidAccountIndex(<UnlockIndex as TryFrom<u16>>::Error),
     // The above is used by `Packable` to denote out-of-range values. The following denotes the actual amount.
     InsufficientStorageDepositAmount {
         amount: u64,
@@ -83,7 +84,7 @@ pub enum Error {
     InvalidInputOutputIndex(<OutputIndex as TryFrom<u16>>::Error),
     InvalidBech32Hrp(Bech32HrpError),
     InvalidCapabilitiesCount(<u8 as TryFrom<usize>>::Error),
-    InvalidBlockWrapperLength(usize),
+    InvalidSignedBlockLength(usize),
     InvalidStateMetadataLength(<StateMetadataLength as TryFrom<usize>>::Error),
     InvalidManaValue(u64),
     InvalidMetadataFeatureLength(<MetadataFeatureLength as TryFrom<usize>>::Error),
@@ -130,6 +131,7 @@ pub enum Error {
     InvalidUnlockReference(u16),
     InvalidUnlockAccount(u16),
     InvalidUnlockNft(u16),
+    InvalidUnlockAnchor(u16),
     InvalidUnlockConditionCount(<UnlockConditionCount as TryFrom<usize>>::Error),
     InvalidUnlockConditionKind(u8),
     InvalidFoundryZeroSerialNumber,
@@ -152,7 +154,8 @@ pub enum Error {
     },
     BlockIssuerKeysNotUniqueSorted,
     RemainingBytesAfterBlock,
-    SelfControlledAccountOutput(AccountId),
+    SelfControlledAnchorOutput(AnchorId),
+    SelfDepositAccount(AccountId),
     SelfDepositNft(NftId),
     SignaturePublicKeyMismatch {
         expected: String,
@@ -171,6 +174,8 @@ pub enum Error {
     },
     UnlockConditionsNotUniqueSorted,
     UnsupportedOutputKind(u8),
+    // TODO use Address::kind_str when available in 2.0 ?
+    UnsupportedAddressKind(u8),
     DuplicateOutputChain(ChainId),
     InvalidField(&'static str),
     NullDelegationValidatorId,
@@ -219,6 +224,7 @@ impl fmt::Display for Error {
             Self::InvalidAddress => write!(f, "invalid address provided"),
             Self::InvalidAddressKind(k) => write!(f, "invalid address kind: {k}"),
             Self::InvalidAccountIndex(index) => write!(f, "invalid account index: {index}"),
+            Self::InvalidAnchorIndex(index) => write!(f, "invalid anchor index: {index}"),
             Self::InvalidBech32Hrp(e) => write!(f, "invalid bech32 hrp: {e}"),
             Self::InvalidCapabilitiesCount(e) => write!(f, "invalid capabilities count: {e}"),
             Self::InvalidBlockKind(k) => write!(f, "invalid block kind: {k}"),
@@ -257,7 +263,7 @@ impl fmt::Display for Error {
             Self::InvalidInputKind(k) => write!(f, "invalid input kind: {k}"),
             Self::InvalidInputCount(count) => write!(f, "invalid input count: {count}"),
             Self::InvalidInputOutputIndex(index) => write!(f, "invalid input or output index: {index}"),
-            Self::InvalidBlockWrapperLength(length) => write!(f, "invalid block wrapper length {length}"),
+            Self::InvalidSignedBlockLength(length) => write!(f, "invalid signed block length {length}"),
             Self::InvalidStateMetadataLength(length) => write!(f, "invalid state metadata length: {length}"),
             Self::InvalidManaValue(mana) => write!(f, "invalid mana value: {mana}"),
             Self::InvalidMetadataFeatureLength(length) => {
@@ -319,6 +325,9 @@ impl fmt::Display for Error {
             Self::InvalidUnlockNft(index) => {
                 write!(f, "invalid unlock nft: {index}")
             }
+            Self::InvalidUnlockAnchor(index) => {
+                write!(f, "invalid unlock anchor: {index}")
+            }
             Self::InvalidUnlockConditionCount(count) => write!(f, "invalid unlock condition count: {count}"),
             Self::InvalidUnlockConditionKind(k) => write!(f, "invalid unlock condition kind: {k}"),
             Self::InvalidFoundryZeroSerialNumber => write!(f, "invalid foundry zero serial number"),
@@ -350,11 +359,14 @@ impl fmt::Display for Error {
             Self::RemainingBytesAfterBlock => {
                 write!(f, "remaining bytes after block")
             }
-            Self::SelfControlledAccountOutput(account_id) => {
-                write!(f, "self controlled account output, account ID {account_id}")
+            Self::SelfControlledAnchorOutput(anchor_id) => {
+                write!(f, "self controlled anchor output, anchor ID {anchor_id}")
             }
             Self::SelfDepositNft(nft_id) => {
                 write!(f, "self deposit nft output, NFT ID {nft_id}")
+            }
+            Self::SelfDepositAccount(account_id) => {
+                write!(f, "self deposit account output, account ID {account_id}")
             }
             Self::SignaturePublicKeyMismatch { expected, actual } => {
                 write!(f, "signature public key mismatch: expected {expected} but got {actual}",)
@@ -377,6 +389,7 @@ impl fmt::Display for Error {
             }
             Self::UnlockConditionsNotUniqueSorted => write!(f, "unlock conditions are not unique and/or sorted"),
             Self::UnsupportedOutputKind(k) => write!(f, "unsupported output kind: {k}"),
+            Self::UnsupportedAddressKind(k) => write!(f, "unsupported address kind: {k}"),
             Self::DuplicateOutputChain(chain_id) => write!(f, "duplicate output chain {chain_id}"),
             Self::InvalidField(field) => write!(f, "invalid field: {field}"),
             Self::NullDelegationValidatorId => write!(f, "null delegation validator ID"),

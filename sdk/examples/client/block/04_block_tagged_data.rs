@@ -10,8 +10,15 @@
 
 use crypto::keys::bip44::Bip44;
 use iota_sdk::{
-    client::{constants::IOTA_COIN_TYPE, secret::SecretManager, Client, Result},
-    types::block::payload::{Payload, TaggedDataPayload},
+    client::{
+        constants::IOTA_COIN_TYPE,
+        secret::{SecretManager, SignBlock},
+        Client, Result,
+    },
+    types::block::{
+        payload::{Payload, TaggedDataPayload},
+        IssuerId,
+    },
 };
 
 #[tokio::main]
@@ -20,6 +27,7 @@ async fn main() -> Result<()> {
     dotenvy::dotenv().ok();
 
     let node_url = std::env::var("NODE_URL").unwrap();
+    let issuer_id = std::env::var("ISSUER_ID").unwrap().parse::<IssuerId>().unwrap();
 
     // Create a node client.
     let client = Client::builder().with_node(&node_url)?.finish().await?;
@@ -29,9 +37,7 @@ async fn main() -> Result<()> {
     // Create and send the block with tag and data.
     let block = client
         .build_basic_block(
-            todo!("issuer id"),
-            todo!("issuing time"),
-            None,
+            issuer_id,
             Some(Payload::TaggedData(Box::new(
                 TaggedDataPayload::new(
                     std::env::args()
@@ -45,9 +51,9 @@ async fn main() -> Result<()> {
                 )
                 .unwrap(),
             ))),
-            &secret_manager,
-            Bip44::new(IOTA_COIN_TYPE),
         )
+        .await?
+        .sign_ed25519(&secret_manager, Bip44::new(IOTA_COIN_TYPE))
         .await?;
 
     println!("{block:#?}\n");

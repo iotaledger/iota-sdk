@@ -5,10 +5,12 @@ use std::pin::Pin;
 
 use futures::Future;
 use iota_sdk::{
-    client::{secret::SecretManager, Client},
+    client::{
+        secret::{DowncastSecretManager, SecretManage},
+        Client,
+    },
     wallet::Wallet,
 };
-use tokio::sync::RwLock;
 
 use crate::{
     method::{ClientMethod, SecretManagerMethod, WalletMethod},
@@ -78,10 +80,13 @@ pub fn call_utils_method(method: UtilsMethod) -> Response {
 }
 
 /// Call a secret manager method.
-pub async fn call_secret_manager_method(
-    secret_manager: &RwLock<SecretManager>,
+pub async fn call_secret_manager_method<S: SecretManage + DowncastSecretManager>(
+    secret_manager: &S,
     method: SecretManagerMethod,
-) -> Response {
+) -> Response
+where
+    iota_sdk::client::Error: From<S::Error>,
+{
     log::debug!("Secret manager method: {method:?}");
     let result =
         convert_async_panics(|| async { call_secret_manager_method_internal(secret_manager, method).await }).await;

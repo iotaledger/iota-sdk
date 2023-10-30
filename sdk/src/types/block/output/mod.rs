@@ -1,6 +1,7 @@
 // Copyright 2020-2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+mod anchor;
 mod chain_id;
 mod delegation;
 mod metadata;
@@ -41,7 +42,8 @@ pub(crate) use self::{
     unlock_condition::AddressUnlockCondition,
 };
 pub use self::{
-    account::{AccountId, AccountOutput, AccountOutputBuilder, AccountTransition},
+    account::{AccountId, AccountOutput, AccountOutputBuilder},
+    anchor::{AnchorId, AnchorOutput, AnchorTransition},
     basic::{BasicOutput, BasicOutputBuilder},
     chain_id::ChainId,
     delegation::{DelegationId, DelegationOutput, DelegationOutputBuilder},
@@ -121,6 +123,8 @@ pub enum Output {
     Nft(NftOutput),
     /// A delegation output.
     Delegation(DelegationOutput),
+    /// An anchor output.
+    Anchor(AnchorOutput),
 }
 
 impl core::fmt::Debug for Output {
@@ -131,6 +135,7 @@ impl core::fmt::Debug for Output {
             Self::Foundry(output) => output.fmt(f),
             Self::Nft(output) => output.fmt(f),
             Self::Delegation(output) => output.fmt(f),
+            Self::Anchor(output) => output.fmt(f),
         }
     }
 }
@@ -147,6 +152,7 @@ impl Output {
             Self::Foundry(_) => FoundryOutput::KIND,
             Self::Nft(_) => NftOutput::KIND,
             Self::Delegation(_) => DelegationOutput::KIND,
+            Self::Anchor(_) => AnchorOutput::KIND,
         }
     }
 
@@ -158,6 +164,7 @@ impl Output {
             Self::Foundry(_) => "Foundry",
             Self::Nft(_) => "Nft",
             Self::Delegation(_) => "Delegation",
+            Self::Anchor(_) => "Anchor",
         }
     }
 
@@ -169,6 +176,7 @@ impl Output {
             Self::Foundry(output) => output.amount(),
             Self::Nft(output) => output.amount(),
             Self::Delegation(output) => output.amount(),
+            Self::Anchor(output) => output.amount(),
         }
     }
 
@@ -180,6 +188,7 @@ impl Output {
             Self::Foundry(_) => 0,
             Self::Nft(output) => output.mana(),
             Self::Delegation(_) => 0,
+            Self::Anchor(output) => output.mana(),
         }
     }
 
@@ -191,6 +200,7 @@ impl Output {
             Self::Foundry(output) => Some(output.native_tokens()),
             Self::Nft(output) => Some(output.native_tokens()),
             Self::Delegation(_) => None,
+            Self::Anchor(output) => Some(output.native_tokens()),
         }
     }
 
@@ -202,6 +212,7 @@ impl Output {
             Self::Foundry(output) => Some(output.unlock_conditions()),
             Self::Nft(output) => Some(output.unlock_conditions()),
             Self::Delegation(output) => Some(output.unlock_conditions()),
+            Self::Anchor(output) => Some(output.unlock_conditions()),
         }
     }
 
@@ -213,6 +224,7 @@ impl Output {
             Self::Foundry(output) => Some(output.features()),
             Self::Nft(output) => Some(output.features()),
             Self::Delegation(_) => None,
+            Self::Anchor(output) => Some(output.features()),
         }
     }
 
@@ -224,6 +236,7 @@ impl Output {
             Self::Foundry(output) => Some(output.immutable_features()),
             Self::Nft(output) => Some(output.immutable_features()),
             Self::Delegation(_) => None,
+            Self::Anchor(output) => Some(output.immutable_features()),
         }
     }
 
@@ -235,10 +248,11 @@ impl Output {
             Self::Foundry(output) => Some(output.chain_id()),
             Self::Nft(output) => Some(output.chain_id()),
             Self::Delegation(_) => None,
+            Self::Anchor(output) => Some(output.chain_id()),
         }
     }
 
-    crate::def_is_as_opt!(Output: Basic, Account, Foundry, Nft, Delegation);
+    crate::def_is_as_opt!(Output: Basic, Account, Foundry, Nft, Delegation, Anchor);
 
     /// Returns the address that is required to unlock this [`Output`] and the account or nft address that gets
     /// unlocked by it, if it's an account or nft.
@@ -247,7 +261,6 @@ impl Output {
         &self,
         slot_index: SlotIndex,
         output_id: &OutputId,
-        account_transition: Option<AccountTransition>,
     ) -> Result<(Address, Option<Address>), Error> {
         match self {
             Self::Basic(output) => Ok((
@@ -257,17 +270,13 @@ impl Output {
                     .clone(),
                 None,
             )),
-            Self::Account(output) => {
-                if account_transition.unwrap_or(AccountTransition::State) == AccountTransition::State {
-                    // Account address is only unlocked if it's a state transition
-                    Ok((
-                        output.state_controller_address().clone(),
-                        Some(Address::Account(output.account_address(output_id))),
-                    ))
-                } else {
-                    Ok((output.governor_address().clone(), None))
-                }
-            }
+            Self::Account(output) => Ok((
+                output
+                    .unlock_conditions()
+                    .locked_address(output.address(), slot_index)
+                    .clone(),
+                Some(Address::Account(output.account_address(output_id))),
+            )),
             Self::Foundry(output) => Ok((Address::Account(*output.account_address()), None)),
             Self::Nft(output) => Ok((
                 output
@@ -283,6 +292,7 @@ impl Output {
                     .clone(),
                 None,
             )),
+            Self::Anchor(_) => Err(Error::UnsupportedOutputKind(AnchorOutput::KIND)),
         }
     }
 
@@ -393,6 +403,10 @@ impl Packable for Output {
                 DelegationOutput::KIND.pack(packer)?;
                 output.pack(packer)
             }
+            Self::Anchor(output) => {
+                AnchorOutput::KIND.pack(packer)?;
+                output.pack(packer)
+            }
         }?;
 
         Ok(())
@@ -408,6 +422,7 @@ impl Packable for Output {
             FoundryOutput::KIND => Self::from(FoundryOutput::unpack::<_, VERIFY>(unpacker, visitor).coerce()?),
             NftOutput::KIND => Self::from(NftOutput::unpack::<_, VERIFY>(unpacker, visitor).coerce()?),
             DelegationOutput::KIND => Self::from(DelegationOutput::unpack::<_, VERIFY>(unpacker, visitor).coerce()?),
+            AnchorOutput::KIND => Self::from(AnchorOutput::unpack::<_, VERIFY>(unpacker, visitor).coerce()?),
             k => return Err(UnpackError::Packable(Error::InvalidOutputKind(k))),
         })
     }
@@ -471,8 +486,8 @@ pub mod dto {
 
     use super::*;
     pub use super::{
-        account::dto::AccountOutputDto, basic::dto::BasicOutputDto, delegation::dto::DelegationOutputDto,
-        foundry::dto::FoundryOutputDto, nft::dto::NftOutputDto,
+        account::dto::AccountOutputDto, anchor::dto::AnchorOutputDto, basic::dto::BasicOutputDto,
+        delegation::dto::DelegationOutputDto, foundry::dto::FoundryOutputDto, nft::dto::NftOutputDto,
     };
     use crate::types::{block::Error, TryFromDto, ValidationParams};
 
@@ -484,6 +499,7 @@ pub mod dto {
         Foundry(FoundryOutputDto),
         Nft(NftOutputDto),
         Delegation(DelegationOutputDto),
+        Anchor(AnchorOutputDto),
     }
 
     impl From<&Output> for OutputDto {
@@ -494,6 +510,7 @@ pub mod dto {
                 Output::Foundry(o) => Self::Foundry(o.into()),
                 Output::Nft(o) => Self::Nft(o.into()),
                 Output::Delegation(o) => Self::Delegation(o.into()),
+                Output::Anchor(o) => Self::Anchor(o.into()),
             }
         }
     }
@@ -511,6 +528,7 @@ pub mod dto {
                 OutputDto::Delegation(o) => {
                     Self::Delegation(DelegationOutput::try_from_dto_with_params_inner(o, params)?)
                 }
+                OutputDto::Anchor(o) => Self::Anchor(AnchorOutput::try_from_dto_with_params_inner(o, params)?),
             })
         }
     }
@@ -545,6 +563,10 @@ pub mod dto {
                             serde::de::Error::custom(format!("cannot deserialize delegation output: {e}"))
                         })?)
                     }
+                    AnchorOutput::KIND => Self::Anchor(
+                        AnchorOutputDto::deserialize(value)
+                            .map_err(|e| serde::de::Error::custom(format!("cannot deserialize anchor output: {e}")))?,
+                    ),
                     _ => return Err(serde::de::Error::custom("invalid output type")),
                 },
             )
@@ -564,6 +586,7 @@ pub mod dto {
                 T2(&'a FoundryOutputDto),
                 T3(&'a NftOutputDto),
                 T4(&'a DelegationOutputDto),
+                T5(&'a AnchorOutputDto),
             }
             #[derive(Serialize)]
             struct TypedOutput<'a> {
@@ -585,6 +608,9 @@ pub mod dto {
                 },
                 Self::Delegation(o) => TypedOutput {
                     output: OutputDto_::T4(o),
+                },
+                Self::Anchor(o) => TypedOutput {
+                    output: OutputDto_::T5(o),
                 },
             };
             output.serialize(serializer)

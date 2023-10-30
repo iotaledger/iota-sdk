@@ -18,6 +18,9 @@ import {
     SignedTransactionPayload,
     Unlock,
     Response,
+    UnsignedBlock,
+    SignedBlock,
+    parseSignedBlock,
 } from '../types';
 
 import { plainToInstance } from 'class-transformer';
@@ -107,6 +110,29 @@ export class SecretManager {
             response,
         ) as Response<SignedTransactionPayload>;
         return plainToInstance(SignedTransactionPayload, parsed.payload);
+    }
+
+    /**
+     * Sign a block.
+     *
+     * @param unsignedBlock An unsigned block.
+     * @param chain A BIP44 chain.
+     * @returns The signed block.
+     */
+    async signBlock(
+        unsignedBlock: UnsignedBlock,
+        chain: Bip44,
+    ): Promise<SignedBlock> {
+        const response = await this.methodHandler.callMethod({
+            name: 'signBlock',
+            data: {
+                unsignedBlock,
+                chain,
+            },
+        });
+
+        const parsed = JSON.parse(response) as Response<SignedBlock>;
+        return parseSignedBlock(parsed.payload);
     }
 
     /**

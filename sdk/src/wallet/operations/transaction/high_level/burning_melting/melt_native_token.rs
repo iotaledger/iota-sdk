@@ -63,10 +63,9 @@ where
             })?;
 
         if let Output::Account(account_output) = &existing_account_output_data.output {
-            // Create the new account output with updated amount and state_index
+            // Create the new account output with updated amount.
             let account_output = AccountOutputBuilder::from(account_output)
                 .with_account_id(account_id)
-                .with_state_index(account_output.state_index() + 1)
                 .finish_output(token_supply)?;
 
             let TokenScheme::Simple(token_scheme) = existing_foundry_output.token_scheme();

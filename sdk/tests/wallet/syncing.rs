@@ -3,10 +3,7 @@
 
 use iota_sdk::{
     types::block::output::{
-        unlock_condition::{
-            AddressUnlockCondition, ExpirationUnlockCondition, GovernorAddressUnlockCondition,
-            StateControllerAddressUnlockCondition, StorageDepositReturnUnlockCondition,
-        },
+        unlock_condition::{AddressUnlockCondition, ExpirationUnlockCondition, StorageDepositReturnUnlockCondition},
         AccountId, AccountOutputBuilder, BasicOutputBuilder, NftId, NftOutputBuilder, UnlockCondition,
     },
     wallet::{Result, SyncOptions},
@@ -51,7 +48,7 @@ async fn updated_default_sync_options() -> Result<()> {
 
 //     let wallet = make_wallet(storage_path, None, None).await?;
 
-//     let account_0 = &request_funds(&wallet, 1).await?[0];
+//     let account_0 = &create_accounts_with_funds(&wallet, 1).await?[0];
 //     let account_1 = wallet.create_account().finish().await?;
 
 //     let account_1_address = account_1.first_address_bech32().await;
@@ -105,12 +102,9 @@ async fn updated_default_sync_options() -> Result<()> {
 //             ])
 //             .finish_output(token_supply)?,
 //         AccountOutputBuilder::new_with_amount(1_000_000, AccountId::null())
-//             .with_unlock_conditions([
-//                 UnlockCondition::StateControllerAddress(StateControllerAddressUnlockCondition::new(
-//                     account_1_address.clone(),
-//                 )),
-//                 UnlockCondition::GovernorAddress(GovernorAddressUnlockCondition::new(account_1_address.clone())),
-//             ])
+//             .with_unlock_conditions([UnlockCondition::Address(AddressUnlockCondition::new(
+//                 account_1_address.clone(),
+//             ))])
 //             .finish_output(token_supply)?,
 //     ];
 
@@ -157,7 +151,7 @@ async fn updated_default_sync_options() -> Result<()> {
 
 //     let wallet = make_wallet(storage_path, None, None).await?;
 
-//     let account_0 = &request_funds(&wallet, 1).await?[0];
+//     let account_0 = &create_accounts_with_funds(&wallet, 1).await?[0];
 //     let account_1 = wallet.create_account().finish().await?;
 
 //     let account_1_address = account_1.first_address_bech32().await;
@@ -203,7 +197,7 @@ async fn updated_default_sync_options() -> Result<()> {
 //     let storage_path = "test-storage/background_syncing";
 //     setup(storage_path)?;
 
-//     let wallet = make_wallet(storage_path, None).await?;
+//     let wallet = make_wallet(storage_path, None, None).await?;
 
 //     wallet.start_background_syncing(None, None).await?;
 

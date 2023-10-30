@@ -2,12 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use crate::{
-    types::block::{
-        address::Address,
-        output::{AccountTransition, Output},
-        slot::SlotIndex,
-    },
-    wallet::types::OutputData,
+    types::block::{address::Address, output::Output, slot::SlotIndex},
+    wallet::types::{AddressWithUnspentOutputs, OutputData},
 };
 
 // Check if an output can be unlocked by the wallet address at the current time
@@ -15,7 +11,6 @@ pub(crate) fn can_output_be_unlocked_now(
     wallet_address: &Address,
     output_data: &OutputData,
     slot_index: SlotIndex,
-    account_transition: Option<AccountTransition>,
 ) -> crate::wallet::Result<bool> {
     if let Some(unlock_conditions) = output_data.output.unlock_conditions() {
         if unlock_conditions.is_time_locked(slot_index) {
@@ -25,7 +20,7 @@ pub(crate) fn can_output_be_unlocked_now(
 
     let (required_unlock_address, _unlocked_account_or_nft_address) = output_data
         .output
-        .required_and_unlocked_address(slot_index, &output_data.output_id, account_transition)?;
+        .required_and_unlocked_address(slot_index, &output_data.output_id)?;
 
     Ok(wallet_address == &required_unlock_address)
 }

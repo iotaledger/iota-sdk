@@ -7,6 +7,7 @@ from dacite import from_dict
 import humps
 
 from iota_sdk.external import create_secret_manager, call_secret_manager_method
+from iota_sdk.types.block.signed_block import SignedBlock, UnsignedBlock
 from iota_sdk.types.common import HexStr
 from iota_sdk.types.signature import Ed25519Signature, Bip44
 from iota_sdk.types.transaction_data import PreparedTransactionData
@@ -251,7 +252,7 @@ class SecretManager():
         """
         return Ed25519Signature.from_dict(self._call_method('signEd25519', {
             'message': message,
-            'chain': chain.__dict__,
+            'chain': chain.to_dict(),
         }))
 
     def sign_secp256k1_ecdsa(self, message: HexStr, chain: Bip44):
@@ -263,7 +264,7 @@ class SecretManager():
         """
         return self._call_method('signSecp256k1Ecdsa', {
             'message': message,
-            'chain': chain.__dict__,
+            'chain': chain.to_dict(),
         })
 
     def sign_transaction(
@@ -277,6 +278,19 @@ class SecretManager():
             'preparedTransactionData': prepared_transaction_data.to_dict()
         }))
 
+    def sign_block(
+            self, unsigned_block: UnsignedBlock, chain: Bip44) -> SignedBlock:
+        """Sign a block.
+
+        Args:
+            unsigned_block: The unsigned block data.
+            chain: The Bip44 chain to use.
+        """
+        return from_dict(SignedBlock, self._call_method('signBlock', {
+            'unsignedBlock': unsigned_block.to_dict(),
+            'chain': chain.to_dict()
+        }))
+
     def signature_unlock(self, transaction_signing_hash: HexStr, chain: Bip44):
         """Sign a transaction hash.
 
@@ -286,5 +300,5 @@ class SecretManager():
         """
         return self._call_method('signatureUnlock', {
             'transactionSigningHash': transaction_signing_hash,
-            'chain': chain.__dict__,
+            'chain': chain.to_dict(),
         })
