@@ -226,29 +226,9 @@ class AccountOutput extends ImmutableFeaturesOutput {
 }
 
 /**
- * Base class for state metadata outputs.
- */
-abstract class StateMetadataOutput extends ImmutableFeaturesOutput {
-    readonly stateMetadata?: HexEncodedString;
-
-    /**
-     * @param type The type of output.
-     * @param amount The amount of the output.
-     * @param unlockConditions The unlock conditions for the output.
-     */
-    constructor(
-        type: OutputType,
-        amount: u64,
-        unlockConditions: UnlockCondition[],
-    ) {
-        super(type, amount, unlockConditions);
-    }
-}
-
-/**
  * An Anchor output.
  */
-class AnchorOutput extends StateMetadataOutput {
+class AnchorOutput extends ImmutableFeaturesOutput {
     /**
      * Unique identifier of the anchor, which is the BLAKE2b-256 hash of the Output ID that created it.
      * Unless its a newly created anchor, then the id is zeroed.
@@ -262,6 +242,10 @@ class AnchorOutput extends StateMetadataOutput {
      * The amount of (stored) Mana held by the output.
      */
     readonly mana: u64;
+    /**
+     * Metadata that can only be changed by the state controller.
+     */
+    readonly stateMetadata?: HexEncodedString;
 
     /**
      * @param amount The amount of the output.
@@ -269,6 +253,7 @@ class AnchorOutput extends StateMetadataOutput {
      * @param anchorId The anchor ID as hex-encoded string.
      * @param stateIndex A counter that must increase by 1 every time the anchor output is state transitioned.
      * @param unlockConditions The unlock conditions of the output.
+     * @param stateMetadata Metadata that can only be changed by the state controller.
      */
     constructor(
         amount: u64,
@@ -276,11 +261,13 @@ class AnchorOutput extends StateMetadataOutput {
         anchorId: AnchorId,
         stateIndex: number,
         unlockConditions: UnlockCondition[],
+        stateMetadata?: HexEncodedString,
     ) {
         super(OutputType.Account, amount, unlockConditions);
         this.anchorId = anchorId;
         this.stateIndex = stateIndex;
         this.mana = mana;
+        this.stateMetadata = stateMetadata;
     }
 }
 
