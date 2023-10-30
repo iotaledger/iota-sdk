@@ -176,7 +176,7 @@ where
                         let client = self.client().clone();
                         tokio::spawn(async move {
                             Ok(client
-                                .foundry_output_ids(FoundryOutputQueryParameters::new().account_address(bech32_address))
+                                .foundry_output_ids(FoundryOutputQueryParameters::new().account(bech32_address))
                                 .await?
                                 .items)
                         })

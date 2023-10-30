@@ -228,7 +228,7 @@ pub struct FoundryOutputQueryParameters {
     /// Filters outputs based on the presence of a specific native token.
     native_token: Option<TokenId>,
     /// Filter foundry outputs based on bech32-encoded address of the controlling account.
-    account_address: Option<Bech32Address>,
+    account: Option<Bech32Address>,
     /// The maximum amount of items returned in one call. If there are more items, a cursor to the next page is
     /// returned too. The parameter is ignored when pageSize is defined via the cursor parameter.
     page_size: Option<usize>,

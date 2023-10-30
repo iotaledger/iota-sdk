@@ -72,7 +72,7 @@ where
                 let client = self.client().clone();
                 tasks.push(Box::pin(task::spawn(async move {
                     client
-                        .foundry_output_ids(FoundryOutputQueryParameters::new().account_address(account_bech32_address))
+                        .foundry_output_ids(FoundryOutputQueryParameters::new().account(account_bech32_address))
                         .await
                         .map_err(From::from)
                 })));
