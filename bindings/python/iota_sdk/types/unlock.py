@@ -4,7 +4,7 @@
 from __future__ import annotations
 from dataclasses import dataclass, field
 from enum import IntEnum
-from typing import Dict, List, Union, Any
+from typing import Dict, List, TypeAlias, Union, Any
 from iota_sdk.types.signature import Ed25519Signature
 from iota_sdk.types.common import json
 
