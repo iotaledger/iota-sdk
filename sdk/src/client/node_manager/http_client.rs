@@ -96,11 +96,11 @@ impl HttpClient {
         Self::parse_response(resp, &node.url).await
     }
 
-    // Get with header: "accept", "application/vnd.iota.serializer-v1"
+    // Get with header: "accept", "application/vnd.iota.serializer-v2"
     pub(crate) async fn get_bytes(&self, node: Node, timeout: Duration) -> Result<Response> {
         let mut request_builder = self.client.get(node.url.clone());
         request_builder = self.build_request(request_builder, &node, timeout);
-        request_builder = request_builder.header("accept", "application/vnd.iota.serializer-v1");
+        request_builder = request_builder.header("accept", "application/vnd.iota.serializer-v2");
         let resp = request_builder.send().await?;
         Self::parse_response(resp, &node.url).await
     }
@@ -114,7 +114,7 @@ impl HttpClient {
     pub(crate) async fn post_bytes(&self, node: Node, timeout: Duration, body: &[u8]) -> Result<Response> {
         let mut request_builder = self.client.post(node.url.clone());
         request_builder = self.build_request(request_builder, &node, timeout);
-        request_builder = request_builder.header("Content-Type", "application/vnd.iota.serializer-v1");
+        request_builder = request_builder.header("Content-Type", "application/vnd.iota.serializer-v2");
         Self::parse_response(request_builder.body(body.to_vec()).send().await?, &node.url).await
     }
 }
