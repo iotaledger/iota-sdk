@@ -504,16 +504,7 @@ fn sdruc_required_non_ed25519_in_address_unlock() {
             None,
             None,
         ),
-        Account(
-            1_000_000,
-            account_id_1,
-            0,
-            BECH32_ADDRESS_ED25519_0,
-            BECH32_ADDRESS_ED25519_0,
-            None,
-            None,
-            None,
-        ),
+        Account(1_000_000, account_id_1, BECH32_ADDRESS_ED25519_0, None, None, None),
     ]);
     let outputs = build_outputs([Basic(
         1_000_000,
@@ -567,16 +558,7 @@ fn useless_sdruc_non_ed25519_in_address_unlock() {
             None,
         ),
         Basic(1_000_000, BECH32_ADDRESS_ACCOUNT_1, None, None, None, None, None, None),
-        Account(
-            1_000_000,
-            account_id_1,
-            0,
-            BECH32_ADDRESS_ED25519_0,
-            BECH32_ADDRESS_ED25519_0,
-            None,
-            None,
-            None,
-        ),
+        Account(1_000_000, account_id_1, BECH32_ADDRESS_ED25519_0, None, None, None),
     ]);
     let outputs = build_outputs([Basic(
         1_000_000,

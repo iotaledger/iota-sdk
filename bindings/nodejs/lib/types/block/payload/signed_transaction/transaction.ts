@@ -9,6 +9,7 @@ import { Output, OutputDiscriminator } from '../../output';
 import { SlotIndex } from '../../slot';
 import { Payload, PayloadType } from '../payload';
 import { TaggedDataPayload } from '../tagged/tagged';
+import { HexEncodedString } from '../../../utils';
 
 /**
  * PayloadDiscriminator for payloads inside of a Transaction.
@@ -43,6 +44,8 @@ class Transaction {
 
     readonly allotments: ManaAllotment[];
 
+    private capabilities: HexEncodedString = '0x';
+
     @Type(() => Payload, {
         discriminator: PayloadDiscriminator,
     })
@@ -76,6 +79,32 @@ class Transaction {
         this.allotments = allotments;
         this.payload = payload;
         this.outputs = outputs;
+    }
+
+    setCapabilities(capabilities: Uint8Array) {
+        if (capabilities.some((c) => c != 0)) {
+            this.capabilities =
+                '0x' +
+                Buffer.from(
+                    capabilities.buffer,
+                    capabilities.byteOffset,
+                    capabilities.byteLength,
+                ).toString('hex');
+        } else {
+            this.capabilities = '0x';
+        }
+    }
+
+    withCapabilities(capabilities: Uint8Array): Transaction {
+        this.setCapabilities(capabilities);
+        return this;
+    }
+
+    /** Get the capability bitflags of the transaction. */
+    getCapabilities(): Uint8Array {
+        return Uint8Array.from(
+            Buffer.from(this.capabilities.substring(2), 'hex'),
+        );
     }
 }
 

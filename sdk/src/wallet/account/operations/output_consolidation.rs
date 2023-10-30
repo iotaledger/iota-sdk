@@ -96,7 +96,7 @@ where
                 return Ok(false);
             }
 
-            can_output_be_unlocked_now(account_addresses, &[], output_data, slot_index, None)?
+            can_output_be_unlocked_now(account_addresses, &[], output_data, slot_index)?
         } else {
             false
         })

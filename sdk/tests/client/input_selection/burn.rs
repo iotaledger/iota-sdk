@@ -10,7 +10,7 @@ use iota_sdk::{
     client::api::input_selection::{Burn, Error, InputSelection, Requirement},
     types::block::{
         address::Address,
-        output::{AccountId, AccountTransition, ChainId, NftId, SimpleTokenScheme, TokenId},
+        output::{AccountId, ChainId, NftId, SimpleTokenScheme, TokenId},
         protocol::protocol_parameters,
     },
 };
@@ -29,16 +29,7 @@ fn burn_account_present() {
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
     let inputs = build_inputs([
-        Account(
-            1_000_000,
-            account_id_1,
-            0,
-            BECH32_ADDRESS_ED25519_0,
-            BECH32_ADDRESS_ED25519_0,
-            None,
-            None,
-            None,
-        ),
+        Account(1_000_000, account_id_1, BECH32_ADDRESS_ED25519_0, None, None, None),
         Basic(1_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
     ]);
     let outputs = build_outputs([Basic(
@@ -73,16 +64,7 @@ fn burn_account_present_and_required() {
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
     let inputs = build_inputs([
-        Account(
-            1_000_000,
-            account_id_1,
-            0,
-            BECH32_ADDRESS_ED25519_0,
-            BECH32_ADDRESS_ED25519_0,
-            None,
-            None,
-            None,
-        ),
+        Account(1_000_000, account_id_1, BECH32_ADDRESS_ED25519_0, None, None, None),
         Basic(1_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
     ]);
     let outputs = build_outputs([Basic(
@@ -194,7 +176,7 @@ fn burn_account_absent() {
 
     assert!(matches!(
         selected,
-        Err(Error::UnfulfillableRequirement(Requirement::Account(account_id, AccountTransition::Governance))) if account_id == account_id_1
+        Err(Error::UnfulfillableRequirement(Requirement::Account(account_id))) if account_id == account_id_1
     ));
 }
 
@@ -205,26 +187,8 @@ fn burn_accounts_present() {
     let account_id_2 = AccountId::from_str(ACCOUNT_ID_2).unwrap();
 
     let inputs = build_inputs([
-        Account(
-            1_000_000,
-            account_id_1,
-            0,
-            BECH32_ADDRESS_ED25519_0,
-            BECH32_ADDRESS_ED25519_0,
-            None,
-            None,
-            None,
-        ),
-        Account(
-            1_000_000,
-            account_id_2,
-            0,
-            BECH32_ADDRESS_ED25519_0,
-            BECH32_ADDRESS_ED25519_0,
-            None,
-            None,
-            None,
-        ),
+        Account(1_000_000, account_id_1, BECH32_ADDRESS_ED25519_0, None, None, None),
+        Account(1_000_000, account_id_2, BECH32_ADDRESS_ED25519_0, None, None, None),
         Basic(1_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
     ]);
     let outputs = build_outputs([Basic(
@@ -258,29 +222,11 @@ fn burn_account_in_outputs() {
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
     let inputs = build_inputs([
-        Account(
-            1_000_000,
-            account_id_1,
-            0,
-            BECH32_ADDRESS_ED25519_0,
-            BECH32_ADDRESS_ED25519_0,
-            None,
-            None,
-            None,
-        ),
+        Account(1_000_000, account_id_1, BECH32_ADDRESS_ED25519_0, None, None, None),
         Basic(1_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
     ]);
     let outputs = build_outputs([
-        Account(
-            1_000_000,
-            account_id_1,
-            0,
-            BECH32_ADDRESS_ED25519_0,
-            BECH32_ADDRESS_ED25519_0,
-            None,
-            None,
-            None,
-        ),
+        Account(1_000_000, account_id_1, BECH32_ADDRESS_ED25519_0, None, None, None),
         Basic(1_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
     ]);
 
@@ -394,16 +340,7 @@ fn burn_nft_id_zero() {
     let account_id_0 = AccountId::from_str(ACCOUNT_ID_0).unwrap();
 
     let inputs = build_inputs([
-        Account(
-            1_000_000,
-            account_id_0,
-            0,
-            BECH32_ADDRESS_ED25519_0,
-            BECH32_ADDRESS_ED25519_0,
-            None,
-            None,
-            None,
-        ),
+        Account(1_000_000, account_id_0, BECH32_ADDRESS_ED25519_0, None, None, None),
         Basic(1_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
     ]);
     let outputs = build_outputs([Basic(
@@ -588,16 +525,7 @@ fn burn_foundry_present() {
             SimpleTokenScheme::new(0, 0, 10).unwrap(),
             None,
         ),
-        Account(
-            1_000_000,
-            account_id_1,
-            0,
-            BECH32_ADDRESS_ED25519_0,
-            BECH32_ADDRESS_ED25519_0,
-            None,
-            None,
-            None,
-        ),
+        Account(1_000_000, account_id_1, BECH32_ADDRESS_ED25519_0, None, None, None),
         Basic(1_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
     ]);
     let outputs = build_outputs([Basic(
@@ -638,15 +566,11 @@ fn burn_foundry_present() {
             } else if output.is_account() {
                 assert_eq!(output.amount(), 1_000_000);
                 assert_eq!(*output.as_account().account_id(), account_id_1);
-                assert_eq!(output.as_account().unlock_conditions().len(), 2);
+                assert_eq!(output.as_account().unlock_conditions().len(), 1);
                 assert_eq!(output.as_account().features().len(), 0);
                 assert_eq!(output.as_account().immutable_features().len(), 0);
                 assert_eq!(
-                    *output.as_account().state_controller_address(),
-                    Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()
-                );
-                assert_eq!(
-                    *output.as_account().governor_address(),
+                    *output.as_account().address(),
                     Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()
                 );
             } else {
@@ -672,16 +596,7 @@ fn burn_foundry_absent() {
         .id();
 
     let inputs = build_inputs([
-        Account(
-            1_000_000,
-            account_id_1,
-            0,
-            BECH32_ADDRESS_ED25519_0,
-            BECH32_ADDRESS_ED25519_0,
-            None,
-            None,
-            None,
-        ),
+        Account(1_000_000, account_id_1, BECH32_ADDRESS_ED25519_0, None, None, None),
         Basic(1_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
     ]);
     let outputs = build_outputs([Basic(
@@ -730,16 +645,7 @@ fn burn_foundries_present() {
             SimpleTokenScheme::new(0, 0, 10).unwrap(),
             None,
         ),
-        Account(
-            1_000_000,
-            account_id_1,
-            2,
-            BECH32_ADDRESS_ED25519_0,
-            BECH32_ADDRESS_ED25519_0,
-            None,
-            None,
-            None,
-        ),
+        Account(1_000_000, account_id_1, BECH32_ADDRESS_ED25519_0, None, None, None),
     ]);
     let outputs = build_outputs([Basic(
         2_000_000,
@@ -773,15 +679,11 @@ fn burn_foundries_present() {
             assert!(output.is_account());
             assert_eq!(output.amount(), 1_000_000);
             assert_eq!(*output.as_account().account_id(), account_id_1);
-            assert_eq!(output.as_account().unlock_conditions().len(), 2);
+            assert_eq!(output.as_account().unlock_conditions().len(), 1);
             assert_eq!(output.as_account().features().len(), 0);
             assert_eq!(output.as_account().immutable_features().len(), 0);
             assert_eq!(
-                *output.as_account().state_controller_address(),
-                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()
-            );
-            assert_eq!(
-                *output.as_account().governor_address(),
+                *output.as_account().address(),
                 Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()
             );
         }
@@ -881,16 +783,7 @@ fn burn_foundry_and_its_account() {
             SimpleTokenScheme::new(0, 0, 10).unwrap(),
             None,
         ),
-        Account(
-            1_000_000,
-            account_id_1,
-            0,
-            BECH32_ADDRESS_ED25519_0,
-            BECH32_ADDRESS_ED25519_0,
-            None,
-            None,
-            None,
-        ),
+        Account(1_000_000, account_id_1, BECH32_ADDRESS_ED25519_0, None, None, None),
         Basic(1_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
     ]);
     let outputs = build_outputs([Basic(
@@ -906,7 +799,7 @@ fn burn_foundry_and_its_account() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        outputs,
+        outputs.clone(),
         addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
@@ -915,10 +808,23 @@ fn burn_foundry_and_its_account() {
             .add_foundry(inputs[0].output.as_foundry().id())
             .add_account(account_id_1),
     )
-    .select();
+    .select()
+    .unwrap();
 
-    assert!(matches!(
-        selected,
-        Err(Error::UnfulfillableRequirement(Requirement::Account(account_id, AccountTransition::State))) if account_id == account_id_1
-    ));
+    assert_eq!(selected.inputs.len(), 2);
+    assert!(selected.inputs.contains(&inputs[0]));
+    assert!(selected.inputs.contains(&inputs[1]));
+    // One output should be added for the remainder.
+    assert_eq!(selected.outputs.len(), 2);
+    assert!(selected.outputs.contains(&outputs[0]));
+    selected.outputs.iter().for_each(|output| {
+        if !outputs.contains(output) {
+            assert!(is_remainder_or_return(
+                output,
+                1_500_000,
+                BECH32_ADDRESS_ED25519_0,
+                None,
+            ));
+        }
+    });
 }

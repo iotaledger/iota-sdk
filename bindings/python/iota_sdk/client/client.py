@@ -13,7 +13,7 @@ from iota_sdk.client._node_indexer_api import NodeIndexerAPI
 from iota_sdk.client._high_level_api import HighLevelAPI
 from iota_sdk.client._utils import ClientUtils
 from iota_sdk.secret_manager.secret_manager import LedgerNanoSecretManager, MnemonicSecretManager, StrongholdSecretManager, SeedSecretManager
-from iota_sdk.types.block.wrapper import BlockWrapper
+from iota_sdk.types.block.signed_block import UnsignedBlock
 from iota_sdk.types.common import HexStr, Node
 from iota_sdk.types.feature import Feature
 from iota_sdk.types.native_token import NativeToken
@@ -155,8 +155,6 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
                              amount: Optional[int] = None,
                              mana: Optional[int] = None,
                              native_tokens: Optional[List[NativeToken]] = None,
-                             state_index: Optional[int] = None,
-                             state_metadata: Optional[str] = None,
                              foundry_counter: Optional[int] = None,
                              features: Optional[List[Feature]] = None,
                              immutable_features: Optional[List[Feature]] = None) -> AccountOutput:
@@ -168,8 +166,6 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
             amount: The amount of base coins in the new output.
             mana: Amount of stored Mana held by this output.
             native_tokens: Native tokens added to the new output.
-            state_index: A counter that must increase by 1 every time the account is state transitioned.
-            state_metadata: Metadata that can only be changed by the state controller.
             foundry_counter: A counter that denotes the number of foundries created by this account output.
             features: A list of features.
             immutable_features: A list of immutable features.
@@ -203,8 +199,6 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
             'amount': amount,
             'mana': mana,
             'nativeTokens': native_tokens,
-            'stateIndex': state_index,
-            'stateMetadata': state_metadata,
             'foundryCounter': foundry_counter,
             'features': features,
             'immutableFeatures': immutable_features
@@ -394,21 +388,27 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
             'preparedTransactionData': prepared_transaction_data
         }))
 
-    def submit_payload(
-            self, payload: Payload) -> List[Union[HexStr, BlockWrapper]]:
-        """Submit a payload in a block.
+    def build_basic_block(
+        self,
+        issuer_id: HexStr,
+        payload: Optional[Payload] = None,
+    ) -> UnsignedBlock:
+        """Build a basic block.
 
         Args:
-            payload : The payload to submit.
+            issuer_id: The identifier of the block issuer account.
+            payload: The payload to submit.
 
         Returns:
-            List of HexStr or Block.
+            An unsigned block.
         """
-        result = self._call_method('postBlockPayload', {
-            'payload': payload.to_dict()
+        if payload is not None:
+            payload = payload.to_dict()
+        result = self._call_method('buildBasicBlock', {
+            'issuerId': issuer_id,
+            'payload': payload,
         })
-        result[1] = BlockWrapper.from_dict(result[1])
-        return result
+        return UnsignedBlock.from_dict(result)
 
     def listen_mqtt(self, topics: List[str], handler):
         """Listen to MQTT events.

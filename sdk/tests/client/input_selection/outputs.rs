@@ -77,8 +77,6 @@ fn no_outputs_but_burn() {
     let inputs = build_inputs([Account(
         2_000_000,
         account_id_2,
-        0,
-        BECH32_ADDRESS_ED25519_0,
         BECH32_ADDRESS_ED25519_0,
         None,
         None,

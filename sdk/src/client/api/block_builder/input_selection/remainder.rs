@@ -5,7 +5,6 @@ use crypto::keys::bip44::Bip44;
 
 use super::{
     requirement::{
-        account::is_account_transition,
         amount::amount_sums,
         native_tokens::{get_minted_and_melted_native_tokens, get_native_tokens, get_native_tokens_diff},
     },
@@ -25,17 +24,9 @@ impl InputSelection {
         if let Some(remainder_address) = &self.remainder_address {
             // Search in inputs for the Bip44 chain for the remainder address, so the ledger can regenerate it
             for input in self.available_inputs.iter().chain(self.selected_inputs.iter()) {
-                let account_transition = is_account_transition(
-                    &input.output,
-                    *input.output_id(),
-                    self.outputs.as_slice(),
-                    self.burn.as_ref(),
-                );
-                let (required_address, _) = input.output.required_and_unlocked_address(
-                    self.slot_index,
-                    input.output_id(),
-                    account_transition,
-                )?;
+                let (required_address, _) = input
+                    .output
+                    .required_and_unlocked_address(self.slot_index, input.output_id())?;
 
                 if &required_address == remainder_address {
                     return Ok(Some((remainder_address.clone(), input.chain)));
@@ -45,15 +36,9 @@ impl InputSelection {
         }
 
         for input in &self.selected_inputs {
-            let account_transition = is_account_transition(
-                &input.output,
-                *input.output_id(),
-                self.outputs.as_slice(),
-                self.burn.as_ref(),
-            );
             let required_address = input
                 .output
-                .required_and_unlocked_address(self.slot_index, input.output_id(), account_transition)?
+                .required_and_unlocked_address(self.slot_index, input.output_id())?
                 .0;
 
             if required_address.is_ed25519() {

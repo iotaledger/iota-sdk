@@ -8,7 +8,7 @@ import { ValidationBlock } from './validation';
 export * from './block';
 export * from './basic';
 export * from './validation';
-export * from './wrapper';
+export * from './signed-block';
 
 // Here because in block.ts it causes a circular dependency
 export const BlockDiscriminator = {

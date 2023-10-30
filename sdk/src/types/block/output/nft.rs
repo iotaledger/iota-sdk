@@ -23,7 +23,7 @@ use crate::types::{
         },
         payload::signed_transaction::TransactionCapabilityFlag,
         protocol::ProtocolParameters,
-        semantic::{TransactionFailureReason, ValidationContext},
+        semantic::{SemanticValidationContext, TransactionFailureReason},
         unlock::Unlock,
         Error,
     },
@@ -381,12 +381,11 @@ impl NftOutput {
         &self,
         output_id: &OutputId,
         unlock: &Unlock,
-        inputs: &[(&OutputId, &Output)],
-        context: &mut ValidationContext<'_>,
+        context: &mut SemanticValidationContext<'_>,
     ) -> Result<(), TransactionFailureReason> {
         self.unlock_conditions()
             .locked_address(self.address(), context.transaction.creation_slot())
-            .unlock(unlock, inputs, context)?;
+            .unlock(unlock, context)?;
 
         let nft_id = if self.nft_id().is_null() {
             NftId::from(output_id)
@@ -401,7 +400,7 @@ impl NftOutput {
         Ok(())
     }
 
-    // Transition, just without full ValidationContext
+    // Transition, just without full SemanticValidationContext
     pub(crate) fn transition_inner(current_state: &Self, next_state: &Self) -> Result<(), StateTransitionError> {
         if current_state.immutable_features != next_state.immutable_features {
             return Err(StateTransitionError::MutatedImmutableField);
@@ -411,7 +410,7 @@ impl NftOutput {
 }
 
 impl StateTransitionVerifier for NftOutput {
-    fn creation(next_state: &Self, context: &ValidationContext<'_>) -> Result<(), StateTransitionError> {
+    fn creation(next_state: &Self, context: &SemanticValidationContext<'_>) -> Result<(), StateTransitionError> {
         if !next_state.nft_id.is_null() {
             return Err(StateTransitionError::NonZeroCreatedId);
         }
@@ -428,12 +427,12 @@ impl StateTransitionVerifier for NftOutput {
     fn transition(
         current_state: &Self,
         next_state: &Self,
-        _context: &ValidationContext<'_>,
+        _context: &SemanticValidationContext<'_>,
     ) -> Result<(), StateTransitionError> {
         Self::transition_inner(current_state, next_state)
     }
 
-    fn destruction(_current_state: &Self, context: &ValidationContext<'_>) -> Result<(), StateTransitionError> {
+    fn destruction(_current_state: &Self, context: &SemanticValidationContext<'_>) -> Result<(), StateTransitionError> {
         if !context
             .transaction
             .has_capability(TransactionCapabilityFlag::DestroyNftOutputs)

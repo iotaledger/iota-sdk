@@ -15,11 +15,10 @@ use iota_sdk::{
         output::{
             dto::OutputDto,
             unlock_condition::{
-                AddressUnlockCondition, ExpirationUnlockCondition, GovernorAddressUnlockCondition,
-                ImmutableAccountAddressUnlockCondition, StateControllerAddressUnlockCondition,
+                AddressUnlockCondition, ExpirationUnlockCondition, ImmutableAccountAddressUnlockCondition,
                 StorageDepositReturnUnlockCondition, TimelockUnlockCondition,
             },
-            AccountId, AccountOutputBuilder, BasicOutputBuilder, FoundryOutputBuilder, SimpleTokenScheme, TokenScheme,
+            BasicOutputBuilder, FoundryOutputBuilder, SimpleTokenScheme, TokenScheme,
         },
     },
 };
@@ -44,8 +43,6 @@ async fn main() -> Result<()> {
 
     let basic_output_builder = BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)
         .add_unlock_condition(AddressUnlockCondition::new(address.clone()));
-    let account_output_builder =
-        AccountOutputBuilder::new_with_minimum_storage_deposit(rent_structure, AccountId::null());
     let foundry_output_builder =
         FoundryOutputBuilder::new_with_minimum_storage_deposit(rent_structure, 1, token_scheme);
 
@@ -69,11 +66,6 @@ async fn main() -> Result<()> {
         // with expiration unlock condition
         basic_output_builder
             .add_unlock_condition(ExpirationUnlockCondition::new(address.clone(), 1)?)
-            .finish_output(token_supply)?,
-        // with governor and state controller unlock condition
-        account_output_builder
-            .add_unlock_condition(GovernorAddressUnlockCondition::new(address.clone()))
-            .add_unlock_condition(StateControllerAddressUnlockCondition::new(address))
             .finish_output(token_supply)?,
         // with immutable account unlock condition
         foundry_output_builder

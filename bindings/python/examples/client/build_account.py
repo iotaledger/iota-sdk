@@ -3,9 +3,9 @@ import os
 
 from dotenv import load_dotenv
 
-from iota_sdk import (Client, Ed25519Address, GovernorAddressUnlockCondition,
+from iota_sdk import (Client, Ed25519Address, AddressUnlockCondition,
                       IssuerFeature, MetadataFeature, SenderFeature,
-                      StateControllerAddressUnlockCondition, Utils,
+                      Utils,
                       utf8_to_hex)
 
 load_dotenv()
@@ -19,10 +19,8 @@ hexAddress = Utils.bech32_to_hex(
     'rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy')
 
 account_id = '0x0000000000000000000000000000000000000000000000000000000000000000'
-state_metadata = data = utf8_to_hex('Hello, World!')
 unlock_conditions = [
-    StateControllerAddressUnlockCondition(Ed25519Address(hexAddress)),
-    GovernorAddressUnlockCondition(Ed25519Address(hexAddress))
+    AddressUnlockCondition(Ed25519Address(hexAddress)),
 ]
 features = [
     SenderFeature(Ed25519Address(hexAddress)),
@@ -36,7 +34,6 @@ immutable_features = [
 # Build account output
 account_output = client.build_account_output(
     account_id=account_id,
-    state_metadata=state_metadata,
     unlock_conditions=unlock_conditions,
     features=features,
     immutable_features=immutable_features

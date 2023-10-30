@@ -434,6 +434,7 @@ fn verify_outputs<const VERIFY: bool>(outputs: &[Output], visitor: &ProtocolPara
                 Output::Foundry(output) => (output.amount(), Some(output.chain_id())),
                 Output::Nft(output) => (output.amount(), Some(output.chain_id())),
                 Output::Delegation(output) => (output.amount(), Some(output.chain_id())),
+                Output::Anchor(output) => (output.amount(), Some(output.chain_id())),
             };
 
             amount_sum = amount_sum
@@ -464,6 +465,7 @@ pub enum TransactionCapabilityFlag {
     BurnNativeTokens,
     BurnMana,
     DestroyAccountOutputs,
+    DestroyAnchorOutputs,
     DestroyFoundryOutputs,
     DestroyNftOutputs,
 }
@@ -472,18 +474,20 @@ impl TransactionCapabilityFlag {
     const BURN_NATIVE_TOKENS: u8 = 0b00000001;
     const BURN_MANA: u8 = 0b00000010;
     const DESTROY_ACCOUNT_OUTPUTS: u8 = 0b00000100;
-    const DESTROY_FOUNDRY_OUTPUTS: u8 = 0b00001000;
-    const DESTROY_NFT_OUTPUTS: u8 = 0b00010000;
+    const DESTROY_ANCHOR_OUTPUTS: u8 = 0b00001000;
+    const DESTROY_FOUNDRY_OUTPUTS: u8 = 0b00010000;
+    const DESTROY_NFT_OUTPUTS: u8 = 0b00100000;
 }
 
 impl CapabilityFlag for TransactionCapabilityFlag {
-    type Iterator = core::array::IntoIter<Self, 5>;
+    type Iterator = core::array::IntoIter<Self, 6>;
 
     fn as_byte(&self) -> u8 {
         match self {
             Self::BurnNativeTokens => Self::BURN_NATIVE_TOKENS,
             Self::BurnMana => Self::BURN_MANA,
             Self::DestroyAccountOutputs => Self::DESTROY_ACCOUNT_OUTPUTS,
+            Self::DestroyAnchorOutputs => Self::DESTROY_ANCHOR_OUTPUTS,
             Self::DestroyFoundryOutputs => Self::DESTROY_FOUNDRY_OUTPUTS,
             Self::DestroyNftOutputs => Self::DESTROY_NFT_OUTPUTS,
         }
@@ -494,6 +498,7 @@ impl CapabilityFlag for TransactionCapabilityFlag {
             Self::BurnNativeTokens
             | Self::BurnMana
             | Self::DestroyAccountOutputs
+            | Self::DestroyAnchorOutputs
             | Self::DestroyFoundryOutputs
             | Self::DestroyNftOutputs => 0,
         }
@@ -504,6 +509,7 @@ impl CapabilityFlag for TransactionCapabilityFlag {
             Self::BurnNativeTokens,
             Self::BurnMana,
             Self::DestroyAccountOutputs,
+            Self::DestroyAnchorOutputs,
             Self::DestroyFoundryOutputs,
             Self::DestroyNftOutputs,
         ]

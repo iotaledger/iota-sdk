@@ -183,7 +183,7 @@ class RestrictedAddress extends Address {
     /**
      * The allowed capabilities bitflags.
      */
-    private allowedCapabilities: HexEncodedString = '0x00';
+    private allowedCapabilities: HexEncodedString = '0x';
     /**
      * @param address An address.
      */
@@ -196,14 +196,13 @@ class RestrictedAddress extends Address {
         if (allowedCapabilities.some((c) => c != 0)) {
             this.allowedCapabilities =
                 '0x' +
-                allowedCapabilities.length.toString(16) +
                 Buffer.from(
                     allowedCapabilities.buffer,
                     allowedCapabilities.byteOffset,
                     allowedCapabilities.byteLength,
                 ).toString('hex');
         } else {
-            this.allowedCapabilities = '0x00';
+            this.allowedCapabilities = '0x';
         }
     }
 

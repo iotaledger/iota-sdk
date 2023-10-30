@@ -19,7 +19,7 @@ use iota_sdk::{
             NativeToken, NftId, OutputId, TokenScheme,
         },
         payload::{dto::PayloadDto, signed_transaction::TransactionId},
-        BlockId, BlockWrapperDto,
+        BlockId, IssuerId, SignedBlockDto,
     },
     utils::serde::{option_string, string},
 };
@@ -43,8 +43,6 @@ pub enum ClientMethod {
         #[serde(default, with = "string")]
         mana: u64,
         account_id: AccountId,
-        state_index: Option<u32>,
-        state_metadata: Option<String>,
         foundry_counter: Option<u32>,
         unlock_conditions: Vec<UnlockConditionDto>,
         features: Option<Vec<Feature>>,
@@ -126,10 +124,13 @@ pub enum ClientMethod {
         query_params: Vec<String>,
         request_object: Option<String>,
     },
-    /// Build a block containing the specified payload and post it to the network.
-    PostBlockPayload {
-        /// The payload to send
-        payload: PayloadDto,
+    #[serde(rename_all = "camelCase")]
+    BuildBasicBlock {
+        /// The issuer's ID.
+        issuer_id: IssuerId,
+        /// The block payload.
+        #[serde(default)]
+        payload: Option<PayloadDto>,
     },
     //////////////////////////////////////////////////////////////////////
     // Node core API
@@ -155,7 +156,7 @@ pub enum ClientMethod {
     /// Post block (JSON)
     PostBlock {
         /// Block
-        block: BlockWrapperDto,
+        block: SignedBlockDto,
     },
     /// Post block (raw)
     #[serde(rename_all = "camelCase")]
@@ -335,8 +336,9 @@ pub enum ClientMethod {
         address: Bech32Address,
     },
     /// Returns a block ID from a block
+    #[serde(rename_all = "camelCase")]
     BlockId {
         /// Block
-        block: BlockWrapperDto,
+        signed_block: SignedBlockDto,
     },
 }
