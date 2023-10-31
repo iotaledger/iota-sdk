@@ -12,7 +12,7 @@ use futures::FutureExt;
 use instant::Instant;
 
 use crate::{
-    client::node_api::indexer::QueryParameter,
+    client::node_api::indexer::query_parameters::{FoundryOutputQueryParameters, OutputQueryParameters},
     types::block::{
         address::{Address, Bech32Address},
         output::OutputId,
@@ -48,7 +48,7 @@ impl Account {
         {
             return Ok(self
                 .client()
-                .output_ids([QueryParameter::UnlockableByAddress(bech32_address.clone())])
+                .output_ids(OutputQueryParameters::new().unlockable_by_address(bech32_address.clone()))
                 .await?
                 .items);
         }
@@ -157,7 +157,7 @@ impl Account {
             {
                 results.push(Ok(self
                     .client()
-                    .foundry_output_ids([QueryParameter::AccountAddress(bech32_address)])
+                    .foundry_output_ids(FoundryOutputQueryParameters::new().account_address(bech32_address))
                     .await?
                     .items))
             }
@@ -170,7 +170,7 @@ impl Account {
                         let client = self.client().clone();
                         tokio::spawn(async move {
                             Ok(client
-                                .foundry_output_ids([QueryParameter::AccountAddress(bech32_address)])
+                                .foundry_output_ids(FoundryOutputQueryParameters::new().account_address(bech32_address))
                                 .await?
                                 .items)
                         })

@@ -134,10 +134,9 @@ impl Account {
             .ok_or_else(|| crate::wallet::Error::MintingFailed("Missing account output".to_string()))?;
 
         if let Output::Account(account_output) = &account_output.output {
-            // Create the new account output with the same feature blocks, just updated state_index and foundry_counter
+            // Create the new account output with the same feature blocks, just updated foundry_counter.
             let new_account_output_builder = AccountOutputBuilder::from(account_output)
                 .with_account_id(account_id)
-                .with_state_index(account_output.state_index() + 1)
                 .with_foundry_counter(account_output.foundry_counter() + 1);
 
             // create foundry output with minted native tokens

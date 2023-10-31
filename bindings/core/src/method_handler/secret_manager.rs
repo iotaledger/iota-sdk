@@ -4,23 +4,24 @@
 use iota_sdk::{
     client::{
         api::{GetAddressesOptions, PreparedTransactionData},
-        secret::{DowncastSecretManager, DynSecretManagerConfig, SecretManage},
+        secret::{DowncastSecretManager, SecretManage, SignBlock},
     },
     types::{
-        block::{address::ToBech32Ext, unlock::Unlock},
+        block::{address::ToBech32Ext, core::UnsignedBlock, unlock::Unlock, SignedBlockDto},
         TryFromDto,
     },
 };
-use tokio::sync::RwLock;
 
 use crate::{method::SecretManagerMethod, response::Response, Result};
 
 /// Call a secret manager method.
-pub(crate) async fn call_secret_manager_method_internal(
-    secret_manager: &RwLock<Box<dyn DynSecretManagerConfig>>,
+pub(crate) async fn call_secret_manager_method_internal<S: SecretManage + DowncastSecretManager + ?Sized>(
+    secret_manager: &S,
     method: SecretManagerMethod,
-) -> Result<Response> {
-    let secret_manager = secret_manager.read().await;
+) -> Result<Response>
+where
+    iota_sdk::client::Error: From<S::Error>,
+{
     let response = match method {
         SecretManagerMethod::GenerateEd25519Addresses {
             options:
@@ -34,7 +35,8 @@ pub(crate) async fn call_secret_manager_method_internal(
         } => {
             let addresses = secret_manager
                 .generate_ed25519_addresses(coin_type, account_index, range, options)
-                .await?
+                .await
+                .map_err(iota_sdk::client::Error::from)?
                 .into_iter()
                 .map(|a| a.to_bech32(bech32_hrp))
                 .collect();
@@ -52,7 +54,8 @@ pub(crate) async fn call_secret_manager_method_internal(
         } => {
             let addresses = secret_manager
                 .generate_evm_addresses(coin_type, account_index, range, options)
-                .await?
+                .await
+                .map_err(iota_sdk::client::Error::from)?
                 .into_iter()
                 .map(|a| prefix_hex::encode(a.as_ref()))
                 .collect();
@@ -67,9 +70,15 @@ pub(crate) async fn call_secret_manager_method_internal(
         } => {
             let transaction = &secret_manager
                 .sign_transaction(PreparedTransactionData::try_from_dto(prepared_transaction_data)?)
-                .await?;
+                .await
+                .map_err(iota_sdk::client::Error::from)?;
             Response::SignedTransaction(transaction.into())
         }
+        SecretManagerMethod::SignBlock { unsigned_block, chain } => Response::SignedBlock(SignedBlockDto::from(
+            &UnsignedBlock::try_from_dto(unsigned_block)?
+                .sign_ed25519(secret_manager, chain)
+                .await?,
+        )),
         SecretManagerMethod::SignatureUnlock {
             transaction_signing_hash,
             chain,
@@ -77,18 +86,25 @@ pub(crate) async fn call_secret_manager_method_internal(
             let transaction_signing_hash: [u8; 32] = prefix_hex::decode(transaction_signing_hash)?;
             let unlock: Unlock = secret_manager
                 .signature_unlock(&transaction_signing_hash, chain)
-                .await?;
+                .await
+                .map_err(iota_sdk::client::Error::from)?;
 
             Response::SignatureUnlock(unlock)
         }
         SecretManagerMethod::SignEd25519 { message, chain } => {
             let msg: Vec<u8> = prefix_hex::decode(message)?;
-            let signature = secret_manager.sign_ed25519(&msg, chain).await?;
+            let signature = secret_manager
+                .sign_ed25519(&msg, chain)
+                .await
+                .map_err(iota_sdk::client::Error::from)?;
             Response::Ed25519Signature(signature)
         }
         SecretManagerMethod::SignSecp256k1Ecdsa { message, chain } => {
             let msg: Vec<u8> = prefix_hex::decode(message)?;
-            let (public_key, signature) = secret_manager.sign_secp256k1_ecdsa(&msg, chain).await?;
+            let (public_key, signature) = secret_manager
+                .sign_secp256k1_ecdsa(&msg, chain)
+                .await
+                .map_err(iota_sdk::client::Error::from)?;
             Response::Secp256k1EcdsaSignature {
                 public_key: prefix_hex::encode(public_key.to_bytes()),
                 signature: prefix_hex::encode(signature.to_bytes()),

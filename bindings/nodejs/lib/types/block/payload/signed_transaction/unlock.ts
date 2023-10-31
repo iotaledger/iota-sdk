@@ -24,6 +24,10 @@ enum UnlockType {
      *  An NFT unlock.
      */
     Nft = 3,
+    /**
+     *  An Anchor unlock.
+     */
+    Anchor = 4,
 }
 
 /**
@@ -117,6 +121,24 @@ class NftUnlock extends Unlock {
     }
 }
 
+/**
+ * An unlock which must reference a previous unlock which unlocks the anchor that the input is locked to.
+ */
+class AnchorUnlock extends Unlock {
+    /**
+     * The reference.
+     */
+    readonly reference: number;
+
+    /**
+     * @param reference An index referencing a previous unlock.
+     */
+    constructor(reference: number) {
+        super(UnlockType.Anchor);
+        this.reference = reference;
+    }
+}
+
 const UnlockDiscriminator = {
     property: 'type',
     subTypes: [
@@ -136,6 +158,10 @@ const UnlockDiscriminator = {
             value: NftUnlock,
             name: UnlockType.Nft as any,
         },
+        {
+            value: AnchorUnlock,
+            name: UnlockType.Anchor as any,
+        },
     ],
 };
 
@@ -146,5 +172,6 @@ export {
     ReferenceUnlock,
     AccountUnlock,
     NftUnlock,
+    AnchorUnlock,
     UnlockDiscriminator,
 };

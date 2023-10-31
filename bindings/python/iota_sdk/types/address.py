@@ -16,12 +16,14 @@ class AddressType(IntEnum):
         NFT (16): Nft address.
         IMPLICIT_ACCOUNT_CREATION (24): Implicit Account Creation address.
         RESTRICTED (40): Address with restricted capabilities.
+        ANCHOR (48): Anchor address.
     """
     ED25519 = 0
     ACCOUNT = 8
     NFT = 16
     IMPLICIT_ACCOUNT_CREATION = 24
     RESTRICTED = 40
+    ANCHOR = 48
 
 
 @json
@@ -88,7 +90,8 @@ class ImplicitAccountCreationAddress:
         """
         Creates an implicit account creation address from a dictionary representation.
         """
-        return ImplicitAccountCreationAddress(Ed25519Address(addr_dict['pubKeyHash']))
+        return ImplicitAccountCreationAddress(
+            Ed25519Address(addr_dict['pubKeyHash']))
 
 
 @json
@@ -100,16 +103,30 @@ class RestrictedAddress:
         allowed_capabilities: The allowed capabilities bitflags.
     """
     address: Union[Ed25519Address, AccountAddress, NFTAddress]
-    allowed_capabilities: HexStr = field(default='0x00', init=False)
+    allowed_capabilities: HexStr = field(default='0x', init=False)
     type: int = field(default_factory=lambda: int(
         AddressType.RESTRICTED), init=False)
 
-    def with_allowed_capabilities(self, allowed_capabilities: bytes):
+    def with_allowed_capabilities(self, capabilities: bytes):
         """Sets the allowed capabilities from a byte array.
         Attributes:
-            allowed_capabilities: The allowed capabilities bitflags.
+            capabilities: The allowed capabilities bitflags.
         """
-        self.allowed_capabilities = '0x00' + allowed_capabilities.hex()
+        self.allowed_capabilities = '0x' + capabilities.hex()
+
+
+@json
+@dataclass
+class AnchorAddress:
+    """Represents an Anchor address.
+    Attributes:
+        anchor_id: The hex encoded anchor id.
+    """
+    anchor_id: HexStr
+    type: int = field(
+        default_factory=lambda: int(
+            AddressType.ANCHOR),
+        init=False)
 
 
 @json
@@ -124,7 +141,7 @@ class AddressWithUnspentOutputs():
 
 
 Address: TypeAlias = Union[Ed25519Address, AccountAddress,
-                           NFTAddress, ImplicitAccountCreationAddress, RestrictedAddress]
+                           NFTAddress, ImplicitAccountCreationAddress, RestrictedAddress, AnchorAddress]
 
 
 def deserialize_address(d: Dict[str, Any]) -> Address:
@@ -145,6 +162,8 @@ def deserialize_address(d: Dict[str, Any]) -> Address:
         return ImplicitAccountCreationAddress.from_dict(d)
     if address_type == AddressType.RESTRICTED:
         return RestrictedAddress.from_dict(d)
+    if address_type == AddressType.ANCHOR:
+        return AnchorAddress.from_dict(d)
     raise Exception(f'invalid address type: {address_type}')
 
 

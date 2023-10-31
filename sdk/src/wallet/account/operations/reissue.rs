@@ -4,7 +4,7 @@
 use crypto::keys::bip44::Bip44;
 
 use crate::{
-    client::Error as ClientError,
+    client::{secret::SignBlock, Error as ClientError},
     types::{
         api::core::{BlockState, TransactionState},
         block::{
@@ -56,9 +56,10 @@ impl Account {
                     .client()
                     .build_basic_block(
                         todo!("issuer id"),
-                        todo!("issuing time"),
-                        None,
                         Some(Payload::SignedTransaction(Box::new(transaction.payload.clone()))),
+                    )
+                    .await?
+                    .sign_ed25519(
                         self.get_secret_manager().read().await.as_ref(),
                         Bip44::new(self.wallet.coin_type()),
                     )
@@ -103,9 +104,10 @@ impl Account {
                             .client()
                             .build_basic_block(
                                 todo!("issuer id"),
-                                todo!("issuing time"),
-                                None,
                                 Some(Payload::SignedTransaction(Box::new(transaction.payload.clone()))),
+                            )
+                            .await?
+                            .sign_ed25519(
                                 self.get_secret_manager().read().await.as_ref(),
                                 Bip44::new(self.wallet.coin_type()),
                             )

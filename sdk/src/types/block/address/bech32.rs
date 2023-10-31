@@ -7,7 +7,7 @@ use alloc::{
 };
 use core::str::FromStr;
 
-use derive_more::{AsRef, Deref};
+use derive_more::{AsRef, Deref, Display};
 use packable::{
     error::{UnpackError, UnpackErrorExt},
     packer::Packer,
@@ -17,7 +17,7 @@ use packable::{
 
 use crate::types::block::{address::Address, ConvertTo, Error};
 
-#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Deref)]
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Deref, Display)]
 #[repr(transparent)]
 pub struct Hrp(bech32::Hrp);
 
@@ -43,12 +43,6 @@ impl FromStr for Hrp {
 
     fn from_str(hrp: &str) -> Result<Self, Self::Err> {
         Ok(Self(bech32::Hrp::parse(hrp)?))
-    }
-}
-
-impl core::fmt::Display for Hrp {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        self.0.fmt(f)
     }
 }
 

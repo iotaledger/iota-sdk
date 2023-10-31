@@ -42,12 +42,12 @@ pub mod slot;
 pub mod unlock;
 
 #[cfg(feature = "serde")]
-pub use self::core::dto::{BlockDto, BlockWrapperDto};
+pub use self::core::dto::{BlockDto, SignedBlockDto, UnsignedBlockDto};
 pub(crate) use self::r#macro::*;
 pub use self::{
     block_id::{BlockHash, BlockId},
     convert::ConvertTo,
-    core::{Block, BlockWrapper},
+    core::{Block, SignedBlock, UnsignedBlock},
     error::Error,
     issuer_id::IssuerId,
 };

@@ -4,12 +4,15 @@
 // These are E2E test samples, so they are ignored by default.
 
 use iota_sdk::{
-    client::{api::GetAddressesOptions, node_api::indexer::query_parameters::QueryParameter, Client, NodeInfoWrapper},
+    client::{
+        api::GetAddressesOptions, node_api::indexer::query_parameters::BasicOutputQueryParameters, Client,
+        NodeInfoWrapper,
+    },
     types::{
         api::core::TransactionState,
         block::{
             output::{Output, OutputId},
-            BlockWrapper,
+            SignedBlock,
         },
     },
 };
@@ -126,7 +129,7 @@ async fn test_get_address_outputs() {
         .unwrap();
 
     let output_ids_response = client
-        .basic_output_ids([QueryParameter::Address(address)])
+        .basic_output_ids(BasicOutputQueryParameters::new().address(address))
         .await
         .unwrap();
 
@@ -192,7 +195,7 @@ async fn test_get_included_block_raw() {
     let (_block_id, transaction_id) = setup_transaction_block(&client).await;
 
     let block = client.get_included_block(&transaction_id).await.unwrap();
-    let block_raw = BlockWrapper::unpack_verified(
+    let block_raw = SignedBlock::unpack_verified(
         client.get_included_block_raw(&transaction_id).await.unwrap(),
         &client.get_protocol_parameters().await.unwrap(),
     )

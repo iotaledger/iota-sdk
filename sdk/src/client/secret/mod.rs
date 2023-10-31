@@ -46,20 +46,19 @@ pub use self::types::LedgerNanoStatus;
 use crate::{
     client::{
         api::{
-            input_selection::{is_account_transition, Error as InputSelectionError},
-            transaction::validate_signed_transaction_payload_length,
+            input_selection::Error as InputSelectionError, transaction::validate_signed_transaction_payload_length,
             verify_semantic, PreparedTransactionData,
         },
         Error,
     },
     types::block::{
-        address::{Address, Ed25519Address},
-        core::BlockWrapperBuilder,
+        address::{Address, AnchorAddress, Ed25519Address},
+        core::UnsignedBlock,
         output::Output,
         payload::SignedTransactionPayload,
         signature::{Ed25519Signature, Signature},
         unlock::{AccountUnlock, NftUnlock, ReferenceUnlock, SignatureUnlock, Unlock, Unlocks},
-        BlockWrapper,
+        Error as BlockError, SignedBlock,
     },
 };
 
@@ -611,11 +610,11 @@ impl SecretManage for SecretManager {
 }
 
 pub trait DowncastSecretManager {
-    fn is<T: 'static + SecretManage>(&self) -> bool;
+    fn is<T: 'static>(&self) -> bool;
 
-    fn downcast_ref<T: 'static + SecretManage>(&self) -> Option<&T>;
+    fn downcast_ref<T: 'static>(&self) -> Option<&T>;
 
-    fn downcast_mut<T: 'static + SecretManage>(&mut self) -> Option<&mut T>;
+    fn downcast_mut<T: 'static>(&mut self) -> Option<&mut T>;
 
     #[cfg(feature = "stronghold")]
     fn as_stronghold(&self) -> crate::client::Result<&StrongholdAdapter> {
@@ -749,29 +748,43 @@ pub trait DowncastSecretManager {
 }
 
 impl<S: 'static + SecretManage + Send + Sync> DowncastSecretManager for S {
-    fn is<T: 'static + SecretManage>(&self) -> bool {
+    fn is<T: 'static>(&self) -> bool {
         self.as_any().is::<T>()
     }
 
-    fn downcast_ref<T: 'static + SecretManage>(&self) -> Option<&T> {
+    fn downcast_ref<T: 'static>(&self) -> Option<&T> {
         self.as_any().downcast_ref::<T>()
     }
 
-    fn downcast_mut<T: 'static + SecretManage>(&mut self) -> Option<&mut T> {
+    fn downcast_mut<T: 'static>(&mut self) -> Option<&mut T> {
+        self.as_any_mut().downcast_mut::<T>()
+    }
+}
+
+impl DowncastSecretManager for dyn DynSecretManagerConfig {
+    fn is<T: 'static>(&self) -> bool {
+        self.as_any().is::<T>()
+    }
+
+    fn downcast_ref<T: 'static>(&self) -> Option<&T> {
+        self.as_any().downcast_ref::<T>()
+    }
+
+    fn downcast_mut<T: 'static>(&mut self) -> Option<&mut T> {
         self.as_any_mut().downcast_mut::<T>()
     }
 }
 
 impl DowncastSecretManager for Box<dyn DynSecretManagerConfig> {
-    fn is<T: 'static + SecretManage>(&self) -> bool {
+    fn is<T: 'static>(&self) -> bool {
         self.as_ref().as_any().is::<T>()
     }
 
-    fn downcast_ref<T: 'static + SecretManage>(&self) -> Option<&T> {
+    fn downcast_ref<T: 'static>(&self) -> Option<&T> {
         self.as_ref().as_any().downcast_ref::<T>()
     }
 
-    fn downcast_mut<T: 'static + SecretManage>(&mut self) -> Option<&mut T> {
+    fn downcast_mut<T: 'static>(&mut self) -> Option<&mut T> {
         self.as_mut().as_any_mut().downcast_mut::<T>()
     }
 }
@@ -854,27 +867,20 @@ where
     // Assuming inputs_data is ordered by address type
     for (current_block_index, input) in prepared_transaction_data.inputs_data.iter().enumerate() {
         // Get the address that is required to unlock the input
-        let account_transition = is_account_transition(
-            &input.output,
-            *input.output_id(),
-            prepared_transaction_data.transaction.outputs(),
-            None,
-        );
-        let (input_address, _) = input.output.required_and_unlocked_address(
-            slot_index,
-            input.output_metadata.output_id(),
-            account_transition,
-        )?;
+        let (input_address, _) = input
+            .output
+            .required_and_unlocked_address(slot_index, input.output_metadata.output_id())?;
 
         // Check if we already added an [Unlock] for this address
         match block_indexes.get(&input_address) {
             // If we already have an [Unlock] for this address, add a [Unlock] based on the address type
             Some(block_index) => match input_address {
-                Address::Account(_account) => blocks.push(Unlock::Account(AccountUnlock::new(*block_index as u16)?)),
                 Address::Ed25519(_ed25519) => {
                     blocks.push(Unlock::Reference(ReferenceUnlock::new(*block_index as u16)?));
                 }
+                Address::Account(_account) => blocks.push(Unlock::Account(AccountUnlock::new(*block_index as u16)?)),
                 Address::Nft(_nft) => blocks.push(Unlock::Nft(NftUnlock::new(*block_index as u16)?)),
+                Address::Anchor(_) => Err(BlockError::UnsupportedAddressKind(AnchorAddress::KIND))?,
                 _ => todo!("What do we do here?"),
             },
             None => {
@@ -953,18 +959,18 @@ pub trait SignBlock {
         self,
         secret_manager: &S,
         chain: Bip44,
-    ) -> crate::client::Result<BlockWrapper>
+    ) -> crate::client::Result<SignedBlock>
     where
         crate::client::Error: From<S::Error>;
 }
 
 #[async_trait]
-impl SignBlock for BlockWrapperBuilder {
+impl SignBlock for UnsignedBlock {
     async fn sign_ed25519<S: SecretManage + ?Sized>(
         self,
         secret_manager: &S,
         chain: Bip44,
-    ) -> crate::client::Result<BlockWrapper>
+    ) -> crate::client::Result<SignedBlock>
     where
         crate::client::Error: From<S::Error>,
     {

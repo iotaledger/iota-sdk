@@ -6,7 +6,7 @@ use std::str::FromStr;
 use iota_sdk::{
     client::api::input_selection::{Error, InputSelection, Requirement},
     types::block::{
-        address::{AccountAddress, Address, Bech32Address, NftAddress},
+        address::{AccountAddress, Address, Bech32Address, NftAddress, RestrictedAddress, ToBech32Ext},
         output::{AccountId, NftId},
         protocol::protocol_parameters,
     },
@@ -554,8 +554,6 @@ fn account_sender() {
         Account(
             1_000_000,
             account_id_1,
-            0,
-            BECH32_ADDRESS_ED25519_0,
             BECH32_ADDRESS_ED25519_0,
             None,
             None,
@@ -609,8 +607,6 @@ fn account_sender_zero_id() {
         Account(
             1_000_000,
             account_id_0,
-            0,
-            BECH32_ADDRESS_ED25519_0,
             BECH32_ADDRESS_ED25519_0,
             None,
             None,
@@ -1392,4 +1388,182 @@ fn too_many_outputs_with_remainder() {
         // 129 because of required remainder
         iota_sdk::client::api::input_selection::Error::InvalidOutputCount(129)
     )
+}
+
+#[test]
+fn restricted_ed25519() {
+    let protocol_parameters = protocol_parameters();
+    let address = Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap();
+    let restricted = RestrictedAddress::new(address.clone()).unwrap();
+    let restricted_bech32 = restricted.to_bech32_unchecked("rms").to_string();
+
+    let inputs = build_inputs([
+        Basic(1_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
+        Basic(1_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
+        Basic(1_000_000, &restricted_bech32, None, None, None, None, None, None),
+        Basic(1_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
+        Basic(1_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
+    ]);
+    let outputs = build_outputs([Basic(
+        1_000_000,
+        BECH32_ADDRESS_ED25519_0,
+        None,
+        None,
+        None,
+        None,
+        None,
+        None,
+    )]);
+
+    let selected = InputSelection::new(
+        inputs.clone(),
+        outputs.clone(),
+        addresses([BECH32_ADDRESS_ED25519_1]),
+        protocol_parameters,
+    )
+    .select()
+    .unwrap();
+
+    assert_eq!(selected.inputs.len(), 1);
+    assert_eq!(selected.inputs, [inputs[2].clone()]);
+    assert!(unsorted_eq(&selected.outputs, &outputs));
+}
+
+#[test]
+fn restricted_nft() {
+    let protocol_parameters = protocol_parameters();
+    let nft_id_1 = NftId::from_str(NFT_ID_1).unwrap();
+    let nft_address = Address::from(nft_id_1);
+    let restricted = RestrictedAddress::new(nft_address.clone()).unwrap();
+    let restricted_bech32 = restricted.to_bech32_unchecked("rms").to_string();
+
+    let inputs = build_inputs([
+        Basic(2_000_000, &restricted_bech32, None, None, None, None, None, None),
+        Nft(
+            2_000_000,
+            nft_id_1,
+            BECH32_ADDRESS_ED25519_0,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+        ),
+    ]);
+    let outputs = build_outputs([Basic(
+        3_000_000,
+        BECH32_ADDRESS_ED25519_0,
+        None,
+        None,
+        None,
+        None,
+        None,
+        None,
+    )]);
+
+    let selected = InputSelection::new(
+        inputs.clone(),
+        outputs.clone(),
+        addresses([BECH32_ADDRESS_ED25519_0]),
+        protocol_parameters,
+    )
+    .select()
+    .unwrap();
+
+    assert!(unsorted_eq(&selected.inputs, &inputs));
+    assert_eq!(selected.outputs.len(), 2);
+    assert!(selected.outputs.contains(&outputs[0]));
+}
+
+#[test]
+fn restricted_account() {
+    let protocol_parameters = protocol_parameters();
+    let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
+    let account_address = Address::from(account_id_1);
+    let restricted = RestrictedAddress::new(account_address.clone()).unwrap();
+    let restricted_bech32 = restricted.to_bech32_unchecked("rms").to_string();
+
+    let inputs = build_inputs([
+        Basic(2_000_000, &restricted_bech32, None, None, None, None, None, None),
+        Account(
+            2_000_000,
+            account_id_1,
+            BECH32_ADDRESS_ED25519_0,
+            None,
+            None,
+            None,
+            None,
+        ),
+    ]);
+
+    let outputs = build_outputs([Basic(
+        3_000_000,
+        BECH32_ADDRESS_ED25519_0,
+        None,
+        None,
+        None,
+        None,
+        None,
+        None,
+    )]);
+
+    let selected = InputSelection::new(
+        inputs.clone(),
+        outputs.clone(),
+        addresses([BECH32_ADDRESS_ED25519_0]),
+        protocol_parameters,
+    )
+    .select()
+    .unwrap();
+
+    assert!(unsorted_eq(&selected.inputs, &inputs));
+    assert_eq!(selected.outputs.len(), 2);
+    assert!(selected.outputs.contains(&outputs[0]));
+}
+
+#[test]
+fn restricted_ed25519_sender() {
+    let protocol_parameters = protocol_parameters();
+    let sender = Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap();
+    let restricted_sender = RestrictedAddress::new(sender.clone()).unwrap();
+    let restricted_sender_bech32 = restricted_sender.to_bech32_unchecked("rms").to_string();
+
+    let inputs = build_inputs([
+        Basic(2_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
+        Basic(2_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
+        Basic(1_000_000, BECH32_ADDRESS_ED25519_1, None, None, None, None, None, None),
+        Basic(2_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
+        Basic(2_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
+    ]);
+    let outputs = build_outputs([Basic(
+        2_000_000,
+        BECH32_ADDRESS_ED25519_0,
+        None,
+        Some(&restricted_sender_bech32),
+        None,
+        None,
+        None,
+        None,
+    )]);
+
+    let selected = InputSelection::new(
+        inputs.clone(),
+        outputs.clone(),
+        addresses([BECH32_ADDRESS_ED25519_0, BECH32_ADDRESS_ED25519_1]),
+        protocol_parameters,
+    )
+    .select()
+    .unwrap();
+
+    // Sender + another for amount
+    assert_eq!(selected.inputs.len(), 2);
+    assert!(
+        selected
+            .inputs
+            .iter()
+            .any(|input| *input.output.as_basic().address() == sender)
+    );
+    // Provided output + remainder
+    assert_eq!(selected.outputs.len(), 2);
 }

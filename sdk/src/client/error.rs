@@ -12,8 +12,7 @@ use serde::{
 };
 
 use crate::{
-    client::{api::input_selection::Error as InputSelectionError, node_api::indexer::QueryParameter},
-    types::block::semantic::TransactionFailureReason,
+    client::api::input_selection::Error as InputSelectionError, types::block::semantic::TransactionFailureReason,
 };
 
 /// Type alias of `Result` in iota-client
@@ -21,6 +20,7 @@ pub type Result<T> = std::result::Result<T, Error>;
 
 /// Error type of the iota client crate.
 #[derive(Debug, thiserror::Error)]
+#[non_exhaustive]
 pub enum Error {
     /// Invalid bech32 HRP, should match the one from the used network
     #[error("invalid bech32 hrp for the connected network: {provided}, expected: {expected}")]
@@ -136,9 +136,6 @@ pub enum Error {
     /// The semantic validation of a transaction failed.
     #[error("the semantic validation of a transaction failed with conflict reason: {} - {0:?}", *.0 as u8)]
     TransactionSemantic(TransactionFailureReason),
-    /// An indexer API request contains a query parameter not supported by the endpoint.
-    #[error("an indexer API request contains a query parameter not supported by the endpoint: {0}.")]
-    UnsupportedQueryParameter(QueryParameter),
     /// Unpack error
     #[error("{0}")]
     Unpack(#[from] packable::error::UnpackError<crate::types::block::Error, UnexpectedEOF>),

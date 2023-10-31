@@ -7,7 +7,7 @@
 //! `cargo run --release --all-features --example account_wallet_transaction`
 
 use iota_sdk::{
-    client::{node_api::indexer::query_parameters::QueryParameter, secret::SecretManager},
+    client::{node_api::indexer::query_parameters::BasicOutputQueryParameters, secret::SecretManager},
     types::block::address::{AccountAddress, ToBech32Ext},
     wallet::{
         account::{AliasSyncOptions, SyncOptions, TransactionOptions},
@@ -54,7 +54,9 @@ async fn main() -> Result<()> {
     // Find first output unlockable by the account address
     let input = *account
         .client()
-        .basic_output_ids([QueryParameter::Address(account_address)])
+        .basic_output_ids(BasicOutputQueryParameters::only_address_unlock_condition(
+            account_address,
+        ))
         .await?
         .items
         .first()

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use iota_sdk::client::secret::SecretManagerDto;
-use iota_sdk_bindings_core::{ClientMethod, Response, UtilsMethod, WalletOptions};
+use iota_sdk_bindings_core::{Response, UtilsMethod, WalletOptions};
 use pretty_assertions::assert_eq;
 
 #[test]

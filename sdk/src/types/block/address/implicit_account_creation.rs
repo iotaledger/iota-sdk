@@ -9,13 +9,13 @@ use crate::types::block::address::Ed25519Address;
 /// An implicit account creation address that can be used to convert a
 /// [`BasicOutput`](crate::types::block::output::BasicOutput) to an
 /// [`AccountOutput`](crate::types::block::output::AccountOutput).
-#[derive(Copy, Clone, Debug, Display, Eq, PartialEq, Ord, PartialOrd, Hash, FromStr, AsRef, Deref, From, Packable)]
+#[derive(Copy, Clone, Display, Eq, PartialEq, Ord, PartialOrd, Hash, FromStr, AsRef, Deref, From, Packable)]
 #[as_ref(forward)]
 pub struct ImplicitAccountCreationAddress(Ed25519Address);
 
 impl ImplicitAccountCreationAddress {
     /// The [`Address`](crate::types::block::address::Address) kind of an [`ImplicitAccountCreationAddress`].
-    pub const KIND: u8 = 24;
+    pub const KIND: u8 = 32;
     /// The length of an [`ImplicitAccountCreationAddress`].
     pub const LENGTH: usize = Ed25519Address::LENGTH;
 
@@ -23,6 +23,12 @@ impl ImplicitAccountCreationAddress {
     #[inline(always)]
     pub fn new(address: [u8; Self::LENGTH]) -> Self {
         Self(Ed25519Address::new(address))
+    }
+}
+
+impl core::fmt::Debug for ImplicitAccountCreationAddress {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        write!(f, "ImplicitAccountCreationAddress({self})")
     }
 }
 

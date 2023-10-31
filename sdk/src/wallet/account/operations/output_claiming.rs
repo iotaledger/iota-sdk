@@ -67,8 +67,6 @@ impl Account {
                             &[],
                             output_data,
                             slot_index,
-                            // Not relevant without account addresses
-                            None,
                         )?
                     {
                         match outputs_to_claim {

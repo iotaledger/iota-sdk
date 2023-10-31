@@ -2,13 +2,14 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use crate::{
-    client::node_api::indexer::query_parameters::QueryParameter,
+    client::node_api::indexer::query_parameters::NftOutputQueryParameters,
     types::block::{address::Bech32Address, output::OutputId, ConvertTo},
     wallet::Account,
 };
 
 impl Account {
-    /// Returns output ids of nft outputs that have the address in any unlock condition
+    /// Returns output ids of NFT outputs that have the address in the `AddressUnlockCondition` or
+    /// `ExpirationUnlockCondition`
     pub(crate) async fn get_nft_output_ids_with_any_unlock_condition(
         &self,
         bech32_address: impl ConvertTo<Bech32Address>,
@@ -17,7 +18,7 @@ impl Account {
 
         Ok(self
             .client()
-            .nft_output_ids([QueryParameter::UnlockableByAddress(bech32_address)])
+            .nft_output_ids(NftOutputQueryParameters::new().unlockable_by_address(bech32_address))
             .await?
             .items)
     }
