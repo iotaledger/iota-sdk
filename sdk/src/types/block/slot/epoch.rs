@@ -75,20 +75,15 @@ impl EpochIndex {
         SlotIndex::from_epoch_index(self + 1, slots_per_epoch_exponent) - 1
     }
 
-    /// Calculates the start slot of the given epoch.
-    pub fn epoch_start(&self, slots_per_epoch_exponent: u8) -> SlotIndex {
-        SlotIndex(self.0 << slots_per_epoch_exponent)
-    }
-
     /// Returns the slot for which to be eligible for the committee selection of epoch n, a potential validator must
     /// issue at least one block between Registration Slot(n)+1. and this slot.
     pub fn activity_window_slot(&self, slots_per_epoch_exponent: u8, epoch_nearing_threshold: u32) -> SlotIndex {
-        self.epoch_start(slots_per_epoch_exponent) - epoch_nearing_threshold - 1
+        self.first_slot_index(slots_per_epoch_exponent) - epoch_nearing_threshold - 1
     }
 
     /// Returns the slot at which delegation can happen for the following epoch.
     pub fn registration_slot(&self, slots_per_epoch_exponent: u8, epoch_nearing_threshold: u32) -> SlotIndex {
-        self.epoch_start(slots_per_epoch_exponent)
+        self.first_slot_index(slots_per_epoch_exponent)
             - epoch_nearing_threshold
             - self.activity_window_slot(slots_per_epoch_exponent, epoch_nearing_threshold)
             - 1
