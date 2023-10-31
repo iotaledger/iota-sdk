@@ -181,7 +181,7 @@ where
             let new_outputs_data = if new_account_and_nft_addresses.is_empty() {
                 // Get outputs for the  addresses and add them also the the addresses_with_unspent_outputs
                 let (unspent_output_ids, spent_or_not_synced_output_ids_inner) = self
-                    .get_unspent_and_spent_output_ids_for_addresses(addresses_to_sync.clone(), options)
+                    .get_output_ids_for_addresses(addresses_to_sync.clone(), options)
                     .await?;
 
                 spent_or_not_synced_output_ids = spent_or_not_synced_output_ids_inner;
@@ -198,7 +198,7 @@ where
                 for (account_or_nft_address, output_address) in &new_account_and_nft_addresses {
                     let output_ids = self
                         .get_output_ids_for_address(
-                            Bech32Address::new(bech32_hrp, account_or_nft_address.clone()),
+                            &Bech32Address::new(bech32_hrp, account_or_nft_address.clone()),
                             options,
                         )
                         .await?;

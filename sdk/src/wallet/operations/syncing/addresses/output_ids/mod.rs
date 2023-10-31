@@ -41,7 +41,7 @@ where
     ) -> crate::wallet::Result<Vec<OutputId>> {
         if sync_options.sync_only_most_basic_outputs {
             let output_ids = self
-                .get_basic_output_ids_with_address_unlock_condition_only(address)
+                .get_basic_output_ids_with_address_unlock_condition_only(address.clone())
                 .await?;
             return Ok(output_ids);
         }
@@ -198,7 +198,7 @@ where
 
     /// Get the current output ids and only returns addresses that have unspent outputs and
     /// return spent outputs separated
-    pub(crate) async fn get_unspent_and_spent_output_ids_for_addresses(
+    pub(crate) async fn get_output_ids_for_addresses(
         &self,
         addresses_with_unspent_outputs: Vec<AddressWithUnspentOutputs>,
         options: &SyncOptions,
@@ -237,7 +237,7 @@ where
                     tasks.push(async move {
                         tokio::spawn(async move {
                             let output_ids = wallet
-                                .get_output_ids_for_address(address.address.clone(), &sync_options)
+                                .get_output_ids_for_address(&address.address, &sync_options)
                                 .await?;
                             crate::wallet::Result::Ok((address, output_ids))
                         })

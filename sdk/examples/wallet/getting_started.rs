@@ -1,8 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! In this example we will create a new wallet, a mnemonic, and an initial account. Then, we'll print the first address
-//! of that account.
+//! In this example we will first create a new wallet and a mnemonic, and then, print the wallet's address.
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh
