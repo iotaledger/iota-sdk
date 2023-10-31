@@ -40,7 +40,7 @@ where
             .items;
 
         // Get all results
-        if sync_options.alias.foundry_outputs {
+        if sync_options.account.foundry_outputs {
             let foundry_output_ids = self.get_foundry_output_ids(&output_ids).await?;
             output_ids.extend(foundry_output_ids);
         }

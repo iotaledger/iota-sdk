@@ -49,7 +49,7 @@ where
         // If interested in alias, basic, NFT and foundry outputs, get them all at once
         if (address.is_ed25519() && sync_options.wallet.all_outputs())
             || (address.is_nft() && sync_options.nft.all_outputs())
-            || (address.is_account() && sync_options.alias.all_outputs())
+            || (address.is_account() && sync_options.account.all_outputs())
         {
             return Ok(self
                 .client()
@@ -66,7 +66,7 @@ where
 
         if (address.inner().is_ed25519() && sync_options.wallet.basic_outputs)
             || (address.inner().is_nft() && sync_options.nft.basic_outputs)
-            || (address.inner().is_account() && sync_options.alias.basic_outputs)
+            || (address.inner().is_account() && sync_options.account.basic_outputs)
         {
             // basic outputs
             #[cfg(target_family = "wasm")]
@@ -97,7 +97,7 @@ where
 
         if (address.inner().is_ed25519() && sync_options.wallet.nft_outputs)
             || (address.inner().is_nft() && sync_options.nft.nft_outputs)
-            || (address.inner().is_account() && sync_options.alias.nft_outputs)
+            || (address.inner().is_account() && sync_options.account.nft_outputs)
         {
             // nfts
             #[cfg(target_family = "wasm")]
@@ -125,7 +125,7 @@ where
 
         if (address.inner().is_ed25519() && sync_options.wallet.account_outputs)
             || (address.inner().is_nft() && sync_options.nft.account_outputs)
-            || (address.inner().is_account() && sync_options.alias.account_outputs)
+            || (address.inner().is_account() && sync_options.account.account_outputs)
         {
             // accounts and foundries
             #[cfg(target_family = "wasm")]
@@ -153,7 +153,7 @@ where
                     .boxed(),
                 );
             }
-        } else if address.is_account() && sync_options.alias.foundry_outputs {
+        } else if address.is_account() && sync_options.account.foundry_outputs {
             // foundries
             #[cfg(target_family = "wasm")]
             {

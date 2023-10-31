@@ -46,7 +46,7 @@ pub use self::{
         output_claiming::OutputsToClaim,
         output_consolidation::ConsolidationParams,
         syncing::{
-            options::{WalletSyncOptions, AliasSyncOptions, NftSyncOptions},
+            options::{AccountSyncOptions, NftSyncOptions, WalletSyncOptions},
             SyncOptions,
         },
         transaction::{

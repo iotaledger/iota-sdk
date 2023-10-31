@@ -45,8 +45,7 @@ pub struct SyncOptions {
     pub wallet: WalletSyncOptions,
     /// Specifies what outputs should be synced for the address of an account output.
     #[serde(default)]
-    // TODO Rename when we are done with Account changes https://github.com/iotaledger/iota-sdk/issues/647.
-    pub alias: AliasSyncOptions,
+    pub account: AccountSyncOptions,
     /// Specifies what outputs should be synced for the address of an nft output.
     #[serde(default)]
     pub nft: NftSyncOptions,
@@ -92,7 +91,7 @@ impl Default for SyncOptions {
             sync_incoming_transactions: default_sync_incoming_transactions(),
             sync_pending_transactions: default_sync_pending_transactions(),
             wallet: WalletSyncOptions::default(),
-            alias: AliasSyncOptions::default(),
+            account: AccountSyncOptions::default(),
             nft: NftSyncOptions::default(),
             sync_only_most_basic_outputs: default_sync_only_most_basic_outputs(),
             sync_native_token_foundries: default_sync_native_token_foundries(),
@@ -129,14 +128,14 @@ impl WalletSyncOptions {
 /// Sync options for addresses from account outputs
 #[derive(Debug, Clone, Eq, PartialEq, Hash, Serialize, Deserialize)]
 #[serde(default, rename_all = "camelCase")]
-pub struct AliasSyncOptions {
+pub struct AccountSyncOptions {
     pub basic_outputs: bool,
     pub nft_outputs: bool,
     pub account_outputs: bool,
     pub foundry_outputs: bool,
 }
 
-impl Default for AliasSyncOptions {
+impl Default for AccountSyncOptions {
     // Sync only foundries
     fn default() -> Self {
         Self {
@@ -148,7 +147,7 @@ impl Default for AliasSyncOptions {
     }
 }
 
-impl AliasSyncOptions {
+impl AccountSyncOptions {
     pub(crate) fn all_outputs(&self) -> bool {
         self.basic_outputs && self.nft_outputs && self.account_outputs && self.foundry_outputs
     }

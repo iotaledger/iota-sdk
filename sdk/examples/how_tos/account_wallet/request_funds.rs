@@ -9,7 +9,7 @@
 use iota_sdk::{
     client::request_funds_from_faucet,
     types::block::address::{AccountAddress, ToBech32Ext},
-    wallet::{AliasSyncOptions, Result, SyncOptions},
+    wallet::{AccountSyncOptions, Result, SyncOptions},
     Wallet,
 };
 
@@ -43,7 +43,7 @@ async fn main() -> Result<()> {
     tokio::time::sleep(std::time::Duration::from_secs(10)).await;
 
     let sync_options = SyncOptions {
-        alias: AliasSyncOptions {
+        account: AccountSyncOptions {
             basic_outputs: true,
             ..Default::default()
         },

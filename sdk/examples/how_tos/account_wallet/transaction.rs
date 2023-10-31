@@ -9,7 +9,7 @@
 use iota_sdk::{
     client::node_api::indexer::query_parameters::BasicOutputQueryParameters,
     types::block::address::{AccountAddress, ToBech32Ext},
-    wallet::{AliasSyncOptions, Result, SyncOptions, TransactionOptions},
+    wallet::{AccountSyncOptions, Result, SyncOptions, TransactionOptions},
     Wallet,
 };
 
@@ -19,7 +19,7 @@ async fn main() -> Result<()> {
     dotenvy::dotenv().ok();
 
     let sync_options = SyncOptions {
-        alias: AliasSyncOptions {
+        account: AccountSyncOptions {
             basic_outputs: true,
             ..Default::default()
         },
