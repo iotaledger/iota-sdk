@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! In this example we will list all outputs of an account.
+//! In this example we will list all outputs of a wallet.
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh
