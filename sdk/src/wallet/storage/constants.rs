@@ -20,7 +20,7 @@ pub(crate) const DATABASE_SCHEMA_VERSION_KEY: &str = "database-schema-version";
 
 pub(crate) const WALLET_DATA_KEY: &str = "wallet-data";
 pub(crate) const WALLET_BUILDER_KEY: &str = "wallet-builder";
-pub(crate) const WALLET_SYNC_OPTIONS: &str = "sync-options";
+pub(crate) const WALLET_SYNC_OPTIONS: &str = "wallet-sync-options";
 
 pub(crate) const SECRET_MANAGER_KEY: &str = "secret_manager";
 
