@@ -196,7 +196,7 @@ async fn output_preparation() -> Result<()> {
     // metadata and tag features
     assert_eq!(output.features().unwrap().len(), 2);
 
-    // Error if this NftId is not in the account
+    // Error if this NftId is not in the wallet
     let error = wallet
         .prepare_output(
             OutputParams {
@@ -755,7 +755,7 @@ async fn prepare_output_only_single_nft() -> Result<()> {
     let wallet_0_address = wallet_0.address().await;
     let wallet_1_address = wallet_1.address().await;
 
-    // Send NFT to second account
+    // Send NFT to second wallet
     let tx = wallet_0
         .mint_nfts([MintNftParams::new().try_with_address(wallet_1_address)?], None)
         .await?;
@@ -768,7 +768,7 @@ async fn prepare_output_only_single_nft() -> Result<()> {
 
     let nft_data = &wallet_1.unspent_outputs(None).await?[0];
     let nft_id = *balance.nfts().first().unwrap();
-    // Send NFT back to first account
+    // Send NFT back to first wallet
     let output = wallet_1
         .prepare_output(
             OutputParams {
@@ -790,11 +790,11 @@ async fn prepare_output_only_single_nft() -> Result<()> {
         .reissue_transaction_until_included(&tx.transaction_id, None, None)
         .await?;
 
-    // account_0 now has the NFT
+    // wallet_0 now has the NFT
     let balance_0 = wallet_0.sync(None).await?;
     assert_eq!(*balance_0.nfts().first().unwrap(), nft_id);
 
-    // account_1 has no NFT and also no base coin amount
+    // wallet_1 has no NFT and also no base coin amount
     let balance_1 = wallet_1.sync(None).await?;
     assert!(balance_1.nfts().is_empty());
     assert_eq!(balance_1.base_coin().total(), 0);
