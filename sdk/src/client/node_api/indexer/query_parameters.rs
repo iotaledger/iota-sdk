@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 //! Query parameters for output_id requests
-//! https://editor.swagger.io/?url=https://raw.githubusercontent.com/iotaledger/tips/tip48/tips/TIP-0048/openapi3-indexer.yaml
 
 use derive_setters::Setters;
 use serde::{Deserialize, Serialize};

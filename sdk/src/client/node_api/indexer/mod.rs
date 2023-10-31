@@ -1,7 +1,7 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! Node indexer API.
+//! [REST API for IOTA UTXO indexers](https://editor.swagger.io/?url=https://raw.githubusercontent.com/iotaledger/tips/tip48/tips/TIP-0048/openapi3-indexer.yaml)
 
 pub mod query_parameters;
 pub mod routes;
