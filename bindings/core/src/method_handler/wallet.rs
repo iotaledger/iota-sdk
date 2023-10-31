@@ -8,13 +8,13 @@ use iota_sdk::{
     wallet::{core::WalletDataDto, Wallet, WalletBuilder},
 };
 
-use super::wallet_operation::call_wallet_operation_method_internal;
+use super::wallet_operation::call_wallet_command_method_internal;
 use crate::{method::WalletMethod, response::Response, Result};
 
 /// Call a wallet method.
 pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletMethod) -> Result<Response> {
     let response = match method {
-        WalletMethod::CallMethod { method } => call_wallet_operation_method_internal(&wallet, method).await?,
+        WalletMethod::CallMethod { method } => call_wallet_command_method_internal(&wallet, method).await?,
         #[cfg(feature = "stronghold")]
         WalletMethod::Backup { destination, password } => {
             wallet.backup(destination, password).await?;

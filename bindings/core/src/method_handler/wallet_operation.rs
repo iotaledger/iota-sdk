@@ -14,7 +14,7 @@ use iota_sdk::{
 
 use crate::{method::WalletCommandMethod, Response, Result};
 
-pub(crate) async fn call_wallet_operation_method_internal(
+pub(crate) async fn call_wallet_command_method_internal(
     wallet: &Wallet,
     method: WalletCommandMethod,
 ) -> Result<Response> {
