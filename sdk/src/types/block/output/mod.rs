@@ -34,13 +34,6 @@ use packable::{
     Packable, PackableExt,
 };
 
-pub(crate) use self::{
-    account::StateMetadataLength,
-    feature::{MetadataFeatureLength, TagFeatureLength},
-    native_token::NativeTokenCount,
-    output_id::OutputIndex,
-    unlock_condition::AddressUnlockCondition,
-};
 pub use self::{
     account::{AccountId, AccountOutput, AccountOutputBuilder},
     anchor::{AnchorId, AnchorOutput, AnchorTransition},
@@ -57,6 +50,13 @@ pub use self::{
     state_transition::{StateTransitionError, StateTransitionVerifier},
     token_scheme::{SimpleTokenScheme, TokenScheme},
     unlock_condition::{UnlockCondition, UnlockConditions},
+};
+pub(crate) use self::{
+    anchor::StateMetadataLength,
+    feature::{MetadataFeatureLength, TagFeatureLength},
+    native_token::NativeTokenCount,
+    output_id::OutputIndex,
+    unlock_condition::AddressUnlockCondition,
 };
 use super::protocol::ProtocolParameters;
 use crate::types::block::{address::Address, semantic::SemanticValidationContext, slot::SlotIndex, Error};
