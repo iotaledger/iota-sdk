@@ -43,78 +43,78 @@ async fn updated_default_sync_options() -> Result<()> {
 // #[ignore]
 // #[tokio::test]
 // async fn sync_only_most_basic_outputs() -> Result<()> {
-//     let storage_path = "test-storage/sync_only_most_basic_outputs";
-//     setup(storage_path)?;
+//     let storage_path_0 = "test-storage/sync_only_most_basic_outputs_0";
+//     setup(storage_path_0)?;
+//     let storage_path_1 = "test-storage/sync_only_most_basic_outputs_1";
+//     setup(storage_path_1)?;
 
-//     let wallet = make_wallet(storage_path, None, None).await?;
+//     let wallet_0 = create_wallet_with_funds(storage_path_0, None, None, 1).await?;
+//     let wallet_1 = make_wallet(storage_path_1, None, None).await?;
 
-//     let account_0 = &create_accounts_with_funds(&wallet, 1).await?[0];
-//     let account_1 = wallet.create_account().finish().await?;
+//     let wallet_1_address = wallet_1.address().await;
 
-//     let account_1_address = account_1.first_address_bech32().await;
-
-//     let token_supply = account_0.client().get_token_supply().await?;
+//     let token_supply = wallet_0.client().get_token_supply().await?;
 //     // Only one basic output without further unlock conditions
 //     let outputs = [
 //         BasicOutputBuilder::new_with_amount(1_000_000)
-//             .with_unlock_conditions([AddressUnlockCondition::new(account_1_address.clone())])
+//             .with_unlock_conditions([AddressUnlockCondition::new(wallet_1_address.clone())])
 //             .finish_output(token_supply)?,
 //         BasicOutputBuilder::new_with_amount(1_000_000)
 //             .with_unlock_conditions([
-//                 UnlockCondition::Address(AddressUnlockCondition::new(account_1_address.clone())),
+//                 UnlockCondition::Address(AddressUnlockCondition::new(wallet_1_address.clone())),
 //                 UnlockCondition::Expiration(ExpirationUnlockCondition::new(
-//                     account_1_address.clone(),
+//                     wallet_1_address.clone(),
 //                     // Already expired
-//                     account_0.client().get_slot_index().await? - 5000,
+//                     wallet_0.client().get_slot_index().await? - 5000,
 //                 )?),
 //             ])
 //             .finish_output(token_supply)?,
 //         BasicOutputBuilder::new_with_amount(1_000_000)
 //             .with_unlock_conditions([
-//                 UnlockCondition::Address(AddressUnlockCondition::new(account_1_address.clone())),
+//                 UnlockCondition::Address(AddressUnlockCondition::new(wallet_1_address.clone())),
 //                 UnlockCondition::Expiration(ExpirationUnlockCondition::new(
-//                     account_1_address.clone(),
+//                     wallet_1_address.clone(),
 //                     // Not expired
-//                     account_0.client().get_slot_index().await? + 5000,
+//                     wallet_0.client().get_slot_index().await? + 5000,
 //                 )?),
 //             ])
 //             .finish_output(token_supply)?,
 //         BasicOutputBuilder::new_with_amount(1_000_000)
 //             .with_unlock_conditions([
-//                 UnlockCondition::Address(AddressUnlockCondition::new(account_1_address.clone())),
+//                 UnlockCondition::Address(AddressUnlockCondition::new(wallet_1_address.clone())),
 //                 UnlockCondition::StorageDepositReturn(StorageDepositReturnUnlockCondition::new(
-//                     account_1_address.clone(),
+//                     wallet_1_address.clone(),
 //                     1_000_000,
 //                     token_supply,
 //                 )?),
 //             ])
 //             .finish_output(token_supply)?,
 //         NftOutputBuilder::new_with_amount(1_000_000, NftId::null())
-//             .with_unlock_conditions([AddressUnlockCondition::new(account_1_address.clone())])
+//             .with_unlock_conditions([AddressUnlockCondition::new(wallet_1_address.clone())])
 //             .finish_output(token_supply)?,
 //         NftOutputBuilder::new_with_amount(1_000_000, NftId::null())
 //             .with_unlock_conditions([
-//                 UnlockCondition::Address(AddressUnlockCondition::new(account_1_address.clone())),
+//                 UnlockCondition::Address(AddressUnlockCondition::new(wallet_1_address.clone())),
 //                 UnlockCondition::Expiration(ExpirationUnlockCondition::new(
-//                     account_1_address.clone(),
-//                     account_0.client().get_slot_index().await? + 5000,
+//                     wallet_1_address.clone(),
+//                     wallet_0.client().get_slot_index().await? + 5000,
 //                 )?),
 //             ])
 //             .finish_output(token_supply)?,
 //         AccountOutputBuilder::new_with_amount(1_000_000, AccountId::null())
 //             .with_unlock_conditions([UnlockCondition::Address(AddressUnlockCondition::new(
-//                 account_1_address.clone(),
+//                 wallet_1_address.clone(),
 //             ))])
 //             .finish_output(token_supply)?,
 //     ];
 
-//     let tx = account_0.send_outputs(outputs, None).await?;
-//     account_0
+//     let tx = wallet_0.send_outputs(outputs, None).await?;
+//     wallet_0
 //         .reissue_transaction_until_included(&tx.transaction_id, None, None)
 //         .await?;
 
 //     // Sync with sync_only_most_basic_outputs: true, only the first output should be synced
-//     let balance = account_1
+//     let balance = wallet_1
 //         .sync(Some(SyncOptions {
 //             sync_only_most_basic_outputs: true,
 //             ..Default::default()
@@ -123,7 +123,7 @@ async fn updated_default_sync_options() -> Result<()> {
 //     assert_eq!(balance.potentially_locked_outputs().len(), 0);
 //     assert_eq!(balance.nfts().len(), 0);
 //     assert_eq!(balance.accounts().len(), 0);
-//     let unspent_outputs = account_1.unspent_outputs(None).await?;
+//     let unspent_outputs = wallet_1.unspent_outputs(None).await?;
 //     assert_eq!(unspent_outputs.len(), 1);
 //     unspent_outputs.into_iter().for_each(|output_data| {
 //         assert!(output_data.output.is_basic());
@@ -136,7 +136,7 @@ async fn updated_default_sync_options() -> Result<()> {
 //                 .address()
 //                 .unwrap()
 //                 .address(),
-//             account_1_address.as_ref()
+//             wallet_1_address.as_ref()
 //         );
 //     });
 
@@ -146,41 +146,41 @@ async fn updated_default_sync_options() -> Result<()> {
 // #[ignore]
 // #[tokio::test]
 // async fn sync_incoming_transactions() -> Result<()> {
-//     let storage_path = "test-storage/sync_incoming_transactions";
-//     setup(storage_path)?;
+//     let storage_path_0 = "test-storage/sync_incoming_transactions_0";
+//     setup(storage_path_0)?;
+//     let storage_path_1 = "test-storage/sync_incoming_transactions_1";
+//     setup(storage_path_1)?;
 
-//     let wallet = make_wallet(storage_path, None, None).await?;
+//     let wallet_0 = create_wallet_with_funds(storage_path_0, None, None, 1).await?;
+//     let wallet_1 = make_wallet(storage_path_1, None, None).await?;
 
-//     let account_0 = &create_accounts_with_funds(&wallet, 1).await?[0];
-//     let account_1 = wallet.create_account().finish().await?;
+//     let wallet_1_address = wallet_1.address().await;
 
-//     let account_1_address = account_1.first_address_bech32().await;
-
-//     let token_supply = account_0.client().get_token_supply().await?;
+//     let token_supply = wallet_0.client().get_token_supply().await?;
 
 //     let outputs = [
 //         BasicOutputBuilder::new_with_amount(750_000)
-//             .with_unlock_conditions([AddressUnlockCondition::new(account_1_address.clone())])
+//             .with_unlock_conditions([AddressUnlockCondition::new(wallet_1_address.clone())])
 //             .finish_output(token_supply)?,
 //         BasicOutputBuilder::new_with_amount(250_000)
-//             .with_unlock_conditions([AddressUnlockCondition::new(account_1_address)])
+//             .with_unlock_conditions([AddressUnlockCondition::new(wallet_1_address)])
 //             .finish_output(token_supply)?,
 //     ];
 
-//     let tx = account_0.send_outputs(outputs, None).await?;
-//     account_0
+//     let tx = wallet_0.send_outputs(outputs, None).await?;
+//     wallet_0
 //         .reissue_transaction_until_included(&tx.transaction_id, None, None)
 //         .await?;
 
-//     account_1
+//     wallet_1
 //         .sync(Some(SyncOptions {
 //             sync_incoming_transactions: true,
 //             ..Default::default()
 //         }))
 //         .await?;
-//     let incoming_transactions = account_1.incoming_transactions().await;
+//     let incoming_transactions = wallet_1.incoming_transactions().await;
 //     assert_eq!(incoming_transactions.len(), 1);
-//     let incoming_tx = account_1.get_incoming_transaction(&tx.transaction_id).await.unwrap();
+//     let incoming_tx = wallet_1.get_incoming_transaction(&tx.transaction_id).await.unwrap();
 //     assert_eq!(incoming_tx.inputs.len(), 1);
 //     let transaction = incoming_tx.payload.transaction();
 
@@ -201,24 +201,22 @@ async fn updated_default_sync_options() -> Result<()> {
 
 //     wallet.start_background_syncing(None, None).await?;
 
-//     let account = wallet.create_account().finish().await?;
-
 //     iota_sdk::client::request_funds_from_faucet(
 //         crate::wallet::common::FAUCET_URL,
-//         &account.first_address_bech32().await,
+//         &wallet.address().await,
 //     )
 //     .await?;
 
 //     for _ in 0..30 {
 //         tokio::time::sleep(std::time::Duration::from_secs(2)).await;
-//         let balance = account.balance().await?;
+//         let balance = wallet.balance().await?;
 //         if balance.base_coin().available() > 0 {
 //             break;
 //         }
 //     }
 
-//     // Balance should be != 0 without calling account.sync()
-//     let balance = account.balance().await?;
+//     // Balance should be != 0 without calling wallet.sync()
+//     let balance = wallet.balance().await?;
 //     if balance.base_coin().available() == 0 {
 //         panic!("Faucet no longer wants to hand over coins or background syncing failed");
 //     }

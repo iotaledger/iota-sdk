@@ -18,7 +18,7 @@ where
     crate::wallet::Error: From<S::Error>,
     crate::client::Error: From<S::Error>,
 {
-    /// Start the background syncing process for all accounts, default interval is 7 seconds
+    /// Start the background syncing process for the wallet, default interval is 7 seconds
     pub async fn start_background_syncing(
         &self,
         options: Option<SyncOptions>,
@@ -73,7 +73,7 @@ where
         Ok(())
     }
 
-    /// Stop the background syncing of the accounts
+    /// Stop the background syncing of the wallet
     pub async fn stop_background_syncing(&self) -> crate::wallet::Result<()> {
         log::debug!("[stop_background_syncing]");
         // immediately return if not running

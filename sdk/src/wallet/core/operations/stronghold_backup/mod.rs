@@ -56,14 +56,14 @@ impl Wallet {
     }
 
     /// Restore a backup from a Stronghold file
-    /// Replaces client_options, bip_path, secret_manager and accounts. Returns an error if accounts were already
+    /// Replaces client_options, bip_path, secret_manager and wallet. Returns an error if the wallet was already
     /// created If Stronghold is used as secret_manager, the existing Stronghold file will be overwritten. If a
     /// mnemonic was stored, it will be gone.
     /// if ignore_if_bip_path_mismatch.is_some(), client options will not be restored
-    /// if ignore_if_bip_path_mismatch == Some(true), client options coin type and accounts will not be restored if the
+    /// if ignore_if_bip_path_mismatch == Some(true), client options coin type and wallet will not be restored if the
     /// coin type doesn't match
-    /// if ignore_if_bech32_hrp_mismatch == Some("rms"), but addresses have something different like "smr", no accounts
-    /// will be restored.
+    /// if ignore_if_bech32_hrp_mismatch == Some("rms"), but addresses have something different like "smr", the wallet 
+    /// will not be restored.
     pub async fn restore_backup(
         &self,
         backup_path: PathBuf,
@@ -208,14 +208,14 @@ impl Wallet<StrongholdSecretManager> {
     }
 
     /// Restore a backup from a Stronghold file
-    /// Replaces client_options, bip path, secret_manager and wallet. Returns an error if accounts were already
+    /// Replaces client_options, bip path, secret_manager and wallet. Returns an error if the wallet was already
     /// created If Stronghold is used as secret_manager, the existing Stronghold file will be overwritten. If a
     /// mnemonic was stored, it will be gone.
     /// if ignore_if_bip_path_mismatch.is_some(), client options will not be restored
     /// if ignore_if_bip_path_mismatch == Some(true), client options bip path and wallet will not be restored if the
     /// bip path doesn't match
-    /// if ignore_if_bech32_hrp_mismatch == Some("rms"), but addresses have something different like "smr", no accounts
-    /// will be restored.
+    /// if ignore_if_bech32_hrp_mismatch == Some("rms"), but addresses have something different like "smr", the wallet
+    /// will not be restored.
     pub async fn restore_backup(
         &self,
         backup_path: PathBuf,
@@ -235,10 +235,10 @@ impl Wallet<StrongholdSecretManager> {
         let mut wallet_data = self.data_mut().await;
 
         // TODO #1279: Is there a way to ensure that the user can't mess up?
-        // We don't want to overwrite possible existing accounts
+        // We don't want to overwrite possible existing wallet
         // if !wallet_data.is_empty() {
         //     return Err(crate::wallet::Error::Backup(
-        //         "can't restore backup when there are already accounts",
+        //         "can't restore backup when there is already a wallet",
         //     ));
         // }
 

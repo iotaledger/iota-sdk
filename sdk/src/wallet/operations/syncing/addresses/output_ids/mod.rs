@@ -47,7 +47,7 @@ where
         }
 
         // If interested in alias, basic, NFT and foundry outputs, get them all at once
-        if (address.is_ed25519() && sync_options.account.all_outputs())
+        if (address.is_ed25519() && sync_options.wallet.all_outputs())
             || (address.is_nft() && sync_options.nft.all_outputs())
             || (address.is_account() && sync_options.alias.all_outputs())
         {
@@ -64,7 +64,7 @@ where
         #[cfg(not(target_family = "wasm"))]
         let mut tasks = Vec::new();
 
-        if (address.inner().is_ed25519() && sync_options.account.basic_outputs)
+        if (address.inner().is_ed25519() && sync_options.wallet.basic_outputs)
             || (address.inner().is_nft() && sync_options.nft.basic_outputs)
             || (address.inner().is_account() && sync_options.alias.basic_outputs)
         {
@@ -95,7 +95,7 @@ where
             }
         }
 
-        if (address.inner().is_ed25519() && sync_options.account.nft_outputs)
+        if (address.inner().is_ed25519() && sync_options.wallet.nft_outputs)
             || (address.inner().is_nft() && sync_options.nft.nft_outputs)
             || (address.inner().is_account() && sync_options.alias.nft_outputs)
         {
@@ -123,7 +123,7 @@ where
             }
         }
 
-        if (address.inner().is_ed25519() && sync_options.account.account_outputs)
+        if (address.inner().is_ed25519() && sync_options.wallet.account_outputs)
             || (address.inner().is_nft() && sync_options.nft.account_outputs)
             || (address.inner().is_account() && sync_options.alias.account_outputs)
         {

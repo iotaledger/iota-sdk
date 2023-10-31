@@ -40,9 +40,9 @@ pub struct SyncOptions {
     /// Checks pending transactions and reissues them if necessary.
     #[serde(default = "default_sync_pending_transactions")]
     pub sync_pending_transactions: bool,
-    /// Specifies what outputs should be synced for the ed25519 addresses from the account.
+    /// Specifies what outputs should be synced for the ed25519 addresses from the wallet.
     #[serde(default)]
-    pub account: AccountSyncOptions,
+    pub wallet: WalletSyncOptions,
     /// Specifies what outputs should be synced for the address of an account output.
     #[serde(default)]
     // TODO Rename when we are done with Account changes https://github.com/iotaledger/iota-sdk/issues/647.
@@ -91,7 +91,7 @@ impl Default for SyncOptions {
             address_start_index_internal: default_address_start_index(),
             sync_incoming_transactions: default_sync_incoming_transactions(),
             sync_pending_transactions: default_sync_pending_transactions(),
-            account: AccountSyncOptions::default(),
+            wallet: WalletSyncOptions::default(),
             alias: AliasSyncOptions::default(),
             nft: NftSyncOptions::default(),
             sync_only_most_basic_outputs: default_sync_only_most_basic_outputs(),
@@ -101,16 +101,16 @@ impl Default for SyncOptions {
     }
 }
 
-/// Sync options for Ed25519 addresses from the account
+/// Sync options for Ed25519 addresses from the wallet
 #[derive(Debug, Clone, Eq, PartialEq, Hash, Serialize, Deserialize)]
 #[serde(default, rename_all = "camelCase")]
-pub struct AccountSyncOptions {
+pub struct WalletSyncOptions {
     pub basic_outputs: bool,
     pub nft_outputs: bool,
     pub account_outputs: bool,
 }
 
-impl Default for AccountSyncOptions {
+impl Default for WalletSyncOptions {
     fn default() -> Self {
         Self {
             basic_outputs: true,
@@ -120,7 +120,7 @@ impl Default for AccountSyncOptions {
     }
 }
 
-impl AccountSyncOptions {
+impl WalletSyncOptions {
     pub(crate) fn all_outputs(&self) -> bool {
         self.basic_outputs && self.nft_outputs && self.account_outputs
     }

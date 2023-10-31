@@ -65,14 +65,14 @@ pub enum WalletMethod {
     #[cfg_attr(docsrs, doc(cfg(feature = "stronghold")))]
     IsStrongholdPasswordAvailable,
     /// Restore a backup from a Stronghold file
-    /// Replaces client_options, coin_type, secret_manager and accounts. Returns an error if accounts were already
+    /// Replaces client_options, coin_type, secret_manager and wallet. Returns an error if the wallet was already
     /// created If Stronghold is used as secret_manager, the existing Stronghold file will be overwritten. If a
     /// mnemonic was stored, it will be gone.
     /// if ignore_if_coin_type_mismatch.is_some(), client options will not be restored
-    /// if ignore_if_coin_type_mismatch == Some(true), client options coin type and accounts will not be restored if
+    /// if ignore_if_coin_type_mismatch == Some(true), client options coin type and the wallet will not be restored if
     /// the cointype doesn't match
-    /// if ignore_if_bech32_hrp_mismatch == Some("rms"), but addresses have something different like "smr", no accounts
-    /// will be restored.
+    /// if ignore_if_bech32_hrp_mismatch == Some("rms"), but addresses have something different like "smr", the wallet
+    /// will not be restored.
     /// Expected response: [`Ok`](crate::Response::Ok)
     #[cfg(feature = "stronghold")]
     #[cfg_attr(docsrs, doc(cfg(feature = "stronghold")))]
@@ -84,14 +84,14 @@ pub enum WalletMethod {
         #[derivative(Debug(format_with = "OmittedDebug::omitted_fmt"))]
         password: String,
         /// If ignore_if_coin_type_mismatch.is_some(), client options will not be restored.
-        /// If ignore_if_coin_type_mismatch == Some(true), client options coin type and accounts will not be restored
+        /// If ignore_if_coin_type_mismatch == Some(true), client options coin type and wallet will not be restored
         /// if the cointype doesn't match.
         ignore_if_coin_type_mismatch: Option<bool>,
-        /// If ignore_if_bech32_hrp_mismatch == Some("rms"), but addresses have something different like "smr", no
-        /// accounts will be restored.
+        /// If ignore_if_bech32_hrp_mismatch == Some("rms"), but addresses have something different like "smr", the
+        /// wallet will not be restored.
         ignore_if_bech32_mismatch: Option<Hrp>,
     },
-    /// Updates the client options for all accounts.
+    /// Updates the client options for the wallet.
     /// Expected response: [`Ok`](crate::Response::Ok)
     #[serde(rename_all = "camelCase")]
     SetClientOptions { client_options: Box<ClientOptions> },

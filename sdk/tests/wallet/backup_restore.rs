@@ -186,22 +186,22 @@ async fn backup_and_restore() -> Result<()> {
 //     // Validate restored data
 
 //     // Restored coin type is used
-//     let new_account = restore_wallet.create_account().finish().await?;
-//     assert_eq!(new_account.details().await.coin_type(), &SHIMMER_COIN_TYPE);
+//     let new_wallet = restore_wallet;
+//     assert_eq!(new_wallet.data().await.coin_type(), &SHIMMER_COIN_TYPE);
 
 //     // compare restored client options
 //     let client_options = restore_wallet.client_options().await;
 //     let node_dto = NodeDto::Node(Node::from(Url::parse(NODE_LOCAL).unwrap()));
 //     assert!(client_options.node_manager_builder.nodes.contains(&node_dto));
 
-//     // Get account
-//     let recovered_account = restore_wallet.get_account("Alice").await?;
-//     assert_eq!(account.addresses().await, recovered_account.addresses().await);
+//     // Get wallet
+//     let recovered_wallet = restore_wallet;
+//     assert_eq!(wallet.address().await, recovered_wallet.address().await);
 
 //     // secret manager is the same
 //     assert_eq!(
-//         account.generate_ed25519_addresses(1, None).await?,
-//         recovered_account.generate_ed25519_addresses(1, None).await?
+//         wallet.generate_ed25519_addresses(1, None).await?,
+//         recovered_wallet.generate_ed25519_addresses(1, None).await?
 //     );
 //     tear_down(storage_path)
 // }
@@ -233,9 +233,6 @@ async fn backup_and_restore() -> Result<()> {
 //         .with_storage_path("test-storage/backup_and_restore_different_coin_type/1")
 //         .finish()
 //         .await?;
-
-//     // Create one account
-//     wallet.create_account().with_alias("Alice").finish().await?;
 
 //     wallet
 //         .backup(
@@ -271,15 +268,15 @@ async fn backup_and_restore() -> Result<()> {
 
 //     // Validate restored data
 
-//     // No accounts restored, because the coin type was different
-//     assert!(restore_wallet.get_accounts().await?.is_empty());
+//     // No wallet restored, because the coin type was different
+//     assert!(restore_wallet.get_wallet_data().await?.is_empty());
 
 //     // Restored coin type is not used and it's still the same one
-//     let new_account = restore_wallet.create_account().finish().await?;
-//     assert_eq!(new_account.details().await.coin_type(), &IOTA_COIN_TYPE);
+//     let new_wallet = restore_wallet;
+//     assert_eq!(new_wallet.data().await.coin_type(), &IOTA_COIN_TYPE);
 //     // secret manager is the same
 //     assert_eq!(
-//         new_account.first_address_bech32().await,
+//         new_wallet.address().await,
 //         "smr1qrpwecegav7eh0z363ca69laxej64rrt4e3u0rtycyuh0mam3vq3ulygj9p"
 //     );
 
@@ -319,8 +316,7 @@ async fn backup_and_restore() -> Result<()> {
 //         .finish()
 //         .await?;
 
-//     // Create one account
-//     let account_before_backup = wallet.create_account().with_alias("Alice").finish().await?;
+//     let wallet_before_backup = wallet;
 
 //     wallet
 //         .backup(
@@ -356,13 +352,13 @@ async fn backup_and_restore() -> Result<()> {
 //     // Validate restored data
 
 //     // The wallet is restored, because the coin type is the same
-//     let restored_accounts = restore_wallet.get_accounts().await?;
-//     assert_eq!(restored_accounts.len(), 1);
+//     let restored_wallet = restore_wallet.get_wallet_data().await?;
+//     assert!(restored_wallet.is_some());
 
 //     // addresses are still there
 //     assert_eq!(
-//         restored_accounts[0].addresses().await,
-//         account_before_backup.addresses().await
+//         restored_wallet.address().await,
+//         wallet_before_backup.address().await
 //     );
 
 //     // compare client options, they are not restored
@@ -401,9 +397,6 @@ async fn backup_and_restore() -> Result<()> {
 //         .finish()
 //         .await?;
 
-//     // Create one account
-//     let account = wallet.create_account().with_alias("Alice").finish().await?;
-
 //     wallet
 //         .backup(
 //             PathBuf::from("test-storage/backup_and_restore_different_coin_type_dont_ignore/backup.stronghold"),
@@ -437,19 +430,19 @@ async fn backup_and_restore() -> Result<()> {
 
 //     // Validate restored data
 
-//     // No accounts restored, because the coin type was different
-//     let restored_account = restore_wallet.get_account("Alice").await?;
+//     // No wallet restored, because the coin type was different
+//     let restored_wallet = restore_wallet.get_wallet_data().await?;
 //     assert_eq!(
-//         account.first_address_bech32().await,
-//         restored_account.first_address_bech32().await,
+//         wallet.address().await,
+//         restored_wallet.address().await,
 //     );
 
-//     // Restored coin type is used
-//     let new_account = restore_wallet.create_account().finish().await?;
-//     assert_eq!(new_account.details().await.coin_type(), &SHIMMER_COIN_TYPE);
+//     // TODO: Restored coin type is used
+//     let new_wallet = restore_wallet;
+//     assert_eq!(new_wallet.data().await.coin_type(), &SHIMMER_COIN_TYPE);
 //     // secret manager is restored
 //     assert_eq!(
-//         new_account.first_address_bech32().await,
+//         new_wallet.address().await,
 //         "smr1qzvjvjyqxgfx4f0m3xhn2rj24e03dwsmjz082735y3wx88v2gudu2afedhu"
 //     );
 
@@ -487,8 +480,6 @@ async fn backup_and_restore() -> Result<()> {
 //         .with_storage_path("test-storage/backup_and_restore_bech32_hrp_mismatch/1")
 //         .finish()
 //         .await?;
-
-//     let account = wallet.create_account().with_alias("Alice").finish().await?;
 
 //     wallet
 //         .backup(
@@ -528,18 +519,18 @@ async fn backup_and_restore() -> Result<()> {
 //     let node_dto = NodeDto::Node(Node::from(Url::parse(NODE_LOCAL).unwrap()));
 //     assert!(client_options.node_manager_builder.nodes.contains(&node_dto));
 
-//     // No restored accounts because the bech32 hrp was different
-//     let restored_accounts = restore_wallet.get_accounts().await?;
-//     assert!(restored_accounts.is_empty());
+//     // No restored wallet because the bech32 hrp was different
+//     let restored_wallet = restore_wallet.get_wallet_data().await?;
+//     assert!(restored_wallet.is_empty());
 
 //     // Restored coin type is used
-//     let new_account = restore_wallet.create_account().finish().await?;
-//     assert_eq!(new_account.details().await.coin_type(), &SHIMMER_COIN_TYPE);
+//     let new_wallet = restore_wallet;
+//     assert_eq!(new_wallet.details().await.coin_type(), &SHIMMER_COIN_TYPE);
 
 //     // secret manager is the same
 //     assert_eq!(
-//         account.generate_ed25519_addresses(1, None).await?,
-//         new_account.generate_ed25519_addresses(1, None).await?
+//         wallet.generate_ed25519_addresses(1, None).await?,
+//         new_wallet.generate_ed25519_addresses(1, None).await?
 //     );
 //     tear_down(storage_path)
 // }
