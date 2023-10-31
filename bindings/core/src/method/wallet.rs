@@ -15,6 +15,7 @@ use iota_sdk::{
 use serde::{Deserialize, Serialize};
 use url::Url;
 
+use crate::method::WalletCommandMethod;
 #[cfg(feature = "stronghold")]
 use crate::OmittedDebug;
 
@@ -29,7 +30,7 @@ pub enum WalletMethod {
     #[serde(rename_all = "camelCase")]
     CallMethod {
         /// The wallet command method to call.
-        method: super::WalletCommandMethod,
+        method: WalletCommandMethod,
     },
     /// Backup storage. Password must be the current one, when Stronghold is used as SecretManager.
     /// Expected response: [`Ok`](crate::Response::Ok)

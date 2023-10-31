@@ -100,15 +100,15 @@ async fn main() -> Result<()> {
         let mut tasks = tokio::task::JoinSet::<std::result::Result<(), (usize, iota_sdk::wallet::Error)>>::new();
 
         for n in 0..num_simultaneous_txs {
-            let recv_address_clone = recv_address.clone();
-            let account_clone = wallet.clone();
+            let recv_address = recv_address.clone();
+            let wallet = wallet.clone();
 
             tasks.spawn(async move {
                 println!("Thread {n}: sending {SEND_AMOUNT} coins to own address");
 
                 let thread_timer = tokio::time::Instant::now();
-                let transaction = account_clone
-                    .send(SEND_AMOUNT, recv_address_clone, None)
+                let transaction = wallet
+                    .send(SEND_AMOUNT, recv_address, None)
                     .await
                     .map_err(|err| (n, err))?;
                 let elapsed = thread_timer.elapsed();
