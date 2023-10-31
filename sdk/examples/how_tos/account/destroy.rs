@@ -1,7 +1,7 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! In this example we will try to destroy the first account output there is in the account.
+//! In this example we will try to destroy the first account output there is in the wallet.
 //!
 //! Make sure that `STRONGHOLD_SNAPSHOT_PATH` and `WALLET_DB_PATH` already exist by
 //! running the `./how_tos/accounts_and_addresses/create_wallet.rs` example!

@@ -26,7 +26,7 @@ where
     crate::wallet::Error: From<S::Error>,
     crate::client::Error: From<S::Error>,
 {
-    /// Selects inputs for a transaction and locks them in the account, so they don't get used again
+    /// Selects inputs for a transaction and locks them in the wallet, so they don't get used again
     pub(crate) async fn select_inputs(
         &self,
         outputs: Vec<Output>,

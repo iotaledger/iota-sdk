@@ -95,7 +95,7 @@ where
             .await
     }
 
-    /// Signs a transaction, submit it to a node and store it in the account
+    /// Signs a transaction, submit it to a node and store it in the wallet
     pub async fn sign_and_submit_transaction(
         &self,
         prepared_transaction_data: PreparedTransactionData,
@@ -116,7 +116,7 @@ where
             .await
     }
 
-    /// Validates the transaction, submit it to a node and store it in the account
+    /// Validates the transaction, submit it to a node and store it in the wallet
     pub async fn submit_and_store_transaction(
         &self,
         signed_transaction_data: SignedTransactionData,

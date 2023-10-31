@@ -36,7 +36,7 @@ where
     /// address) connected to
     pub(crate) async fn get_output_ids_for_address(
         &self,
-        address: Bech32Address,
+        address: &Bech32Address,
         sync_options: &SyncOptions,
     ) -> crate::wallet::Result<Vec<OutputId>> {
         if sync_options.sync_only_most_basic_outputs {
@@ -46,7 +46,7 @@ where
             return Ok(output_ids);
         }
 
-        // If interested in alias, basic, NFT and foundry outputs, get them all at once
+        // If interested in account, basic, NFT and foundry outputs, get them all at once
         if (address.is_ed25519() && sync_options.wallet.all_outputs())
             || (address.is_nft() && sync_options.nft.all_outputs())
             || (address.is_account() && sync_options.account.all_outputs())

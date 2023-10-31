@@ -46,7 +46,7 @@ async fn main() -> Result<()> {
     println!("Generating address...");
     let _ = wallet.generate_ed25519_address(0, 0, None).await?;
 
-    println!("Syncing account");
+    println!("Syncing wallet");
     wallet.sync(None).await?;
 
     println!("Example finished successfully");

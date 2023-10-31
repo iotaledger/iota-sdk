@@ -1,7 +1,7 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-/// Address types used in the account
+/// Address types used in the wallet
 pub(crate) mod address;
 pub(crate) mod balance;
 #[cfg(feature = "participation")]
