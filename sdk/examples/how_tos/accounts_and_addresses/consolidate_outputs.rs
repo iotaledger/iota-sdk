@@ -33,7 +33,7 @@ async fn main() -> Result<()> {
         .set_stronghold_password(std::env::var("STRONGHOLD_PASSWORD").unwrap())
         .await?;
 
-    // Sync account to make sure account is updated with outputs from previous examples
+    // Sync wallet to make sure it is updated with outputs from previous examples
     wallet.sync(None).await?;
     println!("Wallet synced");
 
@@ -73,7 +73,7 @@ async fn main() -> Result<()> {
         block_id
     );
 
-    // Sync account
+    // Sync wallet
     wallet.sync(None).await?;
     println!("Wallet synced");
 

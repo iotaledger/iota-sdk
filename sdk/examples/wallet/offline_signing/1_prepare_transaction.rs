@@ -48,7 +48,7 @@ async fn main() -> Result<()> {
         .finish()
         .await?;
 
-    // Sync the account to get the outputs for the addresses
+    // Sync the wallet to get the outputs for the addresses
     wallet.sync(None).await?;
 
     let prepared_transaction = wallet.prepare_send(params.clone(), None).await?;

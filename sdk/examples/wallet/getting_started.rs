@@ -24,7 +24,7 @@ async fn main() -> Result<()> {
     // WARNING: Never hardcode passwords in production code.
     let secret_manager = StrongholdSecretManager::builder()
         .password("password".to_owned()) // A password to encrypt the stored data.
-        .build("vault.stronghold")?; // The path to store the account snapshot.
+        .build("vault.stronghold")?; // The path to store the wallet snapshot.
 
     let client_options = ClientOptions::new().with_node("https://api.testnet.shimmer.network")?;
 

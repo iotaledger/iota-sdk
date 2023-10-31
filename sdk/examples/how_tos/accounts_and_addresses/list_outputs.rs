@@ -20,7 +20,7 @@ async fn main() -> Result<()> {
         .finish()
         .await?;
 
-    // Sync account
+    // Sync wallet
     wallet.sync(None).await?;
 
     // Print output ids

@@ -23,7 +23,7 @@ async fn main() -> Result<()> {
         .finish()
         .await?;
 
-    // Sync account
+    // Sync wallet
     wallet
         .sync(Some(SyncOptions {
             sync_incoming_transactions: true,

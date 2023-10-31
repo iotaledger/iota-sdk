@@ -16,7 +16,7 @@ where
     /// Search addresses with unspent outputs
     /// `address_gap_limit`: The number of addresses to search for, after the last address with unspent outputs
     /// Addresses that got crated during this operation and have a higher key_index than the latest one with outputs,
-    /// will be removed again, to keep the account size smaller
+    /// will be removed again, to keep the wallet size smaller
     pub(crate) async fn search_addresses_with_outputs(
         &self,
         mut address_gap_limit: u32,
