@@ -19,7 +19,7 @@ use crate::types::{
             NativeTokens, Output, OutputBuilderAmount, OutputId, StorageScore, StorageScoreParameters,
         },
         protocol::ProtocolParameters,
-        semantic::{TransactionFailureReason, ValidationContext},
+        semantic::{SemanticValidationContext, TransactionFailureReason},
         unlock::Unlock,
         Error,
     },
@@ -400,12 +400,11 @@ impl BasicOutput {
         &self,
         _output_id: &OutputId,
         unlock: &Unlock,
-        inputs: &[(&OutputId, &Output)],
-        context: &mut ValidationContext<'_>,
+        context: &mut SemanticValidationContext<'_>,
     ) -> Result<(), TransactionFailureReason> {
         self.unlock_conditions()
             .locked_address(self.address(), context.transaction.creation_slot())
-            .unlock(unlock, inputs, context)
+            .unlock(unlock, context)
     }
 
     /// Returns the address of the unlock conditions if the output is a simple deposit.
@@ -587,7 +586,7 @@ mod tests {
             output::{dto::OutputDto, FoundryId, SimpleTokenScheme, TokenId},
             protocol::protocol_parameters,
             rand::{
-                address::{rand_account_address, rand_address},
+                address::rand_account_address,
                 output::{
                     feature::rand_allowed_features, rand_basic_output, unlock_condition::rand_address_unlock_condition,
                 },

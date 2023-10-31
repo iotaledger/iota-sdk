@@ -3,6 +3,7 @@ import type {
     __GenerateEvmAddressesMethod__,
     __GetLedgerNanoStatusMethod__,
     __SignTransactionMethod__,
+    __SignBlockMethod__,
     __StoreMnemonicMethod__,
     __SignatureUnlockMethod__,
     __SignEd25519Method__,
@@ -14,6 +15,7 @@ export type __SecretManagerMethods__ =
     | __GenerateEvmAddressesMethod__
     | __GetLedgerNanoStatusMethod__
     | __SignTransactionMethod__
+    | __SignBlockMethod__
     | __SignatureUnlockMethod__
     | __StoreMnemonicMethod__
     | __SignEd25519Method__

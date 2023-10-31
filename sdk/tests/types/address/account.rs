@@ -8,6 +8,7 @@ use iota_sdk::types::block::{
     output::AccountId,
 };
 use packable::PackableExt;
+use pretty_assertions::assert_eq;
 use serde_json::json;
 
 const ACCOUNT_ID: &str = "0xe9ba80ad1561e437b663a1f1efbfabd544b0d7da7bb33e0a62e99b20ee450bee";

@@ -22,21 +22,22 @@ use tokio::sync::Mutex;
 use super::{GenerateAddressOptions, SecretManage, SecretManagerConfig};
 use crate::{
     client::secret::{
-        is_account_transition,
         types::{LedgerApp, LedgerDeviceType},
         LedgerNanoStatus, PreparedTransactionData,
     },
     types::block::{
-        address::{AccountAddress, Address, Ed25519Address, NftAddress},
+        address::{AccountAddress, Address, AnchorAddress, Ed25519Address, NftAddress},
         output::Output,
         payload::signed_transaction::SignedTransactionPayload,
         signature::{Ed25519Signature, Signature},
         unlock::{AccountUnlock, NftUnlock, ReferenceUnlock, SignatureUnlock, Unlock, Unlocks},
+        Error as BlockError,
     },
 };
 
 /// Ledger nano errors.
 #[derive(Debug, thiserror::Error)]
+#[non_exhaustive]
 pub enum Error {
     /// Denied by User
     #[error("denied by user")]
@@ -517,29 +518,22 @@ fn merge_unlocks(
     // Assuming inputs_data is ordered by address type
     for (current_block_index, input) in prepared_transaction_data.inputs_data.iter().enumerate() {
         // Get the address that is required to unlock the input
-        let account_transition = is_account_transition(
-            &input.output,
-            *input.output_id(),
-            prepared_transaction_data.transaction.outputs(),
-            None,
-        );
-        let (input_address, _) = input.output.required_and_unlocked_address(
-            slot_index,
-            input.output_metadata.output_id(),
-            account_transition,
-        )?;
+        let (input_address, _) = input
+            .output
+            .required_and_unlocked_address(slot_index, input.output_metadata.output_id())?;
 
         // Check if we already added an [Unlock] for this address
         match block_indexes.get(&input_address) {
             // If we already have an [Unlock] for this address, add a [Unlock] based on the address type
             Some(block_index) => match input_address {
-                Address::Account(_account) => {
-                    merged_unlocks.push(Unlock::Account(AccountUnlock::new(*block_index as u16)?))
-                }
                 Address::Ed25519(_ed25519) => {
                     merged_unlocks.push(Unlock::Reference(ReferenceUnlock::new(*block_index as u16)?));
                 }
+                Address::Account(_account) => {
+                    merged_unlocks.push(Unlock::Account(AccountUnlock::new(*block_index as u16)?))
+                }
                 Address::Nft(_nft) => merged_unlocks.push(Unlock::Nft(NftUnlock::new(*block_index as u16)?)),
+                Address::Anchor(_) => Err(BlockError::UnsupportedAddressKind(AnchorAddress::KIND))?,
                 _ => todo!("What do we do here?"),
             },
             None => {

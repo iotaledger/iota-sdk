@@ -29,16 +29,18 @@ import {
     FoundryOutput,
     NftOutput,
     Output,
-    Block,
     BlockId,
     UnlockCondition,
     Payload,
     SignedTransactionPayload,
-    parseBlockWrapper,
-    BlockWrapper,
+    parseSignedBlock,
+    SignedBlock,
     AccountId,
     NftId,
     FoundryId,
+    IssuerId,
+    UnsignedBlock,
+    parseUnsignedBlock,
 } from '../types/block';
 import { HexEncodedString } from '../utils';
 import {
@@ -175,7 +177,7 @@ export class Client {
      * @param block The block to post.
      * @returns The block ID once the block has been posted.
      */
-    async postBlock(block: Block): Promise<BlockId> {
+    async postBlock(block: SignedBlock): Promise<BlockId> {
         const response = await this.methodHandler.callMethod({
             name: 'postBlock',
             data: {
@@ -192,7 +194,7 @@ export class Client {
      * @param blockId The corresponding block ID of the requested block.
      * @returns The requested block.
      */
-    async getBlock(blockId: BlockId): Promise<BlockWrapper> {
+    async getBlock(blockId: BlockId): Promise<SignedBlock> {
         const response = await this.methodHandler.callMethod({
             name: 'getBlock',
             data: {
@@ -200,8 +202,8 @@ export class Client {
             },
         });
 
-        const parsed = JSON.parse(response) as Response<BlockWrapper>;
-        return parseBlockWrapper(parsed.payload);
+        const parsed = JSON.parse(response) as Response<SignedBlock>;
+        return parseSignedBlock(parsed.payload);
     }
 
     /**
@@ -292,23 +294,25 @@ export class Client {
     }
 
     /**
-     * Submit a payload in a block.
+     * Build an unsigned block.
      *
+     * @param issuerId The identifier of the block issuer account.
      * @param payload The payload to post.
      * @returns The block ID followed by the block containing the payload.
      */
-    async postBlockPayload(payload: Payload): Promise<[BlockId, BlockWrapper]> {
+    async buildBasicBlock(
+        issuerId: IssuerId,
+        payload?: Payload,
+    ): Promise<UnsignedBlock> {
         const response = await this.methodHandler.callMethod({
-            name: 'postBlockPayload',
+            name: 'buildBasicBlock',
             data: {
+                issuerId,
                 payload,
             },
         });
-        const parsed = JSON.parse(response) as Response<
-            [BlockId, BlockWrapper]
-        >;
-        const block = parseBlockWrapper(parsed.payload[1]);
-        return [parsed.payload[0], block];
+        const parsed = JSON.parse(response) as Response<UnsignedBlock>;
+        return parseUnsignedBlock(parsed.payload);
     }
 
     /**
@@ -411,7 +415,7 @@ export class Client {
      * @param block The block.
      * @returns The ID of the posted block.
      */
-    async postBlockRaw(block: Block): Promise<BlockId> {
+    async postBlockRaw(block: SignedBlock): Promise<BlockId> {
         const response = await this.methodHandler.callMethod({
             name: 'postBlockRaw',
             data: {
@@ -445,17 +449,15 @@ export class Client {
      * @param transactionId The ID of the transaction.
      * @returns The included block that contained the transaction.
      */
-    async getIncludedBlock(
-        transactionId: TransactionId,
-    ): Promise<BlockWrapper> {
+    async getIncludedBlock(transactionId: TransactionId): Promise<SignedBlock> {
         const response = await this.methodHandler.callMethod({
             name: 'getIncludedBlock',
             data: {
                 transactionId,
             },
         });
-        const parsed = JSON.parse(response) as Response<BlockWrapper>;
-        return parseBlockWrapper(parsed.payload);
+        const parsed = JSON.parse(response) as Response<SignedBlock>;
+        return parseSignedBlock(parsed.payload);
     }
 
     /**
@@ -466,15 +468,15 @@ export class Client {
      */
     async getIncludedBlockMetadata(
         transactionId: TransactionId,
-    ): Promise<BlockWrapper> {
+    ): Promise<SignedBlock> {
         const response = await this.methodHandler.callMethod({
             name: 'getIncludedBlockMetadata',
             data: {
                 transactionId,
             },
         });
-        const parsed = JSON.parse(response) as Response<BlockWrapper>;
-        return parseBlockWrapper(parsed.payload);
+        const parsed = JSON.parse(response) as Response<SignedBlock>;
+        return parseSignedBlock(parsed.payload);
     }
 
     /**
@@ -699,15 +701,15 @@ export class Client {
      * @param blockIds An array of `BlockId`s.
      * @returns An array of corresponding blocks.
      */
-    async findBlocks(blockIds: BlockId[]): Promise<BlockWrapper[]> {
+    async findBlocks(blockIds: BlockId[]): Promise<SignedBlock[]> {
         const response = await this.methodHandler.callMethod({
             name: 'findBlocks',
             data: {
                 blockIds,
             },
         });
-        const parsed = JSON.parse(response) as Response<BlockWrapper[]>;
-        return parsed.payload.map((p) => parseBlockWrapper(p));
+        const parsed = JSON.parse(response) as Response<SignedBlock[]>;
+        return parsed.payload.map((p) => parseSignedBlock(p));
     }
 
     /**
@@ -865,7 +867,7 @@ export class Client {
     /**
      * Extension method which provides request methods for plugins.
      *
-     * @param basePluginPath The base path for the plugin eg indexer/v1/ .
+     * @param basePluginPath The base path for the plugin eg indexer/v2/ .
      * @param method The http method.
      * @param endpoint The path for the plugin request.
      * @param queryParams Additional query params for the request.

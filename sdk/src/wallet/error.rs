@@ -12,6 +12,7 @@ use crate::types::block::{address::Bech32Address, payload::signed_transaction::T
 
 /// The wallet error type.
 #[derive(Debug, thiserror::Error)]
+#[non_exhaustive]
 pub enum Error {
     /// Account alias must be unique.
     #[error("can't create account: account alias {0} already exists")]

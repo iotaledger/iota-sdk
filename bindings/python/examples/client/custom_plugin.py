@@ -28,5 +28,5 @@ route = "outputs/nft/" + nft_id
 
 # Call our "custom" indexer plugin
 output_id = client.call_plugin_route(
-    "api/indexer/v1/", "GET", route, None, None)
+    "api/indexer/v2/", "GET", route, None, None)
 print(json.dumps(output_id, indent=4))

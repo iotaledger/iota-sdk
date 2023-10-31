@@ -3,7 +3,7 @@
 
 use core::str::FromStr;
 
-use derive_more::{AsRef, Deref, From};
+use derive_more::{AsRef, Deref, Display, From};
 
 use crate::types::block::{
     output::{AccountId, StorageScore},
@@ -11,7 +11,7 @@ use crate::types::block::{
 };
 
 /// An account address.
-#[derive(Clone, Copy, Eq, PartialEq, Ord, PartialOrd, Hash, From, AsRef, Deref, packable::Packable)]
+#[derive(Clone, Copy, Eq, PartialEq, Ord, PartialOrd, Hash, From, AsRef, Deref, Display, packable::Packable)]
 #[as_ref(forward)]
 pub struct AccountAddress(AccountId);
 
@@ -47,12 +47,6 @@ impl FromStr for AccountAddress {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         Ok(Self::new(AccountId::from_str(s)?))
-    }
-}
-
-impl core::fmt::Display for AccountAddress {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        write!(f, "{}", self.0)
     }
 }
 

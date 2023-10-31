@@ -12,7 +12,7 @@ use packable::{
     Packable,
 };
 
-use crate::types::block::{BlockWrapper, Error};
+use crate::types::block::{Error, SignedBlock};
 
 pub(crate) type TagLength =
     BoundedU8<{ *TaggedDataPayload::TAG_LENGTH_RANGE.start() }, { *TaggedDataPayload::TAG_LENGTH_RANGE.end() }>;
@@ -39,7 +39,7 @@ impl TaggedDataPayload {
     // lengths.
     // TODO https://github.com/iotaledger/iota-sdk/issues/1226
     pub const DATA_LENGTH_RANGE: RangeInclusive<u32> =
-        0..=(BlockWrapper::LENGTH_MAX - BlockWrapper::LENGTH_MIN - 9) as u32;
+        0..=(SignedBlock::LENGTH_MAX - SignedBlock::LENGTH_MIN - 9) as u32;
 
     /// Creates a new [`TaggedDataPayload`].
     pub fn new(tag: impl Into<Box<[u8]>>, data: impl Into<Box<[u8]>>) -> Result<Self, Error> {

@@ -6,6 +6,7 @@ pub type Result<T> = std::result::Result<T, Error>;
 
 /// Node errors.
 #[derive(Debug, thiserror::Error)]
+#[non_exhaustive]
 pub enum Error {
     /// The requested data was not found. (404)
     #[error("The requested data {0} was not found.")]

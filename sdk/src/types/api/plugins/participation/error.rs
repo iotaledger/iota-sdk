@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #[derive(Debug)]
+#[non_exhaustive]
 pub enum Error {
     /// Invalid participations error
     InvalidParticipations,

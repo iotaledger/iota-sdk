@@ -1,4 +1,4 @@
-// Copyright 2021 IOTA Stiftung
+// Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
 use alloc::{collections::BTreeSet, vec::Vec};
@@ -9,13 +9,15 @@ use packable::{
     bounded::BoundedU16,
     error::{UnpackError, UnpackErrorExt},
     packer::Packer,
+    prefix::BoxedSlicePrefix,
     unpacker::Unpacker,
     Packable, PackableExt,
 };
 
+use super::{StorageScore, StorageScoreParameters};
 use crate::types::{
     block::{
-        address::{AccountAddress, Address},
+        address::{Address, AnchorAddress},
         output::{
             feature::{verify_allowed_features, Feature, FeatureFlags, Features},
             unlock_condition::{
@@ -23,7 +25,6 @@ use crate::types::{
             },
             verify_output_amount_min, verify_output_amount_packable, verify_output_amount_supply, ChainId, NativeToken,
             NativeTokens, Output, OutputBuilderAmount, OutputId, StateTransitionError, StateTransitionVerifier,
-            StorageScore, StorageScoreParameters,
         },
         payload::signed_transaction::TransactionCapabilityFlag,
         protocol::ProtocolParameters,
@@ -35,64 +36,98 @@ use crate::types::{
 };
 
 crate::impl_id!(
-    /// A unique identifier of an account.
-    pub AccountId {
+    /// A unique identifier of an anchor.
+    pub AnchorId {
         pub const LENGTH: usize = 32;
     }
 );
 
-impl From<&OutputId> for AccountId {
+impl From<&OutputId> for AnchorId {
     fn from(output_id: &OutputId) -> Self {
         Self::from(output_id.hash())
     }
 }
 
-impl AccountId {
+impl AnchorId {
     ///
     pub fn or_from_output_id(self, output_id: &OutputId) -> Self {
         if self.is_null() { Self::from(output_id) } else { self }
     }
 }
 
-impl From<AccountId> for Address {
-    fn from(value: AccountId) -> Self {
-        Self::Account(AccountAddress::new(value))
+impl From<AnchorId> for Address {
+    fn from(value: AnchorId) -> Self {
+        Self::Anchor(AnchorAddress::new(value))
+    }
+}
+
+/// Types of anchor transition.
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+pub enum AnchorTransition {
+    /// State transition.
+    State,
+    /// Governance transition.
+    Governance,
+}
+
+impl AnchorTransition {
+    /// Checks whether the anchor transition is a state one.
+    pub fn is_state(&self) -> bool {
+        matches!(self, Self::State)
+    }
+
+    /// Checks whether the anchor transition is a governance one.
+    pub fn is_governance(&self) -> bool {
+        matches!(self, Self::Governance)
+    }
+}
+
+impl core::fmt::Display for AnchorTransition {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        match self {
+            Self::State => write!(f, "state"),
+            Self::Governance => write!(f, "governance"),
+        }
     }
 }
 
 ///
 #[derive(Clone)]
 #[must_use]
-pub struct AccountOutputBuilder {
+pub struct AnchorOutputBuilder {
     amount: OutputBuilderAmount,
     mana: u64,
     native_tokens: BTreeSet<NativeToken>,
-    account_id: AccountId,
-    foundry_counter: Option<u32>,
+    anchor_id: AnchorId,
+    state_index: u32,
+    state_metadata: Vec<u8>,
     unlock_conditions: BTreeSet<UnlockCondition>,
     features: BTreeSet<Feature>,
     immutable_features: BTreeSet<Feature>,
 }
 
-impl AccountOutputBuilder {
-    /// Creates an [`AccountOutputBuilder`] with a provided amount.
-    pub fn new_with_amount(amount: u64, account_id: AccountId) -> Self {
-        Self::new(OutputBuilderAmount::Amount(amount), account_id)
+impl AnchorOutputBuilder {
+    /// Creates an [`AnchorOutputBuilder`] with a provided amount.
+    pub fn new_with_amount(amount: u64, anchor_id: AnchorId) -> Self {
+        Self::new(OutputBuilderAmount::Amount(amount), anchor_id)
     }
 
-    /// Creates an [`AccountOutputBuilder`] with a provided storage score structure.
+    /// Creates an [`AnchorOutputBuilder`] with a provided storage score structure.
     /// The amount will be set to the storage cost of the resulting output.
-    pub fn new_with_minimum_amount(params: StorageScoreParameters, account_id: AccountId) -> Self {
-        Self::new(OutputBuilderAmount::StorageCost(params), account_id)
+    #[inline(always)]
+    pub fn new_with_minimum_amount(params: StorageScoreParameters, anchor_id: AnchorId) -> Self {
+        Self::new(OutputBuilderAmount::StorageCost(params), anchor_id)
     }
 
-    fn new(amount: OutputBuilderAmount, account_id: AccountId) -> Self {
+    fn new(amount: OutputBuilderAmount, anchor_id: AnchorId) -> Self {
         Self {
             amount,
             mana: Default::default(),
             native_tokens: BTreeSet::new(),
-            account_id,
-            foundry_counter: None,
+            anchor_id,
+            state_index: 0,
+            state_metadata: Vec::new(),
             unlock_conditions: BTreeSet::new(),
             features: BTreeSet::new(),
             immutable_features: BTreeSet::new(),
@@ -134,17 +169,24 @@ impl AccountOutputBuilder {
         self
     }
 
-    /// Sets the account ID to the provided value.
+    /// Sets the anchor ID to the provided value.
     #[inline(always)]
-    pub fn with_account_id(mut self, account_id: AccountId) -> Self {
-        self.account_id = account_id;
+    pub fn with_anchor_id(mut self, anchor_id: AnchorId) -> Self {
+        self.anchor_id = anchor_id;
         self
     }
 
     ///
     #[inline(always)]
-    pub fn with_foundry_counter(mut self, foundry_counter: impl Into<Option<u32>>) -> Self {
-        self.foundry_counter = foundry_counter.into();
+    pub fn with_state_index(mut self, state_index: u32) -> Self {
+        self.state_index = state_index;
+        self
+    }
+
+    ///
+    #[inline(always)]
+    pub fn with_state_metadata(mut self, state_metadata: impl Into<Vec<u8>>) -> Self {
+        self.state_metadata = state_metadata.into();
         self
     }
 
@@ -233,46 +275,51 @@ impl AccountOutputBuilder {
     }
 
     ///
-    pub fn finish(self) -> Result<AccountOutput, Error> {
-        let amount = match self.amount {
-            OutputBuilderAmount::Amount(amount) => amount,
-            OutputBuilderAmount::StorageCost(params) => self.storage_cost(params),
-        };
-        verify_output_amount_min(amount)?;
+    pub fn finish(self) -> Result<AnchorOutput, Error> {
+        let state_metadata = self
+            .state_metadata
+            .into_boxed_slice()
+            .try_into()
+            .map_err(Error::InvalidStateMetadataLength)?;
 
-        let foundry_counter = self.foundry_counter.unwrap_or(0);
-
-        verify_index_counter(&self.account_id, foundry_counter)?;
+        verify_index_counter(&self.anchor_id, self.state_index)?;
 
         let unlock_conditions = UnlockConditions::from_set(self.unlock_conditions)?;
 
-        verify_unlock_conditions(&unlock_conditions, &self.account_id)?;
+        verify_unlock_conditions(&unlock_conditions, &self.anchor_id)?;
 
         let features = Features::from_set(self.features)?;
 
-        verify_allowed_features(&features, AccountOutput::ALLOWED_FEATURES)?;
+        verify_allowed_features(&features, AnchorOutput::ALLOWED_FEATURES)?;
 
         let immutable_features = Features::from_set(self.immutable_features)?;
 
-        verify_allowed_features(&immutable_features, AccountOutput::ALLOWED_IMMUTABLE_FEATURES)?;
+        verify_allowed_features(&immutable_features, AnchorOutput::ALLOWED_IMMUTABLE_FEATURES)?;
 
-        Ok(AccountOutput {
-            amount,
+        let mut output = AnchorOutput {
+            amount: 1,
             mana: self.mana,
             native_tokens: NativeTokens::from_set(self.native_tokens)?,
-            account_id: self.account_id,
-            foundry_counter,
+            anchor_id: self.anchor_id,
+            state_index: self.state_index,
+            state_metadata,
             unlock_conditions,
             features,
             immutable_features,
-        })
+        };
+
+        output.amount = match self.amount {
+            OutputBuilderAmount::Amount(amount) => amount,
+            OutputBuilderAmount::StorageCost(params) => Output::Anchor(output.clone()).storage_cost(params),
+        };
+
+        verify_output_amount_min(output.amount)?;
+
+        Ok(output)
     }
 
     ///
-    pub fn finish_with_params<'a>(
-        self,
-        params: impl Into<ValidationParams<'a>> + Send,
-    ) -> Result<AccountOutput, Error> {
+    pub fn finish_with_params<'a>(self, params: impl Into<ValidationParams<'a>> + Send) -> Result<AnchorOutput, Error> {
         let output = self.finish()?;
 
         if let Some(token_supply) = params.into().token_supply() {
@@ -282,9 +329,9 @@ impl AccountOutputBuilder {
         Ok(output)
     }
 
-    /// Finishes the [`AccountOutputBuilder`] into an [`Output`].
+    /// Finishes the [`AnchorOutputBuilder`] into an [`Output`].
     pub fn finish_output<'a>(self, params: impl Into<ValidationParams<'a>> + Send) -> Result<Output, Error> {
-        Ok(Output::Account(self.finish_with_params(params)?))
+        Ok(Output::Anchor(self.finish_with_params(params)?))
     }
 
     fn stored_len(&self) -> usize {
@@ -297,12 +344,13 @@ impl AccountOutputBuilder {
             // Native Tokens
             + size_of::<u8>()
             + self.native_tokens.iter().map(|nt| nt.packed_len()).sum::<usize>()
-            // AccountId
-            + AccountId::LENGTH
+            // Anchor Id
+            + AnchorId::LENGTH
             // State Index
             + size_of::<u32>()
-            // Foundry Counter
-            + size_of::<u32>()
+            // State Metadata
+            + size_of::<u8>()
+            + self.state_metadata.len()
             // Unlock Conditions
             + size_of::<u8>()
             + self.unlock_conditions.iter().map(|uc| uc.packed_len()).sum::<usize>()
@@ -315,22 +363,7 @@ impl AccountOutputBuilder {
     }
 }
 
-impl From<&AccountOutput> for AccountOutputBuilder {
-    fn from(output: &AccountOutput) -> Self {
-        Self {
-            amount: OutputBuilderAmount::Amount(output.amount),
-            mana: output.mana,
-            native_tokens: output.native_tokens.iter().copied().collect(),
-            account_id: output.account_id,
-            foundry_counter: Some(output.foundry_counter),
-            unlock_conditions: output.unlock_conditions.iter().cloned().collect(),
-            features: output.features.iter().cloned().collect(),
-            immutable_features: output.immutable_features.iter().cloned().collect(),
-        }
-    }
-}
-
-impl StorageScore for AccountOutputBuilder {
+impl StorageScore for AnchorOutputBuilder {
     fn storage_score(&self, params: StorageScoreParameters) -> u64 {
         params.output_offset()
             + self.stored_len() as u64 * params.data_factor() as u64
@@ -340,58 +373,74 @@ impl StorageScore for AccountOutputBuilder {
                 .map(|uc| uc.storage_score(params))
                 .sum::<u64>()
             + self.features.iter().map(|uc| uc.storage_score(params)).sum::<u64>()
-            + self
-                .immutable_features
-                .iter()
-                .map(|uc| uc.storage_score(params))
-                .sum::<u64>()
     }
 }
 
-pub(crate) type StateMetadataLength = BoundedU16<0, { AccountOutput::STATE_METADATA_LENGTH_MAX }>;
+impl From<&AnchorOutput> for AnchorOutputBuilder {
+    fn from(output: &AnchorOutput) -> Self {
+        Self {
+            amount: OutputBuilderAmount::Amount(output.amount),
+            mana: output.mana,
+            native_tokens: output.native_tokens.iter().copied().collect(),
+            anchor_id: output.anchor_id,
+            state_index: output.state_index,
+            state_metadata: output.state_metadata.to_vec(),
+            unlock_conditions: output.unlock_conditions.iter().cloned().collect(),
+            features: output.features.iter().cloned().collect(),
+            immutable_features: output.immutable_features.iter().cloned().collect(),
+        }
+    }
+}
 
-/// Describes an account in the ledger that can be controlled by the state and governance controllers.
+pub(crate) type StateMetadataLength = BoundedU16<0, { AnchorOutput::STATE_METADATA_LENGTH_MAX }>;
+
+/// Describes an anchor in the ledger that can be controlled by the state and governance controllers.
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
-pub struct AccountOutput {
-    // Amount of IOTA coins held by the output.
+pub struct AnchorOutput {
+    /// Amount of IOTA coins held by the output.
     amount: u64,
     mana: u64,
-    // Native tokens held by the output.
+    /// Native tokens held by the output.
     native_tokens: NativeTokens,
-    // Unique identifier of the account.
-    account_id: AccountId,
-    // A counter that denotes the number of foundries created by this account.
-    foundry_counter: u32,
+    /// Unique identifier of the anchor.
+    anchor_id: AnchorId,
+    /// A counter that must increase by 1 every time the anchor is state transitioned.
+    state_index: u32,
+    /// Metadata that can only be changed by the state controller.
+    state_metadata: BoxedSlicePrefix<u8, StateMetadataLength>,
+    /// Define how the output can be unlocked in a transaction.
     unlock_conditions: UnlockConditions,
-    //
+    /// Features of the output.
     features: Features,
-    //
+    /// Immutable features of the output.
     immutable_features: Features,
 }
 
-impl AccountOutput {
-    /// The [`Output`](crate::types::block::output::Output) kind of an [`AccountOutput`].
-    pub const KIND: u8 = 1;
+impl AnchorOutput {
+    /// The [`Output`](crate::types::block::output::Output) kind of an [`AnchorOutput`].
+    /// TODO
+    pub const KIND: u8 = 255;
     /// Maximum possible length in bytes of the state metadata.
     pub const STATE_METADATA_LENGTH_MAX: u16 = 8192;
-    /// The set of allowed [`UnlockCondition`]s for an [`AccountOutput`].
-    pub const ALLOWED_UNLOCK_CONDITIONS: UnlockConditionFlags = UnlockConditionFlags::ADDRESS;
-    /// The set of allowed [`Feature`]s for an [`AccountOutput`].
+    /// The set of allowed [`UnlockCondition`]s for an [`AnchorOutput`].
+    pub const ALLOWED_UNLOCK_CONDITIONS: UnlockConditionFlags =
+        UnlockConditionFlags::STATE_CONTROLLER_ADDRESS.union(UnlockConditionFlags::GOVERNOR_ADDRESS);
+    /// The set of allowed [`Feature`]s for an [`AnchorOutput`].
     pub const ALLOWED_FEATURES: FeatureFlags = FeatureFlags::SENDER.union(FeatureFlags::METADATA);
-    /// The set of allowed immutable [`Feature`]s for an [`AccountOutput`].
+    /// The set of allowed immutable [`Feature`]s for an [`AnchorOutput`].
     pub const ALLOWED_IMMUTABLE_FEATURES: FeatureFlags = FeatureFlags::ISSUER.union(FeatureFlags::METADATA);
 
-    /// Creates a new [`AccountOutputBuilder`] with a provided amount.
+    /// Creates a new [`AnchorOutputBuilder`] with a provided amount.
     #[inline(always)]
-    pub fn build_with_amount(amount: u64, account_id: AccountId) -> AccountOutputBuilder {
-        AccountOutputBuilder::new_with_amount(amount, account_id)
+    pub fn build_with_amount(amount: u64, anchor_id: AnchorId) -> AnchorOutputBuilder {
+        AnchorOutputBuilder::new_with_amount(amount, anchor_id)
     }
 
-    /// Creates a new [`AccountOutputBuilder`] with a provided storage score structure.
+    /// Creates a new [`AnchorOutputBuilder`] with a provided storage score structure.
     /// The amount will be set to the minimum storage deposit.
     #[inline(always)]
-    pub fn build_with_minimum_amount(params: StorageScoreParameters, account_id: AccountId) -> AccountOutputBuilder {
-        AccountOutputBuilder::new_with_minimum_amount(params, account_id)
+    pub fn build_with_minimum_amount(params: StorageScoreParameters, anchor_id: AnchorId) -> AnchorOutputBuilder {
+        AnchorOutputBuilder::new_with_minimum_amount(params, anchor_id)
     }
 
     ///
@@ -413,20 +462,26 @@ impl AccountOutput {
 
     ///
     #[inline(always)]
-    pub fn account_id(&self) -> &AccountId {
-        &self.account_id
+    pub fn anchor_id(&self) -> &AnchorId {
+        &self.anchor_id
     }
 
-    /// Returns the account ID if not null, or creates it from the output ID.
+    /// Returns the anchor ID if not null, or creates it from the output ID.
     #[inline(always)]
-    pub fn account_id_non_null(&self, output_id: &OutputId) -> AccountId {
-        self.account_id.or_from_output_id(output_id)
+    pub fn anchor_id_non_null(&self, output_id: &OutputId) -> AnchorId {
+        self.anchor_id.or_from_output_id(output_id)
     }
 
     ///
     #[inline(always)]
-    pub fn foundry_counter(&self) -> u32 {
-        self.foundry_counter
+    pub fn state_index(&self) -> u32 {
+        self.state_index
+    }
+
+    ///
+    #[inline(always)]
+    pub fn state_metadata(&self) -> &[u8] {
+        &self.state_metadata
     }
 
     ///
@@ -449,10 +504,20 @@ impl AccountOutput {
 
     ///
     #[inline(always)]
-    pub fn address(&self) -> &Address {
-        // An AccountOutput must have an AddressUnlockCondition.
+    pub fn state_controller_address(&self) -> &Address {
+        // An AnchorOutput must have a StateControllerAddressUnlockCondition.
         self.unlock_conditions
-            .address()
+            .state_controller_address()
+            .map(|unlock_condition| unlock_condition.address())
+            .unwrap()
+    }
+
+    ///
+    #[inline(always)]
+    pub fn governor_address(&self) -> &Address {
+        // An AnchorOutput must have a GovernorAddressUnlockCondition.
+        self.unlock_conditions
+            .governor_address()
             .map(|unlock_condition| unlock_condition.address())
             .unwrap()
     }
@@ -460,12 +525,12 @@ impl AccountOutput {
     ///
     #[inline(always)]
     pub fn chain_id(&self) -> ChainId {
-        ChainId::Account(self.account_id)
+        ChainId::Anchor(self.anchor_id)
     }
 
-    /// Returns the account address for this output.
-    pub fn account_address(&self, output_id: &OutputId) -> AccountAddress {
-        AccountAddress::new(self.account_id_non_null(output_id))
+    /// Returns the anchor address for this output.
+    pub fn anchor_address(&self, output_id: &OutputId) -> AnchorAddress {
+        AnchorAddress::new(self.anchor_id_non_null(output_id))
     }
 
     ///
@@ -475,74 +540,66 @@ impl AccountOutput {
         unlock: &Unlock,
         context: &mut SemanticValidationContext<'_>,
     ) -> Result<(), TransactionFailureReason> {
-        self.unlock_conditions()
-            .locked_address(self.address(), context.transaction.creation_slot())
-            .unlock(unlock, context)?;
-
-        let account_id = if self.account_id().is_null() {
-            AccountId::from(output_id)
+        let anchor_id = if self.anchor_id().is_null() {
+            AnchorId::from(output_id)
         } else {
-            *self.account_id()
+            *self.anchor_id()
         };
+        let next_state = context.output_chains.get(&ChainId::from(anchor_id));
 
-        context
-            .unlocked_addresses
-            .insert(Address::from(AccountAddress::from(account_id)));
+        match next_state {
+            Some(Output::Anchor(next_state)) => {
+                if self.state_index() == next_state.state_index() {
+                    self.governor_address().unlock(unlock, context)?;
+                } else {
+                    self.state_controller_address().unlock(unlock, context)?;
+                    // Only a state transition can be used to consider the anchor address for output unlocks and
+                    // sender/issuer validations.
+                    context
+                        .unlocked_addresses
+                        .insert(Address::from(AnchorAddress::from(anchor_id)));
+                }
+            }
+            None => self.governor_address().unlock(unlock, context)?,
+            // The next state can only be an anchor output since it is identified by an anchor chain identifier.
+            Some(_) => unreachable!(),
+        };
 
         Ok(())
     }
 
-    // Transition, just without full SemanticValidationContext
+    // Transition, just without full ValidationContext
     pub(crate) fn transition_inner(
         current_state: &Self,
         next_state: &Self,
-        input_chains: &HashMap<ChainId, &Output>,
-        outputs: &[Output],
+        _input_chains: &HashMap<ChainId, &Output>,
+        _outputs: &[Output],
     ) -> Result<(), StateTransitionError> {
         if current_state.immutable_features != next_state.immutable_features {
             return Err(StateTransitionError::MutatedImmutableField);
         }
 
-        // TODO update when TIP is updated
-        // // Governance transition.
-        // if current_state.amount != next_state.amount
-        //     || current_state.native_tokens != next_state.native_tokens
-        //     || current_state.foundry_counter != next_state.foundry_counter
-        // {
-        //     return Err(StateTransitionError::MutatedFieldWithoutRights);
-        // }
-
-        // // State transition.
-        // if current_state.features.metadata() != next_state.features.metadata() {
-        //     return Err(StateTransitionError::MutatedFieldWithoutRights);
-        // }
-
-        let created_foundries = outputs.iter().filter_map(|output| {
-            if let Output::Foundry(foundry) = output {
-                if foundry.account_address().account_id() == &next_state.account_id
-                    && !input_chains.contains_key(&foundry.chain_id())
-                {
-                    Some(foundry)
-                } else {
-                    None
-                }
-            } else {
-                None
+        if next_state.state_index == current_state.state_index + 1 {
+            // State transition.
+            if current_state.state_controller_address() != next_state.state_controller_address()
+                || current_state.governor_address() != next_state.governor_address()
+                || current_state.features.metadata() != next_state.features.metadata()
+            {
+                return Err(StateTransitionError::MutatedFieldWithoutRights);
             }
-        });
-
-        let mut created_foundries_count = 0;
-
-        for foundry in created_foundries {
-            created_foundries_count += 1;
-
-            if foundry.serial_number() != current_state.foundry_counter + created_foundries_count {
-                return Err(StateTransitionError::UnsortedCreatedFoundries);
+        } else if next_state.state_index == current_state.state_index {
+            // Governance transition.
+            if current_state.amount != next_state.amount
+                || current_state.native_tokens != next_state.native_tokens
+                || current_state.state_metadata != next_state.state_metadata
+            {
+                return Err(StateTransitionError::MutatedFieldWithoutRights);
             }
-        }
-
-        if current_state.foundry_counter + created_foundries_count != next_state.foundry_counter {
-            return Err(StateTransitionError::InconsistentCreatedFoundriesCount);
+        } else {
+            return Err(StateTransitionError::UnsupportedStateIndexOperation {
+                current_state: current_state.state_index,
+                next_state: next_state.state_index,
+            });
         }
 
         Ok(())
@@ -558,27 +615,37 @@ impl AccountOutput {
             // Native Tokens
             + size_of::<u8>()
             + self.native_tokens.iter().map(|nt| nt.packed_len()).sum::<usize>()
-            // AccountId
-            + AccountId::LENGTH
+            // Anchor Id
+            + AnchorId::LENGTH
             // State Index
             + size_of::<u32>()
-            // Foundry Counter
-            + size_of::<u32>()
+            // State Metadata
+            + size_of::<u8>()
+            + self.state_metadata.len()
             // Unlock Conditions
             + size_of::<u8>()
             + self.unlock_conditions.iter().map(|uc| uc.packed_len()).sum::<usize>()
             // Features
             + size_of::<u8>()
             + self.features.iter().map(|uc| uc.packed_len()).sum::<usize>()
-             // Immutable Features
-             + size_of::<u8>()
-             + self.immutable_features.iter().map(|uc| uc.packed_len()).sum::<usize>()
+            // Immutable Features
+            + size_of::<u8>()
+            + self.immutable_features.iter().map(|uc| uc.packed_len()).sum::<usize>()
     }
 }
 
-impl StateTransitionVerifier for AccountOutput {
+impl StorageScore for AnchorOutput {
+    fn storage_score(&self, params: StorageScoreParameters) -> u64 {
+        params.output_offset()
+            + self.stored_len() as u64 * params.data_factor() as u64
+            + self.unlock_conditions.storage_score(params)
+            + self.features.storage_score(params)
+    }
+}
+
+impl StateTransitionVerifier for AnchorOutput {
     fn creation(next_state: &Self, context: &SemanticValidationContext<'_>) -> Result<(), StateTransitionError> {
-        if !next_state.account_id.is_null() {
+        if !next_state.anchor_id.is_null() {
             return Err(StateTransitionError::NonZeroCreatedId);
         }
 
@@ -607,7 +674,8 @@ impl StateTransitionVerifier for AccountOutput {
     fn destruction(_current_state: &Self, context: &SemanticValidationContext<'_>) -> Result<(), StateTransitionError> {
         if !context
             .transaction
-            .has_capability(TransactionCapabilityFlag::DestroyAccountOutputs)
+            .capabilities()
+            .has_capability(TransactionCapabilityFlag::DestroyAnchorOutputs)
         {
             return Err(TransactionFailureReason::TransactionCapabilityAccountDestructionNotAllowed)?;
         }
@@ -615,17 +683,7 @@ impl StateTransitionVerifier for AccountOutput {
     }
 }
 
-impl StorageScore for AccountOutput {
-    fn storage_score(&self, params: StorageScoreParameters) -> u64 {
-        params.output_offset()
-            + self.stored_len() as u64 * params.data_factor() as u64
-            + self.unlock_conditions.storage_score(params)
-            + self.features.storage_score(params)
-            + self.immutable_features.storage_score(params)
-    }
-}
-
-impl Packable for AccountOutput {
+impl Packable for AnchorOutput {
     type UnpackError = Error;
     type UnpackVisitor = ProtocolParameters;
 
@@ -633,8 +691,9 @@ impl Packable for AccountOutput {
         self.amount.pack(packer)?;
         self.mana.pack(packer)?;
         self.native_tokens.pack(packer)?;
-        self.account_id.pack(packer)?;
-        self.foundry_counter.pack(packer)?;
+        self.anchor_id.pack(packer)?;
+        self.state_index.pack(packer)?;
+        self.state_metadata.pack(packer)?;
         self.unlock_conditions.pack(packer)?;
         self.features.pack(packer)?;
         self.immutable_features.pack(packer)?;
@@ -653,18 +712,19 @@ impl Packable for AccountOutput {
         let mana = u64::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
 
         let native_tokens = NativeTokens::unpack::<_, VERIFY>(unpacker, &())?;
-        let account_id = AccountId::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
-
-        let foundry_counter = u32::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
+        let anchor_id = AnchorId::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
+        let state_index = u32::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
+        let state_metadata = BoxedSlicePrefix::<u8, StateMetadataLength>::unpack::<_, VERIFY>(unpacker, &())
+            .map_packable_err(|err| Error::InvalidStateMetadataLength(err.into_prefix_err().into()))?;
 
         if VERIFY {
-            verify_index_counter(&account_id, foundry_counter).map_err(UnpackError::Packable)?;
+            verify_index_counter(&anchor_id, state_index).map_err(UnpackError::Packable)?;
         }
 
         let unlock_conditions = UnlockConditions::unpack::<_, VERIFY>(unpacker, visitor)?;
 
         if VERIFY {
-            verify_unlock_conditions(&unlock_conditions, &account_id).map_err(UnpackError::Packable)?;
+            verify_unlock_conditions(&unlock_conditions, &anchor_id).map_err(UnpackError::Packable)?;
         }
 
         let features = Features::unpack::<_, VERIFY>(unpacker, &())?;
@@ -684,8 +744,9 @@ impl Packable for AccountOutput {
             amount,
             mana,
             native_tokens,
-            account_id,
-            foundry_counter,
+            anchor_id,
+            state_index,
+            state_metadata,
             unlock_conditions,
             features,
             immutable_features,
@@ -694,30 +755,42 @@ impl Packable for AccountOutput {
 }
 
 #[inline]
-fn verify_index_counter(account_id: &AccountId, foundry_counter: u32) -> Result<(), Error> {
-    if account_id.is_null() && foundry_counter != 0 {
+fn verify_index_counter(anchor_id: &AnchorId, state_index: u32) -> Result<(), Error> {
+    if anchor_id.is_null() && state_index != 0 {
         Err(Error::NonZeroStateIndexOrFoundryCounter)
     } else {
         Ok(())
     }
 }
 
-fn verify_unlock_conditions(unlock_conditions: &UnlockConditions, account_id: &AccountId) -> Result<(), Error> {
-    if let Some(unlock_condition) = unlock_conditions.address() {
-        if let Address::Account(account_address) = unlock_condition.address() {
-            if account_address.account_id() == account_id {
-                return Err(Error::SelfDepositAccount(*account_id));
+fn verify_unlock_conditions(unlock_conditions: &UnlockConditions, anchor_id: &AnchorId) -> Result<(), Error> {
+    if let Some(unlock_condition) = unlock_conditions.state_controller_address() {
+        if let Address::Anchor(anchor_address) = unlock_condition.address() {
+            if anchor_address.anchor_id() == anchor_id {
+                return Err(Error::SelfControlledAnchorOutput(*anchor_id));
             }
         }
     } else {
-        return Err(Error::MissingAddressUnlockCondition);
+        return Err(Error::MissingStateControllerUnlockCondition);
     }
 
-    verify_allowed_unlock_conditions(unlock_conditions, AccountOutput::ALLOWED_UNLOCK_CONDITIONS)
+    if let Some(unlock_condition) = unlock_conditions.governor_address() {
+        if let Address::Anchor(anchor_address) = unlock_condition.address() {
+            if anchor_address.anchor_id() == anchor_id {
+                return Err(Error::SelfControlledAnchorOutput(*anchor_id));
+            }
+        }
+    } else {
+        return Err(Error::MissingGovernorUnlockCondition);
+    }
+
+    verify_allowed_unlock_conditions(unlock_conditions, AnchorOutput::ALLOWED_UNLOCK_CONDITIONS)
 }
 
 #[cfg(feature = "serde")]
 pub(crate) mod dto {
+    use alloc::boxed::Box;
+
     use serde::{Deserialize, Serialize};
 
     use super::*;
@@ -726,13 +799,13 @@ pub(crate) mod dto {
             block::{output::unlock_condition::dto::UnlockConditionDto, Error},
             TryFromDto,
         },
-        utils::serde::string,
+        utils::serde::{prefix_hex_bytes, string},
     };
 
-    /// Describes an account in the ledger that can be controlled by the state and governance controllers.
+    /// Describes an anchor in the ledger that can be controlled by the state and governance controllers.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
-    pub struct AccountOutputDto {
+    pub struct AnchorOutputDto {
         #[serde(rename = "type")]
         pub kind: u8,
         #[serde(with = "string")]
@@ -741,8 +814,10 @@ pub(crate) mod dto {
         pub mana: u64,
         #[serde(skip_serializing_if = "Vec::is_empty", default)]
         pub native_tokens: Vec<NativeToken>,
-        pub account_id: AccountId,
-        pub foundry_counter: u32,
+        pub anchor_id: AnchorId,
+        pub state_index: u32,
+        #[serde(skip_serializing_if = "<[_]>::is_empty", default, with = "prefix_hex_bytes")]
+        pub state_metadata: Box<[u8]>,
         pub unlock_conditions: Vec<UnlockConditionDto>,
         #[serde(skip_serializing_if = "Vec::is_empty", default)]
         pub features: Vec<Feature>,
@@ -750,15 +825,16 @@ pub(crate) mod dto {
         pub immutable_features: Vec<Feature>,
     }
 
-    impl From<&AccountOutput> for AccountOutputDto {
-        fn from(value: &AccountOutput) -> Self {
+    impl From<&AnchorOutput> for AnchorOutputDto {
+        fn from(value: &AnchorOutput) -> Self {
             Self {
-                kind: AccountOutput::KIND,
+                kind: AnchorOutput::KIND,
                 amount: value.amount(),
                 mana: value.mana(),
                 native_tokens: value.native_tokens().to_vec(),
-                account_id: *value.account_id(),
-                foundry_counter: value.foundry_counter(),
+                anchor_id: *value.anchor_id(),
+                state_index: value.state_index(),
+                state_metadata: value.state_metadata().into(),
                 unlock_conditions: value.unlock_conditions().iter().map(Into::into).collect::<_>(),
                 features: value.features().to_vec(),
                 immutable_features: value.immutable_features().to_vec(),
@@ -766,17 +842,18 @@ pub(crate) mod dto {
         }
     }
 
-    impl TryFromDto for AccountOutput {
-        type Dto = AccountOutputDto;
+    impl TryFromDto for AnchorOutput {
+        type Dto = AnchorOutputDto;
         type Error = Error;
 
         fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
-            let mut builder = AccountOutputBuilder::new_with_amount(dto.amount, dto.account_id)
+            let mut builder = AnchorOutputBuilder::new_with_amount(dto.amount, dto.anchor_id)
                 .with_mana(dto.mana)
-                .with_foundry_counter(dto.foundry_counter)
+                .with_state_index(dto.state_index)
                 .with_native_tokens(dto.native_tokens)
                 .with_features(dto.features)
-                .with_immutable_features(dto.immutable_features);
+                .with_immutable_features(dto.immutable_features)
+                .with_state_metadata(dto.state_metadata);
 
             for u in dto.unlock_conditions {
                 builder = builder.add_unlock_condition(UnlockCondition::try_from_dto_with_params(u, &params)?);
@@ -786,14 +863,15 @@ pub(crate) mod dto {
         }
     }
 
-    impl AccountOutput {
+    impl AnchorOutput {
         #[allow(clippy::too_many_arguments)]
         pub fn try_from_dtos<'a>(
             amount: OutputBuilderAmount,
             mana: u64,
             native_tokens: Option<Vec<NativeToken>>,
-            account_id: &AccountId,
-            foundry_counter: Option<u32>,
+            anchor_id: &AnchorId,
+            state_index: u32,
+            state_metadata: Option<Vec<u8>>,
             unlock_conditions: Vec<UnlockConditionDto>,
             features: Option<Vec<Feature>>,
             immutable_features: Option<Vec<Feature>>,
@@ -801,19 +879,20 @@ pub(crate) mod dto {
         ) -> Result<Self, Error> {
             let params = params.into();
             let mut builder = match amount {
-                OutputBuilderAmount::Amount(amount) => AccountOutputBuilder::new_with_amount(amount, *account_id),
+                OutputBuilderAmount::Amount(amount) => AnchorOutputBuilder::new_with_amount(amount, *anchor_id),
                 OutputBuilderAmount::StorageCost(params) => {
-                    AccountOutputBuilder::new_with_minimum_amount(params, *account_id)
+                    AnchorOutputBuilder::new_with_minimum_amount(params, *anchor_id)
                 }
             }
-            .with_mana(mana);
+            .with_mana(mana)
+            .with_state_index(state_index);
 
             if let Some(native_tokens) = native_tokens {
                 builder = builder.with_native_tokens(native_tokens);
             }
 
-            if let Some(foundry_counter) = foundry_counter {
-                builder = builder.with_foundry_counter(foundry_counter);
+            if let Some(state_metadata) = state_metadata {
+                builder = builder.with_state_metadata(state_metadata);
             }
 
             let unlock_conditions = unlock_conditions
@@ -837,18 +916,17 @@ pub(crate) mod dto {
 
 #[cfg(test)]
 mod tests {
-    use pretty_assertions::assert_eq;
-
     use super::*;
     use crate::types::{
         block::{
-            output::{dto::OutputDto, FoundryId, SimpleTokenScheme, TokenId},
+            output::dto::OutputDto,
             protocol::protocol_parameters,
-            rand::{
-                address::rand_account_address,
-                output::{
-                    feature::rand_allowed_features, rand_account_id, rand_account_output,
-                    unlock_condition::rand_address_unlock_condition_different_from_account_id,
+            rand::output::{
+                feature::rand_allowed_features,
+                rand_anchor_id, rand_anchor_output,
+                unlock_condition::{
+                    rand_governor_address_unlock_condition_different_from,
+                    rand_state_controller_address_unlock_condition_different_from,
                 },
             },
         },
@@ -858,19 +936,20 @@ mod tests {
     #[test]
     fn to_from_dto() {
         let protocol_parameters = protocol_parameters();
-        let output = rand_account_output(protocol_parameters.token_supply());
-        let dto = OutputDto::Account((&output).into());
+        let output = rand_anchor_output(protocol_parameters.token_supply());
+        let dto = OutputDto::Anchor((&output).into());
         let output_unver = Output::try_from_dto(dto.clone()).unwrap();
-        assert_eq!(&output, output_unver.as_account());
+        assert_eq!(&output, output_unver.as_anchor());
         let output_ver = Output::try_from_dto_with_params(dto, &protocol_parameters).unwrap();
-        assert_eq!(&output, output_ver.as_account());
+        assert_eq!(&output, output_ver.as_anchor());
 
-        let output_split = AccountOutput::try_from_dtos(
+        let output_split = AnchorOutput::try_from_dtos(
             OutputBuilderAmount::Amount(output.amount()),
             output.mana(),
             Some(output.native_tokens().to_vec()),
-            output.account_id(),
-            output.foundry_counter().into(),
+            output.anchor_id(),
+            output.state_index().into(),
+            output.state_metadata().to_owned().into(),
             output.unlock_conditions().iter().map(Into::into).collect(),
             Some(output.features().to_vec()),
             Some(output.immutable_features().to_vec()),
@@ -879,17 +958,18 @@ mod tests {
         .unwrap();
         assert_eq!(output, output_split);
 
-        let account_id = rand_account_id();
-        let foundry_id = FoundryId::build(&rand_account_address(), 0, SimpleTokenScheme::KIND);
-        let address = rand_address_unlock_condition_different_from_account_id(&account_id);
+        let anchor_id = rand_anchor_id();
+        let gov_address = rand_governor_address_unlock_condition_different_from(&anchor_id);
+        let state_address = rand_state_controller_address_unlock_condition_different_from(&anchor_id);
 
-        let test_split_dto = |builder: AccountOutputBuilder| {
-            let output_split = AccountOutput::try_from_dtos(
+        let test_split_dto = |builder: AnchorOutputBuilder| {
+            let output_split = AnchorOutput::try_from_dtos(
                 builder.amount,
                 builder.mana,
                 Some(builder.native_tokens.iter().copied().collect()),
-                &builder.account_id,
-                builder.foundry_counter,
+                &builder.anchor_id,
+                builder.state_index,
+                builder.state_metadata.to_owned().into(),
                 builder.unlock_conditions.iter().map(Into::into).collect(),
                 Some(builder.features.iter().cloned().collect()),
                 Some(builder.immutable_features.iter().cloned().collect()),
@@ -899,19 +979,19 @@ mod tests {
             assert_eq!(builder.finish_with_params(&protocol_parameters).unwrap(), output_split);
         };
 
-        let builder = AccountOutput::build_with_amount(100, account_id)
-            .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000).unwrap())
-            .add_unlock_condition(address.clone())
-            .with_features(rand_allowed_features(AccountOutput::ALLOWED_FEATURES))
-            .with_immutable_features(rand_allowed_features(AccountOutput::ALLOWED_IMMUTABLE_FEATURES));
+        let builder = AnchorOutput::build_with_amount(100, anchor_id)
+            .add_unlock_condition(gov_address.clone())
+            .add_unlock_condition(state_address.clone())
+            .with_features(rand_allowed_features(AnchorOutput::ALLOWED_FEATURES))
+            .with_immutable_features(rand_allowed_features(AnchorOutput::ALLOWED_IMMUTABLE_FEATURES));
         test_split_dto(builder);
 
         let builder =
-            AccountOutput::build_with_minimum_amount(protocol_parameters.storage_score_parameters(), account_id)
-                .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000).unwrap())
-                .add_unlock_condition(address)
-                .with_features(rand_allowed_features(AccountOutput::ALLOWED_FEATURES))
-                .with_immutable_features(rand_allowed_features(AccountOutput::ALLOWED_IMMUTABLE_FEATURES));
+            AnchorOutput::build_with_minimum_amount(protocol_parameters.storage_score_parameters(), anchor_id)
+                .add_unlock_condition(gov_address)
+                .add_unlock_condition(state_address)
+                .with_features(rand_allowed_features(AnchorOutput::ALLOWED_FEATURES))
+                .with_immutable_features(rand_allowed_features(AnchorOutput::ALLOWED_IMMUTABLE_FEATURES));
         test_split_dto(builder);
     }
 }

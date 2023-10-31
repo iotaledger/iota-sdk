@@ -10,7 +10,7 @@ from iota_sdk.types.common import HexStr, json, EpochIndex
 from iota_sdk.types.feature import deserialize_features, SenderFeature, IssuerFeature, MetadataFeature, TagFeature
 from iota_sdk.types.native_token import NativeToken
 from iota_sdk.types.token_scheme import SimpleTokenScheme
-from iota_sdk.types.unlock_condition import deserialize_unlock_conditions, AddressUnlockCondition, StorageDepositReturnUnlockCondition, TimelockUnlockCondition, ExpirationUnlockCondition, StateControllerAddressUnlockCondition, GovernorAddressUnlockCondition, ImmutableAccountAddressUnlockCondition
+from iota_sdk.types.unlock_condition import deserialize_unlock_conditions, AddressUnlockCondition, StateControllerAddressUnlockCondition, GovernorAddressUnlockCondition, StorageDepositReturnUnlockCondition, TimelockUnlockCondition, ExpirationUnlockCondition, ImmutableAccountAddressUnlockCondition
 
 
 class OutputType(IntEnum):
@@ -22,12 +22,14 @@ class OutputType(IntEnum):
         Foundry (2): A foundry output.
         Nft (3): An NFT output.
         Delegation (4): A delegation output.
+        Anchor (5): An anchor output.
     """
     Basic = 0
     Account = 1
     Foundry = 2
     Nft = 3
     Delegation = 4
+    Anchor = 5
 
 
 @json
@@ -83,10 +85,6 @@ class AccountOutput:
             The conditions to unlock the output.
         account_id :
             The account ID if it's an account output.
-        state_index :
-            A counter that must increase by 1 every time the account is state transitioned.
-        state_metadata :
-            Metadata that can only be changed by the state controller.
         foundry_counter :
             A counter that denotes the number of foundries created by this account output.
         features :
@@ -105,8 +103,62 @@ class AccountOutput:
         encoder=str
     ))
     account_id: HexStr
-    state_index: int
     foundry_counter: int
+    unlock_conditions: List[AddressUnlockCondition] = field(
+        metadata=config(
+            decoder=deserialize_unlock_conditions
+        ))
+    features: Optional[List[Union[SenderFeature,
+                            MetadataFeature]]] = field(default=None,
+                                                       metadata=config(
+                                                           decoder=deserialize_features
+                                                       ))
+    immutable_features: Optional[List[Union[IssuerFeature,
+                                            MetadataFeature]]] = field(default=None,
+                                                                       metadata=config(
+                                                                           decoder=deserialize_features
+                                                                       ))
+    native_tokens: Optional[List[NativeToken]] = None
+    type: int = field(
+        default_factory=lambda: int(
+            OutputType.Account),
+        init=False)
+
+
+@json
+@dataclass
+class AnchorOutput:
+    """Describes an anchor output.
+    Attributes:
+        amount :
+            The base coin amount of the output.
+        mana :
+            Amount of stored Mana held by this output.
+        anchor_id :
+            The anchor ID if it's an anchor output.
+        state_index :
+            A counter that must increase by 1 every time the anchor is state transitioned.
+        unlock_conditions:
+            The conditions to unlock the output.
+        features :
+            Features that add utility to the output but do not impose unlocking conditions.
+        immutable_features :
+            Features that add utility to the output but do not impose unlocking conditions. These features need to be kept in future transitions of the UTXO state machine.
+        state_metadata :
+            Metadata that can only be changed by the state controller.
+        native_tokens :
+            Native tokens added to the new output.
+        type :
+            The type of output.
+    """
+    amount: int = field(metadata=config(
+        encoder=str
+    ))
+    mana: int = field(metadata=config(
+        encoder=str
+    ))
+    anchor_id: HexStr
+    state_index: int
     unlock_conditions: List[Union[StateControllerAddressUnlockCondition,
                                   GovernorAddressUnlockCondition]] = field(
         metadata=config(
@@ -126,7 +178,7 @@ class AccountOutput:
     native_tokens: Optional[List[NativeToken]] = None
     type: int = field(
         default_factory=lambda: int(
-            OutputType.Account),
+            OutputType.Anchor),
         init=False)
 
 
@@ -253,7 +305,7 @@ class DelegationOutput:
 
 
 Output: TypeAlias = Union[BasicOutput, AccountOutput,
-                          FoundryOutput, NftOutput, DelegationOutput]
+                          FoundryOutput, NftOutput, DelegationOutput, AnchorOutput]
 
 
 def deserialize_output(d: Dict[str, Any]) -> Output:
@@ -274,6 +326,8 @@ def deserialize_output(d: Dict[str, Any]) -> Output:
         return NftOutput.from_dict(d)
     if output_type == OutputType.Delegation:
         return DelegationOutput.from_dict(d)
+    if output_type == OutputType.Anchor:
+        return AnchorOutput.from_dict(d)
     raise Exception(f'invalid output type: {output_type}')
 
 

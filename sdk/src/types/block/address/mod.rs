@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 mod account;
+mod anchor;
 mod bech32;
 mod ed25519;
 mod implicit_account_creation;
@@ -10,27 +11,29 @@ mod restricted;
 
 use alloc::boxed::Box;
 
-use derive_more::From;
+use derive_more::{Display, From};
 use packable::Packable;
 
 pub use self::{
     account::AccountAddress,
+    anchor::AnchorAddress,
     bech32::{Bech32Address, Hrp},
     ed25519::Ed25519Address,
     implicit_account_creation::ImplicitAccountCreationAddress,
     nft::NftAddress,
     restricted::{AddressCapabilities, AddressCapabilityFlag, RestrictedAddress},
 };
+use super::semantic::SemanticValidationContext;
 use crate::types::block::{
-    output::{Output, OutputId, StorageScore, StorageScoreParameters},
-    semantic::{TransactionFailureReason, ValidationContext},
+    output::{Output, StorageScore, StorageScoreParameters},
+    semantic::TransactionFailureReason,
     signature::Signature,
     unlock::Unlock,
     ConvertTo, Error,
 };
 
 /// A generic address supporting different address kinds.
-#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, From, Packable)]
+#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, From, Display, Packable)]
 #[packable(tag_type = u8, with_error = Error::InvalidAddressKind)]
 #[packable(unpack_error = Error)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize), serde(untagged))]
@@ -44,6 +47,9 @@ pub enum Address {
     /// An NFT address.
     #[packable(tag = NftAddress::KIND)]
     Nft(NftAddress),
+    /// An anchor address.
+    #[packable(tag = AnchorAddress::KIND)]
+    Anchor(AnchorAddress),
     /// An implicit account creation address.
     #[packable(tag = ImplicitAccountCreationAddress::KIND)]
     ImplicitAccountCreation(ImplicitAccountCreationAddress),
@@ -65,6 +71,7 @@ impl core::fmt::Debug for Address {
             Self::Ed25519(address) => address.fmt(f),
             Self::Account(address) => address.fmt(f),
             Self::Nft(address) => address.fmt(f),
+            Self::Anchor(address) => address.fmt(f),
             Self::ImplicitAccountCreation(address) => address.fmt(f),
             Self::Restricted(address) => address.fmt(f),
         }
@@ -78,12 +85,13 @@ impl Address {
             Self::Ed25519(_) => Ed25519Address::KIND,
             Self::Account(_) => AccountAddress::KIND,
             Self::Nft(_) => NftAddress::KIND,
+            Self::Anchor(_) => AnchorAddress::KIND,
             Self::ImplicitAccountCreation(_) => ImplicitAccountCreationAddress::KIND,
             Self::Restricted(_) => RestrictedAddress::KIND,
         }
     }
 
-    crate::def_is_as_opt!(Address: Ed25519, Account, Nft, ImplicitAccountCreation, Restricted);
+    crate::def_is_as_opt!(Address: Ed25519, Account, Nft, Anchor, ImplicitAccountCreation, Restricted);
 
     /// Tries to create an [`Address`] from a bech32 encoded string.
     pub fn try_from_bech32(address: impl AsRef<str>) -> Result<Self, Error> {
@@ -100,8 +108,7 @@ impl Address {
     pub fn unlock(
         &self,
         unlock: &Unlock,
-        inputs: &[(&OutputId, &Output)],
-        context: &mut ValidationContext<'_>,
+        context: &mut SemanticValidationContext<'_>,
     ) -> Result<(), TransactionFailureReason> {
         match (self, unlock) {
             (Self::Ed25519(ed25519_address), Unlock::Signature(unlock)) => {
@@ -128,7 +135,7 @@ impl Address {
             }
             (Self::Account(account_address), Unlock::Account(unlock)) => {
                 // PANIC: indexing is fine as it is already syntactically verified that indexes reference below.
-                if let (output_id, Output::Account(account_output)) = inputs[unlock.index() as usize] {
+                if let (output_id, Output::Account(account_output)) = context.inputs[unlock.index() as usize] {
                     if &account_output.account_id_non_null(output_id) != account_address.account_id() {
                         return Err(TransactionFailureReason::InvalidInputUnlock);
                     }
@@ -141,7 +148,7 @@ impl Address {
             }
             (Self::Nft(nft_address), Unlock::Nft(unlock)) => {
                 // PANIC: indexing is fine as it is already syntactically verified that indexes reference below.
-                if let (output_id, Output::Nft(nft_output)) = inputs[unlock.index() as usize] {
+                if let (output_id, Output::Nft(nft_output)) = context.inputs[unlock.index() as usize] {
                     if &nft_output.nft_id_non_null(output_id) != nft_address.nft_id() {
                         return Err(TransactionFailureReason::InvalidInputUnlock);
                     }
@@ -152,6 +159,8 @@ impl Address {
                     return Err(TransactionFailureReason::InvalidInputUnlock);
                 }
             }
+            // TODO maybe shouldn't be a semantic error but this function currently returns a TransactionFailureReason.
+            (Self::Anchor(_), _) => return Err(TransactionFailureReason::SemanticValidationFailed),
             _ => return Err(TransactionFailureReason::InvalidInputUnlock),
         }
 
@@ -165,6 +174,7 @@ impl StorageScore for Address {
             Address::Ed25519(a) => a.storage_score(params),
             Address::Account(a) => a.storage_score(params),
             Address::Nft(a) => a.storage_score(params),
+            Address::Anchor(a) => a.storage_score(params),
             Address::ImplicitAccountCreation(a) => a.storage_score(params),
             Address::Restricted(a) => a.storage_score(params),
         }

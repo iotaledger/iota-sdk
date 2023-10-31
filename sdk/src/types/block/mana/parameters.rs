@@ -206,6 +206,8 @@ const fn fixed_point_multiply(value: u64, mult_factor: u32, shift_factor: u8) ->
 
 #[cfg(test)]
 mod test {
+    use pretty_assertions::assert_eq;
+
     use super::*;
 
     // Tests from https://github.com/iotaledger/iota.go/blob/develop/mana_decay_provider_test.go

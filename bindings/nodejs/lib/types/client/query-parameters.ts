@@ -29,8 +29,7 @@ export type QueryParameter =
 
 /** Query parameters for filtering Account Outputs */
 export type AccountQueryParameter =
-    | StateController
-    | Governor
+    | Address
     | Issuer
     | Sender
     | UnlockableByAddress

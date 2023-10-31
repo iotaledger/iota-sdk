@@ -17,6 +17,7 @@ use iota_sdk::types::{
     ValidationParams,
 };
 use packable::PackableExt;
+use pretty_assertions::assert_eq;
 
 #[test]
 fn builder() {
