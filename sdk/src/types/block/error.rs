@@ -28,6 +28,7 @@ use crate::types::block::{
 /// Error occurring when creating/parsing/validating blocks.
 #[derive(Debug, PartialEq, Eq)]
 #[allow(missing_docs)]
+#[non_exhaustive]
 pub enum Error {
     ManaAllotmentsNotUniqueSorted,
     ConsumedAmountOverflow,

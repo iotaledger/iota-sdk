@@ -10,6 +10,7 @@ use rustyline::error::ReadlineError;
 use serde_json::Error as SerdeJsonError;
 
 #[derive(Debug, thiserror::Error)]
+#[non_exhaustive]
 pub enum Error {
     #[error("block error: {0}")]
     Block(#[from] BlockError),

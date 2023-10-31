@@ -13,6 +13,7 @@ use crate::types::block::{address::Bech32Address, payload::signed_transaction::T
 
 /// The wallet error type.
 #[derive(Debug, thiserror::Error)]
+#[non_exhaustive]
 pub enum Error {
     /// Errors during backup creation or restoring
     #[error("backup failed {0}")]

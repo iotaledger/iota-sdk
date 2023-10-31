@@ -3,6 +3,7 @@
 
 /// MQTT related errors.
 #[derive(Debug, thiserror::Error)]
+#[non_exhaustive]
 pub enum Error {
     /// Client error.
     #[error("client error {0}")]

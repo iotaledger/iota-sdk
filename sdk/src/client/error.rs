@@ -20,6 +20,7 @@ pub type Result<T> = std::result::Result<T, Error>;
 
 /// Error type of the iota client crate.
 #[derive(Debug, thiserror::Error)]
+#[non_exhaustive]
 pub enum Error {
     /// Invalid bech32 HRP, should match the one from the used network
     #[error("invalid bech32 hrp for the connected network: {provided}, expected: {expected}")]
