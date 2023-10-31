@@ -131,7 +131,7 @@ mod tests {
 
         storage_manager.save_wallet_data(&wallet_data).await.unwrap();
         let wallet = storage_manager.load_wallet_data().await.unwrap();
-        assert!(matches!(wallet, Some(data) if data.alias == "Alice"));
+        assert!(matches!(wallet, Some(data) if data.alias == Some("Alice".to_string())));
     }
 
     #[tokio::test]

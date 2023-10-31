@@ -31,7 +31,7 @@ where
     /// Set the alias for the wallet.
     pub async fn set_alias(&self, alias: &str) -> crate::wallet::Result<()> {
         let mut wallet_data = self.data_mut().await;
-        wallet_data.alias = alias.to_string();
+        wallet_data.alias = Some(alias.to_string());
         #[cfg(feature = "storage")]
         self.save(Some(&wallet_data)).await?;
         Ok(())
@@ -121,7 +121,7 @@ where
 
         #[cfg(feature = "storage")]
         {
-            log::debug!("[SYNC] storing wallet {} with new synced data", wallet_data.alias);
+            log::debug!("[SYNC] storing wallet with new synced data");
             self.save(Some(&wallet_data)).await?;
         }
         Ok(())
@@ -182,10 +182,7 @@ where
 
         #[cfg(feature = "storage")]
         {
-            log::debug!(
-                "[SYNC] storing wallet {} with new synced transactions",
-                wallet_data.alias
-            );
+            log::debug!("[SYNC] storing wallet with new synced transactions");
             self.save(Some(&wallet_data)).await?;
         }
         Ok(())

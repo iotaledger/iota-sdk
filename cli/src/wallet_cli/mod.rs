@@ -1005,8 +1005,11 @@ pub async fn prompt_internal(
     wallet: &Wallet,
     rl: &mut Editor<WalletCommandHelper, MemHistory>,
 ) -> Result<PromptResponse, Error> {
-    let alias = wallet.alias().await;
-    let prompt = format!("Wallet \"{alias}\": ");
+    let prompt = if let Some(alias) = wallet.alias().await {
+        format!("Wallet \"{alias}\": ")
+    } else {
+        format!("Wallet: ")
+    };
 
     if let Some(helper) = rl.helper_mut() {
         helper.set_prompt(prompt.green().to_string());

@@ -40,8 +40,6 @@ pub(crate) async fn make_wallet(storage_path: &str, mnemonic: Option<Mnemonic>, 
         .with_client_options(client_options)
         .with_bip_path(Bip44::new(SHIMMER_COIN_TYPE));
 
-    wallet_builder = wallet_builder.with_alias(storage_path);
-
     #[cfg(feature = "storage")]
     {
         wallet_builder = wallet_builder.with_storage_path(storage_path);

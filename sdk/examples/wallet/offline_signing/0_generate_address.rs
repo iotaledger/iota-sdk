@@ -47,7 +47,7 @@ async fn main() -> Result<()> {
         .finish()
         .await?;
 
-    println!("Generated a new wallet '{}'", wallet.alias().await);
+    println!("Generated a new wallet");
 
     write_wallet_address_to_file(&wallet).await
 }

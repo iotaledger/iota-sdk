@@ -62,19 +62,18 @@ async fn create_wallet() -> Result<Wallet> {
 }
 
 async fn print_address(wallet: &Wallet) -> Result<()> {
-    println!("{}'s wallet address: {}", wallet.alias().await, wallet.address().await);
+    println!("Wallet address: {}", wallet.address().await);
     Ok(())
 }
 
 async fn sync_print_balance(wallet: &Wallet, full_report: bool) -> Result<()> {
-    let alias = wallet.alias().await;
     let now = tokio::time::Instant::now();
     let balance = wallet.sync(None).await?;
-    println!("{alias}'s wallet synced in: {:.2?}", now.elapsed());
+    println!("Wallet synced in: {:.2?}", now.elapsed());
     if full_report {
-        println!("{alias}'s balance:\n{balance:#?}");
+        println!("Balance:\n{balance:#?}");
     } else {
-        println!("{alias}'s coin balance:\n{:#?}", balance.base_coin());
+        println!("Coin balance:\n{:#?}", balance.base_coin());
     }
     Ok(())
 }

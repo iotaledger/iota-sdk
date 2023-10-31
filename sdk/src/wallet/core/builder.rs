@@ -78,8 +78,8 @@ where
     }
 
     /// Set the alias of the wallet.
-    pub fn with_alias<'a>(mut self, alias: impl Into<Option<&'a str>>) -> Self {
-        self.alias = alias.into().map(|alias| alias.to_string());
+    pub fn with_alias(mut self, alias: impl Into<Option<String>>) -> Self {
+        self.alias = alias.into();
         self
     }
 
@@ -187,23 +187,8 @@ where
 
         // May use a previously stored wallet alias if it wasn't provided
         if self.alias.is_none() {
-            let alias = loaded_wallet_builder
-                .as_ref()
-                .and_then(|builder| builder.alias.clone())
-                .unwrap_or_else(|| {
-                    // TODO #1279: I'm not sure we should use anything from the filesystem for the wallet since it can
-                    // be moved. So just default to ""?
-                    #[cfg(feature = "storage")]
-                    let alias = storage_options.path().to_string_lossy().to_string();
-                    #[cfg(not(feature = "storage"))]
-                    let alias = "".to_string();
-                    alias
-                });
-
-            self.alias = Some(alias);
+            self.alias = loaded_wallet_builder.as_ref().and_then(|builder| builder.alias.clone());
         }
-        // Panic: can be safely unwrapped now
-        let alias = self.alias.as_ref().unwrap().clone();
 
         // May use a previously stored wallet address if it wasn't provided
         if self.address.is_none() {
@@ -262,7 +247,7 @@ where
             .finish()
             .await?;
 
-        // Create wallet inner and wallet data.
+        // Build the wallet.
         let wallet_inner = WalletInner {
             default_sync_options: Mutex::new(SyncOptions::default()),
             last_synced: Mutex::new(0),
@@ -276,8 +261,7 @@ where
             #[cfg(feature = "storage")]
             storage_manager: tokio::sync::RwLock::new(storage_manager),
         };
-        let wallet_data = WalletData::new(self.bip_path, address, alias);
-
+        let wallet_data = WalletData::new(self.bip_path, address, self.alias.clone());
         let wallet = Wallet {
             inner: Arc::new(wallet_inner),
             data: Arc::new(RwLock::new(wallet_data)),
@@ -330,7 +314,7 @@ where
         Self {
             bip_path: wallet.bip_path().await,
             address: Some(wallet.address().await),
-            alias: Some(wallet.alias().await),
+            alias: wallet.alias().await,
             client_options: Some(wallet.client_options().await),
             storage_options: Some(wallet.storage_options.clone()),
             secret_manager: Some(wallet.secret_manager.clone()),

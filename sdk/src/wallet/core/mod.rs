@@ -107,8 +107,8 @@ pub struct WalletData {
     pub(crate) bip_path: Option<Bip44>,
     /// The wallet address.
     pub(crate) address: Bech32Address,
-    /// The wallet alias. Defaults to the storage path if available.
-    pub(crate) alias: String,
+    /// The wallet alias.
+    pub(crate) alias: Option<String>,
     /// Outputs
     // stored separated from the wallet for performance?
     pub(crate) outputs: HashMap<OutputId, OutputData>,
@@ -138,7 +138,7 @@ pub struct WalletData {
 }
 
 impl WalletData {
-    pub(crate) fn new(bip_path: Option<Bip44>, address: Bech32Address, alias: String) -> Self {
+    pub(crate) fn new(bip_path: Option<Bip44>, address: Bech32Address, alias: Option<String>) -> Self {
         Self {
             bip_path,
             address,
@@ -234,16 +234,16 @@ where
         self.inner.emit(wallet_event).await
     }
 
-    pub async fn data(&self) -> tokio::sync::RwLockReadGuard<'_, WalletData> {
+    pub(crate) async fn data(&self) -> tokio::sync::RwLockReadGuard<'_, WalletData> {
         self.data.read().await
     }
 
-    pub async fn data_mut(&self) -> tokio::sync::RwLockWriteGuard<'_, WalletData> {
+    pub(crate) async fn data_mut(&self) -> tokio::sync::RwLockWriteGuard<'_, WalletData> {
         self.data.write().await
     }
 
-    /// Get the alias of the wallet.
-    pub async fn alias(&self) -> String {
+    /// Get the alias of the wallet if one was set.
+    pub async fn alias(&self) -> Option<String> {
         self.data().await.alias.clone()
     }
 
@@ -478,25 +478,15 @@ impl<S: SecretManage> Drop for Wallet<S> {
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct WalletDataDto {
-    /// The BIP44 path of the wallet.
     pub bip_path: Option<Bip44>,
-    /// The wallet address.
     pub address: Bech32Address,
-    /// The wallet alias.
-    pub alias: String,
-    /// Outputs
+    pub alias: Option<String>,
     pub outputs: HashMap<OutputId, OutputDataDto>,
-    /// Unspent outputs that are currently used as input for transactions
     pub locked_outputs: HashSet<OutputId>,
-    /// Unspent outputs
     pub unspent_outputs: HashMap<OutputId, OutputDataDto>,
-    /// Sent transactions
     pub transactions: HashMap<TransactionId, TransactionWithMetadataDto>,
-    /// Pending transactions
     pub pending_transactions: HashSet<TransactionId>,
-    /// Incoming transactions
     pub incoming_transactions: HashMap<TransactionId, TransactionWithMetadataDto>,
-    /// Foundries for native tokens in outputs
     #[serde(default)]
     pub native_token_foundries: HashMap<FoundryId, FoundryOutputDto>,
 }
@@ -678,7 +668,7 @@ mod test {
                 "rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy",
             )
             .unwrap(),
-            alias: "Alice".to_string(),
+            alias: Some("Alice".to_string()),
             outputs: HashMap::new(),
             locked_outputs: HashSet::new(),
             unspent_outputs: HashMap::new(),
@@ -711,7 +701,7 @@ mod test {
                     "rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy",
                 )
                 .unwrap(),
-                alias: "Alice".to_string(),
+                alias: Some("Alice".to_string()),
                 outputs: HashMap::new(),
                 locked_outputs: HashSet::new(),
                 unspent_outputs: HashMap::new(),

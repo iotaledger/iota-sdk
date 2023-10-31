@@ -48,7 +48,7 @@ async fn sync_print_balance(wallet: &Wallet) -> Result<()> {
     let alias = wallet.alias().await;
     let now = tokio::time::Instant::now();
     let balance = wallet.sync(None).await?;
-    println!("{alias}'s wallet synced in: {:.2?}", now.elapsed());
-    println!("{alias}'s balance:\n{:#?}", balance.base_coin());
+    println!("Wallet synced in: {:.2?}", now.elapsed());
+    println!("Balance:\n{:#?}", balance.base_coin());
     Ok(())
 }

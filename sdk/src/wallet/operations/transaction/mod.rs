@@ -186,7 +186,7 @@ where
         #[cfg(feature = "storage")]
         {
             // TODO: maybe better to use the wallt address as identifier now?
-            log::debug!("[TRANSACTION] storing wallet {}", (*wallet_data).alias);
+            log::debug!("[TRANSACTION] storing wallet");
             self.save(Some(&wallet_data)).await?;
         }
 
