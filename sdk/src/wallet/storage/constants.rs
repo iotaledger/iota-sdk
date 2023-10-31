@@ -22,7 +22,7 @@ pub(crate) const WALLET_DATA_KEY: &str = "wallet-data";
 pub(crate) const WALLET_BUILDER_KEY: &str = "wallet-builder";
 pub(crate) const WALLET_SYNC_OPTIONS: &str = "wallet-sync-options";
 
-pub(crate) const SECRET_MANAGER_KEY: &str = "secret_manager";
+pub(crate) const SECRET_MANAGER_KEY: &str = "secret-manager";
 
 #[cfg(feature = "participation")]
 pub(crate) const PARTICIPATION_EVENTS: &str = "participation-events";
