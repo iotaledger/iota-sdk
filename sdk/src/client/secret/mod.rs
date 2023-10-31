@@ -49,9 +49,8 @@ use crate::client::secret::types::StrongholdDto;
 use crate::{
     client::{
         api::{
-            input_selection::Error as InputSelectionError,
-            transaction::validate_signed_transaction_payload_length,
-            verify_semantic, PreparedTransactionData,
+            input_selection::Error as InputSelectionError, transaction::validate_signed_transaction_payload_length,
+            PreparedTransactionData,
         },
         Error,
     },
