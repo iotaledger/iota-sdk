@@ -136,7 +136,7 @@ impl Wallet {
             fs::copy(backup_path, new_snapshot_path)?;
         }
 
-        // drop secret manager, otherwise we get a deadlock in set_client_options() (there inside of
+        // drop secret manager, otherwise we get a deadlock in set_client_options() (there inside of save_wallet_data())
         drop(secret_manager);
 
         if ignore_if_bip_path_mismatch.is_none() {
