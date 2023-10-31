@@ -134,20 +134,20 @@ class AnchorOutput:
             The base coin amount of the output.
         mana :
             Amount of stored Mana held by this output.
-        unlock_conditions:
-            The conditions to unlock the output.
         anchor_id :
             The anchor ID if it's an anchor output.
         state_index :
             A counter that must increase by 1 every time the anchor is state transitioned.
-        state_metadata :
-            Metadata that can only be changed by the state controller.
+        unlock_conditions:
+            The conditions to unlock the output.
         features :
             Features that add utility to the output but do not impose unlocking conditions.
-        native_tokens :
-            Native tokens added to the new output.
         immutable_features :
             Features that add utility to the output but do not impose unlocking conditions. These features need to be kept in future transitions of the UTXO state machine.
+        state_metadata :
+            Metadata that can only be changed by the state controller.
+        native_tokens :
+            Native tokens added to the new output.
         type :
             The type of output.
     """
