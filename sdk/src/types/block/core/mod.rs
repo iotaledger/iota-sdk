@@ -3,8 +3,8 @@
 
 pub mod basic;
 mod parent;
+mod signed_block;
 pub mod validation;
-mod wrapper;
 
 use alloc::boxed::Box;
 
@@ -20,8 +20,8 @@ use packable::{
 pub use self::{
     basic::{BasicBlock, BasicBlockBuilder},
     parent::Parents,
+    signed_block::{BlockHeader, SignedBlock, UnsignedBlock},
     validation::{ValidationBlock, ValidationBlockBuilder},
-    wrapper::{BlockHeader, BlockWrapper, BlockWrapperBuilder},
 };
 use crate::types::block::{
     protocol::{ProtocolParameters, ProtocolParametersHash},
@@ -95,7 +95,7 @@ impl Block {
         ValidationBlockBuilder::new(strong_parents, highest_supported_version, protocol_parameters_hash)
     }
 
-    def_is_as_opt!(Block: Basic, Validation);
+    crate::def_is_as_opt!(Block: Basic, Validation);
 
     pub(crate) fn hash(&self) -> [u8; 32] {
         Blake2b256::digest(self.pack_to_vec()).into()
@@ -128,7 +128,7 @@ impl Packable for Block {
         Ok(match u8::unpack::<_, VERIFY>(unpacker, &()).coerce()? {
             BasicBlock::KIND => Self::from(BasicBlock::unpack::<_, VERIFY>(unpacker, visitor).coerce()?),
             ValidationBlock::KIND => Self::from(ValidationBlock::unpack::<_, VERIFY>(unpacker, visitor).coerce()?),
-            k => return Err(Error::InvalidBlockKind(k)).map_err(UnpackError::Packable),
+            k => return Err(UnpackError::Packable(Error::InvalidBlockKind(k))),
         })
     }
 }
@@ -141,7 +141,7 @@ pub(crate) mod dto {
     use serde_json::Value;
 
     use super::*;
-    pub use crate::types::block::core::wrapper::dto::BlockWrapperDto;
+    pub use crate::types::block::core::signed_block::dto::{SignedBlockDto, UnsignedBlockDto};
     use crate::types::{
         block::core::{basic::dto::BasicBlockDto, validation::dto::ValidationBlockDto},
         TryFromDto, ValidationParams,

@@ -22,16 +22,16 @@ use crate::types::block::{
     Block, Error, IssuerId,
 };
 
-/// Builder for a [`BlockWrapper`].
+/// Builder for a [`SignedBlock`].
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct BlockWrapperBuilder {
+pub struct UnsignedBlock {
     /// The block header.
     pub(crate) header: BlockHeader,
     /// The inner block.
     pub(crate) block: Block,
 }
 
-impl BlockWrapperBuilder {
+impl UnsignedBlock {
     pub fn new(header: BlockHeader, block: Block) -> Self {
         Self { header, block }
     }
@@ -56,8 +56,8 @@ impl BlockWrapperBuilder {
         [self.header.hash(), self.block.hash()].concat()
     }
 
-    pub fn finish(self, signature: impl Into<Signature>) -> Result<BlockWrapper, Error> {
-        Ok(BlockWrapper::new(self.header, self.block, signature))
+    pub fn finish(self, signature: impl Into<Signature>) -> Result<SignedBlock, Error> {
+        Ok(SignedBlock::new(self.header, self.block, signature))
     }
 }
 
@@ -167,7 +167,7 @@ impl Packable for BlockHeader {
 
 /// Represent the object that nodes gossip around the network.
 #[derive(Clone, Debug, Eq, PartialEq, Getters, CopyGetters)]
-pub struct BlockWrapper {
+pub struct SignedBlock {
     #[getset(skip)]
     header: BlockHeader,
     /// The inner block.
@@ -178,13 +178,13 @@ pub struct BlockWrapper {
     signature: Signature,
 }
 
-impl BlockWrapper {
+impl SignedBlock {
     /// The minimum number of bytes in a block.
     pub const LENGTH_MIN: usize = 46;
     /// The maximum number of bytes in a block.
     pub const LENGTH_MAX: usize = 32768;
 
-    /// Creates a new [`BlockWrapper`].
+    /// Creates a new [`SignedBlock`].
     #[inline(always)]
     pub fn new(header: BlockHeader, block: Block, signature: impl Into<Signature>) -> Self {
         let signature = signature.into();
@@ -196,43 +196,43 @@ impl BlockWrapper {
         }
     }
 
-    /// Creates a new [`BlockWrapperBuilder`].
+    /// Creates a new [`SignedBlockBuilder`].
     #[inline(always)]
-    pub fn build(header: BlockHeader, block: Block) -> BlockWrapperBuilder {
-        BlockWrapperBuilder::new(header, block)
+    pub fn build(header: BlockHeader, block: Block) -> UnsignedBlock {
+        UnsignedBlock::new(header, block)
     }
 
-    /// Returns the protocol version of a [`BlockWrapper`].
+    /// Returns the protocol version of a [`SignedBlock`].
     #[inline(always)]
     pub fn protocol_version(&self) -> u8 {
         self.header.protocol_version()
     }
 
-    /// Returns the network id of a [`BlockWrapper`].
+    /// Returns the network id of a [`SignedBlock`].
     #[inline(always)]
     pub fn network_id(&self) -> u64 {
         self.header.network_id()
     }
 
-    /// Returns the issuing time of a [`BlockWrapper`].
+    /// Returns the issuing time of a [`SignedBlock`].
     #[inline(always)]
     pub fn issuing_time(&self) -> u64 {
         self.header.issuing_time()
     }
 
-    /// Returns the slot commitment ID of a [`BlockWrapper`].
+    /// Returns the slot commitment ID of a [`SignedBlock`].
     #[inline(always)]
     pub fn slot_commitment_id(&self) -> SlotCommitmentId {
         self.header.slot_commitment_id()
     }
 
-    /// Returns the latest finalized slot of a [`BlockWrapper`].
+    /// Returns the latest finalized slot of a [`SignedBlock`].
     #[inline(always)]
     pub fn latest_finalized_slot(&self) -> SlotIndex {
         self.header.latest_finalized_slot()
     }
 
-    /// Returns the issuer ID of a [`BlockWrapper`].
+    /// Returns the issuer ID of a [`SignedBlock`].
     #[inline(always)]
     pub fn issuer_id(&self) -> IssuerId {
         self.header.issuer_id()
@@ -247,10 +247,10 @@ impl BlockWrapper {
         ]
         .concat();
         let block_hash = BlockHash::new(Blake2b256::digest(id).into());
-        block_hash.with_slot_index(protocol_params.slot_index(self.header.issuing_time() / 1000000000))
+        block_hash.into_block_id(protocol_params.slot_index(self.header.issuing_time() / 1000000000))
     }
 
-    /// Unpacks a [`BlockWrapper`] from a sequence of bytes doing syntactical checks and verifying that
+    /// Unpacks a [`SignedBlock`] from a sequence of bytes doing syntactical checks and verifying that
     /// there are no trailing bytes in the sequence.
     pub fn unpack_strict<T: AsRef<[u8]>>(
         bytes: T,
@@ -290,7 +290,7 @@ impl BlockWrapper {
     }
 }
 
-impl Packable for BlockWrapper {
+impl Packable for SignedBlock {
     type UnpackError = Error;
     type UnpackVisitor = ProtocolParameters;
 
@@ -314,25 +314,25 @@ impl Packable for BlockWrapper {
 
         let signature = Signature::unpack::<_, VERIFY>(unpacker, &())?;
 
-        let wrapper = Self {
+        let signed_block = Self {
             header,
             block,
             signature,
         };
 
         if VERIFY {
-            let wrapper_len = if let (Some(start), Some(end)) = (start_opt, unpacker.read_bytes()) {
+            let signed_block_len = if let (Some(start), Some(end)) = (start_opt, unpacker.read_bytes()) {
                 end - start
             } else {
-                wrapper.packed_len()
+                signed_block.packed_len()
             };
 
-            if wrapper_len > Self::LENGTH_MAX {
-                return Err(UnpackError::Packable(Error::InvalidBlockWrapperLength(wrapper_len)));
+            if signed_block_len > Self::LENGTH_MAX {
+                return Err(UnpackError::Packable(Error::InvalidSignedBlockLength(signed_block_len)));
             }
         }
 
-        Ok(wrapper)
+        Ok(signed_block)
     }
 }
 
@@ -349,7 +349,76 @@ pub(crate) mod dto {
     /// The block object that nodes gossip around in the network.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
-    pub struct BlockWrapperDto {
+    pub struct SignedBlockDto {
+        #[serde(flatten)]
+        pub inner: UnsignedBlockDto,
+        pub signature: Signature,
+    }
+
+    impl core::ops::Deref for SignedBlockDto {
+        type Target = UnsignedBlockDto;
+
+        fn deref(&self) -> &Self::Target {
+            &self.inner
+        }
+    }
+
+    impl From<&SignedBlock> for SignedBlockDto {
+        fn from(value: &SignedBlock) -> Self {
+            Self {
+                inner: UnsignedBlockDto {
+                    protocol_version: value.protocol_version(),
+                    network_id: value.network_id(),
+                    issuing_time: value.issuing_time(),
+                    slot_commitment_id: value.slot_commitment_id(),
+                    latest_finalized_slot: value.latest_finalized_slot(),
+                    issuer_id: value.issuer_id(),
+                    block: BlockDto::from(&value.block),
+                },
+                signature: value.signature,
+            }
+        }
+    }
+
+    impl TryFromDto for SignedBlock {
+        type Dto = SignedBlockDto;
+        type Error = Error;
+
+        fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
+            if let Some(protocol_params) = params.protocol_parameters() {
+                if dto.inner.protocol_version != protocol_params.version() {
+                    return Err(Error::ProtocolVersionMismatch {
+                        expected: protocol_params.version(),
+                        actual: dto.inner.protocol_version,
+                    });
+                }
+
+                if dto.inner.network_id != protocol_params.network_id() {
+                    return Err(Error::NetworkIdMismatch {
+                        expected: protocol_params.network_id(),
+                        actual: dto.inner.network_id,
+                    });
+                }
+            }
+
+            Ok(Self::new(
+                BlockHeader::new(
+                    dto.inner.protocol_version,
+                    dto.inner.network_id,
+                    dto.inner.issuing_time,
+                    dto.inner.slot_commitment_id,
+                    dto.inner.latest_finalized_slot,
+                    dto.inner.issuer_id,
+                ),
+                Block::try_from_dto_with_params_inner(dto.inner.block, params)?,
+                dto.signature,
+            ))
+        }
+    }
+
+    #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+    #[serde(rename_all = "camelCase")]
+    pub struct UnsignedBlockDto {
         pub protocol_version: u8,
         #[serde(with = "string")]
         pub network_id: u64,
@@ -359,26 +428,24 @@ pub(crate) mod dto {
         pub latest_finalized_slot: SlotIndex,
         pub issuer_id: IssuerId,
         pub block: BlockDto,
-        pub signature: Signature,
     }
 
-    impl From<&BlockWrapper> for BlockWrapperDto {
-        fn from(value: &BlockWrapper) -> Self {
+    impl From<&UnsignedBlock> for UnsignedBlockDto {
+        fn from(value: &UnsignedBlock) -> Self {
             Self {
-                protocol_version: value.protocol_version(),
-                network_id: value.network_id(),
-                issuing_time: value.issuing_time(),
-                slot_commitment_id: value.slot_commitment_id(),
-                latest_finalized_slot: value.latest_finalized_slot(),
-                issuer_id: value.issuer_id(),
+                protocol_version: value.header.protocol_version(),
+                network_id: value.header.network_id(),
+                issuing_time: value.header.issuing_time(),
+                slot_commitment_id: value.header.slot_commitment_id(),
+                latest_finalized_slot: value.header.latest_finalized_slot(),
+                issuer_id: value.header.issuer_id(),
                 block: BlockDto::from(&value.block),
-                signature: value.signature,
             }
         }
     }
 
-    impl TryFromDto for BlockWrapper {
-        type Dto = BlockWrapperDto;
+    impl TryFromDto for UnsignedBlock {
+        type Dto = UnsignedBlockDto;
         type Error = Error;
 
         fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
@@ -408,7 +475,6 @@ pub(crate) mod dto {
                     dto.issuer_id,
                 ),
                 Block::try_from_dto_with_params_inner(dto.block, params)?,
-                dto.signature,
             ))
         }
     }

@@ -20,7 +20,7 @@ use super::{GenerateAddressOptions, SecretManage};
 use crate::{
     client::{api::PreparedTransactionData, Error},
     types::block::{
-        address::Ed25519Address, payload::transaction::TransactionPayload, protocol::ProtocolParameters,
+        address::Ed25519Address, payload::signed_transaction::SignedTransactionPayload, protocol::ProtocolParameters,
         signature::Ed25519Signature, unlock::Unlocks,
     },
 };
@@ -82,19 +82,19 @@ impl SecretManage for PrivateKeySecretManager {
         Err(Error::SecretManagerMismatch)
     }
 
-    async fn sign_transaction_essence(
+    async fn transaction_unlocks(
         &self,
         prepared_transaction_data: &PreparedTransactionData,
         protocol_parameters: &ProtocolParameters,
     ) -> Result<Unlocks, Self::Error> {
-        super::default_sign_transaction_essence(self, prepared_transaction_data, protocol_parameters).await
+        super::default_transaction_unlocks(self, prepared_transaction_data, protocol_parameters).await
     }
 
     async fn sign_transaction(
         &self,
         prepared_transaction_data: PreparedTransactionData,
         protocol_parameters: &ProtocolParameters,
-    ) -> Result<TransactionPayload, Self::Error> {
+    ) -> Result<SignedTransactionPayload, Self::Error> {
         super::default_sign_transaction(self, prepared_transaction_data, protocol_parameters).await
     }
 }

@@ -32,7 +32,7 @@ impl Ord for ManaAllotment {
 
 impl ManaAllotment {
     pub fn new(account_id: AccountId, mana: u64, protocol_params: &ProtocolParameters) -> Result<Self, Error> {
-        if mana > protocol_params.mana_structure().max_mana() {
+        if mana > protocol_params.mana_parameters().max_mana() {
             return Err(Error::InvalidManaValue(mana));
         }
         Ok(Self { account_id, mana })

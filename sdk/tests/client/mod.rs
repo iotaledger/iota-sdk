@@ -29,8 +29,7 @@ use iota_sdk::{
         output::{
             feature::{IssuerFeature, SenderFeature},
             unlock_condition::{
-                AddressUnlockCondition, ExpirationUnlockCondition, GovernorAddressUnlockCondition,
-                ImmutableAccountAddressUnlockCondition, StateControllerAddressUnlockCondition,
+                AddressUnlockCondition, ExpirationUnlockCondition, ImmutableAccountAddressUnlockCondition,
                 StorageDepositReturnUnlockCondition, TimelockUnlockCondition, UnlockCondition,
             },
             AccountId, AccountOutputBuilder, BasicOutputBuilder, FoundryOutputBuilder, NativeToken, NativeTokens,
@@ -86,8 +85,6 @@ enum Build<'a> {
     Account(
         u64,
         AccountId,
-        u32,
-        &'a str,
         &'a str,
         Option<Vec<(&'a str, u64)>>,
         Option<&'a str>,
@@ -183,17 +180,13 @@ fn build_nft_output(
 fn build_account_output(
     amount: u64,
     account_id: AccountId,
-    state_index: u32,
-    state_address: Bech32Address,
-    governor_address: Bech32Address,
+    address: Bech32Address,
     native_tokens: Option<Vec<(&str, u64)>>,
     bech32_sender: Option<Bech32Address>,
     bech32_issuer: Option<Bech32Address>,
 ) -> Output {
     let mut builder = AccountOutputBuilder::new_with_amount(amount, account_id)
-        .with_state_index(state_index)
-        .add_unlock_condition(StateControllerAddressUnlockCondition::new(state_address))
-        .add_unlock_condition(GovernorAddressUnlockCondition::new(governor_address));
+        .add_unlock_condition(AddressUnlockCondition::new(address));
 
     if let Some(native_tokens) = native_tokens {
         builder = builder.with_native_tokens(
@@ -274,23 +267,11 @@ fn build_output_inner(build: Build) -> (Output, Option<Bip44>) {
             ),
             chain,
         ),
-        Build::Account(
-            amount,
-            account_id,
-            state_index,
-            state_address,
-            governor_address,
-            native_tokens,
-            bech32_sender,
-            bech32_issuer,
-            chain,
-        ) => (
+        Build::Account(amount, account_id, address, native_tokens, bech32_sender, bech32_issuer, chain) => (
             build_account_output(
                 amount,
                 account_id,
-                state_index,
-                Bech32Address::try_from_str(state_address).unwrap(),
-                Bech32Address::try_from_str(governor_address).unwrap(),
+                Bech32Address::try_from_str(address).unwrap(),
                 native_tokens,
                 bech32_sender.map(|address| Bech32Address::try_from_str(address).unwrap()),
                 bech32_issuer.map(|address| Bech32Address::try_from_str(address).unwrap()),

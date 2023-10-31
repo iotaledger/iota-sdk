@@ -5,14 +5,14 @@ use derivative::Derivative;
 use iota_sdk::types::block::{
     address::{Bech32Address, Hrp},
     output::{dto::OutputDto, AccountId, NftId, OutputId, RentStructure},
-    payload::transaction::{
-        dto::{TransactionEssenceDto, TransactionPayloadDto},
+    payload::signed_transaction::{
+        dto::{SignedTransactionPayloadDto, TransactionDto},
         TransactionId,
     },
     protocol::ProtocolParameters,
     signature::Ed25519Signature,
     slot::SlotCommitment,
-    BlockWrapperDto,
+    SignedBlockDto,
 };
 use serde::{Deserialize, Serialize};
 
@@ -83,14 +83,14 @@ pub enum UtilsMethod {
     #[serde(rename_all = "camelCase")]
     BlockId {
         /// Block
-        block: BlockWrapperDto,
+        block: SignedBlockDto,
         /// Network Protocol Parameters
         protocol_parameters: ProtocolParameters,
     },
     /// Returns the transaction ID (Blake2b256 hash of the provided transaction payload)
     TransactionId {
         /// Transaction Payload
-        payload: TransactionPayloadDto,
+        payload: SignedTransactionPayloadDto,
     },
     /// Computes the account ID
     #[serde(rename_all = "camelCase")]
@@ -123,13 +123,11 @@ pub enum UtilsMethod {
         serial_number: u32,
         token_scheme_type: u8,
     },
-    /// Computes the hash of a transaction essence.
-    HashTransactionEssence {
-        /// The transaction essence
-        essence: TransactionEssenceDto,
+    /// Computes the signing hash of a transaction.
+    TransactionSigningHash {
+        /// The transaction.
+        transaction: TransactionDto,
     },
-    /// Computes the input commitment from the output objects that are used as inputs to fund the transaction.
-    ComputeInputsCommitment { inputs: Vec<OutputDto> },
     /// Computes the required storage deposit of an output.
     ComputeStorageDeposit { output: OutputDto, rent: RentStructure },
     /// Checks if the given mnemonic is valid.

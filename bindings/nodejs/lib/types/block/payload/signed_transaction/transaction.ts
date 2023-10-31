@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Type } from 'class-transformer';
-import { HexEncodedString } from '../../../utils';
 import { ContextInput, ContextInputDiscriminator } from '../../context_input';
 import { Input, InputDiscriminator } from '../../input';
 import { ManaAllotment } from '../../mana-allotment';
@@ -10,36 +9,10 @@ import { Output, OutputDiscriminator } from '../../output';
 import { SlotIndex } from '../../slot';
 import { Payload, PayloadType } from '../payload';
 import { TaggedDataPayload } from '../tagged/tagged';
+import { HexEncodedString } from '../../../utils';
 
 /**
- * All of the essence types.
- */
-enum TransactionEssenceType {
-    /**
-     * A regular transaction essence.
-     */
-    Regular = 1,
-}
-
-/**
- * The base class for transaction essences.
- */
-abstract class TransactionEssence {
-    /**
-     * The type of essence.
-     */
-    readonly type: TransactionEssenceType;
-
-    /**
-     * @param type The type of transaction essence.
-     */
-    constructor(type: TransactionEssenceType) {
-        this.type = type;
-    }
-}
-
-/**
- * PayloadDiscriminator for payloads inside of a TransactionEssence.
+ * PayloadDiscriminator for payloads inside of a Transaction.
  */
 const PayloadDiscriminator = {
     property: 'type',
@@ -49,9 +22,9 @@ const PayloadDiscriminator = {
 };
 
 /**
- * RegularTransactionEssence transaction essence.
+ * A transaction.
  */
-class RegularTransactionEssence extends TransactionEssence {
+class Transaction {
     /**
      * The unique value denoting whether the block was meant for mainnet, testnet, or a private network.
      */
@@ -69,23 +42,22 @@ class RegularTransactionEssence extends TransactionEssence {
     })
     readonly inputs: Input[];
 
-    readonly inputsCommitment: HexEncodedString;
-
-    @Type(() => Output, {
-        discriminator: OutputDiscriminator,
-    })
-    readonly outputs: Output[];
-
     readonly allotments: ManaAllotment[];
+
+    private capabilities: HexEncodedString = '0x';
 
     @Type(() => Payload, {
         discriminator: PayloadDiscriminator,
     })
     readonly payload?: Payload;
 
+    @Type(() => Output, {
+        discriminator: OutputDiscriminator,
+    })
+    readonly outputs: Output[];
+
     /**
      * @param networkId The ID of the network the transaction was issued to.
-     * @param inputsCommitment The hash of all inputs.
      * @param inputs The inputs of the transaction.
      * @param outputs The outputs of the transaction.
      * @param payload An optional Tagged Data payload.
@@ -96,36 +68,44 @@ class RegularTransactionEssence extends TransactionEssence {
         creationSlot: SlotIndex,
         contextInputs: ContextInput[],
         inputs: Input[],
-        inputsCommitment: HexEncodedString,
-        outputs: Output[],
         allotments: ManaAllotment[],
+        outputs: Output[],
         payload?: Payload,
     ) {
-        super(TransactionEssenceType.Regular);
         this.networkId = networkId;
         this.creationSlot = creationSlot;
         this.contextInputs = contextInputs;
         this.inputs = inputs;
-        this.inputsCommitment = inputsCommitment;
-        this.outputs = outputs;
         this.allotments = allotments;
         this.payload = payload;
+        this.outputs = outputs;
+    }
+
+    setCapabilities(capabilities: Uint8Array) {
+        if (capabilities.some((c) => c != 0)) {
+            this.capabilities =
+                '0x' +
+                Buffer.from(
+                    capabilities.buffer,
+                    capabilities.byteOffset,
+                    capabilities.byteLength,
+                ).toString('hex');
+        } else {
+            this.capabilities = '0x';
+        }
+    }
+
+    withCapabilities(capabilities: Uint8Array): Transaction {
+        this.setCapabilities(capabilities);
+        return this;
+    }
+
+    /** Get the capability bitflags of the transaction. */
+    getCapabilities(): Uint8Array {
+        return Uint8Array.from(
+            Buffer.from(this.capabilities.substring(2), 'hex'),
+        );
     }
 }
 
-const TransactionEssenceDiscriminator = {
-    property: 'type',
-    subTypes: [
-        {
-            value: RegularTransactionEssence,
-            name: TransactionEssenceType.Regular as any,
-        },
-    ],
-};
-
-export {
-    TransactionEssenceDiscriminator,
-    TransactionEssence,
-    TransactionEssenceType,
-    RegularTransactionEssence,
-};
+export { Transaction };

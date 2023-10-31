@@ -22,8 +22,8 @@ use crate::{
         api::core::OutputWithMetadataResponse,
         block::{
             address::Address,
-            output::{dto::OutputDto, AccountTransition, Output, OutputId, OutputMetadata},
-            payload::transaction::{dto::TransactionPayloadDto, TransactionId, TransactionPayload},
+            output::{dto::OutputDto, Output, OutputId, OutputMetadata},
+            payload::signed_transaction::{dto::SignedTransactionPayloadDto, SignedTransactionPayload, TransactionId},
             slot::SlotIndex,
             BlockId, Error as BlockError,
         },
@@ -59,11 +59,10 @@ impl OutputData {
         slot_index: SlotIndex,
         min_committable_age: u32,
         max_committable_age: u32,
-        account_transition: Option<AccountTransition>,
     ) -> crate::wallet::Result<Option<InputSigningData>> {
         let required_address = self
             .output
-            .required_address(slot_index, min_committable_age, max_committable_age, account_transition)
+            .required_address(slot_index, min_committable_age, max_committable_age)?
             // TODO
             .unwrap();
 
@@ -161,8 +160,8 @@ impl TryFromDto for OutputData {
 
 /// A transaction with metadata
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct Transaction {
-    pub payload: TransactionPayload,
+pub struct TransactionWithMetadata {
+    pub payload: SignedTransactionPayload,
     pub block_id: Option<BlockId>,
     pub inclusion_state: InclusionState,
     // Transaction creation time
@@ -182,9 +181,9 @@ pub struct Transaction {
 /// Dto for a transaction with metadata
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct TransactionDto {
+pub struct TransactionWithMetadataDto {
     /// The transaction payload
-    pub payload: TransactionPayloadDto,
+    pub payload: SignedTransactionPayloadDto,
     /// BlockId when it got sent to the Tangle
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub block_id: Option<BlockId>,
@@ -202,10 +201,10 @@ pub struct TransactionDto {
     pub inputs: Vec<OutputWithMetadataResponse>,
 }
 
-impl From<&Transaction> for TransactionDto {
-    fn from(value: &Transaction) -> Self {
+impl From<&TransactionWithMetadata> for TransactionWithMetadataDto {
+    fn from(value: &TransactionWithMetadata) -> Self {
         Self {
-            payload: TransactionPayloadDto::from(&value.payload),
+            payload: SignedTransactionPayloadDto::from(&value.payload),
             block_id: value.block_id,
             inclusion_state: value.inclusion_state,
             timestamp: value.timestamp.to_string(),
@@ -218,8 +217,8 @@ impl From<&Transaction> for TransactionDto {
     }
 }
 
-impl TryFromDto for Transaction {
-    type Dto = TransactionDto;
+impl TryFromDto for TransactionWithMetadata {
+    type Dto = TransactionWithMetadataDto;
     type Error = BlockError;
 
     fn try_from_dto_with_params_inner(
@@ -227,7 +226,7 @@ impl TryFromDto for Transaction {
         params: crate::types::ValidationParams<'_>,
     ) -> Result<Self, Self::Error> {
         Ok(Self {
-            payload: TransactionPayload::try_from_dto_with_params(dto.payload, params)?,
+            payload: SignedTransactionPayload::try_from_dto_with_params(dto.payload, params)?,
             block_id: dto.block_id,
             inclusion_state: dto.inclusion_state,
             timestamp: dto

@@ -17,7 +17,7 @@ use crate::{
         },
     },
     wallet::account::{
-        types::{Transaction, TransactionDto},
+        types::{TransactionWithMetadata, TransactionWithMetadataDto},
         Account, TransactionOptions,
     },
 };
@@ -41,7 +41,7 @@ pub struct CreateNativeTokenParams {
 #[derive(Debug)]
 pub struct CreateNativeTokenTransaction {
     pub token_id: TokenId,
-    pub transaction: Transaction,
+    pub transaction: TransactionWithMetadata,
 }
 
 /// Dto for NativeTokenTransaction
@@ -49,14 +49,14 @@ pub struct CreateNativeTokenTransaction {
 #[serde(rename_all = "camelCase")]
 pub struct CreateNativeTokenTransactionDto {
     pub token_id: TokenId,
-    pub transaction: TransactionDto,
+    pub transaction: TransactionWithMetadataDto,
 }
 
 impl From<&CreateNativeTokenTransaction> for CreateNativeTokenTransactionDto {
     fn from(value: &CreateNativeTokenTransaction) -> Self {
         Self {
             token_id: value.token_id,
-            transaction: TransactionDto::from(&value.transaction),
+            transaction: TransactionWithMetadataDto::from(&value.transaction),
         }
     }
 }
@@ -141,10 +141,9 @@ where
             .ok_or_else(|| crate::wallet::Error::MintingFailed("Missing account output".to_string()))?;
 
         if let Output::Account(account_output) = &account_output.output {
-            // Create the new account output with the same feature blocks, just updated state_index and foundry_counter
+            // Create the new account output with the same feature blocks, just updated foundry_counter.
             let new_account_output_builder = AccountOutputBuilder::from(account_output)
                 .with_account_id(account_id)
-                .with_state_index(account_output.state_index() + 1)
                 .with_foundry_counter(account_output.foundry_counter() + 1);
 
             // create foundry output with minted native tokens

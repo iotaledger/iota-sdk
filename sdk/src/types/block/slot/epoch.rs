@@ -50,6 +50,7 @@ use super::SlotIndex;
     FromStr,
     packable::Packable,
 )]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[repr(transparent)]
 pub struct EpochIndex(pub u32);
 
@@ -115,11 +116,10 @@ impl core::ops::SubAssign<u32> for EpochIndex {
     }
 }
 
-#[cfg(feature = "serde")]
-string_serde_impl!(EpochIndex);
-
 #[cfg(test)]
 mod test {
+    use pretty_assertions::assert_eq;
+
     use super::*;
     use crate::types::block::protocol::ProtocolParameters;
 

@@ -11,13 +11,13 @@
 use iota_sdk::{
     client::{
         api::{
-            transaction::validate_transaction_payload_length, PreparedTransactionData, PreparedTransactionDataDto,
-            SignedTransactionData, SignedTransactionDataDto,
+            transaction::validate_signed_transaction_payload_length, PreparedTransactionData,
+            PreparedTransactionDataDto, SignedTransactionData, SignedTransactionDataDto,
         },
         secret::{stronghold::StrongholdSecretManager, SecretManage, SecretManager},
     },
     types::{
-        block::{payload::TransactionPayload, protocol::protocol_parameters},
+        block::{payload::SignedTransactionPayload, protocol::protocol_parameters},
         TryFromDto,
     },
     wallet::Result,
@@ -41,16 +41,15 @@ async fn main() -> Result<()> {
 
     // Signs prepared transaction offline.
     let unlocks = SecretManager::Stronghold(secret_manager)
-        // TODO meh
-        .sign_transaction_essence(&prepared_transaction_data, &protocol_parameters())
+        .transaction_unlocks(&prepared_transaction_data, &protocol_parameters())
         .await?;
 
-    let signed_transaction = TransactionPayload::new(prepared_transaction_data.essence.as_regular().clone(), unlocks)?;
+    let signed_transaction = SignedTransactionPayload::new(prepared_transaction_data.transaction.clone(), unlocks)?;
 
-    validate_transaction_payload_length(&signed_transaction)?;
+    validate_signed_transaction_payload_length(&signed_transaction)?;
 
     let signed_transaction_data = SignedTransactionData {
-        transaction_payload: signed_transaction,
+        payload: signed_transaction,
         inputs_data: prepared_transaction_data.inputs_data,
     };
 

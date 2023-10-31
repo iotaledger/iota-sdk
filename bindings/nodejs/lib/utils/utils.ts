@@ -6,15 +6,15 @@ import {
     Address,
     HexEncodedString,
     Ed25519Signature,
-    TransactionEssence,
-    TransactionPayload,
+    Transaction,
+    SignedTransactionPayload,
     TransactionId,
     TokenSchemeType,
     Output,
     RentStructure,
     OutputId,
     u64,
-    BlockWrapper,
+    SignedBlock,
     ProtocolParameters,
     Bech32Address,
 } from '../types';
@@ -107,21 +107,6 @@ export class Utils {
     }
 
     /**
-     * Compute the input commitment from the output objects that are used as inputs to fund the transaction.
-     *
-     * @param inputs The output objects used as inputs for the transaction.
-     * @returns The inputs commitment hash as hex-encoded string.
-     */
-    static computeInputsCommitment(inputs: Output[]): HexEncodedString {
-        return callUtilsMethod({
-            name: 'computeInputsCommitment',
-            data: {
-                inputs,
-            },
-        });
-    }
-
-    /**
      * Compute the output ID from transaction ID and output index.
      *
      * @param transactionId The ID of the transaction.
@@ -201,7 +186,7 @@ export class Utils {
      * @param params The network protocol parameters.
      * @returns The corresponding block ID.
      */
-    static blockId(block: BlockWrapper, params: ProtocolParameters): BlockId {
+    static blockId(block: SignedBlock, params: ProtocolParameters): BlockId {
         return callUtilsMethod({
             name: 'blockId',
             data: {
@@ -217,7 +202,7 @@ export class Utils {
      * @param payload A transaction payload.
      * @returns The transaction ID.
      */
-    static transactionId(payload: TransactionPayload): TransactionId {
+    static transactionId(payload: SignedTransactionPayload): TransactionId {
         return callUtilsMethod({
             name: 'transactionId',
             data: {
@@ -333,18 +318,16 @@ export class Utils {
     }
 
     /**
-     * Compute the hash of a transaction essence.
+     * Compute the signing hash of a transaction.
      *
-     * @param essence A transaction essence.
-     * @returns The hash of the transaction essence as a hex-encoded string.
+     * @param transaction A transaction.
+     * @returns The signing hash of the transaction as a hex-encoded string.
      */
-    static hashTransactionEssence(
-        essence: TransactionEssence,
-    ): HexEncodedString {
+    static transactionSigningHash(transaction: Transaction): HexEncodedString {
         return callUtilsMethod({
-            name: 'hashTransactionEssence',
+            name: 'transactionSigningHash',
             data: {
-                essence,
+                transaction,
             },
         });
     }

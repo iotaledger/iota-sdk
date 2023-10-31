@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 from dataclasses import dataclass, field
-from typing import Optional, List, Dict
+from typing import Optional, List
 from dataclasses_json import config
 from iota_sdk.types.common import HexStr, json
 from iota_sdk.types.native_token import NativeToken
@@ -71,17 +71,14 @@ class CreateNativeTokenParams():
         foundry_metadata: The foundry metadata of the native token.
         account_id: The ID of the corresponding account.
     """
-    circulating_supply: int
-    maximum_supply: int
+    circulating_supply: int = field(metadata=config(
+        encoder=str
+    ))
+    maximum_supply: int = field(metadata=config(
+        encoder=str
+    ))
     foundry_metadata: Optional[str] = None
     account_id: Optional[str] = None
-
-    @staticmethod
-    def _to_dict_custom(cfg: Dict[str, any]) -> Dict[str, any]:
-        cfg['circulatingSupply'] = hex(cfg['circulatingSupply'])
-        cfg['maximumSupply'] = hex(cfg['maximumSupply'])
-
-        return cfg
 
 
 @json
@@ -114,9 +111,7 @@ class CreateAccountOutputParams():
         address: A Bech32 encoded address which will control the account. Default will use the first address of the account.
         immutable_metadata: Immutable account metadata.
         metadata: Account metadata.
-        state_metadata: Account state metadata.
     """
     address: str
     immutable_metadata: Optional[str] = None
     metadata: Optional[str] = None
-    state_metadata: Optional[str] = None

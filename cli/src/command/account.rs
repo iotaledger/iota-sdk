@@ -14,14 +14,14 @@ use iota_sdk::{
                 unlock_condition::AddressUnlockCondition, AccountId, BasicOutputBuilder, FoundryId, NativeToken,
                 NativeTokensBuilder, NftId, Output, OutputId, TokenId,
             },
-            payload::transaction::TransactionId,
+            payload::signed_transaction::TransactionId,
             slot::SlotIndex,
             ConvertTo,
         },
     },
     wallet::{
         account::{
-            types::{AccountIdentifier, Bip44Address, OutputData, Transaction},
+            types::{AccountIdentifier, Bip44Address, OutputData, TransactionWithMetadata},
             Account, ConsolidationParams, OutputsToClaim, SyncOptions, TransactionOptions,
         },
         CreateNativeTokenParams, MintNftParams, SendNativeTokensParams, SendNftParams, SendParams,
@@ -949,9 +949,11 @@ async fn print_address(account: &Account, address: &Bip44Address) -> Result<(), 
     let mut output_ids: &[OutputId] = &[];
     let mut amount = 0;
     let mut native_tokens = NativeTokensBuilder::new();
-    let mut nfts = Vec::new();
     let mut accounts = Vec::new();
     let mut foundries = Vec::new();
+    let mut nfts = Vec::new();
+    let mut delegations = Vec::new();
+    let mut anchors = Vec::new();
 
     if let Some(address) = addresses
         .iter()
@@ -968,8 +970,7 @@ async fn print_address(account: &Account, address: &Bip44Address) -> Result<(), 
                         slot_index,
                         protocol_parameters.min_committable_age(),
                         protocol_parameters.max_committable_age(),
-                        None,
-                    )
+                    )?
                     // TODO
                     .unwrap();
 
@@ -978,13 +979,14 @@ async fn print_address(account: &Account, address: &Bip44Address) -> Result<(), 
                         native_tokens.add_native_tokens(nts.clone())?;
                     }
                     match &output_data.output {
-                        Output::Nft(nft) => nfts.push(nft.nft_id_non_null(output_id)),
+                        Output::Basic(_) => {}
                         Output::Account(account) => accounts.push(account.account_id_non_null(output_id)),
                         Output::Foundry(foundry) => foundries.push(foundry.id()),
-                        Output::Basic(_) => {}
-                        Output::Delegation(_) => {
-                            // TODO do we want to log them?
+                        Output::Nft(nft) => nfts.push(nft.nft_id_non_null(output_id)),
+                        Output::Delegation(delegation) => {
+                            delegations.push(delegation.delegation_id_non_null(output_id))
                         }
+                        Output::Anchor(anchor) => anchors.push(anchor.anchor_id_non_null(output_id)),
                     }
                     let unlock_conditions = output_data
                         .output
@@ -1002,13 +1004,15 @@ async fn print_address(account: &Account, address: &Bip44Address) -> Result<(), 
     }
 
     log = format!(
-        "{log}\nOutputs: {:#?}\nBase coin amount: {}\nNative Tokens: {:#?}\nNFTs: {:#?}\nAccounts: {:#?}\nFoundries: {:#?}\n",
+        "{log}\nOutputs: {:#?}\nBase coin amount: {}\nNative Tokens: {:?}\nAccounts: {:?}\nFoundries: {:?}\nNFTs: {:?}\nDelegations: {:?}\nAnchors: {:?}\n",
         output_ids,
         amount,
         native_tokens.finish_vec()?,
-        nfts,
         accounts,
         foundries,
+        nfts,
+        delegations,
+        anchors
     );
 
     println_log_info!("{log}");
@@ -1041,6 +1045,6 @@ fn outputs_ordering(a: &OutputData, b: &OutputData) -> std::cmp::Ordering {
     a.output_id.cmp(&b.output_id)
 }
 
-fn transactions_ordering(a: &Transaction, b: &Transaction) -> std::cmp::Ordering {
+fn transactions_ordering(a: &TransactionWithMetadata, b: &TransactionWithMetadata) -> std::cmp::Ordering {
     b.timestamp.cmp(&a.timestamp)
 }

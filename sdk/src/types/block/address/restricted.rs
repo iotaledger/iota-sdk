@@ -19,7 +19,7 @@ pub struct RestrictedAddress {
 
 impl RestrictedAddress {
     /// The [`Address`](crate::types::block::address::Address) kind of a [`RestrictedAddress`].
-    pub const KIND: u8 = 40;
+    pub const KIND: u8 = 48;
 
     /// Creates a new [`RestrictedAddress`] address from an [`Address`] with default allowed capabilities.
     #[inline(always)]
@@ -88,9 +88,12 @@ pub enum AddressCapabilityFlag {
     NftOutputs,
     /// Can receive Delegation Outputs.
     DelegationOutputs,
+    /// Can receive Anchor Outputs.
+    AnchorOutputs,
 }
 
 impl AddressCapabilityFlag {
+    // Byte 0
     const OUTPUTS_WITH_NATIVE_TOKENS: u8 = 0b00000001;
     const OUTPUTS_WITH_MANA: u8 = 0b00000010;
     const OUTPUTS_WITH_TIMELOCK: u8 = 0b00000100;
@@ -99,10 +102,12 @@ impl AddressCapabilityFlag {
     const ACCOUNT_OUTPUTS: u8 = 0b00100000;
     const NFT_OUTPUTS: u8 = 0b01000000;
     const DELEGATION_OUTPUTS: u8 = 0b10000000;
+    // Byte 1
+    const ANCHOR_OUTPUTS: u8 = 0b00000001;
 }
 
 impl CapabilityFlag for AddressCapabilityFlag {
-    type Iterator = core::array::IntoIter<Self, 8>;
+    type Iterator = core::array::IntoIter<Self, 9>;
 
     fn as_byte(&self) -> u8 {
         match self {
@@ -114,6 +119,7 @@ impl CapabilityFlag for AddressCapabilityFlag {
             Self::AccountOutputs => Self::ACCOUNT_OUTPUTS,
             Self::NftOutputs => Self::NFT_OUTPUTS,
             Self::DelegationOutputs => Self::DELEGATION_OUTPUTS,
+            Self::AnchorOutputs => Self::ANCHOR_OUTPUTS,
         }
     }
 
@@ -127,6 +133,7 @@ impl CapabilityFlag for AddressCapabilityFlag {
             | Self::AccountOutputs
             | Self::NftOutputs
             | Self::DelegationOutputs => 0,
+            Self::AnchorOutputs => 1,
         }
     }
 
@@ -140,6 +147,7 @@ impl CapabilityFlag for AddressCapabilityFlag {
             Self::AccountOutputs,
             Self::NftOutputs,
             Self::DelegationOutputs,
+            Self::AnchorOutputs,
         ]
         .into_iter()
     }
@@ -199,5 +207,5 @@ pub(crate) mod dto {
         }
     }
 
-    impl_serde_typed_dto!(RestrictedAddress, RestrictedAddressDto, "restricted address");
+    crate::impl_serde_typed_dto!(RestrictedAddress, RestrictedAddressDto, "restricted address");
 }

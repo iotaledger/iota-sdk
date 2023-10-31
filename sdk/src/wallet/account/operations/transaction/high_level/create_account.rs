@@ -8,13 +8,11 @@ use crate::{
     types::block::{
         address::Bech32Address,
         output::{
-            feature::MetadataFeature,
-            unlock_condition::{GovernorAddressUnlockCondition, StateControllerAddressUnlockCondition},
-            AccountId, AccountOutputBuilder, Output,
+            feature::MetadataFeature, unlock_condition::AddressUnlockCondition, AccountId, AccountOutputBuilder, Output,
         },
     },
     utils::serde::option_prefix_hex_bytes,
-    wallet::account::{types::Transaction, Account, OutputData, TransactionOptions},
+    wallet::account::{types::TransactionWithMetadata, Account, OutputData, TransactionOptions},
 };
 
 /// Params `create_account_output()`
@@ -30,9 +28,6 @@ pub struct CreateAccountParams {
     /// Account metadata
     #[serde(default, with = "option_prefix_hex_bytes")]
     pub metadata: Option<Vec<u8>>,
-    /// Account state metadata
-    #[serde(default, with = "option_prefix_hex_bytes")]
-    pub state_metadata: Option<Vec<u8>>,
 }
 
 impl<S: 'static + SecretManage> Account<S>
@@ -60,7 +55,7 @@ where
         &self,
         params: Option<CreateAccountParams>,
         options: impl Into<Option<TransactionOptions>> + Send,
-    ) -> crate::wallet::Result<Transaction> {
+    ) -> crate::wallet::Result<TransactionWithMetadata> {
         let options = options.into();
         let prepared_transaction = self.prepare_create_account_output(params, options.clone()).await?;
 
@@ -78,7 +73,7 @@ where
         let rent_structure = self.client().get_rent_structure().await?;
         let token_supply = self.client().get_token_supply().await?;
 
-        let controller_address = match params.as_ref().and_then(|options| options.address.as_ref()) {
+        let address = match params.as_ref().and_then(|options| options.address.as_ref()) {
             Some(bech32_address) => {
                 self.client().bech32_hrp_matches(bech32_address.hrp()).await?;
                 bech32_address.inner().clone()
@@ -96,14 +91,11 @@ where
 
         let mut account_output_builder =
             AccountOutputBuilder::new_with_minimum_storage_deposit(rent_structure, AccountId::null())
-                .with_state_index(0)
                 .with_foundry_counter(0)
-                .add_unlock_condition(StateControllerAddressUnlockCondition::new(controller_address.clone()))
-                .add_unlock_condition(GovernorAddressUnlockCondition::new(controller_address));
+                .add_unlock_condition(AddressUnlockCondition::new(address.clone()));
         if let Some(CreateAccountParams {
             immutable_metadata,
             metadata,
-            state_metadata,
             ..
         }) = params
         {
@@ -113,9 +105,6 @@ where
             }
             if let Some(metadata) = metadata {
                 account_output_builder = account_output_builder.add_feature(MetadataFeature::new(metadata)?);
-            }
-            if let Some(state_metadata) = state_metadata {
-                account_output_builder = account_output_builder.with_state_metadata(state_metadata);
             }
         }
 
@@ -163,7 +152,6 @@ mod tests {
             address: None,
             immutable_metadata: None,
             metadata: None,
-            state_metadata: None,
         };
         let json_none = serde_json::to_string(&params_none_1).unwrap();
         let params_none_2 = serde_json::from_str(&json_none).unwrap();
@@ -174,7 +162,6 @@ mod tests {
             address: None,
             immutable_metadata: Some(b"immutable_metadata".to_vec()),
             metadata: Some(b"metadata".to_vec()),
-            state_metadata: Some(b"state_metadata".to_vec()),
         };
         let json_some = serde_json::to_string(&params_some_1).unwrap();
         let params_some_2 = serde_json::from_str(&json_some).unwrap();

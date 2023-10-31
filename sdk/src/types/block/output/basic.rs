@@ -17,7 +17,7 @@ use crate::types::{
             NativeTokens, Output, OutputBuilderAmount, OutputId, Rent, RentStructure,
         },
         protocol::ProtocolParameters,
-        semantic::{TransactionFailureReason, ValidationContext},
+        semantic::{SemanticValidationContext, TransactionFailureReason},
         unlock::Unlock,
         Error,
     },
@@ -301,19 +301,18 @@ impl BasicOutput {
         &self,
         _output_id: &OutputId,
         unlock: &Unlock,
-        inputs: &[(&OutputId, &Output)],
-        context: &mut ValidationContext<'_>,
+        context: &mut SemanticValidationContext<'_>,
     ) -> Result<(), TransactionFailureReason> {
         self.unlock_conditions()
             .locked_address(
                 self.address(),
-                context.essence.creation_slot(),
+                context.transaction.creation_slot(),
                 context.protocol_parameters.min_committable_age(),
                 context.protocol_parameters.max_committable_age(),
             )
             // TODO
             .unwrap()
-            .unlock(unlock, inputs, context)
+            .unlock(unlock, context)
     }
 
     /// Returns the address of the unlock conditions if the output is a simple deposit.

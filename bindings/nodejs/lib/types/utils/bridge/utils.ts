@@ -1,13 +1,13 @@
 import {
     Ed25519Signature,
     HexEncodedString,
-    TransactionEssence,
-    TransactionPayload,
+    Transaction,
+    SignedTransactionPayload,
     TransactionId,
     TokenSchemeType,
     Output,
     RentStructure,
-    BlockWrapper,
+    SignedBlock,
     ProtocolParameters,
     OutputId,
     NftId,
@@ -40,13 +40,6 @@ export interface __ComputeFoundryIdMethod__ {
         accountId: AccountId;
         serialNumber: number;
         tokenSchemeType: number;
-    };
-}
-
-export interface __ComputeInputsCommitmentMethod__ {
-    name: 'computeInputsCommitment';
-    data: {
-        inputs: Output[];
     };
 }
 
@@ -92,7 +85,7 @@ export interface __ParseBech32AddressMethod__ {
 export interface __BlockIdMethod__ {
     name: 'blockId';
     data: {
-        block: BlockWrapper;
+        block: SignedBlock;
         params: ProtocolParameters;
     };
 }
@@ -100,7 +93,7 @@ export interface __BlockIdMethod__ {
 export interface __TransactionIdMethod__ {
     name: 'transactionId';
     data: {
-        payload: TransactionPayload;
+        payload: SignedTransactionPayload;
     };
 }
 
@@ -150,10 +143,10 @@ export interface __IsAddressValidMethod__ {
     };
 }
 
-export interface __HashTransactionEssenceMethod__ {
-    name: 'hashTransactionEssence';
+export interface __TransactionSigningHashMethod__ {
+    name: 'transactionSigningHash';
     data: {
-        essence: TransactionEssence;
+        transaction: Transaction;
     };
 }
 

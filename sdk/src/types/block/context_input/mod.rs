@@ -59,40 +59,37 @@ impl ContextInput {
         }
     }
 
-    def_is_as_opt!(ContextInput: Commitment, BlockIssuanceCredit, Reward);
+    crate::def_is_as_opt!(ContextInput: Commitment, BlockIssuanceCredit, Reward);
 }
 
 #[cfg(test)]
 mod tests {
+    use pretty_assertions::assert_eq;
 
     use super::ContextInput;
 
     #[test]
     fn test_commitment() {
-        let commitment: ContextInput = serde_json::from_str(
-            r#"
+        let commitment: ContextInput = serde_json::from_value(serde_json::json!(
             {
                 "type": 0,
-                "commitmentId": "0xedf5f572c58ddf4b4f9567d82bf96689cc68b730df796d822b4b9fb643f5efda4f9567d82bf96689"
+                "commitmentId": "0xedf5f572c58ddf4b4f9567d82bf96689cc68b730df796d822b4b9fb643f5efda4f9567d8"
             }
-            "#,
-        )
+        ))
         .unwrap();
         assert!(commitment.is_commitment());
         assert_eq!(
             commitment.as_commitment().slot_commitment_id().to_string(),
-            "0xedf5f572c58ddf4b4f9567d82bf96689cc68b730df796d822b4b9fb643f5efda4f9567d82bf96689"
+            "0xedf5f572c58ddf4b4f9567d82bf96689cc68b730df796d822b4b9fb643f5efda4f9567d8"
         );
 
         // Test wrong type returns error.
-        let commitment_deserialization_result: Result<ContextInput, _> = serde_json::from_str(
-            r#"
+        let commitment_deserialization_result: Result<ContextInput, _> = serde_json::from_value(serde_json::json!(
             {
                 "type": 2,
-                "commitmentId": "0xedf5f572c58ddf4b4f9567d82bf96689cc68b730df796d822b4b9fb643f5efda4f9567d82bf96689"
+                "commitmentId": "0xedf5f572c58ddf4b4f9567d82bf96689cc68b730df796d822b4b9fb643f5efda4f9567d8"
             }
-            "#,
-        );
+        ));
         assert!(commitment_deserialization_result.is_err());
     }
 

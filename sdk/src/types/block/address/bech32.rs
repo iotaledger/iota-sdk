@@ -7,7 +7,7 @@ use alloc::{
 };
 use core::str::FromStr;
 
-use derive_more::{AsRef, Deref};
+use derive_more::{AsRef, Deref, Display};
 use packable::{
     error::{UnpackError, UnpackErrorExt},
     packer::Packer,
@@ -17,7 +17,7 @@ use packable::{
 
 use crate::types::block::{address::Address, ConvertTo, Error};
 
-#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Deref)]
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Deref, Display)]
 #[repr(transparent)]
 pub struct Hrp(bech32::Hrp);
 
@@ -43,12 +43,6 @@ impl FromStr for Hrp {
 
     fn from_str(hrp: &str) -> Result<Self, Self::Err> {
         Ok(Self(bech32::Hrp::parse(hrp)?))
-    }
-}
-
-impl core::fmt::Display for Hrp {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        self.0.fmt(f)
     }
 }
 
@@ -101,7 +95,7 @@ impl PartialEq<str> for Hrp {
 }
 
 #[cfg(feature = "serde")]
-string_serde_impl!(Hrp);
+crate::string_serde_impl!(Hrp);
 
 impl<T: AsRef<str> + Send> ConvertTo<Hrp> for T {
     fn convert(self) -> Result<Hrp, Error> {
@@ -217,7 +211,7 @@ impl<T: core::borrow::Borrow<Bech32Address>> From<T> for Address {
 }
 
 #[cfg(feature = "serde")]
-string_serde_impl!(Bech32Address);
+crate::string_serde_impl!(Bech32Address);
 
 impl<T: AsRef<str> + Send> ConvertTo<Bech32Address> for T {
     fn convert(self) -> Result<Bech32Address, Error> {

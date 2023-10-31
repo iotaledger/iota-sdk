@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 mod account;
+mod anchor;
 mod nft;
 mod reference;
 mod signature;
@@ -13,7 +14,10 @@ use derive_more::{Deref, From};
 use hashbrown::HashSet;
 use packable::{bounded::BoundedU16, prefix::BoxedSlicePrefix, Packable};
 
-pub use self::{account::AccountUnlock, nft::NftUnlock, reference::ReferenceUnlock, signature::SignatureUnlock};
+pub use self::{
+    account::AccountUnlock, anchor::AnchorUnlock, nft::NftUnlock, reference::ReferenceUnlock,
+    signature::SignatureUnlock,
+};
 use crate::types::block::{
     input::{INPUT_COUNT_MAX, INPUT_COUNT_RANGE, INPUT_INDEX_MAX},
     Error,
@@ -49,6 +53,9 @@ pub enum Unlock {
     /// An NFT unlock.
     #[packable(tag = NftUnlock::KIND)]
     Nft(NftUnlock),
+    /// An Anchor unlock.
+    #[packable(tag = AnchorUnlock::KIND)]
+    Anchor(AnchorUnlock),
 }
 
 impl From<SignatureUnlock> for Unlock {
@@ -64,6 +71,7 @@ impl core::fmt::Debug for Unlock {
             Self::Reference(unlock) => unlock.fmt(f),
             Self::Account(unlock) => unlock.fmt(f),
             Self::Nft(unlock) => unlock.fmt(f),
+            Self::Anchor(unlock) => unlock.fmt(f),
         }
     }
 }
@@ -76,10 +84,11 @@ impl Unlock {
             Self::Reference(_) => ReferenceUnlock::KIND,
             Self::Account(_) => AccountUnlock::KIND,
             Self::Nft(_) => NftUnlock::KIND,
+            Self::Anchor(_) => AnchorUnlock::KIND,
         }
     }
 
-    def_is_as_opt!(Unlock: Signature, Reference, Account, Nft);
+    crate::def_is_as_opt!(Unlock: Signature, Reference, Account, Nft);
 }
 
 pub(crate) type UnlockCount = BoundedU16<{ *UNLOCK_COUNT_RANGE.start() }, { *UNLOCK_COUNT_RANGE.end() }>;
@@ -138,6 +147,11 @@ fn verify_unlocks<const VERIFY: bool>(unlocks: &[Unlock], _: &()) -> Result<(), 
                 Unlock::Nft(nft) => {
                     if index == 0 || nft.index() >= index {
                         return Err(Error::InvalidUnlockNft(index));
+                    }
+                }
+                Unlock::Anchor(anchor) => {
+                    if index == 0 || anchor.index() >= index {
+                        return Err(Error::InvalidUnlockAnchor(index));
                     }
                 }
             }

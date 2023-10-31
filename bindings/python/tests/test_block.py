@@ -2,8 +2,8 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from typing import get_args
-from iota_sdk import BasicBlock, BlockType, BlockWrapper, Payload, PayloadType
 import pytest
+from iota_sdk import BasicBlock, BlockType, SignedBlock, Payload, PayloadType
 
 
 def test_basic_block_with_tagged_data_payload():
@@ -30,7 +30,7 @@ def test_basic_block_with_tagged_data_payload():
     assert block_to_dict == block_dict
 
 
-def test_block_wrapper_with_tagged_data_payload():
+def test_signed_block_with_tagged_data_payload():
     block_dict = {
         "protocolVersion": 3,
         "networkId": "10549460113735494767",
@@ -63,14 +63,14 @@ def test_block_wrapper_with_tagged_data_payload():
             "signature": "0x7c274e5e771d5d60202d334f06773d3672484b1e4e6f03231b4e69305329267a4834374b0f2e0d5c6c2f7779620f4f534c773b1679400c52303d1f23121a4049"
         }
     }
-    block_wrapper = BlockWrapper.from_dict(block_dict)
-    assert block_wrapper.to_dict() == block_dict
-    assert isinstance(block_wrapper.block, BasicBlock)
-    assert block_wrapper.block.type == BlockType.Basic
-    assert isinstance(block_wrapper.block.payload, get_args(Payload))
-    assert block_wrapper.block.payload.type == PayloadType.TaggedData
-    # TODO: determine the actual hash of the block wrapper
-    # assert block_wrapper.id() == "0x7ce5ad074d4162e57f83cfa01cd2303ef5356567027ce0bcee0c9f57bc11656e"
+    signed_block = SignedBlock.from_dict(block_dict)
+    assert signed_block.to_dict() == block_dict
+    assert isinstance(signed_block.block, BasicBlock)
+    assert signed_block.block.type == BlockType.Basic
+    assert isinstance(signed_block.block.payload, get_args(Payload))
+    assert signed_block.block.payload.type == PayloadType.TaggedData
+    # TODO: determine the actual hash of the block
+    # assert signed_block.id() == "0x7ce5ad074d4162e57f83cfa01cd2303ef5356567027ce0bcee0c9f57bc11656e"
 
 
 @pytest.mark.skip(reason="https://github.com/iotaledger/iota-sdk/issues/1387")
@@ -125,7 +125,7 @@ def test_basic_block_with_tx_payload_all_output_types():
                                 "type": 0, "transactionId": "0x6f23b39ebe433f8b522d2e4360186cd3e6b21baf46c0a591c801161e505330b4", "transactionOutputIndex": 1}, {
                                     "type": 0, "transactionId": "0x6f23b39ebe433f8b522d2e4360186cd3e6b21baf46c0a591c801161e505330b4", "transactionOutputIndex": 2}], "inputsCommitment": "0xb6913235037feeeb74ea54ca0354bd7daee95e5a4fc65b67c960e5f0df6a339f", "outputs": [
                                         {
-                                            "type": 4, "amount": "1000000", "accountId": "0xf90a577f1bae4587fdb00752a847b3a2a9d623743993e9e7abdd0440a004caee", "stateIndex": 2, "foundryCounter": 1, "unlockConditions": [
+                                            "type": 4, "amount": "1000000", "accountId": "0xf90a577f1bae4587fdb00752a847b3a2a9d623743993e9e7abdd0440a004caee", "foundryCounter": 1, "unlockConditions": [
                                                 {
                                                     "type": 4, "address": {
                                                         "type": 0, "pubKeyHash": "0x7ffec9e1233204d9c6dce6812b1539ee96af691ca2e4d9065daa85907d33e5d3"}}, {

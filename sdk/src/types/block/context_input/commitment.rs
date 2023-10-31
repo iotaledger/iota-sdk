@@ -25,7 +25,7 @@ impl CommitmentContextInput {
 
     /// Returns the slot index of the [`CommitmentContextInput`].
     pub fn slot_index(&self) -> SlotIndex {
-        self.0.index()
+        self.0.slot_index()
     }
 }
 
@@ -58,7 +58,7 @@ mod dto {
             Self::new(value.commitment_id)
         }
     }
-    impl_serde_typed_dto!(
+    crate::impl_serde_typed_dto!(
         CommitmentContextInput,
         CommitmentContextInputDto,
         "commitment context input"

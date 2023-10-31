@@ -22,7 +22,7 @@ use crate::types::{
             OutputBuilderAmount, OutputId, Rent, RentStructure, StateTransitionError, StateTransitionVerifier,
         },
         protocol::ProtocolParameters,
-        semantic::{TransactionFailureReason, ValidationContext},
+        semantic::{SemanticValidationContext, TransactionFailureReason},
         slot::EpochIndex,
         unlock::Unlock,
         Error,
@@ -30,10 +30,13 @@ use crate::types::{
     ValidationParams,
 };
 
-impl_id!(pub DelegationId, 32, "Unique identifier of the Delegation Output, which is the BLAKE2b-256 hash of the Output ID that created it.");
-
-#[cfg(feature = "serde")]
-string_serde_impl!(DelegationId);
+crate::impl_id!(
+    /// Unique identifier of the [`DelegationOutput`](crate::types::block::output::DelegationOutput),
+    /// which is the BLAKE2b-256 hash of the [`OutputId`](crate::types::block::output::OutputId) that created it.
+    pub DelegationId {
+        pub const LENGTH: usize = 32;
+    }
+);
 
 impl From<&OutputId> for DelegationId {
     fn from(output_id: &OutputId) -> Self {
@@ -349,22 +352,21 @@ impl DelegationOutput {
         &self,
         _output_id: &OutputId,
         unlock: &Unlock,
-        inputs: &[(&OutputId, &Output)],
-        context: &mut ValidationContext<'_>,
+        context: &mut SemanticValidationContext<'_>,
     ) -> Result<(), TransactionFailureReason> {
         self.unlock_conditions()
             .locked_address(
                 self.address(),
-                context.essence.creation_slot(),
+                context.transaction.creation_slot(),
                 context.protocol_parameters.min_committable_age(),
                 context.protocol_parameters.max_committable_age(),
             )
             // TODO
             .unwrap()
-            .unlock(unlock, inputs, context)
+            .unlock(unlock, context)
     }
 
-    // Transition, just without full ValidationContext.
+    // Transition, just without full SemanticValidationContext.
     pub(crate) fn transition_inner(current_state: &Self, next_state: &Self) -> Result<(), StateTransitionError> {
         #[allow(clippy::nonminimal_bool)]
         if !(current_state.delegation_id.is_null() && !next_state.delegation_id().is_null()) {
@@ -383,7 +385,7 @@ impl DelegationOutput {
 }
 
 impl StateTransitionVerifier for DelegationOutput {
-    fn creation(next_state: &Self, _context: &ValidationContext<'_>) -> Result<(), StateTransitionError> {
+    fn creation(next_state: &Self, _context: &SemanticValidationContext<'_>) -> Result<(), StateTransitionError> {
         if !next_state.delegation_id.is_null() {
             return Err(StateTransitionError::NonZeroCreatedId);
         }
@@ -402,12 +404,15 @@ impl StateTransitionVerifier for DelegationOutput {
     fn transition(
         current_state: &Self,
         next_state: &Self,
-        _context: &ValidationContext<'_>,
+        _context: &SemanticValidationContext<'_>,
     ) -> Result<(), StateTransitionError> {
         Self::transition_inner(current_state, next_state)
     }
 
-    fn destruction(_current_state: &Self, _context: &ValidationContext<'_>) -> Result<(), StateTransitionError> {
+    fn destruction(
+        _current_state: &Self,
+        _context: &SemanticValidationContext<'_>,
+    ) -> Result<(), StateTransitionError> {
         // TODO handle mana rewards
         Ok(())
     }
@@ -442,7 +447,7 @@ impl Packable for DelegationOutput {
         let validator_address = AccountAddress::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
 
         if validator_address.is_null() {
-            return Err(Error::NullDelegationValidatorId).map_err(UnpackError::Packable);
+            return Err(UnpackError::Packable(Error::NullDelegationValidatorId));
         }
 
         let start_epoch = EpochIndex::unpack::<_, VERIFY>(unpacker, &()).coerce()?;

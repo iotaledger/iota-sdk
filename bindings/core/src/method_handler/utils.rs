@@ -8,9 +8,9 @@ use iota_sdk::{
         block::{
             address::{AccountAddress, Address, ToBech32Ext},
             input::UtxoInput,
-            output::{AccountId, FoundryId, InputsCommitment, NftId, Output, OutputId, Rent, TokenId},
-            payload::{transaction::TransactionEssence, TransactionPayload},
-            BlockWrapper,
+            output::{AccountId, FoundryId, NftId, Output, OutputId, Rent, TokenId},
+            payload::{signed_transaction::Transaction, SignedTransactionPayload},
+            SignedBlock,
         },
         TryFromDto,
     },
@@ -42,12 +42,12 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
             block,
             protocol_parameters,
         } => {
-            let block = BlockWrapper::try_from_dto_with_params(block, &protocol_parameters)?;
+            let block = SignedBlock::try_from_dto_with_params(block, &protocol_parameters)?;
             Response::BlockId(block.id(&protocol_parameters))
         }
         UtilsMethod::TransactionId { payload } => {
-            let payload = TransactionPayload::try_from_dto(payload)?;
-            Response::TransactionId(payload.id())
+            let payload = SignedTransactionPayload::try_from_dto(payload)?;
+            Response::TransactionId(payload.transaction().id())
         }
         UtilsMethod::ComputeAccountId { output_id } => Response::AccountId(AccountId::from(&output_id)),
         UtilsMethod::ComputeFoundryId {
@@ -69,15 +69,8 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
             let foundry_id = FoundryId::build(&AccountAddress::new(account_id), serial_number, token_scheme_type);
             Response::TokenId(TokenId::from(foundry_id))
         }
-        UtilsMethod::HashTransactionEssence { essence } => {
-            Response::Hash(prefix_hex::encode(TransactionEssence::try_from_dto(essence)?.hash()))
-        }
-        UtilsMethod::ComputeInputsCommitment { inputs } => {
-            let inputs = inputs
-                .into_iter()
-                .map(|o| Ok(Output::try_from_dto(o)?))
-                .collect::<Result<Vec<Output>>>()?;
-            Response::Hash(InputsCommitment::new(inputs.iter()).to_string())
+        UtilsMethod::TransactionSigningHash { transaction } => {
+            Response::Hash(Transaction::try_from_dto(transaction)?.signing_hash().to_string())
         }
         UtilsMethod::ComputeStorageDeposit { output, rent } => {
             let out = Output::try_from_dto(output)?;

@@ -17,7 +17,7 @@ use crate::{
         slot::SlotIndex,
     },
     wallet::account::{
-        operations::helpers::time::can_output_be_unlocked_now, types::Transaction, Account, OutputData,
+        operations::helpers::time::can_output_be_unlocked_now, types::TransactionWithMetadata, Account, OutputData,
         TransactionOptions,
     },
 };
@@ -75,8 +75,6 @@ where
                             slot_index,
                             protocol_parameters.min_committable_age(),
                             protocol_parameters.max_committable_age(),
-                            // Not relevant without account addresses
-                            None,
                         )?
                     {
                         match outputs_to_claim {
@@ -171,7 +169,7 @@ where
     pub async fn claim_outputs<I: IntoIterator<Item = OutputId> + Send>(
         &self,
         output_ids_to_claim: I,
-    ) -> crate::wallet::Result<Transaction>
+    ) -> crate::wallet::Result<TransactionWithMetadata>
     where
         I::IntoIter: Send,
     {
@@ -202,7 +200,7 @@ where
         &self,
         output_ids_to_claim: I,
         mut possible_additional_inputs: Vec<OutputData>,
-    ) -> crate::wallet::Result<Transaction>
+    ) -> crate::wallet::Result<TransactionWithMetadata>
     where
         I::IntoIter: Send,
     {

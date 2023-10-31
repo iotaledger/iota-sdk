@@ -10,7 +10,7 @@ use packable::{prefix::StringPrefix, Packable, PackableExt};
 
 use super::{
     address::Hrp,
-    mana::{ManaStructure, RewardsParameters},
+    mana::{ManaParameters, RewardsParameters},
     slot::{EpochIndex, SlotIndex},
 };
 use crate::types::block::{helper::network_name_to_id, output::RentStructure, ConvertTo, Error, PROTOCOL_VERSION};
@@ -39,8 +39,8 @@ pub struct ProtocolParameters {
     pub(crate) bech32_hrp: Hrp,
     /// The rent structure used by given node/network.
     pub(crate) rent_structure: RentStructure,
-    /// The work score structure used by the node/network.
-    pub(crate) work_score_structure: WorkScoreStructure,
+    /// The work score parameters used by the node/network.
+    pub(crate) work_score_parameters: WorkScoreParameters,
     /// TokenSupply defines the current token supply on the network.
     #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
     pub(crate) token_supply: u64,
@@ -53,7 +53,7 @@ pub struct ProtocolParameters {
     pub(crate) slots_per_epoch_exponent: u8,
     /// The parameters used for mana calculations.
     #[getset(skip)]
-    pub(crate) mana_structure: ManaStructure,
+    pub(crate) mana_parameters: ManaParameters,
     /// The unbonding period in epochs before an account can stop staking.
     pub(crate) staking_unbonding_period: u32,
     /// The number of validation blocks that each validator should issue each slot.
@@ -95,13 +95,13 @@ impl Default for ProtocolParameters {
             network_name: String::from("iota-core-testnet").try_into().unwrap(),
             bech32_hrp: Hrp::from_str_unchecked("smr"),
             rent_structure: Default::default(),
-            work_score_structure: Default::default(),
+            work_score_parameters: Default::default(),
             token_supply: 1_813_620_509_061_365,
             genesis_unix_timestamp: 1582328545,
             slot_duration_in_seconds: 10,
             epoch_nearing_threshold: 20,
             slots_per_epoch_exponent: Default::default(),
-            mana_structure: Default::default(),
+            mana_parameters: Default::default(),
             staking_unbonding_period: 10,
             validation_blocks_per_slot: 10,
             punishment_epochs: 9,
@@ -152,8 +152,8 @@ impl ProtocolParameters {
     }
 
     /// Returns the parameters used for mana calculations.
-    pub fn mana_structure(&self) -> &ManaStructure {
-        &self.mana_structure
+    pub fn mana_parameters(&self) -> &ManaParameters {
+        &self.mana_parameters
     }
 
     /// Returns the slots per epoch of the [`ProtocolParameters`].
@@ -199,13 +199,11 @@ impl ProtocolParameters {
 )]
 #[packable(unpack_error = Error)]
 #[getset(get_copy = "pub")]
-pub struct WorkScoreStructure {
+pub struct WorkScoreParameters {
     /// Modifier for network traffic per byte.
     data_byte: u32,
     /// Modifier for work done to process a block.
     block: u32,
-    /// Modifier for slashing when there are insufficient strong tips.
-    missing_parent: u32,
     /// Modifier for loading UTXOs and performing mana calculations.
     input: u32,
     /// Modifier for loading and checking the context input.
@@ -222,16 +220,13 @@ pub struct WorkScoreStructure {
     allotment: u32,
     /// Modifier for the block signature check.
     signature_ed25519: u32,
-    /// The minimum count of strong parents in a basic block.
-    min_strong_parents_threshold: u8,
 }
 
-impl Default for WorkScoreStructure {
+impl Default for WorkScoreParameters {
     fn default() -> Self {
         Self {
             data_byte: 0,
             block: 100,
-            missing_parent: 500,
             input: 20,
             context_input: 20,
             output: 20,
@@ -240,7 +235,6 @@ impl Default for WorkScoreStructure {
             block_issuer: 100,
             allotment: 100,
             signature_ed25519: 200,
-            min_strong_parents_threshold: 4,
         }
     }
 }
@@ -336,11 +330,9 @@ pub fn protocol_parameters() -> ProtocolParameters {
     .unwrap()
 }
 
-impl_id!(
-    pub ProtocolParametersHash,
-    32,
-    "The hash of the protocol parameters."
+crate::impl_id!(
+    /// The hash of a [`ProtocolParameters`].
+    pub ProtocolParametersHash {
+        pub const LENGTH: usize = 32;
+    }
 );
-
-#[cfg(feature = "serde")]
-string_serde_impl!(ProtocolParametersHash);

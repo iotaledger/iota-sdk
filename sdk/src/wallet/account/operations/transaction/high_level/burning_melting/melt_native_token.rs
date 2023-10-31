@@ -10,7 +10,7 @@ use crate::{
         TokenScheme,
     },
     wallet::{
-        account::{operations::transaction::Transaction, types::OutputData, Account, TransactionOptions},
+        account::{operations::transaction::TransactionWithMetadata, types::OutputData, Account, TransactionOptions},
         Error,
     },
 };
@@ -30,7 +30,7 @@ where
         token_id: TokenId,
         melt_amount: impl Into<U256> + Send,
         options: impl Into<Option<TransactionOptions>> + Send,
-    ) -> crate::wallet::Result<Transaction> {
+    ) -> crate::wallet::Result<TransactionWithMetadata> {
         let options = options.into();
         let prepared_transaction = self
             .prepare_melt_native_token(token_id, melt_amount, options.clone())
@@ -62,10 +62,9 @@ where
             })?;
 
         if let Output::Account(account_output) = &existing_account_output_data.output {
-            // Create the new account output with updated amount and state_index
+            // Create the new account output with updated amount.
             let account_output = AccountOutputBuilder::from(account_output)
                 .with_account_id(account_id)
-                .with_state_index(account_output.state_index() + 1)
                 .finish_output(token_supply)?;
 
             let TokenScheme::Simple(token_scheme) = existing_foundry_output.token_scheme();

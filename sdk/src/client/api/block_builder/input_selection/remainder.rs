@@ -5,7 +5,6 @@ use crypto::keys::bip44::Bip44;
 
 use super::{
     requirement::{
-        account::is_account_transition,
         amount::amount_sums,
         native_tokens::{get_minted_and_melted_native_tokens, get_native_tokens, get_native_tokens_diff},
     },
@@ -25,20 +24,14 @@ impl InputSelection {
         if let Some(remainder_address) = &self.remainder_address {
             // Search in inputs for the Bip44 chain for the remainder address, so the ledger can regenerate it
             for input in self.available_inputs.iter().chain(self.selected_inputs.iter()) {
-                let account_transition = is_account_transition(
-                    &input.output,
-                    *input.output_id(),
-                    self.outputs.as_slice(),
-                    self.burn.as_ref(),
-                );
                 let required_address = input
                     .output
                     .required_address(
                         self.slot_index,
                         self.protocol_parameters.min_committable_age(),
                         self.protocol_parameters.max_committable_age(),
-                        account_transition,
-                    ) // TODO
+                    )?
+                    // TODO
                     .unwrap();
 
                 if &required_address == remainder_address {
@@ -49,20 +42,13 @@ impl InputSelection {
         }
 
         for input in &self.selected_inputs {
-            let account_transition = is_account_transition(
-                &input.output,
-                *input.output_id(),
-                self.outputs.as_slice(),
-                self.burn.as_ref(),
-            );
             let required_address = input
                 .output
                 .required_address(
                     self.slot_index,
                     self.protocol_parameters.min_committable_age(),
                     self.protocol_parameters.max_committable_age(),
-                    account_transition,
-                )
+                )?
                 // TODO
                 .unwrap();
 

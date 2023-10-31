@@ -5,7 +5,7 @@ use crypto::keys::bip44::Bip44;
 use derivative::Derivative;
 use iota_sdk::{
     client::api::{GetAddressesOptions, PreparedTransactionDataDto},
-    types::block::protocol::ProtocolParameters,
+    types::block::{protocol::ProtocolParameters, UnsignedBlockDto},
     utils::serde::bip44::Bip44Def,
 };
 use serde::{Deserialize, Serialize};
@@ -34,9 +34,9 @@ pub enum SecretManagerMethod {
     /// Create a single Signature Unlock.
     #[serde(rename_all = "camelCase")]
     SignatureUnlock {
-        /// Transaction Essence Hash
-        transaction_essence_hash: String,
-        /// Chain to sign the essence hash with
+        /// Transaction signing hash
+        transaction_signing_hash: String,
+        /// Chain to sign the hash with
         #[serde(with = "Bip44Def")]
         chain: Bip44,
     },
@@ -44,7 +44,7 @@ pub enum SecretManagerMethod {
     SignEd25519 {
         /// The message to sign, hex encoded String
         message: String,
-        /// Chain to sign the essence hash with
+        /// Chain to sign the message with
         #[serde(with = "Bip44Def")]
         chain: Bip44,
     },
@@ -63,6 +63,14 @@ pub enum SecretManagerMethod {
         prepared_transaction_data: PreparedTransactionDataDto,
         protocol_parameters: ProtocolParameters,
     },
+    // Sign a block.
+    #[serde(rename_all = "camelCase")]
+    SignBlock {
+        unsigned_block: UnsignedBlockDto,
+        /// Chain to sign the essence hash with
+        #[serde(with = "Bip44Def")]
+        chain: Bip44,
+    },
     /// Store a mnemonic in the Stronghold vault
     #[cfg(feature = "stronghold")]
     #[cfg_attr(docsrs, doc(cfg(feature = "stronghold")))]
@@ -80,7 +88,7 @@ mod test {
     #[test]
     fn bip44_deserialization() {
         let signature_unlock_method: super::SecretManagerMethod = serde_json::from_str(
-            r#"{"name": "signatureUnlock", "data": {"transactionEssenceHash": "txhash", "chain": {"addressIndex": 1}}}"#,
+            r#"{"name": "signatureUnlock", "data": {"transactionSigningHash": "txhash", "chain": {"addressIndex": 1}}}"#,
         )
         .unwrap();
 
@@ -89,7 +97,7 @@ mod test {
             serde_json::json!({
                 "name": "signatureUnlock",
                 "data": {
-                    "transactionEssenceHash": "txhash",
+                    "transactionSigningHash": "txhash",
                     "chain": {
                         "coinType": 4218,
                         "account": 0,

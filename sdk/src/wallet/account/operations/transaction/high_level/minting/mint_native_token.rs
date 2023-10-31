@@ -9,7 +9,7 @@ use crate::{
         AccountOutputBuilder, FoundryOutputBuilder, Output, SimpleTokenScheme, TokenId, TokenScheme,
     },
     wallet::{
-        account::{types::Transaction, Account, TransactionOptions},
+        account::{types::TransactionWithMetadata, Account, TransactionOptions},
         Error,
     },
 };
@@ -39,7 +39,7 @@ where
         token_id: TokenId,
         mint_amount: impl Into<U256> + Send,
         options: impl Into<Option<TransactionOptions>> + Send,
-    ) -> crate::wallet::Result<Transaction> {
+    ) -> crate::wallet::Result<TransactionWithMetadata> {
         let options = options.into();
         let prepared = self
             .prepare_mint_native_token(token_id, mint_amount, options.clone())
@@ -112,9 +112,8 @@ where
             unreachable!("We checked if it's an foundry output before")
         };
 
-        // Create the next account output with the same data, just updated state_index
-        let new_account_output_builder =
-            AccountOutputBuilder::from(&account_output).with_state_index(account_output.state_index() + 1);
+        // Create the next account output with the same data.
+        let new_account_output_builder = AccountOutputBuilder::from(&account_output);
 
         // Create next foundry output with minted native tokens
 

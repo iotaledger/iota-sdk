@@ -32,7 +32,7 @@ use crate::wallet::{
     account::{
         constants::DEFAULT_OUTPUT_CONSOLIDATION_THRESHOLD,
         operations::{helpers::time::can_output_be_unlocked_now, output_claiming::get_new_native_token_count},
-        types::{OutputData, Transaction},
+        types::{OutputData, TransactionWithMetadata},
         Account, AddressWithUnspentOutputs, TransactionOptions,
     },
     Result,
@@ -106,7 +106,6 @@ where
                 slot_index,
                 protocol_parameters.min_committable_age(),
                 protocol_parameters.max_committable_age(),
-                None,
             )?
         } else {
             false
@@ -117,7 +116,7 @@ where
     /// address or to an own address again if the output amount is >= the output_threshold. When `force`
     /// is set to `true`, the threshold is ignored. Only consolidates the amount of outputs that fit into a single
     /// transaction.
-    pub async fn consolidate_outputs(&self, params: ConsolidationParams) -> Result<Transaction> {
+    pub async fn consolidate_outputs(&self, params: ConsolidationParams) -> Result<TransactionWithMetadata> {
         let prepared_transaction = self.prepare_consolidate_outputs(params).await?;
         let consolidation_tx = self.sign_and_submit_transaction(prepared_transaction, None).await?;
 
