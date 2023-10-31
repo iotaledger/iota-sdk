@@ -352,8 +352,7 @@ impl DelegationOutput {
             .ok_or(StateTransitionError::MissingCommitmentContextInput)?;
 
         let future_bounded_slot: SlotIndex = slot_commitment_id.slot_index() + protocol_parameters.min_committable_age;
-        let future_bounded_epoch =
-            EpochIndex::from_slot_index(future_bounded_slot, protocol_parameters.slots_per_epoch_exponent);
+        let future_bounded_epoch = future_bounded_slot.to_epoch_index(protocol_parameters.slots_per_epoch_exponent);
 
         let registration_slot = future_bounded_epoch.registration_slot(
             protocol_parameters.slots_per_epoch_exponent,
@@ -363,7 +362,7 @@ impl DelegationOutput {
         let expected_end_epoch = if future_bounded_slot <= registration_slot {
             future_bounded_epoch
         } else {
-            EpochIndex(*future_bounded_epoch + 1)
+            future_bounded_epoch + 1
         };
 
         if next_state.end_epoch != expected_end_epoch {
