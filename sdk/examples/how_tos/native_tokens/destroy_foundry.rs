@@ -1,11 +1,11 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! In this example we will try to destroy the first foundry there is in the account. This is only possible if its
+//! In this example we will try to destroy the first foundry there is in the wallet. This is only possible if its
 //! circulating supply is 0 and no native tokens were burned.
 //!
 //! Make sure that `STRONGHOLD_SNAPSHOT_PATH` and `WALLET_DB_PATH` already exist by
-//! running the `./how_tos/accounts_and_addresses/create_account.rs` example!
+//! running the `./how_tos/accounts_and_addresses/create_wallet.rs` example!
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh
@@ -30,7 +30,7 @@ async fn main() -> Result<()> {
     let foundry_count = balance.foundries().len();
     println!("Foundries before destroying: {foundry_count}");
 
-    // We try to destroy the first foundry in the account
+    // We try to destroy the first foundry in the wallet
     if let Some(foundry_id) = balance.foundries().first() {
         let token_id = TokenId::from(*foundry_id);
 

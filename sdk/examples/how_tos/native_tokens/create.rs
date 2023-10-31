@@ -4,7 +4,7 @@
 //! In this example we will create a native token.
 //!
 //! Make sure that `example.stronghold` and `example.walletdb` already exist by
-//! running the `create_account` example!
+//! running the `create_wallet` example!
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh
@@ -39,7 +39,7 @@ async fn main() -> Result<()> {
         .set_stronghold_password(std::env::var("STRONGHOLD_PASSWORD").unwrap())
         .await?;
 
-    // We can first check if we already have an account output in our account, because an account can have many foundry
+    // We can first check if we already have an account output in our wallet, because an account can have many foundry
     // outputs and therefore we can reuse an existing one
     if balance.accounts().is_empty() {
         // If we don't have an account, we need to create one

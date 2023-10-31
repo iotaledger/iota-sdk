@@ -1,11 +1,11 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! In this example we will consolidate basic outputs from an account with only an AddressUnlockCondition by sending
+//! In this example we will consolidate basic outputs from a wallet with only an AddressUnlockCondition by sending
 //! them to the same address again.
 //!
 //! Make sure that `STRONGHOLD_SNAPSHOT_PATH` and `WALLET_DB_PATH` already exist by
-//! running the `./how_tos/accounts_and_addresses/create_account.rs` example!
+//! running the `./how_tos/accounts_and_addresses/create_wallet.rs` example!
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh
@@ -40,7 +40,7 @@ async fn main() -> Result<()> {
     // List unspent outputs before consolidation.
     // The output we created with example `03_get_funds` and the basic output from `09_mint_native_tokens` have only one
     // unlock condition and it is an `AddressUnlockCondition`, and so they are valid for consolidation. They have the
-    // same `AddressUnlockCondition`(the first address of the account), so they will be consolidated into one
+    // same `AddressUnlockCondition`(the address of the wallet), so they will be consolidated into one
     // output.
     let outputs = wallet.unspent_outputs(None).await?;
     println!("Outputs BEFORE consolidation:");

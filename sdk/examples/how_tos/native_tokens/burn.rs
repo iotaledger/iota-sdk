@@ -6,9 +6,9 @@
 //! output that minted it.
 //!
 //! Make sure that `STRONGHOLD_SNAPSHOT_PATH` and `WALLET_DB_PATH` already exist by
-//! running the `./how_tos/accounts_and_addresses/create_account.rs` example!
+//! running the `./how_tos/accounts_and_addresses/create_wallet.rs` example!
 //!
-//! You may provide a TOKEN_ID that is available in the account. You can check this by running the
+//! You may provide a TOKEN_ID that is available in the wallet. You can check this by running the
 //! `get_balance` example. You can create a new native token by running the `create_native_token` example.
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
@@ -22,7 +22,7 @@ use iota_sdk::{
     Wallet, U256,
 };
 
-// The minimum available native token amount to search for in the account
+// The minimum available native token amount to search for in the wallet
 const MIN_AVAILABLE_AMOUNT: u64 = 11;
 // The amount of the native token to burn
 const BURN_AMOUNT: u64 = 1;

@@ -4,9 +4,9 @@
 //! In this example we will melt an existing native token with its foundry.
 //!
 //! Make sure that `STRONGHOLD_SNAPSHOT_PATH` and `WALLET_DB_PATH` already exist by
-//! running the `./how_tos/accounts_and_addresses/create_account.rs` example!
+//! running the `./how_tos/accounts_and_addresses/create_wallet.rs` example!
 //!
-//! You may provide a TOKEN_ID that is available in the account. The foundry
+//! You may provide a TOKEN_ID that is available in the wallet. The foundry
 //! output which minted it needs to be available as well. You can check this by
 //! running the `get_balance` example. You can create a new native token by running
 //! the `create_native_token` example.
@@ -48,7 +48,7 @@ async fn main() -> Result<()> {
         let available_balance = native_token_balance.available();
         println!("Balance before melting: {available_balance}");
     } else {
-        println!("Couldn't find native token '{token_id}' in the account");
+        println!("Couldn't find native token '{token_id}' in the wallet");
         return Ok(());
     }
 
