@@ -32,21 +32,21 @@ class TransactionWithMetadata:
 
     Attributes:
         payload: The transaction payload.
-        block_id: The ID of the block that holds the transaction.
         inclusion_state: The inclusion state of the transaction.
         timestamp: The timestamp of the transaction.
         transaction_id: The ID of the corresponding transaction.
         network_id: The ID of the network this transaction was issued in.
         incoming: Indicates whether the transaction was created by the wallet or whether it was sent by someone else and is incoming.
-        note: A note attached to the transaction.
         inputs: The inputs of the transaction.
+        note: A note attached to the transaction.
+        block_id: The ID of the block that holds the transaction.
     """
     payload: SignedTransactionPayload
-    block_id: Optional[HexStr] = None
     inclusion_state: InclusionState
     timestamp: int
     transaction_id: HexStr
     network_id: int
     incoming: bool
-    note: Optional[str] = None
     inputs = List[OutputWithMetadata]
+    note: Optional[str] = None
+    block_id: Optional[HexStr] = None

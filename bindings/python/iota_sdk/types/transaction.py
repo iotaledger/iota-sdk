@@ -30,8 +30,8 @@ class Transaction:
         inputs: The inputs to consume in order to fund the outputs of the Transaction Payload.
         allotments: The allotments of Mana which which will be added upon commitment of the slot.
         capabilities: The capability bitflags of the transaction.
-        payload: An optional tagged data payload
         outputs: The outputs that are created by the Transaction Payload
+        payload: An optional tagged data payload
     """
     network_id: str
     creation_slot: SlotIndex
@@ -39,8 +39,8 @@ class Transaction:
     inputs: List[UtxoInput]
     allotments: List[ManaAllotment]
     capabilities: HexStr = field(default='0x', init=False)
-    payload: Optional[Payload] = None
     outputs: List[Output]
+    payload: Optional[Payload] = None
 
     def with_capabilities(self, capabilities: bytes):
         """Sets the transaction capabilities from a byte array.
