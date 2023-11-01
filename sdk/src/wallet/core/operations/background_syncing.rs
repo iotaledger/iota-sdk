@@ -51,10 +51,9 @@ where
                 'outer: loop {
                     log::debug!("[background_syncing]: syncing wallet");
 
-                    match wallet.sync(options.clone()).await {
-                        Ok(_) => {}
-                        Err(err) => log::debug!("[background_syncing] error: {}", err),
-                    };
+                    if let Err(err) = wallet.sync(options.clone()).await {
+                        log::debug!("[background_syncing] error: {}", err)
+                    }
 
                     // split interval syncing to seconds so stopping the process doesn't have to wait long
                     let seconds = interval.unwrap_or(DEFAULT_BACKGROUNDSYNCING_INTERVAL).as_secs();
