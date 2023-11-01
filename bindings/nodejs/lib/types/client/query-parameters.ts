@@ -1,5 +1,5 @@
 // Copyright 2021-2023 IOTA Stiftung
-// SPDX-License-Identifier?: Apache-2.0
+// SPDX-License-Identifier: Apache-2.0
 
 import { SlotIndex } from '../block/slot';
 import { Bech32Address, TokenId } from '../block';
