@@ -25,7 +25,7 @@ use crate::{
     },
 };
 
-/// Builder for the wallet inner.
+/// Builder for the wallet.
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct WalletBuilder<S: SecretManage = SecretManager> {

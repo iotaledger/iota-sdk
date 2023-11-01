@@ -71,13 +71,12 @@ where
             }
         }
 
-        let remainder_address = options.as_ref().map_or_else(
-            || None,
-            |options| match &options.remainder_value_strategy {
+        let remainder_address = options
+            .as_ref()
+            .and_then(|options| match &options.remainder_value_strategy {
                 RemainderValueStrategy::ReuseAddress => None,
                 RemainderValueStrategy::CustomAddress(address) => Some(address.clone()),
-            },
-        );
+            });
 
         let selected_transaction_data = self
             .select_inputs(
