@@ -50,12 +50,12 @@ pub enum Unlock {
     /// An account unlock.
     #[packable(tag = AccountUnlock::KIND)]
     Account(AccountUnlock),
-    /// An NFT unlock.
-    #[packable(tag = NftUnlock::KIND)]
-    Nft(NftUnlock),
     /// An Anchor unlock.
     #[packable(tag = AnchorUnlock::KIND)]
     Anchor(AnchorUnlock),
+    /// An NFT unlock.
+    #[packable(tag = NftUnlock::KIND)]
+    Nft(NftUnlock),
 }
 
 impl From<SignatureUnlock> for Unlock {
@@ -70,8 +70,8 @@ impl core::fmt::Debug for Unlock {
             Self::Signature(unlock) => unlock.fmt(f),
             Self::Reference(unlock) => unlock.fmt(f),
             Self::Account(unlock) => unlock.fmt(f),
-            Self::Nft(unlock) => unlock.fmt(f),
             Self::Anchor(unlock) => unlock.fmt(f),
+            Self::Nft(unlock) => unlock.fmt(f),
         }
     }
 }
@@ -83,8 +83,8 @@ impl Unlock {
             Self::Signature(_) => SignatureUnlock::KIND,
             Self::Reference(_) => ReferenceUnlock::KIND,
             Self::Account(_) => AccountUnlock::KIND,
-            Self::Nft(_) => NftUnlock::KIND,
             Self::Anchor(_) => AnchorUnlock::KIND,
+            Self::Nft(_) => NftUnlock::KIND,
         }
     }
 
@@ -144,14 +144,14 @@ fn verify_unlocks<const VERIFY: bool>(unlocks: &[Unlock], _: &()) -> Result<(), 
                         return Err(Error::InvalidUnlockAccount(index));
                     }
                 }
-                Unlock::Nft(nft) => {
-                    if index == 0 || nft.index() >= index {
-                        return Err(Error::InvalidUnlockNft(index));
-                    }
-                }
                 Unlock::Anchor(anchor) => {
                     if index == 0 || anchor.index() >= index {
                         return Err(Error::InvalidUnlockAnchor(index));
+                    }
+                }
+                Unlock::Nft(nft) => {
+                    if index == 0 || nft.index() >= index {
+                        return Err(Error::InvalidUnlockNft(index));
                     }
                 }
             }

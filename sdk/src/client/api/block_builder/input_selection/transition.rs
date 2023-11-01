@@ -152,8 +152,8 @@ impl InputSelection {
     pub(crate) fn transition_input(&mut self, input: &InputSigningData) -> Result<Option<Output>, Error> {
         match &input.output {
             Output::Account(account_input) => self.transition_account_input(account_input, input.output_id()),
-            Output::Nft(nft_input) => self.transition_nft_input(nft_input, input.output_id()),
             Output::Foundry(foundry_input) => self.transition_foundry_input(foundry_input, input.output_id()),
+            Output::Nft(nft_input) => self.transition_nft_input(nft_input, input.output_id()),
             _ => Ok(None),
         }
     }

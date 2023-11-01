@@ -54,11 +54,9 @@ async function run() {
         );
 
         // Find first output unlockable by the account address
-        const queryParameters = [
-            {
-                address: accountAddress,
-            },
-        ];
+        const queryParameters = {
+            address: accountAddress,
+        };
         const input = (
             await (await wallet.getClient()).basicOutputIds(queryParameters)
         ).items[0];

@@ -71,7 +71,8 @@ pub struct OutputQueryParameters {
     /// The maximum amount of items returned in one call. If there are more items, a cursor to the next page is
     /// returned too. The parameter is ignored when pageSize is defined via the cursor parameter.
     page_size: Option<usize>,
-    /// Starts the search from the cursor (createdSlotIndex+outputId.pageSize).
+    /// Starts the search from the cursor (createdSlotIndex+outputId.pageSize). If an empty String is provided, only
+    /// the first page is returned.
     cursor: Option<String>,
     /// Returns outputs that were created before a certain slot index.
     created_before: Option<SlotIndex>,
@@ -121,7 +122,8 @@ pub struct BasicOutputQueryParameters {
     /// The maximum amount of items returned in one call. If there are more items, a cursor to the next page is
     /// returned too. The parameter is ignored when pageSize is defined via the cursor parameter.
     page_size: Option<usize>,
-    /// Starts the search from the cursor (createdSlotIndex+outputId.pageSize).
+    /// Starts the search from the cursor (createdSlotIndex+outputId.pageSize). If an empty String is provided, only
+    /// the first page is returned.
     cursor: Option<String>,
     /// Returns outputs that were created before a certain slot index.
     created_before: Option<SlotIndex>,
@@ -157,7 +159,8 @@ pub struct AccountOutputQueryParameters {
     /// The maximum amount of items returned in one call. If there are more items, a cursor to the next page is
     /// returned too. The parameter is ignored when pageSize is defined via the cursor parameter.
     page_size: Option<usize>,
-    /// Starts the search from the cursor (createdSlotIndex+outputId.pageSize).
+    /// Starts the search from the cursor (createdSlotIndex+outputId.pageSize). If an empty String is provided, only
+    /// the first page is returned.
     cursor: Option<String>,
     /// Returns outputs that were created before a certain slot index.
     created_before: Option<SlotIndex>,
@@ -185,7 +188,8 @@ pub struct AnchorOutputQueryParameters {
     /// The maximum amount of items returned in one call. If there are more items, a cursor to the next page is
     /// returned too. The parameter is ignored when pageSize is defined via the cursor parameter.
     page_size: Option<usize>,
-    /// Starts the search from the cursor (createdSlotIndex+outputId.pageSize).
+    /// Starts the search from the cursor (createdSlotIndex+outputId.pageSize). If an empty String is provided, only
+    /// the first page is returned.
     cursor: Option<String>,
     /// Returns outputs that were created before a certain slot index.
     created_before: Option<SlotIndex>,
@@ -207,7 +211,8 @@ pub struct DelegationOutputQueryParameters {
     /// The maximum amount of items returned in one call. If there are more items, a cursor to the next page is
     /// returned too. The parameter is ignored when pageSize is defined via the cursor parameter.
     page_size: Option<usize>,
-    /// Starts the search from the cursor (createdSlotIndex+outputId.pageSize).
+    /// Starts the search from the cursor (createdSlotIndex+outputId.pageSize). If an empty String is provided, only
+    /// the first page is returned.
     cursor: Option<String>,
     /// Returns outputs that were created before a certain slot index.
     created_before: Option<SlotIndex>,
@@ -231,7 +236,8 @@ pub struct FoundryOutputQueryParameters {
     /// The maximum amount of items returned in one call. If there are more items, a cursor to the next page is
     /// returned too. The parameter is ignored when pageSize is defined via the cursor parameter.
     page_size: Option<usize>,
-    /// Starts the search from the cursor (createdSlotIndex+outputId.pageSize).
+    /// Starts the search from the cursor (createdSlotIndex+outputId.pageSize). If an empty String is provided, only
+    /// the first page is returned.
     cursor: Option<String>,
     /// Returns outputs that were created before a certain slot index.
     created_before: Option<SlotIndex>,
@@ -279,7 +285,8 @@ pub struct NftOutputQueryParameters {
     /// The maximum amount of items returned in one call. If there are more items, a cursor to the next page is
     /// returned too. The parameter is ignored when pageSize is defined via the cursor parameter.
     page_size: Option<usize>,
-    /// Starts the search from the cursor (createdSlotIndex+outputId.pageSize).
+    /// Starts the search from the cursor (createdSlotIndex+outputId.pageSize). If an empty String is provided, only
+    /// the first page is returned.
     cursor: Option<String>,
     /// Returns outputs that were created before a certain slot index.
     created_before: Option<SlotIndex>,
