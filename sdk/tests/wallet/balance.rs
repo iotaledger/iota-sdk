@@ -216,6 +216,7 @@ async fn balance_transfer() -> Result<()> {
     // Balance should have transferred entirely
     let balance_1_sync = wallet_1.sync(None).await?;
     assert!(balance_1.base_coin().available() > 0);
+    assert_eq!(balance_1, balance_1_sync);
 
     tear_down(storage_path_0)?;
     tear_down(storage_path_1)?;
