@@ -20,12 +20,12 @@ enum AddressType {
     Account = 8,
     /** An NFT address. */
     Nft = 16,
-    /** An implicit account creation address. */
-    ImplicitAccountCreation = 24,
     /** An Anchor address. */
-    Anchor = 28,
+    Anchor = 24,
+    /** An implicit account creation address. */
+    ImplicitAccountCreation = 32,
     /** An address with restricted capabilities. */
-    Restricted = 40,
+    Restricted = 48,
 }
 
 /**
@@ -62,13 +62,13 @@ abstract class Address {
             ) as any as AccountAddress;
         } else if (data.type == AddressType.Nft) {
             return plainToInstance(NftAddress, data) as any as NftAddress;
+        } else if (data.type == AddressType.Anchor) {
+            return plainToInstance(AnchorAddress, data) as any as AnchorAddress;
         } else if (data.type == AddressType.ImplicitAccountCreation) {
             return plainToInstance(
                 ImplicitAccountCreationAddress,
                 data,
             ) as any as ImplicitAccountCreationAddress;
-        } else if (data.type == AddressType.Anchor) {
-            return plainToInstance(AnchorAddress, data) as any as AnchorAddress;
         } else if (data.type == AddressType.Restricted) {
             return plainToInstance(
                 RestrictedAddress,
@@ -143,6 +143,27 @@ class NftAddress extends Address {
 }
 
 /**
+ * An Anchor address.
+ */
+class AnchorAddress extends Address {
+    /**
+     * The anchor ID.
+     */
+    readonly anchorId: AnchorId;
+    /**
+     * @param address An anchor address as anchor ID.
+     */
+    constructor(address: AnchorId) {
+        super(AddressType.Anchor);
+        this.anchorId = address;
+    }
+
+    toString(): string {
+        return this.anchorId;
+    }
+}
+
+/**
  * An implicit account creation address that can be used to convert a Basic Output to an Account Output.
  */
 class ImplicitAccountCreationAddress extends Address {
@@ -161,27 +182,6 @@ class ImplicitAccountCreationAddress extends Address {
 
     toString(): string {
         return this.address.toString();
-    }
-}
-
-/**
- * An Anchor address.
- */
-class AnchorAddress extends Address {
-    /**
-     * The anchor ID.
-     */
-    readonly anchorId: AnchorId;
-    /**
-     * @param address An anchor address as anchor ID.
-     */
-    constructor(address: AnchorId) {
-        super(AddressType.Anchor);
-        this.anchorId = address;
-    }
-
-    toString(): string {
-        return this.anchorId;
     }
 }
 
@@ -255,11 +255,11 @@ const AddressDiscriminator = {
         { value: Ed25519Address, name: AddressType.Ed25519 as any },
         { value: AccountAddress, name: AddressType.Account as any },
         { value: NftAddress, name: AddressType.Nft as any },
+        { value: AnchorAddress, name: AddressType.Anchor as any },
         {
             value: ImplicitAccountCreationAddress,
             name: AddressType.ImplicitAccountCreation as any,
         },
-        { value: AnchorAddress, name: AddressType.Anchor as any },
         { value: RestrictedAddress, name: AddressType.Restricted as any },
     ],
 };
@@ -273,4 +273,6 @@ export {
     AccountAddress,
     NftAddress,
     AnchorAddress,
+    ImplicitAccountCreationAddress,
+    RestrictedAddress,
 };
