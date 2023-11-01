@@ -16,10 +16,7 @@ use crate::{
         node_api::indexer::query_parameters::{FoundryOutputQueryParameters, OutputQueryParameters},
         secret::SecretManage,
     },
-    types::block::{
-        address::{Address, Bech32Address},
-        output::OutputId,
-    },
+    types::block::{address::Bech32Address, output::OutputId},
     wallet::{
         constants::PARALLEL_REQUESTS_AMOUNT, operations::syncing::SyncOptions,
         types::address::AddressWithUnspentOutputs, Wallet,
@@ -64,9 +61,9 @@ where
         #[cfg(not(target_family = "wasm"))]
         let mut tasks = Vec::new();
 
-        if (address.inner().is_ed25519() && sync_options.wallet.basic_outputs)
-            || (address.inner().is_nft() && sync_options.nft.basic_outputs)
-            || (address.inner().is_account() && sync_options.account.basic_outputs)
+        if (address.is_ed25519() && sync_options.wallet.basic_outputs)
+            || (address.is_nft() && sync_options.nft.basic_outputs)
+            || (address.is_account() && sync_options.account.basic_outputs)
         {
             // basic outputs
             #[cfg(target_family = "wasm")]
@@ -95,9 +92,9 @@ where
             }
         }
 
-        if (address.inner().is_ed25519() && sync_options.wallet.nft_outputs)
-            || (address.inner().is_nft() && sync_options.nft.nft_outputs)
-            || (address.inner().is_account() && sync_options.account.nft_outputs)
+        if (address.is_ed25519() && sync_options.wallet.nft_outputs)
+            || (address.is_nft() && sync_options.nft.nft_outputs)
+            || (address.is_account() && sync_options.account.nft_outputs)
         {
             // nfts
             #[cfg(target_family = "wasm")]
@@ -123,9 +120,9 @@ where
             }
         }
 
-        if (address.inner().is_ed25519() && sync_options.wallet.account_outputs)
-            || (address.inner().is_nft() && sync_options.nft.account_outputs)
-            || (address.inner().is_account() && sync_options.account.account_outputs)
+        if (address.is_ed25519() && sync_options.wallet.account_outputs)
+            || (address.is_nft() && sync_options.nft.account_outputs)
+            || (address.is_account() && sync_options.account.account_outputs)
         {
             // accounts and foundries
             #[cfg(target_family = "wasm")]
