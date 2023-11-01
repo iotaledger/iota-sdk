@@ -252,7 +252,7 @@ pub enum Response {
 
     // wallet responses
     /// Response for:
-    /// - [`Address`](crate::method::WalletCommandMethod::GetAddress)
+    /// - [`GetAddress`](crate::method::WalletCommandMethod::GetAddress)
     Address(Bech32Address),
     /// Response for:
     /// - [`MinimumRequiredStorageDeposit`](crate::method::ClientMethod::MinimumRequiredStorageDeposit)
