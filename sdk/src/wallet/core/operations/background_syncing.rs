@@ -7,7 +7,7 @@ use tokio::time::sleep;
 
 use crate::{
     client::secret::SecretManage,
-    wallet::{account::operations::syncing::SyncOptions, Wallet},
+    wallet::{operations::syncing::SyncOptions, Wallet},
 };
 
 /// The default interval for background syncing
@@ -18,7 +18,7 @@ where
     crate::wallet::Error: From<S::Error>,
     crate::client::Error: From<S::Error>,
 {
-    /// Start the background syncing process for all accounts, default interval is 7 seconds
+    /// Start the background syncing process for the wallet, default interval is 7 seconds
     pub async fn start_background_syncing(
         &self,
         options: Option<SyncOptions>,
@@ -49,18 +49,12 @@ where
                 .unwrap();
             runtime.block_on(async {
                 'outer: loop {
-                    log::debug!("[background_syncing]: syncing accounts");
-                    for account in wallet.accounts.read().await.iter() {
-                        // Check if the process should stop before syncing each account so it stops faster
-                        if wallet.background_syncing_status.load(Ordering::Relaxed) == 2 {
-                            log::debug!("[background_syncing]: stopping");
-                            break 'outer;
-                        }
-                        match account.sync(options.clone()).await {
-                            Ok(_) => {}
-                            Err(err) => log::debug!("[background_syncing] error: {}", err),
-                        };
+                    log::debug!("[background_syncing]: syncing wallet");
+
+                    if let Err(err) = wallet.sync(options.clone()).await {
+                        log::debug!("[background_syncing] error: {}", err)
                     }
+
                     // split interval syncing to seconds so stopping the process doesn't have to wait long
                     let seconds = interval.unwrap_or(DEFAULT_BACKGROUNDSYNCING_INTERVAL).as_secs();
                     for _ in 0..seconds {
@@ -78,7 +72,7 @@ where
         Ok(())
     }
 
-    /// Stop the background syncing of the accounts
+    /// Stop the background syncing of the wallet
     pub async fn stop_background_syncing(&self) -> crate::wallet::Result<()> {
         log::debug!("[stop_background_syncing]");
         // immediately return if not running
