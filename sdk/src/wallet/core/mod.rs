@@ -214,13 +214,13 @@ where
         log::debug!("[save] wallet data");
         match updated_wallet {
             Some(wallet) => {
-                let mut storage_manager = self.inner.storage_manager.write().await;
+                let mut storage_manager = self.storage_manager.write().await;
                 storage_manager.save_wallet_data(wallet).await?;
                 drop(storage_manager);
             }
             None => {
                 let wallet_data = self.data.read().await;
-                let mut storage_manager = self.inner.storage_manager.write().await;
+                let mut storage_manager = self.storage_manager.write().await;
                 storage_manager.save_wallet_data(&wallet_data).await?;
                 drop(storage_manager);
                 drop(wallet_data);

@@ -159,7 +159,7 @@ where
                 #[cfg(feature = "ledger_nano")]
                 {
                     use crate::client::secret::SecretManager;
-                    let secret_manager = self.inner.secret_manager.read().await;
+                    let secret_manager = self.secret_manager.read().await;
                     if secret_manager
                         .downcast::<LedgerSecretManager>()
                         .or_else(|| {
@@ -199,7 +199,7 @@ where
         #[cfg(feature = "ledger_nano")]
         let max_inputs = {
             use crate::client::secret::SecretManager;
-            let secret_manager = self.inner.secret_manager.read().await;
+            let secret_manager = self.secret_manager.read().await;
             if let Some(ledger) = secret_manager.downcast::<LedgerSecretManager>().or_else(|| {
                 secret_manager.downcast::<SecretManager>().and_then(|s| {
                     if let SecretManager::LedgerNano(n) = s {
