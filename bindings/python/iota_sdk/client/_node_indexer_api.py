@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from typing import Dict, Optional
 from abc import ABCMeta, abstractmethod
 
-from iota_sdk.types.common import HexStr, json
+from iota_sdk.types.common import HexStr, json, SlotIndex
 from iota_sdk.types.output_id import OutputId
 
 
@@ -49,8 +49,8 @@ class NodeIndexerAPI(metaclass=ABCMeta):
         """
         page_size: Optional[int] = None
         cursor: Optional[str] = None
-        created_before: Optional[int] = None
-        created_after: Optional[int] = None
+        created_before: Optional[SlotIndex] = None
+        created_after: Optional[SlotIndex] = None
 
     @json
     @dataclass
@@ -115,11 +115,11 @@ class NodeIndexerAPI(metaclass=ABCMeta):
         storage_deposit_return_address: Optional[str] = None
         has_expiration: Optional[bool] = None
         expiration_return_address: Optional[str] = None
-        expires_before: Optional[int] = None
-        expires_after: Optional[int] = None
+        expires_before: Optional[SlotIndex] = None
+        expires_after: Optional[SlotIndex] = None
         has_timelock: Optional[bool] = None
-        timelocked_before: Optional[int] = None
-        timelocked_after: Optional[int] = None
+        timelocked_before: Optional[SlotIndex] = None
+        timelocked_after: Optional[SlotIndex] = None
         sender: Optional[str] = None
         tag: Optional[HexStr] = None
 
@@ -235,11 +235,11 @@ class NodeIndexerAPI(metaclass=ABCMeta):
         storage_deposit_return_address: Optional[str] = None
         has_expiration: Optional[bool] = None
         expiration_return_address: Optional[str] = None
-        expires_before: Optional[int] = None
-        expires_after: Optional[int] = None
+        expires_before: Optional[SlotIndex] = None
+        expires_after: Optional[SlotIndex] = None
         has_timelock: Optional[bool] = None
-        timelocked_before: Optional[int] = None
-        timelocked_after: Optional[int] = None
+        timelocked_before: Optional[SlotIndex] = None
+        timelocked_after: Optional[SlotIndex] = None
         issuer: Optional[str] = None
         sender: Optional[str] = None
         tag: Optional[HexStr] = None
