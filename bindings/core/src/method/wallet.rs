@@ -72,9 +72,8 @@ pub enum WalletMethod {
     /// if ignore_if_coin_type_mismatch.is_some(), client options will not be restored
     /// if ignore_if_coin_type_mismatch == Some(true), client options coin type and the wallet will not be restored if
     /// the cointype doesn't match
-    /// if ignore_if_bech32_hrp_mismatch == Some("rms"), but addresses have something different like "smr", the wallet
-    /// will not be restored.
-    /// Expected response: [`Ok`](crate::Response::Ok)
+    /// If a bech32 hrp is provided to ignore_if_bech32_hrp_mismatch, that doesn't match the one of the current
+    /// address, the wallet will not be restored. Expected response: [`Ok`](crate::Response::Ok)
     #[cfg(feature = "stronghold")]
     #[cfg_attr(docsrs, doc(cfg(feature = "stronghold")))]
     #[serde(rename_all = "camelCase")]
@@ -88,8 +87,8 @@ pub enum WalletMethod {
         /// If ignore_if_coin_type_mismatch == Some(true), client options coin type and wallet will not be restored
         /// if the cointype doesn't match.
         ignore_if_coin_type_mismatch: Option<bool>,
-        /// If ignore_if_bech32_hrp_mismatch == Some("rms"), but addresses have something different like "smr", the
-        /// wallet will not be restored.
+        /// If a bech32 hrp is provided to ignore_if_bech32_hrp_mismatch, that doesn't match the one of the current
+        /// address, the wallet will not be restored.
         ignore_if_bech32_mismatch: Option<Hrp>,
     },
     /// Updates the client options for the wallet.

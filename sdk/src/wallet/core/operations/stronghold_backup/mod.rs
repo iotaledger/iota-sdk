@@ -62,8 +62,8 @@ impl Wallet {
     /// if ignore_if_bip_path_mismatch.is_some(), client options will not be restored
     /// if ignore_if_bip_path_mismatch == Some(true), client options coin type and wallet will not be restored if the
     /// coin type doesn't match
-    /// if ignore_if_bech32_hrp_mismatch == Some("rms"), but addresses have something different like "smr", the wallet
-    /// will not be restored.
+    /// If a bech32 hrp is provided to ignore_if_bech32_hrp_mismatch, that doesn't match the one of the current address,
+    /// the wallet will not be restored.
     pub async fn restore_backup(
         &self,
         backup_path: PathBuf,
@@ -214,8 +214,8 @@ impl Wallet<StrongholdSecretManager> {
     /// if ignore_if_bip_path_mismatch.is_some(), client options will not be restored
     /// if ignore_if_bip_path_mismatch == Some(true), client options bip path and wallet will not be restored if the
     /// bip path doesn't match
-    /// if ignore_if_bech32_hrp_mismatch == Some("rms"), but addresses have something different like "smr", the wallet
-    /// will not be restored.
+    /// If a bech32 hrp is provided to ignore_if_bech32_hrp_mismatch, that doesn't match the one of the current address,
+    /// the wallet will not be restored.
     pub async fn restore_backup(
         &self,
         backup_path: PathBuf,
