@@ -1,17 +1,8 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-#[cfg(feature = "participation")]
 use iota_sdk::{
-    client::node_manager::node::Node,
-    types::api::plugins::participation::types::{ParticipationEventId, ParticipationEventType},
-    wallet::types::participation::ParticipationEventRegistrationOptions,
-};
-use iota_sdk::{
-    client::{
-        api::{input_selection::Burn, PreparedTransactionDataDto, SignedTransactionDataDto},
-        secret::GenerateAddressOptions,
-    },
+    client::api::{input_selection::Burn, PreparedTransactionDataDto, SignedTransactionDataDto},
     types::block::{
         address::Bech32Address,
         output::{dto::OutputDto, OutputId, TokenId},
@@ -22,6 +13,12 @@ use iota_sdk::{
         OutputsToClaim, SendNativeTokensParams, SendNftParams, SendParams, SyncOptions, TransactionOptions,
     },
     U256,
+};
+#[cfg(feature = "participation")]
+use iota_sdk::{
+    client::node_manager::node::Node,
+    types::api::plugins::participation::types::{ParticipationEventId, ParticipationEventType},
+    wallet::types::participation::ParticipationEventRegistrationOptions,
 };
 use serde::{Deserialize, Serialize};
 

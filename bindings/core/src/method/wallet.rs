@@ -9,7 +9,7 @@ use derivative::Derivative;
 use iota_sdk::wallet::events::types::{WalletEvent, WalletEventType};
 use iota_sdk::{
     client::{node_manager::node::NodeAuth, secret::GenerateAddressOptions},
-    types::block::address::{Bech32Address, Hrp},
+    types::block::address::Hrp,
     wallet::{ClientOptions, SyncOptions},
 };
 use serde::{Deserialize, Serialize};

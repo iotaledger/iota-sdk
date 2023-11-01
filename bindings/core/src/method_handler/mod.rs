@@ -6,7 +6,7 @@ mod client;
 mod secret_manager;
 mod utils;
 mod wallet;
-mod wallet_operation;
+mod wallet_command;
 
 pub use call_method::{
     call_client_method, call_secret_manager_method, call_utils_method, call_wallet_method, CallMethod,

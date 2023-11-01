@@ -3,12 +3,9 @@
 
 use std::time::Duration;
 
-use iota_sdk::{
-    types::block::address::ToBech32Ext,
-    wallet::{core::WalletDataDto, Wallet, WalletBuilder},
-};
+use iota_sdk::{types::block::address::ToBech32Ext, wallet::Wallet};
 
-use super::wallet_operation::call_wallet_command_method_internal;
+use super::wallet_command::call_wallet_command_method_internal;
 use crate::{method::WalletMethod, response::Response, Result};
 
 /// Call a wallet method.

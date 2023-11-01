@@ -34,8 +34,7 @@ use iota_sdk::{
         },
     },
     wallet::{
-        core::WalletDataDto,
-        types::{AddressWithUnspentOutputs, Balance, Bip44Address, OutputDataDto, TransactionWithMetadataDto},
+        types::{Balance, OutputDataDto, TransactionWithMetadataDto},
         PreparedCreateNativeTokenTransactionDto,
     },
 };
