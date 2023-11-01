@@ -156,7 +156,8 @@ where
         }
 
         // Updates wallet with balances, output ids, outputs
-        self.update(outputs_data, spent_or_unsynced_output_metadata_map).await
+        self.update_after_sync(outputs_data, spent_or_unsynced_output_metadata_map)
+            .await
     }
 
     // First request all outputs directly related to the wallet address, then for each nft and account output we got,
