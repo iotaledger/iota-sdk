@@ -1,7 +1,7 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! In this example we will sync an account in the background.
+//! In this example we will sync a wallet in the background.
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh
@@ -14,6 +14,7 @@ use iota_sdk::{
         request_funds_from_faucet,
         secret::{mnemonic::MnemonicSecretManager, SecretManager},
     },
+    crypto::keys::bip44::Bip44,
     wallet::{ClientOptions, Result, Wallet},
 };
 
@@ -29,16 +30,14 @@ async fn main() -> Result<()> {
         .with_secret_manager(SecretManager::Mnemonic(secret_manager))
         .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
         .with_client_options(client_options)
-        .with_coin_type(SHIMMER_COIN_TYPE)
+        .with_bip_path(Bip44::new(SHIMMER_COIN_TYPE))
         .finish()
         .await?;
 
-    // Get or create new account
-    let account = wallet.get_or_create_account("Alice").await?;
-    let addresses = account.addresses().await;
+    let wallet_address = wallet.address().await;
 
     // Manually sync to ensure we have the correct funds to start with
-    let balance = account.sync(None).await?;
+    let balance = wallet.sync(None).await?;
     let funds_before = balance.base_coin().available();
     println!("Current available funds: {funds_before}");
 
@@ -46,8 +45,7 @@ async fn main() -> Result<()> {
     println!("Started background syncing");
 
     println!("Requesting funds from faucet...");
-    let faucet_response =
-        request_funds_from_faucet(&std::env::var("FAUCET_URL").unwrap(), addresses[0].address()).await?;
+    let faucet_response = request_funds_from_faucet(&std::env::var("FAUCET_URL").unwrap(), &wallet_address).await?;
     println!("Response from faucet: {}", faucet_response.trim_end());
 
     println!("Waiting for funds (timeout=60s)...");
@@ -59,7 +57,7 @@ async fn main() -> Result<()> {
             return Ok(());
         };
         // We just query the balance and don't manually sync
-        let balance = account.balance().await?;
+        let balance = wallet.balance().await?;
         let funds_after = balance.base_coin().available();
         if funds_after > funds_before {
             break funds_after;
