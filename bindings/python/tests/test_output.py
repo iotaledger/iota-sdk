@@ -169,7 +169,7 @@ def test_output():
     assert account_output.to_dict() == account_output_dict
 
     foundry_output_dict = {
-        "type": 2,
+        "type": 3,
         "amount": "54700",
         "serialNumber": 1,
         "tokenScheme": {
@@ -198,7 +198,7 @@ def test_output():
     assert foundry_output.to_dict() == foundry_output_dict
 
     nft_output_dict = {
-        "type": 3,
+        "type": 4,
         "mana": "47800",
         "amount": "47800",
         "nftId": "0x90e84936bd0cffd1595d2a58f63b1a8d0d3e333ed893950a5f3f0043c6e59ec1",
