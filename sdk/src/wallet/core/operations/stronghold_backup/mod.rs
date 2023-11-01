@@ -235,6 +235,7 @@ impl Wallet<StrongholdSecretManager> {
         let mut wallet_data = self.data_mut().await;
 
         // We don't want to overwrite a possible existing wallet
+        // TODO not too sure about this, it used to check the presence of accounts, this is not 100% equivalent
         if !wallet_data.outputs.is_empty() {
             return Err(crate::wallet::Error::Backup(
                 "can't restore backup when there is already a wallet",
