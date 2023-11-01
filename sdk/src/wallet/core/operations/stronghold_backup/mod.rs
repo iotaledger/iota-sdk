@@ -234,13 +234,12 @@ impl Wallet<StrongholdSecretManager> {
         // Will be replaced by the restored wallet data
         let mut wallet_data = self.data_mut().await;
 
-        // TODO #1279: Is there a way to ensure that the user can't mess up?
-        // We don't want to overwrite possible existing wallet
-        // if !wallet_data.is_empty() {
-        //     return Err(crate::wallet::Error::Backup(
-        //         "can't restore backup when there is already a wallet",
-        //     ));
-        // }
+        // We don't want to overwrite a possible existing wallet
+        if !wallet_data.outputs.is_empty() {
+            return Err(crate::wallet::Error::Backup(
+                "can't restore backup when there is already a wallet",
+            ));
+        }
 
         let mut secret_manager = self.secret_manager.as_ref().write().await;
         // Get the current snapshot path if set
