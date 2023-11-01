@@ -111,6 +111,8 @@ pub enum WalletCommand {
     Exit,
     /// Request funds from the faucet.
     Faucet {
+        /// Address the faucet sends the funds to, defaults to the wallet address.
+        address: Option<Bech32Address>,
         /// URL of the faucet, default to <https://faucet.testnet.shimmer.network/api/enqueue>.
         url: Option<String>,
     },
@@ -543,8 +545,13 @@ pub async fn destroy_foundry_command(wallet: &Wallet, foundry_id: String) -> Res
 }
 
 // `faucet` command
-pub async fn faucet_command(wallet: &Wallet, url: Option<String>) -> Result<(), Error> {
-    let address = wallet.address().await;
+pub async fn faucet_command(wallet: &Wallet, address: Option<Bech32Address>, url: Option<String>) -> Result<(), Error> {
+    let address = if let Some(address) = address {
+        address
+    } else {
+        wallet.address().await
+    };
+
     let faucet_url = url
         .as_deref()
         .unwrap_or("https://faucet.testnet.shimmer.network/api/enqueue");
@@ -1069,7 +1076,7 @@ pub async fn prompt_internal(
                         WalletCommand::Exit => {
                             return Ok(PromptResponse::Done);
                         }
-                        WalletCommand::Faucet { url } => faucet_command(wallet, url).await,
+                        WalletCommand::Faucet { address, url } => faucet_command(wallet, address, url).await,
                         WalletCommand::MeltNativeToken { token_id, amount } => {
                             melt_native_token_command(wallet, token_id, amount).await
                         }
