@@ -58,8 +58,7 @@ impl StorageManager {
     }
 
     pub(crate) async fn save_wallet_data(&mut self, wallet_data: &WalletData) -> crate::wallet::Result<()> {
-        self.set(&format!("{WALLET_DATA_KEY}"), &WalletDataDto::from(wallet_data))
-            .await
+        self.set(WALLET_DATA_KEY, &WalletDataDto::from(wallet_data)).await
     }
 
     pub(crate) async fn set_default_sync_options(&self, sync_options: &SyncOptions) -> crate::wallet::Result<()> {
@@ -137,21 +136,17 @@ mod tests {
     #[tokio::test]
     async fn save_load_wallet_builder() {
         let storage_manager = StorageManager::new(Memory::default(), None).await.unwrap();
-        assert!(
-            WalletBuilder::<SecretManager>::load(&storage_manager)
-                .await
-                .unwrap()
-                .is_none()
-        );
+        assert!(WalletBuilder::<SecretManager>::load(&storage_manager)
+            .await
+            .unwrap()
+            .is_none());
 
         let wallet_builder = WalletBuilder::<SecretManager>::new();
         wallet_builder.save(&storage_manager).await.unwrap();
 
-        assert!(
-            WalletBuilder::<SecretManager>::load(&storage_manager)
-                .await
-                .unwrap()
-                .is_some()
-        );
+        assert!(WalletBuilder::<SecretManager>::load(&storage_manager)
+            .await
+            .unwrap()
+            .is_some());
     }
 }
