@@ -283,6 +283,7 @@ export type __CallPluginRouteMethod__ = {
 };
 
 // inx-indexer methods
+
 export interface __GetOutputIdsMethod__ {
     name: 'outputIds';
     data: {
