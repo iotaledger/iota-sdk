@@ -42,10 +42,10 @@ class NodeIndexerAPI(metaclass=ABCMeta):
         cursor:
             Starts the search from the cursor (createdSlotIndex+outputId.pageSize).
             If an empty string is provided, only the first page is returned.
-        created_after:
-            Returns outputs that were created after a certain slot index.
         created_before:
             Returns outputs that were created before a certain slot index.
+        created_after:
+            Returns outputs that were created after a certain slot index.
         """
         page_size: Optional[int] = None
         cursor: Optional[str] = None
@@ -55,7 +55,7 @@ class NodeIndexerAPI(metaclass=ABCMeta):
     @json
     @dataclass
     class OutputQueryParameters(CommonQueryParameters):
-        """Common Query parameters
+        """Output Query parameters
 
         **Attributes:**
 
