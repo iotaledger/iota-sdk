@@ -31,101 +31,233 @@ class NodeIndexerAPI(metaclass=ABCMeta):
 
     @json
     @dataclass
-    class QueryParameters:
-        """Query parameters
+    class CommonQueryParameters:
+        """Common Query parameters
 
         **Attributes:**
-        address :
-            Bech32-encoded address that should be searched for.
-        account_address :
-            Filter foundry outputs based on bech32-encoded address of the controlling account.
-        created_after :
-            Returns outputs that were created after a certain Unix timestamp.
-            created_before :
-            Returns outputs that were created before a certain Unix timestamp.
-            cursor :
-            Starts the search from the cursor (confirmationMS+outputId.pageSize).
-            expiration_return_address :
-            Filters outputs based on the presence of a specific Bech32-encoded return address in the expiration unlock
-            condition.
-            expires_after :
-            Returns outputs that expire after a certain Unix timestamp.
-            expires_before :
-            Returns outputs that expire before a certain Unix timestamp.
-            governor :
-            Filters outputs based on bech32-encoded governor (governance controller) address.
-            has_expiration :
-            Filters outputs based on the presence of expiration unlock condition.
-            has_native_tokens :
-            Filters outputs based on the presence of native tokens.
-            has_storage_deposit_return :
-            Filters outputs based on the presence of storage deposit return unlock condition.
-            has_timelock :
-            Filters outputs based on the presence of timelock unlock condition.
-            issuer:
-            Filters outputs based on bech32-encoded issuer address.
-            max_native_token_count :
-            Filters outputs that have at most a certain number of distinct native tokens.
-            min_native_token_count :
-            Filters outputs that have at least a certain number of distinct native tokens.
-            page_size :
+
+        page_size:
             The maximum amount of items returned in one call. If there are more items, a cursor to the next page is
             returned too. The parameter is ignored when pageSize is defined via the cursor parameter.
-            sender :
-            Filters outputs based on the presence of validated Sender (bech32 encoded).
-            state_controller :
-            Filters outputs based on bech32-encoded state controller address.
-            storage_deposit_return_address :
-            Filters outputs based on the presence of a specific return address in the storage deposit return unlock
-            condition.
-            tag :
-            Filters outputs based on matching Tag Block.
-            timelocked_after :
-            Returns outputs that are timelocked after a certain Unix timestamp.
-            timelocked_before :
-            Returns outputs that are timelocked before a certain Unix timestamp.
-         unlockable_by_address :
+        cursor:
+            Starts the search from the cursor (createdSlotIndex+outputId.pageSize).
+            If an empty string is provided, only the first page is returned.
+        created_after:
+            Returns outputs that were created after a certain slot index.
+        created_before:
+            Returns outputs that were created before a certain slot index.
+        """
+        page_size: Optional[int] = None
+        cursor: Optional[str] = None
+        created_before: Optional[int] = None
+        created_after: Optional[int] = None
+
+    @json
+    @dataclass
+    class OutputQueryParameters(CommonQueryParameters):
+        """Common Query parameters
+
+        **Attributes:**
+
+        has_native_token:
+            Filters outputs based on the presence of a native token.
+        native_token:
+            Filters outputs based on the presence of a specific native token.
+        unlockable_by_address:
             Returns outputs that are unlockable by the bech32 address.
         """
-        address: Optional[str] = None
-        account_address: Optional[str] = None
-        created_after: Optional[int] = None
-        created_before: Optional[int] = None
-        cursor: Optional[str] = None
-        expiration_return_address: Optional[str] = None
-        expires_after: Optional[int] = None
-        expires_before: Optional[int] = None
-        governor: Optional[str] = None
-        has_expiration: Optional[bool] = None
-        has_native_tokens: Optional[bool] = None
-        has_storage_deposit_return: Optional[bool] = None
-        has_timelock: Optional[bool] = None
-        issuer: Optional[str] = None
-        max_native_token_count: Optional[int] = None
-        min_native_token_count: Optional[int] = None
-        page_size: Optional[int] = None
-        sender: Optional[str] = None
-        state_controller: Optional[str] = None
-        storage_deposit_return_address: Optional[str] = None
-        tag: Optional[str] = None
-        timelocked_after: Optional[int] = None
-        timelocked_before: Optional[int] = None
+        has_native_token: Optional[bool] = None
+        native_token: Optional[HexStr] = None
         unlockable_by_address: Optional[str] = None
+
+    @json
+    @dataclass
+    class BasicOutputQueryParameters(CommonQueryParameters):
+        """Basic Output Query parameters
+
+        **Attributes: **
+        has_native_token:
+            Filters outputs based on the presence of a native token.
+        native_token:
+            Filters outputs based on the presence of a specific native token.
+        unlockable_by_address:
+            Returns outputs that are unlockable by the bech32 address.
+        address:
+            Bech32-encoded address that should be searched for.
+        has_storage_deposit_return:
+            Filters outputs based on the presence of storage deposit return unlock condition.
+        storage_deposit_return_address:
+            Filters outputs based on the presence of a specific return address in the storage deposit return unlock condition.
+        has_expiration:
+            Filters outputs based on the presence of expiration unlock condition.
+        expiration_return_address:
+            Filters outputs based on the presence of a specific Bech32-encoded return address in the expiration unlock condition.
+        expires_before:
+            Returns outputs that expire before a certain slot index.
+        expires_after:
+            Returns outputs that expire after a certain slot index.
+        has_timelock:
+            Filters outputs based on the presence of timelock unlock condition.
+        timelocked_before:
+            Returns outputs that are timelocked before a certain slot index.
+        timelocked_after:
+            Returns outputs that are timelocked after a certain slot index.
+        sender:
+            Filters outputs based on the presence of validated Sender (bech32 encoded).
+        tag:
+            Filters outputs based on matching Tag Block.
+        """
+        has_native_token: Optional[bool] = None
+        native_token: Optional[HexStr] = None
+        unlockable_by_address: Optional[str] = None
+        address: Optional[str] = None
+        has_storage_deposit_return: Optional[bool] = None
+        storage_deposit_return_address: Optional[str] = None
+        has_expiration: Optional[bool] = None
+        expiration_return_address: Optional[str] = None
+        expires_before: Optional[int] = None
+        expires_after: Optional[int] = None
+        has_timelock: Optional[bool] = None
+        timelocked_before: Optional[int] = None
+        timelocked_after: Optional[int] = None
+        sender: Optional[str] = None
+        tag: Optional[HexStr] = None
+
+    @json
+    @dataclass
+    class AccountOutputQueryParameters(CommonQueryParameters):
+        """Account Output Query parameters
+
+        **Attributes: **
+        address:
+            Bech32-encoded address that should be searched for.
+        issuer:
+            Filters outputs based on bech32-encoded issuer address.
+        sender:
+            Filters outputs based on the presence of validated Sender (bech32 encoded).
+        """
+        address: Optional[str] = None
+        issuer: Optional[str] = None
+        sender: Optional[str] = None
+
+    @json
+    @dataclass
+    class AnchorOutputQueryParameters(CommonQueryParameters):
+        """Anchor Output Query parameters
+
+        **Attributes: **
+        unlockable_by_address:
+            Returns outputs that are unlockable by the bech32 address.
+        state_controller:
+            Filters outputs based on bech32-encoded state controller address.
+        governor:
+            Filters outputs based on bech32-encoded governor (governance controller) address.
+        issuer:
+            Filters outputs based on bech32-encoded issuer address.
+        sender:
+            Filters outputs based on the presence of validated Sender (bech32 encoded).
+        """
+        unlockable_by_address: Optional[str] = None
+        state_controller: Optional[str] = None
+        governor: Optional[str] = None
+        issuer: Optional[str] = None
+        sender: Optional[str] = None
+
+    @json
+    @dataclass
+    class DelegationOutputQueryParameters(CommonQueryParameters):
+        """Delegation Output Query parameters
+
+        **Attributes: **
+        address:
+            Bech32-encoded address that should be searched for.
+        validator:
+            Filter foundry outputs based on bech32-encoded address of the validator.
+        """
+        address: Optional[str] = None
+        validator: Optional[str] = None
+
+    @json
+    @dataclass
+    class FoundryOutputQueryParameters(CommonQueryParameters):
+        """Foundry Output Query parameters
+
+        **Attributes: **
+        has_native_token:
+            Filters outputs based on the presence of a native token.
+        native_token:
+            Filters outputs based on the presence of a specific native token.
+        account:
+            Filter foundry outputs based on bech32-encoded address of the controlling account.
+        """
+        has_native_token: Optional[bool] = None
+        native_token: Optional[HexStr] = None
+        account: Optional[str] = None
+
+    @json
+    @dataclass
+    class NftOutputQueryParameters(CommonQueryParameters):
+        """NFT Output Query parameters
+
+        **Attributes: **
+        unlockable_by_address:
+            Returns outputs that are unlockable by the bech32 address.
+        address:
+            Bech32-encoded address that should be searched for.
+        has_storage_deposit_return:
+            Filters outputs based on the presence of storage deposit return unlock condition.
+        storage_deposit_return_address:
+            Filters outputs based on the presence of a specific return address in the storage deposit return unlock condition.
+        has_expiration:
+            Filters outputs based on the presence of expiration unlock condition.
+        expiration_return_address:
+            Filters outputs based on the presence of a specific Bech32-encoded return address in the expiration unlock condition.
+        expires_before:
+            Returns outputs that expire before a certain slot index.
+        expires_after:
+            Returns outputs that expire after a certain slot index.
+        has_timelock:
+            Filters outputs based on the presence of timelock unlock condition.
+        timelocked_before:
+            Returns outputs that are timelocked before a certain slot index.
+        timelocked_after:
+            Returns outputs that are timelocked after a certain slot index.
+        issuer:
+            Filters outputs based on bech32-encoded issuer address.
+        sender:
+            Filters outputs based on the presence of validated Sender (bech32 encoded).
+        tag:
+            Filters outputs based on matching Tag Block.
+        """
+        unlockable_by_address: Optional[str] = None
+        address: Optional[str] = None
+        has_storage_deposit_return: Optional[bool] = None
+        storage_deposit_return_address: Optional[str] = None
+        has_expiration: Optional[bool] = None
+        expiration_return_address: Optional[str] = None
+        expires_before: Optional[int] = None
+        expires_after: Optional[int] = None
+        has_timelock: Optional[bool] = None
+        timelocked_before: Optional[int] = None
+        timelocked_after: Optional[int] = None
+        issuer: Optional[str] = None
+        sender: Optional[str] = None
+        tag: Optional[HexStr] = None
 
     @abstractmethod
     def _call_method(self, name, data=None):
         return {}
 
     def output_ids(
-            self, query_parameters: QueryParameters) -> OutputIdsResponse:
-        """Fetch alias/basic/NFT/foundry output IDs from the given query parameters.
+            self, query_parameters: OutputQueryParameters) -> OutputIdsResponse:
+        """Fetch account/anchor/basic/delegation/NFT/foundry output IDs from the given query parameters.
         Supported query parameters are: "hasNativeTokens", "minNativeTokenCount", "maxNativeTokenCount", "unlockableByAddress", "createdBefore", "createdAfter", "cursor", "pageSize".
 
         Returns:
             The corresponding output IDs of the outputs.
         """
 
-        query_parameters_camelized = query_parameters.as_dict()
+        query_parameters_camelized = query_parameters.to_dict()
 
         response = self._call_method('outputIds', {
             'queryParameters': query_parameters_camelized,
@@ -133,7 +265,7 @@ class NodeIndexerAPI(metaclass=ABCMeta):
         return OutputIdsResponse(response)
 
     def basic_output_ids(
-            self, query_parameters: QueryParameters) -> OutputIdsResponse:
+            self, query_parameters: BasicOutputQueryParameters) -> OutputIdsResponse:
         """Fetch basic output IDs from the given query parameters.
 
         Returns:
@@ -148,7 +280,7 @@ class NodeIndexerAPI(metaclass=ABCMeta):
         return OutputIdsResponse(response)
 
     def account_output_ids(
-            self, query_parameters: QueryParameters) -> OutputIdsResponse:
+            self, query_parameters: AccountOutputQueryParameters) -> OutputIdsResponse:
         """Fetch account output IDs from the given query parameters.
 
         Returns:
@@ -173,7 +305,7 @@ class NodeIndexerAPI(metaclass=ABCMeta):
         }))
 
     def anchor_output_ids(
-            self, query_parameters: QueryParameters) -> OutputIdsResponse:
+            self, query_parameters: AnchorOutputQueryParameters) -> OutputIdsResponse:
         """Fetch anchor output IDs from the given query parameters.
 
         Returns:
@@ -198,7 +330,7 @@ class NodeIndexerAPI(metaclass=ABCMeta):
         }))
 
     def delegation_output_ids(
-            self, query_parameters: QueryParameters) -> OutputIdsResponse:
+            self, query_parameters: DelegationOutputQueryParameters) -> OutputIdsResponse:
         """Fetch delegation output IDs from the given query parameters.
 
         Returns:
@@ -223,7 +355,7 @@ class NodeIndexerAPI(metaclass=ABCMeta):
         }))
 
     def foundry_output_ids(
-            self, query_parameters: QueryParameters) -> OutputIdsResponse:
+            self, query_parameters: FoundryOutputQueryParameters) -> OutputIdsResponse:
         """Fetch foundry Output IDs from the given query parameters.
 
         Returns:
@@ -248,7 +380,7 @@ class NodeIndexerAPI(metaclass=ABCMeta):
         }))
 
     def nft_output_ids(
-            self, query_parameters: QueryParameters) -> OutputIdsResponse:
+            self, query_parameters: NftOutputQueryParameters) -> OutputIdsResponse:
         """Fetch NFT output IDs from the given query parameters.
 
         Returns:
