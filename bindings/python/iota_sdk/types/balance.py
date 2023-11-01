@@ -62,8 +62,12 @@ class NativeTokensBalance:
         metadata: Some metadata of the native token.
     """
     token_id: HexStr
-    total: HexStr
-    available: HexStr
+    total: int = field(metadata=config(
+        encoder=str
+    ))
+    available: int = field(metadata=config(
+        encoder=str
+    ))
     metadata: Optional[HexStr]
 
 
