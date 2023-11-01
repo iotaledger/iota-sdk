@@ -128,15 +128,13 @@ where
     ) -> crate::wallet::Result<()> {
         log::debug!("[SYNC] request_incoming_transaction_data");
 
-        let account_details = self.data().await;
+        let wallet_data = self.data().await;
         transaction_ids.retain(|transaction_id| {
-            !(account_details.transactions.contains_key(transaction_id)
-                || account_details.incoming_transactions.contains_key(transaction_id)
-                || account_details
-                    .inaccessible_incoming_transactions
-                    .contains(transaction_id))
+            !(wallet_data.transactions.contains_key(transaction_id)
+                || wallet_data.incoming_transactions.contains_key(transaction_id)
+                || wallet_data.inaccessible_incoming_transactions.contains(transaction_id))
         });
-        drop(account_details);
+        drop(wallet_data);
 
         // Limit parallel requests to 100, to avoid timeouts
         let results =
