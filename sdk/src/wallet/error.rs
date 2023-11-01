@@ -3,6 +3,7 @@
 
 use std::fmt::Debug;
 
+use crypto::keys::bip44::Bip44;
 use serde::{
     ser::{SerializeMap, Serializer},
     Serialize,
@@ -14,15 +15,6 @@ use crate::types::block::{address::Bech32Address, payload::signed_transaction::T
 #[derive(Debug, thiserror::Error)]
 #[non_exhaustive]
 pub enum Error {
-    /// Account alias must be unique.
-    #[error("can't create account: account alias {0} already exists")]
-    AccountAliasAlreadyExists(String),
-    /// Account not found
-    #[error("account {0} not found")]
-    AccountNotFound(String),
-    /// Address not found in account
-    #[error("address {0} not found in account")]
-    AddressNotFoundInAccount(Bech32Address),
     /// Errors during backup creation or restoring
     #[error("backup failed {0}")]
     Backup(&'static str),
@@ -35,6 +27,12 @@ pub enum Error {
     /// Client error.
     #[error("`{0}`")]
     Client(Box<crate::client::Error>),
+    /// BIP44 coin type mismatch
+    #[error("BIP44 mismatch: {new_bip_path:?}, existing bip path is: {old_bip_path:?}")]
+    BipPathMismatch {
+        new_bip_path: Option<Bip44>,
+        old_bip_path: Option<Bip44>,
+    },
     /// Funds are spread over too many outputs
     #[error("funds are spread over too many outputs {output_count}/{output_count_max}, consolidation required")]
     ConsolidationRequired { output_count: usize, output_count_max: u16 },
@@ -44,24 +42,20 @@ pub enum Error {
     /// Custom input error
     #[error("custom input error {0}")]
     CustomInput(String),
-    /// Failed to get remainder
-    #[error("failed to get remainder address")]
-    FailedToGetRemainder,
     /// Insufficient funds to send transaction.
     #[error("insufficient funds {available}/{required} available")]
     InsufficientFunds { available: u64, required: u64 },
-    /// Invalid coin type, all accounts need to have the same coin type
-    #[error("invalid coin type for new account: {new_coin_type}, existing coin type is: {existing_coin_type}")]
-    InvalidCoinType {
-        new_coin_type: u32,
-        existing_coin_type: u32,
-    },
     /// Invalid mnemonic error
     #[error("invalid mnemonic: {0}")]
     InvalidMnemonic(String),
     /// Invalid output kind.
     #[error("invalid output kind: {0}")]
     InvalidOutputKind(String),
+    /// Invalid Voting Power
+    #[cfg(feature = "participation")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
+    #[error("invalid voting power")]
+    InvalidVotingPower,
     /// IO error. (storage, backup, restore)
     #[error("`{0}`")]
     Io(#[from] std::io::Error),
@@ -74,6 +68,9 @@ pub enum Error {
     /// Minting failed
     #[error("minting failed {0}")]
     MintingFailed(String),
+    /// Missing BIP path.
+    #[error("missing BIP path")]
+    MissingBipPath,
     /// Missing parameter.
     #[error("missing parameter: {0}")]
     MissingParameter(&'static str),
@@ -116,10 +113,9 @@ pub enum Error {
     #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
     #[error("voting error {0}")]
     Voting(String),
-    #[cfg(feature = "participation")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
-    #[error("invalid voting power")]
-    InvalidVotingPower,
+    /// Address not the wallet address
+    #[error("address {0} is not the wallet address")]
+    WalletAddressMismatch(Bech32Address),
 }
 
 // Serialize type with Display error

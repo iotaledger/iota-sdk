@@ -1,16 +1,18 @@
 // Copyright 2020-2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-mod account;
-mod command;
+mod cli;
 mod error;
 mod helper;
-mod wallet;
+mod wallet_cli;
 
 use clap::Parser;
 use fern_logger::{LoggerConfigBuilder, LoggerOutputConfigBuilder};
 
-use self::{command::wallet::WalletCli, error::Error, wallet::new_wallet};
+use self::{
+    cli::{new_wallet, Cli},
+    error::Error,
+};
 
 #[macro_export]
 macro_rules! println_log_info {
@@ -28,7 +30,7 @@ macro_rules! println_log_error {
     };
 }
 
-fn logger_init(cli: &WalletCli) -> Result<(), Error> {
+fn logger_init(cli: &Cli) -> Result<(), Error> {
     std::panic::set_hook(Box::new(move |panic_info| {
         println_log_error!("{panic_info}");
     }));
@@ -45,10 +47,9 @@ fn logger_init(cli: &WalletCli) -> Result<(), Error> {
     Ok(())
 }
 
-async fn run(cli: WalletCli) -> Result<(), Error> {
-    if let (Some(wallet), Some(account)) = new_wallet(cli).await? {
-        let account = wallet.get_account(account).await?;
-        account::account_prompt(&wallet, account).await?;
+async fn run(cli: Cli) -> Result<(), Error> {
+    if let Some(wallet) = new_wallet(cli).await? {
+        wallet_cli::prompt(&wallet).await?;
     }
 
     Ok(())
@@ -58,7 +59,7 @@ async fn run(cli: WalletCli) -> Result<(), Error> {
 async fn main() {
     dotenvy::dotenv().ok();
 
-    let cli = match WalletCli::try_parse() {
+    let cli = match Cli::try_parse() {
         Ok(cli) => cli,
         Err(e) => {
             println!("{e}");

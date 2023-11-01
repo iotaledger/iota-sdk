@@ -12,14 +12,17 @@ use iota_sdk::{
     client::{
         constants::SHIMMER_COIN_TYPE,
         request_funds_from_faucet,
-        secret::{mnemonic::MnemonicSecretManager, SecretManager},
+        secret::{mnemonic::MnemonicSecretManager, SecretManage, SecretManager},
     },
-    types::block::{address::Bech32Address, output::BasicOutput, payload::signed_transaction::TransactionId},
-    wallet::{account::FilterOptions, Account, ClientOptions, Result, SendParams, Wallet},
+    crypto::keys::bip44::Bip44,
+    types::block::{
+        address::{Address, Bech32Address, Hrp},
+        output::BasicOutput,
+        payload::signed_transaction::TransactionId,
+    },
+    wallet::{ClientOptions, FilterOptions, Result, SendParams, Wallet},
 };
 
-// The account alias used in this example.
-const ACCOUNT_ALIAS: &str = "spammer";
 // The number of spamming rounds.
 const NUM_ROUNDS: usize = 1000;
 // The amount to send in each transaction
@@ -39,23 +42,34 @@ async fn main() -> Result<()> {
     // Restore wallet from a mnemonic phrase.
     let client_options = ClientOptions::new().with_node(&std::env::var("NODE_URL").unwrap())?;
     let secret_manager = MnemonicSecretManager::try_from_mnemonic(std::env::var("MNEMONIC").unwrap())?;
+
+    let bip_path = Bip44::new(SHIMMER_COIN_TYPE);
+    let address = Bech32Address::new(
+        Hrp::from_str_unchecked("smr"),
+        Address::from(
+            secret_manager
+                .generate_ed25519_addresses(bip_path.coin_type, bip_path.account, 0..1, None)
+                .await?[0],
+        ),
+    );
+
     let wallet = Wallet::builder()
         .with_secret_manager(SecretManager::Mnemonic(secret_manager))
         .with_client_options(client_options)
-        .with_coin_type(SHIMMER_COIN_TYPE)
+        .with_bip_path(bip_path)
+        .with_address(address)
         .finish()
         .await?;
-    let account = wallet.get_or_create_account(ACCOUNT_ALIAS).await?;
 
-    let recv_address = account.first_address_bech32().await;
+    let recv_address = wallet.address().await;
     println!("Recv address: {}", recv_address);
 
     // Ensure there are enough available funds for spamming.
-    ensure_enough_funds(&account, &recv_address).await?;
+    ensure_enough_funds(&wallet, &recv_address).await?;
 
     // We make sure that for all threads there are always inputs available to
     // fund the transaction, otherwise we create enough unspent outputs.
-    let num_unspent_basic_outputs_with_send_amount = account
+    let num_unspent_basic_outputs_with_send_amount = wallet
         .unspent_outputs(FilterOptions {
             output_types: Some(vec![BasicOutput::KIND]),
             ..Default::default()
@@ -70,12 +84,12 @@ async fn main() -> Result<()> {
     if num_unspent_basic_outputs_with_send_amount < 127 {
         println!("Creating unspent outputs...");
 
-        let transaction = account
+        let transaction = wallet
             .send_with_params(vec![SendParams::new(SEND_AMOUNT, recv_address.clone())?; 127], None)
             .await?;
-        wait_for_inclusion(&transaction.transaction_id, &account).await?;
+        wait_for_inclusion(&transaction.transaction_id, &wallet).await?;
 
-        account.sync(None).await?;
+        wallet.sync(None).await?;
     }
 
     println!("Spamming transactions...");
@@ -86,14 +100,14 @@ async fn main() -> Result<()> {
         let mut tasks = tokio::task::JoinSet::<std::result::Result<(), (usize, iota_sdk::wallet::Error)>>::new();
 
         for n in 0..num_simultaneous_txs {
-            let account_clone = account.clone();
             let recv_address = recv_address.clone();
+            let wallet = wallet.clone();
 
             tasks.spawn(async move {
                 println!("Thread {n}: sending {SEND_AMOUNT} coins to own address");
 
                 let thread_timer = tokio::time::Instant::now();
-                let transaction = account_clone
+                let transaction = wallet
                     .send(SEND_AMOUNT, recv_address, None)
                     .await
                     .map_err(|err| (n, err))?;
@@ -123,14 +137,14 @@ async fn main() -> Result<()> {
 
         if error_state.is_err() {
             // Sync when getting an error, because that's probably when no outputs are available anymore
-            let mut balance = account.sync(None).await?;
-            println!("Account synced");
+            let mut balance = wallet.sync(None).await?;
+            println!("Wallet synced");
 
             while balance.base_coin().available() == 0 {
                 println!("No funds available");
                 tokio::time::sleep(std::time::Duration::from_secs(2)).await;
-                balance = account.sync(None).await?;
-                println!("Account synced");
+                balance = wallet.sync(None).await?;
+                println!("Wallet synced");
             }
         }
 
@@ -142,8 +156,8 @@ async fn main() -> Result<()> {
     Ok(())
 }
 
-async fn ensure_enough_funds(account: &Account, bech32_address: &Bech32Address) -> Result<()> {
-    let balance = account.sync(None).await?;
+async fn ensure_enough_funds(wallet: &Wallet, bech32_address: &Bech32Address) -> Result<()> {
+    let balance = wallet.sync(None).await?;
     let available_funds = balance.base_coin().available();
     println!("Available funds: {available_funds}");
     let min_required_funds = (1.1f64 * (127u64 * SEND_AMOUNT) as f64) as u64;
@@ -163,7 +177,7 @@ async fn ensure_enough_funds(account: &Account, bech32_address: &Bech32Address) 
             if start.elapsed().as_secs() > 60 {
                 panic!("Requesting funds failed (timeout)");
             };
-            let balance = account.sync(None).await?;
+            let balance = wallet.sync(None).await?;
             let available_funds_after = balance.base_coin().available();
             if available_funds_after > available_funds {
                 break available_funds_after;
@@ -183,14 +197,14 @@ async fn ensure_enough_funds(account: &Account, bech32_address: &Bech32Address) 
     }
 }
 
-async fn wait_for_inclusion(transaction_id: &TransactionId, account: &Account) -> Result<()> {
+async fn wait_for_inclusion(transaction_id: &TransactionId, wallet: &Wallet) -> Result<()> {
     println!(
         "Transaction sent: {}/transaction/{}",
         std::env::var("EXPLORER_URL").unwrap(),
         transaction_id
     );
     // Wait for transaction to get included
-    let block_id = account
+    let block_id = wallet
         .reissue_transaction_until_included(transaction_id, None, None)
         .await?;
     println!(
