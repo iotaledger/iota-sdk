@@ -78,18 +78,6 @@ impl InputSelection {
 
                     is_created
                 }
-                // Add an nft requirement if the nft output is transitioning and then required in the inputs.
-                Output::Nft(nft_output) => {
-                    let is_created = nft_output.nft_id().is_null();
-
-                    if !is_created {
-                        let requirement = Requirement::Nft(*nft_output.nft_id());
-                        log::debug!("Adding {requirement:?} from output");
-                        self.requirements.push(requirement);
-                    }
-
-                    is_created
-                }
                 // Add a foundry requirement if the foundry output is transitioning and then required in the inputs.
                 // Also add an account requirement since the associated account output needs to be transitioned.
                 Output::Foundry(foundry_output) => {
@@ -111,6 +99,18 @@ impl InputSelection {
                     let requirement = Requirement::Account(*foundry_output.account_address().account_id());
                     log::debug!("Adding {requirement:?} from output");
                     self.requirements.push(requirement);
+
+                    is_created
+                }
+                // Add an nft requirement if the nft output is transitioning and then required in the inputs.
+                Output::Nft(nft_output) => {
+                    let is_created = nft_output.nft_id().is_null();
+
+                    if !is_created {
+                        let requirement = Requirement::Nft(*nft_output.nft_id());
+                        log::debug!("Adding {requirement:?} from output");
+                        self.requirements.push(requirement);
+                    }
 
                     is_created
                 }

@@ -19,17 +19,18 @@ class OutputType(IntEnum):
     Attributes:
         Basic (0): A basic output.
         Account (1): An account output.
-        Foundry (2): A foundry output.
-        Nft (3): An NFT output.
-        Delegation (4): A delegation output.
-        Anchor (5): An anchor output.
+        Anchor (2): An anchor output.
+        Foundry (3): A foundry output.
+        Nft (4): An NFT output.
+        Delegation (5): A delegation output.
+
     """
     Basic = 0
     Account = 1
-    Foundry = 2
-    Nft = 3
-    Delegation = 4
-    Anchor = 5
+    Anchor = 2
+    Foundry = 3
+    Nft = 4
+    Delegation = 5
 
 
 @json
@@ -304,8 +305,12 @@ class DelegationOutput:
         OutputType.Delegation), init=False)
 
 
-Output: TypeAlias = Union[BasicOutput, AccountOutput,
-                          FoundryOutput, NftOutput, DelegationOutput, AnchorOutput]
+Output: TypeAlias = Union[BasicOutput,
+                          AccountOutput,
+                          AnchorOutput,
+                          FoundryOutput,
+                          NftOutput,
+                          DelegationOutput]
 
 
 def deserialize_output(d: Dict[str, Any]) -> Output:
@@ -320,14 +325,14 @@ def deserialize_output(d: Dict[str, Any]) -> Output:
         return BasicOutput.from_dict(d)
     if output_type == OutputType.Account:
         return AccountOutput.from_dict(d)
+    if output_type == OutputType.Anchor:
+        return AnchorOutput.from_dict(d)
     if output_type == OutputType.Foundry:
         return FoundryOutput.from_dict(d)
     if output_type == OutputType.Nft:
         return NftOutput.from_dict(d)
     if output_type == OutputType.Delegation:
         return DelegationOutput.from_dict(d)
-    if output_type == OutputType.Anchor:
-        return AnchorOutput.from_dict(d)
     raise Exception(f'invalid output type: {output_type}')
 
 
