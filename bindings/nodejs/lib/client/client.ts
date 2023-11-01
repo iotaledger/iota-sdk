@@ -4,21 +4,21 @@
 import { ClientMethodHandler } from './client-method-handler';
 import {
     IClientOptions,
-    QueryParameter,
     PreparedTransactionData,
     INetworkInfo,
     INode,
     IAuth,
-    BasicOutputBuilderParams,
     AccountOutputBuilderParams,
+    BasicOutputBuilderParams,
     FoundryOutputBuilderParams,
     NftOutputBuilderParams,
-    FoundryQueryParameter,
-    NftQueryParameter,
-    AccountQueryParameter,
-    AnchorQueryParameter,
-    GenericQueryParameter,
-    DelegationQueryParameter,
+    AccountOutputQueryParameters,
+    AnchorOutputQueryParameters,
+    BasicOutputQueryParameters,
+    DelegationOutputQueryParameters,
+    FoundryOutputQueryParameters,
+    NftOutputQueryParameters,
+    OutputQueryParameters,
 } from '../types/client';
 import type { INodeInfoWrapper } from '../types/client/nodeInfo';
 import {
@@ -95,38 +95,6 @@ export class Client {
     async getNetworkInfo(): Promise<INetworkInfo> {
         const response = await this.methodHandler.callMethod({
             name: 'getNetworkInfo',
-        });
-
-        return JSON.parse(response).payload;
-    }
-
-    /**
-     * Fetch alias/basic/NFT/foundry output IDs based on the given query parameters.
-     */
-    async outputIds(
-        queryParameters: GenericQueryParameter[],
-    ): Promise<IOutputsResponse> {
-        const response = await this.methodHandler.callMethod({
-            name: 'outputIds',
-            data: {
-                queryParameters,
-            },
-        });
-
-        return JSON.parse(response).payload;
-    }
-
-    /**
-     * Fetch basic output IDs based on the given query parameters.
-     */
-    async basicOutputIds(
-        queryParameters: QueryParameter[],
-    ): Promise<IOutputsResponse> {
-        const response = await this.methodHandler.callMethod({
-            name: 'basicOutputIds',
-            data: {
-                queryParameters,
-            },
         });
 
         return JSON.parse(response).payload;
@@ -572,186 +540,6 @@ export class Client {
     }
 
     /**
-     * Get the corresponding output IDs given a list of account query parameters.
-     *
-     * @param queryParameters An array of `AccountQueryParameter`s.
-     * @returns A paginated query response of corresponding output IDs.
-     */
-    async accountOutputIds(
-        queryParameters: AccountQueryParameter[],
-    ): Promise<IOutputsResponse> {
-        const response = await this.methodHandler.callMethod({
-            name: 'accountOutputIds',
-            data: {
-                queryParameters,
-            },
-        });
-
-        return JSON.parse(response).payload;
-    }
-
-    /**
-     * Get the corresponding output ID from an account ID.
-     *
-     * @param accountId An account ID.
-     * @returns The corresponding output ID.
-     */
-    async accountOutputId(accountId: AccountId): Promise<OutputId> {
-        const response = await this.methodHandler.callMethod({
-            name: 'accountOutputId',
-            data: {
-                accountId,
-            },
-        });
-
-        return JSON.parse(response).payload;
-    }
-
-    /**
-     * Get the corresponding output IDs given a list of anchor query parameters.
-     *
-     * @param queryParameters An array of `AnchorQueryParameter`s.
-     * @returns A paginated query response of corresponding output IDs.
-     */
-    async anchorOutputIds(
-        queryParameters: AnchorQueryParameter[],
-    ): Promise<IOutputsResponse> {
-        const response = await this.methodHandler.callMethod({
-            name: 'anchorOutputIds',
-            data: {
-                queryParameters,
-            },
-        });
-
-        return JSON.parse(response).payload;
-    }
-
-    /**
-     * Get the corresponding output ID from an anchor ID.
-     *
-     * @param anchorId An anchor ID.
-     * @returns The corresponding output ID.
-     */
-    async anchorOutputId(anchorId: AnchorId): Promise<OutputId> {
-        const response = await this.methodHandler.callMethod({
-            name: 'anchorOutputId',
-            data: {
-                anchorId,
-            },
-        });
-
-        return JSON.parse(response).payload;
-    }
-
-    /**
-     * Get the corresponding output IDs given a list of delegation query parameters.
-     *
-     * @param queryParameters An array of `DelegationQueryParameter`s.
-     * @returns A paginated query response of corresponding output IDs.
-     */
-    async delegationOutputIds(
-        queryParameters: DelegationQueryParameter[],
-    ): Promise<IOutputsResponse> {
-        const response = await this.methodHandler.callMethod({
-            name: 'delegationOutputIds',
-            data: {
-                queryParameters,
-            },
-        });
-
-        return JSON.parse(response).payload;
-    }
-
-    /**
-     * Get the corresponding output ID from an delegation ID.
-     *
-     * @param delegationId A delegation ID.
-     * @returns The corresponding output ID.
-     */
-    async delegationOutputId(delegationId: DelegationId): Promise<OutputId> {
-        const response = await this.methodHandler.callMethod({
-            name: 'delegationOutputId',
-            data: {
-                delegationId,
-            },
-        });
-
-        return JSON.parse(response).payload;
-    }
-
-    /**
-     * Get the corresponding output IDs given a list of Foundry query parameters.
-     *
-     * @param queryParameters An array of `FoundryQueryParameter`s.
-     * @returns A paginated query response of corresponding output IDs.
-     */
-    async foundryOutputIds(
-        queryParameters: FoundryQueryParameter[],
-    ): Promise<IOutputsResponse> {
-        const response = await this.methodHandler.callMethod({
-            name: 'foundryOutputIds',
-            data: {
-                queryParameters,
-            },
-        });
-
-        return JSON.parse(response).payload;
-    }
-
-    /**
-     * Get the corresponding output ID from a Foundry ID.
-     *
-     * @param foundryId A Foundry ID.
-     * @returns The corresponding output ID.
-     */
-    async foundryOutputId(foundryId: FoundryId): Promise<OutputId> {
-        const response = await this.methodHandler.callMethod({
-            name: 'foundryOutputId',
-            data: {
-                foundryId,
-            },
-        });
-
-        return JSON.parse(response).payload;
-    }
-
-    /**
-     * Get the corresponding output IDs given a list of NFT query parameters.
-     *
-     * @param queryParameters An array of `NftQueryParameter`s.
-     * @returns A paginated query response of corresponding output IDs.
-     */
-    async nftOutputIds(
-        queryParameters: NftQueryParameter[],
-    ): Promise<IOutputsResponse> {
-        const response = await this.methodHandler.callMethod({
-            name: 'nftOutputIds',
-            data: {
-                queryParameters,
-            },
-        });
-
-        return JSON.parse(response).payload;
-    }
-
-    /**
-     * Get the corresponding output ID from an NFT ID.
-     *
-     * @param nftId An NFT ID.
-     * @returns The corresponding output ID.
-     */
-    async nftOutputId(nftId: NftId): Promise<OutputId> {
-        const response = await this.methodHandler.callMethod({
-            name: 'nftOutputId',
-            data: {
-                nftId,
-            },
-        });
-
-        return JSON.parse(response).payload;
-    }
-
-    /**
      * Get outputs from provided output IDs (requests are sent
      * in parallel and errors are ignored, can be useful for spent outputs)
      *
@@ -965,6 +753,220 @@ export class Client {
                 endpoint,
                 queryParams: queryParams ?? [],
                 request,
+            },
+        });
+
+        return JSON.parse(response).payload;
+    }
+
+    // inx-indexer routes
+
+    /**
+     * Fetch account/anchor/basic/delegation/NFT/foundry output IDs based on the given query parameters.
+     */
+    async outputIds(
+        queryParameters: OutputQueryParameters,
+    ): Promise<IOutputsResponse> {
+        const response = await this.methodHandler.callMethod({
+            name: 'outputIds',
+            data: {
+                queryParameters,
+            },
+        });
+
+        return JSON.parse(response).payload;
+    }
+
+    /**
+     * Fetch basic output IDs based on the given query parameters.
+     */
+    async basicOutputIds(
+        queryParameters: BasicOutputQueryParameters,
+    ): Promise<IOutputsResponse> {
+        const response = await this.methodHandler.callMethod({
+            name: 'basicOutputIds',
+            data: {
+                queryParameters,
+            },
+        });
+
+        return JSON.parse(response).payload;
+    }
+
+    /**
+     * Get the corresponding output IDs given a list of account query parameters.
+     *
+     * @param outputQueryParameters `AccountOutputQueryParameters`.
+     * @returns A paginated query response of corresponding output IDs.
+     */
+    async accountOutputIds(
+        queryParameters: AccountOutputQueryParameters,
+    ): Promise<IOutputsResponse> {
+        const response = await this.methodHandler.callMethod({
+            name: 'accountOutputIds',
+            data: {
+                queryParameters,
+            },
+        });
+
+        return JSON.parse(response).payload;
+    }
+
+    /**
+     * Get the corresponding output ID from an account ID.
+     *
+     * @param accountId An account ID.
+     * @returns The corresponding output ID.
+     */
+    async accountOutputId(accountId: AccountId): Promise<OutputId> {
+        const response = await this.methodHandler.callMethod({
+            name: 'accountOutputId',
+            data: {
+                accountId,
+            },
+        });
+
+        return JSON.parse(response).payload;
+    }
+
+    /**
+     * Get the corresponding output IDs given a list of anchor query parameters.
+     *
+     * @param outputQueryParameters `AnchorOutputQueryParameters`.
+     * @returns A paginated query response of corresponding output IDs.
+     */
+    async anchorOutputIds(
+        queryParameters: AnchorOutputQueryParameters,
+    ): Promise<IOutputsResponse> {
+        const response = await this.methodHandler.callMethod({
+            name: 'anchorOutputIds',
+            data: {
+                queryParameters,
+            },
+        });
+
+        return JSON.parse(response).payload;
+    }
+
+    /**
+     * Get the corresponding output ID from an anchor ID.
+     *
+     * @param anchorId An anchor ID.
+     * @returns The corresponding output ID.
+     */
+    async anchorOutputId(anchorId: AnchorId): Promise<OutputId> {
+        const response = await this.methodHandler.callMethod({
+            name: 'anchorOutputId',
+            data: {
+                anchorId,
+            },
+        });
+
+        return JSON.parse(response).payload;
+    }
+
+    /**
+     * Get the corresponding output IDs given a list of delegation query parameters.
+     *
+     * @param outputQueryParameters `DelegationOutputQueryParameters`.
+     * @returns A paginated query response of corresponding output IDs.
+     */
+    async delegationOutputIds(
+        queryParameters: DelegationOutputQueryParameters,
+    ): Promise<IOutputsResponse> {
+        const response = await this.methodHandler.callMethod({
+            name: 'delegationOutputIds',
+            data: {
+                queryParameters,
+            },
+        });
+
+        return JSON.parse(response).payload;
+    }
+
+    /**
+     * Get the corresponding output ID from an delegation ID.
+     *
+     * @param delegationId A delegation ID.
+     * @returns The corresponding output ID.
+     */
+    async delegationOutputId(delegationId: DelegationId): Promise<OutputId> {
+        const response = await this.methodHandler.callMethod({
+            name: 'delegationOutputId',
+            data: {
+                delegationId,
+            },
+        });
+
+        return JSON.parse(response).payload;
+    }
+
+    /**
+     * Get the corresponding output IDs given a list of Foundry query parameters.
+     *
+     * @param outputQueryParameters `FoundryOutputQueryParameters`.
+     * @returns A paginated query response of corresponding output IDs.
+     */
+    async foundryOutputIds(
+        queryParameters: FoundryOutputQueryParameters,
+    ): Promise<IOutputsResponse> {
+        const response = await this.methodHandler.callMethod({
+            name: 'foundryOutputIds',
+            data: {
+                queryParameters,
+            },
+        });
+
+        return JSON.parse(response).payload;
+    }
+
+    /**
+     * Get the corresponding output ID from a Foundry ID.
+     *
+     * @param foundryId A Foundry ID.
+     * @returns The corresponding output ID.
+     */
+    async foundryOutputId(foundryId: FoundryId): Promise<OutputId> {
+        const response = await this.methodHandler.callMethod({
+            name: 'foundryOutputId',
+            data: {
+                foundryId,
+            },
+        });
+
+        return JSON.parse(response).payload;
+    }
+
+    /**
+     * Get the corresponding output IDs given a list of NFT query parameters.
+     *
+     * @param outputQueryParameters `NftOutputQueryParameters`.
+     * @returns A paginated query response of corresponding output IDs.
+     */
+    async nftOutputIds(
+        queryParameters: NftOutputQueryParameters,
+    ): Promise<IOutputsResponse> {
+        const response = await this.methodHandler.callMethod({
+            name: 'nftOutputIds',
+            data: {
+                queryParameters,
+            },
+        });
+
+        return JSON.parse(response).payload;
+    }
+
+    /**
+     * Get the corresponding output ID from an NFT ID.
+     *
+     * @param nftId An NFT ID.
+     * @returns The corresponding output ID.
+     */
+    async nftOutputId(nftId: NftId): Promise<OutputId> {
+        const response = await this.methodHandler.callMethod({
+            name: 'nftOutputId',
+            data: {
+                nftId,
             },
         });
 
