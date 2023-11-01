@@ -7,7 +7,7 @@ from typing import Optional, List
 from iota_sdk.types.address import Address
 from iota_sdk.types.output import Output
 from iota_sdk.types.output_metadata import OutputMetadata
-from bindings.python.iota_sdk.types.transaction import Transaction
+from iota_sdk.types.transaction import Transaction
 from iota_sdk.types.payload import SignedTransactionPayload
 from iota_sdk.types.signature import Bip44
 from iota_sdk.types.common import json

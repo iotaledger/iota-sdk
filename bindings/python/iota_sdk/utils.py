@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, List
 from iota_sdk.types.signature import Ed25519Signature
 from iota_sdk.types.address import Address, deserialize_address
 from iota_sdk.types.common import HexStr
-from bindings.python.iota_sdk.types.transaction import Transaction
+from iota_sdk.types.transaction import Transaction
 from iota_sdk.types.node_info import ProtocolParameters
 from iota_sdk.types.output_id import OutputId
 from iota_sdk.types.output import Output

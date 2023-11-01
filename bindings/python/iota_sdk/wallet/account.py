@@ -20,7 +20,7 @@ from iota_sdk.types.output import BasicOutput, NftOutput, Output, deserialize_ou
 from iota_sdk.types.output_params import OutputParams
 from iota_sdk.types.transaction_data import PreparedTransactionData, SignedTransactionData
 from iota_sdk.types.send_params import CreateAccountOutputParams, CreateNativeTokenParams, MintNftParams, SendNativeTokensParams, SendNftParams, SendParams
-from bindings.python.iota_sdk.types.transaction_with_metadata import TransactionWithMetadata
+from iota_sdk.types.transaction_with_metadata import TransactionWithMetadata
 from iota_sdk.types.transaction_options import TransactionOptions
 from iota_sdk.types.consolidation_params import ConsolidationParams
 

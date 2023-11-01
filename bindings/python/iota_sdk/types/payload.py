@@ -6,7 +6,7 @@ from enum import IntEnum
 from typing import Any, Dict, List, TypeAlias, Union
 from dataclasses import dataclass, field
 from iota_sdk.types.common import HexStr, json
-from bindings.python.iota_sdk.types.transaction import Transaction
+from iota_sdk.types.transaction import Transaction
 from iota_sdk.types.unlock import SignatureUnlock, ReferenceUnlock
 
 
