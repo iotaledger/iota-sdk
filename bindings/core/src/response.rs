@@ -131,15 +131,19 @@ pub enum Response {
     Outputs(Vec<OutputWithMetadataResponse>),
     /// Response for:
     /// - [`AccountOutputId`](crate::method::ClientMethod::AccountOutputId)
+    /// - [`AnchorOutputId`](crate::method::ClientMethod::AnchorOutputId)
+    /// - [`DelegationOutputId`](crate::method::ClientMethod::DelegationOutputId)
     /// - [`FoundryOutputId`](crate::method::ClientMethod::FoundryOutputId)
     /// - [`NftOutputId`](crate::method::ClientMethod::NftOutputId)
     OutputId(OutputId),
     /// Response for:
-    /// - [`AccountOutputIds`](crate::method::ClientMethod::AccountOutputIds)
+    /// - [`OutputIds`](crate::method::ClientMethod::OutputIds)
     /// - [`BasicOutputIds`](crate::method::ClientMethod::BasicOutputIds)
+    /// - [`AccountOutputIds`](crate::method::ClientMethod::AccountOutputIds)
+    /// - [`AnchorOutputIds`](crate::method::ClientMethod::AnchorOutputIds)
+    /// - [`DelegationOutputIds`](crate::method::ClientMethod::DelegationOutputIds)
     /// - [`FoundryOutputIds`](crate::method::ClientMethod::FoundryOutputIds)
     /// - [`NftOutputIds`](crate::method::ClientMethod::NftOutputIds)
-    /// - [`OutputIds`](crate::method::ClientMethod::OutputIds)
     OutputIdsResponse(OutputIdsResponse),
     /// Response for:
     /// - [`FindBlocks`](crate::method::ClientMethod::FindBlocks)
