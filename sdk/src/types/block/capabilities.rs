@@ -6,10 +6,12 @@ use core::marker::PhantomData;
 
 use derive_more::Deref;
 use packable::{
-    error::UnpackErrorExt,
+    error::{UnpackError, UnpackErrorExt},
     prefix::{BoxedSlicePrefix, UnpackPrefixError},
     Packable,
 };
+
+use crate::types::block::Error;
 
 /// A list of bitflags that represent capabilities.
 #[derive(Debug, Deref)]
@@ -21,13 +23,17 @@ pub struct Capabilities<Flag> {
 }
 
 impl<Flag> Capabilities<Flag> {
-    pub(crate) fn from_bytes(bytes: BoxedSlicePrefix<u8, u8>) -> Self {
-        let mut res = Self {
+    /// Try to create capabilities from serialized bytes. Bytes with trailing zeroes are invalid.
+    pub(crate) fn from_bytes(bytes: BoxedSlicePrefix<u8, u8>) -> Result<Self, Error> {
+        if let Some(idx) = bytes.iter().rposition(|c| 0.ne(c)) {
+            if idx + 1 < bytes.len() {
+                return Err(Error::TrailingCapabilityBytes);
+            }
+        }
+        Ok(Self {
             bytes,
             _flag: PhantomData,
-        };
-        res.trim();
-        res
+        })
     }
 
     /// Returns a [`Capabilities`] with every possible flag disabled.
@@ -196,25 +202,22 @@ impl<Flag: 'static> Packable for Capabilities<Flag> {
     type UnpackVisitor = ();
 
     fn pack<P: packable::packer::Packer>(&self, packer: &mut P) -> Result<(), P::Error> {
-        if !self.is_none() {
-            self.bytes.pack(packer)?;
-        } else {
-            0_u8.pack(packer)?;
-        }
+        self.bytes.pack(packer)?;
         Ok(())
     }
 
     fn unpack<U: packable::unpacker::Unpacker, const VERIFY: bool>(
         unpacker: &mut U,
         visitor: &Self::UnpackVisitor,
-    ) -> Result<Self, packable::error::UnpackError<Self::UnpackError, U::Error>> {
-        Ok(Self::from_bytes(
+    ) -> Result<Self, UnpackError<Self::UnpackError, U::Error>> {
+        Self::from_bytes(
             BoxedSlicePrefix::unpack::<_, VERIFY>(unpacker, visitor)
                 .map_packable_err(|e| match e {
                     UnpackPrefixError::Item(i) | UnpackPrefixError::Prefix(i) => i,
                 })
                 .coerce()?,
-        ))
+        )
+        .map_err(UnpackError::Packable)
     }
 }
 
@@ -251,7 +254,10 @@ mod serde {
         where
             D: ::serde::Deserializer<'de>,
         {
-            crate::utils::serde::boxed_slice_prefix_hex_bytes::deserialize(deserializer).map(Self::from_bytes)
+            Self::from_bytes(crate::utils::serde::boxed_slice_prefix_hex_bytes::deserialize(
+                deserializer,
+            )?)
+            .map_err(::serde::de::Error::custom)
         }
     }
 }
