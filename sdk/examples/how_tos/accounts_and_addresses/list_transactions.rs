@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! In this example we will list all transaction of an account.
+//! In this example we will list all transaction of a wallet.
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh
@@ -9,7 +9,7 @@
 //! ```
 
 use iota_sdk::{
-    wallet::{account::SyncOptions, Result},
+    wallet::{Result, SyncOptions},
     Wallet,
 };
 
@@ -22,10 +22,9 @@ async fn main() -> Result<()> {
         .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
         .finish()
         .await?;
-    let account = wallet.get_account("Alice").await?;
 
-    // Sync account
-    account
+    // Sync wallet
+    wallet
         .sync(Some(SyncOptions {
             sync_incoming_transactions: true,
             ..Default::default()
@@ -34,13 +33,13 @@ async fn main() -> Result<()> {
 
     // Print transaction ids
     println!("Sent transactions:");
-    for transaction in account.transactions().await {
+    for transaction in wallet.transactions().await {
         println!("{}", transaction.transaction_id);
     }
 
     // Print received transaction ids
     println!("Received transactions:");
-    for transaction in account.incoming_transactions().await {
+    for transaction in wallet.incoming_transactions().await {
         println!("{}", transaction.transaction_id);
     }
 

@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! In this example we will list all outputs of an account.
+//! In this example we will list all outputs of a wallet.
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh
@@ -19,20 +19,19 @@ async fn main() -> Result<()> {
         .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
         .finish()
         .await?;
-    let account = wallet.get_account("Alice").await?;
 
-    // Sync account
-    account.sync(None).await?;
+    // Sync wallet
+    wallet.sync(None).await?;
 
     // Print output ids
     println!("Output ids:");
-    for output in account.outputs(None).await? {
+    for output in wallet.outputs(None).await? {
         println!("{}", output.output_id);
     }
 
     // Print unspent output ids
     println!("Unspent output ids:");
-    for output in account.unspent_outputs(None).await? {
+    for output in wallet.unspent_outputs(None).await? {
         println!("{}", output.output_id);
     }
 

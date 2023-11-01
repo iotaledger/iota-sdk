@@ -13,17 +13,8 @@ use crate::{
             payload::signed_transaction::{dto::SignedTransactionPayloadDto, TransactionId},
         },
     },
-    wallet::account::types::{InclusionState, OutputDataDto},
+    wallet::types::{InclusionState, OutputDataDto},
 };
-
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct Event {
-    /// Associated account index.
-    pub account_index: u32,
-    /// The event
-    pub event: WalletEvent,
-}
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 #[non_exhaustive]
