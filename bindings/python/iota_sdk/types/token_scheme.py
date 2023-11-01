@@ -19,13 +19,13 @@ class SimpleTokenScheme:
         type: The type code of the token scheme.
     """
     minted_tokens: int = field(metadata=config(
-        encoder=str
+        encoder=hex
     ))
     melted_tokens: int = field(metadata=config(
-        encoder=str
+        encoder=hex
     ))
     maximum_supply: int = field(metadata=config(
-        encoder=str
+        encoder=hex
     ))
     type: int = field(default_factory=lambda: 0, init=False)
 
