@@ -32,7 +32,8 @@ account_address = Utils.account_id_to_bech32(
     account_id, wallet.get_client().get_bech32_hrp())
 
 # Find first output unlockable by the account address
-query_parameters = NodeIndexerAPI.QueryParameters(account_address)
+query_parameters = NodeIndexerAPI.BasicOutputQueryParameters(
+    address=account_address)
 inputs = [wallet.get_client().basic_output_ids(query_parameters).items[0]]
 
 params = [SendParams(
