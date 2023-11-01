@@ -207,3 +207,28 @@ pub trait CapabilityFlag {
     /// Returns an iterator over all flags.
     fn all() -> Self::Iterator;
 }
+
+#[cfg(feature = "serde")]
+mod serde {
+    use ::serde::{Deserialize, Serialize};
+
+    use super::*;
+
+    impl<Flag> Serialize for Capabilities<Flag> {
+        fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+        where
+            S: ::serde::Serializer,
+        {
+            crate::utils::serde::boxed_slice_prefix_hex_bytes::serialize(&self.bytes, serializer)
+        }
+    }
+
+    impl<'de, Flag> Deserialize<'de> for Capabilities<Flag> {
+        fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+        where
+            D: ::serde::Deserializer<'de>,
+        {
+            crate::utils::serde::boxed_slice_prefix_hex_bytes::deserialize(deserializer).map(Self::from_bytes)
+        }
+    }
+}
