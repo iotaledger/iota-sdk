@@ -31,5 +31,5 @@ class BasicBlock:
     ))
     payload: Optional[Payload] = None
     type: int = field(
-        default_factory=lambda: BlockType.Basic,
+        default_factory=lambda: int(BlockType.Basic),
         init=False)

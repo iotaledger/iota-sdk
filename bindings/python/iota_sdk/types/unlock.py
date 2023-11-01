@@ -29,15 +29,7 @@ class UnlockType(IntEnum):
 
 @json
 @dataclass
-class Unlock:
-    """Unlock type.
-    """
-    type: int
-
-
-@json
-@dataclass
-class SignatureUnlock(Unlock):
+class SignatureUnlock:
     """An unlock holding a signature unlocking one or more inputs.
     """
     signature: Ed25519Signature
@@ -49,7 +41,7 @@ class SignatureUnlock(Unlock):
 
 @json
 @dataclass
-class ReferenceUnlock(Unlock):
+class ReferenceUnlock:
     """An unlock which must reference a previous unlock which unlocks also the input at the same index as this Reference Unlock.
     """
     reference: int
