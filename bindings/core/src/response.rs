@@ -55,7 +55,7 @@ use crate::{error::Error, OmittedDebug};
 #[non_exhaustive]
 pub enum Response {
     /// Response for:
-    /// - [`GenerateEd25519Address`](crate::method::SecretManagerMethod::GenerateEd25519Addresses)
+    /// - [`GenerateEd25519Addresses`](crate::method::SecretManagerMethod::GenerateEd25519Addresses)
     GeneratedEd25519Addresses(Vec<Bech32Address>),
     /// Response for:
     /// - [`GenerateEvmAddresses`](crate::method::SecretManagerMethod::GenerateEvmAddresses)
