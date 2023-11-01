@@ -200,7 +200,7 @@ where
         addresses_with_unspent_outputs: Vec<AddressWithUnspentOutputs>,
         options: &SyncOptions,
     ) -> crate::wallet::Result<(Vec<AddressWithUnspentOutputs>, Vec<OutputId>)> {
-        log::debug!("[SYNC] start get_unspent_and_spent_output_ids_for_wallet_address");
+        log::debug!("[SYNC] start get_output_ids_for_addresses");
         let address_output_ids_start_time = Instant::now();
 
         let mut addresses_with_outputs = Vec::new();
