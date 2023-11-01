@@ -3,6 +3,7 @@
 
 import { SlotIndex } from '../block/slot';
 import { Bech32Address, TokenId } from '../block';
+import { HexEncodedString } from '../utils/hex-encoding';
 
 /**
  * Common query parameters for output requests.
@@ -11,9 +12,9 @@ export interface CommonOutputQueryParameters {
     /// The maximum amount of items returned in one call. If there are more items, a cursor to the next page is
     /// returned too. The parameter is ignored when pageSize is defined via the cursor parameter.
     pageSize?: number;
-    /// Starts the search from the cursor (createdSlotIndex+outputId.pageSize). If an empty String is provided, only
+    /// Starts the search from the cursor (createdSlotIndex+outputId.pageSize). If an empty string is provided, only
     /// the first page is returned.
-    cursor?: String;
+    cursor?: string;
     /// Returns outputs that were created before a certain slot index.
     createdBefore?: SlotIndex;
     /// Returns outputs that were created after a certain slot index.
@@ -68,7 +69,7 @@ export interface BasicOutputQueryParameters
     /// Filters outputs based on the presence of validated Sender (bech32 encoded).
     sender?: Bech32Address;
     /// Filters outputs based on matching Tag Block.
-    tag?: String;
+    tag?: HexEncodedString;
 }
 
 /**
@@ -158,5 +159,5 @@ export interface NftOutputQueryParameters extends CommonOutputQueryParameters {
     /// Filters outputs based on the presence of validated Sender (bech32 encoded).
     sender?: Bech32Address;
     /// Filters outputs based on matching Tag Block.
-    tag?: String;
+    tag?: HexEncodedString;
 }
