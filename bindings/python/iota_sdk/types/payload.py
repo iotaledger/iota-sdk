@@ -6,7 +6,7 @@ from enum import IntEnum
 from typing import Any, Dict, List, TypeAlias, Union
 from dataclasses import dataclass, field
 from iota_sdk.types.common import HexStr, json
-from iota_sdk.types.essence import TransactionEssence
+from bindings.python.iota_sdk.types.transaction import Transaction
 from iota_sdk.types.unlock import SignatureUnlock, ReferenceUnlock
 
 
@@ -15,11 +15,11 @@ class PayloadType(IntEnum):
 
     Attributes:
         TaggedData (0): A tagged data payload.
-        Transaction (1): A transaction payload.
+        SignedTransaction (1): A signed transaction payload.
         CandidacyAnnouncement (2): A candidacy announcement payload.
     """
     TaggedData = 0
-    Transaction = 1
+    SignedTransaction = 1
     CandidacyAnnouncement = 2
 
 
@@ -42,18 +42,18 @@ class TaggedDataPayload:
 
 @json
 @dataclass
-class TransactionPayload:
-    """A transaction payload.
+class SignedTransactionPayload:
+    """A signed transaction payload.
 
     Attributes:
-        essence: The transaction essence.
+        transaction: The transaction.
         unlocks: The unlocks of the transaction.
     """
-    essence: TransactionEssence
+    transaction: Transaction
     unlocks: List[Union[SignatureUnlock, ReferenceUnlock]]
     type: int = field(
         default_factory=lambda: int(
-            PayloadType.Transaction),
+            PayloadType.SignedTransaction),
         init=False)
 
 
@@ -69,7 +69,7 @@ class CandidacyAnnouncementPayload:
 
 
 Payload: TypeAlias = Union[TaggedDataPayload,
-                           TransactionPayload, CandidacyAnnouncementPayload]
+                           SignedTransactionPayload, CandidacyAnnouncementPayload]
 
 
 def deserialize_payload(d: Dict[str, Any]) -> Payload:
@@ -82,8 +82,8 @@ def deserialize_payload(d: Dict[str, Any]) -> Payload:
     payload_type = d['type']
     if payload_type == PayloadType.TaggedData:
         return TaggedDataPayload.from_dict(d)
-    if payload_type == PayloadType.Transaction:
-        return TransactionPayload.from_dict(d)
+    if payload_type == PayloadType.SignedTransaction:
+        return SignedTransactionPayload.from_dict(d)
     if payload_type == PayloadType.CandidacyAnnouncement:
         return CandidacyAnnouncementPayload.from_dict(d)
     raise Exception(f'invalid payload type: {payload_type}')

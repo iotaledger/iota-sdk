@@ -28,21 +28,21 @@ params = MintNftParams(
 )
 
 
-transaction = account.mint_nfts([params])
+tx = account.mint_nfts([params])
 
 # Wait for transaction to get included
 block_id = account.reissue_transaction_until_included(
-    transaction.transaction_id)
+    tx.transaction_id)
 
 print(
     f'Block sent: {os.environ["EXPLORER_URL"]}/block/{block_id}')
 
-essence = transaction.payload["essence"]
+transaction = tx.payload.transaction
 
-for outputIndex, output in enumerate(essence["outputs"]):
+for outputIndex, output in enumerate(transaction["outputs"]):
     # New minted NFT id is empty in the output
     if output["type"] == 6 and output["nftId"] == '0x0000000000000000000000000000000000000000000000000000000000000000':
         outputId = Utils.compute_output_id(
-            transaction.transaction_id, outputIndex)
+            tx.transaction_id, outputIndex)
         nftId = Utils.compute_nft_id(outputId)
         print(f'New minted NFT id: {nftId}')

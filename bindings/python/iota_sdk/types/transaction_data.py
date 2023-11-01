@@ -7,8 +7,8 @@ from typing import Optional, List
 from iota_sdk.types.address import Address
 from iota_sdk.types.output import Output
 from iota_sdk.types.output_metadata import OutputMetadata
-from iota_sdk.types.essence import TransactionEssence
-from iota_sdk.types.payload import TransactionPayload
+from bindings.python.iota_sdk.types.transaction import Transaction
+from iota_sdk.types.payload import SignedTransactionPayload
 from iota_sdk.types.signature import Bip44
 from iota_sdk.types.common import json
 
@@ -49,11 +49,11 @@ class PreparedTransactionData:
     """Helper class for offline signing.
 
     Attributes:
-        essence: The transaction essence.
+        transaction: The transaction.
         inputs_data: Data about the inputs which is required for signing.
         remainder: Data about a remainder.
     """
-    essence: TransactionEssence
+    transaction: Transaction
     inputs_data: List[InputSigningData]
     remainder: Optional[RemainderData] = None
 
@@ -64,8 +64,8 @@ class SignedTransactionData:
     """Helper class for offline signing.
 
     Attributes:
-        transaction_payload: The transaction payload.
+        payload: The transaction payload.
         inputs_data: Data about the inputs consumed in the transaction.
     """
-    transaction_payload: TransactionPayload
+    payload: SignedTransactionPayload
     inputs_data: List[InputSigningData]
