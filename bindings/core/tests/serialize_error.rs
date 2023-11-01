@@ -17,12 +17,14 @@ fn custom_error_serialization() {
         serde_json::to_string(&error).unwrap(),
         "{\"type\":\"client\",\"error\":\"no healthy node available\"}"
     );
+
     // testing a tuple-like error
     let error = Error::Wallet(WalletError::InvalidMnemonic("nilly willy".to_string()));
     assert_eq!(
         serde_json::to_string(&error).unwrap(),
         "{\"type\":\"wallet\",\"error\":\"invalid mnemonic: nilly willy\"}"
     );
+
     // testing a struct-like error
     let error = Error::Wallet(WalletError::BipPathMismatch {
         old_bip_path: None,
