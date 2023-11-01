@@ -61,8 +61,7 @@ where
                 data: event_data,
                 nodes: vec![options.node.clone()],
             };
-            self.inner
-                .storage_manager
+            self.storage_manager
                 .read()
                 .await
                 .insert_participation_event(event_with_node.clone())
