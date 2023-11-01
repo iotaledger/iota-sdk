@@ -71,20 +71,13 @@ where
             }
         }
 
-        // TODO: more readable than `map_or`?
-        #[allow(clippy::option_if_let_else)]
-        let remainder_address = match &options {
-            Some(options) => {
-                match &options.remainder_value_strategy {
-                    RemainderValueStrategy::ReuseAddress => {
-                        // select_inputs will select an address from the inputs if it's none
-                        None
-                    }
-                    RemainderValueStrategy::CustomAddress(address) => Some(address.clone()),
-                }
-            }
-            None => None,
-        };
+        let remainder_address = options.as_ref().map_or_else(
+            || None,
+            |options| match &options.remainder_value_strategy {
+                RemainderValueStrategy::ReuseAddress => None,
+                RemainderValueStrategy::CustomAddress(address) => Some(address.clone()),
+            },
+        );
 
         let selected_transaction_data = self
             .select_inputs(
