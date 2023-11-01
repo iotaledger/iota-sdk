@@ -976,7 +976,7 @@ async fn print_wallet_address(wallet: &Wallet) -> Result<(), Error> {
     Ok(())
 }
 
-// loop on the protocol prompt
+// loop on the wallet prompt
 pub async fn prompt(wallet: &Wallet) -> Result<(), Error> {
     let config = Config::builder()
         .auto_add_history(true)
