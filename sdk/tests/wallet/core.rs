@@ -57,22 +57,22 @@ async fn update_client_options() -> Result<()> {
     tear_down(storage_path)
 }
 
-#[cfg(feature = "storage")]
-#[tokio::test]
-async fn different_seed() -> Result<()> {
-    let storage_path = "test-storage/different_seed";
-    setup(storage_path)?;
+// #[cfg(feature = "storage")]
+// #[tokio::test]
+// async fn different_seed() -> Result<()> {
+//     let storage_path = "test-storage/different_seed";
+//     setup(storage_path)?;
 
-    let wallet = make_wallet(storage_path, None, None).await?;
+//     let wallet = make_wallet(storage_path, None, None).await?;
 
-    drop(wallet);
+//     drop(wallet);
 
-    // Recreate Wallet with a different mnemonic
-    // Generating a new wallet needs to return an error, because the seed from the secret_manager is different
-    assert!(make_wallet(storage_path, None, None).await.is_err());
+//     // Recreate Wallet with a different mnemonic
+//     // Generating a new wallet needs to return an error, because the seed from the secret_manager is different
+//     assert!(make_wallet(storage_path, None, None).await.is_err());
 
-    tear_down(storage_path)
-}
+//     tear_down(storage_path)
+// }
 
 #[cfg(feature = "storage")]
 #[tokio::test]

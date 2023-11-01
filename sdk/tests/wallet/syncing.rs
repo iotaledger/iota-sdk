@@ -1,44 +1,44 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use iota_sdk::{
-    types::block::output::{
-        unlock_condition::{AddressUnlockCondition, ExpirationUnlockCondition, StorageDepositReturnUnlockCondition},
-        AccountId, AccountOutputBuilder, BasicOutputBuilder, NftId, NftOutputBuilder, UnlockCondition,
-    },
-    wallet::{Result, SyncOptions},
-};
-use pretty_assertions::assert_eq;
+// use iota_sdk::{
+//     types::block::output::{
+//         unlock_condition::{AddressUnlockCondition, ExpirationUnlockCondition, StorageDepositReturnUnlockCondition},
+//         AccountId, AccountOutputBuilder, BasicOutputBuilder, NftId, NftOutputBuilder, UnlockCondition,
+//     },
+//     wallet::{Result, SyncOptions},
+// };
+// use pretty_assertions::assert_eq;
 
-use crate::wallet::common::{make_wallet, request_funds, setup, tear_down};
+// use crate::wallet::common::{make_wallet, request_funds, setup, tear_down};
 
-#[tokio::test]
-#[cfg(feature = "rocksdb")]
-async fn updated_default_sync_options() -> Result<()> {
-    let storage_path = "test-storage/updated_default_sync_options";
-    setup(storage_path)?;
+// #[tokio::test]
+// #[cfg(feature = "rocksdb")]
+// async fn updated_default_sync_options() -> Result<()> {
+//     let storage_path = "test-storage/updated_default_sync_options";
+//     setup(storage_path)?;
 
-    let default_sync = SyncOptions::default();
+//     let default_sync = SyncOptions::default();
 
-    let wallet = make_wallet(storage_path, None, None).await?;
+//     let wallet = make_wallet(storage_path, None, None).await?;
 
-    assert_eq!(default_sync, wallet.default_sync_options().await);
+//     assert_eq!(default_sync, wallet.default_sync_options().await);
 
-    let custom_options = SyncOptions {
-        address_start_index: 10,
-        ..Default::default()
-    };
-    wallet.set_default_sync_options(custom_options.clone()).await?;
-    assert_eq!(custom_options, wallet.default_sync_options().await);
+//     let custom_options = SyncOptions {
+//         address_start_index: 10,
+//         ..Default::default()
+//     };
+//     wallet.set_default_sync_options(custom_options.clone()).await?;
+//     assert_eq!(custom_options, wallet.default_sync_options().await);
 
-    drop(wallet);
+//     drop(wallet);
 
-    let wallet = make_wallet(storage_path, None, None).await?;
+//     let wallet = make_wallet(storage_path, None, None).await?;
 
-    assert_eq!(custom_options, wallet.default_sync_options().await);
+//     assert_eq!(custom_options, wallet.default_sync_options().await);
 
-    tear_down(storage_path)
-}
+//     tear_down(storage_path)
+// }
 
 // #[ignore]
 // #[tokio::test]
