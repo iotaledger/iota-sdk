@@ -206,6 +206,7 @@ pub enum Response {
     /// - [`HexPublicKeyToBech32Address`](crate::method::ClientMethod::HexPublicKeyToBech32Address)
     /// - [`HexToBech32`](crate::method::ClientMethod::HexToBech32)
     /// - [`NftIdToBech32`](crate::method::ClientMethod::NftIdToBech32)
+    /// - [`ImplicitAccountCreationAddress`](crate::method::WalletCommandMethod::ImplicitAccountCreationAddress)
     Bech32Address(Bech32Address),
     /// - [`Faucet`](crate::method::ClientMethod::RequestFundsFromFaucet)
     Faucet(String),

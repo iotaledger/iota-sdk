@@ -32,7 +32,7 @@ use crate::{
     },
     types::{
         block::{
-            address::{Bech32Address, Hrp},
+            address::{Address, Bech32Address, Hrp, ImplicitAccountCreationAddress},
             output::{dto::FoundryOutputDto, AccountId, FoundryId, FoundryOutput, NftId, Output, OutputId, TokenId},
             payload::signed_transaction::{dto::TransactionDto, Transaction, TransactionId},
         },
@@ -41,7 +41,7 @@ use crate::{
     wallet::{
         operations::syncing::SyncOptions,
         types::{OutputData, OutputDataDto},
-        FilterOptions, Result,
+        Error, FilterOptions, Result,
     },
 };
 
@@ -250,6 +250,20 @@ where
     /// Get the wallet address.
     pub async fn address(&self) -> Bech32Address {
         self.data().await.address.clone()
+    }
+
+    /// Returns the implicit account creation address of the wallet if it is Ed25519 based.
+    pub async fn implicit_account_creation_address(&self) -> Result<Bech32Address> {
+        let bech32_address = &self.data().await.address;
+
+        if let Address::Ed25519(address) = bech32_address.inner() {
+            Ok(Bech32Address::new(
+                *bech32_address.hrp(),
+                ImplicitAccountCreationAddress::from(address.clone()),
+            ))
+        } else {
+            return Err(Error::NonEd25519Address);
+        }
     }
 
     /// Get the wallet's configured Bech32 HRP.
