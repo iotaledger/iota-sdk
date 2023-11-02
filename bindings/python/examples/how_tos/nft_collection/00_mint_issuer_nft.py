@@ -39,7 +39,7 @@ print(
 
 transaction = tx.payload.transaction
 
-for outputIndex, output in enumerate(transaction["outputs"]):
+for outputIndex, output in enumerate(transaction.outputs):
     # New minted NFT id is empty in the output
     if output["type"] == 6 and output["nftId"] == '0x0000000000000000000000000000000000000000000000000000000000000000':
         outputId = Utils.compute_output_id(
