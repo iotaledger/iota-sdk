@@ -113,9 +113,11 @@ pub enum WalletCommand {
     Faucet {
         /// Address the faucet sends the funds to, defaults to the wallet address.
         address: Option<Bech32Address>,
-        /// URL of the faucet, default to <https://faucet.testnet.shimmer.network/api/enqueue>.
+        /// URL of the faucet, default to <http://localhost:8088/api/enqueue>.
         url: Option<String>,
     },
+    /// Returns the implicit account creation address of the wallet if it is Ed25519 based.
+    ImplicitAccountCreationAddress,
     /// Mint additional native tokens.
     MintNativeToken {
         /// Token ID to be minted, e.g. 0x087d205988b733d97fb145ae340e27a8b19554d1ceee64574d7e5ff66c45f69e7a0100000000.
@@ -552,11 +554,16 @@ pub async fn faucet_command(wallet: &Wallet, address: Option<Bech32Address>, url
         wallet.address().await
     };
 
-    let faucet_url = url
-        .as_deref()
-        .unwrap_or("https://faucet.testnet.shimmer.network/api/enqueue");
+    let faucet_url = url.as_deref().unwrap_or("http://localhost:8088/api/enqueue");
 
     println_log_info!("{}", request_funds_from_faucet(faucet_url, &address).await?);
+
+    Ok(())
+}
+
+// `implicit-account-creation-address` command
+pub async fn implicit_account_creation_address(wallet: &Wallet) -> Result<(), Error> {
+    println_log_info!("{}", wallet.implicit_account_creation_address().await?);
 
     Ok(())
 }
@@ -1077,6 +1084,9 @@ pub async fn prompt_internal(
                             return Ok(PromptResponse::Done);
                         }
                         WalletCommand::Faucet { address, url } => faucet_command(wallet, address, url).await,
+                        WalletCommand::ImplicitAccountCreationAddress => {
+                            implicit_account_creation_address(wallet).await
+                        }
                         WalletCommand::MeltNativeToken { token_id, amount } => {
                             melt_native_token_command(wallet, token_id, amount).await
                         }

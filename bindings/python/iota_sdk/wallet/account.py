@@ -270,6 +270,13 @@ class Account:
         )
         return [from_dict(OutputData, o) for o in outputs]
 
+    def implicit_account_creation_address(self) -> str:
+        """Returns the implicit account creation address of the wallet if it is Ed25519 based.
+        """
+        return self._call_account_method(
+            'implicitAccountCreationAddress'
+        )
+
     def incoming_transactions(self) -> List[TransactionWithMetadata]:
         """Returns all incoming transactions of the account.
         """

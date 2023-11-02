@@ -759,6 +759,22 @@ export class Account {
     }
 
     /**
+     * Returns the implicit account creation address of the wallet if it is Ed25519 based.
+     *
+     * @returns The implicit account creation address.
+     */
+    async implicitAccountCreationAddress(): Promise<Bech32Address> {
+        const response = await this.methodHandler.callAccountMethod(
+            this.meta.index,
+            {
+                name: 'implicitAccountCreationAddress',
+            },
+        );
+
+        return JSON.parse(response).payload;
+    }
+
+    /**
      * List all incoming transactions of the account.
      *
      * @returns The incoming transactions with their inputs.
