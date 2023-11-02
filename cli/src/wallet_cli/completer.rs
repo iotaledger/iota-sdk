@@ -23,6 +23,7 @@ const WALLET_COMMANDS: &[&str] = &[
     "destroy-foundry",
     "exit",
     "faucet",
+    "implicit-account-creation-address",
     "melt-native-token",
     "mint-native-token",
     "mint-nft",
