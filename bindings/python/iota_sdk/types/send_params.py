@@ -72,10 +72,12 @@ class CreateNativeTokenParams():
         account_id: The ID of the corresponding account.
     """
     circulating_supply: int = field(metadata=config(
-        encoder=str
+        encoder=hex,
+        decoder=lambda v: int(v, 16)
     ))
     maximum_supply: int = field(metadata=config(
-        encoder=str
+        encoder=hex,
+        decoder=lambda v: int(v, 16)
     ))
     foundry_metadata: Optional[str] = None
     account_id: Optional[str] = None
