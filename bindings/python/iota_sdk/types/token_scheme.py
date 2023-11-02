@@ -1,9 +1,10 @@
 # Copyright 2023 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
-from dataclasses import dataclass, field
 from typing import TypeAlias
-from iota_sdk.types.common import HexStr, json
+from dataclasses import dataclass, field
+from dataclasses_json import config
+from iota_sdk.types.common import json
 
 
 @json
@@ -17,10 +18,19 @@ class SimpleTokenScheme:
         maximum_supply: The maximum supply of the token.
         type: The type code of the token scheme.
     """
-    minted_tokens: HexStr
-    melted_tokens: HexStr
-    maximum_supply: HexStr
-    type: int = field(default_factory=lambda: 0, init=False)
+    minted_tokens: int = field(metadata=config(
+        encoder=hex,
+        decoder=lambda v: int(v, 16)
+    ))
+    melted_tokens: int = field(metadata=config(
+        encoder=hex,
+        decoder=lambda v: int(v, 16)
+    ))
+    maximum_supply: int = field(metadata=config(
+        encoder=hex,
+        decoder=lambda v: int(v, 16)
+    ))
+    type: int = field(default=0, init=False)
 
 
 TokenScheme: TypeAlias = SimpleTokenScheme
