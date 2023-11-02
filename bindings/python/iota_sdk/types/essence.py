@@ -54,7 +54,7 @@ class RegularTransactionEssence:
     capabilities: HexStr = field(default='0x', init=False)
     payload: Optional[Payload] = None
     type: int = field(
-        default_factory=lambda: EssenceType.RegularTransactionEssence,
+        default_factory=lambda: int(EssenceType.RegularTransactionEssence),
         init=False)
 
     def with_capabilities(self, capabilities: bytes):
