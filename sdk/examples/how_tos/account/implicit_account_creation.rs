@@ -1,11 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! In this example we will create an account output.
-//!
-//! Make sure that `STRONGHOLD_SNAPSHOT_PATH` and `WALLET_DB_PATH` already exist by
-//! running the `./how_tos/accounts_and_addresses/create_wallet.rs` example and that funds are available by running
-//! the `get_funds` example!
+//! In this example, we create an implicit account creation address.
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh
