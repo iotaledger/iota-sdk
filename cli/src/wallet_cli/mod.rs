@@ -113,7 +113,7 @@ pub enum WalletCommand {
     Faucet {
         /// Address the faucet sends the funds to, defaults to the wallet address.
         address: Option<Bech32Address>,
-        /// URL of the faucet, default to <https://faucet.testnet.shimmer.network/api/enqueue>.
+        /// URL of the faucet, default to <http://localhost:8088/api/enqueue>.
         url: Option<String>,
     },
     ImplicitAccountCreationAddress,
@@ -553,9 +553,7 @@ pub async fn faucet_command(wallet: &Wallet, address: Option<Bech32Address>, url
         wallet.address().await
     };
 
-    let faucet_url = url
-        .as_deref()
-        .unwrap_or("https://faucet.testnet.shimmer.network/api/enqueue");
+    let faucet_url = url.as_deref().unwrap_or("http://localhost:8088/api/enqueue");
 
     println_log_info!("{}", request_funds_from_faucet(faucet_url, &address).await?);
 
