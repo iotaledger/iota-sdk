@@ -87,6 +87,10 @@ pub(crate) async fn call_wallet_command_method_internal(
             let voting_power = wallet.get_voting_power().await?;
             Response::VotingPower(voting_power.to_string())
         }
+        WalletCommandMethod::ImplicitAccountCreationAddress => {
+            let implicit_account_creation_address = wallet.implicit_account_creation_address().await?;
+            Response::Bech32Address(implicit_account_creation_address)
+        }
         WalletCommandMethod::IncomingTransactions => {
             let transactions = wallet.incoming_transactions().await;
             Response::Transactions(transactions.iter().map(TransactionWithMetadataDto::from).collect())
