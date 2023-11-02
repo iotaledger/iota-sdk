@@ -252,6 +252,7 @@ where
         self.data().await.address.clone()
     }
 
+    /// Returns the implicit account creation address of the wallet if it is Ed25519 based.
     pub async fn implicit_account_creation_address(&self) -> Result<Bech32Address> {
         let bech32_address = &self.data().await.address;
 

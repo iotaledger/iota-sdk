@@ -116,6 +116,7 @@ pub enum WalletCommand {
         /// URL of the faucet, default to <http://localhost:8088/api/enqueue>.
         url: Option<String>,
     },
+    /// Returns the implicit account creation address of the wallet if it is Ed25519 based.
     ImplicitAccountCreationAddress,
     /// Mint additional native tokens.
     MintNativeToken {
