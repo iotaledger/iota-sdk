@@ -4,7 +4,7 @@
 from typing import TypeAlias
 from dataclasses import dataclass, field
 from dataclasses_json import config
-from iota_sdk.types.common import json
+from iota_sdk.types.common import hex_str_decoder, json
 
 
 @json
@@ -20,15 +20,15 @@ class SimpleTokenScheme:
     """
     minted_tokens: int = field(metadata=config(
         encoder=hex,
-        decoder=lambda v: int(v, 16)
+        decoder=hex_str_decoder,
     ))
     melted_tokens: int = field(metadata=config(
         encoder=hex,
-        decoder=lambda v: int(v, 16)
+        decoder=hex_str_decoder,
     ))
     maximum_supply: int = field(metadata=config(
         encoder=hex,
-        decoder=lambda v: int(v, 16)
+        decoder=hex_str_decoder,
     ))
     type: int = field(default=0, init=False)
 
