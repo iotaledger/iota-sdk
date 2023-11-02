@@ -73,11 +73,11 @@ class CreateNativeTokenParams():
     """
     circulating_supply: int = field(metadata=config(
         encoder=hex,
-        decoder=lambda v: int(v, 0)
+        decoder=lambda v: int(v, 16)
     ))
     maximum_supply: int = field(metadata=config(
         encoder=hex,
-        decoder=lambda v: int(v, 0)
+        decoder=lambda v: int(v, 16)
     ))
     foundry_metadata: Optional[str] = None
     account_id: Optional[str] = None

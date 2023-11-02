@@ -19,5 +19,5 @@ class NativeToken():
     id: HexStr
     amount: int = field(metadata=config(
         encoder=hex,
-        decoder=lambda v: int(v, 0)
+        decoder=lambda v: int(v, 16)
     ))

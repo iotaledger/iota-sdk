@@ -20,15 +20,15 @@ class SimpleTokenScheme:
     """
     minted_tokens: int = field(metadata=config(
         encoder=hex,
-        decoder=lambda v: int(v, 0)
+        decoder=lambda v: int(v, 16)
     ))
     melted_tokens: int = field(metadata=config(
         encoder=hex,
-        decoder=lambda v: int(v, 0)
+        decoder=lambda v: int(v, 16)
     ))
     maximum_supply: int = field(metadata=config(
         encoder=hex,
-        decoder=lambda v: int(v, 0)
+        decoder=lambda v: int(v, 16)
     ))
     type: int = field(default=0, init=False)
 
