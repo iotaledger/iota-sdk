@@ -51,23 +51,6 @@ impl<Flag> Capabilities<Flag> {
         *self = Default::default();
         self
     }
-
-    /// Removes any trailing zeroes from the flag bytes.
-    fn trim(&mut self) -> &mut Self {
-        if let Some(idx) = self.bytes.iter().rposition(|c| 0.ne(c)) {
-            if idx + 1 < self.len() {
-                self.bytes = self.bytes[..=idx]
-                    .iter()
-                    .copied()
-                    .collect::<Box<[_]>>()
-                    .try_into()
-                    .unwrap();
-            }
-            self
-        } else {
-            self.set_none()
-        }
-    }
 }
 
 impl<Flag: CapabilityFlag> Capabilities<Flag> {
@@ -91,7 +74,8 @@ impl<Flag: CapabilityFlag> Capabilities<Flag> {
         self
     }
 
-    fn inner_add_capability(&mut self, flag: Flag, trim: bool) -> &mut Self {
+    /// Enables a given flag.
+    pub fn add_capability(&mut self, flag: Flag) -> &mut Self {
         if self.bytes.len() <= flag.index() {
             let mut v = Box::<[_]>::from(self.bytes.clone()).into_vec();
             v.resize(flag.index() + 1, 0);
@@ -99,20 +83,15 @@ impl<Flag: CapabilityFlag> Capabilities<Flag> {
             self.bytes = v.into_boxed_slice().try_into().unwrap();
         }
         self.bytes[flag.index()] |= flag.as_byte();
-        if trim { self.trim() } else { self }
-    }
-
-    /// Enables a given flag.
-    pub fn add_capability(&mut self, flag: Flag) -> &mut Self {
-        self.inner_add_capability(flag, true)
+        self
     }
 
     /// Enables a given set of flags.
     pub fn add_capabilities(&mut self, flags: impl IntoIterator<Item = Flag>) -> &mut Self {
         for flag in flags {
-            self.inner_add_capability(flag, false);
+            self.add_capability(flag);
         }
-        self.trim()
+        self
     }
 
     /// Enables a given set of flags.
