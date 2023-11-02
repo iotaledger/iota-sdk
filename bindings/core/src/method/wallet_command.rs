@@ -102,7 +102,7 @@ pub enum WalletCommandMethod {
     #[cfg(feature = "participation")]
     #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
     GetVotingPower,
-    /// Gets the wallet implicit account creation address
+    /// Returns the wallet implicit account creation address
     /// Expected response: [`Bech32Address`](crate::Response::Bech32Address)
     ImplicitAccountCreationAddress,
     /// Returns all incoming transactions of the wallet
