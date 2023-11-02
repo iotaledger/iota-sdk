@@ -4,13 +4,12 @@
 use packable::error::UnexpectedEOF;
 use serde::{ser::SerializeMap, Serialize, Serializer};
 
-pub use super::{method::AccountMethod, response::Response};
-
 /// Result type of the bindings core crate.
 pub type Result<T> = std::result::Result<T, Error>;
 
 /// Error type for the bindings core crate.
 #[derive(Debug, thiserror::Error)]
+#[non_exhaustive]
 pub enum Error {
     /// Block errors.
     #[error("{0}")]

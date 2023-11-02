@@ -3,6 +3,7 @@
 
 /// Stronghold errors.
 #[derive(Debug, thiserror::Error)]
+#[non_exhaustive]
 pub enum Error {
     /// Crypto.rs error
     #[error("{0}")]

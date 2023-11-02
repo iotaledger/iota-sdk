@@ -4,7 +4,7 @@
 //! In this example we will send an NFT.
 //!
 //! Make sure that `STRONGHOLD_SNAPSHOT_PATH` and `WALLET_DB_PATH` already exist by
-//! running the `./how_tos/accounts_and_addresses/create_account.rs` example!
+//! running the `./how_tos/accounts_and_addresses/create_wallet.rs` example!
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh
@@ -29,10 +29,9 @@ async fn main() -> Result<()> {
         .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
         .finish()
         .await?;
-    let account = wallet.get_account("Alice").await?;
 
-    // May want to ensure the account is synced before sending a transaction.
-    let balance = account.sync(None).await?;
+    // May want to ensure the wallet is synced before sending a transaction.
+    let balance = wallet.sync(None).await?;
 
     // Get the first nft
     if let Some(nft_id) = balance.nfts().first() {
@@ -45,11 +44,11 @@ async fn main() -> Result<()> {
 
         println!("Sending NFT '{}' to '{}'...", nft_id, RECV_ADDRESS);
 
-        let transaction = account.send_nft(outputs, None).await?;
+        let transaction = wallet.send_nft(outputs, None).await?;
         println!("Transaction sent: {}", transaction.transaction_id);
 
         // Wait for transaction to get included
-        let block_id = account
+        let block_id = wallet
             .reissue_transaction_until_included(&transaction.transaction_id, None, None)
             .await?;
 

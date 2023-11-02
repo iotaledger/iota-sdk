@@ -33,16 +33,16 @@ use iota_sdk::{
             BlockId, SignedBlockDto, UnsignedBlockDto,
         },
     },
-    wallet::account::{
-        types::{AddressWithUnspentOutputs, Balance, Bip44Address, OutputDataDto, TransactionWithMetadataDto},
-        AccountDetailsDto, PreparedCreateNativeTokenTransactionDto,
+    wallet::{
+        types::{Balance, OutputDataDto, TransactionWithMetadataDto},
+        PreparedCreateNativeTokenTransactionDto,
     },
 };
 use serde::Serialize;
 #[cfg(feature = "participation")]
 use {
     iota_sdk::types::api::plugins::participation::types::{ParticipationEventId, ParticipationEventStatus},
-    iota_sdk::wallet::account::{AccountParticipationOverview, ParticipationEventWithNodes},
+    iota_sdk::wallet::{ParticipationEventWithNodes, ParticipationOverview},
     std::collections::HashMap,
 };
 
@@ -130,15 +130,19 @@ pub enum Response {
     Outputs(Vec<OutputWithMetadataResponse>),
     /// Response for:
     /// - [`AccountOutputId`](crate::method::ClientMethod::AccountOutputId)
+    /// - [`AnchorOutputId`](crate::method::ClientMethod::AnchorOutputId)
+    /// - [`DelegationOutputId`](crate::method::ClientMethod::DelegationOutputId)
     /// - [`FoundryOutputId`](crate::method::ClientMethod::FoundryOutputId)
     /// - [`NftOutputId`](crate::method::ClientMethod::NftOutputId)
     OutputId(OutputId),
     /// Response for:
-    /// - [`AccountOutputIds`](crate::method::ClientMethod::AccountOutputIds)
+    /// - [`OutputIds`](crate::method::ClientMethod::OutputIds)
     /// - [`BasicOutputIds`](crate::method::ClientMethod::BasicOutputIds)
+    /// - [`AccountOutputIds`](crate::method::ClientMethod::AccountOutputIds)
+    /// - [`AnchorOutputIds`](crate::method::ClientMethod::AnchorOutputIds)
+    /// - [`DelegationOutputIds`](crate::method::ClientMethod::DelegationOutputIds)
     /// - [`FoundryOutputIds`](crate::method::ClientMethod::FoundryOutputIds)
     /// - [`NftOutputIds`](crate::method::ClientMethod::NftOutputIds)
-    /// - [`OutputIds`](crate::method::ClientMethod::OutputIds)
     OutputIdsResponse(OutputIdsResponse),
     /// Response for:
     /// - [`FindBlocks`](crate::method::ClientMethod::FindBlocks)
@@ -194,8 +198,8 @@ pub enum Response {
     /// - [`BuildBasicOutput`](crate::method::ClientMethod::BuildBasicOutput)
     /// - [`BuildFoundryOutput`](crate::method::ClientMethod::BuildFoundryOutput)
     /// - [`BuildNftOutput`](crate::method::ClientMethod::BuildNftOutput)
-    /// - [`GetFoundryOutput`](crate::method::AccountMethod::GetFoundryOutput)
-    /// - [`PrepareOutput`](crate::method::AccountMethod::PrepareOutput)
+    /// - [`GetFoundryOutput`](crate::method::WalletCommandMethod::GetFoundryOutput)
+    /// - [`PrepareOutput`](crate::method::WalletCommandMethod::PrepareOutput)
     Output(OutputDto),
     /// Response for:
     /// - [`AccountIdToBech32`](crate::method::ClientMethod::AccountIdToBech32)
@@ -217,7 +221,7 @@ pub enum Response {
     /// - [`BlockId`](crate::method::UtilsMethod::BlockId)
     /// - [`PostBlock`](crate::method::ClientMethod::PostBlock)
     /// - [`PostBlockRaw`](crate::method::ClientMethod::PostBlockRaw)
-    /// - [`ReissueTransactionUntilIncluded`](crate::method::AccountMethod::ReissueTransactionUntilIncluded)
+    /// - [`ReissueTransactionUntilIncluded`](crate::method::WalletCommandMethod::ReissueTransactionUntilIncluded)
     BlockId(BlockId),
     /// Response for:
     /// - [`GetHealth`](crate::method::ClientMethod::GetHealth)
@@ -229,12 +233,12 @@ pub enum Response {
     /// - [`Backup`](crate::method::WalletMethod::Backup),
     /// - [`ClearListeners`](crate::method::WalletMethod::ClearListeners)
     /// - [`ClearStrongholdPassword`](crate::method::WalletMethod::ClearStrongholdPassword),
-    /// - [`DeregisterParticipationEvent`](crate::method::AccountMethod::DeregisterParticipationEvent),
+    /// - [`DeregisterParticipationEvent`](crate::method::WalletCommandMethod::DeregisterParticipationEvent),
     /// - [`EmitTestEvent`](crate::method::WalletMethod::EmitTestEvent),
     /// - [`RestoreBackup`](crate::method::WalletMethod::RestoreBackup),
-    /// - [`SetAlias`](crate::method::AccountMethod::SetAlias),
+    /// - [`SetAlias`](crate::method::WalletCommandMethod::SetAlias),
     /// - [`SetClientOptions`](crate::method::WalletMethod::SetClientOptions),
-    /// - [`SetDefaultSyncOptions`](crate::method::AccountMethod::SetDefaultSyncOptions),
+    /// - [`SetDefaultSyncOptions`](crate::method::WalletCommandMethod::SetDefaultSyncOptions),
     /// - [`SetStrongholdPassword`](crate::method::WalletMethod::SetStrongholdPassword),
     /// - [`SetStrongholdPasswordClearInterval`](crate::method::WalletMethod::SetStrongholdPasswordClearInterval),
     /// - [`StartBackgroundSync`](crate::method::WalletMethod::StartBackgroundSync),
@@ -248,109 +252,93 @@ pub enum Response {
 
     // wallet responses
     /// Response for:
-    /// - [`CreateAccount`](crate::method::WalletMethod::CreateAccount),
-    /// - [`GetAccount`](crate::method::WalletMethod::GetAccount)
-    Account(AccountDetailsDto),
-    /// Response for:
-    /// - [`GetAccountIndexes`](crate::method::WalletMethod::GetAccountIndexes)
-    AccountIndexes(Vec<u32>),
-    /// Response for:
-    /// - [`GetAccounts`](crate::method::WalletMethod::GetAccounts)
-    Accounts(Vec<AccountDetailsDto>),
-    /// Response for:
-    /// - [`Addresses`](crate::method::AccountMethod::Addresses)
-    Addresses(Vec<Bip44Address>),
-    /// Response for:
-    /// - [`AddressesWithUnspentOutputs`](crate::method::AccountMethod::AddressesWithUnspentOutputs)
-    AddressesWithUnspentOutputs(Vec<AddressWithUnspentOutputs>),
+    /// - [`GetAddress`](crate::method::WalletCommandMethod::GetAddress)
+    Address(Bech32Address),
     /// Response for:
     /// - [`MinimumRequiredStorageDeposit`](crate::method::ClientMethod::MinimumRequiredStorageDeposit)
     /// - [`ComputeStorageDeposit`](crate::method::UtilsMethod::ComputeStorageDeposit)
     MinimumRequiredStorageDeposit(String),
     /// Response for:
-    /// - [`ClaimableOutputs`](crate::method::AccountMethod::ClaimableOutputs)
+    /// - [`ClaimableOutputs`](crate::method::WalletCommandMethod::ClaimableOutputs)
     OutputIds(Vec<OutputId>),
     /// Response for:
-    /// - [`GetOutput`](crate::method::AccountMethod::GetOutput)
+    /// - [`GetOutput`](crate::method::WalletCommandMethod::GetOutput)
     OutputData(Option<Box<OutputDataDto>>),
     /// Response for:
-    /// - [`Outputs`](crate::method::AccountMethod::Outputs),
-    /// - [`UnspentOutputs`](crate::method::AccountMethod::UnspentOutputs)
+    /// - [`Outputs`](crate::method::WalletCommandMethod::Outputs),
+    /// - [`UnspentOutputs`](crate::method::WalletCommandMethod::UnspentOutputs)
     OutputsData(Vec<OutputDataDto>),
     /// Response for:
-    /// - [`PrepareBurn`](crate::method::AccountMethod::PrepareBurn),
-    /// - [`PrepareConsolidateOutputs`](crate::method::AccountMethod::PrepareConsolidateOutputs)
-    /// - [`PrepareCreateAccountOutput`](crate::method::AccountMethod::PrepareCreateAccountOutput)
-    /// - [`PrepareDecreaseVotingPower`](crate::method::AccountMethod::PrepareDecreaseVotingPower)
-    /// - [`PrepareIncreaseVotingPower`](crate::method::AccountMethod::PrepareIncreaseVotingPower)
-    /// - [`PrepareMeltNativeToken`](crate::method::AccountMethod::PrepareMeltNativeToken)
-    /// - [`PrepareMintNativeToken`](crate::method::AccountMethod::PrepareMintNativeToken),
-    /// - [`PrepareMintNfts`](crate::method::AccountMethod::PrepareMintNfts),
-    /// - [`PrepareSend`](crate::method::AccountMethod::PrepareSend),
-    /// - [`PrepareSendNativeTokens`](crate::method::AccountMethod::PrepareSendNativeTokens),
-    /// - [`PrepareSendNft`](crate::method::AccountMethod::PrepareSendNft),
-    /// - [`PrepareStopParticipating`](crate::method::AccountMethod::PrepareStopParticipating)
-    /// - [`PrepareTransaction`](crate::method::AccountMethod::PrepareTransaction)
-    /// - [`PrepareVote`](crate::method::AccountMethod::PrepareVote)
+    /// - [`PrepareBurn`](crate::method::WalletCommandMethod::PrepareBurn),
+    /// - [`PrepareConsolidateOutputs`](crate::method::WalletCommandMethod::PrepareConsolidateOutputs)
+    /// - [`PrepareCreateAccountOutput`](crate::method::WalletCommandMethod::PrepareCreateAccountOutput)
+    /// - [`PrepareDecreaseVotingPower`](crate::method::WalletCommandMethod::PrepareDecreaseVotingPower)
+    /// - [`PrepareIncreaseVotingPower`](crate::method::WalletCommandMethod::PrepareIncreaseVotingPower)
+    /// - [`PrepareMeltNativeToken`](crate::method::WalletCommandMethod::PrepareMeltNativeToken)
+    /// - [`PrepareMintNativeToken`](crate::method::WalletCommandMethod::PrepareMintNativeToken),
+    /// - [`PrepareMintNfts`](crate::method::WalletCommandMethod::PrepareMintNfts),
+    /// - [`PrepareSend`](crate::method::WalletCommandMethod::PrepareSend),
+    /// - [`PrepareSendNativeTokens`](crate::method::WalletCommandMethod::PrepareSendNativeTokens),
+    /// - [`PrepareSendNft`](crate::method::WalletCommandMethod::PrepareSendNft),
+    /// - [`PrepareStopParticipating`](crate::method::WalletCommandMethod::PrepareStopParticipating)
+    /// - [`PrepareTransaction`](crate::method::WalletCommandMethod::PrepareTransaction)
+    /// - [`PrepareVote`](crate::method::WalletCommandMethod::PrepareVote)
     PreparedTransaction(PreparedTransactionDataDto),
     /// Response for:
-    /// - [`PrepareCreateNativeToken`](crate::method::AccountMethod::PrepareCreateNativeToken),
+    /// - [`PrepareCreateNativeToken`](crate::method::WalletCommandMethod::PrepareCreateNativeToken),
     PreparedCreateNativeTokenTransaction(PreparedCreateNativeTokenTransactionDto),
     /// Response for:
-    /// - [`GetIncomingTransaction`](crate::method::AccountMethod::GetIncomingTransaction)
-    /// - [`GetTransaction`](crate::method::AccountMethod::GetTransaction),
+    /// - [`GetIncomingTransaction`](crate::method::WalletCommandMethod::GetIncomingTransaction)
+    /// - [`GetTransaction`](crate::method::WalletCommandMethod::GetTransaction),
     Transaction(Option<Box<TransactionWithMetadataDto>>),
     /// Response for:
-    /// - [`IncomingTransactions`](crate::method::AccountMethod::IncomingTransactions)
-    /// - [`PendingTransactions`](crate::method::AccountMethod::PendingTransactions),
-    /// - [`Transactions`](crate::method::AccountMethod::Transactions),
+    /// - [`IncomingTransactions`](crate::method::WalletCommandMethod::IncomingTransactions)
+    /// - [`PendingTransactions`](crate::method::WalletCommandMethod::PendingTransactions),
+    /// - [`Transactions`](crate::method::WalletCommandMethod::Transactions),
     Transactions(Vec<TransactionWithMetadataDto>),
     /// Response for:
-    /// - [`SignTransaction`](crate::method::AccountMethod::SignTransaction)
+    /// - [`SignTransaction`](crate::method::WalletCommandMethod::SignTransaction)
     SignedTransactionData(SignedTransactionDataDto),
     /// Response for:
-    /// - [`GenerateEd25519Addresses`](crate::method::AccountMethod::GenerateEd25519Addresses)
-    GeneratedAccountAddresses(Vec<Bip44Address>),
-    /// Response for:
-    /// - [`GetBalance`](crate::method::AccountMethod::GetBalance),
-    /// - [`Sync`](crate::method::AccountMethod::Sync)
+    /// - [`GetBalance`](crate::method::WalletCommandMethod::GetBalance),
+    /// - [`Sync`](crate::method::WalletCommandMethod::Sync)
     Balance(Balance),
     /// Response for:
-    /// - [`ClaimOutputs`](crate::method::AccountMethod::ClaimOutputs)
-    /// - [`Send`](crate::method::AccountMethod::Send)
-    /// - [`SendOutputs`](crate::method::AccountMethod::SendOutputs)
-    /// - [`SignAndSubmitTransaction`](crate::method::AccountMethod::SignAndSubmitTransaction)
-    /// - [`SubmitAndStoreTransaction`](crate::method::AccountMethod::SubmitAndStoreTransaction)
+    /// - [`ClaimOutputs`](crate::method::WalletCommandMethod::ClaimOutputs)
+    /// - [`Send`](crate::method::WalletCommandMethod::Send)
+    /// - [`SendOutputs`](crate::method::WalletCommandMethod::SendOutputs)
+    /// - [`SignAndSubmitTransaction`](crate::method::WalletCommandMethod::SignAndSubmitTransaction)
+    /// - [`SubmitAndStoreTransaction`](crate::method::WalletCommandMethod::SubmitAndStoreTransaction)
     SentTransaction(TransactionWithMetadataDto),
     /// Response for:
-    /// - [`GetParticipationEvent`](crate::method::AccountMethod::GetParticipationEvent)
+    /// - [`GetParticipationEvent`](crate::method::WalletCommandMethod::GetParticipationEvent)
     #[cfg(feature = "participation")]
     #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
     ParticipationEvent(Option<ParticipationEventWithNodes>),
     /// Response for:
-    /// - [`GetParticipationEventIds`](crate::method::AccountMethod::GetParticipationEventIds)
+    /// - [`GetParticipationEventIds`](crate::method::WalletCommandMethod::GetParticipationEventIds)
     #[cfg(feature = "participation")]
     #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
     ParticipationEventIds(Vec<ParticipationEventId>),
     /// Response for:
-    /// - [`GetParticipationEventStatus`](crate::method::AccountMethod::GetParticipationEventStatus)
+    /// - [`GetParticipationEventStatus`](crate::method::WalletCommandMethod::GetParticipationEventStatus)
     #[cfg(feature = "participation")]
     #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
     ParticipationEventStatus(ParticipationEventStatus),
     /// Response for:
-    /// - [`GetParticipationEvents`](crate::method::AccountMethod::GetParticipationEvents)
-    /// - [`RegisterParticipationEvents`](crate::method::AccountMethod::RegisterParticipationEvents)
+    /// - [`GetParticipationEvents`](crate::method::WalletCommandMethod::GetParticipationEvents)
+    /// - [`RegisterParticipationEvents`](crate::method::WalletCommandMethod::RegisterParticipationEvents)
     #[cfg(feature = "participation")]
     #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
     ParticipationEvents(HashMap<ParticipationEventId, ParticipationEventWithNodes>),
     /// Response for:
-    /// - [`GetVotingPower`](crate::method::AccountMethod::GetVotingPower)
+    /// - [`GetVotingPower`](crate::method::WalletCommandMethod::GetVotingPower)
     #[cfg(feature = "participation")]
     #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
     VotingPower(String),
     /// Response for:
-    /// - [`GetParticipationOverview`](crate::method::AccountMethod::GetParticipationOverview)
+    /// - [`GetParticipationOverview`](crate::method::WalletCommandMethod::GetParticipationOverview)
     #[cfg(feature = "participation")]
     #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
-    AccountParticipationOverview(AccountParticipationOverview),
+    ParticipationOverview(ParticipationOverview),
 }
