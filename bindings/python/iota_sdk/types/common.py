@@ -113,7 +113,7 @@ def opt_int_encoder(value):
 
 
 def hex_str_decoder(value: str) -> int:
-    """ Parses a given string as a hexadecimal integer """
+    """Parses a given string as a hexadecimal integer."""
     return int(value, 16)
 
 
