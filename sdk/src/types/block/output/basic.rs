@@ -320,6 +320,14 @@ impl BasicOutput {
 
         None
     }
+
+    /// Checks whether the basic output is an implicit account.
+    pub fn is_implicit_account(&self) -> bool {
+        self.unlock_conditions.len() == 1
+            && self.address().is_implicit_account_creation()
+            && self.native_tokens.is_empty()
+            && self.features.is_empty()
+    }
 }
 
 fn verify_unlock_conditions<const VERIFY: bool>(unlock_conditions: &UnlockConditions) -> Result<(), Error> {
