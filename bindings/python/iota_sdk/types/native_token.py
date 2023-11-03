@@ -4,7 +4,7 @@
 from dataclasses import dataclass, field
 from dataclasses_json import config
 
-from iota_sdk.types.common import HexStr, json
+from iota_sdk.types.common import hex_str_decoder, HexStr, json
 
 
 @json
@@ -19,5 +19,5 @@ class NativeToken():
     id: HexStr
     amount: int = field(metadata=config(
         encoder=hex,
-        decoder=lambda v: int(v, 16)
+        decoder=hex_str_decoder,
     ))
