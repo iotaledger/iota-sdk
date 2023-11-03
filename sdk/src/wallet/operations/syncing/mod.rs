@@ -99,7 +99,7 @@ where
             address: self.address().await,
             output_ids: self
                 .unspent_outputs(None)
-                .await?
+                .await
                 .into_iter()
                 .map(|data| data.output_id)
                 .collect::<Vec<_>>(),
