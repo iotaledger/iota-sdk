@@ -252,6 +252,15 @@ impl Output {
         }
     }
 
+    /// Checks whether the output is an implicit account.
+    pub fn is_implicit_account(&self) -> bool {
+        if let Output::Basic(output) = self {
+            output.is_implicit_account()
+        } else {
+            false
+        }
+    }
+
     crate::def_is_as_opt!(Output: Basic, Account, Foundry, Nft, Delegation, Anchor);
 
     /// Returns the address that is required to unlock this [`Output`] and the account or nft address that gets
