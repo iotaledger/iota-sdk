@@ -73,7 +73,7 @@ use crate::{
     types::{
         api::core::OutputWithMetadataResponse,
         block::{
-            output::{AccountId, FoundryId, NftId},
+            output::{AccountId, AnchorId, DelegationId, FoundryId, NftId},
             payload::signed_transaction::{SignedTransactionPayload, TransactionId},
         },
     },
@@ -95,10 +95,14 @@ pub struct FilterOptions {
     pub output_types: Option<Vec<u8>>,
     /// Return all account outputs matching these IDs.
     pub account_ids: Option<HashSet<AccountId>>,
+    /// Return all anchor outputs matching these IDs.
+    pub anchor_ids: Option<HashSet<AnchorId>>,
     /// Return all foundry outputs matching these IDs.
     pub foundry_ids: Option<HashSet<FoundryId>>,
     /// Return all nft outputs matching these IDs.
     pub nft_ids: Option<HashSet<NftId>>,
+    /// Return all delegation outputs matching these IDs.
+    pub delegation_ids: Option<HashSet<DelegationId>>,
 }
 
 pub(crate) fn build_transaction_from_payload_and_inputs(

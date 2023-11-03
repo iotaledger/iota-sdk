@@ -33,7 +33,10 @@ use crate::{
     types::{
         block::{
             address::{Address, Bech32Address, Hrp, ImplicitAccountCreationAddress},
-            output::{dto::FoundryOutputDto, AccountId, FoundryId, FoundryOutput, NftId, Output, OutputId, TokenId},
+            output::{
+                dto::FoundryOutputDto, AccountId, AnchorId, DelegationId, FoundryId, FoundryOutput, NftId, Output,
+                OutputId, TokenId,
+            },
             payload::signed_transaction::{dto::TransactionDto, Transaction, TransactionId},
         },
         TryFromDto,
@@ -304,10 +307,19 @@ where
 
             for output in outputs {
                 match &output.output {
-                    Output::Account(alias) => {
+                    Output::Account(account) => {
                         if let Some(account_ids) = &filter.account_ids {
-                            let account_id = alias.account_id_non_null(&output.output_id);
+                            let account_id = account.account_id_non_null(&output.output_id);
                             if account_ids.contains(&account_id) {
+                                filtered_outputs.push(output.clone());
+                                continue;
+                            }
+                        }
+                    }
+                    Output::Anchor(anchor) => {
+                        if let Some(anchor_ids) = &filter.anchor_ids {
+                            let anchor_id = anchor.anchor_id_non_null(&output.output_id);
+                            if anchor_ids.contains(&anchor_id) {
                                 filtered_outputs.push(output.clone());
                                 continue;
                             }
@@ -326,6 +338,15 @@ where
                         if let Some(nft_ids) = &filter.nft_ids {
                             let nft_id = nft.nft_id_non_null(&output.output_id);
                             if nft_ids.contains(&nft_id) {
+                                filtered_outputs.push(output.clone());
+                                continue;
+                            }
+                        }
+                    }
+                    Output::Delegation(delegation) => {
+                        if let Some(delegation_ids) = &filter.delegation_ids {
+                            let delegation_id = delegation.delegation_id_non_null(&output.output_id);
+                            if delegation_ids.contains(&delegation_id) {
                                 filtered_outputs.push(output.clone());
                                 continue;
                             }
@@ -385,6 +406,17 @@ where
         .cloned()
     }
 
+    /// Gets the unspent anchor output matching the given ID.
+    pub async fn unspent_anchor_output(&self, anchor_id: &AnchorId) -> Option<OutputData> {
+        self.unspent_outputs(FilterOptions {
+            anchor_ids: Some([*anchor_id].into()),
+            ..Default::default()
+        })
+        .await
+        .first()
+        .cloned()
+    }
+
     /// Gets the unspent foundry output matching the given ID.
     pub async fn unspent_foundry_output(&self, foundry_id: &FoundryId) -> Option<OutputData> {
         self.unspent_outputs(FilterOptions {
@@ -400,6 +432,17 @@ where
     pub async fn unspent_nft_output(&self, nft_id: &NftId) -> Option<OutputData> {
         self.unspent_outputs(FilterOptions {
             nft_ids: Some([*nft_id].into()),
+            ..Default::default()
+        })
+        .await
+        .first()
+        .cloned()
+    }
+
+    /// Gets the unspent delegation output matching the given ID.
+    pub async fn unspent_delegation_output(&self, delegation_id: &DelegationId) -> Option<OutputData> {
+        self.unspent_outputs(FilterOptions {
+            delegation_ids: Some([*delegation_id].into()),
             ..Default::default()
         })
         .await

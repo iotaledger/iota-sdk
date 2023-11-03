@@ -117,14 +117,14 @@ pub enum Output {
     Basic(BasicOutput),
     /// An account output.
     Account(AccountOutput),
+    /// An anchor output.
+    Anchor(AnchorOutput),
     /// A foundry output.
     Foundry(FoundryOutput),
     /// An NFT output.
     Nft(NftOutput),
     /// A delegation output.
     Delegation(DelegationOutput),
-    /// An anchor output.
-    Anchor(AnchorOutput),
 }
 
 impl core::fmt::Debug for Output {
