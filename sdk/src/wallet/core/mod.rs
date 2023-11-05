@@ -374,7 +374,12 @@ where
                 }
 
                 // If ids are provided, only return them and no other outputs.
-                if filter.account_ids.is_none() && filter.foundry_ids.is_none() && filter.nft_ids.is_none() {
+                if filter.account_ids.is_none()
+                    && filter.anchor_ids.is_none()
+                    && filter.foundry_ids.is_none()
+                    && filter.nft_ids.is_none()
+                    && filter.delegation_ids.is_none()
+                {
                     filtered_outputs.push(output.clone());
                 }
             }
