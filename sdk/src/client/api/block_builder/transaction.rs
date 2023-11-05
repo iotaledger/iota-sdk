@@ -40,7 +40,7 @@ pub fn verify_semantic(
         transaction_payload.transaction(),
         &transaction_id,
         &inputs,
-        transaction_payload.unlocks(),
+        Some(transaction_payload.unlocks()),
     );
 
     Ok(context.validate()?)

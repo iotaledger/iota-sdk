@@ -194,7 +194,7 @@ pub struct SemanticValidationContext<'a> {
     pub(crate) transaction: &'a Transaction,
     pub(crate) transaction_signing_hash: TransactionSigningHash,
     pub(crate) inputs: &'a [(&'a OutputId, &'a Output)],
-    pub(crate) unlocks: &'a Unlocks,
+    pub(crate) unlocks: Option<&'a Unlocks>,
     pub(crate) input_amount: u64,
     pub(crate) input_mana: u64,
     pub(crate) input_native_tokens: BTreeMap<TokenId, U256>,
@@ -214,7 +214,7 @@ impl<'a> SemanticValidationContext<'a> {
         transaction: &'a Transaction,
         transaction_id: &TransactionId,
         inputs: &'a [(&'a OutputId, &'a Output)],
-        unlocks: &'a Unlocks,
+        unlocks: Option<&'a Unlocks>,
     ) -> Self {
         Self {
             transaction,
@@ -257,17 +257,15 @@ impl<'a> SemanticValidationContext<'a> {
     ///
     pub fn validate(mut self) -> Result<Option<TransactionFailureReason>, Error> {
         // Validation of inputs.
-        for ((output_id, consumed_output), unlock) in self.inputs.iter().zip(self.unlocks.iter()) {
-            let (conflict, amount, mana, consumed_native_tokens, unlock_conditions) = match consumed_output {
+        for (index, (output_id, consumed_output)) in self.inputs.iter().enumerate() {
+            let (amount, mana, consumed_native_tokens, unlock_conditions) = match consumed_output {
                 Output::Basic(output) => (
-                    output.unlock(output_id, unlock, &mut self),
                     output.amount(),
                     output.mana(),
                     Some(output.native_tokens()),
                     output.unlock_conditions(),
                 ),
                 Output::Account(output) => (
-                    output.unlock(output_id, unlock, &mut self),
                     output.amount(),
                     output.mana(),
                     Some(output.native_tokens()),
@@ -275,31 +273,19 @@ impl<'a> SemanticValidationContext<'a> {
                 ),
                 Output::Anchor(_) => return Err(Error::UnsupportedOutputKind(AnchorOutput::KIND)),
                 Output::Foundry(output) => (
-                    output.unlock(output_id, unlock, &mut self),
                     output.amount(),
                     0,
                     Some(output.native_tokens()),
                     output.unlock_conditions(),
                 ),
                 Output::Nft(output) => (
-                    output.unlock(output_id, unlock, &mut self),
                     output.amount(),
                     output.mana(),
                     Some(output.native_tokens()),
                     output.unlock_conditions(),
                 ),
-                Output::Delegation(output) => (
-                    output.unlock(output_id, unlock, &mut self),
-                    output.amount(),
-                    0,
-                    None,
-                    output.unlock_conditions(),
-                ),
+                Output::Delegation(output) => (output.amount(), 0, None, output.unlock_conditions()),
             };
-
-            if let Err(conflict) = conflict {
-                return Ok(Some(conflict));
-            }
 
             if unlock_conditions.is_time_locked(self.transaction.creation_slot()) {
                 return Ok(Some(TransactionFailureReason::TimelockNotExpired));
@@ -332,6 +318,26 @@ impl<'a> SemanticValidationContext<'a> {
                     *native_token_amount = native_token_amount
                         .checked_add(native_token.amount())
                         .ok_or(Error::ConsumedNativeTokensAmountOverflow)?;
+                }
+            }
+
+            if let Some(unlocks) = self.unlocks {
+                if unlocks.len() != self.inputs.len() {
+                    return Ok(Some(TransactionFailureReason::InvalidInputUnlock));
+                }
+
+                let unlock = &unlocks[index];
+                let conflict = match consumed_output {
+                    Output::Basic(output) => output.unlock(output_id, unlock, &mut self),
+                    Output::Account(output) => output.unlock(output_id, unlock, &mut self),
+                    Output::Anchor(_) => return Err(Error::UnsupportedOutputKind(AnchorOutput::KIND)),
+                    Output::Foundry(output) => output.unlock(output_id, unlock, &mut self),
+                    Output::Nft(output) => output.unlock(output_id, unlock, &mut self),
+                    Output::Delegation(output) => output.unlock(output_id, unlock, &mut self),
+                };
+
+                if let Err(conflict) = conflict {
+                    return Ok(Some(conflict));
                 }
             }
         }
