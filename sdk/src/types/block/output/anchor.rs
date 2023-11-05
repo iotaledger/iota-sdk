@@ -48,7 +48,11 @@ impl From<&OutputId> for AnchorId {
 impl AnchorId {
     ///
     pub fn or_from_output_id(self, output_id: &OutputId) -> Self {
-        if self.is_null() { Self::from(output_id) } else { self }
+        if self.is_null() {
+            Self::from(output_id)
+        } else {
+            self
+        }
     }
 }
 
@@ -361,7 +365,9 @@ impl AnchorOutput {
     pub const ALLOWED_UNLOCK_CONDITIONS: UnlockConditionFlags =
         UnlockConditionFlags::STATE_CONTROLLER_ADDRESS.union(UnlockConditionFlags::GOVERNOR_ADDRESS);
     /// The set of allowed [`Feature`]s for an [`AnchorOutput`].
-    pub const ALLOWED_FEATURES: FeatureFlags = FeatureFlags::SENDER.union(FeatureFlags::METADATA);
+    pub const ALLOWED_FEATURES: FeatureFlags = FeatureFlags::SENDER
+        .union(FeatureFlags::METADATA)
+        .union(FeatureFlags::GOVERNOR_METADATA);
     /// The set of allowed immutable [`Feature`]s for an [`AnchorOutput`].
     pub const ALLOWED_IMMUTABLE_FEATURES: FeatureFlags = FeatureFlags::ISSUER.union(FeatureFlags::METADATA);
 
