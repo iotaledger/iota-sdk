@@ -13,7 +13,7 @@ use crate::types::block::{
         AnchorOutput, ChainId, FoundryId, NativeTokens, Output, OutputId, StateTransitionError, TokenId,
         UnlockCondition,
     },
-    payload::signed_transaction::{Transaction, TransactionCapabilityFlag, TransactionId, TransactionSigningHash},
+    payload::signed_transaction::{Transaction, TransactionCapabilityFlag, TransactionSigningHash},
     unlock::Unlocks,
     Error,
 };
@@ -212,10 +212,11 @@ impl<'a> SemanticValidationContext<'a> {
     ///
     pub fn new(
         transaction: &'a Transaction,
-        transaction_id: &TransactionId,
         inputs: &'a [(&'a OutputId, &'a Output)],
         unlocks: Option<&'a Unlocks>,
     ) -> Self {
+        let transaction_id = transaction.id();
+
         Self {
             transaction,
             transaction_signing_hash: transaction.signing_hash(),
@@ -242,7 +243,7 @@ impl<'a> SemanticValidationContext<'a> {
                 .filter_map(|(index, output)| {
                     output.chain_id().map(|chain_id| {
                         (
-                            chain_id.or_from_output_id(&OutputId::new(*transaction_id, index as u16).unwrap()),
+                            chain_id.or_from_output_id(&OutputId::new(transaction_id, index as u16).unwrap()),
                             output,
                         )
                     })
