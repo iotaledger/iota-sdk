@@ -277,6 +277,7 @@ impl<'a> SemanticValidationContext<'a> {
                     Some(output.native_tokens()),
                     output.unlock_conditions(),
                 ),
+                Output::Anchor(_) => return Err(Error::UnsupportedOutputKind(AnchorOutput::KIND)),
                 Output::Foundry(output) => (
                     output.unlock(output_id, unlock, &mut self),
                     output.amount(),
@@ -298,7 +299,6 @@ impl<'a> SemanticValidationContext<'a> {
                     None,
                     output.unlock_conditions(),
                 ),
-                Output::Anchor(_) => return Err(Error::UnsupportedOutputKind(AnchorOutput::KIND)),
             };
 
             if let Err(conflict) = conflict {
@@ -383,6 +383,7 @@ impl<'a> SemanticValidationContext<'a> {
                         Some(output.native_tokens()),
                         Some(output.features()),
                     ),
+                    Output::Anchor(_) => return Err(Error::UnsupportedOutputKind(AnchorOutput::KIND)),
                     Output::Foundry(output) => (
                         output.amount(),
                         0,
@@ -396,7 +397,6 @@ impl<'a> SemanticValidationContext<'a> {
                         Some(output.features()),
                     ),
                     Output::Delegation(output) => (output.amount(), 0, None, None),
-                    Output::Anchor(_) => return Err(Error::UnsupportedOutputKind(AnchorOutput::KIND)),
                 };
 
                 if let Some(unlock_conditions) = created_output.unlock_conditions() {
@@ -448,9 +448,9 @@ impl<'a> SemanticValidationContext<'a> {
 
                         if match &created_output {
                             Output::Account(_) => !address.has_capability(AddressCapabilityFlag::AccountOutputs),
+                            Output::Anchor(_) => !address.has_capability(AddressCapabilityFlag::AnchorOutputs),
                             Output::Nft(_) => !address.has_capability(AddressCapabilityFlag::NftOutputs),
                             Output::Delegation(_) => !address.has_capability(AddressCapabilityFlag::DelegationOutputs),
-                            Output::Anchor(_) => !address.has_capability(AddressCapabilityFlag::AnchorOutputs),
                             _ => false,
                         } {
                             // TODO: add a variant https://github.com/iotaledger/iota-sdk/issues/1430

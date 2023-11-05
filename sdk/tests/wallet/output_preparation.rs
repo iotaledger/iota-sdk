@@ -9,14 +9,11 @@ use iota_sdk::{
         output::{MinimumStorageDepositBasicOutput, NativeToken, NftId, Output, Rent, TokenId},
         slot::SlotIndex,
     },
-    wallet::{
-        account::{Assets, Features, OutputParams, ReturnStrategy, StorageDeposit, Unlocks},
-        MintNftParams, Result,
-    },
+    wallet::{Assets, Features, MintNftParams, OutputParams, Result, ReturnStrategy, StorageDeposit, Unlocks},
 };
 use pretty_assertions::assert_eq;
 
-use crate::wallet::common::{create_accounts_with_funds, make_wallet, setup, tear_down};
+use crate::wallet::common::{make_wallet, request_funds, setup, tear_down};
 
 #[ignore]
 #[tokio::test]
@@ -25,14 +22,14 @@ async fn output_preparation() -> Result<()> {
     setup(storage_path)?;
 
     let wallet = make_wallet(storage_path, None, None).await?;
-    let account = &create_accounts_with_funds(&wallet, 1).await?[0];
+    request_funds(&wallet).await?;
 
     let recipient_address_bech32 = String::from("rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu");
     // Roundtrip to get the correct bech32 HRP
     let recipient_address =
-        Address::try_from_bech32(&recipient_address_bech32)?.to_bech32(account.client().get_bech32_hrp().await?);
+        Address::try_from_bech32(&recipient_address_bech32)?.to_bech32(wallet.client().get_bech32_hrp().await?);
 
-    let output = account
+    let output = wallet
         .prepare_output(
             OutputParams {
                 recipient_address: recipient_address.clone(),
@@ -51,7 +48,7 @@ async fn output_preparation() -> Result<()> {
     let sdr = output.unlock_conditions().unwrap().storage_deposit_return().unwrap();
     assert_eq!(sdr.amount(), 46300);
 
-    let output = account
+    let output = wallet
         .prepare_output(
             OutputParams {
                 recipient_address: recipient_address.clone(),
@@ -72,7 +69,7 @@ async fn output_preparation() -> Result<()> {
         TokenId::from_str("0x08847bd287c912fadedb6bf38900bda9f2d377b75b2a0bece8738699f56ebca4130100000000")?,
         10,
     )?;
-    let output = account
+    let output = wallet
         .prepare_output(
             OutputParams {
                 recipient_address: recipient_address.clone(),
@@ -93,7 +90,7 @@ async fn output_preparation() -> Result<()> {
     assert_eq!(output.unlock_conditions().unwrap().len(), 1);
     assert_eq!(output.native_tokens().unwrap().first(), Some(&native_token));
 
-    let output = account
+    let output = wallet
         .prepare_output(
             OutputParams {
                 recipient_address: recipient_address.clone(),
@@ -118,7 +115,7 @@ async fn output_preparation() -> Result<()> {
     assert_eq!(output.features().unwrap().len(), 2);
 
     // only send 1 with metadata feature
-    let output = account
+    let output = wallet
         .prepare_output(
             OutputParams {
                 recipient_address: recipient_address.clone(),
@@ -146,7 +143,7 @@ async fn output_preparation() -> Result<()> {
     // metadata and tag features
     assert_eq!(output.features().unwrap().len(), 2);
 
-    let output = account
+    let output = wallet
         .prepare_output(
             OutputParams {
                 recipient_address: recipient_address.clone(),
@@ -171,7 +168,7 @@ async fn output_preparation() -> Result<()> {
     // metadata and tag features
     assert_eq!(output.features().unwrap().len(), 2);
 
-    let output = account
+    let output = wallet
         .prepare_output(
             OutputParams {
                 recipient_address: recipient_address.clone(),
@@ -199,8 +196,8 @@ async fn output_preparation() -> Result<()> {
     // metadata and tag features
     assert_eq!(output.features().unwrap().len(), 2);
 
-    // Error if this NftId is not in the account
-    let error = account
+    // Error if this NftId is not in the wallet
+    let error = wallet
         .prepare_output(
             OutputParams {
                 recipient_address: recipient_address.clone(),
@@ -224,7 +221,7 @@ async fn output_preparation() -> Result<()> {
         _ => panic!("should return NftNotFoundInUnspentOutputs error"),
     }
 
-    if let Ok(output) = account
+    if let Ok(output) = wallet
         .prepare_output(
             OutputParams {
                 recipient_address: recipient_address.clone(),
@@ -252,13 +249,11 @@ async fn output_preparation() -> Result<()> {
     let issuer_and_sender_address_bech32 =
         Bech32Address::try_from_str("rms1qq724zgvdujt3jdcd3xzsuqq7wl9pwq3dvsa5zvx49rj9tme8cat6qptyfm")?;
     // Roundtrip to get the correct bech32 HRP
-    let issuer_and_sender_address = issuer_and_sender_address_bech32
-        .into_inner()
-        .to_bech32(account.client().get_bech32_hrp().await?);
+    let issuer_and_sender_address = issuer_and_sender_address_bech32.to_bech32(wallet.client().get_bech32_hrp().await?);
     let expected_address = issuer_and_sender_address.inner();
 
     // sender address present when building basic output
-    let output = account
+    let output = wallet
         .prepare_output(
             OutputParams {
                 recipient_address: recipient_address.clone(),
@@ -288,7 +283,7 @@ async fn output_preparation() -> Result<()> {
     assert_eq!(features.sender().unwrap().address(), expected_address);
 
     // error when adding issuer when building basic output
-    let error = account
+    let error = wallet
         .prepare_output(
             OutputParams {
                 recipient_address: recipient_address.clone(),
@@ -313,7 +308,7 @@ async fn output_preparation() -> Result<()> {
     }
 
     // issuer and sender address present when building nft output
-    let output = account
+    let output = wallet
         .prepare_output(
             OutputParams {
                 recipient_address: recipient_address.clone(),
@@ -359,7 +354,7 @@ async fn output_preparation() -> Result<()> {
     assert!(conditions.is_expired(2, 0));
 
     // nft with expiration
-    let output = account
+    let output = wallet
         .prepare_output(
             OutputParams {
                 recipient_address: recipient_address.clone(),
@@ -390,7 +385,7 @@ async fn output_preparation() -> Result<()> {
     // address, sdr, expiration
     assert_eq!(output.unlock_conditions().unwrap().len(), 3);
 
-    let output = account
+    let output = wallet
         .prepare_output(
             OutputParams {
                 recipient_address: recipient_address.clone(),
@@ -433,17 +428,17 @@ async fn output_preparation_sdr() -> Result<()> {
     setup(storage_path)?;
 
     let wallet = make_wallet(storage_path, None, None).await?;
-    let account = &create_accounts_with_funds(&wallet, 1).await?[0];
+    request_funds(&wallet).await?;
 
-    let rent_structure = account.client().get_rent_structure().await?;
-    let token_supply = account.client().get_token_supply().await?;
+    let rent_structure = wallet.client().get_rent_structure().await?;
+    let token_supply = wallet.client().get_token_supply().await?;
 
     let recipient_address_bech32 = String::from("rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu");
     // Roundtrip to get the correct bech32 HRP
     let recipient_address =
-        Address::try_from_bech32(&recipient_address_bech32)?.to_bech32(account.client().get_bech32_hrp().await?);
+        Address::try_from_bech32(&recipient_address_bech32)?.to_bech32(wallet.client().get_bech32_hrp().await?);
 
-    let output = account
+    let output = wallet
         .prepare_output(
             OutputParams {
                 recipient_address: recipient_address.clone(),
@@ -464,7 +459,7 @@ async fn output_preparation_sdr() -> Result<()> {
     let sdr = output.unlock_conditions().unwrap().storage_deposit_return().unwrap();
     assert_eq!(sdr.amount(), 42600);
 
-    let output = account
+    let output = wallet
         .prepare_output(
             OutputParams {
                 recipient_address: recipient_address.clone(),
@@ -486,7 +481,7 @@ async fn output_preparation_sdr() -> Result<()> {
     assert_eq!(sdr.amount(), 42600);
 
     // ReturnStrategy::Return provided
-    let output = account
+    let output = wallet
         .prepare_output(
             OutputParams {
                 recipient_address: recipient_address.clone(),
@@ -511,7 +506,7 @@ async fn output_preparation_sdr() -> Result<()> {
     assert_eq!(sdr.amount(), 42600);
 
     // ReturnStrategy::Gift provided
-    let output = account
+    let output = wallet
         .prepare_output(
             OutputParams {
                 recipient_address: recipient_address.clone(),
@@ -544,29 +539,28 @@ async fn prepare_nft_output_features_update() -> Result<()> {
     setup(storage_path)?;
 
     let wallet = make_wallet(storage_path, None, None).await?;
-    let accounts = &create_accounts_with_funds(&wallet, 1).await?;
-    let addresses = accounts[0].addresses().await;
-    let address = addresses[0].address();
+    request_funds(&wallet).await?;
+    let wallet_address = wallet.address().await;
 
     let nft_options = [MintNftParams::new()
-        .with_address(address.clone())
-        .with_sender(address.clone())
+        .with_address(wallet_address.clone())
+        .with_sender(wallet_address.clone())
         .with_metadata(b"some nft metadata".to_vec())
         .with_tag(b"some nft tag".to_vec())
-        .with_issuer(address.clone())
+        .with_issuer(wallet_address.clone())
         .with_immutable_metadata(b"some immutable nft metadata".to_vec())];
 
-    let transaction = accounts[0].mint_nfts(nft_options, None).await.unwrap();
-    accounts[0]
+    let transaction = wallet.mint_nfts(nft_options, None).await.unwrap();
+    wallet
         .reissue_transaction_until_included(&transaction.transaction_id, None, None)
         .await?;
 
-    let nft_id = *accounts[0].sync(None).await?.nfts().first().unwrap();
+    let nft_id = *wallet.sync(None).await?.nfts().first().unwrap();
 
-    let nft = accounts[0]
+    let nft = wallet
         .prepare_output(
             OutputParams {
-                recipient_address: address.clone(),
+                recipient_address: wallet_address,
                 amount: 1_000_000,
                 assets: Some(Assets {
                     native_tokens: None,
@@ -588,10 +582,7 @@ async fn prepare_nft_output_features_update() -> Result<()> {
         .clone();
 
     assert_eq!(nft.amount(), 1_000_000);
-    assert_eq!(
-        nft.address(),
-        accounts[0].addresses().await[0].clone().into_bech32().as_ref()
-    );
+    assert_eq!(nft.address(), wallet.address().await.inner());
     assert!(nft.features().sender().is_none());
     assert!(nft.features().tag().is_none());
     assert_eq!(nft.features().metadata().unwrap().data(), &[42]);
@@ -601,7 +592,7 @@ async fn prepare_nft_output_features_update() -> Result<()> {
     );
     assert_eq!(
         nft.immutable_features().issuer().unwrap().address(),
-        accounts[0].addresses().await[0].clone().into_bech32().as_ref()
+        wallet.address().await.inner()
     );
 
     tear_down(storage_path)
@@ -610,27 +601,28 @@ async fn prepare_nft_output_features_update() -> Result<()> {
 #[ignore]
 #[tokio::test]
 async fn prepare_output_remainder_dust() -> Result<()> {
-    let storage_path = "test-storage/prepare_output_remainder_dust";
-    setup(storage_path)?;
+    let storage_path_0 = "test-storage/prepare_output_remainder_dust_0";
+    let storage_path_1 = "test-storage/prepare_output_remainder_dust_1";
+    setup(storage_path_0)?;
+    setup(storage_path_1)?;
 
-    let wallet = make_wallet(storage_path, None, None).await?;
-    let accounts = &create_accounts_with_funds(&wallet, 2).await?;
-    let account = &accounts[0];
-    let addresses = &accounts[1].addresses().await;
-    let address = addresses[0].address();
+    let wallet_0 = make_wallet(storage_path_0, None, None).await?;
+    let wallet_1 = make_wallet(storage_path_1, None, None).await?;
+    request_funds(&wallet_0).await?;
+    request_funds(&wallet_1).await?;
 
-    let rent_structure = account.client().get_rent_structure().await?;
-    let token_supply = account.client().get_token_supply().await?;
+    let rent_structure = wallet_0.client().get_rent_structure().await?;
+    let token_supply = wallet_0.client().get_token_supply().await?;
 
-    let balance = account.sync(None).await?;
+    let balance = wallet_0.sync(None).await?;
     let minimum_required_storage_deposit =
         MinimumStorageDepositBasicOutput::new(rent_structure, token_supply).finish()?;
 
     // Send away most balance so we can test with leaving dust
-    let output = account
+    let output = wallet_0
         .prepare_output(
             OutputParams {
-                recipient_address: address.clone(),
+                recipient_address: wallet_1.address().await,
                 amount: balance.base_coin().available() - 63900,
                 assets: None,
                 features: None,
@@ -640,17 +632,17 @@ async fn prepare_output_remainder_dust() -> Result<()> {
             None,
         )
         .await?;
-    let transaction = account.send_outputs(vec![output], None).await?;
-    account
+    let transaction = wallet_0.send_outputs(vec![output], None).await?;
+    wallet_0
         .reissue_transaction_until_included(&transaction.transaction_id, None, None)
         .await?;
-    let balance = account.sync(None).await?;
+    let balance = wallet_0.sync(None).await?;
 
     // 63900 left
-    let output = account
+    let output = wallet_0
         .prepare_output(
             OutputParams {
-                recipient_address: address.clone(),
+                recipient_address: wallet_1.address().await,
                 amount: minimum_required_storage_deposit - 1, // Leave less than min. deposit
                 assets: None,
                 features: None,
@@ -671,10 +663,10 @@ async fn prepare_output_remainder_dust() -> Result<()> {
     // storage deposit gifted, only address unlock condition
     assert_eq!(output.unlock_conditions().unwrap().len(), 1);
 
-    let result = account
+    let result = wallet_0
         .prepare_output(
             OutputParams {
-                recipient_address: address.clone(),
+                recipient_address: wallet_1.address().await,
                 amount: minimum_required_storage_deposit - 1, // Leave less than min. deposit
                 assets: None,
                 features: None,
@@ -691,10 +683,10 @@ async fn prepare_output_remainder_dust() -> Result<()> {
         matches!(result, Err(iota_sdk::wallet::Error::InsufficientFunds{available, required}) if available == balance.base_coin().available() && required == 85199)
     );
 
-    let output = account
+    let output = wallet_0
         .prepare_output(
             OutputParams {
-                recipient_address: address.clone(),
+                recipient_address: wallet_1.address().await,
                 amount: 100, // leave more behind than min. deposit
                 assets: None,
                 features: None,
@@ -715,10 +707,10 @@ async fn prepare_output_remainder_dust() -> Result<()> {
     // storage deposit gifted, only address unlock condition
     assert_eq!(output.unlock_conditions().unwrap().len(), 1);
 
-    let output = account
+    let output = wallet_0
         .prepare_output(
             OutputParams {
-                recipient_address: address.clone(),
+                recipient_address: wallet_1.address().await,
                 amount: 100, // leave more behind than min. deposit
                 assets: None,
                 features: None,
@@ -742,45 +734,47 @@ async fn prepare_output_remainder_dust() -> Result<()> {
     let sdr = output.unlock_conditions().unwrap().storage_deposit_return().unwrap();
     assert_eq!(sdr.amount(), 63900 - 100);
 
-    tear_down(storage_path)
+    tear_down(storage_path_0)?;
+    tear_down(storage_path_1)?;
+
+    Ok(())
 }
 
 #[ignore]
 #[tokio::test]
 async fn prepare_output_only_single_nft() -> Result<()> {
-    let storage_path = "test-storage/prepare_output_only_single_nft";
-    setup(storage_path)?;
+    let storage_path_0 = "test-storage/prepare_output_only_single_nft_0";
+    let storage_path_1 = "test-storage/prepare_output_only_single_nft_1";
+    setup(storage_path_0)?;
+    setup(storage_path_1)?;
 
-    let wallet = make_wallet(storage_path, None, None).await?;
-    let account_0 = &create_accounts_with_funds(&wallet, 1).await?[0];
-    // Create second account without funds, so it only gets the NFT
-    let account_1 = wallet.create_account().finish().await?;
-    let addresses = &account_0.addresses().await;
-    let account_0_address = addresses[0].address();
-    let addresses = &account_1.addresses().await;
-    let account_1_address = addresses[0].address();
+    let wallet_0 = make_wallet(storage_path_0, None, None).await?;
+    request_funds(&wallet_0).await?;
 
-    // Send NFT to second account
-    let tx = account_0
-        .mint_nfts(
-            [MintNftParams::new().try_with_address(account_1_address.clone())?],
-            None,
-        )
+    // Create second wallet without funds, so it only gets the NFT
+    let wallet_1 = make_wallet(storage_path_1, None, None).await?;
+
+    let wallet_0_address = wallet_0.address().await;
+    let wallet_1_address = wallet_1.address().await;
+
+    // Send NFT to second wallet
+    let tx = wallet_0
+        .mint_nfts([MintNftParams::new().try_with_address(wallet_1_address)?], None)
         .await?;
-    account_0
+    wallet_0
         .reissue_transaction_until_included(&tx.transaction_id, None, None)
         .await?;
 
-    let balance = account_1.sync(None).await?;
+    let balance = wallet_1.sync(None).await?;
     assert_eq!(balance.nfts().len(), 1);
 
-    let nft_data = &account_1.unspent_outputs(None).await?[0];
+    let nft_data = &wallet_1.unspent_outputs(None).await?[0];
     let nft_id = *balance.nfts().first().unwrap();
-    // Send NFT back to first account
-    let output = account_1
+    // Send NFT back to first wallet
+    let output = wallet_1
         .prepare_output(
             OutputParams {
-                recipient_address: account_0_address.clone(),
+                recipient_address: wallet_0_address,
                 amount: nft_data.output.amount(),
                 assets: Some(Assets {
                     native_tokens: None,
@@ -793,21 +787,24 @@ async fn prepare_output_only_single_nft() -> Result<()> {
             None,
         )
         .await?;
-    let tx = account_1.send_outputs([output], None).await?;
-    account_1
+    let tx = wallet_1.send_outputs([output], None).await?;
+    wallet_1
         .reissue_transaction_until_included(&tx.transaction_id, None, None)
         .await?;
 
-    // account_0 now has the NFT
-    let balance_0 = account_0.sync(None).await?;
+    // wallet_0 now has the NFT
+    let balance_0 = wallet_0.sync(None).await?;
     assert_eq!(*balance_0.nfts().first().unwrap(), nft_id);
 
-    // account_1 has no NFT and also no base coin amount
-    let balance_1 = account_1.sync(None).await?;
+    // wallet_1 has no NFT and also no base coin amount
+    let balance_1 = wallet_1.sync(None).await?;
     assert!(balance_1.nfts().is_empty());
     assert_eq!(balance_1.base_coin().total(), 0);
 
-    tear_down(storage_path)
+    tear_down(storage_path_0)?;
+    tear_down(storage_path_1)?;
+
+    Ok(())
 }
 
 #[ignore]
@@ -817,9 +814,8 @@ async fn prepare_existing_nft_output_gift() -> Result<()> {
     setup(storage_path)?;
 
     let wallet = make_wallet(storage_path, None, None).await?;
-    let accounts = &create_accounts_with_funds(&wallet, 1).await?;
-    let addresses = accounts[0].addresses().await;
-    let address = addresses[0].address();
+    request_funds(&wallet).await?;
+    let address = wallet.address().await;
 
     let nft_options = [MintNftParams::new()
         .with_address(address.clone())
@@ -829,17 +825,17 @@ async fn prepare_existing_nft_output_gift() -> Result<()> {
         .with_issuer(address.clone())
         .with_immutable_metadata(b"some immutable nft metadata".to_vec())];
 
-    let transaction = accounts[0].mint_nfts(nft_options, None).await.unwrap();
-    accounts[0]
+    let transaction = wallet.mint_nfts(nft_options, None).await.unwrap();
+    wallet
         .reissue_transaction_until_included(&transaction.transaction_id, None, None)
         .await?;
 
-    let nft_id = *accounts[0].sync(None).await?.nfts().first().unwrap();
+    let nft_id = *wallet.sync(None).await?.nfts().first().unwrap();
 
-    let nft = accounts[0]
+    let nft = wallet
         .prepare_output(
             OutputParams {
-                recipient_address: address.clone(),
+                recipient_address: address,
                 amount: 0,
                 assets: Some(Assets {
                     native_tokens: None,
@@ -863,10 +859,7 @@ async fn prepare_existing_nft_output_gift() -> Result<()> {
     assert_eq!(nft.amount(), minimum_storage_deposit);
 
     assert_eq!(nft.amount(), 52300);
-    assert_eq!(
-        nft.address(),
-        accounts[0].addresses().await[0].clone().into_bech32().as_ref()
-    );
+    assert_eq!(nft.address(), wallet.address().await.inner());
     assert!(nft.features().is_empty());
     assert_eq!(
         nft.immutable_features().metadata().unwrap().data(),
@@ -874,7 +867,7 @@ async fn prepare_existing_nft_output_gift() -> Result<()> {
     );
     assert_eq!(
         nft.immutable_features().issuer().unwrap().address(),
-        accounts[0].addresses().await[0].clone().into_bech32().as_ref()
+        wallet.address().await.inner()
     );
 
     tear_down(storage_path)

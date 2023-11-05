@@ -14,14 +14,17 @@ class AddressType(IntEnum):
         ED25519 (0): Ed25519 address.
         ACCOUNT (8): Account address.
         NFT (16): Nft address.
-        IMPLICIT_ACCOUNT_CREATION (24): Implicit Account Creation address.
-        RESTRICTED (40): Address with restricted capabilities.
+        ANCHOR (24): Anchor address.
+        IMPLICIT_ACCOUNT_CREATION (32): Implicit Account Creation address.
+        RESTRICTED (48): Address with restricted capabilities.
+
     """
     ED25519 = 0
     ACCOUNT = 8
     NFT = 16
-    IMPLICIT_ACCOUNT_CREATION = 24
-    RESTRICTED = 40
+    ANCHOR = 24
+    IMPLICIT_ACCOUNT_CREATION = 32
+    RESTRICTED = 48
 
 
 @json
@@ -65,6 +68,20 @@ class NFTAddress:
 
 @json
 @dataclass
+class AnchorAddress:
+    """Represents an Anchor address.
+    Attributes:
+        anchor_id: The hex encoded anchor id.
+    """
+    anchor_id: HexStr
+    type: int = field(
+        default_factory=lambda: int(
+            AddressType.ANCHOR),
+        init=False)
+
+
+@json
+@dataclass
 class ImplicitAccountCreationAddress:
     """An implicit account creation address that can be used to convert a Basic Output to an Account Output.
     Attributes:
@@ -88,7 +105,8 @@ class ImplicitAccountCreationAddress:
         """
         Creates an implicit account creation address from a dictionary representation.
         """
-        return ImplicitAccountCreationAddress(Ed25519Address(addr_dict['pubKeyHash']))
+        return ImplicitAccountCreationAddress(
+            Ed25519Address(addr_dict['pubKeyHash']))
 
 
 @json
@@ -123,8 +141,12 @@ class AddressWithUnspentOutputs():
     output_ids: bool
 
 
-Address: TypeAlias = Union[Ed25519Address, AccountAddress,
-                           NFTAddress, ImplicitAccountCreationAddress, RestrictedAddress]
+Address: TypeAlias = Union[Ed25519Address,
+                           AccountAddress,
+                           NFTAddress,
+                           AnchorAddress,
+                           ImplicitAccountCreationAddress,
+                           RestrictedAddress]
 
 
 def deserialize_address(d: Dict[str, Any]) -> Address:
@@ -141,6 +163,8 @@ def deserialize_address(d: Dict[str, Any]) -> Address:
         return AccountAddress.from_dict(d)
     if address_type == AddressType.NFT:
         return NFTAddress.from_dict(d)
+    if address_type == AddressType.ANCHOR:
+        return AnchorAddress.from_dict(d)
     if address_type == AddressType.IMPLICIT_ACCOUNT_CREATION:
         return ImplicitAccountCreationAddress.from_dict(d)
     if address_type == AddressType.RESTRICTED:

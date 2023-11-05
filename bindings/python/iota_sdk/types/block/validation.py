@@ -28,5 +28,5 @@ class ValidationBlock:
     highest_supported_version: int
     protocol_parameters_hash: HexStr
     type: int = field(
-        default_factory=lambda: BlockType.Validation,
+        default_factory=lambda: int(BlockType.Validation),
         init=False)

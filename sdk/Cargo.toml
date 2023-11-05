@@ -126,7 +126,9 @@ wasm-bindgen-futures = { version = "0.4.37", default-features = false, optional 
 
 [dev-dependencies]
 iota-sdk = { path = ".", default-features = false, features = ["rand"] }
-pretty_assertions = { version = "1.4.0", default-features = false, features = [ "alloc" ] }
+pretty_assertions = { version = "1.4.0", default-features = false, features = [
+    "alloc",
+] }
 
 dotenvy = { version = "0.15.7", default-features = false }
 fern-logger = { version = "0.5.0", default-features = false }
@@ -221,28 +223,13 @@ path = "examples/how_tos/accounts_and_addresses/create_mnemonic.rs"
 required-features = ["client"]
 
 [[example]]
-name = "create_account"
-path = "examples/how_tos/accounts_and_addresses/create_account.rs"
-required-features = ["rocksdb", "stronghold"]
-
-[[example]]
-name = "list_accounts"
-path = "examples/how_tos/accounts_and_addresses/list_accounts.rs"
+name = "create_wallet"
+path = "examples/how_tos/accounts_and_addresses/create_wallet.rs"
 required-features = ["rocksdb", "stronghold"]
 
 [[example]]
 name = "check_balance"
 path = "examples/how_tos/accounts_and_addresses/check_balance.rs"
-required-features = ["rocksdb", "stronghold"]
-
-[[example]]
-name = "list_addresses"
-path = "examples/how_tos/accounts_and_addresses/list_addresses.rs"
-required-features = ["rocksdb", "stronghold"]
-
-[[example]]
-name = "create_address"
-path = "examples/how_tos/accounts_and_addresses/create_address.rs"
 required-features = ["rocksdb", "stronghold"]
 
 [[example]]
@@ -354,6 +341,11 @@ required-features = ["wallet", "stronghold"]
 name = "destroy_account_output"
 path = "examples/how_tos/account/destroy.rs"
 required-features = ["wallet", "stronghold"]
+
+[[example]]
+name = "implicit_account_creation"
+path = "examples/how_tos/account/implicit_account_creation.rs"
+required-features = ["wallet"]
 
 # Outputs
 
@@ -588,8 +580,8 @@ path = "examples/wallet/getting_started.rs"
 required-features = ["stronghold"]
 
 [[example]]
-name = "0_generate_addresses"
-path = "examples/wallet/offline_signing/0_generate_addresses.rs"
+name = "0_generate_address"
+path = "examples/wallet/offline_signing/0_generate_address.rs"
 required-features = ["wallet", "storage", "stronghold"]
 
 [[example]]
@@ -628,11 +620,6 @@ path = "examples/wallet/17_check_unlock_conditions.rs"
 required-features = ["wallet", "storage"]
 
 [[example]]
-name = "accounts"
-path = "examples/wallet/accounts.rs"
-required-features = ["wallet", "storage"]
-
-[[example]]
 name = "background_syncing"
 path = "examples/wallet/background_syncing.rs"
 required-features = ["wallet", "storage"]
@@ -658,19 +645,9 @@ path = "examples/wallet/logger.rs"
 required-features = ["wallet", "storage"]
 
 [[example]]
-name = "recover_accounts"
-path = "examples/wallet/recover_accounts.rs"
-required-features = ["wallet", "storage"]
-
-[[example]]
 name = "spammer"
 path = "examples/wallet/spammer.rs"
 required-features = ["wallet"]
-
-[[example]]
-name = "split_funds"
-path = "examples/wallet/split_funds.rs"
-required-features = ["wallet", "storage"]
 
 [[example]]
 name = "storage"

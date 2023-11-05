@@ -38,6 +38,7 @@ use crate::{
 
 /// Ledger nano errors.
 #[derive(Debug, thiserror::Error)]
+#[non_exhaustive]
 pub enum Error {
     /// Denied by User
     #[error("denied by user")]

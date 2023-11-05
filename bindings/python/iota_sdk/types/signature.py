@@ -18,7 +18,7 @@ class Ed25519Signature:
     """
     public_key: HexStr
     signature: HexStr
-    type: int = field(default_factory=lambda: 0, init=False)
+    type: int = field(default=0, init=False)
 
 
 Signature: TypeAlias = Ed25519Signature
