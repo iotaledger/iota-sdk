@@ -184,7 +184,7 @@ pub struct BlockIssuerFeature {
 
 impl BlockIssuerFeature {
     /// The [`Feature`](crate::types::block::output::Feature) kind of a [`BlockIssuerFeature`].
-    pub const KIND: u8 = 4;
+    pub const KIND: u8 = 5;
 
     /// Creates a new [`BlockIssuerFeature`].
     #[inline(always)]

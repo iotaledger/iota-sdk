@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 mod block_issuer;
+mod governor_metadata;
 mod issuer;
 mod metadata;
 mod sender;
@@ -19,9 +20,13 @@ use packable::{bounded::BoundedU8, prefix::BoxedSlicePrefix, Packable};
 pub use self::metadata::irc_27::{Attribute, Irc27Metadata};
 #[cfg(feature = "irc_30")]
 pub use self::metadata::irc_30::Irc30Metadata;
-pub(crate) use self::{block_issuer::BlockIssuerKeyCount, metadata::MetadataFeatureLength, tag::TagFeatureLength};
+pub(crate) use self::{
+    block_issuer::BlockIssuerKeyCount, governor_metadata::GovernorMetadataFeatureLength,
+    metadata::MetadataFeatureLength, tag::TagFeatureLength,
+};
 pub use self::{
     block_issuer::{BlockIssuerFeature, BlockIssuerKey, BlockIssuerKeys, Ed25519BlockIssuerKey},
+    governor_metadata::GovernorMetadataFeature,
     issuer::IssuerFeature,
     metadata::MetadataFeature,
     sender::SenderFeature,
@@ -45,6 +50,9 @@ pub enum Feature {
     /// A metadata feature.
     #[packable(tag = MetadataFeature::KIND)]
     Metadata(MetadataFeature),
+    /// A governor metadata feature.
+    #[packable(tag = GovernorMetadataFeature::KIND)]
+    GovernorMetadata(GovernorMetadataFeature),
     /// A tag feature.
     #[packable(tag = TagFeature::KIND)]
     Tag(TagFeature),
@@ -74,6 +82,7 @@ impl core::fmt::Debug for Feature {
             Self::Sender(feature) => feature.fmt(f),
             Self::Issuer(feature) => feature.fmt(f),
             Self::Metadata(feature) => feature.fmt(f),
+            Self::GovernorMetadata(feature) => feature.fmt(f),
             Self::Tag(feature) => feature.fmt(f),
             Self::BlockIssuer(feature) => feature.fmt(f),
             Self::Staking(feature) => feature.fmt(f),
@@ -88,6 +97,7 @@ impl Feature {
             Self::Sender(_) => SenderFeature::KIND,
             Self::Issuer(_) => IssuerFeature::KIND,
             Self::Metadata(_) => MetadataFeature::KIND,
+            Self::GovernorMetadata(_) => GovernorMetadataFeature::KIND,
             Self::Tag(_) => TagFeature::KIND,
             Self::BlockIssuer(_) => BlockIssuerFeature::KIND,
             Self::Staking(_) => StakingFeature::KIND,
@@ -100,13 +110,14 @@ impl Feature {
             Self::Sender(_) => FeatureFlags::SENDER,
             Self::Issuer(_) => FeatureFlags::ISSUER,
             Self::Metadata(_) => FeatureFlags::METADATA,
+            Self::GovernorMetadata(_) => FeatureFlags::GOVERNOR_METADATA,
             Self::Tag(_) => FeatureFlags::TAG,
             Self::BlockIssuer(_) => FeatureFlags::BLOCK_ISSUER,
             Self::Staking(_) => FeatureFlags::STAKING,
         }
     }
 
-    crate::def_is_as_opt!(Feature: Sender, Issuer, Metadata, Tag, BlockIssuer, Staking);
+    crate::def_is_as_opt!(Feature: Sender, Issuer, Metadata, GovernorMetadata, Tag, BlockIssuer, Staking);
 }
 
 create_bitflags!(
@@ -117,6 +128,7 @@ create_bitflags!(
         (SENDER, SenderFeature),
         (ISSUER, IssuerFeature),
         (METADATA, MetadataFeature),
+        (GOVERNOR_METADATA, GovernorMetadataFeature),
         (TAG, TagFeature),
         (BLOCK_ISSUER, BlockIssuerFeature),
         (STAKING, StakingFeature),
@@ -158,8 +170,8 @@ impl IntoIterator for Features {
 }
 
 impl Features {
-    ///
-    pub const COUNT_MAX: u8 = 5;
+    /// Maximum number of unique features.
+    pub const COUNT_MAX: u8 = 7;
 
     /// Creates a new [`Features`] from a vec.
     pub fn from_vec(features: Vec<Feature>) -> Result<Self, Error> {
@@ -207,6 +219,12 @@ impl Features {
     /// Gets a reference to a [`MetadataFeature`], if any.
     pub fn metadata(&self) -> Option<&MetadataFeature> {
         self.get(MetadataFeature::KIND).map(Feature::as_metadata)
+    }
+
+    /// Gets a reference to a [`GovernorMetadataFeature`], if any.
+    pub fn governor_metadata(&self) -> Option<&GovernorMetadataFeature> {
+        self.get(GovernorMetadataFeature::KIND)
+            .map(Feature::as_governor_metadata)
     }
 
     /// Gets a reference to a [`TagFeature`], if any.
@@ -261,6 +279,7 @@ mod test {
                 FeatureFlags::SENDER,
                 FeatureFlags::ISSUER,
                 FeatureFlags::METADATA,
+                FeatureFlags::GOVERNOR_METADATA,
                 FeatureFlags::TAG,
                 FeatureFlags::BLOCK_ISSUER,
                 FeatureFlags::STAKING

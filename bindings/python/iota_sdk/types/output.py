@@ -145,8 +145,6 @@ class AnchorOutput:
             Features that add utility to the output but do not impose unlocking conditions.
         immutable_features :
             Features that add utility to the output but do not impose unlocking conditions. These features need to be kept in future transitions of the UTXO state machine.
-        state_metadata :
-            Metadata that can only be changed by the state controller.
         native_tokens :
             Native tokens added to the new output.
         type :
@@ -175,7 +173,6 @@ class AnchorOutput:
                                                                        metadata=config(
                                                                            decoder=deserialize_features
                                                                        ))
-    state_metadata: Optional[HexStr] = None
     native_tokens: Optional[List[NativeToken]] = None
     type: int = field(
         default_factory=lambda: int(

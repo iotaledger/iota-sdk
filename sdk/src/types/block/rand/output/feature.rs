@@ -6,7 +6,7 @@ use alloc::{collections::BTreeSet, vec::Vec};
 use crate::types::block::{
     output::feature::{
         BlockIssuerFeature, BlockIssuerKey, BlockIssuerKeys, Ed25519BlockIssuerKey, Feature, FeatureFlags,
-        IssuerFeature, MetadataFeature, SenderFeature, StakingFeature, TagFeature,
+        GovernorMetadataFeature, IssuerFeature, MetadataFeature, SenderFeature, StakingFeature, TagFeature,
     },
     rand::{
         address::rand_address,
@@ -30,6 +30,12 @@ pub fn rand_issuer_feature() -> IssuerFeature {
 pub fn rand_metadata_feature() -> MetadataFeature {
     let bytes = rand_bytes(rand_number_range(MetadataFeature::LENGTH_RANGE) as usize);
     MetadataFeature::new(bytes).unwrap()
+}
+
+/// Generates a random [`GovernorMetadataFeature`].
+pub fn rand_governor_metadata_feature() -> GovernorMetadataFeature {
+    let bytes = rand_bytes(rand_number_range(GovernorMetadataFeature::LENGTH_RANGE) as usize);
+    GovernorMetadataFeature::new(bytes).unwrap()
 }
 
 /// Generates a random [`TagFeature`].
@@ -83,6 +89,7 @@ fn rand_feature_from_flag(flag: &FeatureFlags) -> Feature {
         FeatureFlags::SENDER => Feature::Sender(rand_sender_feature()),
         FeatureFlags::ISSUER => Feature::Issuer(rand_issuer_feature()),
         FeatureFlags::METADATA => Feature::Metadata(rand_metadata_feature()),
+        FeatureFlags::GOVERNOR_METADATA => Feature::GovernorMetadata(rand_governor_metadata_feature()),
         FeatureFlags::TAG => Feature::Tag(rand_tag_feature()),
         FeatureFlags::BLOCK_ISSUER => Feature::BlockIssuer(rand_block_issuer_feature()),
         FeatureFlags::STAKING => Feature::Staking(rand_staking_feature()),

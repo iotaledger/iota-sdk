@@ -17,8 +17,8 @@ use crate::types::block::{
     output::{
         feature::{BlockIssuerKeyCount, FeatureCount},
         unlock_condition::UnlockConditionCount,
-        AccountId, AnchorId, ChainId, MetadataFeatureLength, NativeTokenCount, NftId, OutputIndex, StateMetadataLength,
-        TagFeatureLength,
+        AccountId, AnchorId, ChainId, GovernorMetadataFeatureLength, MetadataFeatureLength, NativeTokenCount, NftId,
+        OutputIndex, TagFeatureLength,
     },
     payload::{ContextInputCount, InputCount, OutputCount, TagLength, TaggedDataLength},
     protocol::ProtocolParametersHash,
@@ -86,9 +86,9 @@ pub enum Error {
     InvalidBech32Hrp(Bech32HrpError),
     InvalidCapabilitiesCount(<u8 as TryFrom<usize>>::Error),
     InvalidSignedBlockLength(usize),
-    InvalidStateMetadataLength(<StateMetadataLength as TryFrom<usize>>::Error),
     InvalidManaValue(u64),
     InvalidMetadataFeatureLength(<MetadataFeatureLength as TryFrom<usize>>::Error),
+    InvalidGovernorMetadataFeatureLength(<GovernorMetadataFeatureLength as TryFrom<usize>>::Error),
     InvalidNativeTokenCount(<NativeTokenCount as TryFrom<usize>>::Error),
     InvalidNetworkName(FromUtf8Error),
     InvalidManaDecayFactors,
@@ -265,10 +265,12 @@ impl fmt::Display for Error {
             Self::InvalidInputCount(count) => write!(f, "invalid input count: {count}"),
             Self::InvalidInputOutputIndex(index) => write!(f, "invalid input or output index: {index}"),
             Self::InvalidSignedBlockLength(length) => write!(f, "invalid signed block length {length}"),
-            Self::InvalidStateMetadataLength(length) => write!(f, "invalid state metadata length: {length}"),
             Self::InvalidManaValue(mana) => write!(f, "invalid mana value: {mana}"),
             Self::InvalidMetadataFeatureLength(length) => {
                 write!(f, "invalid metadata feature length: {length}")
+            }
+            Self::InvalidGovernorMetadataFeatureLength(length) => {
+                write!(f, "invalid governor metadata feature length: {length}")
             }
             Self::InvalidNativeTokenCount(count) => write!(f, "invalid native token count: {count}"),
             Self::InvalidNetworkName(err) => write!(f, "invalid network name: {err}"),

@@ -45,7 +45,6 @@ where
     ///     address: None,
     ///     immutable_metadata: Some(b"some immutable account metadata".to_vec()),
     ///     metadata: Some(b"some account metadata".to_vec()),
-    ///     state_metadata: Some(b"some account state metadata".to_vec()),
     /// };
     ///
     /// let transaction = account.create_account_output(params, None).await?;
