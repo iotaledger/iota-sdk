@@ -11,6 +11,7 @@ use primitive_types::U256;
 
 use super::slot::EpochIndex;
 use crate::types::block::{
+    address::WeightedAddressCount,
     context_input::RewardContextInputIndex,
     input::UtxoInput,
     mana::ManaAllotmentCount,
@@ -72,6 +73,7 @@ pub enum Error {
     },
     InvalidContextInputKind(u8),
     InvalidContextInputCount(<ContextInputCount as TryFrom<usize>>::Error),
+    InvalidWeightedAddressCount(<WeightedAddressCount as TryFrom<usize>>::Error),
     InvalidFeatureCount(<FeatureCount as TryFrom<usize>>::Error),
     InvalidFeatureKind(u8),
     InvalidFoundryOutputSupply {
@@ -253,6 +255,7 @@ impl fmt::Display for Error {
                 "storage deposit return of {deposit} exceeds the original output amount of {amount}"
             ),
             Self::InvalidContextInputCount(count) => write!(f, "invalid context input count: {count}"),
+            Self::InvalidWeightedAddressCount(count) => write!(f, "invalid weighted address count: {count}"),
             Self::InvalidContextInputKind(k) => write!(f, "invalid context input kind: {k}"),
             Self::InvalidFeatureCount(count) => write!(f, "invalid feature count: {count}"),
             Self::InvalidFeatureKind(k) => write!(f, "invalid feature kind: {k}"),

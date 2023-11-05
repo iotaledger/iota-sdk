@@ -6,6 +6,7 @@ mod anchor;
 mod bech32;
 mod ed25519;
 mod implicit_account_creation;
+mod multi;
 mod nft;
 mod restricted;
 
@@ -14,12 +15,14 @@ use alloc::boxed::Box;
 use derive_more::{Display, From};
 use packable::Packable;
 
+pub(crate) use self::multi::WeightedAddressCount;
 pub use self::{
     account::AccountAddress,
     anchor::AnchorAddress,
     bech32::{Bech32Address, Hrp},
     ed25519::Ed25519Address,
     implicit_account_creation::ImplicitAccountCreationAddress,
+    multi::MultiAddress,
     nft::NftAddress,
     restricted::{AddressCapabilities, AddressCapabilityFlag, RestrictedAddress},
 };
@@ -32,7 +35,7 @@ use crate::types::block::{
 };
 
 /// A generic address supporting different address kinds.
-#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, From, Display, Packable)]
+#[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, From, Display, Packable)]
 #[packable(tag_type = u8, with_error = Error::InvalidAddressKind)]
 #[packable(unpack_error = Error)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize), serde(untagged))]
@@ -52,6 +55,9 @@ pub enum Address {
     /// An implicit account creation address.
     #[packable(tag = ImplicitAccountCreationAddress::KIND)]
     ImplicitAccountCreation(ImplicitAccountCreationAddress),
+    /// A multi address.
+    #[packable(tag = MultiAddress::KIND)]
+    Multi(MultiAddress),
     /// An address with restricted capabilities.
     #[packable(tag = RestrictedAddress::KIND)]
     #[from(ignore)]
@@ -64,19 +70,6 @@ impl From<RestrictedAddress> for Address {
     }
 }
 
-impl core::fmt::Debug for Address {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        match self {
-            Self::Ed25519(address) => address.fmt(f),
-            Self::Account(address) => address.fmt(f),
-            Self::Nft(address) => address.fmt(f),
-            Self::Anchor(address) => address.fmt(f),
-            Self::ImplicitAccountCreation(address) => address.fmt(f),
-            Self::Restricted(address) => address.fmt(f),
-        }
-    }
-}
-
 impl Address {
     /// Returns the address kind of an [`Address`].
     pub fn kind(&self) -> u8 {
@@ -86,11 +79,12 @@ impl Address {
             Self::Nft(_) => NftAddress::KIND,
             Self::Anchor(_) => AnchorAddress::KIND,
             Self::ImplicitAccountCreation(_) => ImplicitAccountCreationAddress::KIND,
+            Self::Multi(_) => MultiAddress::KIND,
             Self::Restricted(_) => RestrictedAddress::KIND,
         }
     }
 
-    crate::def_is_as_opt!(Address: Ed25519, Account, Nft, Anchor, ImplicitAccountCreation, Restricted);
+    crate::def_is_as_opt!(Address: Ed25519, Account, Nft, Anchor, ImplicitAccountCreation, Multi, Restricted);
 
     /// Tries to create an [`Address`] from a bech32 encoded string.
     pub fn try_from_bech32(address: impl AsRef<str>) -> Result<Self, Error> {
