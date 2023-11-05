@@ -20,7 +20,7 @@ use iota_sdk::{
 };
 use iota_sdk_bindings_core::{
     call_client_method, call_secret_manager_method, CallMethod, ClientMethod, Response, Result, SecretManagerMethod,
-    WalletCommandMethod, WalletMethod, WalletOptions,
+    WalletMethod, WalletOptions,
 };
 use pretty_assertions::assert_eq;
 
@@ -49,9 +49,7 @@ async fn create_wallet() -> Result<()> {
         .await?;
 
     let response = wallet
-        .call_method(WalletMethod::CallMethod {
-            method: WalletCommandMethod::UnspentOutputs { filter_options: None },
-        })
+        .call_method(WalletMethod::UnspentOutputs { filter_options: None })
         .await;
 
     match response {

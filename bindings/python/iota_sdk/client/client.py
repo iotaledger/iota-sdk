@@ -5,24 +5,21 @@ from json import dumps, loads
 from datetime import timedelta
 from typing import Any, Dict, List, Optional, Union
 import humps
-from dacite import from_dict
 
 from iota_sdk.external import create_client, call_client_method, listen_mqtt
 from iota_sdk.client._node_core_api import NodeCoreAPI
 from iota_sdk.client._node_indexer_api import NodeIndexerAPI
 from iota_sdk.client._high_level_api import HighLevelAPI
 from iota_sdk.client._utils import ClientUtils
-from iota_sdk.secret_manager.secret_manager import LedgerNanoSecretManager, MnemonicSecretManager, StrongholdSecretManager, SeedSecretManager
 from iota_sdk.types.block.signed_block import UnsignedBlock
 from iota_sdk.types.common import HexStr, Node
 from iota_sdk.types.feature import Feature
 from iota_sdk.types.native_token import NativeToken
 from iota_sdk.types.network_info import NetworkInfo
 from iota_sdk.types.output import AccountOutput, BasicOutput, FoundryOutput, NftOutput, deserialize_output
-from iota_sdk.types.payload import Payload, TransactionPayload
+from iota_sdk.types.payload import Payload
 from iota_sdk.types.token_scheme import SimpleTokenScheme
 from iota_sdk.types.unlock_condition import UnlockCondition
-from iota_sdk.types.transaction_data import PreparedTransactionData
 
 
 class ClientError(Exception):
@@ -372,21 +369,6 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         """Returns the unhealthy nodes.
         """
         return self._call_method('unhealthyNodes')
-
-    def sign_transaction(
-            self,
-            secret_manager: Union[LedgerNanoSecretManager, MnemonicSecretManager, SeedSecretManager, StrongholdSecretManager],
-            prepared_transaction_data: PreparedTransactionData) -> TransactionPayload:
-        """Sign a transaction.
-
-        Args:
-            secret_manager: One of the supported secret managers.
-            prepared_transaction_data: a prepared transaction to sign.
-        """
-        return from_dict(TransactionPayload, self._call_method('signTransaction', {
-            'secretManager': secret_manager,
-            'preparedTransactionData': prepared_transaction_data
-        }))
 
     def build_basic_block(
         self,
