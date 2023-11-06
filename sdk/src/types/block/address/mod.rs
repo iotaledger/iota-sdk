@@ -35,7 +35,7 @@ use crate::types::block::{
 };
 
 /// A generic address supporting different address kinds.
-#[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, From, Display, Packable)]
+#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, From, Display, Packable)]
 #[packable(tag_type = u8, with_error = Error::InvalidAddressKind)]
 #[packable(unpack_error = Error)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize), serde(untagged))]
@@ -67,6 +67,20 @@ pub enum Address {
 impl From<RestrictedAddress> for Address {
     fn from(value: RestrictedAddress) -> Self {
         Self::Restricted(value.into())
+    }
+}
+
+impl core::fmt::Debug for Address {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        match self {
+            Self::Ed25519(address) => address.fmt(f),
+            Self::Account(address) => address.fmt(f),
+            Self::Nft(address) => address.fmt(f),
+            Self::Anchor(address) => address.fmt(f),
+            Self::ImplicitAccountCreation(address) => address.fmt(f),
+            Self::Multi(address) => address.fmt(f),
+            Self::Restricted(address) => address.fmt(f),
+        }
     }
 }
 
