@@ -73,9 +73,9 @@ pub enum Error {
     },
     InvalidAddressWeight(u8),
     InvalidAddressWeightThreshold(u16),
+    InvalidWeightedAddressCount(<WeightedAddressCount as TryFrom<usize>>::Error),
     InvalidContextInputKind(u8),
     InvalidContextInputCount(<ContextInputCount as TryFrom<usize>>::Error),
-    InvalidWeightedAddressCount(<WeightedAddressCount as TryFrom<usize>>::Error),
     InvalidFeatureCount(<FeatureCount as TryFrom<usize>>::Error),
     InvalidFeatureKind(u8),
     InvalidFoundryOutputSupply {
@@ -257,9 +257,9 @@ impl fmt::Display for Error {
                 "storage deposit return of {deposit} exceeds the original output amount of {amount}"
             ),
             Self::InvalidContextInputCount(count) => write!(f, "invalid context input count: {count}"),
-            Self::InvalidWeightedAddressCount(count) => write!(f, "invalid weighted address count: {count}"),
             Self::InvalidAddressWeight(w) => write!(f, "invalid address weight: {w}"),
             Self::InvalidAddressWeightThreshold(t) => write!(f, "invalid address weight threshold: {t}"),
+            Self::InvalidWeightedAddressCount(count) => write!(f, "invalid weighted address count: {count}"),
             Self::InvalidContextInputKind(k) => write!(f, "invalid context input kind: {k}"),
             Self::InvalidFeatureCount(count) => write!(f, "invalid feature count: {count}"),
             Self::InvalidFeatureKind(k) => write!(f, "invalid feature kind: {k}"),
