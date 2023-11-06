@@ -53,11 +53,15 @@ impl WeightedAddress {
 }
 
 fn verify_address<const VERIFY: bool>(address: &Address, _visitor: &()) -> Result<(), Error> {
-    if VERIFY && !address.is_ed25519() && !address.is_account() && !address.is_nft() {
-        return Err(Error::InvalidAddressKind(address.kind()));
-    } else {
-        Ok(())
+    if VERIFY {
+        if !matches!(
+            address,
+            Address::Ed25519(_) | Address::Account(_) | Address::Nft(_) | Address::Anchor(_)
+        ) {
+            return Err(Error::InvalidAddressKind(address.kind()));
+        }
     }
+    Ok(())
 }
 
 fn verify_weight<const VERIFY: bool>(weight: &u8, _visitor: &()) -> Result<(), Error> {
