@@ -373,7 +373,7 @@ where
                     }
                 }
 
-                // If ids are provided, only return them and no other outputs.
+                // Include the output if we're not filtering by IDs.
                 if filter.account_ids.is_none()
                     && filter.anchor_ids.is_none()
                     && filter.foundry_ids.is_none()
