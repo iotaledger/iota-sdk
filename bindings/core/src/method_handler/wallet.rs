@@ -206,6 +206,10 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
             let implicit_account_creation_address = wallet.implicit_account_creation_address().await?;
             Response::Bech32Address(implicit_account_creation_address)
         }
+        WalletMethod::ImplicitAccounts => {
+            let implicit_accounts = wallet.implicit_accounts().await;
+            Response::OutputsData(implicit_accounts.iter().map(OutputDataDto::from).collect())
+        }
         WalletMethod::IncomingTransactions => {
             let transactions = wallet.incoming_transactions().await;
             Response::Transactions(transactions.iter().map(TransactionWithMetadataDto::from).collect())
