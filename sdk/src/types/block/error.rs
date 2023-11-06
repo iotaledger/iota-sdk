@@ -73,6 +73,10 @@ pub enum Error {
     },
     InvalidAddressWeight(u8),
     InvalidAddressWeightThreshold(u16),
+    InvalidCumulativeAddressWeight {
+        cumulative_weight: u16,
+        threshold: u16,
+    },
     InvalidWeightedAddressCount(<WeightedAddressCount as TryFrom<usize>>::Error),
     InvalidContextInputKind(u8),
     InvalidContextInputCount(<ContextInputCount as TryFrom<usize>>::Error),
@@ -259,6 +263,16 @@ impl fmt::Display for Error {
             Self::InvalidContextInputCount(count) => write!(f, "invalid context input count: {count}"),
             Self::InvalidAddressWeight(w) => write!(f, "invalid address weight: {w}"),
             Self::InvalidAddressWeightThreshold(t) => write!(f, "invalid address weight threshold: {t}"),
+            Self::InvalidAddressWeightThreshold(t) => write!(f, "invalid address weight threshold: {t}"),
+            Self::InvalidCumulativeAddressWeight {
+                cumulative_weight,
+                threshold,
+            } => {
+                write!(
+                    f,
+                    "invalid cumulative address weight: cumulative weight {cumulative_weight} < threshold {threshold}"
+                )
+            }
             Self::InvalidWeightedAddressCount(count) => write!(f, "invalid weighted address count: {count}"),
             Self::InvalidContextInputKind(k) => write!(f, "invalid context input kind: {k}"),
             Self::InvalidFeatureCount(count) => write!(f, "invalid feature count: {count}"),

@@ -89,13 +89,13 @@ impl MultiAddress {
     pub fn new(addresses: Vec<WeightedAddress>, threshold: u16) -> Result<Self, Error> {
         verify_threshold::<true>(&threshold, &())?;
 
-        Ok(Self {
-            addresses: BoxedSlicePrefix::<WeightedAddress, WeightedAddressCount>::try_from(
-                addresses.into_boxed_slice(),
-            )
-            .map_err(Error::InvalidWeightedAddressCount)?,
-            threshold,
-        })
+        let addresses =
+            BoxedSlicePrefix::<WeightedAddress, WeightedAddressCount>::try_from(addresses.into_boxed_slice())
+                .map_err(Error::InvalidWeightedAddressCount)?;
+
+        verify_cumulative_weight::<true>(&addresses, &threshold, &())?;
+
+        Ok(Self { addresses, threshold })
     }
 
     // /// Returns the [`AccountId`] of an [`MultiAddress`].
@@ -133,7 +133,8 @@ impl Packable for MultiAddress {
                 .map_packable_err(|e| e.unwrap_item_err_or_else(|e| Error::InvalidWeightedAddressCount(e.into())))?;
         let threshold = u16::unpack::<_, VERIFY>(unpacker, visitor).coerce()?;
 
-        verify_threshold::<true>(&threshold, &()).map_err(UnpackError::Packable)?;
+        verify_threshold::<VERIFY>(&threshold, &()).map_err(UnpackError::Packable)?;
+        verify_cumulative_weight::<VERIFY>(&addresses, &threshold, &()).map_err(UnpackError::Packable)?;
 
         Ok(Self { addresses, threshold })
     }
@@ -145,6 +146,24 @@ fn verify_threshold<const VERIFY: bool>(threshold: &u16, _visitor: &()) -> Resul
     } else {
         Ok(())
     }
+}
+
+fn verify_cumulative_weight<const VERIFY: bool>(
+    addresses: &[WeightedAddress],
+    threshold: &u16,
+    _visitor: &(),
+) -> Result<(), Error> {
+    if VERIFY {
+        let cumulative_weight = addresses.iter().map(|address| address.weight as u16).sum::<u16>();
+
+        if cumulative_weight < *threshold {
+            return Err(Error::InvalidCumulativeAddressWeight {
+                cumulative_weight,
+                threshold: *threshold,
+            });
+        }
+    }
+    Ok(())
 }
 
 // impl FromStr for MultiAddress {
