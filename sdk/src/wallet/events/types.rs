@@ -13,8 +13,10 @@ use crate::{
             payload::signed_transaction::{dto::SignedTransactionPayloadDto, TransactionId},
         },
     },
-    wallet::types::{InclusionState, OutputDataDto},
-    wallet::Error,
+    wallet::{
+        types::{InclusionState, OutputDataDto},
+        Error,
+    },
 };
 
 #[derive(Clone, Debug, Eq, PartialEq)]
