@@ -98,17 +98,17 @@ impl MultiAddress {
         Ok(Self { addresses, threshold })
     }
 
-    // /// Returns the [`AccountId`] of an [`MultiAddress`].
-    // #[inline(always)]
-    // pub fn account_id(&self) -> &AccountId {
-    //     &self.0
-    // }
+    /// Returns the addresses of a [`MultiAddress`].
+    #[inline(always)]
+    pub fn addresses(&self) -> &[WeightedAddress] {
+        &self.addresses
+    }
 
-    // /// Consumes an [`MultiAddress`] and returns its [`AccountId`].
-    // #[inline(always)]
-    // pub fn into_account_id(self) -> AccountId {
-    //     self.0
-    // }
+    /// Returns the threshold of a [`MultiAddress`].
+    #[inline(always)]
+    pub fn threshold(&self) -> u16 {
+        self.threshold
+    }
 }
 
 impl Packable for MultiAddress {
