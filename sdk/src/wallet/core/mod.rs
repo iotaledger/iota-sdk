@@ -404,6 +404,17 @@ where
         .map(|res| res.get(0).cloned())
     }
 
+    /// Returns implicit accounts of the wallet.
+    pub async fn implicit_accounts(&self) -> Vec<OutputData> {
+        self.data()
+            .await
+            .unspent_outputs
+            .values()
+            .filter(|output_data| output_data.output.is_implicit_account())
+            .cloned()
+            .collect()
+    }
+
     /// Returns all incoming transactions of the wallet
     pub async fn incoming_transactions(&self) -> Vec<TransactionWithMetadata> {
         self.data().await.incoming_transactions.values().cloned().collect()
