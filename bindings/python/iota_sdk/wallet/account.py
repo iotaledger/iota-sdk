@@ -278,6 +278,14 @@ class Account:
             'implicitAccountCreationAddress'
         )
 
+    def implicit_accounts(self) -> List[OutputData]:
+        """Returns the implicit accounts of the wallet.
+        """
+        outputs = self._call_account_method(
+            'implicitAccounts'
+        )    
+        return [from_dict(OutputData, o) for o in outputs]
+
     def incoming_transactions(self) -> List[TransactionWithMetadata]:
         """Returns all incoming transactions of the account.
         """
