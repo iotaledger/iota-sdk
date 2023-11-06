@@ -14,9 +14,9 @@ use napi_derive::napi;
 #[derive(Debug, thiserror::Error)]
 #[non_exhaustive]
 pub enum NodejsError {
-    /// Bindings errors.
+    /// Bindings core errors.
     #[error(transparent)]
-    Bindings(#[from] iota_sdk_bindings_core::Error),
+    Core(#[from] iota_sdk_bindings_core::Error),
     /// Client errors.
     #[error(transparent)]
     Client(#[from] iota_sdk_bindings_core::iota_sdk::client::Error),
