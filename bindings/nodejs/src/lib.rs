@@ -15,22 +15,22 @@ use napi_derive::napi;
 #[non_exhaustive]
 pub enum NodejsError {
     /// Bindings errors.
-    #[error("{0}")]
+    #[error("transparent")]
     Bindings(#[from] iota_sdk_bindings_core::Error),
     /// Client errors.
-    #[error("{0}")]
+    #[error("transparent")]
     Client(#[from] iota_sdk_bindings_core::iota_sdk::client::Error),
     /// Mqtt errors.
-    #[error("{0}")]
+    #[error("transparent")]
     Mqtt(#[from] iota_sdk_bindings_core::iota_sdk::client::node_api::mqtt::Error),
     /// SerdeJson errors.
-    #[error("{0}")]
+    #[error("transparent")]
     SerdeJson(#[from] serde_json::error::Error),
     /// IO error.
-    #[error("`{0}`")]
+    #[error("`transparent`")]
     Io(#[from] std::io::Error),
     /// Wallet errors.
-    #[error("{0}")]
+    #[error("transparent")]
     Wallet(#[from] iota_sdk_bindings_core::iota_sdk::wallet::Error),
 }
 
