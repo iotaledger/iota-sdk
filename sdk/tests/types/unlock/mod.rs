@@ -8,7 +8,7 @@ mod signature;
 
 use iota_sdk::types::block::{
     rand::signature::rand_signature,
-    unlock::{AccountUnlock, NftUnlock, ReferenceUnlock, SignatureUnlock, Unlock, Unlocks},
+    unlock::{AccountUnlock, AnchorUnlock, NftUnlock, ReferenceUnlock, SignatureUnlock, Unlock, Unlocks},
     Error,
 };
 use packable::bounded::TryIntoBoundedU16Error;
@@ -19,7 +19,8 @@ fn kind() {
     assert_eq!(Unlock::from(SignatureUnlock::from(rand_signature())).kind(), 0);
     assert_eq!(Unlock::from(ReferenceUnlock::new(0).unwrap()).kind(), 1);
     assert_eq!(Unlock::from(AccountUnlock::new(0).unwrap()).kind(), 2);
-    assert_eq!(Unlock::from(NftUnlock::new(0).unwrap()).kind(), 3);
+    assert_eq!(Unlock::from(AnchorUnlock::new(0).unwrap()).kind(), 3);
+    assert_eq!(Unlock::from(NftUnlock::new(0).unwrap()).kind(), 4);
 }
 
 #[test]

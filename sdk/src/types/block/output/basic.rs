@@ -411,9 +411,9 @@ impl BasicOutput {
     /// Simple deposit outputs are basic outputs with only an address unlock condition, no native tokens and no
     /// features. They are used to return storage deposits.
     pub fn simple_deposit_address(&self) -> Option<&Address> {
-        if let [UnlockCondition::Address(address)] = self.unlock_conditions().as_ref() {
+        if let [UnlockCondition::Address(uc)] = self.unlock_conditions().as_ref() {
             if self.mana == 0 && self.native_tokens.is_empty() && self.features.is_empty() {
-                return Some(address.address());
+                return Some(uc.address());
             }
         }
 
@@ -436,6 +436,15 @@ impl BasicOutput {
             // Features
             + size_of::<u8>()
             + self.features.iter().map(|uc| uc.packed_len()).sum::<usize>()
+    }
+
+    /// Checks whether the basic output is an implicit account.
+    pub fn is_implicit_account(&self) -> bool {
+        if let [UnlockCondition::Address(uc)] = self.unlock_conditions().as_ref() {
+            uc.address().is_implicit_account_creation() && self.native_tokens.is_empty() && self.features.is_empty()
+        } else {
+            false
+        }
     }
 }
 

@@ -6,32 +6,33 @@ use iota_sdk::{
         unlock_condition::{AddressUnlockCondition, ExpirationUnlockCondition},
         BasicOutputBuilder, NativeToken, NftId, NftOutputBuilder, UnlockCondition,
     },
-    wallet::{
-        account::{OutputsToClaim, TransactionOptions},
-        CreateNativeTokenParams, Result, SendNativeTokensParams, SendParams,
-    },
+    wallet::{CreateNativeTokenParams, OutputsToClaim, Result, SendNativeTokensParams, SendParams, TransactionOptions},
     U256,
 };
 use pretty_assertions::assert_eq;
 
-use crate::wallet::common::{create_accounts_with_funds, make_wallet, setup, tear_down};
+use crate::wallet::common::{make_wallet, request_funds, setup, tear_down};
 
 #[ignore]
 #[tokio::test]
 async fn claim_2_basic_micro_outputs() -> Result<()> {
-    let storage_path = "test-storage/claim_2_basic_micro_outputs";
-    setup(storage_path)?;
+    let storage_path_0 = "test-storage/claim_2_basic_micro_outputs_0";
+    let storage_path_1 = "test-storage/claim_2_basic_micro_outputs_1";
+    setup(storage_path_0)?;
+    setup(storage_path_1)?;
 
-    let wallet = make_wallet(storage_path, None, None).await?;
+    let wallet_0 = make_wallet(storage_path_0, None, None).await?;
+    let wallet_1 = make_wallet(storage_path_1, None, None).await?;
 
-    let accounts = create_accounts_with_funds(&wallet, 2).await?;
+    request_funds(&wallet_0).await?;
+    request_funds(&wallet_1).await?;
 
     let micro_amount = 1;
-    let tx = accounts[1]
+    let tx = wallet_1
         .send_with_params(
             [
-                SendParams::new(micro_amount, accounts[0].first_address_bech32().await)?,
-                SendParams::new(micro_amount, accounts[0].first_address_bech32().await)?,
+                SendParams::new(micro_amount, wallet_0.address().await)?,
+                SendParams::new(micro_amount, wallet_0.address().await)?,
             ],
             TransactionOptions {
                 allow_micro_amount: true,
@@ -40,48 +41,55 @@ async fn claim_2_basic_micro_outputs() -> Result<()> {
         )
         .await?;
 
-    accounts[1]
+    wallet_1
         .reissue_transaction_until_included(&tx.transaction_id, None, None)
         .await?;
 
     // Claim with account 0
-    let balance = accounts[0].sync(None).await.unwrap();
+    let balance = wallet_0.sync(None).await.unwrap();
     assert_eq!(balance.potentially_locked_outputs().len(), 2);
     let base_coin_amount_before_claiming = balance.base_coin().available();
 
-    let tx = accounts[0]
-        .claim_outputs(accounts[0].claimable_outputs(OutputsToClaim::MicroTransactions).await?)
+    let tx = wallet_0
+        .claim_outputs(wallet_0.claimable_outputs(OutputsToClaim::MicroTransactions).await?)
         .await?;
-    accounts[0]
+    wallet_0
         .reissue_transaction_until_included(&tx.transaction_id, None, None)
         .await?;
 
-    let balance = accounts[0].sync(None).await.unwrap();
+    let balance = wallet_0.sync(None).await.unwrap();
     assert_eq!(balance.potentially_locked_outputs().len(), 0);
     assert_eq!(
         balance.base_coin().available(),
         base_coin_amount_before_claiming + 2 * micro_amount
     );
 
-    tear_down(storage_path)
+    tear_down(storage_path_0)?;
+    tear_down(storage_path_1)?;
+
+    Ok(())
 }
 
 #[ignore]
 #[tokio::test]
 async fn claim_1_of_2_basic_outputs() -> Result<()> {
-    let storage_path = "test-storage/claim_1_of_2_basic_outputs";
-    setup(storage_path)?;
+    let storage_path_0 = "test-storage/claim_1_of_2_basic_outputs_0";
+    let storage_path_1 = "test-storage/claim_1_of_2_basic_outputs_1";
+    setup(storage_path_0)?;
+    setup(storage_path_1)?;
 
-    let wallet = make_wallet(storage_path, None, None).await?;
+    let wallet_0 = make_wallet(storage_path_0, None, None).await?;
+    let wallet_1 = make_wallet(storage_path_0, None, None).await?;
 
-    let accounts = create_accounts_with_funds(&wallet, 2).await?;
+    request_funds(&wallet_0).await?;
+    request_funds(&wallet_1).await?;
 
     let amount = 10;
-    let tx = accounts[1]
+    let tx = wallet_1
         .send_with_params(
             [
-                SendParams::new(amount, accounts[0].first_address_bech32().await)?,
-                SendParams::new(0, accounts[0].first_address_bech32().await)?,
+                SendParams::new(amount, wallet_0.address().await)?,
+                SendParams::new(0, wallet_0.address().await)?,
             ],
             TransactionOptions {
                 allow_micro_amount: true,
@@ -90,52 +98,57 @@ async fn claim_1_of_2_basic_outputs() -> Result<()> {
         )
         .await?;
 
-    accounts[1]
+    wallet_1
         .reissue_transaction_until_included(&tx.transaction_id, None, None)
         .await?;
 
     // Claim with account 0
-    let balance = accounts[0].sync(None).await.unwrap();
+    let balance = wallet_0.sync(None).await.unwrap();
     assert_eq!(balance.potentially_locked_outputs().len(), 2);
     let base_coin_amount_before_claiming = balance.base_coin().available();
 
-    let tx = accounts[0]
-        .claim_outputs(accounts[0].claimable_outputs(OutputsToClaim::Amount).await?)
+    let tx = wallet_0
+        .claim_outputs(wallet_0.claimable_outputs(OutputsToClaim::Amount).await?)
         .await?;
-    accounts[0]
+    wallet_0
         .reissue_transaction_until_included(&tx.transaction_id, None, None)
         .await?;
 
-    let balance = accounts[0].sync(None).await.unwrap();
+    let balance = wallet_0.sync(None).await.unwrap();
     assert_eq!(balance.potentially_locked_outputs().len(), 1);
     assert_eq!(
         balance.base_coin().available(),
         base_coin_amount_before_claiming + amount
     );
 
-    tear_down(storage_path)
+    tear_down(storage_path_0)?;
+    tear_down(storage_path_1)?;
+
+    Ok(())
 }
 
 #[ignore]
 #[tokio::test]
 async fn claim_2_basic_outputs_no_outputs_in_claim_account() -> Result<()> {
-    let storage_path = "test-storage/claim_2_basic_outputs_no_outputs_in_claim_account";
-    setup(storage_path)?;
+    let storage_path_0 = "test-storage/claim_2_basic_outputs_no_outputs_in_claim_account_0";
+    let storage_path_1 = "test-storage/claim_2_basic_outputs_no_outputs_in_claim_account_1";
+    setup(storage_path_0)?;
+    setup(storage_path_1)?;
 
-    let wallet = make_wallet(storage_path, None, None).await?;
+    let wallet_0 = make_wallet(storage_path_0, None, None).await?;
+    let wallet_1 = make_wallet(storage_path_1, None, None).await?;
 
-    let account_0 = &create_accounts_with_funds(&wallet, 1).await?[0];
-    let account_1 = wallet.create_account().finish().await?;
+    request_funds(&wallet_0).await?;
 
-    let token_supply = account_0.client().get_token_supply().await?;
-    let params = account_0.client().get_storage_score_parameters().await?;
+    let token_supply = wallet_0.client().get_token_supply().await?;
+    let storage_params = wallet_0.client().get_storage_score_parameters().await?;
     // TODO more fitting value
-    let expiration_slot = account_0.client().get_slot_index().await? + 86400;
+    let expiration_slot = wallet_0.client().get_slot_index().await? + 86400;
 
-    let output = BasicOutputBuilder::new_with_minimum_amount(params)
-        .add_unlock_condition(AddressUnlockCondition::new(account_1.first_address_bech32().await))
+    let output = BasicOutputBuilder::new_with_minimum_amount(storage_params)
+        .add_unlock_condition(AddressUnlockCondition::new(wallet_1.address().await))
         .add_unlock_condition(ExpirationUnlockCondition::new(
-            account_0.first_address_bech32().await,
+            wallet_0.address().await,
             expiration_slot,
         )?)
         .finish_output(token_supply)?;
@@ -143,53 +156,57 @@ async fn claim_2_basic_outputs_no_outputs_in_claim_account() -> Result<()> {
 
     let outputs = vec![output; 2];
 
-    let tx = account_0.send_outputs(outputs, None).await?;
+    let tx = wallet_0.send_outputs(outputs, None).await?;
 
-    account_0
+    wallet_0
         .reissue_transaction_until_included(&tx.transaction_id, None, None)
         .await?;
 
-    // Claim with account 1
-    let balance = account_1.sync(None).await.unwrap();
+    // Claim with wallet 1
+    let balance = wallet_1.sync(None).await.unwrap();
     assert_eq!(balance.potentially_locked_outputs().len(), 2);
     let base_coin_amount_before_claiming = balance.base_coin().available();
 
-    let tx = account_1
-        .claim_outputs(account_1.claimable_outputs(OutputsToClaim::All).await?)
+    let tx = wallet_1
+        .claim_outputs(wallet_1.claimable_outputs(OutputsToClaim::All).await?)
         .await?;
-    account_1
+    wallet_1
         .reissue_transaction_until_included(&tx.transaction_id, None, None)
         .await?;
 
-    let balance = account_1.sync(None).await.unwrap();
+    let balance = wallet_1.sync(None).await.unwrap();
     assert_eq!(balance.potentially_locked_outputs().len(), 0);
     assert_eq!(
         balance.base_coin().available(),
         base_coin_amount_before_claiming + 2 * amount
     );
 
-    tear_down(storage_path)
+    tear_down(storage_path_0)
 }
 
 #[ignore]
 #[tokio::test]
 async fn claim_2_native_tokens() -> Result<()> {
-    let storage_path = "test-storage/claim_2_native_tokens";
-    setup(storage_path)?;
+    let storage_path_0 = "test-storage/claim_2_native_tokens_0";
+    let storage_path_1 = "test-storage/claim_2_native_tokens_1";
+    setup(storage_path_0)?;
+    setup(storage_path_1)?;
 
-    let wallet = make_wallet(storage_path, None, None).await?;
+    let wallet_0 = make_wallet(storage_path_0, None, None).await?;
+    let wallet_1 = make_wallet(storage_path_1, None, None).await?;
 
-    let accounts = create_accounts_with_funds(&wallet, 2).await?;
+    request_funds(&wallet_0).await?;
+    request_funds(&wallet_1).await?;
 
     let native_token_amount = U256::from(100);
 
-    let tx = accounts[1].create_account_output(None, None).await?;
-    accounts[1]
+    let tx = wallet_1.create_account_output(None, None).await?;
+    wallet_1
         .reissue_transaction_until_included(&tx.transaction_id, None, None)
         .await?;
-    accounts[1].sync(None).await?;
+    wallet_1.sync(None).await?;
 
-    let create_tx_0 = accounts[1]
+    let create_tx_0 = wallet_1
         .create_native_token(
             CreateNativeTokenParams {
                 account_id: None,
@@ -200,12 +217,12 @@ async fn claim_2_native_tokens() -> Result<()> {
             None,
         )
         .await?;
-    accounts[1]
+    wallet_1
         .reissue_transaction_until_included(&create_tx_0.transaction.transaction_id, None, None)
         .await?;
-    accounts[1].sync(None).await?;
+    wallet_1.sync(None).await?;
 
-    let create_tx_1 = accounts[1]
+    let create_tx_1 = wallet_1
         .create_native_token(
             CreateNativeTokenParams {
                 account_id: None,
@@ -216,42 +233,36 @@ async fn claim_2_native_tokens() -> Result<()> {
             None,
         )
         .await?;
-    accounts[1]
+    wallet_1
         .reissue_transaction_until_included(&create_tx_1.transaction.transaction_id, None, None)
         .await?;
-    accounts[1].sync(None).await?;
+    wallet_1.sync(None).await?;
 
-    let tx = accounts[1]
+    let tx = wallet_1
         .send_native_tokens(
             [
-                SendNativeTokensParams::new(
-                    accounts[0].first_address_bech32().await,
-                    [(create_tx_0.token_id, native_token_amount)],
-                )?,
-                SendNativeTokensParams::new(
-                    accounts[0].first_address_bech32().await,
-                    [(create_tx_1.token_id, native_token_amount)],
-                )?,
+                SendNativeTokensParams::new(wallet_0.address().await, [(create_tx_0.token_id, native_token_amount)])?,
+                SendNativeTokensParams::new(wallet_0.address().await, [(create_tx_1.token_id, native_token_amount)])?,
             ],
             None,
         )
         .await?;
-    accounts[1]
+    wallet_1
         .reissue_transaction_until_included(&tx.transaction_id, None, None)
         .await?;
 
     // Claim with account 0
-    let balance = accounts[0].sync(None).await.unwrap();
+    let balance = wallet_0.sync(None).await.unwrap();
     assert_eq!(balance.potentially_locked_outputs().len(), 2);
 
-    let tx = accounts[0]
-        .claim_outputs(accounts[0].claimable_outputs(OutputsToClaim::NativeTokens).await?)
+    let tx = wallet_0
+        .claim_outputs(wallet_0.claimable_outputs(OutputsToClaim::NativeTokens).await?)
         .await?;
-    accounts[0]
+    wallet_0
         .reissue_transaction_until_included(&tx.transaction_id, None, None)
         .await?;
 
-    let balance = accounts[0].sync(None).await.unwrap();
+    let balance = wallet_0.sync(None).await.unwrap();
     assert_eq!(balance.potentially_locked_outputs().len(), 0);
     assert_eq!(balance.native_tokens().len(), 2);
     let native_token_0 = balance
@@ -267,29 +278,34 @@ async fn claim_2_native_tokens() -> Result<()> {
         .unwrap();
     assert_eq!(native_token_1.total(), native_token_amount);
 
-    tear_down(storage_path)
+    tear_down(storage_path_0)?;
+    tear_down(storage_path_1)?;
+
+    Ok(())
 }
 
 #[ignore]
 #[tokio::test]
 async fn claim_2_native_tokens_no_outputs_in_claim_account() -> Result<()> {
-    let storage_path = "test-storage/claim_2_native_tokens_no_outputs_in_claim_account";
-    setup(storage_path)?;
+    let storage_path_0 = "test-storage/claim_2_native_tokens_no_outputs_in_claim_account_0";
+    let storage_path_1 = "test-storage/claim_2_native_tokens_no_outputs_in_claim_account_1";
+    setup(storage_path_0)?;
+    setup(storage_path_1)?;
 
-    let wallet = make_wallet(storage_path, None, None).await?;
+    let wallet_0 = make_wallet(storage_path_0, None, None).await?;
+    let wallet_1 = make_wallet(storage_path_1, None, None).await?;
 
-    let account_0 = &create_accounts_with_funds(&wallet, 1).await?[0];
-    let account_1 = wallet.create_account().finish().await?;
+    request_funds(&wallet_0).await?;
 
     let native_token_amount = U256::from(100);
 
-    let tx = account_0.create_account_output(None, None).await?;
-    account_0
+    let tx = wallet_0.create_account_output(None, None).await?;
+    wallet_0
         .reissue_transaction_until_included(&tx.transaction_id, None, None)
         .await?;
-    account_0.sync(None).await?;
+    wallet_0.sync(None).await?;
 
-    let create_tx_0 = account_0
+    let create_tx_0 = wallet_0
         .create_native_token(
             CreateNativeTokenParams {
                 account_id: None,
@@ -300,12 +316,12 @@ async fn claim_2_native_tokens_no_outputs_in_claim_account() -> Result<()> {
             None,
         )
         .await?;
-    account_0
+    wallet_0
         .reissue_transaction_until_included(&create_tx_0.transaction.transaction_id, None, None)
         .await?;
-    account_0.sync(None).await?;
+    wallet_0.sync(None).await?;
 
-    let create_tx_1 = account_0
+    let create_tx_1 = wallet_0
         .create_native_token(
             CreateNativeTokenParams {
                 account_id: None,
@@ -316,30 +332,30 @@ async fn claim_2_native_tokens_no_outputs_in_claim_account() -> Result<()> {
             None,
         )
         .await?;
-    account_0
+    wallet_0
         .reissue_transaction_until_included(&create_tx_1.transaction.transaction_id, None, None)
         .await?;
-    account_0.sync(None).await?;
+    wallet_0.sync(None).await?;
 
-    let params = account_0.client().get_storage_score_parameters().await?;
-    let token_supply = account_0.client().get_token_supply().await?;
+    let storage_params = wallet_0.client().get_storage_score_parameters().await?;
+    let token_supply = wallet_0.client().get_token_supply().await?;
 
-    let tx = account_0
+    let tx = wallet_0
         .send_outputs(
             [
-                BasicOutputBuilder::new_with_minimum_amount(params)
-                    .add_unlock_condition(AddressUnlockCondition::new(account_1.first_address_bech32().await))
+                BasicOutputBuilder::new_with_minimum_amount(storage_params)
+                    .add_unlock_condition(AddressUnlockCondition::new(wallet_1.address().await))
                     .add_unlock_condition(ExpirationUnlockCondition::new(
-                        account_0.first_address_bech32().await,
-                        account_0.client().get_slot_index().await? + 5000,
+                        wallet_0.address().await,
+                        wallet_0.client().get_slot_index().await? + 5000,
                     )?)
                     .add_native_token(NativeToken::new(create_tx_0.token_id, native_token_amount)?)
                     .finish_output(token_supply)?,
-                BasicOutputBuilder::new_with_minimum_amount(params)
-                    .add_unlock_condition(AddressUnlockCondition::new(account_1.first_address_bech32().await))
+                BasicOutputBuilder::new_with_minimum_amount(storage_params)
+                    .add_unlock_condition(AddressUnlockCondition::new(wallet_1.address().await))
                     .add_unlock_condition(ExpirationUnlockCondition::new(
-                        account_0.first_address_bech32().await,
-                        account_0.client().get_slot_index().await? + 5000,
+                        wallet_0.address().await,
+                        wallet_0.client().get_slot_index().await? + 5000,
                     )?)
                     .add_native_token(NativeToken::new(create_tx_1.token_id, native_token_amount)?)
                     .finish_output(token_supply)?,
@@ -347,22 +363,22 @@ async fn claim_2_native_tokens_no_outputs_in_claim_account() -> Result<()> {
             None,
         )
         .await?;
-    account_0
+    wallet_0
         .reissue_transaction_until_included(&tx.transaction_id, None, None)
         .await?;
 
     // Claim with account 1
-    let balance = account_1.sync(None).await.unwrap();
+    let balance = wallet_1.sync(None).await.unwrap();
     assert_eq!(balance.potentially_locked_outputs().len(), 2);
 
-    let tx = account_1
-        .claim_outputs(account_1.claimable_outputs(OutputsToClaim::NativeTokens).await?)
+    let tx = wallet_1
+        .claim_outputs(wallet_1.claimable_outputs(OutputsToClaim::NativeTokens).await?)
         .await?;
-    account_1
+    wallet_1
         .reissue_transaction_until_included(&tx.transaction_id, None, None)
         .await?;
 
-    let balance = account_1.sync(None).await.unwrap();
+    let balance = wallet_1.sync(None).await.unwrap();
     assert_eq!(balance.potentially_locked_outputs().len(), 0);
     assert_eq!(balance.native_tokens().len(), 2);
     let native_token_0 = balance
@@ -378,137 +394,154 @@ async fn claim_2_native_tokens_no_outputs_in_claim_account() -> Result<()> {
         .unwrap();
     assert_eq!(native_token_1.total(), native_token_amount);
 
-    tear_down(storage_path)
+    tear_down(storage_path_0)?;
+    tear_down(storage_path_1)?;
+
+    Ok(())
 }
 
 #[ignore]
 #[tokio::test]
 async fn claim_2_nft_outputs() -> Result<()> {
-    let storage_path = "test-storage/claim_2_nft_outputs";
-    setup(storage_path)?;
+    let storage_path_0 = "test-storage/claim_2_nft_outputs_0";
+    let storage_path_1 = "test-storage/claim_2_nft_outputs_1";
+    setup(storage_path_0)?;
+    setup(storage_path_1)?;
 
-    let wallet = make_wallet(storage_path, None, None).await?;
+    let wallet_0 = make_wallet(storage_path_0, None, None).await?;
+    let wallet_1 = make_wallet(storage_path_1, None, None).await?;
 
-    let accounts = create_accounts_with_funds(&wallet, 2).await?;
+    request_funds(&wallet_0).await?;
+    request_funds(&wallet_1).await?;
 
-    let token_supply = accounts[1].client().get_token_supply().await?;
+    let token_supply = wallet_1.client().get_token_supply().await?;
     let outputs = [
         // address of the owner of the NFT
         NftOutputBuilder::new_with_amount(1_000_000, NftId::null())
             .with_unlock_conditions([
-                UnlockCondition::Address(AddressUnlockCondition::new(accounts[0].first_address_bech32().await)),
+                UnlockCondition::Address(AddressUnlockCondition::new(wallet_0.address().await)),
                 UnlockCondition::Expiration(ExpirationUnlockCondition::new(
-                    accounts[1].first_address_bech32().await,
-                    accounts[1].client().get_slot_index().await? + 5000,
+                    wallet_1.address().await,
+                    wallet_1.client().get_slot_index().await? + 5000,
                 )?),
             ])
             .finish_output(token_supply)?,
         NftOutputBuilder::new_with_amount(1_000_000, NftId::null())
             .with_unlock_conditions([
-                UnlockCondition::Address(AddressUnlockCondition::new(accounts[0].first_address_bech32().await)),
+                UnlockCondition::Address(AddressUnlockCondition::new(wallet_0.address().await)),
                 UnlockCondition::Expiration(ExpirationUnlockCondition::new(
-                    accounts[1].first_address_bech32().await,
-                    accounts[1].client().get_slot_index().await? + 5000,
+                    wallet_1.address().await,
+                    wallet_1.client().get_slot_index().await? + 5000,
                 )?),
             ])
             .finish_output(token_supply)?,
     ];
 
-    let tx = accounts[1].send_outputs(outputs, None).await?;
-    accounts[1]
+    let tx = wallet_1.send_outputs(outputs, None).await?;
+    wallet_1
         .reissue_transaction_until_included(&tx.transaction_id, None, None)
         .await?;
 
     // Claim with account 0
-    let balance = accounts[0].sync(None).await.unwrap();
+    let balance = wallet_0.sync(None).await.unwrap();
     assert_eq!(balance.potentially_locked_outputs().len(), 2);
 
-    let tx = accounts[0]
-        .claim_outputs(accounts[0].claimable_outputs(OutputsToClaim::Nfts).await?)
+    let tx = wallet_0
+        .claim_outputs(wallet_0.claimable_outputs(OutputsToClaim::Nfts).await?)
         .await?;
-    accounts[0]
+    wallet_0
         .reissue_transaction_until_included(&tx.transaction_id, None, None)
         .await?;
 
-    let balance = accounts[0].sync(None).await.unwrap();
+    let balance = wallet_0.sync(None).await.unwrap();
     assert_eq!(balance.potentially_locked_outputs().len(), 0);
     assert_eq!(balance.nfts().len(), 2);
 
-    tear_down(storage_path)
+    tear_down(storage_path_0)?;
+    tear_down(storage_path_1)?;
+
+    Ok(())
 }
 
 #[ignore]
 #[tokio::test]
 async fn claim_2_nft_outputs_no_outputs_in_claim_account() -> Result<()> {
-    let storage_path = "test-storage/claim_2_nft_outputs_no_outputs_in_claim_account";
-    setup(storage_path)?;
+    let storage_path_0 = "test-storage/claim_2_nft_outputs_no_outputs_in_claim_wallet_0";
+    let storage_path_1 = "test-storage/claim_2_nft_outputs_no_outputs_in_claim_wallet_1";
+    setup(storage_path_0)?;
+    setup(storage_path_1)?;
 
-    let wallet = make_wallet(storage_path, None, None).await?;
+    let wallet_0 = make_wallet(storage_path_0, None, None).await?;
+    let wallet_1 = make_wallet(storage_path_1, None, None).await?;
 
-    let account_0 = &create_accounts_with_funds(&wallet, 1).await?[0];
-    let account_1 = wallet.create_account().finish().await?;
+    request_funds(&wallet_0).await?;
 
-    let token_supply = account_0.client().get_token_supply().await?;
+    let token_supply = wallet_0.client().get_token_supply().await?;
     let outputs = [
         // address of the owner of the NFT
         NftOutputBuilder::new_with_amount(1_000_000, NftId::null())
             .with_unlock_conditions([
-                UnlockCondition::Address(AddressUnlockCondition::new(account_1.first_address_bech32().await)),
+                UnlockCondition::Address(AddressUnlockCondition::new(wallet_1.address().await)),
                 UnlockCondition::Expiration(ExpirationUnlockCondition::new(
-                    account_0.first_address_bech32().await,
-                    account_0.client().get_slot_index().await? + 5000,
+                    wallet_0.address().await,
+                    wallet_0.client().get_slot_index().await? + 5000,
                 )?),
             ])
             .finish_output(token_supply)?,
         NftOutputBuilder::new_with_amount(1_000_000, NftId::null())
             .with_unlock_conditions([
-                UnlockCondition::Address(AddressUnlockCondition::new(account_1.first_address_bech32().await)),
+                UnlockCondition::Address(AddressUnlockCondition::new(wallet_1.address().await)),
                 UnlockCondition::Expiration(ExpirationUnlockCondition::new(
-                    account_0.first_address_bech32().await,
-                    account_0.client().get_slot_index().await? + 5000,
+                    wallet_0.address().await,
+                    wallet_0.client().get_slot_index().await? + 5000,
                 )?),
             ])
             .finish_output(token_supply)?,
     ];
 
-    let tx = account_0.send_outputs(outputs, None).await?;
-    account_0
+    let tx = wallet_0.send_outputs(outputs, None).await?;
+    wallet_0
         .reissue_transaction_until_included(&tx.transaction_id, None, None)
         .await?;
 
-    // Claim with account 1
-    let balance = account_1.sync(None).await.unwrap();
+    // Claim with wallet 1
+    let balance = wallet_1.sync(None).await.unwrap();
     assert_eq!(balance.potentially_locked_outputs().len(), 2);
 
-    let tx = account_1
-        .claim_outputs(account_1.claimable_outputs(OutputsToClaim::Nfts).await?)
+    let tx = wallet_1
+        .claim_outputs(wallet_1.claimable_outputs(OutputsToClaim::Nfts).await?)
         .await?;
-    account_1
+    wallet_1
         .reissue_transaction_until_included(&tx.transaction_id, None, None)
         .await?;
 
-    let balance = account_1.sync(None).await.unwrap();
+    let balance = wallet_1.sync(None).await.unwrap();
     assert_eq!(balance.potentially_locked_outputs().len(), 0);
     assert_eq!(balance.nfts().len(), 2);
 
-    tear_down(storage_path)
+    tear_down(storage_path_0)?;
+    tear_down(storage_path_1)?;
+
+    Ok(())
 }
 
 #[ignore]
 #[tokio::test]
 async fn claim_basic_micro_output_error() -> Result<()> {
-    let storage_path = "test-storage/claim_basic_micro_output_error";
-    setup(storage_path)?;
+    let storage_path_0 = "test-storage/claim_basic_micro_output_error_0";
+    let storage_path_1 = "test-storage/claim_basic_micro_output_error_1";
+    setup(storage_path_0)?;
+    setup(storage_path_1)?;
 
-    let wallet = make_wallet(storage_path, None, None).await?;
+    let wallet_0 = make_wallet(storage_path_0, None, None).await?;
+    let wallet_1 = make_wallet(storage_path_1, None, None).await?;
 
-    let account_0 = &create_accounts_with_funds(&wallet, 1).await?[0];
-    let account_1 = wallet.create_account().finish().await?;
+    request_funds(&wallet_0).await?;
 
     let micro_amount = 1;
-    let tx = account_0
+    let tx = wallet_0
         .send_with_params(
-            [SendParams::new(micro_amount, account_1.first_address_bech32().await)?],
+            [SendParams::new(micro_amount, wallet_1.address().await)?],
             TransactionOptions {
                 allow_micro_amount: true,
                 ..Default::default()
@@ -516,18 +549,21 @@ async fn claim_basic_micro_output_error() -> Result<()> {
         )
         .await?;
 
-    account_0
+    wallet_0
         .reissue_transaction_until_included(&tx.transaction_id, None, None)
         .await?;
 
     // Try claim with account 1 will fail since it has no funds to cover the storage deposit
-    let balance = account_1.sync(None).await.unwrap();
+    let balance = wallet_1.sync(None).await.unwrap();
     assert_eq!(balance.potentially_locked_outputs().len(), 1);
 
-    let result = account_1
-        .claim_outputs(account_1.claimable_outputs(OutputsToClaim::MicroTransactions).await?)
+    let result = wallet_1
+        .claim_outputs(wallet_1.claimable_outputs(OutputsToClaim::MicroTransactions).await?)
         .await;
     assert!(matches!(result, Err(iota_sdk::wallet::Error::InsufficientFunds { .. })));
 
-    tear_down(storage_path)
+    tear_down(storage_path_0)?;
+    tear_down(storage_path_1)?;
+
+    Ok(())
 }

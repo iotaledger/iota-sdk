@@ -145,6 +145,14 @@ export type __PendingTransactionsMethod__ = {
     name: 'pendingTransactions';
 };
 
+export type __ImplicitAccountCreationAddressMethod__ = {
+    name: 'implicitAccountCreationAddress';
+};
+
+export type __ImplicitAccountsMethod__ = {
+    name: 'implicitAccounts';
+};
+
 export type __IncomingTransactionsMethod__ = {
     name: 'incomingTransactions';
 };

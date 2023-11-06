@@ -16,27 +16,20 @@ class UnlockType(IntEnum):
         Signature (0): An unlock holding a signature unlocking one or more inputs.
         Reference (1): An unlock which must reference a previous unlock which unlocks also the input at the same index as this Reference Unlock.
         Account (2): An unlock which must reference a previous unlock which unlocks the account that the input is locked to.
-        Nft (3): An unlock which must reference a previous unlock which unlocks the NFT that the input is locked to.
-        Anchor (4): An unlock which must reference a previous unlock which unlocks the anchor that the input is locked to.
+        Anchor (3): An unlock which must reference a previous unlock which unlocks the anchor that the input is locked to.
+        Nft (4): An unlock which must reference a previous unlock which unlocks the NFT that the input is locked to.
+
     """
     Signature = 0
     Reference = 1
     Account = 2
-    Nft = 3
-    Anchor = 4
+    Anchor = 3
+    Nft = 4
 
 
 @json
 @dataclass
-class Unlock:
-    """Unlock type.
-    """
-    type: int
-
-
-@json
-@dataclass
-class SignatureUnlock(Unlock):
+class SignatureUnlock:
     """An unlock holding a signature unlocking one or more inputs.
     """
     signature: Ed25519Signature
@@ -48,7 +41,7 @@ class SignatureUnlock(Unlock):
 
 @json
 @dataclass
-class ReferenceUnlock(Unlock):
+class ReferenceUnlock:
     """An unlock which must reference a previous unlock which unlocks also the input at the same index as this Reference Unlock.
     """
     reference: int
@@ -72,15 +65,6 @@ class AccountUnlock:
 
 @json
 @dataclass
-class NftUnlock:
-    """An unlock which must reference a previous unlock which unlocks the NFT that the input is locked to.
-    """
-    reference: int
-    type: int = field(default_factory=lambda: int(UnlockType.Nft), init=False)
-
-
-@json
-@dataclass
 class AnchorUnlock:
     """An unlock which must reference a previous unlock which unlocks the anchor that the input is locked to.
     """
@@ -91,8 +75,20 @@ class AnchorUnlock:
         init=False)
 
 
+@json
+@dataclass
+class NftUnlock:
+    """An unlock which must reference a previous unlock which unlocks the NFT that the input is locked to.
+    """
+    reference: int
+    type: int = field(default_factory=lambda: int(UnlockType.Nft), init=False)
+
+
 Unlock: TypeAlias = Union[SignatureUnlock,
-                          ReferenceUnlock, AccountUnlock, NftUnlock, AnchorUnlock]
+                          ReferenceUnlock,
+                          AccountUnlock,
+                          AnchorUnlock,
+                          NftUnlock]
 
 
 def deserialize_unlock(d: Dict[str, Any]) -> Unlock:
@@ -109,10 +105,10 @@ def deserialize_unlock(d: Dict[str, Any]) -> Unlock:
         return ReferenceUnlock.from_dict(d)
     if unlock_type == UnlockType.Account:
         return AccountUnlock.from_dict(d)
-    if unlock_type == UnlockType.Nft:
-        return NftUnlock.from_dict(d)
     if unlock_type == UnlockType.Anchor:
         return AnchorUnlock.from_dict(d)
+    if unlock_type == UnlockType.Nft:
+        return NftUnlock.from_dict(d)
     raise Exception(f'invalid unlock type: {unlock_type}')
 
 

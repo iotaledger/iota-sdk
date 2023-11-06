@@ -383,7 +383,7 @@ pub struct FoundryOutput {
 
 impl FoundryOutput {
     /// The [`Output`](crate::types::block::output::Output) kind of a [`FoundryOutput`].
-    pub const KIND: u8 = 2;
+    pub const KIND: u8 = 3;
     /// The set of allowed [`UnlockCondition`]s for a [`FoundryOutput`].
     pub const ALLOWED_UNLOCK_CONDITIONS: UnlockConditionFlags = UnlockConditionFlags::IMMUTABLE_ACCOUNT_ADDRESS;
     /// The set of allowed [`Feature`]s for a [`FoundryOutput`].

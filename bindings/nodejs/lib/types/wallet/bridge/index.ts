@@ -15,6 +15,8 @@ import type {
     __AddressesWithUnspentOutputsMethod__,
     __OutputsMethod__,
     __PendingTransactionsMethod__,
+    __ImplicitAccountCreationAddressMethod__,
+    __ImplicitAccountsMethod__,
     __IncomingTransactionsMethod__,
     __TransactionsMethod__,
     __UnspentOutputsMethod__,
@@ -96,6 +98,8 @@ export type __AccountMethod__ =
     | __AddressesWithUnspentOutputsMethod__
     | __OutputsMethod__
     | __PendingTransactionsMethod__
+    | __ImplicitAccountCreationAddressMethod__
+    | __ImplicitAccountsMethod__
     | __IncomingTransactionsMethod__
     | __TransactionsMethod__
     | __UnspentOutputsMethod__

@@ -2,179 +2,162 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { SlotIndex } from '../block/slot';
-import { Bech32Address } from '../block';
+import { Bech32Address, TokenId } from '../block';
+import { HexEncodedString } from '../utils/hex-encoding';
 
 /**
- * Query parameter for filtering output requests
+ * Common query parameters for output requests.
  */
-export type QueryParameter =
-    | Address
-    | AccountAddress
-    | HasStorageDepositReturn
-    | StorageDepositReturnAddress
-    | HasTimelock
-    | TimelockedBefore
-    | TimelockedAfter
-    | HasExpiration
-    | ExpiresBefore
-    | ExpiresAfter
-    | ExpirationReturnAddress
-    | Sender
-    | Tag
-    | Issuer
-    | StateController
-    | Governor
-    | UnlockableByAddress
-    | CommonQueryParameters;
-
-/** Query parameters for filtering Account Outputs */
-export type AccountQueryParameter =
-    | Address
-    | Issuer
-    | Sender
-    | UnlockableByAddress
-    | CommonQueryParameters;
-
-/** Query parameters for filtering Foundry Outputs */
-export type FoundryQueryParameter = AccountAddress | CommonQueryParameters;
-
-/** Query parameters for filtering Nft Outputs */
-export type NftQueryParameter =
-    | Address
-    | HasStorageDepositReturn
-    | StorageDepositReturnAddress
-    | HasTimelock
-    | TimelockedBefore
-    | TimelockedAfter
-    | HasExpiration
-    | ExpiresBefore
-    | ExpiresAfter
-    | ExpirationReturnAddress
-    | Issuer
-    | Sender
-    | Tag
-    | UnlockableByAddress
-    | CommonQueryParameters;
-
-/** Shared query parameters*/
-type CommonQueryParameters =
-    | HasNativeTokens
-    | MinNativeTokenCount
-    | MaxNativeTokenCount
-    | CreatedAfter
-    | CreatedBefore
-    | PageSize
-    | Cursor;
-
-/** Query parameters for filtering alias/basic/NFT/foundry Outputs*/
-export type GenericQueryParameter =
-    | UnlockableByAddress
-    | HasNativeTokens
-    | MinNativeTokenCount
-    | MaxNativeTokenCount
-    | CreatedAfter
-    | CreatedBefore
-    | PageSize
-    | Cursor;
-
-/** Bech32-encoded address that should be searched for. */
-interface Address {
-    address: Bech32Address;
+export interface CommonOutputQueryParameters {
+    /// The maximum amount of items returned in one call. If there are more items, a cursor to the next page is
+    /// returned too. The parameter is ignored when pageSize is defined via the cursor parameter.
+    pageSize?: number;
+    /// Starts the search from the cursor (createdSlotIndex+outputId.pageSize). If an empty string is provided, only
+    /// the first page is returned.
+    cursor?: string;
+    /// Returns outputs that were created before a certain slot index.
+    createdBefore?: SlotIndex;
+    /// Returns outputs that were created after a certain slot index.
+    createdAfter?: SlotIndex;
 }
-/** Filter foundry outputs based on bech32-encoded address of the controlling account. */
-interface AccountAddress {
-    accountAddress: Bech32Address;
-}
-/** Filters outputs based on the presence of storage deposit return unlock condition. */
-interface HasStorageDepositReturn {
-    hasStorageDepositReturn: boolean;
-}
-/** Filter outputs based on the presence of a specific Bech32-encoded return address
- * in the storage deposit return unlock condition.
+
+/**
+ * Query parameters for output requests.
  */
-interface StorageDepositReturnAddress {
-    storageDepositReturnAddress: Bech32Address;
-}
-/** Filters outputs based on the presence of timelock unlock condition. */
-interface HasTimelock {
-    hasTimelock: boolean;
-}
-/** Return outputs that are timelocked before a certain slot index. */
-interface TimelockedBefore {
-    timelockedBefore: SlotIndex;
-}
-/** Return outputs that are timelocked after a certain slot index. */
-interface TimelockedAfter {
-    timelockedAfter: SlotIndex;
+export interface OutputQueryParameters extends CommonOutputQueryParameters {
+    /// Filters outputs based on the presence of a native token.
+    hasNativeToken?: boolean;
+    /// Filters outputs based on the presence of a specific native token.
+    nativeToken?: TokenId;
+    /// Returns outputs that are unlockable by the bech32 address.
+    unlockableByAddress?: Bech32Address;
 }
 
-/** Filters outputs based on the presence of expiration unlock condition. */
-interface HasExpiration {
-    hasExpiration: boolean;
+/**
+ * Query parameters for basic output requests.
+ */
+export interface BasicOutputQueryParameters
+    extends CommonOutputQueryParameters {
+    /// Filters outputs based on the presence of a native token.
+    hasNativeToken?: boolean;
+    /// Filters outputs based on the presence of a specific native token.
+    nativeToken?: TokenId;
+    /// Returns outputs that are unlockable by the bech32 address.
+    unlockableByAddress?: Bech32Address;
+    /// Bech32-encoded address that should be searched for.
+    address?: Bech32Address;
+    /// Filters outputs based on the presence of storage deposit return unlock condition.
+    hasStorageDepositReturn?: boolean;
+    /// Filters outputs based on the presence of a specific return address in the storage deposit return unlock
+    /// condition.
+    storageDepositReturnAddress?: Bech32Address;
+    /// Filters outputs based on the presence of expiration unlock condition.
+    hasExpiration?: boolean;
+    /// Filters outputs based on the presence of a specific Bech32-encoded return address in the expiration unlock
+    /// condition.
+    expirationReturnAddress?: Bech32Address;
+    /// Returns outputs that expire before a certain slot index.
+    expiresBefore?: SlotIndex;
+    /// Returns outputs that expire after a certain slot index.
+    expiresAfter?: SlotIndex;
+    /// Filters outputs based on the presence of timelock unlock condition.
+    hasTimelock?: boolean;
+    /// Returns outputs that are timelocked before a certain slot index.
+    timelockedBefore?: SlotIndex;
+    /// Returns outputs that are timelocked after a certain slot index.
+    timelockedAfter?: SlotIndex;
+    /// Filters outputs based on the presence of validated Sender (bech32 encoded).
+    sender?: Bech32Address;
+    /// Filters outputs based on matching Tag Block.
+    tag?: HexEncodedString;
 }
-/** Filters outputs based on the presence of native tokens. */
-interface HasNativeTokens {
-    hasNativeTokens: boolean;
+
+/**
+ * Query parameters for account output requests.
+ */
+export interface AccountOutputQueryParameters
+    extends CommonOutputQueryParameters {
+    /// Bech32-encoded address that should be searched for.
+    address?: Bech32Address;
+    /// Filters outputs based on bech32-encoded issuer address.
+    issuer?: Bech32Address;
+    /// Filters outputs based on the presence of validated Sender (bech32 encoded).
+    sender?: Bech32Address;
 }
-/** Filters outputs that have at most a certain number of distinct native tokens. */
-interface MaxNativeTokenCount {
-    maxNativeTokenCount: number;
+
+/**
+ * Query parameters for anchor output requests.
+ */
+export interface AnchorOutputQueryParameters
+    extends CommonOutputQueryParameters {
+    /// Returns outputs that are unlockable by the bech32 address.
+    unlockableByAddress?: Bech32Address;
+    /// Filters outputs based on bech32-encoded state controller address.
+    stateController?: Bech32Address;
+    /// Filters outputs based on bech32-encoded governor (governance controller) address.
+    governor?: Bech32Address;
+    /// Filters outputs based on bech32-encoded issuer address.
+    issuer?: Bech32Address;
+    /// Filters outputs based on the presence of validated Sender (bech32 encoded).
+    sender?: Bech32Address;
 }
-/** Filters outputs that have at least a certain number of distinct native tokens. */
-interface MinNativeTokenCount {
-    minNativeTokenCount: number;
+
+/**
+ * Query parameters for delegation output requests.
+ */
+export interface DelegationOutputQueryParameters
+    extends CommonOutputQueryParameters {
+    /// Bech32-encoded address that should be searched for.
+    address?: Bech32Address;
+    /// Filter foundry outputs based on bech32-encoded address of the validator.
+    validator?: Bech32Address;
 }
-/** Return outputs that expire before a certain slot index. */
-interface ExpiresBefore {
-    expiresBefore: SlotIndex;
+
+/**
+ * Query parameters for foundry output requests.
+ */
+export interface FoundryOutputQueryParameters
+    extends CommonOutputQueryParameters {
+    /// Filters outputs based on the presence of a native token.
+    hasNativeToken?: boolean;
+    /// Filters outputs based on the presence of a specific native token.
+    nativeToken?: TokenId;
+    /// Filter foundry outputs based on bech32-encoded address of the controlling account.
+    account?: Bech32Address;
 }
-/** Return outputs that expire after a certain slot index. */
-interface ExpiresAfter {
-    expiresAfter: SlotIndex;
-}
-/** Filter outputs based on the presence of a specific Bech32-encoded return
- * address in the expiration unlock condition.
- * */
-interface ExpirationReturnAddress {
-    expirationReturnAddress: Bech32Address;
-}
-/** Filter for a certain sender */
-interface Sender {
-    sender: string;
-}
-/** Filter for a certain tag */
-interface Tag {
-    tag: string;
-}
-/** Return outputs that were created before a certain slot index. */
-interface CreatedBefore {
-    createdBefore: SlotIndex;
-}
-/** Return outputs that were created after a certain slot index. */
-interface CreatedAfter {
-    createdAfter: SlotIndex;
-}
-/** Pass the cursor(confirmationMS+outputId.pageSize) to start the results from */
-interface Cursor {
-    cursor: string;
-}
-/** Filter for a certain issuer */
-interface Issuer {
-    issuer: string;
-}
-/** Filter outputs based on bech32-encoded state controller address. */
-interface StateController {
-    stateController: Bech32Address;
-}
-/** Filter outputs based on bech32-encoded governor (governance controller) address. */
-interface Governor {
-    governor: Bech32Address;
-}
-/** Define the page size for the results. */
-interface PageSize {
-    pageSize: number;
-}
-/** Returns outputs that are unlockable by the bech32 address. */
-interface UnlockableByAddress {
-    unlockableByAddress: Bech32Address;
+
+/**
+ * Query parameters for NFT output requests.
+ */
+export interface NftOutputQueryParameters extends CommonOutputQueryParameters {
+    /// Returns outputs that are unlockable by the bech32 address.
+    unlockableByAddress?: Bech32Address;
+    /// Bech32-encoded address that should be searched for.
+    address?: Bech32Address;
+    /// Filters outputs based on the presence of storage deposit return unlock condition.
+    hasStorageDepositReturn?: boolean;
+    /// Filters outputs based on the presence of a specific return address in the storage deposit return unlock
+    /// condition.
+    storageDepositReturnAddress?: Bech32Address;
+    /// Filters outputs based on the presence of expiration unlock condition.
+    hasExpiration?: boolean;
+    /// Filters outputs based on the presence of a specific Bech32-encoded return address in the expiration unlock
+    /// condition.
+    expirationReturnAddress?: Bech32Address;
+    /// Returns outputs that expire before a certain slot index.
+    expiresBefore?: SlotIndex;
+    /// Returns outputs that expire after a certain slot index.
+    expiresAfter?: SlotIndex;
+    /// Filters outputs based on the presence of timelock unlock condition.
+    hasTimelock?: boolean;
+    /// Returns outputs that are timelocked before a certain slot index.
+    timelockedBefore?: SlotIndex;
+    /// Returns outputs that are timelocked after a certain slot index.
+    timelockedAfter?: SlotIndex;
+    /// Filters outputs based on bech32-encoded issuer address.
+    issuer?: Bech32Address;
+    /// Filters outputs based on the presence of validated Sender (bech32 encoded).
+    sender?: Bech32Address;
+    /// Filters outputs based on matching Tag Block.
+    tag?: HexEncodedString;
 }

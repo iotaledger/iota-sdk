@@ -432,10 +432,10 @@ fn verify_outputs<const VERIFY: bool>(outputs: &[Output], visitor: &ProtocolPara
             let (amount, native_tokens, chain_id) = match output {
                 Output::Basic(output) => (output.amount(), Some(output.native_tokens()), None),
                 Output::Account(output) => (output.amount(), Some(output.native_tokens()), Some(output.chain_id())),
+                Output::Anchor(output) => (output.amount(), None, Some(output.chain_id())),
                 Output::Foundry(output) => (output.amount(), Some(output.native_tokens()), Some(output.chain_id())),
                 Output::Nft(output) => (output.amount(), Some(output.native_tokens()), Some(output.chain_id())),
                 Output::Delegation(output) => (output.amount(), None, Some(output.chain_id())),
-                Output::Anchor(output) => (output.amount(), None, Some(output.chain_id())),
             };
 
             amount_sum = amount_sum

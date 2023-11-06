@@ -6,7 +6,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Dict, Union
 from dacite import from_dict
 
-from iota_sdk.types.transaction import Transaction
+from iota_sdk.types.transaction_with_metadata import TransactionWithMetadata
 from iota_sdk.types.transaction_data import PreparedTransactionData
 
 # Required to prevent circular import
@@ -42,7 +42,7 @@ class PreparedTransaction:
             self.prepared_transaction_data_dto, PreparedTransactionData) else from_dict(
             PreparedTransactionData, self.prepared_transaction_data_dto)
 
-    def send(self) -> Transaction:
+    def send(self) -> TransactionWithMetadata:
         """Send a transaction. Internally just calls `sign_and_submit_transaction`.
 
         Returns:
@@ -51,13 +51,13 @@ class PreparedTransaction:
         return self.sign_and_submit_transaction()
 
     def sign(self):
-        """Sign a prepared transaction essence using the account's private key and returns
-        the signed transaction essence.
+        """Sign a prepared transaction using the account's private key and returns
+        the signed transaction.
         """
-        return self.account.sign_transaction_essence(
+        return self.account.sign_transaction(
             self.prepared_transaction_data())
 
-    def sign_and_submit_transaction(self) -> Transaction:
+    def sign_and_submit_transaction(self) -> TransactionWithMetadata:
         """Sign and submit a transaction using prepared transaction data.
 
         Returns:

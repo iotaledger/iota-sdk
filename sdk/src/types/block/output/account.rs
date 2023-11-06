@@ -6,7 +6,6 @@ use core::mem::size_of;
 
 use hashbrown::HashMap;
 use packable::{
-    bounded::BoundedU16,
     error::{UnpackError, UnpackErrorExt},
     packer::Packer,
     unpacker::Unpacker,
@@ -348,8 +347,6 @@ impl StorageScore for AccountOutputBuilder {
     }
 }
 
-pub(crate) type StateMetadataLength = BoundedU16<0, { AccountOutput::STATE_METADATA_LENGTH_MAX }>;
-
 /// Describes an account in the ledger that can be controlled by the state and governance controllers.
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct AccountOutput {
@@ -372,8 +369,6 @@ pub struct AccountOutput {
 impl AccountOutput {
     /// The [`Output`](crate::types::block::output::Output) kind of an [`AccountOutput`].
     pub const KIND: u8 = 1;
-    /// Maximum possible length in bytes of the state metadata.
-    pub const STATE_METADATA_LENGTH_MAX: u16 = 8192;
     /// The set of allowed [`UnlockCondition`]s for an [`AccountOutput`].
     pub const ALLOWED_UNLOCK_CONDITIONS: UnlockConditionFlags = UnlockConditionFlags::ADDRESS;
     /// The set of allowed [`Feature`]s for an [`AccountOutput`].

@@ -21,13 +21,13 @@ enum UnlockType {
      */
     Account = 2,
     /**
-     *  An NFT unlock.
-     */
-    Nft = 3,
-    /**
      *  An Anchor unlock.
      */
-    Anchor = 4,
+    Anchor = 3,
+    /**
+     *  An NFT unlock.
+     */
+    Nft = 4,
 }
 
 /**
@@ -104,24 +104,6 @@ class AccountUnlock extends Unlock {
 }
 
 /**
- * An unlock which must reference a previous unlock which unlocks the NFT that the input is locked to.
- */
-class NftUnlock extends Unlock {
-    /**
-     * The reference.
-     */
-    readonly reference: number;
-
-    /**
-     * @param reference An index referencing a previous unlock.
-     */
-    constructor(reference: number) {
-        super(UnlockType.Nft);
-        this.reference = reference;
-    }
-}
-
-/**
  * An unlock which must reference a previous unlock which unlocks the anchor that the input is locked to.
  */
 class AnchorUnlock extends Unlock {
@@ -135,6 +117,24 @@ class AnchorUnlock extends Unlock {
      */
     constructor(reference: number) {
         super(UnlockType.Anchor);
+        this.reference = reference;
+    }
+}
+
+/**
+ * An unlock which must reference a previous unlock which unlocks the NFT that the input is locked to.
+ */
+class NftUnlock extends Unlock {
+    /**
+     * The reference.
+     */
+    readonly reference: number;
+
+    /**
+     * @param reference An index referencing a previous unlock.
+     */
+    constructor(reference: number) {
+        super(UnlockType.Nft);
         this.reference = reference;
     }
 }
@@ -155,12 +155,12 @@ const UnlockDiscriminator = {
             name: UnlockType.Account as any,
         },
         {
-            value: NftUnlock,
-            name: UnlockType.Nft as any,
-        },
-        {
             value: AnchorUnlock,
             name: UnlockType.Anchor as any,
+        },
+        {
+            value: NftUnlock,
+            name: UnlockType.Nft as any,
         },
     ],
 };
@@ -171,7 +171,7 @@ export {
     SignatureUnlock,
     ReferenceUnlock,
     AccountUnlock,
-    NftUnlock,
     AnchorUnlock,
+    NftUnlock,
     UnlockDiscriminator,
 };
