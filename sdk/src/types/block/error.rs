@@ -78,6 +78,7 @@ pub enum Error {
         threshold: u16,
     },
     InvalidWeightedAddressCount(<WeightedAddressCount as TryFrom<usize>>::Error),
+    WeightedAddressesNotUniqueSorted,
     InvalidContextInputKind(u8),
     InvalidContextInputCount(<ContextInputCount as TryFrom<usize>>::Error),
     InvalidFeatureCount(<FeatureCount as TryFrom<usize>>::Error),
@@ -274,6 +275,9 @@ impl fmt::Display for Error {
                 )
             }
             Self::InvalidWeightedAddressCount(count) => write!(f, "invalid weighted address count: {count}"),
+            Self::WeightedAddressesNotUniqueSorted => {
+                write!(f, "weighted addresses are not unique and/or sorted")
+            }
             Self::InvalidContextInputKind(k) => write!(f, "invalid context input kind: {k}"),
             Self::InvalidFeatureCount(count) => write!(f, "invalid feature count: {count}"),
             Self::InvalidFeatureKind(k) => write!(f, "invalid feature kind: {k}"),

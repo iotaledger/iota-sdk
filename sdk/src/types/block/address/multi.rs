@@ -5,6 +5,7 @@ use alloc::vec;
 use core::{fmt, ops::RangeInclusive, str::FromStr};
 
 use derive_more::{AsRef, Display, From};
+use iterator_sorted::is_unique_sorted;
 use packable::{
     bounded::BoundedU8,
     error::{UnpackError, UnpackErrorExt},
@@ -87,6 +88,7 @@ impl MultiAddress {
     /// Creates a new [`MultiAddress`].
     #[inline(always)]
     pub fn new(addresses: Vec<WeightedAddress>, threshold: u16) -> Result<Self, Error> {
+        verify_addresses::<true>(&addresses, &())?;
         verify_threshold::<true>(&threshold, &())?;
 
         let addresses =
@@ -131,12 +133,23 @@ impl Packable for MultiAddress {
         let addresses =
             BoxedSlicePrefix::<WeightedAddress, WeightedAddressCount>::unpack::<_, VERIFY>(unpacker, visitor)
                 .map_packable_err(|e| e.unwrap_item_err_or_else(|e| Error::InvalidWeightedAddressCount(e.into())))?;
+
+        verify_addresses::<VERIFY>(&addresses, &()).map_err(UnpackError::Packable)?;
+
         let threshold = u16::unpack::<_, VERIFY>(unpacker, visitor).coerce()?;
 
         verify_threshold::<VERIFY>(&threshold, &()).map_err(UnpackError::Packable)?;
         verify_cumulative_weight::<VERIFY>(&addresses, &threshold, &()).map_err(UnpackError::Packable)?;
 
         Ok(Self { addresses, threshold })
+    }
+}
+
+fn verify_addresses<const VERIFY: bool>(addresses: &[WeightedAddress], _visitor: &()) -> Result<(), Error> {
+    if VERIFY && !is_unique_sorted(addresses.iter().map(WeightedAddress::address)) {
+        return Err(Error::WeightedAddressesNotUniqueSorted);
+    } else {
+        Ok(())
     }
 }
 
