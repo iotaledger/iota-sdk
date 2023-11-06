@@ -661,7 +661,7 @@ pub async fn output_command(wallet: &Wallet, selector: OutputSelector) -> Result
     let output = match selector {
         OutputSelector::Id(id) => wallet.get_output(&id).await,
         OutputSelector::Index(index) => {
-            let mut outputs = wallet.outputs(None).await;
+            let mut outputs = wallet.outputs(None).await.cloned().collect::<Vec<_>>();
             outputs.sort_unstable_by(outputs_ordering);
             outputs.into_iter().nth(index)
         }
@@ -678,7 +678,7 @@ pub async fn output_command(wallet: &Wallet, selector: OutputSelector) -> Result
 
 /// `outputs` command
 pub async fn outputs_command(wallet: &Wallet) -> Result<(), Error> {
-    print_outputs(wallet.outputs(None).await, "Outputs:").await
+    print_outputs(wallet.outputs(None).await.cloned().collect(), "Outputs:").await
 }
 
 // `send` command
@@ -835,7 +835,11 @@ pub async fn transactions_command(wallet: &Wallet, show_details: bool) -> Result
 
 /// `unspent-outputs` command
 pub async fn unspent_outputs_command(wallet: &Wallet) -> Result<(), Error> {
-    print_outputs(wallet.unspent_outputs(None).await, "Unspent outputs:").await
+    print_outputs(
+        wallet.unspent_outputs(None).await.cloned().collect(),
+        "Unspent outputs:",
+    )
+    .await
 }
 
 pub async fn vote_command(wallet: &Wallet, event_id: ParticipationEventId, answers: Vec<u8>) -> Result<(), Error> {

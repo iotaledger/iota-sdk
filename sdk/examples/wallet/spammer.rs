@@ -75,7 +75,6 @@ async fn main() -> Result<()> {
             ..Default::default()
         })
         .await
-        .iter()
         .filter(|data| data.output.amount() >= SEND_AMOUNT)
         .count();
 

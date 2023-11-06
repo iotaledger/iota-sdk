@@ -44,7 +44,7 @@ async fn main() -> Result<()> {
     // output.
     let outputs = wallet.unspent_outputs(None).await;
     println!("Outputs BEFORE consolidation:");
-    outputs.iter().enumerate().for_each(|(i, output_data)| {
+    outputs.enumerate().for_each(|(i, output_data)| {
         println!("OUTPUT #{i}");
         println!(
             "- address: {:?}\n- amount: {:?}\n- native tokens: {:?}",
@@ -80,7 +80,7 @@ async fn main() -> Result<()> {
     // Outputs after consolidation
     let outputs = wallet.unspent_outputs(None).await;
     println!("Outputs AFTER consolidation:");
-    outputs.iter().enumerate().for_each(|(i, output_data)| {
+    outputs.enumerate().for_each(|(i, output_data)| {
         println!("OUTPUT #{i}");
         println!(
             "- address: {:?}\n- amount: {:?}\n- native tokens: {:?}",

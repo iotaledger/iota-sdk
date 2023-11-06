@@ -216,7 +216,7 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
         }
         WalletMethod::Outputs { filter_options } => {
             let outputs = wallet.outputs(filter_options).await;
-            Response::OutputsData(outputs.iter().map(OutputDataDto::from).collect())
+            Response::OutputsData(outputs.map(OutputDataDto::from).collect())
         }
         WalletMethod::PendingTransactions => {
             let transactions = wallet.pending_transactions().await;
@@ -399,7 +399,7 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
         }
         WalletMethod::UnspentOutputs { filter_options } => {
             let outputs = wallet.unspent_outputs(filter_options).await;
-            Response::OutputsData(outputs.iter().map(OutputDataDto::from).collect())
+            Response::OutputsData(outputs.map(OutputDataDto::from).collect())
         }
     };
     Ok(response)

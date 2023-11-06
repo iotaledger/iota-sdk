@@ -277,7 +277,7 @@ where
         // Set new address unlock condition
         first_output_builder =
             first_output_builder.add_unlock_condition(AddressUnlockCondition::new(recipient_address));
-        Ok((first_output_builder, existing_nft_output_data))
+        Ok((first_output_builder, existing_nft_output_data.cloned()))
     }
 
     // Get a remainder address based on transaction_options or use the first account address
