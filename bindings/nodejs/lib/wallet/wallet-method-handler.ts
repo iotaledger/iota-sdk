@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import {
-    callWalletMethodAsync,
+    callWalletMethod,
     createWallet,
-    listenWalletAsync,
+    listenWallet,
     destroyWallet,
     getClientFromWallet,
     getSecretManagerFromWallet,
@@ -44,7 +44,8 @@ export class WalletMethodHandler {
      * @param method The wallet method to call.
      */
     async callMethod(method: __Method__): Promise<string> {
-        return callWalletMethodAsync(
+        return callWalletMethod(
+            this.methodHandler,
             // mapToObject is required to convert maps to array since they otherwise get serialized as `[{}]` even if not empty
             JSON.stringify(method, function mapToObject(_key, value) {
                 if (value instanceof Map) {
@@ -53,7 +54,6 @@ export class WalletMethodHandler {
                     return value;
                 }
             }),
-            this.methodHandler,
         ).catch((error: Error) => {
             try {
                 if (error.message !== undefined) {
@@ -97,7 +97,7 @@ export class WalletMethodHandler {
         eventTypes: WalletEventType[],
         callback: (error: Error, event: Event) => void,
     ): Promise<void> {
-        return listenWalletAsync(eventTypes, callback, this.methodHandler);
+        return listenWallet(this.methodHandler, eventTypes, callback);
     }
 
     async destroy(): Promise<void> {

@@ -45,6 +45,9 @@ pub enum Error {
     /// Insufficient funds to send transaction.
     #[error("insufficient funds {available}/{required} available")]
     InsufficientFunds { available: u64, required: u64 },
+    /// Invalid event kind.
+    #[error("invalid event kind: {0}")]
+    InvalidEventType(u8),
     /// Invalid mnemonic error
     #[error("invalid mnemonic: {0}")]
     InvalidMnemonic(String),
