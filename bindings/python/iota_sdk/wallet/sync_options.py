@@ -1,7 +1,7 @@
 # Copyright 2023 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
-from typing import List, Optional
+from typing import Optional
 from dataclasses import dataclass
 from iota_sdk.types.common import json
 
@@ -62,17 +62,6 @@ class SyncOptions():
     """The synchronization options.
 
     **Attributes**
-    addresses :
-        Specific Bech32 encoded addresses of the account to sync. If addresses are provided,
-        then `address_start_index` will be ignored.
-    address_start_index :
-        Address index from which to start syncing addresses. 0 by default.
-        Using a higher index will be faster because addresses with a lower index will be skipped,
-        but this could result in a wrong balance for that reason.
-    address_start_index_internal :
-        Address index from which to start syncing internal addresses. 0 by default.
-        Using a higher index will be faster because addresses with a lower index will be skipped,
-        but this could result in a wrong balance for internal addresses for that reason.
     force_syncing :
         Usually syncing is skipped if it's called in between 200ms, because there can only be new
         changes every milestone and calling it twice "at the same time" will not return new data.
@@ -96,9 +85,6 @@ class SyncOptions():
         Sync native token foundries, so their metadata can be returned in the balance.
     """
 
-    addresses: Optional[List[str]] = None
-    address_start_index: Optional[int] = None
-    address_start_index_internal: Optional[int] = None
     force_syncing: Optional[bool] = None
     sync_incoming_transactions: Optional[bool] = None
     sync_pending_transactions: Optional[bool] = None
