@@ -27,7 +27,7 @@ pub enum NodejsError {
     #[error(transparent)]
     SerdeJson(#[from] serde_json::error::Error),
     /// IO error.
-    #[error("`transparent`")]
+    #[error(transparent)]
     Io(#[from] std::io::Error),
     /// Wallet errors.
     #[error(transparent)]
