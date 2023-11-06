@@ -84,7 +84,7 @@ pub struct MultiAddress {
 }
 
 impl MultiAddress {
-    /// The [`Address`](crate::types::block::address::Address) kind of an [`MultiAddress`].
+    /// The [`Address`](crate::types::block::address::Address) kind of a [`MultiAddress`].
     pub const KIND: u8 = 40;
     /// The allowed range of inner [`Address`]es.
     pub const ADDRESSES_COUNT: RangeInclusive<u8> = 1..=10;
