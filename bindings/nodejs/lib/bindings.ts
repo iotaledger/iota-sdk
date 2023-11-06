@@ -22,8 +22,6 @@ const {
     getClientFromWallet,
     getSecretManagerFromWallet,
     migrateStrongholdSnapshotV2ToV3,
-    implCustomDatabase,
-    testCustomDatabase,
 } = addon;
 
 const callUtilsMethod = (method: __UtilsMethods__): any => {
@@ -51,6 +49,4 @@ export {
     getSecretManagerFromWallet,
     listenMqtt,
     migrateStrongholdSnapshotV2ToV3,
-    implCustomDatabase,
-    testCustomDatabase,
 };
