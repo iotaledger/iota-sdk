@@ -50,8 +50,6 @@ fn bech32() {
     });
     let multi_address = serde_json::from_value::<Address>(multi_address_json).unwrap();
 
-    println!("{multi_address:?}");
-
     assert_eq!(
         multi_address.to_bech32_unchecked("iota"),
         "iota19qq0ezu97zl76wqnpdxxleuf55gk0eqhscjtdgqm5sqwav6gcarz6vvesnk"

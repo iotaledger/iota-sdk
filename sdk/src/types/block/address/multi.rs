@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use core::{fmt, ops::RangeInclusive, str::FromStr};
+use core::{fmt, ops::RangeInclusive};
 
 use derive_more::{AsRef, From};
 use iterator_sorted::is_unique_sorted;
@@ -11,7 +11,7 @@ use packable::{
     packer::Packer,
     prefix::BoxedSlicePrefix,
     unpacker::Unpacker,
-    Packable,
+    Packable, PackableExt,
 };
 
 use crate::types::block::{address::Address, Error};
@@ -184,7 +184,7 @@ fn verify_cumulative_weight<const VERIFY: bool>(
 
 impl fmt::Display for MultiAddress {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        todo!()
+        write!(f, "{}", prefix_hex::encode(self.pack_to_vec()))
     }
 }
 
