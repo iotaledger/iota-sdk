@@ -158,7 +158,7 @@ impl std::ops::AddAssign for NativeTokensBalance {
 
 #[cfg(feature = "rand")]
 impl Balance {
-    pub fn rand_mock() -> Self {
+    pub fn rand() -> Self {
         use rand::Rng;
 
         use crate::types::block::rand::bytes::rand_bytes_array;
