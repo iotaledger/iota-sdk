@@ -5,7 +5,14 @@ use alloc::vec;
 use core::{fmt, ops::RangeInclusive, str::FromStr};
 
 use derive_more::{AsRef, Display, From};
-use packable::{bounded::BoundedU8, prefix::BoxedSlicePrefix, Packable};
+use packable::{
+    bounded::BoundedU8,
+    error::{UnpackError, UnpackErrorExt},
+    packer::Packer,
+    prefix::BoxedSlicePrefix,
+    unpacker::Unpacker,
+    Packable,
+};
 
 use crate::types::block::{address::Address, Error};
 
@@ -63,14 +70,11 @@ fn verify_weight<const VERIFY: bool>(weight: &u8, _visitor: &()) -> Result<(), E
 /// An address that consists of addresses with weights and a threshold value.
 /// The Multi Address can be unlocked if the cumulative weight of all unlocked addresses is equal to or exceeds the
 /// threshold.
-#[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Packable)]
-#[packable(unpack_error = Error)]
+#[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct MultiAddress {
     /// The weighted unlocked addresses.
-    #[packable(unpack_error_with = |e| e.unwrap_item_err_or_else(|p| Error::InvalidWeightedAddressCount(p.into())))]
     addresses: BoxedSlicePrefix<WeightedAddress, WeightedAddressCount>,
     /// The threshold that needs to be reached by the unlocked addresses in order to unlock the multi address.
-    #[packable(verify_with = verify_threshold)]
     threshold: u16,
 }
 
@@ -105,6 +109,34 @@ impl MultiAddress {
     // pub fn into_account_id(self) -> AccountId {
     //     self.0
     // }
+}
+
+impl Packable for MultiAddress {
+    type UnpackError = Error;
+    type UnpackVisitor = ();
+
+    #[inline]
+    fn pack<P: Packer>(&self, packer: &mut P) -> Result<(), P::Error> {
+        self.addresses.pack(packer)?;
+        self.threshold.pack(packer)?;
+
+        Ok(())
+    }
+
+    #[inline]
+    fn unpack<U: Unpacker, const VERIFY: bool>(
+        unpacker: &mut U,
+        visitor: &Self::UnpackVisitor,
+    ) -> Result<Self, UnpackError<Self::UnpackError, U::Error>> {
+        let addresses =
+            BoxedSlicePrefix::<WeightedAddress, WeightedAddressCount>::unpack::<_, VERIFY>(unpacker, visitor)
+                .map_packable_err(|e| e.unwrap_item_err_or_else(|e| Error::InvalidWeightedAddressCount(e.into())))?;
+        let threshold = u16::unpack::<_, VERIFY>(unpacker, visitor).coerce()?;
+
+        verify_threshold::<true>(&threshold, &()).map_err(UnpackError::Packable)?;
+
+        Ok(Self { addresses, threshold })
+    }
 }
 
 fn verify_threshold<const VERIFY: bool>(threshold: &u16, _visitor: &()) -> Result<(), Error> {
