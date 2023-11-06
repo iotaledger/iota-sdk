@@ -188,6 +188,9 @@ pub enum WalletMethod {
     /// Returns the implicit account creation address of the wallet if it is Ed25519 based.
     /// Expected response: [`Bech32Address`](crate::Response::Bech32Address)
     ImplicitAccountCreationAddress,
+    /// Returns the implicit accounts of the wallet.
+    /// Expected response: [`OutputsData`](crate::Response::OutputsData)
+    ImplicitAccounts,
     /// Returns all incoming transactions of the wallet
     /// Expected response:
     /// [`Transactions`](crate::Response::Transactions)
