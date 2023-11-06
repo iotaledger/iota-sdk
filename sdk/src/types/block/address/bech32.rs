@@ -3,6 +3,7 @@
 
 use alloc::{
     string::{String, ToString},
+    vec,
     vec::Vec,
 };
 use core::str::FromStr;
