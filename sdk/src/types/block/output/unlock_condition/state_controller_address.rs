@@ -6,8 +6,8 @@ use derive_more::From;
 use crate::types::block::address::Address;
 
 /// Defines the State Controller Address that owns this output, that is, it can unlock it with the proper Unlock in a
-/// transaction that state transitions the account output.
-#[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, From, packable::Packable)]
+/// transaction that state transitions the anchor output.
+#[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, From, packable::Packable)]
 pub struct StateControllerAddressUnlockCondition(Address);
 
 impl StateControllerAddressUnlockCondition {
@@ -45,7 +45,7 @@ pub(crate) mod dto {
         fn from(value: &StateControllerAddressUnlockCondition) -> Self {
             Self {
                 kind: StateControllerAddressUnlockCondition::KIND,
-                address: value.address().into(),
+                address: value.address().clone(),
             }
         }
     }
@@ -56,7 +56,7 @@ pub(crate) mod dto {
         }
     }
 
-    impl_serde_typed_dto!(
+    crate::impl_serde_typed_dto!(
         StateControllerAddressUnlockCondition,
         StateControllerAddressUnlockConditionDto,
         "state controller address unlock condition"

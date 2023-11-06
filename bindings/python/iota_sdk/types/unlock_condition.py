@@ -6,7 +6,7 @@ from dataclasses import dataclass, field
 from typing import Dict, List, TypeAlias, Union, Any
 from dataclasses_json import config
 from iota_sdk.types.address import Address, AccountAddress
-from iota_sdk.types.common import json
+from iota_sdk.types.common import json, SlotIndex
 from iota_sdk.types.address import deserialize_address
 
 
@@ -57,7 +57,9 @@ class StorageDepositReturnUnlockCondition:
         amount: The amount of base coins the consuming transaction must deposit to `return_address`.
         return_address: The address to return the amount to.
     """
-    amount: str
+    amount: int = field(metadata=config(
+        encoder=str
+    ))
     return_address: Address = field(
         metadata=config(
             decoder=deserialize_address
@@ -69,11 +71,11 @@ class StorageDepositReturnUnlockCondition:
 @json
 @dataclass
 class TimelockUnlockCondition:
-    """A timelock unlock condition.
+    """Defines a slot index until which the output can not be unlocked.
     Args:
-        unix_time: The Unix timestamp marking the end of the timelock.
+        slot_index: Slot index that defines when the output can be consumed.
     """
-    unix_time: int
+    slot_index: SlotIndex
     type: int = field(
         default_factory=lambda: int(
             UnlockConditionType.Timelock),
@@ -83,12 +85,13 @@ class TimelockUnlockCondition:
 @json
 @dataclass
 class ExpirationUnlockCondition:
-    """An expiration unlock condition.
+    """Defines a slot index until which only the Address defined in the Address Unlock Condition is allowed to unlock the output. After the slot index is reached/passed, only the Return Address can unlock it.
     Args:
-        unix_time: Unix timestamp marking the expiration of the claim.
+        slot_index: Before this slot index, Address Unlock Condition is allowed to unlock the output,
+                    after that only the address defined in Return Address.
         return_address: The return address if the output was not claimed in time.
     """
-    unix_time: int
+    slot_index: SlotIndex
     return_address: Address = field(
         metadata=config(
             decoder=deserialize_address
@@ -174,7 +177,7 @@ def deserialize_unlock_condition(d: Dict[str, Any]) -> UnlockCondition:
 def deserialize_unlock_conditions(
         dicts: List[Dict[str, Any]]) -> List[UnlockCondition]:
     """
-    Takes a list of dictionaries as input and returns a list with specific instances of a classes based on the value of the 'type' key in the dictionary.
+    Takes a list of dictionaries as input and returns a list with specific instances of classes based on the value of the 'type' key in the dictionary.
 
     Arguments:
     * `dicts`: A list of dictionaries that are expected to have a key called 'type' which specifies the type of the returned value.

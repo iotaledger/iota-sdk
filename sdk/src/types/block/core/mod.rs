@@ -3,8 +3,8 @@
 
 pub mod basic;
 mod parent;
+mod signed_block;
 pub mod validation;
-mod wrapper;
 
 use alloc::boxed::Box;
 
@@ -20,12 +20,12 @@ use packable::{
 pub use self::{
     basic::{BasicBlock, BasicBlockBuilder},
     parent::Parents,
+    signed_block::{BlockHeader, SignedBlock, UnsignedBlock},
     validation::{ValidationBlock, ValidationBlockBuilder},
-    wrapper::{BlockHeader, BlockWrapper, BlockWrapperBuilder},
 };
 use super::protocol::WorkScore;
 use crate::types::block::{
-    protocol::{ProtocolParameters, ProtocolParametersHash, WorkScoreStructure},
+    protocol::{ProtocolParameters, ProtocolParametersHash, WorkScoreParameters},
     Error,
 };
 
@@ -96,35 +96,7 @@ impl Block {
         ValidationBlockBuilder::new(strong_parents, highest_supported_version, protocol_parameters_hash)
     }
 
-    /// Checks whether the block is a [`BasicBlock`].
-    pub fn is_basic(&self) -> bool {
-        matches!(self, Self::Basic(_))
-    }
-
-    /// Gets the block as an actual [`BasicBlock`].
-    /// NOTE: Will panic if the block is not a [`BasicBlock`].
-    pub fn as_basic(&self) -> &BasicBlock {
-        if let Self::Basic(block) = self {
-            block
-        } else {
-            panic!("invalid downcast of non-BasicBlock");
-        }
-    }
-
-    /// Checks whether the block is a [`ValidationBlock`].
-    pub fn is_validation(&self) -> bool {
-        matches!(self, Self::Validation(_))
-    }
-
-    /// Gets the block as an actual [`ValidationBlock`].
-    /// NOTE: Will panic if the block is not a [`ValidationBlock`].
-    pub fn as_validation(&self) -> &ValidationBlock {
-        if let Self::Validation(block) = self {
-            block
-        } else {
-            panic!("invalid downcast of non-ValidationBlock");
-        }
-    }
+    crate::def_is_as_opt!(Block: Basic, Validation);
 
     pub(crate) fn hash(&self) -> [u8; 32] {
         Blake2b256::digest(self.pack_to_vec()).into()
@@ -132,7 +104,7 @@ impl Block {
 }
 
 impl WorkScore for Block {
-    fn work_score(&self, work_score_params: WorkScoreStructure) -> u32 {
+    fn work_score(&self, work_score_params: WorkScoreParameters) -> u32 {
         match self {
             Self::Basic(basic) => basic.work_score(work_score_params),
             Self::Validation(validation) => 0,
@@ -166,7 +138,7 @@ impl Packable for Block {
         Ok(match u8::unpack::<_, VERIFY>(unpacker, &()).coerce()? {
             BasicBlock::KIND => Self::from(BasicBlock::unpack::<_, VERIFY>(unpacker, visitor).coerce()?),
             ValidationBlock::KIND => Self::from(ValidationBlock::unpack::<_, VERIFY>(unpacker, visitor).coerce()?),
-            k => return Err(Error::InvalidBlockKind(k)).map_err(UnpackError::Packable),
+            k => return Err(UnpackError::Packable(Error::InvalidBlockKind(k))),
         })
     }
 }
@@ -179,7 +151,7 @@ pub(crate) mod dto {
     use serde_json::Value;
 
     use super::*;
-    pub use crate::types::block::core::wrapper::dto::BlockWrapperDto;
+    pub use crate::types::block::core::signed_block::dto::{SignedBlockDto, UnsignedBlockDto};
     use crate::types::{
         block::core::{basic::dto::BasicBlockDto, validation::dto::ValidationBlockDto},
         TryFromDto, ValidationParams,

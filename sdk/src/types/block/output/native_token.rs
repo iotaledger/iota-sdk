@@ -14,14 +14,18 @@ use primitive_types::U256;
 
 use crate::types::block::{
     output::foundry::FoundryId,
-    protocol::{WorkScore, WorkScoreStructure},
+    protocol::{WorkScore, WorkScoreParameters},
     Error,
 };
 
-impl_id!(pub TokenId, 38, "Unique identifiers of native tokens. The TokenId of native tokens minted by a specific foundry is the same as the FoundryId.");
-
-#[cfg(feature = "serde")]
-string_serde_impl!(TokenId);
+crate::impl_id!(
+    /// Unique identifier of a [`NativeToken`](crate::types::block::output::NativeToken).
+    /// The TokenId of native tokens minted by a specific foundry is the same as the
+    /// [`FoundryId`](crate::types::block::output::FoundryId).
+    pub TokenId {
+        pub const LENGTH: usize = 38;
+    }
+);
 
 impl From<FoundryId> for TokenId {
     fn from(foundry_id: FoundryId) -> Self {
@@ -253,8 +257,8 @@ impl NativeTokens {
 
 // TODO: should we also impl `WorkScore` for `NativeToken` for plain consistency?
 impl WorkScore for NativeTokens {
-    fn work_score(&self, work_score_params: WorkScoreStructure) -> u32 {
-        self.len() as u32 * work_score_params.native_token
+    fn work_score(&self, work_score_params: WorkScoreParameters) -> u32 {
+        self.len() as u32 * work_score_params.native_token()
     }
 }
 

@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 // TODO uncomment
-
 // use iota_sdk::{
 //     client::{api::GetAddressesOptions, Result},
 //     types::block::{
@@ -12,11 +11,12 @@
 //                 AddressUnlockCondition, GovernorAddressUnlockCondition, ImmutableAliasAddressUnlockCondition,
 //                 StateControllerAddressUnlockCondition, UnlockCondition,
 //             },
-//             AliasId, AliasOutputBuilder, FoundryId, FoundryOutputBuilder, NftId, NftOutputBuilder, SimpleTokenScheme,
-//             TokenScheme,
+//             AliasId, AccountOutputBuilder, FoundryId, FoundryOutputBuilder, NftId, NftOutputBuilder,
+// SimpleTokenScheme,             TokenScheme,
 //         },
 //     },
 // };
+// use pretty_assertions::assert_eq;
 
 // use super::{get_alias_output_id, get_foundry_output_id, get_nft_output_id};
 // use crate::client::common::create_client_and_secret_manager_with_funds;
@@ -32,8 +32,8 @@
 //         .await?[0];
 
 //     let alias_output =
-//         AliasOutputBuilder::new_with_minimum_storage_deposit(*protocol_parameters.rent_structure(), AliasId::null())
-//             .with_state_metadata([1, 2, 3])
+//         AccountOutputBuilder::new_with_minimum_storage_deposit(*protocol_parameters.rent_structure(),
+// AliasId::null())             .with_state_metadata([1, 2, 3])
 //             .add_unlock_condition(StateControllerAddressUnlockCondition::new(address))
 //             .add_unlock_condition(GovernorAddressUnlockCondition::new(address))
 //             .finish_output(protocol_parameters.token_supply())?;
@@ -94,8 +94,8 @@
 //         .await?[0];
 
 //     let alias_output_0 =
-//         AliasOutputBuilder::new_with_minimum_storage_deposit(*protocol_parameters.rent_structure(), AliasId::null())
-//             .with_state_metadata([1, 2, 3])
+//         AccountOutputBuilder::new_with_minimum_storage_deposit(*protocol_parameters.rent_structure(),
+// AliasId::null())             .with_state_metadata([1, 2, 3])
 //             .add_unlock_condition(StateControllerAddressUnlockCondition::new(address))
 //             .add_unlock_condition(GovernorAddressUnlockCondition::new(address))
 //             .finish_output(protocol_parameters.token_supply())?;
@@ -109,9 +109,8 @@
 
 //     let alias_id = AliasId::from(&get_alias_output_id(block.payload().unwrap())?);
 
-//     let alias_output_1 = AliasOutputBuilder::from(alias_output_0.as_alias())
+//     let alias_output_1 = AccountOutputBuilder::from(alias_output_0.as_alias())
 //         .with_alias_id(alias_id)
-//         .with_state_index(alias_output_0.as_alias().state_index() + 1)
 //         .with_foundry_counter(alias_output_0.as_alias().foundry_counter() + 1)
 //         .finish_output(protocol_parameters.token_supply())?;
 

@@ -1,14 +1,17 @@
 import {
     Ed25519Signature,
     HexEncodedString,
-    TransactionEssence,
-    TransactionPayload,
+    Transaction,
+    SignedTransactionPayload,
     TransactionId,
     TokenSchemeType,
     Output,
     RentStructure,
-    BlockWrapper,
+    SignedBlock,
     ProtocolParameters,
+    OutputId,
+    NftId,
+    Bech32Address,
 } from '../../';
 import { AccountId } from '../../block/id';
 import { SlotCommitment } from '../../block/slot';
@@ -27,7 +30,7 @@ export interface __MnemonicToHexSeedMethod__ {
 export interface __ComputeAccountIdMethod__ {
     name: 'computeAccountId';
     data: {
-        outputId: string;
+        outputId: OutputId;
     };
 }
 
@@ -40,17 +43,10 @@ export interface __ComputeFoundryIdMethod__ {
     };
 }
 
-export interface __ComputeInputsCommitmentMethod__ {
-    name: 'computeInputsCommitment';
-    data: {
-        inputs: Output[];
-    };
-}
-
 export interface __ComputeNftIdMethod__ {
     name: 'computeNftId';
     data: {
-        outputId: string;
+        outputId: OutputId;
     };
 }
 
@@ -82,14 +78,14 @@ export interface __ComputeTokenIdMethod__ {
 export interface __ParseBech32AddressMethod__ {
     name: 'parseBech32Address';
     data: {
-        address: string;
+        address: Bech32Address;
     };
 }
 
 export interface __BlockIdMethod__ {
     name: 'blockId';
     data: {
-        block: BlockWrapper;
+        block: SignedBlock;
         params: ProtocolParameters;
     };
 }
@@ -97,21 +93,21 @@ export interface __BlockIdMethod__ {
 export interface __TransactionIdMethod__ {
     name: 'transactionId';
     data: {
-        payload: TransactionPayload;
+        payload: SignedTransactionPayload;
     };
 }
 
 export interface __Bech32ToHexMethod__ {
     name: 'bech32ToHex';
     data: {
-        bech32: string;
+        bech32: Bech32Address;
     };
 }
 
 export interface __HexToBech32Method__ {
     name: 'hexToBech32';
     data: {
-        hex: string;
+        hex: HexEncodedString;
         bech32Hrp?: string;
     };
 }
@@ -119,7 +115,7 @@ export interface __HexToBech32Method__ {
 export interface __AccountIdToBech32Method__ {
     name: 'accountIdToBech32';
     data: {
-        accountId: string;
+        accountId: AccountId;
         bech32Hrp?: string;
     };
 }
@@ -127,7 +123,7 @@ export interface __AccountIdToBech32Method__ {
 export interface __NftIdToBech32Method__ {
     name: 'nftIdToBech32';
     data: {
-        nftId: string;
+        nftId: NftId;
         bech32Hrp?: string;
     };
 }
@@ -135,7 +131,7 @@ export interface __NftIdToBech32Method__ {
 export interface __HexPublicKeyToBech32AddressMethod__ {
     name: 'hexPublicKeyToBech32Address';
     data: {
-        hex: string;
+        hex: HexEncodedString;
         bech32Hrp?: string;
     };
 }
@@ -147,10 +143,10 @@ export interface __IsAddressValidMethod__ {
     };
 }
 
-export interface __HashTransactionEssenceMethod__ {
-    name: 'hashTransactionEssence';
+export interface __TransactionSigningHashMethod__ {
+    name: 'transactionSigningHash';
     data: {
-        essence: TransactionEssence;
+        transaction: Transaction;
     };
 }
 
@@ -187,7 +183,14 @@ export type __FaucetMethod__ = {
 export interface __OutputIdToUtxoInput__ {
     name: 'outputIdToUtxoInput';
     data: {
-        outputId: string;
+        outputId: OutputId;
+    };
+}
+
+export interface __OutputHexBytes__ {
+    name: 'outputHexBytes';
+    data: {
+        output: Output;
     };
 }
 

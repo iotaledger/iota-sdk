@@ -11,7 +11,7 @@ import type {
 import type { Burn, INode, PreparedTransactionData } from '../../client';
 import type { OutputParams } from '../output-params';
 import type { OutputsToClaim } from '../output';
-import type { SignedTransactionEssence } from '../signed-transaction-essence';
+import type { SignedTransactionData } from '../signed-transaction-data';
 import type {
     AccountOutputParams,
     CreateNativeTokenParams,
@@ -24,7 +24,14 @@ import type {
     ParticipationEventType,
 } from '../participation';
 import type { ConsolidationParams } from '../consolidation-params';
-import { HexEncodedAmount, Output } from '../../';
+import {
+    HexEncodedAmount,
+    NumericString,
+    Output,
+    OutputId,
+    TokenId,
+    TransactionId,
+} from '../../';
 
 export type __PrepareBurnMethod__ = {
     name: 'prepareBurn';
@@ -37,7 +44,7 @@ export type __PrepareBurnMethod__ = {
 export type __ClaimOutputsMethod__ = {
     name: 'claimOutputs';
     data: {
-        outputIdsToClaim: string[];
+        outputIdsToClaim: OutputId[];
     };
 };
 
@@ -59,7 +66,7 @@ export type __PrepareCreateAccountOutputMethod__ = {
 export type __PrepareMeltNativeTokenMethod__ = {
     name: 'prepareMeltNativeToken';
     data: {
-        tokenId: string;
+        tokenId: TokenId;
         meltAmount: HexEncodedAmount;
         options?: TransactionOptions;
     };
@@ -87,21 +94,21 @@ export type __GetBalanceMethod__ = {
 export type __GetIncomingTransactionMethod__ = {
     name: 'getIncomingTransaction';
     data: {
-        transactionId: string;
+        transactionId: TransactionId;
     };
 };
 
 export type __GetOutputMethod__ = {
     name: 'getOutput';
     data: {
-        outputId: string;
+        outputId: OutputId;
     };
 };
 
 export type __GetFoundryOutputMethod__ = {
     name: 'getFoundryOutput';
     data: {
-        tokenId: string;
+        tokenId: TokenId;
     };
 };
 
@@ -115,7 +122,7 @@ export type __ClaimableOutputsMethod__ = {
 export type __GetTransactionMethod__ = {
     name: 'getTransaction';
     data: {
-        transactionId: string;
+        transactionId: TransactionId;
     };
 };
 
@@ -138,6 +145,10 @@ export type __PendingTransactionsMethod__ = {
     name: 'pendingTransactions';
 };
 
+export type __ImplicitAccountCreationAddressMethod__ = {
+    name: 'implicitAccountCreationAddress';
+};
+
 export type __IncomingTransactionsMethod__ = {
     name: 'incomingTransactions';
 };
@@ -156,7 +167,7 @@ export type __UnspentOutputsMethod__ = {
 export type __PrepareMintNativeTokenMethod__ = {
     name: 'prepareMintNativeToken';
     data: {
-        tokenId: string;
+        tokenId: TokenId;
         mintAmount: HexEncodedAmount;
         options?: TransactionOptions;
     };
@@ -212,7 +223,7 @@ export type __RegisterParticipationEventsMethod__ = {
 export type __ReissueTransactionUntilIncludedMethod__ = {
     name: 'reissueTransactionUntilIncluded';
     data: {
-        transactionId: string;
+        transactionId: TransactionId;
         interval?: number;
         maxAttempts?: number;
     };
@@ -221,7 +232,7 @@ export type __ReissueTransactionUntilIncludedMethod__ = {
 export type __SendMethod__ = {
     name: 'send';
     data: {
-        amount: string;
+        amount: NumericString;
         address: string;
         options?: TransactionOptions;
     };
@@ -273,8 +284,8 @@ export type __SetDefaultSyncOptionsMethod__ = {
     };
 };
 
-export type __SignTransactionEssenceMethod__ = {
-    name: 'signTransactionEssence';
+export type __SignTransactionMethod__ = {
+    name: 'signTransaction';
     data: {
         preparedTransactionData: PreparedTransactionData;
     };
@@ -290,7 +301,7 @@ export type __SignAndSubmitTransactionMethod__ = {
 export type __SubmitAndStoreTransactionMethod__ = {
     name: 'submitAndStoreTransaction';
     data: {
-        signedTransactionData: SignedTransactionEssence;
+        signedTransactionData: SignedTransactionData;
     };
 };
 
@@ -326,7 +337,7 @@ export type __GetParticipationOverviewMethod__ = {
 export type __PrepareIncreaseVotingPowerMethod__ = {
     name: 'prepareIncreaseVotingPower';
     data: {
-        amount: string;
+        amount: NumericString;
     };
 };
 
@@ -359,6 +370,6 @@ export type __GetParticipationEventStatusMethod__ = {
 export type __PrepareDecreaseVotingPowerMethod__ = {
     name: 'prepareDecreaseVotingPower';
     data: {
-        amount: string;
+        amount: NumericString;
     };
 };

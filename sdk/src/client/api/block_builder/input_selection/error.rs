@@ -12,6 +12,7 @@ use crate::types::block::output::{ChainId, OutputId, TokenId};
 
 /// Errors related to input selection.
 #[derive(Debug, Eq, PartialEq, thiserror::Error)]
+#[non_exhaustive]
 pub enum Error {
     /// Block error.
     #[error("{0}")]
@@ -58,4 +59,8 @@ pub enum Error {
     /// Unfulfillable requirement.
     #[error("unfulfillable requirement {0:?}")]
     UnfulfillableRequirement(Requirement),
+    /// Unsupported address type.
+    #[error("unsupported address type {0}")]
+    // TODO replace with string when 2.0 has Address::kind_str
+    UnsupportedAddressType(u8),
 }

@@ -14,7 +14,7 @@ use iota_sdk::{
         address::Address,
         output::{
             feature::{IssuerFeature, MetadataFeature, SenderFeature},
-            unlock_condition::{GovernorAddressUnlockCondition, StateControllerAddressUnlockCondition},
+            unlock_condition::AddressUnlockCondition,
             AccountId, AccountOutputBuilder,
         },
     },
@@ -44,13 +44,11 @@ async fn main() -> Result<()> {
 
     // Account id needs to be null the first time
     let account_output = AccountOutputBuilder::new_with_minimum_storage_deposit(rent_structure, AccountId::null())
-        .with_state_metadata(metadata)
-        .add_feature(SenderFeature::new(address))
+        .add_feature(SenderFeature::new(address.clone()))
         .add_feature(MetadataFeature::new(metadata)?)
-        .add_immutable_feature(IssuerFeature::new(address))
+        .add_immutable_feature(IssuerFeature::new(address.clone()))
         .add_immutable_feature(MetadataFeature::new(metadata)?)
-        .add_unlock_condition(StateControllerAddressUnlockCondition::new(address))
-        .add_unlock_condition(GovernorAddressUnlockCondition::new(address))
+        .add_unlock_condition(AddressUnlockCondition::new(address))
         .finish_output(token_supply)?;
 
     println!("{account_output:#?}");

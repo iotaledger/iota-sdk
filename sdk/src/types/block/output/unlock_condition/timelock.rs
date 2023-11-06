@@ -51,14 +51,14 @@ pub(crate) mod dto {
     struct TimelockUnlockConditionDto {
         #[serde(rename = "type")]
         kind: u8,
-        slot_index: u64,
+        slot_index: SlotIndex,
     }
 
     impl From<&TimelockUnlockCondition> for TimelockUnlockConditionDto {
         fn from(value: &TimelockUnlockCondition) -> Self {
             Self {
                 kind: TimelockUnlockCondition::KIND,
-                slot_index: *value.slot_index(),
+                slot_index: value.slot_index(),
             }
         }
     }
@@ -67,11 +67,11 @@ pub(crate) mod dto {
         type Error = Error;
 
         fn try_from(value: TimelockUnlockConditionDto) -> Result<Self, Error> {
-            Self::new(SlotIndex::from(value.slot_index)).map_err(|_| Error::InvalidField("timelockUnlockCondition"))
+            Self::new(value.slot_index).map_err(|_| Error::InvalidField("timelockUnlockCondition"))
         }
     }
 
-    impl_serde_typed_dto!(
+    crate::impl_serde_typed_dto!(
         TimelockUnlockCondition,
         TimelockUnlockConditionDto,
         "timelock unlock condition"

@@ -8,6 +8,7 @@ use iota_sdk::types::block::{
     output::AccountId,
 };
 use packable::PackableExt;
+use pretty_assertions::assert_eq;
 use serde_json::json;
 
 const ACCOUNT_ID: &str = "0xe9ba80ad1561e437b663a1f1efbfabd544b0d7da7bb33e0a62e99b20ee450bee";
@@ -90,7 +91,7 @@ fn bech32() {
 #[test]
 fn bech32_roundtrip() {
     let address = Address::from(AccountAddress::from_str(ACCOUNT_ID).unwrap());
-    let bech32 = address.to_bech32_unchecked("rms").to_string();
+    let bech32 = address.clone().to_bech32_unchecked("rms").to_string();
 
     assert_eq!(
         Bech32Address::try_from_str(bech32),

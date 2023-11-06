@@ -9,35 +9,37 @@ import { Feature, FeatureDiscriminator } from './feature';
 
 // Temp solution for not double parsing JSON
 import { plainToInstance, Type } from 'class-transformer';
-import { HexEncodedString, hexToBigInt, u64 } from '../../utils';
+import { HexEncodedString, hexToBigInt, NumericString, u64 } from '../../utils';
 import { TokenScheme, TokenSchemeDiscriminator } from './token-scheme';
 import { INativeToken } from '../../models';
-import { AccountId, DelegationId } from '../id';
+import { AccountId, NftId, AnchorId, DelegationId } from '../id';
+import { EpochIndex } from '../../block/slot';
 
-export type OutputId = string;
+export type OutputId = HexEncodedString;
 
 /**
  * All of the output types.
  */
 enum OutputType {
     /** A Basic output. */
-    Basic = 3,
+    Basic = 0,
     /** An Account output. */
-    Account = 4,
+    Account = 1,
+    /** An Anchor output. */
+    Anchor = 2,
     /** A Foundry output. */
-    Foundry = 5,
+    Foundry = 3,
     /** An NFT output. */
-    Nft = 6,
+    Nft = 4,
     /** A Delegation output. */
-    Delegation = 7,
+    Delegation = 5,
 }
 
 /**
  * The base class for outputs.
  */
 abstract class Output {
-    // Getter transforms it into a proper number
-    amount: string;
+    readonly amount: NumericString;
 
     /**
      * The type of output.
@@ -48,7 +50,7 @@ abstract class Output {
      * @param type The type of output.
      * @param amount The amount of the output as big-integer or string.
      */
-    constructor(type: OutputType, amount: u64 | string) {
+    constructor(type: OutputType, amount: u64 | NumericString) {
         this.type = type;
         if (typeof amount == 'bigint') {
             this.amount = amount.toString(10);
@@ -72,10 +74,17 @@ abstract class Output {
             return plainToInstance(BasicOutput, data) as any as BasicOutput;
         } else if (data.type == OutputType.Account) {
             return plainToInstance(AccountOutput, data) as any as AccountOutput;
+        } else if (data.type == OutputType.Anchor) {
+            return plainToInstance(AnchorOutput, data) as any as AnchorOutput;
         } else if (data.type == OutputType.Foundry) {
             return plainToInstance(FoundryOutput, data) as any as FoundryOutput;
         } else if (data.type == OutputType.Nft) {
             return plainToInstance(NftOutput, data) as any as NftOutput;
+        } else if (data.type == OutputType.Delegation) {
+            return plainToInstance(
+                DelegationOutput,
+                data,
+            ) as any as DelegationOutput;
         }
         throw new Error('Invalid JSON');
     }
@@ -135,6 +144,7 @@ abstract class CommonOutput extends Output {
         return this.nativeTokens;
     }
 }
+
 /**
  * A Basic output.
  */
@@ -178,38 +188,14 @@ abstract class ImmutableFeaturesOutput extends CommonOutput {
 }
 
 /**
- * Base class for state metadata outputs.
- */
-abstract class StateMetadataOutput extends ImmutableFeaturesOutput {
-    readonly stateMetadata?: HexEncodedString;
-
-    /**
-     * @param type The type of output.
-     * @param amount The amount of the output.
-     * @param unlockConditions The unlock conditions for the output.
-     */
-    constructor(
-        type: OutputType,
-        amount: u64,
-        unlockConditions: UnlockCondition[],
-    ) {
-        super(type, amount, unlockConditions);
-    }
-}
-
-/**
  * An Account output.
  */
-class AccountOutput extends StateMetadataOutput {
+class AccountOutput extends ImmutableFeaturesOutput {
     /**
      * Unique identifier of the account, which is the BLAKE2b-256 hash of the Output ID that created it.
      * Unless its a newly created account, then the id is zeroed.
      */
-    readonly accountId: HexEncodedString;
-    /**
-     * A counter that must increase by 1 every time the account output is state transitioned.
-     */
-    readonly stateIndex: number;
+    readonly accountId: AccountId;
     /**
      * A counter that denotes the number of foundries created by this account output.
      */
@@ -223,57 +209,69 @@ class AccountOutput extends StateMetadataOutput {
      * @param amount The amount of the output.
      * @param mana The amount of stored mana.
      * @param accountId The account ID as hex-encoded string.
-     * @param stateIndex A counter that must increase by 1 every time the account output is state transitioned.
      * @param foundryCounter A counter that denotes the number of foundries created by this account output.
      * @param unlockConditions The unlock conditions of the output.
      */
     constructor(
         amount: u64,
         mana: u64,
-        accountId: HexEncodedString,
-        stateIndex: number,
+        accountId: AccountId,
         foundryCounter: number,
         unlockConditions: UnlockCondition[],
     ) {
         super(OutputType.Account, amount, unlockConditions);
         this.accountId = accountId;
-        this.stateIndex = stateIndex;
         this.foundryCounter = foundryCounter;
         this.mana = mana;
     }
 }
-/**
- * An NFT output.
- */
-class NftOutput extends ImmutableFeaturesOutput {
-    /**
-     * Unique identifier of the NFT, which is the BLAKE2b-256 hash of the Output ID that created it.
-     * Unless its newly minted, then the id is zeroed.
-     */
-    readonly nftId: HexEncodedString;
 
+/**
+ * An Anchor output.
+ */
+class AnchorOutput extends ImmutableFeaturesOutput {
+    /**
+     * Unique identifier of the anchor, which is the BLAKE2b-256 hash of the Output ID that created it.
+     * Unless its a newly created anchor, then the id is zeroed.
+     */
+    readonly anchorId: AnchorId;
+    /**
+     * A counter that must increase by 1 every time the anchor output is state transitioned.
+     */
+    readonly stateIndex: number;
     /**
      * The amount of (stored) Mana held by the output.
      */
     readonly mana: u64;
+    /**
+     * Metadata that can only be changed by the state controller.
+     */
+    readonly stateMetadata?: HexEncodedString;
 
     /**
      * @param amount The amount of the output.
      * @param mana The amount of stored mana.
-     * @param nftId The NFT ID as hex-encoded string.
+     * @param anchorId The anchor ID as hex-encoded string.
+     * @param stateIndex A counter that must increase by 1 every time the anchor output is state transitioned.
      * @param unlockConditions The unlock conditions of the output.
+     * @param stateMetadata Metadata that can only be changed by the state controller.
      */
     constructor(
         amount: u64,
         mana: u64,
-        nftId: HexEncodedString,
+        anchorId: AnchorId,
+        stateIndex: number,
         unlockConditions: UnlockCondition[],
+        stateMetadata?: HexEncodedString,
     ) {
-        super(OutputType.Nft, amount, unlockConditions);
-        this.nftId = nftId;
+        super(OutputType.Account, amount, unlockConditions);
+        this.anchorId = anchorId;
+        this.stateIndex = stateIndex;
         this.mana = mana;
+        this.stateMetadata = stateMetadata;
     }
 }
+
 /**
  * A Foundry output.
  */
@@ -308,6 +306,40 @@ class FoundryOutput extends ImmutableFeaturesOutput {
         this.tokenScheme = tokenScheme;
     }
 }
+
+/**
+ * An NFT output.
+ */
+class NftOutput extends ImmutableFeaturesOutput {
+    /**
+     * Unique identifier of the NFT, which is the BLAKE2b-256 hash of the Output ID that created it.
+     * Unless its newly minted, then the id is zeroed.
+     */
+    readonly nftId: NftId;
+
+    /**
+     * The amount of (stored) Mana held by the output.
+     */
+    readonly mana: u64;
+
+    /**
+     * @param amount The amount of the output.
+     * @param mana The amount of stored mana.
+     * @param nftId The NFT ID as hex-encoded string.
+     * @param unlockConditions The unlock conditions of the output.
+     */
+    constructor(
+        amount: u64,
+        mana: u64,
+        nftId: NftId,
+        unlockConditions: UnlockCondition[],
+    ) {
+        super(OutputType.Nft, amount, unlockConditions);
+        this.nftId = nftId;
+        this.mana = mana;
+    }
+}
+
 /**
  * A Delegation output.
  */
@@ -327,11 +359,11 @@ class DelegationOutput extends Output {
     /**
      * The index of the first epoch for which this output delegates.
      */
-    readonly startEpoch: u64;
+    readonly startEpoch: EpochIndex;
     /**
      * The index of the last epoch for which this output delegates.
      */
-    readonly endEpoch: u64;
+    readonly endEpoch: EpochIndex;
     /**
      * The unlock conditions for the output.
      */
@@ -354,8 +386,8 @@ class DelegationOutput extends Output {
         delegatedAmount: u64,
         delegationId: DelegationId,
         validatorId: AccountId,
-        startEpoch: u64,
-        endEpoch: u64,
+        startEpoch: EpochIndex,
+        endEpoch: EpochIndex,
         unlockConditions: UnlockCondition[],
     ) {
         super(OutputType.Delegation, amount);
@@ -373,8 +405,9 @@ const OutputDiscriminator = {
     subTypes: [
         { value: BasicOutput, name: OutputType.Basic as any },
         { value: AccountOutput, name: OutputType.Account as any },
-        { value: NftOutput, name: OutputType.Nft as any },
+        { value: AnchorOutput, name: OutputType.Anchor as any },
         { value: FoundryOutput, name: OutputType.Foundry as any },
+        { value: NftOutput, name: OutputType.Nft as any },
         { value: DelegationOutput, name: OutputType.Delegation as any },
     ],
 };
@@ -386,7 +419,8 @@ export {
     CommonOutput,
     BasicOutput,
     AccountOutput,
-    NftOutput,
+    AnchorOutput,
     FoundryOutput,
+    NftOutput,
     DelegationOutput,
 };

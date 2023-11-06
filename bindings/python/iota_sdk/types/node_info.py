@@ -2,8 +2,9 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from __future__ import annotations
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import List, Optional
+from dataclasses_json import config
 from iota_sdk.types.common import EpochIndex, HexStr, json, SlotIndex
 
 
@@ -25,10 +26,18 @@ class NodeInfoStatus:
         pruning_epoch: The index of the epoch before which the tangle history is pruned.
     """
     is_healthy: bool
-    accepted_tangle_time: str
-    relative_accepted_tangle_time: str
-    confirmed_tangle_time: str
-    relative_confirmed_tangle_time: str
+    accepted_tangle_time: int = field(metadata=config(
+        encoder=str
+    ))
+    relative_accepted_tangle_time: int = field(metadata=config(
+        encoder=str
+    ))
+    confirmed_tangle_time: int = field(metadata=config(
+        encoder=str
+    ))
+    relative_confirmed_tangle_time: int = field(metadata=config(
+        encoder=str
+    ))
     latest_commitment_id: HexStr
     latest_finalized_slot: SlotIndex
     latest_accepted_block_slot: SlotIndex
@@ -46,9 +55,15 @@ class NodeInfoMetrics:
         confirmed_blocks_per_second: The current rate of confirmed blocks per second.
         confirmation_rate: The ratio of confirmed blocks to new blocks of the last confirmed slot.
     """
-    blocks_per_second: float
-    confirmed_blocks_per_second: float
-    confirmation_rate: float
+    blocks_per_second: float = field(metadata=config(
+        encoder=str
+    ))
+    confirmed_blocks_per_second: float = field(metadata=config(
+        encoder=str
+    ))
+    confirmation_rate: float = field(metadata=config(
+        encoder=str
+    ))
 
 
 @json
@@ -74,13 +89,12 @@ class RentStructure:
 
 @json
 @dataclass
-class WorkScoreStructure:
-    """Work structure lists the Work Score of each type, it is used to denote the computation costs of processing an object.
+class WorkScoreParameters:
+    """Work Score Parameters lists the work score of each type, it is used to denote the computation costs of processing an object.
 
     Attributes:
         data_byte: Data_kibibyte accounts for the network traffic per kibibyte.
         block: Block accounts for work done to process a block in the node software.
-        missing_parent: Missing_parent is used to multiply for each missing parent if there are not enough strong ones.
         input: Input accounts for loading the UTXO from the database and performing the mana calculations.
         context_input: Context_input accounts for loading and checking the context input.
         output: Output accounts for storing the UTXO in the database.
@@ -89,11 +103,9 @@ class WorkScoreStructure:
         block_issuer: BlockIssuer accounts for the existence of a block issuer feature in the output.
         allotment: Allotment accounts for accessing the account-based ledger to transform the mana to block issuance credits.
         signature_ed25519: SignatureEd25519 accounts for an Ed25519 signature check.
-        min_strong_parents_threshold: MinStrongParentsThreshold is the minimum amount of strong parents in a basic block, otherwise, the issuer gets slashed.
     """
     data_byte: int
     block: int
-    missing_parent: int
     input: int
     context_input: int
     output: int
@@ -102,7 +114,6 @@ class WorkScoreStructure:
     block_issuer: int
     allotment: int
     signature_ed25519: int
-    min_strong_parents_threshold: int
 
 
 @json
@@ -120,9 +131,15 @@ class CongestionControlParameters:
         max_buffer_size: The maximum size of the buffer in the scheduler.
         max_validation_buffer_size: The maximum number of blocks in the validation buffer.
     """
-    min_reference_mana_cost: str
-    increase: str
-    decrease: str
+    min_reference_mana_cost: int = field(metadata=config(
+        encoder=str
+    ))
+    increase: int = field(metadata=config(
+        encoder=str
+    ))
+    decrease: int = field(metadata=config(
+        encoder=str
+    ))
     increase_threshold: int
     decrease_threshold: int
     scheduler_rate: int
@@ -147,8 +164,8 @@ class VersionSignaling:
 
 @json
 @dataclass
-class ManaStructure:
-    """Mana Structure defines the parameters used by mana calculation.
+class ManaParameters:
+    """ManaParameters defines the parameters used by mana calculation.
 
     Attributes:
         bits_count: The number of bits used to represent Mana.
@@ -170,6 +187,31 @@ class ManaStructure:
 
 @json
 @dataclass
+class RewardsParameters:
+    """Rewards Parameters defines the parameters that are used to calculate Mana rewards.
+
+    Attributes:
+        profit_margin_exponent: Used for shift operation during calculation of profit margin.
+        bootstrapping_duration: The length of the bootstrapping phase in epochs.
+        mana_share_coefficient: The coefficient used for calculation of initial rewards.
+        decay_balancing_constant_exponent: The exponent used for calculation of the initial reward.
+        decay_balancing_constant: An integer approximation which is calculated using the `decay_balancing_constant_exponent`.
+        pool_coefficient_exponent: The exponent used for shifting operation during the pool rewards calculations.
+    """
+    profit_margin_exponent: int
+    bootstrapping_duration: int
+    mana_share_coefficient: int = field(metadata=config(
+        encoder=str
+    ))
+    decay_balancing_constant_exponent: int
+    decay_balancing_constant: int = field(metadata=config(
+        encoder=str
+    ))
+    pool_coefficient_exponent: int
+
+
+@json
+@dataclass
 class ProtocolParameters:
     """The protocol parameters.
 
@@ -181,12 +223,12 @@ class ProtocolParameters:
                     Value `iota` indicates that the node supports mainnet addresses.
                     Value `atoi` indicates that the node supports testnet addresses.
         rent_structure: The rent structure used by a given node/network.
-        work_score_structure: Work structure lists the Work Score of each type, it is used to denote the computation costs of processing an object.
+        work_score_parameters: Work Score Parameters lists the work score of each type, it is used to denote the computation costs of processing an object.
         token_supply: Current supply of the base token. Plain string encoded number.
         genesis_unix_timestamp: The genesis timestamp at which the slots start to count.
         slot_duration_in_seconds: The duration of a slot, in seconds.
         slots_per_epoch_exponent: The number of slots in an epoch expressed as an exponent of 2.
-        mana_structure: Mana Structure defines the parameters used by mana calculation.
+        mana_parameters: ManaParameters defines the parameters used by mana calculation.
         staking_unbonding_period: The unbonding period in epochs before an account can stop staking.
         validation_blocks_per_slot: Validation Blocks Per Slot is the number of validation blocks that each validator should issue each slot.
         punishment_epochs: The number of epochs worth of Mana that a node is punished with for each additional validation block it issues.
@@ -196,27 +238,41 @@ class ProtocolParameters:
         epoch_nearing_threshold: Determine the slot that should trigger a new committee selection for the next and upcoming epoch.
         congestion_control_parameters: Congestion Control Parameters defines the parameters used to calculate the Reference Mana Cost (RMC).
         version_signaling: The version signaling parameters.
+        rewards_parameters: Rewards Parameters defines the parameters that are used to calculate Mana rewards.
     """
     type: int
     version: int
     network_name: str
     bech32_hrp: str
     rent_structure: RentStructure
-    work_score_structure: WorkScoreStructure
-    token_supply: str
-    genesis_unix_timestamp: str
+    work_score_parameters: WorkScoreParameters
+    token_supply: int = field(metadata=config(
+        encoder=str
+    ))
+    genesis_unix_timestamp: int = field(metadata=config(
+        encoder=str
+    ))
     slot_duration_in_seconds: int
     slots_per_epoch_exponent: int
-    mana_structure: ManaStructure
-    staking_unbonding_period: str
+    mana_parameters: ManaParameters
+    staking_unbonding_period: int = field(metadata=config(
+        encoder=str
+    ))
     validation_blocks_per_slot: int
-    punishment_epochs: str
-    liveness_threshold: str
-    min_committable_age: str
-    max_committable_age: str
-    epoch_nearing_threshold: str
+    punishment_epochs: int
+    liveness_threshold: int
+    min_committable_age: int = field(metadata=config(
+        encoder=str
+    ))
+    max_committable_age: int = field(metadata=config(
+        encoder=str
+    ))
+    epoch_nearing_threshold: int = field(metadata=config(
+        encoder=str
+    ))
     congestion_control_parameters: CongestionControlParameters
     version_signaling: VersionSignaling
+    rewards_parameters: RewardsParameters
 
 
 @json

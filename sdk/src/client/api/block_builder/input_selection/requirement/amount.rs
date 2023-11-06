@@ -10,8 +10,8 @@ use crate::{
         address::Address,
         input::INPUT_COUNT_MAX,
         output::{
-            unlock_condition::StorageDepositReturnUnlockCondition, AccountOutputBuilder, AccountTransition,
-            FoundryOutputBuilder, NftOutputBuilder, Output, OutputId, Rent,
+            unlock_condition::StorageDepositReturnUnlockCondition, AccountOutputBuilder, FoundryOutputBuilder,
+            NftOutputBuilder, Output, OutputId, Rent,
         },
         slot::SlotIndex,
     },
@@ -49,7 +49,7 @@ pub(crate) fn amount_sums(
         inputs_sum += selected_input.output.amount();
 
         if let Some(sdruc) = sdruc_not_expired(&selected_input.output, slot_index) {
-            *inputs_sdr.entry(*sdruc.return_address()).or_default() += sdruc.amount();
+            *inputs_sdr.entry(sdruc.return_address().clone()).or_default() += sdruc.amount();
         }
     }
 
@@ -58,7 +58,7 @@ pub(crate) fn amount_sums(
 
         if let Output::Basic(output) = output {
             if let Some(address) = output.simple_deposit_address() {
-                *outputs_sdr.entry(*address).or_default() += output.amount();
+                *outputs_sdr.entry(address.clone()).or_default() += output.amount();
             }
         }
     }
@@ -77,7 +77,7 @@ pub(crate) fn amount_sums(
 
 #[derive(Debug, Clone)]
 struct AmountSelection {
-    newly_selected_inputs: HashMap<OutputId, (InputSigningData, Option<AccountTransition>)>,
+    newly_selected_inputs: HashMap<OutputId, InputSigningData>,
     inputs_sum: u64,
     outputs_sum: u64,
     inputs_sdr: HashMap<Address, u64>,
@@ -144,15 +144,14 @@ impl AmountSelection {
                 if input_sdr > output_sdr {
                     let diff = input_sdr - output_sdr;
                     self.outputs_sum += diff;
-                    *self.outputs_sdr.entry(*sdruc.return_address()).or_default() += sdruc.amount();
+                    *self.outputs_sdr.entry(sdruc.return_address().clone()).or_default() += sdruc.amount();
                 }
 
-                *self.inputs_sdr.entry(*sdruc.return_address()).or_default() += sdruc.amount();
+                *self.inputs_sdr.entry(sdruc.return_address().clone()).or_default() += sdruc.amount();
             }
 
             self.inputs_sum += input.output.amount();
-            self.newly_selected_inputs
-                .insert(*input.output_id(), (input.clone(), None));
+            self.newly_selected_inputs.insert(*input.output_id(), input.clone());
 
             if self.missing_amount() == 0 {
                 return true;
@@ -162,7 +161,7 @@ impl AmountSelection {
         false
     }
 
-    fn into_newly_selected_inputs(self) -> Vec<(InputSigningData, Option<AccountTransition>)> {
+    fn into_newly_selected_inputs(self) -> Vec<InputSigningData> {
         self.newly_selected_inputs.into_values().collect()
     }
 }
@@ -222,18 +221,12 @@ impl InputSelection {
     }
 
     fn reduce_funds_of_chains(&mut self, amount_selection: &mut AmountSelection) -> Result<(), Error> {
-        // Only consider automatically transitioned outputs, except for account governance transitions.
+        // Only consider automatically transitioned outputs.
         let outputs = self.outputs.iter_mut().filter(|output| {
             output
                 .chain_id()
                 .as_ref()
-                .map(|chain_id| {
-                    self.automatically_transitioned
-                        .get(chain_id)
-                        .map_or(false, |account_transition| {
-                            account_transition.map_or(true, |account_transition| account_transition.is_state())
-                        })
-                })
+                .map(|chain_id| self.automatically_transitioned.contains(chain_id))
                 .unwrap_or(false)
         });
 
@@ -257,10 +250,10 @@ impl InputSelection {
                 Output::Account(output) => AccountOutputBuilder::from(&*output)
                     .with_amount(new_amount)
                     .finish_output(self.protocol_parameters.token_supply())?,
-                Output::Nft(output) => NftOutputBuilder::from(&*output)
+                Output::Foundry(output) => FoundryOutputBuilder::from(&*output)
                     .with_amount(new_amount)
                     .finish_output(self.protocol_parameters.token_supply())?,
-                Output::Foundry(output) => FoundryOutputBuilder::from(&*output)
+                Output::Nft(output) => NftOutputBuilder::from(&*output)
                     .with_amount(new_amount)
                     .finish_output(self.protocol_parameters.token_supply())?,
                 _ => panic!("only account, nft and foundry can be automatically created"),
@@ -280,9 +273,7 @@ impl InputSelection {
         })
     }
 
-    pub(crate) fn fulfill_amount_requirement(
-        &mut self,
-    ) -> Result<Vec<(InputSigningData, Option<AccountTransition>)>, Error> {
+    pub(crate) fn fulfill_amount_requirement(&mut self) -> Result<Vec<InputSigningData>, Error> {
         let mut amount_selection = AmountSelection::new(self)?;
 
         if amount_selection.missing_amount() == 0 {
@@ -351,7 +342,7 @@ impl InputSelection {
     fn fulfill_amount_requirement_inner(
         &mut self,
         amount_selection: &mut AmountSelection,
-    ) -> Option<Vec<(InputSigningData, Option<AccountTransition>)>> {
+    ) -> Option<Vec<InputSigningData>> {
         let basic_ed25519_inputs = self.available_inputs.iter().filter(|input| {
             if let Output::Basic(output) = &input.output {
                 output
@@ -389,12 +380,7 @@ impl InputSelection {
         let mut inputs = self
             .available_inputs
             .iter()
-            .filter(|input| match &input.output {
-                Output::Basic(_) => false,
-                // If account, we are only interested in state transitions as governance can't move funds.
-                Output::Account(account) => self.addresses.contains(account.state_controller_address()),
-                _ => true,
-            })
+            .filter(|input| !input.output.is_basic())
             .peekable();
 
         if inputs.peek().is_some() {

@@ -5,7 +5,6 @@ use crypto::keys::bip44::Bip44;
 
 use super::{
     requirement::{
-        account::is_account_transition,
         amount::amount_sums,
         native_tokens::{get_minted_and_melted_native_tokens, get_native_tokens, get_native_tokens_diff},
     },
@@ -21,31 +20,33 @@ use crate::{
 
 impl InputSelection {
     // Gets the remainder address from configuration of finds one from the inputs.
-    fn get_remainder_address(&self) -> Option<(Address, Option<Bip44>)> {
-        if self.remainder_address.is_some() {
-            return self.remainder_address.map(|address| (address, None));
+    fn get_remainder_address(&self) -> Result<Option<(Address, Option<Bip44>)>, Error> {
+        if let Some(remainder_address) = &self.remainder_address {
+            // Search in inputs for the Bip44 chain for the remainder address, so the ledger can regenerate it
+            for input in self.available_inputs.iter().chain(self.selected_inputs.iter()) {
+                let (required_address, _) = input
+                    .output
+                    .required_and_unlocked_address(self.slot_index, input.output_id())?;
+
+                if &required_address == remainder_address {
+                    return Ok(Some((remainder_address.clone(), input.chain)));
+                }
+            }
+            return Ok(Some((remainder_address.clone(), None)));
         }
 
         for input in &self.selected_inputs {
-            let account_transition = is_account_transition(
-                &input.output,
-                *input.output_id(),
-                self.outputs.as_slice(),
-                self.burn.as_ref(),
-            );
-            // PANIC: safe to unwrap as outputs with no address have been filtered out already.
             let required_address = input
                 .output
-                .required_and_unlocked_address(self.slot_index, input.output_id(), account_transition)
-                .unwrap()
+                .required_and_unlocked_address(self.slot_index, input.output_id())?
                 .0;
 
             if required_address.is_ed25519() {
-                return Some((required_address, input.chain));
+                return Ok(Some((required_address, input.chain)));
             }
         }
 
-        None
+        Ok(None)
     }
 
     pub(crate) fn remainder_amount(&self) -> Result<(u64, bool), Error> {
@@ -95,7 +96,7 @@ impl InputSelection {
             if amount > output_sdr_amount {
                 let diff = amount - output_sdr_amount;
                 let srd_output = BasicOutputBuilder::new_with_amount(diff)
-                    .with_unlock_conditions([AddressUnlockCondition::new(address)])
+                    .with_unlock_conditions([AddressUnlockCondition::new(address.clone())])
                     .finish_output(self.protocol_parameters.token_supply())?;
 
                 // TODO verify_storage_deposit ?
@@ -125,14 +126,15 @@ impl InputSelection {
             return Ok((None, storage_deposit_returns));
         }
 
-        let Some((remainder_address, chain)) = self.get_remainder_address() else {
+        let Some((remainder_address, chain)) = self.get_remainder_address()? else {
             return Err(Error::MissingInputWithEd25519Address);
         };
 
         let diff = inputs_sum - outputs_sum;
         let mut remainder_builder = BasicOutputBuilder::new_with_amount(diff);
 
-        remainder_builder = remainder_builder.add_unlock_condition(AddressUnlockCondition::new(remainder_address));
+        remainder_builder =
+            remainder_builder.add_unlock_condition(AddressUnlockCondition::new(remainder_address.clone()));
 
         if let Some(native_tokens) = native_tokens_diff {
             log::debug!("Adding {native_tokens:?} to remainder output for {remainder_address:?}");

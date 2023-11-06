@@ -8,6 +8,7 @@ use iota_sdk::types::block::{
     output::NftId,
 };
 use packable::PackableExt;
+use pretty_assertions::assert_eq;
 use serde_json::json;
 
 const NFT_ID: &str = "0xa9ede98a7f0223fa7a49fbc586f7a88bb4f0d152f282b19bcebd05c9e8a02370";
@@ -90,7 +91,7 @@ fn bech32() {
 #[test]
 fn bech32_roundtrip() {
     let address = Address::from(NftAddress::from_str(NFT_ID).unwrap());
-    let bech32 = address.to_bech32_unchecked("rms").to_string();
+    let bech32 = address.clone().to_bech32_unchecked("rms").to_string();
 
     assert_eq!(
         Bech32Address::try_from_str(bech32),

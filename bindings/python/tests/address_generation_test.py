@@ -1,9 +1,9 @@
 # Copyright 2023 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
-from iota_sdk import Wallet, MnemonicSecretManager, CoinType, ClientOptions
-import pytest
 import shutil
+import pytest
+from iota_sdk import Wallet, MnemonicSecretManager, CoinType, ClientOptions
 
 
 @pytest.mark.skip(reason="https://github.com/iotaledger/iota-sdk/issues/1387")

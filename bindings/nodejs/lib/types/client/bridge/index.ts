@@ -14,7 +14,7 @@ import type {
     __GetBlockMetadataMethod__,
     __FindInputsMethod__,
     __SignTransactionMethod__,
-    __PostBlockPayloadMethod__,
+    __BuildBasicBlockMethod__,
     __GetNodeMethod__,
     __GetNetworkIdMethod__,
     __GetBech32HrpMethod__,
@@ -32,10 +32,14 @@ import type {
     __HexPublicKeyToBech32AddressMethod__,
     __AccountOutputIdsMethod__,
     __AccountOutputIdMethod__,
-    __NftOutputIdsMethod__,
-    __NftOutputIdMethod__,
+    __AnchorOutputIdsMethod__,
+    __AnchorOutputIdMethod__,
+    __DelegationOutputIdsMethod__,
+    __DelegationOutputIdMethod__,
     __FoundryOutputIdsMethod__,
     __FoundryOutputIdMethod__,
+    __NftOutputIdsMethod__,
+    __NftOutputIdMethod__,
     __GetOutputsIgnoreErrorsMethod__,
     __FindBlocksMethod__,
     __UnhealthyNodesMethod__,
@@ -64,7 +68,7 @@ export type __ClientMethods__ =
     | __FindInputsMethod__
     | __SignTransactionMethod__
     | __SignatureUnlockMethod__
-    | __PostBlockPayloadMethod__
+    | __BuildBasicBlockMethod__
     | __GetNodeMethod__
     | __GetNetworkIdMethod__
     | __GetBech32HrpMethod__
@@ -82,10 +86,14 @@ export type __ClientMethods__ =
     | __HexPublicKeyToBech32AddressMethod__
     | __AccountOutputIdsMethod__
     | __AccountOutputIdMethod__
-    | __NftOutputIdsMethod__
-    | __NftOutputIdMethod__
+    | __AnchorOutputIdsMethod__
+    | __AnchorOutputIdMethod__
+    | __DelegationOutputIdsMethod__
+    | __DelegationOutputIdMethod__
     | __FoundryOutputIdsMethod__
     | __FoundryOutputIdMethod__
+    | __NftOutputIdsMethod__
+    | __NftOutputIdMethod__
     | __GetOutputsIgnoreErrorsMethod__
     | __FindBlocksMethod__
     | __UnhealthyNodesMethod__

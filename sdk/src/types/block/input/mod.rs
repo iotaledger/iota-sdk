@@ -46,15 +46,5 @@ impl Input {
         }
     }
 
-    /// Checks whether the input is a [`UtxoInput`].
-    pub fn is_utxo(&self) -> bool {
-        matches!(self, Self::Utxo(_))
-    }
-
-    /// Gets the input as an actual [`UtxoInput`].
-    /// PANIC: do not call on a non-utxo input.
-    pub fn as_utxo(&self) -> &UtxoInput {
-        let Self::Utxo(input) = self;
-        input
-    }
+    crate::def_is_as_opt!(Input: Utxo);
 }

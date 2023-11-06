@@ -2,9 +2,10 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from __future__ import annotations
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Optional, List
-from iota_sdk.types.common import HexStr, json
+from dataclasses_json import config
+from iota_sdk.types.common import hex_str_decoder, HexStr, json
 from iota_sdk.types.native_token import NativeToken
 
 
@@ -22,7 +23,9 @@ class SendParams():
         expiration is needed but not provided, it will default to one day.
     """
     address: str
-    amount: str
+    amount: int = field(metadata=config(
+        encoder=str
+    ))
     return_address: Optional[str] = None
     expiration: Optional[int] = None
 
@@ -68,17 +71,16 @@ class CreateNativeTokenParams():
         foundry_metadata: The foundry metadata of the native token.
         account_id: The ID of the corresponding account.
     """
-    circulating_supply: int
-    maximum_supply: int
+    circulating_supply: int = field(metadata=config(
+        encoder=hex,
+        decoder=hex_str_decoder,
+    ))
+    maximum_supply: int = field(metadata=config(
+        encoder=hex,
+        decoder=hex_str_decoder,
+    ))
     foundry_metadata: Optional[str] = None
     account_id: Optional[str] = None
-
-    @staticmethod
-    def _to_dict_custom(config):
-        config['circulatingSupply'] = hex(config['circulatingSupply'])
-        config['maximumSupply'] = hex(config['maximumSupply'])
-
-        return config
 
 
 @json
@@ -111,9 +113,7 @@ class CreateAccountOutputParams():
         address: A Bech32 encoded address which will control the account. Default will use the first address of the account.
         immutable_metadata: Immutable account metadata.
         metadata: Account metadata.
-        state_metadata: Account state metadata.
     """
     address: str
     immutable_metadata: Optional[str] = None
     metadata: Optional[str] = None
-    state_metadata: Optional[str] = None

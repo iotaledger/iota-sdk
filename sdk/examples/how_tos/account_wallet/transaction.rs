@@ -7,12 +7,9 @@
 //! `cargo run --release --all-features --example account_wallet_transaction`
 
 use iota_sdk::{
-    client::node_api::indexer::query_parameters::QueryParameter,
+    client::node_api::indexer::query_parameters::BasicOutputQueryParameters,
     types::block::address::{AccountAddress, ToBech32Ext},
-    wallet::{
-        account::{AliasSyncOptions, SyncOptions, TransactionOptions},
-        Result,
-    },
+    wallet::{AccountSyncOptions, Result, SyncOptions, TransactionOptions},
     Wallet,
 };
 
@@ -22,7 +19,7 @@ async fn main() -> Result<()> {
     dotenvy::dotenv().ok();
 
     let sync_options = SyncOptions {
-        alias: AliasSyncOptions {
+        account: AccountSyncOptions {
             basic_outputs: true,
             ..Default::default()
         },
@@ -38,9 +35,7 @@ async fn main() -> Result<()> {
         .set_stronghold_password(std::env::var("STRONGHOLD_PASSWORD").unwrap())
         .await?;
 
-    // Get the account
-    let account = wallet.get_account("Alice").await?;
-    let balance = account.sync(Some(sync_options.clone())).await?;
+    let balance = wallet.sync(Some(sync_options.clone())).await?;
 
     let total_base_token_balance = balance.base_coin().total();
     println!("Balance before sending funds from account: {total_base_token_balance:#?}");
@@ -49,18 +44,20 @@ async fn main() -> Result<()> {
     println!("Account Id: {account_id}");
 
     // Get account address
-    let account_address = AccountAddress::new(*account_id).to_bech32(account.client().get_bech32_hrp().await.unwrap());
+    let account_address = AccountAddress::new(*account_id).to_bech32(wallet.client().get_bech32_hrp().await.unwrap());
 
     // Find first output unlockable by the account address
-    let input = *account
+    let input = *wallet
         .client()
-        .basic_output_ids([QueryParameter::Address(account_address)])
+        .basic_output_ids(BasicOutputQueryParameters::only_address_unlock_condition(
+            account_address,
+        ))
         .await?
         .items
         .first()
         .unwrap();
 
-    let transaction = account
+    let transaction = wallet
         .send(
             1_000_000,
             "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu",
@@ -70,7 +67,7 @@ async fn main() -> Result<()> {
             },
         )
         .await?;
-    account
+    wallet
         .reissue_transaction_until_included(&transaction.transaction_id, None, None)
         .await?;
     println!(
@@ -78,7 +75,7 @@ async fn main() -> Result<()> {
         transaction.transaction_id
     );
 
-    let total_base_token_balance = account.sync(Some(sync_options)).await?.base_coin().total();
+    let total_base_token_balance = wallet.sync(Some(sync_options)).await?.base_coin().total();
     println!("Balance after sending funds from account: {total_base_token_balance:#?}");
 
     Ok(())

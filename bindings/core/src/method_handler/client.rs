@@ -4,15 +4,15 @@
 #[cfg(feature = "mqtt")]
 use iota_sdk::client::mqtt::{MqttPayload, Topic};
 use iota_sdk::{
-    client::{request_funds_from_faucet, secret::SecretManager, Client},
+    client::{request_funds_from_faucet, Client},
     types::{
-        api::core::response::OutputWithMetadataResponse,
+        api::core::OutputWithMetadataResponse,
         block::{
             output::{
                 dto::OutputDto, AccountOutput, BasicOutput, FoundryOutput, NftOutput, Output, OutputBuilderAmount, Rent,
             },
             payload::Payload,
-            BlockWrapper, BlockWrapperDto,
+            SignedBlock, SignedBlockDto, UnsignedBlockDto,
         },
         TryFromDto,
     },
@@ -60,8 +60,6 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
             mana,
             native_tokens,
             account_id,
-            state_index,
-            state_metadata,
             foundry_counter,
             unlock_conditions,
             features,
@@ -76,8 +74,6 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
                 mana,
                 native_tokens,
                 &account_id,
-                state_index,
-                state_metadata.map(prefix_hex::decode).transpose()?,
                 foundry_counter,
                 unlock_conditions,
                 features,
@@ -161,6 +157,19 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
 
             Response::Output(OutputDto::from(&output))
         }
+        ClientMethod::BuildBasicBlock { issuer_id, payload } => {
+            let payload = if let Some(payload) = payload {
+                Some(Payload::try_from_dto_with_params(
+                    payload,
+                    &client.get_protocol_parameters().await?,
+                )?)
+            } else {
+                None
+            };
+            Response::UnsignedBlock(UnsignedBlockDto::from(
+                &client.build_basic_block(issuer_id, payload).await?,
+            ))
+        }
         #[cfg(feature = "mqtt")]
         ClientMethod::ClearListeners { topics } => {
             client.unsubscribe(topics).await?;
@@ -171,25 +180,6 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         ClientMethod::GetNetworkId => Response::NetworkId(client.get_network_id().await?.to_string()),
         ClientMethod::GetBech32Hrp => Response::Bech32Hrp(client.get_bech32_hrp().await?),
         ClientMethod::GetProtocolParameters => Response::ProtocolParameters(client.get_protocol_parameters().await?),
-        ClientMethod::PostBlockPayload { payload } => {
-            let block = client
-                .build_basic_block::<SecretManager>(
-                    todo!("issuer id"),
-                    todo!("issuing time"),
-                    None,
-                    Some(Payload::try_from_dto_with_params(
-                        payload,
-                        &client.get_protocol_parameters().await?,
-                    )?),
-                    todo!("secret manager"),
-                    todo!("chain"),
-                )
-                .await?;
-
-            let block_id = client.block_id(&block).await?;
-
-            Response::BlockIdWithBlock(block_id, BlockWrapperDto::from(&block))
-        }
         #[cfg(not(target_family = "wasm"))]
         ClientMethod::UnhealthyNodes => Response::UnhealthyNodes(client.unhealthy_nodes().await.into_iter().collect()),
         ClientMethod::GetHealth { url } => Response::Bool(client.get_health(&url).await?),
@@ -199,7 +189,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         ClientMethod::GetIssuance => Response::Issuance(client.get_issuance().await?),
         ClientMethod::PostBlockRaw { block_bytes } => Response::BlockId(
             client
-                .post_block_raw(&BlockWrapper::unpack_strict(
+                .post_block_raw(&SignedBlock::unpack_strict(
                     &block_bytes[..],
                     &client.get_protocol_parameters().await?,
                 )?)
@@ -207,14 +197,14 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         ),
         ClientMethod::PostBlock { block } => Response::BlockId(
             client
-                .post_block(&BlockWrapper::try_from_dto_with_params(
+                .post_block(&SignedBlock::try_from_dto_with_params(
                     block,
                     client.get_protocol_parameters().await?,
                 )?)
                 .await?,
         ),
         ClientMethod::GetBlock { block_id } => {
-            Response::Block(BlockWrapperDto::from(&client.get_block(&block_id).await?))
+            Response::SignedBlock(SignedBlockDto::from(&client.get_block(&block_id).await?))
         }
         ClientMethod::GetBlockMetadata { block_id } => {
             Response::BlockMetadata(client.get_block_metadata(&block_id).await?)
@@ -229,9 +219,9 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         ClientMethod::GetOutputMetadata { output_id } => {
             Response::OutputMetadata(client.get_output_metadata(&output_id).await?)
         }
-        ClientMethod::GetIncludedBlock { transaction_id } => Response::Block(BlockWrapperDto::from(
-            &client.get_included_block(&transaction_id).await?,
-        )),
+        ClientMethod::GetIncludedBlock { transaction_id } => {
+            Response::SignedBlock(SignedBlockDto::from(&client.get_included_block(&transaction_id).await?))
+        }
         ClientMethod::GetIncludedBlockMetadata { transaction_id } => {
             Response::BlockMetadata(client.get_included_block_metadata(&transaction_id).await?)
         }
@@ -245,14 +235,24 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
             Response::OutputIdsResponse(client.account_output_ids(query_parameters).await?)
         }
         ClientMethod::AccountOutputId { account_id } => Response::OutputId(client.account_output_id(account_id).await?),
-        ClientMethod::NftOutputIds { query_parameters } => {
-            Response::OutputIdsResponse(client.nft_output_ids(query_parameters).await?)
+        ClientMethod::AnchorOutputIds { query_parameters } => {
+            Response::OutputIdsResponse(client.anchor_output_ids(query_parameters).await?)
         }
-        ClientMethod::NftOutputId { nft_id } => Response::OutputId(client.nft_output_id(nft_id).await?),
+        ClientMethod::AnchorOutputId { anchor_id } => Response::OutputId(client.anchor_output_id(anchor_id).await?),
+        ClientMethod::DelegationOutputIds { query_parameters } => {
+            Response::OutputIdsResponse(client.delegation_output_ids(query_parameters).await?)
+        }
+        ClientMethod::DelegationOutputId { delegation_id } => {
+            Response::OutputId(client.delegation_output_id(delegation_id).await?)
+        }
         ClientMethod::FoundryOutputIds { query_parameters } => {
             Response::OutputIdsResponse(client.foundry_output_ids(query_parameters).await?)
         }
         ClientMethod::FoundryOutputId { foundry_id } => Response::OutputId(client.foundry_output_id(foundry_id).await?),
+        ClientMethod::NftOutputIds { query_parameters } => {
+            Response::OutputIdsResponse(client.nft_output_ids(query_parameters).await?)
+        }
+        ClientMethod::NftOutputId { nft_id } => Response::OutputId(client.nft_output_id(nft_id).await?),
         ClientMethod::GetOutputs { output_ids } => {
             let outputs_response = client
                 .get_outputs_with_metadata(&output_ids)
@@ -276,7 +276,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
                 .find_blocks(&block_ids)
                 .await?
                 .iter()
-                .map(BlockWrapperDto::from)
+                .map(SignedBlockDto::from)
                 .collect(),
         ),
         ClientMethod::FindInputs { addresses, amount } => {
@@ -317,9 +317,9 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
                 .await?;
             Response::CustomJson(data)
         }
-        ClientMethod::BlockId { block } => {
+        ClientMethod::BlockId { signed_block: block } => {
             let protocol_parameters = client.get_protocol_parameters().await?;
-            let block = BlockWrapper::try_from_dto_with_params(block, &protocol_parameters)?;
+            let block = SignedBlock::try_from_dto_with_params(block, &protocol_parameters)?;
             Response::BlockId(block.id(&protocol_parameters))
         }
     };

@@ -2,10 +2,19 @@
 // SPDX-License-Identifier: Apache-2.0
 
 /// Convenience macro to implement and derive base features of identifiers.
-#[macro_export]
+#[macro_export(local_inner_macros)]
 macro_rules! impl_id {
-    ($vis:vis $name:ident, $length:literal, $doc:literal) => {
-        #[doc = $doc]
+    (
+        $(#[$hash_meta:meta])*
+        $hash_vis:vis $hash_name:ident {
+            $len_vis:vis const LENGTH: usize = $length:literal;
+        }
+        $(
+            $(#[$id_meta:meta])*
+            $id_vis:vis $id_name:ident;
+        )?
+    ) => {
+        $(#[$hash_meta])*
         #[derive(
             Clone,
             Copy,
@@ -20,37 +29,37 @@ macro_rules! impl_id {
         )]
         #[as_ref(forward)]
         #[repr(transparent)]
-        $vis struct $name([u8; $name::LENGTH]);
+        $hash_vis struct $hash_name([u8; Self::LENGTH]);
 
-        impl $name {
-            #[doc = concat!("The length of a [`", stringify!($ty),"`].")]
-            $vis const LENGTH: usize = $length;
+        impl $hash_name {
+            #[doc = core::concat!("The length of a [`", core::stringify!($hash_name), "`].")]
+            $len_vis const LENGTH: usize = $length;
 
-            #[doc = concat!("Creates a new [`", stringify!($ty),"`].")]
-            $vis fn new(bytes: [u8; $name::LENGTH]) -> Self {
-                Self::from(bytes)
+            #[doc = core::concat!("Creates a new [`", core::stringify!($hash_name), "`].")]
+            $hash_vis const fn new(bytes: [u8; Self::LENGTH]) -> Self {
+                Self(bytes)
             }
 
-            #[doc = concat!("Creates a null [`", stringify!($ty),"`].")]
-            pub fn null() -> Self {
-                Self::from([0u8; $name::LENGTH])
+            #[doc = core::concat!("Creates a null [`", core::stringify!($hash_name), "`].")]
+            $hash_vis const fn null() -> Self {
+                Self([0u8; Self::LENGTH])
             }
 
-            #[doc = concat!("Checks if the [`", stringify!($ty),"`] is null.")]
-            pub fn is_null(&self) -> bool {
+            #[doc = core::concat!("Checks if the [`", core::stringify!($hash_name), "`] is null.")]
+            $hash_vis fn is_null(&self) -> bool {
                 self.0.iter().all(|&b| b == 0)
             }
         }
 
-        impl core::str::FromStr for $name {
+        impl core::str::FromStr for $hash_name {
             type Err = $crate::types::block::Error;
 
             fn from_str(s: &str) -> Result<Self, Self::Err> {
-                Ok($name::new(prefix_hex::decode(s).map_err($crate::types::block::Error::Hex)?))
+                Ok(Self::new(prefix_hex::decode(s).map_err($crate::types::block::Error::Hex)?))
             }
         }
 
-        impl TryFrom<&alloc::string::String> for $name {
+        impl TryFrom<&alloc::string::String> for $hash_name {
             type Error = $crate::types::block::Error;
 
             fn try_from(s: &alloc::string::String) -> Result<Self, Self::Error> {
@@ -58,7 +67,7 @@ macro_rules! impl_id {
             }
         }
 
-        impl TryFrom<&str> for $name {
+        impl TryFrom<&str> for $hash_name {
             type Error = $crate::types::block::Error;
 
             fn try_from(s: &str) -> Result<Self, Self::Error> {
@@ -66,45 +75,165 @@ macro_rules! impl_id {
             }
         }
 
-        impl $crate::types::block::ConvertTo<$name> for &alloc::string::String {
-            fn convert(self) -> Result<$name, $crate::types::block::Error> {
+        impl $crate::types::block::ConvertTo<$hash_name> for &alloc::string::String {
+            fn convert(self) -> Result<$hash_name, $crate::types::block::Error> {
                 self.try_into()
             }
         }
 
-        impl $crate::types::block::ConvertTo<$name> for &str {
-            fn convert(self) -> Result<$name, $crate::types::block::Error> {
+        impl $crate::types::block::ConvertTo<$hash_name> for &str {
+            fn convert(self) -> Result<$hash_name, $crate::types::block::Error> {
                 self.try_into()
             }
         }
 
-        impl core::fmt::Display for $name {
+        impl core::fmt::Display for $hash_name {
             fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-                write!(f, "{}", prefix_hex::encode(self.0))
+                core::write!(f, "{}", prefix_hex::encode(self.0))
             }
         }
 
-        impl core::fmt::Debug for $name {
+        impl core::fmt::Debug for $hash_name {
             fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-                write!(f, "{}({})", stringify!($name), self)
+                core::write!(f, "{}({})", core::stringify!($hash_name), self)
             }
         }
 
-        impl core::ops::Deref for $name {
-            type Target = [u8; $name::LENGTH];
+        impl core::ops::Deref for $hash_name {
+            type Target = [u8; Self::LENGTH];
 
             fn deref(&self) -> &Self::Target {
                 &self.0
             }
         }
+
+        #[cfg(feature = "serde")]
+        string_serde_impl!($hash_name);
+
+        $(
+            paste::paste!{
+                impl $hash_name {
+                    pub fn [<into_ $id_name:snake>](self, slot_index: impl Into<$crate::types::block::slot::SlotIndex>) -> $id_name {
+                        $id_name {
+                            hash: self,
+                            slot_index: slot_index.into().to_le_bytes(),
+                        }
+                    }
+                }
+            }
+
+            $(#[$id_meta])*
+            #[derive(Clone, Copy, Eq, PartialEq, Hash, Ord, PartialOrd, packable::Packable)]
+            #[packable(unpack_error = $crate::types::block::Error)]
+            #[repr(C)]
+            $id_vis struct $id_name {
+                pub(crate) hash: $hash_name,
+                slot_index: [u8; core::mem::size_of::<$crate::types::block::slot::SlotIndex>()],
+            }
+
+            impl $id_name {
+                #[doc = core::concat!("The length of a [`", core::stringify!($id_name), "`].")]
+                pub const LENGTH: usize = $hash_name::LENGTH + core::mem::size_of::<$crate::types::block::slot::SlotIndex>();
+
+                pub fn new(bytes: [u8; Self::LENGTH]) -> Self {
+                    unsafe { core::mem::transmute(bytes) }
+                }
+
+                #[doc = core::concat!("Returns the [`", core::stringify!($id_name), "`]'s hash part.")]
+                pub fn hash(&self) -> &$hash_name {
+                    &self.hash
+                }
+
+                #[doc = core::concat!("Returns the [`", core::stringify!($id_name), "`]'s slot index part.")]
+                pub fn slot_index(&self) -> $crate::types::block::slot::SlotIndex {
+                    unsafe {
+                        #[cfg(target_endian = "little")]
+                        {
+                            core::mem::transmute(self.slot_index)
+                        }
+
+                        #[cfg(target_endian = "big")]
+                        {
+                            core::mem::transmute(self.slot_index.to_le())
+                        }
+                    }
+                }
+            }
+
+            impl AsRef<[u8]> for $id_name {
+                fn as_ref(&self) -> &[u8] {
+                    unsafe { core::mem::transmute::<_, &[u8; Self::LENGTH]>(self) }
+                }
+            }
+
+            impl core::str::FromStr for $id_name {
+                type Err = $crate::types::block::Error;
+
+                fn from_str(s: &str) -> Result<Self, Self::Err> {
+                    Ok(Self::new(prefix_hex::decode(s).map_err($crate::types::block::Error::Hex)?))
+                }
+            }
+
+            impl core::fmt::Debug for $id_name {
+                fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+                    f.debug_struct(core::stringify!($id_name))
+                        .field("id", &alloc::string::ToString::to_string(self))
+                        .field("slot_index", &self.slot_index())
+                        .finish()
+                }
+            }
+
+            impl core::fmt::Display for $id_name {
+                fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+                    prefix_hex::encode(self.as_ref()).fmt(f)
+                }
+            }
+
+            impl TryFrom<&alloc::string::String> for $id_name {
+                type Error = $crate::types::block::Error;
+
+                fn try_from(s: &alloc::string::String) -> Result<Self, Self::Error> {
+                    core::str::FromStr::from_str(s.as_str())
+                }
+            }
+
+            impl TryFrom<&str> for $id_name {
+                type Error = $crate::types::block::Error;
+
+                fn try_from(s: &str) -> Result<Self, Self::Error> {
+                    core::str::FromStr::from_str(s)
+                }
+            }
+
+            impl $crate::types::block::ConvertTo<$id_name> for &alloc::string::String {
+                fn convert(self) -> Result<$id_name, $crate::types::block::Error> {
+                    self.try_into()
+                }
+            }
+
+            impl $crate::types::block::ConvertTo<$id_name> for &str {
+                fn convert(self) -> Result<$id_name, $crate::types::block::Error> {
+                    self.try_into()
+                }
+            }
+
+            impl core::ops::Deref for $id_name {
+                type Target = [u8; Self::LENGTH];
+
+                fn deref(&self) -> &Self::Target {
+                    unsafe { core::mem::transmute::<_, &[u8; Self::LENGTH]>(self) }
+                }
+            }
+            #[cfg(feature = "serde")]
+            string_serde_impl!($id_name);
+        )?
     };
 }
-#[cfg(feature = "serde")]
 pub(crate) use impl_id;
 
 /// Convenience macro to serialize types to string via serde.
-#[macro_export]
 #[cfg(feature = "serde")]
+#[macro_export]
 macro_rules! string_serde_impl {
     ($type:ty) => {
         impl serde::Serialize for $type {
@@ -143,8 +272,6 @@ macro_rules! string_serde_impl {
         }
     };
 }
-#[cfg(feature = "serde")]
-pub(crate) use string_serde_impl;
 
 /// Convenience macro to work around the fact the `[bitflags]` crate does not yet support iterating over the
 /// individual flags. This macro essentially creates the `[bitflags]` and puts the individual flags into an associated
@@ -197,6 +324,41 @@ macro_rules! impl_serde_typed_dto {
             {
                 <$dto>::from(self).serialize(s)
             }
+        }
+    };
+}
+
+#[macro_export]
+macro_rules! def_is_as_opt {
+    ($type:ty: $($name:ident),+$(,)?) => {
+        paste::paste! {
+            $(
+                #[doc = "Checks whether the " [<$type:snake>] " is a(n) [`" [<$name $type>] "`]."]
+                pub fn [<is_ $name:snake>](&self) -> bool {
+                    matches!(self, Self::$name(_))
+                }
+
+                #[doc = "Gets the " [<$type:snake>] " as an actual [`" [<$name $type>] "`]."]
+                #[doc = "PANIC: do not call on a non-" [<$name>] " " [<$type:snake>] "."]
+                pub fn [<as_ $name:snake>](&self) -> &[<$name $type>] {
+                    #[allow(irrefutable_let_patterns)]
+                    if let Self::$name(v) = self {
+                        v
+                    } else {
+                        panic!("{} called on a non-{} {}", stringify!([<as_ $name:snake>]), stringify!([<$name>]), stringify!($type:snake));
+                    }
+                }
+
+                #[doc = "Gets the " [<$type:snake>] " as an actual [`" [<$name $type>] "`], if it is one."]
+                pub fn [<as_ $name:snake _opt>](&self) -> Option<&[<$name $type>]> {
+                    #[allow(irrefutable_let_patterns)]
+                    if let Self::$name(v) = self {
+                        Some(v)
+                    } else {
+                        None
+                    }
+                }
+            )+
         }
     };
 }

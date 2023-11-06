@@ -15,11 +15,10 @@ use iota_sdk::{
         output::{
             dto::OutputDto,
             unlock_condition::{
-                AddressUnlockCondition, ExpirationUnlockCondition, GovernorAddressUnlockCondition,
-                ImmutableAccountAddressUnlockCondition, StateControllerAddressUnlockCondition,
+                AddressUnlockCondition, ExpirationUnlockCondition, ImmutableAccountAddressUnlockCondition,
                 StorageDepositReturnUnlockCondition, TimelockUnlockCondition,
             },
-            AccountId, AccountOutputBuilder, BasicOutputBuilder, FoundryOutputBuilder, SimpleTokenScheme, TokenScheme,
+            BasicOutputBuilder, FoundryOutputBuilder, SimpleTokenScheme, TokenScheme,
         },
     },
 };
@@ -43,9 +42,7 @@ async fn main() -> Result<()> {
     let token_scheme = TokenScheme::Simple(SimpleTokenScheme::new(50, 0, 100)?);
 
     let basic_output_builder = BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)
-        .add_unlock_condition(AddressUnlockCondition::new(address));
-    let account_output_builder =
-        AccountOutputBuilder::new_with_minimum_storage_deposit(rent_structure, AccountId::null());
+        .add_unlock_condition(AddressUnlockCondition::new(address.clone()));
     let foundry_output_builder =
         FoundryOutputBuilder::new_with_minimum_storage_deposit(rent_structure, 1, token_scheme);
 
@@ -56,7 +53,7 @@ async fn main() -> Result<()> {
         basic_output_builder
             .clone()
             .add_unlock_condition(StorageDepositReturnUnlockCondition::new(
-                address,
+                address.clone(),
                 1000000,
                 token_supply,
             )?)
@@ -68,12 +65,7 @@ async fn main() -> Result<()> {
             .finish_output(token_supply)?,
         // with expiration unlock condition
         basic_output_builder
-            .add_unlock_condition(ExpirationUnlockCondition::new(address, 1)?)
-            .finish_output(token_supply)?,
-        // with governor and state controller unlock condition
-        account_output_builder
-            .add_unlock_condition(GovernorAddressUnlockCondition::new(address))
-            .add_unlock_condition(StateControllerAddressUnlockCondition::new(address))
+            .add_unlock_condition(ExpirationUnlockCondition::new(address.clone(), 1)?)
             .finish_output(token_supply)?,
         // with immutable account unlock condition
         foundry_output_builder

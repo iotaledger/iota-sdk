@@ -1,6 +1,6 @@
 {
     "name": "@iota/sdk-wasm",
-    "version": "1.0.6",
+    "version": "1.1.1",
     "description": "WebAssembly bindings for the IOTA SDK library",
     "repository": {
         "type": "git",

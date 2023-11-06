@@ -5,6 +5,7 @@ use core::str::FromStr;
 
 use iota_sdk::types::block::address::{Address, Bech32Address, Ed25519Address, ToBech32Ext};
 use packable::PackableExt;
+use pretty_assertions::assert_eq;
 use serde_json::json;
 
 const ED25519_ADDRESS: &str = "0xebe40a263480190dcd7939447ee01aefa73d6f3cc33c90ef7bf905abf8728655";
@@ -79,7 +80,7 @@ fn bech32() {
 #[test]
 fn bech32_roundtrip() {
     let address = Address::from(Ed25519Address::from_str(ED25519_ADDRESS).unwrap());
-    let bech32 = address.to_bech32_unchecked("rms").to_string();
+    let bech32 = address.clone().to_bech32_unchecked("rms").to_string();
 
     assert_eq!(
         Bech32Address::try_from_str(bech32),

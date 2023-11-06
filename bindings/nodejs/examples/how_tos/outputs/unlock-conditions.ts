@@ -12,8 +12,6 @@ import {
     ExpirationUnlockCondition,
     TimelockUnlockCondition,
     SimpleTokenScheme,
-    StateControllerAddressUnlockCondition,
-    GovernorAddressUnlockCondition,
     ImmutableAccountAddressUnlockCondition,
     AccountAddress,
 } from '@iota/sdk';
@@ -22,7 +20,7 @@ require('dotenv').config({ path: '.env' });
 // Run with command:
 // yarn run-example ./how_tos/outputs/unlock-conditions.ts
 
-// Build ouputs with all unlock conditions
+// Build outputs with all unlock conditions
 async function run() {
     initLogger();
 
@@ -66,7 +64,7 @@ async function run() {
         const basicOutputWithTimelock = await client.buildBasicOutput({
             unlockConditions: [
                 addressUnlockCondition,
-                new TimelockUnlockCondition(BigInt(1)),
+                new TimelockUnlockCondition(1),
             ],
         });
 
@@ -76,21 +74,7 @@ async function run() {
                 addressUnlockCondition,
                 new ExpirationUnlockCondition(
                     new Ed25519Address(hexAddress),
-                    BigInt(1),
-                ),
-            ],
-        });
-
-        // Output with governor and state controller unlock condition
-        const accountOutput = await client.buildAccountOutput({
-            accountId:
-                '0x0000000000000000000000000000000000000000000000000000000000000000',
-            unlockConditions: [
-                new GovernorAddressUnlockCondition(
-                    new Ed25519Address(hexAddress),
-                ),
-                new StateControllerAddressUnlockCondition(
-                    new Ed25519Address(hexAddress),
+                    1,
                 ),
             ],
         });
@@ -113,7 +97,6 @@ async function run() {
                     basicOutputWithStorageReturn,
                     basicOutputWithTimelock,
                     basicOutputWithExpiration,
-                    accountOutput,
                     foundryOutput,
                 ],
                 null,

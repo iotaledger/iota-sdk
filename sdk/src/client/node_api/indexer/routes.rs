@@ -1,76 +1,53 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! IOTA node indexer routes
+//! IOTA node indexer routes.
 
 use crate::{
     client::{
-        node_api::indexer::{
-            query_parameters::{
-                verify_query_parameters_account_outputs, verify_query_parameters_basic_outputs,
-                verify_query_parameters_foundry_outputs, verify_query_parameters_nft_outputs,
-                verify_query_parameters_outputs, QueryParameter,
-            },
-            QueryParameters,
+        node_api::indexer::query_parameters::{
+            AccountOutputQueryParameters, AnchorOutputQueryParameters, BasicOutputQueryParameters,
+            DelegationOutputQueryParameters, FoundryOutputQueryParameters, NftOutputQueryParameters,
+            OutputQueryParameters,
         },
         ClientInner, Error, Result,
     },
     types::{
         api::plugins::indexer::OutputIdsResponse,
-        block::output::{AccountId, FoundryId, NftId, OutputId},
+        block::output::{AccountId, AnchorId, DelegationId, FoundryId, NftId, OutputId},
     },
 };
-
-// hornet: https://github.com/gohornet/hornet/blob/develop/plugins/indexer/routes.go
 
 impl ClientInner {
     /// Get basic, alias, nft and foundry outputs filtered by the given parameters.
     /// GET with query parameter returns all outputIDs that fit these filter criteria.
-    /// Query parameters: "hasNativeTokens", "minNativeTokenCount", "maxNativeTokenCount", "unlockableByAddress",
-    /// "createdBefore", "createdAfter", "cursor", "pageSize".
     /// Returns Err(Node(NotFound) if no results are found.
-    /// api/indexer/v1/outputs
-    pub async fn output_ids(
-        &self,
-        query_parameters: impl Into<Vec<QueryParameter>> + Send,
-    ) -> Result<OutputIdsResponse> {
-        let route = "api/indexer/v1/outputs";
-
-        let query_parameters = verify_query_parameters_outputs(query_parameters.into())?;
+    /// api/indexer/v2/outputs
+    pub async fn output_ids(&self, query_parameters: OutputQueryParameters) -> Result<OutputIdsResponse> {
+        let route = "api/indexer/v2/outputs";
 
         self.get_output_ids(route, query_parameters, true, false).await
     }
 
     /// Get basic outputs filtered by the given parameters.
     /// GET with query parameter returns all outputIDs that fit these filter criteria.
-    /// Query parameters: "address", "hasStorageDepositReturn", "storageDepositReturnAddress",
-    /// "hasExpiration", "expiresBefore", "expiresAfter", "hasTimelock", "timelockedBefore",
-    /// "timelockedAfter", "sender", "tag", "createdBefore" and "createdAfter".
     /// Returns Err(Node(NotFound) if no results are found.
     /// api/indexer/v2/outputs/basic
-    pub async fn basic_output_ids(
-        &self,
-        query_parameters: impl Into<Vec<QueryParameter>> + Send,
-    ) -> Result<OutputIdsResponse> {
+    pub async fn basic_output_ids(&self, query_parameters: BasicOutputQueryParameters) -> Result<OutputIdsResponse> {
         let route = "api/indexer/v2/outputs/basic";
-
-        let query_parameters = verify_query_parameters_basic_outputs(query_parameters.into())?;
 
         self.get_output_ids(route, query_parameters, true, false).await
     }
 
     /// Get account outputs filtered by the given parameters.
     /// GET with query parameter returns all outputIDs that fit these filter criteria.
-    /// Query parameters: "stateController", "governor", "issuer", "sender", "createdBefore", "createdAfter"
     /// Returns Err(Node(NotFound) if no results are found.
     /// api/indexer/v2/outputs/account
     pub async fn account_output_ids(
         &self,
-        query_parameters: impl Into<Vec<QueryParameter>> + Send,
+        query_parameters: AccountOutputQueryParameters,
     ) -> Result<OutputIdsResponse> {
         let route = "api/indexer/v2/outputs/account";
-
-        let query_parameters = verify_query_parameters_account_outputs(query_parameters.into())?;
 
         self.get_output_ids(route, query_parameters, true, false).await
     }
@@ -81,24 +58,68 @@ impl ClientInner {
         let route = format!("api/indexer/v2/outputs/account/{account_id}");
 
         Ok(*(self
-            .get_output_ids(&route, QueryParameters::empty(), true, false)
+            .get_output_ids(&route, AccountOutputQueryParameters::new(), true, false)
             .await?
             .first()
             .ok_or_else(|| Error::NoOutput(format!("{account_id:?}")))?))
     }
 
+    /// Get anchor outputs filtered by the given parameters.
+    /// GET with query parameter returns all outputIDs that fit these filter criteria.
+    /// Returns Err(Node(NotFound) if no results are found.
+    /// api/indexer/v2/outputs/anchor
+    pub async fn anchor_output_ids(&self, query_parameters: AnchorOutputQueryParameters) -> Result<OutputIdsResponse> {
+        let route = "api/indexer/v2/outputs/anchor";
+
+        self.get_output_ids(route, query_parameters, true, false).await
+    }
+
+    /// Get anchor output by its anchorID.
+    /// api/indexer/v2/outputs/anchor/:{AnchorId}
+    pub async fn anchor_output_id(&self, anchor_id: AnchorId) -> Result<OutputId> {
+        let route = format!("api/indexer/v2/outputs/anchor/{anchor_id}");
+
+        Ok(*(self
+            .get_output_ids(&route, AnchorOutputQueryParameters::new(), true, false)
+            .await?
+            .first()
+            .ok_or_else(|| Error::NoOutput(format!("{anchor_id:?}")))?))
+    }
+
+    /// Get delegation outputs filtered by the given parameters.
+    /// GET with query parameter returns all outputIDs that fit these filter criteria.
+    /// Returns Err(Node(NotFound) if no results are found.
+    /// api/indexer/v2/outputs/delegation
+    pub async fn delegation_output_ids(
+        &self,
+        query_parameters: DelegationOutputQueryParameters,
+    ) -> Result<OutputIdsResponse> {
+        let route = "api/indexer/v2/outputs/delegation";
+
+        self.get_output_ids(route, query_parameters, true, false).await
+    }
+
+    /// Get delegation output by its delegationID.
+    /// api/indexer/v2/outputs/delegation/:{DelegationId}
+    pub async fn delegation_output_id(&self, delegation_id: DelegationId) -> Result<OutputId> {
+        let route = format!("api/indexer/v2/outputs/delegation/{delegation_id}");
+
+        Ok(*(self
+            .get_output_ids(&route, DelegationOutputQueryParameters::new(), true, false)
+            .await?
+            .first()
+            .ok_or_else(|| Error::NoOutput(format!("{delegation_id:?}")))?))
+    }
+
     /// Get foundry outputs filtered by the given parameters.
     /// GET with query parameter returns all outputIDs that fit these filter criteria.
-    /// Query parameters: "address", "createdBefore", "createdAfter"
     /// Returns Err(Node(NotFound) if no results are found.
     /// api/indexer/v2/outputs/foundry
     pub async fn foundry_output_ids(
         &self,
-        query_parameters: impl Into<Vec<QueryParameter>> + Send,
+        query_parameters: FoundryOutputQueryParameters,
     ) -> Result<OutputIdsResponse> {
         let route = "api/indexer/v2/outputs/foundry";
-
-        let query_parameters = verify_query_parameters_foundry_outputs(query_parameters.into())?;
 
         self.get_output_ids(route, query_parameters, true, false).await
     }
@@ -109,25 +130,17 @@ impl ClientInner {
         let route = format!("api/indexer/v2/outputs/foundry/{foundry_id}");
 
         Ok(*(self
-            .get_output_ids(&route, QueryParameters::empty(), true, false)
+            .get_output_ids(&route, FoundryOutputQueryParameters::new(), true, false)
             .await?
             .first()
             .ok_or_else(|| Error::NoOutput(format!("{foundry_id:?}")))?))
     }
 
     /// Get NFT outputs filtered by the given parameters.
-    /// Query parameters: "address", "hasStorageDepositReturn", "storageDepositReturnAddress",
-    /// "hasExpiration", "expiresBefore", "expiresAfter", "hasTimelock", "timelockedBefore",
-    /// "timelockedAfter", "issuer", "sender", "tag", "createdBefore", "createdAfter"
     /// Returns Err(Node(NotFound) if no results are found.
     /// api/indexer/v2/outputs/nft
-    pub async fn nft_output_ids(
-        &self,
-        query_parameters: impl Into<Vec<QueryParameter>> + Send,
-    ) -> Result<OutputIdsResponse> {
+    pub async fn nft_output_ids(&self, query_parameters: NftOutputQueryParameters) -> Result<OutputIdsResponse> {
         let route = "api/indexer/v2/outputs/nft";
-
-        let query_parameters = verify_query_parameters_nft_outputs(query_parameters.into())?;
 
         self.get_output_ids(route, query_parameters, true, false).await
     }
@@ -138,7 +151,7 @@ impl ClientInner {
         let route = format!("api/indexer/v2/outputs/nft/{nft_id}");
 
         Ok(*(self
-            .get_output_ids(&route, QueryParameters::empty(), true, false)
+            .get_output_ids(&route, NftOutputQueryParameters::new(), true, false)
             .await?
             .first()
             .ok_or_else(|| Error::NoOutput(format!("{nft_id:?}")))?))

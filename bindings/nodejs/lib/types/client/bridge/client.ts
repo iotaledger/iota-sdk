@@ -5,14 +5,28 @@ import type {
     Bip44,
     SecretManagerType,
 } from '../../secret_manager/secret-manager';
-import type { Block, BlockId, Output, Payload } from '../../block';
+import type {
+    AccountId,
+    SignedBlock,
+    BlockId,
+    FoundryId,
+    IssuerId,
+    AnchorId,
+    NftId,
+    DelegationId,
+    Output,
+    OutputId,
+    Payload,
+} from '../../block';
 import type { PreparedTransactionData } from '../prepared-transaction-data';
 import type {
-    AccountQueryParameter,
-    FoundryQueryParameter,
-    GenericQueryParameter,
-    NftQueryParameter,
-    QueryParameter,
+    AccountOutputQueryParameters,
+    AnchorOutputQueryParameters,
+    BasicOutputQueryParameters,
+    DelegationOutputQueryParameters,
+    FoundryOutputQueryParameters,
+    NftOutputQueryParameters,
+    OutputQueryParameters,
 } from '../query-parameters';
 import type { IAuth } from '../network';
 import type { BasicOutputBuilderParams } from '../output_builder_params/basic-output-params';
@@ -20,6 +34,7 @@ import type { AccountOutputBuilderParams } from '../output_builder_params/accoun
 import type { FoundryOutputBuilderParams } from '../output_builder_params/foundry-output-params';
 import type { NftOutputBuilderParams } from '../output_builder_params/nft-output-params';
 import { HexEncodedString } from '../../utils';
+import { TransactionId } from '../..';
 
 export interface __GetInfoMethod__ {
     name: 'getInfo';
@@ -28,35 +43,21 @@ export interface __GetInfoMethod__ {
 export interface __GetOutputMethod__ {
     name: 'getOutput';
     data: {
-        outputId: string;
-    };
-}
-
-export interface __GetOutputIdsMethod__ {
-    name: 'outputIds';
-    data: {
-        queryParameters: GenericQueryParameter[];
-    };
-}
-
-export interface __GetBasicOutputIdsMethod__ {
-    name: 'basicOutputIds';
-    data: {
-        queryParameters: QueryParameter[];
+        outputId: OutputId;
     };
 }
 
 export interface __GetOutputsMethod__ {
     name: 'getOutputs';
     data: {
-        outputIds: string[];
+        outputIds: OutputId[];
     };
 }
 
 export interface __PostBlockMethod__ {
     name: 'postBlock';
     data: {
-        block: Block;
+        block: SignedBlock;
     };
 }
 
@@ -102,15 +103,16 @@ export interface __SignatureUnlockMethod__ {
     name: 'signatureUnlock';
     data: {
         secretManager: SecretManagerType;
-        transactionEssenceHash: HexEncodedString;
+        transactionSigningHash: HexEncodedString;
         chain: Bip44;
     };
 }
 
-export interface __PostBlockPayloadMethod__ {
-    name: 'postBlockPayload';
+export interface __BuildBasicBlockMethod__ {
+    name: 'buildBasicBlock';
     data: {
-        payload: Payload;
+        issuerId: IssuerId;
+        payload?: Payload;
     };
 }
 
@@ -152,7 +154,7 @@ export interface __GetPeersMethod__ {
 export interface __PostBlockRawMethod__ {
     name: 'postBlockRaw';
     data: {
-        block: Block;
+        block: SignedBlock;
     };
 }
 
@@ -166,21 +168,21 @@ export interface __GetBlockRawMethod__ {
 export interface __GetIncludedBlockMethod__ {
     name: 'getIncludedBlock';
     data: {
-        transactionId: string;
+        transactionId: TransactionId;
     };
 }
 
 export interface __GetIncludedBlockMetadataMethod__ {
     name: 'getIncludedBlockMetadata';
     data: {
-        transactionId: string;
+        transactionId: TransactionId;
     };
 }
 
 export interface __HexToBech32Method__ {
     name: 'hexToBech32';
     data: {
-        hex: string;
+        hex: HexEncodedString;
         bech32Hrp?: string;
     };
 }
@@ -188,7 +190,7 @@ export interface __HexToBech32Method__ {
 export interface __AccountIdToBech32Method__ {
     name: 'accountIdToBech32';
     data: {
-        accountId: string;
+        accountId: AccountId;
         bech32Hrp?: string;
     };
 }
@@ -196,7 +198,7 @@ export interface __AccountIdToBech32Method__ {
 export interface __NftIdToBech32Method__ {
     name: 'nftIdToBech32';
     data: {
-        nftId: string;
+        nftId: NftId;
         bech32Hrp?: string;
     };
 }
@@ -204,64 +206,22 @@ export interface __NftIdToBech32Method__ {
 export interface __HexPublicKeyToBech32AddressMethod__ {
     name: 'hexPublicKeyToBech32Address';
     data: {
-        hex: string;
+        hex: HexEncodedString;
         bech32Hrp?: string;
-    };
-}
-
-export interface __AccountOutputIdsMethod__ {
-    name: 'accountOutputIds';
-    data: {
-        queryParameters: AccountQueryParameter[];
-    };
-}
-
-export interface __AccountOutputIdMethod__ {
-    name: 'accountOutputId';
-    data: {
-        accountId: string;
-    };
-}
-
-export interface __NftOutputIdsMethod__ {
-    name: 'nftOutputIds';
-    data: {
-        queryParameters: NftQueryParameter[];
-    };
-}
-
-export interface __NftOutputIdMethod__ {
-    name: 'nftOutputId';
-    data: {
-        nftId: string;
-    };
-}
-
-export interface __FoundryOutputIdsMethod__ {
-    name: 'foundryOutputIds';
-    data: {
-        queryParameters: FoundryQueryParameter[];
-    };
-}
-
-export interface __FoundryOutputIdMethod__ {
-    name: 'foundryOutputId';
-    data: {
-        foundryId: string;
     };
 }
 
 export interface __GetOutputsIgnoreErrorsMethod__ {
     name: 'getOutputsIgnoreErrors';
     data: {
-        outputIds: string[];
+        outputIds: OutputId[];
     };
 }
 
 export interface __FindBlocksMethod__ {
     name: 'findBlocks';
     data: {
-        blockIds: string[];
+        blockIds: BlockId[];
     };
 }
 
@@ -321,3 +281,89 @@ export type __CallPluginRouteMethod__ = {
         request?: string;
     };
 };
+
+// inx-indexer methods
+
+export interface __GetOutputIdsMethod__ {
+    name: 'outputIds';
+    data: {
+        queryParameters: OutputQueryParameters;
+    };
+}
+
+export interface __GetBasicOutputIdsMethod__ {
+    name: 'basicOutputIds';
+    data: {
+        queryParameters: BasicOutputQueryParameters;
+    };
+}
+
+export interface __AccountOutputIdsMethod__ {
+    name: 'accountOutputIds';
+    data: {
+        queryParameters: AccountOutputQueryParameters;
+    };
+}
+
+export interface __AccountOutputIdMethod__ {
+    name: 'accountOutputId';
+    data: {
+        accountId: AccountId;
+    };
+}
+
+export interface __AnchorOutputIdsMethod__ {
+    name: 'anchorOutputIds';
+    data: {
+        queryParameters: AnchorOutputQueryParameters;
+    };
+}
+
+export interface __AnchorOutputIdMethod__ {
+    name: 'anchorOutputId';
+    data: {
+        anchorId: AnchorId;
+    };
+}
+
+export interface __DelegationOutputIdsMethod__ {
+    name: 'delegationOutputIds';
+    data: {
+        queryParameters: DelegationOutputQueryParameters;
+    };
+}
+
+export interface __DelegationOutputIdMethod__ {
+    name: 'delegationOutputId';
+    data: {
+        delegationId: DelegationId;
+    };
+}
+
+export interface __FoundryOutputIdsMethod__ {
+    name: 'foundryOutputIds';
+    data: {
+        queryParameters: FoundryOutputQueryParameters;
+    };
+}
+
+export interface __FoundryOutputIdMethod__ {
+    name: 'foundryOutputId';
+    data: {
+        foundryId: FoundryId;
+    };
+}
+
+export interface __NftOutputIdsMethod__ {
+    name: 'nftOutputIds';
+    data: {
+        queryParameters: NftOutputQueryParameters;
+    };
+}
+
+export interface __NftOutputIdMethod__ {
+    name: 'nftOutputId';
+    data: {
+        nftId: NftId;
+    };
+}

@@ -21,7 +21,7 @@ use crate::{
         address::{Address, Bech32Address, Ed25519Address, Hrp, ToBech32Ext},
         output::{AccountId, NftId},
         payload::TaggedDataPayload,
-        BlockId, BlockWrapper, ConvertTo,
+        BlockId, ConvertTo, SignedBlock,
     },
 };
 
@@ -31,6 +31,9 @@ pub fn bech32_to_hex(bech32: impl ConvertTo<Bech32Address>) -> Result<String> {
         Address::Ed25519(ed) => ed.to_string(),
         Address::Account(account) => account.to_string(),
         Address::Nft(nft) => nft.to_string(),
+        Address::Anchor(anchor) => anchor.to_string(),
+        Address::ImplicitAccountCreation(implicit) => implicit.to_string(),
+        Address::Restricted(restricted) => restricted.to_string(),
     })
 }
 
@@ -187,7 +190,7 @@ impl Client {
         Ok((Self::tag_to_utf8(payload)?, Self::data_to_utf8(payload)?))
     }
 
-    pub async fn block_id(&self, block: &BlockWrapper) -> Result<BlockId> {
+    pub async fn block_id(&self, block: &SignedBlock) -> Result<BlockId> {
         Ok(block.id(&self.get_protocol_parameters().await?))
     }
 }

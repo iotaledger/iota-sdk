@@ -10,6 +10,7 @@ use iota_sdk::{
         protocol::protocol_parameters,
     },
 };
+use pretty_assertions::assert_eq;
 
 use crate::client::{
     addresses, build_inputs, build_outputs, is_remainder_or_return, unsorted_eq,
@@ -682,8 +683,6 @@ fn expiration_expired_only_account_addresses() {
         Account(
             1_000_000,
             account_id_1,
-            0,
-            BECH32_ADDRESS_ED25519_0,
             BECH32_ADDRESS_ED25519_0,
             None,
             None,

@@ -13,8 +13,8 @@ use packable::{
 };
 
 use crate::types::block::{
-    protocol::{WorkScore, WorkScoreStructure},
-    BlockWrapper, Error,
+    protocol::{WorkScore, WorkScoreParameters},
+    Error, SignedBlock,
 };
 
 pub(crate) type TagLength =
@@ -42,7 +42,7 @@ impl TaggedDataPayload {
     // lengths.
     // TODO https://github.com/iotaledger/iota-sdk/issues/1226
     pub const DATA_LENGTH_RANGE: RangeInclusive<u32> =
-        0..=(BlockWrapper::LENGTH_MAX - BlockWrapper::LENGTH_MIN - 9) as u32;
+        0..=(SignedBlock::LENGTH_MAX - SignedBlock::LENGTH_MIN - 9) as u32;
 
     /// Creates a new [`TaggedDataPayload`].
     pub fn new(tag: impl Into<Box<[u8]>>, data: impl Into<Box<[u8]>>) -> Result<Self, Error> {
@@ -64,8 +64,8 @@ impl TaggedDataPayload {
 }
 
 impl WorkScore for TaggedDataPayload {
-    fn work_score(&self, work_score_params: WorkScoreStructure) -> u32 {
-        let size_score = self.packed_len() as u32 * work_score_params.data_byte;
+    fn work_score(&self, work_score_params: WorkScoreParameters) -> u32 {
+        let size_score = self.packed_len() as u32 * work_score_params.data_byte();
         size_score
     }
 }
@@ -115,5 +115,5 @@ pub mod dto {
         }
     }
 
-    impl_serde_typed_dto!(TaggedDataPayload, TaggedDataPayloadDto, "tagged data payload");
+    crate::impl_serde_typed_dto!(TaggedDataPayload, TaggedDataPayloadDto, "tagged data payload");
 }

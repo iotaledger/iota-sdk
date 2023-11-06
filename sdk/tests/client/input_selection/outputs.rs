@@ -7,6 +7,7 @@ use iota_sdk::{
     client::api::input_selection::{Burn, Error, InputSelection},
     types::block::{output::AccountId, protocol::protocol_parameters},
 };
+use pretty_assertions::assert_eq;
 
 use crate::client::{
     addresses, build_inputs, build_outputs, is_remainder_or_return, unsorted_eq,
@@ -76,8 +77,6 @@ fn no_outputs_but_burn() {
     let inputs = build_inputs([Account(
         2_000_000,
         account_id_2,
-        0,
-        BECH32_ADDRESS_ED25519_0,
         BECH32_ADDRESS_ED25519_0,
         None,
         None,

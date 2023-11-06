@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from enum import Enum
-from typing import Optional, List, Dict, Union
+from typing import Optional, List, Union
 from dataclasses import dataclass
 from iota_sdk.types.burn import Burn
 from iota_sdk.types.common import json
@@ -27,9 +27,19 @@ class RemainderValueStrategyCustomAddress:
     internal: bool
     used: bool
 
-    @staticmethod
-    def _to_dict_custom(config: Dict[str, any]) -> Dict[str, any]:
-        return dict({"strategy": "CustomAddress", "value": config})
+    def to_dict(self) -> dict:
+        """Custom dict conversion.
+        """
+
+        return {
+            'strategy': 'CustomAddress',
+            'value': {
+                'address': self.address,
+                'keyIndex': self.key_index,
+                'internal': self.internal,
+                'used': self.used
+            }
+        }
 
 
 class RemainderValueStrategy(Enum):
@@ -43,15 +53,13 @@ class RemainderValueStrategy(Enum):
     ReuseAddress = None
 
     def to_dict(self):
+        """Custom dict conversion.
         """
-        The function `to_dict` returns a dictionary with the strategy name and its corresponding value.
 
-        Returns:
-
-        a dictionary with two key-value pairs. The "strategy" key is assigned the value of self.name,
-        and the "value" key is assigned the first element of self.value.
-        """
-        return dict({"strategy": self.name, "value": self.value[0]})
+        return {
+            'strategy': self.name,
+            'value': self.value[0]
+        }
 
 
 @json
@@ -85,8 +93,3 @@ class TransactionOptions():
         self.burn = burn
         self.note = note
         self.allow_micro_amount = allow_micro_amount
-
-    def as_dict(self):
-        """The function `as_dict` returns a dictionary representation of an object's attributes.
-        """
-        return dict(self.__dict__)

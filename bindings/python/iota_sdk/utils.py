@@ -8,15 +8,18 @@ from typing import TYPE_CHECKING, List
 from iota_sdk.types.signature import Ed25519Signature
 from iota_sdk.types.address import Address, deserialize_address
 from iota_sdk.types.common import HexStr
-from iota_sdk.types.essence import TransactionEssence
+from iota_sdk.types.transaction import Transaction
 from iota_sdk.types.node_info import ProtocolParameters
 from iota_sdk.types.output_id import OutputId
 from iota_sdk.types.output import Output
 from iota_sdk.external import call_utils_method
+from iota_sdk.types.payload import SignedTransactionPayload
 
 # Required to prevent circular import
 if TYPE_CHECKING:
-    from iota_sdk.types.block.wrapper import BlockWrapper
+    from iota_sdk.types.block.signed_block import SignedBlock
+
+# pylint: disable=too-many-public-methods
 
 
 class Utils():
@@ -76,7 +79,7 @@ class Utils():
             'address': address
         })
 
-        deserialize_address(response)
+        return deserialize_address(response)
 
     @staticmethod
     def is_address_valid(address: str) -> bool:
@@ -165,7 +168,7 @@ class Utils():
         })
 
     @staticmethod
-    def block_id(block: BlockWrapper, params: ProtocolParameters) -> HexStr:
+    def block_id(block: SignedBlock, params: ProtocolParameters) -> HexStr:
         """ Return a block ID (Blake2b256 hash of block bytes) from a block.
         """
         return _call_method('blockId', {
@@ -174,11 +177,19 @@ class Utils():
         })
 
     @staticmethod
-    def hash_transaction_essence(essence: TransactionEssence) -> HexStr:
-        """ Compute the hash of a transaction essence.
+    def transaction_id(payload: SignedTransactionPayload) -> HexStr:
+        """ Compute the transaction ID (Blake2b256 hash of the provided transaction payload) of a transaction payload.
         """
-        return _call_method('hashTransactionEssence', {
-            'essence': essence.to_dict(),
+        return _call_method('transactionId', {
+            'payload': payload.as_dict()
+        })
+
+    @staticmethod
+    def transaction_signing_hash(transaction: Transaction) -> HexStr:
+        """ Compute the signing hash of a transaction.
+        """
+        return _call_method('transactionSigningHash', {
+            'transaction': transaction.to_dict(),
         })
 
     @staticmethod

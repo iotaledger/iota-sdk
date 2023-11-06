@@ -16,17 +16,15 @@ class BlockMetadata:
 
     Attributes:
         block_state: The block state.
-        tx_state: The transaction state.
+        transaction_state: The transaction state.
         block_failure_reason: The block failure reason.
-        tx_failure_reason: The transaction failure reason.
+        transaction_failure_reason: The transaction failure reason.
     """
     block_id: HexStr
-    # TODO: verify if really optional:
-    # https://github.com/iotaledger/tips-draft/pull/24/files#r1293426314
-    block_state: Optional[BlockState] = None
-    tx_state: Optional[TransactionState] = None
+    block_state: BlockState
+    transaction_state: Optional[TransactionState] = None
     block_failure_reason: Optional[BlockFailureReason] = None
-    tx_failure_reason: Optional[TransactionFailureReason] = None
+    transaction_failure_reason: Optional[TransactionFailureReason] = None
 
 
 class BlockState(Enum):
@@ -69,15 +67,29 @@ class BlockFailureReason(IntEnum):
         ParentTooOld (2): One of the block's parents is too old.
         ParentDoesNotExist (3): One of the block's parents does not exist.
         ParentInvalid (4): One of the block's parents is invalid.
-        DroppedDueToCongestion (5): The block is dropped due to congestion.
-        Invalid (6): The block is invalid.
+        IssuerAccountNotFound (5): The block's issuer account could not be found.
+        VersionInvalid (6): The block's protocol version is invalid.
+        ManaCostCalculationFailed (7): The mana cost could not be calculated.
+        BurnedInsufficientMana (8): The block's issuer account burned insufficient Mana for a block.
+        AccountInvalid (9): The account is invalid.
+        SignatureInvalid (10): The block's signature is invalid.
+        DroppedDueToCongestion (11): The block is dropped due to congestion.
+        PayloadInvalid (12): The block payload is invalid.
+        Invalid (255): The block is invalid.
     """
     TooOldToIssue = 1
     ParentTooOld = 2
     ParentDoesNotExist = 3
     ParentInvalid = 4
-    DroppedDueToCongestion = 5
-    Invalid = 6
+    IssuerAccountNotFound = 5
+    VersionInvalid = 6
+    ManaCostCalculationFailed = 7
+    BurnedInsufficientMana = 8
+    AccountInvalid = 9
+    SignatureInvalid = 10
+    DroppedDueToCongestion = 11
+    PayloadInvalid = 12
+    Invalid = 255
 
 
 class TransactionFailureReason(Enum):
@@ -94,7 +106,6 @@ class TransactionFailureReason(Enum):
         InvalidNativeTokens: The given native tokens are invalid.
         StorageDepositReturnUnfulfilled: The return amount in a transaction is not fulfilled by the output side.
         InvalidInputUnlock: An input unlock was invalid.
-        InvalidInputsCommitment: The inputs commitment is invalid.
         SenderNotUnlocked: The output contains a Sender with an ident (address) which is not unlocked.
         InvalidChainStateTransition: The chain state transition is invalid.
         InvalidTransactionIssuingTime: The referenced input is created after the transaction issuing time.
@@ -105,6 +116,12 @@ class TransactionFailureReason(Enum):
         MissingStakingFeature: Staking Feature is not provided in account output when claiming rewards.
         FailedToClaimStakingReward: Failed to claim staking reward.
         FailedToClaimDelegationReward: Failed to claim delegation reward.
+        TransactionCapabilityNativeTokenBurningNotAllowed: Burning of native tokens is not allowed in the transaction capabilities.
+        TransactionCapabilityManaBurningNotAllowed: Burning of mana is not allowed in the transaction capabilities.
+        TransactionCapabilityAccountDestructionNotAllowed: Destruction of accounts is not allowed in the transaction capabilities.
+        TransactionCapabilityAnchorDestructionNotAllowed: Destruction of anchors is not allowed in the transaction capabilities.
+        TransactionCapabilityFoundryDestructionNotAllowed: Destruction of foundries is not allowed in the transaction capabilities.
+        TransactionCapabilityNftDestructionNotAllowed: Destruction of nfts is not allowed in the transaction capabilities.
         SemanticValidationFailed: The semantic validation failed for a reason not covered by the previous variants.
     """
     InputUtxoAlreadySpent = 1
@@ -117,17 +134,22 @@ class TransactionFailureReason(Enum):
     InvalidNativeTokens = 8
     StorageDepositReturnUnfulfilled = 9
     InvalidInputUnlock = 10
-    InvalidInputsCommitment = 11
-    SenderNotUnlocked = 12
-    InvalidChainStateTransition = 13
-    InvalidTransactionIssuingTime = 14
-    InvalidManaAmount = 15
-    InvalidBlockIssuanceCreditsAmount = 16
-    InvalidRewardContextInput = 17
-    InvalidCommitmentContextInput = 18
-    MissingStakingFeature = 19
-    FailedToClaimStakingReward = 20
-    FailedToClaimDelegationReward = 21
+    SenderNotUnlocked = 11
+    InvalidChainStateTransition = 12
+    InvalidTransactionIssuingTime = 13
+    InvalidManaAmount = 14
+    InvalidBlockIssuanceCreditsAmount = 15
+    InvalidRewardContextInput = 16
+    InvalidCommitmentContextInput = 17
+    MissingStakingFeature = 18
+    FailedToClaimStakingReward = 19
+    FailedToClaimDelegationReward = 20
+    TransactionCapabilityNativeTokenBurningNotAllowed = 21
+    TransactionCapabilityManaBurningNotAllowed = 22
+    TransactionCapabilityAccountDestructionNotAllowed = 23
+    TransactionCapabilityAnchorDestructionNotAllowed = 24
+    TransactionCapabilityFoundryDestructionNotAllowed = 25
+    TransactionCapabilityNftDestructionNotAllowed = 26
     SemanticValidationFailed = 255
 
     def __str__(self):
@@ -142,16 +164,21 @@ class TransactionFailureReason(Enum):
             8: "The given native tokens are invalid.",
             9: "The return amount in a transaction is not fulfilled by the output side.",
             10: "An input unlock was invalid.",
-            11: "The inputs commitment is invalid.",
-            12: "The output contains a Sender with an ident (address) which is not unlocked.",
-            13: "The chain state transition is invalid.",
-            14: "The referenced input is created after the transaction issuing time.",
-            15: "The mana amount is invalid.",
-            16: "The Block Issuance Credits amount is invalid.",
-            17: "Reward Context Input is invalid.",
-            18: "Commitment Context Input is invalid.",
-            19: "Staking Feature is not provided in account output when claiming rewards.",
-            20: "Failed to claim staking reward.",
-            21: "Failed to claim delegation reward.",
+            11: "The output contains a Sender with an ident (address) which is not unlocked.",
+            12: "The chain state transition is invalid.",
+            13: "The referenced input is created after the transaction issuing time.",
+            14: "The mana amount is invalid.",
+            15: "The Block Issuance Credits amount is invalid.",
+            16: "Reward Context Input is invalid.",
+            17: "Commitment Context Input is invalid.",
+            18: "Staking Feature is not provided in account output when claiming rewards.",
+            19: "Failed to claim staking reward.",
+            20: "Failed to claim delegation reward.",
+            21: "Burning of native tokens is not allowed in the transaction capabilities.",
+            22: "Burning of mana is not allowed in the transaction capabilities.",
+            23: "Destruction of accounts is not allowed in the transaction capabilities.",
+            24: "Destruction of anchors is not allowed in the transaction capabilities.",
+            25: "Destruction of foundries is not allowed in the transaction capabilities.",
+            26: "Destruction of nfts is not allowed in the transaction capabilities.",
             255: "The semantic validation failed for a reason not covered by the previous variants."
         }[self.value]

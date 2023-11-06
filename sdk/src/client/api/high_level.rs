@@ -10,15 +10,15 @@ use crate::{
         api::input_selection::Error as InputSelectionError,
         constants::FIVE_MINUTES_IN_SECONDS,
         error::{Error, Result},
-        node_api::indexer::query_parameters::QueryParameter,
+        node_api::indexer::query_parameters::BasicOutputQueryParameters,
         unix_timestamp_now, Client,
     },
     types::block::{
         address::Bech32Address,
-        core::{BasicBlock, Block, BlockWrapper},
+        core::{BasicBlock, Block, SignedBlock},
         input::{Input, UtxoInput, INPUT_COUNT_MAX},
         output::OutputWithMetadata,
-        payload::{transaction::TransactionId, Payload},
+        payload::{signed_transaction::TransactionId, Payload},
         slot::SlotIndex,
         BlockId,
     },
@@ -27,11 +27,11 @@ use crate::{
 impl Client {
     /// Get the inputs of a transaction for the given transaction id.
     pub async fn inputs_from_transaction_id(&self, transaction_id: &TransactionId) -> Result<Vec<OutputWithMetadata>> {
-        let wrapper = self.get_included_block(transaction_id).await?;
+        let signed_block = self.get_included_block(transaction_id).await?;
 
-        if let Block::Basic(block) = wrapper.block() {
-            let inputs = if let Some(Payload::Transaction(t)) = block.payload() {
-                t.essence().inputs()
+        if let Block::Basic(block) = signed_block.block() {
+            let inputs = if let Some(Payload::SignedTransaction(t)) = block.payload() {
+                t.transaction().inputs()
             } else {
                 return Err(Error::MissingTransactionPayload);
             };
@@ -47,13 +47,13 @@ impl Client {
         } else {
             Err(Error::UnexpectedBlockKind {
                 expected: BasicBlock::KIND,
-                actual: wrapper.block().kind(),
+                actual: signed_block.block().kind(),
             })
         }
     }
 
     /// Find all blocks by provided block IDs.
-    pub async fn find_blocks(&self, block_ids: &[BlockId]) -> Result<Vec<BlockWrapper>> {
+    pub async fn find_blocks(&self, block_ids: &[BlockId]) -> Result<Vec<SignedBlock>> {
         // Use a `HashSet` to prevent duplicate block_ids.
         let block_ids = block_ids.iter().copied().collect::<HashSet<_>>();
         futures::future::try_join_all(block_ids.iter().map(|block_id| self.get_block(block_id))).await
@@ -64,14 +64,7 @@ impl Client {
     pub async fn find_inputs(&self, addresses: Vec<Bech32Address>, amount: u64) -> Result<Vec<UtxoInput>> {
         // Get outputs from node and select inputs
         let available_outputs = futures::stream::iter(addresses)
-            .then(|address| {
-                self.basic_output_ids([
-                    QueryParameter::Address(address),
-                    QueryParameter::HasExpiration(false),
-                    QueryParameter::HasTimelock(false),
-                    QueryParameter::HasStorageDepositReturn(false),
-                ])
-            })
+            .then(|address| self.basic_output_ids(BasicOutputQueryParameters::only_address_unlock_condition(address)))
             .and_then(|res| async {
                 let items = res.items;
                 self.get_outputs_with_metadata(&items).await

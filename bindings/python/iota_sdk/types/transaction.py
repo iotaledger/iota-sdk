@@ -2,51 +2,49 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from __future__ import annotations
-from dataclasses import dataclass
-from typing import List, Optional
-from enum import Enum
-from iota_sdk.types.common import HexStr, json
-from iota_sdk.types.output_metadata import OutputWithMetadata
-from iota_sdk.types.payload import TransactionPayload
+from typing import TYPE_CHECKING, Optional, List
 
+from dataclasses import dataclass, field
 
-class InclusionState(str, Enum):
-    """Inclusion state variants of a transaction.
+from iota_sdk.types.common import HexStr, json, SlotIndex
+from iota_sdk.types.mana import ManaAllotment
+from iota_sdk.types.input import UtxoInput
+from iota_sdk.types.context_input import ContextInput
+from iota_sdk.types.output import Output
 
-    Attributes:
-        Pending: The transaction is pending.
-        Confirmed: The transaction is confirmed.
-        Conflicting: The transaction is conflicting.
-        UnknownPruned: The transaction is unknown or already pruned.
-    """
-    Pending = 'pending'
-    Confirmed = 'confirmed'
-    Conflicting = 'conflicting'
-    UnknownPruned = 'unknownPruned'
+# Required to prevent circular import
+if TYPE_CHECKING:
+    from iota_sdk.types.payload import Payload
 
 
 @json
 @dataclass
 class Transaction:
-    """A transaction with some metadata.
+    """A transaction consuming inputs, creating outputs and carrying an optional payload.
 
     Attributes:
-        payload: The transaction payload.
-        inclusion_state: The inclusion state of the transaction.
-        timestamp: The timestamp of the transaction.
-        transaction_id: The ID of the corresponding transaction.
-        network_id: The ID of the network this transaction was issued in.
-        incoming: Indicates whether the transaction was created by the wallet or whether it was sent by someone else and is incoming.
-        inputs: The inputs of the transaction.
-        note: A note attached to the transaction.
-        block_id: The ID of the block that holds the transaction.
+        network_id: The unique value denoting whether the block was meant for mainnet, shimmer, testnet, or a private network.
+                    It consists of the first 8 bytes of the BLAKE2b-256 hash of the network name.
+        creation_slot: The slot index in which the transaction was created.
+        context_inputs: The inputs that provide additional contextual information for the execution of a transaction.
+        inputs: The inputs to consume in order to fund the outputs of the Transaction Payload.
+        allotments: The allotments of Mana which which will be added upon commitment of the slot.
+        capabilities: The capability bitflags of the transaction.
+        outputs: The outputs that are created by the Transaction Payload
+        payload: An optional tagged data payload
     """
-    payload: TransactionPayload
-    inclusion_state: InclusionState
-    timestamp: int
-    transaction_id: HexStr
-    network_id: int
-    incoming: bool
-    inputs = List[OutputWithMetadata]
-    note: Optional[str] = None
-    block_id: Optional[HexStr] = None
+    network_id: str
+    creation_slot: SlotIndex
+    context_inputs: List[ContextInput]
+    inputs: List[UtxoInput]
+    allotments: List[ManaAllotment]
+    capabilities: HexStr = field(default='0x', init=False)
+    outputs: List[Output]
+    payload: Optional[Payload] = None
+
+    def with_capabilities(self, capabilities: bytes):
+        """Sets the transaction capabilities from a byte array.
+        Attributes:
+            capabilities: The transaction capabilities bitflags.
+        """
+        self.capabilities = '0x' + capabilities.hex()

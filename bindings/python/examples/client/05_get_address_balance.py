@@ -12,8 +12,8 @@ node_url = os.environ.get('NODE_URL', 'https://api.testnet.shimmer.network')
 client = Client(nodes=[node_url])
 
 ADDRESS = 'rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy'
-query_parameters = NodeIndexerAPI.QueryParameters(
-    ADDRESS,
+query_parameters = NodeIndexerAPI.BasicOutputQueryParameters(
+    address=ADDRESS,
     has_expiration=False,
     has_timelock=False,
     has_storage_deposit_return=False
@@ -34,7 +34,7 @@ total_amount = 0
 native_tokens = []
 for output_with_metadata in outputs:
     output = output_with_metadata.output
-    total_amount += int(output.amount)
+    total_amount += output.amount
     if output.native_tokens:
         native_tokens.append(output.native_tokens)
 

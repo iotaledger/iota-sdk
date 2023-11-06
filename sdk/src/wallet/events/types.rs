@@ -7,23 +7,14 @@ use serde::{Deserialize, Serialize, Serializer};
 use crate::{
     client::api::PreparedTransactionDataDto,
     types::{
-        api::core::response::OutputWithMetadataResponse,
+        api::core::OutputWithMetadataResponse,
         block::{
             address::Bech32Address,
-            payload::transaction::{dto::TransactionPayloadDto, TransactionId},
+            payload::signed_transaction::{dto::SignedTransactionPayloadDto, TransactionId},
         },
     },
-    wallet::account::types::{InclusionState, OutputDataDto},
+    wallet::types::{InclusionState, OutputDataDto},
 };
-
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct Event {
-    /// Associated account index.
-    pub account_index: u32,
-    /// The event
-    pub event: WalletEvent,
-}
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 #[non_exhaustive]
@@ -187,7 +178,7 @@ pub struct NewOutputEvent {
     pub output: OutputDataDto,
     /// The transaction that created the output. Might be pruned and not available.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub transaction: Option<TransactionPayloadDto>,
+    pub transaction: Option<SignedTransactionPayloadDto>,
     /// The inputs for the transaction that created the output. Might be pruned and not available.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub transaction_inputs: Option<Vec<OutputWithMetadataResponse>>,
@@ -215,8 +206,8 @@ pub enum TransactionProgressEvent {
     GeneratingRemainderDepositAddress(AddressData),
     /// Prepared transaction.
     PreparedTransaction(Box<PreparedTransactionDataDto>),
-    /// Prepared transaction essence hash hex encoded, required for blindsigning with a ledger nano
-    PreparedTransactionEssenceHash(String),
+    /// Prepared transaction signing hash hex encoded, required for blindsigning with a ledger nano
+    PreparedTransactionSigningHash(String),
     /// Signing the transaction.
     SigningTransaction,
     /// Broadcasting.
@@ -229,8 +220,9 @@ impl Serialize for TransactionProgressEvent {
         S: Serializer,
     {
         #[derive(Serialize)]
-        struct PreparedTransactionEssenceHash_<'a> {
-            hash: &'a str,
+        #[serde(rename_all = "camelCase")]
+        struct PreparedTransactionSigningHash_<'a> {
+            signing_hash: &'a str,
         }
 
         #[derive(Serialize)]
@@ -239,7 +231,7 @@ impl Serialize for TransactionProgressEvent {
             T0,
             T1(&'a AddressData),
             T2(&'a PreparedTransactionDataDto),
-            T3(PreparedTransactionEssenceHash_<'a>),
+            T3(PreparedTransactionSigningHash_<'a>),
             T4,
             T5,
         }
@@ -263,9 +255,9 @@ impl Serialize for TransactionProgressEvent {
                 kind: 2,
                 event: TransactionProgressEvent_::T2(e),
             },
-            Self::PreparedTransactionEssenceHash(e) => TypedTransactionProgressEvent_ {
+            Self::PreparedTransactionSigningHash(e) => TypedTransactionProgressEvent_ {
                 kind: 3,
-                event: TransactionProgressEvent_::T3(PreparedTransactionEssenceHash_ { hash: e }),
+                event: TransactionProgressEvent_::T3(PreparedTransactionSigningHash_ { signing_hash: e }),
             },
             Self::SigningTransaction => TypedTransactionProgressEvent_ {
                 kind: 4,
@@ -283,8 +275,9 @@ impl Serialize for TransactionProgressEvent {
 impl<'de> Deserialize<'de> for TransactionProgressEvent {
     fn deserialize<D: serde::Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
         #[derive(Deserialize)]
-        struct PreparedTransactionEssenceHash_ {
-            hash: String,
+        #[serde(rename_all = "camelCase")]
+        struct PreparedTransactionSigningHash_ {
+            signing_hash: String,
         }
 
         let value = serde_json::Value::deserialize(d)?;
@@ -302,12 +295,12 @@ impl<'de> Deserialize<'de> for TransactionProgressEvent {
                 2 => Self::PreparedTransaction(Box::new(PreparedTransactionDataDto::deserialize(value).map_err(
                     |e| serde::de::Error::custom(format!("cannot deserialize PreparedTransactionDataDto: {e}")),
                 )?)),
-                3 => Self::PreparedTransactionEssenceHash(
-                    PreparedTransactionEssenceHash_::deserialize(value)
+                3 => Self::PreparedTransactionSigningHash(
+                    PreparedTransactionSigningHash_::deserialize(value)
                         .map_err(|e| {
-                            serde::de::Error::custom(format!("cannot deserialize PreparedTransactionEssenceHash: {e}"))
+                            serde::de::Error::custom(format!("cannot deserialize PreparedTransactionSigningHash: {e}"))
                         })?
-                        .hash,
+                        .signing_hash,
                 ),
                 4 => Self::SigningTransaction,
                 5 => Self::Broadcasting,

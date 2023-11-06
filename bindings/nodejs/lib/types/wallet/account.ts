@@ -4,9 +4,10 @@
 import type { Bip44Address, AddressWithUnspentOutputs } from './address';
 import { AccountId, FoundryId, NftId } from '../block/id';
 import type { OutputData } from './output';
-import type { Transaction } from './transaction';
+import type { TransactionWithMetadata } from './transaction';
 import { CoinType } from '../../client';
 import { HexEncodedString, u256, u64 } from '../utils';
+import { Bech32Address } from '../block/address';
 
 /**
  * Account identifier
@@ -75,7 +76,7 @@ export interface SyncOptions {
      * Specific Bech32 encoded addresses of the account to sync, if addresses are provided,
      * then `address_start_index` will be ignored
      */
-    addresses?: string[];
+    addresses?: Bech32Address[];
     /**
      * Address index from which to start syncing addresses. 0 by default, using a higher index will be faster because
      * addresses with a lower index will be skipped, but could result in a wrong balance for that reason
@@ -163,12 +164,12 @@ export interface AccountMeta {
     /** All unspent outputs of the account. */
     unspentOutputs: { [outputId: string]: OutputData };
     /** All transactions of the account. */
-    transactions: { [transactionId: string]: Transaction };
+    transactions: { [transactionId: string]: TransactionWithMetadata };
     /** All pending transactions of the account. */
     pendingTransactions: Set<string>;
     /** All incoming transactions of the account (with their inputs if available and not already pruned). */
     incomingTransactions: {
-        [transactionId: string]: [Transaction];
+        [transactionId: string]: [TransactionWithMetadata];
     };
 }
 

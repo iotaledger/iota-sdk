@@ -22,18 +22,22 @@ use crate::types::{
             NativeTokens, Output, OutputBuilderAmount, OutputId, Rent, RentStructure, StateTransitionError,
             StateTransitionVerifier,
         },
-        protocol::{ProtocolParameters, WorkScore, WorkScoreStructure},
-        semantic::{TransactionFailureReason, ValidationContext},
+        payload::signed_transaction::TransactionCapabilityFlag,
+        protocol::{ProtocolParameters, WorkScore, WorkScoreParameters},
+        semantic::{SemanticValidationContext, TransactionFailureReason},
         unlock::Unlock,
         Error,
     },
     ValidationParams,
 };
 
-impl_id!(pub NftId, 32, "Unique identifier of an NFT, which is the BLAKE2b-256 hash of the Output ID that created it.");
-
-#[cfg(feature = "serde")]
-string_serde_impl!(NftId);
+crate::impl_id!(
+    /// Unique identifier of the [`NftOutput`](crate::types::block::output::NftOutput),
+    /// which is the BLAKE2b-256 hash of the [`OutputId`](crate::types::block::output::OutputId) that created it.
+    pub NftId {
+        pub const LENGTH: usize = 32;
+    }
+);
 
 impl From<&OutputId> for NftId {
     fn from(output_id: &OutputId) -> Self {
@@ -305,7 +309,7 @@ pub struct NftOutput {
 
 impl NftOutput {
     /// The [`Output`](crate::types::block::output::Output) kind of an [`NftOutput`].
-    pub const KIND: u8 = 3;
+    pub const KIND: u8 = 4;
     /// The set of allowed [`UnlockCondition`]s for an [`NftOutput`].
     pub const ALLOWED_UNLOCK_CONDITIONS: UnlockConditionFlags = UnlockConditionFlags::ADDRESS
         .union(UnlockConditionFlags::STORAGE_DEPOSIT_RETURN)
@@ -404,12 +408,11 @@ impl NftOutput {
         &self,
         output_id: &OutputId,
         unlock: &Unlock,
-        inputs: &[(&OutputId, &Output)],
-        context: &mut ValidationContext<'_>,
+        context: &mut SemanticValidationContext<'_>,
     ) -> Result<(), TransactionFailureReason> {
         self.unlock_conditions()
-            .locked_address(self.address(), context.essence.creation_slot())
-            .unlock(unlock, inputs, context)?;
+            .locked_address(self.address(), context.transaction.creation_slot())
+            .unlock(unlock, context)?;
 
         let nft_id = if self.nft_id().is_null() {
             NftId::from(output_id)
@@ -424,7 +427,7 @@ impl NftOutput {
         Ok(())
     }
 
-    // Transition, just without full ValidationContext
+    // Transition, just without full SemanticValidationContext
     pub(crate) fn transition_inner(current_state: &Self, next_state: &Self) -> Result<(), StateTransitionError> {
         if current_state.immutable_features != next_state.immutable_features {
             return Err(StateTransitionError::MutatedImmutableField);
@@ -434,7 +437,7 @@ impl NftOutput {
 }
 
 impl StateTransitionVerifier for NftOutput {
-    fn creation(next_state: &Self, context: &ValidationContext<'_>) -> Result<(), StateTransitionError> {
+    fn creation(next_state: &Self, context: &SemanticValidationContext<'_>) -> Result<(), StateTransitionError> {
         if !next_state.nft_id.is_null() {
             return Err(StateTransitionError::NonZeroCreatedId);
         }
@@ -451,22 +454,28 @@ impl StateTransitionVerifier for NftOutput {
     fn transition(
         current_state: &Self,
         next_state: &Self,
-        _context: &ValidationContext<'_>,
+        _context: &SemanticValidationContext<'_>,
     ) -> Result<(), StateTransitionError> {
         Self::transition_inner(current_state, next_state)
     }
 
-    fn destruction(_current_state: &Self, _context: &ValidationContext<'_>) -> Result<(), StateTransitionError> {
+    fn destruction(_current_state: &Self, context: &SemanticValidationContext<'_>) -> Result<(), StateTransitionError> {
+        if !context
+            .transaction
+            .has_capability(TransactionCapabilityFlag::DestroyNftOutputs)
+        {
+            return Err(TransactionFailureReason::TransactionCapabilityNftDestructionNotAllowed)?;
+        }
         Ok(())
     }
 }
 
 impl WorkScore for NftOutput {
-    fn work_score(&self, work_score_params: WorkScoreStructure) -> u32 {
+    fn work_score(&self, work_score_params: WorkScoreParameters) -> u32 {
         let native_tokens_score = self.native_tokens().work_score(work_score_params);
         let features_score = self.features().work_score(work_score_params);
         let immutable_features_score = self.immutable_features().work_score(work_score_params);
-        work_score_params.output + native_tokens_score + features_score + immutable_features_score
+        work_score_params.output() + native_tokens_score + features_score + immutable_features_score
     }
 }
 
@@ -657,6 +666,7 @@ pub(crate) mod dto {
 
 #[cfg(test)]
 mod tests {
+    use pretty_assertions::assert_eq;
 
     use super::*;
     use crate::types::{

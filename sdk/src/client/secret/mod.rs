@@ -1,7 +1,7 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! Secret manager module enabling address generation and transaction essence signing.
+//! Secret manager module enabling address generation and transaction signing.
 
 /// Module for ledger nano based secret management.
 #[cfg(feature = "ledger_nano")]
@@ -45,20 +45,19 @@ use crate::client::secret::types::StrongholdDto;
 use crate::{
     client::{
         api::{
-            input_selection::{is_account_transition, Error as InputSelectionError},
-            transaction::validate_transaction_payload_length,
+            input_selection::Error as InputSelectionError, transaction::validate_signed_transaction_payload_length,
             verify_semantic, PreparedTransactionData,
         },
         Error,
     },
     types::block::{
-        address::{Address, Ed25519Address},
-        core::BlockWrapperBuilder,
+        address::{Address, AnchorAddress, Ed25519Address},
+        core::UnsignedBlock,
         output::Output,
-        payload::{transaction::TransactionEssence, TransactionPayload},
+        payload::SignedTransactionPayload,
         signature::{Ed25519Signature, Signature},
         unlock::{AccountUnlock, NftUnlock, ReferenceUnlock, SignatureUnlock, Unlock, Unlocks},
-        BlockWrapper,
+        Error as BlockError, SignedBlock,
     },
 };
 
@@ -96,15 +95,14 @@ pub trait SecretManage: Send + Sync {
         chain: Bip44,
     ) -> Result<(secp256k1_ecdsa::PublicKey, secp256k1_ecdsa::RecoverableSignature), Self::Error>;
 
-    /// Signs `essence_hash` using the given `chain`, returning an [`Unlock`].
-    async fn signature_unlock(&self, essence_hash: &[u8; 32], chain: Bip44) -> Result<Unlock, Self::Error> {
+    /// Signs `transaction_signing_hash` using the given `chain`, returning an [`Unlock`].
+    async fn signature_unlock(&self, transaction_signing_hash: &[u8; 32], chain: Bip44) -> Result<Unlock, Self::Error> {
         Ok(Unlock::from(SignatureUnlock::new(Signature::from(
-            self.sign_ed25519(essence_hash, chain).await?,
+            self.sign_ed25519(transaction_signing_hash, chain).await?,
         ))))
     }
 
-    /// Signs a transaction essence.
-    async fn sign_transaction_essence(
+    async fn transaction_unlocks(
         &self,
         prepared_transaction_data: &PreparedTransactionData,
     ) -> Result<Unlocks, Self::Error>;
@@ -112,7 +110,7 @@ pub trait SecretManage: Send + Sync {
     async fn sign_transaction(
         &self,
         prepared_transaction_data: PreparedTransactionData,
-    ) -> Result<TransactionPayload, Self::Error>;
+    ) -> Result<SignedTransactionPayload, Self::Error>;
 }
 
 pub trait SecretManagerConfig: SecretManage {
@@ -402,24 +400,22 @@ impl SecretManage for SecretManager {
         }
     }
 
-    async fn sign_transaction_essence(
+    async fn transaction_unlocks(
         &self,
         prepared_transaction_data: &PreparedTransactionData,
     ) -> Result<Unlocks, Self::Error> {
         match self {
             #[cfg(feature = "stronghold")]
-            Self::Stronghold(secret_manager) => Ok(secret_manager
-                .sign_transaction_essence(prepared_transaction_data)
-                .await?),
-            #[cfg(feature = "ledger_nano")]
-            Self::LedgerNano(secret_manager) => Ok(secret_manager
-                .sign_transaction_essence(prepared_transaction_data)
-                .await?),
-            Self::Mnemonic(secret_manager) => secret_manager.sign_transaction_essence(prepared_transaction_data).await,
-            #[cfg(feature = "private_key_secret_manager")]
-            Self::PrivateKey(secret_manager) => {
-                secret_manager.sign_transaction_essence(prepared_transaction_data).await
+            Self::Stronghold(secret_manager) => {
+                Ok(secret_manager.transaction_unlocks(prepared_transaction_data).await?)
             }
+            #[cfg(feature = "ledger_nano")]
+            Self::LedgerNano(secret_manager) => {
+                Ok(secret_manager.transaction_unlocks(prepared_transaction_data).await?)
+            }
+            Self::Mnemonic(secret_manager) => secret_manager.transaction_unlocks(prepared_transaction_data).await,
+            #[cfg(feature = "private_key_secret_manager")]
+            Self::PrivateKey(secret_manager) => secret_manager.transaction_unlocks(prepared_transaction_data).await,
             Self::Placeholder => Err(Error::PlaceholderSecretManager),
         }
     }
@@ -427,7 +423,7 @@ impl SecretManage for SecretManager {
     async fn sign_transaction(
         &self,
         prepared_transaction_data: PreparedTransactionData,
-    ) -> Result<TransactionPayload, Self::Error> {
+    ) -> Result<SignedTransactionPayload, Self::Error> {
         match self {
             #[cfg(feature = "stronghold")]
             Self::Stronghold(secret_manager) => Ok(secret_manager.sign_transaction(prepared_transaction_data).await?),
@@ -500,40 +496,36 @@ impl SecretManager {
     }
 }
 
-pub(crate) async fn default_sign_transaction_essence<M: SecretManage>(
+pub(crate) async fn default_transaction_unlocks<M: SecretManage>(
     secret_manager: &M,
     prepared_transaction_data: &PreparedTransactionData,
 ) -> crate::client::Result<Unlocks>
 where
     crate::client::Error: From<M::Error>,
 {
-    // The hashed_essence gets signed
-    let hashed_essence = prepared_transaction_data.essence.hash();
+    let transaction_signing_hash = prepared_transaction_data.transaction.signing_hash();
     let mut blocks = Vec::new();
     let mut block_indexes = HashMap::<Address, usize>::new();
-    let TransactionEssence::Regular(essence) = &prepared_transaction_data.essence;
-    let slot_index = essence.creation_slot();
+    let slot_index = prepared_transaction_data.transaction.creation_slot();
 
     // Assuming inputs_data is ordered by address type
     for (current_block_index, input) in prepared_transaction_data.inputs_data.iter().enumerate() {
         // Get the address that is required to unlock the input
-        let TransactionEssence::Regular(regular) = &prepared_transaction_data.essence;
-        let account_transition = is_account_transition(&input.output, *input.output_id(), regular.outputs(), None);
-        let (input_address, _) = input.output.required_and_unlocked_address(
-            slot_index,
-            input.output_metadata.output_id(),
-            account_transition,
-        )?;
+        let (input_address, _) = input
+            .output
+            .required_and_unlocked_address(slot_index, input.output_metadata.output_id())?;
 
         // Check if we already added an [Unlock] for this address
         match block_indexes.get(&input_address) {
             // If we already have an [Unlock] for this address, add a [Unlock] based on the address type
             Some(block_index) => match input_address {
-                Address::Account(_account) => blocks.push(Unlock::Account(AccountUnlock::new(*block_index as u16)?)),
                 Address::Ed25519(_ed25519) => {
                     blocks.push(Unlock::Reference(ReferenceUnlock::new(*block_index as u16)?));
                 }
+                Address::Account(_account) => blocks.push(Unlock::Account(AccountUnlock::new(*block_index as u16)?)),
                 Address::Nft(_nft) => blocks.push(Unlock::Nft(NftUnlock::new(*block_index as u16)?)),
+                Address::Anchor(_) => Err(BlockError::UnsupportedAddressKind(AnchorAddress::KIND))?,
+                _ => todo!("What do we do here?"),
             },
             None => {
                 // We can only sign ed25519 addresses and block_indexes needs to contain the account or nft
@@ -545,7 +537,9 @@ where
 
                 let chain = input.chain.ok_or(Error::MissingBip32Chain)?;
 
-                let block = secret_manager.signature_unlock(&hashed_essence, chain).await?;
+                let block = secret_manager
+                    .signature_unlock(&transaction_signing_hash, chain)
+                    .await?;
                 blocks.push(block);
 
                 // Add the ed25519 address to the block_indexes, so it gets referenced if further inputs have
@@ -576,24 +570,22 @@ where
 pub(crate) async fn default_sign_transaction<M: SecretManage>(
     secret_manager: &M,
     prepared_transaction_data: PreparedTransactionData,
-) -> crate::client::Result<TransactionPayload>
+) -> crate::client::Result<SignedTransactionPayload>
 where
     crate::client::Error: From<M::Error>,
 {
     log::debug!("[sign_transaction] {:?}", prepared_transaction_data);
 
-    let unlocks = secret_manager
-        .sign_transaction_essence(&prepared_transaction_data)
-        .await?;
+    let unlocks = secret_manager.transaction_unlocks(&prepared_transaction_data).await?;
 
     let PreparedTransactionData {
-        essence: TransactionEssence::Regular(essence),
+        transaction,
         inputs_data,
         ..
     } = prepared_transaction_data;
-    let tx_payload = TransactionPayload::new(essence, unlocks)?;
+    let tx_payload = SignedTransactionPayload::new(transaction, unlocks)?;
 
-    validate_transaction_payload_length(&tx_payload)?;
+    validate_signed_transaction_payload_length(&tx_payload)?;
 
     let conflict = verify_semantic(&inputs_data, &tx_payload)?;
 
@@ -611,18 +603,14 @@ pub trait SignBlock {
         self,
         secret_manager: &S,
         chain: Bip44,
-    ) -> crate::client::Result<BlockWrapper>
+    ) -> crate::client::Result<SignedBlock>
     where
         crate::client::Error: From<S::Error>;
 }
 
 #[async_trait]
-impl SignBlock for BlockWrapperBuilder {
-    async fn sign_ed25519<S: SecretManage>(
-        self,
-        secret_manager: &S,
-        chain: Bip44,
-    ) -> crate::client::Result<BlockWrapper>
+impl SignBlock for UnsignedBlock {
+    async fn sign_ed25519<S: SecretManage>(self, secret_manager: &S, chain: Bip44) -> crate::client::Result<SignedBlock>
     where
         crate::client::Error: From<S::Error>,
     {

@@ -1,8 +1,9 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { u64 } from '../../utils';
 import type { RentStructure } from '../rent-structure';
+import { EpochIndex } from '../../block/slot';
+import { u64 } from '../../utils';
 
 /**
  * The Protocol Info.
@@ -11,7 +12,7 @@ export interface ProtocolInfo {
     /**
      * The start epoch of the set of protocol parameters.
      */
-    startEpoch: string;
+    startEpoch: EpochIndex;
     /**
      * The protocol parameters.
      */
@@ -43,9 +44,9 @@ export interface ProtocolParameters {
      */
     rentStructure: RentStructure;
     /**
-     * Work structure lists the Work Score of each type, it is used to denote the computation costs of processing an object.
+     * Work Score Parameters lists the work score of each type, it is used to denote the computation costs of processing an object.
      */
-    workScoreStructure: WorkScoreStructure;
+    workScoreParameters: WorkScoreParameters;
     /**
      * Current supply of base token.
      */
@@ -65,11 +66,11 @@ export interface ProtocolParameters {
     /**
      * The parameters used by mana calculation.
      */
-    manaStructure: ManaStructure;
+    manaParameters: ManaParameters;
     /**
      * The unbonding period in epochs before an account can stop staking.
      */
-    stakingUnbondingPeriod: u64;
+    stakingUnbondingPeriod: number;
     /**
      * The number of validation blocks that each validator should issue each slot.
      */
@@ -77,23 +78,23 @@ export interface ProtocolParameters {
     /**
      * The number of epochs worth of Mana that a node is punished with for each additional validation block it issues.
      */
-    punishmentEpochs: u64;
+    punishmentEpochs: number;
     /**
      * Determine if a block is eligible by evaluating issuingTime and commitments in its pastcone to ATT and lastCommittedSlot respectively.
      */
-    livenessThreshold: u64;
+    livenessThreshold: number;
     /**
      * MinCommittableAge is the minimum age relative to the accepted tangle time slot index that a slot can be committed.
      */
-    minCommittableAge: u64;
+    minCommittableAge: number;
     /**
      * MaxCommittableAge is the maximum age for a slot commitment to be included in a block relative to the slot index of the block issuing time.
      */
-    maxCommittableAge: u64;
+    maxCommittableAge: number;
     /**
      * Determine the slot that should trigger a new committee selection for the next and upcoming epoch.
      */
-    epochNearingThreshold: u64;
+    epochNearingThreshold: number;
     /**
      * Congestion Control Parameters defines the parameters used to calculate the Reference Mana Cost (RMC).
      */
@@ -102,12 +103,47 @@ export interface ProtocolParameters {
      * The parameters used by signaling protocol parameters upgrade.
      */
     versionSignaling: VersionSignalingParameters;
+    /**
+     * Rewards Parameters defines the parameters that are used to calculate Mana rewards.
+     */
+    rewardsParameters: RewardsParameters;
 }
 
 /**
- * Work structure lists the Work Score of each type, it is used to denote the computation costs of processing an object.
+ * Rewards Parameters defines the parameters that are used to calculate Mana rewards.
  */
-export interface WorkScoreStructure {
+export interface RewardsParameters {
+    /**
+     * Profit Margin Exponent is used for shift operation for calculation of profit margin.
+     */
+    profitMarginExponent: number;
+    /**
+     * The length in epochs of the bootstrapping phase.
+     */
+    bootstrappingDuration: number;
+    /**
+     * Mana Share Coefficient is the coefficient used for calculation of initial rewards.
+     */
+    manaShareCoefficient: u64;
+    /**
+     * Decay Balancing Constant Exponent is the exponent used for calculation of the initial reward.
+     */
+    decayBalancingConstantExponent: number;
+    /**
+     * Decay Balancing Constant is an integer approximation calculated based on chosen Decay Balancing Constant Exponent.
+     */
+    decayBalancingConstant: u64;
+    /**
+     * Pool Coefficient Exponent is the exponent used for shifting operation
+     * in the pool rewards calculations.
+     */
+    poolCoefficientExponent: number;
+}
+
+/**
+ * Work Score Parameters lists the work score of each type, it is used to denote the computation costs of processing an object.
+ */
+export interface WorkScoreParameters {
     /**
      * DataByte accounts for the network traffic per kibibyte.
      */
@@ -116,10 +152,6 @@ export interface WorkScoreStructure {
      * Block accounts for work done to process a block in the node software.
      */
     block: number;
-    /**
-     * MissingParent is used for slashing if there are not enough strong tips.
-     */
-    missingParent: number;
     /**
      * Input accounts for loading the UTXO from the database and performing the mana calculations.
      */
@@ -152,16 +184,12 @@ export interface WorkScoreStructure {
      * SignatureEd25519 accounts for an Ed25519 signature check.
      */
     signatureEd25519: number;
-    /**
-     * MinStrongParentsThreshold is the minimum amount of strong parents in a basic block, otherwise the issuer gets slashed.
-     */
-    minStrongParentsThreshold: number;
 }
 
 /**
- * Mana Structure defines the parameters used by mana calculation.
+ * ManaParameters defines the parameters used by mana calculation.
  */
-export interface ManaStructure {
+export interface ManaParameters {
     /**
      * The number of bits used to represent Mana.
      */

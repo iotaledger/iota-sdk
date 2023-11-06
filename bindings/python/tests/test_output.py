@@ -1,8 +1,8 @@
 # Copyright 2023 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
-from iota_sdk import BasicOutput, AccountOutput, FoundryOutput, NftOutput, IssuerFeature, MetadataFeature
 from dacite import from_dict
+from iota_sdk import BasicOutput, AccountOutput, FoundryOutput, NftOutput, IssuerFeature, MetadataFeature
 
 
 def test_feature():
@@ -26,7 +26,7 @@ def test_feature():
 
 def test_output():
     basic_output_dict = {
-        "type": 3,
+        "type": 0,
         "mana": "999500700",
         "amount": "999500700",
         "unlockConditions": [
@@ -43,7 +43,7 @@ def test_output():
     assert basic_output.to_dict() == basic_output_dict
 
     basic_output_dict = {
-        "type": 3,
+        "type": 0,
         "mana": "57600",
         "amount": "57600",
         "nativeTokens": [
@@ -74,7 +74,7 @@ def test_output():
                     "type": 0,
                     "pubKeyHash": "0x8f463f0c57b86cf52cc69542fb43a2ec87f83b9c47493cce04c1a4616716bed0"
                 },
-                "unixTime": 1659119101
+                "slotIndex": 1659119101
             }
         ]
     }
@@ -82,7 +82,7 @@ def test_output():
     assert basic_output.to_dict() == basic_output_dict
 
     basic_output_dict = {
-        "type": 3,
+        "type": 0,
         "mana": "50100",
         "amount": "50100",
         "nativeTokens": [
@@ -101,7 +101,7 @@ def test_output():
             },
             {
                 "type": 2,
-                "unixTime": 1661850262
+                "slotIndex": 1661850262
             }
         ]
     }
@@ -109,28 +109,19 @@ def test_output():
     assert basic_output.to_dict() == basic_output_dict
 
     account_output_dict = {
-        "type": 4,
+        "type": 1,
         "mana": "168200",
         "amount": "168200",
         "accountId": "0x8d073d15074834785046d9cacec7ac4d672dcb6dad342624a936f3c4334520f1",
-        "stateIndex": 4,
-        "stateMetadata": "0x14bd8ce73814dfe5d6f30f65a11bfd6d0b9e5d29c90aff9d71ec4b3d3a2984386a312295fc8b79cd",
         "foundryCounter": 0,
         "unlockConditions": [
             {
-                "type": 4,
+                "type": 0,
                 "address": {
                     "type": 0,
                     "pubKeyHash": "0x1f964c683db3072db2ad26ec4b4bee69fb4224755e65566e284fc2aac057edbc"
                 }
             },
-            {
-                "type": 5,
-                "address": {
-                    "type": 0,
-                    "pubKeyHash": "0x1f964c683db3072db2ad26ec4b4bee69fb4224755e65566e284fc2aac057edbc"
-                }
-            }
         ],
         "features": [
             {
@@ -146,28 +137,19 @@ def test_output():
     assert account_output.to_dict() == account_output_dict
 
     account_output_dict = {
-        "type": 4,
+        "type": 1,
         "mana": "55100",
         "amount": "55100",
         "accountId": "0x5380cce0ac342b8fa3e9c4f46d5b473ee9e824f0017fe43682dca77e6b875354",
-        "stateIndex": 2,
-        "stateMetadata": "0x",
         "foundryCounter": 1,
         "unlockConditions": [
             {
-                "type": 4,
+                "type": 0,
                 "address": {
                     "type": 0,
                     "pubKeyHash": "0xc5976c01059227e9246686f138b29d13c3a85efd8a2154729dce23a3dfd52119"
                 }
             },
-            {
-                "type": 5,
-                "address": {
-                    "type": 0,
-                    "pubKeyHash": "0xc5976c01059227e9246686f138b29d13c3a85efd8a2154729dce23a3dfd52119"
-                }
-            }
         ],
         "immutableFeatures": [
             {
@@ -187,7 +169,7 @@ def test_output():
     assert account_output.to_dict() == account_output_dict
 
     foundry_output_dict = {
-        "type": 5,
+        "type": 3,
         "amount": "54700",
         "serialNumber": 1,
         "tokenScheme": {
@@ -216,7 +198,7 @@ def test_output():
     assert foundry_output.to_dict() == foundry_output_dict
 
     nft_output_dict = {
-        "type": 6,
+        "type": 4,
         "mana": "47800",
         "amount": "47800",
         "nftId": "0x90e84936bd0cffd1595d2a58f63b1a8d0d3e333ed893950a5f3f0043c6e59ec1",

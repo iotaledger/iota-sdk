@@ -11,8 +11,8 @@
 
 use iota_sdk::{
     client::{
-        api::GetAddressesOptions, node_api::indexer::query_parameters::QueryParameter, secret::SecretManager, Client,
-        Result,
+        api::GetAddressesOptions, node_api::indexer::query_parameters::BasicOutputQueryParameters,
+        secret::SecretManager, Client, Result,
     },
     types::block::output::NativeTokensBuilder,
 };
@@ -31,23 +31,21 @@ async fn main() -> Result<()> {
     let secret_manager = SecretManager::try_from_mnemonic(std::env::var("MNEMONIC").unwrap())?;
 
     // Generate the first address
-    let addresses = secret_manager
+    let first_address = secret_manager
         .generate_ed25519_addresses(
             GetAddressesOptions::from_client(&client)
                 .await?
                 .with_account_index(0)
                 .with_range(0..1),
         )
-        .await?;
+        .await?[0]
+        .clone();
 
     // Get output ids of outputs that can be controlled by this address without further unlock constraints
     let output_ids_response = client
-        .basic_output_ids([
-            QueryParameter::Address(addresses[0]),
-            QueryParameter::HasExpiration(false),
-            QueryParameter::HasTimelock(false),
-            QueryParameter::HasStorageDepositReturn(false),
-        ])
+        .basic_output_ids(BasicOutputQueryParameters::only_address_unlock_condition(
+            first_address.clone(),
+        ))
         .await?;
 
     // Get the outputs by their id
@@ -65,7 +63,7 @@ async fn main() -> Result<()> {
 
     println!(
         "Outputs controlled by {} have: {:?}i and native tokens:\n{:#?}",
-        addresses[0],
+        first_address,
         total_amount,
         total_native_tokens.finish_vec()?
     );

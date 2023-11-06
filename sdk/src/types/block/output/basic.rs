@@ -16,8 +16,8 @@ use crate::types::{
             verify_output_amount_min, verify_output_amount_packable, verify_output_amount_supply, NativeToken,
             NativeTokens, Output, OutputBuilderAmount, OutputId, Rent, RentStructure,
         },
-        protocol::{ProtocolParameters, WorkScore, WorkScoreStructure},
-        semantic::{TransactionFailureReason, ValidationContext},
+        protocol::{ProtocolParameters, WorkScore, WorkScoreParameters},
+        semantic::{SemanticValidationContext, TransactionFailureReason},
         unlock::Unlock,
         Error,
     },
@@ -301,33 +301,41 @@ impl BasicOutput {
         &self,
         _output_id: &OutputId,
         unlock: &Unlock,
-        inputs: &[(&OutputId, &Output)],
-        context: &mut ValidationContext<'_>,
+        context: &mut SemanticValidationContext<'_>,
     ) -> Result<(), TransactionFailureReason> {
         self.unlock_conditions()
-            .locked_address(self.address(), context.essence.creation_slot())
-            .unlock(unlock, inputs, context)
+            .locked_address(self.address(), context.transaction.creation_slot())
+            .unlock(unlock, context)
     }
 
     /// Returns the address of the unlock conditions if the output is a simple deposit.
     /// Simple deposit outputs are basic outputs with only an address unlock condition, no native tokens and no
     /// features. They are used to return storage deposits.
     pub fn simple_deposit_address(&self) -> Option<&Address> {
-        if let [UnlockCondition::Address(address)] = self.unlock_conditions().as_ref() {
+        if let [UnlockCondition::Address(uc)] = self.unlock_conditions().as_ref() {
             if self.mana == 0 && self.native_tokens.is_empty() && self.features.is_empty() {
-                return Some(address.address());
+                return Some(uc.address());
             }
         }
 
         None
     }
+
+    /// Checks whether the basic output is an implicit account.
+    pub fn is_implicit_account(&self) -> bool {
+        if let [UnlockCondition::Address(uc)] = self.unlock_conditions().as_ref() {
+            uc.address().is_implicit_account_creation() && self.native_tokens.is_empty() && self.features.is_empty()
+        } else {
+            false
+        }
+    }
 }
 
 impl WorkScore for BasicOutput {
-    fn work_score(&self, work_score_params: WorkScoreStructure) -> u32 {
+    fn work_score(&self, work_score_params: WorkScoreParameters) -> u32 {
         let native_tokens_score = self.native_tokens().work_score(work_score_params);
         let features_score = self.features().work_score(work_score_params);
-        work_score_params.output + native_tokens_score + features_score
+        work_score_params.output() + native_tokens_score + features_score
     }
 }
 
@@ -463,6 +471,7 @@ pub(crate) mod dto {
 
 #[cfg(test)]
 mod tests {
+    use pretty_assertions::assert_eq;
 
     use super::*;
     use crate::types::{
@@ -521,7 +530,7 @@ mod tests {
 
         let builder = BasicOutput::build_with_amount(100)
             .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000).unwrap())
-            .add_unlock_condition(address)
+            .add_unlock_condition(address.clone())
             .with_features(rand_allowed_features(BasicOutput::ALLOWED_FEATURES));
         test_split_dto(builder);
 

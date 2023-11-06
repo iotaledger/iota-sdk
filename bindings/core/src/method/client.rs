@@ -5,15 +5,22 @@ use derivative::Derivative;
 #[cfg(feature = "mqtt")]
 use iota_sdk::client::mqtt::Topic;
 use iota_sdk::{
-    client::{node_api::indexer::query_parameters::QueryParameter, node_manager::node::NodeAuth},
+    client::{
+        node_api::indexer::query_parameters::{
+            AccountOutputQueryParameters, AnchorOutputQueryParameters, BasicOutputQueryParameters,
+            DelegationOutputQueryParameters, FoundryOutputQueryParameters, NftOutputQueryParameters,
+            OutputQueryParameters,
+        },
+        node_manager::node::NodeAuth,
+    },
     types::block::{
         address::{Bech32Address, Hrp},
         output::{
-            dto::OutputDto, feature::Feature, unlock_condition::dto::UnlockConditionDto, AccountId, FoundryId,
-            NativeToken, NftId, OutputId, TokenScheme,
+            dto::OutputDto, feature::Feature, unlock_condition::dto::UnlockConditionDto, AccountId, AnchorId,
+            DelegationId, FoundryId, NativeToken, NftId, OutputId, TokenScheme,
         },
-        payload::{dto::PayloadDto, transaction::TransactionId},
-        BlockId, BlockWrapperDto,
+        payload::{dto::PayloadDto, signed_transaction::TransactionId},
+        BlockId, IssuerId, SignedBlockDto,
     },
     utils::serde::{option_string, string},
 };
@@ -38,8 +45,6 @@ pub enum ClientMethod {
         mana: u64,
         native_tokens: Option<Vec<NativeToken>>,
         account_id: AccountId,
-        state_index: Option<u32>,
-        state_metadata: Option<String>,
         foundry_counter: Option<u32>,
         unlock_conditions: Vec<UnlockConditionDto>,
         features: Option<Vec<Feature>>,
@@ -122,10 +127,13 @@ pub enum ClientMethod {
         query_params: Vec<String>,
         request_object: Option<String>,
     },
-    /// Build a block containing the specified payload and post it to the network.
-    PostBlockPayload {
-        /// The payload to send
-        payload: PayloadDto,
+    #[serde(rename_all = "camelCase")]
+    BuildBasicBlock {
+        /// The issuer's ID.
+        issuer_id: IssuerId,
+        /// The block payload.
+        #[serde(default)]
+        payload: Option<PayloadDto>,
     },
     //////////////////////////////////////////////////////////////////////
     // Node core API
@@ -151,7 +159,7 @@ pub enum ClientMethod {
     /// Post block (JSON)
     PostBlock {
         /// Block
-        block: BlockWrapperDto,
+        block: SignedBlockDto,
     },
     /// Post block (raw)
     #[serde(rename_all = "camelCase")]
@@ -209,19 +217,19 @@ pub enum ClientMethod {
     #[serde(rename_all = "camelCase")]
     OutputIds {
         /// Query parameters for output requests
-        query_parameters: Vec<QueryParameter>,
+        query_parameters: OutputQueryParameters,
     },
     /// Fetch basic output IDs
     #[serde(rename_all = "camelCase")]
     BasicOutputIds {
         /// Query parameters for output requests
-        query_parameters: Vec<QueryParameter>,
+        query_parameters: BasicOutputQueryParameters,
     },
     /// Fetch account output IDs
     #[serde(rename_all = "camelCase")]
     AccountOutputIds {
         /// Query parameters for output requests
-        query_parameters: Vec<QueryParameter>,
+        query_parameters: AccountOutputQueryParameters,
     },
     /// Fetch account output ID
     #[serde(rename_all = "camelCase")]
@@ -229,29 +237,53 @@ pub enum ClientMethod {
         /// Account id
         account_id: AccountId,
     },
-    /// Fetch NFT output IDs
+    /// Fetch anchor output IDs
     #[serde(rename_all = "camelCase")]
-    NftOutputIds {
+    AnchorOutputIds {
         /// Query parameters for output requests
-        query_parameters: Vec<QueryParameter>,
+        query_parameters: AnchorOutputQueryParameters,
     },
-    /// Fetch NFT output ID
+    /// Fetch anchor output ID
     #[serde(rename_all = "camelCase")]
-    NftOutputId {
-        /// NFT ID
-        nft_id: NftId,
+    AnchorOutputId {
+        /// Anchor id
+        anchor_id: AnchorId,
+    },
+    /// Fetch delegation output IDs
+    #[serde(rename_all = "camelCase")]
+    DelegationOutputIds {
+        /// Query parameters for output requests
+        query_parameters: DelegationOutputQueryParameters,
+    },
+    /// Fetch delegation output ID
+    #[serde(rename_all = "camelCase")]
+    DelegationOutputId {
+        /// Delegation id
+        delegation_id: DelegationId,
     },
     /// Fetch foundry Output IDs
     #[serde(rename_all = "camelCase")]
     FoundryOutputIds {
         /// Query parameters for output requests
-        query_parameters: Vec<QueryParameter>,
+        query_parameters: FoundryOutputQueryParameters,
     },
     /// Fetch foundry Output ID
     #[serde(rename_all = "camelCase")]
     FoundryOutputId {
         /// Foundry ID
         foundry_id: FoundryId,
+    },
+    /// Fetch NFT output IDs
+    #[serde(rename_all = "camelCase")]
+    NftOutputIds {
+        /// Query parameters for output requests
+        query_parameters: NftOutputQueryParameters,
+    },
+    /// Fetch NFT output ID
+    #[serde(rename_all = "camelCase")]
+    NftOutputId {
+        /// NFT ID
+        nft_id: NftId,
     },
 
     //////////////////////////////////////////////////////////////////////
@@ -331,8 +363,9 @@ pub enum ClientMethod {
         address: Bech32Address,
     },
     /// Returns a block ID from a block
+    #[serde(rename_all = "camelCase")]
     BlockId {
         /// Block
-        block: BlockWrapperDto,
+        signed_block: SignedBlockDto,
     },
 }

@@ -21,7 +21,7 @@ impl TryFrom<u16> for NftUnlock {
 
 impl NftUnlock {
     /// The [`Unlock`](crate::types::block::unlock::Unlock) kind of a [`NftUnlock`].
-    pub const KIND: u8 = 3;
+    pub const KIND: u8 = 4;
 
     /// Creates a new [`NftUnlock`].
     #[inline(always)]
@@ -67,5 +67,5 @@ pub(crate) mod dto {
         }
     }
 
-    impl_serde_typed_dto!(NftUnlock, NftUnlockDto, "nft unlock");
+    crate::impl_serde_typed_dto!(NftUnlock, NftUnlockDto, "nft unlock");
 }

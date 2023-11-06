@@ -3,12 +3,14 @@
 
 //! The payload module defines the core data types for representing block payloads.
 
+pub mod candidacy_announcement;
+pub mod signed_transaction;
 pub mod tagged_data;
-pub mod transaction;
 
 use alloc::boxed::Box;
 use core::{mem::size_of, ops::Deref};
 
+use derive_more::From;
 use packable::{
     error::{UnpackError, UnpackErrorExt},
     packer::Packer,
@@ -16,35 +18,35 @@ use packable::{
     Packable, PackableExt,
 };
 
-pub use self::{tagged_data::TaggedDataPayload, transaction::TransactionPayload};
-pub(crate) use self::{
-    tagged_data::{TagLength, TaggedDataLength},
-    transaction::{ContextInputCount, InputCount, OutputCount},
+pub use self::{
+    candidacy_announcement::CandidacyAnnouncementPayload, signed_transaction::SignedTransactionPayload,
+    tagged_data::TaggedDataPayload,
 };
-use super::protocol::{WorkScore, WorkScoreStructure};
+pub(crate) use self::{
+    signed_transaction::{ContextInputCount, InputCount, OutputCount},
+    tagged_data::{TagLength, TaggedDataLength},
+};
+use super::protocol::{WorkScore, WorkScoreParameters};
 use crate::types::block::{protocol::ProtocolParameters, Error};
 
 /// A generic payload that can represent different types defining block payloads.
-#[derive(Clone, Eq, PartialEq)]
+#[derive(Clone, Eq, PartialEq, From)]
 pub enum Payload {
-    /// A transaction payload.
-    Transaction(Box<TransactionPayload>),
     /// A tagged data payload.
     TaggedData(Box<TaggedDataPayload>),
+    /// A signed transaction payload.
+    SignedTransaction(Box<SignedTransactionPayload>),
+    /// A candidacy announcement payload.
+    CandidacyAnnouncement(CandidacyAnnouncementPayload),
 }
 
 impl core::fmt::Debug for Payload {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         match self {
-            Self::Transaction(payload) => payload.fmt(f),
             Self::TaggedData(payload) => payload.fmt(f),
+            Self::SignedTransaction(payload) => payload.fmt(f),
+            Self::CandidacyAnnouncement(payload) => payload.fmt(f),
         }
-    }
-}
-
-impl From<TransactionPayload> for Payload {
-    fn from(payload: TransactionPayload) -> Self {
-        Self::Transaction(Box::new(payload))
     }
 }
 
@@ -54,23 +56,37 @@ impl From<TaggedDataPayload> for Payload {
     }
 }
 
+impl From<SignedTransactionPayload> for Payload {
+    fn from(payload: SignedTransactionPayload) -> Self {
+        Self::SignedTransaction(Box::new(payload))
+    }
+}
+
 impl Payload {
     /// Returns the payload kind of a `Payload`.
     pub fn kind(&self) -> u8 {
         match self {
-            Self::Transaction(_) => TransactionPayload::KIND,
             Self::TaggedData(_) => TaggedDataPayload::KIND,
+            Self::SignedTransaction(_) => SignedTransactionPayload::KIND,
+            Self::CandidacyAnnouncement(_) => CandidacyAnnouncementPayload::KIND,
         }
     }
+
+    crate::def_is_as_opt!(Payload: SignedTransaction, TaggedData);
 }
 
 impl WorkScore for Payload {
-    fn work_score(&self, work_score_params: WorkScoreStructure) -> u32 {
+    fn work_score(&self, work_score_params: WorkScoreParameters) -> u32 {
         // 1 byte for the payload kind
         let score = size_of::<u8>() as u32
             + match self {
-                Self::Transaction(transaction_payload) => transaction_payload.work_score(work_score_params),
+                Self::SignedTransaction(signed_transaction_payload) => {
+                    signed_transaction_payload.work_score(work_score_params)
+                }
                 Self::TaggedData(tagged_data_payload) => tagged_data_payload.work_score(work_score_params),
+                Self::CandidacyAnnouncement(candidacy_announcement_payload) => {
+                    todo!("work score for candidacy announcement payload")
+                }
             };
         score
     }
@@ -82,14 +98,15 @@ impl Packable for Payload {
 
     fn pack<P: Packer>(&self, packer: &mut P) -> Result<(), P::Error> {
         match self {
-            Self::Transaction(transaction) => {
-                TransactionPayload::KIND.pack(packer)?;
-                transaction.pack(packer)
-            }
             Self::TaggedData(tagged_data) => {
                 TaggedDataPayload::KIND.pack(packer)?;
                 tagged_data.pack(packer)
             }
+            Self::SignedTransaction(transaction) => {
+                SignedTransactionPayload::KIND.pack(packer)?;
+                transaction.pack(packer)
+            }
+            Self::CandidacyAnnouncement(_) => CandidacyAnnouncementPayload::KIND.pack(packer),
         }?;
 
         Ok(())
@@ -100,11 +117,12 @@ impl Packable for Payload {
         visitor: &Self::UnpackVisitor,
     ) -> Result<Self, UnpackError<Self::UnpackError, U::Error>> {
         Ok(match u8::unpack::<_, VERIFY>(unpacker, &()).coerce()? {
-            TransactionPayload::KIND => {
-                Self::from(TransactionPayload::unpack::<_, VERIFY>(unpacker, visitor).coerce()?)
-            }
             TaggedDataPayload::KIND => Self::from(TaggedDataPayload::unpack::<_, VERIFY>(unpacker, &()).coerce()?),
-            k => return Err(Error::InvalidPayloadKind(k)).map_err(UnpackError::Packable),
+            SignedTransactionPayload::KIND => {
+                Self::from(SignedTransactionPayload::unpack::<_, VERIFY>(unpacker, visitor).coerce()?)
+            }
+            CandidacyAnnouncementPayload::KIND => Self::from(CandidacyAnnouncementPayload),
+            k => return Err(UnpackError::Packable(Error::InvalidPayloadKind(k))),
         })
     }
 }
@@ -189,7 +207,7 @@ impl Packable for OptionalPayload {
 pub mod dto {
     use serde::{Deserialize, Serialize};
 
-    pub use super::transaction::dto::TransactionPayloadDto;
+    pub use super::signed_transaction::dto::SignedTransactionPayloadDto;
     use super::*;
     use crate::types::{block::Error, TryFromDto, ValidationParams};
 
@@ -197,14 +215,9 @@ pub mod dto {
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
     #[serde(untagged)]
     pub enum PayloadDto {
-        Transaction(Box<TransactionPayloadDto>),
         TaggedData(Box<TaggedDataPayload>),
-    }
-
-    impl From<TransactionPayloadDto> for PayloadDto {
-        fn from(payload: TransactionPayloadDto) -> Self {
-            Self::Transaction(Box::new(payload))
-        }
+        SignedTransaction(Box<SignedTransactionPayloadDto>),
+        CandidacyAnnouncement,
     }
 
     impl From<TaggedDataPayload> for PayloadDto {
@@ -213,11 +226,20 @@ pub mod dto {
         }
     }
 
+    impl From<SignedTransactionPayloadDto> for PayloadDto {
+        fn from(payload: SignedTransactionPayloadDto) -> Self {
+            Self::SignedTransaction(Box::new(payload))
+        }
+    }
+
     impl From<&Payload> for PayloadDto {
         fn from(value: &Payload) -> Self {
             match value {
-                Payload::Transaction(p) => Self::Transaction(Box::new(TransactionPayloadDto::from(p.as_ref()))),
                 Payload::TaggedData(p) => Self::TaggedData(p.clone()),
+                Payload::SignedTransaction(p) => {
+                    Self::SignedTransaction(Box::new(SignedTransactionPayloadDto::from(p.as_ref())))
+                }
+                Payload::CandidacyAnnouncement(_) => Self::CandidacyAnnouncement,
             }
         }
     }
@@ -228,10 +250,11 @@ pub mod dto {
 
         fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
             Ok(match dto {
-                PayloadDto::Transaction(p) => {
-                    Self::from(TransactionPayload::try_from_dto_with_params_inner(*p, params)?)
-                }
                 PayloadDto::TaggedData(p) => Self::from(*p),
+                PayloadDto::SignedTransaction(p) => {
+                    Self::from(SignedTransactionPayload::try_from_dto_with_params_inner(*p, params)?)
+                }
+                PayloadDto::CandidacyAnnouncement => Self::from(CandidacyAnnouncementPayload),
             })
         }
     }

@@ -11,13 +11,14 @@ use iota_sdk::{
     types::block::{
         address::{AccountAddress, Address},
         output::{
-            unlock_condition::{GovernorAddressUnlockCondition, StateControllerAddressUnlockCondition},
-            AccountId, AccountOutputBuilder, AccountTransition, FoundryId, Output, SimpleTokenScheme, TokenId,
+            unlock_condition::AddressUnlockCondition, AccountId, AccountOutputBuilder, FoundryId, Output,
+            SimpleTokenScheme, TokenId,
         },
         protocol::protocol_parameters,
         rand::output::rand_output_metadata,
     },
 };
+use pretty_assertions::assert_eq;
 
 use crate::client::{
     addresses, build_inputs, build_outputs, is_remainder_or_return, unsorted_eq,
@@ -58,7 +59,7 @@ fn missing_input_account_for_foundry() {
 
     assert!(matches!(
         selected,
-        Err(Error::UnfulfillableRequirement(Requirement::Account(account_id, AccountTransition::State))) if account_id == account_id_2
+        Err(Error::UnfulfillableRequirement(Requirement::Account(account_id))) if account_id == account_id_2
     ));
 }
 
@@ -98,13 +99,6 @@ fn missing_input_account_for_foundry() {
 //     assert!(unsorted_eq(&selected.inputs, &inputs));
 //     // Account next state + foundry
 //     assert_eq!(selected.outputs.len(), 2);
-//     // Account state index is increased
-//     selected.outputs.iter().for_each(|output| {
-//         if let Output::Account(account_output) = &output {
-//             // Input account has index 0, output should have index 1
-//             assert_eq!(account_output.state_index(), 1);
-//         }
-//     });
 // }
 
 #[test]
@@ -117,8 +111,6 @@ fn minted_native_tokens_in_new_remainder() {
         Account(
             1_000_000,
             account_id_2,
-            0,
-            BECH32_ADDRESS_ED25519_0,
             BECH32_ADDRESS_ED25519_0,
             None,
             None,
@@ -146,12 +138,7 @@ fn minted_native_tokens_in_new_remainder() {
     assert!(unsorted_eq(&selected.inputs, &inputs));
     // Account next state + foundry + basic output with native tokens
     assert_eq!(selected.outputs.len(), 3);
-    // Account state index is increased
     selected.outputs.iter().for_each(|output| {
-        if let Output::Account(account_output) = &output {
-            // Input account has index 0, output should have index 1
-            assert_eq!(account_output.state_index(), 1);
-        }
         if let Output::Basic(basic_output) = &output {
             // Basic output remainder has the minted native tokens
             assert_eq!(basic_output.native_tokens().first().unwrap().amount().as_u32(), 10);
@@ -171,8 +158,6 @@ fn minted_native_tokens_in_provided_output() {
         Account(
             1_000_000,
             account_id_2,
-            0,
-            BECH32_ADDRESS_ED25519_0,
             BECH32_ADDRESS_ED25519_0,
             None,
             None,
@@ -235,10 +220,7 @@ fn melt_native_tokens() {
         ),
     ]);
     let account_output = AccountOutputBuilder::new_with_amount(1_000_000, account_id_1)
-        .add_unlock_condition(StateControllerAddressUnlockCondition::new(
-            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-        ))
-        .add_unlock_condition(GovernorAddressUnlockCondition::new(
+        .add_unlock_condition(AddressUnlockCondition::new(
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         ))
         .with_foundry_counter(1)
@@ -270,12 +252,7 @@ fn melt_native_tokens() {
     assert!(unsorted_eq(&selected.inputs, &inputs));
     // Account next state + foundry + basic output with native tokens
     assert_eq!(selected.outputs.len(), 3);
-    // Account state index is increased
     selected.outputs.iter().for_each(|output| {
-        if let Output::Account(account_output) = &output {
-            // Input account has index 0, output should have index 1
-            assert_eq!(account_output.state_index(), 1);
-        }
         if let Output::Basic(basic_output) = &output {
             // Basic output remainder has the remaining native tokens
             assert_eq!(basic_output.native_tokens().first().unwrap().amount().as_u32(), 5);
@@ -289,17 +266,7 @@ fn destroy_foundry_with_account_state_transition() {
     let account_id_2 = AccountId::from_str(ACCOUNT_ID_2).unwrap();
 
     let inputs = build_inputs([
-        Account(
-            50_300,
-            account_id_2,
-            1,
-            BECH32_ADDRESS_ED25519_0,
-            BECH32_ADDRESS_ED25519_0,
-            None,
-            None,
-            None,
-            None,
-        ),
+        Account(50_300, account_id_2, BECH32_ADDRESS_ED25519_0, None, None, None, None),
         Foundry(
             52_800,
             account_id_2,
@@ -310,7 +277,6 @@ fn destroy_foundry_with_account_state_transition() {
     ]);
     let account_output = AccountOutputBuilder::from(inputs[0].output.as_account())
         .with_amount(103_100)
-        .with_state_index(inputs[0].output.as_account().state_index() + 1)
         .finish_output(TOKEN_SUPPLY)
         .unwrap();
     // Account output gets the amount from the foundry output added
@@ -332,48 +298,6 @@ fn destroy_foundry_with_account_state_transition() {
 }
 
 #[test]
-fn destroy_foundry_with_account_governance_transition() {
-    let protocol_parameters = protocol_parameters();
-    let account_id_2 = AccountId::from_str(ACCOUNT_ID_2).unwrap();
-
-    let inputs = build_inputs([
-        Account(
-            1_000_000,
-            account_id_2,
-            1,
-            BECH32_ADDRESS_ED25519_0,
-            BECH32_ADDRESS_ED25519_0,
-            None,
-            None,
-            None,
-            None,
-        ),
-        Foundry(
-            1_000_000,
-            account_id_2,
-            1,
-            SimpleTokenScheme::new(10, 10, 10).unwrap(),
-            None,
-        ),
-    ]);
-    let outputs = [inputs[0].output.clone()];
-
-    let selected = InputSelection::new(
-        inputs.clone(),
-        outputs,
-        addresses([BECH32_ADDRESS_ED25519_0]),
-        protocol_parameters,
-    )
-    .with_burn(Burn::new().add_foundry(inputs[1].output.as_foundry().id()))
-    .select();
-
-    assert!(matches!(
-        selected,
-        Err(Error::UnfulfillableRequirement(Requirement::Account(account_id, AccountTransition::State))) if account_id == account_id_2
-    ));
-}
-
-#[test]
 fn destroy_foundry_with_account_burn() {
     let protocol_parameters = protocol_parameters();
     let account_id_2 = AccountId::from_str(ACCOUNT_ID_2).unwrap();
@@ -382,8 +306,6 @@ fn destroy_foundry_with_account_burn() {
         Account(
             1_000_000,
             account_id_2,
-            1,
-            BECH32_ADDRESS_ED25519_0,
             BECH32_ADDRESS_ED25519_0,
             None,
             None,
@@ -411,7 +333,7 @@ fn destroy_foundry_with_account_burn() {
 
     let selected = InputSelection::new(
         inputs.clone(),
-        outputs,
+        outputs.clone(),
         addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
@@ -420,12 +342,22 @@ fn destroy_foundry_with_account_burn() {
             .add_foundry(inputs[1].output.as_foundry().id())
             .add_account(account_id_2),
     )
-    .select();
+    .select()
+    .unwrap();
 
-    assert!(matches!(
-        selected,
-        Err(Error::UnfulfillableRequirement(Requirement::Account(account_id, AccountTransition::State))) if account_id == account_id_2
-    ));
+    assert!(unsorted_eq(&selected.inputs, &inputs));
+    assert_eq!(selected.outputs.len(), 2);
+    assert!(selected.outputs.contains(&outputs[0]));
+    selected.outputs.iter().for_each(|output| {
+        if !outputs.contains(output) {
+            assert!(is_remainder_or_return(
+                output,
+                1_000_000,
+                BECH32_ADDRESS_ED25519_0,
+                None,
+            ));
+        }
+    });
 }
 
 #[test]
@@ -437,8 +369,6 @@ fn prefer_basic_to_foundry() {
         Account(
             1_000_000,
             account_id_1,
-            1,
-            BECH32_ADDRESS_ED25519_0,
             BECH32_ADDRESS_ED25519_0,
             None,
             None,
@@ -495,13 +425,9 @@ fn simple_foundry_transition_basic_not_needed() {
         ),
     ]);
     let account_output = AccountOutputBuilder::new_with_amount(2_000_000, account_id_1)
-        .add_unlock_condition(StateControllerAddressUnlockCondition::new(
+        .add_unlock_condition(AddressUnlockCondition::new(
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         ))
-        .add_unlock_condition(GovernorAddressUnlockCondition::new(
-            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-        ))
-        .with_state_index(1)
         .with_foundry_counter(1)
         .finish_output(protocol_parameters.token_supply())
         .unwrap();
@@ -539,15 +465,11 @@ fn simple_foundry_transition_basic_not_needed() {
             assert_eq!(output.amount(), 2_000_000);
             assert_eq!(output.as_account().native_tokens().len(), 0);
             assert_eq!(*output.as_account().account_id(), account_id_1);
-            assert_eq!(output.as_account().unlock_conditions().len(), 2);
+            assert_eq!(output.as_account().unlock_conditions().len(), 1);
             assert_eq!(output.as_account().features().len(), 0);
             assert_eq!(output.as_account().immutable_features().len(), 0);
             assert_eq!(
-                *output.as_account().state_controller_address(),
-                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()
-            );
-            assert_eq!(
-                *output.as_account().governor_address(),
+                *output.as_account().address(),
                 Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()
             );
         }
@@ -570,14 +492,10 @@ fn simple_foundry_transition_basic_not_needed_with_remainder() {
         ),
     ]);
     let account_output = AccountOutputBuilder::new_with_amount(2_000_000, account_id_1)
-        .add_unlock_condition(StateControllerAddressUnlockCondition::new(
-            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-        ))
-        .add_unlock_condition(GovernorAddressUnlockCondition::new(
+        .add_unlock_condition(AddressUnlockCondition::new(
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         ))
         .with_foundry_counter(1)
-        .with_state_index(1)
         .finish_output(protocol_parameters.token_supply())
         .unwrap();
     inputs.push(InputSigningData {
@@ -613,15 +531,11 @@ fn simple_foundry_transition_basic_not_needed_with_remainder() {
                 assert_eq!(output.amount(), 2_000_000);
                 assert_eq!(output.as_account().native_tokens().len(), 0);
                 assert_eq!(*output.as_account().account_id(), account_id_1);
-                assert_eq!(output.as_account().unlock_conditions().len(), 2);
+                assert_eq!(output.as_account().unlock_conditions().len(), 1);
                 assert_eq!(output.as_account().features().len(), 0);
                 assert_eq!(output.as_account().immutable_features().len(), 0);
                 assert_eq!(
-                    *output.as_account().state_controller_address(),
-                    Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()
-                );
-                assert_eq!(
-                    *output.as_account().governor_address(),
+                    *output.as_account().address(),
                     Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()
                 );
             } else if output.is_basic() {
@@ -678,7 +592,7 @@ fn simple_foundry_transition_basic_not_needed_with_remainder() {
 //     //             assert_eq!(output.amount(), 2_000_000);
 //     //             assert_eq!(output.as_account().native_tokens().len(), 0);
 //     //             assert_eq!(*output.as_account().account_id(), account_id_1);
-//     //             assert_eq!(output.as_account().unlock_conditions().len(), 2);
+//     //             assert_eq!(output.as_account().unlock_conditions().len(), 1);
 //     //             assert_eq!(output.as_account().features().len(), 0);
 //     //             assert_eq!(output.as_account().immutable_features().len(), 0);
 //     //             assert_eq!(
@@ -720,14 +634,10 @@ fn mint_and_burn_at_the_same_time() {
         Some(vec![(&token_id.to_string(), 100)]),
     )]);
     let account_output = AccountOutputBuilder::new_with_amount(2_000_000, account_id_1)
-        .add_unlock_condition(StateControllerAddressUnlockCondition::new(
-            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-        ))
-        .add_unlock_condition(GovernorAddressUnlockCondition::new(
+        .add_unlock_condition(AddressUnlockCondition::new(
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         ))
         .with_foundry_counter(1)
-        .with_state_index(1)
         .finish_output(protocol_parameters.token_supply())
         .unwrap();
     inputs.push(InputSigningData {
@@ -777,14 +687,10 @@ fn take_amount_from_account_and_foundry_to_fund_basic() {
         ),
     ]);
     let account_output = AccountOutputBuilder::new_with_amount(2_000_000, account_id_1)
-        .add_unlock_condition(StateControllerAddressUnlockCondition::new(
-            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-        ))
-        .add_unlock_condition(GovernorAddressUnlockCondition::new(
+        .add_unlock_condition(AddressUnlockCondition::new(
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         ))
         .with_foundry_counter(1)
-        .with_state_index(1)
         .finish_output(protocol_parameters.token_supply())
         .unwrap();
     inputs.push(InputSigningData {
@@ -827,15 +733,13 @@ fn take_amount_from_account_and_foundry_to_fund_basic() {
 fn create_native_token_but_burn_account() {
     let protocol_parameters = protocol_parameters();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
-    let foundry_id = FoundryId::build(&AccountAddress::from(account_id_1), 0, SimpleTokenScheme::KIND);
+    let foundry_id = FoundryId::build(&AccountAddress::from(account_id_1), 1, SimpleTokenScheme::KIND);
     let token_id = TokenId::from(foundry_id);
 
     let inputs = build_inputs([
         Account(
             2_000_000,
             account_id_1,
-            1,
-            BECH32_ADDRESS_ED25519_0,
             BECH32_ADDRESS_ED25519_0,
             None,
             None,
@@ -859,18 +763,29 @@ fn create_native_token_but_burn_account() {
     )]);
 
     let selected = InputSelection::new(
-        inputs,
-        outputs,
+        inputs.clone(),
+        outputs.clone(),
         addresses([BECH32_ADDRESS_ED25519_0]),
         protocol_parameters,
     )
     .with_burn(Burn::new().add_account(account_id_1))
-    .select();
+    .select()
+    .unwrap();
 
-    assert!(matches!(
-        selected,
-        Err(Error::UnfulfillableRequirement(Requirement::Account(account_id, AccountTransition::State))) if account_id == account_id_1
-    ));
+    assert!(unsorted_eq(&selected.inputs, &inputs));
+    // One output should be added for the remainder.
+    assert_eq!(selected.outputs.len(), 2);
+    assert!(selected.outputs.contains(&outputs[0]));
+    selected.outputs.iter().for_each(|output| {
+        if !outputs.contains(output) {
+            assert!(is_remainder_or_return(
+                output,
+                2_000_000,
+                BECH32_ADDRESS_ED25519_0,
+                None,
+            ));
+        }
+    });
 }
 
 #[test]
@@ -884,8 +799,6 @@ fn melted_tokens_not_provided() {
         Account(
             2_000_000,
             account_id_1,
-            1,
-            BECH32_ADDRESS_ED25519_0,
             BECH32_ADDRESS_ED25519_0,
             None,
             None,
@@ -936,8 +849,6 @@ fn burned_tokens_not_provided() {
         Account(
             2_000_000,
             account_id_1,
-            1,
-            BECH32_ADDRESS_ED25519_0,
             BECH32_ADDRESS_ED25519_0,
             None,
             None,
@@ -991,14 +902,10 @@ fn foundry_in_outputs_and_required() {
         None,
     )]);
     let account_output = AccountOutputBuilder::new_with_amount(1_251_500, account_id_2)
-        .add_unlock_condition(StateControllerAddressUnlockCondition::new(
-            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-        ))
-        .add_unlock_condition(GovernorAddressUnlockCondition::new(
+        .add_unlock_condition(AddressUnlockCondition::new(
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         ))
         .with_foundry_counter(1)
-        .with_state_index(1)
         .finish_output(protocol_parameters.token_supply())
         .unwrap();
     inputs.push(InputSigningData {
@@ -1030,6 +937,67 @@ fn foundry_in_outputs_and_required() {
     selected.outputs.iter().for_each(|output| {
         if !outputs.contains(output) {
             assert_eq!(*output.as_account().account_id(), account_id_2);
+        }
+    });
+}
+
+#[test]
+fn melt_and_burn_native_tokens() {
+    let protocol_parameters = protocol_parameters();
+    let account_id = AccountId::from_str(ACCOUNT_ID_1).unwrap();
+    let foundry_id = FoundryId::build(&AccountAddress::from(account_id), 1, SimpleTokenScheme::KIND);
+    let token_id = TokenId::from(foundry_id);
+
+    let mut inputs = build_inputs([
+        Basic(1_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
+        Foundry(
+            1_000_000,
+            account_id,
+            1,
+            SimpleTokenScheme::new(1000, 0, 1000).unwrap(),
+            Some(vec![(&token_id.to_string(), 1000)]),
+        ),
+    ]);
+    let account_output = AccountOutputBuilder::new_with_amount(1_000_000, account_id)
+        .add_unlock_condition(AddressUnlockCondition::new(
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+        ))
+        .with_foundry_counter(1)
+        .finish_output(protocol_parameters.token_supply())
+        .unwrap();
+    inputs.push(InputSigningData {
+        output: account_output,
+        output_metadata: rand_output_metadata(),
+        chain: None,
+    });
+    let outputs = build_outputs([Foundry(
+        1_000_000,
+        account_id,
+        1,
+        // Melt 123 native tokens
+        SimpleTokenScheme::new(1000, 123, 1000).unwrap(),
+        None,
+    )]);
+
+    let selected = InputSelection::new(
+        inputs.clone(),
+        outputs,
+        addresses([BECH32_ADDRESS_ED25519_0]),
+        protocol_parameters,
+    )
+    // Burn 456 native tokens
+    .with_burn(Burn::new().add_native_token(token_id, 456))
+    .select()
+    .unwrap();
+
+    assert!(unsorted_eq(&selected.inputs, &inputs));
+    // Account next state + foundry + basic output with native tokens
+    assert_eq!(selected.outputs.len(), 3);
+    // Account state index is increased
+    selected.outputs.iter().for_each(|output| {
+        if let Output::Basic(basic_output) = &output {
+            // Basic output remainder has the remaining native tokens
+            assert_eq!(basic_output.native_tokens().first().unwrap().amount().as_u32(), 421);
         }
     });
 }

@@ -33,15 +33,5 @@ impl TokenScheme {
         }
     }
 
-    /// Checks whether the token scheme is a [`SimpleTokenScheme`].
-    pub fn is_simple(&self) -> bool {
-        matches!(self, Self::Simple(_))
-    }
-
-    /// Gets the token scheme as an actual [`SimpleTokenScheme`].
-    /// PANIC: do not call on a non-simple token scheme.
-    pub fn as_simple(&self) -> &SimpleTokenScheme {
-        let Self::Simple(scheme) = self;
-        scheme
-    }
+    crate::def_is_as_opt!(TokenScheme: Simple);
 }

@@ -12,8 +12,7 @@ use serde::{
 };
 
 use crate::{
-    client::{api::input_selection::Error as InputSelectionError, node_api::indexer::QueryParameter},
-    types::block::semantic::TransactionFailureReason,
+    client::api::input_selection::Error as InputSelectionError, types::block::semantic::TransactionFailureReason,
 };
 
 /// Type alias of `Result` in iota-client
@@ -21,10 +20,8 @@ pub type Result<T> = std::result::Result<T, Error>;
 
 /// Error type of the iota client crate.
 #[derive(Debug, thiserror::Error)]
+#[non_exhaustive]
 pub enum Error {
-    /// Block dtos error
-    #[error("{0}")]
-    ApiTypes(#[from] crate::types::api::core::error::Error),
     /// Invalid bech32 HRP, should match the one from the used network
     #[error("invalid bech32 hrp for the connected network: {provided}, expected: {expected}")]
     Bech32HrpMismatch {
@@ -39,8 +36,8 @@ pub enum Error {
     /// Block types error
     #[error("{0}")]
     Block(#[from] crate::types::block::Error),
-    /// The wallet account has enough funds, but split on too many outputs
-    #[error("the wallet account has enough funds, but split on too many outputs: {0}, max. is 128, consolidate them")]
+    /// The wallet has enough funds, but split on too many outputs
+    #[error("the wallet has enough funds, but split on too many outputs: {0}, max. is 128, consolidate them")]
     ConsolidationRequired(usize),
     /// Crypto.rs error
     #[error("{0}")]
@@ -59,17 +56,17 @@ pub enum Error {
     /// Invalid mnemonic error
     #[error("invalid mnemonic {0}")]
     InvalidMnemonic(String),
-    /// The transaction essence is too large
-    #[error("the transaction essence is too large. Its length is {length}, max length is {max_length}")]
-    InvalidRegularTransactionEssenceLength {
+    /// The transaction is too large
+    #[error("the transaction is too large. Its length is {length}, max length is {max_length}")]
+    InvalidTransactionLength {
         /// The found length.
         length: usize,
         /// The max supported length.
         max_length: usize,
     },
-    /// The transaction payload is too large
-    #[error("the transaction payload is too large. Its length is {length}, max length is {max_length}")]
-    InvalidTransactionPayloadLength {
+    /// The signed transaction payload is too large
+    #[error("the signed transaction payload is too large. Its length is {length}, max length is {max_length}")]
+    InvalidSignedTransactionPayloadLength {
         /// The found length.
         length: usize,
         /// The max length.
@@ -139,9 +136,6 @@ pub enum Error {
     /// The semantic validation of a transaction failed.
     #[error("the semantic validation of a transaction failed with conflict reason: {} - {0:?}", *.0 as u8)]
     TransactionSemantic(TransactionFailureReason),
-    /// An indexer API request contains a query parameter not supported by the endpoint.
-    #[error("an indexer API request contains a query parameter not supported by the endpoint: {0}.")]
-    UnsupportedQueryParameter(QueryParameter),
     /// Unpack error
     #[error("{0}")]
     Unpack(#[from] packable::error::UnpackError<crate::types::block::Error, UnexpectedEOF>),

@@ -4,7 +4,7 @@
 //! In this example we will mint some collection NFTs with issuer feature.
 //!
 //! Make sure that `STRONGHOLD_SNAPSHOT_PATH` and `WALLET_DB_PATH` already exist by
-//! running the `./how_tos/accounts_and_addresses/create_account.rs` example.
+//! running the `./how_tos/accounts_and_addresses/create_wallet.rs` example.
 //!
 //! You have to provide the ISSUER_NFT_ID that was created by first running the
 //! `mint_issuer_nft` example!
@@ -18,9 +18,9 @@ use iota_sdk::{
     types::block::{
         address::{Bech32Address, NftAddress},
         output::{feature::Irc27Metadata, NftId},
-        payload::transaction::TransactionId,
+        payload::signed_transaction::TransactionId,
     },
-    wallet::{Account, MintNftParams, Result},
+    wallet::{MintNftParams, Result},
     Wallet,
 };
 
@@ -43,17 +43,16 @@ async fn main() -> Result<()> {
         .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
         .finish()
         .await?;
-    let account = wallet.get_account("Alice").await?;
 
-    account.sync(None).await?;
-    println!("Account synced!");
+    wallet.sync(None).await?;
+    println!("Wallet synced!");
 
     // Set the stronghold password
     wallet
         .set_stronghold_password(std::env::var("STRONGHOLD_PASSWORD").unwrap())
         .await?;
 
-    let bech32_hrp = account.client().get_bech32_hrp().await?;
+    let bech32_hrp = wallet.client().get_bech32_hrp().await?;
     let issuer = Bech32Address::new(bech32_hrp, NftAddress::new(issuer_nft_id));
 
     // Create the metadata with another index for each
@@ -62,7 +61,7 @@ async fn main() -> Result<()> {
             MintNftParams::new()
                 .with_immutable_metadata(get_immutable_metadata(index).to_bytes())
                 // The NFT address from the NFT we minted in mint_issuer_nft example
-                .with_issuer(issuer)
+                .with_issuer(issuer.clone())
         })
         .collect::<Vec<_>>();
 
@@ -73,11 +72,11 @@ async fn main() -> Result<()> {
             index * NUM_NFTS_MINTED_PER_TRANSACTION + nft_mint_params.len(),
             NFT_COLLECTION_SIZE
         );
-        let transaction = account.mint_nfts(nft_mint_params.to_vec(), None).await?;
-        wait_for_inclusion(&transaction.transaction_id, &account).await?;
+        let transaction = wallet.mint_nfts(nft_mint_params.to_vec(), None).await?;
+        wait_for_inclusion(&transaction.transaction_id, &wallet).await?;
 
         // Sync so the new outputs are available again for new transactions
-        account.sync(None).await?;
+        wallet.sync(None).await?;
     }
 
     // After the NFTs are minted, the issuer nft can be sent to the so called "null address"
@@ -105,14 +104,14 @@ fn get_immutable_metadata(index: usize) -> Irc27Metadata {
     .with_collection_name("Shimmer OG")
 }
 
-async fn wait_for_inclusion(transaction_id: &TransactionId, account: &Account) -> Result<()> {
+async fn wait_for_inclusion(transaction_id: &TransactionId, wallet: &Wallet) -> Result<()> {
     println!(
         "Transaction sent: {}/transaction/{}",
         std::env::var("EXPLORER_URL").unwrap(),
         transaction_id
     );
     // Wait for transaction to get included
-    let block_id = account
+    let block_id = wallet
         .reissue_transaction_until_included(transaction_id, None, None)
         .await?;
     println!(

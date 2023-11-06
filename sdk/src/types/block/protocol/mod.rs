@@ -13,8 +13,8 @@ pub use work_score::*;
 
 use super::{
     address::Hrp,
-    mana::{ManaStructure, RewardsParameters},
-    slot::SlotIndex,
+    mana::{ManaParameters, RewardsParameters},
+    slot::{EpochIndex, SlotIndex},
 };
 use crate::types::block::{helper::network_name_to_id, output::RentStructure, ConvertTo, Error, PROTOCOL_VERSION};
 
@@ -42,8 +42,8 @@ pub struct ProtocolParameters {
     pub(crate) bech32_hrp: Hrp,
     /// The rent structure used by given node/network.
     pub(crate) rent_structure: RentStructure,
-    /// The work score structure used by the node/network.
-    pub(crate) work_score_structure: WorkScoreStructure,
+    /// The work score parameters used by the node/network.
+    pub(crate) work_score_parameters: WorkScoreParameters,
     /// TokenSupply defines the current token supply on the network.
     #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
     pub(crate) token_supply: u64,
@@ -56,30 +56,24 @@ pub struct ProtocolParameters {
     pub(crate) slots_per_epoch_exponent: u8,
     /// The parameters used for mana calculations.
     #[getset(skip)]
-    pub(crate) mana_structure: ManaStructure,
+    pub(crate) mana_parameters: ManaParameters,
     /// The unbonding period in epochs before an account can stop staking.
-    #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
-    pub(crate) staking_unbonding_period: u64,
+    pub(crate) staking_unbonding_period: u32,
     /// The number of validation blocks that each validator should issue each slot.
     pub(crate) validation_blocks_per_slot: u16,
     /// The number of epochs worth of Mana that a node is punished with for each additional validation block it issues.
-    #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
-    pub(crate) punishment_epochs: u64,
+    pub(crate) punishment_epochs: u32,
     /// Liveness Threshold is used by tip-selection to determine if a block is eligible by evaluating issuingTimes and
     /// commitments in its past-cone to Accepted Tangle Time and lastCommittedSlot respectively.
-    #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
-    pub(crate) liveness_threshold: u64,
+    pub(crate) liveness_threshold: u32,
     /// Minimum age relative to the accepted tangle time slot index that a slot can be committed.
-    #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
-    pub(crate) min_committable_age: u64,
+    pub(crate) min_committable_age: u32,
     /// Maximum age for a slot commitment to be included in a block relative to the slot index of the block issuing
     /// time.
-    #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
-    pub(crate) max_committable_age: u64,
+    pub(crate) max_committable_age: u32,
     /// Epoch Nearing Threshold is used by the epoch orchestrator to detect the slot that should trigger a new
     /// committee selection for the next and upcoming epoch.
-    #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
-    pub(crate) epoch_nearing_threshold: u64,
+    pub(crate) epoch_nearing_threshold: u32,
     /// Parameters used to calculate the Reference Mana Cost (RMC).
     pub(crate) congestion_control_parameters: CongestionControlParameters,
     /// Defines the parameters used to signal a protocol parameters upgrade.
@@ -104,13 +98,13 @@ impl Default for ProtocolParameters {
             network_name: String::from("iota-core-testnet").try_into().unwrap(),
             bech32_hrp: Hrp::from_str_unchecked("smr"),
             rent_structure: Default::default(),
-            work_score_structure: Default::default(),
+            work_score_parameters: Default::default(),
             token_supply: 1_813_620_509_061_365,
             genesis_unix_timestamp: 1582328545,
             slot_duration_in_seconds: 10,
             epoch_nearing_threshold: 20,
             slots_per_epoch_exponent: Default::default(),
-            mana_structure: Default::default(),
+            mana_parameters: Default::default(),
             staking_unbonding_period: 10,
             validation_blocks_per_slot: 10,
             punishment_epochs: 9,
@@ -135,7 +129,7 @@ impl ProtocolParameters {
         token_supply: u64,
         genesis_unix_timestamp: u64,
         slot_duration_in_seconds: u8,
-        epoch_nearing_threshold: u64,
+        epoch_nearing_threshold: u32,
     ) -> Result<Self, Error> {
         Ok(Self {
             version,
@@ -161,13 +155,13 @@ impl ProtocolParameters {
     }
 
     /// Returns the parameters used for mana calculations.
-    pub fn mana_structure(&self) -> &ManaStructure {
-        &self.mana_structure
+    pub fn mana_parameters(&self) -> &ManaParameters {
+        &self.mana_parameters
     }
 
     /// Returns the slots per epoch of the [`ProtocolParameters`].
-    pub fn slots_per_epoch(&self) -> u64 {
-        2_u64.pow(self.slots_per_epoch_exponent() as u32)
+    pub fn slots_per_epoch(&self) -> u32 {
+        2_u32.pow(self.slots_per_epoch_exponent() as u32)
     }
 
     /// Gets a [`SlotIndex`] from a unix timestamp.
@@ -177,6 +171,21 @@ impl ProtocolParameters {
             self.genesis_unix_timestamp(),
             self.slot_duration_in_seconds(),
         )
+    }
+
+    /// Gets the first [`SlotIndex`] of a given [`EpochIndex`].
+    pub fn first_slot_of(&self, epoch_index: impl Into<EpochIndex>) -> SlotIndex {
+        epoch_index.into().first_slot_index(self.slots_per_epoch_exponent())
+    }
+
+    /// Gets the last [`SlotIndex`] of a given [`EpochIndex`].
+    pub fn last_slot_of(&self, epoch_index: impl Into<EpochIndex>) -> SlotIndex {
+        epoch_index.into().last_slot_index(self.slots_per_epoch_exponent())
+    }
+
+    /// Gets the [`EpochIndex`] of a given [`SlotIndex`].
+    pub fn epoch_index_of(&self, slot_index: impl Into<SlotIndex>) -> EpochIndex {
+        EpochIndex::from_slot_index(slot_index.into(), self.slots_per_epoch_exponent())
     }
 
     /// Returns the hash of the [`ProtocolParameters`].
@@ -276,11 +285,9 @@ pub fn protocol_parameters() -> ProtocolParameters {
     .unwrap()
 }
 
-impl_id!(
-    pub ProtocolParametersHash,
-    32,
-    "The hash of the protocol parameters."
+crate::impl_id!(
+    /// The hash of a [`ProtocolParameters`].
+    pub ProtocolParametersHash {
+        pub const LENGTH: usize = 32;
+    }
 );
-
-#[cfg(feature = "serde")]
-string_serde_impl!(ProtocolParametersHash);

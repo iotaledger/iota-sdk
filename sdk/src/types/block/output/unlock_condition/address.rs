@@ -6,7 +6,7 @@ use derive_more::From;
 use crate::types::block::address::Address;
 
 /// Defines the Address that owns this output, that is, it can unlock it with the proper Unlock in a transaction.
-#[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, From, packable::Packable)]
+#[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, From, packable::Packable)]
 pub struct AddressUnlockCondition(Address);
 
 impl AddressUnlockCondition {
@@ -43,7 +43,7 @@ pub(crate) mod dto {
         fn from(value: &AddressUnlockCondition) -> Self {
             Self {
                 kind: AddressUnlockCondition::KIND,
-                address: value.0,
+                address: value.0.clone(),
             }
         }
     }
@@ -54,7 +54,7 @@ pub(crate) mod dto {
         }
     }
 
-    impl_serde_typed_dto!(
+    crate::impl_serde_typed_dto!(
         AddressUnlockCondition,
         AddressUnlockConditionDto,
         "address unlock condition"

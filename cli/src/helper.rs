@@ -8,7 +8,6 @@ use dialoguer::{console::Term, theme::ColorfulTheme, Input, Select};
 use iota_sdk::{
     client::{utils::Password, verify_mnemonic},
     crypto::keys::bip39::Mnemonic,
-    wallet::{Account, Wallet},
 };
 use tokio::{
     fs::{self, OpenOptions},
@@ -21,13 +20,12 @@ use crate::{error::Error, println_log_error, println_log_info};
 const DEFAULT_MNEMONIC_FILE_PATH: &str = "./mnemonic.txt";
 
 pub fn get_password(prompt: &str, confirmation: bool) -> Result<Password, Error> {
-    let mut password = dialoguer::Password::new();
-
-    password.with_prompt(prompt);
+    let mut password = dialoguer::Password::new().with_prompt(prompt);
 
     if confirmation {
-        password.with_prompt("Provide a new Stronghold password");
-        password.with_confirmation("Confirm password", "Password mismatch");
+        password = password
+            .with_prompt("Provide a new Stronghold password")
+            .with_confirmation("Confirm password", "Password mismatch");
     }
 
     Ok(password.interact()?.into())
@@ -50,37 +48,13 @@ pub fn get_decision(prompt: &str) -> Result<bool, Error> {
     }
 }
 
-pub async fn get_account_alias(prompt: &str, wallet: &Wallet) -> Result<String, Error> {
-    let account_aliases = wallet.get_account_aliases().await?;
+pub async fn get_alias(prompt: &str) -> Result<String, Error> {
     loop {
         let input = Input::<String>::new().with_prompt(prompt).interact_text()?;
         if input.is_empty() || !input.is_ascii() {
             println_log_error!("Invalid input, please choose a non-empty alias consisting of ASCII characters.");
-        } else if account_aliases.iter().any(|alias| alias == &input) {
-            println_log_error!("Account '{input}' already exists, please choose another alias.");
         } else {
             return Ok(input);
-        }
-    }
-}
-
-pub async fn pick_account(wallet: &Wallet) -> Result<Option<Account>, Error> {
-    let mut accounts = wallet.get_accounts().await?;
-
-    match accounts.len() {
-        0 => Ok(None),
-        1 => Ok(Some(accounts.swap_remove(0))),
-        _ => {
-            // fetch all available account aliases to display to the user
-            let account_aliases = wallet.get_account_aliases().await?;
-
-            let index = Select::with_theme(&ColorfulTheme::default())
-                .with_prompt("Select an account:")
-                .items(&account_aliases)
-                .default(0)
-                .interact_on(&Term::stderr())?;
-
-            Ok(Some(accounts.swap_remove(index)))
         }
     }
 }
@@ -103,13 +77,13 @@ pub async fn enter_or_generate_mnemonic() -> Result<Mnemonic, Error> {
         .default(0)
         .interact_on(&Term::stderr())?;
 
-    let mnemnonic = match selected_choice {
+    let mnemonic = match selected_choice {
         0 => generate_mnemonic(None, None).await?,
         1 => enter_mnemonic()?,
         _ => unreachable!(),
     };
 
-    Ok(mnemnonic)
+    Ok(mnemonic)
 }
 
 pub async fn generate_mnemonic(
@@ -153,10 +127,10 @@ pub async fn generate_mnemonic(
         println_log_info!("Mnemonic has been written to '{file_path}'.");
     }
 
-    println_log_info!("IMPORTANT:");
-    println_log_info!("Store this mnemonic in a secure location!");
-    println_log_info!(
-        "It is the only way to recover your account if you ever forget your password and/or lose the stronghold file."
+    println!("IMPORTANT:");
+    println!("Store this mnemonic in a secure location!");
+    println!(
+        "It is the only way to recover your wallet if you ever forget your password and/or lose the stronghold file."
     );
 
     Ok(mnemonic)
@@ -211,6 +185,83 @@ async fn write_mnemonic_to_file(path: &str, mnemonic: &str) -> Result<(), Error>
     let mut file = open_options.open(path).await?;
     file.write_all(format!("{mnemonic}\n").as_bytes()).await?;
 
+    #[cfg(windows)]
+    restrict_file_permissions(path)?;
+
+    Ok(())
+}
+
+// Slightly modified from https://github.com/sile/sloggers/blob/master/src/permissions.rs
+#[cfg(windows)]
+pub fn restrict_file_permissions<P: AsRef<Path>>(path: P) -> std::io::Result<()> {
+    use std::io;
+
+    use winapi::um::winnt::{FILE_GENERIC_READ, FILE_GENERIC_WRITE, PSID, STANDARD_RIGHTS_ALL};
+    use windows_acl::{
+        acl::{AceType, ACL},
+        helper::sid_to_string,
+    };
+
+    /// This is the security identifier in Windows for the owner of a file. See:
+    /// - https://docs.microsoft.com/en-us/troubleshoot/windows-server/identity/security-identifiers-in-windows#well-known-sids-all-versions-of-windows
+    const OWNER_SID_STR: &str = "S-1-3-4";
+    /// We don't need any of the `AceFlags` listed here:
+    /// - https://docs.microsoft.com/en-us/windows/win32/api/winnt/ns-winnt-ace_header
+    const OWNER_ACL_ENTRY_FLAGS: u8 = 0;
+    /// Generic Rights:
+    ///  - https://docs.microsoft.com/en-us/windows/win32/fileio/file-security-and-access-rights
+    /// Individual Read/Write/Execute Permissions (referenced in generic rights link):
+    ///  - https://docs.microsoft.com/en-us/windows/win32/wmisdk/file-and-directory-access-rights-constants
+    /// STANDARD_RIGHTS_ALL
+    ///  - https://docs.microsoft.com/en-us/windows/win32/secauthz/access-mask
+    const OWNER_ACL_ENTRY_MASK: u32 = FILE_GENERIC_READ | FILE_GENERIC_WRITE | STANDARD_RIGHTS_ALL;
+
+    let path_str = path
+        .as_ref()
+        .to_str()
+        .ok_or_else(|| io::Error::new(io::ErrorKind::Other, "Unable to open file path.".to_string()))?;
+
+    let mut acl = ACL::from_file_path(path_str, false)
+        .map_err(|e| io::Error::new(io::ErrorKind::Other, format!("Unable to retrieve ACL: {:?}", e)))?;
+
+    let owner_sid = windows_acl::helper::string_to_sid(OWNER_SID_STR)
+        .map_err(|e| io::Error::new(io::ErrorKind::Other, format!("Unable to convert SID: {:?}", e)))?;
+
+    let entries = acl.all().map_err(|e| {
+        io::Error::new(
+            io::ErrorKind::Other,
+            format!("Unable to enumerate ACL entries: {:?}", e),
+        )
+    })?;
+
+    // Add single entry for file owner.
+    acl.add_entry(
+        owner_sid.as_ptr() as PSID,
+        AceType::AccessAllow,
+        OWNER_ACL_ENTRY_FLAGS,
+        OWNER_ACL_ENTRY_MASK,
+    )
+    .map_err(|e| {
+        io::Error::new(
+            io::ErrorKind::Other,
+            format!("Failed to add ACL entry for SID {} error={}", OWNER_SID_STR, e),
+        )
+    })?;
+    // Remove all AccessAllow entries from the file that aren't the owner_sid.
+    for entry in &entries {
+        if let Some(ref entry_sid) = entry.sid {
+            let entry_sid_str = sid_to_string(entry_sid.as_ptr() as PSID).unwrap_or_else(|_| "BadFormat".to_string());
+            if entry_sid_str != OWNER_SID_STR {
+                acl.remove(entry_sid.as_ptr() as PSID, Some(AceType::AccessAllow), None)
+                    .map_err(|_| {
+                        io::Error::new(
+                            io::ErrorKind::Other,
+                            format!("Failed to remove ACL entry for SID {}", entry_sid_str),
+                        )
+                    })?;
+            }
+        }
+    }
     Ok(())
 }
 

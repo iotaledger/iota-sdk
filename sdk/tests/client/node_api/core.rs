@@ -4,16 +4,20 @@
 // These are E2E test samples, so they are ignored by default.
 
 use iota_sdk::{
-    client::{api::GetAddressesOptions, node_api::indexer::query_parameters::QueryParameter, Client, NodeInfoWrapper},
+    client::{
+        api::GetAddressesOptions, node_api::indexer::query_parameters::BasicOutputQueryParameters, Client,
+        NodeInfoWrapper,
+    },
     types::{
-        api::core::response::TransactionState,
+        api::core::TransactionState,
         block::{
             output::{Output, OutputId},
-            BlockWrapper,
+            SignedBlock,
         },
     },
 };
 use packable::PackableExt;
+use pretty_assertions::assert_eq;
 
 use super::{setup_secret_manager, setup_tagged_data_block, setup_transaction_block};
 use crate::client::common::{setup_client_with_node_health_ignored, NODE_LOCAL};
@@ -125,7 +129,7 @@ async fn test_get_address_outputs() {
         .unwrap();
 
     let output_ids_response = client
-        .basic_output_ids([QueryParameter::Address(address)])
+        .basic_output_ids(BasicOutputQueryParameters::new().address(address))
         .await
         .unwrap();
 
@@ -191,7 +195,7 @@ async fn test_get_included_block_raw() {
     let (_block_id, transaction_id) = setup_transaction_block(&client).await;
 
     let block = client.get_included_block(&transaction_id).await.unwrap();
-    let block_raw = BlockWrapper::unpack_verified(
+    let block_raw = SignedBlock::unpack_verified(
         client.get_included_block_raw(&transaction_id).await.unwrap(),
         &client.get_protocol_parameters().await.unwrap(),
     )
@@ -237,7 +241,7 @@ async fn test_get_included_block_metadata() {
     let metadata_response = client.get_included_block_metadata(&transaction_id).await.unwrap();
 
     assert_eq!(metadata_response.block_id, block_id);
-    assert_eq!(metadata_response.tx_state, Some(TransactionState::Finalized));
+    assert_eq!(metadata_response.transaction_state, Some(TransactionState::Finalized));
 
     println!("{metadata_response:#?}");
 }

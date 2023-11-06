@@ -10,8 +10,12 @@
 
 use crypto::keys::bip44::Bip44;
 use iota_sdk::{
-    client::{constants::IOTA_COIN_TYPE, secret::SecretManager, Client, Result},
-    types::api::core::response::BlockState,
+    client::{
+        constants::IOTA_COIN_TYPE,
+        secret::{SecretManager, SignBlock},
+        Client, Result,
+    },
+    types::{api::core::BlockState, block::IssuerId},
 };
 
 #[tokio::main]
@@ -20,6 +24,7 @@ async fn main() -> Result<()> {
     dotenvy::dotenv().ok();
 
     let node_url = std::env::var("NODE_URL").unwrap();
+    let issuer_id = std::env::var("ISSUER_ID").unwrap().parse::<IssuerId>().unwrap();
 
     // Create a node client.
     let client = Client::builder().with_node(&node_url)?.finish().await?;
@@ -28,14 +33,9 @@ async fn main() -> Result<()> {
 
     // Create and send a block.
     let block = client
-        .build_basic_block(
-            todo!("issuer id"),
-            todo!("issuing time"),
-            None,
-            None,
-            &secret_manager,
-            Bip44::new(IOTA_COIN_TYPE),
-        )
+        .build_basic_block(issuer_id, None)
+        .await?
+        .sign_ed25519(&secret_manager, Bip44::new(IOTA_COIN_TYPE))
         .await?;
     let block_id = client.block_id(&block).await?;
 
@@ -45,7 +45,7 @@ async fn main() -> Result<()> {
     for _ in 0..30 {
         tokio::time::sleep(std::time::Duration::from_secs(1)).await;
         let metadata = client.get_block_metadata(&block_id).await?;
-        if let Some(BlockState::Confirmed | BlockState::Finalized) = metadata.block_state {
+        if let BlockState::Confirmed | BlockState::Finalized = metadata.block_state {
             break;
         }
     }

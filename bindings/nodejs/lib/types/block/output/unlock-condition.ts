@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { plainToInstance, Type } from 'class-transformer';
-import { u64 } from '../../utils';
-import { Address, AddressDiscriminator, AccountAddress } from '../address';
 import { SlotIndex } from '../slot';
+import { NumericString, u64 } from '../../utils';
+import { Address, AddressDiscriminator, AccountAddress } from '../address';
 
 /**
  * All of the unlock condition types.
@@ -108,8 +108,10 @@ class AddressUnlockCondition extends UnlockCondition {
  * A Storage Deposit Return Unlock Condition.
  */
 class StorageDepositReturnUnlockCondition extends UnlockCondition {
-    // Getter transforms it into a proper number
-    private amount: string;
+    /**
+     * The amount the consuming transaction must deposit to `returnAddress`.
+     */
+    readonly amount: NumericString;
 
     /**
      * The address to return the amount to.
@@ -123,7 +125,7 @@ class StorageDepositReturnUnlockCondition extends UnlockCondition {
      * @param returnAddress The address to return the amount to.
      * @param amount The amount the consuming transaction must deposit to `returnAddress`.
      */
-    constructor(returnAddress: Address, amount: u64 | string) {
+    constructor(returnAddress: Address, amount: u64 | NumericString) {
         super(UnlockConditionType.StorageDepositReturn);
         if (typeof amount == 'bigint') {
             this.amount = amount.toString(10);
@@ -156,8 +158,8 @@ class TimelockUnlockCondition extends UnlockCondition {
 }
 
 /**
- * Defines an expiration slot index. Before the slot index is reached, only the Address defined in the Address
- * Unlock Condition is allowed to unlock the output. Afterward, only the Return Address can unlock it.
+ * Defines a slot index until which only the Address defined in the Address Unlock Condition is allowed to unlock the output.
+ * After the slot index is reached/passed, only the Return Address can unlock it.
  */
 class ExpirationUnlockCondition extends UnlockCondition {
     /**
@@ -168,8 +170,7 @@ class ExpirationUnlockCondition extends UnlockCondition {
     })
     readonly returnAddress: Address;
     /**
-     * Before this slot index, the condition is allowed to unlock the output,
-     * after that only the address defined in return address.
+     * Before this slot index, the Address Unlock Condition is allowed to unlock the output, after that only the address defined in Return Address can.
      */
     readonly slotIndex: SlotIndex;
 

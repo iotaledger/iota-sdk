@@ -3,12 +3,7 @@
 
 use alloc::collections::BTreeSet;
 
-use packable::{
-    error::{UnpackError, UnpackErrorExt},
-    packer::Packer,
-    unpacker::Unpacker,
-    Packable,
-};
+use packable::Packable;
 
 use crate::types::{
     block::{
@@ -21,8 +16,8 @@ use crate::types::{
             verify_output_amount_min, verify_output_amount_packable, verify_output_amount_supply, Output,
             OutputBuilderAmount, OutputId, Rent, RentStructure, StateTransitionError, StateTransitionVerifier,
         },
-        protocol::{ProtocolParameters, WorkScore, WorkScoreStructure},
-        semantic::{TransactionFailureReason, ValidationContext},
+        protocol::{ProtocolParameters, WorkScore, WorkScoreParameters},
+        semantic::{SemanticValidationContext, TransactionFailureReason},
         slot::EpochIndex,
         unlock::Unlock,
         Error,
@@ -30,10 +25,13 @@ use crate::types::{
     ValidationParams,
 };
 
-impl_id!(pub DelegationId, 32, "Unique identifier of the Delegation Output, which is the BLAKE2b-256 hash of the Output ID that created it.");
-
-#[cfg(feature = "serde")]
-string_serde_impl!(DelegationId);
+crate::impl_id!(
+    /// Unique identifier of the [`DelegationOutput`](crate::types::block::output::DelegationOutput),
+    /// which is the BLAKE2b-256 hash of the [`OutputId`](crate::types::block::output::OutputId) that created it.
+    pub DelegationId {
+        pub const LENGTH: usize = 32;
+    }
+);
 
 impl From<&OutputId> for DelegationId {
     fn from(output_id: &OutputId) -> Self {
@@ -174,9 +172,7 @@ impl DelegationOutputBuilder {
 
     /// Finishes the builder into a [`DelegationOutput`] without parameters verification.
     pub fn finish(self) -> Result<DelegationOutput, Error> {
-        if self.validator_address.is_null() {
-            return Err(Error::NullDelegationValidatorId);
-        }
+        verify_validator_address::<true>(&self.validator_address)?;
 
         let unlock_conditions = UnlockConditions::from_set(self.unlock_conditions)?;
 
@@ -239,27 +235,32 @@ impl From<&DelegationOutput> for DelegationOutputBuilder {
 }
 
 /// An output which delegates its contained IOTA coins as voting power to a validator.
-#[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
+#[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Packable)]
+#[packable(unpack_error = Error)]
+#[packable(unpack_visitor = ProtocolParameters)]
 pub struct DelegationOutput {
     /// Amount of IOTA coins to deposit with this output.
+    #[packable(verify_with = verify_output_amount_packable)]
     amount: u64,
     /// Amount of delegated IOTA coins.
     delegated_amount: u64,
     /// Unique identifier of the delegation output.
     delegation_id: DelegationId,
     /// Account address of the validator to which this output is delegating.
+    #[packable(verify_with = verify_validator_address_packable)]
     validator_address: AccountAddress,
     /// Index of the first epoch for which this output delegates.
     start_epoch: EpochIndex,
     /// Index of the last epoch for which this output delegates.
     end_epoch: EpochIndex,
     /// Define how the output can be unlocked in a transaction.
+    #[packable(verify_with = verify_unlock_conditions_packable)]
     unlock_conditions: UnlockConditions,
 }
 
 impl DelegationOutput {
     /// The [`Output`](crate::types::block::output::Output) kind of a [`DelegationOutput`].
-    pub const KIND: u8 = 4;
+    pub const KIND: u8 = 5;
     /// The set of allowed [`UnlockCondition`]s for a [`DelegationOutput`].
     pub const ALLOWED_UNLOCK_CONDITIONS: UnlockConditionFlags = UnlockConditionFlags::ADDRESS;
 
@@ -349,16 +350,16 @@ impl DelegationOutput {
         &self,
         _output_id: &OutputId,
         unlock: &Unlock,
-        inputs: &[(&OutputId, &Output)],
-        context: &mut ValidationContext<'_>,
+        context: &mut SemanticValidationContext<'_>,
     ) -> Result<(), TransactionFailureReason> {
         self.unlock_conditions()
-            .locked_address(self.address(), context.essence.creation_slot())
-            .unlock(unlock, inputs, context)
+            .locked_address(self.address(), context.transaction.creation_slot())
+            .unlock(unlock, context)
     }
 
-    // Transition, just without full ValidationContext.
+    // Transition, just without full SemanticValidationContext.
     pub(crate) fn transition_inner(current_state: &Self, next_state: &Self) -> Result<(), StateTransitionError> {
+        #[allow(clippy::nonminimal_bool)]
         if !(current_state.delegation_id.is_null() && !next_state.delegation_id().is_null()) {
             return Err(StateTransitionError::NonDelayedClaimingTransition);
         }
@@ -375,7 +376,7 @@ impl DelegationOutput {
 }
 
 impl StateTransitionVerifier for DelegationOutput {
-    fn creation(next_state: &Self, _context: &ValidationContext<'_>) -> Result<(), StateTransitionError> {
+    fn creation(next_state: &Self, _context: &SemanticValidationContext<'_>) -> Result<(), StateTransitionError> {
         if !next_state.delegation_id.is_null() {
             return Err(StateTransitionError::NonZeroCreatedId);
         }
@@ -394,71 +395,39 @@ impl StateTransitionVerifier for DelegationOutput {
     fn transition(
         current_state: &Self,
         next_state: &Self,
-        _context: &ValidationContext<'_>,
+        _context: &SemanticValidationContext<'_>,
     ) -> Result<(), StateTransitionError> {
         Self::transition_inner(current_state, next_state)
     }
 
-    fn destruction(_current_state: &Self, _context: &ValidationContext<'_>) -> Result<(), StateTransitionError> {
+    fn destruction(
+        _current_state: &Self,
+        _context: &SemanticValidationContext<'_>,
+    ) -> Result<(), StateTransitionError> {
         // TODO handle mana rewards
         Ok(())
     }
 }
 
 impl WorkScore for DelegationOutput {
-    fn work_score(&self, work_score_params: WorkScoreStructure) -> u32 {
-        work_score_params.output
+    fn work_score(&self, work_score_params: WorkScoreParameters) -> u32 {
+        work_score_params.output()
     }
 }
 
-impl Packable for DelegationOutput {
-    type UnpackError = Error;
-    type UnpackVisitor = ProtocolParameters;
-
-    fn pack<P: Packer>(&self, packer: &mut P) -> Result<(), P::Error> {
-        self.amount.pack(packer)?;
-        self.delegated_amount.pack(packer)?;
-        self.delegation_id.pack(packer)?;
-        self.validator_address.pack(packer)?;
-        self.start_epoch.pack(packer)?;
-        self.end_epoch.pack(packer)?;
-        self.unlock_conditions.pack(packer)?;
-
+fn verify_validator_address<const VERIFY: bool>(validator_address: &AccountAddress) -> Result<(), Error> {
+    if VERIFY && validator_address.is_null() {
+        return Err(Error::NullDelegationValidatorId);
+    } else {
         Ok(())
     }
+}
 
-    fn unpack<U: Unpacker, const VERIFY: bool>(
-        unpacker: &mut U,
-        visitor: &Self::UnpackVisitor,
-    ) -> Result<Self, UnpackError<Self::UnpackError, U::Error>> {
-        let amount = u64::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
-
-        verify_output_amount_packable::<VERIFY>(&amount, visitor).map_err(UnpackError::Packable)?;
-
-        let delegated_amount = u64::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
-        let delegation_id = DelegationId::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
-        let validator_address = AccountAddress::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
-
-        if validator_address.is_null() {
-            return Err(Error::NullDelegationValidatorId).map_err(UnpackError::Packable);
-        }
-
-        let start_epoch = EpochIndex::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
-        let end_epoch = EpochIndex::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
-        let unlock_conditions = UnlockConditions::unpack::<_, VERIFY>(unpacker, visitor)?;
-
-        verify_unlock_conditions::<VERIFY>(&unlock_conditions).map_err(UnpackError::Packable)?;
-
-        Ok(Self {
-            amount,
-            delegated_amount,
-            delegation_id,
-            validator_address,
-            start_epoch,
-            end_epoch,
-            unlock_conditions,
-        })
-    }
+fn verify_validator_address_packable<const VERIFY: bool>(
+    validator_address: &AccountAddress,
+    _: &ProtocolParameters,
+) -> Result<(), Error> {
+    verify_validator_address::<VERIFY>(validator_address)
 }
 
 fn verify_unlock_conditions<const VERIFY: bool>(unlock_conditions: &UnlockConditions) -> Result<(), Error> {
@@ -471,6 +440,13 @@ fn verify_unlock_conditions<const VERIFY: bool>(unlock_conditions: &UnlockCondit
     } else {
         Ok(())
     }
+}
+
+fn verify_unlock_conditions_packable<const VERIFY: bool>(
+    unlock_conditions: &UnlockConditions,
+    _: &ProtocolParameters,
+) -> Result<(), Error> {
+    verify_unlock_conditions::<VERIFY>(unlock_conditions)
 }
 
 #[cfg(feature = "serde")]

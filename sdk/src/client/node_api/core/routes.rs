@@ -15,16 +15,16 @@ use crate::{
         Client, ClientInner, Result,
     },
     types::{
-        api::core::response::{
+        api::core::{
             BlockMetadataResponse, CommitteeResponse, CongestionResponse, InfoResponse, IssuanceBlockHeaderResponse,
             ManaRewardsResponse, PeerResponse, RoutesResponse, SubmitBlockResponse, UtxoChangesResponse,
             ValidatorResponse, ValidatorsResponse,
         },
         block::{
             output::{dto::OutputDto, AccountId, Output, OutputId, OutputMetadata},
-            payload::transaction::TransactionId,
+            payload::signed_transaction::TransactionId,
             slot::{EpochIndex, SlotCommitment, SlotCommitmentId, SlotIndex},
-            BlockId, BlockWrapper, BlockWrapperDto,
+            BlockId, SignedBlock, SignedBlockDto,
         },
         TryFromDto,
     },
@@ -160,10 +160,10 @@ impl ClientInner {
 
     /// Returns the BlockId of the submitted block.
     /// POST JSON to /api/core/v3/blocks
-    pub async fn post_block(&self, block: &BlockWrapper) -> Result<BlockId> {
+    pub async fn post_block(&self, block: &SignedBlock) -> Result<BlockId> {
         const PATH: &str = "api/core/v3/blocks";
 
-        let block_dto = BlockWrapperDto::from(block);
+        let block_dto = SignedBlockDto::from(block);
 
         let response = self
             .post_request::<SubmitBlockResponse>(PATH, serde_json::to_value(block_dto)?)
@@ -174,7 +174,7 @@ impl ClientInner {
 
     /// Returns the BlockId of the submitted block.
     /// POST /api/core/v3/blocks
-    pub async fn post_block_raw(&self, block: &BlockWrapper) -> Result<BlockId> {
+    pub async fn post_block_raw(&self, block: &SignedBlock) -> Result<BlockId> {
         const PATH: &str = "api/core/v3/blocks";
 
         let response = self
@@ -186,12 +186,12 @@ impl ClientInner {
 
     /// Finds a block by its ID and returns it as object.
     /// GET /api/core/v3/blocks/{blockId}
-    pub async fn get_block(&self, block_id: &BlockId) -> Result<BlockWrapper> {
+    pub async fn get_block(&self, block_id: &BlockId) -> Result<SignedBlock> {
         let path = &format!("api/core/v3/blocks/{block_id}");
 
-        let dto = self.get_request::<BlockWrapperDto>(path, None, false, true).await?;
+        let dto = self.get_request::<SignedBlockDto>(path, None, false, true).await?;
 
-        Ok(BlockWrapper::try_from_dto_with_params(
+        Ok(SignedBlock::try_from_dto_with_params(
             dto,
             self.get_protocol_parameters().await?,
         )?)
@@ -244,12 +244,12 @@ impl ClientInner {
 
     /// Returns the earliest confirmed block containing the transaction with the given ID.
     /// GET /api/core/v3/transactions/{transactionId}/included-block
-    pub async fn get_included_block(&self, transaction_id: &TransactionId) -> Result<BlockWrapper> {
+    pub async fn get_included_block(&self, transaction_id: &TransactionId) -> Result<SignedBlock> {
         let path = &format!("api/core/v3/transactions/{transaction_id}/included-block");
 
-        let dto = self.get_request::<BlockWrapperDto>(path, None, true, true).await?;
+        let dto = self.get_request::<SignedBlockDto>(path, None, true, true).await?;
 
-        Ok(BlockWrapper::try_from_dto_with_params(
+        Ok(SignedBlock::try_from_dto_with_params(
             dto,
             self.get_protocol_parameters().await?,
         )?)

@@ -10,6 +10,7 @@ import {
     SecretManager,
     TaggedDataPayload,
     CommonOutput,
+    CoinType,
 } from '../../';
 import '../customMatchers';
 import 'dotenv/config';
@@ -23,9 +24,19 @@ const client = new Client({
     ],
 });
 
-const secretManager = {
+const secretManager = new SecretManager({
     mnemonic:
         'endorse answer radar about source reunion marriage tag sausage weekend frost daring base attack because joke dream slender leisure group reason prepare broken river',
+});
+
+const issuerId =
+    '0x0000000000000000000000000000000000000000000000000000000000000000';
+
+const chain = {
+    coinType: CoinType.Iota,
+    account: 0,
+    change: 0,
+    addressIndex: 0,
 };
 
 // Skip for CI
@@ -33,7 +44,9 @@ describe.skip('Main examples', () => {
     it('gets info about the node', async () => {
         const info = await client.getInfo();
 
-        expect(info.nodeInfo.protocolParameters[0].parameters[0].bech32Hrp).toBe('rms');
+        expect(
+            info.nodeInfo.protocolParameters[0].parameters[0].bech32Hrp,
+        ).toBe('rms');
     });
 
     it('generates a mnemonic', async () => {
@@ -42,24 +55,25 @@ describe.skip('Main examples', () => {
         expect(mnemonic).toBeDefined();
     });
 
-    it('generates addresses', async () => {
-        const addresses = await new SecretManager(
-            secretManager,
-        ).generateEd25519Addresses({
-            accountIndex: 0,
-            range: {
-                start: 0,
-                end: 5,
-            },
-            bech32Hrp: 'rms',
-        });
+    // TODO
+    // it('generates addresses', async () => {
+    //     const addresses = await new SecretManager(
+    //         secretManager,
+    //     ).generateEd25519Addresses({
+    //         accountIndex: 0,
+    //         range: {
+    //             start: 0,
+    //             end: 5,
+    //         },
+    //         bech32Hrp: 'rms',
+    //     });
 
-        expect(addresses.length).toBe(5);
+    //     expect(addresses.length).toBe(5);
 
-        addresses.forEach((address) => {
-            expect(address).toBeValidAddress();
-        });
-    });
+    //     addresses.forEach((address) => {
+    //         expect(address).toBeValidAddress();
+    //     });
+    // });
 
     it('gets address outputs', async () => {
         const outputIdsResponse = await client.basicOutputIds([
@@ -93,9 +107,7 @@ describe.skip('Main examples', () => {
 
     it('gets the balance of an address', async () => {
         // Generate the first address
-        const addresses = await new SecretManager(
-            secretManager,
-        ).generateEd25519Addresses({
+        const addresses = await secretManager.generateEd25519Addresses({
             accountIndex: 0,
             range: {
                 start: 0,
@@ -131,9 +143,9 @@ describe.skip('Main examples', () => {
                     .getNativeTokens()
                     ?.forEach(
                         (token) =>
-                        (totalNativeTokens[token.id] =
-                            (totalNativeTokens[token.id] || 0) +
-                            Number(token.amount)),
+                            (totalNativeTokens[token.id] =
+                                (totalNativeTokens[token.id] || 0) +
+                                Number(token.amount)),
                     );
             }
 
@@ -168,11 +180,14 @@ describe.skip('Main examples', () => {
     });
 
     it('sends a block with a tagged data payload', async () => {
-        const blockIdAndBlock = await client.postBlockPayload(
+        const unsignedBlock = await client.buildBasicBlock(
+            issuerId,
             new TaggedDataPayload(utf8ToHex('Hello'), utf8ToHex('Tangle')),
         );
+        const signedBlock = await secretManager.signBlock(unsignedBlock, chain);
+        const blockId = await client.postBlock(signedBlock);
 
-        const fetchedBlock = await client.getBlock(blockIdAndBlock[0]);
+        const fetchedBlock = await client.getBlock(blockId);
 
         expect(fetchedBlock.payload).toStrictEqual(
             new TaggedDataPayload(utf8ToHex('Hello'), utf8ToHex('Tangle')),

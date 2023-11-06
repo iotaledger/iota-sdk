@@ -3,8 +3,8 @@
 
 from typing import NewType, Optional
 from enum import IntEnum
-from dataclasses import dataclass
-from dataclasses_json import DataClassJsonMixin, dataclass_json, LetterCase, Undefined
+from dataclasses import dataclass, field
+from dataclasses_json import DataClassJsonMixin, dataclass_json, LetterCase, Undefined, config
 
 HexStr = NewType("HexStr", str)
 EpochIndex = NewType("EpochIndex", int)
@@ -12,21 +12,26 @@ SlotIndex = NewType("SlotIndex", int)
 
 
 def json(cls):
-    """Decorator to add custom to_dict and to_json methods to a dataclass."""
-    # Apply the dataclass_json decorator first to get the default behavior
+    """Decorator to add to_dict and to_json methods to a dataclass."""
+
+    # Get potential override method
+    to_dict = getattr(cls, "to_dict", None)
+
+    # Apply the dataclass_json decorator to get the default behavior
     cls = dataclass_json(
         letter_case=LetterCase.CAMEL,
         undefined=Undefined.RAISE)(cls)
 
-    # Store original methods
-    original_to_dict = cls.to_dict
+    # If no custom one is defined, set the default from dataclass_json
+    if to_dict is None:
+        to_dict = cls.to_dict
 
-    # Override methods
+    # Override to_dict to remove None values
     def custom_to_dict(self, *args, **kwargs):
-        original_dict = original_to_dict(self, *args, **kwargs)
+        # pylint: disable=protected-access
+        original_dict = to_dict(self, *args, **kwargs)
+
         result = {k: v for k, v in original_dict.items() if v is not None}
-        if hasattr(cls, "_to_dict_custom"):
-            result = getattr(cls, "_to_dict_custom")(result)
         return result
 
     def custom_to_json(self, *args, **kwargs):
@@ -74,21 +79,42 @@ class Node():
     password: Optional[str] = None
     disabled: Optional[bool] = None
 
-    @staticmethod
-    def _to_dict_custom(encoded):
+    def to_dict(self):
+        """Custom dict conversion.
+        """
 
-        if 'jwt' in encoded or 'username' in encoded or 'password' in encoded:
-            encoded['auth'] = {}
-            if 'jwt' in encoded:
-                encoded['auth']['jwt'] = encoded.pop('jwt')
-            if 'username' in encoded or 'password' in encoded:
-                basic_auth = encoded['auth']['basicAuthNamePwd'] = []
-                if 'username' in encoded:
-                    basic_auth.append(encoded.pop('username'))
-                if 'password' in encoded:
-                    basic_auth.append(encoded.pop('password'))
+        res = {
+            'url': self.url,
+            'disabled': self.disabled
+        }
+        if self.jwt is not None or self.username is not None or self.password is not None:
+            auth = res['auth'] = {}
+            if self.jwt is not None:
+                auth['jwt'] = self.jwt
+            if self.username is not None or self.password is not None:
+                basic_auth = auth['basicAuthNamePwd'] = []
+                if self.username is not None:
+                    basic_auth.append(self.username)
+                if self.password is not None:
+                    basic_auth.append(self.password)
 
-        return encoded
+        return res
+
+
+def opt_int_encoder(value):
+    """Transforms int to string if Optional is not None
+
+     Attributes:
+            value: The optional int
+    """
+    if value is not None:
+        return str(value)
+    return None
+
+
+def hex_str_decoder(value: str) -> int:
+    """Parses a given string as a hexadecimal integer."""
+    return int(value, 16)
 
 
 @json
@@ -100,14 +126,7 @@ class AddressAndAmount():
             amount: The base coin amount to send.
             address: The receive address.
     """
-    amount: int
+    amount: int = field(metadata=config(
+        encoder=str
+    ))
     address: str
-
-    @staticmethod
-    def _to_dict_custom(config):
-        config = super().to_dict()
-
-        if 'amount' in config:
-            config['amount'] = str(config['amount'])
-
-        return config

@@ -11,4 +11,4 @@ export * from './gossip-heartbeat';
 export * from './native-token';
 export * from './peer';
 export * from './rent-structure';
-export * from './ledger-inclusion-state';
+export * from './state';

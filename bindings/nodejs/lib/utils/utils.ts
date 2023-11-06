@@ -6,16 +6,17 @@ import {
     Address,
     HexEncodedString,
     Ed25519Signature,
-    TransactionEssence,
-    TransactionPayload,
+    Transaction,
+    SignedTransactionPayload,
     TransactionId,
     TokenSchemeType,
     Output,
     RentStructure,
     OutputId,
     u64,
-    BlockWrapper,
+    SignedBlock,
     ProtocolParameters,
+    Bech32Address,
 } from '../types';
 import {
     AccountId,
@@ -58,7 +59,7 @@ export class Utils {
      * @param outputId The output ID as hex-encoded string.
      * @returns The account ID.
      */
-    static computeAccountId(outputId: string): AccountId {
+    static computeAccountId(outputId: OutputId): AccountId {
         return callUtilsMethod({
             name: 'computeAccountId',
             data: {
@@ -96,26 +97,11 @@ export class Utils {
      * @param outputId The output ID as hex-encoded string.
      * @returns The NFT ID.
      */
-    static computeNftId(outputId: string): NftId {
+    static computeNftId(outputId: OutputId): NftId {
         return callUtilsMethod({
             name: 'computeNftId',
             data: {
                 outputId,
-            },
-        });
-    }
-
-    /**
-     * Compute the input commitment from the output objects that are used as inputs to fund the transaction.
-     *
-     * @param inputs The output objects used as inputs for the transaction.
-     * @returns The inputs commitment hash as hex-encoded string.
-     */
-    static computeInputsCommitment(inputs: Output[]): HexEncodedString {
-        return callUtilsMethod({
-            name: 'computeInputsCommitment',
-            data: {
-                inputs,
             },
         });
     }
@@ -183,7 +169,7 @@ export class Utils {
      * @param address A Bech32 address as string.
      * @returns A Bech32 address.
      */
-    static parseBech32Address(address: string): Address {
+    static parseBech32Address(address: Bech32Address): Address {
         const addr = callUtilsMethod({
             name: 'parseBech32Address',
             data: {
@@ -200,7 +186,7 @@ export class Utils {
      * @param params The network protocol parameters.
      * @returns The corresponding block ID.
      */
-    static blockId(block: BlockWrapper, params: ProtocolParameters): BlockId {
+    static blockId(block: SignedBlock, params: ProtocolParameters): BlockId {
         return callUtilsMethod({
             name: 'blockId',
             data: {
@@ -216,7 +202,7 @@ export class Utils {
      * @param payload A transaction payload.
      * @returns The transaction ID.
      */
-    static transactionId(payload: TransactionPayload): TransactionId {
+    static transactionId(payload: SignedTransactionPayload): TransactionId {
         return callUtilsMethod({
             name: 'transactionId',
             data: {
@@ -231,7 +217,7 @@ export class Utils {
      * @param bech32 A Bech32 address.
      * @returns The hex-encoded string.
      */
-    static bech32ToHex(bech32: string): string {
+    static bech32ToHex(bech32: Bech32Address): HexEncodedString {
         return callUtilsMethod({
             name: 'bech32ToHex',
             data: {
@@ -247,7 +233,10 @@ export class Utils {
      * @param bech32Hrp The Bech32 HRP (human readable part) to use.
      * @returns The Bech32-encoded address string.
      */
-    static hexToBech32(hex: string, bech32Hrp: string): string {
+    static hexToBech32(
+        hex: HexEncodedString,
+        bech32Hrp: string,
+    ): Bech32Address {
         return callUtilsMethod({
             name: 'hexToBech32',
             data: {
@@ -264,7 +253,10 @@ export class Utils {
      * @param bech32Hrp The Bech32 HRP (human readable part) to use.
      * @returns The Bech32-encoded address string.
      */
-    static accountIdToBech32(accountId: string, bech32Hrp: string): string {
+    static accountIdToBech32(
+        accountId: AccountId,
+        bech32Hrp: string,
+    ): Bech32Address {
         return callUtilsMethod({
             name: 'accountIdToBech32',
             data: {
@@ -281,7 +273,7 @@ export class Utils {
      * @param bech32Hrp The Bech32 HRP (human readable part) to use.
      * @returns The Bech32-encoded address string.
      */
-    static nftIdToBech32(nftId: string, bech32Hrp: string): string {
+    static nftIdToBech32(nftId: NftId, bech32Hrp: string): Bech32Address {
         return callUtilsMethod({
             name: 'nftIdToBech32',
             data: {
@@ -298,7 +290,10 @@ export class Utils {
      * @param bech32Hrp The Bech32 HRP (human readable part) to use.
      * @returns The Bech32-encoded address string.
      */
-    static hexPublicKeyToBech32Address(hex: string, bech32Hrp: string): string {
+    static hexPublicKeyToBech32Address(
+        hex: HexEncodedString,
+        bech32Hrp: string,
+    ): Bech32Address {
         return callUtilsMethod({
             name: 'hexPublicKeyToBech32Address',
             data: {
@@ -323,18 +318,16 @@ export class Utils {
     }
 
     /**
-     * Compute the hash of a transaction essence.
+     * Compute the signing hash of a transaction.
      *
-     * @param essence A transaction essence.
-     * @returns The hash of the transaction essence as a hex-encoded string.
+     * @param transaction A transaction.
+     * @returns The signing hash of the transaction as a hex-encoded string.
      */
-    static hashTransactionEssence(
-        essence: TransactionEssence,
-    ): HexEncodedString {
+    static transactionSigningHash(transaction: Transaction): HexEncodedString {
         return callUtilsMethod({
-            name: 'hashTransactionEssence',
+            name: 'transactionSigningHash',
             data: {
-                essence,
+                transaction,
             },
         });
     }
@@ -409,5 +402,21 @@ export class Utils {
                 },
             },
         });
+    }
+
+    /**
+     * Returns the hex representation of the serialized output bytes.
+     *
+     * @param output The output.
+     * @returns The hex representation of the serialized output bytes.
+     */
+    static outputHexBytes(output: Output): HexEncodedString {
+        const hexBytes = callUtilsMethod({
+            name: 'outputHexBytes',
+            data: {
+                output,
+            },
+        });
+        return hexBytes;
     }
 }

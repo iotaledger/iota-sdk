@@ -1,7 +1,7 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use crate::types::block::semantic::ValidationContext;
+use crate::types::block::semantic::{SemanticValidationContext, TransactionFailureReason};
 
 ///
 #[allow(missing_docs)]
@@ -28,20 +28,27 @@ pub enum StateTransitionError {
     UnsortedCreatedFoundries,
     UnsupportedStateIndexOperation { current_state: u32, next_state: u32 },
     UnsupportedStateTransition,
+    TransactionFailure(TransactionFailureReason),
+}
+
+impl From<TransactionFailureReason> for StateTransitionError {
+    fn from(error: TransactionFailureReason) -> Self {
+        Self::TransactionFailure(error)
+    }
 }
 
 ///
 pub trait StateTransitionVerifier {
     ///
-    fn creation(next_state: &Self, context: &ValidationContext<'_>) -> Result<(), StateTransitionError>;
+    fn creation(next_state: &Self, context: &SemanticValidationContext<'_>) -> Result<(), StateTransitionError>;
 
     ///
     fn transition(
         current_state: &Self,
         next_state: &Self,
-        context: &ValidationContext<'_>,
+        context: &SemanticValidationContext<'_>,
     ) -> Result<(), StateTransitionError>;
 
     ///
-    fn destruction(current_state: &Self, context: &ValidationContext<'_>) -> Result<(), StateTransitionError>;
+    fn destruction(current_state: &Self, context: &SemanticValidationContext<'_>) -> Result<(), StateTransitionError>;
 }

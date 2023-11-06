@@ -10,21 +10,20 @@ pub(crate) mod requirement;
 pub(crate) mod transition;
 
 use core::ops::Deref;
-use std::collections::{HashMap, HashSet};
+use std::collections::HashSet;
 
 use packable::PackableExt;
-pub(crate) use requirement::is_account_transition;
 
 pub use self::{burn::Burn, error::Error, requirement::Requirement};
 use crate::{
     client::{api::types::RemainderData, secret::types::InputSigningData},
     types::block::{
-        address::{AccountAddress, Address, NftAddress},
+        address::{AccountAddress, Address, AnchorAddress, NftAddress},
         input::INPUT_COUNT_RANGE,
         output::{
-            AccountOutput, AccountTransition, ChainId, FoundryOutput, NativeTokensBuilder, NftOutput, Output, OutputId,
-            OUTPUT_COUNT_RANGE,
+            AccountOutput, ChainId, FoundryOutput, NativeTokensBuilder, NftOutput, Output, OutputId, OUTPUT_COUNT_RANGE,
         },
+        payload::signed_transaction::TransactionCapabilities,
         protocol::ProtocolParameters,
         slot::SlotIndex,
     },
@@ -43,7 +42,7 @@ pub struct InputSelection {
     protocol_parameters: ProtocolParameters,
     slot_index: SlotIndex,
     requirements: Vec<Requirement>,
-    automatically_transitioned: HashMap<ChainId, Option<AccountTransition>>,
+    automatically_transitioned: HashSet<ChainId>,
 }
 
 /// Result of the input selection algorithm.
@@ -59,39 +58,25 @@ pub struct Selected {
 
 impl InputSelection {
     fn required_account_nft_addresses(&self, input: &InputSigningData) -> Result<Option<Requirement>, Error> {
-        let account_transition =
-            is_account_transition(&input.output, *input.output_id(), &self.outputs, self.burn.as_ref());
         let required_address = input
             .output
-            .required_and_unlocked_address(self.slot_index, input.output_id(), account_transition)?
+            .required_and_unlocked_address(self.slot_index, input.output_id())?
             .0;
 
         match required_address {
-            Address::Ed25519(_) => {
-                if account_transition.is_some() {
-                    // Only add the requirement if the output is an account because other types of output have been
-                    // filtered by address already.
-                    Ok(Some(Requirement::Ed25519(required_address)))
-                } else {
-                    Ok(None)
-                }
-            }
-            Address::Account(account_address) => Ok(Some(Requirement::Account(
-                *account_address.account_id(),
-                AccountTransition::State,
-            ))),
+            Address::Ed25519(_) => Ok(None),
+            Address::Account(account_address) => Ok(Some(Requirement::Account(*account_address.account_id()))),
             Address::Nft(nft_address) => Ok(Some(Requirement::Nft(*nft_address.nft_id()))),
+            Address::Anchor(_) => Err(Error::UnsupportedAddressType(AnchorAddress::KIND)),
+            Address::Restricted(_) => Ok(None),
+            _ => todo!("What do we do here?"),
         }
     }
 
-    fn select_input(
-        &mut self,
-        input: InputSigningData,
-        account_transition: Option<AccountTransition>,
-    ) -> Result<(), Error> {
+    fn select_input(&mut self, input: InputSigningData) -> Result<(), Error> {
         log::debug!("Selecting input {:?}", input.output_id());
 
-        if let Some(output) = self.transition_input(&input, account_transition)? {
+        if let Some(output) = self.transition_input(&input)? {
             // No need to check for `outputs_requirements` because
             // - the sender feature doesn't need to be verified as it has been removed
             // - the issuer feature doesn't need to be verified as the chain is not new
@@ -140,7 +125,7 @@ impl InputSelection {
                     let input = self.available_inputs.swap_remove(index);
 
                     // Selects required input.
-                    self.select_input(input, None)?
+                    self.select_input(input)?
                 }
                 None => return Err(Error::RequiredInputIsNotAvailable(required_input)),
             }
@@ -189,7 +174,7 @@ impl InputSelection {
             // TODO may want to make this mandatory at some point
             slot_index: SlotIndex::from(0),
             requirements: Vec::new(),
-            automatically_transitioned: HashMap::new(),
+            automatically_transitioned: HashSet::new(),
         }
     }
 
@@ -225,13 +210,13 @@ impl InputSelection {
 
     fn filter_inputs(&mut self) {
         self.available_inputs.retain(|input| {
-            // Keep account outputs because at this point we do not know if a state or governor address will be
-            // required.
-            if input.output.is_account() {
-                return true;
-            }
-            // Filter out non basic/foundry/nft outputs.
-            else if !input.output.is_basic() && !input.output.is_foundry() && !input.output.is_nft() {
+            // TODO what about other kinds?
+            // Filter out non basic/account/foundry/nft outputs.
+            if !input.output.is_basic()
+                && !input.output.is_account()
+                && !input.output.is_foundry()
+                && !input.output.is_nft()
+            {
                 return false;
             }
 
@@ -245,19 +230,22 @@ impl InputSelection {
             let required_address = input
                 .output
                 // Account transition is irrelevant here as we keep accounts anyway.
-                .required_and_unlocked_address(self.slot_index, input.output_id(), None)
+                .required_and_unlocked_address(self.slot_index, input.output_id())
                 // PANIC: safe to unwrap as non basic/account/foundry/nft outputs are already filtered out.
                 .unwrap()
                 .0;
 
-            self.addresses.contains(&required_address)
+            if let Address::Restricted(restricted_address) = required_address {
+                self.addresses.contains(restricted_address.address())
+            } else {
+                self.addresses.contains(&required_address)
+            }
         })
     }
 
     // Inputs need to be sorted before signing, because the reference unlock conditions can only reference a lower index
     pub(crate) fn sort_input_signing_data(
         mut inputs: Vec<InputSigningData>,
-        outputs: &[Output],
         slot_index: SlotIndex,
     ) -> Result<Vec<InputSigningData>, Error> {
         // initially sort by output to make it deterministic
@@ -267,15 +255,9 @@ impl InputSelection {
         // filter for ed25519 address first
         let (mut sorted_inputs, account_nft_address_inputs): (Vec<InputSigningData>, Vec<InputSigningData>) =
             inputs.into_iter().partition(|input_signing_data| {
-                let account_transition = is_account_transition(
-                    &input_signing_data.output,
-                    *input_signing_data.output_id(),
-                    outputs,
-                    None,
-                );
                 let (input_address, _) = input_signing_data
                     .output
-                    .required_and_unlocked_address(slot_index, input_signing_data.output_id(), account_transition)
+                    .required_and_unlocked_address(slot_index, input_signing_data.output_id())
                     // PANIC: safe to unwrap, because we filtered irrelevant outputs out before
                     .unwrap();
 
@@ -283,11 +265,9 @@ impl InputSelection {
             });
 
         for input in account_nft_address_inputs {
-            let account_transition = is_account_transition(&input.output, *input.output_id(), outputs, None);
-            let (input_address, _) =
-                input
-                    .output
-                    .required_and_unlocked_address(slot_index, input.output_id(), account_transition)?;
+            let (input_address, _) = input
+                .output
+                .required_and_unlocked_address(slot_index, input.output_id())?;
 
             match sorted_inputs.iter().position(|input_signing_data| match input_address {
                 Address::Account(unlock_address) => {
@@ -326,15 +306,9 @@ impl InputSelection {
                     if let Some(account_or_nft_address) = account_or_nft_address {
                         // Check for existing outputs for this address, and insert before
                         match sorted_inputs.iter().position(|input_signing_data| {
-                            let account_transition = is_account_transition(
-                                &input_signing_data.output,
-                                *input_signing_data.output_id(),
-                                outputs,
-                                None,
-                            );
                             let (input_address, _) = input_signing_data
                                 .output
-                                .required_and_unlocked_address(slot_index, input.output_id(), account_transition)
+                                .required_and_unlocked_address(slot_index, input.output_id())
                                 // PANIC: safe to unwrap, because we filtered irrelevant outputs out before
                                 .unwrap();
 
@@ -383,8 +357,8 @@ impl InputSelection {
             let inputs = self.fulfill_requirement(requirement)?;
 
             // Select suggested inputs.
-            for (input, account_transition) in inputs {
-                self.select_input(input, account_transition)?;
+            for input in inputs {
+                self.select_input(input)?;
             }
         }
 
@@ -408,7 +382,7 @@ impl InputSelection {
         self.validate_transitions()?;
 
         Ok(Selected {
-            inputs: Self::sort_input_signing_data(self.selected_inputs, &self.outputs, self.slot_index)?,
+            inputs: Self::sort_input_signing_data(self.selected_inputs, self.slot_index)?,
             outputs: self.outputs,
             remainder,
         })
@@ -421,6 +395,7 @@ impl InputSelection {
         let mut input_chains_foundries = hashbrown::HashMap::new();
         let mut input_foundries = Vec::new();
         let mut input_nfts = Vec::new();
+
         for input in &self.selected_inputs {
             if let Some(native_tokens) = input.output.native_tokens() {
                 input_native_tokens_builder.add_native_tokens(native_tokens.clone())?;
@@ -473,22 +448,16 @@ impl InputSelection {
                         &self.outputs,
                     ) {
                         log::debug!("validate_transitions error {err:?}");
-                        let account_transition =
-                            if account_input.output.as_account().state_index() == account_output.state_index() {
-                                AccountTransition::Governance
-                            } else {
-                                AccountTransition::State
-                            };
                         return Err(Error::UnfulfillableRequirement(Requirement::Account(
                             *account_output.account_id(),
-                            account_transition,
                         )));
                     }
                 }
                 Output::Foundry(foundry_output) => {
+                    let foundry_id = foundry_output.id();
                     let foundry_input = input_foundries.iter().find(|i| {
                         if let Output::Foundry(foundry_input) = &i.output {
-                            foundry_output.id() == foundry_input.id()
+                            foundry_id == foundry_input.id()
                         } else {
                             false
                         }
@@ -499,6 +468,9 @@ impl InputSelection {
                             foundry_output,
                             input_native_tokens_builder.deref(),
                             output_native_tokens_builder.deref(),
+                            // We use `all` capabilities here because this transition may be burning
+                            // native tokens, and validation will fail without the capability.
+                            &TransactionCapabilities::all(),
                         ) {
                             log::debug!("validate_transitions error {err:?}");
                             return Err(Error::UnfulfillableRequirement(Requirement::Foundry(

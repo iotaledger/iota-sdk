@@ -3,15 +3,16 @@
 
 //! Core data types for blocks in the tangle.
 
-#[macro_use]
-mod r#macro;
 mod block_id;
 mod convert;
 mod error;
 mod issuer_id;
+mod r#macro;
 
 /// A module that provides types and syntactic validations of addresses.
 pub mod address;
+/// A module that provides functionality for capabilities.
+pub mod capabilities;
 /// A module that provides types and syntactic validations of context inputs.
 pub mod context_input;
 /// A module that provides types and syntactic validations of blocks.
@@ -40,16 +41,13 @@ pub mod slot;
 /// A module that provides types and syntactic validations of unlocks.
 pub mod unlock;
 
-pub(crate) use r#macro::create_bitflags;
 #[cfg(feature = "serde")]
-pub(crate) use r#macro::{impl_id, string_serde_impl};
-
-#[cfg(feature = "serde")]
-pub use self::core::dto::{BlockDto, BlockWrapperDto};
+pub use self::core::dto::{BlockDto, SignedBlockDto, UnsignedBlockDto};
+pub(crate) use self::r#macro::*;
 pub use self::{
     block_id::{BlockHash, BlockId},
     convert::ConvertTo,
-    core::{Block, BlockWrapper},
+    core::{Block, SignedBlock, UnsignedBlock},
     error::Error,
     issuer_id::IssuerId,
 };

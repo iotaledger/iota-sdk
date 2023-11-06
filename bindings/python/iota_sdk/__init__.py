@@ -15,9 +15,10 @@ from .types.balance import *
 from .types.block.basic import *
 from .types.block.block import *
 from .types.block.metadata import *
-from .types.block.wrapper import *
+from .types.block.signed_block import *
 from .types.block.validation import *
 from .types.block_builder_options import *
+from .types.block_issuer_key import *
 from .types.burn import *
 from .types.client_options import *
 from .types.common import *
@@ -40,6 +41,7 @@ from .types.payload import *
 from .types.send_params import *
 from .types.token_scheme import *
 from .types.transaction import *
+from .types.transaction_with_metadata import *
 from .types.transaction_data import *
 from .types.transaction_options import *
 from .types.unlock import *

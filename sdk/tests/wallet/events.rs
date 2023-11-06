@@ -6,25 +6,26 @@ use iota_sdk::{
     types::block::{
         address::{Address, Bech32Address, Ed25519Address},
         input::{Input, UtxoInput},
-        output::{unlock_condition::AddressUnlockCondition, BasicOutput, Output, OutputId},
-        payload::transaction::{RegularTransactionEssence, TransactionEssence, TransactionId},
+        output::{unlock_condition::AddressUnlockCondition, BasicOutput, Output},
+        payload::signed_transaction::{Transaction, TransactionHash, TransactionId},
         protocol::protocol_parameters,
         rand::{
             mana::rand_mana_allotment,
-            output::{rand_basic_output, rand_inputs_commitment, rand_output_metadata},
+            output::{rand_basic_output, rand_output_metadata},
         },
     },
     wallet::{
-        account::types::{InclusionState, OutputData, OutputDataDto},
         events::types::{
             AddressData, NewOutputEvent, SpentOutputEvent, TransactionInclusionEvent, TransactionProgressEvent,
             WalletEvent,
         },
+        types::{InclusionState, OutputData, OutputDataDto},
     },
 };
+use pretty_assertions::assert_eq;
 
 const ED25519_ADDRESS: &str = "0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c649";
-const TRANSACTION_ID: &str = "0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c649";
+const TRANSACTION_ID: &str = "0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c64900000000";
 
 fn assert_serde_eq(event_0: WalletEvent) {
     let json = serde_json::to_string(&event_0).unwrap();
@@ -44,7 +45,10 @@ fn wallet_events_serde() {
     }));
 
     let output_data_dto = OutputDataDto::from(&OutputData {
-        output_id: OutputId::null(),
+        output_id: TransactionHash::null()
+            .into_transaction_id(0)
+            .into_output_id(0)
+            .unwrap(),
         metadata: rand_output_metadata(),
         output: Output::from(rand_basic_output(1_813_620_509_061_365)),
         is_spent: false,
@@ -65,7 +69,7 @@ fn wallet_events_serde() {
     })));
 
     assert_serde_eq(WalletEvent::TransactionInclusion(TransactionInclusionEvent {
-        transaction_id: TransactionId::null(),
+        transaction_id: TransactionHash::null().into_transaction_id(0),
         inclusion_state: InclusionState::Conflicting,
     }));
 
@@ -94,18 +98,16 @@ fn wallet_events_serde() {
                 .finish_with_params(protocol_parameters.token_supply())
                 .unwrap(),
         );
-        let essence = TransactionEssence::Regular(
-            RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
-                .with_inputs(vec![input1, input2])
-                .add_output(output)
-                .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
-                .finish_with_params(&protocol_parameters)
-                .unwrap(),
-        );
+        let transaction = Transaction::builder(protocol_parameters.network_id())
+            .with_inputs(vec![input1, input2])
+            .add_output(output)
+            .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
+            .finish_with_params(&protocol_parameters)
+            .unwrap();
 
         assert_serde_eq(WalletEvent::TransactionProgress(
             TransactionProgressEvent::PreparedTransaction(Box::new(PreparedTransactionDataDto {
-                essence: (&essence).into(),
+                transaction: (&transaction).into(),
                 inputs_data: Vec::new(),
                 remainder: None,
             })),
@@ -113,7 +115,7 @@ fn wallet_events_serde() {
     }
 
     assert_serde_eq(WalletEvent::TransactionProgress(
-        TransactionProgressEvent::PreparedTransactionEssenceHash(ED25519_ADDRESS.to_string()),
+        TransactionProgressEvent::PreparedTransactionSigningHash(ED25519_ADDRESS.to_string()),
     ));
 
     assert_serde_eq(WalletEvent::TransactionProgress(

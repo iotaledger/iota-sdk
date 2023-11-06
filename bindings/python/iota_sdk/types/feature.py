@@ -6,6 +6,7 @@ from typing import Dict, List, TypeAlias, Union, Any
 from dataclasses import dataclass, field
 from dataclasses_json import config
 from iota_sdk.types.address import Address, deserialize_address
+from iota_sdk.types.block_issuer_key import BlockIssuerKey
 from iota_sdk.types.common import EpochIndex, HexStr, json, SlotIndex
 
 
@@ -93,11 +94,10 @@ class BlockIssuerFeature:
     """Contains the public keys to verify block signatures and allows for unbonding the issuer deposit.
     Attributes:
         expiry_slot: The slot index at which the Block Issuer Feature expires and can be removed.
-        public_keys: The Block Issuer Keys.
+        block_issuer_keys: The Block Issuer Keys.
     """
     expiry_slot: SlotIndex
-    # TODO Replace with a list of PublicKey types
-    public_keys: List[HexStr]
+    block_issuer_keys: List[BlockIssuerKey]
     type: int = field(
         default_factory=lambda: int(
             FeatureType.BlockIssuer),
@@ -114,8 +114,12 @@ class StakingFeature:
         start_epoch: The epoch index in which the staking started.
         end_epoch: The epoch index in which the staking ends.
     """
-    staked_amount: str
-    fixed_cost: str
+    staked_amount: int = field(metadata=config(
+        encoder=str
+    ))
+    fixed_cost: int = field(metadata=config(
+        encoder=str
+    ))
     start_epoch: EpochIndex
     end_epoch: EpochIndex
     type: int = field(
@@ -153,7 +157,7 @@ def deserialize_feature(d: Dict[str, Any]) -> Feature:
 
 def deserialize_features(dicts: List[Dict[str, Any]]) -> List[Feature]:
     """
-    Takes a list of dictionaries as input and returns a list with specific instances of a classes based on the value of the 'type' key in the dictionary.
+    Takes a list of dictionaries as input and returns a list with specific instances of classes based on the value of the 'type' key in the dictionary.
 
     Arguments:
     * `dicts`: A list of dictionaries that are expected to have a key called 'type' which specifies the type of the returned value.

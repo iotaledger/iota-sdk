@@ -10,7 +10,7 @@ use packable::{
 
 use crate::types::block::{
     core::{parent::verify_parents_sets, Block, Parents},
-    protocol::{ProtocolParameters, ProtocolParametersHash, WorkScore, WorkScoreStructure},
+    protocol::{ProtocolParameters, ProtocolParametersHash, WorkScore, WorkScoreParameters},
     Error,
 };
 

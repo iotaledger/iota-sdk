@@ -25,18 +25,22 @@ use crate::types::{
             NativeTokens, Output, OutputBuilderAmount, OutputId, Rent, RentStructure, StateTransitionError,
             StateTransitionVerifier, TokenId, TokenScheme,
         },
-        protocol::{ProtocolParameters, WorkScore, WorkScoreStructure},
-        semantic::{TransactionFailureReason, ValidationContext},
+        payload::signed_transaction::{TransactionCapabilities, TransactionCapabilityFlag},
+        protocol::{ProtocolParameters, WorkScore, WorkScoreParameters},
+        semantic::{SemanticValidationContext, TransactionFailureReason},
         unlock::Unlock,
         Error,
     },
     ValidationParams,
 };
 
-impl_id!(pub FoundryId, 38, "Defines the unique identifier of a foundry.");
-
-#[cfg(feature = "serde")]
-string_serde_impl!(FoundryId);
+crate::impl_id!(
+    /// Unique identifier of the [`FoundryOutput`](crate::types::block::output::FoundryOutput),
+    /// which is the BLAKE2b-256 hash of the [`OutputId`](crate::types::block::output::OutputId) that created it.
+    pub FoundryId {
+        pub const LENGTH: usize = 38;
+    }
+);
 
 impl From<TokenId> for FoundryId {
     fn from(token_id: TokenId) -> Self {
@@ -347,7 +351,7 @@ pub struct FoundryOutput {
 
 impl FoundryOutput {
     /// The [`Output`](crate::types::block::output::Output) kind of a [`FoundryOutput`].
-    pub const KIND: u8 = 2;
+    pub const KIND: u8 = 3;
     /// The set of allowed [`UnlockCondition`]s for a [`FoundryOutput`].
     pub const ALLOWED_UNLOCK_CONDITIONS: UnlockConditionFlags = UnlockConditionFlags::IMMUTABLE_ACCOUNT_ADDRESS;
     /// The set of allowed [`Feature`]s for a [`FoundryOutput`].
@@ -445,18 +449,18 @@ impl FoundryOutput {
         &self,
         _output_id: &OutputId,
         unlock: &Unlock,
-        inputs: &[(&OutputId, &Output)],
-        context: &mut ValidationContext<'_>,
+        context: &mut SemanticValidationContext<'_>,
     ) -> Result<(), TransactionFailureReason> {
-        Address::from(*self.account_address()).unlock(unlock, inputs, context)
+        Address::from(*self.account_address()).unlock(unlock, context)
     }
 
-    // Transition, just without full ValidationContext
+    // Transition, just without full SemanticValidationContext
     pub(crate) fn transition_inner(
         current_state: &Self,
         next_state: &Self,
         input_native_tokens: &BTreeMap<TokenId, U256>,
         output_native_tokens: &BTreeMap<TokenId, U256>,
+        capabilities: &TransactionCapabilities,
     ) -> Result<(), StateTransitionError> {
         if current_state.account_address() != next_state.account_address()
             || current_state.serial_number != next_state.serial_number
@@ -524,6 +528,12 @@ impl FoundryOutput {
                 if melted_diff > token_diff {
                     return Err(StateTransitionError::InconsistentNativeTokensMeltBurn);
                 }
+
+                let burned_diff = token_diff - melted_diff;
+
+                if !burned_diff.is_zero() && !capabilities.has_capability(TransactionCapabilityFlag::BurnNativeTokens) {
+                    return Err(TransactionFailureReason::TransactionCapabilityManaBurningNotAllowed)?;
+                }
             }
         }
 
@@ -532,7 +542,7 @@ impl FoundryOutput {
 }
 
 impl StateTransitionVerifier for FoundryOutput {
-    fn creation(next_state: &Self, context: &ValidationContext<'_>) -> Result<(), StateTransitionError> {
+    fn creation(next_state: &Self, context: &SemanticValidationContext<'_>) -> Result<(), StateTransitionError> {
         let account_chain_id = ChainId::from(*next_state.account_address().account_id());
 
         if let (Some(Output::Account(input_account)), Some(Output::Account(output_account))) = (
@@ -567,17 +577,25 @@ impl StateTransitionVerifier for FoundryOutput {
     fn transition(
         current_state: &Self,
         next_state: &Self,
-        context: &ValidationContext<'_>,
+        context: &SemanticValidationContext<'_>,
     ) -> Result<(), StateTransitionError> {
         Self::transition_inner(
             current_state,
             next_state,
             &context.input_native_tokens,
             &context.output_native_tokens,
+            context.transaction.capabilities(),
         )
     }
 
-    fn destruction(current_state: &Self, context: &ValidationContext<'_>) -> Result<(), StateTransitionError> {
+    fn destruction(current_state: &Self, context: &SemanticValidationContext<'_>) -> Result<(), StateTransitionError> {
+        if !context
+            .transaction
+            .has_capability(TransactionCapabilityFlag::DestroyFoundryOutputs)
+        {
+            return Err(TransactionFailureReason::TransactionCapabilityFoundryDestructionNotAllowed)?;
+        }
+
         let token_id = current_state.token_id();
         let input_tokens = context.input_native_tokens.get(&token_id).copied().unwrap_or_default();
         let TokenScheme::Simple(ref current_token_scheme) = current_state.token_scheme;
@@ -599,16 +617,20 @@ impl StateTransitionVerifier for FoundryOutput {
 }
 
 impl WorkScore for FoundryOutput {
-    fn work_score(&self, work_score_params: WorkScoreStructure) -> u32 {
+    fn work_score(&self, work_score_params: WorkScoreParameters) -> u32 {
         let native_tokens_score = self.native_tokens().work_score(work_score_params);
         let features_score = self.features().work_score(work_score_params);
         let immutable_features_score = self.immutable_features().work_score(work_score_params);
         let token_scheme_score = self
             .token_scheme()
             .is_simple()
-            .then_some(work_score_params.native_token)
+            .then_some(work_score_params.native_token())
             .unwrap_or(0);
-        work_score_params.output + native_tokens_score + features_score + immutable_features_score + token_scheme_score
+        work_score_params.output()
+            + native_tokens_score
+            + features_score
+            + immutable_features_score
+            + token_scheme_score
     }
 }
 
@@ -802,6 +824,7 @@ pub(crate) mod dto {
 
 #[cfg(test)]
 mod tests {
+    use pretty_assertions::assert_eq;
 
     use super::*;
     use crate::types::{

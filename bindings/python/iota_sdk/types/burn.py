@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from __future__ import annotations  # Allow reference to Burn in Burn class
-from typing import List, Optional, Dict, Any
+from typing import List, Optional
 from dataclasses import dataclass
 from iota_sdk.types.native_token import NativeToken
 from iota_sdk.types.common import HexStr, json
@@ -57,10 +57,3 @@ class Burn:
         else:
             self.native_tokens.append(native_token)
         return self
-
-    @staticmethod
-    def _to_dict_custom(config) -> Dict[str, Any]:
-        if "nativeTokens" in config:
-            config["nativeTokens"] = {nativeToken.to_dict()["id"]: nativeToken.to_dict()[
-                "amount"] for nativeToken in config["nativeTokens"]}
-        return config

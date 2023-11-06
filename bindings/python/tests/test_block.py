@@ -2,8 +2,8 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from typing import get_args
-from iota_sdk import BasicBlock, BlockType, BlockWrapper, Payload, PayloadType
 import pytest
+from iota_sdk import BasicBlock, BlockType, SignedBlock, Payload, PayloadType
 
 
 def test_basic_block_with_tagged_data_payload():
@@ -16,16 +16,21 @@ def test_basic_block_with_tagged_data_payload():
         "shallowLikeParents": [],
         "maxBurnedMana": "180500",
         "payload": {
-            "type": 5,
+            "type": 0,
             "tag": "0x484f524e4554205370616d6d6572",
             "data": "0x57652061726520616c6c206d616465206f662073746172647573742e0a436f756e743a20353436333730330a54696d657374616d703a20323032332d30372d31395430373a32323a32385a0a54697073656c656374696f6e3a20343732c2b573"}}
     block = BasicBlock.from_dict(block_dict)
     assert block.to_dict() == block_dict
     assert isinstance(block.payload, get_args(Payload))
     assert block.payload.type == PayloadType.TaggedData
+    assert block.max_burned_mana == 180500
+
+    block_to_dict = block.to_dict()
+    # Make sure encoding is done correctly
+    assert block_to_dict == block_dict
 
 
-def test_block_wrapper_with_tagged_data_payload():
+def test_signed_block_with_tagged_data_payload():
     block_dict = {
         "protocolVersion": 3,
         "networkId": "10549460113735494767",
@@ -47,7 +52,7 @@ def test_block_wrapper_with_tagged_data_payload():
             ],
             "maxBurnedMana": "180500",
             "payload": {
-                "type": 5,
+                "type": 0,
                 "tag": "0x68656c6c6f20776f726c64",
                 "data": "0x01020304"
             }
@@ -58,14 +63,14 @@ def test_block_wrapper_with_tagged_data_payload():
             "signature": "0x7c274e5e771d5d60202d334f06773d3672484b1e4e6f03231b4e69305329267a4834374b0f2e0d5c6c2f7779620f4f534c773b1679400c52303d1f23121a4049"
         }
     }
-    block_wrapper = BlockWrapper.from_dict(block_dict)
-    assert block_wrapper.to_dict() == block_dict
-    assert isinstance(block_wrapper.block, BasicBlock)
-    assert block_wrapper.block.type == BlockType.Basic
-    assert isinstance(block_wrapper.block.payload, get_args(Payload))
-    assert block_wrapper.block.payload.type == PayloadType.TaggedData
-    # TODO: determine the actual hash of the block wrapper
-    # assert block_wrapper.id() == "0x7ce5ad074d4162e57f83cfa01cd2303ef5356567027ce0bcee0c9f57bc11656e"
+    signed_block = SignedBlock.from_dict(block_dict)
+    assert signed_block.to_dict() == block_dict
+    assert isinstance(signed_block.block, BasicBlock)
+    assert signed_block.block.type == BlockType.Basic
+    assert isinstance(signed_block.block.payload, get_args(Payload))
+    assert signed_block.block.payload.type == PayloadType.TaggedData
+    # TODO: determine the actual hash of the block
+    # assert signed_block.id() == "0x7ce5ad074d4162e57f83cfa01cd2303ef5356567027ce0bcee0c9f57bc11656e"
 
 
 @pytest.mark.skip(reason="https://github.com/iotaledger/iota-sdk/issues/1387")
@@ -79,23 +84,22 @@ def test_basic_block_with_tx_payload():
         "weakParents": [],
         "shallowLikeParents": [],
         "maxBurnedMana": "180500",
-        "payload": {"type": 6,
-                    "essence": {"type": 1,
-                                "networkId": "1856588631910923207",
-                                "inputs": [{"type": 0,
-                                            "transactionId": "0xc6765035e75e319e9cd55ab16e7619f6cd658e7f421c71d9fe276c77fdf3f5b3",
-                                            "transactionOutputIndex": 1}],
-                                "inputsCommitment": "0x2468f946993ac949c890d7f895797c6b86075dc1e1556f04f3772903eaf51932",
-                                "outputs": [{"type": 3,
-                                             "amount": "1000000",
-                                                       "unlockConditions": [{"type": 0,
-                                                                             "address": {"type": 0,
-                                                                                         "pubKeyHash": "0xa119005b26d46fc74cf9188b3cef8d01623e68146741ee698cabefd425dc01be"}}]},
-                                            {"type": 3,
-                                             "amount": "995000000",
-                                                       "unlockConditions": [{"type": 0,
-                                                                             "address": {"type": 0,
-                                                                                         "pubKeyHash": "0xa119005b26d46fc74cf9188b3cef8d01623e68146741ee698cabefd425dc01be"}}]}]},
+        "payload": {"type": 1,
+                    "transaction": {
+                        "networkId": "1856588631910923207",
+                        "inputs": [{"type": 0,
+                                    "transactionId": "0xc6765035e75e319e9cd55ab16e7619f6cd658e7f421c71d9fe276c77fdf3f5b3",
+                                    "transactionOutputIndex": 1}],
+                        "outputs": [{"type": 3,
+                                     "amount": "1000000",
+                                     "unlockConditions": [{"type": 0,
+                                                           "address": {"type": 0,
+                                                                       "pubKeyHash": "0xa119005b26d46fc74cf9188b3cef8d01623e68146741ee698cabefd425dc01be"}}]},
+                                    {"type": 3,
+                                     "amount": "995000000",
+                                     "unlockConditions": [{"type": 0,
+                                                           "address": {"type": 0,
+                                                                       "pubKeyHash": "0xa119005b26d46fc74cf9188b3cef8d01623e68146741ee698cabefd425dc01be"}}]}]},
                     "unlocks": [{"type": 0,
                                  "signature": {"type": 0,
                                                "publicKey": "0xa7af600976f440ec97d7bddbf17eacf0bfbf710e8cfb4ae3eae475d4ae8e1b16",
@@ -103,7 +107,7 @@ def test_basic_block_with_tx_payload():
     block = BasicBlock.from_dict(block_dict)
     assert block.to_dict() == block_dict
     assert isinstance(block.payload, get_args(Payload))
-    assert block.payload.type == PayloadType.Transaction
+    assert block.payload.type == PayloadType.SignedTransaction
 
 
 @pytest.mark.skip(reason="https://github.com/iotaledger/iota-sdk/issues/1387")
@@ -112,15 +116,15 @@ def test_basic_block_with_tx_payload_all_output_types():
         "type": 0,
         "strongParents": [
             "0x053296e7434e8a4d602f8db30a5aaf16c01140212fe79d8132137cda1c38a60a", "0x559ec1d9a31c55bd27588ada2ade70fb5b13764ddd600e29c3b018761ba30e15", "0xe78e8cdbbeda89e3408eed51b77e0db5ba035f5f3bf79a8365435bba40697693", "0xee9d6e45dbc080694e6c827fecbc31ad9f654cf57404bc98f4cbca033f8e3139"], "weakParents": [], "shallowLikeParents": [], "payload": {
-            "type": 6, "essence": {
-                "type": 1, "networkId": "1856588631910923207", "inputs": [
+            "type": 1, "transaction": {
+                "networkId": "1856588631910923207", "inputs": [
                     {
                         "type": 0, "transactionId": "0xa49f5a764c3fe22f702b5b238a75a648faae1863f61c14fac51ba58d26acb823", "transactionOutputIndex": 9}, {
                             "type": 0, "transactionId": "0x6f23b39ebe433f8b522d2e4360186cd3e6b21baf46c0a591c801161e505330b4", "transactionOutputIndex": 0}, {
                                 "type": 0, "transactionId": "0x6f23b39ebe433f8b522d2e4360186cd3e6b21baf46c0a591c801161e505330b4", "transactionOutputIndex": 1}, {
                                     "type": 0, "transactionId": "0x6f23b39ebe433f8b522d2e4360186cd3e6b21baf46c0a591c801161e505330b4", "transactionOutputIndex": 2}], "inputsCommitment": "0xb6913235037feeeb74ea54ca0354bd7daee95e5a4fc65b67c960e5f0df6a339f", "outputs": [
                                         {
-                                            "type": 4, "amount": "1000000", "accountId": "0xf90a577f1bae4587fdb00752a847b3a2a9d623743993e9e7abdd0440a004caee", "stateIndex": 2, "foundryCounter": 1, "unlockConditions": [
+                                            "type": 4, "amount": "1000000", "accountId": "0xf90a577f1bae4587fdb00752a847b3a2a9d623743993e9e7abdd0440a004caee", "foundryCounter": 1, "unlockConditions": [
                                                 {
                                                     "type": 4, "address": {
                                                         "type": 0, "pubKeyHash": "0x7ffec9e1233204d9c6dce6812b1539ee96af691ca2e4d9065daa85907d33e5d3"}}, {
@@ -169,12 +173,12 @@ def test_basic_block_with_tx_payload_all_output_types():
                                                                                                                                                                                                                                     "type": 0, "address": {
                                                                                                                                                                                                                                         "type": 0, "pubKeyHash": "0x7ffec9e1233204d9c6dce6812b1539ee96af691ca2e4d9065daa85907d33e5d3"}}, {
                                                                                                                                                                                                                                             "type": 3, "returnAddress": {
-                                                                                                                                                                                                                                                "type": 0, "pubKeyHash": "0x7ffec9e1233204d9c6dce6812b1539ee96af691ca2e4d9065daa85907d33e5d3"}, "unixTime": 1}]}, {
+                                                                                                                                                                                                                                                "type": 0, "pubKeyHash": "0x7ffec9e1233204d9c6dce6812b1539ee96af691ca2e4d9065daa85907d33e5d3"}, "slotIndex": 1}]}, {
                                                                                                                                                                                                                                                     "type": 3, "amount": "1000000", "unlockConditions": [
                                                                                                                                                                                                                                                         {
                                                                                                                                                                                                                                                             "type": 0, "address": {
                                                                                                                                                                                                                                                                 "type": 0, "pubKeyHash": "0x7ffec9e1233204d9c6dce6812b1539ee96af691ca2e4d9065daa85907d33e5d3"}}, {
-                                                                                                                                                                                                                                                                    "type": 2, "unixTime": 1}]}, {
+                                                                                                                                                                                                                                                                    "type": 2, "slotIndex": 1}]}, {
                                                                                                                                                                                                                                                                         "type": 3, "amount": "5578452198", "nativeTokens": [
                                                                                                                                                                                                                                                                             {
                                                                                                                                                                                                                                                                                 "id": "0x080021bcfa2252a500348f73c939722d65c0354eab33b753ab09bc80a7f592c9a40100000000", "amount": "0x41"}, {
@@ -244,7 +248,7 @@ def test_basic_block_with_tx_payload_all_output_types():
     block = BasicBlock.from_dict(block_dict)
     assert block.to_dict() == block_dict
     assert isinstance(block.payload, get_args(Payload))
-    assert block.payload.type == PayloadType.Transaction
+    assert block.payload.type == PayloadType.SignedTransaction
 
 
 @pytest.mark.skip(reason="https://github.com/iotaledger/iota-sdk/issues/1387")
@@ -258,29 +262,29 @@ def test_basic_block_with_tx_payload_with_tagged_data_payload():
         "weakParents": [],
         "shallowLikeParents": [],
         "maxBurnedMana": "180500",
-        "payload": {"type": 6,
-                    "essence": {"type": 1,
-                                "networkId": "1856588631910923207",
-                                "inputs": [{"type": 0,
-                                            "transactionId": "0xeccfbdb73c0a4c9c0301b53a17e5aa301fbf0b079db9e88ff0e32e9e64214b28",
-                                            "transactionOutputIndex": 5},
-                                           {"type": 0,
-                                            "transactionId": "0xf8052938858750c9c69b92b615a685fa2bb5833912b264142fc724e9510b0d0e",
-                                            "transactionOutputIndex": 0}],
-                                "inputsCommitment": "0x9702f2a625db14db2f67289828a9fdbe342477393572b9165b19964b2449061a",
-                                "outputs": [{"type": 3,
-                                             "amount": "1000000",
-                                                       "unlockConditions": [{"type": 0,
-                                                                             "address": {"type": 0,
-                                                                                         "pubKeyHash": "0x60200bad8137a704216e84f8f9acfe65b972d9f4155becb4815282b03cef99fe"}}]},
-                                            {"type": 3,
-                                             "amount": "50600",
-                                                       "unlockConditions": [{"type": 0,
-                                                                             "address": {"type": 0,
-                                                                                         "pubKeyHash": "0x74e8b1f10396eb5e8aeb16d666416802722436a88b5dd1a88e59c170b724c9cc"}}]}],
-                                "payload": {"type": 5,
-                                            "tag": "0x746167",
-                                            "data": "0x64617461"}},
+        "payload": {"type": 1,
+                    "transaction": {
+                        "networkId": "1856588631910923207",
+                        "inputs": [{"type": 0,
+                                    "transactionId": "0xeccfbdb73c0a4c9c0301b53a17e5aa301fbf0b079db9e88ff0e32e9e64214b28",
+                                    "transactionOutputIndex": 5},
+                                   {"type": 0,
+                                    "transactionId": "0xf8052938858750c9c69b92b615a685fa2bb5833912b264142fc724e9510b0d0e",
+                                    "transactionOutputIndex": 0}],
+                        "inputsCommitment": "0x9702f2a625db14db2f67289828a9fdbe342477393572b9165b19964b2449061a",
+                        "outputs": [{"type": 3,
+                                     "amount": "1000000",
+                                     "unlockConditions": [{"type": 0,
+                                                           "address": {"type": 0,
+                                                                       "pubKeyHash": "0x60200bad8137a704216e84f8f9acfe65b972d9f4155becb4815282b03cef99fe"}}]},
+                                    {"type": 3,
+                                     "amount": "50600",
+                                     "unlockConditions": [{"type": 0,
+                                                           "address": {"type": 0,
+                                                                       "pubKeyHash": "0x74e8b1f10396eb5e8aeb16d666416802722436a88b5dd1a88e59c170b724c9cc"}}]}],
+                        "payload": {"type": 5,
+                                    "tag": "0x746167",
+                                    "data": "0x64617461"}},
                     "unlocks": [{"type": 0,
                                  "signature": {"type": 0,
                                                "publicKey": "0x67b7fc3f78763c9394fc4fcdb52cf3a973b6e064bdc3defb40a6cb2c880e6f5c",
@@ -290,4 +294,4 @@ def test_basic_block_with_tx_payload_with_tagged_data_payload():
     block = BasicBlock.from_dict(block_dict)
     assert block.to_dict() == block_dict
     assert isinstance(block.payload, get_args(Payload))
-    assert block.payload.type == PayloadType.Transaction
+    assert block.payload.type == PayloadType.SignedTransaction

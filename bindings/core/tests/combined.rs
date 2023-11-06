@@ -3,15 +3,30 @@
 
 use std::collections::BTreeMap;
 
+use crypto::keys::bip44::Bip44;
 use iota_sdk::{
-    client::{constants::SHIMMER_COIN_TYPE, secret::SecretManagerDto, ClientBuilder},
-    wallet::account::types::AccountIdentifier,
+    client::{
+        constants::{IOTA_COIN_TYPE, SHIMMER_COIN_TYPE},
+        secret::{mnemonic::MnemonicSecretManager, SecretManagerDto},
+        ClientBuilder,
+    },
+    types::{
+        block::{
+            payload::{dto::PayloadDto, Payload, TaggedDataPayload},
+            BlockDto, IssuerId, SignedBlock,
+        },
+        TryFromDto,
+    },
 };
-use iota_sdk_bindings_core::{AccountMethod, CallMethod, Response, Result, WalletMethod, WalletOptions};
+use iota_sdk_bindings_core::{
+    call_client_method, call_secret_manager_method, CallMethod, ClientMethod, Response, Result, SecretManagerMethod,
+    WalletMethod, WalletOptions,
+};
+use pretty_assertions::assert_eq;
 
 #[tokio::test]
-async fn create_account() -> Result<()> {
-    let storage_path = "test-storage/create_account";
+async fn create_wallet() -> Result<()> {
+    let storage_path = "test-storage/create_wallet";
     std::fs::remove_dir_all(storage_path).ok();
 
     let secret_manager = r#"{"Mnemonic":"about solution utility exist rail budget vacuum major survey clerk pave ankle wealth gym gossip still medal expect strong rely amazing inspire lazy lunar"}"#;
@@ -28,147 +43,18 @@ async fn create_account() -> Result<()> {
     let wallet = WalletOptions::default()
         .with_storage_path(storage_path.to_string())
         .with_client_options(ClientBuilder::new().from_json(client_options).unwrap())
-        .with_coin_type(SHIMMER_COIN_TYPE)
+        .with_bip_path(Bip44::new(SHIMMER_COIN_TYPE))
         .with_secret_manager(serde_json::from_str::<SecretManagerDto>(secret_manager).unwrap())
         .build()
         .await?;
 
-    // create an account
     let response = wallet
-        .call_method(WalletMethod::CreateAccount {
-            alias: None,
-            bech32_hrp: None,
-            addresses: None,
-        })
-        .await;
-
-    match response {
-        Response::Account(account) => {
-            assert_eq!(account.index, 0);
-            let id = account.index;
-            println!("Created account index: {id}")
-        }
-        _ => panic!("unexpected response {response:?}"),
-    }
-
-    let response = wallet
-        .call_method(WalletMethod::CallAccountMethod {
-            account_id: AccountIdentifier::Index(0),
-            method: AccountMethod::UnspentOutputs { filter_options: None },
-        })
+        .call_method(WalletMethod::UnspentOutputs { filter_options: None })
         .await;
 
     match response {
         Response::OutputsData(_) => {}
         _ => panic!("unexpected response {response:?}"),
-    }
-
-    std::fs::remove_dir_all(storage_path).ok();
-    Ok(())
-}
-
-#[tokio::test]
-async fn verify_accounts() -> Result<()> {
-    let storage_path = "test-storage/verify_accounts";
-    std::fs::remove_dir_all(storage_path).ok();
-
-    let secret_manager = r#"{"Mnemonic":"about solution utility exist rail budget vacuum major survey clerk pave ankle wealth gym gossip still medal expect strong rely amazing inspire lazy lunar"}"#;
-    let client_options = r#"{
-            "nodes":[
-               {
-                  "url":"http://localhost:14265",
-                  "auth":null,
-                  "disabled":false
-               }
-            ]
-         }"#;
-
-    let wallet = WalletOptions::default()
-        .with_storage_path(storage_path.to_string())
-        .with_client_options(ClientBuilder::new().from_json(client_options).unwrap())
-        .with_coin_type(SHIMMER_COIN_TYPE)
-        .with_secret_manager(serde_json::from_str::<SecretManagerDto>(secret_manager).unwrap())
-        .build()
-        .await?;
-
-    let mut account_details = BTreeMap::new();
-    let mut handle_response = |response| match response {
-        Response::Account(account) => {
-            account_details.insert(account.index, account);
-        }
-        _ => panic!("unexpected response {response:?}"),
-    };
-
-    // Create a few accounts
-    for alias in ["Alice", "Bob", "Roger", "Denise", "Farquad", "Pikachu"] {
-        handle_response(
-            wallet
-                .call_method(WalletMethod::CreateAccount {
-                    alias: Some(alias.to_owned()),
-                    bech32_hrp: None,
-                    addresses: None,
-                })
-                .await,
-        );
-    }
-
-    // Remove latest account
-    match wallet.call_method(WalletMethod::RemoveLatestAccount).await {
-        Response::Ok => {}
-        response => panic!("unexpected response {response:?}"),
-    }
-
-    account_details.pop_last();
-
-    // Get individual account details
-    for account in account_details.values() {
-        // By Index
-        match wallet
-            .call_method(WalletMethod::GetAccount {
-                account_id: account.index.into(),
-            })
-            .await
-        {
-            Response::Account(details) => {
-                assert_eq!(&account_details[&details.index], &details);
-            }
-            response => panic!("unexpected response {response:?}"),
-        }
-
-        // By Name
-        match wallet
-            .call_method(WalletMethod::GetAccount {
-                account_id: account.alias.as_str().into(),
-            })
-            .await
-        {
-            Response::Account(details) => {
-                assert_eq!(&account_details[&details.index], &details);
-            }
-            response => panic!("unexpected response {response:?}"),
-        }
-    }
-
-    // Get account details
-    match wallet.call_method(WalletMethod::GetAccounts).await {
-        Response::Accounts(details) => {
-            assert_eq!(account_details.len(), details.len());
-            for detail in details {
-                assert_eq!(&account_details[&detail.index], &detail);
-            }
-        }
-        response => panic!("unexpected response {response:?}"),
-    }
-
-    // Get account indexes
-    match wallet.call_method(WalletMethod::GetAccountIndexes).await {
-        Response::AccountIndexes(indexes) => {
-            assert_eq!(account_details.len(), indexes.len());
-            for index in indexes {
-                assert!(account_details.contains_key(&index));
-            }
-        }
-        response => panic!("unexpected response {response:?}"),
     }
 
     std::fs::remove_dir_all(storage_path).ok();
@@ -194,32 +80,14 @@ async fn client_from_wallet() -> Result<()> {
     let wallet = WalletOptions::default()
         .with_storage_path(storage_path.to_string())
         .with_client_options(ClientBuilder::new().from_json(client_options).unwrap())
-        .with_coin_type(SHIMMER_COIN_TYPE)
+        .with_bip_path(Bip44::new(SHIMMER_COIN_TYPE))
         .with_secret_manager(serde_json::from_str::<SecretManagerDto>(secret_manager).unwrap())
         .build()
         .await?;
 
-    // create an account
-    let response = wallet
-        .call_method(WalletMethod::CreateAccount {
-            alias: None,
-            bech32_hrp: None,
-            addresses: None,
-        })
-        .await;
-
-    match response {
-        Response::Account(account) => {
-            assert_eq!(account.index, 0);
-            let id = account.index;
-            println!("Created account index: {id}")
-        }
-        _ => panic!("unexpected response {response:?}"),
-    }
-
     // TODO reenable
     // // Send ClientMethod via the client from the wallet
-    // let response = wallet.get_accounts().await?[0]
+    // let response = wallet
     //     .client()
     //     .call_method(ClientMethod::GetHealth)
     //     .await;
@@ -232,3 +100,89 @@ async fn client_from_wallet() -> Result<()> {
     std::fs::remove_dir_all(storage_path).ok();
     Ok(())
 }
+
+// TODO reenable
+// #[tokio::test]
+// async fn build_and_sign_block() -> Result<()> {
+//     let storage_path = "test-storage/build_and_sign_block";
+//     std::fs::remove_dir_all(storage_path).ok();
+
+//     let secret_manager = MnemonicSecretManager::try_from_mnemonic(
+//         "about solution utility exist rail budget vacuum major survey clerk pave ankle wealth gym gossip still medal
+// expect strong rely amazing inspire lazy lunar",     ).unwrap();
+//     let client = ClientBuilder::default()
+//         .with_nodes(&["http://localhost:14265"])
+//         .unwrap()
+//         .finish()
+//         .await
+//         .unwrap();
+
+//     let payload = PayloadDto::from(&Payload::from(
+//         TaggedDataPayload::new("Hello".as_bytes(), "Tangle".as_bytes()).unwrap(),
+//     ));
+
+//     // Get an unsigned block
+//     let response = call_client_method(
+//         &client,
+//         ClientMethod::BuildBasicBlock {
+//             issuer_id: IssuerId::null(),
+//             payload: Some(payload.clone()),
+//         },
+//     )
+//     .await;
+
+//     let unsigned_block = match response {
+//         Response::UnsignedBlock(unsigned_block) => {
+//             match &unsigned_block.block {
+//                 BlockDto::Basic(b) => assert_eq!(b.payload.as_ref(), Some(&payload)),
+//                 BlockDto::Validation(v) => panic!("unexpected block {v:?}"),
+//             }
+//             unsigned_block
+//         }
+//         _ => panic!("unexpected response {response:?}"),
+//     };
+
+//     // Sign the block using the secret manager
+//     let response = call_secret_manager_method(
+//         &secret_manager,
+//         SecretManagerMethod::SignBlock {
+//             unsigned_block,
+//             chain: Bip44::new(IOTA_COIN_TYPE),
+//         },
+//     )
+//     .await;
+
+//     let signed_block = match response {
+//         Response::SignedBlock(block) => {
+//             match &block.block {
+//                 BlockDto::Basic(b) => assert_eq!(b.payload.as_ref(), Some(&payload)),
+//                 BlockDto::Validation(v) => panic!("unexpected block {v:?}"),
+//             }
+//             block
+//         }
+//         _ => panic!("unexpected response {response:?}"),
+//     };
+
+//     // Get the block ID
+//     let response = call_client_method(
+//         &client,
+//         ClientMethod::BlockId {
+//             signed_block: signed_block.clone(),
+//         },
+//     )
+//     .await;
+
+//     match response {
+//         Response::BlockId(block_id) => {
+//             assert_eq!(
+//                 block_id,
+//                 SignedBlock::try_from_dto(signed_block)
+//                     .unwrap()
+//                     .id(&client.get_protocol_parameters().await.unwrap())
+//             );
+//         }
+//         _ => panic!("unexpected response {response:?}"),
+//     };
+
+//     Ok(())
+// }

@@ -6,7 +6,7 @@ from enum import IntEnum
 from typing import Any, Dict, List, TypeAlias, Union
 from dataclasses import dataclass, field
 from iota_sdk.types.common import HexStr, json
-from iota_sdk.types.essence import TransactionEssence
+from iota_sdk.types.transaction import Transaction
 from iota_sdk.types.unlock import SignatureUnlock, ReferenceUnlock
 
 
@@ -14,11 +14,13 @@ class PayloadType(IntEnum):
     """Block payload types.
 
     Attributes:
-        TaggedData (5): A tagged data payload.
-        Transaction (6): A transaction payload.
+        TaggedData (0): A tagged data payload.
+        SignedTransaction (1): A signed transaction payload.
+        CandidacyAnnouncement (2): A candidacy announcement payload.
     """
-    TaggedData = 5
-    Transaction = 6
+    TaggedData = 0
+    SignedTransaction = 1
+    CandidacyAnnouncement = 2
 
 
 @json
@@ -40,22 +42,34 @@ class TaggedDataPayload:
 
 @json
 @dataclass
-class TransactionPayload:
-    """A transaction payload.
+class SignedTransactionPayload:
+    """A signed transaction payload.
 
     Attributes:
-        essence: The transaction essence.
+        transaction: The transaction.
         unlocks: The unlocks of the transaction.
     """
-    essence: TransactionEssence
+    transaction: Transaction
     unlocks: List[Union[SignatureUnlock, ReferenceUnlock]]
     type: int = field(
         default_factory=lambda: int(
-            PayloadType.Transaction),
+            PayloadType.SignedTransaction),
         init=False)
 
 
-Payload: TypeAlias = Union[TaggedDataPayload, TransactionPayload]
+@json
+@dataclass
+class CandidacyAnnouncementPayload:
+    """A payload which is used to indicate candidacy for committee selection for the next epoch.
+    """
+    type: int = field(
+        default_factory=lambda: int(
+            PayloadType.CandidacyAnnouncement),
+        init=False)
+
+
+Payload: TypeAlias = Union[TaggedDataPayload,
+                           SignedTransactionPayload, CandidacyAnnouncementPayload]
 
 
 def deserialize_payload(d: Dict[str, Any]) -> Payload:
@@ -68,15 +82,17 @@ def deserialize_payload(d: Dict[str, Any]) -> Payload:
     payload_type = d['type']
     if payload_type == PayloadType.TaggedData:
         return TaggedDataPayload.from_dict(d)
-    if payload_type == PayloadType.Transaction:
-        return TransactionPayload.from_dict(d)
+    if payload_type == PayloadType.SignedTransaction:
+        return SignedTransactionPayload.from_dict(d)
+    if payload_type == PayloadType.CandidacyAnnouncement:
+        return CandidacyAnnouncementPayload.from_dict(d)
     raise Exception(f'invalid payload type: {payload_type}')
 
 
 def deserialize_payloads(
         dicts: List[Dict[str, Any]]) -> List[Payload]:
     """
-    Takes a list of dictionaries as input and returns a list with specific instances of a classes based on the value of the 'type' key in the dictionary.
+    Takes a list of dictionaries as input and returns a list with specific instances of classes based on the value of the 'type' key in the dictionary.
 
     Arguments:
     * `dicts`: A list of dictionaries that are expected to have a key called 'type' which specifies the type of the returned value.

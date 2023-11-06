@@ -10,6 +10,7 @@ use iota_sdk::types::block::{
     BlockId, Error,
 };
 use packable::{error::UnpackError, prefix::VecPrefix, PackableExt};
+use pretty_assertions::assert_eq;
 
 #[test]
 fn len() {
@@ -91,8 +92,8 @@ fn new_not_unique() {
 fn packed_len() {
     let parents = basic::StrongParents::from_vec(rand_block_ids(5)).unwrap();
 
-    assert_eq!(parents.packed_len(), 1 + 5 * 40);
-    assert_eq!(parents.pack_to_vec().len(), 1 + 5 * 40);
+    assert_eq!(parents.packed_len(), 1 + 5 * 36);
+    assert_eq!(parents.pack_to_vec().len(), 1 + 5 * 36);
 }
 
 #[test]
