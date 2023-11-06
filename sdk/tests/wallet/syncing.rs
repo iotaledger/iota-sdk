@@ -25,7 +25,7 @@
 //     assert_eq!(default_sync, wallet.default_sync_options().await);
 
 //     let custom_options = SyncOptions {
-//         address_start_index: 10,
+//         sync_only_most_basic_outputs: true,
 //         ..Default::default()
 //     };
 //     wallet.set_default_sync_options(custom_options.clone()).await?;
