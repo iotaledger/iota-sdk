@@ -91,13 +91,14 @@ impl MultiAddress {
 
     /// Creates a new [`MultiAddress`].
     #[inline(always)]
-    pub fn new(addresses: Vec<WeightedAddress>, threshold: u16) -> Result<Self, Error> {
+    pub fn new(addresses: impl IntoIterator<Item = WeightedAddress>, threshold: u16) -> Result<Self, Error> {
+        let addresses = addresses.into_iter().collect::<Box<[_]>>();
+
         verify_addresses::<true>(&addresses, &())?;
         verify_threshold::<true>(&threshold, &())?;
 
-        let addresses =
-            BoxedSlicePrefix::<WeightedAddress, WeightedAddressCount>::try_from(addresses.into_boxed_slice())
-                .map_err(Error::InvalidWeightedAddressCount)?;
+        let addresses = BoxedSlicePrefix::<WeightedAddress, WeightedAddressCount>::try_from(addresses)
+            .map_err(Error::InvalidWeightedAddressCount)?;
 
         verify_cumulative_weight::<true>(&addresses, &threshold, &())?;
 
