@@ -12,14 +12,14 @@ use crate::types::block::{address::Address, Error};
 pub(crate) type WeightedAddressCount =
     BoundedU8<{ *MultiAddress::ADDRESSES_COUNT.start() }, { *MultiAddress::ADDRESSES_COUNT.end() }>;
 
-// context_inputs: BoxedSlicePrefix<ContextInput, ContextInputCount>,
-
 /// An address with an assigned weight.
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, From, AsRef, Packable)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct WeightedAddress {
+    /// The unlocked address.
     #[packable(verify_with = verify_address)]
     address: Address,
+    /// The weight of the unlocked address.
     #[packable(verify_with = verify_weight)]
     weight: u8,
 }
@@ -66,7 +66,7 @@ fn verify_weight<const VERIFY: bool>(weight: &u8, _visitor: &()) -> Result<(), E
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Packable)]
 #[packable(unpack_error = Error)]
 pub struct MultiAddress {
-    // #[packable(verify_with = verify_context_inputs_packable)]
+    /// The weighted unlocked addresses.
     #[packable(unpack_error_with = |e| e.unwrap_item_err_or_else(|p| Error::InvalidWeightedAddressCount(p.into())))]
     addresses: BoxedSlicePrefix<WeightedAddress, WeightedAddressCount>,
     /// The threshold that needs to be reached by the unlocked addresses in order to unlock the multi address.
