@@ -18,6 +18,7 @@ pub(crate) type WeightedAddressCount =
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, From, AsRef, Packable)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct WeightedAddress {
+    #[packable(verify_with = verify_address)]
     address: Address,
     #[packable(verify_with = verify_weight)]
     weight: u8,
@@ -26,6 +27,7 @@ pub struct WeightedAddress {
 impl WeightedAddress {
     /// Creates a new [`WeightedAddress`].
     pub fn new(address: Address, weight: u8) -> Result<WeightedAddress, Error> {
+        verify_address::<true>(&address, &())?;
         verify_weight::<true>(&weight, &())?;
 
         Ok(Self { address, weight })
@@ -39,6 +41,14 @@ impl WeightedAddress {
     /// Returns the weight of the [`WeightedAddress`].
     pub fn weight(&self) -> u8 {
         self.weight
+    }
+}
+
+fn verify_address<const VERIFY: bool>(address: &Address, _visitor: &()) -> Result<(), Error> {
+    if VERIFY && !address.is_ed25519() && !address.is_account() && !address.is_nft() {
+        return Err(Error::InvalidAddressKind(address.kind()));
+    } else {
+        Ok(())
     }
 }
 
