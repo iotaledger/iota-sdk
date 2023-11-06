@@ -52,11 +52,14 @@ impl<Flag: CapabilityFlag> Capabilities<Flag> {
         if bytes.last().map(|b| *b == 0).unwrap_or_default() {
             return Err(Error::TrailingCapabilityBytes);
         }
+        // Check if the bytes are valid instances of the flag type.
         for (index, &byte) in bytes.iter().enumerate() {
+            // Get the max value of the flags at this index
             let mut b = 0;
             for flag in Flag::all().filter(|f| f.index() == index) {
                 b |= flag.as_byte();
             }
+            // Check whether the byte contains erroneous bits by using the max value as a mask
             if b | byte != b {
                 return Err(Error::InvalidCapabilityByte { index, byte });
             }
