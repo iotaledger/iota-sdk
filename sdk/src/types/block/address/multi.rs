@@ -70,6 +70,7 @@ pub struct MultiAddress {
     #[packable(unpack_error_with = |e| e.unwrap_item_err_or_else(|p| Error::InvalidWeightedAddressCount(p.into())))]
     addresses: BoxedSlicePrefix<WeightedAddress, WeightedAddressCount>,
     /// The threshold that needs to be reached by the unlocked addresses in order to unlock the multi address.
+    #[packable(verify_with = verify_threshold)]
     threshold: u16,
 }
 
@@ -82,6 +83,8 @@ impl MultiAddress {
     /// Creates a new [`MultiAddress`].
     #[inline(always)]
     pub fn new(addresses: Vec<WeightedAddress>, threshold: u16) -> Result<Self, Error> {
+        verify_threshold::<true>(&threshold, &())?;
+
         Ok(Self {
             addresses: BoxedSlicePrefix::<WeightedAddress, WeightedAddressCount>::try_from(
                 addresses.into_boxed_slice(),
@@ -102,6 +105,14 @@ impl MultiAddress {
     // pub fn into_account_id(self) -> AccountId {
     //     self.0
     // }
+}
+
+fn verify_threshold<const VERIFY: bool>(threshold: &u16, _visitor: &()) -> Result<(), Error> {
+    if VERIFY && *threshold == 0 {
+        return Err(Error::InvalidAddressWeightThreshold(*threshold));
+    } else {
+        Ok(())
+    }
 }
 
 // impl FromStr for MultiAddress {
