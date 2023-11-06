@@ -72,8 +72,8 @@ pub enum Error {
         required: u64,
     },
     InvalidAddressWeight(u8),
-    InvalidAddressWeightThreshold(u16),
-    InvalidCumulativeAddressWeight {
+    InvalidMultiAddressThreshold(u16),
+    InvalidMultiAddressCumulativeWeight {
         cumulative_weight: u16,
         threshold: u16,
     },
@@ -263,15 +263,14 @@ impl fmt::Display for Error {
             ),
             Self::InvalidContextInputCount(count) => write!(f, "invalid context input count: {count}"),
             Self::InvalidAddressWeight(w) => write!(f, "invalid address weight: {w}"),
-            Self::InvalidAddressWeightThreshold(t) => write!(f, "invalid address weight threshold: {t}"),
-            Self::InvalidAddressWeightThreshold(t) => write!(f, "invalid address weight threshold: {t}"),
-            Self::InvalidCumulativeAddressWeight {
+            Self::InvalidMultiAddressThreshold(t) => write!(f, "invalid multi address threshold: {t}"),
+            Self::InvalidMultiAddressCumulativeWeight {
                 cumulative_weight,
                 threshold,
             } => {
                 write!(
                     f,
-                    "invalid cumulative address weight: cumulative weight {cumulative_weight} < threshold {threshold}"
+                    "invalid multi address cumulative weight {cumulative_weight} < threshold {threshold}"
                 )
             }
             Self::InvalidWeightedAddressCount(count) => write!(f, "invalid weighted address count: {count}"),

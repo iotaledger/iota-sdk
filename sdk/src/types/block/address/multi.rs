@@ -155,7 +155,7 @@ fn verify_addresses<const VERIFY: bool>(addresses: &[WeightedAddress], _visitor:
 
 fn verify_threshold<const VERIFY: bool>(threshold: &u16, _visitor: &()) -> Result<(), Error> {
     if VERIFY && *threshold == 0 {
-        return Err(Error::InvalidAddressWeightThreshold(*threshold));
+        return Err(Error::InvalidMultiAddressThreshold(*threshold));
     } else {
         Ok(())
     }
@@ -170,7 +170,7 @@ fn verify_cumulative_weight<const VERIFY: bool>(
         let cumulative_weight = addresses.iter().map(|address| address.weight as u16).sum::<u16>();
 
         if cumulative_weight < *threshold {
-            return Err(Error::InvalidCumulativeAddressWeight {
+            return Err(Error::InvalidMultiAddressCumulativeWeight {
                 cumulative_weight,
                 threshold: *threshold,
             });
