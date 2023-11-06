@@ -118,6 +118,8 @@ pub enum WalletCommand {
     },
     /// Returns the implicit account creation address of the wallet if it is Ed25519 based.
     ImplicitAccountCreationAddress,
+    /// Lists the implicit accounts of the wallet.
+    ImplicitAccounts,
     /// Mint additional native tokens.
     MintNativeToken {
         /// Token ID to be minted, e.g. 0x087d205988b733d97fb145ae340e27a8b19554d1ceee64574d7e5ff66c45f69e7a0100000000.
@@ -562,10 +564,15 @@ pub async fn faucet_command(wallet: &Wallet, address: Option<Bech32Address>, url
 }
 
 // `implicit-account-creation-address` command
-pub async fn implicit_account_creation_address(wallet: &Wallet) -> Result<(), Error> {
+pub async fn implicit_account_creation_address_command(wallet: &Wallet) -> Result<(), Error> {
     println_log_info!("{}", wallet.implicit_account_creation_address().await?);
 
     Ok(())
+}
+
+// `implicit-accounts` command
+pub async fn implicit_accounts_command(wallet: &Wallet) -> Result<(), Error> {
+    print_outputs(wallet.implicit_accounts().await, "Implicit accounts:").await
 }
 
 // `melt-native-token` command
@@ -588,7 +595,7 @@ pub async fn melt_native_token_command(wallet: &Wallet, token_id: String, amount
 }
 
 // `mint-native-token` command
-pub async fn mint_native_token(wallet: &Wallet, token_id: String, amount: String) -> Result<(), Error> {
+pub async fn mint_native_token_command(wallet: &Wallet, token_id: String, amount: String) -> Result<(), Error> {
     let mint_transaction = wallet
         .mint_native_token(
             TokenId::from_str(&token_id)?,
@@ -1085,13 +1092,14 @@ pub async fn prompt_internal(
                         }
                         WalletCommand::Faucet { address, url } => faucet_command(wallet, address, url).await,
                         WalletCommand::ImplicitAccountCreationAddress => {
-                            implicit_account_creation_address(wallet).await
+                            implicit_account_creation_address_command(wallet).await
                         }
+                        WalletCommand::ImplicitAccounts => implicit_accounts_command(wallet).await,
                         WalletCommand::MeltNativeToken { token_id, amount } => {
                             melt_native_token_command(wallet, token_id, amount).await
                         }
                         WalletCommand::MintNativeToken { token_id, amount } => {
-                            mint_native_token(wallet, token_id, amount).await
+                            mint_native_token_command(wallet, token_id, amount).await
                         }
                         WalletCommand::MintNft {
                             address,
