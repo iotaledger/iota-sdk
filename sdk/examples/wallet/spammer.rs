@@ -70,12 +70,12 @@ async fn main() -> Result<()> {
     // We make sure that for all threads there are always inputs available to
     // fund the transaction, otherwise we create enough unspent outputs.
     let num_unspent_basic_outputs_with_send_amount = wallet
-        .unspent_outputs(FilterOptions {
+        .data()
+        .await
+        .filtered_unspent_outputs(FilterOptions {
             output_types: Some(vec![BasicOutput::KIND]),
             ..Default::default()
         })
-        .await
-        .iter()
         .filter(|data| data.output.amount() >= SEND_AMOUNT)
         .count();
 

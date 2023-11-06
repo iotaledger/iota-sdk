@@ -95,7 +95,6 @@ where
     {
         log::debug!("[TRANSACTION] prepare_send_nft");
 
-        let unspent_outputs = self.unspent_outputs(None).await;
         let token_supply = self.client().get_token_supply().await?;
 
         let mut outputs = Vec::new();
@@ -104,7 +103,7 @@ where
             self.client().bech32_hrp_matches(address.hrp()).await?;
 
             // Find nft output from the inputs
-            if let Some(nft_output_data) = unspent_outputs.iter().find(|o| {
+            if let Some(nft_output_data) = self.data().await.unspent_outputs().values().find(|o| {
                 if let Output::Nft(nft_output) = &o.output {
                     nft_id == nft_output.nft_id_non_null(&o.output_id)
                 } else {

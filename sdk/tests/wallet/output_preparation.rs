@@ -766,14 +766,22 @@ async fn prepare_output_only_single_nft() -> Result<()> {
     let balance = wallet_1.sync(None).await?;
     assert_eq!(balance.nfts().len(), 1);
 
-    let nft_data = &wallet_1.unspent_outputs(None).await[0];
+    let nft_amount = wallet_1
+        .data()
+        .await
+        .unspent_outputs()
+        .values()
+        .next()
+        .unwrap()
+        .output
+        .amount();
     let nft_id = *balance.nfts().first().unwrap();
     // Send NFT back to first wallet
     let output = wallet_1
         .prepare_output(
             OutputParams {
                 recipient_address: wallet_0_address,
-                amount: nft_data.output.amount(),
+                amount: nft_amount,
                 assets: Some(Assets {
                     native_tokens: None,
                     nft_id: Some(nft_id),

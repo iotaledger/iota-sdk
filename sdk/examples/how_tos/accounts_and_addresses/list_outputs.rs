@@ -25,13 +25,13 @@ async fn main() -> Result<()> {
 
     // Print output ids
     println!("Output ids:");
-    for output in wallet.outputs(None).await {
+    for output in wallet.data().await.outputs().values() {
         println!("{}", output.output_id);
     }
 
     // Print unspent output ids
     println!("Unspent output ids:");
-    for output in wallet.unspent_outputs(None).await {
+    for output in wallet.data().await.unspent_outputs().values() {
         println!("{}", output.output_id);
     }
 

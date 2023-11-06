@@ -253,7 +253,7 @@ where
                 )
             } else {
                 // Transition an existing NFT output
-                let unspent_nft_output = self.unspent_nft_output(nft_id).await;
+                let unspent_nft_output = self.data().await.unspent_nft_output(nft_id).cloned();
 
                 // Find nft output from the inputs
                 let mut first_output_builder = if let Some(nft_output_data) = &unspent_nft_output {

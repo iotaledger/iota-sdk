@@ -156,18 +156,22 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
             let output = wallet.get_foundry_output(token_id).await?;
             Response::Output(OutputDto::from(&output))
         }
-        WalletMethod::GetIncomingTransaction { transaction_id } => {
-            let transaction = wallet.get_incoming_transaction(&transaction_id).await;
-
-            transaction.map_or_else(
+        WalletMethod::GetIncomingTransaction { transaction_id } => wallet
+            .data()
+            .await
+            .get_incoming_transaction(&transaction_id)
+            .map_or_else(
                 || Response::Transaction(None),
-                |transaction| Response::Transaction(Some(Box::new(TransactionWithMetadataDto::from(&transaction)))),
-            )
-        }
-        WalletMethod::GetOutput { output_id } => {
-            let output_data = wallet.get_output(&output_id).await;
-            Response::OutputData(output_data.as_ref().map(OutputDataDto::from).map(Box::new))
-        }
+                |transaction| Response::Transaction(Some(Box::new(TransactionWithMetadataDto::from(transaction)))),
+            ),
+        WalletMethod::GetOutput { output_id } => Response::OutputData(
+            wallet
+                .data()
+                .await
+                .get_output(&output_id)
+                .map(OutputDataDto::from)
+                .map(Box::new),
+        ),
         #[cfg(feature = "participation")]
         WalletMethod::GetParticipationEvent { event_id } => {
             let event_and_nodes = wallet.get_participation_event(event_id).await?;
@@ -193,10 +197,14 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
             let overview = wallet.get_participation_overview(event_ids).await?;
             Response::ParticipationOverview(overview)
         }
-        WalletMethod::GetTransaction { transaction_id } => {
-            let transaction = wallet.get_transaction(&transaction_id).await;
-            Response::Transaction(transaction.as_ref().map(TransactionWithMetadataDto::from).map(Box::new))
-        }
+        WalletMethod::GetTransaction { transaction_id } => Response::Transaction(
+            wallet
+                .data()
+                .await
+                .get_transaction(&transaction_id)
+                .map(TransactionWithMetadataDto::from)
+                .map(Box::new),
+        ),
         #[cfg(feature = "participation")]
         WalletMethod::GetVotingPower => {
             let voting_power = wallet.get_voting_power().await?;
@@ -206,22 +214,38 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
             let implicit_account_creation_address = wallet.implicit_account_creation_address().await?;
             Response::Bech32Address(implicit_account_creation_address)
         }
-        WalletMethod::ImplicitAccounts => {
-            let implicit_accounts = wallet.implicit_accounts().await;
-            Response::OutputsData(implicit_accounts.iter().map(OutputDataDto::from).collect())
-        }
-        WalletMethod::IncomingTransactions => {
-            let transactions = wallet.incoming_transactions().await;
-            Response::Transactions(transactions.iter().map(TransactionWithMetadataDto::from).collect())
-        }
+        WalletMethod::ImplicitAccounts => Response::OutputsData(
+            wallet
+                .data()
+                .await
+                .implicit_accounts()
+                .map(OutputDataDto::from)
+                .collect(),
+        ),
+        WalletMethod::IncomingTransactions => Response::Transactions(
+            wallet
+                .data()
+                .await
+                .incoming_transactions()
+                .map(TransactionWithMetadataDto::from)
+                .collect(),
+        ),
         WalletMethod::Outputs { filter_options } => {
-            let outputs = wallet.outputs(filter_options).await;
-            Response::OutputsData(outputs.iter().map(OutputDataDto::from).collect())
+            let wallet_data = wallet.data().await;
+            Response::OutputsData(if let Some(filter) = filter_options {
+                wallet_data.filtered_outputs(filter).map(OutputDataDto::from).collect()
+            } else {
+                wallet_data.outputs().values().map(OutputDataDto::from).collect()
+            })
         }
-        WalletMethod::PendingTransactions => {
-            let transactions = wallet.pending_transactions().await;
-            Response::Transactions(transactions.iter().map(TransactionWithMetadataDto::from).collect())
-        }
+        WalletMethod::PendingTransactions => Response::Transactions(
+            wallet
+                .data()
+                .await
+                .pending_transactions()
+                .map(TransactionWithMetadataDto::from)
+                .collect(),
+        ),
         WalletMethod::PrepareBurn { burn, options } => {
             let data = wallet.prepare_burn(burn, options).await?;
             Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
@@ -393,13 +417,28 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
             Response::SentTransaction(TransactionWithMetadataDto::from(&transaction))
         }
         WalletMethod::Sync { options } => Response::Balance(wallet.sync(options).await?),
-        WalletMethod::Transactions => {
-            let transactions = wallet.transactions().await;
-            Response::Transactions(transactions.iter().map(TransactionWithMetadataDto::from).collect())
-        }
+        WalletMethod::Transactions => Response::Transactions(
+            wallet
+                .data()
+                .await
+                .transactions()
+                .map(TransactionWithMetadataDto::from)
+                .collect(),
+        ),
         WalletMethod::UnspentOutputs { filter_options } => {
-            let outputs = wallet.unspent_outputs(filter_options).await;
-            Response::OutputsData(outputs.iter().map(OutputDataDto::from).collect())
+            let wallet_data = wallet.data().await;
+            Response::OutputsData(if let Some(filter) = filter_options {
+                wallet_data
+                    .filtered_unspent_outputs(filter)
+                    .map(OutputDataDto::from)
+                    .collect()
+            } else {
+                wallet_data
+                    .unspent_outputs()
+                    .values()
+                    .map(OutputDataDto::from)
+                    .collect()
+            })
         }
     };
     Ok(response)

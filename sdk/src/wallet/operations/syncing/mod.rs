@@ -98,11 +98,12 @@ where
         let wallet_address_with_unspent_outputs = AddressWithUnspentOutputs {
             address: self.address().await,
             output_ids: self
-                .unspent_outputs(None)
+                .data()
                 .await
-                .into_iter()
+                .unspent_outputs()
+                .values()
                 .map(|data| data.output_id)
-                .collect::<Vec<_>>(),
+                .collect(),
             internal: false,
             key_index: 0,
         };

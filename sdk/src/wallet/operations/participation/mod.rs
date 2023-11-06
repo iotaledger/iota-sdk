@@ -71,17 +71,14 @@ where
             "[get_participation_overview] restored_spent_cached_outputs_len: {}",
             restored_spent_cached_outputs_len
         );
-        let outputs = self.outputs(None).await;
-        let participation_outputs = outputs
-            .into_iter()
-            .filter(|output_data| {
-                is_valid_participation_output(&output_data.output)
+        let wallet_data = self.data().await;
+        let participation_outputs = wallet_data.outputs().values().filter(|output_data| {
+            is_valid_participation_output(&output_data.output)
                 // Check that the metadata exists, because otherwise we aren't participating for anything
                     && output_data.output.features().and_then(|f| f.metadata()).is_some()
                     // Don't add spent cached outputs, we have their data already and it can't change anymore
                     && !spent_cached_outputs.contains_key(&output_data.output_id)
-            })
-            .collect::<Vec<OutputData>>();
+        });
 
         let mut events = HashMap::new();
         let mut spent_outputs = HashSet::new();
@@ -229,9 +226,10 @@ where
     pub async fn get_voting_output(&self) -> Result<Option<OutputData>> {
         log::debug!("[get_voting_output]");
         Ok(self
-            .unspent_outputs(None)
+            .data()
             .await
-            .iter()
+            .unspent_outputs()
+            .values()
             .filter(|output_data| is_valid_participation_output(&output_data.output))
             .max_by_key(|output_data| output_data.output.amount())
             .cloned())
