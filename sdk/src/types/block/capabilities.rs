@@ -48,11 +48,8 @@ impl<Flag: CapabilityFlag> Capabilities<Flag> {
 
     /// Try to create capabilities from serialized bytes. Bytes with trailing zeroes are invalid.
     pub(crate) fn from_prefix_box_slice(bytes: BoxedSlicePrefix<u8, u8>) -> Result<Self, Error> {
-        if let Some(idx) = bytes.iter().rposition(|c| 0.ne(c)) {
-            if idx + 1 < bytes.len() {
-                return Err(Error::TrailingCapabilityBytes);
-            }
-        } else {
+        // Check if there is a trailing zero.
+        if bytes.last().map(|b| *b == 0).unwrap_or_default() {
             return Err(Error::TrailingCapabilityBytes);
         }
         for (index, &byte) in bytes.iter().enumerate() {
