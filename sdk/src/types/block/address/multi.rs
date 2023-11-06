@@ -1,10 +1,9 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use alloc::vec;
 use core::{fmt, ops::RangeInclusive, str::FromStr};
 
-use derive_more::{AsRef, Display, From};
+use derive_more::{AsRef, From};
 use iterator_sorted::is_unique_sorted;
 use packable::{
     bounded::BoundedU8,
@@ -183,25 +182,11 @@ fn verify_cumulative_weight<const VERIFY: bool>(
     Ok(())
 }
 
-// impl FromStr for MultiAddress {
-//     type Err = Error;
-
-//     fn from_str(s: &str) -> Result<Self, Self::Err> {
-//         Ok(Self::new(AccountId::from_str(s)?))
-//     }
-// }
-
 impl fmt::Display for MultiAddress {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        panic!()
+        todo!()
     }
 }
-
-// impl core::fmt::Debug for MultiAddress {
-//     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-//         write!(f, "MultiAddress({self})")
-//     }
-// }
 
 #[cfg(feature = "serde")]
 mod dto {
