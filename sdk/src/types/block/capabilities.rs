@@ -23,19 +23,6 @@ pub struct Capabilities<Flag> {
 }
 
 impl<Flag> Capabilities<Flag> {
-    /// Try to create capabilities from serialized bytes. Bytes with trailing zeroes are invalid.
-    pub(crate) fn from_bytes(bytes: BoxedSlicePrefix<u8, u8>) -> Result<Self, Error> {
-        if let Some(idx) = bytes.iter().rposition(|c| 0.ne(c)) {
-            if idx + 1 < bytes.len() {
-                return Err(Error::TrailingCapabilityBytes);
-            }
-        }
-        Ok(Self {
-            bytes,
-            _flag: PhantomData,
-        })
-    }
-
     /// Returns a [`Capabilities`] with every possible flag disabled.
     pub fn none() -> Self {
         Self::default()
@@ -54,6 +41,35 @@ impl<Flag> Capabilities<Flag> {
 }
 
 impl<Flag: CapabilityFlag> Capabilities<Flag> {
+    /// Try to create capabilities from serialized bytes. Bytes with trailing zeroes are invalid.
+    pub fn from_bytes(bytes: impl Into<Box<[u8]>>) -> Result<Self, Error> {
+        Self::from_prefix_box_slice(bytes.into().try_into().map_err(Error::InvalidCapabilitiesCount)?)
+    }
+
+    /// Try to create capabilities from serialized bytes. Bytes with trailing zeroes are invalid.
+    pub(crate) fn from_prefix_box_slice(bytes: BoxedSlicePrefix<u8, u8>) -> Result<Self, Error> {
+        if let Some(idx) = bytes.iter().rposition(|c| 0.ne(c)) {
+            if idx + 1 < bytes.len() {
+                return Err(Error::TrailingCapabilityBytes);
+            }
+        } else {
+            return Err(Error::TrailingCapabilityBytes);
+        }
+        for (index, &byte) in bytes.iter().enumerate() {
+            let mut b = 0;
+            for flag in Flag::all().filter(|f| f.index() == index) {
+                b |= flag.as_byte();
+            }
+            if b | byte != b {
+                return Err(Error::InvalidCapabilityByte { index, byte });
+            }
+        }
+        Ok(Self {
+            bytes,
+            _flag: PhantomData,
+        })
+    }
+
     /// Returns a [`Capabilities`] with every possible flag enabled.
     pub fn all() -> Self {
         let mut res = Self::default();
@@ -176,7 +192,7 @@ impl<I: IntoIterator<Item = Flag>, Flag: CapabilityFlag> From<I> for Capabilitie
     }
 }
 
-impl<Flag: 'static> Packable for Capabilities<Flag> {
+impl<Flag: 'static + CapabilityFlag> Packable for Capabilities<Flag> {
     type UnpackError = crate::types::block::Error;
     type UnpackVisitor = ();
 
@@ -189,7 +205,7 @@ impl<Flag: 'static> Packable for Capabilities<Flag> {
         unpacker: &mut U,
         visitor: &Self::UnpackVisitor,
     ) -> Result<Self, UnpackError<Self::UnpackError, U::Error>> {
-        Self::from_bytes(
+        Self::from_prefix_box_slice(
             BoxedSlicePrefix::unpack::<_, VERIFY>(unpacker, visitor)
                 .map_packable_err(|e| match e {
                     UnpackPrefixError::Item(i) | UnpackPrefixError::Prefix(i) => i,
@@ -228,15 +244,147 @@ mod serde {
         }
     }
 
-    impl<'de, Flag> Deserialize<'de> for Capabilities<Flag> {
+    impl<'de, Flag: CapabilityFlag> Deserialize<'de> for Capabilities<Flag> {
         fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
         where
             D: ::serde::Deserializer<'de>,
         {
-            Self::from_bytes(crate::utils::serde::boxed_slice_prefix_hex_bytes::deserialize(
+            Self::from_prefix_box_slice(crate::utils::serde::boxed_slice_prefix_hex_bytes::deserialize(
                 deserializer,
             )?)
             .map_err(::serde::de::Error::custom)
         }
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use pretty_assertions::assert_eq;
+
+    use super::*;
+
+    #[derive(Debug)]
+    #[allow(unused)]
+    enum TestFlag {
+        Val1,
+        Val2,
+        Val3,
+        Val4,
+        Val5,
+        Val6,
+        Val7,
+        Val8,
+        Val9,
+    }
+
+    impl TestFlag {
+        const VAL_1: u8 = 0b00000001;
+        const VAL_2: u8 = 0b00000010;
+        const VAL_3: u8 = 0b00000100;
+        const VAL_4: u8 = 0b00001000;
+        const VAL_5: u8 = 0b00010000;
+        const VAL_6: u8 = 0b00100000;
+        const VAL_7: u8 = 0b01000000;
+        const VAL_8: u8 = 0b10000000;
+        const VAL_9: u8 = 0b00000001;
+    }
+
+    impl CapabilityFlag for TestFlag {
+        type Iterator = core::array::IntoIter<Self, 9>;
+
+        fn as_byte(&self) -> u8 {
+            match self {
+                TestFlag::Val1 => Self::VAL_1,
+                TestFlag::Val2 => Self::VAL_2,
+                TestFlag::Val3 => Self::VAL_3,
+                TestFlag::Val4 => Self::VAL_4,
+                TestFlag::Val5 => Self::VAL_5,
+                TestFlag::Val6 => Self::VAL_6,
+                TestFlag::Val7 => Self::VAL_7,
+                TestFlag::Val8 => Self::VAL_8,
+                TestFlag::Val9 => Self::VAL_9,
+            }
+        }
+
+        fn index(&self) -> usize {
+            match self {
+                TestFlag::Val1
+                | TestFlag::Val2
+                | TestFlag::Val3
+                | TestFlag::Val4
+                | TestFlag::Val5
+                | TestFlag::Val6
+                | TestFlag::Val7
+                | TestFlag::Val8 => 0,
+                TestFlag::Val9 => 1,
+            }
+        }
+
+        fn all() -> Self::Iterator {
+            [
+                Self::Val1,
+                Self::Val2,
+                Self::Val3,
+                Self::Val4,
+                Self::Val5,
+                Self::Val6,
+                Self::Val7,
+                Self::Val8,
+                Self::Val9,
+            ]
+            .into_iter()
+        }
+    }
+
+    #[test]
+    fn test_valid() {
+        let capability_bytes = [TestFlag::VAL_1 | TestFlag::VAL_3 | TestFlag::VAL_4];
+        let deser = Capabilities::<TestFlag>::from_bytes(capability_bytes).unwrap();
+        let built = Capabilities::default().with_capabilities([TestFlag::Val1, TestFlag::Val3, TestFlag::Val4]);
+        assert_eq!(deser, built);
+
+        let capability_bytes = [0, TestFlag::VAL_9];
+        let deser = Capabilities::<TestFlag>::from_bytes(capability_bytes).unwrap();
+        let built = Capabilities::default().with_capabilities([TestFlag::Val9]);
+        assert_eq!(deser, built);
+    }
+
+    #[test]
+    fn test_out_of_range() {
+        let capability_bytes = [TestFlag::VAL_1 | TestFlag::VAL_4, TestFlag::VAL_9, TestFlag::VAL_3];
+        assert_eq!(
+            Capabilities::<TestFlag>::from_bytes(capability_bytes),
+            Err(Error::InvalidCapabilityByte {
+                index: 2,
+                byte: TestFlag::VAL_3
+            })
+        );
+    }
+
+    #[test]
+    fn test_trailing() {
+        let capability_bytes = [0, 0];
+        assert_eq!(
+            Capabilities::<TestFlag>::from_bytes(capability_bytes),
+            Err(Error::TrailingCapabilityBytes)
+        );
+
+        let capability_bytes = [TestFlag::VAL_1 | TestFlag::VAL_4, 0];
+        assert_eq!(
+            Capabilities::<TestFlag>::from_bytes(capability_bytes),
+            Err(Error::TrailingCapabilityBytes)
+        );
+    }
+
+    #[test]
+    fn test_invalid_byte() {
+        let capability_bytes = [TestFlag::VAL_1 | TestFlag::VAL_3, TestFlag::VAL_9 | TestFlag::VAL_2];
+        assert_eq!(
+            Capabilities::<TestFlag>::from_bytes(capability_bytes),
+            Err(Error::InvalidCapabilityByte {
+                index: 1,
+                byte: TestFlag::VAL_9 | TestFlag::VAL_2
+            })
+        );
     }
 }
