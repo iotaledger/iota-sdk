@@ -3,7 +3,6 @@
 
 use alloc::{
     string::{String, ToString},
-    vec,
     vec::Vec,
 };
 use core::str::FromStr;
@@ -178,9 +177,9 @@ impl Bech32Address {
 impl core::fmt::Display for Bech32Address {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let bytes = if self.inner.is_multi() {
-            let mut bytes = vec![MultiAddress::KIND];
-            bytes.extend(Blake2b256::digest(self.inner.pack_to_vec()));
-            bytes
+            std::iter::once(MultiAddress::KIND)
+                .chain(Blake2b256::digest(self.inner.pack_to_vec()))
+                .collect()
         } else {
             self.inner.pack_to_vec()
         };
