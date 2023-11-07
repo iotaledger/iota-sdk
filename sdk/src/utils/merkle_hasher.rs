@@ -9,7 +9,7 @@ const LEAF_HASH_PREFIX: u8 = 0x00;
 const NODE_HASH_PREFIX: u8 = 0x01;
 
 /// A Merkle hasher based on a digest function.
-pub(crate) struct MerkleHasher;
+pub struct MerkleHasher;
 
 impl MerkleHasher {
     /// Returns the digest of the empty hash.
@@ -38,7 +38,7 @@ impl MerkleHasher {
     }
 
     /// Returns the digest of a list of hashes as an `Output<D>`.
-    pub(crate) fn digest<D: Default + Digest>(value: &[impl AsRef<[u8]>]) -> Output<D> {
+    pub fn digest<D: Default + Digest>(value: &[impl AsRef<[u8]>]) -> Output<D> {
         match value {
             [] => Self::empty::<D>(),
             [leaf] => Self::leaf::<D>(leaf),
