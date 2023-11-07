@@ -177,7 +177,7 @@ impl Bech32Address {
 impl core::fmt::Display for Bech32Address {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let bytes = if self.inner.is_multi() {
-            std::iter::once(MultiAddress::KIND)
+            core::iter::once(MultiAddress::KIND)
                 .chain(Blake2b256::digest(self.inner.pack_to_vec()))
                 .collect()
         } else {
