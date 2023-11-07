@@ -184,6 +184,7 @@ impl StorageScore for Address {
             Address::Nft(a) => a.storage_score(params),
             Address::Anchor(a) => a.storage_score(params),
             Address::ImplicitAccountCreation(a) => a.storage_score(params),
+            Address::Multi(a) => a.storage_score(params),
             Address::Restricted(a) => a.storage_score(params),
         }
     }
