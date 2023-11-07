@@ -287,11 +287,9 @@ export class Wallet {
      * @returns The accounts of the wallet.
      */
     async accounts(): Promise<OutputData[]> {
-        const response = await this.methodHandler.callMethod(
-            {
-                name: 'accounts',
-            },
-        );
+        const response = await this.methodHandler.callMethod({
+            name: 'accounts',
+        });
 
         const parsed = JSON.parse(response) as Response<OutputData[]>;
         return plainToInstance(OutputData, parsed.payload);
