@@ -265,7 +265,7 @@ where
                 ImplicitAccountCreationAddress::from(address.clone()),
             ))
         } else {
-            return Err(Error::NonEd25519Address);
+            Err(Error::NonEd25519Address)
         }
     }
 
