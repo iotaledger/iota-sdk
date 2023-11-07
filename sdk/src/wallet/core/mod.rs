@@ -265,7 +265,7 @@ where
                 ImplicitAccountCreationAddress::from(address.clone()),
             ))
         } else {
-            return Err(Error::NonEd25519Address);
+            Err(Error::NonEd25519Address)
         }
     }
 
@@ -462,6 +462,17 @@ where
             .unspent_outputs
             .values()
             .filter(|output_data| output_data.output.is_implicit_account())
+            .cloned()
+            .collect()
+    }
+
+    /// Returns accounts of the wallet.
+    pub async fn accounts(&self) -> Vec<OutputData> {
+        self.data()
+            .await
+            .unspent_outputs
+            .values()
+            .filter(|output_data| output_data.output.is_account())
             .cloned()
             .collect()
     }

@@ -461,7 +461,7 @@ impl StorageScore for DelegationOutput {
 
 fn verify_validator_address<const VERIFY: bool>(validator_address: &AccountAddress) -> Result<(), Error> {
     if VERIFY && validator_address.is_null() {
-        return Err(Error::NullDelegationValidatorId);
+        Err(Error::NullDelegationValidatorId)
     } else {
         Ok(())
     }
