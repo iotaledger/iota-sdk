@@ -3,6 +3,7 @@
 
 mod account;
 mod anchor;
+mod multi;
 mod nft;
 mod reference;
 mod signature;
@@ -15,13 +16,14 @@ use hashbrown::HashSet;
 use packable::{bounded::BoundedU16, prefix::BoxedSlicePrefix, Packable};
 
 pub use self::{
-    account::AccountUnlock, anchor::AnchorUnlock, nft::NftUnlock, reference::ReferenceUnlock,
+    account::AccountUnlock, anchor::AnchorUnlock, multi::MultiUnlock, nft::NftUnlock, reference::ReferenceUnlock,
     signature::SignatureUnlock,
 };
 use crate::types::block::{
     input::{INPUT_COUNT_MAX, INPUT_COUNT_RANGE, INPUT_INDEX_MAX},
     Error,
 };
+pub(crate) use multi::UnlocksCount;
 
 /// The maximum number of unlocks of a transaction.
 pub const UNLOCK_COUNT_MAX: u16 = INPUT_COUNT_MAX; // 128
@@ -50,12 +52,15 @@ pub enum Unlock {
     /// An account unlock.
     #[packable(tag = AccountUnlock::KIND)]
     Account(AccountUnlock),
-    /// An Anchor unlock.
+    /// An anchor unlock.
     #[packable(tag = AnchorUnlock::KIND)]
     Anchor(AnchorUnlock),
     /// An NFT unlock.
     #[packable(tag = NftUnlock::KIND)]
     Nft(NftUnlock),
+    /// A multi unlock.
+    #[packable(tag = MultiUnlock::KIND)]
+    Multi(MultiUnlock),
 }
 
 impl From<SignatureUnlock> for Unlock {
@@ -72,6 +77,7 @@ impl core::fmt::Debug for Unlock {
             Self::Account(unlock) => unlock.fmt(f),
             Self::Anchor(unlock) => unlock.fmt(f),
             Self::Nft(unlock) => unlock.fmt(f),
+            Self::Multi(unlock) => unlock.fmt(f),
         }
     }
 }
@@ -85,10 +91,11 @@ impl Unlock {
             Self::Account(_) => AccountUnlock::KIND,
             Self::Anchor(_) => AnchorUnlock::KIND,
             Self::Nft(_) => NftUnlock::KIND,
+            Self::Multi(_) => MultiUnlock::KIND,
         }
     }
 
-    crate::def_is_as_opt!(Unlock: Signature, Reference, Account, Nft);
+    crate::def_is_as_opt!(Unlock: Signature, Reference, Account, Anchor, Nft, Multi);
 }
 
 pub(crate) type UnlockCount = BoundedU16<{ *UNLOCK_COUNT_RANGE.start() }, { *UNLOCK_COUNT_RANGE.end() }>;
@@ -154,6 +161,7 @@ fn verify_unlocks<const VERIFY: bool>(unlocks: &[Unlock], _: &()) -> Result<(), 
                         return Err(Error::InvalidUnlockNft(index));
                     }
                 }
+                Unlock::Multi(_) => todo!(),
             }
         }
     }
