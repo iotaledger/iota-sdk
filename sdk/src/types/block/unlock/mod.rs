@@ -14,6 +14,7 @@ use core::ops::RangeInclusive;
 
 use derive_more::{Deref, From};
 use hashbrown::HashSet;
+pub(crate) use multi::UnlocksCount;
 use packable::{bounded::BoundedU16, prefix::BoxedSlicePrefix, Packable};
 
 pub use self::{
@@ -24,7 +25,6 @@ use crate::types::block::{
     input::{INPUT_COUNT_MAX, INPUT_COUNT_RANGE, INPUT_INDEX_MAX},
     Error,
 };
-pub(crate) use multi::UnlocksCount;
 
 /// The maximum number of unlocks of a transaction.
 pub const UNLOCK_COUNT_MAX: u16 = INPUT_COUNT_MAX; // 128

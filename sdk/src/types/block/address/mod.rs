@@ -22,7 +22,7 @@ pub use self::{
     bech32::{Bech32Address, Hrp},
     ed25519::Ed25519Address,
     implicit_account_creation::ImplicitAccountCreationAddress,
-    multi::MultiAddress,
+    multi::{MultiAddress, WeightedAddress},
     nft::NftAddress,
     restricted::{AddressCapabilities, AddressCapabilityFlag, RestrictedAddress},
 };
