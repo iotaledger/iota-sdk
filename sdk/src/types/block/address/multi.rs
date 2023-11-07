@@ -4,7 +4,7 @@
 use alloc::vec::Vec;
 use core::{fmt, ops::RangeInclusive};
 
-use derive_more::{AsRef, From};
+use derive_more::{AsRef, Display, From};
 use iterator_sorted::is_unique_sorted;
 use packable::{
     bounded::BoundedU8,
@@ -12,7 +12,7 @@ use packable::{
     packer::Packer,
     prefix::BoxedSlicePrefix,
     unpacker::Unpacker,
-    Packable, PackableExt,
+    Packable,
 };
 
 use crate::types::block::{address::Address, Error};
@@ -21,7 +21,8 @@ pub(crate) type WeightedAddressCount =
     BoundedU8<{ *MultiAddress::ADDRESSES_COUNT.start() }, { *MultiAddress::ADDRESSES_COUNT.end() }>;
 
 /// An address with an assigned weight.
-#[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, From, AsRef, Packable)]
+#[derive(Clone, Debug, Display, Eq, PartialEq, Ord, PartialOrd, Hash, From, AsRef, Packable)]
+#[display(fmt = "{address}")]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct WeightedAddress {
     /// The unlocked address.
@@ -186,7 +187,15 @@ fn verify_cumulative_weight<const VERIFY: bool>(
 
 impl fmt::Display for MultiAddress {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", prefix_hex::encode(self.pack_to_vec()))
+        write!(
+            f,
+            "[{}]",
+            self.addresses()
+                .iter()
+                .map(|address| address.to_string())
+                .collect::<Vec<_>>()
+                .join(", ")
+        )
     }
 }
 
