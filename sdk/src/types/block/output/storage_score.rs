@@ -32,16 +32,21 @@ const DEFAULT_OFFSET_DELEGATION: u64 = 100;
 )]
 pub struct StorageScoreParameters {
     /// Defines the number of IOTA tokens required per unit of storage score.
+    #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
     storage_cost: u64,
     /// Defines the factor to be used for data only fields.
     factor_data: u8,
     /// Defines the offset to be applied to all outputs for the overhead of handling them in storage.
+    #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
     offset_output_overhead: u64,
     /// Defines the offset to be used for block issuer feature public keys.
+    #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
     offset_ed25519_block_issuer_key: u64,
     /// Defines the offset to be used for staking feature.
+    #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
     offset_staking_feature: u64,
     /// Defines the offset to be used for delegation output.
+    #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
     offset_delegation: u64,
 }
 
