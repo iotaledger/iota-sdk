@@ -253,6 +253,7 @@ where
             last_synced: Mutex::new(0),
             background_syncing_status: AtomicUsize::new(0),
             client,
+            // TODO: make secret manager optional
             secret_manager: self.secret_manager.expect("make WalletInner::secret_manager optional?"),
             #[cfg(feature = "events")]
             event_emitter,

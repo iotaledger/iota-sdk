@@ -16,6 +16,7 @@
 
 use iota_sdk::{
     client::{
+        api::GetAddressesOptions,
         constants::SHIMMER_COIN_TYPE,
         secret::{ledger_nano::LedgerSecretManager, SecretManager},
     },
@@ -34,23 +35,28 @@ async fn main() -> Result<()> {
     dotenvy::dotenv().ok();
 
     let client_options = ClientOptions::new().with_node(&std::env::var("NODE_URL").unwrap())?;
-    let secret_manager = LedgerSecretManager::new(true);
+    let secret_manager = SecretManager::LedgerNano(LedgerSecretManager::new(true));
+
+    println!("Generating address...");
+    let now = tokio::time::Instant::now();
+    let address = secret_manager
+        .generate_ed25519_addresses(GetAddressesOptions::default().with_coin_type(SHIMMER_COIN_TYPE))
+        .await?
+        .pop()
+        .unwrap();
+    println!("took: {:.2?}", now.elapsed());
+
+    println!("ADDRESS:\n{address:#?}");
     let wallet = Wallet::builder()
-        .with_secret_manager(SecretManager::LedgerNano(secret_manager))
+        .with_secret_manager(secret_manager)
         .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
         .with_client_options(client_options)
         .with_bip_path(Bip44::new(SHIMMER_COIN_TYPE))
+        .with_address(address)
         .finish()
         .await?;
 
     println!("{:?}", wallet.get_ledger_nano_status().await?);
-
-    println!("Generating address...");
-    let now = tokio::time::Instant::now();
-    let address = wallet.generate_ed25519_address(0, 0, None).await?;
-    println!("took: {:.2?}", now.elapsed());
-
-    println!("ADDRESS:\n{address:#?}");
 
     let now = tokio::time::Instant::now();
     let balance = wallet.sync(None).await?;
