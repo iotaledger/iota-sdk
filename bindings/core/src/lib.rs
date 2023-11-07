@@ -58,13 +58,8 @@ impl WalletOptions {
         self
     }
 
-    pub fn with_storage_path(mut self, storage_path: impl Into<Option<String>>) -> Self {
-        self.storage_path = storage_path.into();
-        self
-    }
-
-    pub fn with_client_options(mut self, client_options: impl Into<Option<ClientOptions>>) -> Self {
-        self.client_options = client_options.into();
+    pub fn with_alias(mut self, alias: impl Into<Option<String>>) -> Self {
+        self.alias = alias.into();
         self
     }
 
@@ -73,26 +68,29 @@ impl WalletOptions {
         self
     }
 
+    pub fn with_client_options(mut self, client_options: impl Into<Option<ClientOptions>>) -> Self {
+        self.client_options = client_options.into();
+        self
+    }
+
     pub fn with_secret_manager(mut self, secret_manager: impl Into<Option<SecretManagerDto>>) -> Self {
         self.secret_manager = secret_manager.into();
+        self
+    }
+
+    pub fn with_storage_path(mut self, storage_path: impl Into<Option<String>>) -> Self {
+        self.storage_path = storage_path.into();
         self
     }
 
     pub async fn build(self) -> iota_sdk::wallet::Result<Wallet> {
         log::debug!("wallet options: {self:?}");
         let mut builder = Wallet::builder()
-            .with_client_options(self.client_options)
-            .with_bip_path(self.bip_path);
+            .with_address(self.address)
+            .with_alias(self.alias)
+            .with_bip_path(self.bip_path)
+            .with_client_options(self.client_options);
 
-        if let Some(address) = self.address {
-            builder = builder.with_address(address);
-        }
-        if let Some(alias) = self.alias {
-            builder = builder.with_alias(alias);
-        }
-        if let Some(bip_path) = self.bip_path {
-            builder = builder.with_bip_path(bip_path);
-        }
         #[cfg(feature = "storage")]
         if let Some(storage_path) = &self.storage_path {
             builder = builder.with_storage_path(storage_path);
