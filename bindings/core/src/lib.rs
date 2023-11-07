@@ -17,6 +17,7 @@ use fern_logger::{logger_init, LoggerConfig, LoggerOutputConfigBuilder};
 pub use iota_sdk;
 use iota_sdk::{
     client::secret::{SecretManager, SecretManagerDto},
+    types::block::address::Bech32Address,
     wallet::{ClientOptions, Wallet},
 };
 use serde::Deserialize;
@@ -42,14 +43,21 @@ pub fn init_logger(config: String) -> std::result::Result<(), fern_logger::Error
 #[derivative(Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct WalletOptions {
-    pub storage_path: Option<String>,
-    pub client_options: Option<ClientOptions>,
+    pub address: Option<Bech32Address>,
+    pub alias: Option<String>,
     pub bip_path: Option<Bip44>,
+    pub client_options: Option<ClientOptions>,
     #[derivative(Debug(format_with = "OmittedDebug::omitted_fmt"))]
     pub secret_manager: Option<SecretManagerDto>,
+    pub storage_path: Option<String>,
 }
 
 impl WalletOptions {
+    pub fn with_address(mut self, address: impl Into<Option<Bech32Address>>) -> Self {
+        self.address = address.into();
+        self
+    }
+
     pub fn with_storage_path(mut self, storage_path: impl Into<Option<String>>) -> Self {
         self.storage_path = storage_path.into();
         self
@@ -76,6 +84,15 @@ impl WalletOptions {
             .with_client_options(self.client_options)
             .with_bip_path(self.bip_path);
 
+        if let Some(address) = self.address {
+            builder = builder.with_address(address);
+        }
+        if let Some(alias) = self.alias {
+            builder = builder.with_alias(alias);
+        }
+        if let Some(bip_path) = self.bip_path {
+            builder = builder.with_bip_path(bip_path);
+        }
         #[cfg(feature = "storage")]
         if let Some(storage_path) = &self.storage_path {
             builder = builder.with_storage_path(storage_path);
