@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import {
-    Account,
+    Wallet,
     PreparedTransactionData,
     SignedTransactionData,
     TransactionWithMetadata,
@@ -11,20 +11,20 @@ import {
 /**
  * PreparedTransaction` is a class that represents prepared transaction data, which
  * is useful for offline signing. It contains the prepared transaction data and an
- * `Account` object. It provides methods to retrieve the prepared transaction data, sign
+ * `Wallet` object. It provides methods to retrieve the prepared transaction data, sign
  * the transaction and sign+submit/send the transaction.
  */
 export class PreparedTransaction {
     readonly _preparedData: PreparedTransactionData;
-    readonly _account: Account;
+    readonly _wallet: Wallet;
 
     /**
      * @param preparedData Prepared data to sign and submit a transaction.
-     * @param account A wallet account.
+     * @param wallet A wallet wallet.
      */
-    constructor(preparedData: PreparedTransactionData, account: Account) {
+    constructor(preparedData: PreparedTransactionData, wallet: Wallet) {
         this._preparedData = preparedData;
-        this._account = account;
+        this._wallet = wallet;
     }
 
     /**
@@ -53,7 +53,7 @@ export class PreparedTransaction {
     }
 
     /**
-     * This function signs a prepared transaction using the account's private key and returns
+     * This function signs a prepared transaction using the wallet's private key and returns
      * the signed transaction.
      *
      * Returns:
@@ -61,7 +61,7 @@ export class PreparedTransaction {
      * A `Promise` that resolves to a `SignedTransactionData` object.
      */
     public async sign(): Promise<SignedTransactionData> {
-        return this._account.signTransaction(this.preparedTransactionData());
+        return this._wallet.signTransaction(this.preparedTransactionData());
     }
 
     /**
@@ -72,7 +72,7 @@ export class PreparedTransaction {
      * A Promise that resolves to a TransactionWithMetadata object.
      */
     public async signAndSubmitTransaction(): Promise<TransactionWithMetadata> {
-        return this._account.signAndSubmitTransaction(
+        return this._wallet.signAndSubmitTransaction(
             this.preparedTransactionData(),
         );
     }
