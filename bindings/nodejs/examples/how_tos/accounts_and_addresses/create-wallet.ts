@@ -7,7 +7,6 @@ import {
     initLogger,
     WalletOptions,
     SecretManager,
-    Bip44,
 } from '@iota/sdk';
 
 // This example uses secrets in environment variables for simplicity which should not be done in production.
