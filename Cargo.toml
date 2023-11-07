@@ -2,8 +2,7 @@
 resolver = "2"
 members = [
 	"bindings/core",
-	# TODO: issue #1424
-	#"bindings/nodejs",
+	"bindings/nodejs",
 	# TODO: issue #1423
 	#"bindings/python",
 	# TODO: issue #1425
