@@ -45,6 +45,11 @@ pub enum Error {
     /// Insufficient funds to send transaction.
     #[error("insufficient funds {available}/{required} available")]
     InsufficientFunds { available: u64, required: u64 },
+    /// Invalid event type.
+    #[cfg(feature = "events")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "events")))]
+    #[error("invalid event type: {0}")]
+    InvalidEventType(u8),
     /// Invalid mnemonic error
     #[error("invalid mnemonic: {0}")]
     InvalidMnemonic(String),
