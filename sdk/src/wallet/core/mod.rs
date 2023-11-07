@@ -37,7 +37,7 @@ use crate::{
                 dto::FoundryOutputDto, AccountId, AnchorId, DelegationId, FoundryId, FoundryOutput, NftId, Output,
                 OutputId, TokenId,
             },
-            payload::signed_transaction::{dto::TransactionDto, Transaction, TransactionId},
+            payload::signed_transaction::TransactionId,
         },
         TryFromDto,
     },
@@ -462,6 +462,17 @@ where
             .unspent_outputs
             .values()
             .filter(|output_data| output_data.output.is_implicit_account())
+            .cloned()
+            .collect()
+    }
+
+    /// Returns accounts of the wallet.
+    pub async fn accounts(&self) -> Vec<OutputData> {
+        self.data()
+            .await
+            .unspent_outputs
+            .values()
+            .filter(|output_data| output_data.output.is_account())
             .cloned()
             .collect()
     }
