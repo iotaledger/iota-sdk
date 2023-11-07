@@ -221,7 +221,8 @@ class Account:
             }
         ))
 
-    def get_transaction(self, transaction_id: HexStr) -> TransactionWithMetadata:
+    def get_transaction(
+            self, transaction_id: HexStr) -> TransactionWithMetadata:
         """Get transaction.
         """
         return TransactionWithMetadata.from_dict(self._call_account_method(

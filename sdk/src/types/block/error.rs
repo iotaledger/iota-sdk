@@ -85,6 +85,10 @@ pub enum Error {
     InvalidInputOutputIndex(<OutputIndex as TryFrom<u16>>::Error),
     InvalidBech32Hrp(Bech32HrpError),
     InvalidCapabilitiesCount(<u8 as TryFrom<usize>>::Error),
+    InvalidCapabilityByte {
+        index: usize,
+        byte: u8,
+    },
     InvalidSignedBlockLength(usize),
     InvalidStateMetadataLength(<StateMetadataLength as TryFrom<usize>>::Error),
     InvalidManaValue(u64),
@@ -184,6 +188,7 @@ pub enum Error {
         created: EpochIndex,
         target: EpochIndex,
     },
+    TrailingCapabilityBytes,
 }
 
 #[cfg(feature = "std")]
@@ -228,6 +233,9 @@ impl fmt::Display for Error {
             Self::InvalidAnchorIndex(index) => write!(f, "invalid anchor index: {index}"),
             Self::InvalidBech32Hrp(e) => write!(f, "invalid bech32 hrp: {e}"),
             Self::InvalidCapabilitiesCount(e) => write!(f, "invalid capabilities count: {e}"),
+            Self::InvalidCapabilityByte { index, byte } => {
+                write!(f, "invalid capability byte at index {index}: {byte:x}")
+            }
             Self::InvalidBlockKind(k) => write!(f, "invalid block kind: {k}"),
             Self::InvalidRewardInputIndex(idx) => write!(f, "invalid reward input index: {idx}"),
             Self::InvalidStorageDepositAmount(amount) => {
@@ -397,6 +405,7 @@ impl fmt::Display for Error {
             Self::InvalidEpochDelta { created, target } => {
                 write!(f, "invalid epoch delta: created {created}, target {target}")
             }
+            Self::TrailingCapabilityBytes => write!(f, "capability bytes have trailing zeroes"),
         }
     }
 }
