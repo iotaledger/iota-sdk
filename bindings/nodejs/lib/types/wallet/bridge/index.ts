@@ -16,6 +16,7 @@ import type {
     __OutputsMethod__,
     __PendingTransactionsMethod__,
     __ImplicitAccountCreationAddressMethod__,
+    __AccountsMethod__,
     __ImplicitAccountsMethod__,
     __IncomingTransactionsMethod__,
     __TransactionsMethod__,
@@ -99,6 +100,7 @@ export type __AccountMethod__ =
     | __OutputsMethod__
     | __PendingTransactionsMethod__
     | __ImplicitAccountCreationAddressMethod__
+    | __AccountsMethod__
     | __ImplicitAccountsMethod__
     | __IncomingTransactionsMethod__
     | __TransactionsMethod__
