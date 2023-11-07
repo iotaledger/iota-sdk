@@ -56,6 +56,8 @@ impl WalletCli {
 #[derive(Debug, Subcommand)]
 #[allow(clippy::large_enum_variant)]
 pub enum WalletCommand {
+    /// Lists the accounts of the wallet.
+    Accounts,
     /// Print the wallet address.
     Address,
     /// Print the wallet balance.
@@ -302,6 +304,11 @@ impl FromStr for OutputSelector {
             Self::Id(s.parse()?)
         })
     }
+}
+
+// `accounts` command
+pub async fn accounts_command(wallet: &Wallet) -> Result<(), Error> {
+    print_outputs(wallet.accounts().await, "Accounts:").await
 }
 
 // `address` command
@@ -1057,6 +1064,7 @@ pub async fn prompt_internal(
                         }
                     };
                     match protocol_cli.command {
+                        WalletCommand::Accounts => accounts_command(wallet).await,
                         WalletCommand::Address => address_command(wallet).await,
                         WalletCommand::Balance => balance_command(wallet).await,
                         WalletCommand::BurnNativeToken { token_id, amount } => {
