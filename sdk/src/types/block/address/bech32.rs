@@ -184,6 +184,7 @@ impl core::fmt::Display for Bech32Address {
             self.inner.pack_to_vec()
         };
 
+        // PANIC: unwrap is fine as the Bech32Address has been validated at construction.
         write!(f, "{}", bech32::encode::<bech32::Bech32>(self.hrp.0, &bytes).unwrap())
     }
 }
