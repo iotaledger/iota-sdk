@@ -3,7 +3,7 @@
 
 from enum import IntEnum
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, TypeAlias, Union
+from typing import Any, Dict, List, Optional, TypeAlias, Union
 from iota_sdk.types.common import HexStr, json
 
 
@@ -118,7 +118,7 @@ class RestrictedAddress:
         allowed_capabilities: The allowed capabilities bitflags.
     """
     address: Union[Ed25519Address, AccountAddress, NFTAddress]
-    allowed_capabilities: HexStr = field(default='0x', init=False)
+    allowed_capabilities: Optional[HexStr] = field(default=None, init=False)
     type: int = field(default_factory=lambda: int(
         AddressType.RESTRICTED), init=False)
 
@@ -127,7 +127,10 @@ class RestrictedAddress:
         Attributes:
             capabilities: The allowed capabilities bitflags.
         """
-        self.allowed_capabilities = '0x' + capabilities.hex()
+        if any(c != 0 for c in capabilities):
+            self.allowed_capabilities = '0x' + capabilities.hex()
+        else:
+            self.allowed_capabilities = None
 
 
 @json
