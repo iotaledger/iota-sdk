@@ -67,7 +67,10 @@ async function run() {
         };
 
         const wallet = new Wallet(walletOptions);
-        console.log('Generated wallet');
+
+        console.log(
+            'Generated wallet with address: ' + (await wallet.address()),
+        );
     } catch (error) {
         console.error('Error: ', error);
     }

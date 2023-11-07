@@ -834,13 +834,13 @@ export class Wallet {
     }
 
     /**
-     * List the address of the wallet.
+     * Get the address of the wallet.
      *
      * @returns The address.
      */
     async address(): Promise<Bech32Address> {
         const response = await this.methodHandler.callMethod({
-            name: 'address',
+            name: 'getAddress',
         });
 
         return JSON.parse(response).payload;

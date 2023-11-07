@@ -215,7 +215,7 @@ export type __GetTransactionMethod__ = {
 };
 
 export type __AddressMethod__ = {
-    name: 'address';
+    name: 'getAddress';
 };
 
 export type __OutputsMethod__ = {
