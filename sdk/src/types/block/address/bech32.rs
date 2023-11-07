@@ -184,7 +184,7 @@ impl core::fmt::Display for Bech32Address {
             self.inner.pack_to_vec()
         };
 
-        write!(f, "{}", bech32::encode::<bech32::Bech32>(self.hrp.0, &bytes,).unwrap())
+        write!(f, "{}", bech32::encode::<bech32::Bech32>(self.hrp.0, &bytes).unwrap())
     }
 }
 
