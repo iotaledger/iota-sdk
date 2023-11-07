@@ -166,6 +166,26 @@ impl Address {
                     return Err(TransactionFailureReason::InvalidInputUnlock);
                 }
             }
+            (Self::Multi(address), Unlock::Multi(unlock)) => {
+                let threshold = address.threshold();
+
+                if address.addresses().len() != unlock.unlocks().len() {
+                    todo!();
+                }
+
+                let mut cumulative_unlocked_eight = 0u16;
+
+                for (address, unlock) in address.addresses().iter().zip(unlock.unlocks()) {
+                    if !unlock.is_empty() {
+                        address.address().unlock(unlock, context)?;
+                        cumulative_unlocked_eight += address.weight() as u16;
+                    }
+                }
+
+                if cumulative_unlocked_eight < threshold {
+                    todo!();
+                }
+            }
             // TODO maybe shouldn't be a semantic error but this function currently returns a TransactionFailureReason.
             (Self::Anchor(_), _) => return Err(TransactionFailureReason::SemanticValidationFailed),
             _ => return Err(TransactionFailureReason::InvalidInputUnlock),

@@ -3,6 +3,7 @@
 
 mod account;
 mod anchor;
+mod empty;
 mod multi;
 mod nft;
 mod reference;
@@ -16,8 +17,8 @@ use hashbrown::HashSet;
 use packable::{bounded::BoundedU16, prefix::BoxedSlicePrefix, Packable};
 
 pub use self::{
-    account::AccountUnlock, anchor::AnchorUnlock, multi::MultiUnlock, nft::NftUnlock, reference::ReferenceUnlock,
-    signature::SignatureUnlock,
+    account::AccountUnlock, anchor::AnchorUnlock, empty::EmptyUnlock, multi::MultiUnlock, nft::NftUnlock,
+    reference::ReferenceUnlock, signature::SignatureUnlock,
 };
 use crate::types::block::{
     input::{INPUT_COUNT_MAX, INPUT_COUNT_RANGE, INPUT_INDEX_MAX},
@@ -61,6 +62,9 @@ pub enum Unlock {
     /// A multi unlock.
     #[packable(tag = MultiUnlock::KIND)]
     Multi(MultiUnlock),
+    /// An empty unlock.
+    #[packable(tag = EmptyUnlock::KIND)]
+    Empty(EmptyUnlock),
 }
 
 impl From<SignatureUnlock> for Unlock {
@@ -78,6 +82,7 @@ impl core::fmt::Debug for Unlock {
             Self::Anchor(unlock) => unlock.fmt(f),
             Self::Nft(unlock) => unlock.fmt(f),
             Self::Multi(unlock) => unlock.fmt(f),
+            Self::Empty(unlock) => unlock.fmt(f),
         }
     }
 }
@@ -92,10 +97,11 @@ impl Unlock {
             Self::Anchor(_) => AnchorUnlock::KIND,
             Self::Nft(_) => NftUnlock::KIND,
             Self::Multi(_) => MultiUnlock::KIND,
+            Self::Empty(_) => EmptyUnlock::KIND,
         }
     }
 
-    crate::def_is_as_opt!(Unlock: Signature, Reference, Account, Anchor, Nft, Multi);
+    crate::def_is_as_opt!(Unlock: Signature, Reference, Account, Anchor, Nft, Multi, Empty);
 }
 
 pub(crate) type UnlockCount = BoundedU16<{ *UNLOCK_COUNT_RANGE.start() }, { *UNLOCK_COUNT_RANGE.end() }>;
@@ -162,6 +168,7 @@ fn verify_unlocks<const VERIFY: bool>(unlocks: &[Unlock], _: &()) -> Result<(), 
                     }
                 }
                 Unlock::Multi(_) => todo!(),
+                Unlock::Empty(_) => todo!(),
             }
         }
     }
