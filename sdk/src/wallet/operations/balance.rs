@@ -28,11 +28,7 @@ where
         self.balance_inner(&wallet_data).await
     }
 
-    async fn balance_inner(
-        &self,
-        // addresses_with_unspent_outputs: impl Iterator<Item = &AddressWithUnspentOutputs> + Send,
-        wallet_data: &WalletData,
-    ) -> Result<Balance> {
+    async fn balance_inner(&self, wallet_data: &WalletData) -> Result<Balance> {
         let network_id = self.client().get_network_id().await?;
         let rent_structure = self.client().get_rent_structure().await?;
         let mut balance = Balance::default();

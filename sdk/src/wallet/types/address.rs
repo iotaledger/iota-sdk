@@ -41,26 +41,3 @@ impl ConvertTo<Bech32Address> for Bip44Address {
         self.address
     }
 }
-
-/// An account address with unspent output_ids for unspent outputs.
-#[derive(Debug, Getters, Setters, Clone, Serialize, Deserialize, Eq, PartialEq)]
-#[serde(rename_all = "camelCase")]
-#[getset(get = "pub")]
-pub struct AddressWithUnspentOutputs {
-    /// The address.
-    pub(crate) address: Bech32Address,
-    /// The address key index.
-    #[getset(set = "pub(crate)")]
-    pub(crate) key_index: u32,
-    /// Determines if an address is a public or an internal (change) address.
-    #[getset(set = "pub(crate)")]
-    pub(crate) internal: bool,
-    /// Output ids
-    pub(crate) output_ids: Vec<OutputId>,
-}
-
-impl AddressWithUnspentOutputs {
-    pub fn into_bech32(self) -> Bech32Address {
-        self.address
-    }
-}

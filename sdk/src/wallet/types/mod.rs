@@ -13,7 +13,7 @@ use crypto::keys::bip44::Bip44;
 use serde::{Deserialize, Serialize};
 
 pub use self::{
-    address::{AddressWithUnspentOutputs, Bip44Address},
+    address::Bip44Address,
     balance::{Balance, BaseCoinBalance, NativeTokensBalance, RequiredStorageDeposit},
 };
 use crate::{
@@ -43,8 +43,6 @@ pub struct OutputData {
     pub output: Output,
     /// If an output is spent
     pub is_spent: bool,
-    /// Associated wallet address.
-    pub address: Address,
     /// Network ID
     pub network_id: u64,
     pub remainder: bool,
@@ -61,7 +59,7 @@ impl OutputData {
         let (unlock_address, _unlocked_account_or_nft_address) =
             self.output.required_and_unlocked_address(slot_index, &self.output_id)?;
 
-        let chain = if unlock_address == self.address {
+        let chain = if unlock_address == *wallet_data.address.inner() {
             self.chain
         } else if let Address::Ed25519(_) = unlock_address {
             if wallet_data.address.inner() == &unlock_address {
@@ -96,8 +94,6 @@ pub struct OutputDataDto {
     pub output: OutputDto,
     /// If an output is spent
     pub is_spent: bool,
-    /// Associated account address.
-    pub address: Address,
     /// Network ID
     pub network_id: String,
     /// Remainder
@@ -114,7 +110,6 @@ impl From<&OutputData> for OutputDataDto {
             metadata: value.metadata,
             output: OutputDto::from(&value.output),
             is_spent: value.is_spent,
-            address: value.address.clone(),
             network_id: value.network_id.to_string(),
             remainder: value.remainder,
             chain: value.chain,
@@ -135,7 +130,6 @@ impl TryFromDto for OutputData {
             metadata: dto.metadata,
             output: Output::try_from_dto_with_params(dto.output, params)?,
             is_spent: dto.is_spent,
-            address: dto.address,
             network_id: dto
                 .network_id
                 .parse()
