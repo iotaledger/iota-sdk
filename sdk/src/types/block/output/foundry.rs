@@ -111,7 +111,7 @@ impl FoundryOutputBuilder {
         serial_number: u32,
         token_scheme: TokenScheme,
     ) -> Self {
-        Self::new(OutputBuilderAmount::StorageCost(params), serial_number, token_scheme)
+        Self::new(OutputBuilderAmount::MinimumAmount(params), serial_number, token_scheme)
     }
 
     fn new(amount: OutputBuilderAmount, serial_number: u32, token_scheme: TokenScheme) -> Self {
@@ -136,7 +136,7 @@ impl FoundryOutputBuilder {
     /// Sets the amount to the storage cost.
     #[inline(always)]
     pub fn with_minimum_amount(mut self, params: StorageScoreParameters) -> Self {
-        self.amount = OutputBuilderAmount::StorageCost(params);
+        self.amount = OutputBuilderAmount::MinimumAmount(params);
         self
     }
 
@@ -260,7 +260,7 @@ impl FoundryOutputBuilder {
 
         let amount = match self.amount {
             OutputBuilderAmount::Amount(amount) => amount,
-            OutputBuilderAmount::StorageCost(params) => self.storage_cost(params),
+            OutputBuilderAmount::MinimumAmount(params) => self.storage_cost(params),
         };
         verify_output_amount_min(amount)?;
 
@@ -841,7 +841,7 @@ pub(crate) mod dto {
                 OutputBuilderAmount::Amount(amount) => {
                     FoundryOutputBuilder::new_with_amount(amount, serial_number, token_scheme)
                 }
-                OutputBuilderAmount::StorageCost(params) => {
+                OutputBuilderAmount::MinimumAmount(params) => {
                     FoundryOutputBuilder::new_with_minimum_amount(params, serial_number, token_scheme)
                 }
             };

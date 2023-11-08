@@ -85,7 +85,7 @@ impl DelegationOutputBuilder {
         validator_address: AccountAddress,
     ) -> Self {
         Self::new(
-            OutputBuilderAmount::StorageCost(params),
+            OutputBuilderAmount::MinimumAmount(params),
             delegated_amount,
             delegation_id,
             validator_address,
@@ -117,7 +117,7 @@ impl DelegationOutputBuilder {
 
     /// Sets the amount to the storage cost.
     pub fn with_minimum_amount(mut self, params: StorageScoreParameters) -> Self {
-        self.amount = OutputBuilderAmount::StorageCost(params);
+        self.amount = OutputBuilderAmount::MinimumAmount(params);
         self
     }
 
@@ -176,7 +176,7 @@ impl DelegationOutputBuilder {
     pub fn finish(self) -> Result<DelegationOutput, Error> {
         let amount = match self.amount {
             OutputBuilderAmount::Amount(amount) => amount,
-            OutputBuilderAmount::StorageCost(params) => self.storage_cost(params),
+            OutputBuilderAmount::MinimumAmount(params) => self.storage_cost(params),
         };
         verify_output_amount_min(amount)?;
 
@@ -587,7 +587,7 @@ pub(crate) mod dto {
                     *delegation_id,
                     *validator_address,
                 ),
-                OutputBuilderAmount::StorageCost(params) => DelegationOutputBuilder::new_with_minimum_amount(
+                OutputBuilderAmount::MinimumAmount(params) => DelegationOutputBuilder::new_with_minimum_amount(
                     params,
                     delegated_amount,
                     *delegation_id,

@@ -70,7 +70,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
                 if let Some(amount) = amount {
                     OutputBuilderAmount::Amount(amount)
                 } else {
-                    OutputBuilderAmount::StorageCost(client.get_storage_score_parameters().await?)
+                    OutputBuilderAmount::MinimumAmount(client.get_storage_score_parameters().await?)
                 },
                 mana,
                 native_tokens,
@@ -95,7 +95,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
                 if let Some(amount) = amount {
                     OutputBuilderAmount::Amount(amount)
                 } else {
-                    OutputBuilderAmount::StorageCost(client.get_storage_score_parameters().await?)
+                    OutputBuilderAmount::MinimumAmount(client.get_storage_score_parameters().await?)
                 },
                 mana,
                 native_tokens,
@@ -119,7 +119,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
                 if let Some(amount) = amount {
                     OutputBuilderAmount::Amount(amount)
                 } else {
-                    OutputBuilderAmount::StorageCost(client.get_storage_score_parameters().await?)
+                    OutputBuilderAmount::MinimumAmount(client.get_storage_score_parameters().await?)
                 },
                 native_tokens,
                 serial_number,
@@ -145,7 +145,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
                 if let Some(amount) = amount {
                     OutputBuilderAmount::Amount(amount)
                 } else {
-                    OutputBuilderAmount::StorageCost(client.get_storage_score_parameters().await?)
+                    OutputBuilderAmount::MinimumAmount(client.get_storage_score_parameters().await?)
                 },
                 mana,
                 native_tokens,

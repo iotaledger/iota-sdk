@@ -48,7 +48,7 @@ impl BasicOutputBuilder {
     /// The amount will be set to the storage cost of the resulting output.
     #[inline(always)]
     pub fn new_with_minimum_amount(params: StorageScoreParameters) -> Self {
-        Self::new(OutputBuilderAmount::StorageCost(params))
+        Self::new(OutputBuilderAmount::MinimumAmount(params))
     }
 
     fn new(amount: OutputBuilderAmount) -> Self {
@@ -65,7 +65,7 @@ impl BasicOutputBuilder {
     pub fn amount(&self) -> u64 {
         match self.amount {
             OutputBuilderAmount::Amount(amount) => amount,
-            OutputBuilderAmount::StorageCost(params) => self.storage_cost(params),
+            OutputBuilderAmount::MinimumAmount(params) => self.storage_cost(params),
         }
     }
 
@@ -79,7 +79,7 @@ impl BasicOutputBuilder {
     /// Sets the amount to the storage cost.
     #[inline(always)]
     pub fn with_minimum_amount(mut self, params: StorageScoreParameters) -> Self {
-        self.amount = OutputBuilderAmount::StorageCost(params);
+        self.amount = OutputBuilderAmount::MinimumAmount(params);
         self
     }
 
@@ -209,7 +209,7 @@ impl BasicOutputBuilder {
                     self
                 }
             }
-            OutputBuilderAmount::StorageCost(_) => self,
+            OutputBuilderAmount::MinimumAmount(_) => self,
         })
     }
 
@@ -217,7 +217,7 @@ impl BasicOutputBuilder {
     pub fn finish(self) -> Result<BasicOutput, Error> {
         let amount = match self.amount {
             OutputBuilderAmount::Amount(amount) => amount,
-            OutputBuilderAmount::StorageCost(params) => self.storage_cost(params),
+            OutputBuilderAmount::MinimumAmount(params) => self.storage_cost(params),
         };
         verify_output_amount_min(amount)?;
 
@@ -562,7 +562,7 @@ pub(crate) mod dto {
             let params = params.into();
             let mut builder = match amount {
                 OutputBuilderAmount::Amount(amount) => BasicOutputBuilder::new_with_amount(amount),
-                OutputBuilderAmount::StorageCost(params) => BasicOutputBuilder::new_with_minimum_amount(params),
+                OutputBuilderAmount::MinimumAmount(params) => BasicOutputBuilder::new_with_minimum_amount(params),
             }
             .with_mana(mana);
 

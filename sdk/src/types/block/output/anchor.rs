@@ -117,7 +117,7 @@ impl AnchorOutputBuilder {
     /// The amount will be set to the storage cost of the resulting output.
     #[inline(always)]
     pub fn new_with_minimum_amount(params: StorageScoreParameters, anchor_id: AnchorId) -> Self {
-        Self::new(OutputBuilderAmount::StorageCost(params), anchor_id)
+        Self::new(OutputBuilderAmount::MinimumAmount(params), anchor_id)
     }
 
     fn new(amount: OutputBuilderAmount, anchor_id: AnchorId) -> Self {
@@ -144,7 +144,7 @@ impl AnchorOutputBuilder {
     /// Sets the amount to the storage cost.
     #[inline(always)]
     pub fn with_minimum_amount(mut self, params: StorageScoreParameters) -> Self {
-        self.amount = OutputBuilderAmount::StorageCost(params);
+        self.amount = OutputBuilderAmount::MinimumAmount(params);
         self
     }
 
@@ -310,7 +310,7 @@ impl AnchorOutputBuilder {
 
         output.amount = match self.amount {
             OutputBuilderAmount::Amount(amount) => amount,
-            OutputBuilderAmount::StorageCost(params) => Output::Anchor(output.clone()).storage_cost(params),
+            OutputBuilderAmount::MinimumAmount(params) => Output::Anchor(output.clone()).storage_cost(params),
         };
 
         verify_output_amount_min(output.amount)?;
@@ -879,7 +879,7 @@ pub(crate) mod dto {
             let params = params.into();
             let mut builder = match amount {
                 OutputBuilderAmount::Amount(amount) => AnchorOutputBuilder::new_with_amount(amount, *anchor_id),
-                OutputBuilderAmount::StorageCost(params) => {
+                OutputBuilderAmount::MinimumAmount(params) => {
                     AnchorOutputBuilder::new_with_minimum_amount(params, *anchor_id)
                 }
             }
