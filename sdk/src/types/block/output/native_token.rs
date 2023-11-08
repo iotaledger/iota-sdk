@@ -80,6 +80,7 @@ impl Ord for NativeToken {
     }
 }
 
+// TODO remove when NT are a feature
 impl StorageScore for NativeToken {}
 
 #[inline]
