@@ -182,7 +182,7 @@ impl BasicOutputBuilder {
     }
 
     /// Finishes the [`BasicOutputBuilder`] into an [`Output`].
-    pub fn finish_output<'a>(self) -> Result<Output, Error> {
+    pub fn finish_output(self) -> Result<Output, Error> {
         Ok(Output::Basic(self.finish()?))
     }
 }

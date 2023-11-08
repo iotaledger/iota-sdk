@@ -297,7 +297,7 @@ impl FoundryOutputBuilder {
     }
 
     /// Finishes the [`FoundryOutputBuilder`] into an [`Output`].
-    pub fn finish_output<'a>(self) -> Result<Output, Error> {
+    pub fn finish_output(self) -> Result<Output, Error> {
         Ok(Output::Foundry(self.finish()?))
     }
 }

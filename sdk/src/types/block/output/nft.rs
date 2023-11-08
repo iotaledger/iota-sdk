@@ -257,7 +257,7 @@ impl NftOutputBuilder {
     }
 
     /// Finishes the [`NftOutputBuilder`] into an [`Output`].
-    pub fn finish_output<'a>(self) -> Result<Output, Error> {
+    pub fn finish_output(self) -> Result<Output, Error> {
         Ok(Output::Nft(self.finish()?))
     }
 }

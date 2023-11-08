@@ -271,7 +271,7 @@ impl AccountOutputBuilder {
     }
 
     /// Finishes the [`AccountOutputBuilder`] into an [`Output`].
-    pub fn finish_output<'a>(self) -> Result<Output, Error> {
+    pub fn finish_output(self) -> Result<Output, Error> {
         Ok(Output::Account(self.finish()?))
     }
 }
