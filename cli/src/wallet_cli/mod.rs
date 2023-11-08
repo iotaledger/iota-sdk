@@ -731,7 +731,6 @@ pub async fn send_native_token_command(
     let transaction = if gift_storage_deposit.unwrap_or(false) {
         // Send native tokens together with the required storage deposit
         let rent_structure = wallet.client().get_rent_structure().await?;
-        let token_supply = wallet.client().get_token_supply().await?;
 
         wallet.client().bech32_hrp_matches(address.hrp()).await?;
 
@@ -741,7 +740,7 @@ pub async fn send_native_token_command(
                 TokenId::from_str(&token_id)?,
                 U256::from_dec_str(&amount).map_err(|e| Error::Miscellaneous(e.to_string()))?,
             )?])
-            .finish_output(token_supply)?];
+            .finish_output()?];
 
         wallet.send_outputs(outputs, None).await?
     } else {

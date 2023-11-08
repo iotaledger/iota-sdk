@@ -34,7 +34,7 @@ fn transaction() {
     let output = Output::Basic(
         BasicOutput::build_with_amount(amount)
             .add_unlock_condition(AddressUnlockCondition::new(address))
-            .finish_with_params(&protocol_parameters)
+            .finish()
             .unwrap(),
     );
     let transaction = Transaction::builder(protocol_parameters.network_id())

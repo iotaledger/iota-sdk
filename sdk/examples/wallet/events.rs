@@ -56,7 +56,7 @@ async fn main() -> Result<()> {
     // send transaction
     let outputs = [BasicOutputBuilder::new_with_amount(SEND_AMOUNT)
         .add_unlock_condition(AddressUnlockCondition::new(Address::try_from_bech32(RECV_ADDRESS)?))
-        .finish_output(wallet.client().get_token_supply().await?)?];
+        .finish_output()?];
 
     let transaction = wallet.send_outputs(outputs, None).await?;
     println!("Transaction sent: {}", transaction.transaction_id);

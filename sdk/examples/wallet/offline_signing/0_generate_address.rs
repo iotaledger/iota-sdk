@@ -10,7 +10,7 @@
 
 use iota_sdk::{
     client::{
-        constants::{SHIMMER_BECH32_HRP, SHIMMER_COIN_TYPE},
+        constants::SHIMMER_COIN_TYPE,
         secret::{stronghold::StrongholdSecretManager, SecretManager},
     },
     crypto::keys::{bip39::Mnemonic, bip44::Bip44},
