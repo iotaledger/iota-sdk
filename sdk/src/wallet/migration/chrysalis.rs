@@ -179,12 +179,12 @@ fn decrypt_record(record_bytes: Vec<u8>, encryption_key: &[u8; 32]) -> crate::wa
     let mut pt = vec![0; ct.len()];
     // we can unwrap here since we know the lengths are valid
     XChaCha20Poly1305::decrypt(
-        encryption_key.try_into().unwrap(),
-        &nonce.try_into().unwrap(),
+        encryption_key.into(),
+        &nonce.into(),
         &[],
         &mut pt,
         &ct,
-        tag.as_slice().try_into().unwrap(),
+        tag.as_slice().into(),
     )
     .map_err(|e| Error::Migration(format!("{:?}", e)))?;
 
@@ -200,7 +200,7 @@ pub(crate) fn to_chrysalis_key(key: &[u8], stronghold: bool) -> Vec<u8> {
 
         let (id, _) = buf.split_at(24);
 
-        id.try_into().unwrap()
+        id.into()
     } else {
         key.into()
     }
