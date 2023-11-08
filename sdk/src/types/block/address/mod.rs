@@ -118,11 +118,7 @@ impl Address {
         context: &mut SemanticValidationContext<'_>,
     ) -> Result<(), TransactionFailureReason> {
         match (self, unlock) {
-            (
-                Self::Ed25519(ed25519_address)
-                | Self::ImplicitAccountCreation(ImplicitAccountCreationAddress(ed25519_address)),
-                Unlock::Signature(unlock),
-            ) => {
+            (Self::Ed25519(ed25519_address), Unlock::Signature(unlock)) => {
                 if context.unlocked_addresses.contains(self) {
                     return Err(TransactionFailureReason::InvalidInputUnlock);
                 }
@@ -138,7 +134,7 @@ impl Address {
 
                 context.unlocked_addresses.insert(self.clone());
             }
-            (Self::Ed25519(_) | Self::ImplicitAccountCreation(_), Unlock::Reference(_)) => {
+            (Self::Ed25519(_), Unlock::Reference(_)) => {
                 // TODO actually check that it was unlocked by the same signature.
                 if !context.unlocked_addresses.contains(self) {
                     return Err(TransactionFailureReason::InvalidInputUnlock);
@@ -172,6 +168,9 @@ impl Address {
             }
             // TODO maybe shouldn't be a semantic error but this function currently returns a TransactionFailureReason.
             (Self::Anchor(_), _) => return Err(TransactionFailureReason::SemanticValidationFailed),
+            (Self::ImplicitAccountCreation(ImplicitAccountCreationAddress(ed25519_address)), _) => {
+                Address::from(ed25519_address.clone()).unlock(unlock, context)?
+            }
             _ => return Err(TransactionFailureReason::InvalidInputUnlock),
         }
 
