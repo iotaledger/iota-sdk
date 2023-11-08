@@ -8,13 +8,13 @@ use crypto::hashes::{blake2b::Blake2b256, Digest};
 use getset::{CopyGetters, Getters};
 use packable::{prefix::StringPrefix, Packable, PackableExt};
 
-use super::{
-    address::Hrp,
-    mana::{ManaParameters, RewardsParameters},
-    slot::{EpochIndex, SlotIndex},
-};
 use crate::types::block::{
-    helper::network_name_to_id, output::StorageScoreParameters, ConvertTo, Error, PROTOCOL_VERSION,
+    address::Hrp,
+    helper::network_name_to_id,
+    mana::{ManaParameters, RewardsParameters},
+    output::StorageScoreParameters,
+    slot::{EpochIndex, SlotIndex},
+    ConvertTo, Error, PROTOCOL_VERSION,
 };
 
 /// Defines the parameters of the protocol at a particular version.

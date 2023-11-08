@@ -14,7 +14,6 @@ use packable::{
     Packable, PackableExt,
 };
 
-use super::{StorageScore, StorageScoreParameters};
 use crate::types::{
     block::{
         address::{Address, AnchorAddress},
@@ -25,6 +24,7 @@ use crate::types::{
             },
             verify_output_amount_min, verify_output_amount_packable, verify_output_amount_supply, ChainId, NativeToken,
             NativeTokens, Output, OutputBuilderAmount, OutputId, StateTransitionError, StateTransitionVerifier,
+            StorageScore, StorageScoreParameters,
         },
         payload::signed_transaction::TransactionCapabilityFlag,
         protocol::ProtocolParameters,

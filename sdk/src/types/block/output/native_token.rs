@@ -12,8 +12,10 @@ use iterator_sorted::is_unique_sorted;
 use packable::{bounded::BoundedU8, prefix::BoxedSlicePrefix, Packable};
 use primitive_types::U256;
 
-use super::StorageScore;
-use crate::types::block::{output::foundry::FoundryId, Error};
+use crate::types::block::{
+    output::{FoundryId, StorageScore},
+    Error,
+};
 
 crate::impl_id!(
     /// Unique identifier of a [`NativeToken`](crate::types::block::output::NativeToken).

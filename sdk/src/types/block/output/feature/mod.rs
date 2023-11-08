@@ -28,8 +28,11 @@ pub use self::{
     staking::StakingFeature,
     tag::TagFeature,
 };
-use super::{StorageScore, StorageScoreParameters};
-use crate::types::block::{create_bitflags, Error};
+use crate::types::block::{
+    create_bitflags,
+    output::{StorageScore, StorageScoreParameters},
+    Error,
+};
 
 ///
 #[derive(Clone, Eq, PartialEq, Hash, From, Packable)]
@@ -72,12 +75,12 @@ impl Ord for Feature {
 impl StorageScore for Feature {
     fn storage_score(&self, params: StorageScoreParameters) -> u64 {
         match self {
-            Self::Sender(f) => f.storage_score(params),
-            Self::Issuer(f) => f.storage_score(params),
-            Self::Metadata(f) => f.storage_score(params),
-            Self::Tag(f) => f.storage_score(params),
-            Self::BlockIssuer(f) => f.storage_score(params),
-            Self::Staking(f) => f.storage_score(params),
+            Self::Sender(feature) => feature.storage_score(params),
+            Self::Issuer(feature) => feature.storage_score(params),
+            Self::Metadata(feature) => feature.storage_score(params),
+            Self::Tag(feature) => feature.storage_score(params),
+            Self::BlockIssuer(feature) => feature.storage_score(params),
+            Self::Staking(feature) => feature.storage_score(params),
         }
     }
 }
