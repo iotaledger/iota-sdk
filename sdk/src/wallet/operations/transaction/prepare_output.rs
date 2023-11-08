@@ -117,6 +117,7 @@ where
         // TODO: Probably not good to use ed25519 always here, even if technically it's the same for now..
         let min_storage_deposit_basic_output = BasicOutputBuilder::new_with_minimum_amount(storage_params)
             .add_unlock_condition(AddressUnlockCondition::new(Ed25519Address::null()))
+            .finish()?
             .amount();
 
         let min_required_storage_deposit = first_output.storage_cost(storage_params);

@@ -161,6 +161,8 @@ impl StorageScoreParameters {
         let null_address = Ed25519Address::null();
         let basic_output_score = BasicOutputBuilder::new_with_amount(0)
             .add_unlock_condition(AddressUnlockCondition::new(null_address))
+            .finish()
+            .unwrap()
             .storage_score(*self);
         let ed25519_address_score = null_address.storage_score(*self);
         let basic_score_without_address = basic_output_score - ed25519_address_score;
@@ -168,6 +170,8 @@ impl StorageScoreParameters {
             .add_unlock_condition(GovernorAddressUnlockCondition::new(null_address))
             .add_unlock_condition(StateControllerAddressUnlockCondition::new(null_address))
             .add_feature(BlockIssuerFeature::new(0, [BlockIssuerKey::Ed25519(Ed25519BlockIssuerKey::null())]).unwrap())
+            .finish()
+            .unwrap()
             .storage_score(*self);
         account_output_score - basic_score_without_address
     }

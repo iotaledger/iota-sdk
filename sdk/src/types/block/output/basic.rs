@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use alloc::collections::BTreeSet;
-use core::mem::size_of;
 
 use packable::{Packable, PackableExt};
 
@@ -15,8 +14,8 @@ use crate::types::{
                 verify_allowed_unlock_conditions, AddressUnlockCondition, StorageDepositReturnUnlockCondition,
                 UnlockCondition, UnlockConditionFlags, UnlockConditions,
             },
-            verify_output_amount_min, verify_output_amount_packable, verify_output_amount_supply, NativeToken,
-            NativeTokens, Output, OutputBuilderAmount, OutputId, StorageScore, StorageScoreParameters,
+            verify_output_amount_packable, verify_output_amount_supply, NativeToken, NativeTokens, Output,
+            OutputBuilderAmount, OutputId, StorageScore, StorageScoreParameters,
         },
         protocol::ProtocolParameters,
         semantic::{SemanticValidationContext, TransactionFailureReason},
@@ -58,14 +57,6 @@ impl BasicOutputBuilder {
             native_tokens: BTreeSet::new(),
             unlock_conditions: BTreeSet::new(),
             features: BTreeSet::new(),
-        }
-    }
-
-    /// Gets the current amount as a concrete value.
-    pub fn amount(&self) -> u64 {
-        match self.amount {
-            OutputBuilderAmount::Amount(amount) => amount,
-            OutputBuilderAmount::MinimumAmount(params) => self.storage_cost(params),
         }
     }
 
@@ -174,12 +165,13 @@ impl BasicOutputBuilder {
             OutputBuilderAmount::Amount(amount) => {
                 let return_address = return_address.into();
                 // Get the current storage requirement
-                let storage_cost = self.storage_cost(params);
+                let storage_cost = self.clone().finish()?.storage_cost(params);
                 // Check whether we already have enough funds to cover it
                 if amount < storage_cost {
                     // Get the projected storage cost of the return output
                     let return_storage_cost = Self::new_with_amount(0)
                         .add_unlock_condition(AddressUnlockCondition::new(return_address.clone()))
+                        .finish()?
                         .storage_cost(params);
                     // Add a temporary storage deposit unlock condition so the new storage requirement can be calculated
                     self = self.add_unlock_condition(StorageDepositReturnUnlockCondition::new(
@@ -188,7 +180,7 @@ impl BasicOutputBuilder {
                         token_supply,
                     )?);
                     // Get the storage cost of the output with the added storage deposit return unlock condition
-                    let storage_cost_with_sdruc = self.storage_cost(params);
+                    let storage_cost_with_sdruc = self.clone().finish()?.storage_cost(params);
                     // If the return storage cost and amount are less than the required min
                     let (amount, sdruc_amount) = if storage_cost_with_sdruc >= return_storage_cost + amount {
                         // Then sending storage_cost_with_sdruc covers both minimum requirements
@@ -215,12 +207,6 @@ impl BasicOutputBuilder {
 
     ///
     pub fn finish(self) -> Result<BasicOutput, Error> {
-        let amount = match self.amount {
-            OutputBuilderAmount::Amount(amount) => amount,
-            OutputBuilderAmount::MinimumAmount(params) => self.storage_cost(params),
-        };
-        verify_output_amount_min(amount)?;
-
         let unlock_conditions = UnlockConditions::from_set(self.unlock_conditions)?;
 
         verify_unlock_conditions::<true>(&unlock_conditions)?;
@@ -229,13 +215,20 @@ impl BasicOutputBuilder {
 
         verify_features::<true>(&features)?;
 
-        Ok(BasicOutput {
-            amount,
+        let mut output = BasicOutput {
+            amount: 0,
             mana: self.mana,
             native_tokens: NativeTokens::from_set(self.native_tokens)?,
             unlock_conditions,
             features,
-        })
+        };
+
+        output.amount = match self.amount {
+            OutputBuilderAmount::Amount(amount) => amount,
+            OutputBuilderAmount::MinimumAmount(params) => output.storage_cost(params),
+        };
+
+        Ok(output)
     }
 
     ///
@@ -247,53 +240,12 @@ impl BasicOutputBuilder {
             verify_output_amount_supply(output.amount, token_supply)?;
         }
 
-        if let Some(params) = params.protocol_parameters() {
-            let storage_cost = output.storage_cost(params.storage_score_parameters());
-            if output.amount < storage_cost {
-                return Err(Error::InsufficientStorageDepositAmount {
-                    amount: output.amount,
-                    required: storage_cost,
-                });
-            }
-        }
-
         Ok(output)
     }
 
     /// Finishes the [`BasicOutputBuilder`] into an [`Output`].
     pub fn finish_output<'a>(self, params: impl Into<ValidationParams<'a>> + Send) -> Result<Output, Error> {
         Ok(Output::Basic(self.finish_with_params(params)?))
-    }
-
-    fn stored_len(&self) -> usize {
-        // Type
-        size_of::<u8>()
-            // Amount
-            + size_of::<u64>()
-            // Mana
-            + size_of::<u64>()
-            // Native Tokens
-            + size_of::<u8>()
-            + self.native_tokens.iter().map(|nt| nt.packed_len()).sum::<usize>()
-            // Unlock Conditions
-            + size_of::<u8>()
-            + self.unlock_conditions.iter().map(|uc| uc.packed_len()).sum::<usize>()
-            // Features
-            + size_of::<u8>()
-            + self.features.iter().map(|uc| uc.packed_len()).sum::<usize>()
-    }
-}
-
-impl StorageScore for BasicOutputBuilder {
-    fn storage_score(&self, params: StorageScoreParameters) -> u64 {
-        params.output_offset()
-            + self.stored_len() as u64 * params.data_factor() as u64
-            + self
-                .unlock_conditions
-                .iter()
-                .map(|uc| uc.storage_score(params))
-                .sum::<u64>()
-            + self.features.iter().map(|uc| uc.storage_score(params)).sum::<u64>()
     }
 }
 
@@ -420,24 +372,6 @@ impl BasicOutput {
         None
     }
 
-    fn stored_len(&self) -> usize {
-        // Type
-        size_of::<u8>()
-            // Amount
-            + size_of::<u64>()
-            // Mana
-            + size_of::<u64>()
-            // Native Tokens
-            + size_of::<u8>()
-            + self.native_tokens.iter().map(|nt| nt.packed_len()).sum::<usize>()
-            // Unlock Conditions
-            + size_of::<u8>()
-            + self.unlock_conditions.iter().map(|uc| uc.packed_len()).sum::<usize>()
-            // Features
-            + size_of::<u8>()
-            + self.features.iter().map(|uc| uc.packed_len()).sum::<usize>()
-    }
-
     /// Checks whether the basic output is an implicit account.
     pub fn is_implicit_account(&self) -> bool {
         if let [UnlockCondition::Address(uc)] = self.unlock_conditions().as_ref() {
@@ -451,7 +385,8 @@ impl BasicOutput {
 impl StorageScore for BasicOutput {
     fn storage_score(&self, params: StorageScoreParameters) -> u64 {
         params.output_offset()
-            + self.stored_len() as u64 * params.data_factor() as u64
+            + 1 // Type byte
+            + self.packed_len() as u64 * params.data_factor() as u64
             + self.unlock_conditions.storage_score(params)
             + self.features.storage_score(params)
     }

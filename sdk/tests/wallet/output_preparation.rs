@@ -617,6 +617,7 @@ async fn prepare_output_remainder_dust() -> Result<()> {
     let balance = wallet_0.sync(None).await?;
     let minimum_required_storage_deposit = BasicOutputBuilder::new_with_amount(0)
         .add_unlock_condition(AddressUnlockCondition::new(wallet_1.address().await))
+        .finish()?
         .storage_cost(storage_score_params);
 
     // Send away most balance so we can test with leaving dust

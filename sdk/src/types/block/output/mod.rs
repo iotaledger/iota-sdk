@@ -141,9 +141,6 @@ impl core::fmt::Debug for Output {
 }
 
 impl Output {
-    /// Minimum amount for an output.
-    pub const AMOUNT_MIN: u64 = 1;
-
     /// Return the output kind of an [`Output`].
     pub fn kind(&self) -> u8 {
         match self {
@@ -449,14 +446,6 @@ impl StorageScore for Output {
     }
 }
 
-pub(crate) fn verify_output_amount_min(amount: u64) -> Result<(), Error> {
-    if amount < Output::AMOUNT_MIN {
-        Err(Error::InvalidOutputAmount(amount))
-    } else {
-        Ok(())
-    }
-}
-
 pub(crate) fn verify_output_amount_supply(amount: u64, token_supply: u64) -> Result<(), Error> {
     if amount > token_supply {
         Err(Error::InvalidOutputAmount(amount))
@@ -466,7 +455,6 @@ pub(crate) fn verify_output_amount_supply(amount: u64, token_supply: u64) -> Res
 }
 
 pub(crate) fn verify_output_amount(amount: u64, token_supply: u64) -> Result<(), Error> {
-    verify_output_amount_min(amount)?;
     verify_output_amount_supply(amount, token_supply)
 }
 

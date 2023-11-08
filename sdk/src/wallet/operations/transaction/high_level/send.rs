@@ -169,11 +169,12 @@ where
                 .unwrap_or_else(|| default_return_address.clone());
 
             // Get the minimum required amount for an output assuming it does not need a storage deposit.
-            let output =
-                BasicOutputBuilder::new_with_amount(amount).add_unlock_condition(AddressUnlockCondition::new(address));
+            let output = BasicOutputBuilder::new_with_amount(amount)
+                .add_unlock_condition(AddressUnlockCondition::new(address))
+                .finish()?;
 
             if amount >= output.storage_cost(storage_params) {
-                outputs.push(output.finish_output(token_supply)?)
+                outputs.push(output.into())
             } else {
                 let expiration_slot_index = expiration
                     .map_or(slot_index + DEFAULT_EXPIRATION_SLOTS, |expiration_slot_index| {
@@ -181,7 +182,7 @@ where
                     });
 
                 // Since it does need a storage deposit, calculate how much that should be
-                let output = output
+                let output = BasicOutputBuilder::from(&output)
                     .add_unlock_condition(ExpirationUnlockCondition::new(
                         return_address.clone(),
                         expiration_slot_index,

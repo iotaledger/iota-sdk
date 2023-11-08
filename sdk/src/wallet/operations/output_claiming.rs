@@ -245,6 +245,7 @@ where
             .sum::<u64>()
             >= BasicOutputBuilder::new_with_minimum_amount(storage_score_params)
                 .add_unlock_condition(AddressUnlockCondition::new(Ed25519Address::null()))
+                .finish()?
                 .amount();
 
         // check native tokens
@@ -312,6 +313,7 @@ where
                 + BasicOutputBuilder::new_with_minimum_amount(storage_score_params)
                     .add_unlock_condition(AddressUnlockCondition::new(Ed25519Address::null()))
                     .with_native_tokens(option_native_token.into_iter().flatten())
+                    .finish()?
                     .amount()
         };
 
@@ -333,6 +335,7 @@ where
                     + BasicOutputBuilder::new_with_minimum_amount(storage_score_params)
                         .add_unlock_condition(AddressUnlockCondition::new(Ed25519Address::null()))
                         .with_native_tokens(option_native_token.into_iter().flatten())
+                        .finish()?
                         .amount();
 
                 if available_amount < required_amount {

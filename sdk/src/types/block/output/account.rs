@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use alloc::{collections::BTreeSet, vec::Vec};
-use core::mem::size_of;
 
 use hashbrown::HashMap;
 use packable::{
@@ -20,9 +19,9 @@ use crate::types::{
             unlock_condition::{
                 verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions,
             },
-            verify_output_amount_min, verify_output_amount_packable, verify_output_amount_supply, ChainId, NativeToken,
-            NativeTokens, Output, OutputBuilderAmount, OutputId, StateTransitionError, StateTransitionVerifier,
-            StorageScore, StorageScoreParameters,
+            verify_output_amount_packable, verify_output_amount_supply, ChainId, NativeToken, NativeTokens, Output,
+            OutputBuilderAmount, OutputId, StateTransitionError, StateTransitionVerifier, StorageScore,
+            StorageScoreParameters,
         },
         payload::signed_transaction::TransactionCapabilityFlag,
         protocol::ProtocolParameters,
@@ -233,12 +232,6 @@ impl AccountOutputBuilder {
 
     ///
     pub fn finish(self) -> Result<AccountOutput, Error> {
-        let amount = match self.amount {
-            OutputBuilderAmount::Amount(amount) => amount,
-            OutputBuilderAmount::MinimumAmount(params) => self.storage_cost(params),
-        };
-        verify_output_amount_min(amount)?;
-
         let foundry_counter = self.foundry_counter.unwrap_or(0);
 
         verify_index_counter(&self.account_id, foundry_counter)?;
@@ -255,8 +248,8 @@ impl AccountOutputBuilder {
 
         verify_allowed_features(&immutable_features, AccountOutput::ALLOWED_IMMUTABLE_FEATURES)?;
 
-        Ok(AccountOutput {
-            amount,
+        let mut output = AccountOutput {
+            amount: 0,
             mana: self.mana,
             native_tokens: NativeTokens::from_set(self.native_tokens)?,
             account_id: self.account_id,
@@ -264,7 +257,18 @@ impl AccountOutputBuilder {
             unlock_conditions,
             features,
             immutable_features,
-        })
+        };
+
+        if let OutputBuilderAmount::MinimumAmount(params) = self.amount {
+            output.amount = output.storage_cost(params);
+        }
+
+        output.amount = match self.amount {
+            OutputBuilderAmount::Amount(amount) => amount,
+            OutputBuilderAmount::MinimumAmount(params) => output.storage_cost(params),
+        };
+
+        Ok(output)
     }
 
     ///
@@ -285,33 +289,6 @@ impl AccountOutputBuilder {
     pub fn finish_output<'a>(self, params: impl Into<ValidationParams<'a>> + Send) -> Result<Output, Error> {
         Ok(Output::Account(self.finish_with_params(params)?))
     }
-
-    fn stored_len(&self) -> usize {
-        // Type
-        size_of::<u8>()
-            // Amount
-            + size_of::<u64>()
-            // Mana
-            + size_of::<u64>()
-            // Native Tokens
-            + size_of::<u8>()
-            + self.native_tokens.iter().map(|nt| nt.packed_len()).sum::<usize>()
-            // AccountId
-            + AccountId::LENGTH
-            // State Index
-            + size_of::<u32>()
-            // Foundry Counter
-            + size_of::<u32>()
-            // Unlock Conditions
-            + size_of::<u8>()
-            + self.unlock_conditions.iter().map(|uc| uc.packed_len()).sum::<usize>()
-            // Features
-            + size_of::<u8>()
-            + self.features.iter().map(|uc| uc.packed_len()).sum::<usize>()
-            // Immutable Features
-            + size_of::<u8>()
-            + self.immutable_features.iter().map(|uc| uc.packed_len()).sum::<usize>()
-    }
 }
 
 impl From<&AccountOutput> for AccountOutputBuilder {
@@ -326,24 +303,6 @@ impl From<&AccountOutput> for AccountOutputBuilder {
             features: output.features.iter().cloned().collect(),
             immutable_features: output.immutable_features.iter().cloned().collect(),
         }
-    }
-}
-
-impl StorageScore for AccountOutputBuilder {
-    fn storage_score(&self, params: StorageScoreParameters) -> u64 {
-        params.output_offset()
-            + self.stored_len() as u64 * params.data_factor() as u64
-            + self
-                .unlock_conditions
-                .iter()
-                .map(|uc| uc.storage_score(params))
-                .sum::<u64>()
-            + self.features.iter().map(|uc| uc.storage_score(params)).sum::<u64>()
-            + self
-                .immutable_features
-                .iter()
-                .map(|uc| uc.storage_score(params))
-                .sum::<u64>()
     }
 }
 
@@ -542,33 +501,6 @@ impl AccountOutput {
 
         Ok(())
     }
-
-    fn stored_len(&self) -> usize {
-        // Type
-        size_of::<u8>()
-            // Amount
-            + size_of::<u64>()
-            // Mana
-            + size_of::<u64>()
-            // Native Tokens
-            + size_of::<u8>()
-            + self.native_tokens.iter().map(|nt| nt.packed_len()).sum::<usize>()
-            // AccountId
-            + AccountId::LENGTH
-            // State Index
-            + size_of::<u32>()
-            // Foundry Counter
-            + size_of::<u32>()
-            // Unlock Conditions
-            + size_of::<u8>()
-            + self.unlock_conditions.iter().map(|uc| uc.packed_len()).sum::<usize>()
-            // Features
-            + size_of::<u8>()
-            + self.features.iter().map(|uc| uc.packed_len()).sum::<usize>()
-             // Immutable Features
-             + size_of::<u8>()
-             + self.immutable_features.iter().map(|uc| uc.packed_len()).sum::<usize>()
-    }
 }
 
 impl StateTransitionVerifier for AccountOutput {
@@ -613,7 +545,8 @@ impl StateTransitionVerifier for AccountOutput {
 impl StorageScore for AccountOutput {
     fn storage_score(&self, params: StorageScoreParameters) -> u64 {
         params.output_offset()
-            + self.stored_len() as u64 * params.data_factor() as u64
+            + 1 // Type byte
+            + self.packed_len() as u64 * params.data_factor() as u64
             + self.unlock_conditions.storage_score(params)
             + self.features.storage_score(params)
             + self.immutable_features.storage_score(params)

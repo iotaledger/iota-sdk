@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use alloc::{collections::BTreeSet, vec::Vec};
-use core::mem::size_of;
 
 use hashbrown::HashMap;
 use packable::{
@@ -22,9 +21,9 @@ use crate::types::{
             unlock_condition::{
                 verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions,
             },
-            verify_output_amount_min, verify_output_amount_packable, verify_output_amount_supply, ChainId, NativeToken,
-            NativeTokens, Output, OutputBuilderAmount, OutputId, StateTransitionError, StateTransitionVerifier,
-            StorageScore, StorageScoreParameters,
+            verify_output_amount_packable, verify_output_amount_supply, ChainId, NativeToken, NativeTokens, Output,
+            OutputBuilderAmount, OutputId, StateTransitionError, StateTransitionVerifier, StorageScore,
+            StorageScoreParameters,
         },
         payload::signed_transaction::TransactionCapabilityFlag,
         protocol::ProtocolParameters,
@@ -297,7 +296,7 @@ impl AnchorOutputBuilder {
         verify_allowed_features(&immutable_features, AnchorOutput::ALLOWED_IMMUTABLE_FEATURES)?;
 
         let mut output = AnchorOutput {
-            amount: 1,
+            amount: 0,
             mana: self.mana,
             native_tokens: NativeTokens::from_set(self.native_tokens)?,
             anchor_id: self.anchor_id,
@@ -310,10 +309,8 @@ impl AnchorOutputBuilder {
 
         output.amount = match self.amount {
             OutputBuilderAmount::Amount(amount) => amount,
-            OutputBuilderAmount::MinimumAmount(params) => Output::Anchor(output.clone()).storage_cost(params),
+            OutputBuilderAmount::MinimumAmount(params) => output.storage_cost(params),
         };
-
-        verify_output_amount_min(output.amount)?;
 
         Ok(output)
     }
@@ -332,47 +329,6 @@ impl AnchorOutputBuilder {
     /// Finishes the [`AnchorOutputBuilder`] into an [`Output`].
     pub fn finish_output<'a>(self, params: impl Into<ValidationParams<'a>> + Send) -> Result<Output, Error> {
         Ok(Output::Anchor(self.finish_with_params(params)?))
-    }
-
-    fn stored_len(&self) -> usize {
-        // Type
-        size_of::<u8>()
-            // Amount
-            + size_of::<u64>()
-            // Mana
-            + size_of::<u64>()
-            // Native Tokens
-            + size_of::<u8>()
-            + self.native_tokens.iter().map(|nt| nt.packed_len()).sum::<usize>()
-            // Anchor Id
-            + AnchorId::LENGTH
-            // State Index
-            + size_of::<u32>()
-            // State Metadata
-            + size_of::<u8>()
-            + self.state_metadata.len()
-            // Unlock Conditions
-            + size_of::<u8>()
-            + self.unlock_conditions.iter().map(|uc| uc.packed_len()).sum::<usize>()
-            // Features
-            + size_of::<u8>()
-            + self.features.iter().map(|uc| uc.packed_len()).sum::<usize>()
-            // Immutable Features
-            + size_of::<u8>()
-            + self.immutable_features.iter().map(|uc| uc.packed_len()).sum::<usize>()
-    }
-}
-
-impl StorageScore for AnchorOutputBuilder {
-    fn storage_score(&self, params: StorageScoreParameters) -> u64 {
-        params.output_offset()
-            + self.stored_len() as u64 * params.data_factor() as u64
-            + self
-                .unlock_conditions
-                .iter()
-                .map(|uc| uc.storage_score(params))
-                .sum::<u64>()
-            + self.features.iter().map(|uc| uc.storage_score(params)).sum::<u64>()
     }
 }
 
@@ -603,40 +559,13 @@ impl AnchorOutput {
 
         Ok(())
     }
-
-    fn stored_len(&self) -> usize {
-        // Type
-        size_of::<u8>()
-            // Amount
-            + size_of::<u64>()
-            // Mana
-            + size_of::<u64>()
-            // Native Tokens
-            + size_of::<u8>()
-            + self.native_tokens.iter().map(|nt| nt.packed_len()).sum::<usize>()
-            // Anchor Id
-            + AnchorId::LENGTH
-            // State Index
-            + size_of::<u32>()
-            // State Metadata
-            + size_of::<u8>()
-            + self.state_metadata.len()
-            // Unlock Conditions
-            + size_of::<u8>()
-            + self.unlock_conditions.iter().map(|uc| uc.packed_len()).sum::<usize>()
-            // Features
-            + size_of::<u8>()
-            + self.features.iter().map(|uc| uc.packed_len()).sum::<usize>()
-            // Immutable Features
-            + size_of::<u8>()
-            + self.immutable_features.iter().map(|uc| uc.packed_len()).sum::<usize>()
-    }
 }
 
 impl StorageScore for AnchorOutput {
     fn storage_score(&self, params: StorageScoreParameters) -> u64 {
         params.output_offset()
-            + self.stored_len() as u64 * params.data_factor() as u64
+            + 1 // Type byte
+            + self.packed_len() as u64 * params.data_factor() as u64
             + self.unlock_conditions.storage_score(params)
             + self.features.storage_score(params)
     }

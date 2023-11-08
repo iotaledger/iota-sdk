@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use alloc::collections::BTreeSet;
-use core::mem::size_of;
 
 use packable::{Packable, PackableExt};
 
@@ -14,9 +13,8 @@ use crate::types::{
             unlock_condition::{
                 verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions,
             },
-            verify_output_amount_min, verify_output_amount_packable, verify_output_amount_supply, Output,
-            OutputBuilderAmount, OutputId, StateTransitionError, StateTransitionVerifier, StorageScore,
-            StorageScoreParameters,
+            verify_output_amount_packable, verify_output_amount_supply, Output, OutputBuilderAmount, OutputId,
+            StateTransitionError, StateTransitionVerifier, StorageScore, StorageScoreParameters,
         },
         protocol::ProtocolParameters,
         semantic::{SemanticValidationContext, TransactionFailureReason},
@@ -174,27 +172,28 @@ impl DelegationOutputBuilder {
 
     /// Finishes the builder into a [`DelegationOutput`] without parameters verification.
     pub fn finish(self) -> Result<DelegationOutput, Error> {
-        let amount = match self.amount {
-            OutputBuilderAmount::Amount(amount) => amount,
-            OutputBuilderAmount::MinimumAmount(params) => self.storage_cost(params),
-        };
-        verify_output_amount_min(amount)?;
-
         verify_validator_address::<true>(&self.validator_address)?;
 
         let unlock_conditions = UnlockConditions::from_set(self.unlock_conditions)?;
 
         verify_unlock_conditions::<true>(&unlock_conditions)?;
 
-        Ok(DelegationOutput {
-            amount,
+        let mut output = DelegationOutput {
+            amount: 0,
             delegated_amount: self.delegated_amount,
             delegation_id: self.delegation_id,
             validator_address: self.validator_address,
             start_epoch: self.start_epoch,
             end_epoch: self.end_epoch,
             unlock_conditions,
-        })
+        };
+
+        output.amount = match self.amount {
+            OutputBuilderAmount::Amount(amount) => amount,
+            OutputBuilderAmount::MinimumAmount(params) => output.storage_cost(params),
+        };
+
+        Ok(output)
     }
 
     /// Finishes the builder into a [`DelegationOutput`] with parameters verification.
@@ -214,37 +213,6 @@ impl DelegationOutputBuilder {
     /// Finishes the [`DelegationOutputBuilder`] into an [`Output`].
     pub fn finish_output(self, token_supply: u64) -> Result<Output, Error> {
         Ok(Output::Delegation(self.finish_with_params(token_supply)?))
-    }
-
-    fn stored_len(&self) -> usize {
-        // Type
-        size_of::<u8>()
-            // Amount
-            + size_of::<u64>()
-            // Delegated Amount
-            + size_of::<u64>()
-            // DelegationId
-            + DelegationId::LENGTH
-            // Account Address
-            + AccountAddress::LENGTH
-            // Start/End Epoch
-            + 2 * size_of::<EpochIndex>()
-            // Unlock Conditions
-            + size_of::<u8>()
-            + self.unlock_conditions.iter().map(|uc| uc.packed_len()).sum::<usize>()
-    }
-}
-
-impl StorageScore for DelegationOutputBuilder {
-    fn storage_score(&self, params: StorageScoreParameters) -> u64 {
-        params.output_offset()
-            + self.stored_len() as u64 * params.data_factor() as u64
-            + params.delegation_offset()
-            + self
-                .unlock_conditions
-                .iter()
-                .map(|uc| uc.storage_score(params))
-                .sum::<u64>()
     }
 }
 
@@ -396,24 +364,6 @@ impl DelegationOutput {
         // TODO add end_epoch validation rules
         Ok(())
     }
-
-    fn stored_len(&self) -> usize {
-        // Type
-        size_of::<u8>()
-            // Amount
-            + size_of::<u64>()
-            // Delegated Amount
-            + size_of::<u64>()
-            // DelegationId
-            + DelegationId::LENGTH
-            // Account Address
-            + AccountAddress::LENGTH
-            // Start/End Epoch
-            + 2 * size_of::<EpochIndex>()
-            // Unlock Conditions
-            + size_of::<u8>()
-            + self.unlock_conditions.iter().map(|uc| uc.packed_len()).sum::<usize>()
-    }
 }
 
 impl StateTransitionVerifier for DelegationOutput {
@@ -453,7 +403,8 @@ impl StateTransitionVerifier for DelegationOutput {
 impl StorageScore for DelegationOutput {
     fn storage_score(&self, params: StorageScoreParameters) -> u64 {
         params.output_offset()
-            + self.stored_len() as u64 * params.data_factor() as u64
+            + 1 // Type byte
+            + self.packed_len() as u64 * params.data_factor() as u64
             + params.delegation_offset()
             + self.unlock_conditions.storage_score(params)
     }

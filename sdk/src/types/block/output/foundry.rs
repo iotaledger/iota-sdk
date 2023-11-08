@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use alloc::collections::{BTreeMap, BTreeSet};
-use core::{cmp::Ordering, mem::size_of};
+use core::cmp::Ordering;
 
 use packable::{
     error::{UnpackError, UnpackErrorExt},
@@ -21,9 +21,9 @@ use crate::types::{
             unlock_condition::{
                 verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions,
             },
-            verify_output_amount_min, verify_output_amount_packable, verify_output_amount_supply, ChainId, NativeToken,
-            NativeTokens, Output, OutputBuilderAmount, OutputId, StateTransitionError, StateTransitionVerifier,
-            StorageScore, StorageScoreParameters, TokenId, TokenScheme,
+            verify_output_amount_packable, verify_output_amount_supply, ChainId, NativeToken, NativeTokens, Output,
+            OutputBuilderAmount, OutputId, StateTransitionError, StateTransitionVerifier, StorageScore,
+            StorageScoreParameters, TokenId, TokenScheme,
         },
         payload::signed_transaction::{TransactionCapabilities, TransactionCapabilityFlag},
         protocol::ProtocolParameters,
@@ -258,12 +258,6 @@ impl FoundryOutputBuilder {
             return Err(Error::InvalidFoundryZeroSerialNumber);
         }
 
-        let amount = match self.amount {
-            OutputBuilderAmount::Amount(amount) => amount,
-            OutputBuilderAmount::MinimumAmount(params) => self.storage_cost(params),
-        };
-        verify_output_amount_min(amount)?;
-
         let unlock_conditions = UnlockConditions::from_set(self.unlock_conditions)?;
 
         verify_unlock_conditions(&unlock_conditions)?;
@@ -276,15 +270,22 @@ impl FoundryOutputBuilder {
 
         verify_allowed_features(&immutable_features, FoundryOutput::ALLOWED_IMMUTABLE_FEATURES)?;
 
-        Ok(FoundryOutput {
-            amount,
+        let mut output = FoundryOutput {
+            amount: 0,
             native_tokens: NativeTokens::from_set(self.native_tokens)?,
             serial_number: self.serial_number,
             token_scheme: self.token_scheme,
             unlock_conditions,
             features,
             immutable_features,
-        })
+        };
+
+        output.amount = match self.amount {
+            OutputBuilderAmount::Amount(amount) => amount,
+            OutputBuilderAmount::MinimumAmount(params) => output.storage_cost(params),
+        };
+
+        Ok(output)
     }
 
     ///
@@ -304,47 +305,6 @@ impl FoundryOutputBuilder {
     /// Finishes the [`FoundryOutputBuilder`] into an [`Output`].
     pub fn finish_output<'a>(self, params: impl Into<ValidationParams<'a>> + Send) -> Result<Output, Error> {
         Ok(Output::Foundry(self.finish_with_params(params)?))
-    }
-
-    fn stored_len(&self) -> usize {
-        // Type
-        size_of::<u8>()
-            // Amount
-            + size_of::<u64>()
-            // Native Tokens
-            + size_of::<u8>()
-            + self.native_tokens.iter().map(|nt| nt.packed_len()).sum::<usize>()
-            // Serial Number
-            + size_of::<u32>()
-            // Token Scheme
-            + self.token_scheme.packed_len()
-            // Unlock Conditions
-            + size_of::<u8>()
-            + self.unlock_conditions.iter().map(|uc| uc.packed_len()).sum::<usize>()
-            // Features
-            + size_of::<u8>()
-            + self.features.iter().map(|uc| uc.packed_len()).sum::<usize>()
-            // Immutable Features
-            + size_of::<u8>()
-            + self.immutable_features.iter().map(|uc| uc.packed_len()).sum::<usize>()
-    }
-}
-
-impl StorageScore for FoundryOutputBuilder {
-    fn storage_score(&self, params: StorageScoreParameters) -> u64 {
-        params.output_offset()
-            + self.stored_len() as u64 * params.data_factor() as u64
-            + self
-                .unlock_conditions
-                .iter()
-                .map(|uc| uc.storage_score(params))
-                .sum::<u64>()
-            + self.features.iter().map(|uc| uc.storage_score(params)).sum::<u64>()
-            + self
-                .immutable_features
-                .iter()
-                .map(|uc| uc.storage_score(params))
-                .sum::<u64>()
     }
 }
 
@@ -571,35 +531,13 @@ impl FoundryOutput {
 
         Ok(())
     }
-
-    fn stored_len(&self) -> usize {
-        // Type
-        size_of::<u8>()
-            // Amount
-            + size_of::<u64>()
-            // Native Tokens
-            + size_of::<u8>()
-            + self.native_tokens.iter().map(|nt| nt.packed_len()).sum::<usize>()
-            // Serial Number
-            + size_of::<u32>()
-            // Token Scheme
-            + self.token_scheme.packed_len()
-            // Unlock Conditions
-            + size_of::<u8>()
-            + self.unlock_conditions.iter().map(|uc| uc.packed_len()).sum::<usize>()
-            // Features
-            + size_of::<u8>()
-            + self.features.iter().map(|uc| uc.packed_len()).sum::<usize>()
-            // Immutable Features
-            + size_of::<u8>()
-            + self.immutable_features.iter().map(|uc| uc.packed_len()).sum::<usize>()
-    }
 }
 
 impl StorageScore for FoundryOutput {
     fn storage_score(&self, params: StorageScoreParameters) -> u64 {
         params.output_offset()
-            + self.stored_len() as u64 * params.data_factor() as u64
+            + 1 // Type byte
+            + self.packed_len() as u64 * params.data_factor() as u64
             + self.unlock_conditions.storage_score(params)
             + self.features.storage_score(params)
             + self.immutable_features.storage_score(params)
