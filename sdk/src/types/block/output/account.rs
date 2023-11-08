@@ -15,13 +15,17 @@ use crate::types::{
     block::{
         address::{AccountAddress, Address},
         output::{
-            feature::{verify_allowed_features, Feature, FeatureFlags, Features},
-            unlock_condition::{
-                verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions,
+            feature::{
+                verify_allowed_features, BlockIssuerFeature, BlockIssuerKey, BlockIssuerKeys, Ed25519BlockIssuerKey,
+                Feature, FeatureFlags, Features,
             },
-            verify_output_amount_min, verify_output_amount_packable, verify_output_amount_supply, ChainId, NativeToken,
-            NativeTokens, Output, OutputBuilderAmount, OutputId, Rent, RentStructure, StateTransitionError,
-            StateTransitionVerifier,
+            unlock_condition::{
+                verify_allowed_unlock_conditions, AddressUnlockCondition, UnlockCondition, UnlockConditionFlags,
+                UnlockConditions,
+            },
+            verify_output_amount_min, verify_output_amount_packable, verify_output_amount_supply, BasicOutput, ChainId,
+            NativeToken, NativeTokens, Output, OutputBuilderAmount, OutputId, Rent, RentStructure,
+            StateTransitionError, StateTransitionVerifier,
         },
         payload::signed_transaction::TransactionCapabilityFlag,
         protocol::ProtocolParameters,
@@ -48,7 +52,11 @@ impl From<&OutputId> for AccountId {
 impl AccountId {
     ///
     pub fn or_from_output_id(self, output_id: &OutputId) -> Self {
-        if self.is_null() { Self::from(output_id) } else { self }
+        if self.is_null() {
+            Self::from(output_id)
+        } else {
+            self
+        }
     }
 }
 
@@ -95,6 +103,22 @@ impl AccountOutputBuilder {
             features: BTreeSet::new(),
             immutable_features: BTreeSet::new(),
         }
+    }
+
+    pub fn from_implicit_account(output: &BasicOutput, output_id: &OutputId) -> Result<Self, Error> {
+        if !output.is_implicit_account() {
+            panic!()
+        }
+
+        Ok(Self::new_with_amount(output.amount(), AccountId::from(output_id))
+            .with_mana(output.mana())
+            .with_unlock_conditions([AddressUnlockCondition::from(output.address().clone())])
+            .with_features([BlockIssuerFeature::new(
+                0,
+                BlockIssuerKeys::from_vec([BlockIssuerKey::from(Ed25519BlockIssuerKey::from(
+                    output.address().as_implicit_account_creation(),
+                ))])?,
+            )]))
     }
 
     /// Sets the amount to the provided value.
@@ -331,7 +355,10 @@ impl AccountOutput {
     /// The set of allowed [`UnlockCondition`]s for an [`AccountOutput`].
     pub const ALLOWED_UNLOCK_CONDITIONS: UnlockConditionFlags = UnlockConditionFlags::ADDRESS;
     /// The set of allowed [`Feature`]s for an [`AccountOutput`].
-    pub const ALLOWED_FEATURES: FeatureFlags = FeatureFlags::SENDER.union(FeatureFlags::METADATA);
+    pub const ALLOWED_FEATURES: FeatureFlags = FeatureFlags::SENDER
+        .union(FeatureFlags::METADATA)
+        .union(FeatureFlags::BLOCK_ISSUER)
+        .union(FeatureFlags::STAKING);
     /// The set of allowed immutable [`Feature`]s for an [`AccountOutput`].
     pub const ALLOWED_IMMUTABLE_FEATURES: FeatureFlags = FeatureFlags::ISSUER.union(FeatureFlags::METADATA);
 
