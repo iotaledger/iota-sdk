@@ -430,7 +430,7 @@ async fn output_preparation_sdr() -> Result<()> {
     let wallet = make_wallet(storage_path, None, None).await?;
     request_funds(&wallet).await?;
 
-    let storage_params = wallet.client().get_storage_score_parameters().await?;
+    let storage_score_params = wallet.client().get_storage_score_parameters().await?;
     let token_supply = wallet.client().get_token_supply().await?;
 
     let recipient_address_bech32 = String::from("rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu");
@@ -452,7 +452,7 @@ async fn output_preparation_sdr() -> Result<()> {
         )
         .await?;
     // Check if the output has enough amount to cover the storage deposit
-    output.verify_storage_deposit(storage_params, token_supply)?;
+    output.verify_storage_deposit(storage_score_params, token_supply)?;
     assert_eq!(output.amount(), 50601);
     // address and sdr unlock condition
     assert_eq!(output.unlock_conditions().unwrap().len(), 2);
@@ -473,7 +473,7 @@ async fn output_preparation_sdr() -> Result<()> {
         )
         .await?;
     // Check if the output has enough amount to cover the storage deposit
-    output.verify_storage_deposit(storage_params, token_supply)?;
+    output.verify_storage_deposit(storage_score_params, token_supply)?;
     assert_eq!(output.amount(), 85199);
     // address and sdr unlock condition
     assert_eq!(output.unlock_conditions().unwrap().len(), 2);
@@ -498,7 +498,7 @@ async fn output_preparation_sdr() -> Result<()> {
         )
         .await?;
     // Check if the output has enough amount to cover the storage deposit
-    output.verify_storage_deposit(storage_params, token_supply)?;
+    output.verify_storage_deposit(storage_score_params, token_supply)?;
     assert_eq!(output.amount(), 85199);
     // address and sdr unlock condition
     assert_eq!(output.unlock_conditions().unwrap().len(), 2);
@@ -523,7 +523,7 @@ async fn output_preparation_sdr() -> Result<()> {
         )
         .await?;
     // Check if the output has enough amount to cover the storage deposit
-    output.verify_storage_deposit(storage_params, token_supply)?;
+    output.verify_storage_deposit(storage_score_params, token_supply)?;
     // The additional 1 amount will be added, because the storage deposit should be gifted and not returned
     assert_eq!(output.amount(), 42600);
     // storage deposit gifted, only address unlock condition
@@ -611,13 +611,13 @@ async fn prepare_output_remainder_dust() -> Result<()> {
     request_funds(&wallet_0).await?;
     request_funds(&wallet_1).await?;
 
-    let storage_params = wallet_0.client().get_storage_score_parameters().await?;
+    let storage_score_params = wallet_0.client().get_storage_score_parameters().await?;
     let token_supply = wallet_0.client().get_token_supply().await?;
 
     let balance = wallet_0.sync(None).await?;
     let minimum_required_storage_deposit = BasicOutputBuilder::new_with_amount(0)
         .add_unlock_condition(AddressUnlockCondition::new(wallet_1.address().await))
-        .storage_cost(storage_params);
+        .storage_cost(storage_score_params);
 
     // Send away most balance so we can test with leaving dust
     let output = wallet_0
@@ -658,7 +658,7 @@ async fn prepare_output_remainder_dust() -> Result<()> {
         .await?;
 
     // Check if the output has enough amount to cover the storage deposit
-    output.verify_storage_deposit(storage_params, token_supply)?;
+    output.verify_storage_deposit(storage_score_params, token_supply)?;
     // The left over 21299 is too small to keep, so we donate it
     assert_eq!(output.amount(), balance.base_coin().available());
     // storage deposit gifted, only address unlock condition
@@ -702,7 +702,7 @@ async fn prepare_output_remainder_dust() -> Result<()> {
         .await?;
 
     // Check if the output has enough amount to cover the storage deposit
-    output.verify_storage_deposit(storage_params, token_supply)?;
+    output.verify_storage_deposit(storage_score_params, token_supply)?;
     // We use excess if leftover is too small, so amount == all available balance
     assert_eq!(output.amount(), 63900);
     // storage deposit gifted, only address unlock condition
@@ -726,7 +726,7 @@ async fn prepare_output_remainder_dust() -> Result<()> {
         .await?;
 
     // Check if the output has enough amount to cover the storage deposit
-    output.verify_storage_deposit(storage_params, token_supply)?;
+    output.verify_storage_deposit(storage_score_params, token_supply)?;
     // We use excess if leftover is too small, so amount == all available balance
     assert_eq!(output.amount(), 63900);
     // storage deposit returned, address and SDR unlock condition

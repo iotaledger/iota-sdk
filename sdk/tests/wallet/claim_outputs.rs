@@ -141,11 +141,11 @@ async fn claim_2_basic_outputs_no_outputs_in_claim_account() -> Result<()> {
     request_funds(&wallet_0).await?;
 
     let token_supply = wallet_0.client().get_token_supply().await?;
-    let storage_params = wallet_0.client().get_storage_score_parameters().await?;
+    let storage_score_params = wallet_0.client().get_storage_score_parameters().await?;
     // TODO more fitting value
     let expiration_slot = wallet_0.client().get_slot_index().await? + 86400;
 
-    let output = BasicOutputBuilder::new_with_minimum_amount(storage_params)
+    let output = BasicOutputBuilder::new_with_minimum_amount(storage_score_params)
         .add_unlock_condition(AddressUnlockCondition::new(wallet_1.address().await))
         .add_unlock_condition(ExpirationUnlockCondition::new(
             wallet_0.address().await,
@@ -337,13 +337,13 @@ async fn claim_2_native_tokens_no_outputs_in_claim_account() -> Result<()> {
         .await?;
     wallet_0.sync(None).await?;
 
-    let storage_params = wallet_0.client().get_storage_score_parameters().await?;
+    let storage_score_params = wallet_0.client().get_storage_score_parameters().await?;
     let token_supply = wallet_0.client().get_token_supply().await?;
 
     let tx = wallet_0
         .send_outputs(
             [
-                BasicOutputBuilder::new_with_minimum_amount(storage_params)
+                BasicOutputBuilder::new_with_minimum_amount(storage_score_params)
                     .add_unlock_condition(AddressUnlockCondition::new(wallet_1.address().await))
                     .add_unlock_condition(ExpirationUnlockCondition::new(
                         wallet_0.address().await,
@@ -351,7 +351,7 @@ async fn claim_2_native_tokens_no_outputs_in_claim_account() -> Result<()> {
                     )?)
                     .add_native_token(NativeToken::new(create_tx_0.token_id, native_token_amount)?)
                     .finish_output(token_supply)?,
-                BasicOutputBuilder::new_with_minimum_amount(storage_params)
+                BasicOutputBuilder::new_with_minimum_amount(storage_score_params)
                     .add_unlock_condition(AddressUnlockCondition::new(wallet_1.address().await))
                     .add_unlock_condition(ExpirationUnlockCondition::new(
                         wallet_0.address().await,
