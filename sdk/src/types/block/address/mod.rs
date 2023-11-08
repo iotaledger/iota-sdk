@@ -169,7 +169,7 @@ impl Address {
             // TODO maybe shouldn't be a semantic error but this function currently returns a TransactionFailureReason.
             (Self::Anchor(_), _) => return Err(TransactionFailureReason::SemanticValidationFailed),
             (Self::ImplicitAccountCreation(ImplicitAccountCreationAddress(ed25519_address)), _) => {
-                Address::from(ed25519_address.clone()).unlock(unlock, context)?
+                Address::from(ed25519_address.clone()).unlock(unlock, context)?;
             }
             _ => return Err(TransactionFailureReason::InvalidInputUnlock),
         }
