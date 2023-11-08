@@ -196,7 +196,7 @@ where
                         )?,
                     )
                     .add_unlock_condition(ExpirationUnlockCondition::new(return_address, expiration_slot_index)?)
-                    .finish_output(token_supply)?,
+                    .finish_output()?,
             )
         }
 
