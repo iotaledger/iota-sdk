@@ -64,8 +64,8 @@
 //         .await?[0];
 
 //     let nft_output =
-//         NftOutputBuilder::new_with_minimum_storage_deposit(*protocol_parameters.params(), NftId::null())
-//             .with_unlock_conditions([UnlockCondition::Address(AddressUnlockCondition::new(address))])
+//         NftOutputBuilder::new_with_minimum_storage_deposit(*protocol_parameters.storage_score_parameters(),
+// NftId::null())             .with_unlock_conditions([UnlockCondition::Address(AddressUnlockCondition::new(address))])
 //             .finish_output(protocol_parameters.token_supply())?;
 
 //     let block = client
@@ -121,7 +121,7 @@
 //     );
 
 //     let foundry_output = FoundryOutputBuilder::new_with_minimum_storage_deposit(
-//         *protocol_parameters.params(),
+//         *protocol_parameters.storage_score_parameters(),
 //         alias_output_0.as_alias().foundry_counter() + 1,
 //         TokenScheme::Simple(SimpleTokenScheme::new(100, 0, 500)?),
 //     )

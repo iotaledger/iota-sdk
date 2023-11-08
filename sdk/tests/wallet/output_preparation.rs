@@ -406,8 +406,8 @@ async fn output_preparation() -> Result<()> {
             None,
         )
         .await?;
-    let params = wallet.client().get_storage_score_parameters().await?;
-    let minimum_storage_deposit = output.storage_cost(params);
+    let storage_score_params = wallet.client().get_storage_score_parameters().await?;
+    let minimum_storage_deposit = output.storage_cost(storage_score_params);
     assert_eq!(output.amount(), minimum_storage_deposit);
     assert_eq!(output.amount(), 187900);
     let sdr = output.unlock_conditions().unwrap().storage_deposit_return().unwrap();
@@ -855,8 +855,8 @@ async fn prepare_existing_nft_output_gift() -> Result<()> {
         .as_nft()
         .clone();
 
-    let params = wallet.client().get_storage_score_parameters().await?;
-    let minimum_storage_deposit = nft.storage_cost(params);
+    let storage_score_params = wallet.client().get_storage_score_parameters().await?;
+    let minimum_storage_deposit = nft.storage_cost(storage_score_params);
     assert_eq!(nft.amount(), minimum_storage_deposit);
 
     assert_eq!(nft.amount(), 52300);

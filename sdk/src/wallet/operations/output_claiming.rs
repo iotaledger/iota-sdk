@@ -200,7 +200,7 @@ where
         log::debug!("[OUTPUT_CLAIMING] claim_outputs_internal");
 
         let slot_index = self.client().get_slot_index().await?;
-        let params = self.client().get_storage_score_parameters().await?;
+        let storage_score_params = self.client().get_storage_score_parameters().await?;
         let token_supply = self.client().get_token_supply().await?;
 
         let wallet_data = self.data().await;
@@ -243,7 +243,7 @@ where
             .iter()
             .map(|i| i.output.amount())
             .sum::<u64>()
-            >= BasicOutputBuilder::new_with_minimum_amount(params)
+            >= BasicOutputBuilder::new_with_minimum_amount(storage_score_params)
                 .add_unlock_condition(AddressUnlockCondition::new(Ed25519Address::null()))
                 .amount();
 
@@ -282,7 +282,7 @@ where
                         .finish_output(token_supply)?
                 } else {
                     NftOutputBuilder::from(nft_output)
-                        .with_minimum_amount(params)
+                        .with_minimum_amount(storage_score_params)
                         .with_nft_id(nft_output.nft_id_non_null(&output_data.output_id))
                         .with_unlock_conditions([AddressUnlockCondition::new(wallet_address.clone())])
                         // Set native tokens empty, we will collect them from all inputs later
@@ -309,7 +309,7 @@ where
             required_amount_for_nfts
         } else {
             required_amount_for_nfts
-                + BasicOutputBuilder::new_with_minimum_amount(params)
+                + BasicOutputBuilder::new_with_minimum_amount(storage_score_params)
                     .add_unlock_condition(AddressUnlockCondition::new(Ed25519Address::null()))
                     .with_native_tokens(option_native_token.into_iter().flatten())
                     .amount()
@@ -330,7 +330,7 @@ where
                 // Recalculate every time, because new inputs can also add more native tokens, which would increase
                 // the required storage deposit
                 required_amount = required_amount_for_nfts
-                    + BasicOutputBuilder::new_with_minimum_amount(params)
+                    + BasicOutputBuilder::new_with_minimum_amount(storage_score_params)
                         .add_unlock_condition(AddressUnlockCondition::new(Ed25519Address::null()))
                         .with_native_tokens(option_native_token.into_iter().flatten())
                         .amount();
