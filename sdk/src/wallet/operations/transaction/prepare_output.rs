@@ -49,12 +49,12 @@ where
 
         self.client().bech32_hrp_matches(params.recipient_address.hrp()).await?;
 
-        let storage_params = self.client().get_storage_score_parameters().await?;
+        let storage_score_params = self.client().get_storage_score_parameters().await?;
 
         let nft_id = params.assets.as_ref().and_then(|a| a.nft_id);
 
         let (mut first_output_builder, existing_nft_output_data) = self
-            .create_initial_output_builder(params.recipient_address, nft_id, storage_params)
+            .create_initial_output_builder(params.recipient_address, nft_id, storage_score_params)
             .await?;
 
         if let Some(assets) = &params.assets {
@@ -105,7 +105,7 @@ where
 
         // Build output with minimum required storage deposit so we can use the amount in the next step
         let first_output = first_output_builder
-            .with_minimum_amount(storage_params)
+            .with_minimum_amount(storage_score_params)
             .finish_output(token_supply)?;
 
         let mut second_output_builder = if nft_id.is_some() {
@@ -115,12 +115,12 @@ where
         };
 
         // TODO: Probably not good to use ed25519 always here, even if technically it's the same for now..
-        let min_storage_deposit_basic_output = BasicOutputBuilder::new_with_minimum_amount(storage_params)
+        let min_storage_deposit_basic_output = BasicOutputBuilder::new_with_minimum_amount(storage_score_params)
             .add_unlock_condition(AddressUnlockCondition::new(Ed25519Address::null()))
             .finish()?
             .amount();
 
-        let min_required_storage_deposit = first_output.storage_cost(storage_params);
+        let min_required_storage_deposit = first_output.storage_cost(storage_score_params);
 
         if params.amount > min_required_storage_deposit {
             second_output_builder = second_output_builder.with_amount(params.amount);
@@ -152,7 +152,7 @@ where
                 // need to check the min required storage deposit again
                 let min_storage_deposit_new_amount = second_output_builder
                     .clone()
-                    .with_minimum_amount(storage_params)
+                    .with_minimum_amount(storage_score_params)
                     .finish_output(token_supply)?
                     .amount();
 
@@ -182,7 +182,7 @@ where
         // If we're sending an existing NFT, its minimum required storage deposit is not part of the available base_coin
         // balance, so we add it here
         if let Some(existing_nft_output_data) = existing_nft_output_data {
-            available_base_coin += existing_nft_output_data.output.storage_cost(storage_params);
+            available_base_coin += existing_nft_output_data.output.storage_cost(storage_score_params);
         }
 
         if final_amount > available_base_coin {
@@ -437,8 +437,8 @@ impl OutputBuilder {
     }
     fn finish_output(self, token_supply: u64) -> Result<Output, crate::types::block::Error> {
         match self {
-            Self::Basic(b) => b.finish_output(token_supply),
-            Self::Nft(b) => b.finish_output(token_supply),
+            Self::Basic(b) => b.finish_output(),
+            Self::Nft(b) => b.finish_output(),
         }
     }
 }

@@ -34,7 +34,7 @@ where
         wallet_data: &WalletData,
     ) -> Result<Balance> {
         let network_id = self.client().get_network_id().await?;
-        let storage_params = self.client().get_storage_score_parameters().await?;
+        let storage_score_params = self.client().get_storage_score_parameters().await?;
         let mut balance = Balance::default();
         let mut total_rent_amount = 0;
         let mut total_native_tokens = NativeTokensBuilder::default();
@@ -58,7 +58,7 @@ where
             }
 
             let output = &output_data.output;
-            let storage_cost = output.storage_cost(storage_params);
+            let storage_cost = output.storage_cost(storage_score_params);
 
             // Add account and foundry outputs here because they can't have a
             // [`StorageDepositReturnUnlockCondition`] or time related unlock conditions

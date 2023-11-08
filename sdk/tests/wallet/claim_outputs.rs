@@ -140,7 +140,6 @@ async fn claim_2_basic_outputs_no_outputs_in_claim_account() -> Result<()> {
 
     request_funds(&wallet_0).await?;
 
-    let token_supply = wallet_0.client().get_token_supply().await?;
     let storage_score_params = wallet_0.client().get_storage_score_parameters().await?;
     // TODO more fitting value
     let expiration_slot = wallet_0.client().get_slot_index().await? + 86400;
@@ -151,7 +150,7 @@ async fn claim_2_basic_outputs_no_outputs_in_claim_account() -> Result<()> {
             wallet_0.address().await,
             expiration_slot,
         )?)
-        .finish_output(token_supply)?;
+        .finish_output()?;
     let amount = output.amount();
 
     let outputs = vec![output; 2];
@@ -338,7 +337,6 @@ async fn claim_2_native_tokens_no_outputs_in_claim_account() -> Result<()> {
     wallet_0.sync(None).await?;
 
     let storage_score_params = wallet_0.client().get_storage_score_parameters().await?;
-    let token_supply = wallet_0.client().get_token_supply().await?;
 
     let tx = wallet_0
         .send_outputs(
@@ -350,7 +348,7 @@ async fn claim_2_native_tokens_no_outputs_in_claim_account() -> Result<()> {
                         wallet_0.client().get_slot_index().await? + 5000,
                     )?)
                     .add_native_token(NativeToken::new(create_tx_0.token_id, native_token_amount)?)
-                    .finish_output(token_supply)?,
+                    .finish_output()?,
                 BasicOutputBuilder::new_with_minimum_amount(storage_score_params)
                     .add_unlock_condition(AddressUnlockCondition::new(wallet_1.address().await))
                     .add_unlock_condition(ExpirationUnlockCondition::new(
@@ -358,7 +356,7 @@ async fn claim_2_native_tokens_no_outputs_in_claim_account() -> Result<()> {
                         wallet_0.client().get_slot_index().await? + 5000,
                     )?)
                     .add_native_token(NativeToken::new(create_tx_1.token_id, native_token_amount)?)
-                    .finish_output(token_supply)?,
+                    .finish_output()?,
             ],
             None,
         )
@@ -414,7 +412,6 @@ async fn claim_2_nft_outputs() -> Result<()> {
     request_funds(&wallet_0).await?;
     request_funds(&wallet_1).await?;
 
-    let token_supply = wallet_1.client().get_token_supply().await?;
     let outputs = [
         // address of the owner of the NFT
         NftOutputBuilder::new_with_amount(1_000_000, NftId::null())
@@ -425,7 +422,7 @@ async fn claim_2_nft_outputs() -> Result<()> {
                     wallet_1.client().get_slot_index().await? + 5000,
                 )?),
             ])
-            .finish_output(token_supply)?,
+            .finish_output()?,
         NftOutputBuilder::new_with_amount(1_000_000, NftId::null())
             .with_unlock_conditions([
                 UnlockCondition::Address(AddressUnlockCondition::new(wallet_0.address().await)),
@@ -434,7 +431,7 @@ async fn claim_2_nft_outputs() -> Result<()> {
                     wallet_1.client().get_slot_index().await? + 5000,
                 )?),
             ])
-            .finish_output(token_supply)?,
+            .finish_output()?,
     ];
 
     let tx = wallet_1.send_outputs(outputs, None).await?;
@@ -476,7 +473,6 @@ async fn claim_2_nft_outputs_no_outputs_in_claim_account() -> Result<()> {
 
     request_funds(&wallet_0).await?;
 
-    let token_supply = wallet_0.client().get_token_supply().await?;
     let outputs = [
         // address of the owner of the NFT
         NftOutputBuilder::new_with_amount(1_000_000, NftId::null())
@@ -487,7 +483,7 @@ async fn claim_2_nft_outputs_no_outputs_in_claim_account() -> Result<()> {
                     wallet_0.client().get_slot_index().await? + 5000,
                 )?),
             ])
-            .finish_output(token_supply)?,
+            .finish_output()?,
         NftOutputBuilder::new_with_amount(1_000_000, NftId::null())
             .with_unlock_conditions([
                 UnlockCondition::Address(AddressUnlockCondition::new(wallet_1.address().await)),
@@ -496,7 +492,7 @@ async fn claim_2_nft_outputs_no_outputs_in_claim_account() -> Result<()> {
                     wallet_0.client().get_slot_index().await? + 5000,
                 )?),
             ])
-            .finish_output(token_supply)?,
+            .finish_output()?,
     ];
 
     let tx = wallet_0.send_outputs(outputs, None).await?;

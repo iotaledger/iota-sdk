@@ -161,8 +161,7 @@ where
         I::IntoIter: Send,
     {
         log::debug!("[TRANSACTION] prepare_mint_nfts");
-        let storage_params = self.client().get_storage_score_parameters().await?;
-        let token_supply = self.client().get_token_supply().await?;
+        let storage_score_params = self.client().get_storage_score_parameters().await?;
         let wallet_address = self.address().await.into_inner();
         let mut outputs = Vec::new();
 
@@ -184,7 +183,7 @@ where
             };
 
             // NftId needs to be set to 0 for the creation
-            let mut nft_builder = NftOutputBuilder::new_with_minimum_amount(storage_params, NftId::null())
+            let mut nft_builder = NftOutputBuilder::new_with_minimum_amount(storage_score_params, NftId::null())
                 // Address which will own the nft
                 .add_unlock_condition(AddressUnlockCondition::new(address));
 
@@ -208,7 +207,7 @@ where
                 nft_builder = nft_builder.add_immutable_feature(MetadataFeature::new(immutable_metadata)?);
             }
 
-            outputs.push(nft_builder.finish_output(token_supply)?);
+            outputs.push(nft_builder.finish_output()?);
         }
 
         self.prepare_transaction(outputs, options).await

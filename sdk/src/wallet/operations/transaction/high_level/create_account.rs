@@ -74,8 +74,7 @@ where
         options: impl Into<Option<TransactionOptions>> + Send,
     ) -> crate::wallet::Result<PreparedTransactionData> {
         log::debug!("[TRANSACTION] prepare_create_account_output");
-        let storage_params = self.client().get_storage_score_parameters().await?;
-        let token_supply = self.client().get_token_supply().await?;
+        let storage_score_params = self.client().get_storage_score_parameters().await?;
 
         let address = match params.as_ref().and_then(|options| options.address.as_ref()) {
             Some(bech32_address) => {
@@ -86,7 +85,7 @@ where
         };
 
         let mut account_output_builder =
-            AccountOutputBuilder::new_with_minimum_amount(storage_params, AccountId::null())
+            AccountOutputBuilder::new_with_minimum_amount(storage_score_params, AccountId::null())
                 .with_foundry_counter(0)
                 .add_unlock_condition(AddressUnlockCondition::new(address.clone()));
         if let Some(CreateAccountParams {
@@ -104,7 +103,7 @@ where
             }
         }
 
-        let outputs = [account_output_builder.finish_output(token_supply)?];
+        let outputs = [account_output_builder.finish_output()?];
 
         self.prepare_transaction(outputs, options).await
     }

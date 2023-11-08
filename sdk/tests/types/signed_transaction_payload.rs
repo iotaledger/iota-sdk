@@ -39,7 +39,7 @@ fn builder_too_few_unlocks() {
     let output = Output::Basic(
         BasicOutput::build_with_amount(amount)
             .add_unlock_condition(AddressUnlockCondition::new(address))
-            .finish_with_params(protocol_parameters.token_supply())
+            .finish()
             .unwrap(),
     );
     let transaction = Transaction::builder(protocol_parameters.network_id())
@@ -75,7 +75,7 @@ fn builder_too_many_unlocks() {
     let output = Output::Basic(
         BasicOutput::build_with_amount(amount)
             .add_unlock_condition(AddressUnlockCondition::new(address))
-            .finish_with_params(protocol_parameters.token_supply())
+            .finish()
             .unwrap(),
     );
     let transaction = Transaction::builder(protocol_parameters.network_id())
@@ -114,7 +114,7 @@ fn pack_unpack_valid() {
     let output = Output::Basic(
         BasicOutput::build_with_amount(amount)
             .add_unlock_condition(AddressUnlockCondition::new(address))
-            .finish_with_params(protocol_parameters.token_supply())
+            .finish()
             .unwrap(),
     );
     let transaction = Transaction::builder(protocol_parameters.network_id())
@@ -155,7 +155,7 @@ fn getters() {
     let output = Output::Basic(
         BasicOutput::build_with_amount(amount)
             .add_unlock_condition(AddressUnlockCondition::new(address))
-            .finish_with_params(protocol_parameters.token_supply())
+            .finish()
             .unwrap(),
     );
     let transaction = Transaction::builder(protocol_parameters.network_id())

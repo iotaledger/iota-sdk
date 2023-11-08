@@ -55,7 +55,7 @@ fn builder() {
     let output = builder
         .with_minimum_amount(protocol_parameters.storage_score_parameters())
         .add_unlock_condition(rand_address_unlock_condition())
-        .finish_with_params(protocol_parameters.token_supply())
+        .finish()
         .unwrap();
 
     assert_eq!(

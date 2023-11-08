@@ -34,7 +34,6 @@ async fn main() -> Result<()> {
         .finish()
         .await?;
 
-    let token_supply = client.get_token_supply().await?;
     let storage_score_params = client.get_storage_score_parameters().await?;
 
     let address = std::env::args()
@@ -63,7 +62,7 @@ async fn main() -> Result<()> {
         .add_feature(TagFeature::new(TAG)?)
         .add_immutable_feature(IssuerFeature::new(address))
         .add_immutable_feature(MetadataFeature::new(tip_27_immutable_metadata)?)
-        .finish_output(token_supply)?;
+        .finish_output()?;
 
     println!("{nft_output:#?}");
 

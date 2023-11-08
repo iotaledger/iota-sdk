@@ -1204,7 +1204,7 @@ fn changed_immutable_metadata() {
             .add_unlock_condition(AddressUnlockCondition::new(
                 Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
             ))
-            .finish_output(protocol_parameters.token_supply())
+            .finish_output()
             .unwrap();
 
     let inputs = [InputSigningData {
@@ -1227,7 +1227,7 @@ fn changed_immutable_metadata() {
     let updated_nft_output = NftOutputBuilder::from(nft_output.as_nft())
         .with_minimum_amount(protocol_parameters.storage_score_parameters())
         .with_immutable_features(MetadataFeature::try_from(metadata))
-        .finish_output(protocol_parameters.token_supply())
+        .finish_output()
         .unwrap();
 
     let outputs = [updated_nft_output];
