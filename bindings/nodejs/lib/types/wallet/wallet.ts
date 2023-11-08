@@ -91,21 +91,20 @@ export interface SyncOptions {
     syncIncomingTransactions?: boolean;
     /** Checks pending transactions and reissues them if necessary. Default: true. */
     syncPendingTransactions?: boolean;
-    /** Specifies what outputs should be synced for the ed25519 addresses from the account. */
-    account?: AccountSyncOptions;
+    /** Specifies what outputs should be synced for the ed25519 address from the wallet. */
+    wallet?: WalletSyncOptions;
     /** Specifies what outputs should be synced for the address of an account output. */
-    // TODO Rename when we are done with Account changes https://github.com/iotaledger/iota-sdk/issues/647.
-    alias?: AliasSyncOptions;
+    account?: AccountSyncOptions;
     /** Specifies what outputs should be synced for the address of an nft output. */
     nft?: NftSyncOptions;
-    /** Specifies if only basic outputs with an AddressUnlockCondition alone should be synced, will overwrite `account`, `alias` and `nft` options. Default: false. */
+    /** Specifies if only basic outputs with an AddressUnlockCondition alone should be synced, will overwrite `wallet`, `account` and `nft` options. Default: false. */
     syncOnlyMostBasicOutputs?: boolean;
     /** Sync native token foundries, so their metadata can be returned in the balance. Default: false. */
     syncNativeTokenFoundries?: boolean;
 }
 
-/** Specifies what outputs should be synced for the ed25519 addresses from the account. */
-export interface AccountSyncOptions {
+/** Specifies what outputs should be synced for the ed25519 address from the wallet. */
+export interface WalletSyncOptions {
     /** Whether to sync Basic outputs. */
     basicOutputs?: boolean;
     /** Whether to sync Account outputs. */
@@ -115,7 +114,7 @@ export interface AccountSyncOptions {
 }
 
 /** Specifies what outputs should be synced for the address of an account output. */
-export interface AliasSyncOptions {
+export interface AccountSyncOptions {
     /** Whether to sync Basic outputs. */
     basicOutputs?: boolean;
     /** Whether to sync Account outputs. */

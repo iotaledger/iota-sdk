@@ -20,7 +20,7 @@ export class PreparedTransaction {
 
     /**
      * @param preparedData Prepared data to sign and submit a transaction.
-     * @param wallet A wallet wallet.
+     * @param wallet A wallet.
      */
     constructor(preparedData: PreparedTransactionData, wallet: Wallet) {
         this._preparedData = preparedData;
