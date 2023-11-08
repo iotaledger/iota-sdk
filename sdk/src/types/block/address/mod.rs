@@ -26,10 +26,9 @@ pub use self::{
     nft::NftAddress,
     restricted::{AddressCapabilities, AddressCapabilityFlag, RestrictedAddress},
 };
-use super::semantic::SemanticValidationContext;
 use crate::types::block::{
     output::{Output, StorageScore, StorageScoreParameters},
-    semantic::TransactionFailureReason,
+    semantic::{SemanticValidationContext, TransactionFailureReason},
     signature::Signature,
     unlock::Unlock,
     ConvertTo, Error,
