@@ -133,7 +133,7 @@ where
         options: impl Into<Option<TransactionOptions>> + Send,
     ) -> crate::wallet::Result<PreparedCreateNativeTokenTransaction> {
         log::debug!("[TRANSACTION] create_native_token");
-        let storage_params = self.client().get_storage_score_parameters().await?;
+        let storage_score_params = self.client().get_storage_score_parameters().await?;
 
         let (account_id, account_output) = self
             .get_account_output(params.account_id)
@@ -158,7 +158,7 @@ where
                 new_account_output_builder.finish_output()?,
                 {
                     let mut foundry_builder = FoundryOutputBuilder::new_with_minimum_amount(
-                        storage_params,
+                        storage_score_params,
                         account_output.foundry_counter() + 1,
                         TokenScheme::Simple(SimpleTokenScheme::new(
                             params.circulating_supply,
