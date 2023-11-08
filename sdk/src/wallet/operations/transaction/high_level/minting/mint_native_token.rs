@@ -58,7 +58,6 @@ where
 
         let mint_amount = mint_amount.into();
         let wallet_data = self.data().await;
-        let token_supply = self.client().get_token_supply().await?;
         let existing_foundry_output = wallet_data.unspent_outputs.values().find(|output_data| {
             if let Output::Foundry(output) = &output_data.output {
                 TokenId::new(*output.id()) == token_id
@@ -126,8 +125,8 @@ where
             FoundryOutputBuilder::from(&foundry_output).with_token_scheme(updated_token_scheme);
 
         let outputs = [
-            new_account_output_builder.finish_output(token_supply)?,
-            new_foundry_output_builder.finish_output(token_supply)?,
+            new_account_output_builder.finish_output()?,
+            new_foundry_output_builder.finish_output()?,
             // Native Tokens will be added automatically in the remainder output in try_select_inputs()
         ];
 

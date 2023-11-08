@@ -11,10 +11,7 @@
 //! ```
 
 use iota_sdk::{
-    types::block::{
-        address::Bech32Address,
-        output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder, UnlockCondition},
-    },
+    types::block::output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder, UnlockCondition},
     wallet::Result,
     Wallet,
 };
@@ -38,7 +35,7 @@ async fn main() -> Result<()> {
 
     let output = BasicOutputBuilder::new_with_amount(AMOUNT)
         .add_unlock_condition(AddressUnlockCondition::new(wallet_address.clone()))
-        .finish_output(wallet.client().get_token_supply().await?)?;
+        .finish_output()?;
 
     let controlled_by_account = if let [UnlockCondition::Address(address_unlock_condition)] = output
         .unlock_conditions()
