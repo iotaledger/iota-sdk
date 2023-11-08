@@ -11,7 +11,7 @@ use crate::types::block::address::Ed25519Address;
 /// [`AccountOutput`](crate::types::block::output::AccountOutput).
 #[derive(Copy, Clone, Display, Eq, PartialEq, Ord, PartialOrd, Hash, FromStr, AsRef, Deref, From, Packable)]
 #[as_ref(forward)]
-pub struct ImplicitAccountCreationAddress(Ed25519Address);
+pub struct ImplicitAccountCreationAddress(pub(crate) Ed25519Address);
 
 impl ImplicitAccountCreationAddress {
     /// The [`Address`](crate::types::block::address::Address) kind of an [`ImplicitAccountCreationAddress`].

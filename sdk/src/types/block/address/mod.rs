@@ -118,7 +118,11 @@ impl Address {
         context: &mut SemanticValidationContext<'_>,
     ) -> Result<(), TransactionFailureReason> {
         match (self, unlock) {
-            (Self::Ed25519(ed25519_address), Unlock::Signature(unlock)) => {
+            (
+                Self::Ed25519(ed25519_address)
+                | Self::ImplicitAccountCreation(ImplicitAccountCreationAddress(ed25519_address)),
+                Unlock::Signature(unlock),
+            ) => {
                 if context.unlocked_addresses.contains(self) {
                     return Err(TransactionFailureReason::InvalidInputUnlock);
                 }
@@ -134,7 +138,7 @@ impl Address {
 
                 context.unlocked_addresses.insert(self.clone());
             }
-            (Self::Ed25519(_ed25519_address), Unlock::Reference(_unlock)) => {
+            (Self::Ed25519(_) | Self::ImplicitAccountCreation(_), Unlock::Reference(_)) => {
                 // TODO actually check that it was unlocked by the same signature.
                 if !context.unlocked_addresses.contains(self) {
                     return Err(TransactionFailureReason::InvalidInputUnlock);
