@@ -564,8 +564,8 @@ impl AnchorOutput {
 impl StorageScore for AnchorOutput {
     fn storage_score(&self, params: StorageScoreParameters) -> u64 {
         params.output_offset()
-            + 1 // Type byte
-            + self.packed_len() as u64 * params.data_factor() as u64
+            // Type byte
+            + (1 + self.packed_len() as u64) * params.data_factor() as u64
             + self.unlock_conditions.storage_score(params)
             + self.features.storage_score(params)
     }
