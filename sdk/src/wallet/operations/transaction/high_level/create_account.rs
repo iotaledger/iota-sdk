@@ -75,7 +75,6 @@ where
     ) -> crate::wallet::Result<PreparedTransactionData> {
         log::debug!("[TRANSACTION] prepare_create_account_output");
         let storage_params = self.client().get_storage_score_parameters().await?;
-        let token_supply = self.client().get_token_supply().await?;
 
         let address = match params.as_ref().and_then(|options| options.address.as_ref()) {
             Some(bech32_address) => {
@@ -104,7 +103,7 @@ where
             }
         }
 
-        let outputs = [account_output_builder.finish_output(token_supply)?];
+        let outputs = [account_output_builder.finish_output()?];
 
         self.prepare_transaction(outputs, options).await
     }

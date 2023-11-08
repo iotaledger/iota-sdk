@@ -45,7 +45,7 @@ pub fn rand_basic_output(token_supply: u64) -> BasicOutput {
     BasicOutput::build_with_amount(rand_number_range(0..token_supply))
         .with_features(rand_allowed_features(BasicOutput::ALLOWED_FEATURES))
         .add_unlock_condition(rand_address_unlock_condition())
-        .finish_with_params(token_supply)
+        .finish()
         .unwrap()
 }
 
@@ -67,7 +67,7 @@ pub fn rand_account_output(token_supply: u64) -> AccountOutput {
     AccountOutput::build_with_amount(rand_number_range(0..token_supply), account_id)
         .with_features(rand_allowed_features(AccountOutput::ALLOWED_FEATURES))
         .add_unlock_condition(rand_address_unlock_condition_different_from_account_id(&account_id))
-        .finish_with_params(token_supply)
+        .finish()
         .unwrap()
 }
 
@@ -85,7 +85,7 @@ pub fn rand_anchor_output(token_supply: u64) -> AnchorOutput {
         .add_unlock_condition(rand_state_controller_address_unlock_condition_different_from(
             &anchor_id,
         ))
-        .finish_with_params(token_supply)
+        .finish()
         .unwrap()
 }
 
@@ -103,7 +103,7 @@ pub fn rand_foundry_output(token_supply: u64) -> FoundryOutput {
     FoundryOutput::build_with_amount(rand_number_range(0..token_supply), rand_number(), rand_token_scheme())
         .with_features(rand_allowed_features(FoundryOutput::ALLOWED_FEATURES))
         .add_unlock_condition(ImmutableAccountAddressUnlockCondition::new(rand_account_address()))
-        .finish_with_params(token_supply)
+        .finish()
         .unwrap()
 }
 
@@ -115,7 +115,7 @@ pub fn rand_nft_output(token_supply: u64) -> NftOutput {
     NftOutput::build_with_amount(rand_number_range(0..token_supply), nft_id)
         .with_features(rand_allowed_features(NftOutput::ALLOWED_FEATURES))
         .add_unlock_condition(rand_address_unlock_condition_different_from(&nft_id))
-        .finish_with_params(token_supply)
+        .finish()
         .unwrap()
 }
 

@@ -162,7 +162,6 @@ where
     {
         log::debug!("[TRANSACTION] prepare_mint_nfts");
         let storage_params = self.client().get_storage_score_parameters().await?;
-        let token_supply = self.client().get_token_supply().await?;
         let wallet_address = self.address().await.into_inner();
         let mut outputs = Vec::new();
 
@@ -208,7 +207,7 @@ where
                 nft_builder = nft_builder.add_immutable_feature(MetadataFeature::new(immutable_metadata)?);
             }
 
-            outputs.push(nft_builder.finish_output(token_supply)?);
+            outputs.push(nft_builder.finish_output()?);
         }
 
         self.prepare_transaction(outputs, options).await

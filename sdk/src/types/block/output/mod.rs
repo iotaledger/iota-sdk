@@ -344,7 +344,7 @@ impl Output {
     /// byte cost, given by [`StorageScoreParameters`].
     /// If there is a [`StorageDepositReturnUnlockCondition`](unlock_condition::StorageDepositReturnUnlockCondition),
     /// its amount is also checked.
-    pub fn verify_storage_deposit(&self, params: StorageScoreParameters, token_supply: u64) -> Result<(), Error> {
+    pub fn verify_storage_deposit(&self, params: StorageScoreParameters) -> Result<(), Error> {
         let required_output_amount = self.storage_cost(params);
 
         if self.amount() < required_output_amount {
@@ -367,7 +367,7 @@ impl Output {
                 });
             }
 
-            let minimum_deposit = minimum_storage_deposit(return_condition.return_address(), params, token_supply);
+            let minimum_deposit = minimum_storage_deposit(return_condition.return_address(), params);
 
             // `Minimum Storage Deposit` ≤ `Return Amount`
             if return_condition.amount() < minimum_deposit {
@@ -470,12 +470,12 @@ pub(crate) fn verify_output_amount_packable<const VERIFY: bool>(
 
 /// Computes the minimum amount that a storage deposit has to match to allow creating a return [`Output`] back to the
 /// sender [`Address`].
-fn minimum_storage_deposit(address: &Address, params: StorageScoreParameters, token_supply: u64) -> u64 {
+fn minimum_storage_deposit(address: &Address, params: StorageScoreParameters) -> u64 {
     // PANIC: This can never fail because the amount will always be within the valid range. Also, the actual value is
     // not important, we are only interested in the storage requirements of the type.
     BasicOutputBuilder::new_with_minimum_amount(params)
         .add_unlock_condition(AddressUnlockCondition::new(address.clone()))
-        .finish_with_params(token_supply)
+        .finish()
         .unwrap()
         .amount()
 }

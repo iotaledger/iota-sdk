@@ -54,7 +54,7 @@ fn builder() {
     let output = builder
         .with_minimum_amount(protocol_parameters.storage_score_parameters())
         .add_unlock_condition(ImmutableAccountAddressUnlockCondition::new(rand_account_address()))
-        .finish_with_params(&protocol_parameters)
+        .finish()
         .unwrap();
 
     assert_eq!(

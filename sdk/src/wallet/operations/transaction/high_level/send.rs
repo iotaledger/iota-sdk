@@ -188,7 +188,7 @@ where
                         expiration_slot_index,
                     )?)
                     .with_sufficient_storage_deposit(return_address, storage_params, token_supply)?
-                    .finish_output(token_supply)?;
+                    .finish_output()?;
 
                 if !options.as_ref().map(|o| o.allow_micro_amount).unwrap_or_default() {
                     return Err(Error::InsufficientFunds {

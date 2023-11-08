@@ -14,8 +14,8 @@ use crate::types::{
                 verify_allowed_unlock_conditions, AddressUnlockCondition, StorageDepositReturnUnlockCondition,
                 UnlockCondition, UnlockConditionFlags, UnlockConditions,
             },
-            verify_output_amount_packable, verify_output_amount_supply, NativeToken, NativeTokens, Output,
-            OutputBuilderAmount, OutputId, StorageScore, StorageScoreParameters,
+            verify_output_amount_packable, NativeToken, NativeTokens, Output, OutputBuilderAmount, OutputId,
+            StorageScore, StorageScoreParameters,
         },
         protocol::ProtocolParameters,
         semantic::{SemanticValidationContext, TransactionFailureReason},
@@ -231,21 +231,9 @@ impl BasicOutputBuilder {
         Ok(output)
     }
 
-    ///
-    pub fn finish_with_params<'a>(self, params: impl Into<ValidationParams<'a>> + Send) -> Result<BasicOutput, Error> {
-        let output = self.finish()?;
-        let params = params.into();
-
-        if let Some(token_supply) = params.token_supply() {
-            verify_output_amount_supply(output.amount, token_supply)?;
-        }
-
-        Ok(output)
-    }
-
     /// Finishes the [`BasicOutputBuilder`] into an [`Output`].
-    pub fn finish_output<'a>(self, params: impl Into<ValidationParams<'a>> + Send) -> Result<Output, Error> {
-        Ok(Output::Basic(self.finish_with_params(params)?))
+    pub fn finish_output(self) -> Result<Output, Error> {
+        Ok(Output::Basic(self.finish()?))
     }
 }
 
@@ -481,7 +469,7 @@ pub(crate) mod dto {
                 builder = builder.add_unlock_condition(UnlockCondition::try_from_dto_with_params(u, &params)?);
             }
 
-            builder.finish_with_params(params)
+            builder.finish()
         }
     }
 
@@ -515,7 +503,7 @@ pub(crate) mod dto {
                 builder = builder.with_features(features);
             }
 
-            builder.finish_with_params(params)
+            builder.finish()
         }
     }
 }
@@ -573,10 +561,7 @@ mod tests {
                 protocol_parameters.token_supply(),
             )
             .unwrap();
-            assert_eq!(
-                builder.finish_with_params(protocol_parameters.token_supply()).unwrap(),
-                output_split
-            );
+            assert_eq!(builder.finish().unwrap(), output_split);
         };
 
         let builder = BasicOutput::build_with_amount(100)

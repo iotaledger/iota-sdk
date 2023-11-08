@@ -36,11 +36,10 @@ where
         let outputs = outputs.into();
         let prepare_transaction_start_time = Instant::now();
         let storage_score_params = self.client().get_storage_score_parameters().await?;
-        let token_supply = self.client().get_token_supply().await?;
 
         // Check if the outputs have enough amount to cover the storage deposit
         for output in &outputs {
-            output.verify_storage_deposit(storage_score_params, token_supply)?;
+            output.verify_storage_deposit(storage_score_params)?;
         }
 
         let is_burn_present = options.as_ref().map(|options| options.burn.is_some()).unwrap_or(false);
