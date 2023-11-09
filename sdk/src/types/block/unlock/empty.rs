@@ -25,7 +25,7 @@ mod dto {
     }
 
     impl From<&EmptyUnlock> for EmptyUnlockDto {
-        fn from(value: &EmptyUnlock) -> Self {
+        fn from(_: &EmptyUnlock) -> Self {
             Self {
                 kind: EmptyUnlock::KIND,
             }
@@ -35,10 +35,10 @@ mod dto {
     impl TryFrom<EmptyUnlockDto> for EmptyUnlock {
         type Error = Error;
 
-        fn try_from(value: EmptyUnlockDto) -> Result<Self, Self::Error> {
+        fn try_from(_: EmptyUnlockDto) -> Result<Self, Self::Error> {
             Ok(Self)
         }
     }
 
-    crate::impl_serde_typed_dto!(EmptyUnlock, EmptyUnlockDto, "anchor unlock");
+    crate::impl_serde_typed_dto!(EmptyUnlock, EmptyUnlockDto, "empty unlock");
 }
