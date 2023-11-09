@@ -253,7 +253,7 @@ where
                 )
             } else {
                 // Transition an existing NFT output
-                let unspent_nft_output = self.unspent_nft_output(nft_id).await?;
+                let unspent_nft_output = self.unspent_nft_output(nft_id).await;
 
                 // Find nft output from the inputs
                 let mut first_output_builder = if let Some(nft_output_data) = &unspent_nft_output {
@@ -437,8 +437,8 @@ impl OutputBuilder {
     }
     fn finish_output(self, token_supply: u64) -> Result<Output, crate::types::block::Error> {
         match self {
-            Self::Basic(b) => b.finish_output(token_supply),
-            Self::Nft(b) => b.finish_output(token_supply),
+            Self::Basic(b) => b.finish_output(),
+            Self::Nft(b) => b.finish_output(),
         }
     }
 }

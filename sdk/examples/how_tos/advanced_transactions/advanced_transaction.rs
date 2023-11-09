@@ -48,7 +48,7 @@ async fn main() -> Result<()> {
                 "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu",
             )?))
             .add_unlock_condition(TimelockUnlockCondition::new(slot_index)?)
-            .finish_output(wallet.client().get_token_supply().await?)?;
+            .finish_output()?;
 
         let transaction = wallet.send_outputs(vec![basic_output], None).await?;
         println!("Transaction sent: {}", transaction.transaction_id);

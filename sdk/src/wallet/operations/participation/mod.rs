@@ -71,7 +71,7 @@ where
             "[get_participation_overview] restored_spent_cached_outputs_len: {}",
             restored_spent_cached_outputs_len
         );
-        let outputs = self.outputs(None).await?;
+        let outputs = self.outputs(None).await;
         let participation_outputs = outputs
             .into_iter()
             .filter(|output_data| {
@@ -230,7 +230,7 @@ where
         log::debug!("[get_voting_output]");
         Ok(self
             .unspent_outputs(None)
-            .await?
+            .await
             .iter()
             .filter(|output_data| is_valid_participation_output(&output_data.output))
             .max_by_key(|output_data| output_data.output.amount())

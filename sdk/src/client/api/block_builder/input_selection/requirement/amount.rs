@@ -249,13 +249,13 @@ impl InputSelection {
             let new_output = match output {
                 Output::Account(output) => AccountOutputBuilder::from(&*output)
                     .with_amount(new_amount)
-                    .finish_output(self.protocol_parameters.token_supply())?,
+                    .finish_output()?,
                 Output::Foundry(output) => FoundryOutputBuilder::from(&*output)
                     .with_amount(new_amount)
-                    .finish_output(self.protocol_parameters.token_supply())?,
+                    .finish_output()?,
                 Output::Nft(output) => NftOutputBuilder::from(&*output)
                     .with_amount(new_amount)
-                    .finish_output(self.protocol_parameters.token_supply())?,
+                    .finish_output()?,
                 _ => panic!("only account, nft and foundry can be automatically created"),
             };
 

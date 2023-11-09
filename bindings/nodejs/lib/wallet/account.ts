@@ -775,6 +775,40 @@ export class Account {
     }
 
     /**
+     * Returns the accounts of the wallet.
+     *
+     * @returns The accounts of the wallet.
+     */
+    async accounts(): Promise<OutputData[]> {
+        const response = await this.methodHandler.callAccountMethod(
+            this.meta.index,
+            {
+                name: 'accounts',
+            },
+        );
+
+        const parsed = JSON.parse(response) as Response<OutputData[]>;
+        return plainToInstance(OutputData, parsed.payload);
+    }
+
+    /**
+     * Returns the implicit accounts of the wallet.
+     *
+     * @returns The implicit accounts of the wallet.
+     */
+    async implicitAccounts(): Promise<OutputData[]> {
+        const response = await this.methodHandler.callAccountMethod(
+            this.meta.index,
+            {
+                name: 'implicitAccounts',
+            },
+        );
+
+        const parsed = JSON.parse(response) as Response<OutputData[]>;
+        return plainToInstance(OutputData, parsed.payload);
+    }
+
+    /**
      * List all incoming transactions of the account.
      *
      * @returns The incoming transactions with their inputs.

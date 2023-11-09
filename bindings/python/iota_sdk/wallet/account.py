@@ -221,7 +221,8 @@ class Account:
             }
         ))
 
-    def get_transaction(self, transaction_id: HexStr) -> TransactionWithMetadata:
+    def get_transaction(
+            self, transaction_id: HexStr) -> TransactionWithMetadata:
         """Get transaction.
         """
         return TransactionWithMetadata.from_dict(self._call_account_method(
@@ -276,6 +277,22 @@ class Account:
         return self._call_account_method(
             'implicitAccountCreationAddress'
         )
+
+    def accounts(self) -> List[OutputData]:
+        """Returns the accounts of the wallet.
+        """
+        outputs = self._call_account_method(
+            'accounts'
+        )    
+        return [from_dict(OutputData, o) for o in outputs]
+
+    def implicit_accounts(self) -> List[OutputData]:
+        """Returns the implicit accounts of the wallet.
+        """
+        outputs = self._call_account_method(
+            'implicitAccounts'
+        )    
+        return [from_dict(OutputData, o) for o in outputs]
 
     def incoming_transactions(self) -> List[TransactionWithMetadata]:
         """Returns all incoming transactions of the account.
