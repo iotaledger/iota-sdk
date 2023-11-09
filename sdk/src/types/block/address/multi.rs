@@ -4,7 +4,7 @@
 use alloc::{boxed::Box, string::ToString, vec::Vec};
 use core::{fmt, ops::RangeInclusive};
 
-use derive_more::{AsRef, Display, From};
+use derive_more::{AsRef, Deref, Display, From};
 use iterator_sorted::is_unique_sorted;
 use packable::{
     bounded::BoundedU8,
@@ -76,9 +76,10 @@ fn verify_weight<const VERIFY: bool>(weight: &u8, _visitor: &()) -> Result<(), E
 /// An address that consists of addresses with weights and a threshold value.
 /// The Multi Address can be unlocked if the cumulative weight of all unlocked addresses is equal to or exceeds the
 /// threshold.
-#[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
+#[derive(Clone, Debug, Deref, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct MultiAddress {
     /// The weighted unlocked addresses.
+    #[deref]
     addresses: BoxedSlicePrefix<WeightedAddress, WeightedAddressCount>,
     /// The threshold that needs to be reached by the unlocked addresses in order to unlock the multi address.
     threshold: u16,

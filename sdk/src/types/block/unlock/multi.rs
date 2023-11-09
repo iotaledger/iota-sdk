@@ -3,6 +3,7 @@
 
 use core::ops::RangeInclusive;
 
+use derive_more::Deref;
 use packable::{bounded::BoundedU8, prefix::BoxedSlicePrefix, Packable};
 
 use crate::types::block::{unlock::Unlock, Error};
@@ -11,7 +12,7 @@ pub(crate) type UnlocksCount =
     BoundedU8<{ *MultiUnlock::UNLOCKS_COUNT.start() }, { *MultiUnlock::UNLOCKS_COUNT.end() }>;
 
 /// Unlocks a Multi Address with a list of other unlocks.
-#[derive(Clone, Debug, Eq, PartialEq, Hash, Packable)]
+#[derive(Clone, Debug, Deref, Eq, PartialEq, Hash, Packable)]
 #[packable(unpack_error = Error, with = |e| e.unwrap_item_err_or_else(|p| Error::InvalidMultiUnlockCount(p.into())))]
 pub struct MultiUnlock(#[packable(verify_with = verify_unlocks)] BoxedSlicePrefix<Unlock, UnlocksCount>);
 

@@ -167,7 +167,7 @@ impl Address {
                 }
             }
             (Self::Multi(address), Unlock::Multi(unlock)) => {
-                if address.addresses().len() != unlock.unlocks().len() {
+                if address.len() != unlock.len() {
                     return Err(TransactionFailureReason::InvalidInputUnlock);
                 }
 
