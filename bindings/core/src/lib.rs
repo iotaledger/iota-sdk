@@ -18,6 +18,7 @@ pub use iota_sdk;
 use iota_sdk::{
     client::secret::{SecretManager, SecretManagerDto},
     types::block::address::Bech32Address,
+    utils::serde::bip44::option_bip44,
     wallet::{ClientOptions, Wallet},
 };
 use serde::Deserialize;
@@ -45,6 +46,7 @@ pub fn init_logger(config: String) -> std::result::Result<(), fern_logger::Error
 pub struct WalletOptions {
     pub address: Option<Bech32Address>,
     pub alias: Option<String>,
+    #[serde(with = "option_bip44", default)]
     pub bip_path: Option<Bip44>,
     pub client_options: Option<ClientOptions>,
     #[derivative(Debug(format_with = "OmittedDebug::omitted_fmt"))]

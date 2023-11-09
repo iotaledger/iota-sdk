@@ -23,7 +23,7 @@ use crate::types::block::{
     },
     payload::{ContextInputCount, InputCount, OutputCount, TagLength, TaggedDataLength},
     protocol::ProtocolParametersHash,
-    unlock::{UnlockCount, UnlockIndex},
+    unlock::{UnlockCount, UnlockIndex, UnlocksCount},
 };
 
 /// Error occurring when creating/parsing/validating blocks.
@@ -78,6 +78,8 @@ pub enum Error {
         threshold: u16,
     },
     InvalidWeightedAddressCount(<WeightedAddressCount as TryFrom<usize>>::Error),
+    InvalidMultiUnlockCount(<UnlocksCount as TryFrom<usize>>::Error),
+    MultiUnlockRecursion,
     WeightedAddressesNotUniqueSorted,
     InvalidContextInputKind(u8),
     InvalidContextInputCount(<ContextInputCount as TryFrom<usize>>::Error),
@@ -282,6 +284,8 @@ impl fmt::Display for Error {
                 )
             }
             Self::InvalidWeightedAddressCount(count) => write!(f, "invalid weighted address count: {count}"),
+            Self::InvalidMultiUnlockCount(count) => write!(f, "invalid multi unlock count: {count}"),
+            Self::MultiUnlockRecursion => write!(f, "multi unlock recursion"),
             Self::WeightedAddressesNotUniqueSorted => {
                 write!(f, "weighted addresses are not unique and/or sorted")
             }
