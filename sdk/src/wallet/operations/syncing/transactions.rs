@@ -104,7 +104,9 @@ where
                         if let Some(tx_state) = metadata.transaction_state {
                             match tx_state {
                                 // TODO: Separate TransactionState::Finalized?
-                                TransactionState::Finalized | TransactionState::Confirmed => {
+                                TransactionState::Accepted
+                                | TransactionState::Confirmed
+                                | TransactionState::Finalized => {
                                     log::debug!(
                                         "[SYNC] confirmed transaction {transaction_id} in block {}",
                                         metadata.block_id
