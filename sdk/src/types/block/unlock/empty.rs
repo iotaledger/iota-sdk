@@ -3,7 +3,7 @@
 
 use crate::types::block::Error;
 
-/// Used to maintain correct index relationship between addresses and signatures when unlocking a Multi Address where
+/// Used to maintain correct index relationship between addresses and signatures when unlocking a [`MultiAddress`](crate::types::block::address::MultiAddress) where
 /// not all addresses are unlocked.
 #[derive(Clone, Debug, Eq, PartialEq, Hash, packable::Packable)]
 pub struct EmptyUnlock;
