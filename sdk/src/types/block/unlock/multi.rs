@@ -12,7 +12,7 @@ pub(crate) type UnlocksCount =
 
 /// Unlocks a Multi Address with a list of other unlocks.
 #[derive(Clone, Debug, Eq, PartialEq, Hash, Packable)]
-// #[packable(unpack_error = Error, with = |_| Error::InvalidMultiUnlockCount)]
+#[packable(unpack_error = Error, with = |e| e.unwrap_item_err_or_else(|p| Error::InvalidMultiUnlockCount(p.into())))]
 pub struct MultiUnlock(#[packable(verify_with = verify_unlocks)] BoxedSlicePrefix<Unlock, UnlocksCount>);
 
 impl MultiUnlock {
