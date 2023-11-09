@@ -171,16 +171,16 @@ impl Address {
                     return Err(TransactionFailureReason::InvalidInputUnlock);
                 }
 
-                let mut cumulative_unlocked_eight = 0u16;
+                let mut cumulative_unlocked_weight = 0u16;
 
                 for (address, unlock) in address.addresses().iter().zip(unlock.unlocks()) {
                     if !unlock.is_empty() {
                         address.address().unlock(unlock, context)?;
-                        cumulative_unlocked_eight += address.weight() as u16;
+                        cumulative_unlocked_weight += address.weight() as u16;
                     }
                 }
 
-                if cumulative_unlocked_eight < address.threshold() {
+                if cumulative_unlocked_weight < address.threshold() {
                     return Err(TransactionFailureReason::InvalidInputUnlock);
                 }
             }
