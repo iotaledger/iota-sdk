@@ -133,42 +133,60 @@ impl Unlocks {
     }
 }
 
+fn verify_unlock<'a>(
+    unlocks: &'a [Unlock],
+    unlock: &'a Unlock,
+    index: u16,
+    seen_signatures: &mut HashSet<&'a SignatureUnlock>,
+) -> Result<(), Error> {
+    match unlock {
+        Unlock::Signature(signature) => {
+            if !seen_signatures.insert(signature.as_ref()) {
+                return Err(Error::DuplicateSignatureUnlock(index));
+            }
+        }
+        Unlock::Reference(reference) => {
+            if index == 0
+                || reference.index() >= index
+                || !matches!(unlocks[reference.index() as usize], Unlock::Signature(_))
+            {
+                return Err(Error::InvalidUnlockReference(index));
+            }
+        }
+        Unlock::Account(account) => {
+            if index == 0 || account.index() >= index {
+                return Err(Error::InvalidUnlockAccount(index));
+            }
+        }
+        Unlock::Anchor(anchor) => {
+            if index == 0 || anchor.index() >= index {
+                return Err(Error::InvalidUnlockAnchor(index));
+            }
+        }
+        Unlock::Nft(nft) => {
+            if index == 0 || nft.index() >= index {
+                return Err(Error::InvalidUnlockNft(index));
+            }
+        }
+        Unlock::Multi(_) => return Err(Error::MultiUnlockRecursion),
+        Unlock::Empty(_) => {}
+    }
+
+    Ok(())
+}
+
 fn verify_unlocks<const VERIFY: bool>(unlocks: &[Unlock], _: &()) -> Result<(), Error> {
     if VERIFY {
         let mut seen_signatures = HashSet::new();
 
         for (index, unlock) in (0u16..).zip(unlocks.iter()) {
             match unlock {
-                Unlock::Signature(signature) => {
-                    if !seen_signatures.insert(signature) {
-                        return Err(Error::DuplicateSignatureUnlock(index));
+                Unlock::Multi(multi) => {
+                    for unlock in multi.unlocks() {
+                        verify_unlock(unlocks, unlock, index, &mut seen_signatures)?
                     }
                 }
-                Unlock::Reference(reference) => {
-                    if index == 0
-                        || reference.index() >= index
-                        || !matches!(unlocks[reference.index() as usize], Unlock::Signature(_))
-                    {
-                        return Err(Error::InvalidUnlockReference(index));
-                    }
-                }
-                Unlock::Account(account) => {
-                    if index == 0 || account.index() >= index {
-                        return Err(Error::InvalidUnlockAccount(index));
-                    }
-                }
-                Unlock::Anchor(anchor) => {
-                    if index == 0 || anchor.index() >= index {
-                        return Err(Error::InvalidUnlockAnchor(index));
-                    }
-                }
-                Unlock::Nft(nft) => {
-                    if index == 0 || nft.index() >= index {
-                        return Err(Error::InvalidUnlockNft(index));
-                    }
-                }
-                Unlock::Multi(_) => todo!(),
-                Unlock::Empty(_) => todo!(),
+                _ => verify_unlock(unlocks, unlock, index, &mut seen_signatures)?,
             }
         }
     }
