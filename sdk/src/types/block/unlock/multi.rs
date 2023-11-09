@@ -1,15 +1,12 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use core::ops::RangeInclusive;
-
 use derive_more::Deref;
-use packable::{bounded::BoundedU8, prefix::BoxedSlicePrefix, Packable};
+use packable::{prefix::BoxedSlicePrefix, Packable};
 
-use crate::types::block::{unlock::Unlock, Error};
+use crate::types::block::{address::WeightedAddressCount, unlock::Unlock, Error};
 
-pub(crate) type UnlocksCount =
-    BoundedU8<{ *MultiUnlock::UNLOCKS_COUNT.start() }, { *MultiUnlock::UNLOCKS_COUNT.end() }>;
+pub(crate) type UnlocksCount = WeightedAddressCount;
 
 /// Unlocks a Multi Address with a list of other unlocks.
 #[derive(Clone, Debug, Deref, Eq, PartialEq, Hash, Packable)]
@@ -19,8 +16,6 @@ pub struct MultiUnlock(#[packable(verify_with = verify_unlocks)] BoxedSlicePrefi
 impl MultiUnlock {
     /// The [`Unlock`](crate::types::block::unlock::Unlock) kind of an [`MultiUnlock`].
     pub const KIND: u8 = 5;
-    /// The allowed range of inner [`Unlock`]s.
-    pub const UNLOCKS_COUNT: RangeInclusive<u8> = 1..=10;
 
     /// Creates a new [`MultiUnlock`].
     #[inline(always)]
