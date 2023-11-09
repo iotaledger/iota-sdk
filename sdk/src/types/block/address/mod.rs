@@ -168,24 +168,24 @@ impl Address {
             }
             // TODO maybe shouldn't be a semantic error but this function currently returns a TransactionFailureReason.
             (Self::Anchor(_), _) => return Err(TransactionFailureReason::SemanticValidationFailed),
-            (Self::ImplicitAccountCreation(address), _) => {
-                return Self::from(*address.ed25519_address()).unlock(unlock, context);
+            (Self::ImplicitAccountCreation(implicit_account_creation_address), _) => {
+                return Self::from(*implicit_account_creation_address.ed25519_address()).unlock(unlock, context);
             }
-            (Self::Multi(address), Unlock::Multi(unlock)) => {
-                if address.len() != unlock.len() {
+            (Self::Multi(multi_address), Unlock::Multi(unlock)) => {
+                if multi_address.len() != unlock.len() {
                     return Err(TransactionFailureReason::InvalidInputUnlock);
                 }
 
                 let mut cumulative_unlocked_weight = 0u16;
 
-                for (address, unlock) in address.addresses().iter().zip(unlock.unlocks()) {
+                for (address, unlock) in multi_address.addresses().iter().zip(unlock.unlocks()) {
                     if !unlock.is_empty() {
                         address.unlock(unlock, context)?;
                         cumulative_unlocked_weight += address.weight() as u16;
                     }
                 }
 
-                if cumulative_unlocked_weight < address.threshold() {
+                if cumulative_unlocked_weight < multi_address.threshold() {
                     return Err(TransactionFailureReason::InvalidInputUnlock);
                 }
             }
