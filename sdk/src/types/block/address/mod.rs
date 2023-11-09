@@ -134,7 +134,7 @@ impl Address {
 
                 context.unlocked_addresses.insert(self.clone());
             }
-            (Self::Ed25519(_ed25519_address), Unlock::Reference(_unlock)) => {
+            (Self::Ed25519(_), Unlock::Reference(_)) => {
                 // TODO actually check that it was unlocked by the same signature.
                 if !context.unlocked_addresses.contains(self) {
                     return Err(TransactionFailureReason::InvalidInputUnlock);
@@ -168,6 +168,9 @@ impl Address {
             }
             // TODO maybe shouldn't be a semantic error but this function currently returns a TransactionFailureReason.
             (Self::Anchor(_), _) => return Err(TransactionFailureReason::SemanticValidationFailed),
+            (Self::ImplicitAccountCreation(address), _) => {
+                return Self::from(*address.ed25519_address()).unlock(unlock, context);
+            }
             _ => return Err(TransactionFailureReason::InvalidInputUnlock),
         }
 
