@@ -14,9 +14,9 @@ use core::ops::RangeInclusive;
 
 use derive_more::{Deref, From};
 use hashbrown::HashSet;
-pub(crate) use multi::UnlocksCount;
 use packable::{bounded::BoundedU16, prefix::BoxedSlicePrefix, Packable};
 
+pub(crate) use self::multi::UnlocksCount;
 pub use self::{
     account::AccountUnlock, anchor::AnchorUnlock, empty::EmptyUnlock, multi::MultiUnlock, nft::NftUnlock,
     reference::ReferenceUnlock, signature::SignatureUnlock,
