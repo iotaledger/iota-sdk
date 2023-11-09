@@ -4,7 +4,6 @@
 //! Core data types for blocks in the tangle.
 
 mod block_id;
-mod convert;
 mod error;
 mod issuer_id;
 mod r#macro;
@@ -46,7 +45,6 @@ pub use self::core::dto::{BlockDto, SignedBlockDto, UnsignedBlockDto};
 pub(crate) use self::r#macro::*;
 pub use self::{
     block_id::{BlockHash, BlockId},
-    convert::ConvertTo,
     core::{Block, SignedBlock, UnsignedBlock},
     error::Error,
     issuer_id::IssuerId,

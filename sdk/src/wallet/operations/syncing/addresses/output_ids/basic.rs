@@ -3,7 +3,8 @@
 
 use crate::{
     client::{node_api::indexer::query_parameters::BasicOutputQueryParameters, secret::SecretManage},
-    types::block::{address::Bech32Address, output::OutputId, ConvertTo},
+    types::block::{address::Bech32Address, output::OutputId},
+    utils::ConvertTo,
     wallet::Wallet,
 };
 
