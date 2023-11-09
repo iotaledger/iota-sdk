@@ -10,7 +10,7 @@ use crate::types::block::{address::WeightedAddressCount, unlock::Unlock, Error};
 
 pub(crate) type UnlocksCount = WeightedAddressCount;
 
-/// Unlocks a Multi Address with a list of other unlocks.
+/// Unlocks a [`MultiAddress`](crate::types::block::address::MultiAddress) with a list of other unlocks.
 #[derive(Clone, Debug, Deref, Eq, PartialEq, Hash, Packable)]
 #[packable(unpack_error = Error, with = |e| e.unwrap_item_err_or_else(|p| Error::InvalidMultiUnlockCount(p.into())))]
 pub struct MultiUnlock(#[packable(verify_with = verify_unlocks)] BoxedSlicePrefix<Unlock, UnlocksCount>);
