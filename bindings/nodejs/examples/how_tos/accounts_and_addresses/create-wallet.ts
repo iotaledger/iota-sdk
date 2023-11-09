@@ -44,7 +44,7 @@ async function run() {
         // The mnemonic can't be retrieved from the Stronghold file, so make a backup in a secure place!
         await secretManager.storeMnemonic(process.env.MNEMONIC as string);
 
-        const wallet_address = await secretManager.generateEd25519Addresses({
+        const walletAddress = await secretManager.generateEd25519Addresses({
             coinType: CoinType.IOTA,
             accountIndex: 0,
             range: {
@@ -55,7 +55,7 @@ async function run() {
         });
 
         const walletOptions: WalletOptions = {
-            address: wallet_address[0],
+            address: walletAddress[0],
             storagePath: process.env.WALLET_DB_PATH,
             clientOptions: {
                 nodes: [process.env.NODE_URL as string],

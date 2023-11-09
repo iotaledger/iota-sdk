@@ -24,9 +24,7 @@ async function run() {
         });
 
         // Get the account we generated with `create-account`
-        const account = await wallet.getAccount('Alice');
-
-        const address = (await account.addresses())[0].address;
+        const address = await wallet.address();
         console.log(address);
 
         const faucetResponse = await (

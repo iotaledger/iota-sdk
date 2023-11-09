@@ -5,7 +5,7 @@
 // Run with command:
 // yarn run-example ./exchange/1-create-account.ts
 
-import { Wallet, WalletOptions, CoinType } from '@iota/sdk';
+import { Wallet, WalletOptions, CoinType, SecretManager } from '@iota/sdk';
 
 // This example uses secrets in environment variables for simplicity which should not be done in production.
 require('dotenv').config({ path: '.env' });
@@ -25,34 +25,47 @@ async function run() {
                 );
             }
 
+        const strongholdSecretManager = {
+            stronghold: {
+                snapshotPath: process.env.STRONGHOLD_SNAPSHOT_PATH,
+                password: process.env.STRONGHOLD_PASSWORD,
+            },
+        };
+
+        const secretManager = new SecretManager(strongholdSecretManager);
+
+        // A mnemonic can be generated with `Utils.generateMnemonic()`.
+        // Store the mnemonic in the Stronghold snapshot, this needs to be done only the first time.
+        // The mnemonic can't be retrieved from the Stronghold file, so make a backup in a secure place!
+        await secretManager.storeMnemonic(process.env.MNEMONIC as string);
+
+        const walletAddress = await secretManager.generateEd25519Addresses({
+            coinType: CoinType.IOTA,
+            accountIndex: 0,
+            range: {
+                start: 0,
+                end: 1,
+            },
+            bech32Hrp: 'tst',
+        });
+
         const walletOptions: WalletOptions = {
+            address: walletAddress[0],
             storagePath: process.env.WALLET_DB_PATH,
             clientOptions: {
                 nodes: [process.env.NODE_URL as string],
             },
-            coinType: CoinType.IOTA,
-            secretManager: {
-                stronghold: {
-                    snapshotPath: process.env.STRONGHOLD_SNAPSHOT_PATH,
-                    password: process.env.STRONGHOLD_PASSWORD,
-                },
+            bipPath: {
+                coinType: CoinType.IOTA,
             },
+            secretManager: strongholdSecretManager,
         };
 
         const wallet = new Wallet(walletOptions);
 
-        // Mnemonic only needs to be set the first time.
-        await wallet.storeMnemonic(process.env.MNEMONIC as string);
-
-        const account = await wallet.createAccount({
-            alias: 'Alice',
-        });
-
         // Set syncOnlyMostBasicOutputs to true if not interested in outputs that are timelocked,
         // have a storage deposit return, expiration or are nft/account/foundry outputs.
-        account.setDefaultSyncOptions({ syncOnlyMostBasicOutputs: true });
-
-        console.log(account);
+        wallet.setDefaultSyncOptions({ syncOnlyMostBasicOutputs: true });
     } catch (error) {
         console.error(error);
     }
