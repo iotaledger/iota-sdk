@@ -1,6 +1,8 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use alloc::{boxed::Box, vec::Vec};
+
 use derive_more::Deref;
 use packable::{prefix::BoxedSlicePrefix, Packable};
 
