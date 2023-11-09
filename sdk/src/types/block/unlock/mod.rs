@@ -133,7 +133,9 @@ impl Unlocks {
     }
 }
 
-fn verify_unlock<'a>(
+/// Verifies the consistency of non-multi unlocks.
+/// Will error on multi unlocks as they can't be nested.
+fn verify_non_multi_unlock<'a>(
     unlocks: &'a [Unlock],
     unlock: &'a Unlock,
     index: u16,
@@ -183,10 +185,10 @@ fn verify_unlocks<const VERIFY: bool>(unlocks: &[Unlock], _: &()) -> Result<(), 
             match unlock {
                 Unlock::Multi(multi) => {
                     for unlock in multi.unlocks() {
-                        verify_unlock(unlocks, unlock, index, &mut seen_signatures)?
+                        verify_non_multi_unlock(unlocks, unlock, index, &mut seen_signatures)?
                     }
                 }
-                _ => verify_unlock(unlocks, unlock, index, &mut seen_signatures)?,
+                _ => verify_non_multi_unlock(unlocks, unlock, index, &mut seen_signatures)?,
             }
         }
     }
