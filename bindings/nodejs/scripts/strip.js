@@ -1,3 +1,4 @@
+// Removes symbols and debug information from the binary to reduce its size.
 const { resolve } = require('path');
 const { spawnSync } = require('child_process');
 

@@ -37,7 +37,7 @@ use crate::{
                 dto::FoundryOutputDto, AccountId, AnchorId, DelegationId, FoundryId, FoundryOutput, NftId, Output,
                 OutputId, TokenId,
             },
-            payload::signed_transaction::{dto::TransactionDto, Transaction, TransactionId},
+            payload::signed_transaction::TransactionId,
         },
         TryFromDto,
     },
@@ -265,7 +265,7 @@ where
                 ImplicitAccountCreationAddress::from(address.clone()),
             ))
         } else {
-            return Err(Error::NonEd25519Address);
+            Err(Error::NonEd25519Address)
         }
     }
 
@@ -462,6 +462,17 @@ where
             .unspent_outputs
             .values()
             .filter(|output_data| output_data.output.is_implicit_account())
+            .cloned()
+            .collect()
+    }
+
+    /// Returns accounts of the wallet.
+    pub async fn accounts(&self) -> Vec<OutputData> {
+        self.data()
+            .await
+            .unspent_outputs
+            .values()
+            .filter(|output_data| output_data.output.is_account())
             .cloned()
             .collect()
     }
@@ -697,7 +708,7 @@ mod test {
         let output = Output::Basic(
             BasicOutput::build_with_amount(amount)
                 .add_unlock_condition(AddressUnlockCondition::new(address))
-                .finish_with_params(protocol_parameters.clone())
+                .finish()
                 .unwrap(),
         );
         let transaction = Transaction::builder(protocol_parameters.network_id())

@@ -22,6 +22,10 @@ use crate::{method::WalletMethod, response::Response, Result};
 /// Call a wallet method.
 pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletMethod) -> Result<Response> {
     let response = match method {
+        WalletMethod::Accounts => {
+            let accounts = wallet.accounts().await;
+            Response::OutputsData(accounts.iter().map(OutputDataDto::from).collect())
+        }
         #[cfg(feature = "stronghold")]
         WalletMethod::Backup { destination, password } => {
             wallet.backup(destination, password).await?;

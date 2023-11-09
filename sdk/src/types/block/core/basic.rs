@@ -158,22 +158,11 @@ impl BasicBlock {
 
 impl WorkScore for BasicBlock {
     fn work_score(&self, work_score_params: WorkScoreParameters) -> u32 {
-        // TODO: still deal with this? see updated TIP
-        // let missing_parent_score = {
-        //     let min_strong_parents_threshold = work_score_params.min_strong_parents_threshold as usize;
-        //     if self.strong_parents.len() < min_strong_parents_threshold {
-        //         let missing_parents_count = min_strong_parents_threshold - self.strong_parents.len();
-        //         work_score_params.missing_parent * missing_parents_count as u32
-        //     } else {
-        //         0
-        //     }
-        // };
         let payload_score = self
             .payload
             .as_ref()
             .map(|p| p.work_score(work_score_params))
             .unwrap_or(0);
-        // work_score_params.block() + missing_parent_score + payload_score
         work_score_params.block() + payload_score
     }
 }

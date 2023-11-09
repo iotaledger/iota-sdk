@@ -48,7 +48,7 @@ async fn main() -> Result<()> {
 
     let outputs = [
         //// most simple output
-        basic_output_builder.clone().finish_output(token_supply)?,
+        basic_output_builder.clone().finish_output()?,
         // with storage deposit return unlock condition
         basic_output_builder
             .clone()
@@ -57,22 +57,22 @@ async fn main() -> Result<()> {
                 1000000,
                 token_supply,
             )?)
-            .finish_output(token_supply)?,
+            .finish_output()?,
         // with timeout unlock condition
         basic_output_builder
             .clone()
             .add_unlock_condition(TimelockUnlockCondition::new(1)?)
-            .finish_output(token_supply)?,
+            .finish_output()?,
         // with expiration unlock condition
         basic_output_builder
             .add_unlock_condition(ExpirationUnlockCondition::new(address.clone(), 1)?)
-            .finish_output(token_supply)?,
+            .finish_output()?,
         // with immutable account unlock condition
         foundry_output_builder
             .add_unlock_condition(ImmutableAccountAddressUnlockCondition::new(
                 *account_address.as_account(),
             ))
-            .finish_output(token_supply)?,
+            .finish_output()?,
     ];
 
     // Convert ouput array to json array

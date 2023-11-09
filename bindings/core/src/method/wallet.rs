@@ -43,6 +43,9 @@ use crate::OmittedDebug;
 #[serde(tag = "name", content = "data", rename_all = "camelCase")]
 #[non_exhaustive]
 pub enum WalletMethod {
+    /// Returns the accounts of the wallet.
+    /// Expected response: [`OutputsData`](crate::Response::OutputsData)
+    Accounts,
     /// Backup storage. Password must be the current one, when Stronghold is used as SecretManager.
     /// Expected response: [`Ok`](crate::Response::Ok)
     #[cfg(feature = "stronghold")]

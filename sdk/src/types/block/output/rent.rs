@@ -219,6 +219,6 @@ impl MinimumStorageDepositBasicOutput {
     }
 
     pub fn finish(self) -> Result<u64, Error> {
-        Ok(self.builder.finish_output(self.token_supply)?.rent_cost(self.config))
+        Ok(self.builder.finish_output()?.rent_cost(self.config))
     }
 }

@@ -2,13 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use iota_sdk::{
-    types::block::{
-        address::Bech32Address,
-        output::{
-            feature::SenderFeature,
-            unlock_condition::{AddressUnlockCondition, ExpirationUnlockCondition},
-            BasicOutputBuilder, UnlockCondition,
-        },
+    types::block::output::{
+        feature::SenderFeature,
+        unlock_condition::{AddressUnlockCondition, ExpirationUnlockCondition},
+        BasicOutputBuilder, UnlockCondition,
     },
     wallet::{types::Balance, Result},
 };
@@ -107,7 +104,6 @@ async fn balance_expiration() -> Result<()> {
     request_funds(&wallet_0).await?;
 
     let slots_until_expired = 20;
-    let token_supply = wallet_0.client().get_token_supply().await?;
     let outputs = [BasicOutputBuilder::new_with_amount(1_000_000)
         // Send to account 1 with expiration to account 2, both have no amount yet
         .with_unlock_conditions([
@@ -118,7 +114,7 @@ async fn balance_expiration() -> Result<()> {
             )?),
         ])
         .with_features([SenderFeature::new(wallet_0.address().await)])
-        .finish_output(token_supply)?];
+        .finish_output()?];
 
     let balance_before_tx = wallet_0.balance().await?;
     let tx = wallet_0.send_outputs(outputs, None).await?;
@@ -166,7 +162,7 @@ async fn balance_expiration() -> Result<()> {
     let outputs = [BasicOutputBuilder::new_with_amount(1_000_000)
         // Send to wallet 1 with expiration to wallet 2, both have no amount yet
         .with_unlock_conditions([AddressUnlockCondition::new(wallet_1.address().await)])
-        .finish_output(token_supply)?];
+        .finish_output()?];
     let _tx = wallet_2.send_outputs(outputs, None).await?;
 
     tear_down(storage_path_0)?;
