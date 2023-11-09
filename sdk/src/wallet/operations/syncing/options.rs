@@ -25,7 +25,7 @@ pub struct SyncOptions {
     /// Checks pending transactions and reissues them if necessary.
     #[serde(default = "default_sync_pending_transactions")]
     pub sync_pending_transactions: bool,
-    /// Specifies what outputs should be synced for the ed25519 addresses from the wallet.
+    /// Specifies what outputs should be synced for the ed25519 address from the wallet.
     #[serde(default)]
     pub wallet: WalletSyncOptions,
     /// Specifies what outputs should be synced for the address of an account output.
@@ -35,7 +35,7 @@ pub struct SyncOptions {
     #[serde(default)]
     pub nft: NftSyncOptions,
     /// Specifies if only basic outputs with an AddressUnlockCondition alone should be synced, will overwrite
-    /// `account`, `alias` and `nft` options.
+    /// `wallet`, `account` and `nft` options.
     #[serde(default = "default_sync_only_most_basic_outputs")]
     pub sync_only_most_basic_outputs: bool,
     /// Sync native token foundries, so their metadata can be returned in the balance.

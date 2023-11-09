@@ -12,9 +12,7 @@ import {
 import type {
     WalletEventType,
     WalletOptions,
-    __Method__,
-    __AccountMethod__,
-    AccountIdentifier,
+    __WalletMethod__,
     Event,
 } from '../types/wallet';
 import { Client } from '../client';
@@ -28,14 +26,7 @@ export class WalletMethodHandler {
      * @param options The wallet options.
      */
     constructor(options?: WalletOptions) {
-        const walletOptions = {
-            storagePath: options?.storagePath,
-            clientOptions: options?.clientOptions,
-            coinType: options?.coinType,
-            secretManager: options?.secretManager,
-        };
-
-        this.methodHandler = createWallet(JSON.stringify(walletOptions));
+        this.methodHandler = createWallet(JSON.stringify(options));
     }
 
     /**
@@ -43,7 +34,7 @@ export class WalletMethodHandler {
      *
      * @param method The wallet method to call.
      */
-    async callMethod(method: __Method__): Promise<string> {
+    async callMethod(method: __WalletMethod__): Promise<string> {
         return callWalletMethod(
             this.methodHandler,
             // mapToObject is required to convert maps to array since they otherwise get serialized as `[{}]` even if not empty
@@ -65,25 +56,6 @@ export class WalletMethodHandler {
                 console.error(e);
             }
             return Promise.reject(error);
-        });
-    }
-
-    /**
-     * Call an account method on the Rust backend.
-     *
-     * @param accountIndex The account index.
-     * @param method The account method to call.
-     */
-    async callAccountMethod(
-        accountIndex: AccountIdentifier,
-        method: __AccountMethod__,
-    ): Promise<string> {
-        return this.callMethod({
-            name: 'callAccountMethod',
-            data: {
-                accountId: accountIndex,
-                method,
-            },
         });
     }
 
