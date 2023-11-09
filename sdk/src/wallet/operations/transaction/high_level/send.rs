@@ -173,13 +173,13 @@ where
             // Get the minimum required amount for an output assuming it does not need a storage deposit.
             let output = BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)
                 .add_unlock_condition(AddressUnlockCondition::new(address))
-                .finish_output(token_supply)?;
+                .finish_output()?;
 
             if amount >= output.amount() {
                 outputs.push(
                     BasicOutputBuilder::from(output.as_basic())
                         .with_amount(amount)
-                        .finish_output(token_supply)?,
+                        .finish_output()?,
                 )
             } else {
                 let expiration_slot_index = expiration
@@ -215,7 +215,7 @@ where
                             )?,
                         )
                         .add_unlock_condition(ExpirationUnlockCondition::new(return_address, expiration_slot_index)?)
-                        .finish_output(token_supply)?,
+                        .finish_output()?,
                 )
             }
         }
