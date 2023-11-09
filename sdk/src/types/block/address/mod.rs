@@ -167,8 +167,6 @@ impl Address {
                 }
             }
             (Self::Multi(address), Unlock::Multi(unlock)) => {
-                let threshold = address.threshold();
-
                 if address.addresses().len() != unlock.unlocks().len() {
                     return Err(TransactionFailureReason::InvalidInputUnlock);
                 }
@@ -182,7 +180,7 @@ impl Address {
                     }
                 }
 
-                if cumulative_unlocked_eight < threshold {
+                if cumulative_unlocked_eight < address.threshold() {
                     return Err(TransactionFailureReason::InvalidInputUnlock);
                 }
             }
