@@ -21,11 +21,12 @@ pub(crate) type WeightedAddressCount =
     BoundedU8<{ *MultiAddress::ADDRESSES_COUNT.start() }, { *MultiAddress::ADDRESSES_COUNT.end() }>;
 
 /// An address with an assigned weight.
-#[derive(Clone, Debug, Display, Eq, PartialEq, Ord, PartialOrd, Hash, From, AsRef, Packable)]
+#[derive(Clone, Debug, Display, Eq, PartialEq, Ord, PartialOrd, Hash, From, AsRef, Deref, Packable)]
 #[display(fmt = "{address}")]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct WeightedAddress {
     /// The unlocked address.
+    #[deref]
     #[packable(verify_with = verify_address)]
     address: Address,
     /// The weight of the unlocked address.

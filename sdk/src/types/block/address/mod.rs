@@ -175,7 +175,7 @@ impl Address {
 
                 for (address, unlock) in address.addresses().iter().zip(unlock.unlocks()) {
                     if !unlock.is_empty() {
-                        address.address().unlock(unlock, context)?;
+                        address.unlock(unlock, context)?;
                         cumulative_unlocked_weight += address.weight() as u16;
                     }
                 }
