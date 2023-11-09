@@ -327,6 +327,8 @@ pub struct SubmitBlockResponse {
 pub enum BlockState {
     // Stored but not confirmed.
     Pending,
+    // TODO
+    Accepted,
     // Confirmed with the first level of knowledge.
     Confirmed,
     // Included and can no longer be reverted.
@@ -335,6 +337,8 @@ pub enum BlockState {
     Rejected,
     // Not successfully issued due to failure reason.
     Failed,
+    // TODO
+    Unknown,
 }
 
 /// Describes the state of a transaction.
@@ -343,6 +347,8 @@ pub enum BlockState {
 pub enum TransactionState {
     // Stored but not confirmed.
     Pending,
+    // TODO
+    Accepted,
     // Confirmed with the first level of knowledge.
     Confirmed,
     // Included and can no longer be reverted.
