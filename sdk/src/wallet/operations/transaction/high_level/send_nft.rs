@@ -95,8 +95,6 @@ where
     {
         log::debug!("[TRANSACTION] prepare_send_nft");
 
-        let token_supply = self.client().get_token_supply().await?;
-
         let mut outputs = Vec::new();
 
         for SendNftParams { address, nft_id } in params {
@@ -115,7 +113,7 @@ where
                     let nft_builder = NftOutputBuilder::from(nft_output)
                         .with_nft_id(nft_id)
                         .with_unlock_conditions([AddressUnlockCondition::new(address)]);
-                    outputs.push(nft_builder.finish_output(token_supply)?);
+                    outputs.push(nft_builder.finish_output()?);
                 }
             } else {
                 return Err(crate::wallet::Error::NftNotFoundInUnspentOutputs);

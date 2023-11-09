@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import {
-    callClientMethodAsync,
+    callClientMethod,
     createClient,
     listenMqtt,
     destroyClient,
@@ -38,10 +38,7 @@ export class ClientMethodHandler {
      * @returns A promise that resolves to a JSON string response holding the result of the client method.
      */
     async callMethod(method: __ClientMethods__): Promise<string> {
-        return callClientMethodAsync(
-            JSON.stringify(method),
-            this.methodHandler,
-        );
+        return callClientMethod(this.methodHandler, JSON.stringify(method));
     }
 
     /**
@@ -54,6 +51,6 @@ export class ClientMethodHandler {
         topics: string[],
         callback: (error: Error, result: string) => void,
     ): Promise<void> {
-        return listenMqtt(topics, callback, this.methodHandler);
+        return listenMqtt(this.methodHandler, topics, callback);
     }
 }

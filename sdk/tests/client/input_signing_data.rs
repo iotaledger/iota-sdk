@@ -33,7 +33,7 @@ fn input_signing_data_conversion() {
         .add_unlock_condition(AddressUnlockCondition::new(
             Address::try_from_bech32("rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy").unwrap(),
         ))
-        .finish_output(protocol_parameters.token_supply())
+        .finish_output()
         .unwrap();
 
     let input_signing_data = InputSigningData {

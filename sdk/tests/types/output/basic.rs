@@ -1,20 +1,17 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use iota_sdk::types::{
-    block::{
-        output::{BasicOutput, Feature, FoundryId, NativeToken, Output, Rent, SimpleTokenScheme, TokenId},
-        protocol::protocol_parameters,
-        rand::{
-            address::rand_account_address,
-            output::{
-                feature::{rand_metadata_feature, rand_sender_feature},
-                rand_basic_output,
-                unlock_condition::rand_address_unlock_condition,
-            },
+use iota_sdk::types::block::{
+    output::{BasicOutput, Feature, FoundryId, NativeToken, Output, Rent, SimpleTokenScheme, TokenId},
+    protocol::protocol_parameters,
+    rand::{
+        address::rand_account_address,
+        output::{
+            feature::{rand_metadata_feature, rand_sender_feature},
+            rand_basic_output,
+            unlock_condition::rand_address_unlock_condition,
         },
     },
-    ValidationParams,
 };
 use packable::PackableExt;
 use pretty_assertions::assert_eq;
@@ -54,7 +51,7 @@ fn builder() {
         .with_minimum_storage_deposit(protocol_parameters.rent_structure())
         .add_unlock_condition(rand_address_unlock_condition())
         .with_features([Feature::from(metadata.clone()), sender_1.clone().into()])
-        .finish_with_params(ValidationParams::default().with_protocol_parameters(protocol_parameters.clone()))
+        .finish()
         .unwrap();
 
     assert_eq!(

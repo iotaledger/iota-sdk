@@ -55,6 +55,8 @@ impl WalletCli {
 #[derive(Debug, Subcommand)]
 #[allow(clippy::large_enum_variant)]
 pub enum WalletCommand {
+    /// Lists the accounts of the wallet.
+    Accounts,
     /// Print the wallet address.
     Address,
     /// Print the wallet balance.
@@ -301,6 +303,11 @@ impl FromStr for OutputSelector {
             Self::Id(s.parse()?)
         })
     }
+}
+
+// `accounts` command
+pub async fn accounts_command(wallet: &Wallet) -> Result<(), Error> {
+    print_outputs(wallet.data().await.accounts().cloned().collect(), "Accounts:")
 }
 
 // `address` command
@@ -727,7 +734,6 @@ pub async fn send_native_token_command(
     let transaction = if gift_storage_deposit.unwrap_or(false) {
         // Send native tokens together with the required storage deposit
         let rent_structure = wallet.client().get_rent_structure().await?;
-        let token_supply = wallet.client().get_token_supply().await?;
 
         wallet.client().bech32_hrp_matches(address.hrp()).await?;
 
@@ -737,7 +743,7 @@ pub async fn send_native_token_command(
                 TokenId::from_str(&token_id)?,
                 U256::from_dec_str(&amount).map_err(|e| Error::Miscellaneous(e.to_string()))?,
             )?])
-            .finish_output(token_supply)?];
+            .finish_output()?];
 
         wallet.send_outputs(outputs, None).await?
     } else {
@@ -1064,6 +1070,7 @@ pub async fn prompt_internal(
                         }
                     };
                     match protocol_cli.command {
+                        WalletCommand::Accounts => accounts_command(wallet).await,
                         WalletCommand::Address => address_command(wallet).await,
                         WalletCommand::Balance => balance_command(wallet).await,
                         WalletCommand::BurnNativeToken { token_id, amount } => {

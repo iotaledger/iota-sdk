@@ -437,8 +437,8 @@ impl OutputBuilder {
     }
     fn finish_output(self, token_supply: u64) -> Result<Output, crate::types::block::Error> {
         match self {
-            Self::Basic(b) => b.finish_output(token_supply),
-            Self::Nft(b) => b.finish_output(token_supply),
+            Self::Basic(b) => b.finish_output(),
+            Self::Nft(b) => b.finish_output(),
         }
     }
 }

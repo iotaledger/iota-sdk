@@ -309,6 +309,13 @@ impl WalletData {
             .filter(|output_data| output_data.output.is_implicit_account())
     }
 
+    /// Returns accounts of the wallet.
+    pub fn accounts(&self) -> impl Iterator<Item = &OutputData> {
+        self.unspent_outputs
+            .values()
+            .filter(|output_data| output_data.output.is_account())
+    }
+
     /// Get the [`OutputData`] of an output stored in the wallet.
     pub fn get_output(&self, output_id: &OutputId) -> Option<&OutputData> {
         self.outputs.get(output_id)
@@ -450,7 +457,7 @@ where
                 ImplicitAccountCreationAddress::from(address.clone()),
             ))
         } else {
-            return Err(Error::NonEd25519Address);
+            Err(Error::NonEd25519Address)
         }
     }
 
@@ -671,7 +678,7 @@ mod test {
         let output = Output::Basic(
             BasicOutput::build_with_amount(amount)
                 .add_unlock_condition(AddressUnlockCondition::new(address))
-                .finish_with_params(protocol_parameters.clone())
+                .finish()
                 .unwrap(),
         );
         let transaction = Transaction::builder(protocol_parameters.network_id())

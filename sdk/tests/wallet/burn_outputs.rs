@@ -64,8 +64,6 @@ async fn mint_and_burn_expired_nft() -> Result<()> {
     let wallet_1 = make_wallet(storage_path, None, None).await?;
     request_funds(&wallet_0).await?;
 
-    let token_supply = wallet_0.client().get_token_supply().await?;
-
     let amount = 1_000_000;
     let outputs = [NftOutputBuilder::new_with_amount(amount, NftId::null())
         .with_unlock_conditions([
@@ -73,7 +71,7 @@ async fn mint_and_burn_expired_nft() -> Result<()> {
             // immediately expired to account_1
             UnlockCondition::Expiration(ExpirationUnlockCondition::new(wallet_1.address().await, 1)?),
         ])
-        .finish_output(token_supply)?];
+        .finish_output()?];
 
     let transaction = wallet_0.send_outputs(outputs, None).await?;
     wallet_0

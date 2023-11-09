@@ -13,8 +13,8 @@ use crate::types::{
             unlock_condition::{
                 verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions,
             },
-            verify_output_amount_min, verify_output_amount_packable, verify_output_amount_supply, Output,
-            OutputBuilderAmount, OutputId, Rent, RentStructure, StateTransitionError, StateTransitionVerifier,
+            verify_output_amount_min, verify_output_amount_packable, Output, OutputBuilderAmount, OutputId, Rent,
+            RentStructure, StateTransitionError, StateTransitionVerifier,
         },
         protocol::ProtocolParameters,
         semantic::{SemanticValidationContext, TransactionFailureReason},
@@ -200,23 +200,9 @@ impl DelegationOutputBuilder {
         Ok(output)
     }
 
-    /// Finishes the builder into a [`DelegationOutput`] with parameters verification.
-    pub fn finish_with_params<'a>(
-        self,
-        params: impl Into<ValidationParams<'a>> + Send,
-    ) -> Result<DelegationOutput, Error> {
-        let output = self.finish()?;
-
-        if let Some(token_supply) = params.into().token_supply() {
-            verify_output_amount_supply(output.amount, token_supply)?;
-        }
-
-        Ok(output)
-    }
-
     /// Finishes the [`DelegationOutputBuilder`] into an [`Output`].
-    pub fn finish_output(self, token_supply: u64) -> Result<Output, Error> {
-        Ok(Output::Delegation(self.finish_with_params(token_supply)?))
+    pub fn finish_output(self) -> Result<Output, Error> {
+        Ok(Output::Delegation(self.finish()?))
     }
 }
 
@@ -411,7 +397,7 @@ impl StateTransitionVerifier for DelegationOutput {
 
 fn verify_validator_address<const VERIFY: bool>(validator_address: &AccountAddress) -> Result<(), Error> {
     if VERIFY && validator_address.is_null() {
-        return Err(Error::NullDelegationValidatorId);
+        Err(Error::NullDelegationValidatorId)
     } else {
         Ok(())
     }
@@ -513,7 +499,7 @@ pub(crate) mod dto {
                 builder = builder.add_unlock_condition(UnlockCondition::try_from_dto_with_params(u, &params)?);
             }
 
-            builder.finish_with_params(params)
+            builder.finish()
         }
     }
 
@@ -555,7 +541,7 @@ pub(crate) mod dto {
                 .collect::<Result<Vec<UnlockCondition>, Error>>()?;
             builder = builder.with_unlock_conditions(unlock_conditions);
 
-            builder.finish_with_params(params)
+            builder.finish()
         }
     }
 }
