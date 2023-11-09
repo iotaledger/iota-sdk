@@ -170,7 +170,7 @@ impl Address {
                 let threshold = address.threshold();
 
                 if address.addresses().len() != unlock.unlocks().len() {
-                    todo!();
+                    return Err(TransactionFailureReason::InvalidInputUnlock);
                 }
 
                 let mut cumulative_unlocked_eight = 0u16;
@@ -183,7 +183,7 @@ impl Address {
                 }
 
                 if cumulative_unlocked_eight < threshold {
-                    todo!();
+                    return Err(TransactionFailureReason::InvalidInputUnlock);
                 }
             }
             // TODO maybe shouldn't be a semantic error but this function currently returns a TransactionFailureReason.
