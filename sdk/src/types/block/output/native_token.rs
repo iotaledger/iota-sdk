@@ -255,7 +255,6 @@ impl NativeTokens {
     }
 }
 
-// TODO: should we also impl `WorkScore` for `NativeToken` for plain consistency?
 impl WorkScore for NativeTokens {
     fn work_score(&self, work_score_params: WorkScoreParameters) -> u32 {
         self.len() as u32 * work_score_params.native_token()
