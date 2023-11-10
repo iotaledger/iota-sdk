@@ -5,19 +5,19 @@
     "main": "out/index.js",
     "types": "out/index.d.ts",
     "scripts": {
+        "build": "napi build --release && tsc",
+        "build:debug": "napi build",
         "lint": "eslint --ignore-path .eslintignore --ext .js,.ts .",
         "format": "prettier --ignore-path .eslintignore -w \"{,*/**/}*.{ts,js,json}\"",
         "format-check": "prettier --ignore-path .eslintignore -c \"{,*/**/}*.{ts,js,json}\"",
-        "build": "node scripts/neon-build && tsc",
-        "build:neon": "cargo-cp-artifact -ac iota-sdk-nodejs ./index.node -- cargo build --profile=production --message-format=json-render-diagnostics",
-        "prebuild-x64": "prebuild --runtime napi --target 6 --prepack scripts/neon-build.js --strip --arch x64",
-        "prebuild-macos-arm64": "prebuild --runtime napi --target 6 --prepack 'yarn run neon-build-macos-arm64' --strip --arch arm64",
-        "neon-build-macos-arm64": "cargo-cp-artifact -ac iota-sdk-nodejs ./index.node -- cargo build --profile=production --message-format=json-render-diagnostics --target aarch64-apple-darwin && node -e \"require('./scripts/move-artifact.js')()\"",
-        "prebuild-linux-arm64": "prebuild --runtime napi --target 6 --prepack 'yarn run neon-build-linux-arm64' --strip --arch arm64",
-        "neon-build-linux-arm64": "cargo-cp-artifact -ac iota-sdk-nodejs ./index.node -- cargo build --profile=production --message-format=json-render-diagnostics --target aarch64-unknown-linux-gnu && node -e \"require('./scripts/move-artifact.js')()\"",
-        "prebuild-windows-arm64": "prebuild --runtime napi --target 6 --prepack 'yarn run neon-build-windows-arm64' --strip --arch arm64",
-        "neon-build-windows-arm64": "cargo-cp-artifact -ac iota-sdk-nodejs ./index.node -- cargo build --profile=production --message-format=json-render-diagnostics --target aarch64-pc-windows-msvc && node -e \"require('./scripts/move-artifact.js')()\"",
-        "rebuild": "node scripts/neon-build && tsc && node scripts/strip.js",
+        "prebuild-x64": "prebuild --runtime napi --target 6 --prepack scripts/build.js --strip --arch x64",
+        "prebuild-macos-arm64": "prebuild --runtime napi --target 6 --prepack 'yarn run napi-build-macos-arm64' --strip --arch arm64",
+        "napi-build-macos-arm64": "napi build --cargo-flags=--profile=production --target aarch64-apple-darwin",
+        "prebuild-linux-arm64": "prebuild --runtime napi --target 6 --prepack 'yarn run napi-build-linux-arm64' --strip --arch arm64",
+        "napi-build-linux-arm64": "napi build --cargo-flags=--profile=production --target aarch64-unknown-linux-gnu",
+        "prebuild-windows-arm64": "prebuild --runtime napi --target 6 --prepack 'yarn run napi-build-windows-arm64' --strip --arch arm64",
+        "napi-build-windows-arm64": "napi build --cargo-flags=--profile=production --target aarch64-pc-windows-msvc",
+        "rebuild": "node scripts/build && tsc && node scripts/strip.js",
         "install": "prebuild-install --runtime napi --tag-prefix=iota-sdk-nodejs-v && tsc || npm run rebuild",
         "test": "jest",
         "test-webpack": "cd tests/webpack && webpack-cli build --config ./webpack.config.js ",
@@ -27,7 +27,6 @@
     "license": "Apache-2.0",
     "dependencies": {
         "@types/node": "^18.15.12",
-        "cargo-cp-artifact": "^0.1.6",
         "class-transformer": "^0.5.1",
         "prebuild-install": "^7.1.1",
         "reflect-metadata": "^0.1.13",
@@ -49,7 +48,8 @@
         "typedoc": "^0.24.6",
         "typedoc-plugin-markdown": "^3.14.0",
         "webpack": "^5.88.2",
-        "webpack-cli": "^5.1.4"
+        "webpack-cli": "^5.1.4",
+        "@napi-rs/cli": "^1.0.0"
     },
     "overrides": {
         "tar@<=4.4.17": "^4.4.19",
@@ -75,5 +75,8 @@
     "bugs": {
         "url": "https://github.com/iotaledger/iota-sdk/issues"
     },
-    "homepage": "https://github.com/iotaledger/iota-sdk#readme"
+    "homepage": "https://github.com/iotaledger/iota-sdk#readme",
+    "napi": {
+        "name": "build/Release/index"
+    }
 }

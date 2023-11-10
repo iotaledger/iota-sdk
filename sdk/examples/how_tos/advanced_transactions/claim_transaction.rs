@@ -7,7 +7,7 @@
 //! `cargo run --release --all-features --example claim_transaction`
 
 use iota_sdk::{
-    wallet::{account::OutputsToClaim, Result},
+    wallet::{OutputsToClaim, Result},
     Wallet,
 };
 
@@ -16,31 +16,31 @@ async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
-    // Create the wallet
-    let wallet = Wallet::builder().finish().await?;
+    // Get the wallet we generated with `create_wallet`.
+    let wallet = Wallet::builder()
+        .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
+        .finish()
+        .await?;
 
-    // Get the account we generated with `create_account`
-    let account = wallet.get_account("Alice").await?;
-
-    // May want to ensure the account is synced before sending a transaction.
-    account.sync(None).await?;
+    // May want to ensure the wallet is synced before sending a transaction.
+    wallet.sync(None).await?;
 
     // Set the stronghold password
     wallet
         .set_stronghold_password(std::env::var("STRONGHOLD_PASSWORD").unwrap())
         .await?;
 
-    let output_ids = account.claimable_outputs(OutputsToClaim::All).await?;
+    let output_ids = wallet.claimable_outputs(OutputsToClaim::All).await?;
     println!("Available outputs to claim:");
     for output_id in &output_ids {
         println!("{}", output_id);
     }
 
-    let transaction = account.claim_outputs(output_ids).await?;
+    let transaction = wallet.claim_outputs(output_ids).await?;
     println!("Transaction sent: {}", transaction.transaction_id);
 
     // Wait for transaction to get included
-    let block_id = account
+    let block_id = wallet
         .reissue_transaction_until_included(&transaction.transaction_id, None, None)
         .await?;
     println!(

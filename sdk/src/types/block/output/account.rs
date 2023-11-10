@@ -5,7 +5,6 @@ use alloc::{collections::BTreeSet, vec::Vec};
 
 use hashbrown::HashMap;
 use packable::{
-    bounded::BoundedU16,
     error::{UnpackError, UnpackErrorExt},
     packer::Packer,
     unpacker::Unpacker,
@@ -20,9 +19,8 @@ use crate::types::{
             unlock_condition::{
                 verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions,
             },
-            verify_output_amount_min, verify_output_amount_packable, verify_output_amount_supply, ChainId, NativeToken,
-            NativeTokens, Output, OutputBuilderAmount, OutputId, Rent, RentStructure, StateTransitionError,
-            StateTransitionVerifier,
+            verify_output_amount_min, verify_output_amount_packable, ChainId, NativeToken, NativeTokens, Output,
+            OutputBuilderAmount, OutputId, Rent, RentStructure, StateTransitionError, StateTransitionVerifier,
         },
         payload::signed_transaction::TransactionCapabilityFlag,
         protocol::ProtocolParameters,
@@ -272,23 +270,9 @@ impl AccountOutputBuilder {
         Ok(output)
     }
 
-    ///
-    pub fn finish_with_params<'a>(
-        self,
-        params: impl Into<ValidationParams<'a>> + Send,
-    ) -> Result<AccountOutput, Error> {
-        let output = self.finish()?;
-
-        if let Some(token_supply) = params.into().token_supply() {
-            verify_output_amount_supply(output.amount, token_supply)?;
-        }
-
-        Ok(output)
-    }
-
     /// Finishes the [`AccountOutputBuilder`] into an [`Output`].
-    pub fn finish_output<'a>(self, params: impl Into<ValidationParams<'a>> + Send) -> Result<Output, Error> {
-        Ok(Output::Account(self.finish_with_params(params)?))
+    pub fn finish_output(self) -> Result<Output, Error> {
+        Ok(Output::Account(self.finish()?))
     }
 }
 
@@ -306,8 +290,6 @@ impl From<&AccountOutput> for AccountOutputBuilder {
         }
     }
 }
-
-pub(crate) type StateMetadataLength = BoundedU16<0, { AccountOutput::STATE_METADATA_LENGTH_MAX }>;
 
 /// Describes an account in the ledger that can be controlled by the state and governance controllers.
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
@@ -331,8 +313,6 @@ pub struct AccountOutput {
 impl AccountOutput {
     /// The [`Output`](crate::types::block::output::Output) kind of an [`AccountOutput`].
     pub const KIND: u8 = 1;
-    /// Maximum possible length in bytes of the state metadata.
-    pub const STATE_METADATA_LENGTH_MAX: u16 = 8192;
     /// The set of allowed [`UnlockCondition`]s for an [`AccountOutput`].
     pub const ALLOWED_UNLOCK_CONDITIONS: UnlockConditionFlags = UnlockConditionFlags::ADDRESS;
     /// The set of allowed [`Feature`]s for an [`AccountOutput`].
@@ -707,7 +687,7 @@ pub(crate) mod dto {
                 builder = builder.add_unlock_condition(UnlockCondition::try_from_dto_with_params(u, &params)?);
             }
 
-            builder.finish_with_params(params)
+            builder.finish()
         }
     }
 
@@ -755,7 +735,7 @@ pub(crate) mod dto {
                 builder = builder.with_immutable_features(immutable_features);
             }
 
-            builder.finish_with_params(params)
+            builder.finish()
         }
     }
 }
@@ -821,7 +801,7 @@ mod tests {
                 &protocol_parameters,
             )
             .unwrap();
-            assert_eq!(builder.finish_with_params(&protocol_parameters).unwrap(), output_split);
+            assert_eq!(builder.finish().unwrap(), output_split);
         };
 
         let builder = AccountOutput::build_with_amount(100, account_id)

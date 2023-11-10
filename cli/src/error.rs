@@ -10,6 +10,7 @@ use rustyline::error::ReadlineError;
 use serde_json::Error as SerdeJsonError;
 
 #[derive(Debug, thiserror::Error)]
+#[non_exhaustive]
 pub enum Error {
     #[error("block error: {0}")]
     Block(#[from] BlockError),
@@ -23,8 +24,6 @@ pub enum Error {
     Logger(#[from] LoggerError),
     #[error("{0}")]
     Miscellaneous(String),
-    #[error("generate at least one address before using the faucet")]
-    NoAddressForFaucet,
     #[error("prompt error: {0}")]
     Prompt(#[from] ReadlineError),
     #[error("serde_json error: {0}")]

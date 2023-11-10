@@ -12,7 +12,7 @@ node_url = os.environ.get('NODE_URL', 'https://api.testnet.shimmer.network')
 client = Client(nodes=[node_url])
 
 ADDRESS = 'rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy'
-query_parameters = NodeIndexerAPI.QueryParameters(
+query_parameters = NodeIndexerAPI.BasicOutputQueryParameters(
     address=ADDRESS,
     has_expiration=False,
     has_timelock=False,

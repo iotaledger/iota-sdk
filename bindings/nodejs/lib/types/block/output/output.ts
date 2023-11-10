@@ -25,14 +25,14 @@ enum OutputType {
     Basic = 0,
     /** An Account output. */
     Account = 1,
-    /** A Foundry output. */
-    Foundry = 2,
-    /** An NFT output. */
-    Nft = 3,
-    /** A Delegation output. */
-    Delegation = 4,
     /** An Anchor output. */
-    Anchor = 5,
+    Anchor = 2,
+    /** A Foundry output. */
+    Foundry = 3,
+    /** An NFT output. */
+    Nft = 4,
+    /** A Delegation output. */
+    Delegation = 5,
 }
 
 /**
@@ -74,6 +74,8 @@ abstract class Output {
             return plainToInstance(BasicOutput, data) as any as BasicOutput;
         } else if (data.type == OutputType.Account) {
             return plainToInstance(AccountOutput, data) as any as AccountOutput;
+        } else if (data.type == OutputType.Anchor) {
+            return plainToInstance(AnchorOutput, data) as any as AnchorOutput;
         } else if (data.type == OutputType.Foundry) {
             return plainToInstance(FoundryOutput, data) as any as FoundryOutput;
         } else if (data.type == OutputType.Nft) {
@@ -83,8 +85,6 @@ abstract class Output {
                 DelegationOutput,
                 data,
             ) as any as DelegationOutput;
-        } else if (data.type == OutputType.Anchor) {
-            return plainToInstance(AnchorOutput, data) as any as AnchorOutput;
         }
         throw new Error('Invalid JSON');
     }
@@ -144,6 +144,7 @@ abstract class CommonOutput extends Output {
         return this.nativeTokens;
     }
 }
+
 /**
  * A Basic output.
  */
@@ -272,38 +273,6 @@ class AnchorOutput extends ImmutableFeaturesOutput {
 }
 
 /**
- * An NFT output.
- */
-class NftOutput extends ImmutableFeaturesOutput {
-    /**
-     * Unique identifier of the NFT, which is the BLAKE2b-256 hash of the Output ID that created it.
-     * Unless its newly minted, then the id is zeroed.
-     */
-    readonly nftId: NftId;
-
-    /**
-     * The amount of (stored) Mana held by the output.
-     */
-    readonly mana: u64;
-
-    /**
-     * @param amount The amount of the output.
-     * @param mana The amount of stored mana.
-     * @param nftId The NFT ID as hex-encoded string.
-     * @param unlockConditions The unlock conditions of the output.
-     */
-    constructor(
-        amount: u64,
-        mana: u64,
-        nftId: NftId,
-        unlockConditions: UnlockCondition[],
-    ) {
-        super(OutputType.Nft, amount, unlockConditions);
-        this.nftId = nftId;
-        this.mana = mana;
-    }
-}
-/**
  * A Foundry output.
  */
 class FoundryOutput extends ImmutableFeaturesOutput {
@@ -337,6 +306,40 @@ class FoundryOutput extends ImmutableFeaturesOutput {
         this.tokenScheme = tokenScheme;
     }
 }
+
+/**
+ * An NFT output.
+ */
+class NftOutput extends ImmutableFeaturesOutput {
+    /**
+     * Unique identifier of the NFT, which is the BLAKE2b-256 hash of the Output ID that created it.
+     * Unless its newly minted, then the id is zeroed.
+     */
+    readonly nftId: NftId;
+
+    /**
+     * The amount of (stored) Mana held by the output.
+     */
+    readonly mana: u64;
+
+    /**
+     * @param amount The amount of the output.
+     * @param mana The amount of stored mana.
+     * @param nftId The NFT ID as hex-encoded string.
+     * @param unlockConditions The unlock conditions of the output.
+     */
+    constructor(
+        amount: u64,
+        mana: u64,
+        nftId: NftId,
+        unlockConditions: UnlockCondition[],
+    ) {
+        super(OutputType.Nft, amount, unlockConditions);
+        this.nftId = nftId;
+        this.mana = mana;
+    }
+}
+
 /**
  * A Delegation output.
  */
@@ -402,8 +405,9 @@ const OutputDiscriminator = {
     subTypes: [
         { value: BasicOutput, name: OutputType.Basic as any },
         { value: AccountOutput, name: OutputType.Account as any },
-        { value: NftOutput, name: OutputType.Nft as any },
+        { value: AnchorOutput, name: OutputType.Anchor as any },
         { value: FoundryOutput, name: OutputType.Foundry as any },
+        { value: NftOutput, name: OutputType.Nft as any },
         { value: DelegationOutput, name: OutputType.Delegation as any },
     ],
 };
@@ -416,7 +420,7 @@ export {
     BasicOutput,
     AccountOutput,
     AnchorOutput,
-    NftOutput,
     FoundryOutput,
+    NftOutput,
     DelegationOutput,
 };

@@ -131,7 +131,7 @@ fn build_basic_output(
         builder = builder.add_unlock_condition(ExpirationUnlockCondition::new(address, timestamp).unwrap());
     }
 
-    builder.finish_output(TOKEN_SUPPLY).unwrap()
+    builder.finish_output().unwrap()
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -173,7 +173,7 @@ fn build_nft_output(
         builder = builder.add_unlock_condition(ExpirationUnlockCondition::new(address, timestamp).unwrap());
     }
 
-    builder.finish_output(TOKEN_SUPPLY).unwrap()
+    builder.finish_output().unwrap()
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -204,7 +204,7 @@ fn build_account_output(
         builder = builder.add_immutable_feature(IssuerFeature::new(bech32_issuer));
     }
 
-    builder.finish_output(TOKEN_SUPPLY).unwrap()
+    builder.finish_output().unwrap()
 }
 
 fn build_foundry_output(
@@ -227,7 +227,7 @@ fn build_foundry_output(
         );
     }
 
-    builder.finish_output(TOKEN_SUPPLY).unwrap()
+    builder.finish_output().unwrap()
 }
 
 fn build_output_inner(build: Build) -> (Output, Option<Bip44>) {
