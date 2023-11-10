@@ -343,3 +343,29 @@ pub async fn check_file_exists(path: &Path) -> Result<(), Error> {
     }
     Ok(())
 }
+
+pub enum SecretManagerChoice {
+    Stronghold,
+    LedgerNano,
+}
+
+impl From<usize> for SecretManagerChoice {
+    fn from(value: usize) -> Self {
+        match value {
+            0 => Self::Stronghold,
+            1 => Self::LedgerNano,
+            _ => unreachable!(),
+        }
+    }
+}
+
+pub async fn select_secret_manager() -> Result<SecretManagerChoice, Error> {
+    let choices = ["Stronghold", "Ledger Nano"];
+
+    Ok(Select::with_theme(&ColorfulTheme::default())
+        .with_prompt("Select secret manager")
+        .items(&choices)
+        .default(0)
+        .interact_on(&Term::stderr())?
+        .into())
+}

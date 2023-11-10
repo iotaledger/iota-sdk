@@ -22,6 +22,7 @@ iota-sdk = { path = "../sdk", default-features = false, features = [
     "rocksdb",
     "stronghold",
     "participation",
+    "ledger_nano",
 ] }
 
 chrono = { version = "0.4.31", default-features = false, features = ["std"] }

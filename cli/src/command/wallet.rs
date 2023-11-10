@@ -7,7 +7,7 @@ use clap::{builder::BoolishValueParser, Args, CommandFactory, Parser, Subcommand
 use iota_sdk::{
     client::{
         constants::SHIMMER_COIN_TYPE,
-        secret::{stronghold::StrongholdSecretManager, SecretManager},
+        secret::{ledger_nano::LedgerSecretManager, stronghold::StrongholdSecretManager, SecretManager},
         stronghold::StrongholdAdapter,
         utils::Password,
     },
@@ -17,7 +17,10 @@ use log::LevelFilter;
 
 use crate::{
     error::Error,
-    helper::{check_file_exists, enter_or_generate_mnemonic, generate_mnemonic, get_password, import_mnemonic},
+    helper::{
+        check_file_exists, enter_or_generate_mnemonic, generate_mnemonic, get_password, import_mnemonic,
+        select_secret_manager, SecretManagerChoice,
+    },
     println_log_error, println_log_info,
 };
 
@@ -184,17 +187,24 @@ pub async fn init_command(
             snapshot_path.display()
         )));
     }
-    let password = get_password("Stronghold password", true)?;
-    let mnemonic = match parameters.mnemonic_file_path {
-        Some(path) => import_mnemonic(&path).await?,
-        None => enter_or_generate_mnemonic().await?,
-    };
 
-    let secret_manager = StrongholdSecretManager::builder()
-        .password(password)
-        .build(snapshot_path)?;
-    secret_manager.store_mnemonic(mnemonic).await?;
-    let secret_manager = SecretManager::Stronghold(secret_manager);
+    let secret_manager = match select_secret_manager().await? {
+        SecretManagerChoice::Stronghold => {
+            let password = get_password("Stronghold password", true)?;
+            let mnemonic = match parameters.mnemonic_file_path {
+                Some(path) => import_mnemonic(&path).await?,
+                None => enter_or_generate_mnemonic().await?,
+            };
+
+            let secret_manager = StrongholdSecretManager::builder()
+                .password(password)
+                .build(snapshot_path)?;
+            secret_manager.store_mnemonic(mnemonic).await?;
+
+            SecretManager::Stronghold(secret_manager)
+        }
+        SecretManagerChoice::LedgerNano => SecretManager::LedgerNano(LedgerSecretManager::new(false)),
+    };
 
     Ok(Wallet::builder()
         .with_secret_manager(secret_manager)
