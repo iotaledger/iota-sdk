@@ -347,6 +347,7 @@ pub async fn check_file_exists(path: &Path) -> Result<(), Error> {
 pub enum SecretManagerChoice {
     Stronghold,
     LedgerNano,
+    LedgerNanoSimulator,
 }
 
 impl From<usize> for SecretManagerChoice {
@@ -354,13 +355,14 @@ impl From<usize> for SecretManagerChoice {
         match value {
             0 => Self::Stronghold,
             1 => Self::LedgerNano,
+            2 => Self::LedgerNanoSimulator,
             _ => unreachable!(),
         }
     }
 }
 
 pub async fn select_secret_manager() -> Result<SecretManagerChoice, Error> {
-    let choices = ["Stronghold", "Ledger Nano"];
+    let choices = ["Stronghold", "Ledger Nano", "Ledger Nano Simulator"];
 
     Ok(Select::with_theme(&ColorfulTheme::default())
         .with_prompt("Select secret manager")

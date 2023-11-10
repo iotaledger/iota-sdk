@@ -204,6 +204,7 @@ pub async fn init_command(
             SecretManager::Stronghold(secret_manager)
         }
         SecretManagerChoice::LedgerNano => SecretManager::LedgerNano(LedgerSecretManager::new(false)),
+        SecretManagerChoice::LedgerNanoSimulator => SecretManager::LedgerNano(LedgerSecretManager::new(true)),
     };
 
     Ok(Wallet::builder()

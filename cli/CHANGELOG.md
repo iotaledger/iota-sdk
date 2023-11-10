@@ -34,7 +34,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `UTC` suffix to the formatted date of `transactions`;
 - `addresses` handles NFT and Alias addresses;
 - `AccountCommand::Address` command that accepts either a list index or a `Bech32Address`;
-- Ledger Nano support;
 
 ### Changed
 
