@@ -3,7 +3,7 @@
 
 import { errorHandle } from '..';
 import {
-    callSecretManagerMethodAsync,
+    callSecretManagerMethod,
     createSecretManager,
     migrateStrongholdSnapshotV2ToV3,
 } from '../bindings';
@@ -41,16 +41,9 @@ export class SecretManagerMethodHandler {
      * @returns The JSON response of the method.
      */
     async callMethod(method: __SecretManagerMethods__): Promise<string> {
-        return callSecretManagerMethodAsync(
-            // mapToObject is required to convert maps to array since they otherwise get serialized as `[{}]` even if not empty
-            JSON.stringify(method, function mapToObject(_key, value) {
-                if (value instanceof Map) {
-                    return Object.fromEntries(value);
-                } else {
-                    return value;
-                }
-            }),
+        return callSecretManagerMethod(
             this.methodHandler,
+            JSON.stringify(method),
         ).catch((error: any) => {
             throw errorHandle(error);
         });

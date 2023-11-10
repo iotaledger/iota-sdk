@@ -75,12 +75,7 @@ impl InputSelection {
             remainder_builder = remainder_builder.with_native_tokens(native_tokens);
         }
 
-        Ok((
-            remainder_builder
-                .finish_output(self.protocol_parameters.token_supply())?
-                .amount(),
-            native_tokens_remainder,
-        ))
+        Ok((remainder_builder.finish_output()?.amount(), native_tokens_remainder))
     }
 
     pub(crate) fn remainder_and_storage_deposit_return_outputs(
@@ -97,7 +92,7 @@ impl InputSelection {
                 let diff = amount - output_sdr_amount;
                 let srd_output = BasicOutputBuilder::new_with_amount(diff)
                     .with_unlock_conditions([AddressUnlockCondition::new(address.clone())])
-                    .finish_output(self.protocol_parameters.token_supply())?;
+                    .finish_output()?;
 
                 // TODO verify_storage_deposit ?
 
@@ -141,14 +136,11 @@ impl InputSelection {
             remainder_builder = remainder_builder.with_native_tokens(native_tokens);
         }
 
-        let remainder = remainder_builder.finish_output(self.protocol_parameters.token_supply())?;
+        let remainder = remainder_builder.finish_output()?;
 
         log::debug!("Created remainder output of {diff} for {remainder_address:?}");
 
-        remainder.verify_storage_deposit(
-            self.protocol_parameters.rent_structure(),
-            self.protocol_parameters.token_supply(),
-        )?;
+        remainder.verify_storage_deposit(self.protocol_parameters.rent_structure())?;
 
         Ok((
             Some(RemainderData {

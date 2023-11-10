@@ -6,140 +6,81 @@ use std::sync::{Arc, RwLock};
 use iota_sdk_bindings_core::{
     call_client_method as rust_call_client_method,
     iota_sdk::client::{mqtt::Topic, Client, ClientBuilder},
-    listen_mqtt as rust_listen_mqtt, ClientMethod, Response, Result,
+    listen_mqtt as rust_listen_mqtt, ClientMethod, Response,
 };
-use neon::prelude::*;
+use napi::{bindgen_prelude::External, threadsafe_function::ThreadsafeFunction, Error, Result, Status};
+use napi_derive::napi;
+use tokio::sync::RwLock;
 
-use crate::binding_glue;
+use crate::NodejsError;
 
-type JsCallback = Root<JsFunction<JsObject>>;
+pub type ClientMethodHandler = Arc<RwLock<Option<Client>>>;
 
-pub type SharedClientMethodHandler = Arc<RwLock<Option<ClientMethodHandler>>>;
-
-#[derive(Clone)]
-pub struct ClientMethodHandler {
-    channel: Channel,
-    client: Client,
+#[napi(js_name = "createClient")]
+pub fn create_client(options: String) -> Result<External<ClientMethodHandler>> {
+    let runtime = tokio::runtime::Runtime::new().map_err(NodejsError::from)?;
+    let client = runtime
+        .block_on(
+            ClientBuilder::new()
+                .from_json(&options)
+                .map_err(NodejsError::from)?
+                .finish(),
+        )
+        .map_err(NodejsError::from)?;
+    Ok(External::new(Arc::new(RwLock::new(Some(client)))))
 }
 
-impl Finalize for ClientMethodHandler {}
+#[napi(js_name = "destroyClient")]
+pub async fn destroy_client(client: External<ClientMethodHandler>) {
+    *client.as_ref().write().await = None;
+}
 
-impl ClientMethodHandler {
-    pub fn new(channel: Channel, options: String) -> Result<Self> {
-        let runtime = tokio::runtime::Runtime::new().expect("error initializing client");
-        let client = runtime.block_on(ClientBuilder::new().from_json(&options)?.finish())?;
+#[napi(js_name = "callClientMethod")]
+pub async fn call_client_method(client: External<ClientMethodHandler>, method: String) -> Result<String> {
+    let client_method = serde_json::from_str::<ClientMethod>(&method).map_err(NodejsError::from)?;
 
-        Ok(Self { channel, client })
-    }
-
-    pub(crate) fn new_with_client(channel: Channel, client: Client) -> Self {
-        Self { channel, client }
-    }
-
-    async fn call_method(&self, serialized_method: String) -> (String, bool) {
-        match serde_json::from_str::<ClientMethod>(&serialized_method) {
-            Ok(method) => {
-                let res = rust_call_client_method(&self.client, method).await;
-                let mut is_err = matches!(res, Response::Error(_) | Response::Panic(_));
-
-                let msg = match serde_json::to_string(&res) {
-                    Ok(msg) => msg,
-                    Err(e) => {
-                        is_err = true;
-                        serde_json::to_string(&Response::Error(e.into())).expect("json to string error")
-                    }
-                };
-
-                (msg, is_err)
-            }
-            Err(e) => (
-                serde_json::to_string(&Response::Error(e.into())).expect("json to string error"),
-                true,
-            ),
+    if let Some(client) = &*client.as_ref().read().await {
+        let res = rust_call_client_method(client, client_method).await;
+        if matches!(res, Response::Error(_) | Response::Panic(_)) {
+            return Err(Error::new(
+                Status::GenericFailure,
+                serde_json::to_string(&res).map_err(NodejsError::from)?,
+            ));
         }
+
+        Ok(serde_json::to_string(&res).map_err(NodejsError::from)?)
+    } else {
+        Err(Error::new(
+            Status::GenericFailure,
+            serde_json::to_string(&Response::Panic("Client got destroyed".to_string())).map_err(NodejsError::from)?,
+        ))
     }
 }
 
-pub fn create_client(mut cx: FunctionContext) -> JsResult<JsBox<SharedClientMethodHandler>> {
-    let options = cx.argument::<JsString>(0)?;
-    let options = options.value(&mut cx);
-    let channel = cx.channel();
-    let method_handler = ClientMethodHandler::new(channel, options)
-        .or_else(|e| cx.throw_error(serde_json::to_string(&Response::Error(e)).expect("json to string error")))?;
-    Ok(cx.boxed(Arc::new(RwLock::new(Some(method_handler)))))
-}
-
-pub fn destroy_client(mut cx: FunctionContext) -> JsResult<JsUndefined> {
-    match cx.argument::<JsBox<SharedClientMethodHandler>>(0)?.write() {
-        Ok(mut lock) => *lock = None,
-        Err(e) => {
-            return cx
-                .throw_error(serde_json::to_string(&Response::Panic(e.to_string())).expect("json to string error"));
-        }
-    }
-    Ok(cx.undefined())
-}
-
-pub fn call_client_method(mut cx: FunctionContext) -> JsResult<JsUndefined> {
-    let method_handler = cx.argument::<JsBox<SharedClientMethodHandler>>(1);
-    let method = cx.argument::<JsString>(0)?;
-    let method = method.value(&mut cx);
-    let callback = cx.argument::<JsFunction>(2)?.root(&mut cx);
-    
-    binding_glue!(cx, method, method_handler, callback, "Client")
-}
-
-// MQTT
-pub fn listen_mqtt(mut cx: FunctionContext) -> JsResult<JsUndefined> {
-    let js_arr_handle: Handle<JsArray> = cx.argument(0)?;
-    let vec: Vec<Handle<JsValue>> = js_arr_handle.to_vec(&mut cx)?;
-    let mut topics = Vec::with_capacity(vec.len());
-    for topic_string in vec {
-        let topic = topic_string.downcast::<JsString, FunctionContext>(&mut cx).unwrap();
-        topics.push(Topic::new(topic.value(&mut cx).as_str()).or_else(|e| {
-            cx.throw_error(serde_json::to_string(&Response::Error(e.into())).expect("json to string error"))
-        })?);
+#[napi(js_name = "listenMqtt")]
+pub async fn listen_mqtt(
+    client: External<ClientMethodHandler>,
+    topics: Vec<String>,
+    callback: ThreadsafeFunction<String>,
+) -> Result<()> {
+    let mut validated_topics = Vec::with_capacity(topics.len());
+    for topic_string in topics {
+        validated_topics.push(Topic::new(topic_string).map_err(NodejsError::from)?);
     }
 
-    let callback = Arc::new(cx.argument::<JsFunction>(1)?.root(&mut cx));
-
-    match cx.argument::<JsBox<SharedClientMethodHandler>>(2)?.read() {
-        Ok(lock) => {
-            let method_handler = lock.clone();
-            if let Some(method_handler) = method_handler {
-                crate::RUNTIME.spawn(async move {
-                    rust_listen_mqtt(&method_handler.client, topics, move |event_data| {
-                        call_event_callback(&method_handler.channel, event_data, callback.clone())
-                    })
-                    .await;
-                });
-                Ok(cx.undefined())
-            } else {
-                // Notify that the client was destroyed
-                cx.throw_error(
-                    serde_json::to_string(&Response::Panic("Client was destroyed".to_string()))
-                        .expect("json to string error"),
-                )
-            }
-        }
-        Err(e) => cx.throw_error(serde_json::to_string(&Response::Panic(e.to_string())).expect("json to string error")),
-    }
-}
-
-fn call_event_callback(channel: &neon::event::Channel, event_data: String, callback: Arc<JsCallback>) {
-    channel.send(move |mut cx| {
-        let cb = (*callback).to_inner(&mut cx);
-        // instance of class we call on, its a global fn so "undefined"
-        let this = cx.undefined();
-
-        // callback is fn(err, event)
-        let args = [
-            cx.undefined().upcast::<JsValue>(),
-            cx.string(event_data).upcast::<JsValue>(),
-        ];
-
-        cb.call(&mut cx, this, args)?;
-
+    if let Some(client) = &*client.as_ref().read().await {
+        rust_listen_mqtt(client, validated_topics, move |event_data| {
+            callback.call(
+                Ok(event_data),
+                napi::threadsafe_function::ThreadsafeFunctionCallMode::NonBlocking,
+            );
+        })
+        .await;
         Ok(())
-    });
+    } else {
+        Err(Error::new(
+            Status::GenericFailure,
+            serde_json::to_string(&Response::Panic("Client got destroyed".to_string())).map_err(NodejsError::from)?,
+        ))
+    }
 }

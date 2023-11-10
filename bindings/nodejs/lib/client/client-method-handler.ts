@@ -3,10 +3,10 @@
 
 import { errorHandle } from '..';
 import {
-    callClientMethodAsync,
+    callClientMethod,
     createClient,
-    listenMqtt as listenMqttRust,
-    destroyClient,
+    listenMqtt,
+    destroyClient
 } from '../bindings';
 import type { IClientOptions, __ClientMethods__ } from '../types/client';
 
@@ -47,17 +47,7 @@ export class ClientMethodHandler {
      * @returns A promise that resolves to a JSON string response holding the result of the client method.
      */
     async callMethod(method: __ClientMethods__): Promise<string> {
-        return callClientMethodAsync(
-            // mapToObject is required to convert maps to array since they otherwise get serialized as `[{}]` even if not empty
-            JSON.stringify(method, function mapToObject(_key, value) {
-                if (value instanceof Map) {
-                    return Object.fromEntries(value);
-                } else {
-                    return value;
-                }
-            }),
-            this.methodHandler,
-        ).catch((error: any) => {
+        return callClientMethod(this.methodHandler, JSON.stringify(method)).catch((error: any) => {
             throw errorHandle(error);
         });
     }
@@ -73,7 +63,7 @@ export class ClientMethodHandler {
         callback: (error: Error, result: string) => void,
     ): void {
         try {
-            listenMqttRust(topics, callback, this.methodHandler);
+            listenMqtt(this.methodHandler, topics, callback);
         } catch (error: any) {
             throw errorHandle(error);
         }

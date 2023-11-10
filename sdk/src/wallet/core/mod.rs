@@ -32,16 +32,19 @@ use crate::{
     },
     types::{
         block::{
-            address::{Bech32Address, Hrp},
-            output::{dto::FoundryOutputDto, AccountId, FoundryId, FoundryOutput, NftId, Output, OutputId, TokenId},
-            payload::signed_transaction::{dto::TransactionDto, Transaction, TransactionId},
+            address::{Address, Bech32Address, Hrp, ImplicitAccountCreationAddress},
+            output::{
+                dto::FoundryOutputDto, AccountId, AnchorId, DelegationId, FoundryId, FoundryOutput, NftId, Output,
+                OutputId, TokenId,
+            },
+            payload::signed_transaction::TransactionId,
         },
         TryFromDto,
     },
     wallet::{
         operations::syncing::SyncOptions,
         types::{OutputData, OutputDataDto},
-        FilterOptions, Result,
+        Error, FilterOptions, Result,
     },
 };
 
@@ -252,6 +255,20 @@ where
         self.data().await.address.clone()
     }
 
+    /// Returns the implicit account creation address of the wallet if it is Ed25519 based.
+    pub async fn implicit_account_creation_address(&self) -> Result<Bech32Address> {
+        let bech32_address = &self.data().await.address;
+
+        if let Address::Ed25519(address) = bech32_address.inner() {
+            Ok(Bech32Address::new(
+                *bech32_address.hrp(),
+                ImplicitAccountCreationAddress::from(address.clone()),
+            ))
+        } else {
+            Err(Error::NonEd25519Address)
+        }
+    }
+
     /// Get the wallet's configured Bech32 HRP.
     pub async fn bech32_hrp(&self) -> Hrp {
         self.data().await.address.hrp
@@ -282,7 +299,7 @@ where
         &self,
         outputs: impl Iterator<Item = &'a OutputData>,
         filter: impl Into<Option<FilterOptions>>,
-    ) -> Result<Vec<OutputData>> {
+    ) -> Vec<OutputData> {
         let filter = filter.into();
 
         if let Some(filter) = filter {
@@ -290,10 +307,19 @@ where
 
             for output in outputs {
                 match &output.output {
-                    Output::Account(alias) => {
+                    Output::Account(account) => {
                         if let Some(account_ids) = &filter.account_ids {
-                            let account_id = alias.account_id_non_null(&output.output_id);
+                            let account_id = account.account_id_non_null(&output.output_id);
                             if account_ids.contains(&account_id) {
+                                filtered_outputs.push(output.clone());
+                                continue;
+                            }
+                        }
+                    }
+                    Output::Anchor(anchor) => {
+                        if let Some(anchor_ids) = &filter.anchor_ids {
+                            let anchor_id = anchor.anchor_id_non_null(&output.output_id);
+                            if anchor_ids.contains(&anchor_id) {
                                 filtered_outputs.push(output.clone());
                                 continue;
                             }
@@ -312,6 +338,15 @@ where
                         if let Some(nft_ids) = &filter.nft_ids {
                             let nft_id = nft.nft_id_non_null(&output.output_id);
                             if nft_ids.contains(&nft_id) {
+                                filtered_outputs.push(output.clone());
+                                continue;
+                            }
+                        }
+                    }
+                    Output::Delegation(delegation) => {
+                        if let Some(delegation_ids) = &filter.delegation_ids {
+                            let delegation_id = delegation.delegation_id_non_null(&output.output_id);
+                            if delegation_ids.contains(&delegation_id) {
                                 filtered_outputs.push(output.clone());
                                 continue;
                             }
@@ -338,56 +373,108 @@ where
                     }
                 }
 
-                // If ids are provided, only return them and no other outputs.
-                if filter.account_ids.is_none() && filter.foundry_ids.is_none() && filter.nft_ids.is_none() {
+                // Include the output if we're not filtering by IDs.
+                if filter.account_ids.is_none()
+                    && filter.anchor_ids.is_none()
+                    && filter.foundry_ids.is_none()
+                    && filter.nft_ids.is_none()
+                    && filter.delegation_ids.is_none()
+                {
                     filtered_outputs.push(output.clone());
                 }
             }
 
-            Ok(filtered_outputs)
+            filtered_outputs
         } else {
-            Ok(outputs.cloned().collect())
+            outputs.cloned().collect()
         }
     }
 
     /// Returns outputs of the wallet.
-    pub async fn outputs(&self, filter: impl Into<Option<FilterOptions>> + Send) -> Result<Vec<OutputData>> {
+    pub async fn outputs(&self, filter: impl Into<Option<FilterOptions>> + Send) -> Vec<OutputData> {
         self.filter_outputs(self.data().await.outputs.values(), filter)
     }
 
     /// Returns unspent outputs of the wallet.
-    pub async fn unspent_outputs(&self, filter: impl Into<Option<FilterOptions>> + Send) -> Result<Vec<OutputData>> {
+    pub async fn unspent_outputs(&self, filter: impl Into<Option<FilterOptions>> + Send) -> Vec<OutputData> {
         self.filter_outputs(self.data().await.unspent_outputs.values(), filter)
     }
 
     /// Gets the unspent account output matching the given ID.
-    pub async fn unspent_account_output(&self, account_id: &AccountId) -> Result<Option<OutputData>> {
+    pub async fn unspent_account_output(&self, account_id: &AccountId) -> Option<OutputData> {
         self.unspent_outputs(FilterOptions {
             account_ids: Some([*account_id].into()),
             ..Default::default()
         })
         .await
-        .map(|res| res.get(0).cloned())
+        .first()
+        .cloned()
+    }
+
+    /// Gets the unspent anchor output matching the given ID.
+    pub async fn unspent_anchor_output(&self, anchor_id: &AnchorId) -> Option<OutputData> {
+        self.unspent_outputs(FilterOptions {
+            anchor_ids: Some([*anchor_id].into()),
+            ..Default::default()
+        })
+        .await
+        .first()
+        .cloned()
     }
 
     /// Gets the unspent foundry output matching the given ID.
-    pub async fn unspent_foundry_output(&self, foundry_id: &FoundryId) -> Result<Option<OutputData>> {
+    pub async fn unspent_foundry_output(&self, foundry_id: &FoundryId) -> Option<OutputData> {
         self.unspent_outputs(FilterOptions {
             foundry_ids: Some([*foundry_id].into()),
             ..Default::default()
         })
         .await
-        .map(|res| res.get(0).cloned())
+        .first()
+        .cloned()
     }
 
     /// Gets the unspent nft output matching the given ID.
-    pub async fn unspent_nft_output(&self, nft_id: &NftId) -> Result<Option<OutputData>> {
+    pub async fn unspent_nft_output(&self, nft_id: &NftId) -> Option<OutputData> {
         self.unspent_outputs(FilterOptions {
             nft_ids: Some([*nft_id].into()),
             ..Default::default()
         })
         .await
-        .map(|res| res.get(0).cloned())
+        .first()
+        .cloned()
+    }
+
+    /// Gets the unspent delegation output matching the given ID.
+    pub async fn unspent_delegation_output(&self, delegation_id: &DelegationId) -> Option<OutputData> {
+        self.unspent_outputs(FilterOptions {
+            delegation_ids: Some([*delegation_id].into()),
+            ..Default::default()
+        })
+        .await
+        .first()
+        .cloned()
+    }
+
+    /// Returns implicit accounts of the wallet.
+    pub async fn implicit_accounts(&self) -> Vec<OutputData> {
+        self.data()
+            .await
+            .unspent_outputs
+            .values()
+            .filter(|output_data| output_data.output.is_implicit_account())
+            .cloned()
+            .collect()
+    }
+
+    /// Returns accounts of the wallet.
+    pub async fn accounts(&self) -> Vec<OutputData> {
+        self.data()
+            .await
+            .unspent_outputs
+            .values()
+            .filter(|output_data| output_data.output.is_account())
+            .cloned()
+            .collect()
     }
 
     /// Returns all incoming transactions of the wallet
@@ -621,7 +708,7 @@ mod test {
         let output = Output::Basic(
             BasicOutput::build_with_amount(amount)
                 .add_unlock_condition(AddressUnlockCondition::new(address))
-                .finish_with_params(protocol_parameters.clone())
+                .finish()
                 .unwrap(),
         );
         let transaction = Transaction::builder(protocol_parameters.network_id())

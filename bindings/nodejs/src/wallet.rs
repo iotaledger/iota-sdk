@@ -5,189 +5,104 @@ use std::sync::{Arc, RwLock};
 
 use iota_sdk_bindings_core::{
     call_wallet_method as rust_call_wallet_method,
-    iota_sdk::wallet::{
-        events::types::{Event, WalletEventType},
-        Wallet,
-    },
-    Response, Result, WalletMethod, WalletOptions,
+    iota_sdk::wallet::{events::WalletEventType, Wallet},
+    Response, WalletMethod, WalletOptions,
 };
-use neon::prelude::*;
+use napi::{bindgen_prelude::External, threadsafe_function::ThreadsafeFunction, Error, Result, Status};
+use napi_derive::napi;
+use tokio::sync::RwLock;
 
-use crate::{
-    client::{ClientMethodHandler, SharedClientMethodHandler},
-    secret_manager::SecretManagerMethodHandler, binding_glue,
-};
+use crate::{client::ClientMethodHandler, secret_manager::SecretManagerMethodHandler, NodejsError};
 
-pub type SharedWalletMethodHandler = Arc<RwLock<Option<WalletMethodHandler>>>;
+pub type WalletMethodHandler = Arc<RwLock<Option<Wallet>>>;
 
-#[derive(Clone)]
-pub struct WalletMethodHandler {
-    channel: Channel,
-    wallet: Wallet,
+#[napi(js_name = "createWallet")]
+pub fn create_wallet(options: String) -> Result<External<WalletMethodHandler>> {
+    let wallet_options = serde_json::from_str::<WalletOptions>(&options).map_err(NodejsError::from)?;
+    let runtime = tokio::runtime::Runtime::new().map_err(NodejsError::from)?;
+    let wallet = runtime.block_on(wallet_options.build()).map_err(NodejsError::from)?;
+
+    Ok(External::new(Arc::new(RwLock::new(Some(wallet)))))
 }
 
-impl Finalize for WalletMethodHandler {}
+#[napi(js_name = "destroyWallet")]
+pub async fn destroy_wallet(wallet: External<WalletMethodHandler>) {
+    *wallet.as_ref().write().await = None;
+}
 
-type JsCallback = Root<JsFunction<JsObject>>;
+#[napi(js_name = "callWalletMethod")]
+pub async fn call_wallet_method(wallet: External<WalletMethodHandler>, method: String) -> Result<String> {
+    let wallet_method = serde_json::from_str::<WalletMethod>(&method).map_err(NodejsError::from)?;
 
-impl WalletMethodHandler {
-    fn new(channel: Channel, options: String) -> Result<Self> {
-        let wallet_options = serde_json::from_str::<WalletOptions>(&options)?;
-
-        let wallet = crate::RUNTIME.block_on(async move { wallet_options.build().await })?;
-
-        Ok(Self { channel, wallet })
-    }
-
-    async fn call_method(&self, method: String) -> (String, bool) {
-        match serde_json::from_str::<WalletMethod>(&method) {
-            Ok(method) => {
-                let res = rust_call_wallet_method(&self.wallet, method).await;
-                let mut is_err = matches!(res, Response::Error(_) | Response::Panic(_));
-
-                let msg = match serde_json::to_string(&res) {
-                    Ok(msg) => msg,
-                    Err(e) => {
-                        is_err = true;
-                        serde_json::to_string(&Response::Error(e.into())).expect("json to string error")
-                    }
-                };
-
-                (msg, is_err)
-            }
-            Err(e) => (
-                serde_json::to_string(&Response::Error(e.into())).expect("json to string error"),
-                true,
-            ),
+    if let Some(wallet) = &*wallet.as_ref().read().await {
+        let res = rust_call_wallet_method(wallet, wallet_method).await;
+        if matches!(res, Response::Error(_) | Response::Panic(_)) {
+            return Err(Error::new(
+                Status::GenericFailure,
+                serde_json::to_string(&res).map_err(NodejsError::from)?,
+            ));
         }
+
+        Ok(serde_json::to_string(&res).map_err(NodejsError::from)?)
+    } else {
+        Err(Error::new(
+            Status::GenericFailure,
+            serde_json::to_string(&Response::Panic("Wallet got destroyed".to_string())).map_err(NodejsError::from)?,
+        ))
     }
 }
 
-fn call_event_callback(channel: &neon::event::Channel, event_data: Event, callback: Arc<JsCallback>) {
-    channel.send(move |mut cx| {
-        let cb = (*callback).to_inner(&mut cx);
-        let this = cx.undefined();
-        let args = [
-            cx.undefined().upcast::<JsValue>(),
-            cx.string(serde_json::to_string(&event_data).unwrap())
-                .upcast::<JsValue>(),
-        ];
-
-        cb.call(&mut cx, this, args)?;
-
-        Ok(())
-    });
-}
-
-pub fn create_wallet(mut cx: FunctionContext) -> JsResult<JsBox<SharedWalletMethodHandler>> {
-    let options = cx.argument::<JsString>(0)?;
-    let options = options.value(&mut cx);
-    let channel = cx.channel();
-    let method_handler = WalletMethodHandler::new(channel, options)
-        .or_else(|e| cx.throw_error(serde_json::to_string(&Response::Error(e)).expect("json to string error")))?;
-
-    Ok(cx.boxed(Arc::new(RwLock::new(Some(method_handler)))))
-}
-
-pub fn call_wallet_method(mut cx: FunctionContext) -> JsResult<JsUndefined> {
-    let method_handler = cx.argument::<JsBox<SharedWalletMethodHandler>>(1);
-    let method = cx.argument::<JsString>(0)?;
-    let method = method.value(&mut cx);
-    let callback = cx.argument::<JsFunction>(2)?.root(&mut cx);
-    
-    binding_glue!(cx, method, method_handler, callback, "Wallet")
-}
-
-pub fn listen_wallet(mut cx: FunctionContext) -> JsResult<JsUndefined> {
-    let js_arr_handle: Handle<JsArray> = cx.argument(0)?;
-    let vec: Vec<Handle<JsValue>> = js_arr_handle.to_vec(&mut cx)?;
-    let mut event_types = Vec::with_capacity(vec.len());
-    for event_string in vec {
-        let event_type = event_string.downcast_or_throw::<JsNumber, FunctionContext>(&mut cx)?;
-        let wallet_event_type =
-            WalletEventType::try_from(event_type.value(&mut cx) as u8).or_else(|e| cx.throw_error(e))?;
-        event_types.push(wallet_event_type);
+#[napi(js_name = "listenWallet")]
+pub async fn listen_wallet(
+    wallet: External<WalletMethodHandler>,
+    event_types: Vec<u8>,
+    callback: ThreadsafeFunction<String>,
+) -> Result<()> {
+    let mut validated_event_types = Vec::with_capacity(event_types.len());
+    for event_type in event_types {
+        validated_event_types.push(WalletEventType::try_from(event_type).map_err(NodejsError::from)?);
     }
-    let callback = Arc::new(cx.argument::<JsFunction>(1)?.root(&mut cx));
 
-    match cx.argument::<JsBox<SharedWalletMethodHandler>>(2)?.read() {
-        Ok(lock) => {
-            let method_handler = lock.clone();
-            if let Some(method_handler) = method_handler {
-                crate::RUNTIME.spawn(async move {
-                    method_handler
-                        .wallet
-                        .listen(event_types, move |event_data| {
-                            call_event_callback(&method_handler.channel, event_data.clone(), callback.clone())
-                        })
-                        .await;
-                });
-
-                Ok(cx.undefined())
-            } else {
-                // Notify that the wallet was destroyed
-                cx.throw_error(
-                    serde_json::to_string(&Response::Panic("Wallet was destroyed".to_string()))
-                        .expect("json to string error"),
-                )
-            }
-        }
-        Err(e) => cx.throw_error(serde_json::to_string(&Response::Panic(e.to_string())).expect("json to string error")),
-    }
-}
-
-pub fn destroy_wallet(mut cx: FunctionContext) -> JsResult<JsUndefined> {
-    match cx.argument::<JsBox<SharedWalletMethodHandler>>(0)?.write() {
-        Ok(mut lock) => *lock = None,
-        Err(e) => {
-            return cx
-                .throw_error(serde_json::to_string(&Response::Panic(e.to_string())).expect("json to string error"));
-        }
-    }
-    Ok(cx.undefined())
-}
-
-pub fn get_client(mut cx: FunctionContext) -> JsResult<JsBox<SharedClientMethodHandler>> {
-    match cx.argument::<JsBox<SharedWalletMethodHandler>>(0)?.read() {
-        Ok(lock) => {
-            if let Some(method_handler) = &*lock {
-                let client_method_handler =
-                    ClientMethodHandler::new_with_client(cx.channel(), method_handler.wallet.client().clone());
-
-                Ok(cx.boxed(Arc::new(RwLock::new(Some(client_method_handler)))))
-            } else {
-                // Notify that the wallet was destroyed
-                cx.throw_error(
-                    serde_json::to_string(&Response::Panic("Wallet was destroyed".to_string()))
-                        .expect("json to string error"),
-                )
-            }
-        }
-        Err(e) => cx.throw_error(serde_json::to_string(&Response::Panic(e.to_string())).expect("json to string error")),
-    }
-}
-
-pub fn get_secret_manager(mut cx: FunctionContext) -> JsResult<JsBox<Arc<SecretManagerMethodHandler>>> {
-    match cx.argument::<JsBox<SharedWalletMethodHandler>>(0)?.read() {
-        Ok(lock) => {
-            if let Some(method_handler) = &*lock {
-                let secret_manager_method_handler = SecretManagerMethodHandler::new_with_secret_manager(
-                    cx.channel(),
-                    method_handler.wallet.get_secret_manager().clone(),
+    if let Some(wallet) = &*wallet.as_ref().read().await {
+        wallet
+            .listen(validated_event_types, move |event_data| {
+                callback.call(
+                    serde_json::to_string(event_data)
+                        .map_err(NodejsError::from)
+                        .map_err(Error::from),
+                    napi::threadsafe_function::ThreadsafeFunctionCallMode::NonBlocking,
                 );
+            })
+            .await;
+        Ok(())
+    } else {
+        Err(Error::new(
+            Status::GenericFailure,
+            serde_json::to_string(&Response::Panic("Wallet got destroyed".to_string())).map_err(NodejsError::from)?,
+        ))
+    }
+}
 
-                Ok(cx.boxed(secret_manager_method_handler))
-            } else {
-                // Notify that the wallet was destroyed
-                cx.throw_error(
-                    serde_json::to_string(&Response::Panic("Wallet was destroyed".to_string()))
-                        .expect("json to string error"),
-                )
-            }
-        }
-        Err(e) => {
-            return cx
-                .throw_error(serde_json::to_string(&Response::Panic(e.to_string())).expect("json to string error"));
-        }
+#[napi(js_name = "getClient")]
+pub async fn get_client(wallet: External<WalletMethodHandler>) -> Result<External<ClientMethodHandler>> {
+    if let Some(wallet) = &*wallet.as_ref().read().await {
+        Ok(External::new(Arc::new(RwLock::new(Some(wallet.client().clone())))))
+    } else {
+        Err(Error::new(
+            Status::GenericFailure,
+            serde_json::to_string(&Response::Panic("Wallet got destroyed".to_string())).map_err(NodejsError::from)?,
+        ))
+    }
+}
+
+#[napi(js_name = "getSecretManager")]
+pub async fn get_secret_manager(wallet: External<WalletMethodHandler>) -> Result<External<SecretManagerMethodHandler>> {
+    if let Some(wallet) = &*wallet.as_ref().read().await {
+        Ok(External::new(wallet.get_secret_manager().clone()))
+    } else {
+        Err(Error::new(
+            Status::GenericFailure,
+            serde_json::to_string(&Response::Panic("Wallet got destroyed".to_string())).map_err(NodejsError::from)?,
+        ))
     }
 }

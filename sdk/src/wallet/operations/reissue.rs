@@ -1,8 +1,6 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use crypto::keys::bip44::Bip44;
-
 use crate::{
     client::{
         secret::{SecretManage, SignBlock},

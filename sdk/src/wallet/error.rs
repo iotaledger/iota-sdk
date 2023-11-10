@@ -45,6 +45,11 @@ pub enum Error {
     /// Insufficient funds to send transaction.
     #[error("insufficient funds {available}/{required} available")]
     InsufficientFunds { available: u64, required: u64 },
+    /// Invalid event type.
+    #[cfg(feature = "events")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "events")))]
+    #[error("invalid event type: {0}")]
+    InvalidEventType(u8),
     /// Invalid mnemonic error
     #[error("invalid mnemonic: {0}")]
     InvalidMnemonic(String),
@@ -116,6 +121,9 @@ pub enum Error {
     /// Address not the wallet address
     #[error("address {0} is not the wallet address")]
     WalletAddressMismatch(Bech32Address),
+    /// Action requires the wallet to be Ed25519 address based
+    #[error("tried to perform an action that requires the wallet to be Ed25519 address based")]
+    NonEd25519Address,
 }
 
 // Serialize type with Display error

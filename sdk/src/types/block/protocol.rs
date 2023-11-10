@@ -41,6 +41,9 @@ pub struct ProtocolParameters {
     pub(crate) rent_structure: RentStructure,
     /// The work score parameters used by the node/network.
     pub(crate) work_score_parameters: WorkScoreParameters,
+    /// The parameters used for mana calculations.
+    #[getset(skip)]
+    pub(crate) mana_parameters: ManaParameters,
     /// TokenSupply defines the current token supply on the network.
     #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
     pub(crate) token_supply: u64,
@@ -51,18 +54,16 @@ pub struct ProtocolParameters {
     pub(crate) slot_duration_in_seconds: u8,
     /// The number of slots in an epoch expressed as an exponent of 2.
     pub(crate) slots_per_epoch_exponent: u8,
-    /// The parameters used for mana calculations.
-    #[getset(skip)]
-    pub(crate) mana_parameters: ManaParameters,
     /// The unbonding period in epochs before an account can stop staking.
     pub(crate) staking_unbonding_period: u32,
     /// The number of validation blocks that each validator should issue each slot.
-    pub(crate) validation_blocks_per_slot: u16,
+    pub(crate) validation_blocks_per_slot: u8,
     /// The number of epochs worth of Mana that a node is punished with for each additional validation block it issues.
     pub(crate) punishment_epochs: u32,
-    /// Liveness Threshold is used by tip-selection to determine if a block is eligible by evaluating issuingTimes and
-    /// commitments in its past-cone to Accepted Tangle Time and lastCommittedSlot respectively.
-    pub(crate) liveness_threshold: u32,
+    /// Used by tip-selection to determine if a block is eligible by evaluating issuing times.
+    pub(crate) liveness_threshold_lower_bound: u16,
+    /// Used by tip-selection to determine if a block is eligible by evaluating issuing times
+    pub(crate) liveness_threshold_upper_bound: u16,
     /// Minimum age relative to the accepted tangle time slot index that a slot can be committed.
     pub(crate) min_committable_age: u32,
     /// Maximum age for a slot commitment to be included in a block relative to the slot index of the block issuing
@@ -77,6 +78,9 @@ pub struct ProtocolParameters {
     pub(crate) version_signaling: VersionSignalingParameters,
     /// Defines the parameters used for reward calculation.
     pub(crate) rewards_parameters: RewardsParameters,
+    /// Defines the target size of the committee. If there's fewer candidates the actual committee size could be
+    /// smaller in a given epoch.
+    pub(crate) target_committee_size: u8,
 }
 
 // This implementation is required to make [`ProtocolParameters`] a [`Packable`] visitor.
@@ -105,12 +109,14 @@ impl Default for ProtocolParameters {
             staking_unbonding_period: 10,
             validation_blocks_per_slot: 10,
             punishment_epochs: 9,
-            liveness_threshold: 5,
+            liveness_threshold_lower_bound: 15,
+            liveness_threshold_upper_bound: 30,
             min_committable_age: 10,
             max_committable_age: 20,
             congestion_control_parameters: Default::default(),
             version_signaling: Default::default(),
             rewards_parameters: Default::default(),
+            target_committee_size: 32,
         }
     }
 }
