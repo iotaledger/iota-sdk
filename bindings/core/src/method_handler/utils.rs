@@ -3,7 +3,10 @@
 
 use crypto::keys::bip39::Mnemonic;
 use iota_sdk::{
-    client::{hex_public_key_to_bech32_address, hex_to_bech32, verify_mnemonic, Client},
+    client::{
+        api::verify_semantic, hex_public_key_to_bech32_address, hex_to_bech32, secret::types::InputSigningData,
+        verify_mnemonic, Client,
+    },
     types::{
         block::{
             address::{dto::AddressDto, Address, AliasAddress, ToBech32Ext},
@@ -113,6 +116,21 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
         UtilsMethod::OutputHexBytes { output } => {
             let output = Output::try_from_dto(output)?;
             Response::HexBytes(prefix_hex::encode(output.pack_to_vec()))
+        }
+        UtilsMethod::VerifySemantic {
+            inputs,
+            transaction,
+            time,
+        } => {
+            let conflict = verify_semantic(
+                &inputs
+                    .into_iter()
+                    .map(InputSigningData::try_from_dto)
+                    .collect::<iota_sdk::client::Result<Vec<InputSigningData>>>()?,
+                &TransactionPayload::try_from_dto(transaction)?,
+                time,
+            )?;
+            Response::ConflictReason(conflict)
         }
     };
     Ok(response)

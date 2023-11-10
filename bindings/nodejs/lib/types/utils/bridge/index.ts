@@ -25,6 +25,7 @@ import type {
     __FaucetMethod__,
     __OutputIdToUtxoInput__,
     __OutputHexBytes__,
+    __VerifySemantic__,
 } from './utils';
 
 export type __UtilsMethods__ =
@@ -53,4 +54,5 @@ export type __UtilsMethods__ =
     | __VerifyMnemonicMethod__
     | __FaucetMethod__
     | __OutputIdToUtxoInput__
-    | __OutputHexBytes__;
+    | __OutputHexBytes__
+    | __VerifySemantic__;

@@ -32,6 +32,7 @@ use iota_sdk::{
                 transaction::TransactionId,
             },
             protocol::ProtocolParameters,
+            semantic::ConflictReason,
             signature::dto::Ed25519SignatureDto,
             unlock::dto::UnlockDto,
             BlockDto, BlockId,
@@ -232,6 +233,8 @@ pub enum Response {
     HexBytes(String),
     /// Response for [`CallPluginRoute`](crate::method::ClientMethod::CallPluginRoute)
     CustomJson(serde_json::Value),
+    /// Response for [`VerifySemantic`](crate::method::UtilsMethod::VerifySemantic).
+    ConflictReason(ConflictReason),
 
     // Responses in client and wallet
     /// Response for:

@@ -19,6 +19,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security -->
 
+## 1.1.2 - 2023-MM-DD
+
+### Added
+
+- `Utils:verify_semantic()`;
+
 ## 1.1.1 - 2023-10-31
 
 ### Added

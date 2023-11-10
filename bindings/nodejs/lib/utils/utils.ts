@@ -17,6 +17,7 @@ import {
     IRent,
     OutputId,
     Bech32Address,
+    InputSigningData,
 } from '../types';
 import { AliasId, BlockId, FoundryId, NftId, TokenId } from '../types/block/id';
 
@@ -419,5 +420,29 @@ export class Utils {
             },
         });
         return hexBytes;
+    }
+
+    /**
+     * Verifies the semantic of a transaction.
+     *
+     * @param inputs The inputs data.
+     * @param transaction The transaction payload.
+     * @param time The unix time for which to do the validation, should be roughly the one of the milestone that will reference the transaction.
+     * @returns The conflict reason.
+     */
+    static verifySemantic(
+        inputs: InputSigningData[],
+        transaction: TransactionPayload,
+        time: number,
+    ): string {
+        const conflictReason = callUtilsMethod({
+            name: 'verifySemantic',
+            data: {
+                inputs,
+                transaction,
+                time,
+            },
+        });
+        return conflictReason;
     }
 }
