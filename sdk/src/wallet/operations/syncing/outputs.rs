@@ -63,7 +63,6 @@ where
                     metadata: *output_with_meta.metadata(),
                     output: output_with_meta.output().clone(),
                     is_spent: output_with_meta.metadata().is_spent(),
-                    address: associated_address.address.inner.clone(),
                     network_id,
                     remainder,
                     chain,
