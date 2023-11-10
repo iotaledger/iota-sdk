@@ -19,6 +19,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security -->
 
+## 1.3.0 - 2023-xx-xx
+
+### Added
+
+- Ledger Nano support;
+
 ## 1.2.0 - 2023-10-26
 
 ### Added
@@ -28,6 +34,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `UTC` suffix to the formatted date of `transactions`;
 - `addresses` handles NFT and Alias addresses;
 - `AccountCommand::Address` command that accepts either a list index or a `Bech32Address`;
+- Ledger Nano support;
 
 ### Changed
 
