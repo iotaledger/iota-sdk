@@ -164,7 +164,6 @@ where
         &self,
         addresses_to_sync: Vec<AddressWithUnspentOutputs>,
         options: &SyncOptions,
-        // ) -> crate::wallet::Result<(Vec<AddressWithUnspentOutputs>, Vec<OutputId>, Vec<OutputData>)> {
     ) -> crate::wallet::Result<(Vec<AddressWithUnspentOutputs>, Vec<OutputId>, Vec<OutputData>)> {
         // Cache account and nft addresses with the related Ed25519 address, so we can update the account
         // address with the new output ids.
