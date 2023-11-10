@@ -79,31 +79,8 @@ fn protocol_parameters() -> ProtocolParameters {
 #[ignore = "invalid public key in test vector"]
 fn basic_block_id_tagged_data_payload() {
     // Test vector from https://github.com/iotaledger/tips/blob/tip46/tips/TIP-0046/tip-0046.md#basic-block-id-tagged-data-payload
-    let block_json = serde_json::json!({
-        "protocolVersion": 3,
-        "networkId": "0",
-        "issuingTime": "1695275834000000000",
-        "slotCommitmentId": "0x8633b2eb1845fdecf12ee6c5e789c3cf1f0d0bbb3cee65cb5fb2757e995b5cd700000000",
-        "latestFinalizedSlot": 0,
-        "issuerId": "0x7d534a464b76373157466e412a643733787626623a3a556f4333606b6471034b",
-        "block": {
-          "type": 0,
-          "strongParents": ["0x14385d6b66073665247c4e0f17075e5a28015f61454e5b725e11686c2d6d6071382e3173"],
-          "weakParents": [],
-          "shallowLikeParents": [],
-          "payload": {
-            "type": 0,
-            "tag": "0x746167",
-            "data": "0x6f354e0077473c7c730974575172383d17721a013103477159793576283c31027e38703a2e1a1e3d50703c1a4e60405f6d7d5c564727012d2b1e585c083d721a533a20774a36417a6d1563291a714c4a66100a712e793428315324705a45673f276f62263b0848264a2409646c182b67565f2c6a6c543d40645108461d3e630f1a611c5a2e6433"
-          },
-          "maxBurnedMana": "100"
-        },
-        "signature": {
-            "type": 0,
-            "publicKey": "0x0d2128337477155d5e48225e6c500b2538124611456c7739447031592f1d4d1d",
-            "signature": "0x5263165b422d662427447346404c7d634c49301c0505231e624b481331544f271c4f7e6c33044a06432b655c607a6e056f2e0d1a122004334258020e7d2a3d42"
-      }
-    });
+    let block_string = std::fs::read_to_string("./tests/types/fixtures/basic_block_tagged_data_payload.json").unwrap();
+    let block_json = serde_json::from_str(&block_string).unwrap();
 
     let block_dto = serde_json::from_value::<SignedBlockDto>(block_json).unwrap();
     let block = SignedBlock::try_from_dto(block_dto).unwrap();
@@ -124,107 +101,8 @@ fn basic_block_id_tagged_data_payload() {
 #[ignore = "invalid public key in test vector"]
 fn basic_block_id_transaction_payload() {
     // Test vector from https://github.com/iotaledger/tips/blob/tip46/tips/TIP-0046/tip-0046.md#basic-block-id-transaction-payload
-    let block_json = serde_json::json!({
-        "protocolVersion": 3,
-        "networkId": "0",
-        "issuingTime": "1695275834000000000",
-        "slotCommitmentId": "0x8633b2eb1845fdecf12ee6c5e789c3cf1f0d0bbb3cee65cb5fb2757e995b5cd700000000",
-        "latestFinalizedSlot": 0,
-        "issuerId": "0x554813020e6324372e4b2018284c1403321457351a620a227a2e68201d325471",
-        "block": {
-            "type": 0,
-            "strongParents": [
-            "0x580b62530a1a4f2f6a25442448043a0d324c7579291a5c144742314c3a481e667035040e",
-            "0x5a29685d615d331e38684c0d1c7a2b7875243c77322048215c5c6740562c146155747479",
-            "0x7c602d30626b1056351c464b03672f260c50730f344b1152491451445e18653f3a515567"
-            ],
-            "weakParents": [],
-            "shallowLikeParents": [],
-            "payload": {
-            "type": 1,
-            "transaction": {
-                "networkId": "14147312347886322761",
-                "creationSlot": 0,
-                "contextInputs": [],
-                "inputs": [
-                {
-                    "type": 0,
-                    "transactionId": "0x3b27570e163e3c283e744d305a57473c51624e3e4c093865592576054025411920390b7c",
-                    "transactionOutputIndex": 57
-                },
-                {
-                    "type": 0,
-                    "transactionId": "0x1c0c0c3e6740486b175a333c4a414b295036795b1e67045f6b405b790968750d6352770a",
-                    "transactionOutputIndex": 114
-                }
-                ],
-                "allotments": [
-                {
-                    "accountID": "0x470b7b276e6c644b7b3577213c7b3874183d677831596e667702386952432e68",
-                    "value": "8343"
-                }
-                ],
-                "capabilities": "",
-                "outputs": [
-                {
-                    "type": 0,
-                    "amount": "5892",
-                    "mana": "0",
-                    "unlockConditions": [
-                    {
-                        "type": 0,
-                        "address": {
-                        "type": 0,
-                        "pubKeyHash": "0x286a580f29774c5b7b7d0e6a7610303a277b124e6427363f1635161c753f3e53"
-                        }
-                    }
-                    ],
-                    "features": []
-                },
-                {
-                    "type": 0,
-                    "amount": "9003",
-                    "mana": "0",
-                    "unlockConditions": [
-                    {
-                        "type": 0,
-                        "address": {
-                        "type": 0,
-                        "pubKeyHash": "0x7a0d271a7b347e7e614c5463683b405b357a2b0c594a22340b6a1d1a2d667a26"
-                        }
-                    }
-                    ],
-                    "features": []
-                }
-                ]
-            },
-            "unlocks": [
-                {
-                "type": 0,
-                "signature": {
-                    "type": 0,
-                    "publicKey": "0x0d2128337477155d5e48225e6c500b2538124611456c7739447031592f1d4d1d",
-                    "signature": "0x55414109320a16182c162c1022713126396c4330505352550608266d3c5a364274525914514475730030295e0e0b1a7e6b367a236348382a6e625147512b3813"
-                }
-                },
-                {
-                "type": 0,
-                "signature": {
-                    "type": 0,
-                    "publicKey": "0x4459093a134a3b285d3c720c4d5c415204700d0c5c09525b340905233e1a7d61",
-                    "signature": "0x446e174632766b145020080225044d545423625d6a12440e58791f122f3b150e266c4a1429774857602b7c5d3e015313330020025833610e541d74770a047a4d"
-                }
-                }
-            ]
-            },
-            "maxBurnedMana": "100"
-        },
-        "signature": {
-            "type": 0,
-            "publicKey": "0x20306836691b10254f3e3e5e6c315b4963433152054d452d1b582f785b3b3864",
-            "signature": "0x5263165b422d662427447346404c7d634c49301c0505231e624b481331544f271c4f7e6c33044a06432b655c607a6e056f2e0d1a122004334258020e7d2a3d42"
-        }
-    });
+    let block_string = std::fs::read_to_string("./tests/types/fixtures/basic_block_transaction_payload.json").unwrap();
+    let block_json = serde_json::from_str(&block_string).unwrap();
 
     let block_dto = serde_json::from_value::<SignedBlockDto>(block_json).unwrap();
     let block = SignedBlock::try_from_dto(block_dto).unwrap();
@@ -243,56 +121,8 @@ fn basic_block_id_transaction_payload() {
 #[test]
 fn validation_block_id() {
     // Test vector from https://github.com/iotaledger/tips/blob/tip46/tips/TIP-0046/tip-0046.md#validation-block-id
-    let block_json = serde_json::json!({
-        "protocolVersion": 3,
-        "networkId": "0",
-        "issuingTime": "1695275834000000000",
-        "slotCommitmentId": "0x8633b2eb1845fdecf12ee6c5e789c3cf1f0d0bbb3cee65cb5fb2757e995b5cd700000000",
-        "latestFinalizedSlot": 0,
-        "issuerId": "0x154a1767047449742d2063001f3105661562281d523476623c505f142b111455",
-        "block": {
-            "type": 1,
-            "strongParents": [
-            "0x06532d24754f512011512f6b3d522e451c1f65457036383f5f7c3f297342403557411d73",
-            "0x085a4f1c5028673403193c2f6c630b18340e1a3a191612011418780b211c250c79204a20",
-            "0x0d44571c59600f553755491e2d71325e2f1c252772517b4b6d3d78452e1f7e0f663d2603",
-            "0x104b6d354f00073677382e553d1c78230820095a2702700b6f466a59520445176d0b1f2b",
-            "0x141c2d2c4e1c7d6b3c621c7852331c7d005d541c596d0c4d7c163621471d234a4a6d5075",
-            "0x14645b184b485f60393f2a216309490a411d17454f604d31570d77725030716019430152",
-            "0x1801471a315c75100068344b4f277c0f6776766d16140a6908470c432339615266363319",
-            "0x1a66261f7323385f326d1b47780a74561473161e496f672b233161200c112d5976745846",
-            "0x1b1a687a4b40184f7d26234441672d11084646452b603f767b43757d032f4f6a32721721",
-            "0x1b6e2a68476a303f2814222b604b4c253f0c005817215f1c5f7021263948756f4e37066c",
-            "0x230752313b2e5c296972110e78457c6117274a1d2f475f5e1932111115546930017c1f1b",
-            "0x2b03440a5e016c4d6b41060f6d3f101f423b2c256b3969755d395e2a7d266c1d7a607b54",
-            "0x2b2b3929396c42657b1e2a6f7925367937674567645b5318731a5b162f153a655a12542c",
-            "0x2c1b4023067c182533573c4f102d0230683d384b4c382c4f4b530974215065122a5c6360",
-            "0x300b01792b715a44625c17451c296a36165f331f282b40573f71146116632c5201410a68",
-            "0x304e482a4029224275364039686d70180c1a084474354c5845432663502d2e4f355c6f6a",
-            "0x375c75465c0e50343c483c4205504457305f65066e6c741b1b347d374b342770151f6745",
-            "0x3f19694a000f3247651a7b3c0c05101b5e5b3c3768581d4a0e0e20212e017a6640123950",
-            "0x425c6b69220e5e0f365b7d43694e7129254f223442670c771b677e2723475f0e5f154e11",
-            "0x4a276f4f39592c2f255c0631146e0445684c6e732d6d774045071e2d44787c497d3d5d49",
-            "0x4b20275230617d5377705d64671a7b6a63114f2a54106f1d016d5353734112394a465604",
-            "0x592e4e781b41466d556e526a5f654200351e782763452c732d2f4a7336783e27274b5e4e",
-            "0x607e06657a433d2e0417461c78185732567c78531b5b670226781b26526813364b72675b",
-            "0x62202d1d2d66522e07703d3d767a6b3a330829542b6d454b690c5a4364516c302d435625",
-            "0x62797960364210310a0f01223b504a1436553c44765570503514051034062e48310d6a26",
-            "0x70094d783979401a4b4f117372101f2f27196649382e113f4671194c27080c2b3e712d28",
-            "0x7371635333410a7500102e1240131a7a3b1b3a5b7131195706056907214a334f573e6906",
-            "0x7419161176184c42345c2722236b131d6940061373243b533e5f10712a473a2748195c15"
-            ],
-            "weakParents": [],
-            "shallowLikeParents": [],
-            "highestSupportedVersion": 4,
-            "protocolParametersHash": "0xa19d3fef401f40efc739569dbef84627db1b8af59ee3ef82f9028d00c4d77413"
-        },
-        "signature": {
-            "type": 0,
-            "publicKey": "0x7026712f3170262410010e037e6f454243567c7d3a4827060e617b6b0f757064",
-            "signature": "0x092d0c2e2374337e060819320c3a5b39686334564a560c0b007b2c041f76455677576e310e16683a367c690c2a425c3f1f3d525b201f4c7c41675b443804383c"
-        }
-    });
+    let block_string = std::fs::read_to_string("./tests/types/fixtures/validation_block.json").unwrap();
+    let block_json = serde_json::from_str(&block_string).unwrap();
 
     let block_dto = serde_json::from_value::<SignedBlockDto>(block_json).unwrap();
     let block = SignedBlock::try_from_dto(block_dto).unwrap();
