@@ -7,8 +7,7 @@ from typing import Dict, Optional, List, TypeAlias, Union, Any
 from dataclasses import dataclass, field
 from dataclasses_json import config
 from iota_sdk.types.common import HexStr, json, EpochIndex
-from iota_sdk.types.feature import deserialize_features, SenderFeature, IssuerFeature, MetadataFeature, TagFeature
-from iota_sdk.types.native_token import NativeToken
+from iota_sdk.types.feature import deserialize_features, SenderFeature, IssuerFeature, MetadataFeature, TagFeature, NativeTokenFeature
 from iota_sdk.types.token_scheme import SimpleTokenScheme
 from iota_sdk.types.unlock_condition import deserialize_unlock_conditions, AddressUnlockCondition, StateControllerAddressUnlockCondition, GovernorAddressUnlockCondition, StorageDepositReturnUnlockCondition, TimelockUnlockCondition, ExpirationUnlockCondition, ImmutableAccountAddressUnlockCondition
 
@@ -46,8 +45,6 @@ class BasicOutput:
             The conditions to unlock the output.
         features :
             Features that add utility to the output but do not impose unlocking conditions.
-        native_tokens :
-            Native tokens added to the new output.
         type :
             The type of output.
     """
@@ -62,11 +59,10 @@ class BasicOutput:
                                                                     decoder=deserialize_unlock_conditions
                                                                     ))
     features: Optional[List[Union[SenderFeature,
-                            MetadataFeature, TagFeature]]] = field(default=None,
-                                                                   metadata=config(
-                                                                       decoder=deserialize_features
-                                                                   ))
-    native_tokens: Optional[List[NativeToken]] = None
+                            MetadataFeature, TagFeature, NativeTokenFeature]]] = field(default=None,
+                                                                                       metadata=config(
+                                                                                           decoder=deserialize_features
+                                                                                       ))
     type: int = field(
         default_factory=lambda: int(
             OutputType.Basic),
@@ -90,8 +86,6 @@ class AccountOutput:
             A counter that denotes the number of foundries created by this account output.
         features :
             Features that add utility to the output but do not impose unlocking conditions.
-        native_tokens :
-            Native tokens added to the new output.
         immutable_features :
             Features that add utility to the output but do not impose unlocking conditions. These features need to be kept in future transitions of the UTXO state machine.
         type :
@@ -110,16 +104,15 @@ class AccountOutput:
             decoder=deserialize_unlock_conditions
         ))
     features: Optional[List[Union[SenderFeature,
-                            MetadataFeature]]] = field(default=None,
-                                                       metadata=config(
-                                                           decoder=deserialize_features
-                                                       ))
+                            MetadataFeature, NativeTokenFeature]]] = field(default=None,
+                                                                           metadata=config(
+                                                                               decoder=deserialize_features
+                                                                           ))
     immutable_features: Optional[List[Union[IssuerFeature,
                                             MetadataFeature]]] = field(default=None,
                                                                        metadata=config(
                                                                            decoder=deserialize_features
                                                                        ))
-    native_tokens: Optional[List[NativeToken]] = None
     type: int = field(
         default_factory=lambda: int(
             OutputType.Account),
@@ -147,8 +140,6 @@ class AnchorOutput:
             Features that add utility to the output but do not impose unlocking conditions. These features need to be kept in future transitions of the UTXO state machine.
         state_metadata :
             Metadata that can only be changed by the state controller.
-        native_tokens :
-            Native tokens added to the new output.
         type :
             The type of output.
     """
@@ -176,7 +167,6 @@ class AnchorOutput:
                                                                            decoder=deserialize_features
                                                                        ))
     state_metadata: Optional[HexStr] = None
-    native_tokens: Optional[List[NativeToken]] = None
     type: int = field(
         default_factory=lambda: int(
             OutputType.Anchor),
@@ -194,8 +184,6 @@ class FoundryOutput:
             The conditions to unlock the output.
         features :
             Features that add utility to the output but do not impose unlocking conditions.
-        native_tokens :
-            Native tokens added to the new output.
         immutable_features :
             Features that add utility to the output but do not impose unlocking conditions. These features need to be kept in future transitions of the UTXO state machine.
         serial_number :
@@ -219,7 +207,6 @@ class FoundryOutput:
                                                                 metadata=config(
                                                                     decoder=deserialize_features
                                                                 ))
-    native_tokens: Optional[List[NativeToken]] = None
     type: int = field(
         default_factory=lambda: int(
             OutputType.Foundry),
@@ -241,8 +228,6 @@ class NftOutput:
             The NFT ID if it's an NFT output.
         features :
             Features that add utility to the output but do not impose unlocking conditions.
-        native_tokens :
-            Native tokens added to the new output.
         immutable_features :
             Features that add utility to the output but do not impose unlocking conditions. These features need to be kept in future transitions of the UTXO state machine.
         type :
@@ -270,7 +255,6 @@ class NftOutput:
                                                   metadata=config(
                                                       decoder=deserialize_features
                                                   ))
-    native_tokens: Optional[List[NativeToken]] = None
     type: int = field(default_factory=lambda: int(OutputType.Nft), init=False)
 
 
