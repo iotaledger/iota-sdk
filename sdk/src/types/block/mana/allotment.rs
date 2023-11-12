@@ -1,20 +1,18 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use packable::{
-    error::{UnpackError, UnpackErrorExt},
-    packer::Packer,
-    unpacker::Unpacker,
-    Packable,
-};
+use packable::Packable;
 
 use crate::types::block::{output::AccountId, protocol::ProtocolParameters, Error};
 
 /// An allotment of Mana which will be added upon commitment of the slot in which the containing transaction was issued,
 /// in the form of Block Issuance Credits to the account.
-#[derive(Copy, Clone, Debug, Eq, PartialEq)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq, Packable)]
+#[packable(unpack_error = Error)]
+#[packable(unpack_visitor = ProtocolParameters)]
 pub struct ManaAllotment {
     pub(crate) account_id: AccountId,
+    #[packable(verify_with = verify_mana)]
     pub(crate) mana: u64,
 }
 
@@ -32,9 +30,8 @@ impl Ord for ManaAllotment {
 
 impl ManaAllotment {
     pub fn new(account_id: AccountId, mana: u64, protocol_params: &ProtocolParameters) -> Result<Self, Error> {
-        if mana > protocol_params.mana_parameters().max_mana() {
-            return Err(Error::InvalidManaValue(mana));
-        }
+        verify_mana::<true>(&mana, protocol_params)?;
+
         Ok(Self { account_id, mana })
     }
 
@@ -47,26 +44,12 @@ impl ManaAllotment {
     }
 }
 
-impl Packable for ManaAllotment {
-    type UnpackError = Error;
-    type UnpackVisitor = ProtocolParameters;
-
-    fn pack<P: Packer>(&self, packer: &mut P) -> Result<(), P::Error> {
-        self.account_id.pack(packer)?;
-        self.mana.pack(packer)?;
-
-        Ok(())
+fn verify_mana<const VERIFY: bool>(mana: &u64, params: &ProtocolParameters) -> Result<(), Error> {
+    if VERIFY && *mana > params.mana_parameters().max_mana() {
+        return Err(Error::InvalidManaValue(*mana));
     }
 
-    fn unpack<U: Unpacker, const VERIFY: bool>(
-        unpacker: &mut U,
-        visitor: &Self::UnpackVisitor,
-    ) -> Result<Self, UnpackError<Self::UnpackError, U::Error>> {
-        let account_id = AccountId::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
-        let mana = u64::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
-
-        Self::new(account_id, mana, visitor).map_err(UnpackError::Packable)
-    }
+    Ok(())
 }
 
 #[cfg(feature = "serde")]
