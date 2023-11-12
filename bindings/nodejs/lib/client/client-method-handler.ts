@@ -34,7 +34,7 @@ export class ClientMethodHandler {
 
     async destroy(): Promise<void> {
         try {
-            destroyClient(this.methodHandler)
+            destroyClient(this.methodHandler);
         } catch (error: any) {
             throw errorHandle(error);
         }

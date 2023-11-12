@@ -126,14 +126,14 @@ export class Wallet {
     /**
      * Get client.
      */
-     async getClient(): Promise<Client> {
+    async getClient(): Promise<Client> {
         return this.methodHandler.getClient();
     }
 
     /**
      * Get secret manager.
      */
-     async getSecretManager(): Promise<SecretManager> {
+    async getSecretManager(): Promise<SecretManager> {
         return this.methodHandler.getSecretManager();
     }
 

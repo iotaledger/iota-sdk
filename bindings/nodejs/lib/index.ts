@@ -61,7 +61,7 @@ function errorHandle(error: any): Error {
         if (!err.type) {
             throw error;
         }
-        
+
         if (err.type == 'panic') {
             return Error(err.payload.toString());
         } else {

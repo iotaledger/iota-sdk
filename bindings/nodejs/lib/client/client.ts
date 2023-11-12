@@ -75,7 +75,7 @@ export class Client {
     }
 
     async destroy() {
-        this.methodHandler.destroy()
+        this.methodHandler.destroy();
     }
 
     /**

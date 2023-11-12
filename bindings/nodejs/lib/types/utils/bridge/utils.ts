@@ -198,7 +198,7 @@ export interface __OutputHexBytes__ {
 type SlotCommitmentConverted = Omit<
     SlotCommitment,
     'cumulativeWeight' | 'referenceManaCost'
-    > & {cumulativeWeight: string; referenceManaCost: string};
+> & { cumulativeWeight: string; referenceManaCost: string };
 export interface __ComputeSlotCommitmentId__ {
     name: 'computeSlotCommitmentId';
     data: {
