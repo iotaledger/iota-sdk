@@ -6,7 +6,7 @@ import {
     callClientMethod,
     createClient,
     listenMqtt,
-    destroyClient
+    destroyClient,
 } from '../bindings';
 import type { IClientOptions, __ClientMethods__ } from '../types/client';
 
@@ -32,9 +32,9 @@ export class ClientMethodHandler {
         }
     }
 
-    destroy(): void {
+    async destroy(): Promise<void> {
         try {
-            destroyClient(this.methodHandler);
+            destroyClient(this.methodHandler)
         } catch (error: any) {
             throw errorHandle(error);
         }
@@ -47,7 +47,10 @@ export class ClientMethodHandler {
      * @returns A promise that resolves to a JSON string response holding the result of the client method.
      */
     async callMethod(method: __ClientMethods__): Promise<string> {
-        return callClientMethod(this.methodHandler, JSON.stringify(method)).catch((error: any) => {
+        return callClientMethod(
+            this.methodHandler,
+            JSON.stringify(method),
+        ).catch((error: any) => {
             throw errorHandle(error);
         });
     }

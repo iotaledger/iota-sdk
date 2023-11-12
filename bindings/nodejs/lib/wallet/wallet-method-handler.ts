@@ -5,7 +5,8 @@ import {
     callWalletMethod,
     createWallet,
     listenWallet,
-    getClientFromWallet,
+    destroyWallet,
+    getClient,
     getSecretManagerFromWallet,
 } from '../bindings';
 import {
@@ -67,19 +68,31 @@ export class WalletMethodHandler {
         eventTypes: WalletEventType[],
         callback: (error: Error, event: Event) => void,
     ): Promise<void> {
-        return listenWallet(this.methodHandler, eventTypes, function (err: any, data: string) {
-            const parsed = JSON.parse(data);
-            callback(
-                // Send back raw error instead of parsing
-                err,
-                new Event(parsed.accountIndex, parsed.event),
-            );
-        });
+        return listenWallet(
+            this.methodHandler,
+            eventTypes,
+            function (err: any, data: string) {
+                const parsed = JSON.parse(data);
+                callback(
+                    // Send back raw error instead of parsing
+                    err,
+                    new Event(parsed.accountIndex, parsed.event),
+                );
+            },
+        );
     }
 
-    getClient(): Client {
+    async destroy(): Promise<void> {
         try {
-            const result = getClientFromWallet(this.methodHandler);
+            await destroyWallet(this.methodHandler);
+        } catch (error: any) {
+            throw errorHandle(error);
+        }
+    }
+
+    async getClient(): Promise<Client> {
+        try {
+            const result = await getClient(this.methodHandler);
             return new Client(result);
         } catch (error: any) {
             throw errorHandle(error);
@@ -89,9 +102,9 @@ export class WalletMethodHandler {
     /**
      * Get the secret manager associated with the wallet.
      */
-    getSecretManager(): SecretManager {
+    async getSecretManager(): Promise<SecretManager> {
         try {
-            const result = getSecretManagerFromWallet(this.methodHandler);
+            const result = await getSecretManagerFromWallet(this.methodHandler);
             return new SecretManager(result);
         } catch (error: any) {
             throw errorHandle(error);

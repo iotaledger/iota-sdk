@@ -77,7 +77,7 @@ pub fn destroy_wallet(method_handler: &WalletMethodHandler) -> Result<(), JsErro
     Ok(())
 }
 
-#[wasm_bindgen(js_name = getClientFromWallet)]
+#[wasm_bindgen(js_name = getClient)]
 pub fn get_client(method_handler: &WalletMethodHandler) -> Result<ClientMethodHandler, JsError> {
     let wallet = wallet_pre!(method_handler)?;
 

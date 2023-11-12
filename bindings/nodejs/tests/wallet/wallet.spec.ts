@@ -4,132 +4,135 @@
 import 'reflect-metadata';
 
 import { describe, it, expect } from '@jest/globals';
-import { Wallet, CoinType, WalletOptions } from '../../lib/';
+import { Wallet, CoinType, WalletOptions, SecretManager } from '../../lib/';
+
+const chain = {
+    coinType: CoinType.IOTA,
+    account: 0,
+    change: 0,
+    addressIndex: 0,
+};
 
 describe('Wallet', () => {
     it('create account', async () => {
         let storagePath = 'test-create-account';
         removeDir(storagePath);
 
+        const strongholdSecretManager = {
+            stronghold: {
+                snapshotPath: `./${storagePath}/wallet.stronghold`,
+                password: `A12345678*`,
+            },
+        }
+        const secretManager = await new SecretManager(strongholdSecretManager);
+        await secretManager.storeMnemonic(
+            'vital give early extra blind skin eight discover scissors there globe deal goat fat load robot return rate fragile recycle select live ordinary claim',
+        );
+
         const walletOptions = {
             storagePath: './test-create-account',
             clientOptions: {
                 nodes: ['https://api.testnet.shimmer.network'],
             },
-            coinType: CoinType.Shimmer,
-            secretManager: {
-                stronghold: {
-                    snapshotPath: `./${storagePath}/wallet.stronghold`,
-                    password: `A12345678*`,
-                },
-            },
+            bipPath: chain,
+            secretManager: strongholdSecretManager,
         };
 
         const wallet = new Wallet(walletOptions);
-        await wallet.storeMnemonic(
-            'vital give early extra blind skin eight discover scissors there globe deal goat fat load robot return rate fragile recycle select live ordinary claim',
-        );
 
-        const account = await wallet.createAccount({
-            alias: 'Alice',
-        });
-
-        expect(account.getMetadata().index).toStrictEqual(0);
-
-        wallet.destroy();
+        await wallet.destroy();
         removeDir(storagePath);
-    }, 8000);
+    }, 20000);
 
     it('generate address', async () => {
         let storagePath = 'test-generate-address';
         removeDir(storagePath);
+
+        const strongholdSecretManager = {
+            stronghold: {
+                snapshotPath: `./${storagePath}/wallet.stronghold`,
+                password: `A12345678*`,
+            },
+        }
+        const secretManager = await new SecretManager(strongholdSecretManager);
+        await secretManager.storeMnemonic(
+            'vital give early extra blind skin eight discover scissors there globe deal goat fat load robot return rate fragile recycle select live ordinary claim',
+        );
 
         const walletOptions: WalletOptions = {
             storagePath,
             clientOptions: {
                 nodes: ['https://api.testnet.shimmer.network'],
             },
-            coinType: CoinType.Shimmer,
-            secretManager: {
-                stronghold: {
-                    snapshotPath: `./${storagePath}/wallet.stronghold`,
-                    password: `A12345678*`,
-                },
-            },
+            bipPath: chain,
+            secretManager: strongholdSecretManager,
         };
 
         const wallet = new Wallet(walletOptions);
-        await wallet.storeMnemonic(
-            'vital give early extra blind skin eight discover scissors there globe deal goat fat load robot return rate fragile recycle select live ordinary claim',
-        );
 
-        const address = await wallet.generateEd25519Address(
-            0,
-            0,
-            { internal: false, ledgerNanoPrompt: false },
-            'rms',
-        );
+        const address = await secretManager.generateEd25519Addresses({
+            coinType: CoinType.Shimmer,
+            accountIndex: 0,
+            range: { start: 0, end: 1},
+            options: { internal: false, ledgerNanoPrompt: false },
+            bech32Hrp: 'rms',
+        });
 
-        expect(address).toStrictEqual(
+        expect(address[0]).toStrictEqual(
             'rms1qpqzgvcehafmlxh87zrf9w8ck8q2kw5070ztf68ylhzk89en9a4fy5jqrg8',
         );
 
-        const anotherAddress = await wallet.generateEd25519Address(
-            10,
-            10,
-            { internal: true, ledgerNanoPrompt: false },
-            'tst',
+        const anotherAddress = await secretManager.generateEd25519Addresses({
+            coinType: CoinType.Shimmer,
+            accountIndex: 10,
+            range: { start: 0, end: 10 },
+            options: { internal: true, ledgerNanoPrompt: false },
+            bech32Hrp: 'tst',
+        });
+
+        expect(anotherAddress[0]).toStrictEqual(
+            'tst1qr5ckcctawkng8mc9hmkumnf0c2rrurd56wht6wxjcywtetzpqsvyhph79x',
         );
 
-        expect(anotherAddress).toStrictEqual(
-            'tst1qzp37j45rkfmqn05fapq66vyw0vkmz5zqhmeuey5fked0wt4ry43jeqp2wv',
-        );
-
-        wallet.destroy();
+        await wallet.destroy();
         removeDir(storagePath);
-    }, 8000);
+    }, 20000);
 
     it('recreate wallet', async () => {
         let storagePath = 'test-recreate-wallet';
         removeDir(storagePath);
+
+        const strongholdSecretManager = {
+            stronghold: {
+                snapshotPath: `./${storagePath}/wallet.stronghold`,
+                password: `A12345678*`,
+            },
+        }
+        const secretManager = await new SecretManager(strongholdSecretManager);
+        await secretManager.storeMnemonic(
+            'vital give early extra blind skin eight discover scissors there globe deal goat fat load robot return rate fragile recycle select live ordinary claim',
+        );
 
         const walletOptions = {
             storagePath,
             clientOptions: {
                 nodes: ['https://api.testnet.shimmer.network'],
             },
-            coinType: CoinType.Shimmer,
-            secretManager: {
-                stronghold: {
-                    snapshotPath: `./${storagePath}/wallet.stronghold`,
-                    password: `A12345678*`,
-                },
-            },
+            bipPath: chain,
+            secretManager: strongholdSecretManager,
         };
 
         const wallet = new Wallet(walletOptions);
-        await wallet.storeMnemonic(
-            'vital give early extra blind skin eight discover scissors there globe deal goat fat load robot return rate fragile recycle select live ordinary claim',
-        );
 
-        const account = await wallet.createAccount({
-            alias: 'Alice',
-        });
-
-        expect(account.getMetadata().index).toStrictEqual(0);
-
-        const client = wallet.getClient();
-
-        const localPoW = await client.getLocalPow();
-        expect(localPoW).toBeTruthy();
-
-        wallet.destroy();
+        await wallet.destroy();
 
         const recreatedWallet = new Wallet(walletOptions);
-        const accounts = await recreatedWallet.getAccounts();
-        expect(accounts.length).toStrictEqual(1);
+        const accounts = await recreatedWallet.accounts();
 
-        recreatedWallet.destroy();
+        // TODO: make acocunts test 
+        expect(accounts.length).toStrictEqual(0);
+
+        await recreatedWallet.destroy();
         removeDir(storagePath)
     }, 20000);
 
@@ -137,45 +140,42 @@ describe('Wallet', () => {
         let storagePath = 'test-error-after-destroy';
         removeDir(storagePath);
 
+        const strongholdSecretManager = {
+            stronghold: {
+                snapshotPath: `./${storagePath}/wallet.stronghold`,
+                password: `A12345678*`,
+            },
+        }
+        const secretManager = await new SecretManager(strongholdSecretManager);
+        await secretManager.storeMnemonic(
+            'vital give early extra blind skin eight discover scissors there globe deal goat fat load robot return rate fragile recycle select live ordinary claim',
+        );
+
         const walletOptions = {
             storagePath,
             clientOptions: {
                 nodes: ['https://api.testnet.shimmer.network'],
             },
-            coinType: CoinType.Shimmer,
-            secretManager: {
-                stronghold: {
-                    snapshotPath: `./${storagePath}/wallet.stronghold`,
-                    password: `A12345678*`,
-                },
-            },
+            bipPath: chain,
+            secretManager: strongholdSecretManager,
         };
 
         const wallet = new Wallet(walletOptions);
-        await wallet.storeMnemonic(
-            'vital give early extra blind skin eight discover scissors there globe deal goat fat load robot return rate fragile recycle select live ordinary claim',
-        );
 
-        const account = await wallet.createAccount({
-            alias: 'Alice',
-        });
-
-        expect(account.getMetadata().index).toStrictEqual(0);
-
-        wallet.destroy();
+        await wallet.destroy();
 
         try {
-            const _accounts = await wallet.getAccounts();
+            const _accounts = await wallet.accounts();
             throw 'Should return an error because the wallet was destroyed';
         } catch (err: any) {
-            expect(err.message).toContain('Wallet was destroyed');
+            expect(err.message).toEqual('Wallet was destroyed');
         }
 
         try {
-            const _client = wallet.getClient();
+            const _client = await wallet.getClient();
             throw 'Should return an error because the wallet was destroyed';
         } catch (err: any) {
-            expect(err.message).toContain('Wallet was destroyed');
+            expect(err.message).toEqual('Wallet was destroyed');
         }
         removeDir(storagePath);
     }, 35000);

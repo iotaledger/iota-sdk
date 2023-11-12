@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use std::sync::{Arc, RwLock};
+use std::sync::Arc;
 
 use iota_sdk_bindings_core::{
     call_client_method as rust_call_client_method,
@@ -52,7 +52,7 @@ pub async fn call_client_method(client: External<ClientMethodHandler>, method: S
     } else {
         Err(Error::new(
             Status::GenericFailure,
-            serde_json::to_string(&Response::Panic("Client got destroyed".to_string())).map_err(NodejsError::from)?,
+            serde_json::to_string(&Response::Panic("Client was destroyed".to_string())).map_err(NodejsError::from)?,
         ))
     }
 }
@@ -80,7 +80,7 @@ pub async fn listen_mqtt(
     } else {
         Err(Error::new(
             Status::GenericFailure,
-            serde_json::to_string(&Response::Panic("Client got destroyed".to_string())).map_err(NodejsError::from)?,
+            serde_json::to_string(&Response::Panic("Client was destroyed".to_string())).map_err(NodejsError::from)?,
         ))
     }
 }

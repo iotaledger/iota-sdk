@@ -18,33 +18,33 @@ const client = new Client({
 // Skip for CI
 describe.skip('UTXO methods', () => {
     it('gets accounts output IDs', async () => {
-        const accountsOutputIds = await client.accountOutputIds([
+        const accountsOutputIds = await client.accountOutputIds(
             {
                 address:
                     'rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy',
             },
-        ]);
+        );
 
         expect(accountsOutputIds).toBeDefined();
     });
 
     it('gets nfts output IDs', async () => {
-        const nftsOutputIds = await client.nftOutputIds([
+        const nftsOutputIds = await client.nftOutputIds(
             {
                 address:
                     'rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy',
             },
-        ]);
+        );
 
         expect(nftsOutputIds).toBeDefined();
     });
 
     it('gets foundries output IDs', async () => {
-        const foundriesOutputIds = await client.foundryOutputIds([
+        const foundriesOutputIds = await client.foundryOutputIds(
             {
-                hasNativeTokens: true,
+                hasNativeToken: true,
             },
-        ]);
+        );
 
         expect(foundriesOutputIds).toBeDefined();
     });

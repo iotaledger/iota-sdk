@@ -74,8 +74,8 @@ export class Client {
         this.methodHandler = new ClientMethodHandler(options);
     }
 
-    destroy() {
-        this.methodHandler.destroy();
+    async destroy() {
+        this.methodHandler.destroy()
     }
 
     /**

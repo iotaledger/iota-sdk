@@ -34,6 +34,10 @@ type RootsId = string;
  */
 class SlotCommitment {
     /**
+     * The version of the protocol running.
+     */
+    readonly protocolVersion: number;
+    /**
      * The slot index of this commitment.
      * It is calculated based on genesis timestamp and the duration of a slot.
      */
@@ -41,7 +45,7 @@ class SlotCommitment {
     /**
      * The commitment ID of the previous slot.
      */
-    readonly prevId: SlotCommitmentId;
+    readonly previousCommitmentId: SlotCommitmentId;
     /**
      * A BLAKE2b-256 hash of concatenating multiple sparse merkle tree roots of a slot.
      */
@@ -54,16 +58,25 @@ class SlotCommitment {
      */
     readonly cumulativeWeight: u64;
 
+    /**
+     * Reference Mana Cost (RMC) to be used in the slot with index at `index + Max Committable Age`.
+     */
+    readonly referenceManaCost: u64;
+
     constructor(
+        protocolVersion: number,
         index: SlotIndex,
-        previousSlotCommitmentId: SlotCommitmentId,
+        previousCommitmentId: SlotCommitmentId,
         rootsId: RootsId,
         cumulativeWeight: u64,
+        referenceManaCost: u64,
     ) {
+        this.protocolVersion = protocolVersion;
         this.index = index;
-        this.prevId = previousSlotCommitmentId;
+        this.previousCommitmentId = previousCommitmentId;
         this.rootsId = rootsId;
         this.cumulativeWeight = cumulativeWeight;
+        this.referenceManaCost = referenceManaCost;
     }
 }
 

@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use std::sync::{Arc, RwLock};
+use std::sync::Arc;
 
 use iota_sdk_bindings_core::{
     call_wallet_method as rust_call_wallet_method,
@@ -47,7 +47,7 @@ pub async fn call_wallet_method(wallet: External<WalletMethodHandler>, method: S
     } else {
         Err(Error::new(
             Status::GenericFailure,
-            serde_json::to_string(&Response::Panic("Wallet got destroyed".to_string())).map_err(NodejsError::from)?,
+            serde_json::to_string(&Response::Panic("Wallet was destroyed".to_string())).map_err(NodejsError::from)?,
         ))
     }
 }
@@ -78,7 +78,7 @@ pub async fn listen_wallet(
     } else {
         Err(Error::new(
             Status::GenericFailure,
-            serde_json::to_string(&Response::Panic("Wallet got destroyed".to_string())).map_err(NodejsError::from)?,
+            serde_json::to_string(&Response::Panic("Wallet was destroyed".to_string())).map_err(NodejsError::from)?,
         ))
     }
 }
@@ -90,7 +90,7 @@ pub async fn get_client(wallet: External<WalletMethodHandler>) -> Result<Externa
     } else {
         Err(Error::new(
             Status::GenericFailure,
-            serde_json::to_string(&Response::Panic("Wallet got destroyed".to_string())).map_err(NodejsError::from)?,
+            serde_json::to_string(&Response::Panic("Wallet was destroyed".to_string())).map_err(NodejsError::from)?,
         ))
     }
 }
@@ -102,7 +102,7 @@ pub async fn get_secret_manager(wallet: External<WalletMethodHandler>) -> Result
     } else {
         Err(Error::new(
             Status::GenericFailure,
-            serde_json::to_string(&Response::Panic("Wallet got destroyed".to_string())).map_err(NodejsError::from)?,
+            serde_json::to_string(&Response::Panic("Wallet was destroyed".to_string())).map_err(NodejsError::from)?,
         ))
     }
 }

@@ -109,7 +109,7 @@ export class Wallet {
     /**
      * Destroy the Wallet and drop its database connection.
      */
-    destroy(): void {
+    async destroy(): Promise<void> {
         return this.methodHandler.destroy();
     }
 
@@ -126,14 +126,14 @@ export class Wallet {
     /**
      * Get client.
      */
-    getClient(): Client {
+     async getClient(): Promise<Client> {
         return this.methodHandler.getClient();
     }
 
     /**
      * Get secret manager.
      */
-    getSecretManager(): SecretManager {
+     async getSecretManager(): Promise<SecretManager> {
         return this.methodHandler.getSecretManager();
     }
 

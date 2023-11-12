@@ -394,11 +394,14 @@ export class Utils {
             name: 'computeSlotCommitmentId',
             data: {
                 slotCommitment: {
-                    index: slotCommitment.index.toString(10),
-                    prevId: slotCommitment.prevId,
+                    protocolVersion: slotCommitment.protocolVersion,
+                    index: slotCommitment.index,
+                    previousCommitmentId: slotCommitment.previousCommitmentId,
                     rootsId: slotCommitment.rootsId,
                     cumulativeWeight:
                         slotCommitment.cumulativeWeight.toString(10),
+                    referenceManaCost:
+                        slotCommitment.referenceManaCost.toString(10),
                 },
             },
         });

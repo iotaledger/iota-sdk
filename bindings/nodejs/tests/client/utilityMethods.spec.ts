@@ -71,12 +71,12 @@ describe('Client utility methods', () => {
 
     it('hash output id', async () => {
         const outputId =
-            '0x00000000000000000000000000000000000000000000000000000000000000000000';
+            '0x0000000000000000000000000000000000000000000000000000000000000000000000000000';
 
         const accountId = Utils.computeAccountId(outputId);
 
         expect(accountId).toBe(
-            '0xcf077d276686ba64c0404b9eb2d15556782113c5a1985f262b70f9964d3bbd7f',
+            '0x0ebc2867a240719a70faacdfc3840e857fa450b37d95297ac4f166c2f70c3345',
         );
     });
 
@@ -134,14 +134,16 @@ describe('Client utility methods', () => {
 
     it('slot commitment id', async () => {
         let slotCommitment = new SlotCommitment(
-            BigInt(10),
-            "0x20e07a0ea344707d69a08b90be7ad14eec8326cf2b8b86c8ec23720fab8dcf8ec43a30e4a8cc3f1f",
+            1,
+            10,
+            "0x20e07a0ea344707d69a08b90be7ad14eec8326cf2b8b86c8ec23720fab8dcf8ec43a30e4",
             "0xcf077d276686ba64c0404b9eb2d15556782113c5a1985f262b70f9964d3bbd7f",
-            BigInt(5)
+            BigInt(5),
+            BigInt(6000)
         );
         let id = Utils.computeSlotCommitmentId(slotCommitment);
         expect(id).toBe(
-            '0xb485446277cc5111d54f443b46d886945d4af64e53c2f04064a7c2ea88fa4e020a00000000000000'
+            '0x1d1470e10ed1c498c88002d57d6eaa0db38a31347e1aa5e957300a48967f0ca40a000000'
         );
     });
 });

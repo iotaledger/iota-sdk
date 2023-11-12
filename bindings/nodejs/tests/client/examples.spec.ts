@@ -11,10 +11,12 @@ import {
     TaggedDataPayload,
     CommonOutput,
     CoinType,
+    Ed25519Address,
 } from '../../';
 import '../customMatchers';
 import 'dotenv/config';
 import * as addressOutputs from '../fixtures/addressOutputs.json';
+import { AddressUnlockCondition } from '../../lib';
 
 const client = new Client({
     nodes: [
@@ -33,7 +35,7 @@ const issuerId =
     '0x0000000000000000000000000000000000000000000000000000000000000000';
 
 const chain = {
-    coinType: CoinType.Iota,
+    coinType: CoinType.IOTA,
     account: 0,
     change: 0,
     addressIndex: 0,
@@ -76,15 +78,12 @@ describe.skip('Main examples', () => {
     // });
 
     it('gets address outputs', async () => {
-        const outputIdsResponse = await client.basicOutputIds([
-            {
-                address:
-                    'rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy',
-            },
-            { hasExpiration: false },
-            { hasTimelock: false },
-            { hasStorageDepositReturn: false },
-        ]);
+        const outputIdsResponse = await client.basicOutputIds({
+            address: 'rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy',
+            hasExpiration: false,
+            hasTimelock: false,
+            hasStorageDepositReturn: false
+        });
 
         outputIdsResponse.items.forEach((id) => expect(id).toBeValidOutputId());
 
@@ -117,12 +116,12 @@ describe.skip('Main examples', () => {
         expect(addresses[0]).toBeValidAddress();
 
         // Get output ids of outputs that can be controlled by this address without further unlock constraints
-        const outputIdsResponse = await client.basicOutputIds([
-            { address: addresses[0] },
-            { hasExpiration: false },
-            { hasTimelock: false },
-            { hasStorageDepositReturn: false },
-        ]);
+        const outputIdsResponse = await client.basicOutputIds({
+            address: addresses[0],
+            hasExpiration: false,
+            hasTimelock: false,
+            hasStorageDepositReturn: false,
+        });
         outputIdsResponse.items.forEach((id) => expect(id).toBeValidOutputId());
 
         // Get outputs by their IDs
@@ -170,9 +169,10 @@ describe.skip('Main examples', () => {
 
     it('gets block data', async () => {
         const tips = await client.getTips();
+        const params = await client.getProtocolParameters();
 
         const blockData = await client.getBlock(tips[0]);
-        const blockId = Utils.blockId(blockData);
+        const blockId = Utils.blockId(blockData, params);
         expect(tips[0]).toStrictEqual(blockId);
 
         const blockMetadata = await client.getBlockMetadata(tips[0]);
@@ -189,27 +189,34 @@ describe.skip('Main examples', () => {
 
         const fetchedBlock = await client.getBlock(blockId);
 
-        expect(fetchedBlock.payload).toStrictEqual(
+        expect(fetchedBlock.block.asBasic().payload).toStrictEqual(
             new TaggedDataPayload(utf8ToHex('Hello'), utf8ToHex('Tangle')),
         );
     });
 
     it('sends a transaction', async () => {
-        const addresses = await new SecretManager(secretManager).generateEd25519Addresses({
+        const addresses = await secretManager.generateEd25519Addresses({
             range: {
                 start: 1,
                 end: 2,
             },
         });
 
-        const blockIdAndBlock = await client.buildAndPostBlock(secretManager, {
-            output: {
-                address: addresses[0],
-                amount: BigInt(1000000),
-            },
+        const basicOutput = await client.buildBasicOutput({
+            amount: BigInt(1000000),
+            unlockConditions: [
+                new AddressUnlockCondition(
+                    new Ed25519Address(addresses[0]),
+                ),
+            ],
         });
+        
+        //let payload = await secretManager.signTransaction(prepared);
+        const unsignedBlock = await client.buildBasicBlock("", undefined);
+        const signedBlock = await secretManager.signBlock(unsignedBlock, chain);
+        const blockId = await client.postBlock(signedBlock);
 
-        expect(blockIdAndBlock[0]).toBeValidBlockId();
+        expect(blockId).toBeValidBlockId();
     });
 
     it('destroy', async () => {
@@ -219,16 +226,15 @@ describe.skip('Main examples', () => {
                     url: process.env.NODE_URL || 'http://localhost:14265',
                 },
             ],
-            localPow: true,
         });
         
-        client.destroy();
+        await client.destroy();
 
         try {
             const _info = await client.getInfo();
             throw 'Should return an error because the client was destroyed';
         } catch (err: any) {
-            expect(err.message).toContain('Client was destroyed');
+            expect(err.message).toEqual('Client was destroyed');
         }
     })
 });
