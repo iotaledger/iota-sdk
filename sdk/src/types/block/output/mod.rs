@@ -27,12 +27,7 @@ pub mod unlock_condition;
 use core::ops::RangeInclusive;
 
 use derive_more::From;
-use packable::{
-    error::{UnpackError, UnpackErrorExt},
-    packer::Packer,
-    unpacker::Unpacker,
-    Packable, PackableExt,
-};
+use packable::{Packable, PackableExt};
 
 pub use self::{
     account::{AccountId, AccountOutput, AccountOutputBuilder},
@@ -111,19 +106,28 @@ impl OutputWithMetadata {
 }
 
 /// A generic output that can represent different types defining the deposit of funds.
-#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, From)]
+#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, From, Packable)]
+#[packable(unpack_error = Error)]
+#[packable(tag_type = u8, with_error = Error::InvalidOutputKind)]
+#[packable(unpack_visitor = ProtocolParameters)]
 pub enum Output {
     /// A basic output.
+    #[packable(tag = BasicOutput::KIND)]
     Basic(BasicOutput),
     /// An account output.
+    #[packable(tag = AccountOutput::KIND)]
     Account(AccountOutput),
     /// An anchor output.
+    #[packable(tag = AnchorOutput::KIND)]
     Anchor(AnchorOutput),
     /// A foundry output.
+    #[packable(tag = FoundryOutput::KIND)]
     Foundry(FoundryOutput),
     /// An NFT output.
+    #[packable(tag = NftOutput::KIND)]
     Nft(NftOutput),
     /// A delegation output.
+    #[packable(tag = DelegationOutput::KIND)]
     Delegation(DelegationOutput),
 }
 
@@ -382,57 +386,6 @@ impl Output {
         }
 
         Ok(())
-    }
-}
-
-impl Packable for Output {
-    type UnpackError = Error;
-    type UnpackVisitor = ProtocolParameters;
-
-    fn pack<P: Packer>(&self, packer: &mut P) -> Result<(), P::Error> {
-        match self {
-            Self::Basic(output) => {
-                BasicOutput::KIND.pack(packer)?;
-                output.pack(packer)
-            }
-            Self::Account(output) => {
-                AccountOutput::KIND.pack(packer)?;
-                output.pack(packer)
-            }
-            Self::Anchor(output) => {
-                AnchorOutput::KIND.pack(packer)?;
-                output.pack(packer)
-            }
-            Self::Foundry(output) => {
-                FoundryOutput::KIND.pack(packer)?;
-                output.pack(packer)
-            }
-            Self::Nft(output) => {
-                NftOutput::KIND.pack(packer)?;
-                output.pack(packer)
-            }
-            Self::Delegation(output) => {
-                DelegationOutput::KIND.pack(packer)?;
-                output.pack(packer)
-            }
-        }?;
-
-        Ok(())
-    }
-
-    fn unpack<U: Unpacker, const VERIFY: bool>(
-        unpacker: &mut U,
-        visitor: &Self::UnpackVisitor,
-    ) -> Result<Self, UnpackError<Self::UnpackError, U::Error>> {
-        Ok(match u8::unpack::<_, VERIFY>(unpacker, &()).coerce()? {
-            BasicOutput::KIND => Self::from(BasicOutput::unpack::<_, VERIFY>(unpacker, visitor).coerce()?),
-            AccountOutput::KIND => Self::from(AccountOutput::unpack::<_, VERIFY>(unpacker, visitor).coerce()?),
-            AnchorOutput::KIND => Self::from(AnchorOutput::unpack::<_, VERIFY>(unpacker, visitor).coerce()?),
-            FoundryOutput::KIND => Self::from(FoundryOutput::unpack::<_, VERIFY>(unpacker, visitor).coerce()?),
-            NftOutput::KIND => Self::from(NftOutput::unpack::<_, VERIFY>(unpacker, visitor).coerce()?),
-            DelegationOutput::KIND => Self::from(DelegationOutput::unpack::<_, VERIFY>(unpacker, visitor).coerce()?),
-            k => return Err(UnpackError::Packable(Error::InvalidOutputKind(k))),
-        })
     }
 }
 
