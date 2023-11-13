@@ -11,6 +11,7 @@ from iota_sdk.types.address import Address, AddressType, Ed25519Address, AliasAd
 from iota_sdk.types.common import HexStr
 from iota_sdk.types.output_id import OutputId
 from iota_sdk.types.output import Output
+from iota_sdk.types.transaction_data import InputSigningData
 from iota_sdk.external import call_utils_method
 from iota_sdk.types.payload import TransactionPayload
 
@@ -216,6 +217,17 @@ class Utils():
             'publicKey': public_key,
             'signature': signature,
             'message': message,
+        })
+
+    @staticmethod
+    def verify_transaction_semantic(
+            inputs: List[InputSigningData], transaction: TransactionPayload, time: int) -> str:
+        """Verifies the semantic of a transaction.
+        """
+        return _call_method('verifyTransactionSemantic', {
+            'inputs': [i.as_dict() for i in inputs],
+            'transaction': transaction.as_dict(),
+            'time': time,
         })
 
 
