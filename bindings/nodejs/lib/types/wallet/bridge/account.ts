@@ -1,7 +1,6 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import type { SyncOptions, FilterOptions } from '../account';
 import type {
     SendParams,
     SendNativeTokensParams,
@@ -25,10 +24,12 @@ import type {
 } from '../participation';
 import type { ConsolidationParams } from '../consolidation-params';
 import {
+    FilterOptions,
     HexEncodedAmount,
     NumericString,
     Output,
     OutputId,
+    SyncOptions,
     TokenId,
     TransactionId,
 } from '../../';

@@ -27,6 +27,11 @@ impl ImplicitAccountCreationAddress {
     pub fn new(address: [u8; Self::LENGTH]) -> Self {
         Self(Ed25519Address::new(address))
     }
+
+    /// Returns the inner [`Ed25519Address`] of the [`ImplicitAccountCreationAddress`].
+    pub fn ed25519_address(&self) -> &Ed25519Address {
+        &self.0
+    }
 }
 
 impl StorageScore for ImplicitAccountCreationAddress {

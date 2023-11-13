@@ -8,13 +8,16 @@ use crypto::hashes::{blake2b::Blake2b256, Digest};
 use getset::{CopyGetters, Getters};
 use packable::{prefix::StringPrefix, Packable, PackableExt};
 
-use crate::types::block::{
-    address::Hrp,
-    helper::network_name_to_id,
-    mana::{ManaParameters, RewardsParameters},
-    output::StorageScoreParameters,
-    slot::{EpochIndex, SlotIndex},
-    ConvertTo, Error, PROTOCOL_VERSION,
+use crate::{
+    types::block::{
+        address::Hrp,
+        helper::network_name_to_id,
+        mana::{ManaParameters, RewardsParameters},
+        output::StorageScoreParameters,
+        slot::{EpochIndex, SlotIndex},
+        Error, PROTOCOL_VERSION,
+    },
+    utils::ConvertTo,
 };
 
 /// Defines the parameters of the protocol at a particular version.
@@ -80,6 +83,9 @@ pub struct ProtocolParameters {
     pub(crate) version_signaling: VersionSignalingParameters,
     /// Defines the parameters used for reward calculation.
     pub(crate) rewards_parameters: RewardsParameters,
+    /// Defines the target size of the committee. If there's fewer candidates the actual committee size could be
+    /// smaller in a given epoch.
+    pub(crate) target_committee_size: u8,
 }
 
 // This implementation is required to make [`ProtocolParameters`] a [`Packable`] visitor.
@@ -115,6 +121,7 @@ impl Default for ProtocolParameters {
             congestion_control_parameters: Default::default(),
             version_signaling: Default::default(),
             rewards_parameters: Default::default(),
+            target_committee_size: 32,
         }
     }
 }

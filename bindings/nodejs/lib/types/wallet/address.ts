@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { SlotIndex } from '../block/slot';
-import { Bech32Address, NftId, OutputId, TokenId } from '../block';
+import { Bech32Address, NftId, TokenId } from '../block';
 import { NumericString, u256, u64 } from '../utils';
 
 /** A Bip44 address */
@@ -33,18 +33,6 @@ export interface SendParams {
      * expiration is needed but not provided, it will default to one day.
      */
     expiration?: SlotIndex;
-}
-
-/** Address with unspent outputs */
-export interface AddressWithUnspentOutputs {
-    /** The Bech32 address. */
-    address: Bech32Address;
-    /** The address key index. */
-    keyIndex: number;
-    /** Whether the address is a public or an internal (change) address. */
-    internal: boolean;
-    /** The IDs of associated unspent outputs. */
-    outputIds: OutputId[];
 }
 
 /** Address with native tokens */

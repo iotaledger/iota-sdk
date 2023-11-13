@@ -1,7 +1,7 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use alloc::{collections::BTreeSet, vec::Vec};
+use alloc::collections::BTreeSet;
 
 use hashbrown::HashMap;
 use packable::{
@@ -11,25 +11,20 @@ use packable::{
     Packable, PackableExt,
 };
 
-use crate::types::{
-    block::{
-        address::{AccountAddress, Address},
-        output::{
-            feature::{verify_allowed_features, Feature, FeatureFlags, Features},
-            unlock_condition::{
-                verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions,
-            },
-            verify_output_amount_packable, ChainId, MinimumOutputAmount, NativeToken, NativeTokens, Output,
-            OutputBuilderAmount, OutputId, StateTransitionError, StateTransitionVerifier, StorageScore,
-            StorageScoreParameters,
-        },
-        payload::signed_transaction::TransactionCapabilityFlag,
-        protocol::ProtocolParameters,
-        semantic::{SemanticValidationContext, TransactionFailureReason},
-        unlock::Unlock,
-        Error,
+use crate::types::block::{
+    address::{AccountAddress, Address},
+    output::{
+        feature::{verify_allowed_features, Feature, FeatureFlags, Features},
+        unlock_condition::{verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions},
+        verify_output_amount_packable, ChainId, MinimumOutputAmount, NativeToken, NativeTokens, Output,
+        OutputBuilderAmount, OutputId, StateTransitionError, StateTransitionVerifier, StorageScore,
+        StorageScoreParameters,
     },
-    ValidationParams,
+    payload::signed_transaction::TransactionCapabilityFlag,
+    protocol::ProtocolParameters,
+    semantic::{SemanticValidationContext, TransactionFailureReason},
+    unlock::Unlock,
+    Error,
 };
 
 crate::impl_id!(
@@ -629,13 +624,15 @@ fn verify_unlock_conditions(unlock_conditions: &UnlockConditions, account_id: &A
 
 #[cfg(feature = "serde")]
 pub(crate) mod dto {
+    use alloc::vec::Vec;
+
     use serde::{Deserialize, Serialize};
 
     use super::*;
     use crate::{
         types::{
             block::{output::unlock_condition::dto::UnlockConditionDto, Error},
-            TryFromDto,
+            TryFromDto, ValidationParams,
         },
         utils::serde::string,
     };

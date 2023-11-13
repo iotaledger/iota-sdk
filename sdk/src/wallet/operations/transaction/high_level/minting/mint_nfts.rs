@@ -13,8 +13,8 @@ use crate::{
             unlock_condition::AddressUnlockCondition,
             NftId, NftOutputBuilder,
         },
-        ConvertTo,
     },
+    utils::ConvertTo,
     wallet::{
         operations::transaction::{TransactionOptions, TransactionWithMetadata},
         Wallet,

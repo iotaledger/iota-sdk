@@ -10,26 +10,23 @@ use packable::{
     Packable, PackableExt,
 };
 
-use crate::types::{
-    block::{
-        address::{Address, NftAddress},
-        output::{
-            feature::{verify_allowed_features, Feature, FeatureFlags, Features},
-            unlock_condition::{
-                verify_allowed_unlock_conditions, AddressUnlockCondition, StorageDepositReturnUnlockCondition,
-                UnlockCondition, UnlockConditionFlags, UnlockConditions,
-            },
-            verify_output_amount_packable, ChainId, MinimumOutputAmount, NativeToken, NativeTokens, Output,
-            OutputBuilderAmount, OutputId, StateTransitionError, StateTransitionVerifier, StorageScore,
-            StorageScoreParameters,
+use crate::types::block::{
+    address::{Address, NftAddress},
+    output::{
+        feature::{verify_allowed_features, Feature, FeatureFlags, Features},
+        unlock_condition::{
+            verify_allowed_unlock_conditions, AddressUnlockCondition, StorageDepositReturnUnlockCondition,
+            UnlockCondition, UnlockConditionFlags, UnlockConditions,
         },
-        payload::signed_transaction::TransactionCapabilityFlag,
-        protocol::ProtocolParameters,
-        semantic::{SemanticValidationContext, TransactionFailureReason},
-        unlock::Unlock,
-        Error,
+        verify_output_amount_packable, ChainId, MinimumOutputAmount, NativeToken, NativeTokens, Output,
+        OutputBuilderAmount, OutputId, StateTransitionError, StateTransitionVerifier, StorageScore,
+        StorageScoreParameters,
     },
-    ValidationParams,
+    payload::signed_transaction::TransactionCapabilityFlag,
+    protocol::ProtocolParameters,
+    semantic::{SemanticValidationContext, TransactionFailureReason},
+    unlock::Unlock,
+    Error,
 };
 
 crate::impl_id!(
@@ -604,7 +601,7 @@ pub(crate) mod dto {
     use crate::{
         types::{
             block::{output::unlock_condition::dto::UnlockConditionDto, Error},
-            TryFromDto,
+            TryFromDto, ValidationParams,
         },
         utils::serde::string,
     };

@@ -14,8 +14,8 @@ use crate::{
             BasicOutputBuilder, NativeToken, NativeTokens, TokenId,
         },
         slot::SlotIndex,
-        ConvertTo,
     },
+    utils::ConvertTo,
     wallet::{
         constants::DEFAULT_EXPIRATION_SLOTS,
         operations::transaction::{TransactionOptions, TransactionWithMetadata},
