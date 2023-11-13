@@ -77,7 +77,7 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
             storage_score_parameters: storage_params,
         } => {
             let out = Output::try_from_dto(output)?;
-            Response::MinimumRequiredOutputAmount(out.minimum_amount(storage_params).to_string())
+            Response::OutputAmount(out.minimum_amount(storage_params))
         }
         UtilsMethod::VerifyMnemonic { mnemonic } => {
             let mnemonic = Mnemonic::from(mnemonic);

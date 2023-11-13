@@ -49,11 +49,11 @@ class ClientUtils(metaclass=ABCMeta):
             'bech32Hrp': bech32_hrp
         })
 
-    def minimum_required_output_amount(self, output: Output) -> int:
+    def computer_minimum_output_amount(self, output: Output) -> int:
         """Minimum required output amount.
         """
         return int(self._call_method(
-            'minimumRequiredOutputAmount', {
+            'computeMinimumOutputAmount', {
                 'output': output.to_dict()
             }
         ))

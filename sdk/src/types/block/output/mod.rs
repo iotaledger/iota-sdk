@@ -47,7 +47,7 @@ pub use self::{
     nft::{NftId, NftOutput, NftOutputBuilder},
     output_id::OutputId,
     state_transition::{StateTransitionError, StateTransitionVerifier},
-    storage_score::{MinimumOutputAmount, StorageScore, StorageScoreParameters},
+    storage_score::{StorageScore, StorageScoreParameters},
     token_scheme::{SimpleTokenScheme, TokenScheme},
     unlock_condition::{UnlockCondition, UnlockConditions},
 };
@@ -479,6 +479,15 @@ fn minimum_storage_deposit(address: &Address, params: StorageScoreParameters) ->
         .finish()
         .unwrap()
         .amount()
+}
+
+/// A trait that is shared by all output types, which is used to calculate the minimum amount the output
+/// must contain to satisfy its storage cost.
+pub trait MinimumOutputAmount: StorageScore {
+    /// Computes the minimum amount of this output given [`StorageScoreParameters`].
+    fn minimum_amount(&self, params: StorageScoreParameters) -> u64 {
+        params.storage_cost() * self.storage_score(params)
+    }
 }
 
 #[cfg(feature = "serde")]

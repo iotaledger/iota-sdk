@@ -697,9 +697,9 @@ export class Client {
      * @param output The output to calculate the minimum amount for.
      * @returns The minimum required amount.
      */
-    async minimumRequiredOutputAmount(output: Output): Promise<number> {
+    async computeMinimumOutputAmount(output: Output): Promise<number> {
         const response = await this.methodHandler.callMethod({
-            name: 'minimumRequiredOutputAmount',
+            name: 'computeMinimumOutputAmount',
             data: {
                 output,
             },

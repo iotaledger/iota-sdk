@@ -42,7 +42,7 @@ pub struct ProtocolParameters {
     pub(crate) network_name: StringPrefix<u8>,
     /// The HRP prefix used for Bech32 addresses in the network.
     pub(crate) bech32_hrp: Hrp,
-    /// The storage store parameters used by given node/network.
+    /// The storage score parameters used by given node/network.
     pub(crate) storage_score_parameters: StorageScoreParameters,
     /// The work score parameters used by the node/network.
     pub(crate) work_score_parameters: WorkScoreParameters,

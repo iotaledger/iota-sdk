@@ -256,8 +256,8 @@ export interface __ClearListenersMethod__ {
     };
 }
 
-export type __MinimumRequiredOutputAmountMethod__ = {
-    name: 'minimumRequiredOutputAmount';
+export type __ComputeMinimumOutputAmountMethod__ = {
+    name: 'computeMinimumOutputAmount';
     data: {
         output: Output;
     };

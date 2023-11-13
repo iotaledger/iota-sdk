@@ -150,7 +150,7 @@ impl BasicOutputBuilder {
     }
 
     /// Adds a storage deposit return unlock condition if one is needed to cover the current amount
-    /// (i.e. `amount < storage_cost`). This will increase the total amount to equal the `storage_cost` with
+    /// (i.e. `amount < minimum_amount`). This will increase the total amount to satisfy the `minimum_amount` with
     /// the additional unlock condition that will return the remainder to the provided `return_address`.
     pub fn with_sufficient_storage_deposit(
         mut self,
