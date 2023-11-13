@@ -313,7 +313,7 @@ impl BasicOutput {
     /// Checks whether the basic output is an implicit account.
     pub fn is_implicit_account(&self) -> bool {
         if let [UnlockCondition::Address(uc)] = self.unlock_conditions().as_ref() {
-            uc.address().is_implicit_account_creation() && self.native_tokens.is_empty() && self.features.is_empty()
+            uc.address().is_implicit_account_creation()
         } else {
             false
         }
