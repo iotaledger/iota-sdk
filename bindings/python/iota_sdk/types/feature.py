@@ -26,7 +26,7 @@ class FeatureType(IntEnum):
     Issuer = 1
     Metadata = 2
     Tag = 3
-    NativeToken = 5
+    NativeToken = 4
     BlockIssuer = 5
     Staking = 6
 
