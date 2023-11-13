@@ -78,7 +78,7 @@ async function run() {
             blockId,
         );
 
-        // Sync account
+        // Sync wallet
         wallet.sync();
         console.log('Wallet synced');
 
