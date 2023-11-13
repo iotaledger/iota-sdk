@@ -80,10 +80,20 @@ impl Block {
         }
     }
 
+    /// Updates the max burned mana field if it's a basic block.
+    pub fn set_max_burned_mana(&mut self, max_burned_mana: u64) {
+        match self {
+            Self::Basic(basic_block) => basic_block.set_max_burned_mana(max_burned_mana),
+            Self::Validation(_) => {},
+        }
+    }
+
     /// Creates a new [`BasicBlockBuilder`].
+    /// 
+    /// Note, that `max_burned_mana` is set to 0 and has to be updated to the correct value after the basic block has been built.
     #[inline(always)]
-    pub fn build_basic(strong_parents: self::basic::StrongParents, max_burned_mana: u64) -> BasicBlockBuilder {
-        BasicBlockBuilder::new(strong_parents, max_burned_mana)
+    pub fn build_basic(strong_parents: self::basic::StrongParents) -> BasicBlockBuilder {
+        BasicBlockBuilder::new(strong_parents, 0)
     }
 
     /// Creates a new [`ValidationBlockBuilder`].

@@ -69,13 +69,6 @@ impl BasicBlockBuilder {
         self
     }
 
-    /// Adds max burned mana to a [`BasicBlockBuilder`].
-    #[inline(always)]
-    pub fn with_max_burned_mana(mut self, max_burned_mana: u64) -> Self {
-        self.max_burned_mana = max_burned_mana;
-        self
-    }
-
     /// Finishes the builder into a [`BasicBlock`].
     pub fn finish(self) -> Result<BasicBlock, Error> {
         verify_parents_sets(&self.strong_parents, &self.weak_parents, &self.shallow_like_parents)?;
@@ -153,6 +146,10 @@ impl BasicBlock {
     #[inline(always)]
     pub fn max_burned_mana(&self) -> u64 {
         self.max_burned_mana
+    }
+
+    pub(crate) fn set_max_burned_mana(&mut self, max_burned_mana: u64) {
+        self.max_burned_mana = max_burned_mana;
     }
 }
 

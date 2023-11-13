@@ -43,7 +43,7 @@ pub fn rand_basic_block_with_strong_parents(strong_parents: basic::StrongParents
 
 /// Generates a random basic block builder with given strong parents.
 pub fn rand_basic_block_builder_with_strong_parents(strong_parents: basic::StrongParents) -> BasicBlockBuilder {
-    Block::build_basic(strong_parents, rand_number())
+    Block::build_basic(strong_parents)
 }
 
 /// Generates a random signed block with given block.

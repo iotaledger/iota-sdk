@@ -10,7 +10,7 @@ use crate::{
     types::block::{
         core::{BlockHeader, UnsignedBlock},
         payload::Payload,
-        Block, IssuerId,
+        Block, IssuerId, protocol::WorkScore,
     },
 };
 
@@ -33,6 +33,17 @@ impl ClientInner {
 
         let protocol_params = self.get_protocol_parameters().await?;
 
+        let mut basic_block = Block::build_basic(issuance.strong_parents()?)
+            .with_weak_parents(issuance.weak_parents()?)
+            .with_shallow_like_parents(issuance.shallow_like_parents()?)
+            .with_payload(payload)
+            .finish_block()?;
+
+        let work_score = basic_block.work_score(protocol_params.work_score_parameters) as u64;
+        let max_burned_mana = work_score * issuance.commitment.reference_mana_cost();
+
+        basic_block.set_max_burned_mana(max_burned_mana);
+
         Ok(UnsignedBlock::new(
             BlockHeader::new(
                 protocol_params.version(),
@@ -42,12 +53,7 @@ impl ClientInner {
                 issuance.latest_finalized_slot,
                 issuer_id,
             ),
-            // TODO: burned mana calculation
-            Block::build_basic(issuance.strong_parents()?, 0)
-                .with_weak_parents(issuance.weak_parents()?)
-                .with_shallow_like_parents(issuance.shallow_like_parents()?)
-                .with_payload(payload)
-                .finish_block()?,
+            basic_block,
         ))
     }
 }
