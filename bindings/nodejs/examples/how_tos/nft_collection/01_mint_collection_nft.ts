@@ -32,16 +32,14 @@ async function run() {
         // To sign a transaction we need to unlock stronghold.
         await wallet.setStrongholdPassword(process.env.STRONGHOLD_PASSWORD);
 
-        // Get the account we generated with `how_tos/accounts_and_addresses/create-account`
-        const account = await wallet.getAccount('Alice');
-
-        await account.sync();
+        await wallet.sync();
         console.log(`Account synced!`);
 
         // Get the id we generated with `00_mint_issuer_nft`
         const issuerNftId: NftId = process.argv[2];
 
-        const bech32Hrp = await wallet.getClient().getBech32Hrp();
+        const client = await wallet.getClient();
+        const bech32Hrp = await client.getBech32Hrp();
         const issuer = Utils.nftIdToBech32(issuerNftId, bech32Hrp);
 
         const nftMintParams = [];

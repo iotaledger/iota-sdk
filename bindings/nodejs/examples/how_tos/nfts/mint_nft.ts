@@ -79,7 +79,7 @@ async function run() {
         console.log('Minted NFT 1');
 
         // Build an NFT manually by using the `NftOutputBuilder`
-        const client = wallet.getClient();
+        const client = await wallet.getClient();
 
         const hexAddress = Utils.bech32ToHex(senderAddress);
         const output = await client.buildNftOutput({

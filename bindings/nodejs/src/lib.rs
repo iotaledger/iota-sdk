@@ -102,8 +102,6 @@ macro_rules! binding_glue {
     };
 }
 
-
-
 #[macro_export]
 macro_rules! binding_glue1 {
     ($cx:ident, $method:ident, $method_handler:ident, $callback:ident, $name:expr, $code:expr) => {

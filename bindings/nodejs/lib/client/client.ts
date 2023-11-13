@@ -74,8 +74,8 @@ export class Client {
         this.methodHandler = new ClientMethodHandler(options);
     }
 
-    async destroy() {
-        this.methodHandler.destroy();
+    async destroy(): Promise<void> {
+        this.methodHandler.destroy()
     }
 
     /**
