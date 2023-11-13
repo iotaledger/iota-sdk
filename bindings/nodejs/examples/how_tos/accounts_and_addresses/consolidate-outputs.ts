@@ -35,7 +35,7 @@ async function run() {
         );
 
         // Sync wallet to make sure wallet is updated with outputs from previous examples
-        wallet.sync();
+        await wallet.sync();
         console.log('Wallet synced');
 
         // List unspent outputs before consolidation.
@@ -79,7 +79,7 @@ async function run() {
         );
 
         // Sync wallet
-        wallet.sync();
+        await wallet.sync();
         console.log('Wallet synced');
 
         // Outputs after consolidation
