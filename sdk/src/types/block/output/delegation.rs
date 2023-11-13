@@ -5,24 +5,19 @@ use alloc::collections::BTreeSet;
 
 use packable::Packable;
 
-use crate::types::{
-    block::{
-        address::{AccountAddress, Address},
-        output::{
-            chain_id::ChainId,
-            unlock_condition::{
-                verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions,
-            },
-            verify_output_amount_min, verify_output_amount_packable, Output, OutputBuilderAmount, OutputId, Rent,
-            RentStructure, StateTransitionError, StateTransitionVerifier,
-        },
-        protocol::ProtocolParameters,
-        semantic::{SemanticValidationContext, TransactionFailureReason},
-        slot::EpochIndex,
-        unlock::Unlock,
-        Error,
+use crate::types::block::{
+    address::{AccountAddress, Address},
+    output::{
+        chain_id::ChainId,
+        unlock_condition::{verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions},
+        verify_output_amount_min, verify_output_amount_packable, Output, OutputBuilderAmount, OutputId, Rent,
+        RentStructure, StateTransitionError, StateTransitionVerifier,
     },
-    ValidationParams,
+    protocol::ProtocolParameters,
+    semantic::{SemanticValidationContext, TransactionFailureReason},
+    slot::EpochIndex,
+    unlock::Unlock,
+    Error,
 };
 
 crate::impl_id!(
@@ -442,7 +437,7 @@ pub(crate) mod dto {
                 output::{unlock_condition::dto::UnlockConditionDto, OutputBuilderAmount},
                 Error,
             },
-            TryFromDto,
+            TryFromDto, ValidationParams,
         },
         utils::serde::string,
     };
