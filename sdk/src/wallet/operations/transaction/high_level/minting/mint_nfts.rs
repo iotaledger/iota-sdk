@@ -26,7 +26,7 @@ use crate::{
 #[serde(rename_all = "camelCase")]
 pub struct MintNftParams {
     /// Bech32 encoded address to which the NFT will be minted. Default will use the
-    /// first address of the account.
+    /// address of the wallet.
     #[getset(get = "pub")]
     address: Option<Bech32Address>,
     /// NFT sender feature.
