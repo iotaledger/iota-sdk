@@ -117,7 +117,7 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
             let output = Output::try_from_dto(output)?;
             Response::HexBytes(prefix_hex::encode(output.pack_to_vec()))
         }
-        UtilsMethod::VerifySemantic {
+        UtilsMethod::VerifyTransactionSemantic {
             inputs,
             transaction,
             time,

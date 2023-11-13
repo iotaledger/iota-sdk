@@ -163,7 +163,7 @@ pub enum UtilsMethod {
     #[serde(rename_all = "camelCase")]
     OutputHexBytes { output: OutputDto },
     /// Verifies the semantic of a transaction.
-    VerifySemantic {
+    VerifyTransactionSemantic {
         inputs: Vec<InputSigningDataDto>,
         transaction: TransactionPayloadDto,
         time: u32,

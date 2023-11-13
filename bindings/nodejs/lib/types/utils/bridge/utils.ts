@@ -207,8 +207,8 @@ export interface __OutputHexBytes__ {
     };
 }
 
-export interface __VerifySemantic__ {
-    name: 'verifySemantic';
+export interface __VerifyTransactionSemantic__ {
+    name: 'verifyTransactionSemantic';
     data: {
         inputs: InputSigningData[];
         transaction: TransactionPayload;

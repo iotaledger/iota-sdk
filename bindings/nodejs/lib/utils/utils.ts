@@ -430,13 +430,13 @@ export class Utils {
      * @param time The unix time for which to do the validation, should be roughly the one of the milestone that will reference the transaction.
      * @returns The conflict reason.
      */
-    static verifySemantic(
+    static verifyTransactionSemantic(
         inputs: InputSigningData[],
         transaction: TransactionPayload,
         time: number,
     ): string {
         const conflictReason = callUtilsMethod({
-            name: 'verifySemantic',
+            name: 'verifyTransactionSemantic',
             data: {
                 inputs,
                 transaction,

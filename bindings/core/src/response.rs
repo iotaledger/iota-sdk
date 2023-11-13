@@ -233,7 +233,7 @@ pub enum Response {
     HexBytes(String),
     /// Response for [`CallPluginRoute`](crate::method::ClientMethod::CallPluginRoute)
     CustomJson(serde_json::Value),
-    /// Response for [`VerifySemantic`](crate::method::UtilsMethod::VerifySemantic).
+    /// Response for [`VerifyTransactionSemantic`](crate::method::UtilsMethod::VerifyTransactionSemantic).
     ConflictReason(ConflictReason),
 
     // Responses in client and wallet
