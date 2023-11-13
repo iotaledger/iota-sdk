@@ -104,10 +104,10 @@ class AccountOutput:
             decoder=deserialize_unlock_conditions
         ))
     features: Optional[List[Union[SenderFeature,
-                            MetadataFeature, NativeTokenFeature]]] = field(default=None,
-                                                                           metadata=config(
-                                                                               decoder=deserialize_features
-                                                                           ))
+                            MetadataFeature]]] = field(default=None,
+                                                       metadata=config(
+                                                           decoder=deserialize_features
+                                                       ))
     immutable_features: Optional[List[Union[IssuerFeature,
                                             MetadataFeature]]] = field(default=None,
                                                                        metadata=config(
@@ -199,10 +199,10 @@ class FoundryOutput:
     serial_number: int
     token_scheme: SimpleTokenScheme
     unlock_conditions: List[ImmutableAccountAddressUnlockCondition]
-    features: Optional[List[MetadataFeature]] = field(default=None,
-                                                      metadata=config(
-                                                          decoder=deserialize_features
-                                                      ))
+    features: Optional[List[Union[MetadataFeature, NativeTokenFeature]]] = field(default=None,
+                                                                                 metadata=config(
+                                                                                     decoder=deserialize_features
+                                                                                 ))
     immutable_features: Optional[List[MetadataFeature]] = field(default=None,
                                                                 metadata=config(
                                                                     decoder=deserialize_features
