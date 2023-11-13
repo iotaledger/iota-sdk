@@ -15,8 +15,9 @@ use crate::{
                 ParticipationEventType,
             },
         },
-        block::{address::Bech32Address, output::OutputId, ConvertTo},
+        block::{address::Bech32Address, output::OutputId},
     },
+    utils::ConvertTo,
 };
 
 impl ClientInner {

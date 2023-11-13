@@ -19,9 +19,9 @@ use iota_sdk::{
             },
             payload::signed_transaction::TransactionId,
             slot::SlotIndex,
-            ConvertTo,
         },
     },
+    utils::ConvertTo,
     wallet::{
         types::OutputData, ConsolidationParams, CreateNativeTokenParams, MintNftParams, OutputsToClaim,
         SendNativeTokensParams, SendNftParams, SendParams, SyncOptions, TransactionOptions, Wallet,

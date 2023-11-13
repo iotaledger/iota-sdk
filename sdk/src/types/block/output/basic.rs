@@ -5,23 +5,18 @@ use alloc::collections::BTreeSet;
 
 use packable::Packable;
 
-use crate::types::{
-    block::{
-        address::Address,
-        output::{
-            feature::{verify_allowed_features, Feature, FeatureFlags, Features},
-            unlock_condition::{
-                verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions,
-            },
-            verify_output_amount_min, verify_output_amount_packable, NativeToken, NativeTokens, Output,
-            OutputBuilderAmount, OutputId, Rent, RentStructure,
-        },
-        protocol::ProtocolParameters,
-        semantic::{SemanticValidationContext, TransactionFailureReason},
-        unlock::Unlock,
-        Error,
+use crate::types::block::{
+    address::Address,
+    output::{
+        feature::{verify_allowed_features, Feature, FeatureFlags, Features},
+        unlock_condition::{verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions},
+        verify_output_amount_min, verify_output_amount_packable, NativeToken, NativeTokens, Output,
+        OutputBuilderAmount, OutputId, Rent, RentStructure,
     },
-    ValidationParams,
+    protocol::ProtocolParameters,
+    semantic::{SemanticValidationContext, TransactionFailureReason},
+    unlock::Unlock,
+    Error,
 };
 
 /// Builder for a [`BasicOutput`].
@@ -313,7 +308,7 @@ impl BasicOutput {
     /// Checks whether the basic output is an implicit account.
     pub fn is_implicit_account(&self) -> bool {
         if let [UnlockCondition::Address(uc)] = self.unlock_conditions().as_ref() {
-            uc.address().is_implicit_account_creation() && self.native_tokens.is_empty() && self.features.is_empty()
+            uc.address().is_implicit_account_creation()
         } else {
             false
         }
@@ -361,7 +356,7 @@ pub(crate) mod dto {
     use crate::{
         types::{
             block::{output::unlock_condition::dto::UnlockConditionDto, Error},
-            TryFromDto,
+            TryFromDto, ValidationParams,
         },
         utils::serde::string,
     };
