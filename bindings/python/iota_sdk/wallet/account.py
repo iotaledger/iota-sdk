@@ -283,7 +283,7 @@ class Account:
         """
         outputs = self._call_account_method(
             'accounts'
-        )    
+        )
         return [from_dict(OutputData, o) for o in outputs]
 
     def implicit_accounts(self) -> List[OutputData]:
@@ -291,7 +291,7 @@ class Account:
         """
         outputs = self._call_account_method(
             'implicitAccounts'
-        )    
+        )
         return [from_dict(OutputData, o) for o in outputs]
 
     def incoming_transactions(self) -> List[TransactionWithMetadata]:
