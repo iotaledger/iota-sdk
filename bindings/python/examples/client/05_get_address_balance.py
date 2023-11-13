@@ -2,7 +2,7 @@ import os
 
 from dotenv import load_dotenv
 
-from iota_sdk import Client, NodeIndexerAPI
+from iota_sdk import Client, NodeIndexerAPI, FeatureType
 
 load_dotenv()
 
@@ -35,8 +35,10 @@ native_tokens = []
 for output_with_metadata in outputs:
     output = output_with_metadata.output
     total_amount += output.amount
-    if output.native_tokens:
-        native_tokens.append(output.native_tokens)
+    native_token = [feature for feature in output.features if feature['type']
+                    == FeatureType.NativeToken]
+    if native_token:
+        native_tokens.append(native_token)
 
 print(
     f'Outputs controlled by {ADDRESS} have {total_amount} glow and native tokens: {native_tokens}')
