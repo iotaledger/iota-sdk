@@ -59,7 +59,7 @@ fn builder() {
 
     assert_eq!(
         output.amount(),
-        Output::Foundry(output).minimum_amount(protocol_parameters.storage_score_parameters())
+        output.minimum_amount(protocol_parameters.storage_score_parameters())
     );
 }
 

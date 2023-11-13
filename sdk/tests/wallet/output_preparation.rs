@@ -408,8 +408,8 @@ async fn output_preparation() -> Result<()> {
         )
         .await?;
     let storage_score_params = wallet.client().get_storage_score_parameters().await?;
-    let minimum_storage_deposit = output.minimum_amount(storage_score_params);
-    assert_eq!(output.amount(), minimum_storage_deposit);
+    let minimum_amount = output.minimum_amount(storage_score_params);
+    assert_eq!(output.amount(), minimum_amount);
     assert_eq!(output.amount(), 187900);
     let sdr = output.unlock_conditions().unwrap().storage_deposit_return().unwrap();
     assert_eq!(sdr.amount(), 145300);
