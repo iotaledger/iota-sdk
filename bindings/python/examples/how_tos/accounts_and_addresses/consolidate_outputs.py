@@ -27,7 +27,7 @@ print('Account synced')
 # List unspent outputs before consolidation.
 # The output we created with example `request_funds` and the basic output from `mint` have only one
 # unlock condition and it is an `AddressUnlockCondition`, and so they are valid for consolidation. They have the
-# same `AddressUnlockCondition`(the address of the walle), so they will be consolidated into one
+# same `AddressUnlockCondition`(the address of the wallet), so they will be consolidated into one
 # output.
 outputs = account.unspent_outputs()
 print('Outputs BEFORE consolidation:')
