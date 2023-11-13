@@ -438,10 +438,10 @@ impl StorageScore for Output {
         match self {
             Self::Basic(o) => o.storage_score(params),
             Self::Account(o) => o.storage_score(params),
+            Self::Anchor(o) => o.storage_score(params),
             Self::Foundry(o) => o.storage_score(params),
             Self::Nft(o) => o.storage_score(params),
             Self::Delegation(o) => o.storage_score(params),
-            Self::Anchor(o) => o.storage_score(params),
         }
     }
 }
