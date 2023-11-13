@@ -201,7 +201,6 @@ where
 
         let slot_index = self.client().get_slot_index().await?;
         let storage_score_params = self.client().get_storage_score_parameters().await?;
-        let token_supply = self.client().get_token_supply().await?;
 
         let wallet_data = self.data().await;
 
@@ -276,7 +275,7 @@ where
 
                 let nft_output = if !enough_amount_for_basic_output {
                     // Only update address and nft id if we have no additional inputs which can provide the storage
-                    // deposit for the remaining amount and possible NFTs
+                    // deposit for the remaining amount and possible native tokens
                     NftOutputBuilder::from(nft_output)
                         .with_nft_id(nft_output.nft_id_non_null(&output_data.output_id))
                         .with_unlock_conditions([AddressUnlockCondition::new(wallet_address.clone())])

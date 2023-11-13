@@ -16,10 +16,12 @@ use crate::types::{
         output::{
             feature::{verify_allowed_features, Feature, FeatureFlags, Features},
             unlock_condition::{
-                verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions,
+                verify_allowed_unlock_conditions, AddressUnlockCondition, StorageDepositReturnUnlockCondition,
+                UnlockCondition, UnlockConditionFlags, UnlockConditions,
             },
-            verify_output_amount_packable, ChainId, NativeToken, NativeTokens, Output, OutputBuilderAmount, OutputId,
-            StateTransitionError, StateTransitionVerifier, StorageScore, StorageScoreParameters,
+            verify_output_amount_packable, ChainId, MinimumOutputAmount, NativeToken, NativeTokens, Output,
+            OutputBuilderAmount, OutputId, StateTransitionError, StateTransitionVerifier, StorageScore,
+            StorageScoreParameters,
         },
         payload::signed_transaction::TransactionCapabilityFlag,
         protocol::ProtocolParameters,
@@ -76,8 +78,8 @@ impl NftOutputBuilder {
         Self::new(OutputBuilderAmount::Amount(amount), nft_id)
     }
 
-    /// Creates an [`NftOutputBuilder`] with a provided storage score structure.
-    /// The amount will be set to the storage cost of the resulting output.
+    /// Creates an [`NftOutputBuilder`] with provided storage score parameters.
+    /// The amount will be set to the minimum required amount of the resulting output.
     pub fn new_with_minimum_amount(params: StorageScoreParameters, nft_id: NftId) -> Self {
         Self::new(OutputBuilderAmount::MinimumAmount(params), nft_id)
     }
@@ -101,7 +103,7 @@ impl NftOutputBuilder {
         self
     }
 
-    /// Sets the amount to the storage cost.
+    /// Sets the amount to the minimum required amount.
     #[inline(always)]
     pub fn with_minimum_amount(mut self, params: StorageScoreParameters) -> Self {
         self.amount = OutputBuilderAmount::MinimumAmount(params);
@@ -220,6 +222,59 @@ impl NftOutputBuilder {
         self
     }
 
+    /// Adds a storage deposit return unlock condition if one is needed to cover the current amount
+    /// (i.e. `amount < storage_cost`). This will increase the total amount to equal the `storage_cost` with
+    /// the additional unlock condition that will return the remainder to the provided `return_address`.
+    pub fn with_sufficient_storage_deposit(
+        mut self,
+        return_address: impl Into<Address>,
+        params: StorageScoreParameters,
+        token_supply: u64,
+    ) -> Result<Self, Error> {
+        Ok(match self.amount {
+            OutputBuilderAmount::Amount(amount) => {
+                let return_address = return_address.into();
+                // Get the current storage requirement
+                let minimum_amount = self.clone().finish()?.minimum_amount(params);
+                // Check whether we already have enough funds to cover it
+                if amount < minimum_amount {
+                    // Get the projected minimum amount of the return output
+                    let return_min_amount = Self::new_with_amount(0, self.nft_id)
+                        .add_unlock_condition(AddressUnlockCondition::new(return_address.clone()))
+                        .finish()?
+                        .minimum_amount(params);
+                    // Add a temporary storage deposit unlock condition so the new storage requirement can be calculated
+                    self = self.add_unlock_condition(StorageDepositReturnUnlockCondition::new(
+                        return_address.clone(),
+                        1,
+                        token_supply,
+                    )?);
+                    // Get the min amount of the output with the added storage deposit return unlock condition
+                    let min_amount_with_sdruc = self.clone().finish()?.minimum_amount(params);
+                    // If the return storage cost and amount are less than the required min
+                    let (amount, sdruc_amount) = if min_amount_with_sdruc >= return_min_amount + amount {
+                        // Then sending storage_cost_with_sdruc covers both minimum requirements
+                        (min_amount_with_sdruc, min_amount_with_sdruc - amount)
+                    } else {
+                        // Otherwise we must use the total of the return minimum and the original amount
+                        // which is unfortunately more than the storage_cost_with_sdruc
+                        (return_min_amount + amount, return_min_amount)
+                    };
+                    // Add the required storage deposit unlock condition and the additional storage amount
+                    self.with_amount(amount)
+                        .replace_unlock_condition(StorageDepositReturnUnlockCondition::new(
+                            return_address,
+                            sdruc_amount,
+                            token_supply,
+                        )?)
+                } else {
+                    self
+                }
+            }
+            OutputBuilderAmount::MinimumAmount(_) => self,
+        })
+    }
+
     ///
     pub fn finish(self) -> Result<NftOutput, Error> {
         let unlock_conditions = UnlockConditions::from_set(self.unlock_conditions)?;
@@ -246,7 +301,7 @@ impl NftOutputBuilder {
 
         output.amount = match self.amount {
             OutputBuilderAmount::Amount(amount) => amount,
-            OutputBuilderAmount::MinimumAmount(params) => output.storage_cost(params),
+            OutputBuilderAmount::MinimumAmount(params) => output.minimum_amount(params),
         };
 
         Ok(output)
@@ -312,8 +367,8 @@ impl NftOutput {
         NftOutputBuilder::new_with_amount(amount, nft_id)
     }
 
-    /// Creates a new [`NftOutputBuilder`] with a provided storage score structure.
-    /// The amount will be set to the storage cost of the resulting output.
+    /// Creates a new [`NftOutputBuilder`] with provided storage score parameters.
+    /// The amount will be set to the minimum required amount of the resulting output.
     #[inline(always)]
     pub fn build_with_minimum_amount(params: StorageScoreParameters, nft_id: NftId) -> NftOutputBuilder {
         NftOutputBuilder::new_with_minimum_amount(params, nft_id)
@@ -430,6 +485,7 @@ impl StorageScore for NftOutput {
             + self.immutable_features.storage_score(params)
     }
 }
+impl MinimumOutputAmount for NftOutput {}
 
 impl StateTransitionVerifier for NftOutput {
     fn creation(next_state: &Self, context: &SemanticValidationContext<'_>) -> Result<(), StateTransitionError> {

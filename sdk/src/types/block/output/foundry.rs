@@ -21,8 +21,9 @@ use crate::types::{
             unlock_condition::{
                 verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions,
             },
-            verify_output_amount_packable, ChainId, NativeToken, NativeTokens, Output, OutputBuilderAmount, OutputId,
-            StateTransitionError, StateTransitionVerifier, StorageScore, StorageScoreParameters, TokenId, TokenScheme,
+            verify_output_amount_packable, ChainId, MinimumOutputAmount, NativeToken, NativeTokens, Output,
+            OutputBuilderAmount, OutputId, StateTransitionError, StateTransitionVerifier, StorageScore,
+            StorageScoreParameters, TokenId, TokenScheme,
         },
         payload::signed_transaction::{TransactionCapabilities, TransactionCapabilityFlag},
         protocol::ProtocolParameters,
@@ -103,8 +104,8 @@ impl FoundryOutputBuilder {
         Self::new(OutputBuilderAmount::Amount(amount), serial_number, token_scheme)
     }
 
-    /// Creates a [`FoundryOutputBuilder`] with a provided storage score structure.
-    /// The amount will be set to the storage cost of the resulting output.
+    /// Creates a [`FoundryOutputBuilder`] with provided storage score parameters.
+    /// The amount will be set to the minimum required amount of the resulting output.
     pub fn new_with_minimum_amount(
         params: StorageScoreParameters,
         serial_number: u32,
@@ -132,7 +133,7 @@ impl FoundryOutputBuilder {
         self
     }
 
-    /// Sets the amount to the storage cost.
+    /// Sets the amount to the minimum required amount.
     #[inline(always)]
     pub fn with_minimum_amount(mut self, params: StorageScoreParameters) -> Self {
         self.amount = OutputBuilderAmount::MinimumAmount(params);
@@ -281,7 +282,7 @@ impl FoundryOutputBuilder {
 
         output.amount = match self.amount {
             OutputBuilderAmount::Amount(amount) => amount,
-            OutputBuilderAmount::MinimumAmount(params) => output.storage_cost(params),
+            OutputBuilderAmount::MinimumAmount(params) => output.minimum_amount(params),
         };
 
         Ok(output)
@@ -342,8 +343,8 @@ impl FoundryOutput {
         FoundryOutputBuilder::new_with_amount(amount, serial_number, token_scheme)
     }
 
-    /// Creates a new [`FoundryOutputBuilder`] with a provided storage score structure.
-    /// The amount will be set to the storage cost of the resulting output.
+    /// Creates a new [`FoundryOutputBuilder`] with provided storage score parameters.
+    /// The amount will be set to the minimum required amount of the resulting output.
     #[inline(always)]
     pub fn build_with_minimum_amount(
         params: StorageScoreParameters,
@@ -528,6 +529,7 @@ impl StorageScore for FoundryOutput {
             + self.immutable_features.storage_score(params)
     }
 }
+impl MinimumOutputAmount for FoundryOutput {}
 
 impl StateTransitionVerifier for FoundryOutput {
     fn creation(next_state: &Self, context: &SemanticValidationContext<'_>) -> Result<(), StateTransitionError> {

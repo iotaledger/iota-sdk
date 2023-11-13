@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use iota_sdk::types::block::{
-    output::{BasicOutput, Feature, FoundryId, NativeToken, Output, SimpleTokenScheme, StorageScore, TokenId},
+    output::{BasicOutput, Feature, FoundryId, MinimumOutputAmount, NativeToken, Output, SimpleTokenScheme, TokenId},
     protocol::protocol_parameters,
     rand::{
         address::rand_account_address,
@@ -56,7 +56,7 @@ fn builder() {
 
     assert_eq!(
         output.amount(),
-        Output::Basic(output.clone()).storage_cost(protocol_parameters.storage_score_parameters())
+        Output::Basic(output.clone()).minimum_amount(protocol_parameters.storage_score_parameters())
     );
     assert_eq!(output.features().metadata(), Some(&metadata));
     assert_eq!(output.features().sender(), Some(&sender_1));

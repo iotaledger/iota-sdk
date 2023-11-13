@@ -3,8 +3,8 @@
 
 use iota_sdk::types::block::{
     output::{
-        unlock_condition::ImmutableAccountAddressUnlockCondition, FoundryId, FoundryOutput, NativeToken, Output,
-        SimpleTokenScheme, StorageScore, TokenId,
+        unlock_condition::ImmutableAccountAddressUnlockCondition, FoundryId, FoundryOutput, MinimumOutputAmount,
+        NativeToken, Output, SimpleTokenScheme, TokenId,
     },
     protocol::protocol_parameters,
     rand::{
@@ -59,7 +59,7 @@ fn builder() {
 
     assert_eq!(
         output.amount(),
-        Output::Foundry(output).storage_cost(protocol_parameters.storage_score_parameters())
+        Output::Foundry(output).minimum_amount(protocol_parameters.storage_score_parameters())
     );
 }
 

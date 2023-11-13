@@ -258,7 +258,7 @@ pub enum Response {
     /// Response for:
     /// - [`MinimumRequiredStorageDeposit`](crate::method::ClientMethod::MinimumRequiredStorageDeposit)
     /// - [`ComputeStorageDeposit`](crate::method::UtilsMethod::ComputeStorageDeposit)
-    MinimumRequiredStorageDeposit(String),
+    MinimumRequiredOutputAmount(String),
     /// Response for:
     /// - [`ClaimableOutputs`](crate::method::WalletMethod::ClaimableOutputs)
     OutputIds(Vec<OutputId>),

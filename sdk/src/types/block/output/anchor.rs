@@ -21,8 +21,9 @@ use crate::types::{
             unlock_condition::{
                 verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions,
             },
-            verify_output_amount_packable, ChainId, NativeToken, NativeTokens, Output, OutputBuilderAmount, OutputId,
-            StateTransitionError, StateTransitionVerifier, StorageScore, StorageScoreParameters,
+            verify_output_amount_packable, ChainId, MinimumOutputAmount, NativeToken, NativeTokens, Output,
+            OutputBuilderAmount, OutputId, StateTransitionError, StateTransitionVerifier, StorageScore,
+            StorageScoreParameters,
         },
         payload::signed_transaction::TransactionCapabilityFlag,
         protocol::ProtocolParameters,
@@ -111,8 +112,8 @@ impl AnchorOutputBuilder {
         Self::new(OutputBuilderAmount::Amount(amount), anchor_id)
     }
 
-    /// Creates an [`AnchorOutputBuilder`] with a provided storage score structure.
-    /// The amount will be set to the storage cost of the resulting output.
+    /// Creates an [`AnchorOutputBuilder`] with provided storage score parameters.
+    /// The amount will be set to the minimum required amount of the resulting output.
     #[inline(always)]
     pub fn new_with_minimum_amount(params: StorageScoreParameters, anchor_id: AnchorId) -> Self {
         Self::new(OutputBuilderAmount::MinimumAmount(params), anchor_id)
@@ -139,7 +140,7 @@ impl AnchorOutputBuilder {
         self
     }
 
-    /// Sets the amount to the storage cost.
+    /// Sets the amount to the minimum required amount.
     #[inline(always)]
     pub fn with_minimum_amount(mut self, params: StorageScoreParameters) -> Self {
         self.amount = OutputBuilderAmount::MinimumAmount(params);
@@ -308,7 +309,7 @@ impl AnchorOutputBuilder {
 
         output.amount = match self.amount {
             OutputBuilderAmount::Amount(amount) => amount,
-            OutputBuilderAmount::MinimumAmount(params) => output.storage_cost(params),
+            OutputBuilderAmount::MinimumAmount(params) => output.minimum_amount(params),
         };
 
         Ok(output)
@@ -379,8 +380,8 @@ impl AnchorOutput {
         AnchorOutputBuilder::new_with_amount(amount, anchor_id)
     }
 
-    /// Creates a new [`AnchorOutputBuilder`] with a provided storage score structure.
-    /// The amount will be set to the minimum storage deposit.
+    /// Creates a new [`AnchorOutputBuilder`] with provided storage score parameters.
+    /// The amount will be set to the minimum required amount.
     #[inline(always)]
     pub fn build_with_minimum_amount(params: StorageScoreParameters, anchor_id: AnchorId) -> AnchorOutputBuilder {
         AnchorOutputBuilder::new_with_minimum_amount(params, anchor_id)
@@ -556,8 +557,10 @@ impl StorageScore for AnchorOutput {
             + (1 + self.packed_len() as u64) * params.data_factor() as u64
             + self.unlock_conditions.storage_score(params)
             + self.features.storage_score(params)
+            + self.immutable_features.storage_score(params)
     }
 }
+impl MinimumOutputAmount for AnchorOutput {}
 
 impl StateTransitionVerifier for AnchorOutput {
     fn creation(next_state: &Self, context: &SemanticValidationContext<'_>) -> Result<(), StateTransitionError> {

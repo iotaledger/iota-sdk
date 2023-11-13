@@ -3,7 +3,7 @@
 
 use iota_sdk::types::block::{
     address::AccountAddress,
-    output::{AccountOutput, Feature, FoundryId, NativeToken, Output, SimpleTokenScheme, StorageScore, TokenId},
+    output::{AccountOutput, Feature, FoundryId, MinimumOutputAmount, NativeToken, Output, SimpleTokenScheme, TokenId},
     protocol::protocol_parameters,
     rand::output::{
         feature::{rand_issuer_feature, rand_metadata_feature, rand_sender_feature},
@@ -63,7 +63,7 @@ fn builder() {
 
     assert_eq!(
         output.amount(),
-        Output::Account(output.clone()).storage_cost(protocol_parameters.storage_score_parameters())
+        Output::Account(output.clone()).minimum_amount(protocol_parameters.storage_score_parameters())
     );
     assert_eq!(output.features().metadata(), Some(&metadata));
     assert_eq!(output.features().sender(), Some(&sender_1));

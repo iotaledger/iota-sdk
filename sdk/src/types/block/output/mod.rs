@@ -47,7 +47,7 @@ pub use self::{
     nft::{NftId, NftOutput, NftOutputBuilder},
     output_id::OutputId,
     state_transition::{StateTransitionError, StateTransitionVerifier},
-    storage_score::{StorageScore, StorageScoreParameters},
+    storage_score::{MinimumOutputAmount, StorageScore, StorageScoreParameters},
     token_scheme::{SimpleTokenScheme, TokenScheme},
     unlock_condition::{UnlockCondition, UnlockConditions},
 };
@@ -345,7 +345,7 @@ impl Output {
     /// If there is a [`StorageDepositReturnUnlockCondition`](unlock_condition::StorageDepositReturnUnlockCondition),
     /// its amount is also checked.
     pub fn verify_storage_deposit(&self, params: StorageScoreParameters) -> Result<(), Error> {
-        let required_output_amount = self.storage_cost(params);
+        let required_output_amount = self.minimum_amount(params);
 
         if self.amount() < required_output_amount {
             return Err(Error::InsufficientStorageDepositAmount {
@@ -445,6 +445,7 @@ impl StorageScore for Output {
         }
     }
 }
+impl MinimumOutputAmount for Output {}
 
 pub(crate) fn verify_output_amount_supply(amount: u64, token_supply: u64) -> Result<(), Error> {
     if amount > token_supply {

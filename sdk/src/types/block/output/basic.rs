@@ -14,8 +14,8 @@ use crate::types::{
                 verify_allowed_unlock_conditions, AddressUnlockCondition, StorageDepositReturnUnlockCondition,
                 UnlockCondition, UnlockConditionFlags, UnlockConditions,
             },
-            verify_output_amount_packable, NativeToken, NativeTokens, Output, OutputBuilderAmount, OutputId,
-            StorageScore, StorageScoreParameters,
+            verify_output_amount_packable, MinimumOutputAmount, NativeToken, NativeTokens, Output, OutputBuilderAmount,
+            OutputId, StorageScore, StorageScoreParameters,
         },
         protocol::ProtocolParameters,
         semantic::{SemanticValidationContext, TransactionFailureReason},
@@ -43,8 +43,8 @@ impl BasicOutputBuilder {
         Self::new(OutputBuilderAmount::Amount(amount))
     }
 
-    /// Creates an [`BasicOutputBuilder`] with a provided storage score structure.
-    /// The amount will be set to the storage cost of the resulting output.
+    /// Creates an [`BasicOutputBuilder`] with provided storage score parameters.
+    /// The amount will be set to the minimum required amount of the resulting output.
     #[inline(always)]
     pub fn new_with_minimum_amount(params: StorageScoreParameters) -> Self {
         Self::new(OutputBuilderAmount::MinimumAmount(params))
@@ -67,7 +67,7 @@ impl BasicOutputBuilder {
         self
     }
 
-    /// Sets the amount to the storage cost.
+    /// Sets the amount to the minimum required amount.
     #[inline(always)]
     pub fn with_minimum_amount(mut self, params: StorageScoreParameters) -> Self {
         self.amount = OutputBuilderAmount::MinimumAmount(params);
@@ -165,30 +165,30 @@ impl BasicOutputBuilder {
             OutputBuilderAmount::Amount(amount) => {
                 let return_address = return_address.into();
                 // Get the current storage requirement
-                let storage_cost = self.clone().finish()?.storage_cost(params);
+                let minimum_amount = self.clone().finish()?.minimum_amount(params);
                 // Check whether we already have enough funds to cover it
-                if amount < storage_cost {
-                    // Get the projected storage cost of the return output
-                    let return_storage_cost = Self::new_with_amount(0)
+                if amount < minimum_amount {
+                    // Get the projected minimum amount of the return output
+                    let return_min_amount = Self::new_with_amount(0)
                         .add_unlock_condition(AddressUnlockCondition::new(return_address.clone()))
                         .finish()?
-                        .storage_cost(params);
+                        .minimum_amount(params);
                     // Add a temporary storage deposit unlock condition so the new storage requirement can be calculated
                     self = self.add_unlock_condition(StorageDepositReturnUnlockCondition::new(
                         return_address.clone(),
                         1,
                         token_supply,
                     )?);
-                    // Get the storage cost of the output with the added storage deposit return unlock condition
-                    let storage_cost_with_sdruc = self.clone().finish()?.storage_cost(params);
+                    // Get the min amount of the output with the added storage deposit return unlock condition
+                    let min_amount_with_sdruc = self.clone().finish()?.minimum_amount(params);
                     // If the return storage cost and amount are less than the required min
-                    let (amount, sdruc_amount) = if storage_cost_with_sdruc >= return_storage_cost + amount {
+                    let (amount, sdruc_amount) = if min_amount_with_sdruc >= return_min_amount + amount {
                         // Then sending storage_cost_with_sdruc covers both minimum requirements
-                        (storage_cost_with_sdruc, storage_cost_with_sdruc - amount)
+                        (min_amount_with_sdruc, min_amount_with_sdruc - amount)
                     } else {
                         // Otherwise we must use the total of the return minimum and the original amount
                         // which is unfortunately more than the storage_cost_with_sdruc
-                        (return_storage_cost + amount, return_storage_cost)
+                        (return_min_amount + amount, return_min_amount)
                     };
                     // Add the required storage deposit unlock condition and the additional storage amount
                     self.with_amount(amount)
@@ -225,7 +225,7 @@ impl BasicOutputBuilder {
 
         output.amount = match self.amount {
             OutputBuilderAmount::Amount(amount) => amount,
-            OutputBuilderAmount::MinimumAmount(params) => output.storage_cost(params),
+            OutputBuilderAmount::MinimumAmount(params) => output.minimum_amount(params),
         };
 
         Ok(output)
@@ -289,8 +289,8 @@ impl BasicOutput {
         BasicOutputBuilder::new_with_amount(amount)
     }
 
-    /// Creates a new [`BasicOutputBuilder`] with a provided storage score structure.
-    /// The amount will be set to the minimum storage deposit.
+    /// Creates a new [`BasicOutputBuilder`] with provided storage score parameters.
+    /// The amount will be set to the minimum required amount.
     #[inline(always)]
     pub fn build_with_minimum_amount(params: StorageScoreParameters) -> BasicOutputBuilder {
         BasicOutputBuilder::new_with_minimum_amount(params)
@@ -379,6 +379,7 @@ impl StorageScore for BasicOutput {
             + self.features.storage_score(params)
     }
 }
+impl MinimumOutputAmount for BasicOutput {}
 
 fn verify_unlock_conditions<const VERIFY: bool>(unlock_conditions: &UnlockConditions) -> Result<(), Error> {
     if VERIFY {

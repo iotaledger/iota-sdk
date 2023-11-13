@@ -10,7 +10,7 @@ use crate::{
         address::{Bech32Address, ToBech32Ext},
         output::{
             unlock_condition::{AddressUnlockCondition, ExpirationUnlockCondition},
-            BasicOutputBuilder, StorageScore,
+            BasicOutputBuilder, MinimumOutputAmount,
         },
         slot::SlotIndex,
         ConvertTo,
@@ -173,7 +173,7 @@ where
                 .add_unlock_condition(AddressUnlockCondition::new(address))
                 .finish()?;
 
-            if amount >= output.storage_cost(storage_score_params) {
+            if amount >= output.minimum_amount(storage_score_params) {
                 outputs.push(output.into())
             } else {
                 let expiration_slot_index = expiration

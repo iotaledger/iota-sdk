@@ -11,7 +11,7 @@ use crate::{
         input::INPUT_COUNT_MAX,
         output::{
             unlock_condition::StorageDepositReturnUnlockCondition, AccountOutputBuilder, FoundryOutputBuilder,
-            NftOutputBuilder, Output, OutputId, StorageScore,
+            MinimumOutputAmount, NftOutputBuilder, Output, OutputId,
         },
         slot::SlotIndex,
     },
@@ -233,12 +233,12 @@ impl InputSelection {
         for output in outputs {
             let diff = amount_selection.missing_amount();
             let amount = output.amount();
-            let storage_cost = output.storage_cost(self.protocol_parameters.storage_score_parameters());
+            let minimum_amount = output.minimum_amount(self.protocol_parameters.storage_score_parameters());
 
-            let new_amount = if amount >= diff + storage_cost {
+            let new_amount = if amount >= diff + minimum_amount {
                 amount - diff
             } else {
-                storage_cost
+                minimum_amount
             };
 
             // TODO check that new_amount is enough for the storage cost

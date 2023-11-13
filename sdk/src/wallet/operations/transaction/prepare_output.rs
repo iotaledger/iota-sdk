@@ -13,8 +13,8 @@ use crate::{
                 AddressUnlockCondition, ExpirationUnlockCondition, StorageDepositReturnUnlockCondition,
                 TimelockUnlockCondition,
             },
-            BasicOutputBuilder, NativeToken, NftId, NftOutputBuilder, Output, StorageScore, StorageScoreParameters,
-            UnlockCondition,
+            BasicOutputBuilder, MinimumOutputAmount, NativeToken, NftId, NftOutputBuilder, Output,
+            StorageScoreParameters, UnlockCondition,
         },
         slot::SlotIndex,
         Error,
@@ -115,12 +115,12 @@ where
         };
 
         // TODO: Probably not good to use ed25519 always here, even if technically it's the same for now..
-        let min_storage_deposit_basic_output = BasicOutputBuilder::new_with_minimum_amount(storage_score_params)
+        let min_amount_basic_output = BasicOutputBuilder::new_with_minimum_amount(storage_score_params)
             .add_unlock_condition(AddressUnlockCondition::new(Ed25519Address::null()))
             .finish()?
             .amount();
 
-        let min_required_storage_deposit = first_output.storage_cost(storage_score_params);
+        let min_required_storage_deposit = first_output.minimum_amount(storage_score_params);
 
         if params.amount > min_required_storage_deposit {
             second_output_builder = second_output_builder.with_amount(params.amount);
@@ -141,13 +141,13 @@ where
                 second_output_builder =
                     second_output_builder.add_unlock_condition(StorageDepositReturnUnlockCondition::new(
                         remainder_address.clone(),
-                        // Return minimum storage deposit
-                        min_storage_deposit_basic_output,
+                        // Return minimum amount
+                        min_amount_basic_output,
                         token_supply,
                     )?);
 
                 // Update output amount, so recipient still gets the provided amount
-                let new_amount = params.amount + min_storage_deposit_basic_output;
+                let new_amount = params.amount + min_amount_basic_output;
                 // new_amount could be not enough because we added the storage deposit return unlock condition, so we
                 // need to check the min required storage deposit again
                 let min_storage_deposit_new_amount = second_output_builder
@@ -163,8 +163,8 @@ where
                     second_output_builder =
                         second_output_builder.replace_unlock_condition(StorageDepositReturnUnlockCondition::new(
                             remainder_address.clone(),
-                            // Return minimum storage deposit
-                            min_storage_deposit_basic_output + additional_required_amount,
+                            // Return minimum amount
+                            min_amount_basic_output + additional_required_amount,
                             token_supply,
                         )?);
                 } else {
@@ -182,7 +182,7 @@ where
         // If we're sending an existing NFT, its minimum required storage deposit is not part of the available base_coin
         // balance, so we add it here
         if let Some(existing_nft_output_data) = existing_nft_output_data {
-            available_base_coin += existing_nft_output_data.output.storage_cost(storage_score_params);
+            available_base_coin += existing_nft_output_data.output.minimum_amount(storage_score_params);
         }
 
         if final_amount > available_base_coin {
@@ -197,7 +197,7 @@ where
 
         if final_amount < available_base_coin {
             let remaining_balance = available_base_coin - final_amount;
-            if remaining_balance < min_storage_deposit_basic_output {
+            if remaining_balance < min_amount_basic_output {
                 // not enough for remainder
                 if params
                     .storage_deposit
@@ -219,7 +219,7 @@ where
                         second_output_builder =
                             second_output_builder.replace_unlock_condition(StorageDepositReturnUnlockCondition::new(
                                 remainder_address,
-                                // Return minimum storage deposit
+                                // Return minimum amount
                                 new_sdr_amount,
                                 token_supply,
                             )?);
@@ -228,7 +228,7 @@ where
                     // Would leave dust behind, so return what's required for a remainder
                     return Err(crate::wallet::Error::InsufficientFunds {
                         available: available_base_coin,
-                        required: available_base_coin + min_storage_deposit_basic_output - remaining_balance,
+                        required: available_base_coin + min_amount_basic_output - remaining_balance,
                     });
                 }
             }
@@ -349,10 +349,10 @@ pub struct StorageDeposit {
 #[derive(Debug, Default, Clone, Copy, Eq, PartialEq, Serialize, Deserialize)]
 #[non_exhaustive]
 pub enum ReturnStrategy {
-    // A storage deposit return unlock condition will be added with the required minimum storage deposit
+    // A storage deposit return unlock condition will be added with the required minimum amount
     #[default]
     Return,
-    // The recipient address will get the additional amount to reach the minimum storage deposit gifted
+    // The recipient address will get the additional amount to reach the minimum amount gifted
     Gift,
 }
 

@@ -9,8 +9,8 @@ use iota_sdk::{
         api::core::OutputWithMetadataResponse,
         block::{
             output::{
-                dto::OutputDto, AccountOutput, BasicOutput, FoundryOutput, NftOutput, Output, OutputBuilderAmount,
-                StorageScore,
+                dto::OutputDto, AccountOutput, BasicOutput, FoundryOutput, MinimumOutputAmount, NftOutput, Output,
+                OutputBuilderAmount,
             },
             payload::Payload,
             SignedBlock, SignedBlockDto, UnsignedBlockDto,
@@ -295,13 +295,13 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         ClientMethod::HexPublicKeyToBech32Address { hex, bech32_hrp } => {
             Response::Bech32Address(client.hex_public_key_to_bech32_address(&hex, bech32_hrp).await?)
         }
-        ClientMethod::MinimumRequiredStorageDeposit { output } => {
+        ClientMethod::MinimumRequiredOutputAmount { output } => {
             let output = Output::try_from_dto_with_params(output, client.get_token_supply().await?)?;
             let storage_score_params = client.get_storage_score_parameters().await?;
 
-            let minimum_storage_deposit = output.storage_cost(storage_score_params);
+            let minimum_storage_deposit = output.minimum_amount(storage_score_params);
 
-            Response::MinimumRequiredStorageDeposit(minimum_storage_deposit.to_string())
+            Response::MinimumRequiredOutputAmount(minimum_storage_deposit.to_string())
         }
         ClientMethod::RequestFundsFromFaucet { url, address } => {
             Response::Faucet(request_funds_from_faucet(&url, &address).await?)

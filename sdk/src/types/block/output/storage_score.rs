@@ -178,9 +178,13 @@ pub trait StorageScore {
     fn storage_score(&self, _params: StorageScoreParameters) -> u64 {
         0
     }
+}
 
-    /// Computes the storage cost of this instance given [`StorageScoreParameters`].
-    fn storage_cost(&self, params: StorageScoreParameters) -> u64 {
+/// A trait that is shared by all output types, which is used to calculate the minimum amount the output
+/// must contain to satisfy its storage cost.
+pub trait MinimumOutputAmount: StorageScore {
+    /// Computes the minimum amount of this output given [`StorageScoreParameters`].
+    fn minimum_amount(&self, params: StorageScoreParameters) -> u64 {
         params.storage_cost() * self.storage_score(params)
     }
 }

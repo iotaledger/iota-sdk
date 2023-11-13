@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use iota_sdk::types::block::{
-    output::{FoundryId, NativeToken, NftId, NftOutput, Output, SimpleTokenScheme, StorageScore, TokenId},
+    output::{FoundryId, MinimumOutputAmount, NativeToken, NftId, NftOutput, Output, SimpleTokenScheme, TokenId},
     protocol::protocol_parameters,
     rand::{
         address::rand_account_address,
@@ -60,7 +60,7 @@ fn builder() {
 
     assert_eq!(
         output.amount(),
-        Output::Nft(output).storage_cost(protocol_parameters.storage_score_parameters())
+        Output::Nft(output).minimum_amount(protocol_parameters.storage_score_parameters())
     );
 }
 

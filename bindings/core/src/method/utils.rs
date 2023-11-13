@@ -128,8 +128,9 @@ pub enum UtilsMethod {
         /// The transaction.
         transaction: TransactionDto,
     },
-    /// Computes the required storage deposit of an output.
-    ComputeStorageDeposit {
+    /// Computes the minimum required amount of an output.
+    #[serde(rename_all = "camelCase")]
+    ComputeMinimumOutputAmount {
         output: OutputDto,
         storage_score_parameters: StorageScoreParameters,
     },

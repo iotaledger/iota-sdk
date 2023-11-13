@@ -7,7 +7,8 @@ use iota_sdk::{
     types::block::{
         address::{Address, Bech32Address, ToBech32Ext},
         output::{
-            unlock_condition::AddressUnlockCondition, BasicOutputBuilder, NativeToken, NftId, StorageScore, TokenId,
+            unlock_condition::AddressUnlockCondition, BasicOutputBuilder, MinimumOutputAmount, NativeToken, NftId,
+            TokenId,
         },
         slot::SlotIndex,
     },
@@ -407,7 +408,7 @@ async fn output_preparation() -> Result<()> {
         )
         .await?;
     let storage_score_params = wallet.client().get_storage_score_parameters().await?;
-    let minimum_storage_deposit = output.storage_cost(storage_score_params);
+    let minimum_storage_deposit = output.minimum_amount(storage_score_params);
     assert_eq!(output.amount(), minimum_storage_deposit);
     assert_eq!(output.amount(), 187900);
     let sdr = output.unlock_conditions().unwrap().storage_deposit_return().unwrap();
@@ -616,7 +617,7 @@ async fn prepare_output_remainder_dust() -> Result<()> {
     let minimum_required_storage_deposit = BasicOutputBuilder::new_with_amount(0)
         .add_unlock_condition(AddressUnlockCondition::new(wallet_1.address().await))
         .finish()?
-        .storage_cost(storage_score_params);
+        .minimum_amount(storage_score_params);
 
     // Send away most balance so we can test with leaving dust
     let output = wallet_0
@@ -855,7 +856,7 @@ async fn prepare_existing_nft_output_gift() -> Result<()> {
         .clone();
 
     let storage_score_params = wallet.client().get_storage_score_parameters().await?;
-    let minimum_storage_deposit = nft.storage_cost(storage_score_params);
+    let minimum_storage_deposit = nft.minimum_amount(storage_score_params);
     assert_eq!(nft.amount(), minimum_storage_deposit);
 
     assert_eq!(nft.amount(), 52300);

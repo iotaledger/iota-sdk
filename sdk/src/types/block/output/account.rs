@@ -19,8 +19,9 @@ use crate::types::{
             unlock_condition::{
                 verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions,
             },
-            verify_output_amount_packable, ChainId, NativeToken, NativeTokens, Output, OutputBuilderAmount, OutputId,
-            StateTransitionError, StateTransitionVerifier, StorageScore, StorageScoreParameters,
+            verify_output_amount_packable, ChainId, MinimumOutputAmount, NativeToken, NativeTokens, Output,
+            OutputBuilderAmount, OutputId, StateTransitionError, StateTransitionVerifier, StorageScore,
+            StorageScoreParameters,
         },
         payload::signed_transaction::TransactionCapabilityFlag,
         protocol::ProtocolParameters,
@@ -77,8 +78,8 @@ impl AccountOutputBuilder {
         Self::new(OutputBuilderAmount::Amount(amount), account_id)
     }
 
-    /// Creates an [`AccountOutputBuilder`] with a provided storage score structure.
-    /// The amount will be set to the storage cost of the resulting output.
+    /// Creates an [`AccountOutputBuilder`] with provided storage score parameters.
+    /// The amount will be set to the minimum required amount of the resulting output.
     pub fn new_with_minimum_amount(params: StorageScoreParameters, account_id: AccountId) -> Self {
         Self::new(OutputBuilderAmount::MinimumAmount(params), account_id)
     }
@@ -103,7 +104,7 @@ impl AccountOutputBuilder {
         self
     }
 
-    /// Sets the amount to the storage cost.
+    /// Sets the amount to the minimum required amount.
     #[inline(always)]
     pub fn with_minimum_amount(mut self, params: StorageScoreParameters) -> Self {
         self.amount = OutputBuilderAmount::MinimumAmount(params);
@@ -258,13 +259,9 @@ impl AccountOutputBuilder {
             immutable_features,
         };
 
-        if let OutputBuilderAmount::MinimumAmount(params) = self.amount {
-            output.amount = output.storage_cost(params);
-        }
-
         output.amount = match self.amount {
             OutputBuilderAmount::Amount(amount) => amount,
-            OutputBuilderAmount::MinimumAmount(params) => output.storage_cost(params),
+            OutputBuilderAmount::MinimumAmount(params) => output.minimum_amount(params),
         };
 
         Ok(output)
@@ -326,8 +323,8 @@ impl AccountOutput {
         AccountOutputBuilder::new_with_amount(amount, account_id)
     }
 
-    /// Creates a new [`AccountOutputBuilder`] with a provided storage score structure.
-    /// The amount will be set to the minimum storage deposit.
+    /// Creates a new [`AccountOutputBuilder`] with provided storage score parameters.
+    /// The amount will be set to the minimum required amount.
     #[inline(always)]
     pub fn build_with_minimum_amount(params: StorageScoreParameters, account_id: AccountId) -> AccountOutputBuilder {
         AccountOutputBuilder::new_with_minimum_amount(params, account_id)
@@ -537,6 +534,7 @@ impl StorageScore for AccountOutput {
             + self.immutable_features.storage_score(params)
     }
 }
+impl MinimumOutputAmount for AccountOutput {}
 
 impl Packable for AccountOutput {
     type UnpackError = Error;
