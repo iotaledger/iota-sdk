@@ -24,7 +24,6 @@ async function run() {
             storagePath: process.env.WALLET_DB_PATH,
         });
 
-        // Get the wallet we generated with `01-create-wallet`
         // We need to unlock stronghold.
         await wallet.setStrongholdPassword(process.env.STRONGHOLD_PASSWORD);
 

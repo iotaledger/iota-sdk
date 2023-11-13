@@ -23,7 +23,6 @@ async function run() {
             storagePath: process.env.WALLET_DB_PATH,
         });
 
-        // Get the account we generated with `create-account`
         const address = await wallet.address();
         console.log(address);
 

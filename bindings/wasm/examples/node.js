@@ -3,7 +3,7 @@
 
 const console = require('console');
 const fs = require('fs');
-const { Wallet, CoinType, initLogger } = require('../node/lib');
+const { Wallet, CoinType, initLogger, SecretManager } = require('../node/lib');
 
 async function run() {
     try {
@@ -47,7 +47,6 @@ async function run() {
         },
         secretManager: mnemonicSecretManager,
     });
-
 
     const balance = await wallet.sync();
     console.log(balance);

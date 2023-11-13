@@ -27,7 +27,6 @@ async function run() {
             storagePath: process.env.WALLET_DB_PATH,
         });
 
-        // Get the wallet we generated with `01-create-wallet`
         // May want to ensure the wallet is synced before sending a transaction.
         let balance = await wallet.sync();
 

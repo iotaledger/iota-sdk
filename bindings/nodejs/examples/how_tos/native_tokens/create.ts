@@ -22,7 +22,6 @@ async function run() {
         // Create the wallet
         const wallet = await getUnlockedWallet();
 
-        // Get the wallet we generated with `01-create-wallet`
         const balance = await wallet.sync();
 
         // We can first check if we already have an account output in our account, because an account output can have

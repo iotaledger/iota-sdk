@@ -419,7 +419,7 @@ export class Wallet {
     }
 
     /**
-     * Consolidate basic outputs with only an `AddressUnlockCondition` from an account
+     * Consolidate basic outputs with only an `AddressUnlockCondition` from a wallet
      * by sending them to an own address again if the output amount is greater or
      * equal to the output consolidation threshold.
      * @param params Consolidation options.
@@ -432,7 +432,7 @@ export class Wallet {
     }
 
     /**
-     * Consolidate basic outputs with only an `AddressUnlockCondition` from an account
+     * Consolidate basic outputs with only an `AddressUnlockCondition` from a wallet
      * by sending them to an own address again if the output amount is greater or
      * equal to the output consolidation threshold.
      * @param params Consolidation options.

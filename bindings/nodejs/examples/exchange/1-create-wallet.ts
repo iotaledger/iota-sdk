@@ -1,9 +1,9 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-// This example creates a new database and account.
+// This example creates a new database and wallet.
 // Run with command:
-// yarn run-example ./exchange/1-create-account.ts
+// yarn run-example ./exchange/1-create-wallet.ts
 
 import { Wallet, WalletOptions, CoinType, SecretManager } from '@iota/sdk';
 
