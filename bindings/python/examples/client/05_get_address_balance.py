@@ -35,7 +35,7 @@ native_tokens = []
 for output_with_metadata in outputs:
     output = output_with_metadata.output
     total_amount += output.amount
-    native_token = [feature for feature in output.features if feature['type']
+    native_token = [feature for feature in output.features if feature.type
                     == FeatureType.NativeToken]
     if native_token:
         native_tokens.append(native_token)

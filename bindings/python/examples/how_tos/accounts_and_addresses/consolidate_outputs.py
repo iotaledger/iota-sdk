@@ -38,7 +38,7 @@ for i, output_data in enumerate(outputs):
         '- address: {}\n- amount: {}\n- native tokens: {}'.format(
             Utils.hex_to_bech32(output_data.address.pub_key_hash, 'rms'),
             output_data.output.amount,
-            [feature for feature in output_data.output.features if feature['type']
+            [feature for feature in output_data.output.features if feature.type
                 == FeatureType.NativeToken]
         )
     )
@@ -72,7 +72,7 @@ for i, output_data in enumerate(outputs):
         '- address: {}\n- amount: {}\n- native tokens: {}'.format(
             Utils.hex_to_bech32(output_data.address.pub_key_hash, 'rms'),
             output_data.output.amount,
-            [feature for feature in output_data.output.features if feature['type']
+            [feature for feature in output_data.output.features if feature.type
                 == FeatureType.NativeToken]
         )
     )
