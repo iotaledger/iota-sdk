@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use alloc::{boxed::Box, vec::Vec};
+use alloc::boxed::Box;
 
 use derive_more::Deref;
 use packable::{prefix::BoxedSlicePrefix, Packable};
@@ -46,7 +46,10 @@ fn verify_unlocks<const VERIFY: bool>(unlocks: &[Unlock], _visitor: &()) -> Resu
     }
 }
 
+#[cfg(feature = "serde")]
 mod dto {
+    use alloc::vec::Vec;
+
     use serde::{Deserialize, Serialize};
 
     use super::*;
