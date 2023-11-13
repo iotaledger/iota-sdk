@@ -61,10 +61,10 @@ export class ClientMethodHandler {
      * @param topics The topics to listen to.
      * @param callback The callback to be called when an MQTT event is received.
      */
-    listenMqtt(
+    async listenMqtt(
         topics: string[],
         callback: (error: Error, result: string) => void,
-    ): void {
+    ): Promise<void> {
         try {
             listenMqtt(this.methodHandler, topics, callback);
         } catch (error: any) {
