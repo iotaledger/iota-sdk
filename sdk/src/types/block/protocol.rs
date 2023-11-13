@@ -13,7 +13,10 @@ use super::{
     mana::{ManaParameters, RewardsParameters},
     slot::{EpochIndex, SlotIndex},
 };
-use crate::types::block::{helper::network_name_to_id, output::RentStructure, ConvertTo, Error, PROTOCOL_VERSION};
+use crate::{
+    types::block::{helper::network_name_to_id, output::RentStructure, Error, PROTOCOL_VERSION},
+    utils::ConvertTo,
+};
 
 /// Defines the parameters of the protocol at a particular version.
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Packable, Getters, CopyGetters)]
