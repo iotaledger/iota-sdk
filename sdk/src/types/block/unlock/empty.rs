@@ -11,6 +11,7 @@ impl EmptyUnlock {
     pub const KIND: u8 = 6;
 }
 
+#[cfg(feature = "serde")]
 mod dto {
     use serde::{Deserialize, Serialize};
 
