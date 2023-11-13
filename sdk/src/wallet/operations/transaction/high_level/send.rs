@@ -15,9 +15,8 @@ use crate::{
             BasicOutputBuilder, MinimumStorageDepositBasicOutput,
         },
         slot::SlotIndex,
-        ConvertTo,
     },
-    utils::serde::string,
+    utils::{serde::string, ConvertTo},
     wallet::{
         constants::DEFAULT_EXPIRATION_SLOTS,
         operations::transaction::{TransactionOptions, TransactionWithMetadata},

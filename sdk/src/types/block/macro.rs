@@ -75,13 +75,13 @@ macro_rules! impl_id {
             }
         }
 
-        impl $crate::types::block::ConvertTo<$hash_name> for &alloc::string::String {
+        impl $crate::utils::ConvertTo<$hash_name> for &alloc::string::String {
             fn convert(self) -> Result<$hash_name, $crate::types::block::Error> {
                 self.try_into()
             }
         }
 
-        impl $crate::types::block::ConvertTo<$hash_name> for &str {
+        impl $crate::utils::ConvertTo<$hash_name> for &str {
             fn convert(self) -> Result<$hash_name, $crate::types::block::Error> {
                 self.try_into()
             }
@@ -205,13 +205,13 @@ macro_rules! impl_id {
                 }
             }
 
-            impl $crate::types::block::ConvertTo<$id_name> for &alloc::string::String {
+            impl $crate::utils::ConvertTo<$id_name> for &alloc::string::String {
                 fn convert(self) -> Result<$id_name, $crate::types::block::Error> {
                     self.try_into()
                 }
             }
 
-            impl $crate::types::block::ConvertTo<$id_name> for &str {
+            impl $crate::utils::ConvertTo<$id_name> for &str {
                 fn convert(self) -> Result<$id_name, $crate::types::block::Error> {
                     self.try_into()
                 }
