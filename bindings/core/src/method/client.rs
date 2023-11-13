@@ -353,7 +353,7 @@ pub enum ClientMethod {
     },
     /// Calculate the minimum required amount for an output.
     /// Expected response:
-    /// [`MinimumRequiredOutputAmount`](crate::Response::MinimumRequiredOutputAmount)
+    /// [`OutputAmount`](crate::Response::OutputAmount)
     ComputeMinimumOutputAmount { output: OutputDto },
     /// Requests funds for a given address from the faucet, for example `https://faucet.testnet.shimmer.network/api/enqueue` or `http://localhost:8091/api/enqueue`.
     RequestFundsFromFaucet {
