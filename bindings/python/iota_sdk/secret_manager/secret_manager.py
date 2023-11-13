@@ -11,7 +11,7 @@ from iota_sdk.types.block.signed_block import SignedBlock, UnsignedBlock
 from iota_sdk.types.common import HexStr
 from iota_sdk.types.signature import Ed25519Signature, Bip44
 from iota_sdk.types.transaction_data import PreparedTransactionData
-from iota_sdk.types.payload import TransactionPayload
+from iota_sdk.types.payload import SignedTransactionPayload
 
 
 class LedgerNanoSecretManager(dict):
@@ -268,13 +268,13 @@ class SecretManager():
         })
 
     def sign_transaction(
-            self, prepared_transaction_data: PreparedTransactionData) -> TransactionPayload:
+            self, prepared_transaction_data: PreparedTransactionData) -> SignedTransactionPayload:
         """Sign a transaction.
 
         Args:
             prepare_transaction_data: The prepared transaction data that needs to be signed.
         """
-        return from_dict(TransactionPayload, self._call_method('signTransaction', {
+        return from_dict(SignedTransactionPayload, self._call_method('signTransaction', {
             'preparedTransactionData': prepared_transaction_data.to_dict()
         }))
 

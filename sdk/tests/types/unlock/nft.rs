@@ -7,7 +7,7 @@ use pretty_assertions::assert_eq;
 
 #[test]
 fn kind() {
-    assert_eq!(NftUnlock::KIND, 3);
+    assert_eq!(NftUnlock::KIND, 4);
 }
 
 #[test]

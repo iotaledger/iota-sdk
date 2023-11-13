@@ -38,12 +38,12 @@ async function run() {
         });
 
         // Get output ids of basic outputs that can be controlled by this address without further unlock constraints
-        const outputIdsResponse = await client.basicOutputIds([
-            { address: addresses[0] },
-            { hasExpiration: false },
-            { hasTimelock: false },
-            { hasStorageDepositReturn: false },
-        ]);
+        const outputIdsResponse = await client.basicOutputIds({
+            address: addresses[0],
+            hasExpiration: false,
+            hasTimelock: false,
+            hasStorageDepositReturn: false,
+        });
 
         // Get outputs by their IDs
         const addressOutputs = await client.getOutputs(outputIdsResponse.items);

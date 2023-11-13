@@ -1,20 +1,17 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! In this example we check if an output has only an address unlock condition and that the address is from the account.
+//! In this example we check if an output has only an address unlock condition and that the address is from the wallet.
 //!
 //! Make sure that `STRONGHOLD_SNAPSHOT_PATH` and `WALLET_DB_PATH` already exist by
-//! running the `./how_tos/accounts_and_addresses/create_account.rs` example!
+//! running the `./how_tos/accounts_and_addresses/create_wallet.rs` example!
 //!
 //! ```sh
 //! cargo run --release --all-features --example check_unlock_conditions
 //! ```
 
 use iota_sdk::{
-    types::block::{
-        address::Bech32Address,
-        output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder, UnlockCondition},
-    },
+    types::block::output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder, UnlockCondition},
     wallet::Result,
     Wallet,
 };
@@ -31,30 +28,22 @@ async fn main() -> Result<()> {
         .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
         .finish()
         .await?;
-    let account = wallet.get_account("Alice").await?;
 
-    let account_addresses = account
-        .addresses()
-        .await
-        .into_iter()
-        .map(|a| a.into_bech32())
-        .collect::<Vec<Bech32Address>>();
+    let wallet_address = wallet.address().await;
 
-    println!("ADDRESSES:\n{:#?}", account_addresses);
+    println!("Wallet address:\n{:#?}", wallet_address);
 
     let output = BasicOutputBuilder::new_with_amount(AMOUNT)
-        .add_unlock_condition(AddressUnlockCondition::new(account_addresses[0].as_ref().clone()))
-        .finish_output(account.client().get_token_supply().await?)?;
+        .add_unlock_condition(AddressUnlockCondition::new(wallet_address.clone()))
+        .finish_output()?;
 
     let controlled_by_account = if let [UnlockCondition::Address(address_unlock_condition)] = output
         .unlock_conditions()
         .expect("output needs to have unlock conditions")
         .as_ref()
     {
-        // Check that address in the unlock condition belongs to the account
-        account_addresses
-            .iter()
-            .any(|address| address.as_ref() == address_unlock_condition.address())
+        // Check that the address in the unlock condition belongs to the wallet
+        wallet_address.inner() == address_unlock_condition.address()
     } else {
         false
     };

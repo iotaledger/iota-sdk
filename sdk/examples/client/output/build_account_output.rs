@@ -34,7 +34,6 @@ async fn main() -> Result<()> {
         .finish()
         .await?;
 
-    let token_supply = client.get_token_supply().await?;
     let rent_structure = client.get_rent_structure().await?;
 
     let address = std::env::args()
@@ -49,7 +48,7 @@ async fn main() -> Result<()> {
         .add_immutable_feature(IssuerFeature::new(address.clone()))
         .add_immutable_feature(MetadataFeature::new(metadata)?)
         .add_unlock_condition(AddressUnlockCondition::new(address))
-        .finish_output(token_supply)?;
+        .finish_output()?;
 
     println!("{account_output:#?}");
 

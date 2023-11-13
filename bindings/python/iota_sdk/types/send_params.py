@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Optional, List
 from dataclasses_json import config
-from iota_sdk.types.common import HexStr, json
+from iota_sdk.types.common import hex_str_decoder, HexStr, json
 from iota_sdk.types.native_token import NativeToken
 
 
@@ -72,10 +72,12 @@ class CreateNativeTokenParams():
         account_id: The ID of the corresponding account.
     """
     circulating_supply: int = field(metadata=config(
-        encoder=str
+        encoder=hex,
+        decoder=hex_str_decoder,
     ))
     maximum_supply: int = field(metadata=config(
-        encoder=str
+        encoder=hex,
+        decoder=hex_str_decoder,
     ))
     foundry_metadata: Optional[str] = None
     account_id: Optional[str] = None

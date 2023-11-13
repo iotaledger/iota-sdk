@@ -4,9 +4,9 @@
 //! In this example we will mint an existing native token with its foundry.
 //!
 //! Make sure that `STRONGHOLD_SNAPSHOT_PATH` and `WALLET_DB_PATH` already exist by
-//! running the `./how_tos/accounts_and_addresses/create_account.rs` example!
+//! running the `./how_tos/accounts_and_addresses/create_wallet.rs` example!
 //!
-//! You may provide a TOKEN_ID that is available in the account. The foundry
+//! You may provide a TOKEN_ID that is available in the wallet. The foundry
 //! output which minted it needs to be available as well. You can check this by
 //! running the `get_balance` example. You can create a new native token by running
 //! the `create_native_token` example.
@@ -30,10 +30,9 @@ async fn main() -> Result<()> {
         .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
         .finish()
         .await?;
-    let account = wallet.get_account("Alice").await?;
 
-    // May want to ensure the account is synced before sending a transaction.
-    let balance = account.sync(None).await?;
+    // May want to ensure the wallet is synced before sending a transaction.
+    let balance = wallet.sync(None).await?;
 
     // Find first foundry and corresponding token id
     let token_id = std::env::args()
@@ -49,7 +48,7 @@ async fn main() -> Result<()> {
         let available_balance = native_token_balance.available();
         println!("Balance before minting: {available_balance}");
     } else {
-        println!("Couldn't find native token '{token_id}' in the account");
+        println!("Couldn't find native token '{token_id}' in the wallet");
         return Ok(());
     }
 
@@ -59,10 +58,10 @@ async fn main() -> Result<()> {
         .await?;
 
     // Mint some more native tokens
-    let transaction = account.mint_native_token(token_id, MINT_AMOUNT, None).await?;
+    let transaction = wallet.mint_native_token(token_id, MINT_AMOUNT, None).await?;
     println!("Transaction sent: {}", transaction.transaction_id);
 
-    let block_id = account
+    let block_id = wallet
         .reissue_transaction_until_included(&transaction.transaction_id, None, None)
         .await?;
 
@@ -72,7 +71,7 @@ async fn main() -> Result<()> {
         block_id
     );
 
-    let balance = account.sync(None).await?;
+    let balance = wallet.sync(None).await?;
     let available_balance = balance
         .native_tokens()
         .iter()

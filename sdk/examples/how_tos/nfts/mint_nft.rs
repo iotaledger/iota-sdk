@@ -4,7 +4,7 @@
 //! In this example we will mint some NFTs.
 //!
 //! Make sure that `STRONGHOLD_SNAPSHOT_PATH` and `WALLET_DB_PATH` already exist by
-//! running the `./how_tos/accounts_and_addresses/create_account.rs` example!
+//! running the `./how_tos/accounts_and_addresses/create_wallet.rs` example!
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh
@@ -35,20 +35,17 @@ async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
-    // Create the wallet
+    // Get the wallet we generated with `create_wallet`.
     let wallet = Wallet::builder()
         .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
         .finish()
         .await?;
 
-    // Get the account we generated with `create_account`
-    let account = wallet.get_account("Alice").await?;
+    // Ensure the wallet is synced after minting.
+    wallet.sync(None).await?;
 
-    // Ensure the account is synced after minting.
-    account.sync(None).await?;
-
-    // We send from the first address in the account.
-    let sender_address = account.first_address_bech32().await;
+    // We send from the wallet address.
+    let sender_address = wallet.address().await;
 
     // Set the stronghold password
     wallet
@@ -72,11 +69,11 @@ async fn main() -> Result<()> {
         .try_with_issuer(sender_address.clone())?
         .with_immutable_metadata(metadata.to_bytes())];
 
-    let transaction = account.mint_nfts(nft_params, None).await?;
+    let transaction = wallet.mint_nfts(nft_params, None).await?;
     println!("Transaction sent: {}", transaction.transaction_id);
 
     // Wait for transaction to get included
-    let block_id = account
+    let block_id = wallet
         .reissue_transaction_until_included(&transaction.transaction_id, None, None)
         .await?;
     println!(
@@ -87,21 +84,20 @@ async fn main() -> Result<()> {
     println!("Minted NFT 1");
 
     // Build an NFT manually by using the `NftOutputBuilder`
-    let token_supply = account.client().get_token_supply().await?;
     let outputs = [
         // address of the owner of the NFT
         NftOutputBuilder::new_with_amount(NFT2_AMOUNT, NftId::null())
             .add_unlock_condition(AddressUnlockCondition::new(sender_address.clone()))
             .add_feature(SenderFeature::new(sender_address.clone()))
             .add_immutable_feature(IssuerFeature::new(sender_address))
-            .finish_output(token_supply)?,
+            .finish_output()?,
     ];
 
-    let transaction = account.send_outputs(outputs, None).await?;
+    let transaction = wallet.send_outputs(outputs, None).await?;
     println!("Transaction sent: {}", transaction.transaction_id);
 
     // Wait for transaction to get included
-    let block_id = account
+    let block_id = wallet
         .reissue_transaction_until_included(&transaction.transaction_id, None, None)
         .await?;
     println!(
@@ -111,8 +107,8 @@ async fn main() -> Result<()> {
     );
     println!("Minted NFT 2");
 
-    // Ensure the account is synced after minting.
-    account.sync(None).await?;
+    // Ensure the wallet is synced after minting.
+    wallet.sync(None).await?;
 
     Ok(())
 }
