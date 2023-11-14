@@ -75,9 +75,10 @@ fn verify_simple_token_scheme<const VERIFY: bool>(
     token_scheme: &SimpleTokenScheme,
     _visitor: &(),
 ) -> Result<(), Error> {
-    if token_scheme.maximum_supply.is_zero()
-        || token_scheme.melted_tokens > token_scheme.minted_tokens
-        || token_scheme.minted_tokens - token_scheme.melted_tokens > token_scheme.maximum_supply
+    if VERIFY
+        && (token_scheme.maximum_supply.is_zero()
+            || token_scheme.melted_tokens > token_scheme.minted_tokens
+            || token_scheme.minted_tokens - token_scheme.melted_tokens > token_scheme.maximum_supply)
     {
         return Err(Error::InvalidFoundryOutputSupply {
             minted: token_scheme.minted_tokens,
