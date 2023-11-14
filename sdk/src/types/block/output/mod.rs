@@ -108,8 +108,8 @@ impl OutputWithMetadata {
 /// A generic output that can represent different types defining the deposit of funds.
 #[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, From, Packable)]
 #[packable(unpack_error = Error)]
-#[packable(tag_type = u8, with_error = Error::InvalidOutputKind)]
 #[packable(unpack_visitor = ProtocolParameters)]
+#[packable(tag_type = u8, with_error = Error::InvalidOutputKind)]
 pub enum Output {
     /// A basic output.
     #[packable(tag = BasicOutput::KIND)]
