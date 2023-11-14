@@ -122,6 +122,7 @@ pub struct ValidationBlock {
     /// The highest supported protocol version the issuer of this block supports.
     highest_supported_version: u8,
     /// The hash of the protocol parameters for the Highest Supported Version.
+    #[packable(verify_with = verify_protocol_parameters_hash)]
     protocol_parameters_hash: ProtocolParametersHash,
 }
 
@@ -159,14 +160,19 @@ impl ValidationBlock {
     }
 }
 
-fn validate_protocol_params_hash(hash: &ProtocolParametersHash, params: &ProtocolParameters) -> Result<(), Error> {
-    let params_hash = params.hash();
+fn verify_protocol_parameters_hash<const VERIFY: bool>(
+    hash: &ProtocolParametersHash,
+    params: &ProtocolParameters,
+) -> Result<(), Error> {
+    if VERIFY {
+        let params_hash = params.hash();
 
-    if hash != &params_hash {
-        return Err(Error::InvalidProtocolParametersHash {
-            expected: params_hash,
-            actual: *hash,
-        });
+        if hash != &params_hash {
+            return Err(Error::InvalidProtocolParametersHash {
+                expected: params_hash,
+                actual: *hash,
+            });
+        }
     }
 
     Ok(())
@@ -174,7 +180,7 @@ fn validate_protocol_params_hash(hash: &ProtocolParametersHash, params: &Protoco
 
 fn verify_validation_block<const VERIFY: bool>(
     validation_block: &ValidationBlock,
-    params: &ProtocolParameters,
+    _: &ProtocolParameters,
 ) -> Result<(), Error> {
     if VERIFY {
         verify_parents_sets(
@@ -182,7 +188,6 @@ fn verify_validation_block<const VERIFY: bool>(
             &validation_block.weak_parents,
             &validation_block.shallow_like_parents,
         )?;
-        validate_protocol_params_hash(&validation_block.protocol_parameters_hash, params)?;
     }
 
     Ok(())
@@ -231,7 +236,7 @@ pub(crate) mod dto {
 
         fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
             if let Some(protocol_params) = params.protocol_parameters() {
-                validate_protocol_params_hash(&dto.protocol_parameters_hash, protocol_params)?;
+                verify_protocol_parameters_hash::<true>(&dto.protocol_parameters_hash, protocol_params)?;
             }
 
             ValidationBlockBuilder::new(
