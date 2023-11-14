@@ -166,10 +166,10 @@ impl BasicOutputBuilder {
                 // Check whether we already have enough funds to cover it
                 if amount < minimum_amount {
                     // Get the projected minimum amount of the return output
-                    let return_min_amount = Self::new_with_amount(0)
+                    let return_min_amount = Self::new_with_minimum_amount(params)
                         .add_unlock_condition(AddressUnlockCondition::new(return_address.clone()))
                         .finish()?
-                        .minimum_amount(params);
+                        .amount();
                     // Add a temporary storage deposit unlock condition so the new storage requirement can be calculated
                     self = self.add_unlock_condition(StorageDepositReturnUnlockCondition::new(
                         return_address.clone(),

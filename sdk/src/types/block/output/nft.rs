@@ -18,8 +18,8 @@ use crate::types::block::{
             verify_allowed_unlock_conditions, AddressUnlockCondition, StorageDepositReturnUnlockCondition,
             UnlockCondition, UnlockConditionFlags, UnlockConditions,
         },
-        verify_output_amount_packable, ChainId, MinimumOutputAmount, NativeToken, NativeTokens, Output,
-        OutputBuilderAmount, OutputId, StateTransitionError, StateTransitionVerifier, StorageScore,
+        verify_output_amount_packable, BasicOutputBuilder, ChainId, MinimumOutputAmount, NativeToken, NativeTokens,
+        Output, OutputBuilderAmount, OutputId, StateTransitionError, StateTransitionVerifier, StorageScore,
         StorageScoreParameters,
     },
     payload::signed_transaction::TransactionCapabilityFlag,
@@ -46,7 +46,11 @@ impl From<&OutputId> for NftId {
 impl NftId {
     ///
     pub fn or_from_output_id(self, output_id: &OutputId) -> Self {
-        if self.is_null() { Self::from(output_id) } else { self }
+        if self.is_null() {
+            Self::from(output_id)
+        } else {
+            self
+        }
     }
 }
 
@@ -236,10 +240,10 @@ impl NftOutputBuilder {
                 // Check whether we already have enough funds to cover it
                 if amount < minimum_amount {
                     // Get the projected minimum amount of the return output
-                    let return_min_amount = Self::new_with_amount(0, self.nft_id)
+                    let return_min_amount = BasicOutputBuilder::new_with_minimum_amount(params)
                         .add_unlock_condition(AddressUnlockCondition::new(return_address.clone()))
                         .finish()?
-                        .minimum_amount(params);
+                        .amount();
                     // Add a temporary storage deposit unlock condition so the new storage requirement can be calculated
                     self = self.add_unlock_condition(StorageDepositReturnUnlockCondition::new(
                         return_address.clone(),
