@@ -9,7 +9,7 @@ require('dotenv').config({ path: '.env' });
 // Run with command:
 // yarn run-example ./how_tos/accounts_and_addresses/list-outputs.ts
 
-// This example lists all outputs in the account.
+// This example lists all outputs in the wallet.
 async function run() {
     initLogger();
     if (!process.env.WALLET_DB_PATH) {
@@ -20,16 +20,14 @@ async function run() {
             storagePath: process.env.WALLET_DB_PATH,
         });
 
-        const account = await wallet.getAccount('Alice');
+        await wallet.sync();
 
-        await account.sync();
-
-        const outputs = await account.outputs();
+        const outputs = await wallet.outputs();
 
         console.log('Output ids:');
         for (const output of outputs) console.log(output.outputId);
 
-        const unspentOutputs = await account.unspentOutputs();
+        const unspentOutputs = await wallet.unspentOutputs();
 
         console.log('Unspent output ids:');
         for (const output of unspentOutputs) console.log(output.outputId);

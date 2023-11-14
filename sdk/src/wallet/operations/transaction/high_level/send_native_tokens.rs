@@ -16,8 +16,8 @@ use crate::{
             BasicOutputBuilder, MinimumStorageDepositBasicOutput, NativeToken, NativeTokens, TokenId,
         },
         slot::SlotIndex,
-        ConvertTo,
     },
+    utils::ConvertTo,
     wallet::{
         constants::DEFAULT_EXPIRATION_SLOTS,
         operations::transaction::{TransactionOptions, TransactionWithMetadata},
@@ -36,7 +36,7 @@ pub struct SendNativeTokensParams {
     #[getset(get = "pub")]
     native_tokens: Vec<(TokenId, U256)>,
     /// Bech32 encoded address return address, to which the storage deposit will be returned. Default will use the
-    /// first address of the account
+    /// address of the wallet.
     #[getset(get = "pub")]
     return_address: Option<Bech32Address>,
     /// Expiration in slot indices, after which the output will be available for the sender again, if not spent by the

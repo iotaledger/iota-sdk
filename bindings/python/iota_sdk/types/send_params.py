@@ -89,7 +89,7 @@ class MintNftParams():
     """Parameters for minting NFTs.
 
     Attributes:
-        address: A Bech32 encoded address to which the NFT will be minted. Default will use the first address of the account.
+        address: A Bech32 encoded address to which the NFT will be minted. Default will use the address of the wallet.
         sender: An NFT sender feature.
         metadata: An NFT metadata feature.
         tag: An NFT tag feature.
@@ -110,7 +110,7 @@ class CreateAccountOutputParams():
     """Parameters for creating accounts.
 
     Attributes:
-        address: A Bech32 encoded address which will control the account. Default will use the first address of the account.
+        address: A Bech32 encoded address which will control the account. Default will use the address of the wallet.
         immutable_metadata: Immutable account metadata.
         metadata: Account metadata.
     """
