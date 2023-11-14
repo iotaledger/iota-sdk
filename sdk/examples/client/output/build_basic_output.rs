@@ -48,12 +48,12 @@ async fn main() -> Result<()> {
 
     let outputs = [
         // most simple output
-        basic_output_builder.clone().finish_output(token_supply)?,
+        basic_output_builder.clone().finish_output()?,
         // with metadata feature block
         basic_output_builder
             .clone()
             .add_feature(MetadataFeature::new(METADATA)?)
-            .finish_output(token_supply)?,
+            .finish_output()?,
         // with storage deposit return
         basic_output_builder
             .clone()
@@ -62,26 +62,26 @@ async fn main() -> Result<()> {
                 1_000_000,
                 token_supply,
             )?)
-            .finish_output(token_supply)?,
+            .finish_output()?,
         // with expiration
         basic_output_builder
             .clone()
             .add_unlock_condition(ExpirationUnlockCondition::new(address.clone(), 1)?)
-            .finish_output(token_supply)?,
+            .finish_output()?,
         // with timelock
         basic_output_builder
             .clone()
             .add_unlock_condition(TimelockUnlockCondition::new(1)?)
-            .finish_output(token_supply)?,
+            .finish_output()?,
         // with tag feature
         basic_output_builder
             .clone()
             .add_feature(TagFeature::new(METADATA)?)
-            .finish_output(token_supply)?,
+            .finish_output()?,
         // with sender feature
         basic_output_builder
             .add_feature(SenderFeature::new(address))
-            .finish_output(token_supply)?,
+            .finish_output()?,
     ];
 
     println!("{outputs:#?}");

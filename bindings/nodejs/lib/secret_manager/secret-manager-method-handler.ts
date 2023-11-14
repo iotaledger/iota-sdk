@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import {
-    callSecretManagerMethodAsync,
+    callSecretManagerMethod,
     createSecretManager,
     migrateStrongholdSnapshotV2ToV3,
 } from '../bindings';
@@ -34,9 +34,9 @@ export class SecretManagerMethodHandler {
      * @returns The JSON response of the method.
      */
     async callMethod(method: __SecretManagerMethods__): Promise<string> {
-        return callSecretManagerMethodAsync(
-            JSON.stringify(method),
+        return callSecretManagerMethod(
             this.methodHandler,
+            JSON.stringify(method),
         );
     }
 }

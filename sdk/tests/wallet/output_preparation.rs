@@ -431,7 +431,6 @@ async fn output_preparation_sdr() -> Result<()> {
     request_funds(&wallet).await?;
 
     let rent_structure = wallet.client().get_rent_structure().await?;
-    let token_supply = wallet.client().get_token_supply().await?;
 
     let recipient_address_bech32 = String::from("rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu");
     // Roundtrip to get the correct bech32 HRP
@@ -452,7 +451,7 @@ async fn output_preparation_sdr() -> Result<()> {
         )
         .await?;
     // Check if the output has enough amount to cover the storage deposit
-    output.verify_storage_deposit(rent_structure, token_supply)?;
+    output.verify_storage_deposit(rent_structure)?;
     assert_eq!(output.amount(), 50601);
     // address and sdr unlock condition
     assert_eq!(output.unlock_conditions().unwrap().len(), 2);
@@ -473,7 +472,7 @@ async fn output_preparation_sdr() -> Result<()> {
         )
         .await?;
     // Check if the output has enough amount to cover the storage deposit
-    output.verify_storage_deposit(rent_structure, token_supply)?;
+    output.verify_storage_deposit(rent_structure)?;
     assert_eq!(output.amount(), 85199);
     // address and sdr unlock condition
     assert_eq!(output.unlock_conditions().unwrap().len(), 2);
@@ -498,7 +497,7 @@ async fn output_preparation_sdr() -> Result<()> {
         )
         .await?;
     // Check if the output has enough amount to cover the storage deposit
-    output.verify_storage_deposit(rent_structure, token_supply)?;
+    output.verify_storage_deposit(rent_structure)?;
     assert_eq!(output.amount(), 85199);
     // address and sdr unlock condition
     assert_eq!(output.unlock_conditions().unwrap().len(), 2);
@@ -523,7 +522,7 @@ async fn output_preparation_sdr() -> Result<()> {
         )
         .await?;
     // Check if the output has enough amount to cover the storage deposit
-    output.verify_storage_deposit(rent_structure, token_supply)?;
+    output.verify_storage_deposit(rent_structure)?;
     // The additional 1 amount will be added, because the storage deposit should be gifted and not returned
     assert_eq!(output.amount(), 42600);
     // storage deposit gifted, only address unlock condition
@@ -657,7 +656,7 @@ async fn prepare_output_remainder_dust() -> Result<()> {
         .await?;
 
     // Check if the output has enough amount to cover the storage deposit
-    output.verify_storage_deposit(rent_structure, token_supply)?;
+    output.verify_storage_deposit(rent_structure)?;
     // The left over 21299 is too small to keep, so we donate it
     assert_eq!(output.amount(), balance.base_coin().available());
     // storage deposit gifted, only address unlock condition
@@ -701,7 +700,7 @@ async fn prepare_output_remainder_dust() -> Result<()> {
         .await?;
 
     // Check if the output has enough amount to cover the storage deposit
-    output.verify_storage_deposit(rent_structure, token_supply)?;
+    output.verify_storage_deposit(rent_structure)?;
     // We use excess if leftover is too small, so amount == all available balance
     assert_eq!(output.amount(), 63900);
     // storage deposit gifted, only address unlock condition
@@ -725,7 +724,7 @@ async fn prepare_output_remainder_dust() -> Result<()> {
         .await?;
 
     // Check if the output has enough amount to cover the storage deposit
-    output.verify_storage_deposit(rent_structure, token_supply)?;
+    output.verify_storage_deposit(rent_structure)?;
     // We use excess if leftover is too small, so amount == all available balance
     assert_eq!(output.amount(), 63900);
     // storage deposit returned, address and SDR unlock condition
@@ -768,7 +767,7 @@ async fn prepare_output_only_single_nft() -> Result<()> {
     let balance = wallet_1.sync(None).await?;
     assert_eq!(balance.nfts().len(), 1);
 
-    let nft_data = &wallet_1.unspent_outputs(None).await?[0];
+    let nft_data = &wallet_1.unspent_outputs(None).await[0];
     let nft_id = *balance.nfts().first().unwrap();
     // Send NFT back to first wallet
     let output = wallet_1

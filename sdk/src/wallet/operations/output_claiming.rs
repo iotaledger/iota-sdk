@@ -283,7 +283,7 @@ where
                     NftOutputBuilder::from(nft_output)
                         .with_nft_id(nft_output.nft_id_non_null(&output_data.output_id))
                         .with_unlock_conditions([AddressUnlockCondition::new(wallet_address.clone())])
-                        .finish_output(token_supply)?
+                        .finish_output()?
                 } else {
                     NftOutputBuilder::from(nft_output)
                         .with_minimum_storage_deposit(rent_structure)
@@ -291,7 +291,7 @@ where
                         .with_unlock_conditions([AddressUnlockCondition::new(wallet_address.clone())])
                         // Set native tokens empty, we will collect them from all inputs later
                         .with_native_tokens([])
-                        .finish_output(token_supply)?
+                        .finish_output()?
                 };
 
                 // Add required amount for the new output
@@ -372,7 +372,7 @@ where
             outputs_to_send.push(
                 BasicOutputBuilder::new_with_amount(return_amount)
                     .add_unlock_condition(AddressUnlockCondition::new(return_address))
-                    .finish_output(token_supply)?,
+                    .finish_output()?,
             );
         }
 
@@ -382,7 +382,7 @@ where
                 BasicOutputBuilder::new_with_amount(available_amount - required_amount_for_nfts)
                     .add_unlock_condition(AddressUnlockCondition::new(wallet_address))
                     .with_native_tokens(new_native_tokens.finish()?)
-                    .finish_output(token_supply)?,
+                    .finish_output()?,
             );
         } else if !new_native_tokens.finish()?.is_empty() {
             return Err(crate::client::api::input_selection::Error::InsufficientAmount {

@@ -1,7 +1,7 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use alloc::{collections::BTreeSet, vec::Vec};
+use alloc::collections::BTreeSet;
 
 use hashbrown::HashMap;
 use packable::{
@@ -11,25 +11,19 @@ use packable::{
     Packable,
 };
 
-use crate::types::{
-    block::{
-        address::{AccountAddress, Address},
-        output::{
-            feature::{verify_allowed_features, Feature, FeatureFlags, Features},
-            unlock_condition::{
-                verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions,
-            },
-            verify_output_amount_min, verify_output_amount_packable, verify_output_amount_supply, ChainId, NativeToken,
-            NativeTokens, Output, OutputBuilderAmount, OutputId, Rent, RentStructure, StateTransitionError,
-            StateTransitionVerifier,
-        },
-        payload::signed_transaction::TransactionCapabilityFlag,
-        protocol::ProtocolParameters,
-        semantic::{SemanticValidationContext, TransactionFailureReason},
-        unlock::Unlock,
-        Error,
+use crate::types::block::{
+    address::{AccountAddress, Address},
+    output::{
+        feature::{verify_allowed_features, Feature, FeatureFlags, Features},
+        unlock_condition::{verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions},
+        verify_output_amount_min, verify_output_amount_packable, ChainId, NativeToken, NativeTokens, Output,
+        OutputBuilderAmount, OutputId, Rent, RentStructure, StateTransitionError, StateTransitionVerifier,
     },
-    ValidationParams,
+    payload::signed_transaction::TransactionCapabilityFlag,
+    protocol::ProtocolParameters,
+    semantic::{SemanticValidationContext, TransactionFailureReason},
+    unlock::Unlock,
+    Error,
 };
 
 crate::impl_id!(
@@ -271,23 +265,9 @@ impl AccountOutputBuilder {
         Ok(output)
     }
 
-    ///
-    pub fn finish_with_params<'a>(
-        self,
-        params: impl Into<ValidationParams<'a>> + Send,
-    ) -> Result<AccountOutput, Error> {
-        let output = self.finish()?;
-
-        if let Some(token_supply) = params.into().token_supply() {
-            verify_output_amount_supply(output.amount, token_supply)?;
-        }
-
-        Ok(output)
-    }
-
     /// Finishes the [`AccountOutputBuilder`] into an [`Output`].
-    pub fn finish_output<'a>(self, params: impl Into<ValidationParams<'a>> + Send) -> Result<Output, Error> {
-        Ok(Output::Account(self.finish_with_params(params)?))
+    pub fn finish_output(self) -> Result<Output, Error> {
+        Ok(Output::Account(self.finish()?))
     }
 }
 
@@ -645,13 +625,15 @@ fn verify_unlock_conditions(unlock_conditions: &UnlockConditions, account_id: &A
 
 #[cfg(feature = "serde")]
 pub(crate) mod dto {
+    use alloc::vec::Vec;
+
     use serde::{Deserialize, Serialize};
 
     use super::*;
     use crate::{
         types::{
             block::{output::unlock_condition::dto::UnlockConditionDto, Error},
-            TryFromDto,
+            TryFromDto, ValidationParams,
         },
         utils::serde::string,
     };
@@ -709,7 +691,7 @@ pub(crate) mod dto {
                 builder = builder.add_unlock_condition(UnlockCondition::try_from_dto_with_params(u, &params)?);
             }
 
-            builder.finish_with_params(params)
+            builder.finish()
         }
     }
 
@@ -757,7 +739,7 @@ pub(crate) mod dto {
                 builder = builder.with_immutable_features(immutable_features);
             }
 
-            builder.finish_with_params(params)
+            builder.finish()
         }
     }
 }
@@ -823,7 +805,7 @@ mod tests {
                 &protocol_parameters,
             )
             .unwrap();
-            assert_eq!(builder.finish_with_params(&protocol_parameters).unwrap(), output_split);
+            assert_eq!(builder.finish().unwrap(), output_split);
         };
 
         let builder = AccountOutput::build_with_amount(100, account_id)

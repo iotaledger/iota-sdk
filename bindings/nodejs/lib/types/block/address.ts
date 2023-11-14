@@ -208,7 +208,7 @@ class RestrictedAddress extends Address {
     /**
      * The allowed capabilities bitflags.
      */
-    private allowedCapabilities: HexEncodedString = '0x';
+    private allowedCapabilities?: HexEncodedString;
     /**
      * @param address An address.
      */
@@ -227,7 +227,7 @@ class RestrictedAddress extends Address {
                     allowedCapabilities.byteLength,
                 ).toString('hex');
         } else {
-            this.allowedCapabilities = '0x';
+            this.allowedCapabilities = undefined;
         }
     }
 
@@ -239,13 +239,20 @@ class RestrictedAddress extends Address {
     }
 
     getAllowedCapabilities(): Uint8Array {
-        return Uint8Array.from(
-            Buffer.from(this.allowedCapabilities.substring(2), 'hex'),
-        );
+        return this.allowedCapabilities !== undefined
+            ? Uint8Array.from(
+                  Buffer.from(this.allowedCapabilities.substring(2), 'hex'),
+              )
+            : new Uint8Array();
     }
 
     toString(): string {
-        return this.address.toString() + this.allowedCapabilities.substring(2);
+        return (
+            this.address.toString() +
+            (this.allowedCapabilities !== undefined
+                ? this.allowedCapabilities.substring(2)
+                : '')
+        );
     }
 }
 

@@ -464,7 +464,7 @@ fn verify_outputs<const VERIFY: bool>(outputs: &[Output], visitor: &ProtocolPara
                 }
             }
 
-            output.verify_storage_deposit(visitor.rent_structure(), visitor.token_supply())?;
+            output.verify_storage_deposit(visitor.rent_structure())?;
         }
     }
 
@@ -533,20 +533,14 @@ pub type TransactionCapabilities = Capabilities<TransactionCapabilityFlag>;
 
 #[cfg(feature = "serde")]
 pub(crate) mod dto {
-    use alloc::{
-        boxed::Box,
-        string::{String, ToString},
-    };
+    use alloc::string::{String, ToString};
 
     use serde::{Deserialize, Serialize};
 
     use super::*;
-    use crate::{
-        types::{
-            block::{mana::ManaAllotmentDto, output::dto::OutputDto, payload::dto::PayloadDto, Error},
-            TryFromDto,
-        },
-        utils::serde::prefix_hex_bytes,
+    use crate::types::{
+        block::{mana::ManaAllotmentDto, output::dto::OutputDto, payload::dto::PayloadDto, Error},
+        TryFromDto,
     };
 
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
@@ -557,8 +551,8 @@ pub(crate) mod dto {
         pub context_inputs: Vec<ContextInput>,
         pub inputs: Vec<Input>,
         pub allotments: Vec<ManaAllotmentDto>,
-        #[serde(with = "prefix_hex_bytes")]
-        pub capabilities: Box<[u8]>,
+        #[serde(default, skip_serializing_if = "TransactionCapabilities::is_none")]
+        pub capabilities: TransactionCapabilities,
         #[serde(default, skip_serializing_if = "Option::is_none")]
         pub payload: Option<PayloadDto>,
         pub outputs: Vec<OutputDto>,
@@ -572,7 +566,7 @@ pub(crate) mod dto {
                 context_inputs: value.context_inputs().to_vec(),
                 inputs: value.inputs().to_vec(),
                 allotments: value.mana_allotments().iter().map(Into::into).collect(),
-                capabilities: value.capabilities().iter().copied().collect(),
+                capabilities: value.capabilities().clone(),
                 payload: match value.payload() {
                     Some(p @ Payload::TaggedData(_)) => Some(p.into()),
                     Some(_) => unimplemented!(),
@@ -608,9 +602,7 @@ pub(crate) mod dto {
                 .with_context_inputs(dto.context_inputs)
                 .with_inputs(dto.inputs)
                 .with_mana_allotments(mana_allotments)
-                .with_capabilities(Capabilities::from_bytes(
-                    dto.capabilities.try_into().map_err(Error::InvalidCapabilitiesCount)?,
-                ))
+                .with_capabilities(dto.capabilities)
                 .with_outputs(outputs);
 
             builder = if let Some(p) = dto.payload {

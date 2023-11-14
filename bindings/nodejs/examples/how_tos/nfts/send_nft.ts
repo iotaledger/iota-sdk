@@ -11,7 +11,7 @@ const RECV_ADDRESS =
 // In this example we will send an NFT (Non-fungible token).
 //
 // Make sure that `STRONGHOLD_SNAPSHOT_PATH` and `WALLET_DB_PATH` already exist by
-// running the `how_tos/accounts_and_addresses/create-account` example!
+// running the `how_tos/accounts_and_addresses/create-wallet` example!
 //
 // Rename `.env.example` to `.env` first, then run
 // yarn run-example ./how_tos/nfts/send_nft.ts
@@ -27,14 +27,11 @@ async function run() {
             storagePath: process.env.WALLET_DB_PATH,
         });
 
-        // Get the account we generated with `01-create-wallet`
-        const account = await wallet.getAccount('Alice');
-
         // We need to unlock stronghold.
         await wallet.setStrongholdPassword(process.env.STRONGHOLD_PASSWORD);
 
-        // May want to ensure the account is synced before sending a transaction.
-        const balance = await account.sync();
+        // May want to ensure the wallet is synced before sending a transaction.
+        const balance = await wallet.sync();
 
         if (balance.nfts.length == 0) {
             throw new Error('No available NFTs');
@@ -50,12 +47,12 @@ async function run() {
         ];
 
         // Send the full NFT output to the specified address
-        const transaction = await account.sendNft(outputs);
+        const transaction = await wallet.sendNft(outputs);
 
         console.log(`Transaction sent: ${transaction.transactionId}`);
 
         // Wait for transaction to get included
-        const blockId = await account.reissueTransactionUntilIncluded(
+        const blockId = await wallet.reissueTransactionUntilIncluded(
             transaction.transactionId,
         );
 
@@ -64,7 +61,7 @@ async function run() {
         );
 
         // To send an NFT with expiration unlock condition prepareOutput() can be used like this:
-        // const output = await account.prepareOutput({
+        // const output = await wallet.prepareOutput({
         //     recipientAddress: 'rms1qz6aj69rumk3qu0ra5ag6p6kk8ga3j8rfjlaym3wefugs3mmxgzfwa6kw3l',
         //     amount: "47000",
         //     unlocks: {
@@ -76,7 +73,7 @@ async function run() {
         //     storageDeposit: { returnStrategy: 'Gift' }
         // });
 
-        // const transaction = await account.sendOutputs([output]);
+        // const transaction = await wallet.sendOutputs([output]);
     } catch (error) {
         console.log('Error: ', error);
     }

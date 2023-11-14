@@ -3,7 +3,7 @@
 
 use crate::{
     types::block::{address::Address, output::Output, slot::SlotIndex},
-    wallet::types::{AddressWithUnspentOutputs, OutputData},
+    wallet::types::OutputData,
 };
 
 // Check if an output can be unlocked by the wallet address at the current time

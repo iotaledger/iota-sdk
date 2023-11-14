@@ -22,6 +22,10 @@ use crate::{method::WalletMethod, response::Response, Result};
 /// Call a wallet method.
 pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletMethod) -> Result<Response> {
     let response = match method {
+        WalletMethod::Accounts => {
+            let accounts = wallet.accounts().await;
+            Response::OutputsData(accounts.iter().map(OutputDataDto::from).collect())
+        }
         #[cfg(feature = "stronghold")]
         WalletMethod::Backup { destination, password } => {
             wallet.backup(destination, password).await?;
@@ -206,12 +210,16 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
             let implicit_account_creation_address = wallet.implicit_account_creation_address().await?;
             Response::Bech32Address(implicit_account_creation_address)
         }
+        WalletMethod::ImplicitAccounts => {
+            let implicit_accounts = wallet.implicit_accounts().await;
+            Response::OutputsData(implicit_accounts.iter().map(OutputDataDto::from).collect())
+        }
         WalletMethod::IncomingTransactions => {
             let transactions = wallet.incoming_transactions().await;
             Response::Transactions(transactions.iter().map(TransactionWithMetadataDto::from).collect())
         }
         WalletMethod::Outputs { filter_options } => {
-            let outputs = wallet.outputs(filter_options).await?;
+            let outputs = wallet.outputs(filter_options).await;
             Response::OutputsData(outputs.iter().map(OutputDataDto::from).collect())
         }
         WalletMethod::PendingTransactions => {
@@ -394,7 +402,7 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
             Response::Transactions(transactions.iter().map(TransactionWithMetadataDto::from).collect())
         }
         WalletMethod::UnspentOutputs { filter_options } => {
-            let outputs = wallet.unspent_outputs(filter_options).await?;
+            let outputs = wallet.unspent_outputs(filter_options).await;
             Response::OutputsData(outputs.iter().map(OutputDataDto::from).collect())
         }
     };

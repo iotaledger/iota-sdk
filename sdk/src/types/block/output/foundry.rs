@@ -12,26 +12,21 @@ use packable::{
 };
 use primitive_types::U256;
 
-use crate::types::{
-    block::{
-        address::{AccountAddress, Address},
-        output::{
-            account::AccountId,
-            feature::{verify_allowed_features, Feature, FeatureFlags, Features},
-            unlock_condition::{
-                verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions,
-            },
-            verify_output_amount_min, verify_output_amount_packable, verify_output_amount_supply, ChainId, NativeToken,
-            NativeTokens, Output, OutputBuilderAmount, OutputId, Rent, RentStructure, StateTransitionError,
-            StateTransitionVerifier, TokenId, TokenScheme,
-        },
-        payload::signed_transaction::{TransactionCapabilities, TransactionCapabilityFlag},
-        protocol::ProtocolParameters,
-        semantic::{SemanticValidationContext, TransactionFailureReason},
-        unlock::Unlock,
-        Error,
+use crate::types::block::{
+    address::{AccountAddress, Address},
+    output::{
+        account::AccountId,
+        feature::{verify_allowed_features, Feature, FeatureFlags, Features},
+        unlock_condition::{verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions},
+        verify_output_amount_min, verify_output_amount_packable, ChainId, NativeToken, NativeTokens, Output,
+        OutputBuilderAmount, OutputId, Rent, RentStructure, StateTransitionError, StateTransitionVerifier, TokenId,
+        TokenScheme,
     },
-    ValidationParams,
+    payload::signed_transaction::{TransactionCapabilities, TransactionCapabilityFlag},
+    protocol::ProtocolParameters,
+    semantic::{SemanticValidationContext, TransactionFailureReason},
+    unlock::Unlock,
+    Error,
 };
 
 crate::impl_id!(
@@ -296,23 +291,9 @@ impl FoundryOutputBuilder {
         Ok(output)
     }
 
-    ///
-    pub fn finish_with_params<'a>(
-        self,
-        params: impl Into<ValidationParams<'a>> + Send,
-    ) -> Result<FoundryOutput, Error> {
-        let output = self.finish()?;
-
-        if let Some(token_supply) = params.into().token_supply() {
-            verify_output_amount_supply(output.amount, token_supply)?;
-        }
-
-        Ok(output)
-    }
-
     /// Finishes the [`FoundryOutputBuilder`] into an [`Output`].
-    pub fn finish_output<'a>(self, params: impl Into<ValidationParams<'a>> + Send) -> Result<Output, Error> {
-        Ok(Output::Foundry(self.finish_with_params(params)?))
+    pub fn finish_output(self) -> Result<Output, Error> {
+        Ok(Output::Foundry(self.finish()?))
     }
 }
 
@@ -693,7 +674,7 @@ pub(crate) mod dto {
     use crate::{
         types::{
             block::{output::unlock_condition::dto::UnlockConditionDto, Error},
-            TryFromDto,
+            TryFromDto, ValidationParams,
         },
         utils::serde::string,
     };
@@ -754,7 +735,7 @@ pub(crate) mod dto {
                 builder = builder.add_unlock_condition(UnlockCondition::try_from_dto_with_params(u, &params)?);
             }
 
-            builder.finish_with_params(params)
+            builder.finish()
         }
     }
 
@@ -799,7 +780,7 @@ pub(crate) mod dto {
                 builder = builder.with_immutable_features(immutable_features);
             }
 
-            builder.finish_with_params(params)
+            builder.finish()
         }
     }
 }
@@ -851,10 +832,7 @@ mod tests {
                 protocol_parameters.clone(),
             )
             .unwrap();
-            assert_eq!(
-                builder.finish_with_params(protocol_parameters.clone()).unwrap(),
-                output_split
-            );
+            assert_eq!(builder.finish().unwrap(), output_split);
         };
 
         let builder = FoundryOutput::build_with_amount(100, 123, rand_token_scheme())

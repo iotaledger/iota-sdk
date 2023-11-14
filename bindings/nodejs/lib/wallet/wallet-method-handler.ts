@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import {
-    callWalletMethodAsync,
+    callWalletMethod,
     createWallet,
-    listenWalletAsync,
+    listenWallet,
     destroyWallet,
     getClientFromWallet,
     getSecretManagerFromWallet,
@@ -12,9 +12,7 @@ import {
 import type {
     WalletEventType,
     WalletOptions,
-    __Method__,
-    __AccountMethod__,
-    AccountIdentifier,
+    __WalletMethod__,
     Event,
 } from '../types/wallet';
 import { Client } from '../client';
@@ -28,14 +26,7 @@ export class WalletMethodHandler {
      * @param options The wallet options.
      */
     constructor(options?: WalletOptions) {
-        const walletOptions = {
-            storagePath: options?.storagePath,
-            clientOptions: options?.clientOptions,
-            coinType: options?.coinType,
-            secretManager: options?.secretManager,
-        };
-
-        this.methodHandler = createWallet(JSON.stringify(walletOptions));
+        this.methodHandler = createWallet(JSON.stringify(options));
     }
 
     /**
@@ -43,8 +34,9 @@ export class WalletMethodHandler {
      *
      * @param method The wallet method to call.
      */
-    async callMethod(method: __Method__): Promise<string> {
-        return callWalletMethodAsync(
+    async callMethod(method: __WalletMethod__): Promise<string> {
+        return callWalletMethod(
+            this.methodHandler,
             // mapToObject is required to convert maps to array since they otherwise get serialized as `[{}]` even if not empty
             JSON.stringify(method, function mapToObject(_key, value) {
                 if (value instanceof Map) {
@@ -53,7 +45,6 @@ export class WalletMethodHandler {
                     return value;
                 }
             }),
-            this.methodHandler,
         ).catch((error: Error) => {
             try {
                 if (error.message !== undefined) {
@@ -69,25 +60,6 @@ export class WalletMethodHandler {
     }
 
     /**
-     * Call an account method on the Rust backend.
-     *
-     * @param accountIndex The account index.
-     * @param method The account method to call.
-     */
-    async callAccountMethod(
-        accountIndex: AccountIdentifier,
-        method: __AccountMethod__,
-    ): Promise<string> {
-        return this.callMethod({
-            name: 'callAccountMethod',
-            data: {
-                accountId: accountIndex,
-                method,
-            },
-        });
-    }
-
-    /**
      * Listen to wallet events.
      *
      * @param eventTypes The wallet event types to listen for.
@@ -97,7 +69,7 @@ export class WalletMethodHandler {
         eventTypes: WalletEventType[],
         callback: (error: Error, event: Event) => void,
     ): Promise<void> {
-        return listenWalletAsync(eventTypes, callback, this.methodHandler);
+        return listenWallet(this.methodHandler, eventTypes, callback);
     }
 
     async destroy(): Promise<void> {

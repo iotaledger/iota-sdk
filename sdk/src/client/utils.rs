@@ -21,8 +21,9 @@ use crate::{
         address::{Address, Bech32Address, Ed25519Address, Hrp, ToBech32Ext},
         output::{AccountId, NftId},
         payload::TaggedDataPayload,
-        BlockId, ConvertTo, SignedBlock,
+        BlockId, SignedBlock,
     },
+    utils::ConvertTo,
 };
 
 /// Transforms bech32 to hex
@@ -33,6 +34,7 @@ pub fn bech32_to_hex(bech32: impl ConvertTo<Bech32Address>) -> Result<String> {
         Address::Nft(nft) => nft.to_string(),
         Address::Anchor(anchor) => anchor.to_string(),
         Address::ImplicitAccountCreation(implicit) => implicit.to_string(),
+        Address::Multi(multi) => multi.to_string(),
         Address::Restricted(restricted) => restricted.to_string(),
     })
 }

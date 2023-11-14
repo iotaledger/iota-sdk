@@ -15,9 +15,8 @@ use crate::{
             BasicOutputBuilder, MinimumStorageDepositBasicOutput,
         },
         slot::SlotIndex,
-        ConvertTo,
     },
-    utils::serde::string,
+    utils::{serde::string, ConvertTo},
     wallet::{
         constants::DEFAULT_EXPIRATION_SLOTS,
         operations::transaction::{TransactionOptions, TransactionWithMetadata},
@@ -37,7 +36,7 @@ pub struct SendParams {
     address: Bech32Address,
     /// Bech32 encoded return address, to which the storage deposit will be returned if one is necessary
     /// given the provided amount. If a storage deposit is needed and a return address is not provided, it will
-    /// default to the first address of the account.
+    /// default to the address of the wallet.
     #[getset(get = "pub")]
     return_address: Option<Bech32Address>,
     /// Expiration in slot indices, after which the output will be available for the sender again, if not spent by the
@@ -173,13 +172,13 @@ where
             // Get the minimum required amount for an output assuming it does not need a storage deposit.
             let output = BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)
                 .add_unlock_condition(AddressUnlockCondition::new(address))
-                .finish_output(token_supply)?;
+                .finish_output()?;
 
             if amount >= output.amount() {
                 outputs.push(
                     BasicOutputBuilder::from(output.as_basic())
                         .with_amount(amount)
-                        .finish_output(token_supply)?,
+                        .finish_output()?,
                 )
             } else {
                 let expiration_slot_index = expiration
@@ -215,7 +214,7 @@ where
                             )?,
                         )
                         .add_unlock_condition(ExpirationUnlockCondition::new(return_address, expiration_slot_index)?)
-                        .finish_output(token_supply)?,
+                        .finish_output()?,
                 )
             }
         }

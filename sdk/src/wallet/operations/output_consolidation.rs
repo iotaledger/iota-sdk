@@ -135,7 +135,6 @@ where
         #[cfg(feature = "participation")]
         let voting_output = self.get_voting_output().await?;
         let slot_index = self.client().get_slot_index().await?;
-        let token_supply = self.client().get_token_supply().await?;
         let mut outputs_to_consolidate = Vec::new();
         let wallet_data = self.data().await;
 
@@ -267,7 +266,7 @@ where
                     .unwrap_or_else(|| outputs_to_consolidate[0].address.clone()),
             ))
             .with_native_tokens(total_native_tokens.finish()?)
-            .finish_output(token_supply)?];
+            .finish_output()?];
 
         let options = Some(TransactionOptions {
             custom_inputs: Some(custom_inputs),

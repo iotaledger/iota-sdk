@@ -4,6 +4,7 @@
 mod account;
 mod bech32;
 mod ed25519;
+mod multi;
 mod nft;
 mod restricted;
 

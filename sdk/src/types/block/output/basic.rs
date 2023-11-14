@@ -5,23 +5,18 @@ use alloc::collections::BTreeSet;
 
 use packable::Packable;
 
-use crate::types::{
-    block::{
-        address::Address,
-        output::{
-            feature::{verify_allowed_features, Feature, FeatureFlags, Features},
-            unlock_condition::{
-                verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions,
-            },
-            verify_output_amount_min, verify_output_amount_packable, verify_output_amount_supply, NativeToken,
-            NativeTokens, Output, OutputBuilderAmount, OutputId, Rent, RentStructure,
-        },
-        protocol::ProtocolParameters,
-        semantic::{SemanticValidationContext, TransactionFailureReason},
-        unlock::Unlock,
-        Error,
+use crate::types::block::{
+    address::Address,
+    output::{
+        feature::{verify_allowed_features, Feature, FeatureFlags, Features},
+        unlock_condition::{verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions},
+        verify_output_amount_min, verify_output_amount_packable, NativeToken, NativeTokens, Output,
+        OutputBuilderAmount, OutputId, Rent, RentStructure,
     },
-    ValidationParams,
+    protocol::ProtocolParameters,
+    semantic::{SemanticValidationContext, TransactionFailureReason},
+    unlock::Unlock,
+    Error,
 };
 
 /// Builder for a [`BasicOutput`].
@@ -181,20 +176,9 @@ impl BasicOutputBuilder {
         Ok(output)
     }
 
-    ///
-    pub fn finish_with_params<'a>(self, params: impl Into<ValidationParams<'a>> + Send) -> Result<BasicOutput, Error> {
-        let output = self.finish()?;
-
-        if let Some(token_supply) = params.into().token_supply() {
-            verify_output_amount_supply(output.amount, token_supply)?;
-        }
-
-        Ok(output)
-    }
-
     /// Finishes the [`BasicOutputBuilder`] into an [`Output`].
-    pub fn finish_output<'a>(self, params: impl Into<ValidationParams<'a>> + Send) -> Result<Output, Error> {
-        Ok(Output::Basic(self.finish_with_params(params)?))
+    pub fn finish_output(self) -> Result<Output, Error> {
+        Ok(Output::Basic(self.finish()?))
     }
 }
 
@@ -331,7 +315,7 @@ impl BasicOutput {
     /// Checks whether the basic output is an implicit account.
     pub fn is_implicit_account(&self) -> bool {
         if let [UnlockCondition::Address(uc)] = self.unlock_conditions().as_ref() {
-            uc.address().is_implicit_account_creation() && self.native_tokens.is_empty() && self.features.is_empty()
+            uc.address().is_implicit_account_creation()
         } else {
             false
         }
@@ -379,7 +363,7 @@ pub(crate) mod dto {
     use crate::{
         types::{
             block::{output::unlock_condition::dto::UnlockConditionDto, Error},
-            TryFromDto,
+            TryFromDto, ValidationParams,
         },
         utils::serde::string,
     };
@@ -427,7 +411,7 @@ pub(crate) mod dto {
                 builder = builder.add_unlock_condition(UnlockCondition::try_from_dto_with_params(u, &params)?);
             }
 
-            builder.finish_with_params(params)
+            builder.finish()
         }
     }
 
@@ -463,7 +447,7 @@ pub(crate) mod dto {
                 builder = builder.with_features(features);
             }
 
-            builder.finish_with_params(params)
+            builder.finish()
         }
     }
 }
@@ -521,10 +505,7 @@ mod tests {
                 protocol_parameters.token_supply(),
             )
             .unwrap();
-            assert_eq!(
-                builder.finish_with_params(protocol_parameters.token_supply()).unwrap(),
-                output_split
-            );
+            assert_eq!(builder.finish().unwrap(), output_split);
         };
 
         let builder = BasicOutput::build_with_amount(100)
