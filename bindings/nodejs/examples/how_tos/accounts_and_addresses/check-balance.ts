@@ -20,14 +20,12 @@ async function run() {
             storagePath: process.env.WALLET_DB_PATH,
         });
 
-        const account = await wallet.getAccount('Alice');
-
         // Sync new outputs from the node.
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const _syncBalance = await account.sync();
+        const _syncBalance = await wallet.sync();
 
         // After syncing the balance can also be computed with the local data
-        const balance = await account.getBalance();
+        const balance = await wallet.getBalance();
         console.log('Balance', balance);
     } catch (error) {
         console.error('Error: ', error);

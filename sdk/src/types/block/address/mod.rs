@@ -26,12 +26,15 @@ pub use self::{
     nft::NftAddress,
     restricted::{AddressCapabilities, AddressCapabilityFlag, RestrictedAddress},
 };
-use crate::types::block::{
-    output::Output,
-    semantic::{SemanticValidationContext, TransactionFailureReason},
-    signature::Signature,
-    unlock::Unlock,
-    ConvertTo, Error,
+use crate::{
+    types::block::{
+        output::Output,
+        semantic::{SemanticValidationContext, TransactionFailureReason},
+        signature::Signature,
+        unlock::Unlock,
+        Error,
+    },
+    utils::ConvertTo,
 };
 
 /// A generic address supporting different address kinds.

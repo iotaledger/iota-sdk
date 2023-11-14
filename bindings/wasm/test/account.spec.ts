@@ -29,7 +29,7 @@ async function run() {
 
     expect(account.getMetadata().alias).toBe('Alice');
 
-    const balance: Balance = await account.sync();
+    const balance: Balance = await wallet.sync();
     expect(balance.baseCoin.available).not.toBeNaN();
 
     await account.setAlias('new alias');
