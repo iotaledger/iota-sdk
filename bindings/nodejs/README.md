@@ -108,7 +108,7 @@ run().then(() => process.exit());
 ## Wallet Usage
 
 The following example will create a
-new [`Wallet`](https://wiki.iota.org/shimmer/iota-sdk/references/nodejs/classes/Wallet/) [`Account`](https://wiki.iota.org/shimmer/iota-sdk/references/nodejs/classes/Account/)
+new [`Wallet`](https://wiki.iota.org/shimmer/iota-sdk/references/nodejs/classes/Wallet/)
 that connects to the [Shimmer Testnet](https://api.testnet.shimmer.network) using the
 [`StrongholdSecretManager`](https://wiki.iota.org/shimmer/iota-sdk/references/python/iota_sdk/secret_manager/#strongholdsecretmanager-objects).
 
@@ -116,7 +116,7 @@ that connects to the [Shimmer Testnet](https://api.testnet.shimmer.network) usin
 import {  Wallet, CoinType, WalletOptions } from '@iota/sdk';
 
 const walletOptions: WalletOptions = {
-    storagePath: `Alice`, // A name to associate with the created account.
+    storagePath: `Alice`, // A name to associate with the created wallet.
     clientOptions: {
         nodes: ['https://api.testnet.shimmer.network'], // The node to connect to.
     },
@@ -124,7 +124,7 @@ const walletOptions: WalletOptions = {
     secretManager: {
         // Setup Stronghold secret manager
         stronghold: {
-            snapshotPath: 'vault.stronghold', //  The path to store the account snapshot.
+            snapshotPath: 'vault.stronghold', //  The path to store the wallet snapshot.
             password: 'a-secure-password', // A password to encrypt the stored data. WARNING: Never hardcode passwords in production code.
         },
     },
