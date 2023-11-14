@@ -482,6 +482,7 @@ impl StorageScore for NftOutput {
             + self.immutable_features.storage_score(params)
     }
 }
+
 impl MinimumOutputAmount for NftOutput {}
 
 impl StateTransitionVerifier for NftOutput {

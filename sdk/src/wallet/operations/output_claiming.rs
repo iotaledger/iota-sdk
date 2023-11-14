@@ -11,7 +11,7 @@ use crate::{
         address::{Address, Ed25519Address},
         output::{
             unlock_condition::{AddressUnlockCondition, StorageDepositReturnUnlockCondition},
-            BasicOutputBuilder, NativeTokens, NativeTokensBuilder, NftOutputBuilder, Output, OutputId,
+            BasicOutput, BasicOutputBuilder, NativeTokens, NativeTokensBuilder, NftOutputBuilder, Output, OutputId,
         },
         slot::SlotIndex,
     },
@@ -242,10 +242,7 @@ where
             .iter()
             .map(|i| i.output.amount())
             .sum::<u64>()
-            >= BasicOutputBuilder::new_with_minimum_amount(storage_score_params)
-                .add_unlock_condition(AddressUnlockCondition::new(Ed25519Address::null()))
-                .finish()?
-                .amount();
+            >= BasicOutput::minimum_amount(&Address::from(Ed25519Address::null()), storage_score_params);
 
         // check native tokens
         for output_data in &outputs_to_claim {

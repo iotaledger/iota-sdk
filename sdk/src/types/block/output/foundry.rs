@@ -524,6 +524,7 @@ impl StorageScore for FoundryOutput {
             + self.immutable_features.storage_score(params)
     }
 }
+
 impl MinimumOutputAmount for FoundryOutput {}
 
 impl StateTransitionVerifier for FoundryOutput {

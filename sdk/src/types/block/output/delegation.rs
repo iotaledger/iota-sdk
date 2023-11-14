@@ -390,6 +390,7 @@ impl StorageScore for DelegationOutput {
             + self.unlock_conditions.storage_score(params)
     }
 }
+
 impl MinimumOutputAmount for DelegationOutput {}
 
 fn verify_validator_address<const VERIFY: bool>(validator_address: &AccountAddress) -> Result<(), Error> {

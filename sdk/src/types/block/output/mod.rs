@@ -367,7 +367,7 @@ impl Output {
                 });
             }
 
-            let minimum_deposit = minimum_storage_deposit(return_condition.return_address(), params);
+            let minimum_deposit = BasicOutput::minimum_amount(return_condition.return_address(), params);
 
             // `Minimum Storage Deposit` ≤ `Return Amount`
             if return_condition.amount() < minimum_deposit {
@@ -445,6 +445,7 @@ impl StorageScore for Output {
         }
     }
 }
+
 impl MinimumOutputAmount for Output {}
 
 pub(crate) fn verify_output_amount_supply(amount: u64, token_supply: u64) -> Result<(), Error> {
@@ -467,18 +468,6 @@ pub(crate) fn verify_output_amount_packable<const VERIFY: bool>(
         verify_output_amount(*amount, protocol_parameters.token_supply())?;
     }
     Ok(())
-}
-
-/// Computes the minimum amount that a storage deposit has to match to allow creating a return [`Output`] back to the
-/// sender [`Address`].
-fn minimum_storage_deposit(address: &Address, params: StorageScoreParameters) -> u64 {
-    // PANIC: This can never fail because the amount will always be within the valid range. Also, the actual value is
-    // not important, we are only interested in the storage requirements of the type.
-    BasicOutputBuilder::new_with_minimum_amount(params)
-        .add_unlock_condition(AddressUnlockCondition::new(address.clone()))
-        .finish()
-        .unwrap()
-        .amount()
 }
 
 /// A trait that is shared by all output types, which is used to calculate the minimum amount the output

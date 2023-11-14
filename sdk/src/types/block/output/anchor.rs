@@ -555,6 +555,7 @@ impl StorageScore for AnchorOutput {
             + self.immutable_features.storage_score(params)
     }
 }
+
 impl MinimumOutputAmount for AnchorOutput {}
 
 impl StateTransitionVerifier for AnchorOutput {

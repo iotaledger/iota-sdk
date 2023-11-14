@@ -13,7 +13,7 @@ use crate::{
                 AddressUnlockCondition, ExpirationUnlockCondition, StorageDepositReturnUnlockCondition,
                 TimelockUnlockCondition,
             },
-            BasicOutputBuilder, MinimumOutputAmount, NativeToken, NftId, NftOutputBuilder, Output,
+            BasicOutput, BasicOutputBuilder, MinimumOutputAmount, NativeToken, NftId, NftOutputBuilder, Output,
             StorageScoreParameters, UnlockCondition,
         },
         slot::SlotIndex,
@@ -106,7 +106,7 @@ where
         // Build output with minimum required storage deposit so we can use the amount in the next step
         let first_output = first_output_builder
             .with_minimum_amount(storage_score_params)
-            .finish_output(token_supply)?;
+            .finish_output()?;
 
         let mut second_output_builder = if nft_id.is_some() {
             OutputBuilder::Nft(NftOutputBuilder::from(first_output.as_nft()))
@@ -115,10 +115,8 @@ where
         };
 
         // TODO: Probably not good to use ed25519 always here, even if technically it's the same for now..
-        let min_amount_basic_output = BasicOutputBuilder::new_with_minimum_amount(storage_score_params)
-            .add_unlock_condition(AddressUnlockCondition::new(Ed25519Address::null()))
-            .finish()?
-            .amount();
+        let min_amount_basic_output =
+            BasicOutput::minimum_amount(&Address::from(Ed25519Address::null()), storage_score_params);
 
         let min_required_storage_deposit = first_output.minimum_amount(storage_score_params);
 
@@ -153,7 +151,7 @@ where
                 let min_storage_deposit_new_amount = second_output_builder
                     .clone()
                     .with_minimum_amount(storage_score_params)
-                    .finish_output(token_supply)?
+                    .finish_output()?
                     .amount();
 
                 if new_amount < min_storage_deposit_new_amount {
@@ -174,7 +172,7 @@ where
             }
         }
 
-        let third_output = second_output_builder.clone().finish_output(token_supply)?;
+        let third_output = second_output_builder.clone().finish_output()?;
         let mut final_amount = third_output.amount();
         // Now we have to make sure that our output also works with our available balance, without leaving <
         // min_storage_deposit_basic_output for a remainder (if not 0)
@@ -234,7 +232,7 @@ where
             }
         }
 
-        Ok(second_output_builder.finish_output(token_supply)?)
+        Ok(second_output_builder.finish_output()?)
     }
 
     // Create the initial output builder for prepare_output()
@@ -435,7 +433,7 @@ impl OutputBuilder {
         }
         self
     }
-    fn finish_output(self, token_supply: u64) -> Result<Output, crate::types::block::Error> {
+    fn finish_output(self) -> Result<Output, crate::types::block::Error> {
         match self {
             Self::Basic(b) => b.finish_output(),
             Self::Nft(b) => b.finish_output(),

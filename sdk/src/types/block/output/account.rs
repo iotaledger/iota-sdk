@@ -529,6 +529,7 @@ impl StorageScore for AccountOutput {
             + self.immutable_features.storage_score(params)
     }
 }
+
 impl MinimumOutputAmount for AccountOutput {}
 
 impl Packable for AccountOutput {

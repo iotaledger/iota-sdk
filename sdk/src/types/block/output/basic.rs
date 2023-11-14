@@ -365,6 +365,17 @@ impl BasicOutput {
             false
         }
     }
+
+    /// Computes the minimum amount of the most Basic Output.
+    pub fn minimum_amount(address: &Address, params: StorageScoreParameters) -> u64 {
+        // PANIC: This can never fail because the amount will always be within the valid range. Also, the actual value
+        // is not important, we are only interested in the storage requirements of the type.
+        BasicOutputBuilder::new_with_minimum_amount(params)
+            .add_unlock_condition(AddressUnlockCondition::new(address.clone()))
+            .finish()
+            .unwrap()
+            .amount()
+    }
 }
 
 impl StorageScore for BasicOutput {
@@ -376,6 +387,7 @@ impl StorageScore for BasicOutput {
             + self.features.storage_score(params)
     }
 }
+
 impl MinimumOutputAmount for BasicOutput {}
 
 fn verify_unlock_conditions<const VERIFY: bool>(unlock_conditions: &UnlockConditions) -> Result<(), Error> {

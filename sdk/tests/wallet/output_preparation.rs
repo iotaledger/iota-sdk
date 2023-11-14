@@ -6,10 +6,7 @@ use std::str::FromStr;
 use iota_sdk::{
     types::block::{
         address::{Address, Bech32Address, ToBech32Ext},
-        output::{
-            unlock_condition::AddressUnlockCondition, BasicOutputBuilder, MinimumOutputAmount, NativeToken, NftId,
-            TokenId,
-        },
+        output::{BasicOutput, MinimumOutputAmount, NativeToken, NftId, TokenId},
         slot::SlotIndex,
     },
     wallet::{Assets, Features, MintNftParams, OutputParams, Result, ReturnStrategy, StorageDeposit, Unlocks},
@@ -614,10 +611,7 @@ async fn prepare_output_remainder_dust() -> Result<()> {
     let storage_score_params = wallet_0.client().get_storage_score_parameters().await?;
 
     let balance = wallet_0.sync(None).await?;
-    let minimum_required_storage_deposit = BasicOutputBuilder::new_with_amount(0)
-        .add_unlock_condition(AddressUnlockCondition::new(wallet_1.address().await))
-        .finish()?
-        .minimum_amount(storage_score_params);
+    let minimum_amount = BasicOutput::minimum_amount(&*wallet_1.address().await, storage_score_params);
 
     // Send away most balance so we can test with leaving dust
     let output = wallet_0
@@ -644,7 +638,7 @@ async fn prepare_output_remainder_dust() -> Result<()> {
         .prepare_output(
             OutputParams {
                 recipient_address: wallet_1.address().await,
-                amount: minimum_required_storage_deposit - 1, // Leave less than min. deposit
+                amount: minimum_amount - 1, // Leave less than min. deposit
                 assets: None,
                 features: None,
                 unlocks: None,
@@ -668,7 +662,7 @@ async fn prepare_output_remainder_dust() -> Result<()> {
         .prepare_output(
             OutputParams {
                 recipient_address: wallet_1.address().await,
-                amount: minimum_required_storage_deposit - 1, // Leave less than min. deposit
+                amount: minimum_amount - 1, // Leave less than min. deposit
                 assets: None,
                 features: None,
                 unlocks: None,
