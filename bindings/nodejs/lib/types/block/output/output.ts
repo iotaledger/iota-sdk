@@ -13,7 +13,6 @@ import { HexEncodedString, NumericString, u64 } from '../../utils';
 import { TokenScheme, TokenSchemeDiscriminator } from './token-scheme';
 import { AccountId, NftId, AnchorId, DelegationId } from '../id';
 import { EpochIndex } from '../../block/slot';
-import { INativeToken } from '../../models/native-token';
 
 export type OutputId = HexEncodedString;
 
