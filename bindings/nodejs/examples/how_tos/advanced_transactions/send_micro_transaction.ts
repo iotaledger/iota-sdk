@@ -21,9 +21,7 @@ async function run() {
             storagePath: process.env.WALLET_DB_PATH,
         });
 
-        const account = await wallet.getAccount('Alice');
-
-        await account.sync();
+        await wallet.sync();
 
         // To sign a transaction we need to unlock stronghold.
         await wallet.setStrongholdPassword(process.env.STRONGHOLD_PASSWORD);
@@ -33,13 +31,13 @@ async function run() {
             'rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu';
         const amount = BigInt(1);
 
-        const transaction = await account.send(amount, address, {
+        const transaction = await wallet.send(amount, address, {
             allowMicroAmount: true,
         });
 
         console.log(`Transaction sent: ${transaction.transactionId}`);
 
-        const blockId = await account.reissueTransactionUntilIncluded(
+        const blockId = await wallet.reissueTransactionUntilIncluded(
             transaction.transactionId,
         );
 

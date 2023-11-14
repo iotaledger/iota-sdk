@@ -36,7 +36,7 @@ pub struct SendParams {
     address: Bech32Address,
     /// Bech32 encoded return address, to which the storage deposit will be returned if one is necessary
     /// given the provided amount. If a storage deposit is needed and a return address is not provided, it will
-    /// default to the first address of the account.
+    /// default to the address of the wallet.
     #[getset(get = "pub")]
     return_address: Option<Bech32Address>,
     /// Expiration in slot indices, after which the output will be available for the sender again, if not spent by the
