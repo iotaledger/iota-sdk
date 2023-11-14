@@ -105,7 +105,7 @@ pub async fn enter_or_generate_mnemonic() -> Result<Mnemonic, Error> {
     let mnemonic = match selected_choice {
         0 => generate_mnemonic(None, None).await?,
         1 => enter_mnemonic()?,
-        _ => unreachable!(),
+        _ => panic!("invalid choice index"),
     };
 
     Ok(mnemonic)
@@ -356,7 +356,7 @@ impl From<usize> for SecretManagerChoice {
             0 => Self::Stronghold,
             1 => Self::LedgerNano,
             2 => Self::LedgerNanoSimulator,
-            _ => unreachable!(),
+            _ => panic!("invalid choice index"),
         }
     }
 }
