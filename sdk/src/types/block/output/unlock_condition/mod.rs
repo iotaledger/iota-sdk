@@ -29,7 +29,7 @@ use crate::types::block::{address::Address, create_bitflags, protocol::ProtocolP
 #[derive(Clone, Eq, PartialEq, Hash, From, Packable)]
 #[packable(unpack_error = Error)]
 #[packable(unpack_visitor = ProtocolParameters)]
-#[packable(tag_type = u8, with_error = Error::InvalidOutputKind)]
+#[packable(tag_type = u8, with_error = Error::InvalidUnlockConditionKind)]
 pub enum UnlockCondition {
     /// An address unlock condition.
     #[packable(tag = AddressUnlockCondition::KIND)]
