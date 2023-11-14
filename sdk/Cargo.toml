@@ -45,7 +45,7 @@ iota-crypto = { version = "0.23.0", default-features = false, features = [
     "secp256k1",
 ] }
 iterator-sorted = { version = "0.1.0", default-features = false }
-packable = { version = "0.9.0", git = "https://github.com/thibault-martinez/common-rs", branch = "struct-level-verify-with", default-features = false, features = [
+packable = { version = "0.9.0", default-features = false, features = [
     "primitive-types",
 ] }
 paste = { version = "1.0.14", default-features = false }
