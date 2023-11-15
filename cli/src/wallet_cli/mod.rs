@@ -1201,11 +1201,17 @@ async fn print_outputs(mut outputs: Vec<OutputData>, title: &str) -> Result<(), 
         outputs.sort_unstable_by(outputs_ordering);
 
         for (i, output_data) in outputs.into_iter().enumerate() {
+            let kind_str = if output_data.output.is_implicit_account() {
+                "ImplicitAccount"
+            } else {
+                output_data.output.kind_str()
+            };
+
             println_log_info!(
                 "{:<5}{}\t{}\t{}",
                 i,
                 &output_data.output_id,
-                output_data.output.kind_str(),
+                kind_str,
                 if output_data.is_spent { "Spent" } else { "Unspent" },
             );
         }
