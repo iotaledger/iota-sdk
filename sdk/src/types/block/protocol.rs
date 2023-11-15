@@ -52,6 +52,8 @@ pub struct ProtocolParameters {
     /// TokenSupply defines the current token supply on the network.
     #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
     pub(crate) token_supply: u64,
+    /// Defines the slot of the genesis.
+    pub(crate) genesis_slot: u32,
     /// Genesis timestamp at which the slots start to count.
     #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
     pub(crate) genesis_unix_timestamp: u64,
@@ -106,6 +108,7 @@ impl Default for ProtocolParameters {
             storage_score_parameters: Default::default(),
             work_score_parameters: Default::default(),
             token_supply: 1_813_620_509_061_365,
+            genesis_slot: 0,
             genesis_unix_timestamp: 1582328545,
             slot_duration_in_seconds: 10,
             epoch_nearing_threshold: 20,
