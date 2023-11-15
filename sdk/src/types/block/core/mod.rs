@@ -29,28 +29,28 @@ use crate::types::block::{
 };
 
 #[derive(Clone, Debug, Eq, PartialEq, From)]
-pub enum Block {
+pub enum BlockBody {
     Basic(Box<BasicBlockBody>),
     Validation(Box<ValidationBlockBody>),
 }
 
-impl From<BasicBlockBody> for Block {
+impl From<BasicBlockBody> for BlockBody {
     fn from(value: BasicBlockBody) -> Self {
         Self::Basic(value.into())
     }
 }
 
-impl From<ValidationBlockBody> for Block {
+impl From<ValidationBlockBody> for BlockBody {
     fn from(value: ValidationBlockBody) -> Self {
         Self::Validation(value.into())
     }
 }
 
-impl TryFrom<Block> for BasicBlockBodyBuilder {
+impl TryFrom<BlockBody> for BasicBlockBodyBuilder {
     type Error = Error;
 
-    fn try_from(value: Block) -> Result<Self, Self::Error> {
-        if let Block::Basic(block) = value {
+    fn try_from(value: BlockBody) -> Result<Self, Self::Error> {
+        if let BlockBody::Basic(block) = value {
             Ok((*block).into())
         } else {
             Err(Error::InvalidBlockKind(value.kind()))
@@ -58,11 +58,11 @@ impl TryFrom<Block> for BasicBlockBodyBuilder {
     }
 }
 
-impl TryFrom<Block> for ValidationBlockBodyBuilder {
+impl TryFrom<BlockBody> for ValidationBlockBodyBuilder {
     type Error = Error;
 
-    fn try_from(value: Block) -> Result<Self, Self::Error> {
-        if let Block::Validation(block) = value {
+    fn try_from(value: BlockBody) -> Result<Self, Self::Error> {
+        if let BlockBody::Validation(block) = value {
             Ok((*block).into())
         } else {
             Err(Error::InvalidBlockKind(value.kind()))
@@ -70,8 +70,8 @@ impl TryFrom<Block> for ValidationBlockBodyBuilder {
     }
 }
 
-impl Block {
-    /// Return the block kind of a [`Block`].
+impl BlockBody {
+    /// Return the block body kind of a [`BlockBody`].
     pub fn kind(&self) -> u8 {
         match self {
             Self::Basic(_) => BasicBlockBody::KIND,
@@ -102,19 +102,19 @@ impl Block {
     }
 }
 
-impl Packable for Block {
+impl Packable for BlockBody {
     type UnpackError = Error;
     type UnpackVisitor = ProtocolParameters;
 
     fn pack<P: Packer>(&self, packer: &mut P) -> Result<(), P::Error> {
         match self {
-            Self::Basic(block_body) => {
+            Self::Basic(basic_block_body) => {
                 BasicBlockBody::KIND.pack(packer)?;
-                block_body.pack(packer)
+                basic_block_body.pack(packer)
             }
-            Self::Validation(block_body) => {
+            Self::Validation(validation_block_body) => {
                 ValidationBlockBody::KIND.pack(packer)?;
-                block_body.pack(packer)
+                validation_block_body.pack(packer)
             }
         }?;
 
@@ -150,24 +150,24 @@ pub(crate) mod dto {
     };
 
     #[derive(Clone, Debug, Eq, PartialEq, From)]
-    pub enum BlockDto {
+    pub enum BlockBodyDto {
         Basic(BasicBlockBodyDto),
         Validation(ValidationBlockBodyDto),
     }
 
-    impl From<&BasicBlockBody> for BlockDto {
+    impl From<&BasicBlockBody> for BlockBodyDto {
         fn from(value: &BasicBlockBody) -> Self {
             Self::Basic(value.into())
         }
     }
 
-    impl From<&ValidationBlockBody> for BlockDto {
+    impl From<&ValidationBlockBody> for BlockBodyDto {
         fn from(value: &ValidationBlockBody) -> Self {
             Self::Validation(value.into())
         }
     }
 
-    impl<'de> Deserialize<'de> for BlockDto {
+    impl<'de> Deserialize<'de> for BlockBodyDto {
         fn deserialize<D: serde::Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
             let value = Value::deserialize(d)?;
             Ok(
@@ -176,10 +176,11 @@ pub(crate) mod dto {
                     .and_then(Value::as_u64)
                     .ok_or_else(|| serde::de::Error::custom("invalid block body type"))? as u8
                 {
-                    BasicBlockBody::KIND => Self::Basic(
-                        BasicBlockBodyDto::deserialize(value)
-                            .map_err(|e| serde::de::Error::custom(format!("cannot deserialize basic block body: {e}")))?,
-                    ),
+                    BasicBlockBody::KIND => {
+                        Self::Basic(BasicBlockBodyDto::deserialize(value).map_err(|e| {
+                            serde::de::Error::custom(format!("cannot deserialize basic block body: {e}"))
+                        })?)
+                    }
                     ValidationBlockBody::KIND => {
                         Self::Validation(ValidationBlockBodyDto::deserialize(value).map_err(|e| {
                             serde::de::Error::custom(format!("cannot deserialize validation block body: {e}"))
@@ -191,52 +192,56 @@ pub(crate) mod dto {
         }
     }
 
-    impl Serialize for BlockDto {
+    impl Serialize for BlockBodyDto {
         fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
         where
             S: serde::Serializer,
         {
             #[derive(Serialize)]
             #[serde(untagged)]
-            enum BlockTypeDto_<'a> {
+            enum BlockBodyTypeDto_<'a> {
                 T0(&'a BasicBlockBodyDto),
                 T1(&'a ValidationBlockBodyDto),
             }
             #[derive(Serialize)]
-            struct TypedBlock<'a> {
+            struct TypedBlockBody<'a> {
                 #[serde(flatten)]
-                kind: BlockTypeDto_<'a>,
+                kind: BlockBodyTypeDto_<'a>,
             }
-            let block = match self {
-                Self::Basic(basic_block_body) => TypedBlock {
-                    kind: BlockTypeDto_::T0(basic_block_body),
+            let block_body = match self {
+                Self::Basic(basic_block_body) => TypedBlockBody {
+                    kind: BlockBodyTypeDto_::T0(basic_block_body),
                 },
-                Self::Validation(validation_block_body) => TypedBlock {
-                    kind: BlockTypeDto_::T1(validation_block_body),
+                Self::Validation(validation_block_body) => TypedBlockBody {
+                    kind: BlockBodyTypeDto_::T1(validation_block_body),
                 },
             };
-            block.serialize(serializer)
+            block_body.serialize(serializer)
         }
     }
 
-    impl From<&Block> for BlockDto {
-        fn from(value: &Block) -> Self {
+    impl From<&BlockBody> for BlockBodyDto {
+        fn from(value: &BlockBody) -> Self {
             match value {
-                Block::Basic(basic_block_body) => BasicBlockBodyDto::from(&**basic_block_body).into(),
-                Block::Validation(validation_block_body) => ValidationBlockBodyDto::from(validation_block_body.as_ref()).into(),
+                BlockBody::Basic(basic_block_body) => BasicBlockBodyDto::from(&**basic_block_body).into(),
+                BlockBody::Validation(validation_block_body) => {
+                    ValidationBlockBodyDto::from(validation_block_body.as_ref()).into()
+                }
             }
         }
     }
 
-    impl TryFromDto for Block {
-        type Dto = BlockDto;
+    impl TryFromDto for BlockBody {
+        type Dto = BlockBodyDto;
         type Error = Error;
 
         fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
             match dto {
-                Self::Dto::Basic(basic_block_body) => Ok(BasicBlockBody::try_from_dto_with_params_inner(basic_block_body, params)?.into()),
-                Self::Dto::Validation(validation_block_body) => {
-                    Ok(ValidationBlockBody::try_from_dto_with_params_inner(validation_block_body, params)?.into())
+                Self::Dto::Basic(basic_block_body_dto) => {
+                    Ok(BasicBlockBody::try_from_dto_with_params_inner(basic_block_body_dto, params)?.into())
+                }
+                Self::Dto::Validation(validation_block_body_dto) => {
+                    Ok(ValidationBlockBody::try_from_dto_with_params_inner(validation_block_body_dto, params)?.into())
                 }
             }
         }

@@ -9,7 +9,7 @@ use crate::{
     types::{
         api::core::OutputWithMetadataResponse,
         block::{
-            core::{BasicBlockBody, Block},
+            core::{BasicBlockBody, BlockBody},
             input::Input,
             output::{OutputId, OutputWithMetadata},
             payload::{signed_transaction::TransactionId, Payload, SignedTransactionPayload},
@@ -146,7 +146,7 @@ where
                             let transaction_id = *transaction_id;
                             match client.get_included_block(&transaction_id).await {
                                 Ok(signed_block) => {
-                                    if let Block::Basic(block) = signed_block.block() {
+                                    if let BlockBody::Basic(block) = signed_block.block() {
                                         if let Some(Payload::SignedTransaction(transaction_payload)) = block.payload() {
                                             let inputs_with_meta =
                                                 get_inputs_for_transaction_payload(&client, transaction_payload)

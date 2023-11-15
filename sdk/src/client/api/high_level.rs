@@ -15,7 +15,7 @@ use crate::{
     },
     types::block::{
         address::Bech32Address,
-        core::{BasicBlockBody, Block, SignedBlock},
+        core::{BasicBlockBody, BlockBody, SignedBlock},
         input::{Input, UtxoInput, INPUT_COUNT_MAX},
         output::OutputWithMetadata,
         payload::{signed_transaction::TransactionId, Payload},
@@ -29,8 +29,8 @@ impl Client {
     pub async fn inputs_from_transaction_id(&self, transaction_id: &TransactionId) -> Result<Vec<OutputWithMetadata>> {
         let signed_block = self.get_included_block(transaction_id).await?;
 
-        if let Block::Basic(block) = signed_block.block() {
-            let inputs = if let Some(Payload::SignedTransaction(t)) = block.payload() {
+        if let BlockBody::Basic(basic_block_body) = signed_block.block() {
+            let inputs = if let Some(Payload::SignedTransaction(t)) = basic_block_body.payload() {
                 t.transaction().inputs()
             } else {
                 return Err(Error::MissingTransactionPayload);

@@ -10,7 +10,7 @@ use serde::{de::Error as _, Deserialize, Deserializer, Serialize};
 use serde_json::Value;
 
 use super::Error;
-use crate::types::block::BlockDto;
+use crate::types::block::BlockBodyDto;
 
 type TopicHandler = Box<dyn Fn(&TopicEvent) + Send + Sync>;
 
@@ -33,8 +33,10 @@ pub struct TopicEvent {
 pub enum MqttPayload {
     /// In case it contains JSON.
     Json(Value),
-    /// In case it contains a `Block` object.
-    Block(BlockDto),
+    // TODO: should we still call this variant `Block`? It's less exact, but the mqtt topic will still be called
+    // `blocks` instead of `block_bodies`.
+    /// In case it contains a `BlockBody` object.
+    BlockBody(BlockBodyDto),
 }
 
 /// Mqtt events.

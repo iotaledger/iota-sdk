@@ -25,7 +25,7 @@ async fn test_mqtt() {
             ],
             move |evt| {
                 match &evt.payload {
-                    MqttPayload::Block(_) => {
+                    MqttPayload::BlockBody(_) => {
                         assert_eq!(evt.topic, "blocks");
                     }
                     MqttPayload::Json(_) => {

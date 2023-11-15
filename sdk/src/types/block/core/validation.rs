@@ -9,7 +9,7 @@ use packable::{
 };
 
 use crate::types::block::{
-    core::{parent::verify_parents_sets, Block, Parents},
+    core::{parent::verify_parents_sets, BlockBody, Parents},
     protocol::{ProtocolParameters, ProtocolParametersHash},
     Error,
 };
@@ -93,8 +93,8 @@ impl ValidationBlockBodyBuilder {
     }
 
     /// Finishes the builder into a [`BlockBody`].
-    pub fn finish_block_body(self) -> Result<Block, Error> {
-        Ok(Block::from(self.finish()?))
+    pub fn finish_block_body(self) -> Result<BlockBody, Error> {
+        Ok(BlockBody::from(self.finish()?))
     }
 }
 

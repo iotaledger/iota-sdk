@@ -9,7 +9,7 @@ use packable::{
 };
 
 use crate::types::block::{
-    core::{parent::verify_parents_sets, Block, Parents},
+    core::{parent::verify_parents_sets, BlockBody, Parents},
     payload::{OptionalPayload, Payload},
     protocol::ProtocolParameters,
     Error,
@@ -89,9 +89,9 @@ impl BasicBlockBodyBuilder {
         })
     }
 
-    /// Finishes the builder into a [`Block`].
-    pub fn finish_block(self) -> Result<Block, Error> {
-        Ok(Block::from(self.finish()?))
+    /// Finishes the builder into a [`BlockBody`].
+    pub fn finish_block_body(self) -> Result<BlockBody, Error> {
+        Ok(BlockBody::from(self.finish()?))
     }
 }
 

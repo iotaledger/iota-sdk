@@ -13,7 +13,7 @@ use iota_sdk::{
     types::{
         block::{
             payload::{dto::PayloadDto, Payload, TaggedDataPayload},
-            BlockDto, IssuerId, SignedBlock,
+            BlockBodyDto, IssuerId, SignedBlock,
         },
         TryFromDto,
     },
@@ -134,8 +134,8 @@ async fn client_from_wallet() -> Result<()> {
 //     let unsigned_block = match response {
 //         Response::UnsignedBlock(unsigned_block) => {
 //             match &unsigned_block.block {
-//                 BlockDto::Basic(b) => assert_eq!(b.payload.as_ref(), Some(&payload)),
-//                 BlockDto::Validation(v) => panic!("unexpected block {v:?}"),
+//                 BlockBodyDto::Basic(b) => assert_eq!(b.payload.as_ref(), Some(&payload)),
+//                 BlockBodyDto::Validation(v) => panic!("unexpected block body {v:?}"),
 //             }
 //             unsigned_block
 //         }
@@ -153,12 +153,12 @@ async fn client_from_wallet() -> Result<()> {
 //     .await;
 
 //     let signed_block = match response {
-//         Response::SignedBlock(block) => {
-//             match &block.block {
-//                 BlockDto::Basic(b) => assert_eq!(b.payload.as_ref(), Some(&payload)),
-//                 BlockDto::Validation(v) => panic!("unexpected block {v:?}"),
+//         Response::SignedBlock(block_body) => {
+//             match &block_body.block {
+//                 BlockBodyDto::Basic(b) => assert_eq!(b.payload.as_ref(), Some(&payload)),
+//                 BlockBodyDto::Validation(v) => panic!("unexpected block {v:?}"),
 //             }
-//             block
+//             block_body
 //         }
 //         _ => panic!("unexpected response {response:?}"),
 //     };

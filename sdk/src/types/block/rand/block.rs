@@ -18,7 +18,7 @@ use crate::types::block::{
         signature::rand_sign_ed25519,
         slot::{rand_slot_commitment_id, rand_slot_index},
     },
-    Block, BlockId,
+    BlockBody, BlockId,
 };
 
 /// Generates a random block id.
@@ -33,21 +33,23 @@ pub fn rand_block_ids(len: usize) -> Vec<BlockId> {
     parents
 }
 
-/// Generates a random basic block with given strong parents.
-pub fn rand_basic_block_with_strong_parents(strong_parents: basic::StrongParents) -> Block {
-    rand_basic_block_builder_with_strong_parents(strong_parents)
+/// Generates a random basic block body with given strong parents.
+pub fn rand_basic_block_body_with_strong_parents(strong_parents: basic::StrongParents) -> BlockBody {
+    rand_basic_block_body_builder_with_strong_parents(strong_parents)
         .with_payload(rand_payload_for_block())
-        .finish_block()
+        .finish_block_body()
         .unwrap()
 }
 
-/// Generates a random basic block builder with given strong parents.
-pub fn rand_basic_block_builder_with_strong_parents(strong_parents: basic::StrongParents) -> BasicBlockBodyBuilder {
-    Block::build_basic(strong_parents, rand_number())
+/// Generates a random basic block body builder with given strong parents.
+pub fn rand_basic_block_body_builder_with_strong_parents(
+    strong_parents: basic::StrongParents,
+) -> BasicBlockBodyBuilder {
+    BlockBody::build_basic(strong_parents, rand_number())
 }
 
-/// Generates a random signed block with given block.
-pub fn rand_signed_block_with_block(protocol_params: ProtocolParameters, block: Block) -> SignedBlock {
+/// Generates a random block with given block body.
+pub fn rand_block_with_block_body(protocol_params: ProtocolParameters, block: BlockBody) -> SignedBlock {
     SignedBlock::build(
         BlockHeader::new(
             protocol_params.version(),
@@ -67,7 +69,10 @@ pub fn rand_signed_block_with_strong_parents(
     protocol_params: ProtocolParameters,
     strong_parents: basic::StrongParents,
 ) -> SignedBlock {
-    rand_signed_block_with_block(protocol_params, rand_basic_block_with_strong_parents(strong_parents))
+    rand_block_with_block_body(
+        protocol_params,
+        rand_basic_block_body_with_strong_parents(strong_parents),
+    )
 }
 
 /// Generates a random signed block.

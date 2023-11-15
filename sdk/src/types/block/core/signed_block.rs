@@ -19,7 +19,7 @@ use crate::types::block::{
     protocol::ProtocolParameters,
     signature::Signature,
     slot::{SlotCommitmentId, SlotIndex},
-    Block, Error, IssuerId,
+    BlockBody, Error, IssuerId,
 };
 
 /// Builder for a [`SignedBlock`].
@@ -28,11 +28,11 @@ pub struct UnsignedBlock {
     /// The block header.
     pub(crate) header: BlockHeader,
     /// The inner block.
-    pub(crate) block: Block,
+    pub(crate) block: BlockBody,
 }
 
 impl UnsignedBlock {
-    pub fn new(header: BlockHeader, block: Block) -> Self {
+    pub fn new(header: BlockHeader, block: BlockBody) -> Self {
         Self { header, block }
     }
 
@@ -45,7 +45,7 @@ impl UnsignedBlock {
 
     /// Updates the block.
     #[inline(always)]
-    pub fn with_block(mut self, block: Block) -> Self {
+    pub fn with_block(mut self, block: BlockBody) -> Self {
         self.block = block;
         self
     }
@@ -172,7 +172,7 @@ pub struct SignedBlock {
     header: BlockHeader,
     /// The inner block.
     #[getset(get = "pub")]
-    block: Block,
+    block: BlockBody,
     /// The block signature, used to validate issuance capabilities.
     #[getset(get_copy = "pub")]
     signature: Signature,
@@ -186,7 +186,7 @@ impl SignedBlock {
 
     /// Creates a new [`SignedBlock`].
     #[inline(always)]
-    pub fn new(header: BlockHeader, block: Block, signature: impl Into<Signature>) -> Self {
+    pub fn new(header: BlockHeader, block: BlockBody, signature: impl Into<Signature>) -> Self {
         let signature = signature.into();
 
         Self {
@@ -198,7 +198,7 @@ impl SignedBlock {
 
     /// Creates a new [`SignedBlockBuilder`].
     #[inline(always)]
-    pub fn build(header: BlockHeader, block: Block) -> UnsignedBlock {
+    pub fn build(header: BlockHeader, block: BlockBody) -> UnsignedBlock {
         UnsignedBlock::new(header, block)
     }
 
@@ -310,7 +310,7 @@ impl Packable for SignedBlock {
 
         let header = BlockHeader::unpack::<_, VERIFY>(unpacker, protocol_params)?;
 
-        let block = Block::unpack::<_, VERIFY>(unpacker, protocol_params)?;
+        let block = BlockBody::unpack::<_, VERIFY>(unpacker, protocol_params)?;
 
         let signature = Signature::unpack::<_, VERIFY>(unpacker, &())?;
 
@@ -342,7 +342,7 @@ pub(crate) mod dto {
 
     use super::*;
     use crate::{
-        types::{block::core::dto::BlockDto, TryFromDto, ValidationParams},
+        types::{block::core::dto::BlockBodyDto, TryFromDto, ValidationParams},
         utils::serde::string,
     };
 
@@ -373,7 +373,7 @@ pub(crate) mod dto {
                     slot_commitment_id: value.slot_commitment_id(),
                     latest_finalized_slot: value.latest_finalized_slot(),
                     issuer_id: value.issuer_id(),
-                    block: BlockDto::from(&value.block),
+                    block: BlockBodyDto::from(&value.block),
                 },
                 signature: value.signature,
             }
@@ -410,7 +410,7 @@ pub(crate) mod dto {
                     dto.inner.latest_finalized_slot,
                     dto.inner.issuer_id,
                 ),
-                Block::try_from_dto_with_params_inner(dto.inner.block, params)?,
+                BlockBody::try_from_dto_with_params_inner(dto.inner.block, params)?,
                 dto.signature,
             ))
         }
@@ -427,7 +427,7 @@ pub(crate) mod dto {
         pub slot_commitment_id: SlotCommitmentId,
         pub latest_finalized_slot: SlotIndex,
         pub issuer_id: IssuerId,
-        pub block: BlockDto,
+        pub block: BlockBodyDto,
     }
 
     impl From<&UnsignedBlock> for UnsignedBlockDto {
@@ -439,7 +439,7 @@ pub(crate) mod dto {
                 slot_commitment_id: value.header.slot_commitment_id(),
                 latest_finalized_slot: value.header.latest_finalized_slot(),
                 issuer_id: value.header.issuer_id(),
-                block: BlockDto::from(&value.block),
+                block: BlockBodyDto::from(&value.block),
             }
         }
     }
@@ -474,7 +474,7 @@ pub(crate) mod dto {
                     dto.latest_finalized_slot,
                     dto.issuer_id,
                 ),
-                Block::try_from_dto_with_params_inner(dto.block, params)?,
+                BlockBody::try_from_dto_with_params_inner(dto.block, params)?,
             ))
         }
     }
