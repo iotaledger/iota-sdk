@@ -17,14 +17,12 @@ use log::LevelFilter;
 
 use crate::{
     error::Error,
-    helper::{
-        check_file_exists, enter_or_generate_mnemonic, generate_mnemonic, get_password, import_mnemonic,
-        select_secret_manager, SecretManagerChoice,
-    },
+    helper::{check_file_exists, generate_mnemonic, get_password, SecretManagerChoice},
     println_log_error, println_log_info,
 };
 
 const DEFAULT_LOG_LEVEL: &str = "debug";
+const DEFAULT_SECRET_MANAGER: &str = "stronghold";
 const DEFAULT_NODE_URL: &str = "https://api.testnet.shimmer.network";
 const DEFAULT_STRONGHOLD_SNAPSHOT_PATH: &str = "./stardust-cli-wallet.stronghold";
 const DEFAULT_WALLET_DATABASE_PATH: &str = "./stardust-cli-wallet-db";
@@ -35,7 +33,11 @@ pub struct WalletCli {
     /// Set the path to the wallet database.
     #[arg(long, value_name = "PATH", env = "WALLET_DATABASE_PATH", default_value = DEFAULT_WALLET_DATABASE_PATH)]
     pub wallet_db_path: String,
-    /// Set the path to the stronghold snapshot file.
+    /// Set the secret manager to use.
+    #[arg(short, long, value_name = "SECRET_MANAGER", default_value = DEFAULT_SECRET_MANAGER)]
+    pub secret_manager: SecretManagerChoice,
+    /// Set the path to the stronghold snapshot file. Ignored if the <SECRET_MANAGER> is not a Stronghold secret
+    /// manager.
     #[arg(long, value_name = "PATH", env = "STRONGHOLD_SNAPSHOT_PATH", default_value = DEFAULT_STRONGHOLD_SNAPSHOT_PATH)]
     pub stronghold_snapshot_path: String,
     /// Set the account to enter.
@@ -111,10 +113,30 @@ pub enum WalletCommand {
     Sync,
 }
 
+impl WalletCommand {
+    pub fn is_unlock_command(&self) -> bool {
+        match self {
+            Self::Accounts
+            | Self::Backup { .. }
+            | Self::ChangePassword { .. }
+            | Self::NewAccount { .. }
+            | Self::NodeInfo
+            | Self::SetNodeUrl { .. }
+            | Self::SetPow { .. }
+            | Self::Sync => true,
+            Self::Init(_)
+            | Self::MigrateStrongholdSnapshotV2ToV3 { .. }
+            | Self::Mnemonic { .. }
+            | Self::Restore { .. } => false,
+        }
+    }
+}
+
 #[derive(Debug, Clone, Args)]
 pub struct InitParameters {
+    // TODO: remove this field to make `InitParameters` independ from the secret manager being used?
     /// Set the path to a file containing mnemonics. If empty, a mnemonic has to be entered or will be randomly
-    /// generated.
+    /// generated. Only used by some secret managers.
     #[arg(short, long, value_name = "PATH")]
     pub mnemonic_file_path: Option<String>,
     /// Set the node to connect to with this wallet.
@@ -135,9 +157,7 @@ impl Default for InitParameters {
     }
 }
 
-pub async fn accounts_command(storage_path: &Path, snapshot_path: &Path) -> Result<(), Error> {
-    let password = get_password("Stronghold password", false)?;
-    let wallet = unlock_wallet(storage_path, snapshot_path, password).await?;
+pub async fn accounts_command(wallet: &Wallet) -> Result<(), Error> {
     let accounts = wallet.get_accounts().await?;
 
     println!("INDEX\tALIAS");
@@ -149,68 +169,36 @@ pub async fn accounts_command(storage_path: &Path, snapshot_path: &Path) -> Resu
     Ok(())
 }
 
-pub async fn backup_command(storage_path: &Path, snapshot_path: &Path, backup_path: &Path) -> Result<(), Error> {
-    let password = get_password("Stronghold password", !snapshot_path.exists())?;
-    let wallet = unlock_wallet(storage_path, snapshot_path, password.clone()).await?;
-    wallet.backup(backup_path.into(), password).await?;
+// TODO: should we allow the backup to have a different password?
+// TODO: allow backup wallet with ledger nano?
+pub async fn backup_command_stronghold(wallet: &Wallet, password: &Password, backup_path: &Path) -> Result<(), Error> {
+    wallet.backup(backup_path.into(), password.clone()).await?;
 
     println_log_info!("Wallet has been backed up to \"{}\".", backup_path.display());
 
     Ok(())
 }
 
-pub async fn change_password_command(storage_path: &Path, snapshot_path: &Path) -> Result<Wallet, Error> {
-    let password = get_password("Stronghold password", !snapshot_path.exists())?;
-    let wallet = unlock_wallet(storage_path, snapshot_path, password.clone()).await?;
-    let new_password = get_password("Stronghold new password", true)?;
-    wallet.change_stronghold_password(password, new_password).await?;
+pub async fn change_password_command(wallet: &Wallet, current_password: Password) -> Result<(), Error> {
+    let new_password = get_password("New Stronghold password", true)?;
+    wallet
+        .change_stronghold_password(current_password, new_password)
+        .await?;
 
     println_log_info!("The password has been changed");
 
-    Ok(wallet)
+    Ok(())
 }
 
 pub async fn init_command(
     storage_path: &Path,
-    snapshot_path: &Path,
+    secret_manager: SecretManager,
     parameters: InitParameters,
 ) -> Result<Wallet, Error> {
-    if storage_path.exists() {
-        return Err(Error::Miscellaneous(format!(
-            "cannot initialize: {} already exists",
-            storage_path.display()
-        )));
-    }
-    if snapshot_path.exists() {
-        return Err(Error::Miscellaneous(format!(
-            "cannot initialize: {} already exists",
-            snapshot_path.display()
-        )));
-    }
-
-    let secret_manager = match select_secret_manager().await? {
-        SecretManagerChoice::Stronghold => {
-            let password = get_password("Stronghold password", true)?;
-            let mnemonic = match parameters.mnemonic_file_path {
-                Some(path) => import_mnemonic(&path).await?,
-                None => enter_or_generate_mnemonic().await?,
-            };
-
-            let secret_manager = StrongholdSecretManager::builder()
-                .password(password)
-                .build(snapshot_path)?;
-            secret_manager.store_mnemonic(mnemonic).await?;
-
-            SecretManager::Stronghold(secret_manager)
-        }
-        SecretManagerChoice::LedgerNano => SecretManager::LedgerNano(LedgerSecretManager::new(false)),
-        SecretManagerChoice::LedgerNanoSimulator => SecretManager::LedgerNano(LedgerSecretManager::new(true)),
-    };
-
     Ok(Wallet::builder()
         .with_secret_manager(secret_manager)
         .with_client_options(ClientOptions::new().with_node(parameters.node_url.as_str())?)
-        .with_storage_path(storage_path.to_str().expect("invalid unicode"))
+        .with_storage_path(storage_path.to_str().expect("invalid wallet db path"))
         .with_coin_type(parameters.coin_type)
         .finish()
         .await?)
@@ -233,29 +221,25 @@ pub async fn mnemonic_command(output_file_name: Option<String>, output_stdout: O
     Ok(())
 }
 
-pub async fn new_account_command(
-    storage_path: &Path,
-    snapshot_path: &Path,
-    alias: Option<String>,
-) -> Result<(Wallet, AccountIdentifier), Error> {
-    let password = get_password("Stronghold password", !snapshot_path.exists())?;
-    let wallet = unlock_wallet(storage_path, snapshot_path, password).await?;
-
+pub async fn new_account_command(wallet: &Wallet, alias: Option<String>) -> Result<AccountIdentifier, Error> {
     let alias = add_account(&wallet, alias).await?;
 
-    Ok((wallet, alias))
+    Ok(alias)
 }
 
-pub async fn node_info_command(storage_path: &Path) -> Result<Wallet, Error> {
-    let wallet = unlock_wallet(storage_path, None, None).await?;
+pub async fn node_info_command(wallet: &Wallet) -> Result<(), Error> {
     let node_info = wallet.client().get_info().await?;
 
     println_log_info!("Current node info: {}", serde_json::to_string_pretty(&node_info)?);
 
-    Ok(wallet)
+    Ok(())
 }
 
-pub async fn restore_command(storage_path: &Path, snapshot_path: &Path, backup_path: &Path) -> Result<Wallet, Error> {
+pub async fn restore_command_stronghold(
+    storage_path: &Path,
+    snapshot_path: &Path,
+    backup_path: &Path,
+) -> Result<Wallet, Error> {
     check_file_exists(backup_path).await?;
 
     let mut builder = Wallet::builder();
@@ -293,22 +277,13 @@ pub async fn restore_command(storage_path: &Path, snapshot_path: &Path, backup_p
     Ok(wallet)
 }
 
-pub async fn set_node_url_command(storage_path: &Path, snapshot_path: &Path, url: String) -> Result<Wallet, Error> {
-    let password = get_password("Stronghold password", !snapshot_path.exists())?;
-    let wallet = unlock_wallet(storage_path, snapshot_path, password).await?;
+pub async fn set_node_url_command(wallet: &Wallet, url: String) -> Result<(), Error> {
     wallet.set_client_options(ClientOptions::new().with_node(&url)?).await?;
 
-    Ok(wallet)
+    Ok(())
 }
 
-pub async fn set_pow_command(
-    storage_path: &Path,
-    snapshot_path: &Path,
-    local_pow: bool,
-    worker_count: Option<usize>,
-) -> Result<Wallet, Error> {
-    let password = get_password("Stronghold password", !snapshot_path.exists())?;
-    let wallet = unlock_wallet(storage_path, snapshot_path, password).await?;
+pub async fn set_pow_command(wallet: &Wallet, local_pow: bool, worker_count: Option<usize>) -> Result<(), Error> {
     // Need to get the current node, so it's not removed
     let node = wallet.client().get_node().await?;
     let client_options = ClientOptions::new()
@@ -317,38 +292,40 @@ pub async fn set_pow_command(
         .with_pow_worker_count(worker_count);
     wallet.set_client_options(client_options).await?;
 
-    Ok(wallet)
+    Ok(())
 }
 
-pub async fn sync_command(storage_path: &Path, snapshot_path: &Path) -> Result<Wallet, Error> {
-    let password = get_password("Stronghold password", !snapshot_path.exists())?;
-    let wallet = unlock_wallet(storage_path, snapshot_path, password).await?;
+pub async fn sync_command(wallet: &Wallet) -> Result<(), Error> {
     let total_balance = wallet.sync(None).await?;
 
     println_log_info!("Synchronized all accounts: {:?}", total_balance);
 
-    Ok(wallet)
+    Ok(())
 }
 
-pub async fn unlock_wallet(
+pub async fn unlock_wallet_stronghold(
     storage_path: &Path,
-    snapshot_path: impl Into<Option<&Path>> + Send,
-    password: impl Into<Option<Password>> + Send,
+    snapshot_path: &Path,
+    password: Password,
 ) -> Result<Wallet, Error> {
-    let secret_manager = if let Some(password) = password.into() {
-        let snapshot_path = snapshot_path.into();
-        Some(SecretManager::Stronghold(
-            StrongholdSecretManager::builder()
-                .password(password)
-                .build(snapshot_path.ok_or(Error::Miscellaneous("Snapshot file path is not given".to_string()))?)?,
-        ))
-    } else {
-        None
-    };
+    let secret_manager = SecretManager::Stronghold(
+        StrongholdSecretManager::builder()
+            .password(password)
+            .build(snapshot_path)?,
+    );
 
+    unlock_wallet_inner(storage_path, secret_manager).await
+}
+
+pub async fn unlock_wallet_ledgernano(storage_path: &Path, is_simulator: bool) -> Result<Wallet, Error> {
+    let secret_manager = SecretManager::LedgerNano(LedgerSecretManager::new(is_simulator));
+    unlock_wallet_inner(storage_path, secret_manager).await
+}
+
+async fn unlock_wallet_inner(storage_path: &Path, secret_manager: SecretManager) -> Result<Wallet, Error> {
     let maybe_wallet = Wallet::builder()
         .with_secret_manager(secret_manager)
-        .with_storage_path(storage_path.to_str().expect("invalid unicode"))
+        .with_storage_path(storage_path.to_str().expect("invalid wallet db path"))
         .finish()
         .await;
 
