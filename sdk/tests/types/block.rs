@@ -11,7 +11,7 @@ use iota_sdk::types::{
             parents::rand_strong_parents,
             payload::rand_tagged_data_payload,
         },
-        SignedBlock, SignedBlockDto,
+        Block, BlockDto,
     },
     TryFromDto,
 };
@@ -150,8 +150,8 @@ fn dto_mismatch_version() {
             "signature": "0x3e4a492924302b3b093f1e4266757a1d2041480a3861271d4c2e646d4e3d08360a3e765e1a385a784f6753276c233123475867370a184573195d530b41643a1d"
         }
     });
-    let block_dto = serde_json::from_value::<SignedBlockDto>(block_dto_json).unwrap();
-    let block_res = SignedBlock::try_from_dto_with_params(block_dto, &protocol_parameters);
+    let block_dto = serde_json::from_value::<BlockDto>(block_dto_json).unwrap();
+    let block_res = Block::try_from_dto_with_params(block_dto, &protocol_parameters);
 
     assert_eq!(
         block_res,
@@ -191,8 +191,8 @@ fn dto_mismatch_network_id() {
             "signature": "0x3e4a492924302b3b093f1e4266757a1d2041480a3861271d4c2e646d4e3d08360a3e765e1a385a784f6753276c233123475867370a184573195d530b41643a1d"
         }
     });
-    let block_dto = serde_json::from_value::<SignedBlockDto>(block_dto_json).unwrap();
-    let block_res = SignedBlock::try_from_dto_with_params(block_dto, &protocol_parameters);
+    let block_dto = serde_json::from_value::<BlockDto>(block_dto_json).unwrap();
+    let block_res = Block::try_from_dto_with_params(block_dto, &protocol_parameters);
 
     assert_eq!(
         block_res,

@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 pub mod basic;
+mod block;
 mod parent;
-mod signed_block;
 pub mod validation;
 
 use alloc::boxed::Box;
@@ -19,8 +19,8 @@ use packable::{
 
 pub use self::{
     basic::{BasicBlockBody, BasicBlockBodyBuilder},
+    block::{Block, BlockHeader, UnsignedBlock},
     parent::Parents,
-    signed_block::{BlockHeader, SignedBlock, UnsignedBlock},
     validation::{ValidationBlockBody, ValidationBlockBodyBuilder},
 };
 use crate::types::block::{
@@ -143,7 +143,7 @@ pub(crate) mod dto {
     use serde_json::Value;
 
     use super::*;
-    pub use crate::types::block::core::signed_block::dto::{SignedBlockDto, UnsignedBlockDto};
+    pub use crate::types::block::core::block::dto::{BlockDto, UnsignedBlockDto};
     use crate::types::{
         block::core::{basic::dto::BasicBlockBodyDto, validation::dto::ValidationBlockBodyDto},
         TryFromDto, ValidationParams,

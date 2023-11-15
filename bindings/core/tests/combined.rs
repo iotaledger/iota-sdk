@@ -13,7 +13,7 @@ use iota_sdk::{
     types::{
         block::{
             payload::{dto::PayloadDto, Payload, TaggedDataPayload},
-            BlockBodyDto, IssuerId, SignedBlock,
+            Block, BlockBodyDto, IssuerId,
         },
         TryFromDto,
     },

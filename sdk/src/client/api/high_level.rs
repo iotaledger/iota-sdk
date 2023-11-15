@@ -15,7 +15,7 @@ use crate::{
     },
     types::block::{
         address::Bech32Address,
-        core::{BasicBlockBody, BlockBody, SignedBlock},
+        core::{BasicBlockBody, Block, BlockBody},
         input::{Input, UtxoInput, INPUT_COUNT_MAX},
         output::OutputWithMetadata,
         payload::{signed_transaction::TransactionId, Payload},
@@ -27,9 +27,9 @@ use crate::{
 impl Client {
     /// Get the inputs of a transaction for the given transaction id.
     pub async fn inputs_from_transaction_id(&self, transaction_id: &TransactionId) -> Result<Vec<OutputWithMetadata>> {
-        let signed_block = self.get_included_block(transaction_id).await?;
+        let block = self.get_included_block(transaction_id).await?;
 
-        if let BlockBody::Basic(basic_block_body) = signed_block.block() {
+        if let BlockBody::Basic(basic_block_body) = block.body() {
             let inputs = if let Some(Payload::SignedTransaction(t)) = basic_block_body.payload() {
                 t.transaction().inputs()
             } else {
@@ -47,13 +47,13 @@ impl Client {
         } else {
             Err(Error::UnexpectedBlockBodyKind {
                 expected: BasicBlockBody::KIND,
-                actual: signed_block.block().kind(),
+                actual: block.body().kind(),
             })
         }
     }
 
     /// Find all blocks by provided block IDs.
-    pub async fn find_blocks(&self, block_ids: &[BlockId]) -> Result<Vec<SignedBlock>> {
+    pub async fn find_blocks(&self, block_ids: &[BlockId]) -> Result<Vec<Block>> {
         // Use a `HashSet` to prevent duplicate block_ids.
         let block_ids = block_ids.iter().copied().collect::<HashSet<_>>();
         futures::future::try_join_all(block_ids.iter().map(|block_id| self.get_block(block_id))).await

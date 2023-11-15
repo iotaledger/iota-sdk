@@ -6,7 +6,7 @@ use alloc::vec::Vec;
 use crate::types::block::{
     core::{
         basic::{self, BasicBlockBodyBuilder},
-        BlockHeader, SignedBlock, UnsignedBlock,
+        Block, BlockHeader, UnsignedBlock,
     },
     protocol::ProtocolParameters,
     rand::{
@@ -49,8 +49,8 @@ pub fn rand_basic_block_body_builder_with_strong_parents(
 }
 
 /// Generates a random block with given block body.
-pub fn rand_block_with_block_body(protocol_params: ProtocolParameters, block: BlockBody) -> SignedBlock {
-    SignedBlock::build(
+pub fn rand_block_with_block_body(protocol_params: ProtocolParameters, block: BlockBody) -> Block {
+    Block::build(
         BlockHeader::new(
             protocol_params.version(),
             protocol_params.network_id(),
@@ -68,7 +68,7 @@ pub fn rand_block_with_block_body(protocol_params: ProtocolParameters, block: Bl
 pub fn rand_signed_block_with_strong_parents(
     protocol_params: ProtocolParameters,
     strong_parents: basic::StrongParents,
-) -> SignedBlock {
+) -> Block {
     rand_block_with_block_body(
         protocol_params,
         rand_basic_block_body_with_strong_parents(strong_parents),
@@ -76,16 +76,16 @@ pub fn rand_signed_block_with_strong_parents(
 }
 
 /// Generates a random signed block.
-pub fn rand_signed_block(protocol_params: ProtocolParameters) -> SignedBlock {
+pub fn rand_signed_block(protocol_params: ProtocolParameters) -> Block {
     rand_signed_block_with_strong_parents(protocol_params, rand_strong_parents())
 }
 
 pub trait SignBlockRandom {
-    fn sign_random(self) -> SignedBlock;
+    fn sign_random(self) -> Block;
 }
 
 impl SignBlockRandom for UnsignedBlock {
-    fn sign_random(self) -> SignedBlock {
+    fn sign_random(self) -> Block {
         let signing_input = self.signing_input();
         self.finish(rand_sign_ed25519(&signing_input)).unwrap()
     }

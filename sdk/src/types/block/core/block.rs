@@ -22,18 +22,18 @@ use crate::types::block::{
     BlockBody, Error, IssuerId,
 };
 
-/// Builder for a [`SignedBlock`].
+/// Block without a signature. Can be finished into a [`Block`].
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct UnsignedBlock {
     /// The block header.
     pub(crate) header: BlockHeader,
-    /// The inner block.
-    pub(crate) block: BlockBody,
+    /// The block body.
+    pub(crate) body: BlockBody,
 }
 
 impl UnsignedBlock {
-    pub fn new(header: BlockHeader, block: BlockBody) -> Self {
-        Self { header, block }
+    pub fn new(header: BlockHeader, body: BlockBody) -> Self {
+        Self { header, body }
     }
 
     /// Updates the block header.
@@ -43,21 +43,21 @@ impl UnsignedBlock {
         self
     }
 
-    /// Updates the block.
+    /// Updates the block body.
     #[inline(always)]
-    pub fn with_block(mut self, block: BlockBody) -> Self {
-        self.block = block;
+    pub fn with_block_body(mut self, body: BlockBody) -> Self {
+        self.body = body;
         self
     }
 
     /// Get the signing input that can be used to generate a [`Signature`](crate::types::block::signature::Signature)
     /// for the resulting block.
     pub fn signing_input(&self) -> Vec<u8> {
-        [self.header.hash(), self.block.hash()].concat()
+        [self.header.hash(), self.body.hash()].concat()
     }
 
-    pub fn finish(self, signature: impl Into<Signature>) -> Result<SignedBlock, Error> {
-        Ok(SignedBlock::new(self.header, self.block, signature))
+    pub fn finish(self, signature: impl Into<Signature>) -> Result<Block, Error> {
+        Ok(Block::new(self.header, self.body, signature))
     }
 }
 
@@ -167,72 +167,72 @@ impl Packable for BlockHeader {
 
 /// Represent the object that nodes gossip around the network.
 #[derive(Clone, Debug, Eq, PartialEq, Getters, CopyGetters)]
-pub struct SignedBlock {
+pub struct Block {
     #[getset(skip)]
     header: BlockHeader,
-    /// The inner block.
+    /// The block body.
     #[getset(get = "pub")]
-    block: BlockBody,
+    body: BlockBody,
     /// The block signature, used to validate issuance capabilities.
     #[getset(get_copy = "pub")]
     signature: Signature,
 }
 
-impl SignedBlock {
+impl Block {
     /// The minimum number of bytes in a block.
     pub const LENGTH_MIN: usize = 46;
     /// The maximum number of bytes in a block.
     pub const LENGTH_MAX: usize = 32768;
 
-    /// Creates a new [`SignedBlock`].
+    /// Creates a new [`Block`].
     #[inline(always)]
-    pub fn new(header: BlockHeader, block: BlockBody, signature: impl Into<Signature>) -> Self {
+    pub fn new(header: BlockHeader, body: BlockBody, signature: impl Into<Signature>) -> Self {
         let signature = signature.into();
 
         Self {
             header,
-            block,
+            body,
             signature,
         }
     }
 
-    /// Creates a new [`SignedBlockBuilder`].
+    /// Creates a new [`UnsignedBlock`].
     #[inline(always)]
-    pub fn build(header: BlockHeader, block: BlockBody) -> UnsignedBlock {
-        UnsignedBlock::new(header, block)
+    pub fn build(header: BlockHeader, body: BlockBody) -> UnsignedBlock {
+        UnsignedBlock::new(header, body)
     }
 
-    /// Returns the protocol version of a [`SignedBlock`].
+    /// Returns the protocol version of a [`Block`].
     #[inline(always)]
     pub fn protocol_version(&self) -> u8 {
         self.header.protocol_version()
     }
 
-    /// Returns the network id of a [`SignedBlock`].
+    /// Returns the network id of a [`Block`].
     #[inline(always)]
     pub fn network_id(&self) -> u64 {
         self.header.network_id()
     }
 
-    /// Returns the issuing time of a [`SignedBlock`].
+    /// Returns the issuing time of a [`Block`].
     #[inline(always)]
     pub fn issuing_time(&self) -> u64 {
         self.header.issuing_time()
     }
 
-    /// Returns the slot commitment ID of a [`SignedBlock`].
+    /// Returns the slot commitment ID of a [`Block`].
     #[inline(always)]
     pub fn slot_commitment_id(&self) -> SlotCommitmentId {
         self.header.slot_commitment_id()
     }
 
-    /// Returns the latest finalized slot of a [`SignedBlock`].
+    /// Returns the latest finalized slot of a [`Block`].
     #[inline(always)]
     pub fn latest_finalized_slot(&self) -> SlotIndex {
         self.header.latest_finalized_slot()
     }
 
-    /// Returns the issuer ID of a [`SignedBlock`].
+    /// Returns the issuer ID of a [`Block`].
     #[inline(always)]
     pub fn issuer_id(&self) -> IssuerId {
         self.header.issuer_id()
@@ -242,7 +242,7 @@ impl SignedBlock {
     pub fn id(&self, protocol_params: &ProtocolParameters) -> BlockId {
         let id = [
             &self.header.hash()[..],
-            &self.block.hash()[..],
+            &self.body.hash()[..],
             &self.signature.pack_to_vec(),
         ]
         .concat();
@@ -250,7 +250,7 @@ impl SignedBlock {
         block_hash.into_block_id(protocol_params.slot_index(self.header.issuing_time() / 1000000000))
     }
 
-    /// Unpacks a [`SignedBlock`] from a sequence of bytes doing syntactical checks and verifying that
+    /// Unpacks a [`Block`] from a sequence of bytes doing syntactical checks and verifying that
     /// there are no trailing bytes in the sequence.
     pub fn unpack_strict<T: AsRef<[u8]>>(
         bytes: T,
@@ -267,36 +267,36 @@ impl SignedBlock {
         Ok(block)
     }
 
-    /// Checks whether the inner block body is a [`BasicBlockBody`].
+    /// Checks whether the block body is a [`BasicBlockBody`].
     pub fn is_basic(&self) -> bool {
-        self.block.is_basic()
+        self.body.is_basic()
     }
 
-    /// Gets the inner block body as an actual [`BasicBlockBody`].
-    /// NOTE: Will panic if the inner block body is not a [`BasicBlockBody`].
+    /// Gets the block body as an actual [`BasicBlockBody`].
+    /// NOTE: Will panic if the block body is not a [`BasicBlockBody`].
     pub fn as_basic(&self) -> &BasicBlockBody {
-        self.block.as_basic()
+        self.body.as_basic()
     }
 
-    /// Checks whether the inner block is a [`ValidationBlockBody`].
+    /// Checks whether the block body is a [`ValidationBlockBody`].
     pub fn is_validation(&self) -> bool {
-        self.block.is_validation()
+        self.body.is_validation()
     }
 
-    /// Gets the inner block as an actual [`ValidationBlockBody`].
-    /// NOTE: Will panic if the inner block is not a [`ValidationBlockBody`].
+    /// Gets the block body as an actual [`ValidationBlockBody`].
+    /// NOTE: Will panic if the block body is not a [`ValidationBlockBody`].
     pub fn as_validation(&self) -> &ValidationBlockBody {
-        self.block.as_validation()
+        self.body.as_validation()
     }
 }
 
-impl Packable for SignedBlock {
+impl Packable for Block {
     type UnpackError = Error;
     type UnpackVisitor = ProtocolParameters;
 
     fn pack<P: Packer>(&self, packer: &mut P) -> Result<(), P::Error> {
         self.header.pack(packer)?;
-        self.block.pack(packer)?;
+        self.body.pack(packer)?;
         self.signature.pack(packer)?;
 
         Ok(())
@@ -309,30 +309,28 @@ impl Packable for SignedBlock {
         let start_opt = unpacker.read_bytes();
 
         let header = BlockHeader::unpack::<_, VERIFY>(unpacker, protocol_params)?;
-
-        let block = BlockBody::unpack::<_, VERIFY>(unpacker, protocol_params)?;
-
+        let body = BlockBody::unpack::<_, VERIFY>(unpacker, protocol_params)?;
         let signature = Signature::unpack::<_, VERIFY>(unpacker, &())?;
 
-        let signed_block = Self {
+        let block = Self {
             header,
-            block,
+            body,
             signature,
         };
 
         if VERIFY {
-            let signed_block_len = if let (Some(start), Some(end)) = (start_opt, unpacker.read_bytes()) {
+            let block_len = if let (Some(start), Some(end)) = (start_opt, unpacker.read_bytes()) {
                 end - start
             } else {
-                signed_block.packed_len()
+                block.packed_len()
             };
 
-            if signed_block_len > Self::LENGTH_MAX {
-                return Err(UnpackError::Packable(Error::InvalidSignedBlockLength(signed_block_len)));
+            if block_len > Self::LENGTH_MAX {
+                return Err(UnpackError::Packable(Error::InvalidBlockLength(block_len)));
             }
         }
 
-        Ok(signed_block)
+        Ok(block)
     }
 }
 
@@ -349,13 +347,13 @@ pub(crate) mod dto {
     /// The block object that nodes gossip around in the network.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
-    pub struct SignedBlockDto {
+    pub struct BlockDto {
         #[serde(flatten)]
         pub inner: UnsignedBlockDto,
         pub signature: Signature,
     }
 
-    impl core::ops::Deref for SignedBlockDto {
+    impl core::ops::Deref for BlockDto {
         type Target = UnsignedBlockDto;
 
         fn deref(&self) -> &Self::Target {
@@ -363,8 +361,8 @@ pub(crate) mod dto {
         }
     }
 
-    impl From<&SignedBlock> for SignedBlockDto {
-        fn from(value: &SignedBlock) -> Self {
+    impl From<&Block> for BlockDto {
+        fn from(value: &Block) -> Self {
             Self {
                 inner: UnsignedBlockDto {
                     protocol_version: value.protocol_version(),
@@ -373,15 +371,15 @@ pub(crate) mod dto {
                     slot_commitment_id: value.slot_commitment_id(),
                     latest_finalized_slot: value.latest_finalized_slot(),
                     issuer_id: value.issuer_id(),
-                    block: BlockBodyDto::from(&value.block),
+                    body: BlockBodyDto::from(&value.body),
                 },
                 signature: value.signature,
             }
         }
     }
 
-    impl TryFromDto for SignedBlock {
-        type Dto = SignedBlockDto;
+    impl TryFromDto for Block {
+        type Dto = BlockDto;
         type Error = Error;
 
         fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
@@ -410,7 +408,7 @@ pub(crate) mod dto {
                     dto.inner.latest_finalized_slot,
                     dto.inner.issuer_id,
                 ),
-                BlockBody::try_from_dto_with_params_inner(dto.inner.block, params)?,
+                BlockBody::try_from_dto_with_params_inner(dto.inner.body, params)?,
                 dto.signature,
             ))
         }
@@ -427,7 +425,7 @@ pub(crate) mod dto {
         pub slot_commitment_id: SlotCommitmentId,
         pub latest_finalized_slot: SlotIndex,
         pub issuer_id: IssuerId,
-        pub block: BlockBodyDto,
+        pub body: BlockBodyDto,
     }
 
     impl From<&UnsignedBlock> for UnsignedBlockDto {
@@ -439,7 +437,7 @@ pub(crate) mod dto {
                 slot_commitment_id: value.header.slot_commitment_id(),
                 latest_finalized_slot: value.header.latest_finalized_slot(),
                 issuer_id: value.header.issuer_id(),
-                block: BlockBodyDto::from(&value.block),
+                body: BlockBodyDto::from(&value.body),
             }
         }
     }
@@ -474,7 +472,7 @@ pub(crate) mod dto {
                     dto.latest_finalized_slot,
                     dto.issuer_id,
                 ),
-                BlockBody::try_from_dto_with_params_inner(dto.block, params)?,
+                BlockBody::try_from_dto_with_params_inner(dto.body, params)?,
             ))
         }
     }
