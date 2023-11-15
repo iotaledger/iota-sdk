@@ -10,8 +10,8 @@ use crate::types::block::{
     output::{
         chain_id::ChainId,
         unlock_condition::{verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions},
-        verify_output_amount_packable, MinimumOutputAmount, Output, OutputBuilderAmount, OutputId,
-        StateTransitionError, StateTransitionVerifier, StorageScore, StorageScoreParameters,
+        MinimumOutputAmount, Output, OutputBuilderAmount, OutputId, StateTransitionError, StateTransitionVerifier,
+        StorageScore, StorageScoreParameters,
     },
     protocol::ProtocolParameters,
     semantic::{SemanticValidationContext, TransactionFailureReason},
@@ -217,7 +217,6 @@ impl From<&DelegationOutput> for DelegationOutputBuilder {
 #[packable(unpack_visitor = ProtocolParameters)]
 pub struct DelegationOutput {
     /// Amount of IOTA coins to deposit with this output.
-    #[packable(verify_with = verify_output_amount_packable)]
     amount: u64,
     /// Amount of delegated IOTA coins.
     delegated_amount: u64,
