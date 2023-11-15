@@ -707,10 +707,7 @@ pub(crate) mod dto {
 
     use super::*;
     use crate::{
-        types::{
-            block::{output::unlock_condition::dto::UnlockConditionDto, Error},
-            TryFromDto, ValidationParams,
-        },
+        types::block::{output::unlock_condition::dto::UnlockConditionDto, Error},
         utils::serde::{prefix_hex_bytes, string},
     };
 
@@ -754,11 +751,10 @@ pub(crate) mod dto {
         }
     }
 
-    impl TryFromDto for AnchorOutput {
-        type Dto = AnchorOutputDto;
+    impl TryFrom<AnchorOutputDto> for AnchorOutput {
         type Error = Error;
 
-        fn try_from_dto_with_params_inner(dto: Self::Dto, _params: ValidationParams<'_>) -> Result<Self, Self::Error> {
+        fn try_from(dto: AnchorOutputDto) -> Result<Self, Self::Error> {
             let mut builder = AnchorOutputBuilder::new_with_amount(dto.amount, dto.anchor_id)
                 .with_mana(dto.mana)
                 .with_state_index(dto.state_index)
@@ -827,20 +823,17 @@ pub(crate) mod dto {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::types::{
-        block::{
-            output::dto::OutputDto,
-            protocol::protocol_parameters,
-            rand::output::{
-                feature::rand_allowed_features,
-                rand_anchor_id, rand_anchor_output,
-                unlock_condition::{
-                    rand_governor_address_unlock_condition_different_from,
-                    rand_state_controller_address_unlock_condition_different_from,
-                },
+    use crate::types::block::{
+        output::dto::OutputDto,
+        protocol::protocol_parameters,
+        rand::output::{
+            feature::rand_allowed_features,
+            rand_anchor_id, rand_anchor_output,
+            unlock_condition::{
+                rand_governor_address_unlock_condition_different_from,
+                rand_state_controller_address_unlock_condition_different_from,
             },
         },
-        TryFromDto,
     };
 
     #[test]
@@ -848,9 +841,9 @@ mod tests {
         let protocol_parameters = protocol_parameters();
         let output = rand_anchor_output(protocol_parameters.token_supply());
         let dto = OutputDto::Anchor((&output).into());
-        let output_unver = Output::try_from_dto(dto.clone()).unwrap();
+        let output_unver = Output::try_from(dto.clone()).unwrap();
         assert_eq!(&output, output_unver.as_anchor());
-        let output_ver = Output::try_from_dto_with_params(dto, &protocol_parameters).unwrap();
+        let output_ver = Output::try_from(dto).unwrap();
         assert_eq!(&output, output_ver.as_anchor());
 
         let output_split = AnchorOutput::try_from_dtos(

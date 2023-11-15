@@ -592,10 +592,7 @@ pub(crate) mod dto {
 
     use super::*;
     use crate::{
-        types::{
-            block::{output::unlock_condition::dto::UnlockConditionDto, Error},
-            TryFromDto, ValidationParams,
-        },
+        types::block::{output::unlock_condition::dto::UnlockConditionDto, Error},
         utils::serde::string,
     };
 
@@ -633,11 +630,10 @@ pub(crate) mod dto {
         }
     }
 
-    impl TryFromDto for NftOutput {
-        type Dto = NftOutputDto;
+    impl TryFrom<NftOutputDto> for NftOutput {
         type Error = Error;
 
-        fn try_from_dto_with_params_inner(dto: Self::Dto, _params: ValidationParams<'_>) -> Result<Self, Self::Error> {
+        fn try_from(dto: NftOutputDto) -> Result<Self, Self::Error> {
             let mut builder = NftOutputBuilder::new_with_amount(dto.amount, dto.nft_id)
                 .with_mana(dto.mana)
                 .with_native_tokens(dto.native_tokens)
@@ -699,18 +695,15 @@ mod tests {
     use pretty_assertions::assert_eq;
 
     use super::*;
-    use crate::types::{
-        block::{
-            output::{dto::OutputDto, FoundryId, SimpleTokenScheme, TokenId},
-            protocol::protocol_parameters,
-            rand::{
-                address::rand_account_address,
-                output::{
-                    feature::rand_allowed_features, rand_nft_output, unlock_condition::rand_address_unlock_condition,
-                },
+    use crate::types::block::{
+        output::{dto::OutputDto, FoundryId, SimpleTokenScheme, TokenId},
+        protocol::protocol_parameters,
+        rand::{
+            address::rand_account_address,
+            output::{
+                feature::rand_allowed_features, rand_nft_output, unlock_condition::rand_address_unlock_condition,
             },
         },
-        TryFromDto,
     };
 
     #[test]
@@ -718,9 +711,9 @@ mod tests {
         let protocol_parameters = protocol_parameters();
         let output = rand_nft_output(protocol_parameters.token_supply());
         let dto = OutputDto::Nft((&output).into());
-        let output_unver = Output::try_from_dto(dto.clone()).unwrap();
+        let output_unver = Output::try_from(dto.clone()).unwrap();
         assert_eq!(&output, output_unver.as_nft());
-        let output_ver = Output::try_from_dto_with_params(dto, &protocol_parameters).unwrap();
+        let output_ver = Output::try_from(dto).unwrap();
         assert_eq!(&output, output_ver.as_nft());
 
         let foundry_id = FoundryId::build(&rand_account_address(), 0, SimpleTokenScheme::KIND);

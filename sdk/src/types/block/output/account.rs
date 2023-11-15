@@ -628,10 +628,7 @@ pub(crate) mod dto {
 
     use super::*;
     use crate::{
-        types::{
-            block::{output::unlock_condition::dto::UnlockConditionDto, Error},
-            TryFromDto, ValidationParams,
-        },
+        types::block::{output::unlock_condition::dto::UnlockConditionDto, Error},
         utils::serde::string,
     };
 
@@ -672,11 +669,10 @@ pub(crate) mod dto {
         }
     }
 
-    impl TryFromDto for AccountOutput {
-        type Dto = AccountOutputDto;
+    impl TryFrom<AccountOutputDto> for AccountOutput {
         type Error = Error;
 
-        fn try_from_dto_with_params_inner(dto: Self::Dto, _params: ValidationParams<'_>) -> Result<Self, Self::Error> {
+        fn try_from(dto: AccountOutputDto) -> Result<Self, Self::Error> {
             let mut builder = AccountOutputBuilder::new_with_amount(dto.amount, dto.account_id)
                 .with_mana(dto.mana)
                 .with_foundry_counter(dto.foundry_counter)
@@ -744,19 +740,16 @@ mod tests {
     use pretty_assertions::assert_eq;
 
     use super::*;
-    use crate::types::{
-        block::{
-            output::{dto::OutputDto, FoundryId, SimpleTokenScheme, TokenId},
-            protocol::protocol_parameters,
-            rand::{
-                address::rand_account_address,
-                output::{
-                    feature::rand_allowed_features, rand_account_id, rand_account_output,
-                    unlock_condition::rand_address_unlock_condition_different_from_account_id,
-                },
+    use crate::types::block::{
+        output::{dto::OutputDto, FoundryId, SimpleTokenScheme, TokenId},
+        protocol::protocol_parameters,
+        rand::{
+            address::rand_account_address,
+            output::{
+                feature::rand_allowed_features, rand_account_id, rand_account_output,
+                unlock_condition::rand_address_unlock_condition_different_from_account_id,
             },
         },
-        TryFromDto,
     };
 
     #[test]
@@ -764,9 +757,9 @@ mod tests {
         let protocol_parameters = protocol_parameters();
         let output = rand_account_output(protocol_parameters.token_supply());
         let dto = OutputDto::Account((&output).into());
-        let output_unver = Output::try_from_dto(dto.clone()).unwrap();
+        let output_unver = Output::try_from(dto.clone()).unwrap();
         assert_eq!(&output, output_unver.as_account());
-        let output_ver = Output::try_from_dto_with_params(dto, &protocol_parameters).unwrap();
+        let output_ver = Output::try_from(dto).unwrap();
         assert_eq!(&output, output_ver.as_account());
 
         let output_split = AccountOutput::try_from_dtos(

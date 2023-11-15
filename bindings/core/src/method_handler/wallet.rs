@@ -297,12 +297,11 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
             Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
         }
         WalletMethod::PrepareTransaction { outputs, options } => {
-            let token_supply = wallet.client().get_token_supply().await?;
             let data = wallet
                 .prepare_transaction(
                     outputs
                         .into_iter()
-                        .map(|o| Ok(Output::try_from_dto_with_params(o, token_supply)?))
+                        .map(|o| Ok(Output::try_from(o)?))
                         .collect::<Result<Vec<Output>>>()?,
                     options,
                 )
@@ -342,12 +341,11 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
             Response::SentTransaction(TransactionWithMetadataDto::from(&transaction))
         }
         WalletMethod::SendOutputs { outputs, options } => {
-            let token_supply = wallet.client().get_token_supply().await?;
             let transaction = wallet
                 .send_outputs(
                     outputs
                         .into_iter()
-                        .map(|o| Ok(Output::try_from_dto_with_params(o, token_supply)?))
+                        .map(|o| Ok(Output::try_from(o)?))
                         .collect::<iota_sdk::wallet::Result<Vec<Output>>>()?,
                     options,
                 )

@@ -122,18 +122,14 @@ impl From<&OutputData> for OutputDataDto {
     }
 }
 
-impl TryFromDto for OutputData {
-    type Dto = OutputDataDto;
+impl TryFrom<OutputDataDto> for OutputData {
     type Error = BlockError;
 
-    fn try_from_dto_with_params_inner(
-        dto: Self::Dto,
-        params: crate::types::ValidationParams<'_>,
-    ) -> Result<Self, Self::Error> {
+    fn try_from(dto: OutputDataDto) -> Result<Self, Self::Error> {
         Ok(Self {
             output_id: dto.output_id,
             metadata: dto.metadata,
-            output: Output::try_from_dto_with_params(dto.output, params)?,
+            output: Output::try_from(dto.output)?,
             is_spent: dto.is_spent,
             address: dto.address,
             network_id: dto

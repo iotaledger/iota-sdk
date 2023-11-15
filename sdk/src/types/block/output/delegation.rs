@@ -434,12 +434,9 @@ pub(crate) mod dto {
 
     use super::*;
     use crate::{
-        types::{
-            block::{
-                output::{unlock_condition::dto::UnlockConditionDto, OutputBuilderAmount},
-                Error,
-            },
-            TryFromDto,
+        types::block::{
+            output::{unlock_condition::dto::UnlockConditionDto, OutputBuilderAmount},
+            Error,
         },
         utils::serde::string,
     };
@@ -475,14 +472,10 @@ pub(crate) mod dto {
         }
     }
 
-    impl TryFromDto for DelegationOutput {
-        type Dto = DelegationOutputDto;
+    impl TryFrom<DelegationOutputDto> for DelegationOutput {
         type Error = Error;
 
-        fn try_from_dto_with_params_inner(
-            dto: Self::Dto,
-            _params: crate::types::ValidationParams<'_>,
-        ) -> Result<Self, Self::Error> {
+        fn try_from(dto: DelegationOutputDto) -> Result<Self, Self::Error> {
             let mut builder = DelegationOutputBuilder::new_with_amount(
                 dto.amount,
                 dto.delegated_amount,

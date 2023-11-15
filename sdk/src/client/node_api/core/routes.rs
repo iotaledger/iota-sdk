@@ -226,10 +226,9 @@ impl ClientInner {
     pub async fn get_output(&self, output_id: &OutputId) -> Result<Output> {
         let path = &format!("api/core/v3/outputs/{output_id}");
 
-        let output = self.get_request::<OutputDto>(path, None, false, true).await?;
-        let token_supply = self.get_token_supply().await?;
-
-        Ok(Output::try_from_dto_with_params(output, token_supply)?)
+        Ok(Output::try_from(
+            self.get_request::<OutputDto>(path, None, false, true).await?,
+        )?)
     }
 
     /// Finds an output by its ID and returns it as raw bytes.
