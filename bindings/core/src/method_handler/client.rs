@@ -79,7 +79,6 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
                 unlock_conditions,
                 features,
                 immutable_features,
-                client.get_token_supply().await?,
             )?);
 
             Response::Output(OutputDto::from(&output))
@@ -101,7 +100,6 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
                 native_tokens,
                 unlock_conditions,
                 features,
-                client.get_token_supply().await?,
             )?);
 
             Response::Output(OutputDto::from(&output))
@@ -127,7 +125,6 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
                 unlock_conditions,
                 features,
                 immutable_features,
-                client.get_token_supply().await?,
             )?);
 
             Response::Output(OutputDto::from(&output))
@@ -153,7 +150,6 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
                 unlock_conditions,
                 features,
                 immutable_features,
-                client.get_token_supply().await?,
             )?);
 
             Response::Output(OutputDto::from(&output))

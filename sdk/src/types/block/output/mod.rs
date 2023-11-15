@@ -448,17 +448,17 @@ impl StorageScore for Output {
 
 impl MinimumOutputAmount for Output {}
 
-pub(crate) fn verify_output_amount_supply(amount: u64, token_supply: u64) -> Result<(), Error> {
-    if amount > token_supply {
-        Err(Error::InvalidOutputAmount(amount))
-    } else {
-        Ok(())
-    }
-}
+// pub(crate) fn verify_output_amount_supply(amount: u64, token_supply: u64) -> Result<(), Error> {
+//     if amount > token_supply {
+//         Err(Error::InvalidOutputAmount(amount))
+//     } else {
+//         Ok(())
+//     }
+// }
 
-pub(crate) fn verify_output_amount(amount: u64, token_supply: u64) -> Result<(), Error> {
-    verify_output_amount_supply(amount, token_supply)
-}
+// pub(crate) fn verify_output_amount(amount: u64, token_supply: u64) -> Result<(), Error> {
+//     verify_output_amount_supply(amount, token_supply)
+// }
 
 /// A trait that is shared by all output types, which is used to calculate the minimum amount the output
 /// must contain to satisfy its storage cost.

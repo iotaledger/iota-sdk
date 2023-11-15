@@ -33,7 +33,6 @@ async fn main() -> Result<()> {
     // Create a client instance.
     let client = Client::builder().with_node(&node_url)?.finish().await?;
 
-    let token_supply = client.get_token_supply().await?;
     let storage_score_params = client.get_storage_score_parameters().await?;
 
     let address = Address::try_from_bech32("rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy")?;
@@ -51,11 +50,7 @@ async fn main() -> Result<()> {
         // with storage deposit return unlock condition
         basic_output_builder
             .clone()
-            .add_unlock_condition(StorageDepositReturnUnlockCondition::new(
-                address.clone(),
-                1000000,
-                token_supply,
-            )?)
+            .add_unlock_condition(StorageDepositReturnUnlockCondition::new(address.clone(), 1000000))
             .finish_output()?,
         // with timeout unlock condition
         basic_output_builder

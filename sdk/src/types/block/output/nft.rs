@@ -225,7 +225,6 @@ impl NftOutputBuilder {
         mut self,
         return_address: impl Into<Address>,
         params: StorageScoreParameters,
-        token_supply: u64,
     ) -> Result<Self, Error> {
         Ok(match self.amount {
             OutputBuilderAmount::Amount(amount) => {
@@ -240,11 +239,8 @@ impl NftOutputBuilder {
                         .finish()?
                         .amount();
                     // Add a temporary storage deposit unlock condition so the new storage requirement can be calculated
-                    self = self.add_unlock_condition(StorageDepositReturnUnlockCondition::new(
-                        return_address.clone(),
-                        1,
-                        token_supply,
-                    )?);
+                    self =
+                        self.add_unlock_condition(StorageDepositReturnUnlockCondition::new(return_address.clone(), 1));
                     // Get the min amount of the output with the added storage deposit return unlock condition
                     let min_amount_with_sdruc = self.clone().finish()?.minimum_amount(params);
                     // If the return storage cost and amount are less than the required min
@@ -261,8 +257,7 @@ impl NftOutputBuilder {
                         .replace_unlock_condition(StorageDepositReturnUnlockCondition::new(
                             return_address,
                             sdruc_amount,
-                            token_supply,
-                        )?)
+                        ))
                 } else {
                     self
                 }
@@ -642,7 +637,7 @@ pub(crate) mod dto {
         type Dto = NftOutputDto;
         type Error = Error;
 
-        fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
+        fn try_from_dto_with_params_inner(dto: Self::Dto, _params: ValidationParams<'_>) -> Result<Self, Self::Error> {
             let mut builder = NftOutputBuilder::new_with_amount(dto.amount, dto.nft_id)
                 .with_mana(dto.mana)
                 .with_native_tokens(dto.native_tokens)
@@ -650,7 +645,7 @@ pub(crate) mod dto {
                 .with_immutable_features(dto.immutable_features);
 
             for u in dto.unlock_conditions {
-                builder = builder.add_unlock_condition(UnlockCondition::try_from_dto_with_params(u, &params)?);
+                builder = builder.add_unlock_condition(UnlockCondition::from(u));
             }
 
             builder.finish()
@@ -667,9 +662,7 @@ pub(crate) mod dto {
             unlock_conditions: Vec<UnlockConditionDto>,
             features: Option<Vec<Feature>>,
             immutable_features: Option<Vec<Feature>>,
-            params: impl Into<ValidationParams<'a>> + Send,
         ) -> Result<Self, Error> {
-            let params = params.into();
             let mut builder = match amount {
                 OutputBuilderAmount::Amount(amount) => NftOutputBuilder::new_with_amount(amount, *nft_id),
                 OutputBuilderAmount::MinimumAmount(params) => {
@@ -684,8 +677,8 @@ pub(crate) mod dto {
 
             let unlock_conditions = unlock_conditions
                 .into_iter()
-                .map(|u| UnlockCondition::try_from_dto_with_params(u, &params))
-                .collect::<Result<Vec<UnlockCondition>, Error>>()?;
+                .map(UnlockCondition::from)
+                .collect::<Vec<UnlockCondition>>();
             builder = builder.with_unlock_conditions(unlock_conditions);
 
             if let Some(features) = features {
@@ -740,7 +733,6 @@ mod tests {
             output.unlock_conditions().iter().map(Into::into).collect(),
             Some(output.features().to_vec()),
             Some(output.immutable_features().to_vec()),
-            &protocol_parameters,
         )
         .unwrap();
         assert_eq!(output, output_split);
@@ -754,7 +746,6 @@ mod tests {
                 builder.unlock_conditions.iter().map(Into::into).collect(),
                 Some(builder.features.iter().cloned().collect()),
                 Some(builder.immutable_features.iter().cloned().collect()),
-                &protocol_parameters,
             )
             .unwrap();
             assert_eq!(builder.finish().unwrap(), output_split);
