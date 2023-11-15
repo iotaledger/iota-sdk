@@ -26,12 +26,15 @@ pub use self::{
     nft::NftAddress,
     restricted::{AddressCapabilities, AddressCapabilityFlag, RestrictedAddress},
 };
-use crate::types::block::{
-    output::Output,
-    semantic::{SemanticValidationContext, TransactionFailureReason},
-    signature::Signature,
-    unlock::Unlock,
-    ConvertTo, Error,
+use crate::{
+    types::block::{
+        output::{Output, StorageScore, StorageScoreParameters},
+        semantic::{SemanticValidationContext, TransactionFailureReason},
+        signature::Signature,
+        unlock::Unlock,
+        Error,
+    },
+    utils::ConvertTo,
 };
 
 /// A generic address supporting different address kinds.
@@ -193,6 +196,20 @@ impl Address {
         }
 
         Ok(())
+    }
+}
+
+impl StorageScore for Address {
+    fn storage_score(&self, params: StorageScoreParameters) -> u64 {
+        match self {
+            Address::Ed25519(address) => address.storage_score(params),
+            Address::Account(address) => address.storage_score(params),
+            Address::Nft(address) => address.storage_score(params),
+            Address::Anchor(address) => address.storage_score(params),
+            Address::ImplicitAccountCreation(address) => address.storage_score(params),
+            Address::Multi(address) => address.storage_score(params),
+            Address::Restricted(address) => address.storage_score(params),
+        }
     }
 }
 

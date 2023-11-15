@@ -28,7 +28,11 @@ pub use self::{
     staking::StakingFeature,
     tag::TagFeature,
 };
-use crate::types::block::{create_bitflags, Error};
+use crate::types::block::{
+    create_bitflags,
+    output::{StorageScore, StorageScoreParameters},
+    Error,
+};
 
 ///
 #[derive(Clone, Eq, PartialEq, Hash, From, Packable)]
@@ -65,6 +69,19 @@ impl PartialOrd for Feature {
 impl Ord for Feature {
     fn cmp(&self, other: &Self) -> core::cmp::Ordering {
         self.kind().cmp(&other.kind())
+    }
+}
+
+impl StorageScore for Feature {
+    fn storage_score(&self, params: StorageScoreParameters) -> u64 {
+        match self {
+            Self::Sender(feature) => feature.storage_score(params),
+            Self::Issuer(feature) => feature.storage_score(params),
+            Self::Metadata(feature) => feature.storage_score(params),
+            Self::Tag(feature) => feature.storage_score(params),
+            Self::BlockIssuer(feature) => feature.storage_score(params),
+            Self::Staking(feature) => feature.storage_score(params),
+        }
     }
 }
 
@@ -222,6 +239,12 @@ impl Features {
     /// Gets a reference to a [`StakingFeature`], if any.
     pub fn staking(&self) -> Option<&StakingFeature> {
         self.get(StakingFeature::KIND).map(Feature::as_staking)
+    }
+}
+
+impl StorageScore for Features {
+    fn storage_score(&self, params: StorageScoreParameters) -> u64 {
+        self.iter().map(|f| f.storage_score(params)).sum::<u64>()
     }
 }
 

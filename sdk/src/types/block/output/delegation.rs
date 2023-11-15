@@ -3,26 +3,21 @@
 
 use alloc::collections::BTreeSet;
 
-use packable::Packable;
+use packable::{Packable, PackableExt};
 
-use crate::types::{
-    block::{
-        address::{AccountAddress, Address},
-        output::{
-            chain_id::ChainId,
-            unlock_condition::{
-                verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions,
-            },
-            verify_output_amount_min, verify_output_amount_packable, Output, OutputBuilderAmount, OutputId, Rent,
-            RentStructure, StateTransitionError, StateTransitionVerifier,
-        },
-        protocol::ProtocolParameters,
-        semantic::{SemanticValidationContext, TransactionFailureReason},
-        slot::EpochIndex,
-        unlock::Unlock,
-        Error,
+use crate::types::block::{
+    address::{AccountAddress, Address},
+    output::{
+        chain_id::ChainId,
+        unlock_condition::{verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions},
+        MinimumOutputAmount, Output, OutputBuilderAmount, OutputId, StateTransitionError, StateTransitionVerifier,
+        StorageScore, StorageScoreParameters,
     },
-    ValidationParams,
+    protocol::ProtocolParameters,
+    semantic::{SemanticValidationContext, TransactionFailureReason},
+    slot::EpochIndex,
+    unlock::Unlock,
+    Error,
 };
 
 crate::impl_id!(
@@ -74,16 +69,16 @@ impl DelegationOutputBuilder {
         )
     }
 
-    /// Creates a [`DelegationOutputBuilder`] with a provided rent structure.
-    /// The amount will be set to the minimum storage deposit.
-    pub fn new_with_minimum_storage_deposit(
-        rent_structure: RentStructure,
+    /// Creates a [`DelegationOutputBuilder`] with provided storage score parameters.
+    /// The amount will be set to the minimum required amount of the resulting output.
+    pub fn new_with_minimum_amount(
+        params: StorageScoreParameters,
         delegated_amount: u64,
         delegation_id: DelegationId,
         validator_address: AccountAddress,
     ) -> Self {
         Self::new(
-            OutputBuilderAmount::MinimumStorageDeposit(rent_structure),
+            OutputBuilderAmount::MinimumAmount(params),
             delegated_amount,
             delegation_id,
             validator_address,
@@ -113,9 +108,9 @@ impl DelegationOutputBuilder {
         self
     }
 
-    /// Sets the amount to the minimum storage deposit.
-    pub fn with_minimum_storage_deposit(mut self, rent_structure: RentStructure) -> Self {
-        self.amount = OutputBuilderAmount::MinimumStorageDeposit(rent_structure);
+    /// Sets the amount to the minimum required amount.
+    pub fn with_minimum_amount(mut self, params: StorageScoreParameters) -> Self {
+        self.amount = OutputBuilderAmount::MinimumAmount(params);
         self
     }
 
@@ -179,7 +174,7 @@ impl DelegationOutputBuilder {
         verify_unlock_conditions::<true>(&unlock_conditions)?;
 
         let mut output = DelegationOutput {
-            amount: 1u64,
+            amount: 0,
             delegated_amount: self.delegated_amount,
             delegation_id: self.delegation_id,
             validator_address: self.validator_address,
@@ -190,12 +185,8 @@ impl DelegationOutputBuilder {
 
         output.amount = match self.amount {
             OutputBuilderAmount::Amount(amount) => amount,
-            OutputBuilderAmount::MinimumStorageDeposit(rent_structure) => {
-                Output::Delegation(output.clone()).rent_cost(rent_structure)
-            }
+            OutputBuilderAmount::MinimumAmount(params) => output.minimum_amount(params),
         };
-
-        verify_output_amount_min(output.amount)?;
 
         Ok(output)
     }
@@ -226,7 +217,6 @@ impl From<&DelegationOutput> for DelegationOutputBuilder {
 #[packable(unpack_visitor = ProtocolParameters)]
 pub struct DelegationOutput {
     /// Amount of IOTA coins to deposit with this output.
-    #[packable(verify_with = verify_output_amount_packable)]
     amount: u64,
     /// Amount of delegated IOTA coins.
     delegated_amount: u64,
@@ -260,20 +250,15 @@ impl DelegationOutput {
         DelegationOutputBuilder::new_with_amount(amount, delegated_amount, delegation_id, validator_address)
     }
 
-    /// Creates a new [`DelegationOutputBuilder`] with a provided rent structure.
-    /// The amount will be set to the minimum storage deposit.
-    pub fn build_with_minimum_storage_deposit(
-        rent_structure: RentStructure,
+    /// Creates a new [`DelegationOutputBuilder`] with provided storage score parameters.
+    /// The amount will be set to the minimum required amount.
+    pub fn build_with_minimum_amount(
+        params: StorageScoreParameters,
         delegated_amount: u64,
         delegation_id: DelegationId,
         validator_address: AccountAddress,
     ) -> DelegationOutputBuilder {
-        DelegationOutputBuilder::new_with_minimum_storage_deposit(
-            rent_structure,
-            delegated_amount,
-            delegation_id,
-            validator_address,
-        )
+        DelegationOutputBuilder::new_with_minimum_amount(params, delegated_amount, delegation_id, validator_address)
     }
 
     /// Returns the amount of the [`DelegationOutput`].
@@ -395,6 +380,18 @@ impl StateTransitionVerifier for DelegationOutput {
     }
 }
 
+impl StorageScore for DelegationOutput {
+    fn storage_score(&self, params: StorageScoreParameters) -> u64 {
+        params.output_offset()
+            // Type byte
+            + (1 + self.packed_len() as u64) * params.data_factor() as u64
+            + params.delegation_offset()
+            + self.unlock_conditions.storage_score(params)
+    }
+}
+
+impl MinimumOutputAmount for DelegationOutput {}
+
 fn verify_validator_address<const VERIFY: bool>(validator_address: &AccountAddress) -> Result<(), Error> {
     if VERIFY && validator_address.is_null() {
         Err(Error::NullDelegationValidatorId)
@@ -442,7 +439,7 @@ pub(crate) mod dto {
                 output::{unlock_condition::dto::UnlockConditionDto, OutputBuilderAmount},
                 Error,
             },
-            TryFromDto,
+            TryFromDto, ValidationParams,
         },
         utils::serde::string,
     };
@@ -523,14 +520,12 @@ pub(crate) mod dto {
                     *delegation_id,
                     *validator_address,
                 ),
-                OutputBuilderAmount::MinimumStorageDeposit(rent_structure) => {
-                    DelegationOutputBuilder::new_with_minimum_storage_deposit(
-                        rent_structure,
-                        delegated_amount,
-                        *delegation_id,
-                        *validator_address,
-                    )
-                }
+                OutputBuilderAmount::MinimumAmount(params) => DelegationOutputBuilder::new_with_minimum_amount(
+                    params,
+                    delegated_amount,
+                    *delegation_id,
+                    *validator_address,
+                ),
             }
             .with_start_epoch(start_epoch)
             .with_end_epoch(end_epoch);

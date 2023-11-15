@@ -1,35 +1,30 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import {
-    Wallet,
-    CoinType,
-    initLogger,
-    WalletOptions,
-    SecretManager,
-} from '@iota/sdk';
+// This example creates a new database and wallet.
+// Run with command:
+// yarn run-example ./exchange/1-create-wallet.ts
+
+import { Wallet, WalletOptions, CoinType, SecretManager } from '@iota/sdk';
 
 // This example uses secrets in environment variables for simplicity which should not be done in production.
 require('dotenv').config({ path: '.env' });
 
-// Run with command:
-// yarn run-example ./how_tos/accounts_and_addresses/create-wallet.ts
-
-// This example creates a new database and wallet.
 async function run() {
-    initLogger();
-    for (const envVar of [
-        'NODE_URL',
-        'STRONGHOLD_PASSWORD',
-        'STRONGHOLD_SNAPSHOT_PATH',
-        'MNEMONIC',
-        'WALLET_DB_PATH',
-    ])
-        if (!(envVar in process.env)) {
-            throw new Error(`.env ${envVar} is undefined, see .env.example`);
-        }
-
     try {
+        for (const envVar of [
+            'WALLET_DB_PATH',
+            'NODE_URL',
+            'STRONGHOLD_SNAPSHOT_PATH',
+            'STRONGHOLD_PASSWORD',
+            'MNEMONIC',
+        ])
+            if (!(envVar in process.env)) {
+                throw new Error(
+                    `.env ${envVar} is undefined, see .env.example`,
+                );
+            }
+
         const strongholdSecretManager = {
             stronghold: {
                 snapshotPath: process.env.STRONGHOLD_SNAPSHOT_PATH,
@@ -68,11 +63,11 @@ async function run() {
 
         const wallet = new Wallet(walletOptions);
 
-        console.log(
-            'Generated wallet with address: ' + (await wallet.address()),
-        );
+        // Set syncOnlyMostBasicOutputs to true if not interested in outputs that are timelocked,
+        // have a storage deposit return, expiration or are nft/account/foundry outputs.
+        wallet.setDefaultSyncOptions({ syncOnlyMostBasicOutputs: true });
     } catch (error) {
-        console.error('Error: ', error);
+        console.error(error);
     }
 }
 

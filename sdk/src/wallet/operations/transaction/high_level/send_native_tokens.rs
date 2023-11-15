@@ -10,14 +10,12 @@ use crate::{
     types::block::{
         address::{Bech32Address, ToBech32Ext},
         output::{
-            unlock_condition::{
-                AddressUnlockCondition, ExpirationUnlockCondition, StorageDepositReturnUnlockCondition,
-            },
-            BasicOutputBuilder, MinimumStorageDepositBasicOutput, NativeToken, NativeTokens, TokenId,
+            unlock_condition::{AddressUnlockCondition, ExpirationUnlockCondition},
+            BasicOutputBuilder, NativeToken, NativeTokens, TokenId,
         },
         slot::SlotIndex,
-        ConvertTo,
     },
+    utils::ConvertTo,
     wallet::{
         constants::DEFAULT_EXPIRATION_SLOTS,
         operations::transaction::{TransactionOptions, TransactionWithMetadata},
@@ -36,7 +34,7 @@ pub struct SendNativeTokensParams {
     #[getset(get = "pub")]
     native_tokens: Vec<(TokenId, U256)>,
     /// Bech32 encoded address return address, to which the storage deposit will be returned. Default will use the
-    /// first address of the account
+    /// address of the wallet.
     #[getset(get = "pub")]
     return_address: Option<Bech32Address>,
     /// Expiration in slot indices, after which the output will be available for the sender again, if not spent by the
@@ -129,7 +127,7 @@ where
         I::IntoIter: Send,
     {
         log::debug!("[TRANSACTION] prepare_send_native_tokens");
-        let rent_structure = self.client().get_rent_structure().await?;
+        let storage_score_params = self.client().get_storage_score_parameters().await?;
         let token_supply = self.client().get_token_supply().await?;
 
         let wallet_address = self.address().await;
@@ -168,34 +166,20 @@ where
                     .collect::<Result<Vec<NativeToken>>>()?,
             )?;
 
-            // get minimum required amount for such an output, so we don't lock more than required
-            // We have to check it for every output individually, because different address types and amount of
-            // different native tokens require a different storage deposit
-            let storage_deposit_amount = MinimumStorageDepositBasicOutput::new(rent_structure, token_supply)
-                .with_native_tokens(native_tokens.clone())
-                .with_storage_deposit_return()?
-                .with_expiration()?
-                .finish()?;
-
             let expiration_slot_index = expiration
                 .map_or(slot_index + DEFAULT_EXPIRATION_SLOTS, |expiration_slot_index| {
                     slot_index + expiration_slot_index
                 });
 
             outputs.push(
-                BasicOutputBuilder::new_with_amount(storage_deposit_amount)
+                BasicOutputBuilder::new_with_amount(0)
                     .with_native_tokens(native_tokens)
                     .add_unlock_condition(AddressUnlockCondition::new(address))
-                    .add_unlock_condition(
-                        // We send the full storage_deposit_amount back to the sender, so only the native tokens are
-                        // sent
-                        StorageDepositReturnUnlockCondition::new(
-                            return_address.clone(),
-                            storage_deposit_amount,
-                            token_supply,
-                        )?,
-                    )
-                    .add_unlock_condition(ExpirationUnlockCondition::new(return_address, expiration_slot_index)?)
+                    .add_unlock_condition(ExpirationUnlockCondition::new(
+                        return_address.clone(),
+                        expiration_slot_index,
+                    )?)
+                    .with_sufficient_storage_deposit(return_address, storage_score_params, token_supply)?
                     .finish_output()?,
             )
         }

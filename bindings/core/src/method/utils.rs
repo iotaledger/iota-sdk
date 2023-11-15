@@ -4,7 +4,7 @@
 use derivative::Derivative;
 use iota_sdk::types::block::{
     address::{Bech32Address, Hrp},
-    output::{dto::OutputDto, AccountId, NftId, OutputId, RentStructure},
+    output::{dto::OutputDto, AccountId, NftId, OutputId, StorageScoreParameters},
     payload::signed_transaction::{
         dto::{SignedTransactionPayloadDto, TransactionDto},
         TransactionId,
@@ -128,8 +128,12 @@ pub enum UtilsMethod {
         /// The transaction.
         transaction: TransactionDto,
     },
-    /// Computes the required storage deposit of an output.
-    ComputeStorageDeposit { output: OutputDto, rent: RentStructure },
+    /// Computes the minimum required amount of an output.
+    #[serde(rename_all = "camelCase")]
+    ComputeMinimumOutputAmount {
+        output: OutputDto,
+        storage_score_parameters: StorageScoreParameters,
+    },
     /// Checks if the given mnemonic is valid.
     /// Expected response: [`Ok`](crate::Response::Ok)
     VerifyMnemonic {

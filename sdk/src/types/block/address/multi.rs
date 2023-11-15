@@ -15,7 +15,7 @@ use packable::{
     Packable,
 };
 
-use crate::types::block::{address::Address, Error};
+use crate::types::block::{address::Address, output::StorageScore, Error};
 
 pub(crate) type WeightedAddressCount =
     BoundedU8<{ *MultiAddress::ADDRESSES_COUNT.start() }, { *MultiAddress::ADDRESSES_COUNT.end() }>;
@@ -186,6 +186,8 @@ fn verify_cumulative_weight<const VERIFY: bool>(
     }
     Ok(())
 }
+
+impl StorageScore for MultiAddress {}
 
 impl fmt::Display for MultiAddress {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

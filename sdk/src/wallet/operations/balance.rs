@@ -5,7 +5,9 @@ use primitive_types::U256;
 
 use crate::{
     client::secret::SecretManage,
-    types::block::output::{unlock_condition::UnlockCondition, FoundryId, NativeTokensBuilder, Output, Rent},
+    types::block::output::{
+        unlock_condition::UnlockCondition, FoundryId, MinimumOutputAmount, NativeTokensBuilder, Output,
+    },
     wallet::{
         core::WalletData,
         operations::{helpers::time::can_output_be_unlocked_forever_from_now_on, output_claiming::OutputsToClaim},
@@ -34,9 +36,9 @@ where
         wallet_data: &WalletData,
     ) -> Result<Balance> {
         let network_id = self.client().get_network_id().await?;
-        let rent_structure = self.client().get_rent_structure().await?;
+        let storage_score_params = self.client().get_storage_score_parameters().await?;
         let mut balance = Balance::default();
-        let mut total_rent_amount = 0;
+        let mut total_storage_cost = 0;
         let mut total_native_tokens = NativeTokensBuilder::default();
 
         #[cfg(feature = "participation")]
@@ -58,7 +60,7 @@ where
             }
 
             let output = &output_data.output;
-            let rent = output.rent_cost(rent_structure);
+            let storage_cost = output.minimum_amount(storage_score_params);
 
             // Add account and foundry outputs here because they can't have a
             // [`StorageDepositReturnUnlockCondition`] or time related unlock conditions
@@ -67,9 +69,9 @@ where
                     // Add amount
                     balance.base_coin.total += output.amount();
                     // Add storage deposit
-                    balance.required_storage_deposit.account += rent;
+                    balance.required_storage_deposit.account += storage_cost;
                     if !wallet_data.locked_outputs.contains(output_id) {
-                        total_rent_amount += rent;
+                        total_storage_cost += storage_cost;
                     }
                     // Add native tokens
                     total_native_tokens.add_native_tokens(output.native_tokens().clone())?;
@@ -81,9 +83,9 @@ where
                     // Add amount
                     balance.base_coin.total += output.amount();
                     // Add storage deposit
-                    balance.required_storage_deposit.foundry += rent;
+                    balance.required_storage_deposit.foundry += storage_cost;
                     if !wallet_data.locked_outputs.contains(output_id) {
-                        total_rent_amount += rent;
+                        total_storage_cost += storage_cost;
                     }
                     // Add native tokens
                     total_native_tokens.add_native_tokens(output.native_tokens().clone())?;
@@ -109,19 +111,19 @@ where
 
                         // Add storage deposit
                         if output.is_basic() {
-                            balance.required_storage_deposit.basic += rent;
+                            balance.required_storage_deposit.basic += storage_cost;
                             if output
                                 .native_tokens()
                                 .map(|native_tokens| !native_tokens.is_empty())
                                 .unwrap_or(false)
                                 && !wallet_data.locked_outputs.contains(output_id)
                             {
-                                total_rent_amount += rent;
+                                total_storage_cost += storage_cost;
                             }
                         } else if output.is_nft() {
-                            balance.required_storage_deposit.nft += rent;
+                            balance.required_storage_deposit.nft += storage_cost;
                             if !wallet_data.locked_outputs.contains(output_id) {
-                                total_rent_amount += rent;
+                                total_storage_cost += storage_cost;
                             }
                         }
 
@@ -184,8 +186,8 @@ where
 
                                 // Add storage deposit
                                 if output.is_basic() {
-                                    balance.required_storage_deposit.basic += rent;
-                                    // Amount for basic outputs isn't added to total_rent_amount if there aren't
+                                    balance.required_storage_deposit.basic += storage_cost;
+                                    // Amount for basic outputs isn't added to total storage cost if there aren't
                                     // native tokens, since we can
                                     // spend it without burning.
                                     if output
@@ -194,12 +196,12 @@ where
                                         .unwrap_or(false)
                                         && !wallet_data.locked_outputs.contains(output_id)
                                     {
-                                        total_rent_amount += rent;
+                                        total_storage_cost += storage_cost;
                                     }
                                 } else if output.is_nft() {
-                                    balance.required_storage_deposit.nft += rent;
+                                    balance.required_storage_deposit.nft += storage_cost;
                                     if !wallet_data.locked_outputs.contains(output_id) {
-                                        total_rent_amount += rent;
+                                        total_storage_cost += storage_cost;
                                     }
                                 }
 
@@ -233,7 +235,13 @@ where
         }
         // }
 
-        self.finish(balance, wallet_data, network_id, total_rent_amount, total_native_tokens)
+        self.finish(
+            balance,
+            wallet_data,
+            network_id,
+            total_storage_cost,
+            total_native_tokens,
+        )
     }
 
     fn finish(
@@ -241,7 +249,7 @@ where
         mut balance: Balance,
         wallet_data: &WalletData,
         network_id: u64,
-        total_rent_amount: u64,
+        total_storage_cost: u64,
         total_native_tokens: NativeTokensBuilder,
     ) -> Result<Balance> {
         // for `available` get locked_outputs, sum outputs amount and subtract from total_amount
@@ -267,13 +275,13 @@ where
         }
 
         log::debug!(
-            "[BALANCE] total_amount: {}, locked_amount: {}, total_rent_amount: {}",
+            "[BALANCE] total_amount: {}, locked_amount: {}, total_storage_cost: {}",
             balance.base_coin.total,
             locked_amount,
-            total_rent_amount,
+            total_storage_cost,
         );
 
-        locked_amount += total_rent_amount;
+        locked_amount += total_storage_cost;
 
         for native_token in total_native_tokens.finish_set()? {
             // Check if some amount is currently locked

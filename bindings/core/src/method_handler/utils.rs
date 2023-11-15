@@ -8,7 +8,7 @@ use iota_sdk::{
         block::{
             address::{AccountAddress, Address, ToBech32Ext},
             input::UtxoInput,
-            output::{AccountId, FoundryId, NftId, Output, OutputId, Rent, TokenId},
+            output::{AccountId, FoundryId, MinimumOutputAmount, NftId, Output, OutputId, TokenId},
             payload::{signed_transaction::Transaction, SignedTransactionPayload},
             SignedBlock,
         },
@@ -72,9 +72,12 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
         UtilsMethod::TransactionSigningHash { transaction } => {
             Response::Hash(Transaction::try_from_dto(transaction)?.signing_hash().to_string())
         }
-        UtilsMethod::ComputeStorageDeposit { output, rent } => {
+        UtilsMethod::ComputeMinimumOutputAmount {
+            output,
+            storage_score_parameters: storage_params,
+        } => {
             let out = Output::try_from_dto(output)?;
-            Response::MinimumRequiredStorageDeposit(out.rent_cost(rent).to_string())
+            Response::OutputAmount(out.minimum_amount(storage_params))
         }
         UtilsMethod::VerifyMnemonic { mnemonic } => {
             let mnemonic = Mnemonic::from(mnemonic);

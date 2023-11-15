@@ -7,7 +7,7 @@ from dataclasses import dataclass, field
 from dataclasses_json import config
 from iota_sdk.types.address import Address, deserialize_address
 from iota_sdk.types.block_issuer_key import BlockIssuerKey
-from iota_sdk.types.common import EpochIndex, HexStr, json, SlotIndex
+from iota_sdk.types.common import EpochIndex, HexStr, hex_str_decoder, json, SlotIndex
 
 
 class FeatureType(IntEnum):
@@ -18,15 +18,17 @@ class FeatureType(IntEnum):
         Issuer (1): The issuer feature.
         Metadata (2): The metadata feature.
         Tag (3): The tag feature.
-        BlockIssuer (4): The block issuer feature.
-        Staking (5): The staking feature.
+        NativeToken (4): The native token feature.
+        BlockIssuer (5): The block issuer feature.
+        Staking (6): The staking feature.
     """
     Sender = 0
     Issuer = 1
     Metadata = 2
     Tag = 3
-    BlockIssuer = 4
-    Staking = 5
+    NativeToken = 4
+    BlockIssuer = 5
+    Staking = 6
 
 
 @json
@@ -90,6 +92,22 @@ class TagFeature:
 
 @json
 @dataclass
+class NativeTokenFeature:
+    """Contains a native token.
+        id: The unique identifier of the native token.
+        amount: The amount of native tokens.
+    """
+    id: HexStr
+    amount: int = field(metadata=config(
+        encoder=hex,
+        decoder=hex_str_decoder,
+    ))
+    type: int = field(default_factory=lambda: int(
+        FeatureType.NativeToken), init=False)
+
+
+@json
+@dataclass
 class BlockIssuerFeature:
     """Contains the public keys to verify block signatures and allows for unbonding the issuer deposit.
     Attributes:
@@ -129,7 +147,7 @@ class StakingFeature:
 
 
 Feature: TypeAlias = Union[SenderFeature, IssuerFeature,
-                           MetadataFeature, TagFeature, BlockIssuerFeature, StakingFeature]
+                           MetadataFeature, TagFeature, NativeTokenFeature, BlockIssuerFeature, StakingFeature]
 
 
 def deserialize_feature(d: Dict[str, Any]) -> Feature:
@@ -148,6 +166,8 @@ def deserialize_feature(d: Dict[str, Any]) -> Feature:
         return MetadataFeature.from_dict(d)
     if feature_type == FeatureType.Tag:
         return TagFeature.from_dict(d)
+    if feature_type == FeatureType.NativeToken:
+        return NativeTokenFeature.from_dict(d)
     if feature_type == FeatureType.BlockIssuer:
         return BlockIssuerFeature.from_dict(d)
     if feature_type == FeatureType.Staking:

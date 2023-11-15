@@ -7,7 +7,7 @@ require('dotenv').config({ path: '.env' });
 // Run with command:
 // yarn run-example ./how_tos/advanced_transactions/claim_transaction.ts
 
-// This example claims all claimable outputs in the account.
+// This example claims all claimable outputs in the wallet.
 async function run() {
     initLogger();
     try {
@@ -21,24 +21,22 @@ async function run() {
             storagePath: process.env.WALLET_DB_PATH,
         });
 
-        const account = await wallet.getAccount('Alice');
-
-        await account.sync();
+        await wallet.sync();
 
         // To sign a transaction we need to unlock stronghold.
         await wallet.setStrongholdPassword(process.env.STRONGHOLD_PASSWORD);
 
         // Get all claimable outputs
-        const output_ids = await account.claimableOutputs(OutputsToClaim.All);
+        const output_ids = await wallet.claimableOutputs(OutputsToClaim.All);
         console.log(`Available outputs to claim:`);
         for (const output_id of output_ids) {
             console.log(output_id);
         }
 
-        const transaction = await account.claimOutputs(output_ids);
+        const transaction = await wallet.claimOutputs(output_ids);
         console.log(`Transaction sent: ${transaction.transactionId}`);
 
-        const blockId = await account.reissueTransactionUntilIncluded(
+        const blockId = await wallet.reissueTransactionUntilIncluded(
             transaction.transactionId,
         );
         console.log(`Block sent: ${process.env.EXPLORER_URL}/block/${blockId}`);

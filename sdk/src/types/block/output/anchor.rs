@@ -10,27 +10,22 @@ use packable::{
     packer::Packer,
     prefix::BoxedSlicePrefix,
     unpacker::Unpacker,
-    Packable,
+    Packable, PackableExt,
 };
 
-use crate::types::{
-    block::{
-        address::{Address, AnchorAddress},
-        output::{
-            feature::{verify_allowed_features, Feature, FeatureFlags, Features},
-            unlock_condition::{
-                verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions,
-            },
-            verify_output_amount_min, verify_output_amount_packable, ChainId, NativeToken, NativeTokens, Output,
-            OutputBuilderAmount, OutputId, Rent, RentStructure, StateTransitionError, StateTransitionVerifier,
-        },
-        payload::signed_transaction::TransactionCapabilityFlag,
-        protocol::ProtocolParameters,
-        semantic::{SemanticValidationContext, TransactionFailureReason},
-        unlock::Unlock,
-        Error,
+use crate::types::block::{
+    address::{Address, AnchorAddress},
+    output::{
+        feature::{verify_allowed_features, Feature, FeatureFlags, Features},
+        unlock_condition::{verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions},
+        ChainId, MinimumOutputAmount, NativeToken, NativeTokens, Output, OutputBuilderAmount, OutputId,
+        StateTransitionError, StateTransitionVerifier, StorageScore, StorageScoreParameters,
     },
-    ValidationParams,
+    payload::signed_transaction::TransactionCapabilityFlag,
+    protocol::ProtocolParameters,
+    semantic::{SemanticValidationContext, TransactionFailureReason},
+    unlock::Unlock,
+    Error,
 };
 
 crate::impl_id!(
@@ -98,7 +93,7 @@ pub struct AnchorOutputBuilder {
     mana: u64,
     native_tokens: BTreeSet<NativeToken>,
     anchor_id: AnchorId,
-    state_index: Option<u32>,
+    state_index: u32,
     state_metadata: Vec<u8>,
     unlock_conditions: BTreeSet<UnlockCondition>,
     features: BTreeSet<Feature>,
@@ -111,10 +106,11 @@ impl AnchorOutputBuilder {
         Self::new(OutputBuilderAmount::Amount(amount), anchor_id)
     }
 
-    /// Creates an [`AnchorOutputBuilder`] with a provided rent structure.
-    /// The amount will be set to the minimum storage deposit.
-    pub fn new_with_minimum_storage_deposit(rent_structure: RentStructure, anchor_id: AnchorId) -> Self {
-        Self::new(OutputBuilderAmount::MinimumStorageDeposit(rent_structure), anchor_id)
+    /// Creates an [`AnchorOutputBuilder`] with provided storage score parameters.
+    /// The amount will be set to the minimum required amount of the resulting output.
+    #[inline(always)]
+    pub fn new_with_minimum_amount(params: StorageScoreParameters, anchor_id: AnchorId) -> Self {
+        Self::new(OutputBuilderAmount::MinimumAmount(params), anchor_id)
     }
 
     fn new(amount: OutputBuilderAmount, anchor_id: AnchorId) -> Self {
@@ -123,7 +119,7 @@ impl AnchorOutputBuilder {
             mana: Default::default(),
             native_tokens: BTreeSet::new(),
             anchor_id,
-            state_index: None,
+            state_index: 0,
             state_metadata: Vec::new(),
             unlock_conditions: BTreeSet::new(),
             features: BTreeSet::new(),
@@ -138,10 +134,10 @@ impl AnchorOutputBuilder {
         self
     }
 
-    /// Sets the amount to the minimum storage deposit.
+    /// Sets the amount to the minimum required amount.
     #[inline(always)]
-    pub fn with_minimum_storage_deposit(mut self, rent_structure: RentStructure) -> Self {
-        self.amount = OutputBuilderAmount::MinimumStorageDeposit(rent_structure);
+    pub fn with_minimum_amount(mut self, params: StorageScoreParameters) -> Self {
+        self.amount = OutputBuilderAmount::MinimumAmount(params);
         self
     }
 
@@ -175,8 +171,8 @@ impl AnchorOutputBuilder {
 
     ///
     #[inline(always)]
-    pub fn with_state_index(mut self, state_index: impl Into<Option<u32>>) -> Self {
-        self.state_index = state_index.into();
+    pub fn with_state_index(mut self, state_index: u32) -> Self {
+        self.state_index = state_index;
         self
     }
 
@@ -273,15 +269,13 @@ impl AnchorOutputBuilder {
 
     ///
     pub fn finish(self) -> Result<AnchorOutput, Error> {
-        let state_index = self.state_index.unwrap_or(0);
-
         let state_metadata = self
             .state_metadata
             .into_boxed_slice()
             .try_into()
             .map_err(Error::InvalidStateMetadataLength)?;
 
-        verify_index_counter(&self.anchor_id, state_index)?;
+        verify_index_counter(&self.anchor_id, self.state_index)?;
 
         let unlock_conditions = UnlockConditions::from_set(self.unlock_conditions)?;
 
@@ -296,11 +290,11 @@ impl AnchorOutputBuilder {
         verify_allowed_features(&immutable_features, AnchorOutput::ALLOWED_IMMUTABLE_FEATURES)?;
 
         let mut output = AnchorOutput {
-            amount: 1,
+            amount: 0,
             mana: self.mana,
             native_tokens: NativeTokens::from_set(self.native_tokens)?,
             anchor_id: self.anchor_id,
-            state_index,
+            state_index: self.state_index,
             state_metadata,
             unlock_conditions,
             features,
@@ -309,12 +303,8 @@ impl AnchorOutputBuilder {
 
         output.amount = match self.amount {
             OutputBuilderAmount::Amount(amount) => amount,
-            OutputBuilderAmount::MinimumStorageDeposit(rent_structure) => {
-                Output::Anchor(output.clone()).rent_cost(rent_structure)
-            }
+            OutputBuilderAmount::MinimumAmount(params) => output.minimum_amount(params),
         };
-
-        verify_output_amount_min(output.amount)?;
 
         Ok(output)
     }
@@ -332,7 +322,7 @@ impl From<&AnchorOutput> for AnchorOutputBuilder {
             mana: output.mana,
             native_tokens: output.native_tokens.iter().copied().collect(),
             anchor_id: output.anchor_id,
-            state_index: Some(output.state_index),
+            state_index: output.state_index,
             state_metadata: output.state_metadata.to_vec(),
             unlock_conditions: output.unlock_conditions.iter().cloned().collect(),
             features: output.features.iter().cloned().collect(),
@@ -384,14 +374,11 @@ impl AnchorOutput {
         AnchorOutputBuilder::new_with_amount(amount, anchor_id)
     }
 
-    /// Creates a new [`AnchorOutputBuilder`] with a provided rent structure.
-    /// The amount will be set to the minimum storage deposit.
+    /// Creates a new [`AnchorOutputBuilder`] with provided storage score parameters.
+    /// The amount will be set to the minimum required amount.
     #[inline(always)]
-    pub fn build_with_minimum_storage_deposit(
-        rent_structure: RentStructure,
-        anchor_id: AnchorId,
-    ) -> AnchorOutputBuilder {
-        AnchorOutputBuilder::new_with_minimum_storage_deposit(rent_structure, anchor_id)
+    pub fn build_with_minimum_amount(params: StorageScoreParameters, anchor_id: AnchorId) -> AnchorOutputBuilder {
+        AnchorOutputBuilder::new_with_minimum_amount(params, anchor_id)
     }
 
     ///
@@ -557,6 +544,19 @@ impl AnchorOutput {
     }
 }
 
+impl StorageScore for AnchorOutput {
+    fn storage_score(&self, params: StorageScoreParameters) -> u64 {
+        params.output_offset()
+            // Type byte
+            + (1 + self.packed_len() as u64) * params.data_factor() as u64
+            + self.unlock_conditions.storage_score(params)
+            + self.features.storage_score(params)
+            + self.immutable_features.storage_score(params)
+    }
+}
+
+impl MinimumOutputAmount for AnchorOutput {}
+
 impl StateTransitionVerifier for AnchorOutput {
     fn creation(next_state: &Self, context: &SemanticValidationContext<'_>) -> Result<(), StateTransitionError> {
         if !next_state.anchor_id.is_null() {
@@ -620,8 +620,6 @@ impl Packable for AnchorOutput {
         visitor: &Self::UnpackVisitor,
     ) -> Result<Self, UnpackError<Self::UnpackError, U::Error>> {
         let amount = u64::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
-
-        verify_output_amount_packable::<VERIFY>(&amount, visitor).map_err(UnpackError::Packable)?;
 
         let mana = u64::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
 
@@ -711,7 +709,7 @@ pub(crate) mod dto {
     use crate::{
         types::{
             block::{output::unlock_condition::dto::UnlockConditionDto, Error},
-            TryFromDto,
+            TryFromDto, ValidationParams,
         },
         utils::serde::{prefix_hex_bytes, string},
     };
@@ -784,7 +782,7 @@ pub(crate) mod dto {
             mana: u64,
             native_tokens: Option<Vec<NativeToken>>,
             anchor_id: &AnchorId,
-            state_index: Option<u32>,
+            state_index: u32,
             state_metadata: Option<Vec<u8>>,
             unlock_conditions: Vec<UnlockConditionDto>,
             features: Option<Vec<Feature>>,
@@ -794,18 +792,15 @@ pub(crate) mod dto {
             let params = params.into();
             let mut builder = match amount {
                 OutputBuilderAmount::Amount(amount) => AnchorOutputBuilder::new_with_amount(amount, *anchor_id),
-                OutputBuilderAmount::MinimumStorageDeposit(rent_structure) => {
-                    AnchorOutputBuilder::new_with_minimum_storage_deposit(rent_structure, *anchor_id)
+                OutputBuilderAmount::MinimumAmount(params) => {
+                    AnchorOutputBuilder::new_with_minimum_amount(params, *anchor_id)
                 }
             }
-            .with_mana(mana);
+            .with_mana(mana)
+            .with_state_index(state_index);
 
             if let Some(native_tokens) = native_tokens {
                 builder = builder.with_native_tokens(native_tokens);
-            }
-
-            if let Some(state_index) = state_index {
-                builder = builder.with_state_index(state_index);
             }
 
             if let Some(state_metadata) = state_metadata {
@@ -903,11 +898,12 @@ mod tests {
             .with_immutable_features(rand_allowed_features(AnchorOutput::ALLOWED_IMMUTABLE_FEATURES));
         test_split_dto(builder);
 
-        let builder = AnchorOutput::build_with_minimum_storage_deposit(protocol_parameters.rent_structure(), anchor_id)
-            .add_unlock_condition(gov_address)
-            .add_unlock_condition(state_address)
-            .with_features(rand_allowed_features(AnchorOutput::ALLOWED_FEATURES))
-            .with_immutable_features(rand_allowed_features(AnchorOutput::ALLOWED_IMMUTABLE_FEATURES));
+        let builder =
+            AnchorOutput::build_with_minimum_amount(protocol_parameters.storage_score_parameters(), anchor_id)
+                .add_unlock_condition(gov_address)
+                .add_unlock_condition(state_address)
+                .with_features(rand_allowed_features(AnchorOutput::ALLOWED_FEATURES))
+                .with_immutable_features(rand_allowed_features(AnchorOutput::ALLOWED_IMMUTABLE_FEATURES));
         test_split_dto(builder);
     }
 }

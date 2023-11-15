@@ -1,7 +1,7 @@
 # Copyright 2023 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
-# This example creates a new database and account.
+# This example creates a new database and wallet.
 
 import os
 
