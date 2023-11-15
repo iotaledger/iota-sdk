@@ -733,11 +733,11 @@ pub async fn send_native_token_command(
     let address = address.convert()?;
     let transaction = if gift_storage_deposit.unwrap_or(false) {
         // Send native tokens together with the required storage deposit
-        let rent_structure = wallet.client().get_rent_structure().await?;
+        let storage_params = wallet.client().get_storage_score_parameters().await?;
 
         wallet.client().bech32_hrp_matches(address.hrp()).await?;
 
-        let outputs = [BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)
+        let outputs = [BasicOutputBuilder::new_with_minimum_amount(storage_params)
             .add_unlock_condition(AddressUnlockCondition::new(address))
             .with_native_tokens([NativeToken::new(
                 TokenId::from_str(&token_id)?,

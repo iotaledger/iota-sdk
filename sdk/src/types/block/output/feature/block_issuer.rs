@@ -16,7 +16,11 @@ use packable::{
     Packable,
 };
 
-use crate::types::block::{slot::SlotIndex, Error};
+use crate::types::block::{
+    output::{StorageScore, StorageScoreParameters},
+    slot::SlotIndex,
+    Error,
+};
 
 #[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, From, packable::Packable)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize), serde(untagged))]
@@ -47,6 +51,14 @@ impl BlockIssuerKey {
     crate::def_is_as_opt!(BlockIssuerKey: Ed25519);
 }
 
+impl StorageScore for BlockIssuerKey {
+    fn storage_score(&self, params: StorageScoreParameters) -> u64 {
+        match self {
+            BlockIssuerKey::Ed25519(e) => e.storage_score(params),
+        }
+    }
+}
+
 /// An Ed25519 block issuer key.
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Deref, AsRef, From)]
 #[as_ref(forward)]
@@ -62,6 +74,17 @@ impl Ed25519BlockIssuerKey {
     /// Creates a new [`Ed25519BlockIssuerKey`] from bytes.
     pub fn try_from_bytes(bytes: [u8; Self::LENGTH]) -> Result<Self, Error> {
         Ok(Self(ed25519::PublicKey::try_from_bytes(bytes)?))
+    }
+
+    pub(crate) fn null() -> Self {
+        // Unwrap: we provide a valid byte array
+        Self::try_from_bytes([0; Self::LENGTH]).unwrap()
+    }
+}
+
+impl StorageScore for Ed25519BlockIssuerKey {
+    fn storage_score(&self, params: StorageScoreParameters) -> u64 {
+        params.ed25519_block_issuer_key_offset()
     }
 }
 
@@ -171,6 +194,12 @@ impl BlockIssuerKeys {
     }
 }
 
+impl StorageScore for BlockIssuerKeys {
+    fn storage_score(&self, params: StorageScoreParameters) -> u64 {
+        self.iter().map(|b| b.storage_score(params)).sum::<u64>()
+    }
+}
+
 /// This feature defines the block issuer keys with which a signature from the containing
 /// account's Block Issuance Credit can be verified in order to burn Mana.
 #[derive(Clone, Debug, Eq, PartialEq, Hash, packable::Packable)]
@@ -209,6 +238,12 @@ impl BlockIssuerFeature {
     /// Returns the block issuer keys.
     pub fn block_issuer_keys(&self) -> &[BlockIssuerKey] {
         &self.block_issuer_keys
+    }
+}
+
+impl StorageScore for BlockIssuerFeature {
+    fn storage_score(&self, params: StorageScoreParameters) -> u64 {
+        self.block_issuer_keys.storage_score(params)
     }
 }
 

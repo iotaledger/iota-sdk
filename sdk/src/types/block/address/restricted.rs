@@ -7,6 +7,7 @@ use packable::{Packable, PackableExt};
 use super::Address;
 use crate::types::block::{
     capabilities::{Capabilities, CapabilityFlag},
+    output::{StorageScore, StorageScoreParameters},
     Error,
 };
 
@@ -51,6 +52,12 @@ impl RestrictedAddress {
     /// Returns whether a given [`AddressCapabilityFlag`] is enabled.
     pub fn has_capability(&self, flag: AddressCapabilityFlag) -> bool {
         self.allowed_capabilities.has_capability(flag)
+    }
+}
+
+impl StorageScore for RestrictedAddress {
+    fn storage_score(&self, params: StorageScoreParameters) -> u64 {
+        self.address.storage_score(params)
     }
 }
 
