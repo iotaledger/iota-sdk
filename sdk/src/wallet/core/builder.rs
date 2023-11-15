@@ -270,6 +270,9 @@ where
         // If the wallet builder is not set, it means the user provided it and we need to update the addresses.
         // In the other case it was loaded from the database and addresses are up to date.
         if provided_client_options {
+            // Can't call it in wasm, because it will panic with `condvar wait not supported`. Updating the bech32 hrp
+            // is still possible in wasm when setting the client options on the wallet.
+            #[cfg(not(target_family = "wasm"))]
             wallet.update_bech32_hrp().await?;
         }
 
