@@ -242,7 +242,7 @@ export class Account {
      * @returns The resulting transaction.
      */
     async claimOutputs(outputIds: OutputId[]): Promise<Transaction> {
-        return (await this.prepareClaimOutputs(params)).send();
+        return (await this.prepareClaimOutputs(outputIds)).send();
     }
 
     /**
