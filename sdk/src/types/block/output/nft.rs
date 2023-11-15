@@ -18,9 +18,8 @@ use crate::types::block::{
             verify_allowed_unlock_conditions, AddressUnlockCondition, StorageDepositReturnUnlockCondition,
             UnlockCondition, UnlockConditionFlags, UnlockConditions,
         },
-        verify_output_amount_packable, BasicOutputBuilder, ChainId, MinimumOutputAmount, NativeToken, NativeTokens,
-        Output, OutputBuilderAmount, OutputId, StateTransitionError, StateTransitionVerifier, StorageScore,
-        StorageScoreParameters,
+        BasicOutputBuilder, ChainId, MinimumOutputAmount, NativeToken, NativeTokens, Output, OutputBuilderAmount,
+        OutputId, StateTransitionError, StateTransitionVerifier, StorageScore, StorageScoreParameters,
     },
     payload::signed_transaction::TransactionCapabilityFlag,
     protocol::ProtocolParameters,
@@ -540,8 +539,6 @@ impl Packable for NftOutput {
         visitor: &Self::UnpackVisitor,
     ) -> Result<Self, UnpackError<Self::UnpackError, U::Error>> {
         let amount = u64::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
-
-        verify_output_amount_packable::<VERIFY>(&amount, visitor).map_err(UnpackError::Packable)?;
 
         let mana = u64::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
 
