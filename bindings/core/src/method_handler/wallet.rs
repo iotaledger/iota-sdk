@@ -17,10 +17,10 @@ use iota_sdk::{
     wallet::{types::TransactionWithMetadataDto, OutputDataDto, PreparedCreateNativeTokenTransactionDto, Wallet},
 };
 
-use crate::{method::WalletMethod, response::Response, Result};
+use crate::{method::WalletMethod, response::Response};
 
 /// Call a wallet method.
-pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletMethod) -> Result<Response> {
+pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletMethod) -> crate::Result<Response> {
     let response = match method {
         WalletMethod::Accounts => {
             let accounts = wallet.accounts().await;
@@ -301,8 +301,8 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
                 .prepare_transaction(
                     outputs
                         .into_iter()
-                        .map(|o| Ok(Output::try_from(o)?))
-                        .collect::<Result<Vec<Output>>>()?,
+                        .map(Output::try_from)
+                        .collect::<Result<Vec<Output>, _>>()?,
                     options,
                 )
                 .await?;
@@ -345,8 +345,8 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
                 .send_outputs(
                     outputs
                         .into_iter()
-                        .map(|o| Ok(Output::try_from(o)?))
-                        .collect::<iota_sdk::wallet::Result<Vec<Output>>>()?,
+                        .map(Output::try_from)
+                        .collect::<Result<Vec<Output>, _>>()?,
                     options,
                 )
                 .await?;
