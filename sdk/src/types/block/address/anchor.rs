@@ -6,7 +6,7 @@ use core::str::FromStr;
 use derive_more::{AsRef, Deref, Display, From};
 
 use crate::types::block::{
-    output::{AnchorId, OutputId},
+    output::{AnchorId, OutputId, StorageScore},
     Error,
 };
 
@@ -39,6 +39,8 @@ impl AnchorAddress {
         self.0
     }
 }
+
+impl StorageScore for AnchorAddress {}
 
 impl FromStr for AnchorAddress {
     type Err = Error;

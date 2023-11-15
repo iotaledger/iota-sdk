@@ -1,0 +1,181 @@
+// Copyright 2022 IOTA Stiftung
+// SPDX-License-Identifier: Apache-2.0
+
+use packable::Packable;
+
+use crate::types::block::{
+    address::Ed25519Address,
+    output::{
+        feature::{BlockIssuerFeature, BlockIssuerKey, Ed25519BlockIssuerKey},
+        AccountId, AccountOutputBuilder, AddressUnlockCondition, BasicOutputBuilder, OutputId,
+    },
+    slot::SlotIndex,
+    BlockId,
+};
+
+const DEFAULT_STORAGE_COST: u64 = 500;
+const DEFAULT_FACTOR_DATA: u8 = 1;
+const DEFAULT_OFFSET_OUTPUT_OVERHEAD: u64 = 10;
+const DEFAULT_OFFSET_ED25519_BLOCK_ISSUER_KEY: u64 = 50;
+const DEFAULT_OFFSET_STAKING_FEATURE: u64 = 100;
+const DEFAULT_OFFSET_DELEGATION: u64 = 100;
+
+// Defines the parameters of storage score calculations on objects which take node resources.
+// This structure defines the minimum base token deposit required on an object. This deposit does not
+// generate Mana, which serves as a payment in Mana for storing the object.
+#[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Packable)]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize),
+    serde(rename_all = "camelCase")
+)]
+pub struct StorageScoreParameters {
+    /// Defines the number of IOTA tokens required per unit of storage score.
+    #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
+    storage_cost: u64,
+    /// Defines the factor to be used for data only fields.
+    factor_data: u8,
+    /// Defines the offset to be applied to all outputs for the overhead of handling them in storage.
+    #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
+    offset_output_overhead: u64,
+    /// Defines the offset to be used for block issuer feature public keys.
+    #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
+    offset_ed25519_block_issuer_key: u64,
+    /// Defines the offset to be used for staking feature.
+    #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
+    offset_staking_feature: u64,
+    /// Defines the offset to be used for delegation output.
+    #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
+    offset_delegation: u64,
+}
+
+impl Default for StorageScoreParameters {
+    fn default() -> Self {
+        Self {
+            storage_cost: DEFAULT_STORAGE_COST,
+            factor_data: DEFAULT_FACTOR_DATA,
+            offset_output_overhead: DEFAULT_OFFSET_OUTPUT_OVERHEAD,
+            offset_ed25519_block_issuer_key: DEFAULT_OFFSET_ED25519_BLOCK_ISSUER_KEY,
+            offset_staking_feature: DEFAULT_OFFSET_STAKING_FEATURE,
+            offset_delegation: DEFAULT_OFFSET_DELEGATION,
+        }
+    }
+}
+
+impl StorageScoreParameters {
+    /// Creates a new [`StorageScoreParameters`].
+    pub fn new(
+        storage_cost: u64,
+        data_factor: u8,
+        output_overhead_offset: u64,
+        ed25519_block_issuer_key_offset: u64,
+        staking_feature_offset: u64,
+        delegation_offset: u64,
+    ) -> Self {
+        Self {
+            storage_cost,
+            factor_data: data_factor,
+            offset_output_overhead: output_overhead_offset,
+            offset_ed25519_block_issuer_key: ed25519_block_issuer_key_offset,
+            offset_staking_feature: staking_feature_offset,
+            offset_delegation: delegation_offset,
+        }
+    }
+
+    /// Sets the storage cost per unit of storage score.
+    pub fn with_storage_cost(mut self, storage_cost: u64) -> Self {
+        self.storage_cost = storage_cost;
+        self
+    }
+
+    /// Sets the storage score factor for data fields.
+    pub fn with_data_factor(mut self, factor: u8) -> Self {
+        self.factor_data = factor;
+        self
+    }
+
+    /// Sets the storage score offset overhead per output.
+    pub fn with_output_overhead_offset(mut self, offset: u64) -> Self {
+        self.offset_output_overhead = offset;
+        self
+    }
+
+    /// Sets the storage score offset for Ed25519 block issuer key fields.
+    pub fn with_ed25519_block_issuer_key_offset(mut self, offset: u64) -> Self {
+        self.offset_ed25519_block_issuer_key = offset;
+        self
+    }
+
+    /// Sets the storage score offset for staking fields.
+    pub fn with_staking_feature_offset(mut self, offset: u64) -> Self {
+        self.offset_staking_feature = offset;
+        self
+    }
+
+    /// Sets the storage score offset for delegation fields.
+    pub fn with_delegation_offset(mut self, offset: u64) -> Self {
+        self.offset_delegation = offset;
+        self
+    }
+
+    /// Returns the storage cost per unit of storage score.
+    pub fn storage_cost(&self) -> u64 {
+        self.storage_cost
+    }
+
+    /// Returns the storage score factor for data fields.
+    pub fn data_factor(&self) -> u8 {
+        self.factor_data
+    }
+
+    /// Returns the storage score offset overhead per output.
+    pub fn output_overhead_offset(&self) -> u64 {
+        self.offset_output_overhead
+    }
+
+    /// Returns the storage score offset for Ed25519 block issuer key fields.
+    pub fn ed25519_block_issuer_key_offset(&self) -> u64 {
+        self.offset_ed25519_block_issuer_key
+    }
+
+    /// Returns the storage score offset for staking fields.
+    pub fn staking_feature_offset(&self) -> u64 {
+        self.offset_staking_feature
+    }
+
+    /// Returns the storage score offset for delegation fields.
+    pub fn delegation_offset(&self) -> u64 {
+        self.offset_delegation
+    }
+
+    /// Returns the storage score offset per output.
+    pub fn output_offset(&self) -> u64 {
+        self.output_overhead_offset()
+            + (self.data_factor() as usize * (OutputId::LENGTH + BlockId::LENGTH + core::mem::size_of::<SlotIndex>()))
+                as u64
+    }
+
+    /// Returns the storage score offset for implicit account creation address fields.
+    pub fn implicit_account_creation_address_offset(&self) -> u64 {
+        let null_address = Ed25519Address::null();
+        let basic_output_score = BasicOutputBuilder::new_with_amount(0)
+            .add_unlock_condition(AddressUnlockCondition::new(null_address))
+            .finish()
+            .unwrap()
+            .storage_score(*self);
+        let account_output_score = AccountOutputBuilder::new_with_amount(0, AccountId::null())
+            .add_unlock_condition(AddressUnlockCondition::new(null_address))
+            .add_feature(BlockIssuerFeature::new(0, [BlockIssuerKey::Ed25519(Ed25519BlockIssuerKey::null())]).unwrap())
+            .finish()
+            .unwrap()
+            .storage_score(*self);
+        account_output_score - basic_output_score + null_address.storage_score(*self)
+    }
+}
+
+/// A trait to facilitate the computation of the byte cost of block outputs, which is central to dust protection.
+pub trait StorageScore {
+    fn storage_score(&self, _params: StorageScoreParameters) -> u64 {
+        0
+    }
+}

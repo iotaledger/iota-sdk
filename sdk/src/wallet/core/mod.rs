@@ -670,7 +670,7 @@ mod test {
         types::block::{
             address::{Address, Ed25519Address},
             input::{Input, UtxoInput},
-            output::{AddressUnlockCondition, BasicOutput, Output},
+            output::{AddressUnlockCondition, BasicOutput, Output, StorageScoreParameters},
             payload::signed_transaction::{SignedTransactionPayload, Transaction, TransactionId},
             protocol::ProtocolParameters,
             rand::mana::rand_mana_allotment,
@@ -691,7 +691,7 @@ mod test {
             2,
             "testnet",
             "rms",
-            crate::types::block::output::RentStructure::new(500, 1, 10, 1, 1, 1),
+            StorageScoreParameters::new(500, 1, 10, 1, 1, 1),
             1_813_620_509_061_365,
             1582328545,
             10,

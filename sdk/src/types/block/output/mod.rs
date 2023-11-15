@@ -7,8 +7,8 @@ mod delegation;
 mod metadata;
 mod native_token;
 mod output_id;
-mod rent;
 mod state_transition;
+mod storage_score;
 mod token_scheme;
 
 ///
@@ -31,7 +31,7 @@ use packable::{
     error::{UnpackError, UnpackErrorExt},
     packer::Packer,
     unpacker::Unpacker,
-    Packable, PackableExt,
+    Packable,
 };
 
 pub use self::{
@@ -46,8 +46,8 @@ pub use self::{
     native_token::{NativeToken, NativeTokens, NativeTokensBuilder, TokenId},
     nft::{NftId, NftOutput, NftOutputBuilder},
     output_id::OutputId,
-    rent::{MinimumStorageDepositBasicOutput, Rent, RentStructure},
     state_transition::{StateTransitionError, StateTransitionVerifier},
+    storage_score::{StorageScore, StorageScoreParameters},
     token_scheme::{SimpleTokenScheme, TokenScheme},
     unlock_condition::{UnlockCondition, UnlockConditions},
 };
@@ -73,7 +73,7 @@ pub const OUTPUT_INDEX_RANGE: RangeInclusive<u16> = 0..=OUTPUT_INDEX_MAX; // [0.
 #[derive(Copy, Clone)]
 pub enum OutputBuilderAmount {
     Amount(u64),
-    MinimumStorageDeposit(RentStructure),
+    MinimumAmount(StorageScoreParameters),
 }
 
 /// Contains the generic [`Output`] with associated [`OutputMetadata`].
@@ -141,9 +141,6 @@ impl core::fmt::Debug for Output {
 }
 
 impl Output {
-    /// Minimum amount for an output.
-    pub const AMOUNT_MIN: u64 = 1;
-
     /// Return the output kind of an [`Output`].
     pub fn kind(&self) -> u8 {
         match self {
@@ -344,11 +341,11 @@ impl Output {
     }
 
     /// Verifies if a valid storage deposit was made. Each [`Output`] has to have an amount that covers its associated
-    /// byte cost, given by [`RentStructure`].
+    /// byte cost, given by [`StorageScoreParameters`].
     /// If there is a [`StorageDepositReturnUnlockCondition`](unlock_condition::StorageDepositReturnUnlockCondition),
     /// its amount is also checked.
-    pub fn verify_storage_deposit(&self, rent_structure: RentStructure) -> Result<(), Error> {
-        let required_output_amount = self.rent_cost(rent_structure);
+    pub fn verify_storage_deposit(&self, params: StorageScoreParameters) -> Result<(), Error> {
+        let required_output_amount = self.minimum_amount(params);
 
         if self.amount() < required_output_amount {
             return Err(Error::InsufficientStorageDepositAmount {
@@ -370,7 +367,7 @@ impl Output {
                 });
             }
 
-            let minimum_deposit = minimum_storage_deposit(return_condition.return_address(), rent_structure);
+            let minimum_deposit = BasicOutput::minimum_amount(return_condition.return_address(), params);
 
             // `Minimum Storage Deposit` ≤ `Return Amount`
             if return_condition.amount() < minimum_deposit {
@@ -436,19 +433,20 @@ impl Packable for Output {
     }
 }
 
-impl Rent for Output {
-    fn weighted_bytes(&self, rent_structure: RentStructure) -> u64 {
-        self.packed_len() as u64 * rent_structure.byte_factor_data() as u64
+impl StorageScore for Output {
+    fn storage_score(&self, params: StorageScoreParameters) -> u64 {
+        match self {
+            Self::Basic(o) => o.storage_score(params),
+            Self::Account(o) => o.storage_score(params),
+            Self::Anchor(o) => o.storage_score(params),
+            Self::Foundry(o) => o.storage_score(params),
+            Self::Nft(o) => o.storage_score(params),
+            Self::Delegation(o) => o.storage_score(params),
+        }
     }
 }
 
-pub(crate) fn verify_output_amount_min(amount: u64) -> Result<(), Error> {
-    if amount < Output::AMOUNT_MIN {
-        Err(Error::InvalidOutputAmount(amount))
-    } else {
-        Ok(())
-    }
-}
+impl MinimumOutputAmount for Output {}
 
 pub(crate) fn verify_output_amount_supply(amount: u64, token_supply: u64) -> Result<(), Error> {
     if amount > token_supply {
@@ -459,7 +457,6 @@ pub(crate) fn verify_output_amount_supply(amount: u64, token_supply: u64) -> Res
 }
 
 pub(crate) fn verify_output_amount(amount: u64, token_supply: u64) -> Result<(), Error> {
-    verify_output_amount_min(amount)?;
     verify_output_amount_supply(amount, token_supply)
 }
 
@@ -473,16 +470,13 @@ pub(crate) fn verify_output_amount_packable<const VERIFY: bool>(
     Ok(())
 }
 
-/// Computes the minimum amount that a storage deposit has to match to allow creating a return [`Output`] back to the
-/// sender [`Address`].
-fn minimum_storage_deposit(address: &Address, rent_structure: RentStructure) -> u64 {
-    // PANIC: This can never fail because the amount will always be within the valid range. Also, the actual value is
-    // not important, we are only interested in the storage requirements of the type.
-    BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)
-        .add_unlock_condition(AddressUnlockCondition::new(address.clone()))
-        .finish()
-        .unwrap()
-        .amount()
+/// A trait that is shared by all output types, which is used to calculate the minimum amount the output
+/// must contain to satisfy its storage cost.
+pub trait MinimumOutputAmount: StorageScore {
+    /// Computes the minimum amount of this output given [`StorageScoreParameters`].
+    fn minimum_amount(&self, params: StorageScoreParameters) -> u64 {
+        params.storage_cost() * self.storage_score(params)
+    }
 }
 
 #[cfg(feature = "serde")]
