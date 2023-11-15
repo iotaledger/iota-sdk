@@ -29,7 +29,6 @@ pub use self::{
     tag::TagFeature,
 };
 use crate::types::block::{
-    create_bitflags,
     output::{StorageScore, StorageScoreParameters},
     Error,
 };
@@ -126,7 +125,7 @@ impl Feature {
     crate::def_is_as_opt!(Feature: Sender, Issuer, Metadata, Tag, BlockIssuer, Staking);
 }
 
-create_bitflags!(
+crate::create_bitflags!(
     /// A bitflags-based representation of the set of active [`Feature`]s.
     pub FeatureFlags,
     u16,

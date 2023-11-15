@@ -12,7 +12,7 @@ use getset::Getters;
 use hashbrown::HashMap;
 use packable::PackableExt;
 
-use crate::types::{api::plugins::participation::error::Error, block::impl_id};
+use crate::types::api::plugins::participation::error::Error;
 
 /// Participation tag.
 pub const PARTICIPATION_TAG: &str = "PARTICIPATE";
@@ -51,7 +51,7 @@ pub struct ParticipationEvent {
     pub data: ParticipationEventData,
 }
 
-impl_id!(
+crate::impl_id!(
     /// A participation event id.
     pub ParticipationEventId {
         pub const LENGTH: usize = 32;
