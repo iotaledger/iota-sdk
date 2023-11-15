@@ -4,7 +4,10 @@
 use derive_more::{AsRef, Deref, Display, From, FromStr};
 use packable::Packable;
 
-use crate::types::block::address::Ed25519Address;
+use crate::types::block::{
+    address::Ed25519Address,
+    output::{StorageScore, StorageScoreParameters},
+};
 
 /// An implicit account creation address that can be used to convert a
 /// [`BasicOutput`](crate::types::block::output::BasicOutput) to an
@@ -28,6 +31,12 @@ impl ImplicitAccountCreationAddress {
     /// Returns the inner [`Ed25519Address`] of the [`ImplicitAccountCreationAddress`].
     pub fn ed25519_address(&self) -> &Ed25519Address {
         &self.0
+    }
+}
+
+impl StorageScore for ImplicitAccountCreationAddress {
+    fn storage_score(&self, params: StorageScoreParameters) -> u64 {
+        params.implicit_account_creation_address_offset()
     }
 }
 

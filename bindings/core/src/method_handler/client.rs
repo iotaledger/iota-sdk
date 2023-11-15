@@ -9,7 +9,8 @@ use iota_sdk::{
         api::core::OutputWithMetadataResponse,
         block::{
             output::{
-                dto::OutputDto, AccountOutput, BasicOutput, FoundryOutput, NftOutput, Output, OutputBuilderAmount, Rent,
+                dto::OutputDto, AccountOutput, BasicOutput, FoundryOutput, MinimumOutputAmount, NftOutput, Output,
+                OutputBuilderAmount,
             },
             payload::Payload,
             SignedBlock, SignedBlockDto, UnsignedBlockDto,
@@ -69,7 +70,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
                 if let Some(amount) = amount {
                     OutputBuilderAmount::Amount(amount)
                 } else {
-                    OutputBuilderAmount::MinimumStorageDeposit(client.get_rent_structure().await?)
+                    OutputBuilderAmount::MinimumAmount(client.get_storage_score_parameters().await?)
                 },
                 mana,
                 native_tokens,
@@ -94,7 +95,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
                 if let Some(amount) = amount {
                     OutputBuilderAmount::Amount(amount)
                 } else {
-                    OutputBuilderAmount::MinimumStorageDeposit(client.get_rent_structure().await?)
+                    OutputBuilderAmount::MinimumAmount(client.get_storage_score_parameters().await?)
                 },
                 mana,
                 native_tokens,
@@ -118,7 +119,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
                 if let Some(amount) = amount {
                     OutputBuilderAmount::Amount(amount)
                 } else {
-                    OutputBuilderAmount::MinimumStorageDeposit(client.get_rent_structure().await?)
+                    OutputBuilderAmount::MinimumAmount(client.get_storage_score_parameters().await?)
                 },
                 native_tokens,
                 serial_number,
@@ -144,7 +145,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
                 if let Some(amount) = amount {
                     OutputBuilderAmount::Amount(amount)
                 } else {
-                    OutputBuilderAmount::MinimumStorageDeposit(client.get_rent_structure().await?)
+                    OutputBuilderAmount::MinimumAmount(client.get_storage_score_parameters().await?)
                 },
                 mana,
                 native_tokens,
@@ -294,13 +295,11 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         ClientMethod::HexPublicKeyToBech32Address { hex, bech32_hrp } => {
             Response::Bech32Address(client.hex_public_key_to_bech32_address(&hex, bech32_hrp).await?)
         }
-        ClientMethod::MinimumRequiredStorageDeposit { output } => {
+        ClientMethod::ComputeMinimumOutputAmount { output } => {
             let output = Output::try_from_dto_with_params(output, client.get_token_supply().await?)?;
-            let rent_structure = client.get_rent_structure().await?;
+            let storage_score_params = client.get_storage_score_parameters().await?;
 
-            let minimum_storage_deposit = output.rent_cost(rent_structure);
-
-            Response::MinimumRequiredStorageDeposit(minimum_storage_deposit.to_string())
+            Response::OutputAmount(output.minimum_amount(storage_score_params))
         }
         ClientMethod::RequestFundsFromFaucet { url, address } => {
             Response::Faucet(request_funds_from_faucet(&url, &address).await?)

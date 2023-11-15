@@ -33,6 +33,7 @@ use iota_sdk::{
             BlockId, SignedBlockDto, UnsignedBlockDto,
         },
     },
+    utils::serde::string,
     wallet::{
         types::{Balance, OutputDataDto, TransactionWithMetadataDto},
         PreparedCreateNativeTokenTransactionDto,
@@ -256,9 +257,9 @@ pub enum Response {
     /// - [`GetAddress`](crate::method::WalletMethod::GetAddress)
     Address(Bech32Address),
     /// Response for:
-    /// - [`MinimumRequiredStorageDeposit`](crate::method::ClientMethod::MinimumRequiredStorageDeposit)
-    /// - [`ComputeStorageDeposit`](crate::method::UtilsMethod::ComputeStorageDeposit)
-    MinimumRequiredStorageDeposit(String),
+    /// - [`ClientMethod::ComputeMinimumOutputAmount`](crate::method::ClientMethod::ComputeMinimumOutputAmount)
+    /// - [`UtilsMethod::ComputeMinimumOutputAmount`](crate::method::UtilsMethod::ComputeMinimumOutputAmount)
+    OutputAmount(#[serde(with = "string")] u64),
     /// Response for:
     /// - [`ClaimableOutputs`](crate::method::WalletMethod::ClaimableOutputs)
     OutputIds(Vec<OutputId>),

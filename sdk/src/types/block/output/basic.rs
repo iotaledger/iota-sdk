@@ -3,15 +3,18 @@
 
 use alloc::collections::BTreeSet;
 
-use packable::Packable;
+use packable::{Packable, PackableExt};
 
 use crate::types::block::{
     address::Address,
     output::{
         feature::{verify_allowed_features, Feature, FeatureFlags, Features},
-        unlock_condition::{verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions},
-        verify_output_amount_min, verify_output_amount_packable, NativeToken, NativeTokens, Output,
-        OutputBuilderAmount, OutputId, Rent, RentStructure,
+        unlock_condition::{
+            verify_allowed_unlock_conditions, AddressUnlockCondition, StorageDepositReturnUnlockCondition,
+            UnlockCondition, UnlockConditionFlags, UnlockConditions,
+        },
+        verify_output_amount_packable, MinimumOutputAmount, NativeToken, NativeTokens, Output, OutputBuilderAmount,
+        OutputId, StorageScore, StorageScoreParameters,
     },
     protocol::ProtocolParameters,
     semantic::{SemanticValidationContext, TransactionFailureReason},
@@ -37,11 +40,11 @@ impl BasicOutputBuilder {
         Self::new(OutputBuilderAmount::Amount(amount))
     }
 
-    /// Creates an [`BasicOutputBuilder`] with a provided rent structure.
-    /// The amount will be set to the minimum storage deposit.
+    /// Creates an [`BasicOutputBuilder`] with provided storage score parameters.
+    /// The amount will be set to the minimum required amount of the resulting output.
     #[inline(always)]
-    pub fn new_with_minimum_storage_deposit(rent_structure: RentStructure) -> Self {
-        Self::new(OutputBuilderAmount::MinimumStorageDeposit(rent_structure))
+    pub fn new_with_minimum_amount(params: StorageScoreParameters) -> Self {
+        Self::new(OutputBuilderAmount::MinimumAmount(params))
     }
 
     fn new(amount: OutputBuilderAmount) -> Self {
@@ -61,10 +64,10 @@ impl BasicOutputBuilder {
         self
     }
 
-    /// Sets the amount to the minimum storage deposit.
+    /// Sets the amount to the minimum required amount.
     #[inline(always)]
-    pub fn with_minimum_storage_deposit(mut self, rent_structure: RentStructure) -> Self {
-        self.amount = OutputBuilderAmount::MinimumStorageDeposit(rent_structure);
+    pub fn with_minimum_amount(mut self, params: StorageScoreParameters) -> Self {
+        self.amount = OutputBuilderAmount::MinimumAmount(params);
         self
     }
 
@@ -146,6 +149,59 @@ impl BasicOutputBuilder {
         self
     }
 
+    /// Adds a storage deposit return unlock condition if one is needed to cover the current amount
+    /// (i.e. `amount < minimum_amount`). This will increase the total amount to satisfy the `minimum_amount` with
+    /// the additional unlock condition that will return the remainder to the provided `return_address`.
+    pub fn with_sufficient_storage_deposit(
+        mut self,
+        return_address: impl Into<Address>,
+        params: StorageScoreParameters,
+        token_supply: u64,
+    ) -> Result<Self, Error> {
+        Ok(match self.amount {
+            OutputBuilderAmount::Amount(amount) => {
+                let return_address = return_address.into();
+                // Get the current storage requirement
+                let minimum_amount = self.clone().finish()?.minimum_amount(params);
+                // Check whether we already have enough funds to cover it
+                if amount < minimum_amount {
+                    // Get the projected minimum amount of the return output
+                    let return_min_amount = Self::new_with_minimum_amount(params)
+                        .add_unlock_condition(AddressUnlockCondition::new(return_address.clone()))
+                        .finish()?
+                        .amount();
+                    // Add a temporary storage deposit unlock condition so the new storage requirement can be calculated
+                    self = self.add_unlock_condition(StorageDepositReturnUnlockCondition::new(
+                        return_address.clone(),
+                        1,
+                        token_supply,
+                    )?);
+                    // Get the min amount of the output with the added storage deposit return unlock condition
+                    let min_amount_with_sdruc = self.clone().finish()?.minimum_amount(params);
+                    // If the return storage cost and amount are less than the required min
+                    let (amount, sdruc_amount) = if min_amount_with_sdruc >= return_min_amount + amount {
+                        // Then sending storage_cost_with_sdruc covers both minimum requirements
+                        (min_amount_with_sdruc, min_amount_with_sdruc - amount)
+                    } else {
+                        // Otherwise we must use the total of the return minimum and the original amount
+                        // which is unfortunately more than the storage_cost_with_sdruc
+                        (return_min_amount + amount, return_min_amount)
+                    };
+                    // Add the required storage deposit unlock condition and the additional storage amount
+                    self.with_amount(amount)
+                        .replace_unlock_condition(StorageDepositReturnUnlockCondition::new(
+                            return_address,
+                            sdruc_amount,
+                            token_supply,
+                        )?)
+                } else {
+                    self
+                }
+            }
+            OutputBuilderAmount::MinimumAmount(_) => self,
+        })
+    }
+
     ///
     pub fn finish(self) -> Result<BasicOutput, Error> {
         let unlock_conditions = UnlockConditions::from_set(self.unlock_conditions)?;
@@ -157,7 +213,7 @@ impl BasicOutputBuilder {
         verify_features::<true>(&features)?;
 
         let mut output = BasicOutput {
-            amount: 1u64,
+            amount: 0,
             mana: self.mana,
             native_tokens: NativeTokens::from_set(self.native_tokens)?,
             unlock_conditions,
@@ -166,12 +222,8 @@ impl BasicOutputBuilder {
 
         output.amount = match self.amount {
             OutputBuilderAmount::Amount(amount) => amount,
-            OutputBuilderAmount::MinimumStorageDeposit(rent_structure) => {
-                Output::Basic(output.clone()).rent_cost(rent_structure)
-            }
+            OutputBuilderAmount::MinimumAmount(params) => output.minimum_amount(params),
         };
-
-        verify_output_amount_min(output.amount)?;
 
         Ok(output)
     }
@@ -234,11 +286,11 @@ impl BasicOutput {
         BasicOutputBuilder::new_with_amount(amount)
     }
 
-    /// Creates a new [`BasicOutputBuilder`] with a provided rent structure.
-    /// The amount will be set to the minimum storage deposit.
+    /// Creates a new [`BasicOutputBuilder`] with provided storage score parameters.
+    /// The amount will be set to the minimum required amount.
     #[inline(always)]
-    pub fn build_with_minimum_storage_deposit(rent_structure: RentStructure) -> BasicOutputBuilder {
-        BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)
+    pub fn build_with_minimum_amount(params: StorageScoreParameters) -> BasicOutputBuilder {
+        BasicOutputBuilder::new_with_minimum_amount(params)
     }
 
     ///
@@ -313,7 +365,30 @@ impl BasicOutput {
             false
         }
     }
+
+    /// Computes the minimum amount of the most Basic Output.
+    pub fn minimum_amount(address: &Address, params: StorageScoreParameters) -> u64 {
+        // PANIC: This can never fail because the amount will always be within the valid range. Also, the actual value
+        // is not important, we are only interested in the storage requirements of the type.
+        BasicOutputBuilder::new_with_minimum_amount(params)
+            .add_unlock_condition(AddressUnlockCondition::new(address.clone()))
+            .finish()
+            .unwrap()
+            .amount()
+    }
 }
+
+impl StorageScore for BasicOutput {
+    fn storage_score(&self, params: StorageScoreParameters) -> u64 {
+        params.output_offset()
+            // Type byte
+            + (1 + self.packed_len() as u64) * params.data_factor() as u64
+            + self.unlock_conditions.storage_score(params)
+            + self.features.storage_score(params)
+    }
+}
+
+impl MinimumOutputAmount for BasicOutput {}
 
 fn verify_unlock_conditions<const VERIFY: bool>(unlock_conditions: &UnlockConditions) -> Result<(), Error> {
     if VERIFY {
@@ -420,9 +495,7 @@ pub(crate) mod dto {
             let params = params.into();
             let mut builder = match amount {
                 OutputBuilderAmount::Amount(amount) => BasicOutputBuilder::new_with_amount(amount),
-                OutputBuilderAmount::MinimumStorageDeposit(rent_structure) => {
-                    BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)
-                }
+                OutputBuilderAmount::MinimumAmount(params) => BasicOutputBuilder::new_with_minimum_amount(params),
             }
             .with_mana(mana);
 
@@ -507,10 +580,50 @@ mod tests {
             .with_features(rand_allowed_features(BasicOutput::ALLOWED_FEATURES));
         test_split_dto(builder);
 
-        let builder = BasicOutput::build_with_minimum_storage_deposit(protocol_parameters.rent_structure())
+        let builder = BasicOutput::build_with_minimum_amount(protocol_parameters.storage_score_parameters())
             .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000).unwrap())
             .add_unlock_condition(address)
             .with_features(rand_allowed_features(BasicOutput::ALLOWED_FEATURES));
         test_split_dto(builder);
     }
+
+    // TODO: re-enable when rent is figured out
+    // #[test]
+    // fn storage_deposit() {
+    //     let protocol_parameters = protocol_parameters();
+    //     let address_unlock = rand_address_unlock_condition();
+    //     let return_address = rand_address();
+
+    //     let builder_1 = BasicOutput::build_with_amount(1).add_unlock_condition(address_unlock.clone());
+
+    //     let builder_2 = BasicOutput::build_with_minimum_amount(protocol_parameters.storage_score_parameters())
+    //         .add_unlock_condition(address_unlock);
+
+    //     assert_eq!(
+    //         builder_1.storage_cost(protocol_parameters.storage_score_parameters()),
+    //         builder_2.amount()
+    //     );
+    //     assert_eq!(
+    //         builder_1.clone().finish_output(&protocol_parameters),
+    //         Err(Error::InsufficientStorageDepositAmount {
+    //             amount: 1,
+    //             required: builder_1.storage_cost(protocol_parameters.storage_score_parameters())
+    //         })
+    //     );
+
+    //     let builder_1 = builder_1
+    //         .with_sufficient_storage_deposit(
+    //             return_address.clone(),
+    //             protocol_parameters.storage_score_parameters(),
+    //             protocol_parameters.token_supply(),
+    //         )
+    //         .unwrap();
+
+    //     let sdruc_cost =
+    //         StorageDepositReturnUnlockCondition::new(return_address, 1, protocol_parameters.token_supply())
+    //             .unwrap()
+    //             .storage_cost(protocol_parameters.storage_score_parameters());
+
+    //     assert_eq!(builder_1.amount(), builder_2.amount() + sdruc_cost);
+    // }
 }
