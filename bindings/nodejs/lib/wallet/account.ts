@@ -242,6 +242,16 @@ export class Account {
      * @returns The resulting transaction.
      */
     async claimOutputs(outputIds: OutputId[]): Promise<Transaction> {
+        return (await this.prepareClaimOutputs(params)).send();
+    }
+
+    /**
+     * Claim basic or nft outputs that have additional unlock conditions
+     * to their `AddressUnlockCondition` from the account.
+     * @param outputIds The outputs to claim.
+     * @returns The prepared transaction.
+     */
+    async prepareClaimOutputs(outputIds: OutputId[]): Promise<PreparedTransaction> {
         const response = await this.methodHandler.callAccountMethod(
             this.meta.index,
             {
