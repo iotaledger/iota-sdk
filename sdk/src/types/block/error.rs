@@ -264,7 +264,7 @@ impl fmt::Display for Error {
             Self::InsufficientStorageDepositReturnAmount { deposit, required } => {
                 write!(
                     f,
-                    "the return deposit ({deposit}) must be greater than the minimum storage deposit ({required})"
+                    "the return deposit ({deposit}) must be greater than the minimum output amount ({required})"
                 )
             }
             Self::StorageDepositReturnExceedsOutputAmount { deposit, amount } => write!(

@@ -12,7 +12,10 @@ use iterator_sorted::is_unique_sorted;
 use packable::{bounded::BoundedU8, prefix::BoxedSlicePrefix, Packable};
 use primitive_types::U256;
 
-use crate::types::block::{output::foundry::FoundryId, Error};
+use crate::types::block::{
+    output::{FoundryId, StorageScore},
+    Error,
+};
 
 crate::impl_id!(
     /// Unique identifier of a [`NativeToken`](crate::types::block::output::NativeToken).
@@ -76,6 +79,9 @@ impl Ord for NativeToken {
         self.token_id.cmp(&other.token_id)
     }
 }
+
+// TODO remove when NT are a feature
+impl StorageScore for NativeToken {}
 
 #[inline]
 fn verify_amount<const VERIFY: bool>(amount: &U256, _: &()) -> Result<(), Error> {

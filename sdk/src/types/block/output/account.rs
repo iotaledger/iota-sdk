@@ -8,7 +8,7 @@ use packable::{
     error::{UnpackError, UnpackErrorExt},
     packer::Packer,
     unpacker::Unpacker,
-    Packable,
+    Packable, PackableExt,
 };
 
 use crate::types::block::{
@@ -16,8 +16,8 @@ use crate::types::block::{
     output::{
         feature::{verify_allowed_features, Feature, FeatureFlags, Features},
         unlock_condition::{verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions},
-        verify_output_amount_min, verify_output_amount_packable, ChainId, NativeToken, NativeTokens, Output,
-        OutputBuilderAmount, OutputId, Rent, RentStructure, StateTransitionError, StateTransitionVerifier,
+        ChainId, MinimumOutputAmount, NativeToken, NativeTokens, Output, OutputBuilderAmount, OutputId,
+        StateTransitionError, StateTransitionVerifier, StorageScore, StorageScoreParameters,
     },
     payload::signed_transaction::TransactionCapabilityFlag,
     protocol::ProtocolParameters,
@@ -72,10 +72,10 @@ impl AccountOutputBuilder {
         Self::new(OutputBuilderAmount::Amount(amount), account_id)
     }
 
-    /// Creates an [`AccountOutputBuilder`] with a provided rent structure.
-    /// The amount will be set to the minimum storage deposit.
-    pub fn new_with_minimum_storage_deposit(rent_structure: RentStructure, account_id: AccountId) -> Self {
-        Self::new(OutputBuilderAmount::MinimumStorageDeposit(rent_structure), account_id)
+    /// Creates an [`AccountOutputBuilder`] with provided storage score parameters.
+    /// The amount will be set to the minimum required amount of the resulting output.
+    pub fn new_with_minimum_amount(params: StorageScoreParameters, account_id: AccountId) -> Self {
+        Self::new(OutputBuilderAmount::MinimumAmount(params), account_id)
     }
 
     fn new(amount: OutputBuilderAmount, account_id: AccountId) -> Self {
@@ -98,10 +98,10 @@ impl AccountOutputBuilder {
         self
     }
 
-    /// Sets the amount to the minimum storage deposit.
+    /// Sets the amount to the minimum required amount.
     #[inline(always)]
-    pub fn with_minimum_storage_deposit(mut self, rent_structure: RentStructure) -> Self {
-        self.amount = OutputBuilderAmount::MinimumStorageDeposit(rent_structure);
+    pub fn with_minimum_amount(mut self, params: StorageScoreParameters) -> Self {
+        self.amount = OutputBuilderAmount::MinimumAmount(params);
         self
     }
 
@@ -243,7 +243,7 @@ impl AccountOutputBuilder {
         verify_allowed_features(&immutable_features, AccountOutput::ALLOWED_IMMUTABLE_FEATURES)?;
 
         let mut output = AccountOutput {
-            amount: 1,
+            amount: 0,
             mana: self.mana,
             native_tokens: NativeTokens::from_set(self.native_tokens)?,
             account_id: self.account_id,
@@ -255,12 +255,8 @@ impl AccountOutputBuilder {
 
         output.amount = match self.amount {
             OutputBuilderAmount::Amount(amount) => amount,
-            OutputBuilderAmount::MinimumStorageDeposit(rent_structure) => {
-                Output::Account(output.clone()).rent_cost(rent_structure)
-            }
+            OutputBuilderAmount::MinimumAmount(params) => output.minimum_amount(params),
         };
-
-        verify_output_amount_min(output.amount)?;
 
         Ok(output)
     }
@@ -321,14 +317,11 @@ impl AccountOutput {
         AccountOutputBuilder::new_with_amount(amount, account_id)
     }
 
-    /// Creates a new [`AccountOutputBuilder`] with a provided rent structure.
-    /// The amount will be set to the minimum storage deposit.
+    /// Creates a new [`AccountOutputBuilder`] with provided storage score parameters.
+    /// The amount will be set to the minimum required amount.
     #[inline(always)]
-    pub fn build_with_minimum_storage_deposit(
-        rent_structure: RentStructure,
-        account_id: AccountId,
-    ) -> AccountOutputBuilder {
-        AccountOutputBuilder::new_with_minimum_storage_deposit(rent_structure, account_id)
+    pub fn build_with_minimum_amount(params: StorageScoreParameters, account_id: AccountId) -> AccountOutputBuilder {
+        AccountOutputBuilder::new_with_minimum_amount(params, account_id)
     }
 
     ///
@@ -525,6 +518,19 @@ impl StateTransitionVerifier for AccountOutput {
     }
 }
 
+impl StorageScore for AccountOutput {
+    fn storage_score(&self, params: StorageScoreParameters) -> u64 {
+        params.output_offset()
+            // Type byte
+            + (1 + self.packed_len() as u64) * params.data_factor() as u64
+            + self.unlock_conditions.storage_score(params)
+            + self.features.storage_score(params)
+            + self.immutable_features.storage_score(params)
+    }
+}
+
+impl MinimumOutputAmount for AccountOutput {}
+
 impl Packable for AccountOutput {
     type UnpackError = Error;
     type UnpackVisitor = ProtocolParameters;
@@ -547,8 +553,6 @@ impl Packable for AccountOutput {
         visitor: &Self::UnpackVisitor,
     ) -> Result<Self, UnpackError<Self::UnpackError, U::Error>> {
         let amount = u64::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
-
-        verify_output_amount_packable::<VERIFY>(&amount, visitor).map_err(UnpackError::Packable)?;
 
         let mana = u64::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
 
@@ -704,8 +708,8 @@ pub(crate) mod dto {
             let params = params.into();
             let mut builder = match amount {
                 OutputBuilderAmount::Amount(amount) => AccountOutputBuilder::new_with_amount(amount, *account_id),
-                OutputBuilderAmount::MinimumStorageDeposit(rent_structure) => {
-                    AccountOutputBuilder::new_with_minimum_storage_deposit(rent_structure, *account_id)
+                OutputBuilderAmount::MinimumAmount(params) => {
+                    AccountOutputBuilder::new_with_minimum_amount(params, *account_id)
                 }
             }
             .with_mana(mana);
@@ -809,7 +813,7 @@ mod tests {
         test_split_dto(builder);
 
         let builder =
-            AccountOutput::build_with_minimum_storage_deposit(protocol_parameters.rent_structure(), account_id)
+            AccountOutput::build_with_minimum_amount(protocol_parameters.storage_score_parameters(), account_id)
                 .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000).unwrap())
                 .add_unlock_condition(address)
                 .with_features(rand_allowed_features(AccountOutput::ALLOWED_FEATURES))

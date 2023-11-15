@@ -31,11 +31,11 @@ async fn main() -> Result<()> {
     // Create a client instance.
     let client = Client::builder().with_node(&node_url)?.finish().await?;
 
-    let rent_structure = client.get_rent_structure().await?;
+    let storage_score_params = client.get_storage_score_parameters().await?;
 
     let address = Address::try_from_bech32("rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy")?;
 
-    let nft_output_builder = NftOutputBuilder::new_with_minimum_storage_deposit(rent_structure, NftId::null())
+    let nft_output_builder = NftOutputBuilder::new_with_minimum_amount(storage_score_params, NftId::null())
         .add_unlock_condition(AddressUnlockCondition::new(address.clone()));
 
     let outputs = [

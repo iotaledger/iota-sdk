@@ -3,7 +3,7 @@
 
 use derive_more::From;
 
-use crate::types::block::{slot::SlotIndex, Error};
+use crate::types::block::{output::StorageScore, slot::SlotIndex, Error};
 
 /// Defines a slot index until which the output can not be unlocked.
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, From, packable::Packable)]
@@ -30,6 +30,8 @@ impl TimelockUnlockCondition {
         self.0
     }
 }
+
+impl StorageScore for TimelockUnlockCondition {}
 
 #[inline]
 fn verify_slot_index<const VERIFY: bool>(slot_index: &SlotIndex, _: &()) -> Result<(), Error> {

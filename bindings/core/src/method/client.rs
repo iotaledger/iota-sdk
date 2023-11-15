@@ -37,7 +37,7 @@ pub enum ClientMethod {
     #[allow(missing_docs)]
     #[serde(rename_all = "camelCase")]
     BuildAccountOutput {
-        // If not provided, minimum storage deposit will be used
+        // If not provided, minimum amount will be used
         #[serde(default, with = "option_string")]
         amount: Option<u64>,
         // TODO: Determine if `default` is wanted here
@@ -55,7 +55,7 @@ pub enum ClientMethod {
     #[allow(missing_docs)]
     #[serde(rename_all = "camelCase")]
     BuildBasicOutput {
-        // If not provided, minimum storage deposit will be used
+        // If not provided, minimum amount will be used
         #[serde(default, with = "option_string")]
         amount: Option<u64>,
         // TODO: Determine if `default` is wanted here
@@ -70,7 +70,7 @@ pub enum ClientMethod {
     #[allow(missing_docs)]
     #[serde(rename_all = "camelCase")]
     BuildFoundryOutput {
-        // If not provided, minimum storage deposit will be used
+        // If not provided, minimum amount will be used
         #[serde(default, with = "option_string")]
         amount: Option<u64>,
         native_tokens: Option<Vec<NativeToken>>,
@@ -85,7 +85,7 @@ pub enum ClientMethod {
     #[allow(missing_docs)]
     #[serde(rename_all = "camelCase")]
     BuildNftOutput {
-        // If not provided, minimum storage deposit will be used
+        // If not provided, minimum amount will be used
         #[serde(default, with = "option_string")]
         amount: Option<u64>,
         // TODO: Determine if `default` is wanted here
@@ -351,10 +351,10 @@ pub enum ClientMethod {
         /// Human readable part
         bech32_hrp: Option<Hrp>,
     },
-    /// Calculate the minimum required storage deposit for an output.
+    /// Calculate the minimum required amount for an output.
     /// Expected response:
-    /// [`MinimumRequiredStorageDeposit`](crate::Response::MinimumRequiredStorageDeposit)
-    MinimumRequiredStorageDeposit { output: OutputDto },
+    /// [`OutputAmount`](crate::Response::OutputAmount)
+    ComputeMinimumOutputAmount { output: OutputDto },
     /// Requests funds for a given address from the faucet, for example `https://faucet.testnet.shimmer.network/api/enqueue` or `http://localhost:8091/api/enqueue`.
     RequestFundsFromFaucet {
         /// Faucet URL

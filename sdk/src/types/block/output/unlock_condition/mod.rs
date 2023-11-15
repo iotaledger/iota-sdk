@@ -23,7 +23,14 @@ pub use self::{
     state_controller_address::StateControllerAddressUnlockCondition,
     storage_deposit_return::StorageDepositReturnUnlockCondition, timelock::TimelockUnlockCondition,
 };
-use crate::types::block::{address::Address, create_bitflags, protocol::ProtocolParameters, slot::SlotIndex, Error};
+use crate::types::block::{
+    address::Address,
+    create_bitflags,
+    output::{StorageScore, StorageScoreParameters},
+    protocol::ProtocolParameters,
+    slot::SlotIndex,
+    Error,
+};
 
 ///
 #[derive(Clone, Eq, PartialEq, Hash, From, Packable)]
@@ -62,6 +69,20 @@ impl PartialOrd for UnlockCondition {
 impl Ord for UnlockCondition {
     fn cmp(&self, other: &Self) -> core::cmp::Ordering {
         self.kind().cmp(&other.kind())
+    }
+}
+
+impl StorageScore for UnlockCondition {
+    fn storage_score(&self, params: StorageScoreParameters) -> u64 {
+        match self {
+            Self::Address(uc) => uc.storage_score(params),
+            Self::StorageDepositReturn(uc) => uc.storage_score(params),
+            Self::Timelock(uc) => uc.storage_score(params),
+            Self::Expiration(uc) => uc.storage_score(params),
+            Self::StateControllerAddress(uc) => uc.storage_score(params),
+            Self::GovernorAddress(uc) => uc.storage_score(params),
+            Self::ImmutableAccountAddress(uc) => uc.storage_score(params),
+        }
     }
 }
 
@@ -279,6 +300,12 @@ impl UnlockConditions {
 
         self.expiration()
             .map_or(false, |expiration| slot_index >= expiration.slot_index())
+    }
+}
+
+impl StorageScore for UnlockConditions {
+    fn storage_score(&self, params: StorageScoreParameters) -> u64 {
+        self.iter().map(|uc| uc.storage_score(params)).sum::<u64>()
     }
 }
 

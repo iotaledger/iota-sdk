@@ -8,7 +8,7 @@ use derive_more::{AsRef, Deref, Display, From};
 use iterator_sorted::is_unique_sorted;
 use packable::{bounded::BoundedU8, prefix::BoxedSlicePrefix, Packable};
 
-use crate::types::block::{address::Address, Error};
+use crate::types::block::{address::Address, output::StorageScore, Error};
 
 pub(crate) type WeightedAddressCount =
     BoundedU8<{ *MultiAddress::ADDRESSES_COUNT.start() }, { *MultiAddress::ADDRESSES_COUNT.end() }>;
@@ -150,6 +150,8 @@ fn verify_multi_address<const VERIFY: bool>(address: &MultiAddress, _visitor: &(
     }
     Ok(())
 }
+
+impl StorageScore for MultiAddress {}
 
 impl fmt::Display for MultiAddress {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
