@@ -15,7 +15,7 @@ use packable::{
 
 use crate::types::block::{
     block_id::{BlockHash, BlockId},
-    core::{BasicBlock, ValidationBlock},
+    core::{BasicBlockBody, ValidationBlockBody},
     protocol::ProtocolParameters,
     signature::Signature,
     slot::{SlotCommitmentId, SlotIndex},
@@ -267,25 +267,25 @@ impl SignedBlock {
         Ok(block)
     }
 
-    /// Checks whether the inner block is a [`BasicBlock`].
+    /// Checks whether the inner block body is a [`BasicBlockBody`].
     pub fn is_basic(&self) -> bool {
         self.block.is_basic()
     }
 
-    /// Gets the inner block as an actual [`BasicBlock`].
-    /// NOTE: Will panic if the inner block is not a [`BasicBlock`].
-    pub fn as_basic(&self) -> &BasicBlock {
+    /// Gets the inner block body as an actual [`BasicBlockBody`].
+    /// NOTE: Will panic if the inner block body is not a [`BasicBlockBody`].
+    pub fn as_basic(&self) -> &BasicBlockBody {
         self.block.as_basic()
     }
 
-    /// Checks whether the inner block is a [`ValidationBlock`].
+    /// Checks whether the inner block is a [`ValidationBlockBody`].
     pub fn is_validation(&self) -> bool {
         self.block.is_validation()
     }
 
-    /// Gets the inner block as an actual [`ValidationBlock`].
-    /// NOTE: Will panic if the inner block is not a [`ValidationBlock`].
-    pub fn as_validation(&self) -> &ValidationBlock {
+    /// Gets the inner block as an actual [`ValidationBlockBody`].
+    /// NOTE: Will panic if the inner block is not a [`ValidationBlockBody`].
+    pub fn as_validation(&self) -> &ValidationBlockBody {
         self.block.as_validation()
     }
 }

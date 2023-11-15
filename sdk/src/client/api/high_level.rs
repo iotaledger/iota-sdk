@@ -15,7 +15,7 @@ use crate::{
     },
     types::block::{
         address::Bech32Address,
-        core::{BasicBlock, Block, SignedBlock},
+        core::{BasicBlockBody, Block, SignedBlock},
         input::{Input, UtxoInput, INPUT_COUNT_MAX},
         output::OutputWithMetadata,
         payload::{signed_transaction::TransactionId, Payload},
@@ -45,8 +45,8 @@ impl Client {
 
             self.get_outputs_with_metadata(&input_ids).await
         } else {
-            Err(Error::UnexpectedBlockKind {
-                expected: BasicBlock::KIND,
+            Err(Error::UnexpectedBlockBodyKind {
+                expected: BasicBlockBody::KIND,
                 actual: signed_block.block().kind(),
             })
         }

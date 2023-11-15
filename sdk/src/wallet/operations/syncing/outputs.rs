@@ -9,7 +9,7 @@ use crate::{
     types::{
         api::core::OutputWithMetadataResponse,
         block::{
-            core::{BasicBlock, Block},
+            core::{BasicBlockBody, Block},
             input::Input,
             output::{OutputId, OutputWithMetadata},
             payload::{signed_transaction::TransactionId, Payload, SignedTransactionPayload},
@@ -167,8 +167,8 @@ where
                                             Ok((transaction_id, None))
                                         }
                                     } else {
-                                        Err(ClientError::UnexpectedBlockKind {
-                                            expected: BasicBlock::KIND,
+                                        Err(ClientError::UnexpectedBlockBodyKind {
+                                            expected: BasicBlockBody::KIND,
                                             actual: signed_block.block().kind(),
                                         }
                                         .into())
