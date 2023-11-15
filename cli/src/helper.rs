@@ -356,7 +356,7 @@ impl From<usize> for SecretManagerChoice {
             0 => Self::Stronghold,
             1 => Self::LedgerNano,
             2 => Self::LedgerNanoSimulator,
-            _ => panic!("invalid choice index"),
+            _ => panic!("invalid secret manager choice index"),
         }
     }
 }
