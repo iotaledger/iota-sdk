@@ -34,8 +34,13 @@ async function run() {
             console.log(output_id);
         }
 
-        const preparedTransaction = await account.prepareClaimOutputs(output_ids);
-        console.log('Transaction prepared: ', preparedTransaction.preparedTransactionData());
+        const preparedTransaction = await account.prepareClaimOutputs(
+            output_ids,
+        );
+        console.log(
+            'Transaction prepared: ',
+            preparedTransaction.preparedTransactionData(),
+        );
         const transaction = await preparedTransaction.send();
 
         const blockId = await account.retryTransactionUntilIncluded(

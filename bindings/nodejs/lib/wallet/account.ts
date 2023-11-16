@@ -263,7 +263,9 @@ export class Account {
                 },
             },
         );
-        const parsed = JSON.parse(response) as Response<PreparedTransactionData>;
+        const parsed = JSON.parse(
+            response,
+        ) as Response<PreparedTransactionData>;
         return new PreparedTransaction(
             plainToInstance(PreparedTransactionData, parsed.payload),
             this,
