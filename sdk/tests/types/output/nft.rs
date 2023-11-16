@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use iota_sdk::types::block::{
-    output::{NftId, NftOutput, Output, Rent},
+    output::{MinimumOutputAmount, NftId, NftOutput},
     protocol::protocol_parameters,
     rand::output::{
         feature::{rand_issuer_feature, rand_sender_feature},
