@@ -162,7 +162,7 @@ pub mod dto {
 
     pub use super::signed_transaction::dto::SignedTransactionPayloadDto;
     use super::*;
-    use crate::types::{block::Error, TryFromDto, ValidationParams};
+    use crate::types::{block::Error, TryFromDto};
 
     /// Describes all the different payload types.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
@@ -197,11 +197,13 @@ pub mod dto {
         }
     }
 
-    impl TryFromDto for Payload {
-        type Dto = PayloadDto;
+    impl TryFromDto<PayloadDto> for Payload {
         type Error = Error;
 
-        fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
+        fn try_from_dto_with_params_inner(
+            dto: PayloadDto,
+            params: Option<&ProtocolParameters>,
+        ) -> Result<Self, Self::Error> {
             Ok(match dto {
                 PayloadDto::TaggedData(p) => Self::from(*p),
                 PayloadDto::SignedTransaction(p) => {

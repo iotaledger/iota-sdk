@@ -202,7 +202,7 @@ pub(crate) mod dto {
     use super::*;
     use crate::types::{
         block::{BlockId, Error},
-        TryFromDto, ValidationParams,
+        TryFromDto,
     };
 
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
@@ -230,12 +230,14 @@ pub(crate) mod dto {
         }
     }
 
-    impl TryFromDto for ValidationBlock {
-        type Dto = ValidationBlockDto;
+    impl TryFromDto<ValidationBlockDto> for ValidationBlock {
         type Error = Error;
 
-        fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
-            if let Some(protocol_params) = params.protocol_parameters() {
+        fn try_from_dto_with_params_inner(
+            dto: ValidationBlockDto,
+            params: Option<&ProtocolParameters>,
+        ) -> Result<Self, Self::Error> {
+            if let Some(protocol_params) = params {
                 verify_protocol_parameters_hash::<true>(&dto.protocol_parameters_hash, protocol_params)?;
             }
 
