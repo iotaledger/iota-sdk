@@ -13,8 +13,8 @@ use crate::types::block::{
             verify_allowed_unlock_conditions, AddressUnlockCondition, StorageDepositReturnUnlockCondition,
             UnlockCondition, UnlockConditionFlags, UnlockConditions,
         },
-        verify_output_amount_packable, MinimumOutputAmount, NativeToken, NativeTokens, Output, OutputBuilderAmount,
-        OutputId, StorageScore, StorageScoreParameters,
+        MinimumOutputAmount, NativeToken, NativeTokens, Output, OutputBuilderAmount, OutputId, StorageScore,
+        StorageScoreParameters,
     },
     protocol::ProtocolParameters,
     semantic::{SemanticValidationContext, TransactionFailureReason},
@@ -252,7 +252,6 @@ impl From<&BasicOutput> for BasicOutputBuilder {
 #[packable(unpack_visitor = ProtocolParameters)]
 pub struct BasicOutput {
     /// Amount of IOTA coins to deposit with this output.
-    #[packable(verify_with = verify_output_amount_packable)]
     amount: u64,
     /// Amount of stored Mana held by this output.
     mana: u64,
@@ -261,8 +260,8 @@ pub struct BasicOutput {
     /// Define how the output can be unlocked in a transaction.
     #[packable(verify_with = verify_unlock_conditions_packable)]
     unlock_conditions: UnlockConditions,
-    #[packable(verify_with = verify_features_packable)]
     /// Features of the output.
+    #[packable(verify_with = verify_features_packable)]
     features: Features,
 }
 

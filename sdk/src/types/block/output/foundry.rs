@@ -18,9 +18,8 @@ use crate::types::block::{
         account::AccountId,
         feature::{verify_allowed_features, Feature, FeatureFlags, Features},
         unlock_condition::{verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions},
-        verify_output_amount_packable, ChainId, MinimumOutputAmount, NativeToken, NativeTokens, Output,
-        OutputBuilderAmount, OutputId, StateTransitionError, StateTransitionVerifier, StorageScore,
-        StorageScoreParameters, TokenId, TokenScheme,
+        ChainId, MinimumOutputAmount, NativeToken, NativeTokens, Output, OutputBuilderAmount, OutputId,
+        StateTransitionError, StateTransitionVerifier, StorageScore, StorageScoreParameters, TokenId, TokenScheme,
     },
     payload::signed_transaction::{TransactionCapabilities, TransactionCapabilityFlag},
     protocol::ProtocolParameters,
@@ -623,8 +622,6 @@ impl Packable for FoundryOutput {
         visitor: &Self::UnpackVisitor,
     ) -> Result<Self, UnpackError<Self::UnpackError, U::Error>> {
         let amount = u64::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
-
-        verify_output_amount_packable::<VERIFY>(&amount, visitor).map_err(UnpackError::Packable)?;
 
         let native_tokens = NativeTokens::unpack::<_, VERIFY>(unpacker, &())?;
         let serial_number = u32::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
