@@ -17,7 +17,7 @@ use iota_sdk::{
         address::{Bech32Address, Hrp},
         output::{
             dto::OutputDto, feature::Feature, unlock_condition::dto::UnlockConditionDto, AccountId, AnchorId,
-            DelegationId, FoundryId, NativeToken, NftId, OutputId, TokenScheme,
+            DelegationId, FoundryId, NftId, OutputId, TokenScheme,
         },
         payload::{dto::PayloadDto, signed_transaction::TransactionId},
         BlockId, IssuerId, SignedBlockDto,
@@ -60,7 +60,6 @@ pub enum ClientMethod {
         // TODO: Determine if `default` is wanted here
         #[serde(default, with = "string")]
         mana: u64,
-        native_tokens: Option<Vec<NativeToken>>,
         unlock_conditions: Vec<UnlockConditionDto>,
         features: Option<Vec<Feature>>,
     },
@@ -72,7 +71,6 @@ pub enum ClientMethod {
         // If not provided, minimum amount will be used
         #[serde(default, with = "option_string")]
         amount: Option<u64>,
-        native_tokens: Option<Vec<NativeToken>>,
         serial_number: u32,
         token_scheme: TokenScheme,
         unlock_conditions: Vec<UnlockConditionDto>,
