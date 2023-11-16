@@ -564,7 +564,7 @@ class Account:
             self, output_ids_to_claim: List[OutputId]) -> Transaction:
         """Claim outputs.
         """
-        return self.prepare_claim_outputs(outputs_ids_to_claim).send()
+        return self.prepare_claim_outputs(output_ids_to_claim).send()
 
     def prepare_claim_outputs(
             self, output_ids_to_claim: List[OutputId]) -> PreparedTransaction:
