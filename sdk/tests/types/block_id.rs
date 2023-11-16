@@ -103,7 +103,7 @@ fn memory_layout() {
 //       }
 //     });
 
-//     let block_dto = serde_json::from_value::<SignedBlockDto>(block_json).unwrap();
+//     let block_dto = serde_json::from_value::<BlockDto>(block_json).unwrap();
 //     let block = Block::try_from_dto(block_dto).unwrap();
 //     let block_bytes = block.pack_to_vec();
 
@@ -221,7 +221,7 @@ fn memory_layout() {
 //       }
 //     });
 
-//     let block_dto = serde_json::from_value::<SignedBlockDto>(block_json).unwrap();
+//     let block_dto = serde_json::from_value::<BlockDto>(block_json).unwrap();
 //     let block = Block::try_from_dto(block_dto).unwrap();
 //     let block_bytes = block.pack_to_vec();
 
@@ -299,7 +299,7 @@ fn memory_layout() {
 //       }
 //     });
 
-//     let block_dto = serde_json::from_value::<SignedBlockDto>(block_json).unwrap();
+//     let block_dto = serde_json::from_value::<BlockDto>(block_json).unwrap();
 //     let block = Block::try_from_dto(block_dto).unwrap();
 //     let block_bytes = block.pack_to_vec();
 
