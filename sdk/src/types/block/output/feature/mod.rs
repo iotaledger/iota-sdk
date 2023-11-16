@@ -83,6 +83,7 @@ impl StorageScore for Feature {
             Self::Issuer(feature) => feature.storage_score(params),
             Self::Metadata(feature) => feature.storage_score(params),
             Self::Tag(feature) => feature.storage_score(params),
+            Self::NativeToken(feature) => feature.storage_score(params),
             Self::BlockIssuer(feature) => feature.storage_score(params),
             Self::Staking(feature) => feature.storage_score(params),
         }

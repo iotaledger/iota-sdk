@@ -280,8 +280,6 @@ where
                         .with_minimum_amount(storage_score_params)
                         .with_nft_id(nft_output.nft_id_non_null(&output_data.output_id))
                         .with_unlock_conditions([AddressUnlockCondition::new(wallet_address.clone())])
-                        // Set native tokens empty, we will collect them from all inputs later
-                        .with_native_tokens([])
                         .finish_output()?
                 };
 

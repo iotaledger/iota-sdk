@@ -533,13 +533,13 @@ mod tests {
         };
 
         let builder = BasicOutput::build_with_amount(100)
-            .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000).unwrap())
+            .with_native_token(NativeToken::new(TokenId::from(foundry_id), 1000).unwrap())
             .add_unlock_condition(address.clone())
             .with_features(rand_allowed_features(BasicOutput::ALLOWED_FEATURES));
         test_split_dto(builder);
 
         let builder = BasicOutput::build_with_minimum_amount(protocol_parameters.storage_score_parameters())
-            .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000).unwrap())
+            .with_native_token(NativeToken::new(TokenId::from(foundry_id), 1000).unwrap())
             .add_unlock_condition(address)
             .with_features(rand_allowed_features(BasicOutput::ALLOWED_FEATURES));
         test_split_dto(builder);

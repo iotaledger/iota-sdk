@@ -3,7 +3,7 @@
 
 use derive_more::{Deref, From};
 
-use crate::types::block::output::NativeToken;
+use crate::types::block::output::{NativeToken, StorageScore};
 
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Deref, From, packable::Packable)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -23,3 +23,5 @@ impl NativeTokenFeature {
         &self.0
     }
 }
+
+impl StorageScore for NativeTokenFeature {}
