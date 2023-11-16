@@ -7,10 +7,7 @@ use crypto::keys::bip44::Bip44;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    types::{
-        block::output::{dto::OutputDto, Output, OutputId, OutputMetadata},
-        TryFromDto, ValidationParams,
-    },
+    types::block::output::{dto::OutputDto, Output, OutputId, OutputMetadata},
     utils::serde::bip44::option_bip44,
 };
 
@@ -167,13 +164,12 @@ pub struct InputSigningDataDto {
     pub chain: Option<Bip44>,
 }
 
-impl TryFromDto for InputSigningData {
-    type Dto = InputSigningDataDto;
+impl TryFrom<InputSigningDataDto> for InputSigningData {
     type Error = crate::client::Error;
 
-    fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
+    fn try_from(dto: InputSigningDataDto) -> Result<Self, Self::Error> {
         Ok(Self {
-            output: Output::try_from_dto_with_params_inner(dto.output, params)?,
+            output: Output::try_from(dto.output)?,
             output_metadata: dto.output_metadata,
             chain: dto.chain,
         })

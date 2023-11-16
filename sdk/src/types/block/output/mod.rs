@@ -27,12 +27,7 @@ pub mod unlock_condition;
 use core::ops::RangeInclusive;
 
 use derive_more::From;
-use packable::{
-    error::{UnpackError, UnpackErrorExt},
-    packer::Packer,
-    unpacker::Unpacker,
-    Packable,
-};
+use packable::Packable;
 
 pub use self::{
     account::{AccountId, AccountOutput, AccountOutputBuilder},
@@ -111,19 +106,28 @@ impl OutputWithMetadata {
 }
 
 /// A generic output that can represent different types defining the deposit of funds.
-#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, From)]
+#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, From, Packable)]
+#[packable(unpack_error = Error)]
+#[packable(unpack_visitor = ProtocolParameters)]
+#[packable(tag_type = u8, with_error = Error::InvalidOutputKind)]
 pub enum Output {
     /// A basic output.
+    #[packable(tag = BasicOutput::KIND)]
     Basic(BasicOutput),
     /// An account output.
+    #[packable(tag = AccountOutput::KIND)]
     Account(AccountOutput),
     /// An anchor output.
+    #[packable(tag = AnchorOutput::KIND)]
     Anchor(AnchorOutput),
     /// A foundry output.
+    #[packable(tag = FoundryOutput::KIND)]
     Foundry(FoundryOutput),
     /// An NFT output.
+    #[packable(tag = NftOutput::KIND)]
     Nft(NftOutput),
     /// A delegation output.
+    #[packable(tag = DelegationOutput::KIND)]
     Delegation(DelegationOutput),
 }
 
@@ -382,57 +386,6 @@ impl Output {
     }
 }
 
-impl Packable for Output {
-    type UnpackError = Error;
-    type UnpackVisitor = ProtocolParameters;
-
-    fn pack<P: Packer>(&self, packer: &mut P) -> Result<(), P::Error> {
-        match self {
-            Self::Basic(output) => {
-                BasicOutput::KIND.pack(packer)?;
-                output.pack(packer)
-            }
-            Self::Account(output) => {
-                AccountOutput::KIND.pack(packer)?;
-                output.pack(packer)
-            }
-            Self::Anchor(output) => {
-                AnchorOutput::KIND.pack(packer)?;
-                output.pack(packer)
-            }
-            Self::Foundry(output) => {
-                FoundryOutput::KIND.pack(packer)?;
-                output.pack(packer)
-            }
-            Self::Nft(output) => {
-                NftOutput::KIND.pack(packer)?;
-                output.pack(packer)
-            }
-            Self::Delegation(output) => {
-                DelegationOutput::KIND.pack(packer)?;
-                output.pack(packer)
-            }
-        }?;
-
-        Ok(())
-    }
-
-    fn unpack<U: Unpacker, const VERIFY: bool>(
-        unpacker: &mut U,
-        visitor: &Self::UnpackVisitor,
-    ) -> Result<Self, UnpackError<Self::UnpackError, U::Error>> {
-        Ok(match u8::unpack::<_, VERIFY>(unpacker, &()).coerce()? {
-            BasicOutput::KIND => Self::from(BasicOutput::unpack::<_, VERIFY>(unpacker, visitor).coerce()?),
-            AccountOutput::KIND => Self::from(AccountOutput::unpack::<_, VERIFY>(unpacker, visitor).coerce()?),
-            AnchorOutput::KIND => Self::from(AnchorOutput::unpack::<_, VERIFY>(unpacker, visitor).coerce()?),
-            FoundryOutput::KIND => Self::from(FoundryOutput::unpack::<_, VERIFY>(unpacker, visitor).coerce()?),
-            NftOutput::KIND => Self::from(NftOutput::unpack::<_, VERIFY>(unpacker, visitor).coerce()?),
-            DelegationOutput::KIND => Self::from(DelegationOutput::unpack::<_, VERIFY>(unpacker, visitor).coerce()?),
-            k => return Err(UnpackError::Packable(Error::InvalidOutputKind(k))),
-        })
-    }
-}
-
 impl StorageScore for Output {
     fn storage_score(&self, params: StorageScoreParameters) -> u64 {
         match self {
@@ -447,18 +400,6 @@ impl StorageScore for Output {
 }
 
 impl MinimumOutputAmount for Output {}
-
-pub(crate) fn verify_output_amount_supply(amount: u64, token_supply: u64) -> Result<(), Error> {
-    if amount > token_supply {
-        Err(Error::InvalidOutputAmount(amount))
-    } else {
-        Ok(())
-    }
-}
-
-pub(crate) fn verify_output_amount(amount: u64, token_supply: u64) -> Result<(), Error> {
-    verify_output_amount_supply(amount, token_supply)
-}
 
 /// A trait that is shared by all output types, which is used to calculate the minimum amount the output
 /// must contain to satisfy its storage cost.
@@ -481,7 +422,6 @@ pub mod dto {
         account::dto::AccountOutputDto, anchor::dto::AnchorOutputDto, basic::dto::BasicOutputDto,
         delegation::dto::DelegationOutputDto, foundry::dto::FoundryOutputDto, nft::dto::NftOutputDto,
     };
-    use crate::types::{block::Error, TryFromDto, ValidationParams};
 
     /// Describes all the different output types.
     #[derive(Clone, Debug, Eq, PartialEq, From)]
@@ -507,20 +447,17 @@ pub mod dto {
         }
     }
 
-    impl TryFromDto for Output {
-        type Dto = OutputDto;
+    impl TryFrom<OutputDto> for Output {
         type Error = Error;
 
-        fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
+        fn try_from(dto: OutputDto) -> Result<Self, Self::Error> {
             Ok(match dto {
-                OutputDto::Basic(o) => Self::Basic(BasicOutput::try_from_dto_with_params_inner(o, params)?),
-                OutputDto::Account(o) => Self::Account(AccountOutput::try_from_dto_with_params_inner(o, params)?),
-                OutputDto::Anchor(o) => Self::Anchor(AnchorOutput::try_from_dto_with_params_inner(o, params)?),
-                OutputDto::Foundry(o) => Self::Foundry(FoundryOutput::try_from_dto_with_params_inner(o, params)?),
-                OutputDto::Nft(o) => Self::Nft(NftOutput::try_from_dto_with_params_inner(o, params)?),
-                OutputDto::Delegation(o) => {
-                    Self::Delegation(DelegationOutput::try_from_dto_with_params_inner(o, params)?)
-                }
+                OutputDto::Basic(o) => Self::Basic(BasicOutput::try_from(o)?),
+                OutputDto::Account(o) => Self::Account(AccountOutput::try_from(o)?),
+                OutputDto::Anchor(o) => Self::Anchor(AnchorOutput::try_from(o)?),
+                OutputDto::Foundry(o) => Self::Foundry(FoundryOutput::try_from(o)?),
+                OutputDto::Nft(o) => Self::Nft(NftOutput::try_from(o)?),
+                OutputDto::Delegation(o) => Self::Delegation(DelegationOutput::try_from(o)?),
             })
         }
     }
