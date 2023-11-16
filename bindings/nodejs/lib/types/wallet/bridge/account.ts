@@ -68,7 +68,7 @@ export type __PrepareBurnMethod__ = {
 };
 
 export type __PrepareClaimOutputsMethod__ = {
-    name: 'prepareClaimOutputs',
+    name: 'prepareClaimOutputs';
     data: {
         outputIdsToClaim: OutputId[];
     };
