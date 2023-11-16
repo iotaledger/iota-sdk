@@ -60,10 +60,10 @@ async fn main() -> Result<()> {
 
         let outputs = [SendNativeTokenParams::new(
             bech32_address,
-            [(*token_id, U256::from(SEND_NATIVE_TOKEN_AMOUNT))],
+            (*token_id, U256::from(SEND_NATIVE_TOKEN_AMOUNT)),
         )?];
 
-        let transaction = wallet.send_native_tokens(outputs, None).await?;
+        let transaction = wallet.send_native_token(outputs, None).await?;
         println!("Transaction sent: {}", transaction.transaction_id);
 
         // Wait for transaction to get included

@@ -134,7 +134,7 @@ impl BasicOutputBuilder {
 
     /// Sets the native token of the builder.
     #[inline(always)]
-    pub fn with_native_token(mut self, native_token: impl Into<NativeToken>) -> Self {
+    pub fn with_native_token(self, native_token: impl Into<NativeToken>) -> Self {
         self.add_feature(NativeTokenFeature::from(native_token.into()))
     }
 

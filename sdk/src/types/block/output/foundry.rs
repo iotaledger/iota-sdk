@@ -205,7 +205,7 @@ impl FoundryOutputBuilder {
 
     /// Sets the native token of the builder.
     #[inline(always)]
-    pub fn with_native_token(mut self, native_token: impl Into<NativeToken>) -> Self {
+    pub fn with_native_token(self, native_token: impl Into<NativeToken>) -> Self {
         self.add_feature(NativeTokenFeature::from(native_token.into()))
     }
 
@@ -798,7 +798,7 @@ mod tests {
         };
 
         let builder = FoundryOutput::build_with_amount(100, 123, rand_token_scheme())
-            .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000).unwrap())
+            .with_native_token(NativeToken::new(TokenId::from(foundry_id), 1000).unwrap())
             .add_unlock_condition(ImmutableAccountAddressUnlockCondition::new(rand_account_address()))
             .add_immutable_feature(rand_metadata_feature())
             .with_features(rand_allowed_features(FoundryOutput::ALLOWED_FEATURES));
@@ -809,7 +809,7 @@ mod tests {
             123,
             rand_token_scheme(),
         )
-        .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000).unwrap())
+        .with_native_token(NativeToken::new(TokenId::from(foundry_id), 1000).unwrap())
         .add_unlock_condition(ImmutableAccountAddressUnlockCondition::new(rand_account_address()))
         .add_immutable_feature(rand_metadata_feature())
         .with_features(rand_allowed_features(FoundryOutput::ALLOWED_FEATURES));

@@ -222,10 +222,10 @@ impl Output {
         match self {
             Self::Basic(output) => output.native_token(),
             Self::Account(_) => None,
+            Self::Anchor(_) => None,
             Self::Foundry(output) => output.native_token(),
             Self::Nft(_) => None,
             Self::Delegation(_) => None,
-            Self::Anchor(output) => None,
         }
     }
 

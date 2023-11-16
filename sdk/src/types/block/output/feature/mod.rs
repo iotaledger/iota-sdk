@@ -299,7 +299,7 @@ mod test {
                 FeatureFlags::ISSUER,
                 FeatureFlags::METADATA,
                 FeatureFlags::TAG,
-                FeatureFlags::NATIVE_TOKEN
+                FeatureFlags::NATIVE_TOKEN,
                 FeatureFlags::BLOCK_ISSUER,
                 FeatureFlags::STAKING
             ]
