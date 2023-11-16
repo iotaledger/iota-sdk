@@ -74,35 +74,16 @@ impl<'a, T> From<&'a Boo<'a, T>> for Boo<'a, T> {
 #[derive(Clone, Default, Debug)]
 pub struct ValidationParams<'a> {
     protocol_parameters: Option<Boo<'a, ProtocolParameters>>,
-    token_supply: Option<u64>,
 }
 
 impl<'a> ValidationParams<'a> {
     pub fn with_protocol_parameters(mut self, protocol_parameters: impl Into<Boo<'a, ProtocolParameters>>) -> Self {
-        let protocol_parameters = protocol_parameters.into();
-        let token_supply = protocol_parameters.token_supply();
-        self.protocol_parameters.replace(protocol_parameters);
-        self.with_token_supply(token_supply)
-    }
-
-    pub fn with_token_supply(mut self, token_supply: u64) -> Self {
-        self.token_supply.replace(token_supply);
+        self.protocol_parameters.replace(protocol_parameters.into());
         self
     }
 
     pub fn protocol_parameters(&self) -> Option<&ProtocolParameters> {
         self.protocol_parameters.as_deref()
-    }
-
-    pub fn token_supply(&self) -> Option<u64> {
-        self.token_supply
-            .or_else(|| self.protocol_parameters.as_ref().map(|p| p.token_supply()))
-    }
-}
-
-impl<'a> From<u64> for ValidationParams<'a> {
-    fn from(value: u64) -> Self {
-        Self::default().with_token_supply(value)
     }
 }
 
@@ -122,7 +103,6 @@ impl<'a> From<&'a ValidationParams<'a>> for ValidationParams<'a> {
     fn from(value: &'a ValidationParams<'a>) -> Self {
         Self {
             protocol_parameters: value.protocol_parameters.as_ref().map(Into::into),
-            token_supply: value.token_supply,
         }
     }
 }
