@@ -332,6 +332,7 @@ pub enum Response {
     OutputsData(Vec<OutputDataDto>),
     /// Response for:
     /// - [`PrepareBurn`](crate::method::AccountMethod::PrepareBurn),
+    /// - [`PrepareClaimOutputs`](crate::method::AccountMethod::PrepareClaimOutputs)
     /// - [`PrepareConsolidateOutputs`](crate::method::AccountMethod::PrepareConsolidateOutputs)
     /// - [`PrepareCreateAliasOutput`](crate::method::AccountMethod::PrepareCreateAliasOutput)
     /// - [`PrepareDecreaseVotingPower`](crate::method::AccountMethod::PrepareDecreaseVotingPower)
