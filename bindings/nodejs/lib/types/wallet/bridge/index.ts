@@ -5,6 +5,7 @@ import type {
     __BuildFoundryOutputMethod__,
     __BuildNftOutputMethod__,
     __PrepareBurnMethod__,
+    __PrepareClaimOutputsMethod__,
     __ClaimOutputsMethod__,
     __PrepareConsolidateOutputsMethod__,
     __PrepareCreateAliasOutputMethod__,
@@ -87,6 +88,7 @@ export type __AccountMethod__ =
     | __BuildNftOutputMethod__
     | __PrepareBurnMethod__
     | __ClaimOutputsMethod__
+    | __PrepareClaimOutputsMethod__
     | __PrepareConsolidateOutputsMethod__
     | __PrepareCreateAliasOutputMethod__
     | __DeregisterParticipationEventMethod__

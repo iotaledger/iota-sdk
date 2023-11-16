@@ -67,6 +67,13 @@ export type __PrepareBurnMethod__ = {
     };
 };
 
+export type __PrepareClaimOutputsMethod__ = {
+    name: 'prepareClaimOutputs';
+    data: {
+        outputIdsToClaim: OutputId[];
+    };
+};
+
 export type __ClaimOutputsMethod__ = {
     name: 'claimOutputs';
     data: {

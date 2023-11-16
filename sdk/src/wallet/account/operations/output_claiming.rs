@@ -6,7 +6,7 @@ use std::collections::{HashMap, HashSet};
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    client::secret::SecretManage,
+    client::{api::PreparedTransactionData, secret::SecretManage},
     types::block::{
         address::Address,
         output::{
@@ -186,37 +186,44 @@ where
         I::IntoIter: Send,
     {
         log::debug!("[OUTPUT_CLAIMING] claim_outputs");
-        let basic_outputs = self.get_basic_outputs_for_additional_inputs().await?;
-        self.claim_outputs_internal(output_ids_to_claim, basic_outputs)
-            .await
-            .map_err(|error| {
-                // Map InsufficientStorageDepositAmount error here because it's the result of InsufficientFunds in this
-                // case and then easier to handle
-                match error {
-                    crate::wallet::Error::Block(block_error) => match *block_error {
-                        crate::types::block::Error::InsufficientStorageDepositAmount { amount, required } => {
-                            crate::wallet::Error::InsufficientFunds {
-                                available: amount,
-                                required,
-                            }
+        let prepared_transaction = self.prepare_claim_outputs(output_ids_to_claim).await.map_err(|error| {
+            // Map InsufficientStorageDepositAmount error here because it's the result of InsufficientFunds in this
+            // case and then easier to handle
+            match error {
+                crate::wallet::Error::Block(block_error) => match *block_error {
+                    crate::types::block::Error::InsufficientStorageDepositAmount { amount, required } => {
+                        crate::wallet::Error::InsufficientFunds {
+                            available: amount,
+                            required,
                         }
-                        _ => crate::wallet::Error::Block(block_error),
-                    },
-                    _ => error,
-                }
-            })
+                    }
+                    _ => crate::wallet::Error::Block(block_error),
+                },
+                _ => error,
+            }
+        })?;
+
+        let claim_tx = self.sign_and_submit_transaction(prepared_transaction, None).await?;
+
+        log::debug!(
+            "[OUTPUT_CLAIMING] Claiming transaction created: block_id: {:?} tx_id: {:?}",
+            claim_tx.block_id,
+            claim_tx.transaction_id
+        );
+        Ok(claim_tx)
     }
 
     /// Try to claim basic outputs that have additional unlock conditions to their [AddressUnlockCondition].
-    pub(crate) async fn claim_outputs_internal<I: IntoIterator<Item = OutputId> + Send>(
+    pub async fn prepare_claim_outputs<I: IntoIterator<Item = OutputId> + Send>(
         &self,
         output_ids_to_claim: I,
-        mut possible_additional_inputs: Vec<OutputData>,
-    ) -> crate::wallet::Result<Transaction>
+    ) -> crate::wallet::Result<PreparedTransactionData>
     where
         I::IntoIter: Send,
     {
-        log::debug!("[OUTPUT_CLAIMING] claim_outputs_internal");
+        log::debug!("[OUTPUT_CLAIMING] prepare_claim_outputs");
+
+        let mut possible_additional_inputs = self.get_basic_outputs_for_additional_inputs().await?;
 
         let current_time = self.client().get_time_checked().await?;
         let rent_structure = self.client().get_rent_structure().await?;
@@ -406,29 +413,21 @@ where
             })?;
         }
 
-        let claim_tx = self
-            .finish_transaction(
-                outputs_to_send,
-                Some(TransactionOptions {
-                    custom_inputs: Some(
-                        outputs_to_claim
-                            .iter()
-                            .map(|o| o.output_id)
-                            // add additional inputs
-                            .chain(additional_inputs)
-                            .collect::<Vec<OutputId>>(),
-                    ),
-                    ..Default::default()
-                }),
-            )
-            .await?;
-
-        log::debug!(
-            "[OUTPUT_CLAIMING] Claiming transaction created: block_id: {:?} tx_id: {:?}",
-            claim_tx.block_id,
-            claim_tx.transaction_id
-        );
-        Ok(claim_tx)
+        self.prepare_transaction(
+            outputs_to_send,
+            Some(TransactionOptions {
+                custom_inputs: Some(
+                    outputs_to_claim
+                        .iter()
+                        .map(|o| o.output_id)
+                        // add additional inputs
+                        .chain(additional_inputs)
+                        .collect::<Vec<OutputId>>(),
+                ),
+                ..Default::default()
+            }),
+        )
+        .await
     }
 }
 
