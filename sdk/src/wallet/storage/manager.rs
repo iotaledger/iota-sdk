@@ -1,15 +1,15 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use futures::{StreamExt, TryStreamExt};
 use zeroize::Zeroizing;
 
 use crate::{
     client::storage::StorageAdapter,
     types::TryFromDto,
     wallet::{
-        account::{AccountDetails, AccountDetailsDto, SyncOptions},
+        core::{WalletData, WalletDataDto},
         migration::migrate,
+        operations::syncing::SyncOptions,
         storage::{constants::*, DynStorageAdapter, Storage},
     },
 };
@@ -18,8 +18,6 @@ use crate::{
 #[derive(Debug)]
 pub(crate) struct StorageManager {
     pub(crate) storage: Storage,
-    // account indexes for accounts in the database
-    account_indexes: Vec<u32>,
 }
 
 impl StorageManager {
@@ -46,70 +44,30 @@ impl StorageManager {
                 .await?;
         };
 
-        let account_indexes = storage.get(ACCOUNTS_INDEXATION_KEY).await?.unwrap_or_default();
-
-        let storage_manager = Self {
-            storage,
-            account_indexes,
-        };
+        let storage_manager = Self { storage };
 
         Ok(storage_manager)
     }
 
-    pub(crate) async fn get_accounts(&mut self) -> crate::wallet::Result<Vec<AccountDetails>> {
-        if let Some(account_indexes) = self.get(ACCOUNTS_INDEXATION_KEY).await? {
-            if self.account_indexes.is_empty() {
-                self.account_indexes = account_indexes;
-            }
+    pub(crate) async fn load_wallet_data(&mut self) -> crate::wallet::Result<Option<WalletData>> {
+        if let Some(dto) = self.get::<WalletDataDto>(WALLET_DATA_KEY).await? {
+            Ok(Some(WalletData::try_from_dto(dto)?))
         } else {
-            return Ok(Vec::new());
+            Ok(None)
         }
-
-        futures::stream::iter(&self.account_indexes)
-            .filter_map(|account_index| async {
-                let account_index = *account_index;
-                let key = format!("{ACCOUNT_INDEXATION_KEY}{account_index}");
-                self.get::<AccountDetailsDto>(&key).await.transpose()
-            })
-            .map(|res| AccountDetails::try_from_dto(res?))
-            .try_collect::<Vec<_>>()
-            .await
     }
 
-    pub(crate) async fn save_account(&mut self, account: &AccountDetails) -> crate::wallet::Result<()> {
-        // Only add account index if not already present
-        if !self.account_indexes.contains(account.index()) {
-            self.account_indexes.push(*account.index());
-        }
-
-        self.set(ACCOUNTS_INDEXATION_KEY, &self.account_indexes).await?;
-        self.set(
-            &format!("{ACCOUNT_INDEXATION_KEY}{}", account.index()),
-            &AccountDetailsDto::from(account),
-        )
-        .await
+    pub(crate) async fn save_wallet_data(&mut self, wallet_data: &WalletData) -> crate::wallet::Result<()> {
+        self.set(WALLET_DATA_KEY, &WalletDataDto::from(wallet_data)).await
     }
 
-    pub(crate) async fn remove_account(&mut self, account_index: u32) -> crate::wallet::Result<()> {
-        self.delete(&format!("{ACCOUNT_INDEXATION_KEY}{account_index}")).await?;
-        self.account_indexes.retain(|a| a != &account_index);
-        self.set(ACCOUNTS_INDEXATION_KEY, &self.account_indexes).await
-    }
-
-    pub(crate) async fn set_default_sync_options(
-        &self,
-        account_index: u32,
-        sync_options: &SyncOptions,
-    ) -> crate::wallet::Result<()> {
-        let key = format!("{ACCOUNT_INDEXATION_KEY}{account_index}-{ACCOUNT_SYNC_OPTIONS}");
+    pub(crate) async fn set_default_sync_options(&self, sync_options: &SyncOptions) -> crate::wallet::Result<()> {
+        let key = format!("{WALLET_DATA_KEY}-{WALLET_SYNC_OPTIONS}");
         self.set(&key, &sync_options).await
     }
 
-    pub(crate) async fn get_default_sync_options(
-        &self,
-        account_index: u32,
-    ) -> crate::wallet::Result<Option<SyncOptions>> {
-        let key = format!("{ACCOUNT_INDEXATION_KEY}{account_index}-{ACCOUNT_SYNC_OPTIONS}");
+    pub(crate) async fn get_default_sync_options(&self) -> crate::wallet::Result<Option<SyncOptions>> {
+        let key = format!("{WALLET_DATA_KEY}-{WALLET_SYNC_OPTIONS}");
         self.get(&key).await
     }
 }
@@ -164,23 +122,19 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn save_remove_account() {
+    async fn save_load_wallet_data() {
         let mut storage_manager = StorageManager::new(Memory::default(), None).await.unwrap();
-        assert!(storage_manager.get_accounts().await.unwrap().is_empty());
+        assert!(storage_manager.load_wallet_data().await.unwrap().is_none());
 
-        let account_details = AccountDetails::mock();
+        let wallet_data = WalletData::mock();
 
-        storage_manager.save_account(&account_details).await.unwrap();
-        let accounts = storage_manager.get_accounts().await.unwrap();
-        assert_eq!(accounts.len(), 1);
-        assert_eq!(accounts[0].alias(), "Alice");
-
-        storage_manager.remove_account(0).await.unwrap();
-        assert!(storage_manager.get_accounts().await.unwrap().is_empty());
+        storage_manager.save_wallet_data(&wallet_data).await.unwrap();
+        let wallet = storage_manager.load_wallet_data().await.unwrap();
+        assert!(matches!(wallet, Some(data) if data.alias == Some("Alice".to_string())));
     }
 
     #[tokio::test]
-    async fn save_get_wallet_data() {
+    async fn save_load_wallet_builder() {
         let storage_manager = StorageManager::new(Memory::default(), None).await.unwrap();
         assert!(
             WalletBuilder::<SecretManager>::load(&storage_manager)

@@ -6,12 +6,21 @@ use pretty_assertions::assert_eq;
 
 #[test]
 fn stringified_error() {
-    let error = Error::AccountNotFound("0".into());
+    // testing a unit-type-like error
+    let error = Error::MissingBipPath;
     assert_eq!(
         &serde_json::to_string(&error).unwrap(),
-        "{\"type\":\"accountNotFound\",\"error\":\"account 0 not found\"}"
+        "{\"type\":\"missingBipPath\",\"error\":\"missing BIP path\"}"
     );
 
+    // testing a tuple-like error
+    let error = Error::InvalidMnemonic("nilly willy".to_string());
+    assert_eq!(
+        serde_json::to_string(&error).unwrap(),
+        "{\"type\":\"invalidMnemonic\",\"error\":\"invalid mnemonic: nilly willy\"}"
+    );
+
+    // testing a struct-like error
     let error = Error::NoOutputsToConsolidate {
         available_outputs: 0,
         consolidation_threshold: 0,
@@ -19,11 +28,5 @@ fn stringified_error() {
     assert_eq!(
         &serde_json::to_string(&error).unwrap(),
         "{\"type\":\"noOutputsToConsolidate\",\"error\":\"nothing to consolidate: available outputs: 0, consolidation threshold: 0\"}"
-    );
-
-    let error = Error::FailedToGetRemainder;
-    assert_eq!(
-        &serde_json::to_string(&error).unwrap(),
-        "{\"type\":\"failedToGetRemainder\",\"error\":\"failed to get remainder address\"}"
     );
 }

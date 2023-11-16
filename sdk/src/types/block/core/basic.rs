@@ -1,12 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use packable::{
-    error::{UnpackError, UnpackErrorExt},
-    packer::Packer,
-    unpacker::Unpacker,
-    Packable,
-};
+use packable::Packable;
 
 use crate::types::block::{
     core::{parent::verify_parents_sets, Block, Parents},
@@ -107,7 +102,10 @@ impl From<BasicBlock> for BasicBlockBuilder {
     }
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, Packable)]
+#[packable(unpack_error = Error)]
+#[packable(unpack_visitor = ProtocolParameters)]
+#[packable(verify_with = verify_basic_block)]
 pub struct BasicBlock {
     /// Blocks that are strongly directly approved.
     strong_parents: StrongParents,
@@ -156,45 +154,16 @@ impl BasicBlock {
     }
 }
 
-impl Packable for BasicBlock {
-    type UnpackError = Error;
-    type UnpackVisitor = ProtocolParameters;
-
-    fn pack<P: Packer>(&self, packer: &mut P) -> Result<(), P::Error> {
-        self.strong_parents.pack(packer)?;
-        self.weak_parents.pack(packer)?;
-        self.shallow_like_parents.pack(packer)?;
-        self.payload.pack(packer)?;
-        self.max_burned_mana.pack(packer)?;
-
-        Ok(())
+fn verify_basic_block<const VERIFY: bool>(basic_block: &BasicBlock, _: &ProtocolParameters) -> Result<(), Error> {
+    if VERIFY {
+        verify_parents_sets(
+            &basic_block.strong_parents,
+            &basic_block.weak_parents,
+            &basic_block.shallow_like_parents,
+        )?;
     }
 
-    fn unpack<U: Unpacker, const VERIFY: bool>(
-        unpacker: &mut U,
-        visitor: &Self::UnpackVisitor,
-    ) -> Result<Self, UnpackError<Self::UnpackError, U::Error>> {
-        let strong_parents = StrongParents::unpack::<_, VERIFY>(unpacker, &())?;
-        let weak_parents = WeakParents::unpack::<_, VERIFY>(unpacker, &())?;
-        let shallow_like_parents = ShallowLikeParents::unpack::<_, VERIFY>(unpacker, &())?;
-
-        if VERIFY {
-            verify_parents_sets(&strong_parents, &weak_parents, &shallow_like_parents)
-                .map_err(UnpackError::Packable)?;
-        }
-
-        let payload = OptionalPayload::unpack::<_, VERIFY>(unpacker, visitor)?;
-
-        let max_burned_mana = u64::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
-
-        Ok(Self {
-            strong_parents,
-            weak_parents,
-            shallow_like_parents,
-            payload,
-            max_burned_mana,
-        })
-    }
+    Ok(())
 }
 
 #[cfg(feature = "serde")]

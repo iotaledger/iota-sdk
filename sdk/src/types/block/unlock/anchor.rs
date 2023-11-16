@@ -21,7 +21,7 @@ impl TryFrom<u16> for AnchorUnlock {
 
 impl AnchorUnlock {
     /// The [`Unlock`](crate::types::block::unlock::Unlock) kind of an [`AnchorUnlock`].
-    pub const KIND: u8 = 4;
+    pub const KIND: u8 = 3;
 
     /// Creates a new [`AnchorUnlock`].
     #[inline(always)]
@@ -36,6 +36,7 @@ impl AnchorUnlock {
     }
 }
 
+#[cfg(feature = "serde")]
 mod dto {
     use serde::{Deserialize, Serialize};
 

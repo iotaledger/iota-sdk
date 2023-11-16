@@ -11,7 +11,7 @@ use crate::{
         input::INPUT_COUNT_MAX,
         output::{
             unlock_condition::StorageDepositReturnUnlockCondition, AccountOutputBuilder, FoundryOutputBuilder,
-            NftOutputBuilder, Output, OutputId, Rent,
+            MinimumOutputAmount, NftOutputBuilder, Output, OutputId,
         },
         slot::SlotIndex,
     },
@@ -229,11 +229,15 @@ impl InputSelection {
         for output in outputs {
             let diff = amount_selection.missing_amount();
             let amount = output.amount();
-            let rent = output.rent_cost(self.protocol_parameters.rent_structure());
+            let minimum_amount = output.minimum_amount(self.protocol_parameters.storage_score_parameters());
 
-            let new_amount = if amount >= diff + rent { amount - diff } else { rent };
+            let new_amount = if amount >= diff + minimum_amount {
+                amount - diff
+            } else {
+                minimum_amount
+            };
 
-            // TODO check that new_amount is enough for the rent
+            // TODO check that new_amount is enough for the storage cost
 
             // PANIC: unwrap is fine as non-chain outputs have been filtered out already.
             log::debug!(
@@ -245,13 +249,13 @@ impl InputSelection {
             let new_output = match output {
                 Output::Account(output) => AccountOutputBuilder::from(&*output)
                     .with_amount(new_amount)
-                    .finish_output(self.protocol_parameters.token_supply())?,
-                Output::Nft(output) => NftOutputBuilder::from(&*output)
-                    .with_amount(new_amount)
-                    .finish_output(self.protocol_parameters.token_supply())?,
+                    .finish_output()?,
                 Output::Foundry(output) => FoundryOutputBuilder::from(&*output)
                     .with_amount(new_amount)
-                    .finish_output(self.protocol_parameters.token_supply())?,
+                    .finish_output()?,
+                Output::Nft(output) => NftOutputBuilder::from(&*output)
+                    .with_amount(new_amount)
+                    .finish_output()?,
                 _ => panic!("only account, nft and foundry can be automatically created"),
             };
 

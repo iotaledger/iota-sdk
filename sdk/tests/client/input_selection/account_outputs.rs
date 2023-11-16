@@ -17,7 +17,7 @@ use crate::client::{
     addresses, build_inputs, build_outputs, is_remainder_or_return, unsorted_eq,
     Build::{Account, Basic},
     ACCOUNT_ID_0, ACCOUNT_ID_1, ACCOUNT_ID_2, BECH32_ADDRESS_ACCOUNT_1, BECH32_ADDRESS_ED25519_0,
-    BECH32_ADDRESS_ED25519_1, BECH32_ADDRESS_NFT_1, TOKEN_SUPPLY,
+    BECH32_ADDRESS_ED25519_1, BECH32_ADDRESS_NFT_1,
 };
 
 #[test]
@@ -470,7 +470,7 @@ fn account_in_output_and_sender() {
         Basic(1_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
     ]);
     let account_output = AccountOutputBuilder::from(inputs[0].output.as_account())
-        .finish_output(TOKEN_SUPPLY)
+        .finish_output()
         .unwrap();
     let mut outputs = build_outputs([Basic(
         1_000_000,

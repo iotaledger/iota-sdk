@@ -1,10 +1,10 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! In this example we will send an amount below the minimum storage deposit.
+//! In this example we will send an amount below the minimum amount.
 //!
 //! Make sure that `STRONGHOLD_SNAPSHOT_PATH` and `WALLET_DB_PATH` already exist by
-//! running the `./how_tos/accounts_and_addresses/create_account.rs` example!
+//! running the `./how_tos/accounts_and_addresses/create_wallet.rs` example!
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh
@@ -12,7 +12,7 @@
 //! ```
 
 use iota_sdk::{
-    wallet::{account::TransactionOptions, Result},
+    wallet::{Result, TransactionOptions},
     Wallet,
 };
 
@@ -26,14 +26,14 @@ async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
+    // Get the wallet we generated with `create_wallet`.
     let wallet = Wallet::builder()
         .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
         .finish()
         .await?;
-    let account = wallet.get_account("Alice").await?;
 
-    // May want to ensure the account is synced before sending a transaction.
-    account.sync(None).await?;
+    // May want to ensure the wallet is synced before sending a transaction.
+    wallet.sync(None).await?;
 
     // Set the stronghold password
     wallet
@@ -43,7 +43,7 @@ async fn main() -> Result<()> {
     println!("Sending '{}' coin(s) to '{}'...", SEND_MICRO_AMOUNT, RECV_ADDRESS);
 
     // Send a micro transaction
-    let transaction = account
+    let transaction = wallet
         .send(
             SEND_MICRO_AMOUNT,
             RECV_ADDRESS,
@@ -56,7 +56,7 @@ async fn main() -> Result<()> {
     println!("Transaction sent: {}", transaction.transaction_id);
 
     // Wait for transaction to get included
-    let block_id = account
+    let block_id = wallet
         .reissue_transaction_until_included(&transaction.transaction_id, None, None)
         .await?;
 

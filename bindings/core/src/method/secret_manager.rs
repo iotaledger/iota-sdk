@@ -36,7 +36,7 @@ pub enum SecretManagerMethod {
     SignatureUnlock {
         /// Transaction signing hash
         transaction_signing_hash: String,
-        /// Chain to sign the hash with
+        /// Chain used to sign the hash
         #[serde(with = "Bip44Def")]
         chain: Bip44,
     },
@@ -44,7 +44,7 @@ pub enum SecretManagerMethod {
     SignEd25519 {
         /// The message to sign, hex encoded String
         message: String,
-        /// Chain to sign the message with
+        /// Chain used to sign the message
         #[serde(with = "Bip44Def")]
         chain: Bip44,
     },
@@ -52,7 +52,7 @@ pub enum SecretManagerMethod {
     SignSecp256k1Ecdsa {
         /// The message to sign, hex encoded String
         message: String,
-        /// Chain to sign the message with
+        /// Chain used to sign the message
         #[serde(with = "Bip44Def")]
         chain: Bip44,
     },
@@ -66,7 +66,7 @@ pub enum SecretManagerMethod {
     #[serde(rename_all = "camelCase")]
     SignBlock {
         unsigned_block: UnsignedBlockDto,
-        /// Chain to sign the essence hash with
+        /// Chain used to sign the block
         #[serde(with = "Bip44Def")]
         chain: Bip44,
     },

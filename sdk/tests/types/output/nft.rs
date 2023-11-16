@@ -48,14 +48,14 @@ fn builder() {
     assert!(output.immutable_features().is_empty());
 
     let output = builder
-        .with_minimum_storage_deposit(protocol_parameters.rent_structure())
+        .with_minimum_amount(protocol_parameters.storage_score_parameters())
         .add_unlock_condition(rand_address_unlock_condition())
-        .finish_with_params(protocol_parameters.token_supply())
+        .finish()
         .unwrap();
 
     assert_eq!(
         output.amount(),
-        Output::Nft(output).rent_cost(protocol_parameters.rent_structure())
+        output.minimum_amount(protocol_parameters.storage_score_parameters())
     );
 }
 

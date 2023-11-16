@@ -30,6 +30,7 @@ impl<S: 'static + SecretManage> Wallet<S> {
 
 impl<S: 'static + SecretManage> Wallet<S>
 where
+    crate::client::Error: From<S::Error>,
     crate::wallet::Error: From<S::Error>,
     WalletBuilder<S>: SaveLoadWallet,
 {
@@ -67,9 +68,7 @@ where
             }
             *self.client.network_info.write().await = network_info;
 
-            for account in self.accounts.write().await.iter_mut() {
-                account.update_account_bech32_hrp().await?;
-            }
+            self.update_bech32_hrp().await?;
         }
 
         #[cfg(feature = "storage")]
@@ -154,9 +153,7 @@ where
             .update_node_manager(node_manager_builder.build(HashMap::new()))
             .await?;
 
-        for account in self.accounts.write().await.iter_mut() {
-            account.update_account_bech32_hrp().await?;
-        }
+        self.update_bech32_hrp().await?;
 
         Ok(())
     }

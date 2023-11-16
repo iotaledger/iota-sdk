@@ -34,7 +34,7 @@ if 'STRONGHOLD_PASSWORD' not in os.environ:
 wallet.set_stronghold_password(os.environ["STRONGHOLD_PASSWORD"])
 
 # Signs prepared transaction offline.
-signed_transaction_data = account.sign_transaction_essence(
+signed_transaction_data = account.sign_transaction(
     prepared_transaction_data)
 
 print("Signed transaction.")

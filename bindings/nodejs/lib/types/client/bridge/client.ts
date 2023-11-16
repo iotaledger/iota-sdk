@@ -11,18 +11,22 @@ import type {
     BlockId,
     FoundryId,
     IssuerId,
+    AnchorId,
     NftId,
+    DelegationId,
     Output,
     OutputId,
     Payload,
 } from '../../block';
 import type { PreparedTransactionData } from '../prepared-transaction-data';
 import type {
-    AccountQueryParameter,
-    FoundryQueryParameter,
-    GenericQueryParameter,
-    NftQueryParameter,
-    QueryParameter,
+    AccountOutputQueryParameters,
+    AnchorOutputQueryParameters,
+    BasicOutputQueryParameters,
+    DelegationOutputQueryParameters,
+    FoundryOutputQueryParameters,
+    NftOutputQueryParameters,
+    OutputQueryParameters,
 } from '../query-parameters';
 import type { IAuth } from '../network';
 import type { BasicOutputBuilderParams } from '../output_builder_params/basic-output-params';
@@ -40,20 +44,6 @@ export interface __GetOutputMethod__ {
     name: 'getOutput';
     data: {
         outputId: OutputId;
-    };
-}
-
-export interface __GetOutputIdsMethod__ {
-    name: 'outputIds';
-    data: {
-        queryParameters: GenericQueryParameter[];
-    };
-}
-
-export interface __GetBasicOutputIdsMethod__ {
-    name: 'basicOutputIds';
-    data: {
-        queryParameters: QueryParameter[];
     };
 }
 
@@ -221,48 +211,6 @@ export interface __HexPublicKeyToBech32AddressMethod__ {
     };
 }
 
-export interface __AccountOutputIdsMethod__ {
-    name: 'accountOutputIds';
-    data: {
-        queryParameters: AccountQueryParameter[];
-    };
-}
-
-export interface __AccountOutputIdMethod__ {
-    name: 'accountOutputId';
-    data: {
-        accountId: AccountId;
-    };
-}
-
-export interface __NftOutputIdsMethod__ {
-    name: 'nftOutputIds';
-    data: {
-        queryParameters: NftQueryParameter[];
-    };
-}
-
-export interface __NftOutputIdMethod__ {
-    name: 'nftOutputId';
-    data: {
-        nftId: NftId;
-    };
-}
-
-export interface __FoundryOutputIdsMethod__ {
-    name: 'foundryOutputIds';
-    data: {
-        queryParameters: FoundryQueryParameter[];
-    };
-}
-
-export interface __FoundryOutputIdMethod__ {
-    name: 'foundryOutputId';
-    data: {
-        foundryId: FoundryId;
-    };
-}
-
 export interface __GetOutputsIgnoreErrorsMethod__ {
     name: 'getOutputsIgnoreErrors';
     data: {
@@ -308,8 +256,8 @@ export interface __ClearListenersMethod__ {
     };
 }
 
-export type __MinimumRequiredStorageDepositMethod__ = {
-    name: 'minimumRequiredStorageDeposit';
+export type __ComputeMinimumOutputAmountMethod__ = {
+    name: 'computeMinimumOutputAmount';
     data: {
         output: Output;
     };
@@ -333,3 +281,89 @@ export type __CallPluginRouteMethod__ = {
         request?: string;
     };
 };
+
+// inx-indexer methods
+
+export interface __GetOutputIdsMethod__ {
+    name: 'outputIds';
+    data: {
+        queryParameters: OutputQueryParameters;
+    };
+}
+
+export interface __GetBasicOutputIdsMethod__ {
+    name: 'basicOutputIds';
+    data: {
+        queryParameters: BasicOutputQueryParameters;
+    };
+}
+
+export interface __AccountOutputIdsMethod__ {
+    name: 'accountOutputIds';
+    data: {
+        queryParameters: AccountOutputQueryParameters;
+    };
+}
+
+export interface __AccountOutputIdMethod__ {
+    name: 'accountOutputId';
+    data: {
+        accountId: AccountId;
+    };
+}
+
+export interface __AnchorOutputIdsMethod__ {
+    name: 'anchorOutputIds';
+    data: {
+        queryParameters: AnchorOutputQueryParameters;
+    };
+}
+
+export interface __AnchorOutputIdMethod__ {
+    name: 'anchorOutputId';
+    data: {
+        anchorId: AnchorId;
+    };
+}
+
+export interface __DelegationOutputIdsMethod__ {
+    name: 'delegationOutputIds';
+    data: {
+        queryParameters: DelegationOutputQueryParameters;
+    };
+}
+
+export interface __DelegationOutputIdMethod__ {
+    name: 'delegationOutputId';
+    data: {
+        delegationId: DelegationId;
+    };
+}
+
+export interface __FoundryOutputIdsMethod__ {
+    name: 'foundryOutputIds';
+    data: {
+        queryParameters: FoundryOutputQueryParameters;
+    };
+}
+
+export interface __FoundryOutputIdMethod__ {
+    name: 'foundryOutputId';
+    data: {
+        foundryId: FoundryId;
+    };
+}
+
+export interface __NftOutputIdsMethod__ {
+    name: 'nftOutputIds';
+    data: {
+        queryParameters: NftOutputQueryParameters;
+    };
+}
+
+export interface __NftOutputIdMethod__ {
+    name: 'nftOutputId';
+    data: {
+        nftId: NftId;
+    };
+}

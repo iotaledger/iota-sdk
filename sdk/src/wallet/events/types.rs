@@ -13,17 +13,11 @@ use crate::{
             payload::signed_transaction::{dto::SignedTransactionPayloadDto, TransactionId},
         },
     },
-    wallet::account::types::{InclusionState, OutputDataDto},
+    wallet::{
+        types::{InclusionState, OutputDataDto},
+        Error,
+    },
 };
-
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct Event {
-    /// Associated account index.
-    pub account_index: u32,
-    /// The event
-    pub event: WalletEvent,
-}
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 #[non_exhaustive]
@@ -163,7 +157,7 @@ pub enum WalletEventType {
 }
 
 impl TryFrom<u8> for WalletEventType {
-    type Error = String;
+    type Error = Error;
 
     fn try_from(value: u8) -> Result<Self, Self::Error> {
         let event_type = match value {
@@ -174,7 +168,7 @@ impl TryFrom<u8> for WalletEventType {
             3 => Self::SpentOutput,
             4 => Self::TransactionInclusion,
             5 => Self::TransactionProgress,
-            _ => return Err(format!("invalid event type {value}")),
+            _ => return Err(Error::InvalidEventType(value)),
         };
         Ok(event_type)
     }

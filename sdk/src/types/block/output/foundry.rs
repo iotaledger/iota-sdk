@@ -8,30 +8,24 @@ use packable::{
     error::{UnpackError, UnpackErrorExt},
     packer::{Packer, SlicePacker},
     unpacker::Unpacker,
-    Packable,
+    Packable, PackableExt,
 };
 use primitive_types::U256;
 
-use crate::types::{
-    block::{
-        address::{AccountAddress, Address},
-        output::{
-            account::AccountId,
-            feature::{verify_allowed_features, Feature, FeatureFlags, Features, NativeTokenFeature},
-            unlock_condition::{
-                verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions,
-            },
-            verify_output_amount_min, verify_output_amount_packable, verify_output_amount_supply, ChainId, NativeToken,
-            Output, OutputBuilderAmount, OutputId, Rent, RentStructure, StateTransitionError, StateTransitionVerifier,
-            TokenId, TokenScheme,
-        },
-        payload::signed_transaction::{TransactionCapabilities, TransactionCapabilityFlag},
-        protocol::ProtocolParameters,
-        semantic::{SemanticValidationContext, TransactionFailureReason},
-        unlock::Unlock,
-        Error,
+use crate::types::block::{
+    address::{AccountAddress, Address},
+    output::{
+        account::AccountId,
+        feature::{verify_allowed_features, Feature, FeatureFlags, Features, NativeTokenFeature},
+        unlock_condition::{verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions},
+        ChainId, MinimumOutputAmount, NativeToken, Output, OutputBuilderAmount, OutputId, StateTransitionError,
+        StateTransitionVerifier, StorageScore, StorageScoreParameters, TokenId, TokenScheme,
     },
-    ValidationParams,
+    payload::signed_transaction::{TransactionCapabilities, TransactionCapabilityFlag},
+    protocol::ProtocolParameters,
+    semantic::{SemanticValidationContext, TransactionFailureReason},
+    unlock::Unlock,
+    Error,
 };
 
 crate::impl_id!(
@@ -103,18 +97,14 @@ impl FoundryOutputBuilder {
         Self::new(OutputBuilderAmount::Amount(amount), serial_number, token_scheme)
     }
 
-    /// Creates a [`FoundryOutputBuilder`] with a provided rent structure.
-    /// The amount will be set to the minimum storage deposit.
-    pub fn new_with_minimum_storage_deposit(
-        rent_structure: RentStructure,
+    /// Creates a [`FoundryOutputBuilder`] with provided storage score parameters.
+    /// The amount will be set to the minimum required amount of the resulting output.
+    pub fn new_with_minimum_amount(
+        params: StorageScoreParameters,
         serial_number: u32,
         token_scheme: TokenScheme,
     ) -> Self {
-        Self::new(
-            OutputBuilderAmount::MinimumStorageDeposit(rent_structure),
-            serial_number,
-            token_scheme,
-        )
+        Self::new(OutputBuilderAmount::MinimumAmount(params), serial_number, token_scheme)
     }
 
     fn new(amount: OutputBuilderAmount, serial_number: u32, token_scheme: TokenScheme) -> Self {
@@ -135,10 +125,10 @@ impl FoundryOutputBuilder {
         self
     }
 
-    /// Sets the amount to the minimum storage deposit.
+    /// Sets the amount to the minimum required amount.
     #[inline(always)]
-    pub fn with_minimum_storage_deposit(mut self, rent_structure: RentStructure) -> Self {
-        self.amount = OutputBuilderAmount::MinimumStorageDeposit(rent_structure);
+    pub fn with_minimum_amount(mut self, params: StorageScoreParameters) -> Self {
+        self.amount = OutputBuilderAmount::MinimumAmount(params);
         self
     }
 
@@ -275,33 +265,15 @@ impl FoundryOutputBuilder {
 
         output.amount = match self.amount {
             OutputBuilderAmount::Amount(amount) => amount,
-            OutputBuilderAmount::MinimumStorageDeposit(rent_structure) => {
-                Output::Foundry(output.clone()).rent_cost(rent_structure)
-            }
+            OutputBuilderAmount::MinimumAmount(params) => output.minimum_amount(params),
         };
-
-        verify_output_amount_min(output.amount)?;
-
-        Ok(output)
-    }
-
-    ///
-    pub fn finish_with_params<'a>(
-        self,
-        params: impl Into<ValidationParams<'a>> + Send,
-    ) -> Result<FoundryOutput, Error> {
-        let output = self.finish()?;
-
-        if let Some(token_supply) = params.into().token_supply() {
-            verify_output_amount_supply(output.amount, token_supply)?;
-        }
 
         Ok(output)
     }
 
     /// Finishes the [`FoundryOutputBuilder`] into an [`Output`].
-    pub fn finish_output<'a>(self, params: impl Into<ValidationParams<'a>> + Send) -> Result<Output, Error> {
-        Ok(Output::Foundry(self.finish_with_params(params)?))
+    pub fn finish_output(self) -> Result<Output, Error> {
+        Ok(Output::Foundry(self.finish()?))
     }
 }
 
@@ -337,7 +309,7 @@ pub struct FoundryOutput {
 
 impl FoundryOutput {
     /// The [`Output`](crate::types::block::output::Output) kind of a [`FoundryOutput`].
-    pub const KIND: u8 = 2;
+    pub const KIND: u8 = 3;
     /// The set of allowed [`UnlockCondition`]s for a [`FoundryOutput`].
     pub const ALLOWED_UNLOCK_CONDITIONS: UnlockConditionFlags = UnlockConditionFlags::IMMUTABLE_ACCOUNT_ADDRESS;
     /// The set of allowed [`Feature`]s for a [`FoundryOutput`].
@@ -351,15 +323,15 @@ impl FoundryOutput {
         FoundryOutputBuilder::new_with_amount(amount, serial_number, token_scheme)
     }
 
-    /// Creates a new [`FoundryOutputBuilder`] with a provided rent structure.
-    /// The amount will be set to the minimum storage deposit.
+    /// Creates a new [`FoundryOutputBuilder`] with provided storage score parameters.
+    /// The amount will be set to the minimum required amount of the resulting output.
     #[inline(always)]
-    pub fn build_with_minimum_storage_deposit(
-        rent_structure: RentStructure,
+    pub fn build_with_minimum_amount(
+        params: StorageScoreParameters,
         serial_number: u32,
         token_scheme: TokenScheme,
     ) -> FoundryOutputBuilder {
-        FoundryOutputBuilder::new_with_minimum_storage_deposit(rent_structure, serial_number, token_scheme)
+        FoundryOutputBuilder::new_with_minimum_amount(params, serial_number, token_scheme)
     }
 
     ///
@@ -527,6 +499,19 @@ impl FoundryOutput {
     }
 }
 
+impl StorageScore for FoundryOutput {
+    fn storage_score(&self, params: StorageScoreParameters) -> u64 {
+        params.output_offset()
+            // Type byte
+            + (1 + self.packed_len() as u64) * params.data_factor() as u64
+            + self.unlock_conditions.storage_score(params)
+            + self.features.storage_score(params)
+            + self.immutable_features.storage_score(params)
+    }
+}
+
+impl MinimumOutputAmount for FoundryOutput {}
+
 impl StateTransitionVerifier for FoundryOutput {
     fn creation(next_state: &Self, context: &SemanticValidationContext<'_>) -> Result<(), StateTransitionError> {
         let account_chain_id = ChainId::from(*next_state.account_address().account_id());
@@ -623,8 +608,6 @@ impl Packable for FoundryOutput {
     ) -> Result<Self, UnpackError<Self::UnpackError, U::Error>> {
         let amount = u64::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
 
-        verify_output_amount_packable::<VERIFY>(&amount, visitor).map_err(UnpackError::Packable)?;
-
         let serial_number = u32::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
         let token_scheme = TokenScheme::unpack::<_, VERIFY>(unpacker, &())?;
 
@@ -674,10 +657,7 @@ pub(crate) mod dto {
 
     use super::*;
     use crate::{
-        types::{
-            block::{output::unlock_condition::dto::UnlockConditionDto, Error},
-            TryFromDto,
-        },
+        types::block::{output::unlock_condition::dto::UnlockConditionDto, Error},
         utils::serde::string,
     };
 
@@ -711,12 +691,12 @@ pub(crate) mod dto {
         }
     }
 
-    impl TryFromDto for FoundryOutput {
-        type Dto = FoundryOutputDto;
+    impl TryFrom<FoundryOutputDto> for FoundryOutput {
         type Error = Error;
 
-        fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
-            let mut builder = FoundryOutputBuilder::new_with_amount(dto.amount, dto.serial_number, dto.token_scheme);
+        fn try_from(dto: FoundryOutputDto) -> Result<Self, Self::Error> {
+            let mut builder: FoundryOutputBuilder =
+                FoundryOutputBuilder::new_with_amount(dto.amount, dto.serial_number, dto.token_scheme);
 
             for b in dto.features {
                 builder = builder.add_feature(b);
@@ -727,10 +707,10 @@ pub(crate) mod dto {
             }
 
             for u in dto.unlock_conditions {
-                builder = builder.add_unlock_condition(UnlockCondition::try_from_dto_with_params(u, &params)?);
+                builder = builder.add_unlock_condition(UnlockCondition::from(u));
             }
 
-            builder.finish_with_params(params)
+            builder.finish()
         }
     }
 
@@ -743,23 +723,20 @@ pub(crate) mod dto {
             unlock_conditions: Vec<UnlockConditionDto>,
             features: Option<Vec<Feature>>,
             immutable_features: Option<Vec<Feature>>,
-            params: impl Into<ValidationParams<'a>> + Send,
         ) -> Result<Self, Error> {
-            let params = params.into();
-
             let mut builder = match amount {
                 OutputBuilderAmount::Amount(amount) => {
                     FoundryOutputBuilder::new_with_amount(amount, serial_number, token_scheme)
                 }
-                OutputBuilderAmount::MinimumStorageDeposit(rent_structure) => {
-                    FoundryOutputBuilder::new_with_minimum_storage_deposit(rent_structure, serial_number, token_scheme)
+                OutputBuilderAmount::MinimumAmount(params) => {
+                    FoundryOutputBuilder::new_with_minimum_amount(params, serial_number, token_scheme)
                 }
             };
 
             let unlock_conditions = unlock_conditions
                 .into_iter()
-                .map(|u| UnlockCondition::try_from_dto_with_params(u, &params))
-                .collect::<Result<Vec<UnlockCondition>, Error>>()?;
+                .map(UnlockCondition::from)
+                .collect::<Vec<UnlockCondition>>();
             builder = builder.with_unlock_conditions(unlock_conditions);
 
             if let Some(features) = features {
@@ -770,7 +747,7 @@ pub(crate) mod dto {
                 builder = builder.with_immutable_features(immutable_features);
             }
 
-            builder.finish_with_params(params)
+            builder.finish()
         }
     }
 }
@@ -780,22 +757,19 @@ mod tests {
     use pretty_assertions::assert_eq;
 
     use super::*;
-    use crate::types::{
-        block::{
+    use crate::types::block::{
+        output::{
+            dto::OutputDto, unlock_condition::ImmutableAccountAddressUnlockCondition, FoundryId, SimpleTokenScheme,
+            TokenId,
+        },
+        protocol::protocol_parameters,
+        rand::{
+            address::rand_account_address,
             output::{
-                dto::OutputDto, unlock_condition::ImmutableAccountAddressUnlockCondition, FoundryId, SimpleTokenScheme,
-                TokenId,
-            },
-            protocol::protocol_parameters,
-            rand::{
-                address::rand_account_address,
-                output::{
-                    feature::{rand_allowed_features, rand_metadata_feature},
-                    rand_foundry_output, rand_token_scheme,
-                },
+                feature::{rand_allowed_features, rand_metadata_feature},
+                rand_foundry_output, rand_token_scheme,
             },
         },
-        TryFromDto,
     };
 
     #[test]
@@ -803,9 +777,9 @@ mod tests {
         let protocol_parameters = protocol_parameters();
         let output = rand_foundry_output(protocol_parameters.token_supply());
         let dto = OutputDto::Foundry((&output).into());
-        let output_unver = Output::try_from_dto(dto.clone()).unwrap();
+        let output_unver = Output::try_from(dto.clone()).unwrap();
         assert_eq!(&output, output_unver.as_foundry());
-        let output_ver = Output::try_from_dto_with_params(dto, &protocol_parameters).unwrap();
+        let output_ver = Output::try_from(dto).unwrap();
         assert_eq!(&output, output_ver.as_foundry());
 
         let foundry_id = FoundryId::build(&rand_account_address(), 0, SimpleTokenScheme::KIND);
@@ -818,13 +792,9 @@ mod tests {
                 builder.unlock_conditions.iter().map(Into::into).collect(),
                 Some(builder.features.iter().cloned().collect()),
                 Some(builder.immutable_features.iter().cloned().collect()),
-                protocol_parameters.clone(),
             )
             .unwrap();
-            assert_eq!(
-                builder.finish_with_params(protocol_parameters.clone()).unwrap(),
-                output_split
-            );
+            assert_eq!(builder.finish().unwrap(), output_split);
         };
 
         let builder = FoundryOutput::build_with_amount(100, 123, rand_token_scheme())
@@ -834,8 +804,8 @@ mod tests {
             .with_features(rand_allowed_features(FoundryOutput::ALLOWED_FEATURES));
         test_split_dto(builder);
 
-        let builder = FoundryOutput::build_with_minimum_storage_deposit(
-            protocol_parameters.rent_structure(),
+        let builder = FoundryOutput::build_with_minimum_amount(
+            protocol_parameters.storage_score_parameters(),
             123,
             rand_token_scheme(),
         )

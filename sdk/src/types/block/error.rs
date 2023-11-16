@@ -11,6 +11,7 @@ use primitive_types::U256;
 
 use super::slot::EpochIndex;
 use crate::types::block::{
+    address::WeightedAddressCount,
     context_input::RewardContextInputIndex,
     input::UtxoInput,
     mana::ManaAllotmentCount,
@@ -22,12 +23,13 @@ use crate::types::block::{
     },
     payload::{ContextInputCount, InputCount, OutputCount, TagLength, TaggedDataLength},
     protocol::ProtocolParametersHash,
-    unlock::{UnlockCount, UnlockIndex},
+    unlock::{UnlockCount, UnlockIndex, UnlocksCount},
 };
 
 /// Error occurring when creating/parsing/validating blocks.
 #[derive(Debug, PartialEq, Eq)]
 #[allow(missing_docs)]
+#[non_exhaustive]
 pub enum Error {
     ManaAllotmentsNotUniqueSorted,
     ConsumedAmountOverflow,
@@ -69,6 +71,16 @@ pub enum Error {
         deposit: u64,
         required: u64,
     },
+    InvalidAddressWeight(u8),
+    InvalidMultiAddressThreshold(u16),
+    InvalidMultiAddressCumulativeWeight {
+        cumulative_weight: u16,
+        threshold: u16,
+    },
+    InvalidWeightedAddressCount(<WeightedAddressCount as TryFrom<usize>>::Error),
+    InvalidMultiUnlockCount(<UnlocksCount as TryFrom<usize>>::Error),
+    MultiUnlockRecursion,
+    WeightedAddressesNotUniqueSorted,
     InvalidContextInputKind(u8),
     InvalidContextInputCount(<ContextInputCount as TryFrom<usize>>::Error),
     InvalidFeatureCount(<FeatureCount as TryFrom<usize>>::Error),
@@ -84,6 +96,10 @@ pub enum Error {
     InvalidInputOutputIndex(<OutputIndex as TryFrom<u16>>::Error),
     InvalidBech32Hrp(Bech32HrpError),
     InvalidCapabilitiesCount(<u8 as TryFrom<usize>>::Error),
+    InvalidCapabilityByte {
+        index: usize,
+        byte: u8,
+    },
     InvalidSignedBlockLength(usize),
     InvalidStateMetadataLength(<StateMetadataLength as TryFrom<usize>>::Error),
     InvalidManaValue(u64),
@@ -182,6 +198,7 @@ pub enum Error {
         created: EpochIndex,
         target: EpochIndex,
     },
+    TrailingCapabilityBytes,
 }
 
 #[cfg(feature = "std")]
@@ -226,6 +243,9 @@ impl fmt::Display for Error {
             Self::InvalidAnchorIndex(index) => write!(f, "invalid anchor index: {index}"),
             Self::InvalidBech32Hrp(e) => write!(f, "invalid bech32 hrp: {e}"),
             Self::InvalidCapabilitiesCount(e) => write!(f, "invalid capabilities count: {e}"),
+            Self::InvalidCapabilityByte { index, byte } => {
+                write!(f, "invalid capability byte at index {index}: {byte:x}")
+            }
             Self::InvalidBlockKind(k) => write!(f, "invalid block kind: {k}"),
             Self::InvalidRewardInputIndex(idx) => write!(f, "invalid reward input index: {idx}"),
             Self::InvalidStorageDepositAmount(amount) => {
@@ -243,7 +263,7 @@ impl fmt::Display for Error {
             Self::InsufficientStorageDepositReturnAmount { deposit, required } => {
                 write!(
                     f,
-                    "the return deposit ({deposit}) must be greater than the minimum storage deposit ({required})"
+                    "the return deposit ({deposit}) must be greater than the minimum output amount ({required})"
                 )
             }
             Self::StorageDepositReturnExceedsOutputAmount { deposit, amount } => write!(
@@ -251,6 +271,23 @@ impl fmt::Display for Error {
                 "storage deposit return of {deposit} exceeds the original output amount of {amount}"
             ),
             Self::InvalidContextInputCount(count) => write!(f, "invalid context input count: {count}"),
+            Self::InvalidAddressWeight(w) => write!(f, "invalid address weight: {w}"),
+            Self::InvalidMultiAddressThreshold(t) => write!(f, "invalid multi address threshold: {t}"),
+            Self::InvalidMultiAddressCumulativeWeight {
+                cumulative_weight,
+                threshold,
+            } => {
+                write!(
+                    f,
+                    "invalid multi address cumulative weight {cumulative_weight} < threshold {threshold}"
+                )
+            }
+            Self::InvalidWeightedAddressCount(count) => write!(f, "invalid weighted address count: {count}"),
+            Self::InvalidMultiUnlockCount(count) => write!(f, "invalid multi unlock count: {count}"),
+            Self::MultiUnlockRecursion => write!(f, "multi unlock recursion"),
+            Self::WeightedAddressesNotUniqueSorted => {
+                write!(f, "weighted addresses are not unique and/or sorted")
+            }
             Self::InvalidContextInputKind(k) => write!(f, "invalid context input kind: {k}"),
             Self::InvalidFeatureCount(count) => write!(f, "invalid feature count: {count}"),
             Self::InvalidFeatureKind(k) => write!(f, "invalid feature kind: {k}"),
@@ -392,6 +429,7 @@ impl fmt::Display for Error {
             Self::InvalidEpochDelta { created, target } => {
                 write!(f, "invalid epoch delta: created {created}, target {target}")
             }
+            Self::TrailingCapabilityBytes => write!(f, "capability bytes have trailing zeroes"),
         }
     }
 }

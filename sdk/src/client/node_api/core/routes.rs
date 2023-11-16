@@ -102,10 +102,16 @@ impl ClientInner {
     /// future rewards for those epochs. `epochStart` and `epochEnd` indicates the actual range for which reward value
     /// is returned and decayed for.
     /// GET /api/core/v3/rewards/{outputId}
-    pub async fn get_output_mana_rewards(&self, output_id: &OutputId) -> Result<ManaRewardsResponse> {
+    pub async fn get_output_mana_rewards(
+        &self,
+        output_id: &OutputId,
+        slot_index: impl Into<Option<SlotIndex>> + Send,
+    ) -> Result<ManaRewardsResponse> {
         let path = &format!("api/core/v3/rewards/{output_id}");
 
-        self.get_request(path, None, false, false).await
+        let query = query_tuples_to_query_string([slot_index.into().map(|i| ("slotIndex", i.to_string()))]);
+
+        self.get_request(path, query.as_deref(), false, false).await
     }
 
     // Committee routes.
@@ -220,10 +226,9 @@ impl ClientInner {
     pub async fn get_output(&self, output_id: &OutputId) -> Result<Output> {
         let path = &format!("api/core/v3/outputs/{output_id}");
 
-        let output = self.get_request::<OutputDto>(path, None, false, true).await?;
-        let token_supply = self.get_token_supply().await?;
-
-        Ok(Output::try_from_dto_with_params(output, token_supply)?)
+        Ok(Output::try_from(
+            self.get_request::<OutputDto>(path, None, false, true).await?,
+        )?)
     }
 
     /// Finds an output by its ID and returns it as raw bytes.

@@ -1,12 +1,10 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use std::sync::atomic::Ordering;
-
 use crate::{
     client::secret::{GenerateAddressOptions, SecretManage, SecretManager},
-    types::block::address::{Ed25519Address, Hrp},
-    wallet::Wallet,
+    types::block::address::Ed25519Address,
+    wallet::{Error, Wallet},
 };
 #[cfg(all(feature = "events", feature = "ledger_nano"))]
 use crate::{
@@ -18,12 +16,7 @@ impl Wallet {
     /// Generate an address without storing it
     /// ```ignore
     /// let public_addresses = wallet
-    ///     .generate_ed25519_addresses(
-    ///         0,
-    ///         false,
-    ///         0,
-    ///         None,
-    ///     )
+    ///     .generate_ed25519_address(None)
     ///     .await?;
     /// ```
     pub async fn generate_ed25519_address(
@@ -32,6 +25,10 @@ impl Wallet {
         address_index: u32,
         options: impl Into<Option<GenerateAddressOptions>> + Send,
     ) -> crate::wallet::Result<Ed25519Address> {
+        // TODO #1279: not sure yet whether we also should allow this method to generate addresses for different bip
+        // paths.
+        let coin_type = self.bip_path().await.ok_or(Error::MissingBipPath)?.coin_type;
+
         let address = match &*self.secret_manager.read().await {
             #[cfg(feature = "ledger_nano")]
             SecretManager::LedgerNano(ledger_nano) => {
@@ -50,74 +47,46 @@ impl Wallet {
                         // Generate without prompt to be able to display it
                         let address = ledger_nano
                             .generate_ed25519_addresses(
-                                self.coin_type.load(Ordering::Relaxed),
+                                coin_type,
                                 account_index,
                                 address_index..address_index + 1,
                                 changed_options,
                             )
                             .await?;
 
-                        let bech32_hrp = self.get_bech32_hrp().await?;
+                        let bech32_hrp = self.bech32_hrp().await;
 
-                        self.emit(
-                            account_index,
-                            WalletEvent::LedgerAddressGeneration(AddressData {
-                                address: address[0].to_bech32(bech32_hrp),
-                            }),
-                        )
+                        self.emit(WalletEvent::LedgerAddressGeneration(AddressData {
+                            address: address[0].to_bech32(bech32_hrp),
+                        }))
                         .await;
                     }
 
                     // Generate with prompt so the user can verify
                     ledger_nano
-                        .generate_ed25519_addresses(
-                            self.coin_type.load(Ordering::Relaxed),
-                            account_index,
-                            address_index..address_index + 1,
-                            options,
-                        )
+                        .generate_ed25519_addresses(coin_type, account_index, address_index..address_index + 1, options)
                         .await?
                 } else {
                     ledger_nano
-                        .generate_ed25519_addresses(
-                            self.coin_type.load(Ordering::Relaxed),
-                            account_index,
-                            address_index..address_index + 1,
-                            options,
-                        )
+                        .generate_ed25519_addresses(coin_type, account_index, address_index..address_index + 1, options)
                         .await?
                 }
             }
             #[cfg(feature = "stronghold")]
             SecretManager::Stronghold(stronghold) => {
                 stronghold
-                    .generate_ed25519_addresses(
-                        self.coin_type.load(Ordering::Relaxed),
-                        account_index,
-                        address_index..address_index + 1,
-                        options,
-                    )
+                    .generate_ed25519_addresses(coin_type, account_index, address_index..address_index + 1, options)
                     .await?
             }
             SecretManager::Mnemonic(mnemonic) => {
                 mnemonic
-                    .generate_ed25519_addresses(
-                        self.coin_type.load(Ordering::Relaxed),
-                        account_index,
-                        address_index..address_index + 1,
-                        options,
-                    )
+                    .generate_ed25519_addresses(coin_type, account_index, address_index..address_index + 1, options)
                     .await?
             }
             #[cfg(feature = "private_key_secret_manager")]
             SecretManager::PrivateKey(private_key) => {
                 private_key
-                    .generate_ed25519_addresses(
-                        self.coin_type.load(Ordering::Relaxed),
-                        account_index,
-                        address_index..address_index + 1,
-                        options,
-                    )
+                    .generate_ed25519_addresses(coin_type, account_index, address_index..address_index + 1, options)
                     .await?
             }
             SecretManager::Placeholder => return Err(crate::client::Error::PlaceholderSecretManager.into()),
@@ -126,27 +95,5 @@ impl Wallet {
         Ok(*address
             .first()
             .ok_or(crate::wallet::Error::MissingParameter("address"))?)
-    }
-}
-
-impl<S: 'static + SecretManage> Wallet<S>
-where
-    crate::wallet::Error: From<S::Error>,
-    crate::client::Error: From<S::Error>,
-{
-    /// Get the bech32 hrp from the first account address or if not existent, from the client
-    pub async fn get_bech32_hrp(&self) -> crate::wallet::Result<Hrp> {
-        Ok(match self.get_accounts().await?.first() {
-            Some(account) => {
-                account
-                    .public_addresses()
-                    .await
-                    .first()
-                    .expect("missing first public address")
-                    .address
-                    .hrp
-            }
-            None => self.client().get_bech32_hrp().await?,
-        })
     }
 }

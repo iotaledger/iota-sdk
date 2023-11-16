@@ -7,27 +7,25 @@ use packable::{
     error::{UnpackError, UnpackErrorExt},
     packer::Packer,
     unpacker::Unpacker,
-    Packable,
+    Packable, PackableExt,
 };
 
-use crate::types::{
-    block::{
-        address::{Address, NftAddress},
-        output::{
-            feature::{verify_allowed_features, Feature, FeatureFlags, Features},
-            unlock_condition::{
-                verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions,
-            },
-            verify_output_amount_min, verify_output_amount_packable, verify_output_amount_supply, ChainId, Output,
-            OutputBuilderAmount, OutputId, Rent, RentStructure, StateTransitionError, StateTransitionVerifier,
+use crate::types::block::{
+    address::{Address, NftAddress},
+    output::{
+        feature::{verify_allowed_features, Feature, FeatureFlags, Features},
+        unlock_condition::{
+            verify_allowed_unlock_conditions, AddressUnlockCondition, StorageDepositReturnUnlockCondition,
+            UnlockCondition, UnlockConditionFlags, UnlockConditions,
         },
-        payload::signed_transaction::TransactionCapabilityFlag,
-        protocol::ProtocolParameters,
-        semantic::{SemanticValidationContext, TransactionFailureReason},
-        unlock::Unlock,
-        Error,
+        BasicOutputBuilder, ChainId, MinimumOutputAmount, Output, OutputBuilderAmount, OutputId, StateTransitionError,
+        StateTransitionVerifier, StorageScore, StorageScoreParameters,
     },
-    ValidationParams,
+    payload::signed_transaction::TransactionCapabilityFlag,
+    protocol::ProtocolParameters,
+    semantic::{SemanticValidationContext, TransactionFailureReason},
+    unlock::Unlock,
+    Error,
 };
 
 crate::impl_id!(
@@ -47,7 +45,11 @@ impl From<&OutputId> for NftId {
 impl NftId {
     ///
     pub fn or_from_output_id(self, output_id: &OutputId) -> Self {
-        if self.is_null() { Self::from(output_id) } else { self }
+        if self.is_null() {
+            Self::from(output_id)
+        } else {
+            self
+        }
     }
 }
 
@@ -75,10 +77,10 @@ impl NftOutputBuilder {
         Self::new(OutputBuilderAmount::Amount(amount), nft_id)
     }
 
-    /// Creates an [`NftOutputBuilder`] with a provided rent structure.
-    /// The amount will be set to the minimum storage deposit.
-    pub fn new_with_minimum_storage_deposit(rent_structure: RentStructure, nft_id: NftId) -> Self {
-        Self::new(OutputBuilderAmount::MinimumStorageDeposit(rent_structure), nft_id)
+    /// Creates an [`NftOutputBuilder`] with provided storage score parameters.
+    /// The amount will be set to the minimum required amount of the resulting output.
+    pub fn new_with_minimum_amount(params: StorageScoreParameters, nft_id: NftId) -> Self {
+        Self::new(OutputBuilderAmount::MinimumAmount(params), nft_id)
     }
 
     fn new(amount: OutputBuilderAmount, nft_id: NftId) -> Self {
@@ -99,10 +101,10 @@ impl NftOutputBuilder {
         self
     }
 
-    /// Sets the amount to the minimum storage deposit.
+    /// Sets the amount to the minimum required amount.
     #[inline(always)]
-    pub fn with_minimum_storage_deposit(mut self, rent_structure: RentStructure) -> Self {
-        self.amount = OutputBuilderAmount::MinimumStorageDeposit(rent_structure);
+    pub fn with_minimum_amount(mut self, params: StorageScoreParameters) -> Self {
+        self.amount = OutputBuilderAmount::MinimumAmount(params);
         self
     }
 
@@ -204,6 +206,54 @@ impl NftOutputBuilder {
         self
     }
 
+    /// Adds a storage deposit return unlock condition if one is needed to cover the current amount
+    /// (i.e. `amount < minimum_amount`). This will increase the total amount to satisfy the `minimum_amount` with
+    /// the additional unlock condition that will return the remainder to the provided `return_address`.
+    pub fn with_sufficient_storage_deposit(
+        mut self,
+        return_address: impl Into<Address>,
+        params: StorageScoreParameters,
+    ) -> Result<Self, Error> {
+        Ok(match self.amount {
+            OutputBuilderAmount::Amount(amount) => {
+                let return_address = return_address.into();
+                // Get the current storage requirement
+                let minimum_amount = self.clone().finish()?.minimum_amount(params);
+                // Check whether we already have enough funds to cover it
+                if amount < minimum_amount {
+                    // Get the projected minimum amount of the return output
+                    let return_min_amount = BasicOutputBuilder::new_with_minimum_amount(params)
+                        .add_unlock_condition(AddressUnlockCondition::new(return_address.clone()))
+                        .finish()?
+                        .amount();
+                    // Add a temporary storage deposit unlock condition so the new storage requirement can be calculated
+                    self =
+                        self.add_unlock_condition(StorageDepositReturnUnlockCondition::new(return_address.clone(), 1));
+                    // Get the min amount of the output with the added storage deposit return unlock condition
+                    let min_amount_with_sdruc = self.clone().finish()?.minimum_amount(params);
+                    // If the return storage cost and amount are less than the required min
+                    let (amount, sdruc_amount) = if min_amount_with_sdruc >= return_min_amount + amount {
+                        // Then sending storage_cost_with_sdruc covers both minimum requirements
+                        (min_amount_with_sdruc, min_amount_with_sdruc - amount)
+                    } else {
+                        // Otherwise we must use the total of the return minimum and the original amount
+                        // which is unfortunately more than the storage_cost_with_sdruc
+                        (return_min_amount + amount, return_min_amount)
+                    };
+                    // Add the required storage deposit unlock condition and the additional storage amount
+                    self.with_amount(amount)
+                        .replace_unlock_condition(StorageDepositReturnUnlockCondition::new(
+                            return_address,
+                            sdruc_amount,
+                        ))
+                } else {
+                    self
+                }
+            }
+            OutputBuilderAmount::MinimumAmount(_) => self,
+        })
+    }
+
     ///
     pub fn finish(self) -> Result<NftOutput, Error> {
         let unlock_conditions = UnlockConditions::from_set(self.unlock_conditions)?;
@@ -219,7 +269,7 @@ impl NftOutputBuilder {
         verify_allowed_features(&immutable_features, NftOutput::ALLOWED_IMMUTABLE_FEATURES)?;
 
         let mut output = NftOutput {
-            amount: 1u64,
+            amount: 0,
             mana: self.mana,
             nft_id: self.nft_id,
             unlock_conditions,
@@ -229,30 +279,15 @@ impl NftOutputBuilder {
 
         output.amount = match self.amount {
             OutputBuilderAmount::Amount(amount) => amount,
-            OutputBuilderAmount::MinimumStorageDeposit(rent_structure) => {
-                Output::Nft(output.clone()).rent_cost(rent_structure)
-            }
+            OutputBuilderAmount::MinimumAmount(params) => output.minimum_amount(params),
         };
-
-        verify_output_amount_min(output.amount)?;
-
-        Ok(output)
-    }
-
-    ///
-    pub fn finish_with_params<'a>(self, params: impl Into<ValidationParams<'a>> + Send) -> Result<NftOutput, Error> {
-        let output = self.finish()?;
-
-        if let Some(token_supply) = params.into().token_supply() {
-            verify_output_amount_supply(output.amount, token_supply)?;
-        }
 
         Ok(output)
     }
 
     /// Finishes the [`NftOutputBuilder`] into an [`Output`].
-    pub fn finish_output<'a>(self, params: impl Into<ValidationParams<'a>> + Send) -> Result<Output, Error> {
-        Ok(Output::Nft(self.finish_with_params(params)?))
+    pub fn finish_output(self) -> Result<Output, Error> {
+        Ok(Output::Nft(self.finish()?))
     }
 }
 
@@ -288,7 +323,7 @@ pub struct NftOutput {
 
 impl NftOutput {
     /// The [`Output`](crate::types::block::output::Output) kind of an [`NftOutput`].
-    pub const KIND: u8 = 3;
+    pub const KIND: u8 = 4;
     /// The set of allowed [`UnlockCondition`]s for an [`NftOutput`].
     pub const ALLOWED_UNLOCK_CONDITIONS: UnlockConditionFlags = UnlockConditionFlags::ADDRESS
         .union(UnlockConditionFlags::STORAGE_DEPOSIT_RETURN)
@@ -307,11 +342,11 @@ impl NftOutput {
         NftOutputBuilder::new_with_amount(amount, nft_id)
     }
 
-    /// Creates a new [`NftOutputBuilder`] with a provided rent structure.
-    /// The amount will be set to the minimum storage deposit.
+    /// Creates a new [`NftOutputBuilder`] with provided storage score parameters.
+    /// The amount will be set to the minimum required amount of the resulting output.
     #[inline(always)]
-    pub fn build_with_minimum_storage_deposit(rent_structure: RentStructure, nft_id: NftId) -> NftOutputBuilder {
-        NftOutputBuilder::new_with_minimum_storage_deposit(rent_structure, nft_id)
+    pub fn build_with_minimum_amount(params: StorageScoreParameters, nft_id: NftId) -> NftOutputBuilder {
+        NftOutputBuilder::new_with_minimum_amount(params, nft_id)
     }
 
     ///
@@ -409,6 +444,19 @@ impl NftOutput {
     }
 }
 
+impl StorageScore for NftOutput {
+    fn storage_score(&self, params: StorageScoreParameters) -> u64 {
+        params.output_offset()
+            // Type byte
+            + (1 + self.packed_len() as u64) * params.data_factor() as u64
+            + self.unlock_conditions.storage_score(params)
+            + self.features.storage_score(params)
+            + self.immutable_features.storage_score(params)
+    }
+}
+
+impl MinimumOutputAmount for NftOutput {}
+
 impl StateTransitionVerifier for NftOutput {
     fn creation(next_state: &Self, context: &SemanticValidationContext<'_>) -> Result<(), StateTransitionError> {
         if !next_state.nft_id.is_null() {
@@ -463,8 +511,6 @@ impl Packable for NftOutput {
         visitor: &Self::UnpackVisitor,
     ) -> Result<Self, UnpackError<Self::UnpackError, U::Error>> {
         let amount = u64::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
-
-        verify_output_amount_packable::<VERIFY>(&amount, visitor).map_err(UnpackError::Packable)?;
 
         let mana = u64::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
 
@@ -521,10 +567,7 @@ pub(crate) mod dto {
 
     use super::*;
     use crate::{
-        types::{
-            block::{output::unlock_condition::dto::UnlockConditionDto, Error},
-            TryFromDto,
-        },
+        types::block::{output::unlock_condition::dto::UnlockConditionDto, Error},
         utils::serde::string,
     };
 
@@ -559,21 +602,20 @@ pub(crate) mod dto {
         }
     }
 
-    impl TryFromDto for NftOutput {
-        type Dto = NftOutputDto;
+    impl TryFrom<NftOutputDto> for NftOutput {
         type Error = Error;
 
-        fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
+        fn try_from(dto: NftOutputDto) -> Result<Self, Self::Error> {
             let mut builder = NftOutputBuilder::new_with_amount(dto.amount, dto.nft_id)
                 .with_mana(dto.mana)
                 .with_features(dto.features)
                 .with_immutable_features(dto.immutable_features);
 
             for u in dto.unlock_conditions {
-                builder = builder.add_unlock_condition(UnlockCondition::try_from_dto_with_params(u, &params)?);
+                builder = builder.add_unlock_condition(UnlockCondition::from(u));
             }
 
-            builder.finish_with_params(params)
+            builder.finish()
         }
     }
 
@@ -586,21 +628,19 @@ pub(crate) mod dto {
             unlock_conditions: Vec<UnlockConditionDto>,
             features: Option<Vec<Feature>>,
             immutable_features: Option<Vec<Feature>>,
-            params: impl Into<ValidationParams<'a>> + Send,
         ) -> Result<Self, Error> {
-            let params = params.into();
             let mut builder = match amount {
                 OutputBuilderAmount::Amount(amount) => NftOutputBuilder::new_with_amount(amount, *nft_id),
-                OutputBuilderAmount::MinimumStorageDeposit(rent_structure) => {
-                    NftOutputBuilder::new_with_minimum_storage_deposit(rent_structure, *nft_id)
+                OutputBuilderAmount::MinimumAmount(params) => {
+                    NftOutputBuilder::new_with_minimum_amount(params, *nft_id)
                 }
             }
             .with_mana(mana);
 
             let unlock_conditions = unlock_conditions
                 .into_iter()
-                .map(|u| UnlockCondition::try_from_dto_with_params(u, &params))
-                .collect::<Result<Vec<UnlockCondition>, Error>>()?;
+                .map(UnlockCondition::from)
+                .collect::<Vec<UnlockCondition>>();
             builder = builder.with_unlock_conditions(unlock_conditions);
 
             if let Some(features) = features {
@@ -611,7 +651,7 @@ pub(crate) mod dto {
                 builder = builder.with_immutable_features(immutable_features);
             }
 
-            builder.finish_with_params(params)
+            builder.finish()
         }
     }
 }
@@ -621,15 +661,15 @@ mod tests {
     use pretty_assertions::assert_eq;
 
     use super::*;
-    use crate::types::{
-        block::{
-            output::dto::OutputDto,
-            protocol::protocol_parameters,
-            rand::output::{
+    use crate::types::block::{
+        output::{dto::OutputDto, FoundryId, SimpleTokenScheme, TokenId},
+        protocol::protocol_parameters,
+        rand::{
+            address::rand_account_address,
+            output::{
                 feature::rand_allowed_features, rand_nft_output, unlock_condition::rand_address_unlock_condition,
             },
         },
-        TryFromDto,
     };
 
     #[test]
@@ -637,9 +677,9 @@ mod tests {
         let protocol_parameters = protocol_parameters();
         let output = rand_nft_output(protocol_parameters.token_supply());
         let dto = OutputDto::Nft((&output).into());
-        let output_unver = Output::try_from_dto(dto.clone()).unwrap();
+        let output_unver = Output::try_from(dto.clone()).unwrap();
         assert_eq!(&output, output_unver.as_nft());
-        let output_ver = Output::try_from_dto_with_params(dto, &protocol_parameters).unwrap();
+        let output_ver = Output::try_from(dto).unwrap();
         assert_eq!(&output, output_ver.as_nft());
 
         let output_split = NftOutput::try_from_dtos(
@@ -649,7 +689,6 @@ mod tests {
             output.unlock_conditions().iter().map(Into::into).collect(),
             Some(output.features().to_vec()),
             Some(output.immutable_features().to_vec()),
-            &protocol_parameters,
         )
         .unwrap();
         assert_eq!(output, output_split);
@@ -662,10 +701,9 @@ mod tests {
                 builder.unlock_conditions.iter().map(Into::into).collect(),
                 Some(builder.features.iter().cloned().collect()),
                 Some(builder.immutable_features.iter().cloned().collect()),
-                &protocol_parameters,
             )
             .unwrap();
-            assert_eq!(builder.finish_with_params(&protocol_parameters).unwrap(), output_split);
+            assert_eq!(builder.finish().unwrap(), output_split);
         };
 
         let builder = NftOutput::build_with_amount(100, NftId::null())
@@ -675,7 +713,7 @@ mod tests {
         test_split_dto(builder);
 
         let builder =
-            NftOutput::build_with_minimum_storage_deposit(protocol_parameters.rent_structure(), NftId::null())
+            NftOutput::build_with_minimum_amount(protocol_parameters.storage_score_parameters(), NftId::null())
                 .add_unlock_condition(rand_address_unlock_condition())
                 .with_features(rand_allowed_features(NftOutput::ALLOWED_FEATURES))
                 .with_immutable_features(rand_allowed_features(NftOutput::ALLOWED_IMMUTABLE_FEATURES));

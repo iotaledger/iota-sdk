@@ -23,7 +23,7 @@ use pretty_assertions::assert_eq;
 use crate::client::{
     addresses, build_inputs, build_outputs, is_remainder_or_return, unsorted_eq,
     Build::{Account, Basic, Foundry},
-    ACCOUNT_ID_1, ACCOUNT_ID_2, BECH32_ADDRESS_ED25519_0, TOKEN_SUPPLY,
+    ACCOUNT_ID_1, ACCOUNT_ID_2, BECH32_ADDRESS_ED25519_0,
 };
 
 #[test]
@@ -208,7 +208,7 @@ fn melt_native_tokens() {
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         ))
         .with_foundry_counter(1)
-        .finish_output(protocol_parameters.token_supply())
+        .finish_output()
         .unwrap();
     inputs.push(InputSigningData {
         output: account_output,
@@ -261,7 +261,7 @@ fn destroy_foundry_with_account_state_transition() {
     ]);
     let account_output = AccountOutputBuilder::from(inputs[0].output.as_account())
         .with_amount(103_100)
-        .finish_output(TOKEN_SUPPLY)
+        .finish_output()
         .unwrap();
     // Account output gets the amount from the foundry output added
     let outputs = [account_output];
@@ -397,7 +397,7 @@ fn simple_foundry_transition_basic_not_needed() {
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         ))
         .with_foundry_counter(1)
-        .finish_output(protocol_parameters.token_supply())
+        .finish_output()
         .unwrap();
     inputs.push(InputSigningData {
         output: account_output,
@@ -463,7 +463,7 @@ fn simple_foundry_transition_basic_not_needed_with_remainder() {
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         ))
         .with_foundry_counter(1)
-        .finish_output(protocol_parameters.token_supply())
+        .finish_output()
         .unwrap();
     inputs.push(InputSigningData {
         output: account_output,
@@ -604,7 +604,7 @@ fn mint_and_burn_at_the_same_time() {
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         ))
         .with_foundry_counter(1)
-        .finish_output(protocol_parameters.token_supply())
+        .finish_output()
         .unwrap();
     inputs.push(InputSigningData {
         output: account_output,
@@ -657,7 +657,7 @@ fn take_amount_from_account_and_foundry_to_fund_basic() {
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         ))
         .with_foundry_counter(1)
-        .finish_output(protocol_parameters.token_supply())
+        .finish_output()
         .unwrap();
     inputs.push(InputSigningData {
         output: account_output,
@@ -848,7 +848,7 @@ fn foundry_in_outputs_and_required() {
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         ))
         .with_foundry_counter(1)
-        .finish_output(protocol_parameters.token_supply())
+        .finish_output()
         .unwrap();
     inputs.push(InputSigningData {
         output: account_output,
@@ -905,7 +905,7 @@ fn melt_and_burn_native_tokens() {
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         ))
         .with_foundry_counter(1)
-        .finish_output(protocol_parameters.token_supply())
+        .finish_output()
         .unwrap();
     inputs.push(InputSigningData {
         output: account_output,

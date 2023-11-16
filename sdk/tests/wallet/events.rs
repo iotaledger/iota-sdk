@@ -15,11 +15,11 @@ use iota_sdk::{
         },
     },
     wallet::{
-        account::types::{InclusionState, OutputData, OutputDataDto},
         events::types::{
             AddressData, NewOutputEvent, SpentOutputEvent, TransactionInclusionEvent, TransactionProgressEvent,
             WalletEvent,
         },
+        types::{InclusionState, OutputData, OutputDataDto},
     },
 };
 use pretty_assertions::assert_eq;
@@ -95,7 +95,7 @@ fn wallet_events_serde() {
         let output = Output::Basic(
             BasicOutput::build_with_amount(amount)
                 .add_unlock_condition(AddressUnlockCondition::new(address))
-                .finish_with_params(protocol_parameters.token_supply())
+                .finish()
                 .unwrap(),
         );
         let transaction = Transaction::builder(protocol_parameters.network_id())

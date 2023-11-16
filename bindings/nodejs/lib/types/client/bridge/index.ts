@@ -32,10 +32,14 @@ import type {
     __HexPublicKeyToBech32AddressMethod__,
     __AccountOutputIdsMethod__,
     __AccountOutputIdMethod__,
-    __NftOutputIdsMethod__,
-    __NftOutputIdMethod__,
+    __AnchorOutputIdsMethod__,
+    __AnchorOutputIdMethod__,
+    __DelegationOutputIdsMethod__,
+    __DelegationOutputIdMethod__,
     __FoundryOutputIdsMethod__,
     __FoundryOutputIdMethod__,
+    __NftOutputIdsMethod__,
+    __NftOutputIdMethod__,
     __GetOutputsIgnoreErrorsMethod__,
     __FindBlocksMethod__,
     __UnhealthyNodesMethod__,
@@ -45,7 +49,7 @@ import type {
     __BuildNftOutputMethod__,
     __ClearListenersMethod__,
     __SignatureUnlockMethod__,
-    __MinimumRequiredStorageDepositMethod__,
+    __ComputeMinimumOutputAmountMethod__,
     __RequestFundsFromFaucetMethod__,
     __CallPluginRouteMethod__,
 } from './client';
@@ -82,10 +86,14 @@ export type __ClientMethods__ =
     | __HexPublicKeyToBech32AddressMethod__
     | __AccountOutputIdsMethod__
     | __AccountOutputIdMethod__
-    | __NftOutputIdsMethod__
-    | __NftOutputIdMethod__
+    | __AnchorOutputIdsMethod__
+    | __AnchorOutputIdMethod__
+    | __DelegationOutputIdsMethod__
+    | __DelegationOutputIdMethod__
     | __FoundryOutputIdsMethod__
     | __FoundryOutputIdMethod__
+    | __NftOutputIdsMethod__
+    | __NftOutputIdMethod__
     | __GetOutputsIgnoreErrorsMethod__
     | __FindBlocksMethod__
     | __UnhealthyNodesMethod__
@@ -94,6 +102,6 @@ export type __ClientMethods__ =
     | __BuildFoundryOutputMethod__
     | __BuildNftOutputMethod__
     | __ClearListenersMethod__
-    | __MinimumRequiredStorageDepositMethod__
+    | __ComputeMinimumOutputAmountMethod__
     | __RequestFundsFromFaucetMethod__
     | __CallPluginRouteMethod__;

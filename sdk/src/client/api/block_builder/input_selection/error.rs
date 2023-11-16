@@ -12,6 +12,7 @@ use crate::types::block::output::{ChainId, OutputId, TokenId};
 
 /// Errors related to input selection.
 #[derive(Debug, Eq, PartialEq, thiserror::Error)]
+#[non_exhaustive]
 pub enum Error {
     /// Block error.
     #[error("{0}")]
