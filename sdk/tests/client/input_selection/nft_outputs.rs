@@ -482,8 +482,8 @@ fn missing_ed25519_sender() {
         1_000_000,
         nft_id_2,
         BECH32_ADDRESS_ED25519_0,
-        None,
         Some(BECH32_ADDRESS_ED25519_1),
+        None,
         None,
         None,
         None,
@@ -496,6 +496,8 @@ fn missing_ed25519_sender() {
         protocol_parameters,
     )
     .select();
+
+    println!("{:?}", selected);
 
     assert!(matches!(
         selected,
