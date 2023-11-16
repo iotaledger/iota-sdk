@@ -1431,7 +1431,6 @@ fn restricted_nft() {
             None,
             None,
             None,
-            None,
         ),
     ]);
     let outputs = build_outputs([Basic(
@@ -1469,15 +1468,7 @@ fn restricted_account() {
 
     let inputs = build_inputs([
         Basic(2_000_000, &restricted_bech32, None, None, None, None, None, None),
-        Account(
-            2_000_000,
-            account_id_1,
-            BECH32_ADDRESS_ED25519_0,
-            None,
-            None,
-            None,
-            None,
-        ),
+        Account(2_000_000, account_id_1, BECH32_ADDRESS_ED25519_0, None, None, None),
     ]);
 
     let outputs = build_outputs([Basic(

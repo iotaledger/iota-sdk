@@ -133,7 +133,7 @@ fn minted_native_tokens_in_new_remainder() {
     selected.outputs.iter().for_each(|output| {
         if let Output::Basic(basic_output) = &output {
             // Basic output remainder has the minted native tokens
-            assert_eq!(basic_output.native_tokens().first().unwrap().amount().as_u32(), 10);
+            assert_eq!(basic_output.native_token().unwrap().amount().as_u32(), 10);
         }
     });
 }
@@ -160,7 +160,7 @@ fn minted_native_tokens_in_provided_output() {
         Basic(
             1_000_000,
             BECH32_ADDRESS_ED25519_0,
-            Some(vec![(&token_id.to_string(), 100)]),
+            Some((&token_id.to_string(), 100)),
             None,
             None,
             None,
@@ -197,10 +197,10 @@ fn melt_native_tokens() {
             account_id_1,
             1,
             SimpleTokenScheme::new(10, 0, 10).unwrap(),
-            Some(vec![(
+            Some((
                 "0x0811111111111111111111111111111111111111111111111111111111111111110100000000",
                 10,
-            )]),
+            )),
         ),
     ]);
     let account_output = AccountOutputBuilder::new_with_amount(1_000_000, account_id_1)
@@ -239,7 +239,7 @@ fn melt_native_tokens() {
     selected.outputs.iter().for_each(|output| {
         if let Output::Basic(basic_output) = &output {
             // Basic output remainder has the remaining native tokens
-            assert_eq!(basic_output.native_tokens().first().unwrap().amount().as_u32(), 5);
+            assert_eq!(basic_output.native_token().unwrap().amount().as_u32(), 5);
         }
     });
 }
@@ -597,7 +597,7 @@ fn mint_and_burn_at_the_same_time() {
         account_id_1,
         1,
         SimpleTokenScheme::new(100, 0, 200).unwrap(),
-        Some(vec![(&token_id.to_string(), 100)]),
+        Some((&token_id.to_string(), 100)),
     )]);
     let account_output = AccountOutputBuilder::new_with_amount(2_000_000, account_id_1)
         .add_unlock_condition(AddressUnlockCondition::new(
@@ -617,7 +617,7 @@ fn mint_and_burn_at_the_same_time() {
         account_id_1,
         1,
         SimpleTokenScheme::new(120, 0, 200).unwrap(),
-        Some(vec![(&token_id.to_string(), 110)]),
+        Some((&token_id.to_string(), 110)),
     )]);
 
     let selected = InputSelection::new(
@@ -649,7 +649,7 @@ fn take_amount_from_account_and_foundry_to_fund_basic() {
             account_id_1,
             1,
             SimpleTokenScheme::new(100, 0, 200).unwrap(),
-            Some(vec![(&token_id.to_string(), 100)]),
+            Some((&token_id.to_string(), 100)),
         ),
     ]);
     let account_output = AccountOutputBuilder::new_with_amount(2_000_000, account_id_1)
@@ -717,7 +717,7 @@ fn create_native_token_but_burn_account() {
         account_id_1,
         1,
         SimpleTokenScheme::new(100, 0, 100).unwrap(),
-        Some(vec![(&token_id.to_string(), 100)]),
+        Some((&token_id.to_string(), 100)),
     )]);
 
     let selected = InputSelection::new(
@@ -897,7 +897,7 @@ fn melt_and_burn_native_tokens() {
             account_id,
             1,
             SimpleTokenScheme::new(1000, 0, 1000).unwrap(),
-            Some(vec![(&token_id.to_string(), 1000)]),
+            Some((&token_id.to_string(), 1000)),
         ),
     ]);
     let account_output = AccountOutputBuilder::new_with_amount(1_000_000, account_id)
@@ -939,7 +939,7 @@ fn melt_and_burn_native_tokens() {
     selected.outputs.iter().for_each(|output| {
         if let Output::Basic(basic_output) = &output {
             // Basic output remainder has the remaining native tokens
-            assert_eq!(basic_output.native_tokens().first().unwrap().amount().as_u32(), 421);
+            assert_eq!(basic_output.native_token().unwrap().amount().as_u32(), 421);
         }
     });
 }

@@ -739,7 +739,7 @@ fn burn_native_tokens() {
     let inputs = build_inputs([Basic(
         1_000_000,
         BECH32_ADDRESS_ED25519_0,
-        Some(vec![(TOKEN_ID_1, 100), (TOKEN_ID_2, 100)]),
+        Some((TOKEN_ID_1, 100), (TOKEN_ID_2, 100)),
         None,
         None,
         None,
@@ -766,7 +766,7 @@ fn burn_native_tokens() {
         &selected.outputs[0],
         1_000_000,
         BECH32_ADDRESS_ED25519_0,
-        Some(vec![(TOKEN_ID_1, 80), (TOKEN_ID_2, 70)])
+        Some((TOKEN_ID_1, 80), (TOKEN_ID_2, 70))
     ));
 }
 
