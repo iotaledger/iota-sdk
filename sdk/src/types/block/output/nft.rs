@@ -45,7 +45,11 @@ impl From<&OutputId> for NftId {
 impl NftId {
     ///
     pub fn or_from_output_id(self, output_id: &OutputId) -> Self {
-        if self.is_null() { Self::from(output_id) } else { self }
+        if self.is_null() {
+            Self::from(output_id)
+        } else {
+            self
+        }
     }
 }
 
@@ -658,13 +662,10 @@ mod tests {
 
     use super::*;
     use crate::types::block::{
-        output::{dto::OutputDto, FoundryId, SimpleTokenScheme, TokenId},
+        output::dto::OutputDto,
         protocol::protocol_parameters,
-        rand::{
-            address::rand_account_address,
-            output::{
-                feature::rand_allowed_features, rand_nft_output, unlock_condition::rand_address_unlock_condition,
-            },
+        rand::output::{
+            feature::rand_allowed_features, rand_nft_output, unlock_condition::rand_address_unlock_condition,
         },
     };
 
