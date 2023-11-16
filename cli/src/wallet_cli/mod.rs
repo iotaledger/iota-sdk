@@ -24,7 +24,7 @@ use iota_sdk::{
     utils::ConvertTo,
     wallet::{
         types::{OutputData, TransactionWithMetadata},
-        ConsolidationParams, CreateNativeTokenParams, MintNftParams, OutputsToClaim, SendNativeTokensParams,
+        ConsolidationParams, CreateNativeTokenParams, MintNftParams, OutputsToClaim, SendNativeTokenParams,
         SendNftParams, SendParams, SyncOptions, TransactionOptions, Wallet,
     },
     U256,
@@ -418,14 +418,15 @@ pub async fn claimable_outputs_command(wallet: &Wallet) -> Result<(), Error> {
         };
         println_log_info!("{output_id:?} ({kind})");
 
-        if let Some(native_tokens) = output.native_tokens() {
-            if !native_tokens.is_empty() {
-                println_log_info!("  - native token amount:");
-                native_tokens.iter().for_each(|token| {
-                    println_log_info!("    + {} {}", token.amount(), token.token_id());
-                });
-            }
-        }
+        // TODO https://github.com/iotaledger/iota-sdk/issues/1633
+        // if let Some(native_tokens) = output.native_tokens() {
+        //     if !native_tokens.is_empty() {
+        //         println_log_info!("  - native token amount:");
+        //         native_tokens.iter().for_each(|token| {
+        //             println_log_info!("    + {} {}", token.amount(), token.token_id());
+        //         });
+        //     }
+        // }
 
         if let Some(unlock_conditions) = output.unlock_conditions() {
             let deposit_return = unlock_conditions
@@ -736,10 +737,10 @@ pub async fn send_native_token_command(
 
         let outputs = [BasicOutputBuilder::new_with_minimum_amount(storage_params)
             .add_unlock_condition(AddressUnlockCondition::new(address))
-            .with_native_tokens([NativeToken::new(
+            .with_native_token(NativeToken::new(
                 TokenId::from_str(&token_id)?,
                 U256::from_dec_str(&amount).map_err(|e| Error::Miscellaneous(e.to_string()))?,
-            )?])
+            )?)
             .finish_output()?];
 
         wallet.send_outputs(outputs, None).await?
@@ -747,12 +748,12 @@ pub async fn send_native_token_command(
         // Send native tokens with storage deposit return and expiration
         let outputs = [SendNativeTokenParams::new(
             address,
-            [(
+            (
                 TokenId::from_str(&token_id)?,
                 U256::from_dec_str(&amount).map_err(|e| Error::Miscellaneous(e.to_string()))?,
-            )],
+            ),
         )?];
-        wallet.send_native_tokens(outputs, None).await?
+        wallet.send_native_token(outputs, None).await?
     };
 
     println_log_info!(
@@ -952,8 +953,8 @@ async fn print_wallet_address(wallet: &Wallet) -> Result<(), Error> {
             .required_and_unlocked_address(slot_index, &output_id)?;
 
         if address.inner() == required_address {
-            if let Some(nts) = output_data.output.native_tokens() {
-                native_tokens.add_native_tokens(nts.clone())?;
+            if let Some(nt) = output_data.output.native_token() {
+                native_tokens.add_native_token(nt.clone())?;
             }
             match &output_data.output {
                 Output::Basic(_) => {}
