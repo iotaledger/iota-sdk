@@ -24,7 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - `Utils:verifyTransactionSemantic()`;
-- `Account::prepare_claim_outputs()` method;
+- `Account::prepareClaimOutputs()` method;
 
 ### Fixed
 
