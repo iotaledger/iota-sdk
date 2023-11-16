@@ -86,9 +86,10 @@ where
                                 }
                             }
                             OutputsToClaim::NativeTokens => {
-                                if !output_data.output.native_tokens().map(|n| n.is_empty()).unwrap_or(true) {
-                                    output_ids_to_claim.insert(output_data.output_id);
-                                }
+                                // TODO https://github.com/iotaledger/iota-sdk/issues/1633
+                                // if !output_data.output.native_tokens().map(|n| n.is_empty()).unwrap_or(true) {
+                                //     output_ids_to_claim.insert(output_data.output_id);
+                                // }
                             }
                             OutputsToClaim::Nfts => {
                                 if output_data.output.is_nft() {
@@ -304,7 +305,8 @@ where
             required_amount_for_nfts
                 + BasicOutputBuilder::new_with_minimum_amount(storage_score_params)
                     .add_unlock_condition(AddressUnlockCondition::new(Ed25519Address::null()))
-                    .with_native_tokens(option_native_token.into_iter().flatten())
+                    // TODO https://github.com/iotaledger/iota-sdk/issues/1633
+                    // .with_native_tokens(option_native_token.into_iter().flatten())
                     .finish()?
                     .amount()
         };
@@ -326,7 +328,8 @@ where
                 required_amount = required_amount_for_nfts
                     + BasicOutputBuilder::new_with_minimum_amount(storage_score_params)
                         .add_unlock_condition(AddressUnlockCondition::new(Ed25519Address::null()))
-                        .with_native_token(option_native_token)
+                        // TODO https://github.com/iotaledger/iota-sdk/issues/1633
+                        // .with_native_token(option_native_token)
                         .finish()?
                         .amount();
 
@@ -367,7 +370,8 @@ where
             outputs_to_send.push(
                 BasicOutputBuilder::new_with_amount(available_amount - required_amount_for_nfts)
                     .add_unlock_condition(AddressUnlockCondition::new(wallet_address))
-                    .with_native_tokens(new_native_tokens.finish()?)
+                    // TODO https://github.com/iotaledger/iota-sdk/issues/1633
+                    // .with_native_tokens(new_native_tokens.finish()?)
                     .finish_output()?,
             );
         } else if !new_native_tokens.finish()?.is_empty() {
