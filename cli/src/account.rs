@@ -9,14 +9,15 @@ use rustyline::{error::ReadlineError, history::MemHistory, Config, Editor};
 use crate::{
     command::{
         account::{
-            addresses_command, balance_command, burn_native_token_command, burn_nft_command, claim_command,
-            claimable_outputs_command, consolidate_command, create_alias_outputs_command, create_native_token_command,
-            decrease_voting_power_command, destroy_alias_command, destroy_foundry_command, faucet_command,
-            increase_voting_power_command, melt_native_token_command, mint_native_token, mint_nft_command,
-            new_address_command, node_info_command, output_command, outputs_command, participation_overview_command,
-            send_command, send_native_token_command, send_nft_command, stop_participating_command, sync_command,
-            transaction_command, transactions_command, unspent_outputs_command, vote_command, voting_output_command,
-            voting_power_command, AccountCli, AccountCommand,
+            address_command, addresses_command, balance_command, burn_native_token_command, burn_nft_command,
+            claim_command, claimable_outputs_command, consolidate_command, create_alias_outputs_command,
+            create_native_token_command, decrease_voting_power_command, destroy_alias_command, destroy_foundry_command,
+            faucet_command, increase_voting_power_command, melt_native_token_command, mint_native_token,
+            mint_nft_command, new_address_command, node_info_command, output_command, outputs_command,
+            participation_overview_command, send_command, send_native_token_command, send_nft_command,
+            stop_participating_command, sync_command, transaction_command, transactions_command,
+            unspent_outputs_command, vote_command, voting_output_command, voting_power_command, AccountCli,
+            AccountCommand,
         },
         account_completion::AccountPromptHelper,
     },
@@ -75,9 +76,11 @@ pub async fn account_prompt_internal(
     }
 
     let input = rl.readline(&prompt);
+
     match input {
         Ok(command) => {
-            match command.as_str() {
+            match command.trim() {
+                "" => {}
                 "h" | "help" => AccountCli::print_help()?,
                 "c" | "clear" => {
                     // Clear console
@@ -94,7 +97,7 @@ pub async fn account_prompt_internal(
                 }
                 _ => {
                     // Prepend `Account: ` so the parsing will be correct
-                    let command = format!("Account: {}", command.trim());
+                    let command = format!("Account: {command}");
                     let account_cli = match AccountCli::try_parse_from(command.split_whitespace()) {
                         Ok(account_cli) => account_cli,
                         Err(err) => {
@@ -103,6 +106,7 @@ pub async fn account_prompt_internal(
                         }
                     };
                     match account_cli.command {
+                        AccountCommand::Address { selector } => address_command(account, selector).await,
                         AccountCommand::Addresses => addresses_command(account).await,
                         AccountCommand::Balance { addresses } => balance_command(account, addresses).await,
                         AccountCommand::BurnNativeToken { token_id, amount } => {
@@ -164,7 +168,7 @@ pub async fn account_prompt_internal(
                         }
                         AccountCommand::NewAddress => new_address_command(account).await,
                         AccountCommand::NodeInfo => node_info_command(account).await,
-                        AccountCommand::Output { output_id } => output_command(account, output_id).await,
+                        AccountCommand::Output { selector } => output_command(account, selector).await,
                         AccountCommand::Outputs => outputs_command(account).await,
                         AccountCommand::Send {
                             address,

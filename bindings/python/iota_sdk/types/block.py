@@ -3,12 +3,12 @@
 
 from __future__ import annotations
 from dataclasses import dataclass
-from typing import Dict, List, Optional, Union
+from typing import List, Optional, Union, Dict
+from enum import Enum
+from dacite import from_dict
 from iota_sdk.types.common import HexStr
 from iota_sdk.types.payload import TaggedDataPayload, TransactionPayload, MilestonePayload
 from iota_sdk.utils import Utils
-from enum import Enum
-from dacite import from_dict
 
 
 @dataclass
@@ -30,12 +30,24 @@ class Block:
 
     @classmethod
     def from_dict(cls, block_dict: Dict) -> Block:
+        """
+        Takes a dictionary that contains the data needed to
+        create an instance of the `Block` class.
+
+        Returns:
+
+        An instance of the `Block` class.
+        """
         return from_dict(Block, block_dict)
 
     def id(self) -> HexStr:
+        """Returns the block ID as a hexadecimal string.
+        """
         return Utils.block_id(self)
 
     def as_dict(self):
+        """Converts this object to a dict.
+        """
         config = {k: v for k, v in self.__dict__.items() if v is not None}
 
         if 'payload' in config:
@@ -76,20 +88,20 @@ class ConflictReason(Enum):
         invalidChainState (12): The chain state is invalid.
         semanticValidationFailed (255): The semantic validation failed.
     """
-    none = 0,
-    inputUTXOAlreadySpent = 1,
-    inputUTXOAlreadySpentInThisMilestone = 2,
-    inputUTXONotFound = 3,
-    inputOutputSumMismatch = 4,
-    invalidSignature = 5,
-    invalidTimelock = 6,
-    invalidNativeTokens = 7,
-    returnAmountMismatch = 8,
-    invalidInputUnlock = 9,
-    invalidInputsCommitment = 10,
-    invalidSender = 11,
-    invalidChainState = 12,
-    semanticValidationFailed = 255,
+    none = 0
+    inputUTXOAlreadySpent = 1
+    inputUTXOAlreadySpentInThisMilestone = 2
+    inputUTXONotFound = 3
+    inputOutputSumMismatch = 4
+    invalidSignature = 5
+    invalidTimelock = 6
+    invalidNativeTokens = 7
+    returnAmountMismatch = 8
+    invalidInputUnlock = 9
+    invalidInputsCommitment = 10
+    invalidSender = 11
+    invalidChainState = 12
+    semanticValidationFailed = 255
 
 
 CONFLICT_REASON_STRINGS = {
@@ -137,6 +149,8 @@ class BlockMetadata:
 
     @classmethod
     def from_dict(cls, block_metadata_dict: Dict) -> BlockMetadata:
+        """Converts a dict to a BlockMetadata
+        """
         obj = cls.__new__(cls)
         super(BlockMetadata, obj).__init__()
         for k, v in block_metadata_dict.items():

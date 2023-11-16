@@ -1,4 +1,4 @@
-// Copyright 2020-2022 IOTA Stiftung
+// Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
 use std::str::FromStr;
@@ -9,10 +9,10 @@ use iota_sdk::{
     types::{
         api::plugins::participation::types::ParticipationEventId,
         block::{
-            address::Bech32Address,
+            address::{Address, Bech32Address, ToBech32Ext},
             output::{
-                unlock_condition::AddressUnlockCondition, AliasId, BasicOutputBuilder, FoundryId, NativeToken,
-                NativeTokensBuilder, NftId, Output, OutputId, TokenId,
+                unlock_condition::AddressUnlockCondition, AliasId, AliasOutput, BasicOutputBuilder, FoundryId,
+                NativeToken, NativeTokensBuilder, NftId, NftOutput, Output, OutputId, TokenId,
             },
             payload::transaction::TransactionId,
             ConvertTo,
@@ -20,8 +20,8 @@ use iota_sdk::{
     },
     wallet::{
         account::{
-            types::{AccountAddress, AccountIdentifier},
-            Account, ConsolidationParams, OutputsToClaim, SyncOptions, TransactionOptions,
+            types::{AccountIdentifier, OutputData, Transaction},
+            Account, ConsolidationParams, FilterOptions, OutputsToClaim, SyncOptions, TransactionOptions,
         },
         CreateNativeTokenParams, MintNftParams, SendNativeTokensParams, SendNftParams, SendParams,
     },
@@ -47,6 +47,12 @@ impl AccountCli {
 #[derive(Debug, Subcommand)]
 #[allow(clippy::large_enum_variant)]
 pub enum AccountCommand {
+    /// Show the details of an address.
+    Address {
+        /// Selector for address.
+        /// Either by address (e.g. rms1qqtj7pvnl3lj9n9n6e9lc47mfutjfhjyprmprxtzz2g0uck8tr3gurtp7tq) or index.
+        selector: AddressSelector,
+    },
     /// List the account addresses.
     Addresses,
     /// Print the account balance.
@@ -157,8 +163,9 @@ pub enum AccountCommand {
     NodeInfo,
     /// Display an output.
     Output {
-        /// Output ID to be displayed.
-        output_id: String,
+        /// Selector for output.
+        /// Either by ID (e.g. 0xbce525324af12eda02bf7927e92cea3a8e8322d0f41966271443e6c3b245a4400000) or index.
+        selector: OutputSelector,
     },
     /// List all outputs.
     Outputs,
@@ -281,17 +288,66 @@ impl FromStr for TransactionSelector {
     }
 }
 
-/// `addresses` command
-pub async fn addresses_command(account: &Account) -> Result<(), Error> {
-    let addresses = account.addresses().await?;
+/// Select by output ID or list index
+#[derive(Debug, Copy, Clone)]
+pub enum OutputSelector {
+    Id(OutputId),
+    Index(usize),
+}
 
-    if addresses.is_empty() {
-        println_log_info!("No addresses found");
-    } else {
-        for address in addresses {
+impl FromStr for OutputSelector {
+    type Err = Error;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Ok(if let Ok(index) = s.parse() {
+            Self::Index(index)
+        } else {
+            Self::Id(s.parse()?)
+        })
+    }
+}
+
+/// Select by Bech32 address or list index
+#[derive(Debug, Copy, Clone)]
+pub enum AddressSelector {
+    Address(Bech32Address),
+    Index(usize),
+}
+
+impl FromStr for AddressSelector {
+    type Err = Error;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Ok(if let Ok(index) = s.parse() {
+            Self::Index(index)
+        } else {
+            Self::Address(s.parse()?)
+        })
+    }
+}
+
+/// `address` command
+pub async fn address_command(account: &Account, selector: AddressSelector) -> Result<(), Error> {
+    match selector {
+        AddressSelector::Address(address) => {
             print_address(account, &address).await?;
         }
-    }
+        AddressSelector::Index(index) => {
+            let addresses = get_addresses_sorted(account).await?;
+            if let Some(address) = addresses.get(index) {
+                print_address(account, address).await?;
+            } else {
+                println_log_info!("No address found at index {index}");
+            }
+        }
+    };
+
+    Ok(())
+}
+
+/// `addresses` command
+pub async fn addresses_command(account: &Account) -> Result<(), Error> {
+    print_addresses(get_addresses_sorted(account).await?)?;
 
     Ok(())
 }
@@ -629,7 +685,7 @@ pub async fn mint_nft_command(
 pub async fn new_address_command(account: &Account) -> Result<(), Error> {
     let address = account.generate_ed25519_addresses(1, None).await?;
 
-    print_address(account, &address[0]).await?;
+    print_address(account, address[0].address()).await?;
 
     Ok(())
 }
@@ -644,8 +700,15 @@ pub async fn node_info_command(account: &Account) -> Result<(), Error> {
 }
 
 /// `output` command
-pub async fn output_command(account: &Account, output_id: String) -> Result<(), Error> {
-    let output = account.get_output(&OutputId::from_str(&output_id)?).await;
+pub async fn output_command(account: &Account, selector: OutputSelector) -> Result<(), Error> {
+    let output = match selector {
+        OutputSelector::Id(id) => account.get_output(&id).await,
+        OutputSelector::Index(index) => {
+            let mut outputs = account.outputs(None).await?;
+            outputs.sort_unstable_by(outputs_ordering);
+            outputs.into_iter().nth(index)
+        }
+    };
 
     if let Some(output) = output {
         println_log_info!("{output:#?}");
@@ -658,17 +721,7 @@ pub async fn output_command(account: &Account, output_id: String) -> Result<(), 
 
 /// `outputs` command
 pub async fn outputs_command(account: &Account) -> Result<(), Error> {
-    let outputs = account.outputs(None).await?;
-
-    if outputs.is_empty() {
-        println_log_info!("No outputs found");
-    } else {
-        println_log_info!("Outputs:");
-        for (i, output_data) in outputs.into_iter().enumerate() {
-            println_log_info!("{}\t{}\t{}", i, &output_data.output_id, output_data.output.kind_str());
-        }
-    }
-    Ok(())
+    print_outputs(account.outputs(None).await?, "Outputs:").await
 }
 
 // `send` command
@@ -786,7 +839,7 @@ pub async fn transaction_command(account: &Account, selector: TransactionSelecto
     let transaction = match selector {
         TransactionSelector::Id(id) => transactions.into_iter().find(|tx| tx.transaction_id == id),
         TransactionSelector::Index(index) => {
-            transactions.sort_by(|a, b| a.timestamp.cmp(&b.timestamp));
+            transactions.sort_unstable_by(transactions_ordering);
             transactions.into_iter().nth(index)
         }
     };
@@ -803,17 +856,17 @@ pub async fn transaction_command(account: &Account, selector: TransactionSelecto
 /// `transactions` command
 pub async fn transactions_command(account: &Account, show_details: bool) -> Result<(), Error> {
     let mut transactions = account.transactions().await;
-    transactions.sort_by(|a, b| a.timestamp.cmp(&b.timestamp));
+    transactions.sort_unstable_by(transactions_ordering);
 
     if transactions.is_empty() {
         println_log_info!("No transactions found");
     } else {
-        for (i, tx) in transactions.into_iter().rev().enumerate() {
+        for (i, tx) in transactions.into_iter().enumerate() {
             if show_details {
                 println_log_info!("{:#?}", tx);
             } else {
                 let transaction_time = to_utc_date_time(tx.timestamp)?;
-                let formatted_time = transaction_time.format("%Y-%m-%d %H:%M:%S").to_string();
+                let formatted_time = transaction_time.format("%Y-%m-%d %H:%M:%S UTC").to_string();
 
                 println_log_info!("{:<5}{}\t{}", i, tx.transaction_id, formatted_time);
             }
@@ -825,18 +878,7 @@ pub async fn transactions_command(account: &Account, show_details: bool) -> Resu
 
 /// `unspent-outputs` command
 pub async fn unspent_outputs_command(account: &Account) -> Result<(), Error> {
-    let outputs = account.unspent_outputs(None).await?;
-
-    if outputs.is_empty() {
-        println_log_info!("No outputs found");
-    } else {
-        println_log_info!("Unspent outputs:");
-        for (i, output_data) in outputs.into_iter().enumerate() {
-            println_log_info!("{}\t{}\t{}", i, &output_data.output_id, output_data.output.kind_str());
-        }
-    }
-
-    Ok(())
+    print_outputs(account.unspent_outputs(None).await?, "Unspent outputs:").await
 }
 
 pub async fn vote_command(account: &Account, event_id: ParticipationEventId, answers: Vec<u8>) -> Result<(), Error> {
@@ -914,81 +956,171 @@ pub async fn voting_output_command(account: &Account) -> Result<(), Error> {
     Ok(())
 }
 
-async fn print_address(account: &Account, address: &AccountAddress) -> Result<(), Error> {
-    let mut log = format!(
-        "Address: {}\n{:<9}{}\n{:<9}{:?}",
-        address.key_index(),
-        "Bech32:",
-        address.address(),
-        "Hex:",
-        address.address().inner()
-    );
+async fn print_address(account: &Account, address: &Bech32Address) -> Result<(), Error> {
+    let mut formatted_string = String::new();
 
-    if *address.internal() {
-        log = format!("{log}\nChange address");
-    }
+    formatted_string.push_str(&format!("{:<11}{}\n", "Bech32:", address));
+    formatted_string.push_str(&format!("{:<11}{}\n", "Hex:", address.inner()));
+    formatted_string.push_str(&format!("{:<11}{}\n", "Type:", address.inner().kind_str()));
 
-    let addresses = account.addresses_with_unspent_outputs().await?;
+    let unspent_outputs = account.unspent_outputs(None).await?;
     let current_time = iota_sdk::utils::unix_timestamp_now().as_secs() as u32;
 
-    let mut output_ids: &[OutputId] = &[];
+    let mut outputs = Vec::new();
     let mut amount = 0;
     let mut native_tokens = NativeTokensBuilder::new();
     let mut nfts = Vec::new();
     let mut aliases = Vec::new();
-    let mut foundries = Vec::new();
 
-    if let Some(address) = addresses
-        .iter()
-        .find(|a| a.key_index() == address.key_index() && a.internal() == address.internal())
-    {
-        output_ids = address.output_ids().as_slice();
+    for output_data in unspent_outputs.into_iter() {
+        // Panic: cannot fail for outputs belonging to an account.
+        let required_address = output_data
+            .output
+            .required_and_unlocked_address(current_time, &output_data.output_id, None)
+            .unwrap()
+            .0;
 
-        for output_id in output_ids {
-            if let Some(output_data) = account.get_output(output_id).await {
-                // Output might be associated with the address, but can't be unlocked by it, so we check that here.
-                // Panic: cannot fail for outputs belonging to an account.
-                let (required_address, _) = output_data
-                    .output
-                    .required_and_unlocked_address(current_time, output_id, None)
-                    .unwrap();
+        if address.inner() == &required_address {
+            outputs.push((output_data.output_id, output_data.output.kind_str().to_string()));
 
-                if address.address().as_ref() == &required_address {
-                    if let Some(nts) = output_data.output.native_tokens() {
-                        native_tokens.add_native_tokens(nts.clone())?;
-                    }
-                    match &output_data.output {
-                        Output::Nft(nft) => nfts.push(nft.nft_id_non_null(output_id)),
-                        Output::Alias(alias) => aliases.push(alias.alias_id_non_null(output_id)),
-                        Output::Foundry(foundry) => foundries.push(foundry.id()),
-                        Output::Basic(_) | Output::Treasury(_) => {}
-                    }
-                    let unlock_conditions = output_data
-                        .output
-                        .unlock_conditions()
-                        .expect("output must have unlock conditions");
-                    let sdr_amount = unlock_conditions
-                        .storage_deposit_return()
-                        .map(|sdr| sdr.amount())
-                        .unwrap_or(0);
-
-                    amount += output_data.output.amount() - sdr_amount;
-                }
+            if let Some(nts) = output_data.output.native_tokens() {
+                native_tokens.add_native_tokens(nts.clone())?;
             }
+
+            match &output_data.output {
+                Output::Alias(alias) => aliases.push(alias.alias_id_non_null(&output_data.output_id)),
+                Output::Nft(nft) => nfts.push(nft.nft_id_non_null(&output_data.output_id)),
+                Output::Basic(_) | Output::Foundry(_) | Output::Treasury(_) => {}
+            }
+
+            let sdr_amount = output_data
+                .output
+                .unlock_conditions()
+                .unwrap()
+                .storage_deposit_return()
+                .map(|sdr| sdr.amount())
+                .unwrap_or(0);
+
+            amount += output_data.output.amount() - sdr_amount;
         }
     }
 
-    log = format!(
-        "{log}\nOutputs: {:#?}\nBase coin amount: {}\nNative Tokens: {:#?}\nNFTs: {:#?}\nAliases: {:#?}\nFoundries: {:#?}\n",
-        output_ids,
-        amount,
-        native_tokens.finish_vec()?,
-        nfts,
-        aliases,
-        foundries,
-    );
+    // Coins table
+    formatted_string.push_str(&format!("{:<11}{}\n", "Coins:", amount));
 
-    println_log_info!("{log}");
+    // Outputs table
+    if !outputs.is_empty() {
+        formatted_string.push_str("Outputs:\n");
+        for (id, kind) in outputs {
+            formatted_string.push_str(&format!("  {id}\t{kind}\n"));
+        }
+    }
+
+    // Native tokens table
+    let native_tokens = native_tokens.finish_vec()?;
+    if !native_tokens.is_empty() {
+        formatted_string.push_str("Native Tokens:\n");
+        for (id, amount) in native_tokens
+            .into_iter()
+            .map(|nt| (*nt.token_id(), nt.amount().to_string()))
+        {
+            formatted_string.push_str(&format!("  {id}\t{amount}\n"));
+        }
+    }
+
+    // NFT table
+    if !nfts.is_empty() {
+        formatted_string.push_str("NFTs:\n");
+        for id in nfts.into_iter() {
+            formatted_string.push_str(&format!("  {id}\n"));
+        }
+    }
+
+    // Aliases table
+    if !aliases.is_empty() {
+        formatted_string.push_str("Aliases:\n");
+        for id in aliases.into_iter() {
+            formatted_string.push_str(&format!("  {id}\n"));
+        }
+    }
+
+    println_log_info!("{formatted_string}");
 
     Ok(())
+}
+
+fn print_addresses(mut addresses: Vec<Bech32Address>) -> Result<(), Error> {
+    if addresses.is_empty() {
+        println_log_info!("No addresses found");
+    } else {
+        addresses.sort_unstable();
+
+        for (i, addr) in addresses.into_iter().enumerate() {
+            println_log_info!("{:<5}{}\t{}", i, addr, addr.kind_str());
+        }
+    }
+
+    Ok(())
+}
+
+async fn print_outputs(mut outputs: Vec<OutputData>, title: &str) -> Result<(), Error> {
+    if outputs.is_empty() {
+        println_log_info!("No outputs found");
+    } else {
+        println_log_info!("{title}");
+        outputs.sort_unstable_by(outputs_ordering);
+
+        for (i, output_data) in outputs.into_iter().enumerate() {
+            let booked_time = to_utc_date_time(output_data.metadata.milestone_timestamp_booked() as u128 * 1000)?;
+            let formatted_time = booked_time.format("%Y-%m-%d %H:%M:%S UTC").to_string();
+
+            println_log_info!(
+                "{:<5}{}\t{}\t{}\t{}",
+                i,
+                &output_data.output_id,
+                output_data.output.kind_str(),
+                formatted_time,
+                if output_data.is_spent { "Spent" } else { "Unspent" },
+            );
+        }
+    }
+
+    Ok(())
+}
+
+fn outputs_ordering(a: &OutputData, b: &OutputData) -> std::cmp::Ordering {
+    (b.metadata.milestone_timestamp_booked(), a.output_id).cmp(&(a.metadata.milestone_timestamp_booked(), b.output_id))
+}
+
+fn transactions_ordering(a: &Transaction, b: &Transaction) -> std::cmp::Ordering {
+    b.timestamp.cmp(&a.timestamp)
+}
+
+async fn get_addresses_sorted(account: &Account) -> Result<Vec<Bech32Address>, Error> {
+    let hrp = account.client().get_bech32_hrp().await?;
+    let mut addresses = account
+        .addresses()
+        .await?
+        .into_iter()
+        .map(|address| address.into_bech32())
+        .chain(
+            account
+                .unspent_outputs(FilterOptions {
+                    output_types: Some(vec![AliasOutput::KIND, NftOutput::KIND]),
+                    ..Default::default()
+                })
+                .await?
+                .into_iter()
+                .filter_map(|data| match data.output {
+                    Output::Alias(alias) => Some(Address::Alias(alias.alias_address(&data.output_id))),
+                    Output::Nft(nft) => Some(Address::Nft(nft.nft_address(&data.output_id))),
+                    _ => None,
+                })
+                .map(|address| address.to_bech32_unchecked(hrp)),
+        )
+        .collect::<Vec<_>>();
+
+    addresses.sort_unstable();
+
+    Ok(addresses)
 }

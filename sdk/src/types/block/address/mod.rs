@@ -6,7 +6,7 @@ mod bech32;
 mod ed25519;
 mod nft;
 
-use derive_more::From;
+use derive_more::{Display, From};
 
 pub use self::{
     alias::AliasAddress,
@@ -23,7 +23,7 @@ use crate::types::block::{
 };
 
 /// A generic address supporting different address kinds.
-#[derive(Clone, Copy, Eq, PartialEq, Ord, PartialOrd, Hash, From, packable::Packable)]
+#[derive(Clone, Copy, Eq, PartialEq, Ord, PartialOrd, Hash, From, Display, packable::Packable)]
 #[packable(tag_type = u8, with_error = Error::InvalidAddressKind)]
 #[packable(unpack_error = Error)]
 pub enum Address {
@@ -55,6 +55,15 @@ impl Address {
             Self::Ed25519(_) => Ed25519Address::KIND,
             Self::Alias(_) => AliasAddress::KIND,
             Self::Nft(_) => NftAddress::KIND,
+        }
+    }
+
+    /// Returns the address kind of an [`Address`] as a string.
+    pub fn kind_str(&self) -> &str {
+        match self {
+            Self::Ed25519(_) => "Ed25519",
+            Self::Alias(_) => "Alias",
+            Self::Nft(_) => "Nft",
         }
     }
 

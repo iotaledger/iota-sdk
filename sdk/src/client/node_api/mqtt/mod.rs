@@ -86,10 +86,15 @@ async fn set_mqtt_client(client: &Client) -> Result<(), Error> {
             let port = broker_options.port;
             let secure = node.url.scheme() == "https";
             let mqtt_options = if broker_options.use_ws {
+                let path = if node.url.path().ends_with('/') {
+                    &node.url.path()[0..node.url.path().len() - 1]
+                } else {
+                    node.url.path()
+                };
                 let uri = format!(
-                    "{}://{host}:{}/api/mqtt/v1",
+                    "{}://{host}:{}{path}/api/mqtt/v1",
                     if secure { "wss" } else { "ws" },
-                    node.url.port_or_known_default().unwrap_or(port)
+                    node.url.port_or_known_default().unwrap_or(port),
                 );
                 let mut mqtt_options = MqttOptions::new(id, uri, port);
                 if secure {

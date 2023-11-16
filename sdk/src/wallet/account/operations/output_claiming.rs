@@ -16,7 +16,7 @@ use crate::{
         },
     },
     wallet::account::{
-        operations::helpers::time::can_output_be_unlocked_now, types::Transaction, Account, OutputData,
+        operations::helpers::time::can_output_be_unlocked_now, types::Transaction, Account, AccountDetails, OutputData,
         TransactionOptions,
     },
 };
@@ -32,31 +32,29 @@ pub enum OutputsToClaim {
     All,
 }
 
-impl<S: 'static + SecretManage> Account<S>
-where
-    crate::wallet::Error: From<S::Error>,
-{
+impl AccountDetails {
     /// Get basic and nft outputs that have
     /// [`ExpirationUnlockCondition`](crate::types::block::output::unlock_condition::ExpirationUnlockCondition),
     /// [`StorageDepositReturnUnlockCondition`] or
     /// [`TimelockUnlockCondition`](crate::types::block::output::unlock_condition::TimelockUnlockCondition) and can be
     /// unlocked now and also get basic outputs with only an [`AddressUnlockCondition`] unlock condition, for
     /// additional inputs
-    pub async fn claimable_outputs(&self, outputs_to_claim: OutputsToClaim) -> crate::wallet::Result<Vec<OutputId>> {
-        log::debug!("[OUTPUT_CLAIMING] claimable_outputs");
-        let account_details = self.details().await;
-
-        let local_time = self.client().get_time_checked().await?;
+    pub(crate) fn claimable_outputs(
+        &self,
+        outputs_to_claim: OutputsToClaim,
+        time: u32,
+    ) -> crate::wallet::Result<Vec<OutputId>> {
+        log::debug!("[AccountDetails] claimable_outputs");
 
         // Get outputs for the claim
         let mut output_ids_to_claim: HashSet<OutputId> = HashSet::new();
-        for (output_id, output_data) in account_details
+        for (output_id, output_data) in self
             .unspent_outputs
             .iter()
             .filter(|(_, o)| o.output.is_basic() || o.output.is_nft())
         {
             // Don't use outputs that are locked for other transactions
-            if !account_details.locked_outputs.contains(output_id) && account_details.outputs.contains_key(output_id) {
+            if !self.locked_outputs.contains(output_id) && self.outputs.contains_key(output_id) {
                 if let Some(unlock_conditions) = output_data.output.unlock_conditions() {
                     // If there is a single [UnlockCondition], then it's an
                     // [AddressUnlockCondition] and we own it already without
@@ -65,11 +63,11 @@ where
                         && can_output_be_unlocked_now(
                             // We use the addresses with unspent outputs, because other addresses of the
                             // account without unspent outputs can't be related to this output
-                            &account_details.addresses_with_unspent_outputs,
+                            &self.addresses_with_unspent_outputs,
                             // outputs controlled by an alias or nft are currently not considered
                             &[],
                             output_data,
-                            local_time,
+                            time,
                             // Not relevant without alias addresses
                             None,
                         )?
@@ -78,7 +76,7 @@ where
                             OutputsToClaim::MicroTransactions => {
                                 if let Some(sdr) = unlock_conditions.storage_deposit_return() {
                                     // If expired, it's not a micro transaction anymore
-                                    if unlock_conditions.is_expired(local_time) {
+                                    if unlock_conditions.is_expired(time) {
                                         continue;
                                     }
                                     // Only micro transaction if not the same
@@ -99,7 +97,7 @@ where
                             }
                             OutputsToClaim::Amount => {
                                 let mut claimable_amount = output_data.output.amount();
-                                if !unlock_conditions.is_expired(local_time) {
+                                if !unlock_conditions.is_expired(time) {
                                     claimable_amount -= unlock_conditions
                                         .storage_deposit_return()
                                         .map(|s| s.amount())
@@ -122,6 +120,25 @@ where
             output_ids_to_claim.len()
         );
         Ok(output_ids_to_claim.into_iter().collect())
+    }
+}
+
+impl<S: 'static + SecretManage> Account<S>
+where
+    crate::wallet::Error: From<S::Error>,
+{
+    /// Get basic and nft outputs that have
+    /// [`ExpirationUnlockCondition`](crate::types::block::output::unlock_condition::ExpirationUnlockCondition),
+    /// [`StorageDepositReturnUnlockCondition`] or
+    /// [`TimelockUnlockCondition`](crate::types::block::output::unlock_condition::TimelockUnlockCondition) and can be
+    /// unlocked now and also get basic outputs with only an [`AddressUnlockCondition`] unlock condition, for
+    /// additional inputs
+    pub async fn claimable_outputs(&self, outputs_to_claim: OutputsToClaim) -> crate::wallet::Result<Vec<OutputId>> {
+        let account_details = self.details().await;
+
+        let local_time = self.client().get_time_checked().await?;
+
+        account_details.claimable_outputs(outputs_to_claim, local_time)
     }
 
     /// Get basic outputs that have only one unlock condition which is [AddressUnlockCondition], so they can be used as
@@ -242,6 +259,15 @@ where
         let mut available_amount = 0;
         let mut required_amount_for_nfts = 0;
         let mut new_native_tokens = NativeTokensBuilder::new();
+
+        // There can be outputs with less amount than min required storage deposit, so we have to check that we
+        // have enough amount to create a new basic output
+        let enough_amount_for_basic_output = possible_additional_inputs
+            .iter()
+            .map(|i| i.output.amount())
+            .sum::<u64>()
+            >= MinimumStorageDepositBasicOutput::new(rent_structure, token_supply).finish()?;
+
         // check native tokens
         for output_data in &outputs_to_claim {
             if let Some(native_tokens) = output_data.output.native_tokens() {
@@ -266,7 +292,7 @@ where
                 // build new output with same amount, nft_id, immutable/feature blocks and native tokens, just
                 // updated address unlock conditions
 
-                let nft_output = if possible_additional_inputs.is_empty() {
+                let nft_output = if !enough_amount_for_basic_output {
                     // Only update address and nft id if we have no additional inputs which can provide the storage
                     // deposit for the remaining amount and possible NTs
                     NftOutputBuilder::from(nft_output)
@@ -296,7 +322,7 @@ where
         };
 
         // Check if the new amount is enough for the storage deposit, otherwise increase it to this
-        let mut required_amount = if possible_additional_inputs.is_empty() {
+        let mut required_amount = if !enough_amount_for_basic_output {
             required_amount_for_nfts
         } else {
             required_amount_for_nfts

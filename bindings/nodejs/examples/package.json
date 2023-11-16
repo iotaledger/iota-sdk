@@ -8,7 +8,7 @@
         "run-example": "ts-node"
     },
     "dependencies": {
-        "@iota/sdk": "link:../",
+        "@iota/sdk": "file:../",
         "class-transformer": "^0.5.1",
         "dotenv": "^16.0.0",
         "ts-node": "^10.9.1"
@@ -18,8 +18,10 @@
         "@ethereumjs/rlp": "^4.0.1",
         "@ethereumjs/tx": "^4.1.2",
         "@ethereumjs/util": "^8.0.6",
-        "@types/": "ethereumjs/rlp",
         "typescript": "^4.6.3",
         "web3": "^1.10.0"
+    },
+    "resolutions": {
+        "tough-cookie": "^4.1.3"
     }
 }

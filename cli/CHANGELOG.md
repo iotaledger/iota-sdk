@@ -19,6 +19,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security -->
 
+## 1.2.0 - 2023-10-26
+
+### Added
+
+- `outputs` and `unspent_outputs` print the booked milestone timestamps and sort by them;
+- `outputs` and `unspent_outputs` include spent/unspent information;
+- `UTC` suffix to the formatted date of `transactions`;
+- `addresses` handles NFT and Alias addresses;
+- `AccountCommand::Address` command that accepts either a list index or a `Bech32Address`;
+
+### Changed
+
+- `AccountCommand::Output` accepts either a list index or an `OutputId`;
+- `addresses` prints an indexed list of addresses and their type instead of address details;
+
+### Fixed
+
+- `transaction` and `transactions` indexed transactions in opposite order;
+- Enter was showing the helper message;
+- Earlier trim of the input so that pre-commands (`help`, `clear`, `accounts`, ...) work even with leading/trailing spaces;
+
 ## 1.1.0 - 2023-09-29
 
 ### Added

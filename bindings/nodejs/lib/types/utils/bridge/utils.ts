@@ -14,6 +14,7 @@ import {
     Bech32Address,
 } from '../../';
 import { AliasId } from '../../block/id';
+import { InputSigningData } from '../../client';
 
 export interface __GenerateMnemonicMethod__ {
     name: 'generateMnemonic';
@@ -203,5 +204,14 @@ export interface __OutputHexBytes__ {
     name: 'outputHexBytes';
     data: {
         output: Output;
+    };
+}
+
+export interface __VerifyTransactionSemantic__ {
+    name: 'verifyTransactionSemantic';
+    data: {
+        inputs: InputSigningData[];
+        transaction: TransactionPayload;
+        time: number;
     };
 }

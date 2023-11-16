@@ -19,6 +19,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security -->
 
+## 1.1.4 - 2023-MM-DD
+
+### Added
+
+- `Utils:verifyTransactionSemantic()`;
+
+### Fixed
+
+- `StateMetadataOutput`'s constructor not setting the `stateMetadata` field;
+
+## 1.1.3 - 2023-10-27
+
+### Fixed
+
+- Prebuild binaries;
+
+## 1.1.2 - 2023-10-26
+
+### Fixed
+
+- Slow syncing with many claimable outputs;
+- Potential deadlock in syncing;
+
 ## 1.1.1 - 2023-10-11
 
 ### Added

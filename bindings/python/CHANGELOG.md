@@ -19,11 +19,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security -->
 
-## 1.1.1 - 2023-MM-DD
+## 1.1.2 - 2023-MM-DD
+
+### Added
+
+- `Utils:verify_transaction_semantic()`;
+
+## 1.1.1 - 2023-10-31
 
 ### Added
 
 - `Utils:transaction_id()`;
+- `py.typed` file to the package;
+
+### Fixed
+
+- `Range` type instead of `range` method in `GenerateAddressesOptions` init;
+- `Dict` type instead of `dict` method in `Irc27Metadata` init;
 
 ## 1.1.0 - 2023-09-29
 

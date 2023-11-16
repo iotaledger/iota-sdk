@@ -62,9 +62,7 @@ impl SecretManage for MnemonicSecretManager {
                     .to_bytes();
 
                 // Hash the public key to get the address
-                let result = Blake2b256::digest(public_key).try_into().map_err(|_e| {
-                    crate::client::Error::Blake2b256("hashing the public key while generating the address failed.")
-                })?;
+                let result = Blake2b256::digest(public_key).into();
 
                 crate::client::Result::Ok(Ed25519Address::new(result))
             })
@@ -156,6 +154,8 @@ impl MnemonicSecretManager {
 
 #[cfg(test)]
 mod tests {
+    use pretty_assertions::assert_eq;
+
     use super::*;
     use crate::types::block::address::ToBech32Ext;
 

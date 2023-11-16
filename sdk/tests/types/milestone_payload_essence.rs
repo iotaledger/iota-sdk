@@ -21,6 +21,7 @@ use iota_sdk::types::block::{
     },
 };
 use packable::PackableExt;
+use pretty_assertions::assert_eq;
 
 #[test]
 fn new_valid() {

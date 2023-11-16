@@ -189,7 +189,11 @@ impl NodeManager {
 
         // Set path and query parameters
         for node in &mut nodes_with_modified_url {
-            node.url.set_path(path);
+            if node.url.path().ends_with('/') {
+                node.url.set_path(&format!("{}{}", node.url.path(), path));
+            } else {
+                node.url.set_path(&format!("{}/{}", node.url.path(), path));
+            }
             node.url.set_query(query);
             if let Some(auth) = &node.auth {
                 if let Some((name, password)) = &auth.basic_auth_name_pwd {

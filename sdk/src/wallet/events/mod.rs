@@ -113,6 +113,8 @@ mod tests {
         },
     };
 
+    use pretty_assertions::assert_eq;
+
     use super::{
         types::{TransactionInclusionEvent, TransactionProgressEvent, WalletEvent, WalletEventType},
         EventEmitter,

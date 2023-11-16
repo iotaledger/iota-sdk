@@ -37,6 +37,8 @@ class Output():
     type: int
 
     def as_dict(self):
+        """Converts this object to a dict.
+        """
         config = {k: v for k, v in self.__dict__.items() if v is not None}
 
         if 'unlockConditions' in config:
@@ -235,8 +237,11 @@ class OutputMetadata:
     milestoneTimestampSpent: Optional[int] = None
     transactionIdSpent: Optional[HexStr] = None
 
+    # pylint: disable=redefined-builtin
     @classmethod
     def from_dict(cls, dict: Dict) -> OutputMetadata:
+        """Converts a dict to a OutputMetadata
+        """
         obj = cls.__new__(cls)
         super(OutputMetadata, obj).__init__()
         for k, v in dict.items():
@@ -244,6 +249,8 @@ class OutputMetadata:
         return obj
 
     def as_dict(self):
+        """Converts this object to a dict.
+        """
         return {k: v for k, v in self.__dict__.items() if v is not None}
 
 
@@ -259,8 +266,11 @@ class OutputWithMetadata:
     metadata: OutputMetadata
     output: Union[AliasOutput, FoundryOutput, NftOutput, BasicOutput]
 
+    # pylint: disable=redefined-builtin
     @classmethod
     def from_dict(cls, dict: Dict) -> OutputWithMetadata:
+        """Creates an output with metadata instance from the dict object.
+        """
         obj = cls.__new__(cls)
         super(OutputWithMetadata, obj).__init__()
         for k, v in dict.items():
@@ -268,7 +278,9 @@ class OutputWithMetadata:
         return obj
 
     def as_dict(self):
-        config = dict()
+        """Converts this object to a dict.
+        """
+        config = {}
 
         config['metadata'] = self.metadata.__dict__
         config['output'] = self.output.as_dict()
@@ -278,6 +290,16 @@ class OutputWithMetadata:
 
 def output_from_dict(
         output: Dict[str, any]) -> Union[TreasuryOutput, BasicOutput, AliasOutput, FoundryOutput, NftOutput, Output]:
+    """
+    Takes a dictionary as input and returns an instance of a specific
+    output class based on the value of the 'type' key in the dictionary.
+
+    Arguments:
+
+    * `output`: The `output` parameter is a dictionary that contains information about the output. It is
+    expected to have a key called 'type' which specifies the type of the output. The value of 'type'
+    should be one of the values defined in the `OutputType` enum.
+    """
     output_type = OutputType(output['type'])
 
     if output_type == OutputType.Treasury:

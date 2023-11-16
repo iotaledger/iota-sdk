@@ -43,11 +43,8 @@ pub fn hex_to_bech32(hex: &str, bech32_hrp: impl ConvertTo<Hrp>) -> Result<Bech3
 /// Transforms a prefix hex encoded public key to a bech32 encoded address
 pub fn hex_public_key_to_bech32_address(hex: &str, bech32_hrp: impl ConvertTo<Hrp>) -> Result<Bech32Address> {
     let public_key: [u8; Ed25519Address::LENGTH] = prefix_hex::decode(hex)?;
+    let address = Ed25519Address::new(Blake2b256::digest(public_key).into());
 
-    let address = Blake2b256::digest(public_key)
-        .try_into()
-        .map_err(|_e| Error::Blake2b256("hashing the public key failed."))?;
-    let address: Ed25519Address = Ed25519Address::new(address);
     Ok(Address::Ed25519(address).try_to_bech32(bech32_hrp)?)
 }
 
