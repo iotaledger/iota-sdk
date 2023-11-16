@@ -45,7 +45,6 @@ where
     ) -> crate::wallet::Result<Output> {
         log::debug!("[OUTPUT] prepare_output {params:?}");
         let transaction_options = transaction_options.into();
-        let token_supply = self.client().get_token_supply().await?;
 
         self.client().bech32_hrp_matches(params.recipient_address.hrp()).await?;
 
@@ -141,8 +140,7 @@ where
                         remainder_address.clone(),
                         // Return minimum amount
                         min_amount_basic_output,
-                        token_supply,
-                    )?);
+                    ));
 
                 // Update output amount, so recipient still gets the provided amount
                 let new_amount = params.amount + min_amount_basic_output;
@@ -163,8 +161,7 @@ where
                             remainder_address.clone(),
                             // Return minimum amount
                             min_amount_basic_output + additional_required_amount,
-                            token_supply,
-                        )?);
+                        ));
                 } else {
                     // new_amount is enough
                     second_output_builder = second_output_builder.with_amount(new_amount);
@@ -219,8 +216,7 @@ where
                                 remainder_address,
                                 // Return minimum amount
                                 new_sdr_amount,
-                                token_supply,
-                            )?);
+                            ));
                     }
                 } else {
                     // Would leave dust behind, so return what's required for a remainder

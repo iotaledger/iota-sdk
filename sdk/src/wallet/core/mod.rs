@@ -563,13 +563,13 @@ impl TryFromDto for WalletData {
             outputs: dto
                 .outputs
                 .into_iter()
-                .map(|(id, o)| Ok((id, OutputData::try_from_dto_with_params(o, &params)?)))
+                .map(|(id, o)| Ok((id, OutputData::try_from(o)?)))
                 .collect::<crate::wallet::Result<_>>()?,
             locked_outputs: dto.locked_outputs,
             unspent_outputs: dto
                 .unspent_outputs
                 .into_iter()
-                .map(|(id, o)| Ok((id, OutputData::try_from_dto_with_params(o, &params)?)))
+                .map(|(id, o)| Ok((id, OutputData::try_from(o)?)))
                 .collect::<crate::wallet::Result<_>>()?,
             transactions: dto
                 .transactions
@@ -586,7 +586,7 @@ impl TryFromDto for WalletData {
             native_token_foundries: dto
                 .native_token_foundries
                 .into_iter()
-                .map(|(id, o)| Ok((id, FoundryOutput::try_from_dto_with_params(o, &params)?)))
+                .map(|(id, o)| Ok((id, FoundryOutput::try_from(o)?)))
                 .collect::<crate::wallet::Result<_>>()?,
         })
     }
