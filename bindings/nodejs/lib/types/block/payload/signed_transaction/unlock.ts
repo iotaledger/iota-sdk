@@ -28,6 +28,14 @@ enum UnlockType {
      *  An NFT unlock.
      */
     Nft = 4,
+    /**
+     *  A multi unlock.
+     */
+    Multi = 5,
+    /**
+     *  An empty unlock.
+     */
+    Empty = 6,
 }
 
 /**
@@ -139,6 +147,33 @@ class NftUnlock extends Unlock {
     }
 }
 
+/**
+ * Unlocks a MultiAddress with a list of other unlocks.
+ */
+class MultiUnlock extends Unlock {
+    /**
+     * The inner unlocks.
+     */
+    readonly unlocks: Unlock[];
+
+    /**
+     * @param unlocks The inner unlocks.
+     */
+    constructor(unlocks: Unlock[]) {
+        super(UnlockType.Multi);
+        this.unlocks = unlocks;
+    }
+}
+
+/**
+ * Used to maintain correct index relationship between addresses and signatures when unlocking a MultiUnlock where not all addresses are unlocked.
+ */
+class EmptyUnlock extends Unlock {
+    constructor() {
+        super(UnlockType.Empty);
+    }
+}
+
 const UnlockDiscriminator = {
     property: 'type',
     subTypes: [
@@ -162,6 +197,14 @@ const UnlockDiscriminator = {
             value: NftUnlock,
             name: UnlockType.Nft as any,
         },
+        {
+            value: MultiUnlock,
+            name: UnlockType.Multi as any,
+        },
+        {
+            value: EmptyUnlock,
+            name: UnlockType.Empty as any,
+        },
     ],
 };
 
@@ -173,5 +216,7 @@ export {
     AccountUnlock,
     AnchorUnlock,
     NftUnlock,
+    MultiUnlock,
+    EmptyUnlock,
     UnlockDiscriminator,
 };
