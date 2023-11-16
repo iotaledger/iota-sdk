@@ -128,7 +128,7 @@ impl TryFromDto for OutputData {
 
     fn try_from_dto_with_params_inner(
         dto: Self::Dto,
-        params: crate::types::ValidationParams<'_>,
+        params: &crate::types::ValidationParams<'_>,
     ) -> Result<Self, Self::Error> {
         Ok(Self {
             output_id: dto.output_id,
@@ -211,7 +211,7 @@ impl TryFromDto for TransactionWithMetadata {
 
     fn try_from_dto_with_params_inner(
         dto: Self::Dto,
-        params: crate::types::ValidationParams<'_>,
+        params: &crate::types::ValidationParams<'_>,
     ) -> Result<Self, Self::Error> {
         Ok(Self {
             payload: SignedTransactionPayload::try_from_dto_with_params(dto.payload, params)?,

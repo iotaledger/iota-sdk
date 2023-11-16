@@ -199,7 +199,7 @@ impl ClientInner {
 
         Ok(Block::try_from_dto_with_params(
             dto,
-            self.get_protocol_parameters().await?,
+            &self.get_protocol_parameters().await?,
         )?)
     }
 
@@ -257,7 +257,7 @@ impl ClientInner {
 
         Ok(Block::try_from_dto_with_params(
             dto,
-            self.get_protocol_parameters().await?,
+            &self.get_protocol_parameters().await?,
         )?)
     }
 

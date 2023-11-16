@@ -230,7 +230,7 @@ pub mod dto {
         type Dto = PayloadDto;
         type Error = Error;
 
-        fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
+        fn try_from_dto_with_params_inner(dto: Self::Dto, params: &ValidationParams<'_>) -> Result<Self, Self::Error> {
             Ok(match dto {
                 PayloadDto::TaggedData(p) => Self::from(*p),
                 PayloadDto::SignedTransaction(p) => {

@@ -139,8 +139,8 @@ pub trait TryFromDto: Sized {
         dto: Self::Dto,
         params: impl Into<ValidationParams<'a>> + Send,
     ) -> Result<Self, Self::Error> {
-        Self::try_from_dto_with_params_inner(dto, params.into())
+        Self::try_from_dto_with_params_inner(dto, &params.into())
     }
 
-    fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error>;
+    fn try_from_dto_with_params_inner(dto: Self::Dto, params: &ValidationParams<'_>) -> Result<Self, Self::Error>;
 }

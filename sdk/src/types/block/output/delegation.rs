@@ -481,7 +481,7 @@ pub(crate) mod dto {
 
         fn try_from_dto_with_params_inner(
             dto: Self::Dto,
-            params: crate::types::ValidationParams<'_>,
+            params: &crate::types::ValidationParams<'_>,
         ) -> Result<Self, Self::Error> {
             let mut builder = DelegationOutputBuilder::new_with_amount(
                 dto.amount,
@@ -493,7 +493,7 @@ pub(crate) mod dto {
             .with_end_epoch(dto.end_epoch);
 
             for u in dto.unlock_conditions {
-                builder = builder.add_unlock_condition(UnlockCondition::try_from_dto_with_params(u, &params)?);
+                builder = builder.add_unlock_condition(UnlockCondition::try_from_dto_with_params(u, params)?);
             }
 
             builder.finish()

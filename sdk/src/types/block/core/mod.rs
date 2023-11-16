@@ -235,7 +235,7 @@ pub(crate) mod dto {
         type Dto = BlockBodyDto;
         type Error = Error;
 
-        fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
+        fn try_from_dto_with_params_inner(dto: Self::Dto, params: &ValidationParams<'_>) -> Result<Self, Self::Error> {
             match dto {
                 Self::Dto::Basic(basic_block_body_dto) => {
                     Ok(BasicBlockBody::try_from_dto_with_params_inner(basic_block_body_dto, params)?.into())

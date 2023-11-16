@@ -468,14 +468,14 @@ pub(crate) mod dto {
         type Dto = BasicOutputDto;
         type Error = Error;
 
-        fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
+        fn try_from_dto_with_params_inner(dto: Self::Dto, params: &ValidationParams<'_>) -> Result<Self, Self::Error> {
             let mut builder = BasicOutputBuilder::new_with_amount(dto.amount)
                 .with_native_tokens(dto.native_tokens)
                 .with_mana(dto.mana)
                 .with_features(dto.features);
 
             for u in dto.unlock_conditions {
-                builder = builder.add_unlock_condition(UnlockCondition::try_from_dto_with_params(u, &params)?);
+                builder = builder.add_unlock_condition(UnlockCondition::try_from_dto_with_params(u, params)?);
             }
 
             builder.finish()

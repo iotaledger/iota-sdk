@@ -240,7 +240,7 @@ pub(crate) mod dto {
         type Dto = BasicBlockBodyDto;
         type Error = Error;
 
-        fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
+        fn try_from_dto_with_params_inner(dto: Self::Dto, params: &ValidationParams<'_>) -> Result<Self, Self::Error> {
             BasicBlockBodyBuilder::new(StrongParents::from_set(dto.strong_parents)?, dto.max_burned_mana)
                 .with_weak_parents(WeakParents::from_set(dto.weak_parents)?)
                 .with_shallow_like_parents(ShallowLikeParents::from_set(dto.shallow_like_parents)?)

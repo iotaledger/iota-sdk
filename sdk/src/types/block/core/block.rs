@@ -365,12 +365,7 @@ pub(crate) mod dto {
         fn from(value: &Block) -> Self {
             Self {
                 inner: UnsignedBlockDto {
-                    protocol_version: value.protocol_version(),
-                    network_id: value.network_id(),
-                    issuing_time: value.issuing_time(),
-                    slot_commitment_id: value.slot_commitment_id(),
-                    latest_finalized_slot: value.latest_finalized_slot(),
-                    issuer_id: value.issuer_id(),
+                    header: BlockHeaderDto::from(&value.header),
                     body: BlockBodyDto::from(&value.body),
                 },
                 signature: value.signature,
@@ -382,32 +377,25 @@ pub(crate) mod dto {
         type Dto = BlockDto;
         type Error = Error;
 
-        fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
+        fn try_from_dto_with_params_inner(dto: Self::Dto, params: &ValidationParams<'_>) -> Result<Self, Self::Error> {
             if let Some(protocol_params) = params.protocol_parameters() {
-                if dto.inner.protocol_version != protocol_params.version() {
+                if dto.inner.header.protocol_version != protocol_params.version() {
                     return Err(Error::ProtocolVersionMismatch {
                         expected: protocol_params.version(),
-                        actual: dto.inner.protocol_version,
+                        actual: dto.inner.header.protocol_version,
                     });
                 }
 
-                if dto.inner.network_id != protocol_params.network_id() {
+                if dto.inner.header.network_id != protocol_params.network_id() {
                     return Err(Error::NetworkIdMismatch {
                         expected: protocol_params.network_id(),
-                        actual: dto.inner.network_id,
+                        actual: dto.inner.header.network_id,
                     });
                 }
             }
 
             Ok(Self::new(
-                BlockHeader::new(
-                    dto.inner.protocol_version,
-                    dto.inner.network_id,
-                    dto.inner.issuing_time,
-                    dto.inner.slot_commitment_id,
-                    dto.inner.latest_finalized_slot,
-                    dto.inner.issuer_id,
-                ),
+                BlockHeader::try_from_dto_with_params_inner(dto.inner.header, params)?,
                 BlockBody::try_from_dto_with_params_inner(dto.inner.body, params)?,
                 dto.signature,
             ))
@@ -416,7 +404,7 @@ pub(crate) mod dto {
 
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
-    pub struct UnsignedBlockDto {
+    pub struct BlockHeaderDto {
         pub protocol_version: u8,
         #[serde(with = "string")]
         pub network_id: u64,
@@ -425,28 +413,26 @@ pub(crate) mod dto {
         pub slot_commitment_id: SlotCommitmentId,
         pub latest_finalized_slot: SlotIndex,
         pub issuer_id: IssuerId,
-        pub body: BlockBodyDto,
     }
 
-    impl From<&UnsignedBlock> for UnsignedBlockDto {
-        fn from(value: &UnsignedBlock) -> Self {
+    impl From<&BlockHeader> for BlockHeaderDto {
+        fn from(value: &BlockHeader) -> Self {
             Self {
-                protocol_version: value.header.protocol_version(),
-                network_id: value.header.network_id(),
-                issuing_time: value.header.issuing_time(),
-                slot_commitment_id: value.header.slot_commitment_id(),
-                latest_finalized_slot: value.header.latest_finalized_slot(),
-                issuer_id: value.header.issuer_id(),
-                body: BlockBodyDto::from(&value.body),
+                protocol_version: value.protocol_version(),
+                network_id: value.network_id(),
+                issuing_time: value.issuing_time(),
+                slot_commitment_id: value.slot_commitment_id(),
+                latest_finalized_slot: value.latest_finalized_slot(),
+                issuer_id: value.issuer_id(),
             }
         }
     }
 
-    impl TryFromDto for UnsignedBlock {
-        type Dto = UnsignedBlockDto;
+    impl TryFromDto for BlockHeader {
+        type Dto = BlockHeaderDto;
         type Error = Error;
 
-        fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
+        fn try_from_dto_with_params_inner(dto: Self::Dto, params: &ValidationParams<'_>) -> Result<Self, Self::Error> {
             if let Some(protocol_params) = params.protocol_parameters() {
                 if dto.protocol_version != protocol_params.version() {
                     return Err(Error::ProtocolVersionMismatch {
@@ -464,14 +450,39 @@ pub(crate) mod dto {
             }
 
             Ok(Self::new(
-                BlockHeader::new(
-                    dto.protocol_version,
-                    dto.network_id,
-                    dto.issuing_time,
-                    dto.slot_commitment_id,
-                    dto.latest_finalized_slot,
-                    dto.issuer_id,
-                ),
+                dto.protocol_version,
+                dto.network_id,
+                dto.issuing_time,
+                dto.slot_commitment_id,
+                dto.latest_finalized_slot,
+                dto.issuer_id,
+            ))
+        }
+    }
+
+    #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+    #[serde(rename_all = "camelCase")]
+    pub struct UnsignedBlockDto {
+        pub header: BlockHeaderDto,
+        pub body: BlockBodyDto,
+    }
+
+    impl From<&UnsignedBlock> for UnsignedBlockDto {
+        fn from(value: &UnsignedBlock) -> Self {
+            Self {
+                header: BlockHeaderDto::from(&value.header),
+                body: BlockBodyDto::from(&value.body),
+            }
+        }
+    }
+
+    impl TryFromDto for UnsignedBlock {
+        type Dto = UnsignedBlockDto;
+        type Error = Error;
+
+        fn try_from_dto_with_params_inner(dto: Self::Dto, params: &ValidationParams<'_>) -> Result<Self, Self::Error> {
+            Ok(Self::new(
+                BlockHeader::try_from_dto_with_params_inner(dto.header, params)?,
                 BlockBody::try_from_dto_with_params_inner(dto.body, params)?,
             ))
         }

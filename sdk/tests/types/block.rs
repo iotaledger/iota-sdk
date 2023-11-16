@@ -130,13 +130,15 @@ fn dto_mismatch_version() {
     let network_id = protocol_parameters.network_id();
     let protocol_version = 4;
     let block_dto_json = serde_json::json!({
-        "protocolVersion": protocol_version,
-        "networkId": network_id.to_string(),
-        "issuingTime": issuing_time.to_string(),
-        "slotCommitmentId": "0x8633b2eb1845fdecf12ee6c5e789c3cf1f0d0bbb3cee65cb5fb2757e995b5cd700000000",
-        "latestFinalizedSlot": 0,
-        "issuerId": "0x0000000000000000000000000000000000000000000000000000000000000000",
-        "block": {
+        "header": {
+            "protocolVersion": protocol_version,
+            "networkId": network_id.to_string(),
+            "issuingTime": issuing_time.to_string(),
+            "slotCommitmentId": "0x8633b2eb1845fdecf12ee6c5e789c3cf1f0d0bbb3cee65cb5fb2757e995b5cd700000000",
+            "latestFinalizedSlot": 0,
+            "issuerId": "0x0000000000000000000000000000000000000000000000000000000000000000",
+        },
+        "body": {
             "type":1,
             "strongParents": [ "0x417c5700320912627b604d4c376a5a1663634b09703538570b1d52440b3e474639490b10" ],
             "weakParents": [],
@@ -171,13 +173,15 @@ fn dto_mismatch_network_id() {
         + (slot_index - 1) * protocol_parameters.slot_duration_in_seconds() as u64;
     let network_id = network_name_to_id("invalid-network");
     let block_dto_json = serde_json::json!({
-        "protocolVersion": 3,
-        "networkId": network_id.to_string(),
-        "issuingTime": issuing_time.to_string(),
-        "slotCommitmentId": "0x8633b2eb1845fdecf12ee6c5e789c3cf1f0d0bbb3cee65cb5fb2757e995b5cd700000000",
-        "latestFinalizedSlot": 0,
-        "issuerId": "0x0000000000000000000000000000000000000000000000000000000000000000",
-        "block": {
+        "header": {
+            "protocolVersion": 3,
+            "networkId": network_id.to_string(),
+            "issuingTime": issuing_time.to_string(),
+            "slotCommitmentId": "0x8633b2eb1845fdecf12ee6c5e789c3cf1f0d0bbb3cee65cb5fb2757e995b5cd700000000",
+            "latestFinalizedSlot": 0,
+            "issuerId": "0x0000000000000000000000000000000000000000000000000000000000000000",
+        },
+        "body": {
             "type":1,
             "strongParents": [ "0x417c5700320912627b604d4c376a5a1663634b09703538570b1d52440b3e474639490b10" ],
             "weakParents": [],

@@ -580,7 +580,7 @@ pub(crate) mod dto {
         type Dto = TransactionDto;
         type Error = Error;
 
-        fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
+        fn try_from_dto_with_params_inner(dto: Self::Dto, params: &ValidationParams<'_>) -> Result<Self, Self::Error> {
             let network_id = dto
                 .network_id
                 .parse::<u64>()
@@ -588,12 +588,12 @@ pub(crate) mod dto {
             let mana_allotments = dto
                 .allotments
                 .into_iter()
-                .map(|o| ManaAllotment::try_from_dto_with_params(o, &params))
+                .map(|o| ManaAllotment::try_from_dto_with_params(o, params))
                 .collect::<Result<Vec<ManaAllotment>, Error>>()?;
             let outputs = dto
                 .outputs
                 .into_iter()
-                .map(|o| Output::try_from_dto_with_params(o, &params))
+                .map(|o| Output::try_from_dto_with_params(o, params))
                 .collect::<Result<Vec<Output>, Error>>()?;
 
             let mut builder = Self::builder(network_id)

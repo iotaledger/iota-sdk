@@ -584,7 +584,7 @@ impl TryFromDto for WalletData {
 
     fn try_from_dto_with_params_inner(
         dto: Self::Dto,
-        params: crate::types::ValidationParams<'_>,
+        params: &crate::types::ValidationParams<'_>,
     ) -> core::result::Result<Self, Self::Error> {
         Ok(Self {
             bip_path: dto.bip_path,
@@ -593,30 +593,30 @@ impl TryFromDto for WalletData {
             outputs: dto
                 .outputs
                 .into_iter()
-                .map(|(id, o)| Ok((id, OutputData::try_from_dto_with_params(o, &params)?)))
+                .map(|(id, o)| Ok((id, OutputData::try_from_dto_with_params(o, params)?)))
                 .collect::<crate::wallet::Result<_>>()?,
             locked_outputs: dto.locked_outputs,
             unspent_outputs: dto
                 .unspent_outputs
                 .into_iter()
-                .map(|(id, o)| Ok((id, OutputData::try_from_dto_with_params(o, &params)?)))
+                .map(|(id, o)| Ok((id, OutputData::try_from_dto_with_params(o, params)?)))
                 .collect::<crate::wallet::Result<_>>()?,
             transactions: dto
                 .transactions
                 .into_iter()
-                .map(|(id, o)| Ok((id, TransactionWithMetadata::try_from_dto_with_params(o, &params)?)))
+                .map(|(id, o)| Ok((id, TransactionWithMetadata::try_from_dto_with_params(o, params)?)))
                 .collect::<crate::wallet::Result<_>>()?,
             pending_transactions: dto.pending_transactions,
             incoming_transactions: dto
                 .incoming_transactions
                 .into_iter()
-                .map(|(id, o)| Ok((id, TransactionWithMetadata::try_from_dto_with_params(o, &params)?)))
+                .map(|(id, o)| Ok((id, TransactionWithMetadata::try_from_dto_with_params(o, params)?)))
                 .collect::<crate::wallet::Result<_>>()?,
             inaccessible_incoming_transactions: Default::default(),
             native_token_foundries: dto
                 .native_token_foundries
                 .into_iter()
-                .map(|(id, o)| Ok((id, FoundryOutput::try_from_dto_with_params(o, &params)?)))
+                .map(|(id, o)| Ok((id, FoundryOutput::try_from_dto_with_params(o, params)?)))
                 .collect::<crate::wallet::Result<_>>()?,
         })
     }

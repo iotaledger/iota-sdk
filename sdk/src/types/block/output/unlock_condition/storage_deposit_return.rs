@@ -123,7 +123,7 @@ pub(crate) mod dto {
         type Dto = StorageDepositReturnUnlockConditionDto;
         type Error = Error;
 
-        fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
+        fn try_from_dto_with_params_inner(dto: Self::Dto, params: &ValidationParams<'_>) -> Result<Self, Self::Error> {
             Ok(if let Some(token_supply) = params.token_supply() {
                 Self::new(dto.return_address, dto.amount, token_supply)?
             } else {

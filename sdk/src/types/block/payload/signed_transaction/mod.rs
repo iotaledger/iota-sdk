@@ -116,7 +116,7 @@ pub mod dto {
         type Dto = SignedTransactionPayloadDto;
         type Error = Error;
 
-        fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
+        fn try_from_dto_with_params_inner(dto: Self::Dto, params: &ValidationParams<'_>) -> Result<Self, Self::Error> {
             let transaction = Transaction::try_from_dto_with_params_inner(dto.transaction, params)?;
             Self::new(transaction, Unlocks::new(dto.unlocks)?)
         }

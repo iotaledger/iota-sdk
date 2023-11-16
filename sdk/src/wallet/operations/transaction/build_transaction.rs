@@ -51,7 +51,7 @@ where
             builder = builder.with_payload(options.tagged_data_payload);
         }
 
-        let transaction = builder.finish_with_params(protocol_parameters)?;
+        let transaction = builder.finish_with_params(&protocol_parameters)?;
 
         validate_transaction_length(&transaction)?;
 

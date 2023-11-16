@@ -642,7 +642,7 @@ pub(crate) mod dto {
         type Dto = NftOutputDto;
         type Error = Error;
 
-        fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
+        fn try_from_dto_with_params_inner(dto: Self::Dto, params: &ValidationParams<'_>) -> Result<Self, Self::Error> {
             let mut builder = NftOutputBuilder::new_with_amount(dto.amount, dto.nft_id)
                 .with_mana(dto.mana)
                 .with_native_tokens(dto.native_tokens)
@@ -650,7 +650,7 @@ pub(crate) mod dto {
                 .with_immutable_features(dto.immutable_features);
 
             for u in dto.unlock_conditions {
-                builder = builder.add_unlock_condition(UnlockCondition::try_from_dto_with_params(u, &params)?);
+                builder = builder.add_unlock_condition(UnlockCondition::try_from_dto_with_params(u, params)?);
             }
 
             builder.finish()

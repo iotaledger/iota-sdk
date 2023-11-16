@@ -758,7 +758,7 @@ pub(crate) mod dto {
         type Dto = AnchorOutputDto;
         type Error = Error;
 
-        fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
+        fn try_from_dto_with_params_inner(dto: Self::Dto, params: &ValidationParams<'_>) -> Result<Self, Self::Error> {
             let mut builder = AnchorOutputBuilder::new_with_amount(dto.amount, dto.anchor_id)
                 .with_mana(dto.mana)
                 .with_state_index(dto.state_index)
@@ -768,7 +768,7 @@ pub(crate) mod dto {
                 .with_state_metadata(dto.state_metadata);
 
             for u in dto.unlock_conditions {
-                builder = builder.add_unlock_condition(UnlockCondition::try_from_dto_with_params(u, &params)?);
+                builder = builder.add_unlock_condition(UnlockCondition::try_from_dto_with_params(u, params)?);
             }
 
             builder.finish()

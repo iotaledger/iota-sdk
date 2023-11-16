@@ -718,7 +718,7 @@ pub(crate) mod dto {
         type Dto = FoundryOutputDto;
         type Error = Error;
 
-        fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
+        fn try_from_dto_with_params_inner(dto: Self::Dto, params: &ValidationParams<'_>) -> Result<Self, Self::Error> {
             let mut builder = FoundryOutputBuilder::new_with_amount(dto.amount, dto.serial_number, dto.token_scheme);
 
             for t in dto.native_tokens {
@@ -734,7 +734,7 @@ pub(crate) mod dto {
             }
 
             for u in dto.unlock_conditions {
-                builder = builder.add_unlock_condition(UnlockCondition::try_from_dto_with_params(u, &params)?);
+                builder = builder.add_unlock_condition(UnlockCondition::try_from_dto_with_params(u, params)?);
             }
 
             builder.finish()

@@ -477,7 +477,7 @@ pub mod dto {
         type Dto = UnlockConditionDto;
         type Error = Error;
 
-        fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
+        fn try_from_dto_with_params_inner(dto: Self::Dto, params: &ValidationParams<'_>) -> Result<Self, Self::Error> {
             Ok(match dto {
                 UnlockConditionDto::Address(v) => Self::Address(v),
                 UnlockConditionDto::StorageDepositReturn(v) => Self::StorageDepositReturn(
