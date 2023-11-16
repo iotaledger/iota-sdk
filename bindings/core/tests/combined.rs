@@ -1,8 +1,6 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use std::collections::BTreeMap;
-
 use crypto::keys::bip44::Bip44;
 use iota_sdk::{
     client::{
@@ -153,8 +151,8 @@ async fn client_from_wallet() -> Result<()> {
 //     .await;
 
 //     let block = match response {
-//         Response::Block(block_body) => {
-//             match &block_body.block {
+//         Response::Block(block) => {
+//             match &block.body {
 //                 BlockBodyDto::Basic(b) => assert_eq!(b.payload.as_ref(), Some(&payload)),
 //                 BlockBodyDto::Validation(v) => panic!("unexpected block {v:?}"),
 //             }

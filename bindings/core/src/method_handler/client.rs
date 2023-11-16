@@ -37,8 +37,8 @@ where
             }
             let payload = match &topic_event.payload {
                 MqttPayload::Json(val) => serde_json::to_string(&val).expect("failed to serialize MqttPayload::Json"),
-                MqttPayload::BlockBody(block_body) => {
-                    serde_json::to_string(block_body).expect("failed to serialize MqttPayload::BlockBody")
+                MqttPayload::Block(block) => {
+                    serde_json::to_string(block).expect("failed to serialize MqttPayload::Block")
                 }
                 e => panic!("received unknown mqtt type: {e:?}"),
             };

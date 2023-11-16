@@ -45,7 +45,7 @@ async fn main() -> Result<()> {
                 println!("> Topic: {}", event.topic);
                 match &event.payload {
                     MqttPayload::Json(val) => println!("{}", serde_json::to_string(&val).unwrap()),
-                    MqttPayload::BlockBody(block_body) => println!("{block_body:?}"),
+                    MqttPayload::Block(block) => println!("{block:?}"),
                     e => println!("unknown event received: {e:?}"),
                 }
                 tx.send(()).unwrap();

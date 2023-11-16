@@ -17,7 +17,7 @@ use tokio::sync::watch::Receiver as WatchReceiver;
 pub use self::{error::Error, types::*};
 use crate::{
     client::{Client, ClientInner},
-    types::block::BlockBody,
+    types::block::Block,
 };
 
 impl Client {
@@ -190,13 +190,13 @@ fn poll_mqtt(client: &Client, mut event_loop: EventLoop) {
                                         let payload = &*p.payload;
                                         let protocol_parameters = &client.network_info.read().await.protocol_parameters;
 
-                                        match BlockBody::unpack_verified(payload, protocol_parameters) {
-                                            Ok(block_body) => Ok(TopicEvent {
+                                        match Block::unpack_verified(payload, protocol_parameters) {
+                                            Ok(block) => Ok(TopicEvent {
                                                 topic: p.topic.clone(),
-                                                payload: MqttPayload::BlockBody((&block_body).into()),
+                                                payload: MqttPayload::Block((&block).into()),
                                             }),
                                             Err(e) => {
-                                                warn!("Block body unpacking failed: {:?}", e);
+                                                warn!("Block unpacking failed: {:?}", e);
                                                 Err(())
                                             }
                                         }
