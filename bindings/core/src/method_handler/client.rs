@@ -79,7 +79,6 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
                 unlock_conditions,
                 features,
                 immutable_features,
-                client.get_token_supply().await?,
             )?);
 
             Response::Output(OutputDto::from(&output))
@@ -101,7 +100,6 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
                 native_tokens,
                 unlock_conditions,
                 features,
-                client.get_token_supply().await?,
             )?);
 
             Response::Output(OutputDto::from(&output))
@@ -127,7 +125,6 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
                 unlock_conditions,
                 features,
                 immutable_features,
-                client.get_token_supply().await?,
             )?);
 
             Response::Output(OutputDto::from(&output))
@@ -153,7 +150,6 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
                 unlock_conditions,
                 features,
                 immutable_features,
-                client.get_token_supply().await?,
             )?);
 
             Response::Output(OutputDto::from(&output))
@@ -296,7 +292,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
             Response::Bech32Address(client.hex_public_key_to_bech32_address(&hex, bech32_hrp).await?)
         }
         ClientMethod::ComputeMinimumOutputAmount { output } => {
-            let output = Output::try_from_dto_with_params(output, client.get_token_supply().await?)?;
+            let output = Output::try_from(output)?;
             let storage_score_params = client.get_storage_score_parameters().await?;
 
             Response::OutputAmount(output.minimum_amount(storage_score_params))

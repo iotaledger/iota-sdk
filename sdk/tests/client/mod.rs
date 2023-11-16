@@ -39,7 +39,6 @@ use iota_sdk::{
     },
 };
 
-const TOKEN_SUPPLY: u64 = 1_813_620_509_061_365;
 const ACCOUNT_ID_0: &str = "0x0000000000000000000000000000000000000000000000000000000000000000";
 const ACCOUNT_ID_1: &str = "0x1111111111111111111111111111111111111111111111111111111111111111";
 const ACCOUNT_ID_2: &str = "0x2222222222222222222222222222222222222222222222222222222222222222";
@@ -119,8 +118,7 @@ fn build_basic_output(
     }
 
     if let Some((address, amount)) = sdruc {
-        builder = builder
-            .add_unlock_condition(StorageDepositReturnUnlockCondition::new(address, amount, TOKEN_SUPPLY).unwrap());
+        builder = builder.add_unlock_condition(StorageDepositReturnUnlockCondition::new(address, amount));
     }
 
     if let Some(timelock) = timelock {
@@ -165,8 +163,7 @@ fn build_nft_output(
     }
 
     if let Some((address, amount)) = sdruc {
-        builder = builder
-            .add_unlock_condition(StorageDepositReturnUnlockCondition::new(address, amount, TOKEN_SUPPLY).unwrap());
+        builder = builder.add_unlock_condition(StorageDepositReturnUnlockCondition::new(address, amount));
     }
 
     if let Some((address, timestamp)) = expiration {
