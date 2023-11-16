@@ -364,7 +364,7 @@ impl AnchorOutput {
     pub const ALLOWED_UNLOCK_CONDITIONS: UnlockConditionFlags =
         UnlockConditionFlags::STATE_CONTROLLER_ADDRESS.union(UnlockConditionFlags::GOVERNOR_ADDRESS);
     /// The set of allowed [`Feature`]s for an [`AnchorOutput`].
-    pub const ALLOWED_FEATURES: FeatureFlags = FeatureFlags::SENDER.union(FeatureFlags::METADATA);
+    pub const ALLOWED_FEATURES: FeatureFlags = FeatureFlags::METADATA;
     /// The set of allowed immutable [`Feature`]s for an [`AnchorOutput`].
     pub const ALLOWED_IMMUTABLE_FEATURES: FeatureFlags = FeatureFlags::ISSUER.union(FeatureFlags::METADATA);
 
