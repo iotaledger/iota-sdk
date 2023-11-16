@@ -251,7 +251,8 @@ where
                     .map(|bech32| bech32.into_inner())
                     .unwrap_or_else(|| outputs_to_consolidate[0].address.clone()),
             ))
-            .with_native_tokens(total_native_tokens.finish()?)
+            // TODO https://github.com/iotaledger/iota-sdk/issues/1632
+            // .with_native_tokens(total_native_tokens.finish()?)
             .finish_output()?];
 
         let options = Some(TransactionOptions {
