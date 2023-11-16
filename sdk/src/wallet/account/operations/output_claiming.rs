@@ -6,7 +6,7 @@ use std::collections::{HashMap, HashSet};
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    client::{secret::SecretManage, api::PreparedTransactionData},
+    client::{api::PreparedTransactionData, secret::SecretManage},
     types::block::{
         address::Address,
         output::{
@@ -186,24 +186,22 @@ where
         I::IntoIter: Send,
     {
         log::debug!("[OUTPUT_CLAIMING] claim_outputs");
-        let prepared_transaction = self.prepare_claim_outputs(output_ids_to_claim)
-            .await
-            .map_err(|error| {
-                // Map InsufficientStorageDepositAmount error here because it's the result of InsufficientFunds in this
-                // case and then easier to handle
-                match error {
-                    crate::wallet::Error::Block(block_error) => match *block_error {
-                        crate::types::block::Error::InsufficientStorageDepositAmount { amount, required } => {
-                            crate::wallet::Error::InsufficientFunds {
-                                available: amount,
-                                required,
-                            }
+        let prepared_transaction = self.prepare_claim_outputs(output_ids_to_claim).await.map_err(|error| {
+            // Map InsufficientStorageDepositAmount error here because it's the result of InsufficientFunds in this
+            // case and then easier to handle
+            match error {
+                crate::wallet::Error::Block(block_error) => match *block_error {
+                    crate::types::block::Error::InsufficientStorageDepositAmount { amount, required } => {
+                        crate::wallet::Error::InsufficientFunds {
+                            available: amount,
+                            required,
                         }
-                        _ => crate::wallet::Error::Block(block_error),
-                    },
-                    _ => error,
-                }
-            })?;
+                    }
+                    _ => crate::wallet::Error::Block(block_error),
+                },
+                _ => error,
+            }
+        })?;
 
         let claim_tx = self.sign_and_submit_transaction(prepared_transaction, None).await?;
 
@@ -428,7 +426,8 @@ where
                 ),
                 ..Default::default()
             }),
-        ).await
+        )
+        .await
     }
 }
 
