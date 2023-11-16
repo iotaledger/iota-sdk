@@ -152,7 +152,7 @@ async fn client_from_wallet() -> Result<()> {
 //     )
 //     .await;
 
-//     let signed_block = match response {
+//     let block = match response {
 //         Response::SignedBlock(block_body) => {
 //             match &block_body.block {
 //                 BlockBodyDto::Basic(b) => assert_eq!(b.payload.as_ref(), Some(&payload)),
@@ -167,7 +167,7 @@ async fn client_from_wallet() -> Result<()> {
 //     let response = call_client_method(
 //         &client,
 //         ClientMethod::BlockId {
-//             signed_block: signed_block.clone(),
+//             block: block.clone(),
 //         },
 //     )
 //     .await;
@@ -176,7 +176,7 @@ async fn client_from_wallet() -> Result<()> {
 //         Response::BlockId(block_id) => {
 //             assert_eq!(
 //                 block_id,
-//                 SignedBlock::try_from_dto(signed_block)
+//                 Block::try_from_dto(block)
 //                     .unwrap()
 //                     .id(&client.get_protocol_parameters().await.unwrap())
 //             );

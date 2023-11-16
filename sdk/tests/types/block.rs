@@ -7,7 +7,7 @@ use iota_sdk::types::{
         payload::Payload,
         protocol::{protocol_parameters, ProtocolParameters},
         rand::{
-            block::{rand_basic_block_body_builder_with_strong_parents, rand_block_with_block_body, rand_signed_block},
+            block::{rand_basic_block_body_builder_with_strong_parents, rand_block, rand_block_with_block_body},
             parents::rand_strong_parents,
             payload::rand_tagged_data_payload,
         },
@@ -93,7 +93,7 @@ use pretty_assertions::assert_eq;
 #[test]
 fn pack_unpack_valid() {
     let protocol_parameters = protocol_parameters();
-    let block = rand_signed_block(protocol_parameters.clone());
+    let block = rand_block(protocol_parameters.clone());
     let packed_block = block.pack_to_vec();
 
     assert_eq!(packed_block.len(), block.packed_len());
@@ -113,11 +113,11 @@ fn getters() {
         .with_payload(payload.clone())
         .finish_block_body()
         .unwrap();
-    let signed_block = rand_block_with_block_body(protocol_parameters.clone(), block_body);
+    let block = rand_block_with_block_body(protocol_parameters.clone(), block_body);
 
-    assert_eq!(signed_block.protocol_version(), protocol_parameters.version());
-    assert_eq!(*signed_block.as_basic().strong_parents(), parents);
-    assert_eq!(*signed_block.as_basic().payload().as_ref().unwrap(), &payload);
+    assert_eq!(block.protocol_version(), protocol_parameters.version());
+    assert_eq!(*block.as_basic().strong_parents(), parents);
+    assert_eq!(*block.as_basic().payload().as_ref().unwrap(), &payload);
 }
 
 #[test]

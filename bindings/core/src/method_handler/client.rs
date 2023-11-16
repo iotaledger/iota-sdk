@@ -38,7 +38,7 @@ where
             let payload = match &topic_event.payload {
                 MqttPayload::Json(val) => serde_json::to_string(&val).expect("failed to serialize MqttPayload::Json"),
                 MqttPayload::BlockBody(block_body) => {
-                    serde_json::to_string(block_body).expect("failed to serialize MqttPayload::Block")
+                    serde_json::to_string(block_body).expect("failed to serialize MqttPayload::BlockBody")
                 }
                 e => panic!("received unknown mqtt type: {e:?}"),
             };
@@ -204,9 +204,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
                 )?)
                 .await?,
         ),
-        ClientMethod::GetBlock { block_id } => {
-            Response::SignedBlock(BlockDto::from(&client.get_block(&block_id).await?))
-        }
+        ClientMethod::GetBlock { block_id } => Response::Block(BlockDto::from(&client.get_block(&block_id).await?)),
         ClientMethod::GetBlockMetadata { block_id } => {
             Response::BlockMetadata(client.get_block_metadata(&block_id).await?)
         }
@@ -221,7 +219,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
             Response::OutputMetadata(client.get_output_metadata(&output_id).await?)
         }
         ClientMethod::GetIncludedBlock { transaction_id } => {
-            Response::SignedBlock(BlockDto::from(&client.get_included_block(&transaction_id).await?))
+            Response::Block(BlockDto::from(&client.get_included_block(&transaction_id).await?))
         }
         ClientMethod::GetIncludedBlockMetadata { transaction_id } => {
             Response::BlockMetadata(client.get_included_block_metadata(&transaction_id).await?)

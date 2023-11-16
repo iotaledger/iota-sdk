@@ -64,8 +64,8 @@ pub fn rand_block_with_block_body(protocol_params: ProtocolParameters, block: Bl
     .sign_random()
 }
 
-/// Generates a random signed block with given strong parents.
-pub fn rand_signed_block_with_strong_parents(
+/// Generates a random block with given strong parents.
+pub fn rand_block_with_strong_parents(
     protocol_params: ProtocolParameters,
     strong_parents: basic::StrongParents,
 ) -> Block {
@@ -75,9 +75,9 @@ pub fn rand_signed_block_with_strong_parents(
     )
 }
 
-/// Generates a random signed block.
-pub fn rand_signed_block(protocol_params: ProtocolParameters) -> Block {
-    rand_signed_block_with_strong_parents(protocol_params, rand_strong_parents())
+/// Generates a random block.
+pub fn rand_block(protocol_params: ProtocolParameters) -> Block {
+    rand_block_with_strong_parents(protocol_params, rand_strong_parents())
 }
 
 pub trait SignBlockRandom {

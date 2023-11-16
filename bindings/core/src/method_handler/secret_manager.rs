@@ -82,7 +82,7 @@ where
                 .map_err(iota_sdk::client::Error::from)?;
             Response::SignedTransaction(transaction.into())
         }
-        SecretManagerMethod::SignBlock { unsigned_block, chain } => Response::SignedBlock(BlockDto::from(
+        SecretManagerMethod::SignBlock { unsigned_block, chain } => Response::Block(BlockDto::from(
             &UnsignedBlock::try_from_dto(unsigned_block)?
                 .sign_ed25519(secret_manager, chain)
                 .await?,
