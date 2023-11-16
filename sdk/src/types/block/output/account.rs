@@ -42,11 +42,7 @@ impl From<&OutputId> for AccountId {
 impl AccountId {
     ///
     pub fn or_from_output_id(self, output_id: &OutputId) -> Self {
-        if self.is_null() {
-            Self::from(output_id)
-        } else {
-            self
-        }
+        if self.is_null() { Self::from(output_id) } else { self }
     }
 }
 
@@ -414,7 +410,6 @@ impl AccountOutput {
         // TODO update when TIP is updated
         // // Governance transition.
         // if current_state.amount != next_state.amount
-        //     || current_state.native_tokens != next_state.native_tokens
         //     || current_state.foundry_counter != next_state.foundry_counter
         // {
         //     return Err(StateTransitionError::MutatedFieldWithoutRights);

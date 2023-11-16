@@ -10,11 +10,8 @@ use crate::{
     types::block::{
         address::{Bech32Address, ToBech32Ext},
         output::{
-            unlock_condition::{
-                AddressUnlockCondition, ExpirationUnlockCondition, StorageDepositReturnUnlockCondition,
-            },
+            unlock_condition::{AddressUnlockCondition, ExpirationUnlockCondition},
             BasicOutputBuilder, NativeToken, TokenId,
-            
         },
         slot::SlotIndex,
     },
@@ -126,14 +123,8 @@ where
     where
         I::IntoIter: Send,
     {
-<<<<<<<< HEAD:sdk/src/wallet/operations/transaction/high_level/send_native_token.rs
         log::debug!("[TRANSACTION] prepare_send_native_token");
-        let rent_structure = self.client().get_rent_structure().await?;
-        let token_supply = self.client().get_token_supply().await?;
-========
-        log::debug!("[TRANSACTION] prepare_send_native_tokens");
         let storage_score_params = self.client().get_storage_score_parameters().await?;
->>>>>>>> 2.0:sdk/src/wallet/operations/transaction/high_level/send_native_tokens.rs
 
         let wallet_address = self.address().await;
         let default_return_address = wallet_address.to_bech32(self.client().get_bech32_hrp().await?);
@@ -164,42 +155,14 @@ where
 
             let native_token = NativeToken::new(native_token.0, native_token.1)?;
 
-<<<<<<<< HEAD:sdk/src/wallet/operations/transaction/high_level/send_native_token.rs
-            // get minimum required amount for such an output, so we don't lock more than required
-            // We have to check it for every output individually, because different address types and amount of
-            // different native token require a different storage deposit
-            let storage_deposit_amount = MinimumStorageDepositBasicOutput::new(rent_structure, token_supply)
-                .with_native_token(native_token.clone())
-                .with_storage_deposit_return()?
-                .with_expiration()?
-                .finish()?;
-
-========
->>>>>>>> 2.0:sdk/src/wallet/operations/transaction/high_level/send_native_tokens.rs
             let expiration_slot_index = expiration
                 .map_or(slot_index + DEFAULT_EXPIRATION_SLOTS, |expiration_slot_index| {
                     slot_index + expiration_slot_index
                 });
 
             outputs.push(
-<<<<<<<< HEAD:sdk/src/wallet/operations/transaction/high_level/send_native_token.rs
-                BasicOutputBuilder::new_with_amount(storage_deposit_amount)
-                    .with_native_token(native_token)
-                    .add_unlock_condition(AddressUnlockCondition::new(address))
-                    .add_unlock_condition(
-                        // We send the full storage_deposit_amount back to the sender, so only the native token is
-                        // sent
-                        StorageDepositReturnUnlockCondition::new(
-                            return_address.clone(),
-                            storage_deposit_amount,
-                            token_supply,
-                        )?,
-                    )
-                    .add_unlock_condition(ExpirationUnlockCondition::new(return_address, expiration_slot_index)?)
-                    .finish_output(token_supply)?,
-========
                 BasicOutputBuilder::new_with_amount(0)
-                    .with_native_tokens(native_tokens)
+                    .with_native_token(native_token)
                     .add_unlock_condition(AddressUnlockCondition::new(address))
                     .add_unlock_condition(ExpirationUnlockCondition::new(
                         return_address.clone(),
@@ -207,7 +170,6 @@ where
                     )?)
                     .with_sufficient_storage_deposit(return_address, storage_score_params)?
                     .finish_output()?,
->>>>>>>> 2.0:sdk/src/wallet/operations/transaction/high_level/send_native_tokens.rs
             )
         }
 
