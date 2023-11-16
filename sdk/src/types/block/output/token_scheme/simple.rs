@@ -40,7 +40,7 @@ impl SimpleTokenScheme {
             maximum_supply,
         };
 
-        verify_simple_token_scheme::<true>(&token_scheme, &())?;
+        verify_simple_token_scheme::<true>(&token_scheme)?;
 
         Ok(token_scheme)
     }
@@ -71,10 +71,7 @@ impl SimpleTokenScheme {
 }
 
 #[inline]
-fn verify_simple_token_scheme<const VERIFY: bool>(
-    token_scheme: &SimpleTokenScheme,
-    _visitor: &(),
-) -> Result<(), Error> {
+fn verify_simple_token_scheme<const VERIFY: bool>(token_scheme: &SimpleTokenScheme) -> Result<(), Error> {
     if VERIFY
         && (token_scheme.maximum_supply.is_zero()
             || token_scheme.melted_tokens > token_scheme.minted_tokens
