@@ -255,7 +255,7 @@ impl FoundryOutputBuilder {
         verify_allowed_features(&immutable_features, FoundryOutput::ALLOWED_IMMUTABLE_FEATURES)?;
 
         let mut output = FoundryOutput {
-            amount: 1u64,
+            amount: 0,
             serial_number: self.serial_number,
             token_scheme: self.token_scheme,
             unlock_conditions,
