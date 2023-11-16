@@ -25,7 +25,6 @@ pub use self::{
 };
 use crate::types::block::{
     address::Address,
-    create_bitflags,
     output::{StorageScore, StorageScoreParameters},
     protocol::ProtocolParameters,
     slot::SlotIndex,
@@ -138,7 +137,7 @@ impl UnlockCondition {
     );
 }
 
-create_bitflags!(
+crate::create_bitflags!(
     /// A bitflags-based representation of the set of active [`UnlockCondition`]s.
     pub UnlockConditionFlags,
     u16,
