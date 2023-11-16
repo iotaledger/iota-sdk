@@ -68,14 +68,13 @@ impl TryFromDto for PreparedTransactionData {
             inputs_data: dto
                 .inputs_data
                 .into_iter()
-                .map(|i| InputSigningData::try_from_dto_with_params(i, params))
+                .map(|i| InputSigningData::try_from(i))
                 .collect::<crate::client::Result<Vec<InputSigningData>>>()
                 .map_err(|_| Error::InvalidField("input_data"))?,
             remainder: match dto.remainder {
-                Some(remainder) => Some(
-                    RemainderData::try_from_dto_with_params(remainder, params)
-                        .map_err(|_| Error::InvalidField("remainder"))?,
-                ),
+                Some(remainder) => {
+                    Some(RemainderData::try_from(remainder).map_err(|_| Error::InvalidField("remainder"))?)
+                }
                 None => None,
             },
         })
@@ -121,7 +120,7 @@ impl TryFromDto for SignedTransactionData {
             inputs_data: dto
                 .inputs_data
                 .into_iter()
-                .map(|i| InputSigningData::try_from_dto_with_params(i, params))
+                .map(|i| InputSigningData::try_from(i))
                 .collect::<crate::client::Result<Vec<InputSigningData>>>()
                 .map_err(|_| Error::InvalidField("inputs_data"))?,
         })
@@ -151,13 +150,12 @@ pub struct RemainderDataDto {
     pub address: Address,
 }
 
-impl TryFromDto for RemainderData {
-    type Dto = RemainderDataDto;
+impl TryFrom<RemainderDataDto> for RemainderData {
     type Error = Error;
 
-    fn try_from_dto_with_params_inner(dto: Self::Dto, params: &ValidationParams<'_>) -> Result<Self, Self::Error> {
+    fn try_from(dto: RemainderDataDto) -> Result<Self, Self::Error> {
         Ok(Self {
-            output: Output::try_from_dto_with_params_inner(dto.output, params)?,
+            output: Output::try_from(dto.output)?,
             chain: dto.chain,
             address: dto.address,
         })

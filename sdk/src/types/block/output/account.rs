@@ -628,10 +628,7 @@ pub(crate) mod dto {
 
     use super::*;
     use crate::{
-        types::{
-            block::{output::unlock_condition::dto::UnlockConditionDto, Error},
-            TryFromDto, ValidationParams,
-        },
+        types::block::{output::unlock_condition::dto::UnlockConditionDto, Error},
         utils::serde::string,
     };
 
@@ -672,11 +669,10 @@ pub(crate) mod dto {
         }
     }
 
-    impl TryFromDto for AccountOutput {
-        type Dto = AccountOutputDto;
+    impl TryFrom<AccountOutputDto> for AccountOutput {
         type Error = Error;
 
-        fn try_from_dto_with_params_inner(dto: Self::Dto, params: &ValidationParams<'_>) -> Result<Self, Self::Error> {
+        fn try_from(dto: AccountOutputDto) -> Result<Self, Self::Error> {
             let mut builder = AccountOutputBuilder::new_with_amount(dto.amount, dto.account_id)
                 .with_mana(dto.mana)
                 .with_foundry_counter(dto.foundry_counter)
@@ -685,7 +681,7 @@ pub(crate) mod dto {
                 .with_immutable_features(dto.immutable_features);
 
             for u in dto.unlock_conditions {
-                builder = builder.add_unlock_condition(UnlockCondition::try_from_dto_with_params(u, params)?);
+                builder = builder.add_unlock_condition(UnlockCondition::from(u));
             }
 
             builder.finish()
@@ -703,9 +699,7 @@ pub(crate) mod dto {
             unlock_conditions: Vec<UnlockConditionDto>,
             features: Option<Vec<Feature>>,
             immutable_features: Option<Vec<Feature>>,
-            params: impl Into<ValidationParams<'a>> + Send,
         ) -> Result<Self, Error> {
-            let params = params.into();
             let mut builder = match amount {
                 OutputBuilderAmount::Amount(amount) => AccountOutputBuilder::new_with_amount(amount, *account_id),
                 OutputBuilderAmount::MinimumAmount(params) => {
@@ -724,8 +718,8 @@ pub(crate) mod dto {
 
             let unlock_conditions = unlock_conditions
                 .into_iter()
-                .map(|u| UnlockCondition::try_from_dto_with_params(u, &params))
-                .collect::<Result<Vec<UnlockCondition>, Error>>()?;
+                .map(UnlockCondition::from)
+                .collect::<Vec<UnlockCondition>>();
             builder = builder.with_unlock_conditions(unlock_conditions);
 
             if let Some(features) = features {
@@ -746,19 +740,16 @@ mod tests {
     use pretty_assertions::assert_eq;
 
     use super::*;
-    use crate::types::{
-        block::{
-            output::{dto::OutputDto, FoundryId, SimpleTokenScheme, TokenId},
-            protocol::protocol_parameters,
-            rand::{
-                address::rand_account_address,
-                output::{
-                    feature::rand_allowed_features, rand_account_id, rand_account_output,
-                    unlock_condition::rand_address_unlock_condition_different_from_account_id,
-                },
+    use crate::types::block::{
+        output::{dto::OutputDto, FoundryId, SimpleTokenScheme, TokenId},
+        protocol::protocol_parameters,
+        rand::{
+            address::rand_account_address,
+            output::{
+                feature::rand_allowed_features, rand_account_id, rand_account_output,
+                unlock_condition::rand_address_unlock_condition_different_from_account_id,
             },
         },
-        TryFromDto,
     };
 
     #[test]
@@ -766,9 +757,9 @@ mod tests {
         let protocol_parameters = protocol_parameters();
         let output = rand_account_output(protocol_parameters.token_supply());
         let dto = OutputDto::Account((&output).into());
-        let output_unver = Output::try_from_dto(dto.clone()).unwrap();
+        let output_unver = Output::try_from(dto.clone()).unwrap();
         assert_eq!(&output, output_unver.as_account());
-        let output_ver = Output::try_from_dto_with_params(dto, &protocol_parameters).unwrap();
+        let output_ver = Output::try_from(dto).unwrap();
         assert_eq!(&output, output_ver.as_account());
 
         let output_split = AccountOutput::try_from_dtos(
@@ -780,7 +771,6 @@ mod tests {
             output.unlock_conditions().iter().map(Into::into).collect(),
             Some(output.features().to_vec()),
             Some(output.immutable_features().to_vec()),
-            &protocol_parameters,
         )
         .unwrap();
         assert_eq!(output, output_split);
@@ -799,7 +789,6 @@ mod tests {
                 builder.unlock_conditions.iter().map(Into::into).collect(),
                 Some(builder.features.iter().cloned().collect()),
                 Some(builder.immutable_features.iter().cloned().collect()),
-                &protocol_parameters,
             )
             .unwrap();
             assert_eq!(builder.finish().unwrap(), output_split);

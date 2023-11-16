@@ -593,7 +593,7 @@ pub(crate) mod dto {
             let outputs = dto
                 .outputs
                 .into_iter()
-                .map(|o| Output::try_from_dto_with_params(o, params))
+                .map(Output::try_from)
                 .collect::<Result<Vec<Output>, Error>>()?;
 
             let mut builder = Self::builder(network_id)

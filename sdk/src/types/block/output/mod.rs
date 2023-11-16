@@ -448,18 +448,6 @@ impl StorageScore for Output {
 
 impl MinimumOutputAmount for Output {}
 
-pub(crate) fn verify_output_amount_supply(amount: u64, token_supply: u64) -> Result<(), Error> {
-    if amount > token_supply {
-        Err(Error::InvalidOutputAmount(amount))
-    } else {
-        Ok(())
-    }
-}
-
-pub(crate) fn verify_output_amount(amount: u64, token_supply: u64) -> Result<(), Error> {
-    verify_output_amount_supply(amount, token_supply)
-}
-
 /// A trait that is shared by all output types, which is used to calculate the minimum amount the output
 /// must contain to satisfy its storage cost.
 pub trait MinimumOutputAmount: StorageScore {
@@ -481,7 +469,6 @@ pub mod dto {
         account::dto::AccountOutputDto, anchor::dto::AnchorOutputDto, basic::dto::BasicOutputDto,
         delegation::dto::DelegationOutputDto, foundry::dto::FoundryOutputDto, nft::dto::NftOutputDto,
     };
-    use crate::types::{block::Error, TryFromDto, ValidationParams};
 
     /// Describes all the different output types.
     #[derive(Clone, Debug, Eq, PartialEq, From)]
@@ -507,20 +494,17 @@ pub mod dto {
         }
     }
 
-    impl TryFromDto for Output {
-        type Dto = OutputDto;
+    impl TryFrom<OutputDto> for Output {
         type Error = Error;
 
-        fn try_from_dto_with_params_inner(dto: Self::Dto, params: &ValidationParams<'_>) -> Result<Self, Self::Error> {
+        fn try_from(dto: OutputDto) -> Result<Self, Self::Error> {
             Ok(match dto {
-                OutputDto::Basic(o) => Self::Basic(BasicOutput::try_from_dto_with_params_inner(o, params)?),
-                OutputDto::Account(o) => Self::Account(AccountOutput::try_from_dto_with_params_inner(o, params)?),
-                OutputDto::Anchor(o) => Self::Anchor(AnchorOutput::try_from_dto_with_params_inner(o, params)?),
-                OutputDto::Foundry(o) => Self::Foundry(FoundryOutput::try_from_dto_with_params_inner(o, params)?),
-                OutputDto::Nft(o) => Self::Nft(NftOutput::try_from_dto_with_params_inner(o, params)?),
-                OutputDto::Delegation(o) => {
-                    Self::Delegation(DelegationOutput::try_from_dto_with_params_inner(o, params)?)
-                }
+                OutputDto::Basic(o) => Self::Basic(BasicOutput::try_from(o)?),
+                OutputDto::Account(o) => Self::Account(AccountOutput::try_from(o)?),
+                OutputDto::Anchor(o) => Self::Anchor(AnchorOutput::try_from(o)?),
+                OutputDto::Foundry(o) => Self::Foundry(FoundryOutput::try_from(o)?),
+                OutputDto::Nft(o) => Self::Nft(NftOutput::try_from(o)?),
+                OutputDto::Delegation(o) => Self::Delegation(DelegationOutput::try_from(o)?),
             })
         }
     }

@@ -435,9 +435,7 @@ mod test {
 pub mod dto {
     use serde::{Deserialize, Serialize};
 
-    pub use self::storage_deposit_return::dto::StorageDepositReturnUnlockConditionDto;
     use super::*;
-    use crate::types::{block::Error, TryFromDto, ValidationParams};
 
     #[derive(Clone, Debug, Eq, PartialEq, From, Serialize, Deserialize)]
     #[serde(untagged)]
@@ -445,7 +443,7 @@ pub mod dto {
         /// An address unlock condition.
         Address(AddressUnlockCondition),
         /// A storage deposit return unlock condition.
-        StorageDepositReturn(StorageDepositReturnUnlockConditionDto),
+        StorageDepositReturn(StorageDepositReturnUnlockCondition),
         /// A timelock unlock condition.
         Timelock(TimelockUnlockCondition),
         /// An expiration unlock condition.
@@ -462,7 +460,7 @@ pub mod dto {
         fn from(value: &UnlockCondition) -> Self {
             match value {
                 UnlockCondition::Address(v) => Self::Address(v.clone()),
-                UnlockCondition::StorageDepositReturn(v) => Self::StorageDepositReturn(v.into()),
+                UnlockCondition::StorageDepositReturn(v) => Self::StorageDepositReturn(v.clone()),
                 UnlockCondition::Timelock(v) => Self::Timelock(*v),
                 UnlockCondition::Expiration(v) => Self::Expiration(v.clone()),
                 UnlockCondition::StateControllerAddress(v) => Self::StateControllerAddress(v.clone()),
@@ -472,22 +470,17 @@ pub mod dto {
         }
     }
 
-    impl TryFromDto for UnlockCondition {
-        type Dto = UnlockConditionDto;
-        type Error = Error;
-
-        fn try_from_dto_with_params_inner(dto: Self::Dto, params: &ValidationParams<'_>) -> Result<Self, Self::Error> {
-            Ok(match dto {
+    impl From<UnlockConditionDto> for UnlockCondition {
+        fn from(dto: UnlockConditionDto) -> Self {
+            match dto {
                 UnlockConditionDto::Address(v) => Self::Address(v),
-                UnlockConditionDto::StorageDepositReturn(v) => Self::StorageDepositReturn(
-                    StorageDepositReturnUnlockCondition::try_from_dto_with_params_inner(v, params)?,
-                ),
+                UnlockConditionDto::StorageDepositReturn(v) => Self::StorageDepositReturn(v),
                 UnlockConditionDto::Timelock(v) => Self::Timelock(v),
                 UnlockConditionDto::Expiration(v) => Self::Expiration(v),
                 UnlockConditionDto::StateControllerAddress(v) => Self::StateControllerAddress(v),
                 UnlockConditionDto::GovernorAddress(v) => Self::GovernorAddress(v),
                 UnlockConditionDto::ImmutableAccountAddress(v) => Self::ImmutableAccountAddress(v),
-            })
+            }
         }
     }
 

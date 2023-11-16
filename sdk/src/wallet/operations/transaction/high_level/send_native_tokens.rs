@@ -128,7 +128,6 @@ where
     {
         log::debug!("[TRANSACTION] prepare_send_native_tokens");
         let storage_score_params = self.client().get_storage_score_parameters().await?;
-        let token_supply = self.client().get_token_supply().await?;
 
         let wallet_address = self.address().await;
         let default_return_address = wallet_address.to_bech32(self.client().get_bech32_hrp().await?);
@@ -179,7 +178,7 @@ where
                         return_address.clone(),
                         expiration_slot_index,
                     )?)
-                    .with_sufficient_storage_deposit(return_address, storage_score_params, token_supply)?
+                    .with_sufficient_storage_deposit(return_address, storage_score_params)?
                     .finish_output()?,
             )
         }
