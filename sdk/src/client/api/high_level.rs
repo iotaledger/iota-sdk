@@ -8,7 +8,7 @@ use futures::{StreamExt, TryStreamExt};
 use crate::{
     client::{
         api::input_selection::Error as InputSelectionError,
-        constants::FIVE_MINUTES_IN_SECONDS,
+        constants::FIVE_MINUTES_IN_NANOSECONDS,
         error::{Error, Result},
         node_api::indexer::query_parameters::BasicOutputQueryParameters,
         unix_timestamp_now, Client,
@@ -115,13 +115,15 @@ impl Client {
 
     // Returns the slot index corresponding to the current timestamp.
     pub async fn get_slot_index(&self) -> Result<SlotIndex> {
-        let current_time = unix_timestamp_now().as_secs();
+        let current_time = unix_timestamp_now().as_nanos() as u64;
 
         let network_info = self.get_network_info().await?;
 
         if let Some(tangle_time) = network_info.tangle_time {
             // Check the local time is in the range of +-5 minutes of the node to prevent locking funds by accident
-            if !(tangle_time - FIVE_MINUTES_IN_SECONDS..tangle_time + FIVE_MINUTES_IN_SECONDS).contains(&current_time) {
+            if !(tangle_time - FIVE_MINUTES_IN_NANOSECONDS..tangle_time + FIVE_MINUTES_IN_NANOSECONDS)
+                .contains(&current_time)
+            {
                 return Err(Error::TimeNotSynced {
                     current_time,
                     tangle_time,
@@ -129,6 +131,7 @@ impl Client {
             }
         }
 
+        // TODO double check with TIP if this should be seconds or nanoseconds
         Ok(network_info.protocol_parameters.slot_index(current_time))
     }
 }
