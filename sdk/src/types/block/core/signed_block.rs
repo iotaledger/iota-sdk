@@ -342,7 +342,7 @@ pub(crate) mod dto {
 
     use super::*;
     use crate::{
-        types::{block::core::dto::BlockDto, TryFromDto, ValidationParams},
+        types::{block::core::dto::BlockDto, TryFromDto},
         utils::serde::string,
     };
 
@@ -380,12 +380,14 @@ pub(crate) mod dto {
         }
     }
 
-    impl TryFromDto for SignedBlock {
-        type Dto = SignedBlockDto;
+    impl TryFromDto<SignedBlockDto> for SignedBlock {
         type Error = Error;
 
-        fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
-            if let Some(protocol_params) = params.protocol_parameters() {
+        fn try_from_dto_with_params_inner(
+            dto: SignedBlockDto,
+            params: Option<&ProtocolParameters>,
+        ) -> Result<Self, Self::Error> {
+            if let Some(protocol_params) = params {
                 if dto.inner.protocol_version != protocol_params.version() {
                     return Err(Error::ProtocolVersionMismatch {
                         expected: protocol_params.version(),
@@ -444,12 +446,14 @@ pub(crate) mod dto {
         }
     }
 
-    impl TryFromDto for UnsignedBlock {
-        type Dto = UnsignedBlockDto;
+    impl TryFromDto<UnsignedBlockDto> for UnsignedBlock {
         type Error = Error;
 
-        fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
-            if let Some(protocol_params) = params.protocol_parameters() {
+        fn try_from_dto_with_params_inner(
+            dto: UnsignedBlockDto,
+            params: Option<&ProtocolParameters>,
+        ) -> Result<Self, Self::Error> {
+            if let Some(protocol_params) = params {
                 if dto.protocol_version != protocol_params.version() {
                     return Err(Error::ProtocolVersionMismatch {
                         expected: protocol_params.version(),

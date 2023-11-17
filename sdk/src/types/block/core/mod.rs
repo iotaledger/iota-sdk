@@ -113,7 +113,7 @@ pub(crate) mod dto {
     pub use crate::types::block::core::signed_block::dto::{SignedBlockDto, UnsignedBlockDto};
     use crate::types::{
         block::core::{basic::dto::BasicBlockDto, validation::dto::ValidationBlockDto},
-        TryFromDto, ValidationParams,
+        TryFromDto,
     };
 
     #[derive(Clone, Debug, Eq, PartialEq, From)]
@@ -195,14 +195,16 @@ pub(crate) mod dto {
         }
     }
 
-    impl TryFromDto for Block {
-        type Dto = BlockDto;
+    impl TryFromDto<BlockDto> for Block {
         type Error = Error;
 
-        fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
+        fn try_from_dto_with_params_inner(
+            dto: BlockDto,
+            params: Option<&ProtocolParameters>,
+        ) -> Result<Self, Self::Error> {
             match dto {
-                Self::Dto::Basic(basic) => Ok(BasicBlock::try_from_dto_with_params_inner(basic, params)?.into()),
-                Self::Dto::Validation(validation) => {
+                BlockDto::Basic(basic) => Ok(BasicBlock::try_from_dto_with_params_inner(basic, params)?.into()),
+                BlockDto::Validation(validation) => {
                     Ok(ValidationBlock::try_from_dto_with_params_inner(validation, params)?.into())
                 }
             }
