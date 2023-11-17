@@ -4,11 +4,11 @@
 #[cfg(feature = "ledger_nano")]
 use iota_sdk::client::secret::ledger_nano::LedgerSecretManager;
 #[cfg(feature = "stronghold")]
-use iota_sdk::client::secret::stronghold::StrongholdSecretManager;
+use iota_sdk::client::secret::{stronghold::StrongholdSecretManager, SecretManager};
 use iota_sdk::{
     client::{
         api::{GetAddressesOptions, PreparedTransactionData},
-        secret::{DowncastSecretManager, SecretManage, SecretManager, SignBlock},
+        secret::{DowncastSecretManager, SecretManage, SignBlock},
     },
     types::{
         block::{address::ToBech32Ext, core::UnsignedBlock, unlock::Unlock, BlockDto},
