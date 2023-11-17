@@ -45,5 +45,5 @@ export interface IOutputMetadataResponse {
     /**
      * The ledger index at which these output was available at.
      */
-    ledgerIndex: number;
+    committedSlot: number;
 }

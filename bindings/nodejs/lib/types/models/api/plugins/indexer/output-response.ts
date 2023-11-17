@@ -9,11 +9,11 @@ import type { HexEncodedString } from '../../../../utils/hex-encoding';
  */
 export interface IOutputsResponse {
     /**
-     * The ledger index at which these outputs where available at.
+     * The committed slot at which these outputs where available at.
      */
-    ledgerIndex: number;
+    committedSlot: number;
     /**
-     * The maximum count of results that are returned by the node.
+     * The maximum amount of items returned in one call. If there are more items, a cursor to the next page is returned too.
      */
     pageSize: NumericString;
     /**

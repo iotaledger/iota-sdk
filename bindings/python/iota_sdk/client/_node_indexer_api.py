@@ -9,17 +9,21 @@ from iota_sdk.types.common import HexStr, json, SlotIndex
 from iota_sdk.types.output_id import OutputId
 
 
+@json
+@dataclass
 class OutputIdsResponse:
     """Response type for output IDs.
 
     Attributes:
-        ledger_index: The ledger index for which the response is valid.
+        committed_slot: The committed slot at which these outputs where available at.
+        page_size: The maximum amount of items returned in one call. If there are more items, a cursor to the next page is returned too.
         cursor: The cursor to the next page of results.
         items: The query results.
     """
 
     def __init__(self, output_dict: Dict):
-        self.ledgerIndex = output_dict["ledgerIndex"]
+        self.committed_slot = output_dict["committedSlot"]
+        self.page_size = output_dict["pageSize"]
         self.cursor = output_dict["cursor"]
         self.items = [OutputId.from_string(
             output_id) for output_id in output_dict["items"]]

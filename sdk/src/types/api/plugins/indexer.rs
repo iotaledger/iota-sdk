@@ -17,8 +17,11 @@ use crate::types::block::output::OutputId;
     serde(rename_all = "camelCase")
 )]
 pub struct OutputIdsResponse {
-    /// The ledger index at which the outputs were collected
-    pub ledger_index: u32,
+    /// The committed slot at which these outputs where available at.
+    pub committed_slot: u32,
+    /// The maximum amount of items returned in one call. If there are more items, a cursor to the next page is
+    /// returned too.
+    pub page_size: u32,
     /// Cursor confirmationMS+outputId.pageSize
     pub cursor: Option<String>,
     /// The output ids
