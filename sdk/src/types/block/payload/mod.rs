@@ -29,13 +29,19 @@ pub(crate) use self::{
 use crate::types::block::{protocol::ProtocolParameters, Error};
 
 /// A generic payload that can represent different types defining block payloads.
-#[derive(Clone, Eq, PartialEq, From)]
+#[derive(Clone, Eq, PartialEq, From, Packable)]
+#[packable(unpack_error = Error)]
+#[packable(unpack_visitor = ProtocolParameters)]
+#[packable(tag_type = u8, with_error = Error::InvalidPayloadKind)]
 pub enum Payload {
     /// A tagged data payload.
+    #[packable(tag = TaggedDataPayload::KIND)]
     TaggedData(Box<TaggedDataPayload>),
     /// A signed transaction payload.
+    #[packable(tag = SignedTransactionPayload::KIND)]
     SignedTransaction(Box<SignedTransactionPayload>),
     /// A candidacy announcement payload.
+    #[packable(tag = CandidacyAnnouncementPayload::KIND)]
     CandidacyAnnouncement(CandidacyAnnouncementPayload),
 }
 
@@ -72,41 +78,6 @@ impl Payload {
     }
 
     crate::def_is_as_opt!(Payload: SignedTransaction, TaggedData);
-}
-
-impl Packable for Payload {
-    type UnpackError = Error;
-    type UnpackVisitor = ProtocolParameters;
-
-    fn pack<P: Packer>(&self, packer: &mut P) -> Result<(), P::Error> {
-        match self {
-            Self::TaggedData(tagged_data) => {
-                TaggedDataPayload::KIND.pack(packer)?;
-                tagged_data.pack(packer)
-            }
-            Self::SignedTransaction(transaction) => {
-                SignedTransactionPayload::KIND.pack(packer)?;
-                transaction.pack(packer)
-            }
-            Self::CandidacyAnnouncement(_) => CandidacyAnnouncementPayload::KIND.pack(packer),
-        }?;
-
-        Ok(())
-    }
-
-    fn unpack<U: Unpacker, const VERIFY: bool>(
-        unpacker: &mut U,
-        visitor: &Self::UnpackVisitor,
-    ) -> Result<Self, UnpackError<Self::UnpackError, U::Error>> {
-        Ok(match u8::unpack::<_, VERIFY>(unpacker, &()).coerce()? {
-            TaggedDataPayload::KIND => Self::from(TaggedDataPayload::unpack::<_, VERIFY>(unpacker, &()).coerce()?),
-            SignedTransactionPayload::KIND => {
-                Self::from(SignedTransactionPayload::unpack::<_, VERIFY>(unpacker, visitor).coerce()?)
-            }
-            CandidacyAnnouncementPayload::KIND => Self::from(CandidacyAnnouncementPayload),
-            k => return Err(UnpackError::Packable(Error::InvalidPayloadKind(k))),
-        })
-    }
 }
 
 /// Representation of an optional [`Payload`].
@@ -191,7 +162,7 @@ pub mod dto {
 
     pub use super::signed_transaction::dto::SignedTransactionPayloadDto;
     use super::*;
-    use crate::types::{block::Error, TryFromDto, ValidationParams};
+    use crate::types::{block::Error, TryFromDto};
 
     /// Describes all the different payload types.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
@@ -226,11 +197,13 @@ pub mod dto {
         }
     }
 
-    impl TryFromDto for Payload {
-        type Dto = PayloadDto;
+    impl TryFromDto<PayloadDto> for Payload {
         type Error = Error;
 
-        fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
+        fn try_from_dto_with_params_inner(
+            dto: PayloadDto,
+            params: Option<&ProtocolParameters>,
+        ) -> Result<Self, Self::Error> {
             Ok(match dto {
                 PayloadDto::TaggedData(p) => Self::from(*p),
                 PayloadDto::SignedTransaction(p) => {

@@ -10,12 +10,7 @@ use alloc::boxed::Box;
 
 use crypto::hashes::{blake2b::Blake2b256, Digest};
 use derive_more::From;
-use packable::{
-    error::{UnpackError, UnpackErrorExt},
-    packer::Packer,
-    unpacker::Unpacker,
-    Packable, PackableExt,
-};
+use packable::{Packable, PackableExt};
 
 pub use self::{
     basic::{BasicBlock, BasicBlockBuilder},
@@ -28,9 +23,14 @@ use crate::types::block::{
     Error,
 };
 
-#[derive(Clone, Debug, Eq, PartialEq, From)]
+#[derive(Clone, Debug, Eq, PartialEq, From, Packable)]
+#[packable(unpack_error = Error)]
+#[packable(unpack_visitor = ProtocolParameters)]
+#[packable(tag_type = u8, with_error = Error::InvalidBlockKind)]
 pub enum Block {
+    #[packable(tag = BasicBlock::KIND)]
     Basic(Box<BasicBlock>),
+    #[packable(tag = ValidationBlock::KIND)]
     Validation(Box<ValidationBlock>),
 }
 
@@ -102,37 +102,6 @@ impl Block {
     }
 }
 
-impl Packable for Block {
-    type UnpackError = Error;
-    type UnpackVisitor = ProtocolParameters;
-
-    fn pack<P: Packer>(&self, packer: &mut P) -> Result<(), P::Error> {
-        match self {
-            Self::Basic(block) => {
-                BasicBlock::KIND.pack(packer)?;
-                block.pack(packer)
-            }
-            Self::Validation(block) => {
-                ValidationBlock::KIND.pack(packer)?;
-                block.pack(packer)
-            }
-        }?;
-
-        Ok(())
-    }
-
-    fn unpack<U: Unpacker, const VERIFY: bool>(
-        unpacker: &mut U,
-        visitor: &Self::UnpackVisitor,
-    ) -> Result<Self, UnpackError<Self::UnpackError, U::Error>> {
-        Ok(match u8::unpack::<_, VERIFY>(unpacker, &()).coerce()? {
-            BasicBlock::KIND => Self::from(BasicBlock::unpack::<_, VERIFY>(unpacker, visitor).coerce()?),
-            ValidationBlock::KIND => Self::from(ValidationBlock::unpack::<_, VERIFY>(unpacker, visitor).coerce()?),
-            k => return Err(UnpackError::Packable(Error::InvalidBlockKind(k))),
-        })
-    }
-}
-
 #[cfg(feature = "serde")]
 pub(crate) mod dto {
     use alloc::format;
@@ -144,7 +113,7 @@ pub(crate) mod dto {
     pub use crate::types::block::core::signed_block::dto::{SignedBlockDto, UnsignedBlockDto};
     use crate::types::{
         block::core::{basic::dto::BasicBlockDto, validation::dto::ValidationBlockDto},
-        TryFromDto, ValidationParams,
+        TryFromDto,
     };
 
     #[derive(Clone, Debug, Eq, PartialEq, From)]
@@ -226,14 +195,16 @@ pub(crate) mod dto {
         }
     }
 
-    impl TryFromDto for Block {
-        type Dto = BlockDto;
+    impl TryFromDto<BlockDto> for Block {
         type Error = Error;
 
-        fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
+        fn try_from_dto_with_params_inner(
+            dto: BlockDto,
+            params: Option<&ProtocolParameters>,
+        ) -> Result<Self, Self::Error> {
             match dto {
-                Self::Dto::Basic(basic) => Ok(BasicBlock::try_from_dto_with_params_inner(basic, params)?.into()),
-                Self::Dto::Validation(validation) => {
+                BlockDto::Basic(basic) => Ok(BasicBlock::try_from_dto_with_params_inner(basic, params)?.into()),
+                BlockDto::Validation(validation) => {
                     Ok(ValidationBlock::try_from_dto_with_params_inner(validation, params)?.into())
                 }
             }

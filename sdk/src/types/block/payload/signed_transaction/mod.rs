@@ -91,7 +91,7 @@ pub mod dto {
     use super::*;
     use crate::types::{
         block::{unlock::Unlock, Error},
-        TryFromDto, ValidationParams,
+        TryFromDto,
     };
 
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
@@ -112,11 +112,13 @@ pub mod dto {
         }
     }
 
-    impl TryFromDto for SignedTransactionPayload {
-        type Dto = SignedTransactionPayloadDto;
+    impl TryFromDto<SignedTransactionPayloadDto> for SignedTransactionPayload {
         type Error = Error;
 
-        fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
+        fn try_from_dto_with_params_inner(
+            dto: SignedTransactionPayloadDto,
+            params: Option<&ProtocolParameters>,
+        ) -> Result<Self, Self::Error> {
             let transaction = Transaction::try_from_dto_with_params_inner(dto.transaction, params)?;
             Self::new(transaction, Unlocks::new(dto.unlocks)?)
         }

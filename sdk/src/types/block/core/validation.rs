@@ -1,12 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use packable::{
-    error::{UnpackError, UnpackErrorExt},
-    packer::Packer,
-    unpacker::Unpacker,
-    Packable,
-};
+use packable::Packable;
 
 use crate::types::block::{
     core::{parent::verify_parents_sets, Block, Parents},
@@ -113,7 +108,10 @@ impl From<ValidationBlock> for ValidationBlockBuilder {
 /// A Validation Block is a special type of block used by validators to secure the network. It is recognized by the
 /// Congestion Control of the IOTA 2.0 protocol and can be issued without burning Mana within the constraints of the
 /// allowed validator throughput. It is allowed to reference more parent blocks than a normal Basic Block.
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, Packable)]
+#[packable(unpack_error = Error)]
+#[packable(unpack_visitor = ProtocolParameters)]
+#[packable(verify_with = verify_validation_block)]
 pub struct ValidationBlock {
     /// Blocks that are strongly directly approved.
     strong_parents: StrongParents,
@@ -124,6 +122,7 @@ pub struct ValidationBlock {
     /// The highest supported protocol version the issuer of this block supports.
     highest_supported_version: u8,
     /// The hash of the protocol parameters for the Highest Supported Version.
+    #[packable(verify_with = verify_protocol_parameters_hash)]
     protocol_parameters_hash: ProtocolParametersHash,
 }
 
@@ -161,59 +160,34 @@ impl ValidationBlock {
     }
 }
 
-impl Packable for ValidationBlock {
-    type UnpackError = Error;
-    type UnpackVisitor = ProtocolParameters;
+fn verify_protocol_parameters_hash<const VERIFY: bool>(
+    hash: &ProtocolParametersHash,
+    params: &ProtocolParameters,
+) -> Result<(), Error> {
+    if VERIFY {
+        let params_hash = params.hash();
 
-    fn pack<P: Packer>(&self, packer: &mut P) -> Result<(), P::Error> {
-        self.strong_parents.pack(packer)?;
-        self.weak_parents.pack(packer)?;
-        self.shallow_like_parents.pack(packer)?;
-        self.highest_supported_version.pack(packer)?;
-        self.protocol_parameters_hash.pack(packer)?;
-
-        Ok(())
+        if hash != &params_hash {
+            return Err(Error::InvalidProtocolParametersHash {
+                expected: params_hash,
+                actual: *hash,
+            });
+        }
     }
 
-    fn unpack<U: Unpacker, const VERIFY: bool>(
-        unpacker: &mut U,
-        visitor: &Self::UnpackVisitor,
-    ) -> Result<Self, UnpackError<Self::UnpackError, U::Error>> {
-        let strong_parents = StrongParents::unpack::<_, VERIFY>(unpacker, &())?;
-        let weak_parents = WeakParents::unpack::<_, VERIFY>(unpacker, &())?;
-        let shallow_like_parents = ShallowLikeParents::unpack::<_, VERIFY>(unpacker, &())?;
-
-        if VERIFY {
-            verify_parents_sets(&strong_parents, &weak_parents, &shallow_like_parents)
-                .map_err(UnpackError::Packable)?;
-        }
-
-        let highest_supported_version = u8::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
-
-        let protocol_parameters_hash = ProtocolParametersHash::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
-
-        if VERIFY {
-            validate_protocol_params_hash(&protocol_parameters_hash, visitor).map_err(UnpackError::Packable)?;
-        }
-
-        Ok(Self {
-            strong_parents,
-            weak_parents,
-            shallow_like_parents,
-            highest_supported_version,
-            protocol_parameters_hash,
-        })
-    }
+    Ok(())
 }
 
-fn validate_protocol_params_hash(hash: &ProtocolParametersHash, params: &ProtocolParameters) -> Result<(), Error> {
-    let params_hash = params.hash();
-
-    if hash != &params_hash {
-        return Err(Error::InvalidProtocolParametersHash {
-            expected: params_hash,
-            actual: *hash,
-        });
+fn verify_validation_block<const VERIFY: bool>(
+    validation_block: &ValidationBlock,
+    _: &ProtocolParameters,
+) -> Result<(), Error> {
+    if VERIFY {
+        verify_parents_sets(
+            &validation_block.strong_parents,
+            &validation_block.weak_parents,
+            &validation_block.shallow_like_parents,
+        )?;
     }
 
     Ok(())
@@ -228,7 +202,7 @@ pub(crate) mod dto {
     use super::*;
     use crate::types::{
         block::{BlockId, Error},
-        TryFromDto, ValidationParams,
+        TryFromDto,
     };
 
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
@@ -256,13 +230,15 @@ pub(crate) mod dto {
         }
     }
 
-    impl TryFromDto for ValidationBlock {
-        type Dto = ValidationBlockDto;
+    impl TryFromDto<ValidationBlockDto> for ValidationBlock {
         type Error = Error;
 
-        fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
-            if let Some(protocol_params) = params.protocol_parameters() {
-                validate_protocol_params_hash(&dto.protocol_parameters_hash, protocol_params)?;
+        fn try_from_dto_with_params_inner(
+            dto: ValidationBlockDto,
+            params: Option<&ProtocolParameters>,
+        ) -> Result<Self, Self::Error> {
+            if let Some(protocol_params) = params {
+                verify_protocol_parameters_hash::<true>(&dto.protocol_parameters_hash, protocol_params)?;
             }
 
             ValidationBlockBuilder::new(
