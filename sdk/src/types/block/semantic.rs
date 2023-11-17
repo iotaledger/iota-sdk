@@ -376,14 +376,14 @@ impl<'a> SemanticValidationContext<'a> {
                     })
                     .filter_map(Address::as_restricted_opt);
                 for address in addresses {
-                    if created_output.native_token().is_some()
+                    if created_native_token.is_some()
                         && !address.has_capability(AddressCapabilityFlag::OutputsWithNativeTokens)
                     {
                         // TODO: add a variant https://github.com/iotaledger/iota-sdk/issues/1430
                         return Ok(Some(TransactionFailureReason::SemanticValidationFailed));
                     }
 
-                    if created_output.mana() > 0 && !address.has_capability(AddressCapabilityFlag::OutputsWithMana) {
+                    if mana > 0 && !address.has_capability(AddressCapabilityFlag::OutputsWithMana) {
                         // TODO: add a variant https://github.com/iotaledger/iota-sdk/issues/1430
                         return Ok(Some(TransactionFailureReason::SemanticValidationFailed));
                     }
