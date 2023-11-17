@@ -27,7 +27,7 @@ async function run() {
             coinType: CoinType.IOTA,
         },
         clientOptions: {
-            nodes: ['http://localhost:8080'],
+            nodes: ['http://localhost:8050'],
         },
         secretManager: mnemonicSecretManager,
     });
