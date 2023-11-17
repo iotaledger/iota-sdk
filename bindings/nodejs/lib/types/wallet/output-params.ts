@@ -24,8 +24,6 @@ export interface OutputParams {
 
 /** Assets to include in the output. */
 export interface Assets {
-    /** Native Token assets to include. */
-    nativeTokens?: INativeToken[];
     /** The NFT to include. */
     nftId?: HexEncodedString;
 }
@@ -40,6 +38,8 @@ export interface Features {
     sender?: string;
     /** An Issuer feature to include. */
     issuer?: string;
+    /** Native Token to include. */
+    nativeToken?: INativeToken;
 }
 
 /** Time unlocks to include in the output. */
