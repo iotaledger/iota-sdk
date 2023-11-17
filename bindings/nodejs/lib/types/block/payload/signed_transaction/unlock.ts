@@ -154,6 +154,10 @@ class MultiUnlock extends Unlock {
     /**
      * The inner unlocks.
      */
+    @Type(() => Unlock, {
+        // @ts-ignore:next-line: no-use-before-declare
+        discriminator: UnlockDiscriminator,
+    })
     readonly unlocks: Unlock[];
 
     /**
