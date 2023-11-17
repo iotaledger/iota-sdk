@@ -28,13 +28,10 @@ pub struct WalletMethodHandler {
 /// Creates a method handler with the given options.
 #[wasm_bindgen(js_name = createWallet)]
 #[allow(non_snake_case)]
-pub fn create_wallet(options: String) -> Result<WalletMethodHandler, JsValue> {
+pub async fn create_wallet(options: String) -> Result<WalletMethodHandler, JsValue> {
     let wallet_options = serde_json::from_str::<WalletOptions>(&options).map_err(|e| e.to_string())?;
 
-    let wallet_method_handler = tokio::runtime::Builder::new_current_thread()
-        .build()
-        .map_err(|err| err.to_string())?
-        .block_on(async move { wallet_options.build().await.map_err(|e| e.to_string()) })?;
+    let wallet_method_handler = wallet_options.build().await.map_err(|e| e.to_string())?;
 
     Ok(WalletMethodHandler {
         wallet: Arc::new(Mutex::new(Some(wallet_method_handler))),

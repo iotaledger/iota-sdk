@@ -21,7 +21,7 @@ async function run() {
         bech32Hrp: 'tst',
     });
 
-    const wallet = new Wallet({
+    const wallet = await Wallet.create({
         address: walletAddress[0],
         bipPath: {
             coinType: CoinType.IOTA,

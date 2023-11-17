@@ -66,7 +66,7 @@ async function run() {
             secretManager: strongholdSecretManager,
         };
 
-        const wallet = new Wallet(walletOptions);
+        const wallet = await Wallet.create(walletOptions);
 
         console.log(
             'Generated wallet with address: ' + (await wallet.address()),

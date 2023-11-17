@@ -129,7 +129,7 @@ const walletOptions: WalletOptions = {
         },
     },
 };
-const wallet = new Wallet(walletOptions);
+const wallet = await Wallet.create(walletOptions);
 ```
 
 ## Examples
