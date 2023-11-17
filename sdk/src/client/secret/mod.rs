@@ -57,7 +57,7 @@ use crate::{
         payload::SignedTransactionPayload,
         signature::{Ed25519Signature, Signature},
         unlock::{AccountUnlock, NftUnlock, ReferenceUnlock, SignatureUnlock, Unlock, Unlocks},
-        Error as BlockError, SignedBlock,
+        Block, Error as BlockError,
     },
 };
 
@@ -599,18 +599,14 @@ where
 
 #[async_trait]
 pub trait SignBlock {
-    async fn sign_ed25519<S: SecretManage>(
-        self,
-        secret_manager: &S,
-        chain: Bip44,
-    ) -> crate::client::Result<SignedBlock>
+    async fn sign_ed25519<S: SecretManage>(self, secret_manager: &S, chain: Bip44) -> crate::client::Result<Block>
     where
         crate::client::Error: From<S::Error>;
 }
 
 #[async_trait]
 impl SignBlock for UnsignedBlock {
-    async fn sign_ed25519<S: SecretManage>(self, secret_manager: &S, chain: Bip44) -> crate::client::Result<SignedBlock>
+    async fn sign_ed25519<S: SecretManage>(self, secret_manager: &S, chain: Bip44) -> crate::client::Result<Block>
     where
         crate::client::Error: From<S::Error>,
     {
