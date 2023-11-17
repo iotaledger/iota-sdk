@@ -12,7 +12,7 @@ use iota_sdk::types::block::{
     protocol::ProtocolParameters,
     signature::Ed25519Signature,
     slot::SlotCommitment,
-    SignedBlockDto,
+    BlockDto,
 };
 use serde::{Deserialize, Serialize};
 
@@ -83,7 +83,7 @@ pub enum UtilsMethod {
     #[serde(rename_all = "camelCase")]
     BlockId {
         /// Block
-        block: SignedBlockDto,
+        block: BlockDto,
         /// Network Protocol Parameters
         protocol_parameters: ProtocolParameters,
     },
