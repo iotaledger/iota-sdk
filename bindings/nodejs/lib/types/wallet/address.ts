@@ -40,7 +40,7 @@ export interface SendNativeTokenParams {
     /** The Bech32 address. */
     address: Bech32Address;
     /** The Native Token to send. */
-    nativeToken: [TokenId, u256][];
+    nativeToken: [TokenId, u256];
     /**
      * Bech32 encoded address, to which the storage deposit will be returned.
      * Default will use the address of the wallet.

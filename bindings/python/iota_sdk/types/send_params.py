@@ -37,12 +37,12 @@ class SendNativeTokenParams():
 
     Attributes:
         address: The address to send to.
-        native_tokens: The native token to send.
+        native_token: The native token to send.
         return_address: The address to return the native token to if not claimed.
         expiration: The expiration timestamp until the native token can be claimed.
     """
     address: str
-    native_tokens: NativeToken
+    native_token: NativeToken
     return_address: Optional[str] = None
     expiration: Optional[int] = None
 
