@@ -37,6 +37,7 @@ mod dto {
     struct NativeTokenFeatureDto {
         #[serde(rename = "type")]
         kind: u8,
+        #[serde(rename = "id")]
         token_id: TokenId,
         amount: U256,
     }
