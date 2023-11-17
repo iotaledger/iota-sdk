@@ -2204,9 +2204,9 @@ checksum = "ff011a302c396a5197692431fc1948019154afc178baf7d8e37367442a4601cf"
 
 [[package]]
 name = "packable"
-version = "0.9.0"
+version = "0.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "eee4180de5473e336f075507fea07003183e059bc0d35398b0b0039419747e76"
+checksum = "bbe35ea7a5959be5a87d24bcb31ed984580d9cd321c264c266818fff8cd47b3d"
 dependencies = [
  "autocfg",
  "packable-derive",
@@ -2216,9 +2216,9 @@ dependencies = [
 
 [[package]]
 name = "packable-derive"
-version = "0.8.0"
+version = "0.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "26a5ee3cb4c60754a0b49a3b7a6f5067a191ff5ec9d90414f6c4cfd21ce9acff"
+checksum = "858971e010057f7bcae183e545085b83d41280ca8abe0333613a7135fbb54430"
 dependencies = [
  "proc-macro-crate",
  "proc-macro-error",
