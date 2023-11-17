@@ -284,7 +284,7 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
             Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
         }
         WalletMethod::PrepareSendNativeTokens { params, options } => {
-            let data = wallet.prepare_send_native_token(params.clone(), options).await?;
+            let data = wallet.prepare_send_native_tokens(params.clone(), options).await?;
             Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
         }
         WalletMethod::PrepareSendNft { params, options } => {

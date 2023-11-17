@@ -238,7 +238,7 @@ async fn claim_2_native_tokens() -> Result<()> {
     wallet_1.sync(None).await?;
 
     let tx = wallet_1
-        .send_native_token(
+        .send_native_tokens(
             [
                 SendNativeTokenParams::new(wallet_0.address().await, (create_tx_0.token_id, native_token_amount))?,
                 SendNativeTokenParams::new(wallet_0.address().await, (create_tx_1.token_id, native_token_amount))?,

@@ -49,7 +49,7 @@ async function run() {
             }
             console.log(`Balance before sending: ${token.available}`);
 
-            const transaction = await wallet.sendNativeToken(outputs);
+            const transaction = await wallet.sendNativeTokens(outputs);
 
             console.log(`Transaction sent: ${transaction.transactionId}`);
 

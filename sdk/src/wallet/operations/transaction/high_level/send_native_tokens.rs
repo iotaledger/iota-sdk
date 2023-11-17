@@ -23,7 +23,7 @@ use crate::{
     },
 };
 
-/// Params for `send_native_token()`
+/// Params for `send_native_tokens()`
 #[derive(Debug, Clone, Serialize, Deserialize, Getters)]
 #[serde(rename_all = "camelCase")]
 pub struct SendNativeTokenParams {
@@ -93,13 +93,13 @@ where
     ///     ..Default::default()
     /// }];
     ///
-    /// let tx = account.send_native_token(params, None).await?;
+    /// let tx = account.send_native_tokens(params, None).await?;
     /// println!("Transaction created: {}", tx.transaction_id);
     /// if let Some(block_id) = tx.block_id {
     ///     println!("Block sent: {}", block_id);
     /// }
     /// ```
-    pub async fn send_native_token<I: IntoIterator<Item = SendNativeTokenParams> + Send>(
+    pub async fn send_native_tokens<I: IntoIterator<Item = SendNativeTokenParams> + Send>(
         &self,
         params: I,
         options: impl Into<Option<TransactionOptions>> + Send,
@@ -108,14 +108,14 @@ where
         I::IntoIter: Send,
     {
         let options = options.into();
-        let prepared_transaction = self.prepare_send_native_token(params, options.clone()).await?;
+        let prepared_transaction = self.prepare_send_native_tokens(params, options.clone()).await?;
 
         self.sign_and_submit_transaction(prepared_transaction, options).await
     }
 
     /// Prepares the transaction for
-    /// [Account::send_native_token()](crate::wallet::Account::send_native_token).
-    pub async fn prepare_send_native_token<I: IntoIterator<Item = SendNativeTokenParams> + Send>(
+    /// [Account::send_native_tokens()](crate::wallet::Account::send_native_tokens).
+    pub async fn prepare_send_native_tokens<I: IntoIterator<Item = SendNativeTokenParams> + Send>(
         &self,
         params: I,
         options: impl Into<Option<TransactionOptions>> + Send,
@@ -123,7 +123,7 @@ where
     where
         I::IntoIter: Send,
     {
-        log::debug!("[TRANSACTION] prepare_send_native_token");
+        log::debug!("[TRANSACTION] prepare_send_native_tokens");
         let storage_score_params = self.client().get_storage_score_parameters().await?;
 
         let wallet_address = self.address().await;

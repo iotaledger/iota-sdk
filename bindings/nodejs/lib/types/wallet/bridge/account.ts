@@ -255,8 +255,8 @@ export type __SendWithParamsMethod__ = {
     };
 };
 
-export type __PrepareSendNativeTokenMethod__ = {
-    name: 'prepareSendNativeToken';
+export type __PrepareSendNativeTokensMethod__ = {
+    name: 'prepareSendNativeTokens';
     data: {
         params: SendNativeTokenParams[];
         options?: TransactionOptions;

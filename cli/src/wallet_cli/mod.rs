@@ -194,7 +194,7 @@ pub enum WalletCommand {
         #[arg(long, default_value_t = false)]
         allow_micro_amount: bool,
     },
-    /// Send native tokens.
+    /// Send a native token.
     /// This will create an output with an expiration and storage deposit return unlock condition.
     SendNativeToken {
         /// Address to send the native tokens to, e.g. rms1qztwng6cty8cfm42nzvq099ev7udhrnk0rw8jt8vttf9kpqnxhpsx869vr3.
@@ -753,7 +753,7 @@ pub async fn send_native_token_command(
                 U256::from_dec_str(&amount).map_err(|e| Error::Miscellaneous(e.to_string()))?,
             ),
         )?];
-        wallet.send_native_token(outputs, None).await?
+        wallet.send_native_tokens(outputs, None).await?
     };
 
     println_log_info!(

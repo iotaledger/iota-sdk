@@ -501,13 +501,13 @@ class Account:
             }
         ))
 
-    def send_native_token(
+    def send_native_tokens(
             self, params: List[SendNativeTokenParams], options: Optional[TransactionOptions] = None) -> TransactionWithMetadata:
         """Send native tokens.
         """
-        return self.prepare_send_native_token(params, options).send()
+        return self.prepare_send_native_tokens(params, options).send()
 
-    def prepare_send_native_token(
+    def prepare_send_native_tokens(
             self,
             params: List[SendNativeTokenParams],
             options: Optional[TransactionOptions] = None) -> PreparedTransaction:

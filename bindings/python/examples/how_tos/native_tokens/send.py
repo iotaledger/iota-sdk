@@ -32,7 +32,7 @@ outputs = [SendNativeTokenParams(
     ),
 )]
 
-transaction = account.send_native_token(outputs, None)
+transaction = account.send_native_tokens(outputs, None)
 print(f'Transaction sent: {transaction.transaction_id}')
 
 # Wait for transaction to get included

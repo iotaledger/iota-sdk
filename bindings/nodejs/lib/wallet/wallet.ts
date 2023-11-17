@@ -6,7 +6,7 @@ import {
     Balance,
     SyncOptions,
     SendParams,
-    SendNativeTokensParams,
+    SendNativeTokenParams,
     SendNftParams,
     AccountOutputParams,
     FilterOptions,
@@ -1318,7 +1318,7 @@ export class Wallet {
      * @returns The transaction.
      */
     async sendNativeTokens(
-        params: SendNativeTokensParams[],
+        params: SendNativeTokenParams[],
         transactionOptions?: TransactionOptions,
     ): Promise<TransactionWithMetadata> {
         return (
@@ -1335,7 +1335,7 @@ export class Wallet {
      * @returns The prepared transaction.
      */
     async prepareSendNativeTokens(
-        params: SendNativeTokensParams[],
+        params: SendNativeTokenParams[],
         transactionOptions?: TransactionOptions,
     ): Promise<PreparedTransaction> {
         const response = await this.methodHandler.callMethod({
