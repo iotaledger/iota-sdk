@@ -54,7 +54,7 @@ impl BlockIssuerKey {
 impl StorageScore for BlockIssuerKey {
     fn storage_score(&self, params: StorageScoreParameters) -> u64 {
         match self {
-            BlockIssuerKey::Ed25519(e) => e.storage_score(params),
+            Self::Ed25519(e) => e.storage_score(params),
         }
     }
 }
