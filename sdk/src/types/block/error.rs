@@ -247,7 +247,7 @@ impl fmt::Display for Error {
             Self::InvalidCapabilityByte { index, byte } => {
                 write!(f, "invalid capability byte at index {index}: {byte:x}")
             }
-            Self::InvalidBlockBodyKind(k) => write!(f, "invalid block kind: {k}"),
+            Self::InvalidBlockBodyKind(k) => write!(f, "invalid block body kind: {k}"),
             Self::InvalidRewardInputIndex(idx) => write!(f, "invalid reward input index: {idx}"),
             Self::InvalidStorageDepositAmount(amount) => {
                 write!(f, "invalid storage deposit amount: {amount}")
