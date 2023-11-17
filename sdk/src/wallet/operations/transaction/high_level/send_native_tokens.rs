@@ -78,7 +78,7 @@ where
     crate::wallet::Error: From<S::Error>,
     crate::client::Error: From<S::Error>,
 {
-    /// Sends a native token in basic outputs with a [`StorageDepositReturnUnlockCondition`] and an
+    /// Sends native tokens in basic outputs with a [`StorageDepositReturnUnlockCondition`] and an
     /// [`ExpirationUnlockCondition`], so that the storage deposit is returned to the sender and the sender gets access
     /// to the output again after a predefined time (default 1 day).
     /// Calls [Account::send_outputs()](crate::wallet::Account::send_outputs) internally. The options may define the
