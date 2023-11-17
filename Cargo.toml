@@ -5,8 +5,7 @@ members = [
 	"bindings/nodejs",
 	# TODO: issue #1423
 	#"bindings/python",
-	# TODO: issue #1425
-	#"bindings/wasm",
+	"bindings/wasm",
 	"cli",
 	"sdk",
 ]
