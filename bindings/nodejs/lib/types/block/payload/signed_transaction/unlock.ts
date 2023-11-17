@@ -148,6 +148,15 @@ class NftUnlock extends Unlock {
 }
 
 /**
+ * Used to maintain correct index relationship between addresses and signatures when unlocking a MultiUnlock where not all addresses are unlocked.
+ */
+class EmptyUnlock extends Unlock {
+    constructor() {
+        super(UnlockType.Empty);
+    }
+}
+
+/**
  * Unlocks a MultiAddress with a list of other unlocks.
  */
 class MultiUnlock extends Unlock {
@@ -155,8 +164,35 @@ class MultiUnlock extends Unlock {
      * The inner unlocks.
      */
     @Type(() => Unlock, {
-        // @ts-ignore:next-line: no-use-before-declare
-        discriminator: UnlockDiscriminator,
+        discriminator: {
+            property: 'type',
+            subTypes: [
+                {
+                    value: SignatureUnlock,
+                    name: UnlockType.Signature as any,
+                },
+                {
+                    value: ReferenceUnlock,
+                    name: UnlockType.Reference as any,
+                },
+                {
+                    value: AccountUnlock,
+                    name: UnlockType.Account as any,
+                },
+                {
+                    value: AnchorUnlock,
+                    name: UnlockType.Anchor as any,
+                },
+                {
+                    value: NftUnlock,
+                    name: UnlockType.Nft as any,
+                },
+                {
+                    value: EmptyUnlock,
+                    name: UnlockType.Empty as any,
+                },
+            ],
+        },
     })
     readonly unlocks: Unlock[];
 
@@ -166,15 +202,6 @@ class MultiUnlock extends Unlock {
     constructor(unlocks: Unlock[]) {
         super(UnlockType.Multi);
         this.unlocks = unlocks;
-    }
-}
-
-/**
- * Used to maintain correct index relationship between addresses and signatures when unlocking a MultiUnlock where not all addresses are unlocked.
- */
-class EmptyUnlock extends Unlock {
-    constructor() {
-        super(UnlockType.Empty);
     }
 }
 
