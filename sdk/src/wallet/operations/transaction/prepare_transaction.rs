@@ -7,7 +7,6 @@ use instant::Instant;
 use packable::bounded::TryIntoBoundedU16Error;
 
 #[cfg(feature = "events")]
-// TODO why is this not used anymore? Are we not triggering an event anymore?
 use crate::wallet::events::types::{AddressData, TransactionProgressEvent, WalletEvent};
 use crate::{
     client::{api::PreparedTransactionData, secret::SecretManage},
