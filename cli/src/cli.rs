@@ -27,7 +27,7 @@ use crate::{
 };
 
 const DEFAULT_LOG_LEVEL: &str = "debug";
-const DEFAULT_NODE_URL: &str = "http://localhost:8080";
+const DEFAULT_NODE_URL: &str = "http://localhost:8050";
 const DEFAULT_STRONGHOLD_SNAPSHOT_PATH: &str = "./stardust-cli-wallet.stronghold";
 const DEFAULT_WALLET_DATABASE_PATH: &str = "./stardust-cli-wallet-db";
 

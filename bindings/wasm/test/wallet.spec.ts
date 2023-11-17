@@ -1,17 +1,9 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-const console = require('console');
-const { Wallet, CoinType, initLogger, SecretManager } = require('../node/lib');
+import { Balance, Wallet, CoinType, SecretManager } from '../node/lib';
 
 async function run() {
-    // Config doesn't work yet but this is an example for the future
-    await initLogger({
-        name: 'stdout',
-        levelFilter: 'debug',
-        colorEnabled: true,
-    });
-
     const mnemonicSecretManager = {
         mnemonic:
             'inhale gorilla deny three celery song category owner lottery rent author wealth penalty crawl hobby obtain glad warm early rain clutch slab august bleak',
@@ -26,25 +18,31 @@ async function run() {
             start: 0,
             end: 1,
         },
-        bech32Hrp: 'tst',
+        bech32Hrp: 'rms',
     });
 
     const wallet = await Wallet.create({
         address: walletAddress[0],
-        storagePath: './alice-database',
         bipPath: {
             coinType: CoinType.IOTA,
         },
         clientOptions: {
-            nodes: ['https://api.testnet.shimmer.network'],
+            nodes: ['http://localhost:8050'],
         },
         secretManager: mnemonicSecretManager,
     });
 
-    console.log('wallet created');
+    expect(await wallet.address()).toBe(
+        'rms1qrpwecegav7eh0z363ca69laxej64rrt4e3u0rtycyuh0mam3vq3utrrg7c',
+    );
 
-    const balance = await wallet.sync();
-    console.log(balance);
+    const balance: Balance = await wallet.sync();
+    expect(balance.baseCoin.available).not.toBeNaN();
 }
 
-run();
+describe('wallet tests', () => {
+    jest.setTimeout(10000);
+    it('wallet', async () => {
+        await run();
+    });
+});

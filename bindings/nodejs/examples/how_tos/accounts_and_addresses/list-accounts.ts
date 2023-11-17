@@ -16,7 +16,7 @@ async function run() {
         throw new Error('.env WALLET_DB_PATH is undefined, see .env.example');
     }
     try {
-        const wallet = new Wallet({
+        const wallet = await Wallet.create({
             storagePath: process.env.WALLET_DB_PATH,
         });
 
