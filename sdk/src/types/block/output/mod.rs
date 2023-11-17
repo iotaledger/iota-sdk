@@ -255,7 +255,7 @@ impl Output {
 
     /// Checks whether the output is an implicit account.
     pub fn is_implicit_account(&self) -> bool {
-        if let Output::Basic(output) = self {
+        if let Self::Basic(output) = self {
             output.is_implicit_account()
         } else {
             false

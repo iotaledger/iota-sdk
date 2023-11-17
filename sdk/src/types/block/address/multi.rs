@@ -29,7 +29,7 @@ pub struct WeightedAddress {
 
 impl WeightedAddress {
     /// Creates a new [`WeightedAddress`].
-    pub fn new(address: Address, weight: u8) -> Result<WeightedAddress, Error> {
+    pub fn new(address: Address, weight: u8) -> Result<Self, Error> {
         verify_address::<true>(&address, &())?;
         verify_weight::<true>(&weight, &())?;
 

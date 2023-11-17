@@ -294,29 +294,29 @@ mod test {
 
         fn as_byte(&self) -> u8 {
             match self {
-                TestFlag::Val1 => Self::VAL_1,
-                TestFlag::Val2 => Self::VAL_2,
-                TestFlag::Val3 => Self::VAL_3,
-                TestFlag::Val4 => Self::VAL_4,
-                TestFlag::Val5 => Self::VAL_5,
-                TestFlag::Val6 => Self::VAL_6,
-                TestFlag::Val7 => Self::VAL_7,
-                TestFlag::Val8 => Self::VAL_8,
-                TestFlag::Val9 => Self::VAL_9,
+                Self::Val1 => Self::VAL_1,
+                Self::Val2 => Self::VAL_2,
+                Self::Val3 => Self::VAL_3,
+                Self::Val4 => Self::VAL_4,
+                Self::Val5 => Self::VAL_5,
+                Self::Val6 => Self::VAL_6,
+                Self::Val7 => Self::VAL_7,
+                Self::Val8 => Self::VAL_8,
+                Self::Val9 => Self::VAL_9,
             }
         }
 
         fn index(&self) -> usize {
             match self {
-                TestFlag::Val1
-                | TestFlag::Val2
-                | TestFlag::Val3
-                | TestFlag::Val4
-                | TestFlag::Val5
-                | TestFlag::Val6
-                | TestFlag::Val7
-                | TestFlag::Val8 => 0,
-                TestFlag::Val9 => 1,
+                Self::Val1
+                | Self::Val2
+                | Self::Val3
+                | Self::Val4
+                | Self::Val5
+                | Self::Val6
+                | Self::Val7
+                | Self::Val8 => 0,
+                Self::Val9 => 1,
             }
         }
 
