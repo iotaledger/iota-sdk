@@ -497,8 +497,6 @@ fn missing_ed25519_sender() {
     )
     .select();
 
-    println!("{:?}", selected);
-
     assert!(matches!(
         selected,
         Err(Error::UnfulfillableRequirement(Requirement::Sender(sender))) if sender == Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap()
