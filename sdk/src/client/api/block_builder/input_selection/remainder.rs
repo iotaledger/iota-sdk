@@ -79,8 +79,6 @@ impl InputSelection {
         Ok((remainder_builder.finish_output()?.amount(), native_tokens_remainder))
     }
 
-    // TODO return many remainder, :sadcat:
-    // TODO may require more amount to account for all the basic outputs containing NTs
     pub(crate) fn remainder_and_storage_deposit_return_outputs(
         &self,
     ) -> Result<(Option<RemainderData>, Vec<Output>), Error> {
