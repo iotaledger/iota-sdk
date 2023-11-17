@@ -199,7 +199,7 @@ impl ClientInner {
 
         Ok(SignedBlock::try_from_dto_with_params(
             dto,
-            self.get_protocol_parameters().await?,
+            &self.get_protocol_parameters().await?,
         )?)
     }
 
@@ -256,7 +256,7 @@ impl ClientInner {
 
         Ok(SignedBlock::try_from_dto_with_params(
             dto,
-            self.get_protocol_parameters().await?,
+            &self.get_protocol_parameters().await?,
         )?)
     }
 

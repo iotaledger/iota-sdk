@@ -175,7 +175,7 @@ pub(crate) mod dto {
     use super::*;
     use crate::types::{
         block::{payload::dto::PayloadDto, BlockId, Error},
-        TryFromDto, ValidationParams,
+        TryFromDto,
     };
 
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
@@ -205,11 +205,13 @@ pub(crate) mod dto {
         }
     }
 
-    impl TryFromDto for BasicBlock {
-        type Dto = BasicBlockDto;
+    impl TryFromDto<BasicBlockDto> for BasicBlock {
         type Error = Error;
 
-        fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
+        fn try_from_dto_with_params_inner(
+            dto: BasicBlockDto,
+            params: Option<&ProtocolParameters>,
+        ) -> Result<Self, Self::Error> {
             BasicBlockBuilder::new(StrongParents::from_set(dto.strong_parents)?, dto.max_burned_mana)
                 .with_weak_parents(WeakParents::from_set(dto.weak_parents)?)
                 .with_shallow_like_parents(ShallowLikeParents::from_set(dto.shallow_like_parents)?)
