@@ -20,7 +20,7 @@ use iota_sdk::{
             DelegationId, FoundryId, NftId, OutputId, TokenScheme,
         },
         payload::{dto::PayloadDto, signed_transaction::TransactionId},
-        BlockId, IssuerId, SignedBlockDto,
+        BlockDto, BlockId, IssuerId,
     },
     utils::serde::{option_string, string},
 };
@@ -155,7 +155,7 @@ pub enum ClientMethod {
     /// Post block (JSON)
     PostBlock {
         /// Block
-        block: SignedBlockDto,
+        block: BlockDto,
     },
     /// Post block (raw)
     #[serde(rename_all = "camelCase")]
@@ -359,9 +359,8 @@ pub enum ClientMethod {
         address: Bech32Address,
     },
     /// Returns a block ID from a block
-    #[serde(rename_all = "camelCase")]
     BlockId {
         /// Block
-        signed_block: SignedBlockDto,
+        block: BlockDto,
     },
 }

@@ -154,9 +154,9 @@ pub enum Error {
     /// Missing BIP32 chain to sign with.
     #[error("missing BIP32 chain to sign with")]
     MissingBip32Chain,
-    /// Unexpected block kind.
-    #[error("unexpected block kind: expected {expected}, found {actual}")]
-    UnexpectedBlockKind { expected: u8, actual: u8 },
+    /// Unexpected block body kind.
+    #[error("unexpected block body kind: expected {expected}, found {actual}")]
+    UnexpectedBlockBodyKind { expected: u8, actual: u8 },
     /// Missing transaction payload.
     #[error("missing transaction payload")]
     MissingTransactionPayload,
