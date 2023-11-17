@@ -15,7 +15,7 @@ class OutputIdsResponse:
     """Response type for output IDs.
 
     Attributes:
-        committed_slot: The committed slot at which these outputs where available at.
+        committed_slot: The committed slot at which these outputs were available at.
         page_size: The maximum amount of items returned in one call. If there are more items, a cursor to the next page is returned too.
         cursor: The cursor to the next page of results.
         items: The query results.

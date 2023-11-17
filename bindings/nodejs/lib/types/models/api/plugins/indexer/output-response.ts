@@ -9,7 +9,7 @@ import type { HexEncodedString } from '../../../../utils/hex-encoding';
  */
 export interface IOutputsResponse {
     /**
-     * The committed slot at which these outputs where available at.
+     * The committed slot at which these outputs were available at.
      */
     committedSlot: number;
     /**
