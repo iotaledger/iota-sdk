@@ -363,7 +363,6 @@ pub enum ClientMethod {
         address: Bech32Address,
     },
     /// Returns a block ID from a block
-    #[serde(rename_all = "camelCase")]
     BlockId {
         /// Block
         block: BlockDto,
