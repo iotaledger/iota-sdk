@@ -10,7 +10,7 @@ use crate::{
     types::block::{
         core::{BlockHeader, UnsignedBlock},
         payload::Payload,
-        Block, IssuerId,
+        BlockBody, IssuerId,
     },
 };
 
@@ -43,11 +43,11 @@ impl ClientInner {
                 issuer_id,
             ),
             // TODO: burned mana calculation
-            Block::build_basic(issuance.strong_parents()?, 0)
+            BlockBody::build_basic(issuance.strong_parents()?, 0)
                 .with_weak_parents(issuance.weak_parents()?)
                 .with_shallow_like_parents(issuance.shallow_like_parents()?)
                 .with_payload(payload)
-                .finish_block()?,
+                .finish_block_body()?,
         ))
     }
 }
