@@ -1,12 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use packable::{
-    error::{UnpackError, UnpackErrorExt},
-    packer::Packer,
-    unpacker::Unpacker,
-    Packable,
-};
+use packable::Packable;
 
 use crate::types::block::{
     core::{parent::verify_parents_sets, BlockBody, Parents},
@@ -107,7 +102,10 @@ impl From<BasicBlockBody> for BasicBlockBodyBuilder {
     }
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, Packable)]
+#[packable(unpack_error = Error)]
+#[packable(unpack_visitor = ProtocolParameters)]
+#[packable(verify_with = verify_basic_block_body)]
 pub struct BasicBlockBody {
     /// Blocks that are strongly directly approved.
     strong_parents: StrongParents,
@@ -156,45 +154,19 @@ impl BasicBlockBody {
     }
 }
 
-impl Packable for BasicBlockBody {
-    type UnpackError = Error;
-    type UnpackVisitor = ProtocolParameters;
-
-    fn pack<P: Packer>(&self, packer: &mut P) -> Result<(), P::Error> {
-        self.strong_parents.pack(packer)?;
-        self.weak_parents.pack(packer)?;
-        self.shallow_like_parents.pack(packer)?;
-        self.payload.pack(packer)?;
-        self.max_burned_mana.pack(packer)?;
-
-        Ok(())
+fn verify_basic_block_body<const VERIFY: bool>(
+    basic_block_body: &BasicBlockBody,
+    _: &ProtocolParameters,
+) -> Result<(), Error> {
+    if VERIFY {
+        verify_parents_sets(
+            &basic_block_body.strong_parents,
+            &basic_block_body.weak_parents,
+            &basic_block_body.shallow_like_parents,
+        )?;
     }
 
-    fn unpack<U: Unpacker, const VERIFY: bool>(
-        unpacker: &mut U,
-        visitor: &Self::UnpackVisitor,
-    ) -> Result<Self, UnpackError<Self::UnpackError, U::Error>> {
-        let strong_parents = StrongParents::unpack::<_, VERIFY>(unpacker, &())?;
-        let weak_parents = WeakParents::unpack::<_, VERIFY>(unpacker, &())?;
-        let shallow_like_parents = ShallowLikeParents::unpack::<_, VERIFY>(unpacker, &())?;
-
-        if VERIFY {
-            verify_parents_sets(&strong_parents, &weak_parents, &shallow_like_parents)
-                .map_err(UnpackError::Packable)?;
-        }
-
-        let payload = OptionalPayload::unpack::<_, VERIFY>(unpacker, visitor)?;
-
-        let max_burned_mana = u64::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
-
-        Ok(Self {
-            strong_parents,
-            weak_parents,
-            shallow_like_parents,
-            payload,
-            max_burned_mana,
-        })
-    }
+    Ok(())
 }
 
 #[cfg(feature = "serde")]
@@ -206,7 +178,7 @@ pub(crate) mod dto {
     use super::*;
     use crate::types::{
         block::{payload::dto::PayloadDto, BlockId, Error},
-        TryFromDto, ValidationParams,
+        TryFromDto,
     };
 
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
@@ -236,11 +208,13 @@ pub(crate) mod dto {
         }
     }
 
-    impl TryFromDto for BasicBlockBody {
-        type Dto = BasicBlockBodyDto;
+    impl TryFromDto<BasicBlockBodyDto> for BasicBlockBody {
         type Error = Error;
 
-        fn try_from_dto_with_params_inner(dto: Self::Dto, params: &ValidationParams<'_>) -> Result<Self, Self::Error> {
+        fn try_from_dto_with_params_inner(
+            dto: BasicBlockBodyDto,
+            params: Option<&ProtocolParameters>,
+        ) -> Result<Self, Self::Error> {
             BasicBlockBodyBuilder::new(StrongParents::from_set(dto.strong_parents)?, dto.max_burned_mana)
                 .with_weak_parents(WeakParents::from_set(dto.weak_parents)?)
                 .with_shallow_like_parents(ShallowLikeParents::from_set(dto.shallow_like_parents)?)

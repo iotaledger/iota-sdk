@@ -17,9 +17,10 @@ use crate::{
                 },
                 SignedTransactionPayload,
             },
+            protocol::ProtocolParameters,
             Error,
         },
-        TryFromDto, ValidationParams,
+        TryFromDto,
     },
     utils::serde::bip44::option_bip44,
 };
@@ -57,13 +58,15 @@ impl From<&PreparedTransactionData> for PreparedTransactionDataDto {
     }
 }
 
-impl TryFromDto for PreparedTransactionData {
-    type Dto = PreparedTransactionDataDto;
+impl TryFromDto<PreparedTransactionDataDto> for PreparedTransactionData {
     type Error = Error;
 
-    fn try_from_dto_with_params_inner(dto: Self::Dto, params: &ValidationParams<'_>) -> Result<Self, Self::Error> {
+    fn try_from_dto_with_params_inner(
+        dto: PreparedTransactionDataDto,
+        params: Option<&ProtocolParameters>,
+    ) -> Result<Self, Self::Error> {
         Ok(Self {
-            transaction: Transaction::try_from_dto_with_params(dto.transaction, params)
+            transaction: Transaction::try_from_dto_with_params_inner(dto.transaction, params)
                 .map_err(|_| Error::InvalidField("transaction"))?,
             inputs_data: dto
                 .inputs_data
@@ -109,13 +112,15 @@ impl From<&SignedTransactionData> for SignedTransactionDataDto {
     }
 }
 
-impl TryFromDto for SignedTransactionData {
-    type Dto = SignedTransactionDataDto;
+impl TryFromDto<SignedTransactionDataDto> for SignedTransactionData {
     type Error = Error;
 
-    fn try_from_dto_with_params_inner(dto: Self::Dto, params: &ValidationParams<'_>) -> Result<Self, Self::Error> {
+    fn try_from_dto_with_params_inner(
+        dto: SignedTransactionDataDto,
+        params: Option<&ProtocolParameters>,
+    ) -> Result<Self, Self::Error> {
         Ok(Self {
-            payload: SignedTransactionPayload::try_from_dto_with_params(dto.payload, params)
+            payload: SignedTransactionPayload::try_from_dto_with_params_inner(dto.payload, params)
                 .map_err(|_| Error::InvalidField("transaction_payload"))?,
             inputs_data: dto
                 .inputs_data

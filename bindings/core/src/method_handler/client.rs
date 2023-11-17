@@ -196,7 +196,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
             client
                 .post_block(&Block::try_from_dto_with_params(
                     block,
-                    client.get_protocol_parameters().await?,
+                    &client.get_protocol_parameters().await?,
                 )?)
                 .await?,
         ),

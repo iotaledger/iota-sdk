@@ -340,7 +340,7 @@ pub(crate) mod dto {
 
     use super::*;
     use crate::{
-        types::{block::core::dto::BlockBodyDto, TryFromDto, ValidationParams},
+        types::{block::core::dto::BlockBodyDto, TryFromDto},
         utils::serde::string,
     };
 
@@ -373,12 +373,14 @@ pub(crate) mod dto {
         }
     }
 
-    impl TryFromDto for Block {
-        type Dto = BlockDto;
+    impl TryFromDto<BlockDto> for Block {
         type Error = Error;
 
-        fn try_from_dto_with_params_inner(dto: Self::Dto, params: &ValidationParams<'_>) -> Result<Self, Self::Error> {
-            if let Some(protocol_params) = params.protocol_parameters() {
+        fn try_from_dto_with_params_inner(
+            dto: BlockDto,
+            params: Option<&ProtocolParameters>,
+        ) -> Result<Self, Self::Error> {
+            if let Some(protocol_params) = params {
                 if dto.inner.header.protocol_version != protocol_params.version() {
                     return Err(Error::ProtocolVersionMismatch {
                         expected: protocol_params.version(),
@@ -428,12 +430,14 @@ pub(crate) mod dto {
         }
     }
 
-    impl TryFromDto for BlockHeader {
-        type Dto = BlockHeaderDto;
+    impl TryFromDto<BlockHeaderDto> for BlockHeader {
         type Error = Error;
 
-        fn try_from_dto_with_params_inner(dto: Self::Dto, params: &ValidationParams<'_>) -> Result<Self, Self::Error> {
-            if let Some(protocol_params) = params.protocol_parameters() {
+        fn try_from_dto_with_params_inner(
+            dto: BlockHeaderDto,
+            params: Option<&ProtocolParameters>,
+        ) -> Result<Self, Self::Error> {
+            if let Some(protocol_params) = params {
                 if dto.protocol_version != protocol_params.version() {
                     return Err(Error::ProtocolVersionMismatch {
                         expected: protocol_params.version(),
@@ -476,11 +480,13 @@ pub(crate) mod dto {
         }
     }
 
-    impl TryFromDto for UnsignedBlock {
-        type Dto = UnsignedBlockDto;
+    impl TryFromDto<UnsignedBlockDto> for UnsignedBlock {
         type Error = Error;
 
-        fn try_from_dto_with_params_inner(dto: Self::Dto, params: &ValidationParams<'_>) -> Result<Self, Self::Error> {
+        fn try_from_dto_with_params_inner(
+            dto: UnsignedBlockDto,
+            params: Option<&ProtocolParameters>,
+        ) -> Result<Self, Self::Error> {
             Ok(Self::new(
                 BlockHeader::try_from_dto_with_params_inner(dto.header, params)?,
                 BlockBody::try_from_dto_with_params_inner(dto.body, params)?,
