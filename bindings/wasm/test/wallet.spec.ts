@@ -18,7 +18,7 @@ async function run() {
             start: 0,
             end: 1,
         },
-        bech32Hrp: 'tst',
+        bech32Hrp: 'rms',
     });
 
     const wallet = await Wallet.create({
@@ -33,7 +33,7 @@ async function run() {
     });
 
     expect(await wallet.address()).toBe(
-        'tst1qrpwecegav7eh0z363ca69laxej64rrt4e3u0rtycyuh0mam3vq3uht4pcw',
+        'rms1qrpwecegav7eh0z363ca69laxej64rrt4e3u0rtycyuh0mam3vq3utrrg7c',
     );
 
     const balance: Balance = await wallet.sync();
