@@ -30,12 +30,11 @@ async function run() {
     initLogger();
 
     try {
-        for (const envVar of ['STRONGHOLD_PASSWORD', 'MNEMONIC'])
+        for (const envVar of ['STRONGHOLD_PASSWORD', 'MNEMONIC']) {
             if (!(envVar in process.env)) {
-                throw new Error(
-                    `.env ${envVar} is undefined, see .env.example`,
-                );
+                throw new Error(`.env ${envVar} is undefined, see .env.example`);
             }
+        }
 
         const secretManager = new SecretManager({
             stronghold: {

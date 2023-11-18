@@ -16,14 +16,15 @@ const SIGNED_TRANSACTION_FILE_NAME = 'offline-signing-signed-transaction.json';
 // In this example we will sign the prepared transaction.
 async function run() {
     initLogger();
+    for (const envVar of ['MNEMONIC']) {
+        if (!(envVar in process.env)) {
+            throw new Error(`.env ${envVar} is undefined, see .env.example`);
+        }
+    }
 
     const offlineClient = new Client({});
 
     try {
-        if (!process.env.MNEMONIC) {
-            throw new Error('.env MNEMONIC is undefined, see .env.example');
-        }
-
         const secretManager = {
             mnemonic: process.env.MNEMONIC,
         };

@@ -19,11 +19,13 @@ const ADDRESS_FILE_NAME = 'offline-signing-address.json';
 // In this example we will generate an address offline which will be used later to find inputs.
 async function run() {
     initLogger();
+    for (const envVar of ['MNEMONIC']) {
+        if (!(envVar in process.env)) {
+            throw new Error(`.env ${envVar} is undefined, see .env.example`);
+        }
+    }
 
     try {
-        if (!process.env.MNEMONIC) {
-            throw new Error('.env MNEMONIC is undefined, see .env.example');
-        }
 
         const secretManager = new SecretManager({
             mnemonic: process.env.MNEMONIC,

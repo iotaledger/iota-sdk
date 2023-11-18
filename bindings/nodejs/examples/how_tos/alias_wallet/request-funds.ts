@@ -16,8 +16,10 @@ require('dotenv').config({ path: '.env' });
 // In this example we request funds to an alias wallet.
 async function run() {
     initLogger();
-    if (!process.env.FAUCET_URL) {
-        throw new Error('.env FAUCET_URL is undefined, see .env.example');
+    for (const envVar of ['WALLET_DB_PATH', 'FAUCET_URL']) {
+        if (!(envVar in process.env)) {
+            throw new Error(`.env ${envVar} is undefined, see .env.example`);
+        }
     }
     try {
         const faucetUrl = process.env.FAUCET_URL;
