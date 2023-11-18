@@ -115,6 +115,10 @@ pub(crate) async fn call_account_method_internal(account: &Account, method: Acco
                 .await?;
             Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
         }
+        AccountMethod::PrepareClaimOutputs { output_ids_to_claim } => {
+            let data = account.prepare_claim_outputs(output_ids_to_claim).await?;
+            Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
+        }
         AccountMethod::PrepareConsolidateOutputs { params } => {
             let data = account.prepare_consolidate_outputs(params).await?;
             Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))

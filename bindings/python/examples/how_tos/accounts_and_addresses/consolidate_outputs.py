@@ -50,7 +50,7 @@ print('Transaction sent: ', transaction.transactionId)
 block_id = account.retry_transaction_until_included(transaction.transactionId)
 
 print(
-    f'Transaction included: {os.environ["EXPLORER_ID"]}/block/{block_id}'
+    f'Transaction included: {os.environ["EXPLORER_URL"]}/block/{block_id}'
 )
 
 # Sync account
