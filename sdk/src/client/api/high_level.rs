@@ -89,11 +89,10 @@ impl Client {
 
         let mut total_already_spent = 0;
         let mut selected_inputs = Vec::new();
-        for (_offset, output_wrapper) in basic_outputs
+        for output_wrapper in basic_outputs
             .into_iter()
             // Max inputs is 128
             .take(INPUT_COUNT_MAX.into())
-            .enumerate()
         {
             // Break if we have enough funds and don't create dust for the remainder
             if total_already_spent == amount || total_already_spent >= amount {
