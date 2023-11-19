@@ -36,7 +36,7 @@ use crate::types::block::{
 
 /// Generates a random [`OutputId`].
 pub fn rand_output_id() -> OutputId {
-    OutputId::new(rand_transaction_id(), rand_number_range(OUTPUT_INDEX_RANGE)).unwrap()
+    OutputId::new(rand_transaction_id(), rand_number_range(OUTPUT_INDEX_RANGE))
 }
 
 /// Generates a random [`BasicOutput`](BasicOutput).

@@ -126,7 +126,7 @@ mod dto {
         fn try_from(value: OutputMetadataDto) -> Result<Self, Self::Error> {
             Ok(Self {
                 block_id: value.block_id,
-                output_id: OutputId::new(value.transaction_id, value.output_index)?,
+                output_id: OutputId::new(value.transaction_id, value.output_index),
                 is_spent: value.is_spent,
                 commitment_id_spent: value.commitment_id_spent,
                 transaction_id_spent: value.transaction_id_spent,

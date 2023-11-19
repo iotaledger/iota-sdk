@@ -34,8 +34,8 @@ const ED25519_SIGNATURE: &str = "0xc6a40edf9a089f42c18f4ebccb35fe4b578d93b879e99
 fn build_valid() {
     let protocol_parameters = protocol_parameters();
     let transaction_id = TransactionId::new(prefix_hex::decode(TRANSACTION_ID).unwrap());
-    let input1 = Input::Utxo(UtxoInput::new(transaction_id, 0).unwrap());
-    let input2 = Input::Utxo(UtxoInput::new(transaction_id, 1).unwrap());
+    let input1 = Input::Utxo(UtxoInput::new(transaction_id, 0));
+    let input2 = Input::Utxo(UtxoInput::new(transaction_id, 1));
     let bytes: [u8; 32] = prefix_hex::decode(ED25519_ADDRESS_1).unwrap();
     let address = Address::from(Ed25519Address::new(bytes));
     let amount = 1_000_000;
@@ -59,8 +59,8 @@ fn build_valid() {
 fn build_valid_with_payload() {
     let protocol_parameters = protocol_parameters();
     let transaction_id = TransactionId::new(prefix_hex::decode(TRANSACTION_ID).unwrap());
-    let input1 = Input::Utxo(UtxoInput::new(transaction_id, 0).unwrap());
-    let input2 = Input::Utxo(UtxoInput::new(transaction_id, 1).unwrap());
+    let input1 = Input::Utxo(UtxoInput::new(transaction_id, 0));
+    let input2 = Input::Utxo(UtxoInput::new(transaction_id, 1));
     let bytes: [u8; 32] = prefix_hex::decode(ED25519_ADDRESS_1).unwrap();
     let address = Address::from(Ed25519Address::new(bytes));
     let amount = 1_000_000;
@@ -85,8 +85,8 @@ fn build_valid_with_payload() {
 fn build_valid_add_inputs_outputs() {
     let protocol_parameters = protocol_parameters();
     let transaction_id = TransactionId::new(prefix_hex::decode(TRANSACTION_ID).unwrap());
-    let input1 = Input::Utxo(UtxoInput::new(transaction_id, 0).unwrap());
-    let input2 = Input::Utxo(UtxoInput::new(transaction_id, 1).unwrap());
+    let input1 = Input::Utxo(UtxoInput::new(transaction_id, 0));
+    let input2 = Input::Utxo(UtxoInput::new(transaction_id, 1));
     let bytes: [u8; 32] = prefix_hex::decode(ED25519_ADDRESS_1).unwrap();
     let address = Address::from(Ed25519Address::new(bytes));
     let amount = 1_000_000;
@@ -111,8 +111,8 @@ fn build_invalid_payload_kind() {
     let protocol_parameters = protocol_parameters();
     // Construct a transaction with two inputs and one output.
     let transaction_id = TransactionId::new(prefix_hex::decode(TRANSACTION_ID).unwrap());
-    let input1 = Input::Utxo(UtxoInput::new(transaction_id, 0).unwrap());
-    let input2 = Input::Utxo(UtxoInput::new(transaction_id, 1).unwrap());
+    let input1 = Input::Utxo(UtxoInput::new(transaction_id, 0));
+    let input2 = Input::Utxo(UtxoInput::new(transaction_id, 1));
     let bytes: [u8; 32] = prefix_hex::decode(ED25519_ADDRESS_1).unwrap();
     let address = Address::from(Ed25519Address::new(bytes));
     let amount = 1_000_000;
@@ -177,7 +177,7 @@ fn build_invalid_input_count_low() {
 fn build_invalid_input_count_high() {
     let protocol_parameters = protocol_parameters();
     let transaction_id = TransactionId::new(prefix_hex::decode(TRANSACTION_ID).unwrap());
-    let input = Input::Utxo(UtxoInput::new(transaction_id, 0).unwrap());
+    let input = Input::Utxo(UtxoInput::new(transaction_id, 0));
     let bytes: [u8; 32] = prefix_hex::decode(ED25519_ADDRESS_1).unwrap();
     let address = Address::from(Ed25519Address::new(bytes));
     let amount = 1_000_000;
@@ -204,7 +204,7 @@ fn build_invalid_input_count_high() {
 fn build_invalid_output_count_low() {
     let protocol_parameters = protocol_parameters();
     let transaction_id = TransactionId::new(prefix_hex::decode(TRANSACTION_ID).unwrap());
-    let input = Input::Utxo(UtxoInput::new(transaction_id, 0).unwrap());
+    let input = Input::Utxo(UtxoInput::new(transaction_id, 0));
 
     let transaction = Transaction::builder(protocol_parameters.network_id())
         .add_input(input)
@@ -221,7 +221,7 @@ fn build_invalid_output_count_low() {
 fn build_invalid_output_count_high() {
     let protocol_parameters = protocol_parameters();
     let transaction_id = TransactionId::new(prefix_hex::decode(TRANSACTION_ID).unwrap());
-    let input = Input::Utxo(UtxoInput::new(transaction_id, 0).unwrap());
+    let input = Input::Utxo(UtxoInput::new(transaction_id, 0));
     let bytes: [u8; 32] = prefix_hex::decode(ED25519_ADDRESS_1).unwrap();
     let address = Address::from(Ed25519Address::new(bytes));
     let amount = 1_000_000;
@@ -248,7 +248,7 @@ fn build_invalid_output_count_high() {
 fn build_invalid_duplicate_utxo() {
     let protocol_parameters = protocol_parameters();
     let transaction_id = TransactionId::new(prefix_hex::decode(TRANSACTION_ID).unwrap());
-    let input = Input::Utxo(UtxoInput::new(transaction_id, 0).unwrap());
+    let input = Input::Utxo(UtxoInput::new(transaction_id, 0));
     let bytes: [u8; 32] = prefix_hex::decode(ED25519_ADDRESS_1).unwrap();
     let address = Address::from(Ed25519Address::new(bytes));
     let amount = 1_000_000;
@@ -272,7 +272,7 @@ fn build_invalid_duplicate_utxo() {
 fn build_invalid_accumulated_output() {
     let protocol_parameters = protocol_parameters();
     let transaction_id = TransactionId::new(prefix_hex::decode(TRANSACTION_ID).unwrap());
-    let input = Input::Utxo(UtxoInput::new(transaction_id, 0).unwrap());
+    let input = Input::Utxo(UtxoInput::new(transaction_id, 0));
 
     let bytes1: [u8; 32] = prefix_hex::decode(ED25519_ADDRESS_1).unwrap();
     let address1 = Address::from(Ed25519Address::new(bytes1));
@@ -307,8 +307,8 @@ fn build_invalid_accumulated_output() {
 fn getters() {
     let protocol_parameters = protocol_parameters();
     let transaction_id = TransactionId::new(prefix_hex::decode(TRANSACTION_ID).unwrap());
-    let input1 = Input::Utxo(UtxoInput::new(transaction_id, 0).unwrap());
-    let input2 = Input::Utxo(UtxoInput::new(transaction_id, 1).unwrap());
+    let input1 = Input::Utxo(UtxoInput::new(transaction_id, 0));
+    let input2 = Input::Utxo(UtxoInput::new(transaction_id, 1));
     let bytes: [u8; 32] = prefix_hex::decode(ED25519_ADDRESS_1).unwrap();
     let address = Address::from(Ed25519Address::new(bytes));
     let amount = 1_000_000;
@@ -336,8 +336,8 @@ fn getters() {
 fn duplicate_output_nft() {
     let protocol_parameters = protocol_parameters();
     let transaction_id = TransactionId::new(prefix_hex::decode(TRANSACTION_ID).unwrap());
-    let input1 = Input::Utxo(UtxoInput::new(transaction_id, 0).unwrap());
-    let input2 = Input::Utxo(UtxoInput::new(transaction_id, 1).unwrap());
+    let input1 = Input::Utxo(UtxoInput::new(transaction_id, 0));
+    let input2 = Input::Utxo(UtxoInput::new(transaction_id, 1));
     let bytes: [u8; 32] = prefix_hex::decode(ED25519_ADDRESS_1).unwrap();
     let address = Address::from(Ed25519Address::new(bytes));
     let amount = 1_000_000;
@@ -367,8 +367,8 @@ fn duplicate_output_nft() {
 fn duplicate_output_nft_null() {
     let protocol_parameters = protocol_parameters();
     let transaction_id = TransactionId::new(prefix_hex::decode(TRANSACTION_ID).unwrap());
-    let input1 = Input::Utxo(UtxoInput::new(transaction_id, 0).unwrap());
-    let input2 = Input::Utxo(UtxoInput::new(transaction_id, 1).unwrap());
+    let input1 = Input::Utxo(UtxoInput::new(transaction_id, 0));
+    let input2 = Input::Utxo(UtxoInput::new(transaction_id, 1));
     let bytes: [u8; 32] = prefix_hex::decode(ED25519_ADDRESS_1).unwrap();
     let address = Address::from(Ed25519Address::new(bytes));
     let amount = 1_000_000;
@@ -395,8 +395,8 @@ fn duplicate_output_nft_null() {
 fn duplicate_output_account() {
     let protocol_parameters = protocol_parameters();
     let transaction_id = TransactionId::new(prefix_hex::decode(TRANSACTION_ID).unwrap());
-    let input1 = Input::Utxo(UtxoInput::new(transaction_id, 0).unwrap());
-    let input2 = Input::Utxo(UtxoInput::new(transaction_id, 1).unwrap());
+    let input1 = Input::Utxo(UtxoInput::new(transaction_id, 0));
+    let input2 = Input::Utxo(UtxoInput::new(transaction_id, 1));
     let bytes: [u8; 32] = prefix_hex::decode(ED25519_ADDRESS_1).unwrap();
     let address = Address::from(Ed25519Address::new(bytes));
     let amount = 1_000_000;
@@ -426,8 +426,8 @@ fn duplicate_output_account() {
 fn duplicate_output_foundry() {
     let protocol_parameters = protocol_parameters();
     let transaction_id = TransactionId::new(prefix_hex::decode(TRANSACTION_ID).unwrap());
-    let input1 = Input::Utxo(UtxoInput::new(transaction_id, 0).unwrap());
-    let input2 = Input::Utxo(UtxoInput::new(transaction_id, 1).unwrap());
+    let input1 = Input::Utxo(UtxoInput::new(transaction_id, 0));
+    let input2 = Input::Utxo(UtxoInput::new(transaction_id, 1));
     let bytes: [u8; 32] = prefix_hex::decode(ED25519_ADDRESS_1).unwrap();
     let address = Address::from(Ed25519Address::new(bytes));
     let amount = 1_000_000;
@@ -463,8 +463,8 @@ fn duplicate_output_foundry() {
 fn transactions_capabilities() {
     let protocol_parameters = protocol_parameters();
     let transaction_id = TransactionId::new(prefix_hex::decode(TRANSACTION_ID).unwrap());
-    let input1 = Input::Utxo(UtxoInput::new(transaction_id, 0).unwrap());
-    let input2 = Input::Utxo(UtxoInput::new(transaction_id, 1).unwrap());
+    let input1 = Input::Utxo(UtxoInput::new(transaction_id, 0));
+    let input2 = Input::Utxo(UtxoInput::new(transaction_id, 1));
     let address = Address::from(Ed25519Address::new(prefix_hex::decode(ED25519_ADDRESS_1).unwrap()));
     let amount = 1_000_000;
     let output = Output::Basic(

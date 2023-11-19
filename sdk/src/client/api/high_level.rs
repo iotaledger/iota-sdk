@@ -80,7 +80,7 @@ impl Client {
                     UtxoInput::new(
                         output_with_meta.metadata().transaction_id().to_owned(),
                         output_with_meta.metadata().output_index(),
-                    )?,
+                    ),
                     output_with_meta.output().amount(),
                 ))
             })

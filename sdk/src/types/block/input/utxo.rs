@@ -16,8 +16,8 @@ impl UtxoInput {
     pub const KIND: u8 = 0;
 
     /// Creates a new [`UtxoInput`].
-    pub fn new(id: TransactionId, index: u16) -> Result<Self, Error> {
-        Ok(Self(OutputId::new(id, index)?))
+    pub fn new(id: TransactionId, index: u16) -> Self {
+        Self(OutputId::new(id, index))
     }
 
     /// Returns the output id of a [`UtxoInput`].
@@ -51,7 +51,6 @@ pub(crate) mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;
-    use crate::types::block::Error;
 
     /// Describes an input which references an unspent transaction output to consume.
     #[derive(Serialize, Deserialize)]
@@ -73,10 +72,8 @@ pub(crate) mod dto {
         }
     }
 
-    impl TryFrom<UtxoInputDto> for UtxoInput {
-        type Error = Error;
-
-        fn try_from(value: UtxoInputDto) -> Result<Self, Self::Error> {
+    impl From<UtxoInputDto> for UtxoInput {
+        fn from(value: UtxoInputDto) -> Self {
             Self::new(value.transaction_id, value.transaction_output_index)
         }
     }

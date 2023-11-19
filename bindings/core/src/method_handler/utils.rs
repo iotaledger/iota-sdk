@@ -60,7 +60,7 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
             token_scheme_type,
         )),
         UtilsMethod::ComputeNftId { output_id } => Response::NftId(NftId::from(&output_id)),
-        UtilsMethod::ComputeOutputId { id, index } => Response::OutputId(OutputId::new(id, index)?),
+        UtilsMethod::ComputeOutputId { id, index } => Response::OutputId(OutputId::new(id, index)),
         UtilsMethod::ComputeTokenId {
             account_id,
             serial_number,
