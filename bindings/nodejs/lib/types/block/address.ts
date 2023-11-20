@@ -274,14 +274,6 @@ class WeightedAddress {
                 { value: AccountAddress, name: AddressType.Account as any },
                 { value: NftAddress, name: AddressType.Nft as any },
                 { value: AnchorAddress, name: AddressType.Anchor as any },
-                {
-                    value: ImplicitAccountCreationAddress,
-                    name: AddressType.ImplicitAccountCreation as any,
-                },
-                {
-                    value: RestrictedAddress,
-                    name: AddressType.Restricted as any,
-                },
             ],
         },
     })
