@@ -8,7 +8,7 @@ pub mod routes;
 use packable::PackableExt;
 
 use crate::{
-    client::{Client, Result},
+    client::{node_api::error::Error as NodeApiError, Client, Error, Result},
     types::block::output::{Output, OutputId, OutputMetadata, OutputWithMetadata},
 };
 
@@ -34,13 +34,11 @@ impl Client {
     /// Requests outputs by their output ID in parallel, ignoring outputs not found.
     /// Useful to get data about spent outputs, that might not be pruned yet.
     pub async fn get_outputs_ignore_not_found(&self, output_ids: &[OutputId]) -> Result<Vec<Output>> {
-        Ok(
-            futures::future::join_all(output_ids.iter().map(|id| self.get_output(id)))
-                .await
-                .into_iter()
-                .filter_map(Result::ok)
-                .collect(),
-        )
+        futures::future::join_all(output_ids.iter().map(|id| self.get_output(id)))
+            .await
+            .into_iter()
+            .filter(|res| !matches!(res, Err(Error::Node(NodeApiError::NotFound(_)))))
+            .collect()
     }
 
     /// Requests metadata for outputs by their output ID in parallel.
@@ -50,13 +48,11 @@ impl Client {
 
     /// Requests metadata for outputs by their output ID in parallel, ignoring outputs not found.
     pub async fn get_outputs_metadata_ignore_not_found(&self, output_ids: &[OutputId]) -> Result<Vec<OutputMetadata>> {
-        Ok(
-            futures::future::join_all(output_ids.iter().map(|id| self.get_output_metadata(id)))
-                .await
-                .into_iter()
-                .filter_map(Result::ok)
-                .collect(),
-        )
+        futures::future::join_all(output_ids.iter().map(|id| self.get_output_metadata(id)))
+            .await
+            .into_iter()
+            .filter(|res| !matches!(res, Err(Error::Node(NodeApiError::NotFound(_)))))
+            .collect()
     }
 
     /// Requests outputs and their metadata by their output ID in parallel.
@@ -70,12 +66,10 @@ impl Client {
         &self,
         output_ids: &[OutputId],
     ) -> Result<Vec<OutputWithMetadata>> {
-        Ok(
-            futures::future::join_all(output_ids.iter().map(|id| self.get_output_with_metadata(id)))
-                .await
-                .into_iter()
-                .filter_map(Result::ok)
-                .collect(),
-        )
+        futures::future::join_all(output_ids.iter().map(|id| self.get_output_with_metadata(id)))
+            .await
+            .into_iter()
+            .filter(|res| !matches!(res, Err(Error::Node(NodeApiError::NotFound(_)))))
+            .collect()
     }
 }
