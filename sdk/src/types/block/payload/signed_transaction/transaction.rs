@@ -13,7 +13,7 @@ use crate::{
         context_input::{ContextInput, CONTEXT_INPUT_COUNT_RANGE},
         input::{Input, INPUT_COUNT_RANGE},
         mana::{verify_mana_allotments_sum, ManaAllotment, ManaAllotments},
-        output::{NativeTokens, Output, OUTPUT_COUNT_RANGE},
+        output::{Output, OUTPUT_COUNT_RANGE},
         payload::{
             signed_transaction::{TransactionHash, TransactionId, TransactionSigningHash},
             OptionalPayload, Payload,
@@ -425,17 +425,16 @@ fn verify_payload_packable<const VERIFY: bool>(
 fn verify_outputs<const VERIFY: bool>(outputs: &[Output], visitor: &ProtocolParameters) -> Result<(), Error> {
     if VERIFY {
         let mut amount_sum: u64 = 0;
-        let mut native_tokens_count: u8 = 0;
         let mut chain_ids = HashSet::new();
 
         for output in outputs.iter() {
-            let (amount, native_tokens, chain_id) = match output {
-                Output::Basic(output) => (output.amount(), Some(output.native_tokens()), None),
-                Output::Account(output) => (output.amount(), Some(output.native_tokens()), Some(output.chain_id())),
-                Output::Anchor(output) => (output.amount(), None, Some(output.chain_id())),
-                Output::Foundry(output) => (output.amount(), Some(output.native_tokens()), Some(output.chain_id())),
-                Output::Nft(output) => (output.amount(), Some(output.native_tokens()), Some(output.chain_id())),
-                Output::Delegation(output) => (output.amount(), None, Some(output.chain_id())),
+            let (amount, chain_id) = match output {
+                Output::Basic(output) => (output.amount(), None),
+                Output::Account(output) => (output.amount(), Some(output.chain_id())),
+                Output::Anchor(output) => (output.amount(), Some(output.chain_id())),
+                Output::Foundry(output) => (output.amount(), Some(output.chain_id())),
+                Output::Nft(output) => (output.amount(), Some(output.chain_id())),
+                Output::Delegation(output) => (output.amount(), Some(output.chain_id())),
             };
 
             amount_sum = amount_sum
@@ -445,16 +444,6 @@ fn verify_outputs<const VERIFY: bool>(outputs: &[Output], visitor: &ProtocolPara
             // Accumulated output balance must not exceed the total supply of tokens.
             if amount_sum > visitor.token_supply() {
                 return Err(Error::InvalidTransactionAmountSum(amount_sum as u128));
-            }
-
-            if let Some(native_tokens) = native_tokens {
-                native_tokens_count = native_tokens_count.checked_add(native_tokens.len() as u8).ok_or(
-                    Error::InvalidTransactionNativeTokensCount(native_tokens_count as u16 + native_tokens.len() as u16),
-                )?;
-
-                if native_tokens_count > NativeTokens::COUNT_MAX {
-                    return Err(Error::InvalidTransactionNativeTokensCount(native_tokens_count as u16));
-                }
             }
 
             if let Some(chain_id) = chain_id {

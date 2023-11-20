@@ -143,10 +143,10 @@ where
         if options.sync_native_token_foundries {
             let native_token_foundry_ids = outputs_data
                 .iter()
-                .filter_map(|output| output.output.native_tokens())
-                .flat_map(|native_tokens| {
-                    native_tokens
-                        .iter()
+                .filter_map(|output| {
+                    output
+                        .output
+                        .native_token()
                         .map(|native_token| FoundryId::from(*native_token.token_id()))
                 })
                 .collect::<HashSet<_>>();

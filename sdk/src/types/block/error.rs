@@ -137,7 +137,6 @@ pub enum Error {
     InvalidTagLength(<TagLength as TryFrom<usize>>::Error),
     InvalidTokenSchemeKind(u8),
     InvalidTransactionAmountSum(u128),
-    InvalidTransactionNativeTokensCount(u16),
     InvalidManaAllotmentSum {
         max: u64,
         sum: u128,
@@ -345,9 +344,6 @@ impl fmt::Display for Error {
             }
             Self::InvalidTokenSchemeKind(k) => write!(f, "invalid token scheme kind {k}"),
             Self::InvalidTransactionAmountSum(value) => write!(f, "invalid transaction amount sum: {value}"),
-            Self::InvalidTransactionNativeTokensCount(count) => {
-                write!(f, "invalid transaction native tokens count: {count}")
-            }
             Self::InvalidManaAllotmentSum { max, sum } => {
                 write!(f, "invalid mana allotment sum: {sum} greater than max of {max}")
             }
