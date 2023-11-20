@@ -27,7 +27,7 @@ fn builder() {
     let amount = 500_000;
 
     let mut builder = BasicOutput::build_with_amount(amount)
-        .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000).unwrap())
+        .with_native_token(NativeToken::new(TokenId::from(foundry_id), 1000).unwrap())
         .add_unlock_condition(address_1.clone())
         .add_feature(sender_1.clone())
         .replace_feature(sender_2.clone());

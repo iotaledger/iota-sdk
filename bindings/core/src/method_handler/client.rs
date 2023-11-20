@@ -59,7 +59,6 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         ClientMethod::BuildAccountOutput {
             amount,
             mana,
-            native_tokens,
             account_id,
             foundry_counter,
             unlock_conditions,
@@ -73,7 +72,6 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
                     OutputBuilderAmount::MinimumAmount(client.get_storage_score_parameters().await?)
                 },
                 mana,
-                native_tokens,
                 &account_id,
                 foundry_counter,
                 unlock_conditions,
@@ -86,7 +84,6 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         ClientMethod::BuildBasicOutput {
             amount,
             mana,
-            native_tokens,
             unlock_conditions,
             features,
         } => {
@@ -97,7 +94,6 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
                     OutputBuilderAmount::MinimumAmount(client.get_storage_score_parameters().await?)
                 },
                 mana,
-                native_tokens,
                 unlock_conditions,
                 features,
             )?);
@@ -106,7 +102,6 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         }
         ClientMethod::BuildFoundryOutput {
             amount,
-            native_tokens,
             serial_number,
             token_scheme,
             unlock_conditions,
@@ -119,7 +114,6 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
                 } else {
                     OutputBuilderAmount::MinimumAmount(client.get_storage_score_parameters().await?)
                 },
-                native_tokens,
                 serial_number,
                 token_scheme,
                 unlock_conditions,
@@ -132,7 +126,6 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         ClientMethod::BuildNftOutput {
             amount,
             mana,
-            native_tokens,
             nft_id,
             unlock_conditions,
             features,
@@ -145,7 +138,6 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
                     OutputBuilderAmount::MinimumAmount(client.get_storage_score_parameters().await?)
                 },
                 mana,
-                native_tokens,
                 &nft_id,
                 unlock_conditions,
                 features,

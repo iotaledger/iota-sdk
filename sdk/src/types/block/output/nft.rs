@@ -18,8 +18,8 @@ use crate::types::block::{
             verify_allowed_unlock_conditions, AddressUnlockCondition, StorageDepositReturnUnlockCondition,
             UnlockCondition, UnlockConditionFlags, UnlockConditions,
         },
-        BasicOutputBuilder, ChainId, MinimumOutputAmount, NativeToken, NativeTokens, Output, OutputBuilderAmount,
-        OutputId, StateTransitionError, StateTransitionVerifier, StorageScore, StorageScoreParameters,
+        BasicOutputBuilder, ChainId, MinimumOutputAmount, Output, OutputBuilderAmount, OutputId, StateTransitionError,
+        StateTransitionVerifier, StorageScore, StorageScoreParameters,
     },
     payload::signed_transaction::TransactionCapabilityFlag,
     protocol::ProtocolParameters,
@@ -61,7 +61,6 @@ impl From<NftId> for Address {
 pub struct NftOutputBuilder {
     amount: OutputBuilderAmount,
     mana: u64,
-    native_tokens: BTreeSet<NativeToken>,
     nft_id: NftId,
     unlock_conditions: BTreeSet<UnlockCondition>,
     features: BTreeSet<Feature>,
@@ -84,7 +83,6 @@ impl NftOutputBuilder {
         Self {
             amount,
             mana: Default::default(),
-            native_tokens: BTreeSet::new(),
             nft_id,
             unlock_conditions: BTreeSet::new(),
             features: BTreeSet::new(),
@@ -110,20 +108,6 @@ impl NftOutputBuilder {
     #[inline(always)]
     pub fn with_mana(mut self, mana: u64) -> Self {
         self.mana = mana;
-        self
-    }
-
-    ///
-    #[inline(always)]
-    pub fn add_native_token(mut self, native_token: NativeToken) -> Self {
-        self.native_tokens.insert(native_token);
-        self
-    }
-
-    ///
-    #[inline(always)]
-    pub fn with_native_tokens(mut self, native_tokens: impl IntoIterator<Item = NativeToken>) -> Self {
-        self.native_tokens = native_tokens.into_iter().collect();
         self
     }
 
@@ -283,7 +267,6 @@ impl NftOutputBuilder {
         let mut output = NftOutput {
             amount: 0,
             mana: self.mana,
-            native_tokens: NativeTokens::from_set(self.native_tokens)?,
             nft_id: self.nft_id,
             unlock_conditions,
             features,
@@ -309,7 +292,6 @@ impl From<&NftOutput> for NftOutputBuilder {
         Self {
             amount: OutputBuilderAmount::Amount(output.amount),
             mana: output.mana,
-            native_tokens: output.native_tokens.iter().copied().collect(),
             nft_id: output.nft_id,
             unlock_conditions: output.unlock_conditions.iter().cloned().collect(),
             features: output.features.iter().cloned().collect(),
@@ -325,8 +307,6 @@ pub struct NftOutput {
     amount: u64,
     /// Amount of stored Mana held by this output.
     mana: u64,
-    /// Native tokens held by this output.
-    native_tokens: NativeTokens,
     /// Unique identifier of the NFT.
     nft_id: NftId,
     /// Define how the output can be unlocked in a transaction.
@@ -374,12 +354,6 @@ impl NftOutput {
     #[inline(always)]
     pub fn mana(&self) -> u64 {
         self.mana
-    }
-
-    ///
-    #[inline(always)]
-    pub fn native_tokens(&self) -> &NativeTokens {
-        &self.native_tokens
     }
 
     ///
@@ -520,7 +494,6 @@ impl Packable for NftOutput {
     fn pack<P: Packer>(&self, packer: &mut P) -> Result<(), P::Error> {
         self.amount.pack(packer)?;
         self.mana.pack(packer)?;
-        self.native_tokens.pack(packer)?;
         self.nft_id.pack(packer)?;
         self.unlock_conditions.pack(packer)?;
         self.features.pack(packer)?;
@@ -537,7 +510,6 @@ impl Packable for NftOutput {
 
         let mana = u64::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
 
-        let native_tokens = NativeTokens::unpack::<_, VERIFY>(unpacker, &())?;
         let nft_id = NftId::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
         let unlock_conditions = UnlockConditions::unpack::<_, VERIFY>(unpacker, visitor)?;
 
@@ -561,7 +533,6 @@ impl Packable for NftOutput {
         Ok(Self {
             amount,
             mana,
-            native_tokens,
             nft_id,
             unlock_conditions,
             features,
@@ -605,8 +576,6 @@ pub(crate) mod dto {
         pub amount: u64,
         #[serde(with = "string")]
         pub mana: u64,
-        #[serde(skip_serializing_if = "Vec::is_empty", default)]
-        pub native_tokens: Vec<NativeToken>,
         pub nft_id: NftId,
         pub unlock_conditions: Vec<UnlockConditionDto>,
         #[serde(skip_serializing_if = "Vec::is_empty", default)]
@@ -621,7 +590,6 @@ pub(crate) mod dto {
                 kind: NftOutput::KIND,
                 amount: value.amount(),
                 mana: value.mana(),
-                native_tokens: value.native_tokens().to_vec(),
                 nft_id: *value.nft_id(),
                 unlock_conditions: value.unlock_conditions().iter().map(Into::into).collect::<_>(),
                 features: value.features().to_vec(),
@@ -636,7 +604,6 @@ pub(crate) mod dto {
         fn try_from(dto: NftOutputDto) -> Result<Self, Self::Error> {
             let mut builder = NftOutputBuilder::new_with_amount(dto.amount, dto.nft_id)
                 .with_mana(dto.mana)
-                .with_native_tokens(dto.native_tokens)
                 .with_features(dto.features)
                 .with_immutable_features(dto.immutable_features);
 
@@ -653,7 +620,6 @@ pub(crate) mod dto {
         pub fn try_from_dtos(
             amount: OutputBuilderAmount,
             mana: u64,
-            native_tokens: Option<Vec<NativeToken>>,
             nft_id: &NftId,
             unlock_conditions: Vec<UnlockConditionDto>,
             features: Option<Vec<Feature>>,
@@ -666,10 +632,6 @@ pub(crate) mod dto {
                 }
             }
             .with_mana(mana);
-
-            if let Some(native_tokens) = native_tokens {
-                builder = builder.with_native_tokens(native_tokens);
-            }
 
             let unlock_conditions = unlock_conditions
                 .into_iter()
@@ -696,13 +658,10 @@ mod tests {
 
     use super::*;
     use crate::types::block::{
-        output::{dto::OutputDto, FoundryId, SimpleTokenScheme, TokenId},
+        output::dto::OutputDto,
         protocol::protocol_parameters,
-        rand::{
-            address::rand_account_address,
-            output::{
-                feature::rand_allowed_features, rand_nft_output, unlock_condition::rand_address_unlock_condition,
-            },
+        rand::output::{
+            feature::rand_allowed_features, rand_nft_output, unlock_condition::rand_address_unlock_condition,
         },
     };
 
@@ -716,12 +675,9 @@ mod tests {
         let output_ver = Output::try_from(dto).unwrap();
         assert_eq!(&output, output_ver.as_nft());
 
-        let foundry_id = FoundryId::build(&rand_account_address(), 0, SimpleTokenScheme::KIND);
-
         let output_split = NftOutput::try_from_dtos(
             OutputBuilderAmount::Amount(output.amount()),
             output.mana(),
-            Some(output.native_tokens().to_vec()),
             output.nft_id(),
             output.unlock_conditions().iter().map(Into::into).collect(),
             Some(output.features().to_vec()),
@@ -734,7 +690,6 @@ mod tests {
             let output_split = NftOutput::try_from_dtos(
                 builder.amount,
                 builder.mana,
-                Some(builder.native_tokens.iter().copied().collect()),
                 &builder.nft_id,
                 builder.unlock_conditions.iter().map(Into::into).collect(),
                 Some(builder.features.iter().cloned().collect()),
@@ -745,7 +700,6 @@ mod tests {
         };
 
         let builder = NftOutput::build_with_amount(100, NftId::null())
-            .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000).unwrap())
             .add_unlock_condition(rand_address_unlock_condition())
             .with_features(rand_allowed_features(NftOutput::ALLOWED_FEATURES))
             .with_immutable_features(rand_allowed_features(NftOutput::ALLOWED_IMMUTABLE_FEATURES));
@@ -753,7 +707,6 @@ mod tests {
 
         let builder =
             NftOutput::build_with_minimum_amount(protocol_parameters.storage_score_parameters(), NftId::null())
-                .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000).unwrap())
                 .add_unlock_condition(rand_address_unlock_condition())
                 .with_features(rand_allowed_features(NftOutput::ALLOWED_FEATURES))
                 .with_immutable_features(rand_allowed_features(NftOutput::ALLOWED_IMMUTABLE_FEATURES));

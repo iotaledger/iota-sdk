@@ -2,8 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use iota_sdk::types::block::{
-    address::AccountAddress,
-    output::{AccountOutput, Feature, FoundryId, MinimumOutputAmount, NativeToken, SimpleTokenScheme, TokenId},
+    output::{AccountOutput, Feature, MinimumOutputAmount},
     protocol::protocol_parameters,
     rand::output::{
         feature::{rand_issuer_feature, rand_metadata_feature, rand_sender_feature},
@@ -18,7 +17,6 @@ use pretty_assertions::assert_eq;
 fn builder() {
     let protocol_parameters = protocol_parameters();
     let account_id = rand_account_id();
-    let foundry_id = FoundryId::build(&AccountAddress::from(account_id), 0, SimpleTokenScheme::KIND);
     let address_1 = rand_address_unlock_condition_different_from_account_id(&account_id);
     let address_2 = rand_address_unlock_condition_different_from_account_id(&account_id);
     let sender_1 = rand_sender_feature();
@@ -28,7 +26,6 @@ fn builder() {
     let amount = 500_000;
 
     let mut builder = AccountOutput::build_with_amount(amount, account_id)
-        .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000).unwrap())
         .add_unlock_condition(address_1.clone())
         .add_feature(sender_1.clone())
         .replace_feature(sender_2.clone())

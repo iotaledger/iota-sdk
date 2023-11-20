@@ -8,13 +8,12 @@ use packable::{Packable, PackableExt};
 use crate::types::block::{
     address::Address,
     output::{
-        feature::{verify_allowed_features, Feature, FeatureFlags, Features},
+        feature::{verify_allowed_features, Feature, FeatureFlags, Features, NativeTokenFeature},
         unlock_condition::{
             verify_allowed_unlock_conditions, AddressUnlockCondition, StorageDepositReturnUnlockCondition,
             UnlockCondition, UnlockConditionFlags, UnlockConditions,
         },
-        MinimumOutputAmount, NativeToken, NativeTokens, Output, OutputBuilderAmount, OutputId, StorageScore,
-        StorageScoreParameters,
+        MinimumOutputAmount, NativeToken, Output, OutputBuilderAmount, OutputId, StorageScore, StorageScoreParameters,
     },
     protocol::ProtocolParameters,
     semantic::{SemanticValidationContext, TransactionFailureReason},
@@ -28,7 +27,6 @@ use crate::types::block::{
 pub struct BasicOutputBuilder {
     amount: OutputBuilderAmount,
     mana: u64,
-    native_tokens: BTreeSet<NativeToken>,
     unlock_conditions: BTreeSet<UnlockCondition>,
     features: BTreeSet<Feature>,
 }
@@ -51,7 +49,6 @@ impl BasicOutputBuilder {
         Self {
             amount,
             mana: Default::default(),
-            native_tokens: BTreeSet::new(),
             unlock_conditions: BTreeSet::new(),
             features: BTreeSet::new(),
         }
@@ -75,20 +72,6 @@ impl BasicOutputBuilder {
     #[inline(always)]
     pub fn with_mana(mut self, mana: u64) -> Self {
         self.mana = mana;
-        self
-    }
-
-    ///
-    #[inline(always)]
-    pub fn add_native_token(mut self, native_token: NativeToken) -> Self {
-        self.native_tokens.insert(native_token);
-        self
-    }
-
-    ///
-    #[inline(always)]
-    pub fn with_native_tokens(mut self, native_tokens: impl IntoIterator<Item = NativeToken>) -> Self {
-        self.native_tokens = native_tokens.into_iter().collect();
         self
     }
 
@@ -147,6 +130,12 @@ impl BasicOutputBuilder {
     pub fn clear_features(mut self) -> Self {
         self.features.clear();
         self
+    }
+
+    /// Sets the native token of the builder.
+    #[inline(always)]
+    pub fn with_native_token(self, native_token: impl Into<NativeToken>) -> Self {
+        self.add_feature(NativeTokenFeature::from(native_token.into()))
     }
 
     /// Adds a storage deposit return unlock condition if one is needed to cover the current amount
@@ -210,7 +199,6 @@ impl BasicOutputBuilder {
         let mut output = BasicOutput {
             amount: 0,
             mana: self.mana,
-            native_tokens: NativeTokens::from_set(self.native_tokens)?,
             unlock_conditions,
             features,
         };
@@ -234,7 +222,6 @@ impl From<&BasicOutput> for BasicOutputBuilder {
         Self {
             amount: OutputBuilderAmount::Amount(output.amount),
             mana: output.mana,
-            native_tokens: output.native_tokens.iter().copied().collect(),
             unlock_conditions: output.unlock_conditions.iter().cloned().collect(),
             features: output.features.iter().cloned().collect(),
         }
@@ -250,8 +237,6 @@ pub struct BasicOutput {
     amount: u64,
     /// Amount of stored Mana held by this output.
     mana: u64,
-    /// Native tokens held by this output.
-    native_tokens: NativeTokens,
     /// Define how the output can be unlocked in a transaction.
     #[packable(verify_with = verify_unlock_conditions_packable)]
     unlock_conditions: UnlockConditions,
@@ -272,7 +257,8 @@ impl BasicOutput {
     /// The set of allowed [`Feature`]s for an [`BasicOutput`].
     pub const ALLOWED_FEATURES: FeatureFlags = FeatureFlags::SENDER
         .union(FeatureFlags::METADATA)
-        .union(FeatureFlags::TAG);
+        .union(FeatureFlags::TAG)
+        .union(FeatureFlags::NATIVE_TOKEN);
 
     /// Creates a new [`BasicOutputBuilder`] with a provided amount.
     #[inline(always)]
@@ -300,12 +286,6 @@ impl BasicOutput {
 
     ///
     #[inline(always)]
-    pub fn native_tokens(&self) -> &NativeTokens {
-        &self.native_tokens
-    }
-
-    ///
-    #[inline(always)]
     pub fn unlock_conditions(&self) -> &UnlockConditions {
         &self.unlock_conditions
     }
@@ -314,6 +294,12 @@ impl BasicOutput {
     #[inline(always)]
     pub fn features(&self) -> &Features {
         &self.features
+    }
+
+    ///
+    #[inline(always)]
+    pub fn native_token(&self) -> Option<&NativeToken> {
+        self.features.native_token().map(|f| f.native_token())
     }
 
     ///
@@ -342,9 +328,9 @@ impl BasicOutput {
     /// Simple deposit outputs are basic outputs with only an address unlock condition, no native tokens and no
     /// features. They are used to return storage deposits.
     pub fn simple_deposit_address(&self) -> Option<&Address> {
-        if let [UnlockCondition::Address(uc)] = self.unlock_conditions().as_ref() {
-            if self.mana == 0 && self.native_tokens.is_empty() && self.features.is_empty() {
-                return Some(uc.address());
+        if let [UnlockCondition::Address(address)] = self.unlock_conditions().as_ref() {
+            if self.mana == 0 && self.features.is_empty() {
+                return Some(address.address());
             }
         }
 
@@ -436,8 +422,6 @@ pub(crate) mod dto {
         pub amount: u64,
         #[serde(with = "string")]
         pub mana: u64,
-        #[serde(skip_serializing_if = "Vec::is_empty", default)]
-        pub native_tokens: Vec<NativeToken>,
         pub unlock_conditions: Vec<UnlockConditionDto>,
         #[serde(skip_serializing_if = "Vec::is_empty", default)]
         pub features: Vec<Feature>,
@@ -449,7 +433,6 @@ pub(crate) mod dto {
                 kind: BasicOutput::KIND,
                 amount: value.amount(),
                 mana: value.mana(),
-                native_tokens: value.native_tokens().to_vec(),
                 unlock_conditions: value.unlock_conditions().iter().map(Into::into).collect::<_>(),
                 features: value.features().to_vec(),
             }
@@ -461,7 +444,6 @@ pub(crate) mod dto {
 
         fn try_from(dto: BasicOutputDto) -> Result<Self, Self::Error> {
             let mut builder = BasicOutputBuilder::new_with_amount(dto.amount)
-                .with_native_tokens(dto.native_tokens)
                 .with_mana(dto.mana)
                 .with_features(dto.features);
 
@@ -477,7 +459,6 @@ pub(crate) mod dto {
         pub fn try_from_dtos(
             amount: OutputBuilderAmount,
             mana: u64,
-            native_tokens: Option<Vec<NativeToken>>,
             unlock_conditions: Vec<UnlockConditionDto>,
             features: Option<Vec<Feature>>,
         ) -> Result<Self, Error> {
@@ -486,10 +467,6 @@ pub(crate) mod dto {
                 OutputBuilderAmount::MinimumAmount(params) => BasicOutputBuilder::new_with_minimum_amount(params),
             }
             .with_mana(mana);
-
-            if let Some(native_tokens) = native_tokens {
-                builder = builder.with_native_tokens(native_tokens);
-            }
 
             let unlock_conditions = unlock_conditions
                 .into_iter()
@@ -535,7 +512,6 @@ mod tests {
         let output_split = BasicOutput::try_from_dtos(
             OutputBuilderAmount::Amount(output.amount()),
             output.mana(),
-            Some(output.native_tokens().to_vec()),
             output.unlock_conditions().iter().map(Into::into).collect(),
             Some(output.features().to_vec()),
         )
@@ -549,7 +525,6 @@ mod tests {
             let output_split = BasicOutput::try_from_dtos(
                 builder.amount,
                 builder.mana,
-                Some(builder.native_tokens.iter().copied().collect()),
                 builder.unlock_conditions.iter().map(Into::into).collect(),
                 Some(builder.features.iter().cloned().collect()),
             )
@@ -558,13 +533,13 @@ mod tests {
         };
 
         let builder = BasicOutput::build_with_amount(100)
-            .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000).unwrap())
+            .with_native_token(NativeToken::new(TokenId::from(foundry_id), 1000).unwrap())
             .add_unlock_condition(address.clone())
             .with_features(rand_allowed_features(BasicOutput::ALLOWED_FEATURES));
         test_split_dto(builder);
 
         let builder = BasicOutput::build_with_minimum_amount(protocol_parameters.storage_score_parameters())
-            .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000).unwrap())
+            .with_native_token(NativeToken::new(TokenId::from(foundry_id), 1000).unwrap())
             .add_unlock_condition(address)
             .with_features(rand_allowed_features(BasicOutput::ALLOWED_FEATURES));
         test_split_dto(builder);
