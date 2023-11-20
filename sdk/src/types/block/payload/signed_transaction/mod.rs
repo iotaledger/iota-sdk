@@ -23,7 +23,7 @@ pub struct SignedTransactionPayload {
 }
 
 impl SignedTransactionPayload {
-    /// The payload kind of a [`SignedTransactionPayload`].
+    /// The [`Payload`](crate::types::block::payload::Payload) kind of a [`SignedTransactionPayload`].
     pub const KIND: u8 = 1;
 
     /// Creates a new [`SignedTransactionPayload`].
