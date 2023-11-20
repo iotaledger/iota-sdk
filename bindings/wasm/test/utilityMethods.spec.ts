@@ -50,29 +50,29 @@ describe('Utils methods', () => {
 
     it('hash output id', async () => {
         const outputId =
-            '0x00000000000000000000000000000000000000000000000000000000000000000000';
+            '0x0000000000000000000000000000000000000000000000000000000000000000000000000000';
 
         const accountId = Utils.computeAccountId(outputId);
 
         expect(accountId).toBe(
-            '0xcf077d276686ba64c0404b9eb2d15556782113c5a1985f262b70f9964d3bbd7f',
+            '0x0ebc2867a240719a70faacdfc3840e857fa450b37d95297ac4f166c2f70c3345',
         );
     });
 
     it('account id to address', async () => {
         const accountId =
-            '0xcf077d276686ba64c0404b9eb2d15556782113c5a1985f262b70f9964d3bbd7f';
+            '0x0ebc2867a240719a70faacdfc3840e857fa450b37d95297ac4f166c2f70c3345';
 
         const accountAddress = Utils.accountIdToBech32(accountId, 'rms');
 
         expect(accountAddress).toBe(
-            'rms1pr8swlf8v6rt5exqgp9eavk324t8sggnckseshex9dc0n9jd8w7h7wcnhn7',
+            'rms1pq8tc2r85fq8rxnsl2kdlsuyp6zhlfzskd7e22t6cnckdshhpse52a27mlc',
         );
     });
 
     it('compute foundry id', async () => {
         const accountAddress =
-            '0xcf077d276686ba64c0404b9eb2d15556782113c5a1985f262b70f9964d3bbd7f';
+            '0x0ebc2867a240719a70faacdfc3840e857fa450b37d95297ac4f166c2f70c3345';
         const serialNumber = 0;
         const tokenSchemeType = 0;
 
@@ -83,7 +83,7 @@ describe('Utils methods', () => {
         );
 
         expect(foundryId).toBe(
-            '0x08cf077d276686ba64c0404b9eb2d15556782113c5a1985f262b70f9964d3bbd7f0000000000',
+            '0x080ebc2867a240719a70faacdfc3840e857fa450b37d95297ac4f166c2f70c33450000000000',
         );
     });
 });

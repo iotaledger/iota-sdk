@@ -1,18 +1,15 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use packable::{
-    error::{UnpackError, UnpackErrorExt},
-    packer::Packer,
-    unpacker::Unpacker,
-    Packable,
-};
+use packable::Packable;
 use primitive_types::U256;
 
 use crate::types::block::Error;
 
 ///
-#[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
+#[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Packable)]
+#[packable(unpack_error = Error)]
+#[packable(verify_with = verify_simple_token_scheme)]
 pub struct SimpleTokenScheme {
     // Amount of tokens minted by a foundry.
     minted_tokens: U256,
@@ -37,13 +34,15 @@ impl SimpleTokenScheme {
         let melted_tokens = melted_tokens.into();
         let maximum_supply = maximum_supply.into();
 
-        verify_supply(&minted_tokens, &melted_tokens, &maximum_supply)?;
-
-        Ok(Self {
+        let token_scheme = Self {
             minted_tokens,
             melted_tokens,
             maximum_supply,
-        })
+        };
+
+        verify_simple_token_scheme::<true>(&token_scheme)?;
+
+        Ok(token_scheme)
     }
 
     /// Returns the number of minted tokens of the [`SimpleTokenScheme`].
@@ -71,45 +70,17 @@ impl SimpleTokenScheme {
     }
 }
 
-impl Packable for SimpleTokenScheme {
-    type UnpackError = Error;
-    type UnpackVisitor = ();
-
-    fn pack<P: Packer>(&self, packer: &mut P) -> Result<(), P::Error> {
-        self.minted_tokens.pack(packer)?;
-        self.melted_tokens.pack(packer)?;
-        self.maximum_supply.pack(packer)?;
-
-        Ok(())
-    }
-
-    fn unpack<U: Unpacker, const VERIFY: bool>(
-        unpacker: &mut U,
-        visitor: &Self::UnpackVisitor,
-    ) -> Result<Self, UnpackError<Self::UnpackError, U::Error>> {
-        let minted_tokens = U256::unpack::<_, VERIFY>(unpacker, visitor).coerce()?;
-        let melted_tokens = U256::unpack::<_, VERIFY>(unpacker, visitor).coerce()?;
-        let maximum_supply = U256::unpack::<_, VERIFY>(unpacker, visitor).coerce()?;
-
-        if VERIFY {
-            verify_supply(&minted_tokens, &melted_tokens, &maximum_supply).map_err(UnpackError::Packable)?;
-        }
-
-        Ok(Self {
-            minted_tokens,
-            melted_tokens,
-            maximum_supply,
-        })
-    }
-}
-
 #[inline]
-fn verify_supply(minted_tokens: &U256, melted_tokens: &U256, maximum_supply: &U256) -> Result<(), Error> {
-    if maximum_supply.is_zero() || melted_tokens > minted_tokens || minted_tokens - melted_tokens > *maximum_supply {
+fn verify_simple_token_scheme<const VERIFY: bool>(token_scheme: &SimpleTokenScheme) -> Result<(), Error> {
+    if VERIFY
+        && (token_scheme.maximum_supply.is_zero()
+            || token_scheme.melted_tokens > token_scheme.minted_tokens
+            || token_scheme.minted_tokens - token_scheme.melted_tokens > token_scheme.maximum_supply)
+    {
         return Err(Error::InvalidFoundryOutputSupply {
-            minted: *minted_tokens,
-            melted: *melted_tokens,
-            max: *maximum_supply,
+            minted: token_scheme.minted_tokens,
+            melted: token_scheme.melted_tokens,
+            max: token_scheme.maximum_supply,
         });
     }
 

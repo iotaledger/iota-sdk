@@ -6,7 +6,7 @@ from iota_sdk import Wallet, SendParams
 
 load_dotenv()
 
-# In this example we will send an amount below the minimum storage deposit
+# In this example we will send an amount below the minimum amount
 
 wallet = Wallet(os.environ['WALLET_DB_PATH'])
 

@@ -256,8 +256,8 @@ export interface __ClearListenersMethod__ {
     };
 }
 
-export type __MinimumRequiredStorageDepositMethod__ = {
-    name: 'minimumRequiredStorageDeposit';
+export type __ComputeMinimumOutputAmountMethod__ = {
+    name: 'computeMinimumOutputAmount';
     data: {
         output: Output;
     };

@@ -8,6 +8,7 @@ const DEFAULT_SYNC_INCOMING_TRANSACTIONS: bool = false;
 const DEFAULT_SYNC_ONLY_MOST_BASIC_OUTPUTS: bool = false;
 const DEFAULT_SYNC_PENDING_TRANSACTIONS: bool = true;
 const DEFAULT_SYNC_NATIVE_TOKEN_FOUNDRIES: bool = false;
+const DEFAULT_SYNC_IMPLICIT_ACCOUNTS: bool = false;
 
 /// The synchronization options
 #[derive(Debug, Clone, Eq, PartialEq, Hash, Serialize, Deserialize)]
@@ -25,7 +26,7 @@ pub struct SyncOptions {
     /// Checks pending transactions and reissues them if necessary.
     #[serde(default = "default_sync_pending_transactions")]
     pub sync_pending_transactions: bool,
-    /// Specifies what outputs should be synced for the ed25519 addresses from the wallet.
+    /// Specifies what outputs should be synced for the ed25519 address from the wallet.
     #[serde(default)]
     pub wallet: WalletSyncOptions,
     /// Specifies what outputs should be synced for the address of an account output.
@@ -35,12 +36,15 @@ pub struct SyncOptions {
     #[serde(default)]
     pub nft: NftSyncOptions,
     /// Specifies if only basic outputs with an AddressUnlockCondition alone should be synced, will overwrite
-    /// `account`, `alias` and `nft` options.
+    /// `wallet`, `account` and `nft` options.
     #[serde(default = "default_sync_only_most_basic_outputs")]
     pub sync_only_most_basic_outputs: bool,
     /// Sync native token foundries, so their metadata can be returned in the balance.
     #[serde(default = "default_sync_native_token_foundries")]
     pub sync_native_token_foundries: bool,
+    /// Sync implicit accounts.
+    #[serde(default = "default_sync_implicit_accounts")]
+    pub sync_implicit_accounts: bool,
 }
 
 fn default_force_syncing() -> bool {
@@ -63,6 +67,10 @@ fn default_sync_native_token_foundries() -> bool {
     DEFAULT_SYNC_NATIVE_TOKEN_FOUNDRIES
 }
 
+fn default_sync_implicit_accounts() -> bool {
+    DEFAULT_SYNC_IMPLICIT_ACCOUNTS
+}
+
 impl Default for SyncOptions {
     fn default() -> Self {
         Self {
@@ -74,6 +82,7 @@ impl Default for SyncOptions {
             sync_only_most_basic_outputs: default_sync_only_most_basic_outputs(),
             sync_native_token_foundries: default_sync_native_token_foundries(),
             force_syncing: default_force_syncing(),
+            sync_implicit_accounts: default_sync_implicit_accounts(),
         }
     }
 }

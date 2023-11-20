@@ -3,26 +3,21 @@
 
 use alloc::collections::BTreeSet;
 
-use packable::Packable;
+use packable::{Packable, PackableExt};
 
-use crate::types::{
-    block::{
-        address::{AccountAddress, Address},
-        output::{
-            chain_id::ChainId,
-            unlock_condition::{
-                verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions,
-            },
-            verify_output_amount_min, verify_output_amount_packable, verify_output_amount_supply, Output,
-            OutputBuilderAmount, OutputId, Rent, RentStructure, StateTransitionError, StateTransitionVerifier,
-        },
-        protocol::ProtocolParameters,
-        semantic::{SemanticValidationContext, TransactionFailureReason},
-        slot::EpochIndex,
-        unlock::Unlock,
-        Error,
+use crate::types::block::{
+    address::{AccountAddress, Address},
+    output::{
+        chain_id::ChainId,
+        unlock_condition::{verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions},
+        MinimumOutputAmount, Output, OutputBuilderAmount, OutputId, StateTransitionError, StateTransitionVerifier,
+        StorageScore, StorageScoreParameters,
     },
-    ValidationParams,
+    protocol::ProtocolParameters,
+    semantic::{SemanticValidationContext, TransactionFailureReason},
+    slot::EpochIndex,
+    unlock::Unlock,
+    Error,
 };
 
 crate::impl_id!(
@@ -74,16 +69,16 @@ impl DelegationOutputBuilder {
         )
     }
 
-    /// Creates a [`DelegationOutputBuilder`] with a provided rent structure.
-    /// The amount will be set to the minimum storage deposit.
-    pub fn new_with_minimum_storage_deposit(
-        rent_structure: RentStructure,
+    /// Creates a [`DelegationOutputBuilder`] with provided storage score parameters.
+    /// The amount will be set to the minimum required amount of the resulting output.
+    pub fn new_with_minimum_amount(
+        params: StorageScoreParameters,
         delegated_amount: u64,
         delegation_id: DelegationId,
         validator_address: AccountAddress,
     ) -> Self {
         Self::new(
-            OutputBuilderAmount::MinimumStorageDeposit(rent_structure),
+            OutputBuilderAmount::MinimumAmount(params),
             delegated_amount,
             delegation_id,
             validator_address,
@@ -113,9 +108,9 @@ impl DelegationOutputBuilder {
         self
     }
 
-    /// Sets the amount to the minimum storage deposit.
-    pub fn with_minimum_storage_deposit(mut self, rent_structure: RentStructure) -> Self {
-        self.amount = OutputBuilderAmount::MinimumStorageDeposit(rent_structure);
+    /// Sets the amount to the minimum required amount.
+    pub fn with_minimum_amount(mut self, params: StorageScoreParameters) -> Self {
+        self.amount = OutputBuilderAmount::MinimumAmount(params);
         self
     }
 
@@ -179,7 +174,7 @@ impl DelegationOutputBuilder {
         verify_unlock_conditions::<true>(&unlock_conditions)?;
 
         let mut output = DelegationOutput {
-            amount: 1u64,
+            amount: 0,
             delegated_amount: self.delegated_amount,
             delegation_id: self.delegation_id,
             validator_address: self.validator_address,
@@ -190,33 +185,15 @@ impl DelegationOutputBuilder {
 
         output.amount = match self.amount {
             OutputBuilderAmount::Amount(amount) => amount,
-            OutputBuilderAmount::MinimumStorageDeposit(rent_structure) => {
-                Output::Delegation(output.clone()).rent_cost(rent_structure)
-            }
+            OutputBuilderAmount::MinimumAmount(params) => output.minimum_amount(params),
         };
-
-        verify_output_amount_min(output.amount)?;
-
-        Ok(output)
-    }
-
-    /// Finishes the builder into a [`DelegationOutput`] with parameters verification.
-    pub fn finish_with_params<'a>(
-        self,
-        params: impl Into<ValidationParams<'a>> + Send,
-    ) -> Result<DelegationOutput, Error> {
-        let output = self.finish()?;
-
-        if let Some(token_supply) = params.into().token_supply() {
-            verify_output_amount_supply(output.amount, token_supply)?;
-        }
 
         Ok(output)
     }
 
     /// Finishes the [`DelegationOutputBuilder`] into an [`Output`].
-    pub fn finish_output(self, token_supply: u64) -> Result<Output, Error> {
-        Ok(Output::Delegation(self.finish_with_params(token_supply)?))
+    pub fn finish_output(self) -> Result<Output, Error> {
+        Ok(Output::Delegation(self.finish()?))
     }
 }
 
@@ -240,7 +217,6 @@ impl From<&DelegationOutput> for DelegationOutputBuilder {
 #[packable(unpack_visitor = ProtocolParameters)]
 pub struct DelegationOutput {
     /// Amount of IOTA coins to deposit with this output.
-    #[packable(verify_with = verify_output_amount_packable)]
     amount: u64,
     /// Amount of delegated IOTA coins.
     delegated_amount: u64,
@@ -274,20 +250,15 @@ impl DelegationOutput {
         DelegationOutputBuilder::new_with_amount(amount, delegated_amount, delegation_id, validator_address)
     }
 
-    /// Creates a new [`DelegationOutputBuilder`] with a provided rent structure.
-    /// The amount will be set to the minimum storage deposit.
-    pub fn build_with_minimum_storage_deposit(
-        rent_structure: RentStructure,
+    /// Creates a new [`DelegationOutputBuilder`] with provided storage score parameters.
+    /// The amount will be set to the minimum required amount.
+    pub fn build_with_minimum_amount(
+        params: StorageScoreParameters,
         delegated_amount: u64,
         delegation_id: DelegationId,
         validator_address: AccountAddress,
     ) -> DelegationOutputBuilder {
-        DelegationOutputBuilder::new_with_minimum_storage_deposit(
-            rent_structure,
-            delegated_amount,
-            delegation_id,
-            validator_address,
-        )
+        DelegationOutputBuilder::new_with_minimum_amount(params, delegated_amount, delegation_id, validator_address)
     }
 
     /// Returns the amount of the [`DelegationOutput`].
@@ -409,6 +380,18 @@ impl StateTransitionVerifier for DelegationOutput {
     }
 }
 
+impl StorageScore for DelegationOutput {
+    fn storage_score(&self, params: StorageScoreParameters) -> u64 {
+        params.output_offset()
+            // Type byte
+            + (1 + self.packed_len() as u64) * params.data_factor() as u64
+            + params.delegation_offset()
+            + self.unlock_conditions.storage_score(params)
+    }
+}
+
+impl MinimumOutputAmount for DelegationOutput {}
+
 fn verify_validator_address<const VERIFY: bool>(validator_address: &AccountAddress) -> Result<(), Error> {
     if VERIFY && validator_address.is_null() {
         Err(Error::NullDelegationValidatorId)
@@ -451,12 +434,9 @@ pub(crate) mod dto {
 
     use super::*;
     use crate::{
-        types::{
-            block::{
-                output::{unlock_condition::dto::UnlockConditionDto, OutputBuilderAmount},
-                Error,
-            },
-            TryFromDto,
+        types::block::{
+            output::{unlock_condition::dto::UnlockConditionDto, OutputBuilderAmount},
+            Error,
         },
         utils::serde::string,
     };
@@ -492,14 +472,10 @@ pub(crate) mod dto {
         }
     }
 
-    impl TryFromDto for DelegationOutput {
-        type Dto = DelegationOutputDto;
+    impl TryFrom<DelegationOutputDto> for DelegationOutput {
         type Error = Error;
 
-        fn try_from_dto_with_params_inner(
-            dto: Self::Dto,
-            params: crate::types::ValidationParams<'_>,
-        ) -> Result<Self, Self::Error> {
+        fn try_from(dto: DelegationOutputDto) -> Result<Self, Self::Error> {
             let mut builder = DelegationOutputBuilder::new_with_amount(
                 dto.amount,
                 dto.delegated_amount,
@@ -510,16 +486,16 @@ pub(crate) mod dto {
             .with_end_epoch(dto.end_epoch);
 
             for u in dto.unlock_conditions {
-                builder = builder.add_unlock_condition(UnlockCondition::try_from_dto_with_params(u, &params)?);
+                builder = builder.add_unlock_condition(UnlockCondition::from(u));
             }
 
-            builder.finish_with_params(params)
+            builder.finish()
         }
     }
 
     impl DelegationOutput {
         #[allow(clippy::too_many_arguments)]
-        pub fn try_from_dtos<'a>(
+        pub fn try_from_dtos(
             amount: OutputBuilderAmount,
             delegated_amount: u64,
             delegation_id: &DelegationId,
@@ -527,9 +503,7 @@ pub(crate) mod dto {
             start_epoch: impl Into<EpochIndex>,
             end_epoch: impl Into<EpochIndex>,
             unlock_conditions: Vec<UnlockConditionDto>,
-            params: impl Into<ValidationParams<'a>> + Send,
         ) -> Result<Self, Error> {
-            let params = params.into();
             let mut builder = match amount {
                 OutputBuilderAmount::Amount(amount) => DelegationOutputBuilder::new_with_amount(
                     amount,
@@ -537,25 +511,23 @@ pub(crate) mod dto {
                     *delegation_id,
                     *validator_address,
                 ),
-                OutputBuilderAmount::MinimumStorageDeposit(rent_structure) => {
-                    DelegationOutputBuilder::new_with_minimum_storage_deposit(
-                        rent_structure,
-                        delegated_amount,
-                        *delegation_id,
-                        *validator_address,
-                    )
-                }
+                OutputBuilderAmount::MinimumAmount(params) => DelegationOutputBuilder::new_with_minimum_amount(
+                    params,
+                    delegated_amount,
+                    *delegation_id,
+                    *validator_address,
+                ),
             }
             .with_start_epoch(start_epoch)
             .with_end_epoch(end_epoch);
 
             let unlock_conditions = unlock_conditions
                 .into_iter()
-                .map(|u| UnlockCondition::try_from_dto_with_params(u, &params))
-                .collect::<Result<Vec<UnlockCondition>, Error>>()?;
+                .map(UnlockCondition::from)
+                .collect::<Vec<UnlockCondition>>();
             builder = builder.with_unlock_conditions(unlock_conditions);
 
-            builder.finish_with_params(params)
+            builder.finish()
         }
     }
 }

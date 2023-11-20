@@ -8,22 +8,19 @@ use hashbrown::HashSet;
 use packable::{bounded::BoundedU16, prefix::BoxedSlicePrefix, Packable, PackableExt};
 
 use crate::{
-    types::{
-        block::{
-            capabilities::{Capabilities, CapabilityFlag},
-            context_input::{ContextInput, CONTEXT_INPUT_COUNT_RANGE},
-            input::{Input, INPUT_COUNT_RANGE},
-            mana::{verify_mana_allotments_sum, ManaAllotment, ManaAllotments},
-            output::{NativeTokens, Output, OUTPUT_COUNT_RANGE},
-            payload::{
-                signed_transaction::{TransactionHash, TransactionId, TransactionSigningHash},
-                OptionalPayload, Payload,
-            },
-            protocol::ProtocolParameters,
-            slot::SlotIndex,
-            Error,
+    types::block::{
+        capabilities::{Capabilities, CapabilityFlag},
+        context_input::{ContextInput, CONTEXT_INPUT_COUNT_RANGE},
+        input::{Input, INPUT_COUNT_RANGE},
+        mana::{verify_mana_allotments_sum, ManaAllotment, ManaAllotments},
+        output::{Output, OUTPUT_COUNT_RANGE},
+        payload::{
+            signed_transaction::{TransactionHash, TransactionId, TransactionSigningHash},
+            OptionalPayload, Payload,
         },
-        ValidationParams,
+        protocol::ProtocolParameters,
+        slot::SlotIndex,
+        Error,
     },
     utils::merkle_hasher,
 };
@@ -123,10 +120,13 @@ impl TransactionBuilder {
     }
 
     /// Finishes a [`TransactionBuilder`] into a [`Transaction`].
-    pub fn finish_with_params<'a>(self, params: impl Into<ValidationParams<'a>> + Send) -> Result<Transaction, Error> {
+    pub fn finish_with_params<'a>(
+        self,
+        params: impl Into<Option<&'a ProtocolParameters>>,
+    ) -> Result<Transaction, Error> {
         let params = params.into();
 
-        if let Some(protocol_parameters) = params.protocol_parameters() {
+        if let Some(protocol_parameters) = params {
             if self.network_id != protocol_parameters.network_id() {
                 return Err(Error::NetworkIdMismatch {
                     expected: protocol_parameters.network_id(),
@@ -139,7 +139,7 @@ impl TransactionBuilder {
             .creation_slot
             .or_else(|| {
                 #[cfg(feature = "std")]
-                let creation_slot = params.protocol_parameters().map(|params| {
+                let creation_slot = params.map(|params| {
                     params.slot_index(
                         std::time::SystemTime::now()
                             .duration_since(std::time::UNIX_EPOCH)
@@ -169,7 +169,7 @@ impl TransactionBuilder {
 
         let allotments = ManaAllotments::from_set(self.allotments)?;
 
-        if let Some(protocol_parameters) = params.protocol_parameters() {
+        if let Some(protocol_parameters) = params {
             verify_mana_allotments_sum(allotments.iter(), protocol_parameters)?;
         }
 
@@ -181,7 +181,7 @@ impl TransactionBuilder {
             .try_into()
             .map_err(Error::InvalidOutputCount)?;
 
-        if let Some(protocol_parameters) = params.protocol_parameters() {
+        if let Some(protocol_parameters) = params {
             verify_outputs::<true>(&outputs, protocol_parameters)?;
         }
 
@@ -200,7 +200,7 @@ impl TransactionBuilder {
     /// Finishes a [`TransactionBuilder`] into a [`Transaction`] without protocol
     /// validation.
     pub fn finish(self) -> Result<Transaction, Error> {
-        self.finish_with_params(ValidationParams::default())
+        self.finish_with_params(None)
     }
 }
 
@@ -425,17 +425,16 @@ fn verify_payload_packable<const VERIFY: bool>(
 fn verify_outputs<const VERIFY: bool>(outputs: &[Output], visitor: &ProtocolParameters) -> Result<(), Error> {
     if VERIFY {
         let mut amount_sum: u64 = 0;
-        let mut native_tokens_count: u8 = 0;
         let mut chain_ids = HashSet::new();
 
         for output in outputs.iter() {
-            let (amount, native_tokens, chain_id) = match output {
-                Output::Basic(output) => (output.amount(), Some(output.native_tokens()), None),
-                Output::Account(output) => (output.amount(), Some(output.native_tokens()), Some(output.chain_id())),
-                Output::Anchor(output) => (output.amount(), None, Some(output.chain_id())),
-                Output::Foundry(output) => (output.amount(), Some(output.native_tokens()), Some(output.chain_id())),
-                Output::Nft(output) => (output.amount(), Some(output.native_tokens()), Some(output.chain_id())),
-                Output::Delegation(output) => (output.amount(), None, Some(output.chain_id())),
+            let (amount, chain_id) = match output {
+                Output::Basic(output) => (output.amount(), None),
+                Output::Account(output) => (output.amount(), Some(output.chain_id())),
+                Output::Anchor(output) => (output.amount(), Some(output.chain_id())),
+                Output::Foundry(output) => (output.amount(), Some(output.chain_id())),
+                Output::Nft(output) => (output.amount(), Some(output.chain_id())),
+                Output::Delegation(output) => (output.amount(), Some(output.chain_id())),
             };
 
             amount_sum = amount_sum
@@ -447,23 +446,13 @@ fn verify_outputs<const VERIFY: bool>(outputs: &[Output], visitor: &ProtocolPara
                 return Err(Error::InvalidTransactionAmountSum(amount_sum as u128));
             }
 
-            if let Some(native_tokens) = native_tokens {
-                native_tokens_count = native_tokens_count.checked_add(native_tokens.len() as u8).ok_or(
-                    Error::InvalidTransactionNativeTokensCount(native_tokens_count as u16 + native_tokens.len() as u16),
-                )?;
-
-                if native_tokens_count > NativeTokens::COUNT_MAX {
-                    return Err(Error::InvalidTransactionNativeTokensCount(native_tokens_count as u16));
-                }
-            }
-
             if let Some(chain_id) = chain_id {
                 if !chain_id.is_null() && !chain_ids.insert(chain_id) {
                     return Err(Error::DuplicateOutputChain(chain_id));
                 }
             }
 
-            output.verify_storage_deposit(visitor.rent_structure(), visitor.token_supply())?;
+            output.verify_storage_deposit(visitor.storage_score_parameters())?;
         }
     }
 
@@ -576,11 +565,13 @@ pub(crate) mod dto {
         }
     }
 
-    impl TryFromDto for Transaction {
-        type Dto = TransactionDto;
+    impl TryFromDto<TransactionDto> for Transaction {
         type Error = Error;
 
-        fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
+        fn try_from_dto_with_params_inner(
+            dto: TransactionDto,
+            params: Option<&ProtocolParameters>,
+        ) -> Result<Self, Self::Error> {
             let network_id = dto
                 .network_id
                 .parse::<u64>()
@@ -588,12 +579,12 @@ pub(crate) mod dto {
             let mana_allotments = dto
                 .allotments
                 .into_iter()
-                .map(|o| ManaAllotment::try_from_dto_with_params(o, &params))
+                .map(|o| ManaAllotment::try_from_dto_with_params_inner(o, params))
                 .collect::<Result<Vec<ManaAllotment>, Error>>()?;
             let outputs = dto
                 .outputs
                 .into_iter()
-                .map(|o| Output::try_from_dto_with_params(o, &params))
+                .map(Output::try_from)
                 .collect::<Result<Vec<Output>, Error>>()?;
 
             let mut builder = Self::builder(network_id)

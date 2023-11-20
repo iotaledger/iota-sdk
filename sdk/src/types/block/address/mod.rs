@@ -22,16 +22,19 @@ pub use self::{
     bech32::{Bech32Address, Hrp},
     ed25519::Ed25519Address,
     implicit_account_creation::ImplicitAccountCreationAddress,
-    multi::MultiAddress,
+    multi::{MultiAddress, WeightedAddress},
     nft::NftAddress,
     restricted::{AddressCapabilities, AddressCapabilityFlag, RestrictedAddress},
 };
-use crate::types::block::{
-    output::Output,
-    semantic::{SemanticValidationContext, TransactionFailureReason},
-    signature::Signature,
-    unlock::Unlock,
-    ConvertTo, Error,
+use crate::{
+    types::block::{
+        output::{Output, StorageScore, StorageScoreParameters},
+        semantic::{SemanticValidationContext, TransactionFailureReason},
+        signature::Signature,
+        unlock::Unlock,
+        Error,
+    },
+    utils::ConvertTo,
 };
 
 /// A generic address supporting different address kinds.
@@ -134,7 +137,7 @@ impl Address {
 
                 context.unlocked_addresses.insert(self.clone());
             }
-            (Self::Ed25519(_ed25519_address), Unlock::Reference(_unlock)) => {
+            (Self::Ed25519(_), Unlock::Reference(_)) => {
                 // TODO actually check that it was unlocked by the same signature.
                 if !context.unlocked_addresses.contains(self) {
                     return Err(TransactionFailureReason::InvalidInputUnlock);
@@ -168,10 +171,45 @@ impl Address {
             }
             // TODO maybe shouldn't be a semantic error but this function currently returns a TransactionFailureReason.
             (Self::Anchor(_), _) => return Err(TransactionFailureReason::SemanticValidationFailed),
+            (Self::ImplicitAccountCreation(implicit_account_creation_address), _) => {
+                return Self::from(*implicit_account_creation_address.ed25519_address()).unlock(unlock, context);
+            }
+            (Self::Multi(multi_address), Unlock::Multi(unlock)) => {
+                if multi_address.len() != unlock.len() {
+                    return Err(TransactionFailureReason::InvalidInputUnlock);
+                }
+
+                let mut cumulative_unlocked_weight = 0u16;
+
+                for (address, unlock) in multi_address.addresses().iter().zip(unlock.unlocks()) {
+                    if !unlock.is_empty() {
+                        address.unlock(unlock, context)?;
+                        cumulative_unlocked_weight += address.weight() as u16;
+                    }
+                }
+
+                if cumulative_unlocked_weight < multi_address.threshold() {
+                    return Err(TransactionFailureReason::InvalidInputUnlock);
+                }
+            }
             _ => return Err(TransactionFailureReason::InvalidInputUnlock),
         }
 
         Ok(())
+    }
+}
+
+impl StorageScore for Address {
+    fn storage_score(&self, params: StorageScoreParameters) -> u64 {
+        match self {
+            Self::Ed25519(address) => address.storage_score(params),
+            Self::Account(address) => address.storage_score(params),
+            Self::Nft(address) => address.storage_score(params),
+            Self::Anchor(address) => address.storage_score(params),
+            Self::ImplicitAccountCreation(address) => address.storage_score(params),
+            Self::Multi(address) => address.storage_score(params),
+            Self::Restricted(address) => address.storage_score(params),
+        }
     }
 }
 

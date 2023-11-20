@@ -5,7 +5,10 @@ use core::str::FromStr;
 
 use derive_more::{AsRef, Deref, Display, From};
 
-use crate::types::block::{output::AccountId, Error};
+use crate::types::block::{
+    output::{AccountId, StorageScore},
+    Error,
+};
 
 /// An account address.
 #[derive(Clone, Copy, Eq, PartialEq, Ord, PartialOrd, Hash, From, AsRef, Deref, Display, packable::Packable)]
@@ -36,6 +39,8 @@ impl AccountAddress {
         self.0
     }
 }
+
+impl StorageScore for AccountAddress {}
 
 impl FromStr for AccountAddress {
     type Err = Error;

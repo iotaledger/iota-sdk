@@ -36,6 +36,7 @@ impl AnchorUnlock {
     }
 }
 
+#[cfg(feature = "serde")]
 mod dto {
     use serde::{Deserialize, Serialize};
 

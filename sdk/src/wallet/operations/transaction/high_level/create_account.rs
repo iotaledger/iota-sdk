@@ -45,7 +45,6 @@ where
     ///     address: None,
     ///     immutable_metadata: Some(b"some immutable account metadata".to_vec()),
     ///     metadata: Some(b"some account metadata".to_vec()),
-    ///     state_metadata: Some(b"some account state metadata".to_vec()),
     /// };
     ///
     /// let transaction = account.create_account_output(params, None).await?;
@@ -74,8 +73,7 @@ where
         options: impl Into<Option<TransactionOptions>> + Send,
     ) -> crate::wallet::Result<PreparedTransactionData> {
         log::debug!("[TRANSACTION] prepare_create_account_output");
-        let rent_structure = self.client().get_rent_structure().await?;
-        let token_supply = self.client().get_token_supply().await?;
+        let storage_score_params = self.client().get_storage_score_parameters().await?;
 
         let address = match params.as_ref().and_then(|options| options.address.as_ref()) {
             Some(bech32_address) => {
@@ -86,7 +84,7 @@ where
         };
 
         let mut account_output_builder =
-            AccountOutputBuilder::new_with_minimum_storage_deposit(rent_structure, AccountId::null())
+            AccountOutputBuilder::new_with_minimum_amount(storage_score_params, AccountId::null())
                 .with_foundry_counter(0)
                 .add_unlock_condition(AddressUnlockCondition::new(address.clone()));
         if let Some(CreateAccountParams {
@@ -104,7 +102,7 @@ where
             }
         }
 
-        let outputs = [account_output_builder.finish_output(token_supply)?];
+        let outputs = [account_output_builder.finish_output()?];
 
         self.prepare_transaction(outputs, options).await
     }

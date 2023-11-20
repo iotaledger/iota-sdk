@@ -60,7 +60,7 @@ impl InputSelection {
             .with_foundry_counter(u32::max(highest_foundry_serial_number, input.foundry_counter()))
             .with_features(features);
 
-        let output = builder.finish_output(self.protocol_parameters.token_supply())?;
+        let output = builder.finish_output()?;
 
         self.automatically_transitioned.insert(ChainId::from(account_id));
 
@@ -100,7 +100,7 @@ impl InputSelection {
         let output = NftOutputBuilder::from(input)
             .with_nft_id(nft_id)
             .with_features(features)
-            .finish_output(self.protocol_parameters.token_supply())?;
+            .finish_output()?;
 
         self.automatically_transitioned.insert(ChainId::from(nft_id));
 
@@ -138,7 +138,7 @@ impl InputSelection {
             return Ok(None);
         }
 
-        let output = FoundryOutputBuilder::from(input).finish_output(self.protocol_parameters.token_supply())?;
+        let output = FoundryOutputBuilder::from(input).finish_output()?;
 
         self.automatically_transitioned.insert(ChainId::from(foundry_id));
 

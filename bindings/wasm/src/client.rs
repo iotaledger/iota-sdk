@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use iota_sdk_bindings_core::{
-    call_client_method,
+    call_client_method as rust_call_client_method,
     iota_sdk::client::{Client, ClientBuilder},
     ClientMethod, Response,
 };
@@ -46,15 +46,15 @@ pub async fn destroy_client(_client_method_handler: &ClientMethodHandler) -> Res
 /// Handles a method, returns the response as a JSON-encoded string.
 ///
 /// Returns an error if the response itself is an error or panic.
-#[wasm_bindgen(js_name = callClientMethodAsync)]
+#[wasm_bindgen(js_name = callClientMethod)]
 #[allow(non_snake_case)]
-pub fn call_client_method_async(method: String, methodHandler: &ClientMethodHandler) -> Result<PromiseString, JsValue> {
+pub fn call_client_method(methodHandler: &ClientMethodHandler, method: String) -> Result<PromiseString, JsValue> {
     let client: Client = methodHandler.client.clone();
 
     let promise: js_sys::Promise = future_to_promise(async move {
         let method: ClientMethod = serde_json::from_str(&method).map_err(|err| err.to_string())?;
 
-        let response = call_client_method(&client, method).await;
+        let response = rust_call_client_method(&client, method).await;
         let ser = JsValue::from(serde_json::to_string(&response).map_err(|err| err.to_string())?);
         match response {
             Response::Error(_) | Response::Panic(_) => Err(ser),

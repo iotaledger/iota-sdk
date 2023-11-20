@@ -15,11 +15,7 @@ mod node_api;
 mod secret_manager;
 mod signing;
 
-use std::{
-    collections::{BTreeSet, HashMap},
-    hash::Hash,
-    str::FromStr,
-};
+use std::{collections::HashMap, hash::Hash, str::FromStr};
 
 use crypto::keys::bip44::Bip44;
 use iota_sdk::{
@@ -32,14 +28,13 @@ use iota_sdk::{
                 AddressUnlockCondition, ExpirationUnlockCondition, ImmutableAccountAddressUnlockCondition,
                 StorageDepositReturnUnlockCondition, TimelockUnlockCondition, UnlockCondition,
             },
-            AccountId, AccountOutputBuilder, BasicOutputBuilder, FoundryOutputBuilder, NativeToken, NativeTokens,
-            NftId, NftOutputBuilder, Output, OutputId, OutputMetadata, SimpleTokenScheme, TokenId, TokenScheme,
+            AccountId, AccountOutputBuilder, BasicOutputBuilder, FoundryOutputBuilder, NativeToken, NftId,
+            NftOutputBuilder, Output, OutputId, OutputMetadata, SimpleTokenScheme, TokenId, TokenScheme,
         },
         rand::{block::rand_block_id, slot::rand_slot_commitment_id, transaction::rand_transaction_id},
     },
 };
 
-const TOKEN_SUPPLY: u64 = 1_813_620_509_061_365;
 const ACCOUNT_ID_0: &str = "0x0000000000000000000000000000000000000000000000000000000000000000";
 const ACCOUNT_ID_1: &str = "0x1111111111111111111111111111111111111111111111111111111111111111";
 const ACCOUNT_ID_2: &str = "0x2222222222222222222222222222222222222222222222222222222222222222";
@@ -64,7 +59,7 @@ enum Build<'a> {
     Basic(
         u64,
         &'a str,
-        Option<Vec<(&'a str, u64)>>,
+        Option<(&'a str, u64)>,
         Option<&'a str>,
         Option<(&'a str, u64)>,
         Option<u32>,
@@ -75,29 +70,20 @@ enum Build<'a> {
         u64,
         NftId,
         &'a str,
-        Option<Vec<(&'a str, u64)>>,
         Option<&'a str>,
         Option<&'a str>,
         Option<(&'a str, u64)>,
         Option<(&'a str, u32)>,
         Option<Bip44>,
     ),
-    Account(
-        u64,
-        AccountId,
-        &'a str,
-        Option<Vec<(&'a str, u64)>>,
-        Option<&'a str>,
-        Option<&'a str>,
-        Option<Bip44>,
-    ),
-    Foundry(u64, AccountId, u32, SimpleTokenScheme, Option<Vec<(&'a str, u64)>>),
+    Account(u64, AccountId, &'a str, Option<&'a str>, Option<&'a str>, Option<Bip44>),
+    Foundry(u64, AccountId, u32, SimpleTokenScheme, Option<(&'a str, u64)>),
 }
 
 fn build_basic_output(
     amount: u64,
     bech32_address: Bech32Address,
-    native_tokens: Option<Vec<(&str, u64)>>,
+    native_token: Option<(&str, u64)>,
     bech32_sender: Option<Bech32Address>,
     sdruc: Option<(Bech32Address, u64)>,
     timelock: Option<u32>,
@@ -106,12 +92,8 @@ fn build_basic_output(
     let mut builder =
         BasicOutputBuilder::new_with_amount(amount).add_unlock_condition(AddressUnlockCondition::new(bech32_address));
 
-    if let Some(native_tokens) = native_tokens {
-        builder = builder.with_native_tokens(
-            native_tokens
-                .into_iter()
-                .map(|(id, amount)| NativeToken::new(TokenId::from_str(id).unwrap(), amount).unwrap()),
-        );
+    if let Some((id, amount)) = native_token {
+        builder = builder.with_native_token(NativeToken::new(TokenId::from_str(id).unwrap(), amount).unwrap());
     }
 
     if let Some(bech32_sender) = bech32_sender {
@@ -119,8 +101,7 @@ fn build_basic_output(
     }
 
     if let Some((address, amount)) = sdruc {
-        builder = builder
-            .add_unlock_condition(StorageDepositReturnUnlockCondition::new(address, amount, TOKEN_SUPPLY).unwrap());
+        builder = builder.add_unlock_condition(StorageDepositReturnUnlockCondition::new(address, amount));
     }
 
     if let Some(timelock) = timelock {
@@ -131,7 +112,7 @@ fn build_basic_output(
         builder = builder.add_unlock_condition(ExpirationUnlockCondition::new(address, timestamp).unwrap());
     }
 
-    builder.finish_output(TOKEN_SUPPLY).unwrap()
+    builder.finish_output().unwrap()
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -139,7 +120,6 @@ fn build_nft_output(
     amount: u64,
     nft_id: NftId,
     bech32_address: Bech32Address,
-    native_tokens: Option<Vec<(&str, u64)>>,
     bech32_sender: Option<Bech32Address>,
     bech32_issuer: Option<Bech32Address>,
     sdruc: Option<(Bech32Address, u64)>,
@@ -147,14 +127,6 @@ fn build_nft_output(
 ) -> Output {
     let mut builder = NftOutputBuilder::new_with_amount(amount, nft_id)
         .add_unlock_condition(AddressUnlockCondition::new(bech32_address));
-
-    if let Some(native_tokens) = native_tokens {
-        builder = builder.with_native_tokens(
-            native_tokens
-                .into_iter()
-                .map(|(id, amount)| NativeToken::new(TokenId::from_str(id).unwrap(), amount).unwrap()),
-        );
-    }
 
     if let Some(bech32_sender) = bech32_sender {
         builder = builder.add_feature(SenderFeature::new(bech32_sender));
@@ -165,15 +137,14 @@ fn build_nft_output(
     }
 
     if let Some((address, amount)) = sdruc {
-        builder = builder
-            .add_unlock_condition(StorageDepositReturnUnlockCondition::new(address, amount, TOKEN_SUPPLY).unwrap());
+        builder = builder.add_unlock_condition(StorageDepositReturnUnlockCondition::new(address, amount));
     }
 
     if let Some((address, timestamp)) = expiration {
         builder = builder.add_unlock_condition(ExpirationUnlockCondition::new(address, timestamp).unwrap());
     }
 
-    builder.finish_output(TOKEN_SUPPLY).unwrap()
+    builder.finish_output().unwrap()
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -181,20 +152,11 @@ fn build_account_output(
     amount: u64,
     account_id: AccountId,
     address: Bech32Address,
-    native_tokens: Option<Vec<(&str, u64)>>,
     bech32_sender: Option<Bech32Address>,
     bech32_issuer: Option<Bech32Address>,
 ) -> Output {
     let mut builder = AccountOutputBuilder::new_with_amount(amount, account_id)
         .add_unlock_condition(AddressUnlockCondition::new(address));
-
-    if let Some(native_tokens) = native_tokens {
-        builder = builder.with_native_tokens(
-            native_tokens
-                .into_iter()
-                .map(|(id, amount)| NativeToken::new(TokenId::from_str(id).unwrap(), amount).unwrap()),
-        );
-    }
 
     if let Some(bech32_sender) = bech32_sender {
         builder = builder.add_feature(SenderFeature::new(bech32_sender));
@@ -204,7 +166,7 @@ fn build_account_output(
         builder = builder.add_immutable_feature(IssuerFeature::new(bech32_issuer));
     }
 
-    builder.finish_output(TOKEN_SUPPLY).unwrap()
+    builder.finish_output().unwrap()
 }
 
 fn build_foundry_output(
@@ -212,31 +174,27 @@ fn build_foundry_output(
     account_id: AccountId,
     serial_number: u32,
     token_scheme: SimpleTokenScheme,
-    native_tokens: Option<Vec<(&str, u64)>>,
+    native_token: Option<(&str, u64)>,
 ) -> Output {
     let mut builder = FoundryOutputBuilder::new_with_amount(amount, serial_number, TokenScheme::Simple(token_scheme))
         .add_unlock_condition(ImmutableAccountAddressUnlockCondition::new(AccountAddress::new(
             account_id,
         )));
 
-    if let Some(native_tokens) = native_tokens {
-        builder = builder.with_native_tokens(
-            native_tokens
-                .into_iter()
-                .map(|(id, amount)| NativeToken::new(TokenId::from_str(id).unwrap(), amount).unwrap()),
-        );
+    if let Some((id, amount)) = native_token {
+        builder = builder.with_native_token(NativeToken::new(TokenId::from_str(id).unwrap(), amount).unwrap());
     }
 
-    builder.finish_output(TOKEN_SUPPLY).unwrap()
+    builder.finish_output().unwrap()
 }
 
 fn build_output_inner(build: Build) -> (Output, Option<Bip44>) {
     match build {
-        Build::Basic(amount, bech32_address, native_tokens, bech32_sender, sdruc, timelock, expiration, chain) => (
+        Build::Basic(amount, bech32_address, native_token, bech32_sender, sdruc, timelock, expiration, chain) => (
             build_basic_output(
                 amount,
                 Bech32Address::try_from_str(bech32_address).unwrap(),
-                native_tokens,
+                native_token,
                 bech32_sender.map(|address| Bech32Address::try_from_str(address).unwrap()),
                 sdruc.map(|(address, exp)| (Bech32Address::try_from_str(address).unwrap(), exp)),
                 timelock,
@@ -244,22 +202,11 @@ fn build_output_inner(build: Build) -> (Output, Option<Bip44>) {
             ),
             chain,
         ),
-        Build::Nft(
-            amount,
-            nft_id,
-            bech32_address,
-            native_tokens,
-            bech32_sender,
-            bech32_issuer,
-            sdruc,
-            expiration,
-            chain,
-        ) => (
+        Build::Nft(amount, nft_id, bech32_address, bech32_sender, bech32_issuer, sdruc, expiration, chain) => (
             build_nft_output(
                 amount,
                 nft_id,
                 Bech32Address::try_from_str(bech32_address).unwrap(),
-                native_tokens,
                 bech32_sender.map(|address| Bech32Address::try_from_str(address).unwrap()),
                 bech32_issuer.map(|address| Bech32Address::try_from_str(address).unwrap()),
                 sdruc.map(|(address, exp)| (Bech32Address::try_from_str(address).unwrap(), exp)),
@@ -267,19 +214,18 @@ fn build_output_inner(build: Build) -> (Output, Option<Bip44>) {
             ),
             chain,
         ),
-        Build::Account(amount, account_id, address, native_tokens, bech32_sender, bech32_issuer, chain) => (
+        Build::Account(amount, account_id, address, bech32_sender, bech32_issuer, chain) => (
             build_account_output(
                 amount,
                 account_id,
                 Bech32Address::try_from_str(address).unwrap(),
-                native_tokens,
                 bech32_sender.map(|address| Bech32Address::try_from_str(address).unwrap()),
                 bech32_issuer.map(|address| Bech32Address::try_from_str(address).unwrap()),
             ),
             chain,
         ),
-        Build::Foundry(amount, account_id, serial_number, token_scheme, native_tokens) => (
-            build_foundry_output(amount, account_id, serial_number, token_scheme, native_tokens),
+        Build::Foundry(amount, account_id, serial_number, token_scheme, native_token) => (
+            build_foundry_output(amount, account_id, serial_number, token_scheme, native_token),
             None,
         ),
     }
@@ -330,12 +276,7 @@ where
     count(a) == count(b)
 }
 
-fn is_remainder_or_return(
-    output: &Output,
-    amount: u64,
-    address: &str,
-    native_tokens: Option<Vec<(&str, u64)>>,
-) -> bool {
+fn is_remainder_or_return(output: &Output, amount: u64, address: &str, native_token: Option<(&str, u64)>) -> bool {
     if let Output::Basic(output) = output {
         if output.amount() != amount {
             return false;
@@ -355,19 +296,13 @@ fn is_remainder_or_return(
             return false;
         }
 
-        if let Some(native_tokens) = native_tokens {
-            let native_tokens = NativeTokens::from_set(
-                native_tokens
-                    .into_iter()
-                    .map(|(token_id, amount)| NativeToken::new(TokenId::from_str(token_id).unwrap(), amount).unwrap())
-                    .collect::<BTreeSet<_>>(),
-            )
-            .unwrap();
+        if let Some((token_id, amount)) = native_token {
+            let native_token = NativeToken::new(TokenId::from_str(token_id).unwrap(), amount).unwrap();
 
-            if output.native_tokens() != &native_tokens {
+            if output.native_token().unwrap() != &native_token {
                 return false;
             }
-        } else if output.native_tokens().len() != 0 {
+        } else if output.native_token().is_some() {
             return false;
         }
 

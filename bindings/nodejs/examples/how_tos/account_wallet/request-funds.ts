@@ -6,7 +6,7 @@ import { Utils, Wallet, initLogger } from '@iota/sdk';
 // This example uses secrets in environment variables for simplicity which should not be done in production.
 //
 // Make sure that `example.stronghold` and `example.walletdb` already exist by
-// running the `how_tos/accounts_and_addresses/create-account` example!
+// running the `how_tos/accounts_and_addresses/create-wallet` example!
 //
 require('dotenv').config({ path: '.env' });
 
@@ -23,14 +23,11 @@ async function run() {
         const faucetUrl = process.env.FAUCET_URL;
 
         // Create the wallet
-        const wallet = new Wallet({
+        const wallet = await Wallet.create({
             storagePath: process.env.WALLET_DB_PATH,
         });
 
-        // Get the account we generated with `create_wallet`
-        const account = await wallet.getAccount('Alice');
-
-        const balance = await account.sync();
+        const balance = await wallet.sync();
 
         const totalBaseTokenBalance = balance.baseCoin.total;
         console.log(
@@ -57,7 +54,7 @@ async function run() {
                 basicOutputs: true,
             },
         };
-        const totalBaseTokenBalanceAfter = (await account.sync(syncOptions))
+        const totalBaseTokenBalanceAfter = (await wallet.sync(syncOptions))
             .baseCoin.total;
         console.log(
             `Balance after requesting funds on account address: ${totalBaseTokenBalanceAfter}`,

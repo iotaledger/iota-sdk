@@ -10,14 +10,12 @@ use crate::{
     types::block::{
         address::{Bech32Address, ToBech32Ext},
         output::{
-            unlock_condition::{
-                AddressUnlockCondition, ExpirationUnlockCondition, StorageDepositReturnUnlockCondition,
-            },
-            BasicOutputBuilder, MinimumStorageDepositBasicOutput, NativeToken, NativeTokens, TokenId,
+            unlock_condition::{AddressUnlockCondition, ExpirationUnlockCondition},
+            BasicOutputBuilder, NativeToken, TokenId,
         },
         slot::SlotIndex,
-        ConvertTo,
     },
+    utils::ConvertTo,
     wallet::{
         constants::DEFAULT_EXPIRATION_SLOTS,
         operations::transaction::{TransactionOptions, TransactionWithMetadata},
@@ -28,15 +26,15 @@ use crate::{
 /// Params for `send_native_tokens()`
 #[derive(Debug, Clone, Serialize, Deserialize, Getters)]
 #[serde(rename_all = "camelCase")]
-pub struct SendNativeTokensParams {
+pub struct SendNativeTokenParams {
     /// Bech32 encoded address
     #[getset(get = "pub")]
     address: Bech32Address,
-    /// Native tokens
+    /// Native token
     #[getset(get = "pub")]
-    native_tokens: Vec<(TokenId, U256)>,
+    native_token: (TokenId, U256),
     /// Bech32 encoded address return address, to which the storage deposit will be returned. Default will use the
-    /// first address of the account
+    /// address of the wallet.
     #[getset(get = "pub")]
     return_address: Option<Bech32Address>,
     /// Expiration in slot indices, after which the output will be available for the sender again, if not spent by the
@@ -45,15 +43,12 @@ pub struct SendNativeTokensParams {
     expiration: Option<SlotIndex>,
 }
 
-impl SendNativeTokensParams {
-    /// Creates a new instance of [`SendNativeTokensParams`]
-    pub fn new(
-        address: impl ConvertTo<Bech32Address>,
-        native_tokens: impl IntoIterator<Item = (TokenId, U256)>,
-    ) -> Result<Self> {
+impl SendNativeTokenParams {
+    /// Creates a new instance of [`SendNativeTokenParams`]
+    pub fn new(address: impl ConvertTo<Bech32Address>, native_token: (TokenId, U256)) -> Result<Self> {
         Ok(Self {
             address: address.convert()?,
-            native_tokens: native_tokens.into_iter().collect(),
+            native_token,
             return_address: None,
             expiration: None,
         })
@@ -89,12 +84,12 @@ where
     /// Calls [Account::send_outputs()](crate::wallet::Account::send_outputs) internally. The options may define the
     /// remainder value strategy or custom inputs. Note that the address needs to be bech32-encoded.
     /// ```ignore
-    /// let params = [SendNativeTokensParams {
+    /// let params = [SendNativeTokenParams {
     ///     address: "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu".to_string(),
-    ///     native_tokens: vec![(
+    ///     native_token: (
     ///         TokenId::from_str("08e68f7616cd4948efebc6a77c4f93aed770ac53860100000000000000000000000000000000")?,
     ///         U256::from(50),
-    ///     )],
+    ///     ),
     ///     ..Default::default()
     /// }];
     ///
@@ -104,7 +99,7 @@ where
     ///     println!("Block sent: {}", block_id);
     /// }
     /// ```
-    pub async fn send_native_tokens<I: IntoIterator<Item = SendNativeTokensParams> + Send>(
+    pub async fn send_native_tokens<I: IntoIterator<Item = SendNativeTokenParams> + Send>(
         &self,
         params: I,
         options: impl Into<Option<TransactionOptions>> + Send,
@@ -120,7 +115,7 @@ where
 
     /// Prepares the transaction for
     /// [Account::send_native_tokens()](crate::wallet::Account::send_native_tokens).
-    pub async fn prepare_send_native_tokens<I: IntoIterator<Item = SendNativeTokensParams> + Send>(
+    pub async fn prepare_send_native_tokens<I: IntoIterator<Item = SendNativeTokenParams> + Send>(
         &self,
         params: I,
         options: impl Into<Option<TransactionOptions>> + Send,
@@ -129,8 +124,7 @@ where
         I::IntoIter: Send,
     {
         log::debug!("[TRANSACTION] prepare_send_native_tokens");
-        let rent_structure = self.client().get_rent_structure().await?;
-        let token_supply = self.client().get_token_supply().await?;
+        let storage_score_params = self.client().get_storage_score_parameters().await?;
 
         let wallet_address = self.address().await;
         let default_return_address = wallet_address.to_bech32(self.client().get_bech32_hrp().await?);
@@ -138,9 +132,9 @@ where
         let slot_index = self.client().get_slot_index().await?;
 
         let mut outputs = Vec::new();
-        for SendNativeTokensParams {
+        for SendNativeTokenParams {
             address,
-            native_tokens,
+            native_token,
             return_address,
             expiration,
         } in params
@@ -159,23 +153,7 @@ where
                 .transpose()?
                 .unwrap_or_else(|| default_return_address.clone());
 
-            let native_tokens = NativeTokens::from_vec(
-                native_tokens
-                    .into_iter()
-                    .map(|(id, amount)| {
-                        NativeToken::new(id, amount).map_err(|e| crate::wallet::Error::Client(Box::new(e.into())))
-                    })
-                    .collect::<Result<Vec<NativeToken>>>()?,
-            )?;
-
-            // get minimum required amount for such an output, so we don't lock more than required
-            // We have to check it for every output individually, because different address types and amount of
-            // different native tokens require a different storage deposit
-            let storage_deposit_amount = MinimumStorageDepositBasicOutput::new(rent_structure, token_supply)
-                .with_native_tokens(native_tokens.clone())
-                .with_storage_deposit_return()?
-                .with_expiration()?
-                .finish()?;
+            let native_token = NativeToken::new(native_token.0, native_token.1)?;
 
             let expiration_slot_index = expiration
                 .map_or(slot_index + DEFAULT_EXPIRATION_SLOTS, |expiration_slot_index| {
@@ -183,20 +161,15 @@ where
                 });
 
             outputs.push(
-                BasicOutputBuilder::new_with_amount(storage_deposit_amount)
-                    .with_native_tokens(native_tokens)
+                BasicOutputBuilder::new_with_amount(0)
+                    .with_native_token(native_token)
                     .add_unlock_condition(AddressUnlockCondition::new(address))
-                    .add_unlock_condition(
-                        // We send the full storage_deposit_amount back to the sender, so only the native tokens are
-                        // sent
-                        StorageDepositReturnUnlockCondition::new(
-                            return_address.clone(),
-                            storage_deposit_amount,
-                            token_supply,
-                        )?,
-                    )
-                    .add_unlock_condition(ExpirationUnlockCondition::new(return_address, expiration_slot_index)?)
-                    .finish_output(token_supply)?,
+                    .add_unlock_condition(ExpirationUnlockCondition::new(
+                        return_address.clone(),
+                        expiration_slot_index,
+                    )?)
+                    .with_sufficient_storage_deposit(return_address, storage_score_params)?
+                    .finish_output()?,
             )
         }
 

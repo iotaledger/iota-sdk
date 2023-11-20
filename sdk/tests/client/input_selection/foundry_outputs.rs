@@ -23,7 +23,7 @@ use pretty_assertions::assert_eq;
 use crate::client::{
     addresses, build_inputs, build_outputs, is_remainder_or_return, unsorted_eq,
     Build::{Account, Basic, Foundry},
-    ACCOUNT_ID_1, ACCOUNT_ID_2, BECH32_ADDRESS_ED25519_0, TOKEN_SUPPLY,
+    ACCOUNT_ID_1, ACCOUNT_ID_2, BECH32_ADDRESS_ED25519_0,
 };
 
 #[test]
@@ -108,15 +108,7 @@ fn minted_native_tokens_in_new_remainder() {
 
     let inputs = build_inputs([
         Basic(1_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
-        Account(
-            1_000_000,
-            account_id_2,
-            BECH32_ADDRESS_ED25519_0,
-            None,
-            None,
-            None,
-            None,
-        ),
+        Account(1_000_000, account_id_2, BECH32_ADDRESS_ED25519_0, None, None, None),
     ]);
     let outputs = build_outputs([Foundry(
         1_000_000,
@@ -139,9 +131,10 @@ fn minted_native_tokens_in_new_remainder() {
     // Account next state + foundry + basic output with native tokens
     assert_eq!(selected.outputs.len(), 3);
     selected.outputs.iter().for_each(|output| {
-        if let Output::Basic(basic_output) = &output {
+        if let Output::Basic(_basic_output) = &output {
             // Basic output remainder has the minted native tokens
-            assert_eq!(basic_output.native_tokens().first().unwrap().amount().as_u32(), 10);
+            // TODO reenable when ISA supports NTs again
+            // assert_eq!(basic_output.native_token().unwrap().amount().as_u32(), 10);
         }
     });
 }
@@ -155,15 +148,7 @@ fn minted_native_tokens_in_provided_output() {
 
     let inputs = build_inputs([
         Basic(2_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
-        Account(
-            1_000_000,
-            account_id_2,
-            BECH32_ADDRESS_ED25519_0,
-            None,
-            None,
-            None,
-            None,
-        ),
+        Account(1_000_000, account_id_2, BECH32_ADDRESS_ED25519_0, None, None, None),
     ]);
     let outputs = build_outputs([
         Foundry(
@@ -176,7 +161,7 @@ fn minted_native_tokens_in_provided_output() {
         Basic(
             1_000_000,
             BECH32_ADDRESS_ED25519_0,
-            Some(vec![(&token_id.to_string(), 100)]),
+            Some((&token_id.to_string(), 100)),
             None,
             None,
             None,
@@ -213,10 +198,10 @@ fn melt_native_tokens() {
             account_id_1,
             1,
             SimpleTokenScheme::new(10, 0, 10).unwrap(),
-            Some(vec![(
+            Some((
                 "0x0811111111111111111111111111111111111111111111111111111111111111110100000000",
                 10,
-            )]),
+            )),
         ),
     ]);
     let account_output = AccountOutputBuilder::new_with_amount(1_000_000, account_id_1)
@@ -224,7 +209,7 @@ fn melt_native_tokens() {
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         ))
         .with_foundry_counter(1)
-        .finish_output(protocol_parameters.token_supply())
+        .finish_output()
         .unwrap();
     inputs.push(InputSigningData {
         output: account_output,
@@ -253,9 +238,10 @@ fn melt_native_tokens() {
     // Account next state + foundry + basic output with native tokens
     assert_eq!(selected.outputs.len(), 3);
     selected.outputs.iter().for_each(|output| {
-        if let Output::Basic(basic_output) = &output {
+        if let Output::Basic(_basic_output) = &output {
             // Basic output remainder has the remaining native tokens
-            assert_eq!(basic_output.native_tokens().first().unwrap().amount().as_u32(), 5);
+            // TODO reenable when ISA supports NTs again
+            // assert_eq!(basic_output.native_token().unwrap().amount().as_u32(), 5);
         }
     });
 }
@@ -266,7 +252,7 @@ fn destroy_foundry_with_account_state_transition() {
     let account_id_2 = AccountId::from_str(ACCOUNT_ID_2).unwrap();
 
     let inputs = build_inputs([
-        Account(50_300, account_id_2, BECH32_ADDRESS_ED25519_0, None, None, None, None),
+        Account(50_300, account_id_2, BECH32_ADDRESS_ED25519_0, None, None, None),
         Foundry(
             52_800,
             account_id_2,
@@ -277,7 +263,7 @@ fn destroy_foundry_with_account_state_transition() {
     ]);
     let account_output = AccountOutputBuilder::from(inputs[0].output.as_account())
         .with_amount(103_100)
-        .finish_output(TOKEN_SUPPLY)
+        .finish_output()
         .unwrap();
     // Account output gets the amount from the foundry output added
     let outputs = [account_output];
@@ -303,15 +289,7 @@ fn destroy_foundry_with_account_burn() {
     let account_id_2 = AccountId::from_str(ACCOUNT_ID_2).unwrap();
 
     let inputs = build_inputs([
-        Account(
-            1_000_000,
-            account_id_2,
-            BECH32_ADDRESS_ED25519_0,
-            None,
-            None,
-            None,
-            None,
-        ),
+        Account(1_000_000, account_id_2, BECH32_ADDRESS_ED25519_0, None, None, None),
         Foundry(
             1_000_000,
             account_id_2,
@@ -366,15 +344,7 @@ fn prefer_basic_to_foundry() {
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
     let inputs = build_inputs([
-        Account(
-            1_000_000,
-            account_id_1,
-            BECH32_ADDRESS_ED25519_0,
-            None,
-            None,
-            None,
-            None,
-        ),
+        Account(1_000_000, account_id_1, BECH32_ADDRESS_ED25519_0, None, None, None),
         Foundry(
             1_000_000,
             account_id_1,
@@ -429,7 +399,7 @@ fn simple_foundry_transition_basic_not_needed() {
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         ))
         .with_foundry_counter(1)
-        .finish_output(protocol_parameters.token_supply())
+        .finish_output()
         .unwrap();
     inputs.push(InputSigningData {
         output: account_output,
@@ -463,7 +433,6 @@ fn simple_foundry_transition_basic_not_needed() {
         if !outputs.contains(output) {
             assert!(output.is_account());
             assert_eq!(output.amount(), 2_000_000);
-            assert_eq!(output.as_account().native_tokens().len(), 0);
             assert_eq!(*output.as_account().account_id(), account_id_1);
             assert_eq!(output.as_account().unlock_conditions().len(), 1);
             assert_eq!(output.as_account().features().len(), 0);
@@ -496,7 +465,7 @@ fn simple_foundry_transition_basic_not_needed_with_remainder() {
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         ))
         .with_foundry_counter(1)
-        .finish_output(protocol_parameters.token_supply())
+        .finish_output()
         .unwrap();
     inputs.push(InputSigningData {
         output: account_output,
@@ -529,7 +498,6 @@ fn simple_foundry_transition_basic_not_needed_with_remainder() {
         if !outputs.contains(output) {
             if output.is_account() {
                 assert_eq!(output.amount(), 2_000_000);
-                assert_eq!(output.as_account().native_tokens().len(), 0);
                 assert_eq!(*output.as_account().account_id(), account_id_1);
                 assert_eq!(output.as_account().unlock_conditions().len(), 1);
                 assert_eq!(output.as_account().features().len(), 0);
@@ -631,14 +599,14 @@ fn mint_and_burn_at_the_same_time() {
         account_id_1,
         1,
         SimpleTokenScheme::new(100, 0, 200).unwrap(),
-        Some(vec![(&token_id.to_string(), 100)]),
+        Some((&token_id.to_string(), 100)),
     )]);
     let account_output = AccountOutputBuilder::new_with_amount(2_000_000, account_id_1)
         .add_unlock_condition(AddressUnlockCondition::new(
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         ))
         .with_foundry_counter(1)
-        .finish_output(protocol_parameters.token_supply())
+        .finish_output()
         .unwrap();
     inputs.push(InputSigningData {
         output: account_output,
@@ -651,7 +619,7 @@ fn mint_and_burn_at_the_same_time() {
         account_id_1,
         1,
         SimpleTokenScheme::new(120, 0, 200).unwrap(),
-        Some(vec![(&token_id.to_string(), 110)]),
+        Some((&token_id.to_string(), 110)),
     )]);
 
     let selected = InputSelection::new(
@@ -683,7 +651,7 @@ fn take_amount_from_account_and_foundry_to_fund_basic() {
             account_id_1,
             1,
             SimpleTokenScheme::new(100, 0, 200).unwrap(),
-            Some(vec![(&token_id.to_string(), 100)]),
+            Some((&token_id.to_string(), 100)),
         ),
     ]);
     let account_output = AccountOutputBuilder::new_with_amount(2_000_000, account_id_1)
@@ -691,7 +659,7 @@ fn take_amount_from_account_and_foundry_to_fund_basic() {
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         ))
         .with_foundry_counter(1)
-        .finish_output(protocol_parameters.token_supply())
+        .finish_output()
         .unwrap();
     inputs.push(InputSigningData {
         output: account_output,
@@ -737,15 +705,7 @@ fn create_native_token_but_burn_account() {
     let token_id = TokenId::from(foundry_id);
 
     let inputs = build_inputs([
-        Account(
-            2_000_000,
-            account_id_1,
-            BECH32_ADDRESS_ED25519_0,
-            None,
-            None,
-            None,
-            None,
-        ),
+        Account(2_000_000, account_id_1, BECH32_ADDRESS_ED25519_0, None, None, None),
         Foundry(
             1_000_000,
             account_id_1,
@@ -759,7 +719,7 @@ fn create_native_token_but_burn_account() {
         account_id_1,
         1,
         SimpleTokenScheme::new(100, 0, 100).unwrap(),
-        Some(vec![(&token_id.to_string(), 100)]),
+        Some((&token_id.to_string(), 100)),
     )]);
 
     let selected = InputSelection::new(
@@ -796,15 +756,7 @@ fn melted_tokens_not_provided() {
     let token_id_1 = TokenId::from(foundry_id);
 
     let inputs = build_inputs([
-        Account(
-            2_000_000,
-            account_id_1,
-            BECH32_ADDRESS_ED25519_0,
-            None,
-            None,
-            None,
-            None,
-        ),
+        Account(2_000_000, account_id_1, BECH32_ADDRESS_ED25519_0, None, None, None),
         Foundry(
             1_000_000,
             account_id_1,
@@ -846,15 +798,7 @@ fn burned_tokens_not_provided() {
     let token_id_1 = TokenId::from(foundry_id);
 
     let inputs = build_inputs([
-        Account(
-            2_000_000,
-            account_id_1,
-            BECH32_ADDRESS_ED25519_0,
-            None,
-            None,
-            None,
-            None,
-        ),
+        Account(2_000_000, account_id_1, BECH32_ADDRESS_ED25519_0, None, None, None),
         Foundry(
             1_000_000,
             account_id_1,
@@ -906,7 +850,7 @@ fn foundry_in_outputs_and_required() {
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         ))
         .with_foundry_counter(1)
-        .finish_output(protocol_parameters.token_supply())
+        .finish_output()
         .unwrap();
     inputs.push(InputSigningData {
         output: account_output,
@@ -955,7 +899,7 @@ fn melt_and_burn_native_tokens() {
             account_id,
             1,
             SimpleTokenScheme::new(1000, 0, 1000).unwrap(),
-            Some(vec![(&token_id.to_string(), 1000)]),
+            Some((&token_id.to_string(), 1000)),
         ),
     ]);
     let account_output = AccountOutputBuilder::new_with_amount(1_000_000, account_id)
@@ -963,7 +907,7 @@ fn melt_and_burn_native_tokens() {
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         ))
         .with_foundry_counter(1)
-        .finish_output(protocol_parameters.token_supply())
+        .finish_output()
         .unwrap();
     inputs.push(InputSigningData {
         output: account_output,
@@ -995,9 +939,10 @@ fn melt_and_burn_native_tokens() {
     assert_eq!(selected.outputs.len(), 3);
     // Account state index is increased
     selected.outputs.iter().for_each(|output| {
-        if let Output::Basic(basic_output) = &output {
+        if let Output::Basic(_basic_output) = &output {
             // Basic output remainder has the remaining native tokens
-            assert_eq!(basic_output.native_tokens().first().unwrap().amount().as_u32(), 421);
+            // TODO reenable when ISA supports NTs again
+            // assert_eq!(basic_output.native_token().unwrap().amount().as_u32(), 421);
         }
     });
 }

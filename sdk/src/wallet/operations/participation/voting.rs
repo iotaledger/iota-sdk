@@ -105,7 +105,7 @@ where
                 Feature::Tag(TagFeature::new(PARTICIPATION_TAG)?),
                 Feature::Metadata(MetadataFeature::new(participation_bytes.clone())?),
             ])
-            .finish_output(self.client().get_token_supply().await?)?;
+            .finish_output()?;
 
         self.prepare_transaction(
             [new_output],
@@ -177,7 +177,7 @@ where
                 Feature::Tag(TagFeature::new(PARTICIPATION_TAG)?),
                 Feature::Metadata(MetadataFeature::new(participation_bytes.clone())?),
             ])
-            .finish_output(self.client().get_token_supply().await?)?;
+            .finish_output()?;
 
         self.prepare_transaction(
             [new_output],

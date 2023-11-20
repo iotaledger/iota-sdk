@@ -14,7 +14,6 @@ from iota_sdk.client._utils import ClientUtils
 from iota_sdk.types.block.signed_block import UnsignedBlock
 from iota_sdk.types.common import HexStr, Node
 from iota_sdk.types.feature import Feature
-from iota_sdk.types.native_token import NativeToken
 from iota_sdk.types.network_info import NetworkInfo
 from iota_sdk.types.output import AccountOutput, BasicOutput, FoundryOutput, NftOutput, deserialize_output
 from iota_sdk.types.payload import Payload
@@ -151,7 +150,6 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
                              unlock_conditions: List[UnlockCondition],
                              amount: Optional[int] = None,
                              mana: Optional[int] = None,
-                             native_tokens: Optional[List[NativeToken]] = None,
                              foundry_counter: Optional[int] = None,
                              features: Optional[List[Feature]] = None,
                              immutable_features: Optional[List[Feature]] = None) -> AccountOutput:
@@ -162,7 +160,6 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
             unlock_conditions: The unlock conditions for the new output.
             amount: The amount of base coins in the new output.
             mana: Amount of stored Mana held by this output.
-            native_tokens: Native tokens added to the new output.
             foundry_counter: A counter that denotes the number of foundries created by this account output.
             features: A list of features.
             immutable_features: A list of immutable features.
@@ -173,10 +170,6 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
 
         unlock_conditions = [unlock_condition.to_dict()
                              for unlock_condition in unlock_conditions]
-
-        if native_tokens:
-            native_tokens = [native_token.to_dict()
-                             for native_token in native_tokens]
 
         if features:
             features = [feature.to_dict() for feature in features]
@@ -195,7 +188,6 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
             'unlockConditions': unlock_conditions,
             'amount': amount,
             'mana': mana,
-            'nativeTokens': native_tokens,
             'foundryCounter': foundry_counter,
             'features': features,
             'immutableFeatures': immutable_features
@@ -205,7 +197,6 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
                            unlock_conditions: List[UnlockCondition],
                            amount: Optional[int] = None,
                            mana: Optional[int] = None,
-                           native_tokens: Optional[List[NativeToken]] = None,
                            features: Optional[List[Feature]] = None) -> BasicOutput:
         """Build a BasicOutput.
 
@@ -213,7 +204,6 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
             unlock_conditions: The unlock conditions for the new output.
             amount: The amount of base coins in the new output.
             mana: Amount of stored Mana held by this output.
-            native_tokens: Native tokens added to the new output.
             features: Features that add utility to the output but do not impose unlocking conditions.
 
         Returns:
@@ -222,10 +212,6 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
 
         unlock_conditions = [unlock_condition.to_dict()
                              for unlock_condition in unlock_conditions]
-
-        if native_tokens:
-            native_tokens = [native_token.to_dict()
-                             for native_token in native_tokens]
 
         if features:
             features = [feature.to_dict() for feature in features]
@@ -240,7 +226,6 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
             'unlockConditions': unlock_conditions,
             'amount': amount,
             'mana': mana,
-            'nativeTokens': native_tokens,
             'features': features,
         }))
 
@@ -249,7 +234,6 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
                              token_scheme: SimpleTokenScheme,
                              unlock_conditions: List[UnlockCondition],
                              amount: Optional[int] = None,
-                             native_tokens: Optional[List[NativeToken]] = None,
                              features: Optional[List[Feature]] = None,
                              immutable_features: Optional[List[Feature]] = None) -> FoundryOutput:
         """Build a FoundryOutput.
@@ -259,7 +243,6 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
             token_scheme: Defines the supply control scheme of the tokens controlled by the foundry. Currently only a simple scheme is supported.
             unlock_conditions: The unlock conditions for the new output.
             amount: The amount of base coins in the new output.
-            native_tokens: Native tokens added to the new output.
             features: Features that add utility to the output but do not impose unlocking conditions.
             immutable_features: Features that add utility to the output but do not impose unlocking conditions. These features need to be kept in future transitions of the UTXO state machine.
 
@@ -269,10 +252,6 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
 
         unlock_conditions = [unlock_condition.to_dict()
                              for unlock_condition in unlock_conditions]
-
-        if native_tokens:
-            native_tokens = [native_token.__dict__
-                             for native_token in native_tokens]
 
         if features:
             features = [feature.to_dict() for feature in features]
@@ -288,7 +267,6 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
             'tokenScheme': token_scheme.to_dict(),
             'unlockConditions': unlock_conditions,
             'amount': amount,
-            'nativeTokens': native_tokens,
             'features': features,
             'immutableFeatures': immutable_features
         }))
@@ -298,7 +276,6 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
                          unlock_conditions: List[UnlockCondition],
                          amount: Optional[int] = None,
                          mana: Optional[int] = None,
-                         native_tokens: Optional[List[NativeToken]] = None,
                          features: Optional[List[Feature]] = None,
                          immutable_features: Optional[List[Feature]] = None) -> NftOutput:
         """Build an NftOutput.
@@ -308,7 +285,6 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
             unlock_conditions: The unlock conditions for the new output.
             amount: The amount of base coins in the new output.
             mana: Amount of stored Mana held by this output.
-            native_tokens: Native tokens added to the new output.
             features: Features that add utility to the output but do not impose unlocking conditions.
             immutable_features: Features that add utility to the output but do not impose unlocking conditions. These features need to be kept in future transitions of the UTXO state machine.
 
@@ -318,10 +294,6 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
 
         unlock_conditions = [unlock_condition.to_dict()
                              for unlock_condition in unlock_conditions]
-
-        if native_tokens:
-            native_tokens = [native_token.__dict__
-                             for native_token in native_tokens]
 
         if features:
             features = [feature.to_dict() for feature in features]
@@ -340,7 +312,6 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
             'unlockConditions': unlock_conditions,
             'amount': amount,
             'mana': mana,
-            'nativeTokens': native_tokens,
             'features': features,
             'immutableFeatures': immutable_features
         }))

@@ -14,7 +14,7 @@ import {
  */
 export interface BasicOutputBuilderParams {
     /**
-     * If not provided, minimum storage deposit will be used
+     * If not provided, minimum amount will be used
      */
     amount?: u64 | NumericString;
     /**

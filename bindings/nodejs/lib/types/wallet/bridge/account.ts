@@ -1,10 +1,9 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import type { SyncOptions, FilterOptions } from '../account';
 import type {
     SendParams,
-    SendNativeTokensParams,
+    SendNativeTokenParams,
     SendNftParams,
     GenerateAddressOptions,
 } from '../address';
@@ -25,10 +24,12 @@ import type {
 } from '../participation';
 import type { ConsolidationParams } from '../consolidation-params';
 import {
+    FilterOptions,
     HexEncodedAmount,
     NumericString,
     Output,
     OutputId,
+    SyncOptions,
     TokenId,
     TransactionId,
 } from '../../';
@@ -257,7 +258,7 @@ export type __SendWithParamsMethod__ = {
 export type __PrepareSendNativeTokensMethod__ = {
     name: 'prepareSendNativeTokens';
     data: {
-        params: SendNativeTokensParams[];
+        params: SendNativeTokenParams[];
         options?: TransactionOptions;
     };
 };
