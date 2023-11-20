@@ -119,7 +119,7 @@ where
         log::debug!("[SYNC] spent_or_not_synced_outputs: {spent_or_not_synced_output_ids:?}");
         let spent_or_unsynced_output_metadata_responses = self
             .client()
-            .get_outputs_metadata_ignore_errors(&spent_or_not_synced_output_ids)
+            .get_outputs_metadata_ignore_not_found(&spent_or_not_synced_output_ids)
             .await?;
 
         // Add the output response to the output ids, the output response is optional, because an output could be
