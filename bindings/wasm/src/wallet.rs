@@ -4,9 +4,9 @@
 use std::sync::{Arc, RwLock};
 
 use iota_sdk_bindings_core::{
-    call_wallet_method,
+    call_wallet_method as rust_call_wallet_method,
     iota_sdk::wallet::{
-        events::types::{Event, WalletEventType},
+        events::types::{WalletEvent, WalletEventType},
         Wallet,
     },
     Response, WalletMethod, WalletOptions,
@@ -46,18 +46,14 @@ macro_rules! wallet_pre {
 /// Creates a method handler with the given options.
 #[wasm_bindgen(js_name = createWallet)]
 #[allow(non_snake_case)]
-pub fn create_wallet(options: String) -> Result<WalletMethodHandler, JsError> {
+pub async fn create_wallet(options: String) -> Result<WalletMethodHandler, JsValue> {
     let wallet_options = serde_json::from_str::<WalletOptions>(&options).map_err(|e| {
         JsError::new(&serde_json::to_string(&Response::Panic(e.to_string())).expect("json to string error"))
     })?;
 
-    let wallet_method_handler = tokio::runtime::Builder::new_current_thread()
-        .build()
-        .unwrap()
-        .block_on(async move { wallet_options.build().await })
-        .map_err(|e| {
-            JsError::new(&serde_json::to_string(&Response::Panic(e.to_string())).expect("json to string error"))
-        })?;
+    let wallet_method_handler = wallet_options.build().await.map_err(|e| {
+        JsError::new(&serde_json::to_string(&Response::Panic(e.to_string())).expect("json to string error"))
+    })?;
 
     Ok(WalletMethodHandler {
         inner: Arc::new(RwLock::new(Some(wallet_method_handler))),
@@ -97,8 +93,8 @@ pub fn get_secret_manager(method_handler: &WalletMethodHandler) -> Result<Secret
 /// Handles a method, returns the response as a JSON-encoded string.
 ///
 /// Returns an error if the response itself is an error or panic.
-#[wasm_bindgen(js_name = callWalletMethodAsync)]
-pub async fn call_wallet_method_async(method: String, method_handler: &WalletMethodHandler) -> Result<String, JsError> {
+#[wasm_bindgen(js_name = callWalletMethod)]
+pub async fn call_wallet_method_async(method_handler: &WalletMethodHandler, method: String) -> Result<String, JsError> {
     binding_glue!(method, method_handler, "Client", call_wallet_method)
 }
 
@@ -110,11 +106,11 @@ pub async fn call_wallet_method_async(method: String, method_handler: &WalletMet
 /// * `vec`: An array of strings that represent the event types you want to listen to.
 /// * `callback`: A JavaScript function that will be called when a wallet event occurs.
 /// * `method_handler`: This is the same method handler that we used in the previous section.
-#[wasm_bindgen(js_name = listenWalletAsync)]
+#[wasm_bindgen(js_name = listenWallet)]
 pub async fn listen_wallet(
+    method_handler: &WalletMethodHandler,
     vec: js_sys::Array,
     callback: js_sys::Function,
-    method_handler: &WalletMethodHandler,
 ) -> Result<JsValue, JsError> {
     let mut event_types = Vec::with_capacity(vec.length() as _);
     for event_type in vec.keys() {
@@ -127,9 +123,13 @@ pub async fn listen_wallet(
         event_types.push(wallet_event_type);
     }
 
-    let (tx, mut rx): (UnboundedSender<Event>, UnboundedReceiver<Event>) = unbounded_channel();
-    let wallet = wallet_pre!(method_handler)?;
-    wallet
+    let (tx, mut rx): (UnboundedSender<WalletEvent>, UnboundedReceiver<WalletEvent>) = unbounded_channel();
+    method_handler
+        .wallet
+        .lock()
+        .await
+        .as_ref()
+        .expect("wallet not initialised")
         .listen(event_types, move |wallet_event| {
             tx.send(wallet_event.clone()).unwrap();
         })

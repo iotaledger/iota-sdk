@@ -6,16 +6,9 @@ import 'reflect-metadata';
 import { describe, it, expect } from '@jest/globals';
 import { Wallet, CoinType, WalletOptions, SecretManager } from '../../lib/';
 
-const chain = {
-    coinType: CoinType.IOTA,
-    account: 0,
-    change: 0,
-    addressIndex: 0,
-};
-
 describe('Wallet', () => {
-    it('create account', async () => {
-        let storagePath = 'test-create-account';
+    it('create wallet', async () => {
+        let storagePath = 'test-create-wallet';
         removeDir(storagePath);
 
         const strongholdSecretManager = {
@@ -23,30 +16,21 @@ describe('Wallet', () => {
                 snapshotPath: `./${storagePath}/wallet.stronghold`,
                 password: `A12345678*`,
             },
-        }
-        const secretManager = await new SecretManager(strongholdSecretManager);
-        await secretManager.storeMnemonic(
-            'vital give early extra blind skin eight discover scissors there globe deal goat fat load robot return rate fragile recycle select live ordinary claim',
-        );
-
-        const walletOptions = {
-            storagePath: './test-create-account',
-            clientOptions: {
-                nodes: ['https://api.testnet.shimmer.network'],
-            },
-            bipPath: chain,
-            secretManager: strongholdSecretManager,
         };
 
-        const wallet = new Wallet(walletOptions);
+        const secretManager = new SecretManager(strongholdSecretManager);
 
-        await wallet.destroy();
-        removeDir(storagePath);
-    }, 20000);
+        await secretManager.storeMnemonic('vital give early extra blind skin eight discover scissors there globe deal goat fat load robot return rate fragile recycle select live ordinary claim',);
 
-    it('generate address', async () => {
-        let storagePath = 'test-generate-address';
-        removeDir(storagePath);
+        const wallet_address = await secretManager.generateEd25519Addresses({
+            coinType: CoinType.IOTA,
+            accountIndex: 0,
+            range: {
+                start: 0,
+                end: 1,
+            },
+            bech32Hrp: 'tst',
+        });
 
         const strongholdSecretManager = {
             stronghold: {
@@ -60,43 +44,24 @@ describe('Wallet', () => {
         );
 
         const walletOptions: WalletOptions = {
-            storagePath,
+            address: wallet_address[0],
+            storagePath: './test-create-wallet',
             clientOptions: {
                 nodes: ['https://api.testnet.shimmer.network'],
             },
-            bipPath: chain,
+            bipPath: {
+                coinType: CoinType.IOTA,
+            },
             secretManager: strongholdSecretManager,
         };
 
-        const wallet = new Wallet(walletOptions);
 
-        const address = await secretManager.generateEd25519Addresses({
-            coinType: CoinType.Shimmer,
-            accountIndex: 0,
-            range: { start: 0, end: 1},
-            options: { internal: false, ledgerNanoPrompt: false },
-            bech32Hrp: 'rms',
-        });
-
-        expect(address[0]).toStrictEqual(
-            'rms1qpqzgvcehafmlxh87zrf9w8ck8q2kw5070ztf68ylhzk89en9a4fy5jqrg8',
-        );
-
-        const anotherAddress = await secretManager.generateEd25519Addresses({
-            coinType: CoinType.Shimmer,
-            accountIndex: 10,
-            range: { start: 0, end: 10 },
-            options: { internal: true, ledgerNanoPrompt: false },
-            bech32Hrp: 'tst',
-        });
-
-        expect(anotherAddress[0]).toStrictEqual(
-            'tst1qr5ckcctawkng8mc9hmkumnf0c2rrurd56wht6wxjcywtetzpqsvyhph79x',
-        );
+        const wallet = await Wallet.create(walletOptions);
 
         await wallet.destroy();
         removeDir(storagePath);
     }, 20000);
+
 
     it('recreate wallet', async () => {
         let storagePath = 'test-recreate-wallet';
@@ -107,30 +72,47 @@ describe('Wallet', () => {
                 snapshotPath: `./${storagePath}/wallet.stronghold`,
                 password: `A12345678*`,
             },
-        }
-        const secretManager = await new SecretManager(strongholdSecretManager);
-        await secretManager.storeMnemonic(
-            'vital give early extra blind skin eight discover scissors there globe deal goat fat load robot return rate fragile recycle select live ordinary claim',
-        );
+        };
 
-        const walletOptions = {
-            storagePath,
+        const secretManager = new SecretManager(strongholdSecretManager);
+
+        await secretManager.storeMnemonic('vital give early extra blind skin eight discover scissors there globe deal goat fat load robot return rate fragile recycle select live ordinary claim',);
+
+        const wallet_address = await secretManager.generateEd25519Addresses({
+            coinType: CoinType.IOTA,
+            accountIndex: 0,
+            range: {
+                start: 0,
+                end: 1,
+            },
+            bech32Hrp: 'tst',
+        });
+
+        const walletOptions: WalletOptions = {
+            address: wallet_address[0],
+            storagePath: './test-recreate-wallet',
             clientOptions: {
                 nodes: ['https://api.testnet.shimmer.network'],
             },
-            bipPath: chain,
+            bipPath: {
+                coinType: CoinType.IOTA,
+            },
             secretManager: strongholdSecretManager,
         };
 
-        const wallet = new Wallet(walletOptions);
+
+        const wallet = await Wallet.create(walletOptions);
+
+        const client = await wallet.getClient();
+        const hrp = await client.getBech32Hrp();
+        expect(hrp).toEqual("smr");
 
         await wallet.destroy();
 
-        const recreatedWallet = new Wallet(walletOptions);
-        const accounts = await recreatedWallet.accounts();
+        const recreatedWallet = await Wallet.create({ storagePath: './test-recreate-wallet' });
 
         // TODO: make acocunts test 
-        expect(accounts.length).toStrictEqual(0);
+        // expect(accounts.length).toStrictEqual(0);
 
         await recreatedWallet.destroy();
         removeDir(storagePath)

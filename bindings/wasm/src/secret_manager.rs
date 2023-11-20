@@ -4,7 +4,7 @@
 use std::sync::Arc;
 
 use iota_sdk_bindings_core::{
-    call_secret_manager_method,
+    call_secret_manager_method as rust_call_secret_manager_method,
     iota_sdk::client::secret::{SecretManager, SecretManagerDto},
     Response, SecretManagerMethod,
 };
@@ -38,26 +38,30 @@ pub fn create_secret_manager(options: String) -> Result<SecretManagerMethodHandl
 /// Handles a method, returns the response as a JSON-encoded string.
 ///
 /// Returns an error if the response itself is an error or panic.
-#[wasm_bindgen(js_name = callSecretManagerMethodAsync)]
+#[wasm_bindgen(js_name = callSecretManagerMethod)]
 #[allow(non_snake_case)]
-pub async fn call_secret_manager_method_async(
-    method: String,
+pub async fn call_secret_manager_method(
     methodHandler: &SecretManagerMethodHandler,
-) -> Result<String, JsError> {
+    method: String,
+) -> Result<PromiseString, JsError> {
     let secret_manager = methodHandler.secret_manager.clone();
     let method: SecretManagerMethod = serde_json::from_str(&method).map_err(|err| {
         JsError::new(&serde_json::to_string(&Response::Panic(err.to_string())).expect("json to string error"))
     })?;
 
+
     let response = {
         let secret_manager = secret_manager.read().await;
-        call_secret_manager_method(&*secret_manager, method).await
+        rust_call_secret_manager_method(&*secret_manager, method).await
     };
     let ser = serde_json::to_string(&response).expect("json to string error");
     match response {
         Response::Error(_) | Response::Panic(_) => Err(JsError::new(&ser)),
         _ => Ok(ser),
     }
+
+    // WARNING: this does not validate the return type. Check carefully.
+    Ok(promise.unchecked_into())
 }
 
 /// Stronghold snapshot migration is not supported for WebAssembly bindings.

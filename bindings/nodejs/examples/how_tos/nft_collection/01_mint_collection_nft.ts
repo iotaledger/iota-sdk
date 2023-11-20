@@ -12,7 +12,7 @@ const NUM_NFTS_MINTED_PER_TRANSACTION = 50;
 // In this example we will mint the issuer NFT for the NFT collection.
 //
 // Make sure that `STRONGHOLD_SNAPSHOT_PATH` and `WALLET_DB_PATH` already exist by
-// running the `how_tos/accounts_and_addresses/create-account` example!
+// running the `how_tos/accounts_and_addresses/create-wallet` example!
 //
 // Rename `.env.example` to `.env` first, then run
 // yarn run-example ./how_tos/nfts/01_mint_collection_nft.ts <issuer_nft_id>
@@ -25,15 +25,16 @@ async function run() {
         }
 
         // Create the wallet
-        const wallet = new Wallet({
+        const wallet = await Wallet.create({
             storagePath: process.env.WALLET_DB_PATH,
         });
 
         // To sign a transaction we need to unlock stronghold.
         await wallet.setStrongholdPassword(process.env.STRONGHOLD_PASSWORD);
 
+        // Get the wallet we generated with `how_tos/accounts_and_addresses/create-wallet`
         await wallet.sync();
-        console.log(`Account synced!`);
+        console.log(`Wallet synced!`);
 
         // Get the id we generated with `00_mint_issuer_nft`
         const issuerNftId: NftId = process.argv[2];
@@ -68,10 +69,10 @@ async function run() {
                     i + chunk.length
                 }/${NFT_COLLECTION_SIZE})`,
             );
-            const transaction = await account.mintNfts(chunk);
+            const transaction = await wallet.mintNfts(chunk);
 
             // Wait for transaction to get included
-            const blockId = await account.reissueTransactionUntilIncluded(
+            const blockId = await wallet.reissueTransactionUntilIncluded(
                 transaction.transactionId,
             );
             console.log(
@@ -79,7 +80,7 @@ async function run() {
             );
 
             // Sync so the new outputs are available again for new transactions
-            await account.sync();
+            await wallet.sync();
         }
 
         // After the NFTs are minted, the issuer nft can be sent to the so called "null address"

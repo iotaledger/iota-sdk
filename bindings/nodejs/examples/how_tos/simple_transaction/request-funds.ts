@@ -19,14 +19,11 @@ async function run() {
         const faucetUrl = process.env.FAUCET_URL;
 
         // Create the wallet
-        const wallet = new Wallet({
+        const wallet = await Wallet.create({
             storagePath: process.env.WALLET_DB_PATH,
         });
 
-        // Get the account we generated with `create-account`
-        const account = await wallet.getAccount('Alice');
-
-        const address = (await account.addresses())[0].address;
+        const address = await wallet.address();
         console.log(address);
 
         const faucetResponse = await wallet

@@ -6,7 +6,7 @@ import { Wallet, initLogger } from '@iota/sdk';
 // This example uses secrets in environment variables for simplicity which should not be done in production.
 //
 // Make sure that `example.stronghold` and `example.walletdb` already exist by
-// running the `how_tos/accounts_and_addresses/create-account` example!
+// running the `how_tos/accounts_and_addresses/create-wallet` example!
 //
 require('dotenv').config({ path: '.env' });
 
@@ -27,15 +27,12 @@ async function run() {
 
     try {
         // Create the wallet
-        const wallet = new Wallet({
+        const wallet = await Wallet.create({
             storagePath: process.env.WALLET_DB_PATH,
         });
 
-        // Get the account we generated with `01-create-wallet`
-        const account = await wallet.getAccount('Alice');
-
-        // May want to ensure the account is synced before sending a transaction.
-        let balance = await account.sync();
+        // May want to ensure the wallet is synced before sending a transaction.
+        let balance = await wallet.sync();
 
         console.log(`Accounts BEFORE:\n`, balance.accounts);
 
@@ -47,19 +44,19 @@ async function run() {
         console.log('Sending the create-account transaction...');
 
         // Create an account output
-        const transaction = await account.createAccountOutput();
+        const transaction = await wallet.createAccountOutput();
 
         console.log(`Transaction sent: ${transaction.transactionId}`);
 
         // Wait for transaction to get included
-        const blockId = await account.reissueTransactionUntilIncluded(
+        const blockId = await wallet.reissueTransactionUntilIncluded(
             transaction.transactionId,
         );
         console.log(
             `Block included: ${process.env.EXPLORER_URL}/block/${blockId}`,
         );
 
-        balance = await account.sync();
+        balance = await wallet.sync();
         console.log(`Accounts AFTER:\n`, balance.accounts);
     } catch (error) {
         console.log('Error: ', error);

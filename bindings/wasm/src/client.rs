@@ -4,7 +4,7 @@
 use std::sync::{Arc, RwLock};
 
 use iota_sdk_bindings_core::{
-    call_client_method,
+    call_client_method as rust_call_client_method,
     iota_sdk::client::{Client, ClientBuilder},
     ClientMethod, Response,
 };
@@ -67,9 +67,9 @@ pub fn destroy_client(client_method_handler: &ClientMethodHandler) -> Result<(),
 /// Handles a method, returns the response as a JSON-encoded string.
 ///
 /// Returns an error if the response itself is an error or panic.
-#[wasm_bindgen(js_name = callClientMethodAsync)]
+#[wasm_bindgen(js_name = callClientMethod)]
 #[allow(non_snake_case)]
-pub async fn call_client_method_async(method: String, methodHandler: &ClientMethodHandler) -> Result<String, JsError> {
+pub async fn call_client_method(methodHandler: &ClientMethodHandler, method: String) -> Result<PromiseString, JsValue> {
     binding_glue!(method, methodHandler, "Client", call_client_method)
 }
 

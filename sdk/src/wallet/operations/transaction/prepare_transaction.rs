@@ -6,8 +6,6 @@ use std::collections::HashSet;
 use instant::Instant;
 use packable::bounded::TryIntoBoundedU16Error;
 
-#[cfg(feature = "events")]
-use crate::wallet::events::types::{AddressData, TransactionProgressEvent, WalletEvent};
 use crate::{
     client::{api::PreparedTransactionData, secret::SecretManage},
     types::block::{
@@ -35,11 +33,11 @@ where
         let options = options.into();
         let outputs = outputs.into();
         let prepare_transaction_start_time = Instant::now();
-        let rent_structure = self.client().get_rent_structure().await?;
+        let storage_score_params = self.client().get_storage_score_parameters().await?;
 
         // Check if the outputs have enough amount to cover the storage deposit
         for output in &outputs {
-            output.verify_storage_deposit(rent_structure)?;
+            output.verify_storage_deposit(storage_score_params)?;
         }
 
         let is_burn_present = options.as_ref().map(|options| options.burn.is_some()).unwrap_or(false);

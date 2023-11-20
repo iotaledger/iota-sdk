@@ -23,7 +23,8 @@ impl ClientInner {
         prefer_permanode: bool,
     ) -> Result<OutputIdsResponse> {
         let mut merged_output_ids_response = OutputIdsResponse {
-            ledger_index: 0,
+            committed_slot: 0,
+            page_size: 1000,
             cursor: None,
             items: Vec::new(),
         };
@@ -48,7 +49,8 @@ impl ClientInner {
                 return Ok(output_ids_response);
             }
 
-            merged_output_ids_response.ledger_index = output_ids_response.ledger_index;
+            merged_output_ids_response.committed_slot = output_ids_response.committed_slot;
+            merged_output_ids_response.page_size = output_ids_response.page_size;
             merged_output_ids_response.cursor = output_ids_response.cursor;
             merged_output_ids_response.items.extend(output_ids_response.items);
 

@@ -24,7 +24,7 @@ use crate::{
             output::{dto::OutputDto, AccountId, Output, OutputId, OutputMetadata},
             payload::signed_transaction::TransactionId,
             slot::{EpochIndex, SlotCommitment, SlotCommitmentId, SlotIndex},
-            BlockId, SignedBlock, SignedBlockDto,
+            Block, BlockDto, BlockId,
         },
         TryFromDto,
     },
@@ -102,10 +102,16 @@ impl ClientInner {
     /// future rewards for those epochs. `epochStart` and `epochEnd` indicates the actual range for which reward value
     /// is returned and decayed for.
     /// GET /api/core/v3/rewards/{outputId}
-    pub async fn get_output_mana_rewards(&self, output_id: &OutputId) -> Result<ManaRewardsResponse> {
+    pub async fn get_output_mana_rewards(
+        &self,
+        output_id: &OutputId,
+        slot_index: impl Into<Option<SlotIndex>> + Send,
+    ) -> Result<ManaRewardsResponse> {
         let path = &format!("api/core/v3/rewards/{output_id}");
 
-        self.get_request(path, None, false, false).await
+        let query = query_tuples_to_query_string([slot_index.into().map(|i| ("slotIndex", i.to_string()))]);
+
+        self.get_request(path, query.as_deref(), false, false).await
     }
 
     // Committee routes.
@@ -160,10 +166,10 @@ impl ClientInner {
 
     /// Returns the BlockId of the submitted block.
     /// POST JSON to /api/core/v3/blocks
-    pub async fn post_block(&self, block: &SignedBlock) -> Result<BlockId> {
+    pub async fn post_block(&self, block: &Block) -> Result<BlockId> {
         const PATH: &str = "api/core/v3/blocks";
 
-        let block_dto = SignedBlockDto::from(block);
+        let block_dto = BlockDto::from(block);
 
         let response = self
             .post_request::<SubmitBlockResponse>(PATH, serde_json::to_value(block_dto)?)
@@ -174,7 +180,7 @@ impl ClientInner {
 
     /// Returns the BlockId of the submitted block.
     /// POST /api/core/v3/blocks
-    pub async fn post_block_raw(&self, block: &SignedBlock) -> Result<BlockId> {
+    pub async fn post_block_raw(&self, block: &Block) -> Result<BlockId> {
         const PATH: &str = "api/core/v3/blocks";
 
         let response = self
@@ -186,14 +192,14 @@ impl ClientInner {
 
     /// Finds a block by its ID and returns it as object.
     /// GET /api/core/v3/blocks/{blockId}
-    pub async fn get_block(&self, block_id: &BlockId) -> Result<SignedBlock> {
+    pub async fn get_block(&self, block_id: &BlockId) -> Result<Block> {
         let path = &format!("api/core/v3/blocks/{block_id}");
 
-        let dto = self.get_request::<SignedBlockDto>(path, None, false, true).await?;
+        let dto = self.get_request::<BlockDto>(path, None, false, true).await?;
 
-        Ok(SignedBlock::try_from_dto_with_params(
+        Ok(Block::try_from_dto_with_params(
             dto,
-            self.get_protocol_parameters().await?,
+            &self.get_protocol_parameters().await?,
         )?)
     }
 
@@ -220,10 +226,9 @@ impl ClientInner {
     pub async fn get_output(&self, output_id: &OutputId) -> Result<Output> {
         let path = &format!("api/core/v3/outputs/{output_id}");
 
-        let output = self.get_request::<OutputDto>(path, None, false, true).await?;
-        let token_supply = self.get_token_supply().await?;
-
-        Ok(Output::try_from_dto_with_params(output, token_supply)?)
+        Ok(Output::try_from(
+            self.get_request::<OutputDto>(path, None, false, true).await?,
+        )?)
     }
 
     /// Finds an output by its ID and returns it as raw bytes.
@@ -244,14 +249,14 @@ impl ClientInner {
 
     /// Returns the earliest confirmed block containing the transaction with the given ID.
     /// GET /api/core/v3/transactions/{transactionId}/included-block
-    pub async fn get_included_block(&self, transaction_id: &TransactionId) -> Result<SignedBlock> {
+    pub async fn get_included_block(&self, transaction_id: &TransactionId) -> Result<Block> {
         let path = &format!("api/core/v3/transactions/{transaction_id}/included-block");
 
-        let dto = self.get_request::<SignedBlockDto>(path, None, true, true).await?;
+        let dto = self.get_request::<BlockDto>(path, None, true, true).await?;
 
-        Ok(SignedBlock::try_from_dto_with_params(
+        Ok(Block::try_from_dto_with_params(
             dto,
-            self.get_protocol_parameters().await?,
+            &self.get_protocol_parameters().await?,
         )?)
     }
 

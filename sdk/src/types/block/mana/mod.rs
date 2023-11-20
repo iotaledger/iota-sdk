@@ -22,6 +22,7 @@ pub(crate) type ManaAllotmentCount =
 
 /// A list of [`ManaAllotment`]s with unique [`AccountId`]s.
 #[derive(Clone, Debug, Eq, PartialEq, Deref, Packable)]
+#[packable(unpack_visitor = ProtocolParameters)]
 #[packable(unpack_error = Error, with = |e| e.unwrap_item_err_or_else(|p| Error::InvalidManaAllotmentCount(p.into())))]
 pub struct ManaAllotments(
     #[packable(verify_with = verify_mana_allotments)] BoxedSlicePrefix<ManaAllotment, ManaAllotmentCount>,
