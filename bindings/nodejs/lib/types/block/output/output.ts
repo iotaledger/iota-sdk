@@ -131,8 +131,7 @@ abstract class CommonOutput extends Output {
             return undefined;
         }
 
-        for (let i = 0; i < this.features.length; i++) {
-            const feature = this.features[i];
+        for (const feature of this.features) {
             if (feature instanceof NativeTokenFeature) {
                 return feature as NativeTokenFeature;
             }

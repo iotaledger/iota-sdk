@@ -8,9 +8,10 @@ import {
     BlockIssuerKey,
     BlockIssuerKeyDiscriminator,
 } from './block-issuer-key';
-import { u64 } from '../../utils/type-aliases';
+import { u256, u64 } from '../../utils/type-aliases';
 import { EpochIndex } from '../../block/slot';
 import { INativeToken } from '../../models/native-token';
+import { HexEncodedString } from '../../utils/hex-encoding';
 
 /**
  * All of the feature block types.
@@ -114,9 +115,13 @@ class TagFeature extends Feature {
  */
 class NativeTokenFeature extends Feature {
     /**
-     * The inner native token held by this feature.
+     * Identifier of the native token.
      */
-    readonly nativeToken: INativeToken;
+    readonly id: HexEncodedString;
+    /**
+     * Amount of native tokens of the given Token ID.
+     */
+    readonly amount: u256;
 
     /**
      * Creates a new `NativeTokenFeature`.
@@ -124,7 +129,8 @@ class NativeTokenFeature extends Feature {
      */
     constructor(nativeToken: INativeToken) {
         super(FeatureType.NativeToken);
-        this.nativeToken = nativeToken;
+        this.id = nativeToken.id;
+        this.amount = nativeToken.amount;
     }
 }
 

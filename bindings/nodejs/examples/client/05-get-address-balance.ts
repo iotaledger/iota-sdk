@@ -58,9 +58,9 @@ async function run() {
                     output as CommonOutput
                 ).getNativeToken();
                 if (nativeTokenFeature != undefined) {
-                    totalNativeTokens[nativeTokenFeature.nativeToken.id] =
-                        (totalNativeTokens[nativeTokenFeature.nativeToken.id] ||
-                            BigInt(0)) + nativeTokenFeature.nativeToken.amount;
+                    totalNativeTokens[nativeTokenFeature.id] =
+                        (totalNativeTokens[nativeTokenFeature.id] ||
+                            BigInt(0)) + nativeTokenFeature.amount;
                 }
             }
 
