@@ -287,7 +287,10 @@ impl AccountOutput {
     /// The set of allowed [`UnlockCondition`]s for an [`AccountOutput`].
     pub const ALLOWED_UNLOCK_CONDITIONS: UnlockConditionFlags = UnlockConditionFlags::ADDRESS;
     /// The set of allowed [`Feature`]s for an [`AccountOutput`].
-    pub const ALLOWED_FEATURES: FeatureFlags = FeatureFlags::SENDER.union(FeatureFlags::METADATA);
+    pub const ALLOWED_FEATURES: FeatureFlags = FeatureFlags::SENDER
+        .union(FeatureFlags::METADATA)
+        .union(FeatureFlags::BLOCK_ISSUER)
+        .union(FeatureFlags::STAKING);
     /// The set of allowed immutable [`Feature`]s for an [`AccountOutput`].
     pub const ALLOWED_IMMUTABLE_FEATURES: FeatureFlags = FeatureFlags::ISSUER.union(FeatureFlags::METADATA);
 
