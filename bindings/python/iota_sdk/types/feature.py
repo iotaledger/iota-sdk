@@ -17,18 +17,20 @@ class FeatureType(IntEnum):
         Sender (0): The sender feature.
         Issuer (1): The issuer feature.
         Metadata (2): The metadata feature.
-        Tag (3): The tag feature.
-        NativeToken (4): The native token feature.
-        BlockIssuer (5): The block issuer feature.
-        Staking (6): The staking feature.
+        StateMetadata (3): The state metadata feature.
+        Tag (4): The tag feature.
+        NativeToken (5): The native token feature.
+        BlockIssuer (6): The block issuer feature.
+        Staking (7): The staking feature.
     """
     Sender = 0
     Issuer = 1
     Metadata = 2
-    Tag = 3
-    NativeToken = 4
-    BlockIssuer = 5
-    Staking = 6
+    StateMetadata = 3
+    Tag = 4
+    NativeToken = 5
+    BlockIssuer = 6
+    Staking = 7
 
 
 @json
