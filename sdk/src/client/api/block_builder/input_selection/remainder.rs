@@ -24,9 +24,16 @@ impl InputSelection {
         if let Some(remainder_address) = &self.remainder_address {
             // Search in inputs for the Bip44 chain for the remainder address, so the ledger can regenerate it
             for input in self.available_inputs.iter().chain(self.selected_inputs.iter()) {
-                let (required_address, _) = input
+                let required_address = input
                     .output
-                    .required_and_unlocked_address(self.slot_index, input.output_id())?;
+                    .required_address(
+                        self.slot_index,
+                        self.protocol_parameters.min_committable_age(),
+                        self.protocol_parameters.max_committable_age(),
+                        input.output_id(),
+                    )?
+                    // TODO
+                    .unwrap();
 
                 if &required_address == remainder_address {
                     return Ok(Some((remainder_address.clone(), input.chain)));
@@ -43,7 +50,7 @@ impl InputSelection {
                     self.protocol_parameters.min_committable_age(),
                     self.protocol_parameters.max_committable_age(),
                     input.output_id(),
-                )
+                )?
                 // TODO
                 .unwrap();
 

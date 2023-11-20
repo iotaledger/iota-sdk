@@ -40,8 +40,8 @@ pub(crate) fn can_output_be_unlocked_forever_from_now_on(
     wallet_address: &Address,
     output: &Output,
     slot_index: SlotIndex,
-    min_committable_age: u32,
-    max_committable_age: u32,
+    min_committable_age: SlotIndex,
+    max_committable_age: SlotIndex,
 ) -> bool {
     if let Some(unlock_conditions) = output.unlock_conditions() {
         if unlock_conditions.is_timelocked(slot_index, min_committable_age) {

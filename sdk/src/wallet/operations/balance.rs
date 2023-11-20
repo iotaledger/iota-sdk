@@ -36,8 +36,8 @@ where
         wallet_data: &WalletData,
     ) -> Result<Balance> {
         let protocol_parameters = self.client().get_protocol_parameters().await?;
-        let network_id = self.client().get_network_id().await?;
-        let storage_score_params = self.client().get_storage_score_parameters().await?;
+        let network_id = protocol_parameters.network_id();
+        let storage_score_params = protocol_parameters.storage_score_parameters();
         let mut balance = Balance::default();
         let mut total_storage_cost = 0;
         let mut total_native_tokens = NativeTokensBuilder::default();

@@ -9,9 +9,9 @@ use crate::{
     client::{secret::types::InputSigningData, Error, Result},
     types::block::{
         output::{Output, OutputId},
-        payload::transaction::{RegularTransactionEssence, TransactionPayload},
+        payload::signed_transaction::{SignedTransactionPayload, Transaction},
         protocol::ProtocolParameters,
-        semantic::{semantic_validation, SemanticValidationContext, TransactionFailureReason},
+        semantic::{SemanticValidationContext, TransactionFailureReason},
         signature::Ed25519Signature,
         Block, BlockId,
     },
@@ -28,7 +28,7 @@ const REFERENCE_ACCOUNT_NFT_UNLOCK_LENGTH: usize = 1 + 2;
 /// Verifies the semantic of a prepared transaction.
 pub fn verify_semantic(
     input_signing_data: &[InputSigningData],
-    transaction: &SignedTransactionPayload,
+    transaction_payload: &SignedTransactionPayload,
     protocol_parameters: ProtocolParameters,
 ) -> crate::client::Result<Option<TransactionFailureReason>> {
     let inputs = input_signing_data

@@ -98,8 +98,8 @@ where
                 wallet_address,
                 output_data,
                 slot_index,
-                protocol_parameters.min_committable_age(),
-                protocol_parameters.max_committable_age(),
+                protocol_parameters.min_committable_age().into(),
+                protocol_parameters.max_committable_age().into(),
             )?
         } else {
             false
