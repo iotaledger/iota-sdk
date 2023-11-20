@@ -788,6 +788,7 @@ pub async fn sync_command(wallet: &Wallet) -> Result<(), Error> {
     let balance = wallet
         .sync(Some(SyncOptions {
             sync_native_token_foundries: true,
+            sync_implicit_accounts: true,
             ..Default::default()
         }))
         .await?;
