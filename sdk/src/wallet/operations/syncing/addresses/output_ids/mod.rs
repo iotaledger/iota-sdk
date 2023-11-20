@@ -47,6 +47,7 @@ where
         if (address.is_ed25519() && sync_options.wallet.all_outputs())
             || (address.is_nft() && sync_options.nft.all_outputs())
             || (address.is_account() && sync_options.account.all_outputs())
+            || (address.is_implicit_account_creation() && sync_options.sync_implicit_accounts)
         {
             return Ok(self
                 .client()
