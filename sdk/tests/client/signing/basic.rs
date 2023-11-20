@@ -72,7 +72,7 @@ async fn single_ed25519_unlock() -> Result<()> {
         )
         .with_outputs(outputs)
         .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
-        .finish_with_params(protocol_parameters)?;
+        .finish_with_params(&protocol_parameters)?;
 
     let prepared_transaction_data = PreparedTransactionData {
         transaction,
@@ -167,7 +167,7 @@ async fn ed25519_reference_unlocks() -> Result<()> {
         )
         .with_outputs(outputs)
         .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
-        .finish_with_params(protocol_parameters)?;
+        .finish_with_params(&protocol_parameters)?;
 
     let prepared_transaction_data = PreparedTransactionData {
         transaction,
@@ -273,7 +273,7 @@ async fn two_signature_unlocks() -> Result<()> {
         )
         .with_outputs(outputs)
         .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
-        .finish_with_params(protocol_parameters)?;
+        .finish_with_params(&protocol_parameters)?;
 
     let prepared_transaction_data = PreparedTransactionData {
         transaction,

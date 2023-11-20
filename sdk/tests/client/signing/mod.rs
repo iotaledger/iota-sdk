@@ -377,7 +377,7 @@ async fn all_combined() -> Result<()> {
         .with_outputs(outputs)
         .with_creation_slot(slot_index)
         .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
-        .finish_with_params(protocol_parameters)?;
+        .finish_with_params(&protocol_parameters)?;
 
     let prepared_transaction_data = PreparedTransactionData {
         transaction,

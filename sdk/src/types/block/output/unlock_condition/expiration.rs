@@ -30,7 +30,7 @@ impl ExpirationUnlockCondition {
     pub fn new(return_address: impl Into<Address>, slot_index: impl Into<SlotIndex>) -> Result<Self, Error> {
         let slot_index = slot_index.into();
 
-        verify_slot_index::<true>(&slot_index, &())?;
+        verify_slot_index::<true>(&slot_index)?;
 
         Ok(Self {
             return_address: return_address.into(),
@@ -67,7 +67,7 @@ impl StorageScore for ExpirationUnlockCondition {
 }
 
 #[inline]
-fn verify_slot_index<const VERIFY: bool>(slot_index: &SlotIndex, _: &()) -> Result<(), Error> {
+fn verify_slot_index<const VERIFY: bool>(slot_index: &SlotIndex) -> Result<(), Error> {
     if VERIFY && *slot_index == 0 {
         Err(Error::ExpirationUnlockConditionZero)
     } else {

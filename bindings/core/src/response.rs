@@ -30,7 +30,7 @@ use iota_sdk::{
             signature::Ed25519Signature,
             slot::SlotCommitmentId,
             unlock::Unlock,
-            BlockId, SignedBlockDto, UnsignedBlockDto,
+            BlockDto, BlockId, UnsignedBlockDto,
         },
     },
     utils::serde::string,
@@ -112,7 +112,7 @@ pub enum Response {
     /// - [`GetBlock`](crate::method::ClientMethod::GetBlock)
     /// - [`GetIncludedBlock`](crate::method::ClientMethod::GetIncludedBlock)
     /// - [`SignBlock`](crate::method::SecretManagerMethod::SignBlock)
-    SignedBlock(SignedBlockDto),
+    Block(BlockDto),
     /// Response for:
     /// - [`GetBlockMetadata`](crate::method::ClientMethod::GetBlockMetadata)
     BlockMetadata(BlockMetadataResponse),
@@ -147,7 +147,7 @@ pub enum Response {
     OutputIdsResponse(OutputIdsResponse),
     /// Response for:
     /// - [`FindBlocks`](crate::method::ClientMethod::FindBlocks)
-    Blocks(Vec<SignedBlockDto>),
+    Blocks(Vec<BlockDto>),
     /// Response for:
     /// - [`FindInputs`](crate::method::ClientMethod::FindInputs)
     Inputs(Vec<UtxoInput>),

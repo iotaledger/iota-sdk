@@ -10,7 +10,7 @@ use iota_sdk::{
             input::UtxoInput,
             output::{AccountId, FoundryId, MinimumOutputAmount, NftId, Output, OutputId, TokenId},
             payload::{signed_transaction::Transaction, SignedTransactionPayload},
-            SignedBlock,
+            Block,
         },
         TryFromDto,
     },
@@ -42,7 +42,7 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
             block,
             protocol_parameters,
         } => {
-            let block = SignedBlock::try_from_dto_with_params(block, &protocol_parameters)?;
+            let block = Block::try_from_dto_with_params(block, &protocol_parameters)?;
             Response::BlockId(block.id(&protocol_parameters))
         }
         UtilsMethod::TransactionId { payload } => {

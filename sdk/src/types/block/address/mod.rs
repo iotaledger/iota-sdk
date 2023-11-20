@@ -202,13 +202,13 @@ impl Address {
 impl StorageScore for Address {
     fn storage_score(&self, params: StorageScoreParameters) -> u64 {
         match self {
-            Address::Ed25519(address) => address.storage_score(params),
-            Address::Account(address) => address.storage_score(params),
-            Address::Nft(address) => address.storage_score(params),
-            Address::Anchor(address) => address.storage_score(params),
-            Address::ImplicitAccountCreation(address) => address.storage_score(params),
-            Address::Multi(address) => address.storage_score(params),
-            Address::Restricted(address) => address.storage_score(params),
+            Self::Ed25519(address) => address.storage_score(params),
+            Self::Account(address) => address.storage_score(params),
+            Self::Nft(address) => address.storage_score(params),
+            Self::Anchor(address) => address.storage_score(params),
+            Self::ImplicitAccountCreation(address) => address.storage_score(params),
+            Self::Multi(address) => address.storage_score(params),
+            Self::Restricted(address) => address.storage_score(params),
         }
     }
 }

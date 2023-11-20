@@ -45,7 +45,7 @@ describe('Wallet', () => {
         };
 
 
-        const wallet = new Wallet(walletOptions);
+        const wallet = await Wallet.create(walletOptions);
 
         await wallet.destroy()
         removeDir(storagePath)
@@ -90,7 +90,7 @@ describe('Wallet', () => {
         };
 
 
-        const wallet = new Wallet(walletOptions);
+        const wallet = await Wallet.create(walletOptions);
 
         const client = await wallet.getClient();
         const hrp = await client.getBech32Hrp();
@@ -98,7 +98,7 @@ describe('Wallet', () => {
 
         await wallet.destroy();
 
-        const recreatedWallet = new Wallet({ storagePath: './test-recreate-wallet' });
+        const recreatedWallet = await Wallet.create({ storagePath: './test-recreate-wallet' });
 
         await recreatedWallet.destroy()
         removeDir(storagePath)

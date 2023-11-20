@@ -390,7 +390,7 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
                 .sign_and_submit_transaction(
                     PreparedTransactionData::try_from_dto_with_params(
                         prepared_transaction_data,
-                        wallet.client().get_protocol_parameters().await?,
+                        &wallet.client().get_protocol_parameters().await?,
                     )?,
                     None,
                 )
@@ -410,7 +410,7 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
         } => {
             let signed_transaction_data = SignedTransactionData::try_from_dto_with_params(
                 signed_transaction_data,
-                wallet.client().get_protocol_parameters().await?,
+                &wallet.client().get_protocol_parameters().await?,
             )?;
             let transaction = wallet
                 .submit_and_store_transaction(signed_transaction_data, None)
