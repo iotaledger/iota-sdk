@@ -617,7 +617,7 @@ pub(crate) mod dto {
 
     impl NftOutput {
         #[allow(clippy::too_many_arguments)]
-        pub fn try_from_dtos<'a>(
+        pub fn try_from_dtos(
             amount: OutputBuilderAmount,
             mana: u64,
             nft_id: &NftId,

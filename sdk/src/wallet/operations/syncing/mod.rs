@@ -216,7 +216,7 @@ where
                     let new_outputs_data_inner = self.get_outputs(output_ids).await?;
 
                     let outputs_data_inner = self
-                        .output_response_to_output_data(new_outputs_data_inner, &address_with_unspent_outputs)
+                        .output_response_to_output_data(new_outputs_data_inner, address_with_unspent_outputs)
                         .await?;
 
                     outputs_data.extend(outputs_data_inner.clone());

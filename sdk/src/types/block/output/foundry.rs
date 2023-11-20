@@ -716,7 +716,7 @@ pub(crate) mod dto {
 
     impl FoundryOutput {
         #[allow(clippy::too_many_arguments)]
-        pub fn try_from_dtos<'a>(
+        pub fn try_from_dtos(
             amount: OutputBuilderAmount,
             serial_number: u32,
             token_scheme: TokenScheme,

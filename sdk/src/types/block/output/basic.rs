@@ -456,7 +456,7 @@ pub(crate) mod dto {
     }
 
     impl BasicOutput {
-        pub fn try_from_dtos<'a>(
+        pub fn try_from_dtos(
             amount: OutputBuilderAmount,
             mana: u64,
             unlock_conditions: Vec<UnlockConditionDto>,
