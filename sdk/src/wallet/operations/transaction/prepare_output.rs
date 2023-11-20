@@ -81,7 +81,7 @@ where
             }
 
             if let Some(native_token) = &features.native_token {
-                first_output_builder = first_output_builder.with_native_token(native_token.clone());
+                first_output_builder = first_output_builder.with_native_token(*native_token);
             }
         }
 
