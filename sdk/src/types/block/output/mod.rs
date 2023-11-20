@@ -47,7 +47,6 @@ pub use self::{
     unlock_condition::{UnlockCondition, UnlockConditions},
 };
 pub(crate) use self::{
-    anchor::StateMetadataLength,
     feature::{MetadataFeatureLength, TagFeatureLength},
     native_token::NativeTokenCount,
     output_id::OutputIndex,
