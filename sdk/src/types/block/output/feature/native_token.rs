@@ -46,7 +46,7 @@ mod dto {
         fn from(value: &NativeTokenFeature) -> Self {
             Self {
                 kind: NativeTokenFeature::KIND,
-                token_id: value.token_id().clone(),
+                token_id: *value.token_id(),
                 amount: value.amount(),
             }
         }

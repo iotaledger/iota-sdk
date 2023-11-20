@@ -955,7 +955,7 @@ async fn print_wallet_address(wallet: &Wallet) -> Result<(), Error> {
 
         if address.inner() == required_address {
             if let Some(nt) = output_data.output.native_token() {
-                native_tokens.add_native_token(nt.clone())?;
+                native_tokens.add_native_token(*nt)?;
             }
             match &output_data.output {
                 Output::Basic(_) => {}
