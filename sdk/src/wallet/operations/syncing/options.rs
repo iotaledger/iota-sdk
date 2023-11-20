@@ -42,7 +42,7 @@ pub struct SyncOptions {
     /// Sync native token foundries, so their metadata can be returned in the balance.
     #[serde(default = "default_sync_native_token_foundries")]
     pub sync_native_token_foundries: bool,
-    ///
+    /// Sync implicit accounts.
     #[serde(default = "default_sync_implicit_accounts")]
     pub sync_implicit_accounts: bool,
 }
