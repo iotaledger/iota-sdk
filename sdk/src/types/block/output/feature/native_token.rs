@@ -10,7 +10,7 @@ pub struct NativeTokenFeature(NativeToken);
 
 impl NativeTokenFeature {
     /// The [`Feature`](crate::types::block::output::Feature) kind of [`NativeTokenFeature`].
-    pub const KIND: u8 = 4;
+    pub const KIND: u8 = 5;
 
     /// Creates a new [`NativeTokenFeature`].
     pub fn new(native_token: NativeToken) -> Self {
