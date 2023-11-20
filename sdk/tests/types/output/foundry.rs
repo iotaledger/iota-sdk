@@ -4,7 +4,7 @@
 use iota_sdk::types::block::{
     output::{
         unlock_condition::ImmutableAccountAddressUnlockCondition, FoundryId, FoundryOutput, MinimumOutputAmount,
-        NativeToken, Output, SimpleTokenScheme, TokenId,
+        NativeToken, SimpleTokenScheme, TokenId,
     },
     protocol::protocol_parameters,
     rand::{
