@@ -107,7 +107,15 @@ where
             key_index: 0,
         };
 
-        let address_to_sync = vec![wallet_address_with_unspent_outputs];
+        let address_to_sync = vec![
+            wallet_address_with_unspent_outputs,
+            AddressWithUnspentOutputs {
+                address: self.implicit_account_creation_address().await?,
+                output_ids: vec![],
+                internal: false,
+                key_index: 0,
+            },
+        ];
 
         let (addresses_with_unspent_outputs, spent_or_not_synced_output_ids, outputs_data): (
             Vec<AddressWithUnspentOutputs>,
@@ -124,11 +132,11 @@ where
 
         // Add the output response to the output ids, the output response is optional, because an output could be
         // pruned and then we can't get the metadata
-        let mut spent_or_unsynced_output_metadata_map: HashMap<OutputId, Option<OutputMetadata>> =
+        let mut spent_or_unsynced_output_metadata: HashMap<OutputId, Option<OutputMetadata>> =
             spent_or_not_synced_output_ids.into_iter().map(|o| (o, None)).collect();
         for output_metadata_response in spent_or_unsynced_output_metadata_responses {
             let output_id = output_metadata_response.output_id();
-            spent_or_unsynced_output_metadata_map.insert(*output_id, Some(output_metadata_response));
+            spent_or_unsynced_output_metadata.insert(*output_id, Some(output_metadata_response));
         }
 
         if options.sync_incoming_transactions {
@@ -156,7 +164,7 @@ where
         }
 
         // Updates wallet with balances, output ids, outputs
-        self.update_after_sync(outputs_data, spent_or_unsynced_output_metadata_map)
+        self.update_after_sync(outputs_data, spent_or_unsynced_output_metadata)
             .await
     }
 
