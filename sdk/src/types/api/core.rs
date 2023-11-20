@@ -170,7 +170,6 @@ pub struct BaseTokenResponse {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub subunit: Option<String>,
     pub decimals: u32,
-    pub use_metric_prefix: bool,
 }
 
 /// Response of GET /api/core/v3/blocks/validators.
