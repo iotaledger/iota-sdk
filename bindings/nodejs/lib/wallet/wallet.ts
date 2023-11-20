@@ -6,7 +6,7 @@ import {
     Balance,
     SyncOptions,
     SendParams,
-    SendNativeTokensParams,
+    SendNativeTokenParams,
     SendNftParams,
     AccountOutputParams,
     FilterOptions,
@@ -62,10 +62,17 @@ export class Wallet {
     private methodHandler: WalletMethodHandler;
 
     /**
-     * @param options Wallet options.
+     * @param methodHandler The Rust method handler created in `WalletMethodHandler.create()`.
      */
-    constructor(options: WalletOptions) {
-        this.methodHandler = new WalletMethodHandler(options);
+    constructor(methodHandler: WalletMethodHandler) {
+        this.methodHandler = methodHandler;
+    }
+
+    /**
+     * @param options The wallet options.
+     */
+    static async create(options: WalletOptions): Promise<Wallet> {
+        return new Wallet(await WalletMethodHandler.create(options));
     }
 
     /**
@@ -1318,7 +1325,7 @@ export class Wallet {
      * @returns The transaction.
      */
     async sendNativeTokens(
-        params: SendNativeTokensParams[],
+        params: SendNativeTokenParams[],
         transactionOptions?: TransactionOptions,
     ): Promise<TransactionWithMetadata> {
         return (
@@ -1335,7 +1342,7 @@ export class Wallet {
      * @returns The prepared transaction.
      */
     async prepareSendNativeTokens(
-        params: SendNativeTokensParams[],
+        params: SendNativeTokenParams[],
         transactionOptions?: TransactionOptions,
     ): Promise<PreparedTransaction> {
         const response = await this.methodHandler.callMethod({

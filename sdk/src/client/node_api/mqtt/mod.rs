@@ -84,7 +84,7 @@ async fn set_mqtt_client(client: &Client) -> Result<(), Error> {
             let secure = node.url.scheme() == "https";
             let mqtt_options = if broker_options.use_ws {
                 let uri = format!(
-                    "{}://{host}:{}/api/mqtt/v1",
+                    "{}://{host}:{}/api/mqtt/v2",
                     if secure { "wss" } else { "ws" },
                     node.url.port_or_known_default().unwrap_or(port)
                 );

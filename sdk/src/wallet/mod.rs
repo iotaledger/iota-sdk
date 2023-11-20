@@ -60,7 +60,7 @@ pub use self::{
                     mint_nfts::MintNftParams,
                 },
                 send::SendParams,
-                send_native_tokens::SendNativeTokensParams,
+                send_native_tokens::SendNativeTokenParams,
                 send_nft::SendNftParams,
             },
             prepare_output::{Assets, Features, OutputParams, ReturnStrategy, StorageDeposit, Unlocks},

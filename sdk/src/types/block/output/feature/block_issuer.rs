@@ -54,7 +54,7 @@ impl BlockIssuerKey {
 impl StorageScore for BlockIssuerKey {
     fn storage_score(&self, params: StorageScoreParameters) -> u64 {
         match self {
-            BlockIssuerKey::Ed25519(e) => e.storage_score(params),
+            Self::Ed25519(e) => e.storage_score(params),
         }
     }
 }
@@ -122,10 +122,7 @@ pub struct BlockIssuerKeys(
     #[packable(verify_with = verify_block_issuer_keys)] BoxedSlicePrefix<BlockIssuerKey, BlockIssuerKeyCount>,
 );
 
-fn verify_block_issuer_keys<const VERIFY: bool>(
-    block_issuer_keys: &[BlockIssuerKey],
-    _visitor: &(),
-) -> Result<(), Error> {
+fn verify_block_issuer_keys<const VERIFY: bool>(block_issuer_keys: &[BlockIssuerKey]) -> Result<(), Error> {
     if VERIFY && !is_unique_sorted(block_issuer_keys.iter()) {
         return Err(Error::BlockIssuerKeysNotUniqueSorted);
     }
@@ -177,7 +174,7 @@ impl BlockIssuerKeys {
         block_issuer_keys.sort();
 
         // Still need to verify the duplicate block issuer keys.
-        verify_block_issuer_keys::<true>(&block_issuer_keys, &())?;
+        verify_block_issuer_keys::<true>(&block_issuer_keys)?;
 
         Ok(Self(block_issuer_keys))
     }
@@ -213,7 +210,7 @@ pub struct BlockIssuerFeature {
 
 impl BlockIssuerFeature {
     /// The [`Feature`](crate::types::block::output::Feature) kind of a [`BlockIssuerFeature`].
-    pub const KIND: u8 = 4;
+    pub const KIND: u8 = 5;
 
     /// Creates a new [`BlockIssuerFeature`].
     #[inline(always)]

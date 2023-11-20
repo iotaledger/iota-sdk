@@ -7,11 +7,11 @@ use iota_sdk::types::{
         payload::Payload,
         protocol::{protocol_parameters, ProtocolParameters},
         rand::{
-            block::{rand_basic_block_builder_with_strong_parents, rand_signed_block, rand_signed_block_with_block},
+            block::{rand_basic_block_body_builder_with_strong_parents, rand_block, rand_block_with_block_body},
             parents::rand_strong_parents,
             payload::rand_tagged_data_payload,
         },
-        SignedBlock, SignedBlockDto,
+        Block, BlockDto,
     },
     TryFromDto,
 };
@@ -93,7 +93,7 @@ use pretty_assertions::assert_eq;
 #[test]
 fn pack_unpack_valid() {
     let protocol_parameters = protocol_parameters();
-    let block = rand_signed_block(protocol_parameters.clone());
+    let block = rand_block(protocol_parameters.clone());
     let packed_block = block.pack_to_vec();
 
     assert_eq!(packed_block.len(), block.packed_len());
@@ -109,15 +109,15 @@ fn getters() {
     let parents = rand_strong_parents();
     let payload = Payload::from(rand_tagged_data_payload());
 
-    let block = rand_basic_block_builder_with_strong_parents(parents.clone())
+    let block_body = rand_basic_block_body_builder_with_strong_parents(parents.clone())
         .with_payload(payload.clone())
-        .finish_block()
+        .finish_block_body()
         .unwrap();
-    let signed_block = rand_signed_block_with_block(protocol_parameters.clone(), block);
+    let block = rand_block_with_block_body(protocol_parameters.clone(), block_body);
 
-    assert_eq!(signed_block.protocol_version(), protocol_parameters.version());
-    assert_eq!(*signed_block.as_basic().strong_parents(), parents);
-    assert_eq!(*signed_block.as_basic().payload().as_ref().unwrap(), &payload);
+    assert_eq!(block.protocol_version(), protocol_parameters.version());
+    assert_eq!(*block.as_basic().strong_parents(), parents);
+    assert_eq!(*block.as_basic().payload().as_ref().unwrap(), &payload);
 }
 
 #[test]
@@ -130,13 +130,15 @@ fn dto_mismatch_version() {
     let network_id = protocol_parameters.network_id();
     let protocol_version = 4;
     let block_dto_json = serde_json::json!({
-        "protocolVersion": protocol_version,
-        "networkId": network_id.to_string(),
-        "issuingTime": issuing_time.to_string(),
-        "slotCommitmentId": "0x8633b2eb1845fdecf12ee6c5e789c3cf1f0d0bbb3cee65cb5fb2757e995b5cd700000000",
-        "latestFinalizedSlot": 0,
-        "issuerId": "0x0000000000000000000000000000000000000000000000000000000000000000",
-        "block": {
+        "header": {
+            "protocolVersion": protocol_version,
+            "networkId": network_id.to_string(),
+            "issuingTime": issuing_time.to_string(),
+            "slotCommitmentId": "0x8633b2eb1845fdecf12ee6c5e789c3cf1f0d0bbb3cee65cb5fb2757e995b5cd700000000",
+            "latestFinalizedSlot": 0,
+            "issuerId": "0x0000000000000000000000000000000000000000000000000000000000000000",
+        },
+        "body": {
             "type":1,
             "strongParents": [ "0x417c5700320912627b604d4c376a5a1663634b09703538570b1d52440b3e474639490b10" ],
             "weakParents": [],
@@ -150,8 +152,8 @@ fn dto_mismatch_version() {
             "signature": "0x3e4a492924302b3b093f1e4266757a1d2041480a3861271d4c2e646d4e3d08360a3e765e1a385a784f6753276c233123475867370a184573195d530b41643a1d"
         }
     });
-    let block_dto = serde_json::from_value::<SignedBlockDto>(block_dto_json).unwrap();
-    let block_res = SignedBlock::try_from_dto_with_params(block_dto, &protocol_parameters);
+    let block_dto = serde_json::from_value::<BlockDto>(block_dto_json).unwrap();
+    let block_res = Block::try_from_dto_with_params(block_dto, &protocol_parameters);
 
     assert_eq!(
         block_res,
@@ -171,13 +173,15 @@ fn dto_mismatch_network_id() {
         + (slot_index - 1) * protocol_parameters.slot_duration_in_seconds() as u64;
     let network_id = network_name_to_id("invalid-network");
     let block_dto_json = serde_json::json!({
-        "protocolVersion": 3,
-        "networkId": network_id.to_string(),
-        "issuingTime": issuing_time.to_string(),
-        "slotCommitmentId": "0x8633b2eb1845fdecf12ee6c5e789c3cf1f0d0bbb3cee65cb5fb2757e995b5cd700000000",
-        "latestFinalizedSlot": 0,
-        "issuerId": "0x0000000000000000000000000000000000000000000000000000000000000000",
-        "block": {
+        "header": {
+            "protocolVersion": 3,
+            "networkId": network_id.to_string(),
+            "issuingTime": issuing_time.to_string(),
+            "slotCommitmentId": "0x8633b2eb1845fdecf12ee6c5e789c3cf1f0d0bbb3cee65cb5fb2757e995b5cd700000000",
+            "latestFinalizedSlot": 0,
+            "issuerId": "0x0000000000000000000000000000000000000000000000000000000000000000",
+        },
+        "body": {
             "type":1,
             "strongParents": [ "0x417c5700320912627b604d4c376a5a1663634b09703538570b1d52440b3e474639490b10" ],
             "weakParents": [],
@@ -191,8 +195,8 @@ fn dto_mismatch_network_id() {
             "signature": "0x3e4a492924302b3b093f1e4266757a1d2041480a3861271d4c2e646d4e3d08360a3e765e1a385a784f6753276c233123475867370a184573195d530b41643a1d"
         }
     });
-    let block_dto = serde_json::from_value::<SignedBlockDto>(block_dto_json).unwrap();
-    let block_res = SignedBlock::try_from_dto_with_params(block_dto, &protocol_parameters);
+    let block_dto = serde_json::from_value::<BlockDto>(block_dto_json).unwrap();
+    let block_res = Block::try_from_dto_with_params(block_dto, &protocol_parameters);
 
     assert_eq!(
         block_res,

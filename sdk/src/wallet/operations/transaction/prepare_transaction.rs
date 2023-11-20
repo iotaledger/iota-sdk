@@ -6,8 +6,6 @@ use std::collections::HashSet;
 use instant::Instant;
 use packable::bounded::TryIntoBoundedU16Error;
 
-#[cfg(feature = "events")]
-use crate::wallet::events::types::{AddressData, TransactionProgressEvent, WalletEvent};
 use crate::{
     client::{api::PreparedTransactionData, secret::SecretManage},
     types::block::{

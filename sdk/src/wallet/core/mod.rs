@@ -38,6 +38,7 @@ use crate::{
                 OutputId, TokenId,
             },
             payload::signed_transaction::TransactionId,
+            protocol::ProtocolParameters,
         },
         TryFromDto,
     },
@@ -262,7 +263,7 @@ where
         if let Address::Ed25519(address) = bech32_address.inner() {
             Ok(Bech32Address::new(
                 *bech32_address.hrp(),
-                ImplicitAccountCreationAddress::from(address.clone()),
+                ImplicitAccountCreationAddress::from(*address),
             ))
         } else {
             Err(Error::NonEd25519Address)
@@ -578,13 +579,12 @@ pub struct WalletDataDto {
     pub native_token_foundries: HashMap<FoundryId, FoundryOutputDto>,
 }
 
-impl TryFromDto for WalletData {
-    type Dto = WalletDataDto;
+impl TryFromDto<WalletDataDto> for WalletData {
     type Error = crate::wallet::Error;
 
     fn try_from_dto_with_params_inner(
-        dto: Self::Dto,
-        params: crate::types::ValidationParams<'_>,
+        dto: WalletDataDto,
+        params: Option<&ProtocolParameters>,
     ) -> core::result::Result<Self, Self::Error> {
         Ok(Self {
             bip_path: dto.bip_path,
@@ -593,30 +593,30 @@ impl TryFromDto for WalletData {
             outputs: dto
                 .outputs
                 .into_iter()
-                .map(|(id, o)| Ok((id, OutputData::try_from_dto_with_params(o, &params)?)))
+                .map(|(id, o)| Ok((id, OutputData::try_from(o)?)))
                 .collect::<crate::wallet::Result<_>>()?,
             locked_outputs: dto.locked_outputs,
             unspent_outputs: dto
                 .unspent_outputs
                 .into_iter()
-                .map(|(id, o)| Ok((id, OutputData::try_from_dto_with_params(o, &params)?)))
+                .map(|(id, o)| Ok((id, OutputData::try_from(o)?)))
                 .collect::<crate::wallet::Result<_>>()?,
             transactions: dto
                 .transactions
                 .into_iter()
-                .map(|(id, o)| Ok((id, TransactionWithMetadata::try_from_dto_with_params(o, &params)?)))
+                .map(|(id, o)| Ok((id, TransactionWithMetadata::try_from_dto_with_params_inner(o, params)?)))
                 .collect::<crate::wallet::Result<_>>()?,
             pending_transactions: dto.pending_transactions,
             incoming_transactions: dto
                 .incoming_transactions
                 .into_iter()
-                .map(|(id, o)| Ok((id, TransactionWithMetadata::try_from_dto_with_params(o, &params)?)))
+                .map(|(id, o)| Ok((id, TransactionWithMetadata::try_from_dto_with_params_inner(o, params)?)))
                 .collect::<crate::wallet::Result<_>>()?,
             inaccessible_incoming_transactions: Default::default(),
             native_token_foundries: dto
                 .native_token_foundries
                 .into_iter()
-                .map(|(id, o)| Ok((id, FoundryOutput::try_from_dto_with_params(o, &params)?)))
+                .map(|(id, o)| Ok((id, FoundryOutput::try_from(o)?)))
                 .collect::<crate::wallet::Result<_>>()?,
         })
     }
@@ -715,7 +715,7 @@ mod test {
             .with_inputs([input1, input2])
             .add_output(output)
             .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
-            .finish_with_params(protocol_parameters)
+            .finish_with_params(&protocol_parameters)
             .unwrap();
 
         let pub_key_bytes = prefix_hex::decode(ED25519_PUBLIC_KEY).unwrap();

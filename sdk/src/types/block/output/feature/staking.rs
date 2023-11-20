@@ -21,7 +21,7 @@ pub struct StakingFeature {
 
 impl StakingFeature {
     /// The [`Feature`](crate::types::block::output::Feature) kind of [`StakingFeature`].
-    pub const KIND: u8 = 5;
+    pub const KIND: u8 = 6;
 
     /// Creates a new [`StakingFeature`].
     pub fn new(

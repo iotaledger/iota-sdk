@@ -47,6 +47,7 @@ where
         if (address.is_ed25519() && sync_options.wallet.all_outputs())
             || (address.is_nft() && sync_options.nft.all_outputs())
             || (address.is_account() && sync_options.account.all_outputs())
+            || (address.is_implicit_account_creation() && sync_options.sync_implicit_accounts)
         {
             return Ok(self
                 .client()
@@ -69,7 +70,7 @@ where
             #[cfg(target_family = "wasm")]
             {
                 results.push(
-                    self.get_basic_output_ids_with_any_unlock_condition(bech32_address.clone())
+                    self.get_basic_output_ids_with_any_unlock_condition(address.clone())
                         .await,
                 )
             }
@@ -156,7 +157,7 @@ where
             {
                 results.push(Ok(self
                     .client()
-                    .foundry_output_ids(FoundryOutputQueryParameters::new().account(address))
+                    .foundry_output_ids(FoundryOutputQueryParameters::new().account(address.clone()))
                     .await?
                     .items))
             }
@@ -217,9 +218,7 @@ where
             {
                 let mut tasks = Vec::new();
                 for address in addresses_chunk {
-                    let output_ids = self
-                        .get_output_ids_for_address(&address.address.inner, &options)
-                        .await?;
+                    let output_ids = self.get_output_ids_for_address(&address.address, options).await?;
                     tasks.push(crate::wallet::Result::Ok((address, output_ids)));
                 }
                 results = tasks;

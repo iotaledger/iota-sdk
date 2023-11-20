@@ -15,8 +15,8 @@ pub(crate) fn get_native_tokens<'a>(outputs: impl Iterator<Item = &'a Output>) -
     let mut required_native_tokens = NativeTokensBuilder::new();
 
     for output in outputs {
-        if let Some(output_native_tokens) = output.native_tokens() {
-            required_native_tokens.add_native_tokens(output_native_tokens.clone())?;
+        if let Some(native_token) = output.native_token() {
+            required_native_tokens.add_native_token(*native_token)?;
         }
     }
 
@@ -139,15 +139,14 @@ impl InputSelection {
                 let inputs = self.available_inputs.iter().filter(|input| {
                     input
                         .output
-                        .native_tokens()
-                        .map_or(false, |native_tokens| native_tokens.contains(diff.token_id()))
+                        .native_token()
+                        .is_some_and(|native_token| native_token.token_id() == diff.token_id())
                 });
 
                 for input in inputs {
                     amount += input
                         .output
-                        .native_tokens()
-                        .and_then(|native_tokens| native_tokens.get(diff.token_id()))
+                        .native_token()
                         // PANIC: safe to unwrap as the filter guarantees inputs containing this native token.
                         .unwrap()
                         .amount();
