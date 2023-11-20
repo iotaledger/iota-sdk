@@ -9,7 +9,7 @@ use core::borrow::Borrow;
 use crypto::hashes::{blake2b::Blake2b256, Digest};
 use getset::{CopyGetters, Getters};
 use packable::{prefix::StringPrefix, Packable, PackableExt};
-pub use work_score::*;
+pub use work_score::{WorkScore, WorkScoreParameters};
 
 use crate::{
     types::block::{
