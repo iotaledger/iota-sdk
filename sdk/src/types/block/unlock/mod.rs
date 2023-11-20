@@ -21,9 +21,9 @@ pub use self::{
     account::AccountUnlock, anchor::AnchorUnlock, empty::EmptyUnlock, multi::MultiUnlock, nft::NftUnlock,
     reference::ReferenceUnlock, signature::SignatureUnlock,
 };
-use super::protocol::{WorkScore, WorkScoreParameters};
 use crate::types::block::{
     input::{INPUT_COUNT_MAX, INPUT_COUNT_RANGE, INPUT_INDEX_MAX},
+    protocol::{WorkScore, WorkScoreParameters},
     Error,
 };
 

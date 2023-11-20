@@ -52,8 +52,13 @@ pub(crate) use self::{
     output_id::OutputIndex,
     unlock_condition::AddressUnlockCondition,
 };
-use super::protocol::{ProtocolParameters, WorkScore, WorkScoreParameters};
-use crate::types::block::{address::Address, semantic::SemanticValidationContext, slot::SlotIndex, Error};
+use crate::types::block::{
+    address::Address,
+    protocol::{ProtocolParameters, WorkScore, WorkScoreParameters},
+    semantic::SemanticValidationContext,
+    slot::SlotIndex,
+    Error,
+};
 
 /// The maximum number of outputs of a transaction.
 pub const OUTPUT_COUNT_MAX: u16 = 128;

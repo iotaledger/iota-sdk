@@ -18,9 +18,8 @@ pub use self::{
     parent::Parents,
     validation::{ValidationBlockBody, ValidationBlockBodyBuilder},
 };
-use super::protocol::WorkScore;
 use crate::types::block::{
-    protocol::{ProtocolParameters, ProtocolParametersHash, WorkScoreParameters},
+    protocol::{ProtocolParameters, ProtocolParametersHash, WorkScore, WorkScoreParameters},
     Error,
 };
 

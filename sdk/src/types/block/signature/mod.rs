@@ -6,8 +6,10 @@ mod ed25519;
 use derive_more::From;
 
 pub use self::ed25519::Ed25519Signature;
-use super::protocol::{WorkScore, WorkScoreParameters};
-use crate::types::block::Error;
+use crate::types::block::{
+    protocol::{WorkScore, WorkScoreParameters},
+    Error,
+};
 
 /// A `Signature` contains a signature which is used to unlock a transaction input.
 ///

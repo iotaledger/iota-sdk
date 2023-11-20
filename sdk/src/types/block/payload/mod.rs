@@ -23,8 +23,10 @@ pub use self::{
     candidacy_announcement::CandidacyAnnouncementPayload, signed_transaction::SignedTransactionPayload,
     tagged_data::TaggedDataPayload,
 };
-use super::protocol::{WorkScore, WorkScoreParameters};
-use crate::types::block::{protocol::ProtocolParameters, Error};
+use crate::types::block::{
+    protocol::{ProtocolParameters, WorkScore, WorkScoreParameters},
+    Error,
+};
 
 /// A generic payload that can represent different types defining block payloads.
 #[derive(Clone, Eq, PartialEq, From, Packable)]
