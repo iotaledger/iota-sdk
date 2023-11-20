@@ -8,7 +8,6 @@ use std::ops::Range;
 
 use async_trait::async_trait;
 use crypto::{
-    hashes::{blake2b::Blake2b256, Digest},
     keys::{
         bip39::{Mnemonic, MnemonicRef, Passphrase},
         bip44::Bip44,
@@ -36,8 +35,7 @@ use crate::{
         stronghold::Error,
     },
     types::block::{
-        address::Ed25519Address, payload::signed_transaction::SignedTransactionPayload, signature::Ed25519Signature,
-        unlock::Unlocks,
+        payload::signed_transaction::SignedTransactionPayload, signature::Ed25519Signature, unlock::Unlocks,
     },
 };
 
@@ -45,13 +43,13 @@ use crate::{
 impl SecretManage for StrongholdAdapter {
     type Error = crate::client::Error;
 
-    async fn generate_ed25519_addresses(
+    async fn generate_ed25519_public_keys(
         &self,
         coin_type: u32,
         account_index: u32,
         address_indexes: Range<u32>,
         options: impl Into<Option<GenerateAddressOptions>> + Send,
-    ) -> Result<Vec<Ed25519Address>, Self::Error> {
+    ) -> Result<Vec<ed25519::PublicKey>, Self::Error> {
         // Prevent the method from being invoked when the key has been cleared from the memory. Do note that Stronghold
         // only asks for a key for reading / writing a snapshot, so without our cached key this method is invocable, but
         // it doesn't make sense when it comes to our user (signing transactions / generating addresses without a key).
@@ -64,8 +62,8 @@ impl SecretManage for StrongholdAdapter {
         // Stronghold arguments.
         let seed_location = Slip10DeriveInput::Seed(Location::generic(SECRET_VAULT_PATH, SEED_RECORD_PATH));
 
-        // Addresses to return.
-        let mut addresses = Vec::new();
+        // Public keys to return.
+        let mut public_keys = Vec::new();
         let internal = options.into().map(|o| o.internal).unwrap_or_default();
 
         for address_index in address_indexes {
@@ -104,17 +102,11 @@ impl SecretManage for StrongholdAdapter {
                 .delete_secret(derive_location.record_path())
                 .map_err(Error::from)?;
 
-            // Hash the public key to get the address.
-            let hash = Blake2b256::digest(public_key);
-
-            // Convert the hash into [Address].
-            let address = Ed25519Address::new(hash.into());
-
             // Collect it.
-            addresses.push(address);
+            public_keys.push(public_key);
         }
 
-        Ok(addresses)
+        Ok(public_keys)
     }
 
     async fn generate_evm_addresses(
@@ -589,12 +581,10 @@ mod tests {
         stronghold_adapter.clear_key().await;
 
         // Address generation returns an error when the key is cleared.
-        assert!(
-            stronghold_adapter
-                .generate_ed25519_addresses(IOTA_COIN_TYPE, 0, 0..1, None,)
-                .await
-                .is_err()
-        );
+        assert!(stronghold_adapter
+            .generate_ed25519_addresses(IOTA_COIN_TYPE, 0, 0..1, None,)
+            .await
+            .is_err());
 
         stronghold_adapter.set_password("drowssap".to_owned()).await.unwrap();
 
