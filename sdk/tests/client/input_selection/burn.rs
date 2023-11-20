@@ -29,15 +29,7 @@ fn burn_account_present() {
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
     let inputs = build_inputs([
-        Account(
-            1_000_000,
-            account_id_1,
-            BECH32_ADDRESS_ED25519_0,
-            None,
-            None,
-            None,
-            None,
-        ),
+        Account(1_000_000, account_id_1, BECH32_ADDRESS_ED25519_0, None, None, None),
         Basic(1_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
     ]);
     let outputs = build_outputs([Basic(
@@ -72,15 +64,7 @@ fn burn_account_present_and_required() {
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
     let inputs = build_inputs([
-        Account(
-            1_000_000,
-            account_id_1,
-            BECH32_ADDRESS_ED25519_0,
-            None,
-            None,
-            None,
-            None,
-        ),
+        Account(1_000_000, account_id_1, BECH32_ADDRESS_ED25519_0, None, None, None),
         Basic(1_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
     ]);
     let outputs = build_outputs([Basic(
@@ -120,7 +104,6 @@ fn burn_account_id_zero() {
             1_000_000,
             nft_id_0,
             BECH32_ADDRESS_ED25519_0,
-            None,
             None,
             None,
             None,
@@ -204,24 +187,8 @@ fn burn_accounts_present() {
     let account_id_2 = AccountId::from_str(ACCOUNT_ID_2).unwrap();
 
     let inputs = build_inputs([
-        Account(
-            1_000_000,
-            account_id_1,
-            BECH32_ADDRESS_ED25519_0,
-            None,
-            None,
-            None,
-            None,
-        ),
-        Account(
-            1_000_000,
-            account_id_2,
-            BECH32_ADDRESS_ED25519_0,
-            None,
-            None,
-            None,
-            None,
-        ),
+        Account(1_000_000, account_id_1, BECH32_ADDRESS_ED25519_0, None, None, None),
+        Account(1_000_000, account_id_2, BECH32_ADDRESS_ED25519_0, None, None, None),
         Basic(1_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
     ]);
     let outputs = build_outputs([Basic(
@@ -255,27 +222,11 @@ fn burn_account_in_outputs() {
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
     let inputs = build_inputs([
-        Account(
-            1_000_000,
-            account_id_1,
-            BECH32_ADDRESS_ED25519_0,
-            None,
-            None,
-            None,
-            None,
-        ),
+        Account(1_000_000, account_id_1, BECH32_ADDRESS_ED25519_0, None, None, None),
         Basic(1_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
     ]);
     let outputs = build_outputs([
-        Account(
-            1_000_000,
-            account_id_1,
-            BECH32_ADDRESS_ED25519_0,
-            None,
-            None,
-            None,
-            None,
-        ),
+        Account(1_000_000, account_id_1, BECH32_ADDRESS_ED25519_0, None, None, None),
         Basic(1_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
     ]);
 
@@ -304,7 +255,6 @@ fn burn_nft_present() {
             1_000_000,
             nft_id_1,
             BECH32_ADDRESS_ED25519_0,
-            None,
             None,
             None,
             None,
@@ -354,7 +304,6 @@ fn burn_nft_present_and_required() {
             None,
             None,
             None,
-            None,
         ),
         Basic(1_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
     ]);
@@ -391,15 +340,7 @@ fn burn_nft_id_zero() {
     let account_id_0 = AccountId::from_str(ACCOUNT_ID_0).unwrap();
 
     let inputs = build_inputs([
-        Account(
-            1_000_000,
-            account_id_0,
-            BECH32_ADDRESS_ED25519_0,
-            None,
-            None,
-            None,
-            None,
-        ),
+        Account(1_000_000, account_id_0, BECH32_ADDRESS_ED25519_0, None, None, None),
         Basic(1_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
     ]);
     let outputs = build_outputs([Basic(
@@ -486,13 +427,11 @@ fn burn_nfts_present() {
             None,
             None,
             None,
-            None,
         ),
         Nft(
             1_000_000,
             nft_id_2,
             BECH32_ADDRESS_ED25519_0,
-            None,
             None,
             None,
             None,
@@ -541,7 +480,6 @@ fn burn_nft_in_outputs() {
             None,
             None,
             None,
-            None,
         ),
         Basic(1_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
     ]);
@@ -550,7 +488,6 @@ fn burn_nft_in_outputs() {
             1_000_000,
             nft_id_1,
             BECH32_ADDRESS_ED25519_0,
-            None,
             None,
             None,
             None,
@@ -588,15 +525,7 @@ fn burn_foundry_present() {
             SimpleTokenScheme::new(0, 0, 10).unwrap(),
             None,
         ),
-        Account(
-            1_000_000,
-            account_id_1,
-            BECH32_ADDRESS_ED25519_0,
-            None,
-            None,
-            None,
-            None,
-        ),
+        Account(1_000_000, account_id_1, BECH32_ADDRESS_ED25519_0, None, None, None),
         Basic(1_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
     ]);
     let outputs = build_outputs([Basic(
@@ -636,7 +565,6 @@ fn burn_foundry_present() {
                 ));
             } else if output.is_account() {
                 assert_eq!(output.amount(), 1_000_000);
-                assert_eq!(output.as_account().native_tokens().len(), 0);
                 assert_eq!(*output.as_account().account_id(), account_id_1);
                 assert_eq!(output.as_account().unlock_conditions().len(), 1);
                 assert_eq!(output.as_account().features().len(), 0);
@@ -668,15 +596,7 @@ fn burn_foundry_absent() {
         .id();
 
     let inputs = build_inputs([
-        Account(
-            1_000_000,
-            account_id_1,
-            BECH32_ADDRESS_ED25519_0,
-            None,
-            None,
-            None,
-            None,
-        ),
+        Account(1_000_000, account_id_1, BECH32_ADDRESS_ED25519_0, None, None, None),
         Basic(1_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
     ]);
     let outputs = build_outputs([Basic(
@@ -725,15 +645,7 @@ fn burn_foundries_present() {
             SimpleTokenScheme::new(0, 0, 10).unwrap(),
             None,
         ),
-        Account(
-            1_000_000,
-            account_id_1,
-            BECH32_ADDRESS_ED25519_0,
-            None,
-            None,
-            None,
-            None,
-        ),
+        Account(1_000_000, account_id_1, BECH32_ADDRESS_ED25519_0, None, None, None),
     ]);
     let outputs = build_outputs([Basic(
         2_000_000,
@@ -766,7 +678,6 @@ fn burn_foundries_present() {
         if !outputs.contains(output) {
             assert!(output.is_account());
             assert_eq!(output.amount(), 1_000_000);
-            assert_eq!(output.as_account().native_tokens().len(), 0);
             assert_eq!(*output.as_account().account_id(), account_id_1);
             assert_eq!(output.as_account().unlock_conditions().len(), 1);
             assert_eq!(output.as_account().features().len(), 0);
@@ -828,7 +739,7 @@ fn burn_native_tokens() {
     let inputs = build_inputs([Basic(
         1_000_000,
         BECH32_ADDRESS_ED25519_0,
-        Some(vec![(TOKEN_ID_1, 100), (TOKEN_ID_2, 100)]),
+        Some((TOKEN_ID_1, 100), (TOKEN_ID_2, 100)),
         None,
         None,
         None,
@@ -855,7 +766,7 @@ fn burn_native_tokens() {
         &selected.outputs[0],
         1_000_000,
         BECH32_ADDRESS_ED25519_0,
-        Some(vec![(TOKEN_ID_1, 80), (TOKEN_ID_2, 70)])
+        Some((TOKEN_ID_1, 80), (TOKEN_ID_2, 70))
     ));
 }
 
@@ -872,15 +783,7 @@ fn burn_foundry_and_its_account() {
             SimpleTokenScheme::new(0, 0, 10).unwrap(),
             None,
         ),
-        Account(
-            1_000_000,
-            account_id_1,
-            BECH32_ADDRESS_ED25519_0,
-            None,
-            None,
-            None,
-            None,
-        ),
+        Account(1_000_000, account_id_1, BECH32_ADDRESS_ED25519_0, None, None, None),
         Basic(1_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
     ]);
     let outputs = build_outputs([Basic(

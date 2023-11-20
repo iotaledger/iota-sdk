@@ -6,7 +6,7 @@ from iota_sdk import ClientOptions, CoinType, StrongholdSecretManager, Wallet
 
 load_dotenv()
 
-# This example creates a new database and account
+# This example creates a new database and wallet
 
 node_url = os.environ.get('NODE_URL', 'https://api.testnet.shimmer.network')
 client_options = ClientOptions(nodes=[node_url])

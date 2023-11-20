@@ -17,10 +17,9 @@ use crate::{client::ClientMethodHandler, secret_manager::SecretManagerMethodHand
 pub type WalletMethodHandler = Arc<RwLock<Option<Wallet>>>;
 
 #[napi(js_name = "createWallet")]
-pub fn create_wallet(options: String) -> Result<External<WalletMethodHandler>> {
+pub async fn create_wallet(options: String) -> Result<External<WalletMethodHandler>> {
     let wallet_options = serde_json::from_str::<WalletOptions>(&options).map_err(NodejsError::from)?;
-    let runtime = tokio::runtime::Runtime::new().map_err(NodejsError::from)?;
-    let wallet = runtime.block_on(wallet_options.build()).map_err(NodejsError::from)?;
+    let wallet = wallet_options.build().await.map_err(NodejsError::from)?;
 
     Ok(External::new(Arc::new(RwLock::new(Some(wallet)))))
 }

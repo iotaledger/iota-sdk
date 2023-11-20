@@ -1,7 +1,10 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use crate::types::block::slot::EpochIndex;
+use crate::types::block::{
+    output::{StorageScore, StorageScoreParameters},
+    slot::EpochIndex,
+};
 
 /// Stakes coins to become eligible for committee selection, validate the network and receive Mana rewards.
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, packable::Packable)]
@@ -18,7 +21,7 @@ pub struct StakingFeature {
 
 impl StakingFeature {
     /// The [`Feature`](crate::types::block::output::Feature) kind of [`StakingFeature`].
-    pub const KIND: u8 = 5;
+    pub const KIND: u8 = 6;
 
     /// Creates a new [`StakingFeature`].
     pub fn new(
@@ -56,8 +59,14 @@ impl StakingFeature {
     }
 }
 
+impl StorageScore for StakingFeature {
+    fn storage_score(&self, params: StorageScoreParameters) -> u64 {
+        params.staking_feature_offset()
+    }
+}
+
 #[cfg(feature = "serde")]
-pub(crate) mod dto {
+mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;

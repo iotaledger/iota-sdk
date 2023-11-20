@@ -18,13 +18,13 @@ runs:
 
         # remove the last 5 lines and add docker compose with `-d` to run it in the background
         sed -i -n -e :a -e '1,5!{P;N;D;};N;ba' run.sh
-        echo "docker compose -f \$DOCKER_COMPOSE_FILE up -d" >> run.sh
+        echo "docker compose -f docker-compose.yml up -d" >> run.sh
       working-directory: iota-core/tools/docker-network
 
     # Copied from https://github.com/iotaledger/iota-core/blob/926bf11b5fb6dc46b25482770e0ccf1e048b97c9/.github/workflows/unit-test.yml#L16-L19
     - uses: actions/setup-go@v4
       with:
-        go-version-file: 'iota-core/go.mod'
+        go-version-file: "iota-core/go.mod"
         cache: false
 
     - name: Setup private tangle
@@ -37,8 +37,8 @@ runs:
 
     - name: Wait for tangle to start
       shell: bash
-      run: wget -qO- https://raw.githubusercontent.com/eficode/wait-for/v2.2.4/wait-for | sh -s -- -t 120 http://localhost:8080/health -- echo "Tangle is up"
+      run: wget -qO- https://raw.githubusercontent.com/eficode/wait-for/v2.2.4/wait-for | sh -s -- -t 120 http://localhost:8050/health -- echo "Tangle is up"
     # TODO enable, maybe need another URL
     # - name: Wait for faucet to start
-      # shell: bash
-      # run: wget -qO- https://raw.githubusercontent.com/eficode/wait-for/v2.2.4/wait-for | sh -s -- -t 120 http://localhost:8081/api/info -- echo "Faucet is up"
+    # shell: bash
+    # run: wget -qO- https://raw.githubusercontent.com/eficode/wait-for/v2.2.4/wait-for | sh -s -- -t 120 http://localhost:8081/api/info -- echo "Faucet is up"

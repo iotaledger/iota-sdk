@@ -56,7 +56,7 @@ async fn read_signed_transaction_from_file(client: &Client) -> Result<SignedTran
 
     Ok(SignedTransactionData::try_from_dto_with_params(
         dto,
-        client.get_protocol_parameters().await?,
+        &client.get_protocol_parameters().await?,
     )?)
 }
 
