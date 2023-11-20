@@ -21,10 +21,16 @@ enum FeatureType {
     Issuer = 1,
     /** A Metadata feature. */
     Metadata = 2,
+    /** A StateMetadata feature. */
+    StateMetadata = 3,
     /** A Tag feature. */
-    Tag = 3,
-    BlockIssuer = 4,
-    Staking = 5,
+    Tag = 4,
+    /** A NativeToken feature. */
+    NativeToken = 5,
+    /** A BlockIssuer feature. */
+    BlockIssuer = 6,
+    /** A Staking feature. */
+    Staking = 7,
 }
 
 /** The base class for features. */
