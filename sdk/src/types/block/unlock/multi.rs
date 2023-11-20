@@ -40,7 +40,7 @@ impl MultiUnlock {
 
 fn verify_unlocks<const VERIFY: bool>(unlocks: &[Unlock]) -> Result<(), Error> {
     if VERIFY && unlocks.iter().any(Unlock::is_multi) {
-        return Err(Error::MultiUnlockRecursion);
+        Err(Error::MultiUnlockRecursion)
     } else {
         Ok(())
     }

@@ -34,8 +34,8 @@ impl Ed25519Address {
     }
 
     /// Creates a new [`Ed25519Address`] from the bytes of a [`PublicKey`].
-    pub fn from_public_key_bytes(public_key_bytes: [u8; PublicKey::LENGTH]) -> Result<Self, Error> {
-        Ok(Self::new(Blake2b256::digest(public_key_bytes).try_into()?))
+    pub fn from_public_key_bytes(public_key_bytes: [u8; PublicKey::LENGTH]) -> Self {
+        Self::new(Blake2b256::digest(public_key_bytes).into())
     }
 }
 

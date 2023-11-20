@@ -3,7 +3,7 @@
 
 import type {
     SendParams,
-    SendNativeTokensParams,
+    SendNativeTokenParams,
     SendNftParams,
     GenerateAddressOptions,
 } from '../address';
@@ -258,7 +258,7 @@ export type __SendWithParamsMethod__ = {
 export type __PrepareSendNativeTokensMethod__ = {
     name: 'prepareSendNativeTokens';
     data: {
-        params: SendNativeTokensParams[];
+        params: SendNativeTokenParams[];
         options?: TransactionOptions;
     };
 };

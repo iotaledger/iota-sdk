@@ -397,8 +397,8 @@ impl InputSelection {
         let mut input_nfts = Vec::new();
 
         for input in &self.selected_inputs {
-            if let Some(native_tokens) = input.output.native_tokens() {
-                input_native_tokens_builder.add_native_tokens(native_tokens.clone())?;
+            if let Some(native_token) = input.output.native_token() {
+                input_native_tokens_builder.add_native_token(native_token.clone())?;
             }
             match &input.output {
                 Output::Account(_) => {
@@ -416,8 +416,8 @@ impl InputSelection {
         }
 
         for output in self.outputs.iter() {
-            if let Some(native_token) = output.native_tokens() {
-                output_native_tokens_builder.add_native_tokens(native_token.clone())?;
+            if let Some(native_token) = output.native_token() {
+                output_native_tokens_builder.add_native_token(native_token.clone())?;
             }
         }
 

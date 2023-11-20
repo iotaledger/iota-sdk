@@ -19,7 +19,7 @@ from iota_sdk.types.output_id import OutputId
 from iota_sdk.types.output import BasicOutput, NftOutput, Output, deserialize_output
 from iota_sdk.types.output_params import OutputParams
 from iota_sdk.types.transaction_data import PreparedTransactionData, SignedTransactionData
-from iota_sdk.types.send_params import CreateAccountOutputParams, CreateNativeTokenParams, MintNftParams, SendNativeTokensParams, SendNftParams, SendParams
+from iota_sdk.types.send_params import CreateAccountOutputParams, CreateNativeTokenParams, MintNftParams, SendNativeTokenParams, SendNftParams, SendParams
 from iota_sdk.types.transaction_with_metadata import TransactionWithMetadata
 from iota_sdk.types.transaction_options import TransactionOptions
 from iota_sdk.types.consolidation_params import ConsolidationParams
@@ -502,14 +502,14 @@ class Account:
         ))
 
     def send_native_tokens(
-            self, params: List[SendNativeTokensParams], options: Optional[TransactionOptions] = None) -> TransactionWithMetadata:
+            self, params: List[SendNativeTokenParams], options: Optional[TransactionOptions] = None) -> TransactionWithMetadata:
         """Send native tokens.
         """
         return self.prepare_send_native_tokens(params, options).send()
 
     def prepare_send_native_tokens(
             self,
-            params: List[SendNativeTokensParams],
+            params: List[SendNativeTokenParams],
             options: Optional[TransactionOptions] = None) -> PreparedTransaction:
         """Send native tokens.
         """

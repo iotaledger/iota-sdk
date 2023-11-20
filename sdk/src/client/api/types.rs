@@ -71,7 +71,7 @@ impl TryFromDto<PreparedTransactionDataDto> for PreparedTransactionData {
             inputs_data: dto
                 .inputs_data
                 .into_iter()
-                .map(|i| InputSigningData::try_from(i))
+                .map(InputSigningData::try_from)
                 .collect::<crate::client::Result<Vec<InputSigningData>>>()
                 .map_err(|_| Error::InvalidField("input_data"))?,
             remainder: match dto.remainder {
@@ -125,7 +125,7 @@ impl TryFromDto<SignedTransactionDataDto> for SignedTransactionData {
             inputs_data: dto
                 .inputs_data
                 .into_iter()
-                .map(|i| InputSigningData::try_from(i))
+                .map(InputSigningData::try_from)
                 .collect::<crate::client::Result<Vec<InputSigningData>>>()
                 .map_err(|_| Error::InvalidField("inputs_data"))?,
         })

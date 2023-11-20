@@ -74,11 +74,14 @@ async fn output_preparation() -> Result<()> {
             OutputParams {
                 recipient_address: recipient_address.clone(),
                 amount: 500000,
-                assets: Some(Assets {
-                    native_tokens: Some(vec![native_token]),
-                    nft_id: None,
+                assets: Some(Assets { nft_id: None }),
+                features: Some(Features {
+                    metadata: None,
+                    tag: None,
+                    issuer: None,
+                    sender: None,
+                    native_token: Some(native_token),
                 }),
-                features: None,
                 unlocks: None,
                 storage_deposit: None,
             },
@@ -88,7 +91,7 @@ async fn output_preparation() -> Result<()> {
     assert_eq!(output.amount(), 500000);
     // only address condition
     assert_eq!(output.unlock_conditions().unwrap().len(), 1);
-    assert_eq!(output.native_tokens().unwrap().first(), Some(&native_token));
+    assert_eq!(output.native_token(), Some(&native_token));
 
     let output = wallet
         .prepare_output(
@@ -101,6 +104,7 @@ async fn output_preparation() -> Result<()> {
                     tag: Some(prefix_hex::encode(b"My Tag")),
                     issuer: None,
                     sender: None,
+                    native_token: None,
                 }),
                 unlocks: None,
                 storage_deposit: None,
@@ -126,6 +130,7 @@ async fn output_preparation() -> Result<()> {
                     tag: Some(prefix_hex::encode(b"My Tag")),
                     issuer: None,
                     sender: None,
+                    native_token: None,
                 }),
                 unlocks: None,
                 storage_deposit: None,
@@ -154,6 +159,7 @@ async fn output_preparation() -> Result<()> {
                     tag: Some(prefix_hex::encode(b"My Tag")),
                     issuer: None,
                     sender: None,
+                    native_token: None,
                 }),
                 unlocks: None,
                 storage_deposit: None,
@@ -179,6 +185,7 @@ async fn output_preparation() -> Result<()> {
                     tag: Some(prefix_hex::encode(b"My Tag")),
                     issuer: None,
                     sender: None,
+                    native_token: None,
                 }),
                 unlocks: None,
                 storage_deposit: None,
@@ -203,7 +210,6 @@ async fn output_preparation() -> Result<()> {
                 recipient_address: recipient_address.clone(),
                 amount: 500000,
                 assets: Some(Assets {
-                    native_tokens: None,
                     nft_id: Some(NftId::from_str(
                         "0xa068e00a79922eaef241592a7440f131ea7f8ad9e22e580ef139415f273eff30",
                     )?),
@@ -227,7 +233,6 @@ async fn output_preparation() -> Result<()> {
                 recipient_address: recipient_address.clone(),
                 amount: 500000,
                 assets: Some(Assets {
-                    native_tokens: None,
                     nft_id: Some(NftId::from_str(
                         "0x0000000000000000000000000000000000000000000000000000000000000000",
                     )?),
@@ -258,15 +263,13 @@ async fn output_preparation() -> Result<()> {
             OutputParams {
                 recipient_address: recipient_address.clone(),
                 amount: 500000,
-                assets: Some(Assets {
-                    native_tokens: Some(vec![native_token]),
-                    nft_id: None,
-                }),
+                assets: Some(Assets { nft_id: None }),
                 features: Some(Features {
                     metadata: None,
                     tag: None,
                     issuer: None,
                     sender: Some(issuer_and_sender_address.clone()),
+                    native_token: Some(native_token),
                 }),
                 unlocks: None,
                 storage_deposit: None,
@@ -294,6 +297,7 @@ async fn output_preparation() -> Result<()> {
                     tag: None,
                     issuer: Some(issuer_and_sender_address.clone()),
                     sender: None,
+                    native_token: None,
                 }),
                 unlocks: None,
                 storage_deposit: None,
@@ -314,7 +318,6 @@ async fn output_preparation() -> Result<()> {
                 recipient_address: recipient_address.clone(),
                 amount: 500000,
                 assets: Some(Assets {
-                    native_tokens: None,
                     nft_id: Some(NftId::from_str(
                         "0x0000000000000000000000000000000000000000000000000000000000000000",
                     )?),
@@ -324,6 +327,7 @@ async fn output_preparation() -> Result<()> {
                     tag: None,
                     issuer: Some(issuer_and_sender_address.clone()),
                     sender: Some(issuer_and_sender_address.clone()),
+                    native_token: None,
                 }),
                 unlocks: Some(Unlocks {
                     expiration_slot_index: Some(SlotIndex::from(1)),
@@ -358,7 +362,6 @@ async fn output_preparation() -> Result<()> {
                 recipient_address: recipient_address.clone(),
                 amount: 500,
                 assets: Some(Assets {
-                    native_tokens: None,
                     nft_id: Some(NftId::from_str(
                         "0x0000000000000000000000000000000000000000000000000000000000000000",
                     )?),
@@ -368,6 +371,7 @@ async fn output_preparation() -> Result<()> {
                     tag: None,
                     issuer: None,
                     sender: None,
+                    native_token: None,
                 }),
                 unlocks: Some(Unlocks {
                     expiration_slot_index: Some(SlotIndex::from(1)),
@@ -394,6 +398,7 @@ async fn output_preparation() -> Result<()> {
                     tag: Some(prefix_hex::encode(b"My Tag")),
                     issuer: None,
                     sender: None,
+                    native_token: None,
                 }),
                 unlocks: None,
                 storage_deposit: Some(StorageDeposit {
@@ -559,15 +564,13 @@ async fn prepare_nft_output_features_update() -> Result<()> {
             OutputParams {
                 recipient_address: wallet_address,
                 amount: 1_000_000,
-                assets: Some(Assets {
-                    native_tokens: None,
-                    nft_id: Some(nft_id),
-                }),
+                assets: Some(Assets { nft_id: Some(nft_id) }),
                 features: Some(Features {
                     metadata: Some("0x2a".to_string()),
                     tag: None,
                     issuer: None,
                     sender: None,
+                    native_token: None,
                 }),
                 unlocks: None,
                 storage_deposit: None,
@@ -771,10 +774,7 @@ async fn prepare_output_only_single_nft() -> Result<()> {
             OutputParams {
                 recipient_address: wallet_0_address,
                 amount: nft_data.output.amount(),
-                assets: Some(Assets {
-                    native_tokens: None,
-                    nft_id: Some(nft_id),
-                }),
+                assets: Some(Assets { nft_id: Some(nft_id) }),
                 features: None,
                 unlocks: None,
                 storage_deposit: None,
@@ -832,10 +832,7 @@ async fn prepare_existing_nft_output_gift() -> Result<()> {
             OutputParams {
                 recipient_address: address,
                 amount: 0,
-                assets: Some(Assets {
-                    native_tokens: None,
-                    nft_id: Some(nft_id),
-                }),
+                assets: Some(Assets { nft_id: Some(nft_id) }),
                 features: None,
                 unlocks: None,
                 storage_deposit: Some(StorageDeposit {

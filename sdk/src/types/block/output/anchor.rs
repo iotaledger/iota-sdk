@@ -773,7 +773,7 @@ pub(crate) mod dto {
 
     impl AnchorOutput {
         #[allow(clippy::too_many_arguments)]
-        pub fn try_from_dtos<'a>(
+        pub fn try_from_dtos(
             amount: OutputBuilderAmount,
             mana: u64,
             native_tokens: Option<Vec<NativeToken>>,
@@ -851,7 +851,7 @@ mod tests {
             output.mana(),
             Some(output.native_tokens().to_vec()),
             output.anchor_id(),
-            output.state_index().into(),
+            output.state_index(),
             output.state_metadata().to_owned().into(),
             output.unlock_conditions().iter().map(Into::into).collect(),
             Some(output.features().to_vec()),

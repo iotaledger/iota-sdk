@@ -193,18 +193,6 @@ impl Output {
         }
     }
 
-    /// Returns the native tokens of an [`Output`], if any.
-    pub fn native_tokens(&self) -> Option<&NativeTokens> {
-        match self {
-            Self::Basic(output) => Some(output.native_tokens()),
-            Self::Account(output) => Some(output.native_tokens()),
-            Self::Anchor(output) => Some(output.native_tokens()),
-            Self::Foundry(output) => Some(output.native_tokens()),
-            Self::Nft(output) => Some(output.native_tokens()),
-            Self::Delegation(_) => None,
-        }
-    }
-
     /// Returns the unlock conditions of an [`Output`], if any.
     pub fn unlock_conditions(&self) -> Option<&UnlockConditions> {
         match self {
@@ -225,6 +213,18 @@ impl Output {
             Self::Anchor(output) => Some(output.features()),
             Self::Foundry(output) => Some(output.features()),
             Self::Nft(output) => Some(output.features()),
+            Self::Delegation(_) => None,
+        }
+    }
+
+    /// Returns the native token of an [`Output`], if any.
+    pub fn native_token(&self) -> Option<&NativeToken> {
+        match self {
+            Self::Basic(output) => output.native_token(),
+            Self::Account(_) => None,
+            Self::Anchor(_) => None,
+            Self::Foundry(output) => output.native_token(),
+            Self::Nft(_) => None,
             Self::Delegation(_) => None,
         }
     }

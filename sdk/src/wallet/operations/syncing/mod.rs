@@ -151,10 +151,10 @@ where
         if options.sync_native_token_foundries {
             let native_token_foundry_ids = outputs_data
                 .iter()
-                .filter_map(|output| output.output.native_tokens())
-                .flat_map(|native_tokens| {
-                    native_tokens
-                        .iter()
+                .filter_map(|output| {
+                    output
+                        .output
+                        .native_token()
                         .map(|native_token| FoundryId::from(*native_token.token_id()))
                 })
                 .collect::<HashSet<_>>();
@@ -224,7 +224,7 @@ where
                     let new_outputs_data_inner = self.get_outputs(output_ids).await?;
 
                     let outputs_data_inner = self
-                        .output_response_to_output_data(new_outputs_data_inner, &address_with_unspent_outputs)
+                        .output_response_to_output_data(new_outputs_data_inner, address_with_unspent_outputs)
                         .await?;
 
                     outputs_data.extend(outputs_data_inner.clone());

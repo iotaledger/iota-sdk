@@ -551,15 +551,7 @@ fn account_sender() {
     let inputs = build_inputs([
         Basic(2_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
         Basic(2_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
-        Account(
-            1_000_000,
-            account_id_1,
-            BECH32_ADDRESS_ED25519_0,
-            None,
-            None,
-            None,
-            None,
-        ),
+        Account(1_000_000, account_id_1, BECH32_ADDRESS_ED25519_0, None, None, None),
         Basic(2_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
         Basic(2_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
     ]);
@@ -604,15 +596,7 @@ fn account_sender_zero_id() {
 
     let inputs = build_inputs([
         Basic(2_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
-        Account(
-            1_000_000,
-            account_id_0,
-            BECH32_ADDRESS_ED25519_0,
-            None,
-            None,
-            None,
-            None,
-        ),
+        Account(1_000_000, account_id_0, BECH32_ADDRESS_ED25519_0, None, None, None),
     ]);
     let account_id = AccountId::from(inputs[1].output_id());
     let outputs = build_outputs([Basic(
@@ -705,7 +689,6 @@ fn nft_sender() {
             None,
             None,
             None,
-            None,
         ),
         Basic(2_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
         Basic(2_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
@@ -755,7 +738,6 @@ fn nft_sender_zero_id() {
             1_000_000,
             nft_id_0,
             BECH32_ADDRESS_ED25519_0,
-            None,
             None,
             None,
             None,
@@ -1449,7 +1431,6 @@ fn restricted_nft() {
             None,
             None,
             None,
-            None,
         ),
     ]);
     let outputs = build_outputs([Basic(
@@ -1487,15 +1468,7 @@ fn restricted_account() {
 
     let inputs = build_inputs([
         Basic(2_000_000, &restricted_bech32, None, None, None, None, None, None),
-        Account(
-            2_000_000,
-            account_id_1,
-            BECH32_ADDRESS_ED25519_0,
-            None,
-            None,
-            None,
-            None,
-        ),
+        Account(2_000_000, account_id_1, BECH32_ADDRESS_ED25519_0, None, None, None),
     ]);
 
     let outputs = build_outputs([Basic(
