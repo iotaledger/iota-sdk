@@ -266,7 +266,7 @@ impl WorkScore for Features {
                 Feature::Staking(_) => work_score_params.staking(),
                 _ => 0,
             })
-            .sum::<u32>()
+            .sum()
     }
 }
 

@@ -326,11 +326,10 @@ impl Transaction {
 
 impl WorkScore for Transaction {
     fn work_score(&self, work_score_params: WorkScoreParameters) -> u32 {
-        let input_score = self.inputs().len() as u32 * work_score_params.input();
-        let context_input_score = self.context_inputs().len() as u32 * work_score_params.context_input();
-        let outputs_score = self.outputs().work_score(work_score_params);
-        let allotment_score = self.mana_allotments().len() as u32 * work_score_params.allotment();
-        input_score + context_input_score + outputs_score + allotment_score
+        self.inputs().len() as u32 * work_score_params.input()
+            + self.context_inputs().len() as u32 * work_score_params.context_input()
+            + self.outputs().work_score(work_score_params)
+            + self.mana_allotments().len() as u32 * work_score_params.allotment()
     }
 }
 

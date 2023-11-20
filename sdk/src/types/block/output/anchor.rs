@@ -599,10 +599,10 @@ impl StateTransitionVerifier for AnchorOutput {
 
 impl WorkScore for AnchorOutput {
     fn work_score(&self, work_score_params: WorkScoreParameters) -> u32 {
-        let native_tokens_score = self.native_tokens().work_score(work_score_params);
-        let features_score = self.features().work_score(work_score_params);
-        let immutable_features_score = self.immutable_features().work_score(work_score_params);
-        work_score_params.output() + native_tokens_score + features_score + immutable_features_score
+        work_score_params.output()
+            + self.native_tokens().work_score(work_score_params)
+            + self.features().work_score(work_score_params)
+            + self.immutable_features().work_score(work_score_params)
     }
 }
 

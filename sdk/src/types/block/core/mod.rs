@@ -107,7 +107,7 @@ impl WorkScore for BlockBody {
     fn work_score(&self, work_score_params: WorkScoreParameters) -> u32 {
         match self {
             Self::Basic(basic) => basic.work_score(work_score_params),
-            Self::Validation(validation) => 0,
+            Self::Validation(_) => 0,
         }
     }
 }

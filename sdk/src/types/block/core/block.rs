@@ -292,9 +292,7 @@ impl Block {
 
 impl WorkScore for Block {
     fn work_score(&self, work_score_params: WorkScoreParameters) -> u32 {
-        let body_score = self.body.work_score(work_score_params);
-        let signature_score = self.signature.work_score(work_score_params);
-        body_score + signature_score
+        self.body.work_score(work_score_params) + self.signature.work_score(work_score_params)
     }
 }
 

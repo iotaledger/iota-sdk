@@ -489,9 +489,9 @@ impl StateTransitionVerifier for NftOutput {
 
 impl WorkScore for NftOutput {
     fn work_score(&self, work_score_params: WorkScoreParameters) -> u32 {
-        let features_score = self.features().work_score(work_score_params);
-        let immutable_features_score = self.immutable_features().work_score(work_score_params);
-        work_score_params.output() + features_score + immutable_features_score
+        work_score_params.output()
+            + self.features().work_score(work_score_params)
+            + self.immutable_features().work_score(work_score_params)
     }
 }
 
