@@ -3,7 +3,7 @@
 
 use iota_sdk::types::block::{
     address::AccountAddress,
-    output::{AccountOutput, Feature, FoundryId, MinimumOutputAmount, NativeToken, Output, SimpleTokenScheme, TokenId},
+    output::{AccountOutput, Feature, FoundryId, MinimumOutputAmount, NativeToken, SimpleTokenScheme, TokenId},
     protocol::protocol_parameters,
     rand::output::{
         feature::{rand_issuer_feature, rand_metadata_feature, rand_sender_feature},

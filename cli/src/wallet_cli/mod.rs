@@ -1035,7 +1035,7 @@ pub async fn prompt_internal(
     let prompt = if let Some(alias) = wallet.alias().await {
         format!("Wallet \"{alias}\": ")
     } else {
-        format!("Wallet: ")
+        String::from("Wallet: ")
     };
 
     if let Some(helper) = rl.helper_mut() {
