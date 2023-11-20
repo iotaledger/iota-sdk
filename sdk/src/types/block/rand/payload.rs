@@ -10,7 +10,11 @@ use crate::types::block::{
 pub fn rand_tagged_data_payload() -> TaggedDataPayload {
     TaggedDataPayload::new(
         rand_bytes(rand_number_range(TaggedDataPayload::TAG_LENGTH_RANGE).into()),
-        rand_bytes(rand_number_range(0..10000)),
+        rand_bytes(
+            rand_number_range(TaggedDataPayload::DATA_LENGTH_RANGE)
+                .try_into()
+                .unwrap(),
+        ),
     )
     .unwrap()
 }

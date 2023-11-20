@@ -71,9 +71,10 @@ impl InputSelection {
                     [0; 32],
                 ))));
 
-        if let Some(native_tokens) = native_tokens_diff {
-            remainder_builder = remainder_builder.with_native_tokens(native_tokens);
-        }
+        // TODO https://github.com/iotaledger/iota-sdk/issues/1631
+        // if let Some(native_tokens) = native_tokens_diff {
+        //     remainder_builder = remainder_builder.with_native_tokens(native_tokens);
+        // }
 
         Ok((remainder_builder.finish_output()?.amount(), native_tokens_remainder))
     }
@@ -131,10 +132,11 @@ impl InputSelection {
         remainder_builder =
             remainder_builder.add_unlock_condition(AddressUnlockCondition::new(remainder_address.clone()));
 
-        if let Some(native_tokens) = native_tokens_diff {
-            log::debug!("Adding {native_tokens:?} to remainder output for {remainder_address:?}");
-            remainder_builder = remainder_builder.with_native_tokens(native_tokens);
-        }
+        // TODO https://github.com/iotaledger/iota-sdk/issues/1631
+        // if let Some(native_tokens) = native_tokens_diff {
+        //     log::debug!("Adding {native_tokens:?} to remainder output for {remainder_address:?}");
+        //     remainder_builder = remainder_builder.with_native_tokens(native_tokens);
+        // }
 
         let remainder = remainder_builder.finish_output()?;
 

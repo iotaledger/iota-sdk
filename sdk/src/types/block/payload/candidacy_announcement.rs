@@ -8,6 +8,6 @@ use packable::Packable;
 pub struct CandidacyAnnouncementPayload;
 
 impl CandidacyAnnouncementPayload {
-    /// The payload kind of a [`CandidacyAnnouncementPayload`].
+    /// The [`Payload`](crate::types::block::payload::Payload) kind of a [`CandidacyAnnouncementPayload`].
     pub const KIND: u8 = 2;
 }
