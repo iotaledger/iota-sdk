@@ -3,7 +3,10 @@
 
 use derive_more::From;
 
-use crate::types::block::address::AccountAddress;
+use crate::types::block::{
+    address::AccountAddress,
+    output::{StorageScore, StorageScoreParameters},
+};
 
 /// Defines the permanent [`AccountAddress`] that owns this output.
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, From, packable::Packable)]
@@ -23,6 +26,12 @@ impl ImmutableAccountAddressUnlockCondition {
     /// Returns the account address of an [`ImmutableAccountAddressUnlockCondition`].
     pub fn address(&self) -> &AccountAddress {
         &self.0
+    }
+}
+
+impl StorageScore for ImmutableAccountAddressUnlockCondition {
+    fn storage_score(&self, params: StorageScoreParameters) -> u64 {
+        self.address().storage_score(params)
     }
 }
 

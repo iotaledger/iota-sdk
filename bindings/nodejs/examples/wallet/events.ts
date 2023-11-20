@@ -25,12 +25,7 @@ async function run() {
         const wallet = await getUnlockedWallet();
 
         const callback = function (err: any, event: Event) {
-            console.log(
-                'AccountIndex:',
-                event.accountIndex,
-                ', Event:',
-                event.event,
-            );
+            console.log('Event:', event);
         };
 
         await wallet.listen([], callback);

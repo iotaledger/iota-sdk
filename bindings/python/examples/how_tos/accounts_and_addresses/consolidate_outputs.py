@@ -2,7 +2,7 @@ import os
 
 from dotenv import load_dotenv
 
-from iota_sdk import ConsolidationParams, Utils, Wallet
+from iota_sdk import ConsolidationParams, Utils, Wallet, FeatureType
 
 # In this example we will consolidate basic outputs from an account with only an AddressUnlockCondition by sending
 # them to the same address again.
@@ -27,7 +27,7 @@ print('Account synced')
 # List unspent outputs before consolidation.
 # The output we created with example `request_funds` and the basic output from `mint` have only one
 # unlock condition and it is an `AddressUnlockCondition`, and so they are valid for consolidation. They have the
-# same `AddressUnlockCondition`(the first address of the account), so they will be consolidated into one
+# same `AddressUnlockCondition`(the address of the wallet), so they will be consolidated into one
 # output.
 outputs = account.unspent_outputs()
 print('Outputs BEFORE consolidation:')
@@ -38,7 +38,8 @@ for i, output_data in enumerate(outputs):
         '- address: {}\n- amount: {}\n- native tokens: {}'.format(
             Utils.hex_to_bech32(output_data.address.pub_key_hash, 'rms'),
             output_data.output.amount,
-            output_data.output.native_tokens
+            [feature for feature in output_data.output.features if feature.type
+                == FeatureType.NativeToken]
         )
     )
 
@@ -71,6 +72,7 @@ for i, output_data in enumerate(outputs):
         '- address: {}\n- amount: {}\n- native tokens: {}'.format(
             Utils.hex_to_bech32(output_data.address.pub_key_hash, 'rms'),
             output_data.output.amount,
-            output_data.output.native_tokens
+            [feature for feature in output_data.output.features if feature.type
+                == FeatureType.NativeToken]
         )
     )

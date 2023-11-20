@@ -21,7 +21,10 @@ use crate::types::block::{
         AccountId, AnchorId, ChainId, MetadataFeatureLength, NativeTokenCount, NftId, OutputIndex, StateMetadataLength,
         TagFeatureLength,
     },
-    payload::{ContextInputCount, InputCount, OutputCount, TagLength, TaggedDataLength},
+    payload::{
+        tagged_data::{TagLength, TaggedDataLength},
+        ContextInputCount, InputCount, OutputCount,
+    },
     protocol::ProtocolParametersHash,
     unlock::{UnlockCount, UnlockIndex, UnlocksCount},
 };
@@ -53,7 +56,7 @@ pub enum Error {
     InvalidAddressKind(u8),
     InvalidAccountIndex(<UnlockIndex as TryFrom<u16>>::Error),
     InvalidAnchorIndex(<UnlockIndex as TryFrom<u16>>::Error),
-    InvalidBlockKind(u8),
+    InvalidBlockBodyKind(u8),
     InvalidRewardInputIndex(<RewardContextInputIndex as TryFrom<u16>>::Error),
     InvalidStorageDepositAmount(u64),
     /// Invalid transaction failure reason byte.
@@ -100,7 +103,7 @@ pub enum Error {
         index: usize,
         byte: u8,
     },
-    InvalidSignedBlockLength(usize),
+    InvalidBlockLength(usize),
     InvalidStateMetadataLength(<StateMetadataLength as TryFrom<usize>>::Error),
     InvalidManaValue(u64),
     InvalidMetadataFeatureLength(<MetadataFeatureLength as TryFrom<usize>>::Error),
@@ -137,7 +140,6 @@ pub enum Error {
     InvalidTagLength(<TagLength as TryFrom<usize>>::Error),
     InvalidTokenSchemeKind(u8),
     InvalidTransactionAmountSum(u128),
-    InvalidTransactionNativeTokensCount(u16),
     InvalidManaAllotmentSum {
         max: u64,
         sum: u128,
@@ -247,7 +249,7 @@ impl fmt::Display for Error {
             Self::InvalidCapabilityByte { index, byte } => {
                 write!(f, "invalid capability byte at index {index}: {byte:x}")
             }
-            Self::InvalidBlockKind(k) => write!(f, "invalid block kind: {k}"),
+            Self::InvalidBlockBodyKind(k) => write!(f, "invalid block body kind: {k}"),
             Self::InvalidRewardInputIndex(idx) => write!(f, "invalid reward input index: {idx}"),
             Self::InvalidStorageDepositAmount(amount) => {
                 write!(f, "invalid storage deposit amount: {amount}")
@@ -264,7 +266,7 @@ impl fmt::Display for Error {
             Self::InsufficientStorageDepositReturnAmount { deposit, required } => {
                 write!(
                     f,
-                    "the return deposit ({deposit}) must be greater than the minimum storage deposit ({required})"
+                    "the return deposit ({deposit}) must be greater than the minimum output amount ({required})"
                 )
             }
             Self::StorageDepositReturnExceedsOutputAmount { deposit, amount } => write!(
@@ -300,7 +302,7 @@ impl fmt::Display for Error {
             Self::InvalidInputKind(k) => write!(f, "invalid input kind: {k}"),
             Self::InvalidInputCount(count) => write!(f, "invalid input count: {count}"),
             Self::InvalidInputOutputIndex(index) => write!(f, "invalid input or output index: {index}"),
-            Self::InvalidSignedBlockLength(length) => write!(f, "invalid signed block length {length}"),
+            Self::InvalidBlockLength(length) => write!(f, "invalid block length {length}"),
             Self::InvalidStateMetadataLength(length) => write!(f, "invalid state metadata length: {length}"),
             Self::InvalidManaValue(mana) => write!(f, "invalid mana value: {mana}"),
             Self::InvalidMetadataFeatureLength(length) => {
@@ -345,9 +347,6 @@ impl fmt::Display for Error {
             }
             Self::InvalidTokenSchemeKind(k) => write!(f, "invalid token scheme kind {k}"),
             Self::InvalidTransactionAmountSum(value) => write!(f, "invalid transaction amount sum: {value}"),
-            Self::InvalidTransactionNativeTokensCount(count) => {
-                write!(f, "invalid transaction native tokens count: {count}")
-            }
             Self::InvalidManaAllotmentSum { max, sum } => {
                 write!(f, "invalid mana allotment sum: {sum} greater than max of {max}")
             }

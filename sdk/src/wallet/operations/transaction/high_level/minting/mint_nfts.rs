@@ -13,8 +13,8 @@ use crate::{
             unlock_condition::AddressUnlockCondition,
             NftId, NftOutputBuilder,
         },
-        ConvertTo,
     },
+    utils::ConvertTo,
     wallet::{
         operations::transaction::{TransactionOptions, TransactionWithMetadata},
         Wallet,
@@ -26,7 +26,7 @@ use crate::{
 #[serde(rename_all = "camelCase")]
 pub struct MintNftParams {
     /// Bech32 encoded address to which the NFT will be minted. Default will use the
-    /// first address of the account.
+    /// address of the wallet.
     #[getset(get = "pub")]
     address: Option<Bech32Address>,
     /// NFT sender feature.
@@ -161,7 +161,7 @@ where
         I::IntoIter: Send,
     {
         log::debug!("[TRANSACTION] prepare_mint_nfts");
-        let rent_structure = self.client().get_rent_structure().await?;
+        let storage_score_params = self.client().get_storage_score_parameters().await?;
         let wallet_address = self.address().await.into_inner();
         let mut outputs = Vec::new();
 
@@ -183,7 +183,7 @@ where
             };
 
             // NftId needs to be set to 0 for the creation
-            let mut nft_builder = NftOutputBuilder::new_with_minimum_storage_deposit(rent_structure, NftId::null())
+            let mut nft_builder = NftOutputBuilder::new_with_minimum_amount(storage_score_params, NftId::null())
                 // Address which will own the nft
                 .add_unlock_condition(AddressUnlockCondition::new(address));
 

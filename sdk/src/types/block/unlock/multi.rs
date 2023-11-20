@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use alloc::{boxed::Box, vec::Vec};
+use alloc::boxed::Box;
 
 use derive_more::Deref;
 use packable::{prefix::BoxedSlicePrefix, Packable};
@@ -24,7 +24,7 @@ impl MultiUnlock {
     pub fn new(unlocks: impl IntoIterator<Item = Unlock>) -> Result<Self, Error> {
         let unlocks = unlocks.into_iter().collect::<Box<[_]>>();
 
-        verify_unlocks::<true>(&unlocks, &())?;
+        verify_unlocks::<true>(&unlocks)?;
 
         Ok(Self(
             BoxedSlicePrefix::<Unlock, UnlocksCount>::try_from(unlocks).map_err(Error::InvalidMultiUnlockCount)?,
@@ -38,15 +38,18 @@ impl MultiUnlock {
     }
 }
 
-fn verify_unlocks<const VERIFY: bool>(unlocks: &[Unlock], _visitor: &()) -> Result<(), Error> {
+fn verify_unlocks<const VERIFY: bool>(unlocks: &[Unlock]) -> Result<(), Error> {
     if VERIFY && unlocks.iter().any(Unlock::is_multi) {
-        return Err(Error::MultiUnlockRecursion);
+        Err(Error::MultiUnlockRecursion)
     } else {
         Ok(())
     }
 }
 
+#[cfg(feature = "serde")]
 mod dto {
+    use alloc::vec::Vec;
+
     use serde::{Deserialize, Serialize};
 
     use super::*;

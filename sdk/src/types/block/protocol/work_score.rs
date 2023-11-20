@@ -25,7 +25,7 @@ pub struct WorkScoreParameters {
     context_input: u32,
     /// Modifier for storing UTXOs.
     output: u32,
-    /// Modifier for calculations using native tokens.
+    /// Modifier for calculations using native token features.
     native_token: u32,
     /// Modifier for storing staking features.
     staking: u32,

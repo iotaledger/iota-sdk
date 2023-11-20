@@ -24,6 +24,7 @@ use crate::{
             address::Address,
             output::{dto::OutputDto, Output, OutputId, OutputMetadata},
             payload::signed_transaction::{dto::SignedTransactionPayloadDto, SignedTransactionPayload, TransactionId},
+            protocol::ProtocolParameters,
             slot::SlotIndex,
             BlockId, Error as BlockError,
         },
@@ -122,18 +123,14 @@ impl From<&OutputData> for OutputDataDto {
     }
 }
 
-impl TryFromDto for OutputData {
-    type Dto = OutputDataDto;
+impl TryFrom<OutputDataDto> for OutputData {
     type Error = BlockError;
 
-    fn try_from_dto_with_params_inner(
-        dto: Self::Dto,
-        params: crate::types::ValidationParams<'_>,
-    ) -> Result<Self, Self::Error> {
+    fn try_from(dto: OutputDataDto) -> Result<Self, Self::Error> {
         Ok(Self {
             output_id: dto.output_id,
             metadata: dto.metadata,
-            output: Output::try_from_dto_with_params(dto.output, params)?,
+            output: Output::try_from(dto.output)?,
             is_spent: dto.is_spent,
             address: dto.address,
             network_id: dto
@@ -205,16 +202,15 @@ impl From<&TransactionWithMetadata> for TransactionWithMetadataDto {
     }
 }
 
-impl TryFromDto for TransactionWithMetadata {
-    type Dto = TransactionWithMetadataDto;
+impl TryFromDto<TransactionWithMetadataDto> for TransactionWithMetadata {
     type Error = BlockError;
 
     fn try_from_dto_with_params_inner(
-        dto: Self::Dto,
-        params: crate::types::ValidationParams<'_>,
+        dto: TransactionWithMetadataDto,
+        params: Option<&ProtocolParameters>,
     ) -> Result<Self, Self::Error> {
         Ok(Self {
-            payload: SignedTransactionPayload::try_from_dto_with_params(dto.payload, params)?,
+            payload: SignedTransactionPayload::try_from_dto_with_params_inner(dto.payload, params)?,
             block_id: dto.block_id,
             inclusion_state: dto.inclusion_state,
             timestamp: dto

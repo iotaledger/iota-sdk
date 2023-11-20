@@ -55,8 +55,8 @@ async fn main() -> Result<()> {
     let mut total_amount = 0;
     let mut total_native_tokens = NativeTokensBuilder::new();
     for output in outputs {
-        if let Some(native_tokens) = output.native_tokens() {
-            total_native_tokens.add_native_tokens(native_tokens.clone())?;
+        if let Some(native_token) = output.native_token() {
+            total_native_tokens.add_native_token(native_token.clone())?;
         }
         total_amount += output.amount();
     }

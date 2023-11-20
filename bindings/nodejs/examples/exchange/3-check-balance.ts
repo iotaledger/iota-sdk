@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-// This example gets the balance of an account.
+// This example gets the balance of a wallet.
 // Run with command:
 // yarn run-example ./exchange/3-check-balance.ts
 
@@ -18,18 +18,16 @@ async function run() {
             );
         }
 
-        const wallet = new Wallet({
+        const wallet = await Wallet.create({
             storagePath: process.env.WALLET_DB_PATH,
         });
+        const address = await wallet.address();
 
-        const account = await wallet.getAccount('Alice');
-        const addresses = await account.addresses();
-
-        console.log('Addresses:', addresses);
+        console.log('Address:', address);
 
         // Set syncOnlyMostBasicOutputs to true if not interested in outputs that are timelocked,
         // have a storage deposit return, expiration or are nft/account/foundry outputs.
-        const balance = await account.sync({ syncOnlyMostBasicOutputs: true });
+        const balance = await wallet.sync({ syncOnlyMostBasicOutputs: true });
 
         console.log('Balance', balance);
 
