@@ -343,7 +343,7 @@ macro_rules! def_is_as_opt {
                     if let Self::$name(v) = self {
                         v
                     } else {
-                        panic!("{} called on a non-{} {}", stringify!([<as_ $name:snake>]), stringify!([<$name>]), stringify!($type:snake));
+                        panic!("{} called on a non-{} {}", stringify!([<as_ $name:snake>]), stringify!([<$name>]), stringify!([<$type:snake>]));
                     }
                 }
 
