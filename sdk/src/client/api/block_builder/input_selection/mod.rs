@@ -66,7 +66,6 @@ impl InputSelection {
                 self.slot_index,
                 self.protocol_parameters.min_committable_age(),
                 self.protocol_parameters.max_committable_age(),
-                input.output_id(),
             )?
             .0;
         let required_address = if let Address::Restricted(restricted) = &required_address {
@@ -243,7 +242,6 @@ impl InputSelection {
                     self.slot_index,
                     self.protocol_parameters.min_committable_age(),
                     self.protocol_parameters.max_committable_age(),
-                    input.output_id(),
                 )
                 // PANIC: safe to unwrap as non basic/account/foundry/nft outputs are already filtered out.
                 .unwrap()
@@ -283,14 +281,10 @@ impl InputSelection {
             inputs.into_iter().partition(|input_signing_data| {
                 let required_address = input_signing_data
                     .output
-                    .required_address(
-                        slot_index,
-                        min_committable_age,
-                        max_committable_age,
-                        input_signing_data.output_id(),
-                    )
-                    // TODO
+                    .required_address(slot_index, min_committable_age, max_committable_age)
+                    // PANIC: safe to unwrap as non basic/alias/foundry/nft outputs are already filtered out.
                     .unwrap()
+                    // TODO
                     .unwrap();
 
                 required_address.is_ed25519()
@@ -299,7 +293,7 @@ impl InputSelection {
         for input in account_nft_address_inputs {
             let required_address = input
                 .output
-                .required_address(slot_index, min_committable_age, max_committable_age, input.output_id())?
+                .required_address(slot_index, min_committable_age, max_committable_age)?
                 // TODO
                 .unwrap();
 
@@ -344,14 +338,10 @@ impl InputSelection {
                         match sorted_inputs.iter().position(|input_signing_data| {
                             let required_address = input_signing_data
                                 .output
-                                .required_address(
-                                    slot_index,
-                                    min_committable_age,
-                                    max_committable_age,
-                                    input.output_id(),
-                                )
-                                // TODO
+                                .required_address(slot_index, min_committable_age, max_committable_age)
+                                // PANIC: safe to unwrap as non basic/alias/foundry/nft outputs are already filtered
                                 .unwrap()
+                                // TODO
                                 .unwrap();
 
                             required_address == account_or_nft_address

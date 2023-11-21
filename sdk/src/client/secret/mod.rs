@@ -564,7 +564,6 @@ where
                 slot_index,
                 protocol_parameters.min_committable_age(),
                 protocol_parameters.max_committable_age(),
-                input.output_metadata.output_id(),
             )?
             // TODO
             .unwrap();

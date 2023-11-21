@@ -290,6 +290,8 @@ impl<'a> SemanticValidationContext<'a> {
                 return Ok(Some(TransactionFailureReason::TimelockNotExpired));
             }
 
+            // TODO have the version above with `self.transaction.creation_slot()` or this one with
+            // `commitment.as_commitment().slot_index()`?
             if let Some(timelock) = unlock_conditions.timelock() {
                 if let Some(commitment) = self.transaction.context_inputs().iter().find(|c| c.is_commitment()) {
                     if timelock.is_timelocked(
@@ -302,11 +304,6 @@ impl<'a> SemanticValidationContext<'a> {
                     // TODO return an error
                 }
             }
-
-            // TODO remove the method?
-            // if unlock_conditions.is_time_locked(context.essence.creation_slot()) {
-            //     return Ok(Some(TransactionFailureReason::TimelockNotExpired));
-            // }
 
             if let Some(expiration) = unlock_conditions.expiration() {
                 if let Some(commitment) = self.transaction.context_inputs().iter().find(|c| c.is_commitment()) {

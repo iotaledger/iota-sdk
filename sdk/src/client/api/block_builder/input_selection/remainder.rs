@@ -30,7 +30,6 @@ impl InputSelection {
                         self.slot_index,
                         self.protocol_parameters.min_committable_age(),
                         self.protocol_parameters.max_committable_age(),
-                        input.output_id(),
                     )?
                     // TODO
                     .unwrap();
@@ -49,7 +48,6 @@ impl InputSelection {
                     self.slot_index,
                     self.protocol_parameters.min_committable_age(),
                     self.protocol_parameters.max_committable_age(),
-                    input.output_id(),
                 )?
                 // TODO
                 .unwrap();

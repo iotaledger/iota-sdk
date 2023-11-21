@@ -14,10 +14,10 @@ impl InputSelection {
                 self.slot_index,
                 self.protocol_parameters.min_committable_age(),
                 self.protocol_parameters.max_committable_age(),
-                input.output_id(),
             )
-            // TODO
+            // PANIC: safe to unwrap as outputs with no address have been filtered out already.
             .unwrap()
+            // TODO
             .unwrap();
 
         &required_address == address
@@ -32,7 +32,6 @@ impl InputSelection {
                 self.slot_index,
                 self.protocol_parameters.min_committable_age(),
                 self.protocol_parameters.max_committable_age(),
-                input.output_id(),
             )
             // TODO
             .unwrap()

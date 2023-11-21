@@ -22,12 +22,7 @@ pub(crate) fn can_output_be_unlocked_now(
 
     let required_unlock_address = output_data
         .output
-        .required_address(
-            slot_index,
-            min_committable_age,
-            max_committable_age,
-            &output_data.output_id,
-        )?
+        .required_address(slot_index, min_committable_age, max_committable_age)?
         // TODO
         .unwrap();
 

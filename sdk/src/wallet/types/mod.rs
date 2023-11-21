@@ -63,16 +63,16 @@ impl OutputData {
         min_committable_age: SlotIndex,
         max_committable_age: SlotIndex,
     ) -> crate::wallet::Result<Option<InputSigningData>> {
-        let unlock_address = self
+        let required_address = self
             .output
-            .required_address(slot_index, min_committable_age, max_committable_age, &self.output_id)?
+            .required_address(slot_index, min_committable_age, max_committable_age)?
             // TODO
             .unwrap();
 
-        let chain = if unlock_address == self.address {
+        let chain = if required_address == self.address {
             self.chain
-        } else if let Address::Ed25519(_) = unlock_address {
-            if wallet_data.address.inner() == &unlock_address {
+        } else if required_address.is_ed25519() {
+            if wallet_data.address.inner() == &required_address {
                 // TODO #1279: do we need a check to make sure that `wallet_data.address` and `wallet_data.bip_path` are
                 // never conflicting?
                 wallet_data.bip_path

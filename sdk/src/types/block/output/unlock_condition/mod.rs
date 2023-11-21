@@ -301,11 +301,9 @@ impl UnlockConditions {
         min_committable_age: impl Into<SlotIndex>,
         max_committable_age: impl Into<SlotIndex>,
     ) -> Option<&'a Address> {
-        if let Some(expiration) = self.expiration() {
+        self.expiration().map_or(Some(address), |expiration| {
             expiration.return_address_expired(address, slot_index, min_committable_age, max_committable_age)
-        } else {
-            Some(address)
-        }
+        })
     }
 }
 

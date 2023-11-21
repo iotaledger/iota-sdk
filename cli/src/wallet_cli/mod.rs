@@ -993,7 +993,6 @@ async fn print_wallet_address(wallet: &Wallet) -> Result<(), Error> {
                 slot_index,
                 protocol_parameters.min_committable_age(),
                 protocol_parameters.max_committable_age(),
-                &output_id,
             )?
             // TODO
             .unwrap();

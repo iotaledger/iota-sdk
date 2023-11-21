@@ -276,7 +276,6 @@ impl Output {
         slot_index: impl Into<SlotIndex>,
         min_committable_age: impl Into<SlotIndex>,
         max_committable_age: impl Into<SlotIndex>,
-        output_id: &OutputId,
     ) -> Result<Option<Address>, Error> {
         Ok(match self {
             Self::Basic(output) => output
