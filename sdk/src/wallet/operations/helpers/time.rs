@@ -20,13 +20,12 @@ pub(crate) fn can_output_be_unlocked_now(
         }
     }
 
-    let required_unlock_address = output_data
+    let required_address = output_data
         .output
-        .required_address(slot_index, min_committable_age, max_committable_age)?
-        // TODO
-        .unwrap();
+        .required_address(slot_index, min_committable_age, max_committable_age)?;
 
-    Ok(wallet_address == &required_unlock_address)
+    // In case of `None` the output can currently not be unlocked because of expiration unlock condition
+    required_address.map_or_else(|| Ok(false), |required_address| Ok(wallet_address == &required_address))
 }
 
 // Check if an output can be unlocked by one of the account addresses at the current time and at any

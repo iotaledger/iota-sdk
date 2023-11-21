@@ -31,8 +31,7 @@ impl InputSelection {
                         self.protocol_parameters.min_committable_age(),
                         self.protocol_parameters.max_committable_age(),
                     )?
-                    // TODO
-                    .unwrap();
+                    .expect("expiration unlockable outputs already filtered out");
 
                 if &required_address == remainder_address {
                     return Ok(Some((remainder_address.clone(), input.chain)));
@@ -49,8 +48,7 @@ impl InputSelection {
                     self.protocol_parameters.min_committable_age(),
                     self.protocol_parameters.max_committable_age(),
                 )?
-                // TODO
-                .unwrap();
+                .expect("expiration unlockable outputs already filtered out");
 
             if required_address.is_ed25519() {
                 return Ok(Some((required_address, input.chain)));

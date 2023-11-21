@@ -353,8 +353,7 @@ impl InputSelection {
                         self.protocol_parameters.min_committable_age(),
                         self.protocol_parameters.max_committable_age(),
                     )
-                    // TODO
-                    .unwrap()
+                    .expect("expiration unlockable outputs already filtered out")
                     .is_ed25519()
             } else {
                 false
@@ -375,8 +374,7 @@ impl InputSelection {
                         self.protocol_parameters.min_committable_age(),
                         self.protocol_parameters.max_committable_age(),
                     )
-                    // TODO
-                    .unwrap()
+                    .expect("expiration unlockable outputs already filtered out")
                     .is_ed25519()
             } else {
                 false

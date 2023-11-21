@@ -565,7 +565,7 @@ where
                 protocol_parameters.min_committable_age(),
                 protocol_parameters.max_committable_age(),
             )?
-            // TODO
+            // TODO error because of expiration the input can't be unlocked at this time
             .unwrap();
 
         // Check if we already added an [Unlock] for this address

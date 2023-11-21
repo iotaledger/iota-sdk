@@ -66,7 +66,7 @@ impl OutputData {
         let required_address = self
             .output
             .required_address(slot_index, min_committable_age, max_committable_age)?
-            // TODO
+            // TODO error because of expiration the input can't be unlocked at this time
             .unwrap();
 
         let chain = if required_address == self.address {

@@ -389,7 +389,7 @@ impl AccountOutput {
                 context.protocol_parameters.min_committable_age(),
                 context.protocol_parameters.max_committable_age(),
             )
-            // TODO
+            // TODO error because of expiration the input can't be unlocked at this time
             .unwrap()
             .unlock(unlock, context)?;
 

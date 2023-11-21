@@ -7,7 +7,6 @@ use crate::{client::secret::types::InputSigningData, types::block::address::Addr
 impl InputSelection {
     // Checks if a selected input unlocks a given ED25519 address.
     fn selected_unlocks_ed25519_address(&self, input: &InputSigningData, address: &Address) -> bool {
-        // PANIC: safe to unwrap as outputs with no address have been filtered out already.
         let required_address = input
             .output
             .required_address(
@@ -17,8 +16,7 @@ impl InputSelection {
             )
             // PANIC: safe to unwrap as outputs with no address have been filtered out already.
             .unwrap()
-            // TODO
-            .unwrap();
+            .expect("expiration unlockable outputs already filtered out");
 
         &required_address == address
     }
@@ -33,9 +31,9 @@ impl InputSelection {
                 self.protocol_parameters.min_committable_age(),
                 self.protocol_parameters.max_committable_age(),
             )
-            // TODO
+            // PANIC: safe to unwrap as outputs with no address have been filtered out already.
             .unwrap()
-            .unwrap();
+            .expect("expiration unlockable outputs already filtered out");
 
         &required_address == address
     }

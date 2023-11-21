@@ -67,7 +67,8 @@ impl InputSelection {
                 self.protocol_parameters.min_committable_age(),
                 self.protocol_parameters.max_committable_age(),
             )?
-            .0;
+            .expect("expiration unlockable outputs already filtered out");
+
         let required_address = if let Address::Restricted(restricted) = &required_address {
             restricted.address()
         } else {
@@ -244,12 +245,18 @@ impl InputSelection {
                     self.protocol_parameters.max_committable_age(),
                 )
                 // PANIC: safe to unwrap as non basic/account/foundry/nft outputs are already filtered out.
-                .unwrap()
-                .0;
-            let required_address = if let Address::Restricted(restricted) = &required_address {
-                restricted.address()
-            } else {
-                &required_address
+                .unwrap();
+
+            let required_address = match required_address {
+                Some(address) => {
+                    if let Address::Restricted(restricted) = &address {
+                        *restricted.address()
+                    } else {
+                        address
+                    }
+                }
+                // Time in which no address can unlock the output because of an expiration unlock condition
+                None => return false,
             };
 
             match required_address {
@@ -284,8 +291,7 @@ impl InputSelection {
                     .required_address(slot_index, min_committable_age, max_committable_age)
                     // PANIC: safe to unwrap as non basic/alias/foundry/nft outputs are already filtered out.
                     .unwrap()
-                    // TODO
-                    .unwrap();
+                    .expect("expiration unlockable outputs already filtered out");
 
                 required_address.is_ed25519()
             });
@@ -294,8 +300,7 @@ impl InputSelection {
             let required_address = input
                 .output
                 .required_address(slot_index, min_committable_age, max_committable_age)?
-                // TODO
-                .unwrap();
+                .expect("expiration unlockable outputs already filtered out");
 
             match sorted_inputs
                 .iter()
@@ -341,8 +346,7 @@ impl InputSelection {
                                 .required_address(slot_index, min_committable_age, max_committable_age)
                                 // PANIC: safe to unwrap as non basic/alias/foundry/nft outputs are already filtered
                                 .unwrap()
-                                // TODO
-                                .unwrap();
+                                .expect("expiration unlockable outputs already filtered out");
 
                             required_address == account_or_nft_address
                         }) {

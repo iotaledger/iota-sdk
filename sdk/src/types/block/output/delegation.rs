@@ -330,8 +330,7 @@ impl DelegationOutput {
                 context.protocol_parameters.min_committable_age(),
                 context.protocol_parameters.max_committable_age(),
             )
-            // TODO
-            .unwrap()
+            .expect("delegation can't have expiration unlock condition")
             .unlock(unlock, context)
     }
 

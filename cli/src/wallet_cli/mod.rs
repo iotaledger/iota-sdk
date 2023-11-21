@@ -987,38 +987,36 @@ async fn print_wallet_address(wallet: &Wallet) -> Result<(), Error> {
         output_ids.push(output_id);
 
         // Output might be associated with the address, but can't be unlocked by it, so we check that here.
-        let required_address = &output_data
-            .output
-            .required_address(
-                slot_index,
-                protocol_parameters.min_committable_age(),
-                protocol_parameters.max_committable_age(),
-            )?
-            // TODO
-            .unwrap();
+        let required_address = &output_data.output.required_address(
+            slot_index,
+            protocol_parameters.min_committable_age(),
+            protocol_parameters.max_committable_age(),
+        )?;
 
-        if address.inner() == required_address {
-            if let Some(nt) = output_data.output.native_token() {
-                native_tokens.add_native_token(*nt)?;
-            }
-            match &output_data.output {
-                Output::Basic(_) => {}
-                Output::Account(account) => accounts.push(account.account_id_non_null(&output_id)),
-                Output::Foundry(foundry) => foundries.push(foundry.id()),
-                Output::Nft(nft) => nfts.push(nft.nft_id_non_null(&output_id)),
-                Output::Delegation(delegation) => delegations.push(delegation.delegation_id_non_null(&output_id)),
-                Output::Anchor(anchor) => anchors.push(anchor.anchor_id_non_null(&output_id)),
-            }
-            let unlock_conditions = output_data
-                .output
-                .unlock_conditions()
-                .expect("output must have unlock conditions");
-            let sdr_amount = unlock_conditions
-                .storage_deposit_return()
-                .map(|sdr| sdr.amount())
-                .unwrap_or(0);
+        if let Some(required_address) = required_address {
+            if address.inner() == required_address {
+                if let Some(nt) = output_data.output.native_token() {
+                    native_tokens.add_native_token(*nt)?;
+                }
+                match &output_data.output {
+                    Output::Basic(_) => {}
+                    Output::Account(account) => accounts.push(account.account_id_non_null(&output_id)),
+                    Output::Foundry(foundry) => foundries.push(foundry.id()),
+                    Output::Nft(nft) => nfts.push(nft.nft_id_non_null(&output_id)),
+                    Output::Delegation(delegation) => delegations.push(delegation.delegation_id_non_null(&output_id)),
+                    Output::Anchor(anchor) => anchors.push(anchor.anchor_id_non_null(&output_id)),
+                }
+                let unlock_conditions = output_data
+                    .output
+                    .unlock_conditions()
+                    .expect("output must have unlock conditions");
+                let sdr_amount = unlock_conditions
+                    .storage_deposit_return()
+                    .map(|sdr| sdr.amount())
+                    .unwrap_or(0);
 
-            amount += output_data.output.amount() - sdr_amount;
+                amount += output_data.output.amount() - sdr_amount;
+            }
         }
     }
 
