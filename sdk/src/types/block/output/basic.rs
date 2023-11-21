@@ -358,12 +358,6 @@ impl BasicOutput {
     }
 }
 
-impl WorkScore for BasicOutput {
-    fn work_score(&self, work_score_params: WorkScoreParameters) -> u32 {
-        work_score_params.output() + self.features().work_score(work_score_params)
-    }
-}
-
 impl StorageScore for BasicOutput {
     fn storage_score(&self, params: StorageScoreParameters) -> u64 {
         params.output_offset()
@@ -371,6 +365,12 @@ impl StorageScore for BasicOutput {
             + (1 + self.packed_len() as u64) * params.data_factor() as u64
             + self.unlock_conditions.storage_score(params)
             + self.features.storage_score(params)
+    }
+}
+
+impl WorkScore for BasicOutput {
+    fn work_score(&self, work_score_params: WorkScoreParameters) -> u32 {
+        work_score_params.output() + self.features().work_score(work_score_params)
     }
 }
 

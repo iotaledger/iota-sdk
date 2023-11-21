@@ -451,6 +451,14 @@ impl StorageScore for NftOutput {
     }
 }
 
+impl WorkScore for NftOutput {
+    fn work_score(&self, work_score_params: WorkScoreParameters) -> u32 {
+        work_score_params.output()
+            + self.features().work_score(work_score_params)
+            + self.immutable_features().work_score(work_score_params)
+    }
+}
+
 impl MinimumOutputAmount for NftOutput {}
 
 impl StateTransitionVerifier for NftOutput {
@@ -484,14 +492,6 @@ impl StateTransitionVerifier for NftOutput {
             return Err(TransactionFailureReason::TransactionCapabilityNftDestructionNotAllowed)?;
         }
         Ok(())
-    }
-}
-
-impl WorkScore for NftOutput {
-    fn work_score(&self, work_score_params: WorkScoreParameters) -> u32 {
-        work_score_params.output()
-            + self.features().work_score(work_score_params)
-            + self.immutable_features().work_score(work_score_params)
     }
 }
 
