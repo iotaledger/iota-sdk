@@ -19,7 +19,7 @@ where
     crate::wallet::Error: From<S::Error>,
     crate::client::Error: From<S::Error>,
 {
-    async fn implicit_account_transition(&self, output_id: &OutputId) -> Result<TransactionWithMetadata> {
+    pub async fn implicit_account_transition(&self, output_id: &OutputId) -> Result<TransactionWithMetadata> {
         let implicit_account_data = self.data().await.unspent_outputs.get(output_id).cloned();
 
         let implicit_account = if let Some(implicit_account_data) = &implicit_account_data {
