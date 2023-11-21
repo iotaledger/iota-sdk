@@ -220,7 +220,7 @@ pub(crate) async fn get_inputs_for_transaction_payload(
         .collect::<Vec<_>>();
 
     client
-        .get_outputs_with_metadata_ignore_errors(&output_ids)
+        .get_outputs_with_metadata_ignore_not_found(&output_ids)
         .await
         .map_err(|e| e.into())
 }

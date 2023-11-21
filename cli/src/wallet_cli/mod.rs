@@ -1210,7 +1210,7 @@ async fn print_outputs(mut outputs: Vec<OutputData>, title: &str) -> Result<(), 
             };
 
             println_log_info!(
-                "{:<5}{}\t{}\t{}",
+                "{:<5}{} {:<16}{}",
                 i,
                 &output_data.output_id,
                 kind_str,
