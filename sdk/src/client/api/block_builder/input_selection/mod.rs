@@ -405,6 +405,11 @@ impl InputSelection {
                 input_native_tokens_builder.add_native_token(*native_token)?;
             }
             match &input.output {
+                Output::Basic(basic) => {
+                    if basic.is_implicit_account() {
+                        input_accounts.push(input);
+                    }
+                }
                 Output::Account(_) => {
                     input_accounts.push(input);
                 }
@@ -439,16 +444,24 @@ impl InputSelection {
                         .find(|i| is_account_with_id(&i.output, account_output.account_id(), i.output_id()))
                         .expect("ISA is broken because there is no account input");
 
-                    if let Err(err) = AccountOutput::transition_inner(
-                        account_input.output.as_account(),
-                        account_output,
-                        &input_chains_foundries,
-                        &self.outputs,
-                    ) {
-                        log::debug!("validate_transitions error {err:?}");
-                        return Err(Error::UnfulfillableRequirement(Requirement::Account(
-                            *account_output.account_id(),
-                        )));
+                    match &account_input.output {
+                        Output::Account(account) => {
+                            if let Err(err) = AccountOutput::transition_inner(
+                                account,
+                                account_output,
+                                &input_chains_foundries,
+                                &self.outputs,
+                            ) {
+                                log::debug!("validate_transitions error {err:?}");
+                                return Err(Error::UnfulfillableRequirement(Requirement::Account(
+                                    *account_output.account_id(),
+                                )));
+                            }
+                        }
+                        Output::Basic(_) => {
+                            // TODO
+                        }
+                        _ => unreachable!(),
                     }
                 }
                 Output::Foundry(foundry_output) => {
