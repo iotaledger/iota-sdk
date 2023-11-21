@@ -35,7 +35,7 @@ class RemainderValueStrategyCustomAddress:
 
 
 class RemainderValueStrategy(Enum):
-    """Remainder value stragegy variants.
+    """Remainder value strategy variants.
 
     Attributes:
         ChangeAddress: Allows to move the remainder value to a change address.

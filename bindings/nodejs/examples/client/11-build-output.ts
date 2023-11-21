@@ -43,7 +43,7 @@ async function run() {
         const addressUnlockCondition: UnlockCondition =
             new AddressUnlockCondition(new Ed25519Address(hexAddress));
 
-        // Build most basic output with amound and a single address unlock condition
+        // Build most basic output with amount and a single address unlock condition
         const basicOutput = await client.buildBasicOutput({
             amount: BigInt(1000000),
             unlockConditions: [addressUnlockCondition],

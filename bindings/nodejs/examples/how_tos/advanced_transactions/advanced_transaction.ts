@@ -44,7 +44,7 @@ async function run() {
             process.env.STRONGHOLD_PASSWORD as string,
         );
 
-        // Create an ouput with amount 1_000_000 and a timelock of 1 hour
+        // Create an output with amount 1_000_000 and a timelock of 1 hour
         const in_an_hour = Math.floor(Date.now() / 1000) + 3600;
         const basicOutput = await new Client({}).buildBasicOutput({
             unlockConditions: [
