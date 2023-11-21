@@ -14,6 +14,7 @@ use std::collections::HashSet;
 
 use packable::PackableExt;
 
+use self::requirement::account::is_account_with_id;
 pub use self::{burn::Burn, error::Error, requirement::Requirement};
 use crate::{
     client::{api::types::RemainderData, secret::types::InputSigningData},
@@ -435,13 +436,7 @@ impl InputSelection {
 
                     let account_input = input_accounts
                         .iter()
-                        .find(|i| {
-                            if let Output::Account(account_input) = &i.output {
-                                *account_output.account_id() == account_input.account_id_non_null(i.output_id())
-                            } else {
-                                false
-                            }
-                        })
+                        .find(|i| is_account_with_id(&i.output, account_output.account_id(), i.output_id()))
                         .expect("ISA is broken because there is no account input");
 
                     if let Err(err) = AccountOutput::transition_inner(
