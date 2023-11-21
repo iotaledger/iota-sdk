@@ -15,13 +15,14 @@ const NEW_STATE_METADATA = 'updated state metadata 1';
 async function run() {
     initLogger();
     for (const envVar of [
-        'FAUCET_URL',
         'WALLET_DB_PATH',
         'STRONGHOLD_PASSWORD',
-    ])
+        'EXPLORER_URL',
+    ]) {
         if (!(envVar in process.env)) {
             throw new Error(`.env ${envVar} is undefined, see .env.example`);
         }
+    }
 
     try {
         // Create the wallet
