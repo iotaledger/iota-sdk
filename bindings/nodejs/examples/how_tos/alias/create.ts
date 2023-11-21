@@ -16,7 +16,11 @@ require('dotenv').config({ path: '.env' });
 // In this example we create alias.
 async function run() {
     initLogger();
-    for (const envVar of ['WALLET_DB_PATH', 'STRONGHOLD_PASSWORD', 'EXPLORER_URL']) {
+    for (const envVar of [
+        'WALLET_DB_PATH',
+        'STRONGHOLD_PASSWORD',
+        'EXPLORER_URL',
+    ]) {
         if (!(envVar in process.env)) {
             throw new Error(`.env ${envVar} is undefined, see .env.example`);
         }

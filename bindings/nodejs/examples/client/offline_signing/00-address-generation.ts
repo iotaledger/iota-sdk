@@ -26,9 +26,8 @@ async function run() {
     }
 
     try {
-
         const secretManager = new SecretManager({
-            mnemonic: process.env.MNEMONIC,
+            mnemonic: process.env.MNEMONIC as string,
         });
 
         // Generates an address offline.

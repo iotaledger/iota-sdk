@@ -18,16 +18,15 @@ async function run() {
 
     const client = new Client({
         // Insert your node URL in the .env.
-        nodes: [process.env.NODE_URL],
+        nodes: [process.env.NODE_URL as string],
         localPow: true,
     });
 
     try {
-
         // Configure your own mnemonic in ".env". Since the output amount cannot be zero, the mnemonic must contain non-zero
         // balance
         const secretManager = {
-            mnemonic: process.env.MNEMONIC,
+            mnemonic: process.env.MNEMONIC as string,
         };
 
         // We generate an address from our own mnemonic so that we send the funds to ourselves

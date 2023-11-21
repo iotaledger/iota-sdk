@@ -44,7 +44,7 @@ async function run(): Promise<void> {
     }
     try {
         const mnemonicSecretManager = {
-            mnemonic: process.env.MNEMONIC,
+            mnemonic: process.env.MNEMONIC as string,
         };
 
         const secretManager = new SecretManager(mnemonicSecretManager);

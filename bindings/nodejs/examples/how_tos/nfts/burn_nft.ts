@@ -13,9 +13,15 @@ require('dotenv').config({ path: '.env' });
 // yarn run-example ./how_tos/nfts/burn_nft.ts
 async function run() {
     try {
-        for (const envVar of ['WALLET_DB_PATH', 'STRONGHOLD_PASSWORD', 'EXPLORER_URL']) {
+        for (const envVar of [
+            'WALLET_DB_PATH',
+            'STRONGHOLD_PASSWORD',
+            'EXPLORER_URL',
+        ]) {
             if (!(envVar in process.env)) {
-                throw new Error(`.env ${envVar} is undefined, see .env.example`);
+                throw new Error(
+                    `.env ${envVar} is undefined, see .env.example`,
+                );
             }
         }
 
@@ -28,7 +34,9 @@ async function run() {
         const account = await wallet.getAccount('Alice');
 
         // We need to unlock stronghold.
-        await wallet.setStrongholdPassword(process.env.STRONGHOLD_PASSWORD);
+        await wallet.setStrongholdPassword(
+            process.env.STRONGHOLD_PASSWORD as string,
+        );
 
         // May want to ensure the account is synced before sending a transaction.
         let balance = await account.sync();

@@ -11,9 +11,15 @@ require('dotenv').config({ path: '.env' });
 async function run() {
     initLogger();
     try {
-        for (const envVar of ['WALLET_DB_PATH', 'STRONGHOLD_PASSWORD', 'EXPLORER_URL']) {
+        for (const envVar of [
+            'WALLET_DB_PATH',
+            'STRONGHOLD_PASSWORD',
+            'EXPLORER_URL',
+        ]) {
             if (!(envVar in process.env)) {
-                throw new Error(`.env ${envVar} is undefined, see .env.example`);
+                throw new Error(
+                    `.env ${envVar} is undefined, see .env.example`,
+                );
             }
         }
 
@@ -26,7 +32,9 @@ async function run() {
         await account.sync();
 
         // To sign a transaction we need to unlock stronghold.
-        await wallet.setStrongholdPassword(process.env.STRONGHOLD_PASSWORD);
+        await wallet.setStrongholdPassword(
+            process.env.STRONGHOLD_PASSWORD as string,
+        );
 
         // Get all claimable outputs
         const output_ids = await account.claimableOutputs(OutputsToClaim.All);

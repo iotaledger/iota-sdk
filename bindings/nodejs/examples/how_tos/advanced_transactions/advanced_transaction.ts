@@ -19,9 +19,15 @@ require('dotenv').config({ path: '.env' });
 async function run() {
     initLogger();
     try {
-        for (const envVar of ['WALLET_DB_PATH', 'STRONGHOLD_PASSWORD', 'EXPLORER_URL']) {
+        for (const envVar of [
+            'WALLET_DB_PATH',
+            'STRONGHOLD_PASSWORD',
+            'EXPLORER_URL',
+        ]) {
             if (!(envVar in process.env)) {
-                throw new Error(`.env ${envVar} is undefined, see .env.example`);
+                throw new Error(
+                    `.env ${envVar} is undefined, see .env.example`,
+                );
             }
         }
 
@@ -34,7 +40,9 @@ async function run() {
         await account.sync();
 
         // To sign a transaction we need to unlock stronghold.
-        await wallet.setStrongholdPassword(process.env.STRONGHOLD_PASSWORD);
+        await wallet.setStrongholdPassword(
+            process.env.STRONGHOLD_PASSWORD as string,
+        );
 
         // Create an ouput with amount 1_000_000 and a timelock of 1 hour
         const in_an_hour = Math.floor(Date.now() / 1000) + 3600;

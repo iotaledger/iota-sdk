@@ -19,12 +19,12 @@ async function run() {
 
     const client = new Client({
         // Insert your node URL in the .env.
-        nodes: [process.env.NODE_URL],
+        nodes: [process.env.NODE_URL as string],
     });
 
     try {
         const secretManager = new SecretManager({
-            mnemonic: process.env.MNEMONIC,
+            mnemonic: process.env.MNEMONIC as string,
         });
 
         // Generate the first address

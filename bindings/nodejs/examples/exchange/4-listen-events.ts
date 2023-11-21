@@ -12,9 +12,11 @@ require('dotenv').config({ path: '.env' });
 
 async function run() {
     try {
-        for (const envVar of ['WALLET_DB_PATH',]) {
+        for (const envVar of ['WALLET_DB_PATH']) {
             if (!(envVar in process.env)) {
-                throw new Error(`.env ${envVar} is undefined, see .env.example`);
+                throw new Error(
+                    `.env ${envVar} is undefined, see .env.example`,
+                );
             }
         }
 

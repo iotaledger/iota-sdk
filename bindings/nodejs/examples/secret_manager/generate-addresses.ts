@@ -17,7 +17,7 @@ async function run() {
     }
     try {
         const mnemonicSecretManager = {
-            mnemonic: process.env.MNEMONIC,
+            mnemonic: process.env.MNEMONIC as string,
         };
 
         const secretManager = new SecretManager(mnemonicSecretManager);

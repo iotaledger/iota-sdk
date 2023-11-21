@@ -26,7 +26,7 @@ async function run() {
 
     try {
         const secretManager = {
-            mnemonic: process.env.MNEMONIC,
+            mnemonic: process.env.MNEMONIC as string,
         };
 
         // Read in prepared transaction from example 2_transaction_preparation

@@ -18,7 +18,7 @@ async function run() {
         }
     }
     try {
-        const faucetUrl = process.env.FAUCET_URL;
+        const faucetUrl = process.env.FAUCET_URL as string;
 
         // Create the wallet
         const wallet = new Wallet({

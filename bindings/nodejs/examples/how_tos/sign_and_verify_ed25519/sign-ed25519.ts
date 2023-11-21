@@ -32,7 +32,9 @@ async function run() {
     try {
         for (const envVar of ['STRONGHOLD_PASSWORD', 'MNEMONIC']) {
             if (!(envVar in process.env)) {
-                throw new Error(`.env ${envVar} is undefined, see .env.example`);
+                throw new Error(
+                    `.env ${envVar} is undefined, see .env.example`,
+                );
             }
         }
 
