@@ -382,16 +382,7 @@ impl AccountOutput {
         unlock: &Unlock,
         context: &mut SemanticValidationContext<'_>,
     ) -> Result<(), TransactionFailureReason> {
-        self.unlock_conditions()
-            .locked_address(
-                self.address(),
-                context.transaction.creation_slot(),
-                context.protocol_parameters.min_committable_age(),
-                context.protocol_parameters.max_committable_age(),
-            )
-            // TODO error because of expiration the input can't be unlocked at this time
-            .unwrap()
-            .unlock(unlock, context)?;
+        self.address().unlock(unlock, context)?;
 
         let account_id = if self.account_id().is_null() {
             AccountId::from(output_id)

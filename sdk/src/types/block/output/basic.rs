@@ -326,8 +326,8 @@ impl BasicOutput {
                 context.protocol_parameters.min_committable_age(),
                 context.protocol_parameters.max_committable_age(),
             )
-            // TODO error because of expiration the input can't be unlocked at this time
-            .unwrap()
+            // because of expiration the input can't be unlocked at this time
+            .ok_or(TransactionFailureReason::SemanticValidationFailed)?
             .unlock(unlock, context)
     }
 

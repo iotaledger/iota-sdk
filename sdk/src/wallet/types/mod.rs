@@ -66,8 +66,7 @@ impl OutputData {
         let required_address = self
             .output
             .required_address(slot_index, min_committable_age, max_committable_age)?
-            // TODO error because of expiration the input can't be unlocked at this time
-            .unwrap();
+            .ok_or(crate::client::Error::OutputNotUnlockableDueToExpiration)?;
 
         let chain = if required_address == self.address {
             self.chain

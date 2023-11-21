@@ -565,8 +565,7 @@ where
                 protocol_parameters.min_committable_age(),
                 protocol_parameters.max_committable_age(),
             )?
-            // TODO error because of expiration the input can't be unlocked at this time
-            .unwrap();
+            .ok_or(crate::client::Error::OutputNotUnlockableDueToExpiration)?;
 
         // Check if we already added an [Unlock] for this address
         match block_indexes.get(&required_address) {

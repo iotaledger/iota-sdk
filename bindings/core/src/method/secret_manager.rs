@@ -61,7 +61,7 @@ pub enum SecretManagerMethod {
     SignTransaction {
         /// Prepared transaction data
         prepared_transaction_data: PreparedTransactionDataDto,
-        protocol_parameters: ProtocolParameters,
+        protocol_parameters: Box<ProtocolParameters>,
     },
     // Sign a block.
     #[serde(rename_all = "camelCase")]

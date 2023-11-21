@@ -46,8 +46,8 @@ async fn main() -> Result<()> {
 
     // Signs prepared transaction offline.
     let unlocks = SecretManager::Stronghold(secret_manager)
-        // TODO meh
-        .sign_transaction_essence(&prepared_transaction_data, &protocol_parameters())
+        // TODO don't use default protocol parameters
+        .transaction_unlocks(&prepared_transaction_data, &protocol_parameters())
         .await?;
 
     let signed_transaction = SignedTransactionPayload::new(prepared_transaction_data.transaction.clone(), unlocks)?;

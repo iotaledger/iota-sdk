@@ -79,6 +79,9 @@ pub enum Error {
     /// No available inputs provided
     #[error("No available inputs provided")]
     NoAvailableInputsProvided,
+    /// Output not unlockable due to expiration
+    #[error("output not unlockable due to expiration")]
+    OutputNotUnlockableDueToExpiration,
 }
 
 impl From<crate::types::block::Error> for Error {
@@ -527,15 +530,17 @@ fn merge_unlocks(
     // Assuming inputs_data is ordered by address type
     for (current_block_index, input) in prepared_transaction_data.inputs_data.iter().enumerate() {
         // Get the address that is required to unlock the input
-        let required_address = input
-            .output
-            .required_address(
-                slot_index,
-                protocol_parameters.min_committable_age(),
-                protocol_parameters.max_committable_age(),
-            )?
-            // TODO
-            .unwrap();
+        let required_address = input.output.required_address(
+            slot_index,
+            protocol_parameters.min_committable_age(),
+            protocol_parameters.max_committable_age(),
+        )?;
+
+        let required_address = match required_address {
+            Some(address) => address,
+            // Time in which no address can unlock the output because of an expiration unlock condition
+            None => return Err(Error::OutputNotUnlockableDueToExpiration),
+        };
 
         // Check if we already added an [Unlock] for this address
         match block_indexes.get(&required_address) {
