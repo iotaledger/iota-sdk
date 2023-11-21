@@ -130,7 +130,7 @@ class NodeInfo:
         version: The version of the node.
         status: The status of the node.
         metrics: Some node metrics.
-        supportedProtocolVersions: Supported protocol versions by the ndoe.
+        supportedProtocolVersions: Supported protocol versions by the node.
         protocol: Information about the running protocol.
         pendingProtocolParameters: A list of pending (not yet active) protocol parameters.
         baseToken: Information about the base token.

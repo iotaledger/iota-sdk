@@ -37,7 +37,7 @@ async fn main() -> Result<()> {
             .set_stronghold_password(std::env::var("STRONGHOLD_PASSWORD").unwrap())
             .await?;
 
-        // Create an ouput with amount 1_000_000 and a timelock of 1 hour
+        // Create an output with amount 1_000_000 and a timelock of 1 hour
         let in_an_hour = (std::time::SystemTime::now() + std::time::Duration::from_secs(3600))
             .duration_since(std::time::UNIX_EPOCH)
             .expect("clock went backwards")

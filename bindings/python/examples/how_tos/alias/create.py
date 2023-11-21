@@ -6,7 +6,7 @@ from iota_sdk import Wallet
 
 load_dotenv()
 
-# In this example we will create an alias ouput
+# In this example we will create an alias output
 
 wallet = Wallet(os.environ['WALLET_DB_PATH'])
 

@@ -24,7 +24,7 @@ class PreparedTransaction:
         account: Account,
         prepared_transaction_data: Union[PreparedTransactionData, Dict]
     ):
-        """Initalize `Self`.
+        """Initialize `Self`.
         """
         self.account = account
         self.prepared_transaction_data_dto = prepared_transaction_data
