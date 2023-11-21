@@ -47,7 +47,7 @@ pub enum Error {
     #[error("failed to get remainder address")]
     FailedToGetRemainder,
     /// Insufficient funds to send transaction.
-    #[error("address owns insufficient funds. {required} micros required, but {available} micros available.")]
+    #[error("address owns insufficient funds. {required} base unit required, but {available} base unit available.")]
     InsufficientFunds { available: u64, required: u64 },
     /// Invalid coin type, all accounts need to have the same coin type
     #[error("invalid coin type for new account: {new_coin_type}, existing coin type is: {existing_coin_type}")]
