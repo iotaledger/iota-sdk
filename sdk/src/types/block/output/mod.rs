@@ -319,6 +319,14 @@ impl Output {
             (None, Some(Self::Delegation(next_state))) => DelegationOutput::creation(next_state, context),
 
             // Transitions.
+            (Some(Self::Basic(current_state)), Some(Self::Account(_next_state))) => {
+                if !current_state.is_implicit_account() {
+                    Err(StateTransitionError::UnsupportedStateTransition)
+                } else {
+                    // TODO
+                    Ok(())
+                }
+            }
             (Some(Self::Account(current_state)), Some(Self::Account(next_state))) => {
                 AccountOutput::transition(current_state, next_state, context)
             }
