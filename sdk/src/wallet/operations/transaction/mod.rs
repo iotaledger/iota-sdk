@@ -1,6 +1,7 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+pub(crate) mod account;
 mod build_transaction;
 pub(crate) mod high_level;
 mod input_selection;

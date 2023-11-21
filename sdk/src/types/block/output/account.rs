@@ -14,15 +14,9 @@ use packable::{
 use crate::types::block::{
     address::{AccountAddress, Address},
     output::{
-        feature::{
-            verify_allowed_features, BlockIssuerFeature, BlockIssuerKey, BlockIssuerKeys, Ed25519BlockIssuerKey,
-            Feature, FeatureFlags, Features,
-        },
-        unlock_condition::{
-            verify_allowed_unlock_conditions, AddressUnlockCondition, UnlockCondition, UnlockConditionFlags,
-            UnlockConditions,
-        },
-        BasicOutput, ChainId, MinimumOutputAmount, Output, OutputBuilderAmount, OutputId, StateTransitionError,
+        feature::{verify_allowed_features, Feature, FeatureFlags, Features},
+        unlock_condition::{verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions},
+        ChainId, MinimumOutputAmount, Output, OutputBuilderAmount, OutputId, StateTransitionError,
         StateTransitionVerifier, StorageScore, StorageScoreParameters,
     },
     payload::signed_transaction::TransactionCapabilityFlag,
@@ -97,22 +91,6 @@ impl AccountOutputBuilder {
             features: BTreeSet::new(),
             immutable_features: BTreeSet::new(),
         }
-    }
-
-    pub fn from_implicit_account(output: &BasicOutput, output_id: &OutputId) -> Result<Self, Error> {
-        if !output.is_implicit_account() {
-            panic!()
-        }
-
-        Ok(Self::new_with_amount(output.amount(), AccountId::from(output_id))
-            .with_mana(output.mana())
-            .with_unlock_conditions([AddressUnlockCondition::from(output.address().clone())])
-            .with_features([BlockIssuerFeature::new(
-                0,
-                BlockIssuerKeys::from_vec([BlockIssuerKey::from(Ed25519BlockIssuerKey::from(
-                    output.address().as_implicit_account_creation(),
-                ))])?,
-            )]))
     }
 
     /// Sets the amount to the provided value.
