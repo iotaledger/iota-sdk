@@ -5,8 +5,8 @@ use crate::{
     client::secret::SecretManage,
     types::block::output::{
         feature::{BlockIssuerFeature, BlockIssuerKey, BlockIssuerKeys, Ed25519BlockIssuerKey},
-        unlock_condition::{AddressUnlockCondition, UnlockCondition},
-        AccountId, AccountOutput, BasicOutput, FoundryId, MinimumOutputAmount, NativeTokensBuilder, Output, OutputId,
+        unlock_condition::AddressUnlockCondition,
+        AccountId, AccountOutput, OutputId,
     },
     wallet::{
         operations::transaction::{TransactionOptions, TransactionWithMetadata},
@@ -32,17 +32,29 @@ where
             todo!()
         };
 
-        // [BlockIssuerFeature::new(
-        //     0,
-        //     BlockIssuerKeys::from_vec([BlockIssuerKey::from(Ed25519BlockIssuerKey::from(
-        //         implicit_account.address().as_implicit_account_creation(),
-        //     ))]
+        let public_key = if let Some(bip_path) = self.bip_path().await {
+            self.secret_manager
+                .read()
+                .await
+                .generate_ed25519_public_keys(
+                    bip_path.coin_type,
+                    bip_path.account,
+                    bip_path.address_index..bip_path.address_index + 1,
+                    None,
+                )
+                .await?[0]
+        } else {
+            todo!()
+        };
 
         let account = AccountOutput::build_with_amount(implicit_account.amount(), AccountId::from(output_id))
             .with_mana(implicit_account.mana())
             .with_unlock_conditions([AddressUnlockCondition::from(implicit_account.address().clone())])
+            .with_features([BlockIssuerFeature::new(
+                0,
+                BlockIssuerKeys::from_vec(vec![BlockIssuerKey::from(Ed25519BlockIssuerKey::from(public_key))])?,
+            )?])
             .finish_output()?;
-        // .with_features()?,
 
         let transaction_options = TransactionOptions {
             custom_inputs: Some(vec![*output_id]),
