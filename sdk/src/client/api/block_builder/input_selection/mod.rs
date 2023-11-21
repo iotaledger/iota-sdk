@@ -235,10 +235,12 @@ impl InputSelection {
                 .unwrap()
                 .0;
 
-            if let Address::Restricted(restricted_address) = required_address {
-                self.addresses.contains(restricted_address.address())
-            } else {
-                self.addresses.contains(&required_address)
+            match required_address {
+                Address::ImplicitAccountCreation(implicit_account_creation) => self
+                    .addresses
+                    .contains(&Address::from(*implicit_account_creation.ed25519_address())),
+                Address::Restricted(restricted) => self.addresses.contains(restricted.address()),
+                _ => self.addresses.contains(&required_address),
             }
         })
     }
