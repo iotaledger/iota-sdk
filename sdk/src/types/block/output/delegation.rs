@@ -36,7 +36,11 @@ impl From<&OutputId> for DelegationId {
 
 impl DelegationId {
     pub fn or_from_output_id(self, output_id: &OutputId) -> Self {
-        if self.is_null() { Self::from(output_id) } else { self }
+        if self.is_null() {
+            Self::from(output_id)
+        } else {
+            self
+        }
     }
 }
 
@@ -323,15 +327,7 @@ impl DelegationOutput {
         unlock: &Unlock,
         context: &mut SemanticValidationContext<'_>,
     ) -> Result<(), TransactionFailureReason> {
-        self.unlock_conditions()
-            .locked_address(
-                self.address(),
-                context.transaction.creation_slot(),
-                context.protocol_parameters.min_committable_age(),
-                context.protocol_parameters.max_committable_age(),
-            )
-            .expect("delegation can't have expiration unlock condition")
-            .unlock(unlock, context)
+        self.address().unlock(unlock, context)
     }
 
     // Transition, just without full SemanticValidationContext.
