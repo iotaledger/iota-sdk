@@ -26,7 +26,7 @@ pub use self::{
 use crate::types::block::{
     address::Address,
     output::{StorageScore, StorageScoreParameters},
-    protocol::ProtocolParameters,
+    protocol::{ProtocolParameters, WorkScore, WorkScoreParameters},
     slot::SlotIndex,
     Error,
 };
@@ -82,6 +82,13 @@ impl StorageScore for UnlockCondition {
             Self::GovernorAddress(uc) => uc.storage_score(params),
             Self::ImmutableAccountAddress(uc) => uc.storage_score(params),
         }
+    }
+}
+
+impl WorkScore for UnlockCondition {
+    fn work_score(&self, params: WorkScoreParameters) -> u32 {
+        // TODO: double-check with TIP
+        0
     }
 }
 
@@ -304,7 +311,13 @@ impl UnlockConditions {
 
 impl StorageScore for UnlockConditions {
     fn storage_score(&self, params: StorageScoreParameters) -> u64 {
-        self.iter().map(|uc| uc.storage_score(params)).sum::<u64>()
+        self.iter().map(|uc| uc.storage_score(params)).sum()
+    }
+}
+
+impl WorkScore for UnlockConditions {
+    fn work_score(&self, params: WorkScoreParameters) -> u32 {
+        self.iter().map(|uc| uc.work_score(params)).sum()
     }
 }
 

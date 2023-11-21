@@ -494,14 +494,6 @@ impl StateTransitionVerifier for AccountOutput {
     }
 }
 
-impl WorkScore for AccountOutput {
-    fn work_score(&self, work_score_params: WorkScoreParameters) -> u32 {
-        work_score_params.output()
-            + self.features().work_score(work_score_params)
-            + self.immutable_features().work_score(work_score_params)
-    }
-}
-
 impl StorageScore for AccountOutput {
     fn storage_score(&self, params: StorageScoreParameters) -> u64 {
         params.output_offset()
@@ -510,6 +502,12 @@ impl StorageScore for AccountOutput {
             + self.unlock_conditions.storage_score(params)
             + self.features.storage_score(params)
             + self.immutable_features.storage_score(params)
+    }
+}
+
+impl WorkScore for AccountOutput {
+    fn work_score(&self, params: WorkScoreParameters) -> u32 {
+        params.output() + self.features().work_score(params) + self.immutable_features().work_score(params)
     }
 }
 

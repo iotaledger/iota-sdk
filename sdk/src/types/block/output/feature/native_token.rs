@@ -3,7 +3,10 @@
 
 use derive_more::{Deref, From};
 
-use crate::types::block::output::{NativeToken, StorageScore};
+use crate::types::block::{
+    output::{NativeToken, StorageScore},
+    protocol::{WorkScore, WorkScoreParameters},
+};
 
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Deref, From, packable::Packable)]
 pub struct NativeTokenFeature(NativeToken);
@@ -24,6 +27,12 @@ impl NativeTokenFeature {
 }
 
 impl StorageScore for NativeTokenFeature {}
+
+impl WorkScore for NativeTokenFeature {
+    fn work_score(&self, params: WorkScoreParameters) -> u32 {
+        params.native_token()
+    }
+}
 
 #[cfg(feature = "serde")]
 mod dto {

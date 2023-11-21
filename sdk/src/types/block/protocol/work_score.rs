@@ -56,23 +56,25 @@ impl Default for WorkScoreParameters {
 
 /// A trait to facilitate the computation of the work score of a block, which is central to mana cost calculation.
 pub trait WorkScore {
-    /// Returns its work score.
-    fn work_score(&self, work_score_params: WorkScoreParameters) -> u32;
+    /// Returns its work score. Defaults to 0.
+    fn work_score(&self, params: WorkScoreParameters) -> u32 {
+        0
+    }
 
     /// Returns the Mana cost given its work score.
-    fn mana_cost(&self, work_score_params: WorkScoreParameters, reference_mana_cost: u64) -> u64 {
-        reference_mana_cost * self.work_score(work_score_params) as u64
+    fn mana_cost(&self, params: WorkScoreParameters, reference_mana_cost: u64) -> u64 {
+        reference_mana_cost * self.work_score(params) as u64
     }
 }
 
 impl<T: WorkScore, const N: usize> WorkScore for [T; N] {
-    fn work_score(&self, work_score_params: WorkScoreParameters) -> u32 {
-        self.as_slice().work_score(work_score_params)
+    fn work_score(&self, params: WorkScoreParameters) -> u32 {
+        self.as_slice().work_score(params)
     }
 }
 
 impl<T: WorkScore> WorkScore for [T] {
-    fn work_score(&self, work_score_params: WorkScoreParameters) -> u32 {
-        self.iter().map(|o| o.work_score(work_score_params)).sum()
+    fn work_score(&self, params: WorkScoreParameters) -> u32 {
+        self.iter().map(|o| o.work_score(params)).sum()
     }
 }

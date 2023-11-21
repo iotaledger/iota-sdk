@@ -393,12 +393,25 @@ impl Output {
 impl StorageScore for Output {
     fn storage_score(&self, params: StorageScoreParameters) -> u64 {
         match self {
-            Self::Basic(o) => o.storage_score(params),
-            Self::Account(o) => o.storage_score(params),
-            Self::Anchor(o) => o.storage_score(params),
-            Self::Foundry(o) => o.storage_score(params),
-            Self::Nft(o) => o.storage_score(params),
-            Self::Delegation(o) => o.storage_score(params),
+            Self::Basic(basic) => basic.storage_score(params),
+            Self::Account(account) => account.storage_score(params),
+            Self::Anchor(anchor) => anchor.storage_score(params),
+            Self::Foundry(foundry) => foundry.storage_score(params),
+            Self::Nft(nft) => nft.storage_score(params),
+            Self::Delegation(delegation) => delegation.storage_score(params),
+        }
+    }
+}
+
+impl WorkScore for Output {
+    fn work_score(&self, params: WorkScoreParameters) -> u32 {
+        match self {
+            Self::Basic(basic) => basic.work_score(params),
+            Self::Account(account) => account.work_score(params),
+            Self::Anchor(anchor) => anchor.work_score(params),
+            Self::Foundry(foundry) => foundry.work_score(params),
+            Self::Nft(nft) => nft.work_score(params),
+            Self::Delegation(delegation) => delegation.work_score(params),
         }
     }
 }
@@ -411,19 +424,6 @@ pub trait MinimumOutputAmount: StorageScore {
     /// Computes the minimum amount of this output given [`StorageScoreParameters`].
     fn minimum_amount(&self, params: StorageScoreParameters) -> u64 {
         params.storage_cost() * self.storage_score(params)
-    }
-}
-
-impl WorkScore for Output {
-    fn work_score(&self, work_score_params: WorkScoreParameters) -> u32 {
-        match self {
-            Self::Basic(basic) => basic.work_score(work_score_params),
-            Self::Account(account) => account.work_score(work_score_params),
-            Self::Anchor(anchor) => anchor.work_score(work_score_params),
-            Self::Foundry(foundry) => foundry.work_score(work_score_params),
-            Self::Nft(nft) => nft.work_score(work_score_params),
-            Self::Delegation(delegation) => delegation.work_score(work_score_params),
-        }
     }
 }
 

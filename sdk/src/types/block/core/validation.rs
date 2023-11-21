@@ -160,6 +160,8 @@ impl ValidationBlockBody {
     }
 }
 
+impl WorkScore for ValidationBlockBody {}
+
 fn verify_protocol_parameters_hash<const VERIFY: bool>(
     hash: &ProtocolParametersHash,
     params: &ProtocolParameters,

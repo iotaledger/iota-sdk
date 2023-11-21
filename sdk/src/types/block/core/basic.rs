@@ -155,12 +155,12 @@ impl BasicBlockBody {
 }
 
 impl WorkScore for BasicBlockBody {
-    fn work_score(&self, work_score_params: WorkScoreParameters) -> u32 {
-        work_score_params.block()
+    fn work_score(&self, params: WorkScoreParameters) -> u32 {
+        params.block()
             + self
                 .payload
                 .as_ref()
-                .map(|p| p.work_score(work_score_params))
+                .map(|payload| payload.work_score(params))
                 .unwrap_or(0)
     }
 }

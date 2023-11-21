@@ -46,9 +46,9 @@ impl Signature {
 }
 
 impl WorkScore for Signature {
-    fn work_score(&self, workscore_structure: WorkScoreParameters) -> u32 {
+    fn work_score(&self, params: WorkScoreParameters) -> u32 {
         match self {
-            Self::Ed25519(_) => workscore_structure.signature_ed25519(),
+            Self::Ed25519(ed25519) => ed25519.work_score(params),
         }
     }
 }

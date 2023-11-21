@@ -4,7 +4,7 @@
 use packable::Packable;
 use primitive_types::U256;
 
-use crate::types::block::Error;
+use crate::types::block::{protocol::WorkScore, Error};
 
 ///
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Packable)]
@@ -69,6 +69,9 @@ impl SimpleTokenScheme {
         self.minted_tokens - self.melted_tokens
     }
 }
+
+// TODO: double check with TIP
+impl WorkScore for SimpleTokenScheme {}
 
 #[inline]
 fn verify_simple_token_scheme<const VERIFY: bool>(token_scheme: &SimpleTokenScheme) -> Result<(), Error> {

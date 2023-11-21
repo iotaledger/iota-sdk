@@ -380,12 +380,6 @@ impl StateTransitionVerifier for DelegationOutput {
     }
 }
 
-impl WorkScore for DelegationOutput {
-    fn work_score(&self, work_score_params: WorkScoreParameters) -> u32 {
-        work_score_params.output()
-    }
-}
-
 impl StorageScore for DelegationOutput {
     fn storage_score(&self, params: StorageScoreParameters) -> u64 {
         params.output_offset()
@@ -393,6 +387,12 @@ impl StorageScore for DelegationOutput {
             + (1 + self.packed_len() as u64) * params.data_factor() as u64
             + params.delegation_offset()
             + self.unlock_conditions.storage_score(params)
+    }
+}
+
+impl WorkScore for DelegationOutput {
+    fn work_score(&self, params: WorkScoreParameters) -> u32 {
+        params.output()
     }
 }
 

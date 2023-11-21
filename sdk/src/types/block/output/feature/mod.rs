@@ -257,22 +257,22 @@ impl Features {
     }
 }
 
-impl WorkScore for Features {
-    fn work_score(&self, work_score_params: WorkScoreParameters) -> u32 {
-        self.iter()
-            .map(|f| match f {
-                Feature::BlockIssuer(_) => work_score_params.block_issuer(),
-                Feature::NativeToken(_) => work_score_params.native_token(),
-                Feature::Staking(_) => work_score_params.staking(),
-                _ => 0,
-            })
-            .sum()
-    }
-}
-
 impl StorageScore for Features {
     fn storage_score(&self, params: StorageScoreParameters) -> u64 {
         self.iter().map(|f| f.storage_score(params)).sum::<u64>()
+    }
+}
+
+impl WorkScore for Features {
+    fn work_score(&self, params: WorkScoreParameters) -> u32 {
+        self.iter()
+            .map(|f| match f {
+                Feature::BlockIssuer(block_issuer) => block_issuer.work_score(params),
+                Feature::NativeToken(native_token) => native_token.work_score(params),
+                Feature::Staking(staking) => staking.work_score(params),
+                _ => 0,
+            })
+            .sum()
     }
 }
 

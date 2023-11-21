@@ -109,6 +109,8 @@ impl BlockHeader {
     }
 }
 
+impl WorkScore for BlockHeader {}
+
 impl Packable for BlockHeader {
     type UnpackError = Error;
     type UnpackVisitor = ProtocolParameters;
@@ -291,8 +293,8 @@ impl Block {
 }
 
 impl WorkScore for Block {
-    fn work_score(&self, work_score_params: WorkScoreParameters) -> u32 {
-        self.body.work_score(work_score_params) + self.signature.work_score(work_score_params)
+    fn work_score(&self, params: WorkScoreParameters) -> u32 {
+        self.header.work_score(params) + self.body.work_score(params) + self.signature.work_score(params)
     }
 }
 

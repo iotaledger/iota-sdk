@@ -135,9 +135,9 @@ impl Unlocks {
 }
 
 impl WorkScore for Unlocks {
-    fn work_score(&self, work_score_params: WorkScoreParameters) -> u32 {
+    fn work_score(&self, params: WorkScoreParameters) -> u32 {
         self.iter()
-            .filter_map(|u| u.is_signature().then_some(work_score_params.signature_ed25519()))
+            .filter_map(|u| u.is_signature().then_some(params.signature_ed25519()))
             .sum()
     }
 }

@@ -70,6 +70,12 @@ impl NativeToken {
     }
 }
 
+impl WorkScore for NativeToken {
+    fn work_score(&self, params: WorkScoreParameters) -> u32 {
+        params.native_token()
+    }
+}
+
 impl PartialOrd for NativeToken {
     fn partial_cmp(&self, other: &Self) -> Option<core::cmp::Ordering> {
         Some(self.cmp(other))
@@ -256,8 +262,8 @@ impl NativeTokens {
 }
 
 impl WorkScore for NativeTokens {
-    fn work_score(&self, work_score_params: WorkScoreParameters) -> u32 {
-        self.len() as u32 * work_score_params.native_token()
+    fn work_score(&self, params: WorkScoreParameters) -> u32 {
+        self.iter().map(|nt| nt.work_score(params)).sum()
     }
 }
 
