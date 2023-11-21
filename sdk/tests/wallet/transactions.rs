@@ -296,7 +296,7 @@ async fn prepare_transaction_ledger() -> Result<()> {
         )
         .await?;
 
-    let data = receiver.recv().await.expect("never recieved event");
+    let data = receiver.recv().await.expect("never received event");
     assert_eq!(data.essence, tx.payload.essence().into());
     for (sign, input) in data.inputs_data.iter().zip(tx.inputs) {
         assert_eq!(sign.output, input.output);
