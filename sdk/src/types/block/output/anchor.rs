@@ -16,8 +16,8 @@ use crate::types::block::{
     output::{
         feature::{verify_allowed_features, Feature, FeatureFlags, Features},
         unlock_condition::{verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions},
-        ChainId, MinimumOutputAmount, NativeToken, NativeTokens, Output, OutputBuilderAmount, OutputId,
-        StateTransitionError, StateTransitionVerifier, StorageScore, StorageScoreParameters,
+        ChainId, MinimumOutputAmount, Output, OutputBuilderAmount, OutputId, StateTransitionError,
+        StateTransitionVerifier, StorageScore, StorageScoreParameters,
     },
     payload::signed_transaction::TransactionCapabilityFlag,
     protocol::{ProtocolParameters, WorkScore, WorkScoreParameters},
@@ -89,7 +89,6 @@ impl core::fmt::Display for AnchorTransition {
 pub struct AnchorOutputBuilder {
     amount: OutputBuilderAmount,
     mana: u64,
-    native_tokens: BTreeSet<NativeToken>,
     anchor_id: AnchorId,
     state_index: u32,
     unlock_conditions: BTreeSet<UnlockCondition>,
@@ -114,7 +113,6 @@ impl AnchorOutputBuilder {
         Self {
             amount,
             mana: Default::default(),
-            native_tokens: BTreeSet::new(),
             anchor_id,
             state_index: 0,
             unlock_conditions: BTreeSet::new(),
@@ -141,20 +139,6 @@ impl AnchorOutputBuilder {
     #[inline(always)]
     pub fn with_mana(mut self, mana: u64) -> Self {
         self.mana = mana;
-        self
-    }
-
-    ///
-    #[inline(always)]
-    pub fn add_native_token(mut self, native_token: NativeToken) -> Self {
-        self.native_tokens.insert(native_token);
-        self
-    }
-
-    ///
-    #[inline(always)]
-    pub fn with_native_tokens(mut self, native_tokens: impl IntoIterator<Item = NativeToken>) -> Self {
-        self.native_tokens = native_tokens.into_iter().collect();
         self
     }
 
@@ -275,7 +259,6 @@ impl AnchorOutputBuilder {
         let mut output = AnchorOutput {
             amount: 0,
             mana: self.mana,
-            native_tokens: NativeTokens::from_set(self.native_tokens)?,
             anchor_id: self.anchor_id,
             state_index: self.state_index,
             unlock_conditions,
@@ -302,7 +285,6 @@ impl From<&AnchorOutput> for AnchorOutputBuilder {
         Self {
             amount: OutputBuilderAmount::Amount(output.amount),
             mana: output.mana,
-            native_tokens: output.native_tokens.iter().copied().collect(),
             anchor_id: output.anchor_id,
             state_index: output.state_index,
             unlock_conditions: output.unlock_conditions.iter().cloned().collect(),
@@ -318,8 +300,6 @@ pub struct AnchorOutput {
     /// Amount of IOTA coins held by the output.
     amount: u64,
     mana: u64,
-    /// Native tokens held by the output.
-    native_tokens: NativeTokens,
     /// Unique identifier of the anchor.
     anchor_id: AnchorId,
     /// A counter that must increase by 1 every time the anchor is state transitioned.
@@ -365,12 +345,6 @@ impl AnchorOutput {
     #[inline(always)]
     pub fn mana(&self) -> u64 {
         self.mana
-    }
-
-    ///
-    #[inline(always)]
-    pub fn native_tokens(&self) -> &NativeTokens {
-        &self.native_tokens
     }
 
     ///
@@ -503,7 +477,7 @@ impl AnchorOutput {
             }
         } else if next_state.state_index == current_state.state_index {
             // Governance transition.
-            if current_state.amount != next_state.amount || current_state.native_tokens != next_state.native_tokens
+            if current_state.amount != next_state.amount
             // TODO https://github.com/iotaledger/iota-sdk/issues/1650
             // || current_state.state_metadata != next_state.state_metadata
             {
@@ -589,7 +563,6 @@ impl Packable for AnchorOutput {
     fn pack<P: Packer>(&self, packer: &mut P) -> Result<(), P::Error> {
         self.amount.pack(packer)?;
         self.mana.pack(packer)?;
-        self.native_tokens.pack(packer)?;
         self.anchor_id.pack(packer)?;
         self.state_index.pack(packer)?;
         self.unlock_conditions.pack(packer)?;
@@ -607,7 +580,6 @@ impl Packable for AnchorOutput {
 
         let mana = u64::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
 
-        let native_tokens = NativeTokens::unpack::<_, VERIFY>(unpacker, &())?;
         let anchor_id = AnchorId::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
         let state_index = u32::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
 
@@ -637,7 +609,6 @@ impl Packable for AnchorOutput {
         Ok(Self {
             amount,
             mana,
-            native_tokens,
             anchor_id,
             state_index,
             unlock_conditions,
@@ -701,8 +672,6 @@ pub(crate) mod dto {
         pub amount: u64,
         #[serde(with = "string")]
         pub mana: u64,
-        #[serde(skip_serializing_if = "Vec::is_empty", default)]
-        pub native_tokens: Vec<NativeToken>,
         pub anchor_id: AnchorId,
         pub state_index: u32,
         pub unlock_conditions: Vec<UnlockConditionDto>,
@@ -718,7 +687,6 @@ pub(crate) mod dto {
                 kind: AnchorOutput::KIND,
                 amount: value.amount(),
                 mana: value.mana(),
-                native_tokens: value.native_tokens().to_vec(),
                 anchor_id: *value.anchor_id(),
                 state_index: value.state_index(),
                 unlock_conditions: value.unlock_conditions().iter().map(Into::into).collect::<_>(),
@@ -735,7 +703,6 @@ pub(crate) mod dto {
             let mut builder = AnchorOutputBuilder::new_with_amount(dto.amount, dto.anchor_id)
                 .with_mana(dto.mana)
                 .with_state_index(dto.state_index)
-                .with_native_tokens(dto.native_tokens)
                 .with_features(dto.features)
                 .with_immutable_features(dto.immutable_features);
 
@@ -752,7 +719,6 @@ pub(crate) mod dto {
         pub fn try_from_dtos(
             amount: OutputBuilderAmount,
             mana: u64,
-            native_tokens: Option<Vec<NativeToken>>,
             anchor_id: &AnchorId,
             state_index: u32,
             unlock_conditions: Vec<UnlockConditionDto>,
@@ -767,10 +733,6 @@ pub(crate) mod dto {
             }
             .with_mana(mana)
             .with_state_index(state_index);
-
-            if let Some(native_tokens) = native_tokens {
-                builder = builder.with_native_tokens(native_tokens);
-            }
 
             let unlock_conditions = unlock_conditions
                 .into_iter()
@@ -820,7 +782,6 @@ mod tests {
         let output_split = AnchorOutput::try_from_dtos(
             OutputBuilderAmount::Amount(output.amount()),
             output.mana(),
-            Some(output.native_tokens().to_vec()),
             output.anchor_id(),
             output.state_index(),
             output.unlock_conditions().iter().map(Into::into).collect(),
@@ -838,7 +799,6 @@ mod tests {
             let output_split = AnchorOutput::try_from_dtos(
                 builder.amount,
                 builder.mana,
-                Some(builder.native_tokens.iter().copied().collect()),
                 &builder.anchor_id,
                 builder.state_index,
                 builder.unlock_conditions.iter().map(Into::into).collect(),
