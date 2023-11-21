@@ -110,6 +110,7 @@ class ImplicitAccountCreationAddress:
         return ImplicitAccountCreationAddress(
             Ed25519Address(addr_dict['pubKeyHash']))
 
+
 @json
 @dataclass
 class WeightedAddress:
@@ -136,6 +137,7 @@ class MultiAddress:
     threshold: int
     type: int = field(default_factory=lambda: int(
         AddressType.MULTI), init=False)
+
 
 @json
 @dataclass
