@@ -23,9 +23,6 @@ async function run() {
     });
 
     try {
-        if (!process.env.MNEMONIC) {
-            throw new Error('.env MNEMONIC is undefined, see .env.example');
-        }
 
         // Configure your own mnemonic in ".env". Since the output amount cannot be zero, the mnemonic must contain non-zero
         // balance

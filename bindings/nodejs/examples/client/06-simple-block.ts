@@ -10,8 +10,10 @@ require('dotenv').config({ path: '.env' });
 // In this example we will send a block without a payload.
 async function run() {
     initLogger();
-    if (!process.env.NODE_URL) {
-        throw new Error('.env NODE_URL is undefined, see .env.example');
+    for (const envVar of ['NODE_URL']) {
+        if (!(envVar in process.env)) {
+            throw new Error(`.env ${envVar} is undefined, see .env.example`);
+        }
     }
 
     const client = new Client({

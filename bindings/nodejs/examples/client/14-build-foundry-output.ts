@@ -28,10 +28,6 @@ async function run() {
     });
 
     try {
-        if (!process.env.MNEMONIC) {
-            throw new Error('.env MNEMONIC is undefined, see .env.example');
-        }
-
         const aliasId =
             '0xff311f59790ccb85343a36fbac2f06d233734794404142b308c13f2c616935b5';
 
