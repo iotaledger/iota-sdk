@@ -85,12 +85,8 @@ impl StorageScore for UnlockCondition {
     }
 }
 
-impl WorkScore for UnlockCondition {
-    fn work_score(&self, params: WorkScoreParameters) -> u32 {
-        // TODO: double-check with TIP
-        0
-    }
-}
+// TODO: check with TIP
+impl WorkScore for UnlockCondition {}
 
 impl core::fmt::Debug for UnlockCondition {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
