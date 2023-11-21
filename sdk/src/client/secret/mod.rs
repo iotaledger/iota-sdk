@@ -71,6 +71,8 @@ pub trait SecretManage: Send + Sync {
     type Error: std::error::Error + Send + Sync;
 
     /// Generates public keys.
+    ///
+    /// For `coin_type`, see also <https://github.com/satoshilabs/slips/blob/master/slip-0044.md>.
     async fn generate_ed25519_public_keys(
         &self,
         coin_type: u32,
