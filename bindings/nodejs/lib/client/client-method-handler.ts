@@ -19,7 +19,7 @@ export class ClientMethodHandler {
     /**
      * @param methodHandler The Rust method handler created in `ClientMethodHandler.create()`.
      */
-     constructor(methodHandler: any) {
+    constructor(methodHandler: any) {
         this.methodHandler = methodHandler;
     }
 

@@ -36,7 +36,10 @@ impl From<serde_json::error::Error> for NodejsError {
 
 impl From<NodejsError> for Error {
     fn from(error: NodejsError) -> Self {
-        Error::new(Status::GenericFailure, serde_json::to_string(&error).expect("json to string error"))
+        Error::new(
+            Status::GenericFailure,
+            serde_json::to_string(&error).expect("json to string error"),
+        )
     }
 }
 
@@ -55,5 +58,8 @@ pub(crate) fn destroy(instance: &str) -> Error {
 
 // Serializes a bindings response and puts it in a napi Error.
 pub(crate) fn build_js_error(response: Response) -> Error {
-    Error::new(Status::GenericFailure, serde_json::to_string(&response).expect("json to string error"))
+    Error::new(
+        Status::GenericFailure,
+        serde_json::to_string(&response).expect("json to string error"),
+    )
 }
