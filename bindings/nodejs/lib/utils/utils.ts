@@ -392,17 +392,7 @@ export class Utils {
     ): SlotCommitmentId {
         return callUtilsMethod({
             name: 'computeSlotCommitmentId',
-            data: {
-                slotCommitment: {
-                    protocolVersion: slotCommitment.protocolVersion,
-                    slot: slotCommitment.slot,
-                    previousCommitmentId: slotCommitment.previousCommitmentId,
-                    rootsId: slotCommitment.rootsId,
-                    cumulativeWeight:
-                        slotCommitment.cumulativeWeight.toString(10),
-                    referenceManaCost: slotCommitment.referenceManaCost.toString(10)
-                },
-            },
+            data: { slotCommitment },
         });
     }
 

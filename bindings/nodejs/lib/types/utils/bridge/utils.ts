@@ -194,14 +194,9 @@ export interface __OutputHexBytes__ {
     };
 }
 
-// Modified `SlotCommitment` with bigint types converted to strings.
-type SlotCommitmentConverted = Omit<
-    SlotCommitment,
-    'cumulativeWeight' | 'referenceManaCost'
-> & { cumulativeWeight: string, referenceManaCost: string };
 export interface __ComputeSlotCommitmentId__ {
     name: 'computeSlotCommitmentId';
     data: {
-        slotCommitment: SlotCommitmentConverted;
+        slotCommitment: SlotCommitment;
     };
 }
