@@ -53,12 +53,27 @@ impl ExpirationUnlockCondition {
         self.slot_index
     }
 
-    /// Checks whether the expiration is expired.
-    pub fn is_expired(&self, slot_index: impl Into<SlotIndex>, min_committable_age: impl Into<SlotIndex>) -> bool {
-        (slot_index.into() + min_committable_age.into()) >= self.slot_index
+    /// Checks whether the expiration is expired. If None is returned, then expiration is in the deadzone where it can't
+    /// be unlocked.
+    pub fn is_expired(
+        &self,
+        slot_index: impl Into<SlotIndex>,
+        min_committable_age: impl Into<SlotIndex>,
+        max_committable_age: impl Into<SlotIndex>,
+    ) -> Option<bool> {
+        let slot_index = slot_index.into();
+
+        if self.slot_index() > (slot_index + max_committable_age.into()) {
+            Some(false)
+        } else if self.slot_index() <= (slot_index + min_committable_age.into()) {
+            Some(true)
+        } else {
+            None
+        }
     }
 
-    /// Returns the return address if the condition has expired.
+    /// Returns the address that can unlock the output. If there is an expiration unlock condition, then there is a
+    /// small interval around the expiration slot index in which no address can unlock the output.
     pub fn return_address_expired<'a>(
         &'a self,
         address: &'a Address,

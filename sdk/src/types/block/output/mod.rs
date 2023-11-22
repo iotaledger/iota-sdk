@@ -282,20 +282,14 @@ impl Output {
                 .unlock_conditions()
                 .locked_address(output.address(), slot_index, min_committable_age, max_committable_age)
                 .cloned(),
-            Self::Account(output) => output
-                .unlock_conditions()
-                .locked_address(output.address(), slot_index, min_committable_age, max_committable_age)
-                .cloned(),
+            Self::Account(output) => Some(output.address().clone()),
             Self::Anchor(_) => return Err(Error::UnsupportedOutputKind(AnchorOutput::KIND)),
             Self::Foundry(output) => Some(Address::Account(*output.account_address())),
             Self::Nft(output) => output
                 .unlock_conditions()
                 .locked_address(output.address(), slot_index, min_committable_age, max_committable_age)
                 .cloned(),
-            Self::Delegation(output) => output
-                .unlock_conditions()
-                .locked_address(output.address(), slot_index, min_committable_age, max_committable_age)
-                .cloned(),
+            Self::Delegation(output) => Some(output.address().clone()),
         })
     }
 

@@ -87,9 +87,16 @@ where
             }
 
             let has_storage_deposit_return = unlock_conditions.storage_deposit_return().is_some();
-            let has_expiration = unlock_conditions.expiration().is_some();
-            let is_expired = unlock_conditions.is_expired(slot_index, protocol_parameters.min_committable_age());
-            if has_storage_deposit_return && (!has_expiration || !is_expired) {
+            let is_expired = unlock_conditions.is_expired(
+                slot_index,
+                protocol_parameters.min_committable_age(),
+                protocol_parameters.max_committable_age(),
+            );
+            if is_expired == None {
+                // If the output is in a deadzone because of expiration, then it cannot be consolidated.
+                return Ok(false);
+            }
+            if has_storage_deposit_return && is_expired == Some(false) {
                 // If the output has not expired and must return a storage deposit, then it cannot be consolidated.
                 return Ok(false);
             }

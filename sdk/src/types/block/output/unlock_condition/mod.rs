@@ -263,11 +263,17 @@ impl UnlockConditions {
             .map(UnlockCondition::as_expiration)
     }
 
-    /// Checks whether an expiration exists and is expired.
+    /// Checks whether an expiration exists and is expired. If None is returned, then expiration is in the deadzone
+    /// where it can't be unlocked.
     #[inline(always)]
-    pub fn is_expired(&self, slot_index: impl Into<SlotIndex>, min_committable_age: impl Into<SlotIndex>) -> bool {
-        self.expiration().map_or(false, |expiration| {
-            expiration.is_expired(slot_index, min_committable_age)
+    pub fn is_expired(
+        &self,
+        slot_index: impl Into<SlotIndex>,
+        min_committable_age: impl Into<SlotIndex>,
+        max_committable_age: impl Into<SlotIndex>,
+    ) -> Option<bool> {
+        self.expiration().map_or(Some(false), |expiration| {
+            expiration.is_expired(slot_index, min_committable_age, max_committable_age)
         })
     }
 

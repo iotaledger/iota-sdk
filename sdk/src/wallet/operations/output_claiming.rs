@@ -78,13 +78,19 @@ impl WalletData {
                             OutputsToClaim::MicroTransactions => {
                                 if let Some(sdr) = unlock_conditions.storage_deposit_return() {
                                     // If expired, it's not a micro transaction anymore
-                                    if unlock_conditions.is_expired(slot_index, protocol_parameters.min_committable_age)
-                                    {
-                                        continue;
-                                    }
-                                    // Only micro transaction if not the same
-                                    if sdr.amount() != output_data.output.amount() {
-                                        output_ids_to_claim.insert(output_data.output_id);
+                                    match unlock_conditions.is_expired(
+                                        slot_index,
+                                        protocol_parameters.min_committable_age,
+                                        protocol_parameters.max_committable_age,
+                                    ) {
+                                        Some(false) => {
+                                            // Only micro transaction if not the same amount needs to be returned
+                                            // (resulting in 0 amount to claim)
+                                            if sdr.amount() != output_data.output.amount() {
+                                                output_ids_to_claim.insert(output_data.output_id);
+                                            }
+                                        }
+                                        _ => continue,
                                     }
                                 }
                             }
@@ -101,7 +107,11 @@ impl WalletData {
                             }
                             OutputsToClaim::Amount => {
                                 let mut claimable_amount = output_data.output.amount();
-                                if !unlock_conditions.is_expired(slot_index, protocol_parameters.min_committable_age())
+                                if unlock_conditions.is_expired(
+                                    slot_index,
+                                    protocol_parameters.min_committable_age(),
+                                    protocol_parameters.max_committable_age(),
+                                ) == Some(false)
                                 {
                                     claimable_amount -= unlock_conditions
                                         .storage_deposit_return()

@@ -28,7 +28,7 @@ pub(crate) fn can_output_be_unlocked_now(
     required_address.map_or_else(|| Ok(false), |required_address| Ok(wallet_address == &required_address))
 }
 
-// Check if an output can be unlocked by one of the account addresses at the current time and at any
+// Check if an output can be unlocked by one of the wallet address at the current time and at any
 // point in the future
 pub(crate) fn can_output_be_unlocked_forever_from_now_on(
     wallet_address: &Address,
@@ -43,19 +43,27 @@ pub(crate) fn can_output_be_unlocked_forever_from_now_on(
         }
 
         // TODO HELP
-        // // If there is an expiration unlock condition, we can only unlock it forever from now on, if it's expired and
-        // // the return address belongs to the account
-        // if let Some(expiration) = unlock_conditions.expiration() {
-        //     if let Some(return_address) =
-        //         expiration.return_address_expired(slot_index, min_committable_age, max_committable_age)
-        //     {
-        //         if !account_addresses.iter().any(|a| a.address.inner == *return_address) {
-        //             return false;
-        //         };
-        //     } else {
-        //         return false;
-        //     }
-        // }
+        // If there is an expiration unlock condition, we can only unlock it forever from now on, if it's expired and
+        // the return address belongs to the wallet
+        if let Some(expiration) = unlock_conditions.expiration() {
+            if let Some(address) = expiration.return_address_expired(
+                // Safe to unwrap, if there is an expiration, then there also needs to be an address unlock condition
+                unlock_conditions.address().unwrap().address(),
+                slot_index,
+                min_committable_age,
+                max_committable_age,
+            ) {
+                if address == expiration.return_address() {
+                    if wallet_address != address {
+                        return false;
+                    };
+                } else {
+                    return false;
+                }
+            } else {
+                return false;
+            }
+        }
 
         true
     } else {

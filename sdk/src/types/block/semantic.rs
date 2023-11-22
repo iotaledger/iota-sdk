@@ -283,17 +283,10 @@ impl<'a> SemanticValidationContext<'a> {
                 Output::Delegation(output) => (output.amount(), 0, None, output.unlock_conditions()),
             };
 
-            if unlock_conditions.is_timelocked(
-                self.transaction.creation_slot(),
-                self.protocol_parameters.min_committable_age(),
-            ) {
-                return Ok(Some(TransactionFailureReason::TimelockNotExpired));
-            }
+            let commitment_context_input = self.transaction.context_inputs().iter().find(|c| c.is_commitment());
 
-            // TODO have the version above with `self.transaction.creation_slot()` or this one with
-            // `commitment.as_commitment().slot_index()`?
             if let Some(timelock) = unlock_conditions.timelock() {
-                if let Some(commitment) = self.transaction.context_inputs().iter().find(|c| c.is_commitment()) {
+                if let Some(commitment) = commitment_context_input {
                     if timelock.is_timelocked(
                         commitment.as_commitment().slot_index(),
                         self.protocol_parameters.min_committable_age(),
@@ -301,17 +294,19 @@ impl<'a> SemanticValidationContext<'a> {
                         return Ok(Some(TransactionFailureReason::TimelockNotExpired));
                     }
                 } else {
-                    // TODO return an error
+                    // Missing CommitmentContextInput
+                    return Ok(Some(TransactionFailureReason::SemanticValidationFailed));
                 }
             }
 
             if let Some(expiration) = unlock_conditions.expiration() {
-                if let Some(commitment) = self.transaction.context_inputs().iter().find(|c| c.is_commitment()) {
-                    // TODO check is_deadzoned ?
-                    if !expiration.is_expired(
+                if let Some(commitment) = commitment_context_input {
+                    if expiration.is_expired(
                         commitment.as_commitment().slot_index(),
                         self.protocol_parameters.min_committable_age(),
-                    ) {
+                        self.protocol_parameters.max_committable_age(),
+                    ) == Some(false)
+                    {
                         if let Some(storage_deposit_return) = unlock_conditions.storage_deposit_return() {
                             let amount = self
                                 .storage_deposit_returns
@@ -324,23 +319,10 @@ impl<'a> SemanticValidationContext<'a> {
                         }
                     }
                 } else {
-                    // TODO return an error
+                    // Missing CommitmentContextInput
+                    return Ok(Some(TransactionFailureReason::SemanticValidationFailed));
                 }
             }
-
-            // TODO remove the method?
-            // if !unlock_conditions.is_expired(self.transaction.creation_slot()) {
-            //     if let Some(storage_deposit_return) = unlock_conditions.storage_deposit_return() {
-            //         let amount = self
-            //             .storage_deposit_returns
-            //             .entry(storage_deposit_return.return_address().clone())
-            //             .or_default();
-
-            //         *amount = amount
-            //             .checked_add(storage_deposit_return.amount())
-            //             .ok_or(Error::StorageDepositReturnOverflow)?;
-            //     }
-            // }
 
             self.input_amount = self
                 .input_amount

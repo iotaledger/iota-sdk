@@ -319,10 +319,25 @@ impl BasicOutput {
         unlock: &Unlock,
         context: &mut SemanticValidationContext<'_>,
     ) -> Result<(), TransactionFailureReason> {
+        let slot_index = context
+            .transaction
+            .context_inputs()
+            .iter()
+            .find(|c| c.is_commitment())
+            .map(|c| c.as_commitment().slot_index());
+
+        if slot_index.is_none()
+            && (self.unlock_conditions().timelock().is_some() || self.unlock_conditions().expiration().is_some())
+        {
+            // Missing CommitmentContextInput
+            return Err(TransactionFailureReason::SemanticValidationFailed);
+        }
+
         self.unlock_conditions()
             .locked_address(
                 self.address(),
-                context.transaction.creation_slot(),
+                // Safe to unwrap, we return an error before if its required but None
+                slot_index.unwrap_or_else(|| 0.into()),
                 context.protocol_parameters.min_committable_age(),
                 context.protocol_parameters.max_committable_age(),
             )
