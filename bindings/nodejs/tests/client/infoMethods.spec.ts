@@ -41,10 +41,10 @@ describe.skip('Client info methods', () => {
         expect(nodeHealth).toBeTruthy();
     });
 
-    it('gets the unhealty nodes', async () => {
-        const unhealtyNodes = await client.unhealthyNodes();
+    it('gets the unhealthy nodes', async () => {
+        const unhealthyNodes = await client.unhealthyNodes();
 
-        expect(unhealtyNodes).toBeDefined();
+        expect(unhealthyNodes).toBeDefined();
     });
 
     it('gets tips', async () => {

@@ -10,25 +10,23 @@ require('dotenv').config({ path: '.env' });
 // In this example we will send a transaction.
 async function run() {
     initLogger();
-    if (!process.env.NODE_URL) {
-        throw new Error('.env NODE_URL is undefined, see .env.example');
+    for (const envVar of ['NODE_URL', 'MNEMONIC', 'EXPLORER_URL']) {
+        if (!(envVar in process.env)) {
+            throw new Error(`.env ${envVar} is undefined, see .env.example`);
+        }
     }
 
     const client = new Client({
         // Insert your node URL in the .env.
-        nodes: [process.env.NODE_URL],
+        nodes: [process.env.NODE_URL as string],
         localPow: true,
     });
 
     try {
-        if (!process.env.MNEMONIC) {
-            throw new Error('.env MNEMONIC is undefined, see .env.example');
-        }
-
         // Configure your own mnemonic in ".env". Since the output amount cannot be zero, the mnemonic must contain non-zero
         // balance
         const secretManager = {
-            mnemonic: process.env.MNEMONIC,
+            mnemonic: process.env.MNEMONIC as string,
         };
 
         // We generate an address from our own mnemonic so that we send the funds to ourselves

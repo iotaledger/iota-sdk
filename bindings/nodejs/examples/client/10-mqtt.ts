@@ -18,14 +18,16 @@ require('dotenv').config({ path: '.env' });
 // In this example we will listen to MQTT topics and print the block and milestone payloads.
 async function run() {
     initLogger();
-    if (!process.env.NODE_URL) {
-        throw new Error('.env NODE_URL is undefined, see .env.example');
+    for (const envVar of ['NODE_URL']) {
+        if (!(envVar in process.env)) {
+            throw new Error(`.env ${envVar} is undefined, see .env.example`);
+        }
     }
 
     // Connecting to a MQTT broker using raw ip doesn't work with TCP. This is a limitation of rustls.
     const client = new Client({
         // Insert your node URL in the .env.
-        nodes: [process.env.NODE_URL],
+        nodes: [process.env.NODE_URL as string],
     });
 
     // Array of topics to subscribe to
