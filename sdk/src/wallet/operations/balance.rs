@@ -88,7 +88,7 @@ where
 
                     // Add native token
                     if let Some(native_token) = output.native_token() {
-                        total_native_tokens.add_native_token(native_token.clone())?;
+                        total_native_tokens.add_native_token(*native_token)?;
                     }
 
                     balance.foundries.push(output.id());
@@ -125,7 +125,7 @@ where
 
                         // Add native token
                         if let Some(native_token) = output.native_token() {
-                            total_native_tokens.add_native_token(native_token.clone())?;
+                            total_native_tokens.add_native_token(*native_token)?;
                         }
                     } else {
                         // if we have multiple unlock conditions for basic or nft outputs, then we can't
@@ -199,7 +199,7 @@ where
 
                                 // Add native token
                                 if let Some(native_token) = output.native_token() {
-                                    total_native_tokens.add_native_token(native_token.clone())?;
+                                    total_native_tokens.add_native_token(*native_token)?;
                                 }
                             } else {
                                 // only add outputs that can't be locked now and at any point in the future
@@ -260,7 +260,7 @@ where
                 if output_data.network_id == network_id {
                     locked_amount += output_data.output.amount();
                     if let Some(native_token) = output_data.output.native_token() {
-                        locked_native_tokens.add_native_token(native_token.clone())?;
+                        locked_native_tokens.add_native_token(*native_token)?;
                     }
                 }
             }

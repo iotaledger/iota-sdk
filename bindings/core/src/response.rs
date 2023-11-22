@@ -180,7 +180,6 @@ pub enum Response {
     FoundryId(FoundryId),
     /// Response for:
     /// - [`TransactionSigningHash`](crate::method::UtilsMethod::TransactionSigningHash)
-    /// - [`ComputeInputsCommitment`](crate::method::UtilsMethod::ComputeInputsCommitment)
     Hash(String),
     /// Response for [`GetNodeInfo`](crate::method::ClientMethod::GetNodeInfo)
     NodeInfoWrapper(NodeInfoWrapper),

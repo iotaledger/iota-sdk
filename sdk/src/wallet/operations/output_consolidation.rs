@@ -232,7 +232,7 @@ where
 
         for output_data in outputs_to_consolidate.iter().take(max_inputs.into()) {
             if let Some(native_token) = output_data.output.native_token() {
-                total_native_tokens.add_native_token(native_token.clone())?;
+                total_native_tokens.add_native_token(*native_token)?;
             };
             total_amount += output_data.output.amount();
 

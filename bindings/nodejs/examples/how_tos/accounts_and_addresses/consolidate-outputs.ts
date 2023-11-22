@@ -49,7 +49,7 @@ async function run() {
         outputs.forEach(({ output, address }, i) => {
             console.log(`OUTPUT #${i}`);
             console.log(
-                '- address: %s\n- amount: %d\n- native tokens: %s',
+                '- address: %s\n- amount: %d\n- native token: %s',
                 Utils.hexToBech32(address.toString(), 'rms'),
                 output.getAmount(),
                 output instanceof CommonOutput
