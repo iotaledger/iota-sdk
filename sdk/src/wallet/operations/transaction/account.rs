@@ -3,10 +3,13 @@
 
 use crate::{
     client::secret::SecretManage,
-    types::block::output::{
-        feature::{BlockIssuerFeature, BlockIssuerKey, BlockIssuerKeys, Ed25519BlockIssuerKey},
-        unlock_condition::AddressUnlockCondition,
-        AccountId, AccountOutput, OutputId,
+    types::block::{
+        address::Address,
+        output::{
+            feature::{BlockIssuerFeature, BlockIssuerKey, BlockIssuerKeys, Ed25519BlockIssuerKey},
+            unlock_condition::AddressUnlockCondition,
+            AccountId, AccountOutput, OutputId,
+        },
     },
     wallet::{
         operations::transaction::{TransactionOptions, TransactionWithMetadata},
@@ -51,7 +54,12 @@ where
 
         let account = AccountOutput::build_with_amount(implicit_account.amount(), AccountId::from(output_id))
             .with_mana(implicit_account.mana())
-            .with_unlock_conditions([AddressUnlockCondition::from(implicit_account.address().clone())])
+            .with_unlock_conditions([AddressUnlockCondition::from(Address::from(
+                *implicit_account
+                    .address()
+                    .as_implicit_account_creation()
+                    .ed25519_address(),
+            ))])
             .with_features([BlockIssuerFeature::new(
                 u32::MAX,
                 BlockIssuerKeys::from_vec(vec![BlockIssuerKey::from(Ed25519BlockIssuerKey::from(public_key))])?,
