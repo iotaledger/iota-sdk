@@ -909,7 +909,10 @@ export class Wallet {
             data: { outputId },
         });
 
-        return JSON.parse(response).payload;
+        const parsed = JSON.parse(
+            response,
+        ) as Response<TransactionWithMetadata>;
+        return plainToInstance(TransactionWithMetadata, parsed.payload);
     }
 
     /**
