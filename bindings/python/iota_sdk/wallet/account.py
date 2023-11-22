@@ -278,6 +278,16 @@ class Account:
             'implicitAccountCreationAddress'
         )
 
+        def implicit_account_transition(
+                self, output_id: OutputId) -> TransactionWithMetadata:
+        """Transitions an implicit account to an account.
+        """
+        return TransactionWithMetadata.from_dict(self._call_account_method(
+            'implicitAccountTransition', {
+                'outputId': output_id
+            }
+        ))
+
     def accounts(self) -> List[OutputData]:
         """Returns the accounts of the wallet.
         """
