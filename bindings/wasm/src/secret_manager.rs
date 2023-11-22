@@ -11,27 +11,28 @@ use iota_sdk_bindings_core::{
 use tokio::sync::RwLock;
 use wasm_bindgen::{prelude::wasm_bindgen, JsError, JsValue};
 
+use crate::{build_js_error, map_err};
+
 /// The SecretManager method handler.
 #[wasm_bindgen(js_name = SecretManagerMethodHandler)]
 pub struct SecretManagerMethodHandler {
-    pub(crate) secret_manager: Arc<RwLock<SecretManager>>,
+    pub(crate) inner: Arc<RwLock<SecretManager>>,
 }
 
 impl SecretManagerMethodHandler {
     pub(crate) fn new(secret_manager: Arc<RwLock<SecretManager>>) -> Self {
-        Self { secret_manager }
+        Self { inner: secret_manager }
     }
 }
 
 /// Creates a method handler with the given secret_manager options.
 #[wasm_bindgen(js_name = createSecretManager)]
-#[allow(non_snake_case)]
 pub fn create_secret_manager(options: String) -> Result<SecretManagerMethodHandler, JsValue> {
-    let secret_manager_dto = serde_json::from_str::<SecretManagerDto>(&options).map_err(|err| err.to_string())?;
-    let secret_manager = SecretManager::try_from(secret_manager_dto).map_err(|err| err.to_string())?;
+    let secret_manager_dto = serde_json::from_str::<SecretManagerDto>(&options).map_err(map_err)?;
+    let secret_manager = SecretManager::try_from(secret_manager_dto).map_err(map_err)?;
 
     Ok(SecretManagerMethodHandler {
-        secret_manager: Arc::new(RwLock::new(secret_manager)),
+        inner: Arc::new(RwLock::new(secret_manager)),
     })
 }
 
@@ -39,29 +40,18 @@ pub fn create_secret_manager(options: String) -> Result<SecretManagerMethodHandl
 ///
 /// Returns an error if the response itself is an error or panic.
 #[wasm_bindgen(js_name = callSecretManagerMethod)]
-#[allow(non_snake_case)]
 pub async fn call_secret_manager_method(
-    methodHandler: &SecretManagerMethodHandler,
+    method_handler: &SecretManagerMethodHandler,
     method: String,
-) -> Result<PromiseString, JsError> {
-    let secret_manager = methodHandler.secret_manager.clone();
-    let method: SecretManagerMethod = serde_json::from_str(&method).map_err(|err| {
-        JsError::new(&serde_json::to_string(&Response::Panic(err.to_string())).expect("json to string error"))
-    })?;
-
-
-    let response = {
-        let secret_manager = secret_manager.read().await;
-        rust_call_secret_manager_method(&*secret_manager, method).await
-    };
-    let ser = serde_json::to_string(&response).expect("json to string error");
+) -> Result<String, JsError> {
+    let method = serde_json::from_str(&method).map_err(map_err)?;
+    let secret_manager = &*method_handler.inner.read().await;
+    let response = rust_call_secret_manager_method(secret_manager, method).await;
+    let ser = serde_json::to_string(&response).map_err(map_err)?;
     match response {
         Response::Error(_) | Response::Panic(_) => Err(JsError::new(&ser)),
         _ => Ok(ser),
     }
-
-    // WARNING: this does not validate the return type. Check carefully.
-    Ok(promise.unchecked_into())
 }
 
 /// Stronghold snapshot migration is not supported for WebAssembly bindings.
@@ -77,10 +67,7 @@ pub fn migrate_stronghold_snapshot_v2_to_v3(
     _new_path: Option<String>,
     _new_password: Option<String>,
 ) -> Result<(), JsError> {
-    Err(JsError::new(
-        &serde_json::to_string(&Response::Panic(
-            "Stronghold snapshot migration is not supported for WebAssembly".to_string(),
-        ))
-        .expect("json to string error"),
-    ))
+    Err(build_js_error(Response::Panic(
+        "Stronghold snapshot migration is not supported for WebAssembly".to_string(),
+    )))
 }

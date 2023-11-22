@@ -32,17 +32,6 @@ describe('Wallet', () => {
             bech32Hrp: 'tst',
         });
 
-        const strongholdSecretManager = {
-            stronghold: {
-                snapshotPath: `./${storagePath}/wallet.stronghold`,
-                password: `A12345678*`,
-            },
-        }
-        const secretManager = await new SecretManager(strongholdSecretManager);
-        await secretManager.storeMnemonic(
-            'vital give early extra blind skin eight discover scissors there globe deal goat fat load robot return rate fragile recycle select live ordinary claim',
-        );
-
         const walletOptions: WalletOptions = {
             address: wallet_address[0],
             storagePath: './test-create-wallet',
@@ -133,16 +122,29 @@ describe('Wallet', () => {
             'vital give early extra blind skin eight discover scissors there globe deal goat fat load robot return rate fragile recycle select live ordinary claim',
         );
 
+        const wallet_address = await secretManager.generateEd25519Addresses({
+            coinType: CoinType.IOTA,
+            accountIndex: 0,
+            range: {
+                start: 0,
+                end: 1,
+            },
+            bech32Hrp: 'tst',
+        });
+
         const walletOptions = {
+            address: wallet_address[0],
             storagePath,
             clientOptions: {
                 nodes: ['https://api.testnet.shimmer.network'],
             },
-            bipPath: chain,
+            bipPath: {
+                coinType: CoinType.IOTA,
+            },
             secretManager: strongholdSecretManager,
         };
 
-        const wallet = new Wallet(walletOptions);
+        const wallet = await Wallet.create(walletOptions);
 
         await wallet.destroy();
 

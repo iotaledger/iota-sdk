@@ -33,32 +33,25 @@ extern "C" {
     pub type ArrayString;
 }
 
-#[macro_export]
-macro_rules! binding_glue {
-    ($method:ident, $method_handler:ident, $name:expr, $code:expr) => {
-        match $method_handler.inner.read() {
-            Ok(handler) => {
-                let method = serde_json::from_str(&$method).map_err(|err| {
-                    JsError::new(&serde_json::to_string(&Response::Error(err.into())).expect("json to string error"))
-                })?;
-                if let Some(inner) = &*handler {
-                    let response = $code(inner, method).await;
-                    let ser = serde_json::to_string(&response).expect("json to string error");
-                    match response {
-                        Response::Error(_) | Response::Panic(_) => Err(JsError::new(&ser)),
-                        _ => Ok(ser),
-                    }
-                } else {
-                    // Notify that the inner object was destroyed
-                    Err(JsError::new(
-                        &serde_json::to_string(&Response::Panic(format!("{} was destroyed", $name)))
-                            .expect("json to string error"),
-                    ))
-                }
-            }
-            Err(e) => Err(JsError::new(
-                &serde_json::to_string(&Response::Panic(e.to_string())).expect("json to string error"),
-            )),
-        }
-    };
+// Maps a bindings error into the proper js error
+pub(crate) fn map_err<T>(err: T) -> JsError
+where
+    T: Into<iota_sdk_bindings_core::Error>,
+{
+    build_js_error(iota_sdk_bindings_core::Response::Error(err.into()))
+}
+
+pub(crate) fn destroy(instance: &str) -> JsError {
+    build_js_error(iota_sdk_bindings_core::Response::Panic(format!(
+        "{} was destroyed",
+        instance
+    )))
+}
+
+// Serializes a bindings response and puts it in a JsError
+pub(crate) fn build_js_error<T>(response: T) -> JsError
+where
+    T: Into<iota_sdk_bindings_core::Response>,
+{
+    JsError::new(&serde_json::to_string(&response.into()).expect("json to string error"))
 }

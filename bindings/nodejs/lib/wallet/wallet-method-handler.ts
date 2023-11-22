@@ -87,15 +87,15 @@ export class WalletMethodHandler {
                     new Event(parsed.accountIndex, parsed.event),
                 );
             },
-        );
+        ).catch((error: any) => {
+            throw errorHandle(error);
+        });
     }
 
     async destroy(): Promise<void> {
-        try {
-            await destroyWallet(this.methodHandler);
-        } catch (error: any) {
+        await destroyWallet(this.methodHandler).catch((error: any) => {
             throw errorHandle(error);
-        }
+        });
     }
 
     async getClient(): Promise<Client> {
