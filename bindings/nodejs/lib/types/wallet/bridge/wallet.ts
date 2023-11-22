@@ -233,6 +233,13 @@ export type __ImplicitAccountCreationAddressMethod__ = {
     name: 'implicitAccountCreationAddress';
 };
 
+export type __ImplicitAccountTransitionMethod__ = {
+    name: 'implicitAccountTransition';
+    data: {
+        outputId: OutputId;
+    };
+};
+
 export type __ImplicitAccountsMethod__ = {
     name: 'implicitAccounts';
 };

@@ -896,6 +896,23 @@ export class Wallet {
     }
 
     /**
+     * Transitions an implicit account to an account.
+     *
+     * @param outputId Identifier of the implicit account output.
+     * @returns The created transaction.
+     */
+    async implicitAccountTransition(
+        outputId: OutputId,
+    ): Promise<TransactionWithMetadata> {
+        const response = await this.methodHandler.callMethod({
+            name: 'implicitAccountTransition',
+            data: { outputId },
+        });
+
+        return JSON.parse(response).payload;
+    }
+
+    /**
      * Returns the implicit accounts of the wallet.
      *
      * @returns The implicit accounts of the wallet.

@@ -150,6 +150,10 @@ export type __ImplicitAccountCreationAddressMethod__ = {
     name: 'implicitAccountCreationAddress';
 };
 
+export type __ImplicitAccountTransitionMethod__ = {
+    name: 'implicitAccountTransition';
+};
+
 export type __AccountsMethod__ = {
     name: 'accounts';
 };
