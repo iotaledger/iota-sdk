@@ -904,15 +904,30 @@ export class Wallet {
     async implicitAccountTransition(
         outputId: OutputId,
     ): Promise<TransactionWithMetadata> {
+        return (await this.prepareImplicitAccountTransition(outputId)).send();
+    }
+
+    /**
+     * Prepares to transition an implicit account to an account.
+     *
+     * @param outputId Identifier of the implicit account output.
+     * @returns The prepared transaction.
+     */
+    async prepareImplicitAccountTransition(
+        outputId: OutputId,
+    ): Promise<PreparedTransaction> {
         const response = await this.methodHandler.callMethod({
-            name: 'implicitAccountTransition',
+            name: 'prepareImplicitAccountTransition',
             data: { outputId },
         });
 
         const parsed = JSON.parse(
             response,
-        ) as Response<TransactionWithMetadata>;
-        return plainToInstance(TransactionWithMetadata, parsed.payload);
+        ) as Response<PreparedTransactionData>;
+        return new PreparedTransaction(
+            plainToInstance(PreparedTransactionData, parsed.payload),
+            this,
+        );
     }
 
     /**

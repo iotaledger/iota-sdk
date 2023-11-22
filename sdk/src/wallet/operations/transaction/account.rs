@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use crate::{
-    client::secret::SecretManage,
+    client::{api::PreparedTransactionData, secret::SecretManage},
     types::block::{
         address::Address,
         output::{
@@ -24,6 +24,12 @@ where
 {
     /// Transitions an implicit account to an account.
     pub async fn implicit_account_transition(&self, output_id: &OutputId) -> Result<TransactionWithMetadata> {
+        self.sign_and_submit_transaction(self.prepare_implicit_account_transition(output_id).await?, None)
+            .await
+    }
+
+    /// Prepares to transition an implicit account to an account.
+    pub async fn prepare_implicit_account_transition(&self, output_id: &OutputId) -> Result<PreparedTransactionData> {
         let implicit_account_data = self.data().await.unspent_outputs.get(output_id).cloned();
 
         let implicit_account = if let Some(implicit_account_data) = &implicit_account_data {
@@ -71,11 +77,7 @@ where
             ..Default::default()
         };
 
-        let prepared_transaction = self
-            .prepare_transaction(vec![account], transaction_options.clone())
-            .await?;
-
-        self.sign_and_submit_transaction(prepared_transaction, transaction_options)
+        self.prepare_transaction(vec![account], transaction_options.clone())
             .await
     }
 }
