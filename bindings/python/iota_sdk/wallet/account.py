@@ -293,7 +293,7 @@ class Account:
                 'outputId': output_id
             }
         )
-        return PreparedCreateTokenTransaction(
+        return PreparedTransaction(
             account=self, prepared_transaction_data=prepared)
 
     def accounts(self) -> List[OutputData]:
