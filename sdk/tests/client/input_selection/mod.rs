@@ -3,10 +3,12 @@
 
 mod account_outputs;
 mod basic_outputs;
-mod burn;
+// TODO https://github.com/iotaledger/iota-sdk/issues/1631
+// mod burn;
 mod expiration;
 mod foundry_outputs;
-mod native_tokens;
+// TODO https://github.com/iotaledger/iota-sdk/issues/1631
+// mod native_tokens;
 mod nft_outputs;
 mod outputs;
 mod storage_deposit_return;

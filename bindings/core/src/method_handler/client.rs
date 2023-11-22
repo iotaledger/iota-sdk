@@ -13,7 +13,7 @@ use iota_sdk::{
                 OutputBuilderAmount,
             },
             payload::Payload,
-            SignedBlock, SignedBlockDto, UnsignedBlockDto,
+            Block, BlockDto, UnsignedBlockDto,
         },
         TryFromDto,
     },
@@ -59,7 +59,6 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         ClientMethod::BuildAccountOutput {
             amount,
             mana,
-            native_tokens,
             account_id,
             foundry_counter,
             unlock_conditions,
@@ -73,13 +72,11 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
                     OutputBuilderAmount::MinimumAmount(client.get_storage_score_parameters().await?)
                 },
                 mana,
-                native_tokens,
                 &account_id,
                 foundry_counter,
                 unlock_conditions,
                 features,
                 immutable_features,
-                client.get_token_supply().await?,
             )?);
 
             Response::Output(OutputDto::from(&output))
@@ -87,7 +84,6 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         ClientMethod::BuildBasicOutput {
             amount,
             mana,
-            native_tokens,
             unlock_conditions,
             features,
         } => {
@@ -98,17 +94,14 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
                     OutputBuilderAmount::MinimumAmount(client.get_storage_score_parameters().await?)
                 },
                 mana,
-                native_tokens,
                 unlock_conditions,
                 features,
-                client.get_token_supply().await?,
             )?);
 
             Response::Output(OutputDto::from(&output))
         }
         ClientMethod::BuildFoundryOutput {
             amount,
-            native_tokens,
             serial_number,
             token_scheme,
             unlock_conditions,
@@ -121,13 +114,11 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
                 } else {
                     OutputBuilderAmount::MinimumAmount(client.get_storage_score_parameters().await?)
                 },
-                native_tokens,
                 serial_number,
                 token_scheme,
                 unlock_conditions,
                 features,
                 immutable_features,
-                client.get_token_supply().await?,
             )?);
 
             Response::Output(OutputDto::from(&output))
@@ -135,7 +126,6 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         ClientMethod::BuildNftOutput {
             amount,
             mana,
-            native_tokens,
             nft_id,
             unlock_conditions,
             features,
@@ -148,12 +138,10 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
                     OutputBuilderAmount::MinimumAmount(client.get_storage_score_parameters().await?)
                 },
                 mana,
-                native_tokens,
                 &nft_id,
                 unlock_conditions,
                 features,
                 immutable_features,
-                client.get_token_supply().await?,
             )?);
 
             Response::Output(OutputDto::from(&output))
@@ -190,7 +178,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         ClientMethod::GetIssuance => Response::Issuance(client.get_issuance().await?),
         ClientMethod::PostBlockRaw { block_bytes } => Response::BlockId(
             client
-                .post_block_raw(&SignedBlock::unpack_strict(
+                .post_block_raw(&Block::unpack_strict(
                     &block_bytes[..],
                     &client.get_protocol_parameters().await?,
                 )?)
@@ -198,15 +186,13 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         ),
         ClientMethod::PostBlock { block } => Response::BlockId(
             client
-                .post_block(&SignedBlock::try_from_dto_with_params(
+                .post_block(&Block::try_from_dto_with_params(
                     block,
-                    client.get_protocol_parameters().await?,
+                    &client.get_protocol_parameters().await?,
                 )?)
                 .await?,
         ),
-        ClientMethod::GetBlock { block_id } => {
-            Response::SignedBlock(SignedBlockDto::from(&client.get_block(&block_id).await?))
-        }
+        ClientMethod::GetBlock { block_id } => Response::Block(BlockDto::from(&client.get_block(&block_id).await?)),
         ClientMethod::GetBlockMetadata { block_id } => {
             Response::BlockMetadata(client.get_block_metadata(&block_id).await?)
         }
@@ -221,7 +207,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
             Response::OutputMetadata(client.get_output_metadata(&output_id).await?)
         }
         ClientMethod::GetIncludedBlock { transaction_id } => {
-            Response::SignedBlock(SignedBlockDto::from(&client.get_included_block(&transaction_id).await?))
+            Response::Block(BlockDto::from(&client.get_included_block(&transaction_id).await?))
         }
         ClientMethod::GetIncludedBlockMetadata { transaction_id } => {
             Response::BlockMetadata(client.get_included_block_metadata(&transaction_id).await?)
@@ -265,7 +251,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         }
         ClientMethod::GetOutputsIgnoreErrors { output_ids } => {
             let outputs_response = client
-                .get_outputs_with_metadata_ignore_errors(&output_ids)
+                .get_outputs_with_metadata_ignore_not_found(&output_ids)
                 .await?
                 .iter()
                 .map(OutputWithMetadataResponse::from)
@@ -277,7 +263,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
                 .find_blocks(&block_ids)
                 .await?
                 .iter()
-                .map(SignedBlockDto::from)
+                .map(BlockDto::from)
                 .collect(),
         ),
         ClientMethod::FindInputs { addresses, amount } => {
@@ -296,7 +282,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
             Response::Bech32Address(client.hex_public_key_to_bech32_address(&hex, bech32_hrp).await?)
         }
         ClientMethod::ComputeMinimumOutputAmount { output } => {
-            let output = Output::try_from_dto_with_params(output, client.get_token_supply().await?)?;
+            let output = Output::try_from(output)?;
             let storage_score_params = client.get_storage_score_parameters().await?;
 
             Response::OutputAmount(output.minimum_amount(storage_score_params))
@@ -316,9 +302,9 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
                 .await?;
             Response::CustomJson(data)
         }
-        ClientMethod::BlockId { signed_block: block } => {
+        ClientMethod::BlockId { block } => {
             let protocol_parameters = client.get_protocol_parameters().await?;
-            let block = SignedBlock::try_from_dto_with_params(block, &protocol_parameters)?;
+            let block = Block::try_from_dto_with_params(block, &protocol_parameters)?;
             Response::BlockId(block.id(&protocol_parameters))
         }
     };

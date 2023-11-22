@@ -87,13 +87,11 @@ async fn all_combined() -> Result<()> {
             None,
             None,
             None,
-            None,
         ),
         Account(
             1_000_000,
             account_id_2,
             &ed25519_bech32_address_0.to_string(),
-            None,
             None,
             None,
             Some(Bip44::new(SHIMMER_COIN_TYPE)),
@@ -206,14 +204,12 @@ async fn all_combined() -> Result<()> {
             None,
             None,
             None,
-            None,
             Some(Bip44::new(SHIMMER_COIN_TYPE)),
         ),
         Nft(
             1_000_000,
             nft_id_2,
             &account_1_bech32_address.to_string(),
-            None,
             None,
             None,
             None,
@@ -258,7 +254,6 @@ async fn all_combined() -> Result<()> {
             None,
             None,
             None,
-            None,
             Some((&nft_4_bech32_address.to_string(), 50)),
             None,
         ),
@@ -266,7 +261,6 @@ async fn all_combined() -> Result<()> {
             1_000_000,
             nft_id_4,
             &account_1_bech32_address.to_string(),
-            None,
             None,
             None,
             None,
@@ -283,13 +277,11 @@ async fn all_combined() -> Result<()> {
             None,
             None,
             None,
-            None,
         ),
         Account(
             1_000_000,
             account_id_2,
             &ed25519_bech32_address_0.to_string(),
-            None,
             None,
             None,
             None,
@@ -313,13 +305,11 @@ async fn all_combined() -> Result<()> {
             None,
             None,
             None,
-            None,
         ),
         Nft(
             1_000_000,
             nft_id_2,
             &ed25519_bech32_address_0.to_string(),
-            None,
             None,
             None,
             None,
@@ -335,13 +325,11 @@ async fn all_combined() -> Result<()> {
             None,
             None,
             None,
-            None,
         ),
         Nft(
             1_000_000,
             nft_id_4,
             &ed25519_bech32_address_0.to_string(),
-            None,
             None,
             None,
             None,
@@ -377,7 +365,7 @@ async fn all_combined() -> Result<()> {
         .with_outputs(outputs)
         .with_creation_slot(slot_index)
         .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
-        .finish_with_params(protocol_parameters)?;
+        .finish_with_params(&protocol_parameters)?;
 
     let prepared_transaction_data = PreparedTransactionData {
         transaction,

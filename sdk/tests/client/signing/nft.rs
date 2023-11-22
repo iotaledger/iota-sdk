@@ -59,7 +59,6 @@ async fn nft_reference_unlocks() -> Result<()> {
             None,
             None,
             None,
-            None,
             Some(Bip44::new(SHIMMER_COIN_TYPE)),
         ),
         Basic(
@@ -94,7 +93,6 @@ async fn nft_reference_unlocks() -> Result<()> {
             None,
             None,
             None,
-            None,
         ),
         Basic(
             2_000_000,
@@ -117,7 +115,7 @@ async fn nft_reference_unlocks() -> Result<()> {
         )
         .with_outputs(outputs)
         .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
-        .finish_with_params(protocol_parameters)?;
+        .finish_with_params(&protocol_parameters)?;
 
     let prepared_transaction_data = PreparedTransactionData {
         transaction,

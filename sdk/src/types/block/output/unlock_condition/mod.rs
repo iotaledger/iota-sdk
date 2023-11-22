@@ -14,14 +14,7 @@ use alloc::{boxed::Box, collections::BTreeSet, vec::Vec};
 use bitflags::bitflags;
 use derive_more::{Deref, From};
 use iterator_sorted::is_unique_sorted;
-use packable::{
-    bounded::BoundedU8,
-    error::{UnpackError, UnpackErrorExt},
-    packer::Packer,
-    prefix::BoxedSlicePrefix,
-    unpacker::Unpacker,
-    Packable,
-};
+use packable::{bounded::BoundedU8, prefix::BoxedSlicePrefix, Packable};
 
 pub use self::{
     address::AddressUnlockCondition, expiration::ExpirationUnlockCondition,
@@ -39,21 +32,31 @@ use crate::types::block::{
 };
 
 ///
-#[derive(Clone, Eq, PartialEq, Hash, From)]
+#[derive(Clone, Eq, PartialEq, Hash, From, Packable)]
+#[packable(unpack_error = Error)]
+#[packable(unpack_visitor = ProtocolParameters)]
+#[packable(tag_type = u8, with_error = Error::InvalidUnlockConditionKind)]
 pub enum UnlockCondition {
     /// An address unlock condition.
+    #[packable(tag = AddressUnlockCondition::KIND)]
     Address(AddressUnlockCondition),
     /// A storage deposit return unlock condition.
+    #[packable(tag = StorageDepositReturnUnlockCondition::KIND)]
     StorageDepositReturn(StorageDepositReturnUnlockCondition),
     /// A timelock unlock condition.
+    #[packable(tag = TimelockUnlockCondition::KIND)]
     Timelock(TimelockUnlockCondition),
     /// An expiration unlock condition.
+    #[packable(tag = ExpirationUnlockCondition::KIND)]
     Expiration(ExpirationUnlockCondition),
     /// A state controller address unlock condition.
+    #[packable(tag = StateControllerAddressUnlockCondition::KIND)]
     StateControllerAddress(StateControllerAddressUnlockCondition),
     /// A governor address unlock condition.
+    #[packable(tag = GovernorAddressUnlockCondition::KIND)]
     GovernorAddress(GovernorAddressUnlockCondition),
     /// An immutable account address unlock condition.
+    #[packable(tag = ImmutableAccountAddressUnlockCondition::KIND)]
     ImmutableAccountAddress(ImmutableAccountAddressUnlockCondition),
 }
 
@@ -148,76 +151,6 @@ crate::create_bitflags!(
         (IMMUTABLE_ACCOUNT_ADDRESS, ImmutableAccountAddressUnlockCondition),
     ]
 );
-
-impl Packable for UnlockCondition {
-    type UnpackError = Error;
-    type UnpackVisitor = ProtocolParameters;
-
-    fn pack<P: Packer>(&self, packer: &mut P) -> Result<(), P::Error> {
-        match self {
-            Self::Address(unlock_condition) => {
-                AddressUnlockCondition::KIND.pack(packer)?;
-                unlock_condition.pack(packer)
-            }
-            Self::StorageDepositReturn(unlock_condition) => {
-                StorageDepositReturnUnlockCondition::KIND.pack(packer)?;
-                unlock_condition.pack(packer)
-            }
-            Self::Timelock(unlock_condition) => {
-                TimelockUnlockCondition::KIND.pack(packer)?;
-                unlock_condition.pack(packer)
-            }
-            Self::Expiration(unlock_condition) => {
-                ExpirationUnlockCondition::KIND.pack(packer)?;
-                unlock_condition.pack(packer)
-            }
-            Self::StateControllerAddress(unlock_condition) => {
-                StateControllerAddressUnlockCondition::KIND.pack(packer)?;
-                unlock_condition.pack(packer)
-            }
-            Self::GovernorAddress(unlock_condition) => {
-                GovernorAddressUnlockCondition::KIND.pack(packer)?;
-                unlock_condition.pack(packer)
-            }
-            Self::ImmutableAccountAddress(unlock_condition) => {
-                ImmutableAccountAddressUnlockCondition::KIND.pack(packer)?;
-                unlock_condition.pack(packer)
-            }
-        }?;
-
-        Ok(())
-    }
-
-    fn unpack<U: Unpacker, const VERIFY: bool>(
-        unpacker: &mut U,
-        visitor: &Self::UnpackVisitor,
-    ) -> Result<Self, UnpackError<Self::UnpackError, U::Error>> {
-        Ok(match u8::unpack::<_, VERIFY>(unpacker, &()).coerce()? {
-            AddressUnlockCondition::KIND => {
-                Self::from(AddressUnlockCondition::unpack::<_, VERIFY>(unpacker, &()).coerce()?)
-            }
-            StorageDepositReturnUnlockCondition::KIND => {
-                Self::from(StorageDepositReturnUnlockCondition::unpack::<_, VERIFY>(unpacker, visitor).coerce()?)
-            }
-            TimelockUnlockCondition::KIND => {
-                Self::from(TimelockUnlockCondition::unpack::<_, VERIFY>(unpacker, &()).coerce()?)
-            }
-            ExpirationUnlockCondition::KIND => {
-                Self::from(ExpirationUnlockCondition::unpack::<_, VERIFY>(unpacker, &()).coerce()?)
-            }
-            StateControllerAddressUnlockCondition::KIND => {
-                Self::from(StateControllerAddressUnlockCondition::unpack::<_, VERIFY>(unpacker, &()).coerce()?)
-            }
-            GovernorAddressUnlockCondition::KIND => {
-                Self::from(GovernorAddressUnlockCondition::unpack::<_, VERIFY>(unpacker, &()).coerce()?)
-            }
-            ImmutableAccountAddressUnlockCondition::KIND => {
-                Self::from(ImmutableAccountAddressUnlockCondition::unpack::<_, VERIFY>(unpacker, &()).coerce()?)
-            }
-            k => return Err(UnpackError::Packable(Error::InvalidOutputKind(k))),
-        })
-    }
-}
 
 pub(crate) type UnlockConditionCount = BoundedU8<0, { UnlockConditions::COUNT_MAX }>;
 
@@ -435,9 +368,7 @@ mod test {
 pub mod dto {
     use serde::{Deserialize, Serialize};
 
-    pub use self::storage_deposit_return::dto::StorageDepositReturnUnlockConditionDto;
     use super::*;
-    use crate::types::{block::Error, TryFromDto, ValidationParams};
 
     #[derive(Clone, Debug, Eq, PartialEq, From, Serialize, Deserialize)]
     #[serde(untagged)]
@@ -445,7 +376,7 @@ pub mod dto {
         /// An address unlock condition.
         Address(AddressUnlockCondition),
         /// A storage deposit return unlock condition.
-        StorageDepositReturn(StorageDepositReturnUnlockConditionDto),
+        StorageDepositReturn(StorageDepositReturnUnlockCondition),
         /// A timelock unlock condition.
         Timelock(TimelockUnlockCondition),
         /// An expiration unlock condition.
@@ -462,7 +393,7 @@ pub mod dto {
         fn from(value: &UnlockCondition) -> Self {
             match value {
                 UnlockCondition::Address(v) => Self::Address(v.clone()),
-                UnlockCondition::StorageDepositReturn(v) => Self::StorageDepositReturn(v.into()),
+                UnlockCondition::StorageDepositReturn(v) => Self::StorageDepositReturn(v.clone()),
                 UnlockCondition::Timelock(v) => Self::Timelock(*v),
                 UnlockCondition::Expiration(v) => Self::Expiration(v.clone()),
                 UnlockCondition::StateControllerAddress(v) => Self::StateControllerAddress(v.clone()),
@@ -472,22 +403,17 @@ pub mod dto {
         }
     }
 
-    impl TryFromDto for UnlockCondition {
-        type Dto = UnlockConditionDto;
-        type Error = Error;
-
-        fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
-            Ok(match dto {
+    impl From<UnlockConditionDto> for UnlockCondition {
+        fn from(dto: UnlockConditionDto) -> Self {
+            match dto {
                 UnlockConditionDto::Address(v) => Self::Address(v),
-                UnlockConditionDto::StorageDepositReturn(v) => Self::StorageDepositReturn(
-                    StorageDepositReturnUnlockCondition::try_from_dto_with_params_inner(v, params)?,
-                ),
+                UnlockConditionDto::StorageDepositReturn(v) => Self::StorageDepositReturn(v),
                 UnlockConditionDto::Timelock(v) => Self::Timelock(v),
                 UnlockConditionDto::Expiration(v) => Self::Expiration(v),
                 UnlockConditionDto::StateControllerAddress(v) => Self::StateControllerAddress(v),
                 UnlockConditionDto::GovernorAddress(v) => Self::GovernorAddress(v),
                 UnlockConditionDto::ImmutableAccountAddress(v) => Self::ImmutableAccountAddress(v),
-            })
+            }
         }
     }
 

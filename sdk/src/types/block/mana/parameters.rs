@@ -253,7 +253,7 @@ mod test {
             };
             params
         });
-        &*PARAMS
+        &PARAMS
     }
 
     #[test]

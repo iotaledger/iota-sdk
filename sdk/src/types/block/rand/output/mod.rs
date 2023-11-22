@@ -5,12 +5,14 @@
 pub mod feature;
 /// Module providing random output metadata generation utilities.
 pub mod metadata;
+/// Module providing random native token generation utilities.
+pub mod native_token;
 /// Module providing random unlock condition generation utilities.
 pub mod unlock_condition;
 
 use primitive_types::U256;
 
-pub use self::metadata::rand_output_metadata;
+pub use self::{metadata::rand_output_metadata, native_token::rand_native_token};
 use crate::types::block::{
     output::{
         unlock_condition::ImmutableAccountAddressUnlockCondition, AccountId, AccountOutput, AnchorId, AnchorOutput,

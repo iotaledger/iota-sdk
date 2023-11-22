@@ -29,7 +29,7 @@ async function run() {
             },
         };
 
-        const wallet = new Wallet({
+        const wallet = await Wallet.create({
             storagePath: process.env.WALLET_DB_PATH,
         });
 

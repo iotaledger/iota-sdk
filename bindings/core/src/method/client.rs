@@ -17,10 +17,10 @@ use iota_sdk::{
         address::{Bech32Address, Hrp},
         output::{
             dto::OutputDto, feature::Feature, unlock_condition::dto::UnlockConditionDto, AccountId, AnchorId,
-            DelegationId, FoundryId, NativeToken, NftId, OutputId, TokenScheme,
+            DelegationId, FoundryId, NftId, OutputId, TokenScheme,
         },
         payload::{dto::PayloadDto, signed_transaction::TransactionId},
-        BlockId, IssuerId, SignedBlockDto,
+        BlockDto, BlockId, IssuerId,
     },
     utils::serde::{option_string, string},
 };
@@ -43,7 +43,6 @@ pub enum ClientMethod {
         // TODO: Determine if `default` is wanted here
         #[serde(default, with = "string")]
         mana: u64,
-        native_tokens: Option<Vec<NativeToken>>,
         account_id: AccountId,
         foundry_counter: Option<u32>,
         unlock_conditions: Vec<UnlockConditionDto>,
@@ -61,7 +60,6 @@ pub enum ClientMethod {
         // TODO: Determine if `default` is wanted here
         #[serde(default, with = "string")]
         mana: u64,
-        native_tokens: Option<Vec<NativeToken>>,
         unlock_conditions: Vec<UnlockConditionDto>,
         features: Option<Vec<Feature>>,
     },
@@ -73,7 +71,6 @@ pub enum ClientMethod {
         // If not provided, minimum amount will be used
         #[serde(default, with = "option_string")]
         amount: Option<u64>,
-        native_tokens: Option<Vec<NativeToken>>,
         serial_number: u32,
         token_scheme: TokenScheme,
         unlock_conditions: Vec<UnlockConditionDto>,
@@ -91,7 +88,6 @@ pub enum ClientMethod {
         // TODO: Determine if `default` is wanted here
         #[serde(default, with = "string")]
         mana: u64,
-        native_tokens: Option<Vec<NativeToken>>,
         nft_id: NftId,
         unlock_conditions: Vec<UnlockConditionDto>,
         features: Option<Vec<Feature>>,
@@ -159,7 +155,7 @@ pub enum ClientMethod {
     /// Post block (JSON)
     PostBlock {
         /// Block
-        block: SignedBlockDto,
+        block: BlockDto,
     },
     /// Post block (raw)
     #[serde(rename_all = "camelCase")]
@@ -363,9 +359,8 @@ pub enum ClientMethod {
         address: Bech32Address,
     },
     /// Returns a block ID from a block
-    #[serde(rename_all = "camelCase")]
     BlockId {
         /// Block
-        signed_block: SignedBlockDto,
+        block: BlockDto,
     },
 }

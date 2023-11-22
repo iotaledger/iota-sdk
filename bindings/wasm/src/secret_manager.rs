@@ -4,7 +4,7 @@
 use std::sync::Arc;
 
 use iota_sdk_bindings_core::{
-    call_secret_manager_method,
+    call_secret_manager_method as rust_call_secret_manager_method,
     iota_sdk::client::secret::{SecretManager, SecretManagerDto},
     Response, SecretManagerMethod,
 };
@@ -35,11 +35,11 @@ pub fn create_secret_manager(options: String) -> Result<SecretManagerMethodHandl
 /// Handles a method, returns the response as a JSON-encoded string.
 ///
 /// Returns an error if the response itself is an error or panic.
-#[wasm_bindgen(js_name = callSecretManagerMethodAsync)]
+#[wasm_bindgen(js_name = callSecretManagerMethod)]
 #[allow(non_snake_case)]
-pub fn call_secret_manager_method_async(
-    method: String,
+pub fn call_secret_manager_method(
     methodHandler: &SecretManagerMethodHandler,
+    method: String,
 ) -> Result<PromiseString, JsValue> {
     let secret_manager = methodHandler.secret_manager.clone();
     let promise: js_sys::Promise = future_to_promise(async move {
@@ -47,7 +47,7 @@ pub fn call_secret_manager_method_async(
 
         let response = {
             let secret_manager = secret_manager.read().await;
-            call_secret_manager_method(&*secret_manager, method).await
+            rust_call_secret_manager_method(&*secret_manager, method).await
         };
         let ser = JsValue::from(serde_json::to_string(&response).map_err(|err| err.to_string())?);
         match response {

@@ -61,7 +61,7 @@ async function run() {
             secretManager: strongholdSecretManager,
         };
 
-        const wallet = new Wallet(walletOptions);
+        const wallet = await Wallet.create(walletOptions);
 
         // Set syncOnlyMostBasicOutputs to true if not interested in outputs that are timelocked,
         // have a storage deposit return, expiration or are nft/account/foundry outputs.
