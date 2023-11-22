@@ -104,14 +104,6 @@ brew install cmake openssl@1.1
 You can install `cmake`, `clang`, and `openssl` with your distro's package manager or download them from their websites.
 On Debian and Ubuntu, you will also need the `build-essential` and `libudev-dev` packages.
 
-### Testing
-
-When working on the SDK itself, run its tests using `cargo` with `storage` feature enabled:
-
-```
-cargo test --features "storage"
-```
-
 ## Getting Started
 
 ### Install the IOTA SDK
