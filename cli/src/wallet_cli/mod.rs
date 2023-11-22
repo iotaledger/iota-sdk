@@ -585,7 +585,13 @@ pub async fn implicit_account_creation_address_command(wallet: &Wallet) -> Resul
 
 // `implicit-account-transition` command
 pub async fn implicit_account_transition_command(wallet: &Wallet, output_id: OutputId) -> Result<(), Error> {
-    wallet.implicit_account_transition(&output_id).await?;
+    let transaction = wallet.implicit_account_transition(&output_id).await?;
+
+    println_log_info!(
+        "Implicit account transition transaction sent:\n{:?}\n{:?}",
+        transaction.transaction_id,
+        transaction.block_id
+    );
 
     Ok(())
 }
