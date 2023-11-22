@@ -553,8 +553,10 @@ where
                 // We can only sign ed25519 addresses and block_indexes needs to contain the account or nft
                 // address already at this point, because the reference index needs to be lower
                 // than the current block index
-                if !input_address.is_ed25519() && !input_address.is_implicit_account_creation() {
-                    Err(InputSelectionError::MissingInputWithEd25519Address)?;
+                match &input_address {
+                    Address::Ed25519(_) | Address::ImplicitAccountCreation(_) => {}
+                    Address::Restricted(restricted) if restricted.address().is_ed25519() => {}
+                    _ => Err(InputSelectionError::MissingInputWithEd25519Address)?,
                 }
 
                 let chain = input.chain.ok_or(Error::MissingBip32Chain)?;
