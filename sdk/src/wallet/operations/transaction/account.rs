@@ -10,7 +10,7 @@ use crate::{
     },
     wallet::{
         operations::transaction::{TransactionOptions, TransactionWithMetadata},
-        Result, Wallet,
+        Error, Result, Wallet,
     },
 };
 
@@ -19,6 +19,7 @@ where
     crate::wallet::Error: From<S::Error>,
     crate::client::Error: From<S::Error>,
 {
+    /// Transitions an implicit account to an account.
     pub async fn implicit_account_transition(&self, output_id: &OutputId) -> Result<TransactionWithMetadata> {
         let implicit_account_data = self.data().await.unspent_outputs.get(output_id).cloned();
 
@@ -26,10 +27,10 @@ where
             if implicit_account_data.output.is_implicit_account() {
                 implicit_account_data.output.as_basic()
             } else {
-                todo!()
+                return Err(Error::ImplicitAccountNotFound);
             }
         } else {
-            todo!()
+            return Err(Error::ImplicitAccountNotFound);
         };
 
         let public_key = if let Some(bip_path) = self.bip_path().await {
@@ -44,6 +45,7 @@ where
                 )
                 .await?[0]
         } else {
+            // TODO https://github.com/iotaledger/iota-sdk/issues/1666
             todo!()
         };
 
