@@ -64,7 +64,7 @@
 //           "maxBufferSize":1000,
 //           "maxValidationBufferSize":100
 //         },
-//         "versionSignaling":{
+//         "versionSignalingParameters":{
 //           "windowSize":7,
 //           "windowTargetRatio":5,
 //           "activationOffset":7
