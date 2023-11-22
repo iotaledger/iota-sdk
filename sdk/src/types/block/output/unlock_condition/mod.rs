@@ -250,7 +250,11 @@ impl UnlockConditions {
 
     /// Checks whether a timelock exists and is still relevant.
     #[inline(always)]
-    pub fn is_timelocked(&self, slot_index: impl Into<SlotIndex>, min_committable_age: impl Into<SlotIndex>) -> bool {
+    pub fn is_timelocked(
+        &self,
+        slot_index: impl Into<SlotIndex> + Copy,
+        min_committable_age: impl Into<SlotIndex>,
+    ) -> bool {
         self.timelock().map_or(false, |timelock| {
             timelock.is_timelocked(slot_index, min_committable_age)
         })
@@ -268,9 +272,9 @@ impl UnlockConditions {
     #[inline(always)]
     pub fn is_expired(
         &self,
-        slot_index: impl Into<SlotIndex>,
-        min_committable_age: impl Into<SlotIndex>,
-        max_committable_age: impl Into<SlotIndex>,
+        slot_index: impl Into<SlotIndex> + Copy,
+        min_committable_age: impl Into<SlotIndex> + Copy,
+        max_committable_age: impl Into<SlotIndex> + Copy,
     ) -> Option<bool> {
         self.expiration().map_or(Some(false), |expiration| {
             expiration.is_expired(slot_index, min_committable_age, max_committable_age)
@@ -303,9 +307,9 @@ impl UnlockConditions {
     pub fn locked_address<'a>(
         &'a self,
         address: &'a Address,
-        slot_index: impl Into<SlotIndex>,
-        min_committable_age: impl Into<SlotIndex>,
-        max_committable_age: impl Into<SlotIndex>,
+        slot_index: impl Into<SlotIndex> + Copy,
+        min_committable_age: impl Into<SlotIndex> + Copy,
+        max_committable_age: impl Into<SlotIndex> + Copy,
     ) -> Option<&'a Address> {
         self.expiration().map_or(Some(address), |expiration| {
             expiration.return_address_expired(address, slot_index, min_committable_age, max_committable_age)

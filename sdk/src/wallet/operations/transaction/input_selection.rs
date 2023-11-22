@@ -70,10 +70,8 @@ where
             &wallet_data,
             wallet_data.unspent_outputs.values(),
             slot_index,
-            protocol_parameters.min_committable_age().into(),
-            protocol_parameters.max_committable_age().into(),
-            &outputs,
-            burn,
+            protocol_parameters.min_committable_age(),
+            protocol_parameters.max_committable_age(),
             custom_inputs.as_ref(),
             mandatory_inputs.as_ref(),
         )?;
@@ -200,33 +198,16 @@ where
     }
 }
 
-/// Filter available outputs to only include outputs that don't have unlock conditions, that could create
-/// conflicting transactions or need a new output for the storage deposit return
-/// Also only include Account, Nft and Foundry outputs, if a corresponding output with the same id exists in the output,
-/// so they don't get burned
-///
+/// Filter available outputs to only include outputs that can be unlocked forever from this moment.
 /// Note: this is only for the default input selection, it's still possible to send these outputs by using
 /// `claim_outputs` or providing their OutputId's in the custom_inputs
-///
-/// Some examples for which outputs should be included in the inputs to select from:
-/// | Unlock conditions                                   | Include in inputs |
-/// | --------------------------------------------------- | ----------------- |
-/// | [Address]                                           | yes               |
-/// | [Address, expired Timelock]                         | yes               |
-/// | [Address, not expired Timelock, ...]                | no                |
-/// | [Address, expired Expiration, ...]                  | yes               |
-/// | [Address, not expired Expiration, ...]              | no                |
-/// | [Address, StorageDepositReturn, ...]                | no                |
-/// | [Address, StorageDepositReturn, expired Expiration] | yes               |
 #[allow(clippy::too_many_arguments)]
 fn filter_inputs(
     wallet_data: &WalletData,
     available_outputs: Values<'_, OutputId, OutputData>,
-    slot_index: SlotIndex,
-    min_committable_age: SlotIndex,
-    max_committable_age: SlotIndex,
-    outputs: &[Output],
-    burn: Option<&Burn>,
+    slot_index: impl Into<SlotIndex> + Copy,
+    min_committable_age: impl Into<SlotIndex> + Copy,
+    max_committable_age: impl Into<SlotIndex> + Copy,
     custom_inputs: Option<&HashSet<OutputId>>,
     mandatory_inputs: Option<&HashSet<OutputId>>,
 ) -> crate::wallet::Result<Vec<InputSigningData>> {

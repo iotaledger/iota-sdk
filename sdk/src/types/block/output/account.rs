@@ -382,7 +382,16 @@ impl AccountOutput {
         unlock: &Unlock,
         context: &mut SemanticValidationContext<'_>,
     ) -> Result<(), TransactionFailureReason> {
-        self.address().unlock(unlock, context)?;
+        self.unlock_conditions()
+            .locked_address(
+                self.address(),
+                context.transaction.creation_slot(),
+                context.protocol_parameters.min_committable_age(),
+                context.protocol_parameters.max_committable_age(),
+            )
+            // Safe to unwrap, AccountOutput can't have an expiration unlock condition.
+            .unwrap()
+            .unlock(unlock, context)?;
 
         let account_id = if self.account_id().is_null() {
             AccountId::from(output_id)

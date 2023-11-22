@@ -323,7 +323,16 @@ impl DelegationOutput {
         unlock: &Unlock,
         context: &mut SemanticValidationContext<'_>,
     ) -> Result<(), TransactionFailureReason> {
-        self.address().unlock(unlock, context)
+        self.unlock_conditions()
+            .locked_address(
+                self.address(),
+                context.transaction.creation_slot(),
+                context.protocol_parameters.min_committable_age(),
+                context.protocol_parameters.max_committable_age(),
+            )
+            // Safe to unwrap, DelegationOutput can't have an expiration unlock condition.
+            .unwrap()
+            .unlock(unlock, context)
     }
 
     // Transition, just without full SemanticValidationContext.

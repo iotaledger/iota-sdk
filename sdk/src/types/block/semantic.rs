@@ -192,7 +192,6 @@ impl TryFrom<u8> for TransactionFailureReason {
 
 ///
 pub struct SemanticValidationContext<'a> {
-    pub(crate) protocol_parameters: ProtocolParameters,
     pub(crate) transaction: &'a Transaction,
     pub(crate) transaction_signing_hash: TransactionSigningHash,
     pub(crate) inputs: &'a [(&'a OutputId, &'a Output)],
@@ -208,15 +207,16 @@ pub struct SemanticValidationContext<'a> {
     pub(crate) unlocked_addresses: HashSet<Address>,
     pub(crate) storage_deposit_returns: HashMap<Address, u64>,
     pub(crate) simple_deposits: HashMap<Address, u64>,
+    pub(crate) protocol_parameters: ProtocolParameters,
 }
 
 impl<'a> SemanticValidationContext<'a> {
     ///
     pub fn new(
-        protocol_parameters: ProtocolParameters,
         transaction: &'a Transaction,
         inputs: &'a [(&'a OutputId, &'a Output)],
         unlocks: Option<&'a [Unlock]>,
+        protocol_parameters: ProtocolParameters,
     ) -> Self {
         let transaction_id = transaction.id();
         let input_chains = inputs

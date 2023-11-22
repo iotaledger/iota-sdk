@@ -57,9 +57,9 @@ impl ExpirationUnlockCondition {
     /// be unlocked.
     pub fn is_expired(
         &self,
-        slot_index: impl Into<SlotIndex>,
-        min_committable_age: impl Into<SlotIndex>,
-        max_committable_age: impl Into<SlotIndex>,
+        slot_index: impl Into<SlotIndex> + Copy,
+        min_committable_age: impl Into<SlotIndex> + Copy,
+        max_committable_age: impl Into<SlotIndex> + Copy,
     ) -> Option<bool> {
         let slot_index = slot_index.into();
 
@@ -77,9 +77,9 @@ impl ExpirationUnlockCondition {
     pub fn return_address_expired<'a>(
         &'a self,
         address: &'a Address,
-        slot_index: impl Into<SlotIndex>,
-        min_committable_age: impl Into<SlotIndex>,
-        max_committable_age: impl Into<SlotIndex>,
+        slot_index: impl Into<SlotIndex> + Copy,
+        min_committable_age: impl Into<SlotIndex> + Copy,
+        max_committable_age: impl Into<SlotIndex> + Copy,
     ) -> Option<&'a Address> {
         let slot_index = slot_index.into();
 

@@ -216,7 +216,7 @@ impl BlockIssuerFeature {
     /// Creates a new [`BlockIssuerFeature`].
     #[inline(always)]
     pub fn new(
-        expiry_slot: impl Into<SlotIndex>,
+        expiry_slot: impl Into<SlotIndex> + Copy,
         block_issuer_keys: impl IntoIterator<Item = BlockIssuerKey>,
     ) -> Result<Self, Error> {
         let block_issuer_keys =

@@ -37,10 +37,10 @@ pub fn verify_semantic(
         .collect::<Vec<(&OutputId, &Output)>>();
 
     let context = SemanticValidationContext::new(
-        protocol_parameters,
         transaction_payload.transaction(),
         &inputs,
         Some(transaction_payload.unlocks()),
+        protocol_parameters,
     );
 
     Ok(context.validate()?)

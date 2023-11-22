@@ -92,7 +92,7 @@ where
                 protocol_parameters.min_committable_age(),
                 protocol_parameters.max_committable_age(),
             );
-            if is_expired == None {
+            if is_expired.is_none() {
                 // If the output is in a deadzone because of expiration, then it cannot be consolidated.
                 return Ok(false);
             }
@@ -105,8 +105,8 @@ where
                 wallet_address,
                 output_data,
                 slot_index,
-                protocol_parameters.min_committable_age().into(),
-                protocol_parameters.max_committable_age().into(),
+                protocol_parameters.min_committable_age(),
+                protocol_parameters.max_committable_age(),
             )?
         } else {
             false

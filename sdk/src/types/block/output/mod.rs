@@ -273,9 +273,9 @@ impl Output {
     /// If no `account_transition` has been provided, assumes a state transition.
     pub fn required_address(
         &self,
-        slot_index: impl Into<SlotIndex>,
-        min_committable_age: impl Into<SlotIndex>,
-        max_committable_age: impl Into<SlotIndex>,
+        slot_index: impl Into<SlotIndex> + Copy,
+        min_committable_age: impl Into<SlotIndex> + Copy,
+        max_committable_age: impl Into<SlotIndex> + Copy,
     ) -> Result<Option<Address>, Error> {
         Ok(match self {
             Self::Basic(output) => output
