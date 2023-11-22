@@ -6,7 +6,7 @@ use alloc::boxed::Box;
 use derive_more::Deref;
 use packable::{prefix::BoxedSlicePrefix, Packable};
 
-use crate::types::block::{address::WeightedAddressCount, unlock::Unlock, Error};
+use crate::types::block::{address::WeightedAddressCount, protocol::WorkScore, unlock::Unlock, Error};
 
 pub(crate) type UnlocksCount = WeightedAddressCount;
 
@@ -37,6 +37,8 @@ impl MultiUnlock {
         &self.0
     }
 }
+
+impl WorkScore for MultiUnlock {}
 
 fn verify_unlocks<const VERIFY: bool>(unlocks: &[Unlock]) -> Result<(), Error> {
     if VERIFY && unlocks.iter().any(Unlock::is_multi) {
