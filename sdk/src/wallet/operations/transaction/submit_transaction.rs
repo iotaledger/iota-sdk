@@ -23,7 +23,7 @@ where
 
         let block = self
             .client()
-            // TODO IssuerID
+            // TODO https://github.com/iotaledger/iota-sdk/issues/1665 to set IssuerId
             .build_basic_block(IssuerId::null(), Some(Payload::from(transaction_payload)))
             .await?
             .sign_ed25519(

@@ -323,7 +323,7 @@ impl Output {
                 if !current_state.is_implicit_account() {
                     Err(StateTransitionError::UnsupportedStateTransition)
                 } else {
-                    // TODO
+                    // TODO https://github.com/iotaledger/iota-sdk/issues/1664
                     Ok(())
                 }
             }

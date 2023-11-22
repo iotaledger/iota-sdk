@@ -459,7 +459,7 @@ impl InputSelection {
                             }
                         }
                         Output::Basic(_) => {
-                            // TODO
+                            // TODO https://github.com/iotaledger/iota-sdk/issues/1664
                         }
                         _ => unreachable!(),
                     }
