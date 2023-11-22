@@ -137,6 +137,16 @@ class NativeTokenFeature extends Feature {
         this.id = nativeToken.id;
         this.amount = nativeToken.amount;
     }
+
+    /**
+     * Returns the native token contained in this feature.
+     */
+    public asNativeToken(): INativeToken {
+        return {
+            id: this.id,
+            amount: this.amount,
+        };
+    }
 }
 
 /**
