@@ -53,7 +53,7 @@ where
             .with_mana(implicit_account.mana())
             .with_unlock_conditions([AddressUnlockCondition::from(implicit_account.address().clone())])
             .with_features([BlockIssuerFeature::new(
-                0,
+                u32::MAX,
                 BlockIssuerKeys::from_vec(vec![BlockIssuerKey::from(Ed25519BlockIssuerKey::from(public_key))])?,
             )?])
             .finish_output()?;
