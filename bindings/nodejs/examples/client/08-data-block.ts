@@ -31,7 +31,7 @@ async function run() {
 
     const secretManager = new SecretManager(mnemonicSecretManager);
 
-    const client = new Client({
+    const client = await Client.create({
         // Insert your node URL in the .env.
         nodes: [process.env.NODE_URL],
     });

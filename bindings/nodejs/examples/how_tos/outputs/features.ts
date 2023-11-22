@@ -23,7 +23,7 @@ require('dotenv').config({ path: '.env' });
 async function run() {
     initLogger();
 
-    const client = new Client({});
+    const client = await Client.create({});
 
     try {
         const hexAddress = Utils.bech32ToHex(

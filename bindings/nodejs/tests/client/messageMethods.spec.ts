@@ -14,13 +14,15 @@ import {
 } from '../../';
 import '../customMatchers';
 
-const client = new Client({
-    nodes: [
-        {
-            url: process.env.NODE_URL || 'http://localhost:14265',
-        },
-    ],
-});
+async function makeClient(): Promise<Client> {
+    return await Client.create({
+        nodes: [
+            {
+                url: process.env.NODE_URL || 'http://localhost:14265',
+            },
+        ],
+    });
+}
 
 const secretManager = new SecretManager({
     mnemonic:
@@ -40,6 +42,7 @@ const chain = {
 // Skip for CI
 describe.skip('Block methods', () => {
     it('sends a block raw', async () => {
+        const client = await makeClient();
         const unsignedBlock = await client.buildBasicBlock(
             issuerId,
             new TaggedDataPayload(utf8ToHex('Hello'), utf8ToHex('Tangle')),
@@ -52,6 +55,7 @@ describe.skip('Block methods', () => {
     });
 
     it('finds blocks by block IDs', async () => {
+        const client = await makeClient();
         const blockIds = await client.getTips();
         const blocks = await client.findBlocks(blockIds);
 
@@ -59,6 +63,7 @@ describe.skip('Block methods', () => {
     });
 
     it('gets block as raw bytes', async () => {
+        const client = await makeClient();
         const tips = await client.getTips();
 
         const blockRaw = await client.getBlockRaw(tips[0]);

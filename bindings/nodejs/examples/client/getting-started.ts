@@ -8,7 +8,7 @@ import { Client } from '@iota/sdk';
 
 // In this example we will get information about the node
 async function run() {
-    const client = new Client({
+    const client = await Client.create({
         nodes: ['https://api.testnet.shimmer.network'],
     });
 

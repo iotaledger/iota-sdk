@@ -18,13 +18,15 @@ import 'dotenv/config';
 import * as addressOutputs from '../fixtures/addressOutputs.json';
 import { AddressUnlockCondition } from '../../lib';
 
-const client = new Client({
-    nodes: [
-        {
-            url: process.env.NODE_URL || 'http://localhost:14265',
-        },
-    ],
-});
+async function makeClient(): Promise<Client> {
+    return await Client.create({
+        nodes: [
+            {
+                url: process.env.NODE_URL || 'http://localhost:14265',
+            },
+        ],
+    });
+}
 
 const secretManager = new SecretManager({
     mnemonic:
@@ -44,6 +46,7 @@ const chain = {
 // Skip for CI
 describe.skip('Main examples', () => {
     it('gets info about the node', async () => {
+        const client = await makeClient();
         const info = await client.getInfo();
 
         expect(
@@ -78,6 +81,7 @@ describe.skip('Main examples', () => {
     // });
 
     it('gets address outputs', async () => {
+        const client = await makeClient();
         const outputIdsResponse = await client.basicOutputIds({
             address: 'rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy',
             hasExpiration: false,
@@ -97,6 +101,7 @@ describe.skip('Main examples', () => {
     });
 
     it('gets the output of a known output ID', async () => {
+        const client = await makeClient();
         const output = await client.getOutput(
             '0xc1d95ac9c8c0237c6929faf427556c3562055a7155c6d336ee7891691d5525c90100',
         );
@@ -115,6 +120,7 @@ describe.skip('Main examples', () => {
         });
         expect(addresses[0]).toBeValidAddress();
 
+        const client = await makeClient();
         // Get output ids of outputs that can be controlled by this address without further unlock constraints
         const outputIdsResponse = await client.basicOutputIds({
             address: addresses[0],
@@ -168,6 +174,7 @@ describe.skip('Main examples', () => {
     // });
 
     it('gets block data', async () => {
+        const client = await makeClient();
         const tips = await client.getTips();
         const params = await client.getProtocolParameters();
 
@@ -180,6 +187,7 @@ describe.skip('Main examples', () => {
     });
 
     it('sends a block with a tagged data payload', async () => {
+        const client = await makeClient();
         const unsignedBlock = await client.buildBasicBlock(
             issuerId,
             new TaggedDataPayload(utf8ToHex('Hello'), utf8ToHex('Tangle')),
@@ -195,6 +203,7 @@ describe.skip('Main examples', () => {
     });
 
     it('sends a transaction', async () => {
+        const client = await makeClient();
         const addresses = await secretManager.generateEd25519Addresses({
             range: {
                 start: 1,
@@ -220,7 +229,7 @@ describe.skip('Main examples', () => {
     });
 
     it('destroy', async () => {
-        const client = new Client({
+        const client = await Client.create({
             nodes: [
                 {
                     url: process.env.NODE_URL || 'http://localhost:14265',

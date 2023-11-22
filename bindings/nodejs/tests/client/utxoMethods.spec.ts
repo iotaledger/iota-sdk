@@ -7,17 +7,20 @@ import 'dotenv/config';
 import { Client } from '../../lib/client';
 import '../customMatchers';
 
-const client = new Client({
-    nodes: [
-        {
-            url: process.env.NODE_URL || 'http://localhost:14265',
-        },
-    ],
-});
+async function makeClient(): Promise<Client> {
+    return await Client.create({
+        nodes: [
+            {
+                url: process.env.NODE_URL || 'http://localhost:14265',
+            },
+        ],
+    });
+}
 
 // Skip for CI
 describe.skip('UTXO methods', () => {
     it('gets accounts output IDs', async () => {
+        const client = await makeClient();
         const accountsOutputIds = await client.accountOutputIds(
             {
                 address:
@@ -29,6 +32,7 @@ describe.skip('UTXO methods', () => {
     });
 
     it('gets nfts output IDs', async () => {
+        const client = await makeClient();
         const nftsOutputIds = await client.nftOutputIds(
             {
                 address:
@@ -40,6 +44,7 @@ describe.skip('UTXO methods', () => {
     });
 
     it('gets foundries output IDs', async () => {
+        const client = await makeClient();
         const foundriesOutputIds = await client.foundryOutputIds(
             {
                 hasNativeToken: true,
@@ -51,6 +56,7 @@ describe.skip('UTXO methods', () => {
 
     // TODO: get valid IDs to test with
     it('get account/nft/foundry outputId rejects with 404 for invalid IDs', async () => {
+        const client = await makeClient();
         await expect(
             client.accountOutputId(
                 '0x03119f37e7ad40608fc7ab15db49390abc233648c95e78141ff2e298f60d7a95',

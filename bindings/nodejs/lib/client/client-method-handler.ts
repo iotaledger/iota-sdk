@@ -14,19 +14,22 @@ import type { IClientOptions, __ClientMethods__ } from '../types/client';
  * The MethodHandler which sends the commands to the Rust side.
  */
 export class ClientMethodHandler {
-    methodHandler: ClientMethodHandler;
+    methodHandler: any;
 
     /**
-     * @param options client options or a client method handler.
+     * @param methodHandler The Rust method handler created in `ClientMethodHandler.create()`.
      */
-    constructor(options: IClientOptions | ClientMethodHandler) {
+     constructor(methodHandler: any) {
+        this.methodHandler = methodHandler;
+    }
+
+    /**
+     * @param options The client options.
+     */
+    static async create(options: IClientOptions): Promise<ClientMethodHandler> {
         try {
-            // The rust client object is not extensible
-            if (Object.isExtensible(options)) {
-                this.methodHandler = createClient(JSON.stringify(options));
-            } else {
-                this.methodHandler = options as ClientMethodHandler;
-            }
+            const methodHandler = await createClient(JSON.stringify(options));
+            return new ClientMethodHandler(methodHandler);
         } catch (error: any) {
             throw errorHandle(error);
         }

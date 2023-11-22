@@ -9,7 +9,9 @@ import { Client, SecretManager, Utils } from '../../';
 import '../customMatchers';
 import { SlotCommitment } from '../../out/types/block/slot';
 
-const offlineClient = new Client({});
+async function makeOfflineClient(): Promise<Client> {
+    return await Client.create({});
+}
 
 describe('Client utility methods', () => {
     // Requires "stronghold" in cargo toml iota-client features
@@ -43,6 +45,7 @@ describe('Client utility methods', () => {
 
         expect(hexAddress.slice(0, 2)).toBe('0x');
 
+        let offlineClient = await makeOfflineClient();
         const bech32Address = await offlineClient.hexToBech32(
             hexAddress,
             'rms',
@@ -84,6 +87,7 @@ describe('Client utility methods', () => {
         const accountId =
             '0xcf077d276686ba64c0404b9eb2d15556782113c5a1985f262b70f9964d3bbd7f';
 
+        const offlineClient = await makeOfflineClient();
         const accountAddress = await offlineClient.accountIdToBech32(
             accountId,
             'rms',

@@ -36,7 +36,7 @@ impl From<serde_json::error::Error> for NodejsError {
 
 impl From<NodejsError> for Error {
     fn from(error: NodejsError) -> Self {
-        build_js_error(&serde_json::to_string(&error).expect("json to string error"))
+        Error::new(Status::GenericFailure, serde_json::to_string(&error).expect("json to string error"))
     }
 }
 
@@ -44,19 +44,16 @@ impl From<NodejsError> for Error {
 pub fn init_logger(config: String) -> Result<()> {
     match rust_init_logger(config) {
         Ok(_) => Ok(()),
-        Err(err) => Err(build_js_error(
-            &serde_json::to_string(&Response::Panic(err.to_string())).expect("json to string error"),
-        )),
+        Err(err) => Err(build_js_error(Response::Panic(err.to_string()))),
     }
 }
 
 // Util fn for making the "X was destroyed" error message.
 pub(crate) fn destroy(instance: &str) -> Error {
-    build_js_error(&serde_json::to_string(&format!("{} was destroyed", instance)).expect("json to string error"))
+    build_js_error(Response::Panic(format!("{} was destroyed", instance)))
 }
 
 // Serializes a bindings response and puts it in a napi Error.
-// Message msut be a valid json string.
-pub(crate) fn build_js_error(message: &str) -> Error {
-    Error::new(Status::GenericFailure, message)
+pub(crate) fn build_js_error(response: Response) -> Error {
+    Error::new(Status::GenericFailure, serde_json::to_string(&response).expect("json to string error"))
 }

@@ -15,7 +15,7 @@ import {
     __WalletMethod__,
     Event,
 } from '../types/wallet';
-import { Client } from '../client';
+import { Client, ClientMethodHandler } from '../client';
 import { SecretManager } from '../secret_manager';
 import { errorHandle } from '..';
 
@@ -101,7 +101,7 @@ export class WalletMethodHandler {
     async getClient(): Promise<Client> {
         try {
             const result = await getClient(this.methodHandler);
-            return new Client(result);
+            return new Client(new ClientMethodHandler(result));
         } catch (error: any) {
             throw errorHandle(error);
         }

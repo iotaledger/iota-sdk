@@ -68,12 +68,18 @@ export class Client {
     private methodHandler: ClientMethodHandler;
 
     /**
-     * @param options client options or a client method handler.
+     * @param methodHandler The Rust method handler created in `ClientMethodHandler.create()`.
      */
-    constructor(options: IClientOptions | ClientMethodHandler) {
-        this.methodHandler = new ClientMethodHandler(options);
+    constructor(methodHandler: ClientMethodHandler) {
+        this.methodHandler = methodHandler;
     }
 
+    /**
+     * @param options The wallet options.
+     */
+    static async create(options: IClientOptions): Promise<Client> {
+        return new Client(await ClientMethodHandler.create(options));
+    }
     async destroy(): Promise<void> {
         this.methodHandler.destroy();
     }
