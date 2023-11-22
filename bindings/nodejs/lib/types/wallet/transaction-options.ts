@@ -77,7 +77,7 @@ export interface CreateNativeTokenParams {
 /** Options for minting NFTs. */
 export interface MintNftParams {
     /** Bech32 encoded address to which the Nft will be minted. Default will use the
-     * first address of the account
+     * address of the wallet.
      */
     address?: Bech32Address;
     /** Bech32 encoded sender address **/
@@ -95,7 +95,7 @@ export interface MintNftParams {
 /** Options for the account output creation */
 export interface AccountOutputParams {
     /** Bech32 encoded address to which the Nft will be minted. Default will use the
-     * first address of the account
+     * address of the wallet.
      */
     address?: Bech32Address;
     /** Hex encoded bytes */

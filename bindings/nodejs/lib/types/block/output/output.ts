@@ -243,10 +243,6 @@ class AnchorOutput extends ImmutableFeaturesOutput {
      * The amount of (stored) Mana held by the output.
      */
     readonly mana: u64;
-    /**
-     * Metadata that can only be changed by the state controller.
-     */
-    readonly stateMetadata?: HexEncodedString;
 
     /**
      * @param amount The amount of the output.
@@ -254,7 +250,6 @@ class AnchorOutput extends ImmutableFeaturesOutput {
      * @param anchorId The anchor ID as hex-encoded string.
      * @param stateIndex A counter that must increase by 1 every time the anchor output is state transitioned.
      * @param unlockConditions The unlock conditions of the output.
-     * @param stateMetadata Metadata that can only be changed by the state controller.
      */
     constructor(
         amount: u64,
@@ -262,13 +257,11 @@ class AnchorOutput extends ImmutableFeaturesOutput {
         anchorId: AnchorId,
         stateIndex: number,
         unlockConditions: UnlockCondition[],
-        stateMetadata?: HexEncodedString,
     ) {
         super(OutputType.Account, amount, unlockConditions);
         this.anchorId = anchorId;
         this.stateIndex = stateIndex;
         this.mana = mana;
-        this.stateMetadata = stateMetadata;
     }
 }
 

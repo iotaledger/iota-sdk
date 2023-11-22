@@ -10,7 +10,7 @@ use crypto::{
 use derive_more::{AsRef, Deref, From};
 use packable::Packable;
 
-use crate::types::block::Error;
+use crate::types::block::{output::StorageScore, Error};
 
 /// An Ed25519 address.
 #[derive(Clone, Copy, Eq, PartialEq, Ord, PartialOrd, Hash, From, AsRef, Deref, Packable)]
@@ -25,15 +25,21 @@ impl Ed25519Address {
 
     /// Creates a new [`Ed25519Address`].
     #[inline(always)]
-    pub fn new(address: [u8; Self::LENGTH]) -> Self {
-        Self::from(address)
+    pub const fn new(address: [u8; Self::LENGTH]) -> Self {
+        Self(address)
+    }
+
+    pub(crate) const fn null() -> Self {
+        Self([0; Self::LENGTH])
     }
 
     /// Creates a new [`Ed25519Address`] from the bytes of a [`PublicKey`].
-    pub fn from_public_key_bytes(public_key_bytes: [u8; PublicKey::LENGTH]) -> Result<Self, Error> {
-        Ok(Self::new(Blake2b256::digest(public_key_bytes).try_into()?))
+    pub fn from_public_key_bytes(public_key_bytes: [u8; PublicKey::LENGTH]) -> Self {
+        Self::new(Blake2b256::digest(public_key_bytes).into())
     }
 }
+
+impl StorageScore for Ed25519Address {}
 
 impl FromStr for Ed25519Address {
     type Err = Error;

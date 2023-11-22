@@ -19,13 +19,11 @@ async function run() {
             );
         }
 
-        const wallet = new Wallet({
+        const wallet = await Wallet.create({
             storagePath: process.env.WALLET_DB_PATH,
         });
 
-        const account = await wallet.getAccount('Alice');
-
-        await account.sync();
+        await wallet.sync();
 
         // To sign a transaction we need to unlock stronghold.
         await wallet.setStrongholdPassword(process.env.STRONGHOLD_PASSWORD);
@@ -35,7 +33,7 @@ async function run() {
             'rms1qrrv7flg6lz5cssvzv2lsdt8c673khad060l4quev6q09tkm9mgtupgf0h0';
         const amount = BigInt(1000000);
 
-        const response = await account.send(amount, address);
+        const response = await wallet.send(amount, address);
 
         console.log(
             `Block sent: ${process.env.EXPLORER_URL}/block/${response.blockId}`,

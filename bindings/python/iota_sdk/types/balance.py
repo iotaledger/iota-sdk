@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import List, Optional
 from dataclasses import dataclass, field
 from dataclasses_json import config
-from iota_sdk.types.common import HexStr, json
+from iota_sdk.types.common import hex_str_decoder, HexStr, json
 
 
 @json
@@ -64,11 +64,11 @@ class NativeTokensBalance:
     token_id: HexStr
     total: int = field(metadata=config(
         encoder=hex,
-        decoder=lambda v: int(v, 16)
+        decoder=hex_str_decoder,
     ))
     available: int = field(metadata=config(
         encoder=hex,
-        decoder=lambda v: int(v, 16)
+        decoder=hex_str_decoder,
     ))
     metadata: Optional[HexStr]
 

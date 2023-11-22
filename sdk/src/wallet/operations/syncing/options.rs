@@ -3,31 +3,17 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::types::block::address::Bech32Address;
-
-const DEFAULT_ADDRESS_START_INDEX: u32 = 0;
 const DEFAULT_FORCE_SYNCING: bool = false;
 const DEFAULT_SYNC_INCOMING_TRANSACTIONS: bool = false;
 const DEFAULT_SYNC_ONLY_MOST_BASIC_OUTPUTS: bool = false;
 const DEFAULT_SYNC_PENDING_TRANSACTIONS: bool = true;
 const DEFAULT_SYNC_NATIVE_TOKEN_FOUNDRIES: bool = false;
+const DEFAULT_SYNC_IMPLICIT_ACCOUNTS: bool = false;
 
 /// The synchronization options
 #[derive(Debug, Clone, Eq, PartialEq, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SyncOptions {
-    /// Specific Bech32 encoded addresses of the account to sync, if addresses are provided, then `address_start_index`
-    /// will be ignored
-    #[serde(default)]
-    pub addresses: Vec<Bech32Address>,
-    /// Address index from which to start syncing addresses. 0 by default, using a higher index will be faster because
-    /// addresses with a lower index will be skipped, but could result in a wrong balance for that reason
-    #[serde(default = "default_address_start_index")]
-    pub address_start_index: u32,
-    /// Address index from which to start syncing internal addresses. 0 by default, using a higher index will be faster
-    /// because addresses with a lower index will be skipped, but could result in a wrong balance for that reason
-    #[serde(default = "default_address_start_index")]
-    pub address_start_index_internal: u32,
     /// Usually syncing is skipped if it's called in between 200ms, because there can only be new changes every
     /// milestone and calling it twice "at the same time" will not return new data
     /// When this to true, we will sync anyways, even if it's called 0ms after the las sync finished.
@@ -40,7 +26,7 @@ pub struct SyncOptions {
     /// Checks pending transactions and reissues them if necessary.
     #[serde(default = "default_sync_pending_transactions")]
     pub sync_pending_transactions: bool,
-    /// Specifies what outputs should be synced for the ed25519 addresses from the wallet.
+    /// Specifies what outputs should be synced for the ed25519 address from the wallet.
     #[serde(default)]
     pub wallet: WalletSyncOptions,
     /// Specifies what outputs should be synced for the address of an account output.
@@ -50,16 +36,15 @@ pub struct SyncOptions {
     #[serde(default)]
     pub nft: NftSyncOptions,
     /// Specifies if only basic outputs with an AddressUnlockCondition alone should be synced, will overwrite
-    /// `account`, `alias` and `nft` options.
+    /// `wallet`, `account` and `nft` options.
     #[serde(default = "default_sync_only_most_basic_outputs")]
     pub sync_only_most_basic_outputs: bool,
     /// Sync native token foundries, so their metadata can be returned in the balance.
     #[serde(default = "default_sync_native_token_foundries")]
     pub sync_native_token_foundries: bool,
-}
-
-fn default_address_start_index() -> u32 {
-    DEFAULT_ADDRESS_START_INDEX
+    /// Sync implicit accounts.
+    #[serde(default = "default_sync_implicit_accounts")]
+    pub sync_implicit_accounts: bool,
 }
 
 fn default_force_syncing() -> bool {
@@ -82,12 +67,13 @@ fn default_sync_native_token_foundries() -> bool {
     DEFAULT_SYNC_NATIVE_TOKEN_FOUNDRIES
 }
 
+fn default_sync_implicit_accounts() -> bool {
+    DEFAULT_SYNC_IMPLICIT_ACCOUNTS
+}
+
 impl Default for SyncOptions {
     fn default() -> Self {
         Self {
-            addresses: Vec::new(),
-            address_start_index: default_address_start_index(),
-            address_start_index_internal: default_address_start_index(),
             sync_incoming_transactions: default_sync_incoming_transactions(),
             sync_pending_transactions: default_sync_pending_transactions(),
             wallet: WalletSyncOptions::default(),
@@ -96,6 +82,7 @@ impl Default for SyncOptions {
             sync_only_most_basic_outputs: default_sync_only_most_basic_outputs(),
             sync_native_token_foundries: default_sync_native_token_foundries(),
             force_syncing: default_force_syncing(),
+            sync_implicit_accounts: default_sync_implicit_accounts(),
         }
     }
 }

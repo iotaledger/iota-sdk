@@ -66,21 +66,17 @@ impl InputSelection {
         let native_tokens_remainder = native_tokens_diff.is_some();
 
         let mut remainder_builder =
-            BasicOutputBuilder::new_with_minimum_storage_deposit(self.protocol_parameters.rent_structure())
+            BasicOutputBuilder::new_with_minimum_amount(self.protocol_parameters.storage_score_parameters())
                 .add_unlock_condition(AddressUnlockCondition::new(Address::from(Ed25519Address::from(
                     [0; 32],
                 ))));
 
-        if let Some(native_tokens) = native_tokens_diff {
-            remainder_builder = remainder_builder.with_native_tokens(native_tokens);
-        }
+        // TODO https://github.com/iotaledger/iota-sdk/issues/1631
+        // if let Some(native_tokens) = native_tokens_diff {
+        //     remainder_builder = remainder_builder.with_native_tokens(native_tokens);
+        // }
 
-        Ok((
-            remainder_builder
-                .finish_output(self.protocol_parameters.token_supply())?
-                .amount(),
-            native_tokens_remainder,
-        ))
+        Ok((remainder_builder.finish_output()?.amount(), native_tokens_remainder))
     }
 
     pub(crate) fn remainder_and_storage_deposit_return_outputs(
@@ -97,7 +93,7 @@ impl InputSelection {
                 let diff = amount - output_sdr_amount;
                 let srd_output = BasicOutputBuilder::new_with_amount(diff)
                     .with_unlock_conditions([AddressUnlockCondition::new(address.clone())])
-                    .finish_output(self.protocol_parameters.token_supply())?;
+                    .finish_output()?;
 
                 // TODO verify_storage_deposit ?
 
@@ -136,19 +132,17 @@ impl InputSelection {
         remainder_builder =
             remainder_builder.add_unlock_condition(AddressUnlockCondition::new(remainder_address.clone()));
 
-        if let Some(native_tokens) = native_tokens_diff {
-            log::debug!("Adding {native_tokens:?} to remainder output for {remainder_address:?}");
-            remainder_builder = remainder_builder.with_native_tokens(native_tokens);
-        }
+        // TODO https://github.com/iotaledger/iota-sdk/issues/1631
+        // if let Some(native_tokens) = native_tokens_diff {
+        //     log::debug!("Adding {native_tokens:?} to remainder output for {remainder_address:?}");
+        //     remainder_builder = remainder_builder.with_native_tokens(native_tokens);
+        // }
 
-        let remainder = remainder_builder.finish_output(self.protocol_parameters.token_supply())?;
+        let remainder = remainder_builder.finish_output()?;
 
         log::debug!("Created remainder output of {diff} for {remainder_address:?}");
 
-        remainder.verify_storage_deposit(
-            self.protocol_parameters.rent_structure(),
-            self.protocol_parameters.token_supply(),
-        )?;
+        remainder.verify_storage_deposit(self.protocol_parameters.storage_score_parameters())?;
 
         Ok((
             Some(RemainderData {

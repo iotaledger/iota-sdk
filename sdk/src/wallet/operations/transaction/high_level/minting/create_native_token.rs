@@ -133,8 +133,7 @@ where
         options: impl Into<Option<TransactionOptions>> + Send,
     ) -> crate::wallet::Result<PreparedCreateNativeTokenTransaction> {
         log::debug!("[TRANSACTION] create_native_token");
-        let rent_structure = self.client().get_rent_structure().await?;
-        let token_supply = self.client().get_token_supply().await?;
+        let storage_score_params = self.client().get_storage_score_parameters().await?;
 
         let (account_id, account_output) = self
             .get_account_output(params.account_id)
@@ -156,10 +155,10 @@ where
             let token_id = TokenId::from(foundry_id);
 
             let outputs = [
-                new_account_output_builder.finish_output(token_supply)?,
+                new_account_output_builder.finish_output()?,
                 {
-                    let mut foundry_builder = FoundryOutputBuilder::new_with_minimum_storage_deposit(
-                        rent_structure,
+                    let mut foundry_builder = FoundryOutputBuilder::new_with_minimum_amount(
+                        storage_score_params,
                         account_output.foundry_counter() + 1,
                         TokenScheme::Simple(SimpleTokenScheme::new(
                             params.circulating_supply,
@@ -175,7 +174,7 @@ where
                         foundry_builder = foundry_builder.add_immutable_feature(MetadataFeature::new(foundry_metadata)?)
                     }
 
-                    foundry_builder.finish_output(token_supply)?
+                    foundry_builder.finish_output()?
                 }, // Native Tokens will be added automatically in the remainder output in try_select_inputs()
             ];
 

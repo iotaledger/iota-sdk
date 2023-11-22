@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use std::{ops::Deref, sync::Arc};
+use std::sync::Arc;
 
 use iota_sdk_bindings_core::{
     call_secret_manager_method as rust_call_secret_manager_method,
@@ -9,135 +9,64 @@ use iota_sdk_bindings_core::{
         secret::{SecretManager, SecretManagerDto},
         stronghold::StrongholdAdapter,
     },
-    Response, Result, SecretManagerMethod,
+    Response, SecretManagerMethod,
 };
-use neon::prelude::*;
+use napi::{bindgen_prelude::External, Error, Result, Status};
+use napi_derive::napi;
 use tokio::sync::RwLock;
 
-pub struct SecretManagerMethodHandler {
-    channel: Channel,
-    secret_manager: Arc<RwLock<SecretManager>>,
+use crate::NodejsError;
+
+pub type SecretManagerMethodHandler = Arc<RwLock<SecretManager>>;
+
+#[napi(js_name = "createSecretManager")]
+pub fn create_secret_manager(options: String) -> Result<External<SecretManagerMethodHandler>> {
+    let secret_manager_dto = serde_json::from_str::<SecretManagerDto>(&options).map_err(NodejsError::from)?;
+    let secret_manager = SecretManager::try_from(secret_manager_dto).map_err(NodejsError::from)?;
+
+    Ok(External::new(Arc::new(RwLock::new(secret_manager))))
 }
 
-impl Finalize for SecretManagerMethodHandler {}
+#[napi(js_name = "callSecretManagerMethod")]
+pub async fn call_secret_manager_method(
+    secret_manager: External<SecretManagerMethodHandler>,
+    method: String,
+) -> Result<String> {
+    let secret_manager_method = serde_json::from_str::<SecretManagerMethod>(&method).map_err(NodejsError::from)?;
 
-impl SecretManagerMethodHandler {
-    fn new(channel: Channel, options: String) -> Result<Arc<Self>> {
-        let secret_manager_dto = serde_json::from_str::<SecretManagerDto>(&options)?;
-        let secret_manager = SecretManager::try_from(secret_manager_dto)?;
-
-        Ok(Arc::new(Self {
-            channel,
-            secret_manager: Arc::new(RwLock::new(secret_manager)),
-        }))
+    let res = rust_call_secret_manager_method(&*secret_manager.as_ref().read().await, secret_manager_method).await;
+    if matches!(res, Response::Error(_) | Response::Panic(_)) {
+        return Err(Error::new(
+            Status::GenericFailure,
+            serde_json::to_string(&res).map_err(NodejsError::from)?,
+        ));
     }
 
-    pub fn new_with_secret_manager(channel: Channel, secret_manager: Arc<RwLock<SecretManager>>) -> Arc<Self> {
-        Arc::new(Self {
-            channel,
-            secret_manager,
-        })
-    }
-
-    async fn call_method(&self, method: String) -> (String, bool) {
-        match serde_json::from_str::<SecretManagerMethod>(&method) {
-            Ok(method) => {
-                let res = {
-                    let secret_manager = self.secret_manager.read().await;
-                    rust_call_secret_manager_method(&*secret_manager, method).await
-                };
-                let mut is_err = matches!(res, Response::Error(_) | Response::Panic(_));
-
-                let msg = match serde_json::to_string(&res) {
-                    Ok(msg) => msg,
-                    Err(e) => {
-                        is_err = true;
-                        serde_json::to_string(&Response::Error(e.into())).expect("json to string error")
-                    }
-                };
-
-                (msg, is_err)
-            }
-            Err(e) => {
-                log::error!("{:?}", e);
-                (format!("Couldn't parse to method with error - {e:?}"), true)
-            }
-        }
-    }
+    Ok(serde_json::to_string(&res).map_err(NodejsError::from)?)
 }
 
-pub fn create_secret_manager(mut cx: FunctionContext) -> JsResult<JsBox<Arc<SecretManagerMethodHandler>>> {
-    let options = cx.argument::<JsString>(0)?;
-    let options = options.value(&mut cx);
-    let channel = cx.channel();
-
-    let method_handler = SecretManagerMethodHandler::new(channel, options)
-        .or_else(|e| cx.throw_error(serde_json::to_string(&Response::Error(e)).expect("json to string error")))?;
-
-    Ok(cx.boxed(method_handler))
-}
-
-pub fn call_secret_manager_method(mut cx: FunctionContext) -> JsResult<JsUndefined> {
-    let method = cx.argument::<JsString>(0)?;
-    let method = method.value(&mut cx);
-    let method_handler = Arc::clone(cx.argument::<JsBox<Arc<SecretManagerMethodHandler>>>(1)?.deref());
-    let callback = cx.argument::<JsFunction>(2)?.root(&mut cx);
-
-    crate::RUNTIME.spawn(async move {
-        let (response, is_error) = method_handler.call_method(method).await;
-        method_handler.channel.send(move |mut cx| {
-            let cb = callback.into_inner(&mut cx);
-            let this = cx.undefined();
-
-            let args = vec![
-                if is_error {
-                    cx.string(response.clone()).upcast::<JsValue>()
-                } else {
-                    cx.undefined().upcast::<JsValue>()
-                },
-                cx.string(response).upcast::<JsValue>(),
-            ];
-
-            cb.call(&mut cx, this, args)?;
-
-            Ok(())
-        });
-    });
-
-    Ok(cx.undefined())
-}
-
-pub fn migrate_stronghold_snapshot_v2_to_v3(mut cx: FunctionContext) -> JsResult<JsUndefined> {
-    let current_path = cx.argument::<JsString>(0)?.value(&mut cx);
-    let current_password = cx.argument::<JsString>(1)?.value(&mut cx).into();
-    let salt = cx.argument::<JsString>(2)?.value(&mut cx);
-    let rounds = cx.argument::<JsNumber>(3)?.value(&mut cx);
-    let new_path = cx
-        .argument_opt(4)
-        .map(|opt| opt.downcast_or_throw::<JsString, _>(&mut cx))
-        .transpose()?
-        .map(|opt| opt.value(&mut cx));
-    let new_password = cx
-        .argument_opt(5)
-        .map(|opt| opt.downcast_or_throw::<JsString, _>(&mut cx))
-        .transpose()?
-        .map(|opt| opt.value(&mut cx))
-        .map(Into::into);
+#[napi(js_name = "migrateStrongholdSnapshotV2ToV3")]
+pub fn migrate_stronghold_snapshot_v2_to_v3(
+    current_path: String,
+    current_password: String,
+    salt: String,
+    rounds: u32,
+    new_path: Option<String>,
+    new_password: Option<String>,
+) -> Result<()> {
+    let current_password = current_password.into();
+    let new_password = new_password.map(Into::into);
 
     StrongholdAdapter::migrate_snapshot_v2_to_v3(
         &current_path,
         current_password,
         salt,
-        rounds as u32,
+        rounds,
         new_path.as_ref(),
         new_password,
     )
-    .or_else(|e| {
-        cx.throw_error(
-            serde_json::to_string(&Response::Error(e.into()))
-                .expect("the response is generated manually, so unwrap is safe."),
-        )
-    })?;
+    .map_err(iota_sdk_bindings_core::iota_sdk::client::Error::from)
+    .map_err(NodejsError::from)?;
 
-    Ok(cx.undefined())
+    Ok(())
 }

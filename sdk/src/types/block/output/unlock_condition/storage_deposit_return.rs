@@ -1,7 +1,11 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use crate::types::block::{address::Address, output::verify_output_amount, protocol::ProtocolParameters, Error};
+use crate::types::block::{
+    address::Address,
+    output::storage_score::{StorageScore, StorageScoreParameters},
+    protocol::ProtocolParameters,
+};
 
 /// Defines the amount of IOTAs used as storage deposit that have to be returned to the return [`Address`].
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, packable::Packable)]
@@ -10,7 +14,6 @@ pub struct StorageDepositReturnUnlockCondition {
     // The [`Address`] to return the amount to.
     return_address: Address,
     // Amount of IOTA coins the consuming transaction should deposit to `return_address`.
-    #[packable(verify_with = verify_amount_packable)]
     amount: u64,
 }
 
@@ -21,13 +24,11 @@ impl StorageDepositReturnUnlockCondition {
 
     /// Creates a new [`StorageDepositReturnUnlockCondition`].
     #[inline(always)]
-    pub fn new(return_address: impl Into<Address>, amount: u64, token_supply: u64) -> Result<Self, Error> {
-        verify_amount::<true>(amount, token_supply)?;
-
-        Ok(Self {
+    pub fn new(return_address: impl Into<Address>, amount: u64) -> Self {
+        Self {
             return_address: return_address.into(),
             amount,
-        })
+        }
     }
 
     /// Returns the return address.
@@ -43,32 +44,20 @@ impl StorageDepositReturnUnlockCondition {
     }
 }
 
-fn verify_amount<const VERIFY: bool>(amount: u64, token_supply: u64) -> Result<(), Error> {
-    if VERIFY {
-        verify_output_amount(amount, token_supply).map_err(|_| Error::InvalidStorageDepositAmount(amount))?;
+impl StorageScore for StorageDepositReturnUnlockCondition {
+    fn storage_score(&self, params: StorageScoreParameters) -> u64 {
+        self.return_address().storage_score(params)
     }
-
-    Ok(())
-}
-
-fn verify_amount_packable<const VERIFY: bool>(
-    amount: &u64,
-    protocol_parameters: &ProtocolParameters,
-) -> Result<(), Error> {
-    verify_amount::<VERIFY>(*amount, protocol_parameters.token_supply())
 }
 
 #[cfg(feature = "serde")]
-pub(crate) mod dto {
+mod dto {
     use alloc::format;
 
     use serde::{Deserialize, Serialize};
 
     use super::*;
-    use crate::{
-        types::{block::Error, TryFromDto, ValidationParams},
-        utils::serde::string,
-    };
+    use crate::utils::serde::string;
 
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
@@ -105,28 +94,18 @@ pub(crate) mod dto {
         }
     }
 
-    impl TryFromDto for StorageDepositReturnUnlockCondition {
-        type Dto = StorageDepositReturnUnlockConditionDto;
-        type Error = Error;
-
-        fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
-            Ok(if let Some(token_supply) = params.token_supply() {
-                Self::new(dto.return_address, dto.amount, token_supply)?
-            } else {
-                Self {
-                    return_address: dto.return_address,
-                    amount: dto.amount,
-                }
-            })
+    impl From<StorageDepositReturnUnlockConditionDto> for StorageDepositReturnUnlockCondition {
+        fn from(dto: StorageDepositReturnUnlockConditionDto) -> Self {
+            Self {
+                return_address: dto.return_address,
+                amount: dto.amount,
+            }
         }
     }
 
-    impl Serialize for StorageDepositReturnUnlockCondition {
-        fn serialize<S>(&self, s: S) -> Result<S::Ok, S::Error>
-        where
-            S: serde::Serializer,
-        {
-            StorageDepositReturnUnlockConditionDto::from(self).serialize(s)
-        }
-    }
+    crate::impl_serde_typed_dto!(
+        StorageDepositReturnUnlockCondition,
+        StorageDepositReturnUnlockConditionDto,
+        "storage deposit return unlock condition"
+    );
 }

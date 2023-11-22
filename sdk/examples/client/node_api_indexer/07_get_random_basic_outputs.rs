@@ -20,7 +20,7 @@ async fn main() -> Result<()> {
 
     // Take the node URL from command line argument or use one from env as default.
     let node_url = std::env::args()
-        .nth(2)
+        .nth(1)
         .unwrap_or_else(|| std::env::var("NODE_URL").unwrap());
 
     // Create a node client.

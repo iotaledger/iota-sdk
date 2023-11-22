@@ -19,12 +19,12 @@ use iota_sdk::{
             },
             payload::signed_transaction::TransactionId,
             slot::SlotIndex,
-            ConvertTo,
         },
     },
+    utils::ConvertTo,
     wallet::{
         types::{OutputData, TransactionWithMetadata},
-        ConsolidationParams, CreateNativeTokenParams, MintNftParams, OutputsToClaim, SendNativeTokensParams,
+        ConsolidationParams, CreateNativeTokenParams, MintNftParams, OutputsToClaim, SendNativeTokenParams,
         SendNftParams, SendParams, SyncOptions, TransactionOptions, Wallet,
     },
     U256,
@@ -56,6 +56,8 @@ impl WalletCli {
 #[derive(Debug, Subcommand)]
 #[allow(clippy::large_enum_variant)]
 pub enum WalletCommand {
+    /// Lists the accounts of the wallet.
+    Accounts,
     /// Print the wallet address.
     Address,
     /// Print the wallet balance.
@@ -118,6 +120,8 @@ pub enum WalletCommand {
     },
     /// Returns the implicit account creation address of the wallet if it is Ed25519 based.
     ImplicitAccountCreationAddress,
+    /// Lists the implicit accounts of the wallet.
+    ImplicitAccounts,
     /// Mint additional native tokens.
     MintNativeToken {
         /// Token ID to be minted, e.g. 0x087d205988b733d97fb145ae340e27a8b19554d1ceee64574d7e5ff66c45f69e7a0100000000.
@@ -190,7 +194,7 @@ pub enum WalletCommand {
         #[arg(long, default_value_t = false)]
         allow_micro_amount: bool,
     },
-    /// Send native tokens.
+    /// Send a native token.
     /// This will create an output with an expiration and storage deposit return unlock condition.
     SendNativeToken {
         /// Address to send the native tokens to, e.g. rms1qztwng6cty8cfm42nzvq099ev7udhrnk0rw8jt8vttf9kpqnxhpsx869vr3.
@@ -302,6 +306,11 @@ impl FromStr for OutputSelector {
     }
 }
 
+// `accounts` command
+pub async fn accounts_command(wallet: &Wallet) -> Result<(), Error> {
+    print_outputs(wallet.accounts().await, "Accounts:").await
+}
+
 // `address` command
 pub async fn address_command(wallet: &Wallet) -> Result<(), Error> {
     print_wallet_address(wallet).await?;
@@ -409,14 +418,15 @@ pub async fn claimable_outputs_command(wallet: &Wallet) -> Result<(), Error> {
         };
         println_log_info!("{output_id:?} ({kind})");
 
-        if let Some(native_tokens) = output.native_tokens() {
-            if !native_tokens.is_empty() {
-                println_log_info!("  - native token amount:");
-                native_tokens.iter().for_each(|token| {
-                    println_log_info!("    + {} {}", token.amount(), token.token_id());
-                });
-            }
-        }
+        // TODO https://github.com/iotaledger/iota-sdk/issues/1633
+        // if let Some(native_tokens) = output.native_tokens() {
+        //     if !native_tokens.is_empty() {
+        //         println_log_info!("  - native token amount:");
+        //         native_tokens.iter().for_each(|token| {
+        //             println_log_info!("    + {} {}", token.amount(), token.token_id());
+        //         });
+        //     }
+        // }
 
         if let Some(unlock_conditions) = output.unlock_conditions() {
             let deposit_return = unlock_conditions
@@ -562,10 +572,15 @@ pub async fn faucet_command(wallet: &Wallet, address: Option<Bech32Address>, url
 }
 
 // `implicit-account-creation-address` command
-pub async fn implicit_account_creation_address(wallet: &Wallet) -> Result<(), Error> {
+pub async fn implicit_account_creation_address_command(wallet: &Wallet) -> Result<(), Error> {
     println_log_info!("{}", wallet.implicit_account_creation_address().await?);
 
     Ok(())
+}
+
+// `implicit-accounts` command
+pub async fn implicit_accounts_command(wallet: &Wallet) -> Result<(), Error> {
+    print_outputs(wallet.implicit_accounts().await, "Implicit accounts:").await
 }
 
 // `melt-native-token` command
@@ -588,7 +603,7 @@ pub async fn melt_native_token_command(wallet: &Wallet, token_id: String, amount
 }
 
 // `mint-native-token` command
-pub async fn mint_native_token(wallet: &Wallet, token_id: String, amount: String) -> Result<(), Error> {
+pub async fn mint_native_token_command(wallet: &Wallet, token_id: String, amount: String) -> Result<(), Error> {
     let mint_transaction = wallet
         .mint_native_token(
             TokenId::from_str(&token_id)?,
@@ -654,7 +669,7 @@ pub async fn output_command(wallet: &Wallet, selector: OutputSelector) -> Result
     let output = match selector {
         OutputSelector::Id(id) => wallet.get_output(&id).await,
         OutputSelector::Index(index) => {
-            let mut outputs = wallet.outputs(None).await?;
+            let mut outputs = wallet.outputs(None).await;
             outputs.sort_unstable_by(outputs_ordering);
             outputs.into_iter().nth(index)
         }
@@ -671,7 +686,7 @@ pub async fn output_command(wallet: &Wallet, selector: OutputSelector) -> Result
 
 /// `outputs` command
 pub async fn outputs_command(wallet: &Wallet) -> Result<(), Error> {
-    print_outputs(wallet.outputs(None).await?, "Outputs:").await
+    print_outputs(wallet.outputs(None).await, "Outputs:").await
 }
 
 // `send` command
@@ -716,28 +731,27 @@ pub async fn send_native_token_command(
     let address = address.convert()?;
     let transaction = if gift_storage_deposit.unwrap_or(false) {
         // Send native tokens together with the required storage deposit
-        let rent_structure = wallet.client().get_rent_structure().await?;
-        let token_supply = wallet.client().get_token_supply().await?;
+        let storage_params = wallet.client().get_storage_score_parameters().await?;
 
         wallet.client().bech32_hrp_matches(address.hrp()).await?;
 
-        let outputs = [BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)
+        let outputs = [BasicOutputBuilder::new_with_minimum_amount(storage_params)
             .add_unlock_condition(AddressUnlockCondition::new(address))
-            .with_native_tokens([NativeToken::new(
+            .with_native_token(NativeToken::new(
                 TokenId::from_str(&token_id)?,
                 U256::from_dec_str(&amount).map_err(|e| Error::Miscellaneous(e.to_string()))?,
-            )?])
-            .finish_output(token_supply)?];
+            )?)
+            .finish_output()?];
 
         wallet.send_outputs(outputs, None).await?
     } else {
         // Send native tokens with storage deposit return and expiration
-        let outputs = [SendNativeTokensParams::new(
+        let outputs = [SendNativeTokenParams::new(
             address,
-            [(
+            (
                 TokenId::from_str(&token_id)?,
                 U256::from_dec_str(&amount).map_err(|e| Error::Miscellaneous(e.to_string()))?,
-            )],
+            ),
         )?];
         wallet.send_native_tokens(outputs, None).await?
     };
@@ -774,6 +788,7 @@ pub async fn sync_command(wallet: &Wallet) -> Result<(), Error> {
     let balance = wallet
         .sync(Some(SyncOptions {
             sync_native_token_foundries: true,
+            sync_implicit_accounts: true,
             ..Default::default()
         }))
         .await?;
@@ -828,7 +843,7 @@ pub async fn transactions_command(wallet: &Wallet, show_details: bool) -> Result
 
 /// `unspent-outputs` command
 pub async fn unspent_outputs_command(wallet: &Wallet) -> Result<(), Error> {
-    print_outputs(wallet.unspent_outputs(None).await?, "Unspent outputs:").await
+    print_outputs(wallet.unspent_outputs(None).await, "Unspent outputs:").await
 }
 
 pub async fn vote_command(wallet: &Wallet, event_id: ParticipationEventId, answers: Vec<u8>) -> Result<(), Error> {
@@ -917,7 +932,7 @@ async fn print_wallet_address(wallet: &Wallet) -> Result<(), Error> {
         address.inner()
     );
 
-    let unspent_outputs = wallet.unspent_outputs(None).await?;
+    let unspent_outputs = wallet.unspent_outputs(None).await;
     let slot_index = wallet.client().get_slot_index().await?;
 
     let mut output_ids = Vec::new();
@@ -939,8 +954,8 @@ async fn print_wallet_address(wallet: &Wallet) -> Result<(), Error> {
             .required_and_unlocked_address(slot_index, &output_id)?;
 
         if address.inner() == required_address {
-            if let Some(nts) = output_data.output.native_tokens() {
-                native_tokens.add_native_tokens(nts.clone())?;
+            if let Some(nt) = output_data.output.native_token() {
+                native_tokens.add_native_token(*nt)?;
             }
             match &output_data.output {
                 Output::Basic(_) => {}
@@ -1022,7 +1037,7 @@ pub async fn prompt_internal(
     let prompt = if let Some(alias) = wallet.alias().await {
         format!("Wallet \"{alias}\": ")
     } else {
-        format!("Wallet: ")
+        String::from("Wallet: ")
     };
 
     if let Some(helper) = rl.helper_mut() {
@@ -1050,6 +1065,7 @@ pub async fn prompt_internal(
                         }
                     };
                     match protocol_cli.command {
+                        WalletCommand::Accounts => accounts_command(wallet).await,
                         WalletCommand::Address => address_command(wallet).await,
                         WalletCommand::Balance => balance_command(wallet).await,
                         WalletCommand::BurnNativeToken { token_id, amount } => {
@@ -1085,13 +1101,14 @@ pub async fn prompt_internal(
                         }
                         WalletCommand::Faucet { address, url } => faucet_command(wallet, address, url).await,
                         WalletCommand::ImplicitAccountCreationAddress => {
-                            implicit_account_creation_address(wallet).await
+                            implicit_account_creation_address_command(wallet).await
                         }
+                        WalletCommand::ImplicitAccounts => implicit_accounts_command(wallet).await,
                         WalletCommand::MeltNativeToken { token_id, amount } => {
                             melt_native_token_command(wallet, token_id, amount).await
                         }
                         WalletCommand::MintNativeToken { token_id, amount } => {
-                            mint_native_token(wallet, token_id, amount).await
+                            mint_native_token_command(wallet, token_id, amount).await
                         }
                         WalletCommand::MintNft {
                             address,
@@ -1186,11 +1203,17 @@ async fn print_outputs(mut outputs: Vec<OutputData>, title: &str) -> Result<(), 
         outputs.sort_unstable_by(outputs_ordering);
 
         for (i, output_data) in outputs.into_iter().enumerate() {
+            let kind_str = if output_data.output.is_implicit_account() {
+                "ImplicitAccount"
+            } else {
+                output_data.output.kind_str()
+            };
+
             println_log_info!(
-                "{:<5}{}\t{}\t{}",
+                "{:<5}{} {:<16}{}",
                 i,
                 &output_data.output_id,
-                output_data.output.kind_str(),
+                kind_str,
                 if output_data.is_spent { "Spent" } else { "Unspent" },
             );
         }

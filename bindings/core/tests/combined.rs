@@ -1,8 +1,6 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use std::collections::BTreeMap;
-
 use crypto::keys::bip44::Bip44;
 use iota_sdk::{
     client::{
@@ -13,14 +11,14 @@ use iota_sdk::{
     types::{
         block::{
             payload::{dto::PayloadDto, Payload, TaggedDataPayload},
-            BlockDto, IssuerId, SignedBlock,
+            Block, BlockBodyDto, IssuerId,
         },
         TryFromDto,
     },
 };
 use iota_sdk_bindings_core::{
     call_client_method, call_secret_manager_method, CallMethod, ClientMethod, Response, Result, SecretManagerMethod,
-    WalletCommandMethod, WalletMethod, WalletOptions,
+    WalletMethod, WalletOptions,
 };
 use pretty_assertions::assert_eq;
 
@@ -49,9 +47,7 @@ async fn create_wallet() -> Result<()> {
         .await?;
 
     let response = wallet
-        .call_method(WalletMethod::CallMethod {
-            method: WalletCommandMethod::UnspentOutputs { filter_options: None },
-        })
+        .call_method(WalletMethod::UnspentOutputs { filter_options: None })
         .await;
 
     match response {
@@ -136,8 +132,8 @@ async fn client_from_wallet() -> Result<()> {
 //     let unsigned_block = match response {
 //         Response::UnsignedBlock(unsigned_block) => {
 //             match &unsigned_block.block {
-//                 BlockDto::Basic(b) => assert_eq!(b.payload.as_ref(), Some(&payload)),
-//                 BlockDto::Validation(v) => panic!("unexpected block {v:?}"),
+//                 BlockBodyDto::Basic(b) => assert_eq!(b.payload.as_ref(), Some(&payload)),
+//                 BlockBodyDto::Validation(v) => panic!("unexpected block body {v:?}"),
 //             }
 //             unsigned_block
 //         }
@@ -154,13 +150,13 @@ async fn client_from_wallet() -> Result<()> {
 //     )
 //     .await;
 
-//     let signed_block = match response {
-//         Response::SignedBlock(block) => {
-//             match &block.block {
-//                 BlockDto::Basic(b) => assert_eq!(b.payload.as_ref(), Some(&payload)),
-//                 BlockDto::Validation(v) => panic!("unexpected block {v:?}"),
+//     let block = match response {
+//         Response::Block(block) => {
+//             match &block.body {
+//                 BlockBodyDto::Basic(b) => assert_eq!(b.payload.as_ref(), Some(&payload)),
+//                 BlockBodyDto::Validation(v) => panic!("unexpected block {v:?}"),
 //             }
-//             block
+//             block_body
 //         }
 //         _ => panic!("unexpected response {response:?}"),
 //     };
@@ -169,7 +165,7 @@ async fn client_from_wallet() -> Result<()> {
 //     let response = call_client_method(
 //         &client,
 //         ClientMethod::BlockId {
-//             signed_block: signed_block.clone(),
+//             block: block.clone(),
 //         },
 //     )
 //     .await;
@@ -178,7 +174,7 @@ async fn client_from_wallet() -> Result<()> {
 //         Response::BlockId(block_id) => {
 //             assert_eq!(
 //                 block_id,
-//                 SignedBlock::try_from_dto(signed_block)
+//                 Block::try_from_dto(block)
 //                     .unwrap()
 //                     .id(&client.get_protocol_parameters().await.unwrap())
 //             );

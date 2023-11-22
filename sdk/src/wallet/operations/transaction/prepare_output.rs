@@ -6,15 +6,15 @@ use serde::{Deserialize, Serialize};
 use crate::{
     client::secret::SecretManage,
     types::block::{
-        address::{Address, Bech32Address},
+        address::{Address, Bech32Address, Ed25519Address},
         output::{
-            feature::{IssuerFeature, MetadataFeature, SenderFeature, TagFeature},
+            feature::{IssuerFeature, MetadataFeature, NativeTokenFeature, SenderFeature, TagFeature},
             unlock_condition::{
                 AddressUnlockCondition, ExpirationUnlockCondition, StorageDepositReturnUnlockCondition,
                 TimelockUnlockCondition,
             },
-            BasicOutputBuilder, MinimumStorageDepositBasicOutput, NativeToken, NftId, NftOutputBuilder, Output, Rent,
-            RentStructure, UnlockCondition,
+            BasicOutput, BasicOutputBuilder, MinimumOutputAmount, NativeToken, NftId, NftOutputBuilder, Output,
+            StorageScoreParameters, UnlockCondition,
         },
         slot::SlotIndex,
         Error,
@@ -45,23 +45,16 @@ where
     ) -> crate::wallet::Result<Output> {
         log::debug!("[OUTPUT] prepare_output {params:?}");
         let transaction_options = transaction_options.into();
-        let token_supply = self.client().get_token_supply().await?;
 
         self.client().bech32_hrp_matches(params.recipient_address.hrp()).await?;
 
-        let rent_structure = self.client().get_rent_structure().await?;
+        let storage_score_params = self.client().get_storage_score_parameters().await?;
 
         let nft_id = params.assets.as_ref().and_then(|a| a.nft_id);
 
         let (mut first_output_builder, existing_nft_output_data) = self
-            .create_initial_output_builder(params.recipient_address, nft_id, rent_structure)
+            .create_initial_output_builder(params.recipient_address, nft_id, storage_score_params)
             .await?;
-
-        if let Some(assets) = &params.assets {
-            if let Some(native_tokens) = &assets.native_tokens {
-                first_output_builder = first_output_builder.with_native_tokens(native_tokens.clone());
-            }
-        }
 
         if let Some(features) = params.features {
             if let Some(tag) = features.tag {
@@ -86,6 +79,10 @@ where
                 }
                 first_output_builder = first_output_builder.add_immutable_feature(IssuerFeature::new(issuer));
             }
+
+            if let Some(native_token) = &features.native_token {
+                first_output_builder = first_output_builder.with_native_token(*native_token);
+            }
         }
 
         if let Some(unlocks) = params.unlocks {
@@ -105,8 +102,8 @@ where
 
         // Build output with minimum required storage deposit so we can use the amount in the next step
         let first_output = first_output_builder
-            .with_minimum_storage_deposit(rent_structure)
-            .finish_output(token_supply)?;
+            .with_minimum_amount(storage_score_params)
+            .finish_output()?;
 
         let mut second_output_builder = if nft_id.is_some() {
             OutputBuilder::Nft(NftOutputBuilder::from(first_output.as_nft()))
@@ -114,10 +111,11 @@ where
             OutputBuilder::Basic(BasicOutputBuilder::from(first_output.as_basic()))
         };
 
-        let min_storage_deposit_basic_output =
-            MinimumStorageDepositBasicOutput::new(rent_structure, token_supply).finish()?;
+        // TODO: Probably not good to use ed25519 always here, even if technically it's the same for now..
+        let min_amount_basic_output =
+            BasicOutput::minimum_amount(&Address::from(Ed25519Address::null()), storage_score_params);
 
-        let min_required_storage_deposit = first_output.rent_cost(rent_structure);
+        let min_required_storage_deposit = first_output.minimum_amount(storage_score_params);
 
         if params.amount > min_required_storage_deposit {
             second_output_builder = second_output_builder.with_amount(params.amount);
@@ -138,19 +136,18 @@ where
                 second_output_builder =
                     second_output_builder.add_unlock_condition(StorageDepositReturnUnlockCondition::new(
                         remainder_address.clone(),
-                        // Return minimum storage deposit
-                        min_storage_deposit_basic_output,
-                        token_supply,
-                    )?);
+                        // Return minimum amount
+                        min_amount_basic_output,
+                    ));
 
                 // Update output amount, so recipient still gets the provided amount
-                let new_amount = params.amount + min_storage_deposit_basic_output;
+                let new_amount = params.amount + min_amount_basic_output;
                 // new_amount could be not enough because we added the storage deposit return unlock condition, so we
                 // need to check the min required storage deposit again
                 let min_storage_deposit_new_amount = second_output_builder
                     .clone()
-                    .with_minimum_storage_deposit(rent_structure)
-                    .finish_output(token_supply)?
+                    .with_minimum_amount(storage_score_params)
+                    .finish_output()?
                     .amount();
 
                 if new_amount < min_storage_deposit_new_amount {
@@ -160,10 +157,9 @@ where
                     second_output_builder =
                         second_output_builder.replace_unlock_condition(StorageDepositReturnUnlockCondition::new(
                             remainder_address.clone(),
-                            // Return minimum storage deposit
-                            min_storage_deposit_basic_output + additional_required_amount,
-                            token_supply,
-                        )?);
+                            // Return minimum amount
+                            min_amount_basic_output + additional_required_amount,
+                        ));
                 } else {
                     // new_amount is enough
                     second_output_builder = second_output_builder.with_amount(new_amount);
@@ -171,7 +167,7 @@ where
             }
         }
 
-        let third_output = second_output_builder.clone().finish_output(token_supply)?;
+        let third_output = second_output_builder.clone().finish_output()?;
         let mut final_amount = third_output.amount();
         // Now we have to make sure that our output also works with our available balance, without leaving <
         // min_storage_deposit_basic_output for a remainder (if not 0)
@@ -179,7 +175,7 @@ where
         // If we're sending an existing NFT, its minimum required storage deposit is not part of the available base_coin
         // balance, so we add it here
         if let Some(existing_nft_output_data) = existing_nft_output_data {
-            available_base_coin += existing_nft_output_data.output.rent_cost(rent_structure);
+            available_base_coin += existing_nft_output_data.output.minimum_amount(storage_score_params);
         }
 
         if final_amount > available_base_coin {
@@ -194,7 +190,7 @@ where
 
         if final_amount < available_base_coin {
             let remaining_balance = available_base_coin - final_amount;
-            if remaining_balance < min_storage_deposit_basic_output {
+            if remaining_balance < min_amount_basic_output {
                 // not enough for remainder
                 if params
                     .storage_deposit
@@ -216,22 +212,21 @@ where
                         second_output_builder =
                             second_output_builder.replace_unlock_condition(StorageDepositReturnUnlockCondition::new(
                                 remainder_address,
-                                // Return minimum storage deposit
+                                // Return minimum amount
                                 new_sdr_amount,
-                                token_supply,
-                            )?);
+                            ));
                     }
                 } else {
                     // Would leave dust behind, so return what's required for a remainder
                     return Err(crate::wallet::Error::InsufficientFunds {
                         available: available_base_coin,
-                        required: available_base_coin + min_storage_deposit_basic_output - remaining_balance,
+                        required: available_base_coin + min_amount_basic_output - remaining_balance,
                     });
                 }
             }
         }
 
-        Ok(second_output_builder.finish_output(token_supply)?)
+        Ok(second_output_builder.finish_output()?)
     }
 
     // Create the initial output builder for prepare_output()
@@ -239,21 +234,18 @@ where
         &self,
         recipient_address: Bech32Address,
         nft_id: Option<NftId>,
-        rent_structure: RentStructure,
+        params: StorageScoreParameters,
     ) -> crate::wallet::Result<(OutputBuilder, Option<OutputData>)> {
         let (mut first_output_builder, existing_nft_output_data) = if let Some(nft_id) = &nft_id {
             if nft_id.is_null() {
                 // Mint a new NFT output
                 (
-                    OutputBuilder::Nft(NftOutputBuilder::new_with_minimum_storage_deposit(
-                        rent_structure,
-                        *nft_id,
-                    )),
+                    OutputBuilder::Nft(NftOutputBuilder::new_with_minimum_amount(params, *nft_id)),
                     None,
                 )
             } else {
                 // Transition an existing NFT output
-                let unspent_nft_output = self.unspent_nft_output(nft_id).await?;
+                let unspent_nft_output = self.unspent_nft_output(nft_id).await;
 
                 // Find nft output from the inputs
                 let mut first_output_builder = if let Some(nft_output_data) = &unspent_nft_output {
@@ -269,7 +261,7 @@ where
             }
         } else {
             (
-                OutputBuilder::Basic(BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)),
+                OutputBuilder::Basic(BasicOutputBuilder::new_with_minimum_amount(params)),
                 None,
             )
         };
@@ -318,7 +310,6 @@ pub struct OutputParams {
 #[derive(Debug, Default, Clone, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Assets {
-    pub native_tokens: Option<Vec<NativeToken>>,
     pub nft_id: Option<NftId>,
 }
 
@@ -328,6 +319,7 @@ pub struct Features {
     pub metadata: Option<String>,
     pub issuer: Option<Bech32Address>,
     pub sender: Option<Bech32Address>,
+    pub native_token: Option<NativeToken>,
 }
 
 #[derive(Debug, Default, Clone, Eq, PartialEq, Serialize, Deserialize)]
@@ -349,10 +341,10 @@ pub struct StorageDeposit {
 #[derive(Debug, Default, Clone, Copy, Eq, PartialEq, Serialize, Deserialize)]
 #[non_exhaustive]
 pub enum ReturnStrategy {
-    // A storage deposit return unlock condition will be added with the required minimum storage deposit
+    // A storage deposit return unlock condition will be added with the required minimum amount
     #[default]
     Return,
-    // The recipient address will get the additional amount to reach the minimum storage deposit gifted
+    // The recipient address will get the additional amount to reach the minimum amount gifted
     Gift,
 }
 
@@ -413,32 +405,28 @@ impl OutputBuilder {
         }
         self
     }
-    fn with_minimum_storage_deposit(mut self, rent_structure: RentStructure) -> Self {
+    fn with_minimum_amount(mut self, params: StorageScoreParameters) -> Self {
         match self {
             Self::Basic(b) => {
-                self = Self::Basic(b.with_minimum_storage_deposit(rent_structure));
+                self = Self::Basic(b.with_minimum_amount(params));
             }
             Self::Nft(b) => {
-                self = Self::Nft(b.with_minimum_storage_deposit(rent_structure));
+                self = Self::Nft(b.with_minimum_amount(params));
             }
         }
         self
     }
-    fn with_native_tokens(mut self, native_tokens: impl IntoIterator<Item = NativeToken>) -> Self {
-        match self {
-            Self::Basic(b) => {
-                self = Self::Basic(b.with_native_tokens(native_tokens));
-            }
-            Self::Nft(b) => {
-                self = Self::Nft(b.with_native_tokens(native_tokens));
-            }
+    fn with_native_token(mut self, native_token: NativeToken) -> Self {
+        if let Self::Basic(b) = self {
+            self = Self::Basic(b.add_feature(NativeTokenFeature::from(native_token)));
         }
+
         self
     }
-    fn finish_output(self, token_supply: u64) -> Result<Output, crate::types::block::Error> {
+    fn finish_output(self) -> Result<Output, crate::types::block::Error> {
         match self {
-            Self::Basic(b) => b.finish_output(token_supply),
-            Self::Nft(b) => b.finish_output(token_supply),
+            Self::Basic(b) => b.finish_output(),
+            Self::Nft(b) => b.finish_output(),
         }
     }
 }

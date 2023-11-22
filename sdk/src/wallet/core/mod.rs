@@ -33,8 +33,12 @@ use crate::{
     types::{
         block::{
             address::{Address, Bech32Address, Hrp, ImplicitAccountCreationAddress},
-            output::{dto::FoundryOutputDto, AccountId, FoundryId, FoundryOutput, NftId, Output, OutputId, TokenId},
-            payload::signed_transaction::{dto::TransactionDto, Transaction, TransactionId},
+            output::{
+                dto::FoundryOutputDto, AccountId, AnchorId, DelegationId, FoundryId, FoundryOutput, NftId, Output,
+                OutputId, TokenId,
+            },
+            payload::signed_transaction::TransactionId,
+            protocol::ProtocolParameters,
         },
         TryFromDto,
     },
@@ -259,10 +263,10 @@ where
         if let Address::Ed25519(address) = bech32_address.inner() {
             Ok(Bech32Address::new(
                 *bech32_address.hrp(),
-                ImplicitAccountCreationAddress::from(address.clone()),
+                ImplicitAccountCreationAddress::from(*address),
             ))
         } else {
-            return Err(Error::NonEd25519Address);
+            Err(Error::NonEd25519Address)
         }
     }
 
@@ -296,7 +300,7 @@ where
         &self,
         outputs: impl Iterator<Item = &'a OutputData>,
         filter: impl Into<Option<FilterOptions>>,
-    ) -> Result<Vec<OutputData>> {
+    ) -> Vec<OutputData> {
         let filter = filter.into();
 
         if let Some(filter) = filter {
@@ -304,10 +308,19 @@ where
 
             for output in outputs {
                 match &output.output {
-                    Output::Account(alias) => {
+                    Output::Account(account) => {
                         if let Some(account_ids) = &filter.account_ids {
-                            let account_id = alias.account_id_non_null(&output.output_id);
+                            let account_id = account.account_id_non_null(&output.output_id);
                             if account_ids.contains(&account_id) {
+                                filtered_outputs.push(output.clone());
+                                continue;
+                            }
+                        }
+                    }
+                    Output::Anchor(anchor) => {
+                        if let Some(anchor_ids) = &filter.anchor_ids {
+                            let anchor_id = anchor.anchor_id_non_null(&output.output_id);
+                            if anchor_ids.contains(&anchor_id) {
                                 filtered_outputs.push(output.clone());
                                 continue;
                             }
@@ -326,6 +339,15 @@ where
                         if let Some(nft_ids) = &filter.nft_ids {
                             let nft_id = nft.nft_id_non_null(&output.output_id);
                             if nft_ids.contains(&nft_id) {
+                                filtered_outputs.push(output.clone());
+                                continue;
+                            }
+                        }
+                    }
+                    Output::Delegation(delegation) => {
+                        if let Some(delegation_ids) = &filter.delegation_ids {
+                            let delegation_id = delegation.delegation_id_non_null(&output.output_id);
+                            if delegation_ids.contains(&delegation_id) {
                                 filtered_outputs.push(output.clone());
                                 continue;
                             }
@@ -352,56 +374,108 @@ where
                     }
                 }
 
-                // If ids are provided, only return them and no other outputs.
-                if filter.account_ids.is_none() && filter.foundry_ids.is_none() && filter.nft_ids.is_none() {
+                // Include the output if we're not filtering by IDs.
+                if filter.account_ids.is_none()
+                    && filter.anchor_ids.is_none()
+                    && filter.foundry_ids.is_none()
+                    && filter.nft_ids.is_none()
+                    && filter.delegation_ids.is_none()
+                {
                     filtered_outputs.push(output.clone());
                 }
             }
 
-            Ok(filtered_outputs)
+            filtered_outputs
         } else {
-            Ok(outputs.cloned().collect())
+            outputs.cloned().collect()
         }
     }
 
     /// Returns outputs of the wallet.
-    pub async fn outputs(&self, filter: impl Into<Option<FilterOptions>> + Send) -> Result<Vec<OutputData>> {
+    pub async fn outputs(&self, filter: impl Into<Option<FilterOptions>> + Send) -> Vec<OutputData> {
         self.filter_outputs(self.data().await.outputs.values(), filter)
     }
 
     /// Returns unspent outputs of the wallet.
-    pub async fn unspent_outputs(&self, filter: impl Into<Option<FilterOptions>> + Send) -> Result<Vec<OutputData>> {
+    pub async fn unspent_outputs(&self, filter: impl Into<Option<FilterOptions>> + Send) -> Vec<OutputData> {
         self.filter_outputs(self.data().await.unspent_outputs.values(), filter)
     }
 
     /// Gets the unspent account output matching the given ID.
-    pub async fn unspent_account_output(&self, account_id: &AccountId) -> Result<Option<OutputData>> {
+    pub async fn unspent_account_output(&self, account_id: &AccountId) -> Option<OutputData> {
         self.unspent_outputs(FilterOptions {
             account_ids: Some([*account_id].into()),
             ..Default::default()
         })
         .await
-        .map(|res| res.get(0).cloned())
+        .first()
+        .cloned()
+    }
+
+    /// Gets the unspent anchor output matching the given ID.
+    pub async fn unspent_anchor_output(&self, anchor_id: &AnchorId) -> Option<OutputData> {
+        self.unspent_outputs(FilterOptions {
+            anchor_ids: Some([*anchor_id].into()),
+            ..Default::default()
+        })
+        .await
+        .first()
+        .cloned()
     }
 
     /// Gets the unspent foundry output matching the given ID.
-    pub async fn unspent_foundry_output(&self, foundry_id: &FoundryId) -> Result<Option<OutputData>> {
+    pub async fn unspent_foundry_output(&self, foundry_id: &FoundryId) -> Option<OutputData> {
         self.unspent_outputs(FilterOptions {
             foundry_ids: Some([*foundry_id].into()),
             ..Default::default()
         })
         .await
-        .map(|res| res.get(0).cloned())
+        .first()
+        .cloned()
     }
 
     /// Gets the unspent nft output matching the given ID.
-    pub async fn unspent_nft_output(&self, nft_id: &NftId) -> Result<Option<OutputData>> {
+    pub async fn unspent_nft_output(&self, nft_id: &NftId) -> Option<OutputData> {
         self.unspent_outputs(FilterOptions {
             nft_ids: Some([*nft_id].into()),
             ..Default::default()
         })
         .await
-        .map(|res| res.get(0).cloned())
+        .first()
+        .cloned()
+    }
+
+    /// Gets the unspent delegation output matching the given ID.
+    pub async fn unspent_delegation_output(&self, delegation_id: &DelegationId) -> Option<OutputData> {
+        self.unspent_outputs(FilterOptions {
+            delegation_ids: Some([*delegation_id].into()),
+            ..Default::default()
+        })
+        .await
+        .first()
+        .cloned()
+    }
+
+    /// Returns implicit accounts of the wallet.
+    pub async fn implicit_accounts(&self) -> Vec<OutputData> {
+        self.data()
+            .await
+            .unspent_outputs
+            .values()
+            .filter(|output_data| output_data.output.is_implicit_account())
+            .cloned()
+            .collect()
+    }
+
+    /// Returns accounts of the wallet.
+    pub async fn accounts(&self) -> Vec<OutputData> {
+        self.data()
+            .await
+            .unspent_outputs
+            .values()
+            .filter(|output_data| output_data.output.is_account())
+            .cloned()
+            .collect()
     }
 
     /// Returns all incoming transactions of the wallet
@@ -505,13 +579,12 @@ pub struct WalletDataDto {
     pub native_token_foundries: HashMap<FoundryId, FoundryOutputDto>,
 }
 
-impl TryFromDto for WalletData {
-    type Dto = WalletDataDto;
+impl TryFromDto<WalletDataDto> for WalletData {
     type Error = crate::wallet::Error;
 
     fn try_from_dto_with_params_inner(
-        dto: Self::Dto,
-        params: crate::types::ValidationParams<'_>,
+        dto: WalletDataDto,
+        params: Option<&ProtocolParameters>,
     ) -> core::result::Result<Self, Self::Error> {
         Ok(Self {
             bip_path: dto.bip_path,
@@ -520,30 +593,30 @@ impl TryFromDto for WalletData {
             outputs: dto
                 .outputs
                 .into_iter()
-                .map(|(id, o)| Ok((id, OutputData::try_from_dto_with_params(o, &params)?)))
+                .map(|(id, o)| Ok((id, OutputData::try_from(o)?)))
                 .collect::<crate::wallet::Result<_>>()?,
             locked_outputs: dto.locked_outputs,
             unspent_outputs: dto
                 .unspent_outputs
                 .into_iter()
-                .map(|(id, o)| Ok((id, OutputData::try_from_dto_with_params(o, &params)?)))
+                .map(|(id, o)| Ok((id, OutputData::try_from(o)?)))
                 .collect::<crate::wallet::Result<_>>()?,
             transactions: dto
                 .transactions
                 .into_iter()
-                .map(|(id, o)| Ok((id, TransactionWithMetadata::try_from_dto_with_params(o, &params)?)))
+                .map(|(id, o)| Ok((id, TransactionWithMetadata::try_from_dto_with_params_inner(o, params)?)))
                 .collect::<crate::wallet::Result<_>>()?,
             pending_transactions: dto.pending_transactions,
             incoming_transactions: dto
                 .incoming_transactions
                 .into_iter()
-                .map(|(id, o)| Ok((id, TransactionWithMetadata::try_from_dto_with_params(o, &params)?)))
+                .map(|(id, o)| Ok((id, TransactionWithMetadata::try_from_dto_with_params_inner(o, params)?)))
                 .collect::<crate::wallet::Result<_>>()?,
             inaccessible_incoming_transactions: Default::default(),
             native_token_foundries: dto
                 .native_token_foundries
                 .into_iter()
-                .map(|(id, o)| Ok((id, FoundryOutput::try_from_dto_with_params(o, &params)?)))
+                .map(|(id, o)| Ok((id, FoundryOutput::try_from(o)?)))
                 .collect::<crate::wallet::Result<_>>()?,
         })
     }
@@ -597,7 +670,7 @@ mod test {
         types::block::{
             address::{Address, Ed25519Address},
             input::{Input, UtxoInput},
-            output::{AddressUnlockCondition, BasicOutput, Output},
+            output::{AddressUnlockCondition, BasicOutput, Output, StorageScoreParameters},
             payload::signed_transaction::{SignedTransactionPayload, Transaction, TransactionId},
             protocol::ProtocolParameters,
             rand::mana::rand_mana_allotment,
@@ -618,7 +691,7 @@ mod test {
             2,
             "testnet",
             "rms",
-            crate::types::block::output::RentStructure::new(500, 1, 10, 1, 1, 1),
+            StorageScoreParameters::new(500, 1, 10, 1, 1, 1),
             1_813_620_509_061_365,
             1582328545,
             10,
@@ -635,14 +708,14 @@ mod test {
         let output = Output::Basic(
             BasicOutput::build_with_amount(amount)
                 .add_unlock_condition(AddressUnlockCondition::new(address))
-                .finish_with_params(protocol_parameters.clone())
+                .finish()
                 .unwrap(),
         );
         let transaction = Transaction::builder(protocol_parameters.network_id())
             .with_inputs([input1, input2])
             .add_output(output)
             .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
-            .finish_with_params(protocol_parameters)
+            .finish_with_params(&protocol_parameters)
             .unwrap();
 
         let pub_key_bytes = prefix_hex::decode(ED25519_PUBLIC_KEY).unwrap();

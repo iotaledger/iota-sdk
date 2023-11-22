@@ -84,14 +84,13 @@ async fn main() -> Result<()> {
     println!("Minted NFT 1");
 
     // Build an NFT manually by using the `NftOutputBuilder`
-    let token_supply = wallet.client().get_token_supply().await?;
     let outputs = [
         // address of the owner of the NFT
         NftOutputBuilder::new_with_amount(NFT2_AMOUNT, NftId::null())
             .add_unlock_condition(AddressUnlockCondition::new(sender_address.clone()))
             .add_feature(SenderFeature::new(sender_address.clone()))
             .add_immutable_feature(IssuerFeature::new(sender_address))
-            .finish_output(token_supply)?,
+            .finish_output()?,
     ];
 
     let transaction = wallet.send_outputs(outputs, None).await?;

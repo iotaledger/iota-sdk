@@ -6,7 +6,7 @@ use std::str::FromStr;
 use iota_sdk::{
     types::block::{
         address::{Address, Bech32Address, ToBech32Ext},
-        output::{MinimumStorageDepositBasicOutput, NativeToken, NftId, Output, Rent, TokenId},
+        output::{BasicOutput, MinimumOutputAmount, NativeToken, NftId, TokenId},
         slot::SlotIndex,
     },
     wallet::{Assets, Features, MintNftParams, OutputParams, Result, ReturnStrategy, StorageDeposit, Unlocks},
@@ -74,11 +74,14 @@ async fn output_preparation() -> Result<()> {
             OutputParams {
                 recipient_address: recipient_address.clone(),
                 amount: 500000,
-                assets: Some(Assets {
-                    native_tokens: Some(vec![native_token]),
-                    nft_id: None,
+                assets: Some(Assets { nft_id: None }),
+                features: Some(Features {
+                    metadata: None,
+                    tag: None,
+                    issuer: None,
+                    sender: None,
+                    native_token: Some(native_token),
                 }),
-                features: None,
                 unlocks: None,
                 storage_deposit: None,
             },
@@ -88,7 +91,7 @@ async fn output_preparation() -> Result<()> {
     assert_eq!(output.amount(), 500000);
     // only address condition
     assert_eq!(output.unlock_conditions().unwrap().len(), 1);
-    assert_eq!(output.native_tokens().unwrap().first(), Some(&native_token));
+    assert_eq!(output.native_token(), Some(&native_token));
 
     let output = wallet
         .prepare_output(
@@ -101,6 +104,7 @@ async fn output_preparation() -> Result<()> {
                     tag: Some(prefix_hex::encode(b"My Tag")),
                     issuer: None,
                     sender: None,
+                    native_token: None,
                 }),
                 unlocks: None,
                 storage_deposit: None,
@@ -126,6 +130,7 @@ async fn output_preparation() -> Result<()> {
                     tag: Some(prefix_hex::encode(b"My Tag")),
                     issuer: None,
                     sender: None,
+                    native_token: None,
                 }),
                 unlocks: None,
                 storage_deposit: None,
@@ -154,6 +159,7 @@ async fn output_preparation() -> Result<()> {
                     tag: Some(prefix_hex::encode(b"My Tag")),
                     issuer: None,
                     sender: None,
+                    native_token: None,
                 }),
                 unlocks: None,
                 storage_deposit: None,
@@ -179,6 +185,7 @@ async fn output_preparation() -> Result<()> {
                     tag: Some(prefix_hex::encode(b"My Tag")),
                     issuer: None,
                     sender: None,
+                    native_token: None,
                 }),
                 unlocks: None,
                 storage_deposit: None,
@@ -203,7 +210,6 @@ async fn output_preparation() -> Result<()> {
                 recipient_address: recipient_address.clone(),
                 amount: 500000,
                 assets: Some(Assets {
-                    native_tokens: None,
                     nft_id: Some(NftId::from_str(
                         "0xa068e00a79922eaef241592a7440f131ea7f8ad9e22e580ef139415f273eff30",
                     )?),
@@ -227,7 +233,6 @@ async fn output_preparation() -> Result<()> {
                 recipient_address: recipient_address.clone(),
                 amount: 500000,
                 assets: Some(Assets {
-                    native_tokens: None,
                     nft_id: Some(NftId::from_str(
                         "0x0000000000000000000000000000000000000000000000000000000000000000",
                     )?),
@@ -258,15 +263,13 @@ async fn output_preparation() -> Result<()> {
             OutputParams {
                 recipient_address: recipient_address.clone(),
                 amount: 500000,
-                assets: Some(Assets {
-                    native_tokens: Some(vec![native_token]),
-                    nft_id: None,
-                }),
+                assets: Some(Assets { nft_id: None }),
                 features: Some(Features {
                     metadata: None,
                     tag: None,
                     issuer: None,
                     sender: Some(issuer_and_sender_address.clone()),
+                    native_token: Some(native_token),
                 }),
                 unlocks: None,
                 storage_deposit: None,
@@ -294,6 +297,7 @@ async fn output_preparation() -> Result<()> {
                     tag: None,
                     issuer: Some(issuer_and_sender_address.clone()),
                     sender: None,
+                    native_token: None,
                 }),
                 unlocks: None,
                 storage_deposit: None,
@@ -314,7 +318,6 @@ async fn output_preparation() -> Result<()> {
                 recipient_address: recipient_address.clone(),
                 amount: 500000,
                 assets: Some(Assets {
-                    native_tokens: None,
                     nft_id: Some(NftId::from_str(
                         "0x0000000000000000000000000000000000000000000000000000000000000000",
                     )?),
@@ -324,6 +327,7 @@ async fn output_preparation() -> Result<()> {
                     tag: None,
                     issuer: Some(issuer_and_sender_address.clone()),
                     sender: Some(issuer_and_sender_address.clone()),
+                    native_token: None,
                 }),
                 unlocks: Some(Unlocks {
                     expiration_slot_index: Some(SlotIndex::from(1)),
@@ -358,7 +362,6 @@ async fn output_preparation() -> Result<()> {
                 recipient_address: recipient_address.clone(),
                 amount: 500,
                 assets: Some(Assets {
-                    native_tokens: None,
                     nft_id: Some(NftId::from_str(
                         "0x0000000000000000000000000000000000000000000000000000000000000000",
                     )?),
@@ -368,6 +371,7 @@ async fn output_preparation() -> Result<()> {
                     tag: None,
                     issuer: None,
                     sender: None,
+                    native_token: None,
                 }),
                 unlocks: Some(Unlocks {
                     expiration_slot_index: Some(SlotIndex::from(1)),
@@ -394,6 +398,7 @@ async fn output_preparation() -> Result<()> {
                     tag: Some(prefix_hex::encode(b"My Tag")),
                     issuer: None,
                     sender: None,
+                    native_token: None,
                 }),
                 unlocks: None,
                 storage_deposit: Some(StorageDeposit {
@@ -404,9 +409,9 @@ async fn output_preparation() -> Result<()> {
             None,
         )
         .await?;
-    let rent_structure = wallet.client().get_rent_structure().await?;
-    let minimum_storage_deposit = output.rent_cost(rent_structure);
-    assert_eq!(output.amount(), minimum_storage_deposit);
+    let storage_score_params = wallet.client().get_storage_score_parameters().await?;
+    let minimum_amount = output.minimum_amount(storage_score_params);
+    assert_eq!(output.amount(), minimum_amount);
     assert_eq!(output.amount(), 187900);
     let sdr = output.unlock_conditions().unwrap().storage_deposit_return().unwrap();
     assert_eq!(sdr.amount(), 145300);
@@ -428,8 +433,7 @@ async fn output_preparation_sdr() -> Result<()> {
     let wallet = make_wallet(storage_path, None, None).await?;
     request_funds(&wallet).await?;
 
-    let rent_structure = wallet.client().get_rent_structure().await?;
-    let token_supply = wallet.client().get_token_supply().await?;
+    let storage_score_params = wallet.client().get_storage_score_parameters().await?;
 
     let recipient_address_bech32 = String::from("rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu");
     // Roundtrip to get the correct bech32 HRP
@@ -450,7 +454,7 @@ async fn output_preparation_sdr() -> Result<()> {
         )
         .await?;
     // Check if the output has enough amount to cover the storage deposit
-    output.verify_storage_deposit(rent_structure, token_supply)?;
+    output.verify_storage_deposit(storage_score_params)?;
     assert_eq!(output.amount(), 50601);
     // address and sdr unlock condition
     assert_eq!(output.unlock_conditions().unwrap().len(), 2);
@@ -471,7 +475,7 @@ async fn output_preparation_sdr() -> Result<()> {
         )
         .await?;
     // Check if the output has enough amount to cover the storage deposit
-    output.verify_storage_deposit(rent_structure, token_supply)?;
+    output.verify_storage_deposit(storage_score_params)?;
     assert_eq!(output.amount(), 85199);
     // address and sdr unlock condition
     assert_eq!(output.unlock_conditions().unwrap().len(), 2);
@@ -496,7 +500,7 @@ async fn output_preparation_sdr() -> Result<()> {
         )
         .await?;
     // Check if the output has enough amount to cover the storage deposit
-    output.verify_storage_deposit(rent_structure, token_supply)?;
+    output.verify_storage_deposit(storage_score_params)?;
     assert_eq!(output.amount(), 85199);
     // address and sdr unlock condition
     assert_eq!(output.unlock_conditions().unwrap().len(), 2);
@@ -521,7 +525,7 @@ async fn output_preparation_sdr() -> Result<()> {
         )
         .await?;
     // Check if the output has enough amount to cover the storage deposit
-    output.verify_storage_deposit(rent_structure, token_supply)?;
+    output.verify_storage_deposit(storage_score_params)?;
     // The additional 1 amount will be added, because the storage deposit should be gifted and not returned
     assert_eq!(output.amount(), 42600);
     // storage deposit gifted, only address unlock condition
@@ -560,15 +564,13 @@ async fn prepare_nft_output_features_update() -> Result<()> {
             OutputParams {
                 recipient_address: wallet_address,
                 amount: 1_000_000,
-                assets: Some(Assets {
-                    native_tokens: None,
-                    nft_id: Some(nft_id),
-                }),
+                assets: Some(Assets { nft_id: Some(nft_id) }),
                 features: Some(Features {
                     metadata: Some("0x2a".to_string()),
                     tag: None,
                     issuer: None,
                     sender: None,
+                    native_token: None,
                 }),
                 unlocks: None,
                 storage_deposit: None,
@@ -609,12 +611,10 @@ async fn prepare_output_remainder_dust() -> Result<()> {
     request_funds(&wallet_0).await?;
     request_funds(&wallet_1).await?;
 
-    let rent_structure = wallet_0.client().get_rent_structure().await?;
-    let token_supply = wallet_0.client().get_token_supply().await?;
+    let storage_score_params = wallet_0.client().get_storage_score_parameters().await?;
 
     let balance = wallet_0.sync(None).await?;
-    let minimum_required_storage_deposit =
-        MinimumStorageDepositBasicOutput::new(rent_structure, token_supply).finish()?;
+    let minimum_amount = BasicOutput::minimum_amount(&*wallet_1.address().await, storage_score_params);
 
     // Send away most balance so we can test with leaving dust
     let output = wallet_0
@@ -641,7 +641,7 @@ async fn prepare_output_remainder_dust() -> Result<()> {
         .prepare_output(
             OutputParams {
                 recipient_address: wallet_1.address().await,
-                amount: minimum_required_storage_deposit - 1, // Leave less than min. deposit
+                amount: minimum_amount - 1, // Leave less than min. deposit
                 assets: None,
                 features: None,
                 unlocks: None,
@@ -655,7 +655,7 @@ async fn prepare_output_remainder_dust() -> Result<()> {
         .await?;
 
     // Check if the output has enough amount to cover the storage deposit
-    output.verify_storage_deposit(rent_structure, token_supply)?;
+    output.verify_storage_deposit(storage_score_params)?;
     // The left over 21299 is too small to keep, so we donate it
     assert_eq!(output.amount(), balance.base_coin().available());
     // storage deposit gifted, only address unlock condition
@@ -665,7 +665,7 @@ async fn prepare_output_remainder_dust() -> Result<()> {
         .prepare_output(
             OutputParams {
                 recipient_address: wallet_1.address().await,
-                amount: minimum_required_storage_deposit - 1, // Leave less than min. deposit
+                amount: minimum_amount - 1, // Leave less than min. deposit
                 assets: None,
                 features: None,
                 unlocks: None,
@@ -699,7 +699,7 @@ async fn prepare_output_remainder_dust() -> Result<()> {
         .await?;
 
     // Check if the output has enough amount to cover the storage deposit
-    output.verify_storage_deposit(rent_structure, token_supply)?;
+    output.verify_storage_deposit(storage_score_params)?;
     // We use excess if leftover is too small, so amount == all available balance
     assert_eq!(output.amount(), 63900);
     // storage deposit gifted, only address unlock condition
@@ -723,7 +723,7 @@ async fn prepare_output_remainder_dust() -> Result<()> {
         .await?;
 
     // Check if the output has enough amount to cover the storage deposit
-    output.verify_storage_deposit(rent_structure, token_supply)?;
+    output.verify_storage_deposit(storage_score_params)?;
     // We use excess if leftover is too small, so amount == all available balance
     assert_eq!(output.amount(), 63900);
     // storage deposit returned, address and SDR unlock condition
@@ -766,7 +766,7 @@ async fn prepare_output_only_single_nft() -> Result<()> {
     let balance = wallet_1.sync(None).await?;
     assert_eq!(balance.nfts().len(), 1);
 
-    let nft_data = &wallet_1.unspent_outputs(None).await?[0];
+    let nft_data = &wallet_1.unspent_outputs(None).await[0];
     let nft_id = *balance.nfts().first().unwrap();
     // Send NFT back to first wallet
     let output = wallet_1
@@ -774,10 +774,7 @@ async fn prepare_output_only_single_nft() -> Result<()> {
             OutputParams {
                 recipient_address: wallet_0_address,
                 amount: nft_data.output.amount(),
-                assets: Some(Assets {
-                    native_tokens: None,
-                    nft_id: Some(nft_id),
-                }),
+                assets: Some(Assets { nft_id: Some(nft_id) }),
                 features: None,
                 unlocks: None,
                 storage_deposit: None,
@@ -835,10 +832,7 @@ async fn prepare_existing_nft_output_gift() -> Result<()> {
             OutputParams {
                 recipient_address: address,
                 amount: 0,
-                assets: Some(Assets {
-                    native_tokens: None,
-                    nft_id: Some(nft_id),
-                }),
+                assets: Some(Assets { nft_id: Some(nft_id) }),
                 features: None,
                 unlocks: None,
                 storage_deposit: Some(StorageDeposit {
@@ -852,8 +846,8 @@ async fn prepare_existing_nft_output_gift() -> Result<()> {
         .as_nft()
         .clone();
 
-    let rent_structure = wallet.client().get_rent_structure().await?;
-    let minimum_storage_deposit = Output::Nft(nft.clone()).rent_cost(rent_structure);
+    let storage_score_params = wallet.client().get_storage_score_parameters().await?;
+    let minimum_storage_deposit = nft.minimum_amount(storage_score_params);
     assert_eq!(nft.amount(), minimum_storage_deposit);
 
     assert_eq!(nft.amount(), 52300);

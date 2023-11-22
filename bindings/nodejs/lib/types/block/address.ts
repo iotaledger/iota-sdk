@@ -24,6 +24,8 @@ enum AddressType {
     Anchor = 24,
     /** An implicit account creation address. */
     ImplicitAccountCreation = 32,
+    /** A Multi address. */
+    Multi = 40,
     /** An address with restricted capabilities. */
     Restricted = 48,
 }
@@ -78,6 +80,7 @@ abstract class Address {
         throw new Error('Invalid JSON');
     }
 }
+
 /**
  * An Ed25519 Address.
  */
@@ -208,7 +211,7 @@ class RestrictedAddress extends Address {
     /**
      * The allowed capabilities bitflags.
      */
-    private allowedCapabilities: HexEncodedString = '0x';
+    private allowedCapabilities?: HexEncodedString;
     /**
      * @param address An address.
      */
@@ -227,7 +230,7 @@ class RestrictedAddress extends Address {
                     allowedCapabilities.byteLength,
                 ).toString('hex');
         } else {
-            this.allowedCapabilities = '0x';
+            this.allowedCapabilities = undefined;
         }
     }
 
@@ -239,13 +242,84 @@ class RestrictedAddress extends Address {
     }
 
     getAllowedCapabilities(): Uint8Array {
-        return Uint8Array.from(
-            Buffer.from(this.allowedCapabilities.substring(2), 'hex'),
-        );
+        return this.allowedCapabilities !== undefined
+            ? Uint8Array.from(
+                  Buffer.from(this.allowedCapabilities.substring(2), 'hex'),
+              )
+            : new Uint8Array();
     }
 
     toString(): string {
-        return this.address.toString() + this.allowedCapabilities.substring(2);
+        return (
+            this.address.toString() +
+            (this.allowedCapabilities !== undefined
+                ? this.allowedCapabilities.substring(2)
+                : '')
+        );
+    }
+}
+
+/**
+ * A weighted address.
+ */
+class WeightedAddress {
+    /**
+     * The unlocked address.
+     */
+    @Type(() => Address, {
+        discriminator: {
+            property: 'type',
+            subTypes: [
+                { value: Ed25519Address, name: AddressType.Ed25519 as any },
+                { value: AccountAddress, name: AddressType.Account as any },
+                { value: NftAddress, name: AddressType.Nft as any },
+                { value: AnchorAddress, name: AddressType.Anchor as any },
+            ],
+        },
+    })
+    readonly address: Address;
+    /**
+     * The weight of the unlocked address.
+     */
+    readonly weight: number;
+
+    /**
+     * @param address The unlocked address.
+     * @param weight The weight of the unlocked address.
+     */
+    constructor(address: Address, weight: number) {
+        this.address = address;
+        this.weight = weight;
+    }
+}
+
+/**
+ * An address that consists of addresses with weights and a threshold value.
+ * The Multi Address can be unlocked if the cumulative weight of all unlocked addresses is equal to or exceeds the
+ * threshold.
+ */
+class MultiAddress extends Address {
+    /**
+     * The weighted unlocked addresses.
+     */
+    readonly addresses: WeightedAddress[];
+    /**
+     * The threshold that needs to be reached by the unlocked addresses in order to unlock the multi address.
+     */
+    readonly threshold: number;
+
+    /**
+     * @param addresses The weighted unlocked addresses.
+     * @param threshold The threshold that needs to be reached by the unlocked addresses in order to unlock the multi address.
+     */
+    constructor(addresses: WeightedAddress[], threshold: number) {
+        super(AddressType.Multi);
+        this.addresses = addresses;
+        this.threshold = threshold;
+    }
+
+    toString(): string {
+        return JSON.stringify(this);
     }
 }
 
@@ -260,6 +334,7 @@ const AddressDiscriminator = {
             value: ImplicitAccountCreationAddress,
             name: AddressType.ImplicitAccountCreation as any,
         },
+        { value: MultiAddress, name: AddressType.Multi as any },
         { value: RestrictedAddress, name: AddressType.Restricted as any },
     ],
 };
@@ -274,5 +349,7 @@ export {
     NftAddress,
     AnchorAddress,
     ImplicitAccountCreationAddress,
+    WeightedAddress,
+    MultiAddress,
     RestrictedAddress,
 };
