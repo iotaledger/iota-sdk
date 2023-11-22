@@ -194,6 +194,7 @@ export interface __OutputHexBytes__ {
     };
 }
 
+// TODO we don't do this anywhere else, but it seems necessary, need to reevaluate later.
 // Modified `SlotCommitment` with bigint types converted to strings.
 type SlotCommitmentConverted = Omit<
     SlotCommitment,

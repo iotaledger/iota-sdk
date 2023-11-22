@@ -788,6 +788,7 @@ pub async fn sync_command(wallet: &Wallet) -> Result<(), Error> {
     let balance = wallet
         .sync(Some(SyncOptions {
             sync_native_token_foundries: true,
+            sync_implicit_accounts: true,
             ..Default::default()
         }))
         .await?;
@@ -954,7 +955,7 @@ async fn print_wallet_address(wallet: &Wallet) -> Result<(), Error> {
 
         if address.inner() == required_address {
             if let Some(nt) = output_data.output.native_token() {
-                native_tokens.add_native_token(nt.clone())?;
+                native_tokens.add_native_token(*nt)?;
             }
             match &output_data.output {
                 Output::Basic(_) => {}
@@ -1202,11 +1203,17 @@ async fn print_outputs(mut outputs: Vec<OutputData>, title: &str) -> Result<(), 
         outputs.sort_unstable_by(outputs_ordering);
 
         for (i, output_data) in outputs.into_iter().enumerate() {
+            let kind_str = if output_data.output.is_implicit_account() {
+                "ImplicitAccount"
+            } else {
+                output_data.output.kind_str()
+            };
+
             println_log_info!(
-                "{:<5}{}\t{}\t{}",
+                "{:<5}{} {:<16}{}",
                 i,
                 &output_data.output_id,
-                output_data.output.kind_str(),
+                kind_str,
                 if output_data.is_spent { "Spent" } else { "Unspent" },
             );
         }

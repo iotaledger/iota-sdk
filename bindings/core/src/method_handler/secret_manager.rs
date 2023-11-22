@@ -124,13 +124,9 @@ where
             if let Some(secret_manager) = secret_manager.downcast::<StrongholdSecretManager>() {
                 secret_manager.store_mnemonic(mnemonic).await?;
                 Response::Ok
-            } else if let Some(secret_manager) = secret_manager.downcast::<SecretManager>() {
-                if let SecretManager::Stronghold(secret_manager) = secret_manager {
-                    secret_manager.store_mnemonic(mnemonic).await?;
-                    Response::Ok
-                } else {
-                    return Err(iota_sdk::client::Error::SecretManagerMismatch.into());
-                }
+            } else if let Some(SecretManager::Stronghold(secret_manager)) = secret_manager.downcast::<SecretManager>() {
+                secret_manager.store_mnemonic(mnemonic).await?;
+                Response::Ok
             } else {
                 return Err(iota_sdk::client::Error::SecretManagerMismatch.into());
             }

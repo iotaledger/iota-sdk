@@ -398,7 +398,7 @@ impl InputSelection {
 
         for input in &self.selected_inputs {
             if let Some(native_token) = input.output.native_token() {
-                input_native_tokens_builder.add_native_token(native_token.clone())?;
+                input_native_tokens_builder.add_native_token(*native_token)?;
             }
             match &input.output {
                 Output::Account(_) => {
@@ -417,7 +417,7 @@ impl InputSelection {
 
         for output in self.outputs.iter() {
             if let Some(native_token) = output.native_token() {
-                output_native_tokens_builder.add_native_token(native_token.clone())?;
+                output_native_tokens_builder.add_native_token(*native_token)?;
             }
         }
 

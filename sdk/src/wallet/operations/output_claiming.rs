@@ -248,7 +248,7 @@ where
         // check native tokens
         for output_data in &outputs_to_claim {
             if let Some(native_token) = output_data.output.native_token() {
-                new_native_tokens.add_native_token(native_token.clone())?;
+                new_native_tokens.add_native_token(*native_token)?;
             }
             if let Some(sdr) = sdr_not_expired(&output_data.output, slot_index) {
                 // for own output subtract the return amount
@@ -333,7 +333,7 @@ where
                 if available_amount < required_amount {
                     if !additional_inputs_used.contains(&output_data.output_id) {
                         if let Some(native_token) = output_data.output.native_token() {
-                            new_native_tokens.add_native_token(native_token.clone())?;
+                            new_native_tokens.add_native_token(*native_token)?;
                         }
                         available_amount += output_data.output.amount();
                         additional_inputs.push(output_data.output_id);

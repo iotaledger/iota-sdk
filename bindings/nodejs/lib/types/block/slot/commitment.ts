@@ -41,7 +41,7 @@ class SlotCommitment {
      * The slot index of this commitment.
      * It is calculated based on genesis timestamp and the duration of a slot.
      */
-    readonly index: SlotIndex;
+    readonly slot: SlotIndex;
     /**
      * The commitment ID of the previous slot.
      */
@@ -50,14 +50,12 @@ class SlotCommitment {
      * A BLAKE2b-256 hash of concatenating multiple sparse merkle tree roots of a slot.
      */
     readonly rootsId: RootsId;
-
     /**
      * The sum of previous slot commitment cumulative weight and weight of issuers of accepted blocks within this
      * slot. It is just an indication of "committed into" this slot, and can not strictly be used for evaluating
      * the switching of a chain.
      */
     readonly cumulativeWeight: u64;
-
     /**
      * Reference Mana Cost (RMC) to be used in the slot with index at `index + Max Committable Age`.
      */
@@ -65,14 +63,14 @@ class SlotCommitment {
 
     constructor(
         protocolVersion: number,
-        index: SlotIndex,
+        slot: SlotIndex,
         previousCommitmentId: SlotCommitmentId,
         rootsId: RootsId,
         cumulativeWeight: u64,
         referenceManaCost: u64,
     ) {
         this.protocolVersion = protocolVersion;
-        this.index = index;
+        this.slot = slot;
         this.previousCommitmentId = previousCommitmentId;
         this.rootsId = rootsId;
         this.cumulativeWeight = cumulativeWeight;

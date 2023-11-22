@@ -395,7 +395,7 @@ export class Utils {
             data: {
                 slotCommitment: {
                     protocolVersion: slotCommitment.protocolVersion,
-                    index: slotCommitment.index,
+                    slot: slotCommitment.slot,
                     previousCommitmentId: slotCommitment.previousCommitmentId,
                     rootsId: slotCommitment.rootsId,
                     cumulativeWeight:
