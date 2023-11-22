@@ -521,7 +521,13 @@ fn merge_unlocks(
     mut unlocks: impl Iterator<Item = Unlock>,
     protocol_parameters: &ProtocolParameters,
 ) -> Result<Vec<Unlock>, Error> {
-    let slot_index = prepared_transaction_data.transaction.creation_slot();
+    let slot_index = prepared_transaction_data
+        .transaction
+        .context_inputs()
+        .iter()
+        .find(|c| c.is_commitment())
+        .map(|c| c.as_commitment().slot_index())
+        .unwrap_or_else(|| prepared_transaction_data.transaction.creation_slot());
     let transaction_signing_hash = prepared_transaction_data.transaction.signing_hash();
 
     let mut merged_unlocks = Vec::new();
@@ -560,8 +566,10 @@ fn merge_unlocks(
                 // We can only sign ed25519 addresses and block_indexes needs to contain the account or nft
                 // address already at this point, because the reference index needs to be lower
                 // than the current block index
-                if !required_address.is_ed25519() {
-                    return Err(Error::MissingInputWithEd25519Address);
+                match &required_address {
+                    Address::Ed25519(_) | Address::ImplicitAccountCreation(_) => {}
+                    Address::Restricted(restricted) if restricted.address().is_ed25519() => {}
+                    _ => Err(Error::MissingInputWithEd25519Address)?,
                 }
 
                 let unlock = unlocks.next().ok_or(Error::MissingInputWithEd25519Address)?;

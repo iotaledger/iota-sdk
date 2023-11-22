@@ -553,7 +553,13 @@ where
     let transaction_signing_hash = prepared_transaction_data.transaction.signing_hash();
     let mut blocks = Vec::new();
     let mut block_indexes = HashMap::<Address, usize>::new();
-    let slot_index = prepared_transaction_data.transaction.creation_slot();
+    let slot_index = prepared_transaction_data
+        .transaction
+        .context_inputs()
+        .iter()
+        .find(|c| c.is_commitment())
+        .map(|c| c.as_commitment().slot_index())
+        .unwrap_or_else(|| prepared_transaction_data.transaction.creation_slot());
 
     // Assuming inputs_data is ordered by address type
     for (current_block_index, input) in prepared_transaction_data.inputs_data.iter().enumerate() {

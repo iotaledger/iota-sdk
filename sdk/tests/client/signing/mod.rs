@@ -19,13 +19,14 @@ use iota_sdk::{
         Result,
     },
     types::block::{
-        address::{AccountAddress, Address, NftAddress},
+        address::{AccountAddress, Address, NftAddress, ToBech32Ext},
+        context_input::{CommitmentContextInput, ContextInput},
         input::{Input, UtxoInput},
         output::{AccountId, NftId},
         payload::{signed_transaction::Transaction, SignedTransactionPayload},
         protocol::protocol_parameters,
         rand::mana::rand_mana_allotment,
-        slot::SlotIndex,
+        slot::{SlotCommitmentId, SlotIndex},
         unlock::{SignatureUnlock, Unlock},
     },
 };
@@ -201,7 +202,7 @@ async fn all_combined() -> Result<()> {
         Nft(1_000_000, nft_id_4, ed25519_0.clone(), None, None, None, None, None),
     ]);
 
-    let slot_index = SlotIndex::from(100);
+    let slot_index = SlotIndex::from(90);
 
     let selected = InputSelection::new(
         inputs.clone(),
@@ -214,6 +215,9 @@ async fn all_combined() -> Result<()> {
     .unwrap();
 
     let transaction = Transaction::builder(protocol_parameters.network_id())
+        .with_context_inputs(vec![ContextInput::Commitment(CommitmentContextInput::new(
+            SlotCommitmentId::from_str("0x000000000000000000000000000000000000000000000000000000000000000064000000")?,
+        ))])
         .with_inputs(
             selected
                 .inputs
