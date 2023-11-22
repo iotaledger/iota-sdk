@@ -5,15 +5,15 @@ import {
     UnlockCondition,
     UnlockConditionDiscriminator,
 } from './unlock-condition';
-import { Feature, FeatureDiscriminator } from './feature';
+import { Feature, FeatureDiscriminator, NativeTokenFeature } from './feature';
 
 // Temp solution for not double parsing JSON
 import { plainToInstance, Type } from 'class-transformer';
-import { HexEncodedString, hexToBigInt, NumericString, u64 } from '../../utils';
+import { HexEncodedString, NumericString, u64 } from '../../utils';
 import { TokenScheme, TokenSchemeDiscriminator } from './token-scheme';
-import { INativeToken } from '../../models';
 import { AccountId, NftId, AnchorId, DelegationId } from '../id';
 import { EpochIndex } from '../../block/slot';
+import { INativeToken } from '../../models/native-token';
 
 export type OutputId = HexEncodedString;
 
@@ -102,9 +102,6 @@ abstract class CommonOutput extends Output {
     })
     readonly unlockConditions: UnlockCondition[];
 
-    // Getter transforms it into nativeTokens with a proper number
-    private nativeTokens?: INativeToken[];
-
     /**
      * The features contained by the output.
      */
@@ -126,22 +123,21 @@ abstract class CommonOutput extends Output {
         super(type, amount);
         this.unlockConditions = unlockConditions;
     }
+
     /**
-     * The native tokens held by the output.
+     * The native token held by the output.
      */
-    getNativeTokens(): INativeToken[] | undefined {
-        if (!this.nativeTokens) {
-            return this.nativeTokens;
+    getNativeToken(): INativeToken | undefined {
+        if (!this.features) {
+            return undefined;
         }
 
-        // Make sure the amount of native tokens are of bigint type.
-        for (let i = 0; i < this.nativeTokens.length; i++) {
-            const token = this.nativeTokens[i];
-            if (typeof token.amount === 'string') {
-                this.nativeTokens[i].amount = hexToBigInt(token.amount);
+        for (const feature of this.features) {
+            if (feature instanceof NativeTokenFeature) {
+                return (feature as NativeTokenFeature).asNativeToken();
             }
         }
-        return this.nativeTokens;
+        return undefined;
     }
 }
 
