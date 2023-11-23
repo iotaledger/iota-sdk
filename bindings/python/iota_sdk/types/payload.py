@@ -7,7 +7,7 @@ from typing import Any, Dict, List, TypeAlias, Union
 from dataclasses import dataclass, field
 from iota_sdk.types.common import HexStr, json
 from iota_sdk.types.transaction import Transaction
-from iota_sdk.types.unlock import SignatureUnlock, ReferenceUnlock
+from iota_sdk.types.unlock import Unlock, deserialize_unlocks
 
 
 class PayloadType(IntEnum):
@@ -50,7 +50,9 @@ class SignedTransactionPayload:
         unlocks: The unlocks of the transaction.
     """
     transaction: Transaction
-    unlocks: List[Union[SignatureUnlock, ReferenceUnlock]]
+    unlocks: List[Unlock] = field(metadata=config(
+        decoder=deserialize_unlocks
+    ))
     type: int = field(
         default_factory=lambda: int(
             PayloadType.SignedTransaction),

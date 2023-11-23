@@ -11,8 +11,6 @@ pub mod bool;
 pub mod bytes;
 /// Module providing random input generation utilities.
 pub mod input;
-/// Module providing random issuer ID generation utilities.
-pub mod issuer_id;
 /// Module providing random mana generation utilities.
 pub mod mana;
 /// Module providing random number generation utilities.
