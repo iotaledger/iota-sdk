@@ -149,7 +149,7 @@ class CongestionControlParameters:
 
 @json
 @dataclass
-class VersionSignaling:
+class VersionSignalingParameters:
     """Version Signaling defines the parameters used by signaling protocol parameters upgrade.
 
     Attributes:
@@ -237,7 +237,7 @@ class ProtocolParameters:
         max_committable_age: Max_committable_age is the maximum age for a slot commitment to be included in a block relative to the slot index of the block issuing time.
         epoch_nearing_threshold: Determine the slot that should trigger a new committee selection for the next and upcoming epoch.
         congestion_control_parameters: Congestion Control Parameters defines the parameters used to calculate the Reference Mana Cost (RMC).
-        version_signaling: The version signaling parameters.
+        version_signaling_parameters: The version signaling parameters.
         rewards_parameters: Rewards Parameters defines the parameters that are used to calculate Mana rewards.
     """
     type: int
@@ -271,7 +271,7 @@ class ProtocolParameters:
         encoder=str
     ))
     congestion_control_parameters: CongestionControlParameters
-    version_signaling: VersionSignaling
+    version_signaling_parameters: VersionSignalingParameters
     rewards_parameters: RewardsParameters
 
 
