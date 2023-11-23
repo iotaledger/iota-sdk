@@ -14,7 +14,7 @@
 //! # #[tokio::main]
 //! # async fn main() -> Result<(), Box<dyn std::error::Error>> {
 //! let client = Client::builder()
-//!    .with_node("http://localhost:14265")?
+//!    .with_node("http://localhost:8050")?
 //!    .finish()
 //!    .await?;
 //! let secret_manager = MnemonicSecretManager::try_from_mnemonic(std::env::var("MNEMONIC")?)?;

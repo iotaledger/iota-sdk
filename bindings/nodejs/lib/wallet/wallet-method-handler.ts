@@ -93,9 +93,11 @@ export class WalletMethodHandler {
     }
 
     async destroy(): Promise<void> {
-        await destroyWallet(this.methodHandler).catch((error: any) => {
+        try {
+            await destroyWallet(this.methodHandler);
+        } catch (error: any) {
             throw errorHandle(error);
-        });
+        }
     }
 
     async getClient(): Promise<Client> {

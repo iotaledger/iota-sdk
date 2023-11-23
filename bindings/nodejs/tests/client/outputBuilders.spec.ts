@@ -9,10 +9,10 @@ import { AddressUnlockCondition, AccountAddress, Client, SecretManager, Ed25519A
 import '../customMatchers';
 
 async function makeClient(): Promise<Client> {
-    return await Client.create({
+    return Client.create({
         nodes: [
             {
-                url: process.env.NODE_URL || 'http://localhost:14265',
+                url: process.env.NODE_URL || 'http://localhost:8050',
             },
         ],
     });

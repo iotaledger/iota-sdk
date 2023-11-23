@@ -22,7 +22,7 @@ async function makeClient(): Promise<Client> {
     return await Client.create({
         nodes: [
             {
-                url: process.env.NODE_URL || 'http://localhost:14265',
+                url: process.env.NODE_URL || 'http://localhost:8050',
             },
         ],
     });
@@ -229,14 +229,7 @@ describe.skip('Main examples', () => {
     });
 
     it('destroy', async () => {
-        const client = await Client.create({
-            nodes: [
-                {
-                    url: process.env.NODE_URL || 'http://localhost:14265',
-                },
-            ],
-        });
-        
+        const client = await makeClient();
         await client.destroy();
 
         try {

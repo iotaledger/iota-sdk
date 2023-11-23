@@ -32,7 +32,7 @@ async fn create_wallet() -> Result<()> {
     let client_options = r#"{
             "nodes":[
                {
-                  "url":"http://localhost:14265",
+                  "url":"http://localhost:8050",
                   "auth":null,
                   "disabled":false
                }
@@ -70,7 +70,7 @@ async fn client_from_wallet() -> Result<()> {
     let client_options = r#"{
             "nodes":[
                {
-                  "url":"http://localhost:14265",
+                  "url":"http://localhost:8050",
                   "auth":null,
                   "disabled":false
                }
@@ -112,7 +112,7 @@ async fn client_from_wallet() -> Result<()> {
 //         "about solution utility exist rail budget vacuum major survey clerk pave ankle wealth gym gossip still medal
 // expect strong rely amazing inspire lazy lunar",     ).unwrap();
 //     let client = ClientBuilder::default()
-//         .with_nodes(&["http://localhost:14265"])
+//         .with_nodes(&["http://localhost:8050"])
 //         .unwrap()
 //         .finish()
 //         .await

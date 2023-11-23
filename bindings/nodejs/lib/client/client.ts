@@ -75,7 +75,7 @@ export class Client {
     }
 
     /**
-     * @param options The wallet options.
+     * @param options The client options.
      */
     static async create(options: IClientOptions): Promise<Client> {
         return new Client(await ClientMethodHandler.create(options));
