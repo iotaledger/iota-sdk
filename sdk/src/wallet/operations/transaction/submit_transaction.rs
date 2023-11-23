@@ -25,6 +25,6 @@ where
         self.emit(WalletEvent::TransactionProgress(TransactionProgressEvent::Broadcasting))
             .await;
 
-        self.submit_block(Some(Payload::from(payload))).await
+        self.submit_basic_block(Some(Payload::from(payload))).await
     }
 }

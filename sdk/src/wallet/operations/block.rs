@@ -12,7 +12,7 @@ where
     crate::wallet::Error: From<S::Error>,
     crate::client::Error: From<S::Error>,
 {
-    pub(crate) async fn submit_block(&self, payload: Option<Payload>) -> Result<BlockId> {
+    pub(crate) async fn submit_basic_block(&self, payload: Option<Payload>) -> Result<BlockId> {
         log::debug!("submit_block");
 
         let block = self
