@@ -127,7 +127,7 @@ export class Utils {
      * Compute the required storage deposit of an output.
      *
      * @param output The output.
-     * @param rent Rent cost of objects which take node resources.
+     * @param storageScoreParameters Storage score of objects which take node resources.
      * @returns The required storage deposit.
      */
     static computeStorageDeposit(
