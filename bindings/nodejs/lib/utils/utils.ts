@@ -130,7 +130,10 @@ export class Utils {
      * @param rent Rent cost of objects which take node resources.
      * @returns The required storage deposit.
      */
-    static computeStorageDeposit(output: Output, storageScoreParameters: StorageScoreParameters): u64 {
+    static computeStorageDeposit(
+        output: Output,
+        storageScoreParameters: StorageScoreParameters,
+    ): u64 {
         const minStorageDepositAmount = callUtilsMethod({
             name: 'computeStorageDeposit',
             data: {
