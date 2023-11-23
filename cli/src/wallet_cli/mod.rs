@@ -119,6 +119,11 @@ pub enum WalletCommand {
     },
     /// Returns the implicit account creation address of the wallet if it is Ed25519 based.
     ImplicitAccountCreationAddress,
+    /// Transitions an implicit account to an account.
+    ImplicitAccountTransition {
+        /// Identifier of the implicit account output.
+        output_id: OutputId,
+    },
     /// Lists the implicit accounts of the wallet.
     ImplicitAccounts,
     /// Mint additional native tokens.
@@ -573,6 +578,19 @@ pub async fn faucet_command(wallet: &Wallet, address: Option<Bech32Address>, url
 // `implicit-account-creation-address` command
 pub async fn implicit_account_creation_address_command(wallet: &Wallet) -> Result<(), Error> {
     println_log_info!("{}", wallet.implicit_account_creation_address().await?);
+
+    Ok(())
+}
+
+// `implicit-account-transition` command
+pub async fn implicit_account_transition_command(wallet: &Wallet, output_id: OutputId) -> Result<(), Error> {
+    let transaction = wallet.implicit_account_transition(&output_id).await?;
+
+    println_log_info!(
+        "Implicit account transition transaction sent:\n{:?}\n{:?}",
+        transaction.transaction_id,
+        transaction.block_id
+    );
 
     Ok(())
 }
@@ -1109,6 +1127,9 @@ pub async fn prompt_internal(
                         WalletCommand::Faucet { address, url } => faucet_command(wallet, address, url).await,
                         WalletCommand::ImplicitAccountCreationAddress => {
                             implicit_account_creation_address_command(wallet).await
+                        }
+                        WalletCommand::ImplicitAccountTransition { output_id } => {
+                            implicit_account_transition_command(wallet, output_id).await
                         }
                         WalletCommand::ImplicitAccounts => implicit_accounts_command(wallet).await,
                         WalletCommand::MeltNativeToken { token_id, amount } => {

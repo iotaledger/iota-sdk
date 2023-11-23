@@ -1,6 +1,7 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+pub(crate) mod account;
 mod build_transaction;
 pub(crate) mod high_level;
 mod input_selection;
@@ -185,7 +186,7 @@ where
         wallet_data.pending_transactions.insert(transaction_id);
         #[cfg(feature = "storage")]
         {
-            // TODO: maybe better to use the wallt address as identifier now?
+            // TODO: maybe better to use the wallet address as identifier now?
             log::debug!("[TRANSACTION] storing wallet");
             self.save(Some(&wallet_data)).await?;
         }

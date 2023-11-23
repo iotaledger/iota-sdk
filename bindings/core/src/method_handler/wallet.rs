@@ -225,6 +225,10 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
                 .map(OutputDataDto::from)
                 .collect(),
         ),
+        WalletMethod::PrepareImplicitAccountTransition { output_id } => {
+            let data = wallet.prepare_implicit_account_transition(&output_id).await?;
+            Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
+        }
         WalletMethod::IncomingTransactions => Response::Transactions(
             wallet
                 .data()
