@@ -18,6 +18,8 @@ class UnlockType(IntEnum):
         Account (2): An unlock which must reference a previous unlock which unlocks the account that the input is locked to.
         Anchor (3): An unlock which must reference a previous unlock which unlocks the anchor that the input is locked to.
         Nft (4): An unlock which must reference a previous unlock which unlocks the NFT that the input is locked to.
+        Multi (5): Unlocks a MultiAddress with a list of other unlocks.
+        Empty (6): Used to maintain correct index relationship between addresses and signatures when unlocking a MultiUnlock where not all addresses are unlocked.
 
     """
     Signature = 0
@@ -25,6 +27,8 @@ class UnlockType(IntEnum):
     Account = 2
     Anchor = 3
     Nft = 4
+    Multi = 5
+    Empty = 6
 
 
 @json
@@ -84,11 +88,38 @@ class NftUnlock:
     type: int = field(default_factory=lambda: int(UnlockType.Nft), init=False)
 
 
+@json
+@dataclass
+class MultiUnlock:
+    """Unlocks a MultiAddress with a list of other unlocks.
+    """
+    unlocks: List[Unlock] = field(metadata=config(
+        decoder=deserialize_unlocks
+    ))
+    type: int = field(
+        default_factory=lambda: int(
+            UnlockType.Multi),
+        init=False)
+
+
+@json
+@dataclass
+class EmptyUnlock:
+    """Used to maintain correct index relationship between addresses and signatures when unlocking a MultiUnlock where not all addresses are unlocked.
+    """
+    type: int = field(
+        default_factory=lambda: int(
+            UnlockType.Empty),
+        init=False)
+
+
 Unlock: TypeAlias = Union[SignatureUnlock,
                           ReferenceUnlock,
                           AccountUnlock,
                           AnchorUnlock,
-                          NftUnlock]
+                          NftUnlock,
+                          MultiUnlock,
+                          EmptyUnlock]
 
 
 def deserialize_unlock(d: Dict[str, Any]) -> Unlock:
@@ -109,6 +140,10 @@ def deserialize_unlock(d: Dict[str, Any]) -> Unlock:
         return AnchorUnlock.from_dict(d)
     if unlock_type == UnlockType.Nft:
         return NftUnlock.from_dict(d)
+    if unlock_type == UnlockType.Multi:
+        return MultiUnlock.from_dict(d)
+    if unlock_type == UnlockType.Empty:
+        return EmptyUnlock.from_dict(d)
     raise Exception(f'invalid unlock type: {unlock_type}')
 
 
