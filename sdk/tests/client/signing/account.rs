@@ -55,7 +55,6 @@ async fn sign_account_state_transition() -> Result<()> {
         &bech32_address.to_string(),
         None,
         None,
-        None,
         Some(Bip44::new(SHIMMER_COIN_TYPE)),
     )]);
 
@@ -63,7 +62,6 @@ async fn sign_account_state_transition() -> Result<()> {
         1_000_000,
         account_id,
         &bech32_address.to_string(),
-        None,
         None,
         None,
         None,
@@ -130,7 +128,6 @@ async fn account_reference_unlocks() -> Result<()> {
             &bech32_address.to_string(),
             None,
             None,
-            None,
             Some(Bip44::new(SHIMMER_COIN_TYPE)),
         ),
         Basic(
@@ -156,15 +153,7 @@ async fn account_reference_unlocks() -> Result<()> {
     ]);
 
     let outputs = build_outputs([
-        Account(
-            1_000_000,
-            account_id,
-            &bech32_address.to_string(),
-            None,
-            None,
-            None,
-            None,
-        ),
+        Account(1_000_000, account_id, &bech32_address.to_string(), None, None, None),
         Basic(
             2_000_000,
             &account_bech32_address.to_string(),

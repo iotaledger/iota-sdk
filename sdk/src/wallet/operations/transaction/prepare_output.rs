@@ -8,7 +8,7 @@ use crate::{
     types::block::{
         address::{Address, Bech32Address, Ed25519Address},
         output::{
-            feature::{IssuerFeature, MetadataFeature, SenderFeature, TagFeature},
+            feature::{IssuerFeature, MetadataFeature, NativeTokenFeature, SenderFeature, TagFeature},
             unlock_condition::{
                 AddressUnlockCondition, ExpirationUnlockCondition, StorageDepositReturnUnlockCondition,
                 TimelockUnlockCondition,
@@ -56,12 +56,6 @@ where
             .create_initial_output_builder(params.recipient_address, nft_id, storage_score_params)
             .await?;
 
-        if let Some(assets) = &params.assets {
-            if let Some(native_tokens) = &assets.native_tokens {
-                first_output_builder = first_output_builder.with_native_tokens(native_tokens.clone());
-            }
-        }
-
         if let Some(features) = params.features {
             if let Some(tag) = features.tag {
                 first_output_builder = first_output_builder.add_feature(TagFeature::new(
@@ -84,6 +78,10 @@ where
                     return Err(crate::wallet::Error::MissingParameter("nft_id"));
                 }
                 first_output_builder = first_output_builder.add_immutable_feature(IssuerFeature::new(issuer));
+            }
+
+            if let Some(native_token) = &features.native_token {
+                first_output_builder = first_output_builder.with_native_token(*native_token);
             }
         }
 
@@ -312,7 +310,6 @@ pub struct OutputParams {
 #[derive(Debug, Default, Clone, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Assets {
-    pub native_tokens: Option<Vec<NativeToken>>,
     pub nft_id: Option<NftId>,
 }
 
@@ -322,6 +319,7 @@ pub struct Features {
     pub metadata: Option<String>,
     pub issuer: Option<Bech32Address>,
     pub sender: Option<Bech32Address>,
+    pub native_token: Option<NativeToken>,
 }
 
 #[derive(Debug, Default, Clone, Eq, PartialEq, Serialize, Deserialize)]
@@ -418,15 +416,11 @@ impl OutputBuilder {
         }
         self
     }
-    fn with_native_tokens(mut self, native_tokens: impl IntoIterator<Item = NativeToken>) -> Self {
-        match self {
-            Self::Basic(b) => {
-                self = Self::Basic(b.with_native_tokens(native_tokens));
-            }
-            Self::Nft(b) => {
-                self = Self::Nft(b.with_native_tokens(native_tokens));
-            }
+    fn with_native_token(mut self, native_token: NativeToken) -> Self {
+        if let Self::Basic(b) = self {
+            self = Self::Basic(b.add_feature(NativeTokenFeature::from(native_token)));
         }
+
         self
     }
     fn finish_output(self) -> Result<Output, crate::types::block::Error> {

@@ -7,7 +7,6 @@ use std::ops::Range;
 
 use async_trait::async_trait;
 use crypto::{
-    hashes::{blake2b::Blake2b256, Digest},
     keys::{bip39::Mnemonic, bip44::Bip44, slip10::Seed},
     signatures::{
         ed25519,
@@ -20,8 +19,7 @@ use super::{GenerateAddressOptions, SecretManage};
 use crate::{
     client::{api::PreparedTransactionData, Client, Error},
     types::block::{
-        address::Ed25519Address, payload::signed_transaction::SignedTransactionPayload, signature::Ed25519Signature,
-        unlock::Unlocks,
+        payload::signed_transaction::SignedTransactionPayload, signature::Ed25519Signature, unlock::Unlocks,
     },
 };
 
@@ -40,13 +38,13 @@ impl std::fmt::Debug for MnemonicSecretManager {
 impl SecretManage for MnemonicSecretManager {
     type Error = Error;
 
-    async fn generate_ed25519_addresses(
+    async fn generate_ed25519_public_keys(
         &self,
         coin_type: u32,
         account_index: u32,
         address_indexes: Range<u32>,
         options: impl Into<Option<GenerateAddressOptions>> + Send,
-    ) -> Result<Vec<Ed25519Address>, Self::Error> {
+    ) -> Result<Vec<ed25519::PublicKey>, Self::Error> {
         let internal = options.into().map(|o| o.internal).unwrap_or_default();
 
         Ok(address_indexes
@@ -59,15 +57,9 @@ impl SecretManage for MnemonicSecretManager {
                 let public_key = chain
                     .derive(&self.0.to_master_key::<ed25519::SecretKey>())
                     .secret_key()
-                    .public_key()
-                    .to_bytes();
+                    .public_key();
 
-                // Hash the public key to get the address
-                let result = Blake2b256::digest(public_key).try_into().map_err(|_e| {
-                    crate::client::Error::Blake2b256("hashing the public key while generating the address failed.")
-                })?;
-
-                crate::client::Result::Ok(Ed25519Address::new(result))
+                crate::client::Result::Ok(public_key)
             })
             .collect::<Result<_, _>>()?)
     }

@@ -48,20 +48,21 @@ impl WeightedAddress {
 }
 
 fn verify_address<const VERIFY: bool>(address: &Address) -> Result<(), Error> {
-    if VERIFY {
-        if !matches!(
+    if VERIFY
+        && !matches!(
             address,
             Address::Ed25519(_) | Address::Account(_) | Address::Nft(_) | Address::Anchor(_)
-        ) {
-            return Err(Error::InvalidAddressKind(address.kind()));
-        }
+        )
+    {
+        Err(Error::InvalidAddressKind(address.kind()))
+    } else {
+        Ok(())
     }
-    Ok(())
 }
 
 fn verify_weight<const VERIFY: bool>(weight: &u8) -> Result<(), Error> {
     if VERIFY && *weight == 0 {
-        return Err(Error::InvalidAddressWeight(*weight));
+        Err(Error::InvalidAddressWeight(*weight))
     } else {
         Ok(())
     }
@@ -123,7 +124,7 @@ impl MultiAddress {
 
 fn verify_addresses<const VERIFY: bool>(addresses: &[WeightedAddress]) -> Result<(), Error> {
     if VERIFY && !is_unique_sorted(addresses.iter().map(WeightedAddress::address)) {
-        return Err(Error::WeightedAddressesNotUniqueSorted);
+        Err(Error::WeightedAddressesNotUniqueSorted)
     } else {
         Ok(())
     }
@@ -131,7 +132,7 @@ fn verify_addresses<const VERIFY: bool>(addresses: &[WeightedAddress]) -> Result
 
 fn verify_threshold<const VERIFY: bool>(threshold: &u16) -> Result<(), Error> {
     if VERIFY && *threshold == 0 {
-        return Err(Error::InvalidMultiAddressThreshold(*threshold));
+        Err(Error::InvalidMultiAddressThreshold(*threshold))
     } else {
         Ok(())
     }

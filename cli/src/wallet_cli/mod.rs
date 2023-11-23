@@ -24,7 +24,7 @@ use iota_sdk::{
     utils::ConvertTo,
     wallet::{
         types::OutputData, ConsolidationParams, CreateNativeTokenParams, MintNftParams, OutputsToClaim,
-        SendNativeTokensParams, SendNftParams, SendParams, SyncOptions, TransactionOptions, Wallet,
+        SendNativeTokenParams, SendNftParams, SendParams, SyncOptions, TransactionOptions, Wallet,
     },
     U256,
 };
@@ -193,7 +193,7 @@ pub enum WalletCommand {
         #[arg(long, default_value_t = false)]
         allow_micro_amount: bool,
     },
-    /// Send native tokens.
+    /// Send a native token.
     /// This will create an output with an expiration and storage deposit return unlock condition.
     SendNativeToken {
         /// Address to send the native tokens to, e.g. rms1qztwng6cty8cfm42nzvq099ev7udhrnk0rw8jt8vttf9kpqnxhpsx869vr3.
@@ -417,14 +417,15 @@ pub async fn claimable_outputs_command(wallet: &Wallet) -> Result<(), Error> {
         };
         println_log_info!("{output_id:?} ({kind})");
 
-        if let Some(native_tokens) = output.native_tokens() {
-            if !native_tokens.is_empty() {
-                println_log_info!("  - native token amount:");
-                native_tokens.iter().for_each(|token| {
-                    println_log_info!("    + {} {}", token.amount(), token.token_id());
-                });
-            }
-        }
+        // TODO https://github.com/iotaledger/iota-sdk/issues/1633
+        // if let Some(native_tokens) = output.native_tokens() {
+        //     if !native_tokens.is_empty() {
+        //         println_log_info!("  - native token amount:");
+        //         native_tokens.iter().for_each(|token| {
+        //             println_log_info!("    + {} {}", token.amount(), token.token_id());
+        //         });
+        //     }
+        // }
 
         if let Some(unlock_conditions) = output.unlock_conditions() {
             let deposit_return = unlock_conditions
@@ -739,21 +740,21 @@ pub async fn send_native_token_command(
 
         let outputs = [BasicOutputBuilder::new_with_minimum_amount(storage_params)
             .add_unlock_condition(AddressUnlockCondition::new(address))
-            .with_native_tokens([NativeToken::new(
+            .with_native_token(NativeToken::new(
                 TokenId::from_str(&token_id)?,
                 U256::from_dec_str(&amount).map_err(|e| Error::Miscellaneous(e.to_string()))?,
-            )?])
+            )?)
             .finish_output()?];
 
         wallet.send_outputs(outputs, None).await?
     } else {
         // Send native tokens with storage deposit return and expiration
-        let outputs = [SendNativeTokensParams::new(
+        let outputs = [SendNativeTokenParams::new(
             address,
-            [(
+            (
                 TokenId::from_str(&token_id)?,
                 U256::from_dec_str(&amount).map_err(|e| Error::Miscellaneous(e.to_string()))?,
-            )],
+            ),
         )?];
         wallet.send_native_tokens(outputs, None).await?
     };
@@ -790,6 +791,7 @@ pub async fn sync_command(wallet: &Wallet) -> Result<(), Error> {
     let balance = wallet
         .sync(Some(SyncOptions {
             sync_native_token_foundries: true,
+            sync_implicit_accounts: true,
             ..Default::default()
         }))
         .await?;
@@ -959,8 +961,8 @@ async fn print_wallet_address(wallet: &Wallet) -> Result<(), Error> {
             .required_and_unlocked_address(slot_index, &output_id)?;
 
         if address.inner() == required_address {
-            if let Some(nts) = output_data.output.native_tokens() {
-                native_tokens.add_native_tokens(nts.clone())?;
+            if let Some(nt) = output_data.output.native_token() {
+                native_tokens.add_native_token(*nt)?;
             }
             match &output_data.output {
                 Output::Basic(_) => {}
@@ -1042,7 +1044,7 @@ pub async fn prompt_internal(
     let prompt = if let Some(alias) = wallet.alias().await {
         format!("Wallet \"{alias}\": ")
     } else {
-        format!("Wallet: ")
+        String::from("Wallet: ")
     };
 
     if let Some(helper) = rl.helper_mut() {
@@ -1208,11 +1210,17 @@ fn print_outputs(mut outputs: Vec<OutputData>, title: &str) -> Result<(), Error>
         outputs.sort_unstable_by_key(|o| o.output_id);
 
         for (i, output_data) in outputs.into_iter().enumerate() {
+            let kind_str = if output_data.output.is_implicit_account() {
+                "ImplicitAccount"
+            } else {
+                output_data.output.kind_str()
+            };
+
             println_log_info!(
-                "{:<5}{}\t{}\t{}",
+                "{:<5}{} {:<16}{}",
                 i,
                 &output_data.output_id,
-                output_data.output.kind_str(),
+                kind_str,
                 if output_data.is_spent { "Spent" } else { "Unspent" },
             );
         }

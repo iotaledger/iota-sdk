@@ -55,7 +55,7 @@ async fn main() -> Result<()> {
                 "- address: {:?}\n- amount: {:?}\n- native tokens: {:?}",
                 output_data.address.clone().to_bech32_unchecked("rms"),
                 output_data.output.amount(),
-                output_data.output.native_tokens()
+                output_data.output.native_token()
             )
         });
 
@@ -96,7 +96,7 @@ async fn main() -> Result<()> {
                 "- address: {:?}\n- amount: {:?}\n- native tokens: {:?}",
                 output_data.address.clone().to_bech32_unchecked("rms"),
                 output_data.output.amount(),
-                output_data.output.native_tokens()
+                output_data.output.native_token()
             )
         });
 

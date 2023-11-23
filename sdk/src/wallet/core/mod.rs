@@ -455,7 +455,7 @@ where
         if let Address::Ed25519(address) = bech32_address.inner() {
             Ok(Bech32Address::new(
                 *bech32_address.hrp(),
-                ImplicitAccountCreationAddress::from(address.clone()),
+                ImplicitAccountCreationAddress::from(*address),
             ))
         } else {
             Err(Error::NonEd25519Address)
