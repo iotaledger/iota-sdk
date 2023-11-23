@@ -11,8 +11,8 @@ use crate::types::block::{
     protocol::ProtocolParameters,
     rand::{
         bytes::rand_bytes_array,
-        issuer_id::rand_issuer_id,
         number::rand_number,
+        output::rand_account_id,
         parents::rand_strong_parents,
         payload::rand_payload_for_block,
         signature::rand_sign_ed25519,
@@ -57,7 +57,7 @@ pub fn rand_block_with_block_body(protocol_params: ProtocolParameters, block: Bl
             rand_number(),
             rand_slot_commitment_id(),
             rand_slot_index(),
-            rand_issuer_id(),
+            rand_account_id(),
         ),
         block,
     )

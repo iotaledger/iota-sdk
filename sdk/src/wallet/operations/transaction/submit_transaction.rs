@@ -5,7 +5,7 @@
 use crate::wallet::events::types::{TransactionProgressEvent, WalletEvent};
 use crate::{
     client::secret::{SecretManage, SignBlock},
-    types::block::{payload::Payload, BlockId, IssuerId},
+    types::block::{output::AccountId, payload::Payload, BlockId},
     wallet::{operations::transaction::SignedTransactionPayload, Error, Wallet},
 };
 
@@ -23,8 +23,8 @@ where
 
         let block = self
             .client()
-            // TODO https://github.com/iotaledger/iota-sdk/issues/1665 to set IssuerId
-            .build_basic_block(IssuerId::null(), Some(Payload::from(transaction_payload)))
+            // TODO https://github.com/iotaledger/iota-sdk/issues/1665 to set AccountId
+            .build_basic_block(AccountId::null(), Some(Payload::from(transaction_payload)))
             .await?
             .sign_ed25519(
                 &*self.get_secret_manager().read().await,

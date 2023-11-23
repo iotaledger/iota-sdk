@@ -9,13 +9,14 @@ use crate::{
     client::{ClientInner, Result},
     types::block::{
         core::{BlockHeader, UnsignedBlock},
+        output::AccountId,
         payload::Payload,
-        BlockBody, IssuerId,
+        BlockBody,
     },
 };
 
 impl ClientInner {
-    pub async fn build_basic_block(&self, issuer_id: IssuerId, payload: Option<Payload>) -> Result<UnsignedBlock> {
+    pub async fn build_basic_block(&self, issuer_id: AccountId, payload: Option<Payload>) -> Result<UnsignedBlock> {
         let issuance = self.get_issuance().await?;
 
         let issuing_time = {
