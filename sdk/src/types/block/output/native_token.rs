@@ -261,12 +261,6 @@ impl NativeTokens {
     }
 }
 
-impl WorkScore for NativeTokens {
-    fn work_score(&self, params: WorkScoreParameters) -> u32 {
-        self.iter().map(|nt| nt.work_score(params)).sum()
-    }
-}
-
 #[inline]
 fn verify_unique_sorted<const VERIFY: bool>(native_tokens: &[NativeToken]) -> Result<(), Error> {
     if VERIFY && !is_unique_sorted(native_tokens.iter().map(NativeToken::token_id)) {
