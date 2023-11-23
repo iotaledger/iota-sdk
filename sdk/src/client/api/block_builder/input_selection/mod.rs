@@ -14,6 +14,7 @@ use std::collections::HashSet;
 
 use packable::PackableExt;
 
+use self::requirement::account::is_account_with_id;
 pub use self::{burn::Burn, error::Error, requirement::Requirement};
 use crate::{
     client::{api::types::RemainderData, secret::types::InputSigningData},
@@ -68,6 +69,7 @@ impl InputSelection {
             Address::Account(account_address) => Ok(Some(Requirement::Account(*account_address.account_id()))),
             Address::Nft(nft_address) => Ok(Some(Requirement::Nft(*nft_address.nft_id()))),
             Address::Anchor(_) => Err(Error::UnsupportedAddressType(AnchorAddress::KIND)),
+            Address::ImplicitAccountCreation(_) => Ok(None),
             Address::Restricted(_) => Ok(None),
             _ => todo!("What do we do here?"),
         }
@@ -235,10 +237,12 @@ impl InputSelection {
                 .unwrap()
                 .0;
 
-            if let Address::Restricted(restricted_address) = required_address {
-                self.addresses.contains(restricted_address.address())
-            } else {
-                self.addresses.contains(&required_address)
+            match required_address {
+                Address::ImplicitAccountCreation(implicit_account_creation) => self
+                    .addresses
+                    .contains(&Address::from(*implicit_account_creation.ed25519_address())),
+                Address::Restricted(restricted) => self.addresses.contains(restricted.address()),
+                _ => self.addresses.contains(&required_address),
             }
         })
     }
@@ -401,6 +405,11 @@ impl InputSelection {
                 input_native_tokens_builder.add_native_token(*native_token)?;
             }
             match &input.output {
+                Output::Basic(basic) => {
+                    if basic.is_implicit_account() {
+                        input_accounts.push(input);
+                    }
+                }
                 Output::Account(_) => {
                     input_accounts.push(input);
                 }
@@ -432,25 +441,27 @@ impl InputSelection {
 
                     let account_input = input_accounts
                         .iter()
-                        .find(|i| {
-                            if let Output::Account(account_input) = &i.output {
-                                *account_output.account_id() == account_input.account_id_non_null(i.output_id())
-                            } else {
-                                false
-                            }
-                        })
+                        .find(|i| is_account_with_id(&i.output, account_output.account_id(), i.output_id()))
                         .expect("ISA is broken because there is no account input");
 
-                    if let Err(err) = AccountOutput::transition_inner(
-                        account_input.output.as_account(),
-                        account_output,
-                        &input_chains_foundries,
-                        &self.outputs,
-                    ) {
-                        log::debug!("validate_transitions error {err:?}");
-                        return Err(Error::UnfulfillableRequirement(Requirement::Account(
-                            *account_output.account_id(),
-                        )));
+                    match &account_input.output {
+                        Output::Account(account) => {
+                            if let Err(err) = AccountOutput::transition_inner(
+                                account,
+                                account_output,
+                                &input_chains_foundries,
+                                &self.outputs,
+                            ) {
+                                log::debug!("validate_transitions error {err:?}");
+                                return Err(Error::UnfulfillableRequirement(Requirement::Account(
+                                    *account_output.account_id(),
+                                )));
+                            }
+                        }
+                        Output::Basic(_) => {
+                            // TODO https://github.com/iotaledger/iota-sdk/issues/1664
+                        }
+                        _ => panic!("unreachable: \"input_accounts\" only contains account outputs and implicit account (basic) outputs")
                     }
                 }
                 Output::Foundry(foundry_output) => {

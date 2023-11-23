@@ -12,6 +12,7 @@ import type {
     __OutputsMethod__,
     __PendingTransactionsMethod__,
     __ImplicitAccountCreationAddressMethod__,
+    __PrepareImplicitAccountTransitionMethod__,
     __AccountsMethod__,
     __ImplicitAccountsMethod__,
     __IncomingTransactionsMethod__,
@@ -85,6 +86,7 @@ export type __WalletMethod__ =
     | __OutputsMethod__
     | __PendingTransactionsMethod__
     | __ImplicitAccountCreationAddressMethod__
+    | __PrepareImplicitAccountTransitionMethod__
     | __AccountsMethod__
     | __ImplicitAccountsMethod__
     | __IncomingTransactionsMethod__
