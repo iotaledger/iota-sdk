@@ -82,7 +82,7 @@ pub struct ProtocolParameters {
     /// Parameters used to calculate the Reference Mana Cost (RMC).
     pub(crate) congestion_control_parameters: CongestionControlParameters,
     /// Defines the parameters used to signal a protocol parameters upgrade.
-    pub(crate) version_signaling: VersionSignalingParameters,
+    pub(crate) version_signaling_parameters: VersionSignalingParameters,
     /// Defines the parameters used for reward calculation.
     pub(crate) rewards_parameters: RewardsParameters,
     /// Defines the target size of the committee. If there's fewer candidates the actual committee size could be

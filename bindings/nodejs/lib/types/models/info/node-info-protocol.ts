@@ -102,7 +102,7 @@ export interface ProtocolParameters {
     /**
      * The parameters used by signaling protocol parameters upgrade.
      */
-    versionSignaling: VersionSignalingParameters;
+    versionSignalingParameters: VersionSignalingParameters;
     /**
      * Rewards Parameters defines the parameters that are used to calculate Mana rewards.
      */

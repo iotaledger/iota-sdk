@@ -149,7 +149,7 @@ class CongestionControlParameters:
 
 @json
 @dataclass
-class VersionSignaling:
+class versionSignalingParameters:
     """Version Signaling defines the parameters used by signaling protocol parameters upgrade.
 
     Attributes:
@@ -271,7 +271,7 @@ class ProtocolParameters:
         encoder=str
     ))
     congestion_control_parameters: CongestionControlParameters
-    version_signaling: VersionSignaling
+    version_signaling_parameters: versionSignalingParameters
     rewards_parameters: RewardsParameters
 
 
