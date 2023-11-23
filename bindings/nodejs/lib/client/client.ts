@@ -42,7 +42,6 @@ import {
     NftId,
     FoundryId,
     DelegationId,
-    IssuerId,
     UnsignedBlock,
     parseUnsignedBlock,
 } from '../types/block';
@@ -273,7 +272,7 @@ export class Client {
      * @returns The block ID followed by the block containing the payload.
      */
     async buildBasicBlock(
-        issuerId: IssuerId,
+        issuerId: AccountId,
         payload?: Payload,
     ): Promise<UnsignedBlock> {
         const response = await this.methodHandler.callMethod({

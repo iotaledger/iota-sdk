@@ -16,10 +16,11 @@ use packable::{
 use crate::types::block::{
     block_id::{BlockHash, BlockId},
     core::{BasicBlockBody, ValidationBlockBody},
+    output::AccountId,
     protocol::ProtocolParameters,
     signature::Signature,
     slot::{SlotCommitmentId, SlotIndex},
-    BlockBody, Error, IssuerId,
+    BlockBody, Error,
 };
 
 /// Block without a signature. Can be finished into a [`Block`].
@@ -75,13 +76,13 @@ pub struct BlockHeader {
     /// The slot index of the latest finalized slot.
     latest_finalized_slot: SlotIndex,
     /// The identifier of the account that issued this block.
-    issuer_id: IssuerId,
+    issuer_id: AccountId,
 }
 
 impl BlockHeader {
     /// The length of the block header.
     pub const LENGTH: usize =
-        size_of::<u8>() + 2 * size_of::<u64>() + SlotCommitmentId::LENGTH + size_of::<SlotIndex>() + IssuerId::LENGTH;
+        size_of::<u8>() + 2 * size_of::<u64>() + SlotCommitmentId::LENGTH + size_of::<SlotIndex>() + AccountId::LENGTH;
 
     pub fn new(
         protocol_version: u8,
@@ -89,7 +90,7 @@ impl BlockHeader {
         issuing_time: u64,
         slot_commitment_id: SlotCommitmentId,
         latest_finalized_slot: SlotIndex,
-        issuer_id: IssuerId,
+        issuer_id: AccountId,
     ) -> Self {
         Self {
             protocol_version,
@@ -152,7 +153,7 @@ impl Packable for BlockHeader {
 
         let latest_finalized_slot = SlotIndex::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
 
-        let issuer_id = IssuerId::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
+        let issuer_id = AccountId::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
 
         Ok(Self {
             protocol_version,
@@ -234,7 +235,7 @@ impl Block {
 
     /// Returns the issuer ID of a [`Block`].
     #[inline(always)]
-    pub fn issuer_id(&self) -> IssuerId {
+    pub fn issuer_id(&self) -> AccountId {
         self.header.issuer_id()
     }
 
@@ -414,7 +415,7 @@ pub(crate) mod dto {
         pub issuing_time: u64,
         pub slot_commitment_id: SlotCommitmentId,
         pub latest_finalized_slot: SlotIndex,
-        pub issuer_id: IssuerId,
+        pub issuer_id: AccountId,
     }
 
     impl From<&BlockHeader> for BlockHeaderDto {

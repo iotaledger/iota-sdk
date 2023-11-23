@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { IssuerId } from '../id';
+import { AccountId } from '../id';
 import { Signature, SignatureDiscriminator } from '../signature';
 import { SlotCommitmentId, SlotIndex } from '../slot';
 import { u64 } from '../../utils/type-aliases';
@@ -38,7 +38,7 @@ class SignedBlock {
     /**
      * The identifier of the account that issued this block.
      */
-    readonly issuerId!: IssuerId;
+    readonly issuerId!: AccountId;
 
     @Type(() => Block, {
         discriminator: BlockDiscriminator,
@@ -59,7 +59,7 @@ class SignedBlock {
         issuingTime: u64,
         slotCommitmentId: SlotCommitmentId,
         latestFinalizedSlot: SlotIndex,
-        issuerId: IssuerId,
+        issuerId: AccountId,
         block: Block,
         signature: Signature,
     ) {
@@ -147,7 +147,7 @@ class UnsignedBlock {
     /**
      * The identifier of the account that issued this block.
      */
-    readonly issuerId!: IssuerId;
+    readonly issuerId!: AccountId;
 
     @Type(() => Block, {
         discriminator: BlockDiscriminator,
@@ -160,7 +160,7 @@ class UnsignedBlock {
         issuingTime: u64,
         slotCommitmentId: SlotCommitmentId,
         latestFinalizedSlot: SlotIndex,
-        issuerId: IssuerId,
+        issuerId: AccountId,
         block: Block,
     ) {
         this.protocolVersion = protocolVersion;

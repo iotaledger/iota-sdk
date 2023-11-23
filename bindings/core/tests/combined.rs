@@ -11,7 +11,7 @@ use iota_sdk::{
     types::{
         block::{
             payload::{dto::PayloadDto, Payload, TaggedDataPayload},
-            Block, BlockBodyDto, IssuerId,
+            Block, BlockBodyDto,
         },
         TryFromDto,
     },
@@ -126,7 +126,7 @@ async fn client_from_wallet() -> Result<()> {
 //     let response = call_client_method(
 //         &client,
 //         ClientMethod::BuildBasicBlock {
-//             issuer_id: IssuerId::null(),
+//             issuer_id: AccountId::null(),
 //             payload: Some(payload.clone()),
 //         },
 //     )
