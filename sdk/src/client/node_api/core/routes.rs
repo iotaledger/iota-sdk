@@ -21,6 +21,7 @@ use crate::{
             ValidatorResponse, ValidatorsResponse,
         },
         block::{
+            address::ToBech32Ext,
             output::{dto::OutputDto, AccountId, Output, OutputId, OutputMetadata},
             payload::signed_transaction::TransactionId,
             slot::{EpochIndex, SlotCommitment, SlotCommitmentId, SlotIndex},
@@ -86,9 +87,10 @@ impl ClientInner {
     }
 
     /// Checks if the account is ready to issue a block.
-    /// GET /api/core/v3/accounts/{accountId}/congestion
+    /// GET /api/core/v3/accounts/{bech32Address}/congestion
     pub async fn get_account_congestion(&self, account_id: &AccountId) -> Result<CongestionResponse> {
-        let path = &format!("api/core/v3/accounts/{account_id}/congestion");
+        let bech32_address = account_id.to_bech32(self.get_bech32_hrp().await?);
+        let path = &format!("api/core/v3/accounts/{bech32_address}/congestion");
 
         self.get_request(path, None, false, false).await
     }
@@ -147,9 +149,10 @@ impl ClientInner {
     }
 
     /// Return information about a validator.
-    /// GET /api/core/v3/validators/{accountId}
+    /// GET /api/core/v3/validators/{bech32Address}
     pub async fn get_validator(&self, account_id: &AccountId) -> Result<ValidatorResponse> {
-        let path = &format!("api/core/v3/validators/{account_id}");
+        let bech32_address = account_id.to_bech32(self.get_bech32_hrp().await?);
+        let path = &format!("api/core/v3/validators/{bech32_address}");
 
         self.get_request(path, None, false, false).await
     }
