@@ -93,7 +93,9 @@ class NftUnlock:
 class MultiUnlock:
     """Unlocks a MultiAddress with a list of other unlocks.
     """
-    unlocks: List[Unlock]
+    unlocks: List[Unlock] = field(metadata=config(
+        decoder=deserialize_unlocks
+    ))
     type: int = field(
         default_factory=lambda: int(
             UnlockType.Multi),
