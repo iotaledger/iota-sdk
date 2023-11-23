@@ -50,7 +50,8 @@ impl SignedTransactionPayload {
 
 impl WorkScore for SignedTransactionPayload {
     fn work_score(&self, params: WorkScoreParameters) -> u32 {
-        self.packed_len() as u32 * params.data_byte()
+        // 1 byte for the payload kind
+        (1 + self.packed_len() as u32) * params.data_byte()
             + self.transaction().work_score(params)
             + self.unlocks().work_score(params)
     }

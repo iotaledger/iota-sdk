@@ -82,8 +82,7 @@ impl Payload {
 
 impl WorkScore for Payload {
     fn work_score(&self, params: WorkScoreParameters) -> u32 {
-        // 1 byte for the payload kind
-        1 + match self {
+        match self {
             Self::SignedTransaction(signed_transaction) => signed_transaction.work_score(params),
             Self::TaggedData(tagged_data) => tagged_data.work_score(params),
             Self::CandidacyAnnouncement(candidacy_announcement) => candidacy_announcement.work_score(params),

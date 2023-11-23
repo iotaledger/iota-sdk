@@ -61,7 +61,8 @@ impl TaggedDataPayload {
 
 impl WorkScore for TaggedDataPayload {
     fn work_score(&self, params: WorkScoreParameters) -> u32 {
-        self.packed_len() as u32 * params.data_byte()
+        // 1 byte for the payload kind
+        (1 + self.packed_len() as u32) * params.data_byte()
     }
 }
 

@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use packable::Packable;
+use packable::{Packable, PackableExt};
 
 use crate::types::block::protocol::WorkScore;
 
@@ -15,4 +15,13 @@ impl CandidacyAnnouncementPayload {
 }
 
 // # TODO: check with TIP
-impl WorkScore for CandidacyAnnouncementPayload {}
+impl WorkScore for CandidacyAnnouncementPayload {
+    fn work_score(&self, params: crate::types::block::protocol::WorkScoreParameters) -> u32 {
+        // (1 + self.packed_len()) as u32 * params.data_byte()
+        todo!()
+    }
+
+    fn mana_cost(&self, params: crate::types::block::protocol::WorkScoreParameters, reference_mana_cost: u64) -> u64 {
+        reference_mana_cost * self.work_score(params) as u64
+    }
+}
