@@ -100,7 +100,7 @@ describe('Wallet', () => {
 
         const recreatedWallet = await Wallet.create({ storagePath: './test-recreate-wallet' });
 
-        // TODO: make acocunts test 
+        // TODO: make accounts test 
         // expect(accounts.length).toStrictEqual(0);
 
         await recreatedWallet.destroy();
