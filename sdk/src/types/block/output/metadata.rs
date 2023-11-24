@@ -120,11 +120,9 @@ mod dto {
         latest_commitment_id: SlotCommitmentId,
     }
 
-    impl TryFrom<OutputMetadataDto> for OutputMetadata {
-        type Error = crate::types::block::Error;
-
-        fn try_from(value: OutputMetadataDto) -> Result<Self, Self::Error> {
-            Ok(Self {
+    impl From<OutputMetadataDto> for OutputMetadata {
+        fn from(value: OutputMetadataDto) -> Self {
+            Self {
                 block_id: value.block_id,
                 output_id: OutputId::new(value.transaction_id, value.output_index),
                 is_spent: value.is_spent,
@@ -132,7 +130,7 @@ mod dto {
                 transaction_id_spent: value.transaction_id_spent,
                 included_commitment_id: value.included_commitment_id,
                 latest_commitment_id: value.latest_commitment_id,
-            })
+            }
         }
     }
 
@@ -153,7 +151,7 @@ mod dto {
 
     impl<'de> Deserialize<'de> for OutputMetadata {
         fn deserialize<D: serde::Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
-            OutputMetadataDto::deserialize(d).and_then(|dto| dto.try_into().map_err(serde::de::Error::custom))
+            Ok(OutputMetadataDto::deserialize(d)?.into())
         }
     }
 
