@@ -10,7 +10,7 @@ use primitive_types::U256;
 use crate::types::block::{
     address::{Address, AddressCapabilityFlag},
     output::{
-        AnchorOutput, ChainId, FoundryId, NativeTokens, Output, OutputId, StateTransitionError, TokenId,
+        AccountId, AnchorOutput, ChainId, FoundryId, NativeTokens, Output, OutputId, StateTransitionError, TokenId,
         UnlockCondition,
     },
     payload::signed_transaction::{Transaction, TransactionCapabilityFlag, TransactionId, TransactionSigningHash},
@@ -216,6 +216,32 @@ impl<'a> SemanticValidationContext<'a> {
         inputs: &'a [(&'a OutputId, &'a Output)],
         unlocks: &'a Unlocks,
     ) -> Self {
+        let input_chains = inputs
+            .iter()
+            .filter_map(|(output_id, input)| {
+                if input.is_implicit_account() {
+                    Some((ChainId::from(AccountId::from(*output_id)), *input))
+                } else {
+                    input
+                        .chain_id()
+                        .map(|chain_id| (chain_id.or_from_output_id(output_id), *input))
+                }
+            })
+            .collect();
+        let output_chains = transaction
+            .outputs()
+            .iter()
+            .enumerate()
+            .filter_map(|(index, output)| {
+                output.chain_id().map(|chain_id| {
+                    (
+                        chain_id.or_from_output_id(&OutputId::new(*transaction_id, index as u16).unwrap()),
+                        output,
+                    )
+                })
+            })
+            .collect();
+
         Self {
             transaction,
             transaction_signing_hash: transaction.signing_hash(),
@@ -224,30 +250,11 @@ impl<'a> SemanticValidationContext<'a> {
             input_amount: 0,
             input_mana: 0,
             input_native_tokens: BTreeMap::<TokenId, U256>::new(),
-            input_chains: inputs
-                .iter()
-                .filter_map(|(output_id, input)| {
-                    input
-                        .chain_id()
-                        .map(|chain_id| (chain_id.or_from_output_id(output_id), *input))
-                })
-                .collect(),
+            input_chains,
             output_amount: 0,
             output_mana: 0,
             output_native_tokens: BTreeMap::<TokenId, U256>::new(),
-            output_chains: transaction
-                .outputs()
-                .iter()
-                .enumerate()
-                .filter_map(|(index, output)| {
-                    output.chain_id().map(|chain_id| {
-                        (
-                            chain_id.or_from_output_id(&OutputId::new(*transaction_id, index as u16).unwrap()),
-                            output,
-                        )
-                    })
-                })
-                .collect(),
+            output_chains,
             unlocked_addresses: HashSet::new(),
             storage_deposit_returns: HashMap::new(),
             simple_deposits: HashMap::new(),

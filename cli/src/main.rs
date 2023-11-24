@@ -8,6 +8,7 @@ mod wallet_cli;
 
 use clap::Parser;
 use fern_logger::{LoggerConfigBuilder, LoggerOutputConfigBuilder};
+use log::LevelFilter;
 
 use self::{
     cli::{new_wallet, Cli},
@@ -35,12 +36,20 @@ fn logger_init(cli: &Cli) -> Result<(), Error> {
         println_log_error!("{panic_info}");
     }));
 
+    let target_exclusions = &["rustls"];
     let archive = LoggerOutputConfigBuilder::default()
         .name("archive.log")
         .level_filter(cli.log_level)
-        .target_exclusions(&["rustls"])
+        .target_exclusions(target_exclusions)
         .color_enabled(false);
-    let config = LoggerConfigBuilder::default().with_output(archive).finish();
+    let console = LoggerOutputConfigBuilder::default()
+        .level_filter(LevelFilter::Error)
+        .target_exclusions(target_exclusions)
+        .color_enabled(true);
+    let config = LoggerConfigBuilder::default()
+        .with_output(archive)
+        .with_output(console)
+        .finish();
 
     fern_logger::logger_init(config)?;
 

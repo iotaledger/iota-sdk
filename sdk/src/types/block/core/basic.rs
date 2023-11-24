@@ -115,7 +115,7 @@ pub struct BasicBlockBody {
     shallow_like_parents: ShallowLikeParents,
     /// The optional [`Payload`] of the block.
     payload: OptionalPayload,
-    /// The amount of Mana the Account identified by [`IssuerId`](super::IssuerId) is at most willing to burn for this
+    /// The amount of Mana the Account identified by AccountId is at most willing to burn for this
     /// block.
     max_burned_mana: u64,
 }

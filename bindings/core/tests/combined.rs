@@ -11,7 +11,7 @@ use iota_sdk::{
     types::{
         block::{
             payload::{dto::PayloadDto, Payload, TaggedDataPayload},
-            Block, BlockBodyDto, IssuerId,
+            Block, BlockBodyDto,
         },
         TryFromDto,
     },
@@ -22,6 +22,7 @@ use iota_sdk_bindings_core::{
 };
 use pretty_assertions::assert_eq;
 
+#[cfg(feature = "storage")]
 #[tokio::test]
 async fn create_wallet() -> Result<()> {
     let storage_path = "test-storage/create_wallet";
@@ -59,6 +60,7 @@ async fn create_wallet() -> Result<()> {
     Ok(())
 }
 
+#[cfg(feature = "storage")]
 #[tokio::test]
 async fn client_from_wallet() -> Result<()> {
     let storage_path = "test-storage/client_from_wallet";
@@ -100,6 +102,7 @@ async fn client_from_wallet() -> Result<()> {
 }
 
 // TODO reenable
+// #[cfg(feature = "storage")]
 // #[tokio::test]
 // async fn build_and_sign_block() -> Result<()> {
 //     let storage_path = "test-storage/build_and_sign_block";
@@ -123,7 +126,7 @@ async fn client_from_wallet() -> Result<()> {
 //     let response = call_client_method(
 //         &client,
 //         ClientMethod::BuildBasicBlock {
-//             issuer_id: IssuerId::null(),
+//             issuer_id: AccountId::null(),
 //             payload: Some(payload.clone()),
 //         },
 //     )
