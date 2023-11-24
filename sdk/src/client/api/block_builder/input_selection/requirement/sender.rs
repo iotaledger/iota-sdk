@@ -42,6 +42,30 @@ impl InputSelection {
                     Err(e) => Err(e),
                 }
             }
+            Address::Multi(multi_address) => {
+                let mut cumulative_weight = 0u16;
+
+                for address in multi_address.addresses() {
+                    for input in self.selected_inputs.iter() {
+                        let required_address = input
+                            .output
+                            .required_and_unlocked_address(self.slot_index, input.output_id())
+                            .unwrap()
+                            .0;
+
+                        if &required_address == address.address() {
+                            cumulative_weight += address.weight() as u16;
+                            break;
+                        }
+                    }
+                }
+
+                if cumulative_weight < multi_address.threshold() {
+                    todo!()
+                } else {
+                    Ok(vec![])
+                }
+            }
             Address::Restricted(restricted_address) => {
                 log::debug!("Forwarding {address:?} sender requirement to inner address");
 
