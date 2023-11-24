@@ -124,6 +124,9 @@ pub enum Error {
     /// Action requires the wallet to be Ed25519 address based
     #[error("tried to perform an action that requires the wallet to be Ed25519 address based")]
     NonEd25519Address,
+    /// Implicit account not found.
+    #[error("implicit account not found")]
+    ImplicitAccountNotFound,
 }
 
 // Serialize type with Display error
