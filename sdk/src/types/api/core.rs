@@ -268,8 +268,10 @@ pub struct IssuanceBlockHeaderResponse {
     /// Blocks that are strongly directly approved.
     pub strong_parents: BTreeSet<BlockId>,
     /// Blocks that are weakly directly approved.
+    #[serde(default, skip_serializing_if = "BTreeSet::is_empty")]
     pub weak_parents: BTreeSet<BlockId>,
     /// Blocks that are directly referenced to adjust opinion.
+    #[serde(default, skip_serializing_if = "BTreeSet::is_empty")]
     pub shallow_like_parents: BTreeSet<BlockId>,
     /// The slot index of the latest finalized slot.
     pub latest_finalized_slot: SlotIndex,
