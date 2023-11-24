@@ -311,12 +311,6 @@ impl StorageScore for UnlockConditions {
     }
 }
 
-impl WorkScore for UnlockConditions {
-    fn work_score(&self, params: WorkScoreParameters) -> u32 {
-        self.iter().map(|uc| uc.work_score(params)).sum()
-    }
-}
-
 #[inline]
 fn verify_unique_sorted<const VERIFY: bool>(unlock_conditions: &[UnlockCondition]) -> Result<(), Error> {
     if VERIFY && !is_unique_sorted(unlock_conditions.iter().map(UnlockCondition::kind)) {

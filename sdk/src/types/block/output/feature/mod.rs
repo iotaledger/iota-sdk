@@ -277,12 +277,6 @@ impl StorageScore for Features {
     }
 }
 
-impl WorkScore for Features {
-    fn work_score(&self, params: WorkScoreParameters) -> u32 {
-        self.iter().map(|feature| feature.work_score(params)).sum()
-    }
-}
-
 #[inline]
 fn verify_unique_sorted<const VERIFY: bool>(features: &[Feature]) -> Result<(), Error> {
     if VERIFY && !is_unique_sorted(features.iter().map(Feature::kind)) {
