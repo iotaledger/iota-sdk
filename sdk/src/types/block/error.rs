@@ -18,8 +18,7 @@ use crate::types::block::{
     output::{
         feature::{BlockIssuerKeyCount, FeatureCount},
         unlock_condition::UnlockConditionCount,
-        AccountId, AnchorId, ChainId, MetadataFeatureLength, NativeTokenCount, NftId, OutputIndex, StateMetadataLength,
-        TagFeatureLength,
+        AccountId, AnchorId, ChainId, MetadataFeatureLength, NativeTokenCount, NftId, OutputIndex, TagFeatureLength,
     },
     payload::{ContextInputCount, InputCount, OutputCount, TagLength, TaggedDataLength},
     protocol::ProtocolParametersHash,
@@ -101,7 +100,6 @@ pub enum Error {
         byte: u8,
     },
     InvalidBlockLength(usize),
-    InvalidStateMetadataLength(<StateMetadataLength as TryFrom<usize>>::Error),
     InvalidManaValue(u64),
     InvalidMetadataFeatureLength(<MetadataFeatureLength as TryFrom<usize>>::Error),
     InvalidNativeTokenCount(<NativeTokenCount as TryFrom<usize>>::Error),
@@ -137,7 +135,6 @@ pub enum Error {
     InvalidTagLength(<TagLength as TryFrom<usize>>::Error),
     InvalidTokenSchemeKind(u8),
     InvalidTransactionAmountSum(u128),
-    InvalidTransactionNativeTokensCount(u16),
     InvalidManaAllotmentSum {
         max: u64,
         sum: u128,
@@ -301,7 +298,6 @@ impl fmt::Display for Error {
             Self::InvalidInputCount(count) => write!(f, "invalid input count: {count}"),
             Self::InvalidInputOutputIndex(index) => write!(f, "invalid input or output index: {index}"),
             Self::InvalidBlockLength(length) => write!(f, "invalid block length {length}"),
-            Self::InvalidStateMetadataLength(length) => write!(f, "invalid state metadata length: {length}"),
             Self::InvalidManaValue(mana) => write!(f, "invalid mana value: {mana}"),
             Self::InvalidMetadataFeatureLength(length) => {
                 write!(f, "invalid metadata feature length: {length}")
@@ -345,9 +341,6 @@ impl fmt::Display for Error {
             }
             Self::InvalidTokenSchemeKind(k) => write!(f, "invalid token scheme kind {k}"),
             Self::InvalidTransactionAmountSum(value) => write!(f, "invalid transaction amount sum: {value}"),
-            Self::InvalidTransactionNativeTokensCount(count) => {
-                write!(f, "invalid transaction native tokens count: {count}")
-            }
             Self::InvalidManaAllotmentSum { max, sum } => {
                 write!(f, "invalid mana allotment sum: {sum} greater than max of {max}")
             }

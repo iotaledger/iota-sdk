@@ -123,14 +123,6 @@ class Utils():
         })
 
     @staticmethod
-    def compute_inputs_commitment(inputs: List[Output]) -> HexStr:
-        """Compute the input commitment from the output objects that are used as inputs to fund the transaction.
-        """
-        return _call_method('computeInputsCommitment', {
-            'inputs': [i.to_dict() for i in inputs]
-        })
-
-    @staticmethod
     def compute_storage_deposit(output, rent) -> HexStr:
         """Compute the required storage deposit of an output.
         """

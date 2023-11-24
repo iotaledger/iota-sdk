@@ -47,7 +47,6 @@ pub use self::{
     unlock_condition::{UnlockCondition, UnlockConditions},
 };
 pub(crate) use self::{
-    anchor::StateMetadataLength,
     feature::{MetadataFeatureLength, TagFeatureLength},
     native_token::NativeTokenCount,
     output_id::OutputIndex,
@@ -193,18 +192,6 @@ impl Output {
         }
     }
 
-    /// Returns the native tokens of an [`Output`], if any.
-    pub fn native_tokens(&self) -> Option<&NativeTokens> {
-        match self {
-            Self::Basic(output) => Some(output.native_tokens()),
-            Self::Account(output) => Some(output.native_tokens()),
-            Self::Anchor(output) => Some(output.native_tokens()),
-            Self::Foundry(output) => Some(output.native_tokens()),
-            Self::Nft(output) => Some(output.native_tokens()),
-            Self::Delegation(_) => None,
-        }
-    }
-
     /// Returns the unlock conditions of an [`Output`], if any.
     pub fn unlock_conditions(&self) -> Option<&UnlockConditions> {
         match self {
@@ -225,6 +212,18 @@ impl Output {
             Self::Anchor(output) => Some(output.features()),
             Self::Foundry(output) => Some(output.features()),
             Self::Nft(output) => Some(output.features()),
+            Self::Delegation(_) => None,
+        }
+    }
+
+    /// Returns the native token of an [`Output`], if any.
+    pub fn native_token(&self) -> Option<&NativeToken> {
+        match self {
+            Self::Basic(output) => output.native_token(),
+            Self::Account(_) => None,
+            Self::Anchor(_) => None,
+            Self::Foundry(output) => output.native_token(),
+            Self::Nft(_) => None,
             Self::Delegation(_) => None,
         }
     }
@@ -320,6 +319,14 @@ impl Output {
             (None, Some(Self::Delegation(next_state))) => DelegationOutput::creation(next_state, context),
 
             // Transitions.
+            (Some(Self::Basic(current_state)), Some(Self::Account(_next_state))) => {
+                if !current_state.is_implicit_account() {
+                    Err(StateTransitionError::UnsupportedStateTransition)
+                } else {
+                    // TODO https://github.com/iotaledger/iota-sdk/issues/1664
+                    Ok(())
+                }
+            }
             (Some(Self::Account(current_state)), Some(Self::Account(next_state))) => {
                 AccountOutput::transition(current_state, next_state, context)
             }

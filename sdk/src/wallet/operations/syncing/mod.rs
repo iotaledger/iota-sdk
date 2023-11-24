@@ -107,7 +107,15 @@ where
             key_index: 0,
         };
 
-        let address_to_sync = vec![wallet_address_with_unspent_outputs];
+        let address_to_sync = vec![
+            wallet_address_with_unspent_outputs,
+            AddressWithUnspentOutputs {
+                address: self.implicit_account_creation_address().await?,
+                output_ids: vec![],
+                internal: false,
+                key_index: 0,
+            },
+        ];
 
         let (addresses_with_unspent_outputs, spent_or_not_synced_output_ids, outputs_data): (
             Vec<AddressWithUnspentOutputs>,
@@ -119,16 +127,16 @@ where
         log::debug!("[SYNC] spent_or_not_synced_outputs: {spent_or_not_synced_output_ids:?}");
         let spent_or_unsynced_output_metadata_responses = self
             .client()
-            .get_outputs_metadata_ignore_errors(&spent_or_not_synced_output_ids)
+            .get_outputs_metadata_ignore_not_found(&spent_or_not_synced_output_ids)
             .await?;
 
         // Add the output response to the output ids, the output response is optional, because an output could be
         // pruned and then we can't get the metadata
-        let mut spent_or_unsynced_output_metadata_map: HashMap<OutputId, Option<OutputMetadata>> =
+        let mut spent_or_unsynced_output_metadata: HashMap<OutputId, Option<OutputMetadata>> =
             spent_or_not_synced_output_ids.into_iter().map(|o| (o, None)).collect();
         for output_metadata_response in spent_or_unsynced_output_metadata_responses {
             let output_id = output_metadata_response.output_id();
-            spent_or_unsynced_output_metadata_map.insert(*output_id, Some(output_metadata_response));
+            spent_or_unsynced_output_metadata.insert(*output_id, Some(output_metadata_response));
         }
 
         if options.sync_incoming_transactions {
@@ -143,10 +151,10 @@ where
         if options.sync_native_token_foundries {
             let native_token_foundry_ids = outputs_data
                 .iter()
-                .filter_map(|output| output.output.native_tokens())
-                .flat_map(|native_tokens| {
-                    native_tokens
-                        .iter()
+                .filter_map(|output| {
+                    output
+                        .output
+                        .native_token()
                         .map(|native_token| FoundryId::from(*native_token.token_id()))
                 })
                 .collect::<HashSet<_>>();
@@ -156,7 +164,7 @@ where
         }
 
         // Updates wallet with balances, output ids, outputs
-        self.update_after_sync(outputs_data, spent_or_unsynced_output_metadata_map)
+        self.update_after_sync(outputs_data, spent_or_unsynced_output_metadata)
             .await
     }
 
@@ -216,7 +224,7 @@ where
                     let new_outputs_data_inner = self.get_outputs(output_ids).await?;
 
                     let outputs_data_inner = self
-                        .output_response_to_output_data(new_outputs_data_inner, &address_with_unspent_outputs)
+                        .output_response_to_output_data(new_outputs_data_inner, address_with_unspent_outputs)
                         .await?;
 
                     outputs_data.extend(outputs_data_inner.clone());

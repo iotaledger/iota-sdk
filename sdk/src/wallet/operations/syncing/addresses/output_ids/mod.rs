@@ -47,6 +47,7 @@ where
         if (address.is_ed25519() && sync_options.wallet.all_outputs())
             || (address.is_nft() && sync_options.nft.all_outputs())
             || (address.is_account() && sync_options.account.all_outputs())
+            || (address.is_implicit_account_creation() && sync_options.sync_implicit_accounts)
         {
             return Ok(self
                 .client()
@@ -79,9 +80,9 @@ where
                 tasks.push(
                     async {
                         let bech32_address = address.clone();
-                        let account = self.clone();
+                        let wallet = self.clone();
                         tokio::spawn(async move {
-                            account
+                            wallet
                                 .get_basic_output_ids_with_any_unlock_condition(bech32_address)
                                 .await
                         })
@@ -107,9 +108,9 @@ where
                 tasks.push(
                     async {
                         let bech32_address = address.clone();
-                        let account = self.clone();
+                        let wallet = self.clone();
                         tokio::spawn(async move {
-                            account
+                            wallet
                                 .get_nft_output_ids_with_any_unlock_condition(bech32_address)
                                 .await
                         })
@@ -139,9 +140,9 @@ where
                     async {
                         let bech32_address = address.clone();
                         let sync_options = sync_options.clone();
-                        let account = self.clone();
+                        let wallet = self.clone();
                         tokio::spawn(async move {
-                            account
+                            wallet
                                 .get_account_and_foundry_output_ids(bech32_address, &sync_options)
                                 .await
                         })

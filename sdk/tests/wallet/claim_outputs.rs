@@ -6,7 +6,7 @@ use iota_sdk::{
         unlock_condition::{AddressUnlockCondition, ExpirationUnlockCondition},
         BasicOutputBuilder, NativeToken, NftId, NftOutputBuilder, UnlockCondition,
     },
-    wallet::{CreateNativeTokenParams, OutputsToClaim, Result, SendNativeTokensParams, SendParams, TransactionOptions},
+    wallet::{CreateNativeTokenParams, OutputsToClaim, Result, SendNativeTokenParams, SendParams, TransactionOptions},
     U256,
 };
 use pretty_assertions::assert_eq;
@@ -240,8 +240,8 @@ async fn claim_2_native_tokens() -> Result<()> {
     let tx = wallet_1
         .send_native_tokens(
             [
-                SendNativeTokensParams::new(wallet_0.address().await, [(create_tx_0.token_id, native_token_amount)])?,
-                SendNativeTokensParams::new(wallet_0.address().await, [(create_tx_1.token_id, native_token_amount)])?,
+                SendNativeTokenParams::new(wallet_0.address().await, (create_tx_0.token_id, native_token_amount))?,
+                SendNativeTokenParams::new(wallet_0.address().await, (create_tx_1.token_id, native_token_amount))?,
             ],
             None,
         )
@@ -347,7 +347,7 @@ async fn claim_2_native_tokens_no_outputs_in_claim_account() -> Result<()> {
                         wallet_0.address().await,
                         wallet_0.client().get_slot_index().await? + 5000,
                     )?)
-                    .add_native_token(NativeToken::new(create_tx_0.token_id, native_token_amount)?)
+                    .with_native_token(NativeToken::new(create_tx_0.token_id, native_token_amount)?)
                     .finish_output()?,
                 BasicOutputBuilder::new_with_minimum_amount(storage_score_params)
                     .add_unlock_condition(AddressUnlockCondition::new(wallet_1.address().await))
@@ -355,7 +355,7 @@ async fn claim_2_native_tokens_no_outputs_in_claim_account() -> Result<()> {
                         wallet_0.address().await,
                         wallet_0.client().get_slot_index().await? + 5000,
                     )?)
-                    .add_native_token(NativeToken::new(create_tx_1.token_id, native_token_amount)?)
+                    .with_native_token(NativeToken::new(create_tx_1.token_id, native_token_amount)?)
                     .finish_output()?,
             ],
             None,

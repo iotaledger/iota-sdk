@@ -39,7 +39,7 @@ impl TryFrom<Box<[u8]>> for TagFeature {
 
 impl TagFeature {
     /// The [`Feature`](crate::types::block::output::Feature) kind of an [`TagFeature`].
-    pub const KIND: u8 = 3;
+    pub const KIND: u8 = 4;
     /// Valid lengths for an [`TagFeature`].
     pub const LENGTH_RANGE: RangeInclusive<u8> = 1..=64;
 

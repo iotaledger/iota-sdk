@@ -440,7 +440,7 @@ fn duplicate_output_foundry() {
     let foundry_id = FoundryId::build(&AccountAddress::from(account_id), 1, token_scheme.kind());
     let token_id = TokenId::from(foundry_id);
     let foundry = FoundryOutput::build_with_amount(1_000_000, 1, token_scheme)
-        .add_native_token(NativeToken::new(token_id, 70).unwrap())
+        .with_native_token(NativeToken::new(token_id, 70).unwrap())
         .add_unlock_condition(ImmutableAccountAddressUnlockCondition::new(AccountAddress::from(
             account_id,
         )))

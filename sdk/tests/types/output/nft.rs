@@ -2,15 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use iota_sdk::types::block::{
-    output::{FoundryId, MinimumOutputAmount, NativeToken, NftId, NftOutput, Output, SimpleTokenScheme, TokenId},
+    output::{MinimumOutputAmount, NftId, NftOutput},
     protocol::protocol_parameters,
-    rand::{
-        address::rand_account_address,
-        output::{
-            feature::{rand_issuer_feature, rand_sender_feature},
-            rand_nft_output,
-            unlock_condition::rand_address_unlock_condition,
-        },
+    rand::output::{
+        feature::{rand_issuer_feature, rand_sender_feature},
+        rand_nft_output,
+        unlock_condition::rand_address_unlock_condition,
     },
 };
 use packable::PackableExt;
@@ -19,7 +16,6 @@ use pretty_assertions::assert_eq;
 #[test]
 fn builder() {
     let protocol_parameters = protocol_parameters();
-    let foundry_id = FoundryId::build(&rand_account_address(), 0, SimpleTokenScheme::KIND);
     let address_1 = rand_address_unlock_condition();
     let address_2 = rand_address_unlock_condition();
     let sender_1 = rand_sender_feature();
@@ -29,7 +25,6 @@ fn builder() {
     let amount = 500_000;
 
     let mut builder = NftOutput::build_with_amount(amount, NftId::null())
-        .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000).unwrap())
         .add_unlock_condition(address_1.clone())
         .add_feature(sender_1)
         .replace_feature(sender_2.clone())

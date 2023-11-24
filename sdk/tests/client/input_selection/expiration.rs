@@ -680,15 +680,7 @@ fn expiration_expired_only_account_addresses() {
             Some((BECH32_ADDRESS_ACCOUNT_1, 50)),
             None,
         ),
-        Account(
-            1_000_000,
-            account_id_1,
-            BECH32_ADDRESS_ED25519_0,
-            None,
-            None,
-            None,
-            None,
-        ),
+        Account(1_000_000, account_id_1, BECH32_ADDRESS_ED25519_0, None, None, None),
     ]);
 
     let outputs = build_outputs([Basic(
@@ -728,7 +720,6 @@ fn one_nft_output_expiration_unexpired() {
         None,
         None,
         None,
-        None,
         Some((BECH32_ADDRESS_ED25519_0, 150)),
         None,
     )]);
@@ -736,7 +727,6 @@ fn one_nft_output_expiration_unexpired() {
         2_000_000,
         nft_id_1,
         BECH32_ADDRESS_ED25519_1,
-        None,
         None,
         None,
         None,
@@ -770,7 +760,6 @@ fn one_nft_output_expiration_expired() {
         None,
         None,
         None,
-        None,
         Some((BECH32_ADDRESS_ED25519_0, 50)),
         None,
     )]);
@@ -778,7 +767,6 @@ fn one_nft_output_expiration_expired() {
         2_000_000,
         nft_id_1,
         BECH32_ADDRESS_ED25519_1,
-        None,
         None,
         None,
         None,

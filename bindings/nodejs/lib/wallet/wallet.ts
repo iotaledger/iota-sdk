@@ -6,7 +6,7 @@ import {
     Balance,
     SyncOptions,
     SendParams,
-    SendNativeTokensParams,
+    SendNativeTokenParams,
     SendNftParams,
     AccountOutputParams,
     FilterOptions,
@@ -896,6 +896,41 @@ export class Wallet {
     }
 
     /**
+     * Transitions an implicit account to an account.
+     *
+     * @param outputId Identifier of the implicit account output.
+     * @returns The created transaction.
+     */
+    async implicitAccountTransition(
+        outputId: OutputId,
+    ): Promise<TransactionWithMetadata> {
+        return (await this.prepareImplicitAccountTransition(outputId)).send();
+    }
+
+    /**
+     * Prepares to transition an implicit account to an account.
+     *
+     * @param outputId Identifier of the implicit account output.
+     * @returns The prepared transaction.
+     */
+    async prepareImplicitAccountTransition(
+        outputId: OutputId,
+    ): Promise<PreparedTransaction> {
+        const response = await this.methodHandler.callMethod({
+            name: 'prepareImplicitAccountTransition',
+            data: { outputId },
+        });
+
+        const parsed = JSON.parse(
+            response,
+        ) as Response<PreparedTransactionData>;
+        return new PreparedTransaction(
+            plainToInstance(PreparedTransactionData, parsed.payload),
+            this,
+        );
+    }
+
+    /**
      * Returns the implicit accounts of the wallet.
      *
      * @returns The implicit accounts of the wallet.
@@ -1325,7 +1360,7 @@ export class Wallet {
      * @returns The transaction.
      */
     async sendNativeTokens(
-        params: SendNativeTokensParams[],
+        params: SendNativeTokenParams[],
         transactionOptions?: TransactionOptions,
     ): Promise<TransactionWithMetadata> {
         return (
@@ -1342,7 +1377,7 @@ export class Wallet {
      * @returns The prepared transaction.
      */
     async prepareSendNativeTokens(
-        params: SendNativeTokensParams[],
+        params: SendNativeTokenParams[],
         transactionOptions?: TransactionOptions,
     ): Promise<PreparedTransaction> {
         const response = await this.methodHandler.callMethod({

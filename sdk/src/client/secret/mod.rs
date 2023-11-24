@@ -26,8 +26,12 @@ use std::{collections::HashMap, fmt::Debug, ops::Range, str::FromStr};
 
 use async_trait::async_trait;
 use crypto::{
+    hashes::{blake2b::Blake2b256, Digest},
     keys::{bip39::Mnemonic, bip44::Bip44},
-    signatures::secp256k1_ecdsa::{self, EvmAddress},
+    signatures::{
+        ed25519,
+        secp256k1_ecdsa::{self, EvmAddress},
+    },
 };
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use zeroize::Zeroizing;
@@ -66,6 +70,17 @@ use crate::{
 pub trait SecretManage: Send + Sync {
     type Error: std::error::Error + Send + Sync;
 
+    /// Generates public keys.
+    ///
+    /// For `coin_type`, see also <https://github.com/satoshilabs/slips/blob/master/slip-0044.md>.
+    async fn generate_ed25519_public_keys(
+        &self,
+        coin_type: u32,
+        account_index: u32,
+        address_indexes: Range<u32>,
+        options: impl Into<Option<GenerateAddressOptions>> + Send,
+    ) -> Result<Vec<ed25519::PublicKey>, Self::Error>;
+
     /// Generates addresses.
     ///
     /// For `coin_type`, see also <https://github.com/satoshilabs/slips/blob/master/slip-0044.md>.
@@ -75,7 +90,14 @@ pub trait SecretManage: Send + Sync {
         account_index: u32,
         address_indexes: Range<u32>,
         options: impl Into<Option<GenerateAddressOptions>> + Send,
-    ) -> Result<Vec<Ed25519Address>, Self::Error>;
+    ) -> Result<Vec<Ed25519Address>, Self::Error> {
+        Ok(self
+            .generate_ed25519_public_keys(coin_type, account_index, address_indexes, options)
+            .await?
+            .iter()
+            .map(|public_key| Ed25519Address::new(Blake2b256::digest(public_key.to_bytes()).into()))
+            .collect())
+    }
 
     async fn generate_evm_addresses(
         &self,
@@ -308,31 +330,31 @@ impl From<&SecretManager> for SecretManagerDto {
 impl SecretManage for SecretManager {
     type Error = Error;
 
-    async fn generate_ed25519_addresses(
+    async fn generate_ed25519_public_keys(
         &self,
         coin_type: u32,
         account_index: u32,
         address_indexes: Range<u32>,
         options: impl Into<Option<GenerateAddressOptions>> + Send,
-    ) -> crate::client::Result<Vec<Ed25519Address>> {
+    ) -> Result<Vec<ed25519::PublicKey>, Self::Error> {
         match self {
             #[cfg(feature = "stronghold")]
             Self::Stronghold(secret_manager) => Ok(secret_manager
-                .generate_ed25519_addresses(coin_type, account_index, address_indexes, options)
+                .generate_ed25519_public_keys(coin_type, account_index, address_indexes, options)
                 .await?),
             #[cfg(feature = "ledger_nano")]
             Self::LedgerNano(secret_manager) => Ok(secret_manager
-                .generate_ed25519_addresses(coin_type, account_index, address_indexes, options)
+                .generate_ed25519_public_keys(coin_type, account_index, address_indexes, options)
                 .await?),
             Self::Mnemonic(secret_manager) => {
                 secret_manager
-                    .generate_ed25519_addresses(coin_type, account_index, address_indexes, options)
+                    .generate_ed25519_public_keys(coin_type, account_index, address_indexes, options)
                     .await
             }
             #[cfg(feature = "private_key_secret_manager")]
             Self::PrivateKey(secret_manager) => {
                 secret_manager
-                    .generate_ed25519_addresses(coin_type, account_index, address_indexes, options)
+                    .generate_ed25519_public_keys(coin_type, account_index, address_indexes, options)
                     .await
             }
             Self::Placeholder => Err(Error::PlaceholderSecretManager),
@@ -531,8 +553,10 @@ where
                 // We can only sign ed25519 addresses and block_indexes needs to contain the account or nft
                 // address already at this point, because the reference index needs to be lower
                 // than the current block index
-                if !input_address.is_ed25519() {
-                    Err(InputSelectionError::MissingInputWithEd25519Address)?;
+                match &input_address {
+                    Address::Ed25519(_) | Address::ImplicitAccountCreation(_) => {}
+                    Address::Restricted(restricted) if restricted.address().is_ed25519() => {}
+                    _ => Err(InputSelectionError::MissingInputWithEd25519Address)?,
                 }
 
                 let chain = input.chain.ok_or(Error::MissingBip32Chain)?;

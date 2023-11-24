@@ -170,7 +170,6 @@ pub struct BaseTokenResponse {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub subunit: Option<String>,
     pub decimals: u32,
-    pub use_metric_prefix: bool,
 }
 
 /// Response of GET /api/core/v3/blocks/validators.
@@ -269,8 +268,10 @@ pub struct IssuanceBlockHeaderResponse {
     /// Blocks that are strongly directly approved.
     pub strong_parents: BTreeSet<BlockId>,
     /// Blocks that are weakly directly approved.
+    #[serde(default, skip_serializing_if = "BTreeSet::is_empty")]
     pub weak_parents: BTreeSet<BlockId>,
     /// Blocks that are directly referenced to adjust opinion.
+    #[serde(default, skip_serializing_if = "BTreeSet::is_empty")]
     pub shallow_like_parents: BTreeSet<BlockId>,
     /// The slot index of the latest finalized slot.
     pub latest_finalized_slot: SlotIndex,
