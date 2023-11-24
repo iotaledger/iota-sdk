@@ -5,7 +5,12 @@ use core::str::FromStr;
 
 use derive_more::From;
 
-use crate::types::block::{output::OutputId, payload::signed_transaction::TransactionId, Error};
+use crate::types::block::{
+    output::OutputId,
+    payload::signed_transaction::TransactionId,
+    protocol::{WorkScore, WorkScoreParameters},
+    Error,
+};
 
 /// Represents an input referencing an output.
 #[derive(Clone, Copy, Eq, PartialEq, Hash, Ord, PartialOrd, From, packable::Packable)]
@@ -23,6 +28,12 @@ impl UtxoInput {
     /// Returns the output id of a [`UtxoInput`].
     pub fn output_id(&self) -> &OutputId {
         &self.0
+    }
+}
+
+impl WorkScore for UtxoInput {
+    fn work_score(&self, params: WorkScoreParameters) -> u32 {
+        params.input()
     }
 }
 

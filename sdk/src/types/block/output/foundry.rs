@@ -513,10 +513,10 @@ impl StorageScore for FoundryOutput {
 impl WorkScore for FoundryOutput {
     fn work_score(&self, params: WorkScoreParameters) -> u32 {
         params.output()
-            + self.token_scheme().work_score(params)
-            + self.unlock_conditions().work_score(params)
-            + self.features().work_score(params)
-            + self.immutable_features().work_score(params)
+            + self.token_scheme.work_score(params)
+            + self.unlock_conditions.work_score(params)
+            + self.features.work_score(params)
+            + self.immutable_features.work_score(params)
     }
 }
 

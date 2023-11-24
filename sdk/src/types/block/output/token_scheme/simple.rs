@@ -70,8 +70,12 @@ impl SimpleTokenScheme {
     }
 }
 
-// TODO: double check with TIP
-impl WorkScore for SimpleTokenScheme {}
+// TODO: double check with TIP whetehr this is still correct
+impl WorkScore for SimpleTokenScheme {
+    fn work_score(&self, params: crate::types::block::protocol::WorkScoreParameters) -> u32 {
+        params.native_token()
+    }
+}
 
 #[inline]
 fn verify_simple_token_scheme<const VERIFY: bool>(token_scheme: &SimpleTokenScheme) -> Result<(), Error> {

@@ -507,7 +507,10 @@ impl StorageScore for AnchorOutput {
 
 impl WorkScore for AnchorOutput {
     fn work_score(&self, params: WorkScoreParameters) -> u32 {
-        params.output() + self.features().work_score(params) + self.immutable_features().work_score(params)
+        params.output()
+            + self.unlock_conditions.work_score(params)
+            + self.features.work_score(params)
+            + self.immutable_features.work_score(params)
     }
 }
 

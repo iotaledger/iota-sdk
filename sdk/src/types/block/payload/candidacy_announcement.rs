@@ -17,8 +17,8 @@ impl CandidacyAnnouncementPayload {
 // # TODO: check with TIP
 impl WorkScore for CandidacyAnnouncementPayload {
     fn work_score(&self, params: crate::types::block::protocol::WorkScoreParameters) -> u32 {
-        // (1 + self.packed_len()) as u32 * params.data_byte()
-        todo!()
+        // 1 byte for the payload kind
+        (1 + self.packed_len()) as u32 * params.data_byte()
     }
 
     fn mana_cost(&self, params: crate::types::block::protocol::WorkScoreParameters, reference_mana_cost: u64) -> u64 {

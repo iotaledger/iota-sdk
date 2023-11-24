@@ -392,7 +392,7 @@ impl StorageScore for DelegationOutput {
 
 impl WorkScore for DelegationOutput {
     fn work_score(&self, params: WorkScoreParameters) -> u32 {
-        params.output()
+        params.output() + self.unlock_conditions.work_score(params)
     }
 }
 
