@@ -77,7 +77,7 @@ impl Payload {
         }
     }
 
-    crate::def_is_as_opt!(Payload: SignedTransaction, TaggedData);
+    crate::def_is_as_opt!(Payload: TaggedData, SignedTransaction, CandidacyAnnouncement);
 }
 
 impl WorkScore for Payload {
