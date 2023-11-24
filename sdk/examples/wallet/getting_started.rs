@@ -19,13 +19,22 @@ use iota_sdk::{
 
 #[tokio::main]
 async fn main() -> Result<()> {
+    // This example uses secrets in environment variables for simplicity which should not be done in production.
+    dotenvy::dotenv().ok();
+
+    for var in ["NODE_URL"] {
+        if std::env::var(var).is_err() {
+            panic!(".env variable '{}' is undefined, see .env.example", var);
+        }
+    }
+
     // Setup Stronghold secret manager.
     // WARNING: Never hardcode passwords in production code.
     let secret_manager = StrongholdSecretManager::builder()
         .password("password".to_owned()) // A password to encrypt the stored data.
         .build("vault.stronghold")?; // The path to store the account snapshot.
 
-    let client_options = ClientOptions::new().with_node("https://api.testnet.shimmer.network")?;
+    let client_options = ClientOptions::new().with_node(&std::env::var("NODE_URL").unwrap())?;
 
     // Set up and store the wallet.
     let wallet = Wallet::builder()

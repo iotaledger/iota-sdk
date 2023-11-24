@@ -15,6 +15,12 @@ async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
+    for var in ["NODE_URL"] {
+        if std::env::var(var).is_err() {
+            panic!(".env variable '{}' is undefined, see .env.example", var);
+        }
+    }
+
     // Generates a client.log file with logs for debugging.
     // We exclude logs from h2, hyper and rustls to reduce the noise.
     let logger_output_config = fern_logger::LoggerOutputConfigBuilder::new()

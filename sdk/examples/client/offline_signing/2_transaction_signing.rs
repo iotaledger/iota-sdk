@@ -27,6 +27,12 @@ async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
+    for var in ["MNEMONIC"] {
+        if std::env::var(var).is_err() {
+            panic!(".env variable '{}' is undefined, see .env.example", var);
+        }
+    }
+
     let secret_manager = SecretManager::try_from_mnemonic(std::env::var("MNEMONIC").unwrap())?;
 
     let prepared_transaction_data = read_prepared_transaction_from_file(PREPARED_TRANSACTION_FILE_NAME).await?;

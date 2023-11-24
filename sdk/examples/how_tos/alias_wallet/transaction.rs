@@ -21,6 +21,12 @@ async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
+    for var in ["WALLET_DB_PATH", "STRONGHOLD_PASSWORD", "EXPLORER_URL"] {
+        if std::env::var(var).is_err() {
+            panic!(".env variable '{}' is undefined, see .env.example", var);
+        }
+    }
+
     let sync_options = SyncOptions {
         alias: AliasSyncOptions {
             basic_outputs: true,
@@ -73,8 +79,10 @@ async fn main() -> Result<()> {
     account
         .retry_transaction_until_included(&transaction.transaction_id, None, None)
         .await?;
+
     println!(
-        "Transaction with custom input: https://explorer.shimmer.network/testnet/transaction/{}",
+        "Transaction with custom input: {}/transaction/{}",
+        std::env::var("EXPLORER_URL").unwrap(),
         transaction.transaction_id
     );
 

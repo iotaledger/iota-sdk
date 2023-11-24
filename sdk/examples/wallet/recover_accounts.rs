@@ -23,6 +23,12 @@ async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
+    for var in ["NODE_URL", "MNEMONIC", "WALLET_DB_PATH"] {
+        if std::env::var(var).is_err() {
+            panic!(".env variable '{}' is undefined, see .env.example", var);
+        }
+    }
+
     let client_options = ClientOptions::new().with_node(&std::env::var("NODE_URL").unwrap())?;
 
     let secret_manager = MnemonicSecretManager::try_from_mnemonic(std::env::var("MNEMONIC").unwrap())?;

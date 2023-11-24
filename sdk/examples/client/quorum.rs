@@ -23,6 +23,12 @@ async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
+    for var in ["MNEMONIC"] {
+        if std::env::var(var).is_err() {
+            panic!(".env variable '{}' is undefined, see .env.example", var);
+        }
+    }
+
     let node_1 = std::env::args().nth(1).expect("missing example argument: NODE 1");
     let node_2 = std::env::args().nth(2).expect("missing example argument: NODE 2");
     let node_3 = std::env::args().nth(3).expect("missing example argument: NODE 3");

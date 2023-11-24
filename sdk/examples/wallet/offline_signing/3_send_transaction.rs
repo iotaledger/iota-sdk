@@ -27,6 +27,12 @@ async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
+    for var in ["EXPLORER_URL"] {
+        if std::env::var(var).is_err() {
+            panic!(".env variable '{}' is undefined, see .env.example", var);
+        }
+    }
+
     // Create the wallet with the secret_manager and client options
     let wallet = Wallet::builder()
         .with_storage_path(ONLINE_WALLET_DB_PATH)

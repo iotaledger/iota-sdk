@@ -37,6 +37,12 @@ async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
+    for var in ["NODE_URL", "MNEMONIC", "WALLET_DB_PATH", "EXPLORER_URL"] {
+        if std::env::var(var).is_err() {
+            panic!(".env variable '{}' is undefined, see .env.example", var);
+        }
+    }
+
     let wallet = create_wallet().await?;
 
     let account = wallet.get_or_create_account("Alice").await?;

@@ -24,6 +24,12 @@ async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
+    for var in ["NODE_URL", "MNEMONIC", "WALLET_DB_PATH"] {
+        if std::env::var(var).is_err() {
+            panic!(".env variable '{}' is undefined, see .env.example", var);
+        }
+    }
+
     // Initialize a logger that writes to the specified file
     let logger_output_config = fern_logger::LoggerOutputConfigBuilder::new()
         .name("example.log")

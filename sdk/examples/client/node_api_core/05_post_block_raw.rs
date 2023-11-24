@@ -15,10 +15,16 @@ async fn main() -> Result<()> {
     // If not provided we use the default node from the `.env` file.
     dotenvy::dotenv().ok();
 
+    for var in ["EXPLORER_URL"] {
+        if std::env::var(var).is_err() {
+            panic!(".env variable '{}' is undefined, see .env.example", var);
+        }
+    }
+
     // Take the node URL from command line argument or use one from env as default.
     let node_url = std::env::args()
         .nth(1)
-        .unwrap_or_else(|| std::env::var("NODE_URL").unwrap());
+        .unwrap_or_else(|| std::env::var("NODE_URL").expect("NODE_URL not set"));
 
     // Create a node client.
     let client = Client::builder().with_node(&node_url)?.finish().await?;

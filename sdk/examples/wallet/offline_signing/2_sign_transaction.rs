@@ -29,6 +29,12 @@ async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
+    for var in ["STRONGHOLD_PASSWORD"] {
+        if std::env::var(var).is_err() {
+            panic!(".env variable '{}' is undefined, see .env.example", var);
+        }
+    }
+
     // Setup Stronghold secret_manager
     let secret_manager = StrongholdSecretManager::builder()
         .password(std::env::var("STRONGHOLD_PASSWORD").unwrap())

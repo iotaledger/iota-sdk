@@ -30,6 +30,12 @@ async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
+    for var in ["NODE_URL"] {
+        if std::env::var(var).is_err() {
+            panic!(".env variable '{}' is undefined, see .env.example", var);
+        }
+    }
+
     let params = [SendParams::new(SEND_AMOUNT, RECV_ADDRESS)?];
 
     // Recovers addresses from example `0_address_generation`.

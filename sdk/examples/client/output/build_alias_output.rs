@@ -25,6 +25,12 @@ async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
+    for var in ["NODE_URL"] {
+        if std::env::var(var).is_err() {
+            panic!(".env variable '{}' is undefined, see .env.example", var);
+        }
+    }
+
     let metadata = std::env::args().nth(1).unwrap_or_else(|| "hello".to_string());
     let metadata = metadata.as_bytes();
 

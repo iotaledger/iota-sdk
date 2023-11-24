@@ -24,6 +24,12 @@ async fn main() -> Result<()> {
     // `NON_SECURE_USE_DEVELOPMENT_MNEMONIC_1` must contain non-zero balance.
     dotenvy::dotenv().ok();
 
+    for var in ["NODE_URL", "MNEMONIC", "MNEMONIC_2", "EXPLORER_URL"] {
+        if std::env::var(var).is_err() {
+            panic!(".env variable '{}' is undefined, see .env.example", var);
+        }
+    }
+
     // Create a node client.
     let client = Client::builder()
         .with_node(&std::env::var("NODE_URL").unwrap())?

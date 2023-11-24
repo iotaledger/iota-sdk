@@ -26,6 +26,12 @@ async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
+    for var in ["STRONGHOLD_PASSWORD", "MNEMONIC"] {
+        if std::env::var(var).is_err() {
+            panic!(".env variable '{}' is undefined, see .env.example", var);
+        }
+    }
+
     let offline_client = ClientOptions::new();
 
     // Setup Stronghold secret_manager

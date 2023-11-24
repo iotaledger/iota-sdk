@@ -20,12 +20,18 @@ use iota_sdk::{
 
 #[tokio::main]
 async fn main() -> Result<()> {
+    // This example uses secrets in environment variables for simplicity which should not be done in production.
+    dotenvy::dotenv().ok();
+
+    for var in ["MNEMONIC"] {
+        if std::env::var(var).is_err() {
+            panic!(".env variable '{}' is undefined, see .env.example", var);
+        }
+    }
+
     let stronghold_secret_manager = StrongholdSecretManager::builder()
         .password("some_hopefully_secure_password".to_owned())
         .build("test.stronghold")?;
-
-    // This example uses secrets in environment variables for simplicity which should not be done in production.
-    dotenvy::dotenv().ok();
 
     let mnemonic = Mnemonic::from(std::env::var("MNEMONIC").unwrap());
 
