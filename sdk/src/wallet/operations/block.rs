@@ -13,7 +13,7 @@ where
     crate::client::Error: From<S::Error>,
 {
     pub(crate) async fn submit_basic_block(&self, payload: Option<Payload>) -> Result<BlockId> {
-        log::debug!("submit_block");
+        log::debug!("submit_basic_block");
 
         let block = self
             .client()
