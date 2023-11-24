@@ -293,6 +293,7 @@ class ProtocolParametersResponse:
     start_epoch: EpochIndex
     parameters: ProtocolParameters
 
+
 @json
 @dataclass
 class NodeInfoBaseToken:
