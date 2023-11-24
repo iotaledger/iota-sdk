@@ -69,7 +69,7 @@ class NodeInfoMetrics:
 @json
 @dataclass
 class StorageScoreParameters:
-    """Rent structure for the storage deposit.
+    """Defines the parameters of storage score calculations on objects which take node resources.
 
     Attributes:
         storage_cost: Defines the number of IOTA tokens required per unit of storage score.
@@ -222,7 +222,7 @@ class ProtocolParameters:
         bech32_hrp: Tells whether the node supports mainnet or testnet addresses.
                     Value `iota` indicates that the node supports mainnet addresses.
                     Value `atoi` indicates that the node supports testnet addresses.
-        rent_structure: The rent structure used by a given node/network.
+        storage_score_parameters: The storage score parameters used by given node/network.
         work_score_parameters: Work Score Parameters lists the work score of each type, it is used to denote the computation costs of processing an object.
         token_supply: Current supply of the base token. Plain string encoded number.
         genesis_slot: Defines the slot of the genesis.
