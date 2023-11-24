@@ -56,16 +56,11 @@ impl OutputId {
 #[cfg(feature = "serde")]
 crate::string_serde_impl!(OutputId);
 
+#[allow(clippy::fallible_impl_from)]
 impl From<[u8; Self::LENGTH]> for OutputId {
     fn from(bytes: [u8; Self::LENGTH]) -> Self {
-        let (transaction_id, index) = bytes.split_at(TransactionId::LENGTH);
-
-        Self::new(
-            // Unwrap is fine because size is already known and valid.
-            TransactionId::new(transaction_id.try_into().unwrap()),
-            // Unwrap is fine because size is already known and valid.
-            u16::from_le_bytes(index.try_into().unwrap()),
-        )
+        // Unwrap is fine because size is already known and valid.
+        Self::unpack_unverified(bytes).unwrap()
     }
 }
 
