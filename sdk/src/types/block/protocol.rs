@@ -69,7 +69,7 @@ pub struct ProtocolParameters {
     pub(crate) punishment_epochs: u32,
     /// Used by tip-selection to determine if a block is eligible by evaluating issuing times.
     pub(crate) liveness_threshold_lower_bound: u16,
-    /// Used by tip-selection to determine if a block is eligible by evaluating issuing times
+    /// Used by tip-selection to determine if a block is eligible by evaluating issuing times.
     pub(crate) liveness_threshold_upper_bound: u16,
     /// Minimum age relative to the accepted tangle time slot index that a slot can be committed.
     pub(crate) min_committable_age: u32,
@@ -82,7 +82,7 @@ pub struct ProtocolParameters {
     /// Parameters used to calculate the Reference Mana Cost (RMC).
     pub(crate) congestion_control_parameters: CongestionControlParameters,
     /// Defines the parameters used to signal a protocol parameters upgrade.
-    pub(crate) version_signaling: VersionSignalingParameters,
+    pub(crate) version_signaling_parameters: VersionSignalingParameters,
     /// Defines the parameters used for reward calculation.
     pub(crate) rewards_parameters: RewardsParameters,
     /// Defines the target size of the committee. If there's fewer candidates the actual committee size could be
@@ -122,7 +122,7 @@ impl Default for ProtocolParameters {
             min_committable_age: 10,
             max_committable_age: 20,
             congestion_control_parameters: Default::default(),
-            version_signaling: Default::default(),
+            version_signaling_parameters: Default::default(),
             rewards_parameters: Default::default(),
             target_committee_size: 32,
         }

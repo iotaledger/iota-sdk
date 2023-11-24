@@ -14,6 +14,7 @@ from iota_sdk.client._utils import ClientUtils
 from iota_sdk.types.block.signed_block import UnsignedBlock
 from iota_sdk.types.common import HexStr, Node
 from iota_sdk.types.feature import Feature
+from iota_sdk.types.node_info import NodeInfoWrapper
 from iota_sdk.types.network_info import NetworkInfo
 from iota_sdk.types.output import AccountOutput, BasicOutput, FoundryOutput, NftOutput, deserialize_output
 from iota_sdk.types.payload import Payload
@@ -320,6 +321,13 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         """Get a node candidate from the healthy node pool.
         """
         return self._call_method('getNode')
+
+    def get_info(self) -> NodeInfoWrapper:
+        """Returns general information about the node.
+        """
+        result = self._call_method('getInfo')
+        print(f'{result}')
+        return NodeInfoWrapper.from_dict(result)
 
     def get_network_info(self) -> NetworkInfo:
         """Gets the network related information such as network_id.
