@@ -57,7 +57,7 @@ impl Default for WorkScoreParameters {
 /// A trait to facilitate the computation of the work score of a block, which is central to mana cost calculation.
 pub trait WorkScore {
     /// Returns its work score. Defaults to 0.
-    fn work_score(&self, params: WorkScoreParameters) -> u32 {
+    fn work_score(&self, _params: WorkScoreParameters) -> u32 {
         0
     }
 
