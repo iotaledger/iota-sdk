@@ -32,7 +32,7 @@ impl SignatureUnlock {
 
 impl WorkScore for SignatureUnlock {
     fn work_score(&self, params: WorkScoreParameters) -> u32 {
-        params.signature_ed25519()
+        self.0.work_score(params)
     }
 }
 
