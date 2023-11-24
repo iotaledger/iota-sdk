@@ -5,7 +5,7 @@ use packable::Packable;
 
 use crate::types::block::{
     core::{parent::verify_parents_sets, BlockBody, Parents},
-    protocol::{ProtocolParameters, ProtocolParametersHash, WorkScore, WorkScoreParameters},
+    protocol::{ProtocolParameters, ProtocolParametersHash, WorkScore},
     Error,
 };
 

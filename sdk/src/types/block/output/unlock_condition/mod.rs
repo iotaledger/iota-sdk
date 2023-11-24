@@ -26,7 +26,7 @@ pub use self::{
 use crate::types::block::{
     address::Address,
     output::{StorageScore, StorageScoreParameters},
-    protocol::{ProtocolParameters, WorkScore, WorkScoreParameters},
+    protocol::{ProtocolParameters, WorkScore},
     slot::SlotIndex,
     Error,
 };
