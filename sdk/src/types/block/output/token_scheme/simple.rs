@@ -4,7 +4,10 @@
 use packable::Packable;
 use primitive_types::U256;
 
-use crate::types::block::{protocol::WorkScore, Error};
+use crate::types::block::{
+    protocol::{WorkScore, WorkScoreParameters},
+    Error,
+};
 
 ///
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Packable)]
@@ -72,7 +75,7 @@ impl SimpleTokenScheme {
 
 // TODO: double check with TIP whetehr this is still correct
 impl WorkScore for SimpleTokenScheme {
-    fn work_score(&self, params: crate::types::block::protocol::WorkScoreParameters) -> u32 {
+    fn work_score(&self, params: WorkScoreParameters) -> u32 {
         params.native_token()
     }
 }

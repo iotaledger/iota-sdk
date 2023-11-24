@@ -148,12 +148,6 @@ impl Unlocks {
     }
 }
 
-impl WorkScore for Unlocks {
-    fn work_score(&self, params: WorkScoreParameters) -> u32 {
-        self.iter().map(|unlock| unlock.work_score(params)).sum()
-    }
-}
-
 /// Verifies the consistency of non-multi unlocks.
 /// Will error on multi unlocks as they can't be nested.
 fn verify_non_multi_unlock<'a>(

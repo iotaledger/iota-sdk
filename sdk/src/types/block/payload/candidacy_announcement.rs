@@ -3,7 +3,7 @@
 
 use packable::{Packable, PackableExt};
 
-use crate::types::block::protocol::WorkScore;
+use crate::types::block::protocol::{WorkScore, WorkScoreParameters};
 
 /// A payload which is used to indicate candidacy for committee selection for the next epoch.
 #[derive(Clone, Debug, Eq, PartialEq, Packable)]
@@ -16,7 +16,7 @@ impl CandidacyAnnouncementPayload {
 
 // # TODO: check with TIP
 impl WorkScore for CandidacyAnnouncementPayload {
-    fn work_score(&self, params: crate::types::block::protocol::WorkScoreParameters) -> u32 {
+    fn work_score(&self, params: WorkScoreParameters) -> u32 {
         // 1 byte for the payload kind
         (1 + self.packed_len()) as u32 * params.data_byte()
     }
