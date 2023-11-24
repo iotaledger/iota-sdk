@@ -192,6 +192,9 @@ impl Address {
                     return Err(TransactionFailureReason::InvalidInputUnlock);
                 }
             }
+            (Self::Restricted(restricted_address), _) => {
+                return restricted_address.address().unlock(unlock, context);
+            }
             _ => return Err(TransactionFailureReason::InvalidInputUnlock),
         }
 
