@@ -20,8 +20,4 @@ impl WorkScore for CandidacyAnnouncementPayload {
         // 1 byte for the payload kind
         (1 + self.packed_len()) as u32 * params.data_byte()
     }
-
-    fn mana_cost(&self, params: crate::types::block::protocol::WorkScoreParameters, reference_mana_cost: u64) -> u64 {
-        reference_mana_cost * self.work_score(params) as u64
-    }
 }
