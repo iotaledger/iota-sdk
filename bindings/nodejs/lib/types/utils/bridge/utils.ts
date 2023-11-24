@@ -6,7 +6,7 @@ import {
     TransactionId,
     TokenSchemeType,
     Output,
-    RentStructure,
+    StorageScoreParameters,
     SignedBlock,
     ProtocolParameters,
     OutputId,
@@ -62,7 +62,7 @@ export interface __ComputeStorageDepositMethod__ {
     name: 'computeStorageDeposit';
     data: {
         output: Output;
-        rent: RentStructure;
+        storageScoreParameters: StorageScoreParameters;
     };
 }
 
