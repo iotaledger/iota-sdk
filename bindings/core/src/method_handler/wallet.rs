@@ -210,6 +210,10 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
             let implicit_account_creation_address = wallet.implicit_account_creation_address().await?;
             Response::Bech32Address(implicit_account_creation_address)
         }
+        WalletMethod::PrepareImplicitAccountTransition { output_id } => {
+            let data = wallet.prepare_implicit_account_transition(&output_id).await?;
+            Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
+        }
         WalletMethod::ImplicitAccounts => {
             let implicit_accounts = wallet.implicit_accounts().await;
             Response::OutputsData(implicit_accounts.iter().map(OutputDataDto::from).collect())

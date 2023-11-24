@@ -5,7 +5,6 @@
 
 mod block_id;
 mod error;
-mod issuer_id;
 mod r#macro;
 
 /// A module that provides types and syntactic validations of addresses.
@@ -46,7 +45,6 @@ pub use self::{
     block_id::{BlockHash, BlockId},
     core::{Block, BlockBody, UnsignedBlock},
     error::Error,
-    issuer_id::IssuerId,
 };
 
 pub const PROTOCOL_VERSION: u8 = 3;

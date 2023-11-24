@@ -68,23 +68,23 @@ class NodeInfoMetrics:
 
 @json
 @dataclass
-class RentStructure:
-    """Rent structure for the storage deposit.
+class StorageScoreParameters:
+    """Defines the parameters of storage score calculations on objects which take node resources.
 
     Attributes:
-        v_byte_cost: Defines the rent of a single virtual byte denoted in IOTA tokens.
-        v_byte_factor_data: Defines the factor to be used for data only fields.
-        v_byte_factor_key: Defines the factor to be used for key/lookup generating fields.
-        v_byte_factor_block_issuer_key: Defines the factor to be used for block issuer feature public keys.
-        v_byte_factor_staking_feature: Defines the factor to be used for staking feature.
-        v_byte_factor_delegation: Defines the factor to be used for delegation output.
+        storage_cost: Defines the number of IOTA tokens required per unit of storage score.
+        factor_data: Defines the factor to be used for data only fields.
+        offset_output_overhead: Defines the offset to be applied to all outputs for the overhead of handling them in storage.
+        offset_ed25519_block_issuer_key: Defines the offset to be used for block issuer feature public keys.
+        offset_staking_feature:  Defines the offset to be used for staking feature.
+        offset_delegation: Defines the offset to be used for delegation output.
     """
-    v_byte_cost: int
-    v_byte_factor_data: int
-    v_byte_factor_key: int
-    v_byte_factor_block_issuer_key: int
-    v_byte_factor_staking_feature: int
-    v_byte_factor_delegation: int
+    storage_cost: int
+    factor_data: int
+    offset_output_overhead: int
+    offset_ed25519_block_issuer_key: int
+    offset_staking_feature: int
+    offset_delegation: int
 
 
 @json
@@ -149,7 +149,7 @@ class CongestionControlParameters:
 
 @json
 @dataclass
-class VersionSignaling:
+class VersionSignalingParameters:
     """Version Signaling defines the parameters used by signaling protocol parameters upgrade.
 
     Attributes:
@@ -222,7 +222,7 @@ class ProtocolParameters:
         bech32_hrp: Tells whether the node supports mainnet or testnet addresses.
                     Value `iota` indicates that the node supports mainnet addresses.
                     Value `atoi` indicates that the node supports testnet addresses.
-        rent_structure: The rent structure used by a given node/network.
+        storage_score_parameters: The storage score parameters used by given node/network.
         work_score_parameters: Work Score Parameters lists the work score of each type, it is used to denote the computation costs of processing an object.
         token_supply: Current supply of the base token. Plain string encoded number.
         genesis_unix_timestamp: The genesis timestamp at which the slots start to count.
@@ -237,14 +237,14 @@ class ProtocolParameters:
         max_committable_age: Max_committable_age is the maximum age for a slot commitment to be included in a block relative to the slot index of the block issuing time.
         epoch_nearing_threshold: Determine the slot that should trigger a new committee selection for the next and upcoming epoch.
         congestion_control_parameters: Congestion Control Parameters defines the parameters used to calculate the Reference Mana Cost (RMC).
-        version_signaling: The version signaling parameters.
+        version_signaling_parameters: The version signaling parameters.
         rewards_parameters: Rewards Parameters defines the parameters that are used to calculate Mana rewards.
     """
     type: int
     version: int
     network_name: str
     bech32_hrp: str
-    rent_structure: RentStructure
+    storage_score_parameters: StorageScoreParameters
     work_score_parameters: WorkScoreParameters
     token_supply: int = field(metadata=config(
         encoder=str
@@ -271,7 +271,7 @@ class ProtocolParameters:
         encoder=str
     ))
     congestion_control_parameters: CongestionControlParameters
-    version_signaling: VersionSignaling
+    version_signaling_parameters: VersionSignalingParameters
     rewards_parameters: RewardsParameters
 
 

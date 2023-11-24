@@ -180,7 +180,6 @@ pub enum Response {
     FoundryId(FoundryId),
     /// Response for:
     /// - [`TransactionSigningHash`](crate::method::UtilsMethod::TransactionSigningHash)
-    /// - [`ComputeInputsCommitment`](crate::method::UtilsMethod::ComputeInputsCommitment)
     Hash(String),
     /// Response for [`GetNodeInfo`](crate::method::ClientMethod::GetNodeInfo)
     NodeInfoWrapper(NodeInfoWrapper),
@@ -285,6 +284,7 @@ pub enum Response {
     /// - [`PrepareStopParticipating`](crate::method::WalletMethod::PrepareStopParticipating)
     /// - [`PrepareTransaction`](crate::method::WalletMethod::PrepareTransaction)
     /// - [`PrepareVote`](crate::method::WalletMethod::PrepareVote)
+    /// - [`PrepareImplicitAccountTransition`](crate::method::WalletMethod::PrepareImplicitAccountTransition)
     PreparedTransaction(PreparedTransactionDataDto),
     /// Response for:
     /// - [`PrepareCreateNativeToken`](crate::method::WalletMethod::PrepareCreateNativeToken),

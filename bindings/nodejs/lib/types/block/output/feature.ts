@@ -8,8 +8,10 @@ import {
     BlockIssuerKey,
     BlockIssuerKeyDiscriminator,
 } from './block-issuer-key';
-import { u64 } from '../../utils/type-aliases';
+import { u256, u64 } from '../../utils/type-aliases';
 import { EpochIndex } from '../../block/slot';
+import { INativeToken } from '../../models/native-token';
+import { HexEncodedString } from '../../utils/hex-encoding';
 
 /**
  * All of the feature block types.
@@ -114,6 +116,40 @@ class TagFeature extends Feature {
 }
 
 /**
+ * Native token feature.
+ */
+class NativeTokenFeature extends Feature {
+    /**
+     * Identifier of the native token.
+     */
+    readonly id: HexEncodedString;
+    /**
+     * Amount of native tokens of the given Token ID.
+     */
+    readonly amount: u256;
+
+    /**
+     * Creates a new `NativeTokenFeature`.
+     * @param nativeToken The native token stored with the feature.
+     */
+    constructor(nativeToken: INativeToken) {
+        super(FeatureType.NativeToken);
+        this.id = nativeToken.id;
+        this.amount = nativeToken.amount;
+    }
+
+    /**
+     * Returns the native token contained in this feature.
+     */
+    public asNativeToken(): INativeToken {
+        return {
+            id: this.id,
+            amount: this.amount,
+        };
+    }
+}
+
+/**
  * Block Issuer feature.
  */
 class BlockIssuerFeature extends Feature {
@@ -178,6 +214,7 @@ const FeatureDiscriminator = {
         { value: IssuerFeature, name: FeatureType.Issuer as any },
         { value: MetadataFeature, name: FeatureType.Metadata as any },
         { value: TagFeature, name: FeatureType.Tag as any },
+        { value: NativeTokenFeature, name: FeatureType.NativeToken as any },
         { value: BlockIssuerFeature, name: FeatureType.BlockIssuer as any },
         { value: StakingFeature, name: FeatureType.Staking as any },
     ],
@@ -191,6 +228,7 @@ export {
     IssuerFeature,
     MetadataFeature,
     TagFeature,
+    NativeTokenFeature,
     BlockIssuerFeature,
     StakingFeature,
 };
