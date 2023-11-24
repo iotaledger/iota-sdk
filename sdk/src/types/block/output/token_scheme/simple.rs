@@ -73,7 +73,6 @@ impl SimpleTokenScheme {
     }
 }
 
-// TODO: double check with TIP whetehr this is still correct
 impl WorkScore for SimpleTokenScheme {
     fn work_score(&self, params: WorkScoreParameters) -> u32 {
         params.native_token()
