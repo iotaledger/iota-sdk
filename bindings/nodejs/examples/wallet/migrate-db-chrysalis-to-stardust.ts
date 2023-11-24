@@ -16,10 +16,11 @@ async function run() {
         levelFilter: 'debug',
         targetExclusions: ['h2', 'hyper', 'rustls'],
     });
-    for (const envVar of ['NODE_URL', 'STRONGHOLD_PASSWORD'])
+    for (const envVar of ['NODE_URL', 'STRONGHOLD_PASSWORD']) {
         if (!(envVar in process.env)) {
             throw new Error(`.env ${envVar} is undefined, see .env.example`);
         }
+    }
 
     migrateDbChrysalisToStardust(walletDbPath, 'password');
 
