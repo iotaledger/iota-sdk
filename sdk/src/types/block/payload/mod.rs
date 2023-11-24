@@ -8,7 +8,7 @@ pub mod signed_transaction;
 pub mod tagged_data;
 
 use alloc::boxed::Box;
-use core::{mem::size_of, ops::Deref};
+use core::ops::Deref;
 
 use derive_more::From;
 use packable::{
