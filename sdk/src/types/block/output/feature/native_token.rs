@@ -30,7 +30,7 @@ impl StorageScore for NativeTokenFeature {}
 
 impl WorkScore for NativeTokenFeature {
     fn work_score(&self, params: WorkScoreParameters) -> u32 {
-        params.native_token()
+        self.0.work_score(params)
     }
 }
 
