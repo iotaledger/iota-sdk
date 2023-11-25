@@ -30,9 +30,7 @@ async fn main() -> Result<()> {
     dotenvy::dotenv().ok();
 
     for var in ["NODE_URL", "MNEMONIC", "FAUCET_URL", "EXPLORER_URL"] {
-        if std::env::var(var).is_err() {
-            panic!(".env variable '{}' is undefined, see .env.example", var);
-        }
+        std::env::var(var).expect(&format!(".env variable '{var}' is undefined, see .env.example"));
     }
 
     let node_url = std::env::var("NODE_URL").unwrap();

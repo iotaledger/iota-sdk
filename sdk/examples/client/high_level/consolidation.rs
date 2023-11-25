@@ -16,9 +16,7 @@ async fn main() -> Result<()> {
     dotenvy::dotenv().ok();
 
     for var in ["NODE_URL", "EXPLORER_URL", "MNEMONIC"] {
-        if std::env::var(var).is_err() {
-            panic!(".env variable '{}' is undefined, see .env.example", var);
-        }
+        std::env::var(var).expect(&format!(".env variable '{var}' is undefined, see .env.example"));
     }
 
     let address_range_start = std::env::args().nth(1).map(|s| s.parse::<u32>().unwrap()).unwrap_or(0);

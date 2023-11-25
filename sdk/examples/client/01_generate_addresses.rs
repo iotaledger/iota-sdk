@@ -20,9 +20,7 @@ async fn main() -> Result<()> {
     dotenvy::dotenv().ok();
 
     for var in ["NODE_URL", "MNEMONIC"] {
-        if std::env::var(var).is_err() {
-            panic!(".env variable '{}' is undefined, see .env.example", var);
-        }
+        std::env::var(var).expect(&format!(".env variable '{var}' is undefined, see .env.example"));
     }
 
     // Create a node client.
