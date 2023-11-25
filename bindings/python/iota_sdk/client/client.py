@@ -322,13 +322,6 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         """
         return self._call_method('getNode')
 
-    def get_info(self) -> NodeInfoWrapper:
-        """Returns general information about the node.
-        """
-        result = self._call_method('getInfo')
-        print(f'{result}')
-        return NodeInfoWrapper.from_dict(result)
-
     def get_network_info(self) -> NetworkInfo:
         """Gets the network related information such as network_id.
         """
