@@ -76,7 +76,7 @@ class StorageScoreParameters:
         factor_data: Defines the factor to be used for data only fields.
         offset_output_overhead: Defines the offset to be applied to all outputs for the overhead of handling them in storage.
         offset_ed25519_block_issuer_key: Defines the offset to be used for block issuer feature public keys.
-        offset_staking_feature:  Defines the offset to be used for staking feature.
+        offset_staking_feature: Defines the offset to be used for staking feature.
         offset_delegation: Defines the offset to be used for delegation output.
     """
     storage_cost: int
@@ -225,6 +225,7 @@ class ProtocolParameters:
         storage_score_parameters: The storage score parameters used by given node/network.
         work_score_parameters: Work Score Parameters lists the work score of each type, it is used to denote the computation costs of processing an object.
         token_supply: Current supply of the base token. Plain string encoded number.
+        genesis_slot: Defines the slot of the genesis.
         genesis_unix_timestamp: The genesis timestamp at which the slots start to count.
         slot_duration_in_seconds: The duration of a slot, in seconds.
         slots_per_epoch_exponent: The number of slots in an epoch expressed as an exponent of 2.
@@ -232,13 +233,15 @@ class ProtocolParameters:
         staking_unbonding_period: The unbonding period in epochs before an account can stop staking.
         validation_blocks_per_slot: Validation Blocks Per Slot is the number of validation blocks that each validator should issue each slot.
         punishment_epochs: The number of epochs worth of Mana that a node is punished with for each additional validation block it issues.
-        liveness_threshold: Determine if a block is eligible by evaluating issuing_time and commitments in its past cone to ATT and last_committed_slot respectively.
+        liveness_threshold_lower_bound: Used by tip-selection to determine if a block is eligible by evaluating issuing times.
+        liveness_threshold_upper_bound: Used by tip-selection to determine if a block is eligible by evaluating issuing times.
         min_committable_age: Min_committable_age is the minimum age relative to the accepted tangle time slot index that a slot can be committed.
         max_committable_age: Max_committable_age is the maximum age for a slot commitment to be included in a block relative to the slot index of the block issuing time.
         epoch_nearing_threshold: Determine the slot that should trigger a new committee selection for the next and upcoming epoch.
         congestion_control_parameters: Congestion Control Parameters defines the parameters used to calculate the Reference Mana Cost (RMC).
         version_signaling_parameters: The version signaling parameters.
         rewards_parameters: Rewards Parameters defines the parameters that are used to calculate Mana rewards.
+        target_committee_size: Defines the target size of the committee. If there's fewer candidates the actual committee size could be smaller in a given epoch.
     """
     type: int
     version: int
@@ -249,6 +252,7 @@ class ProtocolParameters:
     token_supply: int = field(metadata=config(
         encoder=str
     ))
+    genesis_slot: int
     genesis_unix_timestamp: int = field(metadata=config(
         encoder=str
     ))
@@ -260,7 +264,8 @@ class ProtocolParameters:
     ))
     validation_blocks_per_slot: int
     punishment_epochs: int
-    liveness_threshold: int
+    liveness_threshold_lower_bound: int
+    liveness_threshold_upper_bound: int
     min_committable_age: int = field(metadata=config(
         encoder=str
     ))
@@ -273,6 +278,7 @@ class ProtocolParameters:
     congestion_control_parameters: CongestionControlParameters
     version_signaling_parameters: VersionSignalingParameters
     rewards_parameters: RewardsParameters
+    target_committee_size: int
 
 
 @json
@@ -288,6 +294,7 @@ class ProtocolParametersResponse:
     parameters: ProtocolParameters
 
 
+@json
 @dataclass
 class NodeInfoBaseToken:
     """The base coin info.
@@ -298,13 +305,11 @@ class NodeInfoBaseToken:
         unit: The primary unit of the token.
         subunit: The name of the smallest possible denomination of the primary unit. subunit * 10^decimals = unit.
         decimals: Number of decimals the primary unit is divisible up to.
-        use_metric_prefix: Whether to use metric prefixes for displaying unit.
     """
     name: str
     ticker_symbol: str
     unit: str
     decimals: int
-    use_metric_prefix: bool
     subunit: Optional[str] = None
 
 

@@ -69,7 +69,7 @@ pub struct ProtocolParameters {
     pub(crate) punishment_epochs: u32,
     /// Used by tip-selection to determine if a block is eligible by evaluating issuing times.
     pub(crate) liveness_threshold_lower_bound: u16,
-    /// Used by tip-selection to determine if a block is eligible by evaluating issuing times
+    /// Used by tip-selection to determine if a block is eligible by evaluating issuing times.
     pub(crate) liveness_threshold_upper_bound: u16,
     /// Minimum age relative to the accepted tangle time slot index that a slot can be committed.
     pub(crate) min_committable_age: u32,
