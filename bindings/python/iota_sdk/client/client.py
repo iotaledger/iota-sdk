@@ -14,7 +14,6 @@ from iota_sdk.client._utils import ClientUtils
 from iota_sdk.types.block.signed_block import UnsignedBlock
 from iota_sdk.types.common import HexStr, Node
 from iota_sdk.types.feature import Feature
-from iota_sdk.types.node_info import NodeInfoWrapper
 from iota_sdk.types.network_info import NetworkInfo
 from iota_sdk.types.output import AccountOutput, BasicOutput, FoundryOutput, NftOutput, deserialize_output
 from iota_sdk.types.payload import Payload
