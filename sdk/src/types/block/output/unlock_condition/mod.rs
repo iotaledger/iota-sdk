@@ -152,7 +152,7 @@ crate::create_bitflags!(
     ]
 );
 
-pub(crate) type UnlockConditionCount = BoundedU8<0, { UnlockConditions::COUNT_MAX }>;
+pub(crate) type UnlockConditionCount = BoundedU8<0, { UnlockConditionFlags::ALL_FLAGS.len() as u8 }>;
 
 ///
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Deref, Packable)]
@@ -190,9 +190,6 @@ impl IntoIterator for UnlockConditions {
 }
 
 impl UnlockConditions {
-    ///
-    pub const COUNT_MAX: u8 = 7;
-
     /// Creates a new [`UnlockConditions`] from a vec.
     pub fn from_vec(unlock_conditions: Vec<UnlockCondition>) -> Result<Self, Error> {
         let mut unlock_conditions =
