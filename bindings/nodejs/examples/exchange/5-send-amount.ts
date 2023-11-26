@@ -23,7 +23,7 @@ async function run() {
                 );
             }
 
-        const wallet = new Wallet({
+        const wallet = await Wallet.create({
             storagePath: process.env.WALLET_DB_PATH,
         });
 
@@ -31,14 +31,11 @@ async function run() {
             process.env.STRONGHOLD_PASSWORD as string,
         );
 
-        const account = await wallet.getAccount('Alice');
-        console.log('Account:', account);
-
         // Set syncOnlyMostBasicOutputs to true if not interested in outputs that are timelocked,
         // have a storage deposit return, expiration or are nft/account/foundry outputs.
-        await account.sync({ syncOnlyMostBasicOutputs: true });
+        await wallet.sync({ syncOnlyMostBasicOutputs: true });
 
-        const response = await account.send(
+        const response = await wallet.send(
             BigInt(1000000),
             // Replace with the address of your choice!
             'rms1qrrv7flg6lz5cssvzv2lsdt8c673khad060l4quev6q09tkm9mgtupgf0h0',

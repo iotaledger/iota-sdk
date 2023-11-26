@@ -1,34 +1,29 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use alloc::{collections::BTreeSet, vec::Vec};
+use alloc::collections::BTreeSet;
 
 use hashbrown::HashMap;
 use packable::{
     error::{UnpackError, UnpackErrorExt},
     packer::Packer,
     unpacker::Unpacker,
-    Packable,
+    Packable, PackableExt,
 };
 
-use crate::types::{
-    block::{
-        address::{AccountAddress, Address},
-        output::{
-            feature::{verify_allowed_features, Feature, FeatureFlags, Features},
-            unlock_condition::{
-                verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions,
-            },
-            verify_output_amount_min, verify_output_amount_packable, ChainId, NativeToken, NativeTokens, Output,
-            OutputBuilderAmount, OutputId, Rent, RentStructure, StateTransitionError, StateTransitionVerifier,
-        },
-        payload::signed_transaction::TransactionCapabilityFlag,
-        protocol::ProtocolParameters,
-        semantic::{SemanticValidationContext, TransactionFailureReason},
-        unlock::Unlock,
-        Error,
+use crate::types::block::{
+    address::{AccountAddress, Address},
+    output::{
+        feature::{verify_allowed_features, Feature, FeatureFlags, Features},
+        unlock_condition::{verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions},
+        ChainId, MinimumOutputAmount, Output, OutputBuilderAmount, OutputId, StateTransitionError,
+        StateTransitionVerifier, StorageScore, StorageScoreParameters,
     },
-    ValidationParams,
+    payload::signed_transaction::TransactionCapabilityFlag,
+    protocol::ProtocolParameters,
+    semantic::{SemanticValidationContext, TransactionFailureReason},
+    unlock::Unlock,
+    Error,
 };
 
 crate::impl_id!(
@@ -63,7 +58,6 @@ impl From<AccountId> for Address {
 pub struct AccountOutputBuilder {
     amount: OutputBuilderAmount,
     mana: u64,
-    native_tokens: BTreeSet<NativeToken>,
     account_id: AccountId,
     foundry_counter: Option<u32>,
     unlock_conditions: BTreeSet<UnlockCondition>,
@@ -77,17 +71,16 @@ impl AccountOutputBuilder {
         Self::new(OutputBuilderAmount::Amount(amount), account_id)
     }
 
-    /// Creates an [`AccountOutputBuilder`] with a provided rent structure.
-    /// The amount will be set to the minimum storage deposit.
-    pub fn new_with_minimum_storage_deposit(rent_structure: RentStructure, account_id: AccountId) -> Self {
-        Self::new(OutputBuilderAmount::MinimumStorageDeposit(rent_structure), account_id)
+    /// Creates an [`AccountOutputBuilder`] with provided storage score parameters.
+    /// The amount will be set to the minimum required amount of the resulting output.
+    pub fn new_with_minimum_amount(params: StorageScoreParameters, account_id: AccountId) -> Self {
+        Self::new(OutputBuilderAmount::MinimumAmount(params), account_id)
     }
 
     fn new(amount: OutputBuilderAmount, account_id: AccountId) -> Self {
         Self {
             amount,
             mana: Default::default(),
-            native_tokens: BTreeSet::new(),
             account_id,
             foundry_counter: None,
             unlock_conditions: BTreeSet::new(),
@@ -103,10 +96,10 @@ impl AccountOutputBuilder {
         self
     }
 
-    /// Sets the amount to the minimum storage deposit.
+    /// Sets the amount to the minimum required amount.
     #[inline(always)]
-    pub fn with_minimum_storage_deposit(mut self, rent_structure: RentStructure) -> Self {
-        self.amount = OutputBuilderAmount::MinimumStorageDeposit(rent_structure);
+    pub fn with_minimum_amount(mut self, params: StorageScoreParameters) -> Self {
+        self.amount = OutputBuilderAmount::MinimumAmount(params);
         self
     }
 
@@ -114,20 +107,6 @@ impl AccountOutputBuilder {
     #[inline(always)]
     pub fn with_mana(mut self, mana: u64) -> Self {
         self.mana = mana;
-        self
-    }
-
-    ///
-    #[inline(always)]
-    pub fn add_native_token(mut self, native_token: NativeToken) -> Self {
-        self.native_tokens.insert(native_token);
-        self
-    }
-
-    ///
-    #[inline(always)]
-    pub fn with_native_tokens(mut self, native_tokens: impl IntoIterator<Item = NativeToken>) -> Self {
-        self.native_tokens = native_tokens.into_iter().collect();
         self
     }
 
@@ -248,9 +227,8 @@ impl AccountOutputBuilder {
         verify_allowed_features(&immutable_features, AccountOutput::ALLOWED_IMMUTABLE_FEATURES)?;
 
         let mut output = AccountOutput {
-            amount: 1,
+            amount: 0,
             mana: self.mana,
-            native_tokens: NativeTokens::from_set(self.native_tokens)?,
             account_id: self.account_id,
             foundry_counter,
             unlock_conditions,
@@ -260,12 +238,8 @@ impl AccountOutputBuilder {
 
         output.amount = match self.amount {
             OutputBuilderAmount::Amount(amount) => amount,
-            OutputBuilderAmount::MinimumStorageDeposit(rent_structure) => {
-                Output::Account(output.clone()).rent_cost(rent_structure)
-            }
+            OutputBuilderAmount::MinimumAmount(params) => output.minimum_amount(params),
         };
-
-        verify_output_amount_min(output.amount)?;
 
         Ok(output)
     }
@@ -281,7 +255,6 @@ impl From<&AccountOutput> for AccountOutputBuilder {
         Self {
             amount: OutputBuilderAmount::Amount(output.amount),
             mana: output.mana,
-            native_tokens: output.native_tokens.iter().copied().collect(),
             account_id: output.account_id,
             foundry_counter: Some(output.foundry_counter),
             unlock_conditions: output.unlock_conditions.iter().cloned().collect(),
@@ -297,8 +270,6 @@ pub struct AccountOutput {
     // Amount of IOTA coins held by the output.
     amount: u64,
     mana: u64,
-    // Native tokens held by the output.
-    native_tokens: NativeTokens,
     // Unique identifier of the account.
     account_id: AccountId,
     // A counter that denotes the number of foundries created by this account.
@@ -316,7 +287,10 @@ impl AccountOutput {
     /// The set of allowed [`UnlockCondition`]s for an [`AccountOutput`].
     pub const ALLOWED_UNLOCK_CONDITIONS: UnlockConditionFlags = UnlockConditionFlags::ADDRESS;
     /// The set of allowed [`Feature`]s for an [`AccountOutput`].
-    pub const ALLOWED_FEATURES: FeatureFlags = FeatureFlags::SENDER.union(FeatureFlags::METADATA);
+    pub const ALLOWED_FEATURES: FeatureFlags = FeatureFlags::SENDER
+        .union(FeatureFlags::METADATA)
+        .union(FeatureFlags::BLOCK_ISSUER)
+        .union(FeatureFlags::STAKING);
     /// The set of allowed immutable [`Feature`]s for an [`AccountOutput`].
     pub const ALLOWED_IMMUTABLE_FEATURES: FeatureFlags = FeatureFlags::ISSUER.union(FeatureFlags::METADATA);
 
@@ -326,14 +300,11 @@ impl AccountOutput {
         AccountOutputBuilder::new_with_amount(amount, account_id)
     }
 
-    /// Creates a new [`AccountOutputBuilder`] with a provided rent structure.
-    /// The amount will be set to the minimum storage deposit.
+    /// Creates a new [`AccountOutputBuilder`] with provided storage score parameters.
+    /// The amount will be set to the minimum required amount.
     #[inline(always)]
-    pub fn build_with_minimum_storage_deposit(
-        rent_structure: RentStructure,
-        account_id: AccountId,
-    ) -> AccountOutputBuilder {
-        AccountOutputBuilder::new_with_minimum_storage_deposit(rent_structure, account_id)
+    pub fn build_with_minimum_amount(params: StorageScoreParameters, account_id: AccountId) -> AccountOutputBuilder {
+        AccountOutputBuilder::new_with_minimum_amount(params, account_id)
     }
 
     ///
@@ -345,12 +316,6 @@ impl AccountOutput {
     #[inline(always)]
     pub fn mana(&self) -> u64 {
         self.mana
-    }
-
-    ///
-    #[inline(always)]
-    pub fn native_tokens(&self) -> &NativeTokens {
-        &self.native_tokens
     }
 
     ///
@@ -448,7 +413,6 @@ impl AccountOutput {
         // TODO update when TIP is updated
         // // Governance transition.
         // if current_state.amount != next_state.amount
-        //     || current_state.native_tokens != next_state.native_tokens
         //     || current_state.foundry_counter != next_state.foundry_counter
         // {
         //     return Err(StateTransitionError::MutatedFieldWithoutRights);
@@ -530,6 +494,19 @@ impl StateTransitionVerifier for AccountOutput {
     }
 }
 
+impl StorageScore for AccountOutput {
+    fn storage_score(&self, params: StorageScoreParameters) -> u64 {
+        params.output_offset()
+            // Type byte
+            + (1 + self.packed_len() as u64) * params.data_factor() as u64
+            + self.unlock_conditions.storage_score(params)
+            + self.features.storage_score(params)
+            + self.immutable_features.storage_score(params)
+    }
+}
+
+impl MinimumOutputAmount for AccountOutput {}
+
 impl Packable for AccountOutput {
     type UnpackError = Error;
     type UnpackVisitor = ProtocolParameters;
@@ -537,7 +514,6 @@ impl Packable for AccountOutput {
     fn pack<P: Packer>(&self, packer: &mut P) -> Result<(), P::Error> {
         self.amount.pack(packer)?;
         self.mana.pack(packer)?;
-        self.native_tokens.pack(packer)?;
         self.account_id.pack(packer)?;
         self.foundry_counter.pack(packer)?;
         self.unlock_conditions.pack(packer)?;
@@ -553,11 +529,8 @@ impl Packable for AccountOutput {
     ) -> Result<Self, UnpackError<Self::UnpackError, U::Error>> {
         let amount = u64::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
 
-        verify_output_amount_packable::<VERIFY>(&amount, visitor).map_err(UnpackError::Packable)?;
-
         let mana = u64::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
 
-        let native_tokens = NativeTokens::unpack::<_, VERIFY>(unpacker, &())?;
         let account_id = AccountId::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
 
         let foundry_counter = u32::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
@@ -588,7 +561,6 @@ impl Packable for AccountOutput {
         Ok(Self {
             amount,
             mana,
-            native_tokens,
             account_id,
             foundry_counter,
             unlock_conditions,
@@ -623,14 +595,13 @@ fn verify_unlock_conditions(unlock_conditions: &UnlockConditions, account_id: &A
 
 #[cfg(feature = "serde")]
 pub(crate) mod dto {
+    use alloc::vec::Vec;
+
     use serde::{Deserialize, Serialize};
 
     use super::*;
     use crate::{
-        types::{
-            block::{output::unlock_condition::dto::UnlockConditionDto, Error},
-            TryFromDto,
-        },
+        types::block::{output::unlock_condition::dto::UnlockConditionDto, Error},
         utils::serde::string,
     };
 
@@ -644,8 +615,6 @@ pub(crate) mod dto {
         pub amount: u64,
         #[serde(with = "string")]
         pub mana: u64,
-        #[serde(skip_serializing_if = "Vec::is_empty", default)]
-        pub native_tokens: Vec<NativeToken>,
         pub account_id: AccountId,
         pub foundry_counter: u32,
         pub unlock_conditions: Vec<UnlockConditionDto>,
@@ -661,7 +630,6 @@ pub(crate) mod dto {
                 kind: AccountOutput::KIND,
                 amount: value.amount(),
                 mana: value.mana(),
-                native_tokens: value.native_tokens().to_vec(),
                 account_id: *value.account_id(),
                 foundry_counter: value.foundry_counter(),
                 unlock_conditions: value.unlock_conditions().iter().map(Into::into).collect::<_>(),
@@ -671,20 +639,18 @@ pub(crate) mod dto {
         }
     }
 
-    impl TryFromDto for AccountOutput {
-        type Dto = AccountOutputDto;
+    impl TryFrom<AccountOutputDto> for AccountOutput {
         type Error = Error;
 
-        fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
+        fn try_from(dto: AccountOutputDto) -> Result<Self, Self::Error> {
             let mut builder = AccountOutputBuilder::new_with_amount(dto.amount, dto.account_id)
                 .with_mana(dto.mana)
                 .with_foundry_counter(dto.foundry_counter)
-                .with_native_tokens(dto.native_tokens)
                 .with_features(dto.features)
                 .with_immutable_features(dto.immutable_features);
 
             for u in dto.unlock_conditions {
-                builder = builder.add_unlock_condition(UnlockCondition::try_from_dto_with_params(u, &params)?);
+                builder = builder.add_unlock_condition(UnlockCondition::from(u));
             }
 
             builder.finish()
@@ -693,29 +659,22 @@ pub(crate) mod dto {
 
     impl AccountOutput {
         #[allow(clippy::too_many_arguments)]
-        pub fn try_from_dtos<'a>(
+        pub fn try_from_dtos(
             amount: OutputBuilderAmount,
             mana: u64,
-            native_tokens: Option<Vec<NativeToken>>,
             account_id: &AccountId,
             foundry_counter: Option<u32>,
             unlock_conditions: Vec<UnlockConditionDto>,
             features: Option<Vec<Feature>>,
             immutable_features: Option<Vec<Feature>>,
-            params: impl Into<ValidationParams<'a>> + Send,
         ) -> Result<Self, Error> {
-            let params = params.into();
             let mut builder = match amount {
                 OutputBuilderAmount::Amount(amount) => AccountOutputBuilder::new_with_amount(amount, *account_id),
-                OutputBuilderAmount::MinimumStorageDeposit(rent_structure) => {
-                    AccountOutputBuilder::new_with_minimum_storage_deposit(rent_structure, *account_id)
+                OutputBuilderAmount::MinimumAmount(params) => {
+                    AccountOutputBuilder::new_with_minimum_amount(params, *account_id)
                 }
             }
             .with_mana(mana);
-
-            if let Some(native_tokens) = native_tokens {
-                builder = builder.with_native_tokens(native_tokens);
-            }
 
             if let Some(foundry_counter) = foundry_counter {
                 builder = builder.with_foundry_counter(foundry_counter);
@@ -723,8 +682,8 @@ pub(crate) mod dto {
 
             let unlock_conditions = unlock_conditions
                 .into_iter()
-                .map(|u| UnlockCondition::try_from_dto_with_params(u, &params))
-                .collect::<Result<Vec<UnlockCondition>, Error>>()?;
+                .map(UnlockCondition::from)
+                .collect::<Vec<UnlockCondition>>();
             builder = builder.with_unlock_conditions(unlock_conditions);
 
             if let Some(features) = features {
@@ -745,19 +704,13 @@ mod tests {
     use pretty_assertions::assert_eq;
 
     use super::*;
-    use crate::types::{
-        block::{
-            output::{dto::OutputDto, FoundryId, SimpleTokenScheme, TokenId},
-            protocol::protocol_parameters,
-            rand::{
-                address::rand_account_address,
-                output::{
-                    feature::rand_allowed_features, rand_account_id, rand_account_output,
-                    unlock_condition::rand_address_unlock_condition_different_from_account_id,
-                },
-            },
+    use crate::types::block::{
+        output::dto::OutputDto,
+        protocol::protocol_parameters,
+        rand::output::{
+            feature::rand_allowed_features, rand_account_id, rand_account_output,
+            unlock_condition::rand_address_unlock_condition_different_from_account_id,
         },
-        TryFromDto,
     };
 
     #[test]
@@ -765,55 +718,48 @@ mod tests {
         let protocol_parameters = protocol_parameters();
         let output = rand_account_output(protocol_parameters.token_supply());
         let dto = OutputDto::Account((&output).into());
-        let output_unver = Output::try_from_dto(dto.clone()).unwrap();
+        let output_unver = Output::try_from(dto.clone()).unwrap();
         assert_eq!(&output, output_unver.as_account());
-        let output_ver = Output::try_from_dto_with_params(dto, &protocol_parameters).unwrap();
+        let output_ver = Output::try_from(dto).unwrap();
         assert_eq!(&output, output_ver.as_account());
 
         let output_split = AccountOutput::try_from_dtos(
             OutputBuilderAmount::Amount(output.amount()),
             output.mana(),
-            Some(output.native_tokens().to_vec()),
             output.account_id(),
             output.foundry_counter().into(),
             output.unlock_conditions().iter().map(Into::into).collect(),
             Some(output.features().to_vec()),
             Some(output.immutable_features().to_vec()),
-            &protocol_parameters,
         )
         .unwrap();
         assert_eq!(output, output_split);
 
         let account_id = rand_account_id();
-        let foundry_id = FoundryId::build(&rand_account_address(), 0, SimpleTokenScheme::KIND);
         let address = rand_address_unlock_condition_different_from_account_id(&account_id);
 
         let test_split_dto = |builder: AccountOutputBuilder| {
             let output_split = AccountOutput::try_from_dtos(
                 builder.amount,
                 builder.mana,
-                Some(builder.native_tokens.iter().copied().collect()),
                 &builder.account_id,
                 builder.foundry_counter,
                 builder.unlock_conditions.iter().map(Into::into).collect(),
                 Some(builder.features.iter().cloned().collect()),
                 Some(builder.immutable_features.iter().cloned().collect()),
-                &protocol_parameters,
             )
             .unwrap();
             assert_eq!(builder.finish().unwrap(), output_split);
         };
 
         let builder = AccountOutput::build_with_amount(100, account_id)
-            .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000).unwrap())
             .add_unlock_condition(address.clone())
             .with_features(rand_allowed_features(AccountOutput::ALLOWED_FEATURES))
             .with_immutable_features(rand_allowed_features(AccountOutput::ALLOWED_IMMUTABLE_FEATURES));
         test_split_dto(builder);
 
         let builder =
-            AccountOutput::build_with_minimum_storage_deposit(protocol_parameters.rent_structure(), account_id)
-                .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000).unwrap())
+            AccountOutput::build_with_minimum_amount(protocol_parameters.storage_score_parameters(), account_id)
                 .add_unlock_condition(address)
                 .with_features(rand_allowed_features(AccountOutput::ALLOWED_FEATURES))
                 .with_immutable_features(rand_allowed_features(AccountOutput::ALLOWED_IMMUTABLE_FEATURES));

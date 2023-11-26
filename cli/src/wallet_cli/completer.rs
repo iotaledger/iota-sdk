@@ -25,6 +25,7 @@ const WALLET_COMMANDS: &[&str] = &[
     "exit",
     "faucet",
     "implicit-account-creation-address",
+    "implicit-account-transition",
     "implicit-accounts",
     "melt-native-token",
     "mint-native-token",

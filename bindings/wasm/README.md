@@ -185,7 +185,7 @@ const { Wallet, CoinType } = require('@iota/sdk-wasm/node');
 
 async function run() {
     try {
-        const wallet = new Wallet({
+        const wallet = await Wallet.create({
             storagePath: './my-database',
             coinType: CoinType.Shimmer,
             clientOptions: {
@@ -214,7 +214,7 @@ run().then(() => process.exit());
 import init, {Wallet, CoinType} from "@iota/sdk-wasm/web";
 
 init().then(async () => {
-    const wallet = new Wallet({
+    const wallet = await Wallet.create({
         storagePath: './my-database',
         coinType: CoinType.Shimmer,
         clientOptions: {

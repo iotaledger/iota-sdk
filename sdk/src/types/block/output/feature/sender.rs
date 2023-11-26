@@ -3,7 +3,10 @@
 
 use derive_more::From;
 
-use crate::types::block::address::Address;
+use crate::types::block::{
+    address::Address,
+    output::{storage_score::StorageScoreParameters, StorageScore},
+};
 
 /// Identifies the validated sender of an output.
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, From, packable::Packable)]
@@ -26,8 +29,14 @@ impl SenderFeature {
     }
 }
 
+impl StorageScore for SenderFeature {
+    fn storage_score(&self, params: StorageScoreParameters) -> u64 {
+        self.address().storage_score(params)
+    }
+}
+
 #[cfg(feature = "serde")]
-pub(crate) mod dto {
+mod dto {
     use serde::{Deserialize, Serialize};
 
     use super::*;

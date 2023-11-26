@@ -10,7 +10,6 @@ import type {
     SignedBlock,
     BlockId,
     FoundryId,
-    IssuerId,
     AnchorId,
     NftId,
     DelegationId,
@@ -111,7 +110,7 @@ export interface __SignatureUnlockMethod__ {
 export interface __BuildBasicBlockMethod__ {
     name: 'buildBasicBlock';
     data: {
-        issuerId: IssuerId;
+        issuerId: AccountId;
         payload?: Payload;
     };
 }
@@ -256,8 +255,8 @@ export interface __ClearListenersMethod__ {
     };
 }
 
-export type __MinimumRequiredStorageDepositMethod__ = {
-    name: 'minimumRequiredStorageDeposit';
+export type __ComputeMinimumOutputAmountMethod__ = {
+    name: 'computeMinimumOutputAmount';
     data: {
         output: Output;
     };

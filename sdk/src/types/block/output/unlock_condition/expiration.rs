@@ -3,7 +3,12 @@
 
 use derive_more::From;
 
-use crate::types::block::{address::Address, slot::SlotIndex, Error};
+use crate::types::block::{
+    address::Address,
+    output::{StorageScore, StorageScoreParameters},
+    slot::SlotIndex,
+    Error,
+};
 
 /// Defines an expiration slot index. Before the slot index is reached, only the Address defined in the Address
 /// Unlock Condition is allowed to unlock the output. Afterward, only the Return Address can unlock it.
@@ -25,7 +30,7 @@ impl ExpirationUnlockCondition {
     pub fn new(return_address: impl Into<Address>, slot_index: impl Into<SlotIndex>) -> Result<Self, Error> {
         let slot_index = slot_index.into();
 
-        verify_slot_index::<true>(&slot_index, &())?;
+        verify_slot_index::<true>(&slot_index)?;
 
         Ok(Self {
             return_address: return_address.into(),
@@ -55,8 +60,14 @@ impl ExpirationUnlockCondition {
     }
 }
 
+impl StorageScore for ExpirationUnlockCondition {
+    fn storage_score(&self, params: StorageScoreParameters) -> u64 {
+        self.return_address().storage_score(params)
+    }
+}
+
 #[inline]
-fn verify_slot_index<const VERIFY: bool>(slot_index: &SlotIndex, _: &()) -> Result<(), Error> {
+fn verify_slot_index<const VERIFY: bool>(slot_index: &SlotIndex) -> Result<(), Error> {
     if VERIFY && *slot_index == 0 {
         Err(Error::ExpirationUnlockConditionZero)
     } else {

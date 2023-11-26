@@ -30,9 +30,10 @@ use iota_sdk::{
             signature::Ed25519Signature,
             slot::SlotCommitmentId,
             unlock::Unlock,
-            BlockId, SignedBlockDto, UnsignedBlockDto,
+            BlockDto, BlockId, UnsignedBlockDto,
         },
     },
+    utils::serde::string,
     wallet::{
         types::{Balance, OutputDataDto, TransactionWithMetadataDto},
         PreparedCreateNativeTokenTransactionDto,
@@ -111,7 +112,7 @@ pub enum Response {
     /// - [`GetBlock`](crate::method::ClientMethod::GetBlock)
     /// - [`GetIncludedBlock`](crate::method::ClientMethod::GetIncludedBlock)
     /// - [`SignBlock`](crate::method::SecretManagerMethod::SignBlock)
-    SignedBlock(SignedBlockDto),
+    Block(BlockDto),
     /// Response for:
     /// - [`GetBlockMetadata`](crate::method::ClientMethod::GetBlockMetadata)
     BlockMetadata(BlockMetadataResponse),
@@ -146,7 +147,7 @@ pub enum Response {
     OutputIdsResponse(OutputIdsResponse),
     /// Response for:
     /// - [`FindBlocks`](crate::method::ClientMethod::FindBlocks)
-    Blocks(Vec<SignedBlockDto>),
+    Blocks(Vec<BlockDto>),
     /// Response for:
     /// - [`FindInputs`](crate::method::ClientMethod::FindInputs)
     Inputs(Vec<UtxoInput>),
@@ -179,7 +180,6 @@ pub enum Response {
     FoundryId(FoundryId),
     /// Response for:
     /// - [`TransactionSigningHash`](crate::method::UtilsMethod::TransactionSigningHash)
-    /// - [`ComputeInputsCommitment`](crate::method::UtilsMethod::ComputeInputsCommitment)
     Hash(String),
     /// Response for [`GetNodeInfo`](crate::method::ClientMethod::GetNodeInfo)
     NodeInfoWrapper(NodeInfoWrapper),
@@ -256,9 +256,9 @@ pub enum Response {
     /// - [`GetAddress`](crate::method::WalletMethod::GetAddress)
     Address(Bech32Address),
     /// Response for:
-    /// - [`MinimumRequiredStorageDeposit`](crate::method::ClientMethod::MinimumRequiredStorageDeposit)
-    /// - [`ComputeStorageDeposit`](crate::method::UtilsMethod::ComputeStorageDeposit)
-    MinimumRequiredStorageDeposit(String),
+    /// - [`ClientMethod::ComputeMinimumOutputAmount`](crate::method::ClientMethod::ComputeMinimumOutputAmount)
+    /// - [`UtilsMethod::ComputeMinimumOutputAmount`](crate::method::UtilsMethod::ComputeMinimumOutputAmount)
+    OutputAmount(#[serde(with = "string")] u64),
     /// Response for:
     /// - [`ClaimableOutputs`](crate::method::WalletMethod::ClaimableOutputs)
     OutputIds(Vec<OutputId>),
@@ -284,6 +284,7 @@ pub enum Response {
     /// - [`PrepareStopParticipating`](crate::method::WalletMethod::PrepareStopParticipating)
     /// - [`PrepareTransaction`](crate::method::WalletMethod::PrepareTransaction)
     /// - [`PrepareVote`](crate::method::WalletMethod::PrepareVote)
+    /// - [`PrepareImplicitAccountTransition`](crate::method::WalletMethod::PrepareImplicitAccountTransition)
     PreparedTransaction(PreparedTransactionDataDto),
     /// Response for:
     /// - [`PrepareCreateNativeToken`](crate::method::WalletMethod::PrepareCreateNativeToken),

@@ -42,7 +42,6 @@ import {
     NftId,
     FoundryId,
     DelegationId,
-    IssuerId,
     UnsignedBlock,
     parseUnsignedBlock,
 } from '../types/block';
@@ -273,7 +272,7 @@ export class Client {
      * @returns The block ID followed by the block containing the payload.
      */
     async buildBasicBlock(
-        issuerId: IssuerId,
+        issuerId: AccountId,
         payload?: Payload,
     ): Promise<UnsignedBlock> {
         const response = await this.methodHandler.callMethod({
@@ -692,14 +691,14 @@ export class Client {
     }
 
     /**
-     * Calculate the minimum required storage deposit for an output.
+     * Calculate the minimum required amount for an output.
      *
-     * @param output The output to calculate the minimum deposit amount for.
+     * @param output The output to calculate the minimum amount for.
      * @returns The minimum required amount.
      */
-    async minimumRequiredStorageDeposit(output: Output): Promise<number> {
+    async computeMinimumOutputAmount(output: Output): Promise<number> {
         const response = await this.methodHandler.callMethod({
-            name: 'minimumRequiredStorageDeposit',
+            name: 'computeMinimumOutputAmount',
             data: {
                 output,
             },

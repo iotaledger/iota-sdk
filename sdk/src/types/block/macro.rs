@@ -75,13 +75,13 @@ macro_rules! impl_id {
             }
         }
 
-        impl $crate::types::block::ConvertTo<$hash_name> for &alloc::string::String {
+        impl $crate::utils::ConvertTo<$hash_name> for &alloc::string::String {
             fn convert(self) -> Result<$hash_name, $crate::types::block::Error> {
                 self.try_into()
             }
         }
 
-        impl $crate::types::block::ConvertTo<$hash_name> for &str {
+        impl $crate::utils::ConvertTo<$hash_name> for &str {
             fn convert(self) -> Result<$hash_name, $crate::types::block::Error> {
                 self.try_into()
             }
@@ -205,13 +205,13 @@ macro_rules! impl_id {
                 }
             }
 
-            impl $crate::types::block::ConvertTo<$id_name> for &alloc::string::String {
+            impl $crate::utils::ConvertTo<$id_name> for &alloc::string::String {
                 fn convert(self) -> Result<$id_name, $crate::types::block::Error> {
                     self.try_into()
                 }
             }
 
-            impl $crate::types::block::ConvertTo<$id_name> for &str {
+            impl $crate::utils::ConvertTo<$id_name> for &str {
                 fn convert(self) -> Result<$id_name, $crate::types::block::Error> {
                     self.try_into()
                 }
@@ -229,7 +229,6 @@ macro_rules! impl_id {
         )?
     };
 }
-pub(crate) use impl_id;
 
 /// Convenience macro to serialize types to string via serde.
 #[cfg(feature = "serde")]
@@ -297,7 +296,6 @@ macro_rules! create_bitflags {
         }
     };
 }
-pub(crate) use create_bitflags;
 
 #[macro_export]
 macro_rules! impl_serde_typed_dto {
@@ -345,7 +343,7 @@ macro_rules! def_is_as_opt {
                     if let Self::$name(v) = self {
                         v
                     } else {
-                        panic!("{} called on a non-{} {}", stringify!([<as_ $name:snake>]), stringify!([<$name>]), stringify!($type:snake));
+                        panic!("{} called on a non-{} {}", stringify!([<as_ $name:snake>]), stringify!([<$name>]), stringify!([<$type:snake>]));
                     }
                 }
 
