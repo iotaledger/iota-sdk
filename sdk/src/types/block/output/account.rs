@@ -267,13 +267,15 @@ impl From<&AccountOutput> for AccountOutputBuilder {
 /// Describes an account in the ledger that can be controlled by the state and governance controllers.
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct AccountOutput {
-    // Amount of IOTA coins held by the output.
+    /// Amount of IOTA coins held by the output.
     amount: u64,
+    /// Amount of stored Mana held by the output.
     mana: u64,
     // Unique identifier of the account.
     account_id: AccountId,
     // A counter that denotes the number of foundries created by this account.
     foundry_counter: u32,
+    /// Define how the output can be unlocked in a transaction.
     unlock_conditions: UnlockConditions,
     //
     features: Features,
