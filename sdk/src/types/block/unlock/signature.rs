@@ -3,7 +3,10 @@
 
 use derive_more::{Deref, From};
 
-use crate::types::block::signature::Signature;
+use crate::types::block::{
+    protocol::{WorkScore, WorkScoreParameters},
+    signature::Signature,
+};
 
 /// An [`Unlock`](crate::types::block::unlock::Unlock) which is used to unlock a signature locked
 /// [`Input`](crate::types::block::input::Input).
@@ -24,6 +27,12 @@ impl SignatureUnlock {
     #[inline(always)]
     pub fn signature(&self) -> &Signature {
         &self.0
+    }
+}
+
+impl WorkScore for SignatureUnlock {
+    fn work_score(&self, params: WorkScoreParameters) -> u32 {
+        self.0.work_score(params)
     }
 }
 

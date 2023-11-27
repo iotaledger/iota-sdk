@@ -26,7 +26,7 @@ pub use self::{
 use crate::types::block::{
     address::Address,
     output::{StorageScore, StorageScoreParameters},
-    protocol::ProtocolParameters,
+    protocol::{ProtocolParameters, WorkScore},
     slot::SlotIndex,
     Error,
 };
@@ -85,16 +85,19 @@ impl StorageScore for UnlockCondition {
     }
 }
 
+// TODO: check with TIP
+impl WorkScore for UnlockCondition {}
+
 impl core::fmt::Debug for UnlockCondition {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         match self {
-            Self::Address(unlock_condition) => unlock_condition.fmt(f),
-            Self::StorageDepositReturn(unlock_condition) => unlock_condition.fmt(f),
-            Self::Timelock(unlock_condition) => unlock_condition.fmt(f),
-            Self::Expiration(unlock_condition) => unlock_condition.fmt(f),
-            Self::StateControllerAddress(unlock_condition) => unlock_condition.fmt(f),
-            Self::GovernorAddress(unlock_condition) => unlock_condition.fmt(f),
-            Self::ImmutableAccountAddress(unlock_condition) => unlock_condition.fmt(f),
+            Self::Address(uc) => uc.fmt(f),
+            Self::StorageDepositReturn(uc) => uc.fmt(f),
+            Self::Timelock(uc) => uc.fmt(f),
+            Self::Expiration(uc) => uc.fmt(f),
+            Self::StateControllerAddress(uc) => uc.fmt(f),
+            Self::GovernorAddress(uc) => uc.fmt(f),
+            Self::ImmutableAccountAddress(uc) => uc.fmt(f),
         }
     }
 }
@@ -304,7 +307,7 @@ impl UnlockConditions {
 
 impl StorageScore for UnlockConditions {
     fn storage_score(&self, params: StorageScoreParameters) -> u64 {
-        self.iter().map(|uc| uc.storage_score(params)).sum::<u64>()
+        self.iter().map(|uc| uc.storage_score(params)).sum()
     }
 }
 

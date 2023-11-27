@@ -3,6 +3,7 @@
 
 use crate::types::block::{
     output::{StorageScore, StorageScoreParameters},
+    protocol::{WorkScore, WorkScoreParameters},
     slot::EpochIndex,
 };
 
@@ -62,6 +63,12 @@ impl StakingFeature {
 impl StorageScore for StakingFeature {
     fn storage_score(&self, params: StorageScoreParameters) -> u64 {
         params.staking_feature_offset()
+    }
+}
+
+impl WorkScore for StakingFeature {
+    fn work_score(&self, params: WorkScoreParameters) -> u32 {
+        params.staking()
     }
 }
 

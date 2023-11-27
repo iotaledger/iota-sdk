@@ -6,6 +6,7 @@ use derive_more::From;
 use crate::types::block::{
     address::Address,
     output::{StorageScore, StorageScoreParameters},
+    protocol::WorkScore,
 };
 
 /// Identifies the validated issuer of the UTXO state machine.
@@ -34,6 +35,8 @@ impl StorageScore for IssuerFeature {
         self.address().storage_score(params)
     }
 }
+
+impl WorkScore for IssuerFeature {}
 
 #[cfg(feature = "serde")]
 mod dto {

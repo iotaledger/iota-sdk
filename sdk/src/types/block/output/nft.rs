@@ -22,7 +22,7 @@ use crate::types::block::{
         StateTransitionVerifier, StorageScore, StorageScoreParameters,
     },
     payload::signed_transaction::TransactionCapabilityFlag,
-    protocol::ProtocolParameters,
+    protocol::{ProtocolParameters, WorkScore, WorkScoreParameters},
     semantic::{SemanticValidationContext, TransactionFailureReason},
     unlock::Unlock,
     Error,
@@ -448,6 +448,15 @@ impl StorageScore for NftOutput {
             + self.unlock_conditions.storage_score(params)
             + self.features.storage_score(params)
             + self.immutable_features.storage_score(params)
+    }
+}
+
+impl WorkScore for NftOutput {
+    fn work_score(&self, params: WorkScoreParameters) -> u32 {
+        params.output()
+            + self.unlock_conditions.work_score(params)
+            + self.features.work_score(params)
+            + self.immutable_features.work_score(params)
     }
 }
 
