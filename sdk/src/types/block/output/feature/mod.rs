@@ -164,7 +164,7 @@ crate::create_bitflags!(
     ]
 );
 
-pub(crate) type FeatureCount = BoundedU8<0, { Features::COUNT_MAX }>;
+pub(crate) type FeatureCount = BoundedU8<0, { FeatureFlags::ALL_FLAGS.len() as u8 }>;
 
 ///
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Deref, Packable)]
@@ -199,9 +199,6 @@ impl IntoIterator for Features {
 }
 
 impl Features {
-    ///
-    pub const COUNT_MAX: u8 = 5;
-
     /// Creates a new [`Features`] from a vec.
     pub fn from_vec(features: Vec<Feature>) -> Result<Self, Error> {
         let mut features = BoxedSlicePrefix::<Feature, FeatureCount>::try_from(features.into_boxed_slice())
