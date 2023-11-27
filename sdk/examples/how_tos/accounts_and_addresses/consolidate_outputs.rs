@@ -24,7 +24,9 @@ async fn main() -> Result<()> {
     dotenvy::dotenv().ok();
 
     for var in ["WALLET_DB_PATH", "EXPLORER_URL", "STRONGHOLD_PASSWORD"] {
-        std::env::var(var).expect(&format!(".env variable '{var}' is undefined, see .env.example"));
+        if std::env::var(var).is_err() {
+            panic!(".env variable '{}' is undefined, see .env.example", var);
+        }
     }
 
     let wallet = Wallet::builder()
