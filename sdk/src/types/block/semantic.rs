@@ -10,10 +10,11 @@ use primitive_types::U256;
 use crate::types::block::{
     address::{Address, AddressCapabilityFlag},
     output::{
-        AccountId, AnchorOutput, ChainId, FoundryId, NativeTokens, Output, OutputId, StateTransitionError, TokenId,
-        UnlockCondition,
+        AccountId, AnchorOutput, ChainId, FoundryId, MinimumOutputAmount, NativeTokens, Output, OutputId,
+        StateTransitionError, TokenId, UnlockCondition,
     },
     payload::signed_transaction::{Transaction, TransactionCapabilityFlag, TransactionId, TransactionSigningHash},
+    protocol::ProtocolParameters,
     unlock::Unlocks,
     Error,
 };
@@ -206,6 +207,7 @@ pub struct SemanticValidationContext<'a> {
     pub(crate) unlocked_addresses: HashSet<Address>,
     pub(crate) storage_deposit_returns: HashMap<Address, u64>,
     pub(crate) simple_deposits: HashMap<Address, u64>,
+    pub(crate) protocol_parameters: ProtocolParameters,
 }
 
 impl<'a> SemanticValidationContext<'a> {
@@ -215,6 +217,7 @@ impl<'a> SemanticValidationContext<'a> {
         transaction_id: &TransactionId,
         inputs: &'a [(&'a OutputId, &'a Output)],
         unlocks: &'a Unlocks,
+        protocol_parameters: ProtocolParameters,
     ) -> Self {
         let input_chains = inputs
             .iter()
@@ -258,6 +261,7 @@ impl<'a> SemanticValidationContext<'a> {
             unlocked_addresses: HashSet::new(),
             storage_deposit_returns: HashMap::new(),
             simple_deposits: HashMap::new(),
+            protocol_parameters,
         }
     }
 
@@ -330,7 +334,37 @@ impl<'a> SemanticValidationContext<'a> {
                 .checked_add(amount)
                 .ok_or(Error::ConsumedAmountOverflow)?;
 
-            self.input_mana = self.input_mana.checked_add(mana).ok_or(Error::ConsumedManaOverflow)?;
+            let potential_mana = {
+                let min_amount = consumed_output.minimum_amount(self.protocol_parameters.storage_score_parameters());
+
+                let generation_amount = consumed_output.amount().checked_sub(min_amount).unwrap_or_default();
+
+                self.protocol_parameters.potential_mana(
+                    generation_amount,
+                    output_id.transaction_id().slot_index(),
+                    self.transaction.creation_slot(),
+                )
+            }?;
+
+            // Add potential mana
+            self.input_mana = self
+                .input_mana
+                .checked_add(potential_mana)
+                .ok_or(Error::ConsumedManaOverflow)?;
+
+            let stored_mana = self.protocol_parameters.mana_with_decay(
+                mana,
+                output_id.transaction_id().slot_index(),
+                self.transaction.creation_slot(),
+            )?;
+
+            // Add stored mana
+            self.input_mana = self
+                .input_mana
+                .checked_add(stored_mana)
+                .ok_or(Error::ConsumedManaOverflow)?;
+
+            // TODO: Add reward mana
 
             if let Some(consumed_native_token) = consumed_native_token {
                 let native_token_amount = self
@@ -440,7 +474,16 @@ impl<'a> SemanticValidationContext<'a> {
                 .checked_add(amount)
                 .ok_or(Error::CreatedAmountOverflow)?;
 
+            // Add stored mana
             self.output_mana = self.output_mana.checked_add(mana).ok_or(Error::CreatedManaOverflow)?;
+
+            // Add allotted mana
+            for mana_allotment in self.transaction.allotments() {
+                self.output_mana = self
+                    .output_mana
+                    .checked_add(mana_allotment.mana())
+                    .ok_or(Error::CreatedManaOverflow)?;
+            }
 
             if let Some(created_native_token) = created_native_token {
                 let native_token_amount = self
@@ -470,9 +513,16 @@ impl<'a> SemanticValidationContext<'a> {
             return Ok(Some(TransactionFailureReason::SumInputsOutputsAmountMismatch));
         }
 
-        if self.input_mana > self.output_mana && !self.transaction.has_capability(TransactionCapabilityFlag::BurnMana) {
-            // TODO: add a variant https://github.com/iotaledger/iota-sdk/issues/1430
-            return Ok(Some(TransactionFailureReason::SemanticValidationFailed));
+        if self.input_mana != self.output_mana {
+            if self.input_mana > self.output_mana
+                && !self.transaction.has_capability(TransactionCapabilityFlag::BurnMana)
+            {
+                return Ok(Some(
+                    TransactionFailureReason::TransactionCapabilityManaBurningNotAllowed,
+                ));
+            } else {
+                return Ok(Some(TransactionFailureReason::InvalidManaAmount));
+            }
         }
 
         // Validation of input native tokens.

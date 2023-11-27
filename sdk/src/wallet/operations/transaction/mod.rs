@@ -130,7 +130,11 @@ where
         let options = options.into();
 
         // Validate transaction before sending and storing it
-        let conflict = verify_semantic(&signed_transaction_data.inputs_data, &signed_transaction_data.payload)?;
+        let conflict = verify_semantic(
+            &signed_transaction_data.inputs_data,
+            &signed_transaction_data.payload,
+            self.client().get_protocol_parameters().await?,
+        )?;
 
         if let Some(conflict) = conflict {
             log::debug!(

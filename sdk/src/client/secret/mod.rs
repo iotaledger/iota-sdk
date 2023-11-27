@@ -611,7 +611,7 @@ where
 
     validate_signed_transaction_payload_length(&tx_payload)?;
 
-    let conflict = verify_semantic(&inputs_data, &tx_payload)?;
+    let conflict = verify_semantic(&inputs_data, &tx_payload, todo!())?;
 
     if let Some(conflict) = conflict {
         log::debug!("[sign_transaction] conflict: {conflict:?} for {:#?}", tx_payload);
