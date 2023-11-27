@@ -9,6 +9,7 @@ use clap::{CommandFactory, Parser, Subcommand};
 use colored::Colorize;
 use iota_sdk::{
     client::request_funds_from_faucet,
+    crypto::signatures::ed25519::PublicKey,
     types::{
         api::plugins::participation::types::ParticipationEventId,
         block::{
@@ -124,6 +125,7 @@ pub enum WalletCommand {
     ImplicitAccountTransition {
         /// Identifier of the implicit account output.
         output_id: OutputId,
+        public_key: Option<String>,
     },
     /// Lists the implicit accounts of the wallet.
     ImplicitAccounts,
@@ -584,8 +586,18 @@ pub async fn implicit_account_creation_address_command(wallet: &Wallet) -> Resul
 }
 
 // `implicit-account-transition` command
-pub async fn implicit_account_transition_command(wallet: &Wallet, output_id: OutputId) -> Result<(), Error> {
-    let transaction = wallet.implicit_account_transition(&output_id).await?;
+pub async fn implicit_account_transition_command(
+    wallet: &Wallet,
+    output_id: OutputId,
+    public_key: Option<String>,
+) -> Result<(), Error> {
+    let public_key = public_key
+        .map(|s| {
+            PublicKey::try_from_bytes(prefix_hex::decode(s).map_err(|e| Error::Miscellaneous(e.to_string()))?)
+                .map_err(|e| Error::Miscellaneous(e.to_string()))
+        })
+        .transpose()?;
+    let transaction = wallet.implicit_account_transition(&output_id, public_key).await?;
 
     println_log_info!(
         "Implicit account transition transaction sent:\n{:?}\n{:?}",
@@ -1121,8 +1133,8 @@ pub async fn prompt_internal(
                         WalletCommand::ImplicitAccountCreationAddress => {
                             implicit_account_creation_address_command(wallet).await
                         }
-                        WalletCommand::ImplicitAccountTransition { output_id } => {
-                            implicit_account_transition_command(wallet, output_id).await
+                        WalletCommand::ImplicitAccountTransition { output_id, public_key } => {
+                            implicit_account_transition_command(wallet, output_id, public_key).await
                         }
                         WalletCommand::ImplicitAccounts => implicit_accounts_command(wallet).await,
                         WalletCommand::MeltNativeToken { token_id, amount } => {
