@@ -6,7 +6,7 @@ use core::{ops::RangeInclusive, str::FromStr};
 
 use packable::{bounded::BoundedU16, prefix::BoxedSlicePrefix};
 
-use crate::types::block::{output::StorageScore, Error};
+use crate::types::block::{output::StorageScore, protocol::WorkScore, Error};
 
 pub(crate) type MetadataFeatureLength =
     BoundedU16<{ *MetadataFeature::LENGTH_RANGE.start() }, { *MetadataFeature::LENGTH_RANGE.end() }>;
@@ -19,7 +19,28 @@ pub struct MetadataFeature(
     pub(crate) BoxedSlicePrefix<u8, MetadataFeatureLength>,
 );
 
+impl MetadataFeature {
+    /// The [`Feature`](crate::types::block::output::Feature) kind of [`MetadataFeature`].
+    pub const KIND: u8 = 2;
+    /// Valid lengths for a [`MetadataFeature`].
+    pub const LENGTH_RANGE: RangeInclusive<u16> = 1..=8192;
+
+    /// Creates a new [`MetadataFeature`].
+    #[inline(always)]
+    pub fn new(data: impl Into<Vec<u8>>) -> Result<Self, Error> {
+        Self::try_from(data.into())
+    }
+
+    /// Returns the data.
+    #[inline(always)]
+    pub fn data(&self) -> &[u8] {
+        &self.0
+    }
+}
+
 impl StorageScore for MetadataFeature {}
+
+impl WorkScore for MetadataFeature {}
 
 macro_rules! impl_from_vec {
     ($type:ty) => {
@@ -65,25 +86,6 @@ impl FromStr for MetadataFeature {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         Self::new(prefix_hex::decode::<Vec<u8>>(s).map_err(Error::Hex)?)
-    }
-}
-
-impl MetadataFeature {
-    /// The [`Feature`](crate::types::block::output::Feature) kind of [`MetadataFeature`].
-    pub const KIND: u8 = 2;
-    /// Valid lengths for a [`MetadataFeature`].
-    pub const LENGTH_RANGE: RangeInclusive<u16> = 1..=8192;
-
-    /// Creates a new [`MetadataFeature`].
-    #[inline(always)]
-    pub fn new(data: impl Into<Vec<u8>>) -> Result<Self, Error> {
-        Self::try_from(data.into())
-    }
-
-    /// Returns the data.
-    #[inline(always)]
-    pub fn data(&self) -> &[u8] {
-        &self.0
     }
 }
 

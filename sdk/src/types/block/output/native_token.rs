@@ -12,7 +12,11 @@ use iterator_sorted::is_unique_sorted;
 use packable::{bounded::BoundedU8, prefix::BoxedSlicePrefix, Packable};
 use primitive_types::U256;
 
-use crate::types::block::{output::FoundryId, Error};
+use crate::types::block::{
+    output::FoundryId,
+    protocol::{WorkScore, WorkScoreParameters},
+    Error,
+};
 
 crate::impl_id!(
     /// Unique identifier of a [`NativeToken`](crate::types::block::output::NativeToken).
@@ -63,6 +67,12 @@ impl NativeToken {
     #[inline(always)]
     pub fn amount(&self) -> U256 {
         self.amount
+    }
+}
+
+impl WorkScore for NativeToken {
+    fn work_score(&self, params: WorkScoreParameters) -> u32 {
+        params.native_token()
     }
 }
 

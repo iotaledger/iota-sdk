@@ -241,7 +241,7 @@ fn build_inputs<'a>(outputs: impl IntoIterator<Item = Build<'a>>) -> Vec<InputSi
                 output,
                 output_metadata: OutputMetadata::new(
                     rand_block_id(),
-                    OutputId::new(rand_transaction_id(), 0).unwrap(),
+                    OutputId::new(rand_transaction_id(), 0),
                     false,
                     None,
                     None,

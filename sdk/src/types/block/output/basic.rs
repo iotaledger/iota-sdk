@@ -15,7 +15,7 @@ use crate::types::block::{
         },
         MinimumOutputAmount, NativeToken, Output, OutputBuilderAmount, OutputId, StorageScore, StorageScoreParameters,
     },
-    protocol::ProtocolParameters,
+    protocol::{ProtocolParameters, WorkScore, WorkScoreParameters},
     semantic::{SemanticValidationContext, TransactionFailureReason},
     unlock::Unlock,
     Error,
@@ -364,6 +364,12 @@ impl StorageScore for BasicOutput {
             + (1 + self.packed_len() as u64) * params.data_factor() as u64
             + self.unlock_conditions.storage_score(params)
             + self.features.storage_score(params)
+    }
+}
+
+impl WorkScore for BasicOutput {
+    fn work_score(&self, params: WorkScoreParameters) -> u32 {
+        params.output() + self.unlock_conditions.work_score(params) + self.features.work_score(params)
     }
 }
 

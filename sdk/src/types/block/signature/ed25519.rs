@@ -14,7 +14,11 @@ use packable::{
     Packable,
 };
 
-use crate::types::block::{address::Ed25519Address, Error};
+use crate::types::block::{
+    address::Ed25519Address,
+    protocol::{WorkScore, WorkScoreParameters},
+    Error,
+};
 
 /// An Ed25519 signature.
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
@@ -101,6 +105,12 @@ impl fmt::Debug for Ed25519Signature {
                 &UnquotedStr(&prefix_hex::encode(self.signature.to_bytes())),
             )
             .finish()
+    }
+}
+
+impl WorkScore for Ed25519Signature {
+    fn work_score(&self, params: WorkScoreParameters) -> u32 {
+        params.signature_ed25519()
     }
 }
 

@@ -22,7 +22,7 @@ use crate::types::block::{
         StateTransitionVerifier, StorageScore, StorageScoreParameters, TokenId, TokenScheme,
     },
     payload::signed_transaction::{TransactionCapabilities, TransactionCapabilityFlag},
-    protocol::ProtocolParameters,
+    protocol::{ProtocolParameters, WorkScore, WorkScoreParameters},
     semantic::{SemanticValidationContext, TransactionFailureReason},
     unlock::Unlock,
     Error,
@@ -507,6 +507,16 @@ impl StorageScore for FoundryOutput {
             + self.unlock_conditions.storage_score(params)
             + self.features.storage_score(params)
             + self.immutable_features.storage_score(params)
+    }
+}
+
+impl WorkScore for FoundryOutput {
+    fn work_score(&self, params: WorkScoreParameters) -> u32 {
+        params.output()
+            + self.token_scheme.work_score(params)
+            + self.unlock_conditions.work_score(params)
+            + self.features.work_score(params)
+            + self.immutable_features.work_score(params)
     }
 }
 

@@ -6,6 +6,7 @@ use derive_more::From;
 use crate::types::block::{
     address::Address,
     output::{storage_score::StorageScoreParameters, StorageScore},
+    protocol::WorkScore,
 };
 
 /// Identifies the validated sender of an output.
@@ -34,6 +35,8 @@ impl StorageScore for SenderFeature {
         self.address().storage_score(params)
     }
 }
+
+impl WorkScore for SenderFeature {}
 
 #[cfg(feature = "serde")]
 mod dto {

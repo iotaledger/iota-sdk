@@ -23,6 +23,7 @@ pub use self::{
 };
 use crate::types::block::{
     input::{INPUT_COUNT_MAX, INPUT_COUNT_RANGE, INPUT_INDEX_MAX},
+    protocol::{WorkScore, WorkScoreParameters},
     Error,
 };
 
@@ -67,6 +68,37 @@ pub enum Unlock {
     Empty(EmptyUnlock),
 }
 
+impl Unlock {
+    /// Returns the unlock kind of an [`Unlock`].
+    pub fn kind(&self) -> u8 {
+        match self {
+            Self::Signature(_) => SignatureUnlock::KIND,
+            Self::Reference(_) => ReferenceUnlock::KIND,
+            Self::Account(_) => AccountUnlock::KIND,
+            Self::Anchor(_) => AnchorUnlock::KIND,
+            Self::Nft(_) => NftUnlock::KIND,
+            Self::Multi(_) => MultiUnlock::KIND,
+            Self::Empty(_) => EmptyUnlock::KIND,
+        }
+    }
+
+    crate::def_is_as_opt!(Unlock: Signature, Reference, Account, Anchor, Nft, Multi, Empty);
+}
+
+impl WorkScore for Unlock {
+    fn work_score(&self, params: WorkScoreParameters) -> u32 {
+        match self {
+            Self::Signature(unlock) => unlock.work_score(params),
+            Self::Reference(unlock) => unlock.work_score(params),
+            Self::Account(unlock) => unlock.work_score(params),
+            Self::Anchor(unlock) => unlock.work_score(params),
+            Self::Nft(unlock) => unlock.work_score(params),
+            Self::Multi(unlock) => unlock.work_score(params),
+            Self::Empty(unlock) => unlock.work_score(params),
+        }
+    }
+}
+
 impl From<SignatureUnlock> for Unlock {
     fn from(value: SignatureUnlock) -> Self {
         Self::Signature(value.into())
@@ -85,23 +117,6 @@ impl core::fmt::Debug for Unlock {
             Self::Empty(unlock) => unlock.fmt(f),
         }
     }
-}
-
-impl Unlock {
-    /// Returns the unlock kind of an [`Unlock`].
-    pub fn kind(&self) -> u8 {
-        match self {
-            Self::Signature(_) => SignatureUnlock::KIND,
-            Self::Reference(_) => ReferenceUnlock::KIND,
-            Self::Account(_) => AccountUnlock::KIND,
-            Self::Anchor(_) => AnchorUnlock::KIND,
-            Self::Nft(_) => NftUnlock::KIND,
-            Self::Multi(_) => MultiUnlock::KIND,
-            Self::Empty(_) => EmptyUnlock::KIND,
-        }
-    }
-
-    crate::def_is_as_opt!(Unlock: Signature, Reference, Account, Anchor, Nft, Multi, Empty);
 }
 
 pub(crate) type UnlockCount = BoundedU16<{ *UNLOCK_COUNT_RANGE.start() }, { *UNLOCK_COUNT_RANGE.end() }>;
