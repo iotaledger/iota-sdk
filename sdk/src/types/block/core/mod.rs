@@ -85,7 +85,7 @@ impl BlockBody {
     /// been built.
     #[inline(always)]
     pub fn build_basic(strong_parents: self::basic::StrongParents) -> BasicBlockBodyBuilder {
-        BasicBlockBodyBuilder::new(strong_parents, 0)
+        BasicBlockBodyBuilder::new(strong_parents)
     }
 
     /// Creates a new [`ValidationBlockBodyBuilder`].

@@ -26,13 +26,13 @@ pub struct BasicBlockBodyBuilder {
 impl BasicBlockBodyBuilder {
     /// Creates a new [`BasicBlockBodyBuilder`].
     #[inline(always)]
-    pub fn new(strong_parents: StrongParents, max_burned_mana: u64) -> Self {
+    pub fn new(strong_parents: StrongParents) -> Self {
         Self {
             strong_parents,
             weak_parents: WeakParents::default(),
             shallow_like_parents: ShallowLikeParents::default(),
             payload: OptionalPayload::default(),
-            max_burned_mana,
+            max_burned_mana: 0,
         }
     }
 
@@ -85,7 +85,7 @@ impl BasicBlockBodyBuilder {
     }
 
     /// Finishes the builder into a [`BasicBlockBody`] with the minimum amount of mana required for the block to get
-    /// accepted by the network.
+    /// accepted by the network. Note that this overrides any manually set value.
     pub fn finish_with_minimum_mana_amount(
         self,
         params: WorkScoreParameters,
@@ -110,7 +110,7 @@ impl BasicBlockBodyBuilder {
     }
 
     /// Finishes the builder into a [`BlockBody`] with the minimum amount of mana required for the block to get accepted
-    /// by the network.
+    /// by the network. Note that this overrides any manually set value.
     pub fn finish_block_body_with_minimum_mana_amount(
         self,
         params: WorkScoreParameters,
@@ -258,7 +258,7 @@ pub(crate) mod dto {
             dto: BasicBlockBodyDto,
             params: Option<&ProtocolParameters>,
         ) -> Result<Self, Self::Error> {
-            BasicBlockBodyBuilder::new(StrongParents::from_set(dto.strong_parents)?, dto.max_burned_mana)
+            BasicBlockBodyBuilder::new(StrongParents::from_set(dto.strong_parents)?)
                 .with_weak_parents(WeakParents::from_set(dto.weak_parents)?)
                 .with_shallow_like_parents(ShallowLikeParents::from_set(dto.shallow_like_parents)?)
                 .with_payload(
@@ -266,6 +266,7 @@ pub(crate) mod dto {
                         .map(|payload| Payload::try_from_dto_with_params_inner(payload, params))
                         .transpose()?,
                 )
+                .with_max_burned_mana(dto.max_burned_mana)
                 .finish()
         }
     }
