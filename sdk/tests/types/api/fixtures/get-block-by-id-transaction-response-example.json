@@ -1,0 +1,100 @@
+{
+    "header": {
+      "protocolVersion": 3,
+      "networkId": "0",
+      "issuingTime": "1692966346513784862",
+      "slotCommitmentId": "0x8633b2eb1845fdecf12ee6c5e789c3cf1f0d0bbb3cee65cb5fb2757e995b5cd70000000000000000",
+      "latestFinalizedSlot": 0,
+      "issuerId": "0x375358f92cc94750669598b0aaa55a6ff73310b90710e1fad524c0f911be0fea"
+    },
+    "body": {
+      "type": 0,
+      "strongParents": [
+        "0x8d6f3b6e3a63ce388d2eb8c927c5b9ba328b0e427ae727d8b3dddc429f6fb24a0000000000000000",
+        "0x408a53af982c49d1398ab5c5b5f5b390d4c4da7da48b61bb9ba7f97c1e8dd7f60000000000000000"
+      ],
+      "weakParents": [
+        "0xe8a904ce3ee081f20a68bb38b2d406cfd138775ba52ea555d93a4e4d4b0ad8440000000000000000",
+        "0xbce912a0f383cd07660d3c08f3d3f3c7fb9de31e2cc1b93d4c29332ef693ba0c0000000000000000"
+      ],
+      "shallowLikeParents": [
+        "0x0276d29ec6b3cbbf3ed6d1f01af8e29b9c6a9ee9c9375e8e5b5b5c5b5b5d45580000000000000000",
+        "0x70a5ce5d8fc3290a9885b1af5d8766d51db89a67a6a839f6d23a6cb8d6f3b6e30000000000000000"
+      ],
+      "payload": {
+        "type": 1,
+        "transaction": {
+          "networkId": "1337133713371337",
+          "creationSlot": 1649442459,
+          "contextInputs": [
+            {
+              "type": 1,
+              "commitmentId": "0x507d5c7d7105022b661e2c755173785f11707b7a6b3369111d000d1f145e652d5f436f26"
+            }
+          ],
+          "inputs": [
+            {
+              "type": 0,
+              "transactionId": "0x0c78e998f5177834ecb3bae1596d5056af76e487386eecb19727465b4be86a79",
+              "transactionOutputIndex": 0
+            },
+            {
+              "type": 0,
+              "transactionId": "0x309b169bfa60c8cf80afd730741862d200405d5df7cabfe9b564361dce1f7036",
+              "transactionOutputIndex": 0
+            },
+            {
+              "type": 0,
+              "transactionId": "0xc138ecdc882010245e9574fbc1f1f43cc7c182fa890e46e018365dd49de0f16e",
+              "transactionOutputIndex": 0
+            }
+          ],
+          "allotments": [
+            {
+              "accountID": "0x030440433d7a726322151f735a6e72543e5b26142d68157d25746a6e45260f37",
+              "mana": "5285"
+            }
+          ],
+          "outputs": [
+            {
+              "type": 0,
+              "amount": "50000000",
+              "unlockConditions": [
+                {
+                  "type": 0,
+                  "address": {
+                    "type": 0,
+                    "pubKeyHash": "0xd49931814e6bfbb8e221f1b2936e206e5a6b6abeb9c070f8603814c525c9abe3"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        "unlocks": [
+          {
+            "type": 0,
+            "signature": {
+              "type": 0,
+              "publicKey": "0x40d0c00fd629a5f528e4bcab4333926a90d06613a3f36a325defcdaf4c9e4092",
+              "signature": "0xed4a63a3e1b22c85f9813b00a21c8576ed72c1f5bc939d01fcea7dcd678c2d0d8d80a2499965d8ce5574c9e92aa0d42b72b969bab3a2a35fe7dbc64659a0d703"
+            }
+          },
+          {
+            "type": 1,
+            "reference": 0
+          },
+          {
+            "type": 1,
+            "reference": 0
+          }
+        ],
+        "maxBurnedMana": "105368"
+      }
+    },
+    "signature": {
+      "type": 0,
+      "publicKey": "0x05c1de274451db8de8182d64c6ee0dca3ae0c9077e0b4330c976976171d79064",
+      "signature": "0xae8a0ad932ff958576bcd787fd578dfb740b8a319d63595a3af7307f56f0afcbc6187d67eee20026aa39b6ba62c93d1a6e27111607b1b1d8f2206889284e9408"
+    }
+  }

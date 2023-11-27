@@ -1,0 +1,111 @@
+{
+    "name": "Example Node",
+    "version": "1.0.0",
+    "status": {
+      "isHealthy": true,
+      "acceptedTangleTime": "1692966168000000000",
+      "relativeAcceptedTangleTime": "1692966173856059205",
+      "confirmedTangleTime": "1692966168000000000",
+      "relativeConfirmedTangleTime": "1692966173855931045",
+      "latestCommitmentID": "0x8fb6cbb1ecf02c6b5a6a5a6a5f6c5a6a5f6c5a6a5a6a5a6a5f6c5a6a5a6a5f6c50000000000000000",
+      "latestFinalizedSlot": 100,
+      "latestAcceptedBlockSlot": 100,
+      "latestConfirmedBlockSlot": 95,
+      "pruningEpoch": 20
+    },
+    "metrics": {
+      "blocksPerSecond": "1.5E+00",
+      "confirmedBlocksPerSecond": "1.5E+00",
+      "confirmationRate": "1E+02"
+    },
+    "protocolParameters": [
+      {
+        "startEpoch": 1,
+        "parameters": {
+          "type": 0,
+          "version": 3,
+          "networkName": "iota-core-testnet",
+          "bech32Hrp": "rms",
+          "storageScoreParameters": {
+            "storageCost": "500",
+            "factorData": 1,
+            "offsetOutputOverhead": "10",
+            "offsetEd25519BlockIssuerKey": "100",
+            "offsetStakingFeature": "100",
+            "storageScoreOffoffsetDelegationsetDelegation": "100"
+          },
+          "workScoreParameters": {
+            "dataByte": 0,
+            "block": 100,
+            "input": 20,
+            "contextInput": 20,
+            "output": 20,
+            "nativeToken": 20,
+            "staking": 100,
+            "blockIssuer": 100,
+            "allotment": 100,
+            "signatureEd25519": 200
+          },
+          "manaParameters": {
+            "bitsCount": 63,
+            "generationRate": 1,
+            "generationRateExponent": 0,
+            "decayFactors": [
+              10,
+              20
+            ],
+            "decayFactorsExponent": 0,
+            "decayFactorEpochsSum": 0,
+            "decayFactorEpochsSumExponent": 0
+          },
+          "tokenSupply": "2779530283277761",
+          "genesisSlot": 5,
+          "genesisUnixTimestamp": "1692966168",
+          "slotDurationInSeconds": 10,
+          "slotsPerEpochExponent": 13,
+          "stakingUnbondingPeriod": 10,
+          "validationBlocksPerSlot": 10,
+          "punishmentEpochs": 10,
+          "livenessThresholdLowerBound": 5,
+          "livenessThresholdUpperBound": 10,
+          "minCommittableAge": 10,
+          "maxCommittableAge": 20,
+          "epochNearingThreshold": 30,
+          "congestionControlParameters": {
+            "minReferenceManaCost": "500",
+            "increase": "500",
+            "decrease": "500",
+            "increaseThreshold": 800000,
+            "decreaseThreshold": 500000,
+            "schedulerRate": 100000,
+            "maxBufferSize": 3276800,
+            "maxValidationBufferSize": 100
+          },
+          "versionSignalingParameters": {
+            "windowSize": 7,
+            "windowTargetRatio": 5,
+            "activationOffset": 7
+          },
+          "rewardsParameters": {
+            "profitMarginExponent": 8,
+            "bootstrappinDuration": 1154,
+            "manaShareCoefficient": "2",
+            "decayBalancingConstantExponent": 8,
+            "decayBalancingConstant": "1",
+            "poolCoefficientExponent": 31
+          },
+          "targetCommitteeSize": 32
+        }
+      }
+    ],
+    "baseToken": {
+      "name": "Shimmer",
+      "tickerSymbol": "SMR",
+      "unit": "SMR",
+      "decimals": 6,
+      "subunit": "glow"
+    },
+    "features": [
+      []
+    ]
+  }

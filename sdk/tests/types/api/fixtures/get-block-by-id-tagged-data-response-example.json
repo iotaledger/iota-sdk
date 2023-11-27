@@ -1,0 +1,30 @@
+{
+    "header": {
+      "protocolVersion": 3,
+      "networkId": "0",
+      "issuingTime": "1692966346513784862",
+      "slotCommitmentId": "0x8633b2eb1845fdecf12ee6c5e789c3cf1f0d0bbb3cee65cb5fb2757e995b5cd70000000000000000",
+      "latestFinalizedSlot": 0,
+      "issuerId": "0x375358f92cc94750669598b0aaa55a6ff73310b90710e1fad524c0f911be0fea"
+    },
+    "body": {
+      "type": 0,
+      "strongParents": [
+        "0x2de585533d9c9684747e49f70e5e620a4e6c3fd1c7d8b73520c198c7def29a050200000000000000",
+        "0x5853745388056fb59c193dc6fe6f8c3f76bf8d82a42ed340eba621a9f5bb79790200000000000000"
+      ],
+      "weakParents": [],
+      "shallowLikeParents": [],
+      "payload": {
+        "type": 0,
+        "tag": "0x4143544956495459",
+        "data": ""
+      },
+      "maxBurnedMana": "500"
+    },
+    "signature": {
+      "type": 0,
+      "publicKey": "0x05c1de274451db8de8182d64c6ee0dca3ae0c9077e0b4330c976976171d79064",
+      "signature": "0xae8a0ad932ff958576bcd787fd578dfb740b8a319d63595a3af7307f56f0afcbc6187d67eee20026aa39b6ba62c93d1a6e27111607b1b1d8f2206889284e9408"
+    }
+  }

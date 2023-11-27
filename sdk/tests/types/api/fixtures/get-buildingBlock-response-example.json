@@ -1,0 +1,23 @@
+{
+    "strongParents": [
+      "0x4f746934d0075179a37ca3e807b7e793ec4ec9189ba31c9ad092d7497b01118c1000000000000000",
+      "0x59daaaba1cd10cd268966376e17710d100c90826fe258753d461acac99b7e3341500000000000000"
+    ],
+    "weakParents": [
+      "0xebb058f1f1c8f1ac6508465deeee1dd090396f9e6e2b5c103eef5583f20a0c133a00000000000000",
+      "0xb173e2d2b6f72600f00da84492ddb6eadee703dc39fb846725828059272093fb3b00000000000000"
+    ],
+    "shallowLikeParents": [
+      "0xdbf86c778d69f413296c2d4d3086d76c74bf4d719e6e95c03a3d9a955ed39bcf3e00000000000000",
+      "0xf15b2ec698e396c9d2e69bc753246631aedebb657da09ba0e0c8d42518a1e8953e00000000000000"
+    ],
+    "latestFinalizedSlot": 1422,
+    "commitment": {
+      "protocolVersion": 3,
+      "slot": 1432,
+      "previousCommitmentId": "0xbf07dc16986166953f5a72c19d78642aab6cbde63964a2369ec3d425144eb42b3800000000000000",
+      "rootsId": "0xa4dd36465af63d495d35a05f592d42a51511c153e1bae8fad00453c8cbb48727",
+      "cumulativeWeight": "45678",
+      "referenceManaCost": "12345"
+    }
+  }
