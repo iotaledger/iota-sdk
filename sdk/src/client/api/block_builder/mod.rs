@@ -35,17 +35,6 @@ impl ClientInner {
 
         let protocol_params = self.get_protocol_parameters().await?;
 
-        let mut basic_block_body = BlockBody::build_basic(issuance.strong_parents()?)
-            .with_weak_parents(issuance.weak_parents()?)
-            .with_shallow_like_parents(issuance.shallow_like_parents()?)
-            .with_payload(payload)
-            .finish()?;
-
-        basic_block_body.set_max_burned_mana_to_minimum(
-            protocol_params.work_score_parameters,
-            issuance.commitment.reference_mana_cost(),
-        );
-
         Ok(UnsignedBlock::new(
             BlockHeader::new(
                 protocol_params.version(),
@@ -55,7 +44,14 @@ impl ClientInner {
                 issuance.latest_finalized_slot,
                 issuer_id,
             ),
-            basic_block_body.into(),
+            BlockBody::build_basic(issuance.strong_parents()?)
+                .with_weak_parents(issuance.weak_parents()?)
+                .with_shallow_like_parents(issuance.shallow_like_parents()?)
+                .with_payload(payload)
+                .finish_block_body_with_minimum_mana_amount(
+                    protocol_params.work_score_parameters,
+                    issuance.commitment.reference_mana_cost(),
+                )?,
         ))
     }
 }

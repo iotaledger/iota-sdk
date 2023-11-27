@@ -36,6 +36,23 @@ impl BasicBlockBodyBuilder {
         }
     }
 
+    /// Creates a new [`BasicBlockBodyBuilder`] with minimum required mana amount for the block to get accepted by the
+    /// network.
+    #[inline(always)]
+    pub fn new_with_minimum_mana_amount(
+        strong_parents: StrongParents,
+        params: ProtocolParameters,
+        reference_mana_cost: u64,
+    ) -> Self {
+        Self {
+            strong_parents,
+            weak_parents: WeakParents::default(),
+            shallow_like_parents: ShallowLikeParents::default(),
+            payload: OptionalPayload::default(),
+            max_burned_mana: 0,
+        }
+    }
+
     /// Adds strong parents to a [`BasicBlockBodyBuilder`].
     #[inline(always)]
     pub fn with_strong_parents(mut self, strong_parents: impl Into<StrongParents>) -> Self {
@@ -84,9 +101,41 @@ impl BasicBlockBodyBuilder {
         })
     }
 
+    /// Finishes the builder into a [`BasicBlockBody`] with the minimum amount of mana required for the block to get
+    /// accepted by the network.
+    pub fn finish_with_minimum_mana_amount(
+        self,
+        params: WorkScoreParameters,
+        reference_mana_cost: u64,
+    ) -> Result<BasicBlockBody, Error> {
+        let mut body = BasicBlockBody {
+            strong_parents: self.strong_parents,
+            weak_parents: self.weak_parents,
+            shallow_like_parents: self.shallow_like_parents,
+            payload: self.payload,
+            max_burned_mana: self.max_burned_mana,
+        };
+
+        body.max_burned_mana = body.work_score(params) as u64 * reference_mana_cost;
+
+        Ok(body)
+    }
+
     /// Finishes the builder into a [`BlockBody`].
     pub fn finish_block_body(self) -> Result<BlockBody, Error> {
         Ok(BlockBody::from(self.finish()?))
+    }
+
+    /// Finishes the builder into a [`BlockBody`] with the minimum amount of mana required for the block to get accepted
+    /// by the network.
+    pub fn finish_block_body_with_minimum_mana_amount(
+        self,
+        params: WorkScoreParameters,
+        reference_mana_cost: u64,
+    ) -> Result<BlockBody, Error> {
+        Ok(BlockBody::from(
+            self.finish_with_minimum_mana_amount(params, reference_mana_cost)?,
+        ))
     }
 }
 
@@ -151,23 +200,6 @@ impl BasicBlockBody {
     #[inline(always)]
     pub fn max_burned_mana(&self) -> u64 {
         self.max_burned_mana
-    }
-
-    /// Sets the `max_burned_mana` field to the minimum possible mana amount for the block to get accepted by the
-    /// network.
-    pub fn set_max_burned_mana_to_minimum(&mut self, params: WorkScoreParameters, reference_mana_cost: u64) {
-        self.max_burned_mana = self.work_score(params) as u64 * reference_mana_cost;
-    }
-}
-
-impl WorkScore for BasicBlockBody {
-    fn work_score(&self, params: WorkScoreParameters) -> u32 {
-        params.block()
-            + self
-                .payload
-                .as_ref()
-                .map(|payload| payload.work_score(params))
-                .unwrap_or(0)
     }
 }
 
