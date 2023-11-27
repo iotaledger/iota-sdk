@@ -6,7 +6,7 @@ use packable::Packable;
 use crate::types::block::{
     core::{parent::verify_parents_sets, BlockBody, Parents},
     payload::{OptionalPayload, Payload},
-    protocol::ProtocolParameters,
+    protocol::{ProtocolParameters, WorkScore, WorkScoreParameters},
     Error,
 };
 
@@ -151,6 +151,17 @@ impl BasicBlockBody {
     #[inline(always)]
     pub fn max_burned_mana(&self) -> u64 {
         self.max_burned_mana
+    }
+}
+
+impl WorkScore for BasicBlockBody {
+    fn work_score(&self, params: WorkScoreParameters) -> u32 {
+        params.block()
+            + self
+                .payload
+                .as_ref()
+                .map(|payload| payload.work_score(params))
+                .unwrap_or(0)
     }
 }
 

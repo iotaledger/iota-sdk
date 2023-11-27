@@ -32,6 +32,7 @@ pub use self::{
 };
 use crate::types::block::{
     output::{StorageScore, StorageScoreParameters},
+    protocol::{WorkScore, WorkScoreParameters},
     Error,
 };
 
@@ -79,13 +80,27 @@ impl Ord for Feature {
 impl StorageScore for Feature {
     fn storage_score(&self, params: StorageScoreParameters) -> u64 {
         match self {
-            Self::Sender(feature) => feature.storage_score(params),
-            Self::Issuer(feature) => feature.storage_score(params),
-            Self::Metadata(feature) => feature.storage_score(params),
-            Self::Tag(feature) => feature.storage_score(params),
-            Self::NativeToken(feature) => feature.storage_score(params),
-            Self::BlockIssuer(feature) => feature.storage_score(params),
-            Self::Staking(feature) => feature.storage_score(params),
+            Self::Sender(sender) => sender.storage_score(params),
+            Self::Issuer(issuer) => issuer.storage_score(params),
+            Self::Metadata(metadata) => metadata.storage_score(params),
+            Self::Tag(tag) => tag.storage_score(params),
+            Self::NativeToken(native_token) => native_token.storage_score(params),
+            Self::BlockIssuer(block_issuer) => block_issuer.storage_score(params),
+            Self::Staking(staking) => staking.storage_score(params),
+        }
+    }
+}
+
+impl WorkScore for Feature {
+    fn work_score(&self, params: WorkScoreParameters) -> u32 {
+        match self {
+            Self::Sender(sender) => sender.work_score(params),
+            Self::Issuer(issuer) => issuer.work_score(params),
+            Self::Metadata(metadata) => metadata.work_score(params),
+            Self::Tag(tag) => tag.work_score(params),
+            Self::NativeToken(native_token) => native_token.work_score(params),
+            Self::BlockIssuer(block_issuer) => block_issuer.work_score(params),
+            Self::Staking(staking) => staking.work_score(params),
         }
     }
 }

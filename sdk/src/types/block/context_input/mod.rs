@@ -14,7 +14,10 @@ pub use self::{
     block_issuance_credit::BlockIssuanceCreditContextInput, commitment::CommitmentContextInput,
     reward::RewardContextInput,
 };
-use crate::types::block::Error;
+use crate::types::block::{
+    protocol::{WorkScore, WorkScoreParameters},
+    Error,
+};
 
 /// The maximum number of context inputs of a transaction.
 pub const CONTEXT_INPUT_COUNT_MAX: u16 = 128;
@@ -39,16 +42,6 @@ pub enum ContextInput {
     Reward(RewardContextInput),
 }
 
-impl core::fmt::Debug for ContextInput {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        match self {
-            Self::Commitment(input) => input.fmt(f),
-            Self::BlockIssuanceCredit(input) => input.fmt(f),
-            Self::Reward(input) => input.fmt(f),
-        }
-    }
-}
-
 impl ContextInput {
     /// Returns the context input kind of a `ContextInput`.
     pub fn kind(&self) -> u8 {
@@ -60,6 +53,26 @@ impl ContextInput {
     }
 
     crate::def_is_as_opt!(ContextInput: Commitment, BlockIssuanceCredit, Reward);
+}
+
+impl WorkScore for ContextInput {
+    fn work_score(&self, params: WorkScoreParameters) -> u32 {
+        match self {
+            Self::Commitment(commitment) => commitment.work_score(params),
+            Self::BlockIssuanceCredit(bic) => bic.work_score(params),
+            Self::Reward(reward) => reward.work_score(params),
+        }
+    }
+}
+
+impl core::fmt::Debug for ContextInput {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        match self {
+            Self::Commitment(input) => input.fmt(f),
+            Self::BlockIssuanceCredit(input) => input.fmt(f),
+            Self::Reward(input) => input.fmt(f),
+        }
+    }
 }
 
 #[cfg(test)]

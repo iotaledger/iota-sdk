@@ -9,10 +9,13 @@ use core::ops::RangeInclusive;
 use packable::{
     bounded::{BoundedU32, BoundedU8},
     prefix::BoxedSlicePrefix,
-    Packable,
+    Packable, PackableExt,
 };
 
-use crate::types::block::Error;
+use crate::types::block::{
+    protocol::{WorkScore, WorkScoreParameters},
+    Error,
+};
 
 pub(crate) type TagLength =
     BoundedU8<{ *TaggedDataPayload::TAG_LENGTH_RANGE.start() }, { *TaggedDataPayload::TAG_LENGTH_RANGE.end() }>;
@@ -53,6 +56,13 @@ impl TaggedDataPayload {
     /// Returns the data of a [`TaggedDataPayload`].
     pub fn data(&self) -> &[u8] {
         &self.data
+    }
+}
+
+impl WorkScore for TaggedDataPayload {
+    fn work_score(&self, params: WorkScoreParameters) -> u32 {
+        // 1 byte for the payload kind
+        (1 + self.packed_len() as u32) * params.data_byte()
     }
 }
 
