@@ -60,7 +60,7 @@ export interface BaseCoinBalance {
 export interface RequiredStorageDeposit {
     /** The required amount for Basic outputs. */
     basic: u64;
-    /** The required amount for Alias outputs. */
+    /** The required amount for Account outputs. */
     account: u64;
     /** The required amount for Foundry outputs. */
     foundry: u64;
