@@ -209,24 +209,24 @@ pub struct ManaRewardsResponse {
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct CommitteeResponse {
-    /// The epoch index of the committee.
-    pub epoch_index: EpochIndex,
+    /// The validators of the committee.
+    pub committee: Box<[CommitteeMember]>,
     /// The total amount of delegated and staked IOTA coins in the selected committee.
     #[serde(with = "string")]
     pub total_stake: u64,
     /// The total amount of staked IOTA coins in the selected committee.
     #[serde(with = "string")]
     pub total_validator_stake: u64,
-    /// The validators of the committee.
-    pub committee: Box<[CommitteeMember]>,
+    /// The epoch index of the committee.
+    pub epoch: EpochIndex,
 }
 
 /// Returns information of a committee member.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct CommitteeMember {
-    /// The account identifier of the validator
-    pub account_id: AccountId,
+    /// Account address of the validator.
+    pub address: Bech32Address,
     /// The total stake of the pool, including delegators.
     #[serde(with = "string")]
     pub pool_stake: u64,
