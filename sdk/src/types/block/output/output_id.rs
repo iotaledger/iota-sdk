@@ -16,8 +16,7 @@ pub(crate) type OutputIndex = BoundedU16<{ *OUTPUT_INDEX_RANGE.start() }, { *OUT
 #[packable(unpack_error = Error)]
 pub struct OutputId {
     transaction_id: TransactionId,
-    #[packable(unpack_error_with = Error::InvalidInputOutputIndex)]
-    index: OutputIndex,
+    index: u16,
 }
 
 impl OutputId {
@@ -25,11 +24,8 @@ impl OutputId {
     pub const LENGTH: usize = TransactionId::LENGTH + core::mem::size_of::<OutputIndex>();
 
     /// Creates a new [`OutputId`].
-    pub fn new(transaction_id: TransactionId, index: u16) -> Result<Self, Error> {
-        index
-            .try_into()
-            .map(|index| Self { transaction_id, index })
-            .map_err(Error::InvalidInputOutputIndex)
+    pub fn new(transaction_id: TransactionId, index: u16) -> Self {
+        Self { transaction_id, index }
     }
 
     /// Returns the [`TransactionId`] of an [`OutputId`].
@@ -41,7 +37,7 @@ impl OutputId {
     /// Returns the index of an [`OutputId`].
     #[inline(always)]
     pub fn index(&self) -> u16 {
-        self.index.get()
+        self.index
     }
 
     /// Splits an [`OutputId`] into its [`TransactionId`] and index.
@@ -60,18 +56,11 @@ impl OutputId {
 #[cfg(feature = "serde")]
 crate::string_serde_impl!(OutputId);
 
-impl TryFrom<[u8; Self::LENGTH]> for OutputId {
-    type Error = Error;
-
-    fn try_from(bytes: [u8; Self::LENGTH]) -> Result<Self, Self::Error> {
-        let (transaction_id, index) = bytes.split_at(TransactionId::LENGTH);
-
-        Self::new(
-            // Unwrap is fine because size is already known and valid.
-            TransactionId::new(transaction_id.try_into().unwrap()),
-            // Unwrap is fine because size is already known and valid.
-            u16::from_le_bytes(index.try_into().unwrap()),
-        )
+#[allow(clippy::fallible_impl_from)]
+impl From<[u8; Self::LENGTH]> for OutputId {
+    fn from(bytes: [u8; Self::LENGTH]) -> Self {
+        // Unwrap is fine because size is already known and valid.
+        Self::unpack_unverified(bytes).unwrap()
     }
 }
 
@@ -79,7 +68,9 @@ impl FromStr for OutputId {
     type Err = Error;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        Self::try_from(prefix_hex::decode::<[u8; Self::LENGTH]>(s).map_err(Error::Hex)?)
+        Ok(Self::from(
+            prefix_hex::decode::<[u8; Self::LENGTH]>(s).map_err(Error::Hex)?,
+        ))
     }
 }
 

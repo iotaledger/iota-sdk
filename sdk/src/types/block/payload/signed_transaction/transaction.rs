@@ -18,7 +18,7 @@ use crate::{
             signed_transaction::{TransactionHash, TransactionId, TransactionSigningHash},
             OptionalPayload, Payload,
         },
-        protocol::ProtocolParameters,
+        protocol::{ProtocolParameters, WorkScore, WorkScoreParameters},
         slot::SlotIndex,
         Error,
     },
@@ -261,7 +261,7 @@ impl Transaction {
     }
 
     /// Returns the [`ManaAllotment`]s of a [`Transaction`].
-    pub fn mana_allotments(&self) -> &[ManaAllotment] {
+    pub fn allotments(&self) -> &[ManaAllotment] {
         &self.allotments
     }
 
@@ -321,6 +321,15 @@ impl Transaction {
     /// Computes the identifier of a [`Transaction`].
     pub fn id(&self) -> TransactionId {
         self.hash().into_transaction_id(self.creation_slot())
+    }
+}
+
+impl WorkScore for Transaction {
+    fn work_score(&self, params: WorkScoreParameters) -> u32 {
+        self.context_inputs().work_score(params)
+            + self.inputs().work_score(params)
+            + self.allotments().work_score(params)
+            + self.outputs().work_score(params)
     }
 }
 
@@ -553,7 +562,7 @@ pub(crate) mod dto {
                 creation_slot: value.creation_slot(),
                 context_inputs: value.context_inputs().to_vec(),
                 inputs: value.inputs().to_vec(),
-                allotments: value.mana_allotments().iter().map(Into::into).collect(),
+                allotments: value.allotments().iter().map(Into::into).collect(),
                 capabilities: value.capabilities().clone(),
                 payload: match value.payload() {
                     Some(p @ Payload::TaggedData(_)) => Some(p.into()),

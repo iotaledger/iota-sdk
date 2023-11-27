@@ -144,7 +144,7 @@ where
 
         // Ignore errors from sending, we will try to send it again during [`sync_pending_transactions`]
         let block_id = match self
-            .submit_transaction_payload(signed_transaction_data.payload.clone())
+            .submit_signed_transaction(signed_transaction_data.payload.clone())
             .await
         {
             Ok(block_id) => Some(block_id),

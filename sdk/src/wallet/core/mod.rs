@@ -670,8 +670,8 @@ mod test {
         .unwrap();
 
         let transaction_id = TransactionId::new(prefix_hex::decode(TRANSACTION_ID).unwrap());
-        let input1 = Input::Utxo(UtxoInput::new(transaction_id, 0).unwrap());
-        let input2 = Input::Utxo(UtxoInput::new(transaction_id, 1).unwrap());
+        let input1 = Input::Utxo(UtxoInput::new(transaction_id, 0));
+        let input2 = Input::Utxo(UtxoInput::new(transaction_id, 1));
         let bytes: [u8; 32] = prefix_hex::decode(ED25519_ADDRESS).unwrap();
         let address = Address::from(Ed25519Address::new(bytes));
         let amount = 1_000_000;

@@ -268,8 +268,10 @@ pub struct IssuanceBlockHeaderResponse {
     /// Blocks that are strongly directly approved.
     pub strong_parents: BTreeSet<BlockId>,
     /// Blocks that are weakly directly approved.
+    #[serde(default, skip_serializing_if = "BTreeSet::is_empty")]
     pub weak_parents: BTreeSet<BlockId>,
     /// Blocks that are directly referenced to adjust opinion.
+    #[serde(default, skip_serializing_if = "BTreeSet::is_empty")]
     pub shallow_like_parents: BTreeSet<BlockId>,
     /// The slot index of the latest finalized slot.
     pub latest_finalized_slot: SlotIndex,
@@ -494,7 +496,7 @@ pub struct RoutesResponse {
 
 /// Response of
 /// - GET /api/core/v3/commitments/{commitmentId}/utxo-changes
-/// - GET /api/core/v3/commitments/by-index/{index}/utxo-changes
+/// - GET /api/core/v3/commitments/by-slot/{slot}/utxo-changes
 /// Returns all UTXO changes that happened at a specific slot.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]

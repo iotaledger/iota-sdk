@@ -461,7 +461,9 @@ impl InputSelection {
                         Output::Basic(_) => {
                             // TODO https://github.com/iotaledger/iota-sdk/issues/1664
                         }
-                        _ => panic!("unreachable: \"input_accounts\" only contains account outputs and implicit account (basic) outputs")
+                        _ => panic!(
+                            "unreachable: \"input_accounts\" only contains account outputs and implicit account (basic) outputs"
+                        ),
                     }
                 }
                 Output::Foundry(foundry_output) => {

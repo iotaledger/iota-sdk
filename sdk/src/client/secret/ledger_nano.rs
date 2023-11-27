@@ -145,7 +145,6 @@ impl SecretManage for LedgerSecretManager {
     ) -> Result<Vec<ed25519::PublicKey>, Self::Error> {
         // need an update on the ledger C lib
         todo!();
-        //
         // let options = options.into().unwrap_or_default();
         // let bip32_account = account_index.harden().into();
 

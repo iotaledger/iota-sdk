@@ -18,24 +18,20 @@ class OutputMetadata:
         block_id: The ID of the block in which the output appeared in.
         transaction_id: The ID of the transaction in which the output was created.
         output_index: The index of the output within the corresponding transaction.
-        is_spent: Whether the output is already spent.
-        milestone_index_booked: The index of the milestone which booked/created the output.
-        milestone_timestamp_booked: The timestamp of the milestone which booked/created the output.
-        ledger_index: The current ledger index.
-        milestone_index_spent: The index of the milestone which spent the output.
-        milestone_timestamp_spent: The timestamp of the milestone which spent the output.
-        transaction_id_spent: The ID of the transaction that spent the output.
+        is_spent: Tells if the output is spent in a confirmed transaction or not.
+        latest_commitment_id: The current latest commitment id for which the request was made.
+        commitment_id_spent: The commitment ID of the slot at which this output was spent.
+        transaction_id_spent: The transaction this output was spent with.
+        included_commitment_id: The commitment ID at which the output was included into the ledger.
     """
     block_id: HexStr
     transaction_id: HexStr
     output_index: int
     is_spent: bool
-    milestone_index_booked: int
-    milestone_timestamp_booked: int
-    ledger_index: int
-    milestone_index_spent: Optional[int] = None
-    milestone_timestamp_spent: Optional[int] = None
+    latest_commitment_id: HexStr
+    commitment_id_spent: Optional[HexStr] = None
     transaction_id_spent: Optional[HexStr] = None
+    included_commitment_id: Optional[HexStr] = None
 
 
 @json

@@ -21,6 +21,7 @@ use crate::{
             ValidatorResponse, ValidatorsResponse,
         },
         block::{
+            address::ToBech32Ext,
             output::{dto::OutputDto, AccountId, Output, OutputId, OutputMetadata},
             payload::signed_transaction::TransactionId,
             slot::{EpochIndex, SlotCommitment, SlotCommitmentId, SlotIndex},
@@ -86,9 +87,10 @@ impl ClientInner {
     }
 
     /// Checks if the account is ready to issue a block.
-    /// GET /api/core/v3/accounts/{accountId}/congestion
+    /// GET /api/core/v3/accounts/{bech32Address}/congestion
     pub async fn get_account_congestion(&self, account_id: &AccountId) -> Result<CongestionResponse> {
-        let path = &format!("api/core/v3/accounts/{account_id}/congestion");
+        let bech32_address = account_id.to_bech32(self.get_bech32_hrp().await?);
+        let path = &format!("api/core/v3/accounts/{bech32_address}/congestion");
 
         self.get_request(path, None, false, false).await
     }
@@ -147,9 +149,10 @@ impl ClientInner {
     }
 
     /// Return information about a validator.
-    /// GET /api/core/v3/validators/{accountId}
+    /// GET /api/core/v3/validators/{bech32Address}
     pub async fn get_validator(&self, account_id: &AccountId) -> Result<ValidatorResponse> {
-        let path = &format!("api/core/v3/validators/{account_id}");
+        let bech32_address = account_id.to_bech32(self.get_bech32_hrp().await?);
+        let path = &format!("api/core/v3/validators/{bech32_address}");
 
         self.get_request(path, None, false, false).await
     }
@@ -306,25 +309,25 @@ impl ClientInner {
     }
 
     /// Finds a slot commitment by slot index and returns it as object.
-    /// GET /api/core/v3/commitments/by-index/{index}
-    pub async fn get_slot_commitment_by_index(&self, slot_index: SlotIndex) -> Result<SlotCommitment> {
-        let path = &format!("api/core/v3/commitments/by-index/{slot_index}");
+    /// GET /api/core/v3/commitments/by-slot/{slot}
+    pub async fn get_slot_commitment_by_slot(&self, slot_index: SlotIndex) -> Result<SlotCommitment> {
+        let path = &format!("api/core/v3/commitments/by-slot/{slot_index}");
 
         self.get_request(path, None, false, true).await
     }
 
     /// Finds a slot commitment by slot index and returns it as raw bytes.
-    /// GET /api/core/v3/commitments/by-index/{index}
-    pub async fn get_slot_commitment_by_index_raw(&self, slot_index: SlotIndex) -> Result<Vec<u8>> {
-        let path = &format!("api/core/v3/commitments/by-index/{slot_index}");
+    /// GET /api/core/v3/commitments/by-slot/{slot}
+    pub async fn get_slot_commitment_by_slot_raw(&self, slot_index: SlotIndex) -> Result<Vec<u8>> {
+        let path = &format!("api/core/v3/commitments/by-slot/{slot_index}");
 
         self.get_request_bytes(path, None).await
     }
 
     /// Get all UTXO changes of a given slot by its index.
-    /// GET /api/core/v3/commitments/by-index/{index}/utxo-changes
-    pub async fn get_utxo_changes_by_slot_index(&self, slot_index: SlotIndex) -> Result<UtxoChangesResponse> {
-        let path = &format!("api/core/v3/commitments/by-index/{slot_index}/utxo-changes");
+    /// GET /api/core/v3/commitments/by-slot/{slot}/utxo-changes
+    pub async fn get_utxo_changes_by_slot(&self, slot_index: SlotIndex) -> Result<UtxoChangesResponse> {
+        let path = &format!("api/core/v3/commitments/by-slot/{slot_index}/utxo-changes");
 
         self.get_request(path, None, false, false).await
     }

@@ -6,7 +6,10 @@ mod ed25519;
 use derive_more::From;
 
 pub use self::ed25519::Ed25519Signature;
-use crate::types::block::Error;
+use crate::types::block::{
+    protocol::{WorkScore, WorkScoreParameters},
+    Error,
+};
 
 /// A `Signature` contains a signature which is used to unlock a transaction input.
 ///
@@ -40,4 +43,12 @@ impl Signature {
     }
 
     crate::def_is_as_opt!(Signature: Ed25519);
+}
+
+impl WorkScore for Signature {
+    fn work_score(&self, params: WorkScoreParameters) -> u32 {
+        match self {
+            Self::Ed25519(ed25519) => ed25519.work_score(params),
+        }
+    }
 }
