@@ -20,7 +20,7 @@ use iota_sdk::{
             DelegationId, FoundryId, NftId, OutputId, TokenScheme,
         },
         payload::{dto::PayloadDto, signed_transaction::TransactionId},
-        BlockDto, BlockId, IssuerId,
+        BlockDto, BlockId,
     },
     utils::serde::{option_string, string},
 };
@@ -126,7 +126,7 @@ pub enum ClientMethod {
     #[serde(rename_all = "camelCase")]
     BuildBasicBlock {
         /// The issuer's ID.
-        issuer_id: IssuerId,
+        issuer_id: AccountId,
         /// The block payload.
         #[serde(default)]
         payload: Option<PayloadDto>,

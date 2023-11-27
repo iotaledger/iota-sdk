@@ -9,10 +9,10 @@ use crate::{
 
 /// Checks if an output is an account with output ID that matches the given account ID.
 pub(crate) fn is_account_with_id(output: &Output, account_id: &AccountId, output_id: &OutputId) -> bool {
-    if let Output::Account(account) = output {
-        &account.account_id_non_null(output_id) == account_id
-    } else {
-        false
+    match output {
+        Output::Basic(basic) => basic.is_implicit_account() && &AccountId::from(output_id) == account_id,
+        Output::Account(account) => &account.account_id_non_null(output_id) == account_id,
+        _ => false,
     }
 }
 

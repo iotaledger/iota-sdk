@@ -9,7 +9,7 @@
 //!  ```no_run
 //! # use iota_sdk::{
 //! #    client::{Client, secret::{mnemonic::MnemonicSecretManager, SignBlock}, constants::IOTA_COIN_TYPE},
-//! #    types::block::IssuerId, crypto::keys::bip44::Bip44
+//! #    types::block::output::AccountId, crypto::keys::bip44::Bip44
 //! # };
 //! # #[tokio::main]
 //! # async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -20,7 +20,7 @@
 //! let secret_manager = MnemonicSecretManager::try_from_mnemonic(std::env::var("MNEMONIC")?)?;
 //! let protocol_params = client.get_protocol_parameters().await?;
 //! let block_id = client
-//!    .build_basic_block(IssuerId::null(), None)
+//!    .build_basic_block(AccountId::null(), None)
 //!    .await?
 //!    .sign_ed25519(&secret_manager, Bip44::new(IOTA_COIN_TYPE))
 //!    .await?

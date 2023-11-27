@@ -11,7 +11,7 @@ import {
     TransactionId,
     TokenSchemeType,
     Output,
-    RentStructure,
+    StorageScoreParameters,
     OutputId,
     u64,
     SignedBlock,
@@ -127,15 +127,18 @@ export class Utils {
      * Compute the required storage deposit of an output.
      *
      * @param output The output.
-     * @param rent Rent cost of objects which take node resources.
+     * @param storageScoreParameters Storage score of objects which take node resources.
      * @returns The required storage deposit.
      */
-    static computeStorageDeposit(output: Output, rent: RentStructure): u64 {
+    static computeStorageDeposit(
+        output: Output,
+        storageScoreParameters: StorageScoreParameters,
+    ): u64 {
         const minStorageDepositAmount = callUtilsMethod({
             name: 'computeStorageDeposit',
             data: {
                 output,
-                rent,
+                storageScoreParameters,
             },
         });
         return BigInt(minStorageDepositAmount);

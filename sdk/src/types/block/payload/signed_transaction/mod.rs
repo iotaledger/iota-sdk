@@ -6,14 +6,18 @@
 mod transaction;
 mod transaction_id;
 
-use packable::{error::UnpackError, packer::Packer, unpacker::Unpacker, Packable};
+use packable::{error::UnpackError, packer::Packer, unpacker::Unpacker, Packable, PackableExt};
 
 pub(crate) use self::transaction::{ContextInputCount, InputCount, OutputCount};
 pub use self::{
     transaction::{Transaction, TransactionBuilder, TransactionCapabilities, TransactionCapabilityFlag},
     transaction_id::{TransactionHash, TransactionId, TransactionSigningHash},
 };
-use crate::types::block::{protocol::ProtocolParameters, unlock::Unlocks, Error};
+use crate::types::block::{
+    protocol::{ProtocolParameters, WorkScore, WorkScoreParameters},
+    unlock::Unlocks,
+    Error,
+};
 
 /// A signed transaction to move funds.
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -41,6 +45,15 @@ impl SignedTransactionPayload {
     /// Returns unlocks of a [`SignedTransactionPayload`].
     pub fn unlocks(&self) -> &Unlocks {
         &self.unlocks
+    }
+}
+
+impl WorkScore for SignedTransactionPayload {
+    fn work_score(&self, params: WorkScoreParameters) -> u32 {
+        // 1 byte for the payload kind
+        (1 + self.packed_len() as u32) * params.data_byte()
+            + self.transaction().work_score(params)
+            + self.unlocks().work_score(params)
     }
 }
 

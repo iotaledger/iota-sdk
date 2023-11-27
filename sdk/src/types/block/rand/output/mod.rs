@@ -38,12 +38,11 @@ use crate::types::block::{
 
 /// Generates a random [`OutputId`].
 pub fn rand_output_id() -> OutputId {
-    OutputId::new(rand_transaction_id(), rand_number_range(OUTPUT_INDEX_RANGE)).unwrap()
+    OutputId::new(rand_transaction_id(), rand_number_range(OUTPUT_INDEX_RANGE))
 }
 
 /// Generates a random [`BasicOutput`](BasicOutput).
 pub fn rand_basic_output(token_supply: u64) -> BasicOutput {
-    // TODO: Add `NativeTokens`
     BasicOutput::build_with_amount(rand_number_range(0..token_supply))
         .with_features(rand_allowed_features(BasicOutput::ALLOWED_FEATURES))
         .add_unlock_condition(rand_address_unlock_condition())
