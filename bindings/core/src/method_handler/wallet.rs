@@ -215,9 +215,9 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
             public_key,
             bip_path,
         } => {
-            let data = if let Some(public_key) = public_key {
+            let data = if public_key.is_some() {
                 wallet
-                    .prepare_implicit_account_transition(&output_id, Some(public_key))
+                    .prepare_implicit_account_transition(&output_id, public_key)
                     .await?
             } else {
                 wallet.prepare_implicit_account_transition(&output_id, bip_path).await?
