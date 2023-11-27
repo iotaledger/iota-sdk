@@ -35,6 +35,7 @@ class RequiredStorageDeposit:
         basic: The required amount for basic outputs.
         foundry: The required amount for foundry outputs.
         nft: The required amount for nft outputs.
+        delegation: The required amount for delegation outputs.
     """
     account: int = field(metadata=config(
         encoder=str
@@ -46,6 +47,9 @@ class RequiredStorageDeposit:
         encoder=str
     ))
     nft: int = field(metadata=config(
+        encoder=str
+    ))
+    delegation: int = field(metadata=config(
         encoder=str
     ))
 
@@ -82,15 +86,17 @@ class Balance:
         base_coin: The base coin balance.
         required_storage_deposit: The required storage deposit.
         native_tokens: The balances of all native tokens.
-        nfts: All owned NFTs.
         accounts: All owned accounts.
         foundries: All owned foundries.
+        nfts: All owned NFTs.
+        delegations: All owned delegation outputs.
         potentially_locked_outputs: A list of potentially locked outputs.
     """
     base_coin: BaseCoinBalance
     required_storage_deposit: RequiredStorageDeposit
     native_tokens: List[NativeTokensBalance]
-    nfts: List[HexStr]
     accounts: List[HexStr]
     foundries: List[HexStr]
+    nfts: List[HexStr]
+    delegations: List[HexStr]
     potentially_locked_outputs: dict[HexStr, bool]

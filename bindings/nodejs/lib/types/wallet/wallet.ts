@@ -31,12 +31,14 @@ export interface Balance {
     requiredStorageDeposit: RequiredStorageDeposit;
     /** The balance of the native tokens */
     nativeTokens: NativeTokenBalance[];
-    /** Nft outputs */
-    nfts: string[];
     /** Account outputs */
     accounts: string[];
     /** Foundry outputs */
     foundries: string[];
+    /** Nft outputs */
+    nfts: string[];
+    /** Delegation outputs */
+    delegations: string[];
     /**
      * Outputs with multiple unlock conditions and if they can currently be spent or not. If there is a
      * TimelockUnlockCondition or ExpirationUnlockCondition this can change at any time
@@ -64,6 +66,8 @@ export interface RequiredStorageDeposit {
     foundry: u64;
     /** The required amount for NFT outputs. */
     nft: u64;
+    /** The required amount for Delegation outputs. */
+    delegation: u64;
 }
 
 /** The balance of a native token */

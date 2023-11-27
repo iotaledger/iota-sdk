@@ -97,9 +97,9 @@ where
                     // Add amount
                     balance.base_coin.total += delegation.amount();
                     // Add storage deposit
-                    balance.required_storage_deposit.delegation += rent;
+                    balance.required_storage_deposit.delegation += storage_cost;
                     if !wallet_data.locked_outputs.contains(output_id) {
-                        total_rent_amount += rent;
+                        total_storage_cost += storage_cost;
                     }
 
                     let delegation_id = delegation.delegation_id_non_null(output_id);
