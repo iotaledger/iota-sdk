@@ -18,6 +18,7 @@ use packable::{
 
 use crate::types::block::{
     output::{StorageScore, StorageScoreParameters},
+    protocol::{WorkScore, WorkScoreParameters},
     slot::SlotIndex,
     Error,
 };
@@ -241,6 +242,12 @@ impl BlockIssuerFeature {
 impl StorageScore for BlockIssuerFeature {
     fn storage_score(&self, params: StorageScoreParameters) -> u64 {
         self.block_issuer_keys.storage_score(params)
+    }
+}
+
+impl WorkScore for BlockIssuerFeature {
+    fn work_score(&self, params: WorkScoreParameters) -> u32 {
+        params.block_issuer()
     }
 }
 

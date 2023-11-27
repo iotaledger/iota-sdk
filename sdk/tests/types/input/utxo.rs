@@ -40,7 +40,7 @@ fn as_methods() {
 #[test]
 fn new_output_id() {
     let output_id = OutputId::from_str(OUTPUT_ID).unwrap();
-    let input = UtxoInput::new(*output_id.transaction_id(), output_id.index()).unwrap();
+    let input = UtxoInput::new(*output_id.transaction_id(), output_id.index());
 
     assert_eq!(*input.output_id(), output_id);
 }
@@ -79,9 +79,7 @@ fn packed_len() {
     let output_id = OutputId::from_str(OUTPUT_ID).unwrap();
 
     assert_eq!(
-        UtxoInput::new(*output_id.transaction_id(), output_id.index())
-            .unwrap()
-            .packed_len(),
+        UtxoInput::new(*output_id.transaction_id(), output_id.index()).packed_len(),
         TransactionId::LENGTH + core::mem::size_of::<u16>()
     );
     assert_eq!(
@@ -93,7 +91,7 @@ fn packed_len() {
 #[test]
 fn pack_unpack() {
     let output_id = OutputId::from_str(OUTPUT_ID).unwrap();
-    let utxo_input = UtxoInput::new(*output_id.transaction_id(), output_id.index()).unwrap();
+    let utxo_input = UtxoInput::new(*output_id.transaction_id(), output_id.index());
     let packed_input = utxo_input.pack_to_vec();
 
     assert_eq!(

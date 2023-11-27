@@ -52,8 +52,13 @@ pub(crate) use self::{
     output_id::OutputIndex,
     unlock_condition::AddressUnlockCondition,
 };
-use super::protocol::ProtocolParameters;
-use crate::types::block::{address::Address, semantic::SemanticValidationContext, slot::SlotIndex, Error};
+use crate::types::block::{
+    address::Address,
+    protocol::{ProtocolParameters, WorkScore, WorkScoreParameters},
+    semantic::SemanticValidationContext,
+    slot::SlotIndex,
+    Error,
+};
 
 /// The maximum number of outputs of a transaction.
 pub const OUTPUT_COUNT_MAX: u16 = 128;
@@ -396,12 +401,25 @@ impl Output {
 impl StorageScore for Output {
     fn storage_score(&self, params: StorageScoreParameters) -> u64 {
         match self {
-            Self::Basic(o) => o.storage_score(params),
-            Self::Account(o) => o.storage_score(params),
-            Self::Anchor(o) => o.storage_score(params),
-            Self::Foundry(o) => o.storage_score(params),
-            Self::Nft(o) => o.storage_score(params),
-            Self::Delegation(o) => o.storage_score(params),
+            Self::Basic(basic) => basic.storage_score(params),
+            Self::Account(account) => account.storage_score(params),
+            Self::Anchor(anchor) => anchor.storage_score(params),
+            Self::Foundry(foundry) => foundry.storage_score(params),
+            Self::Nft(nft) => nft.storage_score(params),
+            Self::Delegation(delegation) => delegation.storage_score(params),
+        }
+    }
+}
+
+impl WorkScore for Output {
+    fn work_score(&self, params: WorkScoreParameters) -> u32 {
+        match self {
+            Self::Basic(basic) => basic.work_score(params),
+            Self::Account(account) => account.work_score(params),
+            Self::Anchor(anchor) => anchor.work_score(params),
+            Self::Foundry(foundry) => foundry.work_score(params),
+            Self::Nft(nft) => nft.work_score(params),
+            Self::Delegation(delegation) => delegation.work_score(params),
         }
     }
 }
@@ -413,7 +431,7 @@ impl MinimumOutputAmount for Output {}
 pub trait MinimumOutputAmount: StorageScore {
     /// Computes the minimum amount of this output given [`StorageScoreParameters`].
     fn minimum_amount(&self, params: StorageScoreParameters) -> u64 {
-        params.storage_cost() * self.storage_score(params)
+        self.storage_score(params) * params.storage_cost()
     }
 }
 

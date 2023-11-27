@@ -24,11 +24,11 @@ class BasicBlock:
         payload: The optional payload of this block.
     """
     strong_parents: List[HexStr]
-    weak_parents: List[HexStr]
-    shallow_like_parents: List[HexStr]
     max_burned_mana: int = field(metadata=config(
         encoder=str
     ))
+    weak_parents: Optional[List[HexStr]] = None
+    shallow_like_parents: Optional[List[HexStr]] = None
     payload: Optional[Payload] = None
     type: int = field(
         default_factory=lambda: int(BlockType.Basic),

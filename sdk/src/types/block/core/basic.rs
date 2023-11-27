@@ -6,7 +6,7 @@ use packable::Packable;
 use crate::types::block::{
     core::{parent::verify_parents_sets, BlockBody, Parents},
     payload::{OptionalPayload, Payload},
-    protocol::ProtocolParameters,
+    protocol::{ProtocolParameters, WorkScore, WorkScoreParameters},
     Error,
 };
 
@@ -154,6 +154,17 @@ impl BasicBlockBody {
     }
 }
 
+impl WorkScore for BasicBlockBody {
+    fn work_score(&self, params: WorkScoreParameters) -> u32 {
+        params.block()
+            + self
+                .payload
+                .as_ref()
+                .map(|payload| payload.work_score(params))
+                .unwrap_or(0)
+    }
+}
+
 fn verify_basic_block_body<const VERIFY: bool>(
     basic_block_body: &BasicBlockBody,
     _: &ProtocolParameters,
@@ -187,7 +198,9 @@ pub(crate) mod dto {
         #[serde(rename = "type")]
         pub kind: u8,
         pub strong_parents: BTreeSet<BlockId>,
+        #[serde(default, skip_serializing_if = "BTreeSet::is_empty")]
         pub weak_parents: BTreeSet<BlockId>,
+        #[serde(default, skip_serializing_if = "BTreeSet::is_empty")]
         pub shallow_like_parents: BTreeSet<BlockId>,
         #[serde(default, skip_serializing_if = "Option::is_none")]
         pub payload: Option<PayloadDto>,
