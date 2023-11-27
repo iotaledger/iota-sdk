@@ -45,7 +45,7 @@ fn responses() {
     // json_response::<BlockDto>("get-block-by-id-validation-response-example.json").unwrap();
     // json_response::<IssuanceBlockHeaderResponse>("get-buildingBlock-response-example.json").unwrap();
     // json_response::<SlotCommitment>("get-commitment-response-example.json").unwrap();
-    // json_response::<CommitteeResponse>("get-committee-example.json").unwrap();
+    json_response::<CommitteeResponse>("get-committee-example.json").unwrap();
     // json_response::<CongestionResponse>("get-congestion-estimate-response-example.json").unwrap();
     // json_response("get-full-output-metadata-example.json").unwrap();
     // json_response::<InfoResponse>("get-info-response-example.json").unwrap();
