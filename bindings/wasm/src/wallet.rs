@@ -17,7 +17,7 @@ use tokio::sync::{
 };
 use wasm_bindgen::{prelude::wasm_bindgen, JsError, JsValue};
 
-use crate::{client::ClientMethodHandler, destroy, map_err, secret_manager::SecretManagerMethodHandler};
+use crate::{client::ClientMethodHandler, destroyed_err, map_err, secret_manager::SecretManagerMethodHandler};
 
 /// The Wallet method handler.
 #[wasm_bindgen(js_name = WalletMethodHandler)]
@@ -54,7 +54,7 @@ pub async fn get_client(method_handler: &WalletMethodHandler) -> Result<ClientMe
         Ok(ClientMethodHandler::new(wallet.client().clone()))
     } else {
         // Notify that the wallet was destroyed
-        Err(destroy("Wallet"))
+        Err(destroyed_err("Wallet"))
     }
 }
 
@@ -64,7 +64,7 @@ pub async fn get_secret_manager(method_handler: &WalletMethodHandler) -> Result<
         Ok(SecretManagerMethodHandler::new(wallet.get_secret_manager().clone()))
     } else {
         // Notify that the wallet was destroyed
-        Err(destroy("Wallet"))
+        Err(destroyed_err("Wallet"))
     }
 }
 
@@ -83,7 +83,7 @@ pub async fn call_wallet_method(method_handler: &WalletMethodHandler, method: St
                 _ => Ok(ser),
             }
         }
-        None => Err(destroy("Wallet")),
+        None => Err(destroyed_err("Wallet")),
     }
 }
 
@@ -137,6 +137,6 @@ pub async fn listen_wallet(
         Ok(JsValue::UNDEFINED)
     } else {
         // Notify that the wallet was destroyed
-        Err(destroy("Wallet"))
+        Err(destroyed_err("Wallet"))
     }
 }

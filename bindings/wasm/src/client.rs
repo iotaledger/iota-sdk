@@ -11,7 +11,7 @@ use iota_sdk_bindings_core::{
 use tokio::sync::RwLock;
 use wasm_bindgen::{prelude::wasm_bindgen, JsError};
 
-use crate::{build_js_error, destroy, map_err, ArrayString};
+use crate::{build_js_error, destroyed_err, map_err, ArrayString};
 
 /// The Client method handler.
 #[wasm_bindgen(js_name = ClientMethodHandler)]
@@ -67,7 +67,7 @@ pub async fn call_client_method(method_handler: &ClientMethodHandler, method: St
                 _ => Ok(ser),
             }
         }
-        None => Err(destroy("Client")),
+        None => Err(destroyed_err("Client")),
     }
 }
 

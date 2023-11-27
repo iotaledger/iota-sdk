@@ -41,7 +41,7 @@ where
     build_js_error(iota_sdk_bindings_core::Response::Error(err.into()))
 }
 
-pub(crate) fn destroy(instance: &str) -> JsError {
+pub(crate) fn destroyed_err(instance: &str) -> JsError {
     build_js_error(iota_sdk_bindings_core::Response::Panic(format!(
         "{} was destroyed",
         instance
