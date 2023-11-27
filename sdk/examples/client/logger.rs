@@ -17,7 +17,7 @@ async fn main() -> Result<()> {
 
     #[allow(clippy::single_element_loop)]
     for var in ["NODE_URL"] {
-        std::env::var(var).expect(&format!(".env variable '{var}' is undefined, see .env.example"));
+        std::env::var(var).unwrap_or_else(|_| panic!(".env variable '{var}' is undefined, see .env.example"));
     }
 
     // Generates a client.log file with logs for debugging.
