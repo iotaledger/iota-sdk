@@ -37,7 +37,7 @@ export class SecretManager {
     }
 
     /**
-     * @param options The scret manager options.
+     * @param options The secret manager options.
      */
     static create(options: SecretManagerType): SecretManager {
         return new SecretManager(SecretManagerMethodHandler.create(options));
