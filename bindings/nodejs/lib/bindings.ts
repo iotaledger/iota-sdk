@@ -27,7 +27,9 @@ const {
 
 const callUtilsMethod = (method: __UtilsMethods__): any => {
     try {
-        const response = JSON.parse(callUtilsMethodRust(JSON.stringify(method)));
+        const response = JSON.parse(
+            callUtilsMethodRust(JSON.stringify(method)),
+        );
         return response.payload;
     } catch (error: any) {
         throw errorHandle(error);

@@ -34,7 +34,7 @@ describe('Client utility methods', () => {
             Utils.verifyMnemonic('invalid mnemonic '.repeat(12));
             throw 'should error';
         } catch (e: any) {
-            expect(e.payload.error).toContain('NoSuchWord');
+            expect(e.message).toContain('NoSuchWord');
         }
     });
 

@@ -42,15 +42,15 @@ export * from './logger';
 
 // For future reference to see what we return from rust as a serialized string
 export type Result = {
-    // "error" | "panic" or other binding method response name
+    // "error" | "panic", or other binding "Response" enum name, we consider "ok".
     type: string;
     payload: {
         // All method names from types/bridge/__name__.name
-        // Or all variants of rust sdk Error type
+        // Or all variants of iota_sdk_bindings_core::Error type
         type: string;
         // If "ok", json payload
         payload?: string;
-        // If !"ok", error
+        // If !"ok", json error
         error?: string;
     };
 };
@@ -59,16 +59,25 @@ function errorHandle(error: any): Error {
     try {
         const err: Result = JSON.parse(error.message);
         if (!err.type) {
-            throw error;
+            return error;
         }
 
         if (err.type == 'panic') {
+            // Panic example:
+            // {"type":"panic","payload":"Client was destroyed"}
             return Error(err.payload.toString());
-        } else {
+        } else if (err.type == 'error') {
+            // Error example:
+            // {"type":"error","payload":{"type":"client","error":"no healthy node available"}}
+            // TODO: switch on type and create proper js errors
             return Error(err.payload.error);
+        } else {
+            return Error(
+                'in ErrorHandle without a valid error object. Only call this in catch statements.',
+            );
         }
     } catch (err: any) {
-        // json error, SyntaxError, we must have send a bad error
+        // json error, SyntaxError, we must have send a non-json error
         return error;
     }
 }

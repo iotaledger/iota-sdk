@@ -13,15 +13,15 @@ use napi_derive::napi;
 use tokio::sync::RwLock;
 
 use crate::{
-    build_js_error, client::ClientMethodHandler, destroy, secret_manager::SecretManagerMethodHandler, NodejsError,
+    build_js_error, client::ClientMethodHandler, destroyed_err, secret_manager::SecretManagerMethodHandler, NodejsError,
 };
 
 pub type WalletMethodHandler = Arc<RwLock<Option<Wallet>>>;
 
 #[napi(js_name = "createWallet")]
 pub async fn create_wallet(options: String) -> Result<External<WalletMethodHandler>> {
-    let wallet_options = serde_json::from_str::<WalletOptions>(&options).map_err(NodejsError::from)?;
-    let wallet = wallet_options.build().await.map_err(NodejsError::from)?;
+    let wallet_options = serde_json::from_str::<WalletOptions>(&options).map_err(NodejsError::new)?;
+    let wallet = wallet_options.build().await.map_err(NodejsError::new)?;
 
     Ok(External::new(Arc::new(RwLock::new(Some(wallet)))))
 }
@@ -33,17 +33,17 @@ pub async fn destroy_wallet(wallet: External<WalletMethodHandler>) {
 
 #[napi(js_name = "callWalletMethod")]
 pub async fn call_wallet_method(wallet: External<WalletMethodHandler>, method: String) -> Result<String> {
-    let method = serde_json::from_str::<WalletMethod>(&method).map_err(NodejsError::from)?;
+    let method = serde_json::from_str::<WalletMethod>(&method).map_err(NodejsError::new)?;
 
     match &*wallet.as_ref().read().await {
         Some(wallet) => {
             let response = rust_call_wallet_method(&wallet, method).await;
             match response {
                 Response::Error(_) | Response::Panic(_) => Err(build_js_error(response)),
-                _ => Ok(serde_json::to_string(&response).map_err(NodejsError::from)?),
+                _ => Ok(serde_json::to_string(&response).map_err(NodejsError::new)?),
             }
         }
-        None => Err(destroy("Wallet")),
+        None => Err(destroyed_err("Wallet")),
     }
 }
 
@@ -55,7 +55,7 @@ pub async fn listen_wallet(
 ) -> Result<()> {
     let mut validated_event_types = Vec::with_capacity(event_types.len());
     for event_type in event_types {
-        validated_event_types.push(WalletEventType::try_from(event_type).map_err(NodejsError::from)?);
+        validated_event_types.push(WalletEventType::try_from(event_type).map_err(NodejsError::new)?);
     }
 
     match &*wallet.as_ref().read().await {
@@ -64,7 +64,7 @@ pub async fn listen_wallet(
                 .listen(validated_event_types, move |event_data| {
                     callback.call(
                         serde_json::to_string(event_data)
-                            .map_err(NodejsError::from)
+                            .map_err(NodejsError::new)
                             .map_err(Error::from),
                         napi::threadsafe_function::ThreadsafeFunctionCallMode::NonBlocking,
                     );
@@ -72,7 +72,7 @@ pub async fn listen_wallet(
                 .await;
             Ok(())
         }
-        None => Err(destroy("Wallet")),
+        None => Err(destroyed_err("Wallet")),
     }
 }
 
@@ -81,7 +81,7 @@ pub async fn get_client(wallet: External<WalletMethodHandler>) -> Result<Externa
     if let Some(wallet) = &*wallet.as_ref().read().await {
         Ok(External::new(Arc::new(RwLock::new(Some(wallet.client().clone())))))
     } else {
-        Err(destroy("Wallet"))
+        Err(destroyed_err("Wallet"))
     }
 }
 
@@ -90,6 +90,6 @@ pub async fn get_secret_manager(wallet: External<WalletMethodHandler>) -> Result
     if let Some(wallet) = &*wallet.as_ref().read().await {
         Ok(External::new(wallet.get_secret_manager().clone()))
     } else {
-        Err(destroy("Wallet"))
+        Err(destroyed_err("Wallet"))
     }
 }

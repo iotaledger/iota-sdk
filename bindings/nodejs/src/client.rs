@@ -12,7 +12,7 @@ use napi::{bindgen_prelude::External, threadsafe_function::ThreadsafeFunction, R
 use napi_derive::napi;
 use tokio::sync::RwLock;
 
-use crate::{build_js_error, destroy, NodejsError};
+use crate::{build_js_error, destroyed_err, NodejsError};
 
 pub type ClientMethodHandler = Arc<RwLock<Option<Client>>>;
 
@@ -20,10 +20,10 @@ pub type ClientMethodHandler = Arc<RwLock<Option<Client>>>;
 pub async fn create_client(options: String) -> Result<External<ClientMethodHandler>> {
     let client = ClientBuilder::new()
         .from_json(&options)
-        .map_err(NodejsError::from)?
+        .map_err(NodejsError::new)?
         .finish()
         .await
-        .map_err(NodejsError::from)?;
+        .map_err(NodejsError::new)?;
     Ok(External::new(Arc::new(RwLock::new(Some(client)))))
 }
 
@@ -34,17 +34,17 @@ pub async fn destroy_client(client: External<ClientMethodHandler>) {
 
 #[napi(js_name = "callClientMethod")]
 pub async fn call_client_method(client: External<ClientMethodHandler>, method: String) -> Result<String> {
-    let method = serde_json::from_str::<ClientMethod>(&method).map_err(NodejsError::from)?;
+    let method = serde_json::from_str::<ClientMethod>(&method).map_err(NodejsError::new)?;
 
     match &*client.as_ref().read().await {
         Some(client) => {
             let response = rust_call_client_method(&client, method).await;
             match response {
                 Response::Error(_) | Response::Panic(_) => Err(build_js_error(response)),
-                _ => Ok(serde_json::to_string(&response).map_err(NodejsError::from)?),
+                _ => Ok(serde_json::to_string(&response).map_err(NodejsError::new)?),
             }
         }
-        None => Err(destroy("Client")),
+        None => Err(destroyed_err("Client")),
     }
 }
 
@@ -56,7 +56,7 @@ pub async fn listen_mqtt(
 ) -> Result<()> {
     let mut validated_topics = Vec::with_capacity(topics.len());
     for topic_string in topics {
-        validated_topics.push(Topic::new(topic_string).map_err(NodejsError::from)?);
+        validated_topics.push(Topic::new(topic_string).map_err(NodejsError::new)?);
     }
 
     match &*client.as_ref().read().await {
@@ -70,6 +70,6 @@ pub async fn listen_mqtt(
             .await;
             Ok(())
         }
-        None => Err(destroy("Client")),
+        None => Err(destroyed_err("Client")),
     }
 }

@@ -22,7 +22,7 @@ async function makeClient(): Promise<Client> {
     return await Client.create({
         nodes: [
             {
-                url: process.env.NODE_URL || 'http://localhost:8050',
+                url: 'http://localhost:8050',
             },
         ],
     });
@@ -50,7 +50,7 @@ describe.skip('Main examples', () => {
         const info = await client.getInfo();
 
         expect(
-            info.nodeInfo.protocolParameters[0].parameters[0].bech32Hrp,
+            info.nodeInfo.protocolParameters[0].parameters.bech32Hrp,
         ).toBe('rms');
     });
 
@@ -144,14 +144,10 @@ describe.skip('Main examples', () => {
         for (const outputResponse of testOutputs) {
             const output = outputResponse['output'];
             if (output instanceof CommonOutput) {
-                (output as CommonOutput)
-                    .getNativeTokens()
-                    ?.forEach(
-                        (token) =>
-                            (totalNativeTokens[token.id] =
-                                (totalNativeTokens[token.id] || 0) +
-                                Number(token.amount)),
-                    );
+                const token = (output as CommonOutput).getNativeToken();
+                if (token) {
+                    totalNativeTokens[token.id] = (totalNativeTokens[token.id] || 0) + Number(token.amount);
+                }
             }
 
             totalAmount += Number(output.getAmount());
