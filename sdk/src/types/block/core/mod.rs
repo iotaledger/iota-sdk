@@ -80,9 +80,6 @@ impl BlockBody {
     }
 
     /// Creates a new [`BasicBlockBodyBuilder`].
-    ///
-    /// Note, that `max_burned_mana` is set to 0 and has to be updated to the correct value after the basic block has
-    /// been built.
     #[inline(always)]
     pub fn build_basic(strong_parents: self::basic::StrongParents) -> BasicBlockBodyBuilder {
         BasicBlockBodyBuilder::new(strong_parents)
