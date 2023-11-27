@@ -4,9 +4,7 @@
 //! Core data types for blocks in the tangle.
 
 mod block_id;
-mod convert;
 mod error;
-mod issuer_id;
 mod r#macro;
 
 /// A module that provides types and syntactic validations of addresses.
@@ -42,14 +40,11 @@ pub mod slot;
 pub mod unlock;
 
 #[cfg(feature = "serde")]
-pub use self::core::dto::{BlockDto, SignedBlockDto, UnsignedBlockDto};
-pub(crate) use self::r#macro::*;
+pub use self::core::dto::{BlockBodyDto, BlockDto, UnsignedBlockDto};
 pub use self::{
     block_id::{BlockHash, BlockId},
-    convert::ConvertTo,
-    core::{Block, SignedBlock, UnsignedBlock},
+    core::{Block, BlockBody, UnsignedBlock},
     error::Error,
-    issuer_id::IssuerId,
 };
 
 pub const PROTOCOL_VERSION: u8 = 3;

@@ -9,13 +9,15 @@ use crate::{
     client::{ClientInner, Result},
     types::block::{
         core::{BlockHeader, UnsignedBlock},
+        output::AccountId,
         payload::Payload,
-        Block, IssuerId, protocol::WorkScore,
+        protocol::WorkScore,
+        BlockBody,
     },
 };
 
 impl ClientInner {
-    pub async fn build_basic_block(&self, issuer_id: IssuerId, payload: Option<Payload>) -> Result<UnsignedBlock> {
+    pub async fn build_basic_block(&self, issuer_id: AccountId, payload: Option<Payload>) -> Result<UnsignedBlock> {
         let issuance = self.get_issuance().await?;
 
         let issuing_time = {
@@ -33,16 +35,16 @@ impl ClientInner {
 
         let protocol_params = self.get_protocol_parameters().await?;
 
-        let mut basic_block = Block::build_basic(issuance.strong_parents()?)
+        let mut basic_block_body = BlockBody::build_basic(issuance.strong_parents()?)
             .with_weak_parents(issuance.weak_parents()?)
             .with_shallow_like_parents(issuance.shallow_like_parents()?)
             .with_payload(payload)
-            .finish_block()?;
+            .finish_block_body()?;
 
-        let work_score = basic_block.work_score(protocol_params.work_score_parameters) as u64;
+        let work_score = basic_block_body.work_score(protocol_params.work_score_parameters) as u64;
         let max_burned_mana = work_score * issuance.commitment.reference_mana_cost();
 
-        basic_block.set_max_burned_mana(max_burned_mana);
+        basic_block_body.set_max_burned_mana(max_burned_mana);
 
         Ok(UnsignedBlock::new(
             BlockHeader::new(
@@ -53,7 +55,7 @@ impl ClientInner {
                 issuance.latest_finalized_slot,
                 issuer_id,
             ),
-            basic_block,
+            basic_block_body,
         ))
     }
 }

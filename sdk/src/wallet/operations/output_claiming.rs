@@ -8,11 +8,10 @@ use serde::{Deserialize, Serialize};
 use crate::{
     client::secret::SecretManage,
     types::block::{
-        address::Address,
+        address::{Address, Ed25519Address},
         output::{
             unlock_condition::{AddressUnlockCondition, StorageDepositReturnUnlockCondition},
-            BasicOutputBuilder, MinimumStorageDepositBasicOutput, NativeTokens, NativeTokensBuilder, NftOutputBuilder,
-            Output, OutputId,
+            BasicOutput, BasicOutputBuilder, NativeTokensBuilder, NftOutputBuilder, Output, OutputId,
         },
         slot::SlotIndex,
     },
@@ -87,9 +86,10 @@ where
                                 }
                             }
                             OutputsToClaim::NativeTokens => {
-                                if !output_data.output.native_tokens().map(|n| n.is_empty()).unwrap_or(true) {
-                                    output_ids_to_claim.insert(output_data.output_id);
-                                }
+                                // TODO https://github.com/iotaledger/iota-sdk/issues/1633
+                                // if !output_data.output.native_tokens().map(|n| n.is_empty()).unwrap_or(true) {
+                                //     output_ids_to_claim.insert(output_data.output_id);
+                                // }
                             }
                             OutputsToClaim::Nfts => {
                                 if output_data.output.is_nft() {
@@ -201,8 +201,7 @@ where
         log::debug!("[OUTPUT_CLAIMING] claim_outputs_internal");
 
         let slot_index = self.client().get_slot_index().await?;
-        let rent_structure = self.client().get_rent_structure().await?;
-        let token_supply = self.client().get_token_supply().await?;
+        let storage_score_params = self.client().get_storage_score_parameters().await?;
 
         let wallet_data = self.data().await;
 
@@ -244,17 +243,12 @@ where
             .iter()
             .map(|i| i.output.amount())
             .sum::<u64>()
-            >= MinimumStorageDepositBasicOutput::new(rent_structure, token_supply).finish()?;
+            >= BasicOutput::minimum_amount(&Address::from(Ed25519Address::null()), storage_score_params);
 
         // check native tokens
         for output_data in &outputs_to_claim {
-            if let Some(native_tokens) = output_data.output.native_tokens() {
-                // Skip output if the max native tokens count would be exceeded
-                if get_new_native_token_count(&new_native_tokens, native_tokens)? > NativeTokens::COUNT_MAX.into() {
-                    log::debug!("[OUTPUT_CLAIMING] skipping output to not exceed the max native tokens count");
-                    continue;
-                }
-                new_native_tokens.add_native_tokens(native_tokens.clone())?;
+            if let Some(native_token) = output_data.output.native_token() {
+                new_native_tokens.add_native_token(*native_token)?;
             }
             if let Some(sdr) = sdr_not_expired(&output_data.output, slot_index) {
                 // for own output subtract the return amount
@@ -274,18 +268,16 @@ where
 
                 let nft_output = if !enough_amount_for_basic_output {
                     // Only update address and nft id if we have no additional inputs which can provide the storage
-                    // deposit for the remaining amount and possible NTs
+                    // deposit for the remaining amount and possible native tokens
                     NftOutputBuilder::from(nft_output)
                         .with_nft_id(nft_output.nft_id_non_null(&output_data.output_id))
                         .with_unlock_conditions([AddressUnlockCondition::new(wallet_address.clone())])
                         .finish_output()?
                 } else {
                     NftOutputBuilder::from(nft_output)
-                        .with_minimum_storage_deposit(rent_structure)
+                        .with_minimum_amount(storage_score_params)
                         .with_nft_id(nft_output.nft_id_non_null(&output_data.output_id))
                         .with_unlock_conditions([AddressUnlockCondition::new(wallet_address.clone())])
-                        // Set native tokens empty, we will collect them from all inputs later
-                        .with_native_tokens([])
                         .finish_output()?
                 };
 
@@ -295,25 +287,30 @@ where
             }
         }
 
+        // TODO: rework native tokens
         let option_native_token = if new_native_tokens.is_empty() {
             None
         } else {
             Some(new_native_tokens.clone().finish()?)
         };
 
-        // Check if the new amount is enough for the storage deposit, otherwise increase it to this
+        // Check if the new amount is enough for the storage deposit, otherwise increase it with a minimal basic output
+        // amount
         let mut required_amount = if !enough_amount_for_basic_output {
             required_amount_for_nfts
         } else {
             required_amount_for_nfts
-                + MinimumStorageDepositBasicOutput::new(rent_structure, token_supply)
-                    .with_native_tokens(option_native_token)
+                + BasicOutputBuilder::new_with_minimum_amount(storage_score_params)
+                    .add_unlock_condition(AddressUnlockCondition::new(Ed25519Address::null()))
+                    // TODO https://github.com/iotaledger/iota-sdk/issues/1633
+                    // .with_native_tokens(option_native_token.into_iter().flatten())
                     .finish()?
+                    .amount()
         };
 
         let mut additional_inputs = Vec::new();
         if available_amount < required_amount {
-            // Sort by amount so we use as less as possible
+            // Sort by amount so we use as little as possible
             possible_additional_inputs.sort_by_key(|o| o.output.amount());
 
             // add more inputs
@@ -326,23 +323,17 @@ where
                 // Recalculate every time, because new inputs can also add more native tokens, which would increase
                 // the required storage deposit
                 required_amount = required_amount_for_nfts
-                    + MinimumStorageDepositBasicOutput::new(rent_structure, token_supply)
-                        .with_native_tokens(option_native_token)
-                        .finish()?;
+                    + BasicOutputBuilder::new_with_minimum_amount(storage_score_params)
+                        .add_unlock_condition(AddressUnlockCondition::new(Ed25519Address::null()))
+                        // TODO https://github.com/iotaledger/iota-sdk/issues/1633
+                        // .with_native_token(option_native_token)
+                        .finish()?
+                        .amount();
 
                 if available_amount < required_amount {
                     if !additional_inputs_used.contains(&output_data.output_id) {
-                        if let Some(native_tokens) = output_data.output.native_tokens() {
-                            // Skip input if the max native tokens count would be exceeded
-                            if get_new_native_token_count(&new_native_tokens, native_tokens)?
-                                > NativeTokens::COUNT_MAX.into()
-                            {
-                                log::debug!(
-                                    "[OUTPUT_CLAIMING] skipping input to not exceed the max native tokens count"
-                                );
-                                continue;
-                            }
-                            new_native_tokens.add_native_tokens(native_tokens.clone())?;
+                        if let Some(native_token) = output_data.output.native_token() {
+                            new_native_tokens.add_native_token(*native_token)?;
                         }
                         available_amount += output_data.output.amount();
                         additional_inputs.push(output_data.output_id);
@@ -376,7 +367,8 @@ where
             outputs_to_send.push(
                 BasicOutputBuilder::new_with_amount(available_amount - required_amount_for_nfts)
                     .add_unlock_condition(AddressUnlockCondition::new(wallet_address))
-                    .with_native_tokens(new_native_tokens.finish()?)
+                    // TODO https://github.com/iotaledger/iota-sdk/issues/1633
+                    // .with_native_tokens(new_native_tokens.finish()?)
                     .finish_output()?,
             );
         } else if !new_native_tokens.finish()?.is_empty() {
@@ -424,16 +416,4 @@ pub(crate) fn sdr_not_expired(output: &Output, slot_index: SlotIndex) -> Option<
             (!expired).then_some(sdr)
         })
     })
-}
-
-// Helper function to calculate the native token count without duplicates, when new native tokens are added
-// Might be possible to refactor the sections where it's used to remove the clones
-pub(crate) fn get_new_native_token_count(
-    native_tokens_builder: &NativeTokensBuilder,
-    native_tokens: &NativeTokens,
-) -> crate::wallet::Result<usize> {
-    // Clone to get the new native token count without actually modifying it
-    let mut native_tokens_count = native_tokens_builder.clone();
-    native_tokens_count.add_native_tokens(native_tokens.clone())?;
-    Ok(native_tokens_count.len())
 }

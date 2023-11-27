@@ -4,6 +4,7 @@
 mod block_issuer;
 mod issuer;
 mod metadata;
+mod native_token;
 mod sender;
 mod staking;
 mod tag;
@@ -24,12 +25,13 @@ pub use self::{
     block_issuer::{BlockIssuerFeature, BlockIssuerKey, BlockIssuerKeys, Ed25519BlockIssuerKey},
     issuer::IssuerFeature,
     metadata::MetadataFeature,
+    native_token::NativeTokenFeature,
     sender::SenderFeature,
     staking::StakingFeature,
     tag::TagFeature,
 };
 use crate::types::block::{
-    create_bitflags,
+    output::{StorageScore, StorageScoreParameters},
     protocol::{WorkScore, WorkScoreParameters},
     Error,
 };
@@ -52,6 +54,9 @@ pub enum Feature {
     /// A tag feature.
     #[packable(tag = TagFeature::KIND)]
     Tag(TagFeature),
+    /// A native token feature.
+    #[packable(tag = NativeTokenFeature::KIND)]
+    NativeToken(NativeTokenFeature),
     /// A block issuer feature.
     #[packable(tag = BlockIssuerFeature::KIND)]
     BlockIssuer(BlockIssuerFeature),
@@ -72,6 +77,34 @@ impl Ord for Feature {
     }
 }
 
+impl StorageScore for Feature {
+    fn storage_score(&self, params: StorageScoreParameters) -> u64 {
+        match self {
+            Self::Sender(sender) => sender.storage_score(params),
+            Self::Issuer(issuer) => issuer.storage_score(params),
+            Self::Metadata(metadata) => metadata.storage_score(params),
+            Self::Tag(tag) => tag.storage_score(params),
+            Self::NativeToken(native_token) => native_token.storage_score(params),
+            Self::BlockIssuer(block_issuer) => block_issuer.storage_score(params),
+            Self::Staking(staking) => staking.storage_score(params),
+        }
+    }
+}
+
+impl WorkScore for Feature {
+    fn work_score(&self, params: WorkScoreParameters) -> u32 {
+        match self {
+            Self::Sender(sender) => sender.work_score(params),
+            Self::Issuer(issuer) => issuer.work_score(params),
+            Self::Metadata(metadata) => metadata.work_score(params),
+            Self::Tag(tag) => tag.work_score(params),
+            Self::NativeToken(native_token) => native_token.work_score(params),
+            Self::BlockIssuer(block_issuer) => block_issuer.work_score(params),
+            Self::Staking(staking) => staking.work_score(params),
+        }
+    }
+}
+
 impl core::fmt::Debug for Feature {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         match self {
@@ -79,6 +112,7 @@ impl core::fmt::Debug for Feature {
             Self::Issuer(feature) => feature.fmt(f),
             Self::Metadata(feature) => feature.fmt(f),
             Self::Tag(feature) => feature.fmt(f),
+            Self::NativeToken(feature) => feature.fmt(f),
             Self::BlockIssuer(feature) => feature.fmt(f),
             Self::Staking(feature) => feature.fmt(f),
         }
@@ -93,6 +127,7 @@ impl Feature {
             Self::Issuer(_) => IssuerFeature::KIND,
             Self::Metadata(_) => MetadataFeature::KIND,
             Self::Tag(_) => TagFeature::KIND,
+            Self::NativeToken(_) => NativeTokenFeature::KIND,
             Self::BlockIssuer(_) => BlockIssuerFeature::KIND,
             Self::Staking(_) => StakingFeature::KIND,
         }
@@ -105,15 +140,16 @@ impl Feature {
             Self::Issuer(_) => FeatureFlags::ISSUER,
             Self::Metadata(_) => FeatureFlags::METADATA,
             Self::Tag(_) => FeatureFlags::TAG,
+            Self::NativeToken(_) => FeatureFlags::NATIVE_TOKEN,
             Self::BlockIssuer(_) => FeatureFlags::BLOCK_ISSUER,
             Self::Staking(_) => FeatureFlags::STAKING,
         }
     }
 
-    crate::def_is_as_opt!(Feature: Sender, Issuer, Metadata, Tag, BlockIssuer, Staking);
+    crate::def_is_as_opt!(Feature: Sender, Issuer, Metadata, Tag, NativeToken, BlockIssuer, Staking);
 }
 
-create_bitflags!(
+crate::create_bitflags!(
     /// A bitflags-based representation of the set of active [`Feature`]s.
     pub FeatureFlags,
     u16,
@@ -122,6 +158,7 @@ create_bitflags!(
         (ISSUER, IssuerFeature),
         (METADATA, MetadataFeature),
         (TAG, TagFeature),
+        (NATIVE_TOKEN, NativeTokenFeature),
         (BLOCK_ISSUER, BlockIssuerFeature),
         (STAKING, StakingFeature),
     ]
@@ -172,7 +209,7 @@ impl Features {
 
         features.sort_by_key(Feature::kind);
         // Sort is obviously fine now but uniqueness still needs to be checked.
-        verify_unique_sorted::<true>(&features, &())?;
+        verify_unique_sorted::<true>(&features)?;
 
         Ok(Self(features))
     }
@@ -218,6 +255,11 @@ impl Features {
         self.get(TagFeature::KIND).map(Feature::as_tag)
     }
 
+    /// Gets a reference to a [`NativeTokenFeature`], if any.
+    pub fn native_token(&self) -> Option<&NativeTokenFeature> {
+        self.get(NativeTokenFeature::KIND).map(Feature::as_native_token)
+    }
+
     /// Gets a reference to a [`BlockIssuerFeature`], if any.
     pub fn block_issuer(&self) -> Option<&BlockIssuerFeature> {
         self.get(BlockIssuerFeature::KIND).map(Feature::as_block_issuer)
@@ -229,20 +271,14 @@ impl Features {
     }
 }
 
-impl WorkScore for Features {
-    fn work_score(&self, work_score_params: WorkScoreParameters) -> u32 {
-        self.iter()
-            .map(|f| match f {
-                Feature::BlockIssuer(_) => work_score_params.block_issuer(),
-                Feature::Staking(_) => work_score_params.staking(),
-                _ => 0,
-            })
-            .sum::<u32>()
+impl StorageScore for Features {
+    fn storage_score(&self, params: StorageScoreParameters) -> u64 {
+        self.iter().map(|f| f.storage_score(params)).sum::<u64>()
     }
 }
 
 #[inline]
-fn verify_unique_sorted<const VERIFY: bool>(features: &[Feature], _: &()) -> Result<(), Error> {
+fn verify_unique_sorted<const VERIFY: bool>(features: &[Feature]) -> Result<(), Error> {
     if VERIFY && !is_unique_sorted(features.iter().map(Feature::kind)) {
         Err(Error::FeaturesNotUniqueSorted)
     } else {
@@ -278,6 +314,7 @@ mod test {
                 FeatureFlags::ISSUER,
                 FeatureFlags::METADATA,
                 FeatureFlags::TAG,
+                FeatureFlags::NATIVE_TOKEN,
                 FeatureFlags::BLOCK_ISSUER,
                 FeatureFlags::STAKING
             ]

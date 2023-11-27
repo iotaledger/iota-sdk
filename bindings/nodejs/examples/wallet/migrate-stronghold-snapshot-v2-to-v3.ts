@@ -1,12 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import {
-    CoinType,
-    WalletOptions,
-    Wallet,
-    migrateStrongholdSnapshotV2ToV3,
-} from '@iota/sdk';
+import { migrateStrongholdSnapshotV2ToV3, SecretManager } from '@iota/sdk';
 require('dotenv').config({ path: '.env' });
 
 const v2Path = '../../../sdk/tests/wallet/fixtures/v2.stronghold';
@@ -21,23 +16,16 @@ async function run() {
             throw new Error(`.env ${envVar} is undefined, see .env.example`);
         }
 
-    let walletOptions: WalletOptions = {
-        storagePath: process.env.WALLET_DB_PATH,
-        clientOptions: {
-            nodes: [process.env.NODE_URL as string],
-        },
-        coinType: CoinType.Shimmer,
-        secretManager: {
-            stronghold: {
-                snapshotPath: v2Path,
-                password: 'current_password',
-            },
+    const strongholdSecretManager = {
+        stronghold: {
+            snapshotPath: process.env.STRONGHOLD_SNAPSHOT_PATH,
+            password: process.env.STRONGHOLD_PASSWORD,
         },
     };
 
     try {
         // This should fail with error, migration required.
-        new Wallet(walletOptions);
+        new SecretManager(strongholdSecretManager);
     } catch (error) {
         console.error(error);
     }
@@ -51,22 +39,8 @@ async function run() {
         'new_password',
     );
 
-    walletOptions = {
-        storagePath: process.env.WALLET_DB_PATH,
-        clientOptions: {
-            nodes: [process.env.NODE_URL as string],
-        },
-        coinType: CoinType.Shimmer,
-        secretManager: {
-            stronghold: {
-                snapshotPath: v3Path,
-                password: 'new_password',
-            },
-        },
-    };
-
     // This shouldn't fail anymore as snapshot has been migrated.
-    new Wallet(walletOptions);
+    new SecretManager(strongholdSecretManager);
 }
 
 run().then(() => process.exit());

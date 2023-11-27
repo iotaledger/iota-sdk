@@ -1,4 +1,4 @@
-// Copyright 2022 IOTA Stiftung
+// Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
 use getset::CopyGetters;
@@ -15,25 +15,25 @@ use crate::types::block::Error;
 #[packable(unpack_error = Error)]
 #[getset(get_copy = "pub")]
 pub struct WorkScoreParameters {
-    /// Modifier for network traffic per byte.
+    /// Accounts for the network traffic per byte.
     data_byte: u32,
-    /// Modifier for work done to process a block.
+    /// Accounts for work done to process a block in the node software.
     block: u32,
-    /// Modifier for loading UTXOs and performing mana calculations.
+    /// Accounts for loading the UTXO from the database and performing the mana balance check.
     input: u32,
-    /// Modifier for loading and checking the context input.
+    /// Accounts for loading and checking the context input.
     context_input: u32,
-    /// Modifier for storing UTXOs.
+    /// Accounts for storing the UTXO in the database.
     output: u32,
-    /// Modifier for calculations using native tokens.
+    /// Accounts for native token balance checks which use big integers.
     native_token: u32,
-    /// Modifier for storing staking features.
+    /// Accounts for the cost of updating the staking vector when a staking feature is present.
     staking: u32,
-    /// Modifier for storing block issuer features.
+    /// Accounts for the cost of updating the block issuer keys when a block issuer feature is present.
     block_issuer: u32,
-    /// Modifier for accessing the account-based ledger to transform mana to Block Issuance Credits.
+    /// Accounts for accessing the account based ledger to transform the allotted mana to block issuance credits.
     allotment: u32,
-    /// Modifier for the block signature check.
+    /// Accounts for an Ed25519 signature check.
     signature_ed25519: u32,
 }
 
@@ -56,23 +56,19 @@ impl Default for WorkScoreParameters {
 
 /// A trait to facilitate the computation of the work score of a block, which is central to mana cost calculation.
 pub trait WorkScore {
-    /// Returns its work score.
-    fn work_score(&self, work_score_params: WorkScoreParameters) -> u32;
-
-    /// Returns the Mana cost given its work score.
-    fn mana_cost(&self, work_score_params: WorkScoreParameters, reference_mana_cost: u64) -> u64 {
-        reference_mana_cost * self.work_score(work_score_params) as u64
+    fn work_score(&self, _params: WorkScoreParameters) -> u32 {
+        0
     }
 }
 
 impl<T: WorkScore, const N: usize> WorkScore for [T; N] {
-    fn work_score(&self, work_score_params: WorkScoreParameters) -> u32 {
-        self.as_slice().work_score(work_score_params)
+    fn work_score(&self, params: WorkScoreParameters) -> u32 {
+        self.as_slice().work_score(params)
     }
 }
 
 impl<T: WorkScore> WorkScore for [T] {
-    fn work_score(&self, work_score_params: WorkScoreParameters) -> u32 {
-        self.iter().map(|o| o.work_score(work_score_params)).sum()
+    fn work_score(&self, params: WorkScoreParameters) -> u32 {
+        self.iter().map(|o| o.work_score(params)).sum()
     }
 }

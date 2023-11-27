@@ -23,10 +23,18 @@ export class WalletMethodHandler {
     methodHandler: any;
 
     /**
+     * @param methodHandler The Rust method handler created in `WalletMethodHandler.create()`.
+     */
+    constructor(methodHandler: any) {
+        this.methodHandler = methodHandler;
+    }
+
+    /**
      * @param options The wallet options.
      */
-    constructor(options?: WalletOptions) {
-        this.methodHandler = createWallet(JSON.stringify(options));
+    static async create(options: WalletOptions): Promise<WalletMethodHandler> {
+        const methodHandler = await createWallet(JSON.stringify(options));
+        return new WalletMethodHandler(methodHandler);
     }
 
     /**

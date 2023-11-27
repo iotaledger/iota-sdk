@@ -24,7 +24,7 @@ use crate::{
         node_manager::NodeManager,
         Error,
     },
-    types::block::{address::Hrp, output::RentStructure, protocol::ProtocolParameters},
+    types::block::{address::Hrp, output::StorageScoreParameters, protocol::ProtocolParameters},
 };
 
 /// An IOTA node client.
@@ -152,9 +152,13 @@ impl ClientInner {
         Ok(self.get_network_info().await?.protocol_parameters.bech32_hrp())
     }
 
-    /// Gets the rent structure of the node we're connecting to.
-    pub async fn get_rent_structure(&self) -> Result<RentStructure> {
-        Ok(self.get_network_info().await?.protocol_parameters.rent_structure())
+    /// Gets the storage score parameters of the node we're connecting to.
+    pub async fn get_storage_score_parameters(&self) -> Result<StorageScoreParameters> {
+        Ok(self
+            .get_network_info()
+            .await?
+            .protocol_parameters
+            .storage_score_parameters())
     }
 
     /// Gets the token supply of the node we're connecting to.

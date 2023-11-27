@@ -24,7 +24,7 @@ export interface SendParams {
     /**
      * Bech32 encoded address, to which the storage deposit will be returned if one is necessary
      * given the provided amount. If a storage deposit is needed and a return address is not provided, it will
-     * default to the first address of the account.
+     * default to the address of the wallet.
      */
     returnAddress?: string;
     /**
@@ -35,15 +35,15 @@ export interface SendParams {
     expiration?: SlotIndex;
 }
 
-/** Address with native tokens */
-export interface SendNativeTokensParams {
+/** Address with native token */
+export interface SendNativeTokenParams {
     /** The Bech32 address. */
     address: Bech32Address;
-    /** The Native Tokens to send. */
-    nativeTokens: [TokenId, u256][];
+    /** The Native Token to send. */
+    nativeToken: [TokenId, u256];
     /**
      * Bech32 encoded address, to which the storage deposit will be returned.
-     * Default will use the first address of the account.
+     * Default will use the address of the wallet.
      */
     returnAddress?: Bech32Address;
     /**

@@ -27,7 +27,7 @@ pub struct SignedTransactionPayload {
 }
 
 impl SignedTransactionPayload {
-    /// The payload kind of a [`SignedTransactionPayload`].
+    /// The [`Payload`](crate::types::block::payload::Payload) kind of a [`SignedTransactionPayload`].
     pub const KIND: u8 = 1;
 
     /// Creates a new [`SignedTransactionPayload`].
@@ -49,11 +49,11 @@ impl SignedTransactionPayload {
 }
 
 impl WorkScore for SignedTransactionPayload {
-    fn work_score(&self, work_score_params: WorkScoreParameters) -> u32 {
-        let size_score = self.packed_len() as u32 * work_score_params.data_byte();
-        let essence_score = self.transaction().work_score(work_score_params);
-        let unlocks_score = self.unlocks().work_score(work_score_params);
-        size_score + essence_score + unlocks_score
+    fn work_score(&self, params: WorkScoreParameters) -> u32 {
+        // 1 byte for the payload kind
+        (1 + self.packed_len() as u32) * params.data_byte()
+            + self.transaction().work_score(params)
+            + self.unlocks().work_score(params)
     }
 }
 
@@ -104,7 +104,7 @@ pub mod dto {
     use super::*;
     use crate::types::{
         block::{unlock::Unlock, Error},
-        TryFromDto, ValidationParams,
+        TryFromDto,
     };
 
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
@@ -125,11 +125,13 @@ pub mod dto {
         }
     }
 
-    impl TryFromDto for SignedTransactionPayload {
-        type Dto = SignedTransactionPayloadDto;
+    impl TryFromDto<SignedTransactionPayloadDto> for SignedTransactionPayload {
         type Error = Error;
 
-        fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
+        fn try_from_dto_with_params_inner(
+            dto: SignedTransactionPayloadDto,
+            params: Option<&ProtocolParameters>,
+        ) -> Result<Self, Self::Error> {
             let transaction = Transaction::try_from_dto_with_params_inner(dto.transaction, params)?;
             Self::new(transaction, Unlocks::new(dto.unlocks)?)
         }

@@ -78,7 +78,7 @@ export interface NativeTokenBalance {
     available: u256;
 }
 
-/** Sync options for an account */
+/** Sync options for a wallet */
 export interface SyncOptions {
     /**
      * Usually syncing is skipped if it's called in between 200ms, because there can only be new changes every

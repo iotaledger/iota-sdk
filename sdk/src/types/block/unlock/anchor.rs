@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use crate::types::block::{unlock::UnlockIndex, Error};
+use crate::types::block::{protocol::WorkScore, unlock::UnlockIndex, Error};
 
 /// Points to the unlock of a consumed anchor output.
 #[derive(Clone, Debug, Eq, PartialEq, Hash, packable::Packable)]
@@ -10,14 +10,6 @@ pub struct AnchorUnlock(
     /// Index of input and unlock corresponding to an [`AnchorOutput`](crate::types::block::output::AnchorOutput).
     UnlockIndex,
 );
-
-impl TryFrom<u16> for AnchorUnlock {
-    type Error = Error;
-
-    fn try_from(index: u16) -> Result<Self, Self::Error> {
-        Self::new(index)
-    }
-}
 
 impl AnchorUnlock {
     /// The [`Unlock`](crate::types::block::unlock::Unlock) kind of an [`AnchorUnlock`].
@@ -36,6 +28,17 @@ impl AnchorUnlock {
     }
 }
 
+impl WorkScore for AnchorUnlock {}
+
+impl TryFrom<u16> for AnchorUnlock {
+    type Error = Error;
+
+    fn try_from(index: u16) -> Result<Self, Self::Error> {
+        Self::new(index)
+    }
+}
+
+#[cfg(feature = "serde")]
 mod dto {
     use serde::{Deserialize, Serialize};
 

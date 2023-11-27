@@ -9,7 +9,7 @@ use crate::{
     types::{
         api::core::OutputWithMetadataResponse,
         block::{
-            core::{BasicBlock, Block},
+            core::{BasicBlockBody, BlockBody},
             input::Input,
             output::{OutputId, OutputWithMetadata},
             payload::{signed_transaction::TransactionId, Payload, SignedTransactionPayload},
@@ -48,14 +48,12 @@ where
                     .get(output_with_meta.metadata().transaction_id())
                     .map_or(false, |tx| !tx.incoming);
 
-                let chain = wallet_data.bip_path.map_or(None, |bip_path| {
+                let chain = wallet_data.bip_path.map(|bip_path| {
                     // BIP 44 (HD wallets) and 4218 is the registered index for IOTA https://github.com/satoshilabs/slips/blob/master/slip-0044.md
-                    Some(
-                        Bip44::new(bip_path.coin_type)
-                            .with_account(bip_path.account)
-                            .with_change(associated_address.internal as _)
-                            .with_address_index(associated_address.key_index),
-                    )
+                    Bip44::new(bip_path.coin_type)
+                        .with_account(bip_path.account)
+                        .with_change(associated_address.internal as _)
+                        .with_address_index(associated_address.key_index)
                 });
 
                 OutputData {
@@ -145,9 +143,11 @@ where
                         futures::future::try_join_all(transaction_ids.iter().map(|transaction_id| async {
                             let transaction_id = *transaction_id;
                             match client.get_included_block(&transaction_id).await {
-                                Ok(signed_block) => {
-                                    if let Block::Basic(block) = signed_block.block() {
-                                        if let Some(Payload::SignedTransaction(transaction_payload)) = block.payload() {
+                                Ok(block) => {
+                                    if let BlockBody::Basic(basic_block_body) = block.body() {
+                                        if let Some(Payload::SignedTransaction(transaction_payload)) =
+                                            basic_block_body.payload()
+                                        {
                                             let inputs_with_meta =
                                                 get_inputs_for_transaction_payload(&client, transaction_payload)
                                                     .await?;
@@ -167,9 +167,9 @@ where
                                             Ok((transaction_id, None))
                                         }
                                     } else {
-                                        Err(ClientError::UnexpectedBlockKind {
-                                            expected: BasicBlock::KIND,
-                                            actual: signed_block.block().kind(),
+                                        Err(ClientError::UnexpectedBlockBodyKind {
+                                            expected: BasicBlockBody::KIND,
+                                            actual: block.body().kind(),
                                         }
                                         .into())
                                     }
@@ -220,7 +220,7 @@ pub(crate) async fn get_inputs_for_transaction_payload(
         .collect::<Vec<_>>();
 
     client
-        .get_outputs_with_metadata_ignore_errors(&output_ids)
+        .get_outputs_with_metadata_ignore_not_found(&output_ids)
         .await
         .map_err(|e| e.into())
 }

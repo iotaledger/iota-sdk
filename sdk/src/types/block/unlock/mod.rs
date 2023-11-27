@@ -21,9 +21,9 @@ pub use self::{
     account::AccountUnlock, anchor::AnchorUnlock, empty::EmptyUnlock, multi::MultiUnlock, nft::NftUnlock,
     reference::ReferenceUnlock, signature::SignatureUnlock,
 };
-use super::protocol::{WorkScore, WorkScoreParameters};
 use crate::types::block::{
     input::{INPUT_COUNT_MAX, INPUT_COUNT_RANGE, INPUT_INDEX_MAX},
+    protocol::{WorkScore, WorkScoreParameters},
     Error,
 };
 
@@ -68,6 +68,37 @@ pub enum Unlock {
     Empty(EmptyUnlock),
 }
 
+impl Unlock {
+    /// Returns the unlock kind of an [`Unlock`].
+    pub fn kind(&self) -> u8 {
+        match self {
+            Self::Signature(_) => SignatureUnlock::KIND,
+            Self::Reference(_) => ReferenceUnlock::KIND,
+            Self::Account(_) => AccountUnlock::KIND,
+            Self::Anchor(_) => AnchorUnlock::KIND,
+            Self::Nft(_) => NftUnlock::KIND,
+            Self::Multi(_) => MultiUnlock::KIND,
+            Self::Empty(_) => EmptyUnlock::KIND,
+        }
+    }
+
+    crate::def_is_as_opt!(Unlock: Signature, Reference, Account, Anchor, Nft, Multi, Empty);
+}
+
+impl WorkScore for Unlock {
+    fn work_score(&self, params: WorkScoreParameters) -> u32 {
+        match self {
+            Self::Signature(unlock) => unlock.work_score(params),
+            Self::Reference(unlock) => unlock.work_score(params),
+            Self::Account(unlock) => unlock.work_score(params),
+            Self::Anchor(unlock) => unlock.work_score(params),
+            Self::Nft(unlock) => unlock.work_score(params),
+            Self::Multi(unlock) => unlock.work_score(params),
+            Self::Empty(unlock) => unlock.work_score(params),
+        }
+    }
+}
+
 impl From<SignatureUnlock> for Unlock {
     fn from(value: SignatureUnlock) -> Self {
         Self::Signature(value.into())
@@ -88,23 +119,6 @@ impl core::fmt::Debug for Unlock {
     }
 }
 
-impl Unlock {
-    /// Returns the unlock kind of an [`Unlock`].
-    pub fn kind(&self) -> u8 {
-        match self {
-            Self::Signature(_) => SignatureUnlock::KIND,
-            Self::Reference(_) => ReferenceUnlock::KIND,
-            Self::Account(_) => AccountUnlock::KIND,
-            Self::Anchor(_) => AnchorUnlock::KIND,
-            Self::Nft(_) => NftUnlock::KIND,
-            Self::Multi(_) => MultiUnlock::KIND,
-            Self::Empty(_) => EmptyUnlock::KIND,
-        }
-    }
-
-    crate::def_is_as_opt!(Unlock: Signature, Reference, Account, Anchor, Nft, Multi, Empty);
-}
-
 pub(crate) type UnlockCount = BoundedU16<{ *UNLOCK_COUNT_RANGE.start() }, { *UNLOCK_COUNT_RANGE.end() }>;
 
 /// A collection of unlocks.
@@ -118,7 +132,7 @@ impl Unlocks {
         let unlocks: BoxedSlicePrefix<Unlock, UnlockCount> =
             unlocks.into().try_into().map_err(Error::InvalidUnlockCount)?;
 
-        verify_unlocks::<true>(&unlocks, &())?;
+        verify_unlocks::<true>(&unlocks)?;
 
         Ok(Self(unlocks))
     }
@@ -131,16 +145,6 @@ impl Unlocks {
             Some(unlock) => Some(unlock),
             None => None,
         }
-    }
-}
-
-impl WorkScore for Unlocks {
-    fn work_score(&self, work_score_params: WorkScoreParameters) -> u32 {
-        let signature_score = self
-            .iter()
-            .filter_map(|u| u.is_signature().then_some(work_score_params.signature_ed25519()))
-            .sum::<u32>();
-        signature_score
     }
 }
 
@@ -188,7 +192,7 @@ fn verify_non_multi_unlock<'a>(
     Ok(())
 }
 
-fn verify_unlocks<const VERIFY: bool>(unlocks: &[Unlock], _: &()) -> Result<(), Error> {
+fn verify_unlocks<const VERIFY: bool>(unlocks: &[Unlock]) -> Result<(), Error> {
     if VERIFY {
         let mut seen_signatures = HashSet::new();
 

@@ -9,7 +9,7 @@ require('dotenv').config({ path: '.env' });
 // Run with command:
 // yarn run-example ./how_tos/accounts_and_addresses/consolidate-outputs.ts
 
-// In this example we will consolidate basic outputs from an account with only an AddressUnlockCondition by sending
+// In this example we will consolidate basic outputs from an wallet with only an AddressUnlockCondition by sending
 // them to the same address again.
 async function run() {
     initLogger();
@@ -25,37 +25,35 @@ async function run() {
                 );
             }
 
-        const wallet = new Wallet({
+        const wallet = await Wallet.create({
             storagePath: process.env.WALLET_DB_PATH,
         });
-
-        const account = await wallet.getAccount('Alice');
 
         // To create an address we need to unlock stronghold.
         await wallet.setStrongholdPassword(
             process.env.STRONGHOLD_PASSWORD as string,
         );
 
-        // Sync account to make sure account is updated with outputs from previous examples
-        account.sync();
-        console.log('Account synced');
+        // Sync wallet to make sure wallet is updated with outputs from previous examples
+        await wallet.sync();
+        console.log('Wallet synced');
 
         // List unspent outputs before consolidation.
         // The output we created with example `request_funds` and the basic output from `mint` have only one
         // unlock condition and it is an `AddressUnlockCondition`, and so they are valid for consolidation. They have the
-        // same `AddressUnlockCondition`(the first address of the account), so they will be consolidated into one
+        // same `AddressUnlockCondition`(the address of the wallet), so they will be consolidated into one
         // output.
-        const outputs = await account.unspentOutputs();
+        const outputs = await wallet.unspentOutputs();
         console.log('Outputs BEFORE consolidation:');
 
         outputs.forEach(({ output, address }, i) => {
             console.log(`OUTPUT #${i}`);
             console.log(
-                '- address: %s\n- amount: %d\n- native tokens: %s',
+                '- address: %s\n- amount: %d\n- native token: %s',
                 Utils.hexToBech32(address.toString(), 'rms'),
                 output.getAmount(),
                 output instanceof CommonOutput
-                    ? (output as CommonOutput).getNativeTokens()
+                    ? (output as CommonOutput).getNativeToken() ?? []
                     : [],
             );
         });
@@ -64,13 +62,13 @@ async function run() {
 
         // Consolidate unspent outputs and print the consolidation transaction ID
         // Set `force` to true to force the consolidation even though the `output_threshold` isn't reached
-        const transaction = await account.consolidateOutputs({
+        const transaction = await wallet.consolidateOutputs({
             force: true,
         });
         console.log('Transaction sent: %s', transaction.transactionId);
 
         // Wait for the consolidation transaction to get confirmed
-        const blockId = account.reissueTransactionUntilIncluded(
+        const blockId = wallet.reissueTransactionUntilIncluded(
             transaction.transactionId,
         );
 
@@ -80,9 +78,9 @@ async function run() {
             blockId,
         );
 
-        // Sync account
-        account.sync();
-        console.log('Account synced');
+        // Sync wallet
+        await wallet.sync();
+        console.log('Wallet synced');
 
         // Outputs after consolidation
         console.log('Outputs AFTER consolidation:');
@@ -93,7 +91,7 @@ async function run() {
                 Utils.hexToBech32(address.toString(), 'rms'),
                 output.getAmount(),
                 output instanceof CommonOutput
-                    ? (output as CommonOutput).getNativeTokens()
+                    ? (output as CommonOutput).getNativeToken()
                     : undefined,
             );
         });

@@ -13,7 +13,7 @@ use packable::{bounded::BoundedU8, prefix::BoxedSlicePrefix, Packable};
 use primitive_types::U256;
 
 use crate::types::block::{
-    output::foundry::FoundryId,
+    output::FoundryId,
     protocol::{WorkScore, WorkScoreParameters},
     Error,
 };
@@ -52,7 +52,7 @@ impl NativeToken {
     pub fn new(token_id: TokenId, amount: impl Into<U256>) -> Result<Self, Error> {
         let amount = amount.into();
 
-        verify_amount::<true>(&amount, &())?;
+        verify_amount::<true>(&amount)?;
 
         Ok(Self { token_id, amount })
     }
@@ -70,6 +70,12 @@ impl NativeToken {
     }
 }
 
+impl WorkScore for NativeToken {
+    fn work_score(&self, params: WorkScoreParameters) -> u32 {
+        params.native_token()
+    }
+}
+
 impl PartialOrd for NativeToken {
     fn partial_cmp(&self, other: &Self) -> Option<core::cmp::Ordering> {
         Some(self.cmp(other))
@@ -82,7 +88,7 @@ impl Ord for NativeToken {
 }
 
 #[inline]
-fn verify_amount<const VERIFY: bool>(amount: &U256, _: &()) -> Result<(), Error> {
+fn verify_amount<const VERIFY: bool>(amount: &U256) -> Result<(), Error> {
     if VERIFY && amount.is_zero() {
         Err(Error::NativeTokensNullAmount)
     } else {
@@ -216,7 +222,7 @@ impl NativeTokens {
 
         native_tokens.sort_by(|a, b| a.token_id().cmp(b.token_id()));
         // Sort is obviously fine now but uniqueness still needs to be checked.
-        verify_unique_sorted::<true>(&native_tokens, &())?;
+        verify_unique_sorted::<true>(&native_tokens)?;
 
         Ok(Self(native_tokens))
     }
@@ -255,14 +261,8 @@ impl NativeTokens {
     }
 }
 
-impl WorkScore for NativeTokens {
-    fn work_score(&self, work_score_params: WorkScoreParameters) -> u32 {
-        self.len() as u32 * work_score_params.native_token()
-    }
-}
-
 #[inline]
-fn verify_unique_sorted<const VERIFY: bool>(native_tokens: &[NativeToken], _: &()) -> Result<(), Error> {
+fn verify_unique_sorted<const VERIFY: bool>(native_tokens: &[NativeToken]) -> Result<(), Error> {
     if VERIFY && !is_unique_sorted(native_tokens.iter().map(NativeToken::token_id)) {
         Err(Error::NativeTokensNotUniqueSorted)
     } else {

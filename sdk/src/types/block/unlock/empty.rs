@@ -1,6 +1,8 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use crate::types::block::protocol::WorkScore;
+
 /// Used to maintain correct index relationship between addresses and signatures when unlocking a
 /// [`MultiAddress`](crate::types::block::address::MultiAddress) where not all addresses are unlocked.
 #[derive(Clone, Debug, Eq, PartialEq, Hash, packable::Packable)]
@@ -11,6 +13,9 @@ impl EmptyUnlock {
     pub const KIND: u8 = 6;
 }
 
+impl WorkScore for EmptyUnlock {}
+
+#[cfg(feature = "serde")]
 mod dto {
     use serde::{Deserialize, Serialize};
 
