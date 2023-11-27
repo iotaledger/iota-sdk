@@ -79,7 +79,7 @@ impl BlockBody {
         }
     }
 
-    /// Creates a new [`BasicBlockBuilder`].
+    /// Creates a new [`BasicBlockBodyBuilder`].
     ///
     /// Note, that `max_burned_mana` is set to 0 and has to be updated to the correct value after the basic block has
     /// been built.

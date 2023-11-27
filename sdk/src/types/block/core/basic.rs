@@ -91,16 +91,8 @@ impl BasicBlockBodyBuilder {
         params: WorkScoreParameters,
         reference_mana_cost: u64,
     ) -> Result<BasicBlockBody, Error> {
-        let mut body = BasicBlockBody {
-            strong_parents: self.strong_parents,
-            weak_parents: self.weak_parents,
-            shallow_like_parents: self.shallow_like_parents,
-            payload: self.payload,
-            max_burned_mana: self.max_burned_mana,
-        };
-
+        let mut body = self.finish()?;
         body.max_burned_mana = body.work_score(params) as u64 * reference_mana_cost;
-
         Ok(body)
     }
 
