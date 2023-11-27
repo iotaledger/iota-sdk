@@ -3,7 +3,11 @@
 
 use packable::Packable;
 
-use crate::types::block::{output::AccountId, protocol::ProtocolParameters, Error};
+use crate::types::block::{
+    output::AccountId,
+    protocol::{ProtocolParameters, WorkScore, WorkScoreParameters},
+    Error,
+};
 
 /// An allotment of Mana which will be added upon commitment of the slot in which the containing transaction was issued,
 /// in the form of Block Issuance Credits to the account.
@@ -14,18 +18,6 @@ pub struct ManaAllotment {
     pub(crate) account_id: AccountId,
     #[packable(verify_with = verify_mana)]
     pub(crate) mana: u64,
-}
-
-impl PartialOrd for ManaAllotment {
-    fn partial_cmp(&self, other: &Self) -> Option<core::cmp::Ordering> {
-        Some(self.cmp(other))
-    }
-}
-
-impl Ord for ManaAllotment {
-    fn cmp(&self, other: &Self) -> core::cmp::Ordering {
-        self.account_id.cmp(&other.account_id)
-    }
 }
 
 impl ManaAllotment {
@@ -41,6 +33,24 @@ impl ManaAllotment {
 
     pub fn mana(&self) -> u64 {
         self.mana
+    }
+}
+
+impl PartialOrd for ManaAllotment {
+    fn partial_cmp(&self, other: &Self) -> Option<core::cmp::Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl Ord for ManaAllotment {
+    fn cmp(&self, other: &Self) -> core::cmp::Ordering {
+        self.account_id.cmp(&other.account_id)
+    }
+}
+
+impl WorkScore for ManaAllotment {
+    fn work_score(&self, params: WorkScoreParameters) -> u32 {
+        params.allotment()
     }
 }
 

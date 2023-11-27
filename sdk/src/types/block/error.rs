@@ -20,7 +20,10 @@ use crate::types::block::{
         unlock_condition::UnlockConditionCount,
         AccountId, AnchorId, ChainId, MetadataFeatureLength, NativeTokenCount, NftId, OutputIndex, TagFeatureLength,
     },
-    payload::{ContextInputCount, InputCount, OutputCount, TagLength, TaggedDataLength},
+    payload::{
+        tagged_data::{TagLength, TaggedDataLength},
+        ContextInputCount, InputCount, OutputCount,
+    },
     protocol::ProtocolParametersHash,
     unlock::{UnlockCount, UnlockIndex, UnlocksCount},
 };

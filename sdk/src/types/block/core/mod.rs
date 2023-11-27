@@ -19,7 +19,7 @@ pub use self::{
     validation::{ValidationBlockBody, ValidationBlockBodyBuilder},
 };
 use crate::types::block::{
-    protocol::{ProtocolParameters, ProtocolParametersHash},
+    protocol::{ProtocolParameters, ProtocolParametersHash, WorkScore, WorkScoreParameters},
     Error,
 };
 
@@ -99,6 +99,15 @@ impl BlockBody {
 
     pub(crate) fn hash(&self) -> [u8; 32] {
         Blake2b256::digest(self.pack_to_vec()).into()
+    }
+}
+
+impl WorkScore for BlockBody {
+    fn work_score(&self, params: WorkScoreParameters) -> u32 {
+        match self {
+            Self::Basic(basic) => basic.work_score(params),
+            Self::Validation(validation) => validation.work_score(params),
+        }
     }
 }
 

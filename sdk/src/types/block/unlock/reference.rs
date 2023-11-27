@@ -1,7 +1,7 @@
 // Copyright 2020-2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use crate::types::block::{unlock::UnlockIndex, Error};
+use crate::types::block::{protocol::WorkScore, unlock::UnlockIndex, Error};
 
 /// An [`Unlock`](crate::types::block::unlock::Unlock) that refers to another unlock.
 #[derive(Clone, Debug, Eq, PartialEq, Hash, packable::Packable)]
@@ -32,6 +32,8 @@ impl ReferenceUnlock {
         self.0.get()
     }
 }
+
+impl WorkScore for ReferenceUnlock {}
 
 #[cfg(feature = "serde")]
 pub(crate) mod dto {

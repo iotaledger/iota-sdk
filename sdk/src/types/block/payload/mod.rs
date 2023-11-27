@@ -18,15 +18,15 @@ use packable::{
     Packable, PackableExt,
 };
 
+pub(crate) use self::signed_transaction::{ContextInputCount, InputCount, OutputCount};
 pub use self::{
     candidacy_announcement::CandidacyAnnouncementPayload, signed_transaction::SignedTransactionPayload,
     tagged_data::TaggedDataPayload,
 };
-pub(crate) use self::{
-    signed_transaction::{ContextInputCount, InputCount, OutputCount},
-    tagged_data::{TagLength, TaggedDataLength},
+use crate::types::block::{
+    protocol::{ProtocolParameters, WorkScore, WorkScoreParameters},
+    Error,
 };
-use crate::types::block::{protocol::ProtocolParameters, Error};
 
 /// A generic payload that can represent different types defining block payloads.
 #[derive(Clone, Eq, PartialEq, From, Packable)]
@@ -77,7 +77,17 @@ impl Payload {
         }
     }
 
-    crate::def_is_as_opt!(Payload: SignedTransaction, TaggedData);
+    crate::def_is_as_opt!(Payload: TaggedData, SignedTransaction, CandidacyAnnouncement);
+}
+
+impl WorkScore for Payload {
+    fn work_score(&self, params: WorkScoreParameters) -> u32 {
+        match self {
+            Self::TaggedData(tagged_data) => tagged_data.work_score(params),
+            Self::SignedTransaction(signed_transaction) => signed_transaction.work_score(params),
+            Self::CandidacyAnnouncement(candidacy_announcement) => candidacy_announcement.work_score(params),
+        }
+    }
 }
 
 /// Representation of an optional [`Payload`].

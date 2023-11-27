@@ -35,7 +35,7 @@ async fn mint_and_burn_nft() -> Result<()> {
 
     let balance = wallet.sync(None).await.unwrap();
 
-    let output_id = OutputId::new(transaction.transaction_id, 0u16).unwrap();
+    let output_id = OutputId::new(transaction.transaction_id, 0u16);
     let nft_id = NftId::from(&output_id);
 
     let search = balance.nfts().iter().find(|&balance_nft_id| *balance_nft_id == nft_id);
@@ -78,7 +78,7 @@ async fn mint_and_burn_expired_nft() -> Result<()> {
         .reissue_transaction_until_included(&transaction.transaction_id, None, None)
         .await?;
 
-    let output_id = OutputId::new(transaction.transaction_id, 0u16)?;
+    let output_id = OutputId::new(transaction.transaction_id, 0u16);
     let nft_id = NftId::from(&output_id);
 
     wallet_1.sync(None).await?;
@@ -291,7 +291,7 @@ async fn mint_and_burn_nft_with_account() -> Result<()> {
     wallet
         .reissue_transaction_until_included(&nft_tx.transaction_id, None, None)
         .await?;
-    let output_id = OutputId::new(nft_tx.transaction_id, 0u16).unwrap();
+    let output_id = OutputId::new(nft_tx.transaction_id, 0u16);
     let nft_id = NftId::from(&output_id);
 
     let balance = wallet.sync(None).await?;
