@@ -12,9 +12,11 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     types::block::{
+        address::Bech32Address,
         core::Parents,
         output::{dto::OutputDto, AccountId, OutputId, OutputMetadata, OutputWithMetadata},
         protocol::ProtocolParameters,
+        protocol::ProtocolParametersHash,
         semantic::TransactionFailureReason,
         slot::{EpochIndex, SlotCommitment, SlotCommitmentId, SlotIndex},
         BlockId,
@@ -241,10 +243,10 @@ pub struct CommitteeMember {
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ValidatorResponse {
-    /// The account identifier of the validator
-    account_id: AccountId,
+    /// Account address of the validator.
+    address: Bech32Address,
     /// The epoch index until which the validator registered to stake.
-    staking_end_epoch: EpochIndex,
+    staking_epoch_end: EpochIndex,
     /// The total stake of the pool, including delegators.
     #[serde(with = "string")]
     pool_stake: u64,
@@ -258,6 +260,8 @@ pub struct ValidatorResponse {
     active: bool,
     /// The latest protocol version the validator supported.
     latest_supported_protocol_version: u8,
+    // The protocol hash of the latest supported protocol of the validator.
+    latest_supported_protocol_hash: ProtocolParametersHash,
 }
 
 /// Response of GET /api/core/v3/blocks/issuance
