@@ -8,10 +8,10 @@ pub use self::transaction::verify_semantic;
 use crate::{
     client::{ClientInner, Result},
     types::block::{
-        core::{BlockHeader, UnsignedBlock},
+        core::{BasicBlockBody, BlockHeader, UnsignedBlock},
         output::AccountId,
         payload::Payload,
-        protocol::WorkScore,
+        protocol::{WorkScore, WorkScoreParameters},
         BlockBody,
     },
 };
@@ -39,12 +39,12 @@ impl ClientInner {
             .with_weak_parents(issuance.weak_parents()?)
             .with_shallow_like_parents(issuance.shallow_like_parents()?)
             .with_payload(payload)
-            .finish_block_body()?;
+            .finish()?;
 
-        let work_score = basic_block_body.work_score(protocol_params.work_score_parameters) as u64;
-        let max_burned_mana = work_score * issuance.commitment.reference_mana_cost();
-
-        basic_block_body.set_max_burned_mana(max_burned_mana);
+        basic_block_body.set_max_burned_mana_to_minimum(
+            protocol_params.work_score_parameters,
+            issuance.commitment.reference_mana_cost(),
+        );
 
         Ok(UnsignedBlock::new(
             BlockHeader::new(
@@ -55,7 +55,7 @@ impl ClientInner {
                 issuance.latest_finalized_slot,
                 issuer_id,
             ),
-            basic_block_body,
+            basic_block_body.into(),
         ))
     }
 }

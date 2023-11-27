@@ -153,8 +153,10 @@ impl BasicBlockBody {
         self.max_burned_mana
     }
 
-    pub(crate) fn set_max_burned_mana(&mut self, max_burned_mana: u64) {
-        self.max_burned_mana = max_burned_mana;
+    /// Sets the `max_burned_mana` field to the minimum possible mana amount for the block to get accepted by the
+    /// network.
+    pub fn set_max_burned_mana_to_minimum(&mut self, params: WorkScoreParameters, reference_mana_cost: u64) {
+        self.max_burned_mana = self.work_score(params) as u64 * reference_mana_cost;
     }
 }
 
