@@ -583,7 +583,7 @@ mod tests {
         // Address generation returns an error when the key is cleared.
         assert!(
             stronghold_adapter
-                .generate_ed25519_addresses(IOTA_COIN_TYPE, 0, 0..1, None,)
+                .generate_ed25519_addresses(IOTA_COIN_TYPE, 0, 0..1, None)
                 .await
                 .is_err()
         );
