@@ -14,7 +14,7 @@ use crate::{
     types::block::{
         address::Bech32Address,
         core::Parents,
-        output::{dto::OutputDto, AccountId, OutputId, OutputMetadata, OutputWithMetadata},
+        output::{dto::OutputDto, OutputId, OutputMetadata, OutputWithMetadata},
         protocol::{ProtocolParameters, ProtocolParametersHash},
         semantic::TransactionFailureReason,
         slot::{EpochIndex, SlotCommitment, SlotCommitmentId, SlotIndex},
