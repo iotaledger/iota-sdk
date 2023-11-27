@@ -224,7 +224,7 @@ impl NftOutputBuilder {
                         .amount();
                     // Add a temporary storage deposit unlock condition so the new storage requirement can be calculated
                     self =
-                        self.add_unlock_condition(StorageDepositReturnUnlockCondition::new(return_address.clone(), 1));
+                        self.add_unlock_condition(StorageDepositReturnUnlockCondition::new(return_address.clone(), 1)?);
                     // Get the min amount of the output with the added storage deposit return unlock condition
                     let min_amount_with_sdruc = self.clone().finish()?.minimum_amount(params);
                     // If the return storage cost and amount are less than the required min
@@ -241,7 +241,7 @@ impl NftOutputBuilder {
                         .replace_unlock_condition(StorageDepositReturnUnlockCondition::new(
                             return_address,
                             sdruc_amount,
-                        ))
+                        )?)
                 } else {
                     self
                 }
