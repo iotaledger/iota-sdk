@@ -31,16 +31,16 @@ class RequiredStorageDeposit:
     """Required storage deposit for the outputs in the account.
 
     Attributes:
-        account: The required amount for account outputs.
         basic: The required amount for basic outputs.
+        account: The required amount for account outputs.
         foundry: The required amount for foundry outputs.
         nft: The required amount for nft outputs.
         delegation: The required amount for delegation outputs.
     """
-    account: int = field(metadata=config(
+    basic: int = field(metadata=config(
         encoder=str
     ))
-    basic: int = field(metadata=config(
+    account: int = field(metadata=config(
         encoder=str
     ))
     foundry: int = field(metadata=config(

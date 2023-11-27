@@ -58,10 +58,10 @@ export interface BaseCoinBalance {
 
 /** The required storage deposit per output type */
 export interface RequiredStorageDeposit {
-    /** The required amount for Alias outputs. */
-    account: u64;
     /** The required amount for Basic outputs. */
     basic: u64;
+    /** The required amount for Alias outputs. */
+    account: u64;
     /** The required amount for Foundry outputs. */
     foundry: u64;
     /** The required amount for NFT outputs. */
