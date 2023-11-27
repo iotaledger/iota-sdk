@@ -496,7 +496,7 @@ pub struct RoutesResponse {
 
 /// Response of
 /// - GET /api/core/v3/commitments/{commitmentId}/utxo-changes
-/// - GET /api/core/v3/commitments/by-index/{index}/utxo-changes
+/// - GET /api/core/v3/commitments/by-slot/{slot}/utxo-changes
 /// Returns all UTXO changes that happened at a specific slot.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
