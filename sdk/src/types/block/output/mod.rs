@@ -431,7 +431,7 @@ impl MinimumOutputAmount for Output {}
 pub trait MinimumOutputAmount: StorageScore {
     /// Computes the minimum amount of this output given [`StorageScoreParameters`].
     fn minimum_amount(&self, params: StorageScoreParameters) -> u64 {
-        params.storage_cost() * self.storage_score(params)
+        self.storage_score(params) * params.storage_cost()
     }
 }
 
