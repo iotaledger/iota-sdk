@@ -171,6 +171,17 @@ impl WorkScore for BasicBlockBody {
     }
 }
 
+impl WorkScore for BasicBlockBody {
+    fn work_score(&self, params: WorkScoreParameters) -> u32 {
+        params.block()
+            + self
+                .payload
+                .as_ref()
+                .map(|payload| payload.work_score(params))
+                .unwrap_or(0)
+    }
+}
+
 fn verify_basic_block_body<const VERIFY: bool>(
     basic_block_body: &BasicBlockBody,
     _: &ProtocolParameters,

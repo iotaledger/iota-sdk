@@ -235,7 +235,7 @@ impl<'a> SemanticValidationContext<'a> {
             .filter_map(|(index, output)| {
                 output.chain_id().map(|chain_id| {
                     (
-                        chain_id.or_from_output_id(&OutputId::new(*transaction_id, index as u16).unwrap()),
+                        chain_id.or_from_output_id(&OutputId::new(*transaction_id, index as u16)),
                         output,
                     )
                 })

@@ -134,10 +134,7 @@ mod tests {
         );
 
         let outputs_participation = std::iter::once((
-            TransactionHash::new([3; 32])
-                .into_transaction_id(0)
-                .into_output_id(0)
-                .unwrap(),
+            TransactionHash::new([3; 32]).into_transaction_id(0).into_output_id(0),
             OutputStatusResponse::mock(),
         ))
         .collect::<HashMap<_, _>>();
