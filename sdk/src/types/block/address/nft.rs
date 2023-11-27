@@ -10,15 +10,18 @@ use crate::types::block::{
     Error,
 };
 
-/// An NFT address.
+/// An [`Address`](super::Address) derived from an NFT ID which can be unlocked by unlocking the corresponding NFT.
 #[derive(Clone, Copy, Eq, PartialEq, Ord, PartialOrd, Hash, From, AsRef, Deref, Display, packable::Packable)]
 #[as_ref(forward)]
-pub struct NftAddress(NftId);
+pub struct NftAddress(
+    /// BLAKE2b-256 hash of the Output ID that created the NFT.
+    NftId,
+);
 
 impl NftAddress {
-    /// The [`Address`](crate::types::block::address::Address) kind of an NFT address.
+    /// The [`Address`](super::Address) kind of an [`NftAddress`].
     pub const KIND: u8 = 16;
-    /// The length of a [`NftAddress`].
+    /// The length of an [`NftAddress`].
     pub const LENGTH: usize = NftId::LENGTH;
 
     /// Creates a new [`NftAddress`].

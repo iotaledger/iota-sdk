@@ -10,13 +10,17 @@ use crate::types::block::{
     Error,
 };
 
-/// An anchor address.
+/// An [`Address`](super::Address) derived from an anchor ID which can be unlocked by unlocking the corresponding
+/// anchor.
 #[derive(Clone, Copy, Eq, PartialEq, Ord, PartialOrd, Hash, From, AsRef, Deref, Display, packable::Packable)]
 #[as_ref(forward)]
-pub struct AnchorAddress(AnchorId);
+pub struct AnchorAddress(
+    /// BLAKE2b-256 hash of the Output ID that created it the anchor.
+    AnchorId,
+);
 
 impl AnchorAddress {
-    /// The [`Address`](crate::types::block::address::Address) kind of an [`AnchorAddress`].
+    /// The [`Address`](super::Address) kind of an [`AnchorAddress`].
     pub const KIND: u8 = 24;
     /// The length of an [`AnchorAddress`].
     pub const LENGTH: usize = AnchorId::LENGTH;

@@ -12,13 +12,16 @@ use packable::Packable;
 
 use crate::types::block::{output::StorageScore, Error};
 
-/// An Ed25519 address.
+/// An [`Address`](super::Address) derived from an Ed25519 public key.
 #[derive(Clone, Copy, Eq, PartialEq, Ord, PartialOrd, Hash, From, AsRef, Deref, Packable)]
 #[as_ref(forward)]
-pub struct Ed25519Address([u8; Self::LENGTH]);
+pub struct Ed25519Address(
+    /// BLAKE2b-256 hash of the Ed25519 public key.
+    [u8; Self::LENGTH],
+);
 
 impl Ed25519Address {
-    /// The [`Address`](crate::types::block::address::Address) kind of an [`Ed25519Address`].
+    /// The [`Address`](super::Address) kind of an [`Ed25519Address`].
     pub const KIND: u8 = 0;
     /// The length of an [`Ed25519Address`].
     pub const LENGTH: usize = PublicKey::LENGTH;
