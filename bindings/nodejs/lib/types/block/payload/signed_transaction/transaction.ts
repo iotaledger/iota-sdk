@@ -35,14 +35,14 @@ class Transaction {
     @Type(() => Input, {
         discriminator: ContextInputDiscriminator,
     })
-    readonly contextInputs: ContextInput[];
+    readonly contextInputs?: ContextInput[];
 
     @Type(() => Input, {
         discriminator: InputDiscriminator,
     })
     readonly inputs: Input[];
 
-    readonly allotments: ManaAllotment[];
+    readonly allotments?: ManaAllotment[];
 
     private capabilities?: HexEncodedString;
 
