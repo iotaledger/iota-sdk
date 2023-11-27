@@ -14,7 +14,10 @@ use crate::{
     },
     types::{
         api::plugins::indexer::OutputIdsResponse,
-        block::output::{AccountId, AnchorId, DelegationId, FoundryId, NftId, OutputId},
+        block::{
+            address::ToBech32Ext,
+            output::{AccountId, AnchorId, DelegationId, FoundryId, NftId, OutputId},
+        },
     },
 };
 
@@ -53,9 +56,10 @@ impl ClientInner {
     }
 
     /// Get account output by its accountID.
-    /// api/indexer/v2/outputs/account/:{AccountId}
+    /// api/indexer/v2/outputs/account/{bech32Address}
     pub async fn account_output_id(&self, account_id: AccountId) -> Result<OutputId> {
-        let route = format!("api/indexer/v2/outputs/account/{account_id}");
+        let bech32_address = account_id.to_bech32(self.get_bech32_hrp().await?);
+        let route = format!("api/indexer/v2/outputs/account/{bech32_address}");
 
         Ok(*(self
             .get_output_ids(&route, AccountOutputQueryParameters::new(), true, false)
@@ -75,9 +79,10 @@ impl ClientInner {
     }
 
     /// Get anchor output by its anchorID.
-    /// api/indexer/v2/outputs/anchor/:{AnchorId}
+    /// api/indexer/v2/outputs/anchor/{bech32Address}
     pub async fn anchor_output_id(&self, anchor_id: AnchorId) -> Result<OutputId> {
-        let route = format!("api/indexer/v2/outputs/anchor/{anchor_id}");
+        let bech32_address = anchor_id.to_bech32(self.get_bech32_hrp().await?);
+        let route = format!("api/indexer/v2/outputs/anchor/{bech32_address}");
 
         Ok(*(self
             .get_output_ids(&route, AnchorOutputQueryParameters::new(), true, false)
@@ -146,9 +151,10 @@ impl ClientInner {
     }
 
     /// Get NFT output by its nftID.
-    /// api/indexer/v2/outputs/nft/:{NftId}
+    /// api/indexer/v2/outputs/nft/{bech32Address}
     pub async fn nft_output_id(&self, nft_id: NftId) -> Result<OutputId> {
-        let route = format!("api/indexer/v2/outputs/nft/{nft_id}");
+        let bech32_address = nft_id.to_bech32(self.get_bech32_hrp().await?);
+        let route = format!("api/indexer/v2/outputs/nft/{bech32_address}");
 
         Ok(*(self
             .get_output_ids(&route, NftOutputQueryParameters::new(), true, false)
