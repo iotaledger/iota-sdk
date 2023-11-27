@@ -14,21 +14,22 @@ import {
 
 /** The MethodHandler which sends the commands to the Rust backend. */
 export class SecretManagerMethodHandler {
-    methodHandler: SecretManagerMethodHandler;
+    methodHandler: any;
+
+    /**
+     * @param methodHandler The Rust method handler created in `ClientMethodHandler.create()`.
+     */
+    constructor(methodHandler: any) {
+        this.methodHandler = methodHandler;
+    }
 
     /**
      * @param options A secret manager type or a secret manager method handler.
      */
-    constructor(options: SecretManagerType | SecretManagerMethodHandler) {
+    static create(options: SecretManagerType): SecretManagerMethodHandler {
         try {
-            // The rust secret manager object is not extensible
-            if (Object.isExtensible(options)) {
-                this.methodHandler = createSecretManager(
-                    JSON.stringify(options),
-                );
-            } else {
-                this.methodHandler = options as SecretManagerMethodHandler;
-            }
+            const methodHandler = createSecretManager(JSON.stringify(options));
+            return new SecretManagerMethodHandler(methodHandler);
         } catch (error: any) {
             throw errorHandle(error);
         }
