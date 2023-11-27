@@ -36,23 +36,6 @@ impl BasicBlockBodyBuilder {
         }
     }
 
-    /// Creates a new [`BasicBlockBodyBuilder`] with minimum required mana amount for the block to get accepted by the
-    /// network.
-    #[inline(always)]
-    pub fn new_with_minimum_mana_amount(
-        strong_parents: StrongParents,
-        params: ProtocolParameters,
-        reference_mana_cost: u64,
-    ) -> Self {
-        Self {
-            strong_parents,
-            weak_parents: WeakParents::default(),
-            shallow_like_parents: ShallowLikeParents::default(),
-            payload: OptionalPayload::default(),
-            max_burned_mana: 0,
-        }
-    }
-
     /// Adds strong parents to a [`BasicBlockBodyBuilder`].
     #[inline(always)]
     pub fn with_strong_parents(mut self, strong_parents: impl Into<StrongParents>) -> Self {
