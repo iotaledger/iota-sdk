@@ -13,7 +13,7 @@ use crate::types::block::{
         MinimumOutputAmount, Output, OutputBuilderAmount, OutputId, StateTransitionError, StateTransitionVerifier,
         StorageScore, StorageScoreParameters,
     },
-    protocol::ProtocolParameters,
+    protocol::{ProtocolParameters, WorkScore, WorkScoreParameters},
     semantic::{SemanticValidationContext, TransactionFailureReason},
     slot::EpochIndex,
     unlock::Unlock,
@@ -387,6 +387,12 @@ impl StorageScore for DelegationOutput {
             + (1 + self.packed_len() as u64) * params.data_factor() as u64
             + params.delegation_offset()
             + self.unlock_conditions.storage_score(params)
+    }
+}
+
+impl WorkScore for DelegationOutput {
+    fn work_score(&self, params: WorkScoreParameters) -> u32 {
+        params.output() + self.unlock_conditions.work_score(params)
     }
 }
 
