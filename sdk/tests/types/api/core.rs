@@ -55,8 +55,8 @@ fn responses() {
     // json_response("get-outputs-by-id-response-example.json").unwrap();
     json_response::<RoutesResponse>("get-routes-response-example.json").unwrap();
     // json_response::<UtxoChangesResponse>("get-utxo-changes-response-example.json").unwrap();
-    // json_response::<ValidatorResponse>("get-validator-example.json").unwrap();
-    // json_response::<ValidatorsResponse>("get-validators-example.json").unwrap();
+    json_response::<ValidatorResponse>("get-validator-example.json").unwrap();
+    json_response::<ValidatorsResponse>("get-validators-example.json").unwrap();
     // json_response::<BlockId>("post-blocks-response-example.json").unwrap();
 
     binary_response::<SlotCommitment>("get-commitment-response-binary-example", &()).unwrap();
