@@ -50,7 +50,7 @@ export type Result = {
         type: string;
         // If "ok", json payload
         payload?: string;
-        // If !"ok", json error
+        // If not "ok", json error
         error?: string;
     };
 };
