@@ -85,7 +85,7 @@ mod tests {
     fn test_commitment() {
         let commitment: ContextInput = serde_json::from_value(serde_json::json!(
             {
-                "type": 0,
+                "type": 1,
                 "commitmentId": "0xedf5f572c58ddf4b4f9567d82bf96689cc68b730df796d822b4b9fb643f5efda4f9567d8"
             }
         ))
@@ -111,7 +111,7 @@ mod tests {
         let bic: ContextInput = serde_json::from_str(
             r#"
             {
-                "type": 1,
+                "type": 2,
                 "accountId": "0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c649"
             }
             "#,
@@ -127,7 +127,7 @@ mod tests {
         let bic_deserialization_result: Result<ContextInput, _> = serde_json::from_str(
             r#"
             {
-                "type": 2,
+                "type": 3,
                 "accountId": "0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c649"
             }
             "#,
@@ -140,7 +140,7 @@ mod tests {
         let reward: ContextInput = serde_json::from_str(
             r#"
             {
-                "type": 2,
+                "type": 3,
                 "index": 10 
             }
             "#,
