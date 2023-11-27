@@ -4,7 +4,10 @@
 mod simple;
 
 pub use self::simple::SimpleTokenScheme;
-use crate::types::block::Error;
+use crate::types::block::{
+    protocol::{WorkScore, WorkScoreParameters},
+    Error,
+};
 
 ///
 #[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, derive_more::From, packable::Packable)]
@@ -34,4 +37,12 @@ impl TokenScheme {
     }
 
     crate::def_is_as_opt!(TokenScheme: Simple);
+}
+
+impl WorkScore for TokenScheme {
+    fn work_score(&self, params: WorkScoreParameters) -> u32 {
+        match self {
+            Self::Simple(simple) => simple.work_score(params),
+        }
+    }
 }
