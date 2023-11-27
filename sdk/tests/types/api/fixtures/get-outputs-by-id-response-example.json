@@ -1,0 +1,22 @@
+{
+    "output": {
+      "type": 3,
+      "amount": "1000",
+      "unlockConditions": [
+        {
+          "type": 0,
+          "address": {
+            "type": 0,
+            "pubKeyHash": "0x8eaf87ac1f52eb05f2c7c0c15502df990a228838dc37bd18de9503d69afd257d"
+          }
+        }
+      ],
+      "mana": "2000"
+    },
+    "outputIdProof": {
+      "slot": 20,
+      "outputIndex": 0,
+      "transactionCommitment": "0x897dr69bfa60c8cf80afd730741862d200405d5df7cabfe9b564361dce1f7036",
+      "outputCommitmentProof": "0xd3a0a0c76ab2d9b406a32c30c43e102fe0f39a12a3f6c1e3b19d239db2f18d75"
+    }
+  }

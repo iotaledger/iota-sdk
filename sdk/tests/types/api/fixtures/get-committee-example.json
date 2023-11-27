@@ -1,0 +1,19 @@
+{
+    "epoch": 10,
+    "totalStake": "900000000",
+    "totalValidatorStake": "60000000",
+    "committee": [
+      {
+        "address": "rms1pqm4xk8e9ny5w5rxjkvtp249tfhlwvcshyr3pc0665jvp7g3hc875k538hl",
+        "poolStake": "200000",
+        "validatorStake": "100000",
+        "fixedCost": "50000"
+      },
+      {
+        "address": "rms1pp4wuuz0y42caz48vv876qfpmffswsvg40zz8v79sy8cp0jfxm4kunflcgt",
+        "poolStake": "205000",
+        "validatorStake": "90000",
+        "fixedCost": "52000"
+      }
+    ]
+  }
