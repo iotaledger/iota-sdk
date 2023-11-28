@@ -49,7 +49,7 @@ async fn main() -> Result<()> {
         // with storage deposit return
         basic_output_builder
             .clone()
-            .add_unlock_condition(StorageDepositReturnUnlockCondition::new(address.clone(), 1_000_000))
+            .add_unlock_condition(StorageDepositReturnUnlockCondition::new(address.clone(), 1_000_000)?)
             .finish_output()?,
         // with expiration
         basic_output_builder

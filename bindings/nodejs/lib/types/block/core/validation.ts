@@ -20,11 +20,11 @@ export class ValidationBlock extends Block {
     /**
      * Blocks that are weakly directly approved.
      */
-    readonly weakParents!: WeakParents;
+    readonly weakParents?: WeakParents;
     /**
      * Blocks that are directly referenced to adjust opinion.
      */
-    readonly shallowLikeParents!: ShallowLikeParents;
+    readonly shallowLikeParents?: ShallowLikeParents;
 
     /**
      * The highest supported protocol version the issuer of this block supports.

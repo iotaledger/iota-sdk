@@ -50,7 +50,7 @@ async fn main() -> Result<()> {
         // with storage deposit return unlock condition
         basic_output_builder
             .clone()
-            .add_unlock_condition(StorageDepositReturnUnlockCondition::new(address.clone(), 1000000))
+            .add_unlock_condition(StorageDepositReturnUnlockCondition::new(address.clone(), 1000000)?)
             .finish_output()?,
         // with timeout unlock condition
         basic_output_builder

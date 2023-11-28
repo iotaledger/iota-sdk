@@ -244,7 +244,9 @@ pub(crate) mod dto {
         #[serde(rename = "type")]
         pub kind: u8,
         pub strong_parents: BTreeSet<BlockId>,
+        #[serde(default, skip_serializing_if = "BTreeSet::is_empty")]
         pub weak_parents: BTreeSet<BlockId>,
+        #[serde(default, skip_serializing_if = "BTreeSet::is_empty")]
         pub shallow_like_parents: BTreeSet<BlockId>,
         #[serde(default, skip_serializing_if = "Option::is_none")]
         pub payload: Option<PayloadDto>,
