@@ -175,6 +175,12 @@ pub enum ClientMethod {
         /// Block ID
         block_id: BlockId,
     },
+    /// Get a block with its metadata
+    #[serde(rename_all = "camelCase")]
+    GetBlockFull {
+        /// Block ID
+        block_id: BlockId,
+    },
     /// Get block raw
     #[serde(rename_all = "camelCase")]
     GetBlockRaw {

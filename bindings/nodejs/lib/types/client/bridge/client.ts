@@ -82,6 +82,13 @@ export interface __GetBlockMetadataMethod__ {
     };
 }
 
+export interface __GetBlockFullMethod__ {
+    name: 'getBlockFull';
+    data: {
+        blockId: BlockId;
+    };
+}
+
 export interface __FindInputsMethod__ {
     name: 'findInputs';
     data: {

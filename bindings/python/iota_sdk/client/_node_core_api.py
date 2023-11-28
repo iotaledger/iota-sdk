@@ -6,7 +6,7 @@ from abc import ABCMeta, abstractmethod
 from dacite import from_dict
 
 from iota_sdk.types.block.signed_block import SignedBlock
-from iota_sdk.types.block.metadata import BlockMetadata
+from iota_sdk.types.block.metadata import BlockMetadata, BlockWithMetadata
 from iota_sdk.types.common import HexStr
 from iota_sdk.types.node_info import NodeInfo, NodeInfoWrapper
 from iota_sdk.types.output_metadata import OutputWithMetadata, OutputMetadata
@@ -82,6 +82,13 @@ class NodeCoreAPI(metaclass=ABCMeta):
         """Get the block metadata corresponding to the given block id.
         """
         return BlockMetadata.from_dict(self._call_method('getBlockMetadata', {
+            'blockId': block_id
+        }))
+
+    def get_block_full(self, block_id: HexStr) -> BlockWithMetadata:
+        """Get a block with its metadata corresponding to the given block id.
+        """
+        return BlockWithMetadata.from_dict(self._call_method('getBlockFull', {
             'blockId': block_id
         }))
 
