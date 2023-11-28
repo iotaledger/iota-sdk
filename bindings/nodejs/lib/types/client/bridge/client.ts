@@ -82,8 +82,8 @@ export interface __GetBlockMetadataMethod__ {
     };
 }
 
-export interface __GetBlockFullMethod__ {
-    name: 'getBlockFull';
+export interface __GetBlockWithMetadataMethod__ {
+    name: 'getBlockWithMetadata';
     data: {
         blockId: BlockId;
     };

@@ -12,7 +12,7 @@ import type {
     __GetNetworkInfoMethod__,
     __GetBlockMethod__,
     __GetBlockMetadataMethod__,
-    __GetBlockFullMethod__,
+    __GetBlockWithMetadataMethod__,
     __FindInputsMethod__,
     __SignTransactionMethod__,
     __BuildBasicBlockMethod__,
@@ -66,7 +66,7 @@ export type __ClientMethods__ =
     | __GetNetworkInfoMethod__
     | __GetBlockMethod__
     | __GetBlockMetadataMethod__
-    | __GetBlockFullMethod__
+    | __GetBlockWithMetadataMethod__
     | __FindInputsMethod__
     | __SignTransactionMethod__
     | __SignatureUnlockMethod__

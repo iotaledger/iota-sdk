@@ -85,10 +85,10 @@ class NodeCoreAPI(metaclass=ABCMeta):
             'blockId': block_id
         }))
 
-    def get_block_full(self, block_id: HexStr) -> BlockWithMetadata:
+    def get_block_with_metadata(self, block_id: HexStr) -> BlockWithMetadata:
         """Get a block with its metadata corresponding to the given block id.
         """
-        return BlockWithMetadata.from_dict(self._call_method('getBlockFull', {
+        return BlockWithMetadata.from_dict(self._call_method('getBlockWithMetadata', {
             'blockId': block_id
         }))
 

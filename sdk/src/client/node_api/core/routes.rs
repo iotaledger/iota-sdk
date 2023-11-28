@@ -224,7 +224,7 @@ impl ClientInner {
 
     /// Returns a block with its metadata.
     /// GET /api/core/v3/blocks/{blockId}/full
-    pub async fn get_block_full(&self, block_id: &BlockId) -> Result<BlockWithMetadataResponse> {
+    pub async fn get_block_with_metadata(&self, block_id: &BlockId) -> Result<BlockWithMetadataResponse> {
         let path = &format!("api/core/v3/blocks/{block_id}/full");
 
         self.get_request(path, None, true, true).await

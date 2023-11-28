@@ -117,7 +117,7 @@ pub enum Response {
     /// - [`GetBlockMetadata`](crate::method::ClientMethod::GetBlockMetadata)
     BlockMetadata(BlockMetadataResponse),
     /// Response for:
-    /// - [`GetBlockFull`](crate::method::ClientMethod::GetBlockFull)
+    /// - [`GetBlockWithMetadata`](crate::method::ClientMethod::GetBlockWithMetadata)
     BlockFull(BlockWithMetadataResponse),
     /// Response for:
     /// - [`GetBlockRaw`](crate::method::ClientMethod::GetBlockRaw)

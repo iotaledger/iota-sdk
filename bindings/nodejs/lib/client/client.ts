@@ -201,9 +201,9 @@ export class Client {
      * @param blockId The corresponding block ID of the requested block.
      * @returns The requested block with its metadata.
      */
-    async getBlockFull(blockId: BlockId): Promise<IBlockWithMetadata> {
+    async getBlockWithMetadata(blockId: BlockId): Promise<IBlockWithMetadata> {
         const response = await this.methodHandler.callMethod({
-            name: 'getBlockFull',
+            name: 'getBlockWithMetadata',
             data: {
                 blockId,
             },

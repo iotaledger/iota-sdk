@@ -177,7 +177,7 @@ pub enum ClientMethod {
     },
     /// Get a block with its metadata
     #[serde(rename_all = "camelCase")]
-    GetBlockFull {
+    GetBlockWithMetadata {
         /// Block ID
         block_id: BlockId,
     },
