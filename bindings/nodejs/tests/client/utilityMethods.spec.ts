@@ -25,7 +25,7 @@ describe('Client utility methods', () => {
             },
         };
         await expect(
-            new SecretManager(strongholdSecretManager).storeMnemonic(mnemonic),
+            SecretManager.create(strongholdSecretManager).storeMnemonic(mnemonic),
         ).resolves.toBe(null);
     });
 
@@ -122,7 +122,7 @@ describe('Client utility methods', () => {
 
         // `IOTA` hex encoded
         const message = '0x494f5441';
-        const signature = await new SecretManager(secretManager).signEd25519(
+        const signature = await SecretManager.create(secretManager).signEd25519(
             message,
             {
                 coinType: 4218,

@@ -28,7 +28,7 @@ async function makeClient(): Promise<Client> {
     });
 }
 
-const secretManager = new SecretManager({
+const secretManager = SecretManager.create({
     mnemonic:
         'endorse answer radar about source reunion marriage tag sausage weekend frost daring base attack because joke dream slender leisure group reason prepare broken river',
 });
@@ -62,7 +62,7 @@ describe.skip('Main examples', () => {
 
     // TODO
     // it('generates addresses', async () => {
-    //     const addresses = await new SecretManager(
+    //     const addresses = await SecretManager.create(
     //         secretManager,
     //     ).generateEd25519Addresses({
     //         accountIndex: 0,

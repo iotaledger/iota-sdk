@@ -24,7 +24,7 @@ async function makeClient(): Promise<Client> {
     });
 }
 
-const secretManager = new SecretManager({
+const secretManager = SecretManager.create({
     mnemonic:
         'endorse answer radar about source reunion marriage tag sausage weekend frost daring base attack because joke dream slender leisure group reason prepare broken river',
 });

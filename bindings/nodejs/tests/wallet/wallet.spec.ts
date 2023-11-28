@@ -18,7 +18,7 @@ describe('Wallet', () => {
             },
         };
 
-        const secretManager = new SecretManager(strongholdSecretManager);
+        const secretManager = SecretManager.create(strongholdSecretManager);
 
         await secretManager.storeMnemonic('vital give early extra blind skin eight discover scissors there globe deal goat fat load robot return rate fragile recycle select live ordinary claim',);
 
@@ -63,7 +63,7 @@ describe('Wallet', () => {
             },
         };
 
-        const secretManager = new SecretManager(strongholdSecretManager);
+        const secretManager = SecretManager.create(strongholdSecretManager);
 
         await secretManager.storeMnemonic('vital give early extra blind skin eight discover scissors there globe deal goat fat load robot return rate fragile recycle select live ordinary claim',);
 
@@ -117,7 +117,7 @@ describe('Wallet', () => {
                 password: `A12345678*`,
             },
         }
-        const secretManager = await new SecretManager(strongholdSecretManager);
+        const secretManager = await SecretManager.create(strongholdSecretManager);
         await secretManager.storeMnemonic(
             'vital give early extra blind skin eight discover scissors there globe deal goat fat load robot return rate fragile recycle select live ordinary claim',
         );

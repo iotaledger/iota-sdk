@@ -26,7 +26,7 @@ const secretManager = {
 // Skip for CI
 describe.skip('Output builder methods', () => {
     it('builds a basic output', async () => {
-        const addresses = await new SecretManager(secretManager).generateEd25519Addresses({
+        const addresses = await SecretManager.create(secretManager).generateEd25519Addresses({
             range: {
                 start: 0,
                 end: 1,
@@ -50,7 +50,7 @@ describe.skip('Output builder methods', () => {
     });
 
     it('builds an account output', async () => {
-        const addresses = await new SecretManager(secretManager).generateEd25519Addresses({
+        const addresses = await SecretManager.create(secretManager).generateEd25519Addresses({
             range: {
                 start: 0,
                 end: 1,
@@ -103,7 +103,7 @@ describe.skip('Output builder methods', () => {
 
     it('builds an nft output', async () => {
         const client = await makeClient();
-        const addresses = await new SecretManager(secretManager).generateEd25519Addresses({
+        const addresses = await SecretManager.create(secretManager).generateEd25519Addresses({
             range: {
                 start: 0,
                 end: 1,

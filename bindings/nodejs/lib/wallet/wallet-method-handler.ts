@@ -115,7 +115,7 @@ export class WalletMethodHandler {
     async getSecretManager(): Promise<SecretManager> {
         try {
             const result = await getSecretManagerFromWallet(this.methodHandler);
-            return new SecretManager(result);
+            return SecretManager.create(result);
         } catch (error: any) {
             throw errorHandle(error);
         }

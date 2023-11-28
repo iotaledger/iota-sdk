@@ -29,7 +29,7 @@ async function run() {
         mnemonic: process.env.MNEMONIC,
     };
 
-    const secretManager = new SecretManager(mnemonicSecretManager);
+    const secretManager = SecretManager.create(mnemonicSecretManager);
 
     const client = await Client.create({
         // Insert your node URL in the .env.

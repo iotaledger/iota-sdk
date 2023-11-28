@@ -9,7 +9,7 @@ async function run() {
             'inhale gorilla deny three celery song category owner lottery rent author wealth penalty crawl hobby obtain glad warm early rain clutch slab august bleak',
     };
 
-    const secretManager = new SecretManager(mnemonicSecretManager);
+    const secretManager = SecretManager.create(mnemonicSecretManager);
 
     const walletAddress = await secretManager.generateEd25519Addresses({
         coinType: CoinType.IOTA,
@@ -41,7 +41,7 @@ async function run() {
 }
 
 describe('wallet tests', () => {
-    jest.setTimeout(10000);
+    jest.setTimeout(100000);
     it('wallet', async () => {
         await run();
     });

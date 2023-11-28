@@ -45,7 +45,7 @@ async function run(): Promise<void> {
             mnemonic: process.env.MNEMONIC,
         };
 
-        const secretManager = new SecretManager(mnemonicSecretManager);
+        const secretManager = SecretManager.create(mnemonicSecretManager);
 
         const addresses = await secretManager.generateEvmAddresses({
             coinType: ETHEREUM_COIN_TYPE,

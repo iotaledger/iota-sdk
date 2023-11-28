@@ -24,7 +24,7 @@ async function run() {
         if (!process.env.MNEMONIC) {
             throw new Error('.env MNEMONIC is undefined, see .env.example');
         }
-        const secretManager = new SecretManager({
+        const secretManager = SecretManager.create({
             mnemonic: process.env.MNEMONIC,
         });
 

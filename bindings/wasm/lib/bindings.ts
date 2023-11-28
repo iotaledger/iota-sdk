@@ -26,7 +26,7 @@ const getSecretManagerFromWallet = (
 ): SecretManagerMethodHandler => {
     // TODO figure out why this one is extensible but client isnt
     const res = getSecretManagerFromWalletRust(method);
-    Object.preventExtensions(res);
+    //Object.preventExtensions(res);
     return res;
 };
 

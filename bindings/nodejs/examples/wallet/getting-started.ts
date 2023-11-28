@@ -33,7 +33,7 @@ async function main() {
         },
     };
 
-    const secretManager = new SecretManager(strongholdSecretManager);
+    const secretManager = SecretManager.create(strongholdSecretManager);
 
     // Generate a mnemonic and store its seed in the Stronghold vault.
     // INFO: It is best practice to back up the mnemonic somewhere secure.
