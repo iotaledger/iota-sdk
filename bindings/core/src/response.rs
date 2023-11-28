@@ -118,7 +118,7 @@ pub enum Response {
     BlockMetadata(BlockMetadataResponse),
     /// Response for:
     /// - [`GetBlockWithMetadata`](crate::method::ClientMethod::GetBlockWithMetadata)
-    BlockFull(BlockWithMetadataResponse),
+    BlockWithMetadata(BlockWithMetadataResponse),
     /// Response for:
     /// - [`GetBlockRaw`](crate::method::ClientMethod::GetBlockRaw)
     Raw(Vec<u8>),
