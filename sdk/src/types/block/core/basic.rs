@@ -99,14 +99,6 @@ impl BasicBlockBodyBuilder {
         self
     }
 
-    // TODO: keep or remove?
-    // /// Adds max burned mana to a [`BasicBlockBodyBuilder`].
-    // #[inline(always)]
-    // pub fn with_max_burned_mana(mut self, max_burned_mana: u64) -> Self {
-    //     self.max_burned_mana = max_burned_mana;
-    //     self
-    // }
-
     /// Finishes the builder into a [`BasicBlockBody`].
     pub fn finish(self) -> Result<BasicBlockBody, Error> {
         verify_parents_sets(&self.strong_parents, &self.weak_parents, &self.shallow_like_parents)?;
