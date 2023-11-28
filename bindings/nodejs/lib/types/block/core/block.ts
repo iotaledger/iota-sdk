@@ -6,7 +6,7 @@ import { Signature, SignatureDiscriminator } from '../signature';
 import { SlotCommitmentId, SlotIndex } from '../slot';
 import { u64 } from '../../utils/type-aliases';
 import { plainToInstance, Type } from 'class-transformer';
-import { BlockBody, BlockBodyType } from './block-body';
+import { BlockBody } from './block-body';
 import { BasicBlockBody } from './basic';
 import { ValidationBlockBody } from './validation';
 import { BlockBodyDiscriminator } from '.';
@@ -78,7 +78,7 @@ class Block {
      * @returns true if it is, otherwise false
      */
     isBasic(): boolean {
-        return this.body.type === BlockBodyType.Basic;
+        return this.body.isBasic();
     }
 
     /**
@@ -87,11 +87,7 @@ class Block {
      * @returns The block
      */
     asBasic(): BasicBlockBody {
-        if (this.isBasic()) {
-            return this.body as unknown as BasicBlockBody;
-        } else {
-            throw new Error('invalid downcast of non-BasicBlockBody');
-        }
+        return this.body.asBasic();
     }
 
     /**
@@ -99,7 +95,7 @@ class Block {
      * @returns true if it is, otherwise false
      */
     isValidation(): boolean {
-        return this.body.type === BlockBodyType.Validation;
+        return this.body.isValidation();
     }
 
     /**
@@ -108,11 +104,7 @@ class Block {
      * @returns The block
      */
     asValidation(): ValidationBlockBody {
-        if (this.isValidation()) {
-            return this.body as unknown as ValidationBlockBody;
-        } else {
-            throw new Error('invalid downcast of non-ValidationBlockBody');
-        }
+        return this.body.asValidation();
     }
 }
 
@@ -177,7 +169,7 @@ class UnsignedBlock {
      * @returns true if it is, otherwise false
      */
     isBasic(): boolean {
-        return this.body.type === BlockBodyType.Basic;
+        return this.body.isBasic();
     }
 
     /**
@@ -186,11 +178,7 @@ class UnsignedBlock {
      * @returns The BasicBlockBody
      */
     asBasic(): BasicBlockBody {
-        if (this.isBasic()) {
-            return this.body as unknown as BasicBlockBody;
-        } else {
-            throw new Error('invalid downcast of non-BasicBlockBody');
-        }
+        return this.body.asBasic();
     }
 
     /**
@@ -198,7 +186,7 @@ class UnsignedBlock {
      * @returns true if it is, otherwise false
      */
     isValidation(): boolean {
-        return this.body.type === BlockBodyType.Validation;
+        return this.body.isValidation();
     }
 
     /**
@@ -207,11 +195,7 @@ class UnsignedBlock {
      * @returns The ValidationBlockBody
      */
     asValidation(): ValidationBlockBody {
-        if (this.isValidation()) {
-            return this.body as unknown as ValidationBlockBody;
-        } else {
-            throw new Error('invalid downcast of non-ValidationBlockBody');
-        }
+        return this.body.asValidation();
     }
 }
 
