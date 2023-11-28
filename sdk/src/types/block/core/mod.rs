@@ -19,6 +19,7 @@ pub use self::{
     validation::{ValidationBlockBody, ValidationBlockBodyBuilder},
 };
 use crate::types::block::{
+    core::basic::MaxBurnedManaAmount,
     protocol::{ProtocolParameters, ProtocolParametersHash, WorkScore, WorkScoreParameters},
     Error,
 };
@@ -81,8 +82,11 @@ impl BlockBody {
 
     /// Creates a new [`BasicBlockBodyBuilder`].
     #[inline(always)]
-    pub fn build_basic(strong_parents: self::basic::StrongParents) -> BasicBlockBodyBuilder {
-        BasicBlockBodyBuilder::new(strong_parents)
+    pub fn build_basic(
+        strong_parents: self::basic::StrongParents,
+        max_burned_mana: MaxBurnedManaAmount,
+    ) -> BasicBlockBodyBuilder {
+        BasicBlockBodyBuilder::new(strong_parents, max_burned_mana)
     }
 
     /// Creates a new [`ValidationBlockBodyBuilder`].

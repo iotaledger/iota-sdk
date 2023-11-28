@@ -8,7 +8,7 @@ pub use self::transaction::verify_semantic;
 use crate::{
     client::{ClientInner, Result},
     types::block::{
-        core::{BasicBlockBody, BlockHeader, UnsignedBlock},
+        core::{basic::MaxBurnedManaAmount, BasicBlockBody, BlockHeader, UnsignedBlock},
         output::AccountId,
         payload::Payload,
         protocol::{WorkScore, WorkScoreParameters},
@@ -44,14 +44,18 @@ impl ClientInner {
                 issuance.latest_finalized_slot,
                 issuer_id,
             ),
-            BlockBody::build_basic(issuance.strong_parents()?)
-                .with_weak_parents(issuance.weak_parents()?)
-                .with_shallow_like_parents(issuance.shallow_like_parents()?)
-                .with_payload(payload)
-                .finish_block_body_with_minimum_mana_amount(
-                    protocol_params.work_score_parameters,
-                    issuance.commitment.reference_mana_cost(),
-                )?,
+            BlockBody::build_basic(
+                issuance.strong_parents()?,
+                MaxBurnedManaAmount::MinimumAmount {
+                    params: protocol_params.work_score_parameters,
+                    reference_mana_cost: issuance.commitment.reference_mana_cost(),
+                },
+            )
+            .with_weak_parents(issuance.weak_parents()?)
+            .with_shallow_like_parents(issuance.shallow_like_parents()?)
+            .with_payload(payload)
+            .finish()?
+            .into(),
         ))
     }
 }

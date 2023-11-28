@@ -14,25 +14,60 @@ pub type StrongParents = Parents<1, 8>;
 pub type WeakParents = Parents<0, 8>;
 pub type ShallowLikeParents = Parents<0, 8>;
 
+#[derive(Copy, Clone)]
+pub enum MaxBurnedManaAmount {
+    Amount(u64),
+    MinimumAmount {
+        params: WorkScoreParameters,
+        reference_mana_cost: u64,
+    },
+}
+
 /// A builder for a [`BasicBlockBody`].
 pub struct BasicBlockBodyBuilder {
     strong_parents: StrongParents,
     weak_parents: WeakParents,
     shallow_like_parents: ShallowLikeParents,
     payload: OptionalPayload,
-    max_burned_mana: u64,
+    max_burned_mana: MaxBurnedManaAmount,
 }
 
 impl BasicBlockBodyBuilder {
-    /// Creates a new [`BasicBlockBodyBuilder`].
+    /// Creates a new [`BasicBlockBodyBuilder`] with `max burned mana` set to the provided value.
     #[inline(always)]
-    pub fn new(strong_parents: StrongParents) -> Self {
+    pub fn new_with_mana_amount(strong_parents: StrongParents, max_burned_mana: u64) -> Self {
+        Self::new(strong_parents, MaxBurnedManaAmount::Amount(max_burned_mana))
+    }
+
+    /// Creates a new [`BasicBlockBodyBuilder`] with `max burned mana` set to the minimum value according to the
+    /// provided reference mana cost.
+    #[inline(always)]
+    pub fn new_with_minimum_mana_amount(
+        strong_parents: StrongParents,
+        params: WorkScoreParameters,
+        reference_mana_cost: u64,
+    ) -> Self {
         Self {
             strong_parents,
             weak_parents: WeakParents::default(),
             shallow_like_parents: ShallowLikeParents::default(),
             payload: OptionalPayload::default(),
-            max_burned_mana: 0,
+            max_burned_mana: MaxBurnedManaAmount::MinimumAmount {
+                params,
+                reference_mana_cost,
+            },
+        }
+    }
+
+    /// Creates a new [`BasicBlockBodyBuilder`].
+    #[inline(always)]
+    pub fn new(strong_parents: StrongParents, max_burned_mana: MaxBurnedManaAmount) -> Self {
+        Self {
+            strong_parents,
+            weak_parents: WeakParents::default(),
+            shallow_like_parents: ShallowLikeParents::default(),
+            payload: OptionalPayload::default(),
+            max_burned_mana,
         }
     }
 
@@ -64,53 +99,40 @@ impl BasicBlockBodyBuilder {
         self
     }
 
-    /// Adds max burned mana to a [`BasicBlockBodyBuilder`].
-    #[inline(always)]
-    pub fn with_max_burned_mana(mut self, max_burned_mana: u64) -> Self {
-        self.max_burned_mana = max_burned_mana;
-        self
-    }
+    // TODO: keep or remove?
+    // /// Adds max burned mana to a [`BasicBlockBodyBuilder`].
+    // #[inline(always)]
+    // pub fn with_max_burned_mana(mut self, max_burned_mana: u64) -> Self {
+    //     self.max_burned_mana = max_burned_mana;
+    //     self
+    // }
 
     /// Finishes the builder into a [`BasicBlockBody`].
     pub fn finish(self) -> Result<BasicBlockBody, Error> {
         verify_parents_sets(&self.strong_parents, &self.weak_parents, &self.shallow_like_parents)?;
 
-        Ok(BasicBlockBody {
+        let mut body = BasicBlockBody {
             strong_parents: self.strong_parents,
             weak_parents: self.weak_parents,
             shallow_like_parents: self.shallow_like_parents,
             payload: self.payload,
-            max_burned_mana: self.max_burned_mana,
-        })
-    }
+            max_burned_mana: 0,
+        };
 
-    /// Finishes the builder into a [`BasicBlockBody`] with the minimum amount of mana required for the block to get
-    /// accepted by the network. Note that this overrides any manually set value.
-    pub fn finish_with_minimum_mana_amount(
-        self,
-        params: WorkScoreParameters,
-        reference_mana_cost: u64,
-    ) -> Result<BasicBlockBody, Error> {
-        let mut body = self.finish()?;
-        body.max_burned_mana = body.work_score(params) as u64 * reference_mana_cost;
+        body.max_burned_mana = match self.max_burned_mana {
+            MaxBurnedManaAmount::Amount(amount) => amount,
+            MaxBurnedManaAmount::MinimumAmount {
+                params,
+                reference_mana_cost,
+            } => body.work_score(params) as u64 * reference_mana_cost,
+        };
+
         Ok(body)
     }
 
     /// Finishes the builder into a [`BlockBody`].
     pub fn finish_block_body(self) -> Result<BlockBody, Error> {
         Ok(BlockBody::from(self.finish()?))
-    }
-
-    /// Finishes the builder into a [`BlockBody`] with the minimum amount of mana required for the block to get accepted
-    /// by the network. Note that this overrides any manually set value.
-    pub fn finish_block_body_with_minimum_mana_amount(
-        self,
-        params: WorkScoreParameters,
-        reference_mana_cost: u64,
-    ) -> Result<BlockBody, Error> {
-        Ok(BlockBody::from(
-            self.finish_with_minimum_mana_amount(params, reference_mana_cost)?,
-        ))
     }
 }
 
@@ -121,7 +143,7 @@ impl From<BasicBlockBody> for BasicBlockBodyBuilder {
             weak_parents: value.weak_parents,
             shallow_like_parents: value.shallow_like_parents,
             payload: value.payload,
-            max_burned_mana: value.max_burned_mana,
+            max_burned_mana: MaxBurnedManaAmount::Amount(value.max_burned_mana),
         }
     }
 }
@@ -250,16 +272,18 @@ pub(crate) mod dto {
             dto: BasicBlockBodyDto,
             params: Option<&ProtocolParameters>,
         ) -> Result<Self, Self::Error> {
-            BasicBlockBodyBuilder::new(StrongParents::from_set(dto.strong_parents)?)
-                .with_weak_parents(WeakParents::from_set(dto.weak_parents)?)
-                .with_shallow_like_parents(ShallowLikeParents::from_set(dto.shallow_like_parents)?)
-                .with_payload(
-                    dto.payload
-                        .map(|payload| Payload::try_from_dto_with_params_inner(payload, params))
-                        .transpose()?,
-                )
-                .with_max_burned_mana(dto.max_burned_mana)
-                .finish()
+            BasicBlockBodyBuilder::new_with_mana_amount(
+                StrongParents::from_set(dto.strong_parents)?,
+                dto.max_burned_mana,
+            )
+            .with_weak_parents(WeakParents::from_set(dto.weak_parents)?)
+            .with_shallow_like_parents(ShallowLikeParents::from_set(dto.shallow_like_parents)?)
+            .with_payload(
+                dto.payload
+                    .map(|payload| Payload::try_from_dto_with_params_inner(payload, params))
+                    .transpose()?,
+            )
+            .finish()
         }
     }
 }

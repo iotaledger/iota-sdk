@@ -45,7 +45,7 @@ pub fn rand_basic_block_body_with_strong_parents(strong_parents: basic::StrongPa
 pub fn rand_basic_block_body_builder_with_strong_parents(
     strong_parents: basic::StrongParents,
 ) -> BasicBlockBodyBuilder {
-    BlockBody::build_basic(strong_parents)
+    BlockBody::build_basic(strong_parents, basic::MaxBurnedManaAmount::Amount(0))
 }
 
 /// Generates a random block with given block body.
