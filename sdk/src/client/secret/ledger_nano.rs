@@ -426,11 +426,9 @@ impl SecretManagerConfig for LedgerSecretManager {
 pub fn needs_blind_signing(prepared_transaction: &PreparedTransactionData, buffer_size: usize) -> bool {
     let TransactionEssence::Regular(essence) = &prepared_transaction.essence;
 
-    if !essence
-        .outputs()
-        .iter()
-        .all(|output| matches!(output, Output::Basic(o) if o.simple_deposit_address().is_some()))
-    {
+    if !essence.outputs().iter().all(
+        |output| matches!(output, Output::Basic(o) if o.simple_deposit_address().is_some() && o.address().is_ed25519()),
+    ) {
         return true;
     }
 
