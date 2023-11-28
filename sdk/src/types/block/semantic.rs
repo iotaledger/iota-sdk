@@ -8,7 +8,7 @@ use hashbrown::{HashMap, HashSet};
 use primitive_types::U256;
 
 use crate::types::block::{
-    address::{Address, AddressCapabilityFlag},
+    address::{Address, AddressCapabilityFlag, ImplicitAccountCreationAddress},
     output::{
         AccountId, AnchorOutput, ChainId, FoundryId, NativeTokens, Output, OutputId, StateTransitionError, TokenId,
         UnlockCondition,
@@ -264,6 +264,8 @@ impl<'a> SemanticValidationContext<'a> {
     ///
     pub fn validate(mut self) -> Result<Option<TransactionFailureReason>, Error> {
         // Validation of inputs.
+        let mut has_implicit_account_creation_address = false;
+
         for ((output_id, consumed_output), unlock) in self.inputs.iter().zip(self.unlocks.iter()) {
             let (conflict, amount, mana, consumed_native_token, unlock_conditions) = match consumed_output {
                 Output::Basic(output) => (
@@ -306,6 +308,17 @@ impl<'a> SemanticValidationContext<'a> {
 
             if let Err(conflict) = conflict {
                 return Ok(Some(conflict));
+            }
+
+            if unlock_conditions
+                .address()
+                .map_or(false, |uc| uc.address().is_implicit_account_creation())
+            {
+                if has_implicit_account_creation_address {
+                    //TODO
+                } else {
+                    has_implicit_account_creation_address = true;
+                }
             }
 
             if unlock_conditions.is_time_locked(self.transaction.creation_slot()) {

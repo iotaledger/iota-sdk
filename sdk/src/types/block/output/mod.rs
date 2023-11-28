@@ -324,12 +324,11 @@ impl Output {
             (None, Some(Self::Delegation(next_state))) => DelegationOutput::creation(next_state, context),
 
             // Transitions.
-            (Some(Self::Basic(current_state)), Some(Self::Account(_next_state))) => {
-                if !current_state.is_implicit_account() {
-                    Err(StateTransitionError::UnsupportedStateTransition)
+            (Some(Self::Basic(current_state)), Some(Self::Account(next_state))) => {
+                if current_state.is_implicit_account() {
+                    AccountOutput::implicit_transition(current_state, next_state)
                 } else {
-                    // TODO https://github.com/iotaledger/iota-sdk/issues/1664
-                    Ok(())
+                    Err(StateTransitionError::UnsupportedStateTransition)
                 }
             }
             (Some(Self::Account(current_state)), Some(Self::Account(next_state))) => {

@@ -16,7 +16,7 @@ use crate::types::block::{
     output::{
         feature::{verify_allowed_features, Feature, FeatureFlags, Features},
         unlock_condition::{verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions},
-        ChainId, MinimumOutputAmount, Output, OutputBuilderAmount, OutputId, StateTransitionError,
+        BasicOutput, ChainId, MinimumOutputAmount, Output, OutputBuilderAmount, OutputId, StateTransitionError,
         StateTransitionVerifier, StorageScore, StorageScoreParameters,
     },
     payload::signed_transaction::TransactionCapabilityFlag,
@@ -42,7 +42,11 @@ impl From<&OutputId> for AccountId {
 impl AccountId {
     ///
     pub fn or_from_output_id(self, output_id: &OutputId) -> Self {
-        if self.is_null() { Self::from(output_id) } else { self }
+        if self.is_null() {
+            Self::from(output_id)
+        } else {
+            self
+        }
     }
 }
 
@@ -450,6 +454,32 @@ impl AccountOutput {
         if current_state.foundry_counter + created_foundries_count != next_state.foundry_counter {
             return Err(StateTransitionError::InconsistentCreatedFoundriesCount);
         }
+
+        Ok(())
+    }
+
+    pub(crate) fn implicit_transition(
+        current_state: &BasicOutput,
+        next_state: &Self,
+    ) -> Result<(), StateTransitionError> {
+        if next_state.account_id.is_null() {
+            // TODO
+            return Err(StateTransitionError::NonZeroCreatedId);
+        }
+
+        if let Some(block_issuer) = next_state.features().block_issuer() {
+            // - The `Account` must have a Block Issuer Feature and it must pass semantic validation as if the implicit account
+            // contained a Block Issuer Feature with its `Expiry Slot` set to the maximum value of slot indices and the feature
+            // was transitioned.
+        } else {
+            // TODO
+        }
+
+        // if let Some(issuer) = next_state.immutable_features().issuer() {
+        //     if !context.unlocked_addresses.contains(issuer.address()) {
+        //         return Err(StateTransitionError::IssuerNotUnlocked);
+        //     }
+        // }
 
         Ok(())
     }
