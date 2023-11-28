@@ -44,9 +44,9 @@ describe.skip('Block methods', () => {
             issuerId,
             new TaggedDataPayload(utf8ToHex('Hello'), utf8ToHex('Tangle')),
         );
-        const signedBlock = await secretManager.signBlock(unsignedBlock, chain);
+        const block = await secretManager.signBlock(unsignedBlock, chain);
 
-        const blockId = await client.postBlockRaw(signedBlock);
+        const blockId = await client.postBlockRaw(block);
 
         expect(blockId).toBeValidBlockId();
     });
