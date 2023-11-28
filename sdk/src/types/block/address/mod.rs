@@ -101,6 +101,19 @@ impl Address {
         }
     }
 
+    /// Returns the address kind of an [`Address`] as a string.
+    pub fn kind_str(&self) -> &str {
+        match self {
+            Self::Ed25519(_) => "Ed25519",
+            Self::Account(_) => "Account",
+            Self::Nft(_) => "Nft",
+            Self::Anchor(_) => "Anchor",
+            Self::ImplicitAccountCreation(_) => "ImplicitAccountCreation",
+            Self::Multi(_) => "Multi",
+            Self::Restricted(_) => "Restricted",
+        }
+    }
+
     crate::def_is_as_opt!(Address: Ed25519, Account, Nft, Anchor, ImplicitAccountCreation, Multi, Restricted);
 
     /// Tries to create an [`Address`] from a bech32 encoded string.

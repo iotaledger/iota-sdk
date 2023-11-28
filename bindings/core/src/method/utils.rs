@@ -2,17 +2,20 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use derivative::Derivative;
-use iota_sdk::types::block::{
-    address::{Bech32Address, Hrp},
-    output::{dto::OutputDto, AccountId, NftId, OutputId, StorageScoreParameters},
-    payload::signed_transaction::{
-        dto::{SignedTransactionPayloadDto, TransactionDto},
-        TransactionId,
+use iota_sdk::{
+    client::secret::types::InputSigningDataDto,
+    types::block::{
+        address::{Bech32Address, Hrp},
+        output::{dto::OutputDto, AccountId, NftId, OutputId, StorageScoreParameters},
+        payload::signed_transaction::{
+            dto::{SignedTransactionPayloadDto, TransactionDto},
+            TransactionId,
+        },
+        protocol::ProtocolParameters,
+        signature::Ed25519Signature,
+        slot::SlotCommitment,
+        BlockDto,
     },
-    protocol::ProtocolParameters,
-    signature::Ed25519Signature,
-    slot::SlotCommitment,
-    BlockDto,
 };
 use serde::{Deserialize, Serialize};
 
@@ -161,4 +164,9 @@ pub enum UtilsMethod {
     /// Returns the hex representation of the serialized output bytes.
     #[serde(rename_all = "camelCase")]
     OutputHexBytes { output: OutputDto },
+    /// Verifies the semantic of a transaction.
+    VerifyTransactionSemantic {
+        inputs: Vec<InputSigningDataDto>,
+        transaction: SignedTransactionPayloadDto,
+    },
 }

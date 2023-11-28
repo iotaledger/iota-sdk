@@ -18,8 +18,10 @@ require('dotenv').config({ path: '.env' });
 // In this example we will send a block with a tagged data payload.
 async function run() {
     initLogger();
-    if (!process.env.NODE_URL) {
-        throw new Error('.env NODE_URL is undefined, see .env.example');
+    for (const envVar of ['NODE_URL', 'EXPLORER_URL']) {
+        if (!(envVar in process.env)) {
+            throw new Error(`.env ${envVar} is undefined, see .env.example`);
+        }
     }
 
     if (!process.env.MNEMONIC) {
@@ -33,7 +35,7 @@ async function run() {
 
     const client = new Client({
         // Insert your node URL in the .env.
-        nodes: [process.env.NODE_URL],
+        nodes: [process.env.NODE_URL as string],
     });
 
     const issuerId = process.env.ISSUER_ID
