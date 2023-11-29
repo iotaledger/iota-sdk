@@ -67,8 +67,13 @@ jobs:
           sudo apt-get install libudev-dev libusb-1.0-0-dev
 
       - name: Install gon (macOS)
-        # https://github.com/mitchellh/gon
-        run: brew install mitchellh/gon/gon
+        # Fork of https://github.com/mitchellh/gon
+        # https://github.com/Bearer/gon
+        # Since we're dealing with code signing secrets we want to pin the version of gon
+        run: |
+          wget https://raw.githubusercontent.com/Bearer/homebrew-tap/366bc999e14a8d04e07e24f9387bcbaf89c1bc53/Formula/gon.rb
+          brew install --formula gon.rb
+          rm gon.rb
         if: matrix.os == 'macos-latest'
 
       - name: Install LLVM and Clang (Windows) # required for bindgen to work, see https://github.com/rust-lang/rust-bindgen/issues/1797

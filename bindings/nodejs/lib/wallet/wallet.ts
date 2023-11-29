@@ -413,16 +413,31 @@ export class Wallet {
     async claimOutputs(
         outputIds: OutputId[],
     ): Promise<TransactionWithMetadata> {
+        return (await this.prepareClaimOutputs(outputIds)).send();
+    }
+
+    /**
+     * Claim basic or nft outputs that have additional unlock conditions
+     * to their `AddressUnlockCondition` from the wallet.
+     * @param outputIds The outputs to claim.
+     * @returns The prepared transaction.
+     */
+    async prepareClaimOutputs(
+        outputIds: OutputId[],
+    ): Promise<PreparedTransaction> {
         const response = await this.methodHandler.callMethod({
-            name: 'claimOutputs',
+            name: 'prepareClaimOutputs',
             data: {
                 outputIdsToClaim: outputIds,
             },
         });
         const parsed = JSON.parse(
             response,
-        ) as Response<TransactionWithMetadata>;
-        return plainToInstance(TransactionWithMetadata, parsed.payload);
+        ) as Response<PreparedTransactionData>;
+        return new PreparedTransaction(
+            plainToInstance(PreparedTransactionData, parsed.payload),
+            this,
+        );
     }
 
     /**

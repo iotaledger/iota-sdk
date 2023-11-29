@@ -30,7 +30,8 @@ pub async fn setup_client_with_node_health_ignored() -> Client {
 //     mnemonic: Option<Mnemonic>,
 // ) -> Result<(Client, SecretManager)> { let client = Client::builder().with_node(NODE_LOCAL)?.finish().await?;
 
-//     let secret_manager = SecretManager::try_from_mnemonic(mnemonic.unwrap_or(Client::generate_mnemonic().unwrap()))?;
+// let secret_manager =
+//     SecretManager::try_from_mnemonic(mnemonic.unwrap_or_else(|| Client::generate_mnemonic().unwrap()))?;
 
 //     let address = secret_manager
 //         .generate_ed25519_addresses(
