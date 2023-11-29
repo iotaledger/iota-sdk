@@ -44,9 +44,10 @@ export * from './logger';
 export type Result = {
     // "error" | "panic", or other binding "Response" enum name, we consider "ok".
     type: string;
+    // "panic" means payload is just a string, otherwise its the object below.
     payload: {
-        // All method names from types/bridge/__name__.name
-        // Or all variants of iota_sdk_bindings_core::Error type
+        // Ok: All method names from types/bridge/__name__.name
+        // Not ok: all variants of iota_sdk_bindings_core::Error type i.e block/client/wallet/
         type: string;
         // If "ok", json payload
         payload?: string;
