@@ -239,7 +239,10 @@ async fn test_get_included_block_metadata() {
 
     assert_eq!(metadata_response.block_id, block_id);
     assert_eq!(
-        metadata_response.transaction_metadata.map(|m| m.transaction_state),
+        metadata_response
+            .transaction_metadata
+            .as_ref()
+            .map(|m| m.transaction_state),
         Some(TransactionState::Finalized)
     );
 
