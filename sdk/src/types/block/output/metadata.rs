@@ -20,7 +20,8 @@ pub struct OutputInclusionMetadata {
     // Transaction ID that created the output.
     transaction_id: TransactionId,
     // Commitment ID that includes the creation of the output.
-    commitment_id: Option<SlotCommitmentId>, // `serix:",omitempty"`
+    #[cfg_attr(feature = "serde", serde(default, skip_serializing_if = "Option::is_none"))]
+    commitment_id: Option<SlotCommitmentId>,
 }
 
 impl OutputInclusionMetadata {
@@ -45,7 +46,8 @@ pub struct OutputConsumptionMetadata {
     // Transaction ID that spent the output.
     transaction_id: TransactionId,
     // Commitment ID that includes the spending of the output.
-    commitment_id: Option<SlotCommitmentId>, // `serix:",omitempty"`
+    #[cfg_attr(feature = "serde", serde(default, skip_serializing_if = "Option::is_none"))]
+    commitment_id: Option<SlotCommitmentId>,
 }
 
 impl OutputConsumptionMetadata {
@@ -73,7 +75,8 @@ pub struct OutputMetadata {
     // Metadata of the output if it is included in the ledger.
     included: OutputInclusionMetadata,
     // Metadata of the output if it is marked as spent in the ledger.
-    spent: Option<OutputConsumptionMetadata>, // `serix:",optional,omitempty"`
+    #[cfg_attr(feature = "serde", serde(default, skip_serializing_if = "Option::is_none"))]
+    spent: Option<OutputConsumptionMetadata>,
     /// Latest commitment ID of the node.
     latest_commitment_id: SlotCommitmentId,
 }
