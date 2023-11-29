@@ -19,11 +19,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security -->
 
-## 1.1.2 - 2023-MM-DD
+## Unreleased - 2023-MM-DD
+
+### Added
+
+- `Account::prepare_claim_outputs` method;
+
+### Changed
+
+- Display of `WalletError::InsufficientFunds`;
+
+## 1.1.2 - 2023-10-26
+
+### Added
+
+- `impl From<&OutputId> for {AliasAddress, NftAddress}`;
+- `Address::kind_str` method;
+- `Display` for `Address`;
 
 ### Fixed
 
 - `Account::claim_outputs()` if an input has less amount than min storage deposit;
+- URLs aren't truncated after the hostname anymore;
+- Ledger nano potentially failing to identify the correct remainder output;
+- Slow syncing with many claimable outputs;
+- Potential deadlock in syncing;
 
 ## 1.1.1 - 2023-10-11
 

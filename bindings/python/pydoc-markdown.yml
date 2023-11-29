@@ -8,8 +8,8 @@ processors:
   - type: crossref
 renderer:
   type: docusaurus
-  docs_base_path: ./docs/
-  relative_output_path: references/python
+  docs_base_path: ../../docs/
+  relative_output_path: python
 
   markdown:
     use_fixed_header_levels: true

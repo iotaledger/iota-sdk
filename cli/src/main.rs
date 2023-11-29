@@ -36,7 +36,7 @@ fn logger_init(cli: &Cli) -> Result<(), Error> {
         println_log_error!("{panic_info}");
     }));
 
-    let target_exclusions = &["rustls"];
+    let target_exclusions = &["rustls", "rustyline"];
     let archive = LoggerOutputConfigBuilder::default()
         .name("archive.log")
         .level_filter(cli.log_level)

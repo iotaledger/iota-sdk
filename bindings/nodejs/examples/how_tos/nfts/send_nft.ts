@@ -17,10 +17,16 @@ const RECV_ADDRESS =
 // yarn run-example ./how_tos/nfts/send_nft.ts
 async function run() {
     try {
-        if (!process.env.STRONGHOLD_PASSWORD) {
-            throw new Error(
-                '.env STRONGHOLD_PASSWORD is undefined, see .env.example',
-            );
+        for (const envVar of [
+            'WALLET_DB_PATH',
+            'STRONGHOLD_PASSWORD',
+            'EXPLORER_URL',
+        ]) {
+            if (!(envVar in process.env)) {
+                throw new Error(
+                    `.env ${envVar} is undefined, see .env.example`,
+                );
+            }
         }
 
         const wallet = await Wallet.create({
@@ -28,7 +34,9 @@ async function run() {
         });
 
         // We need to unlock stronghold.
-        await wallet.setStrongholdPassword(process.env.STRONGHOLD_PASSWORD);
+        await wallet.setStrongholdPassword(
+            process.env.STRONGHOLD_PASSWORD as string,
+        );
 
         // May want to ensure the wallet is synced before sending a transaction.
         const balance = await wallet.sync();
