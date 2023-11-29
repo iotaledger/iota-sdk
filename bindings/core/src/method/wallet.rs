@@ -220,6 +220,10 @@ pub enum WalletMethod {
         burn: Burn,
         options: Option<TransactionOptions>,
     },
+    /// Claim outputs.
+    /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
+    #[serde(rename_all = "camelCase")]
+    PrepareClaimOutputs { output_ids_to_claim: Vec<OutputId> },
     /// Consolidate outputs.
     /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
     PrepareConsolidateOutputs { params: ConsolidationParams },

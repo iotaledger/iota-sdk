@@ -7,7 +7,7 @@ import {
     TokenSchemeType,
     Output,
     StorageScoreParameters,
-    SignedBlock,
+    Block,
     ProtocolParameters,
     OutputId,
     NftId,
@@ -15,6 +15,7 @@ import {
 } from '../../';
 import { AccountId } from '../../block/id';
 import { SlotCommitment } from '../../block/slot';
+import { InputSigningData } from '../../client';
 
 export interface __GenerateMnemonicMethod__ {
     name: 'generateMnemonic';
@@ -85,7 +86,7 @@ export interface __ParseBech32AddressMethod__ {
 export interface __BlockIdMethod__ {
     name: 'blockId';
     data: {
-        block: SignedBlock;
+        block: Block;
         params: ProtocolParameters;
     };
 }
@@ -204,5 +205,14 @@ export interface __ComputeSlotCommitmentId__ {
     name: 'computeSlotCommitmentId';
     data: {
         slotCommitment: SlotCommitmentConverted;
+    };
+}
+
+export interface __VerifyTransactionSemantic__ {
+    name: 'verifyTransactionSemantic';
+    data: {
+        inputs: InputSigningData[];
+        transaction: SignedTransactionPayload;
+        time: number;
     };
 }

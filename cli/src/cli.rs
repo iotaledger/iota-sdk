@@ -344,7 +344,7 @@ pub async fn restore_command(
         let password = get_password("Stronghold password", false)?;
         Arc::new(SecretManager::Stronghold(
             StrongholdSecretManager::builder()
-                .password(password.clone())
+                .password(password)
                 .build(snapshot_path)?,
         ))
     } else {
@@ -397,8 +397,8 @@ pub async fn sync_command(storage_path: &Path, snapshot_path: &Path) -> Result<(
 
 pub async fn unlock_wallet(
     storage_path: &Path,
-    snapshot_path: impl Into<Option<&Path>>,
-    password: impl Into<Option<Password>>,
+    snapshot_path: impl Into<Option<&Path>> + Send,
+    password: impl Into<Option<Password>> + Send,
 ) -> Result<(Wallet, Arc<SecretManager>), Error> {
     let secret_manager = if let Some(password) = password.into() {
         let snapshot_path = snapshot_path.into();

@@ -299,44 +299,47 @@ impl SecretManage for LedgerSecretManager {
                 .prepare_blind_signing(input_bip32_indices, transaction_signing_hash)
                 .map_err(Error::from)?;
         } else {
-            // figure out the remainder address and bip32 index (if there is one)
+            // figure out the remainder output and bip32 index (if there is one)
             #[allow(clippy::option_if_let_else)]
-            let (remainder_address, remainder_bip32): (Option<&Address>, LedgerBIP32Index) =
-                match &prepared_transaction.remainder {
-                    Some(a) => {
-                        if let Some(chain) = a.chain {
-                            (
-                                Some(&a.address),
-                                LedgerBIP32Index {
-                                    bip32_change: chain.change.harden().into(),
-                                    bip32_index: chain.address_index.harden().into(),
-                                },
-                            )
-                        } else {
-                            (None, LedgerBIP32Index::default())
-                        }
+            let (remainder_output, remainder_bip32) = match &prepared_transaction.remainder {
+                Some(remainder) => {
+                    if let Some(chain) = remainder.chain {
+                        (
+                            Some(&remainder.output),
+                            LedgerBIP32Index {
+                                bip32_change: chain.change.harden().into(),
+                                bip32_index: chain.address_index.harden().into(),
+                            },
+                        )
+                    } else {
+                        (None, LedgerBIP32Index::default())
                     }
-                    None => (None, LedgerBIP32Index::default()),
-                };
+                }
+                None => (None, LedgerBIP32Index::default()),
+            };
 
             let mut remainder_index = 0u16;
-            if let Some(remainder_address) = remainder_address {
-                // Find the index of the remainder in the transaction this has to be done because the remainder is not
-                // always the last output. The index within the transaction and the bip32 index will be
-                // validated by the hardware wallet.
-                'transaction_outputs: for output in prepared_transaction.transaction.outputs().iter() {
-                    if let Output::Basic(s) = output {
-                        if let Some(address) = s.unlock_conditions().address() {
-                            if *remainder_address == *address.address() {
-                                break 'transaction_outputs;
-                            }
-                        }
-                    } else {
+            if let Some(remainder_output) = remainder_output {
+                // Find the index of the remainder in the transaction because it is not always the last output.
+                // The index within the transaction and the bip32 index will be validated by the hardware
+                // wallet.
+                for output in prepared_transaction.transaction.outputs().iter() {
+                    if !output.is_basic() {
                         log::debug!("[LEDGER] unsupported output");
                         return Err(Error::MiscError.into());
                     }
 
+                    if remainder_output == output {
+                        break;
+                    }
+
                     remainder_index += 1;
+                }
+
+                // Was index found?
+                if remainder_index as usize == prepared_transaction.transaction.outputs().len() {
+                    log::debug!("[LEDGER] remainder_index not found");
+                    return Err(Error::MiscError.into());
                 }
 
                 // was index found?
@@ -352,7 +355,7 @@ impl SecretManage for LedgerSecretManager {
                 "[LEDGER] {:?} {:02x?} {} {} {:?}",
                 input_bip32_indices,
                 transaction_bytes,
-                remainder_address.is_some(),
+                remainder_output.is_some(),
                 remainder_index,
                 remainder_bip32
             );
@@ -360,7 +363,7 @@ impl SecretManage for LedgerSecretManager {
                 .prepare_signing(
                     input_bip32_indices,
                     transaction_bytes,
-                    remainder_address.is_some(),
+                    remainder_output.is_some(),
                     remainder_index,
                     remainder_bip32,
                 )

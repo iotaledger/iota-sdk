@@ -249,6 +249,10 @@ where
             let data = wallet.prepare_burn(burn, options).await?;
             Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
         }
+        WalletMethod::PrepareClaimOutputs { output_ids_to_claim } => {
+            let data = wallet.prepare_claim_outputs(output_ids_to_claim).await?;
+            Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
+        }
         WalletMethod::PrepareConsolidateOutputs { params } => {
             let data = wallet.prepare_consolidate_outputs(secret_manager, params).await?;
             Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))

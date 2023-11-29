@@ -32,12 +32,17 @@ impl Wallet {
     ) -> Result<Balance> {
         let network_id = self.client().get_network_id().await?;
         let storage_score_params = self.client().get_storage_score_parameters().await?;
+        let slot_index = self.client().get_slot_index().await?;
         let mut balance = Balance::default();
         let mut total_storage_cost = 0;
         let mut total_native_tokens = NativeTokensBuilder::default();
 
         #[cfg(feature = "participation")]
-        let voting_output = self.get_voting_output().await?;
+        let voting_output = wallet_data.get_voting_output()?;
+
+        let wallet_address = self.address().await.into_inner();
+
+        let claimable_outputs = wallet_data.claimable_outputs(OutputsToClaim::All, slot_index)?;
 
         #[cfg(feature = "participation")]
         {
@@ -138,9 +143,7 @@ impl Wallet {
                         // if we have multiple unlock conditions for basic or nft outputs, then we can't
                         // spend the balance at the moment or in the future
 
-                        let wallet_address = self.address().await.into_inner();
-                        let slot_index = self.client().get_slot_index().await?;
-                        let is_claimable = self.claimable_outputs(OutputsToClaim::All).await?.contains(output_id);
+                        let is_claimable = claimable_outputs.contains(output_id);
 
                         // For outputs that are expired or have a timelock unlock condition, but no expiration
                         // unlock condition and we then can unlock them, then

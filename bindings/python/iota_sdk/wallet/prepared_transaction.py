@@ -27,7 +27,7 @@ class PreparedTransaction:
         account: Account,
         prepared_transaction_data: Union[PreparedTransactionData, Dict]
     ):
-        """Initalize `Self`.
+        """Initialize `Self`.
         """
         self.account = account
         self.prepared_transaction_data_dto = prepared_transaction_data
@@ -70,7 +70,6 @@ class PreparedTransaction:
 class PreparedCreateTokenTransaction(PreparedTransaction):
 
     """A prepared transaction for creating a native token.
-    The function returns the token_id as a string.
 
     Returns: The token id of the PreparedCreateTokenTransaction.
     """
@@ -81,7 +80,7 @@ class PreparedCreateTokenTransaction(PreparedTransaction):
         return self.prepared_transaction_data_dto["tokenId"]
 
     def prepared_transaction_data(self):
-        """The function returns the prepared transaction data.
+        """Returns the prepared transaction data.
         """
         return from_dict(PreparedTransactionData,
                          self.prepared_transaction_data_dto["transaction"])
