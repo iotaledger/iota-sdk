@@ -50,7 +50,7 @@ async fn main() -> Result<()> {
         // with storage deposit return unlock condition
         basic_output_builder
             .clone()
-            .add_unlock_condition(StorageDepositReturnUnlockCondition::new(address.clone(), 1000000))
+            .add_unlock_condition(StorageDepositReturnUnlockCondition::new(address.clone(), 1000000)?)
             .finish_output()?,
         // with timeout unlock condition
         basic_output_builder
@@ -69,7 +69,7 @@ async fn main() -> Result<()> {
             .finish_output()?,
     ];
 
-    // Convert ouput array to json array
+    // Convert output array to json array
     let json_outputs = serde_json::to_string_pretty(&outputs.iter().map(OutputDto::from).collect::<Vec<OutputDto>>())?;
     println!("{json_outputs}");
 

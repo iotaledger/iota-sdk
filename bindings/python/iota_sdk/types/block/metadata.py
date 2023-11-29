@@ -6,6 +6,8 @@ from enum import Enum, IntEnum
 from dataclasses import dataclass
 from typing import Optional
 from iota_sdk.types.common import HexStr, json
+# TODO rename change to Block
+from iota_sdk.types.block.signed_block import SignedBlock
 
 
 @json
@@ -182,3 +184,17 @@ class TransactionFailureReason(Enum):
             26: "Destruction of nfts is not allowed in the transaction capabilities.",
             255: "The semantic validation failed for a reason not covered by the previous variants."
         }[self.value]
+
+
+@json
+@dataclass
+class BlockWithMetadata:
+    """Represents a block with its metadata.
+    Response of GET /api/core/v3/blocks/{blockId}/full.
+
+    Attributes:
+        block: The block.
+        metadata: The block metadata.
+    """
+    block: SignedBlock
+    metadata: BlockMetadata

@@ -101,7 +101,7 @@ fn build_basic_output(
     }
 
     if let Some((address, amount)) = sdruc {
-        builder = builder.add_unlock_condition(StorageDepositReturnUnlockCondition::new(address, amount));
+        builder = builder.add_unlock_condition(StorageDepositReturnUnlockCondition::new(address, amount).unwrap());
     }
 
     if let Some(timelock) = timelock {
@@ -137,7 +137,7 @@ fn build_nft_output(
     }
 
     if let Some((address, amount)) = sdruc {
-        builder = builder.add_unlock_condition(StorageDepositReturnUnlockCondition::new(address, amount));
+        builder = builder.add_unlock_condition(StorageDepositReturnUnlockCondition::new(address, amount).unwrap());
     }
 
     if let Some((address, timestamp)) = expiration {

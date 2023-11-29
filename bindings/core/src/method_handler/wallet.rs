@@ -257,6 +257,10 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
             let data = wallet.prepare_burn(burn, options).await?;
             Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
         }
+        WalletMethod::PrepareClaimOutputs { output_ids_to_claim } => {
+            let data = wallet.prepare_claim_outputs(output_ids_to_claim).await?;
+            Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
+        }
         WalletMethod::PrepareConsolidateOutputs { params } => {
             let data = wallet.prepare_consolidate_outputs(params).await?;
             Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))

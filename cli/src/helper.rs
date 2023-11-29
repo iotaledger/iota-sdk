@@ -121,7 +121,7 @@ pub async fn generate_mnemonic(
         println!("{}", mnemonic.as_ref());
     }
     if [1, 2].contains(&selected_choice) {
-        let file_path = output_file_name.unwrap_or(DEFAULT_MNEMONIC_FILE_PATH.to_string());
+        let file_path = output_file_name.unwrap_or_else(|| DEFAULT_MNEMONIC_FILE_PATH.to_string());
 
         write_mnemonic_to_file(&file_path, &mnemonic).await?;
         println_log_info!("Mnemonic has been written to '{file_path}'.");

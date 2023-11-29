@@ -545,8 +545,10 @@ pub(crate) mod dto {
     pub struct TransactionDto {
         pub network_id: String,
         pub creation_slot: SlotIndex,
+        #[serde(default, skip_serializing_if = "Vec::is_empty")]
         pub context_inputs: Vec<ContextInput>,
         pub inputs: Vec<Input>,
+        #[serde(default, skip_serializing_if = "Vec::is_empty")]
         pub allotments: Vec<ManaAllotmentDto>,
         #[serde(default, skip_serializing_if = "TransactionCapabilities::is_none")]
         pub capabilities: TransactionCapabilities,

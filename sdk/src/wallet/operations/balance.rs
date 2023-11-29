@@ -37,12 +37,17 @@ where
     ) -> Result<Balance> {
         let network_id = self.client().get_network_id().await?;
         let storage_score_params = self.client().get_storage_score_parameters().await?;
+        let slot_index = self.client().get_slot_index().await?;
         let mut balance = Balance::default();
         let mut total_storage_cost = 0;
         let mut total_native_tokens = NativeTokensBuilder::default();
 
         #[cfg(feature = "participation")]
-        let voting_output = self.get_voting_output().await?;
+        let voting_output = wallet_data.get_voting_output()?;
+
+        let wallet_address = self.address().await.into_inner();
+
+        let claimable_outputs = wallet_data.claimable_outputs(OutputsToClaim::All, slot_index)?;
 
         #[cfg(feature = "participation")]
         {
@@ -62,24 +67,24 @@ where
             let output = &output_data.output;
             let storage_cost = output.minimum_amount(storage_score_params);
 
-            // Add account and foundry outputs here because they can't have a
+            // Add account, foundry, and delegation outputs here because they can't have a
             // [`StorageDepositReturnUnlockCondition`] or time related unlock conditions
             match output {
-                Output::Account(output) => {
+                Output::Account(account) => {
                     // Add amount
-                    balance.base_coin.total += output.amount();
+                    balance.base_coin.total += account.amount();
                     // Add storage deposit
                     balance.required_storage_deposit.account += storage_cost;
                     if !wallet_data.locked_outputs.contains(output_id) {
                         total_storage_cost += storage_cost;
                     }
 
-                    let account_id = output.account_id_non_null(output_id);
+                    let account_id = account.account_id_non_null(output_id);
                     balance.accounts.push(account_id);
                 }
-                Output::Foundry(output) => {
+                Output::Foundry(foundry) => {
                     // Add amount
-                    balance.base_coin.total += output.amount();
+                    balance.base_coin.total += foundry.amount();
                     // Add storage deposit
                     balance.required_storage_deposit.foundry += storage_cost;
                     if !wallet_data.locked_outputs.contains(output_id) {
@@ -91,7 +96,19 @@ where
                         total_native_tokens.add_native_token(*native_token)?;
                     }
 
-                    balance.foundries.push(output.id());
+                    balance.foundries.push(foundry.id());
+                }
+                Output::Delegation(delegation) => {
+                    // Add amount
+                    balance.base_coin.total += delegation.amount();
+                    // Add storage deposit
+                    balance.required_storage_deposit.delegation += storage_cost;
+                    if !wallet_data.locked_outputs.contains(output_id) {
+                        total_storage_cost += storage_cost;
+                    }
+
+                    let delegation_id = delegation.delegation_id_non_null(output_id);
+                    balance.delegations.push(delegation_id);
                 }
                 _ => {
                     // If there is only an [AddressUnlockCondition], then we can spend the output at any time
@@ -102,8 +119,8 @@ where
                         .as_ref()
                     {
                         // add nft_id for nft outputs
-                        if let Output::Nft(output) = &output {
-                            let nft_id = output.nft_id_non_null(output_id);
+                        if let Output::Nft(nft) = &output {
+                            let nft_id = nft.nft_id_non_null(output_id);
                             balance.nfts.push(nft_id);
                         }
 
@@ -131,9 +148,7 @@ where
                         // if we have multiple unlock conditions for basic or nft outputs, then we can't
                         // spend the balance at the moment or in the future
 
-                        let wallet_address = self.address().await.into_inner();
-                        let slot_index = self.client().get_slot_index().await?;
-                        let is_claimable = self.claimable_outputs(OutputsToClaim::All).await?.contains(output_id);
+                        let is_claimable = claimable_outputs.contains(output_id);
 
                         // For outputs that are expired or have a timelock unlock condition, but no expiration
                         // unlock condition and we then can unlock them, then
@@ -223,9 +238,7 @@ where
                     }
                 }
             }
-            // }
         }
-        // }
 
         self.finish(
             balance,
