@@ -111,7 +111,7 @@ impl OutputWithMetadata {
 
 /// A generic output that can represent different types defining the deposit of funds.
 #[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, From, Packable)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize), serde(untagged))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize), serde(untagged))]
 #[packable(unpack_error = Error)]
 #[packable(unpack_visitor = ProtocolParameters)]
 #[packable(tag_type = u8, with_error = Error::InvalidOutputKind)]
@@ -433,55 +433,5 @@ pub trait MinimumOutputAmount: StorageScore {
     /// Computes the minimum amount of this output given [`StorageScoreParameters`].
     fn minimum_amount(&self, params: StorageScoreParameters) -> u64 {
         self.storage_score(params) * params.storage_cost()
-    }
-}
-
-#[cfg(feature = "serde")]
-pub mod dto {
-    use alloc::format;
-
-    use serde::Deserialize;
-    use serde_json::Value;
-
-    use super::*;
-
-    impl<'de> Deserialize<'de> for Output {
-        fn deserialize<D: serde::Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
-            let value = Value::deserialize(d)?;
-            Ok(
-                match value
-                    .get("type")
-                    .and_then(Value::as_u64)
-                    .ok_or_else(|| serde::de::Error::custom("invalid output type"))? as u8
-                {
-                    BasicOutput::KIND => Self::Basic(
-                        BasicOutput::deserialize(value)
-                            .map_err(|e| serde::de::Error::custom(format!("cannot deserialize basic output: {e}")))?,
-                    ),
-                    AccountOutput::KIND => Self::Account(
-                        AccountOutput::deserialize(value)
-                            .map_err(|e| serde::de::Error::custom(format!("cannot deserialize account output: {e}")))?,
-                    ),
-                    AnchorOutput::KIND => Self::Anchor(
-                        AnchorOutput::deserialize(value)
-                            .map_err(|e| serde::de::Error::custom(format!("cannot deserialize anchor output: {e}")))?,
-                    ),
-                    FoundryOutput::KIND => Self::Foundry(
-                        FoundryOutput::deserialize(value)
-                            .map_err(|e| serde::de::Error::custom(format!("cannot deserialize foundry output: {e}")))?,
-                    ),
-                    NftOutput::KIND => Self::Nft(
-                        NftOutput::deserialize(value)
-                            .map_err(|e| serde::de::Error::custom(format!("cannot deserialize NFT output: {e}")))?,
-                    ),
-                    DelegationOutput::KIND => {
-                        Self::Delegation(DelegationOutput::deserialize(value).map_err(|e| {
-                            serde::de::Error::custom(format!("cannot deserialize delegation output: {e}"))
-                        })?)
-                    }
-                    _ => return Err(serde::de::Error::custom("invalid output type")),
-                },
-            )
-        }
     }
 }
