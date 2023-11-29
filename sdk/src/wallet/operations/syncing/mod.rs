@@ -226,18 +226,17 @@ where
 
             // Get the unspent outputs of the new addresses
             for (account_or_nft_address, output_address) in addresses_to_scan.drain() {
-                // Update address with new associated unspent outputs
                 let address_with_unspent_output_ids = addresses_with_unspent_output_ids_all
                     .iter_mut()
                     .find(|address| address.address.inner() == &output_address)
-                    .ok_or_else(|| {
-                        crate::wallet::Error::WalletAddressMismatch(output_address.clone().to_bech32(bech32_hrp))
-                    })?;
+                    // Panic: can't happen because one is a superset of the other
+                    .unwrap();
 
                 let account_or_nft_output_ids = self
                     .get_output_ids_for_address(&Bech32Address::new(bech32_hrp, account_or_nft_address), options)
                     .await?;
 
+                // Update address with new associated unspent outputs
                 address_with_unspent_output_ids
                     .output_ids
                     .extend(account_or_nft_output_ids.clone());
