@@ -12,9 +12,9 @@ import { ValidationBlockBody } from './validation';
 import { BlockBodyDiscriminator } from '.';
 
 /**
- * Represent the object that nodes gossip around the network.
+ * The block header.
  */
-class Block {
+class BlockHeader {
     /**
      * Protocol version of the block.
      */
@@ -40,6 +40,32 @@ class Block {
      */
     readonly issuerId!: AccountId;
 
+    constructor(
+        protocolVersion: number,
+        networkId: u64,
+        issuingTime: u64,
+        slotCommitmentId: SlotCommitmentId,
+        latestFinalizedSlot: SlotIndex,
+        issuerId: AccountId,
+    ) {
+        this.protocolVersion = protocolVersion;
+        this.networkId = networkId;
+        this.issuingTime = issuingTime;
+        this.slotCommitmentId = slotCommitmentId;
+        this.latestFinalizedSlot = latestFinalizedSlot;
+        this.issuerId = issuerId;
+    }
+}
+
+/**
+ * Represent the object that nodes gossip around the network.
+ */
+class Block {
+    /**
+     * The block header.
+     */
+    readonly header!: BlockHeader;
+
     @Type(() => BlockBody, {
         discriminator: BlockBodyDiscriminator,
     })
@@ -53,22 +79,8 @@ class Block {
     })
     readonly signature!: Signature;
 
-    constructor(
-        protocolVersion: number,
-        networkId: u64,
-        issuingTime: u64,
-        slotCommitmentId: SlotCommitmentId,
-        latestFinalizedSlot: SlotIndex,
-        issuerId: AccountId,
-        body: BlockBody,
-        signature: Signature,
-    ) {
-        this.protocolVersion = protocolVersion;
-        this.networkId = networkId;
-        this.issuingTime = issuingTime;
-        this.slotCommitmentId = slotCommitmentId;
-        this.latestFinalizedSlot = latestFinalizedSlot;
-        this.issuerId = issuerId;
+    constructor(header: BlockHeader, body: BlockBody, signature: Signature) {
+        this.header = header;
         this.body = body;
         this.signature = signature;
     }
@@ -203,4 +215,4 @@ function parseUnsignedBlock(data: any): UnsignedBlock {
     return plainToInstance(UnsignedBlock, data) as any as UnsignedBlock;
 }
 
-export { Block, parseBlock, UnsignedBlock, parseUnsignedBlock };
+export { Block, BlockHeader, parseBlock, UnsignedBlock, parseUnsignedBlock };
