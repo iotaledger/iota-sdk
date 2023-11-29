@@ -3,6 +3,7 @@
 
 import { BasicBlockBody } from './basic';
 import { ValidationBlockBody } from './validation';
+
 /**
  * All of the block body types.
  */
