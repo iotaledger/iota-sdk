@@ -4,8 +4,6 @@
 from typing import List
 
 from dataclasses import dataclass
-from iota_sdk.types.common import HexStr
-
 from iota_sdk.types.common import HexStr, json
 
 

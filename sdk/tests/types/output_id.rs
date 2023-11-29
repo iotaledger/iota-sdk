@@ -6,14 +6,12 @@ use core::str::FromStr;
 use iota_sdk::types::block::{
     output::OutputId,
     payload::signed_transaction::{TransactionHash, TransactionId},
-    Error,
 };
-use packable::{bounded::InvalidBoundedU16, error::UnpackError, PackableExt};
+use packable::PackableExt;
 use pretty_assertions::assert_eq;
 
 const TRANSACTION_ID: &str = "0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c64900000000";
 const OUTPUT_ID: &str = "0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c649000000002a00";
-const OUTPUT_ID_INVALID_INDEX: &str = "0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c649000000008000";
 
 #[test]
 fn debug_impl() {
@@ -31,7 +29,7 @@ fn debug_impl() {
 }
 
 #[test]
-fn new_valid() {
+fn new() {
     let transaction_id = TransactionId::from_str(TRANSACTION_ID).unwrap();
     let output_id = OutputId::new(transaction_id, 42);
 
@@ -58,17 +56,17 @@ fn split_valid() {
 }
 
 #[test]
-fn try_from_valid() {
+fn from_bytes() {
     let transaction_id = TransactionId::from_str(TRANSACTION_ID).unwrap();
     let output_id_bytes: [u8; OutputId::LENGTH] = prefix_hex::decode(OUTPUT_ID).unwrap();
-    let output_id = OutputId::try_from(output_id_bytes).unwrap();
+    let output_id = OutputId::from(output_id_bytes);
 
     assert_eq!(*output_id.transaction_id(), transaction_id);
     assert_eq!(output_id.index(), 42);
 }
 
 #[test]
-fn from_str_valid() {
+fn from_str() {
     let transaction_id = TransactionId::from_str(TRANSACTION_ID).unwrap();
     let output_id = OutputId::from_str(OUTPUT_ID).unwrap();
 
@@ -98,7 +96,7 @@ fn packed_len() {
 }
 
 #[test]
-fn pack_unpack_valid() {
+fn pack_unpack() {
     let output_id_1 = OutputId::from_str(OUTPUT_ID).unwrap();
     let output_id_2 = OutputId::unpack_verified(output_id_1.pack_to_vec().as_slice(), &()).unwrap();
 

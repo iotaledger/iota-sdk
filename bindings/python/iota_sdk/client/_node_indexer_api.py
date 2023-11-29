@@ -8,9 +8,6 @@ from abc import ABCMeta, abstractmethod
 from iota_sdk.types.common import HexStr, json, SlotIndex
 from iota_sdk.types.output_id import OutputId
 
-from iota_sdk.types.common import HexStr
-from iota_sdk.types.output_id import OutputId
-
 
 @json
 @dataclass
