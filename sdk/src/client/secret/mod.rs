@@ -24,10 +24,14 @@ use std::{collections::HashMap, fmt::Debug, ops::Range, str::FromStr};
 
 use async_trait::async_trait;
 use crypto::{
+    hashes::{blake2b::Blake2b256, Digest},
     keys::{bip39::Mnemonic, bip44::Bip44},
-    signatures::secp256k1_ecdsa::{self, EvmAddress},
+    signatures::{
+        ed25519,
+        secp256k1_ecdsa::{self, EvmAddress},
+    },
 };
-use serde::{de::DeserializeOwned, Deserialize, Serialize};
+use serde::{Deserialize, Serialize};
 use zeroize::Zeroizing;
 #[cfg(feature = "stronghold")]
 use {
@@ -58,7 +62,7 @@ use crate::{
         payload::SignedTransactionPayload,
         signature::{Ed25519Signature, Signature},
         unlock::{AccountUnlock, NftUnlock, ReferenceUnlock, SignatureUnlock, Unlock, Unlocks},
-        Error as BlockError, SignedBlock,
+        Block, Error as BlockError,
     },
 };
 
@@ -66,6 +70,17 @@ use crate::{
 #[async_trait]
 pub trait SecretManage: Send + Sync {
     type Error: std::error::Error + Send + Sync;
+
+    /// Generates public keys.
+    ///
+    /// For `coin_type`, see also <https://github.com/satoshilabs/slips/blob/master/slip-0044.md>.
+    async fn generate_ed25519_public_keys(
+        &self,
+        coin_type: u32,
+        account_index: u32,
+        address_indexes: Range<u32>,
+        options: impl Into<Option<GenerateAddressOptions>> + Send,
+    ) -> Result<Vec<ed25519::PublicKey>, Self::Error>;
 
     /// Generates addresses.
     ///
@@ -76,7 +91,14 @@ pub trait SecretManage: Send + Sync {
         account_index: u32,
         address_indexes: Range<u32>,
         options: impl Into<Option<GenerateAddressOptions>> + Send,
-    ) -> Result<Vec<Ed25519Address>, Self::Error>;
+    ) -> Result<Vec<Ed25519Address>, Self::Error> {
+        Ok(self
+            .generate_ed25519_public_keys(coin_type, account_index, address_indexes, options)
+            .await?
+            .iter()
+            .map(|public_key| Ed25519Address::new(Blake2b256::digest(public_key.to_bytes()).into()))
+            .collect())
+    }
 
     async fn generate_evm_addresses(
         &self,
@@ -115,114 +137,18 @@ pub trait SecretManage: Send + Sync {
 }
 
 #[async_trait]
-pub trait DynSecretManage: std::fmt::Debug + Send + Sync {
-    async fn dyn_generate_ed25519_addresses(
-        &self,
-        coin_type: u32,
-        account_index: u32,
-        address_indexes: Range<u32>,
-        options: Option<GenerateAddressOptions>,
-    ) -> Result<Vec<Ed25519Address>, Error>;
+impl<T: SecretManage> SecretManage for alloc::sync::Arc<T> {
+    type Error = T::Error;
 
-    async fn dyn_generate_evm_addresses(
-        &self,
-        coin_type: u32,
-        account_index: u32,
-        address_indexes: Range<u32>,
-        options: Option<GenerateAddressOptions>,
-    ) -> Result<Vec<EvmAddress>, Error>;
-
-    async fn dyn_sign_ed25519(&self, msg: &[u8], chain: Bip44) -> Result<Ed25519Signature, Error>;
-
-    async fn dyn_sign_secp256k1_ecdsa(
-        &self,
-        msg: &[u8],
-        chain: Bip44,
-    ) -> Result<(secp256k1_ecdsa::PublicKey, secp256k1_ecdsa::RecoverableSignature), Error>;
-
-    async fn dyn_signature_unlock(&self, essence_hash: &[u8; 32], chain: Bip44) -> Result<Unlock, Error>;
-
-    async fn dyn_transaction_unlocks(
-        &self,
-        prepared_transaction_data: &PreparedTransactionData,
-    ) -> Result<Unlocks, Error>;
-
-    async fn dyn_sign_transaction(
-        &self,
-        prepared_transaction_data: PreparedTransactionData,
-    ) -> Result<SignedTransactionPayload, Error>;
-}
-#[async_trait]
-impl<T: SecretManage + std::fmt::Debug> DynSecretManage for T
-where
-    Error: From<T::Error>,
-{
-    async fn dyn_generate_ed25519_addresses(
-        &self,
-        coin_type: u32,
-        account_index: u32,
-        address_indexes: Range<u32>,
-        options: Option<GenerateAddressOptions>,
-    ) -> Result<Vec<Ed25519Address>, Error> {
-        Ok(self
-            .generate_ed25519_addresses(coin_type, account_index, address_indexes, options)
-            .await?)
-    }
-
-    async fn dyn_generate_evm_addresses(
-        &self,
-        coin_type: u32,
-        account_index: u32,
-        address_indexes: Range<u32>,
-        options: Option<GenerateAddressOptions>,
-    ) -> Result<Vec<EvmAddress>, Error> {
-        Ok(self
-            .generate_evm_addresses(coin_type, account_index, address_indexes, options)
-            .await?)
-    }
-
-    async fn dyn_sign_ed25519(&self, msg: &[u8], chain: Bip44) -> Result<Ed25519Signature, Error> {
-        Ok(self.sign_ed25519(msg, chain).await?)
-    }
-
-    async fn dyn_sign_secp256k1_ecdsa(
-        &self,
-        msg: &[u8],
-        chain: Bip44,
-    ) -> Result<(secp256k1_ecdsa::PublicKey, secp256k1_ecdsa::RecoverableSignature), Error> {
-        Ok(self.sign_secp256k1_ecdsa(msg, chain).await?)
-    }
-
-    async fn dyn_signature_unlock(&self, essence_hash: &[u8; 32], chain: Bip44) -> Result<Unlock, Error> {
-        Ok(self.signature_unlock(essence_hash, chain).await?)
-    }
-
-    async fn dyn_transaction_unlocks(
-        &self,
-        prepared_transaction_data: &PreparedTransactionData,
-    ) -> Result<Unlocks, Error> {
-        Ok(self.transaction_unlocks(prepared_transaction_data).await?)
-    }
-
-    async fn dyn_sign_transaction(
-        &self,
-        prepared_transaction_data: PreparedTransactionData,
-    ) -> Result<SignedTransactionPayload, Error> {
-        Ok(self.sign_transaction(prepared_transaction_data).await?)
-    }
-}
-#[async_trait]
-impl SecretManage for dyn DynSecretManagerConfig {
-    type Error = Error;
-
-    async fn generate_ed25519_addresses(
+    async fn generate_ed25519_public_keys(
         &self,
         coin_type: u32,
         account_index: u32,
         address_indexes: Range<u32>,
         options: impl Into<Option<GenerateAddressOptions>> + Send,
-    ) -> Result<Vec<Ed25519Address>, Self::Error> {
-        self.dyn_generate_ed25519_addresses(coin_type, account_index, address_indexes, options.into())
+    ) -> Result<Vec<ed25519::PublicKey>, Self::Error> {
+        self.as_ref()
+            .generate_ed25519_public_keys(coin_type, account_index, address_indexes, options)
             .await
     }
 
@@ -233,12 +159,13 @@ impl SecretManage for dyn DynSecretManagerConfig {
         address_indexes: Range<u32>,
         options: impl Into<Option<GenerateAddressOptions>> + Send,
     ) -> Result<Vec<EvmAddress>, Self::Error> {
-        self.dyn_generate_evm_addresses(coin_type, account_index, address_indexes, options.into())
+        self.as_ref()
+            .generate_evm_addresses(coin_type, account_index, address_indexes, options)
             .await
     }
 
     async fn sign_ed25519(&self, msg: &[u8], chain: Bip44) -> Result<Ed25519Signature, Self::Error> {
-        self.dyn_sign_ed25519(msg, chain).await
+        self.as_ref().sign_ed25519(msg, chain).await
     }
 
     async fn sign_secp256k1_ecdsa(
@@ -246,54 +173,194 @@ impl SecretManage for dyn DynSecretManagerConfig {
         msg: &[u8],
         chain: Bip44,
     ) -> Result<(secp256k1_ecdsa::PublicKey, secp256k1_ecdsa::RecoverableSignature), Self::Error> {
-        self.dyn_sign_secp256k1_ecdsa(msg, chain).await
-    }
-
-    async fn signature_unlock(&self, essence_hash: &[u8; 32], chain: Bip44) -> Result<Unlock, Self::Error> {
-        self.dyn_signature_unlock(essence_hash, chain).await
+        self.as_ref().sign_secp256k1_ecdsa(msg, chain).await
     }
 
     async fn transaction_unlocks(
         &self,
         prepared_transaction_data: &PreparedTransactionData,
     ) -> Result<Unlocks, Self::Error> {
-        self.dyn_transaction_unlocks(prepared_transaction_data).await
+        self.as_ref().transaction_unlocks(prepared_transaction_data).await
     }
 
     async fn sign_transaction(
         &self,
         prepared_transaction_data: PreparedTransactionData,
     ) -> Result<SignedTransactionPayload, Self::Error> {
-        self.dyn_sign_transaction(prepared_transaction_data).await
+        self.as_ref().sign_transaction(prepared_transaction_data).await
     }
 }
 
-pub trait SecretManagerConfig: SecretManage {
-    type Config: Serialize + DeserializeOwned + Debug + Send + Sync;
+// #[async_trait]
+// pub trait DynSecretManage: std::fmt::Debug + Send + Sync {
+//     async fn dyn_generate_ed25519_addresses(
+//         &self,
+//         coin_type: u32,
+//         account_index: u32,
+//         address_indexes: Range<u32>,
+//         options: Option<GenerateAddressOptions>,
+//     ) -> Result<Vec<Ed25519Address>, Error>;
 
-    fn to_config(&self) -> Option<Self::Config>;
+//     async fn dyn_generate_evm_addresses(
+//         &self,
+//         coin_type: u32,
+//         account_index: u32,
+//         address_indexes: Range<u32>,
+//         options: Option<GenerateAddressOptions>,
+//     ) -> Result<Vec<EvmAddress>, Error>;
 
-    fn from_config(config: &Self::Config) -> Result<Self, Self::Error>
-    where
-        Self: Sized;
-}
+//     async fn dyn_sign_ed25519(&self, msg: &[u8], chain: Bip44) -> Result<Ed25519Signature, Error>;
 
-pub trait DynSerialize: erased_serde::Serialize + std::fmt::Debug + Send + Sync {}
-impl<T: erased_serde::Serialize + std::fmt::Debug + Send + Sync> DynSerialize for T {}
-erased_serde::serialize_trait_object!(DynSerialize);
+//     async fn dyn_sign_secp256k1_ecdsa(
+//         &self,
+//         msg: &[u8],
+//         chain: Bip44,
+//     ) -> Result<(secp256k1_ecdsa::PublicKey, secp256k1_ecdsa::RecoverableSignature), Error>;
 
-pub trait DynSecretManagerConfig: DynSecretManage + AsAny {
-    fn dyn_to_config(&self) -> Option<Box<dyn DynSerialize>>;
-}
-impl<T: SecretManagerConfig + AsAny + std::fmt::Debug> DynSecretManagerConfig for T
-where
-    Error: From<T::Error>,
-    T::Config: 'static,
-{
-    fn dyn_to_config(&self) -> Option<Box<dyn DynSerialize>> {
-        self.to_config().map(|v| Box::new(v) as _)
-    }
-}
+//     async fn dyn_signature_unlock(&self, essence_hash: &[u8; 32], chain: Bip44) -> Result<Unlock, Error>;
+
+//     async fn dyn_transaction_unlocks(
+//         &self,
+//         prepared_transaction_data: &PreparedTransactionData,
+//     ) -> Result<Unlocks, Error>;
+
+//     async fn dyn_sign_transaction(
+//         &self,
+//         prepared_transaction_data: PreparedTransactionData,
+//     ) -> Result<SignedTransactionPayload, Error>;
+// }
+// #[async_trait]
+// impl<T: SecretManage + std::fmt::Debug> DynSecretManage for T
+// where
+//     Error: From<T::Error>,
+// {
+//     async fn dyn_generate_ed25519_addresses(
+//         &self,
+//         coin_type: u32,
+//         account_index: u32,
+//         address_indexes: Range<u32>,
+//         options: Option<GenerateAddressOptions>,
+//     ) -> Result<Vec<Ed25519Address>, Error> { Ok(self .generate_ed25519_addresses(coin_type, account_index,
+//       address_indexes, options) .await?)
+//     }
+
+//     async fn dyn_generate_evm_addresses(
+//         &self,
+//         coin_type: u32,
+//         account_index: u32,
+//         address_indexes: Range<u32>,
+//         options: Option<GenerateAddressOptions>,
+//     ) -> Result<Vec<EvmAddress>, Error> { Ok(self .generate_evm_addresses(coin_type, account_index, address_indexes,
+//       options) .await?)
+//     }
+
+//     async fn dyn_sign_ed25519(&self, msg: &[u8], chain: Bip44) -> Result<Ed25519Signature, Error> {
+//         Ok(self.sign_ed25519(msg, chain).await?)
+//     }
+
+//     async fn dyn_sign_secp256k1_ecdsa(
+//         &self,
+//         msg: &[u8],
+//         chain: Bip44,
+//     ) -> Result<(secp256k1_ecdsa::PublicKey, secp256k1_ecdsa::RecoverableSignature), Error> {
+//       Ok(self.sign_secp256k1_ecdsa(msg, chain).await?)
+//     }
+
+//     async fn dyn_signature_unlock(&self, essence_hash: &[u8; 32], chain: Bip44) -> Result<Unlock, Error> {
+//         Ok(self.signature_unlock(essence_hash, chain).await?)
+//     }
+
+//     async fn dyn_transaction_unlocks(
+//         &self,
+//         prepared_transaction_data: &PreparedTransactionData,
+//     ) -> Result<Unlocks, Error> { Ok(self.transaction_unlocks(prepared_transaction_data).await?)
+//     }
+
+//     async fn dyn_sign_transaction(
+//         &self,
+//         prepared_transaction_data: PreparedTransactionData,
+//     ) -> Result<SignedTransactionPayload, Error> { Ok(self.sign_transaction(prepared_transaction_data).await?)
+//     }
+// }
+// #[async_trait]
+// impl SecretManage for dyn DynSecretManagerConfig {
+//     type Error = Error;
+
+//     async fn generate_ed25519_addresses(
+//         &self,
+//         coin_type: u32,
+//         account_index: u32,
+//         address_indexes: Range<u32>,
+//         options: impl Into<Option<GenerateAddressOptions>> + Send,
+//     ) -> Result<Vec<Ed25519Address>, Self::Error> { self.dyn_generate_ed25519_addresses(coin_type, account_index,
+//       address_indexes, options.into()) .await
+//     }
+
+//     async fn generate_evm_addresses(
+//         &self,
+//         coin_type: u32,
+//         account_index: u32,
+//         address_indexes: Range<u32>,
+//         options: impl Into<Option<GenerateAddressOptions>> + Send,
+//     ) -> Result<Vec<EvmAddress>, Self::Error> { self.dyn_generate_evm_addresses(coin_type, account_index,
+//       address_indexes, options.into()) .await
+//     }
+
+//     async fn sign_ed25519(&self, msg: &[u8], chain: Bip44) -> Result<Ed25519Signature, Self::Error> {
+//         self.dyn_sign_ed25519(msg, chain).await
+//     }
+
+//     async fn sign_secp256k1_ecdsa(
+//         &self,
+//         msg: &[u8],
+//         chain: Bip44,
+//     ) -> Result<(secp256k1_ecdsa::PublicKey, secp256k1_ecdsa::RecoverableSignature), Self::Error> {
+//       self.dyn_sign_secp256k1_ecdsa(msg, chain).await
+//     }
+
+//     async fn signature_unlock(&self, essence_hash: &[u8; 32], chain: Bip44) -> Result<Unlock, Self::Error> {
+//         self.dyn_signature_unlock(essence_hash, chain).await
+//     }
+
+//     async fn transaction_unlocks(
+//         &self,
+//         prepared_transaction_data: &PreparedTransactionData,
+//     ) -> Result<Unlocks, Self::Error> { self.dyn_transaction_unlocks(prepared_transaction_data).await
+//     }
+
+//     async fn sign_transaction(
+//         &self,
+//         prepared_transaction_data: PreparedTransactionData,
+//     ) -> Result<SignedTransactionPayload, Self::Error> { self.dyn_sign_transaction(prepared_transaction_data).await
+//     }
+// }
+
+// pub trait SecretManagerConfig: SecretManage {
+//     type Config: Serialize + DeserializeOwned + Debug + Send + Sync;
+
+//     fn to_config(&self) -> Option<Self::Config>;
+
+//     fn from_config(config: &Self::Config) -> Result<Self, Self::Error>
+//     where
+//         Self: Sized;
+// }
+
+// pub trait DynSerialize: erased_serde::Serialize + std::fmt::Debug + Send + Sync {}
+// impl<T: erased_serde::Serialize + std::fmt::Debug + Send + Sync> DynSerialize for T {}
+// erased_serde::serialize_trait_object!(DynSerialize);
+
+// pub trait DynSecretManagerConfig: DynSecretManage + AsAny {
+//     fn dyn_to_config(&self) -> Option<Box<dyn DynSerialize>>;
+// }
+// impl<T: SecretManagerConfig + AsAny + std::fmt::Debug> DynSecretManagerConfig for T
+// where
+//     Error: From<T::Error>,
+//     T::Config: 'static,
+// {
+//     fn dyn_to_config(&self) -> Option<Box<dyn DynSerialize>> {
+//         self.to_config().map(|v| Box::new(v) as _)
+//     }
+// }
 
 /// Supported secret managers
 
@@ -480,31 +547,31 @@ impl From<&SecretManager> for SecretManagerDto {
 impl SecretManage for SecretManager {
     type Error = Error;
 
-    async fn generate_ed25519_addresses(
+    async fn generate_ed25519_public_keys(
         &self,
         coin_type: u32,
         account_index: u32,
         address_indexes: Range<u32>,
         options: impl Into<Option<GenerateAddressOptions>> + Send,
-    ) -> crate::client::Result<Vec<Ed25519Address>> {
+    ) -> Result<Vec<ed25519::PublicKey>, Self::Error> {
         match self {
             #[cfg(feature = "stronghold")]
             Self::Stronghold(secret_manager) => Ok(secret_manager
-                .generate_ed25519_addresses(coin_type, account_index, address_indexes, options)
+                .generate_ed25519_public_keys(coin_type, account_index, address_indexes, options)
                 .await?),
             #[cfg(feature = "ledger_nano")]
             Self::LedgerNano(secret_manager) => Ok(secret_manager
-                .generate_ed25519_addresses(coin_type, account_index, address_indexes, options)
+                .generate_ed25519_public_keys(coin_type, account_index, address_indexes, options)
                 .await?),
             Self::Mnemonic(secret_manager) => {
                 secret_manager
-                    .generate_ed25519_addresses(coin_type, account_index, address_indexes, options)
+                    .generate_ed25519_public_keys(coin_type, account_index, address_indexes, options)
                     .await
             }
             #[cfg(feature = "private_key_secret_manager")]
             Self::PrivateKey(secret_manager) => {
                 secret_manager
-                    .generate_ed25519_addresses(coin_type, account_index, address_indexes, options)
+                    .generate_ed25519_public_keys(coin_type, account_index, address_indexes, options)
                     .await
             }
             Self::Placeholder => Err(Error::PlaceholderSecretManager),
@@ -761,33 +828,33 @@ impl<S: 'static + SecretManage + Send + Sync> DowncastSecretManager for S {
     }
 }
 
-impl DowncastSecretManager for dyn DynSecretManagerConfig {
-    fn is<T: 'static>(&self) -> bool {
-        self.as_any().is::<T>()
-    }
+// impl DowncastSecretManager for dyn DynSecretManagerConfig {
+//     fn is<T: 'static>(&self) -> bool {
+//         self.as_any().is::<T>()
+//     }
 
-    fn downcast_ref<T: 'static>(&self) -> Option<&T> {
-        self.as_any().downcast_ref::<T>()
-    }
+//     fn downcast_ref<T: 'static>(&self) -> Option<&T> {
+//         self.as_any().downcast_ref::<T>()
+//     }
 
-    fn downcast_mut<T: 'static>(&mut self) -> Option<&mut T> {
-        self.as_any_mut().downcast_mut::<T>()
-    }
-}
+//     fn downcast_mut<T: 'static>(&mut self) -> Option<&mut T> {
+//         self.as_any_mut().downcast_mut::<T>()
+//     }
+// }
 
-impl DowncastSecretManager for Box<dyn DynSecretManagerConfig> {
-    fn is<T: 'static>(&self) -> bool {
-        self.as_ref().as_any().is::<T>()
-    }
+// impl DowncastSecretManager for Box<dyn DynSecretManagerConfig> {
+//     fn is<T: 'static>(&self) -> bool {
+//         self.as_ref().as_any().is::<T>()
+//     }
 
-    fn downcast_ref<T: 'static>(&self) -> Option<&T> {
-        self.as_ref().as_any().downcast_ref::<T>()
-    }
+//     fn downcast_ref<T: 'static>(&self) -> Option<&T> {
+//         self.as_ref().as_any().downcast_ref::<T>()
+//     }
 
-    fn downcast_mut<T: 'static>(&mut self) -> Option<&mut T> {
-        self.as_mut().as_any_mut().downcast_mut::<T>()
-    }
-}
+//     fn downcast_mut<T: 'static>(&mut self) -> Option<&mut T> {
+//         self.as_mut().as_any_mut().downcast_mut::<T>()
+//     }
+// }
 
 pub trait AsAny: 'static + Send + Sync {
     fn as_any(&self) -> &(dyn std::any::Any + Send + Sync);
@@ -803,42 +870,42 @@ impl<T: 'static + Send + Sync> AsAny for T {
     }
 }
 
-impl SecretManagerConfig for SecretManager {
-    type Config = SecretManagerDto;
+// impl SecretManagerConfig for SecretManager {
+//     type Config = SecretManagerDto;
 
-    fn to_config(&self) -> Option<Self::Config> {
-        match self {
-            #[cfg(feature = "stronghold")]
-            Self::Stronghold(s) => s.to_config().map(Self::Config::Stronghold),
-            #[cfg(feature = "ledger_nano")]
-            Self::LedgerNano(s) => s.to_config().map(Self::Config::LedgerNano),
-            Self::Mnemonic(_) => None,
-            #[cfg(feature = "private_key_secret_manager")]
-            Self::PrivateKey(_) => None,
-            Self::Placeholder => None,
-        }
-    }
+//     fn to_config(&self) -> Option<Self::Config> {
+//         match self {
+//             #[cfg(feature = "stronghold")]
+//             Self::Stronghold(s) => s.to_config().map(Self::Config::Stronghold),
+//             #[cfg(feature = "ledger_nano")]
+//             Self::LedgerNano(s) => s.to_config().map(Self::Config::LedgerNano),
+//             Self::Mnemonic(_) => None,
+//             #[cfg(feature = "private_key_secret_manager")]
+//             Self::PrivateKey(_) => None,
+//             Self::Placeholder => None,
+//         }
+//     }
 
-    fn from_config(config: &Self::Config) -> Result<Self, Self::Error> {
-        Ok(match config {
-            #[cfg(feature = "stronghold")]
-            SecretManagerDto::Stronghold(config) => Self::Stronghold(StrongholdSecretManager::from_config(config)?),
-            #[cfg(feature = "ledger_nano")]
-            SecretManagerDto::LedgerNano(config) => Self::LedgerNano(LedgerSecretManager::from_config(config)?),
-            SecretManagerDto::HexSeed(hex_seed) => {
-                Self::Mnemonic(MnemonicSecretManager::try_from_hex_seed(hex_seed.clone())?)
-            }
-            SecretManagerDto::Mnemonic(mnemonic) => {
-                Self::Mnemonic(MnemonicSecretManager::try_from_mnemonic(mnemonic.as_str().to_owned())?)
-            }
-            #[cfg(feature = "private_key_secret_manager")]
-            SecretManagerDto::PrivateKey(private_key) => {
-                Self::PrivateKey(Box::new(PrivateKeySecretManager::try_from_hex(private_key.to_owned())?))
-            }
-            SecretManagerDto::Placeholder => Self::Placeholder,
-        })
-    }
-}
+//     fn from_config(config: &Self::Config) -> Result<Self, Self::Error> {
+//         Ok(match config {
+//             #[cfg(feature = "stronghold")]
+//             SecretManagerDto::Stronghold(config) => Self::Stronghold(StrongholdSecretManager::from_config(config)?),
+//             #[cfg(feature = "ledger_nano")]
+//             SecretManagerDto::LedgerNano(config) => Self::LedgerNano(LedgerSecretManager::from_config(config)?),
+//             SecretManagerDto::HexSeed(hex_seed) => {
+//                 Self::Mnemonic(MnemonicSecretManager::try_from_hex_seed(hex_seed.clone())?)
+//             }
+//             SecretManagerDto::Mnemonic(mnemonic) => {
+//                 Self::Mnemonic(MnemonicSecretManager::try_from_mnemonic(mnemonic.as_str().to_owned())?)
+//             }
+//             #[cfg(feature = "private_key_secret_manager")]
+//             SecretManagerDto::PrivateKey(private_key) => {
+//                 Self::PrivateKey(Box::new(PrivateKeySecretManager::try_from_hex(private_key.to_owned())?))
+//             }
+//             SecretManagerDto::Placeholder => Self::Placeholder,
+//         })
+//     }
+// }
 
 impl SecretManager {
     /// Tries to create a [`SecretManager`] from a mnemonic string.
@@ -887,8 +954,10 @@ where
                 // We can only sign ed25519 addresses and block_indexes needs to contain the account or nft
                 // address already at this point, because the reference index needs to be lower
                 // than the current block index
-                if !input_address.is_ed25519() {
-                    Err(InputSelectionError::MissingInputWithEd25519Address)?;
+                match &input_address {
+                    Address::Ed25519(_) | Address::ImplicitAccountCreation(_) => {}
+                    Address::Restricted(restricted) if restricted.address().is_ed25519() => {}
+                    _ => Err(InputSelectionError::MissingInputWithEd25519Address)?,
                 }
 
                 let chain = input.chain.ok_or(Error::MissingBip32Chain)?;
@@ -959,7 +1028,7 @@ pub trait SignBlock {
         self,
         secret_manager: &S,
         chain: Bip44,
-    ) -> crate::client::Result<SignedBlock>
+    ) -> crate::client::Result<Block>
     where
         crate::client::Error: From<S::Error>;
 }
@@ -970,7 +1039,7 @@ impl SignBlock for UnsignedBlock {
         self,
         secret_manager: &S,
         chain: Bip44,
-    ) -> crate::client::Result<SignedBlock>
+    ) -> crate::client::Result<Block>
     where
         crate::client::Error: From<S::Error>,
     {

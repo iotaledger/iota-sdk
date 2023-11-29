@@ -3,13 +3,19 @@
 
 use derive_more::From;
 
-use crate::types::block::{address::Address, slot::SlotIndex, Error};
+use crate::types::block::{
+    address::Address,
+    output::{StorageScore, StorageScoreParameters},
+    slot::SlotIndex,
+    Error,
+};
 
 /// Defines an expiration slot index. Before the slot index is reached, only the Address defined in the Address
 /// Unlock Condition is allowed to unlock the output. Afterward, only the Return Address can unlock it.
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, From, packable::Packable)]
 pub struct ExpirationUnlockCondition {
     // The address that can unlock the expired output.
+    #[packable(verify_with = verify_return_address)]
     return_address: Address,
     /// The slot index that determines when the associated output expires.
     #[packable(verify_with = verify_slot_index)]
@@ -24,11 +30,13 @@ impl ExpirationUnlockCondition {
     #[inline(always)]
     pub fn new(return_address: impl Into<Address>, slot_index: impl Into<SlotIndex>) -> Result<Self, Error> {
         let slot_index = slot_index.into();
+        let return_address = return_address.into();
 
-        verify_slot_index::<true>(&slot_index, &())?;
+        verify_slot_index::<true>(&slot_index)?;
+        verify_return_address::<true>(&return_address)?;
 
         Ok(Self {
-            return_address: return_address.into(),
+            return_address,
             slot_index,
         })
     }
@@ -55,8 +63,23 @@ impl ExpirationUnlockCondition {
     }
 }
 
+impl StorageScore for ExpirationUnlockCondition {
+    fn storage_score(&self, params: StorageScoreParameters) -> u64 {
+        self.return_address().storage_score(params)
+    }
+}
+
 #[inline]
-fn verify_slot_index<const VERIFY: bool>(slot_index: &SlotIndex, _: &()) -> Result<(), Error> {
+fn verify_return_address<const VERIFY: bool>(return_address: &Address) -> Result<(), Error> {
+    if VERIFY && return_address.is_implicit_account_creation() {
+        Err(Error::InvalidAddressKind(return_address.kind()))
+    } else {
+        Ok(())
+    }
+}
+
+#[inline]
+fn verify_slot_index<const VERIFY: bool>(slot_index: &SlotIndex) -> Result<(), Error> {
     if VERIFY && *slot_index == 0 {
         Err(Error::ExpirationUnlockConditionZero)
     } else {

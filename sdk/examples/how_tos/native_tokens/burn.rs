@@ -6,9 +6,9 @@
 //! output that minted it.
 //!
 //! Make sure that `STRONGHOLD_SNAPSHOT_PATH` and `WALLET_DB_PATH` already exist by
-//! running the `./how_tos/accounts_and_addresses/create_account.rs` example!
+//! running the `./how_tos/accounts_and_addresses/create_wallet.rs` example!
 //!
-//! You may provide a TOKEN_ID that is available in the account. You can check this by running the
+//! You may provide a TOKEN_ID that is available in the wallet. You can check this by running the
 //! `get_balance` example. You can create a new native token by running the `create_native_token` example.
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
@@ -16,14 +16,15 @@
 //! cargo run --release --all-features --example burn_native_token [TOKEN_ID]
 //! ```
 
+use crypto::keys::bip39::Mnemonic;
 use iota_sdk::{
-    client::secret::SecretManager,
+    client::secret::stronghold::StrongholdSecretManager,
     types::block::output::{NativeToken, TokenId},
     wallet::{Result, Wallet},
     U256,
 };
 
-// The minimum available native token amount to search for in the account
+// The minimum available native token amount to search for in the wallet
 const MIN_AVAILABLE_AMOUNT: u64 = 11;
 // The amount of the native token to burn
 const BURN_AMOUNT: u64 = 1;
@@ -33,16 +34,24 @@ async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
-    let wallet = Wallet::builder()
-        .load_storage::<SecretManager>(std::env::var("WALLET_DB_PATH").unwrap())
-        .await?
-        .finish()
-        .await?;
-    let alias = "Alice";
-    let account = wallet.get_account(alias.to_string()).await?;
+    // Setup Stronghold secret_manager
+    let secret_manager = StrongholdSecretManager::builder()
+        .password(std::env::var("STRONGHOLD_PASSWORD").unwrap())
+        .build(std::env::var("STRONGHOLD_SNAPSHOT_PATH").unwrap())?;
 
-    // May want to ensure the account is synced before sending a transaction.
-    let balance = account.sync(None).await?;
+    // Only required the first time, can also be generated with `manager.generate_mnemonic()?`
+    let mnemonic = Mnemonic::from(std::env::var("MNEMONIC").unwrap());
+
+    // The mnemonic only needs to be stored the first time
+    secret_manager.store_mnemonic(mnemonic).await?;
+
+    let wallet = Wallet::builder()
+        .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
+        .finish(&secret_manager)
+        .await?;
+
+    // May want to ensure the wallet is synced before sending a transaction.
+    let balance = wallet.sync(&secret_manager, None).await?;
 
     // Take the given token id, or use a default.
     let token_id = std::env::args()
@@ -56,16 +65,18 @@ async fn main() -> Result<()> {
         println!("Balance before burning: {native_token_balance:#?}");
 
         // Set the stronghold password
-        wallet
-            .set_stronghold_password(std::env::var("STRONGHOLD_PASSWORD").unwrap())
+        secret_manager
+            .set_password(std::env::var("STRONGHOLD_PASSWORD").unwrap())
             .await?;
 
         // Burn a native token
-        let transaction = account.burn(NativeToken::new(token_id, BURN_AMOUNT)?, None).await?;
+        let transaction = wallet
+            .burn(&secret_manager, NativeToken::new(token_id, BURN_AMOUNT)?, None)
+            .await?;
         println!("Transaction sent: {}", transaction.transaction_id);
 
-        let block_id = account
-            .reissue_transaction_until_included(&transaction.transaction_id, None, None)
+        let block_id = wallet
+            .reissue_transaction_until_included(&secret_manager, &transaction.transaction_id, None, None)
             .await?;
         println!(
             "Block included: {}/block/{}",
@@ -73,7 +84,7 @@ async fn main() -> Result<()> {
             block_id
         );
 
-        let balance = account.sync(None).await?;
+        let balance = wallet.sync(&secret_manager, None).await?;
 
         print!("Balance after burning: ");
         if let Some(native_token_balance) = balance
@@ -87,7 +98,7 @@ async fn main() -> Result<()> {
         }
     } else {
         println!(
-            "Native token '{token_id}' doesn't exist or there's not at least '{MIN_AVAILABLE_AMOUNT}' tokens of it in account '{alias}'"
+            "Native token '{token_id}' doesn't exist or there's not at least '{MIN_AVAILABLE_AMOUNT}' tokens of it in the wallet"
         );
     }
 

@@ -3,8 +3,8 @@
 
 use iota_sdk::types::block::{
     output::{
-        unlock_condition::ImmutableAccountAddressUnlockCondition, FoundryId, FoundryOutput, NativeToken, Output, Rent,
-        SimpleTokenScheme, TokenId,
+        unlock_condition::ImmutableAccountAddressUnlockCondition, FoundryId, FoundryOutput, MinimumOutputAmount,
+        NativeToken, SimpleTokenScheme, TokenId,
     },
     protocol::protocol_parameters,
     rand::{
@@ -27,7 +27,7 @@ fn builder() {
 
     let mut builder = FoundryOutput::build_with_amount(amount, 234, rand_token_scheme())
         .with_serial_number(85)
-        .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000).unwrap())
+        .with_native_token(NativeToken::new(TokenId::from(foundry_id), 1000).unwrap())
         .with_unlock_conditions([account_1])
         .add_feature(metadata_1.clone())
         .replace_feature(metadata_2.clone())
@@ -52,14 +52,14 @@ fn builder() {
     assert!(output.immutable_features().is_empty());
 
     let output = builder
-        .with_minimum_storage_deposit(protocol_parameters.rent_structure())
+        .with_minimum_amount(protocol_parameters.storage_score_parameters())
         .add_unlock_condition(ImmutableAccountAddressUnlockCondition::new(rand_account_address()))
-        .finish_with_params(&protocol_parameters)
+        .finish()
         .unwrap();
 
     assert_eq!(
         output.amount(),
-        Output::Foundry(output).rent_cost(protocol_parameters.rent_structure())
+        output.minimum_amount(protocol_parameters.storage_score_parameters())
     );
 }
 

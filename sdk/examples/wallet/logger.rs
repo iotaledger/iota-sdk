@@ -9,15 +9,10 @@
 //! ```
 
 use iota_sdk::{
-    client::{
-        constants::SHIMMER_COIN_TYPE,
-        secret::{mnemonic::MnemonicSecretManager, SecretManager},
-    },
+    client::{constants::SHIMMER_COIN_TYPE, secret::mnemonic::MnemonicSecretManager},
+    crypto::keys::bip44::Bip44,
     wallet::{ClientOptions, Result, Wallet},
 };
-
-// The number of addresses to generate
-const NUM_ADDRESSES_TO_GENERATE: u32 = 5;
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -38,24 +33,17 @@ async fn main() -> Result<()> {
     let client_options = ClientOptions::new().with_node(&std::env::var("NODE_URL").unwrap())?;
     let secret_manager = MnemonicSecretManager::try_from_mnemonic(std::env::var("MNEMONIC").unwrap())?;
     let wallet = Wallet::builder()
-        .load_storage::<SecretManager>(std::env::var("WALLET_DB_PATH").unwrap())
-        .await?
-        .with_secret_manager(SecretManager::Mnemonic(secret_manager))
+        .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
         .with_client_options(client_options)
-        .with_coin_type(SHIMMER_COIN_TYPE)
-        .finish()
+        .with_bip_path(Bip44::new(SHIMMER_COIN_TYPE))
+        .finish(&secret_manager)
         .await?;
 
-    // Get or create a new account
-    let account = wallet.get_or_create_account("Alice").await?;
+    println!("Generating address...");
+    let _ = wallet.generate_ed25519_address(&secret_manager, 0, 0, None).await?;
 
-    println!("Generating {NUM_ADDRESSES_TO_GENERATE} addresses...");
-    let _ = account
-        .generate_ed25519_addresses(NUM_ADDRESSES_TO_GENERATE, None)
-        .await?;
-
-    println!("Syncing account");
-    account.sync(None).await?;
+    println!("Syncing wallet");
+    wallet.sync(&secret_manager, None).await?;
 
     println!("Example finished successfully");
     Ok(())

@@ -1,7 +1,7 @@
 // Copyright 2020-2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use crate::types::block::{unlock::UnlockIndex, Error};
+use crate::types::block::{protocol::WorkScore, unlock::UnlockIndex, Error};
 
 /// Points to the unlock of a consumed account output.
 #[derive(Clone, Debug, Eq, PartialEq, Hash, packable::Packable)]
@@ -10,14 +10,6 @@ pub struct AccountUnlock(
     /// Index of input and unlock corresponding to an [`AccountOutput`](crate::types::block::output::AccountOutput).
     UnlockIndex,
 );
-
-impl TryFrom<u16> for AccountUnlock {
-    type Error = Error;
-
-    fn try_from(index: u16) -> Result<Self, Self::Error> {
-        Self::new(index)
-    }
-}
 
 impl AccountUnlock {
     /// The [`Unlock`](crate::types::block::unlock::Unlock) kind of an [`AccountUnlock`].
@@ -36,6 +28,17 @@ impl AccountUnlock {
     }
 }
 
+impl WorkScore for AccountUnlock {}
+
+impl TryFrom<u16> for AccountUnlock {
+    type Error = Error;
+
+    fn try_from(index: u16) -> Result<Self, Self::Error> {
+        Self::new(index)
+    }
+}
+
+#[cfg(feature = "serde")]
 mod dto {
     use serde::{Deserialize, Serialize};
 

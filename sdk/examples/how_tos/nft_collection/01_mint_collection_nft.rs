@@ -4,7 +4,7 @@
 //! In this example we will mint some collection NFTs with issuer feature.
 //!
 //! Make sure that `STRONGHOLD_SNAPSHOT_PATH` and `WALLET_DB_PATH` already exist by
-//! running the `./how_tos/accounts_and_addresses/create_account.rs` example.
+//! running the `./how_tos/accounts_and_addresses/create_wallet.rs` example.
 //!
 //! You have to provide the ISSUER_NFT_ID that was created by first running the
 //! `mint_issuer_nft` example!
@@ -14,14 +14,16 @@
 //! cargo run --release --all-features --example mint_collection_nft <ISSUER_NFT_ID>
 //! ```
 
+use crypto::keys::bip39::Mnemonic;
 use iota_sdk::{
-    client::secret::SecretManager,
+    client::secret::stronghold::StrongholdSecretManager,
     types::block::{
         address::{Bech32Address, NftAddress},
         output::{feature::Irc27Metadata, NftId},
         payload::signed_transaction::TransactionId,
     },
-    wallet::{Account, MintNftParams, Result, Wallet},
+    wallet::{MintNftParams, Result},
+    Wallet,
 };
 
 // The NFT collection size
@@ -39,22 +41,26 @@ async fn main() -> Result<()> {
         .expect("missing example argument: ISSUER_NFT_ID")
         .parse::<NftId>()?;
 
+    // Setup Stronghold secret_manager
+    let secret_manager = StrongholdSecretManager::builder()
+        .password(std::env::var("STRONGHOLD_PASSWORD").unwrap())
+        .build(std::env::var("STRONGHOLD_SNAPSHOT_PATH").unwrap())?;
+
+    // Only required the first time, can also be generated with `manager.generate_mnemonic()?`
+    let mnemonic = Mnemonic::from(std::env::var("MNEMONIC").unwrap());
+
+    // The mnemonic only needs to be stored the first time
+    secret_manager.store_mnemonic(mnemonic).await?;
+
     let wallet = Wallet::builder()
-        .load_storage::<SecretManager>(std::env::var("WALLET_DB_PATH").unwrap())
-        .await?
-        .finish()
-        .await?;
-    let account = wallet.get_account("Alice").await?;
-
-    account.sync(None).await?;
-    println!("Account synced!");
-
-    // Set the stronghold password
-    wallet
-        .set_stronghold_password(std::env::var("STRONGHOLD_PASSWORD").unwrap())
+        .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
+        .finish(&secret_manager)
         .await?;
 
-    let bech32_hrp = account.client().get_bech32_hrp().await?;
+    wallet.sync(&secret_manager, None).await?;
+    println!("Wallet synced!");
+
+    let bech32_hrp = wallet.client().get_bech32_hrp().await?;
     let issuer = Bech32Address::new(bech32_hrp, NftAddress::new(issuer_nft_id));
 
     // Create the metadata with another index for each
@@ -74,11 +80,13 @@ async fn main() -> Result<()> {
             index * NUM_NFTS_MINTED_PER_TRANSACTION + nft_mint_params.len(),
             NFT_COLLECTION_SIZE
         );
-        let transaction = account.mint_nfts(nft_mint_params.to_vec(), None).await?;
-        wait_for_inclusion(&transaction.transaction_id, &account).await?;
+        let transaction = wallet
+            .mint_nfts(&secret_manager, nft_mint_params.to_vec(), None)
+            .await?;
+        wait_for_inclusion(&wallet, &secret_manager, &transaction.transaction_id).await?;
 
         // Sync so the new outputs are available again for new transactions
-        account.sync(None).await?;
+        wallet.sync(&secret_manager, None).await?;
     }
 
     // After the NFTs are minted, the issuer nft can be sent to the so called "null address"
@@ -106,15 +114,19 @@ fn get_immutable_metadata(index: usize) -> Irc27Metadata {
     .with_collection_name("Shimmer OG")
 }
 
-async fn wait_for_inclusion(transaction_id: &TransactionId, account: &Account) -> Result<()> {
+async fn wait_for_inclusion(
+    wallet: &Wallet,
+    secret_manager: &StrongholdSecretManager,
+    transaction_id: &TransactionId,
+) -> Result<()> {
     println!(
         "Transaction sent: {}/transaction/{}",
         std::env::var("EXPLORER_URL").unwrap(),
         transaction_id
     );
     // Wait for transaction to get included
-    let block_id = account
-        .reissue_transaction_until_included(transaction_id, None, None)
+    let block_id = wallet
+        .reissue_transaction_until_included(secret_manager, transaction_id, None, None)
         .await?;
     println!(
         "Block included: {}/block/{}",

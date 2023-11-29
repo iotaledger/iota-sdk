@@ -4,11 +4,10 @@
 use std::sync::Arc;
 
 use iota_sdk_bindings_core::{
-    call_secret_manager_method,
-    iota_sdk::client::secret::{DynSecretManagerConfig, SecretManager, SecretManagerDto},
+    call_secret_manager_method as rust_call_secret_manager_method,
+    iota_sdk::client::secret::{SecretManager, SecretManagerDto},
     Response, SecretManagerMethod,
 };
-use tokio::sync::RwLock;
 use wasm_bindgen::{prelude::wasm_bindgen, JsCast, JsValue};
 use wasm_bindgen_futures::future_to_promise;
 
@@ -16,8 +15,9 @@ use crate::PromiseString;
 
 /// The SecretManager method handler.
 #[wasm_bindgen(js_name = SecretManagerMethodHandler)]
+#[derive(Clone)]
 pub struct SecretManagerMethodHandler {
-    pub(crate) secret_manager: Arc<RwLock<Box<dyn DynSecretManagerConfig>>>,
+    pub(crate) inner: Arc<SecretManager>,
 }
 
 /// Creates a method handler with the given secret_manager options.
@@ -28,27 +28,24 @@ pub fn create_secret_manager(options: String) -> Result<SecretManagerMethodHandl
     let secret_manager = SecretManager::try_from(secret_manager_dto).map_err(|err| err.to_string())?;
 
     Ok(SecretManagerMethodHandler {
-        secret_manager: Arc::new(RwLock::new(Box::new(secret_manager) as _)),
+        inner: Arc::new(secret_manager),
     })
 }
 
 /// Handles a method, returns the response as a JSON-encoded string.
 ///
 /// Returns an error if the response itself is an error or panic.
-#[wasm_bindgen(js_name = callSecretManagerMethodAsync)]
+#[wasm_bindgen(js_name = callSecretManagerMethod)]
 #[allow(non_snake_case)]
-pub fn call_secret_manager_method_async(
-    method: String,
+pub fn call_secret_manager_method(
     methodHandler: &SecretManagerMethodHandler,
+    method: String,
 ) -> Result<PromiseString, JsValue> {
-    let secret_manager = methodHandler.secret_manager.clone();
+    let secret_manager = methodHandler.inner.clone();
     let promise: js_sys::Promise = future_to_promise(async move {
         let method: SecretManagerMethod = serde_json::from_str(&method).map_err(|err| err.to_string())?;
 
-        let response = {
-            let secret_manager = secret_manager.read().await;
-            call_secret_manager_method(secret_manager.as_ref(), method).await
-        };
+        let response = { rust_call_secret_manager_method(&secret_manager, method).await };
         let ser = JsValue::from(serde_json::to_string(&response).map_err(|err| err.to_string())?);
         match response {
             Response::Error(_) | Response::Panic(_) => Err(ser),

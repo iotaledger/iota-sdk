@@ -20,16 +20,16 @@ class BasicBlock:
         strong_parents: Blocks that are strongly directly approved.
         weak_parents: Blocks that are weakly directly approved.
         shallow_like_parents: Blocks that are directly referenced to adjust opinion.
-        max_burned_mana: The amount of Mana the Account identified by the IssuerId is at most willing to burn for this block.
+        max_burned_mana: The amount of Mana the Account identified by the AccountId is at most willing to burn for this block.
         payload: The optional payload of this block.
     """
     strong_parents: List[HexStr]
-    weak_parents: List[HexStr]
-    shallow_like_parents: List[HexStr]
     max_burned_mana: int = field(metadata=config(
         encoder=str
     ))
+    weak_parents: Optional[List[HexStr]] = None
+    shallow_like_parents: Optional[List[HexStr]] = None
     payload: Optional[Payload] = None
     type: int = field(
-        default_factory=lambda: BlockType.Basic,
+        default_factory=lambda: int(BlockType.Basic),
         init=False)

@@ -8,7 +8,7 @@
 //! * if a voting occurred, stops the voting and destroys the voting output
 //!
 //! Make sure that `STRONGHOLD_SNAPSHOT_PATH` and `WALLET_DB_PATH` already exist by
-//! running the `./how_tos/accounts_and_addresses/create_account.rs` example and there are funds on the first address
+//! running the `./how_tos/accounts_and_addresses/create_wallet.rs` example and there are funds on the first address
 //! by running the `get_funds` example!
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
@@ -16,9 +16,11 @@
 //! cargo run --release --all-features --example wallet_participation
 //! ```
 
+use crypto::keys::bip39::Mnemonic;
 use iota_sdk::{
-    client::{node_manager::node::Node, secret::SecretManager},
-    wallet::{account::types::participation::ParticipationEventRegistrationOptions, Result, Wallet},
+    client::{node_manager::node::Node, secret::stronghold::StrongholdSecretManager},
+    wallet::{types::participation::ParticipationEventRegistrationOptions, Result},
+    Wallet,
 };
 use url::Url;
 
@@ -41,16 +43,20 @@ async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
-    let wallet = Wallet::builder()
-        .load_storage::<SecretManager>(std::env::var("WALLET_DB_PATH").unwrap())
-        .await?
-        .finish()
-        .await?;
-    let account = wallet.get_account("Alice").await?;
+    // Setup Stronghold secret_manager
+    let secret_manager = StrongholdSecretManager::builder()
+        .password(std::env::var("STRONGHOLD_PASSWORD").unwrap())
+        .build(std::env::var("STRONGHOLD_SNAPSHOT_PATH").unwrap())?;
 
-    // Provide the stronghold password
-    wallet
-        .set_stronghold_password(std::env::var("STRONGHOLD_PASSWORD").unwrap())
+    // Only required the first time, can also be generated with `manager.generate_mnemonic()?`
+    let mnemonic = Mnemonic::from(std::env::var("MNEMONIC").unwrap());
+
+    // The mnemonic only needs to be stored the first time
+    secret_manager.store_mnemonic(mnemonic).await?;
+
+    let wallet = Wallet::builder()
+        .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
+        .finish(&secret_manager)
         .await?;
 
     let event_id = PARTICIPATION_EVENT_ID_1.parse()?;
@@ -59,7 +65,7 @@ async fn main() -> Result<()> {
         auth: None,
         disabled: false,
     };
-    let _ = account
+    let _ = wallet
         .register_participation_events(&ParticipationEventRegistrationOptions {
             node,
             // We ignore this particular event
@@ -72,7 +78,7 @@ async fn main() -> Result<()> {
         .await?;
 
     println!("Registered events:");
-    let registered_participation_events = account.get_participation_events().await?;
+    let registered_participation_events = wallet.get_participation_events().await?;
     for (i, (id, event)) in registered_participation_events.iter().enumerate() {
         println!("EVENT #{i}");
         println!(
@@ -86,11 +92,11 @@ async fn main() -> Result<()> {
     }
 
     println!("Checking for participation event '{PARTICIPATION_EVENT_ID_1}'");
-    if let Ok(Some(event)) = account.get_participation_event(event_id).await {
+    if let Ok(Some(event)) = wallet.get_participation_event(event_id).await {
         println!("{event:#?}");
 
         println!("Getting event status for '{PARTICIPATION_EVENT_ID_1}'");
-        let event_status = account.get_participation_event_status(&event_id).await?;
+        let event_status = wallet.get_participation_event_status(&event_id).await?;
         println!("{event_status:#?}");
     } else {
         println!("Event not found");
@@ -100,12 +106,12 @@ async fn main() -> Result<()> {
     // deregister an event
     ////////////////////////////////////////////////
     if !DEREGISTERED_PARTICIPATION_EVENT.is_empty() {
-        account
+        wallet
             .deregister_participation_event(&DEREGISTERED_PARTICIPATION_EVENT.parse()?)
             .await?;
 
         println!("Registered events (updated):");
-        let registered_participation_events = account.get_participation_events().await?;
+        let registered_participation_events = wallet.get_participation_events().await?;
         for (i, (id, event)) in registered_participation_events.iter().enumerate() {
             println!("EVENT #{i}");
             println!(
@@ -119,8 +125,8 @@ async fn main() -> Result<()> {
         }
     }
 
-    let balance = account.sync(None).await?;
-    println!("Account synced");
+    let balance = wallet.sync(&secret_manager, None).await?;
+    println!("Wallet synced");
 
     ////////////////////////////////////////////////
     // create voting output or increase voting power
@@ -129,12 +135,14 @@ async fn main() -> Result<()> {
     println!("Current voting power: {}", balance.base_coin().voting_power());
 
     println!("Sending transaction to increase voting power...");
-    let transaction = account.increase_voting_power(INCREASE_VOTING_POWER_AMOUNT).await?;
+    let transaction = wallet
+        .increase_voting_power(&secret_manager, INCREASE_VOTING_POWER_AMOUNT)
+        .await?;
     println!("Transaction sent: {}", transaction.transaction_id);
 
     println!("Waiting for `increase voting power` transaction to be included...");
-    let block_id = account
-        .reissue_transaction_until_included(&transaction.transaction_id, None, None)
+    let block_id = wallet
+        .reissue_transaction_until_included(&secret_manager, &transaction.transaction_id, None, None)
         .await?;
     println!(
         "Block included: {}/block/{}",
@@ -142,11 +150,11 @@ async fn main() -> Result<()> {
         block_id
     );
 
-    let balance = account.sync(None).await?;
-    println!("Account synced");
+    let balance = wallet.sync(&secret_manager, None).await?;
+    println!("Wallet synced");
     println!("New voting power: {}", balance.base_coin().voting_power());
 
-    let voting_output = account.get_voting_output().await?.unwrap();
+    let voting_output = wallet.get_voting_output().await?.unwrap();
     println!("Voting output:\n{:#?}", voting_output.output);
 
     ////////////////////////////////////////////////
@@ -154,12 +162,14 @@ async fn main() -> Result<()> {
     ////////////////////////////////////////////////
 
     println!("Sending transaction to decrease voting power...");
-    let transaction = account.decrease_voting_power(DECREASE_VOTING_POWER_AMOUNT).await?;
+    let transaction = wallet
+        .decrease_voting_power(&secret_manager, DECREASE_VOTING_POWER_AMOUNT)
+        .await?;
     println!("Transaction sent: {}", transaction.transaction_id);
 
     println!("Waiting for `decrease voting power` transaction to be included...");
-    let block_id = account
-        .reissue_transaction_until_included(&transaction.transaction_id, None, None)
+    let block_id = wallet
+        .reissue_transaction_until_included(&secret_manager, &transaction.transaction_id, None, None)
         .await?;
     println!(
         "Block included: {}/block/{}",
@@ -167,8 +177,8 @@ async fn main() -> Result<()> {
         block_id
     );
 
-    let balance = account.sync(None).await?;
-    println!("Account synced");
+    let balance = wallet.sync(&secret_manager, None).await?;
+    println!("Wallet synced");
     println!("New voting power: {}", balance.base_coin().voting_power());
 
     ////////////////////////////////////////////////
@@ -176,15 +186,15 @@ async fn main() -> Result<()> {
     ////////////////////////////////////////////////
 
     println!("Sending transaction to vote...");
-    let transaction = account.vote(Some(event_id), Some(vec![0])).await?;
+    let transaction = wallet.vote(&secret_manager, Some(event_id), Some(vec![0])).await?;
     // NOTE!!!
     // from here on out, the example will only proceed if you've set up your own participation event and
     // changed the constants above with a valid (i.e. ongoing) event id for
     println!("Transaction sent: {}", transaction.transaction_id);
 
     println!("Waiting for `vote` transaction to be included...");
-    let block_id = account
-        .reissue_transaction_until_included(&transaction.transaction_id, None, None)
+    let block_id = wallet
+        .reissue_transaction_until_included(&secret_manager, &transaction.transaction_id, None, None)
         .await?;
     println!(
         "Block included: {}/block/{}",
@@ -192,26 +202,26 @@ async fn main() -> Result<()> {
         block_id
     );
 
-    account.sync(None).await?;
-    println!("Account synced");
+    wallet.sync(&secret_manager, None).await?;
+    println!("Wallet synced");
 
     ////////////////////////////////////////////////
     // get voting overview
     ////////////////////////////////////////////////
 
-    let overview = account.get_participation_overview(None).await?;
+    let overview = wallet.get_participation_overview(None).await?;
     println!("Particpation overview:\n{overview:?}");
 
     ////////////////////////////////////////////////
     // stop vote
     ////////////////////////////////////////////////
 
-    let transaction = account.stop_participating(event_id).await?;
+    let transaction = wallet.stop_participating(&secret_manager, event_id).await?;
     println!("Transaction sent: {}", transaction.transaction_id);
 
     println!("Waiting for `stop participating` transaction to be included...");
-    let block_id = account
-        .reissue_transaction_until_included(&transaction.transaction_id, None, None)
+    let block_id = wallet
+        .reissue_transaction_until_included(&secret_manager, &transaction.transaction_id, None, None)
         .await?;
     println!(
         "Block included: {}/block/{}",
@@ -219,23 +229,25 @@ async fn main() -> Result<()> {
         block_id
     );
 
-    account.sync(None).await?;
-    println!("Account synced");
+    wallet.sync(&secret_manager, None).await?;
+    println!("Wallet synced");
 
     ////////////////////////////////////////////////
     // destroy voting output
     ////////////////////////////////////////////////
 
-    let voting_output = account.get_voting_output().await?.unwrap();
+    let voting_output = wallet.get_voting_output().await?.unwrap();
     println!("Voting output: {:?}", voting_output.output);
 
     // Decrease full amount, there should be no voting output afterwards
-    let transaction = account.decrease_voting_power(voting_output.output.amount()).await?;
+    let transaction = wallet
+        .decrease_voting_power(&secret_manager, voting_output.output.amount())
+        .await?;
     println!("Transaction sent: {}", transaction.transaction_id);
 
     println!("Waiting for `decrease voting power` transaction to be included...");
-    let block_id = account
-        .reissue_transaction_until_included(&transaction.transaction_id, None, None)
+    let block_id = wallet
+        .reissue_transaction_until_included(&secret_manager, &transaction.transaction_id, None, None)
         .await?;
     println!(
         "Block included: {}/block/{}",
@@ -243,10 +255,10 @@ async fn main() -> Result<()> {
         block_id
     );
 
-    account.sync(None).await?;
-    println!("Account synced");
+    wallet.sync(&secret_manager, None).await?;
+    println!("Wallet synced");
 
-    assert!(account.get_voting_output().await.is_err());
+    assert!(wallet.get_voting_output().await.is_err());
 
     Ok(())
 }

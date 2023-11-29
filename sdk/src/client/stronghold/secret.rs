@@ -8,7 +8,6 @@ use std::ops::Range;
 
 use async_trait::async_trait;
 use crypto::{
-    hashes::{blake2b::Blake2b256, Digest},
     keys::{
         bip39::{Mnemonic, MnemonicRef, Passphrase},
         bip44::Bip44,
@@ -19,7 +18,6 @@ use crypto::{
         secp256k1_ecdsa::{self, EvmAddress},
     },
 };
-use instant::Duration;
 use iota_stronghold::{
     procedures::{self, Curve, KeyType, Slip10DeriveInput},
     Location,
@@ -32,12 +30,11 @@ use super::{
 use crate::{
     client::{
         api::PreparedTransactionData,
-        secret::{types::StrongholdDto, GenerateAddressOptions, SecretManage, SecretManagerConfig},
+        secret::{GenerateAddressOptions, SecretManage},
         stronghold::Error,
     },
     types::block::{
-        address::Ed25519Address, payload::signed_transaction::SignedTransactionPayload, signature::Ed25519Signature,
-        unlock::Unlocks,
+        payload::signed_transaction::SignedTransactionPayload, signature::Ed25519Signature, unlock::Unlocks,
     },
 };
 
@@ -45,13 +42,13 @@ use crate::{
 impl SecretManage for StrongholdAdapter {
     type Error = crate::client::Error;
 
-    async fn generate_ed25519_addresses(
+    async fn generate_ed25519_public_keys(
         &self,
         coin_type: u32,
         account_index: u32,
         address_indexes: Range<u32>,
         options: impl Into<Option<GenerateAddressOptions>> + Send,
-    ) -> Result<Vec<Ed25519Address>, Self::Error> {
+    ) -> Result<Vec<ed25519::PublicKey>, Self::Error> {
         // Prevent the method from being invoked when the key has been cleared from the memory. Do note that Stronghold
         // only asks for a key for reading / writing a snapshot, so without our cached key this method is invocable, but
         // it doesn't make sense when it comes to our user (signing transactions / generating addresses without a key).
@@ -64,8 +61,8 @@ impl SecretManage for StrongholdAdapter {
         // Stronghold arguments.
         let seed_location = Slip10DeriveInput::Seed(Location::generic(SECRET_VAULT_PATH, SEED_RECORD_PATH));
 
-        // Addresses to return.
-        let mut addresses = Vec::new();
+        // Public keys to return.
+        let mut public_keys = Vec::new();
         let internal = options.into().map(|o| o.internal).unwrap_or_default();
 
         for address_index in address_indexes {
@@ -104,17 +101,11 @@ impl SecretManage for StrongholdAdapter {
                 .delete_secret(derive_location.record_path())
                 .map_err(Error::from)?;
 
-            // Hash the public key to get the address.
-            let hash = Blake2b256::digest(public_key);
-
-            // Convert the hash into [Address].
-            let address = Ed25519Address::new(hash.into());
-
             // Collect it.
-            addresses.push(address);
+            public_keys.push(public_key);
         }
 
-        Ok(addresses)
+        Ok(public_keys)
     }
 
     async fn generate_evm_addresses(
@@ -296,31 +287,31 @@ impl SecretManage for StrongholdAdapter {
     }
 }
 
-impl SecretManagerConfig for StrongholdAdapter {
-    type Config = StrongholdDto;
+// impl SecretManagerConfig for StrongholdAdapter {
+//     type Config = StrongholdDto;
 
-    fn to_config(&self) -> Option<Self::Config> {
-        Some(Self::Config {
-            password: None,
-            timeout: self.get_timeout().map(|duration| duration.as_secs()),
-            snapshot_path: self.snapshot_path.clone().into_os_string().to_string_lossy().into(),
-        })
-    }
+//     fn to_config(&self) -> Option<Self::Config> {
+//         Some(Self::Config {
+//             password: None,
+//             timeout: self.get_timeout().map(|duration| duration.as_secs()),
+//             snapshot_path: self.snapshot_path.clone().into_os_string().to_string_lossy().into(),
+//         })
+//     }
 
-    fn from_config(config: &Self::Config) -> Result<Self, Self::Error> {
-        let mut builder = Self::builder();
+//     fn from_config(config: &Self::Config) -> Result<Self, Self::Error> {
+//         let mut builder = Self::builder();
 
-        if let Some(password) = &config.password {
-            builder = builder.password(password.clone());
-        }
+//         if let Some(password) = &config.password {
+//             builder = builder.password(password.clone());
+//         }
 
-        if let Some(timeout) = &config.timeout {
-            builder = builder.timeout(Duration::from_secs(*timeout));
-        }
+//         if let Some(timeout) = &config.timeout {
+//             builder = builder.timeout(Duration::from_secs(*timeout));
+//         }
 
-        Ok(builder.build(&config.snapshot_path)?)
-    }
-}
+//         Ok(builder.build(&config.snapshot_path)?)
+//     }
+// }
 
 /// Private methods for the secret manager implementation.
 impl StrongholdAdapter {
@@ -591,7 +582,7 @@ mod tests {
         // Address generation returns an error when the key is cleared.
         assert!(
             stronghold_adapter
-                .generate_ed25519_addresses(IOTA_COIN_TYPE, 0, 0..1, None,)
+                .generate_ed25519_addresses(IOTA_COIN_TYPE, 0, 0..1, None)
                 .await
                 .is_err()
         );

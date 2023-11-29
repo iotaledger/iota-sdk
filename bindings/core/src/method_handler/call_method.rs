@@ -38,14 +38,6 @@ impl CallMethod for Client {
     }
 }
 
-impl CallMethod for Wallet {
-    type Method = WalletMethod;
-
-    fn call_method<'a>(&'a self, method: Self::Method) -> Pin<Box<dyn Future<Output = Response> + 'a>> {
-        Box::pin(call_wallet_method(self, method))
-    }
-}
-
 /// Call a client method.
 pub async fn call_client_method(client: &Client, method: ClientMethod) -> Response {
     log::debug!("Client method: {method:?}");
@@ -58,9 +50,17 @@ pub async fn call_client_method(client: &Client, method: ClientMethod) -> Respon
 }
 
 /// Call a wallet method.
-pub async fn call_wallet_method(wallet: &Wallet, method: WalletMethod) -> Response {
+pub async fn call_wallet_method<S: 'static + SecretManage + Clone>(
+    wallet: &Wallet,
+    secret_manager: &S,
+    method: WalletMethod,
+) -> Response
+where
+    iota_sdk::client::Error: From<S::Error>,
+{
     log::debug!("Wallet method: {method:?}");
-    let result = convert_async_panics(|| async { call_wallet_method_internal(wallet, method).await }).await;
+    let result =
+        convert_async_panics(|| async { call_wallet_method_internal(wallet, secret_manager, method).await }).await;
 
     let response = result.unwrap_or_else(Response::Error);
 

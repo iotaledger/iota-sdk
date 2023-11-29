@@ -21,13 +21,21 @@ enum UnlockType {
      */
     Account = 2,
     /**
-     *  An NFT unlock.
-     */
-    Nft = 3,
-    /**
      *  An Anchor unlock.
      */
-    Anchor = 4,
+    Anchor = 3,
+    /**
+     *  An NFT unlock.
+     */
+    Nft = 4,
+    /**
+     *  A multi unlock.
+     */
+    Multi = 5,
+    /**
+     *  An empty unlock.
+     */
+    Empty = 6,
 }
 
 /**
@@ -104,6 +112,24 @@ class AccountUnlock extends Unlock {
 }
 
 /**
+ * An unlock which must reference a previous unlock which unlocks the anchor that the input is locked to.
+ */
+class AnchorUnlock extends Unlock {
+    /**
+     * The reference.
+     */
+    readonly reference: number;
+
+    /**
+     * @param reference An index referencing a previous unlock.
+     */
+    constructor(reference: number) {
+        super(UnlockType.Anchor);
+        this.reference = reference;
+    }
+}
+
+/**
  * An unlock which must reference a previous unlock which unlocks the NFT that the input is locked to.
  */
 class NftUnlock extends Unlock {
@@ -122,20 +148,60 @@ class NftUnlock extends Unlock {
 }
 
 /**
- * An unlock which must reference a previous unlock which unlocks the anchor that the input is locked to.
+ * Used to maintain correct index relationship between addresses and signatures when unlocking a MultiUnlock where not all addresses are unlocked.
  */
-class AnchorUnlock extends Unlock {
+class EmptyUnlock extends Unlock {
+    constructor() {
+        super(UnlockType.Empty);
+    }
+}
+
+/**
+ * Unlocks a MultiAddress with a list of other unlocks.
+ */
+class MultiUnlock extends Unlock {
     /**
-     * The reference.
+     * The inner unlocks.
      */
-    readonly reference: number;
+    @Type(() => Unlock, {
+        discriminator: {
+            property: 'type',
+            subTypes: [
+                {
+                    value: SignatureUnlock,
+                    name: UnlockType.Signature as any,
+                },
+                {
+                    value: ReferenceUnlock,
+                    name: UnlockType.Reference as any,
+                },
+                {
+                    value: AccountUnlock,
+                    name: UnlockType.Account as any,
+                },
+                {
+                    value: AnchorUnlock,
+                    name: UnlockType.Anchor as any,
+                },
+                {
+                    value: NftUnlock,
+                    name: UnlockType.Nft as any,
+                },
+                {
+                    value: EmptyUnlock,
+                    name: UnlockType.Empty as any,
+                },
+            ],
+        },
+    })
+    readonly unlocks: Unlock[];
 
     /**
-     * @param reference An index referencing a previous unlock.
+     * @param unlocks The inner unlocks.
      */
-    constructor(reference: number) {
-        super(UnlockType.Anchor);
-        this.reference = reference;
+    constructor(unlocks: Unlock[]) {
+        super(UnlockType.Multi);
+        this.unlocks = unlocks;
     }
 }
 
@@ -155,12 +221,20 @@ const UnlockDiscriminator = {
             name: UnlockType.Account as any,
         },
         {
+            value: AnchorUnlock,
+            name: UnlockType.Anchor as any,
+        },
+        {
             value: NftUnlock,
             name: UnlockType.Nft as any,
         },
         {
-            value: AnchorUnlock,
-            name: UnlockType.Anchor as any,
+            value: MultiUnlock,
+            name: UnlockType.Multi as any,
+        },
+        {
+            value: EmptyUnlock,
+            name: UnlockType.Empty as any,
         },
     ],
 };
@@ -171,7 +245,9 @@ export {
     SignatureUnlock,
     ReferenceUnlock,
     AccountUnlock,
-    NftUnlock,
     AnchorUnlock,
+    NftUnlock,
+    MultiUnlock,
+    EmptyUnlock,
     UnlockDiscriminator,
 };

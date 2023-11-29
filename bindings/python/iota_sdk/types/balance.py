@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import List, Optional
 from dataclasses import dataclass, field
 from dataclasses_json import config
-from iota_sdk.types.common import HexStr, json
+from iota_sdk.types.common import hex_str_decoder, HexStr, json
 
 
 @json
@@ -31,21 +31,25 @@ class RequiredStorageDeposit:
     """Required storage deposit for the outputs in the account.
 
     Attributes:
-        account: The required amount for account outputs.
         basic: The required amount for basic outputs.
+        account: The required amount for account outputs.
         foundry: The required amount for foundry outputs.
         nft: The required amount for nft outputs.
+        delegation: The required amount for delegation outputs.
     """
-    account: int = field(metadata=config(
+    basic: int = field(metadata=config(
         encoder=str
     ))
-    basic: int = field(metadata=config(
+    account: int = field(metadata=config(
         encoder=str
     ))
     foundry: int = field(metadata=config(
         encoder=str
     ))
     nft: int = field(metadata=config(
+        encoder=str
+    ))
+    delegation: int = field(metadata=config(
         encoder=str
     ))
 
@@ -62,8 +66,14 @@ class NativeTokensBalance:
         metadata: Some metadata of the native token.
     """
     token_id: HexStr
-    total: HexStr
-    available: HexStr
+    total: int = field(metadata=config(
+        encoder=hex,
+        decoder=hex_str_decoder,
+    ))
+    available: int = field(metadata=config(
+        encoder=hex,
+        decoder=hex_str_decoder,
+    ))
     metadata: Optional[HexStr]
 
 
@@ -76,15 +86,17 @@ class Balance:
         base_coin: The base coin balance.
         required_storage_deposit: The required storage deposit.
         native_tokens: The balances of all native tokens.
-        nfts: All owned NFTs.
         accounts: All owned accounts.
         foundries: All owned foundries.
+        nfts: All owned NFTs.
+        delegations: All owned delegation outputs.
         potentially_locked_outputs: A list of potentially locked outputs.
     """
     base_coin: BaseCoinBalance
     required_storage_deposit: RequiredStorageDeposit
     native_tokens: List[NativeTokensBalance]
-    nfts: List[HexStr]
     accounts: List[HexStr]
     foundries: List[HexStr]
+    nfts: List[HexStr]
+    delegations: List[HexStr]
     potentially_locked_outputs: dict[HexStr, bool]

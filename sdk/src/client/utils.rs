@@ -21,8 +21,9 @@ use crate::{
         address::{Address, Bech32Address, Ed25519Address, Hrp, ToBech32Ext},
         output::{AccountId, NftId},
         payload::TaggedDataPayload,
-        BlockId, ConvertTo, SignedBlock,
+        Block, BlockId,
     },
+    utils::ConvertTo,
 };
 
 /// Transforms bech32 to hex
@@ -33,24 +34,23 @@ pub fn bech32_to_hex(bech32: impl ConvertTo<Bech32Address>) -> Result<String> {
         Address::Nft(nft) => nft.to_string(),
         Address::Anchor(anchor) => anchor.to_string(),
         Address::ImplicitAccountCreation(implicit) => implicit.to_string(),
+        Address::Multi(multi) => multi.to_string(),
         Address::Restricted(restricted) => restricted.to_string(),
     })
 }
 
 /// Transforms a hex encoded address to a bech32 encoded address
 pub fn hex_to_bech32(hex: &str, bech32_hrp: impl ConvertTo<Hrp>) -> Result<Bech32Address> {
-    let address: Ed25519Address = hex.parse::<Ed25519Address>()?;
+    let address = hex.parse::<Ed25519Address>()?;
+
     Ok(Address::Ed25519(address).try_to_bech32(bech32_hrp)?)
 }
 
 /// Transforms a prefix hex encoded public key to a bech32 encoded address
 pub fn hex_public_key_to_bech32_address(hex: &str, bech32_hrp: impl ConvertTo<Hrp>) -> Result<Bech32Address> {
     let public_key: [u8; Ed25519Address::LENGTH] = prefix_hex::decode(hex)?;
+    let address = Ed25519Address::new(Blake2b256::digest(public_key).into());
 
-    let address = Blake2b256::digest(public_key)
-        .try_into()
-        .map_err(|_e| Error::Blake2b256("hashing the public key failed."))?;
-    let address: Ed25519Address = Ed25519Address::new(address);
     Ok(Address::Ed25519(address).try_to_bech32(bech32_hrp)?)
 }
 
@@ -190,7 +190,7 @@ impl Client {
         Ok((Self::tag_to_utf8(payload)?, Self::data_to_utf8(payload)?))
     }
 
-    pub async fn block_id(&self, block: &SignedBlock) -> Result<BlockId> {
+    pub async fn block_id(&self, block: &Block) -> Result<BlockId> {
         Ok(block.id(&self.get_protocol_parameters().await?))
     }
 }

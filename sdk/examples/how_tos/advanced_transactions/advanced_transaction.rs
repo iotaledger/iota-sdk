@@ -2,12 +2,14 @@
 // SPDX-License-Identifier: Apache-2.0
 
 //! In this example we will send a transaction.
+//!
 //! Rename `.env.example` to `.env` first.
 //!
 //! `cargo run --release --all-features --example advanced_transaction`
 
+use crypto::keys::bip39::Mnemonic;
 use iota_sdk::{
-    client::secret::SecretManager,
+    client::secret::stronghold::StrongholdSecretManager,
     types::block::{
         address::Bech32Address,
         output::{
@@ -24,22 +26,30 @@ async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
-    // Create the wallet
+    // Setup Stronghold secret_manager
+    let secret_manager = StrongholdSecretManager::builder()
+        .password(std::env::var("STRONGHOLD_PASSWORD").unwrap())
+        .build(std::env::var("STRONGHOLD_SNAPSHOT_PATH").unwrap())?;
+
+    // Only required the first time, can also be generated with `manager.generate_mnemonic()?`
+    let mnemonic = Mnemonic::from(std::env::var("MNEMONIC").unwrap());
+
+    // The mnemonic only needs to be stored the first time
+    secret_manager.store_mnemonic(mnemonic).await?;
+
+    // Get the wallet we generated with `create_wallet`.
     let wallet = Wallet::builder()
-        .load_storage::<SecretManager>(std::env::var("WALLET_DB_PATH").unwrap())
-        .await?
-        .finish()
+        .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
+        .finish(&secret_manager)
         .await?;
 
-    // Get the account we generated with `create_account`
-    let account = wallet.get_account("Alice").await?;
-    // May want to ensure the account is synced before sending a transaction.
-    let balance = wallet.sync(None).await?;
+    // May want to ensure the wallet is synced before sending a transaction.
+    let balance = wallet.sync(&secret_manager, None).await?;
 
     if balance.base_coin().available() >= 1_000_000 {
         // Set the stronghold password
-        wallet
-            .set_stronghold_password(std::env::var("STRONGHOLD_PASSWORD").unwrap())
+        secret_manager
+            .set_password(std::env::var("STRONGHOLD_PASSWORD").unwrap())
             .await?;
 
         // TODO better time-based UX ?
@@ -50,14 +60,14 @@ async fn main() -> Result<()> {
                 "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu",
             )?))
             .add_unlock_condition(TimelockUnlockCondition::new(slot_index)?)
-            .finish_output(account.client().get_token_supply().await?)?;
+            .finish_output()?;
 
-        let transaction = account.send_outputs(vec![basic_output], None).await?;
+        let transaction = wallet.send_outputs(&secret_manager, vec![basic_output], None).await?;
         println!("Transaction sent: {}", transaction.transaction_id);
 
         // Wait for transaction to get included
-        let block_id = account
-            .reissue_transaction_until_included(&transaction.transaction_id, None, None)
+        let block_id = wallet
+            .reissue_transaction_until_included(&secret_manager, &transaction.transaction_id, None, None)
             .await?;
         println!(
             "Block sent: {}/block/{}",

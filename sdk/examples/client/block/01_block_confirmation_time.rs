@@ -15,7 +15,7 @@ use iota_sdk::{
         secret::{SecretManager, SignBlock},
         Client, Result,
     },
-    types::{api::core::BlockState, block::IssuerId},
+    types::{api::core::BlockState, block::output::AccountId},
 };
 
 #[tokio::main]
@@ -24,7 +24,7 @@ async fn main() -> Result<()> {
     dotenvy::dotenv().ok();
 
     let node_url = std::env::var("NODE_URL").unwrap();
-    let issuer_id = std::env::var("ISSUER_ID").unwrap().parse::<IssuerId>().unwrap();
+    let issuer_id = std::env::var("ISSUER_ID").unwrap().parse::<AccountId>().unwrap();
 
     // Create a node client.
     let client = Client::builder().with_node(&node_url)?.finish().await?;

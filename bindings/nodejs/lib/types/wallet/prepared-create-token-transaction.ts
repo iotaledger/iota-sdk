@@ -1,8 +1,7 @@
 // Copyright 2021-2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { Account, PreparedCreateNativeTokenTransactionData } from '../..';
-
+import { Wallet, PreparedCreateNativeTokenTransactionData } from '../..';
 import { PreparedTransaction } from './prepared-transaction';
 
 /*
@@ -13,13 +12,13 @@ export class PreparedCreateNativeTokenTransaction extends PreparedTransaction {
 
     /**
      * @param preparedData Prepared data to create a Native Token.
-     * @param account A wallet account.
+     * @param wallet A wallet.
      */
     constructor(
         preparedData: PreparedCreateNativeTokenTransactionData,
-        account: Account,
+        wallet: Wallet,
     ) {
-        super(preparedData.transaction, account);
+        super(preparedData.transaction, wallet);
         this._tokenId = preparedData.tokenId;
     }
 

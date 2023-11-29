@@ -11,11 +11,12 @@
 use iota_sdk::{
     client::{
         api::{SignedTransactionData, SignedTransactionDataDto},
-        secret::SecretManager,
+        secret::mnemonic::MnemonicSecretManager,
         Client,
     },
     types::{block::payload::signed_transaction::TransactionId, TryFromDto},
-    wallet::{Account, Result, Wallet},
+    wallet::Result,
+    Wallet,
 };
 
 const ONLINE_WALLET_DB_PATH: &str = "./examples/wallet/offline_signing/example-online-walletdb";
@@ -26,25 +27,21 @@ async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
+    let secret_manager = MnemonicSecretManager::try_from_mnemonic(std::env::var("MNEMONIC").unwrap()).unwrap();
+
     // Create the wallet with the secret_manager and client options
     let wallet = Wallet::builder()
-        .load_storage::<SecretManager>(ONLINE_WALLET_DB_PATH)
-        .await?
         .with_storage_path(ONLINE_WALLET_DB_PATH)
-        .with_secret_manager(SecretManager::Placeholder)
-        .finish()
+        .finish(&secret_manager)
         .await?;
 
-    // Create a new account
-    let account = wallet.get_account("Alice").await?;
-
-    let signed_transaction_data = read_signed_transaction_from_file(account.client()).await?;
+    let signed_transaction_data = read_signed_transaction_from_file(wallet.client()).await?;
 
     // Sends offline signed transaction online.
-    let transaction = account
-        .submit_and_store_transaction(signed_transaction_data, None)
+    let transaction = wallet
+        .submit_and_store_transaction(&secret_manager, signed_transaction_data, None)
         .await?;
-    wait_for_inclusion(&transaction.transaction_id, &account).await?;
+    wait_for_inclusion(&wallet, &secret_manager, &transaction.transaction_id).await?;
 
     Ok(())
 }
@@ -60,19 +57,23 @@ async fn read_signed_transaction_from_file(client: &Client) -> Result<SignedTran
 
     Ok(SignedTransactionData::try_from_dto_with_params(
         dto,
-        client.get_protocol_parameters().await?,
+        &client.get_protocol_parameters().await?,
     )?)
 }
 
-async fn wait_for_inclusion(transaction_id: &TransactionId, account: &Account) -> Result<()> {
+async fn wait_for_inclusion(
+    wallet: &Wallet,
+    secret_manager: &MnemonicSecretManager,
+    transaction_id: &TransactionId,
+) -> Result<()> {
     println!(
         "Transaction sent: {}/transaction/{}",
         std::env::var("EXPLORER_URL").unwrap(),
         transaction_id
     );
     // Wait for transaction to get included
-    let block_id = account
-        .reissue_transaction_until_included(transaction_id, None, None)
+    let block_id = wallet
+        .reissue_transaction_until_included(secret_manager, transaction_id, None, None)
         .await?;
     println!(
         "Block included: {}/block/{}",

@@ -38,12 +38,12 @@ async function run() {
         });
 
         // Get output ids of basic outputs that can be controlled by this address without further unlock constraints
-        const outputIdsResponse = await client.basicOutputIds([
-            { address: addresses[0] },
-            { hasExpiration: false },
-            { hasTimelock: false },
-            { hasStorageDepositReturn: false },
-        ]);
+        const outputIdsResponse = await client.basicOutputIds({
+            address: addresses[0],
+            hasExpiration: false,
+            hasTimelock: false,
+            hasStorageDepositReturn: false,
+        });
 
         // Get outputs by their IDs
         const addressOutputs = await client.getOutputs(outputIdsResponse.items);
@@ -54,11 +54,14 @@ async function run() {
         for (const outputResponse of addressOutputs) {
             const output = outputResponse['output'];
             if (output instanceof CommonOutput) {
-                (output as CommonOutput).getNativeTokens()?.forEach((token) => {
-                    totalNativeTokens[token.id] =
-                        (totalNativeTokens[token.id] || BigInt(0)) +
-                        token.amount;
-                });
+                const nativeTokenFeature = (
+                    output as CommonOutput
+                ).getNativeToken();
+                if (nativeTokenFeature != undefined) {
+                    totalNativeTokens[nativeTokenFeature.id] =
+                        (totalNativeTokens[nativeTokenFeature.id] ||
+                            BigInt(0)) + nativeTokenFeature.amount;
+                }
             }
 
             totalAmount += output.getAmount();

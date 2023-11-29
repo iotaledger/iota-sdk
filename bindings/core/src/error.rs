@@ -4,8 +4,6 @@
 use packable::error::UnexpectedEOF;
 use serde::{ser::SerializeMap, Serialize, Serializer};
 
-pub use super::{method::AccountMethod, response::Response};
-
 /// Result type of the bindings core crate.
 pub type Result<T> = std::result::Result<T, Error>;
 
@@ -28,6 +26,8 @@ pub enum Error {
     /// SerdeJson errors.
     #[error("{0}")]
     SerdeJson(#[from] serde_json::error::Error),
+    #[error("secret manager was not provided")]
+    MissingSecretManager,
     /// Unpack errors.
     #[error("{0}")]
     Unpack(#[from] packable::error::UnpackError<iota_sdk::types::block::Error, UnexpectedEOF>),

@@ -8,7 +8,6 @@ use dialoguer::{console::Term, theme::ColorfulTheme, Input, Select};
 use iota_sdk::{
     client::{utils::Password, verify_mnemonic},
     crypto::keys::bip39::Mnemonic,
-    wallet::{Account, Wallet},
 };
 use tokio::{
     fs::{self, OpenOptions},
@@ -49,37 +48,13 @@ pub fn get_decision(prompt: &str) -> Result<bool, Error> {
     }
 }
 
-pub async fn get_account_alias(prompt: &str, wallet: &Wallet) -> Result<String, Error> {
-    let account_aliases = wallet.get_account_aliases().await?;
+pub async fn get_alias(prompt: &str) -> Result<String, Error> {
     loop {
         let input = Input::<String>::new().with_prompt(prompt).interact_text()?;
         if input.is_empty() || !input.is_ascii() {
             println_log_error!("Invalid input, please choose a non-empty alias consisting of ASCII characters.");
-        } else if account_aliases.iter().any(|alias| alias == &input) {
-            println_log_error!("Account '{input}' already exists, please choose another alias.");
         } else {
             return Ok(input);
-        }
-    }
-}
-
-pub async fn pick_account(wallet: &Wallet) -> Result<Option<Account>, Error> {
-    let mut accounts = wallet.get_accounts().await?;
-
-    match accounts.len() {
-        0 => Ok(None),
-        1 => Ok(Some(accounts.swap_remove(0))),
-        _ => {
-            // fetch all available account aliases to display to the user
-            let account_aliases = wallet.get_account_aliases().await?;
-
-            let index = Select::with_theme(&ColorfulTheme::default())
-                .with_prompt("Select an account:")
-                .items(&account_aliases)
-                .default(0)
-                .interact_on(&Term::stderr())?;
-
-            Ok(Some(accounts.swap_remove(index)))
         }
     }
 }
@@ -152,10 +127,10 @@ pub async fn generate_mnemonic(
         println_log_info!("Mnemonic has been written to '{file_path}'.");
     }
 
-    println_log_info!("IMPORTANT:");
-    println_log_info!("Store this mnemonic in a secure location!");
-    println_log_info!(
-        "It is the only way to recover your account if you ever forget your password and/or lose the stronghold file."
+    println!("IMPORTANT:");
+    println!("Store this mnemonic in a secure location!");
+    println!(
+        "It is the only way to recover your wallet if you ever forget your password and/or lose the stronghold file."
     );
 
     Ok(mnemonic)

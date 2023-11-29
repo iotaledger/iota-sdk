@@ -1,18 +1,14 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use iota_sdk::types::{
-    block::{
-        address::AccountAddress,
-        output::{AccountOutput, Feature, FoundryId, NativeToken, Output, Rent, SimpleTokenScheme, TokenId},
-        protocol::protocol_parameters,
-        rand::output::{
-            feature::{rand_issuer_feature, rand_metadata_feature, rand_sender_feature},
-            rand_account_id, rand_account_output,
-            unlock_condition::rand_address_unlock_condition_different_from_account_id,
-        },
+use iota_sdk::types::block::{
+    output::{AccountOutput, Feature, MinimumOutputAmount},
+    protocol::protocol_parameters,
+    rand::output::{
+        feature::{rand_issuer_feature, rand_metadata_feature, rand_sender_feature},
+        rand_account_id, rand_account_output,
+        unlock_condition::rand_address_unlock_condition_different_from_account_id,
     },
-    ValidationParams,
 };
 use packable::PackableExt;
 use pretty_assertions::assert_eq;
@@ -21,7 +17,6 @@ use pretty_assertions::assert_eq;
 fn builder() {
     let protocol_parameters = protocol_parameters();
     let account_id = rand_account_id();
-    let foundry_id = FoundryId::build(&AccountAddress::from(account_id), 0, SimpleTokenScheme::KIND);
     let address_1 = rand_address_unlock_condition_different_from_account_id(&account_id);
     let address_2 = rand_address_unlock_condition_different_from_account_id(&account_id);
     let sender_1 = rand_sender_feature();
@@ -31,7 +26,6 @@ fn builder() {
     let amount = 500_000;
 
     let mut builder = AccountOutput::build_with_amount(amount, account_id)
-        .add_native_token(NativeToken::new(TokenId::from(foundry_id), 1000).unwrap())
         .add_unlock_condition(address_1.clone())
         .add_feature(sender_1.clone())
         .replace_feature(sender_2.clone())
@@ -57,16 +51,16 @@ fn builder() {
     let metadata = rand_metadata_feature();
 
     let output = builder
-        .with_minimum_storage_deposit(protocol_parameters.rent_structure())
+        .with_minimum_amount(protocol_parameters.storage_score_parameters())
         .add_unlock_condition(rand_address_unlock_condition_different_from_account_id(&account_id))
         .with_features([Feature::from(metadata.clone()), sender_1.clone().into()])
         .with_immutable_features([Feature::from(metadata.clone()), issuer_1.clone().into()])
-        .finish_with_params(ValidationParams::default().with_protocol_parameters(protocol_parameters.clone()))
+        .finish()
         .unwrap();
 
     assert_eq!(
         output.amount(),
-        Output::Account(output.clone()).rent_cost(protocol_parameters.rent_structure())
+        output.minimum_amount(protocol_parameters.storage_score_parameters())
     );
     assert_eq!(output.features().metadata(), Some(&metadata));
     assert_eq!(output.features().sender(), Some(&sender_1));

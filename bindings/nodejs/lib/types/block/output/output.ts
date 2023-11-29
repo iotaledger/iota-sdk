@@ -5,15 +5,15 @@ import {
     UnlockCondition,
     UnlockConditionDiscriminator,
 } from './unlock-condition';
-import { Feature, FeatureDiscriminator } from './feature';
+import { Feature, FeatureDiscriminator, NativeTokenFeature } from './feature';
 
 // Temp solution for not double parsing JSON
 import { plainToInstance, Type } from 'class-transformer';
-import { HexEncodedString, hexToBigInt, NumericString, u64 } from '../../utils';
+import { HexEncodedString, NumericString, u64 } from '../../utils';
 import { TokenScheme, TokenSchemeDiscriminator } from './token-scheme';
-import { INativeToken } from '../../models';
 import { AccountId, NftId, AnchorId, DelegationId } from '../id';
 import { EpochIndex } from '../../block/slot';
+import { INativeToken } from '../../models/native-token';
 
 export type OutputId = HexEncodedString;
 
@@ -25,14 +25,14 @@ enum OutputType {
     Basic = 0,
     /** An Account output. */
     Account = 1,
-    /** A Foundry output. */
-    Foundry = 2,
-    /** An NFT output. */
-    Nft = 3,
-    /** A Delegation output. */
-    Delegation = 4,
     /** An Anchor output. */
-    Anchor = 5,
+    Anchor = 2,
+    /** A Foundry output. */
+    Foundry = 3,
+    /** An NFT output. */
+    Nft = 4,
+    /** A Delegation output. */
+    Delegation = 5,
 }
 
 /**
@@ -74,6 +74,8 @@ abstract class Output {
             return plainToInstance(BasicOutput, data) as any as BasicOutput;
         } else if (data.type == OutputType.Account) {
             return plainToInstance(AccountOutput, data) as any as AccountOutput;
+        } else if (data.type == OutputType.Anchor) {
+            return plainToInstance(AnchorOutput, data) as any as AnchorOutput;
         } else if (data.type == OutputType.Foundry) {
             return plainToInstance(FoundryOutput, data) as any as FoundryOutput;
         } else if (data.type == OutputType.Nft) {
@@ -83,8 +85,6 @@ abstract class Output {
                 DelegationOutput,
                 data,
             ) as any as DelegationOutput;
-        } else if (data.type == OutputType.Anchor) {
-            return plainToInstance(AnchorOutput, data) as any as AnchorOutput;
         }
         throw new Error('Invalid JSON');
     }
@@ -101,9 +101,6 @@ abstract class CommonOutput extends Output {
         discriminator: UnlockConditionDiscriminator,
     })
     readonly unlockConditions: UnlockCondition[];
-
-    // Getter transforms it into nativeTokens with a proper number
-    private nativeTokens?: INativeToken[];
 
     /**
      * The features contained by the output.
@@ -126,24 +123,24 @@ abstract class CommonOutput extends Output {
         super(type, amount);
         this.unlockConditions = unlockConditions;
     }
+
     /**
-     * The native tokens held by the output.
+     * The native token held by the output.
      */
-    getNativeTokens(): INativeToken[] | undefined {
-        if (!this.nativeTokens) {
-            return this.nativeTokens;
+    getNativeToken(): INativeToken | undefined {
+        if (!this.features) {
+            return undefined;
         }
 
-        // Make sure the amount of native tokens are of bigint type.
-        for (let i = 0; i < this.nativeTokens.length; i++) {
-            const token = this.nativeTokens[i];
-            if (typeof token.amount === 'string') {
-                this.nativeTokens[i].amount = hexToBigInt(token.amount);
+        for (const feature of this.features) {
+            if (feature instanceof NativeTokenFeature) {
+                return (feature as NativeTokenFeature).asNativeToken();
             }
         }
-        return this.nativeTokens;
+        return undefined;
     }
 }
+
 /**
  * A Basic output.
  */
@@ -242,10 +239,6 @@ class AnchorOutput extends ImmutableFeaturesOutput {
      * The amount of (stored) Mana held by the output.
      */
     readonly mana: u64;
-    /**
-     * Metadata that can only be changed by the state controller.
-     */
-    readonly stateMetadata?: HexEncodedString;
 
     /**
      * @param amount The amount of the output.
@@ -253,7 +246,6 @@ class AnchorOutput extends ImmutableFeaturesOutput {
      * @param anchorId The anchor ID as hex-encoded string.
      * @param stateIndex A counter that must increase by 1 every time the anchor output is state transitioned.
      * @param unlockConditions The unlock conditions of the output.
-     * @param stateMetadata Metadata that can only be changed by the state controller.
      */
     constructor(
         amount: u64,
@@ -261,13 +253,46 @@ class AnchorOutput extends ImmutableFeaturesOutput {
         anchorId: AnchorId,
         stateIndex: number,
         unlockConditions: UnlockCondition[],
-        stateMetadata?: HexEncodedString,
     ) {
         super(OutputType.Account, amount, unlockConditions);
         this.anchorId = anchorId;
         this.stateIndex = stateIndex;
         this.mana = mana;
-        this.stateMetadata = stateMetadata;
+    }
+}
+
+/**
+ * A Foundry output.
+ */
+class FoundryOutput extends ImmutableFeaturesOutput {
+    /**
+     * The serial number of the Foundry with respect to the controlling alias.
+     */
+    readonly serialNumber: number;
+
+    /**
+     * The token scheme for the Foundry.
+     */
+    @Type(() => TokenScheme, {
+        discriminator: TokenSchemeDiscriminator,
+    })
+    readonly tokenScheme: TokenScheme;
+
+    /**
+     * @param amount The amount of the output.
+     * @param serialNumber The serial number of the Foundry with respect to the controlling alias.
+     * @param unlockConditions The unlock conditions of the output.
+     * @param tokenScheme The token scheme for the Foundry.
+     */
+    constructor(
+        amount: u64,
+        serialNumber: number,
+        unlockConditions: UnlockCondition[],
+        tokenScheme: TokenScheme,
+    ) {
+        super(OutputType.Foundry, amount, unlockConditions);
+        this.serialNumber = serialNumber;
+        this.tokenScheme = tokenScheme;
     }
 }
 
@@ -303,40 +328,7 @@ class NftOutput extends ImmutableFeaturesOutput {
         this.mana = mana;
     }
 }
-/**
- * A Foundry output.
- */
-class FoundryOutput extends ImmutableFeaturesOutput {
-    /**
-     * The serial number of the Foundry with respect to the controlling alias.
-     */
-    readonly serialNumber: number;
 
-    /**
-     * The token scheme for the Foundry.
-     */
-    @Type(() => TokenScheme, {
-        discriminator: TokenSchemeDiscriminator,
-    })
-    readonly tokenScheme: TokenScheme;
-
-    /**
-     * @param amount The amount of the output.
-     * @param serialNumber The serial number of the Foundry with respect to the controlling alias.
-     * @param unlockConditions The unlock conditions of the output.
-     * @param tokenScheme The token scheme for the Foundry.
-     */
-    constructor(
-        amount: u64,
-        serialNumber: number,
-        unlockConditions: UnlockCondition[],
-        tokenScheme: TokenScheme,
-    ) {
-        super(OutputType.Foundry, amount, unlockConditions);
-        this.serialNumber = serialNumber;
-        this.tokenScheme = tokenScheme;
-    }
-}
 /**
  * A Delegation output.
  */
@@ -402,8 +394,9 @@ const OutputDiscriminator = {
     subTypes: [
         { value: BasicOutput, name: OutputType.Basic as any },
         { value: AccountOutput, name: OutputType.Account as any },
-        { value: NftOutput, name: OutputType.Nft as any },
+        { value: AnchorOutput, name: OutputType.Anchor as any },
         { value: FoundryOutput, name: OutputType.Foundry as any },
+        { value: NftOutput, name: OutputType.Nft as any },
         { value: DelegationOutput, name: OutputType.Delegation as any },
     ],
 };
@@ -416,7 +409,7 @@ export {
     BasicOutput,
     AccountOutput,
     AnchorOutput,
-    NftOutput,
     FoundryOutput,
+    NftOutput,
     DelegationOutput,
 };

@@ -1,19 +1,21 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! In this example we will send an amount below the minimum storage deposit.
+//! In this example we will send an amount below the minimum amount.
 //!
 //! Make sure that `STRONGHOLD_SNAPSHOT_PATH` and `WALLET_DB_PATH` already exist by
-//! running the `./how_tos/accounts_and_addresses/create_account.rs` example!
+//! running the `./how_tos/accounts_and_addresses/create_wallet.rs` example!
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh
 //! cargo run --release --all-features --example send_micro_transaction
 //! ```
 
+use crypto::keys::bip39::Mnemonic;
 use iota_sdk::{
-    client::secret::SecretManager,
-    wallet::{account::TransactionOptions, Result, Wallet},
+    client::secret::stronghold::StrongholdSecretManager,
+    wallet::{Result, TransactionOptions},
+    Wallet,
 };
 
 // The base coin micro amount to send
@@ -26,26 +28,32 @@ async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
+    // Setup Stronghold secret_manager
+    let secret_manager = StrongholdSecretManager::builder()
+        .password(std::env::var("STRONGHOLD_PASSWORD").unwrap())
+        .build(std::env::var("STRONGHOLD_SNAPSHOT_PATH").unwrap())?;
+
+    // Only required the first time, can also be generated with `manager.generate_mnemonic()?`
+    let mnemonic = Mnemonic::from(std::env::var("MNEMONIC").unwrap());
+
+    // The mnemonic only needs to be stored the first time
+    secret_manager.store_mnemonic(mnemonic).await?;
+
+    // Get the wallet we generated with `create_wallet`.
     let wallet = Wallet::builder()
-        .load_storage::<SecretManager>(std::env::var("WALLET_DB_PATH").unwrap())
-        .await?
-        .finish()
+        .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
+        .finish(&secret_manager)
         .await?;
-    let account = wallet.get_account("Alice").await?;
 
-    // May want to ensure the account is synced before sending a transaction.
-    account.sync(None).await?;
-
-    // Set the stronghold password
-    wallet
-        .set_stronghold_password(std::env::var("STRONGHOLD_PASSWORD").unwrap())
-        .await?;
+    // May want to ensure the wallet is synced before sending a transaction.
+    wallet.sync(&secret_manager, None).await?;
 
     println!("Sending '{}' coin(s) to '{}'...", SEND_MICRO_AMOUNT, RECV_ADDRESS);
 
     // Send a micro transaction
-    let transaction = account
+    let transaction = wallet
         .send(
+            &secret_manager,
             SEND_MICRO_AMOUNT,
             RECV_ADDRESS,
             TransactionOptions {
@@ -57,8 +65,8 @@ async fn main() -> Result<()> {
     println!("Transaction sent: {}", transaction.transaction_id);
 
     // Wait for transaction to get included
-    let block_id = account
-        .reissue_transaction_until_included(&transaction.transaction_id, None, None)
+    let block_id = wallet
+        .reissue_transaction_until_included(&secret_manager, &transaction.transaction_id, None, None)
         .await?;
 
     println!(

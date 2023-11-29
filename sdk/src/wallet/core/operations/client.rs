@@ -5,7 +5,6 @@ use std::collections::{HashMap, HashSet};
 
 use url::Url;
 
-use super::storage::SaveLoadWallet;
 use crate::{
     client::{
         node_manager::{
@@ -27,10 +26,7 @@ impl Wallet {
     }
 }
 
-impl Wallet
-where
-    WalletBuilder: SaveLoadWallet,
-{
+impl Wallet {
     pub async fn set_client_options(&self, client_options: ClientBuilder) -> crate::wallet::Result<()> {
         let ClientBuilder {
             node_manager_builder,
@@ -60,14 +56,11 @@ where
             // Update the protocol of the network_info to not have the default data, which can be wrong
             // Ignore errors, because there might be no node at all and then it should still not error
             if let Ok(info) = self.client.get_info().await {
-                // TODO
-                // network_info.protocol_parameters = info.node_info.protocol;
+                network_info.protocol_parameters = info.node_info.latest_protocol_parameters().parameters.clone();
             }
             *self.client.network_info.write().await = network_info;
 
-            for account in self.accounts.write().await.iter_mut() {
-                account.update_account_bech32_hrp().await?;
-            }
+            self.update_bech32_hrp().await?;
         }
 
         #[cfg(feature = "storage")]
@@ -152,9 +145,7 @@ where
             .update_node_manager(node_manager_builder.build(HashMap::new()))
             .await?;
 
-        for account in self.accounts.write().await.iter_mut() {
-            account.update_account_bech32_hrp().await?;
-        }
+        self.update_bech32_hrp().await?;
 
         Ok(())
     }

@@ -4,17 +4,19 @@
 //! In this example we will send native tokens.
 //!
 //! Make sure that `STRONGHOLD_SNAPSHOT_PATH` and `WALLET_DB_PATH` already exist by
-//! running the `./how_tos/accounts_and_addresses/create_account.rs` example!
+//! running the `./how_tos/accounts_and_addresses/create_wallet.rs` example!
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh
 //! cargo run --release --all-features --example send_native_tokens
 //! ```
 
+use crypto::keys::bip39::Mnemonic;
 use iota_sdk::{
-    client::secret::SecretManager,
+    client::secret::stronghold::StrongholdSecretManager,
     types::block::address::Bech32Address,
-    wallet::{Result, SendNativeTokensParams, Wallet},
+    wallet::{Result, SendNativeTokenParams},
+    Wallet,
 };
 use primitive_types::U256;
 
@@ -28,15 +30,22 @@ async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
-    let wallet = Wallet::builder()
-        .load_storage::<SecretManager>(std::env::var("WALLET_DB_PATH").unwrap())
-        .await?
-        .finish()
-        .await?;
-    let account = wallet.get_account("Alice").await?;
+    let secret_manager = StrongholdSecretManager::builder()
+        .password("some_hopefully_secure_password".to_owned())
+        .build("test.stronghold")?;
 
-    // May want to ensure the account is synced before sending a transaction.
-    let balance = account.sync(None).await?;
+    let mnemonic = Mnemonic::from(std::env::var("MNEMONIC").unwrap());
+
+    // The mnemonic only needs to be stored the first time
+    secret_manager.store_mnemonic(mnemonic).await?;
+
+    let wallet = Wallet::builder()
+        .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
+        .finish(&secret_manager)
+        .await?;
+
+    // May want to ensure the wallet is synced before sending a transaction.
+    let balance = wallet.sync(&secret_manager, None).await?;
 
     // Get a token with sufficient balance
     if let Some(token_id) = balance
@@ -54,23 +63,23 @@ async fn main() -> Result<()> {
         println!("Balance before sending: {available_balance}");
 
         // Set the stronghold password
-        wallet
-            .set_stronghold_password(std::env::var("STRONGHOLD_PASSWORD").unwrap())
+        secret_manager
+            .set_password(std::env::var("STRONGHOLD_PASSWORD").unwrap())
             .await?;
 
         let bech32_address = RECV_ADDRESS.parse::<Bech32Address>()?;
 
-        let outputs = [SendNativeTokensParams::new(
+        let outputs = [SendNativeTokenParams::new(
             bech32_address,
-            [(*token_id, U256::from(SEND_NATIVE_TOKEN_AMOUNT))],
+            (*token_id, U256::from(SEND_NATIVE_TOKEN_AMOUNT)),
         )?];
 
-        let transaction = account.send_native_tokens(outputs, None).await?;
+        let transaction = wallet.send_native_tokens(&secret_manager, outputs, None).await?;
         println!("Transaction sent: {}", transaction.transaction_id);
 
         // Wait for transaction to get included
-        let block_id = account
-            .reissue_transaction_until_included(&transaction.transaction_id, None, None)
+        let block_id = wallet
+            .reissue_transaction_until_included(&secret_manager, &transaction.transaction_id, None, None)
             .await?;
         println!(
             "Block included: {}/block/{}",
@@ -78,7 +87,7 @@ async fn main() -> Result<()> {
             block_id
         );
 
-        let balance = account.sync(None).await?;
+        let balance = wallet.sync(&secret_manager, None).await?;
 
         let available_balance = balance
             .native_tokens()

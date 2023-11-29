@@ -7,7 +7,7 @@ use iota_sdk::{
         secret::{DowncastSecretManager, SecretManage, SignBlock},
     },
     types::{
-        block::{address::ToBech32Ext, core::UnsignedBlock, unlock::Unlock, SignedBlockDto},
+        block::{address::ToBech32Ext, core::UnsignedBlock, unlock::Unlock, BlockDto},
         TryFromDto,
     },
 };
@@ -74,7 +74,7 @@ where
                 .map_err(iota_sdk::client::Error::from)?;
             Response::SignedTransaction(transaction.into())
         }
-        SecretManagerMethod::SignBlock { unsigned_block, chain } => Response::SignedBlock(SignedBlockDto::from(
+        SecretManagerMethod::SignBlock { unsigned_block, chain } => Response::Block(BlockDto::from(
             &UnsignedBlock::try_from_dto(unsigned_block)?
                 .sign_ed25519(secret_manager, chain)
                 .await?,

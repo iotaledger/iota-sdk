@@ -2,7 +2,7 @@ import os
 
 from dotenv import load_dotenv
 
-from iota_sdk import Client, NodeIndexerAPI
+from iota_sdk import Client, NodeIndexerAPI, FeatureType
 
 load_dotenv()
 
@@ -12,7 +12,7 @@ node_url = os.environ.get('NODE_URL', 'https://api.testnet.shimmer.network')
 client = Client(nodes=[node_url])
 
 ADDRESS = 'rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy'
-query_parameters = NodeIndexerAPI.QueryParameters(
+query_parameters = NodeIndexerAPI.BasicOutputQueryParameters(
     address=ADDRESS,
     has_expiration=False,
     has_timelock=False,
@@ -35,8 +35,10 @@ native_tokens = []
 for output_with_metadata in outputs:
     output = output_with_metadata.output
     total_amount += output.amount
-    if output.native_tokens:
-        native_tokens.append(output.native_tokens)
+    native_token = [feature for feature in output.features if feature.type
+                    == FeatureType.NativeToken]
+    if native_token:
+        native_tokens.append(native_token)
 
 print(
     f'Outputs controlled by {ADDRESS} have {total_amount} glow and native tokens: {native_tokens}')

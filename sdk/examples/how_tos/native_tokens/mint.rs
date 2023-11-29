@@ -4,9 +4,9 @@
 //! In this example we will mint an existing native token with its foundry.
 //!
 //! Make sure that `STRONGHOLD_SNAPSHOT_PATH` and `WALLET_DB_PATH` already exist by
-//! running the `./how_tos/accounts_and_addresses/create_account.rs` example!
+//! running the `./how_tos/accounts_and_addresses/create_wallet.rs` example!
 //!
-//! You may provide a TOKEN_ID that is available in the account. The foundry
+//! You may provide a TOKEN_ID that is available in the wallet. The foundry
 //! output which minted it needs to be available as well. You can check this by
 //! running the `get_balance` example. You can create a new native token by running
 //! the `create_native_token` example.
@@ -16,8 +16,9 @@
 //! cargo run --release --all-features --example mint_native_token [TOKEN_ID]
 //! ```
 
+use crypto::keys::bip39::Mnemonic;
 use iota_sdk::{
-    client::secret::SecretManager,
+    client::secret::stronghold::StrongholdSecretManager,
     types::block::output::TokenId,
     wallet::{Result, Wallet},
 };
@@ -30,15 +31,24 @@ async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
-    let wallet = Wallet::builder()
-        .load_storage::<SecretManager>(std::env::var("WALLET_DB_PATH").unwrap())
-        .await?
-        .finish()
-        .await?;
-    let account = wallet.get_account("Alice").await?;
+    // Setup Stronghold secret_manager
+    let secret_manager = StrongholdSecretManager::builder()
+        .password(std::env::var("STRONGHOLD_PASSWORD").unwrap())
+        .build(std::env::var("STRONGHOLD_SNAPSHOT_PATH").unwrap())?;
 
-    // May want to ensure the account is synced before sending a transaction.
-    let balance = account.sync(None).await?;
+    // Only required the first time, can also be generated with `manager.generate_mnemonic()?`
+    let mnemonic = Mnemonic::from(std::env::var("MNEMONIC").unwrap());
+
+    // The mnemonic only needs to be stored the first time
+    secret_manager.store_mnemonic(mnemonic).await?;
+
+    let wallet = Wallet::builder()
+        .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
+        .finish(&secret_manager)
+        .await?;
+
+    // May want to ensure the wallet is synced before sending a transaction.
+    let balance = wallet.sync(&secret_manager, None).await?;
 
     // Find first foundry and corresponding token id
     let token_id = std::env::args()
@@ -54,21 +64,18 @@ async fn main() -> Result<()> {
         let available_balance = native_token_balance.available();
         println!("Balance before minting: {available_balance}");
     } else {
-        println!("Couldn't find native token '{token_id}' in the account");
+        println!("Couldn't find native token '{token_id}' in the wallet");
         return Ok(());
     }
 
-    // Set the stronghold password
-    wallet
-        .set_stronghold_password(std::env::var("STRONGHOLD_PASSWORD").unwrap())
-        .await?;
-
     // Mint some more native tokens
-    let transaction = account.mint_native_token(token_id, MINT_AMOUNT, None).await?;
+    let transaction = wallet
+        .mint_native_token(&secret_manager, token_id, MINT_AMOUNT, None)
+        .await?;
     println!("Transaction sent: {}", transaction.transaction_id);
 
-    let block_id = account
-        .reissue_transaction_until_included(&transaction.transaction_id, None, None)
+    let block_id = wallet
+        .reissue_transaction_until_included(&secret_manager, &transaction.transaction_id, None, None)
         .await?;
 
     println!(
@@ -77,7 +84,7 @@ async fn main() -> Result<()> {
         block_id
     );
 
-    let balance = account.sync(None).await?;
+    let balance = wallet.sync(&secret_manager, None).await?;
     let available_balance = balance
         .native_tokens()
         .iter()

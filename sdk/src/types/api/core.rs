@@ -12,9 +12,10 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     types::block::{
+        address::Bech32Address,
         core::Parents,
         output::{dto::OutputDto, AccountId, OutputId, OutputMetadata, OutputWithMetadata},
-        protocol::ProtocolParameters,
+        protocol::{ProtocolParameters, ProtocolParametersHash},
         semantic::TransactionFailureReason,
         slot::{EpochIndex, SlotCommitment, SlotCommitmentId, SlotIndex},
         BlockId,
@@ -170,7 +171,6 @@ pub struct BaseTokenResponse {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub subunit: Option<String>,
     pub decimals: u32,
-    pub use_metric_prefix: bool,
 }
 
 /// Response of GET /api/core/v3/blocks/validators.
@@ -209,24 +209,24 @@ pub struct ManaRewardsResponse {
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct CommitteeResponse {
-    /// The epoch index of the committee.
-    pub epoch_index: EpochIndex,
+    /// The validators of the committee.
+    pub committee: Box<[CommitteeMember]>,
     /// The total amount of delegated and staked IOTA coins in the selected committee.
     #[serde(with = "string")]
     pub total_stake: u64,
     /// The total amount of staked IOTA coins in the selected committee.
     #[serde(with = "string")]
     pub total_validator_stake: u64,
-    /// The validators of the committee.
-    pub committee: Box<[CommitteeMember]>,
+    /// The epoch index of the committee.
+    pub epoch: EpochIndex,
 }
 
 /// Returns information of a committee member.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct CommitteeMember {
-    /// The account identifier of the validator
-    pub account_id: AccountId,
+    /// Account address of the validator.
+    pub address: Bech32Address,
     /// The total stake of the pool, including delegators.
     #[serde(with = "string")]
     pub pool_stake: u64,
@@ -242,10 +242,10 @@ pub struct CommitteeMember {
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ValidatorResponse {
-    /// The account identifier of the validator
-    account_id: AccountId,
+    /// Account address of the validator.
+    address: Bech32Address,
     /// The epoch index until which the validator registered to stake.
-    staking_end_epoch: EpochIndex,
+    staking_epoch_end: EpochIndex,
     /// The total stake of the pool, including delegators.
     #[serde(with = "string")]
     pool_stake: u64,
@@ -259,6 +259,8 @@ pub struct ValidatorResponse {
     active: bool,
     /// The latest protocol version the validator supported.
     latest_supported_protocol_version: u8,
+    // The protocol hash of the latest supported protocol of the validator.
+    latest_supported_protocol_hash: ProtocolParametersHash,
 }
 
 /// Response of GET /api/core/v3/blocks/issuance
@@ -269,8 +271,10 @@ pub struct IssuanceBlockHeaderResponse {
     /// Blocks that are strongly directly approved.
     pub strong_parents: BTreeSet<BlockId>,
     /// Blocks that are weakly directly approved.
+    #[serde(default, skip_serializing_if = "BTreeSet::is_empty")]
     pub weak_parents: BTreeSet<BlockId>,
     /// Blocks that are directly referenced to adjust opinion.
+    #[serde(default, skip_serializing_if = "BTreeSet::is_empty")]
     pub shallow_like_parents: BTreeSet<BlockId>,
     /// The slot index of the latest finalized slot.
     pub latest_finalized_slot: SlotIndex,
@@ -495,7 +499,7 @@ pub struct RoutesResponse {
 
 /// Response of
 /// - GET /api/core/v3/commitments/{commitmentId}/utxo-changes
-/// - GET /api/core/v3/commitments/by-index/{index}/utxo-changes
+/// - GET /api/core/v3/commitments/by-slot/{slot}/utxo-changes
 /// Returns all UTXO changes that happened at a specific slot.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]

@@ -12,6 +12,7 @@ use iota_sdk::{
         stronghold::{Error as StrongholdError, StrongholdAdapter},
         Error as ClientError,
     },
+    crypto::keys::bip44::Bip44,
     wallet::{ClientOptions, Error as WalletError, Wallet},
 };
 use pretty_assertions::assert_eq;
@@ -47,14 +48,14 @@ async fn stronghold_snapshot_v2_v3_migration() {
     )
     .unwrap();
 
-    let stronghold_secret_manager = SecretManager::Stronghold(
+    let secret_manager = SecretManager::Stronghold(
         StrongholdSecretManager::builder()
             .password("new_password".to_owned())
             .build("./tests/wallet/fixtures/v3.stronghold")
             .unwrap(),
     );
 
-    let addresses = stronghold_secret_manager
+    let addresses = secret_manager
         .generate_ed25519_addresses(
             GetAddressesOptions::default()
                 .with_bech32_hrp(SHIMMER_TESTNET_BECH32_HRP)
@@ -85,17 +86,17 @@ async fn stronghold_snapshot_v2_v3_migration() {
 
     let restore_manager = Wallet::builder()
         .with_storage_path("test-storage/stronghold_snapshot_v2_v3_migration")
-        .with_secret_manager(stronghold_secret_manager)
         .with_client_options(ClientOptions::new().with_node(NODE_LOCAL).unwrap())
         // Build with a different coin type, to check if it gets replaced by the one from the backup
-        .with_coin_type(IOTA_COIN_TYPE)
-        .finish()
+        .with_bip_path(Bip44::new(IOTA_COIN_TYPE))
+        .finish(&secret_manager)
         .await
         .unwrap();
 
     // restore with ignore_if_coin_type_mismatch: Some(true) to not overwrite the coin type
     let error = restore_manager
-        .restore_backup::<SecretManager>(
+        .restore_backup(
+            &secret_manager,
             PathBuf::from("./tests/wallet/fixtures/v3.stronghold"),
             "wrong_password".to_owned(),
             Some(false),

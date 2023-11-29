@@ -1,7 +1,7 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! Node indexer API.
+//! [REST API for IOTA UTXO indexers](https://editor.swagger.io/?url=https://raw.githubusercontent.com/iotaledger/tips/tip48/tips/TIP-0048/openapi3-indexer.yaml)
 
 pub mod query_parameters;
 pub mod routes;
@@ -23,7 +23,8 @@ impl ClientInner {
         prefer_permanode: bool,
     ) -> Result<OutputIdsResponse> {
         let mut merged_output_ids_response = OutputIdsResponse {
-            ledger_index: 0,
+            committed_slot: 0,
+            page_size: 1000,
             cursor: None,
             items: Vec::new(),
         };
@@ -48,7 +49,8 @@ impl ClientInner {
                 return Ok(output_ids_response);
             }
 
-            merged_output_ids_response.ledger_index = output_ids_response.ledger_index;
+            merged_output_ids_response.committed_slot = output_ids_response.committed_slot;
+            merged_output_ids_response.page_size = output_ids_response.page_size;
             merged_output_ids_response.cursor = output_ids_response.cursor;
             merged_output_ids_response.items.extend(output_ids_response.items);
 

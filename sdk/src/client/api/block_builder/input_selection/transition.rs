@@ -60,7 +60,7 @@ impl InputSelection {
             .with_foundry_counter(u32::max(highest_foundry_serial_number, input.foundry_counter()))
             .with_features(features);
 
-        let output = builder.finish_output(self.protocol_parameters.token_supply())?;
+        let output = builder.finish_output()?;
 
         self.automatically_transitioned.insert(ChainId::from(account_id));
 
@@ -100,7 +100,7 @@ impl InputSelection {
         let output = NftOutputBuilder::from(input)
             .with_nft_id(nft_id)
             .with_features(features)
-            .finish_output(self.protocol_parameters.token_supply())?;
+            .finish_output()?;
 
         self.automatically_transitioned.insert(ChainId::from(nft_id));
 
@@ -138,7 +138,7 @@ impl InputSelection {
             return Ok(None);
         }
 
-        let output = FoundryOutputBuilder::from(input).finish_output(self.protocol_parameters.token_supply())?;
+        let output = FoundryOutputBuilder::from(input).finish_output()?;
 
         self.automatically_transitioned.insert(ChainId::from(foundry_id));
 
@@ -152,8 +152,8 @@ impl InputSelection {
     pub(crate) fn transition_input(&mut self, input: &InputSigningData) -> Result<Option<Output>, Error> {
         match &input.output {
             Output::Account(account_input) => self.transition_account_input(account_input, input.output_id()),
-            Output::Nft(nft_input) => self.transition_nft_input(nft_input, input.output_id()),
             Output::Foundry(foundry_input) => self.transition_foundry_input(foundry_input, input.output_id()),
+            Output::Nft(nft_input) => self.transition_nft_input(nft_input, input.output_id()),
             _ => Ok(None),
         }
     }

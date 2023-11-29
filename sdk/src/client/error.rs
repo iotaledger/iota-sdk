@@ -36,8 +36,8 @@ pub enum Error {
     /// Block types error
     #[error("{0}")]
     Block(#[from] crate::types::block::Error),
-    /// The wallet account has enough funds, but split on too many outputs
-    #[error("the wallet account has enough funds, but split on too many outputs: {0}, max. is 128, consolidate them")]
+    /// The wallet has enough funds, but split on too many outputs
+    #[error("the wallet has enough funds, but split on too many outputs: {0}, max. is 128, consolidate them")]
     ConsolidationRequired(usize),
     /// Crypto.rs error
     #[error("{0}")]
@@ -154,9 +154,9 @@ pub enum Error {
     /// Missing BIP32 chain to sign with.
     #[error("missing BIP32 chain to sign with")]
     MissingBip32Chain,
-    /// Unexpected block kind.
-    #[error("unexpected block kind: expected {expected}, found {actual}")]
-    UnexpectedBlockKind { expected: u8, actual: u8 },
+    /// Unexpected block body kind.
+    #[error("unexpected block body kind: expected {expected}, found {actual}")]
+    UnexpectedBlockBodyKind { expected: u8, actual: u8 },
     /// Missing transaction payload.
     #[error("missing transaction payload")]
     MissingTransactionPayload,

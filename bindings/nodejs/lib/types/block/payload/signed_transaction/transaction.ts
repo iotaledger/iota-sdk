@@ -35,16 +35,16 @@ class Transaction {
     @Type(() => Input, {
         discriminator: ContextInputDiscriminator,
     })
-    readonly contextInputs: ContextInput[];
+    readonly contextInputs?: ContextInput[];
 
     @Type(() => Input, {
         discriminator: InputDiscriminator,
     })
     readonly inputs: Input[];
 
-    readonly allotments: ManaAllotment[];
+    readonly allotments?: ManaAllotment[];
 
-    private capabilities: HexEncodedString = '0x';
+    private capabilities?: HexEncodedString;
 
     @Type(() => Payload, {
         discriminator: PayloadDiscriminator,
@@ -91,7 +91,7 @@ class Transaction {
                     capabilities.byteLength,
                 ).toString('hex');
         } else {
-            this.capabilities = '0x';
+            this.capabilities = undefined;
         }
     }
 
@@ -102,9 +102,11 @@ class Transaction {
 
     /** Get the capability bitflags of the transaction. */
     getCapabilities(): Uint8Array {
-        return Uint8Array.from(
-            Buffer.from(this.capabilities.substring(2), 'hex'),
-        );
+        return this.capabilities !== undefined
+            ? Uint8Array.from(
+                  Buffer.from(this.capabilities.substring(2), 'hex'),
+              )
+            : new Uint8Array();
     }
 }
 

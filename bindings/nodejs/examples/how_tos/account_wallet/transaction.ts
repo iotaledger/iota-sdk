@@ -6,7 +6,7 @@ import { Wallet, initLogger, Utils } from '@iota/sdk';
 // This example uses secrets in environment variables for simplicity which should not be done in production.
 //
 // Make sure that `example.stronghold` and `example.walletdb` already exist by
-// running the `how_tos/accounts_and_addresses/create-account` example!
+// running the `how_tos/accounts_and_addresses/create-wallet` example!
 //
 require('dotenv').config({ path: '.env' });
 
@@ -29,15 +29,13 @@ async function run() {
             },
         };
 
-        const wallet = new Wallet({
+        const wallet = await Wallet.create({
             storagePath: process.env.WALLET_DB_PATH,
         });
 
-        const account = await wallet.getAccount('Alice');
-
         await wallet.setStrongholdPassword(process.env.STRONGHOLD_PASSWORD);
 
-        const balance = await account.sync(syncOptions);
+        const balance = await wallet.sync(syncOptions);
 
         const totalBaseTokenBalance = balance.baseCoin.total;
         console.log(
@@ -54,11 +52,9 @@ async function run() {
         );
 
         // Find first output unlockable by the account address
-        const queryParameters = [
-            {
-                address: accountAddress,
-            },
-        ];
+        const queryParameters = {
+            address: accountAddress,
+        };
         const input = (
             await (await wallet.getClient()).basicOutputIds(queryParameters)
         ).items[0];
@@ -74,15 +70,13 @@ async function run() {
             mandatoryInputs: [input],
             allowMicroAmount: false,
         };
-        const transaction = await account.sendWithParams(params, options);
-        await account.reissueTransactionUntilIncluded(
-            transaction.transactionId,
-        );
+        const transaction = await wallet.sendWithParams(params, options);
+        await wallet.reissueTransactionUntilIncluded(transaction.transactionId);
         console.log(
             `Transaction with custom input: https://explorer.iota.org/testnet/transaction/${transaction.transactionId}`,
         );
 
-        const totalBaseTokenBalanceAfter = (await account.sync(syncOptions))
+        const totalBaseTokenBalanceAfter = (await wallet.sync(syncOptions))
             .baseCoin.total;
         console.log(
             `Balance after sending funds from account: ${totalBaseTokenBalanceAfter}`,

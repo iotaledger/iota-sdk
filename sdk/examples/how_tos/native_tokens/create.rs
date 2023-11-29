@@ -4,15 +4,16 @@
 //! In this example we will create a native token.
 //!
 //! Make sure that `example.stronghold` and `example.walletdb` already exist by
-//! running the `create_account` example!
+//! running the `create_wallet` example!
 //!
 //! Rename `.env.example` to `.env` first, then run the command:
 //! ```sh
 //! cargo run --release --all-features --example create_native_token
 //! ```
 
+use crypto::keys::bip39::Mnemonic;
 use iota_sdk::{
-    client::secret::SecretManager,
+    client::secret::stronghold::StrongholdSecretManager,
     types::block::output::feature::Irc30Metadata,
     wallet::{CreateNativeTokenParams, Result, Wallet},
     U256,
@@ -28,29 +29,34 @@ async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
+    // Setup Stronghold secret_manager
+    let secret_manager = StrongholdSecretManager::builder()
+        .password(std::env::var("STRONGHOLD_PASSWORD").unwrap())
+        .build(std::env::var("STRONGHOLD_SNAPSHOT_PATH").unwrap())?;
+
+    // Only required the first time, can also be generated with `manager.generate_mnemonic()?`
+    let mnemonic = Mnemonic::from(std::env::var("MNEMONIC").unwrap());
+
+    // The mnemonic only needs to be stored the first time
+    secret_manager.store_mnemonic(mnemonic).await?;
+
     let wallet = Wallet::builder()
-        .load_storage::<SecretManager>(std::env::var("WALLET_DB_PATH").unwrap())
-        .await?
-        .finish()
-        .await?;
-    let account = wallet.get_account("Alice").await?;
-    let balance = account.sync(None).await?;
-
-    // Set the stronghold password
-    wallet
-        .set_stronghold_password(std::env::var("STRONGHOLD_PASSWORD").unwrap())
+        .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
+        .finish(&secret_manager)
         .await?;
 
-    // We can first check if we already have an account output in our account, because an account can have many foundry
+    let balance = wallet.sync(&secret_manager, None).await?;
+
+    // We can first check if we already have an account output in our wallet, because an account can have many foundry
     // outputs and therefore we can reuse an existing one
     if balance.accounts().is_empty() {
         // If we don't have an account, we need to create one
-        let transaction = account.create_account_output(None, None).await?;
+        let transaction = wallet.create_account_output(&secret_manager, None, None).await?;
         println!("Transaction sent: {}", transaction.transaction_id);
 
         // Wait for transaction to get included
-        let block_id = account
-            .reissue_transaction_until_included(&transaction.transaction_id, None, None)
+        let block_id = wallet
+            .reissue_transaction_until_included(&secret_manager, &transaction.transaction_id, None, None)
             .await?;
         println!(
             "Block included: {}/block/{}",
@@ -58,8 +64,8 @@ async fn main() -> Result<()> {
             block_id
         );
 
-        account.sync(None).await?;
-        println!("Account synced");
+        wallet.sync(&secret_manager, None).await?;
+        println!("Wallet synced");
     }
 
     let metadata =
@@ -74,12 +80,12 @@ async fn main() -> Result<()> {
         foundry_metadata: Some(metadata.to_bytes()),
     };
 
-    let transaction = account.create_native_token(params, None).await?;
+    let transaction = wallet.create_native_token(&secret_manager, params, None).await?;
     println!("Transaction sent: {}", transaction.transaction.transaction_id);
 
     // Wait for transaction to get included
-    let block_id = account
-        .reissue_transaction_until_included(&transaction.transaction.transaction_id, None, None)
+    let block_id = wallet
+        .reissue_transaction_until_included(&secret_manager, &transaction.transaction.transaction_id, None, None)
         .await?;
     println!(
         "Block included: {}/block/{}",
@@ -88,9 +94,9 @@ async fn main() -> Result<()> {
     );
     println!("Created token: {}", transaction.token_id);
 
-    // Ensure the account is synced after creating the native token.
-    account.sync(None).await?;
-    println!("Account synced");
+    // Ensure the wallet is synced after creating the native token.
+    wallet.sync(&secret_manager, None).await?;
+    println!("Wallet synced");
 
     Ok(())
 }

@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Optional, List
 from dataclasses_json import config
-from iota_sdk.types.common import HexStr, json
+from iota_sdk.types.common import hex_str_decoder, HexStr, json
 from iota_sdk.types.native_token import NativeToken
 
 
@@ -32,17 +32,17 @@ class SendParams():
 
 @json
 @dataclass
-class SendNativeTokensParams():
-    """Parameters for sending native tokens
+class SendNativeTokenParams():
+    """Parameters for sending a native token
 
     Attributes:
         address: The address to send to.
-        native_tokens: The native tokens to send.
-        return_address: The address to return the native tokens to if not claimed.
-        expiration: The expiration timestamp until native tokens can be claimed.
+        native_token: The native token to send.
+        return_address: The address to return the native token to if not claimed.
+        expiration: The expiration timestamp until the native token can be claimed.
     """
     address: str
-    native_tokens: List[NativeToken]
+    native_token: NativeToken
     return_address: Optional[str] = None
     expiration: Optional[int] = None
 
@@ -72,10 +72,12 @@ class CreateNativeTokenParams():
         account_id: The ID of the corresponding account.
     """
     circulating_supply: int = field(metadata=config(
-        encoder=str
+        encoder=hex,
+        decoder=hex_str_decoder,
     ))
     maximum_supply: int = field(metadata=config(
-        encoder=str
+        encoder=hex,
+        decoder=hex_str_decoder,
     ))
     foundry_metadata: Optional[str] = None
     account_id: Optional[str] = None
@@ -87,7 +89,7 @@ class MintNftParams():
     """Parameters for minting NFTs.
 
     Attributes:
-        address: A Bech32 encoded address to which the NFT will be minted. Default will use the first address of the account.
+        address: A Bech32 encoded address to which the NFT will be minted. Default will use the address of the wallet.
         sender: An NFT sender feature.
         metadata: An NFT metadata feature.
         tag: An NFT tag feature.
@@ -108,7 +110,7 @@ class CreateAccountOutputParams():
     """Parameters for creating accounts.
 
     Attributes:
-        address: A Bech32 encoded address which will control the account. Default will use the first address of the account.
+        address: A Bech32 encoded address which will control the account. Default will use the address of the wallet.
         immutable_metadata: Immutable account metadata.
         metadata: Account metadata.
     """

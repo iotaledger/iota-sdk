@@ -8,7 +8,10 @@ use core::ops::RangeInclusive;
 use derive_more::From;
 
 pub use self::utxo::UtxoInput;
-use crate::types::block::Error;
+use crate::types::block::{
+    protocol::{WorkScore, WorkScoreParameters},
+    Error,
+};
 
 /// The maximum number of inputs of a transaction.
 pub const INPUT_COUNT_MAX: u16 = 128;
@@ -28,6 +31,14 @@ pub enum Input {
     /// A UTXO input.
     #[packable(tag = UtxoInput::KIND)]
     Utxo(UtxoInput),
+}
+
+impl WorkScore for Input {
+    fn work_score(&self, params: WorkScoreParameters) -> u32 {
+        match self {
+            Self::Utxo(utxo) => utxo.work_score(params),
+        }
+    }
 }
 
 impl core::fmt::Debug for Input {

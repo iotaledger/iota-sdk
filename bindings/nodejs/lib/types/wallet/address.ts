@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { SlotIndex } from '../block/slot';
-import { Bech32Address, NftId, OutputId, TokenId } from '../block';
+import { Bech32Address, NftId, TokenId } from '../block';
 import { NumericString, u256, u64 } from '../utils';
 
 /** A Bip44 address */
@@ -24,7 +24,7 @@ export interface SendParams {
     /**
      * Bech32 encoded address, to which the storage deposit will be returned if one is necessary
      * given the provided amount. If a storage deposit is needed and a return address is not provided, it will
-     * default to the first address of the account.
+     * default to the address of the wallet.
      */
     returnAddress?: string;
     /**
@@ -35,27 +35,15 @@ export interface SendParams {
     expiration?: SlotIndex;
 }
 
-/** Address with unspent outputs */
-export interface AddressWithUnspentOutputs {
+/** Address with native token */
+export interface SendNativeTokenParams {
     /** The Bech32 address. */
     address: Bech32Address;
-    /** The address key index. */
-    keyIndex: number;
-    /** Whether the address is a public or an internal (change) address. */
-    internal: boolean;
-    /** The IDs of associated unspent outputs. */
-    outputIds: OutputId[];
-}
-
-/** Address with native tokens */
-export interface SendNativeTokensParams {
-    /** The Bech32 address. */
-    address: Bech32Address;
-    /** The Native Tokens to send. */
-    nativeTokens: [TokenId, u256][];
+    /** The Native Token to send. */
+    nativeToken: [TokenId, u256];
     /**
      * Bech32 encoded address, to which the storage deposit will be returned.
-     * Default will use the first address of the account.
+     * Default will use the address of the wallet.
      */
     returnAddress?: Bech32Address;
     /**

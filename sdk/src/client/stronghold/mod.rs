@@ -74,7 +74,7 @@ use super::{storage::StorageAdapter, utils::Password};
 /// A wrapper on [Stronghold].
 ///
 /// See the [module-level documentation](self) for more details.
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct StrongholdAdapter {
     /// A stronghold instance.
     stronghold: Arc<Mutex<Stronghold>>,
@@ -233,6 +233,21 @@ impl StrongholdAdapter {
     /// Create a builder to construct a [StrongholdAdapter].
     pub fn builder() -> StrongholdAdapterBuilder {
         StrongholdAdapterBuilder::default()
+    }
+
+    /// Change the Stronghold password to another one and also re-encrypt the values in the loaded snapshot with it.
+    /// TODO: fix weirdness with duplicated methods
+    pub async fn change_stronghold_password(
+        &self,
+        current_password: impl Into<Password> + Send,
+        new_password: impl Into<Password> + Send,
+    ) -> crate::wallet::Result<()> {
+        let current_password = current_password.into();
+        let new_password = new_password.into();
+
+        self.set_password(current_password).await?;
+        self.change_password(new_password).await?;
+        Ok(())
     }
 
     /// Test if the key hasn't been cleared.

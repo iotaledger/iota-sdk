@@ -8,12 +8,12 @@ from typing import TYPE_CHECKING, List
 from iota_sdk.types.signature import Ed25519Signature
 from iota_sdk.types.address import Address, deserialize_address
 from iota_sdk.types.common import HexStr
-from iota_sdk.types.essence import TransactionEssence
+from iota_sdk.types.transaction import Transaction
 from iota_sdk.types.node_info import ProtocolParameters
 from iota_sdk.types.output_id import OutputId
 from iota_sdk.types.output import Output
 from iota_sdk.external import call_utils_method
-from iota_sdk.types.payload import TransactionPayload
+from iota_sdk.types.payload import SignedTransactionPayload
 
 # Required to prevent circular import
 if TYPE_CHECKING:
@@ -123,14 +123,6 @@ class Utils():
         })
 
     @staticmethod
-    def compute_inputs_commitment(inputs: List[Output]) -> HexStr:
-        """Compute the input commitment from the output objects that are used as inputs to fund the transaction.
-        """
-        return _call_method('computeInputsCommitment', {
-            'inputs': [i.to_dict() for i in inputs]
-        })
-
-    @staticmethod
     def compute_storage_deposit(output, rent) -> HexStr:
         """Compute the required storage deposit of an output.
         """
@@ -177,19 +169,19 @@ class Utils():
         })
 
     @staticmethod
-    def transaction_id(transaction_payload: TransactionPayload) -> HexStr:
+    def transaction_id(payload: SignedTransactionPayload) -> HexStr:
         """ Compute the transaction ID (Blake2b256 hash of the provided transaction payload) of a transaction payload.
         """
         return _call_method('transactionId', {
-            'payload': transaction_payload.as_dict()
+            'payload': payload.as_dict()
         })
 
     @staticmethod
-    def transaction_signing_hash(essence: TransactionEssence) -> HexStr:
+    def transaction_signing_hash(transaction: Transaction) -> HexStr:
         """ Compute the signing hash of a transaction.
         """
         return _call_method('transactionSigningHash', {
-            'essence': essence.to_dict(),
+            'transaction': transaction.to_dict(),
         })
 
     @staticmethod

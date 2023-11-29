@@ -62,7 +62,7 @@ fn memory_layout() {
 
 // TODO: re-enable below tests when source is updated
 // fn protocol_parameters() -> ProtocolParameters {
-//     ProtocolParameters::new(3, "test", "rms", RentStructure::default(), 0, 1695275822, 10, 0).unwrap()
+//     ProtocolParameters::new(3, "test", "rms", StorageScoreParameters::default(), 0, 1695275822, 10, 0).unwrap()
 // }
 
 // #[test]
@@ -103,8 +103,8 @@ fn memory_layout() {
 //       }
 //     });
 
-//     let block_dto = serde_json::from_value::<SignedBlockDto>(block_json).unwrap();
-//     let block = SignedBlock::try_from_dto(block_dto).unwrap();
+//     let block_dto = serde_json::from_value::<BlockDto>(block_json).unwrap();
+//     let block = Block::try_from_dto(block_dto).unwrap();
 //     let block_bytes = block.pack_to_vec();
 
 //     assert_eq!(
@@ -221,8 +221,8 @@ fn memory_layout() {
 //       }
 //     });
 
-//     let block_dto = serde_json::from_value::<SignedBlockDto>(block_json).unwrap();
-//     let block = SignedBlock::try_from_dto(block_dto).unwrap();
+//     let block_dto = serde_json::from_value::<BlockDto>(block_json).unwrap();
+//     let block = Block::try_from_dto(block_dto).unwrap();
 //     let block_bytes = block.pack_to_vec();
 
 //     assert_eq!(
@@ -299,8 +299,8 @@ fn memory_layout() {
 //       }
 //     });
 
-//     let block_dto = serde_json::from_value::<SignedBlockDto>(block_json).unwrap();
-//     let block = SignedBlock::try_from_dto(block_dto).unwrap();
+//     let block_dto = serde_json::from_value::<BlockDto>(block_json).unwrap();
+//     let block = Block::try_from_dto(block_dto).unwrap();
 //     let block_bytes = block.pack_to_vec();
 
 //     assert_eq!(

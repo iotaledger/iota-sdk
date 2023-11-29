@@ -4,7 +4,7 @@
 use iota_sdk::{
     client::Error as ClientError,
     types::block::address::{Bech32Address, ToBech32Ext},
-    wallet::{account::OutputParams, Error, Result, SendParams},
+    wallet::{Error, OutputParams, Result, SendParams},
 };
 use pretty_assertions::assert_eq;
 
@@ -16,22 +16,21 @@ async fn bech32_hrp_send_amount() -> Result<()> {
     let storage_path = "test-storage/bech32_hrp_send_amount";
     setup(storage_path)?;
 
-    let wallet = make_wallet(storage_path, None, None).await?;
+    let (wallet, secret_manager) = make_wallet(storage_path, None, None).await?;
 
-    let account = wallet.create_account().finish().await?;
-
-    let error = account
+    let error = wallet
         .send_with_params(
+            &secret_manager,
             [SendParams::new(
                 1_000_000,
-                Bech32Address::try_new("wronghrp", account.first_address_bech32().await)?,
+                Bech32Address::try_new("wronghrp", wallet.address().await)?,
             )?],
             None,
         )
         .await
         .unwrap_err();
 
-    let bech32_hrp = account.client().get_bech32_hrp().await?;
+    let bech32_hrp = wallet.client().get_bech32_hrp().await?;
 
     match error {
         Error::Client(error) => match *error {
@@ -53,17 +52,12 @@ async fn bech32_hrp_prepare_output() -> Result<()> {
     let storage_path = "test-storage/bech32_hrp_prepare_output";
     setup(storage_path)?;
 
-    let wallet = make_wallet(storage_path, None, None).await?;
-    let account = wallet.create_account().finish().await?;
+    let (wallet, _) = make_wallet(storage_path, None, None).await?;
 
-    let error = account
+    let error = wallet
         .prepare_output(
             OutputParams {
-                recipient_address: account.addresses().await[0]
-                    .clone()
-                    .into_bech32()
-                    .into_inner()
-                    .to_bech32_unchecked("wronghrp"),
+                recipient_address: wallet.address().await.to_bech32_unchecked("wronghrp"),
                 amount: 1_000_000,
                 assets: None,
                 features: None,
@@ -75,7 +69,7 @@ async fn bech32_hrp_prepare_output() -> Result<()> {
         .await
         .unwrap_err();
 
-    let bech32_hrp = account.client().get_bech32_hrp().await?;
+    let bech32_hrp = wallet.client().get_bech32_hrp().await?;
 
     match error {
         Error::Client(error) => match *error {

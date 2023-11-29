@@ -9,13 +9,14 @@ use crate::{
     client::{ClientInner, Result},
     types::block::{
         core::{BlockHeader, UnsignedBlock},
+        output::AccountId,
         payload::Payload,
-        Block, IssuerId,
+        BlockBody,
     },
 };
 
 impl ClientInner {
-    pub async fn build_basic_block(&self, issuer_id: IssuerId, payload: Option<Payload>) -> Result<UnsignedBlock> {
+    pub async fn build_basic_block(&self, issuer_id: AccountId, payload: Option<Payload>) -> Result<UnsignedBlock> {
         let issuance = self.get_issuance().await?;
 
         let issuing_time = {
@@ -43,11 +44,11 @@ impl ClientInner {
                 issuer_id,
             ),
             // TODO: burned mana calculation
-            Block::build_basic(issuance.strong_parents()?, 0)
+            BlockBody::build_basic(issuance.strong_parents()?, 0)
                 .with_weak_parents(issuance.weak_parents()?)
                 .with_shallow_like_parents(issuance.shallow_like_parents()?)
                 .with_payload(payload)
-                .finish_block()?,
+                .finish_block_body()?,
         ))
     }
 }

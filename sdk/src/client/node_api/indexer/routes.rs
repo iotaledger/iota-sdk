@@ -1,29 +1,29 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! IOTA node indexer routes
+//! IOTA node indexer routes.
 
 use crate::{
     client::{
         node_api::indexer::query_parameters::{
-            AccountOutputQueryParameters, BasicOutputQueryParameters, FoundryOutputQueryParameters,
-            NftOutputQueryParameters, OutputQueryParameters,
+            AccountOutputQueryParameters, AnchorOutputQueryParameters, BasicOutputQueryParameters,
+            DelegationOutputQueryParameters, FoundryOutputQueryParameters, NftOutputQueryParameters,
+            OutputQueryParameters,
         },
         ClientInner, Error, Result,
     },
     types::{
         api::plugins::indexer::OutputIdsResponse,
-        block::output::{AccountId, FoundryId, NftId, OutputId},
+        block::{
+            address::ToBech32Ext,
+            output::{AccountId, AnchorId, DelegationId, FoundryId, NftId, OutputId},
+        },
     },
 };
-
-// hornet: https://github.com/gohornet/hornet/blob/develop/plugins/indexer/routes.go
 
 impl ClientInner {
     /// Get basic, alias, nft and foundry outputs filtered by the given parameters.
     /// GET with query parameter returns all outputIDs that fit these filter criteria.
-    /// Query parameters: "hasNativeTokens", "minNativeTokenCount", "maxNativeTokenCount", "unlockableByAddress",
-    /// "createdBefore", "createdAfter", "cursor", "pageSize".
     /// Returns Err(Node(NotFound) if no results are found.
     /// api/indexer/v2/outputs
     pub async fn output_ids(&self, query_parameters: OutputQueryParameters) -> Result<OutputIdsResponse> {
@@ -34,9 +34,6 @@ impl ClientInner {
 
     /// Get basic outputs filtered by the given parameters.
     /// GET with query parameter returns all outputIDs that fit these filter criteria.
-    /// Query parameters: "address", "hasStorageDepositReturn", "storageDepositReturnAddress",
-    /// "hasExpiration", "expiresBefore", "expiresAfter", "hasTimelock", "timelockedBefore",
-    /// "timelockedAfter", "sender", "tag", "createdBefore" and "createdAfter".
     /// Returns Err(Node(NotFound) if no results are found.
     /// api/indexer/v2/outputs/basic
     pub async fn basic_output_ids(&self, query_parameters: BasicOutputQueryParameters) -> Result<OutputIdsResponse> {
@@ -47,7 +44,6 @@ impl ClientInner {
 
     /// Get account outputs filtered by the given parameters.
     /// GET with query parameter returns all outputIDs that fit these filter criteria.
-    /// Query parameters: "address", "issuer", "sender", "createdBefore", "createdAfter"
     /// Returns Err(Node(NotFound) if no results are found.
     /// api/indexer/v2/outputs/account
     pub async fn account_output_ids(
@@ -60,9 +56,10 @@ impl ClientInner {
     }
 
     /// Get account output by its accountID.
-    /// api/indexer/v2/outputs/account/:{AccountId}
+    /// api/indexer/v2/outputs/account/{bech32Address}
     pub async fn account_output_id(&self, account_id: AccountId) -> Result<OutputId> {
-        let route = format!("api/indexer/v2/outputs/account/{account_id}");
+        let bech32_address = account_id.to_bech32(self.get_bech32_hrp().await?);
+        let route = format!("api/indexer/v2/outputs/account/{bech32_address}");
 
         Ok(*(self
             .get_output_ids(&route, AccountOutputQueryParameters::new(), true, false)
@@ -71,9 +68,56 @@ impl ClientInner {
             .ok_or_else(|| Error::NoOutput(format!("{account_id:?}")))?))
     }
 
+    /// Get anchor outputs filtered by the given parameters.
+    /// GET with query parameter returns all outputIDs that fit these filter criteria.
+    /// Returns Err(Node(NotFound) if no results are found.
+    /// api/indexer/v2/outputs/anchor
+    pub async fn anchor_output_ids(&self, query_parameters: AnchorOutputQueryParameters) -> Result<OutputIdsResponse> {
+        let route = "api/indexer/v2/outputs/anchor";
+
+        self.get_output_ids(route, query_parameters, true, false).await
+    }
+
+    /// Get anchor output by its anchorID.
+    /// api/indexer/v2/outputs/anchor/{bech32Address}
+    pub async fn anchor_output_id(&self, anchor_id: AnchorId) -> Result<OutputId> {
+        let bech32_address = anchor_id.to_bech32(self.get_bech32_hrp().await?);
+        let route = format!("api/indexer/v2/outputs/anchor/{bech32_address}");
+
+        Ok(*(self
+            .get_output_ids(&route, AnchorOutputQueryParameters::new(), true, false)
+            .await?
+            .first()
+            .ok_or_else(|| Error::NoOutput(format!("{anchor_id:?}")))?))
+    }
+
+    /// Get delegation outputs filtered by the given parameters.
+    /// GET with query parameter returns all outputIDs that fit these filter criteria.
+    /// Returns Err(Node(NotFound) if no results are found.
+    /// api/indexer/v2/outputs/delegation
+    pub async fn delegation_output_ids(
+        &self,
+        query_parameters: DelegationOutputQueryParameters,
+    ) -> Result<OutputIdsResponse> {
+        let route = "api/indexer/v2/outputs/delegation";
+
+        self.get_output_ids(route, query_parameters, true, false).await
+    }
+
+    /// Get delegation output by its delegationID.
+    /// api/indexer/v2/outputs/delegation/:{DelegationId}
+    pub async fn delegation_output_id(&self, delegation_id: DelegationId) -> Result<OutputId> {
+        let route = format!("api/indexer/v2/outputs/delegation/{delegation_id}");
+
+        Ok(*(self
+            .get_output_ids(&route, DelegationOutputQueryParameters::new(), true, false)
+            .await?
+            .first()
+            .ok_or_else(|| Error::NoOutput(format!("{delegation_id:?}")))?))
+    }
+
     /// Get foundry outputs filtered by the given parameters.
     /// GET with query parameter returns all outputIDs that fit these filter criteria.
-    /// Query parameters: "address", "createdBefore", "createdAfter"
     /// Returns Err(Node(NotFound) if no results are found.
     /// api/indexer/v2/outputs/foundry
     pub async fn foundry_output_ids(
@@ -98,9 +142,6 @@ impl ClientInner {
     }
 
     /// Get NFT outputs filtered by the given parameters.
-    /// Query parameters: "address", "hasStorageDepositReturn", "storageDepositReturnAddress",
-    /// "hasExpiration", "expiresBefore", "expiresAfter", "hasTimelock", "timelockedBefore",
-    /// "timelockedAfter", "issuer", "sender", "tag", "createdBefore", "createdAfter"
     /// Returns Err(Node(NotFound) if no results are found.
     /// api/indexer/v2/outputs/nft
     pub async fn nft_output_ids(&self, query_parameters: NftOutputQueryParameters) -> Result<OutputIdsResponse> {
@@ -110,9 +151,10 @@ impl ClientInner {
     }
 
     /// Get NFT output by its nftID.
-    /// api/indexer/v2/outputs/nft/:{NftId}
+    /// api/indexer/v2/outputs/nft/{bech32Address}
     pub async fn nft_output_id(&self, nft_id: NftId) -> Result<OutputId> {
-        let route = format!("api/indexer/v2/outputs/nft/{nft_id}");
+        let bech32_address = nft_id.to_bech32(self.get_bech32_hrp().await?);
+        let route = format!("api/indexer/v2/outputs/nft/{bech32_address}");
 
         Ok(*(self
             .get_output_ids(&route, NftOutputQueryParameters::new(), true, false)
