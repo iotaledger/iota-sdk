@@ -7,7 +7,7 @@ import {
     TokenSchemeType,
     Output,
     StorageScoreParameters,
-    SignedBlock,
+    Block,
     ProtocolParameters,
     OutputId,
     NftId,
@@ -87,7 +87,7 @@ export interface __ParseBech32AddressMethod__ {
 export interface __BlockIdMethod__ {
     name: 'blockId';
     data: {
-        block: SignedBlock;
+        block: Block;
         params: ProtocolParameters;
     };
 }

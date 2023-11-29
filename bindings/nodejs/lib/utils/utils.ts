@@ -14,7 +14,7 @@ import {
     StorageScoreParameters,
     OutputId,
     u64,
-    SignedBlock,
+    Block,
     ProtocolParameters,
     Bech32Address,
     InputSigningData,
@@ -191,7 +191,7 @@ export class Utils {
      * @param params The network protocol parameters.
      * @returns The corresponding block ID.
      */
-    static blockId(block: SignedBlock, params: ProtocolParameters): BlockId {
+    static blockId(block: Block, params: ProtocolParameters): BlockId {
         return callUtilsMethod({
             name: 'blockId',
             data: {
