@@ -10,13 +10,14 @@ require('dotenv').config({ path: '.env' });
 // In this example we will create addresses from a mnemonic defined in .env
 async function run() {
     initLogger();
-
-    try {
-        if (!process.env.MNEMONIC) {
-            throw new Error('.env MNEMONIC is undefined, see .env.example');
+    for (const envVar of ['MNEMONIC']) {
+        if (!(envVar in process.env)) {
+            throw new Error(`.env ${envVar} is undefined, see .env.example`);
         }
+    }
+    try {
         const mnemonicSecretManager = {
-            mnemonic: process.env.MNEMONIC,
+            mnemonic: process.env.MNEMONIC as string,
         };
 
         const secretManager = new SecretManager(mnemonicSecretManager);
