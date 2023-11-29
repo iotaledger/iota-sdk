@@ -18,10 +18,16 @@ const NUM_NFTS_MINTED_PER_TRANSACTION = 50;
 // yarn run-example ./how_tos/nfts/01_mint_collection_nft.ts <issuer_nft_id>
 async function run() {
     try {
-        if (!process.env.STRONGHOLD_PASSWORD) {
-            throw new Error(
-                '.env STRONGHOLD_PASSWORD is undefined, see .env.example',
-            );
+        for (const envVar of [
+            'WALLET_DB_PATH',
+            'STRONGHOLD_PASSWORD',
+            'EXPLORER_URL',
+        ]) {
+            if (!(envVar in process.env)) {
+                throw new Error(
+                    `.env ${envVar} is undefined, see .env.example`,
+                );
+            }
         }
 
         // Create the wallet
@@ -30,7 +36,9 @@ async function run() {
         });
 
         // To sign a transaction we need to unlock stronghold.
-        await wallet.setStrongholdPassword(process.env.STRONGHOLD_PASSWORD);
+        await wallet.setStrongholdPassword(
+            process.env.STRONGHOLD_PASSWORD as string,
+        );
 
         // Get the wallet we generated with `how_tos/accounts_and_addresses/create-wallet`
         await wallet.sync();

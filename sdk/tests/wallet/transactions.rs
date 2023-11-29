@@ -300,7 +300,7 @@ use crate::wallet::common::{make_wallet, request_funds, setup, tear_down};
 //         .send_with_params([SendParams::new(amount, wallet_1.address().await)?], None)
 //         .await?;
 
-//     let data = receiver.recv().await.expect("never recieved event");
+//     let data = receiver.recv().await.expect("never received event");
 //     // TODO put it back
 //     // assert_eq!(data.transaction, tx.payload.transaction().into());
 //     for (sign, input) in data.inputs_data.iter().zip(tx.inputs) {

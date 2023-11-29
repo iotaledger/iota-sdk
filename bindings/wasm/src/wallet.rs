@@ -46,9 +46,10 @@ pub async fn destroy_wallet(method_handler: &WalletMethodHandler) -> Result<(), 
 
 #[wasm_bindgen(js_name = getClientFromWallet)]
 pub async fn get_client(method_handler: &WalletMethodHandler) -> Result<ClientMethodHandler, JsValue> {
-    let wallet = method_handler.wallet.lock().await;
-
-    let client = wallet
+    let client = method_handler
+        .wallet
+        .lock()
+        .await
         .as_ref()
         .ok_or_else(|| "wallet got destroyed".to_string())?
         .client()
@@ -59,9 +60,10 @@ pub async fn get_client(method_handler: &WalletMethodHandler) -> Result<ClientMe
 
 #[wasm_bindgen(js_name = getSecretManagerFromWallet)]
 pub async fn get_secret_manager(method_handler: &WalletMethodHandler) -> Result<SecretManagerMethodHandler, JsValue> {
-    let wallet = method_handler.wallet.lock().await;
-
-    let secret_manager = wallet
+    let secret_manager = method_handler
+        .wallet
+        .lock()
+        .await
         .as_ref()
         .ok_or_else(|| "wallet got destroyed".to_string())?
         .get_secret_manager()

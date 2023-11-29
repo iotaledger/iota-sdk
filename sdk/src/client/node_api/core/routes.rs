@@ -16,9 +16,9 @@ use crate::{
     },
     types::{
         api::core::{
-            BlockMetadataResponse, CommitteeResponse, CongestionResponse, InfoResponse, IssuanceBlockHeaderResponse,
-            ManaRewardsResponse, PeerResponse, RoutesResponse, SubmitBlockResponse, UtxoChangesResponse,
-            ValidatorResponse, ValidatorsResponse,
+            BlockMetadataResponse, BlockWithMetadataResponse, CommitteeResponse, CongestionResponse, InfoResponse,
+            IssuanceBlockHeaderResponse, ManaRewardsResponse, PeerResponse, RoutesResponse, SubmitBlockResponse,
+            UtxoChangesResponse, ValidatorResponse, ValidatorsResponse,
         },
         block::{
             address::ToBech32Ext,
@@ -222,6 +222,14 @@ impl ClientInner {
         self.get_request(path, None, true, true).await
     }
 
+    /// Returns a block with its metadata.
+    /// GET /api/core/v3/blocks/{blockId}/full
+    pub async fn get_block_with_metadata(&self, block_id: &BlockId) -> Result<BlockWithMetadataResponse> {
+        let path = &format!("api/core/v3/blocks/{block_id}/full");
+
+        self.get_request(path, None, true, true).await
+    }
+
     // UTXO routes.
 
     /// Finds an output by its ID and returns it as object.
@@ -374,7 +382,12 @@ impl Client {
                     .map_err(|_| crate::client::Error::UrlAuth("password"))?;
             }
         }
-        url.set_path(INFO_PATH);
+
+        if url.path().ends_with('/') {
+            url.set_path(&format!("{}{}", url.path(), INFO_PATH));
+        } else {
+            url.set_path(&format!("{}/{}", url.path(), INFO_PATH));
+        }
 
         let resp: InfoResponse =
             crate::client::node_manager::http_client::HttpClient::new(DEFAULT_USER_AGENT.to_string())
