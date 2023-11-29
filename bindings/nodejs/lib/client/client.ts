@@ -57,6 +57,7 @@ import {
     u64,
     TransactionId,
     Bech32Address,
+    IBlockWithMetadata,
 } from '../types';
 import { OutputResponse, IOutputsResponse } from '../types/models/api';
 
@@ -186,6 +187,23 @@ export class Client {
     async getBlockMetadata(blockId: BlockId): Promise<IBlockMetadata> {
         const response = await this.methodHandler.callMethod({
             name: 'getBlockMetadata',
+            data: {
+                blockId,
+            },
+        });
+
+        return JSON.parse(response).payload;
+    }
+
+    /**
+     * Get a block with its metadata.
+     *
+     * @param blockId The corresponding block ID of the requested block.
+     * @returns The requested block with its metadata.
+     */
+    async getBlockWithMetadata(blockId: BlockId): Promise<IBlockWithMetadata> {
+        const response = await this.methodHandler.callMethod({
+            name: 'getBlockWithMetadata',
             data: {
                 blockId,
             },
