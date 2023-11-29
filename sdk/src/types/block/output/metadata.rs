@@ -6,6 +6,11 @@ use crate::types::block::{
 };
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize),
+    serde(rename_all = "camelCase")
+)]
 struct OutputInclusionMetadata {
     // Slot in which the output was included.
     slot: SlotIndex,
@@ -16,6 +21,11 @@ struct OutputInclusionMetadata {
 }
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize),
+    serde(rename_all = "camelCase")
+)]
 struct OutputConsumptionMetadata {
     // Slot in which the output was spent.
     slot: SlotIndex,
@@ -27,6 +37,11 @@ struct OutputConsumptionMetadata {
 
 /// Metadata of an [`Output`](crate::types::block::output::Output).
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize),
+    serde(rename_all = "camelCase")
+)]
 pub struct OutputMetadata {
     /// The ID of the output.
     output_id: OutputId,
@@ -106,70 +121,5 @@ impl OutputMetadata {
     /// Returns the latest commitment ID of the [`OutputMetadata`].
     pub fn latest_commitment_id(&self) -> &SlotCommitmentId {
         &self.latest_commitment_id
-    }
-}
-
-#[cfg(feature = "serde")]
-mod dto {
-    use serde::{Deserialize, Serialize};
-
-    use super::*;
-
-    #[derive(Serialize, Deserialize)]
-    #[serde(rename_all = "camelCase")]
-    struct OutputMetadataDto {
-        output_id: OutputId,
-        block_id: BlockId,
-        is_spent: bool,
-        #[serde(default, skip_serializing_if = "Option::is_none")]
-        commitment_id_spent: Option<SlotCommitmentId>,
-        #[serde(default, skip_serializing_if = "Option::is_none")]
-        transaction_id_spent: Option<TransactionId>,
-        #[serde(default, skip_serializing_if = "Option::is_none")]
-        included_commitment_id: Option<SlotCommitmentId>,
-        latest_commitment_id: SlotCommitmentId,
-    }
-
-    impl From<OutputMetadataDto> for OutputMetadata {
-        fn from(value: OutputMetadataDto) -> Self {
-            Self {
-                output_id: value.output_id,
-                block_id: value.block_id,
-                is_spent: value.is_spent,
-                commitment_id_spent: value.commitment_id_spent,
-                transaction_id_spent: value.transaction_id_spent,
-                included_commitment_id: value.included_commitment_id,
-                latest_commitment_id: value.latest_commitment_id,
-            }
-        }
-    }
-
-    impl From<&OutputMetadata> for OutputMetadataDto {
-        fn from(value: &OutputMetadata) -> Self {
-            Self {
-                output_id: value.output_id,
-                block_id: value.block_id,
-                is_spent: value.is_spent,
-                commitment_id_spent: value.commitment_id_spent,
-                transaction_id_spent: value.transaction_id_spent,
-                included_commitment_id: value.included_commitment_id,
-                latest_commitment_id: value.latest_commitment_id,
-            }
-        }
-    }
-
-    impl<'de> Deserialize<'de> for OutputMetadata {
-        fn deserialize<D: serde::Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
-            Ok(OutputMetadataDto::deserialize(d)?.into())
-        }
-    }
-
-    impl Serialize for OutputMetadata {
-        fn serialize<S>(&self, s: S) -> Result<S::Ok, S::Error>
-        where
-            S: serde::Serializer,
-        {
-            OutputMetadataDto::from(self).serialize(s)
-        }
     }
 }
