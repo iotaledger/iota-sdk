@@ -3,6 +3,8 @@
 
 /// The module to get the wallet's balance
 pub(crate) mod balance;
+/// The module for blocks
+pub(crate) mod block;
 /// Helper functions
 pub(crate) mod helpers;
 /// The module for claiming of outputs with

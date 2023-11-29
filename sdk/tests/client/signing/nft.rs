@@ -59,7 +59,6 @@ async fn nft_reference_unlocks() -> Result<()> {
             None,
             None,
             None,
-            None,
             Some(Bip44::new(SHIMMER_COIN_TYPE)),
         ),
         Basic(
@@ -94,7 +93,6 @@ async fn nft_reference_unlocks() -> Result<()> {
             None,
             None,
             None,
-            None,
         ),
         Basic(
             2_000_000,
@@ -117,7 +115,7 @@ async fn nft_reference_unlocks() -> Result<()> {
         )
         .with_outputs(outputs)
         .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
-        .finish_with_params(protocol_parameters)?;
+        .finish_with_params(&protocol_parameters)?;
 
     let prepared_transaction_data = PreparedTransactionData {
         transaction,
@@ -128,7 +126,7 @@ async fn nft_reference_unlocks() -> Result<()> {
     let unlocks = secret_manager.transaction_unlocks(&prepared_transaction_data).await?;
 
     assert_eq!(unlocks.len(), 3);
-    assert_eq!((*unlocks).get(0).unwrap().kind(), SignatureUnlock::KIND);
+    assert_eq!((*unlocks).first().unwrap().kind(), SignatureUnlock::KIND);
     match (*unlocks).get(1).unwrap() {
         Unlock::Nft(a) => {
             assert_eq!(a.index(), 0);

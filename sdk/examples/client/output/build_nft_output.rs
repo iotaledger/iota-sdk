@@ -34,11 +34,11 @@ async fn main() -> Result<()> {
         .finish()
         .await?;
 
-    let rent_structure = client.get_rent_structure().await?;
+    let storage_score_params = client.get_storage_score_parameters().await?;
 
     let address = std::env::args()
         .nth(1)
-        .unwrap_or("rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy".to_string());
+        .unwrap_or_else(|| "rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy".to_string());
     let address = Address::try_from_bech32(address)?;
 
     // IOTA NFT Standard - IRC27: https://github.com/iotaledger/tips/blob/main/tips/TIP-0027/tip-0027.md
@@ -55,7 +55,7 @@ async fn main() -> Result<()> {
     .to_string();
 
     // NftId needs to be null the first time
-    let nft_output = NftOutputBuilder::new_with_minimum_storage_deposit(rent_structure, NftId::null())
+    let nft_output = NftOutputBuilder::new_with_minimum_amount(storage_score_params, NftId::null())
         .add_unlock_condition(AddressUnlockCondition::new(address.clone()))
         .add_feature(SenderFeature::new(address.clone()))
         .add_feature(MetadataFeature::new(MUTABLE_METADATA)?)

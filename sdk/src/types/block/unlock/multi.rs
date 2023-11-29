@@ -6,7 +6,12 @@ use alloc::boxed::Box;
 use derive_more::Deref;
 use packable::{prefix::BoxedSlicePrefix, Packable};
 
-use crate::types::block::{address::WeightedAddressCount, unlock::Unlock, Error};
+use crate::types::block::{
+    address::WeightedAddressCount,
+    protocol::{WorkScore, WorkScoreParameters},
+    unlock::Unlock,
+    Error,
+};
 
 pub(crate) type UnlocksCount = WeightedAddressCount;
 
@@ -24,7 +29,7 @@ impl MultiUnlock {
     pub fn new(unlocks: impl IntoIterator<Item = Unlock>) -> Result<Self, Error> {
         let unlocks = unlocks.into_iter().collect::<Box<[_]>>();
 
-        verify_unlocks::<true>(&unlocks, &())?;
+        verify_unlocks::<true>(&unlocks)?;
 
         Ok(Self(
             BoxedSlicePrefix::<Unlock, UnlocksCount>::try_from(unlocks).map_err(Error::InvalidMultiUnlockCount)?,
@@ -38,9 +43,15 @@ impl MultiUnlock {
     }
 }
 
-fn verify_unlocks<const VERIFY: bool>(unlocks: &[Unlock], _visitor: &()) -> Result<(), Error> {
+impl WorkScore for MultiUnlock {
+    fn work_score(&self, params: WorkScoreParameters) -> u32 {
+        self.0.work_score(params)
+    }
+}
+
+fn verify_unlocks<const VERIFY: bool>(unlocks: &[Unlock]) -> Result<(), Error> {
     if VERIFY && unlocks.iter().any(Unlock::is_multi) {
-        return Err(Error::MultiUnlockRecursion);
+        Err(Error::MultiUnlockRecursion)
     } else {
         Ok(())
     }

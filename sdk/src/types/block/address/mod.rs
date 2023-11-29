@@ -28,7 +28,7 @@ pub use self::{
 };
 use crate::{
     types::block::{
-        output::Output,
+        output::{Output, StorageScore, StorageScoreParameters},
         semantic::{SemanticValidationContext, TransactionFailureReason},
         signature::Signature,
         unlock::Unlock,
@@ -98,6 +98,19 @@ impl Address {
             Self::ImplicitAccountCreation(_) => ImplicitAccountCreationAddress::KIND,
             Self::Multi(_) => MultiAddress::KIND,
             Self::Restricted(_) => RestrictedAddress::KIND,
+        }
+    }
+
+    /// Returns the address kind of an [`Address`] as a string.
+    pub fn kind_str(&self) -> &str {
+        match self {
+            Self::Ed25519(_) => "Ed25519",
+            Self::Account(_) => "Account",
+            Self::Nft(_) => "Nft",
+            Self::Anchor(_) => "Anchor",
+            Self::ImplicitAccountCreation(_) => "ImplicitAccountCreation",
+            Self::Multi(_) => "Multi",
+            Self::Restricted(_) => "Restricted",
         }
     }
 
@@ -192,10 +205,27 @@ impl Address {
                     return Err(TransactionFailureReason::InvalidInputUnlock);
                 }
             }
+            (Self::Restricted(restricted_address), _) => {
+                return restricted_address.address().unlock(unlock, context);
+            }
             _ => return Err(TransactionFailureReason::InvalidInputUnlock),
         }
 
         Ok(())
+    }
+}
+
+impl StorageScore for Address {
+    fn storage_score(&self, params: StorageScoreParameters) -> u64 {
+        match self {
+            Self::Ed25519(address) => address.storage_score(params),
+            Self::Account(address) => address.storage_score(params),
+            Self::Nft(address) => address.storage_score(params),
+            Self::Anchor(address) => address.storage_score(params),
+            Self::ImplicitAccountCreation(address) => address.storage_score(params),
+            Self::Multi(address) => address.storage_score(params),
+            Self::Restricted(address) => address.storage_score(params),
+        }
     }
 }
 

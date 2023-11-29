@@ -6,12 +6,13 @@ use alloc::{collections::BTreeSet, vec::Vec};
 use crate::types::block::{
     output::feature::{
         BlockIssuerFeature, BlockIssuerKey, BlockIssuerKeys, Ed25519BlockIssuerKey, Feature, FeatureFlags,
-        IssuerFeature, MetadataFeature, SenderFeature, StakingFeature, TagFeature,
+        IssuerFeature, MetadataFeature, NativeTokenFeature, SenderFeature, StakingFeature, TagFeature,
     },
     rand::{
         address::rand_address,
         bytes::rand_bytes,
         number::{rand_number, rand_number_range},
+        output::rand_native_token,
         slot::{rand_epoch_index, rand_slot_index},
     },
 };
@@ -62,6 +63,11 @@ pub fn rand_block_issuer_keys(len: usize) -> BTreeSet<BlockIssuerKey> {
     block_issuer_keys
 }
 
+/// Generates a random [`NativeTokenFeature`].
+pub fn rand_native_token_feature() -> NativeTokenFeature {
+    NativeTokenFeature::new(rand_native_token())
+}
+
 /// Generates a random [`BlockIssuerFeature`].
 pub fn rand_block_issuer_feature() -> BlockIssuerFeature {
     BlockIssuerFeature::new(
@@ -84,6 +90,7 @@ fn rand_feature_from_flag(flag: &FeatureFlags) -> Feature {
         FeatureFlags::ISSUER => Feature::Issuer(rand_issuer_feature()),
         FeatureFlags::METADATA => Feature::Metadata(rand_metadata_feature()),
         FeatureFlags::TAG => Feature::Tag(rand_tag_feature()),
+        FeatureFlags::NATIVE_TOKEN => Feature::NativeToken(rand_native_token_feature()),
         FeatureFlags::BLOCK_ISSUER => Feature::BlockIssuer(rand_block_issuer_feature()),
         FeatureFlags::STAKING => Feature::Staking(rand_staking_feature()),
         _ => unreachable!(),

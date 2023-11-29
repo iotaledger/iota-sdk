@@ -42,7 +42,6 @@ import {
     NftId,
     FoundryId,
     DelegationId,
-    IssuerId,
     UnsignedBlock,
     parseUnsignedBlock,
 } from '../types/block';
@@ -58,6 +57,7 @@ import {
     u64,
     TransactionId,
     Bech32Address,
+    IBlockWithMetadata,
 } from '../types';
 import { OutputResponse, IOutputsResponse } from '../types/models/api';
 
@@ -196,6 +196,23 @@ export class Client {
     }
 
     /**
+     * Get a block with its metadata.
+     *
+     * @param blockId The corresponding block ID of the requested block.
+     * @returns The requested block with its metadata.
+     */
+    async getBlockWithMetadata(blockId: BlockId): Promise<IBlockWithMetadata> {
+        const response = await this.methodHandler.callMethod({
+            name: 'getBlockWithMetadata',
+            data: {
+                blockId,
+            },
+        });
+
+        return JSON.parse(response).payload;
+    }
+
+    /**
      * Find inputs from addresses for a given amount (useful for offline signing).
      *
      * @param addresses A list of included addresses.
@@ -273,7 +290,7 @@ export class Client {
      * @returns The block ID followed by the block containing the payload.
      */
     async buildBasicBlock(
-        issuerId: IssuerId,
+        issuerId: AccountId,
         payload?: Payload,
     ): Promise<UnsignedBlock> {
         const response = await this.methodHandler.callMethod({
@@ -692,14 +709,14 @@ export class Client {
     }
 
     /**
-     * Calculate the minimum required storage deposit for an output.
+     * Calculate the minimum required amount for an output.
      *
-     * @param output The output to calculate the minimum deposit amount for.
+     * @param output The output to calculate the minimum amount for.
      * @returns The minimum required amount.
      */
-    async minimumRequiredStorageDeposit(output: Output): Promise<number> {
+    async computeMinimumOutputAmount(output: Output): Promise<number> {
         const response = await this.methodHandler.callMethod({
-            name: 'minimumRequiredStorageDeposit',
+            name: 'computeMinimumOutputAmount',
             data: {
                 output,
             },

@@ -22,7 +22,7 @@ async function getUnlockedWallet() {
     const walletOptions: WalletOptions = {
         storagePath: process.env.WALLET_DB_PATH,
     };
-    const wallet = new Wallet(walletOptions);
+    const wallet = await Wallet.create(walletOptions);
 
     return wallet;
 }

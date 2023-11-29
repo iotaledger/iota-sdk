@@ -17,10 +17,10 @@ use iota_sdk::{
     wallet::{types::TransactionWithMetadataDto, OutputDataDto, PreparedCreateNativeTokenTransactionDto, Wallet},
 };
 
-use crate::{method::WalletMethod, response::Response, Result};
+use crate::{method::WalletMethod, response::Response};
 
 /// Call a wallet method.
-pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletMethod) -> Result<Response> {
+pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletMethod) -> crate::Result<Response> {
     let response = match method {
         WalletMethod::Accounts => {
             let accounts = wallet.accounts().await;
@@ -210,6 +210,10 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
             let implicit_account_creation_address = wallet.implicit_account_creation_address().await?;
             Response::Bech32Address(implicit_account_creation_address)
         }
+        WalletMethod::PrepareImplicitAccountTransition { output_id } => {
+            let data = wallet.prepare_implicit_account_transition(&output_id).await?;
+            Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
+        }
         WalletMethod::ImplicitAccounts => {
             let implicit_accounts = wallet.implicit_accounts().await;
             Response::OutputsData(implicit_accounts.iter().map(OutputDataDto::from).collect())
@@ -228,6 +232,10 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
         }
         WalletMethod::PrepareBurn { burn, options } => {
             let data = wallet.prepare_burn(burn, options).await?;
+            Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
+        }
+        WalletMethod::PrepareClaimOutputs { output_ids_to_claim } => {
+            let data = wallet.prepare_claim_outputs(output_ids_to_claim).await?;
             Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
         }
         WalletMethod::PrepareConsolidateOutputs { params } => {
@@ -297,13 +305,12 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
             Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
         }
         WalletMethod::PrepareTransaction { outputs, options } => {
-            let token_supply = wallet.client().get_token_supply().await?;
             let data = wallet
                 .prepare_transaction(
                     outputs
                         .into_iter()
-                        .map(|o| Ok(Output::try_from_dto_with_params(o, token_supply)?))
-                        .collect::<Result<Vec<Output>>>()?,
+                        .map(Output::try_from)
+                        .collect::<Result<Vec<Output>, _>>()?,
                     options,
                 )
                 .await?;
@@ -342,13 +349,12 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
             Response::SentTransaction(TransactionWithMetadataDto::from(&transaction))
         }
         WalletMethod::SendOutputs { outputs, options } => {
-            let token_supply = wallet.client().get_token_supply().await?;
             let transaction = wallet
                 .send_outputs(
                     outputs
                         .into_iter()
-                        .map(|o| Ok(Output::try_from_dto_with_params(o, token_supply)?))
-                        .collect::<iota_sdk::wallet::Result<Vec<Output>>>()?,
+                        .map(Output::try_from)
+                        .collect::<Result<Vec<Output>, _>>()?,
                     options,
                 )
                 .await?;
@@ -369,7 +375,7 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
                 .sign_and_submit_transaction(
                     PreparedTransactionData::try_from_dto_with_params(
                         prepared_transaction_data,
-                        wallet.client().get_protocol_parameters().await?,
+                        &wallet.client().get_protocol_parameters().await?,
                     )?,
                     None,
                 )
@@ -389,7 +395,7 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
         } => {
             let signed_transaction_data = SignedTransactionData::try_from_dto_with_params(
                 signed_transaction_data,
-                wallet.client().get_protocol_parameters().await?,
+                &wallet.client().get_protocol_parameters().await?,
             )?;
             let transaction = wallet
                 .submit_and_store_transaction(signed_transaction_data, None)

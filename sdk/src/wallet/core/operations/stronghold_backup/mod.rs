@@ -110,7 +110,7 @@ impl Wallet {
         });
 
         if !ignore_backup_values {
-            (*wallet_data).bip_path = read_bip_path;
+            wallet_data.bip_path = read_bip_path;
         }
 
         if let Some(mut read_secret_manager) = read_secret_manager {
@@ -267,7 +267,7 @@ impl Wallet<StrongholdSecretManager> {
         });
 
         if !ignore_backup_values {
-            (*wallet_data).bip_path = read_bip_path;
+            wallet_data.bip_path = read_bip_path;
         }
 
         if let Some(mut read_secret_manager) = read_secret_manager {

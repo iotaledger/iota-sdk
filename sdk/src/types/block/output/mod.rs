@@ -7,8 +7,8 @@ mod delegation;
 mod metadata;
 mod native_token;
 mod output_id;
-mod rent;
 mod state_transition;
+mod storage_score;
 mod token_scheme;
 
 ///
@@ -27,12 +27,7 @@ pub mod unlock_condition;
 use core::ops::RangeInclusive;
 
 use derive_more::From;
-use packable::{
-    error::{UnpackError, UnpackErrorExt},
-    packer::Packer,
-    unpacker::Unpacker,
-    Packable, PackableExt,
-};
+use packable::Packable;
 
 pub use self::{
     account::{AccountId, AccountOutput, AccountOutputBuilder},
@@ -46,20 +41,24 @@ pub use self::{
     native_token::{NativeToken, NativeTokens, NativeTokensBuilder, TokenId},
     nft::{NftId, NftOutput, NftOutputBuilder},
     output_id::OutputId,
-    rent::{MinimumStorageDepositBasicOutput, Rent, RentStructure},
     state_transition::{StateTransitionError, StateTransitionVerifier},
+    storage_score::{StorageScore, StorageScoreParameters},
     token_scheme::{SimpleTokenScheme, TokenScheme},
     unlock_condition::{UnlockCondition, UnlockConditions},
 };
 pub(crate) use self::{
-    anchor::StateMetadataLength,
     feature::{MetadataFeatureLength, TagFeatureLength},
     native_token::NativeTokenCount,
     output_id::OutputIndex,
     unlock_condition::AddressUnlockCondition,
 };
-use super::protocol::ProtocolParameters;
-use crate::types::block::{address::Address, semantic::SemanticValidationContext, slot::SlotIndex, Error};
+use crate::types::block::{
+    address::Address,
+    protocol::{ProtocolParameters, WorkScore, WorkScoreParameters},
+    semantic::SemanticValidationContext,
+    slot::SlotIndex,
+    Error,
+};
 
 /// The maximum number of outputs of a transaction.
 pub const OUTPUT_COUNT_MAX: u16 = 128;
@@ -73,7 +72,7 @@ pub const OUTPUT_INDEX_RANGE: RangeInclusive<u16> = 0..=OUTPUT_INDEX_MAX; // [0.
 #[derive(Copy, Clone)]
 pub enum OutputBuilderAmount {
     Amount(u64),
-    MinimumStorageDeposit(RentStructure),
+    MinimumAmount(StorageScoreParameters),
 }
 
 /// Contains the generic [`Output`] with associated [`OutputMetadata`].
@@ -111,19 +110,28 @@ impl OutputWithMetadata {
 }
 
 /// A generic output that can represent different types defining the deposit of funds.
-#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, From)]
+#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, From, Packable)]
+#[packable(unpack_error = Error)]
+#[packable(unpack_visitor = ProtocolParameters)]
+#[packable(tag_type = u8, with_error = Error::InvalidOutputKind)]
 pub enum Output {
     /// A basic output.
+    #[packable(tag = BasicOutput::KIND)]
     Basic(BasicOutput),
     /// An account output.
+    #[packable(tag = AccountOutput::KIND)]
     Account(AccountOutput),
     /// An anchor output.
+    #[packable(tag = AnchorOutput::KIND)]
     Anchor(AnchorOutput),
     /// A foundry output.
+    #[packable(tag = FoundryOutput::KIND)]
     Foundry(FoundryOutput),
     /// An NFT output.
+    #[packable(tag = NftOutput::KIND)]
     Nft(NftOutput),
     /// A delegation output.
+    #[packable(tag = DelegationOutput::KIND)]
     Delegation(DelegationOutput),
 }
 
@@ -141,9 +149,6 @@ impl core::fmt::Debug for Output {
 }
 
 impl Output {
-    /// Minimum amount for an output.
-    pub const AMOUNT_MIN: u64 = 1;
-
     /// Return the output kind of an [`Output`].
     pub fn kind(&self) -> u8 {
         match self {
@@ -192,18 +197,6 @@ impl Output {
         }
     }
 
-    /// Returns the native tokens of an [`Output`], if any.
-    pub fn native_tokens(&self) -> Option<&NativeTokens> {
-        match self {
-            Self::Basic(output) => Some(output.native_tokens()),
-            Self::Account(output) => Some(output.native_tokens()),
-            Self::Anchor(output) => Some(output.native_tokens()),
-            Self::Foundry(output) => Some(output.native_tokens()),
-            Self::Nft(output) => Some(output.native_tokens()),
-            Self::Delegation(_) => None,
-        }
-    }
-
     /// Returns the unlock conditions of an [`Output`], if any.
     pub fn unlock_conditions(&self) -> Option<&UnlockConditions> {
         match self {
@@ -224,6 +217,18 @@ impl Output {
             Self::Anchor(output) => Some(output.features()),
             Self::Foundry(output) => Some(output.features()),
             Self::Nft(output) => Some(output.features()),
+            Self::Delegation(_) => None,
+        }
+    }
+
+    /// Returns the native token of an [`Output`], if any.
+    pub fn native_token(&self) -> Option<&NativeToken> {
+        match self {
+            Self::Basic(output) => output.native_token(),
+            Self::Account(_) => None,
+            Self::Anchor(_) => None,
+            Self::Foundry(output) => output.native_token(),
+            Self::Nft(_) => None,
             Self::Delegation(_) => None,
         }
     }
@@ -254,7 +259,7 @@ impl Output {
 
     /// Checks whether the output is an implicit account.
     pub fn is_implicit_account(&self) -> bool {
-        if let Output::Basic(output) = self {
+        if let Self::Basic(output) = self {
             output.is_implicit_account()
         } else {
             false
@@ -319,6 +324,14 @@ impl Output {
             (None, Some(Self::Delegation(next_state))) => DelegationOutput::creation(next_state, context),
 
             // Transitions.
+            (Some(Self::Basic(current_state)), Some(Self::Account(_next_state))) => {
+                if !current_state.is_implicit_account() {
+                    Err(StateTransitionError::UnsupportedStateTransition)
+                } else {
+                    // TODO https://github.com/iotaledger/iota-sdk/issues/1664
+                    Ok(())
+                }
+            }
             (Some(Self::Account(current_state)), Some(Self::Account(next_state))) => {
                 AccountOutput::transition(current_state, next_state, context)
             }
@@ -344,11 +357,11 @@ impl Output {
     }
 
     /// Verifies if a valid storage deposit was made. Each [`Output`] has to have an amount that covers its associated
-    /// byte cost, given by [`RentStructure`].
+    /// byte cost, given by [`StorageScoreParameters`].
     /// If there is a [`StorageDepositReturnUnlockCondition`](unlock_condition::StorageDepositReturnUnlockCondition),
     /// its amount is also checked.
-    pub fn verify_storage_deposit(&self, rent_structure: RentStructure) -> Result<(), Error> {
-        let required_output_amount = self.rent_cost(rent_structure);
+    pub fn verify_storage_deposit(&self, params: StorageScoreParameters) -> Result<(), Error> {
+        let required_output_amount = self.minimum_amount(params);
 
         if self.amount() < required_output_amount {
             return Err(Error::InsufficientStorageDepositAmount {
@@ -370,7 +383,7 @@ impl Output {
                 });
             }
 
-            let minimum_deposit = minimum_storage_deposit(return_condition.return_address(), rent_structure);
+            let minimum_deposit = BasicOutput::minimum_amount(return_condition.return_address(), params);
 
             // `Minimum Storage Deposit` ≤ `Return Amount`
             if return_condition.amount() < minimum_deposit {
@@ -385,104 +398,41 @@ impl Output {
     }
 }
 
-impl Packable for Output {
-    type UnpackError = Error;
-    type UnpackVisitor = ProtocolParameters;
-
-    fn pack<P: Packer>(&self, packer: &mut P) -> Result<(), P::Error> {
+impl StorageScore for Output {
+    fn storage_score(&self, params: StorageScoreParameters) -> u64 {
         match self {
-            Self::Basic(output) => {
-                BasicOutput::KIND.pack(packer)?;
-                output.pack(packer)
-            }
-            Self::Account(output) => {
-                AccountOutput::KIND.pack(packer)?;
-                output.pack(packer)
-            }
-            Self::Anchor(output) => {
-                AnchorOutput::KIND.pack(packer)?;
-                output.pack(packer)
-            }
-            Self::Foundry(output) => {
-                FoundryOutput::KIND.pack(packer)?;
-                output.pack(packer)
-            }
-            Self::Nft(output) => {
-                NftOutput::KIND.pack(packer)?;
-                output.pack(packer)
-            }
-            Self::Delegation(output) => {
-                DelegationOutput::KIND.pack(packer)?;
-                output.pack(packer)
-            }
-        }?;
-
-        Ok(())
-    }
-
-    fn unpack<U: Unpacker, const VERIFY: bool>(
-        unpacker: &mut U,
-        visitor: &Self::UnpackVisitor,
-    ) -> Result<Self, UnpackError<Self::UnpackError, U::Error>> {
-        Ok(match u8::unpack::<_, VERIFY>(unpacker, &()).coerce()? {
-            BasicOutput::KIND => Self::from(BasicOutput::unpack::<_, VERIFY>(unpacker, visitor).coerce()?),
-            AccountOutput::KIND => Self::from(AccountOutput::unpack::<_, VERIFY>(unpacker, visitor).coerce()?),
-            AnchorOutput::KIND => Self::from(AnchorOutput::unpack::<_, VERIFY>(unpacker, visitor).coerce()?),
-            FoundryOutput::KIND => Self::from(FoundryOutput::unpack::<_, VERIFY>(unpacker, visitor).coerce()?),
-            NftOutput::KIND => Self::from(NftOutput::unpack::<_, VERIFY>(unpacker, visitor).coerce()?),
-            DelegationOutput::KIND => Self::from(DelegationOutput::unpack::<_, VERIFY>(unpacker, visitor).coerce()?),
-            k => return Err(UnpackError::Packable(Error::InvalidOutputKind(k))),
-        })
+            Self::Basic(basic) => basic.storage_score(params),
+            Self::Account(account) => account.storage_score(params),
+            Self::Anchor(anchor) => anchor.storage_score(params),
+            Self::Foundry(foundry) => foundry.storage_score(params),
+            Self::Nft(nft) => nft.storage_score(params),
+            Self::Delegation(delegation) => delegation.storage_score(params),
+        }
     }
 }
 
-impl Rent for Output {
-    fn weighted_bytes(&self, rent_structure: RentStructure) -> u64 {
-        self.packed_len() as u64 * rent_structure.byte_factor_data() as u64
+impl WorkScore for Output {
+    fn work_score(&self, params: WorkScoreParameters) -> u32 {
+        match self {
+            Self::Basic(basic) => basic.work_score(params),
+            Self::Account(account) => account.work_score(params),
+            Self::Anchor(anchor) => anchor.work_score(params),
+            Self::Foundry(foundry) => foundry.work_score(params),
+            Self::Nft(nft) => nft.work_score(params),
+            Self::Delegation(delegation) => delegation.work_score(params),
+        }
     }
 }
 
-pub(crate) fn verify_output_amount_min(amount: u64) -> Result<(), Error> {
-    if amount < Output::AMOUNT_MIN {
-        Err(Error::InvalidOutputAmount(amount))
-    } else {
-        Ok(())
+impl MinimumOutputAmount for Output {}
+
+/// A trait that is shared by all output types, which is used to calculate the minimum amount the output
+/// must contain to satisfy its storage cost.
+pub trait MinimumOutputAmount: StorageScore {
+    /// Computes the minimum amount of this output given [`StorageScoreParameters`].
+    fn minimum_amount(&self, params: StorageScoreParameters) -> u64 {
+        self.storage_score(params) * params.storage_cost()
     }
-}
-
-pub(crate) fn verify_output_amount_supply(amount: u64, token_supply: u64) -> Result<(), Error> {
-    if amount > token_supply {
-        Err(Error::InvalidOutputAmount(amount))
-    } else {
-        Ok(())
-    }
-}
-
-pub(crate) fn verify_output_amount(amount: u64, token_supply: u64) -> Result<(), Error> {
-    verify_output_amount_min(amount)?;
-    verify_output_amount_supply(amount, token_supply)
-}
-
-pub(crate) fn verify_output_amount_packable<const VERIFY: bool>(
-    amount: &u64,
-    protocol_parameters: &ProtocolParameters,
-) -> Result<(), Error> {
-    if VERIFY {
-        verify_output_amount(*amount, protocol_parameters.token_supply())?;
-    }
-    Ok(())
-}
-
-/// Computes the minimum amount that a storage deposit has to match to allow creating a return [`Output`] back to the
-/// sender [`Address`].
-fn minimum_storage_deposit(address: &Address, rent_structure: RentStructure) -> u64 {
-    // PANIC: This can never fail because the amount will always be within the valid range. Also, the actual value is
-    // not important, we are only interested in the storage requirements of the type.
-    BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)
-        .add_unlock_condition(AddressUnlockCondition::new(address.clone()))
-        .finish()
-        .unwrap()
-        .amount()
 }
 
 #[cfg(feature = "serde")]
@@ -497,7 +447,6 @@ pub mod dto {
         account::dto::AccountOutputDto, anchor::dto::AnchorOutputDto, basic::dto::BasicOutputDto,
         delegation::dto::DelegationOutputDto, foundry::dto::FoundryOutputDto, nft::dto::NftOutputDto,
     };
-    use crate::types::{block::Error, TryFromDto, ValidationParams};
 
     /// Describes all the different output types.
     #[derive(Clone, Debug, Eq, PartialEq, From)]
@@ -523,20 +472,17 @@ pub mod dto {
         }
     }
 
-    impl TryFromDto for Output {
-        type Dto = OutputDto;
+    impl TryFrom<OutputDto> for Output {
         type Error = Error;
 
-        fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
+        fn try_from(dto: OutputDto) -> Result<Self, Self::Error> {
             Ok(match dto {
-                OutputDto::Basic(o) => Self::Basic(BasicOutput::try_from_dto_with_params_inner(o, params)?),
-                OutputDto::Account(o) => Self::Account(AccountOutput::try_from_dto_with_params_inner(o, params)?),
-                OutputDto::Anchor(o) => Self::Anchor(AnchorOutput::try_from_dto_with_params_inner(o, params)?),
-                OutputDto::Foundry(o) => Self::Foundry(FoundryOutput::try_from_dto_with_params_inner(o, params)?),
-                OutputDto::Nft(o) => Self::Nft(NftOutput::try_from_dto_with_params_inner(o, params)?),
-                OutputDto::Delegation(o) => {
-                    Self::Delegation(DelegationOutput::try_from_dto_with_params_inner(o, params)?)
-                }
+                OutputDto::Basic(o) => Self::Basic(BasicOutput::try_from(o)?),
+                OutputDto::Account(o) => Self::Account(AccountOutput::try_from(o)?),
+                OutputDto::Anchor(o) => Self::Anchor(AnchorOutput::try_from(o)?),
+                OutputDto::Foundry(o) => Self::Foundry(FoundryOutput::try_from(o)?),
+                OutputDto::Nft(o) => Self::Nft(NftOutput::try_from(o)?),
+                OutputDto::Delegation(o) => Self::Delegation(DelegationOutput::try_from(o)?),
             })
         }
     }

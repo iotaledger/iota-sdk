@@ -12,7 +12,7 @@ use iota_sdk::{
         api::core::TransactionState,
         block::{
             output::{Output, OutputId},
-            SignedBlock,
+            Block,
         },
     },
 };
@@ -144,10 +144,7 @@ async fn test_get_output() {
     let client = setup_client_with_node_health_ignored().await;
     let (_block_id, transaction_id) = setup_transaction_block(&client).await;
 
-    let r = client
-        .get_output(&OutputId::new(transaction_id, 0).unwrap())
-        .await
-        .unwrap();
+    let r = client.get_output(&OutputId::new(transaction_id, 0)).await.unwrap();
 
     println!("{r:#?}");
 }
@@ -157,7 +154,7 @@ async fn test_get_output() {
 async fn test_get_output_raw() {
     let client = setup_client_with_node_health_ignored().await;
     let (_block_id, transaction_id) = setup_transaction_block(&client).await;
-    let output_id = OutputId::new(transaction_id, 0).unwrap();
+    let output_id = OutputId::new(transaction_id, 0);
 
     let output = client.get_output(&output_id).await.unwrap();
     let output_raw = Output::unpack_verified(
@@ -195,7 +192,7 @@ async fn test_get_included_block_raw() {
     let (_block_id, transaction_id) = setup_transaction_block(&client).await;
 
     let block = client.get_included_block(&transaction_id).await.unwrap();
-    let block_raw = SignedBlock::unpack_verified(
+    let block_raw = Block::unpack_verified(
         client.get_included_block_raw(&transaction_id).await.unwrap(),
         &client.get_protocol_parameters().await.unwrap(),
     )

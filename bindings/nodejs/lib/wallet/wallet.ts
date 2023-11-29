@@ -6,7 +6,7 @@ import {
     Balance,
     SyncOptions,
     SendParams,
-    SendNativeTokensParams,
+    SendNativeTokenParams,
     SendNftParams,
     AccountOutputParams,
     FilterOptions,
@@ -62,10 +62,17 @@ export class Wallet {
     private methodHandler: WalletMethodHandler;
 
     /**
-     * @param options Wallet options.
+     * @param methodHandler The Rust method handler created in `WalletMethodHandler.create()`.
      */
-    constructor(options: WalletOptions) {
-        this.methodHandler = new WalletMethodHandler(options);
+    constructor(methodHandler: WalletMethodHandler) {
+        this.methodHandler = methodHandler;
+    }
+
+    /**
+     * @param options The wallet options.
+     */
+    static async create(options: WalletOptions): Promise<Wallet> {
+        return new Wallet(await WalletMethodHandler.create(options));
     }
 
     /**
@@ -406,16 +413,31 @@ export class Wallet {
     async claimOutputs(
         outputIds: OutputId[],
     ): Promise<TransactionWithMetadata> {
+        return (await this.prepareClaimOutputs(outputIds)).send();
+    }
+
+    /**
+     * Claim basic or nft outputs that have additional unlock conditions
+     * to their `AddressUnlockCondition` from the wallet.
+     * @param outputIds The outputs to claim.
+     * @returns The prepared transaction.
+     */
+    async prepareClaimOutputs(
+        outputIds: OutputId[],
+    ): Promise<PreparedTransaction> {
         const response = await this.methodHandler.callMethod({
-            name: 'claimOutputs',
+            name: 'prepareClaimOutputs',
             data: {
                 outputIdsToClaim: outputIds,
             },
         });
         const parsed = JSON.parse(
             response,
-        ) as Response<TransactionWithMetadata>;
-        return plainToInstance(TransactionWithMetadata, parsed.payload);
+        ) as Response<PreparedTransactionData>;
+        return new PreparedTransaction(
+            plainToInstance(PreparedTransactionData, parsed.payload),
+            this,
+        );
     }
 
     /**
@@ -889,6 +911,41 @@ export class Wallet {
     }
 
     /**
+     * Transitions an implicit account to an account.
+     *
+     * @param outputId Identifier of the implicit account output.
+     * @returns The created transaction.
+     */
+    async implicitAccountTransition(
+        outputId: OutputId,
+    ): Promise<TransactionWithMetadata> {
+        return (await this.prepareImplicitAccountTransition(outputId)).send();
+    }
+
+    /**
+     * Prepares to transition an implicit account to an account.
+     *
+     * @param outputId Identifier of the implicit account output.
+     * @returns The prepared transaction.
+     */
+    async prepareImplicitAccountTransition(
+        outputId: OutputId,
+    ): Promise<PreparedTransaction> {
+        const response = await this.methodHandler.callMethod({
+            name: 'prepareImplicitAccountTransition',
+            data: { outputId },
+        });
+
+        const parsed = JSON.parse(
+            response,
+        ) as Response<PreparedTransactionData>;
+        return new PreparedTransaction(
+            plainToInstance(PreparedTransactionData, parsed.payload),
+            this,
+        );
+    }
+
+    /**
      * Returns the implicit accounts of the wallet.
      *
      * @returns The implicit accounts of the wallet.
@@ -1318,7 +1375,7 @@ export class Wallet {
      * @returns The transaction.
      */
     async sendNativeTokens(
-        params: SendNativeTokensParams[],
+        params: SendNativeTokenParams[],
         transactionOptions?: TransactionOptions,
     ): Promise<TransactionWithMetadata> {
         return (
@@ -1335,7 +1392,7 @@ export class Wallet {
      * @returns The prepared transaction.
      */
     async prepareSendNativeTokens(
-        params: SendNativeTokensParams[],
+        params: SendNativeTokenParams[],
         transactionOptions?: TransactionOptions,
     ): Promise<PreparedTransaction> {
         const response = await this.methodHandler.callMethod({

@@ -2,16 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 const console = require('console');
-const fs = require('fs');
 const { Wallet, CoinType, initLogger, SecretManager } = require('../node/lib');
 
 async function run() {
-    try {
-        fs.rmdirSync('./alice-database', { recursive: true });
-    } catch (e) {
-        // ignore it
-    }
-
     // Config doesn't work yet but this is an example for the future
     await initLogger({
         name: 'stdout',
@@ -36,7 +29,7 @@ async function run() {
         bech32Hrp: 'tst',
     });
 
-    const wallet = new Wallet({
+    const wallet = await Wallet.create({
         address: walletAddress[0],
         storagePath: './alice-database',
         bipPath: {
@@ -47,6 +40,8 @@ async function run() {
         },
         secretManager: mnemonicSecretManager,
     });
+
+    console.log('wallet created');
 
     const balance = await wallet.sync();
     console.log(balance);

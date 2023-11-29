@@ -11,20 +11,28 @@ require('dotenv').config({ path: '.env' });
 async function run() {
     initLogger();
     try {
-        if (!process.env.STRONGHOLD_PASSWORD) {
-            throw new Error(
-                '.env STRONGHOLD_PASSWORD is undefined, see .env.example',
-            );
+        for (const envVar of [
+            'WALLET_DB_PATH',
+            'STRONGHOLD_PASSWORD',
+            'EXPLORER_URL',
+        ]) {
+            if (!(envVar in process.env)) {
+                throw new Error(
+                    `.env ${envVar} is undefined, see .env.example`,
+                );
+            }
         }
 
-        const wallet = new Wallet({
+        const wallet = await Wallet.create({
             storagePath: process.env.WALLET_DB_PATH,
         });
 
         await wallet.sync();
 
         // To sign a transaction we need to unlock stronghold.
-        await wallet.setStrongholdPassword(process.env.STRONGHOLD_PASSWORD);
+        await wallet.setStrongholdPassword(
+            process.env.STRONGHOLD_PASSWORD as string,
+        );
 
         // Replace with the address of your choice!
         const address =

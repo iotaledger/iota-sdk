@@ -23,10 +23,9 @@ pub struct SlotCommitment {
     protocol_version: u8,
     /// The slot index of this commitment.
     /// It is calculated based on genesis timestamp and the duration of a slot.
-    index: SlotIndex,
+    slot: SlotIndex,
     /// The commitment ID of the previous slot.
-    #[cfg_attr(feature = "serde", serde(rename = "previousCommitmentId"))]
-    previous_slot_commitment_id: SlotCommitmentId,
+    previous_commitment_id: SlotCommitmentId,
     /// The digest of multiple sparse merkle tree roots of this slot.
     roots_id: RootsId,
     /// The sum of previous slot commitment cumulative weight and weight of issuers of accepted blocks within this
@@ -43,16 +42,16 @@ impl SlotCommitment {
     /// Creates a new [`SlotCommitment`].
     pub fn new(
         protocol_version: u8,
-        index: SlotIndex,
-        previous_slot_commitment_id: SlotCommitmentId,
+        slot: SlotIndex,
+        previous_commitment_id: SlotCommitmentId,
         roots_id: RootsId,
         cumulative_weight: u64,
         reference_mana_cost: u64,
     ) -> Self {
         Self {
             protocol_version,
-            index,
-            previous_slot_commitment_id,
+            slot,
+            previous_commitment_id,
             roots_id,
             cumulative_weight,
             reference_mana_cost,
@@ -64,14 +63,14 @@ impl SlotCommitment {
         self.protocol_version
     }
 
-    /// Returns the index of the [`SlotCommitment`].
-    pub fn index(&self) -> SlotIndex {
-        self.index
+    /// Returns the slot index of the [`SlotCommitment`].
+    pub fn slot(&self) -> SlotIndex {
+        self.slot
     }
 
     /// Returns the previous slot commitment ID of the [`SlotCommitment`].
-    pub fn previous_slot_commitment_id(&self) -> &SlotCommitmentId {
-        &self.previous_slot_commitment_id
+    pub fn previous_commitment_id(&self) -> &SlotCommitmentId {
+        &self.previous_commitment_id
     }
 
     /// Returns the roots ID of the [`SlotCommitment`].
@@ -91,6 +90,6 @@ impl SlotCommitment {
 
     /// Computes the [`SlotCommitmentId`] of the [`SlotCommitment`].
     pub fn id(&self) -> SlotCommitmentId {
-        SlotCommitmentHash::new(Blake2b256::digest(self.pack_to_vec()).into()).into_slot_commitment_id(self.index)
+        SlotCommitmentHash::new(Blake2b256::digest(self.pack_to_vec()).into()).into_slot_commitment_id(self.slot)
     }
 }

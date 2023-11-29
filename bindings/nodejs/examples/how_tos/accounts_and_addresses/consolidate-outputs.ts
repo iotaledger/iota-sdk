@@ -25,7 +25,7 @@ async function run() {
                 );
             }
 
-        const wallet = new Wallet({
+        const wallet = await Wallet.create({
             storagePath: process.env.WALLET_DB_PATH,
         });
 
@@ -49,11 +49,11 @@ async function run() {
         outputs.forEach(({ output, address }, i) => {
             console.log(`OUTPUT #${i}`);
             console.log(
-                '- address: %s\n- amount: %d\n- native tokens: %s',
+                '- address: %s\n- amount: %d\n- native token: %s',
                 Utils.hexToBech32(address.toString(), 'rms'),
                 output.getAmount(),
                 output instanceof CommonOutput
-                    ? (output as CommonOutput).getNativeTokens()
+                    ? (output as CommonOutput).getNativeToken() ?? []
                     : [],
             );
         });
@@ -91,7 +91,7 @@ async function run() {
                 Utils.hexToBech32(address.toString(), 'rms'),
                 output.getAmount(),
                 output instanceof CommonOutput
-                    ? (output as CommonOutput).getNativeTokens()
+                    ? (output as CommonOutput).getNativeToken()
                     : undefined,
             );
         });

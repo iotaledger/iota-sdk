@@ -1,5 +1,6 @@
 import type {
     __PrepareBurnMethod__,
+    __PrepareClaimOutputsMethod__,
     __ClaimOutputsMethod__,
     __PrepareConsolidateOutputsMethod__,
     __PrepareCreateAccountOutputMethod__,
@@ -12,6 +13,7 @@ import type {
     __OutputsMethod__,
     __PendingTransactionsMethod__,
     __ImplicitAccountCreationAddressMethod__,
+    __PrepareImplicitAccountTransitionMethod__,
     __AccountsMethod__,
     __ImplicitAccountsMethod__,
     __IncomingTransactionsMethod__,
@@ -69,6 +71,7 @@ import type {
 export type __WalletMethod__ =
     | __PrepareBurnMethod__
     | __ClaimOutputsMethod__
+    | __PrepareClaimOutputsMethod__
     | __PrepareConsolidateOutputsMethod__
     | __PrepareCreateAccountOutputMethod__
     | __DeregisterParticipationEventMethod__
@@ -85,6 +88,7 @@ export type __WalletMethod__ =
     | __OutputsMethod__
     | __PendingTransactionsMethod__
     | __ImplicitAccountCreationAddressMethod__
+    | __PrepareImplicitAccountTransitionMethod__
     | __AccountsMethod__
     | __ImplicitAccountsMethod__
     | __IncomingTransactionsMethod__

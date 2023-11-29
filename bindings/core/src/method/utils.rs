@@ -2,17 +2,20 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use derivative::Derivative;
-use iota_sdk::types::block::{
-    address::{Bech32Address, Hrp},
-    output::{dto::OutputDto, AccountId, NftId, OutputId, RentStructure},
-    payload::signed_transaction::{
-        dto::{SignedTransactionPayloadDto, TransactionDto},
-        TransactionId,
+use iota_sdk::{
+    client::secret::types::InputSigningDataDto,
+    types::block::{
+        address::{Bech32Address, Hrp},
+        output::{dto::OutputDto, AccountId, NftId, OutputId, StorageScoreParameters},
+        payload::signed_transaction::{
+            dto::{SignedTransactionPayloadDto, TransactionDto},
+            TransactionId,
+        },
+        protocol::ProtocolParameters,
+        signature::Ed25519Signature,
+        slot::SlotCommitment,
+        BlockDto,
     },
-    protocol::ProtocolParameters,
-    signature::Ed25519Signature,
-    slot::SlotCommitment,
-    SignedBlockDto,
 };
 use serde::{Deserialize, Serialize};
 
@@ -83,7 +86,7 @@ pub enum UtilsMethod {
     #[serde(rename_all = "camelCase")]
     BlockId {
         /// Block
-        block: SignedBlockDto,
+        block: BlockDto,
         /// Network Protocol Parameters
         protocol_parameters: ProtocolParameters,
     },
@@ -128,8 +131,12 @@ pub enum UtilsMethod {
         /// The transaction.
         transaction: TransactionDto,
     },
-    /// Computes the required storage deposit of an output.
-    ComputeStorageDeposit { output: OutputDto, rent: RentStructure },
+    /// Computes the minimum required amount of an output.
+    #[serde(rename_all = "camelCase")]
+    ComputeMinimumOutputAmount {
+        output: OutputDto,
+        storage_score_parameters: StorageScoreParameters,
+    },
     /// Checks if the given mnemonic is valid.
     /// Expected response: [`Ok`](crate::Response::Ok)
     VerifyMnemonic {
@@ -157,4 +164,9 @@ pub enum UtilsMethod {
     /// Returns the hex representation of the serialized output bytes.
     #[serde(rename_all = "camelCase")]
     OutputHexBytes { output: OutputDto },
+    /// Verifies the semantic of a transaction.
+    VerifyTransactionSemantic {
+        inputs: Vec<InputSigningDataDto>,
+        transaction: SignedTransactionPayloadDto,
+    },
 }

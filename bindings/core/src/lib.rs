@@ -80,6 +80,7 @@ impl WalletOptions {
         self
     }
 
+    #[cfg(feature = "storage")]
     pub fn with_storage_path(mut self, storage_path: impl Into<Option<String>>) -> Self {
         self.storage_path = storage_path.into();
         self

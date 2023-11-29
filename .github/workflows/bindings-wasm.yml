@@ -65,7 +65,7 @@ jobs:
       - name: Install wasm-bindgen-cli
         uses: jetli/wasm-bindgen-action@v0.2.0
         with:
-          version: "0.2.87"
+          version: "0.2.88"
 
       - name: Set Up Node.js ${{ matrix.node }} and Yarn Cache
         uses: actions/setup-node@v3
@@ -86,16 +86,16 @@ jobs:
         if: ${{ startsWith(matrix.os, 'ubuntu') }}
         uses: "./.github/actions/private-tangle/setup"
 
-      # - name: Run Yarn Test
-      #   if: ${{ startsWith(matrix.os, 'ubuntu') }}
-      #   working-directory: bindings/wasm/
-      #   run: yarn test
+      - name: Run Yarn Test
+        if: ${{ startsWith(matrix.os, 'ubuntu') }}
+        working-directory: bindings/wasm/
+        run: yarn test
 
       - name: Run Yarn Test
         if: ${{ !startsWith(matrix.os, 'ubuntu') }}
         working-directory: bindings/wasm/
         # Only run test that doesn't require a node because we can't use the private tangle script on macos and windows
-        run: yarn test -t 'Wallet methods'
+        run: yarn test -t 'utils methods'
 
       - name: Tear down private tangle
         if: ${{ startsWith(matrix.os, 'ubuntu') }}

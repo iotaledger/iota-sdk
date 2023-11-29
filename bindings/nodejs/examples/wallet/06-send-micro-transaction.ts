@@ -11,7 +11,7 @@ const SEND_MICRO_AMOUNT = BigInt(1);
 const RECV_ADDRESS =
     'rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu';
 
-// In this example we will send an amount below the minimum storage deposit.
+// In this example we will send an amount below the minimum output amount.
 //
 // Make sure that `STRONGHOLD_SNAPSHOT_PATH` and `WALLET_DB_PATH` already exist by
 // running the `how_tos/accounts_and_addresses/create-wallet` example!
@@ -20,6 +20,13 @@ const RECV_ADDRESS =
 // yarn run-example ./wallet/06-send-micro-transaction.ts
 async function run() {
     try {
+        for (const envVar of ['EXPLORER_URL']) {
+            if (!(envVar in process.env)) {
+                throw new Error(
+                    `.env ${envVar} is undefined, see .env.example`,
+                );
+            }
+        }
         // Create the wallet
         const wallet = await getUnlockedWallet();
 

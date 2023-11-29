@@ -137,10 +137,8 @@ where
         // Check if the db exists and if not, return an error if one parameter is missing, because otherwise the db
         // would be created with an empty parameter which just leads to errors later
         #[cfg(feature = "storage")]
-        if !storage_options.path.is_dir() {
-            if self.client_options.is_none() {
-                return Err(crate::wallet::Error::MissingParameter("client_options"));
-            }
+        if !storage_options.path.is_dir() && self.client_options.is_none() {
+            return Err(crate::wallet::Error::MissingParameter("client_options"));
         }
 
         #[cfg(all(feature = "rocksdb", feature = "storage"))]

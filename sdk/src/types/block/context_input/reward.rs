@@ -4,7 +4,10 @@
 use packable::bounded::BoundedU16;
 
 use super::CONTEXT_INPUT_COUNT_RANGE;
-use crate::types::block::Error;
+use crate::types::block::{
+    protocol::{WorkScore, WorkScoreParameters},
+    Error,
+};
 
 pub(crate) type RewardContextInputIndex =
     BoundedU16<{ *CONTEXT_INPUT_COUNT_RANGE.start() }, { *CONTEXT_INPUT_COUNT_RANGE.end() }>;
@@ -26,6 +29,12 @@ impl RewardContextInput {
     /// Returns the index of a [`RewardContextInput`].
     pub fn index(&self) -> u16 {
         self.0.get()
+    }
+}
+
+impl WorkScore for RewardContextInput {
+    fn work_score(&self, params: WorkScoreParameters) -> u32 {
+        params.context_input()
     }
 }
 

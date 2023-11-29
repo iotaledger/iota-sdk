@@ -3,14 +3,17 @@
 
 use crypto::keys::bip39::Mnemonic;
 use iota_sdk::{
-    client::{hex_public_key_to_bech32_address, hex_to_bech32, verify_mnemonic, Client},
+    client::{
+        api::verify_semantic, hex_public_key_to_bech32_address, hex_to_bech32, secret::types::InputSigningData,
+        verify_mnemonic, Client,
+    },
     types::{
         block::{
             address::{AccountAddress, Address, ToBech32Ext},
             input::UtxoInput,
-            output::{AccountId, FoundryId, NftId, Output, OutputId, Rent, TokenId},
+            output::{AccountId, FoundryId, MinimumOutputAmount, NftId, Output, OutputId, TokenId},
             payload::{signed_transaction::Transaction, SignedTransactionPayload},
-            SignedBlock,
+            Block,
         },
         TryFromDto,
     },
@@ -42,7 +45,7 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
             block,
             protocol_parameters,
         } => {
-            let block = SignedBlock::try_from_dto_with_params(block, &protocol_parameters)?;
+            let block = Block::try_from_dto_with_params(block, &protocol_parameters)?;
             Response::BlockId(block.id(&protocol_parameters))
         }
         UtilsMethod::TransactionId { payload } => {
@@ -60,7 +63,7 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
             token_scheme_type,
         )),
         UtilsMethod::ComputeNftId { output_id } => Response::NftId(NftId::from(&output_id)),
-        UtilsMethod::ComputeOutputId { id, index } => Response::OutputId(OutputId::new(id, index)?),
+        UtilsMethod::ComputeOutputId { id, index } => Response::OutputId(OutputId::new(id, index)),
         UtilsMethod::ComputeTokenId {
             account_id,
             serial_number,
@@ -72,9 +75,12 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
         UtilsMethod::TransactionSigningHash { transaction } => {
             Response::Hash(Transaction::try_from_dto(transaction)?.signing_hash().to_string())
         }
-        UtilsMethod::ComputeStorageDeposit { output, rent } => {
-            let out = Output::try_from_dto(output)?;
-            Response::MinimumRequiredStorageDeposit(out.rent_cost(rent).to_string())
+        UtilsMethod::ComputeMinimumOutputAmount {
+            output,
+            storage_score_parameters: storage_params,
+        } => {
+            let out = Output::try_from(output)?;
+            Response::OutputAmount(out.minimum_amount(storage_params))
         }
         UtilsMethod::VerifyMnemonic { mnemonic } => {
             let mnemonic = Mnemonic::from(mnemonic);
@@ -102,8 +108,20 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
         UtilsMethod::OutputIdToUtxoInput { output_id } => Response::Input(UtxoInput::from(output_id)),
         UtilsMethod::ComputeSlotCommitmentId { slot_commitment } => Response::SlotCommitmentId(slot_commitment.id()),
         UtilsMethod::OutputHexBytes { output } => {
-            let output = Output::try_from_dto(output)?;
+            let output = Output::try_from(output)?;
             Response::HexBytes(prefix_hex::encode(output.pack_to_vec()))
+        }
+        UtilsMethod::VerifyTransactionSemantic { inputs, transaction } => {
+            let conflict = verify_semantic(
+                &inputs
+                    .into_iter()
+                    .map(InputSigningData::try_from)
+                    .collect::<iota_sdk::client::Result<Vec<InputSigningData>>>()?,
+                &SignedTransactionPayload::try_from_dto(transaction)?,
+            )?;
+            // TODO conflict reason is an Option now
+            todo!();
+            // Response::TransactionFailureReason(conflict)
         }
     };
     Ok(response)

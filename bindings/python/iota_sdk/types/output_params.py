@@ -15,7 +15,6 @@ from iota_sdk.types.native_token import NativeToken
 class Assets():
     """Assets for OutputParams.
     """
-    native_tokens: Optional[List[NativeToken]] = None
     nft_id: Optional[HexStr] = None
 
 
@@ -28,6 +27,7 @@ class Features():
     metadata: Optional[HexStr] = None
     issuer: Optional[str] = None
     sender: Optional[str] = None
+    native_token: Optional[NativeToken] = None
 
 
 @json

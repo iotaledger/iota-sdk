@@ -6,7 +6,7 @@ import {
     TransactionId,
     TokenSchemeType,
     Output,
-    RentStructure,
+    StorageScoreParameters,
     SignedBlock,
     ProtocolParameters,
     OutputId,
@@ -15,6 +15,7 @@ import {
 } from '../../';
 import { AccountId } from '../../block/id';
 import { SlotCommitment } from '../../block/slot';
+import { InputSigningData } from '../../client';
 
 export interface __GenerateMnemonicMethod__ {
     name: 'generateMnemonic';
@@ -62,7 +63,7 @@ export interface __ComputeStorageDepositMethod__ {
     name: 'computeStorageDeposit';
     data: {
         output: Output;
-        rent: RentStructure;
+        storageScoreParameters: StorageScoreParameters;
     };
 }
 
@@ -194,14 +195,24 @@ export interface __OutputHexBytes__ {
     };
 }
 
+// TODO we don't do this anywhere else, but it seems necessary, need to reevaluate later.
 // Modified `SlotCommitment` with bigint types converted to strings.
 type SlotCommitmentConverted = Omit<
     SlotCommitment,
-    'index' | 'cumulativeWeight'
-> & { index: string; cumulativeWeight: string };
+    'cumulativeWeight' | 'referenceManaCost'
+> & { cumulativeWeight: string; referenceManaCost: string };
 export interface __ComputeSlotCommitmentId__ {
     name: 'computeSlotCommitmentId';
     data: {
         slotCommitment: SlotCommitmentConverted;
+    };
+}
+
+export interface __VerifyTransactionSemantic__ {
+    name: 'verifyTransactionSemantic';
+    data: {
+        inputs: InputSigningData[];
+        transaction: SignedTransactionPayload;
+        time: number;
     };
 }

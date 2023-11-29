@@ -33,18 +33,16 @@ async fn main() -> Result<()> {
     // Create a client instance.
     let client = Client::builder().with_node(&node_url)?.finish().await?;
 
-    let token_supply = client.get_token_supply().await?;
-    let rent_structure = client.get_rent_structure().await?;
+    let storage_score_params = client.get_storage_score_parameters().await?;
 
     let address = Address::try_from_bech32("rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy")?;
     let account_address = Address::try_from_bech32("rms1pr59qm43mjtvhcajfmupqf23x29llam88yecn6pyul80rx099krmv2fnnux")?;
 
     let token_scheme = TokenScheme::Simple(SimpleTokenScheme::new(50, 0, 100)?);
 
-    let basic_output_builder = BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)
+    let basic_output_builder = BasicOutputBuilder::new_with_minimum_amount(storage_score_params)
         .add_unlock_condition(AddressUnlockCondition::new(address.clone()));
-    let foundry_output_builder =
-        FoundryOutputBuilder::new_with_minimum_storage_deposit(rent_structure, 1, token_scheme);
+    let foundry_output_builder = FoundryOutputBuilder::new_with_minimum_amount(storage_score_params, 1, token_scheme);
 
     let outputs = [
         //// most simple output
@@ -52,11 +50,7 @@ async fn main() -> Result<()> {
         // with storage deposit return unlock condition
         basic_output_builder
             .clone()
-            .add_unlock_condition(StorageDepositReturnUnlockCondition::new(
-                address.clone(),
-                1000000,
-                token_supply,
-            )?)
+            .add_unlock_condition(StorageDepositReturnUnlockCondition::new(address.clone(), 1000000)?)
             .finish_output()?,
         // with timeout unlock condition
         basic_output_builder
@@ -75,7 +69,7 @@ async fn main() -> Result<()> {
             .finish_output()?,
     ];
 
-    // Convert ouput array to json array
+    // Convert output array to json array
     let json_outputs = serde_json::to_string_pretty(&outputs.iter().map(OutputDto::from).collect::<Vec<OutputDto>>())?;
     println!("{json_outputs}");
 

@@ -27,7 +27,7 @@ use crate::{
 };
 
 const DEFAULT_LOG_LEVEL: &str = "debug";
-const DEFAULT_NODE_URL: &str = "http://localhost:8080";
+const DEFAULT_NODE_URL: &str = "http://localhost:8050";
 const DEFAULT_STRONGHOLD_SNAPSHOT_PATH: &str = "./stardust-cli-wallet.stronghold";
 const DEFAULT_WALLET_DATABASE_PATH: &str = "./stardust-cli-wallet-db";
 
@@ -334,7 +334,7 @@ pub async fn restore_command(storage_path: &Path, snapshot_path: &Path, backup_p
         let password = get_password("Stronghold password", false)?;
         let secret_manager = SecretManager::Stronghold(
             StrongholdSecretManager::builder()
-                .password(password.clone())
+                .password(password)
                 .build(snapshot_path)?,
         );
         builder = builder.with_secret_manager(secret_manager);
@@ -380,8 +380,8 @@ pub async fn sync_command(storage_path: &Path, snapshot_path: &Path) -> Result<W
 
 pub async fn unlock_wallet(
     storage_path: &Path,
-    snapshot_path: impl Into<Option<&Path>>,
-    password: impl Into<Option<Password>>,
+    snapshot_path: impl Into<Option<&Path>> + Send,
+    password: impl Into<Option<Password>> + Send,
 ) -> Result<Wallet, Error> {
     let secret_manager = if let Some(password) = password.into() {
         let snapshot_path = snapshot_path.into();

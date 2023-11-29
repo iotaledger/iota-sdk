@@ -12,6 +12,7 @@ import type {
     __GetNetworkInfoMethod__,
     __GetBlockMethod__,
     __GetBlockMetadataMethod__,
+    __GetBlockWithMetadataMethod__,
     __FindInputsMethod__,
     __SignTransactionMethod__,
     __BuildBasicBlockMethod__,
@@ -49,7 +50,7 @@ import type {
     __BuildNftOutputMethod__,
     __ClearListenersMethod__,
     __SignatureUnlockMethod__,
-    __MinimumRequiredStorageDepositMethod__,
+    __ComputeMinimumOutputAmountMethod__,
     __RequestFundsFromFaucetMethod__,
     __CallPluginRouteMethod__,
 } from './client';
@@ -65,6 +66,7 @@ export type __ClientMethods__ =
     | __GetNetworkInfoMethod__
     | __GetBlockMethod__
     | __GetBlockMetadataMethod__
+    | __GetBlockWithMetadataMethod__
     | __FindInputsMethod__
     | __SignTransactionMethod__
     | __SignatureUnlockMethod__
@@ -102,6 +104,6 @@ export type __ClientMethods__ =
     | __BuildFoundryOutputMethod__
     | __BuildNftOutputMethod__
     | __ClearListenersMethod__
-    | __MinimumRequiredStorageDepositMethod__
+    | __ComputeMinimumOutputAmountMethod__
     | __RequestFundsFromFaucetMethod__
     | __CallPluginRouteMethod__;

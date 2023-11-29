@@ -12,13 +12,15 @@ require('dotenv').config({ path: '.env' });
 
 async function run() {
     try {
-        if (!process.env.WALLET_DB_PATH) {
-            throw new Error(
-                '.env WALLET_DB_PATH is undefined, see .env.example',
-            );
+        for (const envVar of ['WALLET_DB_PATH']) {
+            if (!(envVar in process.env)) {
+                throw new Error(
+                    `.env ${envVar} is undefined, see .env.example`,
+                );
+            }
         }
 
-        const wallet = new Wallet({
+        const wallet = await Wallet.create({
             storagePath: process.env.WALLET_DB_PATH,
         });
 

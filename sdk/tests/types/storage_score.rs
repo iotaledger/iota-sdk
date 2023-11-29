@@ -1,7 +1,7 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-// TODO: Re-enable when rent is figured out
+// TODO: Re-enable when storage score is figured out
 
 // use iota_sdk::types::block::{
 //     output::{Output, Rent},

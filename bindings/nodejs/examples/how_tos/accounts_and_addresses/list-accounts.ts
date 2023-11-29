@@ -12,11 +12,13 @@ require('dotenv').config({ path: '.env' });
 // This example lists all account outputs in the wallet.
 async function run() {
     initLogger();
-    if (!process.env.WALLET_DB_PATH) {
-        throw new Error('.env WALLET_DB_PATH is undefined, see .env.example');
+    for (const envVar of ['WALLET_DB_PATH']) {
+        if (!(envVar in process.env)) {
+            throw new Error(`.env ${envVar} is undefined, see .env.example`);
+        }
     }
     try {
-        const wallet = new Wallet({
+        const wallet = await Wallet.create({
             storagePath: process.env.WALLET_DB_PATH,
         });
 

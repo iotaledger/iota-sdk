@@ -1,17 +1,17 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { SendNativeTokensParams } from '@iota/sdk';
+import { SendNativeTokenParams } from '@iota/sdk';
 
 import { getUnlockedWallet } from '../../wallet/common';
 
 // The native token amount to send.
 const SEND_NATIVE_TOKEN_AMOUNT = BigInt(10);
-// The address to send the tokens to
+// The address to send the token to
 const RECV_ADDRESS =
     'rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu';
 
-// In this example we will send native tokens.
+// In this example we will send a native token.
 //
 // Make sure that `STRONGHOLD_SNAPSHOT_PATH` and `WALLET_DB_PATH` already exist by
 // running the `how_tos/accounts_and_addresses/create-wallet` example!
@@ -19,6 +19,11 @@ const RECV_ADDRESS =
 // Rename `.env.example` to `.env` first, then run
 // yarn run-example ./how_tos/native_tokens/send.ts
 async function run() {
+    for (const envVar of ['EXPLORER_URL']) {
+        if (!(envVar in process.env)) {
+            throw new Error(`.env ${envVar} is undefined, see .env.example`);
+        }
+    }
     try {
         // Create the wallet
         const wallet = await getUnlockedWallet();
@@ -32,10 +37,10 @@ async function run() {
         )?.tokenId;
 
         if (tokenId != null) {
-            const outputs: SendNativeTokensParams[] = [
+            const outputs: SendNativeTokenParams[] = [
                 {
                     address: RECV_ADDRESS,
-                    nativeTokens: [[tokenId, SEND_NATIVE_TOKEN_AMOUNT]],
+                    nativeToken: [tokenId, SEND_NATIVE_TOKEN_AMOUNT],
                 },
             ];
 

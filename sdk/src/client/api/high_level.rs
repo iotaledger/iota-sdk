@@ -8,14 +8,14 @@ use futures::{StreamExt, TryStreamExt};
 use crate::{
     client::{
         api::input_selection::Error as InputSelectionError,
-        constants::FIVE_MINUTES_IN_SECONDS,
+        constants::FIVE_MINUTES_IN_NANOSECONDS,
         error::{Error, Result},
         node_api::indexer::query_parameters::BasicOutputQueryParameters,
         unix_timestamp_now, Client,
     },
     types::block::{
         address::Bech32Address,
-        core::{BasicBlock, Block, SignedBlock},
+        core::{BasicBlockBody, Block, BlockBody},
         input::{Input, UtxoInput, INPUT_COUNT_MAX},
         output::OutputWithMetadata,
         payload::{signed_transaction::TransactionId, Payload},
@@ -27,10 +27,10 @@ use crate::{
 impl Client {
     /// Get the inputs of a transaction for the given transaction id.
     pub async fn inputs_from_transaction_id(&self, transaction_id: &TransactionId) -> Result<Vec<OutputWithMetadata>> {
-        let signed_block = self.get_included_block(transaction_id).await?;
+        let block = self.get_included_block(transaction_id).await?;
 
-        if let Block::Basic(block) = signed_block.block() {
-            let inputs = if let Some(Payload::SignedTransaction(t)) = block.payload() {
+        if let BlockBody::Basic(basic_block_body) = block.body() {
+            let inputs = if let Some(Payload::SignedTransaction(t)) = basic_block_body.payload() {
                 t.transaction().inputs()
             } else {
                 return Err(Error::MissingTransactionPayload);
@@ -45,15 +45,15 @@ impl Client {
 
             self.get_outputs_with_metadata(&input_ids).await
         } else {
-            Err(Error::UnexpectedBlockKind {
-                expected: BasicBlock::KIND,
-                actual: signed_block.block().kind(),
+            Err(Error::UnexpectedBlockBodyKind {
+                expected: BasicBlockBody::KIND,
+                actual: block.body().kind(),
             })
         }
     }
 
     /// Find all blocks by provided block IDs.
-    pub async fn find_blocks(&self, block_ids: &[BlockId]) -> Result<Vec<SignedBlock>> {
+    pub async fn find_blocks(&self, block_ids: &[BlockId]) -> Result<Vec<Block>> {
         // Use a `HashSet` to prevent duplicate block_ids.
         let block_ids = block_ids.iter().copied().collect::<HashSet<_>>();
         futures::future::try_join_all(block_ids.iter().map(|block_id| self.get_block(block_id))).await
@@ -80,7 +80,7 @@ impl Client {
                     UtxoInput::new(
                         output_with_meta.metadata().transaction_id().to_owned(),
                         output_with_meta.metadata().output_index(),
-                    )?,
+                    ),
                     output_with_meta.output().amount(),
                 ))
             })
@@ -89,11 +89,10 @@ impl Client {
 
         let mut total_already_spent = 0;
         let mut selected_inputs = Vec::new();
-        for (_offset, output_wrapper) in basic_outputs
+        for output_wrapper in basic_outputs
             .into_iter()
             // Max inputs is 128
             .take(INPUT_COUNT_MAX.into())
-            .enumerate()
         {
             // Break if we have enough funds and don't create dust for the remainder
             if total_already_spent == amount || total_already_spent >= amount {
@@ -115,13 +114,15 @@ impl Client {
 
     // Returns the slot index corresponding to the current timestamp.
     pub async fn get_slot_index(&self) -> Result<SlotIndex> {
-        let current_time = unix_timestamp_now().as_secs();
+        let current_time = unix_timestamp_now().as_nanos() as u64;
 
         let network_info = self.get_network_info().await?;
 
         if let Some(tangle_time) = network_info.tangle_time {
             // Check the local time is in the range of +-5 minutes of the node to prevent locking funds by accident
-            if !(tangle_time - FIVE_MINUTES_IN_SECONDS..tangle_time + FIVE_MINUTES_IN_SECONDS).contains(&current_time) {
+            if !(tangle_time - FIVE_MINUTES_IN_NANOSECONDS..tangle_time + FIVE_MINUTES_IN_NANOSECONDS)
+                .contains(&current_time)
+            {
                 return Err(Error::TimeNotSynced {
                     current_time,
                     tangle_time,
@@ -129,6 +130,7 @@ impl Client {
             }
         }
 
+        // TODO double check with TIP if this should be seconds or nanoseconds
         Ok(network_info.protocol_parameters.slot_index(current_time))
     }
 }

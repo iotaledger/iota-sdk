@@ -10,7 +10,7 @@ use primitive_types::U256;
 use crate::types::block::{
     address::{Address, AddressCapabilityFlag},
     output::{
-        AnchorOutput, ChainId, FoundryId, NativeTokens, Output, OutputId, StateTransitionError, TokenId,
+        AccountId, AnchorOutput, ChainId, FoundryId, NativeTokens, Output, OutputId, StateTransitionError, TokenId,
         UnlockCondition,
     },
     payload::signed_transaction::{Transaction, TransactionCapabilityFlag, TransactionSigningHash},
@@ -216,6 +216,31 @@ impl<'a> SemanticValidationContext<'a> {
         unlocks: Option<&'a Unlocks>,
     ) -> Self {
         let transaction_id = transaction.id();
+        let input_chains = inputs
+            .iter()
+            .filter_map(|(output_id, input)| {
+                if input.is_implicit_account() {
+                    Some((ChainId::from(AccountId::from(*output_id)), *input))
+                } else {
+                    input
+                        .chain_id()
+                        .map(|chain_id| (chain_id.or_from_output_id(output_id), *input))
+                }
+            })
+            .collect();
+        let output_chains = transaction
+            .outputs()
+            .iter()
+            .enumerate()
+            .filter_map(|(index, output)| {
+                output.chain_id().map(|chain_id| {
+                    (
+                        chain_id.or_from_output_id(&OutputId::new(transaction_id, index as u16)),
+                        output,
+                    )
+                })
+            })
+            .collect();
 
         Self {
             transaction,
@@ -225,30 +250,11 @@ impl<'a> SemanticValidationContext<'a> {
             input_amount: 0,
             input_mana: 0,
             input_native_tokens: BTreeMap::<TokenId, U256>::new(),
-            input_chains: inputs
-                .iter()
-                .filter_map(|(output_id, input)| {
-                    input
-                        .chain_id()
-                        .map(|chain_id| (chain_id.or_from_output_id(output_id), *input))
-                })
-                .collect(),
+            input_chains,
             output_amount: 0,
             output_mana: 0,
             output_native_tokens: BTreeMap::<TokenId, U256>::new(),
-            output_chains: transaction
-                .outputs()
-                .iter()
-                .enumerate()
-                .filter_map(|(index, output)| {
-                    output.chain_id().map(|chain_id| {
-                        (
-                            chain_id.or_from_output_id(&OutputId::new(transaction_id, index as u16).unwrap()),
-                            output,
-                        )
-                    })
-                })
-                .collect(),
+            output_chains,
             unlocked_addresses: HashSet::new(),
             storage_deposit_returns: HashMap::new(),
             simple_deposits: HashMap::new(),
@@ -259,32 +265,17 @@ impl<'a> SemanticValidationContext<'a> {
     pub fn validate(mut self) -> Result<Option<TransactionFailureReason>, Error> {
         // Validation of inputs.
         for (index, (output_id, consumed_output)) in self.inputs.iter().enumerate() {
-            let (amount, mana, consumed_native_tokens, unlock_conditions) = match consumed_output {
+            let (amount, mana, consumed_native_token, unlock_conditions) = match consumed_output {
                 Output::Basic(output) => (
                     output.amount(),
                     output.mana(),
-                    Some(output.native_tokens()),
+                    output.native_token(),
                     output.unlock_conditions(),
                 ),
-                Output::Account(output) => (
-                    output.amount(),
-                    output.mana(),
-                    Some(output.native_tokens()),
-                    output.unlock_conditions(),
-                ),
+                Output::Account(output) => (output.amount(), output.mana(), None, output.unlock_conditions()),
                 Output::Anchor(_) => return Err(Error::UnsupportedOutputKind(AnchorOutput::KIND)),
-                Output::Foundry(output) => (
-                    output.amount(),
-                    0,
-                    Some(output.native_tokens()),
-                    output.unlock_conditions(),
-                ),
-                Output::Nft(output) => (
-                    output.amount(),
-                    output.mana(),
-                    Some(output.native_tokens()),
-                    output.unlock_conditions(),
-                ),
+                Output::Foundry(output) => (output.amount(), 0, output.native_token(), output.unlock_conditions()),
+                Output::Nft(output) => (output.amount(), output.mana(), None, output.unlock_conditions()),
                 Output::Delegation(output) => (output.amount(), 0, None, output.unlock_conditions()),
             };
 
@@ -312,14 +303,15 @@ impl<'a> SemanticValidationContext<'a> {
 
             self.input_mana = self.input_mana.checked_add(mana).ok_or(Error::ConsumedManaOverflow)?;
 
-            if let Some(consumed_native_tokens) = consumed_native_tokens {
-                for native_token in consumed_native_tokens.iter() {
-                    let native_token_amount = self.input_native_tokens.entry(*native_token.token_id()).or_default();
+            if let Some(consumed_native_token) = consumed_native_token {
+                let native_token_amount = self
+                    .input_native_tokens
+                    .entry(*consumed_native_token.token_id())
+                    .or_default();
 
-                    *native_token_amount = native_token_amount
-                        .checked_add(native_token.amount())
-                        .ok_or(Error::ConsumedNativeTokensAmountOverflow)?;
-                }
+                *native_token_amount = native_token_amount
+                    .checked_add(consumed_native_token.amount())
+                    .ok_or(Error::ConsumedNativeTokensAmountOverflow)?;
             }
 
             if let Some(unlocks) = self.unlocks {
@@ -345,7 +337,7 @@ impl<'a> SemanticValidationContext<'a> {
 
         // Validation of outputs.
         for created_output in self.transaction.outputs() {
-            let (amount, mana, created_native_tokens, features) = match created_output {
+            let (amount, mana, created_native_token, features) = match created_output {
                 Output::Basic(output) => {
                     if let Some(address) = output.simple_deposit_address() {
                         let amount = self.simple_deposits.entry(address.clone()).or_default();
@@ -358,29 +350,14 @@ impl<'a> SemanticValidationContext<'a> {
                     (
                         output.amount(),
                         output.mana(),
-                        Some(output.native_tokens()),
+                        output.native_token(),
                         Some(output.features()),
                     )
                 }
-                Output::Account(output) => (
-                    output.amount(),
-                    output.mana(),
-                    Some(output.native_tokens()),
-                    Some(output.features()),
-                ),
+                Output::Account(output) => (output.amount(), output.mana(), None, Some(output.features())),
                 Output::Anchor(_) => return Err(Error::UnsupportedOutputKind(AnchorOutput::KIND)),
-                Output::Foundry(output) => (
-                    output.amount(),
-                    0,
-                    Some(output.native_tokens()),
-                    Some(output.features()),
-                ),
-                Output::Nft(output) => (
-                    output.amount(),
-                    output.mana(),
-                    Some(output.native_tokens()),
-                    Some(output.features()),
-                ),
+                Output::Foundry(output) => (output.amount(), 0, output.native_token(), Some(output.features())),
+                Output::Nft(output) => (output.amount(), output.mana(), None, Some(output.features())),
                 Output::Delegation(output) => (output.amount(), 0, None, None),
             };
 
@@ -397,14 +374,14 @@ impl<'a> SemanticValidationContext<'a> {
                     })
                     .filter_map(Address::as_restricted_opt);
                 for address in addresses {
-                    if created_output.native_tokens().map(|t| t.len()).unwrap_or_default() > 0
+                    if created_native_token.is_some()
                         && !address.has_capability(AddressCapabilityFlag::OutputsWithNativeTokens)
                     {
                         // TODO: add a variant https://github.com/iotaledger/iota-sdk/issues/1430
                         return Ok(Some(TransactionFailureReason::SemanticValidationFailed));
                     }
 
-                    if created_output.mana() > 0 && !address.has_capability(AddressCapabilityFlag::OutputsWithMana) {
+                    if mana > 0 && !address.has_capability(AddressCapabilityFlag::OutputsWithMana) {
                         // TODO: add a variant https://github.com/iotaledger/iota-sdk/issues/1430
                         return Ok(Some(TransactionFailureReason::SemanticValidationFailed));
                     }
@@ -456,14 +433,15 @@ impl<'a> SemanticValidationContext<'a> {
 
             self.output_mana = self.output_mana.checked_add(mana).ok_or(Error::CreatedManaOverflow)?;
 
-            if let Some(created_native_tokens) = created_native_tokens {
-                for native_token in created_native_tokens.iter() {
-                    let native_token_amount = self.output_native_tokens.entry(*native_token.token_id()).or_default();
+            if let Some(created_native_token) = created_native_token {
+                let native_token_amount = self
+                    .output_native_tokens
+                    .entry(*created_native_token.token_id())
+                    .or_default();
 
-                    *native_token_amount = native_token_amount
-                        .checked_add(native_token.amount())
-                        .ok_or(Error::CreatedNativeTokensAmountOverflow)?;
-                }
+                *native_token_amount = native_token_amount
+                    .checked_add(created_native_token.amount())
+                    .ok_or(Error::CreatedNativeTokensAmountOverflow)?;
             }
         }
 
