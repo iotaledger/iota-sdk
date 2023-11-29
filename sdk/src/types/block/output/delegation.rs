@@ -433,7 +433,7 @@ fn verify_unlock_conditions_packable<const VERIFY: bool>(
 }
 
 #[cfg(feature = "serde")]
-pub mod dto {
+mod dto {
     use alloc::vec::Vec;
 
     use serde::{Deserialize, Serialize};
