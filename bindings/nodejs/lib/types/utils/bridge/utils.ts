@@ -12,6 +12,7 @@ import {
     OutputId,
     NftId,
     Bech32Address,
+    Unlock,
 } from '../../';
 import { AccountId } from '../../block/id';
 import { SlotCommitment } from '../../block/slot';
@@ -211,7 +212,8 @@ export interface __ComputeSlotCommitmentId__ {
 export interface __VerifyTransactionSemantic__ {
     name: 'verifyTransactionSemantic';
     data: {
-        inputs: InputSigningData[];
         transaction: SignedTransactionPayload;
+        inputs: InputSigningData[];
+        unlocks: Unlock[];
     };
 }
