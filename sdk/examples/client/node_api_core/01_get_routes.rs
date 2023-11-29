@@ -14,11 +14,10 @@ use iota_sdk::client::{Client, Result};
 async fn main() -> Result<()> {
     // If not provided we use the default node from the `.env` file.
     dotenvy::dotenv().ok();
-
     // Take the node URL from command line argument or use one from env as default.
     let node_url = std::env::args()
         .nth(1)
-        .unwrap_or_else(|| std::env::var("NODE_URL").unwrap());
+        .unwrap_or_else(|| std::env::var("NODE_URL").expect("NODE_URL not set"));
 
     // Create a node client.
     let client = Client::builder()

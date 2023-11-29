@@ -29,6 +29,10 @@ async fn main() -> Result<()> {
     // non-zero balance.
     dotenvy::dotenv().ok();
 
+    for var in ["NODE_URL", "MNEMONIC", "FAUCET_URL", "EXPLORER_URL"] {
+        std::env::var(var).unwrap_or_else(|_| panic!(".env variable '{var}' is undefined, see .env.example"));
+    }
+
     let node_url = std::env::var("NODE_URL").unwrap();
     let explorer_url = std::env::var("EXPLORER_URL").unwrap();
     let faucet_url = std::env::var("FAUCET_URL").unwrap();

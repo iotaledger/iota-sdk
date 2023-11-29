@@ -16,13 +16,17 @@ use iota_sdk::client::{
 
 #[tokio::main]
 async fn main() -> Result<()> {
+    // This example uses secrets in environment variables for simplicity which should not be done in production.
+    dotenvy::dotenv().ok();
+
+    for var in ["NODE_URL", "MNEMONIC", "FAUCET_URL", "EXPLORER_URL"] {
+        std::env::var(var).unwrap_or_else(|_| panic!(".env variable '{var}' is undefined, see .env.example"));
+    }
+
     let amount = std::env::args()
         .nth(1)
         .map(|s| s.parse::<u64>().unwrap())
         .unwrap_or(9_000_000);
-
-    // This example uses secrets in environment variables for simplicity which should not be done in production.
-    dotenvy::dotenv().ok();
 
     // Create a client instance.
     let client = Client::builder()
