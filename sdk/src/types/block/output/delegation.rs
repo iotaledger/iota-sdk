@@ -449,7 +449,7 @@ pub(crate) mod dto {
 
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
-    pub struct DelegationOutputDto {
+    struct DelegationOutputDto {
         #[serde(rename = "type")]
         pub kind: u8,
         #[serde(with = "string")]
@@ -536,4 +536,6 @@ pub(crate) mod dto {
             builder.finish()
         }
     }
+
+    crate::impl_serde_typed_dto!(DelegationOutput, DelegationOutputDto, "delegation output");
 }
