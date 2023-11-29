@@ -23,6 +23,21 @@ pub enum MaxBurnedManaAmount {
     },
 }
 
+impl From<u64> for MaxBurnedManaAmount {
+    fn from(value: u64) -> Self {
+        Self::Amount(value)
+    }
+}
+
+impl From<(WorkScoreParameters, u64)> for MaxBurnedManaAmount {
+    fn from(value: (WorkScoreParameters, u64)) -> Self {
+        Self::MinimumAmount {
+            params: value.0,
+            reference_mana_cost: value.1,
+        }
+    }
+}
+
 /// A builder for a [`BasicBlockBody`].
 pub struct BasicBlockBodyBuilder {
     strong_parents: StrongParents,
@@ -33,35 +48,10 @@ pub struct BasicBlockBodyBuilder {
 }
 
 impl BasicBlockBodyBuilder {
-    /// Creates a new [`BasicBlockBodyBuilder`] with `max burned mana` set to the provided value.
-    #[inline(always)]
-    pub fn new_with_mana_amount(strong_parents: StrongParents, max_burned_mana: u64) -> Self {
-        Self::new(strong_parents, MaxBurnedManaAmount::Amount(max_burned_mana))
-    }
-
-    /// Creates a new [`BasicBlockBodyBuilder`] with `max burned mana` set to the minimum value according to the
-    /// provided reference mana cost.
-    #[inline(always)]
-    pub fn new_with_minimum_mana_amount(
-        strong_parents: StrongParents,
-        params: WorkScoreParameters,
-        reference_mana_cost: u64,
-    ) -> Self {
-        Self {
-            strong_parents,
-            weak_parents: WeakParents::default(),
-            shallow_like_parents: ShallowLikeParents::default(),
-            payload: OptionalPayload::default(),
-            max_burned_mana: MaxBurnedManaAmount::MinimumAmount {
-                params,
-                reference_mana_cost,
-            },
-        }
-    }
-
     /// Creates a new [`BasicBlockBodyBuilder`].
     #[inline(always)]
-    pub fn new(strong_parents: StrongParents, max_burned_mana: MaxBurnedManaAmount) -> Self {
+    pub fn new(strong_parents: StrongParents, max_burned_mana: impl Into<MaxBurnedManaAmount>) -> Self {
+        let max_burned_mana = max_burned_mana.into();
         Self {
             strong_parents,
             weak_parents: WeakParents::default(),
@@ -266,18 +256,15 @@ pub(crate) mod dto {
             dto: BasicBlockBodyDto,
             params: Option<&ProtocolParameters>,
         ) -> Result<Self, Self::Error> {
-            BasicBlockBodyBuilder::new_with_mana_amount(
-                StrongParents::from_set(dto.strong_parents)?,
-                dto.max_burned_mana,
-            )
-            .with_weak_parents(WeakParents::from_set(dto.weak_parents)?)
-            .with_shallow_like_parents(ShallowLikeParents::from_set(dto.shallow_like_parents)?)
-            .with_payload(
-                dto.payload
-                    .map(|payload| Payload::try_from_dto_with_params_inner(payload, params))
-                    .transpose()?,
-            )
-            .finish()
+            BasicBlockBodyBuilder::new(StrongParents::from_set(dto.strong_parents)?, dto.max_burned_mana)
+                .with_weak_parents(WeakParents::from_set(dto.weak_parents)?)
+                .with_shallow_like_parents(ShallowLikeParents::from_set(dto.shallow_like_parents)?)
+                .with_payload(
+                    dto.payload
+                        .map(|payload| Payload::try_from_dto_with_params_inner(payload, params))
+                        .transpose()?,
+                )
+                .finish()
         }
     }
 }

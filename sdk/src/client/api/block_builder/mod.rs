@@ -45,10 +45,10 @@ impl ClientInner {
             ),
             BlockBody::build_basic(
                 issuance.strong_parents()?,
-                MaxBurnedManaAmount::MinimumAmount {
-                    params: protocol_params.work_score_parameters,
-                    reference_mana_cost: issuance.commitment.reference_mana_cost(),
-                },
+                (
+                    protocol_params.work_score_parameters,
+                    issuance.commitment.reference_mana_cost(),
+                ),
             )
             .with_weak_parents(issuance.weak_parents()?)
             .with_shallow_like_parents(issuance.shallow_like_parents()?)

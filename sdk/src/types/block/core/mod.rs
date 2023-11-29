@@ -84,7 +84,7 @@ impl BlockBody {
     #[inline(always)]
     pub fn build_basic(
         strong_parents: self::basic::StrongParents,
-        max_burned_mana: MaxBurnedManaAmount,
+        max_burned_mana: impl Into<MaxBurnedManaAmount>,
     ) -> BasicBlockBodyBuilder {
         BasicBlockBodyBuilder::new(strong_parents, max_burned_mana)
     }
