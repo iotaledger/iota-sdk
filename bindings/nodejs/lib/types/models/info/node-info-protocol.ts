@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import type { RentStructure } from '../rent-structure';
+import type { StorageScoreParameters } from '../storage-score';
 import { EpochIndex } from '../../block/slot';
 import { u64 } from '../../utils';
 
@@ -40,9 +40,9 @@ export interface ProtocolParameters {
      */
     bech32Hrp: string;
     /**
-     * The rent structure according to TIP-19.
+     * The storage score parameters used by given node/network.
      */
-    rentStructure: RentStructure;
+    storageScoreParameters: StorageScoreParameters;
     /**
      * Work Score Parameters lists the work score of each type, it is used to denote the computation costs of processing an object.
      */
@@ -102,7 +102,7 @@ export interface ProtocolParameters {
     /**
      * The parameters used by signaling protocol parameters upgrade.
      */
-    versionSignaling: VersionSignalingParameters;
+    versionSignalingParameters: VersionSignalingParameters;
     /**
      * Rewards Parameters defines the parameters that are used to calculate Mana rewards.
      */

@@ -6,16 +6,9 @@ use core::{fmt, ops::RangeInclusive};
 
 use derive_more::{AsRef, Deref, Display, From};
 use iterator_sorted::is_unique_sorted;
-use packable::{
-    bounded::BoundedU8,
-    error::{UnpackError, UnpackErrorExt},
-    packer::Packer,
-    prefix::BoxedSlicePrefix,
-    unpacker::Unpacker,
-    Packable,
-};
+use packable::{bounded::BoundedU8, prefix::BoxedSlicePrefix, Packable};
 
-use crate::types::block::{address::Address, Error};
+use crate::types::block::{address::Address, output::StorageScore, Error};
 
 pub(crate) type WeightedAddressCount =
     BoundedU8<{ *MultiAddress::ADDRESSES_COUNT.start() }, { *MultiAddress::ADDRESSES_COUNT.end() }>;
@@ -37,8 +30,8 @@ pub struct WeightedAddress {
 impl WeightedAddress {
     /// Creates a new [`WeightedAddress`].
     pub fn new(address: Address, weight: u8) -> Result<Self, Error> {
-        verify_address::<true>(&address, &())?;
-        verify_weight::<true>(&weight, &())?;
+        verify_address::<true>(&address)?;
+        verify_weight::<true>(&weight)?;
 
         Ok(Self { address, weight })
     }
@@ -54,21 +47,22 @@ impl WeightedAddress {
     }
 }
 
-fn verify_address<const VERIFY: bool>(address: &Address, _visitor: &()) -> Result<(), Error> {
-    if VERIFY {
-        if !matches!(
+fn verify_address<const VERIFY: bool>(address: &Address) -> Result<(), Error> {
+    if VERIFY
+        && !matches!(
             address,
             Address::Ed25519(_) | Address::Account(_) | Address::Nft(_) | Address::Anchor(_)
-        ) {
-            return Err(Error::InvalidAddressKind(address.kind()));
-        }
+        )
+    {
+        Err(Error::InvalidAddressKind(address.kind()))
+    } else {
+        Ok(())
     }
-    Ok(())
 }
 
-fn verify_weight<const VERIFY: bool>(weight: &u8, _visitor: &()) -> Result<(), Error> {
+fn verify_weight<const VERIFY: bool>(weight: &u8) -> Result<(), Error> {
     if VERIFY && *weight == 0 {
-        return Err(Error::InvalidAddressWeight(*weight));
+        Err(Error::InvalidAddressWeight(*weight))
     } else {
         Ok(())
     }
@@ -77,12 +71,17 @@ fn verify_weight<const VERIFY: bool>(weight: &u8, _visitor: &()) -> Result<(), E
 /// An address that consists of addresses with weights and a threshold value.
 /// The Multi Address can be unlocked if the cumulative weight of all unlocked addresses is equal to or exceeds the
 /// threshold.
-#[derive(Clone, Debug, Deref, Eq, PartialEq, Ord, PartialOrd, Hash)]
+#[derive(Clone, Debug, Deref, Eq, PartialEq, Ord, PartialOrd, Hash, Packable)]
+#[packable(unpack_error = Error)]
+#[packable(verify_with = verify_multi_address)]
 pub struct MultiAddress {
     /// The weighted unlocked addresses.
     #[deref]
+    #[packable(verify_with = verify_addresses)]
+    #[packable(unpack_error_with = |e| e.unwrap_item_err_or_else(|p| Error::InvalidWeightedAddressCount(p.into())))]
     addresses: BoxedSlicePrefix<WeightedAddress, WeightedAddressCount>,
     /// The threshold that needs to be reached by the unlocked addresses in order to unlock the multi address.
+    #[packable(verify_with = verify_threshold)]
     threshold: u16,
 }
 
@@ -97,15 +96,17 @@ impl MultiAddress {
     pub fn new(addresses: impl IntoIterator<Item = WeightedAddress>, threshold: u16) -> Result<Self, Error> {
         let addresses = addresses.into_iter().collect::<Box<[_]>>();
 
-        verify_addresses::<true>(&addresses, &())?;
-        verify_threshold::<true>(&threshold, &())?;
+        verify_addresses::<true>(&addresses)?;
+        verify_threshold::<true>(&threshold)?;
 
         let addresses = BoxedSlicePrefix::<WeightedAddress, WeightedAddressCount>::try_from(addresses)
             .map_err(Error::InvalidWeightedAddressCount)?;
 
-        verify_cumulative_weight::<true>(&addresses, &threshold, &())?;
+        let multi_address = Self { addresses, threshold };
 
-        Ok(Self { addresses, threshold })
+        verify_multi_address::<true>(&multi_address)?;
+
+        Ok(multi_address)
     }
 
     /// Returns the addresses of a [`MultiAddress`].
@@ -121,71 +122,37 @@ impl MultiAddress {
     }
 }
 
-impl Packable for MultiAddress {
-    type UnpackError = Error;
-    type UnpackVisitor = ();
-
-    #[inline]
-    fn pack<P: Packer>(&self, packer: &mut P) -> Result<(), P::Error> {
-        self.addresses.pack(packer)?;
-        self.threshold.pack(packer)?;
-
-        Ok(())
-    }
-
-    #[inline]
-    fn unpack<U: Unpacker, const VERIFY: bool>(
-        unpacker: &mut U,
-        visitor: &Self::UnpackVisitor,
-    ) -> Result<Self, UnpackError<Self::UnpackError, U::Error>> {
-        let addresses =
-            BoxedSlicePrefix::<WeightedAddress, WeightedAddressCount>::unpack::<_, VERIFY>(unpacker, visitor)
-                .map_packable_err(|e| e.unwrap_item_err_or_else(|e| Error::InvalidWeightedAddressCount(e.into())))?;
-
-        verify_addresses::<VERIFY>(&addresses, &()).map_err(UnpackError::Packable)?;
-
-        let threshold = u16::unpack::<_, VERIFY>(unpacker, visitor).coerce()?;
-
-        verify_threshold::<VERIFY>(&threshold, &()).map_err(UnpackError::Packable)?;
-        verify_cumulative_weight::<VERIFY>(&addresses, &threshold, &()).map_err(UnpackError::Packable)?;
-
-        Ok(Self { addresses, threshold })
-    }
-}
-
-fn verify_addresses<const VERIFY: bool>(addresses: &[WeightedAddress], _visitor: &()) -> Result<(), Error> {
+fn verify_addresses<const VERIFY: bool>(addresses: &[WeightedAddress]) -> Result<(), Error> {
     if VERIFY && !is_unique_sorted(addresses.iter().map(WeightedAddress::address)) {
-        return Err(Error::WeightedAddressesNotUniqueSorted);
+        Err(Error::WeightedAddressesNotUniqueSorted)
     } else {
         Ok(())
     }
 }
 
-fn verify_threshold<const VERIFY: bool>(threshold: &u16, _visitor: &()) -> Result<(), Error> {
+fn verify_threshold<const VERIFY: bool>(threshold: &u16) -> Result<(), Error> {
     if VERIFY && *threshold == 0 {
-        return Err(Error::InvalidMultiAddressThreshold(*threshold));
+        Err(Error::InvalidMultiAddressThreshold(*threshold))
     } else {
         Ok(())
     }
 }
 
-fn verify_cumulative_weight<const VERIFY: bool>(
-    addresses: &[WeightedAddress],
-    threshold: &u16,
-    _visitor: &(),
-) -> Result<(), Error> {
+fn verify_multi_address<const VERIFY: bool>(address: &MultiAddress) -> Result<(), Error> {
     if VERIFY {
-        let cumulative_weight = addresses.iter().map(|address| address.weight as u16).sum::<u16>();
+        let cumulative_weight = address.iter().map(|address| address.weight as u16).sum::<u16>();
 
-        if cumulative_weight < *threshold {
+        if cumulative_weight < address.threshold {
             return Err(Error::InvalidMultiAddressCumulativeWeight {
                 cumulative_weight,
-                threshold: *threshold,
+                threshold: address.threshold,
             });
         }
     }
     Ok(())
 }
+
+impl StorageScore for MultiAddress {}
 
 impl fmt::Display for MultiAddress {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

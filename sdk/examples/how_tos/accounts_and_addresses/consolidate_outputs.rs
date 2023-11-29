@@ -49,7 +49,7 @@ async fn main() -> Result<()> {
         println!(
             "- amount: {:?}\n- native tokens: {:?}",
             output_data.output.amount(),
-            output_data.output.native_tokens()
+            output_data.output.native_token()
         )
     });
 
@@ -84,7 +84,7 @@ async fn main() -> Result<()> {
         println!(
             "- amount: {:?}\n- native tokens: {:?}",
             output_data.output.amount(),
-            output_data.output.native_tokens()
+            output_data.output.native_token()
         )
     });
 

@@ -13,31 +13,29 @@ require('dotenv').config({ path: '.env' });
 async function run() {
     initLogger();
     for (const envVar of [
-        'FAUCET_URL',
         'WALLET_DB_PATH',
         'STRONGHOLD_PASSWORD',
-    ])
+        'EXPLORER_URL',
+    ]) {
         if (!(envVar in process.env)) {
             throw new Error(`.env ${envVar} is undefined, see .env.example`);
         }
+    }
 
     try {
         // Create the wallet
-        const wallet = new Wallet({
+        const wallet = await Wallet.create({
             storagePath: process.env.WALLET_DB_PATH,
         });
 
-        // Get the account we generated with `01-create-wallet`
-        const account = await wallet.getAccount('Alice');
-
-        // May want to ensure the account is synced before sending a transaction.
-        let balance = await account.sync();
+        // May want to ensure the wallet is synced before sending a transaction.
+        let balance = await wallet.sync();
 
         if (balance.accounts.length == 0) {
             throw new Error(`No Account output available in account 'Alice'`);
         }
 
-        // We try to destroy the first account output in the account
+        // We try to destroy the first account output in the wallet
         const accountId = balance.accounts[0];
 
         console.log(
@@ -53,14 +51,14 @@ async function run() {
         console.log('Sending the destroy-account transaction...');
 
         // Destroy an account output
-        const transaction = await account
+        const transaction = await wallet
             .prepareDestroyAccount(accountId)
             .then((prepared) => prepared.send());
 
         console.log(`Transaction sent: ${transaction.transactionId}`);
 
         // Wait for transaction to get included
-        const blockId = await account.reissueTransactionUntilIncluded(
+        const blockId = await wallet.reissueTransactionUntilIncluded(
             transaction.transactionId,
         );
         console.log(
@@ -68,7 +66,7 @@ async function run() {
         );
         console.log(`Destroyed account output ${accountId}`);
 
-        balance = await account.sync();
+        balance = await wallet.sync();
         console.log(
             `Accounts AFTER destroying (${balance.accounts.length}):\n`,
             balance.accounts,

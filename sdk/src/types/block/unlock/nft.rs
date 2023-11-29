@@ -1,7 +1,7 @@
 // Copyright 2020-2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use crate::types::block::{unlock::UnlockIndex, Error};
+use crate::types::block::{protocol::WorkScore, unlock::UnlockIndex, Error};
 
 /// Points to the unlock of a consumed NFT output.
 #[derive(Clone, Debug, Eq, PartialEq, Hash, packable::Packable)]
@@ -10,14 +10,6 @@ pub struct NftUnlock(
     /// Index of input and unlock corresponding to an [`NftOutput`](crate::types::block::output::NftOutput).
     UnlockIndex,
 );
-
-impl TryFrom<u16> for NftUnlock {
-    type Error = Error;
-
-    fn try_from(index: u16) -> Result<Self, Self::Error> {
-        Self::new(index)
-    }
-}
 
 impl NftUnlock {
     /// The [`Unlock`](crate::types::block::unlock::Unlock) kind of a [`NftUnlock`].
@@ -33,6 +25,16 @@ impl NftUnlock {
     #[inline(always)]
     pub fn index(&self) -> u16 {
         self.0.get()
+    }
+}
+
+impl WorkScore for NftUnlock {}
+
+impl TryFrom<u16> for NftUnlock {
+    type Error = Error;
+
+    fn try_from(index: u16) -> Result<Self, Self::Error> {
+        Self::new(index)
     }
 }
 

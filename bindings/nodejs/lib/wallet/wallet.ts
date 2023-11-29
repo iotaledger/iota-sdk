@@ -6,7 +6,7 @@ import {
     Balance,
     SyncOptions,
     SendParams,
-    SendNativeTokensParams,
+    SendNativeTokenParams,
     SendNftParams,
     AccountOutputParams,
     FilterOptions,
@@ -62,10 +62,17 @@ export class Wallet {
     private methodHandler: WalletMethodHandler;
 
     /**
-     * @param options Wallet options.
+     * @param methodHandler The Rust method handler created in `WalletMethodHandler.create()`.
      */
-    constructor(options: WalletOptions) {
-        this.methodHandler = new WalletMethodHandler(options);
+    constructor(methodHandler: WalletMethodHandler) {
+        this.methodHandler = methodHandler;
+    }
+
+    /**
+     * @param options The wallet options.
+     */
+    static async create(options: WalletOptions): Promise<Wallet> {
+        return new Wallet(await WalletMethodHandler.create(options));
     }
 
     /**
@@ -399,27 +406,42 @@ export class Wallet {
 
     /**
      * Claim basic or nft outputs that have additional unlock conditions
-     * to their `AddressUnlockCondition` from the account.
+     * to their `AddressUnlockCondition` from the wallet.
      * @param outputIds The outputs to claim.
      * @returns The resulting transaction.
      */
     async claimOutputs(
         outputIds: OutputId[],
     ): Promise<TransactionWithMetadata> {
+        return (await this.prepareClaimOutputs(outputIds)).send();
+    }
+
+    /**
+     * Claim basic or nft outputs that have additional unlock conditions
+     * to their `AddressUnlockCondition` from the wallet.
+     * @param outputIds The outputs to claim.
+     * @returns The prepared transaction.
+     */
+    async prepareClaimOutputs(
+        outputIds: OutputId[],
+    ): Promise<PreparedTransaction> {
         const response = await this.methodHandler.callMethod({
-            name: 'claimOutputs',
+            name: 'prepareClaimOutputs',
             data: {
                 outputIdsToClaim: outputIds,
             },
         });
         const parsed = JSON.parse(
             response,
-        ) as Response<TransactionWithMetadata>;
-        return plainToInstance(TransactionWithMetadata, parsed.payload);
+        ) as Response<PreparedTransactionData>;
+        return new PreparedTransaction(
+            plainToInstance(PreparedTransactionData, parsed.payload),
+            this,
+        );
     }
 
     /**
-     * Consolidate basic outputs with only an `AddressUnlockCondition` from an account
+     * Consolidate basic outputs with only an `AddressUnlockCondition` from a wallet
      * by sending them to an own address again if the output amount is greater or
      * equal to the output consolidation threshold.
      * @param params Consolidation options.
@@ -432,7 +454,7 @@ export class Wallet {
     }
 
     /**
-     * Consolidate basic outputs with only an `AddressUnlockCondition` from an account
+     * Consolidate basic outputs with only an `AddressUnlockCondition` from a wallet
      * by sending them to an own address again if the output amount is greater or
      * equal to the output consolidation threshold.
      * @param params Consolidation options.
@@ -757,7 +779,7 @@ export class Wallet {
 
     /**
      * Get a `FoundryOutput` by native token ID. It will try to get the foundry from
-     * the account, if it isn't in the account it will try to get it from the node.
+     * the account, if it isn't in the wallet it will try to get it from the node.
      *
      * @param tokenId The native token ID to get the foundry for.
      * @returns The `FoundryOutput` that minted the token.
@@ -789,7 +811,7 @@ export class Wallet {
     }
 
     /**
-     * Get a transaction stored in the account.
+     * Get a transaction stored in the wallet.
      *
      * @param transactionId The ID of the transaction to get.
      * @returns The transaction.
@@ -810,7 +832,7 @@ export class Wallet {
     }
 
     /**
-     * Get the transaction with inputs of an incoming transaction stored in the account
+     * Get the transaction with inputs of an incoming transaction stored in the wallet
      * List might not be complete, if the node pruned the data already
      *
      * @param transactionId The ID of the transaction to get.
@@ -886,6 +908,41 @@ export class Wallet {
         });
 
         return JSON.parse(response).payload;
+    }
+
+    /**
+     * Transitions an implicit account to an account.
+     *
+     * @param outputId Identifier of the implicit account output.
+     * @returns The created transaction.
+     */
+    async implicitAccountTransition(
+        outputId: OutputId,
+    ): Promise<TransactionWithMetadata> {
+        return (await this.prepareImplicitAccountTransition(outputId)).send();
+    }
+
+    /**
+     * Prepares to transition an implicit account to an account.
+     *
+     * @param outputId Identifier of the implicit account output.
+     * @returns The prepared transaction.
+     */
+    async prepareImplicitAccountTransition(
+        outputId: OutputId,
+    ): Promise<PreparedTransaction> {
+        const response = await this.methodHandler.callMethod({
+            name: 'prepareImplicitAccountTransition',
+            data: { outputId },
+        });
+
+        const parsed = JSON.parse(
+            response,
+        ) as Response<PreparedTransactionData>;
+        return new PreparedTransaction(
+            plainToInstance(PreparedTransactionData, parsed.payload),
+            this,
+        );
     }
 
     /**
@@ -1229,7 +1286,7 @@ export class Wallet {
     }
 
     /**
-     * Reissues a transaction sent from the account for a provided transaction id until it's
+     * Reissues a transaction sent from the wallet for a provided transaction id until it's
      * included (referenced by a milestone). Returns the included block id.
      */
     async reissueTransactionUntilIncluded(
@@ -1318,7 +1375,7 @@ export class Wallet {
      * @returns The transaction.
      */
     async sendNativeTokens(
-        params: SendNativeTokensParams[],
+        params: SendNativeTokenParams[],
         transactionOptions?: TransactionOptions,
     ): Promise<TransactionWithMetadata> {
         return (
@@ -1335,7 +1392,7 @@ export class Wallet {
      * @returns The prepared transaction.
      */
     async prepareSendNativeTokens(
-        params: SendNativeTokensParams[],
+        params: SendNativeTokenParams[],
         transactionOptions?: TransactionOptions,
     ): Promise<PreparedTransaction> {
         const response = await this.methodHandler.callMethod({
@@ -1493,7 +1550,7 @@ export class Wallet {
     }
 
     /**
-     * Validate the transaction, submit it to a node and store it in the account.
+     * Validate the transaction, submit it to a node and store it in the wallet.
      *
      * @param signedTransactionData A signed transaction to submit and store.
      * @returns The sent transaction.
@@ -1584,7 +1641,7 @@ export class Wallet {
     }
 
     /**
-     * Calculates the voting overview of an account.
+     * Calculates the voting overview of a wallet.
      *
      * @param eventIds Optional, filters participations only for provided events.
      * @returns An instance of `ParticipationOverview`

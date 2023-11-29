@@ -11,7 +11,7 @@ use crate::{
         input::INPUT_COUNT_MAX,
         output::{
             unlock_condition::StorageDepositReturnUnlockCondition, AccountOutputBuilder, FoundryOutputBuilder,
-            NftOutputBuilder, Output, OutputId, Rent,
+            MinimumOutputAmount, NftOutputBuilder, Output, OutputId,
         },
         slot::SlotIndex,
     },
@@ -172,40 +172,36 @@ impl InputSelection {
         base_inputs: impl Iterator<Item = &'a InputSigningData> + Clone,
         amount_selection: &mut AmountSelection,
     ) -> bool {
-        // No native tokens, expired SDRUC.
+        // No native token, expired SDRUC.
         let inputs = base_inputs.clone().filter(|input| {
-            input.output.native_tokens().unwrap().is_empty()
-                && sdruc_not_expired(&input.output, self.slot_index).is_none()
+            input.output.native_token().is_none() && sdruc_not_expired(&input.output, self.slot_index).is_none()
         });
 
         if amount_selection.fulfil(inputs) {
             return true;
         }
 
-        // No native tokens, unexpired SDRUC.
+        // No native token, unexpired SDRUC.
         let inputs = base_inputs.clone().filter(|input| {
-            input.output.native_tokens().unwrap().is_empty()
-                && sdruc_not_expired(&input.output, self.slot_index).is_some()
+            input.output.native_token().is_none() && sdruc_not_expired(&input.output, self.slot_index).is_some()
         });
 
         if amount_selection.fulfil(inputs) {
             return true;
         }
 
-        // Native tokens, expired SDRUC.
+        // Native token, expired SDRUC.
         let inputs = base_inputs.clone().filter(|input| {
-            !input.output.native_tokens().unwrap().is_empty()
-                && sdruc_not_expired(&input.output, self.slot_index).is_none()
+            input.output.native_token().is_some() && sdruc_not_expired(&input.output, self.slot_index).is_none()
         });
 
         if amount_selection.fulfil(inputs) {
             return true;
         }
 
-        // Native tokens, unexpired SDRUC.
+        // Native token, unexpired SDRUC.
         let inputs = base_inputs.clone().filter(|input| {
-            !input.output.native_tokens().unwrap().is_empty()
-                && sdruc_not_expired(&input.output, self.slot_index).is_some()
+            input.output.native_token().is_some() && sdruc_not_expired(&input.output, self.slot_index).is_some()
         });
 
         if amount_selection.fulfil(inputs) {
@@ -233,11 +229,15 @@ impl InputSelection {
         for output in outputs {
             let diff = amount_selection.missing_amount();
             let amount = output.amount();
-            let rent = output.rent_cost(self.protocol_parameters.rent_structure());
+            let minimum_amount = output.minimum_amount(self.protocol_parameters.storage_score_parameters());
 
-            let new_amount = if amount >= diff + rent { amount - diff } else { rent };
+            let new_amount = if amount >= diff + minimum_amount {
+                amount - diff
+            } else {
+                minimum_amount
+            };
 
-            // TODO check that new_amount is enough for the rent
+            // TODO check that new_amount is enough for the storage cost
 
             // PANIC: unwrap is fine as non-chain outputs have been filtered out already.
             log::debug!(

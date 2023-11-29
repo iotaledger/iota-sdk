@@ -38,13 +38,11 @@ fn input_nft_eq_output_nft() {
         None,
         None,
         None,
-        None,
     )]);
     let outputs = build_outputs([Nft(
         1_000_000,
         nft_id_2,
         BECH32_ADDRESS_ED25519_0,
-        None,
         None,
         None,
         None,
@@ -79,14 +77,12 @@ fn transition_nft_id_zero() {
         None,
         None,
         None,
-        None,
     )]);
     let nft_id = NftId::from(inputs[0].output_id());
     let outputs = build_outputs([Nft(
         1_000_000,
         nft_id,
         BECH32_ADDRESS_ED25519_0,
-        None,
         None,
         None,
         None,
@@ -219,7 +215,6 @@ fn mint_nft() {
         None,
         None,
         None,
-        None,
     )]);
 
     let selected = InputSelection::new(
@@ -253,7 +248,6 @@ fn burn_nft() {
         2_000_000,
         nft_id_2,
         BECH32_ADDRESS_ED25519_0,
-        None,
         None,
         None,
         None,
@@ -354,7 +348,6 @@ fn missing_input_for_nft_output() {
         None,
         None,
         None,
-        None,
     )]);
 
     let selected = InputSelection::new(
@@ -395,7 +388,6 @@ fn missing_input_for_nft_output_but_created() {
         None,
         None,
         None,
-        None,
     )]);
 
     let selected = InputSelection::new(
@@ -424,7 +416,6 @@ fn nft_in_output_and_sender() {
             None,
             None,
             None,
-            None,
         ),
         Basic(1_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
     ]);
@@ -433,7 +424,6 @@ fn nft_in_output_and_sender() {
             1_000_000,
             nft_id_1,
             BECH32_ADDRESS_ED25519_0,
-            None,
             None,
             None,
             None,
@@ -487,13 +477,11 @@ fn missing_ed25519_sender() {
         None,
         None,
         None,
-        None,
     )]);
     let outputs = build_outputs([Nft(
         1_000_000,
         nft_id_2,
         BECH32_ADDRESS_ED25519_0,
-        None,
         Some(BECH32_ADDRESS_ED25519_1),
         None,
         None,
@@ -535,7 +523,6 @@ fn missing_ed25519_issuer_created() {
         nft_id_0,
         BECH32_ADDRESS_ED25519_0,
         None,
-        None,
         Some(BECH32_ADDRESS_ED25519_1),
         None,
         None,
@@ -566,7 +553,6 @@ fn missing_ed25519_issuer_transition() {
         nft_id_1,
         BECH32_ADDRESS_ED25519_0,
         None,
-        None,
         Some(BECH32_ADDRESS_ED25519_1),
         None,
         None,
@@ -576,7 +562,6 @@ fn missing_ed25519_issuer_transition() {
         1_000_000,
         nft_id_1,
         BECH32_ADDRESS_ED25519_0,
-        None,
         None,
         Some(BECH32_ADDRESS_ED25519_1),
         None,
@@ -609,13 +594,11 @@ fn missing_account_sender() {
         None,
         None,
         None,
-        None,
     )]);
     let outputs = build_outputs([Nft(
         1_000_000,
         nft_id_2,
         BECH32_ADDRESS_ED25519_0,
-        None,
         Some(BECH32_ADDRESS_ACCOUNT_1),
         None,
         None,
@@ -657,7 +640,6 @@ fn missing_account_issuer_created() {
         nft_id_0,
         BECH32_ADDRESS_ED25519_0,
         None,
-        None,
         Some(BECH32_ADDRESS_ACCOUNT_1),
         None,
         None,
@@ -688,7 +670,6 @@ fn missing_account_issuer_transition() {
         nft_id_2,
         BECH32_ADDRESS_ED25519_0,
         None,
-        None,
         Some(BECH32_ADDRESS_ACCOUNT_1),
         None,
         None,
@@ -698,7 +679,6 @@ fn missing_account_issuer_transition() {
         1_000_000,
         nft_id_2,
         BECH32_ADDRESS_ED25519_0,
-        None,
         None,
         Some(BECH32_ADDRESS_ACCOUNT_1),
         None,
@@ -731,13 +711,11 @@ fn missing_nft_sender() {
         None,
         None,
         None,
-        None,
     )]);
     let outputs = build_outputs([Nft(
         1_000_000,
         nft_id_2,
         BECH32_ADDRESS_ED25519_0,
-        None,
         Some(BECH32_ADDRESS_NFT_1),
         None,
         None,
@@ -779,7 +757,6 @@ fn missing_nft_issuer_created() {
         nft_id_0,
         BECH32_ADDRESS_ED25519_0,
         None,
-        None,
         Some(BECH32_ADDRESS_NFT_1),
         None,
         None,
@@ -810,7 +787,6 @@ fn missing_nft_issuer_transition() {
         nft_id_2,
         BECH32_ADDRESS_ED25519_0,
         None,
-        None,
         Some(BECH32_ADDRESS_NFT_1),
         None,
         None,
@@ -820,7 +796,6 @@ fn missing_nft_issuer_transition() {
         1_000_000,
         nft_id_2,
         BECH32_ADDRESS_ED25519_0,
-        None,
         None,
         Some(BECH32_ADDRESS_NFT_1),
         None,
@@ -854,7 +829,6 @@ fn increase_nft_amount() {
             None,
             None,
             None,
-            None,
         ),
         Basic(1_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
     ]);
@@ -862,7 +836,6 @@ fn increase_nft_amount() {
         3_000_000,
         nft_id_1,
         BECH32_ADDRESS_ED25519_0,
-        None,
         None,
         None,
         None,
@@ -898,7 +871,6 @@ fn decrease_nft_amount() {
             None,
             None,
             None,
-            None,
         ),
         Basic(1_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
     ]);
@@ -906,7 +878,6 @@ fn decrease_nft_amount() {
         1_000_000,
         nft_id_1,
         BECH32_ADDRESS_ED25519_0,
-        None,
         None,
         None,
         None,
@@ -949,7 +920,6 @@ fn prefer_basic_to_nft() {
             2_000_000,
             nft_id_1,
             BECH32_ADDRESS_ED25519_0,
-            None,
             None,
             None,
             None,
@@ -998,7 +968,6 @@ fn take_amount_from_nft_to_fund_basic() {
             None,
             None,
             None,
-            None,
         ),
         Basic(1_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
     ]);
@@ -1029,7 +998,6 @@ fn take_amount_from_nft_to_fund_basic() {
         if !outputs.contains(output) {
             assert!(output.is_nft());
             assert_eq!(output.amount(), 1_800_000);
-            assert_eq!(output.as_nft().native_tokens().len(), 0);
             assert_eq!(output.as_nft().unlock_conditions().len(), 1);
             assert_eq!(output.as_nft().features().len(), 0);
             assert_eq!(
@@ -1051,7 +1019,6 @@ fn nft_burn_should_validate_nft_sender() {
             1_000_000,
             nft_id_1,
             BECH32_ADDRESS_ED25519_0,
-            None,
             None,
             None,
             None,
@@ -1100,7 +1067,6 @@ fn nft_burn_should_validate_nft_address() {
             None,
             None,
             None,
-            None,
         ),
     ]);
     let outputs = build_outputs([Basic(
@@ -1142,7 +1108,6 @@ fn transitioned_zero_nft_id_no_longer_is_zero() {
         None,
         None,
         None,
-        None,
     )]);
     let outputs = build_outputs([Basic(
         1_000_000,
@@ -1172,7 +1137,6 @@ fn transitioned_zero_nft_id_no_longer_is_zero() {
             assert!(output.is_nft());
             assert_eq!(output.amount(), 1_000_000);
             assert_ne!(*output.as_nft().nft_id(), nft_id_0);
-            assert_eq!(output.as_nft().native_tokens().len(), 0);
             assert_eq!(output.as_nft().unlock_conditions().len(), 1);
             assert_eq!(output.as_nft().features().len(), 0);
             assert_eq!(
@@ -1198,13 +1162,14 @@ fn changed_immutable_metadata() {
     #[cfg(not(feature = "irc_27"))]
     let metadata = [1, 2, 3];
 
-    let nft_output = NftOutputBuilder::new_with_minimum_storage_deposit(protocol_parameters.rent_structure(), nft_id_1)
-        .with_immutable_features(MetadataFeature::try_from(metadata))
-        .add_unlock_condition(AddressUnlockCondition::new(
-            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-        ))
-        .finish_output()
-        .unwrap();
+    let nft_output =
+        NftOutputBuilder::new_with_minimum_amount(protocol_parameters.storage_score_parameters(), nft_id_1)
+            .with_immutable_features(MetadataFeature::try_from(metadata))
+            .add_unlock_condition(AddressUnlockCondition::new(
+                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            ))
+            .finish_output()
+            .unwrap();
 
     let inputs = [InputSigningData {
         output: nft_output.clone(),
@@ -1224,7 +1189,7 @@ fn changed_immutable_metadata() {
 
     // New nft output with changed immutable metadata feature
     let updated_nft_output = NftOutputBuilder::from(nft_output.as_nft())
-        .with_minimum_storage_deposit(protocol_parameters.rent_structure())
+        .with_minimum_amount(protocol_parameters.storage_score_parameters())
         .with_immutable_features(MetadataFeature::try_from(metadata))
         .finish_output()
         .unwrap();

@@ -1,6 +1,8 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+mod work_score;
+
 use alloc::string::String;
 use core::borrow::Borrow;
 
@@ -8,12 +10,18 @@ use crypto::hashes::{blake2b::Blake2b256, Digest};
 use getset::{CopyGetters, Getters};
 use packable::{prefix::StringPrefix, Packable, PackableExt};
 
-use super::{
-    address::Hrp,
-    mana::{ManaParameters, RewardsParameters},
-    slot::{EpochIndex, SlotIndex},
+pub use self::work_score::{WorkScore, WorkScoreParameters};
+use crate::{
+    types::block::{
+        address::Hrp,
+        helper::network_name_to_id,
+        mana::{ManaParameters, RewardsParameters},
+        output::StorageScoreParameters,
+        slot::{EpochIndex, SlotIndex},
+        Error, PROTOCOL_VERSION,
+    },
+    utils::ConvertTo,
 };
-use crate::types::block::{helper::network_name_to_id, output::RentStructure, ConvertTo, Error, PROTOCOL_VERSION};
 
 /// Defines the parameters of the protocol at a particular version.
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Packable, Getters, CopyGetters)]
@@ -37,8 +45,8 @@ pub struct ProtocolParameters {
     pub(crate) network_name: StringPrefix<u8>,
     /// The HRP prefix used for Bech32 addresses in the network.
     pub(crate) bech32_hrp: Hrp,
-    /// The rent structure used by given node/network.
-    pub(crate) rent_structure: RentStructure,
+    /// The storage score parameters used by given node/network.
+    pub(crate) storage_score_parameters: StorageScoreParameters,
     /// The work score parameters used by the node/network.
     pub(crate) work_score_parameters: WorkScoreParameters,
     /// The parameters used for mana calculations.
@@ -47,6 +55,8 @@ pub struct ProtocolParameters {
     /// TokenSupply defines the current token supply on the network.
     #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
     pub(crate) token_supply: u64,
+    /// Defines the slot of the genesis.
+    pub(crate) genesis_slot: u32,
     /// Genesis timestamp at which the slots start to count.
     #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
     pub(crate) genesis_unix_timestamp: u64,
@@ -62,7 +72,7 @@ pub struct ProtocolParameters {
     pub(crate) punishment_epochs: u32,
     /// Used by tip-selection to determine if a block is eligible by evaluating issuing times.
     pub(crate) liveness_threshold_lower_bound: u16,
-    /// Used by tip-selection to determine if a block is eligible by evaluating issuing times
+    /// Used by tip-selection to determine if a block is eligible by evaluating issuing times.
     pub(crate) liveness_threshold_upper_bound: u16,
     /// Minimum age relative to the accepted tangle time slot index that a slot can be committed.
     pub(crate) min_committable_age: u32,
@@ -75,7 +85,7 @@ pub struct ProtocolParameters {
     /// Parameters used to calculate the Reference Mana Cost (RMC).
     pub(crate) congestion_control_parameters: CongestionControlParameters,
     /// Defines the parameters used to signal a protocol parameters upgrade.
-    pub(crate) version_signaling: VersionSignalingParameters,
+    pub(crate) version_signaling_parameters: VersionSignalingParameters,
     /// Defines the parameters used for reward calculation.
     pub(crate) rewards_parameters: RewardsParameters,
     /// Defines the target size of the committee. If there's fewer candidates the actual committee size could be
@@ -98,9 +108,10 @@ impl Default for ProtocolParameters {
             // Unwrap: Known to be valid
             network_name: String::from("iota-core-testnet").try_into().unwrap(),
             bech32_hrp: Hrp::from_str_unchecked("smr"),
-            rent_structure: Default::default(),
+            storage_score_parameters: Default::default(),
             work_score_parameters: Default::default(),
             token_supply: 1_813_620_509_061_365,
+            genesis_slot: 0,
             genesis_unix_timestamp: 1582328545,
             slot_duration_in_seconds: 10,
             epoch_nearing_threshold: 20,
@@ -114,7 +125,7 @@ impl Default for ProtocolParameters {
             min_committable_age: 10,
             max_committable_age: 20,
             congestion_control_parameters: Default::default(),
-            version_signaling: Default::default(),
+            version_signaling_parameters: Default::default(),
             rewards_parameters: Default::default(),
             target_committee_size: 32,
         }
@@ -128,7 +139,7 @@ impl ProtocolParameters {
         version: u8,
         network_name: impl Into<String>,
         bech32_hrp: impl ConvertTo<Hrp>,
-        rent_structure: RentStructure,
+        storage_score_parameters: StorageScoreParameters,
         token_supply: u64,
         genesis_unix_timestamp: u64,
         slot_duration_in_seconds: u8,
@@ -138,7 +149,7 @@ impl ProtocolParameters {
             version,
             network_name: <StringPrefix<u8>>::try_from(network_name.into()).map_err(Error::InvalidStringPrefix)?,
             bech32_hrp: bech32_hrp.convert()?,
-            rent_structure,
+            storage_score_parameters,
             token_supply,
             genesis_unix_timestamp,
             slot_duration_in_seconds,
@@ -194,54 +205,6 @@ impl ProtocolParameters {
     /// Returns the hash of the [`ProtocolParameters`].
     pub fn hash(&self) -> ProtocolParametersHash {
         ProtocolParametersHash::new(Blake2b256::digest(self.pack_to_vec()).into())
-    }
-}
-
-#[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Packable, CopyGetters)]
-#[cfg_attr(
-    feature = "serde",
-    derive(serde::Serialize, serde::Deserialize),
-    serde(rename_all = "camelCase")
-)]
-#[packable(unpack_error = Error)]
-#[getset(get_copy = "pub")]
-pub struct WorkScoreParameters {
-    /// Modifier for network traffic per byte.
-    data_byte: u32,
-    /// Modifier for work done to process a block.
-    block: u32,
-    /// Modifier for loading UTXOs and performing mana calculations.
-    input: u32,
-    /// Modifier for loading and checking the context input.
-    context_input: u32,
-    /// Modifier for storing UTXOs.
-    output: u32,
-    /// Modifier for calculations using native tokens.
-    native_token: u32,
-    /// Modifier for storing staking features.
-    staking: u32,
-    /// Modifier for storing block issuer features.
-    block_issuer: u32,
-    /// Modifier for accessing the account-based ledger to transform mana to Block Issuance Credits.
-    allotment: u32,
-    /// Modifier for the block signature check.
-    signature_ed25519: u32,
-}
-
-impl Default for WorkScoreParameters {
-    fn default() -> Self {
-        Self {
-            data_byte: 0,
-            block: 100,
-            input: 20,
-            context_input: 20,
-            output: 20,
-            native_token: 20,
-            staking: 100,
-            block_issuer: 100,
-            allotment: 100,
-            signature_ed25519: 200,
-        }
     }
 }
 
@@ -327,7 +290,7 @@ pub fn protocol_parameters() -> ProtocolParameters {
         2,
         "testnet",
         "rms",
-        crate::types::block::output::RentStructure::new(500, 1, 10, 1, 1, 1),
+        crate::types::block::output::StorageScoreParameters::new(500, 1, 10, 1, 1, 1),
         1_813_620_509_061_365,
         1582328545,
         10,

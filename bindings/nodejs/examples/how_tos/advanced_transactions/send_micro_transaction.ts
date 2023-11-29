@@ -11,35 +11,41 @@ require('dotenv').config({ path: '.env' });
 async function run() {
     initLogger();
     try {
-        if (!process.env.STRONGHOLD_PASSWORD) {
-            throw new Error(
-                '.env STRONGHOLD_PASSWORD is undefined, see .env.example',
-            );
+        for (const envVar of [
+            'WALLET_DB_PATH',
+            'STRONGHOLD_PASSWORD',
+            'EXPLORER_URL',
+        ]) {
+            if (!(envVar in process.env)) {
+                throw new Error(
+                    `.env ${envVar} is undefined, see .env.example`,
+                );
+            }
         }
 
-        const wallet = new Wallet({
+        const wallet = await Wallet.create({
             storagePath: process.env.WALLET_DB_PATH,
         });
 
-        const account = await wallet.getAccount('Alice');
-
-        await account.sync();
+        await wallet.sync();
 
         // To sign a transaction we need to unlock stronghold.
-        await wallet.setStrongholdPassword(process.env.STRONGHOLD_PASSWORD);
+        await wallet.setStrongholdPassword(
+            process.env.STRONGHOLD_PASSWORD as string,
+        );
 
         // Replace with the address of your choice!
         const address =
             'rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu';
         const amount = BigInt(1);
 
-        const transaction = await account.send(amount, address, {
+        const transaction = await wallet.send(amount, address, {
             allowMicroAmount: true,
         });
 
         console.log(`Transaction sent: ${transaction.transactionId}`);
 
-        const blockId = await account.reissueTransactionUntilIncluded(
+        const blockId = await wallet.reissueTransactionUntilIncluded(
             transaction.transactionId,
         );
 

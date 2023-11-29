@@ -28,7 +28,7 @@ js-sys = { version = "0.3.64", default-features = false, features = [] }
 log = { version = "0.4.20", default-features = false }
 serde_json = { version = "1.0.107", default-features = false }
 tokio = { version = "1.33.0", default-features = false, features = ["sync"] }
-wasm-bindgen = { version = "0.2.87", default-features = false, features = [
+wasm-bindgen = { version = "0.2.88", default-features = false, features = [
     "spans",
     "std",
     "serde-serialize",

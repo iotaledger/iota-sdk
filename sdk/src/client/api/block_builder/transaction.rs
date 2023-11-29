@@ -12,13 +12,12 @@ use crate::{
         payload::signed_transaction::{SignedTransactionPayload, Transaction},
         semantic::{SemanticValidationContext, TransactionFailureReason},
         signature::Ed25519Signature,
-        BlockId, SignedBlock,
+        Block, BlockId,
     },
 };
 
 // TODO this is wrong because of https://github.com/iotaledger/iota-sdk/issues/1208
-const MAX_TX_LENGTH_FOR_BLOCK_WITH_8_PARENTS: usize =
-    SignedBlock::LENGTH_MAX - SignedBlock::LENGTH_MIN - (7 * BlockId::LENGTH);
+const MAX_TX_LENGTH_FOR_BLOCK_WITH_8_PARENTS: usize = Block::LENGTH_MAX - Block::LENGTH_MIN - (7 * BlockId::LENGTH);
 // Length for unlocks with a single signature unlock (unlocks length + unlock type + signature type + public key +
 // signature)
 const SINGLE_UNLOCK_LENGTH: usize = 1 + 1 + Ed25519Signature::PUBLIC_KEY_LENGTH + Ed25519Signature::SIGNATURE_LENGTH;

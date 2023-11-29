@@ -4,9 +4,9 @@
 use std::sync::Arc;
 
 use iota_sdk_bindings_core::{
-    call_wallet_method,
+    call_wallet_method as rust_call_wallet_method,
     iota_sdk::wallet::{
-        events::types::{Event, WalletEventType},
+        events::types::{WalletEvent, WalletEventType},
         Wallet,
     },
     Response, WalletMethod, WalletOptions,
@@ -28,14 +28,10 @@ pub struct WalletMethodHandler {
 /// Creates a method handler with the given options.
 #[wasm_bindgen(js_name = createWallet)]
 #[allow(non_snake_case)]
-pub fn create_wallet(options: String) -> Result<WalletMethodHandler, JsValue> {
+pub async fn create_wallet(options: String) -> Result<WalletMethodHandler, JsValue> {
     let wallet_options = serde_json::from_str::<WalletOptions>(&options).map_err(|e| e.to_string())?;
 
-    let wallet_method_handler = tokio::runtime::Builder::new_current_thread()
-        .build()
-        .unwrap()
-        .block_on(async move { wallet_options.build().await })
-        .map_err(|e| e.to_string())?;
+    let wallet_method_handler = wallet_options.build().await.map_err(|e| e.to_string())?;
 
     Ok(WalletMethodHandler {
         wallet: Arc::new(Mutex::new(Some(wallet_method_handler))),
@@ -50,9 +46,10 @@ pub async fn destroy_wallet(method_handler: &WalletMethodHandler) -> Result<(), 
 
 #[wasm_bindgen(js_name = getClientFromWallet)]
 pub async fn get_client(method_handler: &WalletMethodHandler) -> Result<ClientMethodHandler, JsValue> {
-    let wallet = method_handler.wallet.lock().await;
-
-    let client = wallet
+    let client = method_handler
+        .wallet
+        .lock()
+        .await
         .as_ref()
         .ok_or_else(|| "wallet got destroyed".to_string())?
         .client()
@@ -63,9 +60,10 @@ pub async fn get_client(method_handler: &WalletMethodHandler) -> Result<ClientMe
 
 #[wasm_bindgen(js_name = getSecretManagerFromWallet)]
 pub async fn get_secret_manager(method_handler: &WalletMethodHandler) -> Result<SecretManagerMethodHandler, JsValue> {
-    let wallet = method_handler.wallet.lock().await;
-
-    let secret_manager = wallet
+    let secret_manager = method_handler
+        .wallet
+        .lock()
+        .await
         .as_ref()
         .ok_or_else(|| "wallet got destroyed".to_string())?
         .get_secret_manager()
@@ -77,12 +75,12 @@ pub async fn get_secret_manager(method_handler: &WalletMethodHandler) -> Result<
 /// Handles a method, returns the response as a JSON-encoded string.
 ///
 /// Returns an error if the response itself is an error or panic.
-#[wasm_bindgen(js_name = callWalletMethodAsync)]
-pub async fn call_wallet_method_async(method: String, method_handler: &WalletMethodHandler) -> Result<String, JsValue> {
+#[wasm_bindgen(js_name = callWalletMethod)]
+pub async fn call_wallet_method(method_handler: &WalletMethodHandler, method: String) -> Result<String, JsValue> {
     let wallet = method_handler.wallet.lock().await;
     let method: WalletMethod = serde_json::from_str(&method).map_err(|err| err.to_string())?;
 
-    let response = call_wallet_method(wallet.as_ref().expect("wallet got destroyed"), method).await;
+    let response = rust_call_wallet_method(wallet.as_ref().expect("wallet got destroyed"), method).await;
     match response {
         Response::Error(e) => Err(e.to_string().into()),
         Response::Panic(p) => Err(p.into()),
@@ -98,22 +96,22 @@ pub async fn call_wallet_method_async(method: String, method_handler: &WalletMet
 /// * `vec`: An array of strings that represent the event types you want to listen to.
 /// * `callback`: A JavaScript function that will be called when a wallet event occurs.
 /// * `method_handler`: This is the same method handler that we used in the previous section.
-#[wasm_bindgen(js_name = listenWalletAsync)]
+#[wasm_bindgen(js_name = listenWallet)]
 pub async fn listen_wallet(
+    method_handler: &WalletMethodHandler,
     vec: js_sys::Array,
     callback: js_sys::Function,
-    method_handler: &WalletMethodHandler,
 ) -> Result<JsValue, JsValue> {
     let mut event_types = Vec::with_capacity(vec.length() as _);
     for event_type in vec.keys() {
         // We know the built-in iterator for set elements won't throw
         // exceptions, so just unwrap the element.
         let event_type = event_type.unwrap().as_f64().unwrap() as u8;
-        let wallet_event_type = WalletEventType::try_from(event_type).map_err(JsValue::from)?;
+        let wallet_event_type = WalletEventType::try_from(event_type).map_err(|err| err.to_string())?;
         event_types.push(wallet_event_type);
     }
 
-    let (tx, mut rx): (UnboundedSender<Event>, UnboundedReceiver<Event>) = unbounded_channel();
+    let (tx, mut rx): (UnboundedSender<WalletEvent>, UnboundedReceiver<WalletEvent>) = unbounded_channel();
     method_handler
         .wallet
         .lock()

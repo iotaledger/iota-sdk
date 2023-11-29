@@ -12,21 +12,20 @@ require('dotenv').config({ path: '.env' });
 // This example requests funds from the faucet
 async function run() {
     initLogger();
-    if (!process.env.FAUCET_URL) {
-        throw new Error('.env FAUCET_URL is undefined, see .env.example');
+    for (const envVar of ['FAUCET_URL', 'WALLET_DB_PATH']) {
+        if (!(envVar in process.env)) {
+            throw new Error(`.env ${envVar} is not defined`);
+        }
     }
     try {
-        const faucetUrl = process.env.FAUCET_URL;
+        const faucetUrl = process.env.FAUCET_URL as string;
 
         // Create the wallet
-        const wallet = new Wallet({
+        const wallet = await Wallet.create({
             storagePath: process.env.WALLET_DB_PATH,
         });
 
-        // Get the account we generated with `create-account`
-        const account = await wallet.getAccount('Alice');
-
-        const address = (await account.addresses())[0].address;
+        const address = await wallet.address();
         console.log(address);
 
         const faucetResponse = await (

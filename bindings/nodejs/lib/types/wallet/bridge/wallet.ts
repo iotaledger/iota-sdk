@@ -9,7 +9,7 @@ import type {
 } from '../../client';
 import type {
     SendParams,
-    SendNativeTokensParams,
+    SendNativeTokenParams,
     SendNftParams,
 } from '../address';
 import type { OutputParams } from '../output-params';
@@ -137,6 +137,13 @@ export type __PrepareBurnMethod__ = {
     };
 };
 
+export type __PrepareClaimOutputsMethod__ = {
+    name: 'prepareClaimOutputs';
+    data: {
+        outputIdsToClaim: OutputId[];
+    };
+};
+
 export type __ClaimOutputsMethod__ = {
     name: 'claimOutputs';
     data: {
@@ -231,6 +238,13 @@ export type __PendingTransactionsMethod__ = {
 
 export type __ImplicitAccountCreationAddressMethod__ = {
     name: 'implicitAccountCreationAddress';
+};
+
+export type __PrepareImplicitAccountTransitionMethod__ = {
+    name: 'prepareImplicitAccountTransition';
+    data: {
+        outputId: OutputId;
+    };
 };
 
 export type __ImplicitAccountsMethod__ = {
@@ -337,7 +351,7 @@ export type __SendWithParamsMethod__ = {
 export type __PrepareSendNativeTokensMethod__ = {
     name: 'prepareSendNativeTokens';
     data: {
-        params: SendNativeTokensParams[];
+        params: SendNativeTokenParams[];
         options?: TransactionOptions;
     };
 };

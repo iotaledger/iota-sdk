@@ -24,8 +24,6 @@ export interface OutputParams {
 
 /** Assets to include in the output. */
 export interface Assets {
-    /** Native Token assets to include. */
-    nativeTokens?: INativeToken[];
     /** The NFT to include. */
     nftId?: HexEncodedString;
 }
@@ -40,6 +38,8 @@ export interface Features {
     sender?: string;
     /** An Issuer feature to include. */
     issuer?: string;
+    /** Native Token to include. */
+    nativeToken?: INativeToken;
 }
 
 /** Time unlocks to include in the output. */
@@ -58,7 +58,7 @@ export interface StorageDeposit {
     returnStrategy?: ReturnStrategy;
     /**
      * Determines whether the storage deposit will automatically add excess small funds when necessary.
-     * For example, given an account has 20 tokens and wants to send 15 tokens, and the minimum storage deposit
+     * For example, given an account has 20 tokens and wants to send 15 tokens, and the minimum amount
      * is 10 tokens, it wouldn't be possible to create an output with the 5 token remainder. If this flag is enabled,
      * the 5 tokens will be added to the output automatically.
      */
@@ -67,8 +67,8 @@ export interface StorageDeposit {
 
 /** Return strategy for the storage deposit. */
 export enum ReturnStrategy {
-    /** A storage deposit return unlock condition will be added with the required minimum storage deposit. */
+    /** A storage deposit return unlock condition will be added with the additional amount needed to satisfy storage costs. */
     Return = 'Return',
-    /** The recipient address will get the additional amount to reach the minimum storage deposit gifted. */
+    /** The recipient address will receive the additional amount needed to satisfy storage costs. */
     Gift = 'Gift',
 }

@@ -72,7 +72,7 @@ async fn single_ed25519_unlock() -> Result<()> {
         )
         .with_outputs(outputs)
         .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
-        .finish_with_params(protocol_parameters)?;
+        .finish_with_params(&protocol_parameters)?;
 
     let prepared_transaction_data = PreparedTransactionData {
         transaction,
@@ -83,7 +83,7 @@ async fn single_ed25519_unlock() -> Result<()> {
     let unlocks = secret_manager.transaction_unlocks(&prepared_transaction_data).await?;
 
     assert_eq!(unlocks.len(), 1);
-    assert_eq!((*unlocks).get(0).unwrap().kind(), SignatureUnlock::KIND);
+    assert_eq!((*unlocks).first().unwrap().kind(), SignatureUnlock::KIND);
 
     let tx_payload = SignedTransactionPayload::new(prepared_transaction_data.transaction.clone(), unlocks)?;
 
@@ -167,7 +167,7 @@ async fn ed25519_reference_unlocks() -> Result<()> {
         )
         .with_outputs(outputs)
         .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
-        .finish_with_params(protocol_parameters)?;
+        .finish_with_params(&protocol_parameters)?;
 
     let prepared_transaction_data = PreparedTransactionData {
         transaction,
@@ -178,7 +178,7 @@ async fn ed25519_reference_unlocks() -> Result<()> {
     let unlocks = secret_manager.transaction_unlocks(&prepared_transaction_data).await?;
 
     assert_eq!(unlocks.len(), 3);
-    assert_eq!((*unlocks).get(0).unwrap().kind(), SignatureUnlock::KIND);
+    assert_eq!((*unlocks).first().unwrap().kind(), SignatureUnlock::KIND);
     match (*unlocks).get(1).unwrap() {
         Unlock::Reference(r) => {
             assert_eq!(r.index(), 0);
@@ -273,7 +273,7 @@ async fn two_signature_unlocks() -> Result<()> {
         )
         .with_outputs(outputs)
         .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
-        .finish_with_params(protocol_parameters)?;
+        .finish_with_params(&protocol_parameters)?;
 
     let prepared_transaction_data = PreparedTransactionData {
         transaction,
@@ -284,7 +284,7 @@ async fn two_signature_unlocks() -> Result<()> {
     let unlocks = secret_manager.transaction_unlocks(&prepared_transaction_data).await?;
 
     assert_eq!(unlocks.len(), 2);
-    assert_eq!((*unlocks).get(0).unwrap().kind(), SignatureUnlock::KIND);
+    assert_eq!((*unlocks).first().unwrap().kind(), SignatureUnlock::KIND);
     assert_eq!((*unlocks).get(1).unwrap().kind(), SignatureUnlock::KIND);
 
     let tx_payload = SignedTransactionPayload::new(prepared_transaction_data.transaction.clone(), unlocks)?;

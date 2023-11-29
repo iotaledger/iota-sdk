@@ -12,22 +12,22 @@ require('dotenv').config({ path: '.env' });
 // This example syncs the account and prints the balance.
 async function run() {
     initLogger();
-    if (!process.env.WALLET_DB_PATH) {
-        throw new Error('.env WALLET_DB_PATH is undefined, see .env.example');
+    for (const envVar of ['WALLET_DB_PATH']) {
+        if (!(envVar in process.env)) {
+            throw new Error(`.env ${envVar} is undefined, see .env.example`);
+        }
     }
     try {
-        const wallet = new Wallet({
+        const wallet = await Wallet.create({
             storagePath: process.env.WALLET_DB_PATH,
         });
 
-        const account = await wallet.getAccount('Alice');
-
         // Sync new outputs from the node.
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const _syncBalance = await account.sync();
+        const _syncBalance = await wallet.sync();
 
         // After syncing the balance can also be computed with the local data
-        const balance = await account.getBalance();
+        const balance = await wallet.getBalance();
         console.log('Balance', balance);
     } catch (error) {
         console.error('Error: ', error);

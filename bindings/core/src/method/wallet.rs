@@ -26,7 +26,7 @@ use iota_sdk::{
     },
     wallet::{
         ClientOptions, ConsolidationParams, CreateAccountParams, CreateNativeTokenParams, FilterOptions, MintNftParams,
-        OutputParams, OutputsToClaim, SendNativeTokensParams, SendNftParams, SendParams, SyncOptions,
+        OutputParams, OutputsToClaim, SendNativeTokenParams, SendNftParams, SendParams, SyncOptions,
         TransactionOptions,
     },
     U256,
@@ -191,6 +191,10 @@ pub enum WalletMethod {
     /// Returns the implicit account creation address of the wallet if it is Ed25519 based.
     /// Expected response: [`Bech32Address`](crate::Response::Bech32Address)
     ImplicitAccountCreationAddress,
+    /// Prepares to transition an implicit account to an account.
+    /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
+    #[serde(rename_all = "camelCase")]
+    PrepareImplicitAccountTransition { output_id: OutputId },
     /// Returns the implicit accounts of the wallet.
     /// Expected response: [`OutputsData`](crate::Response::OutputsData)
     ImplicitAccounts,
@@ -216,6 +220,10 @@ pub enum WalletMethod {
         burn: Burn,
         options: Option<TransactionOptions>,
     },
+    /// Claim outputs.
+    /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
+    #[serde(rename_all = "camelCase")]
+    PrepareClaimOutputs { output_ids_to_claim: Vec<OutputId> },
     /// Consolidate outputs.
     /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
     PrepareConsolidateOutputs { params: ConsolidationParams },
@@ -295,7 +303,7 @@ pub enum WalletMethod {
     /// Prepare to send native tokens.
     /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
     PrepareSendNativeTokens {
-        params: Vec<SendNativeTokensParams>,
+        params: Vec<SendNativeTokenParams>,
         options: Option<TransactionOptions>,
     },
     /// Prepare to Send nft.

@@ -9,7 +9,7 @@ from iota_sdk import (ClientOptions, CoinType, StrongholdSecretManager, Wallet,
 
 load_dotenv()
 
-# This example creates a new database and account and write debug logs in
+# This example creates a new database and wallet and write debug logs in
 # `wallet.log`.
 
 log_config = {

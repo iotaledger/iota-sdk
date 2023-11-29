@@ -6,9 +6,12 @@ use std::hash::Hash;
 use getset::{Getters, Setters};
 use serde::{Deserialize, Serialize};
 
-use crate::types::{
-    self,
-    block::{address::Bech32Address, output::OutputId, ConvertTo},
+use crate::{
+    types::{
+        self,
+        block::{address::Bech32Address, output::OutputId},
+    },
+    utils::ConvertTo,
 };
 
 /// A BIP44 address.

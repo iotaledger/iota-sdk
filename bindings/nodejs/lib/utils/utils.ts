@@ -11,12 +11,13 @@ import {
     TransactionId,
     TokenSchemeType,
     Output,
-    RentStructure,
+    StorageScoreParameters,
     OutputId,
     u64,
     SignedBlock,
     ProtocolParameters,
     Bech32Address,
+    InputSigningData,
 } from '../types';
 import {
     AccountId,
@@ -127,15 +128,18 @@ export class Utils {
      * Compute the required storage deposit of an output.
      *
      * @param output The output.
-     * @param rent Rent cost of objects which take node resources.
+     * @param storageScoreParameters Storage score of objects which take node resources.
      * @returns The required storage deposit.
      */
-    static computeStorageDeposit(output: Output, rent: RentStructure): u64 {
+    static computeStorageDeposit(
+        output: Output,
+        storageScoreParameters: StorageScoreParameters,
+    ): u64 {
         const minStorageDepositAmount = callUtilsMethod({
             name: 'computeStorageDeposit',
             data: {
                 output,
-                rent,
+                storageScoreParameters,
             },
         });
         return BigInt(minStorageDepositAmount);
@@ -394,11 +398,14 @@ export class Utils {
             name: 'computeSlotCommitmentId',
             data: {
                 slotCommitment: {
-                    index: slotCommitment.index.toString(10),
-                    prevId: slotCommitment.prevId,
+                    protocolVersion: slotCommitment.protocolVersion,
+                    slot: slotCommitment.slot,
+                    previousCommitmentId: slotCommitment.previousCommitmentId,
                     rootsId: slotCommitment.rootsId,
                     cumulativeWeight:
                         slotCommitment.cumulativeWeight.toString(10),
+                    referenceManaCost:
+                        slotCommitment.referenceManaCost.toString(10),
                 },
             },
         });
@@ -418,5 +425,29 @@ export class Utils {
             },
         });
         return hexBytes;
+    }
+
+    /**
+     * Verifies the semantic of a transaction.
+     *
+     * @param inputs The inputs data.
+     * @param transaction The transaction payload.
+     * @param time The unix time for which to do the validation, should be roughly the one of the milestone that will reference the transaction.
+     * @returns The conflict reason.
+     */
+    static verifyTransactionSemantic(
+        inputs: InputSigningData[],
+        transaction: SignedTransactionPayload,
+        time: number,
+    ): string {
+        const conflictReason = callUtilsMethod({
+            name: 'verifyTransactionSemantic',
+            data: {
+                inputs,
+                transaction,
+                time,
+            },
+        });
+        return conflictReason;
     }
 }

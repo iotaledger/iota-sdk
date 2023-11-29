@@ -1,6 +1,7 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+pub(crate) mod account;
 mod build_transaction;
 pub(crate) mod high_level;
 mod input_selection;
@@ -73,7 +74,7 @@ where
 
         // Check if the outputs have enough amount to cover the storage deposit
         for output in &outputs {
-            output.verify_storage_deposit(protocol_parameters.rent_structure())?;
+            output.verify_storage_deposit(protocol_parameters.storage_score_parameters())?;
         }
 
         self.finish_transaction(outputs, options).await
@@ -143,7 +144,7 @@ where
 
         // Ignore errors from sending, we will try to send it again during [`sync_pending_transactions`]
         let block_id = match self
-            .submit_transaction_payload(signed_transaction_data.payload.clone())
+            .submit_signed_transaction(signed_transaction_data.payload.clone())
             .await
         {
             Ok(block_id) => Some(block_id),
@@ -185,7 +186,7 @@ where
         wallet_data.pending_transactions.insert(transaction_id);
         #[cfg(feature = "storage")]
         {
-            // TODO: maybe better to use the wallt address as identifier now?
+            // TODO: maybe better to use the wallet address as identifier now?
             log::debug!("[TRANSACTION] storing wallet");
             self.save(Some(&wallet_data)).await?;
         }
