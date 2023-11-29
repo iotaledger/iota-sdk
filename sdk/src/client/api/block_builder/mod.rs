@@ -39,7 +39,7 @@ impl ClientInner {
                 protocol_params.version(),
                 protocol_params.network_id(),
                 issuing_time,
-                issuance.commitment.id(),
+                issuance.latest_commitment.id(),
                 issuance.latest_finalized_slot,
                 issuer_id,
             ),
