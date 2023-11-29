@@ -5,6 +5,7 @@ import type { TransactionFailureReason } from './transaction-failure-reason';
 import type { HexEncodedString } from '../utils/hex-encoding';
 import { BlockState, TransactionState } from './state';
 import { BlockFailureReason } from './block-failure-reason';
+import { Block } from '../block';
 
 /**
  * Response from the metadata endpoint.
@@ -30,4 +31,18 @@ export interface IBlockMetadata {
      * The transaction failure reason.
      */
     transactionFailureReason?: TransactionFailureReason;
+}
+
+/**
+ * Response from the full endpoint.
+ */
+export interface IBlockWithMetadata {
+    /**
+     * The block.
+     */
+    block: Block;
+    /**
+     * The block metadata.
+     */
+    metadata: IBlockMetadata;
 }

@@ -14,11 +14,11 @@ use crate::{
     types::block::{
         address::Bech32Address,
         core::Parents,
-        output::{dto::OutputDto, AccountId, OutputId, OutputMetadata, OutputWithMetadata},
+        output::{dto::OutputDto, OutputId, OutputMetadata, OutputWithMetadata},
         protocol::{ProtocolParameters, ProtocolParametersHash},
         semantic::TransactionFailureReason,
         slot::{EpochIndex, SlotCommitment, SlotCommitmentId, SlotIndex},
-        BlockId,
+        BlockDto, BlockId,
     },
     utils::serde::{option_string, string},
 };
@@ -402,6 +402,14 @@ pub struct BlockMetadataResponse {
     pub block_failure_reason: Option<BlockFailureReason>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub transaction_failure_reason: Option<TransactionFailureReason>,
+}
+
+/// Response of GET /api/core/v3/blocks/{blockId}/full.
+/// Returns a block and its metadata.
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+pub struct BlockWithMetadataResponse {
+    pub block: BlockDto,
+    pub metadata: BlockMetadataResponse,
 }
 
 /// Response of GET /api/core/v3/outputs/{output_id}.
