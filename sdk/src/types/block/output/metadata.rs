@@ -2,7 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use crate::types::block::{
-    output::OutputId, payload::signed_transaction::TransactionId, slot::SlotCommitmentId, slot::SlotIndex, BlockId,
+    output::OutputId,
+    payload::signed_transaction::TransactionId,
+    slot::{SlotCommitmentId, SlotIndex},
+    BlockId,
 };
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]
@@ -11,7 +14,7 @@ use crate::types::block::{
     derive(serde::Serialize, serde::Deserialize),
     serde(rename_all = "camelCase")
 )]
-struct OutputInclusionMetadata {
+pub struct OutputInclusionMetadata {
     // Slot in which the output was included.
     slot: SlotIndex,
     // Transaction ID that created the output.
@@ -20,19 +23,39 @@ struct OutputInclusionMetadata {
     commitment_id: Option<SlotCommitmentId>, // `serix:",omitempty"`
 }
 
+impl OutputInclusionMetadata {
+    pub fn new(slot: SlotIndex, transaction_id: TransactionId, commitment_id: Option<SlotCommitmentId>) -> Self {
+        Self {
+            slot,
+            transaction_id,
+            commitment_id,
+        }
+    }
+}
+
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize, serde::Deserialize),
     serde(rename_all = "camelCase")
 )]
-struct OutputConsumptionMetadata {
+pub struct OutputConsumptionMetadata {
     // Slot in which the output was spent.
     slot: SlotIndex,
     // Transaction ID that spent the output.
     transaction_id: TransactionId,
     // Commitment ID that includes the spending of the output.
     commitment_id: Option<SlotCommitmentId>, // `serix:",omitempty"`
+}
+
+impl OutputConsumptionMetadata {
+    pub fn new(slot: SlotIndex, transaction_id: TransactionId, commitment_id: Option<SlotCommitmentId>) -> Self {
+        Self {
+            slot,
+            transaction_id,
+            commitment_id,
+        }
+    }
 }
 
 /// Metadata of an [`Output`](crate::types::block::output::Output).
@@ -57,7 +80,6 @@ pub struct OutputMetadata {
 
 impl OutputMetadata {
     /// Creates a new [`OutputMetadata`].
-    #[allow(clippy::too_many_arguments)]
     pub fn new(
         output_id: OutputId,
         block_id: BlockId,
