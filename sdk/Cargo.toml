@@ -847,7 +847,7 @@ required-features = ["wallet", "participation"]
 [[example]]
 name = "logger"
 path = "examples/wallet/logger.rs"
-required-features = ["wallet"]
+required-features = ["wallet", "storage"]
 
 [[example]]
 name = "recover_accounts"

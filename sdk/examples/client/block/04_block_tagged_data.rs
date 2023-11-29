@@ -18,6 +18,10 @@ async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
+    for var in ["NODE_URL", "EXPLORER_URL"] {
+        std::env::var(var).unwrap_or_else(|_| panic!(".env variable '{var}' is undefined, see .env.example"));
+    }
+
     let node_url = std::env::var("NODE_URL").unwrap();
 
     let tag = std::env::args().nth(1).unwrap_or_else(|| "Hello".to_string());
