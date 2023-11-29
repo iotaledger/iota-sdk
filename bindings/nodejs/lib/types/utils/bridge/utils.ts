@@ -213,6 +213,5 @@ export interface __VerifyTransactionSemantic__ {
     data: {
         inputs: InputSigningData[];
         transaction: SignedTransactionPayload;
-        time: number;
     };
 }

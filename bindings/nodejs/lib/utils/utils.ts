@@ -438,14 +438,12 @@ export class Utils {
     static verifyTransactionSemantic(
         inputs: InputSigningData[],
         transaction: SignedTransactionPayload,
-        time: number,
     ): string {
         const conflictReason = callUtilsMethod({
             name: 'verifyTransactionSemantic',
             data: {
                 inputs,
                 transaction,
-                time,
             },
         });
         return conflictReason;
