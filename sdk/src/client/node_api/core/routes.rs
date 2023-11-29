@@ -16,9 +16,9 @@ use crate::{
     },
     types::{
         api::core::{
-            BlockMetadataResponse, CommitteeResponse, CongestionResponse, InfoResponse, IssuanceBlockHeaderResponse,
-            ManaRewardsResponse, PeerResponse, RoutesResponse, SubmitBlockResponse, UtxoChangesResponse,
-            ValidatorResponse, ValidatorsResponse,
+            BlockMetadataResponse, BlockWithMetadataResponse, CommitteeResponse, CongestionResponse, InfoResponse,
+            IssuanceBlockHeaderResponse, ManaRewardsResponse, PeerResponse, RoutesResponse, SubmitBlockResponse,
+            UtxoChangesResponse, ValidatorResponse, ValidatorsResponse,
         },
         block::{
             address::ToBech32Ext,
@@ -218,6 +218,14 @@ impl ClientInner {
     /// GET /api/core/v3/blocks/{blockId}/metadata
     pub async fn get_block_metadata(&self, block_id: &BlockId) -> Result<BlockMetadataResponse> {
         let path = &format!("api/core/v3/blocks/{block_id}/metadata");
+
+        self.get_request(path, None, true, true).await
+    }
+
+    /// Returns a block with its metadata.
+    /// GET /api/core/v3/blocks/{blockId}/full
+    pub async fn get_block_with_metadata(&self, block_id: &BlockId) -> Result<BlockWithMetadataResponse> {
+        let path = &format!("api/core/v3/blocks/{block_id}/full");
 
         self.get_request(path, None, true, true).await
     }

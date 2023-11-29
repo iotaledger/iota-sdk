@@ -196,6 +196,9 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         ClientMethod::GetBlockMetadata { block_id } => {
             Response::BlockMetadata(client.get_block_metadata(&block_id).await?)
         }
+        ClientMethod::GetBlockWithMetadata { block_id } => {
+            Response::BlockWithMetadata(client.get_block_with_metadata(&block_id).await?)
+        }
         ClientMethod::GetBlockRaw { block_id } => Response::Raw(client.get_block_raw(&block_id).await?),
         ClientMethod::GetOutput { output_id } => Response::OutputWithMetadataResponse(
             client
