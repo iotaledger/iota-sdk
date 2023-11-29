@@ -14,7 +14,7 @@ use crate::types::block::{
         UnlockCondition,
     },
     payload::signed_transaction::{Transaction, TransactionCapabilityFlag, TransactionSigningHash},
-    unlock::Unlocks,
+    unlock::Unlock,
     Error,
 };
 
@@ -194,7 +194,7 @@ pub struct SemanticValidationContext<'a> {
     pub(crate) transaction: &'a Transaction,
     pub(crate) transaction_signing_hash: TransactionSigningHash,
     pub(crate) inputs: &'a [(&'a OutputId, &'a Output)],
-    pub(crate) unlocks: Option<&'a Unlocks>,
+    pub(crate) unlocks: Option<&'a [Unlock]>,
     pub(crate) input_amount: u64,
     pub(crate) input_mana: u64,
     pub(crate) input_native_tokens: BTreeMap<TokenId, U256>,
@@ -213,7 +213,7 @@ impl<'a> SemanticValidationContext<'a> {
     pub fn new(
         transaction: &'a Transaction,
         inputs: &'a [(&'a OutputId, &'a Output)],
-        unlocks: Option<&'a Unlocks>,
+        unlocks: Option<&'a [Unlock]>,
     ) -> Self {
         let transaction_id = transaction.id();
         let input_chains = inputs
