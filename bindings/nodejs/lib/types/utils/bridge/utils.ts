@@ -214,6 +214,6 @@ export interface __VerifyTransactionSemantic__ {
     data: {
         transaction: SignedTransactionPayload;
         inputs: InputSigningData[];
-        unlocks: Unlock[];
+        unlocks?: Unlock[];
     };
 }

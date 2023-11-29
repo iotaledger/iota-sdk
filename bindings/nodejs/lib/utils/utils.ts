@@ -440,7 +440,7 @@ export class Utils {
     static verifyTransactionSemantic(
         transaction: SignedTransactionPayload,
         inputs: InputSigningData[],
-        unlocks: Unlock[],
+        unlocks?: Unlock[],
     ): string {
         const conflictReason = callUtilsMethod({
             name: 'verifyTransactionSemantic',
