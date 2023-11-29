@@ -313,7 +313,7 @@ pub struct AnchorOutput {
 }
 
 impl AnchorOutput {
-    /// The [`Output`](crate::types::block::output::Output) kind of an [`AnchorOutput`].
+    /// The [`Output`] kind of an [`AnchorOutput`].
     pub const KIND: u8 = 2;
     /// The set of allowed [`UnlockCondition`]s for an [`AnchorOutput`].
     pub const ALLOWED_UNLOCK_CONDITIONS: UnlockConditionFlags =

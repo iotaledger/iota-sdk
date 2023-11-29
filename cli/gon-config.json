@@ -2,7 +2,7 @@
   "source": ["../target/production/wallet"],
   "bundle_id": "org.iota.cli-wallet",
   "apple_id": {
-    "password": "@env:AC_PASSWORD"
+    "provider": "UG77RJKZHH"
   },
   "sign": {
     "application_identity": "Developer ID Application: IOTA Stiftung (UG77RJKZHH)"

@@ -10,6 +10,8 @@ disable=missing-module-docstring,
 	too-many-instance-attributes,
 	too-many-arguments,
 	too-few-public-methods
+	too-many-public-methods,
+	too-many-locals
 
 [TYPECHECK]
 generated-members=from_dict,to_dict,to_json # Made from @json

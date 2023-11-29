@@ -19,7 +19,24 @@ class NodeCoreAPI(metaclass=ABCMeta):
 
     @abstractmethod
     def _call_method(self, name, data=None):
-        return {}
+        """
+        Sends a message to the Rust library and returns the response.
+        It is abstract here as its implementation is located in `client.py`, which is a composite class.
+
+        Arguments:
+
+        * `name`: The `name` parameter is a string that represents the name of the method to be called.
+        It is used to identify the specific method to be executed in the Rust library.
+        * `data`: The `data` parameter is an optional parameter that represents additional data to be
+        sent along with the method call. It is a dictionary that contains key-value pairs of data. If
+        the `data` parameter is provided, it will be included in the `message` dictionary as the 'data'
+        key.
+
+        Returns:
+
+        The method returns either the payload from the JSON response or the entire response if there is
+        no payload.
+        """
 
     def get_health(self, url: str):
         """ Get node health.

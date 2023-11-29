@@ -27,6 +27,7 @@ use iota_sdk::{
             output::{dto::OutputDto, AccountId, FoundryId, NftId, OutputId, OutputMetadata, TokenId},
             payload::{dto::SignedTransactionPayloadDto, signed_transaction::TransactionId},
             protocol::ProtocolParameters,
+            semantic::TransactionFailureReason,
             signature::Ed25519Signature,
             slot::SlotCommitmentId,
             unlock::Unlock,
@@ -191,6 +192,8 @@ pub enum Response {
     CustomJson(serde_json::Value),
     /// Response for [`ComputeSlotCommitmentId`](crate::method::UtilsMethod::ComputeSlotCommitmentId)
     SlotCommitmentId(SlotCommitmentId),
+    /// Response for [`VerifyTransactionSemantic`](crate::method::UtilsMethod::VerifyTransactionSemantic).
+    TransactionFailureReason(TransactionFailureReason),
 
     // Responses in client and wallet
     /// Response for:
@@ -271,6 +274,7 @@ pub enum Response {
     OutputsData(Vec<OutputDataDto>),
     /// Response for:
     /// - [`PrepareBurn`](crate::method::WalletMethod::PrepareBurn),
+    /// - [`PrepareClaimOutputs`](crate::method::WalletMethod::PrepareClaimOutputs)
     /// - [`PrepareConsolidateOutputs`](crate::method::WalletMethod::PrepareConsolidateOutputs)
     /// - [`PrepareCreateAccountOutput`](crate::method::WalletMethod::PrepareCreateAccountOutput)
     /// - [`PrepareDecreaseVotingPower`](crate::method::WalletMethod::PrepareDecreaseVotingPower)

@@ -22,7 +22,7 @@ def get_py_version_cfgs():
 
 setup(
     name="iota_sdk",
-    version="1.1.0",
+    version="1.1.1",
     classifiers=[
         "License :: SPDX-License-Identifier ::  Apache-2.0",
         "Intended Audience :: Developers",
@@ -42,4 +42,5 @@ setup(
     include_package_data=True,
     zip_safe=False,
     install_requires=["dacite >= 1.8.1 ; pyhumps >= 3.8.0"],
+    package_data={"iota_sdk": ["py.typed"]}
 )

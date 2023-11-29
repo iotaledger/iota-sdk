@@ -129,7 +129,7 @@ fn get_none() {
 fn get_signature() {
     let signature = Unlock::from(SignatureUnlock::from(rand_signature()));
 
-    assert_eq!(Unlocks::new([signature.clone()]).unwrap().get(0), Some(&signature));
+    assert_eq!(Unlocks::new([signature.clone()]).unwrap().first(), Some(&signature));
 }
 
 #[test]

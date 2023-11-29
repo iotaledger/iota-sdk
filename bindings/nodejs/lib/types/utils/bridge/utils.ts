@@ -15,6 +15,7 @@ import {
 } from '../../';
 import { AccountId } from '../../block/id';
 import { SlotCommitment } from '../../block/slot';
+import { InputSigningData } from '../../client';
 
 export interface __GenerateMnemonicMethod__ {
     name: 'generateMnemonic';
@@ -204,5 +205,14 @@ export interface __ComputeSlotCommitmentId__ {
     name: 'computeSlotCommitmentId';
     data: {
         slotCommitment: SlotCommitmentConverted;
+    };
+}
+
+export interface __VerifyTransactionSemantic__ {
+    name: 'verifyTransactionSemantic';
+    data: {
+        inputs: InputSigningData[];
+        transaction: SignedTransactionPayload;
+        time: number;
     };
 }
