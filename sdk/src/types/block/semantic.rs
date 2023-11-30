@@ -295,7 +295,7 @@ impl<'a> SemanticValidationContext<'a> {
                     }
                 } else {
                     // Missing CommitmentContextInput
-                    return Ok(Some(TransactionFailureReason::SemanticValidationFailed));
+                    return Ok(Some(TransactionFailureReason::InvalidCommitmentContextInput));
                 }
             }
 

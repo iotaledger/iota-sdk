@@ -330,7 +330,7 @@ impl BasicOutput {
             && (self.unlock_conditions().timelock().is_some() || self.unlock_conditions().expiration().is_some())
         {
             // Missing CommitmentContextInput
-            return Err(TransactionFailureReason::SemanticValidationFailed);
+            return Err(TransactionFailureReason::InvalidCommitmentContextInput);
         }
 
         self.unlock_conditions()
