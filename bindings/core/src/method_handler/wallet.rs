@@ -228,6 +228,7 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
                 .data()
                 .await
                 .incoming_transactions()
+                .values()
                 .map(TransactionWithMetadataDto::from)
                 .collect(),
         ),
@@ -409,6 +410,7 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
                 .data()
                 .await
                 .transactions()
+                .values()
                 .map(TransactionWithMetadataDto::from)
                 .collect(),
         ),

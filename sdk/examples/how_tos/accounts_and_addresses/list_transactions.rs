@@ -33,14 +33,14 @@ async fn main() -> Result<()> {
 
     // Print transaction ids
     println!("Sent transactions:");
-    for transaction in wallet.data().await.transactions() {
-        println!("{}", transaction.transaction_id);
+    for transaction_id in wallet.data().await.transactions().keys() {
+        println!("{}", transaction_id);
     }
 
     // Print received transaction ids
     println!("Received transactions:");
-    for transaction in wallet.data().await.incoming_transactions() {
-        println!("{}", transaction.transaction_id);
+    for transaction_id in wallet.data().await.incoming_transactions().keys() {
+        println!("{}", transaction_id);
     }
 
     Ok(())

@@ -823,9 +823,9 @@ pub async fn sync_command(wallet: &Wallet) -> Result<(), Error> {
 pub async fn transaction_command(wallet: &Wallet, selector: TransactionSelector) -> Result<(), Error> {
     let wallet_data = wallet.data().await;
     let transaction = match selector {
-        TransactionSelector::Id(id) => wallet_data.transactions().find(|tx| tx.transaction_id == id),
+        TransactionSelector::Id(id) => wallet_data.get_transaction(&id),
         TransactionSelector::Index(index) => {
-            let mut transactions = wallet_data.transactions().collect::<Vec<_>>();
+            let mut transactions = wallet_data.transactions().values().collect::<Vec<_>>();
             transactions.sort_unstable_by(|a, b| b.timestamp.cmp(&a.timestamp));
             transactions.into_iter().nth(index)
         }
@@ -843,7 +843,7 @@ pub async fn transaction_command(wallet: &Wallet, selector: TransactionSelector)
 /// `transactions` command
 pub async fn transactions_command(wallet: &Wallet, show_details: bool) -> Result<(), Error> {
     let wallet_data = wallet.data().await;
-    let mut transactions = wallet_data.transactions().collect::<Vec<_>>();
+    let mut transactions = wallet_data.transactions().values().collect::<Vec<_>>();
     transactions.sort_unstable_by(|a, b| b.timestamp.cmp(&a.timestamp));
 
     if transactions.is_empty() {

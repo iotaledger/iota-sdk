@@ -331,13 +331,13 @@ impl WalletData {
     }
 
     /// Returns all incoming transactions of the wallet
-    pub fn incoming_transactions(&self) -> impl Iterator<Item = &TransactionWithMetadata> {
-        self.incoming_transactions.values()
+    pub fn incoming_transactions(&self) -> &HashMap<TransactionId, TransactionWithMetadata> {
+        &self.incoming_transactions
     }
 
     /// Returns all transactions of the wallet
-    pub fn transactions(&self) -> impl Iterator<Item = &TransactionWithMetadata> {
-        self.transactions.values()
+    pub fn transactions(&self) -> &HashMap<TransactionId, TransactionWithMetadata> {
+        &self.transactions
     }
 
     /// Returns all pending transactions of the wallet
