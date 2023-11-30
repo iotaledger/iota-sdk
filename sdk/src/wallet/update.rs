@@ -50,7 +50,7 @@ where
         for (output_id, output_metadata_response_opt) in spent_or_unsynced_output_metadata_map {
             // If we got the output response and it's still unspent, skip it
             if let Some(output_metadata_response) = output_metadata_response_opt {
-                if output_metadata_response.spent().is_some() {
+                if output_metadata_response.is_spent() {
                     wallet_data.unspent_outputs.remove(&output_id);
                     if let Some(output_data) = wallet_data.outputs.get_mut(&output_id) {
                         output_data.metadata = output_metadata_response;

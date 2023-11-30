@@ -245,7 +245,7 @@ fn process_transaction_with_unknown_state(
     for input in transaction.payload.transaction().inputs() {
         let Input::Utxo(input) = input;
         if let Some(output_data) = wallet_data.outputs.get(input.output_id()) {
-            if !output_data.metadata.spent().is_some() {
+            if !output_data.metadata.is_spent() {
                 // unspent output needs to be made available again
                 output_ids_to_unlock.push(*input.output_id());
                 all_inputs_spent = false;

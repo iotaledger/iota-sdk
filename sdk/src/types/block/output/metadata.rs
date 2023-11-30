@@ -143,6 +143,11 @@ impl OutputMetadata {
         self.spent.as_ref()
     }
 
+    /// Returns whether the [`OutputMetadata`] is spent or not.
+    pub fn is_spent(&self) -> bool {
+        self.spent.is_some()
+    }
+
     /// Returns the latest commitment ID of the [`OutputMetadata`].
     pub fn latest_commitment_id(&self) -> &SlotCommitmentId {
         &self.latest_commitment_id

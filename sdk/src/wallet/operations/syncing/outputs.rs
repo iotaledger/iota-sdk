@@ -60,7 +60,7 @@ where
                     output_id: output_with_meta.metadata().output_id().to_owned(),
                     metadata: *output_with_meta.metadata(),
                     output: output_with_meta.output().clone(),
-                    is_spent: output_with_meta.metadata().spent().is_some(),
+                    is_spent: output_with_meta.metadata().is_spent(),
                     address: associated_address.address.inner.clone(),
                     network_id,
                     remainder,
