@@ -73,7 +73,7 @@ where
     /// unspent, because we wouldn't get them from the node if they were spent
     pub(crate) async fn get_outputs(
         &self,
-        output_ids: Vec<OutputId>,
+        output_ids: impl IntoIterator<Item = &OutputId> + Send,
     ) -> crate::wallet::Result<Vec<OutputWithMetadata>> {
         log::debug!("[SYNC] start get_outputs");
         let get_outputs_start_time = Instant::now();
@@ -83,17 +83,17 @@ where
         let mut wallet_data = self.data_mut().await;
 
         for output_id in output_ids {
-            match wallet_data.outputs.get_mut(&output_id) {
+            match wallet_data.outputs.get_mut(output_id) {
                 // set unspent
                 Some(output_data) => {
                     output_data.is_spent = false;
-                    unspent_outputs.push((output_id, output_data.clone()));
+                    unspent_outputs.push((*output_id, output_data.clone()));
                     outputs.push(OutputWithMetadata::new(
                         output_data.output.clone(),
                         output_data.metadata,
                     ));
                 }
-                None => unknown_outputs.push(output_id),
+                None => unknown_outputs.push(*output_id),
             }
         }
         // known output is unspent, so insert it to the unspent outputs again, because if it was an

@@ -35,7 +35,7 @@ where
         &self,
         address: &Bech32Address,
         sync_options: &SyncOptions,
-    ) -> crate::wallet::Result<Vec<OutputId>> {
+    ) -> crate::wallet::Result<HashSet<OutputId>> {
         if sync_options.sync_only_most_basic_outputs {
             let output_ids = self
                 .get_basic_output_ids_with_address_unlock_condition_only(address.clone())
@@ -53,7 +53,9 @@ where
                 .client()
                 .output_ids(OutputQueryParameters::new().unlockable_by_address(address.clone()))
                 .await?
-                .items);
+                .items
+                .into_iter()
+                .collect());
         }
 
         #[cfg(target_family = "wasm")]
@@ -159,7 +161,9 @@ where
                     .client()
                     .foundry_output_ids(FoundryOutputQueryParameters::new().account(address.clone()))
                     .await?
-                    .items))
+                    .items
+                    .into_iter()
+                    .collect()))
             }
 
             #[cfg(not(target_family = "wasm"))]
@@ -172,7 +176,9 @@ where
                             Ok(client
                                 .foundry_output_ids(FoundryOutputQueryParameters::new().account(bech32_address))
                                 .await?
-                                .items)
+                                .items
+                                .into_iter()
+                                .collect())
                         })
                         .await
                     }
@@ -200,13 +206,13 @@ where
         &self,
         addresses_with_unspent_outputs: Vec<AddressWithUnspentOutputs>,
         options: &SyncOptions,
-    ) -> crate::wallet::Result<(Vec<AddressWithUnspentOutputs>, Vec<OutputId>)> {
+    ) -> crate::wallet::Result<(Vec<AddressWithUnspentOutputs>, HashSet<OutputId>)> {
         log::debug!("[SYNC] start get_output_ids_for_addresses");
         let address_output_ids_start_time = Instant::now();
 
         let mut addresses_with_outputs = Vec::new();
         // spent outputs or account/nft/foundries that don't get synced anymore, because of other sync options
-        let mut spent_or_not_anymore_synced_outputs = Vec::new();
+        let mut spent_or_not_anymore_synced_outputs = HashSet::new();
 
         // We split the addresses into chunks so we don't get timeouts if we have thousands
         for addresses_chunk in &mut addresses_with_unspent_outputs
@@ -245,14 +251,14 @@ where
             }
 
             for res in results {
-                let (mut address, output_ids): (AddressWithUnspentOutputs, Vec<OutputId>) = res?;
+                let (mut address, output_ids): (AddressWithUnspentOutputs, HashSet<OutputId>) = res?;
                 // only return addresses with outputs
                 if !output_ids.is_empty() {
                     // outputs we had before, but now not anymore, got spent or are account/nft/foundries that don't
                     // get synced anymore because of other sync options
                     for output_id in address.output_ids {
                         if !output_ids.contains(&output_id) {
-                            spent_or_not_anymore_synced_outputs.push(output_id);
+                            spent_or_not_anymore_synced_outputs.insert(output_id);
                         }
                     }
                     address.output_ids = output_ids;

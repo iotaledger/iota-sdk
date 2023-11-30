@@ -1,7 +1,7 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use std::hash::Hash;
+use std::{collections::HashSet, hash::Hash};
 
 use getset::{Getters, Setters};
 use serde::{Deserialize, Serialize};
@@ -59,7 +59,7 @@ pub struct AddressWithUnspentOutputs {
     #[getset(set = "pub(crate)")]
     pub(crate) internal: bool,
     /// Output ids
-    pub(crate) output_ids: Vec<OutputId>,
+    pub(crate) output_ids: HashSet<OutputId>,
 }
 
 impl AddressWithUnspentOutputs {

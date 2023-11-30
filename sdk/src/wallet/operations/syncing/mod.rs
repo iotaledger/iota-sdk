@@ -9,11 +9,13 @@ pub(crate) mod transactions;
 
 use std::collections::{HashMap, HashSet};
 
+use futures::{future::BoxFuture, FutureExt};
+
 pub use self::options::SyncOptions;
 use crate::{
     client::secret::SecretManage,
     types::block::{
-        address::{AccountAddress, Address, Bech32Address, NftAddress, ToBech32Ext},
+        address::{AccountAddress, Address, Hrp, NftAddress, ToBech32Ext},
         output::{FoundryId, Output, OutputId, OutputMetadata},
     },
     wallet::{
@@ -102,7 +104,7 @@ where
                 .await
                 .into_iter()
                 .map(|data| data.output_id)
-                .collect::<Vec<_>>(),
+                .collect(),
             internal: false,
             key_index: 0,
         };
@@ -111,7 +113,7 @@ where
             wallet_address_with_unspent_outputs,
             AddressWithUnspentOutputs {
                 address: self.implicit_account_creation_address().await?,
-                output_ids: vec![],
+                output_ids: HashSet::new(),
                 internal: false,
                 key_index: 0,
             },
@@ -165,6 +167,66 @@ where
             .await
     }
 
+    /// Recursively scans the given address for associated outputs.
+    /// Adds to the unspent_outputs_data and removes unspent data from spent_output_ids.
+    fn scan_address<'a>(
+        &'a self,
+        bech32_hrp: Hrp,
+        address_with_unspent_outputs: &'a mut AddressWithUnspentOutputs,
+        unspent_outputs_data: &'a mut Vec<OutputData>,
+        unspent_outputs: &'a [OutputData],
+        spent_output_ids: &'a mut HashSet<OutputId>,
+        options: &'a SyncOptions,
+    ) -> BoxFuture<'a, crate::wallet::Result<()>> {
+        async move {
+            for unspent_output in unspent_outputs {
+                // TODO: is this really necessary?
+                spent_output_ids.remove(&unspent_output.output_id);
+                if let Some(account_or_nft_address) = match &unspent_output.output {
+                    Output::Account(account) => {
+                        Some(AccountAddress::from(account.account_id_non_null(&unspent_output.output_id)).into())
+                    }
+                    Output::Nft(nft) => Some(NftAddress::from(nft.nft_id_non_null(&unspent_output.output_id)).into()),
+                    _ => None,
+                }
+                .map(|a| Address::to_bech32(a, bech32_hrp))
+                {
+                    let account_or_nft_output_ids = self
+                        .get_output_ids_for_address(&account_or_nft_address, options)
+                        .await?;
+
+                    let account_or_nft_outputs_with_metadata = self.get_outputs(&account_or_nft_output_ids).await?;
+
+                    // Update address with new associated unspent outputs
+                    address_with_unspent_outputs
+                        .output_ids
+                        .extend(account_or_nft_output_ids);
+
+                    let output_data = self
+                        .output_response_to_output_data(
+                            account_or_nft_outputs_with_metadata,
+                            address_with_unspent_outputs,
+                        )
+                        .await?;
+
+                    self.scan_address(
+                        bech32_hrp,
+                        address_with_unspent_outputs,
+                        unspent_outputs_data,
+                        &output_data,
+                        spent_output_ids,
+                        options,
+                    )
+                    .await?;
+
+                    unspent_outputs_data.extend(output_data);
+                }
+            }
+            Ok(())
+        }
+        .boxed()
+    }
+
     // First request all outputs directly related to the wallet address, then for each nft and account output we got,
     // request all outputs that are related to their account/nft addresses in a loop until no new account or nft outputs
     // are found.
@@ -172,99 +234,34 @@ where
         &self,
         addresses_to_sync: Vec<AddressWithUnspentOutputs>,
         options: &SyncOptions,
-    ) -> crate::wallet::Result<(Vec<AddressWithUnspentOutputs>, Vec<OutputId>, Vec<OutputData>)> {
-        // Cache account and nft addresses with the related Ed25519 address, so we can update the account
-        // address with the new output ids.
-        let mut addresses_to_scan: HashMap<Address, Address> = HashMap::new();
-        let mut addresses_with_unspent_output_ids_all = Vec::new();
-        let mut unspent_outputs_data_all = Vec::new();
-
+    ) -> crate::wallet::Result<(Vec<AddressWithUnspentOutputs>, HashSet<OutputId>, Vec<OutputData>)> {
         let bech32_hrp = self.client().get_bech32_hrp().await?;
 
         // Get the unspent and spent/not-synced output ids per address to sync
-        let (addresses_to_sync_with_unspent_output_ids, mut spent_or_not_synced_output_ids) = self
-            .get_output_ids_for_addresses(addresses_to_sync.clone(), options)
-            .await?;
+        let (addresses_to_sync_with_unspent_output_ids, mut spent_output_ids) =
+            self.get_output_ids_for_addresses(addresses_to_sync, options).await?;
 
         // Get the corresponding unspent output data
-        let mut new_unspent_outputs_data = self
+        let unspent_outputs_map = self
             .get_outputs_from_address_output_ids(addresses_to_sync_with_unspent_output_ids)
             .await?;
 
-        loop {
-            // Try to discover new addresses
-            // See https://github.com/rust-lang/rust-clippy/issues/8539 regarding this lint.
-            #[allow(clippy::iter_with_drain)]
-            for (address_with_unspent, unspent_data) in new_unspent_outputs_data.drain(..) {
-                for unspent_data in &unspent_data {
-                    match &unspent_data.output {
-                        Output::Account(account) => {
-                            addresses_to_scan.insert(
-                                AccountAddress::from(account.account_id_non_null(&unspent_data.output_id)).into(),
-                                address_with_unspent.address.inner().clone(),
-                            );
-                        }
-                        Output::Nft(nft) => {
-                            addresses_to_scan.insert(
-                                NftAddress::from(nft.nft_id_non_null(&unspent_data.output_id)).into(),
-                                address_with_unspent.address.inner().clone(),
-                            );
-                        }
-                        _ => {}
-                    }
-                }
-                addresses_with_unspent_output_ids_all.push(address_with_unspent);
-                unspent_outputs_data_all.extend(unspent_data);
-            }
-
-            log::debug!("[SYNC] new_addresses: {addresses_to_scan:?}");
-
-            // If there are no new addresses to scan, we are finished
-            if addresses_to_scan.is_empty() {
-                break;
-            }
-
-            // Get the unspent outputs of the new addresses
-            for (account_or_nft_address, output_address) in addresses_to_scan.drain() {
-                let address_with_unspent_output_ids = addresses_with_unspent_output_ids_all
-                    .iter_mut()
-                    .find(|address| address.address.inner() == &output_address)
-                    // Panic: can't happen because one is a superset of the other
-                    .unwrap();
-
-                let account_or_nft_output_ids = self
-                    .get_output_ids_for_address(&Bech32Address::new(bech32_hrp, account_or_nft_address), options)
-                    .await?;
-
-                // Update address with new associated unspent outputs
-                address_with_unspent_output_ids
-                    .output_ids
-                    .extend(account_or_nft_output_ids.clone());
-
-                let account_or_nft_outputs_with_metadata = self.get_outputs(account_or_nft_output_ids).await?;
-                let account_or_nft_outputs_data = self
-                    .output_response_to_output_data(
-                        account_or_nft_outputs_with_metadata,
-                        address_with_unspent_output_ids,
-                    )
-                    .await?;
-
-                new_unspent_outputs_data.push((address_with_unspent_output_ids.clone(), account_or_nft_outputs_data));
-            }
+        let mut addresses_with_unspent_outputs = Vec::with_capacity(unspent_outputs_map.len());
+        let mut unspent_outputs_data = Vec::new();
+        for (_, (mut address_with_unspent_outputs, unspent_outputs)) in unspent_outputs_map {
+            self.scan_address(
+                bech32_hrp,
+                &mut address_with_unspent_outputs,
+                &mut unspent_outputs_data,
+                &unspent_outputs,
+                &mut spent_output_ids,
+                options,
+            )
+            .await?;
+            addresses_with_unspent_outputs.push(address_with_unspent_outputs);
+            unspent_outputs_data.extend(unspent_outputs);
         }
 
-        // get_output_ids_for_addresses() will return recursively owned outputs not anymore, sine they will only get
-        // synced afterwards, so we filter these unspent outputs here. Maybe the spent_or_not_synced_output_ids can be
-        // calculated more efficient in the future, by comparing the new and old outputs only at this point. Then this
-        // retain isn't needed anymore.
-        let unspent_output_ids_all: HashSet<OutputId> =
-            HashSet::from_iter(unspent_outputs_data_all.iter().map(|o| o.output_id));
-        spent_or_not_synced_output_ids.retain(|o| !unspent_output_ids_all.contains(o));
-
-        Ok((
-            addresses_with_unspent_output_ids_all,
-            spent_or_not_synced_output_ids,
-            unspent_outputs_data_all,
-        ))
+        Ok((addresses_with_unspent_outputs, spent_output_ids, unspent_outputs_data))
     }
 }

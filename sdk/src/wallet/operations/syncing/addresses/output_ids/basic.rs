@@ -1,6 +1,8 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use std::collections::HashSet;
+
 use crate::{
     client::{node_api::indexer::query_parameters::BasicOutputQueryParameters, secret::SecretManage},
     types::block::{address::Bech32Address, output::OutputId},
@@ -16,7 +18,7 @@ where
     pub(crate) async fn get_basic_output_ids_with_address_unlock_condition_only(
         &self,
         bech32_address: impl ConvertTo<Bech32Address>,
-    ) -> crate::client::Result<Vec<OutputId>> {
+    ) -> crate::client::Result<HashSet<OutputId>> {
         let bech32_address = bech32_address.convert()?;
 
         Ok(self
@@ -25,7 +27,9 @@ where
                 bech32_address,
             ))
             .await?
-            .items)
+            .items
+            .into_iter()
+            .collect())
     }
 
     /// Returns output ids of basic outputs that have the address in the `AddressUnlockCondition` or
@@ -33,13 +37,15 @@ where
     pub(crate) async fn get_basic_output_ids_with_any_unlock_condition(
         &self,
         bech32_address: impl ConvertTo<Bech32Address>,
-    ) -> crate::wallet::Result<Vec<OutputId>> {
+    ) -> crate::wallet::Result<HashSet<OutputId>> {
         let bech32_address = bech32_address.convert()?;
 
         Ok(self
             .client()
             .basic_output_ids(BasicOutputQueryParameters::new().unlockable_by_address(bech32_address.clone()))
             .await?
-            .items)
+            .items
+            .into_iter()
+            .collect())
     }
 }

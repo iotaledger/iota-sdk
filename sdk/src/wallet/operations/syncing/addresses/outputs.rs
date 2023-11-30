@@ -25,11 +25,11 @@ where
     pub(crate) async fn get_outputs_from_address_output_ids(
         &self,
         addresses_with_unspent_outputs: Vec<AddressWithUnspentOutputs>,
-    ) -> crate::wallet::Result<(Vec<(AddressWithUnspentOutputs, Vec<OutputData>)>)> {
+    ) -> crate::wallet::Result<HashMap<Address, (AddressWithUnspentOutputs, Vec<OutputData>)>> {
         log::debug!("[SYNC] start get_outputs_from_address_output_ids");
         let address_outputs_start_time = Instant::now();
 
-        let mut addresses_with_outputs = Vec::new();
+        let mut addresses_with_outputs = HashMap::new();
 
         // We split the addresses into chunks so we don't get timeouts if we have thousands
         for addresses_chunk in &mut addresses_with_unspent_outputs
@@ -41,9 +41,8 @@ where
                 let wallet = self.clone();
                 tasks.push(async move {
                     task::spawn(async move {
-                        let unspent_outputs_with_metadata = wallet
-                            .get_outputs(address_with_unspent_outputs.output_ids.clone())
-                            .await?;
+                        let unspent_outputs_with_metadata =
+                            wallet.get_outputs(&address_with_unspent_outputs.output_ids).await?;
                         let unspent_outputs_data = wallet
                             .output_response_to_output_data(
                                 unspent_outputs_with_metadata,
@@ -55,9 +54,15 @@ where
                     .await
                 });
             }
-            let results = futures::future::try_join_all(tasks).await?;
-            for res in results {
-                addresses_with_outputs.push(res?);
+            let results = futures::future::try_join_all(tasks)
+                .await?
+                .into_iter()
+                .collect::<Result<Vec<_>, _>>()?;
+            for (address_with_unspent_outputs, output_data) in results {
+                addresses_with_outputs.insert(
+                    address_with_unspent_outputs.address().inner.clone(),
+                    (address_with_unspent_outputs, output_data),
+                );
             }
         }
         log::debug!(
