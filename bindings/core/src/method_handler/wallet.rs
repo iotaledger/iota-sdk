@@ -212,7 +212,7 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
         } => {
             let data = if let Some(public_key_str) = public_key {
                 let public_key = PublicKey::try_from_bytes(prefix_hex::decode(public_key_str)?)
-                    .map_err(iota_sdk::wallet::Error::other)?;
+                    .map_err(iota_sdk::wallet::Error::from)?;
                 wallet
                     .prepare_implicit_account_transition(&output_id, Some(public_key))
                     .await?
