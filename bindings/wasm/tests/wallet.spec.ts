@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { Balance, Wallet, CoinType, SecretManager } from '../node/lib';
+import { Wallet, CoinType, SecretManager } from '../node/lib';
 
 describe('wallet tests', () => {
     jest.setTimeout(100000);
@@ -34,7 +34,7 @@ describe('wallet tests', () => {
             secretManager: mnemonicSecretManager,
         });
 
-        let implicitAccountCreationAddress =
+        const implicitAccountCreationAddress =
             await wallet.implicitAccountCreationAddress();
 
         expect(implicitAccountCreationAddress).toBe(

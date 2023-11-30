@@ -44,4 +44,4 @@ async function run() {
     SecretManager.create(strongholdSecretManager);
 }
 
-run().then(() => process.exit());
+void run().then(() => process.exit());

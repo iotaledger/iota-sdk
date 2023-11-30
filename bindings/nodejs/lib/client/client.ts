@@ -81,7 +81,7 @@ export class Client {
         return new Client(await ClientMethodHandler.create(options));
     }
     async destroy(): Promise<void> {
-        this.methodHandler.destroy();
+        return this.methodHandler.destroy();
     }
 
     /**

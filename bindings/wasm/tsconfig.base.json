@@ -11,6 +11,6 @@
         "forceConsistentCasingInFileNames": true,
         "experimentalDecorators": true
     },
-    "include": ["out/**/*"],
+    "include": ["out/**/*", "lib", "examples", "tests"],
     "exclude": ["node_modules", "out/test/*"]
 }

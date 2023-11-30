@@ -142,7 +142,7 @@ async function run() {
     }
 }
 
-run().then(() => process.exit());
+void run().then(() => process.exit());
 ```
 
 ### Web
@@ -205,7 +205,7 @@ async function run() {
     } catch (err) { console.error }
 }
 
-run().then(() => process.exit());
+void run().then(() => process.exit());
 ```
 
 ### Web

@@ -170,4 +170,4 @@ function padHexString(str: string): string {
     return str.length % 2 !== 0 ? '0' + str : str;
 }
 
-run();
+void run().then(() => process.exit());

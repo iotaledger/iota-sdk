@@ -65,10 +65,10 @@ async function run() {
 
         // Set syncOnlyMostBasicOutputs to true if not interested in outputs that are timelocked,
         // have a storage deposit return, expiration or are nft/account/foundry outputs.
-        wallet.setDefaultSyncOptions({ syncOnlyMostBasicOutputs: true });
+        await wallet.setDefaultSyncOptions({ syncOnlyMostBasicOutputs: true });
     } catch (error) {
         console.error(error);
     }
 }
 
-run().then(() => process.exit());
+void run().then(() => process.exit());

@@ -47,4 +47,4 @@ async function run() {
     console.log(balance);
 }
 
-run();
+void run().then(() => process.exit());

@@ -55,4 +55,4 @@ async function run() {
     }, 10000);
 }
 
-run();
+void run().then(() => process.exit());

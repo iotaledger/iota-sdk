@@ -116,4 +116,4 @@ function getImmutableMetadata(index: number) {
         .withCollectionName('Shimmer OG');
 }
 
-run();
+void run().then(() => process.exit());
