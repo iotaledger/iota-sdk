@@ -37,7 +37,7 @@ pub use self::{
     delegation::{DelegationId, DelegationOutput, DelegationOutputBuilder},
     feature::{Feature, Features},
     foundry::{FoundryId, FoundryOutput, FoundryOutputBuilder},
-    metadata::OutputMetadata,
+    metadata::{OutputConsumptionMetadata, OutputInclusionMetadata, OutputMetadata},
     native_token::{NativeToken, NativeTokens, NativeTokensBuilder, TokenId},
     nft::{NftId, NftOutput, NftOutputBuilder},
     output_id::OutputId,

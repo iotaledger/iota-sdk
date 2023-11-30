@@ -29,9 +29,9 @@ use iota_sdk::{
                 StorageDepositReturnUnlockCondition, TimelockUnlockCondition, UnlockCondition,
             },
             AccountId, AccountOutputBuilder, BasicOutputBuilder, FoundryOutputBuilder, NativeToken, NftId,
-            NftOutputBuilder, Output, OutputId, OutputMetadata, SimpleTokenScheme, TokenId, TokenScheme,
+            NftOutputBuilder, Output, OutputId, SimpleTokenScheme, TokenId, TokenScheme,
         },
-        rand::{block::rand_block_id, slot::rand_slot_commitment_id, transaction::rand_transaction_id},
+        rand::{output::rand_output_metadata_with_id, transaction::rand_transaction_id},
     },
 };
 
@@ -239,15 +239,7 @@ fn build_inputs<'a>(outputs: impl IntoIterator<Item = Build<'a>>) -> Vec<InputSi
 
             InputSigningData {
                 output,
-                output_metadata: OutputMetadata::new(
-                    rand_block_id(),
-                    OutputId::new(rand_transaction_id(), 0),
-                    false,
-                    None,
-                    None,
-                    None,
-                    rand_slot_commitment_id(),
-                ),
+                output_metadata: rand_output_metadata_with_id(OutputId::new(rand_transaction_id(), 0)),
                 chain,
             }
         })
