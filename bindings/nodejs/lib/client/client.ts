@@ -35,8 +35,8 @@ import {
     UnlockCondition,
     Payload,
     SignedTransactionPayload,
-    parseSignedBlock,
-    SignedBlock,
+    parseBlock,
+    Block,
     AccountId,
     AnchorId,
     NftId,
@@ -149,7 +149,7 @@ export class Client {
      * @param block The block to post.
      * @returns The block ID once the block has been posted.
      */
-    async postBlock(block: SignedBlock): Promise<BlockId> {
+    async postBlock(block: Block): Promise<BlockId> {
         const response = await this.methodHandler.callMethod({
             name: 'postBlock',
             data: {
@@ -166,7 +166,7 @@ export class Client {
      * @param blockId The corresponding block ID of the requested block.
      * @returns The requested block.
      */
-    async getBlock(blockId: BlockId): Promise<SignedBlock> {
+    async getBlock(blockId: BlockId): Promise<Block> {
         const response = await this.methodHandler.callMethod({
             name: 'getBlock',
             data: {
@@ -174,8 +174,8 @@ export class Client {
             },
         });
 
-        const parsed = JSON.parse(response) as Response<SignedBlock>;
-        return parseSignedBlock(parsed.payload);
+        const parsed = JSON.parse(response) as Response<Block>;
+        return parseBlock(parsed.payload);
     }
 
     /**
@@ -404,7 +404,7 @@ export class Client {
      * @param block The block.
      * @returns The ID of the posted block.
      */
-    async postBlockRaw(block: SignedBlock): Promise<BlockId> {
+    async postBlockRaw(block: Block): Promise<BlockId> {
         const response = await this.methodHandler.callMethod({
             name: 'postBlockRaw',
             data: {
@@ -438,15 +438,15 @@ export class Client {
      * @param transactionId The ID of the transaction.
      * @returns The included block that contained the transaction.
      */
-    async getIncludedBlock(transactionId: TransactionId): Promise<SignedBlock> {
+    async getIncludedBlock(transactionId: TransactionId): Promise<Block> {
         const response = await this.methodHandler.callMethod({
             name: 'getIncludedBlock',
             data: {
                 transactionId,
             },
         });
-        const parsed = JSON.parse(response) as Response<SignedBlock>;
-        return parseSignedBlock(parsed.payload);
+        const parsed = JSON.parse(response) as Response<Block>;
+        return parseBlock(parsed.payload);
     }
 
     /**
@@ -457,15 +457,15 @@ export class Client {
      */
     async getIncludedBlockMetadata(
         transactionId: TransactionId,
-    ): Promise<SignedBlock> {
+    ): Promise<Block> {
         const response = await this.methodHandler.callMethod({
             name: 'getIncludedBlockMetadata',
             data: {
                 transactionId,
             },
         });
-        const parsed = JSON.parse(response) as Response<SignedBlock>;
-        return parseSignedBlock(parsed.payload);
+        const parsed = JSON.parse(response) as Response<Block>;
+        return parseBlock(parsed.payload);
     }
 
     /**
@@ -582,15 +582,15 @@ export class Client {
      * @param blockIds An array of `BlockId`s.
      * @returns An array of corresponding blocks.
      */
-    async findBlocks(blockIds: BlockId[]): Promise<SignedBlock[]> {
+    async findBlocks(blockIds: BlockId[]): Promise<Block[]> {
         const response = await this.methodHandler.callMethod({
             name: 'findBlocks',
             data: {
                 blockIds,
             },
         });
-        const parsed = JSON.parse(response) as Response<SignedBlock[]>;
-        return parsed.payload.map((p) => parseSignedBlock(p));
+        const parsed = JSON.parse(response) as Response<Block[]>;
+        return parsed.payload.map((p) => parseBlock(p));
     }
 
     /**
