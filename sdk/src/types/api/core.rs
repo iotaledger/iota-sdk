@@ -191,7 +191,7 @@ pub struct ValidatorResponse {
     /// The fixed cost of the validator, which it receives as part of its Mana rewards.
     #[serde(with = "string")]
     fixed_cost: u64,
-    /// Shows whether validator was active recently.
+    /// Shows whether the validator was active recently.
     active: bool,
     /// The latest protocol version the validator supported.
     latest_supported_protocol_version: u8,
