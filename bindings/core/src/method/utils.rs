@@ -14,6 +14,7 @@ use iota_sdk::{
         protocol::ProtocolParameters,
         signature::Ed25519Signature,
         slot::SlotCommitment,
+        unlock::Unlock,
         BlockDto,
     },
 };
@@ -166,7 +167,8 @@ pub enum UtilsMethod {
     OutputHexBytes { output: Output },
     /// Verifies the semantic of a transaction.
     VerifyTransactionSemantic {
+        transaction: TransactionDto,
         inputs: Vec<InputSigningDataDto>,
-        transaction: SignedTransactionPayloadDto,
+        unlocks: Option<Vec<Unlock>>,
     },
 }

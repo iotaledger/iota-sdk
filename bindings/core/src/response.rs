@@ -196,7 +196,7 @@ pub enum Response {
     /// Response for [`ComputeSlotCommitmentId`](crate::method::UtilsMethod::ComputeSlotCommitmentId)
     SlotCommitmentId(SlotCommitmentId),
     /// Response for [`VerifyTransactionSemantic`](crate::method::UtilsMethod::VerifyTransactionSemantic).
-    TransactionFailureReason(TransactionFailureReason),
+    TransactionFailureReason(Option<TransactionFailureReason>),
 
     // Responses in client and wallet
     /// Response for:
