@@ -78,8 +78,8 @@ impl Client {
             .map(|output_with_meta| {
                 Ok((
                     UtxoInput::new(
-                        output_with_meta.metadata().transaction_id().to_owned(),
-                        output_with_meta.metadata().output_index(),
+                        output_with_meta.metadata().output_id().transaction_id().to_owned(),
+                        output_with_meta.metadata().output_id().index(),
                     ),
                     output_with_meta.output().amount(),
                 ))

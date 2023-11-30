@@ -45,7 +45,7 @@ where
                 // transactions separated, then this check wouldn't be required)
                 let remainder = wallet_data
                     .transactions
-                    .get(output_with_meta.metadata().transaction_id())
+                    .get(output_with_meta.metadata().output_id().transaction_id())
                     .map_or(false, |tx| !tx.incoming);
 
                 let chain = wallet_data.bip_path.map(|bip_path| {
@@ -60,7 +60,7 @@ where
                     output_id: output_with_meta.metadata().output_id().to_owned(),
                     metadata: *output_with_meta.metadata(),
                     output: output_with_meta.output().clone(),
-                    is_spent: output_with_meta.metadata().is_spent(),
+                    is_spent: output_with_meta.metadata().spent().is_some(),
                     address: associated_address.address.inner.clone(),
                     network_id,
                     remainder,

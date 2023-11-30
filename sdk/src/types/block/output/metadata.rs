@@ -32,6 +32,18 @@ impl OutputInclusionMetadata {
             commitment_id,
         }
     }
+
+    pub fn slot(&self) -> SlotIndex {
+        self.slot
+    }
+
+    pub fn transaction_id(&self) -> &TransactionId {
+        &self.transaction_id
+    }
+
+    pub fn commitment_id(&self) -> Option<&SlotCommitmentId> {
+        self.commitment_id.as_ref()
+    }
 }
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]
@@ -57,6 +69,18 @@ impl OutputConsumptionMetadata {
             transaction_id,
             commitment_id,
         }
+    }
+
+    pub fn slot(&self) -> SlotIndex {
+        self.slot
+    }
+
+    pub fn transaction_id(&self) -> &TransactionId {
+        &self.transaction_id
+    }
+
+    pub fn commitment_id(&self) -> Option<&SlotCommitmentId> {
+        self.commitment_id.as_ref()
     }
 }
 
@@ -104,44 +128,20 @@ impl OutputMetadata {
         &self.output_id
     }
 
-    pub fn transaction_id(&self) -> &TransactionId {
-        self.output_id.transaction_id()
-    }
-
-    /// Returns the output index of the [`OutputMetadata`].
-    pub fn output_index(&self) -> u16 {
-        self.output_id.index()
-    }
-
     /// Returns the block ID of the [`OutputMetadata`].
     pub fn block_id(&self) -> &BlockId {
         &self.block_id
     }
 
-    /// Returns whether the output is spent or not.
-    pub fn is_spent(&self) -> bool {
-        self.spent.is_some()
+    /// Returns the inclusion metadata of the [`OutputMetadata`].
+    pub fn included(&self) -> &OutputInclusionMetadata {
+        &self.included
     }
 
-    // /// Sets whether the output is spent or not.
-    // pub fn set_spent(&mut self, spent: bool) {
-    //     self.is_spent = spent;
-    // }
-
-    // /// Returns the commitment ID spent of the [`OutputMetadata`].
-    // pub fn commitment_id_spent(&self) -> Option<&SlotCommitmentId> {
-    //     self.commitment_id_spent.as_ref()
-    // }
-
-    // /// Returns the transaction ID spent of the [`OutputMetadata`].
-    // pub fn transaction_id_spent(&self) -> Option<&TransactionId> {
-    //     self.transaction_id_spent.as_ref()
-    // }
-
-    // /// Returns the included commitment ID of the [`OutputMetadata`].
-    // pub fn included_commitment_id(&self) -> Option<&SlotCommitmentId> {
-    //     self.included_commitment_id.as_ref()
-    // }
+    /// Returns the consumption metadata of the [`OutputMetadata`].
+    pub fn spent(&self) -> Option<&OutputConsumptionMetadata> {
+        self.spent.as_ref()
+    }
 
     /// Returns the latest commitment ID of the [`OutputMetadata`].
     pub fn latest_commitment_id(&self) -> &SlotCommitmentId {
