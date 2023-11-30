@@ -48,17 +48,22 @@ async fn main() -> Result<()> {
     // unlock condition and it is an `AddressUnlockCondition`, and so they are valid for consolidation. They have the
     // same `AddressUnlockCondition`(the address of the wallet), so they will be consolidated into one
     // output.
-    let outputs = wallet.unspent_outputs(None).await;
     println!("Outputs BEFORE consolidation:");
-    outputs.iter().enumerate().for_each(|(i, output_data)| {
-        println!("OUTPUT #{i}");
-        println!(
-            "- address: {:?}\n- amount: {:?}\n- native tokens: {:?}",
-            output_data.address.clone().to_bech32_unchecked("rms"),
-            output_data.output.amount(),
-            output_data.output.native_token()
-        )
-    });
+    wallet
+        .data()
+        .await
+        .unspent_outputs()
+        .values()
+        .enumerate()
+        .for_each(|(i, output_data)| {
+            println!("OUTPUT #{i}");
+            println!(
+                "- address: {:?}\n- amount: {:?}\n- native tokens: {:?}",
+                output_data.address.clone().to_bech32_unchecked("rms"),
+                output_data.output.amount(),
+                output_data.output.native_token()
+            )
+        });
 
     println!("Sending consolidation transaction...");
 
@@ -84,17 +89,22 @@ async fn main() -> Result<()> {
     println!("Wallet synced");
 
     // Outputs after consolidation
-    let outputs = wallet.unspent_outputs(None).await;
     println!("Outputs AFTER consolidation:");
-    outputs.iter().enumerate().for_each(|(i, output_data)| {
-        println!("OUTPUT #{i}");
-        println!(
-            "- address: {:?}\n- amount: {:?}\n- native tokens: {:?}",
-            output_data.address.clone().to_bech32_unchecked("rms"),
-            output_data.output.amount(),
-            output_data.output.native_token()
-        )
-    });
+    wallet
+        .data()
+        .await
+        .unspent_outputs()
+        .values()
+        .enumerate()
+        .for_each(|(i, output_data)| {
+            println!("OUTPUT #{i}");
+            println!(
+                "- address: {:?}\n- amount: {:?}\n- native tokens: {:?}",
+                output_data.address.clone().to_bech32_unchecked("rms"),
+                output_data.output.amount(),
+                output_data.output.native_token()
+            )
+        });
 
     Ok(())
 }
