@@ -63,7 +63,7 @@ impl InputSelection {
                 if cumulative_weight < multi_address.threshold() {
                     Err(Error::UnfulfillableRequirement(Requirement::Sender(address.clone())))
                 } else {
-                    Ok(vec![])
+                    Ok(Vec::new())
                 }
             }
             Address::Restricted(restricted_address) => {
