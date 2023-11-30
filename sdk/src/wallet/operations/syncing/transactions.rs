@@ -101,7 +101,7 @@ where
             if let Some(block_id) = transaction.block_id {
                 match self.client().get_block_metadata(&block_id).await {
                     Ok(metadata) => {
-                        if let Some(tx_state) = metadata.transaction_state {
+                        if let Some(tx_state) = metadata.transaction_metadata.map(|m| m.transaction_state) {
                             match tx_state {
                                 // TODO: Separate TransactionState::Finalized?
                                 TransactionState::Finalized | TransactionState::Confirmed => {
