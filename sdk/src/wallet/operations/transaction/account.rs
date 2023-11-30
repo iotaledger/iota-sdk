@@ -66,7 +66,7 @@ where
 
         let public_key = match key_source {
             BlockIssuerKeySource::Key(public_key) => public_key,
-            BlockIssuerKeySource::Path(bip_path) => {
+            BlockIssuerKeySource::Bip44Path(bip_path) => {
                 self.secret_manager
                     .read()
                     .await
@@ -107,5 +107,5 @@ where
 #[derive(From)]
 pub enum BlockIssuerKeySource {
     Key(PublicKey),
-    Path(Bip44),
+    Bip44Path(Bip44),
 }

@@ -198,7 +198,7 @@ pub enum WalletMethod {
     PrepareImplicitAccountTransition {
         output_id: OutputId,
         #[serde(default)]
-        public_key: Option<PublicKey>,
+        public_key: Option<String>,
         #[serde(default)]
         bip_path: Option<Bip44>,
     },
