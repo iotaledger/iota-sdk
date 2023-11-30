@@ -22,7 +22,7 @@ use crate::{
         },
         block::{
             address::ToBech32Ext,
-            output::{dto::OutputDto, AccountId, Output, OutputId, OutputMetadata},
+            output::{AccountId, Output, OutputId, OutputMetadata},
             payload::signed_transaction::TransactionId,
             slot::{EpochIndex, SlotCommitment, SlotCommitmentId, SlotIndex},
             Block, BlockDto, BlockId,
@@ -237,9 +237,7 @@ impl ClientInner {
     pub async fn get_output(&self, output_id: &OutputId) -> Result<Output> {
         let path = &format!("api/core/v3/outputs/{output_id}");
 
-        Ok(Output::try_from(
-            self.get_request::<OutputDto>(path, None, false, true).await?,
-        )?)
+        self.get_request(path, None, false, true).await
     }
 
     /// Finds an output by its ID and returns it as raw bytes.

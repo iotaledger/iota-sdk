@@ -33,10 +33,7 @@ use crate::{
     types::{
         block::{
             address::{Address, Bech32Address, Hrp, ImplicitAccountCreationAddress},
-            output::{
-                dto::FoundryOutputDto, AccountId, AnchorId, DelegationId, FoundryId, FoundryOutput, NftId, Output,
-                OutputId, TokenId,
-            },
+            output::{AccountId, AnchorId, DelegationId, FoundryId, FoundryOutput, NftId, Output, OutputId, TokenId},
             payload::signed_transaction::TransactionId,
             protocol::ProtocolParameters,
         },
@@ -546,7 +543,7 @@ pub struct WalletDataDto {
     pub pending_transactions: HashSet<TransactionId>,
     pub incoming_transactions: HashMap<TransactionId, TransactionWithMetadataDto>,
     #[serde(default)]
-    pub native_token_foundries: HashMap<FoundryId, FoundryOutputDto>,
+    pub native_token_foundries: HashMap<FoundryId, FoundryOutput>,
 }
 
 impl TryFromDto<WalletDataDto> for WalletData {
@@ -583,11 +580,7 @@ impl TryFromDto<WalletDataDto> for WalletData {
                 .map(|(id, o)| Ok((id, TransactionWithMetadata::try_from_dto_with_params_inner(o, params)?)))
                 .collect::<crate::wallet::Result<_>>()?,
             inaccessible_incoming_transactions: Default::default(),
-            native_token_foundries: dto
-                .native_token_foundries
-                .into_iter()
-                .map(|(id, o)| Ok((id, FoundryOutput::try_from(o)?)))
-                .collect::<crate::wallet::Result<_>>()?,
+            native_token_foundries: dto.native_token_foundries,
         })
     }
 }
@@ -620,11 +613,7 @@ impl From<&WalletData> for WalletDataDto {
                 .iter()
                 .map(|(id, transaction)| (*id, TransactionWithMetadataDto::from(transaction)))
                 .collect(),
-            native_token_foundries: value
-                .native_token_foundries
-                .iter()
-                .map(|(id, foundry)| (*id, FoundryOutputDto::from(foundry)))
-                .collect(),
+            native_token_foundries: value.native_token_foundries.clone(),
         }
     }
 }
