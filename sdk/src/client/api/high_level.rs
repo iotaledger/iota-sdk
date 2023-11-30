@@ -77,10 +77,7 @@ impl Client {
             .flatten()
             .map(|output_with_meta| {
                 Ok((
-                    UtxoInput::new(
-                        output_with_meta.metadata().output_id().transaction_id().to_owned(),
-                        output_with_meta.metadata().output_id().index(),
-                    ),
+                    UtxoInput::from(*output_with_meta.metadata().output_id()),
                     output_with_meta.output().amount(),
                 ))
             })
