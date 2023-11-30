@@ -55,8 +55,8 @@ async function run() {
             issuerId,
             new TaggedDataPayload(utf8ToHex('Hello'), utf8ToHex('Tangle')),
         );
-        const signedBlock = await secretManager.signBlock(unsignedBlock, chain);
-        const blockId = await client.postBlock(signedBlock);
+        const block = await secretManager.signBlock(unsignedBlock, chain);
+        const blockId = await client.postBlock(block);
 
         console.log(`Block sent: ${process.env.EXPLORER_URL}/block/${blockId}`);
 
