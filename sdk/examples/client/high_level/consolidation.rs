@@ -15,6 +15,10 @@ async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
+    for var in ["NODE_URL", "EXPLORER_URL", "MNEMONIC"] {
+        std::env::var(var).unwrap_or_else(|_| panic!(".env variable '{var}' is undefined, see .env.example"));
+    }
+
     let address_range_start = std::env::args().nth(1).map(|s| s.parse::<u32>().unwrap()).unwrap_or(0);
     let address_range_len = std::env::args().nth(2).map(|s| s.parse::<u32>().unwrap()).unwrap_or(10);
 

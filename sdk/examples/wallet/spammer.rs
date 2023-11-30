@@ -35,6 +35,10 @@ async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
+    for var in ["NODE_URL", "MNEMONIC", "EXPLORER_URL", "FAUCET_URL"] {
+        std::env::var(var).unwrap_or_else(|_| panic!(".env variable '{var}' is undefined, see .env.example"));
+    }
+
     let num_simultaneous_txs = NUM_SIMULTANEOUS_TXS.min(num_cpus::get());
 
     println!("Spammer set up to issue {num_simultaneous_txs} transactions simultaneously.");
