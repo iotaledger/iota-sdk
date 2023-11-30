@@ -160,9 +160,9 @@ pub enum Error {
     /// Missing transaction payload.
     #[error("missing transaction payload")]
     MissingTransactionPayload,
-    /// Output not unlockable due to expiration
-    #[error("output not unlockable due to expiration")]
-    OutputNotUnlockableDueToExpiration,
+    /// Output not unlockable due to deadzone in expiration unlock condition.
+    #[error("ooutput not unlockable due to deadzone in expiration unlock condition")]
+    ExpirationDeadzone,
 
     /// Participation error
     #[cfg(feature = "participation")]

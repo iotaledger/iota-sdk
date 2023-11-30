@@ -79,9 +79,9 @@ pub enum Error {
     /// No available inputs provided
     #[error("No available inputs provided")]
     NoAvailableInputsProvided,
-    /// Output not unlockable due to expiration
-    #[error("output not unlockable due to expiration")]
-    OutputNotUnlockableDueToExpiration,
+    /// Output not unlockable due to deadzone in expiration unlock condition.
+    #[error("output not unlockable due to deadzone in expiration unlock condition")]
+    ExpirationDeadzone,
 }
 
 impl From<crate::types::block::Error> for Error {
@@ -545,7 +545,7 @@ fn merge_unlocks(
         let required_address = match required_address {
             Some(address) => address,
             // Time in which no address can unlock the output because of an expiration unlock condition
-            None => return Err(Error::OutputNotUnlockableDueToExpiration),
+            None => return Err(Error::ExpirationDeadzone),
         };
 
         // Check if we already added an [Unlock] for this address

@@ -66,7 +66,7 @@ impl OutputData {
         let required_address = self
             .output
             .required_address(slot_index, min_committable_age, max_committable_age)?
-            .ok_or(crate::client::Error::OutputNotUnlockableDueToExpiration)?;
+            .ok_or(crate::client::Error::ExpirationDeadzone)?;
 
         let chain = if required_address == self.address {
             self.chain

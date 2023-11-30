@@ -571,7 +571,7 @@ where
                 protocol_parameters.min_committable_age(),
                 protocol_parameters.max_committable_age(),
             )?
-            .ok_or(crate::client::Error::OutputNotUnlockableDueToExpiration)?;
+            .ok_or(crate::client::Error::ExpirationDeadzone)?;
 
         // Check if we already added an [Unlock] for this address
         match block_indexes.get(&required_address) {
