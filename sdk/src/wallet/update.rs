@@ -69,7 +69,7 @@ where
                     wallet_data.unspent_outputs.remove(&output_id);
                     // Update spent data fields
                     if let Some(output_data) = wallet_data.outputs.get_mut(&output_id) {
-                        // TODO wat do?
+                        // TODO https://github.com/iotaledger/iota-sdk/issues/1718
                         // output_data.metadata.set_spent(true);
                         output_data.is_spent = true;
                         #[cfg(feature = "events")]
