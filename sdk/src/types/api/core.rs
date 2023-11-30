@@ -195,7 +195,7 @@ pub struct ValidatorResponse {
     active: bool,
     /// The latest protocol version the validator supported.
     latest_supported_protocol_version: u8,
-    // The protocol hash of the latest supported protocol of the validator.
+    /// The protocol hash of the latest supported protocol of the validator.
     latest_supported_protocol_hash: ProtocolParametersHash,
 }
 
