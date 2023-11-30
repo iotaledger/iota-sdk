@@ -10,9 +10,9 @@ describe('wallet tests', () => {
             mnemonic:
                 'inhale gorilla deny three celery song category owner lottery rent author wealth penalty crawl hobby obtain glad warm early rain clutch slab august bleak',
         };
-    
+
         const secretManager = SecretManager.create(mnemonicSecretManager);
-    
+
         const walletAddress = await secretManager.generateEd25519Addresses({
             coinType: CoinType.IOTA,
             accountIndex: 0,
@@ -22,7 +22,7 @@ describe('wallet tests', () => {
             },
             bech32Hrp: 'rms',
         });
-    
+
         const wallet = await Wallet.create({
             address: walletAddress[0],
             bipPath: {
@@ -33,9 +33,12 @@ describe('wallet tests', () => {
             },
             secretManager: mnemonicSecretManager,
         });
-    
-        let implicitAccountCreationAddress = await wallet.implicitAccountCreationAddress();
-    
-        expect(implicitAccountCreationAddress).toBe("rms1yrpwecegav7eh0z363ca69laxej64rrt4e3u0rtycyuh0mam3vq3uvx3u3m");
+
+        let implicitAccountCreationAddress =
+            await wallet.implicitAccountCreationAddress();
+
+        expect(implicitAccountCreationAddress).toBe(
+            'rms1yrpwecegav7eh0z363ca69laxej64rrt4e3u0rtycyuh0mam3vq3uvx3u3m',
+        );
     });
 });
