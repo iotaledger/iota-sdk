@@ -12,7 +12,10 @@ pub mod unlock_condition;
 
 use primitive_types::U256;
 
-pub use self::{metadata::rand_output_metadata, native_token::rand_native_token};
+pub use self::{
+    metadata::{rand_output_metadata, rand_output_metadata_with_id},
+    native_token::rand_native_token,
+};
 use crate::types::block::{
     output::{
         unlock_condition::ImmutableAccountAddressUnlockCondition, AccountId, AccountOutput, AnchorId, AnchorOutput,
@@ -38,12 +41,11 @@ use crate::types::block::{
 
 /// Generates a random [`OutputId`].
 pub fn rand_output_id() -> OutputId {
-    OutputId::new(rand_transaction_id(), rand_number_range(OUTPUT_INDEX_RANGE)).unwrap()
+    OutputId::new(rand_transaction_id(), rand_number_range(OUTPUT_INDEX_RANGE))
 }
 
-/// Generates a random [`BasicOutput`](BasicOutput).
+/// Generates a random [`BasicOutput`].
 pub fn rand_basic_output(token_supply: u64) -> BasicOutput {
-    // TODO: Add `NativeTokens`
     BasicOutput::build_with_amount(rand_number_range(0..token_supply))
         .with_features(rand_allowed_features(BasicOutput::ALLOWED_FEATURES))
         .add_unlock_condition(rand_address_unlock_condition())
@@ -51,17 +53,17 @@ pub fn rand_basic_output(token_supply: u64) -> BasicOutput {
         .unwrap()
 }
 
-/// Generates a random [`AccountId`](AccountId).
+/// Generates a random [`AccountId`].
 pub fn rand_account_id() -> AccountId {
     AccountId::from(rand_bytes_array())
 }
 
-/// Generates a random [`AnchorId`](AnchorId).
+/// Generates a random [`AnchorId`].
 pub fn rand_anchor_id() -> AnchorId {
     AnchorId::from(rand_bytes_array())
 }
 
-/// Generates a random [`AccountOutput`](AccountOutput).
+/// Generates a random [`AccountOutput`].
 pub fn rand_account_output(token_supply: u64) -> AccountOutput {
     // We need to make sure that `AccountId` and `Address` don't match.
     let account_id = rand_account_id();
@@ -100,7 +102,7 @@ pub fn rand_token_scheme() -> TokenScheme {
     TokenScheme::Simple(SimpleTokenScheme::new(minted, melted, max).unwrap())
 }
 
-/// Generates a random [`FoundryOutput`](FoundryOutput).
+/// Generates a random [`FoundryOutput`].
 pub fn rand_foundry_output(token_supply: u64) -> FoundryOutput {
     FoundryOutput::build_with_amount(rand_number_range(0..token_supply), rand_number(), rand_token_scheme())
         .with_features(rand_allowed_features(FoundryOutput::ALLOWED_FEATURES))
@@ -109,7 +111,7 @@ pub fn rand_foundry_output(token_supply: u64) -> FoundryOutput {
         .unwrap()
 }
 
-/// Generates a random [`NftOutput`](NftOutput).
+/// Generates a random [`NftOutput`].
 pub fn rand_nft_output(token_supply: u64) -> NftOutput {
     // We need to make sure that `NftId` and `Address` don't match.
     let nft_id = NftId::from(rand_bytes_array());

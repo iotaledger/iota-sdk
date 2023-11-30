@@ -18,7 +18,7 @@ use crate::{
             signed_transaction::{TransactionHash, TransactionId, TransactionSigningHash},
             OptionalPayload, Payload,
         },
-        protocol::ProtocolParameters,
+        protocol::{ProtocolParameters, WorkScore, WorkScoreParameters},
         slot::SlotIndex,
         Error,
     },
@@ -261,7 +261,7 @@ impl Transaction {
     }
 
     /// Returns the [`ManaAllotment`]s of a [`Transaction`].
-    pub fn mana_allotments(&self) -> &[ManaAllotment] {
+    pub fn allotments(&self) -> &[ManaAllotment] {
         &self.allotments
     }
 
@@ -321,6 +321,15 @@ impl Transaction {
     /// Computes the identifier of a [`Transaction`].
     pub fn id(&self) -> TransactionId {
         self.hash().into_transaction_id(self.creation_slot())
+    }
+}
+
+impl WorkScore for Transaction {
+    fn work_score(&self, params: WorkScoreParameters) -> u32 {
+        self.context_inputs().work_score(params)
+            + self.inputs().work_score(params)
+            + self.allotments().work_score(params)
+            + self.outputs().work_score(params)
     }
 }
 
@@ -527,7 +536,7 @@ pub(crate) mod dto {
 
     use super::*;
     use crate::types::{
-        block::{mana::ManaAllotmentDto, output::dto::OutputDto, payload::dto::PayloadDto, Error},
+        block::{mana::ManaAllotmentDto, payload::dto::PayloadDto, Error},
         TryFromDto,
     };
 
@@ -536,14 +545,16 @@ pub(crate) mod dto {
     pub struct TransactionDto {
         pub network_id: String,
         pub creation_slot: SlotIndex,
+        #[serde(default, skip_serializing_if = "Vec::is_empty")]
         pub context_inputs: Vec<ContextInput>,
         pub inputs: Vec<Input>,
+        #[serde(default, skip_serializing_if = "Vec::is_empty")]
         pub allotments: Vec<ManaAllotmentDto>,
         #[serde(default, skip_serializing_if = "TransactionCapabilities::is_none")]
         pub capabilities: TransactionCapabilities,
         #[serde(default, skip_serializing_if = "Option::is_none")]
         pub payload: Option<PayloadDto>,
-        pub outputs: Vec<OutputDto>,
+        pub outputs: Vec<Output>,
     }
 
     impl From<&Transaction> for TransactionDto {
@@ -553,14 +564,14 @@ pub(crate) mod dto {
                 creation_slot: value.creation_slot(),
                 context_inputs: value.context_inputs().to_vec(),
                 inputs: value.inputs().to_vec(),
-                allotments: value.mana_allotments().iter().map(Into::into).collect(),
+                allotments: value.allotments().iter().map(Into::into).collect(),
                 capabilities: value.capabilities().clone(),
                 payload: match value.payload() {
                     Some(p @ Payload::TaggedData(_)) => Some(p.into()),
                     Some(_) => unimplemented!(),
                     None => None,
                 },
-                outputs: value.outputs().iter().map(Into::into).collect(),
+                outputs: value.outputs().to_vec(),
             }
         }
     }
@@ -581,11 +592,7 @@ pub(crate) mod dto {
                 .into_iter()
                 .map(|o| ManaAllotment::try_from_dto_with_params_inner(o, params))
                 .collect::<Result<Vec<ManaAllotment>, Error>>()?;
-            let outputs = dto
-                .outputs
-                .into_iter()
-                .map(Output::try_from)
-                .collect::<Result<Vec<Output>, Error>>()?;
+            let outputs = dto.outputs;
 
             let mut builder = Self::builder(network_id)
                 .with_creation_slot(dto.creation_slot)

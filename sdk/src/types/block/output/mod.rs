@@ -37,7 +37,7 @@ pub use self::{
     delegation::{DelegationId, DelegationOutput, DelegationOutputBuilder},
     feature::{Feature, Features},
     foundry::{FoundryId, FoundryOutput, FoundryOutputBuilder},
-    metadata::OutputMetadata,
+    metadata::{OutputConsumptionMetadata, OutputInclusionMetadata, OutputMetadata},
     native_token::{NativeToken, NativeTokens, NativeTokensBuilder, TokenId},
     nft::{NftId, NftOutput, NftOutputBuilder},
     output_id::OutputId,
@@ -52,8 +52,13 @@ pub(crate) use self::{
     output_id::OutputIndex,
     unlock_condition::AddressUnlockCondition,
 };
-use super::protocol::ProtocolParameters;
-use crate::types::block::{address::Address, semantic::SemanticValidationContext, slot::SlotIndex, Error};
+use crate::types::block::{
+    address::Address,
+    protocol::{ProtocolParameters, WorkScore, WorkScoreParameters},
+    semantic::SemanticValidationContext,
+    slot::SlotIndex,
+    Error,
+};
 
 /// The maximum number of outputs of a transaction.
 pub const OUTPUT_COUNT_MAX: u16 = 128;
@@ -106,6 +111,7 @@ impl OutputWithMetadata {
 
 /// A generic output that can represent different types defining the deposit of funds.
 #[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, From, Packable)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize), serde(untagged))]
 #[packable(unpack_error = Error)]
 #[packable(unpack_visitor = ProtocolParameters)]
 #[packable(tag_type = u8, with_error = Error::InvalidOutputKind)]
@@ -396,12 +402,25 @@ impl Output {
 impl StorageScore for Output {
     fn storage_score(&self, params: StorageScoreParameters) -> u64 {
         match self {
-            Self::Basic(o) => o.storage_score(params),
-            Self::Account(o) => o.storage_score(params),
-            Self::Anchor(o) => o.storage_score(params),
-            Self::Foundry(o) => o.storage_score(params),
-            Self::Nft(o) => o.storage_score(params),
-            Self::Delegation(o) => o.storage_score(params),
+            Self::Basic(basic) => basic.storage_score(params),
+            Self::Account(account) => account.storage_score(params),
+            Self::Anchor(anchor) => anchor.storage_score(params),
+            Self::Foundry(foundry) => foundry.storage_score(params),
+            Self::Nft(nft) => nft.storage_score(params),
+            Self::Delegation(delegation) => delegation.storage_score(params),
+        }
+    }
+}
+
+impl WorkScore for Output {
+    fn work_score(&self, params: WorkScoreParameters) -> u32 {
+        match self {
+            Self::Basic(basic) => basic.work_score(params),
+            Self::Account(account) => account.work_score(params),
+            Self::Anchor(anchor) => anchor.work_score(params),
+            Self::Foundry(foundry) => foundry.work_score(params),
+            Self::Nft(nft) => nft.work_score(params),
+            Self::Delegation(delegation) => delegation.work_score(params),
         }
     }
 }
@@ -413,143 +432,6 @@ impl MinimumOutputAmount for Output {}
 pub trait MinimumOutputAmount: StorageScore {
     /// Computes the minimum amount of this output given [`StorageScoreParameters`].
     fn minimum_amount(&self, params: StorageScoreParameters) -> u64 {
-        params.storage_cost() * self.storage_score(params)
-    }
-}
-
-#[cfg(feature = "serde")]
-pub mod dto {
-    use alloc::format;
-
-    use serde::{Deserialize, Serialize, Serializer};
-    use serde_json::Value;
-
-    use super::*;
-    pub use super::{
-        account::dto::AccountOutputDto, anchor::dto::AnchorOutputDto, basic::dto::BasicOutputDto,
-        delegation::dto::DelegationOutputDto, foundry::dto::FoundryOutputDto, nft::dto::NftOutputDto,
-    };
-
-    /// Describes all the different output types.
-    #[derive(Clone, Debug, Eq, PartialEq, From)]
-    pub enum OutputDto {
-        Basic(BasicOutputDto),
-        Account(AccountOutputDto),
-        Anchor(AnchorOutputDto),
-        Foundry(FoundryOutputDto),
-        Nft(NftOutputDto),
-        Delegation(DelegationOutputDto),
-    }
-
-    impl From<&Output> for OutputDto {
-        fn from(value: &Output) -> Self {
-            match value {
-                Output::Basic(o) => Self::Basic(o.into()),
-                Output::Account(o) => Self::Account(o.into()),
-                Output::Anchor(o) => Self::Anchor(o.into()),
-                Output::Foundry(o) => Self::Foundry(o.into()),
-                Output::Nft(o) => Self::Nft(o.into()),
-                Output::Delegation(o) => Self::Delegation(o.into()),
-            }
-        }
-    }
-
-    impl TryFrom<OutputDto> for Output {
-        type Error = Error;
-
-        fn try_from(dto: OutputDto) -> Result<Self, Self::Error> {
-            Ok(match dto {
-                OutputDto::Basic(o) => Self::Basic(BasicOutput::try_from(o)?),
-                OutputDto::Account(o) => Self::Account(AccountOutput::try_from(o)?),
-                OutputDto::Anchor(o) => Self::Anchor(AnchorOutput::try_from(o)?),
-                OutputDto::Foundry(o) => Self::Foundry(FoundryOutput::try_from(o)?),
-                OutputDto::Nft(o) => Self::Nft(NftOutput::try_from(o)?),
-                OutputDto::Delegation(o) => Self::Delegation(DelegationOutput::try_from(o)?),
-            })
-        }
-    }
-
-    impl<'de> Deserialize<'de> for OutputDto {
-        fn deserialize<D: serde::Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
-            let value = Value::deserialize(d)?;
-            Ok(
-                match value
-                    .get("type")
-                    .and_then(Value::as_u64)
-                    .ok_or_else(|| serde::de::Error::custom("invalid output type"))? as u8
-                {
-                    BasicOutput::KIND => Self::Basic(
-                        BasicOutputDto::deserialize(value)
-                            .map_err(|e| serde::de::Error::custom(format!("cannot deserialize basic output: {e}")))?,
-                    ),
-                    AccountOutput::KIND => Self::Account(
-                        AccountOutputDto::deserialize(value)
-                            .map_err(|e| serde::de::Error::custom(format!("cannot deserialize account output: {e}")))?,
-                    ),
-                    AnchorOutput::KIND => Self::Anchor(
-                        AnchorOutputDto::deserialize(value)
-                            .map_err(|e| serde::de::Error::custom(format!("cannot deserialize anchor output: {e}")))?,
-                    ),
-                    FoundryOutput::KIND => Self::Foundry(
-                        FoundryOutputDto::deserialize(value)
-                            .map_err(|e| serde::de::Error::custom(format!("cannot deserialize foundry output: {e}")))?,
-                    ),
-                    NftOutput::KIND => Self::Nft(
-                        NftOutputDto::deserialize(value)
-                            .map_err(|e| serde::de::Error::custom(format!("cannot deserialize NFT output: {e}")))?,
-                    ),
-                    DelegationOutput::KIND => {
-                        Self::Delegation(DelegationOutputDto::deserialize(value).map_err(|e| {
-                            serde::de::Error::custom(format!("cannot deserialize delegation output: {e}"))
-                        })?)
-                    }
-                    _ => return Err(serde::de::Error::custom("invalid output type")),
-                },
-            )
-        }
-    }
-
-    impl Serialize for OutputDto {
-        fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-        where
-            S: Serializer,
-        {
-            #[derive(Serialize)]
-            #[serde(untagged)]
-            enum OutputDto_<'a> {
-                T0(&'a BasicOutputDto),
-                T1(&'a AccountOutputDto),
-                T2(&'a AnchorOutputDto),
-                T3(&'a FoundryOutputDto),
-                T4(&'a NftOutputDto),
-                T5(&'a DelegationOutputDto),
-            }
-            #[derive(Serialize)]
-            struct TypedOutput<'a> {
-                #[serde(flatten)]
-                output: OutputDto_<'a>,
-            }
-            let output = match self {
-                Self::Basic(o) => TypedOutput {
-                    output: OutputDto_::T0(o),
-                },
-                Self::Account(o) => TypedOutput {
-                    output: OutputDto_::T1(o),
-                },
-                Self::Anchor(o) => TypedOutput {
-                    output: OutputDto_::T2(o),
-                },
-                Self::Foundry(o) => TypedOutput {
-                    output: OutputDto_::T3(o),
-                },
-                Self::Nft(o) => TypedOutput {
-                    output: OutputDto_::T4(o),
-                },
-                Self::Delegation(o) => TypedOutput {
-                    output: OutputDto_::T5(o),
-                },
-            };
-            output.serialize(serializer)
-        }
+        self.storage_score(params) * params.storage_cost()
     }
 }

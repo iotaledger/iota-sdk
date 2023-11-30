@@ -3,7 +3,10 @@
 
 use derive_more::{Display, From};
 
-use crate::types::block::slot::SlotCommitmentId;
+use crate::types::block::{
+    protocol::{WorkScore, WorkScoreParameters},
+    slot::SlotCommitmentId,
+};
 
 /// A Commitment Context Input references a commitment to a certain slot.
 #[derive(Clone, Copy, Display, Debug, Eq, PartialEq, Hash, Ord, PartialOrd, From, packable::Packable)]
@@ -21,6 +24,12 @@ impl CommitmentContextInput {
     /// Returns the commitment id of the [`CommitmentContextInput`].
     pub fn commitment_id(&self) -> SlotCommitmentId {
         self.0
+    }
+}
+
+impl WorkScore for CommitmentContextInput {
+    fn work_score(&self, params: WorkScoreParameters) -> u32 {
+        params.context_input()
     }
 }
 

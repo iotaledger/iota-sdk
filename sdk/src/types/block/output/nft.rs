@@ -22,7 +22,7 @@ use crate::types::block::{
         StateTransitionVerifier, StorageScore, StorageScoreParameters,
     },
     payload::signed_transaction::TransactionCapabilityFlag,
-    protocol::ProtocolParameters,
+    protocol::{ProtocolParameters, WorkScore, WorkScoreParameters},
     semantic::{SemanticValidationContext, TransactionFailureReason},
     unlock::Unlock,
     Error,
@@ -224,7 +224,7 @@ impl NftOutputBuilder {
                         .amount();
                     // Add a temporary storage deposit unlock condition so the new storage requirement can be calculated
                     self =
-                        self.add_unlock_condition(StorageDepositReturnUnlockCondition::new(return_address.clone(), 1));
+                        self.add_unlock_condition(StorageDepositReturnUnlockCondition::new(return_address.clone(), 1)?);
                     // Get the min amount of the output with the added storage deposit return unlock condition
                     let min_amount_with_sdruc = self.clone().finish()?.minimum_amount(params);
                     // If the return storage cost and amount are less than the required min
@@ -241,7 +241,7 @@ impl NftOutputBuilder {
                         .replace_unlock_condition(StorageDepositReturnUnlockCondition::new(
                             return_address,
                             sdruc_amount,
-                        ))
+                        )?)
                 } else {
                     self
                 }
@@ -318,7 +318,7 @@ pub struct NftOutput {
 }
 
 impl NftOutput {
-    /// The [`Output`](crate::types::block::output::Output) kind of an [`NftOutput`].
+    /// The [`Output`] kind of an [`NftOutput`].
     pub const KIND: u8 = 4;
     /// The set of allowed [`UnlockCondition`]s for an [`NftOutput`].
     pub const ALLOWED_UNLOCK_CONDITIONS: UnlockConditionFlags = UnlockConditionFlags::ADDRESS
@@ -451,6 +451,15 @@ impl StorageScore for NftOutput {
     }
 }
 
+impl WorkScore for NftOutput {
+    fn work_score(&self, params: WorkScoreParameters) -> u32 {
+        params.output()
+            + self.unlock_conditions.work_score(params)
+            + self.features.work_score(params)
+            + self.immutable_features.work_score(params)
+    }
+}
+
 impl MinimumOutputAmount for NftOutput {}
 
 impl StateTransitionVerifier for NftOutput {
@@ -569,7 +578,7 @@ pub(crate) mod dto {
 
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
-    pub struct NftOutputDto {
+    pub(crate) struct NftOutputDto {
         #[serde(rename = "type")]
         pub kind: u8,
         #[serde(with = "string")]
@@ -650,6 +659,8 @@ pub(crate) mod dto {
             builder.finish()
         }
     }
+
+    crate::impl_serde_typed_dto!(NftOutput, NftOutputDto, "nft output");
 }
 
 #[cfg(test)]
@@ -658,7 +669,7 @@ mod tests {
 
     use super::*;
     use crate::types::block::{
-        output::dto::OutputDto,
+        output::nft::dto::NftOutputDto,
         protocol::protocol_parameters,
         rand::output::{
             feature::rand_allowed_features, rand_nft_output, unlock_condition::rand_address_unlock_condition,
@@ -668,23 +679,21 @@ mod tests {
     #[test]
     fn to_from_dto() {
         let protocol_parameters = protocol_parameters();
-        let output = rand_nft_output(protocol_parameters.token_supply());
-        let dto = OutputDto::Nft((&output).into());
-        let output_unver = Output::try_from(dto.clone()).unwrap();
-        assert_eq!(&output, output_unver.as_nft());
-        let output_ver = Output::try_from(dto).unwrap();
-        assert_eq!(&output, output_ver.as_nft());
+        let nft_output = rand_nft_output(protocol_parameters.token_supply());
+        let dto = NftOutputDto::from(&nft_output);
+        let output = Output::Nft(NftOutput::try_from(dto).unwrap());
+        assert_eq!(&nft_output, output.as_nft());
 
         let output_split = NftOutput::try_from_dtos(
-            OutputBuilderAmount::Amount(output.amount()),
-            output.mana(),
-            output.nft_id(),
-            output.unlock_conditions().iter().map(Into::into).collect(),
-            Some(output.features().to_vec()),
-            Some(output.immutable_features().to_vec()),
+            OutputBuilderAmount::Amount(nft_output.amount()),
+            nft_output.mana(),
+            nft_output.nft_id(),
+            nft_output.unlock_conditions().iter().map(Into::into).collect(),
+            Some(nft_output.features().to_vec()),
+            Some(nft_output.immutable_features().to_vec()),
         )
         .unwrap();
-        assert_eq!(output, output_split);
+        assert_eq!(nft_output, output_split);
 
         let test_split_dto = |builder: NftOutputBuilder| {
             let output_split = NftOutput::try_from_dtos(

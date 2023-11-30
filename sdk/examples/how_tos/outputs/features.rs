@@ -13,7 +13,6 @@ use iota_sdk::{
     types::block::{
         address::Address,
         output::{
-            dto::OutputDto,
             feature::{IssuerFeature, MetadataFeature, SenderFeature, TagFeature},
             unlock_condition::AddressUnlockCondition,
             NftId, NftOutputBuilder,
@@ -65,8 +64,8 @@ async fn main() -> Result<()> {
             .finish_output()?,
     ];
 
-    // Convert ouput array to json array
-    let json_outputs = serde_json::to_string_pretty(&outputs.iter().map(OutputDto::from).collect::<Vec<OutputDto>>())?;
+    // Convert output array to json array
+    let json_outputs = serde_json::to_string_pretty(&outputs)?;
     println!("{json_outputs}");
 
     Ok(())

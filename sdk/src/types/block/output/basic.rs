@@ -15,7 +15,7 @@ use crate::types::block::{
         },
         MinimumOutputAmount, NativeToken, Output, OutputBuilderAmount, OutputId, StorageScore, StorageScoreParameters,
     },
-    protocol::ProtocolParameters,
+    protocol::{ProtocolParameters, WorkScore, WorkScoreParameters},
     semantic::{SemanticValidationContext, TransactionFailureReason},
     unlock::Unlock,
     Error,
@@ -160,7 +160,7 @@ impl BasicOutputBuilder {
                         .amount();
                     // Add a temporary storage deposit unlock condition so the new storage requirement can be calculated
                     self =
-                        self.add_unlock_condition(StorageDepositReturnUnlockCondition::new(return_address.clone(), 1));
+                        self.add_unlock_condition(StorageDepositReturnUnlockCondition::new(return_address.clone(), 1)?);
                     // Get the min amount of the output with the added storage deposit return unlock condition
                     let min_amount_with_sdruc = self.clone().finish()?.minimum_amount(params);
                     // If the return storage cost and amount are less than the required min
@@ -177,7 +177,7 @@ impl BasicOutputBuilder {
                         .replace_unlock_condition(StorageDepositReturnUnlockCondition::new(
                             return_address,
                             sdruc_amount,
-                        ))
+                        )?)
                 } else {
                     self
                 }
@@ -246,7 +246,7 @@ pub struct BasicOutput {
 }
 
 impl BasicOutput {
-    /// The [`Output`](crate::types::block::output::Output) kind of an [`BasicOutput`].
+    /// The [`Output`] kind of an [`BasicOutput`].
     pub const KIND: u8 = 0;
 
     /// The set of allowed [`UnlockCondition`]s for an [`BasicOutput`].
@@ -368,6 +368,12 @@ impl StorageScore for BasicOutput {
     }
 }
 
+impl WorkScore for BasicOutput {
+    fn work_score(&self, params: WorkScoreParameters) -> u32 {
+        params.output() + self.unlock_conditions.work_score(params) + self.features.work_score(params)
+    }
+}
+
 impl MinimumOutputAmount for BasicOutput {}
 
 fn verify_unlock_conditions<const VERIFY: bool>(unlock_conditions: &UnlockConditions) -> Result<(), Error> {
@@ -415,7 +421,7 @@ pub(crate) mod dto {
 
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
-    pub struct BasicOutputDto {
+    pub(crate) struct BasicOutputDto {
         #[serde(rename = "type")]
         pub kind: u8,
         #[serde(with = "string")]
@@ -481,6 +487,8 @@ pub(crate) mod dto {
             builder.finish()
         }
     }
+
+    crate::impl_serde_typed_dto!(BasicOutput, BasicOutputDto, "basic output");
 }
 
 #[cfg(test)]
@@ -489,7 +497,7 @@ mod tests {
 
     use super::*;
     use crate::types::block::{
-        output::{dto::OutputDto, FoundryId, SimpleTokenScheme, TokenId},
+        output::{basic::dto::BasicOutputDto, FoundryId, SimpleTokenScheme, TokenId},
         protocol::protocol_parameters,
         rand::{
             address::rand_account_address,
@@ -502,21 +510,19 @@ mod tests {
     #[test]
     fn to_from_dto() {
         let protocol_parameters = protocol_parameters();
-        let output = rand_basic_output(protocol_parameters.token_supply());
-        let dto = OutputDto::Basic((&output).into());
-        let output_unver = Output::try_from(dto.clone()).unwrap();
-        assert_eq!(&output, output_unver.as_basic());
-        let output_ver = Output::try_from(dto).unwrap();
-        assert_eq!(&output, output_ver.as_basic());
+        let basic_output = rand_basic_output(protocol_parameters.token_supply());
+        let dto = BasicOutputDto::from(&basic_output);
+        let output = Output::Basic(BasicOutput::try_from(dto).unwrap());
+        assert_eq!(&basic_output, output.as_basic());
 
         let output_split = BasicOutput::try_from_dtos(
-            OutputBuilderAmount::Amount(output.amount()),
-            output.mana(),
-            output.unlock_conditions().iter().map(Into::into).collect(),
-            Some(output.features().to_vec()),
+            OutputBuilderAmount::Amount(basic_output.amount()),
+            basic_output.mana(),
+            basic_output.unlock_conditions().iter().map(Into::into).collect(),
+            Some(basic_output.features().to_vec()),
         )
         .unwrap();
-        assert_eq!(output, output_split);
+        assert_eq!(basic_output, output_split);
 
         let foundry_id = FoundryId::build(&rand_account_address(), 0, SimpleTokenScheme::KIND);
         let address = rand_address_unlock_condition();

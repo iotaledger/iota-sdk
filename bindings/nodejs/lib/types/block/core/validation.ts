@@ -3,16 +3,16 @@
 
 import { StrongParents, WeakParents, ShallowLikeParents } from '../parents';
 import { HexEncodedString } from '../../utils';
-import { Block } from './block';
+import { BlockBody } from './block-body';
 
 /**
- * A Validation Block is a special type of block used by validators to secure the network.
+ * A Validation Block Body is a special type of block body used by validators to secure the network.
  * It is recognised by the Congestion Control of the IOTA 2.0 protocol and can be issued without
  * burning Mana within the constraints of the allowed validator throughput.
  *
- * It is allowed to reference more parent blocks than a normal Basic Block.
+ * It is allowed to reference more parent blocks than a normal Basic Block Body.
  */
-export class ValidationBlock extends Block {
+export class ValidationBlockBody extends BlockBody {
     /**
      * Blocks that are strongly directly approved.
      */
@@ -20,11 +20,11 @@ export class ValidationBlock extends Block {
     /**
      * Blocks that are weakly directly approved.
      */
-    readonly weakParents!: WeakParents;
+    readonly weakParents?: WeakParents;
     /**
      * Blocks that are directly referenced to adjust opinion.
      */
-    readonly shallowLikeParents!: ShallowLikeParents;
+    readonly shallowLikeParents?: ShallowLikeParents;
 
     /**
      * The highest supported protocol version the issuer of this block supports.

@@ -21,7 +21,7 @@ use iota_sdk::{
     },
     types::block::{
         address::{Bech32Address, Hrp},
-        output::{dto::OutputDto, OutputId, TokenId},
+        output::{Output, OutputId, TokenId},
         payload::signed_transaction::TransactionId,
     },
     wallet::{
@@ -220,6 +220,10 @@ pub enum WalletMethod {
         burn: Burn,
         options: Option<TransactionOptions>,
     },
+    /// Claim outputs.
+    /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
+    #[serde(rename_all = "camelCase")]
+    PrepareClaimOutputs { output_ids_to_claim: Vec<OutputId> },
     /// Consolidate outputs.
     /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
     PrepareConsolidateOutputs { params: ConsolidationParams },
@@ -317,7 +321,7 @@ pub enum WalletMethod {
     /// Prepare transaction.
     /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
     PrepareTransaction {
-        outputs: Vec<OutputDto>,
+        outputs: Vec<Output>,
         options: Option<TransactionOptions>,
     },
     /// Vote for a participation event.
@@ -367,7 +371,7 @@ pub enum WalletMethod {
     /// Send outputs in a transaction.
     /// Expected response: [`SentTransaction`](crate::Response::SentTransaction)
     SendOutputs {
-        outputs: Vec<OutputDto>,
+        outputs: Vec<Output>,
         options: Option<TransactionOptions>,
     },
     /// Set the alias of the wallet.

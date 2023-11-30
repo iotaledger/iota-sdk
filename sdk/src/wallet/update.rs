@@ -5,10 +5,7 @@ use std::collections::HashMap;
 
 use crate::{
     client::secret::SecretManage,
-    types::{
-        api::core::OutputWithMetadataResponse,
-        block::output::{OutputId, OutputMetadata},
-    },
+    types::block::output::{OutputId, OutputMetadata},
     wallet::{
         types::{InclusionState, OutputData, TransactionWithMetadata},
         Wallet,
@@ -16,6 +13,7 @@ use crate::{
 };
 #[cfg(feature = "events")]
 use crate::{
+    types::api::core::OutputWithMetadataResponse,
     types::block::payload::signed_transaction::dto::SignedTransactionPayloadDto,
     wallet::{
         events::types::{NewOutputEvent, SpentOutputEvent, TransactionInclusionEvent, WalletEvent},
@@ -71,7 +69,8 @@ where
                     wallet_data.unspent_outputs.remove(&output_id);
                     // Update spent data fields
                     if let Some(output_data) = wallet_data.outputs.get_mut(&output_id) {
-                        output_data.metadata.set_spent(true);
+                        // TODO https://github.com/iotaledger/iota-sdk/issues/1718
+                        // output_data.metadata.set_spent(true);
                         output_data.is_spent = true;
                         #[cfg(feature = "events")]
                         {

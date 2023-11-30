@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 from dataclasses import dataclass, field
-from typing import List
+from typing import List, Optional
 from iota_sdk.types.block.block import BlockType
 from iota_sdk.types.common import HexStr, json
 
@@ -23,10 +23,10 @@ class ValidationBlock:
         protocol_parameters_hash: The hash of the protocol parameters for the Highest Supported Version.
     """
     strong_parents: List[HexStr]
-    weak_parents: List[HexStr]
-    shallow_like_parents: List[HexStr]
     highest_supported_version: int
     protocol_parameters_hash: HexStr
+    weak_parents: Optional[List[HexStr]] = None
+    shallow_like_parents: Optional[List[HexStr]] = None
     type: int = field(
         default_factory=lambda: int(BlockType.Validation),
         init=False)

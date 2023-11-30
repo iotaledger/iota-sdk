@@ -4,13 +4,13 @@
 import { Payload, PayloadDiscriminator } from '../payload';
 import { Type } from 'class-transformer';
 import { StrongParents, WeakParents, ShallowLikeParents } from '../parents';
-import { Block } from './block';
+import { BlockBody } from './block-body';
 import { u64 } from '../../utils';
 
 /**
- * Basic Block layout.
+ * Basic Block Body layout.
  */
-export class BasicBlock extends Block {
+export class BasicBlockBody extends BlockBody {
     /**
      * Blocks that are strongly directly approved.
      */
@@ -18,11 +18,11 @@ export class BasicBlock extends Block {
     /**
      * Blocks that are weakly directly approved.
      */
-    readonly weakParents!: WeakParents;
+    readonly weakParents?: WeakParents;
     /**
      * Blocks that are directly referenced to adjust opinion.
      */
-    readonly shallowLikeParents!: ShallowLikeParents;
+    readonly shallowLikeParents?: ShallowLikeParents;
     /**
      * The payload contents.
      */

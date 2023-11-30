@@ -13,7 +13,7 @@ use crate::types::block::{
         MinimumOutputAmount, Output, OutputBuilderAmount, OutputId, StateTransitionError, StateTransitionVerifier,
         StorageScore, StorageScoreParameters,
     },
-    protocol::ProtocolParameters,
+    protocol::{ProtocolParameters, WorkScore, WorkScoreParameters},
     semantic::{SemanticValidationContext, TransactionFailureReason},
     slot::EpochIndex,
     unlock::Unlock,
@@ -390,6 +390,12 @@ impl StorageScore for DelegationOutput {
     }
 }
 
+impl WorkScore for DelegationOutput {
+    fn work_score(&self, params: WorkScoreParameters) -> u32 {
+        params.output() + self.unlock_conditions.work_score(params)
+    }
+}
+
 impl MinimumOutputAmount for DelegationOutput {}
 
 fn verify_validator_address<const VERIFY: bool>(validator_address: &AccountAddress) -> Result<(), Error> {
@@ -427,7 +433,7 @@ fn verify_unlock_conditions_packable<const VERIFY: bool>(
 }
 
 #[cfg(feature = "serde")]
-pub(crate) mod dto {
+mod dto {
     use alloc::vec::Vec;
 
     use serde::{Deserialize, Serialize};
@@ -443,7 +449,7 @@ pub(crate) mod dto {
 
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
-    pub struct DelegationOutputDto {
+    struct DelegationOutputDto {
         #[serde(rename = "type")]
         pub kind: u8,
         #[serde(with = "string")]
@@ -530,4 +536,6 @@ pub(crate) mod dto {
             builder.finish()
         }
     }
+
+    crate::impl_serde_typed_dto!(DelegationOutput, DelegationOutputDto, "delegation output");
 }
