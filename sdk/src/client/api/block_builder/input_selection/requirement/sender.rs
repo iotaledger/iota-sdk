@@ -44,14 +44,13 @@ impl InputSelection {
             }
             // TODO https://github.com/iotaledger/iota-sdk/issues/1721
             Address::Multi(multi_address) => {
-                let mut cumulative_weight = 0u16;
+                let mut cumulative_weight = 0;
 
                 for address in multi_address.addresses() {
                     for input in self.selected_inputs.iter() {
                         let required_address = input
                             .output
-                            .required_and_unlocked_address(self.slot_index, input.output_id())
-                            .unwrap()
+                            .required_and_unlocked_address(self.slot_index, input.output_id())?
                             .0;
 
                         if &required_address == address.address() {
@@ -62,7 +61,7 @@ impl InputSelection {
                 }
 
                 if cumulative_weight < multi_address.threshold() {
-                    todo!()
+                    Err(Error::UnfulfillableRequirement(Requirement::Sender(address.clone())))
                 } else {
                     Ok(vec![])
                 }
