@@ -197,7 +197,9 @@ pub enum WalletMethod {
     #[serde(rename_all = "camelCase")]
     PrepareImplicitAccountTransition {
         output_id: OutputId,
+        #[serde(default)]
         public_key: Option<PublicKey>,
+        #[serde(default)]
         bip_path: Option<Bip44>,
     },
     /// Returns the implicit accounts of the wallet.
