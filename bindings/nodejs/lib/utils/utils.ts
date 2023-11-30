@@ -14,9 +14,10 @@ import {
     StorageScoreParameters,
     OutputId,
     u64,
-    SignedBlock,
+    Block,
     ProtocolParameters,
     Bech32Address,
+    InputSigningData,
 } from '../types';
 import {
     AccountId,
@@ -189,7 +190,7 @@ export class Utils {
      * @param params The network protocol parameters.
      * @returns The corresponding block ID.
      */
-    static blockId(block: SignedBlock, params: ProtocolParameters): BlockId {
+    static blockId(block: Block, params: ProtocolParameters): BlockId {
         return callUtilsMethod({
             name: 'blockId',
             data: {
@@ -424,5 +425,29 @@ export class Utils {
             },
         });
         return hexBytes;
+    }
+
+    /**
+     * Verifies the semantic of a transaction.
+     *
+     * @param inputs The inputs data.
+     * @param transaction The transaction payload.
+     * @param time The unix time for which to do the validation, should be roughly the one of the milestone that will reference the transaction.
+     * @returns The conflict reason.
+     */
+    static verifyTransactionSemantic(
+        inputs: InputSigningData[],
+        transaction: SignedTransactionPayload,
+        time: number,
+    ): string {
+        const conflictReason = callUtilsMethod({
+            name: 'verifyTransactionSemantic',
+            data: {
+                inputs,
+                transaction,
+                time,
+            },
+        });
+        return conflictReason;
     }
 }

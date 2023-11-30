@@ -10,17 +10,21 @@ require('dotenv').config({ path: '.env' });
 // In this example we will get the node health
 async function run() {
     initLogger();
-    if (!process.env.NODE_URL) {
-        throw new Error('.env NODE_URL is undefined, see .env.example');
+    for (const envVar of ['NODE_URL']) {
+        if (!(envVar in process.env)) {
+            throw new Error(`.env ${envVar} is undefined, see .env.example`);
+        }
     }
 
     const client = new Client({
         // Insert your node URL in the .env.
-        nodes: [process.env.NODE_URL],
+        nodes: [process.env.NODE_URL as string],
     });
 
     try {
-        const isHealthy = await client.getHealth(process.env.NODE_URL);
+        const isHealthy = await client.getHealth(
+            process.env.NODE_URL as string,
+        );
         console.log('Healthy: ', isHealthy);
     } catch (error) {
         console.error('Error: ', error);

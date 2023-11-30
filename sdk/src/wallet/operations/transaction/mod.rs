@@ -20,10 +20,7 @@ use crate::{
     },
     types::{
         api::core::OutputWithMetadataResponse,
-        block::{
-            output::{dto::OutputDto, Output},
-            payload::signed_transaction::SignedTransactionPayload,
-        },
+        block::{output::Output, payload::signed_transaction::SignedTransactionPayload},
     },
     wallet::{
         types::{InclusionState, TransactionWithMetadata},
@@ -168,7 +165,7 @@ where
             .into_iter()
             .map(|input| OutputWithMetadataResponse {
                 metadata: input.output_metadata,
-                output: OutputDto::from(&input.output),
+                output: input.output,
             })
             .collect();
 

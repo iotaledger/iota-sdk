@@ -25,7 +25,12 @@ async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
-    let metadata = std::env::args().nth(1).unwrap_or("hello".to_string());
+    #[allow(clippy::single_element_loop)]
+    for var in ["NODE_URL"] {
+        std::env::var(var).unwrap_or_else(|_| panic!(".env variable '{var}' is undefined, see .env.example"));
+    }
+
+    let metadata = std::env::args().nth(1).unwrap_or_else(|| "hello".to_string());
     let metadata = metadata.as_bytes();
 
     // Create a node client.
@@ -38,7 +43,7 @@ async fn main() -> Result<()> {
 
     let address = std::env::args()
         .nth(1)
-        .unwrap_or("rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy".to_string());
+        .unwrap_or_else(|| "rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy".to_string());
     let address = Address::try_from_bech32(address)?;
 
     // Account id needs to be null the first time

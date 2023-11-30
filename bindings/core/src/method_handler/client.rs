@@ -9,8 +9,7 @@ use iota_sdk::{
         api::core::OutputWithMetadataResponse,
         block::{
             output::{
-                dto::OutputDto, AccountOutput, BasicOutput, FoundryOutput, MinimumOutputAmount, NftOutput, Output,
-                OutputBuilderAmount,
+                AccountOutput, BasicOutput, FoundryOutput, MinimumOutputAmount, NftOutput, Output, OutputBuilderAmount,
             },
             payload::Payload,
             Block, BlockDto, UnsignedBlockDto,
@@ -79,7 +78,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
                 immutable_features,
             )?);
 
-            Response::Output(OutputDto::from(&output))
+            Response::Output(output)
         }
         ClientMethod::BuildBasicOutput {
             amount,
@@ -98,7 +97,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
                 features,
             )?);
 
-            Response::Output(OutputDto::from(&output))
+            Response::Output(output)
         }
         ClientMethod::BuildFoundryOutput {
             amount,
@@ -121,7 +120,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
                 immutable_features,
             )?);
 
-            Response::Output(OutputDto::from(&output))
+            Response::Output(output)
         }
         ClientMethod::BuildNftOutput {
             amount,
@@ -144,7 +143,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
                 immutable_features,
             )?);
 
-            Response::Output(OutputDto::from(&output))
+            Response::Output(output)
         }
         ClientMethod::BuildBasicBlock { issuer_id, payload } => {
             let payload = if let Some(payload) = payload {
@@ -195,6 +194,9 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         ClientMethod::GetBlock { block_id } => Response::Block(BlockDto::from(&client.get_block(&block_id).await?)),
         ClientMethod::GetBlockMetadata { block_id } => {
             Response::BlockMetadata(client.get_block_metadata(&block_id).await?)
+        }
+        ClientMethod::GetBlockWithMetadata { block_id } => {
+            Response::BlockWithMetadata(client.get_block_with_metadata(&block_id).await?)
         }
         ClientMethod::GetBlockRaw { block_id } => Response::Raw(client.get_block_raw(&block_id).await?),
         ClientMethod::GetOutput { output_id } => Response::OutputWithMetadataResponse(
@@ -282,7 +284,6 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
             Response::Bech32Address(client.hex_public_key_to_bech32_address(&hex, bech32_hrp).await?)
         }
         ClientMethod::ComputeMinimumOutputAmount { output } => {
-            let output = Output::try_from(output)?;
             let storage_score_params = client.get_storage_score_parameters().await?;
 
             Response::OutputAmount(output.minimum_amount(storage_score_params))

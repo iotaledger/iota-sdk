@@ -107,10 +107,10 @@ pub trait SecretManage: Send + Sync {
         options: impl Into<Option<GenerateAddressOptions>> + Send,
     ) -> Result<Vec<EvmAddress>, Self::Error>;
 
-    /// Signs msg using the given [`Chain`] using Ed25519.
+    /// Signs msg using the given [`Bip44`] using Ed25519.
     async fn sign_ed25519(&self, msg: &[u8], chain: Bip44) -> Result<Ed25519Signature, Self::Error>;
 
-    /// Signs msg using the given [`Chain`] using Secp256k1.
+    /// Signs msg using the given [`Bip44`] using Secp256k1.
     async fn sign_secp256k1_ecdsa(
         &self,
         msg: &[u8],
@@ -146,7 +146,6 @@ pub trait SecretManagerConfig: SecretManage {
 }
 
 /// Supported secret managers
-
 #[non_exhaustive]
 pub enum SecretManager {
     /// Secret manager that uses [`iota_stronghold`] as the backing storage.

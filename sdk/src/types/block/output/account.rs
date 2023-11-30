@@ -282,7 +282,7 @@ pub struct AccountOutput {
 }
 
 impl AccountOutput {
-    /// The [`Output`](crate::types::block::output::Output) kind of an [`AccountOutput`].
+    /// The [`Output`] kind of an [`AccountOutput`].
     pub const KIND: u8 = 1;
     /// The set of allowed [`UnlockCondition`]s for an [`AccountOutput`].
     pub const ALLOWED_UNLOCK_CONDITIONS: UnlockConditionFlags = UnlockConditionFlags::ADDRESS;
@@ -617,7 +617,7 @@ pub(crate) mod dto {
     /// Describes an account in the ledger that can be controlled by the state and governance controllers.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
-    pub struct AccountOutputDto {
+    pub(crate) struct AccountOutputDto {
         #[serde(rename = "type")]
         pub kind: u8,
         #[serde(with = "string")]
@@ -706,6 +706,8 @@ pub(crate) mod dto {
             builder.finish()
         }
     }
+
+    crate::impl_serde_typed_dto!(AccountOutput, AccountOutputDto, "account output");
 }
 
 #[cfg(test)]
@@ -714,7 +716,7 @@ mod tests {
 
     use super::*;
     use crate::types::block::{
-        output::dto::OutputDto,
+        output::account::dto::AccountOutputDto,
         protocol::protocol_parameters,
         rand::output::{
             feature::rand_allowed_features, rand_account_id, rand_account_output,
@@ -725,24 +727,22 @@ mod tests {
     #[test]
     fn to_from_dto() {
         let protocol_parameters = protocol_parameters();
-        let output = rand_account_output(protocol_parameters.token_supply());
-        let dto = OutputDto::Account((&output).into());
-        let output_unver = Output::try_from(dto.clone()).unwrap();
-        assert_eq!(&output, output_unver.as_account());
-        let output_ver = Output::try_from(dto).unwrap();
-        assert_eq!(&output, output_ver.as_account());
+        let account_output = rand_account_output(protocol_parameters.token_supply());
+        let dto = AccountOutputDto::from(&account_output);
+        let output = Output::Account(AccountOutput::try_from(dto).unwrap());
+        assert_eq!(&account_output, output.as_account());
 
         let output_split = AccountOutput::try_from_dtos(
-            OutputBuilderAmount::Amount(output.amount()),
-            output.mana(),
-            output.account_id(),
-            output.foundry_counter().into(),
-            output.unlock_conditions().iter().map(Into::into).collect(),
-            Some(output.features().to_vec()),
-            Some(output.immutable_features().to_vec()),
+            OutputBuilderAmount::Amount(account_output.amount()),
+            account_output.mana(),
+            account_output.account_id(),
+            account_output.foundry_counter().into(),
+            account_output.unlock_conditions().iter().map(Into::into).collect(),
+            Some(account_output.features().to_vec()),
+            Some(account_output.immutable_features().to_vec()),
         )
         .unwrap();
-        assert_eq!(output, output_split);
+        assert_eq!(account_output, output_split);
 
         let account_id = rand_account_id();
         let address = rand_address_unlock_condition_different_from_account_id(&account_id);

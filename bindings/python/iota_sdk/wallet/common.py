@@ -5,7 +5,6 @@ import json
 from json import dumps, JSONEncoder
 from enum import Enum
 import humps
-
 from iota_sdk import call_wallet_method
 
 

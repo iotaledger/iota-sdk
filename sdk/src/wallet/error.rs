@@ -43,7 +43,7 @@ pub enum Error {
     #[error("custom input error {0}")]
     CustomInput(String),
     /// Insufficient funds to send transaction.
-    #[error("insufficient funds {available}/{required} available")]
+    #[error("address owns insufficient funds: {required} base unit required, but {available} base unit available")]
     InsufficientFunds { available: u64, required: u64 },
     /// Invalid event type.
     #[cfg(feature = "events")]

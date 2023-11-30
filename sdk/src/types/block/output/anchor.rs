@@ -313,7 +313,7 @@ pub struct AnchorOutput {
 }
 
 impl AnchorOutput {
-    /// The [`Output`](crate::types::block::output::Output) kind of an [`AnchorOutput`].
+    /// The [`Output`] kind of an [`AnchorOutput`].
     pub const KIND: u8 = 2;
     /// The set of allowed [`UnlockCondition`]s for an [`AnchorOutput`].
     pub const ALLOWED_UNLOCK_CONDITIONS: UnlockConditionFlags =
@@ -665,7 +665,7 @@ pub(crate) mod dto {
     /// Describes an anchor in the ledger that can be controlled by the state and governance controllers.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
-    pub struct AnchorOutputDto {
+    pub(crate) struct AnchorOutputDto {
         #[serde(rename = "type")]
         pub kind: u8,
         #[serde(with = "string")]
@@ -751,13 +751,15 @@ pub(crate) mod dto {
             builder.finish()
         }
     }
+
+    crate::impl_serde_typed_dto!(AnchorOutput, AnchorOutputDto, "anchor output");
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::types::block::{
-        output::dto::OutputDto,
+        output::anchor::dto::AnchorOutputDto,
         protocol::protocol_parameters,
         rand::output::{
             feature::rand_allowed_features,
@@ -772,24 +774,22 @@ mod tests {
     #[test]
     fn to_from_dto() {
         let protocol_parameters = protocol_parameters();
-        let output = rand_anchor_output(protocol_parameters.token_supply());
-        let dto = OutputDto::Anchor((&output).into());
-        let output_unver = Output::try_from(dto.clone()).unwrap();
-        assert_eq!(&output, output_unver.as_anchor());
-        let output_ver = Output::try_from(dto).unwrap();
-        assert_eq!(&output, output_ver.as_anchor());
+        let anchor_output = rand_anchor_output(protocol_parameters.token_supply());
+        let dto = AnchorOutputDto::from(&anchor_output);
+        let output = Output::Anchor(AnchorOutput::try_from(dto).unwrap());
+        assert_eq!(&anchor_output, output.as_anchor());
 
         let output_split = AnchorOutput::try_from_dtos(
             OutputBuilderAmount::Amount(output.amount()),
-            output.mana(),
-            output.anchor_id(),
-            output.state_index(),
-            output.unlock_conditions().iter().map(Into::into).collect(),
-            Some(output.features().to_vec()),
-            Some(output.immutable_features().to_vec()),
+            anchor_output.mana(),
+            anchor_output.anchor_id(),
+            anchor_output.state_index(),
+            anchor_output.unlock_conditions().iter().map(Into::into).collect(),
+            Some(anchor_output.features().to_vec()),
+            Some(anchor_output.immutable_features().to_vec()),
         )
         .unwrap();
-        assert_eq!(output, output_split);
+        assert_eq!(anchor_output, output_split);
 
         let anchor_id = rand_anchor_id();
         let gov_address = rand_governor_address_unlock_condition_different_from(&anchor_id);

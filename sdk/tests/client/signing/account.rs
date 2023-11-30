@@ -87,7 +87,7 @@ async fn sign_account_state_transition() -> Result<()> {
     let unlocks = secret_manager.transaction_unlocks(&prepared_transaction_data).await?;
 
     assert_eq!(unlocks.len(), 1);
-    assert_eq!((*unlocks).get(0).unwrap().kind(), SignatureUnlock::KIND);
+    assert_eq!((*unlocks).first().unwrap().kind(), SignatureUnlock::KIND);
 
     let tx_payload = SignedTransactionPayload::new(prepared_transaction_data.transaction.clone(), unlocks)?;
 
@@ -186,7 +186,7 @@ async fn account_reference_unlocks() -> Result<()> {
     let unlocks = secret_manager.transaction_unlocks(&prepared_transaction_data).await?;
 
     assert_eq!(unlocks.len(), 3);
-    assert_eq!((*unlocks).get(0).unwrap().kind(), SignatureUnlock::KIND);
+    assert_eq!((*unlocks).first().unwrap().kind(), SignatureUnlock::KIND);
     match (*unlocks).get(1).unwrap() {
         Unlock::Account(a) => {
             assert_eq!(a.index(), 0);
