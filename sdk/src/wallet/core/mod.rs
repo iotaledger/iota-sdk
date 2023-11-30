@@ -39,11 +39,7 @@ use crate::{
         },
         TryFromDto,
     },
-    wallet::{
-        operations::syncing::SyncOptions,
-        types::{OutputData, OutputDataDto},
-        Error, FilterOptions, Result,
-    },
+    wallet::{operations::syncing::SyncOptions, types::OutputData, Error, FilterOptions, Result},
 };
 
 /// The stateful wallet used to interact with an IOTA network.
@@ -536,9 +532,9 @@ pub struct WalletDataDto {
     pub bip_path: Option<Bip44>,
     pub address: Bech32Address,
     pub alias: Option<String>,
-    pub outputs: HashMap<OutputId, OutputDataDto>,
+    pub outputs: HashMap<OutputId, OutputData>,
     pub locked_outputs: HashSet<OutputId>,
-    pub unspent_outputs: HashMap<OutputId, OutputDataDto>,
+    pub unspent_outputs: HashMap<OutputId, OutputData>,
     pub transactions: HashMap<TransactionId, TransactionWithMetadataDto>,
     pub pending_transactions: HashSet<TransactionId>,
     pub incoming_transactions: HashMap<TransactionId, TransactionWithMetadataDto>,
@@ -557,17 +553,9 @@ impl TryFromDto<WalletDataDto> for WalletData {
             bip_path: dto.bip_path,
             address: dto.address,
             alias: dto.alias,
-            outputs: dto
-                .outputs
-                .into_iter()
-                .map(|(id, o)| Ok((id, OutputData::try_from(o)?)))
-                .collect::<crate::wallet::Result<_>>()?,
+            outputs: dto.outputs,
             locked_outputs: dto.locked_outputs,
-            unspent_outputs: dto
-                .unspent_outputs
-                .into_iter()
-                .map(|(id, o)| Ok((id, OutputData::try_from(o)?)))
-                .collect::<crate::wallet::Result<_>>()?,
+            unspent_outputs: dto.unspent_outputs,
             transactions: dto
                 .transactions
                 .into_iter()
@@ -591,17 +579,9 @@ impl From<&WalletData> for WalletDataDto {
             bip_path: value.bip_path,
             address: value.address.clone(),
             alias: value.alias.clone(),
-            outputs: value
-                .outputs
-                .iter()
-                .map(|(id, output)| (*id, OutputDataDto::from(output)))
-                .collect(),
+            outputs: value.outputs.clone(),
             locked_outputs: value.locked_outputs.clone(),
-            unspent_outputs: value
-                .unspent_outputs
-                .iter()
-                .map(|(id, output)| (*id, OutputDataDto::from(output)))
-                .collect(),
+            unspent_outputs: value.unspent_outputs.clone(),
             transactions: value
                 .transactions
                 .iter()

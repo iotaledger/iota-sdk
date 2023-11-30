@@ -3,9 +3,7 @@
 
 use crypto::keys::bip39::Mnemonic;
 use iota_sdk::{
-    client::{
-        hex_public_key_to_bech32_address, hex_to_bech32, secret::types::InputSigningData, verify_mnemonic, Client,
-    },
+    client::{hex_public_key_to_bech32_address, hex_to_bech32, verify_mnemonic, Client},
     types::{
         block::{
             address::{AccountAddress, Address, ToBech32Ext},
@@ -111,10 +109,6 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
             unlocks,
         } => {
             let transaction = Transaction::try_from_dto(transaction)?;
-            let inputs = &inputs
-                .into_iter()
-                .map(InputSigningData::try_from)
-                .collect::<iota_sdk::client::Result<Vec<InputSigningData>>>()?;
             let inputs = inputs
                 .iter()
                 .map(|input| (input.output_id(), &input.output))

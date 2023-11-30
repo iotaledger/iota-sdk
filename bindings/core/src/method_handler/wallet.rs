@@ -8,7 +8,7 @@ use iota_sdk::{
         PreparedTransactionData, PreparedTransactionDataDto, SignedTransactionData, SignedTransactionDataDto,
     },
     types::{block::address::ToBech32Ext, TryFromDto},
-    wallet::{types::TransactionWithMetadataDto, OutputDataDto, PreparedCreateNativeTokenTransactionDto, Wallet},
+    wallet::{types::TransactionWithMetadataDto, PreparedCreateNativeTokenTransactionDto, Wallet},
 };
 
 use crate::{method::WalletMethod, response::Response};
@@ -16,9 +16,7 @@ use crate::{method::WalletMethod, response::Response};
 /// Call a wallet method.
 pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletMethod) -> crate::Result<Response> {
     let response = match method {
-        WalletMethod::Accounts => {
-            Response::OutputsData(wallet.data().await.accounts().map(OutputDataDto::from).collect())
-        }
+        WalletMethod::Accounts => Response::OutputsData(wallet.data().await.accounts().collect()),
         #[cfg(feature = "stronghold")]
         WalletMethod::Backup { destination, password } => {
             wallet.backup(destination, password).await?;
@@ -161,14 +159,10 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
                 || Response::Transaction(None),
                 |transaction| Response::Transaction(Some(Box::new(TransactionWithMetadataDto::from(transaction)))),
             ),
-        WalletMethod::GetOutput { output_id } => Response::OutputData(
-            wallet
-                .data()
-                .await
-                .get_output(&output_id)
-                .map(OutputDataDto::from)
-                .map(Box::new),
-        ),
+        WalletMethod::GetOutput { output_id } => {
+            let output_data = wallet.data().await.get_output(&output_id);
+            Response::OutputData(output_data.cloned().map(Box::new))
+        }
         #[cfg(feature = "participation")]
         WalletMethod::GetParticipationEvent { event_id } => {
             let event_and_nodes = wallet.get_participation_event(event_id).await?;
@@ -211,14 +205,9 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
             let implicit_account_creation_address = wallet.implicit_account_creation_address().await?;
             Response::Bech32Address(implicit_account_creation_address)
         }
-        WalletMethod::ImplicitAccounts => Response::OutputsData(
-            wallet
-                .data()
-                .await
-                .implicit_accounts()
-                .map(OutputDataDto::from)
-                .collect(),
-        ),
+        WalletMethod::ImplicitAccounts => {
+            Response::OutputsData(wallet.data().await.implicit_accounts().cloned().collect())
+        }
         WalletMethod::PrepareImplicitAccountTransition { output_id } => {
             let data = wallet.prepare_implicit_account_transition(&output_id).await?;
             Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
@@ -235,11 +224,19 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
         WalletMethod::Outputs { filter_options } => {
             let wallet_data = wallet.data().await;
             Response::OutputsData(if let Some(filter) = filter_options {
-                wallet_data.filtered_outputs(filter).map(OutputDataDto::from).collect()
+                wallet_data.filtered_outputs(filter).cloned().collect()
             } else {
-                wallet_data.outputs().values().map(OutputDataDto::from).collect()
+                wallet_data.outputs().values().cloned().collect()
             })
         }
+        WalletMethod::PendingTransactions => Response::Transactions(
+            wallet
+                .data()
+                .await
+                .pending_transactions()
+                .map(TransactionWithMetadataDto::from)
+                .collect(),
+        ),
         WalletMethod::PendingTransactions => Response::Transactions(
             wallet
                 .data()
@@ -417,16 +414,9 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
         WalletMethod::UnspentOutputs { filter_options } => {
             let wallet_data = wallet.data().await;
             Response::OutputsData(if let Some(filter) = filter_options {
-                wallet_data
-                    .filtered_unspent_outputs(filter)
-                    .map(OutputDataDto::from)
-                    .collect()
+                wallet_data.filtered_unspent_outputs(filter).cloned().collect()
             } else {
-                wallet_data
-                    .unspent_outputs()
-                    .values()
-                    .map(OutputDataDto::from)
-                    .collect()
+                wallet_data.unspent_outputs().values().cloned().collect()
             })
         }
     };
