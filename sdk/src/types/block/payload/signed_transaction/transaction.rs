@@ -536,7 +536,7 @@ pub(crate) mod dto {
 
     use super::*;
     use crate::types::{
-        block::{mana::ManaAllotmentDto, output::dto::OutputDto, payload::dto::PayloadDto, Error},
+        block::{mana::ManaAllotmentDto, payload::dto::PayloadDto, Error},
         TryFromDto,
     };
 
@@ -554,7 +554,7 @@ pub(crate) mod dto {
         pub capabilities: TransactionCapabilities,
         #[serde(default, skip_serializing_if = "Option::is_none")]
         pub payload: Option<PayloadDto>,
-        pub outputs: Vec<OutputDto>,
+        pub outputs: Vec<Output>,
     }
 
     impl From<&Transaction> for TransactionDto {
@@ -571,7 +571,7 @@ pub(crate) mod dto {
                     Some(_) => unimplemented!(),
                     None => None,
                 },
-                outputs: value.outputs().iter().map(Into::into).collect(),
+                outputs: value.outputs().to_vec(),
             }
         }
     }
@@ -592,11 +592,7 @@ pub(crate) mod dto {
                 .into_iter()
                 .map(|o| ManaAllotment::try_from_dto_with_params_inner(o, params))
                 .collect::<Result<Vec<ManaAllotment>, Error>>()?;
-            let outputs = dto
-                .outputs
-                .into_iter()
-                .map(Output::try_from)
-                .collect::<Result<Vec<Output>, Error>>()?;
+            let outputs = dto.outputs;
 
             let mut builder = Self::builder(network_id)
                 .with_creation_slot(dto.creation_slot)

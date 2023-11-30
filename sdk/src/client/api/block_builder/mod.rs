@@ -43,12 +43,17 @@ impl ClientInner {
                 issuance.latest_finalized_slot,
                 issuer_id,
             ),
-            // TODO: burned mana calculation
-            BlockBody::build_basic(issuance.strong_parents()?, 0)
-                .with_weak_parents(issuance.weak_parents()?)
-                .with_shallow_like_parents(issuance.shallow_like_parents()?)
-                .with_payload(payload)
-                .finish_block_body()?,
+            BlockBody::build_basic(
+                issuance.strong_parents()?,
+                (
+                    protocol_params.work_score_parameters,
+                    issuance.latest_commitment.reference_mana_cost(),
+                ),
+            )
+            .with_weak_parents(issuance.weak_parents()?)
+            .with_shallow_like_parents(issuance.shallow_like_parents()?)
+            .with_payload(payload)
+            .finish_block_body()?,
         ))
     }
 }
