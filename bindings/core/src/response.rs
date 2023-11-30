@@ -24,7 +24,7 @@ use iota_sdk::{
         block::{
             address::{Address, Bech32Address, Hrp},
             input::UtxoInput,
-            output::{dto::OutputDto, AccountId, FoundryId, NftId, OutputId, OutputMetadata, TokenId},
+            output::{AccountId, FoundryId, NftId, Output, OutputId, OutputMetadata, TokenId},
             payload::{dto::SignedTransactionPayloadDto, signed_transaction::TransactionId},
             protocol::ProtocolParameters,
             semantic::TransactionFailureReason,
@@ -206,7 +206,7 @@ pub enum Response {
     /// - [`BuildNftOutput`](crate::method::ClientMethod::BuildNftOutput)
     /// - [`GetFoundryOutput`](crate::method::WalletMethod::GetFoundryOutput)
     /// - [`PrepareOutput`](crate::method::WalletMethod::PrepareOutput)
-    Output(OutputDto),
+    Output(Output),
     /// Response for:
     /// - [`AccountIdToBech32`](crate::method::ClientMethod::AccountIdToBech32)
     /// - [`HexPublicKeyToBech32Address`](crate::method::ClientMethod::HexPublicKeyToBech32Address)

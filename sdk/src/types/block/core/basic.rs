@@ -14,19 +14,44 @@ pub type StrongParents = Parents<1, 8>;
 pub type WeakParents = Parents<0, 8>;
 pub type ShallowLikeParents = Parents<0, 8>;
 
+#[derive(Copy, Clone)]
+pub enum MaxBurnedManaAmount {
+    Amount(u64),
+    MinimumAmount {
+        params: WorkScoreParameters,
+        reference_mana_cost: u64,
+    },
+}
+
+impl From<u64> for MaxBurnedManaAmount {
+    fn from(value: u64) -> Self {
+        Self::Amount(value)
+    }
+}
+
+impl From<(WorkScoreParameters, u64)> for MaxBurnedManaAmount {
+    fn from(value: (WorkScoreParameters, u64)) -> Self {
+        Self::MinimumAmount {
+            params: value.0,
+            reference_mana_cost: value.1,
+        }
+    }
+}
+
 /// A builder for a [`BasicBlockBody`].
 pub struct BasicBlockBodyBuilder {
     strong_parents: StrongParents,
     weak_parents: WeakParents,
     shallow_like_parents: ShallowLikeParents,
     payload: OptionalPayload,
-    max_burned_mana: u64,
+    max_burned_mana: MaxBurnedManaAmount,
 }
 
 impl BasicBlockBodyBuilder {
     /// Creates a new [`BasicBlockBodyBuilder`].
     #[inline(always)]
-    pub fn new(strong_parents: StrongParents, max_burned_mana: u64) -> Self {
+    pub fn new(strong_parents: StrongParents, max_burned_mana: impl Into<MaxBurnedManaAmount>) -> Self {
+        let max_burned_mana = max_burned_mana.into();
         Self {
             strong_parents,
             weak_parents: WeakParents::default(),
@@ -64,24 +89,27 @@ impl BasicBlockBodyBuilder {
         self
     }
 
-    /// Adds max burned mana to a [`BasicBlockBodyBuilder`].
-    #[inline(always)]
-    pub fn with_max_burned_mana(mut self, max_burned_mana: u64) -> Self {
-        self.max_burned_mana = max_burned_mana;
-        self
-    }
-
     /// Finishes the builder into a [`BasicBlockBody`].
     pub fn finish(self) -> Result<BasicBlockBody, Error> {
         verify_parents_sets(&self.strong_parents, &self.weak_parents, &self.shallow_like_parents)?;
 
-        Ok(BasicBlockBody {
+        let mut body = BasicBlockBody {
             strong_parents: self.strong_parents,
             weak_parents: self.weak_parents,
             shallow_like_parents: self.shallow_like_parents,
             payload: self.payload,
-            max_burned_mana: self.max_burned_mana,
-        })
+            max_burned_mana: 0,
+        };
+
+        body.max_burned_mana = match self.max_burned_mana {
+            MaxBurnedManaAmount::Amount(amount) => amount,
+            MaxBurnedManaAmount::MinimumAmount {
+                params,
+                reference_mana_cost,
+            } => body.work_score(params) as u64 * reference_mana_cost,
+        };
+
+        Ok(body)
     }
 
     /// Finishes the builder into a [`BlockBody`].
@@ -97,7 +125,7 @@ impl From<BasicBlockBody> for BasicBlockBodyBuilder {
             weak_parents: value.weak_parents,
             shallow_like_parents: value.shallow_like_parents,
             payload: value.payload,
-            max_burned_mana: value.max_burned_mana,
+            max_burned_mana: MaxBurnedManaAmount::Amount(value.max_burned_mana),
         }
     }
 }

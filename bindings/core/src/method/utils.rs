@@ -6,7 +6,7 @@ use iota_sdk::{
     client::secret::types::InputSigningDataDto,
     types::block::{
         address::{Bech32Address, Hrp},
-        output::{dto::OutputDto, AccountId, NftId, OutputId, StorageScoreParameters},
+        output::{AccountId, NftId, Output, OutputId, StorageScoreParameters},
         payload::signed_transaction::{
             dto::{SignedTransactionPayloadDto, TransactionDto},
             TransactionId,
@@ -135,7 +135,7 @@ pub enum UtilsMethod {
     /// Computes the minimum required amount of an output.
     #[serde(rename_all = "camelCase")]
     ComputeMinimumOutputAmount {
-        output: OutputDto,
+        output: Output,
         storage_score_parameters: StorageScoreParameters,
     },
     /// Checks if the given mnemonic is valid.
@@ -164,7 +164,7 @@ pub enum UtilsMethod {
     ComputeSlotCommitmentId { slot_commitment: SlotCommitment },
     /// Returns the hex representation of the serialized output bytes.
     #[serde(rename_all = "camelCase")]
-    OutputHexBytes { output: OutputDto },
+    OutputHexBytes { output: Output },
     /// Verifies the semantic of a transaction.
     VerifyTransactionSemantic {
         transaction: TransactionDto,

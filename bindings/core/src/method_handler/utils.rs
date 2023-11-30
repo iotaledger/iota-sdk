@@ -78,10 +78,7 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
         UtilsMethod::ComputeMinimumOutputAmount {
             output,
             storage_score_parameters: storage_params,
-        } => {
-            let out = Output::try_from(output)?;
-            Response::OutputAmount(out.minimum_amount(storage_params))
-        }
+        } => Response::OutputAmount(output.minimum_amount(storage_params)),
         UtilsMethod::VerifyMnemonic { mnemonic } => {
             let mnemonic = Mnemonic::from(mnemonic);
             verify_mnemonic(mnemonic)?;
@@ -107,10 +104,7 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
         }
         UtilsMethod::OutputIdToUtxoInput { output_id } => Response::Input(UtxoInput::from(output_id)),
         UtilsMethod::ComputeSlotCommitmentId { slot_commitment } => Response::SlotCommitmentId(slot_commitment.id()),
-        UtilsMethod::OutputHexBytes { output } => {
-            let output = Output::try_from(output)?;
-            Response::HexBytes(prefix_hex::encode(output.pack_to_vec()))
-        }
+        UtilsMethod::OutputHexBytes { output } => Response::HexBytes(prefix_hex::encode(output.pack_to_vec())),
         UtilsMethod::VerifyTransactionSemantic {
             transaction,
             inputs,

@@ -9,7 +9,7 @@ use crate::{
     types::{
         block::{
             address::Address,
-            output::{dto::OutputDto, Output},
+            output::Output,
             payload::{
                 signed_transaction::{
                     dto::{SignedTransactionPayloadDto, TransactionDto},
@@ -147,7 +147,7 @@ pub struct RemainderData {
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub struct RemainderDataDto {
     /// The remainder output
-    pub output: OutputDto,
+    pub output: Output,
     /// The chain derived from seed, for the remainder addresses
     #[serde(with = "option_bip44", default)]
     pub chain: Option<Bip44>,
@@ -160,7 +160,7 @@ impl TryFrom<RemainderDataDto> for RemainderData {
 
     fn try_from(dto: RemainderDataDto) -> Result<Self, Self::Error> {
         Ok(Self {
-            output: Output::try_from(dto.output)?,
+            output: dto.output,
             chain: dto.chain,
             address: dto.address,
         })
@@ -169,7 +169,7 @@ impl TryFrom<RemainderDataDto> for RemainderData {
 impl From<&RemainderData> for RemainderDataDto {
     fn from(remainder: &RemainderData) -> Self {
         Self {
-            output: OutputDto::from(&remainder.output),
+            output: remainder.output.clone(),
             chain: remainder.chain,
             address: remainder.address.clone(),
         }
