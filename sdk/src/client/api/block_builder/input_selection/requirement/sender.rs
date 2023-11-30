@@ -46,15 +46,15 @@ impl InputSelection {
             Address::Multi(multi_address) => {
                 let mut cumulative_weight = 0;
 
-                for address in multi_address.addresses() {
+                for weight_address in multi_address.addresses() {
                     for input in self.selected_inputs.iter() {
                         let required_address = input
                             .output
                             .required_and_unlocked_address(self.slot_index, input.output_id())?
                             .0;
 
-                        if &required_address == address.address() {
-                            cumulative_weight += address.weight() as u16;
+                        if &required_address == weight_address.address() {
+                            cumulative_weight += weight_address.weight() as u16;
                             break;
                         }
                     }
