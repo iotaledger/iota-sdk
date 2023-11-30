@@ -21,7 +21,7 @@ const {
     listenWallet,
     destroyWallet,
     getClient,
-    getSecretManagerFromWallet,
+    getSecretManager,
     migrateStrongholdSnapshotV2ToV3,
 } = addon;
 
@@ -49,7 +49,7 @@ export {
     destroyWallet,
     listenWallet,
     getClient,
-    getSecretManagerFromWallet,
+    getSecretManager,
     listenMqtt,
     migrateStrongholdSnapshotV2ToV3,
 };

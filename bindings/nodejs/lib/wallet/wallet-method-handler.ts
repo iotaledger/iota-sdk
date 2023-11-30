@@ -7,7 +7,7 @@ import {
     listenWallet,
     destroyWallet,
     getClient,
-    getSecretManagerFromWallet,
+    getSecretManager,
 } from '../bindings';
 import {
     WalletEventType,
@@ -16,7 +16,7 @@ import {
     Event,
 } from '../types/wallet';
 import { Client, ClientMethodHandler } from '../client';
-import { SecretManager } from '../secret_manager';
+import { SecretManager, SecretManagerMethodHandler } from '../secret_manager';
 import { errorHandle } from '..';
 
 // The WalletMethodHandler class interacts with methods with the rust bindings.
@@ -114,8 +114,8 @@ export class WalletMethodHandler {
      */
     async getSecretManager(): Promise<SecretManager> {
         try {
-            const result = await getSecretManagerFromWallet(this.methodHandler);
-            return SecretManager.create(result);
+            const result = await getSecretManager(this.methodHandler);
+            return new SecretManager(new SecretManagerMethodHandler(result));
         } catch (error: any) {
             throw errorHandle(error);
         }

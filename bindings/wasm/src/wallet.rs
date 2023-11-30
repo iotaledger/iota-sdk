@@ -58,7 +58,7 @@ pub async fn get_client(method_handler: &WalletMethodHandler) -> Result<ClientMe
     }
 }
 
-#[wasm_bindgen(js_name = getSecretManagerFromWallet)]
+#[wasm_bindgen(js_name = getSecretManager)]
 pub async fn get_secret_manager(method_handler: &WalletMethodHandler) -> Result<SecretManagerMethodHandler, JsError> {
     if let Some(wallet) = &*method_handler.inner.read().await {
         Ok(SecretManagerMethodHandler::new(wallet.get_secret_manager().clone()))
