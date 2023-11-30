@@ -46,7 +46,7 @@ impl WalletData {
         &self,
         outputs_to_claim: OutputsToClaim,
         slot_index: SlotIndex,
-        protocol_parameters: ProtocolParameters,
+        protocol_parameters: &ProtocolParameters,
     ) -> crate::wallet::Result<Vec<OutputId>> {
         log::debug!("[OUTPUT_CLAIMING] claimable_outputs");
 
@@ -155,7 +155,7 @@ where
         let slot_index = self.client().get_slot_index().await?;
         let protocol_parameters = self.client().get_protocol_parameters().await?;
 
-        wallet_data.claimable_outputs(outputs_to_claim, slot_index, protocol_parameters)
+        wallet_data.claimable_outputs(outputs_to_claim, slot_index, &protocol_parameters)
     }
 
     /// Get basic outputs that have only one unlock condition which is [AddressUnlockCondition], so they can be used as

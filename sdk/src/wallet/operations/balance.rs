@@ -36,8 +36,10 @@ where
         wallet_data: &WalletData,
     ) -> Result<Balance> {
         let protocol_parameters = self.client().get_protocol_parameters().await?;
+        let slot_index = self.client().get_slot_index().await?;
         let network_id = protocol_parameters.network_id();
         let storage_score_params = protocol_parameters.storage_score_parameters();
+
         let mut balance = Balance::default();
         let mut total_storage_cost = 0;
         let mut total_native_tokens = NativeTokensBuilder::default();
@@ -47,7 +49,7 @@ where
 
         let wallet_address = self.address().await.into_inner();
 
-        let claimable_outputs = wallet_data.claimable_outputs(OutputsToClaim::All, slot_index)?;
+        let claimable_outputs = wallet_data.claimable_outputs(OutputsToClaim::All, slot_index, &protocol_parameters)?;
 
         #[cfg(feature = "participation")]
         {
