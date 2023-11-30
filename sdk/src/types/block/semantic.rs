@@ -246,7 +246,6 @@ impl<'a> SemanticValidationContext<'a> {
             .collect();
 
         Self {
-            protocol_parameters,
             transaction,
             transaction_signing_hash: transaction.signing_hash(),
             inputs,
@@ -262,6 +261,7 @@ impl<'a> SemanticValidationContext<'a> {
             unlocked_addresses: HashSet::new(),
             storage_deposit_returns: HashMap::new(),
             simple_deposits: HashMap::new(),
+            protocol_parameters,
         }
     }
 
