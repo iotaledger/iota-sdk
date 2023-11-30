@@ -22,7 +22,7 @@ use crate::{
         api::core::OutputWithMetadataResponse,
         block::{
             address::Address,
-            output::{dto::OutputDto, Output, OutputId, OutputMetadata},
+            output::{Output, OutputId, OutputMetadata},
             payload::signed_transaction::{dto::SignedTransactionPayloadDto, SignedTransactionPayload, TransactionId},
             protocol::ProtocolParameters,
             slot::SlotIndex,
@@ -94,7 +94,7 @@ pub struct OutputDataDto {
     /// The metadata of the output
     pub metadata: OutputMetadata,
     /// The actual Output
-    pub output: OutputDto,
+    pub output: Output,
     /// If an output is spent
     pub is_spent: bool,
     /// Associated account address.
@@ -113,7 +113,7 @@ impl From<&OutputData> for OutputDataDto {
         Self {
             output_id: value.output_id,
             metadata: value.metadata,
-            output: OutputDto::from(&value.output),
+            output: value.output.clone(),
             is_spent: value.is_spent,
             address: value.address.clone(),
             network_id: value.network_id.to_string(),
@@ -130,7 +130,7 @@ impl TryFrom<OutputDataDto> for OutputData {
         Ok(Self {
             output_id: dto.output_id,
             metadata: dto.metadata,
-            output: Output::try_from(dto.output)?,
+            output: dto.output,
             is_spent: dto.is_spent,
             address: dto.address,
             network_id: dto

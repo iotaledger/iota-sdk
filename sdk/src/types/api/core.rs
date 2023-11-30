@@ -14,7 +14,7 @@ use crate::{
     types::block::{
         address::Bech32Address,
         core::Parents,
-        output::{dto::OutputDto, OutputId, OutputMetadata, OutputWithMetadata},
+        output::{Output, OutputId, OutputMetadata, OutputWithMetadata},
         protocol::{ProtocolParameters, ProtocolParametersHash},
         semantic::TransactionFailureReason,
         slot::{EpochIndex, SlotCommitment, SlotCommitmentId, SlotIndex},
@@ -418,14 +418,14 @@ pub struct BlockWithMetadataResponse {
 #[serde(rename_all = "camelCase")]
 pub struct OutputWithMetadataResponse {
     pub metadata: OutputMetadata,
-    pub output: OutputDto,
+    pub output: Output,
 }
 
 impl From<&OutputWithMetadata> for OutputWithMetadataResponse {
     fn from(value: &OutputWithMetadata) -> Self {
         Self {
             metadata: value.metadata,
-            output: OutputDto::from(value.output()),
+            output: value.output().clone(),
         }
     }
 }

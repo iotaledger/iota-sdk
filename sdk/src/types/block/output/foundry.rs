@@ -673,7 +673,7 @@ pub(crate) mod dto {
 
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
-    pub struct FoundryOutputDto {
+    pub(crate) struct FoundryOutputDto {
         #[serde(rename = "type")]
         pub kind: u8,
         #[serde(with = "string")]
@@ -760,6 +760,8 @@ pub(crate) mod dto {
             builder.finish()
         }
     }
+
+    crate::impl_serde_typed_dto!(FoundryOutput, FoundryOutputDto, "foundry output");
 }
 
 #[cfg(test)]
@@ -769,8 +771,8 @@ mod tests {
     use super::*;
     use crate::types::block::{
         output::{
-            dto::OutputDto, unlock_condition::ImmutableAccountAddressUnlockCondition, FoundryId, SimpleTokenScheme,
-            TokenId,
+            foundry::dto::FoundryOutputDto, unlock_condition::ImmutableAccountAddressUnlockCondition, FoundryId,
+            SimpleTokenScheme, TokenId,
         },
         protocol::protocol_parameters,
         rand::{
@@ -785,12 +787,10 @@ mod tests {
     #[test]
     fn to_from_dto() {
         let protocol_parameters = protocol_parameters();
-        let output = rand_foundry_output(protocol_parameters.token_supply());
-        let dto = OutputDto::Foundry((&output).into());
-        let output_unver = Output::try_from(dto.clone()).unwrap();
-        assert_eq!(&output, output_unver.as_foundry());
-        let output_ver = Output::try_from(dto).unwrap();
-        assert_eq!(&output, output_ver.as_foundry());
+        let foundry_output = rand_foundry_output(protocol_parameters.token_supply());
+        let dto = FoundryOutputDto::from(&foundry_output);
+        let output = Output::Foundry(FoundryOutput::try_from(dto).unwrap());
+        assert_eq!(&foundry_output, output.as_foundry());
 
         let foundry_id = FoundryId::build(&rand_account_address(), 0, SimpleTokenScheme::KIND);
 
