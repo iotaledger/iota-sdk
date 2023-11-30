@@ -138,7 +138,7 @@ where
                         remainder_address.clone(),
                         // Return minimum amount
                         min_amount_basic_output,
-                    ));
+                    )?);
 
                 // Update output amount, so recipient still gets the provided amount
                 let new_amount = params.amount + min_amount_basic_output;
@@ -159,7 +159,7 @@ where
                             remainder_address.clone(),
                             // Return minimum amount
                             min_amount_basic_output + additional_required_amount,
-                        ));
+                        )?);
                 } else {
                     // new_amount is enough
                     second_output_builder = second_output_builder.with_amount(new_amount);
@@ -214,7 +214,7 @@ where
                                 remainder_address,
                                 // Return minimum amount
                                 new_sdr_amount,
-                            ));
+                            )?);
                     }
                 } else {
                     // Would leave dust behind, so return what's required for a remainder

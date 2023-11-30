@@ -188,12 +188,12 @@ describe.skip('Main examples', () => {
             issuerId,
             new TaggedDataPayload(utf8ToHex('Hello'), utf8ToHex('Tangle')),
         );
-        const signedBlock = await secretManager.signBlock(unsignedBlock, chain);
-        const blockId = await client.postBlock(signedBlock);
+        const block = await secretManager.signBlock(unsignedBlock, chain);
+        const blockId = await client.postBlock(block);
 
         const fetchedBlock = await client.getBlock(blockId);
 
-        expect(fetchedBlock.block.asBasic().payload).toStrictEqual(
+        expect(fetchedBlock.body.asBasic().payload).toStrictEqual(
             new TaggedDataPayload(utf8ToHex('Hello'), utf8ToHex('Tangle')),
         );
     });

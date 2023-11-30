@@ -67,12 +67,12 @@ impl OutputMetadata {
         self.output_id.index()
     }
 
-    /// Returns whether the output is spent ot not.
+    /// Returns whether the output is spent or not.
     pub fn is_spent(&self) -> bool {
         self.is_spent
     }
 
-    /// Sets whether the output is spent ot not.
+    /// Sets whether the output is spent or not.
     pub fn set_spent(&mut self, spent: bool) {
         self.is_spent = spent;
     }

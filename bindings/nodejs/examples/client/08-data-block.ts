@@ -18,8 +18,10 @@ require('dotenv').config({ path: '.env' });
 // In this example we will send a block with a tagged data payload.
 async function run() {
     initLogger();
-    if (!process.env.NODE_URL) {
-        throw new Error('.env NODE_URL is undefined, see .env.example');
+    for (const envVar of ['NODE_URL', 'EXPLORER_URL']) {
+        if (!(envVar in process.env)) {
+            throw new Error(`.env ${envVar} is undefined, see .env.example`);
+        }
     }
 
     if (!process.env.MNEMONIC) {
@@ -33,7 +35,7 @@ async function run() {
 
     const client = await Client.create({
         // Insert your node URL in the .env.
-        nodes: [process.env.NODE_URL],
+        nodes: [process.env.NODE_URL as string],
     });
 
     const issuerId = process.env.ISSUER_ID
@@ -53,8 +55,8 @@ async function run() {
             issuerId,
             new TaggedDataPayload(utf8ToHex('Hello'), utf8ToHex('Tangle')),
         );
-        const signedBlock = await secretManager.signBlock(unsignedBlock, chain);
-        const blockId = await client.postBlock(signedBlock);
+        const block = await secretManager.signBlock(unsignedBlock, chain);
+        const blockId = await client.postBlock(block);
 
         console.log(`Block sent: ${process.env.EXPLORER_URL}/block/${blockId}`);
 

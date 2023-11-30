@@ -52,7 +52,7 @@ class Wallet():
         """Create a new account.
 
         Args:
-            alias: The alias of the newaccount.
+            alias: The alias of the new account.
             bech32_hrp: The Bech32 HRP of the new account.
 
         Returns:
@@ -278,6 +278,7 @@ class Wallet():
         """
         return destroy_wallet(self.handle)
 
+    # pylint: disable=redefined-builtin
     @staticmethod
     def __return_str_or_none(opt_str):
         if opt_str:

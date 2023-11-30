@@ -282,7 +282,7 @@ pub struct AccountOutput {
 }
 
 impl AccountOutput {
-    /// The [`Output`](crate::types::block::output::Output) kind of an [`AccountOutput`].
+    /// The [`Output`] kind of an [`AccountOutput`].
     pub const KIND: u8 = 1;
     /// The set of allowed [`UnlockCondition`]s for an [`AccountOutput`].
     pub const ALLOWED_UNLOCK_CONDITIONS: UnlockConditionFlags = UnlockConditionFlags::ADDRESS;

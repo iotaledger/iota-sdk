@@ -18,6 +18,11 @@ const BURN_AMOUNT = BigInt(1);
 // Rename `.env.example` to `.env` first, then run
 // yarn run-example ./how_tos/native_tokens/burn.ts
 async function run() {
+    for (const envVar of ['EXPLORER_URL']) {
+        if (!(envVar in process.env)) {
+            throw new Error(`.env ${envVar} is undefined, see .env.example`);
+        }
+    }
     try {
         // Create the wallet
         const wallet = await getUnlockedWallet();

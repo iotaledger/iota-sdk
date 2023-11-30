@@ -24,13 +24,15 @@ require('dotenv').config({ path: '.env' });
 // In this example we will build a basic output with various options.
 async function run() {
     initLogger();
-    if (!process.env.NODE_URL) {
-        throw new Error('.env NODE_URL is undefined, see .env.example');
+    for (const envVar of ['NODE_URL']) {
+        if (!(envVar in process.env)) {
+            throw new Error(`.env ${envVar} is undefined, see .env.example`);
+        }
     }
 
     const client = await Client.create({
         // Insert your node URL in the .env.
-        nodes: [process.env.NODE_URL],
+        nodes: [process.env.NODE_URL as string],
     });
 
     try {
@@ -41,7 +43,7 @@ async function run() {
         const addressUnlockCondition: UnlockCondition =
             new AddressUnlockCondition(new Ed25519Address(hexAddress));
 
-        // Build most basic output with amound and a single address unlock condition
+        // Build most basic output with amount and a single address unlock condition
         const basicOutput = await client.buildBasicOutput({
             amount: BigInt(1000000),
             unlockConditions: [addressUnlockCondition],
