@@ -16,8 +16,8 @@ use iota_sdk::{
     types::block::{
         address::{Bech32Address, Hrp},
         output::{
-            dto::OutputDto, feature::Feature, unlock_condition::dto::UnlockConditionDto, AccountId, AnchorId,
-            DelegationId, FoundryId, NftId, OutputId, TokenScheme,
+            feature::Feature, unlock_condition::dto::UnlockConditionDto, AccountId, AnchorId, DelegationId, FoundryId,
+            NftId, Output, OutputId, TokenScheme,
         },
         payload::{dto::PayloadDto, signed_transaction::TransactionId},
         BlockDto, BlockId,
@@ -356,7 +356,7 @@ pub enum ClientMethod {
     /// Calculate the minimum required amount for an output.
     /// Expected response:
     /// [`OutputAmount`](crate::Response::OutputAmount)
-    ComputeMinimumOutputAmount { output: OutputDto },
+    ComputeMinimumOutputAmount { output: Output },
     /// Requests funds for a given address from the faucet, for example `https://faucet.testnet.shimmer.network/api/enqueue` or `http://localhost:8091/api/enqueue`.
     RequestFundsFromFaucet {
         /// Faucet URL

@@ -7,7 +7,7 @@ use crypto::keys::bip44::Bip44;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    types::block::output::{dto::OutputDto, Output, OutputId, OutputMetadata},
+    types::block::output::{Output, OutputId, OutputMetadata},
     utils::serde::bip44::option_bip44,
 };
 
@@ -156,7 +156,7 @@ impl InputSigningData {
 #[serde(rename_all = "camelCase")]
 pub struct InputSigningDataDto {
     /// The output
-    pub output: OutputDto,
+    pub output: Output,
     /// The output metadata
     pub output_metadata: OutputMetadata,
     /// The chain derived from seed, only for ed25519 addresses
@@ -169,7 +169,7 @@ impl TryFrom<InputSigningDataDto> for InputSigningData {
 
     fn try_from(dto: InputSigningDataDto) -> Result<Self, Self::Error> {
         Ok(Self {
-            output: Output::try_from(dto.output)?,
+            output: dto.output,
             output_metadata: dto.output_metadata,
             chain: dto.chain,
         })
@@ -179,7 +179,7 @@ impl TryFrom<InputSigningDataDto> for InputSigningData {
 impl From<&InputSigningData> for InputSigningDataDto {
     fn from(input: &InputSigningData) -> Self {
         Self {
-            output: OutputDto::from(&input.output),
+            output: input.output.clone(),
             output_metadata: input.output_metadata,
             chain: input.chain,
         }

@@ -12,7 +12,10 @@ pub mod unlock_condition;
 
 use primitive_types::U256;
 
-pub use self::{metadata::rand_output_metadata, native_token::rand_native_token};
+pub use self::{
+    metadata::{rand_output_metadata, rand_output_metadata_with_id},
+    native_token::rand_native_token,
+};
 use crate::types::block::{
     output::{
         unlock_condition::ImmutableAccountAddressUnlockCondition, AccountId, AccountOutput, AnchorId, AnchorOutput,
