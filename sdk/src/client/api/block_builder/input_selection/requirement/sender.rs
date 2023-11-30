@@ -42,6 +42,7 @@ impl InputSelection {
                     Err(e) => Err(e),
                 }
             }
+            // TODO https://github.com/iotaledger/iota-sdk/issues/1721
             Address::Multi(multi_address) => {
                 let mut cumulative_weight = 0u16;
 
