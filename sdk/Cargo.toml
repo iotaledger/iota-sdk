@@ -345,7 +345,7 @@ required-features = ["wallet", "stronghold"]
 [[example]]
 name = "implicit_account_creation"
 path = "examples/how_tos/account/implicit_account_creation.rs"
-required-features = ["wallet"]
+required-features = ["wallet", "storage"]
 
 # Outputs
 

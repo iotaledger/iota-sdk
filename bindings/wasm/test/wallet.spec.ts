@@ -34,11 +34,8 @@ describe('wallet tests', () => {
             secretManager: mnemonicSecretManager,
         });
     
-        expect(await wallet.address()).toBe(
-            'rms1qrpwecegav7eh0z363ca69laxej64rrt4e3u0rtycyuh0mam3vq3utrrg7c',
-        );
+        let implicitAccountCreationAddress = await wallet.implicitAccountCreationAddress();
     
-        const balance: Balance = await wallet.sync();
-        expect(balance.baseCoin.available).not.toBeNaN();
+        expect(implicitAccountCreationAddress).toBe("rms1yrpwecegav7eh0z363ca69laxej64rrt4e3u0rtycyuh0mam3vq3uvx3u3m");
     });
 });
