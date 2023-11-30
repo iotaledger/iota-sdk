@@ -6,7 +6,7 @@ use std::sync::Arc;
 use iota_sdk_bindings_core::{
     call_secret_manager_method as rust_call_secret_manager_method,
     iota_sdk::client::secret::{SecretManager, SecretManagerDto},
-    Response, SecretManagerMethod,
+    Response,
 };
 use tokio::sync::RwLock;
 use wasm_bindgen::{prelude::wasm_bindgen, JsError, JsValue};
