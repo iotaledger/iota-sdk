@@ -36,7 +36,7 @@ use iota_sdk::{
     },
     utils::serde::string,
     wallet::{
-        types::{Balance, OutputDataDto, TransactionWithMetadataDto},
+        types::{Balance, OutputData, TransactionWithMetadataDto},
         PreparedCreateNativeTokenTransactionDto,
     },
 };
@@ -196,7 +196,7 @@ pub enum Response {
     /// Response for [`ComputeSlotCommitmentId`](crate::method::UtilsMethod::ComputeSlotCommitmentId)
     SlotCommitmentId(SlotCommitmentId),
     /// Response for [`VerifyTransactionSemantic`](crate::method::UtilsMethod::VerifyTransactionSemantic).
-    TransactionFailureReason(TransactionFailureReason),
+    TransactionFailureReason(Option<TransactionFailureReason>),
 
     // Responses in client and wallet
     /// Response for:
@@ -270,11 +270,11 @@ pub enum Response {
     OutputIds(Vec<OutputId>),
     /// Response for:
     /// - [`GetOutput`](crate::method::WalletMethod::GetOutput)
-    OutputData(Option<Box<OutputDataDto>>),
+    OutputData(Option<Box<OutputData>>),
     /// Response for:
     /// - [`Outputs`](crate::method::WalletMethod::Outputs),
     /// - [`UnspentOutputs`](crate::method::WalletMethod::UnspentOutputs)
-    OutputsData(Vec<OutputDataDto>),
+    OutputsData(Vec<OutputData>),
     /// Response for:
     /// - [`PrepareBurn`](crate::method::WalletMethod::PrepareBurn),
     /// - [`PrepareClaimOutputs`](crate::method::WalletMethod::PrepareClaimOutputs)

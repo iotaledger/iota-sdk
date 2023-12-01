@@ -610,7 +610,7 @@ pub(crate) mod dto {
 
     use super::*;
     use crate::{
-        types::block::{output::unlock_condition::dto::UnlockConditionDto, Error},
+        types::block::{output::unlock_condition::UnlockCondition, Error},
         utils::serde::string,
     };
 
@@ -626,7 +626,7 @@ pub(crate) mod dto {
         pub mana: u64,
         pub account_id: AccountId,
         pub foundry_counter: u32,
-        pub unlock_conditions: Vec<UnlockConditionDto>,
+        pub unlock_conditions: Vec<UnlockCondition>,
         #[serde(skip_serializing_if = "Vec::is_empty", default)]
         pub features: Vec<Feature>,
         #[serde(skip_serializing_if = "Vec::is_empty", default)]
@@ -641,7 +641,7 @@ pub(crate) mod dto {
                 mana: value.mana(),
                 account_id: *value.account_id(),
                 foundry_counter: value.foundry_counter(),
-                unlock_conditions: value.unlock_conditions().iter().map(Into::into).collect::<_>(),
+                unlock_conditions: value.unlock_conditions().to_vec(),
                 features: value.features().to_vec(),
                 immutable_features: value.immutable_features().to_vec(),
             }
@@ -659,7 +659,7 @@ pub(crate) mod dto {
                 .with_immutable_features(dto.immutable_features);
 
             for u in dto.unlock_conditions {
-                builder = builder.add_unlock_condition(UnlockCondition::from(u));
+                builder = builder.add_unlock_condition(u);
             }
 
             builder.finish()
@@ -673,7 +673,7 @@ pub(crate) mod dto {
             mana: u64,
             account_id: &AccountId,
             foundry_counter: Option<u32>,
-            unlock_conditions: Vec<UnlockConditionDto>,
+            unlock_conditions: Vec<UnlockCondition>,
             features: Option<Vec<Feature>>,
             immutable_features: Option<Vec<Feature>>,
         ) -> Result<Self, Error> {
@@ -737,7 +737,7 @@ mod tests {
             account_output.mana(),
             account_output.account_id(),
             account_output.foundry_counter().into(),
-            account_output.unlock_conditions().iter().map(Into::into).collect(),
+            account_output.unlock_conditions().to_vec(),
             Some(account_output.features().to_vec()),
             Some(account_output.immutable_features().to_vec()),
         )
@@ -753,7 +753,7 @@ mod tests {
                 builder.mana,
                 &builder.account_id,
                 builder.foundry_counter,
-                builder.unlock_conditions.iter().map(Into::into).collect(),
+                builder.unlock_conditions.iter().cloned().collect(),
                 Some(builder.features.iter().cloned().collect()),
                 Some(builder.immutable_features.iter().cloned().collect()),
             )

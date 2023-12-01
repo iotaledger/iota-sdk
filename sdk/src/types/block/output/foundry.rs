@@ -667,7 +667,7 @@ pub(crate) mod dto {
 
     use super::*;
     use crate::{
-        types::block::{output::unlock_condition::dto::UnlockConditionDto, Error},
+        types::block::{output::unlock_condition::UnlockCondition, Error},
         utils::serde::string,
     };
 
@@ -680,7 +680,7 @@ pub(crate) mod dto {
         pub amount: u64,
         pub serial_number: u32,
         pub token_scheme: TokenScheme,
-        pub unlock_conditions: Vec<UnlockConditionDto>,
+        pub unlock_conditions: Vec<UnlockCondition>,
         #[serde(skip_serializing_if = "Vec::is_empty", default)]
         pub features: Vec<Feature>,
         #[serde(skip_serializing_if = "Vec::is_empty", default)]
@@ -694,7 +694,7 @@ pub(crate) mod dto {
                 amount: value.amount(),
                 serial_number: value.serial_number(),
                 token_scheme: value.token_scheme().clone(),
-                unlock_conditions: value.unlock_conditions().iter().map(Into::into).collect::<_>(),
+                unlock_conditions: value.unlock_conditions().to_vec(),
                 features: value.features().to_vec(),
                 immutable_features: value.immutable_features().to_vec(),
             }
@@ -717,7 +717,7 @@ pub(crate) mod dto {
             }
 
             for u in dto.unlock_conditions {
-                builder = builder.add_unlock_condition(UnlockCondition::from(u));
+                builder = builder.add_unlock_condition(u);
             }
 
             builder.finish()
@@ -730,7 +730,7 @@ pub(crate) mod dto {
             amount: OutputBuilderAmount,
             serial_number: u32,
             token_scheme: TokenScheme,
-            unlock_conditions: Vec<UnlockConditionDto>,
+            unlock_conditions: Vec<UnlockCondition>,
             features: Option<Vec<Feature>>,
             immutable_features: Option<Vec<Feature>>,
         ) -> Result<Self, Error> {
@@ -799,7 +799,7 @@ mod tests {
                 builder.amount,
                 builder.serial_number,
                 builder.token_scheme.clone(),
-                builder.unlock_conditions.iter().map(Into::into).collect(),
+                builder.unlock_conditions.iter().cloned().collect(),
                 Some(builder.features.iter().cloned().collect()),
                 Some(builder.immutable_features.iter().cloned().collect()),
             )
