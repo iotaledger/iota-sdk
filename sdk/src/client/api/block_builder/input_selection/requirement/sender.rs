@@ -58,6 +58,10 @@ impl InputSelection {
                             break;
                         }
                     }
+
+                    if cumulative_weight >= multi_address.threshold() {
+                        break;
+                    }
                 }
 
                 if cumulative_weight < multi_address.threshold() {
