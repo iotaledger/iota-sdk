@@ -6,7 +6,10 @@ use std::str::FromStr;
 use iota_sdk::{
     client::api::input_selection::{Error, InputSelection, Requirement},
     types::block::{
-        address::{AccountAddress, Address, Bech32Address, NftAddress, RestrictedAddress, ToBech32Ext},
+        address::{
+            AccountAddress, Address, Bech32Address, MultiAddress, NftAddress, RestrictedAddress, ToBech32Ext,
+            WeightedAddress,
+        },
         output::{AccountId, NftId},
         protocol::protocol_parameters,
     },
@@ -17,7 +20,7 @@ use crate::client::{
     addresses, build_inputs, build_outputs, is_remainder_or_return, unsorted_eq,
     Build::{Account, Basic, Nft},
     ACCOUNT_ID_0, ACCOUNT_ID_1, BECH32_ADDRESS_ACCOUNT_1, BECH32_ADDRESS_ED25519_0, BECH32_ADDRESS_ED25519_1,
-    BECH32_ADDRESS_NFT_1, BECH32_ADDRESS_REMAINDER, NFT_ID_0, NFT_ID_1,
+    BECH32_ADDRESS_ED25519_2, BECH32_ADDRESS_NFT_1, BECH32_ADDRESS_REMAINDER, NFT_ID_0, NFT_ID_1,
 };
 
 #[test]
@@ -494,12 +497,10 @@ fn ed25519_sender() {
 
     // Sender + another for amount
     assert_eq!(selected.inputs.len(), 2);
-    assert!(
-        selected
-            .inputs
-            .iter()
-            .any(|input| *input.output.as_basic().address() == sender)
-    );
+    assert!(selected
+        .inputs
+        .iter()
+        .any(|input| *input.output.as_basic().address() == sender));
     // Provided output + remainder
     assert_eq!(selected.outputs.len(), 2);
 }
@@ -578,12 +579,10 @@ fn account_sender() {
 
     // Sender + another for amount
     assert_eq!(selected.inputs.len(), 2);
-    assert!(
-        selected
-            .inputs
-            .iter()
-            .any(|input| input.output.is_account() && *input.output.as_account().account_id() == account_id_1)
-    );
+    assert!(selected
+        .inputs
+        .iter()
+        .any(|input| input.output.is_account() && *input.output.as_account().account_id() == account_id_1));
     // Provided output + account
     assert_eq!(selected.outputs.len(), 2);
     assert!(selected.outputs.contains(&outputs[0]));
@@ -625,12 +624,10 @@ fn account_sender_zero_id() {
 
     assert!(unsorted_eq(&selected.inputs, &inputs));
     assert_eq!(selected.outputs.len(), 2);
-    assert!(
-        selected
-            .outputs
-            .iter()
-            .any(|output| output.is_account() && *output.as_account().account_id() == account_id)
-    );
+    assert!(selected
+        .outputs
+        .iter()
+        .any(|output| output.is_account() && *output.as_account().account_id() == account_id));
 }
 
 #[test]
@@ -715,12 +712,10 @@ fn nft_sender() {
 
     // Sender + another for amount
     assert_eq!(selected.inputs.len(), 2);
-    assert!(
-        selected
-            .inputs
-            .iter()
-            .any(|input| input.output.is_nft() && *input.output.as_nft().nft_id() == nft_id_1)
-    );
+    assert!(selected
+        .inputs
+        .iter()
+        .any(|input| input.output.is_nft() && *input.output.as_nft().nft_id() == nft_id_1));
     // Provided output + nft
     assert_eq!(selected.outputs.len(), 2);
     assert!(selected.outputs.contains(&inputs[2].output));
@@ -772,12 +767,10 @@ fn nft_sender_zero_id() {
 
     assert!(unsorted_eq(&selected.inputs, &inputs));
     assert_eq!(selected.outputs.len(), 2);
-    assert!(
-        selected
-            .outputs
-            .iter()
-            .any(|output| output.is_nft() && *output.as_nft().nft_id() == nft_id)
-    );
+    assert!(selected
+        .outputs
+        .iter()
+        .any(|output| output.is_nft() && *output.as_nft().nft_id() == nft_id));
 }
 
 #[test]
@@ -1532,12 +1525,66 @@ fn restricted_ed25519_sender() {
 
     // Sender + another for amount
     assert_eq!(selected.inputs.len(), 2);
-    assert!(
-        selected
-            .inputs
-            .iter()
-            .any(|input| *input.output.as_basic().address() == sender)
-    );
+    assert!(selected
+        .inputs
+        .iter()
+        .any(|input| *input.output.as_basic().address() == sender));
     // Provided output + remainder
     assert_eq!(selected.outputs.len(), 2);
+}
+
+#[test]
+fn multi_address_sender() {
+    let protocol_parameters = protocol_parameters();
+    let sender_0 = Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap();
+    let sender_1 = Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap();
+    let sender_2 = Address::try_from_bech32(BECH32_ADDRESS_ED25519_2).unwrap();
+    let multi = Address::from(
+        MultiAddress::new(
+            [
+                WeightedAddress::new(sender_0, 1).unwrap(),
+                WeightedAddress::new(sender_1, 1).unwrap(),
+                WeightedAddress::new(sender_2, 1).unwrap(),
+            ],
+            3,
+        )
+        .unwrap(),
+    );
+    let multi_bech32 = multi.try_to_bech32("rms").unwrap().to_string();
+
+    let inputs = build_inputs([
+        Basic(1_000_000, BECH32_ADDRESS_ACCOUNT_1, None, None, None, None, None, None),
+        Basic(1_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
+        Basic(1_000_000, BECH32_ADDRESS_ED25519_1, None, None, None, None, None, None),
+        Basic(1_000_000, BECH32_ADDRESS_ED25519_2, None, None, None, None, None, None),
+        Basic(1_000_000, BECH32_ADDRESS_ACCOUNT_1, None, None, None, None, None, None),
+    ]);
+    let outputs = build_outputs([Basic(
+        2_000_000,
+        BECH32_ADDRESS_ED25519_0,
+        None,
+        Some(&multi_bech32),
+        None,
+        None,
+        None,
+        None,
+    )]);
+
+    let selected = InputSelection::new(
+        inputs,
+        outputs,
+        addresses([BECH32_ADDRESS_ED25519_0, BECH32_ADDRESS_ED25519_1]),
+        protocol_parameters,
+    )
+    .select()
+    .unwrap();
+
+    // // Sender + another for amount
+    // assert_eq!(selected.inputs.len(), 2);
+    // assert!(selected
+    //     .inputs
+    //     .iter()
+    //     .any(|input| *input.output.as_basic().address() == sender));
+    // // Provided output + remainder
+    // assert_eq!(selected.outputs.len(), 2);
 }
