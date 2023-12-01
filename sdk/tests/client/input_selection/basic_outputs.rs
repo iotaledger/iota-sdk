@@ -6,10 +6,7 @@ use std::str::FromStr;
 use iota_sdk::{
     client::api::input_selection::{Error, InputSelection, Requirement},
     types::block::{
-        address::{
-            AccountAddress, Address, Bech32Address, MultiAddress, NftAddress, RestrictedAddress, ToBech32Ext,
-            WeightedAddress,
-        },
+        address::{AccountAddress, Address, MultiAddress, NftAddress, RestrictedAddress, WeightedAddress},
         output::{AccountId, NftId},
         protocol::protocol_parameters,
     },
@@ -17,7 +14,7 @@ use iota_sdk::{
 use pretty_assertions::assert_eq;
 
 use crate::client::{
-    addresses, build_inputs, build_outputs, is_remainder_or_return, unsorted_eq,
+    build_inputs, build_outputs, is_remainder_or_return, unsorted_eq,
     Build::{Account, Basic, Nft},
     ACCOUNT_ID_0, ACCOUNT_ID_1, BECH32_ADDRESS_ACCOUNT_1, BECH32_ADDRESS_ED25519_0, BECH32_ADDRESS_ED25519_1,
     BECH32_ADDRESS_ED25519_2, BECH32_ADDRESS_NFT_1, BECH32_ADDRESS_REMAINDER, NFT_ID_0, NFT_ID_1,
@@ -29,7 +26,7 @@ fn input_amount_equal_output_amount() {
 
     let inputs = build_inputs([Basic(
         1_000_000,
-        BECH32_ADDRESS_ED25519_0,
+        Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
         None,
         None,
@@ -39,7 +36,7 @@ fn input_amount_equal_output_amount() {
     )]);
     let outputs = build_outputs([Basic(
         1_000_000,
-        BECH32_ADDRESS_ED25519_0,
+        Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
         None,
         None,
@@ -51,7 +48,7 @@ fn input_amount_equal_output_amount() {
     let selected = InputSelection::new(
         inputs.clone(),
         outputs.clone(),
-        addresses([BECH32_ADDRESS_ED25519_0]),
+        [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         protocol_parameters,
     )
     .select()
@@ -67,7 +64,7 @@ fn input_amount_lower_than_output_amount() {
 
     let inputs = build_inputs([Basic(
         1_000_000,
-        BECH32_ADDRESS_ED25519_0,
+        Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
         None,
         None,
@@ -77,7 +74,7 @@ fn input_amount_lower_than_output_amount() {
     )]);
     let outputs = build_outputs([Basic(
         2_000_000,
-        BECH32_ADDRESS_ED25519_0,
+        Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
         None,
         None,
@@ -89,7 +86,7 @@ fn input_amount_lower_than_output_amount() {
     let selected = InputSelection::new(
         inputs,
         outputs,
-        addresses([BECH32_ADDRESS_ED25519_0]),
+        [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         protocol_parameters,
     )
     .select();
@@ -108,12 +105,30 @@ fn input_amount_lower_than_output_amount_2() {
     let protocol_parameters = protocol_parameters();
 
     let inputs = build_inputs([
-        Basic(1_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
-        Basic(2_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
+        Basic(
+            1_000_000,
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+        ),
+        Basic(
+            2_000_000,
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+        ),
     ]);
     let outputs = build_outputs([Basic(
         3_500_000,
-        BECH32_ADDRESS_ED25519_0,
+        Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
         None,
         None,
@@ -125,7 +140,7 @@ fn input_amount_lower_than_output_amount_2() {
     let selected = InputSelection::new(
         inputs,
         outputs,
-        addresses([BECH32_ADDRESS_ED25519_0]),
+        [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         protocol_parameters,
     )
     .select();
@@ -145,7 +160,7 @@ fn input_amount_greater_than_output_amount() {
 
     let inputs = build_inputs([Basic(
         2_000_000,
-        BECH32_ADDRESS_ED25519_0,
+        Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
         None,
         None,
@@ -155,7 +170,7 @@ fn input_amount_greater_than_output_amount() {
     )]);
     let outputs = build_outputs([Basic(
         500_000,
-        BECH32_ADDRESS_ED25519_0,
+        Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
         None,
         None,
@@ -167,7 +182,7 @@ fn input_amount_greater_than_output_amount() {
     let selected = InputSelection::new(
         inputs.clone(),
         outputs.clone(),
-        addresses([BECH32_ADDRESS_ED25519_0]),
+        [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         protocol_parameters,
     )
     .select()
@@ -182,7 +197,7 @@ fn input_amount_greater_than_output_amount() {
             assert!(is_remainder_or_return(
                 output,
                 1_500_000,
-                BECH32_ADDRESS_ED25519_0,
+                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                 None,
             ));
         }
@@ -196,7 +211,7 @@ fn input_amount_greater_than_output_amount_with_remainder_address() {
 
     let inputs = build_inputs([Basic(
         2_000_000,
-        BECH32_ADDRESS_ED25519_0,
+        Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
         None,
         None,
@@ -206,7 +221,7 @@ fn input_amount_greater_than_output_amount_with_remainder_address() {
     )]);
     let outputs = build_outputs([Basic(
         500_000,
-        BECH32_ADDRESS_ED25519_0,
+        Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
         None,
         None,
@@ -218,7 +233,7 @@ fn input_amount_greater_than_output_amount_with_remainder_address() {
     let selected = InputSelection::new(
         inputs.clone(),
         outputs.clone(),
-        addresses([BECH32_ADDRESS_ED25519_0]),
+        [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         protocol_parameters,
     )
     .with_remainder_address(remainder_address)
@@ -234,7 +249,7 @@ fn input_amount_greater_than_output_amount_with_remainder_address() {
             assert!(is_remainder_or_return(
                 output,
                 1_500_000,
-                BECH32_ADDRESS_REMAINDER,
+                Address::try_from_bech32(BECH32_ADDRESS_REMAINDER).unwrap(),
                 None,
             ));
         }
@@ -246,12 +261,30 @@ fn two_same_inputs_one_needed() {
     let protocol_parameters = protocol_parameters();
 
     let inputs = build_inputs([
-        Basic(2_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
-        Basic(2_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
+        Basic(
+            2_000_000,
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+        ),
+        Basic(
+            2_000_000,
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+        ),
     ]);
     let outputs = build_outputs([Basic(
         500_000,
-        BECH32_ADDRESS_ED25519_0,
+        Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
         None,
         None,
@@ -263,7 +296,7 @@ fn two_same_inputs_one_needed() {
     let selected = InputSelection::new(
         inputs,
         outputs.clone(),
-        addresses([BECH32_ADDRESS_ED25519_0]),
+        [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         protocol_parameters,
     )
     .select()
@@ -279,7 +312,7 @@ fn two_same_inputs_one_needed() {
             assert!(is_remainder_or_return(
                 output,
                 1_500_000,
-                BECH32_ADDRESS_ED25519_0,
+                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                 None,
             ));
         }
@@ -291,12 +324,30 @@ fn two_inputs_one_needed() {
     let protocol_parameters = protocol_parameters();
 
     let inputs = build_inputs([
-        Basic(1_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
-        Basic(2_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
+        Basic(
+            1_000_000,
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+        ),
+        Basic(
+            2_000_000,
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+        ),
     ]);
     let outputs = build_outputs([Basic(
         1_000_000,
-        BECH32_ADDRESS_ED25519_0,
+        Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
         None,
         None,
@@ -308,7 +359,7 @@ fn two_inputs_one_needed() {
     let selected = InputSelection::new(
         inputs.clone(),
         outputs.clone(),
-        addresses([BECH32_ADDRESS_ED25519_0]),
+        [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         protocol_parameters,
     )
     .select()
@@ -323,12 +374,30 @@ fn two_inputs_one_needed_reversed() {
     let protocol_parameters = protocol_parameters();
 
     let inputs = build_inputs([
-        Basic(2_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
-        Basic(1_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
+        Basic(
+            2_000_000,
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+        ),
+        Basic(
+            1_000_000,
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+        ),
     ]);
     let outputs = build_outputs([Basic(
         1_000_000,
-        BECH32_ADDRESS_ED25519_0,
+        Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
         None,
         None,
@@ -340,7 +409,7 @@ fn two_inputs_one_needed_reversed() {
     let selected = InputSelection::new(
         inputs.clone(),
         outputs.clone(),
-        addresses([BECH32_ADDRESS_ED25519_0]),
+        [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         protocol_parameters,
     )
     .select()
@@ -355,12 +424,30 @@ fn two_inputs_both_needed() {
     let protocol_parameters = protocol_parameters();
 
     let inputs = build_inputs([
-        Basic(1_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
-        Basic(2_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
+        Basic(
+            1_000_000,
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+        ),
+        Basic(
+            2_000_000,
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+        ),
     ]);
     let outputs = build_outputs([Basic(
         3_000_000,
-        BECH32_ADDRESS_ED25519_0,
+        Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
         None,
         None,
@@ -372,7 +459,7 @@ fn two_inputs_both_needed() {
     let selected = InputSelection::new(
         inputs.clone(),
         outputs.clone(),
-        addresses([BECH32_ADDRESS_ED25519_0]),
+        [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         protocol_parameters,
     )
     .select()
@@ -387,12 +474,30 @@ fn two_inputs_remainder() {
     let protocol_parameters = protocol_parameters();
 
     let inputs = build_inputs([
-        Basic(1_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
-        Basic(2_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
+        Basic(
+            1_000_000,
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+        ),
+        Basic(
+            2_000_000,
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+        ),
     ]);
     let outputs = build_outputs([Basic(
         2_500_000,
-        BECH32_ADDRESS_ED25519_0,
+        Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
         None,
         None,
@@ -404,7 +509,7 @@ fn two_inputs_remainder() {
     let selected = InputSelection::new(
         inputs.clone(),
         outputs.clone(),
-        addresses([BECH32_ADDRESS_ED25519_0]),
+        [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         protocol_parameters,
     )
     .select()
@@ -416,7 +521,12 @@ fn two_inputs_remainder() {
     assert!(selected.outputs.contains(&outputs[0]));
     selected.outputs.iter().for_each(|output| {
         if !outputs.contains(output) {
-            assert!(is_remainder_or_return(output, 500_000, BECH32_ADDRESS_ED25519_0, None));
+            assert!(is_remainder_or_return(
+                output,
+                500_000,
+                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+                None
+            ));
         }
     });
 }
@@ -427,7 +537,7 @@ fn two_inputs_remainder() {
 
 //     let inputs = build_inputs([Basic(
 //         1_000_001,
-//         BECH32_ADDRESS_ED25519_0,
+//         Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
 //         None,
 //         None,
 //         None,
@@ -437,7 +547,7 @@ fn two_inputs_remainder() {
 //     )]);
 //     let outputs = build_outputs([Basic(
 //         1_000_000,
-//         BECH32_ADDRESS_ED25519_0,
+//         Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
 //         None,
 //         None,
 //         None,
@@ -449,7 +559,7 @@ fn two_inputs_remainder() {
 //     let selected = InputSelection::new(
 //         inputs,
 //         outputs,
-//         addresses([BECH32_ADDRESS_ED25519_0]),
+//         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
 //         protocol_parameters,
 //     )
 //     .select();
@@ -469,17 +579,62 @@ fn ed25519_sender() {
     let sender = Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap();
 
     let inputs = build_inputs([
-        Basic(2_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
-        Basic(2_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
-        Basic(1_000_000, BECH32_ADDRESS_ED25519_1, None, None, None, None, None, None),
-        Basic(2_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
-        Basic(2_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
+        Basic(
+            2_000_000,
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+        ),
+        Basic(
+            2_000_000,
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+        ),
+        Basic(
+            1_000_000,
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+        ),
+        Basic(
+            2_000_000,
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+        ),
+        Basic(
+            2_000_000,
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+        ),
     ]);
     let outputs = build_outputs([Basic(
         2_000_000,
-        BECH32_ADDRESS_ED25519_0,
+        Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
-        Some(BECH32_ADDRESS_ED25519_1),
+        Some(Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap()),
         None,
         None,
         None,
@@ -489,7 +644,10 @@ fn ed25519_sender() {
     let selected = InputSelection::new(
         inputs,
         outputs,
-        addresses([BECH32_ADDRESS_ED25519_0, BECH32_ADDRESS_ED25519_1]),
+        [
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
+        ],
         protocol_parameters,
     )
     .select()
@@ -497,10 +655,12 @@ fn ed25519_sender() {
 
     // Sender + another for amount
     assert_eq!(selected.inputs.len(), 2);
-    assert!(selected
-        .inputs
-        .iter()
-        .any(|input| *input.output.as_basic().address() == sender));
+    assert!(
+        selected
+            .inputs
+            .iter()
+            .any(|input| *input.output.as_basic().address() == sender)
+    );
     // Provided output + remainder
     assert_eq!(selected.outputs.len(), 2);
 }
@@ -511,7 +671,7 @@ fn missing_ed25519_sender() {
 
     let inputs = build_inputs([Basic(
         5_000_000,
-        BECH32_ADDRESS_ED25519_0,
+        Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
         None,
         None,
@@ -521,9 +681,9 @@ fn missing_ed25519_sender() {
     )]);
     let outputs = build_outputs([Basic(
         1_000_000,
-        BECH32_ADDRESS_ED25519_0,
+        Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
-        Some(BECH32_ADDRESS_ED25519_1),
+        Some(Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap()),
         None,
         None,
         None,
@@ -533,7 +693,7 @@ fn missing_ed25519_sender() {
     let selected = InputSelection::new(
         inputs,
         outputs,
-        addresses([BECH32_ADDRESS_ED25519_0]),
+        [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         protocol_parameters,
     )
     .select();
@@ -550,18 +710,61 @@ fn account_sender() {
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
     let inputs = build_inputs([
-        Basic(2_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
-        Basic(2_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
-        Account(1_000_000, account_id_1, BECH32_ADDRESS_ED25519_0, None, None, None),
-        Basic(2_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
-        Basic(2_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
+        Basic(
+            2_000_000,
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+        ),
+        Basic(
+            2_000_000,
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+        ),
+        Account(
+            1_000_000,
+            account_id_1,
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            None,
+            None,
+            None,
+        ),
+        Basic(
+            2_000_000,
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+        ),
+        Basic(
+            2_000_000,
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+        ),
     ]);
 
     let outputs = build_outputs([Basic(
         2_000_000,
-        BECH32_ADDRESS_ED25519_0,
+        Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
-        Some(BECH32_ADDRESS_ACCOUNT_1),
+        Some(Address::try_from_bech32(BECH32_ADDRESS_ACCOUNT_1).unwrap()),
         None,
         None,
         None,
@@ -571,7 +774,7 @@ fn account_sender() {
     let selected = InputSelection::new(
         inputs,
         outputs.clone(),
-        addresses([BECH32_ADDRESS_ED25519_0]),
+        [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         protocol_parameters,
     )
     .select()
@@ -579,10 +782,12 @@ fn account_sender() {
 
     // Sender + another for amount
     assert_eq!(selected.inputs.len(), 2);
-    assert!(selected
-        .inputs
-        .iter()
-        .any(|input| input.output.is_account() && *input.output.as_account().account_id() == account_id_1));
+    assert!(
+        selected
+            .inputs
+            .iter()
+            .any(|input| input.output.is_account() && *input.output.as_account().account_id() == account_id_1)
+    );
     // Provided output + account
     assert_eq!(selected.outputs.len(), 2);
     assert!(selected.outputs.contains(&outputs[0]));
@@ -594,19 +799,31 @@ fn account_sender_zero_id() {
     let account_id_0 = AccountId::from_str(ACCOUNT_ID_0).unwrap();
 
     let inputs = build_inputs([
-        Basic(2_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
-        Account(1_000_000, account_id_0, BECH32_ADDRESS_ED25519_0, None, None, None),
+        Basic(
+            2_000_000,
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+        ),
+        Account(
+            1_000_000,
+            account_id_0,
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            None,
+            None,
+            None,
+        ),
     ]);
     let account_id = AccountId::from(inputs[1].output_id());
     let outputs = build_outputs([Basic(
         2_000_000,
-        BECH32_ADDRESS_ED25519_0,
+        Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
-        Some(
-            &Bech32Address::try_new("rms", AccountAddress::from(account_id))
-                .unwrap()
-                .to_string(),
-        ),
+        Some(Address::from(AccountAddress::from(account_id))),
         None,
         None,
         None,
@@ -616,7 +833,7 @@ fn account_sender_zero_id() {
     let selected = InputSelection::new(
         inputs.clone(),
         outputs,
-        addresses([BECH32_ADDRESS_ED25519_0]),
+        [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         protocol_parameters,
     )
     .select()
@@ -624,10 +841,12 @@ fn account_sender_zero_id() {
 
     assert!(unsorted_eq(&selected.inputs, &inputs));
     assert_eq!(selected.outputs.len(), 2);
-    assert!(selected
-        .outputs
-        .iter()
-        .any(|output| output.is_account() && *output.as_account().account_id() == account_id));
+    assert!(
+        selected
+            .outputs
+            .iter()
+            .any(|output| output.is_account() && *output.as_account().account_id() == account_id)
+    );
 }
 
 #[test]
@@ -636,7 +855,7 @@ fn missing_account_sender() {
 
     let inputs = build_inputs([Basic(
         5_000_000,
-        BECH32_ADDRESS_ED25519_0,
+        Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
         None,
         None,
@@ -646,9 +865,9 @@ fn missing_account_sender() {
     )]);
     let outputs = build_outputs([Basic(
         1_000_000,
-        BECH32_ADDRESS_ED25519_0,
+        Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
-        Some(BECH32_ADDRESS_ACCOUNT_1),
+        Some(Address::try_from_bech32(BECH32_ADDRESS_ACCOUNT_1).unwrap()),
         None,
         None,
         None,
@@ -658,7 +877,7 @@ fn missing_account_sender() {
     let selected = InputSelection::new(
         inputs,
         outputs,
-        addresses([BECH32_ADDRESS_ED25519_0]),
+        [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         protocol_parameters,
     )
     .select();
@@ -675,26 +894,62 @@ fn nft_sender() {
     let nft_id_1 = NftId::from_str(NFT_ID_1).unwrap();
 
     let inputs = build_inputs([
-        Basic(2_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
-        Basic(2_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
-        Nft(
-            1_000_000,
-            nft_id_1,
-            BECH32_ADDRESS_ED25519_0,
+        Basic(
+            2_000_000,
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            None,
             None,
             None,
             None,
             None,
             None,
         ),
-        Basic(2_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
-        Basic(2_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
+        Basic(
+            2_000_000,
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+        ),
+        Nft(
+            1_000_000,
+            nft_id_1,
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            None,
+            None,
+            None,
+            None,
+            None,
+        ),
+        Basic(
+            2_000_000,
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+        ),
+        Basic(
+            2_000_000,
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+        ),
     ]);
     let outputs = build_outputs([Basic(
         2_000_000,
-        BECH32_ADDRESS_ED25519_0,
+        Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
-        Some(BECH32_ADDRESS_NFT_1),
+        Some(Address::try_from_bech32(BECH32_ADDRESS_NFT_1).unwrap()),
         None,
         None,
         None,
@@ -704,7 +959,7 @@ fn nft_sender() {
     let selected = InputSelection::new(
         inputs.clone(),
         outputs.clone(),
-        addresses([BECH32_ADDRESS_ED25519_0]),
+        [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         protocol_parameters,
     )
     .select()
@@ -712,10 +967,12 @@ fn nft_sender() {
 
     // Sender + another for amount
     assert_eq!(selected.inputs.len(), 2);
-    assert!(selected
-        .inputs
-        .iter()
-        .any(|input| input.output.is_nft() && *input.output.as_nft().nft_id() == nft_id_1));
+    assert!(
+        selected
+            .inputs
+            .iter()
+            .any(|input| input.output.is_nft() && *input.output.as_nft().nft_id() == nft_id_1)
+    );
     // Provided output + nft
     assert_eq!(selected.outputs.len(), 2);
     assert!(selected.outputs.contains(&inputs[2].output));
@@ -728,11 +985,20 @@ fn nft_sender_zero_id() {
     let nft_id_0 = NftId::from_str(NFT_ID_0).unwrap();
 
     let inputs = build_inputs([
-        Basic(2_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
+        Basic(
+            2_000_000,
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+        ),
         Nft(
             1_000_000,
             nft_id_0,
-            BECH32_ADDRESS_ED25519_0,
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
             None,
             None,
             None,
@@ -743,13 +1009,9 @@ fn nft_sender_zero_id() {
     let nft_id = NftId::from(inputs[1].output_id());
     let outputs = build_outputs([Basic(
         2_000_000,
-        BECH32_ADDRESS_ED25519_0,
+        Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
-        Some(
-            &Bech32Address::try_new("rms", NftAddress::from(nft_id))
-                .unwrap()
-                .to_string(),
-        ),
+        Some(Address::from(NftAddress::from(nft_id))),
         None,
         None,
         None,
@@ -759,7 +1021,7 @@ fn nft_sender_zero_id() {
     let selected = InputSelection::new(
         inputs.clone(),
         outputs,
-        addresses([BECH32_ADDRESS_ED25519_0]),
+        [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         protocol_parameters,
     )
     .select()
@@ -767,10 +1029,12 @@ fn nft_sender_zero_id() {
 
     assert!(unsorted_eq(&selected.inputs, &inputs));
     assert_eq!(selected.outputs.len(), 2);
-    assert!(selected
-        .outputs
-        .iter()
-        .any(|output| output.is_nft() && *output.as_nft().nft_id() == nft_id));
+    assert!(
+        selected
+            .outputs
+            .iter()
+            .any(|output| output.is_nft() && *output.as_nft().nft_id() == nft_id)
+    );
 }
 
 #[test]
@@ -779,7 +1043,7 @@ fn missing_nft_sender() {
 
     let inputs = build_inputs([Basic(
         5_000_000,
-        BECH32_ADDRESS_ED25519_0,
+        Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
         None,
         None,
@@ -789,9 +1053,9 @@ fn missing_nft_sender() {
     )]);
     let outputs = build_outputs([Basic(
         1_000_000,
-        BECH32_ADDRESS_ED25519_0,
+        Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
-        Some(BECH32_ADDRESS_NFT_1),
+        Some(Address::try_from_bech32(BECH32_ADDRESS_NFT_1).unwrap()),
         None,
         None,
         None,
@@ -801,7 +1065,7 @@ fn missing_nft_sender() {
     let selected = InputSelection::new(
         inputs,
         outputs,
-        addresses([BECH32_ADDRESS_ED25519_0]),
+        [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         protocol_parameters,
     )
     .select();
@@ -818,7 +1082,7 @@ fn simple_remainder() {
 
     let inputs = build_inputs([Basic(
         1_000_000,
-        BECH32_ADDRESS_ED25519_0,
+        Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
         None,
         None,
@@ -828,7 +1092,7 @@ fn simple_remainder() {
     )]);
     let outputs = build_outputs([Basic(
         500_000,
-        BECH32_ADDRESS_ED25519_0,
+        Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
         None,
         None,
@@ -840,7 +1104,7 @@ fn simple_remainder() {
     let selected = InputSelection::new(
         inputs.clone(),
         outputs.clone(),
-        addresses([BECH32_ADDRESS_ED25519_0]),
+        [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         protocol_parameters,
     )
     .select()
@@ -851,7 +1115,12 @@ fn simple_remainder() {
     assert!(selected.outputs.contains(&outputs[0]));
     selected.outputs.iter().for_each(|output| {
         if !outputs.contains(output) {
-            assert!(is_remainder_or_return(output, 500_000, BECH32_ADDRESS_ED25519_0, None));
+            assert!(is_remainder_or_return(
+                output,
+                500_000,
+                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+                None
+            ));
         }
     });
 }
@@ -862,7 +1131,7 @@ fn simple_remainder() {
 
 //     let inputs = build_inputs([Basic(
 //         1_000_000,
-//         BECH32_ADDRESS_ED25519_0,
+//         Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
 //         None,
 //         None,
 //         None,
@@ -872,7 +1141,7 @@ fn simple_remainder() {
 //     )]);
 //     let outputs = build_outputs([Basic(
 //         800_000,
-//         BECH32_ADDRESS_ED25519_0,
+//         Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
 //         None,
 //         None,
 //         None,
@@ -884,7 +1153,7 @@ fn simple_remainder() {
 //     let selected = InputSelection::new(
 //         inputs,
 //         outputs,
-//         addresses([BECH32_ADDRESS_ED25519_0]),
+//         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
 //         protocol_parameters,
 //     )
 //     .select();
@@ -905,12 +1174,12 @@ fn simple_remainder() {
 //     let protocol_parameters = protocol_parameters();
 
 //     let inputs = build_inputs([
-//         Basic(1_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
-//         Basic(2_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
-//     ]);
+//         Basic(1_000_000, Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(), None, None, None, None, None,
+// None),         Basic(2_000_000, Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(), None, None, None, None,
+// None, None),     ]);
 //     let outputs = build_outputs([Basic(
 //         2_800_000,
-//         BECH32_ADDRESS_ED25519_0,
+//         Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
 //         None,
 //         None,
 //         None,
@@ -922,7 +1191,7 @@ fn simple_remainder() {
 //     let selected = InputSelection::new(
 //         inputs,
 //         outputs,
-//         addresses([BECH32_ADDRESS_ED25519_0]),
+//         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
 //         protocol_parameters,
 //     )
 //     .select();
@@ -942,7 +1211,7 @@ fn one_provided_one_needed() {
 
     let inputs = build_inputs([Basic(
         1_000_000,
-        BECH32_ADDRESS_ED25519_0,
+        Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
         None,
         None,
@@ -952,7 +1221,7 @@ fn one_provided_one_needed() {
     )]);
     let outputs = build_outputs([Basic(
         1_000_000,
-        BECH32_ADDRESS_ED25519_0,
+        Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
         None,
         None,
@@ -964,7 +1233,7 @@ fn one_provided_one_needed() {
     let selected = InputSelection::new(
         inputs.clone(),
         outputs.clone(),
-        addresses([BECH32_ADDRESS_ED25519_0]),
+        [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         protocol_parameters,
     )
     .select()
@@ -980,7 +1249,7 @@ fn insufficient_amount() {
 
     let inputs = build_inputs([Basic(
         1_000_000,
-        BECH32_ADDRESS_ED25519_0,
+        Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
         None,
         None,
@@ -990,7 +1259,7 @@ fn insufficient_amount() {
     )]);
     let outputs = build_outputs([Basic(
         1_250_000,
-        BECH32_ADDRESS_ED25519_0,
+        Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
         None,
         None,
@@ -1002,7 +1271,7 @@ fn insufficient_amount() {
     let selected = InputSelection::new(
         inputs,
         outputs,
-        addresses([BECH32_ADDRESS_ED25519_0]),
+        [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         protocol_parameters,
     )
     .select();
@@ -1021,12 +1290,30 @@ fn two_inputs_remainder_2() {
     let protocol_parameters = protocol_parameters();
 
     let inputs = build_inputs([
-        Basic(1_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
-        Basic(2_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
+        Basic(
+            1_000_000,
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+        ),
+        Basic(
+            2_000_000,
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+        ),
     ]);
     let outputs = build_outputs([Basic(
         500_000,
-        BECH32_ADDRESS_ED25519_0,
+        Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
         None,
         None,
@@ -1038,7 +1325,7 @@ fn two_inputs_remainder_2() {
     let selected = InputSelection::new(
         inputs.clone(),
         outputs.clone(),
-        addresses([BECH32_ADDRESS_ED25519_0]),
+        [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         protocol_parameters,
     )
     .select()
@@ -1050,7 +1337,12 @@ fn two_inputs_remainder_2() {
     assert!(selected.outputs.contains(&outputs[0]));
     selected.outputs.iter().for_each(|output| {
         if !outputs.contains(output) {
-            assert!(is_remainder_or_return(output, 500_000, BECH32_ADDRESS_ED25519_0, None));
+            assert!(is_remainder_or_return(
+                output,
+                500_000,
+                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+                None
+            ));
         }
     });
 }
@@ -1060,12 +1352,30 @@ fn two_inputs_remainder_3() {
     let protocol_parameters = protocol_parameters();
 
     let inputs = build_inputs([
-        Basic(1_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
-        Basic(2_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
+        Basic(
+            1_000_000,
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+        ),
+        Basic(
+            2_000_000,
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+        ),
     ]);
     let outputs = build_outputs([Basic(
         1_750_000,
-        BECH32_ADDRESS_ED25519_0,
+        Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
         None,
         None,
@@ -1077,7 +1387,7 @@ fn two_inputs_remainder_3() {
     let selected = InputSelection::new(
         inputs.clone(),
         outputs.clone(),
-        addresses([BECH32_ADDRESS_ED25519_0]),
+        [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         protocol_parameters,
     )
     .select()
@@ -1091,7 +1401,7 @@ fn two_inputs_remainder_3() {
             assert!(is_remainder_or_return(
                 output,
                 1_250_000,
-                BECH32_ADDRESS_ED25519_0,
+                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                 None
             ));
         }
@@ -1104,13 +1414,13 @@ fn two_inputs_remainder_3() {
 //     let protocol_parameters = protocol_parameters();
 
 //     let inputs = build_inputs([
-//         Basic(500_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
-//         Basic(600_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
-//         Basic(700_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
-//     ]);
+//         Basic(500_000, Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(), None, None, None, None, None,
+// None),         Basic(600_000, Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(), None, None, None, None,
+// None, None),         Basic(700_000, Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(), None, None, None,
+// None, None, None),     ]);
 //     let outputs = build_outputs([Basic(
 //         1_000_000,
-//         BECH32_ADDRESS_ED25519_0,
+//         Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
 //         None,
 //         None,
 //         None,
@@ -1122,7 +1432,7 @@ fn two_inputs_remainder_3() {
 //     let selected = InputSelection::new(
 //         inputs.clone(),
 //         outputs.clone(),
-//         addresses([BECH32_ADDRESS_ED25519_0]),
+//         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
 //         protocol_parameters,
 //     )
 //     .select()
@@ -1133,8 +1443,8 @@ fn two_inputs_remainder_3() {
 //     assert!(selected.outputs.contains(&outputs[0]));
 //     selected.outputs.iter().for_each(|output| {
 //         if !outputs.contains(output) {
-//             assert!(is_remainder_or_return(output, 800_000, BECH32_ADDRESS_ED25519_0, None));
-//         }
+//             assert!(is_remainder_or_return(output, 800_000,
+// Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(), None));         }
 //     });
 // }
 
@@ -1144,7 +1454,7 @@ fn sender_already_selected() {
 
     let inputs = build_inputs([Basic(
         1_000_000,
-        BECH32_ADDRESS_ED25519_1,
+        Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
         None,
         None,
         None,
@@ -1154,9 +1464,9 @@ fn sender_already_selected() {
     )]);
     let outputs = build_outputs([Basic(
         1_000_000,
-        BECH32_ADDRESS_ED25519_0,
+        Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
-        Some(BECH32_ADDRESS_ED25519_1),
+        Some(Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap()),
         None,
         None,
         None,
@@ -1166,7 +1476,10 @@ fn sender_already_selected() {
     let selected = InputSelection::new(
         inputs.clone(),
         outputs.clone(),
-        addresses([BECH32_ADDRESS_ED25519_0, BECH32_ADDRESS_ED25519_1]),
+        [
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
+        ],
         protocol_parameters,
     )
     .with_required_inputs([*inputs[0].output_id()])
@@ -1183,7 +1496,7 @@ fn single_mandatory_input() {
 
     let inputs = build_inputs([Basic(
         1_000_000,
-        BECH32_ADDRESS_ED25519_1,
+        Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
         None,
         None,
         None,
@@ -1193,7 +1506,7 @@ fn single_mandatory_input() {
     )]);
     let outputs = build_outputs([Basic(
         1_000_000,
-        BECH32_ADDRESS_ED25519_0,
+        Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
         None,
         None,
@@ -1205,7 +1518,10 @@ fn single_mandatory_input() {
     let selected = InputSelection::new(
         inputs.clone(),
         outputs.clone(),
-        addresses([BECH32_ADDRESS_ED25519_0, BECH32_ADDRESS_ED25519_1]),
+        [
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
+        ],
         protocol_parameters,
     )
     .with_required_inputs([*inputs[0].output_id()])
@@ -1222,13 +1538,24 @@ fn too_many_inputs() {
 
     // 129 inputs that would be required for the amount, but that's above max inputs
     let inputs = build_inputs(
-        std::iter::repeat_with(|| Basic(1_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None))
-            .take(129),
+        std::iter::repeat_with(|| {
+            Basic(
+                1_000_000,
+                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+            )
+        })
+        .take(129),
     );
 
     let outputs = build_outputs([Basic(
         129_000_000,
-        BECH32_ADDRESS_ED25519_0,
+        Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
         None,
         None,
@@ -1240,7 +1567,7 @@ fn too_many_inputs() {
     let selected = InputSelection::new(
         inputs,
         outputs,
-        addresses([BECH32_ADDRESS_ED25519_0]),
+        [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         protocol_parameters,
     )
     .select();
@@ -1257,13 +1584,24 @@ fn more_than_max_inputs_only_one_needed() {
 
     // 1000 inputs where 129 would be needed for the required amount which is above the max inputs
     let mut inputs = build_inputs(
-        std::iter::repeat_with(|| Basic(1_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None))
-            .take(1000),
+        std::iter::repeat_with(|| {
+            Basic(
+                1_000_000,
+                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+            )
+        })
+        .take(1000),
     );
     // Add the needed input
     let needed_input = build_inputs([Basic(
         129_000_000,
-        BECH32_ADDRESS_ED25519_0,
+        Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
         None,
         None,
@@ -1275,7 +1613,7 @@ fn more_than_max_inputs_only_one_needed() {
 
     let outputs = build_outputs([Basic(
         129_000_000,
-        BECH32_ADDRESS_ED25519_0,
+        Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
         None,
         None,
@@ -1287,7 +1625,7 @@ fn more_than_max_inputs_only_one_needed() {
     let selected = InputSelection::new(
         inputs,
         outputs.clone(),
-        addresses([BECH32_ADDRESS_ED25519_0]),
+        [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         protocol_parameters,
     )
     .select()
@@ -1303,7 +1641,7 @@ fn too_many_outputs() {
 
     let inputs = build_inputs([Basic(
         2_000_000_000,
-        BECH32_ADDRESS_ED25519_0,
+        Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
         None,
         None,
@@ -1313,14 +1651,25 @@ fn too_many_outputs() {
     )]);
 
     let outputs = build_outputs(
-        std::iter::repeat_with(|| Basic(1_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None))
-            .take(129),
+        std::iter::repeat_with(|| {
+            Basic(
+                1_000_000,
+                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+            )
+        })
+        .take(129),
     );
 
     let selected = InputSelection::new(
         inputs,
         outputs,
-        addresses([BECH32_ADDRESS_ED25519_0]),
+        [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         protocol_parameters,
     )
     .select();
@@ -1337,7 +1686,7 @@ fn too_many_outputs_with_remainder() {
 
     let inputs = build_inputs([Basic(
         2_000_000_000,
-        BECH32_ADDRESS_ED25519_0,
+        Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
         None,
         None,
@@ -1347,14 +1696,25 @@ fn too_many_outputs_with_remainder() {
     )]);
 
     let outputs = build_outputs(
-        std::iter::repeat_with(|| Basic(1_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None))
-            .take(128),
+        std::iter::repeat_with(|| {
+            Basic(
+                1_000_000,
+                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+            )
+        })
+        .take(128),
     );
 
     let selected = InputSelection::new(
         inputs,
         outputs,
-        addresses([BECH32_ADDRESS_ED25519_0]),
+        [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         protocol_parameters,
     )
     .select();
@@ -1370,19 +1730,54 @@ fn too_many_outputs_with_remainder() {
 fn restricted_ed25519() {
     let protocol_parameters = protocol_parameters();
     let address = Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap();
-    let restricted = RestrictedAddress::new(address.clone()).unwrap();
-    let restricted_bech32 = restricted.to_bech32_unchecked("rms").to_string();
+    let restricted = Address::from(RestrictedAddress::new(address.clone()).unwrap());
 
     let inputs = build_inputs([
-        Basic(1_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
-        Basic(1_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
-        Basic(1_000_000, &restricted_bech32, None, None, None, None, None, None),
-        Basic(1_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
-        Basic(1_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
+        Basic(
+            1_000_000,
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+        ),
+        Basic(
+            1_000_000,
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+        ),
+        Basic(1_000_000, restricted, None, None, None, None, None, None),
+        Basic(
+            1_000_000,
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+        ),
+        Basic(
+            1_000_000,
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+        ),
     ]);
     let outputs = build_outputs([Basic(
         1_000_000,
-        BECH32_ADDRESS_ED25519_0,
+        Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
         None,
         None,
@@ -1394,7 +1789,7 @@ fn restricted_ed25519() {
     let selected = InputSelection::new(
         inputs.clone(),
         outputs.clone(),
-        addresses([BECH32_ADDRESS_ED25519_1]),
+        [Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap()],
         protocol_parameters,
     )
     .select()
@@ -1410,15 +1805,14 @@ fn restricted_nft() {
     let protocol_parameters = protocol_parameters();
     let nft_id_1 = NftId::from_str(NFT_ID_1).unwrap();
     let nft_address = Address::from(nft_id_1);
-    let restricted = RestrictedAddress::new(nft_address.clone()).unwrap();
-    let restricted_bech32 = restricted.to_bech32_unchecked("rms").to_string();
+    let restricted = Address::from(RestrictedAddress::new(nft_address.clone()).unwrap());
 
     let inputs = build_inputs([
-        Basic(2_000_000, &restricted_bech32, None, None, None, None, None, None),
+        Basic(2_000_000, restricted, None, None, None, None, None, None),
         Nft(
             2_000_000,
             nft_id_1,
-            BECH32_ADDRESS_ED25519_0,
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
             None,
             None,
             None,
@@ -1428,7 +1822,7 @@ fn restricted_nft() {
     ]);
     let outputs = build_outputs([Basic(
         3_000_000,
-        BECH32_ADDRESS_ED25519_0,
+        Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
         None,
         None,
@@ -1440,7 +1834,7 @@ fn restricted_nft() {
     let selected = InputSelection::new(
         inputs.clone(),
         outputs.clone(),
-        addresses([BECH32_ADDRESS_ED25519_0]),
+        [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         protocol_parameters,
     )
     .select()
@@ -1456,17 +1850,23 @@ fn restricted_account() {
     let protocol_parameters = protocol_parameters();
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
     let account_address = Address::from(account_id_1);
-    let restricted = RestrictedAddress::new(account_address.clone()).unwrap();
-    let restricted_bech32 = restricted.to_bech32_unchecked("rms").to_string();
+    let restricted = Address::from(RestrictedAddress::new(account_address.clone()).unwrap());
 
     let inputs = build_inputs([
-        Basic(2_000_000, &restricted_bech32, None, None, None, None, None, None),
-        Account(2_000_000, account_id_1, BECH32_ADDRESS_ED25519_0, None, None, None),
+        Basic(2_000_000, restricted, None, None, None, None, None, None),
+        Account(
+            2_000_000,
+            account_id_1,
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            None,
+            None,
+            None,
+        ),
     ]);
 
     let outputs = build_outputs([Basic(
         3_000_000,
-        BECH32_ADDRESS_ED25519_0,
+        Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
         None,
         None,
@@ -1478,7 +1878,7 @@ fn restricted_account() {
     let selected = InputSelection::new(
         inputs.clone(),
         outputs.clone(),
-        addresses([BECH32_ADDRESS_ED25519_0]),
+        [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         protocol_parameters,
     )
     .select()
@@ -1493,21 +1893,65 @@ fn restricted_account() {
 fn restricted_ed25519_sender() {
     let protocol_parameters = protocol_parameters();
     let sender = Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap();
-    let restricted_sender = RestrictedAddress::new(sender.clone()).unwrap();
-    let restricted_sender_bech32 = restricted_sender.to_bech32_unchecked("rms").to_string();
+    let restricted_sender = Address::from(RestrictedAddress::new(sender.clone()).unwrap());
 
     let inputs = build_inputs([
-        Basic(2_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
-        Basic(2_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
-        Basic(1_000_000, BECH32_ADDRESS_ED25519_1, None, None, None, None, None, None),
-        Basic(2_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
-        Basic(2_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
+        Basic(
+            2_000_000,
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+        ),
+        Basic(
+            2_000_000,
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+        ),
+        Basic(
+            1_000_000,
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+        ),
+        Basic(
+            2_000_000,
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+        ),
+        Basic(
+            2_000_000,
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+        ),
     ]);
     let outputs = build_outputs([Basic(
         2_000_000,
-        BECH32_ADDRESS_ED25519_0,
+        Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
-        Some(&restricted_sender_bech32),
+        Some(restricted_sender),
         None,
         None,
         None,
@@ -1517,7 +1961,10 @@ fn restricted_ed25519_sender() {
     let selected = InputSelection::new(
         inputs.clone(),
         outputs.clone(),
-        addresses([BECH32_ADDRESS_ED25519_0, BECH32_ADDRESS_ED25519_1]),
+        [
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
+        ],
         protocol_parameters,
     )
     .select()
@@ -1525,10 +1972,12 @@ fn restricted_ed25519_sender() {
 
     // Sender + another for amount
     assert_eq!(selected.inputs.len(), 2);
-    assert!(selected
-        .inputs
-        .iter()
-        .any(|input| *input.output.as_basic().address() == sender));
+    assert!(
+        selected
+            .inputs
+            .iter()
+            .any(|input| *input.output.as_basic().address() == sender)
+    );
     // Provided output + remainder
     assert_eq!(selected.outputs.len(), 2);
 }
@@ -1550,20 +1999,44 @@ fn multi_address_sender() {
         )
         .unwrap(),
     );
-    let multi_bech32 = multi.try_to_bech32("rms").unwrap().to_string();
 
     let inputs = build_inputs([
-        Basic(1_000_000, BECH32_ADDRESS_ACCOUNT_1, None, None, None, None, None, None),
-        Basic(1_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
-        Basic(1_000_000, BECH32_ADDRESS_ED25519_1, None, None, None, None, None, None),
-        Basic(1_000_000, BECH32_ADDRESS_ED25519_2, None, None, None, None, None, None),
-        Basic(1_000_000, BECH32_ADDRESS_ACCOUNT_1, None, None, None, None, None, None),
+        Basic(
+            1_000_000,
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+        ),
+        Basic(
+            1_000_000,
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+        ),
+        Basic(
+            1_000_000,
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_2).unwrap(),
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+        ),
     ]);
     let outputs = build_outputs([Basic(
         2_000_000,
-        BECH32_ADDRESS_ED25519_0,
+        Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
-        Some(&multi_bech32),
+        Some(multi),
         None,
         None,
         None,
@@ -1573,7 +2046,10 @@ fn multi_address_sender() {
     let selected = InputSelection::new(
         inputs,
         outputs,
-        addresses([BECH32_ADDRESS_ED25519_0, BECH32_ADDRESS_ED25519_1]),
+        [
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
+        ],
         protocol_parameters,
     )
     .select()

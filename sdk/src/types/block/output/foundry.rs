@@ -72,7 +72,7 @@ impl FoundryId {
         )
     }
 
-    /// Returns the [`TokenScheme`](crate::types::block::output::TokenScheme) kind of the [`FoundryId`].
+    /// Returns the [`TokenScheme`] kind of the [`FoundryId`].
     pub fn token_scheme_kind(&self) -> u8 {
         // PANIC: the length is known.
         *self.0.last().unwrap()

@@ -21,7 +21,7 @@ pub(crate) type UnlocksCount = WeightedAddressCount;
 pub struct MultiUnlock(#[packable(verify_with = verify_unlocks)] BoxedSlicePrefix<Unlock, UnlocksCount>);
 
 impl MultiUnlock {
-    /// The [`Unlock`](crate::types::block::unlock::Unlock) kind of an [`MultiUnlock`].
+    /// The [`Unlock`] kind of an [`MultiUnlock`].
     pub const KIND: u8 = 5;
 
     /// Creates a new [`MultiUnlock`].

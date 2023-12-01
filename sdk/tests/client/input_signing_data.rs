@@ -31,15 +31,9 @@ fn input_signing_data_conversion() {
 
     assert_eq!(input_signing_data.chain.as_ref(), Some(&bip44_chain));
 
-    let restored_input_signing_data = InputSigningData::try_from(input_signing_data.clone()).unwrap();
-    assert_eq!(input_signing_data, restored_input_signing_data);
-
     let input_signing_data_json = serde_json::to_value(&input_signing_data).unwrap();
 
     let restored_input_signing_data = serde_json::from_value::<InputSigningData>(input_signing_data_json).unwrap();
-    assert_eq!(restored_input_signing_data.chain.as_ref(), Some(&bip44_chain));
-
-    let restored_input_signing_data = InputSigningData::try_from(restored_input_signing_data).unwrap();
     assert!(restored_input_signing_data.output.is_basic());
-    assert_eq!(restored_input_signing_data.chain, Some(bip44_chain));
+    assert_eq!(restored_input_signing_data.chain.as_ref(), Some(&bip44_chain));
 }

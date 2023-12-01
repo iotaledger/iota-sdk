@@ -40,8 +40,7 @@ where
         self.sign_and_submit_transaction(prepared_transaction, options).await
     }
 
-    /// Prepares the transaction for
-    /// [Account::melt_native_token()](crate::wallet::Account::melt_native_token).
+    /// Prepares the transaction for [Wallet::melt_native_token()].
     pub async fn prepare_melt_native_token(
         &self,
         token_id: TokenId,
