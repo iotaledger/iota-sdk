@@ -33,4 +33,4 @@ function run() {
     }
 }
 
-void run().then(() => process.exit());
+run();

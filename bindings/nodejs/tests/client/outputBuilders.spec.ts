@@ -5,7 +5,7 @@ import { describe, it } from '@jest/globals';
 import 'reflect-metadata';
 import 'dotenv/config';
 
-import { AddressUnlockCondition, AccountAddress, Client, SecretManager, Ed25519Address, ImmutableAccountAddressUnlockCondition, SimpleTokenScheme, Utils } from '../../';
+import { AddressUnlockCondition, AccountAddress, Client, SecretManager, Ed25519Address, ImmutableAccountAddressUnlockCondition, SimpleTokenScheme, Utils } from '../../lib';
 import '../customMatchers';
 
 async function makeClient(): Promise<Client> {
