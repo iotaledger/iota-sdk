@@ -16,7 +16,7 @@ use crate::{method::WalletMethod, response::Response};
 /// Call a wallet method.
 pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletMethod) -> crate::Result<Response> {
     let response = match method {
-        WalletMethod::Accounts => Response::OutputsData(wallet.data().await.accounts().collect()),
+        WalletMethod::Accounts => Response::OutputsData(wallet.data().await.accounts().cloned().collect()),
         #[cfg(feature = "stronghold")]
         WalletMethod::Backup { destination, password } => {
             wallet.backup(destination, password).await?;
@@ -160,8 +160,7 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
                 |transaction| Response::Transaction(Some(Box::new(TransactionWithMetadataDto::from(transaction)))),
             ),
         WalletMethod::GetOutput { output_id } => {
-            let output_data = wallet.data().await.get_output(&output_id);
-            Response::OutputData(output_data.cloned().map(Box::new))
+            Response::OutputData(wallet.data().await.get_output(&output_id).cloned().map(Box::new))
         }
         #[cfg(feature = "participation")]
         WalletMethod::GetParticipationEvent { event_id } => {
@@ -229,14 +228,6 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
                 wallet_data.outputs().values().cloned().collect()
             })
         }
-        WalletMethod::PendingTransactions => Response::Transactions(
-            wallet
-                .data()
-                .await
-                .pending_transactions()
-                .map(TransactionWithMetadataDto::from)
-                .collect(),
-        ),
         WalletMethod::PendingTransactions => Response::Transactions(
             wallet
                 .data()
