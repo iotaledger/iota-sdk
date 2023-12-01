@@ -54,7 +54,7 @@ impl SlotIndex {
         Self(*epoch_index << slots_per_epoch_exponent)
     }
 
-    /// Gets the slot index of a unix timestamp.
+    /// Gets the slot index of a unix timestamp in seconds.
     /// Slots are counted starting from `1` with `0` being reserved for times before the genesis.
     pub fn from_timestamp(timestamp: u64, genesis_unix_timestamp: u64, slot_duration_in_seconds: u8) -> Self {
         timestamp
