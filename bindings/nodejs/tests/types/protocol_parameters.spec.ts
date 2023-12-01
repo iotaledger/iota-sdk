@@ -1,11 +1,9 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { plainToInstance, Type } from 'class-transformer';
 import { describe, it } from '@jest/globals';
 import { expect } from '@jest/globals';
-import { ProtocolParameters, WorkScoreParameters, ManaParameters } from '../../lib/types/models/info/node-info-protocol';
-import { StorageScoreParameters } from '../../lib/types/models';
+import { ProtocolParameters } from '../../lib/types/models/info/node-info-protocol';
 import { Utils } from '../../lib/utils/utils';
 import * as protocol_parameters from '../../../../sdk/tests/types/fixtures/protocol_parameters.json';
 
