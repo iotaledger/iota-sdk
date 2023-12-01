@@ -660,7 +660,7 @@ fn verify_unlock_conditions(unlock_conditions: &UnlockConditions) -> Result<(), 
 }
 
 #[cfg(feature = "serde")]
-pub(crate) mod dto {
+mod dto {
     use alloc::vec::Vec;
 
     use serde::{Deserialize, Serialize};

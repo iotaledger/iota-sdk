@@ -408,7 +408,7 @@ fn verify_features_packable<const VERIFY: bool>(features: &Features, _: &Protoco
 }
 
 #[cfg(feature = "serde")]
-pub(crate) mod dto {
+mod dto {
     use alloc::vec::Vec;
 
     use serde::{Deserialize, Serialize};

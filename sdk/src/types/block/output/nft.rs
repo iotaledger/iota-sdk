@@ -565,7 +565,7 @@ fn verify_unlock_conditions(unlock_conditions: &UnlockConditions, nft_id: &NftId
 }
 
 #[cfg(feature = "serde")]
-pub(crate) mod dto {
+mod dto {
     use alloc::vec::Vec;
 
     use serde::{Deserialize, Serialize};
