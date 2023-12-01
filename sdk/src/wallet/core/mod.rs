@@ -154,6 +154,198 @@ impl WalletData {
             native_token_foundries: HashMap::new(),
         }
     }
+
+    fn filter_outputs<'a>(
+        outputs: impl Iterator<Item = &'a OutputData>,
+        filter: FilterOptions,
+    ) -> impl Iterator<Item = &'a OutputData> {
+        outputs.filter(move |output| {
+            match &output.output {
+                Output::Account(account) => {
+                    if let Some(account_ids) = &filter.account_ids {
+                        let account_id = account.account_id_non_null(&output.output_id);
+                        if account_ids.contains(&account_id) {
+                            return true;
+                        }
+                    }
+                }
+                Output::Anchor(anchor) => {
+                    if let Some(anchor_ids) = &filter.anchor_ids {
+                        let anchor_id = anchor.anchor_id_non_null(&output.output_id);
+                        if anchor_ids.contains(&anchor_id) {
+                            return true;
+                        }
+                    }
+                }
+                Output::Foundry(foundry) => {
+                    if let Some(foundry_ids) = &filter.foundry_ids {
+                        let foundry_id = foundry.id();
+                        if foundry_ids.contains(&foundry_id) {
+                            return true;
+                        }
+                    }
+                }
+                Output::Nft(nft) => {
+                    if let Some(nft_ids) = &filter.nft_ids {
+                        let nft_id = nft.nft_id_non_null(&output.output_id);
+                        if nft_ids.contains(&nft_id) {
+                            return true;
+                        }
+                    }
+                }
+                Output::Delegation(delegation) => {
+                    if let Some(delegation_ids) = &filter.delegation_ids {
+                        let delegation_id = delegation.delegation_id_non_null(&output.output_id);
+                        if delegation_ids.contains(&delegation_id) {
+                            return true;
+                        }
+                    }
+                }
+                _ => {}
+            }
+
+            // TODO filter based on slot index
+            // if let Some(lower_bound_booked_timestamp) = filter.lower_bound_booked_timestamp {
+            //     if output.metadata.milestone_timestamp_booked() < lower_bound_booked_timestamp {
+            //         continue;
+            //     }
+            // }
+            // if let Some(upper_bound_booked_timestamp) = filter.upper_bound_booked_timestamp {
+            //     if output.metadata.milestone_timestamp_booked() > upper_bound_booked_timestamp {
+            //         continue;
+            //     }
+            // }
+
+            if let Some(output_types) = &filter.output_types {
+                if !output_types.contains(&output.output.kind()) {
+                    return false;
+                }
+            }
+
+            // Include the output if we're not filtering by IDs.
+            if filter.account_ids.is_none()
+                && filter.anchor_ids.is_none()
+                && filter.foundry_ids.is_none()
+                && filter.nft_ids.is_none()
+                && filter.delegation_ids.is_none()
+            {
+                return true;
+            }
+            false
+        })
+    }
+
+    /// Returns outputs map of the wallet.
+    pub fn outputs(&self) -> &HashMap<OutputId, OutputData> {
+        &self.outputs
+    }
+
+    /// Returns unspent outputs map of the wallet.
+    pub fn unspent_outputs(&self) -> &HashMap<OutputId, OutputData> {
+        &self.unspent_outputs
+    }
+
+    /// Returns outputs of the wallet.
+    pub fn filtered_outputs(&self, filter: FilterOptions) -> impl Iterator<Item = &OutputData> {
+        Self::filter_outputs(self.outputs.values(), filter)
+    }
+
+    /// Returns unspent outputs of the wallet.
+    pub fn filtered_unspent_outputs(&self, filter: FilterOptions) -> impl Iterator<Item = &OutputData> {
+        Self::filter_outputs(self.unspent_outputs.values(), filter)
+    }
+
+    /// Gets the unspent account output matching the given ID.
+    pub fn unspent_account_output(&self, account_id: &AccountId) -> Option<&OutputData> {
+        self.filtered_unspent_outputs(FilterOptions {
+            account_ids: Some([*account_id].into()),
+            ..Default::default()
+        })
+        .next()
+    }
+
+    /// Gets the unspent anchor output matching the given ID.
+    pub fn unspent_anchor_output(&self, anchor_id: &AnchorId) -> Option<&OutputData> {
+        self.filtered_unspent_outputs(FilterOptions {
+            anchor_ids: Some([*anchor_id].into()),
+            ..Default::default()
+        })
+        .next()
+    }
+
+    /// Gets the unspent foundry output matching the given ID.
+    pub fn unspent_foundry_output(&self, foundry_id: &FoundryId) -> Option<&OutputData> {
+        self.filtered_unspent_outputs(FilterOptions {
+            foundry_ids: Some([*foundry_id].into()),
+            ..Default::default()
+        })
+        .next()
+    }
+
+    /// Gets the unspent nft output matching the given ID.
+    pub fn unspent_nft_output(&self, nft_id: &NftId) -> Option<&OutputData> {
+        self.filtered_unspent_outputs(FilterOptions {
+            nft_ids: Some([*nft_id].into()),
+            ..Default::default()
+        })
+        .next()
+    }
+
+    /// Gets the unspent delegation output matching the given ID.
+    pub fn unspent_delegation_output(&self, delegation_id: &DelegationId) -> Option<&OutputData> {
+        self.filtered_unspent_outputs(FilterOptions {
+            delegation_ids: Some([*delegation_id].into()),
+            ..Default::default()
+        })
+        .next()
+    }
+
+    /// Returns implicit accounts of the wallet.
+    pub fn implicit_accounts(&self) -> impl Iterator<Item = &OutputData> {
+        self.unspent_outputs
+            .values()
+            .filter(|output_data| output_data.output.is_implicit_account())
+    }
+
+    /// Returns accounts of the wallet.
+    pub fn accounts(&self) -> impl Iterator<Item = &OutputData> {
+        self.unspent_outputs
+            .values()
+            .filter(|output_data| output_data.output.is_account())
+    }
+
+    /// Get the [`OutputData`] of an output stored in the wallet.
+    pub fn get_output(&self, output_id: &OutputId) -> Option<&OutputData> {
+        self.outputs.get(output_id)
+    }
+
+    /// Get the [`TransactionWithMetadata`] of a transaction stored in the wallet.
+    pub fn get_transaction(&self, transaction_id: &TransactionId) -> Option<&TransactionWithMetadata> {
+        self.transactions.get(transaction_id)
+    }
+
+    /// Get the transaction with inputs of an incoming transaction stored in the wallet.
+    /// List might not be complete, if the node pruned the data already
+    pub fn get_incoming_transaction(&self, transaction_id: &TransactionId) -> Option<&TransactionWithMetadata> {
+        self.incoming_transactions.get(transaction_id)
+    }
+
+    /// Returns all incoming transactions of the wallet
+    pub fn incoming_transactions(&self) -> &HashMap<TransactionId, TransactionWithMetadata> {
+        &self.incoming_transactions
+    }
+
+    /// Returns all transactions of the wallet
+    pub fn transactions(&self) -> &HashMap<TransactionId, TransactionWithMetadata> {
+        &self.transactions
+    }
+
+    /// Returns all pending transactions of the wallet
+    pub fn pending_transactions(&self) -> impl Iterator<Item = &TransactionWithMetadata> {
+        self.pending_transactions
+            .iter()
+            .filter_map(|transaction_id| self.get_transaction(transaction_id))
+    }
 }
 
 impl<S: 'static + SecretManage> Wallet<S>
@@ -235,7 +427,7 @@ where
         self.inner.emit(wallet_event).await
     }
 
-    pub(crate) async fn data(&self) -> tokio::sync::RwLockReadGuard<'_, WalletData> {
+    pub async fn data(&self) -> tokio::sync::RwLockReadGuard<'_, WalletData> {
         self.data.read().await
     }
 
@@ -275,228 +467,6 @@ where
     /// Get the wallet's configured bip path.
     pub async fn bip_path(&self) -> Option<Bip44> {
         self.data().await.bip_path
-    }
-
-    /// Get the [`OutputData`] of an output stored in the wallet.
-    pub async fn get_output(&self, output_id: &OutputId) -> Option<OutputData> {
-        self.data().await.outputs.get(output_id).cloned()
-    }
-
-    /// Get the [`TransactionWithMetadata`] of a transaction stored in the wallet.
-    pub async fn get_transaction(&self, transaction_id: &TransactionId) -> Option<TransactionWithMetadata> {
-        self.data().await.transactions.get(transaction_id).cloned()
-    }
-
-    /// Get the transaction with inputs of an incoming transaction stored in the wallet.
-    /// List might not be complete, if the node pruned the data already
-    pub async fn get_incoming_transaction(&self, transaction_id: &TransactionId) -> Option<TransactionWithMetadata> {
-        self.data().await.incoming_transactions.get(transaction_id).cloned()
-    }
-
-    fn filter_outputs<'a>(
-        &self,
-        outputs: impl Iterator<Item = &'a OutputData>,
-        filter: impl Into<Option<FilterOptions>>,
-    ) -> Vec<OutputData> {
-        let filter = filter.into();
-
-        if let Some(filter) = filter {
-            let mut filtered_outputs = Vec::new();
-
-            for output in outputs {
-                match &output.output {
-                    Output::Account(account) => {
-                        if let Some(account_ids) = &filter.account_ids {
-                            let account_id = account.account_id_non_null(&output.output_id);
-                            if account_ids.contains(&account_id) {
-                                filtered_outputs.push(output.clone());
-                                continue;
-                            }
-                        }
-                    }
-                    Output::Anchor(anchor) => {
-                        if let Some(anchor_ids) = &filter.anchor_ids {
-                            let anchor_id = anchor.anchor_id_non_null(&output.output_id);
-                            if anchor_ids.contains(&anchor_id) {
-                                filtered_outputs.push(output.clone());
-                                continue;
-                            }
-                        }
-                    }
-                    Output::Foundry(foundry) => {
-                        if let Some(foundry_ids) = &filter.foundry_ids {
-                            let foundry_id = foundry.id();
-                            if foundry_ids.contains(&foundry_id) {
-                                filtered_outputs.push(output.clone());
-                                continue;
-                            }
-                        }
-                    }
-                    Output::Nft(nft) => {
-                        if let Some(nft_ids) = &filter.nft_ids {
-                            let nft_id = nft.nft_id_non_null(&output.output_id);
-                            if nft_ids.contains(&nft_id) {
-                                filtered_outputs.push(output.clone());
-                                continue;
-                            }
-                        }
-                    }
-                    Output::Delegation(delegation) => {
-                        if let Some(delegation_ids) = &filter.delegation_ids {
-                            let delegation_id = delegation.delegation_id_non_null(&output.output_id);
-                            if delegation_ids.contains(&delegation_id) {
-                                filtered_outputs.push(output.clone());
-                                continue;
-                            }
-                        }
-                    }
-                    _ => {}
-                }
-
-                // TODO filter based on slot index
-                // if let Some(lower_bound_booked_timestamp) = filter.lower_bound_booked_timestamp {
-                //     if output.metadata.milestone_timestamp_booked() < lower_bound_booked_timestamp {
-                //         continue;
-                //     }
-                // }
-                // if let Some(upper_bound_booked_timestamp) = filter.upper_bound_booked_timestamp {
-                //     if output.metadata.milestone_timestamp_booked() > upper_bound_booked_timestamp {
-                //         continue;
-                //     }
-                // }
-
-                if let Some(output_types) = &filter.output_types {
-                    if !output_types.contains(&output.output.kind()) {
-                        continue;
-                    }
-                }
-
-                // Include the output if we're not filtering by IDs.
-                if filter.account_ids.is_none()
-                    && filter.anchor_ids.is_none()
-                    && filter.foundry_ids.is_none()
-                    && filter.nft_ids.is_none()
-                    && filter.delegation_ids.is_none()
-                {
-                    filtered_outputs.push(output.clone());
-                }
-            }
-
-            filtered_outputs
-        } else {
-            outputs.cloned().collect()
-        }
-    }
-
-    /// Returns outputs of the wallet.
-    pub async fn outputs(&self, filter: impl Into<Option<FilterOptions>> + Send) -> Vec<OutputData> {
-        self.filter_outputs(self.data().await.outputs.values(), filter)
-    }
-
-    /// Returns unspent outputs of the wallet.
-    pub async fn unspent_outputs(&self, filter: impl Into<Option<FilterOptions>> + Send) -> Vec<OutputData> {
-        self.filter_outputs(self.data().await.unspent_outputs.values(), filter)
-    }
-
-    /// Gets the unspent account output matching the given ID.
-    pub async fn unspent_account_output(&self, account_id: &AccountId) -> Option<OutputData> {
-        self.unspent_outputs(FilterOptions {
-            account_ids: Some([*account_id].into()),
-            ..Default::default()
-        })
-        .await
-        .first()
-        .cloned()
-    }
-
-    /// Gets the unspent anchor output matching the given ID.
-    pub async fn unspent_anchor_output(&self, anchor_id: &AnchorId) -> Option<OutputData> {
-        self.unspent_outputs(FilterOptions {
-            anchor_ids: Some([*anchor_id].into()),
-            ..Default::default()
-        })
-        .await
-        .first()
-        .cloned()
-    }
-
-    /// Gets the unspent foundry output matching the given ID.
-    pub async fn unspent_foundry_output(&self, foundry_id: &FoundryId) -> Option<OutputData> {
-        self.unspent_outputs(FilterOptions {
-            foundry_ids: Some([*foundry_id].into()),
-            ..Default::default()
-        })
-        .await
-        .first()
-        .cloned()
-    }
-
-    /// Gets the unspent nft output matching the given ID.
-    pub async fn unspent_nft_output(&self, nft_id: &NftId) -> Option<OutputData> {
-        self.unspent_outputs(FilterOptions {
-            nft_ids: Some([*nft_id].into()),
-            ..Default::default()
-        })
-        .await
-        .first()
-        .cloned()
-    }
-
-    /// Gets the unspent delegation output matching the given ID.
-    pub async fn unspent_delegation_output(&self, delegation_id: &DelegationId) -> Option<OutputData> {
-        self.unspent_outputs(FilterOptions {
-            delegation_ids: Some([*delegation_id].into()),
-            ..Default::default()
-        })
-        .await
-        .first()
-        .cloned()
-    }
-
-    /// Returns implicit accounts of the wallet.
-    pub async fn implicit_accounts(&self) -> Vec<OutputData> {
-        self.data()
-            .await
-            .unspent_outputs
-            .values()
-            .filter(|output_data| output_data.output.is_implicit_account())
-            .cloned()
-            .collect()
-    }
-
-    /// Returns accounts of the wallet.
-    pub async fn accounts(&self) -> Vec<OutputData> {
-        self.data()
-            .await
-            .unspent_outputs
-            .values()
-            .filter(|output_data| output_data.output.is_account())
-            .cloned()
-            .collect()
-    }
-
-    /// Returns all incoming transactions of the wallet
-    pub async fn incoming_transactions(&self) -> Vec<TransactionWithMetadata> {
-        self.data().await.incoming_transactions.values().cloned().collect()
-    }
-
-    /// Returns all transactions of the wallet
-    pub async fn transactions(&self) -> Vec<TransactionWithMetadata> {
-        self.data().await.transactions.values().cloned().collect()
-    }
-
-    /// Returns all pending transactions of the wallet
-    pub async fn pending_transactions(&self) -> Vec<TransactionWithMetadata> {
-        let mut transactions = Vec::new();
-        let wallet_data = self.data().await;
-
-        for transaction_id in &wallet_data.pending_transactions {
-            if let Some(transaction) = wallet_data.transactions.get(transaction_id) {
-                transactions.push(transaction.clone());
-            }
-        }
-
-        transactions
     }
 }
 
