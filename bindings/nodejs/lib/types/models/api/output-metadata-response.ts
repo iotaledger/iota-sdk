@@ -15,35 +15,27 @@ export interface IOutputMetadataResponse {
      */
     transactionId: HexEncodedString;
     /**
-     * The index for the output.
+     * The index of the output within the corresponding transaction.
      */
     outputIndex: number;
     /**
-     * Is the output spent.
+     * Tells if the output is spent in a confirmed transaction or not.
      */
     isSpent: boolean;
     /**
-     * The milestone index at which this output was spent.
+     * The current latest commitment id for which the request was made.
      */
-    milestoneIndexSpent?: number;
+    latestCommitmentId: HexEncodedString;
     /**
-     * The milestone timestamp this output was spent.
+     * The commitment ID of the slot at which this output was spent.
      */
-    milestoneTimestampSpent?: number;
+    commitmentIdSpent?: HexEncodedString;
     /**
      * The transaction this output was spent with.
      */
     transactionIdSpent?: HexEncodedString;
     /**
-     * The milestone index at which this output was booked into the ledger.
+     * The commitment ID at which the output was included into the ledger.
      */
-    milestoneIndexBooked: number;
-    /**
-     * The milestone timestamp this output was booked in the ledger.
-     */
-    milestoneTimestampBooked: number;
-    /**
-     * The ledger index at which these output was available at.
-     */
-    ledgerIndex: number;
+    includedCommitmentId?: HexEncodedString;
 }

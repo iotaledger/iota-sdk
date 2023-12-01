@@ -4,7 +4,6 @@
 from typing import List, Optional, Union
 from dataclasses import dataclass
 from dacite import from_dict
-
 from iota_sdk.wallet.common import _call_method_routine
 from iota_sdk.wallet.prepared_transaction import PreparedTransaction, PreparedCreateTokenTransaction
 from iota_sdk.wallet.sync_options import SyncOptions
@@ -41,6 +40,7 @@ class AccountMetadata:
 # pylint: disable=too-many-public-methods
 
 
+# pylint: disable=too-many-public-methods
 class Account:
     """A wallet account.
 
@@ -610,8 +610,14 @@ class Account:
             self, output_ids_to_claim: List[OutputId]) -> TransactionWithMetadata:
         """Claim outputs.
         """
-        return TransactionWithMetadata.from_dict(self._call_account_method(
-            'claimOutputs', {
+        return self.prepare_claim_outputs(output_ids_to_claim).send()
+
+    def prepare_claim_outputs(
+            self, output_ids_to_claim: List[OutputId]) -> PreparedTransaction:
+        """Claim outputs.
+        """
+        return PreparedTransaction(self, self._call_account_method(
+            'prepareClaimOutputs', {
                 'outputIdsToClaim': output_ids_to_claim
             }
         ))

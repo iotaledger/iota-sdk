@@ -6,7 +6,7 @@ use core::ops::RangeInclusive;
 
 use packable::{bounded::BoundedU8, prefix::BoxedSlicePrefix};
 
-use crate::types::block::{output::StorageScore, Error};
+use crate::types::block::{output::StorageScore, protocol::WorkScore, Error};
 
 pub(crate) type TagFeatureLength =
     BoundedU8<{ *TagFeature::LENGTH_RANGE.start() }, { *TagFeature::LENGTH_RANGE.end() }>;
@@ -18,24 +18,6 @@ pub struct TagFeature(
     // Binary tag.
     pub(crate) BoxedSlicePrefix<u8, TagFeatureLength>,
 );
-
-impl StorageScore for TagFeature {}
-
-impl TryFrom<Vec<u8>> for TagFeature {
-    type Error = Error;
-
-    fn try_from(tag: Vec<u8>) -> Result<Self, Error> {
-        tag.into_boxed_slice().try_into()
-    }
-}
-
-impl TryFrom<Box<[u8]>> for TagFeature {
-    type Error = Error;
-
-    fn try_from(tag: Box<[u8]>) -> Result<Self, Error> {
-        tag.try_into().map(Self).map_err(Error::InvalidTagFeatureLength)
-    }
-}
 
 impl TagFeature {
     /// The [`Feature`](crate::types::block::output::Feature) kind of an [`TagFeature`].
@@ -53,6 +35,26 @@ impl TagFeature {
     #[inline(always)]
     pub fn tag(&self) -> &[u8] {
         &self.0
+    }
+}
+
+impl StorageScore for TagFeature {}
+
+impl WorkScore for TagFeature {}
+
+impl TryFrom<Vec<u8>> for TagFeature {
+    type Error = Error;
+
+    fn try_from(tag: Vec<u8>) -> Result<Self, Error> {
+        tag.into_boxed_slice().try_into()
+    }
+}
+
+impl TryFrom<Box<[u8]>> for TagFeature {
+    type Error = Error;
+
+    fn try_from(tag: Box<[u8]>) -> Result<Self, Error> {
+        tag.try_into().map(Self).map_err(Error::InvalidTagFeatureLength)
     }
 }
 

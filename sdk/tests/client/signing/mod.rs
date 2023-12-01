@@ -14,12 +14,12 @@ use iota_sdk::{
             input_selection::InputSelection, transaction::validate_signed_transaction_payload_length, verify_semantic,
             GetAddressesOptions, PreparedTransactionData,
         },
-        constants::{SHIMMER_COIN_TYPE, SHIMMER_TESTNET_BECH32_HRP},
+        constants::SHIMMER_COIN_TYPE,
         secret::{SecretManage, SecretManager},
         Result,
     },
     types::block::{
-        address::{AccountAddress, Address, NftAddress, ToBech32Ext},
+        address::{AccountAddress, Address, NftAddress},
         input::{Input, UtxoInput},
         output::{AccountId, NftId},
         payload::{signed_transaction::Transaction, SignedTransactionPayload},
@@ -53,112 +53,43 @@ async fn all_combined() -> Result<()> {
                 .with_range(0..3),
         )
         .await?;
-    let ed25519_bech32_address_0 = ed25519_bech32_addresses[0]
-        .clone()
-        .to_bech32(SHIMMER_TESTNET_BECH32_HRP);
-    let ed25519_bech32_address_1 = ed25519_bech32_addresses[1]
-        .clone()
-        .to_bech32(SHIMMER_TESTNET_BECH32_HRP);
-    let ed25519_bech32_address_2 = ed25519_bech32_addresses[2]
-        .clone()
-        .to_bech32(SHIMMER_TESTNET_BECH32_HRP);
+    let ed25519_0 = ed25519_bech32_addresses[0].clone().into_inner();
+    let ed25519_1 = ed25519_bech32_addresses[1].clone().into_inner();
+    let ed25519_2 = ed25519_bech32_addresses[2].clone().into_inner();
 
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1)?;
     let account_id_2 = AccountId::from_str(ACCOUNT_ID_2)?;
-    let account_1_bech32_address =
-        &Address::Account(AccountAddress::new(account_id_1)).to_bech32(SHIMMER_TESTNET_BECH32_HRP);
-    let account_2_bech32_address =
-        &Address::Account(AccountAddress::new(account_id_2)).to_bech32(SHIMMER_TESTNET_BECH32_HRP);
+    let account_1 = Address::Account(AccountAddress::new(account_id_1));
+    let account_2 = Address::Account(AccountAddress::new(account_id_2));
 
     let nft_id_1 = NftId::from_str(NFT_ID_1)?;
     let nft_id_2 = NftId::from_str(NFT_ID_2)?;
     let nft_id_3 = NftId::from_str(NFT_ID_3)?;
     let nft_id_4 = NftId::from_str(NFT_ID_4)?;
-    let nft_1_bech32_address = &Address::Nft(NftAddress::new(nft_id_1)).to_bech32(SHIMMER_TESTNET_BECH32_HRP);
-    let nft_2_bech32_address = &Address::Nft(NftAddress::new(nft_id_2)).to_bech32(SHIMMER_TESTNET_BECH32_HRP);
-    let nft_3_bech32_address = &Address::Nft(NftAddress::new(nft_id_3)).to_bech32(SHIMMER_TESTNET_BECH32_HRP);
-    let nft_4_bech32_address = &Address::Nft(NftAddress::new(nft_id_4)).to_bech32(SHIMMER_TESTNET_BECH32_HRP);
+    let nft_1 = Address::Nft(NftAddress::new(nft_id_1));
+    let nft_2 = Address::Nft(NftAddress::new(nft_id_2));
+    let nft_3 = Address::Nft(NftAddress::new(nft_id_3));
+    let nft_4 = Address::Nft(NftAddress::new(nft_id_4));
 
     let inputs = build_inputs([
-        Account(
-            1_000_000,
-            account_id_1,
-            &nft_1_bech32_address.to_string(),
-            None,
-            None,
-            None,
-        ),
+        Account(1_000_000, account_id_1, nft_1.clone(), None, None, None),
         Account(
             1_000_000,
             account_id_2,
-            &ed25519_bech32_address_0.to_string(),
+            ed25519_0.clone(),
             None,
             None,
             Some(Bip44::new(SHIMMER_COIN_TYPE)),
         ),
+        Basic(1_000_000, account_1.clone(), None, None, None, None, None, None),
+        Basic(1_000_000, account_2.clone(), None, None, None, None, None, None),
+        Basic(1_000_000, account_2, None, None, None, None, None, None),
+        Basic(1_000_000, nft_2.clone(), None, None, None, None, None, None),
+        Basic(1_000_000, nft_2, None, None, None, None, None, None),
+        Basic(1_000_000, nft_4.clone(), None, None, None, None, None, None),
         Basic(
             1_000_000,
-            &account_1_bech32_address.to_string(),
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-        ),
-        Basic(
-            1_000_000,
-            &account_2_bech32_address.to_string(),
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-        ),
-        Basic(
-            1_000_000,
-            &account_2_bech32_address.to_string(),
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-        ),
-        Basic(
-            1_000_000,
-            &nft_2_bech32_address.to_string(),
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-        ),
-        Basic(
-            1_000_000,
-            &nft_2_bech32_address.to_string(),
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-        ),
-        Basic(
-            1_000_000,
-            &nft_4_bech32_address.to_string(),
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-        ),
-        Basic(
-            1_000_000,
-            &ed25519_bech32_address_0.to_string(),
+            ed25519_0.clone(),
             None,
             None,
             None,
@@ -168,7 +99,7 @@ async fn all_combined() -> Result<()> {
         ),
         Basic(
             1_000_000,
-            &ed25519_bech32_address_1.to_string(),
+            ed25519_1.clone(),
             None,
             None,
             None,
@@ -178,7 +109,7 @@ async fn all_combined() -> Result<()> {
         ),
         Basic(
             1_000_000,
-            &ed25519_bech32_address_2.to_string(),
+            ed25519_2.clone(),
             None,
             None,
             None,
@@ -188,7 +119,7 @@ async fn all_combined() -> Result<()> {
         ),
         Basic(
             1_000_000,
-            &ed25519_bech32_address_2.to_string(),
+            ed25519_2.clone(),
             None,
             None,
             None,
@@ -199,143 +130,75 @@ async fn all_combined() -> Result<()> {
         Nft(
             1_000_000,
             nft_id_1,
-            &ed25519_bech32_address_0.to_string(),
+            ed25519_0.clone(),
             None,
             None,
             None,
             None,
             Some(Bip44::new(SHIMMER_COIN_TYPE)),
         ),
-        Nft(
-            1_000_000,
-            nft_id_2,
-            &account_1_bech32_address.to_string(),
-            None,
-            None,
-            None,
-            None,
-            None,
-        ),
+        Nft(1_000_000, nft_id_2, account_1.clone(), None, None, None, None, None),
         // Expirations
         Basic(
             2_000_000,
-            &ed25519_bech32_address_0.to_string(),
+            ed25519_0.clone(),
             None,
             None,
             None,
             None,
-            Some((&account_1_bech32_address.to_string(), 50)),
-            None,
-        ),
-        Basic(
-            2_000_000,
-            &ed25519_bech32_address_0.to_string(),
-            None,
-            None,
-            None,
-            None,
-            Some((&nft_3_bech32_address.to_string(), 50)),
+            Some((account_1.clone(), 50)),
             None,
         ),
         Basic(
             2_000_000,
-            &ed25519_bech32_address_0.to_string(),
+            ed25519_0.clone(),
             None,
             None,
             None,
             None,
-            Some((&nft_3_bech32_address.to_string(), 150)),
+            Some((nft_3.clone(), 50)),
+            None,
+        ),
+        Basic(
+            2_000_000,
+            ed25519_0.clone(),
+            None,
+            None,
+            None,
+            None,
+            Some((nft_3.clone(), 150)),
             Some(Bip44::new(SHIMMER_COIN_TYPE)),
         ),
         Nft(
             1_000_000,
             nft_id_3,
-            &account_1_bech32_address.to_string(),
+            account_1.clone(),
             None,
             None,
             None,
-            Some((&nft_4_bech32_address.to_string(), 50)),
+            Some((nft_4, 50)),
             None,
         ),
         Nft(
             1_000_000,
             nft_id_4,
-            &account_1_bech32_address.to_string(),
+            account_1,
             None,
             None,
             None,
-            Some((&nft_3_bech32_address.to_string(), 150)),
+            Some((nft_3, 150)),
             None,
         ),
     ]);
 
     let outputs = build_outputs([
-        Account(
-            1_000_000,
-            account_id_1,
-            &nft_1_bech32_address.to_string(),
-            None,
-            None,
-            None,
-        ),
-        Account(
-            1_000_000,
-            account_id_2,
-            &ed25519_bech32_address_0.to_string(),
-            None,
-            None,
-            None,
-        ),
-        Basic(
-            10_000_000,
-            &ed25519_bech32_address_0.to_string(),
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-        ),
-        Nft(
-            1_000_000,
-            nft_id_1,
-            &ed25519_bech32_address_0.to_string(),
-            None,
-            None,
-            None,
-            None,
-            None,
-        ),
-        Nft(
-            1_000_000,
-            nft_id_2,
-            &ed25519_bech32_address_0.to_string(),
-            None,
-            None,
-            None,
-            None,
-            None,
-        ),
-        Nft(
-            1_000_000,
-            nft_id_3,
-            &ed25519_bech32_address_0.to_string(),
-            None,
-            None,
-            None,
-            None,
-            None,
-        ),
-        Nft(
-            1_000_000,
-            nft_id_4,
-            &ed25519_bech32_address_0.to_string(),
-            None,
-            None,
-            None,
-            None,
-            None,
-        ),
+        Account(1_000_000, account_id_1, nft_1, None, None, None),
+        Account(1_000_000, account_id_2, ed25519_0.clone(), None, None, None),
+        Basic(10_000_000, ed25519_0.clone(), None, None, None, None, None, None),
+        Nft(1_000_000, nft_id_1, ed25519_0.clone(), None, None, None, None, None),
+        Nft(1_000_000, nft_id_2, ed25519_0.clone(), None, None, None, None, None),
+        Nft(1_000_000, nft_id_3, ed25519_0.clone(), None, None, None, None, None),
+        Nft(1_000_000, nft_id_4, ed25519_0.clone(), None, None, None, None, None),
     ]);
 
     let slot_index = SlotIndex::from(100);
@@ -343,11 +206,7 @@ async fn all_combined() -> Result<()> {
     let selected = InputSelection::new(
         inputs.clone(),
         outputs.clone(),
-        [
-            ed25519_bech32_address_0.into_inner(),
-            ed25519_bech32_address_1.into_inner(),
-            ed25519_bech32_address_2.into_inner(),
-        ],
+        [ed25519_0, ed25519_1, ed25519_2],
         protocol_parameters.clone(),
     )
     .with_slot_index(slot_index)
@@ -376,7 +235,7 @@ async fn all_combined() -> Result<()> {
     let unlocks = secret_manager.transaction_unlocks(&prepared_transaction_data).await?;
 
     assert_eq!(unlocks.len(), 15);
-    assert_eq!((*unlocks).get(0).unwrap().kind(), SignatureUnlock::KIND);
+    assert_eq!((*unlocks).first().unwrap().kind(), SignatureUnlock::KIND);
     match (*unlocks).get(1).unwrap() {
         Unlock::Reference(a) => {
             assert_eq!(a.index(), 0);

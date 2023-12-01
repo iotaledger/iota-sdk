@@ -20,7 +20,7 @@ use crate::types::block::{
         StateTransitionVerifier, StorageScore, StorageScoreParameters,
     },
     payload::signed_transaction::TransactionCapabilityFlag,
-    protocol::ProtocolParameters,
+    protocol::{ProtocolParameters, WorkScore, WorkScoreParameters},
     semantic::{SemanticValidationContext, TransactionFailureReason},
     unlock::Unlock,
     Error,
@@ -313,7 +313,7 @@ pub struct AnchorOutput {
 }
 
 impl AnchorOutput {
-    /// The [`Output`](crate::types::block::output::Output) kind of an [`AnchorOutput`].
+    /// The [`Output`] kind of an [`AnchorOutput`].
     pub const KIND: u8 = 2;
     /// The set of allowed [`UnlockCondition`]s for an [`AnchorOutput`].
     pub const ALLOWED_UNLOCK_CONDITIONS: UnlockConditionFlags =
@@ -505,6 +505,15 @@ impl StorageScore for AnchorOutput {
     }
 }
 
+impl WorkScore for AnchorOutput {
+    fn work_score(&self, params: WorkScoreParameters) -> u32 {
+        params.output()
+            + self.unlock_conditions.work_score(params)
+            + self.features.work_score(params)
+            + self.immutable_features.work_score(params)
+    }
+}
+
 impl MinimumOutputAmount for AnchorOutput {}
 
 impl StateTransitionVerifier for AnchorOutput {
@@ -643,20 +652,20 @@ fn verify_unlock_conditions(unlock_conditions: &UnlockConditions, anchor_id: &An
 }
 
 #[cfg(feature = "serde")]
-pub(crate) mod dto {
+mod dto {
 
     use serde::{Deserialize, Serialize};
 
     use super::*;
     use crate::{
-        types::block::{output::unlock_condition::dto::UnlockConditionDto, Error},
+        types::block::{output::unlock_condition::UnlockCondition, Error},
         utils::serde::string,
     };
 
     /// Describes an anchor in the ledger that can be controlled by the state and governance controllers.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
-    pub struct AnchorOutputDto {
+    pub(crate) struct AnchorOutputDto {
         #[serde(rename = "type")]
         pub kind: u8,
         #[serde(with = "string")]
@@ -665,7 +674,7 @@ pub(crate) mod dto {
         pub mana: u64,
         pub anchor_id: AnchorId,
         pub state_index: u32,
-        pub unlock_conditions: Vec<UnlockConditionDto>,
+        pub unlock_conditions: Vec<UnlockCondition>,
         #[serde(skip_serializing_if = "Vec::is_empty", default)]
         pub features: Vec<Feature>,
         #[serde(skip_serializing_if = "Vec::is_empty", default)]
@@ -680,7 +689,7 @@ pub(crate) mod dto {
                 mana: value.mana(),
                 anchor_id: *value.anchor_id(),
                 state_index: value.state_index(),
-                unlock_conditions: value.unlock_conditions().iter().map(Into::into).collect::<_>(),
+                unlock_conditions: value.unlock_conditions().to_vec(),
                 features: value.features().to_vec(),
                 immutable_features: value.immutable_features().to_vec(),
             }
@@ -698,7 +707,7 @@ pub(crate) mod dto {
                 .with_immutable_features(dto.immutable_features);
 
             for u in dto.unlock_conditions {
-                builder = builder.add_unlock_condition(UnlockCondition::from(u));
+                builder = builder.add_unlock_condition(u);
             }
 
             builder.finish()
@@ -712,7 +721,7 @@ pub(crate) mod dto {
             mana: u64,
             anchor_id: &AnchorId,
             state_index: u32,
-            unlock_conditions: Vec<UnlockConditionDto>,
+            unlock_conditions: Vec<UnlockCondition>,
             features: Option<Vec<Feature>>,
             immutable_features: Option<Vec<Feature>>,
         ) -> Result<Self, Error> {
@@ -742,13 +751,15 @@ pub(crate) mod dto {
             builder.finish()
         }
     }
+
+    crate::impl_serde_typed_dto!(AnchorOutput, AnchorOutputDto, "anchor output");
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::types::block::{
-        output::dto::OutputDto,
+        output::anchor::dto::AnchorOutputDto,
         protocol::protocol_parameters,
         rand::output::{
             feature::rand_allowed_features,
@@ -763,24 +774,22 @@ mod tests {
     #[test]
     fn to_from_dto() {
         let protocol_parameters = protocol_parameters();
-        let output = rand_anchor_output(protocol_parameters.token_supply());
-        let dto = OutputDto::Anchor((&output).into());
-        let output_unver = Output::try_from(dto.clone()).unwrap();
-        assert_eq!(&output, output_unver.as_anchor());
-        let output_ver = Output::try_from(dto).unwrap();
-        assert_eq!(&output, output_ver.as_anchor());
+        let anchor_output = rand_anchor_output(protocol_parameters.token_supply());
+        let dto = AnchorOutputDto::from(&anchor_output);
+        let output = Output::Anchor(AnchorOutput::try_from(dto).unwrap());
+        assert_eq!(&anchor_output, output.as_anchor());
 
         let output_split = AnchorOutput::try_from_dtos(
             OutputBuilderAmount::Amount(output.amount()),
-            output.mana(),
-            output.anchor_id(),
-            output.state_index(),
-            output.unlock_conditions().iter().map(Into::into).collect(),
-            Some(output.features().to_vec()),
-            Some(output.immutable_features().to_vec()),
+            anchor_output.mana(),
+            anchor_output.anchor_id(),
+            anchor_output.state_index(),
+            anchor_output.unlock_conditions().to_vec(),
+            Some(anchor_output.features().to_vec()),
+            Some(anchor_output.immutable_features().to_vec()),
         )
         .unwrap();
-        assert_eq!(output, output_split);
+        assert_eq!(anchor_output, output_split);
 
         let anchor_id = rand_anchor_id();
         let gov_address = rand_governor_address_unlock_condition_different_from(&anchor_id);
@@ -792,7 +801,7 @@ mod tests {
                 builder.mana,
                 &builder.anchor_id,
                 builder.state_index,
-                builder.unlock_conditions.iter().map(Into::into).collect(),
+                builder.unlock_conditions.iter().cloned().collect(),
                 Some(builder.features.iter().cloned().collect()),
                 Some(builder.immutable_features.iter().cloned().collect()),
             )

@@ -17,7 +17,7 @@ use crate::types::block::{
     block_id::{BlockHash, BlockId},
     core::{BasicBlockBody, ValidationBlockBody},
     output::AccountId,
-    protocol::ProtocolParameters,
+    protocol::{ProtocolParameters, WorkScore, WorkScoreParameters},
     signature::Signature,
     slot::{SlotCommitmentId, SlotIndex},
     BlockBody, Error,
@@ -51,8 +51,7 @@ impl UnsignedBlock {
         self
     }
 
-    /// Get the signing input that can be used to generate a [`Signature`](crate::types::block::signature::Signature)
-    /// for the resulting block.
+    /// Get the signing input that can be used to generate a [`Signature`] for the resulting block.
     pub fn signing_input(&self) -> Vec<u8> {
         [self.header.hash(), self.body.hash()].concat()
     }
@@ -109,6 +108,8 @@ impl BlockHeader {
         Blake2b256::digest(bytes).into()
     }
 }
+
+impl WorkScore for BlockHeader {}
 
 impl Packable for BlockHeader {
     type UnpackError = Error;
@@ -288,6 +289,12 @@ impl Block {
     /// NOTE: Will panic if the block body is not a [`ValidationBlockBody`].
     pub fn as_validation(&self) -> &ValidationBlockBody {
         self.body.as_validation()
+    }
+}
+
+impl WorkScore for Block {
+    fn work_score(&self, params: WorkScoreParameters) -> u32 {
+        self.header.work_score(params) + self.body.work_score(params) + self.signature.work_score(params)
     }
 }
 

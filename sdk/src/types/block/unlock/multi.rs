@@ -6,7 +6,12 @@ use alloc::boxed::Box;
 use derive_more::Deref;
 use packable::{prefix::BoxedSlicePrefix, Packable};
 
-use crate::types::block::{address::WeightedAddressCount, unlock::Unlock, Error};
+use crate::types::block::{
+    address::WeightedAddressCount,
+    protocol::{WorkScore, WorkScoreParameters},
+    unlock::Unlock,
+    Error,
+};
 
 pub(crate) type UnlocksCount = WeightedAddressCount;
 
@@ -16,7 +21,7 @@ pub(crate) type UnlocksCount = WeightedAddressCount;
 pub struct MultiUnlock(#[packable(verify_with = verify_unlocks)] BoxedSlicePrefix<Unlock, UnlocksCount>);
 
 impl MultiUnlock {
-    /// The [`Unlock`](crate::types::block::unlock::Unlock) kind of an [`MultiUnlock`].
+    /// The [`Unlock`] kind of an [`MultiUnlock`].
     pub const KIND: u8 = 5;
 
     /// Creates a new [`MultiUnlock`].
@@ -35,6 +40,12 @@ impl MultiUnlock {
     #[inline(always)]
     pub fn unlocks(&self) -> &[Unlock] {
         &self.0
+    }
+}
+
+impl WorkScore for MultiUnlock {
+    fn work_score(&self, params: WorkScoreParameters) -> u32 {
+        self.0.work_score(params)
     }
 }
 

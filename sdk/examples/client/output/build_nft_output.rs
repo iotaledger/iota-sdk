@@ -28,6 +28,11 @@ async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
+    #[allow(clippy::single_element_loop)]
+    for var in ["NODE_URL"] {
+        std::env::var(var).unwrap_or_else(|_| panic!(".env variable '{var}' is undefined, see .env.example"));
+    }
+
     // Create a node client.
     let client = Client::builder()
         .with_node(&std::env::var("NODE_URL").unwrap())?
@@ -38,7 +43,7 @@ async fn main() -> Result<()> {
 
     let address = std::env::args()
         .nth(1)
-        .unwrap_or("rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy".to_string());
+        .unwrap_or_else(|| "rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy".to_string());
     let address = Address::try_from_bech32(address)?;
 
     // IOTA NFT Standard - IRC27: https://github.com/iotaledger/tips/blob/main/tips/TIP-0027/tip-0027.md

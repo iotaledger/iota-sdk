@@ -19,7 +19,8 @@ pub use self::{
     validation::{ValidationBlockBody, ValidationBlockBodyBuilder},
 };
 use crate::types::block::{
-    protocol::{ProtocolParameters, ProtocolParametersHash},
+    core::basic::MaxBurnedManaAmount,
+    protocol::{ProtocolParameters, ProtocolParametersHash, WorkScore, WorkScoreParameters},
     Error,
 };
 
@@ -81,7 +82,10 @@ impl BlockBody {
 
     /// Creates a new [`BasicBlockBodyBuilder`].
     #[inline(always)]
-    pub fn build_basic(strong_parents: self::basic::StrongParents, max_burned_mana: u64) -> BasicBlockBodyBuilder {
+    pub fn build_basic(
+        strong_parents: self::basic::StrongParents,
+        max_burned_mana: impl Into<MaxBurnedManaAmount>,
+    ) -> BasicBlockBodyBuilder {
         BasicBlockBodyBuilder::new(strong_parents, max_burned_mana)
     }
 
@@ -99,6 +103,15 @@ impl BlockBody {
 
     pub(crate) fn hash(&self) -> [u8; 32] {
         Blake2b256::digest(self.pack_to_vec()).into()
+    }
+}
+
+impl WorkScore for BlockBody {
+    fn work_score(&self, params: WorkScoreParameters) -> u32 {
+        match self {
+            Self::Basic(basic) => basic.work_score(params),
+            Self::Validation(validation) => validation.work_score(params),
+        }
     }
 }
 

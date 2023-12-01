@@ -28,6 +28,10 @@ async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
+    for var in ["WALLET_DB_PATH", "STRONGHOLD_PASSWORD", "EXPLORER_URL"] {
+        std::env::var(var).unwrap_or_else(|_| panic!(".env variable '{var}' is undefined, see .env.example"));
+    }
+
     let wallet = Wallet::builder()
         .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
         .finish()
@@ -53,7 +57,7 @@ async fn main() -> Result<()> {
         if let Output::Nft(nft_output) = output {
             // New minted nft id is empty in the output
             if nft_output.nft_id().is_null() {
-                let output_id = OutputId::new(transaction.transaction_id, output_index as u16)?;
+                let output_id = OutputId::new(transaction.transaction_id, output_index as u16);
                 let nft_id = NftId::from(&output_id);
                 println!("New minted issuer NFT id: {nft_id}");
             }

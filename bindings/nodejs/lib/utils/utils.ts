@@ -14,9 +14,11 @@ import {
     StorageScoreParameters,
     OutputId,
     u64,
-    SignedBlock,
+    Block,
     ProtocolParameters,
     Bech32Address,
+    InputSigningData,
+    Unlock,
 } from '../types';
 import {
     AccountId,
@@ -189,7 +191,7 @@ export class Utils {
      * @param params The network protocol parameters.
      * @returns The corresponding block ID.
      */
-    static blockId(block: SignedBlock, params: ProtocolParameters): BlockId {
+    static blockId(block: Block, params: ProtocolParameters): BlockId {
         return callUtilsMethod({
             name: 'blockId',
             data: {
@@ -424,5 +426,30 @@ export class Utils {
             },
         });
         return hexBytes;
+    }
+
+    /**
+     * Verifies the semantic of a transaction.
+     *
+     * @param transaction The transaction payload.
+     * @param inputs The inputs data.
+     * @param unlocks The unlocks.
+     *
+     * @returns The conflict reason.
+     */
+    static verifyTransactionSemantic(
+        transaction: SignedTransactionPayload,
+        inputs: InputSigningData[],
+        unlocks?: Unlock[],
+    ): string {
+        const conflictReason = callUtilsMethod({
+            name: 'verifyTransactionSemantic',
+            data: {
+                transaction,
+                inputs,
+                unlocks,
+            },
+        });
+        return conflictReason;
     }
 }

@@ -4,14 +4,14 @@
 use crate::types::block::{
     address::Address,
     output::storage_score::{StorageScore, StorageScoreParameters},
-    protocol::ProtocolParameters,
+    Error,
 };
 
 /// Defines the amount of IOTAs used as storage deposit that have to be returned to the return [`Address`].
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, packable::Packable)]
-#[packable(unpack_visitor = ProtocolParameters)]
 pub struct StorageDepositReturnUnlockCondition {
     // The [`Address`] to return the amount to.
+    #[packable(verify_with = verify_return_address)]
     return_address: Address,
     // Amount of IOTA coins the consuming transaction should deposit to `return_address`.
     amount: u64,
@@ -24,11 +24,12 @@ impl StorageDepositReturnUnlockCondition {
 
     /// Creates a new [`StorageDepositReturnUnlockCondition`].
     #[inline(always)]
-    pub fn new(return_address: impl Into<Address>, amount: u64) -> Self {
-        Self {
-            return_address: return_address.into(),
-            amount,
-        }
+    pub fn new(return_address: impl Into<Address>, amount: u64) -> Result<Self, Error> {
+        let return_address = return_address.into();
+
+        verify_return_address::<true>(&return_address)?;
+
+        Ok(Self { return_address, amount })
     }
 
     /// Returns the return address.
@@ -47,6 +48,15 @@ impl StorageDepositReturnUnlockCondition {
 impl StorageScore for StorageDepositReturnUnlockCondition {
     fn storage_score(&self, params: StorageScoreParameters) -> u64 {
         self.return_address().storage_score(params)
+    }
+}
+
+#[inline]
+fn verify_return_address<const VERIFY: bool>(return_address: &Address) -> Result<(), Error> {
+    if VERIFY && return_address.is_implicit_account_creation() {
+        Err(Error::InvalidAddressKind(return_address.kind()))
+    } else {
+        Ok(())
     }
 }
 

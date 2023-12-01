@@ -1,6 +1,8 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+mod work_score;
+
 use alloc::string::String;
 use core::borrow::Borrow;
 
@@ -8,6 +10,7 @@ use crypto::hashes::{blake2b::Blake2b256, Digest};
 use getset::{CopyGetters, Getters};
 use packable::{prefix::StringPrefix, Packable, PackableExt};
 
+pub use self::work_score::{WorkScore, WorkScoreParameters};
 use crate::{
     types::block::{
         address::Hrp,
@@ -69,7 +72,7 @@ pub struct ProtocolParameters {
     pub(crate) punishment_epochs: u32,
     /// Used by tip-selection to determine if a block is eligible by evaluating issuing times.
     pub(crate) liveness_threshold_lower_bound: u16,
-    /// Used by tip-selection to determine if a block is eligible by evaluating issuing times
+    /// Used by tip-selection to determine if a block is eligible by evaluating issuing times.
     pub(crate) liveness_threshold_upper_bound: u16,
     /// Minimum age relative to the accepted tangle time slot index that a slot can be committed.
     pub(crate) min_committable_age: u32,
@@ -202,54 +205,6 @@ impl ProtocolParameters {
     /// Returns the hash of the [`ProtocolParameters`].
     pub fn hash(&self) -> ProtocolParametersHash {
         ProtocolParametersHash::new(Blake2b256::digest(self.pack_to_vec()).into())
-    }
-}
-
-#[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Packable, CopyGetters)]
-#[cfg_attr(
-    feature = "serde",
-    derive(serde::Serialize, serde::Deserialize),
-    serde(rename_all = "camelCase")
-)]
-#[packable(unpack_error = Error)]
-#[getset(get_copy = "pub")]
-pub struct WorkScoreParameters {
-    /// Modifier for network traffic per byte.
-    data_byte: u32,
-    /// Modifier for work done to process a block.
-    block: u32,
-    /// Modifier for loading UTXOs and performing mana calculations.
-    input: u32,
-    /// Modifier for loading and checking the context input.
-    context_input: u32,
-    /// Modifier for storing UTXOs.
-    output: u32,
-    /// Modifier for calculations using native tokens.
-    native_token: u32,
-    /// Modifier for storing staking features.
-    staking: u32,
-    /// Modifier for storing block issuer features.
-    block_issuer: u32,
-    /// Modifier for accessing the account-based ledger to transform mana to Block Issuance Credits.
-    allotment: u32,
-    /// Modifier for the block signature check.
-    signature_ed25519: u32,
-}
-
-impl Default for WorkScoreParameters {
-    fn default() -> Self {
-        Self {
-            data_byte: 0,
-            block: 100,
-            input: 20,
-            context_input: 20,
-            output: 20,
-            native_token: 20,
-            staking: 100,
-            block_issuer: 100,
-            allotment: 100,
-            signature_ed25519: 200,
-        }
     }
 }
 

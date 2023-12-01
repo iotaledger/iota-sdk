@@ -7,7 +7,7 @@ use crypto::keys::bip44::Bip44;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    types::block::output::{dto::OutputDto, Output, OutputId, OutputMetadata},
+    types::block::output::{Output, OutputId, OutputMetadata},
     utils::serde::bip44::option_bip44,
 };
 
@@ -134,29 +134,11 @@ impl LedgerNanoStatus {
 }
 
 /// Data for transaction inputs for signing and ordering of unlock blocks
-#[derive(Clone, Debug, Eq, PartialEq, Hash)]
+#[derive(Clone, Debug, Eq, PartialEq, Hash, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct InputSigningData {
     /// The output
     pub output: Output,
-    /// The output metadata
-    pub output_metadata: OutputMetadata,
-    /// The chain derived from seed, only for ed25519 addresses
-    pub chain: Option<Bip44>,
-}
-
-impl InputSigningData {
-    /// Return the [OutputId]
-    pub fn output_id(&self) -> &OutputId {
-        self.output_metadata.output_id()
-    }
-}
-
-/// Dto for data for transaction inputs for signing and ordering of unlock blocks
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct InputSigningDataDto {
-    /// The output
-    pub output: OutputDto,
     /// The output metadata
     pub output_metadata: OutputMetadata,
     /// The chain derived from seed, only for ed25519 addresses
@@ -164,24 +146,9 @@ pub struct InputSigningDataDto {
     pub chain: Option<Bip44>,
 }
 
-impl TryFrom<InputSigningDataDto> for InputSigningData {
-    type Error = crate::client::Error;
-
-    fn try_from(dto: InputSigningDataDto) -> Result<Self, Self::Error> {
-        Ok(Self {
-            output: Output::try_from(dto.output)?,
-            output_metadata: dto.output_metadata,
-            chain: dto.chain,
-        })
-    }
-}
-
-impl From<&InputSigningData> for InputSigningDataDto {
-    fn from(input: &InputSigningData) -> Self {
-        Self {
-            output: OutputDto::from(&input.output),
-            output_metadata: input.output_metadata,
-            chain: input.chain,
-        }
+impl InputSigningData {
+    /// Return the [OutputId]
+    pub fn output_id(&self) -> &OutputId {
+        self.output_metadata.output_id()
     }
 }

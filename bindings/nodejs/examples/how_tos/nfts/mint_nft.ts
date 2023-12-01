@@ -33,11 +33,16 @@ const NFT2_AMOUNT = '1000000';
 // yarn run-example ./how_tos/nfts/mint_nft.ts
 async function run() {
     try {
-        if (!process.env.STRONGHOLD_PASSWORD) {
-            throw new Error(
-                '.env STRONGHOLD_PASSWORD is undefined, see .env.example',
-            );
-        }
+        for (const envVar of [
+            'STRONGHOLD_PASSWORD',
+            'WALLET_DB_PATH',
+            'EXPLORER_URL',
+        ])
+            if (!(envVar in process.env)) {
+                throw new Error(
+                    `.env ${envVar} is undefined, see .env.example`,
+                );
+            }
 
         const wallet = await Wallet.create({
             storagePath: process.env.WALLET_DB_PATH,
@@ -47,7 +52,9 @@ async function run() {
         const senderAddress = await wallet.address();
 
         // We need to unlock stronghold.
-        await wallet.setStrongholdPassword(process.env.STRONGHOLD_PASSWORD);
+        await wallet.setStrongholdPassword(
+            process.env.STRONGHOLD_PASSWORD as string,
+        );
 
         const metadata = new Irc27Metadata(
             'video/mp4',

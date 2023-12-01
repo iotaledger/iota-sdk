@@ -180,6 +180,7 @@ class SecretManager():
             'options': options
         })
 
+    # pylint: disable=unused-argument
     def generate_evm_addresses(self,
                                account_index: Optional[int] = None,
                                start: Optional[int] = None,
