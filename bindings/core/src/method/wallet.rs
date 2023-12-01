@@ -133,7 +133,7 @@ pub enum WalletMethod {
     /// Get wallet balance information.
     /// Expected response: [`Balance`](crate::Response::Balance)
     GetBalance,
-    /// Get the [`Output`] that minted a native token by its TokenId
+    /// Get the [`Output`] that minted a native token by its TokenId.
     /// Expected response: [`Output`](crate::Response::Output)
     #[serde(rename_all = "camelCase")]
     GetFoundryOutput { token_id: TokenId },
