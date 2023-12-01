@@ -94,9 +94,10 @@ impl MultiAddress {
     /// Creates a new [`MultiAddress`].
     #[inline(always)]
     pub fn new(addresses: impl IntoIterator<Item = WeightedAddress>, threshold: u16) -> Result<Self, Error> {
-        let addresses = addresses.into_iter().collect::<Box<[_]>>();
+        let mut addresses = addresses.into_iter().collect::<Box<[_]>>();
 
-        verify_addresses::<true>(&addresses)?;
+        addresses.sort_by(|a, b| a.address().cmp(b.address()));
+
         verify_threshold::<true>(&threshold)?;
 
         let addresses = BoxedSlicePrefix::<WeightedAddress, WeightedAddressCount>::try_from(addresses)
