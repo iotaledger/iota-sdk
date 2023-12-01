@@ -144,7 +144,7 @@ impl TransactionBuilder {
                         std::time::SystemTime::now()
                             .duration_since(std::time::UNIX_EPOCH)
                             .unwrap()
-                            .as_nanos() as u64,
+                            .as_secs(),
                     )
                 });
                 #[cfg(not(feature = "std"))]
