@@ -11,12 +11,7 @@ import * as protocol_parameters from '../../../../sdk/tests/types/fixtures/proto
 
 describe('ProtocolParameters tests', () => {
 
-    it('compares ProtocolParameters bytes from a fixture', async () => {
-        // TODO: serialize to ProtocolParameters to bytes
-    });
-
     it('compares ProtocolParameters hash from a fixture', async () => {
-        // TODO: do we want to hash from binding side? Feels unnecessary tbh.
 
         const params = protocol_parameters.params as unknown as ProtocolParameters;
         const hash = Utils.protocolParametersHash(params);
