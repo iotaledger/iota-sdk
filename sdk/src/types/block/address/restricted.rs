@@ -19,7 +19,7 @@ pub struct RestrictedAddress {
 }
 
 impl RestrictedAddress {
-    /// The [`Address`](crate::types::block::address::Address) kind of a [`RestrictedAddress`].
+    /// The [`Address`] kind of a [`RestrictedAddress`].
     pub const KIND: u8 = 48;
 
     /// Creates a new [`RestrictedAddress`] address from an [`Address`] with default allowed capabilities.

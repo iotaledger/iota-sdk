@@ -51,8 +51,7 @@ impl UnsignedBlock {
         self
     }
 
-    /// Get the signing input that can be used to generate a [`Signature`](crate::types::block::signature::Signature)
-    /// for the resulting block.
+    /// Get the signing input that can be used to generate a [`Signature`] for the resulting block.
     pub fn signing_input(&self) -> Vec<u8> {
         [self.header.hash(), self.body.hash()].concat()
     }
