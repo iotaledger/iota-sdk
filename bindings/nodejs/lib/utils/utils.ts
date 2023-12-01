@@ -325,16 +325,16 @@ export class Utils {
     /**
      * Compute the hash of an instance of ProtocolParameters.
      *
-     * @param protocol_parameters A ProtocolParameters instance.
+     * @param protocolParameters A ProtocolParameters instance.
      * @returns The hash of the protocol parameters as a hex-encoded string.
      */
     static protocolParametersHash(
-        protocol_parameters: ProtocolParameters,
+        protocolParameters: ProtocolParameters,
     ): HexEncodedString {
         return callUtilsMethod({
             name: 'protocolParametersHash',
             data: {
-                protocol_parameters,
+                protocolParameters,
             },
         });
     }

@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import { describe, it } from '@jest/globals';
+import { expect, describe, it } from '@jest/globals';
 import {
     Client,
     utf8ToHex,
