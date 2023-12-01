@@ -26,6 +26,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Utils:verify_transaction_semantic()`;
 - `Account::prepare_claim_outputs()` method;
 
+### Fixed
+
+- Missing `init_logger` export;
+- `Client::build_and_post_block()` with custom input range;
+
 ## 1.1.1 - 2023-10-31
 
 ### Added
