@@ -48,9 +48,17 @@ export interface ProtocolParameters {
      */
     workScoreParameters: WorkScoreParameters;
     /**
+     * The parameters used by mana calculation.
+     */
+    manaParameters: ManaParameters;
+    /**
      * Current supply of base token.
      */
     tokenSupply: u64;
+    /**
+     * TODO
+     */
+    genesisSlot: number;
     /**
      * The genesis timestamp at which the slots start to count.
      */
@@ -64,10 +72,6 @@ export interface ProtocolParameters {
      */
     slotsPerEpochExponent: number;
     /**
-     * The parameters used by mana calculation.
-     */
-    manaParameters: ManaParameters;
-    /**
      * The unbonding period in epochs before an account can stop staking.
      */
     stakingUnbondingPeriod: number;
@@ -80,9 +84,13 @@ export interface ProtocolParameters {
      */
     punishmentEpochs: number;
     /**
-     * Determine if a block is eligible by evaluating issuingTime and commitments in its pastcone to ATT and lastCommittedSlot respectively.
+     * TODO
      */
-    livenessThreshold: number;
+    livenessThresholdLowerBound: number;
+    /**
+     * TODO
+     */
+    livenessThresholdUpperBound: number;
     /**
      * MinCommittableAge is the minimum age relative to the accepted tangle time slot index that a slot can be committed.
      */
@@ -107,6 +115,10 @@ export interface ProtocolParameters {
      * Rewards Parameters defines the parameters that are used to calculate Mana rewards.
      */
     rewardsParameters: RewardsParameters;
+    /**
+     * TODO
+     */
+    targetCommitteeSize: number;
 }
 
 /**
