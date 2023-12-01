@@ -116,8 +116,8 @@ where
 {
     /// Mints NFTs.
     ///
-    /// Calls [Wallet::send_outputs()] internally. The options may define the
-    /// remainder value strategy or custom inputs. Note that addresses need to be bech32-encoded.
+    /// Calls [Wallet::send_outputs()] internally. The options may define the remainder value strategy or custom inputs.
+    /// Note that addresses need to be bech32-encoded.
     /// ```ignore
     /// let nft_id: [u8; 38] =
     ///     prefix_hex::decode("08e68f7616cd4948efebc6a77c4f93aed770ac53860100000000000000000000000000000000")?

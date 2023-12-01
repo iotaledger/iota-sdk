@@ -113,7 +113,7 @@ pub enum WalletMethod {
         /// Authentication options
         auth: Option<NodeAuth>,
     },
-    /// Get outputs with additional unlock conditions
+    /// Get outputs with additional unlock conditions.
     /// Expected response: [`OutputIds`](crate::Response::OutputIds)
     #[serde(rename_all = "camelCase")]
     ClaimableOutputs { outputs_to_claim: OutputsToClaim },
@@ -137,12 +137,12 @@ pub enum WalletMethod {
     /// Expected response: [`Output`](crate::Response::Output)
     #[serde(rename_all = "camelCase")]
     GetFoundryOutput { token_id: TokenId },
-    /// Get the transaction with inputs of an incoming transaction stored in the wallet
-    /// List might not be complete, if the node pruned the data already
+    /// Get the transaction with inputs of an incoming transaction stored in the wallet.
+    /// List might not be complete, if the node pruned the data already.
     /// Expected response: [`Transaction`](crate::Response::Transaction)
     #[serde(rename_all = "camelCase")]
     GetIncomingTransaction { transaction_id: TransactionId },
-    /// Get the [`OutputData`](iota_sdk::wallet::types::OutputData) of an output stored in the wallet
+    /// Get the [`OutputData`](iota_sdk::wallet::types::OutputData) of an output stored in the wallet.
     /// Expected response: [`OutputData`](crate::Response::OutputData)
     #[serde(rename_all = "camelCase")]
     GetOutput { output_id: OutputId },
@@ -171,8 +171,7 @@ pub enum WalletMethod {
     GetParticipationEvents,
     /// Calculates a participation overview for the wallet. If event_ids are provided, only return outputs and tracked
     /// participations for them.
-    /// Expected response:
-    /// [`ParticipationOverview`](crate::Response::ParticipationOverview)
+    /// Expected response: [`ParticipationOverview`](crate::Response::ParticipationOverview)
     #[cfg(feature = "participation")]
     #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
     #[serde(rename_all = "camelCase")]
@@ -180,7 +179,8 @@ pub enum WalletMethod {
         event_ids: Option<Vec<ParticipationEventId>>,
     },
     /// Get the [`TransactionWithMetadata`](iota_sdk::wallet::types::TransactionWithMetadata) of a transaction stored
-    /// in the wallet. Expected response: [`Transaction`](crate::Response::Transaction)
+    /// in the wallet.
+    /// Expected response: [`Transaction`](crate::Response::Transaction)
     #[serde(rename_all = "camelCase")]
     GetTransaction { transaction_id: TransactionId },
     /// Get the wallet's total voting power (voting or NOT voting).
@@ -198,15 +198,14 @@ pub enum WalletMethod {
     /// Returns the implicit accounts of the wallet.
     /// Expected response: [`OutputsData`](crate::Response::OutputsData)
     ImplicitAccounts,
-    /// Returns all incoming transactions of the wallet
-    /// Expected response:
-    /// [`Transactions`](crate::Response::Transactions)
+    /// Returns all incoming transactions of the wallet.
+    /// Expected response: [`Transactions`](crate::Response::Transactions)
     IncomingTransactions,
-    /// Returns all outputs of the wallet
+    /// Returns all outputs of the wallet.
     /// Expected response: [`OutputsData`](crate::Response::OutputsData)
     #[serde(rename_all = "camelCase")]
     Outputs { filter_options: Option<FilterOptions> },
-    /// Returns all pending transactions of the wallet
+    /// Returns all pending transactions of the wallet.
     /// Expected response: [`Transactions`](crate::Response::Transactions)
     PendingTransactions,
     /// A generic function that can be used to burn native tokens, nfts, foundries and accounts.
