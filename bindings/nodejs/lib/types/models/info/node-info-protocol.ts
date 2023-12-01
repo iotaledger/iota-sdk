@@ -56,7 +56,7 @@ export interface ProtocolParameters {
      */
     tokenSupply: u64;
     /**
-     * TODO
+     * Genesis Slot defines the slot of the genesis.
      */
     genesisSlot: number;
     /**
@@ -84,11 +84,11 @@ export interface ProtocolParameters {
      */
     punishmentEpochs: number;
     /**
-     * TODO
+     * Liveness Threshold Lower Bound is used by tip-selection to determine if a block is eligible by evaluating issuingTimes.
      */
     livenessThresholdLowerBound: number;
     /**
-     * TODO
+     * Liveness Threshold Upper Bound is used by tip-selection to determine if a block is eligible by evaluating issuingTimes.
      */
     livenessThresholdUpperBound: number;
     /**
@@ -116,7 +116,7 @@ export interface ProtocolParameters {
      */
     rewardsParameters: RewardsParameters;
     /**
-     * TODO
+     * Target Committee Size defines the target size of the committee. If there's fewer candidates the actual committee size could be smaller in a given epoch.
      */
     targetCommitteeSize: number;
 }
