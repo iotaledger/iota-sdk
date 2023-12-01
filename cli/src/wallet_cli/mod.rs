@@ -23,9 +23,8 @@ use iota_sdk::{
     },
     utils::ConvertTo,
     wallet::{
-        types::{OutputData, TransactionWithMetadata},
-        ConsolidationParams, CreateNativeTokenParams, MintNftParams, OutputsToClaim, SendNativeTokenParams,
-        SendNftParams, SendParams, SyncOptions, TransactionOptions, Wallet,
+        types::OutputData, ConsolidationParams, CreateNativeTokenParams, MintNftParams, OutputsToClaim,
+        SendNativeTokenParams, SendNftParams, SendParams, SyncOptions, TransactionOptions, Wallet,
     },
     U256,
 };
@@ -313,7 +312,7 @@ impl FromStr for OutputSelector {
 
 // `accounts` command
 pub async fn accounts_command(wallet: &Wallet) -> Result<(), Error> {
-    print_outputs(wallet.accounts().await, "Accounts:").await
+    print_outputs(wallet.data().await.accounts().cloned().collect(), "Accounts:")
 }
 
 // `address` command
@@ -413,9 +412,9 @@ pub async fn claimable_outputs_command(wallet: &Wallet) -> Result<(), Error> {
         .iter()
         .filter_map(|(output_id, unlockable)| unlockable.then_some(output_id))
     {
+        let wallet_data = wallet.data().await;
         // Unwrap: for the iterated `OutputId`s this call will always return `Some(...)`.
-        let output_data = wallet.get_output(output_id).await.unwrap();
-        let output = output_data.output;
+        let output = &wallet_data.get_output(output_id).unwrap().output;
         let kind = match output {
             Output::Nft(_) => "Nft",
             Output::Basic(_) => "Basic",
@@ -598,7 +597,10 @@ pub async fn implicit_account_transition_command(wallet: &Wallet, output_id: Out
 
 // `implicit-accounts` command
 pub async fn implicit_accounts_command(wallet: &Wallet) -> Result<(), Error> {
-    print_outputs(wallet.implicit_accounts().await, "Implicit accounts:").await
+    print_outputs(
+        wallet.data().await.implicit_accounts().cloned().collect(),
+        "Implicit accounts:",
+    )
 }
 
 // `melt-native-token` command
@@ -684,11 +686,12 @@ pub async fn node_info_command(wallet: &Wallet) -> Result<(), Error> {
 
 /// `output` command
 pub async fn output_command(wallet: &Wallet, selector: OutputSelector) -> Result<(), Error> {
+    let wallet_data = wallet.data().await;
     let output = match selector {
-        OutputSelector::Id(id) => wallet.get_output(&id).await,
+        OutputSelector::Id(id) => wallet_data.get_output(&id),
         OutputSelector::Index(index) => {
-            let mut outputs = wallet.outputs(None).await;
-            outputs.sort_unstable_by(outputs_ordering);
+            let mut outputs = wallet_data.outputs().values().collect::<Vec<_>>();
+            outputs.sort_unstable_by_key(|o| o.output_id);
             outputs.into_iter().nth(index)
         }
     };
@@ -704,7 +707,7 @@ pub async fn output_command(wallet: &Wallet, selector: OutputSelector) -> Result
 
 /// `outputs` command
 pub async fn outputs_command(wallet: &Wallet) -> Result<(), Error> {
-    print_outputs(wallet.outputs(None).await, "Outputs:").await
+    print_outputs(wallet.data().await.outputs().values().cloned().collect(), "Outputs:")
 }
 
 // `send` command
@@ -818,11 +821,12 @@ pub async fn sync_command(wallet: &Wallet) -> Result<(), Error> {
 
 /// `transaction` command
 pub async fn transaction_command(wallet: &Wallet, selector: TransactionSelector) -> Result<(), Error> {
-    let mut transactions = wallet.transactions().await;
+    let wallet_data = wallet.data().await;
     let transaction = match selector {
-        TransactionSelector::Id(id) => transactions.into_iter().find(|tx| tx.transaction_id == id),
+        TransactionSelector::Id(id) => wallet_data.get_transaction(&id),
         TransactionSelector::Index(index) => {
-            transactions.sort_unstable_by(transactions_ordering);
+            let mut transactions = wallet_data.transactions().values().collect::<Vec<_>>();
+            transactions.sort_unstable_by(|a, b| b.timestamp.cmp(&a.timestamp));
             transactions.into_iter().nth(index)
         }
     };
@@ -838,8 +842,9 @@ pub async fn transaction_command(wallet: &Wallet, selector: TransactionSelector)
 
 /// `transactions` command
 pub async fn transactions_command(wallet: &Wallet, show_details: bool) -> Result<(), Error> {
-    let mut transactions = wallet.transactions().await;
-    transactions.sort_unstable_by(transactions_ordering);
+    let wallet_data = wallet.data().await;
+    let mut transactions = wallet_data.transactions().values().collect::<Vec<_>>();
+    transactions.sort_unstable_by(|a, b| b.timestamp.cmp(&a.timestamp));
 
     if transactions.is_empty() {
         println_log_info!("No transactions found");
@@ -861,7 +866,10 @@ pub async fn transactions_command(wallet: &Wallet, show_details: bool) -> Result
 
 /// `unspent-outputs` command
 pub async fn unspent_outputs_command(wallet: &Wallet) -> Result<(), Error> {
-    print_outputs(wallet.unspent_outputs(None).await, "Unspent outputs:").await
+    print_outputs(
+        wallet.data().await.unspent_outputs().values().cloned().collect(),
+        "Unspent outputs:",
+    )
 }
 
 pub async fn vote_command(wallet: &Wallet, event_id: ParticipationEventId, answers: Vec<u8>) -> Result<(), Error> {
@@ -950,7 +958,6 @@ async fn print_wallet_address(wallet: &Wallet) -> Result<(), Error> {
         address.inner()
     );
 
-    let unspent_outputs = wallet.unspent_outputs(None).await;
     let slot_index = wallet.client().get_slot_index().await?;
 
     let mut output_ids = Vec::new();
@@ -962,7 +969,7 @@ async fn print_wallet_address(wallet: &Wallet) -> Result<(), Error> {
     let mut delegations = Vec::new();
     let mut anchors = Vec::new();
 
-    for output_data in unspent_outputs {
+    for output_data in wallet.data().await.unspent_outputs().values() {
         let output_id = output_data.output_id;
         output_ids.push(output_id);
 
@@ -1216,12 +1223,12 @@ pub async fn prompt_internal(
     Ok(PromptResponse::Reprompt)
 }
 
-async fn print_outputs(mut outputs: Vec<OutputData>, title: &str) -> Result<(), Error> {
+fn print_outputs(mut outputs: Vec<OutputData>, title: &str) -> Result<(), Error> {
     if outputs.is_empty() {
         println_log_info!("No outputs found");
     } else {
         println_log_info!("{title}");
-        outputs.sort_unstable_by(outputs_ordering);
+        outputs.sort_unstable_by_key(|o| o.output_id);
 
         for (i, output_data) in outputs.into_iter().enumerate() {
             let kind_str = if output_data.output.is_implicit_account() {
@@ -1241,12 +1248,4 @@ async fn print_outputs(mut outputs: Vec<OutputData>, title: &str) -> Result<(), 
     }
 
     Ok(())
-}
-
-fn outputs_ordering(a: &OutputData, b: &OutputData) -> std::cmp::Ordering {
-    a.output_id.cmp(&b.output_id)
-}
-
-fn transactions_ordering(a: &TransactionWithMetadata, b: &TransactionWithMetadata) -> std::cmp::Ordering {
-    b.timestamp.cmp(&a.timestamp)
 }

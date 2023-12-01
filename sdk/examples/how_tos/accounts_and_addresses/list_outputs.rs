@@ -15,6 +15,11 @@ async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
+    #[allow(clippy::single_element_loop)]
+    for var in ["WALLET_DB_PATH"] {
+        std::env::var(var).unwrap_or_else(|_| panic!(".env variable '{var}' is undefined, see .env.example"));
+    }
+
     let wallet = Wallet::builder()
         .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
         .finish()
@@ -25,13 +30,13 @@ async fn main() -> Result<()> {
 
     // Print output ids
     println!("Output ids:");
-    for output in wallet.outputs(None).await {
+    for output in wallet.data().await.outputs().values() {
         println!("{}", output.output_id);
     }
 
     // Print unspent output ids
     println!("Unspent output ids:");
-    for output in wallet.unspent_outputs(None).await {
+    for output in wallet.data().await.unspent_outputs().values() {
         println!("{}", output.output_id);
     }
 

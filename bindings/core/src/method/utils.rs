@@ -3,7 +3,7 @@
 
 use derivative::Derivative;
 use iota_sdk::{
-    client::secret::types::InputSigningDataDto,
+    client::secret::types::InputSigningData,
     types::block::{
         address::{Bech32Address, Hrp},
         output::{AccountId, NftId, Output, OutputId, StorageScoreParameters},
@@ -14,6 +14,7 @@ use iota_sdk::{
         protocol::ProtocolParameters,
         signature::Ed25519Signature,
         slot::SlotCommitment,
+        unlock::Unlock,
         BlockDto,
     },
 };
@@ -166,7 +167,8 @@ pub enum UtilsMethod {
     OutputHexBytes { output: Output },
     /// Verifies the semantic of a transaction.
     VerifyTransactionSemantic {
-        inputs: Vec<InputSigningDataDto>,
-        transaction: SignedTransactionPayloadDto,
+        transaction: TransactionDto,
+        inputs: Vec<InputSigningData>,
+        unlocks: Option<Vec<Unlock>>,
     },
 }
