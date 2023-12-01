@@ -145,6 +145,13 @@ export interface __IsAddressValidMethod__ {
     };
 }
 
+export interface __ProtocolParametersHashMethod__ {
+    name: 'protocolParametersHash';
+    data: {
+        protocol_parameters: ProtocolParameters;
+    };
+}
+
 export interface __TransactionSigningHashMethod__ {
     name: 'transactionSigningHash';
     data: {

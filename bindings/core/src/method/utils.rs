@@ -127,6 +127,12 @@ pub enum UtilsMethod {
         serial_number: u32,
         token_scheme_type: u8,
     },
+    /// Computes the hash of the given protocol parameters.
+    #[serde(rename_all = "camelCase")]
+    ProtocolParametersHash {
+        /// Network Protocol Parameters
+        protocol_parameters: ProtocolParameters,
+    },
     /// Computes the signing hash of a transaction.
     TransactionSigningHash {
         /// The transaction.
