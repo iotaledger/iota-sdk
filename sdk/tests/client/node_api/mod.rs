@@ -96,9 +96,9 @@ pub async fn setup_transaction_block(client: &Client) -> (BlockId, TransactionId
         _ => unreachable!(),
     };
 
-    let _ = client.retry_until_included(&block.id(), None, None).await.unwrap();
+    let retried = client.retry_until_included(&block.id(), None, None).await.unwrap();
 
-    (block_id, transaction_id)
+    (retried[0].0, transaction_id)
 }
 
 // helper function to get the output id for the first alias output
