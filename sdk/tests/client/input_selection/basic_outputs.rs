@@ -1983,7 +1983,7 @@ fn restricted_ed25519_sender() {
 }
 
 #[test]
-fn multi_address_sender() {
+fn multi_address_sender_already_fulfilled() {
     let protocol_parameters = protocol_parameters();
     let sender_0 = Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap();
     let sender_1 = Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap();
@@ -2033,7 +2033,7 @@ fn multi_address_sender() {
         ),
     ]);
     let outputs = build_outputs([Basic(
-        2_000_000,
+        3_000_000,
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
         Some(multi),
@@ -2044,23 +2044,19 @@ fn multi_address_sender() {
     )]);
 
     let selected = InputSelection::new(
-        inputs,
-        outputs,
+        inputs.clone(),
+        outputs.clone(),
         [
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_2).unwrap(),
         ],
         protocol_parameters,
     )
+    .with_required_inputs([*inputs[0].output_id(), *inputs[1].output_id(), *inputs[2].output_id()])
     .select()
     .unwrap();
 
-    // // Sender + another for amount
-    // assert_eq!(selected.inputs.len(), 2);
-    // assert!(selected
-    //     .inputs
-    //     .iter()
-    //     .any(|input| *input.output.as_basic().address() == sender));
-    // // Provided output + remainder
-    // assert_eq!(selected.outputs.len(), 2);
+    assert!(unsorted_eq(&selected.inputs, &inputs));
+    assert!(unsorted_eq(&selected.outputs, &outputs));
 }
