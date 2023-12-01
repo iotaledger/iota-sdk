@@ -652,7 +652,7 @@ fn verify_unlock_conditions(unlock_conditions: &UnlockConditions, anchor_id: &An
 }
 
 #[cfg(feature = "serde")]
-pub(crate) mod dto {
+mod dto {
 
     use serde::{Deserialize, Serialize};
 
