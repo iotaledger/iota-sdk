@@ -31,7 +31,7 @@ use packable::Packable;
 
 pub use self::{
     account::{AccountId, AccountOutput, AccountOutputBuilder},
-    anchor::{AnchorId, AnchorOutput, AnchorTransition},
+    anchor::{AnchorId, AnchorOutput, AnchorOutputBuilder, AnchorTransition},
     basic::{BasicOutput, BasicOutputBuilder},
     chain_id::ChainId,
     delegation::{DelegationId, DelegationOutput, DelegationOutputBuilder},

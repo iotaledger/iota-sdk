@@ -116,8 +116,7 @@ where
         Ok(consolidation_tx)
     }
 
-    /// Prepares the transaction for
-    /// [Account::consolidate_outputs()](crate::wallet::Account::consolidate_outputs).
+    /// Prepares the transaction for [Wallet::consolidate_outputs()].
     pub async fn prepare_consolidate_outputs(&self, params: ConsolidationParams) -> Result<PreparedTransactionData> {
         log::debug!("[OUTPUT_CONSOLIDATION] prepare consolidating outputs if needed");
         #[cfg(feature = "participation")]

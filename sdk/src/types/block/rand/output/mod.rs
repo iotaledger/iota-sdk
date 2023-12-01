@@ -75,7 +75,7 @@ pub fn rand_account_output(token_supply: u64) -> AccountOutput {
         .unwrap()
 }
 
-/// Generates a random [`AnchorOutput`](AnchorOutput).
+/// Generates a random [`AnchorOutput`].
 pub fn rand_anchor_output(token_supply: u64) -> AnchorOutput {
     // We need to make sure that `AnchorId` and `Address` don't match.
     let anchor_id = rand_anchor_id();
