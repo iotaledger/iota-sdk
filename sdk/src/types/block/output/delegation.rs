@@ -441,7 +441,7 @@ mod dto {
     use super::*;
     use crate::{
         types::block::{
-            output::{unlock_condition::dto::UnlockConditionDto, OutputBuilderAmount},
+            output::{unlock_condition::UnlockCondition, OutputBuilderAmount},
             Error,
         },
         utils::serde::string,
@@ -460,7 +460,7 @@ mod dto {
         pub validator_address: AccountAddress,
         start_epoch: EpochIndex,
         end_epoch: EpochIndex,
-        pub unlock_conditions: Vec<UnlockConditionDto>,
+        pub unlock_conditions: Vec<UnlockCondition>,
     }
 
     impl From<&DelegationOutput> for DelegationOutputDto {
@@ -473,7 +473,7 @@ mod dto {
                 validator_address: *value.validator_address(),
                 start_epoch: value.start_epoch(),
                 end_epoch: value.end_epoch(),
-                unlock_conditions: value.unlock_conditions().iter().map(Into::into).collect::<_>(),
+                unlock_conditions: value.unlock_conditions().to_vec(),
             }
         }
     }
@@ -492,7 +492,7 @@ mod dto {
             .with_end_epoch(dto.end_epoch);
 
             for u in dto.unlock_conditions {
-                builder = builder.add_unlock_condition(UnlockCondition::from(u));
+                builder = builder.add_unlock_condition(u);
             }
 
             builder.finish()
@@ -508,7 +508,7 @@ mod dto {
             validator_address: &AccountAddress,
             start_epoch: impl Into<EpochIndex>,
             end_epoch: impl Into<EpochIndex>,
-            unlock_conditions: Vec<UnlockConditionDto>,
+            unlock_conditions: Vec<UnlockCondition>,
         ) -> Result<Self, Error> {
             let mut builder = match amount {
                 OutputBuilderAmount::Amount(amount) => DelegationOutputBuilder::new_with_amount(
