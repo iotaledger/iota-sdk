@@ -65,8 +65,7 @@ where
         self.sign_and_submit_transaction(prepared_transaction, options).await
     }
 
-    /// Prepares the transaction for
-    /// [Account::create_account_output()](crate::wallet::Account::create_account_output).
+    /// Prepares the transaction for [Wallet::create_account_output()].
     pub async fn prepare_create_account_output(
         &self,
         params: Option<CreateAccountParams>,

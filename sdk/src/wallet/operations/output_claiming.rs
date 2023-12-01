@@ -177,7 +177,7 @@ where
     }
 
     /// Try to claim basic or nft outputs that have additional unlock conditions to their [AddressUnlockCondition]
-    /// from [`Account::claimable_outputs()`].
+    /// from [`Wallet::claimable_outputs()`].
     pub async fn claim_outputs<I: IntoIterator<Item = OutputId> + Send>(
         &self,
         output_ids_to_claim: I,

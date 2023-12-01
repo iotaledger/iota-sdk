@@ -116,7 +116,7 @@ where
 {
     /// Mints NFTs.
     ///
-    /// Calls [Account::send_outputs()](crate::wallet::Account::send_outputs) internally. The options may define the
+    /// Calls [Wallet::send_outputs()] internally. The options may define the
     /// remainder value strategy or custom inputs. Note that addresses need to be bech32-encoded.
     /// ```ignore
     /// let nft_id: [u8; 38] =
@@ -150,8 +150,7 @@ where
         self.sign_and_submit_transaction(prepared_transaction, options).await
     }
 
-    /// Prepares the transaction for
-    /// [Account::mint_nfts()](crate::wallet::Account::mint_nfts).
+    /// Prepares the transaction for [Wallet::mint_nfts()].
     pub async fn prepare_mint_nfts<I: IntoIterator<Item = MintNftParams> + Send>(
         &self,
         params: I,

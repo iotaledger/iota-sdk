@@ -179,8 +179,8 @@ pub enum WalletMethod {
     GetParticipationOverview {
         event_ids: Option<Vec<ParticipationEventId>>,
     },
-    /// Get the [`Transaction`](iota_sdk::wallet::types::Transaction) of a transaction stored in the wallet
-    /// Expected response: [`Transaction`](crate::Response::Transaction)
+    /// Get the [`TransactionWithMetadata`](iota_sdk::wallet::types::TransactionWithMetadata) of a transaction stored
+    /// in the wallet. Expected response: [`Transaction`](crate::Response::Transaction)
     #[serde(rename_all = "camelCase")]
     GetTransaction { transaction_id: TransactionId },
     /// Get the wallet's total voting power (voting or NOT voting).
