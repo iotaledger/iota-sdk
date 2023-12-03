@@ -27,6 +27,11 @@ async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
+    #[allow(clippy::single_element_loop)]
+    for var in ["EXPLORER_URL"] {
+        std::env::var(var).unwrap_or_else(|_| panic!(".env variable '{var}' is undefined, see .env.example"));
+    }
+
     // Create the wallet with the secret_manager and client options
     let wallet = Wallet::builder()
         .with_storage_path(ONLINE_WALLET_DB_PATH)

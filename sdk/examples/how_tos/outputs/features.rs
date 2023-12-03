@@ -13,7 +13,6 @@ use iota_sdk::{
     types::block::{
         address::Address,
         output::{
-            dto::OutputDto,
             feature::{IssuerFeature, MetadataFeature, SenderFeature, TagFeature},
             unlock_condition::AddressUnlockCondition,
             NftId, NftOutputBuilder,
@@ -25,6 +24,11 @@ use iota_sdk::{
 async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
+
+    #[allow(clippy::single_element_loop)]
+    for var in ["NODE_URL"] {
+        std::env::var(var).unwrap_or_else(|_| panic!(".env variable '{var}' is undefined, see .env.example"));
+    }
 
     let node_url = std::env::var("NODE_URL").unwrap();
 
@@ -65,8 +69,8 @@ async fn main() -> Result<()> {
             .finish_output()?,
     ];
 
-    // Convert ouput array to json array
-    let json_outputs = serde_json::to_string_pretty(&outputs.iter().map(OutputDto::from).collect::<Vec<OutputDto>>())?;
+    // Convert output array to json array
+    let json_outputs = serde_json::to_string_pretty(&outputs)?;
     println!("{json_outputs}");
 
     Ok(())

@@ -2,17 +2,21 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use derivative::Derivative;
-use iota_sdk::types::block::{
-    address::{Bech32Address, Hrp},
-    output::{dto::OutputDto, AccountId, NftId, OutputId, StorageScoreParameters},
-    payload::signed_transaction::{
-        dto::{SignedTransactionPayloadDto, TransactionDto},
-        TransactionId,
+use iota_sdk::{
+    client::secret::types::InputSigningData,
+    types::block::{
+        address::{Bech32Address, Hrp},
+        output::{AccountId, NftId, Output, OutputId, StorageScoreParameters},
+        payload::signed_transaction::{
+            dto::{SignedTransactionPayloadDto, TransactionDto},
+            TransactionId,
+        },
+        protocol::ProtocolParameters,
+        signature::Ed25519Signature,
+        slot::SlotCommitment,
+        unlock::Unlock,
+        BlockDto,
     },
-    protocol::ProtocolParameters,
-    signature::Ed25519Signature,
-    slot::SlotCommitment,
-    BlockDto,
 };
 use serde::{Deserialize, Serialize};
 
@@ -131,7 +135,7 @@ pub enum UtilsMethod {
     /// Computes the minimum required amount of an output.
     #[serde(rename_all = "camelCase")]
     ComputeMinimumOutputAmount {
-        output: OutputDto,
+        output: Output,
         storage_score_parameters: StorageScoreParameters,
     },
     /// Checks if the given mnemonic is valid.
@@ -160,5 +164,11 @@ pub enum UtilsMethod {
     ComputeSlotCommitmentId { slot_commitment: SlotCommitment },
     /// Returns the hex representation of the serialized output bytes.
     #[serde(rename_all = "camelCase")]
-    OutputHexBytes { output: OutputDto },
+    OutputHexBytes { output: Output },
+    /// Verifies the semantic of a transaction.
+    VerifyTransactionSemantic {
+        transaction: TransactionDto,
+        inputs: Vec<InputSigningData>,
+        unlocks: Option<Vec<Unlock>>,
+    },
 }

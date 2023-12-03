@@ -67,7 +67,7 @@ pub use self::{
             RemainderValueStrategy, TransactionOptions,
         },
     },
-    types::OutputDataDto,
+    types::OutputData,
 };
 use crate::{
     types::{

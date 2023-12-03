@@ -7,7 +7,7 @@ import type {
 } from '../../secret_manager/secret-manager';
 import type {
     AccountId,
-    SignedBlock,
+    Block,
     BlockId,
     FoundryId,
     AnchorId,
@@ -56,7 +56,7 @@ export interface __GetOutputsMethod__ {
 export interface __PostBlockMethod__ {
     name: 'postBlock';
     data: {
-        block: SignedBlock;
+        block: Block;
     };
 }
 
@@ -77,6 +77,13 @@ export interface __GetBlockMethod__ {
 
 export interface __GetBlockMetadataMethod__ {
     name: 'getBlockMetadata';
+    data: {
+        blockId: BlockId;
+    };
+}
+
+export interface __GetBlockWithMetadataMethod__ {
+    name: 'getBlockWithMetadata';
     data: {
         blockId: BlockId;
     };
@@ -153,7 +160,7 @@ export interface __GetPeersMethod__ {
 export interface __PostBlockRawMethod__ {
     name: 'postBlockRaw';
     data: {
-        block: SignedBlock;
+        block: Block;
     };
 }
 

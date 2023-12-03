@@ -25,7 +25,7 @@ use crate::{
         },
         block::output::{unlock_condition::UnlockCondition, Output, OutputId},
     },
-    wallet::{task, types::OutputData, Result, Wallet},
+    wallet::{core::WalletData, task, types::OutputData, Result, Wallet},
 };
 
 /// An object containing an account's entire participation overview.
@@ -71,17 +71,14 @@ where
             "[get_participation_overview] restored_spent_cached_outputs_len: {}",
             restored_spent_cached_outputs_len
         );
-        let outputs = self.outputs(None).await;
-        let participation_outputs = outputs
-            .into_iter()
-            .filter(|output_data| {
-                is_valid_participation_output(&output_data.output)
+        let wallet_data = self.data().await;
+        let participation_outputs = wallet_data.outputs().values().filter(|output_data| {
+            is_valid_participation_output(&output_data.output)
                 // Check that the metadata exists, because otherwise we aren't participating for anything
                     && output_data.output.features().and_then(|f| f.metadata()).is_some()
                     // Don't add spent cached outputs, we have their data already and it can't change anymore
                     && !spent_cached_outputs.contains_key(&output_data.output_id)
-            })
-            .collect::<Vec<OutputData>>();
+        });
 
         let mut events = HashMap::new();
         let mut spent_outputs = HashSet::new();
@@ -227,14 +224,7 @@ where
     ///
     /// If multiple outputs with this tag exist, the one with the largest amount will be returned.
     pub async fn get_voting_output(&self) -> Result<Option<OutputData>> {
-        log::debug!("[get_voting_output]");
-        Ok(self
-            .unspent_outputs(None)
-            .await
-            .iter()
-            .filter(|output_data| is_valid_participation_output(&output_data.output))
-            .max_by_key(|output_data| output_data.output.amount())
-            .cloned())
+        self.data().await.get_voting_output()
     }
 
     /// Gets client for an event.
@@ -284,6 +274,21 @@ where
         }
 
         Ok(())
+    }
+}
+
+impl WalletData {
+    /// Returns the voting output ("PARTICIPATION" tag).
+    ///
+    /// If multiple outputs with this tag exist, the one with the largest amount will be returned.
+    pub(crate) fn get_voting_output(&self) -> Result<Option<OutputData>> {
+        log::debug!("[get_voting_output]");
+        Ok(self
+            .unspent_outputs
+            .values()
+            .filter(|output_data| is_valid_participation_output(&output_data.output))
+            .max_by_key(|output_data| output_data.output.amount())
+            .cloned())
     }
 }
 

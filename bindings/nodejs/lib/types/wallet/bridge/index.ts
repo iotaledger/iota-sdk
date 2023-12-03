@@ -1,5 +1,6 @@
 import type {
     __PrepareBurnMethod__,
+    __PrepareClaimOutputsMethod__,
     __ClaimOutputsMethod__,
     __PrepareConsolidateOutputsMethod__,
     __PrepareCreateAccountOutputMethod__,
@@ -70,6 +71,7 @@ import type {
 export type __WalletMethod__ =
     | __PrepareBurnMethod__
     | __ClaimOutputsMethod__
+    | __PrepareClaimOutputsMethod__
     | __PrepareConsolidateOutputsMethod__
     | __PrepareCreateAccountOutputMethod__
     | __DeregisterParticipationEventMethod__
