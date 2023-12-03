@@ -1,7 +1,7 @@
 {
-    "routes": [
-      "core/v3",
-      "dashboard-metrics/v2",
-      "debug/v2"
-    ]
-  }
+  "routes": [
+    "core/v3",
+    "dashboard-metrics/v2",
+    "debug/v2"
+  ]
+}

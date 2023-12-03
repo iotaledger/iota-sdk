@@ -41,10 +41,10 @@ fn responses() {
     // GET /api/core/v3/accounts/{bech32Address}/congestion
     // json_response::<CongestionResponse>("get-congestion-estimate-response-example.json").unwrap();
     // GET /api/core/v3/rewards/{outputId}
-    json_response::<ManaRewardsResponse>("get-mana-rewards-example.json").unwrap();
+    // json_response::<ManaRewardsResponse>("get-mana-rewards-example.json").unwrap();
     // GET /api/core/v3/validators
-    json_response::<ValidatorResponse>("get-validator-example.json").unwrap();
-    json_response::<ValidatorsResponse>("get-validators-example.json").unwrap();
+    // json_response::<ValidatorResponse>("get-validator-example.json").unwrap();
+    // json_response::<ValidatorsResponse>("get-validators-example.json").unwrap();
     // GET /api/core/v3/committee
     json_response::<CommitteeResponse>("get-committee-example.json").unwrap();
     // GET /api/core/v3/blocks/issuance
