@@ -17,6 +17,7 @@ use crate::types::block::{
     },
     protocol::{ProtocolParameters, WorkScore, WorkScoreParameters},
     semantic::{SemanticValidationContext, TransactionFailureReason},
+    slot::SlotIndex,
     unlock::Unlock,
     Error,
 };
@@ -338,7 +339,7 @@ impl BasicOutput {
             .locked_address(
                 self.address(),
                 // Safe to unwrap, we return an error before if its required but None
-                slot_index.unwrap_or_else(|| 0.into()),
+                slot_index.unwrap_or(SlotIndex(0)),
                 context.protocol_parameters.min_committable_age(),
                 context.protocol_parameters.max_committable_age(),
             )
