@@ -1,6 +1,9 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use crypto::{keys::bip44::Bip44, signatures::ed25519::PublicKey};
+use derive_more::From;
+
 use crate::{
     client::{api::PreparedTransactionData, secret::SecretManage},
     types::block::{
@@ -23,11 +26,15 @@ where
     crate::client::Error: From<S::Error>,
 {
     /// Transitions an implicit account to an account.
-    pub async fn implicit_account_transition(&self, output_id: &OutputId) -> Result<TransactionWithMetadata> {
+    pub async fn implicit_account_transition(
+        &self,
+        output_id: &OutputId,
+        key_source: Option<impl Into<BlockIssuerKeySource>>,
+    ) -> Result<TransactionWithMetadata> {
         let issuer_id = AccountId::from(output_id);
 
         self.sign_and_submit_transaction(
-            self.prepare_implicit_account_transition(output_id).await?,
+            self.prepare_implicit_account_transition(output_id, key_source).await?,
             issuer_id,
             None,
         )
@@ -35,7 +42,14 @@ where
     }
 
     /// Prepares to transition an implicit account to an account.
-    pub async fn prepare_implicit_account_transition(&self, output_id: &OutputId) -> Result<PreparedTransactionData> {
+    pub async fn prepare_implicit_account_transition(
+        &self,
+        output_id: &OutputId,
+        key_source: Option<impl Into<BlockIssuerKeySource>>,
+    ) -> Result<PreparedTransactionData>
+    where
+        crate::wallet::Error: From<S::Error>,
+    {
         let implicit_account_data = self.data().await.unspent_outputs.get(output_id).cloned();
 
         let implicit_account = if let Some(implicit_account_data) = &implicit_account_data {
@@ -48,20 +62,25 @@ where
             return Err(Error::ImplicitAccountNotFound);
         };
 
-        let public_key = if let Some(bip_path) = self.bip_path().await {
-            self.secret_manager
-                .read()
-                .await
-                .generate_ed25519_public_keys(
-                    bip_path.coin_type,
-                    bip_path.account,
-                    bip_path.address_index..bip_path.address_index + 1,
-                    None,
-                )
-                .await?[0]
-        } else {
-            // TODO https://github.com/iotaledger/iota-sdk/issues/1666
-            todo!()
+        let key_source = match key_source.map(Into::into) {
+            Some(key_source) => key_source,
+            None => self.bip_path().await.ok_or(Error::MissingBipPath)?.into(),
+        };
+
+        let public_key = match key_source {
+            BlockIssuerKeySource::Key(public_key) => public_key,
+            BlockIssuerKeySource::Bip44Path(bip_path) => {
+                self.secret_manager
+                    .read()
+                    .await
+                    .generate_ed25519_public_keys(
+                        bip_path.coin_type,
+                        bip_path.account,
+                        bip_path.address_index..bip_path.address_index + 1,
+                        None,
+                    )
+                    .await?[0]
+            }
         };
 
         let account = AccountOutput::build_with_amount(implicit_account.amount(), AccountId::from(output_id))
@@ -86,4 +105,10 @@ where
         self.prepare_transaction(vec![account], transaction_options.clone())
             .await
     }
+}
+
+#[derive(From)]
+pub enum BlockIssuerKeySource {
+    Key(PublicKey),
+    Bip44Path(Bip44),
 }
