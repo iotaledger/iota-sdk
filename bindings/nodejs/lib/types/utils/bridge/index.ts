@@ -16,6 +16,7 @@ import type {
     __NftIdToBech32Method__,
     __HexPublicKeyToBech32AddressMethod__,
     __IsAddressValidMethod__,
+    __ProtocolParametersHashMethod__,
     __TransactionSigningHashMethod__,
     __VerifyEd25519SignatureMethod__,
     __VerifySecp256k1EcdsaSignatureMethod__,
@@ -45,6 +46,7 @@ export type __UtilsMethods__ =
     | __NftIdToBech32Method__
     | __HexPublicKeyToBech32AddressMethod__
     | __IsAddressValidMethod__
+    | __ProtocolParametersHashMethod__
     | __TransactionSigningHashMethod__
     | __VerifyEd25519SignatureMethod__
     | __VerifySecp256k1EcdsaSignatureMethod__

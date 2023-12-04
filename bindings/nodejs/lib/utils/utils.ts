@@ -323,6 +323,23 @@ export class Utils {
     }
 
     /**
+     * Compute the hash of an instance of ProtocolParameters.
+     *
+     * @param protocolParameters A ProtocolParameters instance.
+     * @returns The hash of the protocol parameters as a hex-encoded string.
+     */
+    static protocolParametersHash(
+        protocolParameters: ProtocolParameters,
+    ): HexEncodedString {
+        return callUtilsMethod({
+            name: 'protocolParametersHash',
+            data: {
+                protocolParameters,
+            },
+        });
+    }
+
+    /**
      * Compute the signing hash of a transaction.
      *
      * @param transaction A transaction.
