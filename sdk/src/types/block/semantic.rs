@@ -13,8 +13,8 @@ use crate::types::block::{
         AccountId, AnchorOutput, ChainId, FoundryId, NativeTokens, Output, OutputId, StateTransitionError, TokenId,
         UnlockCondition,
     },
-    payload::signed_transaction::{Transaction, TransactionCapabilityFlag, TransactionId, TransactionSigningHash},
-    unlock::Unlocks,
+    payload::signed_transaction::{Transaction, TransactionCapabilityFlag, TransactionSigningHash},
+    unlock::Unlock,
     Error,
 };
 
@@ -194,7 +194,7 @@ pub struct SemanticValidationContext<'a> {
     pub(crate) transaction: &'a Transaction,
     pub(crate) transaction_signing_hash: TransactionSigningHash,
     pub(crate) inputs: &'a [(&'a OutputId, &'a Output)],
-    pub(crate) unlocks: &'a Unlocks,
+    pub(crate) unlocks: Option<&'a [Unlock]>,
     pub(crate) input_amount: u64,
     pub(crate) input_mana: u64,
     pub(crate) input_native_tokens: BTreeMap<TokenId, U256>,
@@ -212,10 +212,10 @@ impl<'a> SemanticValidationContext<'a> {
     ///
     pub fn new(
         transaction: &'a Transaction,
-        transaction_id: &TransactionId,
         inputs: &'a [(&'a OutputId, &'a Output)],
-        unlocks: &'a Unlocks,
+        unlocks: Option<&'a [Unlock]>,
     ) -> Self {
+        let transaction_id = transaction.id();
         let input_chains = inputs
             .iter()
             .filter_map(|(output_id, input)| {
@@ -235,7 +235,7 @@ impl<'a> SemanticValidationContext<'a> {
             .filter_map(|(index, output)| {
                 output.chain_id().map(|chain_id| {
                     (
-                        chain_id.or_from_output_id(&OutputId::new(*transaction_id, index as u16)),
+                        chain_id.or_from_output_id(&OutputId::new(transaction_id, index as u16)),
                         output,
                     )
                 })
@@ -265,57 +265,27 @@ impl<'a> SemanticValidationContext<'a> {
     pub fn validate(mut self) -> Result<Option<TransactionFailureReason>, Error> {
         // Validation of inputs.
         let mut has_implicit_account_creation_address = false;
-
-        for ((output_id, consumed_output), unlock) in self.inputs.iter().zip(self.unlocks.iter()) {
-            let (conflict, amount, mana, consumed_native_token, unlock_conditions) = match consumed_output {
+        for (index, (output_id, consumed_output)) in self.inputs.iter().enumerate() {
+            let (amount, mana, consumed_native_token, unlock_conditions) = match consumed_output {
                 Output::Basic(output) => (
-                    output.unlock(output_id, unlock, &mut self),
                     output.amount(),
                     output.mana(),
                     output.native_token(),
                     output.unlock_conditions(),
                 ),
-                Output::Account(output) => (
-                    output.unlock(output_id, unlock, &mut self),
-                    output.amount(),
-                    output.mana(),
-                    None,
-                    output.unlock_conditions(),
-                ),
+                Output::Account(output) => (output.amount(), output.mana(), None, output.unlock_conditions()),
                 Output::Anchor(_) => return Err(Error::UnsupportedOutputKind(AnchorOutput::KIND)),
-                Output::Foundry(output) => (
-                    output.unlock(output_id, unlock, &mut self),
-                    output.amount(),
-                    0,
-                    output.native_token(),
-                    output.unlock_conditions(),
-                ),
-                Output::Nft(output) => (
-                    output.unlock(output_id, unlock, &mut self),
-                    output.amount(),
-                    output.mana(),
-                    None,
-                    output.unlock_conditions(),
-                ),
-                Output::Delegation(output) => (
-                    output.unlock(output_id, unlock, &mut self),
-                    output.amount(),
-                    0,
-                    None,
-                    output.unlock_conditions(),
-                ),
+                Output::Foundry(output) => (output.amount(), 0, output.native_token(), output.unlock_conditions()),
+                Output::Nft(output) => (output.amount(), output.mana(), None, output.unlock_conditions()),
+                Output::Delegation(output) => (output.amount(), 0, None, output.unlock_conditions()),
             };
-
-            if let Err(conflict) = conflict {
-                return Ok(Some(conflict));
-            }
 
             if unlock_conditions
                 .address()
                 .map_or(false, |uc| uc.address().is_implicit_account_creation())
             {
                 if has_implicit_account_creation_address {
-                    //TODO
+                    // TODO
                 } else {
                     has_implicit_account_creation_address = true;
                 }
@@ -354,6 +324,26 @@ impl<'a> SemanticValidationContext<'a> {
                 *native_token_amount = native_token_amount
                     .checked_add(consumed_native_token.amount())
                     .ok_or(Error::ConsumedNativeTokensAmountOverflow)?;
+            }
+
+            if let Some(unlocks) = self.unlocks {
+                if unlocks.len() != self.inputs.len() {
+                    return Ok(Some(TransactionFailureReason::InvalidInputUnlock));
+                }
+
+                let unlock = &unlocks[index];
+                let conflict = match consumed_output {
+                    Output::Basic(output) => output.unlock(output_id, unlock, &mut self),
+                    Output::Account(output) => output.unlock(output_id, unlock, &mut self),
+                    Output::Anchor(_) => return Err(Error::UnsupportedOutputKind(AnchorOutput::KIND)),
+                    Output::Foundry(output) => output.unlock(output_id, unlock, &mut self),
+                    Output::Nft(output) => output.unlock(output_id, unlock, &mut self),
+                    Output::Delegation(output) => output.unlock(output_id, unlock, &mut self),
+                };
+
+                if let Err(conflict) = conflict {
+                    return Ok(Some(conflict));
+                }
             }
         }
 

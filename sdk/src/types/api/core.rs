@@ -14,11 +14,12 @@ use crate::{
     types::block::{
         address::Bech32Address,
         core::Parents,
-        output::{dto::OutputDto, AccountId, OutputId, OutputMetadata, OutputWithMetadata},
+        output::{Output, OutputId, OutputMetadata, OutputWithMetadata},
+        payload::signed_transaction::TransactionId,
         protocol::{ProtocolParameters, ProtocolParametersHash},
         semantic::TransactionFailureReason,
         slot::{EpochIndex, SlotCommitment, SlotCommitmentId, SlotIndex},
-        BlockId,
+        BlockDto, BlockId,
     },
     utils::serde::{option_string, string},
 };
@@ -173,6 +174,31 @@ pub struct BaseTokenResponse {
     pub decimals: u32,
 }
 
+/// Information of a validator.
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ValidatorResponse {
+    /// Account address of the validator.
+    address: Bech32Address,
+    /// The epoch index until which the validator registered to stake.
+    staking_end_epoch: EpochIndex,
+    /// The total stake of the pool, including delegators.
+    #[serde(with = "string")]
+    pool_stake: u64,
+    /// The stake of a validator.
+    #[serde(with = "string")]
+    validator_stake: u64,
+    /// The fixed cost of the validator, which it receives as part of its Mana rewards.
+    #[serde(with = "string")]
+    fixed_cost: u64,
+    /// Shows whether the validator was active recently.
+    active: bool,
+    /// The latest protocol version the validator supported.
+    latest_supported_protocol_version: u8,
+    /// The protocol hash of the latest supported protocol of the validator.
+    latest_supported_protocol_hash: ProtocolParametersHash,
+}
+
 /// Response of GET /api/core/v3/blocks/validators.
 /// A paginated list of all registered validators ready for the next epoch and indicates if they were active recently
 /// (are eligible for committee selection).
@@ -195,10 +221,10 @@ pub struct ValidatorsResponse {
 #[serde(rename_all = "camelCase")]
 pub struct ManaRewardsResponse {
     /// The starting epoch index for which the mana rewards are returned.
-    pub epoch_start: EpochIndex,
+    pub start_epoch: EpochIndex,
     /// The ending epoch index for which the mana rewards are returned, the decay is applied up to this point
     /// included.
-    pub epoch_end: EpochIndex,
+    pub end_epoch: EpochIndex,
     /// The amount of totally available rewards the requested output may claim.
     #[serde(with = "string")]
     pub rewards: u64,
@@ -238,31 +264,6 @@ pub struct CommitteeMember {
     pub fixed_cost: u64,
 }
 
-/// Information of a validator.
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct ValidatorResponse {
-    /// Account address of the validator.
-    address: Bech32Address,
-    /// The epoch index until which the validator registered to stake.
-    staking_epoch_end: EpochIndex,
-    /// The total stake of the pool, including delegators.
-    #[serde(with = "string")]
-    pool_stake: u64,
-    /// The stake of a validator.
-    #[serde(with = "string")]
-    validator_stake: u64,
-    /// The fixed cost of the validator, which it receives as part of its Mana rewards.
-    #[serde(with = "string")]
-    fixed_cost: u64,
-    /// Shows whether validator was active recently.
-    active: bool,
-    /// The latest protocol version the validator supported.
-    latest_supported_protocol_version: u8,
-    // The protocol hash of the latest supported protocol of the validator.
-    latest_supported_protocol_hash: ProtocolParametersHash,
-}
-
 /// Response of GET /api/core/v3/blocks/issuance
 /// Information that is ideal for attaching a block in the network.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
@@ -278,8 +279,8 @@ pub struct IssuanceBlockHeaderResponse {
     pub shallow_like_parents: BTreeSet<BlockId>,
     /// The slot index of the latest finalized slot.
     pub latest_finalized_slot: SlotIndex,
-    /// The most recent slot commitment.
-    pub commitment: SlotCommitment,
+    /// The latest slot commitment.
+    pub latest_commitment: SlotCommitment,
 }
 
 impl IssuanceBlockHeaderResponse {
@@ -389,6 +390,16 @@ pub enum BlockFailureReason {
     Invalid = 255,
 }
 
+// Response of a GET transaction metadata REST API call.
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct TransactionMetadataResponse {
+    pub transaction_id: TransactionId,
+    pub transaction_state: TransactionState,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub transaction_failure_reason: Option<TransactionFailureReason>,
+}
+
 /// Response of GET /api/core/v3/blocks/{blockId}/metadata.
 /// Returns the metadata of a block.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
@@ -397,11 +408,17 @@ pub struct BlockMetadataResponse {
     pub block_id: BlockId,
     pub block_state: BlockState,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub transaction_state: Option<TransactionState>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub block_failure_reason: Option<BlockFailureReason>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub transaction_failure_reason: Option<TransactionFailureReason>,
+    pub transaction_metadata: Option<TransactionMetadataResponse>,
+}
+
+/// Response of GET /api/core/v3/blocks/{blockId}/full.
+/// Returns a block and its metadata.
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+pub struct BlockWithMetadataResponse {
+    pub block: BlockDto,
+    pub metadata: BlockMetadataResponse,
 }
 
 /// Response of GET /api/core/v3/outputs/{output_id}.
@@ -410,14 +427,14 @@ pub struct BlockMetadataResponse {
 #[serde(rename_all = "camelCase")]
 pub struct OutputWithMetadataResponse {
     pub metadata: OutputMetadata,
-    pub output: OutputDto,
+    pub output: Output,
 }
 
 impl From<&OutputWithMetadata> for OutputWithMetadataResponse {
     fn from(value: &OutputWithMetadata) -> Self {
         Self {
             metadata: value.metadata,
-            output: OutputDto::from(value.output()),
+            output: value.output().clone(),
         }
     }
 }

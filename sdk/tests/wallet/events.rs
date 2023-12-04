@@ -19,7 +19,7 @@ use iota_sdk::{
             AddressData, NewOutputEvent, SpentOutputEvent, TransactionInclusionEvent, TransactionProgressEvent,
             WalletEvent,
         },
-        types::{InclusionState, OutputData, OutputDataDto},
+        types::{InclusionState, OutputData},
     },
 };
 use pretty_assertions::assert_eq;
@@ -44,7 +44,7 @@ fn wallet_events_serde() {
             .unwrap(),
     }));
 
-    let output_data_dto = OutputDataDto::from(&OutputData {
+    let output_data = OutputData {
         output_id: TransactionHash::null().into_transaction_id(0).into_output_id(0),
         metadata: rand_output_metadata(),
         output: Output::from(rand_basic_output(1_813_620_509_061_365)),
@@ -53,16 +53,16 @@ fn wallet_events_serde() {
         network_id: 42,
         remainder: true,
         chain: None,
-    });
+    };
 
     assert_serde_eq(WalletEvent::NewOutput(Box::new(NewOutputEvent {
-        output: output_data_dto.clone(),
+        output: output_data.clone(),
         transaction: None,
         transaction_inputs: None,
     })));
 
     assert_serde_eq(WalletEvent::SpentOutput(Box::new(SpentOutputEvent {
-        output: output_data_dto,
+        output: output_data,
     })));
 
     assert_serde_eq(WalletEvent::TransactionInclusion(TransactionInclusionEvent {

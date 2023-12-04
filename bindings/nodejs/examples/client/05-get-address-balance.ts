@@ -11,21 +11,20 @@ require('dotenv').config({ path: '.env' });
 // conditions and sum the amounts and native tokens.
 async function run() {
     initLogger();
-    if (!process.env.NODE_URL) {
-        throw new Error('.env NODE_URL is undefined, see .env.example');
+    for (const envVar of ['NODE_URL', 'MNEMONIC']) {
+        if (!(envVar in process.env)) {
+            throw new Error(`.env ${envVar} is undefined, see .env.example`);
+        }
     }
 
     const client = new Client({
         // Insert your node URL in the .env.
-        nodes: [process.env.NODE_URL],
+        nodes: [process.env.NODE_URL as string],
     });
 
     try {
-        if (!process.env.MNEMONIC) {
-            throw new Error('.env MNEMONIC is undefined, see .env.example');
-        }
         const secretManager = new SecretManager({
-            mnemonic: process.env.MNEMONIC,
+            mnemonic: process.env.MNEMONIC as string,
         });
 
         // Generate the first address

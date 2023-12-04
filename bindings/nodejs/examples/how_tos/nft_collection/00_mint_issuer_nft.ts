@@ -20,10 +20,16 @@ require('dotenv').config({ path: '.env' });
 // yarn run-example ./how_tos/nft_collection/00_mint_issuer_nft.ts
 async function run() {
     try {
-        if (!process.env.STRONGHOLD_PASSWORD) {
-            throw new Error(
-                '.env STRONGHOLD_PASSWORD is undefined, see .env.example',
-            );
+        for (const envVar of [
+            'WALLET_DB_PATH',
+            'STRONGHOLD_PASSWORD',
+            'EXPLORER_URL',
+        ]) {
+            if (!(envVar in process.env)) {
+                throw new Error(
+                    `.env ${envVar} is undefined, see .env.example`,
+                );
+            }
         }
 
         // Create the wallet
@@ -32,7 +38,9 @@ async function run() {
         });
 
         // To sign a transaction we need to unlock stronghold.
-        await wallet.setStrongholdPassword(process.env.STRONGHOLD_PASSWORD);
+        await wallet.setStrongholdPassword(
+            process.env.STRONGHOLD_PASSWORD as string,
+        );
 
         await wallet.sync();
         console.log(`Wallet synced!`);

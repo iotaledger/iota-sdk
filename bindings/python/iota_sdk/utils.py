@@ -14,6 +14,7 @@ from iota_sdk.types.output_id import OutputId
 from iota_sdk.types.output import Output
 from iota_sdk.external import call_utils_method
 from iota_sdk.types.payload import SignedTransactionPayload
+from iota_sdk.types.transaction_data import InputSigningData
 
 # Required to prevent circular import
 if TYPE_CHECKING:
@@ -34,6 +35,7 @@ class Utils():
             'bech32': bech32
         })
 
+    # pylint: disable=redefined-builtin
     @staticmethod
     def hex_to_bech32(hex_str: HexStr, bech32_hrp: str) -> str:
         """Convert a hex encoded address to a Bech32 encoded address.
@@ -61,6 +63,7 @@ class Utils():
             'bech32Hrp': bech32_hrp
         })
 
+    # pylint: disable=redefined-builtin
     @staticmethod
     def hex_public_key_to_bech32_address(
             hex_str: HexStr, bech32_hrp: str) -> str:
@@ -203,6 +206,17 @@ class Utils():
             'publicKey': public_key,
             'signature': signature,
             'message': message,
+        })
+
+    @staticmethod
+    def verify_transaction_semantic(
+            inputs: transaction: Transaction, inputs: List[InputSigningData], unlocks: Optional[List[Unlock]] = None) -> str:
+        """Verifies the semantic of a transaction.
+        """
+        return _call_method('verifyTransactionSemantic', {
+            'transaction': transaction.as_dict(),
+            'inputs': [i.as_dict() for i in inputs],
+            'unlocks': [u.as_dict() for u in unlocks],
         })
 
 
