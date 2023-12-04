@@ -42,7 +42,6 @@ pub(crate) fn can_output_be_unlocked_forever_from_now_on(
             return false;
         }
 
-        // TODO HELP
         // If there is an expiration unlock condition, we can only unlock it forever from now on, if it's expired and
         // the return address belongs to the wallet
         if let Some(expiration) = unlock_conditions.expiration() {

@@ -414,12 +414,13 @@ impl NftOutput {
         unlock: &Unlock,
         context: &mut SemanticValidationContext<'_>,
     ) -> Result<(), TransactionFailureReason> {
-        let slot_index = context
-            .transaction
-            .context_inputs()
-            .iter()
-            .find(|c| c.is_commitment())
-            .map(|c| c.as_commitment().slot_index());
+        let slot_index = context.transaction.context_inputs().iter().find_map(|c| {
+            if c.is_commitment() {
+                Some(c.as_commitment().slot_index())
+            } else {
+                None
+            }
+        });
 
         if slot_index.is_none()
             && (self.unlock_conditions().timelock().is_some() || self.unlock_conditions().expiration().is_some())

@@ -283,14 +283,17 @@ impl<'a> SemanticValidationContext<'a> {
                 Output::Delegation(output) => (output.amount(), 0, None, output.unlock_conditions()),
             };
 
-            let commitment_context_input = self.transaction.context_inputs().iter().find(|c| c.is_commitment());
+            let commitment_slot_index = self.transaction.context_inputs().iter().find_map(|c| {
+                if c.is_commitment() {
+                    Some(c.as_commitment().slot_index())
+                } else {
+                    None
+                }
+            });
 
             if let Some(timelock) = unlock_conditions.timelock() {
-                if let Some(commitment) = commitment_context_input {
-                    if timelock.is_timelocked(
-                        commitment.as_commitment().slot_index(),
-                        self.protocol_parameters.min_committable_age(),
-                    ) {
+                if let Some(commitment_slot_index) = commitment_slot_index {
+                    if timelock.is_timelocked(commitment_slot_index, self.protocol_parameters.min_committable_age()) {
                         return Ok(Some(TransactionFailureReason::TimelockNotExpired));
                     }
                 } else {
@@ -300,9 +303,9 @@ impl<'a> SemanticValidationContext<'a> {
             }
 
             if let Some(expiration) = unlock_conditions.expiration() {
-                if let Some(commitment) = commitment_context_input {
+                if let Some(commitment_slot_index) = commitment_slot_index {
                     if expiration.is_expired(
-                        commitment.as_commitment().slot_index(),
+                        commitment_slot_index,
                         self.protocol_parameters.min_committable_age(),
                         self.protocol_parameters.max_committable_age(),
                     ) == Some(false)
