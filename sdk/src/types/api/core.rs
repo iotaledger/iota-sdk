@@ -307,7 +307,7 @@ impl IssuanceBlockHeaderResponse {
 #[serde(rename_all = "camelCase")]
 pub struct CongestionResponse {
     /// The slot index for which the congestion estimate is provided.
-    pub slot_index: SlotIndex,
+    pub slot: SlotIndex,
     /// Indicates if a node is ready to issue a block in a current congestion or should wait.
     pub ready: bool,
     /// The cost in mana for issuing a block in a current congestion estimated based on RMC and slot index.
