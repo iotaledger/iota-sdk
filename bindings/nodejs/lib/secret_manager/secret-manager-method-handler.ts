@@ -17,7 +17,7 @@ export class SecretManagerMethodHandler {
     methodHandler: any;
 
     /**
-     * @param methodHandler The Rust method handler created in `ClientMethodHandler.create()`.
+     * @param methodHandler The Rust method handler created in `SecretManagerMethodHandler.create()`.
      */
     constructor(methodHandler: any) {
         this.methodHandler = methodHandler;
