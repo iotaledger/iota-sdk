@@ -6,7 +6,7 @@
 mod transaction;
 mod transaction_id;
 
-use packable::{error::UnpackError, packer::Packer, unpacker::Unpacker, Packable, PackableExt};
+use packable::{Packable, PackableExt};
 
 pub(crate) use self::transaction::{ContextInputCount, InputCount, OutputCount};
 pub use self::{
@@ -20,7 +20,9 @@ use crate::types::block::{
 };
 
 /// A signed transaction to move funds.
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, Packable)]
+#[packable(unpack_error = Error)]
+#[packable(verify_with = verify_signed_transaction_payload)]
 pub struct SignedTransactionPayload {
     transaction: Transaction,
     unlocks: Unlocks,
@@ -32,9 +34,11 @@ impl SignedTransactionPayload {
 
     /// Creates a new [`SignedTransactionPayload`].
     pub fn new(transaction: Transaction, unlocks: Unlocks) -> Result<Self, Error> {
-        verify_transaction_unlocks(&transaction, &unlocks)?;
+        let payload = Self { transaction, unlocks };
 
-        Ok(Self { transaction, unlocks })
+        verify_signed_transaction_payload::<true>(&payload)?;
+
+        Ok(payload)
     }
 
     /// Returns the transaction of a [`SignedTransactionPayload`].
@@ -57,37 +61,11 @@ impl WorkScore for SignedTransactionPayload {
     }
 }
 
-impl Packable for SignedTransactionPayload {
-    type UnpackError = Error;
-    type UnpackVisitor = ProtocolParameters;
-
-    fn pack<P: Packer>(&self, packer: &mut P) -> Result<(), P::Error> {
-        self.transaction.pack(packer)?;
-        self.unlocks.pack(packer)?;
-
-        Ok(())
-    }
-
-    fn unpack<U: Unpacker, const VERIFY: bool>(
-        unpacker: &mut U,
-        visitor: &Self::UnpackVisitor,
-    ) -> Result<Self, UnpackError<Self::UnpackError, U::Error>> {
-        let transaction = Transaction::unpack::<_, VERIFY>(unpacker, visitor)?;
-        let unlocks = Unlocks::unpack::<_, VERIFY>(unpacker, &())?;
-
-        if VERIFY {
-            verify_transaction_unlocks(&transaction, &unlocks).map_err(UnpackError::Packable)?;
-        }
-
-        Ok(Self { transaction, unlocks })
-    }
-}
-
-fn verify_transaction_unlocks(transaction: &Transaction, unlocks: &Unlocks) -> Result<(), Error> {
-    if transaction.inputs().len() != unlocks.len() {
+fn verify_signed_transaction_payload<const VERIFY: bool>(payload: &SignedTransactionPayload) -> Result<(), Error> {
+    if payload.transaction.inputs().len() != payload.unlocks.len() {
         return Err(Error::InputUnlockCountMismatch {
-            input_count: transaction.inputs().len(),
-            unlock_count: unlocks.len(),
+            input_count: payload.transaction.inputs().len(),
+            unlock_count: payload.unlocks.len(),
         });
     }
 
