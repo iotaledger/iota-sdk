@@ -557,13 +557,7 @@ where
         .transaction
         .context_inputs()
         .iter()
-        .find_map(|c| {
-            if c.is_commitment() {
-                Some(c.as_commitment().slot_index())
-            } else {
-                None
-            }
-        })
+        .find_map(|c| c.as_commitment_opt().map(|c| c.slot_index()))
         .unwrap_or_else(|| prepared_transaction_data.transaction.creation_slot());
 
     // Assuming inputs_data is ordered by address type

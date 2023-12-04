@@ -283,13 +283,11 @@ impl<'a> SemanticValidationContext<'a> {
                 Output::Delegation(output) => (output.amount(), 0, None, output.unlock_conditions()),
             };
 
-            let commitment_slot_index = self.transaction.context_inputs().iter().find_map(|c| {
-                if c.is_commitment() {
-                    Some(c.as_commitment().slot_index())
-                } else {
-                    None
-                }
-            });
+            let commitment_slot_index = self
+                .transaction
+                .context_inputs()
+                .iter()
+                .find_map(|c| c.as_commitment_opt().map(|c| c.slot_index()));
 
             if let Some(timelock) = unlock_conditions.timelock() {
                 if let Some(commitment_slot_index) = commitment_slot_index {

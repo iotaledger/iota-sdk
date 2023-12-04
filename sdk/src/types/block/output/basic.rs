@@ -320,13 +320,11 @@ impl BasicOutput {
         unlock: &Unlock,
         context: &mut SemanticValidationContext<'_>,
     ) -> Result<(), TransactionFailureReason> {
-        let slot_index = context.transaction.context_inputs().iter().find_map(|c| {
-            if c.is_commitment() {
-                Some(c.as_commitment().slot_index())
-            } else {
-                None
-            }
-        });
+        let slot_index = context
+            .transaction
+            .context_inputs()
+            .iter()
+            .find_map(|c| c.as_commitment_opt().map(|c| c.slot_index()));
 
         if slot_index.is_none()
             && (self.unlock_conditions().timelock().is_some() || self.unlock_conditions().expiration().is_some())
