@@ -270,7 +270,6 @@ impl Output {
     crate::def_is_as_opt!(Output: Basic, Account, Foundry, Nft, Delegation, Anchor);
 
     /// Returns the address that is required to unlock this [`Output`].
-    /// If no `account_transition` has been provided, assumes a state transition.
     pub fn required_address(
         &self,
         slot_index: impl Into<SlotIndex> + Copy,

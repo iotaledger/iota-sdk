@@ -47,8 +47,6 @@ where
         #[cfg(feature = "participation")]
         let voting_output = wallet_data.get_voting_output()?;
 
-        let wallet_address = self.address().await.into_inner();
-
         let claimable_outputs = wallet_data.claimable_outputs(OutputsToClaim::All, slot_index, &protocol_parameters)?;
 
         #[cfg(feature = "participation")]
@@ -180,7 +178,7 @@ where
                                     .map_or_else(
                                         || output.amount(),
                                         |sdr| {
-                                            if &wallet_address == sdr.return_address() {
+                                            if wallet_data.address.inner() == sdr.return_address() {
                                                 // sending to ourself, we get the full amount
                                                 output.amount()
                                             } else {
