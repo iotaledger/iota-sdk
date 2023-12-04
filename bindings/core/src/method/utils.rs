@@ -3,7 +3,7 @@
 
 use derivative::Derivative;
 use iota_sdk::{
-    client::secret::types::InputSigningDataDto,
+    client::secret::types::InputSigningData,
     types::block::{
         address::{Bech32Address, Hrp},
         output::{AccountId, NftId, Output, OutputId, StorageScoreParameters},
@@ -168,7 +168,7 @@ pub enum UtilsMethod {
     /// Verifies the semantic of a transaction.
     VerifyTransactionSemantic {
         transaction: TransactionDto,
-        inputs: Vec<InputSigningDataDto>,
+        inputs: Vec<InputSigningData>,
         unlocks: Option<Vec<Unlock>>,
     },
 }

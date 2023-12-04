@@ -565,14 +565,14 @@ fn verify_unlock_conditions(unlock_conditions: &UnlockConditions, nft_id: &NftId
 }
 
 #[cfg(feature = "serde")]
-pub(crate) mod dto {
+mod dto {
     use alloc::vec::Vec;
 
     use serde::{Deserialize, Serialize};
 
     use super::*;
     use crate::{
-        types::block::{output::unlock_condition::dto::UnlockConditionDto, Error},
+        types::block::{output::unlock_condition::UnlockCondition, Error},
         utils::serde::string,
     };
 
@@ -586,7 +586,7 @@ pub(crate) mod dto {
         #[serde(with = "string")]
         pub mana: u64,
         pub nft_id: NftId,
-        pub unlock_conditions: Vec<UnlockConditionDto>,
+        pub unlock_conditions: Vec<UnlockCondition>,
         #[serde(skip_serializing_if = "Vec::is_empty", default)]
         pub features: Vec<Feature>,
         #[serde(skip_serializing_if = "Vec::is_empty", default)]
@@ -600,7 +600,7 @@ pub(crate) mod dto {
                 amount: value.amount(),
                 mana: value.mana(),
                 nft_id: *value.nft_id(),
-                unlock_conditions: value.unlock_conditions().iter().map(Into::into).collect::<_>(),
+                unlock_conditions: value.unlock_conditions().to_vec(),
                 features: value.features().to_vec(),
                 immutable_features: value.immutable_features().to_vec(),
             }
@@ -617,7 +617,7 @@ pub(crate) mod dto {
                 .with_immutable_features(dto.immutable_features);
 
             for u in dto.unlock_conditions {
-                builder = builder.add_unlock_condition(UnlockCondition::from(u));
+                builder = builder.add_unlock_condition(u);
             }
 
             builder.finish()
@@ -630,7 +630,7 @@ pub(crate) mod dto {
             amount: OutputBuilderAmount,
             mana: u64,
             nft_id: &NftId,
-            unlock_conditions: Vec<UnlockConditionDto>,
+            unlock_conditions: Vec<UnlockCondition>,
             features: Option<Vec<Feature>>,
             immutable_features: Option<Vec<Feature>>,
         ) -> Result<Self, Error> {
@@ -688,7 +688,7 @@ mod tests {
             OutputBuilderAmount::Amount(nft_output.amount()),
             nft_output.mana(),
             nft_output.nft_id(),
-            nft_output.unlock_conditions().iter().map(Into::into).collect(),
+            nft_output.unlock_conditions().to_vec(),
             Some(nft_output.features().to_vec()),
             Some(nft_output.immutable_features().to_vec()),
         )
@@ -700,7 +700,7 @@ mod tests {
                 builder.amount,
                 builder.mana,
                 &builder.nft_id,
-                builder.unlock_conditions.iter().map(Into::into).collect(),
+                builder.unlock_conditions.iter().cloned().collect(),
                 Some(builder.features.iter().cloned().collect()),
                 Some(builder.immutable_features.iter().cloned().collect()),
             )

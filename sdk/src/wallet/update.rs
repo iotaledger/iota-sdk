@@ -15,10 +15,7 @@ use crate::{
 use crate::{
     types::api::core::OutputWithMetadataResponse,
     types::block::payload::signed_transaction::dto::SignedTransactionPayloadDto,
-    wallet::{
-        events::types::{NewOutputEvent, SpentOutputEvent, TransactionInclusionEvent, WalletEvent},
-        types::OutputDataDto,
-    },
+    wallet::events::types::{NewOutputEvent, SpentOutputEvent, TransactionInclusionEvent, WalletEvent},
 };
 
 impl<S: 'static + SecretManage> Wallet<S>
@@ -75,7 +72,7 @@ where
                         #[cfg(feature = "events")]
                         {
                             self.emit(WalletEvent::SpentOutput(Box::new(SpentOutputEvent {
-                                output: OutputDataDto::from(&*output_data),
+                                output: output_data.clone(),
                             })))
                             .await;
                         }
@@ -98,7 +95,7 @@ where
                         .incoming_transactions
                         .get(output_data.output_id.transaction_id());
                     self.emit(WalletEvent::NewOutput(Box::new(NewOutputEvent {
-                        output: OutputDataDto::from(&output_data),
+                        output: output_data.clone(),
                         transaction: transaction
                             .as_ref()
                             .map(|tx| SignedTransactionPayloadDto::from(&tx.payload)),
