@@ -24,8 +24,14 @@ where
 {
     /// Transitions an implicit account to an account.
     pub async fn implicit_account_transition(&self, output_id: &OutputId) -> Result<TransactionWithMetadata> {
-        self.sign_and_submit_transaction(self.prepare_implicit_account_transition(output_id).await?, None)
-            .await
+        let issuer_id = AccountId::from(output_id);
+
+        self.sign_and_submit_transaction(
+            self.prepare_implicit_account_transition(output_id).await?,
+            issuer_id,
+            None,
+        )
+        .await
     }
 
     /// Prepares to transition an implicit account to an account.

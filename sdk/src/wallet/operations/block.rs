@@ -12,13 +12,19 @@ where
     crate::wallet::Error: From<S::Error>,
     crate::client::Error: From<S::Error>,
 {
-    pub(crate) async fn submit_basic_block(&self, payload: Option<Payload>) -> Result<BlockId> {
+    pub(crate) async fn submit_basic_block(
+        &self,
+        payload: Option<Payload>,
+        issuer_id: impl Into<Option<AccountId>> + Send,
+    ) -> Result<BlockId> {
         log::debug!("submit_basic_block");
+
+        // TODO
+        let issuer_id = issuer_id.into().unwrap_or(AccountId::null());
 
         let block = self
             .client()
-            // TODO https://github.com/iotaledger/iota-sdk/issues/1665 to set AccountId
-            .build_basic_block(AccountId::null(), payload)
+            .build_basic_block(issuer_id, payload)
             .await?
             .sign_ed25519(
                 &*self.get_secret_manager().read().await,
