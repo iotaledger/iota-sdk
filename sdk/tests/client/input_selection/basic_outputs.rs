@@ -6,7 +6,7 @@ use std::str::FromStr;
 use iota_sdk::{
     client::api::input_selection::{Error, InputSelection, Requirement},
     types::block::{
-        address::{AccountAddress, Address, NftAddress, RestrictedAddress},
+        address::{AccountAddress, Address, MultiAddress, NftAddress, RestrictedAddress, WeightedAddress},
         output::{AccountId, NftId},
         protocol::protocol_parameters,
     },
@@ -17,7 +17,7 @@ use crate::client::{
     build_inputs, build_outputs, is_remainder_or_return, unsorted_eq,
     Build::{Account, Basic, Nft},
     ACCOUNT_ID_0, ACCOUNT_ID_1, BECH32_ADDRESS_ACCOUNT_1, BECH32_ADDRESS_ED25519_0, BECH32_ADDRESS_ED25519_1,
-    BECH32_ADDRESS_NFT_1, BECH32_ADDRESS_REMAINDER, NFT_ID_0, NFT_ID_1,
+    BECH32_ADDRESS_ED25519_2, BECH32_ADDRESS_NFT_1, BECH32_ADDRESS_REMAINDER, NFT_ID_0, NFT_ID_1,
 };
 
 #[test]
@@ -1980,4 +1980,83 @@ fn restricted_ed25519_sender() {
     );
     // Provided output + remainder
     assert_eq!(selected.outputs.len(), 2);
+}
+
+#[test]
+fn multi_address_sender_already_fulfilled() {
+    let protocol_parameters = protocol_parameters();
+    let sender_0 = Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap();
+    let sender_1 = Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap();
+    let sender_2 = Address::try_from_bech32(BECH32_ADDRESS_ED25519_2).unwrap();
+    let multi = Address::from(
+        MultiAddress::new(
+            [
+                WeightedAddress::new(sender_0, 1).unwrap(),
+                WeightedAddress::new(sender_1, 1).unwrap(),
+                WeightedAddress::new(sender_2, 1).unwrap(),
+            ],
+            3,
+        )
+        .unwrap(),
+    );
+
+    let inputs = build_inputs([
+        Basic(
+            1_000_000,
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+        ),
+        Basic(
+            1_000_000,
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+        ),
+        Basic(
+            1_000_000,
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_2).unwrap(),
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+        ),
+    ]);
+    let outputs = build_outputs([Basic(
+        3_000_000,
+        Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+        None,
+        Some(multi),
+        None,
+        None,
+        None,
+        None,
+    )]);
+
+    let selected = InputSelection::new(
+        inputs.clone(),
+        outputs.clone(),
+        [
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_2).unwrap(),
+        ],
+        protocol_parameters,
+    )
+    .with_required_inputs([*inputs[0].output_id(), *inputs[1].output_id(), *inputs[2].output_id()])
+    .select()
+    .unwrap();
+
+    assert!(unsorted_eq(&selected.inputs, &inputs));
+    assert!(unsorted_eq(&selected.outputs, &outputs));
 }
