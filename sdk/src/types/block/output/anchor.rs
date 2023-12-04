@@ -653,7 +653,6 @@ fn verify_unlock_conditions(unlock_conditions: &UnlockConditions, anchor_id: &An
 
 #[cfg(feature = "serde")]
 mod dto {
-
     use alloc::vec::Vec;
 
     use serde::{Deserialize, Serialize};
