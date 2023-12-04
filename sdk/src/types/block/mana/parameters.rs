@@ -351,30 +351,29 @@ mod test {
         );
     }
 
-    // TODO: Uncomment when iota.go fixes their calculation + test data
-    // #[test]
-    // fn test_potential_mana_lookup_len_delta() {
-    //     assert_eq!(
-    //         params().potential_mana(
-    //             i64::MAX as u64,
-    //             params().first_slot_of(1),
-    //             params().first_slot_of(params().mana_parameters().decay_factors().len() as u32 + 1)
-    //         ),
-    //         Ok(183827294847826527)
-    //     );
-    // }
+    #[test]
+    fn test_potential_mana_lookup_len_delta() {
+        assert_eq!(
+            params().potential_mana(
+                i64::MAX as u64,
+                params().first_slot_of(1),
+                params().first_slot_of(params().mana_parameters().decay_factors().len() as u32 + 1)
+            ),
+            Ok(183827295065703076)
+        );
+    }
 
-    // #[test]
-    // fn test_potential_mana_lookup_len_delta_multiple() {
-    //     assert_eq!(
-    //         params().potential_mana(
-    //             i64::MAX as u64,
-    //             params().first_slot_of(1),
-    //             params().first_slot_of(3 * params().mana_parameters().decay_factors().len() as u32 + 1)
-    //         ),
-    //         Ok(410192222442040018)
-    //     );
-    // }
+    #[test]
+    fn test_potential_mana_lookup_len_delta_multiple() {
+        assert_eq!(
+            params().potential_mana(
+                i64::MAX as u64,
+                params().first_slot_of(1),
+                params().first_slot_of(3 * params().mana_parameters().decay_factors().len() as u32 + 1)
+            ),
+            Ok(410192223115924783)
+        );
+    }
 
     #[test]
     fn test_potential_mana_same_epoch() {
@@ -392,19 +391,19 @@ mod test {
         );
     }
 
-    // #[test]
-    // fn test_potential_mana_several_epochs() {
-    //     assert_eq!(
-    //         params().potential_mana(i64::MAX as u64, params().first_slot_of(1), params().last_slot_of(3)),
-    //         Ok(1687319975062367)
-    //     );
-    // }
+    #[test]
+    fn test_potential_mana_several_epochs() {
+        assert_eq!(
+            params().potential_mana(i64::MAX as u64, params().first_slot_of(1), params().last_slot_of(3)),
+            Ok(1687319824887185)
+        );
+    }
 
-    // #[test]
-    // fn test_potential_mana_max_mana() {
-    //     assert_eq!(
-    //         params().potential_mana(i64::MAX as u64, params().first_slot_of(1), params().first_slot_of(401)),
-    //         Ok(190239292158065300)
-    //     );
-    // }
+    #[test]
+    fn test_potential_mana_max_mana() {
+        assert_eq!(
+            params().potential_mana(i64::MAX as u64, params().first_slot_of(1), params().first_slot_of(401)),
+            Ok(190239292388858706)
+        );
+    }
 }
