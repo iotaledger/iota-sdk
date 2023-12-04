@@ -59,9 +59,9 @@ impl OutputData {
     pub fn input_signing_data(
         &self,
         wallet_data: &WalletData,
-        slot_index: impl Into<SlotIndex> + Copy,
-        min_committable_age: impl Into<SlotIndex> + Copy,
-        max_committable_age: impl Into<SlotIndex> + Copy,
+        slot_index: impl Into<SlotIndex>,
+        min_committable_age: impl Into<SlotIndex>,
+        max_committable_age: impl Into<SlotIndex>,
     ) -> crate::wallet::Result<Option<InputSigningData>> {
         let required_address = self
             .output

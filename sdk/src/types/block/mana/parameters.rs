@@ -108,8 +108,8 @@ impl ProtocolParameters {
     pub fn mana_with_decay(
         &self,
         mana: u64,
-        slot_index_created: impl Into<SlotIndex> + Copy,
-        slot_index_target: impl Into<SlotIndex> + Copy,
+        slot_index_created: impl Into<SlotIndex>,
+        slot_index_target: impl Into<SlotIndex>,
     ) -> Result<u64, Error> {
         let (slot_index_created, slot_index_target) = (slot_index_created.into(), slot_index_target.into());
         let (epoch_index_created, epoch_index_target) = (
@@ -149,8 +149,8 @@ impl ProtocolParameters {
     pub fn potential_mana(
         &self,
         amount: u64,
-        slot_index_created: impl Into<SlotIndex> + Copy,
-        slot_index_target: impl Into<SlotIndex> + Copy,
+        slot_index_created: impl Into<SlotIndex>,
+        slot_index_target: impl Into<SlotIndex>,
     ) -> Result<u64, Error> {
         let (slot_index_created, slot_index_target) = (slot_index_created.into(), slot_index_target.into());
         let (epoch_index_created, epoch_index_target) = (

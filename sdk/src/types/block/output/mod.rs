@@ -272,9 +272,9 @@ impl Output {
     /// Returns the address that is required to unlock this [`Output`].
     pub fn required_address(
         &self,
-        slot_index: impl Into<SlotIndex> + Copy,
-        min_committable_age: impl Into<SlotIndex> + Copy,
-        max_committable_age: impl Into<SlotIndex> + Copy,
+        slot_index: impl Into<SlotIndex>,
+        min_committable_age: impl Into<SlotIndex>,
+        max_committable_age: impl Into<SlotIndex>,
     ) -> Result<Option<Address>, Error> {
         Ok(match self {
             Self::Basic(output) => output
