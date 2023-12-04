@@ -259,7 +259,7 @@ where
             #[cfg(feature = "storage")]
             storage_manager: tokio::sync::RwLock::new(storage_manager),
         };
-        let wallet_data = WalletData::new(self.bip_path, address, self.alias.clone());
+        let wallet_data = wallet_data.unwrap_or_else(|| WalletData::new(self.bip_path, address, self.alias.clone()));
         let wallet = Wallet {
             inner: Arc::new(wallet_inner),
             data: Arc::new(RwLock::new(wallet_data)),
