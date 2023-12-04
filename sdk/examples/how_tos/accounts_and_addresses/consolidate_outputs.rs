@@ -23,6 +23,12 @@ async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
+    for var in ["WALLET_DB_PATH", "EXPLORER_URL", "STRONGHOLD_PASSWORD"] {
+        if std::env::var(var).is_err() {
+            panic!(".env variable '{}' is undefined, see .env.example", var);
+        }
+    }
+
     let wallet = Wallet::builder()
         .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
         .finish()
@@ -42,16 +48,21 @@ async fn main() -> Result<()> {
     // unlock condition and it is an `AddressUnlockCondition`, and so they are valid for consolidation. They have the
     // same `AddressUnlockCondition`(the address of the wallet), so they will be consolidated into one
     // output.
-    let outputs = wallet.unspent_outputs(None).await;
     println!("Outputs BEFORE consolidation:");
-    outputs.iter().enumerate().for_each(|(i, output_data)| {
-        println!("OUTPUT #{i}");
-        println!(
-            "- amount: {:?}\n- native tokens: {:?}",
-            output_data.output.amount(),
-            output_data.output.native_token()
-        )
-    });
+    wallet
+        .data()
+        .await
+        .unspent_outputs()
+        .values()
+        .enumerate()
+        .for_each(|(i, output_data)| {
+            println!("OUTPUT #{i}");
+            println!(
+                "- amount: {:?}\n- native tokens: {:?}",
+                output_data.output.amount(),
+                output_data.output.native_token()
+            )
+        });
 
     println!("Sending consolidation transaction...");
 
@@ -77,16 +88,21 @@ async fn main() -> Result<()> {
     println!("Wallet synced");
 
     // Outputs after consolidation
-    let outputs = wallet.unspent_outputs(None).await;
     println!("Outputs AFTER consolidation:");
-    outputs.iter().enumerate().for_each(|(i, output_data)| {
-        println!("OUTPUT #{i}");
-        println!(
-            "- amount: {:?}\n- native tokens: {:?}",
-            output_data.output.amount(),
-            output_data.output.native_token()
-        )
-    });
+    wallet
+        .data()
+        .await
+        .unspent_outputs()
+        .values()
+        .enumerate()
+        .for_each(|(i, output_data)| {
+            println!("OUTPUT #{i}");
+            println!(
+                "- amount: {:?}\n- native tokens: {:?}",
+                output_data.output.amount(),
+                output_data.output.native_token()
+            )
+        });
 
     Ok(())
 }

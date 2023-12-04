@@ -603,21 +603,21 @@ fn verify_unlock_conditions(unlock_conditions: &UnlockConditions, account_id: &A
 }
 
 #[cfg(feature = "serde")]
-pub(crate) mod dto {
+mod dto {
     use alloc::vec::Vec;
 
     use serde::{Deserialize, Serialize};
 
     use super::*;
     use crate::{
-        types::block::{output::unlock_condition::dto::UnlockConditionDto, Error},
+        types::block::{output::unlock_condition::UnlockCondition, Error},
         utils::serde::string,
     };
 
     /// Describes an account in the ledger that can be controlled by the state and governance controllers.
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
-    pub struct AccountOutputDto {
+    pub(crate) struct AccountOutputDto {
         #[serde(rename = "type")]
         pub kind: u8,
         #[serde(with = "string")]
@@ -626,7 +626,7 @@ pub(crate) mod dto {
         pub mana: u64,
         pub account_id: AccountId,
         pub foundry_counter: u32,
-        pub unlock_conditions: Vec<UnlockConditionDto>,
+        pub unlock_conditions: Vec<UnlockCondition>,
         #[serde(skip_serializing_if = "Vec::is_empty", default)]
         pub features: Vec<Feature>,
         #[serde(skip_serializing_if = "Vec::is_empty", default)]
@@ -641,7 +641,7 @@ pub(crate) mod dto {
                 mana: value.mana(),
                 account_id: *value.account_id(),
                 foundry_counter: value.foundry_counter(),
-                unlock_conditions: value.unlock_conditions().iter().map(Into::into).collect::<_>(),
+                unlock_conditions: value.unlock_conditions().to_vec(),
                 features: value.features().to_vec(),
                 immutable_features: value.immutable_features().to_vec(),
             }
@@ -659,7 +659,7 @@ pub(crate) mod dto {
                 .with_immutable_features(dto.immutable_features);
 
             for u in dto.unlock_conditions {
-                builder = builder.add_unlock_condition(UnlockCondition::from(u));
+                builder = builder.add_unlock_condition(u);
             }
 
             builder.finish()
@@ -673,7 +673,7 @@ pub(crate) mod dto {
             mana: u64,
             account_id: &AccountId,
             foundry_counter: Option<u32>,
-            unlock_conditions: Vec<UnlockConditionDto>,
+            unlock_conditions: Vec<UnlockCondition>,
             features: Option<Vec<Feature>>,
             immutable_features: Option<Vec<Feature>>,
         ) -> Result<Self, Error> {
@@ -706,6 +706,8 @@ pub(crate) mod dto {
             builder.finish()
         }
     }
+
+    crate::impl_serde_typed_dto!(AccountOutput, AccountOutputDto, "account output");
 }
 
 #[cfg(test)]
@@ -714,7 +716,7 @@ mod tests {
 
     use super::*;
     use crate::types::block::{
-        output::dto::OutputDto,
+        output::account::dto::AccountOutputDto,
         protocol::protocol_parameters,
         rand::output::{
             feature::rand_allowed_features, rand_account_id, rand_account_output,
@@ -725,24 +727,22 @@ mod tests {
     #[test]
     fn to_from_dto() {
         let protocol_parameters = protocol_parameters();
-        let output = rand_account_output(protocol_parameters.token_supply());
-        let dto = OutputDto::Account((&output).into());
-        let output_unver = Output::try_from(dto.clone()).unwrap();
-        assert_eq!(&output, output_unver.as_account());
-        let output_ver = Output::try_from(dto).unwrap();
-        assert_eq!(&output, output_ver.as_account());
+        let account_output = rand_account_output(protocol_parameters.token_supply());
+        let dto = AccountOutputDto::from(&account_output);
+        let output = Output::Account(AccountOutput::try_from(dto).unwrap());
+        assert_eq!(&account_output, output.as_account());
 
         let output_split = AccountOutput::try_from_dtos(
-            OutputBuilderAmount::Amount(output.amount()),
-            output.mana(),
-            output.account_id(),
-            output.foundry_counter().into(),
-            output.unlock_conditions().iter().map(Into::into).collect(),
-            Some(output.features().to_vec()),
-            Some(output.immutable_features().to_vec()),
+            OutputBuilderAmount::Amount(account_output.amount()),
+            account_output.mana(),
+            account_output.account_id(),
+            account_output.foundry_counter().into(),
+            account_output.unlock_conditions().to_vec(),
+            Some(account_output.features().to_vec()),
+            Some(account_output.immutable_features().to_vec()),
         )
         .unwrap();
-        assert_eq!(output, output_split);
+        assert_eq!(account_output, output_split);
 
         let account_id = rand_account_id();
         let address = rand_address_unlock_condition_different_from_account_id(&account_id);
@@ -753,7 +753,7 @@ mod tests {
                 builder.mana,
                 &builder.account_id,
                 builder.foundry_counter,
-                builder.unlock_conditions.iter().map(Into::into).collect(),
+                builder.unlock_conditions.iter().cloned().collect(),
                 Some(builder.features.iter().cloned().collect()),
                 Some(builder.immutable_features.iter().cloned().collect()),
             )

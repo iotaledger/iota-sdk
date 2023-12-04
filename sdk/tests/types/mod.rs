@@ -12,7 +12,7 @@ mod output;
 mod output_id;
 mod parents;
 mod payload;
-mod protocol;
+mod protocol_parameters;
 mod signed_transaction_payload;
 mod slot;
 mod storage_score;

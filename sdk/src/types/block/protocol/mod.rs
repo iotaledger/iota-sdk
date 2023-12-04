@@ -178,7 +178,7 @@ impl ProtocolParameters {
         2_u32.pow(self.slots_per_epoch_exponent() as u32)
     }
 
-    /// Gets a [`SlotIndex`] from a unix timestamp.
+    /// Gets a [`SlotIndex`] from a unix timestamp in seconds.
     pub fn slot_index(&self, timestamp: u64) -> SlotIndex {
         SlotIndex::from_timestamp(
             timestamp,

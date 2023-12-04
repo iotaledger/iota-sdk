@@ -16,8 +16,8 @@ use iota_sdk::{
     types::block::{
         address::{Bech32Address, Hrp},
         output::{
-            dto::OutputDto, feature::Feature, unlock_condition::dto::UnlockConditionDto, AccountId, AnchorId,
-            DelegationId, FoundryId, NftId, OutputId, TokenScheme,
+            feature::Feature, unlock_condition::UnlockCondition, AccountId, AnchorId, DelegationId, FoundryId, NftId,
+            Output, OutputId, TokenScheme,
         },
         payload::{dto::PayloadDto, signed_transaction::TransactionId},
         BlockDto, BlockId,
@@ -45,7 +45,7 @@ pub enum ClientMethod {
         mana: u64,
         account_id: AccountId,
         foundry_counter: Option<u32>,
-        unlock_conditions: Vec<UnlockConditionDto>,
+        unlock_conditions: Vec<UnlockCondition>,
         features: Option<Vec<Feature>>,
         immutable_features: Option<Vec<Feature>>,
     },
@@ -60,7 +60,7 @@ pub enum ClientMethod {
         // TODO: Determine if `default` is wanted here
         #[serde(default, with = "string")]
         mana: u64,
-        unlock_conditions: Vec<UnlockConditionDto>,
+        unlock_conditions: Vec<UnlockCondition>,
         features: Option<Vec<Feature>>,
     },
     /// Build a FoundryOutput.
@@ -73,7 +73,7 @@ pub enum ClientMethod {
         amount: Option<u64>,
         serial_number: u32,
         token_scheme: TokenScheme,
-        unlock_conditions: Vec<UnlockConditionDto>,
+        unlock_conditions: Vec<UnlockCondition>,
         features: Option<Vec<Feature>>,
         immutable_features: Option<Vec<Feature>>,
     },
@@ -89,7 +89,7 @@ pub enum ClientMethod {
         #[serde(default, with = "string")]
         mana: u64,
         nft_id: NftId,
-        unlock_conditions: Vec<UnlockConditionDto>,
+        unlock_conditions: Vec<UnlockCondition>,
         features: Option<Vec<Feature>>,
         immutable_features: Option<Vec<Feature>>,
     },
@@ -356,7 +356,7 @@ pub enum ClientMethod {
     /// Calculate the minimum required amount for an output.
     /// Expected response:
     /// [`OutputAmount`](crate::Response::OutputAmount)
-    ComputeMinimumOutputAmount { output: OutputDto },
+    ComputeMinimumOutputAmount { output: Output },
     /// Requests funds for a given address from the faucet, for example `https://faucet.testnet.shimmer.network/api/enqueue` or `http://localhost:8091/api/enqueue`.
     RequestFundsFromFaucet {
         /// Faucet URL

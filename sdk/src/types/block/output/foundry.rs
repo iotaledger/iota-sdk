@@ -72,7 +72,7 @@ impl FoundryId {
         )
     }
 
-    /// Returns the [`TokenScheme`](crate::types::block::output::TokenScheme) kind of the [`FoundryId`].
+    /// Returns the [`TokenScheme`] kind of the [`FoundryId`].
     pub fn token_scheme_kind(&self) -> u8 {
         // PANIC: the length is known.
         *self.0.last().unwrap()
@@ -660,27 +660,27 @@ fn verify_unlock_conditions(unlock_conditions: &UnlockConditions) -> Result<(), 
 }
 
 #[cfg(feature = "serde")]
-pub(crate) mod dto {
+mod dto {
     use alloc::vec::Vec;
 
     use serde::{Deserialize, Serialize};
 
     use super::*;
     use crate::{
-        types::block::{output::unlock_condition::dto::UnlockConditionDto, Error},
+        types::block::{output::unlock_condition::UnlockCondition, Error},
         utils::serde::string,
     };
 
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
-    pub struct FoundryOutputDto {
+    pub(crate) struct FoundryOutputDto {
         #[serde(rename = "type")]
         pub kind: u8,
         #[serde(with = "string")]
         pub amount: u64,
         pub serial_number: u32,
         pub token_scheme: TokenScheme,
-        pub unlock_conditions: Vec<UnlockConditionDto>,
+        pub unlock_conditions: Vec<UnlockCondition>,
         #[serde(skip_serializing_if = "Vec::is_empty", default)]
         pub features: Vec<Feature>,
         #[serde(skip_serializing_if = "Vec::is_empty", default)]
@@ -694,7 +694,7 @@ pub(crate) mod dto {
                 amount: value.amount(),
                 serial_number: value.serial_number(),
                 token_scheme: value.token_scheme().clone(),
-                unlock_conditions: value.unlock_conditions().iter().map(Into::into).collect::<_>(),
+                unlock_conditions: value.unlock_conditions().to_vec(),
                 features: value.features().to_vec(),
                 immutable_features: value.immutable_features().to_vec(),
             }
@@ -717,7 +717,7 @@ pub(crate) mod dto {
             }
 
             for u in dto.unlock_conditions {
-                builder = builder.add_unlock_condition(UnlockCondition::from(u));
+                builder = builder.add_unlock_condition(u);
             }
 
             builder.finish()
@@ -730,7 +730,7 @@ pub(crate) mod dto {
             amount: OutputBuilderAmount,
             serial_number: u32,
             token_scheme: TokenScheme,
-            unlock_conditions: Vec<UnlockConditionDto>,
+            unlock_conditions: Vec<UnlockCondition>,
             features: Option<Vec<Feature>>,
             immutable_features: Option<Vec<Feature>>,
         ) -> Result<Self, Error> {
@@ -760,6 +760,8 @@ pub(crate) mod dto {
             builder.finish()
         }
     }
+
+    crate::impl_serde_typed_dto!(FoundryOutput, FoundryOutputDto, "foundry output");
 }
 
 #[cfg(test)]
@@ -769,8 +771,8 @@ mod tests {
     use super::*;
     use crate::types::block::{
         output::{
-            dto::OutputDto, unlock_condition::ImmutableAccountAddressUnlockCondition, FoundryId, SimpleTokenScheme,
-            TokenId,
+            foundry::dto::FoundryOutputDto, unlock_condition::ImmutableAccountAddressUnlockCondition, FoundryId,
+            SimpleTokenScheme, TokenId,
         },
         protocol::protocol_parameters,
         rand::{
@@ -785,12 +787,10 @@ mod tests {
     #[test]
     fn to_from_dto() {
         let protocol_parameters = protocol_parameters();
-        let output = rand_foundry_output(protocol_parameters.token_supply());
-        let dto = OutputDto::Foundry((&output).into());
-        let output_unver = Output::try_from(dto.clone()).unwrap();
-        assert_eq!(&output, output_unver.as_foundry());
-        let output_ver = Output::try_from(dto).unwrap();
-        assert_eq!(&output, output_ver.as_foundry());
+        let foundry_output = rand_foundry_output(protocol_parameters.token_supply());
+        let dto = FoundryOutputDto::from(&foundry_output);
+        let output = Output::Foundry(FoundryOutput::try_from(dto).unwrap());
+        assert_eq!(&foundry_output, output.as_foundry());
 
         let foundry_id = FoundryId::build(&rand_account_address(), 0, SimpleTokenScheme::KIND);
 
@@ -799,7 +799,7 @@ mod tests {
                 builder.amount,
                 builder.serial_number,
                 builder.token_scheme.clone(),
-                builder.unlock_conditions.iter().map(Into::into).collect(),
+                builder.unlock_conditions.iter().cloned().collect(),
                 Some(builder.features.iter().cloned().collect()),
                 Some(builder.immutable_features.iter().cloned().collect()),
             )

@@ -235,7 +235,7 @@ pub struct DelegationOutput {
 }
 
 impl DelegationOutput {
-    /// The [`Output`](crate::types::block::output::Output) kind of a [`DelegationOutput`].
+    /// The [`Output`] kind of a [`DelegationOutput`].
     pub const KIND: u8 = 5;
     /// The set of allowed [`UnlockCondition`]s for a [`DelegationOutput`].
     pub const ALLOWED_UNLOCK_CONDITIONS: UnlockConditionFlags = UnlockConditionFlags::ADDRESS;
@@ -433,7 +433,7 @@ fn verify_unlock_conditions_packable<const VERIFY: bool>(
 }
 
 #[cfg(feature = "serde")]
-pub(crate) mod dto {
+mod dto {
     use alloc::vec::Vec;
 
     use serde::{Deserialize, Serialize};
@@ -441,7 +441,7 @@ pub(crate) mod dto {
     use super::*;
     use crate::{
         types::block::{
-            output::{unlock_condition::dto::UnlockConditionDto, OutputBuilderAmount},
+            output::{unlock_condition::UnlockCondition, OutputBuilderAmount},
             Error,
         },
         utils::serde::string,
@@ -449,7 +449,7 @@ pub(crate) mod dto {
 
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
-    pub struct DelegationOutputDto {
+    struct DelegationOutputDto {
         #[serde(rename = "type")]
         pub kind: u8,
         #[serde(with = "string")]
@@ -460,7 +460,7 @@ pub(crate) mod dto {
         pub validator_address: AccountAddress,
         start_epoch: EpochIndex,
         end_epoch: EpochIndex,
-        pub unlock_conditions: Vec<UnlockConditionDto>,
+        pub unlock_conditions: Vec<UnlockCondition>,
     }
 
     impl From<&DelegationOutput> for DelegationOutputDto {
@@ -473,7 +473,7 @@ pub(crate) mod dto {
                 validator_address: *value.validator_address(),
                 start_epoch: value.start_epoch(),
                 end_epoch: value.end_epoch(),
-                unlock_conditions: value.unlock_conditions().iter().map(Into::into).collect::<_>(),
+                unlock_conditions: value.unlock_conditions().to_vec(),
             }
         }
     }
@@ -492,7 +492,7 @@ pub(crate) mod dto {
             .with_end_epoch(dto.end_epoch);
 
             for u in dto.unlock_conditions {
-                builder = builder.add_unlock_condition(UnlockCondition::from(u));
+                builder = builder.add_unlock_condition(u);
             }
 
             builder.finish()
@@ -508,7 +508,7 @@ pub(crate) mod dto {
             validator_address: &AccountAddress,
             start_epoch: impl Into<EpochIndex>,
             end_epoch: impl Into<EpochIndex>,
-            unlock_conditions: Vec<UnlockConditionDto>,
+            unlock_conditions: Vec<UnlockCondition>,
         ) -> Result<Self, Error> {
             let mut builder = match amount {
                 OutputBuilderAmount::Amount(amount) => DelegationOutputBuilder::new_with_amount(
@@ -536,4 +536,6 @@ pub(crate) mod dto {
             builder.finish()
         }
     }
+
+    crate::impl_serde_typed_dto!(DelegationOutput, DelegationOutputDto, "delegation output");
 }
