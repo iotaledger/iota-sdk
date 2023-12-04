@@ -257,7 +257,7 @@ mod test {
     }
 
     #[test]
-    fn test_mana_decay_no_factors() {
+    fn mana_decay_no_factors() {
         let mana_parameters = ManaParameters {
             decay_factors: Box::<[_]>::default().try_into().unwrap(),
             ..Default::default()
@@ -266,7 +266,7 @@ mod test {
     }
 
     #[test]
-    fn test_mana_decay_no_delta() {
+    fn mana_decay_no_delta() {
         assert_eq!(
             params().mana_with_decay(100, params().first_slot_of(1), params().first_slot_of(1)),
             Ok(100)
@@ -274,7 +274,7 @@ mod test {
     }
 
     #[test]
-    fn test_mana_decay_no_mana() {
+    fn mana_decay_no_mana() {
         assert_eq!(
             params().mana_with_decay(0, params().first_slot_of(1), params().first_slot_of(400)),
             Ok(0)
@@ -282,7 +282,7 @@ mod test {
     }
 
     #[test]
-    fn test_mana_decay_negative_delta() {
+    fn mana_decay_negative_delta() {
         assert_eq!(
             params().mana_with_decay(100, params().first_slot_of(2), params().first_slot_of(1)),
             Err(Error::InvalidEpochDelta {
@@ -293,7 +293,7 @@ mod test {
     }
 
     #[test]
-    fn test_mana_decay_lookup_len_delta() {
+    fn mana_decay_lookup_len_delta() {
         assert_eq!(
             params().mana_with_decay(
                 u64::MAX,
@@ -305,7 +305,7 @@ mod test {
     }
 
     #[test]
-    fn test_mana_decay_lookup_len_delta_multiple() {
+    fn mana_decay_lookup_len_delta_multiple() {
         assert_eq!(
             params().mana_with_decay(
                 u64::MAX,
@@ -317,7 +317,7 @@ mod test {
     }
 
     #[test]
-    fn test_mana_decay_max_mana() {
+    fn mana_decay_max_mana() {
         assert_eq!(
             params().mana_with_decay(u64::MAX, params().first_slot_of(1), params().first_slot_of(401)),
             Ok(13046663022640287317)
@@ -325,7 +325,7 @@ mod test {
     }
 
     #[test]
-    fn test_potential_mana_no_delta() {
+    fn potential_mana_no_delta() {
         assert_eq!(
             params().potential_mana(100, params().first_slot_of(1), params().first_slot_of(1)),
             Ok(0)
@@ -333,7 +333,7 @@ mod test {
     }
 
     #[test]
-    fn test_potential_mana_no_mana() {
+    fn potential_mana_no_mana() {
         assert_eq!(
             params().potential_mana(0, params().first_slot_of(1), params().first_slot_of(400)),
             Ok(0)
@@ -341,7 +341,7 @@ mod test {
     }
 
     #[test]
-    fn test_potential_mana_negative_delta() {
+    fn potential_mana_negative_delta() {
         assert_eq!(
             params().potential_mana(100, params().first_slot_of(2), params().first_slot_of(1)),
             Err(Error::InvalidEpochDelta {
@@ -351,33 +351,32 @@ mod test {
         );
     }
 
-    // TODO: Uncomment when iota.go fixes their calculation + test data
-    // #[test]
-    // fn test_potential_mana_lookup_len_delta() {
-    //     assert_eq!(
-    //         params().potential_mana(
-    //             i64::MAX as u64,
-    //             params().first_slot_of(1),
-    //             params().first_slot_of(params().mana_parameters().decay_factors().len() as u32 + 1)
-    //         ),
-    //         Ok(183827294847826527)
-    //     );
-    // }
-
-    // #[test]
-    // fn test_potential_mana_lookup_len_delta_multiple() {
-    //     assert_eq!(
-    //         params().potential_mana(
-    //             i64::MAX as u64,
-    //             params().first_slot_of(1),
-    //             params().first_slot_of(3 * params().mana_parameters().decay_factors().len() as u32 + 1)
-    //         ),
-    //         Ok(410192222442040018)
-    //     );
-    // }
+    #[test]
+    fn potential_mana_lookup_len_delta() {
+        assert_eq!(
+            params().potential_mana(
+                i64::MAX as u64,
+                params().first_slot_of(1),
+                params().first_slot_of(params().mana_parameters().decay_factors().len() as u32 + 1)
+            ),
+            Ok(183827295065703076)
+        );
+    }
 
     #[test]
-    fn test_potential_mana_same_epoch() {
+    fn potential_mana_lookup_len_delta_multiple() {
+        assert_eq!(
+            params().potential_mana(
+                i64::MAX as u64,
+                params().first_slot_of(1),
+                params().first_slot_of(3 * params().mana_parameters().decay_factors().len() as u32 + 1)
+            ),
+            Ok(410192223115924783)
+        );
+    }
+
+    #[test]
+    fn potential_mana_same_epoch() {
         assert_eq!(
             params().potential_mana(i64::MAX as u64, params().first_slot_of(1), params().last_slot_of(1)),
             Ok(562881233944575)
@@ -385,26 +384,26 @@ mod test {
     }
 
     #[test]
-    fn test_potential_mana_one_epoch() {
+    fn potential_mana_one_epoch() {
         assert_eq!(
             params().potential_mana(i64::MAX as u64, params().first_slot_of(1), params().last_slot_of(2)),
             Ok(1125343946211326)
         );
     }
 
-    // #[test]
-    // fn test_potential_mana_several_epochs() {
-    //     assert_eq!(
-    //         params().potential_mana(i64::MAX as u64, params().first_slot_of(1), params().last_slot_of(3)),
-    //         Ok(1687319975062367)
-    //     );
-    // }
+    #[test]
+    fn potential_mana_several_epochs() {
+        assert_eq!(
+            params().potential_mana(i64::MAX as u64, params().first_slot_of(1), params().last_slot_of(3)),
+            Ok(1687319824887185)
+        );
+    }
 
-    // #[test]
-    // fn test_potential_mana_max_mana() {
-    //     assert_eq!(
-    //         params().potential_mana(i64::MAX as u64, params().first_slot_of(1), params().first_slot_of(401)),
-    //         Ok(190239292158065300)
-    //     );
-    // }
+    #[test]
+    fn potential_mana_max_mana() {
+        assert_eq!(
+            params().potential_mana(i64::MAX as u64, params().first_slot_of(1), params().first_slot_of(401)),
+            Ok(190239292388858706)
+        );
+    }
 }
