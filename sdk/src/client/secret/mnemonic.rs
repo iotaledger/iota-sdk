@@ -3,8 +3,6 @@
 
 //! Implementation of [`MnemonicSecretManager`].
 
-use std::ops::Range;
-
 use async_trait::async_trait;
 use crypto::{
     keys::{bip39::Mnemonic, bip44::Bip44, slip10::Seed},
@@ -15,12 +13,14 @@ use crypto::{
 };
 use zeroize::Zeroizing;
 
-use super::{GenerateAddressOptions, SecretManage};
 use crate::{
-    client::{api::PreparedTransactionData, Client, Error},
-    types::block::{
-        payload::signed_transaction::SignedTransactionPayload, signature::Ed25519Signature, unlock::Unlocks,
+    client::{
+        secret::{
+            types::EvmSignature, Generate, GenerateMultiKeyOptions, GeneratePublicKeyOptions, Sign, SignTransaction,
+        },
+        Client, Error,
     },
+    types::block::{address::Ed25519Address, signature::Ed25519Signature},
 };
 
 /// Secret manager that uses only a mnemonic.
@@ -35,62 +35,134 @@ impl std::fmt::Debug for MnemonicSecretManager {
 }
 
 #[async_trait]
-impl SecretManage for MnemonicSecretManager {
-    type Error = Error;
+impl Generate<ed25519::PublicKey> for MnemonicSecretManager {
+    type Options = GeneratePublicKeyOptions;
 
-    async fn generate_ed25519_public_keys(
-        &self,
-        coin_type: u32,
-        account_index: u32,
-        address_indexes: Range<u32>,
-        options: impl Into<Option<GenerateAddressOptions>> + Send,
-    ) -> Result<Vec<ed25519::PublicKey>, Self::Error> {
-        let internal = options.into().map(|o| o.internal).unwrap_or_default();
+    async fn generate(&self, options: &Self::Options) -> crate::client::Result<ed25519::PublicKey> {
+        let chain = Bip44::new(options.coin_type)
+            .with_account(options.account_index)
+            .with_change(options.internal as _);
 
-        Ok(address_indexes
-            .map(|address_index| {
-                let chain = Bip44::new(coin_type)
-                    .with_account(account_index)
-                    .with_change(internal as _)
-                    .with_address_index(address_index);
+        let public_key = chain
+            .derive(&self.0.to_master_key::<ed25519::SecretKey>())
+            .secret_key()
+            .public_key();
 
-                let public_key = chain
-                    .derive(&self.0.to_master_key::<ed25519::SecretKey>())
-                    .secret_key()
-                    .public_key();
-
-                crate::client::Result::Ok(public_key)
-            })
-            .collect::<Result<_, _>>()?)
+        Ok(public_key)
     }
+}
 
-    async fn generate_evm_addresses(
-        &self,
-        coin_type: u32,
-        account_index: u32,
-        address_indexes: Range<u32>,
-        options: impl Into<Option<GenerateAddressOptions>> + Send,
-    ) -> Result<Vec<EvmAddress>, Self::Error> {
-        let internal = options.into().map(|o| o.internal).unwrap_or_default();
+#[async_trait]
+impl Generate<Ed25519Address> for MnemonicSecretManager {
+    type Options = GeneratePublicKeyOptions;
 
-        Ok(address_indexes
-            .map(|address_index| {
-                let chain = Bip44::new(coin_type)
-                    .with_account(account_index)
-                    .with_change(internal as _)
-                    .with_address_index(address_index);
-
-                let public_key = chain
-                    .derive(&self.0.to_master_key::<secp256k1_ecdsa::SecretKey>())
-                    .secret_key()
-                    .public_key();
-
-                crate::client::Result::Ok(public_key.evm_address())
-            })
-            .collect::<Result<_, _>>()?)
+    async fn generate(&self, options: &Self::Options) -> crate::client::Result<Ed25519Address> {
+        let public_key: ed25519::PublicKey = self.generate(options).await?;
+        Ok(Ed25519Address::from_public_key_bytes(public_key.to_bytes()))
     }
+}
 
-    async fn sign_ed25519(&self, msg: &[u8], chain: Bip44) -> Result<Ed25519Signature, Self::Error> {
+#[async_trait]
+impl Generate<Vec<ed25519::PublicKey>> for MnemonicSecretManager {
+    type Options = GenerateMultiKeyOptions;
+
+    async fn generate(&self, options: &Self::Options) -> crate::client::Result<Vec<ed25519::PublicKey>> {
+        let mut res = Vec::with_capacity(options.address_range.len());
+        for address_index in options.address_range.clone() {
+            let public_key: ed25519::PublicKey = self
+                .generate(
+                    &GeneratePublicKeyOptions::default()
+                        .with_coin_type(options.coin_type)
+                        .with_account_index(options.account_index)
+                        .with_internal(options.internal)
+                        .with_address_index(address_index),
+                )
+                .await?;
+            res.push(public_key);
+        }
+        Ok(res)
+    }
+}
+
+#[async_trait]
+impl Generate<Vec<Ed25519Address>> for MnemonicSecretManager {
+    type Options = GenerateMultiKeyOptions;
+
+    async fn generate(&self, options: &Self::Options) -> crate::client::Result<Vec<Ed25519Address>> {
+        let public_keys: Vec<ed25519::PublicKey> = self.generate(options).await?;
+        Ok(public_keys
+            .into_iter()
+            .map(|k| Ed25519Address::from_public_key_bytes(k.to_bytes()))
+            .collect())
+    }
+}
+
+#[async_trait]
+impl Generate<secp256k1_ecdsa::PublicKey> for MnemonicSecretManager {
+    type Options = GeneratePublicKeyOptions;
+
+    async fn generate(&self, options: &Self::Options) -> crate::client::Result<secp256k1_ecdsa::PublicKey> {
+        let chain = Bip44::new(options.coin_type)
+            .with_account(options.account_index)
+            .with_change(options.internal as _);
+
+        let public_key = chain
+            .derive(&self.0.to_master_key::<secp256k1_ecdsa::SecretKey>())
+            .secret_key()
+            .public_key();
+
+        Ok(public_key)
+    }
+}
+
+#[async_trait]
+impl Generate<EvmAddress> for MnemonicSecretManager {
+    type Options = GeneratePublicKeyOptions;
+
+    async fn generate(&self, options: &Self::Options) -> crate::client::Result<EvmAddress> {
+        let public_key: secp256k1_ecdsa::PublicKey = self.generate(options).await?;
+        Ok(public_key.evm_address())
+    }
+}
+
+#[async_trait]
+impl Generate<Vec<secp256k1_ecdsa::PublicKey>> for MnemonicSecretManager {
+    type Options = GenerateMultiKeyOptions;
+
+    async fn generate(&self, options: &Self::Options) -> crate::client::Result<Vec<secp256k1_ecdsa::PublicKey>> {
+        let mut res = Vec::with_capacity(options.address_range.len());
+        for address_index in options.address_range.clone() {
+            res.push(
+                Generate::<secp256k1_ecdsa::PublicKey>::generate(
+                    self,
+                    &GeneratePublicKeyOptions::default()
+                        .with_coin_type(options.coin_type)
+                        .with_account_index(options.account_index)
+                        .with_internal(options.internal)
+                        .with_address_index(address_index),
+                )
+                .await?,
+            );
+        }
+        Ok(res)
+    }
+}
+
+#[async_trait]
+impl Generate<Vec<EvmAddress>> for MnemonicSecretManager {
+    type Options = GenerateMultiKeyOptions;
+
+    async fn generate(&self, options: &Self::Options) -> crate::client::Result<Vec<EvmAddress>> {
+        let public_keys: Vec<secp256k1_ecdsa::PublicKey> = self.generate(options).await?;
+        Ok(public_keys.into_iter().map(|k| k.evm_address()).collect())
+    }
+}
+
+#[async_trait]
+impl Sign<Ed25519Signature> for MnemonicSecretManager {
+    type Options = Bip44;
+
+    async fn sign(&self, msg: &[u8], chain: &Self::Options) -> crate::client::Result<Ed25519Signature> {
         // Get the private and public key for this Ed25519 address
         let private_key = chain.derive(&self.0.to_master_key::<ed25519::SecretKey>()).secret_key();
         let public_key = private_key.public_key();
@@ -98,12 +170,13 @@ impl SecretManage for MnemonicSecretManager {
 
         Ok(Ed25519Signature::new(public_key, signature))
     }
+}
 
-    async fn sign_secp256k1_ecdsa(
-        &self,
-        msg: &[u8],
-        chain: Bip44,
-    ) -> Result<(secp256k1_ecdsa::PublicKey, secp256k1_ecdsa::RecoverableSignature), Self::Error> {
+#[async_trait]
+impl Sign<EvmSignature> for MnemonicSecretManager {
+    type Options = Bip44;
+
+    async fn sign(&self, msg: &[u8], chain: &Self::Options) -> crate::client::Result<EvmSignature> {
         // Get the private and public key for this secp256k1_ecdsa key
         let private_key = chain
             .derive(&self.0.to_master_key::<secp256k1_ecdsa::SecretKey>())
@@ -111,23 +184,11 @@ impl SecretManage for MnemonicSecretManager {
         let public_key = private_key.public_key();
         let signature = private_key.try_sign_keccak256(msg)?;
 
-        Ok((public_key, signature))
-    }
-
-    async fn transaction_unlocks(
-        &self,
-        prepared_transaction_data: &PreparedTransactionData,
-    ) -> Result<Unlocks, Self::Error> {
-        super::default_transaction_unlocks(self, prepared_transaction_data).await
-    }
-
-    async fn sign_transaction(
-        &self,
-        prepared_transaction_data: PreparedTransactionData,
-    ) -> Result<SignedTransactionPayload, Self::Error> {
-        super::default_sign_transaction(self, prepared_transaction_data).await
+        Ok(EvmSignature { public_key, signature })
     }
 }
+
+impl SignTransaction for MnemonicSecretManager {}
 
 impl MnemonicSecretManager {
     /// Create a new [`MnemonicSecretManager`] from a BIP-39 mnemonic in English.
@@ -160,13 +221,12 @@ mod tests {
         let mnemonic = "giant dynamic museum toddler six deny defense ostrich bomb access mercy blood explain muscle shoot shallow glad autumn author calm heavy hawk abuse rally";
         let secret_manager = MnemonicSecretManager::try_from_mnemonic(mnemonic.to_owned()).unwrap();
 
-        let addresses = secret_manager
-            .generate_ed25519_addresses(IOTA_COIN_TYPE, 0, 0..1, None)
-            .await
-            .unwrap();
+        let options = GeneratePublicKeyOptions::default().with_coin_type(IOTA_COIN_TYPE);
+
+        let address: Ed25519Address = secret_manager.generate(&options).await.unwrap();
 
         assert_eq!(
-            addresses[0].to_bech32_unchecked("atoi"),
+            address.to_bech32_unchecked("atoi"),
             "atoi1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluehe53e"
         );
     }
@@ -178,13 +238,12 @@ mod tests {
         let seed = "0x256a818b2aac458941f7274985a410e57fb750f3a3a67969ece5bd9ae7eef5b2".to_owned();
         let secret_manager = MnemonicSecretManager::try_from_hex_seed(seed).unwrap();
 
-        let addresses = secret_manager
-            .generate_ed25519_addresses(IOTA_COIN_TYPE, 0, 0..1, None)
-            .await
-            .unwrap();
+        let options = GeneratePublicKeyOptions::default().with_coin_type(IOTA_COIN_TYPE);
+
+        let address: Ed25519Address = secret_manager.generate(&options).await.unwrap();
 
         assert_eq!(
-            addresses[0].to_bech32_unchecked("atoi"),
+            address.to_bech32_unchecked("atoi"),
             "atoi1qzt0nhsf38nh6rs4p6zs5knqp6psgha9wsv74uajqgjmwc75ugupx3y7x0r"
         );
     }

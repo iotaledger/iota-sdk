@@ -91,7 +91,7 @@ impl WalletOptions {
         let mut builder = Wallet::builder()
             .with_address(self.address)
             .with_alias(self.alias)
-            .with_bip_path(self.bip_path)
+            .with_public_key_options(self.bip_path)
             .with_client_options(self.client_options);
 
         #[cfg(feature = "storage")]

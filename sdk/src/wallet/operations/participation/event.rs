@@ -14,11 +14,7 @@ use crate::{
     },
 };
 
-impl<S: 'static + SecretManage> Wallet<S>
-where
-    crate::wallet::Error: From<S::Error>,
-    crate::client::Error: From<S::Error>,
-{
+impl<S: 'static + SecretManage> Wallet<S> {
     /// Stores participation information for the given events locally and returns them all.
     ///
     /// This will NOT store the node url and auth inside the client options.

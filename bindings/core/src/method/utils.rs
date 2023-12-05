@@ -124,7 +124,7 @@ pub enum UtilsMethod {
     /// Verifies the semantic of a transaction.
     VerifyTransactionSemantic {
         transaction: TransactionDto,
-        inputs: Vec<InputSigningData>,
+        inputs: Vec<InputSigningData<O>>,
         unlocks: Option<Vec<Unlock>>,
     },
 }

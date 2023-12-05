@@ -30,8 +30,6 @@ impl<S: 'static + SecretManage> Wallet<S> {
 
 impl<S: 'static + SecretManage> Wallet<S>
 where
-    crate::client::Error: From<S::Error>,
-    crate::wallet::Error: From<S::Error>,
     WalletBuilder<S>: SaveLoadWallet,
 {
     pub async fn set_client_options(&self, client_options: ClientBuilder) -> crate::wallet::Result<()> {

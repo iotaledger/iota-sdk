@@ -1015,7 +1015,7 @@ async fn print_wallet_address(wallet: &Wallet) -> Result<(), Error> {
         }
     }
 
-    let bip_path = wallet.bip_path().await;
+    let bip_path = wallet.public_key_options().await;
     log = format!("{log}\nBIP path: {bip_path:?}");
 
     log = format!(

@@ -23,11 +23,7 @@ use crate::{
     },
 };
 
-impl<S: 'static + SecretManage> Wallet<S>
-where
-    crate::wallet::Error: From<S::Error>,
-    crate::client::Error: From<S::Error>,
-{
+impl<S: 'static + SecretManage> Wallet<S> {
     /// Set the fallback SyncOptions for account syncing.
     /// If storage is enabled, will persist during restarts.
     pub async fn set_default_sync_options(&self, options: SyncOptions) -> crate::wallet::Result<()> {
@@ -115,7 +111,7 @@ where
         let (addresses_with_unspent_outputs, spent_or_not_synced_output_ids, outputs_data): (
             Vec<AddressWithUnspentOutputs>,
             Vec<OutputId>,
-            Vec<OutputData>,
+            Vec<OutputData<S::SigningOptions>>,
         ) = self.request_outputs_recursively(address_to_sync, options).await?;
 
         // Request possible spent outputs
@@ -170,7 +166,11 @@ where
         &self,
         addresses_to_sync: Vec<AddressWithUnspentOutputs>,
         options: &SyncOptions,
-    ) -> crate::wallet::Result<(Vec<AddressWithUnspentOutputs>, Vec<OutputId>, Vec<OutputData>)> {
+    ) -> crate::wallet::Result<(
+        Vec<AddressWithUnspentOutputs>,
+        Vec<OutputId>,
+        Vec<OutputData<S::SigningOptions>>,
+    )> {
         // Cache the account and nft address with the related ed2559 address, so we can update the account address with
         // the new output ids
 

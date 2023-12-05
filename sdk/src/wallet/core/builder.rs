@@ -16,10 +16,10 @@ use crate::wallet::storage::adapter::memory::Memory;
 #[cfg(feature = "storage")]
 use crate::wallet::storage::{StorageManager, StorageOptions};
 use crate::{
-    client::secret::{GenerateAddressOptions, SecretManage, SecretManager},
-    types::block::address::{Address, Bech32Address},
+    client::secret::{SecretManage, SecretManager},
+    types::block::address::{Bech32Address, Ed25519Address, ToBech32Ext},
     wallet::{
-        core::{Bip44, WalletData, WalletInner},
+        core::{WalletData, WalletInner},
         operations::syncing::SyncOptions,
         ClientOptions, Wallet,
     },
@@ -29,7 +29,8 @@ use crate::{
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct WalletBuilder<S: SecretManage = SecretManager> {
-    pub(crate) bip_path: Option<Bip44>,
+    pub(crate) public_key_options: Option<S::GenerationOptions>,
+    pub(crate) signing_options: Option<S::SigningOptions>,
     pub(crate) address: Option<Bech32Address>,
     pub(crate) alias: Option<String>,
     pub(crate) client_options: Option<ClientOptions>,
@@ -42,7 +43,8 @@ pub struct WalletBuilder<S: SecretManage = SecretManager> {
 impl<S: SecretManage> Default for WalletBuilder<S> {
     fn default() -> Self {
         Self {
-            bip_path: Default::default(),
+            public_key_options: Default::default(),
+            signing_options: Default::default(),
             address: Default::default(),
             alias: Default::default(),
             client_options: Default::default(),
@@ -53,10 +55,7 @@ impl<S: SecretManage> Default for WalletBuilder<S> {
     }
 }
 
-impl<S: 'static + SecretManage> WalletBuilder<S>
-where
-    crate::wallet::Error: From<S::Error>,
-{
+impl<S: 'static + SecretManage> WalletBuilder<S> {
     /// Initialises a new instance of the wallet builder with the default storage adapter.
     pub fn new() -> Self {
         Self {
@@ -65,9 +64,15 @@ where
         }
     }
 
-    /// Set the BIP44 path of the wallet.
-    pub fn with_bip_path(mut self, bip_path: impl Into<Option<Bip44>>) -> Self {
-        self.bip_path = bip_path.into();
+    /// Set the public key options.
+    pub fn with_public_key_options(mut self, public_key_options: impl Into<Option<S::GenerationOptions>>) -> Self {
+        self.public_key_options = public_key_options.into();
+        self
+    }
+
+    /// Set the signing options.
+    pub fn with_signing_options(mut self, signing_options: impl Into<Option<S::SigningOptions>>) -> Self {
+        self.signing_options = signing_options.into();
         self
     }
 
@@ -124,9 +129,8 @@ where
 
 impl<S: 'static + SecretManage> WalletBuilder<S>
 where
-    crate::wallet::Error: From<S::Error>,
-    crate::client::Error: From<S::Error>,
     Self: SaveLoadWallet,
+    for<'a> &'a S::GenerationOptions: PartialEq,
 {
     /// Builds the wallet.
     pub async fn finish(mut self) -> crate::wallet::Result<Wallet<S>> {
@@ -178,9 +182,11 @@ where
             self.secret_manager = secret_manager;
         }
 
-        // May use a previously stored BIP path if it wasn't provided
-        if self.bip_path.is_none() {
-            self.bip_path = loaded_wallet_builder.as_ref().and_then(|builder| builder.bip_path);
+        // May use previously stored options if they weren't provided
+        if self.public_key_options.is_none() {
+            self.public_key_options = loaded_wallet_builder
+                .as_ref()
+                .and_then(|builder| builder.public_key_options.clone());
         }
 
         // May use a previously stored wallet alias if it wasn't provided
@@ -208,18 +214,21 @@ where
         let address = self.address.as_ref().unwrap().clone();
 
         #[cfg(feature = "storage")]
-        let mut wallet_data = storage_manager.load_wallet_data().await?;
+        let mut wallet_data = storage_manager.load_wallet_data::<S>().await?;
 
-        // The bip path must not change.
+        // The public key options must not change.
         #[cfg(feature = "storage")]
         if let Some(wallet_data) = &wallet_data {
-            let new_bip_path = self.bip_path;
-            let old_bip_path = wallet_data.bip_path;
-            if new_bip_path != old_bip_path {
-                return Err(crate::wallet::Error::BipPathMismatch {
-                    new_bip_path,
-                    old_bip_path,
-                });
+            let old = &wallet_data.public_key_options;
+            if let Some(new) = self.public_key_options.as_ref() {
+                if new != old {
+                    return Err(crate::wallet::Error::PublicKeyOptionsMismatch {
+                        new: serde_json::to_value(new)?,
+                        old: serde_json::to_value(old)?,
+                    });
+                }
+            } else {
+                self.public_key_options = Some(old.clone());
             }
         }
 
@@ -260,7 +269,17 @@ where
             storage_manager: tokio::sync::RwLock::new(storage_manager),
         };
         #[cfg(feature = "storage")]
-        let wallet_data = wallet_data.unwrap_or_else(|| WalletData::new(self.bip_path, address, self.alias.clone()));
+        let wallet_data = match wallet_data {
+            Some(d) => d,
+            None => WalletData::new(
+                self.public_key_options
+                    .ok_or(crate::wallet::Error::MissingParameter("public_key_options"))?,
+                self.signing_options
+                    .ok_or(crate::wallet::Error::MissingParameter("signing_options"))?,
+                address,
+                self.alias.clone(),
+            ),
+        };
         #[cfg(not(feature = "storage"))]
         let wallet_data = WalletData::new(self.bip_path, address, self.alias.clone());
         let wallet = Wallet {
@@ -286,34 +305,30 @@ where
             .network_info
             .protocol_parameters
             .bech32_hrp;
-        let bip_path = self.bip_path.as_ref().unwrap();
+        let options = self.public_key_options.as_ref().unwrap();
 
-        Ok(Bech32Address::new(
-            bech32_hrp,
-            Address::Ed25519(
-                self.secret_manager
-                    .as_ref()
-                    .unwrap()
-                    .read()
-                    .await
-                    .generate_ed25519_addresses(
-                        bip_path.coin_type,
-                        bip_path.account,
-                        bip_path.address_index..bip_path.address_index + 1,
-                        GenerateAddressOptions {
-                            internal: bip_path.change != 0,
-                            ledger_nano_prompt: false,
-                        },
-                    )
-                    .await?[0],
-            ),
-        ))
+        Ok(Ed25519Address::from_public_key_bytes(
+            self.secret_manager
+                .as_ref()
+                .unwrap()
+                .read()
+                .await
+                .generate(options)
+                .await?
+                .to_bytes(),
+        )
+        .to_bech32(bech32_hrp))
     }
 
     #[cfg(feature = "storage")]
-    pub(crate) async fn from_wallet(wallet: &Wallet<S>) -> Self {
+    pub(crate) async fn from_wallet(wallet: &Wallet<S>) -> Self
+    where
+        S::GenerationOptions: Clone,
+        S::SigningOptions: Clone,
+    {
         Self {
-            bip_path: wallet.bip_path().await,
+            public_key_options: Some(wallet.data().await.public_key_options.clone()),
+            signing_options: Some(wallet.data().await.signing_options.clone()),
             address: Some(wallet.address().await),
             alias: wallet.alias().await,
             client_options: Some(wallet.client_options().await),
@@ -326,7 +341,7 @@ where
 // Check if any of the locked inputs is not used in a transaction and unlock them, so they get available for new
 // transactions
 #[cfg(feature = "storage")]
-fn unlock_unused_inputs(wallet_data: &mut WalletData) -> crate::wallet::Result<()> {
+fn unlock_unused_inputs<S: SecretManage>(wallet_data: &mut WalletData<S>) -> crate::wallet::Result<()> {
     log::debug!("[unlock_unused_inputs]");
     let mut used_inputs = HashSet::new();
     for transaction_id in &wallet_data.pending_transactions {
@@ -356,9 +371,11 @@ pub(crate) mod dto {
 
     #[derive(Debug, Deserialize)]
     #[serde(rename_all = "camelCase")]
-    pub struct WalletBuilderDto {
-        #[serde(default, skip_serializing_if = "Option::is_none")]
-        pub(crate) bip_path: Option<Bip44>,
+    pub struct WalletBuilderDto<G, S> {
+        #[serde(default = "Option::default", skip_serializing_if = "Option::is_none")]
+        pub(crate) public_key_options: Option<G>,
+        #[serde(default = "Option::default", skip_serializing_if = "Option::is_none")]
+        pub(crate) signing_options: Option<S>,
         #[serde(default, skip_serializing_if = "Option::is_none")]
         pub(crate) address: Option<Bech32Address>,
         #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -370,10 +387,11 @@ pub(crate) mod dto {
         pub(crate) storage_options: Option<StorageOptions>,
     }
 
-    impl<S: SecretManage> From<WalletBuilderDto> for WalletBuilder<S> {
-        fn from(value: WalletBuilderDto) -> Self {
+    impl<S: SecretManage> From<WalletBuilderDto<S::GenerationOptions, S::SigningOptions>> for WalletBuilder<S> {
+        fn from(value: WalletBuilderDto<S::GenerationOptions, S::SigningOptions>) -> Self {
             Self {
-                bip_path: value.bip_path,
+                public_key_options: value.public_key_options,
+                signing_options: value.signing_options,
                 address: value.address,
                 alias: value.alias,
                 client_options: value.client_options,
@@ -384,12 +402,16 @@ pub(crate) mod dto {
         }
     }
 
-    impl<'de, S: SecretManage> Deserialize<'de> for WalletBuilder<S> {
+    impl<'de, S: SecretManage> Deserialize<'de> for WalletBuilder<S>
+    where
+        S::GenerationOptions: Deserialize<'de>,
+        S::SigningOptions: Deserialize<'de>,
+    {
         fn deserialize<D>(d: D) -> Result<Self, D::Error>
         where
             D: serde::Deserializer<'de>,
         {
-            WalletBuilderDto::deserialize(d).map(Into::into)
+            WalletBuilderDto::<S::GenerationOptions, S::SigningOptions>::deserialize(d).map(Into::into)
         }
     }
 }

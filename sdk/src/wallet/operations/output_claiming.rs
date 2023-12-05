@@ -6,7 +6,10 @@ use std::collections::{HashMap, HashSet};
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    client::{api::PreparedTransactionData, secret::SecretManage},
+    client::{
+        api::PreparedTransactionData,
+        secret::{SecretManage, Sign},
+    },
     types::block::{
         address::{Address, Ed25519Address},
         output::{
@@ -34,7 +37,7 @@ pub enum OutputsToClaim {
     All,
 }
 
-impl WalletData {
+impl<S: SecretManage> WalletData<S> {
     /// Get basic and nft outputs that have
     /// [`ExpirationUnlockCondition`](crate::types::block::output::unlock_condition::ExpirationUnlockCondition),
     /// [`StorageDepositReturnUnlockCondition`] or
@@ -122,11 +125,7 @@ impl WalletData {
     }
 }
 
-impl<S: 'static + SecretManage> Wallet<S>
-where
-    crate::wallet::Error: From<S::Error>,
-    crate::client::Error: From<S::Error>,
-{
+impl<S: 'static + SecretManage> Wallet<S> {
     /// Get basic and nft outputs that have
     /// [`ExpirationUnlockCondition`](crate::types::block::output::unlock_condition::ExpirationUnlockCondition),
     /// [`StorageDepositReturnUnlockCondition`] or
@@ -143,14 +142,16 @@ where
 
     /// Get basic outputs that have only one unlock condition which is [AddressUnlockCondition], so they can be used as
     /// additional inputs
-    pub(crate) async fn get_basic_outputs_for_additional_inputs(&self) -> crate::wallet::Result<Vec<OutputData>> {
+    pub(crate) async fn get_basic_outputs_for_additional_inputs(
+        &self,
+    ) -> crate::wallet::Result<Vec<OutputData<S::SigningOptions>>> {
         log::debug!("[OUTPUT_CLAIMING] get_basic_outputs_for_additional_inputs");
         #[cfg(feature = "participation")]
         let voting_output = self.get_voting_output().await?;
         let wallet_data = self.data().await;
 
         // Get basic outputs only with AddressUnlockCondition and no other unlock condition
-        let mut basic_outputs: Vec<OutputData> = Vec::new();
+        let mut basic_outputs: Vec<OutputData<S::SigningOptions>> = Vec::new();
         for (output_id, output_data) in &wallet_data.unspent_outputs {
             #[cfg(feature = "participation")]
             if let Some(ref voting_output) = voting_output {
@@ -219,7 +220,7 @@ where
     pub async fn prepare_claim_outputs<I: IntoIterator<Item = OutputId> + Send>(
         &self,
         output_ids_to_claim: I,
-    ) -> crate::wallet::Result<PreparedTransactionData>
+    ) -> crate::wallet::Result<PreparedTransactionData<S::SigningOptions>>
     where
         I::IntoIter: Send,
     {

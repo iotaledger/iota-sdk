@@ -19,11 +19,7 @@ use crate::{
 // also revalidate that the locked outputs needs to be there, maybe there was a conflict or the transaction got
 // confirmed, then they should get removed
 
-impl<S: 'static + SecretManage> Wallet<S>
-where
-    crate::wallet::Error: From<S::Error>,
-    crate::client::Error: From<S::Error>,
-{
+impl<S: 'static + SecretManage> Wallet<S> {
     /// Sync transactions and reissue them if unconfirmed. Returns the transaction with updated metadata and spent
     /// output ids that don't need to be locked anymore
     /// Return true if a transaction got confirmed for which we don't have an output already, based on this outputs will
@@ -237,8 +233,8 @@ fn updated_transaction_and_outputs(
 
 // When a transaction got pruned, the inputs and outputs are also not available, then this could mean that it was
 // confirmed and the created outputs got also already spent and pruned or the inputs got spent in another transaction
-fn process_transaction_with_unknown_state(
-    wallet_data: &WalletData,
+fn process_transaction_with_unknown_state<S: SecretManage>(
+    wallet_data: &WalletData<S>,
     mut transaction: TransactionWithMetadata,
     updated_transactions: &mut Vec<TransactionWithMetadata>,
     output_ids_to_unlock: &mut Vec<OutputId>,

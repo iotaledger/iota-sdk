@@ -47,7 +47,7 @@ async fn main() -> Result<()> {
         .with_secret_manager(SecretManager::Stronghold(secret_manager))
         .with_storage_path(OFFLINE_WALLET_DB_PATH)
         .with_client_options(offline_client)
-        .with_bip_path(Bip44::new(SHIMMER_COIN_TYPE))
+        .with_public_key_options(Bip44::new(SHIMMER_COIN_TYPE))
         .finish()
         .await?;
 

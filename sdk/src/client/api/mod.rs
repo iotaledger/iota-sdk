@@ -3,11 +3,8 @@
 
 //! High level APIs
 
-mod address;
 mod block_builder;
 mod high_level;
 mod types;
 
-pub use self::{address::*, block_builder::*, types::*};
-
-const ADDRESS_GAP_RANGE: u32 = 20;
+pub use self::{block_builder::*, types::*};

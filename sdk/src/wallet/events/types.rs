@@ -21,44 +21,44 @@ use crate::{
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 #[non_exhaustive]
-pub enum WalletEvent {
+pub enum WalletEvent<O> {
     ConsolidationRequired,
     #[cfg(feature = "ledger_nano")]
     #[cfg_attr(docsrs, doc(cfg(feature = "ledger_nano")))]
     LedgerAddressGeneration(AddressData),
-    NewOutput(Box<NewOutputEvent>),
-    SpentOutput(Box<SpentOutputEvent>),
+    NewOutput(Box<NewOutputEvent<O>>),
+    SpentOutput(Box<SpentOutputEvent<O>>),
     TransactionInclusion(TransactionInclusionEvent),
-    TransactionProgress(TransactionProgressEvent),
+    TransactionProgress(TransactionProgressEvent<O>),
 }
 
-impl Serialize for WalletEvent {
+impl<O: Serialize> Serialize for WalletEvent<O> {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
     {
         #[derive(Serialize)]
-        struct TransactionProgressEvent_<'a> {
-            progress: &'a TransactionProgressEvent,
+        struct TransactionProgressEvent_<'a, O> {
+            progress: &'a TransactionProgressEvent<O>,
         }
 
         #[derive(Serialize)]
         #[serde(untagged)]
-        enum WalletEvent_<'a> {
+        enum WalletEvent_<'a, O> {
             T0,
             #[cfg(feature = "ledger_nano")]
             T1(&'a AddressData),
-            T2(&'a NewOutputEvent),
-            T3(&'a SpentOutputEvent),
+            T2(&'a NewOutputEvent<O>),
+            T3(&'a SpentOutputEvent<O>),
             T4(&'a TransactionInclusionEvent),
-            T5(TransactionProgressEvent_<'a>),
+            T5(TransactionProgressEvent_<'a, O>),
         }
         #[derive(Serialize)]
-        struct TypedWalletEvent_<'a> {
+        struct TypedWalletEvent_<'a, O> {
             #[serde(rename = "type")]
             kind: u8,
             #[serde(flatten)]
-            event: WalletEvent_<'a>,
+            event: WalletEvent_<'a, O>,
         }
         let event = match self {
             Self::ConsolidationRequired => TypedWalletEvent_ {
@@ -91,11 +91,11 @@ impl Serialize for WalletEvent {
     }
 }
 
-impl<'de> Deserialize<'de> for WalletEvent {
+impl<'de, O: Deserialize<'de>> Deserialize<'de> for WalletEvent<O> {
     fn deserialize<D: serde::Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
         #[derive(Deserialize)]
-        struct TransactionProgressEvent_ {
-            progress: TransactionProgressEvent,
+        struct TransactionProgressEvent_<O> {
+            progress: TransactionProgressEvent<O>,
         }
 
         let value = serde_json::Value::deserialize(d)?;
@@ -176,9 +176,9 @@ impl TryFrom<u8> for WalletEventType {
 
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct NewOutputEvent {
+pub struct NewOutputEvent<O> {
     /// The new output.
-    pub output: OutputData,
+    pub output: OutputData<O>,
     /// The transaction that created the output. Might be pruned and not available.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub transaction: Option<SignedTransactionPayloadDto>,
@@ -188,9 +188,9 @@ pub struct NewOutputEvent {
 }
 
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-pub struct SpentOutputEvent {
+pub struct SpentOutputEvent<O> {
     /// The spent output.
-    pub output: OutputData,
+    pub output: OutputData<O>,
 }
 
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Serialize, Deserialize)]
@@ -202,13 +202,13 @@ pub struct TransactionInclusionEvent {
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 #[non_exhaustive]
-pub enum TransactionProgressEvent {
+pub enum TransactionProgressEvent<O> {
     /// Performing input selection.
     SelectingInputs,
     /// Generating remainder value deposit address.
     GeneratingRemainderDepositAddress(AddressData),
     /// Prepared transaction.
-    PreparedTransaction(Box<PreparedTransactionDataDto>),
+    PreparedTransaction(Box<PreparedTransactionDataDto<O>>),
     /// Prepared transaction signing hash hex encoded, required for blindsigning with a ledger nano
     PreparedTransactionSigningHash(String),
     /// Signing the transaction.
@@ -217,7 +217,7 @@ pub enum TransactionProgressEvent {
     Broadcasting,
 }
 
-impl Serialize for TransactionProgressEvent {
+impl<O: Serialize> Serialize for TransactionProgressEvent<O> {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
@@ -230,20 +230,20 @@ impl Serialize for TransactionProgressEvent {
 
         #[derive(Serialize)]
         #[serde(untagged)]
-        enum TransactionProgressEvent_<'a> {
+        enum TransactionProgressEvent_<'a, O> {
             T0,
             T1(&'a AddressData),
-            T2(&'a PreparedTransactionDataDto),
+            T2(&'a PreparedTransactionDataDto<O>),
             T3(PreparedTransactionSigningHash_<'a>),
             T4,
             T5,
         }
         #[derive(Serialize)]
-        struct TypedTransactionProgressEvent_<'a> {
+        struct TypedTransactionProgressEvent_<'a, O> {
             #[serde(rename = "type")]
             kind: u8,
             #[serde(flatten)]
-            event: TransactionProgressEvent_<'a>,
+            event: TransactionProgressEvent_<'a, O>,
         }
         let event = match self {
             Self::SelectingInputs => TypedTransactionProgressEvent_ {
@@ -275,7 +275,7 @@ impl Serialize for TransactionProgressEvent {
     }
 }
 
-impl<'de> Deserialize<'de> for TransactionProgressEvent {
+impl<'de, O: Deserialize<'de>> Deserialize<'de> for TransactionProgressEvent<O> {
     fn deserialize<D: serde::Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
         #[derive(Deserialize)]
         #[serde(rename_all = "camelCase")]

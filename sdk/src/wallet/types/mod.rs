@@ -9,7 +9,6 @@ pub mod participation;
 
 use std::str::FromStr;
 
-use crypto::keys::bip44::Bip44;
 use serde::{Deserialize, Serialize};
 
 pub use self::{
@@ -17,7 +16,7 @@ pub use self::{
     balance::{Balance, BaseCoinBalance, NativeTokensBalance, RequiredStorageDeposit},
 };
 use crate::{
-    client::secret::types::InputSigningData,
+    client::secret::{types::InputSigningData, SecretManage},
     types::{
         api::core::OutputWithMetadataResponse,
         block::{
@@ -30,14 +29,13 @@ use crate::{
         },
         TryFromDto,
     },
-    utils::serde::bip44::option_bip44,
     wallet::core::WalletData,
 };
 
 /// An output with metadata
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct OutputData {
+pub struct OutputData<O> {
     /// The output id
     pub output_id: OutputId,
     pub metadata: OutputMetadata,
@@ -51,26 +49,23 @@ pub struct OutputData {
     pub network_id: u64,
     pub remainder: bool,
     // bip44 path
-    #[serde(with = "option_bip44", default)]
-    pub chain: Option<Bip44>,
+    pub signing_options: Option<O>,
 }
 
-impl OutputData {
-    pub fn input_signing_data(
+impl<O: Clone> OutputData<O> {
+    pub fn input_signing_data<S: SecretManage<SigningOptions = O>>(
         &self,
-        wallet_data: &WalletData,
+        wallet_data: &WalletData<S>,
         slot_index: SlotIndex,
-    ) -> crate::wallet::Result<Option<InputSigningData>> {
+    ) -> crate::wallet::Result<Option<InputSigningData<S::SigningOptions>>> {
         let (unlock_address, _unlocked_account_or_nft_address) =
             self.output.required_and_unlocked_address(slot_index, &self.output_id)?;
 
         let chain = if unlock_address == self.address {
-            self.chain
+            self.signing_options
         } else if let Address::Ed25519(_) = unlock_address {
             if wallet_data.address.inner() == &unlock_address {
-                // TODO #1279: do we need a check to make sure that `wallet_data.address` and `wallet_data.bip_path` are
-                // never conflicting?
-                wallet_data.bip_path
+                Some(wallet_data.signing_options)
             } else {
                 return Ok(None);
             }
@@ -82,7 +77,7 @@ impl OutputData {
         Ok(Some(InputSigningData {
             output: self.output.clone(),
             output_metadata: self.metadata,
-            chain,
+            signing_options: self.signing_options.clone(),
         }))
     }
 }

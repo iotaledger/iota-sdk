@@ -1,8 +1,6 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use crypto::keys::bip44::Bip44;
-
 use super::{
     requirement::{
         amount::amount_sums,
@@ -18,9 +16,9 @@ use crate::{
     },
 };
 
-impl InputSelection {
+impl<O> InputSelection<O> {
     // Gets the remainder address from configuration of finds one from the inputs.
-    fn get_remainder_address(&self) -> Result<Option<(Address, Option<Bip44>)>, Error> {
+    fn get_remainder_address(&self) -> Result<Option<(Address, Option<O>)>, Error> {
         if let Some(remainder_address) = &self.remainder_address {
             // Search in inputs for the Bip44 chain for the remainder address, so the ledger can regenerate it
             for input in self.available_inputs.iter().chain(self.selected_inputs.iter()) {
@@ -29,7 +27,7 @@ impl InputSelection {
                     .required_and_unlocked_address(self.slot_index, input.output_id())?;
 
                 if &required_address == remainder_address {
-                    return Ok(Some((remainder_address.clone(), input.chain)));
+                    return Ok(Some((remainder_address.clone(), input.signing_options)));
                 }
             }
             return Ok(Some((remainder_address.clone(), None)));
@@ -42,7 +40,7 @@ impl InputSelection {
                 .0;
 
             if required_address.is_ed25519() {
-                return Ok(Some((required_address, input.chain)));
+                return Ok(Some((required_address, input.signing_options)));
             }
         }
 
@@ -81,7 +79,7 @@ impl InputSelection {
 
     pub(crate) fn remainder_and_storage_deposit_return_outputs(
         &self,
-    ) -> Result<(Option<RemainderData>, Vec<Output>), Error> {
+    ) -> Result<(Option<RemainderData<O>>, Vec<Output>), Error> {
         let (inputs_sum, outputs_sum, inputs_sdr, outputs_sdr) =
             amount_sums(&self.selected_inputs, &self.outputs, self.slot_index);
         let mut storage_deposit_returns = Vec::new();
@@ -147,7 +145,7 @@ impl InputSelection {
         Ok((
             Some(RemainderData {
                 output: remainder,
-                chain,
+                signing_options: chain,
                 address: remainder_address,
             }),
             storage_deposit_returns,

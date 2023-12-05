@@ -25,8 +25,8 @@ const SINGLE_UNLOCK_LENGTH: usize = 1 + 1 + Ed25519Signature::PUBLIC_KEY_LENGTH 
 const REFERENCE_ACCOUNT_NFT_UNLOCK_LENGTH: usize = 1 + 2;
 
 /// Verifies the semantic of a prepared transaction.
-pub fn verify_semantic(
-    input_signing_data: &[InputSigningData],
+pub fn verify_semantic<O>(
+    input_signing_data: &[InputSigningData<O>],
     transaction_payload: &SignedTransactionPayload,
 ) -> crate::client::Result<Option<TransactionFailureReason>> {
     let inputs = input_signing_data

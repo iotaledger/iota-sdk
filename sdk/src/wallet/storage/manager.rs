@@ -4,7 +4,7 @@
 use zeroize::Zeroizing;
 
 use crate::{
-    client::storage::StorageAdapter,
+    client::{secret::SecretManage, storage::StorageAdapter},
     types::TryFromDto,
     wallet::{
         core::{WalletData, WalletDataDto},
@@ -49,15 +49,21 @@ impl StorageManager {
         Ok(storage_manager)
     }
 
-    pub(crate) async fn load_wallet_data(&mut self) -> crate::wallet::Result<Option<WalletData>> {
-        if let Some(dto) = self.get::<WalletDataDto>(WALLET_DATA_KEY).await? {
+    pub(crate) async fn load_wallet_data<S: SecretManage>(&mut self) -> crate::wallet::Result<Option<WalletData<S>>> {
+        if let Some(dto) = self
+            .get::<WalletDataDto<S::GenerationOptions, S::SigningOptions>>(WALLET_DATA_KEY)
+            .await?
+        {
             Ok(Some(WalletData::try_from_dto(dto)?))
         } else {
             Ok(None)
         }
     }
 
-    pub(crate) async fn save_wallet_data(&mut self, wallet_data: &WalletData) -> crate::wallet::Result<()> {
+    pub(crate) async fn save_wallet_data<S: SecretManage>(
+        &mut self,
+        wallet_data: &WalletData<S>,
+    ) -> crate::wallet::Result<()> {
         self.set(WALLET_DATA_KEY, &WalletDataDto::from(wallet_data)).await
     }
 

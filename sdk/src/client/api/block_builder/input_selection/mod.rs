@@ -31,11 +31,11 @@ use crate::{
 };
 
 /// Working state for the input selection algorithm.
-pub struct InputSelection {
-    available_inputs: Vec<InputSigningData>,
+pub struct InputSelection<O> {
+    available_inputs: Vec<InputSigningData<O>>,
     required_inputs: HashSet<OutputId>,
     forbidden_inputs: HashSet<OutputId>,
-    selected_inputs: Vec<InputSigningData>,
+    selected_inputs: Vec<InputSigningData<O>>,
     outputs: Vec<Output>,
     addresses: HashSet<Address>,
     burn: Option<Burn>,
@@ -48,17 +48,17 @@ pub struct InputSelection {
 
 /// Result of the input selection algorithm.
 #[derive(Clone, Debug)]
-pub struct Selected {
+pub struct Selected<O> {
     /// Selected inputs.
-    pub inputs: Vec<InputSigningData>,
+    pub inputs: Vec<InputSigningData<O>>,
     /// Provided and created outputs.
     pub outputs: Vec<Output>,
     /// Remainder, if there was one.
-    pub remainder: Option<RemainderData>,
+    pub remainder: Option<RemainderData<O>>,
 }
 
-impl InputSelection {
-    fn required_account_nft_addresses(&self, input: &InputSigningData) -> Result<Option<Requirement>, Error> {
+impl<O: Clone + std::fmt::Debug> InputSelection<O> {
+    fn required_account_nft_addresses(&self, input: &InputSigningData<O>) -> Result<Option<Requirement>, Error> {
         let required_address = input
             .output
             .required_and_unlocked_address(self.slot_index, input.output_id())?
@@ -75,7 +75,7 @@ impl InputSelection {
         }
     }
 
-    fn select_input(&mut self, input: InputSigningData) -> Result<(), Error> {
+    fn select_input(&mut self, input: InputSigningData<O>) -> Result<(), Error> {
         log::debug!("Selecting input {:?}", input.output_id());
 
         if let Some(output) = self.transition_input(&input)? {
@@ -145,7 +145,7 @@ impl InputSelection {
 
     /// Creates a new [`InputSelection`].
     pub fn new(
-        available_inputs: impl Into<Vec<InputSigningData>>,
+        available_inputs: impl Into<Vec<InputSigningData<O>>>,
         outputs: impl Into<Vec<Output>>,
         addresses: impl IntoIterator<Item = Address>,
         protocol_parameters: ProtocolParameters,
@@ -249,15 +249,15 @@ impl InputSelection {
 
     // Inputs need to be sorted before signing, because the reference unlock conditions can only reference a lower index
     pub(crate) fn sort_input_signing_data(
-        mut inputs: Vec<InputSigningData>,
+        mut inputs: Vec<InputSigningData<O>>,
         slot_index: SlotIndex,
-    ) -> Result<Vec<InputSigningData>, Error> {
+    ) -> Result<Vec<InputSigningData<O>>, Error> {
         // initially sort by output to make it deterministic
         // TODO: rethink this, we only need it deterministic for tests, for the protocol it doesn't matter, also there
         // might be a more efficient way to do this
         inputs.sort_by_key(|i| i.output.pack_to_vec());
         // filter for ed25519 address first
-        let (mut sorted_inputs, account_nft_address_inputs): (Vec<InputSigningData>, Vec<InputSigningData>) =
+        let (mut sorted_inputs, account_nft_address_inputs): (Vec<InputSigningData<O>>, Vec<InputSigningData<O>>) =
             inputs.into_iter().partition(|input_signing_data| {
                 let (input_address, _) = input_signing_data
                     .output
@@ -338,7 +338,7 @@ impl InputSelection {
 
     /// Selects inputs that meet the requirements of the outputs to satisfy the semantic validation of the overall
     /// transaction. Also creates a remainder output and chain transition outputs if required.
-    pub fn select(mut self) -> Result<Selected, Error> {
+    pub fn select(mut self) -> Result<Selected<O>, Error> {
         if !OUTPUT_COUNT_RANGE.contains(&(self.outputs.len() as u16)) {
             // If burn is provided, outputs will be added later
             if !(self.outputs.is_empty() && self.burn.is_some()) {

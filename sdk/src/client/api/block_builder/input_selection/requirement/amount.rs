@@ -35,8 +35,8 @@ pub(crate) fn sdruc_not_expired(
     })
 }
 
-pub(crate) fn amount_sums(
-    selected_inputs: &[InputSigningData],
+pub(crate) fn amount_sums<O>(
+    selected_inputs: &[InputSigningData<O>],
     outputs: &[Output],
     slot_index: SlotIndex,
 ) -> (u64, u64, HashMap<Address, u64>, HashMap<Address, u64>) {
@@ -76,8 +76,8 @@ pub(crate) fn amount_sums(
 }
 
 #[derive(Debug, Clone)]
-struct AmountSelection {
-    newly_selected_inputs: HashMap<OutputId, InputSigningData>,
+struct AmountSelection<O> {
+    newly_selected_inputs: HashMap<OutputId, InputSigningData<O>>,
     inputs_sum: u64,
     outputs_sum: u64,
     inputs_sdr: HashMap<Address, u64>,
@@ -87,8 +87,8 @@ struct AmountSelection {
     slot_index: SlotIndex,
 }
 
-impl AmountSelection {
-    fn new(input_selection: &InputSelection) -> Result<Self, Error> {
+impl<O: 'static + Clone> AmountSelection<O> {
+    fn new(input_selection: &InputSelection<O>) -> Result<Self, Error> {
         let (inputs_sum, outputs_sum, inputs_sdr, outputs_sdr) = amount_sums(
             &input_selection.selected_inputs,
             &input_selection.outputs,
@@ -127,7 +127,7 @@ impl AmountSelection {
         }
     }
 
-    fn fulfil<'a>(&mut self, inputs: impl Iterator<Item = &'a InputSigningData>) -> bool {
+    fn fulfil<'a>(&mut self, inputs: impl Iterator<Item = &'a InputSigningData<O>>) -> bool {
         for input in inputs {
             if self.newly_selected_inputs.contains_key(input.output_id()) {
                 continue;
@@ -161,16 +161,16 @@ impl AmountSelection {
         false
     }
 
-    fn into_newly_selected_inputs(self) -> Vec<InputSigningData> {
+    fn into_newly_selected_inputs(self) -> Vec<InputSigningData<O>> {
         self.newly_selected_inputs.into_values().collect()
     }
 }
 
-impl InputSelection {
+impl<O: 'static + Clone + std::fmt::Debug> InputSelection<O> {
     fn fulfil<'a>(
         &self,
-        base_inputs: impl Iterator<Item = &'a InputSigningData> + Clone,
-        amount_selection: &mut AmountSelection,
+        base_inputs: impl Iterator<Item = &'a InputSigningData<O>> + Clone,
+        amount_selection: &mut AmountSelection<O>,
     ) -> bool {
         // No native token, expired SDRUC.
         let inputs = base_inputs.clone().filter(|input| {
@@ -216,7 +216,7 @@ impl InputSelection {
         false
     }
 
-    fn reduce_funds_of_chains(&mut self, amount_selection: &mut AmountSelection) -> Result<(), Error> {
+    fn reduce_funds_of_chains(&mut self, amount_selection: &mut AmountSelection<O>) -> Result<(), Error> {
         // Only consider automatically transitioned outputs.
         let outputs = self.outputs.iter_mut().filter(|output| {
             output
@@ -273,7 +273,7 @@ impl InputSelection {
         })
     }
 
-    pub(crate) fn fulfill_amount_requirement(&mut self) -> Result<Vec<InputSigningData>, Error> {
+    pub(crate) fn fulfill_amount_requirement(&mut self) -> Result<Vec<InputSigningData<O>>, Error> {
         let mut amount_selection = AmountSelection::new(self)?;
 
         if amount_selection.missing_amount() == 0 {
@@ -341,8 +341,8 @@ impl InputSelection {
 
     fn fulfill_amount_requirement_inner(
         &mut self,
-        amount_selection: &mut AmountSelection,
-    ) -> Option<Vec<InputSigningData>> {
+        amount_selection: &mut AmountSelection<O>,
+    ) -> Option<Vec<InputSigningData<O>>> {
         let basic_ed25519_inputs = self.available_inputs.iter().filter(|input| {
             if let Output::Basic(output) = &input.output {
                 output

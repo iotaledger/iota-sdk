@@ -27,11 +27,7 @@ use crate::{
     },
 };
 
-impl<S: 'static + SecretManage> Wallet<S>
-where
-    crate::wallet::Error: From<S::Error>,
-    crate::client::Error: From<S::Error>,
-{
+impl<S: 'static + SecretManage> Wallet<S> {
     /// Prepare a basic or NFT output for sending
     /// If the amount is below the minimum required storage deposit, by default the remaining amount will automatically
     /// be added with a StorageDepositReturn UnlockCondition, when setting the ReturnStrategy to `gift`, the full
@@ -235,7 +231,7 @@ where
         recipient_address: Bech32Address,
         nft_id: Option<NftId>,
         params: StorageScoreParameters,
-    ) -> crate::wallet::Result<(OutputBuilder, Option<OutputData>)> {
+    ) -> crate::wallet::Result<(OutputBuilder, Option<OutputData<S::SigningOptions>>)> {
         let (mut first_output_builder, existing_nft_output_data) = if let Some(nft_id) = &nft_id {
             if nft_id.is_null() {
                 // Mint a new NFT output

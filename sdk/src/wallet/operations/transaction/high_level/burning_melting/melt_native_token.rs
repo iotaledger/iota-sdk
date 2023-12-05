@@ -16,11 +16,7 @@ use crate::{
     },
 };
 
-impl<S: 'static + SecretManage> Wallet<S>
-where
-    crate::wallet::Error: From<S::Error>,
-    crate::client::Error: From<S::Error>,
-{
+impl<S: 'static + SecretManage> Wallet<S> {
     /// Melts native tokens.
     ///
     /// This happens with the foundry output which minted them, by increasing it's
@@ -47,7 +43,7 @@ where
         token_id: TokenId,
         melt_amount: impl Into<U256> + Send,
         options: impl Into<Option<TransactionOptions>> + Send,
-    ) -> crate::wallet::Result<PreparedTransactionData> {
+    ) -> crate::wallet::Result<PreparedTransactionData<S::SigningOptions>> {
         log::debug!("[TRANSACTION] prepare_melt_native_token");
 
         let foundry_id = FoundryId::from(token_id);
@@ -90,7 +86,7 @@ where
         &self,
         account_id: AccountId,
         foundry_id: FoundryId,
-    ) -> crate::wallet::Result<(OutputData, OutputData)> {
+    ) -> crate::wallet::Result<(OutputData<S::SigningOptions>, OutputData<S::SigningOptions>)> {
         let mut existing_account_output_data = None;
         let mut existing_foundry_output = None;
 

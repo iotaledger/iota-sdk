@@ -18,17 +18,13 @@ use crate::{
     },
 };
 
-impl<S: 'static + SecretManage> Wallet<S>
-where
-    crate::wallet::Error: From<S::Error>,
-    crate::client::Error: From<S::Error>,
-{
+impl<S: 'static + SecretManage> Wallet<S> {
     /// Get inputs and build the transaction
     pub async fn prepare_transaction(
         &self,
         outputs: impl Into<Vec<Output>> + Send,
         options: impl Into<Option<TransactionOptions>> + Send,
-    ) -> crate::wallet::Result<PreparedTransactionData> {
+    ) -> crate::wallet::Result<PreparedTransactionData<S::SigningOptions>> {
         log::debug!("[TRANSACTION] prepare_transaction");
         let options = options.into();
         let outputs = outputs.into();

@@ -2,16 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use crate::{
-    client::secret::{SecretManage, SignBlock},
+    client::secret::{BlockSignExt, SecretManage},
     types::block::{output::AccountId, payload::Payload, BlockId},
-    wallet::{Error, Result, Wallet},
+    wallet::{Result, Wallet},
 };
 
-impl<S: 'static + SecretManage> Wallet<S>
-where
-    crate::wallet::Error: From<S::Error>,
-    crate::client::Error: From<S::Error>,
-{
+impl<S: 'static + SecretManage> Wallet<S> {
     pub(crate) async fn submit_basic_block(
         &self,
         payload: Option<Payload>,
@@ -28,7 +24,7 @@ where
             .await?
             .sign_ed25519(
                 &*self.get_secret_manager().read().await,
-                self.bip_path().await.ok_or(Error::MissingBipPath)?,
+                &self.data().await.signing_options,
             )
             .await?;
 

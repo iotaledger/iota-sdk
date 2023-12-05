@@ -16,11 +16,7 @@ use crate::{
     wallet::{operations::transaction::TransactionOptions, types::TransactionWithMetadata, Result, Wallet},
 };
 
-impl<S: 'static + SecretManage> Wallet<S>
-where
-    crate::wallet::Error: From<S::Error>,
-    crate::client::Error: From<S::Error>,
-{
+impl<S: 'static + SecretManage> Wallet<S> {
     /// Casts a given number of votes for a given (voting) event.
     ///
     /// If voting for other events, continues voting for them.
@@ -49,7 +45,7 @@ where
         &self,
         event_id: impl Into<Option<ParticipationEventId>> + Send,
         answers: impl Into<Option<Vec<u8>>> + Send,
-    ) -> Result<PreparedTransactionData> {
+    ) -> Result<PreparedTransactionData<S::SigningOptions>> {
         let event_id = event_id.into();
         let answers = answers.into();
         if let Some(event_id) = event_id {
@@ -135,7 +131,10 @@ where
     }
 
     /// Prepares the transaction for [Wallet::stop_participating()].
-    pub async fn prepare_stop_participating(&self, event_id: ParticipationEventId) -> Result<PreparedTransactionData> {
+    pub async fn prepare_stop_participating(
+        &self,
+        event_id: ParticipationEventId,
+    ) -> Result<PreparedTransactionData<S::SigningOptions>> {
         let voting_output = self
             .get_voting_output()
             .await?

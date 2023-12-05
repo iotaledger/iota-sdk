@@ -9,11 +9,7 @@ use crate::{
     wallet::{operations::transaction::SignedTransactionPayload, Wallet},
 };
 
-impl<S: 'static + SecretManage> Wallet<S>
-where
-    crate::wallet::Error: From<S::Error>,
-    crate::client::Error: From<S::Error>,
-{
+impl<S: 'static + SecretManage> Wallet<S> {
     /// Submits a signed transaction in a block.
     pub(crate) async fn submit_signed_transaction(
         &self,

@@ -46,7 +46,7 @@ use crate::{
 #[derive(Debug)]
 pub struct Wallet<S: SecretManage = SecretManager> {
     pub(crate) inner: Arc<WalletInner<S>>,
-    pub(crate) data: Arc<RwLock<WalletData>>,
+    pub(crate) data: Arc<RwLock<WalletData<S>>>,
 }
 
 impl<S: SecretManage> Clone for Wallet<S> {
@@ -66,10 +66,7 @@ impl<S: SecretManage> core::ops::Deref for Wallet<S> {
     }
 }
 
-impl<S: 'static + SecretManage> Wallet<S>
-where
-    crate::wallet::Error: From<S::Error>,
-{
+impl<S: 'static + SecretManage> Wallet<S> {
     /// Initialises the wallet builder.
     pub fn builder() -> WalletBuilder<S> {
         WalletBuilder::<S>::new()
@@ -90,7 +87,7 @@ pub struct WalletInner<S: SecretManage = SecretManager> {
     // TODO: make this optional?
     pub(crate) secret_manager: Arc<RwLock<S>>,
     #[cfg(feature = "events")]
-    pub(crate) event_emitter: tokio::sync::RwLock<EventEmitter>,
+    pub(crate) event_emitter: tokio::sync::RwLock<EventEmitter<S::SigningOptions>>,
     #[cfg(feature = "storage")]
     pub(crate) storage_options: StorageOptions,
     #[cfg(feature = "storage")]
@@ -99,23 +96,25 @@ pub struct WalletInner<S: SecretManage = SecretManager> {
 
 /// Wallet data.
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct WalletData {
-    /// The wallet BIP44 path.
-    pub(crate) bip_path: Option<Bip44>,
+pub struct WalletData<S: SecretManage> {
+    /// The public key generation options.
+    pub(crate) public_key_options: S::GenerationOptions,
+    /// The signing options for transactions and blocks.
+    pub(crate) signing_options: S::SigningOptions,
     /// The wallet address.
     pub(crate) address: Bech32Address,
     /// The wallet alias.
     pub(crate) alias: Option<String>,
     /// Outputs
     // stored separated from the wallet for performance?
-    pub(crate) outputs: HashMap<OutputId, OutputData>,
+    pub(crate) outputs: HashMap<OutputId, OutputData<S::SigningOptions>>,
     /// Unspent outputs that are currently used as input for transactions
     // outputs used in transactions should be locked here so they don't get used again, which would result in a
     // conflicting transaction
     pub(crate) locked_outputs: HashSet<OutputId>,
     /// Unspent outputs
     // have unspent outputs in a separated hashmap so we don't need to iterate over all outputs we have
-    pub(crate) unspent_outputs: HashMap<OutputId, OutputData>,
+    pub(crate) unspent_outputs: HashMap<OutputId, OutputData<S::SigningOptions>>,
     /// Sent transactions
     // stored separated from the wallet for performance and only the transaction id here? where to add the network id?
     // transactions: HashSet<TransactionId>,
@@ -134,10 +133,16 @@ pub struct WalletData {
     pub(crate) native_token_foundries: HashMap<FoundryId, FoundryOutput>,
 }
 
-impl WalletData {
-    pub(crate) fn new(bip_path: Option<Bip44>, address: Bech32Address, alias: Option<String>) -> Self {
+impl<S: SecretManage> WalletData<S> {
+    pub(crate) fn new(
+        public_key_options: S::GenerationOptions,
+        signing_options: S::SigningOptions,
+        address: Bech32Address,
+        alias: Option<String>,
+    ) -> Self {
         Self {
-            bip_path,
+            public_key_options,
+            signing_options,
             address,
             alias,
             outputs: HashMap::new(),
@@ -152,9 +157,9 @@ impl WalletData {
     }
 
     fn filter_outputs<'a>(
-        outputs: impl Iterator<Item = &'a OutputData>,
+        outputs: impl Iterator<Item = &'a OutputData<S::SigningOptions>>,
         filter: FilterOptions,
-    ) -> impl Iterator<Item = &'a OutputData> {
+    ) -> impl Iterator<Item = &'a OutputData<S::SigningOptions>> {
         outputs.filter(move |output| {
             match &output.output {
                 Output::Account(account) => {
@@ -232,27 +237,30 @@ impl WalletData {
     }
 
     /// Returns outputs map of the wallet.
-    pub fn outputs(&self) -> &HashMap<OutputId, OutputData> {
+    pub fn outputs(&self) -> &HashMap<OutputId, OutputData<S::SigningOptions>> {
         &self.outputs
     }
 
     /// Returns unspent outputs map of the wallet.
-    pub fn unspent_outputs(&self) -> &HashMap<OutputId, OutputData> {
+    pub fn unspent_outputs(&self) -> &HashMap<OutputId, OutputData<S::SigningOptions>> {
         &self.unspent_outputs
     }
 
     /// Returns outputs of the wallet.
-    pub fn filtered_outputs(&self, filter: FilterOptions) -> impl Iterator<Item = &OutputData> {
+    pub fn filtered_outputs(&self, filter: FilterOptions) -> impl Iterator<Item = &OutputData<S::SigningOptions>> {
         Self::filter_outputs(self.outputs.values(), filter)
     }
 
     /// Returns unspent outputs of the wallet.
-    pub fn filtered_unspent_outputs(&self, filter: FilterOptions) -> impl Iterator<Item = &OutputData> {
+    pub fn filtered_unspent_outputs(
+        &self,
+        filter: FilterOptions,
+    ) -> impl Iterator<Item = &OutputData<S::SigningOptions>> {
         Self::filter_outputs(self.unspent_outputs.values(), filter)
     }
 
     /// Gets the unspent account output matching the given ID.
-    pub fn unspent_account_output(&self, account_id: &AccountId) -> Option<&OutputData> {
+    pub fn unspent_account_output(&self, account_id: &AccountId) -> Option<&OutputData<S::SigningOptions>> {
         self.filtered_unspent_outputs(FilterOptions {
             account_ids: Some([*account_id].into()),
             ..Default::default()
@@ -261,7 +269,7 @@ impl WalletData {
     }
 
     /// Gets the unspent anchor output matching the given ID.
-    pub fn unspent_anchor_output(&self, anchor_id: &AnchorId) -> Option<&OutputData> {
+    pub fn unspent_anchor_output(&self, anchor_id: &AnchorId) -> Option<&OutputData<S::SigningOptions>> {
         self.filtered_unspent_outputs(FilterOptions {
             anchor_ids: Some([*anchor_id].into()),
             ..Default::default()
@@ -270,7 +278,7 @@ impl WalletData {
     }
 
     /// Gets the unspent foundry output matching the given ID.
-    pub fn unspent_foundry_output(&self, foundry_id: &FoundryId) -> Option<&OutputData> {
+    pub fn unspent_foundry_output(&self, foundry_id: &FoundryId) -> Option<&OutputData<S::SigningOptions>> {
         self.filtered_unspent_outputs(FilterOptions {
             foundry_ids: Some([*foundry_id].into()),
             ..Default::default()
@@ -279,7 +287,7 @@ impl WalletData {
     }
 
     /// Gets the unspent nft output matching the given ID.
-    pub fn unspent_nft_output(&self, nft_id: &NftId) -> Option<&OutputData> {
+    pub fn unspent_nft_output(&self, nft_id: &NftId) -> Option<&OutputData<S::SigningOptions>> {
         self.filtered_unspent_outputs(FilterOptions {
             nft_ids: Some([*nft_id].into()),
             ..Default::default()
@@ -288,7 +296,7 @@ impl WalletData {
     }
 
     /// Gets the unspent delegation output matching the given ID.
-    pub fn unspent_delegation_output(&self, delegation_id: &DelegationId) -> Option<&OutputData> {
+    pub fn unspent_delegation_output(&self, delegation_id: &DelegationId) -> Option<&OutputData<S::SigningOptions>> {
         self.filtered_unspent_outputs(FilterOptions {
             delegation_ids: Some([*delegation_id].into()),
             ..Default::default()
@@ -297,21 +305,21 @@ impl WalletData {
     }
 
     /// Returns implicit accounts of the wallet.
-    pub fn implicit_accounts(&self) -> impl Iterator<Item = &OutputData> {
+    pub fn implicit_accounts(&self) -> impl Iterator<Item = &OutputData<S::SigningOptions>> {
         self.unspent_outputs
             .values()
             .filter(|output_data| output_data.output.is_implicit_account())
     }
 
     /// Returns accounts of the wallet.
-    pub fn accounts(&self) -> impl Iterator<Item = &OutputData> {
+    pub fn accounts(&self) -> impl Iterator<Item = &OutputData<S::SigningOptions>> {
         self.unspent_outputs
             .values()
             .filter(|output_data| output_data.output.is_account())
     }
 
     /// Get the [`OutputData`] of an output stored in the wallet.
-    pub fn get_output(&self, output_id: &OutputId) -> Option<&OutputData> {
+    pub fn get_output(&self, output_id: &OutputId) -> Option<&OutputData<S::SigningOptions>> {
         self.outputs.get(output_id)
     }
 
@@ -344,13 +352,9 @@ impl WalletData {
     }
 }
 
-impl<S: 'static + SecretManage> Wallet<S>
-where
-    crate::wallet::Error: From<S::Error>,
-    crate::client::Error: From<S::Error>,
-{
+impl<S: 'static + SecretManage> Wallet<S> {
     /// Create a new wallet.
-    pub(crate) async fn new(inner: Arc<WalletInner<S>>, data: WalletData) -> Result<Self> {
+    pub(crate) async fn new(inner: Arc<WalletInner<S>>, data: WalletData<S>) -> Result<Self> {
         #[cfg(feature = "storage")]
         let default_sync_options = inner
             .storage_manager
@@ -399,7 +403,7 @@ where
     /// Save the wallet to the database, accepts the updated wallet data as option so we don't need to drop it before
     /// saving
     #[cfg(feature = "storage")]
-    pub(crate) async fn save(&self, updated_wallet: Option<&WalletData>) -> Result<()> {
+    pub(crate) async fn save(&self, updated_wallet: Option<&WalletData<S>>) -> Result<()> {
         log::debug!("[save] wallet data");
         match updated_wallet {
             Some(wallet) => {
@@ -419,15 +423,15 @@ where
     }
 
     #[cfg(feature = "events")]
-    pub(crate) async fn emit(&self, wallet_event: super::events::types::WalletEvent) {
+    pub(crate) async fn emit(&self, wallet_event: super::events::types::WalletEvent<S::SigningOptions>) {
         self.inner.emit(wallet_event).await
     }
 
-    pub async fn data(&self) -> tokio::sync::RwLockReadGuard<'_, WalletData> {
+    pub async fn data(&self) -> tokio::sync::RwLockReadGuard<'_, WalletData<S>> {
         self.data.read().await
     }
 
-    pub(crate) async fn data_mut(&self) -> tokio::sync::RwLockWriteGuard<'_, WalletData> {
+    pub(crate) async fn data_mut(&self) -> tokio::sync::RwLockWriteGuard<'_, WalletData<S>> {
         self.data.write().await
     }
 
@@ -459,11 +463,6 @@ where
     pub async fn bech32_hrp(&self) -> Hrp {
         self.data().await.address.hrp
     }
-
-    /// Get the wallet's configured bip path.
-    pub async fn bip_path(&self) -> Option<Bip44> {
-        self.data().await.bip_path
-    }
 }
 
 impl<S: SecretManage> WalletInner<S> {
@@ -478,7 +477,7 @@ impl<S: SecretManage> WalletInner<S> {
     pub async fn listen<F, I: IntoIterator<Item = WalletEventType> + Send>(&self, events: I, handler: F)
     where
         I::IntoIter: Send,
-        F: Fn(&WalletEvent) + 'static + Send + Sync,
+        F: Fn(&WalletEvent<S::SigningOptions>) + 'static + Send + Sync,
     {
         let mut emitter = self.event_emitter.write().await;
         emitter.on(events, handler);
@@ -507,14 +506,14 @@ impl<S: SecretManage> WalletInner<S> {
     }
 
     #[cfg(feature = "events")]
-    pub(crate) async fn emit(&self, event: crate::wallet::events::types::WalletEvent) {
+    pub(crate) async fn emit(&self, event: crate::wallet::events::types::WalletEvent<S::SigningOptions>) {
         self.event_emitter.read().await.emit(event);
     }
 
     /// Helper function to test events.
     #[cfg(feature = "events")]
     #[cfg_attr(docsrs, doc(cfg(feature = "events")))]
-    pub async fn emit_test_event(&self, event: crate::wallet::events::types::WalletEvent) {
+    pub async fn emit_test_event(&self, event: crate::wallet::events::types::WalletEvent<S::SigningOptions>) {
         self.emit(event).await
     }
 }
@@ -528,13 +527,14 @@ impl<S: SecretManage> Drop for Wallet<S> {
 /// Dto for the wallet data.
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct WalletDataDto {
-    pub bip_path: Option<Bip44>,
+pub struct WalletDataDto<G, S> {
+    pub public_key_options: G,
+    pub signing_options: S,
     pub address: Bech32Address,
     pub alias: Option<String>,
-    pub outputs: HashMap<OutputId, OutputData>,
+    pub outputs: HashMap<OutputId, OutputData<S>>,
     pub locked_outputs: HashSet<OutputId>,
-    pub unspent_outputs: HashMap<OutputId, OutputData>,
+    pub unspent_outputs: HashMap<OutputId, OutputData<S>>,
     pub transactions: HashMap<TransactionId, TransactionWithMetadataDto>,
     pub pending_transactions: HashSet<TransactionId>,
     pub incoming_transactions: HashMap<TransactionId, TransactionWithMetadataDto>,
@@ -542,15 +542,16 @@ pub struct WalletDataDto {
     pub native_token_foundries: HashMap<FoundryId, FoundryOutput>,
 }
 
-impl TryFromDto<WalletDataDto> for WalletData {
+impl<S: SecretManage> TryFromDto<WalletDataDto<S::GenerationOptions, S::SigningOptions>> for WalletData<S> {
     type Error = crate::wallet::Error;
 
     fn try_from_dto_with_params_inner(
-        dto: WalletDataDto,
+        dto: WalletDataDto<S::GenerationOptions, S::SigningOptions>,
         params: Option<&ProtocolParameters>,
     ) -> core::result::Result<Self, Self::Error> {
         Ok(Self {
-            bip_path: dto.bip_path,
+            public_key_options: dto.public_key_options,
+            signing_options: dto.signing_options,
             address: dto.address,
             alias: dto.alias,
             outputs: dto.outputs,
@@ -573,10 +574,15 @@ impl TryFromDto<WalletDataDto> for WalletData {
     }
 }
 
-impl From<&WalletData> for WalletDataDto {
-    fn from(value: &WalletData) -> Self {
+impl<S: SecretManage> From<&WalletData<S>> for WalletDataDto<S::GenerationOptions, S::SigningOptions>
+where
+    S::GenerationOptions: Clone,
+    S::SigningOptions: Clone,
+{
+    fn from(value: &WalletData<S>) -> Self {
         Self {
-            bip_path: value.bip_path,
+            public_key_options: value.public_key_options.clone(),
+            signing_options: value.signing_options.clone(),
             address: value.address.clone(),
             alias: value.alias.clone(),
             outputs: value.outputs.clone(),
@@ -606,6 +612,7 @@ mod test {
 
     use super::*;
     use crate::{
+        client::secret::GeneratePublicKeyOptions,
         types::block::{
             address::{Address, Ed25519Address},
             input::{Input, UtxoInput},
@@ -689,7 +696,8 @@ mod test {
         );
 
         let wallet_data = WalletData {
-            bip_path: Some(Bip44::new(4218)),
+            public_key_options: GeneratePublicKeyOptions::default().with_coin_type(4218),
+            signing_options: Bip44::new(4218),
             address: crate::types::block::address::Bech32Address::from_str(
                 "rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy",
             )
@@ -722,7 +730,8 @@ mod test {
         #[cfg(feature = "storage")]
         pub(crate) fn mock() -> Self {
             Self {
-                bip_path: Some(Bip44::new(4218)),
+                public_key_options: GeneratePublicKeyOptions::default().with_coin_type(4218),
+                signing_options: Bip44::new(4218),
                 address: crate::types::block::address::Bech32Address::from_str(
                     "rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy",
                 )

@@ -3,7 +3,7 @@
 
 use crate::{
     client::{
-        secret::{SecretManage, SignBlock},
+        secret::{BlockSignExt, SecretManage},
         Error as ClientError,
     },
     types::{
@@ -19,11 +19,7 @@ use crate::{
 const DEFAULT_REISSUE_UNTIL_INCLUDED_INTERVAL: u64 = 1;
 const DEFAULT_REISSUE_UNTIL_INCLUDED_MAX_AMOUNT: u64 = 40;
 
-impl<S: 'static + SecretManage> Wallet<S>
-where
-    Error: From<S::Error>,
-    crate::client::Error: From<S::Error>,
-{
+impl<S: 'static + SecretManage> Wallet<S> {
     /// Reissues a transaction sent from the account for a provided transaction id until it's
     /// included (referenced by a milestone). Returns the included block id.
     pub async fn reissue_transaction_until_included(
@@ -63,7 +59,7 @@ where
                     .await?
                     .sign_ed25519(
                         &*self.get_secret_manager().read().await,
-                        self.bip_path().await.ok_or(Error::MissingBipPath)?,
+                        &self.data().await.signing_options,
                     )
                     .await?
                     .id(&protocol_parameters),
@@ -111,7 +107,7 @@ where
                             .await?
                             .sign_ed25519(
                                 &*self.get_secret_manager().read().await,
-                                self.bip_path().await.ok_or(Error::MissingBipPath)?,
+                                &self.data().await.signing_options,
                             )
                             .await?;
                         block_ids.push(reissued_block.id(&protocol_parameters));

@@ -1,7 +1,6 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use crypto::keys::bip44::Bip44;
 use serde::{Deserialize, Serialize};
 
 use crate::{
@@ -22,34 +21,33 @@ use crate::{
         },
         TryFromDto,
     },
-    utils::serde::bip44::option_bip44,
 };
 
 /// Helper struct for offline signing
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct PreparedTransactionData {
+pub struct PreparedTransactionData<O> {
     /// Transaction
     pub transaction: Transaction,
     /// Required input information for signing. Inputs need to be ordered by address type
-    pub inputs_data: Vec<InputSigningData>,
+    pub inputs_data: Vec<InputSigningData<O>>,
     /// Optional remainder output information
-    pub remainder: Option<RemainderData>,
+    pub remainder: Option<RemainderData<O>>,
 }
 
 /// PreparedTransactionData Dto
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct PreparedTransactionDataDto {
+pub struct PreparedTransactionDataDto<O> {
     /// Transaction
     pub transaction: TransactionDto,
     /// Required address information for signing
-    pub inputs_data: Vec<InputSigningData>,
+    pub inputs_data: Vec<InputSigningData<O>>,
     /// Optional remainder output information
-    pub remainder: Option<RemainderData>,
+    pub remainder: Option<RemainderData<O>>,
 }
 
-impl From<&PreparedTransactionData> for PreparedTransactionDataDto {
-    fn from(value: &PreparedTransactionData) -> Self {
+impl<O: Clone> From<&PreparedTransactionData<O>> for PreparedTransactionDataDto<O> {
+    fn from(value: &PreparedTransactionData<O>) -> Self {
         Self {
             transaction: TransactionDto::from(&value.transaction),
             inputs_data: value.inputs_data.clone(),
@@ -58,11 +56,11 @@ impl From<&PreparedTransactionData> for PreparedTransactionDataDto {
     }
 }
 
-impl TryFromDto<PreparedTransactionDataDto> for PreparedTransactionData {
+impl<O> TryFromDto<PreparedTransactionDataDto<O>> for PreparedTransactionData<O> {
     type Error = Error;
 
     fn try_from_dto_with_params_inner(
-        dto: PreparedTransactionDataDto,
+        dto: PreparedTransactionDataDto<O>,
         params: Option<&ProtocolParameters>,
     ) -> Result<Self, Self::Error> {
         Ok(Self {
@@ -76,25 +74,25 @@ impl TryFromDto<PreparedTransactionDataDto> for PreparedTransactionData {
 
 /// Helper struct for offline signing
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct SignedTransactionData {
+pub struct SignedTransactionData<O> {
     /// Signed transaction payload
     pub payload: SignedTransactionPayload,
     /// Required address information for signing
-    pub inputs_data: Vec<InputSigningData>,
+    pub inputs_data: Vec<InputSigningData<O>>,
 }
 
 /// SignedTransactionData Dto
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct SignedTransactionDataDto {
+pub struct SignedTransactionDataDto<O> {
     /// Signed transaction payload
     pub payload: SignedTransactionPayloadDto,
     /// Required address information for signing
-    pub inputs_data: Vec<InputSigningData>,
+    pub inputs_data: Vec<InputSigningData<O>>,
 }
 
-impl From<&SignedTransactionData> for SignedTransactionDataDto {
-    fn from(value: &SignedTransactionData) -> Self {
+impl<O: Clone> From<&SignedTransactionData<O>> for SignedTransactionDataDto<O> {
+    fn from(value: &SignedTransactionData<O>) -> Self {
         Self {
             payload: SignedTransactionPayloadDto::from(&value.payload),
             inputs_data: value.inputs_data.clone(),
@@ -102,11 +100,11 @@ impl From<&SignedTransactionData> for SignedTransactionDataDto {
     }
 }
 
-impl TryFromDto<SignedTransactionDataDto> for SignedTransactionData {
+impl<O> TryFromDto<SignedTransactionDataDto<O>> for SignedTransactionData<O> {
     type Error = Error;
 
     fn try_from_dto_with_params_inner(
-        dto: SignedTransactionDataDto,
+        dto: SignedTransactionDataDto<O>,
         params: Option<&ProtocolParameters>,
     ) -> Result<Self, Self::Error> {
         Ok(Self {
@@ -119,12 +117,11 @@ impl TryFromDto<SignedTransactionDataDto> for SignedTransactionData {
 
 /// Data for a remainder output, used for ledger nano
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-pub struct RemainderData {
+pub struct RemainderData<O> {
     /// The remainder output
     pub output: Output,
-    /// The chain derived from seed, for the remainder addresses
-    #[serde(with = "option_bip44", default)]
-    pub chain: Option<Bip44>,
+    /// The signing options for the remainder addresses
+    pub signing_options: Option<O>,
     /// The remainder address
     pub address: Address,
 }

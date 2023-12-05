@@ -4,9 +4,9 @@
 use super::{Error, InputSelection, Requirement};
 use crate::{client::secret::types::InputSigningData, types::block::address::Address};
 
-impl InputSelection {
+impl<O> InputSelection<O> {
     /// Fulfills a sender requirement by selecting an available input that unlocks its address.
-    pub(crate) fn fulfill_sender_requirement(&mut self, address: &Address) -> Result<Vec<InputSigningData>, Error> {
+    pub(crate) fn fulfill_sender_requirement(&mut self, address: &Address) -> Result<Vec<InputSigningData<O>>, Error> {
         match address {
             Address::Ed25519(_) => {
                 log::debug!("Treating {address:?} sender requirement as an ed25519 requirement");

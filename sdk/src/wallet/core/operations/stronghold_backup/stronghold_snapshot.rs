@@ -38,7 +38,7 @@ impl<S: 'static + SecretManagerConfig> Wallet<S> {
 
 pub(crate) async fn read_wallet_data_from_stronghold_snapshot<S: 'static + SecretManagerConfig>(
     stronghold: &StrongholdAdapter,
-) -> crate::wallet::Result<(Option<ClientOptions>, Option<S::Config>, Option<WalletData>)> {
+) -> crate::wallet::Result<(Option<ClientOptions>, Option<S::Config>, Option<WalletData<S>>)> {
     migrate(stronghold).await?;
 
     // Get client_options
@@ -64,7 +64,7 @@ pub(crate) async fn read_wallet_data_from_stronghold_snapshot<S: 'static + Secre
 
     // Get wallet data
     let restored_wallet_data = stronghold
-        .get::<WalletDataDto>(WALLET_DATA_KEY)
+        .get::<WalletDataDto<S::GenerationOptions, S::SigningOptions>>(WALLET_DATA_KEY)
         .await?
         .map(WalletData::try_from_dto)
         .transpose()?;

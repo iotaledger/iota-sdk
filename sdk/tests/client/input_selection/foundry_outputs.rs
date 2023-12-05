@@ -255,7 +255,7 @@ fn melt_native_tokens() {
     inputs.push(InputSigningData {
         output: account_output,
         output_metadata: rand_output_metadata(),
-        chain: None,
+        signing_options: None,
     });
     let outputs = build_outputs([Foundry(
         1_000_000,
@@ -484,7 +484,7 @@ fn simple_foundry_transition_basic_not_needed() {
     inputs.push(InputSigningData {
         output: account_output,
         output_metadata: rand_output_metadata(),
-        chain: None,
+        signing_options: None,
     });
 
     let outputs = build_outputs([Foundry(
@@ -559,7 +559,7 @@ fn simple_foundry_transition_basic_not_needed_with_remainder() {
     inputs.push(InputSigningData {
         output: account_output,
         output_metadata: rand_output_metadata(),
-        chain: None,
+        signing_options: None,
     });
     let outputs = build_outputs([Foundry(
         1_000_000,
@@ -700,7 +700,7 @@ fn mint_and_burn_at_the_same_time() {
     inputs.push(InputSigningData {
         output: account_output,
         output_metadata: rand_output_metadata(),
-        chain: None,
+        signing_options: None,
     });
 
     let outputs = build_outputs([Foundry(
@@ -762,7 +762,7 @@ fn take_amount_from_account_and_foundry_to_fund_basic() {
     inputs.push(InputSigningData {
         output: account_output,
         output_metadata: rand_output_metadata(),
-        chain: None,
+        signing_options: None,
     });
     let outputs = build_outputs([Basic(
         3_200_000,
@@ -974,7 +974,7 @@ fn foundry_in_outputs_and_required() {
     inputs.push(InputSigningData {
         output: account_output,
         output_metadata: rand_output_metadata(),
-        chain: None,
+        signing_options: None,
     });
     let outputs = build_outputs([Foundry(
         1_000_000,
@@ -1040,7 +1040,7 @@ fn melt_and_burn_native_tokens() {
     inputs.push(InputSigningData {
         output: account_output,
         output_metadata: rand_output_metadata(),
-        chain: None,
+        signing_options: None,
     });
     let outputs = build_outputs([Foundry(
         1_000_000,

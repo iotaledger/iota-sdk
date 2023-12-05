@@ -92,16 +92,16 @@ async fn changed_bip_path() -> Result<()> {
         .with_secret_manager(SecretManager::Mnemonic(MnemonicSecretManager::try_from_mnemonic(
             mnemonic.clone(),
         )?))
-        .with_bip_path(Bip44::new(IOTA_COIN_TYPE))
+        .with_public_key_options(Bip44::new(IOTA_COIN_TYPE))
         .with_storage_path(storage_path)
         .finish()
         .await;
 
     // Building the wallet with another coin type needs to return an error, because a different coin type was used in
     // the existing account
-    let mismatch_err: Result<Wallet> = Err(Error::BipPathMismatch {
-        new_bip_path: Some(Bip44::new(IOTA_COIN_TYPE)),
-        old_bip_path: Some(Bip44::new(SHIMMER_COIN_TYPE)),
+    let mismatch_err: Result<Wallet> = Err(Error::PublicKeyOptionsMismatch {
+        new: Some(Bip44::new(IOTA_COIN_TYPE)),
+        old: Some(Bip44::new(SHIMMER_COIN_TYPE)),
     });
     assert!(matches!(err, mismatch_err));
 
@@ -149,7 +149,7 @@ async fn iota_coin_type() -> Result<()> {
     let mut wallet_builder = Wallet::builder()
         .with_secret_manager(SecretManager::Mnemonic(secret_manager))
         .with_client_options(client_options)
-        .with_bip_path(Bip44::new(IOTA_COIN_TYPE));
+        .with_public_key_options(Bip44::new(IOTA_COIN_TYPE));
 
     #[cfg(feature = "storage")]
     {

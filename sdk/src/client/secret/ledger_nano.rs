@@ -5,15 +5,12 @@
 //!
 //! Ledger status codes: <https://github.com/iotaledger/ledger-iota-app/blob/53c1f96d15f8b014ba8ba31a85f0401bb4d33e18/src/iota_io.h#L54>.
 
-use std::{collections::HashMap, ops::Range};
+use std::collections::HashMap;
 
 use async_trait::async_trait;
 use crypto::{
     keys::{bip44::Bip44, slip10::Segment},
-    signatures::{
-        ed25519,
-        secp256k1_ecdsa::{self, EvmAddress},
-    },
+    signatures::ed25519,
 };
 use iota_ledger_nano::{
     api::errors::APIError, get_app_config, get_buffer_size, get_ledger, get_opened_app, LedgerBIP32Index,
@@ -22,16 +19,15 @@ use iota_ledger_nano::{
 use packable::{error::UnexpectedEOF, unpacker::SliceUnpacker, Packable, PackableExt};
 use tokio::sync::Mutex;
 
-use super::{GenerateAddressOptions, SecretManage, SecretManagerConfig};
 use crate::{
     client::secret::{
         types::{LedgerApp, LedgerDeviceType},
-        LedgerNanoStatus, PreparedTransactionData,
+        Generate, LedgerNanoStatus, PreparedTransactionData, SecretManagerConfig, Sign, SignTransaction,
     },
     types::block::{
-        address::{AccountAddress, Address, AnchorAddress, NftAddress},
+        address::{AccountAddress, Address, AnchorAddress, Ed25519Address, NftAddress},
         output::Output,
-        payload::signed_transaction::SignedTransactionPayload,
+        protocol::ProtocolParameters,
         signature::{Ed25519Signature, Signature},
         unlock::{AccountUnlock, NftUnlock, ReferenceUnlock, SignatureUnlock, Unlock, Unlocks},
         Error as BlockError,
@@ -131,71 +127,62 @@ impl TryFrom<u8> for LedgerDeviceType {
 }
 
 #[async_trait]
-impl SecretManage for LedgerSecretManager {
-    type Error = crate::client::Error;
+impl Generate<ed25519::PublicKey> for LedgerSecretManager {
+    type Options = ();
 
-    async fn generate_ed25519_public_keys(
-        &self,
-        // https://github.com/satoshilabs/slips/blob/master/slip-0044.md
-        // current ledger app only supports IOTA_COIN_TYPE, SHIMMER_COIN_TYPE and TESTNET_COIN_TYPE
-        _coin_type: u32,
-        _account_index: u32,
-        _address_indexes: Range<u32>,
-        _options: impl Into<Option<GenerateAddressOptions>> + Send,
-    ) -> Result<Vec<ed25519::PublicKey>, Self::Error> {
-        // need an update on the ledger C lib
-        todo!();
-        // let options = options.into().unwrap_or_default();
-        // let bip32_account = account_index.harden().into();
-
-        // let bip32 = LedgerBIP32Index {
-        //     bip32_index: address_indexes.start.harden().into(),
-        //     bip32_change: u32::from(options.internal).harden().into(),
-        // };
-
-        // // lock the mutex to prevent multiple simultaneous requests to a ledger
-        // let lock = self.mutex.lock().await;
-
-        // // get ledger
-        // let ledger = get_ledger(coin_type, bip32_account, self.is_simulator).map_err(Error::from)?;
-        // if ledger.is_debug_app() {
-        //     ledger
-        //         .set_non_interactive_mode(self.non_interactive)
-        //         .map_err(Error::from)?;
-        // }
-
-        // let addresses = ledger
-        //     .get_addresses(options.ledger_nano_prompt, bip32, address_indexes.len())
-        //     .map_err(Error::from)?;
-
-        // drop(lock);
-
-        // Ok(addresses.into_iter().map(Ed25519Address::new).collect())
+    async fn generate(&self, _options: &Self::Options) -> crate::client::Result<ed25519::PublicKey> {
+        todo!()
     }
+}
 
-    async fn generate_evm_addresses(
-        &self,
-        _coin_type: u32,
-        _account_index: u32,
-        _address_indexes: Range<u32>,
-        _options: impl Into<Option<GenerateAddressOptions>> + Send,
-    ) -> Result<Vec<EvmAddress>, Self::Error> {
-        Err(Error::UnsupportedOperation.into())
+#[async_trait]
+impl Generate<Ed25519Address> for LedgerSecretManager {
+    type Options = ();
+
+    async fn generate(&self, options: &Self::Options) -> crate::client::Result<Ed25519Address> {
+        let public_key: ed25519::PublicKey = self.generate(options).await?;
+        Ok(Ed25519Address::from_public_key_bytes(public_key.to_bytes()))
     }
+}
 
-    /// Ledger only allows signing messages of 32 bytes, anything else is unsupported and will result in an error.
-    async fn sign_ed25519(&self, msg: &[u8], chain: Bip44) -> Result<Ed25519Signature, Self::Error> {
+#[async_trait]
+impl Generate<Vec<ed25519::PublicKey>> for LedgerSecretManager {
+    type Options = ();
+
+    async fn generate(&self, _options: &Self::Options) -> crate::client::Result<Vec<ed25519::PublicKey>> {
+        todo!()
+    }
+}
+
+#[async_trait]
+impl Generate<Vec<Ed25519Address>> for LedgerSecretManager {
+    type Options = ();
+
+    async fn generate(&self, options: &Self::Options) -> crate::client::Result<Vec<Ed25519Address>> {
+        let public_keys: Vec<ed25519::PublicKey> = self.generate(options).await?;
+        Ok(public_keys
+            .into_iter()
+            .map(|k| Ed25519Address::from_public_key_bytes(k.to_bytes()))
+            .collect())
+    }
+}
+
+#[async_trait]
+impl Sign<Ed25519Signature> for LedgerSecretManager {
+    type Options = Bip44;
+
+    async fn sign(&self, msg: &[u8], options: &Self::Options) -> crate::client::Result<Ed25519Signature> {
         if msg.len() != 32 {
             return Err(Error::UnsupportedOperation.into());
         }
 
         let msg = msg.to_vec();
 
-        let coin_type = chain.coin_type;
-        let account_index = chain.account.harden().into();
+        let coin_type = options.coin_type;
+        let account_index = options.account.harden().into();
         let bip32_index = LedgerBIP32Index {
-            bip32_change: chain.change.harden().into(),
-            bip32_index: chain.address_index.harden().into(),
+            bip32_change: options.change.harden().into(),
+            bip32_index: options.address_index.harden().into(),
         };
 
         // Lock the mutex to prevent multiple simultaneous requests to a ledger.
@@ -234,19 +221,15 @@ impl SecretManage for LedgerSecretManager {
             _ => Err(Error::UnsupportedOperation.into()),
         };
     }
+}
 
-    async fn sign_secp256k1_ecdsa(
-        &self,
-        _msg: &[u8],
-        _chain: Bip44,
-    ) -> Result<(secp256k1_ecdsa::PublicKey, secp256k1_ecdsa::RecoverableSignature), Self::Error> {
-        Err(Error::UnsupportedOperation.into())
-    }
-
+#[async_trait]
+impl SignTransaction for LedgerSecretManager {
     async fn transaction_unlocks(
         &self,
-        prepared_transaction: &PreparedTransactionData,
-    ) -> Result<Unlocks, <Self as SecretManage>::Error> {
+        prepared_transaction: &PreparedTransactionData<Self::Options>,
+        _protocol_parameters: &ProtocolParameters,
+    ) -> crate::client::Result<Unlocks> {
         let mut input_bip32_indices = Vec::new();
         let mut coin_type = None;
         let mut account_index = None;
@@ -254,7 +237,7 @@ impl SecretManage for LedgerSecretManager {
         let input_len = prepared_transaction.inputs_data.len();
 
         for input in &prepared_transaction.inputs_data {
-            let chain = input.chain.ok_or(Error::MissingBip32Chain)?;
+            let chain = input.signing_options.ok_or(Error::MissingBip32Chain)?;
 
             // coin_type and account_index should be the same in each output
             if (coin_type.is_some() && coin_type != Some(chain.coin_type))
@@ -303,7 +286,7 @@ impl SecretManage for LedgerSecretManager {
             #[allow(clippy::option_if_let_else)]
             let (remainder_output, remainder_bip32) = match &prepared_transaction.remainder {
                 Some(remainder) => {
-                    if let Some(chain) = remainder.chain {
+                    if let Some(chain) = remainder.signing_options {
                         (
                             Some(&remainder.output),
                             LedgerBIP32Index {
@@ -405,13 +388,6 @@ impl SecretManage for LedgerSecretManager {
 
         Ok(Unlocks::new(unlocks)?)
     }
-
-    async fn sign_transaction(
-        &self,
-        prepared_transaction_data: PreparedTransactionData,
-    ) -> Result<SignedTransactionPayload, Self::Error> {
-        super::default_sign_transaction(self, prepared_transaction_data).await
-    }
 }
 
 impl SecretManagerConfig for LedgerSecretManager {
@@ -421,7 +397,7 @@ impl SecretManagerConfig for LedgerSecretManager {
         Some(self.is_simulator)
     }
 
-    fn from_config(config: &Self::Config) -> Result<Self, Self::Error> {
+    fn from_config(config: &Self::Config) -> crate::client::Result<Self> {
         Ok(Self::new(*config))
     }
 }
@@ -430,10 +406,13 @@ impl SecretManagerConfig for LedgerSecretManager {
 /// is signed but only with BasicOutputs, without extra-features and if the transaction is not too large.
 /// If criteria are not met, blind signing is needed.
 /// This method finds out if we have to switch to blind signing mode.
-pub fn needs_blind_signing(prepared_transaction: &PreparedTransactionData, buffer_size: usize) -> bool {
-    if !prepared_transaction.transaction.outputs().iter().all(
-        |output| matches!(output, Output::Basic(o) if o.simple_deposit_address().is_some()&& o.address().is_ed25519()),
-    ) {
+pub fn needs_blind_signing(prepared_transaction: &PreparedTransactionData<Bip44>, buffer_size: usize) -> bool {
+    if !prepared_transaction
+        .transaction
+        .outputs()
+        .iter()
+        .all(|output| matches!(output, Output::Basic(o) if o.simple_deposit_address().is_some()))
+    {
         return true;
     }
 
@@ -511,7 +490,7 @@ impl LedgerSecretManager {
 
 // Merge signature unlocks with Account/Nft/Reference unlocks
 fn merge_unlocks(
-    prepared_transaction_data: &PreparedTransactionData,
+    prepared_transaction_data: &PreparedTransactionData<Bip44>,
     mut unlocks: impl Iterator<Item = Unlock>,
 ) -> Result<Vec<Unlock>, Error> {
     let slot_index = prepared_transaction_data.transaction.creation_slot();
@@ -594,7 +573,7 @@ mod tests {
 
     use super::*;
     use crate::{
-        client::{api::GetAddressesOptions, constants::IOTA_COIN_TYPE, secret::SecretManager},
+        client::{constants::IOTA_COIN_TYPE, secret::SecretManager},
         types::block::address::ToBech32Ext,
     };
 

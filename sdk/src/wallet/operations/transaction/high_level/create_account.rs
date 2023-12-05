@@ -34,11 +34,7 @@ pub struct CreateAccountParams {
     pub metadata: Option<Vec<u8>>,
 }
 
-impl<S: 'static + SecretManage> Wallet<S>
-where
-    crate::wallet::Error: From<S::Error>,
-    crate::client::Error: From<S::Error>,
-{
+impl<S: 'static + SecretManage> Wallet<S> {
     /// Creates an account output.
     /// ```ignore
     /// let params = CreateAccountParams {
@@ -71,7 +67,7 @@ where
         &self,
         params: Option<CreateAccountParams>,
         options: impl Into<Option<TransactionOptions>> + Send,
-    ) -> crate::wallet::Result<PreparedTransactionData> {
+    ) -> crate::wallet::Result<PreparedTransactionData<S::SigningOptions>> {
         log::debug!("[TRANSACTION] prepare_create_account_output");
         let storage_score_params = self.client().get_storage_score_parameters().await?;
 
@@ -108,7 +104,10 @@ where
     }
 
     /// Gets an existing account output.
-    pub(crate) async fn get_account_output(&self, account_id: Option<AccountId>) -> Option<(AccountId, OutputData)> {
+    pub(crate) async fn get_account_output(
+        &self,
+        account_id: Option<AccountId>,
+    ) -> Option<(AccountId, OutputData<S::SigningOptions>)> {
         log::debug!("[get_account_output]");
         self.data()
             .await

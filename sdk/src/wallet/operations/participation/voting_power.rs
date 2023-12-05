@@ -17,11 +17,7 @@ use crate::{
     wallet::{operations::transaction::TransactionOptions, types::TransactionWithMetadata, Error, Result, Wallet},
 };
 
-impl<S: 'static + SecretManage> Wallet<S>
-where
-    crate::wallet::Error: From<S::Error>,
-    crate::client::Error: From<S::Error>,
-{
+impl<S: 'static + SecretManage> Wallet<S> {
     /// Returns an account's total voting power (voting or NOT voting).
     pub async fn get_voting_power(&self) -> Result<u64> {
         Ok(self
@@ -48,7 +44,10 @@ where
     }
 
     /// Prepares the transaction for [Wallet::increase_voting_power()].
-    pub async fn prepare_increase_voting_power(&self, amount: u64) -> Result<PreparedTransactionData> {
+    pub async fn prepare_increase_voting_power(
+        &self,
+        amount: u64,
+    ) -> Result<PreparedTransactionData<S::SigningOptions>> {
         let (new_output, tx_options) = match self.get_voting_output().await? {
             Some(current_output_data) => {
                 let output = current_output_data.output.as_basic();
@@ -96,7 +95,10 @@ where
     }
 
     /// Prepares the transaction for [Wallet::decrease_voting_power()].
-    pub async fn prepare_decrease_voting_power(&self, amount: u64) -> Result<PreparedTransactionData> {
+    pub async fn prepare_decrease_voting_power(
+        &self,
+        amount: u64,
+    ) -> Result<PreparedTransactionData<S::SigningOptions>> {
         let current_output_data = self
             .get_voting_output()
             .await?

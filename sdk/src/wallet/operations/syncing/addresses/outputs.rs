@@ -13,16 +13,12 @@ use crate::{
     },
 };
 
-impl<S: 'static + SecretManage> Wallet<S>
-where
-    crate::wallet::Error: From<S::Error>,
-    crate::client::Error: From<S::Error>,
-{
+impl<S: 'static + SecretManage> Wallet<S> {
     /// Get outputs from addresses
     pub(crate) async fn get_outputs_from_address_output_ids(
         &self,
         addresses_with_unspent_outputs: Vec<AddressWithUnspentOutputs>,
-    ) -> crate::wallet::Result<(Vec<AddressWithUnspentOutputs>, Vec<OutputData>)> {
+    ) -> crate::wallet::Result<(Vec<AddressWithUnspentOutputs>, Vec<OutputData<S::SigningOptions>>)> {
         log::debug!("[SYNC] start get_outputs_from_address_output_ids");
         let address_outputs_start_time = Instant::now();
 
@@ -51,7 +47,7 @@ where
             }
             let results = futures::future::try_join_all(tasks).await?;
             for res in results {
-                let (address, outputs): (AddressWithUnspentOutputs, Vec<OutputData>) = res?;
+                let (address, outputs): (AddressWithUnspentOutputs, Vec<OutputData<S::SigningOptions>>) = res?;
                 addresses_with_outputs.push(address);
                 outputs_data.extend(outputs);
             }

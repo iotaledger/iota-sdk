@@ -13,7 +13,7 @@ use crate::{
     },
 };
 
-impl InputSelection {
+impl<O> InputSelection<O> {
     /// Transitions an account input by creating a new account output if required.
     fn transition_account_input(
         &mut self,
@@ -149,7 +149,7 @@ impl InputSelection {
 
     /// Transitions an input by creating a new output if required.
     /// If no `account_transition` is provided, assumes a state transition.
-    pub(crate) fn transition_input(&mut self, input: &InputSigningData) -> Result<Option<Output>, Error> {
+    pub(crate) fn transition_input(&mut self, input: &InputSigningData<O>) -> Result<Option<Output>, Error> {
         match &input.output {
             Output::Account(account_input) => self.transition_account_input(account_input, input.output_id()),
             Output::Foundry(foundry_input) => self.transition_foundry_input(foundry_input, input.output_id()),

@@ -26,9 +26,9 @@ fn custom_error_serialization() {
     );
 
     // testing a struct-like error
-    let error = Error::Wallet(WalletError::BipPathMismatch {
-        old_bip_path: None,
-        new_bip_path: Some(Bip44::new(SHIMMER_COIN_TYPE)),
+    let error = Error::Wallet(WalletError::PublicKeyOptionsMismatch {
+        old: None,
+        new: Some(Bip44::new(SHIMMER_COIN_TYPE)),
     });
     assert_eq!(
         serde_json::to_string(&error).unwrap(),

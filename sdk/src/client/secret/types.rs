@@ -3,13 +3,10 @@
 
 //! Miscellaneous types for secret managers.
 
-use crypto::keys::bip44::Bip44;
+use crypto::signatures::secp256k1_ecdsa;
 use serde::{Deserialize, Serialize};
 
-use crate::{
-    types::block::output::{Output, OutputId, OutputMetadata},
-    utils::serde::bip44::option_bip44,
-};
+use crate::types::block::output::{Output, OutputId, OutputMetadata};
 
 /// Stronghold DTO to allow the creation of a Stronghold secret manager from bindings
 #[cfg(feature = "stronghold")]
@@ -32,24 +29,6 @@ impl core::fmt::Debug for StrongholdDto {
             .field("timeout", &self.timeout)
             .field("snapshot_path", &self.snapshot_path)
             .finish()
-    }
-}
-
-/// Options provided to generate addresses.
-#[derive(Copy, Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase", default)]
-pub struct GenerateAddressOptions {
-    pub internal: bool,
-    /// Display the address on ledger devices.
-    pub ledger_nano_prompt: bool,
-}
-
-impl GenerateAddressOptions {
-    pub const fn internal() -> Self {
-        Self {
-            internal: true,
-            ledger_nano_prompt: false,
-        }
     }
 }
 
@@ -136,19 +115,22 @@ impl LedgerNanoStatus {
 /// Data for transaction inputs for signing and ordering of unlock blocks
 #[derive(Clone, Debug, Eq, PartialEq, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct InputSigningData {
+pub struct InputSigningData<O> {
     /// The output
     pub output: Output,
     /// The output metadata
     pub output_metadata: OutputMetadata,
-    /// The chain derived from seed, only for ed25519 addresses
-    #[serde(with = "option_bip44", default)]
-    pub chain: Option<Bip44>,
+    pub signing_options: Option<O>,
 }
 
-impl InputSigningData {
+impl<O> InputSigningData<O> {
     /// Return the [OutputId]
     pub fn output_id(&self) -> &OutputId {
         self.output_metadata.output_id()
     }
+}
+
+pub struct EvmSignature {
+    pub public_key: secp256k1_ecdsa::PublicKey,
+    pub signature: secp256k1_ecdsa::RecoverableSignature,
 }

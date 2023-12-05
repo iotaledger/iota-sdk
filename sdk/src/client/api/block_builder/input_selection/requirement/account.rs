@@ -26,12 +26,12 @@ pub(crate) fn is_account_with_id_non_null(output: &Output, account_id: &AccountI
     }
 }
 
-impl InputSelection {
+impl<O> InputSelection<O> {
     /// Fulfills an account requirement by selecting the appropriate account from the available inputs.
     pub(crate) fn fulfill_account_requirement(
         &mut self,
         account_id: AccountId,
-    ) -> Result<Vec<InputSigningData>, Error> {
+    ) -> Result<Vec<InputSigningData<O>>, Error> {
         // Check if the requirement is already fulfilled.
         if let Some(input) = self
             .selected_inputs

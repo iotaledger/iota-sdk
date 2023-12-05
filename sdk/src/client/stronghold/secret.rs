@@ -3,8 +3,7 @@
 
 //! The [SecretManage] implementation for [StrongholdAdapter].
 
-use core::borrow::Borrow;
-use std::ops::Range;
+use core::{borrow::Borrow, time::Duration};
 
 use async_trait::async_trait;
 use crypto::{
@@ -18,7 +17,6 @@ use crypto::{
         secp256k1_ecdsa::{self, EvmAddress},
     },
 };
-use instant::Duration;
 use iota_stronghold::{
     procedures::{self, Curve, KeyType, Slip10DeriveInput},
     Location,
@@ -30,26 +28,85 @@ use super::{
 };
 use crate::{
     client::{
-        api::PreparedTransactionData,
-        secret::{types::StrongholdDto, GenerateAddressOptions, SecretManage, SecretManagerConfig},
+        secret::{
+            types::{EvmSignature, StrongholdDto},
+            Generate, GenerateMultiKeyOptions, GeneratePublicKeyOptions, SecretManagerConfig, Sign, SignTransaction,
+        },
         stronghold::Error,
     },
-    types::block::{
-        payload::signed_transaction::SignedTransactionPayload, signature::Ed25519Signature, unlock::Unlocks,
-    },
+    types::block::{address::Ed25519Address, signature::Ed25519Signature},
 };
 
 #[async_trait]
-impl SecretManage for StrongholdAdapter {
-    type Error = crate::client::Error;
+impl Generate<ed25519::PublicKey> for StrongholdAdapter {
+    type Options = GeneratePublicKeyOptions;
 
-    async fn generate_ed25519_public_keys(
-        &self,
-        coin_type: u32,
-        account_index: u32,
-        address_indexes: Range<u32>,
-        options: impl Into<Option<GenerateAddressOptions>> + Send,
-    ) -> Result<Vec<ed25519::PublicKey>, Self::Error> {
+    async fn generate(&self, options: &Self::Options) -> crate::client::Result<ed25519::PublicKey> {
+        // Prevent the method from being invoked when the key has been cleared from the memory. Do note that Stronghold
+        // only asks for a key for reading / writing a snapshot, so without our cached key this method is invocable, but
+        // it doesn't make sense when it comes to our user (signing transactions / generating addresses without a key).
+        // Thus, we put an extra guard here to prevent this methods from being invoked when our cached key has
+        // been cleared.
+        if !self.is_key_available().await {
+            return Err(Error::KeyCleared.into());
+        }
+
+        // Stronghold arguments.
+        let seed_location = Slip10DeriveInput::Seed(Location::generic(SECRET_VAULT_PATH, SEED_RECORD_PATH));
+
+        let chain = Bip44::new(options.coin_type)
+            .with_account(options.account_index)
+            .with_change(options.internal as _);
+
+        let derive_location = Location::generic(
+            SECRET_VAULT_PATH,
+            [
+                DERIVE_OUTPUT_RECORD_PATH,
+                &chain
+                    .to_chain::<ed25519::SecretKey>()
+                    .into_iter()
+                    .flat_map(|seg| seg.ser32())
+                    .collect::<Vec<u8>>(),
+            ]
+            .concat(),
+        );
+
+        // Derive a SLIP-10 private key in the vault.
+        self.slip10_derive(Curve::Ed25519, chain, seed_location.clone(), derive_location.clone())
+            .await?;
+
+        // Get the Ed25519 public key from the derived SLIP-10 private key in the vault.
+        let public_key = self.ed25519_public_key(derive_location.clone()).await?;
+
+        // Cleanup location afterwards
+        self.stronghold
+            .lock()
+            .await
+            .get_client(PRIVATE_DATA_CLIENT_PATH)
+            .map_err(Error::from)?
+            .vault(SECRET_VAULT_PATH)
+            .delete_secret(derive_location.record_path())
+            .map_err(Error::from)?;
+
+        Ok(public_key)
+    }
+}
+
+#[async_trait]
+impl Generate<Ed25519Address> for StrongholdAdapter {
+    type Options = GeneratePublicKeyOptions;
+
+    async fn generate(&self, options: &Self::Options) -> crate::client::Result<Ed25519Address> {
+        let public_key: ed25519::PublicKey = self.generate(options).await?;
+        Ok(Ed25519Address::from_public_key_bytes(public_key.to_bytes()))
+    }
+}
+
+#[async_trait]
+impl Generate<Vec<ed25519::PublicKey>> for StrongholdAdapter {
+    type Options = GenerateMultiKeyOptions;
+
+    async fn generate(&self, options: &Self::Options) -> crate::client::Result<Vec<ed25519::PublicKey>> {
         // Prevent the method from being invoked when the key has been cleared from the memory. Do note that Stronghold
         // only asks for a key for reading / writing a snapshot, so without our cached key this method is invocable, but
         // it doesn't make sense when it comes to our user (signing transactions / generating addresses without a key).
@@ -64,12 +121,11 @@ impl SecretManage for StrongholdAdapter {
 
         // Public keys to return.
         let mut public_keys = Vec::new();
-        let internal = options.into().map(|o| o.internal).unwrap_or_default();
 
-        for address_index in address_indexes {
-            let chain = Bip44::new(coin_type)
-                .with_account(account_index)
-                .with_change(internal as _)
+        for address_index in options.address_range.clone() {
+            let chain = Bip44::new(options.coin_type)
+                .with_account(options.account_index)
+                .with_change(options.internal as _)
                 .with_address_index(address_index);
 
             let derive_location = Location::generic(
@@ -108,14 +164,91 @@ impl SecretManage for StrongholdAdapter {
 
         Ok(public_keys)
     }
+}
 
-    async fn generate_evm_addresses(
-        &self,
-        coin_type: u32,
-        account_index: u32,
-        address_indexes: Range<u32>,
-        options: impl Into<Option<GenerateAddressOptions>> + Send,
-    ) -> Result<Vec<EvmAddress>, Self::Error> {
+#[async_trait]
+impl Generate<Vec<Ed25519Address>> for StrongholdAdapter {
+    type Options = GenerateMultiKeyOptions;
+
+    async fn generate(&self, options: &Self::Options) -> crate::client::Result<Vec<Ed25519Address>> {
+        let public_keys: Vec<ed25519::PublicKey> = self.generate(options).await?;
+        Ok(public_keys
+            .into_iter()
+            .map(|k| Ed25519Address::from_public_key_bytes(k.to_bytes()))
+            .collect())
+    }
+}
+
+#[async_trait]
+impl Generate<secp256k1_ecdsa::PublicKey> for StrongholdAdapter {
+    type Options = GeneratePublicKeyOptions;
+
+    async fn generate(&self, options: &Self::Options) -> crate::client::Result<secp256k1_ecdsa::PublicKey> {
+        // Prevent the method from being invoked when the key has been cleared from the memory. Do note that Stronghold
+        // only asks for a key for reading / writing a snapshot, so without our cached key this method is invocable, but
+        // it doesn't make sense when it comes to our user (signing transactions / generating addresses without a key).
+        // Thus, we put an extra guard here to prevent this methods from being invoked when our cached key has
+        // been cleared.
+        if !self.is_key_available().await {
+            return Err(Error::KeyCleared.into());
+        }
+
+        // Stronghold arguments.
+        let seed_location = Slip10DeriveInput::Seed(Location::generic(SECRET_VAULT_PATH, SEED_RECORD_PATH));
+
+        let chain = Bip44::new(options.coin_type)
+            .with_account(options.account_index)
+            .with_change(options.internal as _);
+
+        let derive_location = Location::generic(
+            SECRET_VAULT_PATH,
+            [
+                DERIVE_OUTPUT_RECORD_PATH,
+                &chain
+                    .to_chain::<secp256k1_ecdsa::SecretKey>()
+                    .into_iter()
+                    .flat_map(|seg| seg.ser32())
+                    .collect::<Vec<u8>>(),
+            ]
+            .concat(),
+        );
+
+        // Derive a SLIP-10 private key in the vault.
+        self.slip10_derive(Curve::Secp256k1, chain, seed_location.clone(), derive_location.clone())
+            .await?;
+
+        // Get the Secp256k1 public key from the derived SLIP-10 private key in the vault.
+        let public_key = self.secp256k1_ecdsa_public_key(derive_location.clone()).await?;
+
+        // Cleanup location afterwards
+        self.stronghold
+            .lock()
+            .await
+            .get_client(PRIVATE_DATA_CLIENT_PATH)
+            .map_err(Error::from)?
+            .vault(SECRET_VAULT_PATH)
+            .delete_secret(derive_location.record_path())
+            .map_err(Error::from)?;
+
+        Ok(public_key)
+    }
+}
+
+#[async_trait]
+impl Generate<EvmAddress> for StrongholdAdapter {
+    type Options = GeneratePublicKeyOptions;
+
+    async fn generate(&self, options: &Self::Options) -> crate::client::Result<EvmAddress> {
+        let public_key: secp256k1_ecdsa::PublicKey = self.generate(options).await?;
+        Ok(public_key.evm_address())
+    }
+}
+
+#[async_trait]
+impl Generate<Vec<secp256k1_ecdsa::PublicKey>> for StrongholdAdapter {
+    type Options = GenerateMultiKeyOptions;
+
+    async fn generate(&self, options: &Self::Options) -> crate::client::Result<Vec<secp256k1_ecdsa::PublicKey>> {
         // Prevent the method from being invoked when the key has been cleared from the memory. Do note that Stronghold
         // only asks for a key for reading / writing a snapshot, so without our cached key this method is invocable, but
         // it doesn't make sense when it comes to our user (signing transactions / generating addresses without a key).
@@ -130,12 +263,11 @@ impl SecretManage for StrongholdAdapter {
 
         // Addresses to return.
         let mut addresses = Vec::new();
-        let internal = options.into().map(|o| o.internal).unwrap_or_default();
 
-        for address_index in address_indexes {
-            let chain = Bip44::new(coin_type)
-                .with_account(account_index)
-                .with_change(internal as _)
+        for address_index in options.address_range.clone() {
+            let chain = Bip44::new(options.coin_type)
+                .with_account(options.account_index)
+                .with_change(options.internal as _)
                 .with_address_index(address_index);
 
             let derive_location = Location::generic(
@@ -169,13 +301,28 @@ impl SecretManage for StrongholdAdapter {
                 .map_err(Error::from)?;
 
             // Collect it.
-            addresses.push(public_key.evm_address());
+            addresses.push(public_key);
         }
 
         Ok(addresses)
     }
+}
 
-    async fn sign_ed25519(&self, msg: &[u8], chain: Bip44) -> Result<Ed25519Signature, Self::Error> {
+#[async_trait]
+impl Generate<Vec<EvmAddress>> for StrongholdAdapter {
+    type Options = GenerateMultiKeyOptions;
+
+    async fn generate(&self, options: &Self::Options) -> crate::client::Result<Vec<EvmAddress>> {
+        let public_keys: Vec<secp256k1_ecdsa::PublicKey> = self.generate(options).await?;
+        Ok(public_keys.into_iter().map(|k| k.evm_address()).collect())
+    }
+}
+
+#[async_trait]
+impl Sign<Ed25519Signature> for StrongholdAdapter {
+    type Options = Bip44;
+
+    async fn sign(&self, msg: &[u8], chain: &Self::Options) -> crate::client::Result<Ed25519Signature> {
         // Prevent the method from being invoked when the key has been cleared from the memory. Do note that Stronghold
         // only asks for a key for reading / writing a snapshot, so without our cached key this method is invocable, but
         // it doesn't make sense when it comes to our user (signing transactions / generating addresses without a key).
@@ -202,7 +349,7 @@ impl SecretManage for StrongholdAdapter {
         );
 
         // Derive a SLIP-10 private key in the vault.
-        self.slip10_derive(Curve::Ed25519, chain, seed_location, derive_location.clone())
+        self.slip10_derive(Curve::Ed25519, *chain, seed_location, derive_location.clone())
             .await?;
 
         // Get the Ed25519 public key from the derived SLIP-10 private key in the vault.
@@ -221,12 +368,13 @@ impl SecretManage for StrongholdAdapter {
 
         Ok(Ed25519Signature::new(public_key, signature))
     }
+}
 
-    async fn sign_secp256k1_ecdsa(
-        &self,
-        msg: &[u8],
-        chain: Bip44,
-    ) -> Result<(secp256k1_ecdsa::PublicKey, secp256k1_ecdsa::RecoverableSignature), Self::Error> {
+#[async_trait]
+impl Sign<EvmSignature> for StrongholdAdapter {
+    type Options = Bip44;
+
+    async fn sign(&self, msg: &[u8], chain: &Self::Options) -> crate::client::Result<EvmSignature> {
         // Prevent the method from being invoked when the key has been cleared from the memory. Do note that Stronghold
         // only asks for a key for reading / writing a snapshot, so without our cached key this method is invocable, but
         // it doesn't make sense when it comes to our user (signing transactions / generating addresses without a key).
@@ -253,7 +401,7 @@ impl SecretManage for StrongholdAdapter {
         );
 
         // Derive a SLIP-10 private key in the vault.
-        self.slip10_derive(Curve::Secp256k1, chain, seed_location, derive_location.clone())
+        self.slip10_derive(Curve::Secp256k1, *chain, seed_location, derive_location.clone())
             .await?;
 
         // Get the public key from the derived SLIP-10 private key in the vault.
@@ -270,23 +418,11 @@ impl SecretManage for StrongholdAdapter {
             .delete_secret(derive_location.record_path())
             .map_err(Error::from)?;
 
-        Ok((public_key, signature))
-    }
-
-    async fn transaction_unlocks(
-        &self,
-        prepared_transaction_data: &PreparedTransactionData,
-    ) -> Result<Unlocks, Self::Error> {
-        crate::client::secret::default_transaction_unlocks(self, prepared_transaction_data).await
-    }
-
-    async fn sign_transaction(
-        &self,
-        prepared_transaction_data: PreparedTransactionData,
-    ) -> Result<SignedTransactionPayload, Self::Error> {
-        crate::client::secret::default_sign_transaction(self, prepared_transaction_data).await
+        Ok(EvmSignature { public_key, signature })
     }
 }
+
+impl SignTransaction for StrongholdAdapter {}
 
 impl SecretManagerConfig for StrongholdAdapter {
     type Config = StrongholdDto;
@@ -299,7 +435,7 @@ impl SecretManagerConfig for StrongholdAdapter {
         })
     }
 
-    fn from_config(config: &Self::Config) -> Result<Self, Self::Error> {
+    fn from_config(config: &Self::Config) -> crate::client::Result<Self> {
         let mut builder = Self::builder();
 
         if let Some(password) = &config.password {

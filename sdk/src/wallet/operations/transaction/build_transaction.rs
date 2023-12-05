@@ -15,23 +15,20 @@ use crate::{
     wallet::{operations::transaction::TransactionOptions, Wallet},
 };
 
-impl<S: 'static + SecretManage> Wallet<S>
-where
-    crate::wallet::Error: From<S::Error>,
-{
+impl<S: 'static + SecretManage> Wallet<S> {
     /// Builds the transaction from the selected in and outputs.
     pub(crate) async fn build_transaction(
         &self,
-        selected_transaction_data: Selected,
+        selected_transaction_data: Selected<S::SigningOptions>,
         options: impl Into<Option<TransactionOptions>> + Send,
-    ) -> crate::wallet::Result<PreparedTransactionData> {
+    ) -> crate::wallet::Result<PreparedTransactionData<S::SigningOptions>> {
         log::debug!("[TRANSACTION] build_transaction");
 
         let build_transaction_start_time = Instant::now();
         let protocol_parameters = self.client().get_protocol_parameters().await?;
 
         let mut inputs: Vec<Input> = Vec::new();
-        let mut inputs_for_signing: Vec<InputSigningData> = Vec::new();
+        let mut inputs_for_signing: Vec<InputSigningData<_>> = Vec::new();
 
         for utxo in &selected_transaction_data.inputs {
             let input = Input::Utxo(UtxoInput::from(*utxo.output_id()));

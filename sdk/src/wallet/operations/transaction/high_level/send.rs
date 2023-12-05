@@ -73,11 +73,7 @@ impl SendParams {
     }
 }
 
-impl<S: 'static + SecretManage> Wallet<S>
-where
-    crate::wallet::Error: From<S::Error>,
-    crate::client::Error: From<S::Error>,
-{
+impl<S: 'static + SecretManage> Wallet<S> {
     /// Sends a certain amount of base coins to a single address.
     ///
     /// Calls [Wallet::send_with_params()] internally.
@@ -130,7 +126,7 @@ where
         &self,
         params: I,
         options: impl Into<Option<TransactionOptions>> + Send,
-    ) -> crate::wallet::Result<PreparedTransactionData>
+    ) -> crate::wallet::Result<PreparedTransactionData<S::SigningOptions>>
     where
         I::IntoIter: Send,
     {

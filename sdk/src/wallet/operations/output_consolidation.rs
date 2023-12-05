@@ -65,14 +65,10 @@ impl ConsolidationParams {
     }
 }
 
-impl<S: 'static + SecretManage> Wallet<S>
-where
-    crate::wallet::Error: From<S::Error>,
-    crate::client::Error: From<S::Error>,
-{
+impl<S: 'static + SecretManage> Wallet<S> {
     fn should_consolidate_output(
         &self,
-        output_data: &OutputData,
+        output_data: &OutputData<S::SigningOptions>,
         slot_index: SlotIndex,
         wallet_address: &Address,
     ) -> Result<bool> {
@@ -119,7 +115,10 @@ where
     }
 
     /// Prepares the transaction for [Wallet::consolidate_outputs()].
-    pub async fn prepare_consolidate_outputs(&self, params: ConsolidationParams) -> Result<PreparedTransactionData> {
+    pub async fn prepare_consolidate_outputs(
+        &self,
+        params: ConsolidationParams,
+    ) -> Result<PreparedTransactionData<S::SigningOptions>> {
         log::debug!("[OUTPUT_CONSOLIDATION] prepare consolidating outputs if needed");
         #[cfg(feature = "participation")]
         let voting_output = self.get_voting_output().await?;
@@ -153,21 +152,8 @@ where
             None => {
                 #[cfg(feature = "ledger_nano")]
                 {
-                    use crate::client::secret::SecretManager;
                     let secret_manager = self.secret_manager.read().await;
-                    if secret_manager
-                        .downcast::<LedgerSecretManager>()
-                        .or_else(|| {
-                            secret_manager.downcast::<SecretManager>().and_then(|s| {
-                                if let SecretManager::LedgerNano(n) = s {
-                                    Some(n)
-                                } else {
-                                    None
-                                }
-                            })
-                        })
-                        .is_some()
-                    {
+                    if secret_manager.as_ledger_nano().is_ok() {
                         DEFAULT_LEDGER_OUTPUT_CONSOLIDATION_THRESHOLD
                     } else {
                         DEFAULT_OUTPUT_CONSOLIDATION_THRESHOLD
@@ -193,17 +179,8 @@ where
 
         #[cfg(feature = "ledger_nano")]
         let max_inputs = {
-            use crate::client::secret::SecretManager;
             let secret_manager = self.secret_manager.read().await;
-            if let Some(ledger) = secret_manager.downcast::<LedgerSecretManager>().or_else(|| {
-                secret_manager.downcast::<SecretManager>().and_then(|s| {
-                    if let SecretManager::LedgerNano(n) = s {
-                        Some(n)
-                    } else {
-                        None
-                    }
-                })
-            }) {
+            if let Ok(ledger) = secret_manager.as_ledger_nano() {
                 let ledger_nano_status = ledger.get_ledger_nano_status().await;
                 // With blind signing we are only limited by the protocol
                 if ledger_nano_status.blind_signing_enabled() {

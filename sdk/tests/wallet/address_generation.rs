@@ -35,7 +35,7 @@ async fn wallet_address_generation_mnemonic() -> Result<()> {
     let mut wallet_builder = Wallet::builder()
         .with_secret_manager(SecretManager::Mnemonic(secret_manager))
         .with_client_options(client_options)
-        .with_bip_path(Bip44::new(IOTA_COIN_TYPE));
+        .with_public_key_options(Bip44::new(IOTA_COIN_TYPE));
 
     #[cfg(feature = "storage")]
     {
@@ -74,7 +74,7 @@ async fn wallet_address_generation_stronghold() -> Result<()> {
     let mut wallet_builder = Wallet::builder()
         .with_secret_manager(SecretManager::Stronghold(secret_manager))
         .with_client_options(client_options)
-        .with_bip_path(Bip44::new(IOTA_COIN_TYPE));
+        .with_public_key_options(Bip44::new(IOTA_COIN_TYPE));
     #[cfg(feature = "storage")]
     {
         wallet_builder = wallet_builder.with_storage_path(storage_path);
@@ -107,7 +107,7 @@ async fn wallet_address_generation_ledger() -> Result<()> {
     let mut wallet_builder = Wallet::builder()
         .with_secret_manager(SecretManager::LedgerNano(secret_manager))
         .with_client_options(client_options)
-        .with_bip_path(Bip44::new(IOTA_COIN_TYPE));
+        .with_public_key_options(Bip44::new(IOTA_COIN_TYPE));
 
     #[cfg(feature = "storage")]
     {

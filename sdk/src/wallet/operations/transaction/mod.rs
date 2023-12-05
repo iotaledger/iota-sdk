@@ -31,11 +31,7 @@ use crate::{
     },
 };
 
-impl<S: 'static + SecretManage> Wallet<S>
-where
-    crate::wallet::Error: From<S::Error>,
-    crate::client::Error: From<S::Error>,
-{
+impl<S: 'static + SecretManage> Wallet<S> {
     /// Sends a transaction by specifying its outputs.
     ///
     /// Note that, if sending a block fails, the method will return `None` for the block id, but the wallet
@@ -99,7 +95,7 @@ where
     /// Signs a transaction, submit it to a node and store it in the wallet
     pub async fn sign_and_submit_transaction(
         &self,
-        prepared_transaction_data: PreparedTransactionData,
+        prepared_transaction_data: PreparedTransactionData<S::SigningOptions>,
         issuer_id: impl Into<Option<AccountId>> + Send,
         options: impl Into<Option<TransactionOptions>> + Send,
     ) -> crate::wallet::Result<TransactionWithMetadata> {
@@ -121,7 +117,7 @@ where
     /// Validates the transaction, submit it to a node and store it in the wallet
     pub async fn submit_and_store_transaction(
         &self,
-        signed_transaction_data: SignedTransactionData,
+        signed_transaction_data: SignedTransactionData<S::SigningOptions>,
         issuer_id: impl Into<Option<AccountId>> + Send,
         options: impl Into<Option<TransactionOptions>> + Send,
     ) -> crate::wallet::Result<TransactionWithMetadata> {
@@ -197,7 +193,7 @@ where
     }
 
     // unlock outputs
-    async fn unlock_inputs(&self, inputs: &[InputSigningData]) -> crate::wallet::Result<()> {
+    async fn unlock_inputs(&self, inputs: &[InputSigningData<S::SigningOptions>]) -> crate::wallet::Result<()> {
         let mut wallet_data = self.data_mut().await;
         for input_signing_data in inputs {
             let output_id = input_signing_data.output_id();

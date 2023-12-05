@@ -43,7 +43,7 @@ async fn main() -> Result<()> {
         .with_secret_manager(SecretManager::Mnemonic(secret_manager))
         .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
         .with_client_options(client_options)
-        .with_bip_path(Bip44::new(SHIMMER_COIN_TYPE))
+        .with_public_key_options(Bip44::new(SHIMMER_COIN_TYPE))
         .finish()
         .await?;
 

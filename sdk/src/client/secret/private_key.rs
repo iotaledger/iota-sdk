@@ -3,24 +3,16 @@
 
 //! Implementation of [`PrivateKeySecretManager`].
 
-use std::ops::Range;
-
 use async_trait::async_trait;
-use crypto::{
-    keys::bip44::Bip44,
-    signatures::{
-        ed25519,
-        secp256k1_ecdsa::{self, EvmAddress},
-    },
-};
+use crypto::signatures::ed25519;
 use zeroize::{Zeroize, Zeroizing};
 
-use super::{GenerateAddressOptions, SecretManage};
 use crate::{
-    client::{api::PreparedTransactionData, Error},
-    types::block::{
-        payload::signed_transaction::SignedTransactionPayload, signature::Ed25519Signature, unlock::Unlocks,
+    client::{
+        secret::{Generate, Sign, SignTransaction},
+        Error,
     },
+    types::block::{address::Ed25519Address, signature::Ed25519Signature},
 };
 
 /// Secret manager based on a single private key.
@@ -33,60 +25,37 @@ impl std::fmt::Debug for PrivateKeySecretManager {
 }
 
 #[async_trait]
-impl SecretManage for PrivateKeySecretManager {
-    type Error = Error;
+impl Generate<ed25519::PublicKey> for PrivateKeySecretManager {
+    type Options = ();
 
-    async fn generate_ed25519_public_keys(
-        &self,
-        _coin_type: u32,
-        _account_index: u32,
-        _address_indexes: Range<u32>,
-        _options: impl Into<Option<GenerateAddressOptions>> + Send,
-    ) -> Result<Vec<ed25519::PublicKey>, Self::Error> {
-        crate::client::Result::Ok(vec![self.0.public_key()])
+    async fn generate(&self, _options: &Self::Options) -> crate::client::Result<ed25519::PublicKey> {
+        crate::client::Result::Ok(self.0.public_key())
     }
+}
 
-    async fn generate_evm_addresses(
-        &self,
-        _coin_type: u32,
-        _account_index: u32,
-        _address_indexes: Range<u32>,
-        _options: impl Into<Option<GenerateAddressOptions>> + Send,
-    ) -> Result<Vec<EvmAddress>, Self::Error> {
-        // TODO replace with a more fitting variant.
-        Err(Error::SecretManagerMismatch)
+#[async_trait]
+impl Generate<Ed25519Address> for PrivateKeySecretManager {
+    type Options = ();
+
+    async fn generate(&self, options: &Self::Options) -> crate::client::Result<Ed25519Address> {
+        let public_key: ed25519::PublicKey = self.generate(options).await?;
+        Ok(Ed25519Address::from_public_key_bytes(public_key.to_bytes()))
     }
+}
 
-    async fn sign_ed25519(&self, msg: &[u8], _chain: Bip44) -> Result<Ed25519Signature, Self::Error> {
+#[async_trait]
+impl Sign<Ed25519Signature> for PrivateKeySecretManager {
+    type Options = ();
+
+    async fn sign(&self, msg: &[u8], _options: &Self::Options) -> crate::client::Result<Ed25519Signature> {
         let public_key = self.0.public_key();
         let signature = self.0.sign(msg);
 
         Ok(Ed25519Signature::new(public_key, signature))
     }
-
-    async fn sign_secp256k1_ecdsa(
-        &self,
-        _msg: &[u8],
-        _chain: Bip44,
-    ) -> Result<(secp256k1_ecdsa::PublicKey, secp256k1_ecdsa::RecoverableSignature), Self::Error> {
-        // TODO replace with a more fitting variant.
-        Err(Error::SecretManagerMismatch)
-    }
-
-    async fn transaction_unlocks(
-        &self,
-        prepared_transaction_data: &PreparedTransactionData,
-    ) -> Result<Unlocks, Self::Error> {
-        super::default_transaction_unlocks(self, prepared_transaction_data).await
-    }
-
-    async fn sign_transaction(
-        &self,
-        prepared_transaction_data: PreparedTransactionData,
-    ) -> Result<SignedTransactionPayload, Self::Error> {
-        super::default_sign_transaction(self, prepared_transaction_data).await
-    }
 }
+
+impl SignTransaction for PrivateKeySecretManager {}
 
 impl PrivateKeySecretManager {
     /// Create a new [`PrivateKeySecretManager`] from a base 58 encoded private key.

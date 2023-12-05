@@ -1237,7 +1237,7 @@ fn changed_immutable_metadata() {
     let inputs = [InputSigningData {
         output: nft_output.clone(),
         output_metadata: rand_output_metadata(),
-        chain: None,
+        signing_options: None,
     }];
 
     #[cfg(feature = "irc_27")]

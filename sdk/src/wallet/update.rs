@@ -4,8 +4,11 @@
 use std::collections::HashMap;
 
 use crate::{
-    client::secret::SecretManage,
-    types::block::output::{OutputId, OutputMetadata},
+    client::secret::{SecretManage, Sign},
+    types::block::{
+        output::{OutputId, OutputMetadata},
+        signature::Ed25519Signature,
+    },
     wallet::{
         types::{InclusionState, OutputData, TransactionWithMetadata},
         Wallet,
@@ -18,11 +21,7 @@ use crate::{
     wallet::events::types::{NewOutputEvent, SpentOutputEvent, TransactionInclusionEvent, WalletEvent},
 };
 
-impl<S: 'static + SecretManage> Wallet<S>
-where
-    crate::wallet::Error: From<S::Error>,
-    crate::client::Error: From<S::Error>,
-{
+impl<S: 'static + SecretManage> Wallet<S> {
     /// Set the alias for the wallet.
     pub async fn set_alias(&self, alias: &str) -> crate::wallet::Result<()> {
         let mut wallet_data = self.data_mut().await;
@@ -35,7 +34,7 @@ where
     /// Update wallet with newly synced data and emit events for outputs.
     pub(crate) async fn update_after_sync(
         &self,
-        unspent_outputs: Vec<OutputData>,
+        unspent_outputs: Vec<OutputData<S::SigningOptions>>,
         spent_or_unsynced_output_metadata_map: HashMap<OutputId, Option<OutputMetadata>>,
     ) -> crate::wallet::Result<()> {
         log::debug!("[SYNC] Update wallet with new synced transactions");

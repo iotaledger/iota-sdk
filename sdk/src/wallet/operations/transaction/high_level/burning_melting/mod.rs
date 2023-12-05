@@ -2,13 +2,16 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use crate::{
-    client::api::{input_selection::Burn, PreparedTransactionData},
+    client::{
+        api::{input_selection::Burn, PreparedTransactionData},
+        secret::SecretManage,
+    },
     wallet::{operations::transaction::TransactionOptions, types::TransactionWithMetadata, Wallet},
 };
 
 pub(crate) mod melt_native_token;
 
-impl Wallet {
+impl<S: 'static + SecretManage> Wallet<S> {
     /// A generic function that can be used to burn native tokens, nfts, foundries and accounts.
     ///
     /// Note that burning **native tokens** doesn't require the foundry output which minted them, but will not increase
@@ -35,7 +38,7 @@ impl Wallet {
         &self,
         burn: impl Into<Burn> + Send,
         options: impl Into<Option<TransactionOptions>> + Send,
-    ) -> crate::wallet::Result<PreparedTransactionData> {
+    ) -> crate::wallet::Result<PreparedTransactionData<S::SigningOptions>> {
         let mut options: TransactionOptions = options.into().unwrap_or_default();
         options.burn = Some(burn.into());
 

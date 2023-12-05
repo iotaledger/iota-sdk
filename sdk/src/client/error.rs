@@ -151,9 +151,9 @@ pub enum Error {
     /// Input selection error.
     #[error("{0}")]
     InputSelection(#[from] InputSelectionError),
-    /// Missing BIP32 chain to sign with.
-    #[error("missing BIP32 chain to sign with")]
-    MissingBip32Chain,
+    /// Missing options for signing.
+    #[error("missing options for signing")]
+    MissingSigningOptions,
     /// Unexpected block body kind.
     #[error("unexpected block body kind: expected {expected}, found {actual}")]
     UnexpectedBlockBodyKind { expected: u8, actual: u8 },

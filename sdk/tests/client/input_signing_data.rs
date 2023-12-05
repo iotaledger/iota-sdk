@@ -26,14 +26,14 @@ fn input_signing_data_conversion() {
     let input_signing_data = InputSigningData {
         output,
         output_metadata: rand_output_metadata(),
-        chain: Some(bip44_chain),
+        signing_options: Some(bip44_chain),
     };
 
     assert_eq!(input_signing_data.chain.as_ref(), Some(&bip44_chain));
 
     let input_signing_data_json = serde_json::to_value(&input_signing_data).unwrap();
 
-    let restored_input_signing_data = serde_json::from_value::<InputSigningData>(input_signing_data_json).unwrap();
+    let restored_input_signing_data = serde_json::from_value::<InputSigningData<O>>(input_signing_data_json).unwrap();
     assert!(restored_input_signing_data.output.is_basic());
     assert_eq!(restored_input_signing_data.chain.as_ref(), Some(&bip44_chain));
 }

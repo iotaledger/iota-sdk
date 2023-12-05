@@ -16,11 +16,7 @@ use crate::{
     },
 };
 
-impl<S: 'static + SecretManage> Wallet<S>
-where
-    crate::wallet::Error: From<S::Error>,
-    crate::client::Error: From<S::Error>,
-{
+impl<S: 'static + SecretManage> Wallet<S> {
     /// Get the balance of the wallet.
     pub async fn balance(&self) -> Result<Balance> {
         log::debug!("[BALANCE] balance");
@@ -33,7 +29,7 @@ where
     async fn balance_inner(
         &self,
         // addresses_with_unspent_outputs: impl Iterator<Item = &AddressWithUnspentOutputs> + Send,
-        wallet_data: &WalletData,
+        wallet_data: &WalletData<S>,
     ) -> Result<Balance> {
         let network_id = self.client().get_network_id().await?;
         let storage_score_params = self.client().get_storage_score_parameters().await?;
@@ -252,7 +248,7 @@ where
     fn finish(
         &self,
         mut balance: Balance,
-        wallet_data: &WalletData,
+        wallet_data: &WalletData<S>,
         network_id: u64,
         total_storage_cost: u64,
         total_native_tokens: NativeTokensBuilder,

@@ -11,11 +11,7 @@ use crate::{
     wallet::{operations::transaction::TransactionOptions, types::TransactionWithMetadata, Error, Wallet},
 };
 
-impl<S: 'static + SecretManage> Wallet<S>
-where
-    crate::wallet::Error: From<S::Error>,
-    crate::client::Error: From<S::Error>,
-{
+impl<S: 'static + SecretManage> Wallet<S> {
     /// Mints additional native tokens.
     ///
     /// The max supply must not be reached yet. The foundry needs to be
@@ -52,7 +48,7 @@ where
         token_id: TokenId,
         mint_amount: impl Into<U256> + Send,
         options: impl Into<Option<TransactionOptions>> + Send,
-    ) -> crate::wallet::Result<PreparedTransactionData> {
+    ) -> crate::wallet::Result<PreparedTransactionData<S::SigningOptions>> {
         log::debug!("[TRANSACTION] mint_native_token");
 
         let mint_amount = mint_amount.into();

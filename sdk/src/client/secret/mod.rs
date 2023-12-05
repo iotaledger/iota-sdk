@@ -7,6 +7,7 @@
 #[cfg(feature = "ledger_nano")]
 #[cfg_attr(docsrs, doc(cfg(feature = "ledger_nano")))]
 pub mod ledger_nano;
+mod manager;
 /// Module for mnemonic based secret management.
 pub mod mnemonic;
 /// Module for single private key based secret management.
@@ -20,119 +21,319 @@ pub mod stronghold;
 /// Signing related types
 pub mod types;
 
-#[cfg(feature = "stronghold")]
-use std::time::Duration;
-use std::{collections::HashMap, fmt::Debug, ops::Range, str::FromStr};
+use std::{collections::HashMap, fmt::Debug, ops::Range, sync::Arc};
 
 use async_trait::async_trait;
-use crypto::{
-    hashes::{blake2b::Blake2b256, Digest},
-    keys::{bip39::Mnemonic, bip44::Bip44},
-    signatures::{
-        ed25519,
-        secp256k1_ecdsa::{self, EvmAddress},
-    },
-};
+use crypto::{keys::bip44::Bip44, signatures::ed25519};
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
-use zeroize::Zeroizing;
 
 #[cfg(feature = "ledger_nano")]
 use self::ledger_nano::LedgerSecretManager;
+pub use self::manager::{SecretManager, SecretManagerDto};
 use self::mnemonic::MnemonicSecretManager;
 #[cfg(feature = "private_key_secret_manager")]
 use self::private_key::PrivateKeySecretManager;
+#[cfg(feature = "ledger_nano")]
+pub use self::types::LedgerNanoStatus;
 #[cfg(feature = "stronghold")]
-use self::stronghold::StrongholdSecretManager;
-pub use self::types::{GenerateAddressOptions, LedgerNanoStatus};
-#[cfg(feature = "stronghold")]
-use crate::client::secret::types::StrongholdDto;
+use super::stronghold::StrongholdAdapter;
 use crate::{
     client::{
         api::{
             input_selection::Error as InputSelectionError, transaction::validate_signed_transaction_payload_length,
             verify_semantic, PreparedTransactionData,
         },
+        constants::IOTA_COIN_TYPE,
         Error,
     },
     types::block::{
-        address::{Address, AnchorAddress, Ed25519Address},
+        address::{Address, AnchorAddress},
         core::UnsignedBlock,
         output::Output,
         payload::SignedTransactionPayload,
+        protocol::ProtocolParameters,
         signature::{Ed25519Signature, Signature},
         unlock::{AccountUnlock, NftUnlock, ReferenceUnlock, SignatureUnlock, Unlock, Unlocks},
         Block, Error as BlockError,
     },
 };
 
-/// The secret manager interface.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct GeneratePublicKeyOptions {
+    pub coin_type: u32,
+    pub account_index: u32,
+    pub internal: bool,
+    pub address_index: u32,
+}
+
+impl Default for GeneratePublicKeyOptions {
+    fn default() -> Self {
+        Self {
+            coin_type: IOTA_COIN_TYPE,
+            account_index: 0,
+            internal: false,
+            address_index: 0,
+        }
+    }
+}
+
+impl GeneratePublicKeyOptions {
+    /// Set the coin type
+    pub fn with_coin_type(mut self, coin_type: u32) -> Self {
+        self.coin_type = coin_type;
+        self
+    }
+
+    /// Set the account index
+    pub fn with_account_index(mut self, account_index: u32) -> Self {
+        self.account_index = account_index;
+        self
+    }
+
+    /// Set internal flag.
+    pub fn with_internal(mut self, internal: bool) -> Self {
+        self.internal = internal;
+        self
+    }
+
+    /// Set internal flag.
+    pub fn with_address_index(mut self, address_index: u32) -> Self {
+        self.address_index = address_index;
+        self
+    }
+}
+
+impl From<Bip44> for GeneratePublicKeyOptions {
+    fn from(value: Bip44) -> Self {
+        Self::default()
+            .with_coin_type(value.coin_type)
+            .with_account_index(value.account)
+            .with_internal(value.change != 0)
+            .with_address_index(value.address_index)
+    }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct GenerateMultiKeyOptions {
+    pub coin_type: u32,
+    pub account_index: u32,
+    pub internal: bool,
+    pub address_range: Range<u32>,
+}
+
+impl Default for GenerateMultiKeyOptions {
+    fn default() -> Self {
+        Self {
+            coin_type: IOTA_COIN_TYPE,
+            account_index: 0,
+            internal: false,
+            address_range: 0..1,
+        }
+    }
+}
+
+impl GenerateMultiKeyOptions {
+    /// Set the coin type
+    pub fn with_coin_type(mut self, coin_type: u32) -> Self {
+        self.coin_type = coin_type;
+        self
+    }
+
+    /// Set the account index
+    pub fn with_account_index(mut self, account_index: u32) -> Self {
+        self.account_index = account_index;
+        self
+    }
+
+    /// Set internal flag.
+    pub fn with_internal(mut self, internal: bool) -> Self {
+        self.internal = internal;
+        self
+    }
+
+    /// Set range to the builder
+    pub fn with_address_range(mut self, range: Range<u32>) -> Self {
+        self.address_range = range;
+        self
+    }
+}
+
 #[async_trait]
-pub trait SecretManage: Send + Sync {
-    type Error: std::error::Error + Send + Sync;
+pub trait Generate<K>: Send + Sync {
+    type Options: 'static + Send + Sync + Serialize + Clone + Debug + DeserializeOwned + PartialEq;
 
-    /// Generates public keys.
-    ///
-    /// For `coin_type`, see also <https://github.com/satoshilabs/slips/blob/master/slip-0044.md>.
-    async fn generate_ed25519_public_keys(
-        &self,
-        coin_type: u32,
-        account_index: u32,
-        address_indexes: Range<u32>,
-        options: impl Into<Option<GenerateAddressOptions>> + Send,
-    ) -> Result<Vec<ed25519::PublicKey>, Self::Error>;
+    async fn generate(&self, options: &Self::Options) -> crate::client::Result<K>;
+}
 
-    /// Generates addresses.
-    ///
-    /// For `coin_type`, see also <https://github.com/satoshilabs/slips/blob/master/slip-0044.md>.
-    async fn generate_ed25519_addresses(
-        &self,
-        coin_type: u32,
-        account_index: u32,
-        address_indexes: Range<u32>,
-        options: impl Into<Option<GenerateAddressOptions>> + Send,
-    ) -> Result<Vec<Ed25519Address>, Self::Error> {
-        Ok(self
-            .generate_ed25519_public_keys(coin_type, account_index, address_indexes, options)
-            .await?
-            .iter()
-            .map(|public_key| Ed25519Address::new(Blake2b256::digest(public_key.to_bytes()).into()))
-            .collect())
+#[async_trait]
+impl<T: Generate<K>, K> Generate<K> for Arc<T> {
+    type Options = T::Options;
+
+    async fn generate(&self, options: &Self::Options) -> crate::client::Result<K> {
+        self.as_ref().generate(options).await
     }
+}
 
-    async fn generate_evm_addresses(
+#[async_trait]
+pub trait Sign<S>: Send + Sync {
+    type Options: 'static + Send + Sync + Serialize + Clone + Debug + DeserializeOwned + PartialEq;
+
+    async fn sign(&self, msg: &[u8], options: &Self::Options) -> crate::client::Result<S>;
+
+    /// Signs `signing_hash` using the given `options`, returning a [`SignatureUnlock`].
+    async fn signature_unlock(
         &self,
-        coin_type: u32,
-        account_index: u32,
-        address_indexes: Range<u32>,
-        options: impl Into<Option<GenerateAddressOptions>> + Send,
-    ) -> Result<Vec<EvmAddress>, Self::Error>;
-
-    /// Signs msg using the given [`Bip44`] using Ed25519.
-    async fn sign_ed25519(&self, msg: &[u8], chain: Bip44) -> Result<Ed25519Signature, Self::Error>;
-
-    /// Signs msg using the given [`Bip44`] using Secp256k1.
-    async fn sign_secp256k1_ecdsa(
-        &self,
-        msg: &[u8],
-        chain: Bip44,
-    ) -> Result<(secp256k1_ecdsa::PublicKey, secp256k1_ecdsa::RecoverableSignature), Self::Error>;
-
-    /// Signs `transaction_signing_hash` using the given `chain`, returning an [`Unlock`].
-    async fn signature_unlock(&self, transaction_signing_hash: &[u8; 32], chain: Bip44) -> Result<Unlock, Self::Error> {
-        Ok(Unlock::from(SignatureUnlock::new(Signature::from(
-            self.sign_ed25519(transaction_signing_hash, chain).await?,
-        ))))
+        signing_hash: &[u8; 32],
+        options: &Self::Options,
+    ) -> crate::client::Result<SignatureUnlock>
+    where
+        Signature: From<S>,
+    {
+        Ok(SignatureUnlock::new(Signature::from(
+            self.sign(signing_hash, options).await?,
+        )))
     }
+}
 
+#[async_trait]
+impl<T: Sign<S>, S> Sign<S> for Arc<T> {
+    type Options = T::Options;
+
+    async fn sign(&self, msg: &[u8], options: &Self::Options) -> crate::client::Result<S> {
+        self.as_ref().sign(msg, options).await
+    }
+}
+
+#[async_trait]
+pub trait SignBlock: Sign<Ed25519Signature> {
+    async fn sign_block(&self, unsigned_block: UnsignedBlock, options: &Self::Options) -> crate::client::Result<Block> {
+        let msg = unsigned_block.signing_input();
+        Ok(unsigned_block.finish(self.sign(&msg, options).await?)?)
+    }
+}
+impl<T: Sign<Ed25519Signature>> SignBlock for T {}
+
+#[async_trait]
+pub trait SignTransaction: Sign<Ed25519Signature> {
     async fn transaction_unlocks(
         &self,
-        prepared_transaction_data: &PreparedTransactionData,
-    ) -> Result<Unlocks, Self::Error>;
+        prepared_transaction_data: &PreparedTransactionData<Self::Options>,
+        _protocol_parameters: &ProtocolParameters,
+    ) -> crate::client::Result<Unlocks> {
+        let transaction_signing_hash = prepared_transaction_data.transaction.signing_hash();
+        let mut blocks = Vec::new();
+        let mut block_indexes = HashMap::<Address, usize>::new();
+        let slot_index = prepared_transaction_data.transaction.creation_slot();
+
+        // Assuming inputs_data is ordered by address type
+        for (current_block_index, input) in prepared_transaction_data.inputs_data.iter().enumerate() {
+            // Get the address that is required to unlock the input
+            let (input_address, _) = input
+                .output
+                .required_and_unlocked_address(slot_index, input.output_metadata.output_id())?;
+
+            // Check if we already added an [Unlock] for this address
+            match block_indexes.get(&input_address) {
+                // If we already have an [Unlock] for this address, add a [Unlock] based on the address type
+                Some(block_index) => match input_address {
+                    Address::Ed25519(_ed25519) => {
+                        blocks.push(Unlock::Reference(ReferenceUnlock::new(*block_index as u16)?));
+                    }
+                    Address::Account(_account) => {
+                        blocks.push(Unlock::Account(AccountUnlock::new(*block_index as u16)?))
+                    }
+                    Address::Nft(_nft) => blocks.push(Unlock::Nft(NftUnlock::new(*block_index as u16)?)),
+                    Address::Anchor(_) => Err(BlockError::UnsupportedAddressKind(AnchorAddress::KIND))?,
+                    _ => todo!("What do we do here?"),
+                },
+                None => {
+                    // We can only sign ed25519 addresses and block_indexes needs to contain the account or nft
+                    // address already at this point, because the reference index needs to be lower
+                    // than the current block index
+                    match &input_address {
+                        Address::Ed25519(_) | Address::ImplicitAccountCreation(_) => {}
+                        Address::Restricted(restricted) if restricted.address().is_ed25519() => {}
+                        _ => Err(InputSelectionError::MissingInputWithEd25519Address)?,
+                    }
+
+                    let options = input.signing_options.as_ref().ok_or(Error::MissingSigningOptions)?;
+
+                    let block = self.signature_unlock(&transaction_signing_hash, options).await?;
+                    blocks.push(block.into());
+
+                    // Add the ed25519 address to the block_indexes, so it gets referenced if further inputs have
+                    // the same address in their unlock condition
+                    block_indexes.insert(input_address, current_block_index);
+                }
+            }
+
+            // When we have an account or Nft output, we will add their account or nft address to block_indexes,
+            // because they can be used to unlock outputs via [Unlock::Account] or [Unlock::Nft],
+            // that have the corresponding account or nft address in their unlock condition
+            match &input.output {
+                Output::Account(account_output) => block_indexes.insert(
+                    Address::Account(account_output.account_address(input.output_id())),
+                    current_block_index,
+                ),
+                Output::Nft(nft_output) => block_indexes.insert(
+                    Address::Nft(nft_output.nft_address(input.output_id())),
+                    current_block_index,
+                ),
+                _ => None,
+            };
+        }
+
+        Ok(Unlocks::new(blocks)?)
+    }
 
     async fn sign_transaction(
         &self,
-        prepared_transaction_data: PreparedTransactionData,
-    ) -> Result<SignedTransactionPayload, Self::Error>;
+        prepared_transaction_data: PreparedTransactionData<Self::Options>,
+        protocol_parameters: &ProtocolParameters,
+    ) -> crate::client::Result<SignedTransactionPayload> {
+        log::debug!("[sign_transaction] {:?}", prepared_transaction_data);
+
+        let unlocks = self
+            .transaction_unlocks(&prepared_transaction_data, protocol_parameters)
+            .await?;
+
+        let PreparedTransactionData {
+            transaction,
+            inputs_data,
+            ..
+        } = prepared_transaction_data;
+        let tx_payload = SignedTransactionPayload::new(transaction, unlocks)?;
+
+        validate_signed_transaction_payload_length(&tx_payload)?;
+
+        let conflict = verify_semantic(&inputs_data, &tx_payload)?;
+
+        if let Some(conflict) = conflict {
+            log::debug!("[sign_transaction] conflict: {conflict:?} for {:#?}", tx_payload);
+            return Err(Error::TransactionSemantic(conflict));
+        }
+
+        Ok(tx_payload)
+    }
+}
+impl<T: SignTransaction> SignTransaction for Arc<T> {}
+
+/// Unifying trait for secret managers. This type must be able to, at minimum, generate
+/// an address and sign transactions and blocks.
+#[async_trait]
+pub trait SecretManage:
+    Generate<ed25519::PublicKey, Options = Self::GenerationOptions>
+    + SignTransaction<Options = Self::SigningOptions>
+    + SignBlock<Options = Self::SigningOptions>
+{
+    type GenerationOptions: 'static + Send + Sync + Serialize + Clone + Debug + DeserializeOwned + PartialEq;
+    type SigningOptions: 'static + Send + Sync + Serialize + Clone + Debug + DeserializeOwned + PartialEq;
+}
+
+#[async_trait]
+impl<T: Generate<ed25519::PublicKey> + SignTransaction + SignBlock> SecretManage for T {
+    type GenerationOptions = <Self as Generate<ed25519::PublicKey>>::Options;
+    type SigningOptions = <Self as Sign<Ed25519Signature>>::Options;
 }
 
 pub trait SecretManagerConfig: SecretManage {
@@ -140,500 +341,198 @@ pub trait SecretManagerConfig: SecretManage {
 
     fn to_config(&self) -> Option<Self::Config>;
 
-    fn from_config(config: &Self::Config) -> Result<Self, Self::Error>
+    fn from_config(config: &Self::Config) -> crate::client::Result<Self>
     where
         Self: Sized;
 }
 
-/// Supported secret managers
-#[non_exhaustive]
-pub enum SecretManager {
-    /// Secret manager that uses [`iota_stronghold`] as the backing storage.
+pub trait DowncastSecretManager {
+    fn is<T: 'static>(&self) -> bool;
+
+    fn downcast_ref<T: 'static>(&self) -> Option<&T>;
+
+    fn downcast_mut<T: 'static>(&mut self) -> Option<&mut T>;
+
     #[cfg(feature = "stronghold")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "stronghold")))]
-    Stronghold(StrongholdSecretManager),
-
-    /// Secret manager that uses a Ledger Nano hardware wallet or Speculos simulator.
-    #[cfg(feature = "ledger_nano")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "ledger_nano")))]
-    LedgerNano(LedgerSecretManager),
-
-    /// Secret manager that uses a mnemonic in plain memory. It's not recommended for production use. Use
-    /// LedgerNano or Stronghold instead.
-    Mnemonic(MnemonicSecretManager),
-
-    /// Secret manager that uses a single private key.
-    #[cfg(feature = "private_key_secret_manager")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "private_key_secret_manager")))]
-    PrivateKey(Box<PrivateKeySecretManager>),
-
-    /// Secret manager that's just a placeholder, so it can be provided to an online wallet, but can't be used for
-    /// signing.
-    Placeholder,
-}
-
-#[cfg(feature = "stronghold")]
-impl From<StrongholdSecretManager> for SecretManager {
-    fn from(secret_manager: StrongholdSecretManager) -> Self {
-        Self::Stronghold(secret_manager)
+    fn as_stronghold(&self) -> crate::client::Result<&StrongholdAdapter> {
+        self.downcast_ref::<StrongholdAdapter>()
+            .or_else(|| {
+                self.downcast_ref::<SecretManager>().and_then(|s| {
+                    if let SecretManager::Stronghold(a) = s {
+                        Some(a)
+                    } else {
+                        None
+                    }
+                })
+            })
+            .ok_or(crate::client::Error::SecretManagerMismatch)
     }
-}
 
-#[cfg(feature = "ledger_nano")]
-impl From<LedgerSecretManager> for SecretManager {
-    fn from(secret_manager: LedgerSecretManager) -> Self {
-        Self::LedgerNano(secret_manager)
-    }
-}
-
-impl From<MnemonicSecretManager> for SecretManager {
-    fn from(secret_manager: MnemonicSecretManager) -> Self {
-        Self::Mnemonic(secret_manager)
-    }
-}
-
-#[cfg(feature = "private_key_secret_manager")]
-impl From<PrivateKeySecretManager> for SecretManager {
-    fn from(secret_manager: PrivateKeySecretManager) -> Self {
-        Self::PrivateKey(Box::new(secret_manager))
-    }
-}
-
-impl Debug for SecretManager {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            #[cfg(feature = "stronghold")]
-            Self::Stronghold(_) => f.debug_tuple("Stronghold").field(&"...").finish(),
-            #[cfg(feature = "ledger_nano")]
-            Self::LedgerNano(_) => f.debug_tuple("LedgerNano").field(&"...").finish(),
-            Self::Mnemonic(_) => f.debug_tuple("Mnemonic").field(&"...").finish(),
-            #[cfg(feature = "private_key_secret_manager")]
-            Self::PrivateKey(_) => f.debug_tuple("PrivateKey").field(&"...").finish(),
-            Self::Placeholder => f.debug_struct("Placeholder").finish(),
-        }
-    }
-}
-
-impl FromStr for SecretManager {
-    type Err = Error;
-
-    fn from_str(s: &str) -> crate::client::Result<Self> {
-        Self::try_from(serde_json::from_str::<SecretManagerDto>(s)?)
-    }
-}
-
-/// DTO for secret manager types with required data.
-#[derive(Clone, Debug, Serialize, Deserialize)]
-#[non_exhaustive]
-pub enum SecretManagerDto {
-    /// Stronghold
     #[cfg(feature = "stronghold")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "stronghold")))]
-    #[serde(alias = "stronghold")]
-    Stronghold(StrongholdDto),
-    /// Ledger Device, bool specifies if it's a simulator or not
+    fn as_stronghold_mut(&mut self) -> crate::client::Result<&mut StrongholdAdapter> {
+        // Have to do this because of https://docs.rs/polonius-the-crab/latest/polonius_the_crab/#rationale-limitations-of-the-nll-borrow-checker
+        if self.is::<StrongholdAdapter>() {
+            Ok(self.downcast_mut::<StrongholdAdapter>().unwrap())
+        } else {
+            self.downcast_mut::<SecretManager>()
+                .and_then(|s| {
+                    if let SecretManager::Stronghold(a) = s {
+                        Some(a)
+                    } else {
+                        None
+                    }
+                })
+                .ok_or(crate::client::Error::SecretManagerMismatch)
+        }
+    }
+
+    fn as_mnemonic(&self) -> crate::client::Result<&MnemonicSecretManager> {
+        self.downcast_ref::<MnemonicSecretManager>()
+            .or_else(|| {
+                self.downcast_ref::<SecretManager>().and_then(|s| {
+                    if let SecretManager::Mnemonic(a) = s {
+                        Some(a)
+                    } else {
+                        None
+                    }
+                })
+            })
+            .ok_or(crate::client::Error::SecretManagerMismatch)
+    }
+
+    fn as_mnemonic_mut(&mut self) -> crate::client::Result<&mut MnemonicSecretManager> {
+        // Have to do this because of https://docs.rs/polonius-the-crab/latest/polonius_the_crab/#rationale-limitations-of-the-nll-borrow-checker
+        if self.is::<MnemonicSecretManager>() {
+            Ok(self.downcast_mut::<MnemonicSecretManager>().unwrap())
+        } else {
+            self.downcast_mut::<SecretManager>()
+                .and_then(|s| {
+                    if let SecretManager::Mnemonic(a) = s {
+                        Some(a)
+                    } else {
+                        None
+                    }
+                })
+                .ok_or(crate::client::Error::SecretManagerMismatch)
+        }
+    }
+
     #[cfg(feature = "ledger_nano")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "ledger_nano")))]
-    #[serde(alias = "ledgerNano")]
-    LedgerNano(bool),
-    /// Mnemonic
-    #[serde(alias = "mnemonic")]
-    Mnemonic(Zeroizing<String>),
-    /// Private Key
+    fn as_ledger_nano(&self) -> crate::client::Result<&LedgerSecretManager> {
+        self.downcast_ref::<LedgerSecretManager>()
+            .or_else(|| {
+                self.downcast_ref::<SecretManager>().and_then(|s| {
+                    if let SecretManager::LedgerNano(a) = s {
+                        Some(a)
+                    } else {
+                        None
+                    }
+                })
+            })
+            .ok_or(crate::client::Error::SecretManagerMismatch)
+    }
+
+    #[cfg(feature = "ledger_nano")]
+    fn as_ledger_nano_mut(&mut self) -> crate::client::Result<&mut LedgerSecretManager> {
+        // Have to do this because of https://docs.rs/polonius-the-crab/latest/polonius_the_crab/#rationale-limitations-of-the-nll-borrow-checker
+        if self.is::<LedgerSecretManager>() {
+            Ok(self.downcast_mut::<LedgerSecretManager>().unwrap())
+        } else {
+            self.downcast_mut::<SecretManager>()
+                .and_then(|s| {
+                    if let SecretManager::LedgerNano(a) = s {
+                        Some(a)
+                    } else {
+                        None
+                    }
+                })
+                .ok_or(crate::client::Error::SecretManagerMismatch)
+        }
+    }
+
     #[cfg(feature = "private_key_secret_manager")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "private_key_secret_manager")))]
-    #[serde(alias = "privateKey")]
-    PrivateKey(Zeroizing<String>),
-    /// Hex seed
-    #[serde(alias = "hexSeed")]
-    HexSeed(Zeroizing<String>),
-    /// Placeholder
-    #[serde(alias = "placeholder")]
-    Placeholder,
-}
+    fn as_private_key(&self) -> crate::client::Result<&PrivateKeySecretManager> {
+        self.downcast_ref::<PrivateKeySecretManager>()
+            .or_else(|| {
+                self.downcast_ref::<SecretManager>().and_then(|s| {
+                    if let SecretManager::PrivateKey(a) = s {
+                        Some(a.as_ref())
+                    } else {
+                        None
+                    }
+                })
+            })
+            .ok_or(crate::client::Error::SecretManagerMismatch)
+    }
 
-impl TryFrom<SecretManagerDto> for SecretManager {
-    type Error = Error;
-
-    fn try_from(value: SecretManagerDto) -> crate::client::Result<Self> {
-        Ok(match value {
-            #[cfg(feature = "stronghold")]
-            SecretManagerDto::Stronghold(stronghold_dto) => {
-                let mut builder = StrongholdSecretManager::builder();
-
-                if let Some(password) = stronghold_dto.password {
-                    builder = builder.password(password);
-                }
-
-                if let Some(timeout) = stronghold_dto.timeout {
-                    builder = builder.timeout(Duration::from_secs(timeout));
-                }
-
-                Self::Stronghold(builder.build(&stronghold_dto.snapshot_path)?)
-            }
-
-            #[cfg(feature = "ledger_nano")]
-            SecretManagerDto::LedgerNano(is_simulator) => Self::LedgerNano(LedgerSecretManager::new(is_simulator)),
-
-            SecretManagerDto::Mnemonic(mnemonic) => {
-                Self::Mnemonic(MnemonicSecretManager::try_from_mnemonic(mnemonic.as_str().to_owned())?)
-            }
-
-            #[cfg(feature = "private_key_secret_manager")]
-            SecretManagerDto::PrivateKey(private_key) => {
-                Self::PrivateKey(Box::new(PrivateKeySecretManager::try_from_hex(private_key)?))
-            }
-
-            SecretManagerDto::HexSeed(hex_seed) => {
-                // `SecretManagerDto` is `ZeroizeOnDrop` so it will take care of zeroizing the original.
-                Self::Mnemonic(MnemonicSecretManager::try_from_hex_seed(hex_seed)?)
-            }
-
-            SecretManagerDto::Placeholder => Self::Placeholder,
-        })
+    #[cfg(feature = "private_key_secret_manager")]
+    fn as_private_key_mut(&mut self) -> crate::client::Result<&mut PrivateKeySecretManager> {
+        // Have to do this because of https://docs.rs/polonius-the-crab/latest/polonius_the_crab/#rationale-limitations-of-the-nll-borrow-checker
+        if self.is::<PrivateKeySecretManager>() {
+            Ok(self.downcast_mut::<PrivateKeySecretManager>().unwrap())
+        } else {
+            self.downcast_mut::<SecretManager>()
+                .and_then(|s| {
+                    if let SecretManager::PrivateKey(a) = s {
+                        Some(a.as_mut())
+                    } else {
+                        None
+                    }
+                })
+                .ok_or(crate::client::Error::SecretManagerMismatch)
+        }
     }
 }
 
-impl From<&SecretManager> for SecretManagerDto {
-    fn from(value: &SecretManager) -> Self {
-        match value {
-            #[cfg(feature = "stronghold")]
-            SecretManager::Stronghold(stronghold_adapter) => Self::Stronghold(StrongholdDto {
-                password: None,
-                timeout: stronghold_adapter.get_timeout().map(|duration| duration.as_secs()),
-                snapshot_path: stronghold_adapter
-                    .snapshot_path
-                    .clone()
-                    .into_os_string()
-                    .to_string_lossy()
-                    .into(),
-            }),
+impl<S: 'static + Send + Sync> DowncastSecretManager for S {
+    fn is<T: 'static>(&self) -> bool {
+        self.as_any().is::<T>()
+    }
 
-            #[cfg(feature = "ledger_nano")]
-            SecretManager::LedgerNano(ledger_nano) => Self::LedgerNano(ledger_nano.is_simulator),
+    fn downcast_ref<T: 'static>(&self) -> Option<&T> {
+        self.as_any().downcast_ref::<T>()
+    }
 
-            // `MnemonicSecretManager(Seed)` doesn't have Debug or Display implemented and in the current use cases of
-            // the client/wallet we also don't need to convert it in this direction with the mnemonic/seed, we only need
-            // to know the type
-            SecretManager::Mnemonic(_mnemonic) => Self::Mnemonic("...".to_string().into()),
+    fn downcast_mut<T: 'static>(&mut self) -> Option<&mut T> {
+        self.as_any_mut().downcast_mut::<T>()
+    }
+}
 
-            #[cfg(feature = "private_key_secret_manager")]
-            SecretManager::PrivateKey(_private_key) => Self::PrivateKey("...".to_string().into()),
+pub trait AsAny: 'static + Send + Sync {
+    fn as_any(&self) -> &(dyn std::any::Any + Send + Sync);
+    fn as_any_mut(&mut self) -> &mut (dyn std::any::Any + Send + Sync);
+}
 
-            SecretManager::Placeholder => Self::Placeholder,
-        }
+impl<T: 'static + Send + Sync> AsAny for T {
+    fn as_any(&self) -> &(dyn std::any::Any + Send + Sync) {
+        self
+    }
+    fn as_any_mut(&mut self) -> &mut (dyn std::any::Any + Send + Sync) {
+        self
     }
 }
 
 #[async_trait]
-impl SecretManage for SecretManager {
-    type Error = Error;
-
-    async fn generate_ed25519_public_keys(
-        &self,
-        coin_type: u32,
-        account_index: u32,
-        address_indexes: Range<u32>,
-        options: impl Into<Option<GenerateAddressOptions>> + Send,
-    ) -> Result<Vec<ed25519::PublicKey>, Self::Error> {
-        match self {
-            #[cfg(feature = "stronghold")]
-            Self::Stronghold(secret_manager) => Ok(secret_manager
-                .generate_ed25519_public_keys(coin_type, account_index, address_indexes, options)
-                .await?),
-            #[cfg(feature = "ledger_nano")]
-            Self::LedgerNano(secret_manager) => Ok(secret_manager
-                .generate_ed25519_public_keys(coin_type, account_index, address_indexes, options)
-                .await?),
-            Self::Mnemonic(secret_manager) => {
-                secret_manager
-                    .generate_ed25519_public_keys(coin_type, account_index, address_indexes, options)
-                    .await
-            }
-            #[cfg(feature = "private_key_secret_manager")]
-            Self::PrivateKey(secret_manager) => {
-                secret_manager
-                    .generate_ed25519_public_keys(coin_type, account_index, address_indexes, options)
-                    .await
-            }
-            Self::Placeholder => Err(Error::PlaceholderSecretManager),
-        }
-    }
-
-    async fn generate_evm_addresses(
-        &self,
-        coin_type: u32,
-        account_index: u32,
-        address_indexes: Range<u32>,
-        options: impl Into<Option<GenerateAddressOptions>> + Send,
-    ) -> Result<Vec<EvmAddress>, Self::Error> {
-        match self {
-            #[cfg(feature = "stronghold")]
-            Self::Stronghold(secret_manager) => Ok(secret_manager
-                .generate_evm_addresses(coin_type, account_index, address_indexes, options)
-                .await?),
-            #[cfg(feature = "ledger_nano")]
-            Self::LedgerNano(secret_manager) => Ok(secret_manager
-                .generate_evm_addresses(coin_type, account_index, address_indexes, options)
-                .await?),
-            Self::Mnemonic(secret_manager) => {
-                secret_manager
-                    .generate_evm_addresses(coin_type, account_index, address_indexes, options)
-                    .await
-            }
-            #[cfg(feature = "private_key_secret_manager")]
-            Self::PrivateKey(secret_manager) => {
-                secret_manager
-                    .generate_evm_addresses(coin_type, account_index, address_indexes, options)
-                    .await
-            }
-            Self::Placeholder => Err(Error::PlaceholderSecretManager),
-        }
-    }
-
-    async fn sign_ed25519(&self, msg: &[u8], chain: Bip44) -> crate::client::Result<Ed25519Signature> {
-        match self {
-            #[cfg(feature = "stronghold")]
-            Self::Stronghold(secret_manager) => Ok(secret_manager.sign_ed25519(msg, chain).await?),
-            #[cfg(feature = "ledger_nano")]
-            Self::LedgerNano(secret_manager) => Ok(secret_manager.sign_ed25519(msg, chain).await?),
-            Self::Mnemonic(secret_manager) => secret_manager.sign_ed25519(msg, chain).await,
-            #[cfg(feature = "private_key_secret_manager")]
-            Self::PrivateKey(secret_manager) => secret_manager.sign_ed25519(msg, chain).await,
-            Self::Placeholder => Err(Error::PlaceholderSecretManager),
-        }
-    }
-
-    async fn sign_secp256k1_ecdsa(
-        &self,
-        msg: &[u8],
-        chain: Bip44,
-    ) -> Result<(secp256k1_ecdsa::PublicKey, secp256k1_ecdsa::RecoverableSignature), Self::Error> {
-        match self {
-            #[cfg(feature = "stronghold")]
-            Self::Stronghold(secret_manager) => Ok(secret_manager.sign_secp256k1_ecdsa(msg, chain).await?),
-            #[cfg(feature = "ledger_nano")]
-            Self::LedgerNano(secret_manager) => Ok(secret_manager.sign_secp256k1_ecdsa(msg, chain).await?),
-            Self::Mnemonic(secret_manager) => secret_manager.sign_secp256k1_ecdsa(msg, chain).await,
-            #[cfg(feature = "private_key_secret_manager")]
-            Self::PrivateKey(secret_manager) => secret_manager.sign_secp256k1_ecdsa(msg, chain).await,
-            Self::Placeholder => Err(Error::PlaceholderSecretManager),
-        }
-    }
-
-    async fn transaction_unlocks(
-        &self,
-        prepared_transaction_data: &PreparedTransactionData,
-    ) -> Result<Unlocks, Self::Error> {
-        match self {
-            #[cfg(feature = "stronghold")]
-            Self::Stronghold(secret_manager) => {
-                Ok(secret_manager.transaction_unlocks(prepared_transaction_data).await?)
-            }
-            #[cfg(feature = "ledger_nano")]
-            Self::LedgerNano(secret_manager) => {
-                Ok(secret_manager.transaction_unlocks(prepared_transaction_data).await?)
-            }
-            Self::Mnemonic(secret_manager) => secret_manager.transaction_unlocks(prepared_transaction_data).await,
-            #[cfg(feature = "private_key_secret_manager")]
-            Self::PrivateKey(secret_manager) => secret_manager.transaction_unlocks(prepared_transaction_data).await,
-            Self::Placeholder => Err(Error::PlaceholderSecretManager),
-        }
-    }
-
-    async fn sign_transaction(
-        &self,
-        prepared_transaction_data: PreparedTransactionData,
-    ) -> Result<SignedTransactionPayload, Self::Error> {
-        match self {
-            #[cfg(feature = "stronghold")]
-            Self::Stronghold(secret_manager) => Ok(secret_manager.sign_transaction(prepared_transaction_data).await?),
-            #[cfg(feature = "ledger_nano")]
-            Self::LedgerNano(secret_manager) => Ok(secret_manager.sign_transaction(prepared_transaction_data).await?),
-            Self::Mnemonic(secret_manager) => secret_manager.sign_transaction(prepared_transaction_data).await,
-            #[cfg(feature = "private_key_secret_manager")]
-            Self::PrivateKey(secret_manager) => secret_manager.sign_transaction(prepared_transaction_data).await,
-            Self::Placeholder => Err(Error::PlaceholderSecretManager),
-        }
-    }
-}
-
-pub trait DowncastSecretManager: SecretManage {
-    fn downcast<T: 'static + SecretManage>(&self) -> Option<&T>;
-}
-
-impl<S: 'static + SecretManage + Send + Sync> DowncastSecretManager for S {
-    fn downcast<T: 'static + SecretManage>(&self) -> Option<&T> {
-        (self as &(dyn std::any::Any + Send + Sync)).downcast_ref::<T>()
-    }
-}
-
-impl SecretManagerConfig for SecretManager {
-    type Config = SecretManagerDto;
-
-    fn to_config(&self) -> Option<Self::Config> {
-        match self {
-            #[cfg(feature = "stronghold")]
-            Self::Stronghold(s) => s.to_config().map(Self::Config::Stronghold),
-            #[cfg(feature = "ledger_nano")]
-            Self::LedgerNano(s) => s.to_config().map(Self::Config::LedgerNano),
-            Self::Mnemonic(_) => None,
-            #[cfg(feature = "private_key_secret_manager")]
-            Self::PrivateKey(_) => None,
-            Self::Placeholder => None,
-        }
-    }
-
-    fn from_config(config: &Self::Config) -> Result<Self, Self::Error> {
-        Ok(match config {
-            #[cfg(feature = "stronghold")]
-            SecretManagerDto::Stronghold(config) => Self::Stronghold(StrongholdSecretManager::from_config(config)?),
-            #[cfg(feature = "ledger_nano")]
-            SecretManagerDto::LedgerNano(config) => Self::LedgerNano(LedgerSecretManager::from_config(config)?),
-            SecretManagerDto::HexSeed(hex_seed) => {
-                Self::Mnemonic(MnemonicSecretManager::try_from_hex_seed(hex_seed.clone())?)
-            }
-            SecretManagerDto::Mnemonic(mnemonic) => {
-                Self::Mnemonic(MnemonicSecretManager::try_from_mnemonic(mnemonic.as_str().to_owned())?)
-            }
-            #[cfg(feature = "private_key_secret_manager")]
-            SecretManagerDto::PrivateKey(private_key) => {
-                Self::PrivateKey(Box::new(PrivateKeySecretManager::try_from_hex(private_key.to_owned())?))
-            }
-            SecretManagerDto::Placeholder => Self::Placeholder,
-        })
-    }
-}
-
-impl SecretManager {
-    /// Tries to create a [`SecretManager`] from a mnemonic string.
-    pub fn try_from_mnemonic(mnemonic: impl Into<Mnemonic>) -> crate::client::Result<Self> {
-        Ok(Self::Mnemonic(MnemonicSecretManager::try_from_mnemonic(mnemonic)?))
-    }
-
-    /// Tries to create a [`SecretManager`] from a seed hex string.
-    pub fn try_from_hex_seed(seed: impl Into<Zeroizing<String>>) -> crate::client::Result<Self> {
-        Ok(Self::Mnemonic(MnemonicSecretManager::try_from_hex_seed(seed)?))
-    }
-}
-
-pub(crate) async fn default_transaction_unlocks<M: SecretManage>(
-    secret_manager: &M,
-    prepared_transaction_data: &PreparedTransactionData,
-) -> crate::client::Result<Unlocks>
-where
-    crate::client::Error: From<M::Error>,
-{
-    let transaction_signing_hash = prepared_transaction_data.transaction.signing_hash();
-    let mut blocks = Vec::new();
-    let mut block_indexes = HashMap::<Address, usize>::new();
-    let slot_index = prepared_transaction_data.transaction.creation_slot();
-
-    // Assuming inputs_data is ordered by address type
-    for (current_block_index, input) in prepared_transaction_data.inputs_data.iter().enumerate() {
-        // Get the address that is required to unlock the input
-        let (input_address, _) = input
-            .output
-            .required_and_unlocked_address(slot_index, input.output_metadata.output_id())?;
-
-        // Check if we already added an [Unlock] for this address
-        match block_indexes.get(&input_address) {
-            // If we already have an [Unlock] for this address, add a [Unlock] based on the address type
-            Some(block_index) => match input_address {
-                Address::Ed25519(_ed25519) => {
-                    blocks.push(Unlock::Reference(ReferenceUnlock::new(*block_index as u16)?));
-                }
-                Address::Account(_account) => blocks.push(Unlock::Account(AccountUnlock::new(*block_index as u16)?)),
-                Address::Nft(_nft) => blocks.push(Unlock::Nft(NftUnlock::new(*block_index as u16)?)),
-                Address::Anchor(_) => Err(BlockError::UnsupportedAddressKind(AnchorAddress::KIND))?,
-                _ => todo!("What do we do here?"),
-            },
-            None => {
-                // We can only sign ed25519 addresses and block_indexes needs to contain the account or nft
-                // address already at this point, because the reference index needs to be lower
-                // than the current block index
-                match &input_address {
-                    Address::Ed25519(_) | Address::ImplicitAccountCreation(_) => {}
-                    Address::Restricted(restricted) if restricted.address().is_ed25519() => {}
-                    _ => Err(InputSelectionError::MissingInputWithEd25519Address)?,
-                }
-
-                let chain = input.chain.ok_or(Error::MissingBip32Chain)?;
-
-                let block = secret_manager
-                    .signature_unlock(&transaction_signing_hash, chain)
-                    .await?;
-                blocks.push(block);
-
-                // Add the ed25519 address to the block_indexes, so it gets referenced if further inputs have
-                // the same address in their unlock condition
-                block_indexes.insert(input_address, current_block_index);
-            }
-        }
-
-        // When we have an account or Nft output, we will add their account or nft address to block_indexes,
-        // because they can be used to unlock outputs via [Unlock::Account] or [Unlock::Nft],
-        // that have the corresponding account or nft address in their unlock condition
-        match &input.output {
-            Output::Account(account_output) => block_indexes.insert(
-                Address::Account(account_output.account_address(input.output_id())),
-                current_block_index,
-            ),
-            Output::Nft(nft_output) => block_indexes.insert(
-                Address::Nft(nft_output.nft_address(input.output_id())),
-                current_block_index,
-            ),
-            _ => None,
-        };
-    }
-
-    Ok(Unlocks::new(blocks)?)
-}
-
-pub(crate) async fn default_sign_transaction<M: SecretManage>(
-    secret_manager: &M,
-    prepared_transaction_data: PreparedTransactionData,
-) -> crate::client::Result<SignedTransactionPayload>
-where
-    crate::client::Error: From<M::Error>,
-{
-    log::debug!("[sign_transaction] {:?}", prepared_transaction_data);
-
-    let unlocks = secret_manager.transaction_unlocks(&prepared_transaction_data).await?;
-
-    let PreparedTransactionData {
-        transaction,
-        inputs_data,
-        ..
-    } = prepared_transaction_data;
-    let tx_payload = SignedTransactionPayload::new(transaction, unlocks)?;
-
-    validate_signed_transaction_payload_length(&tx_payload)?;
-
-    let conflict = verify_semantic(&inputs_data, &tx_payload)?;
-
-    if let Some(conflict) = conflict {
-        log::debug!("[sign_transaction] conflict: {conflict:?} for {:#?}", tx_payload);
-        return Err(Error::TransactionSemantic(conflict));
-    }
-
-    Ok(tx_payload)
-}
-
-#[async_trait]
-pub trait SignBlock {
-    async fn sign_ed25519<S: SecretManage>(self, secret_manager: &S, chain: Bip44) -> crate::client::Result<Block>
+pub trait BlockSignExt {
+    async fn sign_ed25519<S: SignBlock + ?Sized>(
+        self,
+        secret_manager: &S,
+        options: &S::Options,
+    ) -> crate::client::Result<Block>
     where
-        crate::client::Error: From<S::Error>;
+        Self: Sized;
 }
 
 #[async_trait]
-impl SignBlock for UnsignedBlock {
-    async fn sign_ed25519<S: SecretManage>(self, secret_manager: &S, chain: Bip44) -> crate::client::Result<Block>
+impl BlockSignExt for UnsignedBlock {
+    async fn sign_ed25519<S: SignBlock + ?Sized>(
+        self,
+        secret_manager: &S,
+        options: &S::Options,
+    ) -> crate::client::Result<Block>
     where
-        crate::client::Error: From<S::Error>,
+        Self: Sized,
     {
-        let msg = self.signing_input();
-        Ok(self.finish(secret_manager.sign_ed25519(&msg, chain).await?)?)
+        Ok(secret_manager.sign_block(self, options).await?)
     }
 }

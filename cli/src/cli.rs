@@ -289,7 +289,7 @@ pub async fn init_command(
         .with_secret_manager(secret_manager)
         .with_client_options(ClientOptions::new().with_node(init_params.node_url.as_str())?)
         .with_storage_path(storage_path.to_str().expect("invalid unicode"))
-        .with_bip_path(init_params.bip_path)
+        .with_public_key_options(init_params.bip_path)
         .with_address(address)
         .with_alias(alias)
         .finish()
@@ -345,7 +345,7 @@ pub async fn restore_command(storage_path: &Path, snapshot_path: &Path, backup_p
         .with_client_options(ClientOptions::new().with_node(DEFAULT_NODE_URL)?)
         .with_storage_path(storage_path.to_str().expect("invalid unicode"))
         // Will be overwritten by the backup's value.
-        .with_bip_path(Bip44::new(SHIMMER_COIN_TYPE))
+        .with_public_key_options(Bip44::new(SHIMMER_COIN_TYPE))
         .finish()
         .await?;
 

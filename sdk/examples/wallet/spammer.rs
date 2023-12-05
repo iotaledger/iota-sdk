@@ -60,7 +60,7 @@ async fn main() -> Result<()> {
     let wallet = Wallet::builder()
         .with_secret_manager(SecretManager::Mnemonic(secret_manager))
         .with_client_options(client_options)
-        .with_bip_path(bip_path)
+        .with_public_key_options(bip_path)
         .with_address(address)
         .finish()
         .await?;

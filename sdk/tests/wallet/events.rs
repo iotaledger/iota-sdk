@@ -52,7 +52,7 @@ fn wallet_events_serde() {
         address: Address::Ed25519(Ed25519Address::new([0; Ed25519Address::LENGTH])),
         network_id: 42,
         remainder: true,
-        chain: None,
+        signing_options: None,
     };
 
     assert_serde_eq(WalletEvent::NewOutput(Box::new(NewOutputEvent {

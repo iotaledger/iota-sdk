@@ -208,7 +208,7 @@ fn build_output_inner(build: Build) -> (Output, Option<Bip44>) {
     }
 }
 
-fn build_inputs<'a>(outputs: impl IntoIterator<Item = Build<'a>>) -> Vec<InputSigningData> {
+fn build_inputs<'a>(outputs: impl IntoIterator<Item = Build<'a>>) -> Vec<InputSigningData<O>> {
     outputs
         .into_iter()
         .map(|build| {
@@ -217,7 +217,7 @@ fn build_inputs<'a>(outputs: impl IntoIterator<Item = Build<'a>>) -> Vec<InputSi
             InputSigningData {
                 output,
                 output_metadata: rand_output_metadata_with_id(OutputId::new(rand_transaction_id(), 0)),
-                chain,
+                signing_options: chain,
             }
         })
         .collect()

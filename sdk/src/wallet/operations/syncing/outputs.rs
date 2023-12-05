@@ -1,7 +1,6 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use crypto::keys::bip44::Bip44;
 use instant::Instant;
 
 use crate::{
@@ -22,17 +21,13 @@ use crate::{
     },
 };
 
-impl<S: 'static + SecretManage> Wallet<S>
-where
-    crate::wallet::Error: From<S::Error>,
-    crate::client::Error: From<S::Error>,
-{
+impl<S: 'static + SecretManage> Wallet<S> {
     /// Convert OutputWithMetadataResponse to OutputData with the network_id added
     pub(crate) async fn output_response_to_output_data(
         &self,
         outputs_with_meta: Vec<OutputWithMetadata>,
         associated_address: &AddressWithUnspentOutputs,
-    ) -> crate::wallet::Result<Vec<OutputData>> {
+    ) -> crate::wallet::Result<Vec<OutputData<S::SigningOptions>>> {
         log::debug!("[SYNC] convert output_responses");
         // store outputs with network_id
         let network_id = self.client().get_network_id().await?;
@@ -48,14 +43,6 @@ where
                     .get(output_with_meta.metadata().output_id().transaction_id())
                     .map_or(false, |tx| !tx.incoming);
 
-                let chain = wallet_data.bip_path.map(|bip_path| {
-                    // BIP 44 (HD wallets) and 4218 is the registered index for IOTA https://github.com/satoshilabs/slips/blob/master/slip-0044.md
-                    Bip44::new(bip_path.coin_type)
-                        .with_account(bip_path.account)
-                        .with_change(associated_address.internal as _)
-                        .with_address_index(associated_address.key_index)
-                });
-
                 OutputData {
                     output_id: output_with_meta.metadata().output_id().to_owned(),
                     metadata: *output_with_meta.metadata(),
@@ -64,7 +51,9 @@ where
                     address: associated_address.address.inner.clone(),
                     network_id,
                     remainder,
-                    chain,
+                    // TODO: previously we set the internal and address index here, but
+                    // they were always default values anyway. Do we need some mechanism here tho?
+                    signing_options: Some(wallet_data.signing_options.clone()),
                 }
             })
             .collect())

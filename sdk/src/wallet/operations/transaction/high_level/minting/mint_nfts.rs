@@ -109,11 +109,7 @@ impl MintNftParams {
     }
 }
 
-impl<S: 'static + SecretManage> Wallet<S>
-where
-    crate::wallet::Error: From<S::Error>,
-    crate::client::Error: From<S::Error>,
-{
+impl<S: 'static + SecretManage> Wallet<S> {
     /// Mints NFTs.
     ///
     /// Calls [Wallet::send_outputs()] internally. The options may define the remainder value strategy or custom inputs.
@@ -156,7 +152,7 @@ where
         &self,
         params: I,
         options: impl Into<Option<TransactionOptions>> + Send,
-    ) -> crate::wallet::Result<PreparedTransactionData>
+    ) -> crate::wallet::Result<PreparedTransactionData<S::SigningOptions>>
     where
         I::IntoIter: Send,
     {

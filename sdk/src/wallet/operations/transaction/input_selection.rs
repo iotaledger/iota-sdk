@@ -21,11 +21,7 @@ use crate::{
     },
 };
 
-impl<S: 'static + SecretManage> Wallet<S>
-where
-    crate::wallet::Error: From<S::Error>,
-    crate::client::Error: From<S::Error>,
-{
+impl<S: 'static + SecretManage> Wallet<S> {
     /// Selects inputs for a transaction and locks them in the wallet, so they don't get used again
     pub(crate) async fn select_inputs(
         &self,
@@ -34,7 +30,7 @@ where
         mandatory_inputs: Option<HashSet<OutputId>>,
         remainder_address: Option<Address>,
         burn: Option<&Burn>,
-    ) -> crate::wallet::Result<Selected> {
+    ) -> crate::wallet::Result<Selected<S::SigningOptions>> {
         log::debug!("[TRANSACTION] select_inputs");
         // Voting output needs to be requested before to prevent a deadlock
         #[cfg(feature = "participation")]
@@ -215,13 +211,13 @@ where
 /// | [Address, StorageDepositReturn, ...]                | no                |
 /// | [Address, StorageDepositReturn, expired Expiration] | yes               |
 #[allow(clippy::too_many_arguments)]
-fn filter_inputs(
-    wallet_data: &WalletData,
-    available_outputs: Values<'_, OutputId, OutputData>,
+fn filter_inputs<S: SecretManage>(
+    wallet_data: &WalletData<S>,
+    available_outputs: Values<'_, OutputId, OutputData<S::SigningOptions>>,
     slot_index: SlotIndex,
     custom_inputs: Option<&HashSet<OutputId>>,
     mandatory_inputs: Option<&HashSet<OutputId>>,
-) -> crate::wallet::Result<Vec<InputSigningData>> {
+) -> crate::wallet::Result<Vec<InputSigningData<S::SigningOptions>>> {
     let mut available_outputs_signing_data = Vec::new();
 
     for output_data in available_outputs {

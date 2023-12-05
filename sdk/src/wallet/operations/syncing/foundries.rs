@@ -9,11 +9,7 @@ use crate::{
     wallet::{task, Wallet},
 };
 
-impl<S: 'static + SecretManage> Wallet<S>
-where
-    crate::wallet::Error: From<S::Error>,
-    crate::client::Error: From<S::Error>,
-{
+impl<S: 'static + SecretManage> Wallet<S> {
     pub(crate) async fn request_and_store_foundry_outputs(
         &self,
         foundry_ids: HashSet<FoundryId>,

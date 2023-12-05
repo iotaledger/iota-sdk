@@ -1,8 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use crypto::{keys::bip44::Bip44, signatures::ed25519::PublicKey};
-use derive_more::From;
+use crypto::signatures::ed25519::PublicKey;
 
 use crate::{
     client::{api::PreparedTransactionData, secret::SecretManage},
@@ -21,16 +20,12 @@ use crate::{
     },
 };
 
-impl<S: 'static + SecretManage> Wallet<S>
-where
-    crate::wallet::Error: From<S::Error>,
-    crate::client::Error: From<S::Error>,
-{
+impl<S: 'static + SecretManage> Wallet<S> {
     /// Transitions an implicit account to an account.
     pub async fn implicit_account_transition(
         &self,
         output_id: &OutputId,
-        key_source: Option<impl Into<BlockIssuerKeySource> + Send>,
+        key_source: impl Into<Option<BlockIssuerKeySource<S::GenerationOptions>>> + Send,
     ) -> Result<TransactionWithMetadata> {
         let issuer_id = AccountId::from(output_id);
 
@@ -46,11 +41,8 @@ where
     pub async fn prepare_implicit_account_transition(
         &self,
         output_id: &OutputId,
-        key_source: Option<impl Into<BlockIssuerKeySource> + Send>,
-    ) -> Result<PreparedTransactionData>
-    where
-        crate::wallet::Error: From<S::Error>,
-    {
+        key_source: impl Into<Option<BlockIssuerKeySource<S::GenerationOptions>>> + Send,
+    ) -> Result<PreparedTransactionData<S::SigningOptions>> {
         let implicit_account_data = self.data().await.unspent_outputs.get(output_id).cloned();
 
         let implicit_account = if let Some(implicit_account_data) = &implicit_account_data {
@@ -63,25 +55,14 @@ where
             return Err(Error::ImplicitAccountNotFound);
         };
 
-        let key_source = match key_source.map(Into::into) {
+        let key_source = match key_source.into() {
             Some(key_source) => key_source,
-            None => self.bip_path().await.ok_or(Error::MissingBipPath)?.into(),
+            None => BlockIssuerKeySource::Options(self.data().await.public_key_options.clone()),
         };
 
         let public_key = match key_source {
             BlockIssuerKeySource::Key(public_key) => public_key,
-            BlockIssuerKeySource::Bip44Path(bip_path) => {
-                self.secret_manager
-                    .read()
-                    .await
-                    .generate_ed25519_public_keys(
-                        bip_path.coin_type,
-                        bip_path.account,
-                        bip_path.address_index..bip_path.address_index + 1,
-                        None,
-                    )
-                    .await?[0]
-            }
+            BlockIssuerKeySource::Options(options) => self.secret_manager.read().await.generate(&options).await?,
         };
 
         let account_id = AccountId::from(output_id);
@@ -116,8 +97,7 @@ where
     }
 }
 
-#[derive(From)]
-pub enum BlockIssuerKeySource {
+pub enum BlockIssuerKeySource<O> {
     Key(PublicKey),
-    Bip44Path(Bip44),
+    Options(O),
 }
