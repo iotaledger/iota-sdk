@@ -103,7 +103,7 @@ where
         // TODO https://github.com/iotaledger/iota-sdk/issues/1740
         let issuance = self.client().get_issuance().await?;
 
-        // TODO this needs to be removed when Mana is properly handled
+        // TODO remove when https://github.com/iotaledger/iota-sdk/issues/1744 is done
         let mut capabilities = TransactionCapabilities::default();
         capabilities.add_capability(TransactionCapabilityFlag::BurnMana);
 
