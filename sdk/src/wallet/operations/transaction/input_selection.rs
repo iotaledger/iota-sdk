@@ -206,7 +206,7 @@ fn filter_inputs(
     wallet_data: &WalletData,
     available_outputs: Values<'_, OutputId, OutputData>,
     slot_index: impl Into<SlotIndex> + Copy,
-    committable_age: CommittableAgeRange,
+    committable_age_range: CommittableAgeRange,
     custom_inputs: Option<&HashSet<OutputId>>,
     mandatory_inputs: Option<&HashSet<OutputId>>,
 ) -> crate::wallet::Result<Vec<InputSigningData>> {
@@ -226,7 +226,7 @@ fn filter_inputs(
                 &wallet_data.address.inner,
                 &output_data.output,
                 slot_index,
-                committable_age,
+                committable_age_range,
             );
 
             // Outputs that could get unlocked in the future will not be included
@@ -235,7 +235,7 @@ fn filter_inputs(
             }
         }
 
-        if let Some(available_input) = output_data.input_signing_data(wallet_data, slot_index, committable_age)? {
+        if let Some(available_input) = output_data.input_signing_data(wallet_data, slot_index, committable_age_range)? {
             available_outputs_signing_data.push(available_input);
         }
     }

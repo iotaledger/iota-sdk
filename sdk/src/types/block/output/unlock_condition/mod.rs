@@ -266,9 +266,13 @@ impl UnlockConditions {
     /// Checks whether an expiration exists and is expired. If None is returned, then expiration is in the deadzone
     /// where it can't be unlocked.
     #[inline(always)]
-    pub fn is_expired(&self, slot_index: impl Into<SlotIndex>, committable_age: CommittableAgeRange) -> Option<bool> {
+    pub fn is_expired(
+        &self,
+        slot_index: impl Into<SlotIndex>,
+        committable_age_range: CommittableAgeRange,
+    ) -> Option<bool> {
         self.expiration().map_or(Some(false), |expiration| {
-            expiration.is_expired(slot_index, committable_age)
+            expiration.is_expired(slot_index, committable_age_range)
         })
     }
 
@@ -299,10 +303,10 @@ impl UnlockConditions {
         &'a self,
         address: &'a Address,
         slot_index: impl Into<SlotIndex>,
-        committable_age: CommittableAgeRange,
+        committable_age_range: CommittableAgeRange,
     ) -> Option<&'a Address> {
         self.expiration().map_or(Some(address), |expiration| {
-            expiration.return_address_expired(address, slot_index, committable_age)
+            expiration.return_address_expired(address, slot_index, committable_age_range)
         })
     }
 }

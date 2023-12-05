@@ -56,12 +56,16 @@ impl ExpirationUnlockCondition {
 
     /// Checks whether the expiration is expired. If None is returned, then expiration is in the deadzone where it can't
     /// be unlocked.
-    pub fn is_expired(&self, slot_index: impl Into<SlotIndex>, committable_age: CommittableAgeRange) -> Option<bool> {
+    pub fn is_expired(
+        &self,
+        slot_index: impl Into<SlotIndex>,
+        committable_age_range: CommittableAgeRange,
+    ) -> Option<bool> {
         let slot_index = slot_index.into();
 
-        if self.slot_index() > (slot_index + committable_age.max) {
+        if self.slot_index() > (slot_index + committable_age_range.max) {
             Some(false)
-        } else if self.slot_index() <= (slot_index + committable_age.min) {
+        } else if self.slot_index() <= (slot_index + committable_age_range.min) {
             Some(true)
         } else {
             None
@@ -74,13 +78,13 @@ impl ExpirationUnlockCondition {
         &'a self,
         address: &'a Address,
         slot_index: impl Into<SlotIndex>,
-        committable_age: CommittableAgeRange,
+        committable_age_range: CommittableAgeRange,
     ) -> Option<&'a Address> {
         let slot_index = slot_index.into();
 
-        if self.slot_index() > (slot_index + committable_age.max) {
+        if self.slot_index() > (slot_index + committable_age_range.max) {
             Some(address)
-        } else if self.slot_index() <= (slot_index + committable_age.min) {
+        } else if self.slot_index() <= (slot_index + committable_age_range.min) {
             Some(&self.return_address)
         } else {
             None

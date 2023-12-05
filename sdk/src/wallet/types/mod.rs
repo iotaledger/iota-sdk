@@ -60,11 +60,11 @@ impl OutputData {
         &self,
         wallet_data: &WalletData,
         slot_index: impl Into<SlotIndex>,
-        committable_age: CommittableAgeRange,
+        committable_age_range: CommittableAgeRange,
     ) -> crate::wallet::Result<Option<InputSigningData>> {
         let required_address = self
             .output
-            .required_address(slot_index, committable_age)?
+            .required_address(slot_index, committable_age_range)?
             .ok_or(crate::client::Error::ExpirationDeadzone)?;
 
         let chain = if required_address == self.address {

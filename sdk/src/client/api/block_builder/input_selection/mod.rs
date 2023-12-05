@@ -268,7 +268,7 @@ impl InputSelection {
     pub(crate) fn sort_input_signing_data(
         mut inputs: Vec<InputSigningData>,
         slot_index: SlotIndex,
-        committable_age: CommittableAgeRange,
+        committable_age_range: CommittableAgeRange,
     ) -> Result<Vec<InputSigningData>, Error> {
         // initially sort by output to make it deterministic
         // TODO: rethink this, we only need it deterministic for tests, for the protocol it doesn't matter, also there
@@ -279,7 +279,7 @@ impl InputSelection {
             inputs.into_iter().partition(|input_signing_data| {
                 let required_address = input_signing_data
                     .output
-                    .required_address(slot_index, committable_age)
+                    .required_address(slot_index, committable_age_range)
                     // PANIC: safe to unwrap as non basic/alias/foundry/nft outputs are already filtered out.
                     .unwrap()
                     .expect("expiration unlockable outputs already filtered out");
@@ -290,7 +290,7 @@ impl InputSelection {
         for input in account_nft_address_inputs {
             let required_address = input
                 .output
-                .required_address(slot_index, committable_age)?
+                .required_address(slot_index, committable_age_range)?
                 .expect("expiration unlockable outputs already filtered out");
 
             match sorted_inputs
@@ -334,7 +334,7 @@ impl InputSelection {
                         match sorted_inputs.iter().position(|input_signing_data| {
                             let required_address = input_signing_data
                                 .output
-                                .required_address(slot_index, committable_age)
+                                .required_address(slot_index, committable_age_range)
                                 // PANIC: safe to unwrap as non basic/alias/foundry/nft outputs are already filtered
                                 .unwrap()
                                 .expect("expiration unlockable outputs already filtered out");
