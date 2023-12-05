@@ -14,6 +14,7 @@ use crate::{
             unlock_condition::AddressUnlockCondition,
             AccountId, AccountOutput, OutputId,
         },
+        payload::signed_transaction::{TransactionCapabilities, TransactionCapabilityFlag},
     },
     wallet::{
         operations::transaction::{TransactionOptions, TransactionWithMetadata},
@@ -102,12 +103,17 @@ where
         // TODO https://github.com/iotaledger/iota-sdk/issues/1740
         let issuance = self.client().get_issuance().await?;
 
+        // TODO remove when https://github.com/iotaledger/iota-sdk/issues/1744 is done
+        let mut capabilities = TransactionCapabilities::default();
+        capabilities.add_capability(TransactionCapabilityFlag::BurnMana);
+
         let transaction_options = TransactionOptions {
             context_inputs: Some(vec![
                 CommitmentContextInput::new(issuance.latest_commitment.id()).into(),
                 BlockIssuanceCreditContextInput::new(account_id).into(),
             ]),
             custom_inputs: Some(vec![*output_id]),
+            capabilities: Some(capabilities),
             ..Default::default()
         };
 
