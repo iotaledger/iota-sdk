@@ -82,10 +82,10 @@ mod tests {
     use super::ContextInput;
 
     #[test]
-    fn test_commitment() {
+    fn commitment() {
         let commitment: ContextInput = serde_json::from_value(serde_json::json!(
             {
-                "type": 0,
+                "type": 1,
                 "commitmentId": "0xedf5f572c58ddf4b4f9567d82bf96689cc68b730df796d822b4b9fb643f5efda4f9567d8"
             }
         ))
@@ -107,15 +107,13 @@ mod tests {
     }
 
     #[test]
-    fn test_block_issuance_credit() {
-        let bic: ContextInput = serde_json::from_str(
-            r#"
+    fn block_issuance_credit() {
+        let bic: ContextInput = serde_json::from_value(serde_json::json!(
             {
-                "type": 1,
+                "type": 2,
                 "accountId": "0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c649"
             }
-            "#,
-        )
+        ))
         .unwrap();
         assert!(bic.is_block_issuance_credit());
         assert_eq!(
@@ -124,27 +122,23 @@ mod tests {
         );
 
         // Test wrong type returns error.
-        let bic_deserialization_result: Result<ContextInput, _> = serde_json::from_str(
-            r#"
+        let bic_deserialization_result: Result<ContextInput, _> = serde_json::from_value(serde_json::json!(
             {
-                "type": 2,
+                "type": 3,
                 "accountId": "0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c649"
             }
-            "#,
-        );
+        ));
         assert!(bic_deserialization_result.is_err());
     }
 
     #[test]
-    fn test_reward() {
-        let reward: ContextInput = serde_json::from_str(
-            r#"
+    fn reward() {
+        let reward: ContextInput = serde_json::from_value(serde_json::json!(
             {
-                "type": 2,
-                "index": 10 
+                "type": 3,
+                "index": 10
             }
-            "#,
-        )
+        ))
         .unwrap();
         assert!(reward.is_reward());
         assert_eq!(reward.as_reward().index(), 10);
