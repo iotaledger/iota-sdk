@@ -31,8 +31,16 @@ def json(cls):
         # pylint: disable=protected-access
         original_dict = to_dict(self, *args, **kwargs)
 
-        result = {k: v for k, v in original_dict.items() if v is not None}
-        return result
+        # recursive remove the None values
+        def filter_none(value):
+            if isinstance(value, dict):
+                return {k: filter_none(v) for k, v in value.items() if v is not None}
+            elif isinstance(value, list):
+                return [filter_none(item) for item in value if item is not None]
+            else:
+                return value
+
+        return filter_none(original_dict)
 
     def custom_to_json(self, *args, **kwargs):
         # Use the custom to_dict method for serialization
@@ -79,7 +87,7 @@ class Node():
     password: Optional[str] = None
     disabled: Optional[bool] = None
 
-    def to_dict(self):
+    def to_dict(self) -> dict:
         """Custom dict conversion.
         """
 

@@ -5,6 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from enum import IntEnum
 from typing import Dict, List, TypeAlias, Union, Any
+from dataclasses_json import config
 from iota_sdk.types.signature import Ed25519Signature
 from iota_sdk.types.common import json
 
@@ -87,6 +88,9 @@ class NftUnlock:
     reference: int
     type: int = field(default_factory=lambda: int(UnlockType.Nft), init=False)
 
+
+def deserialize_unlocks(dicts: List[Dict[str, Any]]) -> List[Unlock]:
+    pass
 
 @json
 @dataclass
