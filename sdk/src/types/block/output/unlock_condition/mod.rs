@@ -33,6 +33,7 @@ use crate::types::block::{
 
 ///
 #[derive(Clone, Eq, PartialEq, Hash, From, Packable)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize), serde(untagged))]
 #[packable(unpack_error = Error)]
 #[packable(unpack_visitor = ProtocolParameters)]
 #[packable(tag_type = u8, with_error = Error::InvalidUnlockConditionKind)]
@@ -361,74 +362,5 @@ mod test {
                 UnlockConditionFlags::IMMUTABLE_ACCOUNT_ADDRESS
             ]
         );
-    }
-}
-
-#[cfg(feature = "serde")]
-pub mod dto {
-    use serde::{Deserialize, Serialize};
-
-    use super::*;
-
-    #[derive(Clone, Debug, Eq, PartialEq, From, Serialize, Deserialize)]
-    #[serde(untagged)]
-    pub enum UnlockConditionDto {
-        /// An address unlock condition.
-        Address(AddressUnlockCondition),
-        /// A storage deposit return unlock condition.
-        StorageDepositReturn(StorageDepositReturnUnlockCondition),
-        /// A timelock unlock condition.
-        Timelock(TimelockUnlockCondition),
-        /// An expiration unlock condition.
-        Expiration(ExpirationUnlockCondition),
-        /// A state controller address unlock condition.
-        StateControllerAddress(StateControllerAddressUnlockCondition),
-        /// A governor address unlock condition.
-        GovernorAddress(GovernorAddressUnlockCondition),
-        /// An immutable account address unlock condition.
-        ImmutableAccountAddress(ImmutableAccountAddressUnlockCondition),
-    }
-
-    impl From<&UnlockCondition> for UnlockConditionDto {
-        fn from(value: &UnlockCondition) -> Self {
-            match value {
-                UnlockCondition::Address(v) => Self::Address(v.clone()),
-                UnlockCondition::StorageDepositReturn(v) => Self::StorageDepositReturn(v.clone()),
-                UnlockCondition::Timelock(v) => Self::Timelock(*v),
-                UnlockCondition::Expiration(v) => Self::Expiration(v.clone()),
-                UnlockCondition::StateControllerAddress(v) => Self::StateControllerAddress(v.clone()),
-                UnlockCondition::GovernorAddress(v) => Self::GovernorAddress(v.clone()),
-                UnlockCondition::ImmutableAccountAddress(v) => Self::ImmutableAccountAddress(*v),
-            }
-        }
-    }
-
-    impl From<UnlockConditionDto> for UnlockCondition {
-        fn from(dto: UnlockConditionDto) -> Self {
-            match dto {
-                UnlockConditionDto::Address(v) => Self::Address(v),
-                UnlockConditionDto::StorageDepositReturn(v) => Self::StorageDepositReturn(v),
-                UnlockConditionDto::Timelock(v) => Self::Timelock(v),
-                UnlockConditionDto::Expiration(v) => Self::Expiration(v),
-                UnlockConditionDto::StateControllerAddress(v) => Self::StateControllerAddress(v),
-                UnlockConditionDto::GovernorAddress(v) => Self::GovernorAddress(v),
-                UnlockConditionDto::ImmutableAccountAddress(v) => Self::ImmutableAccountAddress(v),
-            }
-        }
-    }
-
-    impl UnlockConditionDto {
-        /// Return the unlock condition kind of a `UnlockConditionDto`.
-        pub fn kind(&self) -> u8 {
-            match self {
-                Self::Address(_) => AddressUnlockCondition::KIND,
-                Self::StorageDepositReturn(_) => StorageDepositReturnUnlockCondition::KIND,
-                Self::Timelock(_) => TimelockUnlockCondition::KIND,
-                Self::Expiration(_) => ExpirationUnlockCondition::KIND,
-                Self::StateControllerAddress(_) => StateControllerAddressUnlockCondition::KIND,
-                Self::GovernorAddress(_) => GovernorAddressUnlockCondition::KIND,
-                Self::ImmutableAccountAddress(_) => ImmutableAccountAddressUnlockCondition::KIND,
-            }
-        }
     }
 }

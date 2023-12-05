@@ -3,10 +3,7 @@
 
 use crypto::keys::bip44::Bip44;
 use iota_sdk::{
-    client::{
-        constants::SHIMMER_COIN_TYPE,
-        secret::types::{InputSigningData, InputSigningDataDto},
-    },
+    client::{constants::SHIMMER_COIN_TYPE, secret::types::InputSigningData},
     types::block::{
         address::Address,
         output::{unlock_condition::AddressUnlockCondition, BasicOutput},
@@ -32,19 +29,11 @@ fn input_signing_data_conversion() {
         chain: Some(bip44_chain),
     };
 
-    let input_signing_data_dto = InputSigningDataDto::from(&input_signing_data);
-    assert_eq!(input_signing_data_dto.chain.as_ref(), Some(&bip44_chain));
+    assert_eq!(input_signing_data.chain.as_ref(), Some(&bip44_chain));
 
-    let restored_input_signing_data = InputSigningData::try_from(input_signing_data_dto.clone()).unwrap();
-    assert_eq!(input_signing_data, restored_input_signing_data);
+    let input_signing_data_json = serde_json::to_value(&input_signing_data).unwrap();
 
-    let input_signing_data_dto_json = serde_json::to_string(&input_signing_data_dto).unwrap();
-
-    let restored_input_signing_data_dto =
-        serde_json::from_str::<InputSigningDataDto>(&input_signing_data_dto_json).unwrap();
-    assert_eq!(restored_input_signing_data_dto.chain.as_ref(), Some(&bip44_chain));
-
-    let restored_input_signing_data = InputSigningData::try_from(restored_input_signing_data_dto).unwrap();
+    let restored_input_signing_data = serde_json::from_value::<InputSigningData>(input_signing_data_json).unwrap();
     assert!(restored_input_signing_data.output.is_basic());
-    assert_eq!(restored_input_signing_data.chain, Some(bip44_chain));
+    assert_eq!(restored_input_signing_data.chain.as_ref(), Some(&bip44_chain));
 }

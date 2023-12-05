@@ -38,7 +38,7 @@ pub struct SendNativeTokenParams {
     #[getset(get = "pub")]
     return_address: Option<Bech32Address>,
     /// Expiration in slot indices, after which the output will be available for the sender again, if not spent by the
-    /// receiver before. Default is [`DEFAULT_EXPIRATION_SLOTS`] slots.
+    /// receiver before. Default is DEFAULT_EXPIRATION_SLOTS slots.
     #[getset(get = "pub")]
     expiration: Option<SlotIndex>,
 }
@@ -78,11 +78,12 @@ where
     crate::wallet::Error: From<S::Error>,
     crate::client::Error: From<S::Error>,
 {
-    /// Sends native tokens in basic outputs with a [`StorageDepositReturnUnlockCondition`] and an
-    /// [`ExpirationUnlockCondition`], so that the storage deposit is returned to the sender and the sender gets access
-    /// to the output again after a predefined time (default 1 day).
-    /// Calls [Account::send_outputs()](crate::wallet::Account::send_outputs) internally. The options may define the
-    /// remainder value strategy or custom inputs. Note that the address needs to be bech32-encoded.
+    /// Sends native tokens in basic outputs with a
+    /// [`StorageDepositReturnUnlockCondition`](crate::types::block::output::unlock_condition::StorageDepositReturnUnlockCondition)
+    /// and an [`ExpirationUnlockCondition`], so that the storage deposit is returned to the sender and the sender
+    /// gets access to the output again after a predefined time (default 1 day).
+    /// Calls [Wallet::send_outputs()] internally. The options may define the remainder value strategy or custom inputs.
+    /// Note that the address needs to be bech32-encoded.
     /// ```ignore
     /// let params = [SendNativeTokenParams {
     ///     address: "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu".to_string(),
@@ -110,11 +111,11 @@ where
         let options = options.into();
         let prepared_transaction = self.prepare_send_native_tokens(params, options.clone()).await?;
 
-        self.sign_and_submit_transaction(prepared_transaction, options).await
+        self.sign_and_submit_transaction(prepared_transaction, None, options)
+            .await
     }
 
-    /// Prepares the transaction for
-    /// [Account::send_native_tokens()](crate::wallet::Account::send_native_tokens).
+    /// Prepares the transaction for [Wallet::send_native_tokens()].
     pub async fn prepare_send_native_tokens<I: IntoIterator<Item = SendNativeTokenParams> + Send>(
         &self,
         params: I,

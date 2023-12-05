@@ -105,7 +105,9 @@ where
     /// transaction.
     pub async fn consolidate_outputs(&self, params: ConsolidationParams) -> Result<TransactionWithMetadata> {
         let prepared_transaction = self.prepare_consolidate_outputs(params).await?;
-        let consolidation_tx = self.sign_and_submit_transaction(prepared_transaction, None).await?;
+        let consolidation_tx = self
+            .sign_and_submit_transaction(prepared_transaction, None, None)
+            .await?;
 
         log::debug!(
             "[OUTPUT_CONSOLIDATION] consolidation transaction created: block_id: {:?} tx_id: {:?}",
@@ -116,8 +118,7 @@ where
         Ok(consolidation_tx)
     }
 
-    /// Prepares the transaction for
-    /// [Account::consolidate_outputs()](crate::wallet::Account::consolidate_outputs).
+    /// Prepares the transaction for [Wallet::consolidate_outputs()].
     pub async fn prepare_consolidate_outputs(&self, params: ConsolidationParams) -> Result<PreparedTransactionData> {
         log::debug!("[OUTPUT_CONSOLIDATION] prepare consolidating outputs if needed");
         #[cfg(feature = "participation")]

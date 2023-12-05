@@ -408,14 +408,14 @@ fn verify_features_packable<const VERIFY: bool>(features: &Features, _: &Protoco
 }
 
 #[cfg(feature = "serde")]
-pub(crate) mod dto {
+mod dto {
     use alloc::vec::Vec;
 
     use serde::{Deserialize, Serialize};
 
     use super::*;
     use crate::{
-        types::block::{output::unlock_condition::dto::UnlockConditionDto, Error},
+        types::block::{output::unlock_condition::UnlockCondition, Error},
         utils::serde::string,
     };
 
@@ -428,7 +428,7 @@ pub(crate) mod dto {
         pub amount: u64,
         #[serde(with = "string")]
         pub mana: u64,
-        pub unlock_conditions: Vec<UnlockConditionDto>,
+        pub unlock_conditions: Vec<UnlockCondition>,
         #[serde(skip_serializing_if = "Vec::is_empty", default)]
         pub features: Vec<Feature>,
     }
@@ -439,7 +439,7 @@ pub(crate) mod dto {
                 kind: BasicOutput::KIND,
                 amount: value.amount(),
                 mana: value.mana(),
-                unlock_conditions: value.unlock_conditions().iter().map(Into::into).collect::<_>(),
+                unlock_conditions: value.unlock_conditions().to_vec(),
                 features: value.features().to_vec(),
             }
         }
@@ -454,7 +454,7 @@ pub(crate) mod dto {
                 .with_features(dto.features);
 
             for u in dto.unlock_conditions {
-                builder = builder.add_unlock_condition(UnlockCondition::from(u));
+                builder = builder.add_unlock_condition(u);
             }
 
             builder.finish()
@@ -465,7 +465,7 @@ pub(crate) mod dto {
         pub fn try_from_dtos(
             amount: OutputBuilderAmount,
             mana: u64,
-            unlock_conditions: Vec<UnlockConditionDto>,
+            unlock_conditions: Vec<UnlockCondition>,
             features: Option<Vec<Feature>>,
         ) -> Result<Self, Error> {
             let mut builder = match amount {
@@ -518,7 +518,7 @@ mod tests {
         let output_split = BasicOutput::try_from_dtos(
             OutputBuilderAmount::Amount(basic_output.amount()),
             basic_output.mana(),
-            basic_output.unlock_conditions().iter().map(Into::into).collect(),
+            basic_output.unlock_conditions().to_vec(),
             Some(basic_output.features().to_vec()),
         )
         .unwrap();
@@ -531,7 +531,7 @@ mod tests {
             let output_split = BasicOutput::try_from_dtos(
                 builder.amount,
                 builder.mana,
-                builder.unlock_conditions.iter().map(Into::into).collect(),
+                builder.unlock_conditions.iter().cloned().collect(),
                 Some(builder.features.iter().cloned().collect()),
             )
             .unwrap();

@@ -177,7 +177,7 @@ where
     }
 
     /// Try to claim basic or nft outputs that have additional unlock conditions to their [AddressUnlockCondition]
-    /// from [`Account::claimable_outputs()`].
+    /// from [`Wallet::claimable_outputs()`].
     pub async fn claim_outputs<I: IntoIterator<Item = OutputId> + Send>(
         &self,
         output_ids_to_claim: I,
@@ -203,7 +203,9 @@ where
             }
         })?;
 
-        let claim_tx = self.sign_and_submit_transaction(prepared_transaction, None).await?;
+        let claim_tx = self
+            .sign_and_submit_transaction(prepared_transaction, None, None)
+            .await?;
 
         log::debug!(
             "[OUTPUT_CLAIMING] Claiming transaction created: block_id: {:?} tx_id: {:?}",

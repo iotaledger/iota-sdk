@@ -21,7 +21,7 @@ use iota_sdk::{
 use pretty_assertions::assert_eq;
 
 use crate::client::{
-    addresses, build_inputs, build_outputs, is_remainder_or_return, unsorted_eq,
+    build_inputs, build_outputs, is_remainder_or_return, unsorted_eq,
     Build::{Account, Basic, Foundry},
     ACCOUNT_ID_1, ACCOUNT_ID_2, BECH32_ADDRESS_ED25519_0,
 };
@@ -33,7 +33,7 @@ fn missing_input_account_for_foundry() {
 
     let inputs = build_inputs([Basic(
         1_000_000,
-        BECH32_ADDRESS_ED25519_0,
+        Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
         None,
         None,
@@ -52,7 +52,7 @@ fn missing_input_account_for_foundry() {
     let selected = InputSelection::new(
         inputs,
         outputs,
-        addresses([BECH32_ADDRESS_ED25519_0]),
+        [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         protocol_parameters,
     )
     .select();
@@ -72,8 +72,8 @@ fn missing_input_account_for_foundry() {
 //         1_255_500,
 //         account_id_2,
 //         0,
-//         BECH32_ADDRESS_ED25519_0,
-//         BECH32_ADDRESS_ED25519_0,
+//         Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+//         Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
 //         None,
 //         None,
 //         None,
@@ -90,7 +90,7 @@ fn missing_input_account_for_foundry() {
 //     let selected = InputSelection::new(
 //         inputs.clone(),
 //         outputs,
-//         addresses([BECH32_ADDRESS_ED25519_0]),
+//         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
 //         protocol_parameters,
 //     )
 //     .select()
@@ -107,8 +107,24 @@ fn minted_native_tokens_in_new_remainder() {
     let account_id_2 = AccountId::from_str(ACCOUNT_ID_2).unwrap();
 
     let inputs = build_inputs([
-        Basic(1_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
-        Account(1_000_000, account_id_2, BECH32_ADDRESS_ED25519_0, None, None, None),
+        Basic(
+            1_000_000,
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+        ),
+        Account(
+            1_000_000,
+            account_id_2,
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            None,
+            None,
+            None,
+        ),
     ]);
     let outputs = build_outputs([Foundry(
         1_000_000,
@@ -121,7 +137,7 @@ fn minted_native_tokens_in_new_remainder() {
     let selected = InputSelection::new(
         inputs.clone(),
         outputs,
-        addresses([BECH32_ADDRESS_ED25519_0]),
+        [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         protocol_parameters,
     )
     .select()
@@ -147,8 +163,24 @@ fn minted_native_tokens_in_provided_output() {
     let token_id = TokenId::from(foundry_id);
 
     let inputs = build_inputs([
-        Basic(2_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
-        Account(1_000_000, account_id_2, BECH32_ADDRESS_ED25519_0, None, None, None),
+        Basic(
+            2_000_000,
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+        ),
+        Account(
+            1_000_000,
+            account_id_2,
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            None,
+            None,
+            None,
+        ),
     ]);
     let outputs = build_outputs([
         Foundry(
@@ -160,7 +192,7 @@ fn minted_native_tokens_in_provided_output() {
         ),
         Basic(
             1_000_000,
-            BECH32_ADDRESS_ED25519_0,
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
             Some((&token_id.to_string(), 100)),
             None,
             None,
@@ -173,7 +205,7 @@ fn minted_native_tokens_in_provided_output() {
     let selected = InputSelection::new(
         inputs.clone(),
         outputs.clone(),
-        addresses([BECH32_ADDRESS_ED25519_0]),
+        [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         protocol_parameters,
     )
     .select()
@@ -192,7 +224,16 @@ fn melt_native_tokens() {
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
     let mut inputs = build_inputs([
-        Basic(1_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
+        Basic(
+            1_000_000,
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+        ),
         Foundry(
             1_000_000,
             account_id_1,
@@ -228,7 +269,7 @@ fn melt_native_tokens() {
     let selected = InputSelection::new(
         inputs.clone(),
         outputs,
-        addresses([BECH32_ADDRESS_ED25519_0]),
+        [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         protocol_parameters,
     )
     .select()
@@ -252,7 +293,14 @@ fn destroy_foundry_with_account_state_transition() {
     let account_id_2 = AccountId::from_str(ACCOUNT_ID_2).unwrap();
 
     let inputs = build_inputs([
-        Account(50_300, account_id_2, BECH32_ADDRESS_ED25519_0, None, None, None),
+        Account(
+            50_300,
+            account_id_2,
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            None,
+            None,
+            None,
+        ),
         Foundry(
             52_800,
             account_id_2,
@@ -271,7 +319,7 @@ fn destroy_foundry_with_account_state_transition() {
     let selected = InputSelection::new(
         inputs.clone(),
         outputs,
-        addresses([BECH32_ADDRESS_ED25519_0]),
+        [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         protocol_parameters,
     )
     .with_burn(Burn::new().add_foundry(inputs[1].output.as_foundry().id()))
@@ -289,7 +337,14 @@ fn destroy_foundry_with_account_burn() {
     let account_id_2 = AccountId::from_str(ACCOUNT_ID_2).unwrap();
 
     let inputs = build_inputs([
-        Account(1_000_000, account_id_2, BECH32_ADDRESS_ED25519_0, None, None, None),
+        Account(
+            1_000_000,
+            account_id_2,
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            None,
+            None,
+            None,
+        ),
         Foundry(
             1_000_000,
             account_id_2,
@@ -300,7 +355,7 @@ fn destroy_foundry_with_account_burn() {
     ]);
     let outputs = build_outputs([Basic(
         1_000_000,
-        BECH32_ADDRESS_ED25519_0,
+        Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
         None,
         None,
@@ -312,7 +367,7 @@ fn destroy_foundry_with_account_burn() {
     let selected = InputSelection::new(
         inputs.clone(),
         outputs.clone(),
-        addresses([BECH32_ADDRESS_ED25519_0]),
+        [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         protocol_parameters,
     )
     .with_burn(
@@ -331,7 +386,7 @@ fn destroy_foundry_with_account_burn() {
             assert!(is_remainder_or_return(
                 output,
                 1_000_000,
-                BECH32_ADDRESS_ED25519_0,
+                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                 None,
             ));
         }
@@ -344,7 +399,14 @@ fn prefer_basic_to_foundry() {
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
     let inputs = build_inputs([
-        Account(1_000_000, account_id_1, BECH32_ADDRESS_ED25519_0, None, None, None),
+        Account(
+            1_000_000,
+            account_id_1,
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            None,
+            None,
+            None,
+        ),
         Foundry(
             1_000_000,
             account_id_1,
@@ -352,11 +414,20 @@ fn prefer_basic_to_foundry() {
             SimpleTokenScheme::new(10, 10, 10).unwrap(),
             None,
         ),
-        Basic(1_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
+        Basic(
+            1_000_000,
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+        ),
     ]);
     let outputs = build_outputs([Basic(
         1_000_000,
-        BECH32_ADDRESS_ED25519_0,
+        Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
         None,
         None,
@@ -368,7 +439,7 @@ fn prefer_basic_to_foundry() {
     let selected = InputSelection::new(
         inputs.clone(),
         outputs.clone(),
-        addresses([BECH32_ADDRESS_ED25519_0]),
+        [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         protocol_parameters,
     )
     .select()
@@ -385,7 +456,16 @@ fn simple_foundry_transition_basic_not_needed() {
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
     let mut inputs = build_inputs([
-        Basic(1_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
+        Basic(
+            1_000_000,
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+        ),
         Foundry(
             1_000_000,
             account_id_1,
@@ -418,7 +498,7 @@ fn simple_foundry_transition_basic_not_needed() {
     let selected = InputSelection::new(
         inputs.clone(),
         outputs.clone(),
-        addresses([BECH32_ADDRESS_ED25519_0]),
+        [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         protocol_parameters,
     )
     .select()
@@ -451,7 +531,16 @@ fn simple_foundry_transition_basic_not_needed_with_remainder() {
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1).unwrap();
 
     let mut inputs = build_inputs([
-        Basic(1_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
+        Basic(
+            1_000_000,
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+        ),
         Foundry(
             2_000_000,
             account_id_1,
@@ -483,7 +572,7 @@ fn simple_foundry_transition_basic_not_needed_with_remainder() {
     let selected = InputSelection::new(
         inputs.clone(),
         outputs.clone(),
-        addresses([BECH32_ADDRESS_ED25519_0]),
+        [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         protocol_parameters,
     )
     .select()
@@ -510,7 +599,7 @@ fn simple_foundry_transition_basic_not_needed_with_remainder() {
                 assert!(is_remainder_or_return(
                     output,
                     1_000_000,
-                    BECH32_ADDRESS_ED25519_0,
+                    Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                     None,
                 ));
             } else {
@@ -625,7 +714,7 @@ fn mint_and_burn_at_the_same_time() {
     let selected = InputSelection::new(
         inputs.clone(),
         outputs,
-        addresses([BECH32_ADDRESS_ED25519_0]),
+        [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         protocol_parameters,
     )
     .with_burn(Burn::new().add_native_token(token_id, 10))
@@ -645,7 +734,16 @@ fn take_amount_from_account_and_foundry_to_fund_basic() {
     let token_id = TokenId::from(foundry_id);
 
     let mut inputs = build_inputs([
-        Basic(1_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
+        Basic(
+            1_000_000,
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+        ),
         Foundry(
             1_000_000,
             account_id_1,
@@ -668,7 +766,7 @@ fn take_amount_from_account_and_foundry_to_fund_basic() {
     });
     let outputs = build_outputs([Basic(
         3_200_000,
-        BECH32_ADDRESS_ED25519_0,
+        Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
         None,
         None,
@@ -680,7 +778,7 @@ fn take_amount_from_account_and_foundry_to_fund_basic() {
     let selected = InputSelection::new(
         inputs.clone(),
         outputs.clone(),
-        addresses([BECH32_ADDRESS_ED25519_0]),
+        [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         protocol_parameters,
     )
     .select()
@@ -705,7 +803,14 @@ fn create_native_token_but_burn_account() {
     let token_id = TokenId::from(foundry_id);
 
     let inputs = build_inputs([
-        Account(2_000_000, account_id_1, BECH32_ADDRESS_ED25519_0, None, None, None),
+        Account(
+            2_000_000,
+            account_id_1,
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            None,
+            None,
+            None,
+        ),
         Foundry(
             1_000_000,
             account_id_1,
@@ -725,7 +830,7 @@ fn create_native_token_but_burn_account() {
     let selected = InputSelection::new(
         inputs.clone(),
         outputs.clone(),
-        addresses([BECH32_ADDRESS_ED25519_0]),
+        [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         protocol_parameters,
     )
     .with_burn(Burn::new().add_account(account_id_1))
@@ -741,7 +846,7 @@ fn create_native_token_but_burn_account() {
             assert!(is_remainder_or_return(
                 output,
                 2_000_000,
-                BECH32_ADDRESS_ED25519_0,
+                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
                 None,
             ));
         }
@@ -756,7 +861,14 @@ fn melted_tokens_not_provided() {
     let token_id_1 = TokenId::from(foundry_id);
 
     let inputs = build_inputs([
-        Account(2_000_000, account_id_1, BECH32_ADDRESS_ED25519_0, None, None, None),
+        Account(
+            2_000_000,
+            account_id_1,
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            None,
+            None,
+            None,
+        ),
         Foundry(
             1_000_000,
             account_id_1,
@@ -776,7 +888,7 @@ fn melted_tokens_not_provided() {
     let selected = InputSelection::new(
         inputs,
         outputs,
-        addresses([BECH32_ADDRESS_ED25519_0]),
+        [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         protocol_parameters,
     )
     .select();
@@ -798,7 +910,14 @@ fn burned_tokens_not_provided() {
     let token_id_1 = TokenId::from(foundry_id);
 
     let inputs = build_inputs([
-        Account(2_000_000, account_id_1, BECH32_ADDRESS_ED25519_0, None, None, None),
+        Account(
+            2_000_000,
+            account_id_1,
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            None,
+            None,
+            None,
+        ),
         Foundry(
             1_000_000,
             account_id_1,
@@ -818,7 +937,7 @@ fn burned_tokens_not_provided() {
     let selected = InputSelection::new(
         inputs,
         outputs,
-        addresses([BECH32_ADDRESS_ED25519_0]),
+        [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         protocol_parameters,
     )
     .with_burn(Burn::new().add_native_token(token_id_1, 100))
@@ -868,7 +987,7 @@ fn foundry_in_outputs_and_required() {
     let selected = InputSelection::new(
         inputs.clone(),
         outputs.clone(),
-        addresses([BECH32_ADDRESS_ED25519_0]),
+        [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         protocol_parameters,
     )
     .with_required_inputs([*inputs[1].output_id()])
@@ -893,7 +1012,16 @@ fn melt_and_burn_native_tokens() {
     let token_id = TokenId::from(foundry_id);
 
     let mut inputs = build_inputs([
-        Basic(1_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
+        Basic(
+            1_000_000,
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+        ),
         Foundry(
             1_000_000,
             account_id,
@@ -926,7 +1054,7 @@ fn melt_and_burn_native_tokens() {
     let selected = InputSelection::new(
         inputs.clone(),
         outputs,
-        addresses([BECH32_ADDRESS_ED25519_0]),
+        [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         protocol_parameters,
     )
     // Burn 456 native tokens

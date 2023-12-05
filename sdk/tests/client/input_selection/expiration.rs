@@ -6,6 +6,7 @@ use std::str::FromStr;
 use iota_sdk::{
     client::api::input_selection::{Error, InputSelection},
     types::block::{
+        address::Address,
         output::{AccountId, NftId},
         protocol::protocol_parameters,
     },
@@ -13,7 +14,7 @@ use iota_sdk::{
 use pretty_assertions::assert_eq;
 
 use crate::client::{
-    addresses, build_inputs, build_outputs, is_remainder_or_return, unsorted_eq,
+    build_inputs, build_outputs, is_remainder_or_return, unsorted_eq,
     Build::{Account, Basic, Nft},
     ACCOUNT_ID_1, BECH32_ADDRESS_ACCOUNT_1, BECH32_ADDRESS_ED25519_0, BECH32_ADDRESS_ED25519_1,
     BECH32_ADDRESS_ED25519_2, NFT_ID_1,
@@ -25,17 +26,17 @@ fn one_output_expiration_not_expired() {
 
     let inputs = build_inputs([Basic(
         2_000_000,
-        BECH32_ADDRESS_ED25519_1,
+        Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
         None,
         None,
         None,
         None,
-        Some((BECH32_ADDRESS_ED25519_0, 200)),
+        Some((Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(), 200)),
         None,
     )]);
     let outputs = build_outputs([Basic(
         2_000_000,
-        BECH32_ADDRESS_ED25519_0,
+        Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
         None,
         None,
@@ -47,7 +48,7 @@ fn one_output_expiration_not_expired() {
     let selected = InputSelection::new(
         inputs,
         outputs,
-        addresses([BECH32_ADDRESS_ED25519_0]),
+        [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         protocol_parameters,
     )
     .with_slot_index(100)
@@ -62,17 +63,17 @@ fn expiration_equal_timestamp() {
 
     let inputs = build_inputs([Basic(
         2_000_000,
-        BECH32_ADDRESS_ED25519_1,
+        Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
         None,
         None,
         None,
         None,
-        Some((BECH32_ADDRESS_ED25519_0, 200)),
+        Some((Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(), 200)),
         None,
     )]);
     let outputs = build_outputs([Basic(
         2_000_000,
-        BECH32_ADDRESS_ED25519_0,
+        Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
         None,
         None,
@@ -84,7 +85,7 @@ fn expiration_equal_timestamp() {
     let selected = InputSelection::new(
         inputs.clone(),
         outputs.clone(),
-        addresses([BECH32_ADDRESS_ED25519_0]),
+        [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         protocol_parameters,
     )
     .with_slot_index(200)
@@ -101,17 +102,17 @@ fn one_output_expiration_expired() {
 
     let inputs = build_inputs([Basic(
         2_000_000,
-        BECH32_ADDRESS_ED25519_1,
+        Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
         None,
         None,
         None,
         None,
-        Some((BECH32_ADDRESS_ED25519_0, 50)),
+        Some((Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(), 50)),
         None,
     )]);
     let outputs = build_outputs([Basic(
         2_000_000,
-        BECH32_ADDRESS_ED25519_0,
+        Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
         None,
         None,
@@ -123,7 +124,7 @@ fn one_output_expiration_expired() {
     let selected = InputSelection::new(
         inputs.clone(),
         outputs.clone(),
-        addresses([BECH32_ADDRESS_ED25519_0]),
+        [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         protocol_parameters,
     )
     .with_slot_index(100)
@@ -141,28 +142,28 @@ fn two_outputs_one_expiration_expired() {
     let inputs = build_inputs([
         Basic(
             2_000_000,
-            BECH32_ADDRESS_ED25519_1,
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
             None,
             None,
             None,
             None,
-            Some((BECH32_ADDRESS_ED25519_0, 200)),
+            Some((Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(), 200)),
             None,
         ),
         Basic(
             2_000_000,
-            BECH32_ADDRESS_ED25519_1,
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
             None,
             None,
             None,
             None,
-            Some((BECH32_ADDRESS_ED25519_0, 50)),
+            Some((Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(), 50)),
             None,
         ),
     ]);
     let outputs = build_outputs([Basic(
         2_000_000,
-        BECH32_ADDRESS_ED25519_1,
+        Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
         None,
         None,
         None,
@@ -174,7 +175,7 @@ fn two_outputs_one_expiration_expired() {
     let selected = InputSelection::new(
         inputs.clone(),
         outputs.clone(),
-        addresses([BECH32_ADDRESS_ED25519_0]),
+        [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         protocol_parameters,
     )
     .with_slot_index(100)
@@ -193,19 +194,28 @@ fn two_outputs_one_unexpired_one_missing() {
     let inputs = build_inputs([
         Basic(
             2_000_000,
-            BECH32_ADDRESS_ED25519_1,
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
             None,
             None,
             None,
             None,
-            Some((BECH32_ADDRESS_ED25519_0, 200)),
+            Some((Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(), 200)),
             None,
         ),
-        Basic(2_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
+        Basic(
+            2_000_000,
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+        ),
     ]);
     let outputs = build_outputs([Basic(
         2_000_000,
-        BECH32_ADDRESS_ED25519_1,
+        Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
         None,
         None,
         None,
@@ -217,7 +227,7 @@ fn two_outputs_one_unexpired_one_missing() {
     let selected = InputSelection::new(
         inputs.clone(),
         outputs.clone(),
-        addresses([BECH32_ADDRESS_ED25519_0]),
+        [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         protocol_parameters,
     )
     .with_slot_index(100)
@@ -236,29 +246,38 @@ fn two_outputs_two_expired() {
     let inputs = build_inputs([
         Basic(
             2_000_000,
-            BECH32_ADDRESS_ED25519_1,
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
             None,
             None,
             None,
             None,
-            Some((BECH32_ADDRESS_ED25519_0, 100)),
+            Some((Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(), 100)),
             None,
         ),
         Basic(
             2_000_000,
-            BECH32_ADDRESS_ED25519_1,
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
             None,
             None,
             None,
             None,
-            Some((BECH32_ADDRESS_ED25519_2, 100)),
+            Some((Address::try_from_bech32(BECH32_ADDRESS_ED25519_2).unwrap(), 100)),
             None,
         ),
-        Basic(2_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
+        Basic(
+            2_000_000,
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+        ),
     ]);
     let outputs = build_outputs([Basic(
         2_000_000,
-        BECH32_ADDRESS_ED25519_1,
+        Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
         None,
         None,
         None,
@@ -270,7 +289,7 @@ fn two_outputs_two_expired() {
     let selected = InputSelection::new(
         inputs.clone(),
         outputs.clone(),
-        addresses([BECH32_ADDRESS_ED25519_2]),
+        [Address::try_from_bech32(BECH32_ADDRESS_ED25519_2).unwrap()],
         protocol_parameters,
     )
     .with_slot_index(200)
@@ -289,28 +308,28 @@ fn two_outputs_two_expired_2() {
     let inputs = build_inputs([
         Basic(
             2_000_000,
-            BECH32_ADDRESS_ED25519_1,
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
             None,
             None,
             None,
             None,
-            Some((BECH32_ADDRESS_ED25519_1, 100)),
+            Some((Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(), 100)),
             None,
         ),
         Basic(
             2_000_000,
-            BECH32_ADDRESS_ED25519_1,
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
             None,
             None,
             None,
             None,
-            Some((BECH32_ADDRESS_ED25519_2, 100)),
+            Some((Address::try_from_bech32(BECH32_ADDRESS_ED25519_2).unwrap(), 100)),
             None,
         ),
     ]);
     let outputs = build_outputs([Basic(
         4_000_000,
-        BECH32_ADDRESS_ED25519_1,
+        Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
         None,
         None,
         None,
@@ -322,7 +341,10 @@ fn two_outputs_two_expired_2() {
     let selected = InputSelection::new(
         inputs.clone(),
         outputs.clone(),
-        addresses([BECH32_ADDRESS_ED25519_1, BECH32_ADDRESS_ED25519_2]),
+        [
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_2).unwrap(),
+        ],
         protocol_parameters,
     )
     .with_slot_index(200)
@@ -339,17 +361,17 @@ fn expiration_expired_with_sdr() {
 
     let inputs = build_inputs([Basic(
         2_000_000,
-        BECH32_ADDRESS_ED25519_1,
+        Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
         None,
         None,
-        Some((BECH32_ADDRESS_ED25519_1, 1_000_000)),
+        Some((Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(), 1_000_000)),
         None,
-        Some((BECH32_ADDRESS_ED25519_0, 50)),
+        Some((Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(), 50)),
         None,
     )]);
     let outputs = build_outputs([Basic(
         2_000_000,
-        BECH32_ADDRESS_ED25519_1,
+        Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
         None,
         None,
         None,
@@ -361,7 +383,7 @@ fn expiration_expired_with_sdr() {
     let selected = InputSelection::new(
         inputs.clone(),
         outputs.clone(),
-        addresses([BECH32_ADDRESS_ED25519_0]),
+        [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         protocol_parameters,
     )
     .with_slot_index(100)
@@ -378,17 +400,17 @@ fn expiration_expired_with_sdr_2() {
 
     let inputs = build_inputs([Basic(
         2_000_000,
-        BECH32_ADDRESS_ED25519_0,
+        Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
         None,
-        Some((BECH32_ADDRESS_ED25519_1, 1_000_000)),
+        Some((Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(), 1_000_000)),
         None,
-        Some((BECH32_ADDRESS_ED25519_0, 50)),
+        Some((Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(), 50)),
         None,
     )]);
     let outputs = build_outputs([Basic(
         2_000_000,
-        BECH32_ADDRESS_ED25519_0,
+        Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
         None,
         None,
@@ -400,7 +422,7 @@ fn expiration_expired_with_sdr_2() {
     let selected = InputSelection::new(
         inputs.clone(),
         outputs.clone(),
-        addresses([BECH32_ADDRESS_ED25519_0]),
+        [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         protocol_parameters,
     )
     .with_slot_index(100)
@@ -417,17 +439,17 @@ fn expiration_expired_with_sdr_and_timelock() {
 
     let inputs = build_inputs([Basic(
         2_000_000,
-        BECH32_ADDRESS_ED25519_1,
+        Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
         None,
         None,
-        Some((BECH32_ADDRESS_ED25519_0, 1_000_000)),
+        Some((Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(), 1_000_000)),
         Some(50),
-        Some((BECH32_ADDRESS_ED25519_0, 50)),
+        Some((Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(), 50)),
         None,
     )]);
     let outputs = build_outputs([Basic(
         2_000_000,
-        BECH32_ADDRESS_ED25519_1,
+        Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
         None,
         None,
         None,
@@ -439,7 +461,7 @@ fn expiration_expired_with_sdr_and_timelock() {
     let selected = InputSelection::new(
         inputs.clone(),
         outputs.clone(),
-        addresses([BECH32_ADDRESS_ED25519_0]),
+        [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         protocol_parameters,
     )
     .with_slot_index(100)
@@ -456,17 +478,17 @@ fn expiration_expired_with_sdr_and_timelock_2() {
 
     let inputs = build_inputs([Basic(
         2_000_000,
-        BECH32_ADDRESS_ED25519_1,
+        Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
         None,
         None,
-        Some((BECH32_ADDRESS_ED25519_1, 1_000_000)),
+        Some((Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(), 1_000_000)),
         Some(50),
-        Some((BECH32_ADDRESS_ED25519_0, 50)),
+        Some((Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(), 50)),
         None,
     )]);
     let outputs = build_outputs([Basic(
         2_000_000,
-        BECH32_ADDRESS_ED25519_1,
+        Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
         None,
         None,
         None,
@@ -478,7 +500,7 @@ fn expiration_expired_with_sdr_and_timelock_2() {
     let selected = InputSelection::new(
         inputs.clone(),
         outputs.clone(),
-        addresses([BECH32_ADDRESS_ED25519_0]),
+        [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         protocol_parameters,
     )
     .with_slot_index(100)
@@ -494,26 +516,62 @@ fn sender_in_expiration() {
     let protocol_parameters = protocol_parameters();
 
     let inputs = build_inputs([
-        Basic(1_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
-        Basic(1_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
         Basic(
             1_000_000,
-            BECH32_ADDRESS_ED25519_0,
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
             None,
             None,
             None,
             None,
-            Some((BECH32_ADDRESS_ED25519_1, 50)),
+            None,
             None,
         ),
-        Basic(1_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
-        Basic(1_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
+        Basic(
+            1_000_000,
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+        ),
+        Basic(
+            1_000_000,
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            None,
+            None,
+            None,
+            None,
+            Some((Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(), 50)),
+            None,
+        ),
+        Basic(
+            1_000_000,
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+        ),
+        Basic(
+            1_000_000,
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+        ),
     ]);
     let outputs = build_outputs([Basic(
         1_000_000,
-        BECH32_ADDRESS_ED25519_0,
+        Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
-        Some(BECH32_ADDRESS_ED25519_1),
+        Some(Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap()),
         None,
         None,
         None,
@@ -523,7 +581,10 @@ fn sender_in_expiration() {
     let selected = InputSelection::new(
         inputs.clone(),
         outputs.clone(),
-        addresses([BECH32_ADDRESS_ED25519_0, BECH32_ADDRESS_ED25519_1]),
+        [
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
+        ],
         protocol_parameters,
     )
     .with_slot_index(100)
@@ -541,19 +602,19 @@ fn sender_in_expiration_already_selected() {
 
     let inputs = build_inputs([Basic(
         1_000_000,
-        BECH32_ADDRESS_ED25519_0,
+        Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
         None,
         None,
         None,
-        Some((BECH32_ADDRESS_ED25519_1, 50)),
+        Some((Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(), 50)),
         None,
     )]);
     let outputs = build_outputs([Basic(
         1_000_000,
-        BECH32_ADDRESS_ED25519_0,
+        Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
-        Some(BECH32_ADDRESS_ED25519_1),
+        Some(Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap()),
         None,
         None,
         None,
@@ -563,7 +624,10 @@ fn sender_in_expiration_already_selected() {
     let selected = InputSelection::new(
         inputs.clone(),
         outputs.clone(),
-        addresses([BECH32_ADDRESS_ED25519_0, BECH32_ADDRESS_ED25519_1]),
+        [
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
+        ],
         protocol_parameters,
     )
     .with_slot_index(100)
@@ -581,19 +645,19 @@ fn remainder_in_expiration() {
 
     let inputs = build_inputs([Basic(
         2_000_000,
-        BECH32_ADDRESS_ACCOUNT_1,
+        Address::try_from_bech32(BECH32_ADDRESS_ACCOUNT_1).unwrap(),
         None,
         None,
         None,
         None,
-        Some((BECH32_ADDRESS_ED25519_1, 50)),
+        Some((Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(), 50)),
         None,
     )]);
     let outputs = build_outputs([Basic(
         1_000_000,
-        BECH32_ADDRESS_ED25519_0,
+        Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
-        Some(BECH32_ADDRESS_ED25519_1),
+        Some(Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap()),
         None,
         None,
         None,
@@ -603,7 +667,10 @@ fn remainder_in_expiration() {
     let selected = InputSelection::new(
         inputs.clone(),
         outputs.clone(),
-        addresses([BECH32_ADDRESS_ED25519_0, BECH32_ADDRESS_ED25519_1]),
+        [
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
+        ],
         protocol_parameters,
     )
     .with_slot_index(100)
@@ -618,7 +685,7 @@ fn remainder_in_expiration() {
             assert!(is_remainder_or_return(
                 output,
                 1_000_000,
-                BECH32_ADDRESS_ED25519_1,
+                Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
                 None
             ));
         }
@@ -631,17 +698,17 @@ fn expiration_expired_non_ed25519_in_address_unlock_condition() {
 
     let inputs = build_inputs([Basic(
         2_000_000,
-        BECH32_ADDRESS_ACCOUNT_1,
+        Address::try_from_bech32(BECH32_ADDRESS_ACCOUNT_1).unwrap(),
         None,
         None,
         None,
         None,
-        Some((BECH32_ADDRESS_ED25519_0, 50)),
+        Some((Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(), 50)),
         None,
     )]);
     let outputs = build_outputs([Basic(
         2_000_000,
-        BECH32_ADDRESS_ED25519_0,
+        Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
         None,
         None,
@@ -653,7 +720,7 @@ fn expiration_expired_non_ed25519_in_address_unlock_condition() {
     let selected = InputSelection::new(
         inputs.clone(),
         outputs.clone(),
-        addresses([BECH32_ADDRESS_ED25519_0]),
+        [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         protocol_parameters,
     )
     .with_slot_index(100)
@@ -672,20 +739,27 @@ fn expiration_expired_only_account_addresses() {
     let inputs = build_inputs([
         Basic(
             2_000_000,
-            BECH32_ADDRESS_ACCOUNT_1,
+            Address::try_from_bech32(BECH32_ADDRESS_ACCOUNT_1).unwrap(),
             None,
             None,
             None,
             None,
-            Some((BECH32_ADDRESS_ACCOUNT_1, 50)),
+            Some((Address::try_from_bech32(BECH32_ADDRESS_ACCOUNT_1).unwrap(), 50)),
             None,
         ),
-        Account(1_000_000, account_id_1, BECH32_ADDRESS_ED25519_0, None, None, None),
+        Account(
+            1_000_000,
+            account_id_1,
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            None,
+            None,
+            None,
+        ),
     ]);
 
     let outputs = build_outputs([Basic(
         2_000_000,
-        BECH32_ADDRESS_ED25519_0,
+        Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
         None,
         None,
@@ -697,7 +771,7 @@ fn expiration_expired_only_account_addresses() {
     let selected = InputSelection::new(
         inputs.clone(),
         outputs,
-        addresses([BECH32_ADDRESS_ED25519_0]),
+        [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         protocol_parameters,
     )
     .with_slot_index(100)
@@ -716,17 +790,17 @@ fn one_nft_output_expiration_unexpired() {
     let inputs = build_inputs([Nft(
         2_000_000,
         nft_id_1,
-        BECH32_ADDRESS_ED25519_1,
+        Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
         None,
         None,
         None,
-        Some((BECH32_ADDRESS_ED25519_0, 150)),
+        Some((Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(), 150)),
         None,
     )]);
     let outputs = build_outputs([Nft(
         2_000_000,
         nft_id_1,
-        BECH32_ADDRESS_ED25519_1,
+        Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
         None,
         None,
         None,
@@ -737,7 +811,7 @@ fn one_nft_output_expiration_unexpired() {
     let selected = InputSelection::new(
         inputs.clone(),
         outputs.clone(),
-        addresses([BECH32_ADDRESS_ED25519_1]),
+        [Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap()],
         protocol_parameters,
     )
     .with_slot_index(100)
@@ -756,17 +830,17 @@ fn one_nft_output_expiration_expired() {
     let inputs = build_inputs([Nft(
         2_000_000,
         nft_id_1,
-        BECH32_ADDRESS_ED25519_1,
+        Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
         None,
         None,
         None,
-        Some((BECH32_ADDRESS_ED25519_0, 50)),
+        Some((Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(), 50)),
         None,
     )]);
     let outputs = build_outputs([Nft(
         2_000_000,
         nft_id_1,
-        BECH32_ADDRESS_ED25519_1,
+        Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
         None,
         None,
         None,
@@ -777,7 +851,7 @@ fn one_nft_output_expiration_expired() {
     let selected = InputSelection::new(
         inputs.clone(),
         outputs.clone(),
-        addresses([BECH32_ADDRESS_ED25519_0]),
+        [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         protocol_parameters,
     )
     .with_slot_index(100)

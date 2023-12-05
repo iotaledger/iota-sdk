@@ -652,13 +652,13 @@ fn verify_unlock_conditions(unlock_conditions: &UnlockConditions, anchor_id: &An
 }
 
 #[cfg(feature = "serde")]
-pub(crate) mod dto {
+mod dto {
 
     use serde::{Deserialize, Serialize};
 
     use super::*;
     use crate::{
-        types::block::{output::unlock_condition::dto::UnlockConditionDto, Error},
+        types::block::{output::unlock_condition::UnlockCondition, Error},
         utils::serde::string,
     };
 
@@ -674,7 +674,7 @@ pub(crate) mod dto {
         pub mana: u64,
         pub anchor_id: AnchorId,
         pub state_index: u32,
-        pub unlock_conditions: Vec<UnlockConditionDto>,
+        pub unlock_conditions: Vec<UnlockCondition>,
         #[serde(skip_serializing_if = "Vec::is_empty", default)]
         pub features: Vec<Feature>,
         #[serde(skip_serializing_if = "Vec::is_empty", default)]
@@ -689,7 +689,7 @@ pub(crate) mod dto {
                 mana: value.mana(),
                 anchor_id: *value.anchor_id(),
                 state_index: value.state_index(),
-                unlock_conditions: value.unlock_conditions().iter().map(Into::into).collect::<_>(),
+                unlock_conditions: value.unlock_conditions().to_vec(),
                 features: value.features().to_vec(),
                 immutable_features: value.immutable_features().to_vec(),
             }
@@ -707,7 +707,7 @@ pub(crate) mod dto {
                 .with_immutable_features(dto.immutable_features);
 
             for u in dto.unlock_conditions {
-                builder = builder.add_unlock_condition(UnlockCondition::from(u));
+                builder = builder.add_unlock_condition(u);
             }
 
             builder.finish()
@@ -721,7 +721,7 @@ pub(crate) mod dto {
             mana: u64,
             anchor_id: &AnchorId,
             state_index: u32,
-            unlock_conditions: Vec<UnlockConditionDto>,
+            unlock_conditions: Vec<UnlockCondition>,
             features: Option<Vec<Feature>>,
             immutable_features: Option<Vec<Feature>>,
         ) -> Result<Self, Error> {
@@ -784,7 +784,7 @@ mod tests {
             anchor_output.mana(),
             anchor_output.anchor_id(),
             anchor_output.state_index(),
-            anchor_output.unlock_conditions().iter().map(Into::into).collect(),
+            anchor_output.unlock_conditions().to_vec(),
             Some(anchor_output.features().to_vec()),
             Some(anchor_output.immutable_features().to_vec()),
         )
@@ -801,7 +801,7 @@ mod tests {
                 builder.mana,
                 &builder.anchor_id,
                 builder.state_index,
-                builder.unlock_conditions.iter().map(Into::into).collect(),
+                builder.unlock_conditions.iter().cloned().collect(),
                 Some(builder.features.iter().cloned().collect()),
                 Some(builder.immutable_features.iter().cloned().collect()),
             )

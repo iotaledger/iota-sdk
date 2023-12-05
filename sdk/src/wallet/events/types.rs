@@ -14,7 +14,7 @@ use crate::{
         },
     },
     wallet::{
-        types::{InclusionState, OutputDataDto},
+        types::{InclusionState, OutputData},
         Error,
     },
 };
@@ -178,7 +178,7 @@ impl TryFrom<u8> for WalletEventType {
 #[serde(rename_all = "camelCase")]
 pub struct NewOutputEvent {
     /// The new output.
-    pub output: OutputDataDto,
+    pub output: OutputData,
     /// The transaction that created the output. Might be pruned and not available.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub transaction: Option<SignedTransactionPayloadDto>,
@@ -190,7 +190,7 @@ pub struct NewOutputEvent {
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub struct SpentOutputEvent {
     /// The spent output.
-    pub output: OutputDataDto,
+    pub output: OutputData,
 }
 
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Serialize, Deserialize)]

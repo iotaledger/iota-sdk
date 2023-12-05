@@ -18,6 +18,7 @@ import {
     ProtocolParameters,
     Bech32Address,
     InputSigningData,
+    Unlock,
 } from '../types';
 import {
     AccountId,
@@ -322,6 +323,23 @@ export class Utils {
     }
 
     /**
+     * Compute the hash of an instance of ProtocolParameters.
+     *
+     * @param protocolParameters A ProtocolParameters instance.
+     * @returns The hash of the protocol parameters as a hex-encoded string.
+     */
+    static protocolParametersHash(
+        protocolParameters: ProtocolParameters,
+    ): HexEncodedString {
+        return callUtilsMethod({
+            name: 'protocolParametersHash',
+            data: {
+                protocolParameters,
+            },
+        });
+    }
+
+    /**
      * Compute the signing hash of a transaction.
      *
      * @param transaction A transaction.
@@ -430,22 +448,23 @@ export class Utils {
     /**
      * Verifies the semantic of a transaction.
      *
-     * @param inputs The inputs data.
      * @param transaction The transaction payload.
-     * @param time The unix time for which to do the validation, should be roughly the one of the milestone that will reference the transaction.
+     * @param inputs The inputs data.
+     * @param unlocks The unlocks.
+     *
      * @returns The conflict reason.
      */
     static verifyTransactionSemantic(
-        inputs: InputSigningData[],
         transaction: SignedTransactionPayload,
-        time: number,
+        inputs: InputSigningData[],
+        unlocks?: Unlock[],
     ): string {
         const conflictReason = callUtilsMethod({
             name: 'verifyTransactionSemantic',
             data: {
-                inputs,
                 transaction,
-                time,
+                inputs,
+                unlocks,
             },
         });
         return conflictReason;
