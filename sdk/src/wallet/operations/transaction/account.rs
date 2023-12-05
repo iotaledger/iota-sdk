@@ -30,7 +30,7 @@ where
     pub async fn implicit_account_transition(
         &self,
         output_id: &OutputId,
-        key_source: Option<impl Into<BlockIssuerKeySource>>,
+        key_source: Option<impl Into<BlockIssuerKeySource> + Send>,
     ) -> Result<TransactionWithMetadata> {
         let issuer_id = AccountId::from(output_id);
 
@@ -46,7 +46,7 @@ where
     pub async fn prepare_implicit_account_transition(
         &self,
         output_id: &OutputId,
-        key_source: Option<impl Into<BlockIssuerKeySource>>,
+        key_source: Option<impl Into<BlockIssuerKeySource> + Send>,
     ) -> Result<PreparedTransactionData>
     where
         crate::wallet::Error: From<S::Error>,
