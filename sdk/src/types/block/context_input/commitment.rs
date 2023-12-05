@@ -14,7 +14,7 @@ pub struct CommitmentContextInput(SlotCommitmentId);
 
 impl CommitmentContextInput {
     /// The context input kind of a [`CommitmentContextInput`].
-    pub const KIND: u8 = 0;
+    pub const KIND: u8 = 1;
 
     /// Creates a new [`CommitmentContextInput`].
     pub fn new(commitment_id: SlotCommitmentId) -> Self {
