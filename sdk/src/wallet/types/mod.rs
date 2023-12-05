@@ -19,7 +19,7 @@ pub use self::{
 use crate::{
     client::secret::types::InputSigningData,
     types::{
-        api::core::OutputWithMetadataResponse,
+        api::core::{OutputIdProof, OutputWithMetadataResponse},
         block::{
             address::Address,
             output::{Output, OutputId, OutputMetadata},
@@ -43,6 +43,8 @@ pub struct OutputData {
     pub metadata: OutputMetadata,
     /// The actual Output
     pub output: Output,
+    /// The OutputIdProof
+    pub output_id_proof: OutputIdProof,
     /// If an output is spent
     pub is_spent: bool,
     /// Associated wallet address.

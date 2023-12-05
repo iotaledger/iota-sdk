@@ -52,12 +52,15 @@ pub(crate) use self::{
     output_id::OutputIndex,
     unlock_condition::AddressUnlockCondition,
 };
-use crate::types::block::{
-    address::Address,
-    protocol::{CommittableAgeRange, ProtocolParameters, WorkScore, WorkScoreParameters},
-    semantic::SemanticValidationContext,
-    slot::SlotIndex,
-    Error,
+use crate::types::{
+    api::core::OutputIdProof,
+    block::{
+        address::Address,
+        protocol::{CommittableAgeRange, ProtocolParameters, WorkScore, WorkScoreParameters},
+        semantic::SemanticValidationContext,
+        slot::SlotIndex,
+        Error,
+    },
 };
 
 /// The maximum number of outputs of a transaction.
@@ -75,17 +78,27 @@ pub enum OutputBuilderAmount {
     MinimumAmount(StorageScoreParameters),
 }
 
-/// Contains the generic [`Output`] with associated [`OutputMetadata`].
+/// Contains the generic [`Output`] with associated [`OutputIdProof`] and [`OutputMetadata`].
 #[derive(Clone, Debug)]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize),
+    serde(rename_all = "camelCase")
+)]
 pub struct OutputWithMetadata {
-    pub(crate) output: Output,
-    pub(crate) metadata: OutputMetadata,
+    pub output: Output,
+    pub output_id_proof: OutputIdProof,
+    pub metadata: OutputMetadata,
 }
 
 impl OutputWithMetadata {
     /// Creates a new [`OutputWithMetadata`].
-    pub fn new(output: Output, metadata: OutputMetadata) -> Self {
-        Self { output, metadata }
+    pub fn new(output: Output, output_id_proof: OutputIdProof, metadata: OutputMetadata) -> Self {
+        Self {
+            output,
+            output_id_proof,
+            metadata,
+        }
     }
 
     /// Returns the [`Output`].
@@ -96,6 +109,16 @@ impl OutputWithMetadata {
     /// Consumes self and returns the [`Output`].
     pub fn into_output(self) -> Output {
         self.output
+    }
+
+    /// Returns the [`OutputIdProof`].
+    pub fn output_id_proof(&self) -> &OutputIdProof {
+        &self.output_id_proof
+    }
+
+    /// Consumes self and returns the [`OutputIdProof`].
+    pub fn into_output_id_proof(self) -> OutputIdProof {
+        self.output_id_proof
     }
 
     /// Returns the [`OutputMetadata`].

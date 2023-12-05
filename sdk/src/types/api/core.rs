@@ -9,6 +9,7 @@ use alloc::{
 };
 
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
 
 use crate::{
     types::block::{
@@ -21,7 +22,7 @@ use crate::{
         slot::{EpochIndex, SlotCommitment, SlotCommitmentId, SlotIndex},
         BlockDto, BlockId,
     },
-    utils::serde::{option_string, string},
+    utils::serde::{option_string, prefix_hex_bytes, string},
 };
 
 /// Response of GET /api/core/v3/info.
@@ -527,4 +528,85 @@ pub struct UtxoChangesResponse {
     pub commitment_id: SlotCommitmentId,
     pub created_outputs: Vec<OutputId>,
     pub consumed_outputs: Vec<OutputId>,
+}
+
+/// Contains the generic [`Output`] with associated [`OutputIdProof`].
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct OutputResponse {
+    pub output: Output,
+    pub output_id_proof: OutputIdProof,
+}
+
+/// The proof of the output identifier.
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct OutputIdProof {
+    pub slot: SlotIndex,
+    pub output_index: u16,
+    pub transaction_commitment: String,
+    pub output_commitment_proof: OutputCommitmentProof,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq, Serialize)]
+#[serde(untagged)]
+pub enum OutputCommitmentProof {
+    HashableNode(HashableNode),
+    LeafHash(LeafHash),
+    ValueHash(ValueHash),
+}
+
+impl<'de> Deserialize<'de> for OutputCommitmentProof {
+    fn deserialize<D: serde::Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
+        let value = Value::deserialize(d)?;
+        Ok(
+            match value
+                .get("type")
+                .and_then(Value::as_u64)
+                .ok_or_else(|| serde::de::Error::custom("invalid output commitment proof type"))?
+                as u8
+            {
+                0 => Self::HashableNode(
+                    serde_json::from_value::<HashableNode>(value)
+                        .map_err(|e| serde::de::Error::custom(format!("cannot deserialize hashable node: {e}")))?,
+                ),
+                1 => Self::LeafHash(
+                    serde_json::from_value::<LeafHash>(value)
+                        .map_err(|e| serde::de::Error::custom(format!("cannot deserialize leaf hash: {e}")))?,
+                ),
+                2 => Self::ValueHash(
+                    serde_json::from_value::<ValueHash>(value)
+                        .map_err(|e| serde::de::Error::custom(format!("cannot deserialize value hash: {e}")))?,
+                ),
+                _ => return Err(serde::de::Error::custom("invalid output commitment proof")),
+            },
+        )
+    }
+}
+
+/// The proof of the output commitment.
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+pub struct HashableNode {
+    #[serde(rename = "type")]
+    pub kind: u8,
+    pub l: Box<OutputCommitmentProof>,
+    pub r: Box<OutputCommitmentProof>,
+}
+
+/// Leaf Hash contains the hash of a leaf in the tree.
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+pub struct LeafHash {
+    #[serde(rename = "type")]
+    pub kind: u8,
+    #[serde(with = "prefix_hex_bytes")]
+    pub hash: [u8; 32],
+}
+
+/// Value Hash contains the hash of the value for which the proof is being computed.
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+pub struct ValueHash {
+    #[serde(rename = "type")]
+    pub kind: u8,
+    #[serde(with = "prefix_hex_bytes")]
+    pub hash: [u8; 32],
 }
