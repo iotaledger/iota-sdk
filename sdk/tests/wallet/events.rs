@@ -3,15 +3,19 @@
 
 use iota_sdk::{
     client::api::PreparedTransactionDataDto,
-    types::block::{
-        address::{Address, Bech32Address, Ed25519Address},
-        input::{Input, UtxoInput},
-        output::{unlock_condition::AddressUnlockCondition, BasicOutput, Output},
-        payload::signed_transaction::{Transaction, TransactionHash, TransactionId},
-        protocol::protocol_parameters,
-        rand::{
-            mana::rand_mana_allotment,
-            output::{rand_basic_output, rand_output_metadata},
+    types::{
+        api::core::{LeafHash, OutputCommitmentProof, OutputIdProof},
+        block::{
+            address::{Address, Bech32Address, Ed25519Address},
+            input::{Input, UtxoInput},
+            output::{unlock_condition::AddressUnlockCondition, BasicOutput, Output},
+            payload::signed_transaction::{Transaction, TransactionHash, TransactionId},
+            protocol::protocol_parameters,
+            rand::{
+                mana::rand_mana_allotment,
+                output::{rand_basic_output, rand_output_metadata},
+            },
+            slot::SlotIndex,
         },
     },
     wallet::{
@@ -48,6 +52,15 @@ fn wallet_events_serde() {
         output_id: TransactionHash::null().into_transaction_id(0).into_output_id(0),
         metadata: rand_output_metadata(),
         output: Output::from(rand_basic_output(1_813_620_509_061_365)),
+        output_id_proof: OutputIdProof {
+            slot: SlotIndex(1),
+            output_index: 0,
+            transaction_commitment: "0x".to_string(),
+            output_commitment_proof: OutputCommitmentProof::LeafHash(LeafHash {
+                kind: 1,
+                hash: [0u8; 32],
+            }),
+        },
         is_spent: false,
         address: Address::Ed25519(Ed25519Address::new([0; Ed25519Address::LENGTH])),
         network_id: 42,
