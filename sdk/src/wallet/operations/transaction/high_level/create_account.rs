@@ -62,7 +62,8 @@ where
         let options = options.into();
         let prepared_transaction = self.prepare_create_account_output(params, options.clone()).await?;
 
-        self.sign_and_submit_transaction(prepared_transaction, options).await
+        self.sign_and_submit_transaction(prepared_transaction, None, options)
+            .await
     }
 
     /// Prepares the transaction for [Wallet::create_account_output()].

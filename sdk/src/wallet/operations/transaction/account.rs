@@ -31,8 +31,11 @@ where
         output_id: &OutputId,
         key_source: Option<impl Into<BlockIssuerKeySource>>,
     ) -> Result<TransactionWithMetadata> {
+        let issuer_id = AccountId::from(output_id);
+
         self.sign_and_submit_transaction(
             self.prepare_implicit_account_transition(output_id, key_source).await?,
+            issuer_id,
             None,
         )
         .await
