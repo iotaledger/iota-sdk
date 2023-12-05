@@ -19,7 +19,7 @@ where
     ) -> Result<BlockId> {
         log::debug!("submit_basic_block");
 
-        // TODO
+        // TODO https://github.com/iotaledger/iota-sdk/issues/1741
         let issuer_id = issuer_id.into().unwrap_or(AccountId::null());
 
         let block = self
