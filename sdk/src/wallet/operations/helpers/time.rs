@@ -28,7 +28,7 @@ pub(crate) fn can_output_be_unlocked_now(
     required_address.map_or_else(|| Ok(false), |required_address| Ok(wallet_address == &required_address))
 }
 
-// Check if an output can be unlocked by one of the wallet address at the current time and at any
+// Check if an output can be unlocked by the wallet address at the current time and at any
 // point in the future
 pub(crate) fn can_output_be_unlocked_forever_from_now_on(
     wallet_address: &Address,
