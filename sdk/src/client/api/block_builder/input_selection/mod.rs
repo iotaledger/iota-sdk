@@ -25,7 +25,7 @@ use crate::{
             AccountOutput, ChainId, FoundryOutput, NativeTokensBuilder, NftOutput, Output, OutputId, OUTPUT_COUNT_RANGE,
         },
         payload::signed_transaction::TransactionCapabilities,
-        protocol::{CommittableAge, ProtocolParameters},
+        protocol::{CommittableAgeRange, ProtocolParameters},
         slot::SlotIndex,
     },
 };
@@ -268,7 +268,7 @@ impl InputSelection {
     pub(crate) fn sort_input_signing_data(
         mut inputs: Vec<InputSigningData>,
         slot_index: SlotIndex,
-        committable_age: CommittableAge,
+        committable_age: CommittableAgeRange,
     ) -> Result<Vec<InputSigningData>, Error> {
         // initially sort by output to make it deterministic
         // TODO: rethink this, we only need it deterministic for tests, for the protocol it doesn't matter, also there

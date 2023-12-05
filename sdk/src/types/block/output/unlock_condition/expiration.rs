@@ -6,7 +6,7 @@ use derive_more::From;
 use crate::types::block::{
     address::Address,
     output::{StorageScore, StorageScoreParameters},
-    protocol::CommittableAge,
+    protocol::CommittableAgeRange,
     slot::SlotIndex,
     Error,
 };
@@ -56,7 +56,7 @@ impl ExpirationUnlockCondition {
 
     /// Checks whether the expiration is expired. If None is returned, then expiration is in the deadzone where it can't
     /// be unlocked.
-    pub fn is_expired(&self, slot_index: impl Into<SlotIndex>, committable_age: CommittableAge) -> Option<bool> {
+    pub fn is_expired(&self, slot_index: impl Into<SlotIndex>, committable_age: CommittableAgeRange) -> Option<bool> {
         let slot_index = slot_index.into();
 
         if self.slot_index() > (slot_index + committable_age.max) {
@@ -74,7 +74,7 @@ impl ExpirationUnlockCondition {
         &'a self,
         address: &'a Address,
         slot_index: impl Into<SlotIndex>,
-        committable_age: CommittableAge,
+        committable_age: CommittableAgeRange,
     ) -> Option<&'a Address> {
         let slot_index = slot_index.into();
 

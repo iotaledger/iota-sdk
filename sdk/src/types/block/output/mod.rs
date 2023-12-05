@@ -54,7 +54,7 @@ pub(crate) use self::{
 };
 use crate::types::block::{
     address::Address,
-    protocol::{CommittableAge, ProtocolParameters, WorkScore, WorkScoreParameters},
+    protocol::{CommittableAgeRange, ProtocolParameters, WorkScore, WorkScoreParameters},
     semantic::SemanticValidationContext,
     slot::SlotIndex,
     Error,
@@ -273,7 +273,7 @@ impl Output {
     pub fn required_address(
         &self,
         slot_index: impl Into<SlotIndex>,
-        committable_age: CommittableAge,
+        committable_age: CommittableAgeRange,
     ) -> Result<Option<Address>, Error> {
         Ok(match self {
             Self::Basic(output) => output

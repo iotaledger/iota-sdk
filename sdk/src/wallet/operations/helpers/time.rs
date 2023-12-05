@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use crate::{
-    types::block::{address::Address, output::Output, protocol::CommittableAge, slot::SlotIndex},
+    types::block::{address::Address, output::Output, protocol::CommittableAgeRange, slot::SlotIndex},
     wallet::types::OutputData,
 };
 
@@ -11,7 +11,7 @@ pub(crate) fn can_output_be_unlocked_now(
     wallet_address: &Address,
     output_data: &OutputData,
     slot_index: impl Into<SlotIndex> + Copy,
-    committable_age: CommittableAge,
+    committable_age: CommittableAgeRange,
 ) -> crate::wallet::Result<bool> {
     if let Some(unlock_conditions) = output_data.output.unlock_conditions() {
         if unlock_conditions.is_timelocked(slot_index, committable_age.min) {
@@ -31,7 +31,7 @@ pub(crate) fn can_output_be_unlocked_forever_from_now_on(
     wallet_address: &Address,
     output: &Output,
     slot_index: impl Into<SlotIndex> + Copy,
-    committable_age: CommittableAge,
+    committable_age: CommittableAgeRange,
 ) -> bool {
     if let Some(unlock_conditions) = output.unlock_conditions() {
         if unlock_conditions.is_timelocked(slot_index, committable_age.min) {

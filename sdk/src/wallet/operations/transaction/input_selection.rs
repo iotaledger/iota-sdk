@@ -13,7 +13,7 @@ use crate::{
     types::block::{
         address::Address,
         output::{Output, OutputId},
-        protocol::CommittableAge,
+        protocol::CommittableAgeRange,
         slot::SlotIndex,
     },
     wallet::{
@@ -206,7 +206,7 @@ fn filter_inputs(
     wallet_data: &WalletData,
     available_outputs: Values<'_, OutputId, OutputData>,
     slot_index: impl Into<SlotIndex> + Copy,
-    committable_age: CommittableAge,
+    committable_age: CommittableAgeRange,
     custom_inputs: Option<&HashSet<OutputId>>,
     mandatory_inputs: Option<&HashSet<OutputId>>,
 ) -> crate::wallet::Result<Vec<InputSigningData>> {

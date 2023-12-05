@@ -208,8 +208,8 @@ impl ProtocolParameters {
     }
 
     /// Returns the [`CommittableAge`].
-    pub fn committable_age(&self) -> CommittableAge {
-        CommittableAge {
+    pub fn committable_age(&self) -> CommittableAgeRange {
+        CommittableAgeRange {
             min: self.min_committable_age(),
             max: self.max_committable_age(),
         }
@@ -218,7 +218,7 @@ impl ProtocolParameters {
 
 /// Defines the age in which a block can be issued.
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Packable, CopyGetters)]
-pub struct CommittableAge {
+pub struct CommittableAgeRange {
     /// Minimum age relative to the accepted tangle time slot index that a slot can be committed.
     pub min: u32,
     /// Maximum age for a slot commitment to be included in a block relative to the slot index of the block issuing
