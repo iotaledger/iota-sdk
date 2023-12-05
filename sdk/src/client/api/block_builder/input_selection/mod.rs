@@ -19,7 +19,7 @@ pub use self::{burn::Burn, error::Error, requirement::Requirement};
 use crate::{
     client::{api::types::RemainderData, secret::types::InputSigningData},
     types::block::{
-        address::{AccountAddress, Address, AnchorAddress, NftAddress},
+        address::{AccountAddress, Address, NftAddress},
         input::INPUT_COUNT_RANGE,
         output::{
             AccountOutput, ChainId, FoundryOutput, NativeTokensBuilder, NftOutput, Output, OutputId, OUTPUT_COUNT_RANGE,
