@@ -46,8 +46,8 @@ where
             .with_inputs(inputs)
             .with_outputs(selected_transaction_data.outputs);
 
-        // Optional add a tagged payload
         if let Some(options) = options.into() {
+            // Optional add a tagged payload
             builder = builder.with_payload(options.tagged_data_payload);
 
             if let Some(context_inputs) = options.context_inputs {
