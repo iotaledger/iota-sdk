@@ -207,7 +207,7 @@ impl ProtocolParameters {
         ProtocolParametersHash::new(Blake2b256::digest(self.pack_to_vec()).into())
     }
 
-    /// Returns the [`CommittableAge`].
+    /// Returns the [`CommittableAgeRange`].
     pub fn committable_age(&self) -> CommittableAgeRange {
         CommittableAgeRange {
             min: self.min_committable_age(),
