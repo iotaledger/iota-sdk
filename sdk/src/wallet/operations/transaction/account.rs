@@ -103,7 +103,7 @@ where
 
         let transaction_options = TransactionOptions {
             context_inputs: Some(vec![
-                CommitmentContextInput::new(*issuance.latest_commitment.previous_commitment_id()).into(),
+                CommitmentContextInput::new(issuance.latest_commitment.id()).into(),
                 BlockIssuanceCreditContextInput::new(account_id).into(),
             ]),
             custom_inputs: Some(vec![*output_id]),
