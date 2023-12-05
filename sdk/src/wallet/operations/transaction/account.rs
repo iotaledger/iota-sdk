@@ -99,6 +99,7 @@ where
             )?])
             .finish_output()?;
 
+        // TODO https://github.com/iotaledger/iota-sdk/issues/1740
         let issuance = self.client().get_issuance().await?;
 
         let transaction_options = TransactionOptions {
