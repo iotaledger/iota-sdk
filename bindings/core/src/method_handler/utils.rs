@@ -70,6 +70,9 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
             let foundry_id = FoundryId::build(&AccountAddress::new(account_id), serial_number, token_scheme_type);
             Response::TokenId(TokenId::from(foundry_id))
         }
+        UtilsMethod::ProtocolParametersHash { protocol_parameters } => {
+            Response::Hash(protocol_parameters.hash().to_string())
+        }
         UtilsMethod::TransactionSigningHash { transaction } => {
             Response::Hash(Transaction::try_from_dto(transaction)?.signing_hash().to_string())
         }

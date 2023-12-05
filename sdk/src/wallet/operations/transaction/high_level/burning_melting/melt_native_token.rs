@@ -37,7 +37,8 @@ where
             .prepare_melt_native_token(token_id, melt_amount, options.clone())
             .await?;
 
-        self.sign_and_submit_transaction(prepared_transaction, options).await
+        self.sign_and_submit_transaction(prepared_transaction, None, options)
+            .await
     }
 
     /// Prepares the transaction for [Wallet::melt_native_token()].

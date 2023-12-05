@@ -44,7 +44,7 @@ where
     pub async fn increase_voting_power(&self, amount: u64) -> Result<TransactionWithMetadata> {
         let prepared = self.prepare_increase_voting_power(amount).await?;
 
-        self.sign_and_submit_transaction(prepared, None).await
+        self.sign_and_submit_transaction(prepared, None, None).await
     }
 
     /// Prepares the transaction for [Wallet::increase_voting_power()].
@@ -92,7 +92,7 @@ where
     pub async fn decrease_voting_power(&self, amount: u64) -> Result<TransactionWithMetadata> {
         let prepared = self.prepare_decrease_voting_power(amount).await?;
 
-        self.sign_and_submit_transaction(prepared, None).await
+        self.sign_and_submit_transaction(prepared, None, None).await
     }
 
     /// Prepares the transaction for [Wallet::decrease_voting_power()].
