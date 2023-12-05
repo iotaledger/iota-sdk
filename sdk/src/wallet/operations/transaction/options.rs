@@ -6,7 +6,10 @@ use serde::{Deserialize, Serialize};
 use crate::{
     client::api::input_selection::Burn,
     types::block::{
-        address::Address, context_input::ContextInput, output::OutputId, payload::tagged_data::TaggedDataPayload,
+        address::Address,
+        context_input::ContextInput,
+        output::OutputId,
+        payload::{signed_transaction::TransactionCapabilities, tagged_data::TaggedDataPayload},
     },
 };
 
@@ -30,6 +33,8 @@ pub struct TransactionOptions {
     pub note: Option<String>,
     #[serde(default)]
     pub allow_micro_amount: bool,
+    #[serde(default)]
+    pub capabilities: Option<TransactionCapabilities>,
 }
 
 #[allow(clippy::enum_variant_names)]
