@@ -13,6 +13,7 @@ use crate::{
     types::block::{
         address::Address,
         output::{Output, OutputId},
+        protocol::CommittableAge,
         slot::SlotIndex,
     },
     wallet::{
@@ -70,8 +71,7 @@ where
             &wallet_data,
             wallet_data.unspent_outputs.values(),
             slot_index,
-            protocol_parameters.min_committable_age(),
-            protocol_parameters.max_committable_age(),
+            protocol_parameters.committable_age(),
             custom_inputs.as_ref(),
             mandatory_inputs.as_ref(),
         )?;
@@ -206,8 +206,7 @@ fn filter_inputs(
     wallet_data: &WalletData,
     available_outputs: Values<'_, OutputId, OutputData>,
     slot_index: impl Into<SlotIndex> + Copy,
-    min_committable_age: impl Into<SlotIndex> + Copy,
-    max_committable_age: impl Into<SlotIndex> + Copy,
+    committable_age: CommittableAge,
     custom_inputs: Option<&HashSet<OutputId>>,
     mandatory_inputs: Option<&HashSet<OutputId>>,
 ) -> crate::wallet::Result<Vec<InputSigningData>> {
@@ -227,8 +226,7 @@ fn filter_inputs(
                 &wallet_data.address.inner,
                 &output_data.output,
                 slot_index,
-                min_committable_age,
-                max_committable_age,
+                committable_age,
             );
 
             // Outputs that could get unlocked in the future will not be included
@@ -237,9 +235,7 @@ fn filter_inputs(
             }
         }
 
-        if let Some(available_input) =
-            output_data.input_signing_data(wallet_data, slot_index, min_committable_age, max_committable_age)?
-        {
+        if let Some(available_input) = output_data.input_signing_data(wallet_data, slot_index, committable_age)? {
             available_outputs_signing_data.push(available_input);
         }
     }

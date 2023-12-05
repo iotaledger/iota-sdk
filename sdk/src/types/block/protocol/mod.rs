@@ -206,6 +206,24 @@ impl ProtocolParameters {
     pub fn hash(&self) -> ProtocolParametersHash {
         ProtocolParametersHash::new(Blake2b256::digest(self.pack_to_vec()).into())
     }
+
+    /// Returns the [`CommittableAge`].
+    pub fn committable_age(&self) -> CommittableAge {
+        CommittableAge {
+            min: self.min_committable_age(),
+            max: self.max_committable_age(),
+        }
+    }
+}
+
+/// Defines the age in which a block can be issued.
+#[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Packable, CopyGetters)]
+pub struct CommittableAge {
+    /// Minimum age relative to the accepted tangle time slot index that a slot can be committed.
+    pub min: u32,
+    /// Maximum age for a slot commitment to be included in a block relative to the slot index of the block issuing
+    /// time.
+    pub max: u32,
 }
 
 /// Defines the parameters used to calculate the Reference Mana Cost (RMC).

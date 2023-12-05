@@ -302,11 +302,8 @@ impl<'a> SemanticValidationContext<'a> {
 
             if let Some(expiration) = unlock_conditions.expiration() {
                 if let Some(commitment_slot_index) = commitment_slot_index {
-                    if expiration.is_expired(
-                        commitment_slot_index,
-                        self.protocol_parameters.min_committable_age(),
-                        self.protocol_parameters.max_committable_age(),
-                    ) == Some(false)
+                    if expiration.is_expired(commitment_slot_index, self.protocol_parameters.committable_age())
+                        == Some(false)
                     {
                         if let Some(storage_deposit_return) = unlock_conditions.storage_deposit_return() {
                             let amount = self

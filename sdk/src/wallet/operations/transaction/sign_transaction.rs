@@ -74,14 +74,12 @@ where
             }
         }
 
+        let protocol_parameters = self.client().get_protocol_parameters().await?;
         let unlocks = match self
             .secret_manager
             .read()
             .await
-            .transaction_unlocks(
-                prepared_transaction_data,
-                &self.client().get_protocol_parameters().await?,
-            )
+            .transaction_unlocks(prepared_transaction_data, &protocol_parameters)
             .await
         {
             Ok(res) => res,

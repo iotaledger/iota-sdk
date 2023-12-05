@@ -433,8 +433,7 @@ impl NftOutput {
                 self.address(),
                 // Safe to unwrap, we return an error before if its required but None
                 slot_index.unwrap_or(SlotIndex(0)),
-                context.protocol_parameters.min_committable_age(),
-                context.protocol_parameters.max_committable_age(),
+                context.protocol_parameters.committable_age(),
             )
             // because of expiration the input can't be unlocked at this time
             .ok_or(TransactionFailureReason::SemanticValidationFailed)?

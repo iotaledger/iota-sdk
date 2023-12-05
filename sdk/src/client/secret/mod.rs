@@ -565,11 +565,7 @@ where
         // Get the address that is required to unlock the input
         let required_address = input
             .output
-            .required_address(
-                slot_index,
-                protocol_parameters.min_committable_age(),
-                protocol_parameters.max_committable_age(),
-            )?
+            .required_address(slot_index, protocol_parameters.committable_age())?
             .ok_or(crate::client::Error::ExpirationDeadzone)?;
 
         // Check if we already added an [Unlock] for this address

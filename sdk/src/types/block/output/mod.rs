@@ -54,7 +54,7 @@ pub(crate) use self::{
 };
 use crate::types::block::{
     address::Address,
-    protocol::{ProtocolParameters, WorkScore, WorkScoreParameters},
+    protocol::{CommittableAge, ProtocolParameters, WorkScore, WorkScoreParameters},
     semantic::SemanticValidationContext,
     slot::SlotIndex,
     Error,
@@ -273,20 +273,19 @@ impl Output {
     pub fn required_address(
         &self,
         slot_index: impl Into<SlotIndex>,
-        min_committable_age: impl Into<SlotIndex>,
-        max_committable_age: impl Into<SlotIndex>,
+        committable_age: CommittableAge,
     ) -> Result<Option<Address>, Error> {
         Ok(match self {
             Self::Basic(output) => output
                 .unlock_conditions()
-                .locked_address(output.address(), slot_index, min_committable_age, max_committable_age)
+                .locked_address(output.address(), slot_index, committable_age)
                 .cloned(),
             Self::Account(output) => Some(output.address().clone()),
             Self::Anchor(_) => return Err(Error::UnsupportedOutputKind(AnchorOutput::KIND)),
             Self::Foundry(output) => Some(Address::Account(*output.account_address())),
             Self::Nft(output) => output
                 .unlock_conditions()
-                .locked_address(output.address(), slot_index, min_committable_age, max_committable_age)
+                .locked_address(output.address(), slot_index, committable_age)
                 .cloned(),
             Self::Delegation(output) => Some(output.address().clone()),
         })

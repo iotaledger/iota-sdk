@@ -164,8 +164,7 @@ where
                                 wallet_data.address.inner(),
                                 output,
                                 slot_index,
-                                protocol_parameters.min_committable_age(),
-                                protocol_parameters.max_committable_age(),
+                                protocol_parameters.committable_age(),
                             );
 
                             if output_can_be_unlocked_now_and_in_future {

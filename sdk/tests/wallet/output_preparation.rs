@@ -7,6 +7,7 @@ use iota_sdk::{
     types::block::{
         address::{Address, Bech32Address, ToBech32Ext},
         output::{BasicOutput, MinimumOutputAmount, NativeToken, NftId, TokenId},
+        protocol::CommittableAge,
         slot::SlotIndex,
     },
     wallet::{Assets, Features, MintNftParams, OutputParams, Result, ReturnStrategy, StorageDeposit, Unlocks},
@@ -353,7 +354,7 @@ async fn output_preparation() -> Result<()> {
     // Unlocks
     let conditions = output.unlock_conditions().unwrap();
     assert!(conditions.is_timelocked(0, 0));
-    assert_eq!(conditions.is_expired(2, 0, 0), Some(false));
+    assert_eq!(conditions.is_expired(2, CommittableAge { min: 0, max: 0 }), Some(false));
 
     // nft with expiration
     let output = wallet

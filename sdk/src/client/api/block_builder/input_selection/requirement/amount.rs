@@ -350,8 +350,7 @@ impl InputSelection {
                     .locked_address(
                         output.address(),
                         self.slot_index,
-                        self.protocol_parameters.min_committable_age(),
-                        self.protocol_parameters.max_committable_age(),
+                        self.protocol_parameters.committable_age(),
                     )
                     .expect("expiration unlockable outputs already filtered out")
                     .is_ed25519()
@@ -371,8 +370,7 @@ impl InputSelection {
                     .locked_address(
                         output.address(),
                         self.slot_index,
-                        self.protocol_parameters.min_committable_age(),
-                        self.protocol_parameters.max_committable_age(),
+                        self.protocol_parameters.committable_age(),
                     )
                     .expect("expiration unlockable outputs already filtered out")
                     .is_ed25519()

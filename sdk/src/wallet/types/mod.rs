@@ -24,7 +24,7 @@ use crate::{
             address::Address,
             output::{Output, OutputId, OutputMetadata},
             payload::signed_transaction::{dto::SignedTransactionPayloadDto, SignedTransactionPayload, TransactionId},
-            protocol::ProtocolParameters,
+            protocol::{CommittableAge, ProtocolParameters},
             slot::SlotIndex,
             BlockId, Error as BlockError,
         },
@@ -60,12 +60,11 @@ impl OutputData {
         &self,
         wallet_data: &WalletData,
         slot_index: impl Into<SlotIndex>,
-        min_committable_age: impl Into<SlotIndex>,
-        max_committable_age: impl Into<SlotIndex>,
+        committable_age: CommittableAge,
     ) -> crate::wallet::Result<Option<InputSigningData>> {
         let required_address = self
             .output
-            .required_address(slot_index, min_committable_age, max_committable_age)?
+            .required_address(slot_index, committable_age)?
             .ok_or(crate::client::Error::ExpirationDeadzone)?;
 
         let chain = if required_address == self.address {

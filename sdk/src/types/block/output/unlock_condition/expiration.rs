@@ -6,6 +6,7 @@ use derive_more::From;
 use crate::types::block::{
     address::Address,
     output::{StorageScore, StorageScoreParameters},
+    protocol::CommittableAge,
     slot::SlotIndex,
     Error,
 };
@@ -55,17 +56,12 @@ impl ExpirationUnlockCondition {
 
     /// Checks whether the expiration is expired. If None is returned, then expiration is in the deadzone where it can't
     /// be unlocked.
-    pub fn is_expired(
-        &self,
-        slot_index: impl Into<SlotIndex>,
-        min_committable_age: impl Into<SlotIndex>,
-        max_committable_age: impl Into<SlotIndex>,
-    ) -> Option<bool> {
+    pub fn is_expired(&self, slot_index: impl Into<SlotIndex>, committable_age: CommittableAge) -> Option<bool> {
         let slot_index = slot_index.into();
 
-        if self.slot_index() > (slot_index + max_committable_age.into()) {
+        if self.slot_index() > (slot_index + committable_age.max) {
             Some(false)
-        } else if self.slot_index() <= (slot_index + min_committable_age.into()) {
+        } else if self.slot_index() <= (slot_index + committable_age.min) {
             Some(true)
         } else {
             None
@@ -78,14 +74,13 @@ impl ExpirationUnlockCondition {
         &'a self,
         address: &'a Address,
         slot_index: impl Into<SlotIndex>,
-        min_committable_age: impl Into<SlotIndex>,
-        max_committable_age: impl Into<SlotIndex>,
+        committable_age: CommittableAge,
     ) -> Option<&'a Address> {
         let slot_index = slot_index.into();
 
-        if self.slot_index() > (slot_index + max_committable_age.into()) {
+        if self.slot_index() > (slot_index + committable_age.max) {
             Some(address)
-        } else if self.slot_index() <= (slot_index + min_committable_age.into()) {
+        } else if self.slot_index() <= (slot_index + committable_age.min) {
             Some(&self.return_address)
         } else {
             None

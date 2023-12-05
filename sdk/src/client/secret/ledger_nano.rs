@@ -535,11 +535,9 @@ fn merge_unlocks(
     // Assuming inputs_data is ordered by address type
     for (current_block_index, input) in prepared_transaction_data.inputs_data.iter().enumerate() {
         // Get the address that is required to unlock the input
-        let required_address = input.output.required_address(
-            slot_index,
-            protocol_parameters.min_committable_age(),
-            protocol_parameters.max_committable_age(),
-        )?;
+        let required_address = input
+            .output
+            .required_address(slot_index, protocol_parameters.committable_age())?;
 
         let required_address = match required_address {
             Some(address) => address,
