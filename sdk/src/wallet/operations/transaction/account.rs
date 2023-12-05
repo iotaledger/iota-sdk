@@ -8,6 +8,7 @@ use crate::{
     client::{api::PreparedTransactionData, secret::SecretManage},
     types::block::{
         address::Address,
+        context_input::{BlockIssuanceCreditContextInput, CommitmentContextInput},
         output::{
             feature::{BlockIssuerFeature, BlockIssuerKey, BlockIssuerKeys, Ed25519BlockIssuerKey},
             unlock_condition::AddressUnlockCondition,
@@ -29,7 +30,7 @@ where
     pub async fn implicit_account_transition(
         &self,
         output_id: &OutputId,
-        key_source: Option<impl Into<BlockIssuerKeySource>>,
+        key_source: Option<impl Into<BlockIssuerKeySource> + Send>,
     ) -> Result<TransactionWithMetadata> {
         let issuer_id = AccountId::from(output_id);
 
@@ -45,7 +46,7 @@ where
     pub async fn prepare_implicit_account_transition(
         &self,
         output_id: &OutputId,
-        key_source: Option<impl Into<BlockIssuerKeySource>>,
+        key_source: Option<impl Into<BlockIssuerKeySource> + Send>,
     ) -> Result<PreparedTransactionData>
     where
         crate::wallet::Error: From<S::Error>,
@@ -83,7 +84,8 @@ where
             }
         };
 
-        let account = AccountOutput::build_with_amount(implicit_account.amount(), AccountId::from(output_id))
+        let account_id = AccountId::from(output_id);
+        let account = AccountOutput::build_with_amount(implicit_account.amount(), account_id)
             .with_mana(implicit_account.mana())
             .with_unlock_conditions([AddressUnlockCondition::from(Address::from(
                 *implicit_account
@@ -97,7 +99,14 @@ where
             )?])
             .finish_output()?;
 
+        // TODO https://github.com/iotaledger/iota-sdk/issues/1740
+        let issuance = self.client().get_issuance().await?;
+
         let transaction_options = TransactionOptions {
+            context_inputs: Some(vec![
+                CommitmentContextInput::new(issuance.latest_commitment.id()).into(),
+                BlockIssuanceCreditContextInput::new(account_id).into(),
+            ]),
             custom_inputs: Some(vec![*output_id]),
             ..Default::default()
         };
