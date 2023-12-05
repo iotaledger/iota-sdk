@@ -239,10 +239,10 @@ impl InputSelection {
                 // PANIC: safe to unwrap as non basic/account/foundry/nft outputs are already filtered out.
                 .unwrap();
 
-            let required_address = match required_address {
+            let required_address = match &required_address {
                 Some(address) => {
-                    if let Address::Restricted(restricted) = &address {
-                        *restricted.address()
+                    if let Address::Restricted(restricted) = address {
+                        restricted.address()
                     } else {
                         address
                     }
