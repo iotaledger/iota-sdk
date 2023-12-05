@@ -63,15 +63,16 @@ impl InputSelection {
             .output
             .required_and_unlocked_address(self.slot_index, input.output_id())?
             .0;
+        let required_address = if let Address::Restricted(restricted) = &required_address {
+            restricted.address()
+        } else {
+            &required_address
+        };
 
         match required_address {
-            Address::Ed25519(_) => Ok(None),
             Address::Account(account_address) => Ok(Some(Requirement::Account(*account_address.account_id()))),
             Address::Nft(nft_address) => Ok(Some(Requirement::Nft(*nft_address.nft_id()))),
-            Address::Anchor(_) => Err(Error::UnsupportedAddressType(AnchorAddress::KIND)),
-            Address::ImplicitAccountCreation(_) => Ok(None),
-            Address::Restricted(_) => Ok(None),
-            _ => todo!("What do we do here?"),
+            _ => Ok(None),
         }
     }
 
@@ -236,12 +237,17 @@ impl InputSelection {
                 // PANIC: safe to unwrap as non basic/account/foundry/nft outputs are already filtered out.
                 .unwrap()
                 .0;
+            let required_address = if let Address::Restricted(restricted) = &required_address {
+                restricted.address()
+            } else {
+                &required_address
+            };
 
             match required_address {
+                Address::Anchor(_) => false,
                 Address::ImplicitAccountCreation(implicit_account_creation) => self
                     .addresses
                     .contains(&Address::from(*implicit_account_creation.ed25519_address())),
-                Address::Restricted(restricted) => self.addresses.contains(restricted.address()),
                 _ => self.addresses.contains(&required_address),
             }
         })
