@@ -1,6 +1,8 @@
 // Copyright 2020-2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use core::str::FromStr;
+
 use iota_sdk::types::block::{
     address::{Address, AliasAddress, Ed25519Address},
     input::{Input, TreasuryInput, UtxoInput},
@@ -43,8 +45,7 @@ fn build_valid() {
     let transaction_id = TransactionId::new(prefix_hex::decode(TRANSACTION_ID).unwrap());
     let input1 = Input::Utxo(UtxoInput::new(transaction_id, 0).unwrap());
     let input2 = Input::Utxo(UtxoInput::new(transaction_id, 1).unwrap());
-    let bytes: [u8; 32] = prefix_hex::decode(ED25519_ADDRESS_1).unwrap();
-    let address = Address::from(Ed25519Address::new(bytes));
+    let address = Address::from(Ed25519Address::from_str(ED25519_ADDRESS_1).unwrap());
     let amount = 1_000_000;
     let output = Output::Basic(
         BasicOutput::build_with_amount(amount)
@@ -67,8 +68,7 @@ fn build_valid_with_payload() {
     let transaction_id = TransactionId::new(prefix_hex::decode(TRANSACTION_ID).unwrap());
     let input1 = Input::Utxo(UtxoInput::new(transaction_id, 0).unwrap());
     let input2 = Input::Utxo(UtxoInput::new(transaction_id, 1).unwrap());
-    let bytes: [u8; 32] = prefix_hex::decode(ED25519_ADDRESS_1).unwrap();
-    let address = Address::from(Ed25519Address::new(bytes));
+    let address = Address::from(Ed25519Address::from_str(ED25519_ADDRESS_1).unwrap());
     let amount = 1_000_000;
     let output = Output::Basic(
         BasicOutput::build_with_amount(amount)
@@ -92,8 +92,7 @@ fn build_valid_add_inputs_outputs() {
     let transaction_id = TransactionId::new(prefix_hex::decode(TRANSACTION_ID).unwrap());
     let input1 = Input::Utxo(UtxoInput::new(transaction_id, 0).unwrap());
     let input2 = Input::Utxo(UtxoInput::new(transaction_id, 1).unwrap());
-    let bytes: [u8; 32] = prefix_hex::decode(ED25519_ADDRESS_1).unwrap();
-    let address = Address::from(Ed25519Address::new(bytes));
+    let address = Address::from(Ed25519Address::from_str(ED25519_ADDRESS_1).unwrap());
     let amount = 1_000_000;
     let output = Output::Basic(
         BasicOutput::build_with_amount(amount)
@@ -116,8 +115,7 @@ fn build_invalid_payload_kind() {
     let transaction_id = TransactionId::new(prefix_hex::decode(TRANSACTION_ID).unwrap());
     let input1 = Input::Utxo(UtxoInput::new(transaction_id, 0).unwrap());
     let input2 = Input::Utxo(UtxoInput::new(transaction_id, 1).unwrap());
-    let bytes: [u8; 32] = prefix_hex::decode(ED25519_ADDRESS_1).unwrap();
-    let address = Address::from(Ed25519Address::new(bytes));
+    let address = Address::from(Ed25519Address::from_str(ED25519_ADDRESS_1).unwrap());
     let amount = 1_000_000;
     let output = Output::Basic(
         BasicOutput::build_with_amount(amount)
@@ -138,8 +136,7 @@ fn build_invalid_payload_kind() {
 #[test]
 fn build_invalid_input_count_low() {
     let protocol_parameters = protocol_parameters();
-    let bytes: [u8; 32] = prefix_hex::decode(ED25519_ADDRESS_1).unwrap();
-    let address = Address::from(Ed25519Address::new(bytes));
+    let address = Address::from(Ed25519Address::from_str(ED25519_ADDRESS_1).unwrap());
     let amount = 1_000_000;
     let output = Output::Basic(
         BasicOutput::build_with_amount(amount)
@@ -163,8 +160,7 @@ fn build_invalid_input_count_high() {
     let protocol_parameters = protocol_parameters();
     let transaction_id = TransactionId::new(prefix_hex::decode(TRANSACTION_ID).unwrap());
     let input = Input::Utxo(UtxoInput::new(transaction_id, 0).unwrap());
-    let bytes: [u8; 32] = prefix_hex::decode(ED25519_ADDRESS_1).unwrap();
-    let address = Address::from(Ed25519Address::new(bytes));
+    let address = Address::from(Ed25519Address::from_str(ED25519_ADDRESS_1).unwrap());
     let amount = 1_000_000;
     let output = Output::Basic(
         BasicOutput::build_with_amount(amount)
@@ -205,8 +201,7 @@ fn build_invalid_output_count_high() {
     let protocol_parameters = protocol_parameters();
     let transaction_id = TransactionId::new(prefix_hex::decode(TRANSACTION_ID).unwrap());
     let input = Input::Utxo(UtxoInput::new(transaction_id, 0).unwrap());
-    let bytes: [u8; 32] = prefix_hex::decode(ED25519_ADDRESS_1).unwrap();
-    let address = Address::from(Ed25519Address::new(bytes));
+    let address = Address::from(Ed25519Address::from_str(ED25519_ADDRESS_1).unwrap());
     let amount = 1_000_000;
     let output = Output::Basic(
         BasicOutput::build_with_amount(amount)
@@ -231,8 +226,7 @@ fn build_invalid_duplicate_utxo() {
     let protocol_parameters = protocol_parameters();
     let transaction_id = TransactionId::new(prefix_hex::decode(TRANSACTION_ID).unwrap());
     let input = Input::Utxo(UtxoInput::new(transaction_id, 0).unwrap());
-    let bytes: [u8; 32] = prefix_hex::decode(ED25519_ADDRESS_1).unwrap();
-    let address = Address::from(Ed25519Address::new(bytes));
+    let address = Address::from(Ed25519Address::from_str(ED25519_ADDRESS_1).unwrap());
     let amount = 1_000_000;
     let output = Output::Basic(
         BasicOutput::build_with_amount(amount)
@@ -253,8 +247,7 @@ fn build_invalid_duplicate_utxo() {
 fn build_invalid_input_kind() {
     let protocol_parameters = protocol_parameters();
     let input = Input::Treasury(TreasuryInput::new(MilestoneId::new(rand_bytes_array())));
-    let bytes: [u8; 32] = prefix_hex::decode(ED25519_ADDRESS_1).unwrap();
-    let address = Address::from(Ed25519Address::new(bytes));
+    let address = Address::from(Ed25519Address::from_str(ED25519_ADDRESS_1).unwrap());
     let amount = 1_000_000;
     let output = Output::Basic(
         BasicOutput::build_with_amount(amount)
@@ -327,8 +320,7 @@ fn getters() {
     let transaction_id = TransactionId::new(prefix_hex::decode(TRANSACTION_ID).unwrap());
     let input1 = Input::Utxo(UtxoInput::new(transaction_id, 0).unwrap());
     let input2 = Input::Utxo(UtxoInput::new(transaction_id, 1).unwrap());
-    let bytes: [u8; 32] = prefix_hex::decode(ED25519_ADDRESS_1).unwrap();
-    let address = Address::from(Ed25519Address::new(bytes));
+    let address = Address::from(Ed25519Address::from_str(ED25519_ADDRESS_1).unwrap());
     let amount = 1_000_000;
     let outputs = [Output::Basic(
         BasicOutput::build_with_amount(amount)
@@ -355,14 +347,13 @@ fn duplicate_output_nft() {
     let transaction_id = TransactionId::new(prefix_hex::decode(TRANSACTION_ID).unwrap());
     let input1 = Input::Utxo(UtxoInput::new(transaction_id, 0).unwrap());
     let input2 = Input::Utxo(UtxoInput::new(transaction_id, 1).unwrap());
-    let bytes: [u8; 32] = prefix_hex::decode(ED25519_ADDRESS_1).unwrap();
-    let address = Address::from(Ed25519Address::new(bytes));
+    let address = Address::from(Ed25519Address::from_str(ED25519_ADDRESS_1).unwrap());
     let amount = 1_000_000;
     let basic = BasicOutput::build_with_amount(amount)
         .add_unlock_condition(AddressUnlockCondition::new(address))
         .finish_output(protocol_parameters.token_supply())
         .unwrap();
-    let nft_id = NftId::from(bytes);
+    let nft_id = NftId::from_str(ED25519_ADDRESS_1).unwrap();
     let nft = NftOutput::build_with_amount(1_000_000, nft_id)
         .add_unlock_condition(AddressUnlockCondition::new(address))
         .finish_output(protocol_parameters.token_supply())
@@ -385,8 +376,7 @@ fn duplicate_output_nft_null() {
     let transaction_id = TransactionId::new(prefix_hex::decode(TRANSACTION_ID).unwrap());
     let input1 = Input::Utxo(UtxoInput::new(transaction_id, 0).unwrap());
     let input2 = Input::Utxo(UtxoInput::new(transaction_id, 1).unwrap());
-    let bytes: [u8; 32] = prefix_hex::decode(ED25519_ADDRESS_1).unwrap();
-    let address = Address::from(Ed25519Address::new(bytes));
+    let address = Address::from(Ed25519Address::from_str(ED25519_ADDRESS_1).unwrap());
     let amount = 1_000_000;
     let basic = BasicOutput::build_with_amount(amount)
         .add_unlock_condition(AddressUnlockCondition::new(address))
@@ -412,14 +402,13 @@ fn duplicate_output_alias() {
     let transaction_id = TransactionId::new(prefix_hex::decode(TRANSACTION_ID).unwrap());
     let input1 = Input::Utxo(UtxoInput::new(transaction_id, 0).unwrap());
     let input2 = Input::Utxo(UtxoInput::new(transaction_id, 1).unwrap());
-    let bytes: [u8; 32] = prefix_hex::decode(ED25519_ADDRESS_1).unwrap();
-    let address = Address::from(Ed25519Address::new(bytes));
+    let address = Address::from(Ed25519Address::from_str(ED25519_ADDRESS_1).unwrap());
     let amount = 1_000_000;
     let basic = BasicOutput::build_with_amount(amount)
         .add_unlock_condition(AddressUnlockCondition::new(address))
         .finish_output(protocol_parameters.token_supply())
         .unwrap();
-    let alias_id = AliasId::from(bytes);
+    let alias_id = AliasId::from_str(ED25519_ADDRESS_1).unwrap();
     let alias = AliasOutput::build_with_amount(1_000_000, alias_id)
         .add_unlock_condition(StateControllerAddressUnlockCondition::new(address))
         .add_unlock_condition(GovernorAddressUnlockCondition::new(address))
@@ -443,14 +432,13 @@ fn duplicate_output_foundry() {
     let transaction_id = TransactionId::new(prefix_hex::decode(TRANSACTION_ID).unwrap());
     let input1 = Input::Utxo(UtxoInput::new(transaction_id, 0).unwrap());
     let input2 = Input::Utxo(UtxoInput::new(transaction_id, 1).unwrap());
-    let bytes: [u8; 32] = prefix_hex::decode(ED25519_ADDRESS_1).unwrap();
-    let address = Address::from(Ed25519Address::new(bytes));
+    let address = Address::from(Ed25519Address::from_str(ED25519_ADDRESS_1).unwrap());
     let amount = 1_000_000;
     let basic = BasicOutput::build_with_amount(amount)
         .add_unlock_condition(AddressUnlockCondition::new(address))
         .finish_output(protocol_parameters.token_supply())
         .unwrap();
-    let alias_id = AliasId::from(bytes);
+    let alias_id = AliasId::from_str(ED25519_ADDRESS_1).unwrap();
     let token_scheme = TokenScheme::Simple(SimpleTokenScheme::new(70, 0, 100).unwrap());
     let foundry_id = FoundryId::build(&AliasAddress::from(alias_id), 1, token_scheme.kind());
     let token_id = TokenId::from(foundry_id);
@@ -468,5 +456,63 @@ fn duplicate_output_foundry() {
     assert!(matches!(
         essence,
         Err(Error::DuplicateOutputChain(ChainId::Foundry(foundry_id_0))) if foundry_id_0 == foundry_id
+    ));
+}
+
+#[test]
+fn more_than_64_same_native_tokens() {
+    let protocol_parameters = protocol_parameters();
+    let transaction_id = TransactionId::new(prefix_hex::decode(TRANSACTION_ID).unwrap());
+    let input = Input::Utxo(UtxoInput::new(transaction_id, 0).unwrap());
+    let address = Address::from(Ed25519Address::from_str(ED25519_ADDRESS_1).unwrap());
+    let amount = 1_000_000;
+    let alias_id = AliasId::from_str(ED25519_ADDRESS_1).unwrap();
+    let token_scheme = TokenScheme::Simple(SimpleTokenScheme::new(70, 0, 100).unwrap());
+    let foundry_id = FoundryId::build(&AliasAddress::from(alias_id), 1, token_scheme.kind());
+    let token_id = TokenId::from(foundry_id);
+    let basic = BasicOutput::build_with_amount(amount)
+        .add_native_token(NativeToken::new(token_id, 70).unwrap())
+        .add_unlock_condition(AddressUnlockCondition::new(address))
+        .finish_output(protocol_parameters.token_supply())
+        .unwrap();
+
+    let essence = RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
+        .with_inputs([input])
+        .with_outputs(vec![basic; 100])
+        .finish_with_params(&protocol_parameters);
+
+    assert!(essence.is_ok());
+}
+
+#[test]
+fn more_than_64_distinctive_native_tokens() {
+    let protocol_parameters = protocol_parameters();
+    let transaction_id = TransactionId::new(prefix_hex::decode(TRANSACTION_ID).unwrap());
+    let input = Input::Utxo(UtxoInput::new(transaction_id, 0).unwrap());
+    let address = Address::from(Ed25519Address::from_str(ED25519_ADDRESS_1).unwrap());
+    let amount = 1_000_000;
+
+    let mut outputs = Vec::new();
+    for _ in 0..65 {
+        let alias_id = AliasId::from(rand_bytes_array());
+        let token_scheme = TokenScheme::Simple(SimpleTokenScheme::new(70, 0, 100).unwrap());
+        let foundry_id = FoundryId::build(&AliasAddress::from(alias_id), 1, token_scheme.kind());
+        let token_id = TokenId::from(foundry_id);
+        let basic = BasicOutput::build_with_amount(amount)
+            .add_native_token(NativeToken::new(token_id, 70).unwrap())
+            .add_unlock_condition(AddressUnlockCondition::new(address))
+            .finish_output(protocol_parameters.token_supply())
+            .unwrap();
+        outputs.push(basic);
+    }
+
+    let essence = RegularTransactionEssence::builder(protocol_parameters.network_id(), rand_inputs_commitment())
+        .with_inputs([input])
+        .with_outputs(outputs)
+        .finish_with_params(&protocol_parameters);
+
+    assert!(matches!(
+        essence,
+        Err(Error::InvalidTransactionNativeTokensCount(count)) if count == 65
     ));
 }
