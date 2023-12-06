@@ -302,12 +302,17 @@ impl UnlockConditions {
     pub fn locked_address<'a>(
         &'a self,
         address: &'a Address,
-        slot_index: impl Into<SlotIndex>,
+        slot_index: impl Into<Option<SlotIndex>>,
         committable_age_range: CommittableAgeRange,
-    ) -> Option<&'a Address> {
-        self.expiration().map_or(Some(address), |expiration| {
+    ) -> Result<Option<&'a Address>, Error> {
+        let address = if let Some(expiration) = self.expiration() {
+            let slot_index = slot_index.into().ok_or(Error::MissingSlotIndex)?;
             expiration.return_address_expired(address, slot_index, committable_age_range)
-        })
+        } else {
+            Some(address)
+        };
+
+        Ok(address)
     }
 }
 

@@ -177,6 +177,7 @@ impl InputSelection {
             remainder_address: None,
             protocol_parameters,
             // TODO may want to make this mandatory at some point
+            // Should be set from a commitment context input
             slot_index: SlotIndex::from(0),
             requirements: Vec::new(),
             automatically_transitioned: HashSet::new(),

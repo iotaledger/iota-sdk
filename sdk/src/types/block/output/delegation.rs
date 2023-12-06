@@ -326,10 +326,11 @@ impl DelegationOutput {
         self.unlock_conditions()
             .locked_address(
                 self.address(),
-                context.transaction.creation_slot(),
+                None,
                 context.protocol_parameters.committable_age_range(),
             )
             // Safe to unwrap, DelegationOutput can't have an expiration unlock condition.
+            .unwrap()
             .unwrap()
             .unlock(unlock, context)
     }

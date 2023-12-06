@@ -352,6 +352,7 @@ impl InputSelection {
                         self.slot_index,
                         self.protocol_parameters.committable_age_range(),
                     )
+                    .expect("slot index was provided")
                     .expect("expiration unlockable outputs already filtered out")
                     .is_ed25519()
             } else {
@@ -372,6 +373,7 @@ impl InputSelection {
                         self.slot_index,
                         self.protocol_parameters.committable_age_range(),
                     )
+                    .expect("slot index was provided")
                     .expect("expiration unlockable outputs already filtered out")
                     .is_ed25519()
             } else {

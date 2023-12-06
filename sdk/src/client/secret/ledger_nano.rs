@@ -525,8 +525,7 @@ fn merge_unlocks(
         .transaction
         .context_inputs()
         .iter()
-        .find_map(|c| c.as_commitment_opt().map(|c| c.slot_index()))
-        .unwrap_or_else(|| prepared_transaction_data.transaction.creation_slot());
+        .find_map(|c| c.as_commitment_opt().map(|c| c.slot_index()));
     let transaction_signing_hash = prepared_transaction_data.transaction.signing_hash();
 
     let mut merged_unlocks = Vec::new();

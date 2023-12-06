@@ -24,7 +24,6 @@ use crate::types::block::{
     payload::signed_transaction::TransactionCapabilityFlag,
     protocol::{ProtocolParameters, WorkScore, WorkScoreParameters},
     semantic::{SemanticValidationContext, TransactionFailureReason},
-    slot::SlotIndex,
     unlock::Unlock,
     Error,
 };
@@ -421,20 +420,13 @@ impl NftOutput {
             .iter()
             .find_map(|c| c.as_commitment_opt().map(|c| c.slot_index()));
 
-        if slot_index.is_none()
-            && (self.unlock_conditions().timelock().is_some() || self.unlock_conditions().expiration().is_some())
-        {
-            // Missing CommitmentContextInput
-            return Err(TransactionFailureReason::InvalidCommitmentContextInput);
-        }
-
         self.unlock_conditions()
             .locked_address(
                 self.address(),
-                // Safe to unwrap, we return an error before if its required but None
-                slot_index.unwrap_or(SlotIndex(0)),
+                slot_index,
                 context.protocol_parameters.committable_age_range(),
             )
+            .map_err(|_| TransactionFailureReason::InvalidCommitmentContextInput)?
             // because of expiration the input can't be unlocked at this time
             .ok_or(TransactionFailureReason::SemanticValidationFailed)?
             .unlock(unlock, context)?;
