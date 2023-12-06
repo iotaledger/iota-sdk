@@ -1,5 +1,5 @@
 {
-    "epochStart": 60,
-    "epochEnd": 80,
-    "rewards": "800000"
-  }
+  "startEpoch": 60,
+  "endEpoch": 80,
+  "rewards": "800000"
+}
