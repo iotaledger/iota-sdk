@@ -1,8 +1,8 @@
 {
-    "protocolVersion": 3,
-    "slot": 986,
-    "previousCommitmentId": "0x8fb6cbb1ecf02c6b5a6a5a6a5f6c5a6a5f6c5a6a5a6a5a6a5f6c5a6a5a6a5f6c50000000000000000",
-    "rootsId": "0xa4dd36465af63d495d35a05f592d42a51511c153e1bae8fad00453c8cbb48727",
-    "cumulativeWeight": "78901",
-    "referenceManaCost": "600"
-  }
+  "protocolVersion": 3,
+  "slot": 986,
+  "previousCommitmentId": "0xd91549dbf441da4c7e50063b58c05d5b2bfb1d33b346a2f9a18220ce6207f7a289010000",
+  "rootsId": "0x6a8f424929e1f08d87a204efc8a60499b789465aaa28178b77debe75cc2915d3",
+  "cumulativeWeight": "78901",
+  "referenceManaCost": "600"
+}
