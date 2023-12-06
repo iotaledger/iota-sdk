@@ -180,6 +180,14 @@ class Utils():
         })
 
     @staticmethod
+    def protocol_parameters_hash(params: ProtocolParameters) -> HexStr:
+        """ Compute the hash of a ProtocolParameters instance.
+        """
+        return _call_method('protocolParametersHash', {
+            'protocolParameters': params.to_dict(),
+        })
+
+    @staticmethod
     def transaction_signing_hash(transaction: Transaction) -> HexStr:
         """ Compute the signing hash of a transaction.
         """

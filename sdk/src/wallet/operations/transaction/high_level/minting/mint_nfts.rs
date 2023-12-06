@@ -147,7 +147,8 @@ where
         let options = options.into();
         let prepared_transaction = self.prepare_mint_nfts(params, options.clone()).await?;
 
-        self.sign_and_submit_transaction(prepared_transaction, options).await
+        self.sign_and_submit_transaction(prepared_transaction, None, options)
+            .await
     }
 
     /// Prepares the transaction for [Wallet::mint_nfts()].

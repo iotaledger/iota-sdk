@@ -3,6 +3,7 @@
 
 use std::time::Duration;
 
+use crypto::signatures::ed25519::PublicKey;
 use iota_sdk::{
     client::api::{
         PreparedTransactionData, PreparedTransactionDataDto, SignedTransactionData, SignedTransactionDataDto,
@@ -204,12 +205,24 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
             let implicit_account_creation_address = wallet.implicit_account_creation_address().await?;
             Response::Bech32Address(implicit_account_creation_address)
         }
+        WalletMethod::PrepareImplicitAccountTransition {
+            output_id,
+            public_key,
+            bip_path,
+        } => {
+            let data = if let Some(public_key_str) = public_key {
+                let public_key = PublicKey::try_from_bytes(prefix_hex::decode(public_key_str)?)
+                    .map_err(iota_sdk::wallet::Error::from)?;
+                wallet
+                    .prepare_implicit_account_transition(&output_id, Some(public_key))
+                    .await?
+            } else {
+                wallet.prepare_implicit_account_transition(&output_id, bip_path).await?
+            };
+            Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
+        }
         WalletMethod::ImplicitAccounts => {
             Response::OutputsData(wallet.data().await.implicit_accounts().cloned().collect())
-        }
-        WalletMethod::PrepareImplicitAccountTransition { output_id } => {
-            let data = wallet.prepare_implicit_account_transition(&output_id).await?;
-            Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
         }
         WalletMethod::IncomingTransactions => Response::Transactions(
             wallet
@@ -368,6 +381,7 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
                         &wallet.client().get_protocol_parameters().await?,
                     )?,
                     None,
+                    None,
                 )
                 .await?;
             Response::SentTransaction(TransactionWithMetadataDto::from(&transaction))
@@ -388,7 +402,7 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
                 &wallet.client().get_protocol_parameters().await?,
             )?;
             let transaction = wallet
-                .submit_and_store_transaction(signed_transaction_data, None)
+                .submit_and_store_transaction(signed_transaction_data, None, None)
                 .await?;
             Response::SentTransaction(TransactionWithMetadataDto::from(&transaction))
         }
