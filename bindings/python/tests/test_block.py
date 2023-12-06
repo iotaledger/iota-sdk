@@ -1,34 +1,42 @@
 # Copyright 2023 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
+import json
 from typing import get_args
 import pytest
-from iota_sdk import BasicBlock, BlockType, SignedBlock, Payload, PayloadType
+from iota_sdk import BasicBlock, BlockType, SignedBlock, Payload, PayloadType, ProtocolParameters, Utils
 
+basic_block_tagged_data_payload_json = {}
+with open('../../sdk/tests/types/fixtures/basic_block_tagged_data_payload.json', "r", encoding="utf-8") as json_file:
+    basic_block_tagged_data_payload_json = json.load(json_file)
 
-def test_basic_block_with_tagged_data_payload():
-    block_dict = {
-        "type": 0,
-        "strongParents": [
-            "0x17c297a273facf4047e244a65eb34ee33b1f1698e1fff28679466fa2ad81c0e8",
-            "0x9858e80fa0b37b6d9397e23d1f58ce53955a9be1aa8020c0d0e11672996c6db9"],
-        "weakParents": [],
-        "shallowLikeParents": [],
-        "maxBurnedMana": "180500",
-        "payload": {
-            "type": 0,
-            "tag": "0x484f524e4554205370616d6d6572",
-            "data": "0x57652061726520616c6c206d616465206f662073746172647573742e0a436f756e743a20353436333730330a54696d657374616d703a20323032332d30372d31395430373a32323a32385a0a54697073656c656374696f6e3a20343732c2b573"}}
-    block = BasicBlock.from_dict(block_dict)
-    assert block.to_dict() == block_dict
-    assert isinstance(block.payload, get_args(Payload))
-    assert block.payload.type == PayloadType.TaggedData
-    assert block.max_burned_mana == 180500
+basic_block_transaction_payload_json = {}
+with open('../../sdk/tests/types/fixtures/basic_block_transaction_payload.json', "r", encoding="utf-8") as json_file:
+    basic_block_transaction_payload_json = json.load(json_file)
 
-    block_to_dict = block.to_dict()
-    # Make sure encoding is done correctly
-    assert block_to_dict == block_dict
+validation_block_json = {}
+with open('../../sdk/tests/types/fixtures/validation_block.json', "r", encoding="utf-8") as json_file:
+    validation_block_json = json.load(json_file)
 
+protocol_params_json = {}
+with open('../../sdk/tests/types/fixtures/protocol_parameters.json', "r", encoding="utf-8") as json_file:
+    protocol_params_json = json.load(json_file)
+
+def test_basic_block_tagged_data_payload():
+
+    basic_block_tagged_data_payload_dict = basic_block_tagged_data_payload_json['block']
+    basic_block_tagged_data_payload = BasicBlock.from_dict(basic_block_tagged_data_payload_dict)
+    assert basic_block_tagged_data_payload.to_dict() == basic_block_tagged_data_payload_dict
+
+    assert isinstance(basic_block_tagged_data_payload.payload, get_args(Payload))
+    assert basic_block_tagged_data_payload.payload.type == PayloadType.TaggedData
+    assert basic_block_tagged_data_payload.max_burned_mana == 864
+
+    protocol_params_dict = protocol_params_json['params']
+    protocol_params = ProtocolParameters.from_dict(protocol_params_dict)
+
+    expected_id = basic_block_tagged_data_payload_json['id']
+    assert Utils.block_id(basic_block_tagged_data_payload, protocol_params) == expected_id
 
 def test_signed_block_with_tagged_data_payload():
     block_dict = {
