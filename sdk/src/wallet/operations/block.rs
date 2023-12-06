@@ -19,8 +19,16 @@ where
     ) -> Result<BlockId> {
         log::debug!("submit_basic_block");
 
-        // TODO https://github.com/iotaledger/iota-sdk/issues/1741
-        let issuer_id = issuer_id.into().unwrap_or(AccountId::null());
+        let issuer_id = match issuer_id.into() {
+            Some(issuer_id) => Some(issuer_id),
+            None => self
+                .data()
+                .await
+                .accounts()
+                .next()
+                .map(|o| o.output.as_account().account_id_non_null(&o.output_id)),
+        }
+        .ok_or(Error::NoAccountToIssueBlock)?;
 
         let block = self
             .client()

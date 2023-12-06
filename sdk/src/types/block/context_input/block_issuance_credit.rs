@@ -15,7 +15,7 @@ pub struct BlockIssuanceCreditContextInput(AccountId);
 
 impl BlockIssuanceCreditContextInput {
     /// The context input kind of a [`BlockIssuanceCreditContextInput`].
-    pub const KIND: u8 = 1;
+    pub const KIND: u8 = 2;
 
     /// Creates a new [`BlockIssuanceCreditContextInput`].
     pub fn new(account_id: AccountId) -> Self {

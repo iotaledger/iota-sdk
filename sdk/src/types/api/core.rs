@@ -521,7 +521,7 @@ pub struct RoutesResponse {
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct UtxoChangesResponse {
-    pub index: u32,
+    pub commitment_id: SlotCommitmentId,
     pub created_outputs: Vec<OutputId>,
     pub consumed_outputs: Vec<OutputId>,
 }
