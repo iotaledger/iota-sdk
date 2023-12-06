@@ -13,11 +13,11 @@ wallet = Wallet(os.environ['WALLET_DB_PATH'])
 
 account = wallet.get_account("Alice")
 
-accountAddresses = account.addresses()
+accountaddress = wallet.address()
 
 # using prepare_output
 output = account.prepare_output(OutputParams(
-    accountAddresses[0].address, 1000000))
+    accountaddresss, 1000000))
 
 
 def hexAddress(address):

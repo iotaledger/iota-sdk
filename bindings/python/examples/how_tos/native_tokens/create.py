@@ -10,15 +10,13 @@ load_dotenv()
 
 wallet = Wallet(os.environ['WALLET_DB_PATH'])
 
-account = wallet.get_account('Alice')
-
 if 'STRONGHOLD_PASSWORD' not in os.environ:
     raise Exception(".env STRONGHOLD_PASSWORD is undefined, see .env.example")
 
 wallet.set_stronghold_password(os.environ["STRONGHOLD_PASSWORD"])
 
 # Sync account with the node
-balance = account.sync()
+balance = wallet.sync()
 
 # We can first check if we already have an account output in our account, because
 # an account can have many foundry outputs and therefore we can reuse an
@@ -33,7 +31,7 @@ if not balance.accounts:
         transaction.transaction_id)
     print(f'Block included: {os.environ["EXPLORER_URL"]}/block/{block_id}')
 
-    account.sync()
+    wallet.sync()
     print("Account synced")
 
 print('Preparing transaction to create native token...')
@@ -60,5 +58,5 @@ print(f'Block included: {os.environ["EXPLORER_URL"]}/block/{block_id}')
 print(f'Created token: {prepared_transaction.token_id()}')
 
 # Ensure the account is synced after creating the native token.
-account.sync()
+wallet.sync()
 print('Account synced')

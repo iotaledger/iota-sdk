@@ -274,7 +274,7 @@ class SecretManager():
         Args:
             prepare_transaction_data: The prepared transaction data that needs to be signed.
         """
-        return from_dict(SignedTransactionPayload, self._call_method('signTransaction', {
+        return SignedTransactionPayload.from_dict(self._call_method('signTransaction', {
             'preparedTransactionData': prepared_transaction_data.to_dict()
         }))
 
@@ -286,7 +286,7 @@ class SecretManager():
             unsigned_block: The unsigned block data.
             chain: The Bip44 chain to use.
         """
-        return from_dict(SignedBlock, self._call_method('signBlock', {
+        return SignedBlock.from_dict(self._call_method('signBlock', {
             'unsignedBlock': unsigned_block.to_dict(),
             'chain': chain.to_dict()
         }))

@@ -10,10 +10,8 @@ load_dotenv()
 
 wallet = Wallet(os.environ['WALLET_DB_PATH'])
 
-account = wallet.get_account('Alice')
-
 # Sync account with the node
-balance = account.sync()
+balance = wallet.sync()
 
 # We try to destroy the first account in the account
 account_id = balance.accounts[0]

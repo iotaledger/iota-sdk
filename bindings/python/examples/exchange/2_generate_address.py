@@ -21,7 +21,5 @@ wallet = Wallet(os.environ.get('WALLET_DB_PATH'))
 
 wallet.set_stronghold_password(os.environ["STRONGHOLD_PASSWORD"])
 
-account = wallet.get_account('Alice')
-
 address = account.generate_ed25519_addresses(1)[0]
 print('Address:', address.address)

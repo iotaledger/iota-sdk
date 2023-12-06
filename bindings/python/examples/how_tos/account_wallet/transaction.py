@@ -12,14 +12,12 @@ sync_options = SyncOptions(alias=AccountSyncOptions(basic_outputs=True))
 
 wallet = Wallet(os.environ['WALLET_DB_PATH'])
 
-account = wallet.get_account('Alice')
-
 if 'STRONGHOLD_PASSWORD' not in os.environ:
     raise Exception(".env STRONGHOLD_PASSWORD is undefined, see .env.example")
 
 wallet.set_stronghold_password(os.environ["STRONGHOLD_PASSWORD"])
 
-balance = account.sync(sync_options)
+balance = wallet.sync(sync_options)
 
 total_base_token_balance = balance.base_coin.total
 print(f'Balance before sending funds from account: {total_base_token_balance}')
@@ -49,5 +47,5 @@ account.reissue_transaction_until_included(
 print(
     f'Transaction with custom input: https://explorer.shimmer.network/testnet/transaction/{transaction.transaction_id}')
 
-total_base_token_balance = account.sync(sync_options).base_coin.total
+total_base_token_balance = wallet.sync(sync_options).base_coin.total
 print(f'Balance after sending funds from account: {total_base_token_balance}')

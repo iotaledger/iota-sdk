@@ -17,11 +17,9 @@ if 'STRONGHOLD_PASSWORD' not in os.environ:
 wallet = Wallet(os.environ['WALLET_DB_PATH'])
 wallet.set_stronghold_password(os.environ['STRONGHOLD_PASSWORD'])
 
-account = wallet.get_account('Alice')
-
 # Sync account to make sure account is updated with outputs from previous
 # examples.
-account.sync()
+wallet.sync()
 print('Account synced')
 
 # List unspent outputs before consolidation.
@@ -57,7 +55,7 @@ print(
 )
 
 # Sync account
-account.sync()
+wallet.sync()
 print('Account synced')
 
 # Outputs after consolidation

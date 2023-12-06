@@ -15,10 +15,8 @@ if 'STRONGHOLD_PASSWORD' not in os.environ:
 
 wallet.set_stronghold_password(os.environ["STRONGHOLD_PASSWORD"])
 
-account = wallet.get_account('Alice')
-
 # Sync account with the node
-response = account.sync()
+response = wallet.sync()
 
 outputs = [MintNftParams(
     immutable_metadata=utf8_to_hex("some immutable nft metadata"),

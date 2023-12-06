@@ -2,19 +2,15 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from json import dumps
-from typing import Any, Dict, List, Optional, Union
+from typing import List, Optional, Union
 from dataclasses import dataclass
 
 from iota_sdk import destroy_wallet, create_wallet, listen_wallet, get_client_from_wallet, get_secret_manager_from_wallet, Client
 from iota_sdk.secret_manager.secret_manager import LedgerNanoSecretManager, MnemonicSecretManager, StrongholdSecretManager, SeedSecretManager, SecretManager
-from iota_sdk.types.address import AccountAddress
-
-from iota_sdk.wallet.sync_options import SyncOptions
 
 from iota_sdk.wallet.common import _call_method_routine
 from iota_sdk.wallet.prepared_transaction import PreparedTransaction, PreparedCreateTokenTransaction
-from iota_sdk.wallet.sync_options import SyncOptions 
-from iota_sdk.types.address import AccountAddress
+from iota_sdk.wallet.sync_options import SyncOptions
 from iota_sdk.types.balance import Balance
 from iota_sdk.types.burn import Burn
 from iota_sdk.types.common import HexStr, json
@@ -32,8 +28,6 @@ from iota_sdk.types.transaction_with_metadata import TransactionWithMetadata
 from iota_sdk.types.transaction_options import TransactionOptions
 from iota_sdk.types.consolidation_params import ConsolidationParams
 
-# pylint: disable=too-many-public-methods
-
 
 @json
 @dataclass
@@ -45,6 +39,9 @@ class WalletOptions:
     client_options: Optional[ClientOptions] = None
     secret_manager: Optional[Union[LedgerNanoSecretManager, MnemonicSecretManager, SeedSecretManager, StrongholdSecretManager]] = None
     storage_path: Optional[str] = None
+
+
+# pylint: disable=too-many-public-methods
 
 
 class Wallet():
@@ -227,7 +224,7 @@ class Wallet():
         """
         return self._call_method(
             'updateNodeAuth', {
-                'url': mnemonic,
+                'url': url,
                 'auth': auth
             }
         )
@@ -238,7 +235,7 @@ class Wallet():
         outputs = self._call_method(
             'accounts'
         )
-        return [from_dict(OutputData, o) for o in outputs]
+        return [OutputData.from_dict(o) for o in outputs]
 
     def burn(
             self, burn: Burn, options: Optional[TransactionOptions] = None) -> TransactionWithMetadata:
@@ -402,7 +399,7 @@ class Wallet():
     def get_output(self, output_id: OutputId) -> OutputData:
         """Get output.
         """
-        return from_dict(OutputData, self._call_method(
+        return OutputData.from_dict(self._call_method(
             'getOutput', {
                 'outputId': output_id
             }
@@ -484,8 +481,7 @@ class Wallet():
                 'outputId': output_id
             }
         )
-        return PreparedTransaction(
-            account=self, prepared_transaction_data=prepared)
+        return PreparedTransaction(self, prepared)
 
     def implicit_accounts(self) -> List[OutputData]:
         """Returns the implicit accounts of the wallet.
@@ -493,7 +489,7 @@ class Wallet():
         outputs = self._call_method(
             'implicitAccounts'
         )
-        return [from_dict(OutputData, o) for o in outputs]
+        return [OutputData.from_dict(o) for o in outputs]
 
     def incoming_transactions(self) -> List[TransactionWithMetadata]:
         """Returns all incoming transactions of the account.
@@ -520,7 +516,7 @@ class Wallet():
                 'filterOptions': filter_options
             }
         )
-        return [from_dict(OutputData, o) for o in outputs]
+        return [OutputData.from_dict(o) for o in outputs]
 
     def mint_native_token(self, token_id: HexStr, mint_amount: int,
                           options: Optional[TransactionOptions] = None) -> TransactionWithMetadata:
@@ -558,8 +554,7 @@ class Wallet():
                 'options': options
             }
         )
-        return PreparedCreateTokenTransaction(
-            account=self, prepared_transaction_data=prepared)
+        return PreparedCreateTokenTransaction(self, prepared)
 
     def mint_nfts(self, params: List[MintNftParams],
                   options: Optional[TransactionOptions] = None) -> TransactionWithMetadata:
@@ -764,15 +759,8 @@ class Wallet():
         Will also reissue pending transactions and consolidate outputs if necessary.
         A custom default can be set using set_default_sync_options.
         """
-        return from_dict(Balance, self._call_method(
+        return Balance.from_dict(self._call_method(
             'sync', {
                 'options': options,
             }
         ))
-
-    # pylint: disable=redefined-builtin
-    @staticmethod
-    def __return_str_or_none(opt_str):
-        if opt_str:
-            return opt_str
-        return None

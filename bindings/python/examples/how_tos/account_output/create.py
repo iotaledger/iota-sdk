@@ -10,10 +10,8 @@ load_dotenv()
 
 wallet = Wallet(os.environ['WALLET_DB_PATH'])
 
-account = wallet.get_account('Alice')
-
 # Sync account with the node
-account.sync()
+wallet.sync()
 
 if 'STRONGHOLD_PASSWORD' not in os.environ:
     raise Exception(".env STRONGHOLD_PASSWORD is undefined, see .env.example")

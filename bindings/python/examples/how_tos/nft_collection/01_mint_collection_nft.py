@@ -26,10 +26,8 @@ if 'STRONGHOLD_PASSWORD' not in os.environ:
 
 wallet.set_stronghold_password(os.environ["STRONGHOLD_PASSWORD"])
 
-account = wallet.get_account('Alice')
-
 # Sync account with the node
-account.sync()
+wallet.sync()
 
 bech32_hrp = wallet.get_client().get_bech32_hrp()
 issuer = Utils.nft_id_to_bech32(issuer_nft_id, bech32_hrp)
@@ -74,4 +72,4 @@ while nft_mint_params:
     print(f'Block sent: {os.environ["EXPLORER_URL"]}/block/{block_id}')
 
     # Sync so the new outputs are available again for new transactions
-    account.sync()
+    wallet.sync()

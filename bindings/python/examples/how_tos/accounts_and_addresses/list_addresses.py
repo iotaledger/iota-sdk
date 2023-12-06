@@ -12,9 +12,7 @@ load_dotenv()
 
 wallet = Wallet(os.environ['WALLET_DB_PATH'])
 
-account = wallet.get_account('Alice')
-
-addresses = account.addresses()
+address = wallet.address()
 
 for address in addresses:
     print(address.address)

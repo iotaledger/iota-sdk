@@ -13,10 +13,8 @@ load_dotenv()
 
 wallet = Wallet(os.environ['WALLET_DB_PATH'])
 
-account = wallet.get_account('Alice')
-
 # Sync account with the node
-_balance = account.sync()
+_balance = wallet.sync()
 
 # Just calculate the balance with the known state
 balance = account.get_balance()

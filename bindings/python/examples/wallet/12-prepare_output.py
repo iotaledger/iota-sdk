@@ -28,7 +28,7 @@ output = account.prepare_output(
             expiration_slot_index=1676570528)))
 print(f"Output: {json.dumps(output.to_dict(), indent=4)}")
 
-account.sync()
+wallet.sync()
 
 transaction = account.send_outputs([output])
 print(f'Block sent: {os.environ["EXPLORER_URL"]}/block/{transaction.block_id}')

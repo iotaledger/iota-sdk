@@ -14,8 +14,6 @@ FAUCET_URL = os.environ.get(
 
 wallet = Wallet(os.environ['WALLET_DB_PATH'])
 
-account = wallet.get_account('Alice')
-
 address = account.addresses()[0].address
 print(address)
 

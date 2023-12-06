@@ -33,7 +33,7 @@ secret_manager = StrongholdSecretManager(
 mnemonic = Utils.generate_mnemonic()
 print(f'Mnemonic: {mnemonic}')
 
-# SecretManager(secret_manager).store_mnemonic(mnemonic)
+SecretManager(secret_manager).store_mnemonic(mnemonic)
 
 # Set up and store the wallet.
 client_options = ClientOptions(nodes=[node_url])

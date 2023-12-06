@@ -11,9 +11,7 @@ from iota_sdk import Wallet
 load_dotenv()
 
 wallet = Wallet(os.environ['WALLET_DB_PATH'])
-
-account = wallet.get_account('Alice')
-account.sync()
+wallet.sync()
 
 # All outputs stored in the account
 outputs = account.outputs()

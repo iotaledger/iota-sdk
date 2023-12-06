@@ -19,13 +19,11 @@ for env_var in ['WALLET_DB_PATH', 'STRONGHOLD_PASSWORD', 'EXPLORER_URL']:
 
 wallet = Wallet(os.environ.get('WALLET_DB_PATH'))
 
-account = wallet.get_account('Alice')
-
 wallet.set_stronghold_password(os.environ["STRONGHOLD_PASSWORD"])
 
 # Set sync_only_most_basic_outputs to True if not interested in outputs that are timelocked,
 # have a storage deposit return, expiration or are nft/account/foundry outputs.
-balance = account.sync(SyncOptions(sync_only_most_basic_outputs=True))
+balance = wallet.sync(SyncOptions(sync_only_most_basic_outputs=True))
 print('Balance', balance)
 
 transaction = account.send(

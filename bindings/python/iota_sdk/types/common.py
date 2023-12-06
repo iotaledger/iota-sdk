@@ -35,10 +35,9 @@ def json(cls):
         def filter_none(value):
             if isinstance(value, dict):
                 return {k: filter_none(v) for k, v in value.items() if v is not None}
-            elif isinstance(value, list):
+            if isinstance(value, list):
                 return [filter_none(item) for item in value if item is not None]
-            else:
-                return value
+            return value
 
         return filter_none(original_dict)
 

@@ -14,10 +14,8 @@ if 'STRONGHOLD_PASSWORD' not in os.environ:
 
 wallet.set_stronghold_password(os.environ["STRONGHOLD_PASSWORD"])
 
-account = wallet.get_account('Alice')
-
 # Sync account with the node
-balance = account.sync()
+balance = wallet.sync()
 
 nftId = balance.nfts[0]
 

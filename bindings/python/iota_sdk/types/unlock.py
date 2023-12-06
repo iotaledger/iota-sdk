@@ -89,6 +89,7 @@ class NftUnlock:
     type: int = field(default_factory=lambda: int(UnlockType.Nft), init=False)
 
 
+# pylint: disable=missing-function-docstring,unused-argument
 def deserialize_unlocks(dicts: List[Dict[str, Any]]) -> List[Unlock]:
     pass
 
@@ -125,7 +126,7 @@ Unlock: TypeAlias = Union[SignatureUnlock,
                           MultiUnlock,
                           EmptyUnlock]
 
-
+# pylint: disable=too-many-return-statements
 def deserialize_unlock(d: Dict[str, Any]) -> Unlock:
     """
     Takes a dictionary as input and returns an instance of a specific class based on the value of the 'type' key in the dictionary.
@@ -151,6 +152,7 @@ def deserialize_unlock(d: Dict[str, Any]) -> Unlock:
     raise Exception(f'invalid unlock type: {unlock_type}')
 
 
+# pylint: disable=function-redefined
 def deserialize_unlocks(dicts: List[Dict[str, Any]]) -> List[Unlock]:
     """
     Takes a list of dictionaries as input and returns a list with specific instances of classes based on the value of the 'type' key in the dictionary.

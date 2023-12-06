@@ -41,7 +41,7 @@ wallet = Wallet(ONLINE_WALLET_DB_PATH, client_options,
 account = wallet.create_account('Alice', "rms", addresses)
 print("Account created:", account.get_metadata())
 
-account.sync()
+wallet.sync()
 
 prepared_transaction = account.prepare_send(params)
 

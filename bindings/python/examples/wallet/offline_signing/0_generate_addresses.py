@@ -39,7 +39,7 @@ account = wallet.create_account('Alice', "rms")
 print("Account created:", account.get_metadata())
 
 # Get the addresses from the account (by default only one)
-addresses = account.addresses()
+address = wallet.address()
 
 json_data = json.dumps(list(map(lambda x: x.__dict__, addresses)), indent=4)
 print(f"example.addresses.json:\n{json_data}")

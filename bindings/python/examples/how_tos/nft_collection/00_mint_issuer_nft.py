@@ -15,10 +15,8 @@ if 'STRONGHOLD_PASSWORD' not in os.environ:
 
 wallet.set_stronghold_password(os.environ["STRONGHOLD_PASSWORD"])
 
-account = wallet.get_account('Alice')
-
 # Sync account with the node
-account.sync()
+wallet.sync()
 
 # Issue the minting transaction and wait for its inclusion
 print('Sending NFT minting transaction...')

@@ -13,9 +13,7 @@ FAUCET_URL = os.environ.get(
     'FAUCET_URL', 'https://faucet.testnet.shimmer.network/api/enqueue')
 
 wallet = Wallet(os.environ['WALLET_DB_PATH'])
-
-account = wallet.get_account('Alice')
-balance = account.sync(None)
+balance = wallet.sync(None)
 
 total_base_token_balance = balance.base_coin.total
 print(
@@ -35,6 +33,6 @@ time.sleep(10)
 
 sync_options = SyncOptions(alias=AccountSyncOptions(basic_outputs=True))
 
-total_base_token_balance = account.sync(sync_options).base_coin.total
+total_base_token_balance = wallet.sync(sync_options).base_coin.total
 print(
     f'Balance after requesting funds on account address: {total_base_token_balance}')

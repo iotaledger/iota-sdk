@@ -11,15 +11,13 @@ load_dotenv()
 
 wallet = Wallet(os.environ['WALLET_DB_PATH'])
 
-account = wallet.get_account('Alice')
-
 if 'STRONGHOLD_PASSWORD' not in os.environ:
     raise Exception(".env STRONGHOLD_PASSWORD is undefined, see .env.example")
 
 wallet.set_stronghold_password(os.environ["STRONGHOLD_PASSWORD"])
 
 # Sync account with the node
-response = account.sync()
+response = wallet.sync()
 
 # Only the unspent outputs in the account
 output_ids = account.claimable_outputs('All')

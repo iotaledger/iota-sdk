@@ -8,10 +8,8 @@ load_dotenv()
 
 wallet = Wallet(os.environ['WALLET_DB_PATH'])
 
-account = wallet.get_account('Alice')
-
 # Sync account with the node
-balance = account.sync()
+balance = wallet.sync()
 print(f'Foundries before destroying: {len(balance.foundries)}')
 
 if 'STRONGHOLD_PASSWORD' not in os.environ:
@@ -31,5 +29,5 @@ block_id = account.reissue_transaction_until_included(
     transaction.transaction_id)
 print(f'Block included: {os.environ["EXPLORER_URL"]}/block/{block_id}')
 
-balance = account.sync()
+balance = wallet.sync()
 print(f'Foundries after destroying: {len(balance.foundries)}')
