@@ -1,11 +1,11 @@
 {
-    "slot": 789,
-    "createdOutputs": [
-      "0x1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2",
-      "0x3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2a3b4"
-    ],
-    "consumedOutputs": [
-      "0x5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6",
-      "0x7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7"
-    ]
-  }
+  "commitmentId": "0x3b264c038283c30094e0cb5d22eaa52c9959bfda084ace3980b30d4be588fa0012000000",
+  "createdOutputs": [
+    "0x2628fd7c1ad5dd635fa76c6f4c2272fbdb658cc3437dbed07f9984580b227b63f0a3e4d40000",
+    "0xfa3d71ea93849b317c2b29c928b726b6d3bd2131c7ad560c9e28952f117fd50c35d6e0890000"
+  ],
+  "consumedOutputs": [
+    "0xfa3d71ea93849b317c2b29c928b726b6d3bd2131c7ad560c9e28952f117fd50c35d6e0890100",
+    "0x9c40a07de878863fbda03caeb68875254c49199e6b55740f78a4bab3686f89957b1249130000"
+  ]
+}

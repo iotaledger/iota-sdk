@@ -79,7 +79,7 @@ fn responses() {
     // GET /api/core/v3/commitments/{commitmentId}
     // json_response::<SlotCommitment>("get-commitment-response-example.json").unwrap();
     // GET /api/core/v3/commitments/{commitmentId}/utxo-changes
-    // json_response::<UtxoChangesResponse>("get-utxo-changes-response-example.json").unwrap();
+    json_response::<UtxoChangesResponse>("get-utxo-changes-response-example.json").unwrap();
 
     binary_response::<SlotCommitment>("get-commitment-response-binary-example", &()).unwrap();
     // TODO add all remaining binary responses
