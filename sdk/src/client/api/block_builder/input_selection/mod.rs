@@ -31,6 +31,7 @@ use crate::{
 };
 
 /// Working state for the input selection algorithm.
+#[derive(Debug)]
 pub struct InputSelection {
     available_inputs: Vec<InputSigningData>,
     required_inputs: HashSet<OutputId>,
@@ -245,9 +246,12 @@ impl InputSelection {
 
             match required_address {
                 Address::Anchor(_) => false,
-                Address::ImplicitAccountCreation(implicit_account_creation) => self
-                    .addresses
-                    .contains(&Address::from(*implicit_account_creation.ed25519_address())),
+                Address::ImplicitAccountCreation(implicit_account_creation) => {
+                    self.required_inputs.contains(input.output_id())
+                        && self
+                            .addresses
+                            .contains(&Address::from(*implicit_account_creation.ed25519_address()))
+                }
                 _ => self.addresses.contains(&required_address),
             }
         })
