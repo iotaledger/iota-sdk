@@ -82,13 +82,11 @@ impl ExpirationUnlockCondition {
     ) -> Option<&'a Address> {
         let slot_index = slot_index.into();
 
-        if self.slot_index() > (slot_index + committable_age_range.max) {
-            Some(address)
-        } else if self.slot_index() <= (slot_index + committable_age_range.min) {
-            Some(&self.return_address)
-        } else {
-            None
-        }
+        self.is_expired(slot_index, committable_age_range).map(
+            |expired| {
+                if expired { &self.return_address } else { address }
+            },
+        )
     }
 }
 
