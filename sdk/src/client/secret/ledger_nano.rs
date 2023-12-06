@@ -537,13 +537,9 @@ fn merge_unlocks(
         // Get the address that is required to unlock the input
         let required_address = input
             .output
-            .required_address(slot_index, protocol_parameters.committable_age())?;
-
-        let required_address = match required_address {
-            Some(address) => address,
+            .required_address(slot_index, protocol_parameters.committable_age_range())?
             // Time in which no address can unlock the output because of an expiration unlock condition
-            None => return Err(Error::ExpirationDeadzone),
-        };
+            .ok_or(Error::ExpirationDeadzone)?;
 
         // Check if we already added an [Unlock] for this address
         match block_indexes.get(&required_address) {

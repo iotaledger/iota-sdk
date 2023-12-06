@@ -989,7 +989,7 @@ async fn print_wallet_address(wallet: &Wallet) -> Result<(), Error> {
         // Output might be associated with the address, but can't be unlocked by it, so we check that here.
         let required_address = &output_data
             .output
-            .required_address(slot_index, protocol_parameters.committable_age())?;
+            .required_address(slot_index, protocol_parameters.committable_age_range())?;
 
         if required_address
             .as_ref()

@@ -208,7 +208,7 @@ impl ProtocolParameters {
     }
 
     /// Returns the [`CommittableAgeRange`].
-    pub fn committable_age(&self) -> CommittableAgeRange {
+    pub fn committable_age_range(&self) -> CommittableAgeRange {
         CommittableAgeRange {
             min: self.min_committable_age(),
             max: self.max_committable_age(),

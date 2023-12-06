@@ -302,7 +302,7 @@ impl<'a> SemanticValidationContext<'a> {
 
             if let Some(expiration) = unlock_conditions.expiration() {
                 if let Some(commitment_slot_index) = commitment_slot_index {
-                    if expiration.is_expired(commitment_slot_index, self.protocol_parameters.committable_age())
+                    if expiration.is_expired(commitment_slot_index, self.protocol_parameters.committable_age_range())
                         == Some(false)
                     {
                         if let Some(storage_deposit_return) = unlock_conditions.storage_deposit_return() {
@@ -318,7 +318,7 @@ impl<'a> SemanticValidationContext<'a> {
                     }
                 } else {
                     // Missing CommitmentContextInput
-                    return Ok(Some(TransactionFailureReason::SemanticValidationFailed));
+                    return Ok(Some(TransactionFailureReason::InvalidCommitmentContextInput));
                 }
             }
 

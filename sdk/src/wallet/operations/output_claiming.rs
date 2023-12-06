@@ -70,7 +70,7 @@ impl WalletData {
                             self.address.inner(),
                             output_data,
                             slot_index,
-                            protocol_parameters.committable_age(),
+                            protocol_parameters.committable_age_range(),
                         )?
                     {
                         match outputs_to_claim {
@@ -78,7 +78,7 @@ impl WalletData {
                                 if let Some(sdr) = unlock_conditions.storage_deposit_return() {
                                     // If expired, it's not a micro transaction anymore
                                     match unlock_conditions
-                                        .is_expired(slot_index, protocol_parameters.committable_age())
+                                        .is_expired(slot_index, protocol_parameters.committable_age_range())
                                     {
                                         Some(false) => {
                                             // Only micro transaction if not the same amount needs to be returned
@@ -104,7 +104,7 @@ impl WalletData {
                             }
                             OutputsToClaim::Amount => {
                                 let mut claimable_amount = output_data.output.amount();
-                                if unlock_conditions.is_expired(slot_index, protocol_parameters.committable_age())
+                                if unlock_conditions.is_expired(slot_index, protocol_parameters.committable_age_range())
                                     == Some(false)
                                 {
                                     claimable_amount -= unlock_conditions

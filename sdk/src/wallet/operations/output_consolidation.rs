@@ -87,7 +87,7 @@ where
             }
 
             let has_storage_deposit_return = unlock_conditions.storage_deposit_return().is_some();
-            let is_expired = unlock_conditions.is_expired(slot_index, protocol_parameters.committable_age());
+            let is_expired = unlock_conditions.is_expired(slot_index, protocol_parameters.committable_age_range());
             if is_expired.is_none() {
                 // If the output is in a deadzone because of expiration, then it cannot be consolidated.
                 return Ok(false);
@@ -101,7 +101,7 @@ where
                 wallet_address,
                 output_data,
                 slot_index,
-                protocol_parameters.committable_age(),
+                protocol_parameters.committable_age_range(),
             )?
         } else {
             false

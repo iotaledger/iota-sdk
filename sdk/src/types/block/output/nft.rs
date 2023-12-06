@@ -425,7 +425,7 @@ impl NftOutput {
             && (self.unlock_conditions().timelock().is_some() || self.unlock_conditions().expiration().is_some())
         {
             // Missing CommitmentContextInput
-            return Err(TransactionFailureReason::SemanticValidationFailed);
+            return Err(TransactionFailureReason::InvalidCommitmentContextInput);
         }
 
         self.unlock_conditions()
@@ -433,7 +433,7 @@ impl NftOutput {
                 self.address(),
                 // Safe to unwrap, we return an error before if its required but None
                 slot_index.unwrap_or(SlotIndex(0)),
-                context.protocol_parameters.committable_age(),
+                context.protocol_parameters.committable_age_range(),
             )
             // because of expiration the input can't be unlocked at this time
             .ok_or(TransactionFailureReason::SemanticValidationFailed)?

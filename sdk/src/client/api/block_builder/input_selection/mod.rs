@@ -62,7 +62,7 @@ impl InputSelection {
     fn required_account_nft_addresses(&self, input: &InputSigningData) -> Result<Option<Requirement>, Error> {
         let required_address = input
             .output
-            .required_address(self.slot_index, self.protocol_parameters.committable_age())?
+            .required_address(self.slot_index, self.protocol_parameters.committable_age_range())?
             .expect("expiration unlockable outputs already filtered out");
 
         let required_address = if let Address::Restricted(restricted) = &required_address {
@@ -235,7 +235,7 @@ impl InputSelection {
             let required_address = input
                 .output
                 // Account transition is irrelevant here as we keep accounts anyway.
-                .required_address(self.slot_index, self.protocol_parameters.committable_age())
+                .required_address(self.slot_index, self.protocol_parameters.committable_age_range())
                 // PANIC: safe to unwrap as non basic/account/foundry/nft outputs are already filtered out.
                 .unwrap();
 
@@ -259,7 +259,7 @@ impl InputSelection {
                             .addresses
                             .contains(&Address::from(*implicit_account_creation.ed25519_address()))
                 }
-                _ => self.addresses.contains(&required_address),
+                _ => self.addresses.contains(required_address),
             }
         })
     }
@@ -412,7 +412,7 @@ impl InputSelection {
             inputs: Self::sort_input_signing_data(
                 self.selected_inputs,
                 self.slot_index,
-                self.protocol_parameters.committable_age(),
+                self.protocol_parameters.committable_age_range(),
             )?,
             outputs: self.outputs,
             remainder,

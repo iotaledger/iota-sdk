@@ -71,7 +71,7 @@ where
             &wallet_data,
             wallet_data.unspent_outputs.values(),
             slot_index,
-            protocol_parameters.committable_age(),
+            protocol_parameters.committable_age_range(),
             custom_inputs.as_ref(),
             mandatory_inputs.as_ref(),
         )?;
