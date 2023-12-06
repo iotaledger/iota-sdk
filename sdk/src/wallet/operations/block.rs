@@ -21,14 +21,16 @@ where
 
         // TODO https://github.com/iotaledger/iota-sdk/issues/1741
 
-        let wallet_data = self.data().await;
-        let issuer_id = issuer_id
-            .into()
-            .or(wallet_data
+        let issuer_id = match issuer_id.into() {
+            Some(issuer_id) => Some(issuer_id),
+            None => self
+                .data()
+                .await
                 .accounts()
                 .next()
-                .map(|o| *o.output.as_account().account_id()))
-            .unwrap();
+                .map(|o| *o.output.as_account().account_id()),
+        }
+        .unwrap();
 
         let block = self
             .client()
