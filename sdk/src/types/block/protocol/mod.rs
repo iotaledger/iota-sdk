@@ -91,7 +91,7 @@ pub struct ProtocolParameters {
     /// Defines the target size of the committee. If there's fewer candidates the actual committee size could be
     /// smaller in a given epoch.
     pub(crate) target_committee_size: u8,
-    // Defines the number of heavier slots that a chain needs to be ahead of the current chain to be considered for switching.
+    /// Defines the number of heavier slots that a chain needs to be ahead of the current chain to be considered for switching.
     pub(crate) chain_switching_threshold: u8,
 }
 
