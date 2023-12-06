@@ -10,6 +10,7 @@ use iota_sdk::types::{
 };
 use packable::{
     error::{UnexpectedEOF, UnpackError},
+    unpacker::SliceUnpacker,
     Packable, PackableExt,
 };
 use serde::Deserialize;
@@ -28,8 +29,12 @@ fn binary_response<T: PackableExt>(
 ) -> Result<T, UnpackError<<T as Packable>::UnpackError, UnexpectedEOF>> {
     let file = std::fs::read_to_string(&format!("./tests/types/api/fixtures/{path}")).unwrap();
     let bytes = hex::decode(file).unwrap();
-    T::unpack_verified(bytes, visitor)
-    // TODO check there is no bytes left
+    let mut unpacker = SliceUnpacker::new(bytes.as_slice());
+    let res = T::unpack::<_, true>(&mut unpacker, visitor);
+
+    assert!(u8::unpack::<_, true>(&mut unpacker, &()).is_err());
+
+    res
 }
 
 #[test]
