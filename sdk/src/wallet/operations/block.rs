@@ -26,7 +26,7 @@ where
                 .await
                 .accounts()
                 .next()
-                .map(|o| *o.output.as_account().account_id()),
+                .map(|o| o.output.as_account().account_id_non_null(&o.output_id)),
         }
         .ok_or(Error::NoAccountToIssueBlock)?;
 
