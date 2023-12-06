@@ -530,13 +530,14 @@ pub struct UtxoChangesResponse {
     pub consumed_outputs: Vec<OutputId>,
 }
 
-/// Contains the generic [`Output`] with associated [`OutputIdProof`].
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct OutputResponse {
-    pub output: Output,
-    pub output_id_proof: OutputIdProof,
-}
+// TODO use for outputs route https://github.com/iotaledger/iota-sdk/issues/1686
+// /// Contains the generic [`Output`] with associated [`OutputIdProof`].
+// #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+// #[serde(rename_all = "camelCase")]
+// pub struct OutputResponse {
+//     pub output: Output,
+//     pub output_id_proof: OutputIdProof,
+// }
 
 /// The proof of the output identifier.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
