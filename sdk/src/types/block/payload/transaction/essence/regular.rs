@@ -219,7 +219,7 @@ fn verify_inputs_packable<const VERIFY: bool>(inputs: &[Input], _visitor: &Proto
 fn verify_outputs<const VERIFY: bool>(outputs: &[Output], visitor: &ProtocolParameters) -> Result<(), Error> {
     if VERIFY {
         let mut amount_sum: u64 = 0;
-        let mut total_native_tokens: HashSet<TokenId> = HashSet::new();
+        let mut total_native_tokens = HashSet::<TokenId>::new();
         let mut chain_ids = HashSet::new();
 
         for output in outputs.iter() {
