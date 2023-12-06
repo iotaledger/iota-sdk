@@ -20,7 +20,15 @@ where
         log::debug!("submit_basic_block");
 
         // TODO https://github.com/iotaledger/iota-sdk/issues/1741
-        let issuer_id = issuer_id.into().unwrap_or(AccountId::null());
+
+        let wallet_data = self.data().await;
+        let issuer_id = issuer_id
+            .into()
+            .or(wallet_data
+                .accounts()
+                .next()
+                .map(|o| *o.output.as_account().account_id()))
+            .unwrap();
 
         let block = self
             .client()
