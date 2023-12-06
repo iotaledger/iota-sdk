@@ -19,6 +19,7 @@ impl ClientInner {
     pub async fn build_basic_block(&self, issuer_id: AccountId, payload: Option<Payload>) -> Result<UnsignedBlock> {
         let issuance = self.get_issuance().await?;
 
+        // TODO https://github.com/iotaledger/iota-sdk/issues/1753
         let issuing_time = {
             #[cfg(feature = "std")]
             let issuing_time = std::time::SystemTime::now()
