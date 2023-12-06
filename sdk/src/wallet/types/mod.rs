@@ -43,7 +43,7 @@ pub struct OutputData {
     pub metadata: OutputMetadata,
     /// The actual Output
     pub output: Output,
-    /// The OutputIdProof
+    /// The output ID proof
     pub output_id_proof: OutputIdProof,
     /// If an output is spent
     pub is_spent: bool,
