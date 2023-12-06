@@ -16,7 +16,7 @@ use crate::{
     },
 };
 
-impl<O> InputSelection<O> {
+impl<O: Clone> InputSelection<O> {
     // Gets the remainder address from configuration of finds one from the inputs.
     fn get_remainder_address(&self) -> Result<Option<(Address, Option<O>)>, Error> {
         if let Some(remainder_address) = &self.remainder_address {
@@ -27,7 +27,7 @@ impl<O> InputSelection<O> {
                     .required_and_unlocked_address(self.slot_index, input.output_id())?;
 
                 if &required_address == remainder_address {
-                    return Ok(Some((remainder_address.clone(), input.signing_options)));
+                    return Ok(Some((remainder_address.clone(), input.signing_options.clone())));
                 }
             }
             return Ok(Some((remainder_address.clone(), None)));
@@ -40,7 +40,7 @@ impl<O> InputSelection<O> {
                 .0;
 
             if required_address.is_ed25519() {
-                return Ok(Some((required_address, input.signing_options)));
+                return Ok(Some((required_address, input.signing_options.clone())));
             }
         }
 

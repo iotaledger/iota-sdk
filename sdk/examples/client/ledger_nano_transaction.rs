@@ -17,10 +17,16 @@
 //! cargo run --release --all-features --example ledger_nano_transaction
 //! ```
 
-use iota_sdk::client::{
-    api::GetAddressesOptions,
-    secret::{ledger_nano::LedgerSecretManager, SecretManager},
-    Client, Result,
+use iota_sdk::{
+    client::{
+        constants::IOTA_COIN_TYPE,
+        secret::{
+            ledger_nano::{LedgerOptions, LedgerSecretManager},
+            MultiKeyOptions, SecretManageExt,
+        },
+        Client, Result,
+    },
+    types::block::address::{Ed25519Address, ToBech32Ext},
 };
 
 // const AMOUNT: u64 = 1_000_000;
@@ -40,17 +46,19 @@ async fn main() -> Result<()> {
         .finish()
         .await?;
 
-    let secret_manager = SecretManager::LedgerNano(LedgerSecretManager::new(true));
+    let secret_manager = LedgerSecretManager::new(true);
+
+    let hrp = client.get_bech32_hrp().await?;
 
     // Generate addresses with custom account index and range
     let addresses = secret_manager
-        .generate_ed25519_addresses(
-            GetAddressesOptions::from_client(&client)
-                .await?
-                .with_account_index(0)
-                .with_range(0..2),
-        )
-        .await?;
+        .generate::<Vec<Ed25519Address>>(&LedgerOptions::new(
+            MultiKeyOptions::new(IOTA_COIN_TYPE).with_address_range(0..2),
+        ))
+        .await?
+        .into_iter()
+        .map(|a| a.to_bech32(hrp))
+        .collect::<Vec<_>>();
 
     println!("List of generated public addresses:\n{addresses:#?}\n");
 

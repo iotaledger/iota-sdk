@@ -13,7 +13,7 @@
 use iota_sdk::{
     client::{
         constants::SHIMMER_COIN_TYPE,
-        secret::{stronghold::StrongholdSecretManager, SecretManager},
+        secret::{stronghold::StrongholdSecretManager, PublicKeyOptions, SecretManager},
     },
     crypto::keys::{bip39::Mnemonic, bip44::Bip44},
     wallet::{ClientOptions, Result, Wallet},
@@ -49,10 +49,11 @@ async fn main() -> Result<()> {
 
     // Create the wallet
     let wallet = Wallet::builder()
-        .with_secret_manager(SecretManager::Stronghold(secret_manager))
+        .with_secret_manager(secret_manager)
         .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
         .with_client_options(client_options)
-        .with_public_key_options(Bip44::new(SHIMMER_COIN_TYPE))
+        .with_public_key_options(PublicKeyOptions::new(SHIMMER_COIN_TYPE))
+        .with_signing_options(Bip44::new(SHIMMER_COIN_TYPE))
         .finish()
         .await?;
 

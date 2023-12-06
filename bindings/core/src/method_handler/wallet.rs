@@ -5,17 +5,23 @@ use std::time::Duration;
 
 use crypto::signatures::ed25519::PublicKey;
 use iota_sdk::{
-    client::api::{
-        PreparedTransactionData, PreparedTransactionDataDto, SignedTransactionData, SignedTransactionDataDto,
+    client::{
+        api::{PreparedTransactionData, PreparedTransactionDataDto, SignedTransactionData, SignedTransactionDataDto},
+        secret::{DowncastSecretManager, SecretManager},
     },
-    types::{block::address::ToBech32Ext, TryFromDto},
-    wallet::{types::TransactionWithMetadataDto, PreparedCreateNativeTokenTransactionDto, Wallet},
+    types::TryFromDto,
+    wallet::{
+        types::TransactionWithMetadataDto, BlockIssuerKeySource, PreparedCreateNativeTokenTransactionDto, Wallet,
+    },
 };
 
 use crate::{method::WalletMethod, response::Response};
 
 /// Call a wallet method.
-pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletMethod) -> crate::Result<Response> {
+pub(crate) async fn call_wallet_method_internal(
+    wallet: &Wallet<SecretManager>,
+    method: WalletMethod,
+) -> crate::Result<Response> {
     let response = match method {
         WalletMethod::Accounts => Response::OutputsData(wallet.data().await.accounts().cloned().collect()),
         #[cfg(feature = "stronghold")]
@@ -66,25 +72,11 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
         }
         #[cfg(feature = "ledger_nano")]
         WalletMethod::GetLedgerNanoStatus => {
-            let ledger_nano_status = wallet.get_ledger_nano_status().await?;
+            let ledger_nano_status = (&*wallet.get_secret_manager().read().await)
+                .as_ledger_nano()?
+                .get_ledger_nano_status()
+                .await;
             Response::LedgerNanoStatus(ledger_nano_status)
-        }
-        WalletMethod::GenerateEd25519Address {
-            account_index,
-            address_index,
-            options,
-            bech32_hrp,
-        } => {
-            let address = wallet
-                .generate_ed25519_address(account_index, address_index, options)
-                .await?;
-
-            let bech32_hrp = match bech32_hrp {
-                Some(bech32_hrp) => bech32_hrp,
-                None => *wallet.address().await.hrp(),
-            };
-
-            Response::Bech32Address(address.to_bech32(bech32_hrp))
         }
         #[cfg(feature = "stronghold")]
         WalletMethod::SetStrongholdPassword { password } => {
@@ -208,18 +200,20 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
         WalletMethod::PrepareImplicitAccountTransition {
             output_id,
             public_key,
-            bip_path,
+            public_key_options,
         } => {
-            let data = if let Some(public_key_str) = public_key {
-                let public_key = PublicKey::try_from_bytes(prefix_hex::decode(public_key_str)?)
-                    .map_err(iota_sdk::wallet::Error::from)?;
-                wallet
-                    .prepare_implicit_account_transition(&output_id, Some(public_key))
-                    .await?
-            } else {
-                wallet.prepare_implicit_account_transition(&output_id, bip_path).await?
-            };
-            Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
+            let source = public_key
+                .map(|s| {
+                    crate::Result::Ok(BlockIssuerKeySource::Key(
+                        PublicKey::try_from_bytes(prefix_hex::decode(s)?).map_err(iota_sdk::wallet::Error::from)?,
+                    ))
+                })
+                .transpose()?
+                .or(public_key_options.map(BlockIssuerKeySource::Options));
+
+            Response::PreparedTransaction(PreparedTransactionDataDto::from(
+                &wallet.prepare_implicit_account_transition(&output_id, source).await?,
+            ))
         }
         WalletMethod::ImplicitAccounts => {
             Response::OutputsData(wallet.data().await.implicit_accounts().cloned().collect())

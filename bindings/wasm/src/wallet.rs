@@ -5,9 +5,12 @@ use std::sync::Arc;
 
 use iota_sdk_bindings_core::{
     call_wallet_method as rust_call_wallet_method,
-    iota_sdk::wallet::{
-        events::types::{WalletEvent, WalletEventType},
-        Wallet,
+    iota_sdk::{
+        client::secret::SecretManager,
+        wallet::{
+            events::types::{WalletEvent, WalletEventType},
+            Wallet,
+        },
     },
     Response, WalletMethod, WalletOptions,
 };
@@ -22,7 +25,7 @@ use crate::{client::ClientMethodHandler, secret_manager::SecretManagerMethodHand
 /// The Wallet method handler.
 #[wasm_bindgen(js_name = WalletMethodHandler)]
 pub struct WalletMethodHandler {
-    wallet: Arc<Mutex<Option<Wallet>>>,
+    wallet: Arc<Mutex<Option<Wallet<SecretManager>>>>,
 }
 
 /// Creates a method handler with the given options.
@@ -111,7 +114,10 @@ pub async fn listen_wallet(
         event_types.push(wallet_event_type);
     }
 
-    let (tx, mut rx): (UnboundedSender<WalletEvent>, UnboundedReceiver<WalletEvent>) = unbounded_channel();
+    let (tx, mut rx): (
+        UnboundedSender<WalletEvent<serde_json::Value>>,
+        UnboundedReceiver<WalletEvent<serde_json::Value>>,
+    ) = unbounded_channel();
     method_handler
         .wallet
         .lock()

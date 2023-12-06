@@ -11,7 +11,7 @@ use iota_sdk::{
 use iota_sdk::{
     client::{
         constants::IOTA_COIN_TYPE,
-        secret::{mnemonic::MnemonicSecretManager, SecretManager},
+        secret::{mnemonic::MnemonicSecretManager, PublicKeyOptions},
     },
     crypto::keys::bip44::Bip44,
     types::block::address::Bech32Address,
@@ -89,28 +89,24 @@ async fn changed_bip_path() -> Result<()> {
     drop(wallet);
 
     let err = Wallet::builder()
-        .with_secret_manager(SecretManager::Mnemonic(MnemonicSecretManager::try_from_mnemonic(
-            mnemonic.clone(),
-        )?))
-        .with_public_key_options(Bip44::new(IOTA_COIN_TYPE))
+        .with_secret_manager(MnemonicSecretManager::try_from_mnemonic(mnemonic.clone())?)
+        .with_public_key_options(PublicKeyOptions::new(IOTA_COIN_TYPE))
+        .with_signing_options(Bip44::new(IOTA_COIN_TYPE))
         .with_storage_path(storage_path)
         .finish()
         .await;
 
     // Building the wallet with another coin type needs to return an error, because a different coin type was used in
     // the existing account
-    let mismatch_err: Result<Wallet> = Err(Error::PublicKeyOptionsMismatch {
-        new: Some(Bip44::new(IOTA_COIN_TYPE)),
-        old: Some(Bip44::new(SHIMMER_COIN_TYPE)),
-    });
-    assert!(matches!(err, mismatch_err));
+    assert!(matches!(err, Err(Error::PublicKeyOptionsMismatch{new, old})
+        if new == serde_json::to_value(PublicKeyOptions::new(IOTA_COIN_TYPE))? &&
+            old == serde_json::to_value(PublicKeyOptions::new(SHIMMER_COIN_TYPE))?
+    ));
 
     // Building the wallet with the same coin type still works
     assert!(
         Wallet::builder()
-            .with_secret_manager(SecretManager::Mnemonic(MnemonicSecretManager::try_from_mnemonic(
-                mnemonic,
-            )?))
+            .with_secret_manager(MnemonicSecretManager::try_from_mnemonic(mnemonic,)?)
             .with_storage_path(storage_path)
             .finish()
             .await
@@ -147,9 +143,10 @@ async fn iota_coin_type() -> Result<()> {
 
     #[allow(unused_mut)]
     let mut wallet_builder = Wallet::builder()
-        .with_secret_manager(SecretManager::Mnemonic(secret_manager))
+        .with_secret_manager(secret_manager)
         .with_client_options(client_options)
-        .with_public_key_options(Bip44::new(IOTA_COIN_TYPE));
+        .with_public_key_options(PublicKeyOptions::new(IOTA_COIN_TYPE))
+        .with_signing_options(Bip44::new(IOTA_COIN_TYPE));
 
     #[cfg(feature = "storage")]
     {

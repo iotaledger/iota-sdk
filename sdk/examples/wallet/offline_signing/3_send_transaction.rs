@@ -18,6 +18,7 @@ use iota_sdk::{
     wallet::Result,
     Wallet,
 };
+use serde::de::DeserializeOwned;
 
 const ONLINE_WALLET_DB_PATH: &str = "./examples/wallet/offline_signing/example-online-walletdb";
 const SIGNED_TRANSACTION_FILE_PATH: &str = "./examples/wallet/offline_signing/example.signed_transaction.json";
@@ -50,14 +51,16 @@ async fn main() -> Result<()> {
     Ok(())
 }
 
-async fn read_signed_transaction_from_file(client: &Client) -> Result<SignedTransactionData> {
+async fn read_signed_transaction_from_file<O: Clone + DeserializeOwned>(
+    client: &Client,
+) -> Result<SignedTransactionData<O>> {
     use tokio::io::AsyncReadExt;
 
     let mut file = tokio::io::BufReader::new(tokio::fs::File::open(SIGNED_TRANSACTION_FILE_PATH).await?);
     let mut json = String::new();
     file.read_to_string(&mut json).await?;
 
-    let dto = serde_json::from_str::<SignedTransactionDataDto>(&json)?;
+    let dto = serde_json::from_str::<SignedTransactionDataDto<O>>(&json)?;
 
     Ok(SignedTransactionData::try_from_dto_with_params(
         dto,

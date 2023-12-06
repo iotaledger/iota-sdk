@@ -9,7 +9,7 @@ use clap::{CommandFactory, Parser, Subcommand};
 use colored::Colorize;
 use iota_sdk::{
     client::request_funds_from_faucet,
-    crypto::signatures::ed25519::PublicKey,
+    crypto::{keys::bip44::Bip44, signatures::ed25519::PublicKey},
     types::{
         api::plugins::participation::types::ParticipationEventId,
         block::{
@@ -24,8 +24,8 @@ use iota_sdk::{
     },
     utils::ConvertTo,
     wallet::{
-        types::OutputData, ConsolidationParams, CreateNativeTokenParams, MintNftParams, OutputsToClaim,
-        SendNativeTokenParams, SendNftParams, SendParams, SyncOptions, TransactionOptions, Wallet,
+        types::OutputData, BlockIssuerKeySource, ConsolidationParams, CreateNativeTokenParams, MintNftParams,
+        OutputsToClaim, SendNativeTokenParams, SendNftParams, SendParams, SyncOptions, TransactionOptions,
     },
     U256,
 };
@@ -35,7 +35,7 @@ use self::completer::WalletCommandHelper;
 use crate::{
     error::Error,
     helper::{bytes_from_hex_or_file, to_utc_date_time},
-    println_log_error, println_log_info,
+    println_log_error, println_log_info, Wallet,
 };
 
 #[derive(Debug, Parser)]
@@ -595,7 +595,8 @@ pub async fn implicit_account_transition_command(
             PublicKey::try_from_bytes(prefix_hex::decode(s).map_err(|e| Error::Miscellaneous(e.to_string()))?)
                 .map_err(|e| Error::Miscellaneous(e.to_string()))
         })
-        .transpose()?;
+        .transpose()?
+        .map(BlockIssuerKeySource::Key);
     let transaction = wallet.implicit_account_transition(&output_id, public_key).await?;
 
     println_log_info!(
@@ -1015,7 +1016,7 @@ async fn print_wallet_address(wallet: &Wallet) -> Result<(), Error> {
         }
     }
 
-    let bip_path = wallet.public_key_options().await;
+    let bip_path = wallet.data().await.signing_options().clone();
     log = format!("{log}\nBIP path: {bip_path:?}");
 
     log = format!(
@@ -1235,7 +1236,7 @@ pub async fn prompt_internal(
     Ok(PromptResponse::Reprompt)
 }
 
-fn print_outputs(mut outputs: Vec<OutputData>, title: &str) -> Result<(), Error> {
+fn print_outputs(mut outputs: Vec<OutputData<Bip44>>, title: &str) -> Result<(), Error> {
     if outputs.is_empty() {
         println_log_info!("No outputs found");
     } else {

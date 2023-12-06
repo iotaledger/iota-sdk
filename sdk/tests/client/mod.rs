@@ -208,7 +208,7 @@ fn build_output_inner(build: Build) -> (Output, Option<Bip44>) {
     }
 }
 
-fn build_inputs<'a>(outputs: impl IntoIterator<Item = Build<'a>>) -> Vec<InputSigningData<O>> {
+fn build_inputs<'a>(outputs: impl IntoIterator<Item = Build<'a>>) -> Vec<InputSigningData<Bip44>> {
     outputs
         .into_iter()
         .map(|build| {

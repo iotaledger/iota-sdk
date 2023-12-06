@@ -17,6 +17,7 @@ use iota_sdk::{
     crypto::keys::bip44::Bip44,
     wallet::{types::Bip44Address, ClientOptions, Result, SendParams, Wallet},
 };
+use serde::Serialize;
 
 const ONLINE_WALLET_DB_PATH: &str = "./examples/wallet/offline_signing/example-online-walletdb";
 const ADDRESS_FILE_PATH: &str = "./examples/wallet/offline_signing/example.address.json";
@@ -48,7 +49,7 @@ async fn main() -> Result<()> {
         .with_secret_manager(SecretManager::Placeholder)
         .with_storage_path(ONLINE_WALLET_DB_PATH)
         .with_client_options(client_options.clone())
-        .with_public_key_options(Bip44::new(SHIMMER_COIN_TYPE))
+        // .with_public_key_options(())
         .with_address(address)
         .finish()
         .await?;
@@ -75,7 +76,9 @@ async fn read_address_from_file() -> Result<Bip44Address> {
     Ok(serde_json::from_str(&json)?)
 }
 
-async fn write_transaction_to_file(prepared_transaction: PreparedTransactionData) -> Result<()> {
+async fn write_transaction_to_file<O: Clone + Serialize>(
+    prepared_transaction: PreparedTransactionData<O>,
+) -> Result<()> {
     use tokio::io::AsyncWriteExt;
 
     let json = serde_json::to_string_pretty(&PreparedTransactionDataDto::from(&prepared_transaction))?;

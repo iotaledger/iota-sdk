@@ -4,7 +4,7 @@
 #[cfg(feature = "stronghold")]
 use std::path::PathBuf;
 
-use crypto::{keys::bip44::Bip44, signatures::ed25519::PublicKey};
+use crypto::keys::bip44::Bip44;
 use derivative::Derivative;
 #[cfg(feature = "events")]
 use iota_sdk::wallet::events::types::{WalletEvent, WalletEventType};
@@ -18,7 +18,6 @@ use iota_sdk::{
     client::{
         api::{input_selection::Burn, PreparedTransactionDataDto, SignedTransactionDataDto},
         node_manager::node::NodeAuth,
-        secret::GenerateAddressOptions,
     },
     types::block::{
         address::{Bech32Address, Hrp},
@@ -200,7 +199,7 @@ pub enum WalletMethod {
         #[serde(default)]
         public_key: Option<String>,
         #[serde(default)]
-        bip_path: Option<Bip44>,
+        public_key_options: Option<serde_json::Value>,
     },
     /// Returns the implicit accounts of the wallet.
     /// Expected response: [`OutputsData`](crate::Response::OutputsData)
@@ -391,19 +390,19 @@ pub enum WalletMethod {
     /// Expected response: [`SentTransaction`](crate::Response::SentTransaction)
     #[serde(rename_all = "camelCase")]
     SignAndSubmitTransaction {
-        prepared_transaction_data: PreparedTransactionDataDto,
+        prepared_transaction_data: PreparedTransactionDataDto<serde_json::Value>,
     },
     /// Sign a prepared transaction.
     /// Expected response: [`SignedTransactionData`](crate::Response::SignedTransactionData)
     #[serde(rename_all = "camelCase")]
     SignTransaction {
-        prepared_transaction_data: PreparedTransactionDataDto,
+        prepared_transaction_data: PreparedTransactionDataDto<serde_json::Value>,
     },
     /// Validate the transaction, submit it to a node and store it in the wallet.
     /// Expected response: [`SentTransaction`](crate::Response::SentTransaction)
     #[serde(rename_all = "camelCase")]
     SubmitAndStoreTransaction {
-        signed_transaction_data: SignedTransactionDataDto,
+        signed_transaction_data: SignedTransactionDataDto<serde_json::Value>,
     },
     /// Sync the wallet by fetching new information from the nodes. Will also reissue pending transactions
     /// if necessary. A custom default can be set using SetDefaultSyncOptions.
@@ -424,22 +423,9 @@ pub enum WalletMethod {
     /// Expected response: [`Ok`](crate::Response::Ok)
     #[cfg(feature = "events")]
     #[cfg_attr(docsrs, doc(cfg(feature = "events")))]
-    EmitTestEvent { event: WalletEvent },
+    EmitTestEvent { event: WalletEvent<serde_json::Value> },
 
     // TODO: reconsider whether to have the following methods on the wallet
-    /// Generate an address without storing it
-    /// Expected response: [`Bech32Address`](crate::Response::Bech32Address)
-    #[serde(rename_all = "camelCase")]
-    GenerateEd25519Address {
-        /// Account index
-        account_index: u32,
-        /// Account index
-        address_index: u32,
-        /// Options
-        options: Option<GenerateAddressOptions>,
-        /// Bech32 HRP
-        bech32_hrp: Option<Hrp>,
-    },
     /// Get the ledger nano status
     /// Expected response: [`LedgerNanoStatus`](crate::Response::LedgerNanoStatus)
     #[cfg(feature = "ledger_nano")]

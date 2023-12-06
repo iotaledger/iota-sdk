@@ -270,11 +270,11 @@ pub enum Response {
     OutputIds(Vec<OutputId>),
     /// Response for:
     /// - [`GetOutput`](crate::method::WalletMethod::GetOutput)
-    OutputData(Option<Box<OutputData>>),
+    OutputData(Option<Box<OutputData<serde_json::Value>>>),
     /// Response for:
     /// - [`Outputs`](crate::method::WalletMethod::Outputs),
     /// - [`UnspentOutputs`](crate::method::WalletMethod::UnspentOutputs)
-    OutputsData(Vec<OutputData>),
+    OutputsData(Vec<OutputData<serde_json::Value>>),
     /// Response for:
     /// - [`PrepareBurn`](crate::method::WalletMethod::PrepareBurn),
     /// - [`PrepareClaimOutputs`](crate::method::WalletMethod::PrepareClaimOutputs)
@@ -292,10 +292,10 @@ pub enum Response {
     /// - [`PrepareTransaction`](crate::method::WalletMethod::PrepareTransaction)
     /// - [`PrepareVote`](crate::method::WalletMethod::PrepareVote)
     /// - [`PrepareImplicitAccountTransition`](crate::method::WalletMethod::PrepareImplicitAccountTransition)
-    PreparedTransaction(PreparedTransactionDataDto),
+    PreparedTransaction(PreparedTransactionDataDto<serde_json::Value>),
     /// Response for:
     /// - [`PrepareCreateNativeToken`](crate::method::WalletMethod::PrepareCreateNativeToken),
-    PreparedCreateNativeTokenTransaction(PreparedCreateNativeTokenTransactionDto),
+    PreparedCreateNativeTokenTransaction(PreparedCreateNativeTokenTransactionDto<serde_json::Value>),
     /// Response for:
     /// - [`GetIncomingTransaction`](crate::method::WalletMethod::GetIncomingTransaction)
     /// - [`GetTransaction`](crate::method::WalletMethod::GetTransaction),
@@ -307,7 +307,7 @@ pub enum Response {
     Transactions(Vec<TransactionWithMetadataDto>),
     /// Response for:
     /// - [`SignTransaction`](crate::method::WalletMethod::SignTransaction)
-    SignedTransactionData(SignedTransactionDataDto),
+    SignedTransactionData(SignedTransactionDataDto<serde_json::Value>),
     /// Response for:
     /// - [`GetBalance`](crate::method::WalletMethod::GetBalance),
     /// - [`Sync`](crate::method::WalletMethod::Sync)

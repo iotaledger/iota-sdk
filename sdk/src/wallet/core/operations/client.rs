@@ -5,14 +5,13 @@ use std::collections::{HashMap, HashSet};
 
 use url::Url;
 
-use super::storage::SaveLoadWallet;
 use crate::{
     client::{
         node_manager::{
             builder::NodeManagerBuilder,
             node::{Node, NodeAuth, NodeDto},
         },
-        secret::SecretManage,
+        secret::{SecretManage, SecretManagerConfig},
         Client, ClientBuilder,
     },
     wallet::{Wallet, WalletBuilder},
@@ -28,10 +27,7 @@ impl<S: 'static + SecretManage> Wallet<S> {
     }
 }
 
-impl<S: 'static + SecretManage> Wallet<S>
-where
-    WalletBuilder<S>: SaveLoadWallet,
-{
+impl<S: 'static + SecretManagerConfig> Wallet<S> {
     pub async fn set_client_options(&self, client_options: ClientBuilder) -> crate::wallet::Result<()> {
         let ClientBuilder {
             node_manager_builder,

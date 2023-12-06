@@ -43,7 +43,6 @@ use crate::{
             input_selection::Error as InputSelectionError, transaction::validate_signed_transaction_payload_length,
             verify_semantic, PreparedTransactionData,
         },
-        constants::IOTA_COIN_TYPE,
         Error,
     },
     types::block::{
@@ -59,29 +58,23 @@ use crate::{
 };
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
-pub struct GeneratePublicKeyOptions {
+#[serde(rename_all = "camelCase")]
+pub struct PublicKeyOptions {
     pub coin_type: u32,
     pub account_index: u32,
     pub internal: bool,
     pub address_index: u32,
 }
 
-impl Default for GeneratePublicKeyOptions {
-    fn default() -> Self {
+impl PublicKeyOptions {
+    /// Create a new public key generation options
+    pub fn new(coin_type: u32) -> Self {
         Self {
-            coin_type: IOTA_COIN_TYPE,
+            coin_type,
             account_index: 0,
             internal: false,
             address_index: 0,
         }
-    }
-}
-
-impl GeneratePublicKeyOptions {
-    /// Set the coin type
-    pub fn with_coin_type(mut self, coin_type: u32) -> Self {
-        self.coin_type = coin_type;
-        self
     }
 
     /// Set the account index
@@ -96,17 +89,16 @@ impl GeneratePublicKeyOptions {
         self
     }
 
-    /// Set internal flag.
+    /// Set the address index.
     pub fn with_address_index(mut self, address_index: u32) -> Self {
         self.address_index = address_index;
         self
     }
 }
 
-impl From<Bip44> for GeneratePublicKeyOptions {
+impl From<Bip44> for PublicKeyOptions {
     fn from(value: Bip44) -> Self {
-        Self::default()
-            .with_coin_type(value.coin_type)
+        Self::new(value.coin_type)
             .with_account_index(value.account)
             .with_internal(value.change != 0)
             .with_address_index(value.address_index)
@@ -114,29 +106,23 @@ impl From<Bip44> for GeneratePublicKeyOptions {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
-pub struct GenerateMultiKeyOptions {
+#[serde(rename_all = "camelCase")]
+pub struct MultiKeyOptions {
     pub coin_type: u32,
     pub account_index: u32,
     pub internal: bool,
     pub address_range: Range<u32>,
 }
 
-impl Default for GenerateMultiKeyOptions {
-    fn default() -> Self {
+impl MultiKeyOptions {
+    /// Create a new multikey generation options
+    pub fn new(coin_type: u32) -> Self {
         Self {
-            coin_type: IOTA_COIN_TYPE,
+            coin_type,
             account_index: 0,
             internal: false,
             address_range: 0..1,
         }
-    }
-}
-
-impl GenerateMultiKeyOptions {
-    /// Set the coin type
-    pub fn with_coin_type(mut self, coin_type: u32) -> Self {
-        self.coin_type = coin_type;
-        self
     }
 
     /// Set the account index
@@ -151,7 +137,7 @@ impl GenerateMultiKeyOptions {
         self
     }
 
-    /// Set range to the builder
+    /// Set the address index range
     pub fn with_address_range(mut self, range: Range<u32>) -> Self {
         self.address_range = range;
         self
@@ -179,20 +165,6 @@ pub trait Sign<S>: Send + Sync {
     type Options: 'static + Send + Sync + Serialize + Clone + Debug + DeserializeOwned + PartialEq;
 
     async fn sign(&self, msg: &[u8], options: &Self::Options) -> crate::client::Result<S>;
-
-    /// Signs `signing_hash` using the given `options`, returning a [`SignatureUnlock`].
-    async fn signature_unlock(
-        &self,
-        signing_hash: &[u8; 32],
-        options: &Self::Options,
-    ) -> crate::client::Result<SignatureUnlock>
-    where
-        Signature: From<S>,
-    {
-        Ok(SignatureUnlock::new(Signature::from(
-            self.sign(signing_hash, options).await?,
-        )))
-    }
 }
 
 #[async_trait]
@@ -215,6 +187,17 @@ impl<T: Sign<Ed25519Signature>> SignBlock for T {}
 
 #[async_trait]
 pub trait SignTransaction: Sign<Ed25519Signature> {
+    /// Signs `transaction_signing_hash` using the given `options`, returning a [`SignatureUnlock`].
+    async fn signature_unlock(
+        &self,
+        transaction_signing_hash: &[u8; 32],
+        options: &Self::Options,
+    ) -> crate::client::Result<SignatureUnlock> {
+        Ok(SignatureUnlock::new(Signature::from(
+            self.sign(transaction_signing_hash, options).await?,
+        )))
+    }
+
     async fn transaction_unlocks(
         &self,
         prepared_transaction_data: &PreparedTransactionData<Self::Options>,
@@ -336,6 +319,24 @@ impl<T: Generate<ed25519::PublicKey> + SignTransaction + SignBlock> SecretManage
     type SigningOptions = <Self as Sign<Ed25519Signature>>::Options;
 }
 
+#[async_trait]
+pub trait SecretManageExt {
+    async fn generate<K>(&self, options: &Self::Options) -> crate::client::Result<K>
+    where
+        Self: Generate<K>,
+    {
+        Generate::<K>::generate(self, options).await
+    }
+
+    async fn sign<S>(&self, msg: &[u8], options: &Self::Options) -> crate::client::Result<S>
+    where
+        Self: Sign<S>,
+    {
+        Sign::<S>::sign(self, msg, options).await
+    }
+}
+impl<T> SecretManageExt for T {}
+
 pub trait SecretManagerConfig: SecretManage {
     type Config: Serialize + DeserializeOwned + Debug + Send + Sync;
 
@@ -344,6 +345,18 @@ pub trait SecretManagerConfig: SecretManage {
     fn from_config(config: &Self::Config) -> crate::client::Result<Self>
     where
         Self: Sized;
+}
+
+impl<T: SecretManagerConfig> SecretManagerConfig for Arc<T> {
+    type Config = T::Config;
+
+    fn to_config(&self) -> Option<Self::Config> {
+        self.as_ref().to_config()
+    }
+
+    fn from_config(config: &Self::Config) -> crate::client::Result<Self> {
+        Ok(Arc::new(T::from_config(config)?))
+    }
 }
 
 pub trait DowncastSecretManager {
@@ -498,7 +511,7 @@ impl<S: 'static + Send + Sync> DowncastSecretManager for S {
     }
 }
 
-pub trait AsAny: 'static + Send + Sync {
+pub trait AsAny: Send + Sync {
     fn as_any(&self) -> &(dyn std::any::Any + Send + Sync);
     fn as_any_mut(&mut self) -> &mut (dyn std::any::Any + Send + Sync);
 }

@@ -16,10 +16,14 @@
 
 use iota_sdk::{
     client::{
-        constants::SHIMMER_COIN_TYPE,
-        secret::{ledger_nano::LedgerSecretManager, SecretManager},
+        constants::IOTA_COIN_TYPE,
+        secret::{
+            ledger_nano::{LedgerOptions, LedgerSecretManager},
+            PublicKeyOptions, SecretManageExt,
+        },
     },
     crypto::keys::bip44::Bip44,
+    types::block::address::{Ed25519Address, ToBech32Ext},
     wallet::{ClientOptions, Result, Wallet},
 };
 
@@ -38,23 +42,28 @@ async fn main() -> Result<()> {
     }
 
     let client_options = ClientOptions::new().with_node(&std::env::var("NODE_URL").unwrap())?;
-    let secret_manager = LedgerSecretManager::new(true);
+    let secret_manager = std::sync::Arc::new(LedgerSecretManager::new(true));
     let wallet = Wallet::builder()
-        .with_secret_manager(SecretManager::LedgerNano(secret_manager))
+        .with_secret_manager(secret_manager.clone())
         .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
         .with_client_options(client_options)
-        .with_public_key_options(Bip44::new(SHIMMER_COIN_TYPE))
+        .with_public_key_options(LedgerOptions::new(PublicKeyOptions::new(IOTA_COIN_TYPE)))
+        .with_signing_options(Bip44::new(IOTA_COIN_TYPE))
         .finish()
         .await?;
 
-    println!("{:?}", wallet.get_ledger_nano_status().await?);
+    println!("{:?}", secret_manager.get_ledger_nano_status().await);
+
+    let hrp = wallet.client().get_bech32_hrp().await?;
 
     println!("Generating address...");
     let now = tokio::time::Instant::now();
-    let address = wallet.generate_ed25519_address(0, 0, None).await?;
+    let address = secret_manager
+        .generate::<Ed25519Address>(&LedgerOptions::new(PublicKeyOptions::new(IOTA_COIN_TYPE)))
+        .await?;
     println!("took: {:.2?}", now.elapsed());
 
-    println!("ADDRESS:\n{address:#?}");
+    println!("ADDRESS:\n{:#?}", address.to_bech32(hrp));
 
     let now = tokio::time::Instant::now();
     let balance = wallet.sync(None).await?;

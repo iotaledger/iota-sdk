@@ -1,7 +1,10 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use iota_sdk::client::{api::GetAddressesOptions, constants::ETHER_COIN_TYPE, secret::SecretManager};
+use iota_sdk::client::{
+    constants::{ETHER_COIN_TYPE, IOTA_COIN_TYPE, IOTA_TESTNET_BECH32_HRP},
+    secret::{PublicKeyOptions, SecretManager},
+};
 use iota_sdk_bindings_core::{call_secret_manager_method, Response, Result, SecretManagerMethod};
 use pretty_assertions::assert_eq;
 
@@ -12,7 +15,8 @@ async fn generate_ed25519_addresses() -> Result<()> {
     )?;
 
     let method = SecretManagerMethod::GenerateEd25519Addresses {
-        options: GetAddressesOptions::default().with_range(0..1),
+        bech32_hrp: IOTA_TESTNET_BECH32_HRP,
+        options: serde_json::to_value(PublicKeyOptions::new(IOTA_COIN_TYPE)).unwrap(),
     };
 
     let response = call_secret_manager_method(&secret_manager, method).await;
@@ -34,9 +38,7 @@ async fn generate_evm_addresses() -> Result<()> {
     )?;
 
     let method = SecretManagerMethod::GenerateEvmAddresses {
-        options: GetAddressesOptions::default()
-            .with_range(0..1)
-            .with_coin_type(ETHER_COIN_TYPE),
+        options: serde_json::to_value(PublicKeyOptions::new(ETHER_COIN_TYPE)).unwrap(),
     };
 
     let response = call_secret_manager_method(&secret_manager, method).await;

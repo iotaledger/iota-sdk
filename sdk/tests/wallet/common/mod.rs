@@ -8,7 +8,7 @@ use iota_sdk::{
     client::{
         constants::SHIMMER_COIN_TYPE,
         request_funds_from_faucet,
-        secret::{mnemonic::MnemonicSecretManager, SecretManager},
+        secret::{mnemonic::MnemonicSecretManager, PublicKeyOptions, SecretManage},
         Client,
     },
     wallet::{ClientOptions, Result, Wallet},
@@ -29,16 +29,21 @@ pub use self::constants::*;
 ///
 /// A Wallet
 #[allow(dead_code, unused_variables)]
-pub(crate) async fn make_wallet(storage_path: &str, mnemonic: Option<Mnemonic>, node: Option<&str>) -> Result<Wallet> {
+pub(crate) async fn make_wallet(
+    storage_path: &str,
+    mnemonic: Option<Mnemonic>,
+    node: Option<&str>,
+) -> Result<Wallet<MnemonicSecretManager>> {
     let client_options = ClientOptions::new().with_node(node.unwrap_or(NODE_LOCAL))?;
     let secret_manager =
         MnemonicSecretManager::try_from_mnemonic(mnemonic.unwrap_or_else(|| Client::generate_mnemonic().unwrap()))?;
 
     #[allow(unused_mut)]
     let mut wallet_builder = Wallet::builder()
-        .with_secret_manager(SecretManager::Mnemonic(secret_manager))
+        .with_secret_manager(secret_manager)
         .with_client_options(client_options)
-        .with_public_key_options(Bip44::new(SHIMMER_COIN_TYPE));
+        .with_public_key_options(PublicKeyOptions::new(SHIMMER_COIN_TYPE))
+        .with_signing_options(Bip44::new(SHIMMER_COIN_TYPE));
 
     #[cfg(feature = "storage")]
     {
@@ -50,16 +55,22 @@ pub(crate) async fn make_wallet(storage_path: &str, mnemonic: Option<Mnemonic>, 
 
 #[allow(dead_code, unused_variables)]
 #[cfg(feature = "ledger_nano")]
-pub(crate) async fn make_ledger_nano_wallet(storage_path: &str, node: Option<&str>) -> Result<Wallet> {
+pub(crate) async fn make_ledger_nano_wallet(
+    storage_path: &str,
+    node: Option<&str>,
+) -> Result<Wallet<iota_sdk::client::secret::ledger_nano::LedgerSecretManager>> {
+    use iota_sdk::client::secret::ledger_nano::{LedgerOptions, LedgerSecretManager};
+
     let client_options = ClientOptions::new().with_node(node.unwrap_or(NODE_LOCAL))?;
-    let mut secret_manager = iota_sdk::client::secret::ledger_nano::LedgerSecretManager::new(true);
+    let mut secret_manager = LedgerSecretManager::new(true);
     secret_manager.non_interactive = true;
 
     #[allow(unused_mut)]
     let mut wallet_builder = Wallet::builder()
-        .with_secret_manager(SecretManager::LedgerNano(secret_manager))
+        .with_secret_manager(secret_manager)
         .with_client_options(client_options)
-        .with_public_key_options(Bip44::new(SHIMMER_COIN_TYPE));
+        .with_public_key_options(LedgerOptions::new(PublicKeyOptions::new(SHIMMER_COIN_TYPE)))
+        .with_signing_options(Bip44::new(SHIMMER_COIN_TYPE));
     #[cfg(feature = "storage")]
     {
         wallet_builder = wallet_builder.with_storage_path(storage_path);
@@ -70,7 +81,7 @@ pub(crate) async fn make_ledger_nano_wallet(storage_path: &str, node: Option<&st
 
 /// Request funds from the faucet and sync the wallet.
 #[allow(dead_code)]
-pub(crate) async fn request_funds(wallet: &Wallet) -> Result<()> {
+pub(crate) async fn request_funds<S: 'static + SecretManage>(wallet: &Wallet<S>) -> Result<()> {
     request_funds_from_faucet(FAUCET_URL, &wallet.address().await).await?;
 
     // Continue only after funds are received

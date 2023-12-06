@@ -4,20 +4,19 @@
 #[cfg(feature = "stronghold")]
 use crypto::keys::bip39::Mnemonic;
 use crypto::keys::bip44::Bip44;
+#[cfg(feature = "ledger_nano")]
+use iota_sdk::client::secret::ledger_nano::{LedgerOptions, LedgerSecretManager};
 #[cfg(feature = "stronghold")]
 use iota_sdk::client::secret::stronghold::StrongholdSecretManager;
-#[cfg(feature = "ledger_nano")]
-use iota_sdk::client::secret::{ledger_nano::LedgerSecretManager, GenerateAddressOptions};
 #[cfg(feature = "events")]
 use iota_sdk::wallet::events::{WalletEvent, WalletEventType};
 use iota_sdk::{
     client::{
-        constants::IOTA_COIN_TYPE,
-        secret::{mnemonic::MnemonicSecretManager, SecretManager},
-        Error as ClientError,
+        constants::{IOTA_COIN_TYPE, SHIMMER_TESTNET_BECH32_HRP},
+        secret::{mnemonic::MnemonicSecretManager, PublicKeyOptions, SecretManageExt},
     },
-    types::block::address::ToBech32Ext,
-    wallet::{ClientOptions, Error, Result, Wallet},
+    types::block::address::{Ed25519Address, ToBech32Ext},
+    wallet::{ClientOptions, Result, Wallet},
 };
 use pretty_assertions::assert_eq;
 
@@ -33,9 +32,10 @@ async fn wallet_address_generation_mnemonic() -> Result<()> {
 
     #[allow(unused_mut)]
     let mut wallet_builder = Wallet::builder()
-        .with_secret_manager(SecretManager::Mnemonic(secret_manager))
+        .with_secret_manager(secret_manager)
         .with_client_options(client_options)
-        .with_public_key_options(Bip44::new(IOTA_COIN_TYPE));
+        .with_public_key_options(PublicKeyOptions::new(IOTA_COIN_TYPE))
+        .with_signing_options(Bip44::new(IOTA_COIN_TYPE));
 
     #[cfg(feature = "storage")]
     {
@@ -43,7 +43,9 @@ async fn wallet_address_generation_mnemonic() -> Result<()> {
     }
     let wallet = wallet_builder.finish().await?;
 
-    let address = wallet.generate_ed25519_address(0, 0, None).await?;
+    let address = (*wallet.get_secret_manager().read().await)
+        .generate::<Ed25519Address>(&PublicKeyOptions::new(IOTA_COIN_TYPE))
+        .await?;
 
     assert_eq!(
         address.to_bech32_unchecked("smr"),
@@ -72,16 +74,19 @@ async fn wallet_address_generation_stronghold() -> Result<()> {
     let client_options = ClientOptions::new().with_node(NODE_LOCAL)?;
     #[allow(unused_mut)]
     let mut wallet_builder = Wallet::builder()
-        .with_secret_manager(SecretManager::Stronghold(secret_manager))
+        .with_secret_manager(secret_manager)
         .with_client_options(client_options)
-        .with_public_key_options(Bip44::new(IOTA_COIN_TYPE));
+        .with_public_key_options(PublicKeyOptions::new(IOTA_COIN_TYPE))
+        .with_signing_options(Bip44::new(IOTA_COIN_TYPE));
     #[cfg(feature = "storage")]
     {
         wallet_builder = wallet_builder.with_storage_path(storage_path);
     }
     let wallet = wallet_builder.finish().await?;
 
-    let address = wallet.generate_ed25519_address(0, 0, None).await?;
+    let address = (*wallet.get_secret_manager().read().await)
+        .generate::<Ed25519Address>(&PublicKeyOptions::new(IOTA_COIN_TYPE))
+        .await?;
 
     assert_eq!(
         address.to_bech32_unchecked("smr"),
@@ -105,9 +110,10 @@ async fn wallet_address_generation_ledger() -> Result<()> {
 
     #[allow(unused_mut)]
     let mut wallet_builder = Wallet::builder()
-        .with_secret_manager(SecretManager::LedgerNano(secret_manager))
+        .with_secret_manager(secret_manager)
         .with_client_options(client_options)
-        .with_public_key_options(Bip44::new(IOTA_COIN_TYPE));
+        .with_public_key_options(LedgerOptions::new(PublicKeyOptions::new(IOTA_COIN_TYPE)))
+        .with_signing_options(Bip44::new(IOTA_COIN_TYPE));
 
     #[cfg(feature = "storage")]
     {
@@ -115,7 +121,10 @@ async fn wallet_address_generation_ledger() -> Result<()> {
     }
     let wallet = wallet_builder.finish().await?;
 
-    let address = wallet.generate_ed25519_address(0, 0, None).await?;
+    let address = (*wallet.get_secret_manager().read().await)
+        .generate::<Ed25519Address>(&LedgerOptions::new(PublicKeyOptions::new(IOTA_COIN_TYPE)))
+        .await?
+        .to_bech32(SHIMMER_TESTNET_BECH32_HRP);
 
     assert_eq!(
         address.to_bech32_unchecked("smr"),
@@ -140,16 +149,12 @@ async fn wallet_address_generation_ledger() -> Result<()> {
         })
         .await;
 
-    let address = wallet
-        .generate_ed25519_address(
-            0,
-            0,
-            Some(GenerateAddressOptions {
-                ledger_nano_prompt: true,
-                ..Default::default()
-            }),
+    let address = (*wallet.get_secret_manager().read().await)
+        .generate::<Ed25519Address>(
+            &LedgerOptions::new(PublicKeyOptions::new(IOTA_COIN_TYPE)).with_ledger_nano_prompt(true),
         )
-        .await?;
+        .await?
+        .to_bech32(SHIMMER_TESTNET_BECH32_HRP);
 
     assert_eq!(
         address.to_bech32_unchecked("smr"),

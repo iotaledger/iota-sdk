@@ -17,8 +17,8 @@
 use crypto::keys::bip44::Bip44;
 use iota_sdk::{
     client::{
-        constants::SHIMMER_COIN_TYPE,
-        secret::{mnemonic::MnemonicSecretManager, SecretManager},
+        constants::IOTA_COIN_TYPE,
+        secret::{mnemonic::MnemonicSecretManager, PublicKeyOptions, SecretManage},
     },
     types::block::payload::signed_transaction::TransactionId,
     wallet::{ClientOptions, Result, Wallet},
@@ -45,7 +45,7 @@ async fn main() -> Result<()> {
 
     println!("Sending '{}' coins to '{}'...", SEND_AMOUNT, RECV_ADDRESS);
     let transaction = wallet.send(SEND_AMOUNT, RECV_ADDRESS, None).await?;
-    wait_for_inclusion(&transaction.transaction_id, &wallet).await?;
+    wait_for_inclusion(&wallet, &transaction.transaction_id).await?;
 
     sync_print_balance(&wallet, false).await?;
 
@@ -53,24 +53,20 @@ async fn main() -> Result<()> {
     Ok(())
 }
 
-async fn create_wallet() -> Result<Wallet> {
+async fn create_wallet() -> Result<Wallet<MnemonicSecretManager>> {
     let client_options = ClientOptions::new().with_node(&std::env::var("NODE_URL").unwrap())?;
     let secret_manager = MnemonicSecretManager::try_from_mnemonic(std::env::var("MNEMONIC").unwrap())?;
     Wallet::builder()
-        .with_secret_manager(SecretManager::Mnemonic(secret_manager))
+        .with_secret_manager(secret_manager)
         .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
         .with_client_options(client_options)
-        .with_public_key_options(Bip44::new(SHIMMER_COIN_TYPE))
+        .with_public_key_options(PublicKeyOptions::new(IOTA_COIN_TYPE))
+        .with_signing_options(Bip44::new(IOTA_COIN_TYPE))
         .finish()
         .await
 }
 
-async fn print_address(wallet: &Wallet) -> Result<()> {
-    println!("Wallet address: {}", wallet.address().await);
-    Ok(())
-}
-
-async fn sync_print_balance(wallet: &Wallet, full_report: bool) -> Result<()> {
+async fn sync_print_balance<S: 'static + SecretManage>(wallet: &Wallet<S>, full_report: bool) -> Result<()> {
     let now = tokio::time::Instant::now();
     let balance = wallet.sync(None).await?;
     println!("Wallet synced in: {:.2?}", now.elapsed());
@@ -82,7 +78,10 @@ async fn sync_print_balance(wallet: &Wallet, full_report: bool) -> Result<()> {
     Ok(())
 }
 
-async fn wait_for_inclusion(transaction_id: &TransactionId, wallet: &Wallet) -> Result<()> {
+async fn wait_for_inclusion<S: 'static + SecretManage>(
+    wallet: &Wallet<S>,
+    transaction_id: &TransactionId,
+) -> Result<()> {
     println!(
         "Transaction sent: {}/transaction/{}",
         std::env::var("EXPLORER_URL").unwrap(),

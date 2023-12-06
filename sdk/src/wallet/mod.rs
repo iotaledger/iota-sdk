@@ -64,7 +64,7 @@ pub use self::{
                 send_nft::SendNftParams,
             },
             prepare_output::{Assets, Features, OutputParams, ReturnStrategy, StorageDeposit, Unlocks},
-            RemainderValueStrategy, TransactionOptions,
+            BlockIssuerKeySource, RemainderValueStrategy, TransactionOptions,
         },
     },
     types::OutputData,

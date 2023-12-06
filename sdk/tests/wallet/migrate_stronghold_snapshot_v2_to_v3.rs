@@ -5,14 +5,14 @@ use std::path::PathBuf;
 
 use iota_sdk::{
     client::{
-        api::GetAddressesOptions,
         constants::{IOTA_COIN_TYPE, SHIMMER_COIN_TYPE, SHIMMER_TESTNET_BECH32_HRP},
-        secret::{stronghold::StrongholdSecretManager, SecretManager},
+        secret::{stronghold::StrongholdSecretManager, MultiKeyOptions, PublicKeyOptions, SecretManageExt},
         storage::StorageAdapter,
         stronghold::{Error as StrongholdError, StrongholdAdapter},
         Error as ClientError,
     },
     crypto::keys::bip44::Bip44,
+    types::block::address::{Ed25519Address, ToBech32Ext},
     wallet::{ClientOptions, Error as WalletError, Wallet},
 };
 use pretty_assertions::assert_eq;
@@ -48,23 +48,18 @@ async fn stronghold_snapshot_v2_v3_migration() {
     )
     .unwrap();
 
-    let stronghold_secret_manager = SecretManager::Stronghold(
-        StrongholdSecretManager::builder()
-            .password("new_password".to_owned())
-            .build("./tests/wallet/fixtures/v3.stronghold")
-            .unwrap(),
-    );
+    let stronghold_secret_manager = StrongholdSecretManager::builder()
+        .password("new_password".to_owned())
+        .build("./tests/wallet/fixtures/v3.stronghold")
+        .unwrap();
 
     let addresses = stronghold_secret_manager
-        .generate_ed25519_addresses(
-            GetAddressesOptions::default()
-                .with_bech32_hrp(SHIMMER_TESTNET_BECH32_HRP)
-                .with_coin_type(SHIMMER_COIN_TYPE)
-                .with_account_index(0)
-                .with_range(0..10),
-        )
+        .generate::<Vec<Ed25519Address>>(&MultiKeyOptions::new(SHIMMER_COIN_TYPE).with_address_range(0..10))
         .await
-        .unwrap();
+        .unwrap()
+        .into_iter()
+        .map(|a| a.to_bech32(SHIMMER_TESTNET_BECH32_HRP))
+        .collect::<Vec<_>>();
 
     // mnemonic: winter spend artefact viable cigar pink easy charge ranch license coyote cage brass mushroom repair
     // game attack peanut glad rather cart obey famous chat
@@ -89,7 +84,8 @@ async fn stronghold_snapshot_v2_v3_migration() {
         .with_secret_manager(stronghold_secret_manager)
         .with_client_options(ClientOptions::new().with_node(NODE_LOCAL).unwrap())
         // Build with a different coin type, to check if it gets replaced by the one from the backup
-        .with_public_key_options(Bip44::new(IOTA_COIN_TYPE))
+        .with_public_key_options(PublicKeyOptions::new(IOTA_COIN_TYPE))
+        .with_signing_options(Bip44::new(IOTA_COIN_TYPE))
         .finish()
         .await
         .unwrap();
@@ -191,16 +187,13 @@ async fn stronghold_snapshot_v2_v3_migration_with_backup() {
     let coin_type = u32::from_le_bytes(coin_type_bytes.try_into().expect("invalid coin_type"));
     assert_eq!(coin_type, SHIMMER_COIN_TYPE);
 
-    let addresses = SecretManager::Stronghold(stronghold_secret_manager)
-        .generate_ed25519_addresses(
-            GetAddressesOptions::default()
-                .with_bech32_hrp(SHIMMER_TESTNET_BECH32_HRP)
-                .with_coin_type(SHIMMER_COIN_TYPE)
-                .with_account_index(0)
-                .with_range(0..10),
-        )
+    let addresses = stronghold_secret_manager
+        .generate::<Vec<Ed25519Address>>(&MultiKeyOptions::new(SHIMMER_COIN_TYPE).with_address_range(0..10))
         .await
-        .unwrap();
+        .unwrap()
+        .into_iter()
+        .map(|a| a.to_bech32(SHIMMER_TESTNET_BECH32_HRP))
+        .collect::<Vec<_>>();
 
     // mnemonic: brisk egg allow van merge process chest type dove bomb proud purity monitor snap load verb utility
     // hungry cube coast fetch pioneer gadget credit

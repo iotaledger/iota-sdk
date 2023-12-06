@@ -10,7 +10,8 @@ use crate::{
     wallet::Wallet,
 };
 
-impl Wallet {
+// TODO: Remove these and just use the secret manager directly
+impl Wallet<SecretManager> {
     /// Sets the Stronghold password
     pub async fn set_stronghold_password(&self, password: impl Into<Password> + Send) -> crate::wallet::Result<()> {
         let password = password.into();

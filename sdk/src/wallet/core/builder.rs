@@ -8,7 +8,6 @@ use std::sync::{atomic::AtomicUsize, Arc};
 use serde::Serialize;
 use tokio::sync::{Mutex, RwLock};
 
-use super::operations::storage::SaveLoadWallet;
 #[cfg(feature = "events")]
 use crate::wallet::events::EventEmitter;
 #[cfg(all(feature = "storage", not(feature = "rocksdb")))]
@@ -16,7 +15,7 @@ use crate::wallet::storage::adapter::memory::Memory;
 #[cfg(feature = "storage")]
 use crate::wallet::storage::{StorageManager, StorageOptions};
 use crate::{
-    client::secret::{SecretManage, SecretManager},
+    client::secret::{SecretManage, SecretManager, SecretManagerConfig},
     types::block::address::{Bech32Address, Ed25519Address, ToBech32Ext},
     wallet::{
         core::{WalletData, WalletInner},
@@ -28,7 +27,7 @@ use crate::{
 /// Builder for the wallet.
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub struct WalletBuilder<S: SecretManage = SecretManager> {
+pub struct WalletBuilder<S: SecretManage> {
     pub(crate) public_key_options: Option<S::GenerationOptions>,
     pub(crate) signing_options: Option<S::SigningOptions>,
     pub(crate) address: Option<Bech32Address>,
@@ -127,9 +126,8 @@ impl<S: 'static + SecretManage> WalletBuilder<S> {
     }
 }
 
-impl<S: 'static + SecretManage> WalletBuilder<S>
+impl<S: 'static + SecretManagerConfig> WalletBuilder<S>
 where
-    Self: SaveLoadWallet,
     for<'a> &'a S::GenerationOptions: PartialEq,
 {
     /// Builds the wallet.

@@ -4,15 +4,13 @@
 use crypto::keys::bip44::Bip44;
 use iota_sdk::{
     client::{
-        api::{
-            transaction::validate_signed_transaction_payload_length, verify_semantic, GetAddressesOptions,
-            PreparedTransactionData,
-        },
+        api::{transaction::validate_signed_transaction_payload_length, verify_semantic, PreparedTransactionData},
         constants::SHIMMER_COIN_TYPE,
-        secret::{SecretManage, SecretManager},
+        secret::{mnemonic::MnemonicSecretManager, PublicKeyOptions, SecretManageExt, SignTransaction},
         Client, Result,
     },
     types::block::{
+        address::{Address, Ed25519Address},
         input::{Input, UtxoInput},
         payload::{signed_transaction::Transaction, SignedTransactionPayload},
         protocol::protocol_parameters,
@@ -26,17 +24,13 @@ use crate::client::{build_inputs, build_outputs, Build::Basic};
 
 #[tokio::test]
 async fn single_ed25519_unlock() -> Result<()> {
-    let secret_manager = SecretManager::try_from_mnemonic(Client::generate_mnemonic()?)?;
+    let secret_manager = MnemonicSecretManager::try_from_mnemonic(Client::generate_mnemonic()?)?;
 
-    let address_0 = secret_manager
-        .generate_ed25519_addresses(
-            GetAddressesOptions::default()
-                .with_coin_type(SHIMMER_COIN_TYPE)
-                .with_range(0..1),
-        )
-        .await?[0]
-        .clone()
-        .into_inner();
+    let address_0 = Address::from(
+        secret_manager
+            .generate::<Ed25519Address>(&PublicKeyOptions::new(SHIMMER_COIN_TYPE))
+            .await?,
+    );
 
     let protocol_parameters = protocol_parameters();
 
@@ -79,7 +73,9 @@ async fn single_ed25519_unlock() -> Result<()> {
         remainder: None,
     };
 
-    let unlocks = secret_manager.transaction_unlocks(&prepared_transaction_data).await?;
+    let unlocks = secret_manager
+        .transaction_unlocks(&prepared_transaction_data, &protocol_parameters)
+        .await?;
 
     assert_eq!(unlocks.len(), 1);
     assert_eq!((*unlocks).first().unwrap().kind(), SignatureUnlock::KIND);
@@ -99,17 +95,13 @@ async fn single_ed25519_unlock() -> Result<()> {
 
 #[tokio::test]
 async fn ed25519_reference_unlocks() -> Result<()> {
-    let secret_manager = SecretManager::try_from_mnemonic(Client::generate_mnemonic()?)?;
+    let secret_manager = MnemonicSecretManager::try_from_mnemonic(Client::generate_mnemonic()?)?;
 
-    let address_0 = secret_manager
-        .generate_ed25519_addresses(
-            GetAddressesOptions::default()
-                .with_coin_type(SHIMMER_COIN_TYPE)
-                .with_range(0..1),
-        )
-        .await?[0]
-        .clone()
-        .into_inner();
+    let address_0 = Address::from(
+        secret_manager
+            .generate::<Ed25519Address>(&PublicKeyOptions::new(SHIMMER_COIN_TYPE))
+            .await?,
+    );
 
     let protocol_parameters = protocol_parameters();
 
@@ -174,7 +166,9 @@ async fn ed25519_reference_unlocks() -> Result<()> {
         remainder: None,
     };
 
-    let unlocks = secret_manager.transaction_unlocks(&prepared_transaction_data).await?;
+    let unlocks = secret_manager
+        .transaction_unlocks(&prepared_transaction_data, &protocol_parameters)
+        .await?;
 
     assert_eq!(unlocks.len(), 3);
     assert_eq!((*unlocks).first().unwrap().kind(), SignatureUnlock::KIND);
@@ -206,26 +200,18 @@ async fn ed25519_reference_unlocks() -> Result<()> {
 
 #[tokio::test]
 async fn two_signature_unlocks() -> Result<()> {
-    let secret_manager = SecretManager::try_from_mnemonic(Client::generate_mnemonic()?)?;
+    let secret_manager = MnemonicSecretManager::try_from_mnemonic(Client::generate_mnemonic()?)?;
 
-    let address_0 = secret_manager
-        .generate_ed25519_addresses(
-            GetAddressesOptions::default()
-                .with_coin_type(SHIMMER_COIN_TYPE)
-                .with_range(0..1),
-        )
-        .await?[0]
-        .clone()
-        .into_inner();
-    let address_1 = secret_manager
-        .generate_ed25519_addresses(
-            GetAddressesOptions::default()
-                .with_coin_type(SHIMMER_COIN_TYPE)
-                .with_range(1..2),
-        )
-        .await?[0]
-        .clone()
-        .into_inner();
+    let address_0 = Address::from(
+        secret_manager
+            .generate::<Ed25519Address>(&PublicKeyOptions::new(SHIMMER_COIN_TYPE))
+            .await?,
+    );
+    let address_1 = Address::from(
+        secret_manager
+            .generate::<Ed25519Address>(&PublicKeyOptions::new(SHIMMER_COIN_TYPE).with_address_index(1))
+            .await?,
+    );
 
     let protocol_parameters = protocol_parameters();
 
@@ -280,7 +266,9 @@ async fn two_signature_unlocks() -> Result<()> {
         remainder: None,
     };
 
-    let unlocks = secret_manager.transaction_unlocks(&prepared_transaction_data).await?;
+    let unlocks = secret_manager
+        .transaction_unlocks(&prepared_transaction_data, &protocol_parameters)
+        .await?;
 
     assert_eq!(unlocks.len(), 2);
     assert_eq!((*unlocks).first().unwrap().kind(), SignatureUnlock::KIND);

@@ -3,6 +3,7 @@
 
 use std::str::FromStr;
 
+use crypto::keys::bip44::Bip44;
 use iota_sdk::{
     client::api::input_selection::{Burn, Error, InputSelection},
     types::block::{address::Address, output::AccountId, protocol::protocol_parameters},
@@ -31,7 +32,7 @@ fn no_inputs() {
         None,
     )]);
 
-    let selected = InputSelection::new(
+    let selected = InputSelection::<Bip44>::new(
         inputs,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],

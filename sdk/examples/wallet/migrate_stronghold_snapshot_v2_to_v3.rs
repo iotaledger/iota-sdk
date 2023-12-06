@@ -7,12 +7,14 @@
 //! cargo run --release --all-features --example migrate_stronghold_snapshot_v2_to_v3
 //! ```
 
-use iota_sdk::client::{
-    api::GetAddressesOptions,
-    constants::{SHIMMER_COIN_TYPE, SHIMMER_TESTNET_BECH32_HRP},
-    secret::{stronghold::StrongholdSecretManager, SecretManager},
-    stronghold::StrongholdAdapter,
-    Result,
+use iota_sdk::{
+    client::{
+        constants::{IOTA_COIN_TYPE, IOTA_TESTNET_BECH32_HRP},
+        secret::{stronghold::StrongholdSecretManager, PublicKeyOptions, SecretManageExt},
+        stronghold::StrongholdAdapter,
+        Result,
+    },
+    types::block::address::{Ed25519Address, ToBech32Ext},
 };
 
 const V2_PATH: &str = "./tests/wallet/fixtures/v2.stronghold";
@@ -48,18 +50,13 @@ async fn main() -> Result<()> {
         .build(V3_PATH)?;
 
     // Generate addresses with custom account index and range
-    let addresses = SecretManager::Stronghold(stronghold_secret_manager)
-        .generate_ed25519_addresses(
-            GetAddressesOptions::default()
-                .with_bech32_hrp(SHIMMER_TESTNET_BECH32_HRP)
-                .with_coin_type(SHIMMER_COIN_TYPE)
-                .with_account_index(0)
-                .with_range(0..1),
-        )
+    let address = stronghold_secret_manager
+        .generate::<Ed25519Address>(&PublicKeyOptions::new(IOTA_COIN_TYPE))
         .await
-        .unwrap();
+        .unwrap()
+        .to_bech32(IOTA_TESTNET_BECH32_HRP);
 
-    println!("First public address: {}", addresses[0]);
+    println!("First public address: {address}");
 
     Ok(())
 }

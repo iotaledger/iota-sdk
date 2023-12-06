@@ -7,13 +7,13 @@ use clap::{builder::BoolishValueParser, Args, CommandFactory, Parser, Subcommand
 use iota_sdk::{
     client::{
         constants::SHIMMER_COIN_TYPE,
-        secret::{stronghold::StrongholdSecretManager, SecretManager},
+        secret::{stronghold::StrongholdSecretManager, PublicKeyOptions},
         stronghold::StrongholdAdapter,
         utils::Password,
     },
     crypto::keys::bip44::Bip44,
     types::block::address::Bech32Address,
-    wallet::{ClientOptions, Wallet},
+    wallet::ClientOptions,
 };
 use log::LevelFilter;
 
@@ -23,7 +23,7 @@ use crate::{
         check_file_exists, enter_or_generate_mnemonic, generate_mnemonic, get_alias, get_decision, get_password,
         import_mnemonic,
     },
-    println_log_error, println_log_info,
+    println_log_error, println_log_info, Wallet,
 };
 
 const DEFAULT_LOG_LEVEL: &str = "debug";
@@ -272,7 +272,6 @@ pub async fn init_command(
         .password(password)
         .build(snapshot_path)?;
     secret_manager.store_mnemonic(mnemonic).await?;
-    let secret_manager = SecretManager::Stronghold(secret_manager);
 
     let alias = if get_decision("Do you want to assign an alias to your wallet?")? {
         Some(get_alias("New wallet alias").await?)
@@ -285,11 +284,19 @@ pub async fn init_command(
         .map(|addr| Bech32Address::from_str(&addr))
         .transpose()?;
 
+    let public_key_options = init_params.bip_path.map(|bip| {
+        PublicKeyOptions::new(bip.coin_type)
+            .with_account_index(bip.account)
+            .with_internal(bip.change != 0)
+            .with_address_index(bip.address_index)
+    });
+
     Ok(Wallet::builder()
         .with_secret_manager(secret_manager)
         .with_client_options(ClientOptions::new().with_node(init_params.node_url.as_str())?)
         .with_storage_path(storage_path.to_str().expect("invalid unicode"))
-        .with_public_key_options(init_params.bip_path)
+        .with_public_key_options(public_key_options)
+        .with_signing_options(init_params.bip_path)
         .with_address(address)
         .with_alias(alias)
         .finish()
@@ -332,11 +339,9 @@ pub async fn restore_command(storage_path: &Path, snapshot_path: &Path, backup_p
             snapshot_path.to_str().unwrap()
         );
         let password = get_password("Stronghold password", false)?;
-        let secret_manager = SecretManager::Stronghold(
-            StrongholdSecretManager::builder()
-                .password(password)
-                .build(snapshot_path)?,
-        );
+        let secret_manager = StrongholdSecretManager::builder()
+            .password(password)
+            .build(snapshot_path)?;
         builder = builder.with_secret_manager(secret_manager);
     }
 
@@ -345,7 +350,8 @@ pub async fn restore_command(storage_path: &Path, snapshot_path: &Path, backup_p
         .with_client_options(ClientOptions::new().with_node(DEFAULT_NODE_URL)?)
         .with_storage_path(storage_path.to_str().expect("invalid unicode"))
         // Will be overwritten by the backup's value.
-        .with_public_key_options(Bip44::new(SHIMMER_COIN_TYPE))
+        .with_public_key_options(PublicKeyOptions::new(SHIMMER_COIN_TYPE))
+        .with_signing_options(Bip44::new(SHIMMER_COIN_TYPE))
         .finish()
         .await?;
 
@@ -385,11 +391,11 @@ pub async fn unlock_wallet(
 ) -> Result<Wallet, Error> {
     let secret_manager = if let Some(password) = password.into() {
         let snapshot_path = snapshot_path.into();
-        Some(SecretManager::Stronghold(
+        Some(
             StrongholdSecretManager::builder()
                 .password(password)
                 .build(snapshot_path.ok_or(Error::Miscellaneous("Snapshot file path is not given".to_string()))?)?,
-        ))
+        )
     } else {
         None
     };

@@ -3,6 +3,7 @@
 
 use std::str::FromStr;
 
+use crypto::keys::bip44::Bip44;
 use iota_sdk::{
     client::{
         api::input_selection::{Burn, Error, InputSelection, Requirement},
@@ -1234,7 +1235,7 @@ fn changed_immutable_metadata() {
             .finish_output()
             .unwrap();
 
-    let inputs = [InputSigningData {
+    let inputs = [InputSigningData::<Bip44> {
         output: nft_output.clone(),
         output_metadata: rand_output_metadata(),
         signing_options: None,

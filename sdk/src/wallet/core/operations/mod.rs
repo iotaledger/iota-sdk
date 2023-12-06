@@ -4,8 +4,7 @@
 pub(crate) mod address_generation;
 pub(crate) mod background_syncing;
 pub(crate) mod client;
-#[cfg(feature = "ledger_nano")]
-pub(crate) mod ledger_nano;
+#[cfg(feature = "storage")]
 pub(crate) mod storage;
 #[cfg(feature = "stronghold")]
 pub(crate) mod stronghold;

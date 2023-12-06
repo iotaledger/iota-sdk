@@ -122,7 +122,7 @@ mod tests {
 
     #[test]
     fn events() {
-        let mut emitter = EventEmitter::new();
+        let mut emitter = EventEmitter::<()>::new();
         let event_counter = Arc::new(AtomicUsize::new(0));
 
         // single event

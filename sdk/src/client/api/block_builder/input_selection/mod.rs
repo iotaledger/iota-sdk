@@ -57,7 +57,7 @@ pub struct Selected<O> {
     pub remainder: Option<RemainderData<O>>,
 }
 
-impl<O: Clone + std::fmt::Debug> InputSelection<O> {
+impl<O: 'static + Clone + std::fmt::Debug> InputSelection<O> {
     fn required_account_nft_addresses(&self, input: &InputSigningData<O>) -> Result<Option<Requirement>, Error> {
         let required_address = input
             .output

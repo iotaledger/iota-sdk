@@ -16,11 +16,16 @@
 //! cargo run --release --all-features --example ledger_nano
 //! ```
 
-use iota_sdk::client::{
-    api::GetAddressesOptions,
-    constants::{SHIMMER_COIN_TYPE, SHIMMER_TESTNET_BECH32_HRP},
-    secret::{ledger_nano::LedgerSecretManager, SecretManager},
-    Result,
+use iota_sdk::{
+    client::{
+        constants::{IOTA_COIN_TYPE, IOTA_TESTNET_BECH32_HRP},
+        secret::{
+            ledger_nano::{LedgerOptions, LedgerSecretManager},
+            MultiKeyOptions, SecretManageExt,
+        },
+        Result,
+    },
+    types::block::address::{Ed25519Address, ToBech32Ext},
 };
 
 #[tokio::main]
@@ -28,22 +33,19 @@ async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
-    let ledger_nano = LedgerSecretManager::new(true);
+    let secret_manager = LedgerSecretManager::new(true);
 
-    println!("{:?}", ledger_nano.get_ledger_nano_status().await);
-
-    let secret_manager = SecretManager::LedgerNano(ledger_nano);
+    println!("{:?}", secret_manager.get_ledger_nano_status().await);
 
     // Generate addresses with custom account index and range
     let addresses = secret_manager
-        .generate_ed25519_addresses(
-            GetAddressesOptions::default()
-                .with_bech32_hrp(SHIMMER_TESTNET_BECH32_HRP)
-                .with_coin_type(SHIMMER_COIN_TYPE)
-                .with_account_index(0)
-                .with_range(0..2),
-        )
-        .await?;
+        .generate::<Vec<Ed25519Address>>(&LedgerOptions::new(
+            MultiKeyOptions::new(IOTA_COIN_TYPE).with_address_range(0..2),
+        ))
+        .await?
+        .into_iter()
+        .map(|a| a.to_bech32(IOTA_TESTNET_BECH32_HRP))
+        .collect::<Vec<_>>();
 
     println!("List of generated public addresses:\n{addresses:?}\n");
 

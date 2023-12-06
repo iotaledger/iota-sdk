@@ -13,9 +13,10 @@ use iota_sdk::{
     client::{
         constants::SHIMMER_COIN_TYPE,
         hex_public_key_to_bech32_address,
-        secret::{stronghold::StrongholdSecretManager, SecretManage, SecretManager},
+        secret::{stronghold::StrongholdSecretManager, SecretManage, SecretManageExt, SecretManager},
     },
     crypto::keys::bip39::Mnemonic,
+    types::block::signature::Ed25519Signature,
     wallet::Result,
 };
 
@@ -48,9 +49,7 @@ async fn main() -> Result<()> {
         .with_address_index(ADDRESS_INDEX);
 
     let message = FOUNDRY_METADATA.as_bytes();
-    let signature = SecretManager::Stronghold(stronghold)
-        .sign_ed25519(message, bip44_chain)
-        .await?;
+    let signature = stronghold.sign::<Ed25519Signature>(message, &bip44_chain).await?;
     println!(
         "Public key: {}\nSignature: {}",
         prefix_hex::encode(signature.public_key().as_ref()),

@@ -9,10 +9,7 @@ use std::{
     sync::{atomic::AtomicUsize, Arc},
 };
 
-use crypto::keys::{
-    bip39::{Mnemonic, MnemonicRef},
-    bip44::Bip44,
-};
+use crypto::keys::bip39::{Mnemonic, MnemonicRef};
 use serde::{Deserialize, Serialize};
 use tokio::sync::{Mutex, RwLock};
 
@@ -44,7 +41,7 @@ use crate::{
 
 /// The stateful wallet used to interact with an IOTA network.
 #[derive(Debug)]
-pub struct Wallet<S: SecretManage = SecretManager> {
+pub struct Wallet<S: SecretManage> {
     pub(crate) inner: Arc<WalletInner<S>>,
     pub(crate) data: Arc<RwLock<WalletData<S>>>,
 }
@@ -75,7 +72,7 @@ impl<S: 'static + SecretManage> Wallet<S> {
 
 /// Wallet inner.
 #[derive(Debug)]
-pub struct WalletInner<S: SecretManage = SecretManager> {
+pub struct WalletInner<S: SecretManage> {
     // mutex to prevent multiple sync calls at the same or almost the same time, the u128 is a timestamp
     // if the last synced time was < `MIN_SYNC_INTERVAL` second ago, we don't sync, but only calculate the balance
     // again, because sending transactions can change that
@@ -84,7 +81,6 @@ pub struct WalletInner<S: SecretManage = SecretManager> {
     // 0 = not running, 1 = running, 2 = stopping
     pub(crate) background_syncing_status: AtomicUsize,
     pub(crate) client: Client,
-    // TODO: make this optional?
     pub(crate) secret_manager: Arc<RwLock<S>>,
     #[cfg(feature = "events")]
     pub(crate) event_emitter: tokio::sync::RwLock<EventEmitter<S::SigningOptions>>,
@@ -95,7 +91,6 @@ pub struct WalletInner<S: SecretManage = SecretManager> {
 }
 
 /// Wallet data.
-#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct WalletData<S: SecretManage> {
     /// The public key generation options.
     pub(crate) public_key_options: S::GenerationOptions,
@@ -236,6 +231,16 @@ impl<S: SecretManage> WalletData<S> {
         })
     }
 
+    /// Returns the public key options.
+    pub fn public_key_options(&self) -> &S::GenerationOptions {
+        &self.public_key_options
+    }
+
+    /// Returns the signing options.
+    pub fn signing_options(&self) -> &S::SigningOptions {
+        &self.signing_options
+    }
+
     /// Returns outputs map of the wallet.
     pub fn outputs(&self) -> &HashMap<OutputId, OutputData<S::SigningOptions>> {
         &self.outputs
@@ -349,6 +354,63 @@ impl<S: SecretManage> WalletData<S> {
         self.pending_transactions
             .iter()
             .filter_map(|transaction_id| self.get_transaction(transaction_id))
+    }
+}
+
+impl<S: SecretManage> PartialEq for WalletData<S> {
+    fn eq(&self, other: &Self) -> bool {
+        self.public_key_options == other.public_key_options
+            && self.signing_options == other.signing_options
+            && self.address == other.address
+            && self.alias == other.alias
+            && self.outputs == other.outputs
+            && self.locked_outputs == other.locked_outputs
+            && self.unspent_outputs == other.unspent_outputs
+            && self.transactions == other.transactions
+            && self.pending_transactions == other.pending_transactions
+            && self.incoming_transactions == other.incoming_transactions
+            && self.inaccessible_incoming_transactions == other.inaccessible_incoming_transactions
+            && self.native_token_foundries == other.native_token_foundries
+    }
+}
+impl<S: SecretManage> Eq for WalletData<S> {}
+impl<S: SecretManage> core::fmt::Debug for WalletData<S> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("WalletData")
+            .field("public_key_options", &self.public_key_options)
+            .field("signing_options", &self.signing_options)
+            .field("address", &self.address)
+            .field("alias", &self.alias)
+            .field("outputs", &self.outputs)
+            .field("locked_outputs", &self.locked_outputs)
+            .field("unspent_outputs", &self.unspent_outputs)
+            .field("transactions", &self.transactions)
+            .field("pending_transactions", &self.pending_transactions)
+            .field("incoming_transactions", &self.incoming_transactions)
+            .field(
+                "inaccessible_incoming_transactions",
+                &self.inaccessible_incoming_transactions,
+            )
+            .field("native_token_foundries", &self.native_token_foundries)
+            .finish()
+    }
+}
+impl<S: SecretManage> Clone for WalletData<S> {
+    fn clone(&self) -> Self {
+        Self {
+            public_key_options: self.public_key_options.clone(),
+            signing_options: self.signing_options.clone(),
+            address: self.address.clone(),
+            alias: self.alias.clone(),
+            outputs: self.outputs.clone(),
+            locked_outputs: self.locked_outputs.clone(),
+            unspent_outputs: self.unspent_outputs.clone(),
+            transactions: self.transactions.clone(),
+            pending_transactions: self.pending_transactions.clone(),
+            incoming_transactions: self.incoming_transactions.clone(),
+            inaccessible_incoming_transactions: self.inaccessible_incoming_transactions.clone(),
+            native_token_foundries: self.native_token_foundries.clone(),
+        }
     }
 }
 
@@ -608,11 +670,12 @@ where
 mod test {
     use core::str::FromStr;
 
+    use crypto::keys::bip44::Bip44;
     use pretty_assertions::assert_eq;
 
     use super::*;
     use crate::{
-        client::secret::GeneratePublicKeyOptions,
+        client::secret::{mnemonic::MnemonicSecretManager, PublicKeyOptions},
         types::block::{
             address::{Address, Ed25519Address},
             input::{Input, UtxoInput},
@@ -696,7 +759,7 @@ mod test {
         );
 
         let wallet_data = WalletData {
-            public_key_options: GeneratePublicKeyOptions::default().with_coin_type(4218),
+            public_key_options: PublicKeyOptions::new(4218),
             signing_options: Bip44::new(4218),
             address: crate::types::block::address::Bech32Address::from_str(
                 "rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy",
@@ -713,16 +776,18 @@ mod test {
             native_token_foundries: HashMap::new(),
         };
 
-        let deser_wallet_data = WalletData::try_from_dto(
-            serde_json::from_str::<WalletDataDto>(&serde_json::to_string(&WalletDataDto::from(&wallet_data)).unwrap())
-                .unwrap(),
+        let deser_wallet_data = WalletData::<MnemonicSecretManager>::try_from_dto(
+            serde_json::from_str::<WalletDataDto<_, _>>(
+                &serde_json::to_string(&WalletDataDto::from(&wallet_data)).unwrap(),
+            )
+            .unwrap(),
         )
         .unwrap();
 
         assert_eq!(wallet_data, deser_wallet_data);
     }
 
-    impl WalletData {
+    impl<S: 'static + SecretManage<GenerationOptions = PublicKeyOptions, SigningOptions = Bip44>> WalletData<S> {
         /// Returns a mock of this type with the following values:
         /// index: 0, coin_type: 4218, alias: "Alice", address:
         /// rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy, all other fields are set to their Rust
@@ -730,7 +795,7 @@ mod test {
         #[cfg(feature = "storage")]
         pub(crate) fn mock() -> Self {
             Self {
-                public_key_options: GeneratePublicKeyOptions::default().with_coin_type(4218),
+                public_key_options: PublicKeyOptions::new(4218),
                 signing_options: Bip44::new(4218),
                 address: crate::types::block::address::Bech32Address::from_str(
                     "rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy",

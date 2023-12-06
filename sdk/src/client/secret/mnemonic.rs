@@ -16,7 +16,8 @@ use zeroize::Zeroizing;
 use crate::{
     client::{
         secret::{
-            types::EvmSignature, Generate, GenerateMultiKeyOptions, GeneratePublicKeyOptions, Sign, SignTransaction,
+            types::EvmSignature, Generate, MultiKeyOptions, PublicKeyOptions, SecretManagerConfig, Sign,
+            SignTransaction,
         },
         Client, Error,
     },
@@ -36,7 +37,7 @@ impl std::fmt::Debug for MnemonicSecretManager {
 
 #[async_trait]
 impl Generate<ed25519::PublicKey> for MnemonicSecretManager {
-    type Options = GeneratePublicKeyOptions;
+    type Options = PublicKeyOptions;
 
     async fn generate(&self, options: &Self::Options) -> crate::client::Result<ed25519::PublicKey> {
         let chain = Bip44::new(options.coin_type)
@@ -54,7 +55,7 @@ impl Generate<ed25519::PublicKey> for MnemonicSecretManager {
 
 #[async_trait]
 impl Generate<Ed25519Address> for MnemonicSecretManager {
-    type Options = GeneratePublicKeyOptions;
+    type Options = PublicKeyOptions;
 
     async fn generate(&self, options: &Self::Options) -> crate::client::Result<Ed25519Address> {
         let public_key: ed25519::PublicKey = self.generate(options).await?;
@@ -64,15 +65,14 @@ impl Generate<Ed25519Address> for MnemonicSecretManager {
 
 #[async_trait]
 impl Generate<Vec<ed25519::PublicKey>> for MnemonicSecretManager {
-    type Options = GenerateMultiKeyOptions;
+    type Options = MultiKeyOptions;
 
     async fn generate(&self, options: &Self::Options) -> crate::client::Result<Vec<ed25519::PublicKey>> {
         let mut res = Vec::with_capacity(options.address_range.len());
         for address_index in options.address_range.clone() {
             let public_key: ed25519::PublicKey = self
                 .generate(
-                    &GeneratePublicKeyOptions::default()
-                        .with_coin_type(options.coin_type)
+                    &PublicKeyOptions::new(options.coin_type)
                         .with_account_index(options.account_index)
                         .with_internal(options.internal)
                         .with_address_index(address_index),
@@ -86,7 +86,7 @@ impl Generate<Vec<ed25519::PublicKey>> for MnemonicSecretManager {
 
 #[async_trait]
 impl Generate<Vec<Ed25519Address>> for MnemonicSecretManager {
-    type Options = GenerateMultiKeyOptions;
+    type Options = MultiKeyOptions;
 
     async fn generate(&self, options: &Self::Options) -> crate::client::Result<Vec<Ed25519Address>> {
         let public_keys: Vec<ed25519::PublicKey> = self.generate(options).await?;
@@ -99,7 +99,7 @@ impl Generate<Vec<Ed25519Address>> for MnemonicSecretManager {
 
 #[async_trait]
 impl Generate<secp256k1_ecdsa::PublicKey> for MnemonicSecretManager {
-    type Options = GeneratePublicKeyOptions;
+    type Options = PublicKeyOptions;
 
     async fn generate(&self, options: &Self::Options) -> crate::client::Result<secp256k1_ecdsa::PublicKey> {
         let chain = Bip44::new(options.coin_type)
@@ -117,7 +117,7 @@ impl Generate<secp256k1_ecdsa::PublicKey> for MnemonicSecretManager {
 
 #[async_trait]
 impl Generate<EvmAddress> for MnemonicSecretManager {
-    type Options = GeneratePublicKeyOptions;
+    type Options = PublicKeyOptions;
 
     async fn generate(&self, options: &Self::Options) -> crate::client::Result<EvmAddress> {
         let public_key: secp256k1_ecdsa::PublicKey = self.generate(options).await?;
@@ -127,7 +127,7 @@ impl Generate<EvmAddress> for MnemonicSecretManager {
 
 #[async_trait]
 impl Generate<Vec<secp256k1_ecdsa::PublicKey>> for MnemonicSecretManager {
-    type Options = GenerateMultiKeyOptions;
+    type Options = MultiKeyOptions;
 
     async fn generate(&self, options: &Self::Options) -> crate::client::Result<Vec<secp256k1_ecdsa::PublicKey>> {
         let mut res = Vec::with_capacity(options.address_range.len());
@@ -135,8 +135,7 @@ impl Generate<Vec<secp256k1_ecdsa::PublicKey>> for MnemonicSecretManager {
             res.push(
                 Generate::<secp256k1_ecdsa::PublicKey>::generate(
                     self,
-                    &GeneratePublicKeyOptions::default()
-                        .with_coin_type(options.coin_type)
+                    &PublicKeyOptions::new(options.coin_type)
                         .with_account_index(options.account_index)
                         .with_internal(options.internal)
                         .with_address_index(address_index),
@@ -150,7 +149,7 @@ impl Generate<Vec<secp256k1_ecdsa::PublicKey>> for MnemonicSecretManager {
 
 #[async_trait]
 impl Generate<Vec<EvmAddress>> for MnemonicSecretManager {
-    type Options = GenerateMultiKeyOptions;
+    type Options = MultiKeyOptions;
 
     async fn generate(&self, options: &Self::Options) -> crate::client::Result<Vec<EvmAddress>> {
         let public_keys: Vec<secp256k1_ecdsa::PublicKey> = self.generate(options).await?;
@@ -205,6 +204,26 @@ impl MnemonicSecretManager {
         let seed = Seed::from_bytes(bytes.as_ref());
         Ok(Self(seed))
     }
+
+    /// Generate a random mnemonic to use for the secret manager.
+    pub fn generate() -> Result<Self, Error> {
+        Self::try_from_mnemonic(Client::generate_mnemonic()?)
+    }
+}
+
+impl SecretManagerConfig for MnemonicSecretManager {
+    type Config = String;
+
+    fn to_config(&self) -> Option<Self::Config> {
+        None
+    }
+
+    fn from_config(config: &Self::Config) -> crate::client::Result<Self>
+    where
+        Self: Sized,
+    {
+        Self::try_from_mnemonic(config.as_str())
+    }
 }
 
 #[cfg(test)]
@@ -221,7 +240,7 @@ mod tests {
         let mnemonic = "giant dynamic museum toddler six deny defense ostrich bomb access mercy blood explain muscle shoot shallow glad autumn author calm heavy hawk abuse rally";
         let secret_manager = MnemonicSecretManager::try_from_mnemonic(mnemonic.to_owned()).unwrap();
 
-        let options = GeneratePublicKeyOptions::default().with_coin_type(IOTA_COIN_TYPE);
+        let options = PublicKeyOptions::new(IOTA_COIN_TYPE);
 
         let address: Ed25519Address = secret_manager.generate(&options).await.unwrap();
 
@@ -238,7 +257,7 @@ mod tests {
         let seed = "0x256a818b2aac458941f7274985a410e57fb750f3a3a67969ece5bd9ae7eef5b2".to_owned();
         let secret_manager = MnemonicSecretManager::try_from_hex_seed(seed).unwrap();
 
-        let options = GeneratePublicKeyOptions::default().with_coin_type(IOTA_COIN_TYPE);
+        let options = PublicKeyOptions::new(IOTA_COIN_TYPE);
 
         let address: Ed25519Address = secret_manager.generate(&options).await.unwrap();
 

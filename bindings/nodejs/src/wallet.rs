@@ -5,7 +5,10 @@ use std::sync::Arc;
 
 use iota_sdk_bindings_core::{
     call_wallet_method as rust_call_wallet_method,
-    iota_sdk::wallet::{events::WalletEventType, Wallet},
+    iota_sdk::{
+        client::secret::SecretManager,
+        wallet::{events::WalletEventType, Wallet},
+    },
     Response, WalletMethod, WalletOptions,
 };
 use napi::{bindgen_prelude::External, threadsafe_function::ThreadsafeFunction, Error, Result, Status};
@@ -14,7 +17,7 @@ use tokio::sync::RwLock;
 
 use crate::{client::ClientMethodHandler, secret_manager::SecretManagerMethodHandler, NodejsError};
 
-pub type WalletMethodHandler = Arc<RwLock<Option<Wallet>>>;
+pub type WalletMethodHandler = Arc<RwLock<Option<Wallet<SecretManager>>>>;
 
 #[napi(js_name = "createWallet")]
 pub async fn create_wallet(options: String) -> Result<External<WalletMethodHandler>> {

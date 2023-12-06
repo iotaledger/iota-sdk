@@ -17,12 +17,14 @@ use iota_ledger_nano::{
     Packable as LedgerNanoPackable, TransportTypes,
 };
 use packable::{error::UnexpectedEOF, unpacker::SliceUnpacker, Packable, PackableExt};
+use serde::{Deserialize, Serialize};
 use tokio::sync::Mutex;
 
 use crate::{
     client::secret::{
         types::{LedgerApp, LedgerDeviceType},
-        Generate, LedgerNanoStatus, PreparedTransactionData, SecretManagerConfig, Sign, SignTransaction,
+        Generate, LedgerNanoStatus, MultiKeyOptions, PreparedTransactionData, PublicKeyOptions, SecretManagerConfig,
+        Sign, SignTransaction,
     },
     types::block::{
         address::{AccountAddress, Address, AnchorAddress, Ed25519Address, NftAddress},
@@ -33,6 +35,29 @@ use crate::{
         Error as BlockError,
     },
 };
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct LedgerOptions<O> {
+    options: O,
+    ledger_nano_prompt: bool,
+}
+
+impl<O> LedgerOptions<O> {
+    /// Create a new ledger options
+    pub fn new(options: O) -> Self {
+        Self {
+            options,
+            ledger_nano_prompt: false,
+        }
+    }
+
+    /// Set ledger_nano_prompt flag.
+    pub fn with_ledger_nano_prompt(mut self, ledger_nano_prompt: bool) -> Self {
+        self.ledger_nano_prompt = ledger_nano_prompt;
+        self
+    }
+}
 
 /// Ledger nano errors.
 #[derive(Debug, thiserror::Error)]
@@ -128,16 +153,46 @@ impl TryFrom<u8> for LedgerDeviceType {
 
 #[async_trait]
 impl Generate<ed25519::PublicKey> for LedgerSecretManager {
-    type Options = ();
+    type Options = LedgerOptions<PublicKeyOptions>;
 
-    async fn generate(&self, _options: &Self::Options) -> crate::client::Result<ed25519::PublicKey> {
-        todo!()
+    async fn generate(&self, options: &Self::Options) -> crate::client::Result<ed25519::PublicKey> {
+        let LedgerOptions {
+            options,
+            ledger_nano_prompt,
+        } = options;
+        let bip32_account = options.account_index.harden().into();
+
+        let bip32 = LedgerBIP32Index {
+            bip32_index: options.address_index.harden().into(),
+            bip32_change: u32::from(options.internal).harden().into(),
+        };
+
+        // lock the mutex to prevent multiple simultaneous requests to a ledger
+        let lock = self.mutex.lock().await;
+
+        // get ledger
+        let ledger = get_ledger(options.coin_type, bip32_account, self.is_simulator).map_err(Error::from)?;
+        if ledger.is_debug_app() {
+            ledger
+                .set_non_interactive_mode(self.non_interactive)
+                .map_err(Error::from)?;
+        }
+
+        let public_key = ed25519::PublicKey::try_from_bytes(
+            ledger
+                .get_addresses(*ledger_nano_prompt, bip32, 0)
+                .map_err(Error::from)?[0],
+        )?;
+
+        drop(lock);
+
+        Ok(public_key)
     }
 }
 
 #[async_trait]
 impl Generate<Ed25519Address> for LedgerSecretManager {
-    type Options = ();
+    type Options = LedgerOptions<PublicKeyOptions>;
 
     async fn generate(&self, options: &Self::Options) -> crate::client::Result<Ed25519Address> {
         let public_key: ed25519::PublicKey = self.generate(options).await?;
@@ -147,16 +202,47 @@ impl Generate<Ed25519Address> for LedgerSecretManager {
 
 #[async_trait]
 impl Generate<Vec<ed25519::PublicKey>> for LedgerSecretManager {
-    type Options = ();
+    type Options = LedgerOptions<MultiKeyOptions>;
 
-    async fn generate(&self, _options: &Self::Options) -> crate::client::Result<Vec<ed25519::PublicKey>> {
-        todo!()
+    async fn generate(&self, options: &Self::Options) -> crate::client::Result<Vec<ed25519::PublicKey>> {
+        let LedgerOptions {
+            options,
+            ledger_nano_prompt,
+        } = options;
+        let bip32_account = options.account_index.harden().into();
+
+        let bip32 = LedgerBIP32Index {
+            bip32_index: options.address_range.start.harden().into(),
+            bip32_change: u32::from(options.internal).harden().into(),
+        };
+
+        // lock the mutex to prevent multiple simultaneous requests to a ledger
+        let lock = self.mutex.lock().await;
+
+        // get ledger
+        let ledger = get_ledger(options.coin_type, bip32_account, self.is_simulator).map_err(Error::from)?;
+        if ledger.is_debug_app() {
+            ledger
+                .set_non_interactive_mode(self.non_interactive)
+                .map_err(Error::from)?;
+        }
+
+        let public_keys = ledger
+            .get_addresses(*ledger_nano_prompt, bip32, options.address_range.len())
+            .map_err(Error::from)?
+            .into_iter()
+            .map(|b| ed25519::PublicKey::try_from_bytes(b))
+            .collect::<Result<Vec<_>, _>>()?;
+
+        drop(lock);
+
+        Ok(public_keys)
     }
 }
 
 #[async_trait]
 impl Generate<Vec<Ed25519Address>> for LedgerSecretManager {
-    type Options = ();
+    type Options = LedgerOptions<MultiKeyOptions>;
 
     async fn generate(&self, options: &Self::Options) -> crate::client::Result<Vec<Ed25519Address>> {
         let public_keys: Vec<ed25519::PublicKey> = self.generate(options).await?;
@@ -572,10 +658,7 @@ mod tests {
     use pretty_assertions::assert_eq;
 
     use super::*;
-    use crate::{
-        client::{constants::IOTA_COIN_TYPE, secret::SecretManager},
-        types::block::address::ToBech32Ext,
-    };
+    use crate::{client::constants::IOTA_COIN_TYPE, types::block::address::ToBech32Ext};
 
     #[tokio::test]
     #[ignore = "requires ledger nano instance"]
@@ -583,18 +666,15 @@ mod tests {
         let mut secret_manager = LedgerSecretManager::new(true);
         secret_manager.non_interactive = true;
 
-        let addresses = SecretManager::LedgerNano(secret_manager)
-            .generate_ed25519_addresses(
-                GetAddressesOptions::default()
-                    .with_coin_type(IOTA_COIN_TYPE)
-                    .with_account_index(0)
-                    .with_range(0..1),
-            )
-            .await
-            .unwrap();
+        let address = Generate::<Ed25519Address>::generate(
+            &secret_manager,
+            &LedgerOptions::new(PublicKeyOptions::new(IOTA_COIN_TYPE)),
+        )
+        .await
+        .unwrap();
 
         assert_eq!(
-            addresses[0].clone().to_bech32_unchecked("atoi").to_string(),
+            address.to_bech32_unchecked("atoi").to_string(),
             "atoi1qqdnv60ryxynaeyu8paq3lp9rkll7d7d92vpumz88fdj4l0pn5mru50gvd8"
         );
     }

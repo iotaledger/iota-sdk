@@ -102,8 +102,8 @@ mod tests {
 
     use super::*;
     use crate::{
-        client::secret::SecretManager,
-        wallet::{core::operations::storage::SaveLoadWallet, storage::adapter::memory::Memory, WalletBuilder},
+        client::secret::{mnemonic::MnemonicSecretManager, SecretManager},
+        wallet::{storage::adapter::memory::Memory, WalletBuilder},
     };
 
     #[tokio::test]
@@ -130,12 +130,21 @@ mod tests {
     #[tokio::test]
     async fn save_load_wallet_data() {
         let mut storage_manager = StorageManager::new(Memory::default(), None).await.unwrap();
-        assert!(storage_manager.load_wallet_data().await.unwrap().is_none());
+        assert!(
+            storage_manager
+                .load_wallet_data::<MnemonicSecretManager>()
+                .await
+                .unwrap()
+                .is_none()
+        );
 
-        let wallet_data = WalletData::mock();
+        let wallet_data = WalletData::<MnemonicSecretManager>::mock();
 
         storage_manager.save_wallet_data(&wallet_data).await.unwrap();
-        let wallet = storage_manager.load_wallet_data().await.unwrap();
+        let wallet = storage_manager
+            .load_wallet_data::<MnemonicSecretManager>()
+            .await
+            .unwrap();
         assert!(matches!(wallet, Some(data) if data.alias == Some("Alice".to_string())));
     }
 
@@ -143,17 +152,17 @@ mod tests {
     async fn save_load_wallet_builder() {
         let storage_manager = StorageManager::new(Memory::default(), None).await.unwrap();
         assert!(
-            WalletBuilder::<SecretManager>::load(&storage_manager)
+            WalletBuilder::<MnemonicSecretManager>::load(&storage_manager)
                 .await
                 .unwrap()
                 .is_none()
         );
 
-        let wallet_builder = WalletBuilder::<SecretManager>::new();
+        let wallet_builder = WalletBuilder::<MnemonicSecretManager>::new();
         wallet_builder.save(&storage_manager).await.unwrap();
 
         assert!(
-            WalletBuilder::<SecretManager>::load(&storage_manager)
+            WalletBuilder::<MnemonicSecretManager>::load(&storage_manager)
                 .await
                 .unwrap()
                 .is_some()

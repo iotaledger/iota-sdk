@@ -6,16 +6,13 @@ use std::str::FromStr;
 use crypto::keys::bip44::Bip44;
 use iota_sdk::{
     client::{
-        api::{
-            transaction::validate_signed_transaction_payload_length, verify_semantic, GetAddressesOptions,
-            PreparedTransactionData,
-        },
+        api::{transaction::validate_signed_transaction_payload_length, verify_semantic, PreparedTransactionData},
         constants::SHIMMER_COIN_TYPE,
-        secret::{SecretManage, SecretManager},
-        Client, Result,
+        secret::{mnemonic::MnemonicSecretManager, PublicKeyOptions, SecretManageExt, SignTransaction},
+        Result,
     },
     types::block::{
-        address::{AccountAddress, Address},
+        address::{AccountAddress, Address, Ed25519Address},
         input::{Input, UtxoInput},
         output::AccountId,
         payload::{signed_transaction::Transaction, SignedTransactionPayload},
@@ -34,17 +31,13 @@ use crate::client::{
 
 #[tokio::test]
 async fn sign_account_state_transition() -> Result<()> {
-    let secret_manager = SecretManager::try_from_mnemonic(Client::generate_mnemonic()?)?;
+    let secret_manager = MnemonicSecretManager::generate()?;
 
-    let address = secret_manager
-        .generate_ed25519_addresses(
-            GetAddressesOptions::default()
-                .with_coin_type(SHIMMER_COIN_TYPE)
-                .with_range(0..1),
-        )
-        .await?[0]
-        .clone()
-        .into_inner();
+    let address = Address::from(
+        secret_manager
+            .generate::<Ed25519Address>(&PublicKeyOptions::new(SHIMMER_COIN_TYPE))
+            .await?,
+    );
 
     let protocol_parameters = protocol_parameters();
     let account_id = AccountId::from_str(ACCOUNT_ID_1)?;
@@ -77,7 +70,9 @@ async fn sign_account_state_transition() -> Result<()> {
         remainder: None,
     };
 
-    let unlocks = secret_manager.transaction_unlocks(&prepared_transaction_data).await?;
+    let unlocks = secret_manager
+        .transaction_unlocks(&prepared_transaction_data, &protocol_parameters)
+        .await?;
 
     assert_eq!(unlocks.len(), 1);
     assert_eq!((*unlocks).first().unwrap().kind(), SignatureUnlock::KIND);
@@ -97,17 +92,13 @@ async fn sign_account_state_transition() -> Result<()> {
 
 #[tokio::test]
 async fn account_reference_unlocks() -> Result<()> {
-    let secret_manager = SecretManager::try_from_mnemonic(Client::generate_mnemonic()?)?;
+    let secret_manager = MnemonicSecretManager::generate()?;
 
-    let address = secret_manager
-        .generate_ed25519_addresses(
-            GetAddressesOptions::default()
-                .with_coin_type(SHIMMER_COIN_TYPE)
-                .with_range(0..1),
-        )
-        .await?[0]
-        .clone()
-        .into_inner();
+    let address = Address::from(
+        secret_manager
+            .generate::<Ed25519Address>(&PublicKeyOptions::new(SHIMMER_COIN_TYPE))
+            .await?,
+    );
 
     let protocol_parameters = protocol_parameters();
     let account_id = AccountId::from_str(ACCOUNT_ID_1)?;
@@ -148,7 +139,9 @@ async fn account_reference_unlocks() -> Result<()> {
         remainder: None,
     };
 
-    let unlocks = secret_manager.transaction_unlocks(&prepared_transaction_data).await?;
+    let unlocks = secret_manager
+        .transaction_unlocks(&prepared_transaction_data, &protocol_parameters)
+        .await?;
 
     assert_eq!(unlocks.len(), 3);
     assert_eq!((*unlocks).first().unwrap().kind(), SignatureUnlock::KIND);

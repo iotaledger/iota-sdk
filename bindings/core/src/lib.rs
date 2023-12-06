@@ -11,14 +11,12 @@ mod response;
 
 use std::fmt::{Formatter, Result as FmtResult};
 
-use crypto::keys::bip44::Bip44;
 use derivative::Derivative;
 use fern_logger::{logger_init, LoggerConfig, LoggerOutputConfigBuilder};
 pub use iota_sdk;
 use iota_sdk::{
     client::secret::{SecretManager, SecretManagerDto},
     types::block::address::Bech32Address,
-    utils::serde::bip44::option_bip44,
     wallet::{ClientOptions, Wallet},
 };
 use serde::Deserialize;
@@ -46,8 +44,10 @@ pub fn init_logger(config: String) -> std::result::Result<(), fern_logger::Error
 pub struct WalletOptions {
     pub address: Option<Bech32Address>,
     pub alias: Option<String>,
-    #[serde(with = "option_bip44", default)]
-    pub bip_path: Option<Bip44>,
+    #[serde(default)]
+    pub public_key_options: Option<serde_json::Value>,
+    #[serde(default)]
+    pub signing_options: Option<serde_json::Value>,
     pub client_options: Option<ClientOptions>,
     #[derivative(Debug(format_with = "OmittedDebug::omitted_fmt"))]
     pub secret_manager: Option<SecretManagerDto>,
@@ -65,8 +65,13 @@ impl WalletOptions {
         self
     }
 
-    pub fn with_bip_path(mut self, bip_path: impl Into<Option<Bip44>>) -> Self {
-        self.bip_path = bip_path.into();
+    pub fn with_public_key_options(mut self, public_key_options: impl Into<Option<serde_json::Value>>) -> Self {
+        self.public_key_options = public_key_options.into();
+        self
+    }
+
+    pub fn with_signing_options(mut self, signing_options: impl Into<Option<serde_json::Value>>) -> Self {
+        self.signing_options = signing_options.into();
         self
     }
 
@@ -86,12 +91,13 @@ impl WalletOptions {
         self
     }
 
-    pub async fn build(self) -> iota_sdk::wallet::Result<Wallet> {
+    pub async fn build(self) -> iota_sdk::wallet::Result<Wallet<SecretManager>> {
         log::debug!("wallet options: {self:?}");
         let mut builder = Wallet::builder()
             .with_address(self.address)
             .with_alias(self.alias)
-            .with_public_key_options(self.bip_path)
+            .with_public_key_options(self.public_key_options)
+            .with_signing_options(self.signing_options)
             .with_client_options(self.client_options);
 
         #[cfg(feature = "storage")]

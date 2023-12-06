@@ -9,14 +9,14 @@ mod mqtt;
 use crypto::keys::bip44::Bip44;
 use iota_sdk::{
     client::{
-        api::GetAddressesOptions,
-        constants::IOTA_COIN_TYPE,
+        constants::{IOTA_BECH32_HRP, IOTA_COIN_TYPE},
         node_api::indexer::query_parameters::BasicOutputQueryParameters,
         request_funds_from_faucet,
-        secret::{SecretManager, SignBlock},
+        secret::{mnemonic::MnemonicSecretManager, BlockSignExt, PublicKeyOptions, SecretManage, SecretManageExt},
         Client,
     },
     types::block::{
+        address::{Ed25519Address, ToBech32Ext},
         output::AccountId,
         payload::{signed_transaction::TransactionId, tagged_data::TaggedDataPayload, Payload},
         BlockId,
@@ -29,7 +29,7 @@ use crate::client::common::{setup_client_with_node_health_ignored, FAUCET_URL};
 const DEFAULT_DEVELOPMENT_SEED: &str = "0x256a818b2aac458941f7274985a410e57fb750f3a3a67969ece5bd9ae7eef5b2";
 
 // Sends a tagged data block to the node to test against it.
-async fn setup_tagged_data_block(secret_manager: &SecretManager) -> BlockId {
+async fn setup_tagged_data_block<S: SecretManage<SigningOptions = Bip44>>(secret_manager: &S) -> BlockId {
     let client = setup_client_with_node_health_ignored().await;
 
     let protocol_params = client.get_protocol_parameters().await.unwrap();
@@ -43,28 +43,26 @@ async fn setup_tagged_data_block(secret_manager: &SecretManager) -> BlockId {
         )
         .await
         .unwrap()
-        .sign_ed25519(secret_manager, Bip44::new(IOTA_COIN_TYPE))
+        .sign_ed25519(secret_manager, &Bip44::new(IOTA_COIN_TYPE))
         .await
         .unwrap()
         .id(&protocol_params)
 }
 
-pub fn setup_secret_manager() -> SecretManager {
-    SecretManager::try_from_hex_seed(DEFAULT_DEVELOPMENT_SEED.to_owned()).unwrap()
+pub fn setup_secret_manager() -> MnemonicSecretManager {
+    MnemonicSecretManager::try_from_hex_seed(DEFAULT_DEVELOPMENT_SEED.to_owned()).unwrap()
 }
 
 // Sends a transaction block to the node to test against it.
 pub async fn setup_transaction_block(client: &Client) -> (BlockId, TransactionId) {
     let secret_manager = setup_secret_manager();
 
-    let addresses = secret_manager
-        .generate_ed25519_addresses(GetAddressesOptions::from_client(client).await.unwrap().with_range(0..2))
+    let address = secret_manager
+        .generate::<Ed25519Address>(&PublicKeyOptions::new(IOTA_COIN_TYPE))
         .await
-        .unwrap();
-    println!(
-        "{}",
-        request_funds_from_faucet(FAUCET_URL, &addresses[0]).await.unwrap()
-    );
+        .unwrap()
+        .to_bech32(IOTA_BECH32_HRP);
+    println!("{}", request_funds_from_faucet(FAUCET_URL, &address).await.unwrap());
 
     // Continue only after funds are received
     let mut round = 0;
@@ -76,7 +74,7 @@ pub async fn setup_transaction_block(client: &Client) -> (BlockId, TransactionId
         tokio::time::sleep(std::time::Duration::from_secs(1)).await;
         let output_ids_response = client
             .basic_output_ids(BasicOutputQueryParameters::only_address_unlock_condition(
-                addresses[0].clone(),
+                address.clone(),
             ))
             .await
             .unwrap();

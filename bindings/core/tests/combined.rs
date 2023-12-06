@@ -5,7 +5,7 @@ use crypto::keys::bip44::Bip44;
 use iota_sdk::{
     client::{
         constants::{IOTA_COIN_TYPE, SHIMMER_COIN_TYPE},
-        secret::{mnemonic::MnemonicSecretManager, SecretManagerDto},
+        secret::{mnemonic::MnemonicSecretManager, PublicKeyOptions, SecretManagerDto},
         ClientBuilder,
     },
     types::{
@@ -42,7 +42,8 @@ async fn create_wallet() -> Result<()> {
     let wallet = WalletOptions::default()
         .with_storage_path(storage_path.to_string())
         .with_client_options(ClientBuilder::new().from_json(client_options).unwrap())
-        .with_bip_path(Bip44::new(SHIMMER_COIN_TYPE))
+        .with_public_key_options(serde_json::to_value(PublicKeyOptions::new(SHIMMER_COIN_TYPE)).unwrap())
+        .with_signing_options(serde_json::to_value(Bip44::new(SHIMMER_COIN_TYPE)).unwrap())
         .with_secret_manager(serde_json::from_str::<SecretManagerDto>(secret_manager).unwrap())
         .build()
         .await?;
@@ -80,7 +81,8 @@ async fn client_from_wallet() -> Result<()> {
     let wallet = WalletOptions::default()
         .with_storage_path(storage_path.to_string())
         .with_client_options(ClientBuilder::new().from_json(client_options).unwrap())
-        .with_bip_path(Bip44::new(SHIMMER_COIN_TYPE))
+        .with_public_key_options(serde_json::to_value(PublicKeyOptions::new(SHIMMER_COIN_TYPE)).unwrap())
+        .with_signing_options(serde_json::to_value(Bip44::new(SHIMMER_COIN_TYPE)).unwrap())
         .with_secret_manager(serde_json::from_str::<SecretManagerDto>(secret_manager).unwrap())
         .build()
         .await?;

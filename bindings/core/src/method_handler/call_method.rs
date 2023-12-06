@@ -5,10 +5,7 @@ use std::pin::Pin;
 
 use futures::Future;
 use iota_sdk::{
-    client::{
-        secret::{DowncastSecretManager, SecretManage},
-        Client,
-    },
+    client::{secret::SecretManager, Client},
     wallet::Wallet,
 };
 
@@ -38,7 +35,7 @@ impl CallMethod for Client {
     }
 }
 
-impl CallMethod for Wallet {
+impl CallMethod for Wallet<SecretManager> {
     type Method = WalletMethod;
 
     fn call_method<'a>(&'a self, method: Self::Method) -> Pin<Box<dyn Future<Output = Response> + 'a>> {
@@ -58,7 +55,7 @@ pub async fn call_client_method(client: &Client, method: ClientMethod) -> Respon
 }
 
 /// Call a wallet method.
-pub async fn call_wallet_method(wallet: &Wallet, method: WalletMethod) -> Response {
+pub async fn call_wallet_method(wallet: &Wallet<SecretManager>, method: WalletMethod) -> Response {
     log::debug!("Wallet method: {method:?}");
     let result = convert_async_panics(|| async { call_wallet_method_internal(wallet, method).await }).await;
 
@@ -80,13 +77,7 @@ pub fn call_utils_method(method: UtilsMethod) -> Response {
 }
 
 /// Call a secret manager method.
-pub async fn call_secret_manager_method<S: SecretManage + DowncastSecretManager>(
-    secret_manager: &S,
-    method: SecretManagerMethod,
-) -> Response
-where
-    iota_sdk::client::Error: From<S::Error>,
-{
+pub async fn call_secret_manager_method(secret_manager: &SecretManager, method: SecretManagerMethod) -> Response {
     log::debug!("Secret manager method: {method:?}");
     let result =
         convert_async_panics(|| async { call_secret_manager_method_internal(secret_manager, method).await }).await;

@@ -5,12 +5,15 @@
 
 use iota_sdk::{
     client::{
-        api::GetAddressesOptions, node_api::indexer::query_parameters::BasicOutputQueryParameters, Client,
-        NodeInfoWrapper,
+        constants::IOTA_COIN_TYPE,
+        node_api::indexer::query_parameters::BasicOutputQueryParameters,
+        secret::{PublicKeyOptions, SecretManageExt},
+        Client, NodeInfoWrapper,
     },
     types::{
         api::core::TransactionState,
         block::{
+            address::{Ed25519Address, ToBech32Ext},
             output::{Output, OutputId},
             Block,
         },
@@ -116,17 +119,10 @@ async fn test_get_address_outputs() {
     let secret_manager = setup_secret_manager();
 
     let address = secret_manager
-        .generate_ed25519_addresses(
-            GetAddressesOptions::from_client(&client)
-                .await
-                .unwrap()
-                .with_range(0..1),
-        )
+        .generate::<Ed25519Address>(&PublicKeyOptions::new(IOTA_COIN_TYPE))
         .await
         .unwrap()
-        .into_iter()
-        .next()
-        .unwrap();
+        .to_bech32(client.get_bech32_hrp().await.unwrap());
 
     let output_ids_response = client
         .basic_output_ids(BasicOutputQueryParameters::new().address(address))

@@ -1,19 +1,21 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use core::ops::Range;
+
 #[cfg(feature = "stronghold")]
 use crypto::keys::bip39::Mnemonic;
+use crypto::signatures::secp256k1_ecdsa::EvmAddress;
 #[cfg(feature = "stronghold")]
 use iota_sdk::client::secret::stronghold::StrongholdSecretManager;
 use iota_sdk::{
     client::{
-        api::GetAddressesOptions,
         constants::{IOTA_BECH32_HRP, IOTA_COIN_TYPE, IOTA_TESTNET_BECH32_HRP, SHIMMER_BECH32_HRP, SHIMMER_COIN_TYPE},
         generate_mnemonic,
-        secret::{GenerateAddressOptions, SecretManager},
+        secret::{mnemonic::MnemonicSecretManager, MultiKeyOptions, PublicKeyOptions, SecretManageExt},
         Client, Result,
     },
-    types::block::address::{Address, Hrp},
+    types::block::address::{Address, Ed25519Address, Hrp, ToBech32Ext},
 };
 use pretty_assertions::assert_eq;
 use serde::{Deserialize, Serialize};
@@ -22,22 +24,23 @@ use serde::{Deserialize, Serialize};
 async fn ed25519_addresses() {
     let secret_manager = crate::client::node_api::setup_secret_manager();
 
-    let opts = GetAddressesOptions::default()
-        .with_bech32_hrp(IOTA_TESTNET_BECH32_HRP)
-        .with_coin_type(IOTA_COIN_TYPE)
-        .with_range(0..1);
-    let public = secret_manager.generate_ed25519_addresses(opts.clone()).await.unwrap();
-    let internal = secret_manager
-        .generate_ed25519_addresses(opts.internal())
+    let public = secret_manager
+        .generate::<Ed25519Address>(&PublicKeyOptions::new(IOTA_COIN_TYPE))
         .await
-        .unwrap();
+        .unwrap()
+        .to_bech32(IOTA_TESTNET_BECH32_HRP);
+    let internal = secret_manager
+        .generate::<Ed25519Address>(&PublicKeyOptions::new(IOTA_COIN_TYPE).with_internal(true))
+        .await
+        .unwrap()
+        .to_bech32(IOTA_TESTNET_BECH32_HRP);
 
     assert_eq!(
-        public[0],
+        public,
         "atoi1qzt0nhsf38nh6rs4p6zs5knqp6psgha9wsv74uajqgjmwc75ugupx3y7x0r"
     );
     assert_eq!(
-        internal[0],
+        internal,
         "atoi1qprxpfvaz2peggq6f8k9cj8zfsxuw69e4nszjyv5kuf8yt70t2847shpjak"
     );
 }
@@ -46,18 +49,26 @@ async fn ed25519_addresses() {
 async fn evm_addresses() {
     let secret_manager = crate::client::node_api::setup_secret_manager();
 
-    let opts = GetAddressesOptions::default()
-        .with_bech32_hrp(IOTA_TESTNET_BECH32_HRP)
-        .with_coin_type(IOTA_COIN_TYPE)
-        .with_range(0..1);
-    let public = secret_manager.generate_evm_addresses(opts.clone()).await.unwrap();
-    let internal = secret_manager.generate_evm_addresses(opts.internal()).await.unwrap();
+    let public = secret_manager
+        .generate::<EvmAddress>(&PublicKeyOptions::new(IOTA_COIN_TYPE))
+        .await
+        .unwrap();
+    let internal = secret_manager
+        .generate::<EvmAddress>(&PublicKeyOptions::new(IOTA_COIN_TYPE).with_internal(true))
+        .await
+        .unwrap();
 
     // Address generated with bip32 path: [44, 4218, 0, 0, 0].
     // This address was generated with a MnemonicSecretManager and verified with an outside source.
     // Seed: 0x256a818b2aac458941f7274985a410e57fb750f3a3a67969ece5bd9ae7eef5b2.
-    assert_eq!(public[0], "0xb23e784f0464a30d536c961e414925eab6b3107d");
-    assert_eq!(internal[0], "0x98d8833ec4b82587d66207eb9c578fd0134c51b6");
+    assert_eq!(
+        prefix_hex::encode(public.as_ref()),
+        "0xb23e784f0464a30d536c961e414925eab6b3107d"
+    );
+    assert_eq!(
+        prefix_hex::encode(internal.as_ref()),
+        "0x98d8833ec4b82587d66207eb9c578fd0134c51b6"
+    );
 }
 
 #[tokio::test]
@@ -79,19 +90,16 @@ async fn public_key_to_address() {
 #[tokio::test]
 async fn mnemonic_address_generation_iota() {
     let mnemonic = "acoustic trophy damage hint search taste love bicycle foster cradle brown govern endless depend situate athlete pudding blame question genius transfer van random vast".to_owned();
-    let secret_manager = SecretManager::try_from_mnemonic(mnemonic).unwrap();
+    let secret_manager = MnemonicSecretManager::try_from_mnemonic(mnemonic).unwrap();
 
     // account 0, address 0 and 1
     let addresses = secret_manager
-        .generate_ed25519_addresses(
-            GetAddressesOptions::default()
-                .with_bech32_hrp(IOTA_BECH32_HRP)
-                .with_coin_type(IOTA_COIN_TYPE)
-                .with_range(0..2)
-                .with_account_index(0),
-        )
+        .generate::<Vec<Ed25519Address>>(&MultiKeyOptions::new(IOTA_COIN_TYPE).with_address_range(0..2))
         .await
-        .unwrap();
+        .unwrap()
+        .into_iter()
+        .map(|a| a.to_bech32(IOTA_BECH32_HRP))
+        .collect::<Vec<_>>();
 
     assert_eq!(
         addresses[0],
@@ -103,19 +111,14 @@ async fn mnemonic_address_generation_iota() {
     );
 
     // account 1
-    let addresses = secret_manager
-        .generate_ed25519_addresses(
-            GetAddressesOptions::default()
-                .with_bech32_hrp(IOTA_BECH32_HRP)
-                .with_coin_type(IOTA_COIN_TYPE)
-                .with_range(0..1)
-                .with_account_index(1),
-        )
+    let address = secret_manager
+        .generate::<Ed25519Address>(&PublicKeyOptions::new(IOTA_COIN_TYPE))
         .await
-        .unwrap();
+        .unwrap()
+        .to_bech32(IOTA_BECH32_HRP);
 
     assert_eq!(
-        addresses[0],
+        address,
         "iota1qr43g007shcd7zx3xe7s4lu2c9fr33w7tfjppyy0swlhrxx247szqhuaeaa"
     );
 }
@@ -123,19 +126,16 @@ async fn mnemonic_address_generation_iota() {
 #[tokio::test]
 async fn mnemonic_address_generation_shimmer() {
     let mnemonic = "acoustic trophy damage hint search taste love bicycle foster cradle brown govern endless depend situate athlete pudding blame question genius transfer van random vast".to_owned();
-    let secret_manager = SecretManager::try_from_mnemonic(mnemonic).unwrap();
+    let secret_manager = MnemonicSecretManager::try_from_mnemonic(mnemonic).unwrap();
 
     // account 0, address 0 and 1
     let addresses = secret_manager
-        .generate_ed25519_addresses(
-            GetAddressesOptions::default()
-                .with_bech32_hrp(SHIMMER_BECH32_HRP)
-                .with_coin_type(SHIMMER_COIN_TYPE)
-                .with_range(0..2)
-                .with_account_index(0),
-        )
+        .generate::<Vec<Ed25519Address>>(&MultiKeyOptions::new(SHIMMER_COIN_TYPE).with_address_range(0..2))
         .await
-        .unwrap();
+        .unwrap()
+        .into_iter()
+        .map(|a| a.to_bech32(SHIMMER_BECH32_HRP))
+        .collect::<Vec<_>>();
 
     assert_eq!(
         addresses[0],
@@ -147,19 +147,14 @@ async fn mnemonic_address_generation_shimmer() {
     );
 
     // account 1
-    let addresses = secret_manager
-        .generate_ed25519_addresses(
-            GetAddressesOptions::default()
-                .with_bech32_hrp(SHIMMER_BECH32_HRP)
-                .with_coin_type(SHIMMER_COIN_TYPE)
-                .with_range(0..1)
-                .with_account_index(1),
-        )
+    let address = secret_manager
+        .generate::<Ed25519Address>(&PublicKeyOptions::new(SHIMMER_COIN_TYPE))
         .await
-        .unwrap();
+        .unwrap()
+        .to_bech32(SHIMMER_BECH32_HRP);
 
     assert_eq!(
-        addresses[0],
+        address,
         "smr1qrexl2g0m74v57y4kl6kfwqz7zrlrkvjt8m30av0cxgxlu92kyzc5npslm8"
     );
 }
@@ -184,26 +179,22 @@ async fn address_generation() {
     let addresses_data: Vec<AddressData> =
         serde_json::from_value(general.get("address_generations").unwrap().clone()).unwrap();
 
-    for address in &addresses_data {
-        let secret_manager = SecretManager::try_from_mnemonic(address.mnemonic.clone()).unwrap();
-        let addresses = secret_manager
-            .generate_ed25519_addresses(
-                GetAddressesOptions::default()
-                    .with_bech32_hrp(address.bech32_hrp)
-                    .with_coin_type(address.coin_type)
-                    .with_range(address.address_index..address.address_index + 1)
-                    .with_account_index(address.account_index)
-                    .with_options(GenerateAddressOptions {
-                        internal: address.internal,
-                        ..Default::default()
-                    }),
+    for address_data in &addresses_data {
+        let secret_manager = MnemonicSecretManager::try_from_mnemonic(address_data.mnemonic.clone()).unwrap();
+        let address = secret_manager
+            .generate::<Ed25519Address>(
+                &PublicKeyOptions::new(address_data.coin_type)
+                    .with_account_index(address_data.account_index)
+                    .with_address_index(address_data.address_index)
+                    .with_internal(address_data.internal),
             )
             .await
-            .unwrap();
+            .unwrap()
+            .to_bech32(address_data.bech32_hrp);
 
-        assert_eq!(addresses[0], address.bech32_address);
-        if let Address::Ed25519(ed25519_address) = addresses[0].inner() {
-            assert_eq!(ed25519_address.to_string(), address.ed25519_address);
+        assert_eq!(address, address_data.bech32_address);
+        if let Address::Ed25519(ed25519_address) = address.inner() {
+            assert_eq!(ed25519_address.to_string(), address_data.ed25519_address);
         } else {
             panic!("Invalid address type")
         }
@@ -212,36 +203,32 @@ async fn address_generation() {
     #[cfg(feature = "stronghold")]
     {
         iota_stronghold::engine::snapshot::try_set_encrypt_work_factor(0).unwrap();
-        for address in &addresses_data {
-            let stronghold_filename = format!("{}.stronghold", address.bech32_address);
+        for address_data in &addresses_data {
+            let stronghold_filename = format!("{}.stronghold", address_data.bech32_address);
             let stronghold_secret_manager = StrongholdSecretManager::builder()
                 .password("some_hopefully_secure_password".to_owned())
                 .build(&stronghold_filename)
                 .unwrap();
 
             stronghold_secret_manager
-                .store_mnemonic(Mnemonic::from(address.mnemonic.as_str()))
+                .store_mnemonic(Mnemonic::from(address_data.mnemonic.as_str()))
                 .await
                 .unwrap();
 
-            let addresses = SecretManager::Stronghold(stronghold_secret_manager)
-                .generate_ed25519_addresses(
-                    GetAddressesOptions::default()
-                        .with_bech32_hrp(address.bech32_hrp)
-                        .with_coin_type(address.coin_type)
-                        .with_range(address.address_index..address.address_index + 1)
-                        .with_account_index(address.account_index)
-                        .with_options(GenerateAddressOptions {
-                            internal: address.internal,
-                            ..Default::default()
-                        }),
+            let address = stronghold_secret_manager
+                .generate::<Ed25519Address>(
+                    &PublicKeyOptions::new(address_data.coin_type)
+                        .with_account_index(address_data.account_index)
+                        .with_address_index(address_data.address_index)
+                        .with_internal(address_data.internal),
                 )
                 .await
-                .unwrap();
+                .unwrap()
+                .to_bech32(address_data.bech32_hrp);
 
-            assert_eq!(addresses[0], address.bech32_address);
-            if let Address::Ed25519(ed25519_address) = addresses[0].inner() {
-                assert_eq!(ed25519_address.to_string(), address.ed25519_address);
+            assert_eq!(address, address_data.bech32_address);
+            if let Address::Ed25519(ed25519_address) = address.inner() {
+                assert_eq!(ed25519_address.to_string(), address_data.ed25519_address);
             } else {
                 panic!("Invalid address type")
             }
@@ -251,64 +238,32 @@ async fn address_generation() {
 }
 
 #[tokio::test]
-async fn search_address() -> Result<()> {
+async fn address_search() -> Result<()> {
     let client = Client::builder().finish().await.unwrap();
 
-    let secret_manager = SecretManager::try_from_mnemonic(generate_mnemonic()?)?;
+    let secret_manager = MnemonicSecretManager::try_from_mnemonic(generate_mnemonic()?)?;
 
     // Public
-    let addresses = secret_manager
-        .generate_ed25519_addresses(
-            GetAddressesOptions::from_client(&client)
-                .await?
-                .with_coin_type(IOTA_COIN_TYPE)
-                .with_account_index(0)
-                .with_range(9..10)
-                .with_bech32_hrp(IOTA_BECH32_HRP),
-        )
-        .await?;
+    let address = secret_manager
+        .generate::<Ed25519Address>(&PublicKeyOptions::new(IOTA_COIN_TYPE).with_address_index(9))
+        .await
+        .unwrap();
 
-    let res = iota_sdk::client::api::search_address(
-        &secret_manager,
-        IOTA_BECH32_HRP,
-        IOTA_COIN_TYPE,
-        0,
-        0..10,
-        &addresses[0],
-    )
-    .await?;
+    let res = search_address(&secret_manager, IOTA_BECH32_HRP, IOTA_COIN_TYPE, 0, 0..10, &address).await?;
 
     assert_eq!(res, (9, false));
 
     // Internal
-    let addresses = secret_manager
-        .generate_ed25519_addresses(
-            GetAddressesOptions::from_client(&client)
-                .await?
-                .internal()
-                .with_coin_type(IOTA_COIN_TYPE)
-                .with_account_index(0)
-                .with_range(9..10)
-                .with_bech32_hrp(IOTA_BECH32_HRP),
-        )
+    let address = secret_manager
+        .generate::<Ed25519Address>(&PublicKeyOptions::new(IOTA_COIN_TYPE).with_address_index(9))
         .await?;
 
-    let res = iota_sdk::client::api::search_address(
-        &secret_manager,
-        IOTA_BECH32_HRP,
-        IOTA_COIN_TYPE,
-        0,
-        0..10,
-        &addresses[0],
-    )
-    .await?;
+    let res = search_address(&secret_manager, IOTA_BECH32_HRP, IOTA_COIN_TYPE, 0, 0..10, &address).await?;
 
     assert_eq!(res, (9, true));
 
     // not in range
-    let res =
-        iota_sdk::client::api::search_address(&secret_manager, IOTA_BECH32_HRP, IOTA_COIN_TYPE, 0, 0..9, &addresses[0])
-            .await;
+    let res = search_address(&secret_manager, IOTA_BECH32_HRP, IOTA_COIN_TYPE, 0, 0..9, &address).await;
 
     match res {
         Err(iota_sdk::client::Error::InputAddressNotFound { .. }) => {}
@@ -316,4 +271,33 @@ async fn search_address() -> Result<()> {
     }
 
     Ok(())
+}
+
+pub async fn search_address<S: iota_sdk::client::secret::Generate<Vec<Ed25519Address>, Options = MultiKeyOptions>>(
+    secret_manager: &S,
+    bech32_hrp: Hrp,
+    coin_type: u32,
+    account_index: u32,
+    range: Range<u32>,
+    address: &Ed25519Address,
+) -> Result<(u32, bool)> {
+    use iota_sdk::client::secret::Generate;
+    let mut opts = MultiKeyOptions::new(coin_type)
+        .with_account_index(account_index)
+        .with_address_range(range.clone());
+    let public = Generate::<Vec<Ed25519Address>>::generate(secret_manager, &opts).await?;
+    opts = opts.with_internal(true);
+    let internal = Generate::<Vec<Ed25519Address>>::generate(secret_manager, &opts).await?;
+    for index in 0..public.len() {
+        if &public[index] == address {
+            return Ok((range.start + index as u32, false));
+        }
+        if &internal[index] == address {
+            return Ok((range.start + index as u32, true));
+        }
+    }
+    Err(iota_sdk::client::Error::InputAddressNotFound {
+        address: address.clone().to_bech32(bech32_hrp).to_string(),
+        range: format!("{range:?}"),
+    })
 }

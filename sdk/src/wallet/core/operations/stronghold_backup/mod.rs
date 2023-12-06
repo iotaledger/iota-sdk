@@ -10,10 +10,7 @@ use self::stronghold_snapshot::read_wallet_data_from_stronghold_snapshot;
 use crate::wallet::WalletBuilder;
 use crate::{
     client::{
-        secret::{
-            stronghold::StrongholdSecretManager, DowncastSecretManager, SecretManager, SecretManagerConfig,
-            SecretManagerDto,
-        },
+        secret::{stronghold::StrongholdSecretManager, DowncastSecretManager, SecretManagerConfig},
         utils::Password,
     },
     types::block::address::Hrp,
@@ -33,7 +30,7 @@ impl<S: 'static + SecretManagerConfig> Wallet<S> {
         log::debug!("[backup] creating a stronghold backup");
         let secret_manager = self.secret_manager.read().await;
 
-        match secret_manager.as_stronghold() {
+        match (&*secret_manager).as_stronghold() {
             // Backup with existing stronghold
             Ok(stronghold) => {
                 stronghold.set_password(stronghold_password).await?;
@@ -86,7 +83,7 @@ impl<S: 'static + SecretManagerConfig> Wallet<S> {
 
         let mut secret_manager = self.secret_manager.as_ref().write().await;
         // Get the current snapshot path if set
-        let new_snapshot_path = if let Ok(stronghold) = secret_manager.as_stronghold() {
+        let new_snapshot_path = if let Ok(stronghold) = (&*secret_manager).as_stronghold() {
             stronghold.snapshot_path.clone()
         } else {
             PathBuf::from("wallet.stronghold")
@@ -165,7 +162,6 @@ impl<S: 'static + SecretManagerConfig> Wallet<S> {
         // store new data
         #[cfg(feature = "storage")]
         {
-            use crate::wallet::core::operations::storage::SaveLoadWallet;
             let wallet_builder = WalletBuilder::new()
                 .with_secret_manager_arc(self.secret_manager.clone())
                 .with_storage_path(

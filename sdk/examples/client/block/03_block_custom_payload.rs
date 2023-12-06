@@ -12,7 +12,7 @@ use crypto::keys::bip44::Bip44;
 use iota_sdk::{
     client::{
         constants::IOTA_COIN_TYPE,
-        secret::{SecretManager, SignBlock},
+        secret::{mnemonic::MnemonicSecretManager, BlockSignExt},
         Client, Result,
     },
     types::block::{
@@ -36,7 +36,7 @@ async fn main() -> Result<()> {
     // Create a node client.
     let client = Client::builder().with_node(&node_url)?.finish().await?;
 
-    let secret_manager = SecretManager::try_from_mnemonic(std::env::var("MNEMONIC").unwrap())?;
+    let secret_manager = MnemonicSecretManager::try_from_mnemonic(std::env::var("MNEMONIC").unwrap())?;
 
     // Create a custom payload.
     let tagged_data_payload = TaggedDataPayload::new(*b"Your tag", *b"Your data")?;
@@ -45,7 +45,7 @@ async fn main() -> Result<()> {
     let block = client
         .build_basic_block(issuer_id, Some(Payload::from(tagged_data_payload)))
         .await?
-        .sign_ed25519(&secret_manager, Bip44::new(IOTA_COIN_TYPE))
+        .sign_ed25519(&secret_manager, &Bip44::new(IOTA_COIN_TYPE))
         .await?;
 
     println!("{block:#?}");

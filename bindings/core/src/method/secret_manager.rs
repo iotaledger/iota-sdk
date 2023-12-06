@@ -1,12 +1,10 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use crypto::keys::bip44::Bip44;
 use derivative::Derivative;
 use iota_sdk::{
-    client::api::{GetAddressesOptions, PreparedTransactionDataDto},
-    types::block::{protocol::ProtocolParameters, UnsignedBlockDto},
-    utils::serde::bip44::Bip44Def,
+    client::api::PreparedTransactionDataDto,
+    types::block::{address::Hrp, protocol::ProtocolParameters, UnsignedBlockDto},
 };
 use serde::{Deserialize, Serialize};
 
@@ -21,11 +19,13 @@ use crate::OmittedDebug;
 pub enum SecretManagerMethod {
     /// Generate Ed25519 addresses.
     GenerateEd25519Addresses {
+        /// The Bech32 human-readable part
+        bech32_hrp: Hrp,
         /// Addresses generation options
-        options: GetAddressesOptions,
+        options: serde_json::Value,
     },
     /// Generate Evm addresses.
-    GenerateEvmAddresses { options: GetAddressesOptions },
+    GenerateEvmAddresses { options: serde_json::Value },
     /// Get the ledger status
     /// Expected response: [`LedgerNanoStatus`](crate::Response::LedgerNanoStatus)
     #[cfg(feature = "ledger_nano")]
@@ -36,40 +36,36 @@ pub enum SecretManagerMethod {
     SignatureUnlock {
         /// Transaction signing hash
         transaction_signing_hash: String,
-        /// Chain used to sign the hash
-        #[serde(with = "Bip44Def")]
-        chain: Bip44,
+        /// Options used to sign the hash
+        signing_options: serde_json::Value,
     },
     /// Signs a message with an Ed25519 private key.
     SignEd25519 {
         /// The message to sign, hex encoded String
         message: String,
-        /// Chain used to sign the message
-        #[serde(with = "Bip44Def")]
-        chain: Bip44,
+        /// Options used to sign the message
+        signing_options: serde_json::Value,
     },
     /// Signs a message with an Secp256k1Ecdsa private key.
     SignSecp256k1Ecdsa {
         /// The message to sign, hex encoded String
         message: String,
-        /// Chain used to sign the message
-        #[serde(with = "Bip44Def")]
-        chain: Bip44,
+        /// Options used to sign the hash
+        signing_options: serde_json::Value,
     },
     /// Sign a transaction
     #[serde(rename_all = "camelCase")]
     SignTransaction {
         /// Prepared transaction data
-        prepared_transaction_data: PreparedTransactionDataDto,
+        prepared_transaction_data: PreparedTransactionDataDto<serde_json::Value>,
         protocol_parameters: ProtocolParameters,
     },
     // Sign a block.
     #[serde(rename_all = "camelCase")]
     SignBlock {
         unsigned_block: UnsignedBlockDto,
-        /// Chain used to sign the block
-        #[serde(with = "Bip44Def")]
-        chain: Bip44,
+        /// Options used to sign the block
+        signing_options: serde_json::Value,
     },
     /// Store a mnemonic in the Stronghold vault
     #[cfg(feature = "stronghold")]

@@ -10,13 +10,13 @@
 
 use iota_sdk::{
     client::{
-        constants::SHIMMER_COIN_TYPE,
+        constants::IOTA_COIN_TYPE,
         request_funds_from_faucet,
-        secret::{mnemonic::MnemonicSecretManager, SecretManage, SecretManager},
+        secret::{mnemonic::MnemonicSecretManager, PublicKeyOptions, SecretManage, SecretManageExt},
     },
     crypto::keys::bip44::Bip44,
     types::block::{
-        address::{Address, Bech32Address, Hrp},
+        address::{Bech32Address, Ed25519Address, ToBech32Ext},
         output::BasicOutput,
         payload::signed_transaction::TransactionId,
     },
@@ -47,20 +47,16 @@ async fn main() -> Result<()> {
     let client_options = ClientOptions::new().with_node(&std::env::var("NODE_URL").unwrap())?;
     let secret_manager = MnemonicSecretManager::try_from_mnemonic(std::env::var("MNEMONIC").unwrap())?;
 
-    let bip_path = Bip44::new(SHIMMER_COIN_TYPE);
-    let address = Bech32Address::new(
-        Hrp::from_str_unchecked("smr"),
-        Address::from(
-            secret_manager
-                .generate_ed25519_addresses(bip_path.coin_type, bip_path.account, 0..1, None)
-                .await?[0],
-        ),
-    );
+    let address = secret_manager
+        .generate::<Ed25519Address>(&PublicKeyOptions::new(IOTA_COIN_TYPE))
+        .await?
+        .to_bech32_unchecked("smr");
 
     let wallet = Wallet::builder()
-        .with_secret_manager(SecretManager::Mnemonic(secret_manager))
+        .with_secret_manager(secret_manager)
         .with_client_options(client_options)
-        .with_public_key_options(bip_path)
+        .with_public_key_options(PublicKeyOptions::new(IOTA_COIN_TYPE))
+        .with_signing_options(Bip44::new(IOTA_COIN_TYPE))
         .with_address(address)
         .finish()
         .await?;
@@ -91,7 +87,7 @@ async fn main() -> Result<()> {
         let transaction = wallet
             .send_with_params(vec![SendParams::new(SEND_AMOUNT, recv_address.clone())?; 127], None)
             .await?;
-        wait_for_inclusion(&transaction.transaction_id, &wallet).await?;
+        wait_for_inclusion(&wallet, &transaction.transaction_id).await?;
 
         wallet.sync(None).await?;
     }
@@ -160,7 +156,10 @@ async fn main() -> Result<()> {
     Ok(())
 }
 
-async fn ensure_enough_funds(wallet: &Wallet, bech32_address: &Bech32Address) -> Result<()> {
+async fn ensure_enough_funds<S: 'static + SecretManage>(
+    wallet: &Wallet<S>,
+    bech32_address: &Bech32Address,
+) -> Result<()> {
     let balance = wallet.sync(None).await?;
     let available_funds = balance.base_coin().available();
     println!("Available funds: {available_funds}");
@@ -201,7 +200,10 @@ async fn ensure_enough_funds(wallet: &Wallet, bech32_address: &Bech32Address) ->
     }
 }
 
-async fn wait_for_inclusion(transaction_id: &TransactionId, wallet: &Wallet) -> Result<()> {
+async fn wait_for_inclusion<S: 'static + SecretManage>(
+    wallet: &Wallet<S>,
+    transaction_id: &TransactionId,
+) -> Result<()> {
     println!(
         "Transaction sent: {}/transaction/{}",
         std::env::var("EXPLORER_URL").unwrap(),

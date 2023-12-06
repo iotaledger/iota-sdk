@@ -11,7 +11,7 @@
 use iota_sdk::{
     client::{
         constants::SHIMMER_COIN_TYPE,
-        secret::{stronghold::StrongholdSecretManager, SecretManager},
+        secret::{stronghold::StrongholdSecretManager, PublicKeyOptions, SecretManage},
     },
     crypto::keys::{bip39::Mnemonic, bip44::Bip44},
     wallet::{ClientOptions, Result, Wallet},
@@ -44,10 +44,11 @@ async fn main() -> Result<()> {
 
     // Create the wallet with the secret_manager and client options
     let wallet = Wallet::builder()
-        .with_secret_manager(SecretManager::Stronghold(secret_manager))
+        .with_secret_manager(secret_manager)
         .with_storage_path(OFFLINE_WALLET_DB_PATH)
         .with_client_options(offline_client)
-        .with_public_key_options(Bip44::new(SHIMMER_COIN_TYPE))
+        .with_public_key_options(PublicKeyOptions::new(SHIMMER_COIN_TYPE))
+        .with_signing_options(Bip44::new(SHIMMER_COIN_TYPE))
         .finish()
         .await?;
 
@@ -56,7 +57,7 @@ async fn main() -> Result<()> {
     write_wallet_address_to_file(&wallet).await
 }
 
-async fn write_wallet_address_to_file(wallet: &Wallet) -> Result<()> {
+async fn write_wallet_address_to_file<S: 'static + SecretManage>(wallet: &Wallet<S>) -> Result<()> {
     use tokio::io::AsyncWriteExt;
 
     let wallet_address = wallet.address().await;

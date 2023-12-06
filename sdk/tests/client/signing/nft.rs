@@ -6,16 +6,13 @@ use std::str::FromStr;
 use crypto::keys::bip44::Bip44;
 use iota_sdk::{
     client::{
-        api::{
-            transaction::validate_signed_transaction_payload_length, verify_semantic, GetAddressesOptions,
-            PreparedTransactionData,
-        },
+        api::{transaction::validate_signed_transaction_payload_length, verify_semantic, PreparedTransactionData},
         constants::SHIMMER_COIN_TYPE,
-        secret::{SecretManage, SecretManager},
-        Client, Result,
+        secret::{mnemonic::MnemonicSecretManager, PublicKeyOptions, SecretManageExt, SignTransaction},
+        Result,
     },
     types::block::{
-        address::{Address, NftAddress},
+        address::{Address, Ed25519Address, NftAddress},
         input::{Input, UtxoInput},
         output::NftId,
         payload::{signed_transaction::Transaction, SignedTransactionPayload},
@@ -34,17 +31,13 @@ use crate::client::{
 
 #[tokio::test]
 async fn nft_reference_unlocks() -> Result<()> {
-    let secret_manager = SecretManager::try_from_mnemonic(Client::generate_mnemonic()?)?;
+    let secret_manager = MnemonicSecretManager::generate()?;
 
-    let address_0 = secret_manager
-        .generate_ed25519_addresses(
-            GetAddressesOptions::default()
-                .with_coin_type(SHIMMER_COIN_TYPE)
-                .with_range(0..1),
-        )
-        .await?[0]
-        .clone()
-        .into_inner();
+    let address_0 = Address::from(
+        secret_manager
+            .generate::<Ed25519Address>(&PublicKeyOptions::new(SHIMMER_COIN_TYPE))
+            .await?,
+    );
 
     let protocol_parameters = protocol_parameters();
     let nft_id = NftId::from_str(NFT_ID_1)?;
@@ -87,7 +80,9 @@ async fn nft_reference_unlocks() -> Result<()> {
         remainder: None,
     };
 
-    let unlocks = secret_manager.transaction_unlocks(&prepared_transaction_data).await?;
+    let unlocks = secret_manager
+        .transaction_unlocks(&prepared_transaction_data, &protocol_parameters)
+        .await?;
 
     assert_eq!(unlocks.len(), 3);
     assert_eq!((*unlocks).first().unwrap().kind(), SignatureUnlock::KIND);

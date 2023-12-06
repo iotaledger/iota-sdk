@@ -9,7 +9,10 @@
 //! ```
 
 use iota_sdk::{
-    client::{constants::SHIMMER_COIN_TYPE, secret::SecretManager},
+    client::{
+        constants::SHIMMER_COIN_TYPE,
+        secret::{mnemonic::MnemonicSecretManager, PublicKeyOptions, SecretManager},
+    },
     crypto::keys::bip44::Bip44,
     wallet::{ClientOptions, Result, Wallet},
 };
@@ -19,14 +22,15 @@ async fn main() -> Result<()> {
     //  This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
-    let secret_manager = SecretManager::try_from_mnemonic(std::env::var("MNEMONIC").unwrap())?;
+    let secret_manager = MnemonicSecretManager::try_from_mnemonic(std::env::var("MNEMONIC").unwrap())?;
     let client_options = ClientOptions::new().with_node("https://api.testnet.shimmer.network")?;
 
     let wallet = Wallet::builder()
         .with_secret_manager(secret_manager)
         .with_client_options(client_options)
         .with_storage_path("implicit_account_creation")
-        .with_public_key_options(Bip44::new(SHIMMER_COIN_TYPE))
+        .with_public_key_options(PublicKeyOptions::new(SHIMMER_COIN_TYPE))
+        .with_signing_options(Bip44::new(SHIMMER_COIN_TYPE))
         .finish()
         .await?;
 

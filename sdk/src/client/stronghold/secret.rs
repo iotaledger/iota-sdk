@@ -30,7 +30,7 @@ use crate::{
     client::{
         secret::{
             types::{EvmSignature, StrongholdDto},
-            Generate, GenerateMultiKeyOptions, GeneratePublicKeyOptions, SecretManagerConfig, Sign, SignTransaction,
+            Generate, MultiKeyOptions, PublicKeyOptions, SecretManagerConfig, Sign, SignTransaction,
         },
         stronghold::Error,
     },
@@ -39,7 +39,7 @@ use crate::{
 
 #[async_trait]
 impl Generate<ed25519::PublicKey> for StrongholdAdapter {
-    type Options = GeneratePublicKeyOptions;
+    type Options = PublicKeyOptions;
 
     async fn generate(&self, options: &Self::Options) -> crate::client::Result<ed25519::PublicKey> {
         // Prevent the method from being invoked when the key has been cleared from the memory. Do note that Stronghold
@@ -94,7 +94,7 @@ impl Generate<ed25519::PublicKey> for StrongholdAdapter {
 
 #[async_trait]
 impl Generate<Ed25519Address> for StrongholdAdapter {
-    type Options = GeneratePublicKeyOptions;
+    type Options = PublicKeyOptions;
 
     async fn generate(&self, options: &Self::Options) -> crate::client::Result<Ed25519Address> {
         let public_key: ed25519::PublicKey = self.generate(options).await?;
@@ -104,7 +104,7 @@ impl Generate<Ed25519Address> for StrongholdAdapter {
 
 #[async_trait]
 impl Generate<Vec<ed25519::PublicKey>> for StrongholdAdapter {
-    type Options = GenerateMultiKeyOptions;
+    type Options = MultiKeyOptions;
 
     async fn generate(&self, options: &Self::Options) -> crate::client::Result<Vec<ed25519::PublicKey>> {
         // Prevent the method from being invoked when the key has been cleared from the memory. Do note that Stronghold
@@ -168,7 +168,7 @@ impl Generate<Vec<ed25519::PublicKey>> for StrongholdAdapter {
 
 #[async_trait]
 impl Generate<Vec<Ed25519Address>> for StrongholdAdapter {
-    type Options = GenerateMultiKeyOptions;
+    type Options = MultiKeyOptions;
 
     async fn generate(&self, options: &Self::Options) -> crate::client::Result<Vec<Ed25519Address>> {
         let public_keys: Vec<ed25519::PublicKey> = self.generate(options).await?;
@@ -181,7 +181,7 @@ impl Generate<Vec<Ed25519Address>> for StrongholdAdapter {
 
 #[async_trait]
 impl Generate<secp256k1_ecdsa::PublicKey> for StrongholdAdapter {
-    type Options = GeneratePublicKeyOptions;
+    type Options = PublicKeyOptions;
 
     async fn generate(&self, options: &Self::Options) -> crate::client::Result<secp256k1_ecdsa::PublicKey> {
         // Prevent the method from being invoked when the key has been cleared from the memory. Do note that Stronghold
@@ -236,7 +236,7 @@ impl Generate<secp256k1_ecdsa::PublicKey> for StrongholdAdapter {
 
 #[async_trait]
 impl Generate<EvmAddress> for StrongholdAdapter {
-    type Options = GeneratePublicKeyOptions;
+    type Options = PublicKeyOptions;
 
     async fn generate(&self, options: &Self::Options) -> crate::client::Result<EvmAddress> {
         let public_key: secp256k1_ecdsa::PublicKey = self.generate(options).await?;
@@ -246,7 +246,7 @@ impl Generate<EvmAddress> for StrongholdAdapter {
 
 #[async_trait]
 impl Generate<Vec<secp256k1_ecdsa::PublicKey>> for StrongholdAdapter {
-    type Options = GenerateMultiKeyOptions;
+    type Options = MultiKeyOptions;
 
     async fn generate(&self, options: &Self::Options) -> crate::client::Result<Vec<secp256k1_ecdsa::PublicKey>> {
         // Prevent the method from being invoked when the key has been cleared from the memory. Do note that Stronghold
@@ -310,7 +310,7 @@ impl Generate<Vec<secp256k1_ecdsa::PublicKey>> for StrongholdAdapter {
 
 #[async_trait]
 impl Generate<Vec<EvmAddress>> for StrongholdAdapter {
-    type Options = GenerateMultiKeyOptions;
+    type Options = MultiKeyOptions;
 
     async fn generate(&self, options: &Self::Options) -> crate::client::Result<Vec<EvmAddress>> {
         let public_keys: Vec<secp256k1_ecdsa::PublicKey> = self.generate(options).await?;
@@ -653,13 +653,12 @@ mod tests {
         // The snapshot should have been on the disk now.
         assert!(Path::new(stronghold_path).exists());
 
-        let addresses = stronghold_adapter
-            .generate_ed25519_addresses(IOTA_COIN_TYPE, 0, 0..1, None)
+        let address = Generate::<Ed25519Address>::generate(&stronghold_adapter, &PublicKeyOptions::new(IOTA_COIN_TYPE))
             .await
             .unwrap();
 
         assert_eq!(
-            addresses[0].to_bech32_unchecked("atoi"),
+            address.to_bech32_unchecked("atoi"),
             "atoi1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluehe53e"
         );
 
@@ -685,13 +684,12 @@ mod tests {
         // The snapshot should have been on the disk now.
         assert!(Path::new(stronghold_path).exists());
 
-        let addresses = stronghold_adapter
-            .generate_evm_addresses(ETHER_COIN_TYPE, 0, 0..1, None)
+        let address = Generate::<EvmAddress>::generate(&stronghold_adapter, &PublicKeyOptions::new(ETHER_COIN_TYPE))
             .await
             .unwrap();
 
         assert_eq!(
-            prefix_hex::encode(addresses[0].as_ref()),
+            prefix_hex::encode(address.as_ref()),
             "0xcaefde2b487ded55688765964320ff390cd87828"
         );
 
@@ -721,8 +719,7 @@ mod tests {
 
         // Address generation returns an error when the key is cleared.
         assert!(
-            stronghold_adapter
-                .generate_ed25519_addresses(IOTA_COIN_TYPE, 0, 0..1, None)
+            Generate::<Ed25519Address>::generate(&stronghold_adapter, &PublicKeyOptions::new(IOTA_COIN_TYPE))
                 .await
                 .is_err()
         );
@@ -730,13 +727,12 @@ mod tests {
         stronghold_adapter.set_password("drowssap".to_owned()).await.unwrap();
 
         // After setting the correct password it works again.
-        let addresses = stronghold_adapter
-            .generate_ed25519_addresses(IOTA_COIN_TYPE, 0, 0..1, None)
+        let address = Generate::<Ed25519Address>::generate(&stronghold_adapter, &PublicKeyOptions::new(IOTA_COIN_TYPE))
             .await
             .unwrap();
 
         assert_eq!(
-            addresses[0].to_bech32_unchecked("atoi"),
+            address.to_bech32_unchecked("atoi"),
             "atoi1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluehe53e"
         );
 

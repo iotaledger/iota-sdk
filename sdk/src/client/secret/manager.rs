@@ -71,7 +71,10 @@ impl Generate<ed25519::PublicKey> for SecretManager {
                 Ok(s.generate(&options).await?)
             }
             #[cfg(feature = "ledger_nano")]
-            SecretManager::LedgerNano(l) => Ok(l.generate(&()).await?),
+            SecretManager::LedgerNano(l) => {
+                let options = <LedgerSecretManager as Generate<ed25519::PublicKey>>::Options::deserialize(options)?;
+                Ok(l.generate(&options).await?)
+            }
             SecretManager::Mnemonic(m) => {
                 let options = <MnemonicSecretManager as Generate<ed25519::PublicKey>>::Options::deserialize(options)?;
                 Ok(m.generate(&options).await?)
@@ -106,7 +109,11 @@ impl Generate<Vec<ed25519::PublicKey>> for SecretManager {
                 Ok(s.generate(&options).await?)
             }
             #[cfg(feature = "ledger_nano")]
-            SecretManager::LedgerNano(l) => Ok(l.generate(&()).await?),
+            SecretManager::LedgerNano(l) => {
+                let options =
+                    <LedgerSecretManager as Generate<Vec<ed25519::PublicKey>>>::Options::deserialize(options)?;
+                Ok(l.generate(&options).await?)
+            }
             SecretManager::Mnemonic(m) => {
                 let options =
                     <MnemonicSecretManager as Generate<Vec<ed25519::PublicKey>>>::Options::deserialize(options)?;

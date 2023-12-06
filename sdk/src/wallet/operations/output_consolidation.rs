@@ -4,7 +4,7 @@
 use serde::{Deserialize, Serialize};
 
 #[cfg(feature = "ledger_nano")]
-use crate::client::secret::{ledger_nano::LedgerSecretManager, DowncastSecretManager};
+use crate::client::secret::DowncastSecretManager;
 use crate::{
     client::{api::PreparedTransactionData, secret::SecretManage},
     types::block::{
@@ -153,7 +153,7 @@ impl<S: 'static + SecretManage> Wallet<S> {
                 #[cfg(feature = "ledger_nano")]
                 {
                     let secret_manager = self.secret_manager.read().await;
-                    if secret_manager.as_ledger_nano().is_ok() {
+                    if (&*secret_manager).as_ledger_nano().is_ok() {
                         DEFAULT_LEDGER_OUTPUT_CONSOLIDATION_THRESHOLD
                     } else {
                         DEFAULT_OUTPUT_CONSOLIDATION_THRESHOLD
@@ -180,7 +180,7 @@ impl<S: 'static + SecretManage> Wallet<S> {
         #[cfg(feature = "ledger_nano")]
         let max_inputs = {
             let secret_manager = self.secret_manager.read().await;
-            if let Ok(ledger) = secret_manager.as_ledger_nano() {
+            if let Ok(ledger) = (&*secret_manager).as_ledger_nano() {
                 let ledger_nano_status = ledger.get_ledger_nano_status().await;
                 // With blind signing we are only limited by the protocol
                 if ledger_nano_status.blind_signing_enabled() {

@@ -12,14 +12,14 @@ use iota_sdk::{
     client::{
         api::{
             input_selection::InputSelection, transaction::validate_signed_transaction_payload_length, verify_semantic,
-            GetAddressesOptions, PreparedTransactionData,
+            PreparedTransactionData,
         },
         constants::SHIMMER_COIN_TYPE,
-        secret::{SecretManage, SecretManager},
+        secret::{mnemonic::MnemonicSecretManager, MultiKeyOptions, SecretManageExt, SignTransaction},
         Result,
     },
     types::block::{
-        address::{AccountAddress, Address, NftAddress},
+        address::{AccountAddress, Address, Ed25519Address, NftAddress},
         input::{Input, UtxoInput},
         output::{AccountId, NftId},
         payload::{signed_transaction::Transaction, SignedTransactionPayload},
@@ -39,23 +39,19 @@ use crate::client::{
 
 #[tokio::test]
 async fn all_combined() -> Result<()> {
-    let secret_manager = SecretManager::try_from_mnemonic(
+    let secret_manager = MnemonicSecretManager::try_from_mnemonic(
         // mnemonic needs to be hardcoded to make the ordering deterministic
         "mirror add nothing long orphan hat this rough scare gallery fork twelve old shrug voyage job table obscure mimic holiday possible proud giraffe fan".to_owned(),
     )?;
 
     let protocol_parameters = protocol_parameters();
 
-    let ed25519_bech32_addresses = secret_manager
-        .generate_ed25519_addresses(
-            GetAddressesOptions::default()
-                .with_coin_type(SHIMMER_COIN_TYPE)
-                .with_range(0..3),
-        )
-        .await?;
-    let ed25519_0 = ed25519_bech32_addresses[0].clone().into_inner();
-    let ed25519_1 = ed25519_bech32_addresses[1].clone().into_inner();
-    let ed25519_2 = ed25519_bech32_addresses[2].clone().into_inner();
+    let [ed25519_0, ed25519_1, ed25519_2] = secret_manager
+        .generate::<Vec<Ed25519Address>>(&MultiKeyOptions::new(SHIMMER_COIN_TYPE).with_address_range(0..3))
+        .await?[..]
+    else {
+        unreachable!()
+    };
 
     let account_id_1 = AccountId::from_str(ACCOUNT_ID_1)?;
     let account_id_2 = AccountId::from_str(ACCOUNT_ID_2)?;
@@ -76,7 +72,7 @@ async fn all_combined() -> Result<()> {
         Account(
             1_000_000,
             account_id_2,
-            ed25519_0.clone(),
+            ed25519_0.into(),
             None,
             None,
             Some(Bip44::new(SHIMMER_COIN_TYPE)),
@@ -89,7 +85,7 @@ async fn all_combined() -> Result<()> {
         Basic(1_000_000, nft_4.clone(), None, None, None, None, None, None),
         Basic(
             1_000_000,
-            ed25519_0.clone(),
+            ed25519_0.into(),
             None,
             None,
             None,
@@ -99,7 +95,7 @@ async fn all_combined() -> Result<()> {
         ),
         Basic(
             1_000_000,
-            ed25519_1.clone(),
+            ed25519_1.into(),
             None,
             None,
             None,
@@ -109,7 +105,7 @@ async fn all_combined() -> Result<()> {
         ),
         Basic(
             1_000_000,
-            ed25519_2.clone(),
+            ed25519_2.into(),
             None,
             None,
             None,
@@ -119,7 +115,7 @@ async fn all_combined() -> Result<()> {
         ),
         Basic(
             1_000_000,
-            ed25519_2.clone(),
+            ed25519_2.into(),
             None,
             None,
             None,
@@ -130,7 +126,7 @@ async fn all_combined() -> Result<()> {
         Nft(
             1_000_000,
             nft_id_1,
-            ed25519_0.clone(),
+            ed25519_0.into(),
             None,
             None,
             None,
@@ -141,7 +137,7 @@ async fn all_combined() -> Result<()> {
         // Expirations
         Basic(
             2_000_000,
-            ed25519_0.clone(),
+            ed25519_0.into(),
             None,
             None,
             None,
@@ -151,7 +147,7 @@ async fn all_combined() -> Result<()> {
         ),
         Basic(
             2_000_000,
-            ed25519_0.clone(),
+            ed25519_0.into(),
             None,
             None,
             None,
@@ -161,7 +157,7 @@ async fn all_combined() -> Result<()> {
         ),
         Basic(
             2_000_000,
-            ed25519_0.clone(),
+            ed25519_0.into(),
             None,
             None,
             None,
@@ -193,12 +189,12 @@ async fn all_combined() -> Result<()> {
 
     let outputs = build_outputs([
         Account(1_000_000, account_id_1, nft_1, None, None, None),
-        Account(1_000_000, account_id_2, ed25519_0.clone(), None, None, None),
-        Basic(10_000_000, ed25519_0.clone(), None, None, None, None, None, None),
-        Nft(1_000_000, nft_id_1, ed25519_0.clone(), None, None, None, None, None),
-        Nft(1_000_000, nft_id_2, ed25519_0.clone(), None, None, None, None, None),
-        Nft(1_000_000, nft_id_3, ed25519_0.clone(), None, None, None, None, None),
-        Nft(1_000_000, nft_id_4, ed25519_0.clone(), None, None, None, None, None),
+        Account(1_000_000, account_id_2, ed25519_0.into(), None, None, None),
+        Basic(10_000_000, ed25519_0.into(), None, None, None, None, None, None),
+        Nft(1_000_000, nft_id_1, ed25519_0.into(), None, None, None, None, None),
+        Nft(1_000_000, nft_id_2, ed25519_0.into(), None, None, None, None, None),
+        Nft(1_000_000, nft_id_3, ed25519_0.into(), None, None, None, None, None),
+        Nft(1_000_000, nft_id_4, ed25519_0.into(), None, None, None, None, None),
     ]);
 
     let slot_index = SlotIndex::from(100);
@@ -206,7 +202,7 @@ async fn all_combined() -> Result<()> {
     let selected = InputSelection::new(
         inputs.clone(),
         outputs.clone(),
-        [ed25519_0, ed25519_1, ed25519_2],
+        [ed25519_0.into(), ed25519_1.into(), ed25519_2.into()],
         protocol_parameters.clone(),
     )
     .with_slot_index(slot_index)
@@ -232,7 +228,9 @@ async fn all_combined() -> Result<()> {
         remainder: None,
     };
 
-    let unlocks = secret_manager.transaction_unlocks(&prepared_transaction_data).await?;
+    let unlocks = secret_manager
+        .transaction_unlocks(&prepared_transaction_data, &protocol_parameters)
+        .await?;
 
     assert_eq!(unlocks.len(), 15);
     assert_eq!((*unlocks).first().unwrap().kind(), SignatureUnlock::KIND);

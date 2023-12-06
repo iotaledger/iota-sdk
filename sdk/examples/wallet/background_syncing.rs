@@ -10,9 +10,9 @@
 
 use iota_sdk::{
     client::{
-        constants::SHIMMER_COIN_TYPE,
+        constants::IOTA_COIN_TYPE,
         request_funds_from_faucet,
-        secret::{mnemonic::MnemonicSecretManager, SecretManager},
+        secret::{mnemonic::MnemonicSecretManager, PublicKeyOptions},
     },
     crypto::keys::bip44::Bip44,
     wallet::{ClientOptions, Result, Wallet},
@@ -31,10 +31,11 @@ async fn main() -> Result<()> {
     let client_options = ClientOptions::new().with_node(&std::env::var("NODE_URL").unwrap())?;
     let secret_manager = MnemonicSecretManager::try_from_mnemonic(std::env::var("MNEMONIC").unwrap())?;
     let wallet = Wallet::builder()
-        .with_secret_manager(SecretManager::Mnemonic(secret_manager))
+        .with_secret_manager(secret_manager)
         .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
         .with_client_options(client_options)
-        .with_public_key_options(Bip44::new(SHIMMER_COIN_TYPE))
+        .with_public_key_options(PublicKeyOptions::new(IOTA_COIN_TYPE))
+        .with_signing_options(Bip44::new(IOTA_COIN_TYPE))
         .finish()
         .await?;
 

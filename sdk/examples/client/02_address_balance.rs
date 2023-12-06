@@ -11,10 +11,15 @@
 
 use iota_sdk::{
     client::{
-        api::GetAddressesOptions, node_api::indexer::query_parameters::BasicOutputQueryParameters,
-        secret::SecretManager, Client, Result,
+        constants::IOTA_COIN_TYPE,
+        node_api::indexer::query_parameters::BasicOutputQueryParameters,
+        secret::{mnemonic::MnemonicSecretManager, PublicKeyOptions, SecretManageExt},
+        Client, Result,
     },
-    types::block::output::NativeTokensBuilder,
+    types::block::{
+        address::{Ed25519Address, ToBech32Ext},
+        output::NativeTokensBuilder,
+    },
 };
 
 #[tokio::main]
@@ -32,18 +37,15 @@ async fn main() -> Result<()> {
         .finish()
         .await?;
 
-    let secret_manager = SecretManager::try_from_mnemonic(std::env::var("MNEMONIC").unwrap())?;
+    let secret_manager = MnemonicSecretManager::try_from_mnemonic(std::env::var("MNEMONIC").unwrap())?;
+
+    let hrp = client.get_bech32_hrp().await?;
 
     // Generate the first address
     let first_address = secret_manager
-        .generate_ed25519_addresses(
-            GetAddressesOptions::from_client(&client)
-                .await?
-                .with_account_index(0)
-                .with_range(0..1),
-        )
-        .await?[0]
-        .clone();
+        .generate::<Ed25519Address>(&PublicKeyOptions::new(IOTA_COIN_TYPE))
+        .await?
+        .to_bech32(hrp);
 
     // Get output ids of outputs that can be controlled by this address without further unlock constraints
     let output_ids_response = client

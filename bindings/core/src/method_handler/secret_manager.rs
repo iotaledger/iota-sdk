@@ -1,17 +1,20 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-#[cfg(feature = "ledger_nano")]
-use iota_sdk::client::secret::ledger_nano::LedgerSecretManager;
+use crypto::signatures::secp256k1_ecdsa::EvmAddress;
 #[cfg(feature = "stronghold")]
-use iota_sdk::client::secret::{stronghold::StrongholdSecretManager, SecretManager};
+use iota_sdk::client::secret::SecretManager;
 use iota_sdk::{
     client::{
-        api::{GetAddressesOptions, PreparedTransactionData},
-        secret::{DowncastSecretManager, SecretManage, SignBlock},
+        api::PreparedTransactionData,
+        secret::{types::EvmSignature, BlockSignExt, DowncastSecretManager, Generate, Sign, SignTransaction},
     },
     types::{
-        block::{address::ToBech32Ext, core::UnsignedBlock, unlock::Unlock, BlockDto},
+        block::{
+            address::{Ed25519Address, ToBech32Ext},
+            core::UnsignedBlock,
+            BlockDto,
+        },
         TryFromDto,
     },
 };
@@ -19,26 +22,14 @@ use iota_sdk::{
 use crate::{method::SecretManagerMethod, response::Response, Result};
 
 /// Call a secret manager method.
-pub(crate) async fn call_secret_manager_method_internal<S: SecretManage + DowncastSecretManager>(
-    secret_manager: &S,
+pub(crate) async fn call_secret_manager_method_internal(
+    secret_manager: &SecretManager,
     method: SecretManagerMethod,
-) -> Result<Response>
-where
-    iota_sdk::client::Error: From<S::Error>,
-{
+) -> Result<Response> {
     let response = match method {
-        SecretManagerMethod::GenerateEd25519Addresses {
-            options:
-                GetAddressesOptions {
-                    coin_type,
-                    account_index,
-                    range,
-                    bech32_hrp,
-                    options,
-                },
-        } => {
-            let addresses = secret_manager
-                .generate_ed25519_addresses(coin_type, account_index, range, options)
+        SecretManagerMethod::GenerateEd25519Addresses { bech32_hrp, options } => {
+            let options = serde_json::from_value(options)?;
+            let addresses = Generate::<Vec<Ed25519Address>>::generate(secret_manager, &options)
                 .await
                 .map_err(iota_sdk::client::Error::from)?
                 .into_iter()
@@ -46,18 +37,9 @@ where
                 .collect();
             Response::GeneratedEd25519Addresses(addresses)
         }
-        SecretManagerMethod::GenerateEvmAddresses {
-            options:
-                GetAddressesOptions {
-                    coin_type,
-                    account_index,
-                    range,
-                    bech32_hrp: _,
-                    options,
-                },
-        } => {
-            let addresses = secret_manager
-                .generate_evm_addresses(coin_type, account_index, range, options)
+        SecretManagerMethod::GenerateEvmAddresses { options } => {
+            let options = serde_json::from_value(options)?;
+            let addresses = Generate::<Vec<EvmAddress>>::generate(secret_manager, &options)
                 .await
                 .map_err(iota_sdk::client::Error::from)?
                 .into_iter()
@@ -67,11 +49,7 @@ where
         }
         #[cfg(feature = "ledger_nano")]
         SecretManagerMethod::GetLedgerNanoStatus => {
-            if let Some(secret_manager) = secret_manager.downcast::<LedgerSecretManager>() {
-                Response::LedgerNanoStatus(secret_manager.get_ledger_nano_status().await)
-            } else {
-                return Err(iota_sdk::client::Error::SecretManagerMismatch.into());
-            }
+            Response::LedgerNanoStatus(secret_manager.as_ledger_nano()?.get_ledger_nano_status().await)
         }
         SecretManagerMethod::SignTransaction {
             prepared_transaction_data,
@@ -86,35 +64,44 @@ where
                 .map_err(iota_sdk::client::Error::from)?;
             Response::SignedTransaction(transaction.into())
         }
-        SecretManagerMethod::SignBlock { unsigned_block, chain } => Response::Block(BlockDto::from(
+        SecretManagerMethod::SignBlock {
+            unsigned_block,
+            signing_options,
+        } => Response::Block(BlockDto::from(
             &UnsignedBlock::try_from_dto(unsigned_block)?
-                .sign_ed25519(secret_manager, chain)
+                .sign_ed25519(secret_manager, &signing_options)
                 .await?,
         )),
         SecretManagerMethod::SignatureUnlock {
             transaction_signing_hash,
-            chain,
+            signing_options,
         } => {
             let transaction_signing_hash: [u8; 32] = prefix_hex::decode(transaction_signing_hash)?;
-            let unlock: Unlock = secret_manager
-                .signature_unlock(&transaction_signing_hash, chain)
+            let unlock = secret_manager
+                .signature_unlock(&transaction_signing_hash, &signing_options)
                 .await
                 .map_err(iota_sdk::client::Error::from)?;
 
-            Response::SignatureUnlock(unlock)
+            Response::SignatureUnlock(unlock.into())
         }
-        SecretManagerMethod::SignEd25519 { message, chain } => {
+        SecretManagerMethod::SignEd25519 {
+            message,
+            signing_options,
+        } => {
             let msg: Vec<u8> = prefix_hex::decode(message)?;
             let signature = secret_manager
-                .sign_ed25519(&msg, chain)
+                .sign(&msg, &signing_options)
                 .await
                 .map_err(iota_sdk::client::Error::from)?;
             Response::Ed25519Signature(signature)
         }
-        SecretManagerMethod::SignSecp256k1Ecdsa { message, chain } => {
+        SecretManagerMethod::SignSecp256k1Ecdsa {
+            message,
+            signing_options,
+        } => {
             let msg: Vec<u8> = prefix_hex::decode(message)?;
-            let (public_key, signature) = secret_manager
-                .sign_secp256k1_ecdsa(&msg, chain)
+            let EvmSignature { public_key, signature } = secret_manager
+                .sign(&msg, &signing_options)
                 .await
                 .map_err(iota_sdk::client::Error::from)?;
             Response::Secp256k1EcdsaSignature {
@@ -125,15 +112,8 @@ where
         #[cfg(feature = "stronghold")]
         SecretManagerMethod::StoreMnemonic { mnemonic } => {
             let mnemonic = crypto::keys::bip39::Mnemonic::from(mnemonic);
-            if let Some(secret_manager) = secret_manager.downcast::<StrongholdSecretManager>() {
-                secret_manager.store_mnemonic(mnemonic).await?;
-                Response::Ok
-            } else if let Some(SecretManager::Stronghold(secret_manager)) = secret_manager.downcast::<SecretManager>() {
-                secret_manager.store_mnemonic(mnemonic).await?;
-                Response::Ok
-            } else {
-                return Err(iota_sdk::client::Error::SecretManagerMismatch.into());
-            }
+            secret_manager.as_stronghold()?.store_mnemonic(mnemonic).await?;
+            Response::Ok
         }
     };
     Ok(response)

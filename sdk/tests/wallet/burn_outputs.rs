@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use iota_sdk::{
-    client::api::input_selection::Burn,
+    client::{api::input_selection::Burn, secret::SecretManage},
     types::block::output::{
         unlock_condition::{AddressUnlockCondition, ExpirationUnlockCondition},
         NativeToken, NftId, NftOutputBuilder, OutputId, UnlockCondition,
@@ -177,7 +177,7 @@ async fn create_and_melt_native_token() -> Result<()> {
     tear_down(storage_path)
 }
 
-async fn destroy_foundry(wallet: &Wallet) -> Result<()> {
+async fn destroy_foundry<S: 'static + SecretManage>(wallet: &Wallet<S>) -> Result<()> {
     let balance = wallet.sync(None).await?;
     println!("wallet balance -> {}", serde_json::to_string(&balance).unwrap());
 
@@ -200,7 +200,7 @@ async fn destroy_foundry(wallet: &Wallet) -> Result<()> {
     Ok(())
 }
 
-async fn destroy_account(wallet: &Wallet) -> Result<()> {
+async fn destroy_account<S: 'static + SecretManage>(wallet: &Wallet<S>) -> Result<()> {
     let balance = wallet.sync(None).await.unwrap();
     println!("account balance -> {}", serde_json::to_string(&balance).unwrap());
 

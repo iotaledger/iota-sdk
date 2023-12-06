@@ -8,10 +8,13 @@
 //! cargo run --release --example 01_generate_addresses
 //! ```
 
-use iota_sdk::client::{
-    api::GetAddressesOptions,
-    secret::{GenerateAddressOptions, SecretManager},
-    Client, Result,
+use iota_sdk::{
+    client::{
+        constants::IOTA_COIN_TYPE,
+        secret::{mnemonic::MnemonicSecretManager, MultiKeyOptions, SecretManageExt},
+        Client, Result,
+    },
+    types::block::address::{Ed25519Address, ToBech32Ext},
 };
 
 #[tokio::main]
@@ -29,39 +32,48 @@ async fn main() -> Result<()> {
         .finish()
         .await?;
 
-    let secret_manager = SecretManager::try_from_mnemonic(std::env::var("MNEMONIC").unwrap())?;
+    let secret_manager = MnemonicSecretManager::try_from_mnemonic(std::env::var("MNEMONIC").unwrap())?;
+
+    let hrp = client.get_bech32_hrp().await?;
 
     // Generate addresses with default account index and range
     let addresses = secret_manager
-        .generate_ed25519_addresses(GetAddressesOptions::from_client(&client).await?)
-        .await?;
+        .generate::<Vec<Ed25519Address>>(&MultiKeyOptions::new(IOTA_COIN_TYPE))
+        .await?
+        .into_iter()
+        .map(|a| a.to_bech32(hrp))
+        .collect::<Vec<_>>();
 
     println!("List of generated public addresses (default):");
     println!("{addresses:#?}\n");
 
     // Generate addresses with custom account index and range
     let addresses = secret_manager
-        .generate_ed25519_addresses(
-            GetAddressesOptions::from_client(&client)
-                .await?
+        .generate::<Vec<Ed25519Address>>(
+            &MultiKeyOptions::new(IOTA_COIN_TYPE)
                 .with_account_index(0)
-                .with_range(0..4),
+                .with_address_range(0..4),
         )
-        .await?;
+        .await?
+        .into_iter()
+        .map(|a| a.to_bech32(hrp))
+        .collect::<Vec<_>>();
 
     println!("List of generated public addresses (0..4):\n");
     println!("{addresses:#?}\n");
 
     // Generate internal addresses with custom account index and range
     let addresses = secret_manager
-        .generate_ed25519_addresses(
-            GetAddressesOptions::from_client(&client)
-                .await?
+        .generate::<Vec<Ed25519Address>>(
+            &MultiKeyOptions::new(IOTA_COIN_TYPE)
                 .with_account_index(0)
-                .with_range(0..4)
-                .with_options(GenerateAddressOptions::internal()),
+                .with_address_range(0..4)
+                .with_internal(true),
         )
-        .await?;
+        .await?
+        .into_iter()
+        .map(|a| a.to_bech32(hrp))
+        .collect::<Vec<_>>();
 
     println!("List of generated internal addresses:\n");
     println!("{addresses:#?}\n");
