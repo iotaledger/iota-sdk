@@ -105,7 +105,9 @@ where
     /// transaction.
     pub async fn consolidate_outputs(&self, params: ConsolidationParams) -> Result<TransactionWithMetadata> {
         let prepared_transaction = self.prepare_consolidate_outputs(params).await?;
-        let consolidation_tx = self.sign_and_submit_transaction(prepared_transaction, None).await?;
+        let consolidation_tx = self
+            .sign_and_submit_transaction(prepared_transaction, None, None)
+            .await?;
 
         log::debug!(
             "[OUTPUT_CONSOLIDATION] consolidation transaction created: block_id: {:?} tx_id: {:?}",

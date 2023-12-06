@@ -101,6 +101,11 @@ impl TransactionBuilder {
         self
     }
 
+    pub fn add_capabilities(mut self, capabilities: impl IntoIterator<Item = TransactionCapabilityFlag>) -> Self {
+        self.capabilities.add_capabilities(capabilities);
+        self
+    }
+
     /// Sets the payload of a [`TransactionBuilder`].
     pub fn with_payload(mut self, payload: impl Into<OptionalPayload>) -> Self {
         self.payload = payload.into();

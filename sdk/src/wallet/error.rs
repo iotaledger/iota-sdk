@@ -129,6 +129,12 @@ pub enum Error {
     ImplicitAccountNotFound,
 }
 
+impl Error {
+    pub fn other<E: 'static + std::error::Error + Send + Sync>(err: E) -> Self {
+        Self::Other(Box::new(err) as _)
+    }
+}
+
 // Serialize type with Display error
 impl Serialize for Error {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
