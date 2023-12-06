@@ -9,6 +9,7 @@ use clap::{CommandFactory, Parser, Subcommand};
 use colored::Colorize;
 use iota_sdk::{
     client::request_funds_from_faucet,
+    crypto::signatures::ed25519::PublicKey,
     types::{
         api::plugins::participation::types::ParticipationEventId,
         block::{
@@ -19,13 +20,12 @@ use iota_sdk::{
             },
             payload::signed_transaction::TransactionId,
             slot::SlotIndex,
-            ConvertTo,
         },
     },
+    utils::ConvertTo,
     wallet::{
-        types::{OutputData, TransactionWithMetadata},
-        ConsolidationParams, CreateNativeTokenParams, MintNftParams, OutputsToClaim, SendNativeTokensParams,
-        SendNftParams, SendParams, SyncOptions, TransactionOptions, Wallet,
+        types::OutputData, ConsolidationParams, CreateNativeTokenParams, MintNftParams, OutputsToClaim,
+        SendNativeTokenParams, SendNftParams, SendParams, SyncOptions, TransactionOptions, Wallet,
     },
     U256,
 };
@@ -56,6 +56,8 @@ impl WalletCli {
 #[derive(Debug, Subcommand)]
 #[allow(clippy::large_enum_variant)]
 pub enum WalletCommand {
+    /// Lists the accounts of the wallet.
+    Accounts,
     /// Print the wallet address.
     Address,
     /// Print the wallet balance.
@@ -118,6 +120,12 @@ pub enum WalletCommand {
     },
     /// Returns the implicit account creation address of the wallet if it is Ed25519 based.
     ImplicitAccountCreationAddress,
+    /// Transitions an implicit account to an account.
+    ImplicitAccountTransition {
+        /// Identifier of the implicit account output.
+        output_id: OutputId,
+        public_key: Option<String>,
+    },
     /// Lists the implicit accounts of the wallet.
     ImplicitAccounts,
     /// Mint additional native tokens.
@@ -192,7 +200,7 @@ pub enum WalletCommand {
         #[arg(long, default_value_t = false)]
         allow_micro_amount: bool,
     },
-    /// Send native tokens.
+    /// Send a native token.
     /// This will create an output with an expiration and storage deposit return unlock condition.
     SendNativeToken {
         /// Address to send the native tokens to, e.g. rms1qztwng6cty8cfm42nzvq099ev7udhrnk0rw8jt8vttf9kpqnxhpsx869vr3.
@@ -304,6 +312,11 @@ impl FromStr for OutputSelector {
     }
 }
 
+// `accounts` command
+pub async fn accounts_command(wallet: &Wallet) -> Result<(), Error> {
+    print_outputs(wallet.data().await.accounts().cloned().collect(), "Accounts:")
+}
+
 // `address` command
 pub async fn address_command(wallet: &Wallet) -> Result<(), Error> {
     print_wallet_address(wallet).await?;
@@ -401,9 +414,9 @@ pub async fn claimable_outputs_command(wallet: &Wallet) -> Result<(), Error> {
         .iter()
         .filter_map(|(output_id, unlockable)| unlockable.then_some(output_id))
     {
+        let wallet_data = wallet.data().await;
         // Unwrap: for the iterated `OutputId`s this call will always return `Some(...)`.
-        let output_data = wallet.get_output(output_id).await.unwrap();
-        let output = output_data.output;
+        let output = &wallet_data.get_output(output_id).unwrap().output;
         let kind = match output {
             Output::Nft(_) => "Nft",
             Output::Basic(_) => "Basic",
@@ -411,14 +424,15 @@ pub async fn claimable_outputs_command(wallet: &Wallet) -> Result<(), Error> {
         };
         println_log_info!("{output_id:?} ({kind})");
 
-        if let Some(native_tokens) = output.native_tokens() {
-            if !native_tokens.is_empty() {
-                println_log_info!("  - native token amount:");
-                native_tokens.iter().for_each(|token| {
-                    println_log_info!("    + {} {}", token.amount(), token.token_id());
-                });
-            }
-        }
+        // TODO https://github.com/iotaledger/iota-sdk/issues/1633
+        // if let Some(native_tokens) = output.native_tokens() {
+        //     if !native_tokens.is_empty() {
+        //         println_log_info!("  - native token amount:");
+        //         native_tokens.iter().for_each(|token| {
+        //             println_log_info!("    + {} {}", token.amount(), token.token_id());
+        //         });
+        //     }
+        // }
 
         if let Some(unlock_conditions) = output.unlock_conditions() {
             let deposit_return = unlock_conditions
@@ -570,9 +584,35 @@ pub async fn implicit_account_creation_address_command(wallet: &Wallet) -> Resul
     Ok(())
 }
 
+// `implicit-account-transition` command
+pub async fn implicit_account_transition_command(
+    wallet: &Wallet,
+    output_id: OutputId,
+    public_key: Option<String>,
+) -> Result<(), Error> {
+    let public_key = public_key
+        .map(|s| {
+            PublicKey::try_from_bytes(prefix_hex::decode(s).map_err(|e| Error::Miscellaneous(e.to_string()))?)
+                .map_err(|e| Error::Miscellaneous(e.to_string()))
+        })
+        .transpose()?;
+    let transaction = wallet.implicit_account_transition(&output_id, public_key).await?;
+
+    println_log_info!(
+        "Implicit account transition transaction sent:\n{:?}\n{:?}",
+        transaction.transaction_id,
+        transaction.block_id
+    );
+
+    Ok(())
+}
+
 // `implicit-accounts` command
 pub async fn implicit_accounts_command(wallet: &Wallet) -> Result<(), Error> {
-    print_outputs(wallet.implicit_accounts().await, "Implicit accounts:").await
+    print_outputs(
+        wallet.data().await.implicit_accounts().cloned().collect(),
+        "Implicit accounts:",
+    )
 }
 
 // `melt-native-token` command
@@ -658,11 +698,12 @@ pub async fn node_info_command(wallet: &Wallet) -> Result<(), Error> {
 
 /// `output` command
 pub async fn output_command(wallet: &Wallet, selector: OutputSelector) -> Result<(), Error> {
+    let wallet_data = wallet.data().await;
     let output = match selector {
-        OutputSelector::Id(id) => wallet.get_output(&id).await,
+        OutputSelector::Id(id) => wallet_data.get_output(&id),
         OutputSelector::Index(index) => {
-            let mut outputs = wallet.outputs(None).await;
-            outputs.sort_unstable_by(outputs_ordering);
+            let mut outputs = wallet_data.outputs().values().collect::<Vec<_>>();
+            outputs.sort_unstable_by_key(|o| o.output_id);
             outputs.into_iter().nth(index)
         }
     };
@@ -678,7 +719,7 @@ pub async fn output_command(wallet: &Wallet, selector: OutputSelector) -> Result
 
 /// `outputs` command
 pub async fn outputs_command(wallet: &Wallet) -> Result<(), Error> {
-    print_outputs(wallet.outputs(None).await, "Outputs:").await
+    print_outputs(wallet.data().await.outputs().values().cloned().collect(), "Outputs:")
 }
 
 // `send` command
@@ -723,28 +764,27 @@ pub async fn send_native_token_command(
     let address = address.convert()?;
     let transaction = if gift_storage_deposit.unwrap_or(false) {
         // Send native tokens together with the required storage deposit
-        let rent_structure = wallet.client().get_rent_structure().await?;
-        let token_supply = wallet.client().get_token_supply().await?;
+        let storage_params = wallet.client().get_storage_score_parameters().await?;
 
         wallet.client().bech32_hrp_matches(address.hrp()).await?;
 
-        let outputs = [BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)
+        let outputs = [BasicOutputBuilder::new_with_minimum_amount(storage_params)
             .add_unlock_condition(AddressUnlockCondition::new(address))
-            .with_native_tokens([NativeToken::new(
+            .with_native_token(NativeToken::new(
                 TokenId::from_str(&token_id)?,
                 U256::from_dec_str(&amount).map_err(|e| Error::Miscellaneous(e.to_string()))?,
-            )?])
-            .finish_output(token_supply)?];
+            )?)
+            .finish_output()?];
 
         wallet.send_outputs(outputs, None).await?
     } else {
         // Send native tokens with storage deposit return and expiration
-        let outputs = [SendNativeTokensParams::new(
+        let outputs = [SendNativeTokenParams::new(
             address,
-            [(
+            (
                 TokenId::from_str(&token_id)?,
                 U256::from_dec_str(&amount).map_err(|e| Error::Miscellaneous(e.to_string()))?,
-            )],
+            ),
         )?];
         wallet.send_native_tokens(outputs, None).await?
     };
@@ -781,6 +821,7 @@ pub async fn sync_command(wallet: &Wallet) -> Result<(), Error> {
     let balance = wallet
         .sync(Some(SyncOptions {
             sync_native_token_foundries: true,
+            sync_implicit_accounts: true,
             ..Default::default()
         }))
         .await?;
@@ -792,11 +833,12 @@ pub async fn sync_command(wallet: &Wallet) -> Result<(), Error> {
 
 /// `transaction` command
 pub async fn transaction_command(wallet: &Wallet, selector: TransactionSelector) -> Result<(), Error> {
-    let mut transactions = wallet.transactions().await;
+    let wallet_data = wallet.data().await;
     let transaction = match selector {
-        TransactionSelector::Id(id) => transactions.into_iter().find(|tx| tx.transaction_id == id),
+        TransactionSelector::Id(id) => wallet_data.get_transaction(&id),
         TransactionSelector::Index(index) => {
-            transactions.sort_unstable_by(transactions_ordering);
+            let mut transactions = wallet_data.transactions().values().collect::<Vec<_>>();
+            transactions.sort_unstable_by(|a, b| b.timestamp.cmp(&a.timestamp));
             transactions.into_iter().nth(index)
         }
     };
@@ -812,8 +854,9 @@ pub async fn transaction_command(wallet: &Wallet, selector: TransactionSelector)
 
 /// `transactions` command
 pub async fn transactions_command(wallet: &Wallet, show_details: bool) -> Result<(), Error> {
-    let mut transactions = wallet.transactions().await;
-    transactions.sort_unstable_by(transactions_ordering);
+    let wallet_data = wallet.data().await;
+    let mut transactions = wallet_data.transactions().values().collect::<Vec<_>>();
+    transactions.sort_unstable_by(|a, b| b.timestamp.cmp(&a.timestamp));
 
     if transactions.is_empty() {
         println_log_info!("No transactions found");
@@ -835,7 +878,10 @@ pub async fn transactions_command(wallet: &Wallet, show_details: bool) -> Result
 
 /// `unspent-outputs` command
 pub async fn unspent_outputs_command(wallet: &Wallet) -> Result<(), Error> {
-    print_outputs(wallet.unspent_outputs(None).await, "Unspent outputs:").await
+    print_outputs(
+        wallet.data().await.unspent_outputs().values().cloned().collect(),
+        "Unspent outputs:",
+    )
 }
 
 pub async fn vote_command(wallet: &Wallet, event_id: ParticipationEventId, answers: Vec<u8>) -> Result<(), Error> {
@@ -924,7 +970,6 @@ async fn print_wallet_address(wallet: &Wallet) -> Result<(), Error> {
         address.inner()
     );
 
-    let unspent_outputs = wallet.unspent_outputs(None).await;
     let slot_index = wallet.client().get_slot_index().await?;
 
     let mut output_ids = Vec::new();
@@ -936,7 +981,7 @@ async fn print_wallet_address(wallet: &Wallet) -> Result<(), Error> {
     let mut delegations = Vec::new();
     let mut anchors = Vec::new();
 
-    for output_data in unspent_outputs {
+    for output_data in wallet.data().await.unspent_outputs().values() {
         let output_id = output_data.output_id;
         output_ids.push(output_id);
 
@@ -946,8 +991,8 @@ async fn print_wallet_address(wallet: &Wallet) -> Result<(), Error> {
             .required_and_unlocked_address(slot_index, &output_id)?;
 
         if address.inner() == required_address {
-            if let Some(nts) = output_data.output.native_tokens() {
-                native_tokens.add_native_tokens(nts.clone())?;
+            if let Some(nt) = output_data.output.native_token() {
+                native_tokens.add_native_token(*nt)?;
             }
             match &output_data.output {
                 Output::Basic(_) => {}
@@ -1029,7 +1074,7 @@ pub async fn prompt_internal(
     let prompt = if let Some(alias) = wallet.alias().await {
         format!("Wallet \"{alias}\": ")
     } else {
-        format!("Wallet: ")
+        String::from("Wallet: ")
     };
 
     if let Some(helper) = rl.helper_mut() {
@@ -1057,6 +1102,7 @@ pub async fn prompt_internal(
                         }
                     };
                     match protocol_cli.command {
+                        WalletCommand::Accounts => accounts_command(wallet).await,
                         WalletCommand::Address => address_command(wallet).await,
                         WalletCommand::Balance => balance_command(wallet).await,
                         WalletCommand::BurnNativeToken { token_id, amount } => {
@@ -1093,6 +1139,9 @@ pub async fn prompt_internal(
                         WalletCommand::Faucet { address, url } => faucet_command(wallet, address, url).await,
                         WalletCommand::ImplicitAccountCreationAddress => {
                             implicit_account_creation_address_command(wallet).await
+                        }
+                        WalletCommand::ImplicitAccountTransition { output_id, public_key } => {
+                            implicit_account_transition_command(wallet, output_id, public_key).await
                         }
                         WalletCommand::ImplicitAccounts => implicit_accounts_command(wallet).await,
                         WalletCommand::MeltNativeToken { token_id, amount } => {
@@ -1186,31 +1235,29 @@ pub async fn prompt_internal(
     Ok(PromptResponse::Reprompt)
 }
 
-async fn print_outputs(mut outputs: Vec<OutputData>, title: &str) -> Result<(), Error> {
+fn print_outputs(mut outputs: Vec<OutputData>, title: &str) -> Result<(), Error> {
     if outputs.is_empty() {
         println_log_info!("No outputs found");
     } else {
         println_log_info!("{title}");
-        outputs.sort_unstable_by(outputs_ordering);
+        outputs.sort_unstable_by_key(|o| o.output_id);
 
         for (i, output_data) in outputs.into_iter().enumerate() {
+            let kind_str = if output_data.output.is_implicit_account() {
+                "ImplicitAccount"
+            } else {
+                output_data.output.kind_str()
+            };
+
             println_log_info!(
-                "{:<5}{}\t{}\t{}",
+                "{:<5}{} {:<16}{}",
                 i,
                 &output_data.output_id,
-                output_data.output.kind_str(),
+                kind_str,
                 if output_data.is_spent { "Spent" } else { "Unspent" },
             );
         }
     }
 
     Ok(())
-}
-
-fn outputs_ordering(a: &OutputData, b: &OutputData) -> std::cmp::Ordering {
-    a.output_id.cmp(&b.output_id)
-}
-
-fn transactions_ordering(a: &TransactionWithMetadata, b: &TransactionWithMetadata) -> std::cmp::Ordering {
-    b.timestamp.cmp(&a.timestamp)
 }

@@ -22,8 +22,9 @@ use crate::{
         api::core::OutputWithMetadataResponse,
         block::{
             address::Address,
-            output::{dto::OutputDto, Output, OutputId, OutputMetadata},
+            output::{Output, OutputId, OutputMetadata},
             payload::signed_transaction::{dto::SignedTransactionPayloadDto, SignedTransactionPayload, TransactionId},
+            protocol::ProtocolParameters,
             slot::SlotIndex,
             BlockId, Error as BlockError,
         },
@@ -34,7 +35,8 @@ use crate::{
 };
 
 /// An output with metadata
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct OutputData {
     /// The output id
     pub output_id: OutputId,
@@ -49,6 +51,7 @@ pub struct OutputData {
     pub network_id: u64,
     pub remainder: bool,
     // bip44 path
+    #[serde(with = "option_bip44", default)]
     pub chain: Option<Bip44>,
 }
 
@@ -81,68 +84,6 @@ impl OutputData {
             output_metadata: self.metadata,
             chain,
         }))
-    }
-}
-
-/// Dto for an output with metadata
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct OutputDataDto {
-    /// The output id
-    pub output_id: OutputId,
-    /// The metadata of the output
-    pub metadata: OutputMetadata,
-    /// The actual Output
-    pub output: OutputDto,
-    /// If an output is spent
-    pub is_spent: bool,
-    /// Associated account address.
-    pub address: Address,
-    /// Network ID
-    pub network_id: String,
-    /// Remainder
-    pub remainder: bool,
-    /// Bip32 path
-    #[serde(with = "option_bip44", default)]
-    pub chain: Option<Bip44>,
-}
-
-impl From<&OutputData> for OutputDataDto {
-    fn from(value: &OutputData) -> Self {
-        Self {
-            output_id: value.output_id,
-            metadata: value.metadata,
-            output: OutputDto::from(&value.output),
-            is_spent: value.is_spent,
-            address: value.address.clone(),
-            network_id: value.network_id.to_string(),
-            remainder: value.remainder,
-            chain: value.chain,
-        }
-    }
-}
-
-impl TryFromDto for OutputData {
-    type Dto = OutputDataDto;
-    type Error = BlockError;
-
-    fn try_from_dto_with_params_inner(
-        dto: Self::Dto,
-        params: crate::types::ValidationParams<'_>,
-    ) -> Result<Self, Self::Error> {
-        Ok(Self {
-            output_id: dto.output_id,
-            metadata: dto.metadata,
-            output: Output::try_from_dto_with_params(dto.output, params)?,
-            is_spent: dto.is_spent,
-            address: dto.address,
-            network_id: dto
-                .network_id
-                .parse()
-                .map_err(|_| BlockError::InvalidField("network id"))?,
-            remainder: dto.remainder,
-            chain: dto.chain,
-        })
     }
 }
 
@@ -205,16 +146,15 @@ impl From<&TransactionWithMetadata> for TransactionWithMetadataDto {
     }
 }
 
-impl TryFromDto for TransactionWithMetadata {
-    type Dto = TransactionWithMetadataDto;
+impl TryFromDto<TransactionWithMetadataDto> for TransactionWithMetadata {
     type Error = BlockError;
 
     fn try_from_dto_with_params_inner(
-        dto: Self::Dto,
-        params: crate::types::ValidationParams<'_>,
+        dto: TransactionWithMetadataDto,
+        params: Option<&ProtocolParameters>,
     ) -> Result<Self, Self::Error> {
         Ok(Self {
-            payload: SignedTransactionPayload::try_from_dto_with_params(dto.payload, params)?,
+            payload: SignedTransactionPayload::try_from_dto_with_params_inner(dto.payload, params)?,
             block_id: dto.block_id,
             inclusion_state: dto.inclusion_state,
             timestamp: dto

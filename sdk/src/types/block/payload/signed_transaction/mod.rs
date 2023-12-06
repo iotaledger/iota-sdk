@@ -6,31 +6,39 @@
 mod transaction;
 mod transaction_id;
 
-use packable::{error::UnpackError, packer::Packer, unpacker::Unpacker, Packable};
+use packable::{Packable, PackableExt};
 
 pub(crate) use self::transaction::{ContextInputCount, InputCount, OutputCount};
 pub use self::{
     transaction::{Transaction, TransactionBuilder, TransactionCapabilities, TransactionCapabilityFlag},
     transaction_id::{TransactionHash, TransactionId, TransactionSigningHash},
 };
-use crate::types::block::{protocol::ProtocolParameters, unlock::Unlocks, Error};
+use crate::types::block::{
+    protocol::{ProtocolParameters, WorkScore, WorkScoreParameters},
+    unlock::Unlocks,
+    Error,
+};
 
 /// A signed transaction to move funds.
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, Packable)]
+#[packable(unpack_error = Error)]
+#[packable(verify_with = verify_signed_transaction_payload)]
 pub struct SignedTransactionPayload {
     transaction: Transaction,
     unlocks: Unlocks,
 }
 
 impl SignedTransactionPayload {
-    /// The payload kind of a [`SignedTransactionPayload`].
+    /// The [`Payload`](crate::types::block::payload::Payload) kind of a [`SignedTransactionPayload`].
     pub const KIND: u8 = 1;
 
     /// Creates a new [`SignedTransactionPayload`].
     pub fn new(transaction: Transaction, unlocks: Unlocks) -> Result<Self, Error> {
-        verify_transaction_unlocks(&transaction, &unlocks)?;
+        let payload = Self { transaction, unlocks };
 
-        Ok(Self { transaction, unlocks })
+        verify_signed_transaction_payload::<true>(&payload)?;
+
+        Ok(payload)
     }
 
     /// Returns the transaction of a [`SignedTransactionPayload`].
@@ -44,37 +52,20 @@ impl SignedTransactionPayload {
     }
 }
 
-impl Packable for SignedTransactionPayload {
-    type UnpackError = Error;
-    type UnpackVisitor = ProtocolParameters;
-
-    fn pack<P: Packer>(&self, packer: &mut P) -> Result<(), P::Error> {
-        self.transaction.pack(packer)?;
-        self.unlocks.pack(packer)?;
-
-        Ok(())
-    }
-
-    fn unpack<U: Unpacker, const VERIFY: bool>(
-        unpacker: &mut U,
-        visitor: &Self::UnpackVisitor,
-    ) -> Result<Self, UnpackError<Self::UnpackError, U::Error>> {
-        let transaction = Transaction::unpack::<_, VERIFY>(unpacker, visitor)?;
-        let unlocks = Unlocks::unpack::<_, VERIFY>(unpacker, &())?;
-
-        if VERIFY {
-            verify_transaction_unlocks(&transaction, &unlocks).map_err(UnpackError::Packable)?;
-        }
-
-        Ok(Self { transaction, unlocks })
+impl WorkScore for SignedTransactionPayload {
+    fn work_score(&self, params: WorkScoreParameters) -> u32 {
+        // 1 byte for the payload kind
+        (1 + self.packed_len() as u32) * params.data_byte()
+            + self.transaction().work_score(params)
+            + self.unlocks().work_score(params)
     }
 }
 
-fn verify_transaction_unlocks(transaction: &Transaction, unlocks: &Unlocks) -> Result<(), Error> {
-    if transaction.inputs().len() != unlocks.len() {
+fn verify_signed_transaction_payload<const VERIFY: bool>(payload: &SignedTransactionPayload) -> Result<(), Error> {
+    if payload.transaction.inputs().len() != payload.unlocks.len() {
         return Err(Error::InputUnlockCountMismatch {
-            input_count: transaction.inputs().len(),
-            unlock_count: unlocks.len(),
+            input_count: payload.transaction.inputs().len(),
+            unlock_count: payload.unlocks.len(),
         });
     }
 
@@ -91,7 +82,7 @@ pub mod dto {
     use super::*;
     use crate::types::{
         block::{unlock::Unlock, Error},
-        TryFromDto, ValidationParams,
+        TryFromDto,
     };
 
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
@@ -112,11 +103,13 @@ pub mod dto {
         }
     }
 
-    impl TryFromDto for SignedTransactionPayload {
-        type Dto = SignedTransactionPayloadDto;
+    impl TryFromDto<SignedTransactionPayloadDto> for SignedTransactionPayload {
         type Error = Error;
 
-        fn try_from_dto_with_params_inner(dto: Self::Dto, params: ValidationParams<'_>) -> Result<Self, Self::Error> {
+        fn try_from_dto_with_params_inner(
+            dto: SignedTransactionPayloadDto,
+            params: Option<&ProtocolParameters>,
+        ) -> Result<Self, Self::Error> {
             let transaction = Transaction::try_from_dto_with_params_inner(dto.transaction, params)?;
             Self::new(transaction, Unlocks::new(dto.unlocks)?)
         }

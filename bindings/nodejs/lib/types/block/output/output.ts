@@ -5,15 +5,15 @@ import {
     UnlockCondition,
     UnlockConditionDiscriminator,
 } from './unlock-condition';
-import { Feature, FeatureDiscriminator } from './feature';
+import { Feature, FeatureDiscriminator, NativeTokenFeature } from './feature';
 
 // Temp solution for not double parsing JSON
 import { plainToInstance, Type } from 'class-transformer';
-import { HexEncodedString, hexToBigInt, NumericString, u64 } from '../../utils';
+import { HexEncodedString, NumericString, u64 } from '../../utils';
 import { TokenScheme, TokenSchemeDiscriminator } from './token-scheme';
-import { INativeToken } from '../../models';
 import { AccountId, NftId, AnchorId, DelegationId } from '../id';
 import { EpochIndex } from '../../block/slot';
+import { INativeToken } from '../../models/native-token';
 
 export type OutputId = HexEncodedString;
 
@@ -102,9 +102,6 @@ abstract class CommonOutput extends Output {
     })
     readonly unlockConditions: UnlockCondition[];
 
-    // Getter transforms it into nativeTokens with a proper number
-    private nativeTokens?: INativeToken[];
-
     /**
      * The features contained by the output.
      */
@@ -126,22 +123,21 @@ abstract class CommonOutput extends Output {
         super(type, amount);
         this.unlockConditions = unlockConditions;
     }
+
     /**
-     * The native tokens held by the output.
+     * The native token held by the output.
      */
-    getNativeTokens(): INativeToken[] | undefined {
-        if (!this.nativeTokens) {
-            return this.nativeTokens;
+    getNativeToken(): INativeToken | undefined {
+        if (!this.features) {
+            return undefined;
         }
 
-        // Make sure the amount of native tokens are of bigint type.
-        for (let i = 0; i < this.nativeTokens.length; i++) {
-            const token = this.nativeTokens[i];
-            if (typeof token.amount === 'string') {
-                this.nativeTokens[i].amount = hexToBigInt(token.amount);
+        for (const feature of this.features) {
+            if (feature instanceof NativeTokenFeature) {
+                return (feature as NativeTokenFeature).asNativeToken();
             }
         }
-        return this.nativeTokens;
+        return undefined;
     }
 }
 
@@ -243,10 +239,6 @@ class AnchorOutput extends ImmutableFeaturesOutput {
      * The amount of (stored) Mana held by the output.
      */
     readonly mana: u64;
-    /**
-     * Metadata that can only be changed by the state controller.
-     */
-    readonly stateMetadata?: HexEncodedString;
 
     /**
      * @param amount The amount of the output.
@@ -254,7 +246,6 @@ class AnchorOutput extends ImmutableFeaturesOutput {
      * @param anchorId The anchor ID as hex-encoded string.
      * @param stateIndex A counter that must increase by 1 every time the anchor output is state transitioned.
      * @param unlockConditions The unlock conditions of the output.
-     * @param stateMetadata Metadata that can only be changed by the state controller.
      */
     constructor(
         amount: u64,
@@ -262,13 +253,11 @@ class AnchorOutput extends ImmutableFeaturesOutput {
         anchorId: AnchorId,
         stateIndex: number,
         unlockConditions: UnlockCondition[],
-        stateMetadata?: HexEncodedString,
     ) {
         super(OutputType.Account, amount, unlockConditions);
         this.anchorId = anchorId;
         this.stateIndex = stateIndex;
         this.mana = mana;
-        this.stateMetadata = stateMetadata;
     }
 }
 

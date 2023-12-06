@@ -8,12 +8,11 @@ use iota_sdk::{
             transaction::validate_signed_transaction_payload_length, verify_semantic, GetAddressesOptions,
             PreparedTransactionData,
         },
-        constants::{SHIMMER_COIN_TYPE, SHIMMER_TESTNET_BECH32_HRP},
+        constants::SHIMMER_COIN_TYPE,
         secret::{SecretManage, SecretManager},
         Client, Result,
     },
     types::block::{
-        address::ToBech32Ext,
         input::{Input, UtxoInput},
         payload::{signed_transaction::Transaction, SignedTransactionPayload},
         protocol::protocol_parameters,
@@ -29,7 +28,7 @@ use crate::client::{build_inputs, build_outputs, Build::Basic};
 async fn single_ed25519_unlock() -> Result<()> {
     let secret_manager = SecretManager::try_from_mnemonic(Client::generate_mnemonic()?)?;
 
-    let bech32_address_0 = &secret_manager
+    let address_0 = secret_manager
         .generate_ed25519_addresses(
             GetAddressesOptions::default()
                 .with_coin_type(SHIMMER_COIN_TYPE)
@@ -37,13 +36,13 @@ async fn single_ed25519_unlock() -> Result<()> {
         )
         .await?[0]
         .clone()
-        .to_bech32(SHIMMER_TESTNET_BECH32_HRP);
+        .into_inner();
 
     let protocol_parameters = protocol_parameters();
 
     let inputs = build_inputs([Basic(
         1_000_000,
-        &bech32_address_0.to_string(),
+        address_0.clone(),
         None,
         None,
         None,
@@ -54,7 +53,7 @@ async fn single_ed25519_unlock() -> Result<()> {
 
     let outputs = build_outputs([Basic(
         1_000_000,
-        &bech32_address_0.to_string(),
+        address_0,
         None,
         None,
         None,
@@ -72,7 +71,7 @@ async fn single_ed25519_unlock() -> Result<()> {
         )
         .with_outputs(outputs)
         .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
-        .finish_with_params(protocol_parameters)?;
+        .finish_with_params(&protocol_parameters)?;
 
     let prepared_transaction_data = PreparedTransactionData {
         transaction,
@@ -83,7 +82,7 @@ async fn single_ed25519_unlock() -> Result<()> {
     let unlocks = secret_manager.transaction_unlocks(&prepared_transaction_data).await?;
 
     assert_eq!(unlocks.len(), 1);
-    assert_eq!((*unlocks).get(0).unwrap().kind(), SignatureUnlock::KIND);
+    assert_eq!((*unlocks).first().unwrap().kind(), SignatureUnlock::KIND);
 
     let tx_payload = SignedTransactionPayload::new(prepared_transaction_data.transaction.clone(), unlocks)?;
 
@@ -102,7 +101,7 @@ async fn single_ed25519_unlock() -> Result<()> {
 async fn ed25519_reference_unlocks() -> Result<()> {
     let secret_manager = SecretManager::try_from_mnemonic(Client::generate_mnemonic()?)?;
 
-    let bech32_address_0 = &secret_manager
+    let address_0 = secret_manager
         .generate_ed25519_addresses(
             GetAddressesOptions::default()
                 .with_coin_type(SHIMMER_COIN_TYPE)
@@ -110,14 +109,14 @@ async fn ed25519_reference_unlocks() -> Result<()> {
         )
         .await?[0]
         .clone()
-        .to_bech32(SHIMMER_TESTNET_BECH32_HRP);
+        .into_inner();
 
     let protocol_parameters = protocol_parameters();
 
     let inputs = build_inputs([
         Basic(
             1_000_000,
-            &bech32_address_0.to_string(),
+            address_0.clone(),
             None,
             None,
             None,
@@ -127,7 +126,7 @@ async fn ed25519_reference_unlocks() -> Result<()> {
         ),
         Basic(
             1_000_000,
-            &bech32_address_0.to_string(),
+            address_0.clone(),
             None,
             None,
             None,
@@ -137,7 +136,7 @@ async fn ed25519_reference_unlocks() -> Result<()> {
         ),
         Basic(
             1_000_000,
-            &bech32_address_0.to_string(),
+            address_0.clone(),
             None,
             None,
             None,
@@ -149,7 +148,7 @@ async fn ed25519_reference_unlocks() -> Result<()> {
 
     let outputs = build_outputs([Basic(
         3_000_000,
-        &bech32_address_0.to_string(),
+        address_0,
         None,
         None,
         None,
@@ -167,7 +166,7 @@ async fn ed25519_reference_unlocks() -> Result<()> {
         )
         .with_outputs(outputs)
         .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
-        .finish_with_params(protocol_parameters)?;
+        .finish_with_params(&protocol_parameters)?;
 
     let prepared_transaction_data = PreparedTransactionData {
         transaction,
@@ -178,7 +177,7 @@ async fn ed25519_reference_unlocks() -> Result<()> {
     let unlocks = secret_manager.transaction_unlocks(&prepared_transaction_data).await?;
 
     assert_eq!(unlocks.len(), 3);
-    assert_eq!((*unlocks).get(0).unwrap().kind(), SignatureUnlock::KIND);
+    assert_eq!((*unlocks).first().unwrap().kind(), SignatureUnlock::KIND);
     match (*unlocks).get(1).unwrap() {
         Unlock::Reference(r) => {
             assert_eq!(r.index(), 0);
@@ -209,7 +208,7 @@ async fn ed25519_reference_unlocks() -> Result<()> {
 async fn two_signature_unlocks() -> Result<()> {
     let secret_manager = SecretManager::try_from_mnemonic(Client::generate_mnemonic()?)?;
 
-    let bech32_address_0 = &secret_manager
+    let address_0 = secret_manager
         .generate_ed25519_addresses(
             GetAddressesOptions::default()
                 .with_coin_type(SHIMMER_COIN_TYPE)
@@ -217,8 +216,8 @@ async fn two_signature_unlocks() -> Result<()> {
         )
         .await?[0]
         .clone()
-        .to_bech32(SHIMMER_TESTNET_BECH32_HRP);
-    let bech32_address_1 = &secret_manager
+        .into_inner();
+    let address_1 = secret_manager
         .generate_ed25519_addresses(
             GetAddressesOptions::default()
                 .with_coin_type(SHIMMER_COIN_TYPE)
@@ -226,14 +225,14 @@ async fn two_signature_unlocks() -> Result<()> {
         )
         .await?[0]
         .clone()
-        .to_bech32(SHIMMER_TESTNET_BECH32_HRP);
+        .into_inner();
 
     let protocol_parameters = protocol_parameters();
 
     let inputs = build_inputs([
         Basic(
             1_000_000,
-            &bech32_address_0.to_string(),
+            address_0.clone(),
             None,
             None,
             None,
@@ -243,7 +242,7 @@ async fn two_signature_unlocks() -> Result<()> {
         ),
         Basic(
             1_000_000,
-            &bech32_address_1.to_string(),
+            address_1,
             None,
             None,
             None,
@@ -255,7 +254,7 @@ async fn two_signature_unlocks() -> Result<()> {
 
     let outputs = build_outputs([Basic(
         2_000_000,
-        &bech32_address_0.to_string(),
+        address_0,
         None,
         None,
         None,
@@ -273,7 +272,7 @@ async fn two_signature_unlocks() -> Result<()> {
         )
         .with_outputs(outputs)
         .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
-        .finish_with_params(protocol_parameters)?;
+        .finish_with_params(&protocol_parameters)?;
 
     let prepared_transaction_data = PreparedTransactionData {
         transaction,
@@ -284,7 +283,7 @@ async fn two_signature_unlocks() -> Result<()> {
     let unlocks = secret_manager.transaction_unlocks(&prepared_transaction_data).await?;
 
     assert_eq!(unlocks.len(), 2);
-    assert_eq!((*unlocks).get(0).unwrap().kind(), SignatureUnlock::KIND);
+    assert_eq!((*unlocks).first().unwrap().kind(), SignatureUnlock::KIND);
     assert_eq!((*unlocks).get(1).unwrap().kind(), SignatureUnlock::KIND);
 
     let tx_payload = SignedTransactionPayload::new(prepared_transaction_data.transaction.clone(), unlocks)?;

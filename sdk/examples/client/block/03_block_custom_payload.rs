@@ -16,8 +16,8 @@ use iota_sdk::{
         Client, Result,
     },
     types::block::{
+        output::AccountId,
         payload::{Payload, TaggedDataPayload},
-        IssuerId,
     },
 };
 
@@ -26,8 +26,12 @@ async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
+    for var in ["NODE_URL", "EXPLORER_URL"] {
+        std::env::var(var).unwrap_or_else(|_| panic!(".env variable '{var}' is undefined, see .env.example"));
+    }
+
     let node_url = std::env::var("NODE_URL").unwrap();
-    let issuer_id = std::env::var("ISSUER_ID").unwrap().parse::<IssuerId>().unwrap();
+    let issuer_id = std::env::var("ISSUER_ID").unwrap().parse::<AccountId>().unwrap();
 
     // Create a node client.
     let client = Client::builder().with_node(&node_url)?.finish().await?;

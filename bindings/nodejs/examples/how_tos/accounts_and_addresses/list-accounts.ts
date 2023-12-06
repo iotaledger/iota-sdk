@@ -9,21 +9,22 @@ require('dotenv').config({ path: '.env' });
 // Run with command:
 // yarn run-example ./how_tos/accounts_and_addresses/list-accounts.ts
 
-// This example lists all accounts in the wallet.
+// This example lists all account outputs in the wallet.
 async function run() {
     initLogger();
-    if (!process.env.WALLET_DB_PATH) {
-        throw new Error('.env WALLET_DB_PATH is undefined, see .env.example');
+    for (const envVar of ['WALLET_DB_PATH']) {
+        if (!(envVar in process.env)) {
+            throw new Error(`.env ${envVar} is undefined, see .env.example`);
+        }
     }
     try {
-        const wallet = new Wallet({
+        const wallet = await Wallet.create({
             storagePath: process.env.WALLET_DB_PATH,
         });
 
-        const accounts = await wallet.getAccounts();
+        const accounts = await wallet.accounts();
 
-        for (const account of accounts)
-            console.log(account.getMetadata().alias);
+        for (const account of accounts) console.log(account);
     } catch (error) {
         console.error('Error: ', error);
     }

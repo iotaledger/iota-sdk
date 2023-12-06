@@ -37,11 +37,11 @@ where
             .prepare_melt_native_token(token_id, melt_amount, options.clone())
             .await?;
 
-        self.sign_and_submit_transaction(prepared_transaction, options).await
+        self.sign_and_submit_transaction(prepared_transaction, None, options)
+            .await
     }
 
-    /// Prepares the transaction for
-    /// [Account::melt_native_token()](crate::wallet::Account::melt_native_token).
+    /// Prepares the transaction for [Wallet::melt_native_token()].
     pub async fn prepare_melt_native_token(
         &self,
         token_id: TokenId,
@@ -52,7 +52,6 @@ where
 
         let foundry_id = FoundryId::from(token_id);
         let account_id = *foundry_id.account_address().account_id();
-        let token_supply = self.client().get_token_supply().await?;
 
         let (existing_account_output_data, existing_foundry_output) = self
             .find_account_and_foundry_output_data(account_id, foundry_id)
@@ -66,7 +65,7 @@ where
             // Create the new account output with updated amount.
             let account_output = AccountOutputBuilder::from(account_output)
                 .with_account_id(account_id)
-                .finish_output(token_supply)?;
+                .finish_output()?;
 
             let TokenScheme::Simple(token_scheme) = existing_foundry_output.token_scheme();
             let outputs = [
@@ -77,7 +76,7 @@ where
                         token_scheme.melted_tokens() + melt_amount,
                         token_scheme.maximum_supply(),
                     )?))
-                    .finish_output(token_supply)?,
+                    .finish_output()?,
             ];
             // Input selection will detect that we're melting native tokens and add the required inputs if available
             self.prepare_transaction(outputs, options).await

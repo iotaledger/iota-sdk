@@ -10,17 +10,12 @@ use crate::{
     types::block::{
         address::{Address, Bech32Address},
         input::INPUT_COUNT_MAX,
-        output::{
-            unlock_condition::AddressUnlockCondition, BasicOutputBuilder, NativeTokens, NativeTokensBuilder, Output,
-        },
+        output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder, NativeTokensBuilder, Output},
         slot::SlotIndex,
     },
     wallet::{
         constants::DEFAULT_OUTPUT_CONSOLIDATION_THRESHOLD,
-        operations::{
-            helpers::time::can_output_be_unlocked_now, output_claiming::get_new_native_token_count,
-            transaction::TransactionOptions,
-        },
+        operations::{helpers::time::can_output_be_unlocked_now, transaction::TransactionOptions},
         types::{OutputData, TransactionWithMetadata},
         Result, Wallet,
     },
@@ -110,7 +105,9 @@ where
     /// transaction.
     pub async fn consolidate_outputs(&self, params: ConsolidationParams) -> Result<TransactionWithMetadata> {
         let prepared_transaction = self.prepare_consolidate_outputs(params).await?;
-        let consolidation_tx = self.sign_and_submit_transaction(prepared_transaction, None).await?;
+        let consolidation_tx = self
+            .sign_and_submit_transaction(prepared_transaction, None, None)
+            .await?;
 
         log::debug!(
             "[OUTPUT_CONSOLIDATION] consolidation transaction created: block_id: {:?} tx_id: {:?}",
@@ -121,14 +118,12 @@ where
         Ok(consolidation_tx)
     }
 
-    /// Prepares the transaction for
-    /// [Account::consolidate_outputs()](crate::wallet::Account::consolidate_outputs).
+    /// Prepares the transaction for [Wallet::consolidate_outputs()].
     pub async fn prepare_consolidate_outputs(&self, params: ConsolidationParams) -> Result<PreparedTransactionData> {
         log::debug!("[OUTPUT_CONSOLIDATION] prepare consolidating outputs if needed");
         #[cfg(feature = "participation")]
         let voting_output = self.get_voting_output().await?;
         let slot_index = self.client().get_slot_index().await?;
-        let token_supply = self.client().get_token_supply().await?;
         let mut outputs_to_consolidate = Vec::new();
         let wallet_data = self.data().await;
 
@@ -237,13 +232,8 @@ where
         let mut total_native_tokens = NativeTokensBuilder::new();
 
         for output_data in outputs_to_consolidate.iter().take(max_inputs.into()) {
-            if let Some(native_tokens) = output_data.output.native_tokens() {
-                // Skip output if the max native tokens count would be exceeded
-                if get_new_native_token_count(&total_native_tokens, native_tokens)? > NativeTokens::COUNT_MAX.into() {
-                    log::debug!("[OUTPUT_CONSOLIDATION] skipping output to not exceed the max native tokens count");
-                    continue;
-                }
-                total_native_tokens.add_native_tokens(native_tokens.clone())?;
+            if let Some(native_token) = output_data.output.native_token() {
+                total_native_tokens.add_native_token(*native_token)?;
             };
             total_amount += output_data.output.amount();
 
@@ -257,8 +247,9 @@ where
                     .map(|bech32| bech32.into_inner())
                     .unwrap_or_else(|| outputs_to_consolidate[0].address.clone()),
             ))
-            .with_native_tokens(total_native_tokens.finish()?)
-            .finish_output(token_supply)?];
+            // TODO https://github.com/iotaledger/iota-sdk/issues/1632
+            // .with_native_tokens(total_native_tokens.finish()?)
+            .finish_output()?];
 
         let options = Some(TransactionOptions {
             custom_inputs: Some(custom_inputs),

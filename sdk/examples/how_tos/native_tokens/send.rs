@@ -13,7 +13,7 @@
 
 use iota_sdk::{
     types::block::address::Bech32Address,
-    wallet::{Result, SendNativeTokensParams},
+    wallet::{Result, SendNativeTokenParams},
     Wallet,
 };
 use primitive_types::U256;
@@ -27,6 +27,10 @@ const RECV_ADDRESS: &str = "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpu
 async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
+
+    for var in ["WALLET_DB_PATH", "STRONGHOLD_PASSWORD", "EXPLORER_URL"] {
+        std::env::var(var).unwrap_or_else(|_| panic!(".env variable '{var}' is undefined, see .env.example"));
+    }
 
     let wallet = Wallet::builder()
         .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
@@ -58,9 +62,9 @@ async fn main() -> Result<()> {
 
         let bech32_address = RECV_ADDRESS.parse::<Bech32Address>()?;
 
-        let outputs = [SendNativeTokensParams::new(
+        let outputs = [SendNativeTokenParams::new(
             bech32_address,
-            [(*token_id, U256::from(SEND_NATIVE_TOKEN_AMOUNT))],
+            (*token_id, U256::from(SEND_NATIVE_TOKEN_AMOUNT)),
         )?];
 
         let transaction = wallet.send_native_tokens(outputs, None).await?;

@@ -35,6 +35,10 @@ async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
+    for var in ["NODE_URL", "MNEMONIC", "EXPLORER_URL", "FAUCET_URL"] {
+        std::env::var(var).unwrap_or_else(|_| panic!(".env variable '{var}' is undefined, see .env.example"));
+    }
+
     let num_simultaneous_txs = NUM_SIMULTANEOUS_TXS.min(num_cpus::get());
 
     println!("Spammer set up to issue {num_simultaneous_txs} transactions simultaneously.");
@@ -70,12 +74,12 @@ async fn main() -> Result<()> {
     // We make sure that for all threads there are always inputs available to
     // fund the transaction, otherwise we create enough unspent outputs.
     let num_unspent_basic_outputs_with_send_amount = wallet
-        .unspent_outputs(FilterOptions {
+        .data()
+        .await
+        .filtered_unspent_outputs(FilterOptions {
             output_types: Some(vec![BasicOutput::KIND]),
             ..Default::default()
         })
-        .await
-        .iter()
         .filter(|data| data.output.amount() >= SEND_AMOUNT)
         .count();
 

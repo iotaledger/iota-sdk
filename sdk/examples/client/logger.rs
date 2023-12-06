@@ -15,6 +15,11 @@ async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
+    #[allow(clippy::single_element_loop)]
+    for var in ["NODE_URL"] {
+        std::env::var(var).unwrap_or_else(|_| panic!(".env variable '{var}' is undefined, see .env.example"));
+    }
+
     // Generates a client.log file with logs for debugging.
     // We exclude logs from h2, hyper and rustls to reduce the noise.
     let logger_output_config = fern_logger::LoggerOutputConfigBuilder::new()

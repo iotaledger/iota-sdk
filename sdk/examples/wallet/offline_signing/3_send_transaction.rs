@@ -27,6 +27,11 @@ async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
+    #[allow(clippy::single_element_loop)]
+    for var in ["EXPLORER_URL"] {
+        std::env::var(var).unwrap_or_else(|_| panic!(".env variable '{var}' is undefined, see .env.example"));
+    }
+
     // Create the wallet with the secret_manager and client options
     let wallet = Wallet::builder()
         .with_storage_path(ONLINE_WALLET_DB_PATH)
@@ -38,7 +43,7 @@ async fn main() -> Result<()> {
 
     // Sends offline signed transaction online.
     let transaction = wallet
-        .submit_and_store_transaction(signed_transaction_data, None)
+        .submit_and_store_transaction(signed_transaction_data, None, None)
         .await?;
     wait_for_inclusion(&transaction.transaction_id, &wallet).await?;
 
@@ -56,7 +61,7 @@ async fn read_signed_transaction_from_file(client: &Client) -> Result<SignedTran
 
     Ok(SignedTransactionData::try_from_dto_with_params(
         dto,
-        client.get_protocol_parameters().await?,
+        &client.get_protocol_parameters().await?,
     )?)
 }
 

@@ -6,15 +6,17 @@ import {
     TransactionId,
     TokenSchemeType,
     Output,
-    RentStructure,
-    SignedBlock,
+    StorageScoreParameters,
+    Block,
     ProtocolParameters,
     OutputId,
     NftId,
     Bech32Address,
+    Unlock,
 } from '../../';
 import { AccountId } from '../../block/id';
 import { SlotCommitment } from '../../block/slot';
+import { InputSigningData } from '../../client';
 
 export interface __GenerateMnemonicMethod__ {
     name: 'generateMnemonic';
@@ -62,7 +64,7 @@ export interface __ComputeStorageDepositMethod__ {
     name: 'computeStorageDeposit';
     data: {
         output: Output;
-        rent: RentStructure;
+        storageScoreParameters: StorageScoreParameters;
     };
 }
 
@@ -85,7 +87,7 @@ export interface __ParseBech32AddressMethod__ {
 export interface __BlockIdMethod__ {
     name: 'blockId';
     data: {
-        block: SignedBlock;
+        block: Block;
         params: ProtocolParameters;
     };
 }
@@ -143,6 +145,13 @@ export interface __IsAddressValidMethod__ {
     };
 }
 
+export interface __ProtocolParametersHashMethod__ {
+    name: 'protocolParametersHash';
+    data: {
+        protocolParameters: ProtocolParameters;
+    };
+}
+
 export interface __TransactionSigningHashMethod__ {
     name: 'transactionSigningHash';
     data: {
@@ -194,14 +203,24 @@ export interface __OutputHexBytes__ {
     };
 }
 
+// TODO we don't do this anywhere else, but it seems necessary, need to reevaluate later.
 // Modified `SlotCommitment` with bigint types converted to strings.
 type SlotCommitmentConverted = Omit<
     SlotCommitment,
-    'index' | 'cumulativeWeight'
-> & { index: string; cumulativeWeight: string };
+    'cumulativeWeight' | 'referenceManaCost'
+> & { cumulativeWeight: string; referenceManaCost: string };
 export interface __ComputeSlotCommitmentId__ {
     name: 'computeSlotCommitmentId';
     data: {
         slotCommitment: SlotCommitmentConverted;
+    };
+}
+
+export interface __VerifyTransactionSemantic__ {
+    name: 'verifyTransactionSemantic';
+    data: {
+        transaction: SignedTransactionPayload;
+        inputs: InputSigningData[];
+        unlocks?: Unlock[];
     };
 }

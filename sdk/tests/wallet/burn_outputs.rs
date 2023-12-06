@@ -35,7 +35,7 @@ async fn mint_and_burn_nft() -> Result<()> {
 
     let balance = wallet.sync(None).await.unwrap();
 
-    let output_id = OutputId::new(transaction.transaction_id, 0u16).unwrap();
+    let output_id = OutputId::new(transaction.transaction_id, 0u16);
     let nft_id = NftId::from(&output_id);
 
     let search = balance.nfts().iter().find(|&balance_nft_id| *balance_nft_id == nft_id);
@@ -64,8 +64,6 @@ async fn mint_and_burn_expired_nft() -> Result<()> {
     let wallet_1 = make_wallet(storage_path, None, None).await?;
     request_funds(&wallet_0).await?;
 
-    let token_supply = wallet_0.client().get_token_supply().await?;
-
     let amount = 1_000_000;
     let outputs = [NftOutputBuilder::new_with_amount(amount, NftId::null())
         .with_unlock_conditions([
@@ -73,14 +71,14 @@ async fn mint_and_burn_expired_nft() -> Result<()> {
             // immediately expired to account_1
             UnlockCondition::Expiration(ExpirationUnlockCondition::new(wallet_1.address().await, 1)?),
         ])
-        .finish_output(token_supply)?];
+        .finish_output()?];
 
     let transaction = wallet_0.send_outputs(outputs, None).await?;
     wallet_0
         .reissue_transaction_until_included(&transaction.transaction_id, None, None)
         .await?;
 
-    let output_id = OutputId::new(transaction.transaction_id, 0u16)?;
+    let output_id = OutputId::new(transaction.transaction_id, 0u16);
     let nft_id = NftId::from(&output_id);
 
     wallet_1.sync(None).await?;
@@ -293,7 +291,7 @@ async fn mint_and_burn_nft_with_account() -> Result<()> {
     wallet
         .reissue_transaction_until_included(&nft_tx.transaction_id, None, None)
         .await?;
-    let output_id = OutputId::new(nft_tx.transaction_id, 0u16).unwrap();
+    let output_id = OutputId::new(nft_tx.transaction_id, 0u16);
     let nft_id = NftId::from(&output_id);
 
     let balance = wallet.sync(None).await?;

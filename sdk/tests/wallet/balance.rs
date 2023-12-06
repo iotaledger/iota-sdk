@@ -2,13 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use iota_sdk::{
-    types::block::{
-        address::Bech32Address,
-        output::{
-            feature::SenderFeature,
-            unlock_condition::{AddressUnlockCondition, ExpirationUnlockCondition},
-            BasicOutputBuilder, UnlockCondition,
-        },
+    types::block::output::{
+        feature::SenderFeature,
+        unlock_condition::{AddressUnlockCondition, ExpirationUnlockCondition},
+        BasicOutputBuilder, UnlockCondition,
     },
     wallet::{types::Balance, Result},
 };
@@ -17,76 +14,116 @@ use pretty_assertions::assert_eq;
 use crate::wallet::common::{make_wallet, request_funds, setup, tear_down};
 
 #[test]
-fn balance_add_assign() {
+fn rand_balance_add_assign() {
     use iota_sdk::U256;
 
-    let mut balance1 = Balance::rand_mock();
-    let total1 = balance1.base_coin().total();
-    let available1 = balance1.base_coin().available();
-    #[cfg(feature = "participation")]
-    let voting_power1 = balance1.base_coin().voting_power();
+    let old_balance = Balance::rand();
+    let add_balance = Balance::rand();
 
-    let sdr_account_1 = balance1.required_storage_deposit().account();
-    let sdr_basic1 = balance1.required_storage_deposit().basic();
-    let sdr_foundry1 = balance1.required_storage_deposit().foundry();
-    let sdr_nft1 = balance1.required_storage_deposit().nft();
+    let mut new_balance = old_balance.clone();
+    assert_eq!(new_balance, old_balance);
 
-    let native_tokens1 = balance1.native_tokens().clone();
-    let num_accounts_1 = balance1.accounts().len();
-    let num_foundries1 = balance1.foundries().len();
-    let num_nfts1 = balance1.nfts().len();
+    let rhs_balance = add_balance.clone();
+    assert_eq!(rhs_balance, add_balance);
 
-    let balance2 = Balance::rand_mock();
-    let total2 = balance2.base_coin().total();
-    let available2 = balance2.base_coin().available();
-    #[cfg(feature = "participation")]
-    let voting_power2 = balance2.base_coin().voting_power();
+    new_balance += rhs_balance;
 
-    let sdr_account_2 = balance2.required_storage_deposit().account();
-    let sdr_basic2 = balance2.required_storage_deposit().basic();
-    let sdr_foundry2 = balance2.required_storage_deposit().foundry();
-    let sdr_nft2 = balance2.required_storage_deposit().nft();
-
-    let native_tokens2 = balance2.native_tokens().clone();
-    let num_accounts_2 = balance2.accounts().len();
-    let num_foundries2 = balance2.foundries().len();
-    let num_nfts2 = balance2.nfts().len();
-
-    balance1 += balance2;
-
-    assert_eq!(balance1.base_coin().total(), total1 + total2);
-    assert_eq!(balance1.base_coin().available(), available1 + available2);
-    #[cfg(feature = "participation")]
-    assert_eq!(balance1.base_coin().voting_power(), voting_power1 + voting_power2);
-
+    // Base Coin
     assert_eq!(
-        balance1.required_storage_deposit().account(),
-        sdr_account_1 + sdr_account_2
+        new_balance.base_coin().total(),
+        old_balance.base_coin().total() + add_balance.base_coin().total()
     );
-    assert_eq!(balance1.required_storage_deposit().basic(), sdr_basic1 + sdr_basic2);
     assert_eq!(
-        balance1.required_storage_deposit().foundry(),
-        sdr_foundry1 + sdr_foundry2
+        new_balance.base_coin().available(),
+        old_balance.base_coin().available() + add_balance.base_coin().available()
     );
-    assert_eq!(balance1.required_storage_deposit().nft(), sdr_nft1 + sdr_nft2);
+    #[cfg(feature = "participation")]
+    assert_eq!(
+        new_balance.base_coin().voting_power(),
+        old_balance.base_coin().voting_power() + add_balance.base_coin().voting_power()
+    );
 
-    assert_eq!(balance1.accounts().len(), num_accounts_1 + num_accounts_2);
-    assert_eq!(balance1.foundries().len(), num_foundries1 + num_foundries2);
-    assert_eq!(balance1.nfts().len(), num_nfts1 + num_nfts2);
+    // Required Storage Deposit
+    assert_eq!(
+        new_balance.required_storage_deposit().basic(),
+        old_balance.required_storage_deposit().basic() + add_balance.required_storage_deposit().basic()
+    );
+    assert_eq!(
+        new_balance.required_storage_deposit().account(),
+        old_balance.required_storage_deposit().account() + add_balance.required_storage_deposit().account()
+    );
+    assert_eq!(
+        new_balance.required_storage_deposit().foundry(),
+        old_balance.required_storage_deposit().foundry() + add_balance.required_storage_deposit().foundry()
+    );
+    assert_eq!(
+        new_balance.required_storage_deposit().nft(),
+        old_balance.required_storage_deposit().nft() + add_balance.required_storage_deposit().nft()
+    );
+    assert_eq!(
+        new_balance.required_storage_deposit().delegation(),
+        old_balance.required_storage_deposit().delegation() + add_balance.required_storage_deposit().delegation()
+    );
 
-    let mut expected = std::collections::HashMap::new();
-    for nt in native_tokens1.iter().chain(native_tokens2.iter()) {
-        let v = expected
-            .entry(nt.token_id())
+    // Assets
+    assert_eq!(
+        new_balance.accounts(),
+        &old_balance
+            .accounts()
+            .iter()
+            .chain(add_balance.accounts().iter())
+            .cloned()
+            .collect::<Vec<_>>()
+    );
+    assert_eq!(
+        new_balance.foundries(),
+        &old_balance
+            .foundries()
+            .iter()
+            .chain(add_balance.foundries().iter())
+            .cloned()
+            .collect::<Vec<_>>()
+    );
+    assert_eq!(
+        new_balance.nfts(),
+        &old_balance
+            .nfts()
+            .iter()
+            .chain(add_balance.nfts().iter())
+            .cloned()
+            .collect::<Vec<_>>()
+    );
+    assert_eq!(
+        new_balance.delegations(),
+        &old_balance
+            .delegations()
+            .iter()
+            .chain(add_balance.delegations().iter())
+            .cloned()
+            .collect::<Vec<_>>()
+    );
+    let mut expected_native_tokens = std::collections::HashMap::new();
+    for native_token in old_balance
+        .native_tokens()
+        .iter()
+        .chain(add_balance.native_tokens().iter())
+    {
+        let v = expected_native_tokens
+            .entry(native_token.token_id())
             .or_insert((U256::default(), U256::default()));
-        v.0 += nt.total();
-        v.1 += nt.available();
+        v.0 += native_token.total();
+        v.1 += native_token.available();
     }
-
-    assert_eq!(balance1.native_tokens().len(), expected.len());
-    for nt in balance1.native_tokens().iter() {
-        assert_eq!(nt.total(), expected.get(nt.token_id()).unwrap().0);
-        assert_eq!(nt.available(), expected.get(nt.token_id()).unwrap().1);
+    assert_eq!(new_balance.native_tokens().len(), expected_native_tokens.len());
+    for native_token in new_balance.native_tokens().iter() {
+        assert_eq!(
+            native_token.total(),
+            expected_native_tokens.get(native_token.token_id()).unwrap().0
+        );
+        assert_eq!(
+            native_token.available(),
+            expected_native_tokens.get(native_token.token_id()).unwrap().1
+        );
     }
 }
 
@@ -107,7 +144,6 @@ async fn balance_expiration() -> Result<()> {
     request_funds(&wallet_0).await?;
 
     let slots_until_expired = 20;
-    let token_supply = wallet_0.client().get_token_supply().await?;
     let outputs = [BasicOutputBuilder::new_with_amount(1_000_000)
         // Send to account 1 with expiration to account 2, both have no amount yet
         .with_unlock_conditions([
@@ -118,7 +154,7 @@ async fn balance_expiration() -> Result<()> {
             )?),
         ])
         .with_features([SenderFeature::new(wallet_0.address().await)])
-        .finish_output(token_supply)?];
+        .finish_output()?];
 
     let balance_before_tx = wallet_0.balance().await?;
     let tx = wallet_0.send_outputs(outputs, None).await?;
@@ -166,7 +202,7 @@ async fn balance_expiration() -> Result<()> {
     let outputs = [BasicOutputBuilder::new_with_amount(1_000_000)
         // Send to wallet 1 with expiration to wallet 2, both have no amount yet
         .with_unlock_conditions([AddressUnlockCondition::new(wallet_1.address().await)])
-        .finish_output(token_supply)?];
+        .finish_output()?];
     let _tx = wallet_2.send_outputs(outputs, None).await?;
 
     tear_down(storage_path_0)?;

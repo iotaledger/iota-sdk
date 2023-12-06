@@ -7,7 +7,6 @@ use std::ops::Range;
 
 use async_trait::async_trait;
 use crypto::{
-    hashes::{blake2b::Blake2b256, Digest},
     keys::bip44::Bip44,
     signatures::{
         ed25519,
@@ -20,8 +19,7 @@ use super::{GenerateAddressOptions, SecretManage};
 use crate::{
     client::{api::PreparedTransactionData, Error},
     types::block::{
-        address::Ed25519Address, payload::signed_transaction::SignedTransactionPayload, signature::Ed25519Signature,
-        unlock::Unlocks,
+        payload::signed_transaction::SignedTransactionPayload, signature::Ed25519Signature, unlock::Unlocks,
     },
 };
 
@@ -38,21 +36,14 @@ impl std::fmt::Debug for PrivateKeySecretManager {
 impl SecretManage for PrivateKeySecretManager {
     type Error = Error;
 
-    async fn generate_ed25519_addresses(
+    async fn generate_ed25519_public_keys(
         &self,
         _coin_type: u32,
         _account_index: u32,
         _address_indexes: Range<u32>,
         _options: impl Into<Option<GenerateAddressOptions>> + Send,
-    ) -> Result<Vec<Ed25519Address>, Self::Error> {
-        let public_key = self.0.public_key().to_bytes();
-
-        // Hash the public key to get the address
-        let result = Blake2b256::digest(public_key).try_into().map_err(|_e| {
-            crate::client::Error::Blake2b256("hashing the public key while generating the address failed.")
-        })?;
-
-        crate::client::Result::Ok(vec![Ed25519Address::new(result)])
+    ) -> Result<Vec<ed25519::PublicKey>, Self::Error> {
+        crate::client::Result::Ok(vec![self.0.public_key()])
     }
 
     async fn generate_evm_addresses(

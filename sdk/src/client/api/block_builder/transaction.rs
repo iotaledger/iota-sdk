@@ -12,13 +12,12 @@ use crate::{
         payload::signed_transaction::{SignedTransactionPayload, Transaction},
         semantic::{SemanticValidationContext, TransactionFailureReason},
         signature::Ed25519Signature,
-        BlockId, SignedBlock,
+        Block, BlockId,
     },
 };
 
 // TODO this is wrong because of https://github.com/iotaledger/iota-sdk/issues/1208
-const MAX_TX_LENGTH_FOR_BLOCK_WITH_8_PARENTS: usize =
-    SignedBlock::LENGTH_MAX - SignedBlock::LENGTH_MIN - (7 * BlockId::LENGTH);
+const MAX_TX_LENGTH_FOR_BLOCK_WITH_8_PARENTS: usize = Block::LENGTH_MAX - Block::LENGTH_MIN - (7 * BlockId::LENGTH);
 // Length for unlocks with a single signature unlock (unlocks length + unlock type + signature type + public key +
 // signature)
 const SINGLE_UNLOCK_LENGTH: usize = 1 + 1 + Ed25519Signature::PUBLIC_KEY_LENGTH + Ed25519Signature::SIGNATURE_LENGTH;
@@ -30,7 +29,6 @@ pub fn verify_semantic(
     input_signing_data: &[InputSigningData],
     transaction_payload: &SignedTransactionPayload,
 ) -> crate::client::Result<Option<TransactionFailureReason>> {
-    let transaction_id = transaction_payload.transaction().id();
     let inputs = input_signing_data
         .iter()
         .map(|input| (input.output_id(), &input.output))
@@ -38,9 +36,8 @@ pub fn verify_semantic(
 
     let context = SemanticValidationContext::new(
         transaction_payload.transaction(),
-        &transaction_id,
         &inputs,
-        transaction_payload.unlocks(),
+        Some(transaction_payload.unlocks()),
     );
 
     Ok(context.validate()?)

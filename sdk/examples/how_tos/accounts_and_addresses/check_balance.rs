@@ -11,12 +11,16 @@
 //! cargo run --release --all-features --example check_balance
 //! ```
 
-use iota_sdk::{types::block::address::ToBech32Ext, wallet::Result, Wallet};
+use iota_sdk::{wallet::Result, Wallet};
 
 #[tokio::main]
 async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
+
+    for var in ["WALLET_DB_PATH", "EXPLORER_URL"] {
+        std::env::var(var).unwrap_or_else(|_| panic!(".env variable '{var}' is undefined, see .env.example"));
+    }
 
     let wallet = Wallet::builder()
         .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())

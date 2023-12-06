@@ -137,10 +137,8 @@ where
         // Check if the db exists and if not, return an error if one parameter is missing, because otherwise the db
         // would be created with an empty parameter which just leads to errors later
         #[cfg(feature = "storage")]
-        if !storage_options.path.is_dir() {
-            if self.client_options.is_none() {
-                return Err(crate::wallet::Error::MissingParameter("client_options"));
-            }
+        if !storage_options.path.is_dir() && self.client_options.is_none() {
+            return Err(crate::wallet::Error::MissingParameter("client_options"));
         }
 
         #[cfg(all(feature = "rocksdb", feature = "storage"))]
@@ -262,6 +260,9 @@ where
             #[cfg(feature = "storage")]
             storage_manager: tokio::sync::RwLock::new(storage_manager),
         };
+        #[cfg(feature = "storage")]
+        let wallet_data = wallet_data.unwrap_or_else(|| WalletData::new(self.bip_path, address, self.alias.clone()));
+        #[cfg(not(feature = "storage"))]
         let wallet_data = WalletData::new(self.bip_path, address, self.alias.clone());
         let wallet = Wallet {
             inner: Arc::new(wallet_inner),

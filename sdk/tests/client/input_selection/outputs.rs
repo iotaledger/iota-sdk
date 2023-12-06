@@ -5,12 +5,12 @@ use std::str::FromStr;
 
 use iota_sdk::{
     client::api::input_selection::{Burn, Error, InputSelection},
-    types::block::{output::AccountId, protocol::protocol_parameters},
+    types::block::{address::Address, output::AccountId, protocol::protocol_parameters},
 };
 use pretty_assertions::assert_eq;
 
 use crate::client::{
-    addresses, build_inputs, build_outputs, is_remainder_or_return, unsorted_eq,
+    build_inputs, build_outputs, is_remainder_or_return, unsorted_eq,
     Build::{Account, Basic},
     ACCOUNT_ID_2, BECH32_ADDRESS_ED25519_0, BECH32_ADDRESS_ED25519_1,
 };
@@ -22,7 +22,7 @@ fn no_inputs() {
     let inputs = Vec::new();
     let outputs = build_outputs([Basic(
         1_000_000,
-        BECH32_ADDRESS_ED25519_0,
+        Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
         None,
         None,
@@ -34,7 +34,7 @@ fn no_inputs() {
     let selected = InputSelection::new(
         inputs,
         outputs,
-        addresses([BECH32_ADDRESS_ED25519_0]),
+        [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         protocol_parameters,
     )
     .select();
@@ -48,7 +48,7 @@ fn no_outputs() {
 
     let inputs = build_inputs([Basic(
         1_000_000,
-        BECH32_ADDRESS_ED25519_0,
+        Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
         None,
         None,
@@ -61,7 +61,7 @@ fn no_outputs() {
     let selected = InputSelection::new(
         inputs,
         outputs,
-        addresses([BECH32_ADDRESS_ED25519_0]),
+        [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         protocol_parameters,
     )
     .select();
@@ -77,8 +77,7 @@ fn no_outputs_but_burn() {
     let inputs = build_inputs([Account(
         2_000_000,
         account_id_2,
-        BECH32_ADDRESS_ED25519_0,
-        None,
+        Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
         None,
         None,
@@ -88,7 +87,7 @@ fn no_outputs_but_burn() {
     let selected = InputSelection::new(
         inputs.clone(),
         outputs,
-        addresses([BECH32_ADDRESS_ED25519_0]),
+        [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         protocol_parameters,
     )
     .with_burn(Burn::new().add_account(account_id_2))
@@ -100,7 +99,7 @@ fn no_outputs_but_burn() {
     assert!(is_remainder_or_return(
         &selected.outputs[0],
         2_000_000,
-        BECH32_ADDRESS_ED25519_0,
+        Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None
     ));
 }
@@ -111,7 +110,7 @@ fn no_address_provided() {
 
     let inputs = build_inputs([Basic(
         1_000_000,
-        BECH32_ADDRESS_ED25519_0,
+        Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
         None,
         None,
@@ -121,7 +120,7 @@ fn no_address_provided() {
     )]);
     let outputs = build_outputs([Basic(
         1_000_000,
-        BECH32_ADDRESS_ED25519_0,
+        Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
         None,
         None,
@@ -141,7 +140,7 @@ fn no_matching_address_provided() {
 
     let inputs = build_inputs([Basic(
         1_000_000,
-        BECH32_ADDRESS_ED25519_0,
+        Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
         None,
         None,
@@ -151,7 +150,7 @@ fn no_matching_address_provided() {
     )]);
     let outputs = build_outputs([Basic(
         1_000_000,
-        BECH32_ADDRESS_ED25519_0,
+        Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
         None,
         None,
@@ -163,7 +162,7 @@ fn no_matching_address_provided() {
     let selected = InputSelection::new(
         inputs,
         outputs,
-        addresses([BECH32_ADDRESS_ED25519_1]),
+        [Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap()],
         protocol_parameters,
     )
     .select();
@@ -176,12 +175,30 @@ fn two_addresses_one_missing() {
     let protocol_parameters = protocol_parameters();
 
     let inputs = build_inputs([
-        Basic(1_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
-        Basic(1_000_000, BECH32_ADDRESS_ED25519_1, None, None, None, None, None, None),
+        Basic(
+            1_000_000,
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+        ),
+        Basic(
+            1_000_000,
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+        ),
     ]);
     let outputs = build_outputs([Basic(
         2_000_000,
-        BECH32_ADDRESS_ED25519_0,
+        Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
         None,
         None,
@@ -193,7 +210,7 @@ fn two_addresses_one_missing() {
     let selected = InputSelection::new(
         inputs,
         outputs,
-        addresses([BECH32_ADDRESS_ED25519_0]),
+        [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
         protocol_parameters,
     )
     .select();
@@ -212,12 +229,30 @@ fn two_addresses() {
     let protocol_parameters = protocol_parameters();
 
     let inputs = build_inputs([
-        Basic(1_000_000, BECH32_ADDRESS_ED25519_0, None, None, None, None, None, None),
-        Basic(1_000_000, BECH32_ADDRESS_ED25519_1, None, None, None, None, None, None),
+        Basic(
+            1_000_000,
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+        ),
+        Basic(
+            1_000_000,
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+        ),
     ]);
     let outputs = build_outputs([Basic(
         2_000_000,
-        BECH32_ADDRESS_ED25519_0,
+        Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
         None,
         None,
@@ -229,7 +264,10 @@ fn two_addresses() {
     let selected = InputSelection::new(
         inputs.clone(),
         outputs.clone(),
-        addresses([BECH32_ADDRESS_ED25519_0, BECH32_ADDRESS_ED25519_1]),
+        [
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
+        ],
         protocol_parameters,
     )
     .select()

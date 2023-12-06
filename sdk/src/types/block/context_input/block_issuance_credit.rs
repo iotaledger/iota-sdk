@@ -3,7 +3,10 @@
 
 use derive_more::{Display, From};
 
-use crate::types::block::output::AccountId;
+use crate::types::block::{
+    output::AccountId,
+    protocol::{WorkScore, WorkScoreParameters},
+};
 
 /// A Block Issuance Credit (BIC) Context Input provides the VM with context for the value of
 /// the BIC vector of a specific slot.
@@ -12,7 +15,7 @@ pub struct BlockIssuanceCreditContextInput(AccountId);
 
 impl BlockIssuanceCreditContextInput {
     /// The context input kind of a [`BlockIssuanceCreditContextInput`].
-    pub const KIND: u8 = 1;
+    pub const KIND: u8 = 2;
 
     /// Creates a new [`BlockIssuanceCreditContextInput`].
     pub fn new(account_id: AccountId) -> Self {
@@ -22,6 +25,12 @@ impl BlockIssuanceCreditContextInput {
     /// Returns the account id of the [`BlockIssuanceCreditContextInput`].
     pub fn account_id(&self) -> AccountId {
         self.0
+    }
+}
+
+impl WorkScore for BlockIssuanceCreditContextInput {
+    fn work_score(&self, params: WorkScoreParameters) -> u32 {
+        params.context_input()
     }
 }
 

@@ -66,7 +66,7 @@ pub(crate) async fn read_wallet_data_from_stronghold_snapshot<S: 'static + Secre
     let restored_wallet_data = stronghold
         .get::<WalletDataDto>(WALLET_DATA_KEY)
         .await?
-        .map(|dto| WalletData::try_from_dto(dto))
+        .map(WalletData::try_from_dto)
         .transpose()?;
 
     Ok((client_options, restored_secret_manager, restored_wallet_data))

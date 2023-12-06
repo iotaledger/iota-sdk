@@ -25,13 +25,13 @@ impl StorageManager {
 
         let mut events = self
             .storage
-            .get::<HashMap<ParticipationEventId, ParticipationEventWithNodes>>(&format!("{PARTICIPATION_EVENTS}"))
+            .get::<HashMap<ParticipationEventId, ParticipationEventWithNodes>>(PARTICIPATION_EVENTS)
             .await?
             .unwrap_or_default();
 
         events.insert(event_with_nodes.id, event_with_nodes);
 
-        self.storage.set(&format!("{PARTICIPATION_EVENTS}"), &events).await?;
+        self.storage.set(PARTICIPATION_EVENTS, &events).await?;
 
         Ok(())
     }
@@ -41,7 +41,7 @@ impl StorageManager {
 
         let mut events = match self
             .storage
-            .get::<HashMap<ParticipationEventId, ParticipationEventWithNodes>>(&format!("{PARTICIPATION_EVENTS}"))
+            .get::<HashMap<ParticipationEventId, ParticipationEventWithNodes>>(PARTICIPATION_EVENTS)
             .await?
         {
             Some(events) => events,
@@ -50,7 +50,7 @@ impl StorageManager {
 
         events.remove(id);
 
-        self.storage.set(&format!("{PARTICIPATION_EVENTS}"), &events).await?;
+        self.storage.set(PARTICIPATION_EVENTS, &events).await?;
 
         Ok(())
     }
@@ -60,11 +60,7 @@ impl StorageManager {
     ) -> crate::wallet::Result<HashMap<ParticipationEventId, ParticipationEventWithNodes>> {
         log::debug!("get_participation_events");
 
-        Ok(self
-            .storage
-            .get(&format!("{PARTICIPATION_EVENTS}"))
-            .await?
-            .unwrap_or_default())
+        Ok(self.storage.get(PARTICIPATION_EVENTS).await?.unwrap_or_default())
     }
 
     pub(crate) async fn set_cached_participation_output_status(
@@ -74,7 +70,7 @@ impl StorageManager {
         log::debug!("set_cached_participation");
 
         self.storage
-            .set(&format!("{PARTICIPATION_CACHED_OUTPUTS}"), outputs_participation)
+            .set(PARTICIPATION_CACHED_OUTPUTS, outputs_participation)
             .await?;
 
         Ok(())
@@ -87,7 +83,7 @@ impl StorageManager {
 
         Ok(self
             .storage
-            .get(&format!("{PARTICIPATION_CACHED_OUTPUTS}"))
+            .get(PARTICIPATION_CACHED_OUTPUTS)
             .await?
             .unwrap_or_default())
     }
@@ -138,10 +134,7 @@ mod tests {
         );
 
         let outputs_participation = std::iter::once((
-            TransactionHash::new([3; 32])
-                .into_transaction_id(0)
-                .into_output_id(0)
-                .unwrap(),
+            TransactionHash::new([3; 32]).into_transaction_id(0).into_output_id(0),
             OutputStatusResponse::mock(),
         ))
         .collect::<HashMap<_, _>>();

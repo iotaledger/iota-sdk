@@ -35,6 +35,10 @@ async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
+    for var in ["WALLET_DB_PATH", "STRONGHOLD_PASSWORD", "EXPLORER_URL"] {
+        std::env::var(var).unwrap_or_else(|_| panic!(".env variable '{var}' is undefined, see .env.example"));
+    }
+
     // Get the wallet we generated with `create_wallet`.
     let wallet = Wallet::builder()
         .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
@@ -84,14 +88,13 @@ async fn main() -> Result<()> {
     println!("Minted NFT 1");
 
     // Build an NFT manually by using the `NftOutputBuilder`
-    let token_supply = wallet.client().get_token_supply().await?;
     let outputs = [
         // address of the owner of the NFT
         NftOutputBuilder::new_with_amount(NFT2_AMOUNT, NftId::null())
             .add_unlock_condition(AddressUnlockCondition::new(sender_address.clone()))
             .add_feature(SenderFeature::new(sender_address.clone()))
             .add_immutable_feature(IssuerFeature::new(sender_address))
-            .finish_output(token_supply)?,
+            .finish_output()?,
     ];
 
     let transaction = wallet.send_outputs(outputs, None).await?;

@@ -12,12 +12,14 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     types::block::{
+        address::Bech32Address,
         core::Parents,
-        output::{dto::OutputDto, AccountId, OutputId, OutputMetadata, OutputWithMetadata},
-        protocol::ProtocolParameters,
+        output::{Output, OutputId, OutputMetadata, OutputWithMetadata},
+        payload::signed_transaction::TransactionId,
+        protocol::{ProtocolParameters, ProtocolParametersHash},
         semantic::TransactionFailureReason,
         slot::{EpochIndex, SlotCommitment, SlotCommitmentId, SlotIndex},
-        BlockId,
+        BlockDto, BlockId,
     },
     utils::serde::{option_string, string},
 };
@@ -170,7 +172,31 @@ pub struct BaseTokenResponse {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub subunit: Option<String>,
     pub decimals: u32,
-    pub use_metric_prefix: bool,
+}
+
+/// Information of a validator.
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ValidatorResponse {
+    /// Account address of the validator.
+    address: Bech32Address,
+    /// The epoch index until which the validator registered to stake.
+    staking_end_epoch: EpochIndex,
+    /// The total stake of the pool, including delegators.
+    #[serde(with = "string")]
+    pool_stake: u64,
+    /// The stake of a validator.
+    #[serde(with = "string")]
+    validator_stake: u64,
+    /// The fixed cost of the validator, which it receives as part of its Mana rewards.
+    #[serde(with = "string")]
+    fixed_cost: u64,
+    /// Shows whether the validator was active recently.
+    active: bool,
+    /// The latest protocol version the validator supported.
+    latest_supported_protocol_version: u8,
+    /// The protocol hash of the latest supported protocol of the validator.
+    latest_supported_protocol_hash: ProtocolParametersHash,
 }
 
 /// Response of GET /api/core/v3/blocks/validators.
@@ -195,10 +221,10 @@ pub struct ValidatorsResponse {
 #[serde(rename_all = "camelCase")]
 pub struct ManaRewardsResponse {
     /// The starting epoch index for which the mana rewards are returned.
-    pub epoch_start: EpochIndex,
+    pub start_epoch: EpochIndex,
     /// The ending epoch index for which the mana rewards are returned, the decay is applied up to this point
     /// included.
-    pub epoch_end: EpochIndex,
+    pub end_epoch: EpochIndex,
     /// The amount of totally available rewards the requested output may claim.
     #[serde(with = "string")]
     pub rewards: u64,
@@ -209,24 +235,24 @@ pub struct ManaRewardsResponse {
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct CommitteeResponse {
-    /// The epoch index of the committee.
-    pub epoch_index: EpochIndex,
+    /// The validators of the committee.
+    pub committee: Box<[CommitteeMember]>,
     /// The total amount of delegated and staked IOTA coins in the selected committee.
     #[serde(with = "string")]
     pub total_stake: u64,
     /// The total amount of staked IOTA coins in the selected committee.
     #[serde(with = "string")]
     pub total_validator_stake: u64,
-    /// The validators of the committee.
-    pub committee: Box<[CommitteeMember]>,
+    /// The epoch index of the committee.
+    pub epoch: EpochIndex,
 }
 
 /// Returns information of a committee member.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct CommitteeMember {
-    /// The account identifier of the validator
-    pub account_id: AccountId,
+    /// Account address of the validator.
+    pub address: Bech32Address,
     /// The total stake of the pool, including delegators.
     #[serde(with = "string")]
     pub pool_stake: u64,
@@ -238,29 +264,6 @@ pub struct CommitteeMember {
     pub fixed_cost: u64,
 }
 
-/// Information of a validator.
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct ValidatorResponse {
-    /// The account identifier of the validator
-    account_id: AccountId,
-    /// The epoch index until which the validator registered to stake.
-    staking_end_epoch: EpochIndex,
-    /// The total stake of the pool, including delegators.
-    #[serde(with = "string")]
-    pool_stake: u64,
-    /// The stake of a validator.
-    #[serde(with = "string")]
-    validator_stake: u64,
-    /// The fixed cost of the validator, which it receives as part of its Mana rewards.
-    #[serde(with = "string")]
-    fixed_cost: u64,
-    /// Shows whether validator was active recently.
-    active: bool,
-    /// The latest protocol version the validator supported.
-    latest_supported_protocol_version: u8,
-}
-
 /// Response of GET /api/core/v3/blocks/issuance
 /// Information that is ideal for attaching a block in the network.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
@@ -269,13 +272,15 @@ pub struct IssuanceBlockHeaderResponse {
     /// Blocks that are strongly directly approved.
     pub strong_parents: BTreeSet<BlockId>,
     /// Blocks that are weakly directly approved.
+    #[serde(default, skip_serializing_if = "BTreeSet::is_empty")]
     pub weak_parents: BTreeSet<BlockId>,
     /// Blocks that are directly referenced to adjust opinion.
+    #[serde(default, skip_serializing_if = "BTreeSet::is_empty")]
     pub shallow_like_parents: BTreeSet<BlockId>,
     /// The slot index of the latest finalized slot.
     pub latest_finalized_slot: SlotIndex,
-    /// The most recent slot commitment.
-    pub commitment: SlotCommitment,
+    /// The latest slot commitment.
+    pub latest_commitment: SlotCommitment,
 }
 
 impl IssuanceBlockHeaderResponse {
@@ -302,7 +307,7 @@ impl IssuanceBlockHeaderResponse {
 #[serde(rename_all = "camelCase")]
 pub struct CongestionResponse {
     /// The slot index for which the congestion estimate is provided.
-    pub slot_index: SlotIndex,
+    pub slot: SlotIndex,
     /// Indicates if a node is ready to issue a block in a current congestion or should wait.
     pub ready: bool,
     /// The cost in mana for issuing a block in a current congestion estimated based on RMC and slot index.
@@ -385,6 +390,16 @@ pub enum BlockFailureReason {
     Invalid = 255,
 }
 
+// Response of a GET transaction metadata REST API call.
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct TransactionMetadataResponse {
+    pub transaction_id: TransactionId,
+    pub transaction_state: TransactionState,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub transaction_failure_reason: Option<TransactionFailureReason>,
+}
+
 /// Response of GET /api/core/v3/blocks/{blockId}/metadata.
 /// Returns the metadata of a block.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
@@ -393,11 +408,17 @@ pub struct BlockMetadataResponse {
     pub block_id: BlockId,
     pub block_state: BlockState,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub transaction_state: Option<TransactionState>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub block_failure_reason: Option<BlockFailureReason>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub transaction_failure_reason: Option<TransactionFailureReason>,
+    pub transaction_metadata: Option<TransactionMetadataResponse>,
+}
+
+/// Response of GET /api/core/v3/blocks/{blockId}/full.
+/// Returns a block and its metadata.
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+pub struct BlockWithMetadataResponse {
+    pub block: BlockDto,
+    pub metadata: BlockMetadataResponse,
 }
 
 /// Response of GET /api/core/v3/outputs/{output_id}.
@@ -406,14 +427,14 @@ pub struct BlockMetadataResponse {
 #[serde(rename_all = "camelCase")]
 pub struct OutputWithMetadataResponse {
     pub metadata: OutputMetadata,
-    pub output: OutputDto,
+    pub output: Output,
 }
 
 impl From<&OutputWithMetadata> for OutputWithMetadataResponse {
     fn from(value: &OutputWithMetadata) -> Self {
         Self {
             metadata: value.metadata,
-            output: OutputDto::from(value.output()),
+            output: value.output().clone(),
         }
     }
 }
@@ -495,12 +516,12 @@ pub struct RoutesResponse {
 
 /// Response of
 /// - GET /api/core/v3/commitments/{commitmentId}/utxo-changes
-/// - GET /api/core/v3/commitments/by-index/{index}/utxo-changes
+/// - GET /api/core/v3/commitments/by-slot/{slot}/utxo-changes
 /// Returns all UTXO changes that happened at a specific slot.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct UtxoChangesResponse {
-    pub index: u32,
+    pub commitment_id: SlotCommitmentId,
     pub created_outputs: Vec<OutputId>,
     pub consumed_outputs: Vec<OutputId>,
 }

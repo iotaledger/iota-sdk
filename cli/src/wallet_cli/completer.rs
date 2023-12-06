@@ -9,6 +9,7 @@ use rustyline::{
 };
 
 const WALLET_COMMANDS: &[&str] = &[
+    "accounts",
     "address",
     "balance",
     "burn-native-token",
@@ -24,6 +25,7 @@ const WALLET_COMMANDS: &[&str] = &[
     "exit",
     "faucet",
     "implicit-account-creation-address",
+    "implicit-account-transition",
     "implicit-accounts",
     "melt-native-token",
     "mint-native-token",

@@ -17,26 +17,26 @@ iota-sdk = { path = "../../sdk", default-features = false, features = [
 backtrace = { version = "0.3.69", default-features = false, features = ["std"] }
 derivative = { version = "2.2.0", default-features = false }
 fern-logger = { version = "0.5.0", default-features = false }
-futures = { version = "0.3.28", default-features = false }
+futures = { version = "0.3.29", default-features = false }
 iota-crypto = { version = "0.23.0", default-features = false, features = [
     "slip10",
     "bip44",
 ] }
 log = { version = "0.4.20", default-features = false }
-packable = { version = "0.8.3", default-features = false }
+packable = { version = "0.10.0", default-features = false }
 prefix-hex = { version = "0.7.1", default-features = false }
 primitive-types = { version = "0.12.2", default-features = false }
-serde = { version = "1.0.188", default-features = false }
-serde_json = { version = "1.0.107", default-features = false }
-thiserror = { version = "1.0.49", default-features = false }
-tokio = { version = "1.33.0", default-features = false }
-url = { version = "2.4.1", default-features = false, features = [
-    "serde",
-] }
-zeroize = { version = "1.6.0", default-features = false }
+serde = { version = "1.0.193", default-features = false }
+serde_json = { version = "1.0.108", default-features = false }
+thiserror = { version = "1.0.50", default-features = false }
+tokio = { version = "1.34.0", default-features = false }
+url = { version = "2.4.1", default-features = false, features = ["serde"] }
+zeroize = { version = "1.7.0", default-features = false }
 
 [dev-dependencies]
-pretty_assertions = { version = "1.4.0", default-features = false, features = [ "alloc" ] }
+pretty_assertions = { version = "1.4.0", default-features = false, features = [
+    "alloc",
+] }
 
 [features]
 events = ["iota-sdk/events"]

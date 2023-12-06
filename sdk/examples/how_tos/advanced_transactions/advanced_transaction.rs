@@ -25,6 +25,10 @@ async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
+    for var in ["WALLET_DB_PATH", "EXPLORER_URL", "STRONGHOLD_PASSWORD"] {
+        std::env::var(var).unwrap_or_else(|_| panic!(".env variable '{var}' is undefined, see .env.example"));
+    }
+
     // Get the wallet we generated with `create_wallet`.
     let wallet = Wallet::builder()
         .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
@@ -48,7 +52,7 @@ async fn main() -> Result<()> {
                 "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu",
             )?))
             .add_unlock_condition(TimelockUnlockCondition::new(slot_index)?)
-            .finish_output(wallet.client().get_token_supply().await?)?;
+            .finish_output()?;
 
         let transaction = wallet.send_outputs(vec![basic_output], None).await?;
         println!("Transaction sent: {}", transaction.transaction_id);

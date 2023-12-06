@@ -16,11 +16,11 @@ use iota_sdk::{
     types::block::{
         address::{Bech32Address, Hrp},
         output::{
-            dto::OutputDto, feature::Feature, unlock_condition::dto::UnlockConditionDto, AccountId, AnchorId,
-            DelegationId, FoundryId, NativeToken, NftId, OutputId, TokenScheme,
+            feature::Feature, unlock_condition::UnlockCondition, AccountId, AnchorId, DelegationId, FoundryId, NftId,
+            Output, OutputId, TokenScheme,
         },
         payload::{dto::PayloadDto, signed_transaction::TransactionId},
-        BlockId, IssuerId, SignedBlockDto,
+        BlockDto, BlockId,
     },
     utils::serde::{option_string, string},
 };
@@ -37,16 +37,15 @@ pub enum ClientMethod {
     #[allow(missing_docs)]
     #[serde(rename_all = "camelCase")]
     BuildAccountOutput {
-        // If not provided, minimum storage deposit will be used
+        // If not provided, minimum amount will be used
         #[serde(default, with = "option_string")]
         amount: Option<u64>,
         // TODO: Determine if `default` is wanted here
         #[serde(default, with = "string")]
         mana: u64,
-        native_tokens: Option<Vec<NativeToken>>,
         account_id: AccountId,
         foundry_counter: Option<u32>,
-        unlock_conditions: Vec<UnlockConditionDto>,
+        unlock_conditions: Vec<UnlockCondition>,
         features: Option<Vec<Feature>>,
         immutable_features: Option<Vec<Feature>>,
     },
@@ -55,14 +54,13 @@ pub enum ClientMethod {
     #[allow(missing_docs)]
     #[serde(rename_all = "camelCase")]
     BuildBasicOutput {
-        // If not provided, minimum storage deposit will be used
+        // If not provided, minimum amount will be used
         #[serde(default, with = "option_string")]
         amount: Option<u64>,
         // TODO: Determine if `default` is wanted here
         #[serde(default, with = "string")]
         mana: u64,
-        native_tokens: Option<Vec<NativeToken>>,
-        unlock_conditions: Vec<UnlockConditionDto>,
+        unlock_conditions: Vec<UnlockCondition>,
         features: Option<Vec<Feature>>,
     },
     /// Build a FoundryOutput.
@@ -70,13 +68,12 @@ pub enum ClientMethod {
     #[allow(missing_docs)]
     #[serde(rename_all = "camelCase")]
     BuildFoundryOutput {
-        // If not provided, minimum storage deposit will be used
+        // If not provided, minimum amount will be used
         #[serde(default, with = "option_string")]
         amount: Option<u64>,
-        native_tokens: Option<Vec<NativeToken>>,
         serial_number: u32,
         token_scheme: TokenScheme,
-        unlock_conditions: Vec<UnlockConditionDto>,
+        unlock_conditions: Vec<UnlockCondition>,
         features: Option<Vec<Feature>>,
         immutable_features: Option<Vec<Feature>>,
     },
@@ -85,15 +82,14 @@ pub enum ClientMethod {
     #[allow(missing_docs)]
     #[serde(rename_all = "camelCase")]
     BuildNftOutput {
-        // If not provided, minimum storage deposit will be used
+        // If not provided, minimum amount will be used
         #[serde(default, with = "option_string")]
         amount: Option<u64>,
         // TODO: Determine if `default` is wanted here
         #[serde(default, with = "string")]
         mana: u64,
-        native_tokens: Option<Vec<NativeToken>>,
         nft_id: NftId,
-        unlock_conditions: Vec<UnlockConditionDto>,
+        unlock_conditions: Vec<UnlockCondition>,
         features: Option<Vec<Feature>>,
         immutable_features: Option<Vec<Feature>>,
     },
@@ -130,7 +126,7 @@ pub enum ClientMethod {
     #[serde(rename_all = "camelCase")]
     BuildBasicBlock {
         /// The issuer's ID.
-        issuer_id: IssuerId,
+        issuer_id: AccountId,
         /// The block payload.
         #[serde(default)]
         payload: Option<PayloadDto>,
@@ -159,7 +155,7 @@ pub enum ClientMethod {
     /// Post block (JSON)
     PostBlock {
         /// Block
-        block: SignedBlockDto,
+        block: BlockDto,
     },
     /// Post block (raw)
     #[serde(rename_all = "camelCase")]
@@ -176,6 +172,12 @@ pub enum ClientMethod {
     /// Get block metadata with block_id
     #[serde(rename_all = "camelCase")]
     GetBlockMetadata {
+        /// Block ID
+        block_id: BlockId,
+    },
+    /// Get a block with its metadata
+    #[serde(rename_all = "camelCase")]
+    GetBlockWithMetadata {
         /// Block ID
         block_id: BlockId,
     },
@@ -351,10 +353,10 @@ pub enum ClientMethod {
         /// Human readable part
         bech32_hrp: Option<Hrp>,
     },
-    /// Calculate the minimum required storage deposit for an output.
+    /// Calculate the minimum required amount for an output.
     /// Expected response:
-    /// [`MinimumRequiredStorageDeposit`](crate::Response::MinimumRequiredStorageDeposit)
-    MinimumRequiredStorageDeposit { output: OutputDto },
+    /// [`OutputAmount`](crate::Response::OutputAmount)
+    ComputeMinimumOutputAmount { output: Output },
     /// Requests funds for a given address from the faucet, for example `https://faucet.testnet.shimmer.network/api/enqueue` or `http://localhost:8091/api/enqueue`.
     RequestFundsFromFaucet {
         /// Faucet URL
@@ -363,9 +365,8 @@ pub enum ClientMethod {
         address: Bech32Address,
     },
     /// Returns a block ID from a block
-    #[serde(rename_all = "camelCase")]
     BlockId {
         /// Block
-        signed_block: SignedBlockDto,
+        block: BlockDto,
     },
 }

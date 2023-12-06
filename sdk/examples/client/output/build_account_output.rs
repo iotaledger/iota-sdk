@@ -25,7 +25,12 @@ async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
-    let metadata = std::env::args().nth(1).unwrap_or("hello".to_string());
+    #[allow(clippy::single_element_loop)]
+    for var in ["NODE_URL"] {
+        std::env::var(var).unwrap_or_else(|_| panic!(".env variable '{var}' is undefined, see .env.example"));
+    }
+
+    let metadata = std::env::args().nth(1).unwrap_or_else(|| "hello".to_string());
     let metadata = metadata.as_bytes();
 
     // Create a node client.
@@ -34,22 +39,21 @@ async fn main() -> Result<()> {
         .finish()
         .await?;
 
-    let token_supply = client.get_token_supply().await?;
-    let rent_structure = client.get_rent_structure().await?;
+    let storage_score_params = client.get_storage_score_parameters().await?;
 
     let address = std::env::args()
         .nth(1)
-        .unwrap_or("rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy".to_string());
+        .unwrap_or_else(|| "rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy".to_string());
     let address = Address::try_from_bech32(address)?;
 
     // Account id needs to be null the first time
-    let account_output = AccountOutputBuilder::new_with_minimum_storage_deposit(rent_structure, AccountId::null())
+    let account_output = AccountOutputBuilder::new_with_minimum_amount(storage_score_params, AccountId::null())
         .add_feature(SenderFeature::new(address.clone()))
         .add_feature(MetadataFeature::new(metadata)?)
         .add_immutable_feature(IssuerFeature::new(address.clone()))
         .add_immutable_feature(MetadataFeature::new(metadata)?)
         .add_unlock_condition(AddressUnlockCondition::new(address))
-        .finish_output(token_supply)?;
+        .finish_output()?;
 
     println!("{account_output:#?}");
 

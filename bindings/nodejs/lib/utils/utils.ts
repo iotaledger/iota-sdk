@@ -11,12 +11,14 @@ import {
     TransactionId,
     TokenSchemeType,
     Output,
-    RentStructure,
+    StorageScoreParameters,
     OutputId,
     u64,
-    SignedBlock,
+    Block,
     ProtocolParameters,
     Bech32Address,
+    InputSigningData,
+    Unlock,
 } from '../types';
 import {
     AccountId,
@@ -127,15 +129,18 @@ export class Utils {
      * Compute the required storage deposit of an output.
      *
      * @param output The output.
-     * @param rent Rent cost of objects which take node resources.
+     * @param storageScoreParameters Storage score of objects which take node resources.
      * @returns The required storage deposit.
      */
-    static computeStorageDeposit(output: Output, rent: RentStructure): u64 {
+    static computeStorageDeposit(
+        output: Output,
+        storageScoreParameters: StorageScoreParameters,
+    ): u64 {
         const minStorageDepositAmount = callUtilsMethod({
             name: 'computeStorageDeposit',
             data: {
                 output,
-                rent,
+                storageScoreParameters,
             },
         });
         return BigInt(minStorageDepositAmount);
@@ -186,7 +191,7 @@ export class Utils {
      * @param params The network protocol parameters.
      * @returns The corresponding block ID.
      */
-    static blockId(block: SignedBlock, params: ProtocolParameters): BlockId {
+    static blockId(block: Block, params: ProtocolParameters): BlockId {
         return callUtilsMethod({
             name: 'blockId',
             data: {
@@ -318,6 +323,23 @@ export class Utils {
     }
 
     /**
+     * Compute the hash of an instance of ProtocolParameters.
+     *
+     * @param protocolParameters A ProtocolParameters instance.
+     * @returns The hash of the protocol parameters as a hex-encoded string.
+     */
+    static protocolParametersHash(
+        protocolParameters: ProtocolParameters,
+    ): HexEncodedString {
+        return callUtilsMethod({
+            name: 'protocolParametersHash',
+            data: {
+                protocolParameters,
+            },
+        });
+    }
+
+    /**
      * Compute the signing hash of a transaction.
      *
      * @param transaction A transaction.
@@ -394,11 +416,14 @@ export class Utils {
             name: 'computeSlotCommitmentId',
             data: {
                 slotCommitment: {
-                    index: slotCommitment.index.toString(10),
-                    prevId: slotCommitment.prevId,
+                    protocolVersion: slotCommitment.protocolVersion,
+                    slot: slotCommitment.slot,
+                    previousCommitmentId: slotCommitment.previousCommitmentId,
                     rootsId: slotCommitment.rootsId,
                     cumulativeWeight:
                         slotCommitment.cumulativeWeight.toString(10),
+                    referenceManaCost:
+                        slotCommitment.referenceManaCost.toString(10),
                 },
             },
         });
@@ -418,5 +443,30 @@ export class Utils {
             },
         });
         return hexBytes;
+    }
+
+    /**
+     * Verifies the semantic of a transaction.
+     *
+     * @param transaction The transaction payload.
+     * @param inputs The inputs data.
+     * @param unlocks The unlocks.
+     *
+     * @returns The conflict reason.
+     */
+    static verifyTransactionSemantic(
+        transaction: SignedTransactionPayload,
+        inputs: InputSigningData[],
+        unlocks?: Unlock[],
+    ): string {
+        const conflictReason = callUtilsMethod({
+            name: 'verifyTransactionSemantic',
+            data: {
+                transaction,
+                inputs,
+                unlocks,
+            },
+        });
+        return conflictReason;
     }
 }

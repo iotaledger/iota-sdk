@@ -17,8 +17,9 @@ use iota_sdk::{
         Client,
     },
     types::block::{
+        output::AccountId,
         payload::{signed_transaction::TransactionId, tagged_data::TaggedDataPayload, Payload},
-        BlockId, IssuerId,
+        BlockId,
     },
 };
 
@@ -35,7 +36,7 @@ async fn setup_tagged_data_block(secret_manager: &SecretManager) -> BlockId {
 
     client
         .build_basic_block(
-            IssuerId::null(),
+            AccountId::null(),
             Some(Payload::TaggedData(Box::new(
                 TaggedDataPayload::new(b"Hello".to_vec(), b"Tangle".to_vec()).unwrap(),
             ))),

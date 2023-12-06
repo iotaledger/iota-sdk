@@ -13,7 +13,6 @@ use iota_sdk::{
     types::block::{
         address::Address,
         output::{
-            dto::OutputDto,
             feature::{IssuerFeature, MetadataFeature, SenderFeature, TagFeature},
             unlock_condition::AddressUnlockCondition,
             NftId, NftOutputBuilder,
@@ -26,17 +25,21 @@ async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
+    #[allow(clippy::single_element_loop)]
+    for var in ["NODE_URL"] {
+        std::env::var(var).unwrap_or_else(|_| panic!(".env variable '{var}' is undefined, see .env.example"));
+    }
+
     let node_url = std::env::var("NODE_URL").unwrap();
 
     // Create a client instance.
     let client = Client::builder().with_node(&node_url)?.finish().await?;
 
-    let token_supply = client.get_token_supply().await?;
-    let rent_structure = client.get_rent_structure().await?;
+    let storage_score_params = client.get_storage_score_parameters().await?;
 
     let address = Address::try_from_bech32("rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy")?;
 
-    let nft_output_builder = NftOutputBuilder::new_with_minimum_storage_deposit(rent_structure, NftId::null())
+    let nft_output_builder = NftOutputBuilder::new_with_minimum_amount(storage_score_params, NftId::null())
         .add_unlock_condition(AddressUnlockCondition::new(address.clone()));
 
     let outputs = [
@@ -44,30 +47,30 @@ async fn main() -> Result<()> {
         nft_output_builder
             .clone()
             .add_feature(SenderFeature::new(address.clone()))
-            .finish_output(token_supply)?,
+            .finish_output()?,
         // with issuer feature
         nft_output_builder
             .clone()
             .add_immutable_feature(IssuerFeature::new(address))
-            .finish_output(token_supply)?,
+            .finish_output()?,
         // with metadata feature block
         nft_output_builder
             .clone()
             .add_feature(MetadataFeature::new("Hello, World!")?)
-            .finish_output(token_supply)?,
+            .finish_output()?,
         // with immutable metadata feature block
         nft_output_builder
             .clone()
             .add_immutable_feature(MetadataFeature::new("Hello, World!")?)
-            .finish_output(token_supply)?,
+            .finish_output()?,
         // with tag feature
         nft_output_builder
             .add_feature(TagFeature::new("Hello, World!")?)
-            .finish_output(token_supply)?,
+            .finish_output()?,
     ];
 
-    // Convert ouput array to json array
-    let json_outputs = serde_json::to_string_pretty(&outputs.iter().map(OutputDto::from).collect::<Vec<OutputDto>>())?;
+    // Convert output array to json array
+    let json_outputs = serde_json::to_string_pretty(&outputs)?;
     println!("{json_outputs}");
 
     Ok(())

@@ -10,7 +10,7 @@
 
 use iota_sdk::{
     client::{
-        constants::{SHIMMER_BECH32_HRP, SHIMMER_COIN_TYPE},
+        constants::SHIMMER_COIN_TYPE,
         secret::{stronghold::StrongholdSecretManager, SecretManager},
     },
     crypto::keys::{bip39::Mnemonic, bip44::Bip44},
@@ -25,6 +25,10 @@ const ADDRESS_FILE_PATH: &str = "./examples/wallet/offline_signing/example.addre
 async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
+
+    for var in ["STRONGHOLD_PASSWORD", "MNEMONIC"] {
+        std::env::var(var).unwrap_or_else(|_| panic!(".env variable '{var}' is undefined, see .env.example"));
+    }
 
     let offline_client = ClientOptions::new();
 

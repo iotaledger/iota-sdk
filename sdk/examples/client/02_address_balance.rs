@@ -22,6 +22,10 @@ async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
+    for var in ["NODE_URL", "MNEMONIC"] {
+        std::env::var(var).unwrap_or_else(|_| panic!(".env variable '{var}' is undefined, see .env.example"));
+    }
+
     // Create a node client.
     let client = Client::builder()
         .with_node(&std::env::var("NODE_URL").unwrap())?
@@ -55,8 +59,8 @@ async fn main() -> Result<()> {
     let mut total_amount = 0;
     let mut total_native_tokens = NativeTokensBuilder::new();
     for output in outputs {
-        if let Some(native_tokens) = output.native_tokens() {
-            total_native_tokens.add_native_tokens(native_tokens.clone())?;
+        if let Some(native_token) = output.native_token() {
+            total_native_tokens.add_native_token(*native_token)?;
         }
         total_amount += output.amount();
     }

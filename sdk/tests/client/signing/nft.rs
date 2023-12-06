@@ -10,12 +10,12 @@ use iota_sdk::{
             transaction::validate_signed_transaction_payload_length, verify_semantic, GetAddressesOptions,
             PreparedTransactionData,
         },
-        constants::{SHIMMER_COIN_TYPE, SHIMMER_TESTNET_BECH32_HRP},
+        constants::SHIMMER_COIN_TYPE,
         secret::{SecretManage, SecretManager},
         Client, Result,
     },
     types::block::{
-        address::{Address, NftAddress, ToBech32Ext},
+        address::{Address, NftAddress},
         input::{Input, UtxoInput},
         output::NftId,
         payload::{signed_transaction::Transaction, SignedTransactionPayload},
@@ -36,7 +36,7 @@ use crate::client::{
 async fn nft_reference_unlocks() -> Result<()> {
     let secret_manager = SecretManager::try_from_mnemonic(Client::generate_mnemonic()?)?;
 
-    let bech32_address_0 = &secret_manager
+    let address_0 = secret_manager
         .generate_ed25519_addresses(
             GetAddressesOptions::default()
                 .with_coin_type(SHIMMER_COIN_TYPE)
@@ -44,68 +44,30 @@ async fn nft_reference_unlocks() -> Result<()> {
         )
         .await?[0]
         .clone()
-        .to_bech32(SHIMMER_TESTNET_BECH32_HRP);
+        .into_inner();
 
     let protocol_parameters = protocol_parameters();
     let nft_id = NftId::from_str(NFT_ID_1)?;
-    let nft_bech32_address = &Address::Nft(NftAddress::new(nft_id)).to_bech32(SHIMMER_TESTNET_BECH32_HRP);
+    let nft_address = Address::Nft(NftAddress::new(nft_id));
 
     let inputs = build_inputs([
         Nft(
             1_000_000,
             nft_id,
-            &bech32_address_0.to_string(),
-            None,
+            address_0.clone(),
             None,
             None,
             None,
             None,
             Some(Bip44::new(SHIMMER_COIN_TYPE)),
         ),
-        Basic(
-            1_000_000,
-            &nft_bech32_address.to_string(),
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-        ),
-        Basic(
-            1_000_000,
-            &nft_bech32_address.to_string(),
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-        ),
+        Basic(1_000_000, nft_address.clone(), None, None, None, None, None, None),
+        Basic(1_000_000, nft_address.clone(), None, None, None, None, None, None),
     ]);
 
     let outputs = build_outputs([
-        Nft(
-            1_000_000,
-            nft_id,
-            &bech32_address_0.to_string(),
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-        ),
-        Basic(
-            2_000_000,
-            &nft_bech32_address.to_string(),
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-        ),
+        Nft(1_000_000, nft_id, address_0, None, None, None, None, None),
+        Basic(2_000_000, nft_address, None, None, None, None, None, None),
     ]);
 
     let transaction = Transaction::builder(protocol_parameters.network_id())
@@ -117,7 +79,7 @@ async fn nft_reference_unlocks() -> Result<()> {
         )
         .with_outputs(outputs)
         .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
-        .finish_with_params(protocol_parameters)?;
+        .finish_with_params(&protocol_parameters)?;
 
     let prepared_transaction_data = PreparedTransactionData {
         transaction,
@@ -128,7 +90,7 @@ async fn nft_reference_unlocks() -> Result<()> {
     let unlocks = secret_manager.transaction_unlocks(&prepared_transaction_data).await?;
 
     assert_eq!(unlocks.len(), 3);
-    assert_eq!((*unlocks).get(0).unwrap().kind(), SignatureUnlock::KIND);
+    assert_eq!((*unlocks).first().unwrap().kind(), SignatureUnlock::KIND);
     match (*unlocks).get(1).unwrap() {
         Unlock::Nft(a) => {
             assert_eq!(a.index(), 0);

@@ -15,7 +15,7 @@ use iota_sdk::{
         secret::{SecretManager, SignBlock},
         Client, Result,
     },
-    types::block::IssuerId,
+    types::block::output::AccountId,
 };
 
 #[tokio::main]
@@ -23,11 +23,16 @@ async fn main() -> Result<()> {
     // If not provided we use the default node from the `.env` file.
     dotenvy::dotenv().ok();
 
+    #[allow(clippy::single_element_loop)]
+    for var in ["NODE_URL", "MNEMONIC", "ISSUER_ID", "EXPLORER_URL"] {
+        std::env::var(var).unwrap_or_else(|_| panic!(".env variable '{var}' is undefined, see .env.example"));
+    }
+
     // Take the node URL from command line argument or use one from env as default.
     let node_url = std::env::args()
         .nth(1)
         .unwrap_or_else(|| std::env::var("NODE_URL").unwrap());
-    let issuer_id = std::env::var("ISSUER_ID").unwrap().parse::<IssuerId>().unwrap();
+    let issuer_id = std::env::var("ISSUER_ID").unwrap().parse::<AccountId>().unwrap();
 
     // Create a node client.
     let client = Client::builder().with_node(&node_url)?.finish().await?;

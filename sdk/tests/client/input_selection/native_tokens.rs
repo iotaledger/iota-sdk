@@ -23,7 +23,7 @@ fn two_native_tokens_one_needed() {
         Basic(
             1_000_000,
             BECH32_ADDRESS_ED25519_0,
-            Some(vec![(TOKEN_ID_1, 100)]),
+            Some((TOKEN_ID_1, 100)),
             None,
             None,
             None,
@@ -33,7 +33,7 @@ fn two_native_tokens_one_needed() {
         Basic(
             1_000_000,
             BECH32_ADDRESS_ED25519_0,
-            Some(vec![(TOKEN_ID_1, 100), (TOKEN_ID_2, 100)]),
+            Some((TOKEN_ID_1, 100), (TOKEN_ID_2, 100)),
             None,
             None,
             None,
@@ -44,7 +44,7 @@ fn two_native_tokens_one_needed() {
     let outputs = build_outputs([Basic(
         1_000_000,
         BECH32_ADDRESS_ED25519_0,
-        Some(vec![(TOKEN_ID_1, 150)]),
+        Some((TOKEN_ID_1, 150)),
         None,
         None,
         None,
@@ -84,7 +84,7 @@ fn two_native_tokens_both_needed_plus_remainder() {
         Basic(
             1_000_000,
             BECH32_ADDRESS_ED25519_0,
-            Some(vec![(TOKEN_ID_1, 100)]),
+            Some((TOKEN_ID_1, 100)),
             None,
             None,
             None,
@@ -94,7 +94,7 @@ fn two_native_tokens_both_needed_plus_remainder() {
         Basic(
             1_000_000,
             BECH32_ADDRESS_ED25519_0,
-            Some(vec![(TOKEN_ID_1, 100), (TOKEN_ID_2, 100)]),
+            Some((TOKEN_ID_1, 100), (TOKEN_ID_2, 100)),
             None,
             None,
             None,
@@ -131,7 +131,7 @@ fn two_native_tokens_both_needed_plus_remainder() {
                 output,
                 1_000_000,
                 BECH32_ADDRESS_ED25519_0,
-                Some(vec![(TOKEN_ID_1, 50)])
+                Some((TOKEN_ID_1, 50))
             ));
         }
     });
@@ -145,7 +145,7 @@ fn three_inputs_two_needed_plus_remainder() {
         Basic(
             1_000_000,
             BECH32_ADDRESS_ED25519_0,
-            Some(vec![(TOKEN_ID_1, 100)]),
+            Some((TOKEN_ID_1, 100)),
             None,
             None,
             None,
@@ -155,7 +155,7 @@ fn three_inputs_two_needed_plus_remainder() {
         Basic(
             1_000_000,
             BECH32_ADDRESS_ED25519_0,
-            Some(vec![(TOKEN_ID_1, 100)]),
+            Some((TOKEN_ID_1, 100)),
             None,
             None,
             None,
@@ -165,7 +165,7 @@ fn three_inputs_two_needed_plus_remainder() {
         Basic(
             1_000_000,
             BECH32_ADDRESS_ED25519_0,
-            Some(vec![(TOKEN_ID_1, 100)]),
+            Some((TOKEN_ID_1, 100)),
             None,
             None,
             None,
@@ -202,7 +202,7 @@ fn three_inputs_two_needed_plus_remainder() {
                 output,
                 1_000_000,
                 BECH32_ADDRESS_ED25519_0,
-                Some(vec![(TOKEN_ID_1, 80)])
+                Some((TOKEN_ID_1, 80))
             ));
         }
     });
@@ -216,7 +216,7 @@ fn three_inputs_two_needed_no_remainder() {
         Basic(
             1_000_000,
             BECH32_ADDRESS_ED25519_0,
-            Some(vec![(TOKEN_ID_1, 100)]),
+            Some((TOKEN_ID_1, 100)),
             None,
             None,
             None,
@@ -226,7 +226,7 @@ fn three_inputs_two_needed_no_remainder() {
         Basic(
             1_000_000,
             BECH32_ADDRESS_ED25519_0,
-            Some(vec![(TOKEN_ID_1, 100)]),
+            Some((TOKEN_ID_1, 100)),
             None,
             None,
             None,
@@ -236,7 +236,7 @@ fn three_inputs_two_needed_no_remainder() {
         Basic(
             1_000_000,
             BECH32_ADDRESS_ED25519_0,
-            Some(vec![(TOKEN_ID_1, 100)]),
+            Some((TOKEN_ID_1, 100)),
             None,
             None,
             None,
@@ -275,7 +275,7 @@ fn insufficient_native_tokens_one_input() {
     let inputs = build_inputs([Basic(
         1_000_000,
         BECH32_ADDRESS_ED25519_0,
-        Some(vec![(TOKEN_ID_1, 100)]),
+        Some((TOKEN_ID_1, 100)),
         None,
         None,
         None,
@@ -285,7 +285,7 @@ fn insufficient_native_tokens_one_input() {
     let outputs = build_outputs([Basic(
         1_000_000,
         BECH32_ADDRESS_ED25519_0,
-        Some(vec![(TOKEN_ID_1, 150)]),
+        Some((TOKEN_ID_1, 150)),
         None,
         None,
         None,
@@ -318,7 +318,7 @@ fn insufficient_native_tokens_three_inputs() {
         Basic(
             1_000_000,
             BECH32_ADDRESS_ED25519_0,
-            Some(vec![(TOKEN_ID_1, 100)]),
+            Some((TOKEN_ID_1, 100)),
             None,
             None,
             None,
@@ -328,7 +328,7 @@ fn insufficient_native_tokens_three_inputs() {
         Basic(
             1_000_000,
             BECH32_ADDRESS_ED25519_0,
-            Some(vec![(TOKEN_ID_1, 100)]),
+            Some((TOKEN_ID_1, 100)),
             None,
             None,
             None,
@@ -338,7 +338,7 @@ fn insufficient_native_tokens_three_inputs() {
         Basic(
             1_000_000,
             BECH32_ADDRESS_ED25519_0,
-            Some(vec![(TOKEN_ID_1, 100)]),
+            Some((TOKEN_ID_1, 100)),
             None,
             None,
             None,
@@ -349,7 +349,7 @@ fn insufficient_native_tokens_three_inputs() {
     let outputs = build_outputs([Basic(
         1_000_000,
         BECH32_ADDRESS_ED25519_0,
-        Some(vec![(TOKEN_ID_1, 301)]),
+        Some((TOKEN_ID_1, 301)),
         None,
         None,
         None,
@@ -381,7 +381,7 @@ fn burn_and_send_at_the_same_time() {
     let inputs = build_inputs([Basic(
         2_000_000,
         BECH32_ADDRESS_ED25519_0,
-        Some(vec![(TOKEN_ID_1, 100), (TOKEN_ID_2, 100)]),
+        Some((TOKEN_ID_1, 100), (TOKEN_ID_2, 100)),
         None,
         None,
         None,
@@ -418,7 +418,7 @@ fn burn_and_send_at_the_same_time() {
                 output,
                 1_000_000,
                 BECH32_ADDRESS_ED25519_0,
-                Some(vec![(TOKEN_ID_1, 40)])
+                Some((TOKEN_ID_1, 40))
             ));
         }
     });
@@ -431,7 +431,7 @@ fn burn_one_input_no_output() {
     let inputs = build_inputs([Basic(
         1_000_000,
         BECH32_ADDRESS_ED25519_0,
-        Some(vec![(TOKEN_ID_1, 100)]),
+        Some((TOKEN_ID_1, 100)),
         None,
         None,
         None,
@@ -455,7 +455,7 @@ fn burn_one_input_no_output() {
         &selected.outputs[0],
         1_000_000,
         BECH32_ADDRESS_ED25519_0,
-        Some(vec![(TOKEN_ID_1, 50)])
+        Some((TOKEN_ID_1, 50))
     ));
 }
 
@@ -467,7 +467,7 @@ fn burn_two_inputs_no_output() {
         Basic(
             1_000_000,
             BECH32_ADDRESS_ED25519_0,
-            Some(vec![(TOKEN_ID_1, 100)]),
+            Some((TOKEN_ID_1, 100)),
             None,
             None,
             None,
@@ -477,7 +477,7 @@ fn burn_two_inputs_no_output() {
         Basic(
             1_000_000,
             BECH32_ADDRESS_ED25519_0,
-            Some(vec![(TOKEN_ID_1, 100), (TOKEN_ID_2, 100)]),
+            Some((TOKEN_ID_1, 100), (TOKEN_ID_2, 100)),
             None,
             None,
             None,
@@ -503,7 +503,7 @@ fn burn_two_inputs_no_output() {
         &selected.outputs[0],
         1_000_000,
         BECH32_ADDRESS_ED25519_0,
-        Some(vec![(TOKEN_ID_1, 50)])
+        Some((TOKEN_ID_1, 50))
     ));
 }
 
@@ -514,7 +514,7 @@ fn burn_one_input_two_tokens_no_output() {
     let inputs = build_inputs([Basic(
         1_000_000,
         BECH32_ADDRESS_ED25519_0,
-        Some(vec![(TOKEN_ID_1, 100), (TOKEN_ID_2, 100)]),
+        Some((TOKEN_ID_1, 100), (TOKEN_ID_2, 100)),
         None,
         None,
         None,
@@ -550,7 +550,7 @@ fn multiple_native_tokens_1() {
         Basic(
             1_000_000,
             BECH32_ADDRESS_ED25519_0,
-            Some(vec![(TOKEN_ID_1, 100)]),
+            Some((TOKEN_ID_1, 100)),
             None,
             None,
             None,
@@ -560,7 +560,7 @@ fn multiple_native_tokens_1() {
         Basic(
             1_000_000,
             BECH32_ADDRESS_ED25519_0,
-            Some(vec![(TOKEN_ID_1, 100), (TOKEN_ID_2, 100)]),
+            Some((TOKEN_ID_1, 100), (TOKEN_ID_2, 100)),
             None,
             None,
             None,
@@ -571,7 +571,7 @@ fn multiple_native_tokens_1() {
     let outputs = build_outputs([Basic(
         1_000_000,
         BECH32_ADDRESS_ED25519_0,
-        Some(vec![(TOKEN_ID_1, 100)]),
+        Some((TOKEN_ID_1, 100)),
         None,
         None,
         None,
@@ -601,7 +601,7 @@ fn multiple_native_tokens_2() {
         Basic(
             1_000_000,
             BECH32_ADDRESS_ED25519_0,
-            Some(vec![(TOKEN_ID_1, 100)]),
+            Some((TOKEN_ID_1, 100)),
             None,
             None,
             None,
@@ -611,7 +611,7 @@ fn multiple_native_tokens_2() {
         Basic(
             1_000_000,
             BECH32_ADDRESS_ED25519_0,
-            Some(vec![(TOKEN_ID_1, 100), (TOKEN_ID_2, 100)]),
+            Some((TOKEN_ID_1, 100), (TOKEN_ID_2, 100)),
             None,
             None,
             None,
@@ -622,7 +622,7 @@ fn multiple_native_tokens_2() {
     let outputs = build_outputs([Basic(
         1_000_000,
         BECH32_ADDRESS_ED25519_0,
-        Some(vec![(TOKEN_ID_1, 150)]),
+        Some((TOKEN_ID_1, 150)),
         None,
         None,
         None,
@@ -658,7 +658,7 @@ fn multiple_native_tokens_3() {
         Basic(
             1_000_000,
             BECH32_ADDRESS_ED25519_0,
-            Some(vec![(TOKEN_ID_1, 100)]),
+            Some((TOKEN_ID_1, 100)),
             None,
             None,
             None,
@@ -668,7 +668,7 @@ fn multiple_native_tokens_3() {
         Basic(
             1_000_000,
             BECH32_ADDRESS_ED25519_0,
-            Some(vec![(TOKEN_ID_1, 100), (TOKEN_ID_2, 100)]),
+            Some((TOKEN_ID_1, 100), (TOKEN_ID_2, 100)),
             None,
             None,
             None,
@@ -703,7 +703,7 @@ fn multiple_native_tokens_3() {
         &selected.outputs[1],
         1_000_000,
         BECH32_ADDRESS_ED25519_0,
-        Some(vec![(TOKEN_ID_2, 100)])
+        Some((TOKEN_ID_2, 100))
     ));
 }
 
@@ -724,7 +724,7 @@ fn insufficient_native_tokens() {
     let outputs = build_outputs([Basic(
         1_000_000,
         BECH32_ADDRESS_ED25519_0,
-        Some(vec![(TOKEN_ID_1, 150)]),
+        Some((TOKEN_ID_1, 150)),
         None,
         None,
         None,
@@ -756,7 +756,7 @@ fn insufficient_native_tokens_2() {
     let inputs = build_inputs([Basic(
         1_000_000,
         BECH32_ADDRESS_ED25519_0,
-        Some(vec![(TOKEN_ID_1, 100)]),
+        Some((TOKEN_ID_1, 100)),
         None,
         None,
         None,
@@ -766,7 +766,7 @@ fn insufficient_native_tokens_2() {
     let outputs = build_outputs([Basic(
         1_000_000,
         BECH32_ADDRESS_ED25519_0,
-        Some(vec![(TOKEN_ID_1, 150)]),
+        Some((TOKEN_ID_1, 150)),
         None,
         None,
         None,
@@ -798,7 +798,7 @@ fn insufficient_native_tokens_2() {
 //     let inputs = build_inputs([Basic(
 //         1_000_000,
 //         BECH32_ADDRESS_ED25519_0,
-//         Some(vec![(TOKEN_ID_1, 100)]),
+//         Some((TOKEN_ID_1, 100)),
 //         None,
 //         None,
 //         None,
@@ -808,7 +808,7 @@ fn insufficient_native_tokens_2() {
 //     let outputs = build_outputs([Basic(
 //         1_000_000,
 //         BECH32_ADDRESS_ED25519_0,
-//         Some(vec![(TOKEN_ID_1, 50)]),
+//         Some((TOKEN_ID_1, 50)),
 //         None,
 //         None,
 //         None,
@@ -842,7 +842,7 @@ fn single_output_native_token_no_remainder() {
     let inputs = build_inputs([Basic(
         1_000_000,
         BECH32_ADDRESS_ED25519_0,
-        Some(vec![(TOKEN_ID_1, 100)]),
+        Some((TOKEN_ID_1, 100)),
         None,
         None,
         None,
@@ -852,7 +852,7 @@ fn single_output_native_token_no_remainder() {
     let outputs = build_outputs([Basic(
         1_000_000,
         BECH32_ADDRESS_ED25519_0,
-        Some(vec![(TOKEN_ID_1, 100)]),
+        Some((TOKEN_ID_1, 100)),
         None,
         None,
         None,
@@ -880,7 +880,7 @@ fn single_output_native_token_remainder_1() {
     let inputs = build_inputs([Basic(
         1_000_000,
         BECH32_ADDRESS_ED25519_0,
-        Some(vec![(TOKEN_ID_1, 100)]),
+        Some((TOKEN_ID_1, 100)),
         None,
         None,
         None,
@@ -890,7 +890,7 @@ fn single_output_native_token_remainder_1() {
     let outputs = build_outputs([Basic(
         500_000,
         BECH32_ADDRESS_ED25519_0,
-        Some(vec![(TOKEN_ID_1, 50)]),
+        Some((TOKEN_ID_1, 50)),
         None,
         None,
         None,
@@ -914,7 +914,7 @@ fn single_output_native_token_remainder_1() {
         &selected.outputs[0],
         500_000,
         BECH32_ADDRESS_ED25519_0,
-        Some(vec![(TOKEN_ID_1, 50)])
+        Some((TOKEN_ID_1, 50))
     ));
 }
 
@@ -925,7 +925,7 @@ fn single_output_native_token_remainder_2() {
     let inputs = build_inputs([Basic(
         1_000_000,
         BECH32_ADDRESS_ED25519_0,
-        Some(vec![(TOKEN_ID_1, 100)]),
+        Some((TOKEN_ID_1, 100)),
         None,
         None,
         None,
@@ -935,7 +935,7 @@ fn single_output_native_token_remainder_2() {
     let outputs = build_outputs([Basic(
         500_000,
         BECH32_ADDRESS_ED25519_0,
-        Some(vec![(TOKEN_ID_1, 100)]),
+        Some((TOKEN_ID_1, 100)),
         None,
         None,
         None,
@@ -971,7 +971,7 @@ fn two_basic_outputs_1() {
         Basic(
             1_000_000,
             BECH32_ADDRESS_ED25519_0,
-            Some(vec![(TOKEN_ID_1, 100)]),
+            Some((TOKEN_ID_1, 100)),
             None,
             None,
             None,
@@ -1017,7 +1017,7 @@ fn two_basic_outputs_1() {
         &selected.outputs[1],
         500_000,
         BECH32_ADDRESS_ED25519_0,
-        Some(vec![(TOKEN_ID_1, 100)]),
+        Some((TOKEN_ID_1, 100)),
     ));
 }
 
@@ -1029,7 +1029,7 @@ fn two_basic_outputs_2() {
         Basic(
             1_000_000,
             BECH32_ADDRESS_ED25519_0,
-            Some(vec![(TOKEN_ID_1, 100)]),
+            Some((TOKEN_ID_1, 100)),
             None,
             None,
             None,
@@ -1050,7 +1050,7 @@ fn two_basic_outputs_2() {
     let outputs = build_outputs([Basic(
         500_000,
         BECH32_ADDRESS_ED25519_0,
-        Some(vec![(TOKEN_ID_1, 50)]),
+        Some((TOKEN_ID_1, 50)),
         None,
         None,
         None,
@@ -1075,7 +1075,7 @@ fn two_basic_outputs_2() {
         &selected.outputs[1],
         500_000,
         BECH32_ADDRESS_ED25519_0,
-        Some(vec![(TOKEN_ID_1, 50)]),
+        Some((TOKEN_ID_1, 50)),
     ));
 }
 
@@ -1087,7 +1087,7 @@ fn two_basic_outputs_3() {
         Basic(
             1_000_000,
             BECH32_ADDRESS_ED25519_0,
-            Some(vec![(TOKEN_ID_1, 100)]),
+            Some((TOKEN_ID_1, 100)),
             None,
             None,
             None,
@@ -1145,7 +1145,7 @@ fn two_basic_outputs_4() {
         Basic(
             1_000_000,
             BECH32_ADDRESS_ED25519_0,
-            Some(vec![(TOKEN_ID_1, 100)]),
+            Some((TOKEN_ID_1, 100)),
             None,
             None,
             None,
@@ -1166,7 +1166,7 @@ fn two_basic_outputs_4() {
     let outputs = build_outputs([Basic(
         500_000,
         BECH32_ADDRESS_ED25519_0,
-        Some(vec![(TOKEN_ID_1, 100)]),
+        Some((TOKEN_ID_1, 100)),
         None,
         None,
         None,
@@ -1203,7 +1203,7 @@ fn two_basic_outputs_5() {
         Basic(
             1_000_000,
             BECH32_ADDRESS_ED25519_0,
-            Some(vec![(TOKEN_ID_1, 100)]),
+            Some((TOKEN_ID_1, 100)),
             None,
             None,
             None,
@@ -1224,7 +1224,7 @@ fn two_basic_outputs_5() {
     let outputs = build_outputs([Basic(
         500_000,
         BECH32_ADDRESS_ED25519_0,
-        Some(vec![(TOKEN_ID_1, 100)]),
+        Some((TOKEN_ID_1, 100)),
         None,
         None,
         None,
@@ -1261,7 +1261,7 @@ fn two_basic_outputs_6() {
         Basic(
             1_000_000,
             BECH32_ADDRESS_ED25519_0,
-            Some(vec![(TOKEN_ID_1, 100)]),
+            Some((TOKEN_ID_1, 100)),
             None,
             None,
             None,
@@ -1306,7 +1306,7 @@ fn two_basic_outputs_6() {
         &selected.outputs[1],
         1_500_000,
         BECH32_ADDRESS_ED25519_0,
-        Some(vec![(TOKEN_ID_1, 50)]),
+        Some((TOKEN_ID_1, 50)),
     ));
 }
 
@@ -1318,7 +1318,7 @@ fn two_basic_outputs_7() {
         Basic(
             1_000_000,
             BECH32_ADDRESS_ED25519_0,
-            Some(vec![(TOKEN_ID_1, 100)]),
+            Some((TOKEN_ID_1, 100)),
             None,
             None,
             None,
@@ -1375,7 +1375,7 @@ fn two_basic_outputs_8() {
         Basic(
             1_000_000,
             BECH32_ADDRESS_ED25519_0,
-            Some(vec![(TOKEN_ID_1, 100)]),
+            Some((TOKEN_ID_1, 100)),
             None,
             None,
             None,
@@ -1429,7 +1429,7 @@ fn two_basic_outputs_native_tokens_not_needed() {
         Basic(
             1_000_000,
             BECH32_ADDRESS_ED25519_0,
-            Some(vec![(TOKEN_ID_1, 100)]),
+            Some((TOKEN_ID_1, 100)),
             None,
             None,
             None,

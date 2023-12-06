@@ -44,23 +44,19 @@ where
     pub async fn increase_voting_power(&self, amount: u64) -> Result<TransactionWithMetadata> {
         let prepared = self.prepare_increase_voting_power(amount).await?;
 
-        self.sign_and_submit_transaction(prepared, None).await
+        self.sign_and_submit_transaction(prepared, None, None).await
     }
 
-    /// Prepares the transaction for
-    /// [Account::increase_voting_power()](crate::wallet::Account::increase_voting_power).
+    /// Prepares the transaction for [Wallet::increase_voting_power()].
     pub async fn prepare_increase_voting_power(&self, amount: u64) -> Result<PreparedTransactionData> {
-        let token_supply = self.client().get_token_supply().await?;
-
         let (new_output, tx_options) = match self.get_voting_output().await? {
             Some(current_output_data) => {
                 let output = current_output_data.output.as_basic();
 
                 let new_amount = output.amount().checked_add(amount).ok_or(Error::InvalidVotingPower)?;
 
-                let (new_output, tagged_data_payload) = self
-                    .new_voting_output_and_tagged_data(output, new_amount, token_supply)
-                    .await?;
+                let (new_output, tagged_data_payload) =
+                    self.new_voting_output_and_tagged_data(output, new_amount).await?;
 
                 (
                     new_output,
@@ -76,7 +72,7 @@ where
                 BasicOutputBuilder::new_with_amount(amount)
                     .add_unlock_condition(AddressUnlockCondition::new(self.address().await))
                     .add_feature(TagFeature::new(PARTICIPATION_TAG)?)
-                    .finish_output(token_supply)?,
+                    .finish_output()?,
                 None,
             ),
         };
@@ -96,13 +92,11 @@ where
     pub async fn decrease_voting_power(&self, amount: u64) -> Result<TransactionWithMetadata> {
         let prepared = self.prepare_decrease_voting_power(amount).await?;
 
-        self.sign_and_submit_transaction(prepared, None).await
+        self.sign_and_submit_transaction(prepared, None, None).await
     }
 
-    /// Prepares the transaction for
-    /// [Account::decrease_voting_power()](crate::wallet::Account::decrease_voting_power).
+    /// Prepares the transaction for [Wallet::decrease_voting_power()].
     pub async fn prepare_decrease_voting_power(&self, amount: u64) -> Result<PreparedTransactionData> {
-        let token_supply = self.client().get_token_supply().await?;
         let current_output_data = self
             .get_voting_output()
             .await?
@@ -111,18 +105,11 @@ where
 
         // If the amount to decrease is the amount of the output, then we just remove the features.
         let (new_output, tagged_data_payload) = if amount == output.amount() {
-            (
-                BasicOutputBuilder::from(output)
-                    .clear_features()
-                    .finish_output(token_supply)?,
-                None,
-            )
+            (BasicOutputBuilder::from(output).clear_features().finish_output()?, None)
         } else {
             let new_amount = output.amount().checked_sub(amount).ok_or(Error::InvalidVotingPower)?;
 
-            let (new_output, tagged_data_payload) = self
-                .new_voting_output_and_tagged_data(output, new_amount, token_supply)
-                .await?;
+            let (new_output, tagged_data_payload) = self.new_voting_output_and_tagged_data(output, new_amount).await?;
 
             (new_output, Some(tagged_data_payload))
         };
@@ -144,7 +131,6 @@ where
         &self,
         output: &BasicOutput,
         amount: u64,
-        token_supply: u64,
     ) -> Result<(Output, TaggedDataPayload)> {
         let mut output_builder = BasicOutputBuilder::from(output).with_amount(amount);
         let mut participation_bytes = output.features().metadata().map(|m| m.data()).unwrap_or(&[]);
@@ -163,7 +149,7 @@ where
         };
 
         Ok((
-            output_builder.finish_output(token_supply)?,
+            output_builder.finish_output()?,
             TaggedDataPayload::new(PARTICIPATION_TAG.as_bytes().to_vec(), participation_bytes.to_vec())?,
         ))
     }

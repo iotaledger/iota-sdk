@@ -7,6 +7,7 @@ use packable::{Packable, PackableExt};
 use super::Address;
 use crate::types::block::{
     capabilities::{Capabilities, CapabilityFlag},
+    output::{StorageScore, StorageScoreParameters},
     Error,
 };
 
@@ -18,7 +19,7 @@ pub struct RestrictedAddress {
 }
 
 impl RestrictedAddress {
-    /// The [`Address`](crate::types::block::address::Address) kind of a [`RestrictedAddress`].
+    /// The [`Address`] kind of a [`RestrictedAddress`].
     pub const KIND: u8 = 48;
 
     /// Creates a new [`RestrictedAddress`] address from an [`Address`] with default allowed capabilities.
@@ -51,6 +52,12 @@ impl RestrictedAddress {
     /// Returns whether a given [`AddressCapabilityFlag`] is enabled.
     pub fn has_capability(&self, flag: AddressCapabilityFlag) -> bool {
         self.allowed_capabilities.has_capability(flag)
+    }
+}
+
+impl StorageScore for RestrictedAddress {
+    fn storage_score(&self, params: StorageScoreParameters) -> u64 {
+        self.address.storage_score(params)
     }
 }
 
@@ -157,12 +164,9 @@ pub type AddressCapabilities = Capabilities<AddressCapabilityFlag>;
 
 #[cfg(feature = "serde")]
 pub(crate) mod dto {
-    use alloc::boxed::Box;
-
     use serde::{Deserialize, Serialize};
 
     use super::*;
-    use crate::utils::serde::prefix_hex_bytes;
 
     #[derive(Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
@@ -170,8 +174,8 @@ pub(crate) mod dto {
         #[serde(rename = "type")]
         kind: u8,
         pub address: Address,
-        #[serde(with = "prefix_hex_bytes")]
-        pub allowed_capabilities: Box<[u8]>,
+        #[serde(default, skip_serializing_if = "AddressCapabilities::is_none")]
+        pub allowed_capabilities: AddressCapabilities,
     }
 
     impl core::ops::Deref for RestrictedAddressDto {
@@ -187,7 +191,7 @@ pub(crate) mod dto {
             Self {
                 kind: RestrictedAddress::KIND,
                 address: value.address.clone(),
-                allowed_capabilities: value.allowed_capabilities.iter().copied().collect(),
+                allowed_capabilities: value.allowed_capabilities.clone(),
             }
         }
     }
@@ -196,14 +200,7 @@ pub(crate) mod dto {
         type Error = Error;
 
         fn try_from(value: RestrictedAddressDto) -> Result<Self, Self::Error> {
-            Ok(
-                Self::new(value.address)?.with_allowed_capabilities(AddressCapabilities::from_bytes(
-                    value
-                        .allowed_capabilities
-                        .try_into()
-                        .map_err(Error::InvalidCapabilitiesCount)?,
-                )),
-            )
+            Ok(Self::new(value.address)?.with_allowed_capabilities(value.allowed_capabilities))
         }
     }
 

@@ -6,6 +6,7 @@ mod anchor;
 mod bech32;
 mod ed25519;
 mod implicit_account_creation;
+mod multi;
 mod nft;
 mod restricted;
 
@@ -14,21 +15,26 @@ use alloc::boxed::Box;
 use derive_more::{Display, From};
 use packable::Packable;
 
+pub(crate) use self::multi::WeightedAddressCount;
 pub use self::{
     account::AccountAddress,
     anchor::AnchorAddress,
     bech32::{Bech32Address, Hrp},
     ed25519::Ed25519Address,
     implicit_account_creation::ImplicitAccountCreationAddress,
+    multi::{MultiAddress, WeightedAddress},
     nft::NftAddress,
     restricted::{AddressCapabilities, AddressCapabilityFlag, RestrictedAddress},
 };
-use crate::types::block::{
-    output::Output,
-    semantic::{SemanticValidationContext, TransactionFailureReason},
-    signature::Signature,
-    unlock::Unlock,
-    ConvertTo, Error,
+use crate::{
+    types::block::{
+        output::{Output, StorageScore, StorageScoreParameters},
+        semantic::{SemanticValidationContext, TransactionFailureReason},
+        signature::Signature,
+        unlock::Unlock,
+        Error,
+    },
+    utils::ConvertTo,
 };
 
 /// A generic address supporting different address kinds.
@@ -52,6 +58,9 @@ pub enum Address {
     /// An implicit account creation address.
     #[packable(tag = ImplicitAccountCreationAddress::KIND)]
     ImplicitAccountCreation(ImplicitAccountCreationAddress),
+    /// A multi address.
+    #[packable(tag = MultiAddress::KIND)]
+    Multi(MultiAddress),
     /// An address with restricted capabilities.
     #[packable(tag = RestrictedAddress::KIND)]
     #[from(ignore)]
@@ -72,6 +81,7 @@ impl core::fmt::Debug for Address {
             Self::Nft(address) => address.fmt(f),
             Self::Anchor(address) => address.fmt(f),
             Self::ImplicitAccountCreation(address) => address.fmt(f),
+            Self::Multi(address) => address.fmt(f),
             Self::Restricted(address) => address.fmt(f),
         }
     }
@@ -86,11 +96,25 @@ impl Address {
             Self::Nft(_) => NftAddress::KIND,
             Self::Anchor(_) => AnchorAddress::KIND,
             Self::ImplicitAccountCreation(_) => ImplicitAccountCreationAddress::KIND,
+            Self::Multi(_) => MultiAddress::KIND,
             Self::Restricted(_) => RestrictedAddress::KIND,
         }
     }
 
-    crate::def_is_as_opt!(Address: Ed25519, Account, Nft, Anchor, ImplicitAccountCreation, Restricted);
+    /// Returns the address kind of an [`Address`] as a string.
+    pub fn kind_str(&self) -> &str {
+        match self {
+            Self::Ed25519(_) => "Ed25519",
+            Self::Account(_) => "Account",
+            Self::Nft(_) => "Nft",
+            Self::Anchor(_) => "Anchor",
+            Self::ImplicitAccountCreation(_) => "ImplicitAccountCreation",
+            Self::Multi(_) => "Multi",
+            Self::Restricted(_) => "Restricted",
+        }
+    }
+
+    crate::def_is_as_opt!(Address: Ed25519, Account, Nft, Anchor, ImplicitAccountCreation, Multi, Restricted);
 
     /// Tries to create an [`Address`] from a bech32 encoded string.
     pub fn try_from_bech32(address: impl AsRef<str>) -> Result<Self, Error> {
@@ -126,7 +150,7 @@ impl Address {
 
                 context.unlocked_addresses.insert(self.clone());
             }
-            (Self::Ed25519(_ed25519_address), Unlock::Reference(_unlock)) => {
+            (Self::Ed25519(_), Unlock::Reference(_)) => {
                 // TODO actually check that it was unlocked by the same signature.
                 if !context.unlocked_addresses.contains(self) {
                     return Err(TransactionFailureReason::InvalidInputUnlock);
@@ -160,10 +184,48 @@ impl Address {
             }
             // TODO maybe shouldn't be a semantic error but this function currently returns a TransactionFailureReason.
             (Self::Anchor(_), _) => return Err(TransactionFailureReason::SemanticValidationFailed),
+            (Self::ImplicitAccountCreation(implicit_account_creation_address), _) => {
+                return Self::from(*implicit_account_creation_address.ed25519_address()).unlock(unlock, context);
+            }
+            (Self::Multi(multi_address), Unlock::Multi(unlock)) => {
+                if multi_address.len() != unlock.len() {
+                    return Err(TransactionFailureReason::InvalidInputUnlock);
+                }
+
+                let mut cumulative_unlocked_weight = 0u16;
+
+                for (address, unlock) in multi_address.addresses().iter().zip(unlock.unlocks()) {
+                    if !unlock.is_empty() {
+                        address.unlock(unlock, context)?;
+                        cumulative_unlocked_weight += address.weight() as u16;
+                    }
+                }
+
+                if cumulative_unlocked_weight < multi_address.threshold() {
+                    return Err(TransactionFailureReason::InvalidInputUnlock);
+                }
+            }
+            (Self::Restricted(restricted_address), _) => {
+                return restricted_address.address().unlock(unlock, context);
+            }
             _ => return Err(TransactionFailureReason::InvalidInputUnlock),
         }
 
         Ok(())
+    }
+}
+
+impl StorageScore for Address {
+    fn storage_score(&self, params: StorageScoreParameters) -> u64 {
+        match self {
+            Self::Ed25519(address) => address.storage_score(params),
+            Self::Account(address) => address.storage_score(params),
+            Self::Nft(address) => address.storage_score(params),
+            Self::Anchor(address) => address.storage_score(params),
+            Self::ImplicitAccountCreation(address) => address.storage_score(params),
+            Self::Multi(address) => address.storage_score(params),
+            Self::Restricted(address) => address.storage_score(params),
+        }
     }
 }
 

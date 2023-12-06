@@ -35,11 +35,11 @@ class Transaction:
     """
     network_id: str
     creation_slot: SlotIndex
-    context_inputs: List[ContextInput]
     inputs: List[UtxoInput]
-    allotments: List[ManaAllotment]
-    capabilities: HexStr = field(default='0x', init=False)
+    capabilities: Optional[HexStr] = field(default=None, init=False)
     outputs: List[Output]
+    context_inputs: Optional[List[ContextInput]] = None
+    allotments: Optional[List[ManaAllotment]] = None
     payload: Optional[Payload] = None
 
     def with_capabilities(self, capabilities: bytes):
@@ -47,4 +47,7 @@ class Transaction:
         Attributes:
             capabilities: The transaction capabilities bitflags.
         """
-        self.capabilities = '0x' + capabilities.hex()
+        if any(c != 0 for c in capabilities):
+            self.capabilities = '0x' + capabilities.hex()
+        else:
+            self.capabilities = None

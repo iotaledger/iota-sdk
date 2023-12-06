@@ -9,15 +9,12 @@ use crate::{
     types::block::{
         address::{Bech32Address, ToBech32Ext},
         output::{
-            unlock_condition::{
-                AddressUnlockCondition, ExpirationUnlockCondition, StorageDepositReturnUnlockCondition,
-            },
-            BasicOutputBuilder, MinimumStorageDepositBasicOutput,
+            unlock_condition::{AddressUnlockCondition, ExpirationUnlockCondition},
+            BasicOutputBuilder, MinimumOutputAmount,
         },
         slot::SlotIndex,
-        ConvertTo,
     },
-    utils::serde::string,
+    utils::{serde::string, ConvertTo},
     wallet::{
         constants::DEFAULT_EXPIRATION_SLOTS,
         operations::transaction::{TransactionOptions, TransactionWithMetadata},
@@ -37,7 +34,7 @@ pub struct SendParams {
     address: Bech32Address,
     /// Bech32 encoded return address, to which the storage deposit will be returned if one is necessary
     /// given the provided amount. If a storage deposit is needed and a return address is not provided, it will
-    /// default to the first address of the account.
+    /// default to the address of the wallet.
     #[getset(get = "pub")]
     return_address: Option<Bech32Address>,
     /// Expiration in slot indices, after which the output will be available for the sender again, if not spent by the
@@ -83,7 +80,7 @@ where
 {
     /// Sends a certain amount of base coins to a single address.
     ///
-    /// Calls [Account::send_with_params()](crate::wallet::Account::send_with_params) internally.
+    /// Calls [Wallet::send_with_params()] internally.
     /// The options may define the remainder value strategy or custom inputs.
     /// The provided Addresses provided with [`SendParams`] need to be bech32-encoded.
     pub async fn send(
@@ -98,7 +95,7 @@ where
 
     /// Sends a certain amount of base coins with full customizability of the transaction.
     ///
-    /// Calls [Account::send_outputs()](crate::wallet::Account::send_outputs) internally.
+    /// Calls [Wallet::send_outputs()] internally.
     /// The options may define the remainder value strategy or custom inputs.
     /// Addresses provided with [`SendParams`] need to be bech32-encoded.
     /// ```ignore
@@ -124,11 +121,11 @@ where
         let options = options.into();
         let prepared_transaction = self.prepare_send(params, options.clone()).await?;
 
-        self.sign_and_submit_transaction(prepared_transaction, options).await
+        self.sign_and_submit_transaction(prepared_transaction, None, options)
+            .await
     }
 
-    /// Prepares the transaction for
-    /// [Account::send()](crate::wallet::Account::send).
+    /// Prepares the transaction for [Wallet::send()].
     pub async fn prepare_send<I: IntoIterator<Item = SendParams> + Send>(
         &self,
         params: I,
@@ -139,8 +136,7 @@ where
     {
         log::debug!("[TRANSACTION] prepare_send");
         let options = options.into();
-        let rent_structure = self.client().get_rent_structure().await?;
-        let token_supply = self.client().get_token_supply().await?;
+        let storage_score_params = self.client().get_storage_score_parameters().await?;
 
         let wallet_address = self.address().await;
 
@@ -171,16 +167,12 @@ where
                 .unwrap_or_else(|| default_return_address.clone());
 
             // Get the minimum required amount for an output assuming it does not need a storage deposit.
-            let output = BasicOutputBuilder::new_with_minimum_storage_deposit(rent_structure)
+            let output = BasicOutputBuilder::new_with_amount(amount)
                 .add_unlock_condition(AddressUnlockCondition::new(address))
-                .finish_output(token_supply)?;
+                .finish()?;
 
-            if amount >= output.amount() {
-                outputs.push(
-                    BasicOutputBuilder::from(output.as_basic())
-                        .with_amount(amount)
-                        .finish_output(token_supply)?,
-                )
+            if amount >= output.minimum_amount(storage_score_params) {
+                outputs.push(output.into())
             } else {
                 let expiration_slot_index = expiration
                     .map_or(slot_index + DEFAULT_EXPIRATION_SLOTS, |expiration_slot_index| {
@@ -188,35 +180,22 @@ where
                     });
 
                 // Since it does need a storage deposit, calculate how much that should be
-                let storage_deposit_amount = MinimumStorageDepositBasicOutput::new(rent_structure, token_supply)
-                    .with_storage_deposit_return()?
-                    .with_expiration()?
-                    .finish()?;
+                let output = BasicOutputBuilder::from(&output)
+                    .add_unlock_condition(ExpirationUnlockCondition::new(
+                        return_address.clone(),
+                        expiration_slot_index,
+                    )?)
+                    .with_sufficient_storage_deposit(return_address, storage_score_params)?
+                    .finish_output()?;
 
                 if !options.as_ref().map(|o| o.allow_micro_amount).unwrap_or_default() {
                     return Err(Error::InsufficientFunds {
                         available: amount,
-                        required: amount + storage_deposit_amount,
+                        required: output.amount(),
                     });
                 }
 
-                outputs.push(
-                    // Add address_and_amount.amount+storage_deposit_amount, so receiver can get
-                    // address_and_amount.amount
-                    BasicOutputBuilder::from(output.as_basic())
-                        .with_amount(amount + storage_deposit_amount)
-                        .add_unlock_condition(
-                            // We send the storage_deposit_amount back to the sender, so only the additional amount is
-                            // sent
-                            StorageDepositReturnUnlockCondition::new(
-                                return_address.clone(),
-                                storage_deposit_amount,
-                                token_supply,
-                            )?,
-                        )
-                        .add_unlock_condition(ExpirationUnlockCondition::new(return_address, expiration_slot_index)?)
-                        .finish_output(token_supply)?,
-                )
+                outputs.push(output)
             }
         }
 

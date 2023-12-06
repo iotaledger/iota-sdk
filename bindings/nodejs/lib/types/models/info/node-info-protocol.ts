@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import type { RentStructure } from '../rent-structure';
+import type { StorageScoreParameters } from '../storage-score';
 import { EpochIndex } from '../../block/slot';
 import { u64 } from '../../utils';
 
@@ -40,17 +40,25 @@ export interface ProtocolParameters {
      */
     bech32Hrp: string;
     /**
-     * The rent structure according to TIP-19.
+     * The storage score parameters used by given node/network.
      */
-    rentStructure: RentStructure;
+    storageScoreParameters: StorageScoreParameters;
     /**
      * Work Score Parameters lists the work score of each type, it is used to denote the computation costs of processing an object.
      */
     workScoreParameters: WorkScoreParameters;
     /**
+     * The parameters used by mana calculation.
+     */
+    manaParameters: ManaParameters;
+    /**
      * Current supply of base token.
      */
     tokenSupply: u64;
+    /**
+     * Genesis Slot defines the slot of the genesis.
+     */
+    genesisSlot: number;
     /**
      * The genesis timestamp at which the slots start to count.
      */
@@ -64,10 +72,6 @@ export interface ProtocolParameters {
      */
     slotsPerEpochExponent: number;
     /**
-     * The parameters used by mana calculation.
-     */
-    manaParameters: ManaParameters;
-    /**
      * The unbonding period in epochs before an account can stop staking.
      */
     stakingUnbondingPeriod: number;
@@ -80,9 +84,13 @@ export interface ProtocolParameters {
      */
     punishmentEpochs: number;
     /**
-     * Determine if a block is eligible by evaluating issuingTime and commitments in its pastcone to ATT and lastCommittedSlot respectively.
+     * Liveness Threshold Lower Bound is used by tip-selection to determine if a block is eligible by evaluating issuingTimes.
      */
-    livenessThreshold: number;
+    livenessThresholdLowerBound: number;
+    /**
+     * Liveness Threshold Upper Bound is used by tip-selection to determine if a block is eligible by evaluating issuingTimes.
+     */
+    livenessThresholdUpperBound: number;
     /**
      * MinCommittableAge is the minimum age relative to the accepted tangle time slot index that a slot can be committed.
      */
@@ -102,11 +110,15 @@ export interface ProtocolParameters {
     /**
      * The parameters used by signaling protocol parameters upgrade.
      */
-    versionSignaling: VersionSignalingParameters;
+    versionSignalingParameters: VersionSignalingParameters;
     /**
      * Rewards Parameters defines the parameters that are used to calculate Mana rewards.
      */
     rewardsParameters: RewardsParameters;
+    /**
+     * Target Committee Size defines the target size of the committee. If there's fewer candidates the actual committee size could be smaller in a given epoch.
+     */
+    targetCommitteeSize: number;
 }
 
 /**

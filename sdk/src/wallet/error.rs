@@ -43,7 +43,7 @@ pub enum Error {
     #[error("custom input error {0}")]
     CustomInput(String),
     /// Insufficient funds to send transaction.
-    #[error("insufficient funds {available}/{required} available")]
+    #[error("address owns insufficient funds: {required} base unit required, but {available} base unit available")]
     InsufficientFunds { available: u64, required: u64 },
     /// Invalid event type.
     #[cfg(feature = "events")]
@@ -124,6 +124,18 @@ pub enum Error {
     /// Action requires the wallet to be Ed25519 address based
     #[error("tried to perform an action that requires the wallet to be Ed25519 address based")]
     NonEd25519Address,
+    /// Implicit account not found.
+    #[error("implicit account not found")]
+    ImplicitAccountNotFound,
+    /// No account was provided or found to issue the block.
+    #[error("no account was provided or found to issue the block")]
+    NoAccountToIssueBlock,
+}
+
+impl Error {
+    pub fn other<E: 'static + std::error::Error + Send + Sync>(err: E) -> Self {
+        Self::Other(Box::new(err) as _)
+    }
 }
 
 // Serialize type with Display error

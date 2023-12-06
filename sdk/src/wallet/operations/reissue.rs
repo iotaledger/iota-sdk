@@ -1,8 +1,6 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use crypto::keys::bip44::Bip44;
-
 use crate::{
     client::{
         secret::{SecretManage, SignBlock},
@@ -90,7 +88,7 @@ where
                 let mut failed = false;
                 for (index, block_id) in block_ids.clone().iter().enumerate() {
                     let block_metadata = self.client().get_block_metadata(block_id).await?;
-                    if let Some(transaction_state) = block_metadata.transaction_state {
+                    if let Some(transaction_state) = block_metadata.transaction_metadata.map(|m| m.transaction_state) {
                         match transaction_state {
                             // TODO: find out what to do with TransactionState::Confirmed
                             TransactionState::Finalized => return Ok(*block_id),

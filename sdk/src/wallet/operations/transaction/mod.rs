@@ -1,6 +1,7 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+pub(crate) mod account;
 mod build_transaction;
 pub(crate) mod high_level;
 mod input_selection;
@@ -20,7 +21,7 @@ use crate::{
     types::{
         api::core::OutputWithMetadataResponse,
         block::{
-            output::{dto::OutputDto, Output},
+            output::{AccountId, Output},
             payload::signed_transaction::SignedTransactionPayload,
         },
     },
@@ -73,7 +74,7 @@ where
 
         // Check if the outputs have enough amount to cover the storage deposit
         for output in &outputs {
-            output.verify_storage_deposit(protocol_parameters.rent_structure(), protocol_parameters.token_supply())?;
+            output.verify_storage_deposit(protocol_parameters.storage_score_parameters())?;
         }
 
         self.finish_transaction(outputs, options).await
@@ -91,7 +92,7 @@ where
 
         let prepared_transaction_data = self.prepare_transaction(outputs, options.clone()).await?;
 
-        self.sign_and_submit_transaction(prepared_transaction_data, options)
+        self.sign_and_submit_transaction(prepared_transaction_data, None, options)
             .await
     }
 
@@ -99,6 +100,7 @@ where
     pub async fn sign_and_submit_transaction(
         &self,
         prepared_transaction_data: PreparedTransactionData,
+        issuer_id: impl Into<Option<AccountId>> + Send,
         options: impl Into<Option<TransactionOptions>> + Send,
     ) -> crate::wallet::Result<TransactionWithMetadata> {
         log::debug!("[TRANSACTION] sign_and_submit_transaction");
@@ -112,7 +114,7 @@ where
             }
         };
 
-        self.submit_and_store_transaction(signed_transaction_data, options)
+        self.submit_and_store_transaction(signed_transaction_data, issuer_id, options)
             .await
     }
 
@@ -120,6 +122,7 @@ where
     pub async fn submit_and_store_transaction(
         &self,
         signed_transaction_data: SignedTransactionData,
+        issuer_id: impl Into<Option<AccountId>> + Send,
         options: impl Into<Option<TransactionOptions>> + Send,
     ) -> crate::wallet::Result<TransactionWithMetadata> {
         log::debug!(
@@ -143,7 +146,7 @@ where
 
         // Ignore errors from sending, we will try to send it again during [`sync_pending_transactions`]
         let block_id = match self
-            .submit_transaction_payload(signed_transaction_data.payload.clone())
+            .submit_signed_transaction(signed_transaction_data.payload.clone(), issuer_id)
             .await
         {
             Ok(block_id) => Some(block_id),
@@ -163,7 +166,7 @@ where
             .into_iter()
             .map(|input| OutputWithMetadataResponse {
                 metadata: input.output_metadata,
-                output: OutputDto::from(&input.output),
+                output: input.output,
             })
             .collect();
 
@@ -185,7 +188,7 @@ where
         wallet_data.pending_transactions.insert(transaction_id);
         #[cfg(feature = "storage")]
         {
-            // TODO: maybe better to use the wallt address as identifier now?
+            // TODO: maybe better to use the wallet address as identifier now?
             log::debug!("[TRANSACTION] storing wallet");
             self.save(Some(&wallet_data)).await?;
         }
