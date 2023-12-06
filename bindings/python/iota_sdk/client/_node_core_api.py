@@ -85,7 +85,7 @@ class NodeCoreAPI(metaclass=ABCMeta):
             The block id of the posted block.
         """
         return self._call_method('postBlock', {
-            'block': block.__dict__
+            'block': block.to_dict()
         })
 
     def get_block(self, block_id: HexStr) -> SignedBlock:

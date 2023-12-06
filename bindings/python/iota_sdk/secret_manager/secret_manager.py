@@ -3,7 +3,6 @@
 
 from json import dumps, loads
 from typing import Optional, Union
-from dacite import from_dict
 import humps
 
 from iota_sdk.external import create_secret_manager, call_secret_manager_method

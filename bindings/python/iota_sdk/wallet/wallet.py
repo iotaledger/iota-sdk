@@ -14,7 +14,7 @@ from iota_sdk.wallet.sync_options import SyncOptions
 from iota_sdk.wallet.common import _call_method_routine
 from iota_sdk.wallet.prepared_transaction import PreparedTransaction, PreparedCreateTokenTransaction
 from iota_sdk.wallet.sync_options import SyncOptions 
-from iota_sdk.types.address import AccountAddress, AddressWithUnspentOutputs
+from iota_sdk.types.address import AccountAddress
 from iota_sdk.types.balance import Balance
 from iota_sdk.types.burn import Burn
 from iota_sdk.types.common import HexStr, json

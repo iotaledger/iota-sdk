@@ -163,17 +163,6 @@ class RestrictedAddress:
             self.allowed_capabilities = None
 
 
-@json
-@dataclass
-class AddressWithUnspentOutputs():
-    """An Address with unspent outputs.
-    """
-    address: str
-    key_index: int
-    internal: bool
-    output_ids: bool
-
-
 Address: TypeAlias = Union[Ed25519Address,
                            AccountAddress,
                            NFTAddress,

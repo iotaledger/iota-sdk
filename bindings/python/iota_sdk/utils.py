@@ -193,7 +193,7 @@ class Utils():
         """Verify an Ed25519 signature against a message.
         """
         return _call_method('verifyEd25519Signature', {
-            'signature': signature.__dict__,
+            'signature': signature.to_dict(),
             'message': message,
         })
 
