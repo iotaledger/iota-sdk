@@ -12,7 +12,7 @@ with open('../../sdk/tests/types/fixtures/basic_block_tagged_data_payload.json',
 
 basic_block_transaction_payload_json = {}
 with open('../../sdk/tests/types/fixtures/basic_block_transaction_payload.json', "r", encoding="utf-8") as json_file:
-    basic_block_transaction_payload_json = json.load(json_file)
+    signed_block_transaction_payload_json = json.load(json_file)
 
 validation_block_json = {}
 with open('../../sdk/tests/types/fixtures/validation_block.json', "r", encoding="utf-8") as json_file:
@@ -23,62 +23,22 @@ with open('../../sdk/tests/types/fixtures/protocol_parameters.json', "r", encodi
     protocol_params_json = json.load(json_file)
 
 def test_basic_block_tagged_data_payload():
+    signed_block_dict = basic_block_tagged_data_payload_json['block']
+    signed_block = SignedBlock.from_dict(signed_block_dict)
+    assert signed_block.to_dict() == signed_block_dict
 
-    basic_block_tagged_data_payload_dict = basic_block_tagged_data_payload_json['block']
-    basic_block_tagged_data_payload = BasicBlock.from_dict(basic_block_tagged_data_payload_dict)
-    assert basic_block_tagged_data_payload.to_dict() == basic_block_tagged_data_payload_dict
+    assert isinstance(signed_block.body, BasicBlock)
+    assert signed_block.body.type == BlockType.Basic
+    assert signed_block.body.max_burned_mana == 864
 
-    assert isinstance(basic_block_tagged_data_payload.payload, get_args(Payload))
-    assert basic_block_tagged_data_payload.payload.type == PayloadType.TaggedData
-    assert basic_block_tagged_data_payload.max_burned_mana == 864
+    assert isinstance(signed_block.body.payload, get_args(Payload))
+    assert signed_block.body.payload.type == PayloadType.TaggedData
 
     protocol_params_dict = protocol_params_json['params']
     protocol_params = ProtocolParameters.from_dict(protocol_params_dict)
 
     expected_id = basic_block_tagged_data_payload_json['id']
-    assert Utils.block_id(basic_block_tagged_data_payload, protocol_params) == expected_id
-
-def test_signed_block_with_tagged_data_payload():
-    block_dict = {
-        "protocolVersion": 3,
-        "networkId": "10549460113735494767",
-        "issuingTime": "1675563954966263210",
-        "slotCommitmentId": "0x498bf08a5ed287bc87340341ffab28706768cd3a7035ae5e33932d9a12bb30940000000000000000",
-        "latestFinalizedSlot": 21,
-        "issuerId": "0x3370746f30705b7d0b42597459714d45241e5a64761b09627c447b751c7e145c",
-        "block": {
-            "type": 0,
-            "strongParents": [
-                "0x304442486c7a05361408585e4b5f7a67441c437528755a70041e0e557a6d4b2d7d4362083d492b57",
-                "0x5f736978340a243d381b343b160b316a6b7d4b1e3c0355492e2e72113c2b126600157e69113c0b5c"
-            ],
-            "weakParents": [
-                "0x0b5a48384f382f4a49471c4860683c6f0a0d446f012e1b117c4e405f5e24497c72691f43535c0b42"
-            ],
-            "shallowLikeParents": [
-                "0x163007217803006078040b0f51507d3572355a457839095e572f125500401b7d220c772b56165a12"
-            ],
-            "maxBurnedMana": "180500",
-            "payload": {
-                "type": 0,
-                "tag": "0x68656c6c6f20776f726c64",
-                "data": "0x01020304"
-            }
-        },
-        "signature": {
-            "type": 0,
-            "publicKey": "0x024b6f086177156350111d5e56227242034e596b7e3d0901180873740723193c",
-            "signature": "0x7c274e5e771d5d60202d334f06773d3672484b1e4e6f03231b4e69305329267a4834374b0f2e0d5c6c2f7779620f4f534c773b1679400c52303d1f23121a4049"
-        }
-    }
-    signed_block = SignedBlock.from_dict(block_dict)
-    assert signed_block.to_dict() == block_dict
-    assert isinstance(signed_block.block, BasicBlock)
-    assert signed_block.block.type == BlockType.Basic
-    assert isinstance(signed_block.block.payload, get_args(Payload))
-    assert signed_block.block.payload.type == PayloadType.TaggedData
-    # TODO: determine the actual hash of the block
-    # assert signed_block.id() == "0x7ce5ad074d4162e57f83cfa01cd2303ef5356567027ce0bcee0c9f57bc11656e"
+    assert signed_block.id(protocol_params) == expected_id
 
 
 @pytest.mark.skip(reason="https://github.com/iotaledger/iota-sdk/issues/1387")
