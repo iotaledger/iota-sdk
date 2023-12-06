@@ -9,7 +9,7 @@ use packable::{bounded::BoundedU16, prefix::BoxedSlicePrefix, Packable};
 use crate::types::{
     block::{
         input::{Input, INPUT_COUNT_RANGE},
-        output::{InputsCommitment, NativeTokens, Output, OUTPUT_COUNT_RANGE},
+        output::{InputsCommitment, NativeTokens, Output, TokenId, OUTPUT_COUNT_RANGE},
         payload::{OptionalPayload, Payload},
         protocol::ProtocolParameters,
         Error,
@@ -219,7 +219,7 @@ fn verify_inputs_packable<const VERIFY: bool>(inputs: &[Input], _visitor: &Proto
 fn verify_outputs<const VERIFY: bool>(outputs: &[Output], visitor: &ProtocolParameters) -> Result<(), Error> {
     if VERIFY {
         let mut amount_sum: u64 = 0;
-        let mut native_tokens_count: u8 = 0;
+        let mut total_native_tokens: HashSet<TokenId> = HashSet::new();
         let mut chain_ids = HashSet::new();
 
         for output in outputs.iter() {
@@ -240,12 +240,12 @@ fn verify_outputs<const VERIFY: bool>(outputs: &[Output], visitor: &ProtocolPara
                 return Err(Error::InvalidTransactionAmountSum(amount_sum as u128));
             }
 
-            native_tokens_count = native_tokens_count.checked_add(native_tokens.len() as u8).ok_or(
-                Error::InvalidTransactionNativeTokensCount(native_tokens_count as u16 + native_tokens.len() as u16),
-            )?;
+            total_native_tokens.extend(native_tokens.iter().map(|n| n.token_id()));
 
-            if native_tokens_count > NativeTokens::COUNT_MAX {
-                return Err(Error::InvalidTransactionNativeTokensCount(native_tokens_count as u16));
+            if total_native_tokens.len() > NativeTokens::COUNT_MAX.into() {
+                return Err(Error::InvalidTransactionNativeTokensCount(
+                    total_native_tokens.len() as u16
+                ));
             }
 
             if let Some(chain_id) = chain_id {

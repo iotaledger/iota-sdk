@@ -32,6 +32,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - `needs_blind_signing()` for non Ed25519 addresses;
+- InvalidTransactionNativeTokensCount error for multiple entries with the same native token;
 
 ## 1.1.2 - 2023-10-26
 
