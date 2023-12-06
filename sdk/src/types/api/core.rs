@@ -277,6 +277,9 @@ pub struct IssuanceBlockHeaderResponse {
     /// Blocks that are directly referenced to adjust opinion.
     #[serde(default, skip_serializing_if = "BTreeSet::is_empty")]
     pub shallow_like_parents: BTreeSet<BlockId>,
+    // Latest issuing time of the returned parents.
+    #[serde(with = "string")]
+    pub latest_parent_block_issuing_time: u64,
     /// The slot index of the latest finalized slot.
     pub latest_finalized_slot: SlotIndex,
     /// The latest slot commitment.
