@@ -44,7 +44,7 @@ fern-logger = { version = "0.5.0", default-features = false }
 humantime = { version = "2.1.0", default-features = false }
 log = { version = "0.4.20", default-features = false }
 prefix-hex = { version = "0.7.1", default-features = false, features = ["std"] }
-rustyline = { version = "12.0.0", features = ["derive"] }
+rustyline = { version = "13.0.0", features = ["derive"] }
 serde_json = { version = "1.0.108", default-features = false }
 thiserror = { version = "1.0.50", default-features = false }
 tokio = { version = "1.34.0", default-features = false, features = ["fs"] }
