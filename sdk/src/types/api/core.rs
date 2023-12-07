@@ -585,7 +585,7 @@ impl<'de> Deserialize<'de> for OutputCommitmentProof {
     }
 }
 
-/// The proof of the output commitment.
+/// Node contains the hashes of the left and right children of a node in the tree.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub struct HashableNode {
     #[serde(rename = "type")]
