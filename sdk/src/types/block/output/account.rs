@@ -277,9 +277,9 @@ pub struct AccountOutput {
     foundry_counter: u32,
     /// Define how the output can be unlocked in a transaction.
     unlock_conditions: UnlockConditions,
-    //
+    /// Features of the output.
     features: Features,
-    //
+    /// Immutable features of the output.
     immutable_features: Features,
 }
 

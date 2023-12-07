@@ -15,7 +15,7 @@ use crate::types::block::{
 #[derive(Clone, Copy, Eq, PartialEq, Ord, PartialOrd, Hash, From, AsRef, Deref, Display, packable::Packable)]
 #[as_ref(forward)]
 pub struct AnchorAddress(
-    /// BLAKE2b-256 hash of the Output ID that created it the anchor.
+    /// BLAKE2b-256 hash of the Output ID that created the anchor.
     AnchorId,
 );
 
