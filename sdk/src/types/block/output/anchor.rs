@@ -299,6 +299,7 @@ impl From<&AnchorOutput> for AnchorOutputBuilder {
 pub struct AnchorOutput {
     /// Amount of IOTA coins held by the output.
     amount: u64,
+    /// Amount of stored Mana held by the output.
     mana: u64,
     /// Unique identifier of the anchor.
     anchor_id: AnchorId,

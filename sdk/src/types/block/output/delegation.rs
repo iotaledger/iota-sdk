@@ -216,7 +216,7 @@ impl From<&DelegationOutput> for DelegationOutputBuilder {
 #[packable(unpack_error = Error)]
 #[packable(unpack_visitor = ProtocolParameters)]
 pub struct DelegationOutput {
-    /// Amount of IOTA coins to deposit with this output.
+    /// Amount of IOTA coins held by the output.
     amount: u64,
     /// Amount of delegated IOTA coins.
     delegated_amount: u64,
