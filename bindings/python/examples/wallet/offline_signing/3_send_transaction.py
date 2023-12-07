@@ -9,7 +9,7 @@ import os
 from dacite import from_dict
 from dotenv import load_dotenv
 
-from iota_sdk import SignedTransactionData, Wallet,  WalletOptions
+from iota_sdk import SignedTransactionData, Wallet, WalletOptions
 
 load_dotenv()
 

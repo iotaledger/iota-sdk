@@ -21,7 +21,13 @@ try:
     secret_manager = StrongholdSecretManager(v2_path, "current_password")
     # This should fail with error, migration required.
 
-    wallet_options = WalletOptions(None, None, bib_path, client_options, secret_manager, os.environ.get('WALLET_DB_PATH'))
+    wallet_options = WalletOptions(
+        None,
+        None,
+        bib_path,
+        client_options,
+        secret_manager,
+        os.environ.get('WALLET_DB_PATH'))
     wallet = Wallet(wallet_options)
 except ValueError as e:
     print(e)

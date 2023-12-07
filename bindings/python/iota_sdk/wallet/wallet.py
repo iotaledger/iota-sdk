@@ -37,7 +37,8 @@ class WalletOptions:
     alias: Optional[str] = None
     bip_path: Optional[Bip44] = None
     client_options: Optional[ClientOptions] = None
-    secret_manager: Optional[Union[LedgerNanoSecretManager, MnemonicSecretManager, SeedSecretManager, StrongholdSecretManager]] = None
+    secret_manager: Optional[Union[LedgerNanoSecretManager,
+                                   MnemonicSecretManager, SeedSecretManager, StrongholdSecretManager]] = None
     storage_path: Optional[str] = None
 
 

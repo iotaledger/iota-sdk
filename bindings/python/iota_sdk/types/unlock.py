@@ -93,6 +93,7 @@ class NftUnlock:
 def deserialize_unlocks(dicts: List[Dict[str, Any]]) -> List[Unlock]:
     pass
 
+
 @json
 @dataclass
 class MultiUnlock:
@@ -127,6 +128,8 @@ Unlock: TypeAlias = Union[SignatureUnlock,
                           EmptyUnlock]
 
 # pylint: disable=too-many-return-statements
+
+
 def deserialize_unlock(d: Dict[str, Any]) -> Unlock:
     """
     Takes a dictionary as input and returns an instance of a specific class based on the value of the 'type' key in the dictionary.
