@@ -63,6 +63,7 @@ impl<S: SecretManage> Wallet<SecretData<S>> {
 
         let protocol_parameters = self.client().get_protocol_parameters().await?;
 
+        let protocol_parameters = self.client().get_protocol_parameters().await?;
         let unlocks = match self
             .secret_manager()
             .read()

@@ -20,12 +20,13 @@ use iota_sdk::{
     },
     types::block::{
         address::{AccountAddress, Address, Ed25519Address, NftAddress},
+        context_input::{CommitmentContextInput, ContextInput},
         input::{Input, UtxoInput},
         output::{AccountId, NftId},
         payload::{signed_transaction::Transaction, SignedTransactionPayload},
         protocol::protocol_parameters,
         rand::mana::rand_mana_allotment,
-        slot::SlotIndex,
+        slot::{SlotCommitmentId, SlotIndex},
         unlock::{SignatureUnlock, Unlock},
     },
 };
@@ -132,7 +133,7 @@ async fn all_combined() -> Result<()> {
         Nft(1_000_000, nft_id_4, ed25519_0.into(), None, None, None, None),
     ]);
 
-    let slot_index = SlotIndex::from(100);
+    let slot_index = SlotIndex::from(90);
 
     let selected = InputSelection::new(
         inputs.clone(),
@@ -145,6 +146,9 @@ async fn all_combined() -> Result<()> {
     .unwrap();
 
     let transaction = Transaction::builder(protocol_parameters.network_id())
+        .with_context_inputs(vec![ContextInput::Commitment(CommitmentContextInput::new(
+            SlotCommitmentId::from_str("0x000000000000000000000000000000000000000000000000000000000000000064000000")?,
+        ))])
         .with_inputs(
             selected
                 .inputs
@@ -251,7 +255,7 @@ async fn all_combined() -> Result<()> {
 
     validate_signed_transaction_payload_length(&tx_payload)?;
 
-    let conflict = verify_semantic(&prepared_transaction_data.inputs_data, &tx_payload)?;
+    let conflict = verify_semantic(&prepared_transaction_data.inputs_data, &tx_payload, protocol_parameters)?;
 
     if let Some(conflict) = conflict {
         panic!("{conflict:?}, with {tx_payload:#?}");

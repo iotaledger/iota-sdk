@@ -201,25 +201,30 @@ pub trait SignTransaction: Sign<Ed25519Signature> {
     async fn transaction_unlocks(
         &self,
         prepared_transaction_data: &PreparedTransactionData,
-        _protocol_parameters: &ProtocolParameters,
+        protocol_parameters: &ProtocolParameters,
         options: &Self::Options,
     ) -> crate::client::Result<Unlocks> {
         let transaction_signing_hash = prepared_transaction_data.transaction.signing_hash();
         let mut blocks = Vec::new();
         let mut block_indexes = HashMap::<Address, usize>::new();
-        let slot_index = prepared_transaction_data.transaction.creation_slot();
+        let slot_index = prepared_transaction_data
+            .transaction
+            .context_inputs()
+            .iter()
+            .find_map(|c| c.as_commitment_opt().map(|c| c.slot_index()));
 
         // Assuming inputs_data is ordered by address type
         for (current_block_index, input) in prepared_transaction_data.inputs_data.iter().enumerate() {
             // Get the address that is required to unlock the input
-            let (input_address, _) = input
+            let required_address = input
                 .output
-                .required_and_unlocked_address(slot_index, input.output_metadata.output_id())?;
+                .required_address(slot_index, protocol_parameters.committable_age_range())?
+                .ok_or(crate::client::Error::ExpirationDeadzone)?;
 
             // Check if we already added an [Unlock] for this address
-            match block_indexes.get(&input_address) {
+            match block_indexes.get(&required_address) {
                 // If we already have an [Unlock] for this address, add a [Unlock] based on the address type
-                Some(block_index) => match input_address {
+                Some(block_index) => match required_address {
                     Address::Ed25519(_ed25519) => {
                         blocks.push(Unlock::Reference(ReferenceUnlock::new(*block_index as u16)?));
                     }
@@ -234,7 +239,7 @@ pub trait SignTransaction: Sign<Ed25519Signature> {
                     // We can only sign ed25519 addresses and block_indexes needs to contain the account or nft
                     // address already at this point, because the reference index needs to be lower
                     // than the current block index
-                    match &input_address {
+                    match &required_address {
                         Address::Ed25519(_) | Address::ImplicitAccountCreation(_) => {}
                         Address::Restricted(restricted) if restricted.address().is_ed25519() => {}
                         _ => Err(InputSelectionError::MissingInputWithEd25519Address)?,
@@ -245,7 +250,7 @@ pub trait SignTransaction: Sign<Ed25519Signature> {
 
                     // Add the ed25519 address to the block_indexes, so it gets referenced if further inputs have
                     // the same address in their unlock condition
-                    block_indexes.insert(input_address, current_block_index);
+                    block_indexes.insert(required_address, current_block_index);
                 }
             }
 
@@ -289,7 +294,7 @@ pub trait SignTransaction: Sign<Ed25519Signature> {
 
         validate_signed_transaction_payload_length(&tx_payload)?;
 
-        let conflict = verify_semantic(&inputs_data, &tx_payload)?;
+        let conflict = verify_semantic(&inputs_data, &tx_payload, protocol_parameters.clone())?;
 
         if let Some(conflict) = conflict {
             log::debug!("[sign_transaction] conflict: {conflict:?} for {:#?}", tx_payload);

@@ -23,12 +23,13 @@ use crate::{
             address::Address,
             output::{Output, OutputId, OutputMetadata},
             payload::signed_transaction::{dto::SignedTransactionPayloadDto, SignedTransactionPayload, TransactionId},
-            protocol::ProtocolParameters,
+            protocol::{CommittableAgeRange, ProtocolParameters},
             slot::SlotIndex,
             BlockId, Error as BlockError,
         },
         TryFromDto,
     },
+    wallet::core::WalletData,
 };
 
 /// An output with metadata
@@ -50,7 +51,21 @@ pub struct OutputData {
 }
 
 impl OutputData {
-    pub fn input_signing_data(&self, slot_index: SlotIndex) -> crate::wallet::Result<Option<InputSigningData>> {
+    pub fn input_signing_data(
+        &self,
+        wallet_data: &WalletData,
+        slot_index: impl Into<SlotIndex>,
+        committable_age_range: CommittableAgeRange,
+    ) -> crate::wallet::Result<Option<InputSigningData>> {
+        let required_address = self
+            .output
+            .required_address(slot_index.into(), committable_age_range)?
+            .ok_or(crate::client::Error::ExpirationDeadzone)?;
+
+        if required_address.is_ed25519() && wallet_data.address.inner() != &required_address {
+            return Ok(None);
+        }
+
         Ok(Some(InputSigningData {
             output: self.output.clone(),
             output_metadata: self.metadata,

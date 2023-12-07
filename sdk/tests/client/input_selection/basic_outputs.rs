@@ -1765,7 +1765,7 @@ fn restricted_account() {
     let restricted = Address::from(RestrictedAddress::new(account_address.clone()).unwrap());
 
     let inputs = build_inputs([
-        Basic(2_000_000, restricted, None, None, None, None, None),
+        Basic(3_000_000, restricted, None, None, None, None, None),
         Account(
             2_000_000,
             account_id_1,

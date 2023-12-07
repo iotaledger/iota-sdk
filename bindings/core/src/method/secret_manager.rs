@@ -58,7 +58,7 @@ pub enum SecretManagerMethod {
     SignTransaction {
         /// Prepared transaction data
         prepared_transaction_data: PreparedTransactionDataDto,
-        protocol_parameters: ProtocolParameters,
+        protocol_parameters: Box<ProtocolParameters>,
         /// Options used to sign the transaction
         signing_options: serde_json::Value,
     },

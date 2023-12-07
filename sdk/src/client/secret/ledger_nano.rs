@@ -99,6 +99,9 @@ pub enum Error {
     /// No available inputs provided
     #[error("No available inputs provided")]
     NoAvailableInputsProvided,
+    /// Output not unlockable due to deadzone in expiration unlock condition.
+    #[error("output not unlockable due to deadzone in expiration unlock condition")]
+    ExpirationDeadzone,
 }
 
 impl From<crate::types::block::Error> for Error {
@@ -314,7 +317,7 @@ impl SignTransaction for LedgerSecretManager {
     async fn transaction_unlocks(
         &self,
         prepared_transaction: &PreparedTransactionData,
-        _protocol_parameters: &ProtocolParameters,
+        protocol_parameters: &ProtocolParameters,
         chain: &Self::Options,
     ) -> crate::client::Result<Unlocks> {
         let mut input_bip32_indices = Vec::new();
@@ -462,7 +465,7 @@ impl SignTransaction for LedgerSecretManager {
         // With blind signing the ledger only returns SignatureUnlocks, so we might have to merge them with
         // Account/Nft/Reference unlocks
         if blind_signing {
-            unlocks = merge_unlocks(prepared_transaction, unlocks.into_iter())?;
+            unlocks = merge_unlocks(prepared_transaction, unlocks.into_iter(), protocol_parameters)?;
         }
 
         Ok(Unlocks::new(unlocks)?)
@@ -571,8 +574,13 @@ impl LedgerSecretManager {
 fn merge_unlocks(
     prepared_transaction_data: &PreparedTransactionData,
     mut unlocks: impl Iterator<Item = Unlock>,
+    protocol_parameters: &ProtocolParameters,
 ) -> Result<Vec<Unlock>, Error> {
-    let slot_index = prepared_transaction_data.transaction.creation_slot();
+    let slot_index = prepared_transaction_data
+        .transaction
+        .context_inputs()
+        .iter()
+        .find_map(|c| c.as_commitment_opt().map(|c| c.slot_index()));
     let transaction_signing_hash = prepared_transaction_data.transaction.signing_hash();
 
     let mut merged_unlocks = Vec::new();
@@ -581,14 +589,16 @@ fn merge_unlocks(
     // Assuming inputs_data is ordered by address type
     for (current_block_index, input) in prepared_transaction_data.inputs_data.iter().enumerate() {
         // Get the address that is required to unlock the input
-        let (input_address, _) = input
+        let required_address = input
             .output
-            .required_and_unlocked_address(slot_index, input.output_metadata.output_id())?;
+            .required_address(slot_index, protocol_parameters.committable_age_range())?
+            // Time in which no address can unlock the output because of an expiration unlock condition
+            .ok_or(Error::ExpirationDeadzone)?;
 
         // Check if we already added an [Unlock] for this address
-        match block_indexes.get(&input_address) {
+        match block_indexes.get(&required_address) {
             // If we already have an [Unlock] for this address, add a [Unlock] based on the address type
-            Some(block_index) => match input_address {
+            Some(block_index) => match required_address {
                 Address::Ed25519(_ed25519) => {
                     merged_unlocks.push(Unlock::Reference(ReferenceUnlock::new(*block_index as u16)?));
                 }
@@ -603,15 +613,17 @@ fn merge_unlocks(
                 // We can only sign ed25519 addresses and block_indexes needs to contain the account or nft
                 // address already at this point, because the reference index needs to be lower
                 // than the current block index
-                if !input_address.is_ed25519() {
-                    return Err(Error::MissingInputWithEd25519Address);
+                match &required_address {
+                    Address::Ed25519(_) | Address::ImplicitAccountCreation(_) => {}
+                    Address::Restricted(restricted) if restricted.address().is_ed25519() => {}
+                    _ => Err(Error::MissingInputWithEd25519Address)?,
                 }
 
                 let unlock = unlocks.next().ok_or(Error::MissingInputWithEd25519Address)?;
 
                 if let Unlock::Signature(signature_unlock) = &unlock {
                     let Signature::Ed25519(ed25519_signature) = signature_unlock.signature();
-                    let ed25519_address = match input_address {
+                    let ed25519_address = match required_address {
                         Address::Ed25519(ed25519_address) => ed25519_address,
                         _ => return Err(Error::MissingInputWithEd25519Address),
                     };
@@ -622,7 +634,7 @@ fn merge_unlocks(
 
                 // Add the ed25519 address to the block_indexes, so it gets referenced if further inputs have
                 // the same address in their unlock condition
-                block_indexes.insert(input_address, current_block_index);
+                block_indexes.insert(required_address, current_block_index);
             }
         }
 

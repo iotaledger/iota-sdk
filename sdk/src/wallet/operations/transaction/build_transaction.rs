@@ -50,6 +50,10 @@ impl<T> Wallet<T> {
             if let Some(context_inputs) = options.context_inputs {
                 builder = builder.with_context_inputs(context_inputs);
             }
+
+            if let Some(capabilities) = options.capabilities {
+                builder = builder.add_capabilities(capabilities.capabilities_iter());
+            }
         }
 
         let transaction = builder.finish_with_params(&protocol_parameters)?;

@@ -31,9 +31,11 @@ impl<T> Wallet<T> {
         // addresses_with_unspent_outputs: impl Iterator<Item = &AddressWithUnspentOutputs> + Send,
         wallet_data: &WalletData,
     ) -> Result<Balance> {
-        let network_id = self.client().get_network_id().await?;
-        let storage_score_params = self.client().get_storage_score_parameters().await?;
+        let protocol_parameters = self.client().get_protocol_parameters().await?;
         let slot_index = self.client().get_slot_index().await?;
+        let network_id = protocol_parameters.network_id();
+        let storage_score_params = protocol_parameters.storage_score_parameters();
+
         let mut balance = Balance::default();
         let mut total_storage_cost = 0;
         let mut total_native_tokens = NativeTokensBuilder::default();
@@ -41,9 +43,7 @@ impl<T> Wallet<T> {
         #[cfg(feature = "participation")]
         let voting_output = wallet_data.get_voting_output()?;
 
-        let wallet_address = self.address().await.into_inner();
-
-        let claimable_outputs = wallet_data.claimable_outputs(OutputsToClaim::All, slot_index)?;
+        let claimable_outputs = wallet_data.claimable_outputs(OutputsToClaim::All, slot_index, &protocol_parameters)?;
 
         #[cfg(feature = "participation")]
         {
@@ -160,6 +160,7 @@ impl<T> Wallet<T> {
                                 wallet_data.address.inner(),
                                 output,
                                 slot_index,
+                                protocol_parameters.committable_age_range(),
                             );
 
                             if output_can_be_unlocked_now_and_in_future {
@@ -172,7 +173,7 @@ impl<T> Wallet<T> {
                                     .map_or_else(
                                         || output.amount(),
                                         |sdr| {
-                                            if &wallet_address == sdr.return_address() {
+                                            if wallet_data.address.inner() == sdr.return_address() {
                                                 // sending to ourself, we get the full amount
                                                 output.amount()
                                             } else {
