@@ -23,7 +23,7 @@ use crate::{
     },
 };
 
-impl<S: 'static + SecretManage> Wallet<S> {
+impl<T> Wallet<T> {
     /// Set the fallback SyncOptions for account syncing.
     /// If storage is enabled, will persist during restarts.
     pub async fn set_default_sync_options(&self, options: SyncOptions) -> crate::wallet::Result<()> {
@@ -41,7 +41,9 @@ impl<S: 'static + SecretManage> Wallet<S> {
     pub async fn default_sync_options(&self) -> SyncOptions {
         self.default_sync_options.lock().await.clone()
     }
+}
 
+impl<T: 'static + Send + Sync + Clone> Wallet<T> {
     /// Sync the wallet by fetching new information from the nodes. Will also reissue pending transactions
     /// if necessary. A custom default can be set using set_default_sync_options.
     pub async fn sync(&self, options: Option<SyncOptions>) -> crate::wallet::Result<Balance> {

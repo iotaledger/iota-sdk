@@ -7,7 +7,7 @@ use crate::{
     client::{secret::SecretManage, storage::StorageAdapter},
     types::TryFromDto,
     wallet::{
-        core::{WalletData, WalletDataDto},
+        core::{SecretData, WalletData, WalletDataDto},
         migration::migrate,
         operations::syncing::SyncOptions,
         storage::{constants::*, DynStorageAdapter, Storage},
@@ -49,22 +49,27 @@ impl StorageManager {
         Ok(storage_manager)
     }
 
-    pub(crate) async fn load_wallet_data<S: SecretManage>(&mut self) -> crate::wallet::Result<Option<WalletData<S>>> {
-        if let Some(dto) = self
-            .get::<WalletDataDto<S::GenerationOptions, S::SigningOptions>>(WALLET_DATA_KEY)
-            .await?
-        {
+    pub(crate) async fn load_wallet_data(&mut self) -> crate::wallet::Result<Option<WalletData>> {
+        if let Some(dto) = self.get::<WalletDataDto>(WALLET_DATA_KEY).await? {
             Ok(Some(WalletData::try_from_dto(dto)?))
         } else {
             Ok(None)
         }
     }
 
-    pub(crate) async fn save_wallet_data<S: SecretManage>(
-        &mut self,
-        wallet_data: &WalletData<S>,
-    ) -> crate::wallet::Result<()> {
+    pub(crate) async fn save_wallet_data(&mut self, wallet_data: &WalletData) -> crate::wallet::Result<()> {
         self.set(WALLET_DATA_KEY, &WalletDataDto::from(wallet_data)).await
+    }
+
+    pub(crate) async fn load_secret_data<S: SecretManage>(&mut self) -> crate::wallet::Result<Option<SecretData<S>>> {
+        todo!()
+    }
+
+    pub(crate) async fn save_secret_data<S: SecretManage>(
+        &mut self,
+        secret_data: &SecretData<S>,
+    ) -> crate::wallet::Result<()> {
+        todo!()
     }
 
     pub(crate) async fn set_default_sync_options(&self, sync_options: &SyncOptions) -> crate::wallet::Result<()> {
@@ -102,8 +107,12 @@ mod tests {
 
     use super::*;
     use crate::{
-        client::secret::{mnemonic::MnemonicSecretManager, SecretManager},
-        wallet::{storage::adapter::memory::Memory, WalletBuilder},
+        client::secret::mnemonic::MnemonicSecretManager,
+        wallet::{
+            core::builder::{dto::SecretDataDto, SecretDataBuilder},
+            storage::adapter::memory::Memory,
+            WalletBuilder,
+        },
     };
 
     #[tokio::test]
@@ -130,21 +139,12 @@ mod tests {
     #[tokio::test]
     async fn save_load_wallet_data() {
         let mut storage_manager = StorageManager::new(Memory::default(), None).await.unwrap();
-        assert!(
-            storage_manager
-                .load_wallet_data::<MnemonicSecretManager>()
-                .await
-                .unwrap()
-                .is_none()
-        );
+        assert!(storage_manager.load_wallet_data().await.unwrap().is_none());
 
-        let wallet_data = WalletData::<MnemonicSecretManager>::mock();
+        let wallet_data = WalletData::mock();
 
         storage_manager.save_wallet_data(&wallet_data).await.unwrap();
-        let wallet = storage_manager
-            .load_wallet_data::<MnemonicSecretManager>()
-            .await
-            .unwrap();
+        let wallet = storage_manager.load_wallet_data().await.unwrap();
         assert!(matches!(wallet, Some(data) if data.alias == Some("Alice".to_string())));
     }
 
@@ -152,17 +152,17 @@ mod tests {
     async fn save_load_wallet_builder() {
         let storage_manager = StorageManager::new(Memory::default(), None).await.unwrap();
         assert!(
-            WalletBuilder::<MnemonicSecretManager>::load(&storage_manager)
+            WalletBuilder::<SecretDataBuilder<MnemonicSecretManager>>::load::<SecretDataDto<_, _>>(&storage_manager)
                 .await
                 .unwrap()
                 .is_none()
         );
 
-        let wallet_builder = WalletBuilder::<MnemonicSecretManager>::new();
+        let wallet_builder = WalletBuilder::new().with_secret_type::<MnemonicSecretManager>();
         wallet_builder.save(&storage_manager).await.unwrap();
 
         assert!(
-            WalletBuilder::<MnemonicSecretManager>::load(&storage_manager)
+            WalletBuilder::<SecretDataBuilder<MnemonicSecretManager>>::load::<SecretDataDto<_, _>>(&storage_manager)
                 .await
                 .unwrap()
                 .is_some()

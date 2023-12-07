@@ -15,12 +15,13 @@ use crate::{
         },
     },
     wallet::{
+        core::SecretData,
         operations::transaction::{TransactionOptions, TransactionWithMetadata},
         Error, Result, Wallet,
     },
 };
 
-impl<S: 'static + SecretManage> Wallet<S> {
+impl<S: SecretManage> Wallet<SecretData<S>> {
     /// Transitions an implicit account to an account.
     pub async fn implicit_account_transition(
         &self,
@@ -57,12 +58,12 @@ impl<S: 'static + SecretManage> Wallet<S> {
 
         let key_source = match key_source.into() {
             Some(key_source) => key_source,
-            None => BlockIssuerKeySource::Options(self.data().await.public_key_options.clone()),
+            None => BlockIssuerKeySource::Options(self.public_key_options().clone()),
         };
 
         let public_key = match key_source {
             BlockIssuerKeySource::Key(public_key) => public_key,
-            BlockIssuerKeySource::Options(options) => self.secret_manager.read().await.generate(&options).await?,
+            BlockIssuerKeySource::Options(options) => self.secret_manager().read().await.generate(&options).await?,
         };
 
         let account_id = AccountId::from(output_id);

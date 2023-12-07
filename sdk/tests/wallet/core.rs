@@ -15,7 +15,7 @@ use iota_sdk::{
     },
     crypto::keys::bip44::Bip44,
     types::block::address::Bech32Address,
-    wallet::{ClientOptions, Result, Wallet},
+    wallet::{ClientOptions, Result, WalletBuilder},
 };
 use pretty_assertions::assert_eq;
 use url::Url;
@@ -88,7 +88,7 @@ async fn changed_bip_path() -> Result<()> {
 
     drop(wallet);
 
-    let err = Wallet::builder()
+    let err = WalletBuilder::new()
         .with_secret_manager(MnemonicSecretManager::try_from_mnemonic(mnemonic.clone())?)
         .with_public_key_options(PublicKeyOptions::new(IOTA_COIN_TYPE))
         .with_signing_options(Bip44::new(IOTA_COIN_TYPE))
@@ -105,7 +105,7 @@ async fn changed_bip_path() -> Result<()> {
 
     // Building the wallet with the same coin type still works
     assert!(
-        Wallet::builder()
+        WalletBuilder::new()
             .with_secret_manager(MnemonicSecretManager::try_from_mnemonic(mnemonic,)?)
             .with_storage_path(storage_path)
             .finish()
@@ -142,7 +142,7 @@ async fn iota_coin_type() -> Result<()> {
     let secret_manager = MnemonicSecretManager::try_from_mnemonic(DEFAULT_MNEMONIC.to_owned())?;
 
     #[allow(unused_mut)]
-    let mut wallet_builder = Wallet::builder()
+    let mut wallet_builder = WalletBuilder::new()
         .with_secret_manager(secret_manager)
         .with_client_options(client_options)
         .with_public_key_options(PublicKeyOptions::new(IOTA_COIN_TYPE))

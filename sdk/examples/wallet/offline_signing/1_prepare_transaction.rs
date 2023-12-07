@@ -15,7 +15,7 @@ use iota_sdk::{
         secret::SecretManager,
     },
     crypto::keys::bip44::Bip44,
-    wallet::{types::Bip44Address, ClientOptions, Result, SendParams, Wallet},
+    wallet::{types::Bip44Address, ClientOptions, Result, SendParams, Wallet, WalletBuilder},
 };
 use serde::Serialize;
 
@@ -45,7 +45,7 @@ async fn main() -> Result<()> {
     let client_options = ClientOptions::new().with_node(&std::env::var("NODE_URL").unwrap())?;
 
     // Create the wallet with the secret_manager and client options
-    let wallet = Wallet::builder()
+    let wallet = WalletBuilder::new()
         .with_secret_manager(SecretManager::Placeholder)
         .with_storage_path(ONLINE_WALLET_DB_PATH)
         .with_client_options(client_options.clone())

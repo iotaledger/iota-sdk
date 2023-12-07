@@ -8,10 +8,12 @@ use crate::{
     types::block::output::{
         AccountOutputBuilder, FoundryOutputBuilder, Output, SimpleTokenScheme, TokenId, TokenScheme,
     },
-    wallet::{operations::transaction::TransactionOptions, types::TransactionWithMetadata, Error, Wallet},
+    wallet::{
+        core::SecretData, operations::transaction::TransactionOptions, types::TransactionWithMetadata, Error, Wallet,
+    },
 };
 
-impl<S: 'static + SecretManage> Wallet<S> {
+impl<S: SecretManage> Wallet<SecretData<S>> {
     /// Mints additional native tokens.
     ///
     /// The max supply must not be reached yet. The foundry needs to be
@@ -41,7 +43,9 @@ impl<S: 'static + SecretManage> Wallet<S> {
 
         Ok(transaction)
     }
+}
 
+impl<T> Wallet<T> {
     /// Prepares the transaction for [Wallet::mint_native_token()].
     pub async fn prepare_mint_native_token(
         &self,

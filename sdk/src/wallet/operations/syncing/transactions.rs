@@ -19,7 +19,7 @@ use crate::{
 // also revalidate that the locked outputs needs to be there, maybe there was a conflict or the transaction got
 // confirmed, then they should get removed
 
-impl<S: 'static + SecretManage> Wallet<S> {
+impl<T> Wallet<T> {
     /// Sync transactions and reissue them if unconfirmed. Returns the transaction with updated metadata and spent
     /// output ids that don't need to be locked anymore
     /// Return true if a transaction got confirmed for which we don't have an output already, based on this outputs will
@@ -196,14 +196,15 @@ impl<S: 'static + SecretManage> Wallet<S> {
         }
         drop(wallet_data);
 
-        for mut transaction in transactions_to_reissue {
-            log::debug!("[SYNC] reissue transaction");
-            let reissued_block = self
-                .submit_signed_transaction(transaction.payload.clone(), None)
-                .await?;
-            transaction.block_id.replace(reissued_block);
-            updated_transactions.push(transaction);
-        }
+        // TODO: this is a problem
+        // for mut transaction in transactions_to_reissue {
+        //     log::debug!("[SYNC] reissue transaction");
+        //     let reissued_block = self
+        //         .submit_signed_transaction(transaction.payload.clone(), None)
+        //         .await?;
+        //     transaction.block_id.replace(reissued_block);
+        //     updated_transactions.push(transaction);
+        // }
 
         // updates account with balances, output ids, outputs
         self.update_with_transactions(updated_transactions, spent_output_ids, output_ids_to_unlock)
@@ -233,8 +234,8 @@ fn updated_transaction_and_outputs(
 
 // When a transaction got pruned, the inputs and outputs are also not available, then this could mean that it was
 // confirmed and the created outputs got also already spent and pruned or the inputs got spent in another transaction
-fn process_transaction_with_unknown_state<S: SecretManage>(
-    wallet_data: &WalletData<S>,
+fn process_transaction_with_unknown_state(
+    wallet_data: &WalletData,
     mut transaction: TransactionWithMetadata,
     updated_transactions: &mut Vec<TransactionWithMetadata>,
     output_ids_to_unlock: &mut Vec<OutputId>,

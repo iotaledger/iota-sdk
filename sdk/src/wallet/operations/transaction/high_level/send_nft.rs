@@ -12,6 +12,7 @@ use crate::{
     },
     utils::ConvertTo,
     wallet::{
+        core::SecretData,
         operations::transaction::{TransactionOptions, TransactionWithMetadata},
         Wallet,
     },
@@ -42,7 +43,7 @@ impl SendNftParams {
     }
 }
 
-impl<S: 'static + SecretManage> Wallet<S> {
+impl<S: SecretManage> Wallet<SecretData<S>> {
     /// Sends native tokens in basic outputs with a
     /// [`StorageDepositReturnUnlockCondition`](crate::types::block::output::unlock_condition::StorageDepositReturnUnlockCondition) and an
     /// [`ExpirationUnlockCondition`](crate::types::block::output::unlock_condition::ExpirationUnlockCondition), so that
@@ -78,7 +79,9 @@ impl<S: 'static + SecretManage> Wallet<S> {
         self.sign_and_submit_transaction(prepared_transaction, None, options)
             .await
     }
+}
 
+impl<T> Wallet<T> {
     /// Prepares the transaction for [Wallet::send_nft()].
     pub async fn prepare_send_nft<I: IntoIterator<Item = SendNftParams> + Send>(
         &self,

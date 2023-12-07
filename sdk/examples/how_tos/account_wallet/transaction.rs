@@ -7,7 +7,10 @@
 //! `cargo run --release --all-features --example account_wallet_transaction`
 
 use iota_sdk::{
-    client::node_api::indexer::query_parameters::BasicOutputQueryParameters,
+    client::{
+        node_api::indexer::query_parameters::BasicOutputQueryParameters,
+        secret::{stronghold::StrongholdSecretManager, SecretManager},
+    },
     types::block::address::{AccountAddress, ToBech32Ext},
     wallet::{AccountSyncOptions, Result, SyncOptions, TransactionOptions},
     Wallet,
@@ -32,6 +35,7 @@ async fn main() -> Result<()> {
 
     // Create the wallet
     let wallet = Wallet::builder()
+        .with_secret_type::<SecretManager>()
         .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
         .finish()
         .await?;

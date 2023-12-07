@@ -13,10 +13,12 @@ use crate::{
             payload::TaggedDataPayload,
         },
     },
-    wallet::{operations::transaction::TransactionOptions, types::TransactionWithMetadata, Result, Wallet},
+    wallet::{
+        core::SecretData, operations::transaction::TransactionOptions, types::TransactionWithMetadata, Result, Wallet,
+    },
 };
 
-impl<S: 'static + SecretManage> Wallet<S> {
+impl<S: SecretManage> Wallet<SecretData<S>> {
     /// Casts a given number of votes for a given (voting) event.
     ///
     /// If voting for other events, continues voting for them.
@@ -39,7 +41,23 @@ impl<S: 'static + SecretManage> Wallet<S> {
 
         self.sign_and_submit_transaction(prepared, None, None).await
     }
+}
 
+impl<S: SecretManage> Wallet<SecretData<S>> {
+    /// Removes metadata corresponding to a given (voting) event ID from the voting output if it contains it.
+    ///
+    /// If voting for other events, continues voting for them.
+    /// Removes metadata for any event that has expired (use event IDs to get cached event information, checks event
+    /// milestones in there against latest network milestone).
+    /// If NOT already voting for this event, throws an error.
+    pub async fn stop_participating(&self, event_id: ParticipationEventId) -> Result<TransactionWithMetadata> {
+        let prepared = self.prepare_stop_participating(event_id).await?;
+
+        self.sign_and_submit_transaction(prepared, None, None).await
+    }
+}
+
+impl<T> Wallet<T> {
     /// Prepares the transaction for [Wallet::vote()].
     pub async fn prepare_vote(
         &self,
@@ -116,18 +134,6 @@ impl<S: 'static + SecretManage> Wallet<S> {
             }),
         )
         .await
-    }
-
-    /// Removes metadata corresponding to a given (voting) event ID from the voting output if it contains it.
-    ///
-    /// If voting for other events, continues voting for them.
-    /// Removes metadata for any event that has expired (use event IDs to get cached event information, checks event
-    /// milestones in there against latest network milestone).
-    /// If NOT already voting for this event, throws an error.
-    pub async fn stop_participating(&self, event_id: ParticipationEventId) -> Result<TransactionWithMetadata> {
-        let prepared = self.prepare_stop_participating(event_id).await?;
-
-        self.sign_and_submit_transaction(prepared, None, None).await
     }
 
     /// Prepares the transaction for [Wallet::stop_participating()].

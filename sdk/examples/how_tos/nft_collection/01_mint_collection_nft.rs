@@ -15,6 +15,7 @@
 //! ```
 
 use iota_sdk::{
+    client::secret::SecretManager,
     types::block::{
         address::{Bech32Address, NftAddress},
         output::{feature::Irc27Metadata, NftId},
@@ -44,6 +45,7 @@ async fn main() -> Result<()> {
         .parse::<NftId>()?;
 
     let wallet = Wallet::builder()
+        .with_secret_type::<SecretManager>()
         .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
         .finish()
         .await?;

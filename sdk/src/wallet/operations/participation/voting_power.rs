@@ -14,10 +14,13 @@ use crate::{
             payload::TaggedDataPayload,
         },
     },
-    wallet::{operations::transaction::TransactionOptions, types::TransactionWithMetadata, Error, Result, Wallet},
+    wallet::{
+        core::SecretData, operations::transaction::TransactionOptions, types::TransactionWithMetadata, Error, Result,
+        Wallet,
+    },
 };
 
-impl<S: 'static + SecretManage> Wallet<S> {
+impl<S: SecretManage> Wallet<SecretData<S>> {
     /// Returns an account's total voting power (voting or NOT voting).
     pub async fn get_voting_power(&self) -> Result<u64> {
         Ok(self
@@ -43,6 +46,23 @@ impl<S: 'static + SecretManage> Wallet<S> {
         self.sign_and_submit_transaction(prepared, None, None).await
     }
 
+    /// Reduces an account's "voting power" by a given amount.
+    /// This will stop voting, but the voting data isn't lost and calling `Vote` without parameters will revote.
+    ///
+    /// If amount is higher than actual voting power, throws an error.
+    /// If voting and amount is equal to voting power, removes tagged data payload and output metadata.
+    /// Removes metadata for any events that have expired (uses event IDs to get cached event information, checks event
+    /// milestones in there against latest network milestone).
+    /// Prioritizes consuming outputs that are designated for voting but don't have any metadata (only possible if user
+    /// increases voting power then decreases immediately after).
+    pub async fn decrease_voting_power(&self, amount: u64) -> Result<TransactionWithMetadata> {
+        let prepared = self.prepare_decrease_voting_power(amount).await?;
+
+        self.sign_and_submit_transaction(prepared, None, None).await
+    }
+}
+
+impl<T> Wallet<T> {
     /// Prepares the transaction for [Wallet::increase_voting_power()].
     pub async fn prepare_increase_voting_power(&self, amount: u64) -> Result<PreparedTransactionData> {
         let (new_output, tx_options) = match self.get_voting_output().await? {
@@ -74,21 +94,6 @@ impl<S: 'static + SecretManage> Wallet<S> {
         };
 
         self.prepare_transaction([new_output], tx_options).await
-    }
-
-    /// Reduces an account's "voting power" by a given amount.
-    /// This will stop voting, but the voting data isn't lost and calling `Vote` without parameters will revote.
-    ///
-    /// If amount is higher than actual voting power, throws an error.
-    /// If voting and amount is equal to voting power, removes tagged data payload and output metadata.
-    /// Removes metadata for any events that have expired (uses event IDs to get cached event information, checks event
-    /// milestones in there against latest network milestone).
-    /// Prioritizes consuming outputs that are designated for voting but don't have any metadata (only possible if user
-    /// increases voting power then decreases immediately after).
-    pub async fn decrease_voting_power(&self, amount: u64) -> Result<TransactionWithMetadata> {
-        let prepared = self.prepare_decrease_voting_power(amount).await?;
-
-        self.sign_and_submit_transaction(prepared, None, None).await
     }
 
     /// Prepares the transaction for [Wallet::decrease_voting_power()].

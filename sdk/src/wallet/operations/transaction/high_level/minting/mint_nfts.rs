@@ -16,6 +16,7 @@ use crate::{
     },
     utils::ConvertTo,
     wallet::{
+        core::SecretData,
         operations::transaction::{TransactionOptions, TransactionWithMetadata},
         Wallet,
     },
@@ -109,7 +110,7 @@ impl MintNftParams {
     }
 }
 
-impl<S: 'static + SecretManage> Wallet<S> {
+impl<S: SecretManage> Wallet<SecretData<S>> {
     /// Mints NFTs.
     ///
     /// Calls [Wallet::send_outputs()] internally. The options may define the remainder value strategy or custom inputs.
@@ -146,7 +147,9 @@ impl<S: 'static + SecretManage> Wallet<S> {
         self.sign_and_submit_transaction(prepared_transaction, None, options)
             .await
     }
+}
 
+impl<T> Wallet<T> {
     /// Prepares the transaction for [Wallet::mint_nfts()].
     pub async fn prepare_mint_nfts<I: IntoIterator<Item = MintNftParams> + Send>(
         &self,

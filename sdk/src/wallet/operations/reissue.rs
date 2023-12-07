@@ -13,13 +13,13 @@ use crate::{
             BlockId,
         },
     },
-    wallet::{types::InclusionState, Error, Wallet},
+    wallet::{core::SecretData, types::InclusionState, Error, Wallet},
 };
 
 const DEFAULT_REISSUE_UNTIL_INCLUDED_INTERVAL: u64 = 1;
 const DEFAULT_REISSUE_UNTIL_INCLUDED_MAX_AMOUNT: u64 = 40;
 
-impl<S: 'static + SecretManage> Wallet<S> {
+impl<S: SecretManage> Wallet<SecretData<S>> {
     /// Reissues a transaction sent from the account for a provided transaction id until it's
     /// included (referenced by a milestone). Returns the included block id.
     pub async fn reissue_transaction_until_included(
@@ -57,10 +57,7 @@ impl<S: 'static + SecretManage> Wallet<S> {
                         Some(Payload::SignedTransaction(Box::new(transaction.payload.clone()))),
                     )
                     .await?
-                    .sign_ed25519(
-                        &*self.get_secret_manager().read().await,
-                        &self.data().await.signing_options,
-                    )
+                    .sign_ed25519(&*self.secret_manager().read().await, self.signing_options())
                     .await?
                     .id(&protocol_parameters),
             };
@@ -105,10 +102,7 @@ impl<S: 'static + SecretManage> Wallet<S> {
                                 Some(Payload::SignedTransaction(Box::new(transaction.payload.clone()))),
                             )
                             .await?
-                            .sign_ed25519(
-                                &*self.get_secret_manager().read().await,
-                                &self.data().await.signing_options,
-                            )
+                            .sign_ed25519(&*self.secret_manager().read().await, self.signing_options())
                             .await?;
                         block_ids.push(reissued_block.id(&protocol_parameters));
                     }

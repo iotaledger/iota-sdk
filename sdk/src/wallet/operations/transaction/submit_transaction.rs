@@ -6,10 +6,10 @@ use crate::wallet::events::types::{TransactionProgressEvent, WalletEvent};
 use crate::{
     client::secret::SecretManage,
     types::block::{output::AccountId, payload::Payload, BlockId},
-    wallet::{operations::transaction::SignedTransactionPayload, Wallet},
+    wallet::{core::SecretData, operations::transaction::SignedTransactionPayload, Wallet},
 };
 
-impl<S: 'static + SecretManage> Wallet<S> {
+impl<S: SecretManage> Wallet<SecretData<S>> {
     /// Submits a signed transaction in a block.
     pub(crate) async fn submit_signed_transaction(
         &self,

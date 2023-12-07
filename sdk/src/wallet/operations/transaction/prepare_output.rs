@@ -27,7 +27,7 @@ use crate::{
     },
 };
 
-impl<S: 'static + SecretManage> Wallet<S> {
+impl<T> Wallet<T> {
     /// Prepare a basic or NFT output for sending
     /// If the amount is below the minimum required storage deposit, by default the remaining amount will automatically
     /// be added with a StorageDepositReturn UnlockCondition, when setting the ReturnStrategy to `gift`, the full

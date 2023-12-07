@@ -12,7 +12,7 @@
 //     wallet::events::types::{AddressData, WalletEvent},
 // };
 
-// impl<S: 'static + SecretManage> Wallet<S> {
+// impl<T> Wallet<T> {
 //     /// Generate an address without storing it
 //     /// ```ignore
 //     /// let public_addresses = wallet

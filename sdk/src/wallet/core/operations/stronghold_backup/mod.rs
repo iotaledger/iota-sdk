@@ -14,10 +14,10 @@ use crate::{
         utils::Password,
     },
     types::block::address::Hrp,
-    wallet::Wallet,
+    wallet::{core::SecretData, Wallet},
 };
 
-impl<S: 'static + SecretManagerConfig> Wallet<S> {
+impl<S: 'static + SecretManagerConfig> Wallet<SecretData<S>> {
     /// Backup the wallet data in a Stronghold file
     /// stronghold_password must be the current one when Stronghold is used as SecretManager.
     pub async fn backup(
@@ -28,7 +28,7 @@ impl<S: 'static + SecretManagerConfig> Wallet<S> {
         let stronghold_password = stronghold_password.into();
 
         log::debug!("[backup] creating a stronghold backup");
-        let secret_manager = self.secret_manager.read().await;
+        let secret_manager = self.secret_manager().read().await;
 
         match (&*secret_manager).as_stronghold() {
             // Backup with existing stronghold
@@ -81,7 +81,7 @@ impl<S: 'static + SecretManagerConfig> Wallet<S> {
 
         let mut wallet_data = self.data.write().await;
 
-        let mut secret_manager = self.secret_manager.as_ref().write().await;
+        let mut secret_manager = self.secret_manager().as_ref().write().await;
         // Get the current snapshot path if set
         let new_snapshot_path = if let Ok(stronghold) = (&*secret_manager).as_stronghold() {
             stronghold.snapshot_path.clone()
@@ -94,16 +94,16 @@ impl<S: 'static + SecretManagerConfig> Wallet<S> {
             .password(stronghold_password.clone())
             .build(backup_path.clone())?;
 
-        let (loaded_client_options, loaded_secret_manager_config, loaded_wallet_data) =
+        let (loaded_client_options, loaded_secret_manager_config, loaded_wallet_data, loaded_secret_data) =
             read_wallet_data_from_stronghold_snapshot::<S>(&new_stronghold).await?;
 
-        let loaded_pub_key_opts = loaded_wallet_data.as_ref().map(|data| &data.public_key_options);
+        let loaded_pub_key_opts = loaded_secret_data.as_ref().map(|data| &data.public_key_options);
 
         // If the bip path is not matching the current one, we may ignore the backup
         let ignore_backup_values = ignore_if_bip_path_mismatch.map_or(false, |ignore| {
             if ignore {
                 // TODO: #1279 okay that if both are none we always load the backup values?
-                loaded_pub_key_opts.is_some_and(|opts| &wallet_data.public_key_options != opts)
+                loaded_pub_key_opts.is_some_and(|opts| self.public_key_options() != opts)
             } else {
                 false
             }
@@ -111,7 +111,8 @@ impl<S: 'static + SecretManagerConfig> Wallet<S> {
 
         if !ignore_backup_values {
             if let Some(opts) = loaded_pub_key_opts {
-                wallet_data.public_key_options = opts.clone();
+                // TODO
+                // self.secret_data.public_key_options = opts.clone();
             }
         }
 
@@ -163,7 +164,7 @@ impl<S: 'static + SecretManagerConfig> Wallet<S> {
         #[cfg(feature = "storage")]
         {
             let wallet_builder = WalletBuilder::new()
-                .with_secret_manager_arc(self.secret_manager.clone())
+                .with_secret_manager_arc(self.secret_manager().clone())
                 .with_storage_path(
                     &self
                         .storage_options
@@ -174,8 +175,8 @@ impl<S: 'static + SecretManagerConfig> Wallet<S> {
                         .expect("can't convert os string"),
                 )
                 .with_client_options(self.client_options().await)
-                .with_public_key_options(self.data().await.public_key_options.clone())
-                .with_signing_options(self.data().await.signing_options.clone());
+                .with_public_key_options(self.public_key_options().clone())
+                .with_signing_options(self.signing_options().clone());
 
             wallet_builder.save(&*self.storage_manager.read().await).await?;
 

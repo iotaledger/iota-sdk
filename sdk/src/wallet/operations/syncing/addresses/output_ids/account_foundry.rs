@@ -19,7 +19,7 @@ use crate::{
     wallet::{operations::syncing::SyncOptions, task, Wallet},
 };
 
-impl<S: 'static + SecretManage> Wallet<S> {
+impl<T> Wallet<T> {
     /// Returns output ids of account outputs
     pub(crate) async fn get_account_and_foundry_output_ids(
         &self,

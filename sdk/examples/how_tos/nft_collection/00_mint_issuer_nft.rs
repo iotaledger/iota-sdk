@@ -15,6 +15,7 @@
 //! ```
 
 use iota_sdk::{
+    client::secret::{stronghold::StrongholdSecretManager, SecretManager},
     types::block::{
         output::{NftId, Output, OutputId},
         payload::signed_transaction::TransactionId,
@@ -33,6 +34,7 @@ async fn main() -> Result<()> {
     }
 
     let wallet = Wallet::builder()
+        .with_secret_type::<SecretManager>()
         .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
         .finish()
         .await?;

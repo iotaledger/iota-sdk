@@ -103,7 +103,7 @@
 //     // secret manager is the same
 //     assert_eq!(
 //         wallet
-//             .get_secret_manager()
+//             .secret_manager()
 //             .read()
 //             .await
 //             .generate_ed25519_addresses(GetAddressesOptions {
@@ -113,7 +113,7 @@
 //             })
 //             .await?,
 //         restored_wallet
-//             .get_secret_manager()
+//             .secret_manager()
 //             .read()
 //             .await
 //             .generate_ed25519_addresses(GetAddressesOptions {

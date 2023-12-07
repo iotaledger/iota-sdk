@@ -14,7 +14,7 @@ use iota_sdk::{
         secret::{stronghold::StrongholdSecretManager, PublicKeyOptions, SecretManage},
     },
     crypto::keys::{bip39::Mnemonic, bip44::Bip44},
-    wallet::{ClientOptions, Result, Wallet},
+    wallet::{ClientOptions, Result, Wallet, WalletBuilder},
 };
 
 const OFFLINE_WALLET_DB_PATH: &str = "./examples/wallet/offline_signing/example-offline-walletdb";
@@ -43,7 +43,7 @@ async fn main() -> Result<()> {
     secret_manager.store_mnemonic(mnemonic).await?;
 
     // Create the wallet with the secret_manager and client options
-    let wallet = Wallet::builder()
+    let wallet = WalletBuilder::new()
         .with_secret_manager(secret_manager)
         .with_storage_path(OFFLINE_WALLET_DB_PATH)
         .with_client_options(offline_client)
@@ -57,7 +57,7 @@ async fn main() -> Result<()> {
     write_wallet_address_to_file(&wallet).await
 }
 
-async fn write_wallet_address_to_file<S: 'static + SecretManage>(wallet: &Wallet<S>) -> Result<()> {
+async fn write_wallet_address_to_file<T>(wallet: &Wallet<T>) -> Result<()> {
     use tokio::io::AsyncWriteExt;
 
     let wallet_address = wallet.address().await;

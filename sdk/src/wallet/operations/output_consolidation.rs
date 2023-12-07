@@ -15,6 +15,7 @@ use crate::{
     },
     wallet::{
         constants::DEFAULT_OUTPUT_CONSOLIDATION_THRESHOLD,
+        core::SecretData,
         operations::{helpers::time::can_output_be_unlocked_now, transaction::TransactionOptions},
         types::{OutputData, TransactionWithMetadata},
         Result, Wallet,
@@ -65,7 +66,7 @@ impl ConsolidationParams {
     }
 }
 
-impl<S: 'static + SecretManage> Wallet<S> {
+impl<T> Wallet<T> {
     fn should_consolidate_output(
         &self,
         output_data: &OutputData,
@@ -94,7 +95,9 @@ impl<S: 'static + SecretManage> Wallet<S> {
             false
         })
     }
+}
 
+impl<S: 'static + SecretManage> Wallet<SecretData<S>> {
     /// Consolidates basic outputs with only an [AddressUnlockCondition] from an account by sending them to a provided
     /// address or to an own address again if the output amount is >= the output_threshold. When `force`
     /// is set to `true`, the threshold is ignored. Only consolidates the amount of outputs that fit into a single
@@ -149,7 +152,7 @@ impl<S: 'static + SecretManage> Wallet<S> {
             None => {
                 #[cfg(feature = "ledger_nano")]
                 {
-                    let secret_manager = self.secret_manager.read().await;
+                    let secret_manager = self.secret_manager().read().await;
                     if (&*secret_manager).as_ledger_nano().is_ok() {
                         DEFAULT_LEDGER_OUTPUT_CONSOLIDATION_THRESHOLD
                     } else {
@@ -176,7 +179,7 @@ impl<S: 'static + SecretManage> Wallet<S> {
 
         #[cfg(feature = "ledger_nano")]
         let max_inputs = {
-            let secret_manager = self.secret_manager.read().await;
+            let secret_manager = self.secret_manager().read().await;
             if let Ok(ledger) = (&*secret_manager).as_ledger_nano() {
                 let ledger_nano_status = ledger.get_ledger_nano_status().await;
                 // With blind signing we are only limited by the protocol

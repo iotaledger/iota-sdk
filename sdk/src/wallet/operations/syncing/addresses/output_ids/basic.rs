@@ -8,7 +8,7 @@ use crate::{
     wallet::Wallet,
 };
 
-impl<S: 'static + SecretManage> Wallet<S> {
+impl<T> Wallet<T> {
     /// Returns output ids of basic outputs that have only the address unlock condition
     pub(crate) async fn get_basic_output_ids_with_address_unlock_condition_only(
         &self,

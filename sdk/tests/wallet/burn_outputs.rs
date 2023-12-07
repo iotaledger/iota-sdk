@@ -7,7 +7,7 @@ use iota_sdk::{
         unlock_condition::{AddressUnlockCondition, ExpirationUnlockCondition},
         NativeToken, NftId, NftOutputBuilder, OutputId, UnlockCondition,
     },
-    wallet::{CreateNativeTokenParams, MintNftParams, Result, Wallet},
+    wallet::{core::SecretData, CreateNativeTokenParams, MintNftParams, Result, Wallet},
     U256,
 };
 use pretty_assertions::assert_eq;
@@ -177,7 +177,7 @@ async fn create_and_melt_native_token() -> Result<()> {
     tear_down(storage_path)
 }
 
-async fn destroy_foundry<S: 'static + SecretManage>(wallet: &Wallet<S>) -> Result<()> {
+async fn destroy_foundry<S: 'static + SecretManage>(wallet: &Wallet<SecretData<S>>) -> Result<()> {
     let balance = wallet.sync(None).await?;
     println!("wallet balance -> {}", serde_json::to_string(&balance).unwrap());
 
@@ -200,7 +200,7 @@ async fn destroy_foundry<S: 'static + SecretManage>(wallet: &Wallet<S>) -> Resul
     Ok(())
 }
 
-async fn destroy_account<S: 'static + SecretManage>(wallet: &Wallet<S>) -> Result<()> {
+async fn destroy_account<S: 'static + SecretManage>(wallet: &Wallet<SecretData<S>>) -> Result<()> {
     let balance = wallet.sync(None).await.unwrap();
     println!("account balance -> {}", serde_json::to_string(&balance).unwrap());
 

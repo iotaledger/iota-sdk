@@ -16,7 +16,7 @@ use iota_sdk::{
         secret::{stronghold::StrongholdSecretManager, PublicKeyOptions, SecretManager},
     },
     crypto::keys::{bip39::Mnemonic, bip44::Bip44},
-    wallet::{ClientOptions, Result, Wallet},
+    wallet::{ClientOptions, Result, Wallet, WalletBuilder},
 };
 
 #[tokio::main]
@@ -48,7 +48,7 @@ async fn main() -> Result<()> {
     let client_options = ClientOptions::new().with_node(&std::env::var("NODE_URL").unwrap())?;
 
     // Create the wallet
-    let wallet = Wallet::builder()
+    let wallet = WalletBuilder::new()
         .with_secret_manager(secret_manager)
         .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
         .with_client_options(client_options)

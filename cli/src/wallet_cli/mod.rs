@@ -1016,7 +1016,7 @@ async fn print_wallet_address(wallet: &Wallet) -> Result<(), Error> {
         }
     }
 
-    let bip_path = wallet.data().await.signing_options().clone();
+    let bip_path = wallet.signing_options().clone();
     log = format!("{log}\nBIP path: {bip_path:?}");
 
     log = format!(

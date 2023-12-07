@@ -11,7 +11,11 @@
 //! cargo run --release --all-features --example request_funds
 //! ```
 
-use iota_sdk::{client::request_funds_from_faucet, wallet::Result, Wallet};
+use iota_sdk::{
+    client::{request_funds_from_faucet, secret::SecretManager},
+    wallet::Result,
+    Wallet,
+};
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -23,6 +27,7 @@ async fn main() -> Result<()> {
     }
 
     let wallet = Wallet::builder()
+        .with_secret_type::<SecretManager>()
         .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
         .finish()
         .await?;

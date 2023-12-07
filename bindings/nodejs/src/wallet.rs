@@ -7,7 +7,7 @@ use iota_sdk_bindings_core::{
     call_wallet_method as rust_call_wallet_method,
     iota_sdk::{
         client::secret::SecretManager,
-        wallet::{events::WalletEventType, Wallet},
+        wallet::{core::SecretData, events::WalletEventType, Wallet},
     },
     Response, WalletMethod, WalletOptions,
 };
@@ -17,7 +17,7 @@ use tokio::sync::RwLock;
 
 use crate::{client::ClientMethodHandler, secret_manager::SecretManagerMethodHandler, NodejsError};
 
-pub type WalletMethodHandler = Arc<RwLock<Option<Wallet<SecretManager>>>>;
+pub type WalletMethodHandler = Arc<RwLock<Option<Wallet<SecretData<SecretManager>>>>>;
 
 #[napi(js_name = "createWallet")]
 pub async fn create_wallet(options: String) -> Result<External<WalletMethodHandler>> {
@@ -100,7 +100,7 @@ pub async fn get_client(wallet: External<WalletMethodHandler>) -> Result<Externa
 #[napi(js_name = "getSecretManager")]
 pub async fn get_secret_manager(wallet: External<WalletMethodHandler>) -> Result<External<SecretManagerMethodHandler>> {
     if let Some(wallet) = &*wallet.as_ref().read().await {
-        Ok(External::new(wallet.get_secret_manager().clone()))
+        Ok(External::new(wallet.secret_manager().clone()))
     } else {
         Err(Error::new(
             Status::GenericFailure,

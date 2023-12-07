@@ -37,39 +37,50 @@ use crate::{
 };
 
 /// The stateful wallet used to interact with an IOTA network.
-#[derive(Debug)]
-pub struct Wallet<S: SecretManage> {
-    pub(crate) inner: Arc<WalletInner<S>>,
-    pub(crate) data: Arc<RwLock<WalletData<S>>>,
+#[derive(Debug, Clone)]
+pub struct Wallet<T = ()> {
+    pub(crate) inner: Arc<WalletInner>,
+    pub(crate) data: Arc<RwLock<WalletData>>,
+    pub(crate) secret_data: T,
 }
 
-impl<S: SecretManage> Clone for Wallet<S> {
+#[derive(Debug)]
+pub struct SecretData<S: SecretManage> {
+    /// The public key generation options.
+    pub(crate) public_key_options: S::GenerationOptions,
+    /// The signing options for transactions and blocks.
+    pub(crate) signing_options: S::SigningOptions,
+    pub(crate) secret_manager: Arc<RwLock<S>>,
+}
+
+impl<S: SecretManage> Clone for SecretData<S> {
     fn clone(&self) -> Self {
         Self {
-            inner: self.inner.clone(),
-            data: self.data.clone(),
+            public_key_options: self.public_key_options.clone(),
+            signing_options: self.signing_options.clone(),
+            secret_manager: self.secret_manager.clone(),
         }
     }
 }
 
-impl<S: SecretManage> core::ops::Deref for Wallet<S> {
-    type Target = WalletInner<S>;
+impl<T> core::ops::Deref for Wallet<T> {
+    type Target = WalletInner;
 
     fn deref(&self) -> &Self::Target {
         &self.inner
     }
 }
 
-impl<S: 'static + SecretManage> Wallet<S> {
+impl<T> Wallet<T> {
     /// Initialises the wallet builder.
-    pub fn builder() -> WalletBuilder<S> {
-        WalletBuilder::<S>::new()
+    pub fn builder() -> WalletBuilder {
+        WalletBuilder::new()
     }
 }
 
 /// Wallet inner.
 #[derive(Debug)]
-pub struct WalletInner<S: SecretManage> {
+pub struct WalletInner {
     // mutex to prevent multiple sync calls at the same or almost the same time, the u128 is a timestamp
     // if the last synced time was < `MIN_SYNC_INTERVAL` second ago, we don't sync, but only calculate the balance
     // again, because sending transactions can change that
@@ -78,7 +89,7 @@ pub struct WalletInner<S: SecretManage> {
     // 0 = not running, 1 = running, 2 = stopping
     pub(crate) background_syncing_status: AtomicUsize,
     pub(crate) client: Client,
-    pub(crate) secret_manager: Arc<RwLock<S>>,
+
     #[cfg(feature = "events")]
     pub(crate) event_emitter: tokio::sync::RwLock<EventEmitter>,
     #[cfg(feature = "storage")]
@@ -88,11 +99,8 @@ pub struct WalletInner<S: SecretManage> {
 }
 
 /// Wallet data.
-pub struct WalletData<S: SecretManage> {
-    /// The public key generation options.
-    pub(crate) public_key_options: S::GenerationOptions,
-    /// The signing options for transactions and blocks.
-    pub(crate) signing_options: S::SigningOptions,
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct WalletData {
     /// The wallet address.
     pub(crate) address: Bech32Address,
     /// The wallet alias.
@@ -125,16 +133,9 @@ pub struct WalletData<S: SecretManage> {
     pub(crate) native_token_foundries: HashMap<FoundryId, FoundryOutput>,
 }
 
-impl<S: SecretManage> WalletData<S> {
-    pub(crate) fn new(
-        public_key_options: S::GenerationOptions,
-        signing_options: S::SigningOptions,
-        address: Bech32Address,
-        alias: Option<String>,
-    ) -> Self {
+impl WalletData {
+    pub(crate) fn new(address: Bech32Address, alias: Option<String>) -> Self {
         Self {
-            public_key_options,
-            signing_options,
             address,
             alias,
             outputs: HashMap::new(),
@@ -226,16 +227,6 @@ impl<S: SecretManage> WalletData<S> {
             }
             false
         })
-    }
-
-    /// Returns the public key options.
-    pub fn public_key_options(&self) -> &S::GenerationOptions {
-        &self.public_key_options
-    }
-
-    /// Returns the signing options.
-    pub fn signing_options(&self) -> &S::SigningOptions {
-        &self.signing_options
     }
 
     /// Returns outputs map of the wallet.
@@ -351,66 +342,9 @@ impl<S: SecretManage> WalletData<S> {
     }
 }
 
-impl<S: SecretManage> PartialEq for WalletData<S> {
-    fn eq(&self, other: &Self) -> bool {
-        self.public_key_options == other.public_key_options
-            && self.signing_options == other.signing_options
-            && self.address == other.address
-            && self.alias == other.alias
-            && self.outputs == other.outputs
-            && self.locked_outputs == other.locked_outputs
-            && self.unspent_outputs == other.unspent_outputs
-            && self.transactions == other.transactions
-            && self.pending_transactions == other.pending_transactions
-            && self.incoming_transactions == other.incoming_transactions
-            && self.inaccessible_incoming_transactions == other.inaccessible_incoming_transactions
-            && self.native_token_foundries == other.native_token_foundries
-    }
-}
-impl<S: SecretManage> Eq for WalletData<S> {}
-impl<S: SecretManage> core::fmt::Debug for WalletData<S> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("WalletData")
-            .field("public_key_options", &self.public_key_options)
-            .field("signing_options", &self.signing_options)
-            .field("address", &self.address)
-            .field("alias", &self.alias)
-            .field("outputs", &self.outputs)
-            .field("locked_outputs", &self.locked_outputs)
-            .field("unspent_outputs", &self.unspent_outputs)
-            .field("transactions", &self.transactions)
-            .field("pending_transactions", &self.pending_transactions)
-            .field("incoming_transactions", &self.incoming_transactions)
-            .field(
-                "inaccessible_incoming_transactions",
-                &self.inaccessible_incoming_transactions,
-            )
-            .field("native_token_foundries", &self.native_token_foundries)
-            .finish()
-    }
-}
-impl<S: SecretManage> Clone for WalletData<S> {
-    fn clone(&self) -> Self {
-        Self {
-            public_key_options: self.public_key_options.clone(),
-            signing_options: self.signing_options.clone(),
-            address: self.address.clone(),
-            alias: self.alias.clone(),
-            outputs: self.outputs.clone(),
-            locked_outputs: self.locked_outputs.clone(),
-            unspent_outputs: self.unspent_outputs.clone(),
-            transactions: self.transactions.clone(),
-            pending_transactions: self.pending_transactions.clone(),
-            incoming_transactions: self.incoming_transactions.clone(),
-            inaccessible_incoming_transactions: self.inaccessible_incoming_transactions.clone(),
-            native_token_foundries: self.native_token_foundries.clone(),
-        }
-    }
-}
-
-impl<S: 'static + SecretManage> Wallet<S> {
+impl<T> Wallet<T> {
     /// Create a new wallet.
-    pub(crate) async fn new(inner: Arc<WalletInner<S>>, data: WalletData<S>) -> Result<Self> {
+    pub(crate) async fn new(inner: Arc<WalletInner>, data: WalletData, secret_data: T) -> Result<Self> {
         #[cfg(feature = "storage")]
         let default_sync_options = inner
             .storage_manager
@@ -433,6 +367,7 @@ impl<S: 'static + SecretManage> Wallet<S> {
         Ok(Self {
             inner,
             data: Arc::new(RwLock::new(data)),
+            secret_data,
         })
     }
 
@@ -459,7 +394,7 @@ impl<S: 'static + SecretManage> Wallet<S> {
     /// Save the wallet to the database, accepts the updated wallet data as option so we don't need to drop it before
     /// saving
     #[cfg(feature = "storage")]
-    pub(crate) async fn save(&self, updated_wallet: Option<&WalletData<S>>) -> Result<()> {
+    pub(crate) async fn save(&self, updated_wallet: Option<&WalletData>) -> Result<()> {
         log::debug!("[save] wallet data");
         match updated_wallet {
             Some(wallet) => {
@@ -483,11 +418,11 @@ impl<S: 'static + SecretManage> Wallet<S> {
         self.inner.emit(wallet_event).await
     }
 
-    pub async fn data(&self) -> tokio::sync::RwLockReadGuard<'_, WalletData<S>> {
+    pub async fn data(&self) -> tokio::sync::RwLockReadGuard<'_, WalletData> {
         self.data.read().await
     }
 
-    pub(crate) async fn data_mut(&self) -> tokio::sync::RwLockWriteGuard<'_, WalletData<S>> {
+    pub(crate) async fn data_mut(&self) -> tokio::sync::RwLockWriteGuard<'_, WalletData> {
         self.data.write().await
     }
 
@@ -521,12 +456,22 @@ impl<S: 'static + SecretManage> Wallet<S> {
     }
 }
 
-impl<S: SecretManage> WalletInner<S> {
+impl<S: SecretManage> Wallet<SecretData<S>> {
     /// Get the [SecretManager]
-    pub fn get_secret_manager(&self) -> &Arc<RwLock<S>> {
-        &self.secret_manager
+    pub fn secret_manager(&self) -> &Arc<RwLock<S>> {
+        &self.secret_data.secret_manager
     }
 
+    pub fn public_key_options(&self) -> &S::GenerationOptions {
+        &self.secret_data.public_key_options
+    }
+
+    pub fn signing_options(&self) -> &S::SigningOptions {
+        &self.secret_data.signing_options
+    }
+}
+
+impl WalletInner {
     /// Listen to wallet events, empty vec will listen to all events
     #[cfg(feature = "events")]
     #[cfg_attr(docsrs, doc(cfg(feature = "events")))]
@@ -574,18 +519,10 @@ impl<S: SecretManage> WalletInner<S> {
     }
 }
 
-impl<S: SecretManage> Drop for Wallet<S> {
-    fn drop(&mut self) {
-        log::debug!("drop Wallet");
-    }
-}
-
 /// Dto for the wallet data.
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct WalletDataDto<G, S> {
-    pub public_key_options: G,
-    pub signing_options: S,
+pub struct WalletDataDto {
     pub address: Bech32Address,
     pub alias: Option<String>,
     pub outputs: HashMap<OutputId, OutputData>,
@@ -598,16 +535,14 @@ pub struct WalletDataDto<G, S> {
     pub native_token_foundries: HashMap<FoundryId, FoundryOutput>,
 }
 
-impl<S: SecretManage> TryFromDto<WalletDataDto<S::GenerationOptions, S::SigningOptions>> for WalletData<S> {
+impl TryFromDto<WalletDataDto> for WalletData {
     type Error = crate::wallet::Error;
 
     fn try_from_dto_with_params_inner(
-        dto: WalletDataDto<S::GenerationOptions, S::SigningOptions>,
+        dto: WalletDataDto,
         params: Option<&ProtocolParameters>,
     ) -> core::result::Result<Self, Self::Error> {
         Ok(Self {
-            public_key_options: dto.public_key_options,
-            signing_options: dto.signing_options,
             address: dto.address,
             alias: dto.alias,
             outputs: dto.outputs,
@@ -630,15 +565,9 @@ impl<S: SecretManage> TryFromDto<WalletDataDto<S::GenerationOptions, S::SigningO
     }
 }
 
-impl<S: SecretManage> From<&WalletData<S>> for WalletDataDto<S::GenerationOptions, S::SigningOptions>
-where
-    S::GenerationOptions: Clone,
-    S::SigningOptions: Clone,
-{
-    fn from(value: &WalletData<S>) -> Self {
+impl From<&WalletData> for WalletDataDto {
+    fn from(value: &WalletData) -> Self {
         Self {
-            public_key_options: value.public_key_options.clone(),
-            signing_options: value.signing_options.clone(),
             address: value.address.clone(),
             alias: value.alias.clone(),
             outputs: value.outputs.clone(),
@@ -753,8 +682,6 @@ mod test {
         );
 
         let wallet_data = WalletData {
-            public_key_options: PublicKeyOptions::new(4218),
-            signing_options: Bip44::new(4218),
             address: crate::types::block::address::Bech32Address::from_str(
                 "rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy",
             )
@@ -770,18 +697,16 @@ mod test {
             native_token_foundries: HashMap::new(),
         };
 
-        let deser_wallet_data = WalletData::<MnemonicSecretManager>::try_from_dto(
-            serde_json::from_str::<WalletDataDto<_, _>>(
-                &serde_json::to_string(&WalletDataDto::from(&wallet_data)).unwrap(),
-            )
-            .unwrap(),
+        let deser_wallet_data = WalletData::try_from_dto(
+            serde_json::from_str::<WalletDataDto>(&serde_json::to_string(&WalletDataDto::from(&wallet_data)).unwrap())
+                .unwrap(),
         )
         .unwrap();
 
         assert_eq!(wallet_data, deser_wallet_data);
     }
 
-    impl<S: 'static + SecretManage<GenerationOptions = PublicKeyOptions, SigningOptions = Bip44>> WalletData<S> {
+    impl WalletData {
         /// Returns a mock of this type with the following values:
         /// index: 0, coin_type: 4218, alias: "Alice", address:
         /// rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy, all other fields are set to their Rust
@@ -789,8 +714,6 @@ mod test {
         #[cfg(feature = "storage")]
         pub(crate) fn mock() -> Self {
             Self {
-                public_key_options: PublicKeyOptions::new(4218),
-                signing_options: Bip44::new(4218),
                 address: crate::types::block::address::Bech32Address::from_str(
                     "rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy",
                 )

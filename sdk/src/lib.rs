@@ -28,5 +28,7 @@ pub use crypto;
 pub use packable;
 pub use primitive_types::U256;
 
+use crate::wallet::core::SecretData;
+
 #[cfg(feature = "wallet")]
-pub type Wallet = self::wallet::Wallet<client::secret::SecretManager>;
+pub type Wallet = self::wallet::Wallet<SecretData<client::secret::SecretManager>>;

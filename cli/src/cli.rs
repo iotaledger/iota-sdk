@@ -13,7 +13,7 @@ use iota_sdk::{
     },
     crypto::keys::bip44::Bip44,
     types::block::address::Bech32Address,
-    wallet::ClientOptions,
+    wallet::{ClientOptions, WalletBuilder},
 };
 use log::LevelFilter;
 
@@ -291,7 +291,7 @@ pub async fn init_command(
             .with_address_index(bip.address_index)
     });
 
-    Ok(Wallet::builder()
+    Ok(WalletBuilder::new()
         .with_secret_manager(secret_manager)
         .with_client_options(ClientOptions::new().with_node(init_params.node_url.as_str())?)
         .with_storage_path(storage_path.to_str().expect("invalid unicode"))
@@ -332,7 +332,7 @@ pub async fn node_info_command(storage_path: &Path) -> Result<Wallet, Error> {
 pub async fn restore_command(storage_path: &Path, snapshot_path: &Path, backup_path: &Path) -> Result<Wallet, Error> {
     check_file_exists(backup_path).await?;
 
-    let mut builder = Wallet::builder();
+    let mut builder = WalletBuilder::new().with_secret_type();
     if check_file_exists(snapshot_path).await.is_ok() {
         println!(
             "Detected a stronghold file at {}. Enter password to unlock:",
@@ -400,7 +400,7 @@ pub async fn unlock_wallet(
         None
     };
 
-    let maybe_wallet = Wallet::builder()
+    let maybe_wallet = WalletBuilder::new()
         .with_secret_manager(secret_manager)
         .with_storage_path(storage_path.to_str().expect("invalid unicode"))
         .finish()

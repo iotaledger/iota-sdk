@@ -12,7 +12,7 @@
 //! cargo run --release --all-features --example destroy_foundry
 //! ```
 
-use iota_sdk::{types::block::output::TokenId, wallet::Result, Wallet};
+use iota_sdk::{client::secret::SecretManager, types::block::output::TokenId, wallet::Result, Wallet};
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -24,6 +24,7 @@ async fn main() -> Result<()> {
     }
 
     let wallet = Wallet::builder()
+        .with_secret_type::<SecretManager>()
         .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
         .finish()
         .await?;

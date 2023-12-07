@@ -20,7 +20,7 @@ use iota_sdk::{
         output::BasicOutput,
         payload::signed_transaction::TransactionId,
     },
-    wallet::{ClientOptions, FilterOptions, Result, SendParams, Wallet},
+    wallet::{core::SecretData, ClientOptions, FilterOptions, Result, SendParams, Wallet, WalletBuilder},
 };
 
 // The number of spamming rounds.
@@ -52,7 +52,7 @@ async fn main() -> Result<()> {
         .await?
         .to_bech32_unchecked("smr");
 
-    let wallet = Wallet::builder()
+    let wallet = WalletBuilder::new()
         .with_secret_manager(secret_manager)
         .with_client_options(client_options)
         .with_public_key_options(PublicKeyOptions::new(IOTA_COIN_TYPE))
@@ -156,8 +156,8 @@ async fn main() -> Result<()> {
     Ok(())
 }
 
-async fn ensure_enough_funds<S: 'static + SecretManage>(
-    wallet: &Wallet<S>,
+async fn ensure_enough_funds<T: 'static + Send + Sync + Clone>(
+    wallet: &Wallet<T>,
     bech32_address: &Bech32Address,
 ) -> Result<()> {
     let balance = wallet.sync(None).await?;
@@ -201,7 +201,7 @@ async fn ensure_enough_funds<S: 'static + SecretManage>(
 }
 
 async fn wait_for_inclusion<S: 'static + SecretManage>(
-    wallet: &Wallet<S>,
+    wallet: &Wallet<SecretData<S>>,
     transaction_id: &TransactionId,
 ) -> Result<()> {
     println!(

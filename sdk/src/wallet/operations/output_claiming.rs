@@ -19,7 +19,7 @@ use crate::{
         slot::SlotIndex,
     },
     wallet::{
-        core::WalletData,
+        core::{SecretData, WalletData},
         operations::{helpers::time::can_output_be_unlocked_now, transaction::TransactionOptions},
         types::{OutputData, TransactionWithMetadata},
         Wallet,
@@ -37,7 +37,7 @@ pub enum OutputsToClaim {
     All,
 }
 
-impl<S: SecretManage> WalletData<S> {
+impl WalletData {
     /// Get basic and nft outputs that have
     /// [`ExpirationUnlockCondition`](crate::types::block::output::unlock_condition::ExpirationUnlockCondition),
     /// [`StorageDepositReturnUnlockCondition`] or
@@ -125,7 +125,7 @@ impl<S: SecretManage> WalletData<S> {
     }
 }
 
-impl<S: 'static + SecretManage> Wallet<S> {
+impl<T> Wallet<T> {
     /// Get basic and nft outputs that have
     /// [`ExpirationUnlockCondition`](crate::types::block::output::unlock_condition::ExpirationUnlockCondition),
     /// [`StorageDepositReturnUnlockCondition`] or
@@ -174,7 +174,9 @@ impl<S: 'static + SecretManage> Wallet<S> {
         log::debug!("[OUTPUT_CLAIMING] available basic outputs: {}", basic_outputs.len());
         Ok(basic_outputs)
     }
+}
 
+impl<S: SecretManage> Wallet<SecretData<S>> {
     /// Try to claim basic or nft outputs that have additional unlock conditions to their [AddressUnlockCondition]
     /// from [`Wallet::claimable_outputs()`].
     pub async fn claim_outputs<I: IntoIterator<Item = OutputId> + Send>(
@@ -213,7 +215,9 @@ impl<S: 'static + SecretManage> Wallet<S> {
         );
         Ok(claim_tx)
     }
+}
 
+impl<T> Wallet<T> {
     /// Try to claim basic outputs that have additional unlock conditions to their [AddressUnlockCondition].
     pub async fn prepare_claim_outputs<I: IntoIterator<Item = OutputId> + Send>(
         &self,

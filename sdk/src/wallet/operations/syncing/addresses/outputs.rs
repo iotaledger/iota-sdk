@@ -3,17 +3,14 @@
 
 use instant::Instant;
 
-use crate::{
-    client::secret::SecretManage,
-    wallet::{
-        constants::PARALLEL_REQUESTS_AMOUNT,
-        task,
-        types::{address::AddressWithUnspentOutputs, OutputData},
-        Wallet,
-    },
+use crate::wallet::{
+    constants::PARALLEL_REQUESTS_AMOUNT,
+    task,
+    types::{address::AddressWithUnspentOutputs, OutputData},
+    Wallet,
 };
 
-impl<S: 'static + SecretManage> Wallet<S> {
+impl<T: 'static + Send + Sync + Clone> Wallet<T> {
     /// Get outputs from addresses
     pub(crate) async fn get_outputs_from_address_output_ids(
         &self,

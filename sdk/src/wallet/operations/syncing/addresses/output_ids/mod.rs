@@ -12,10 +12,7 @@ use futures::FutureExt;
 use instant::Instant;
 
 use crate::{
-    client::{
-        node_api::indexer::query_parameters::{FoundryOutputQueryParameters, OutputQueryParameters},
-        secret::SecretManage,
-    },
+    client::node_api::indexer::query_parameters::{FoundryOutputQueryParameters, OutputQueryParameters},
     types::block::{address::Bech32Address, output::OutputId},
     wallet::{
         constants::PARALLEL_REQUESTS_AMOUNT, operations::syncing::SyncOptions,
@@ -23,7 +20,7 @@ use crate::{
     },
 };
 
-impl<S: 'static + SecretManage> Wallet<S> {
+impl<T: 'static + Send + Sync + Clone> Wallet<T> {
     /// Returns output ids for outputs that are directly (Ed25519 address in AddressUnlockCondition) or indirectly
     /// (account/nft address in AddressUnlockCondition and the account/nft output is controlled with the Ed25519
     /// address) connected to

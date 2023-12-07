@@ -24,7 +24,7 @@ use iota_sdk::{
     },
     crypto::keys::bip44::Bip44,
     types::block::address::{Ed25519Address, ToBech32Ext},
-    wallet::{ClientOptions, Result, Wallet},
+    wallet::{ClientOptions, Result, Wallet, WalletBuilder},
 };
 
 // The address to send coins to
@@ -43,7 +43,7 @@ async fn main() -> Result<()> {
 
     let client_options = ClientOptions::new().with_node(&std::env::var("NODE_URL").unwrap())?;
     let secret_manager = std::sync::Arc::new(LedgerSecretManager::new(true));
-    let wallet = Wallet::builder()
+    let wallet = WalletBuilder::new()
         .with_secret_manager(secret_manager.clone())
         .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
         .with_client_options(client_options)

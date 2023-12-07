@@ -19,7 +19,7 @@ use iota_sdk::{
         address::Address,
         output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder},
     },
-    wallet::{ClientOptions, Result, Wallet},
+    wallet::{ClientOptions, Result, Wallet, WalletBuilder},
 };
 
 // The amount of base coins we'll send
@@ -40,7 +40,7 @@ async fn main() -> Result<()> {
 
     let secret_manager = MnemonicSecretManager::try_from_mnemonic(std::env::var("MNEMONIC").unwrap())?;
 
-    let wallet = Wallet::builder()
+    let wallet = WalletBuilder::new()
         .with_secret_manager(secret_manager)
         .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
         .with_client_options(client_options)

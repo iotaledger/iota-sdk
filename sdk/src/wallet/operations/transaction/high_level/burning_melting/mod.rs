@@ -6,12 +6,12 @@ use crate::{
         api::{input_selection::Burn, PreparedTransactionData},
         secret::SecretManage,
     },
-    wallet::{operations::transaction::TransactionOptions, types::TransactionWithMetadata, Wallet},
+    wallet::{core::SecretData, operations::transaction::TransactionOptions, types::TransactionWithMetadata, Wallet},
 };
 
 pub(crate) mod melt_native_token;
 
-impl<S: 'static + SecretManage> Wallet<S> {
+impl<S: SecretManage> Wallet<SecretData<S>> {
     /// A generic function that can be used to burn native tokens, nfts, foundries and accounts.
     ///
     /// Note that burning **native tokens** doesn't require the foundry output which minted them, but will not increase
@@ -27,7 +27,9 @@ impl<S: 'static + SecretManage> Wallet<S> {
 
         self.sign_and_submit_transaction(prepared, None, options).await
     }
+}
 
+impl<T> Wallet<T> {
     /// A generic `prepare_burn()` function that can be used to prepare the burn of native tokens, nfts, foundries and
     /// accounts.
     ///

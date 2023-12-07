@@ -3,6 +3,7 @@
 
 use std::collections::{HashMap, HashSet};
 
+use serde::Serialize;
 use url::Url;
 
 use crate::{
@@ -11,13 +12,12 @@ use crate::{
             builder::NodeManagerBuilder,
             node::{Node, NodeAuth, NodeDto},
         },
-        secret::{SecretManage, SecretManagerConfig},
         Client, ClientBuilder,
     },
-    wallet::{Wallet, WalletBuilder},
+    wallet::{core::builder::BuilderFrom, Wallet, WalletBuilder},
 };
 
-impl<S: 'static + SecretManage> Wallet<S> {
+impl<T> Wallet<T> {
     pub fn client(&self) -> &Client {
         &self.client
     }
@@ -27,7 +27,10 @@ impl<S: 'static + SecretManage> Wallet<S> {
     }
 }
 
-impl<S: 'static + SecretManagerConfig> Wallet<S> {
+impl<T: Sync + BuilderFrom> Wallet<T>
+where
+    T::Builder: Send + Sync + Serialize,
+{
     pub async fn set_client_options(&self, client_options: ClientBuilder) -> crate::wallet::Result<()> {
         let ClientBuilder {
             node_manager_builder,

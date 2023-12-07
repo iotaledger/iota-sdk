@@ -6,7 +6,7 @@ use std::pin::Pin;
 use futures::Future;
 use iota_sdk::{
     client::{secret::SecretManager, Client},
-    wallet::Wallet,
+    wallet::{core::SecretData, Wallet},
 };
 
 use crate::{
@@ -35,7 +35,7 @@ impl CallMethod for Client {
     }
 }
 
-impl CallMethod for Wallet<SecretManager> {
+impl CallMethod for Wallet<SecretData<SecretManager>> {
     type Method = WalletMethod;
 
     fn call_method<'a>(&'a self, method: Self::Method) -> Pin<Box<dyn Future<Output = Response> + 'a>> {
@@ -55,7 +55,7 @@ pub async fn call_client_method(client: &Client, method: ClientMethod) -> Respon
 }
 
 /// Call a wallet method.
-pub async fn call_wallet_method(wallet: &Wallet<SecretManager>, method: WalletMethod) -> Response {
+pub async fn call_wallet_method(wallet: &Wallet<SecretData<SecretManager>>, method: WalletMethod) -> Response {
     log::debug!("Wallet method: {method:?}");
     let result = convert_async_panics(|| async { call_wallet_method_internal(wallet, method).await }).await;
 

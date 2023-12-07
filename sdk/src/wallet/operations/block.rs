@@ -4,10 +4,10 @@
 use crate::{
     client::secret::{BlockSignExt, SecretManage},
     types::block::{output::AccountId, payload::Payload, BlockId},
-    wallet::{Result, Wallet},
+    wallet::{core::SecretData, Result, Wallet},
 };
 
-impl<S: 'static + SecretManage> Wallet<S> {
+impl<S: SecretManage> Wallet<SecretData<S>> {
     pub(crate) async fn submit_basic_block(
         &self,
         payload: Option<Payload>,
@@ -22,10 +22,7 @@ impl<S: 'static + SecretManage> Wallet<S> {
             .client()
             .build_basic_block(issuer_id, payload)
             .await?
-            .sign_ed25519(
-                &*self.get_secret_manager().read().await,
-                &self.data().await.signing_options,
-            )
+            .sign_ed25519(&*self.secret_manager().read().await, &self.signing_options())
             .await?;
 
         let block_id = self.client().post_block(&block).await?;

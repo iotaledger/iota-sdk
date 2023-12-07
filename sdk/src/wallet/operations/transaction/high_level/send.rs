@@ -17,6 +17,7 @@ use crate::{
     utils::{serde::string, ConvertTo},
     wallet::{
         constants::DEFAULT_EXPIRATION_SLOTS,
+        core::SecretData,
         operations::transaction::{TransactionOptions, TransactionWithMetadata},
         Error, Wallet,
     },
@@ -73,7 +74,7 @@ impl SendParams {
     }
 }
 
-impl<S: 'static + SecretManage> Wallet<S> {
+impl<S: SecretManage> Wallet<SecretData<S>> {
     /// Sends a certain amount of base coins to a single address.
     ///
     /// Calls [Wallet::send_with_params()] internally.
@@ -120,7 +121,9 @@ impl<S: 'static + SecretManage> Wallet<S> {
         self.sign_and_submit_transaction(prepared_transaction, None, options)
             .await
     }
+}
 
+impl<T> Wallet<T> {
     /// Prepares the transaction for [Wallet::send()].
     pub async fn prepare_send<I: IntoIterator<Item = SendParams> + Send>(
         &self,

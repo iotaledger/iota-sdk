@@ -21,7 +21,7 @@ use crate::{
     },
 };
 
-impl<S: 'static + SecretManage> Wallet<S> {
+impl<T> Wallet<T> {
     /// Selects inputs for a transaction and locks them in the wallet, so they don't get used again
     pub(crate) async fn select_inputs(
         &self,
@@ -211,8 +211,8 @@ impl<S: 'static + SecretManage> Wallet<S> {
 /// | [Address, StorageDepositReturn, ...]                | no                |
 /// | [Address, StorageDepositReturn, expired Expiration] | yes               |
 #[allow(clippy::too_many_arguments)]
-fn filter_inputs<S: SecretManage>(
-    wallet_data: &WalletData<S>,
+fn filter_inputs(
+    wallet_data: &WalletData,
     available_outputs: Values<'_, OutputId, OutputData>,
     slot_index: SlotIndex,
     custom_inputs: Option<&HashSet<OutputId>>,

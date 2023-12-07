@@ -18,6 +18,7 @@ use crate::{
     utils::ConvertTo,
     wallet::{
         constants::DEFAULT_EXPIRATION_SLOTS,
+        core::SecretData,
         operations::transaction::{TransactionOptions, TransactionWithMetadata},
         Error, Result, Wallet,
     },
@@ -73,7 +74,7 @@ impl SendNativeTokenParams {
     }
 }
 
-impl<S: 'static + SecretManage> Wallet<S> {
+impl<S: SecretManage> Wallet<SecretData<S>> {
     /// Sends native tokens in basic outputs with a
     /// [`StorageDepositReturnUnlockCondition`](crate::types::block::output::unlock_condition::StorageDepositReturnUnlockCondition)
     /// and an [`ExpirationUnlockCondition`], so that the storage deposit is returned to the sender and the sender
@@ -110,7 +111,9 @@ impl<S: 'static + SecretManage> Wallet<S> {
         self.sign_and_submit_transaction(prepared_transaction, None, options)
             .await
     }
+}
 
+impl<T> Wallet<T> {
     /// Prepares the transaction for [Wallet::send_native_tokens()].
     pub async fn prepare_send_native_tokens<I: IntoIterator<Item = SendNativeTokenParams> + Send>(
         &self,

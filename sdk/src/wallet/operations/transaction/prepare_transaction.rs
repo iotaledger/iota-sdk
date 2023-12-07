@@ -18,7 +18,7 @@ use crate::{
     },
 };
 
-impl<S: 'static + SecretManage> Wallet<S> {
+impl<T> Wallet<T> {
     /// Get inputs and build the transaction
     pub async fn prepare_transaction(
         &self,

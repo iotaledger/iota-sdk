@@ -14,7 +14,7 @@ use iota_sdk::{
         secret::{mnemonic::MnemonicSecretManager, PublicKeyOptions, SecretManage},
     },
     crypto::keys::bip44::Bip44,
-    wallet::{ClientOptions, Result, Wallet},
+    wallet::{ClientOptions, Result, Wallet, WalletBuilder},
 };
 
 #[tokio::main]
@@ -30,7 +30,7 @@ async fn main() -> Result<()> {
 
     let client_options = ClientOptions::new().with_node(&std::env::var("NODE_URL").unwrap())?;
 
-    let wallet = Wallet::builder()
+    let wallet = WalletBuilder::new()
         .with_secret_manager(secret_manager)
         .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
         .with_client_options(client_options)
@@ -49,7 +49,7 @@ async fn main() -> Result<()> {
     Ok(())
 }
 
-async fn sync_print_balance<S: 'static + SecretManage>(wallet: &Wallet<S>) -> Result<()> {
+async fn sync_print_balance<T: 'static + Send + Sync + Clone>(wallet: &Wallet<T>) -> Result<()> {
     let alias = wallet.alias().await;
     let now = tokio::time::Instant::now();
     let balance = wallet.sync(None).await?;

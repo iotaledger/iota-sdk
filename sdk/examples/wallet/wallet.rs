@@ -21,7 +21,7 @@ use iota_sdk::{
         secret::{mnemonic::MnemonicSecretManager, PublicKeyOptions, SecretManage},
     },
     types::block::payload::signed_transaction::TransactionId,
-    wallet::{ClientOptions, Result, Wallet},
+    wallet::{core::SecretData, ClientOptions, Result, Wallet, WalletBuilder},
 };
 
 // The amount of coins to send
@@ -53,10 +53,10 @@ async fn main() -> Result<()> {
     Ok(())
 }
 
-async fn create_wallet() -> Result<Wallet<MnemonicSecretManager>> {
+async fn create_wallet() -> Result<Wallet<SecretData<MnemonicSecretManager>>> {
     let client_options = ClientOptions::new().with_node(&std::env::var("NODE_URL").unwrap())?;
     let secret_manager = MnemonicSecretManager::try_from_mnemonic(std::env::var("MNEMONIC").unwrap())?;
-    Wallet::builder()
+    WalletBuilder::new()
         .with_secret_manager(secret_manager)
         .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
         .with_client_options(client_options)
@@ -66,7 +66,7 @@ async fn create_wallet() -> Result<Wallet<MnemonicSecretManager>> {
         .await
 }
 
-async fn sync_print_balance<S: 'static + SecretManage>(wallet: &Wallet<S>, full_report: bool) -> Result<()> {
+async fn sync_print_balance<T: 'static + Send + Sync + Clone>(wallet: &Wallet<T>, full_report: bool) -> Result<()> {
     let now = tokio::time::Instant::now();
     let balance = wallet.sync(None).await?;
     println!("Wallet synced in: {:.2?}", now.elapsed());
@@ -79,7 +79,7 @@ async fn sync_print_balance<S: 'static + SecretManage>(wallet: &Wallet<S>, full_
 }
 
 async fn wait_for_inclusion<S: 'static + SecretManage>(
-    wallet: &Wallet<S>,
+    wallet: &Wallet<SecretData<S>>,
     transaction_id: &TransactionId,
 ) -> Result<()> {
     println!(

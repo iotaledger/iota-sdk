@@ -17,6 +17,7 @@ use crate::{
         },
     },
     wallet::{
+        core::SecretData,
         operations::transaction::TransactionOptions,
         types::{TransactionWithMetadata, TransactionWithMetadataDto},
         Wallet,
@@ -86,7 +87,7 @@ impl From<&PreparedCreateNativeTokenTransaction> for PreparedCreateNativeTokenTr
     }
 }
 
-impl<S: 'static + SecretManage> Wallet<S> {
+impl<S: SecretManage> Wallet<SecretData<S>> {
     /// Creates a new foundry output with minted native tokens.
     ///
     /// Calls [Wallet::send_outputs()] internally, the options may define the remainder value strategy or custom inputs.
@@ -120,7 +121,9 @@ impl<S: 'static + SecretManage> Wallet<S> {
                 transaction,
             })
     }
+}
 
+impl<T> Wallet<T> {
     /// Prepares the transaction for [Wallet::create_native_token()].
     pub async fn prepare_create_native_token(
         &self,

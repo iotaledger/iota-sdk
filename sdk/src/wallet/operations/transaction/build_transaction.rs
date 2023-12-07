@@ -15,7 +15,7 @@ use crate::{
     wallet::{operations::transaction::TransactionOptions, Wallet},
 };
 
-impl<S: 'static + SecretManage> Wallet<S> {
+impl<T> Wallet<T> {
     /// Builds the transaction from the selected in and outputs.
     pub(crate) async fn build_transaction(
         &self,

@@ -10,13 +10,14 @@ use crate::{
         TokenScheme,
     },
     wallet::{
+        core::SecretData,
         operations::transaction::TransactionOptions,
         types::{OutputData, TransactionWithMetadata},
         Error, Wallet,
     },
 };
 
-impl<S: 'static + SecretManage> Wallet<S> {
+impl<S: SecretManage> Wallet<SecretData<S>> {
     /// Melts native tokens.
     ///
     /// This happens with the foundry output which minted them, by increasing it's
@@ -36,7 +37,9 @@ impl<S: 'static + SecretManage> Wallet<S> {
         self.sign_and_submit_transaction(prepared_transaction, None, options)
             .await
     }
+}
 
+impl<T> Wallet<T> {
     /// Prepares the transaction for [Wallet::melt_native_token()].
     pub async fn prepare_melt_native_token(
         &self,

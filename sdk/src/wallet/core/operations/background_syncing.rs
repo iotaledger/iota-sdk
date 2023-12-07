@@ -5,15 +5,12 @@ use std::{sync::atomic::Ordering, time::Duration};
 
 use tokio::time::sleep;
 
-use crate::{
-    client::secret::SecretManage,
-    wallet::{operations::syncing::SyncOptions, Wallet},
-};
+use crate::wallet::{operations::syncing::SyncOptions, Wallet};
 
 /// The default interval for background syncing
 pub(crate) const DEFAULT_BACKGROUNDSYNCING_INTERVAL: Duration = Duration::from_secs(7);
 
-impl<S: 'static + SecretManage> Wallet<S> {
+impl<T: 'static + Send + Sync + Clone> Wallet<T> {
     /// Start the background syncing process for the wallet, default interval is 7 seconds
     pub async fn start_background_syncing(
         &self,

@@ -46,7 +46,7 @@ pub struct ParticipationEventWithNodes {
     pub nodes: Vec<Node>,
 }
 
-impl<S: 'static + SecretManage> Wallet<S> {
+impl<T> Wallet<T> {
     /// Calculates the voting overview of a wallet. If event_ids are provided, only return outputs and tracked
     /// participations for them.
     pub async fn get_participation_overview(
@@ -273,7 +273,7 @@ impl<S: 'static + SecretManage> Wallet<S> {
     }
 }
 
-impl<S: SecretManage> WalletData<S> {
+impl WalletData {
     /// Returns the voting output ("PARTICIPATION" tag).
     ///
     /// If multiple outputs with this tag exist, the one with the largest amount will be returned.

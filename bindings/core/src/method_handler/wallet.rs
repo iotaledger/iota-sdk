@@ -11,7 +11,8 @@ use iota_sdk::{
     },
     types::TryFromDto,
     wallet::{
-        types::TransactionWithMetadataDto, BlockIssuerKeySource, PreparedCreateNativeTokenTransactionDto, Wallet,
+        core::SecretData, types::TransactionWithMetadataDto, BlockIssuerKeySource,
+        PreparedCreateNativeTokenTransactionDto, Wallet,
     },
 };
 
@@ -19,7 +20,7 @@ use crate::{method::WalletMethod, response::Response};
 
 /// Call a wallet method.
 pub(crate) async fn call_wallet_method_internal(
-    wallet: &Wallet<SecretManager>,
+    wallet: &Wallet<SecretData<SecretManager>>,
     method: WalletMethod,
 ) -> crate::Result<Response> {
     let response = match method {
@@ -72,7 +73,7 @@ pub(crate) async fn call_wallet_method_internal(
         }
         #[cfg(feature = "ledger_nano")]
         WalletMethod::GetLedgerNanoStatus => {
-            let ledger_nano_status = (&*wallet.get_secret_manager().read().await)
+            let ledger_nano_status = (&*wallet.secret_manager().read().await)
                 .as_ledger_nano()?
                 .get_ledger_nano_status()
                 .await;

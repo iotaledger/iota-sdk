@@ -8,7 +8,7 @@ use crate::{
     wallet::Wallet,
 };
 
-impl<S: 'static + SecretManage> Wallet<S> {
+impl<T> Wallet<T> {
     /// Returns output ids of NFT outputs that have the address in the `AddressUnlockCondition` or
     /// `ExpirationUnlockCondition`
     pub(crate) async fn get_nft_output_ids_with_any_unlock_condition(

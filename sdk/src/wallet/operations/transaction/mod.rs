@@ -29,12 +29,13 @@ use crate::{
         },
     },
     wallet::{
+        core::SecretData,
         types::{InclusionState, TransactionWithMetadata},
         Wallet,
     },
 };
 
-impl<S: 'static + SecretManage> Wallet<S> {
+impl<S: SecretManage> Wallet<SecretData<S>> {
     /// Sends a transaction by specifying its outputs.
     ///
     /// Note that, if sending a block fails, the method will return `None` for the block id, but the wallet
@@ -194,7 +195,9 @@ impl<S: 'static + SecretManage> Wallet<S> {
 
         Ok(transaction)
     }
+}
 
+impl<T> Wallet<T> {
     // unlock outputs
     async fn unlock_inputs(&self, inputs: &[InputSigningData]) -> crate::wallet::Result<()> {
         let mut wallet_data = self.data_mut().await;

@@ -13,7 +13,7 @@ use iota_sdk::{
     },
     crypto::keys::bip44::Bip44,
     types::block::address::{Ed25519Address, ToBech32Ext},
-    wallet::{ClientOptions, Error as WalletError, Wallet},
+    wallet::{ClientOptions, Error as WalletError, Wallet, WalletBuilder},
 };
 use pretty_assertions::assert_eq;
 
@@ -79,7 +79,7 @@ async fn stronghold_snapshot_v2_v3_migration() {
         ]
     );
 
-    let restore_manager = Wallet::builder()
+    let restore_manager = WalletBuilder::new()
         .with_storage_path("test-storage/stronghold_snapshot_v2_v3_migration")
         .with_secret_manager(stronghold_secret_manager)
         .with_client_options(ClientOptions::new().with_node(NODE_LOCAL).unwrap())

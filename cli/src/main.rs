@@ -8,7 +8,7 @@ mod wallet_cli;
 
 use clap::Parser;
 use fern_logger::{LoggerConfigBuilder, LoggerOutputConfigBuilder};
-use iota_sdk::client::secret::stronghold::StrongholdSecretManager;
+use iota_sdk::{client::secret::stronghold::StrongholdSecretManager, wallet::core::SecretData};
 use log::LevelFilter;
 
 use self::{
@@ -16,7 +16,7 @@ use self::{
     error::Error,
 };
 
-pub type Wallet = iota_sdk::wallet::Wallet<StrongholdSecretManager>;
+pub type Wallet = iota_sdk::wallet::Wallet<SecretData<StrongholdSecretManager>>;
 
 #[macro_export]
 macro_rules! println_log_info {

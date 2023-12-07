@@ -17,7 +17,7 @@ pub use iota_sdk;
 use iota_sdk::{
     client::secret::{SecretManager, SecretManagerDto},
     types::block::address::Bech32Address,
-    wallet::{ClientOptions, Wallet},
+    wallet::{core::SecretData, ClientOptions, Wallet, WalletBuilder},
 };
 use serde::Deserialize;
 
@@ -91,9 +91,9 @@ impl WalletOptions {
         self
     }
 
-    pub async fn build(self) -> iota_sdk::wallet::Result<Wallet<SecretManager>> {
+    pub async fn build(self) -> iota_sdk::wallet::Result<Wallet<SecretData<SecretManager>>> {
         log::debug!("wallet options: {self:?}");
-        let mut builder = Wallet::builder()
+        let mut builder = WalletBuilder::new()
             .with_address(self.address)
             .with_alias(self.alias)
             .with_public_key_options(self.public_key_options)

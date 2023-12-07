@@ -17,7 +17,7 @@
 //! ```
 
 use iota_sdk::{
-    client::node_manager::node::Node,
+    client::{node_manager::node::Node, secret::SecretManager},
     wallet::{types::participation::ParticipationEventRegistrationOptions, Result},
     Wallet,
 };
@@ -47,6 +47,7 @@ async fn main() -> Result<()> {
     }
 
     let wallet = Wallet::builder()
+        .with_secret_type::<SecretManager>()
         .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
         .finish()
         .await?;

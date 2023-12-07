@@ -3,25 +3,21 @@
 
 use std::collections::HashMap;
 
-use crate::{
-    client::secret::{SecretManage, Sign},
-    types::block::{
-        output::{OutputId, OutputMetadata},
-        signature::Ed25519Signature,
-    },
-    wallet::{
-        types::{InclusionState, OutputData, TransactionWithMetadata},
-        Wallet,
-    },
-};
 #[cfg(feature = "events")]
 use crate::{
     types::api::core::OutputWithMetadataResponse,
     types::block::payload::signed_transaction::dto::SignedTransactionPayloadDto,
     wallet::events::types::{NewOutputEvent, SpentOutputEvent, TransactionInclusionEvent, WalletEvent},
 };
+use crate::{
+    types::block::output::{OutputId, OutputMetadata},
+    wallet::{
+        types::{InclusionState, OutputData, TransactionWithMetadata},
+        Wallet,
+    },
+};
 
-impl<S: 'static + SecretManage> Wallet<S> {
+impl<T> Wallet<T> {
     /// Set the alias for the wallet.
     pub async fn set_alias(&self, alias: &str) -> crate::wallet::Result<()> {
         let mut wallet_data = self.data_mut().await;

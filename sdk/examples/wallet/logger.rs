@@ -15,7 +15,7 @@ use iota_sdk::{
     },
     crypto::keys::bip44::Bip44,
     types::block::address::Ed25519Address,
-    wallet::{ClientOptions, Result, Wallet},
+    wallet::{ClientOptions, Result, Wallet, WalletBuilder},
 };
 
 #[tokio::main]
@@ -42,7 +42,7 @@ async fn main() -> Result<()> {
     let secret_manager = std::sync::Arc::new(MnemonicSecretManager::try_from_mnemonic(
         std::env::var("MNEMONIC").unwrap(),
     )?);
-    let wallet = Wallet::builder()
+    let wallet = WalletBuilder::new()
         .with_secret_manager(secret_manager.clone())
         .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
         .with_client_options(client_options)

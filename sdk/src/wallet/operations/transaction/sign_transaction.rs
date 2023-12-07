@@ -1,12 +1,6 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-#[cfg(all(feature = "events", feature = "ledger_nano"))]
-use {
-    crate::client::api::PreparedTransactionDataDto,
-    crate::client::secret::ledger_nano::{needs_blind_signing, LedgerSecretManager},
-};
-
 #[cfg(feature = "events")]
 use crate::wallet::events::types::{TransactionProgressEvent, WalletEvent};
 use crate::{
@@ -16,10 +10,10 @@ use crate::{
         },
         secret::SecretManage,
     },
-    wallet::{operations::transaction::SignedTransactionPayload, Wallet},
+    wallet::{core::SecretData, operations::transaction::SignedTransactionPayload, Wallet},
 };
 
-impl<S: 'static + SecretManage> Wallet<S> {
+impl<S: SecretManage> Wallet<SecretData<S>> {
     /// Signs a transaction.
     pub async fn sign_transaction(
         &self,
@@ -70,14 +64,10 @@ impl<S: 'static + SecretManage> Wallet<S> {
         let protocol_parameters = self.client().get_protocol_parameters().await?;
 
         let unlocks = match self
-            .secret_manager
+            .secret_manager()
             .read()
             .await
-            .transaction_unlocks(
-                prepared_transaction_data,
-                &protocol_parameters,
-                self.data().await.signing_options(),
-            )
+            .transaction_unlocks(prepared_transaction_data, &protocol_parameters, self.signing_options())
             .await
         {
             Ok(res) => res,

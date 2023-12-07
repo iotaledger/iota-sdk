@@ -7,7 +7,7 @@
 //! `cargo run --release --all-features --example account_wallet_request_funds`
 
 use iota_sdk::{
-    client::request_funds_from_faucet,
+    client::{request_funds_from_faucet, secret::SecretManager},
     types::block::address::{AccountAddress, ToBech32Ext},
     wallet::{AccountSyncOptions, Result, SyncOptions},
     Wallet,
@@ -26,6 +26,7 @@ async fn main() -> Result<()> {
 
     // Create the wallet
     let wallet = Wallet::builder()
+        .with_secret_type::<SecretManager>()
         .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
         .finish()
         .await?;

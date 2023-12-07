@@ -13,6 +13,7 @@ use crate::{
     },
     utils::serde::option_prefix_hex_bytes,
     wallet::{
+        core::SecretData,
         operations::transaction::TransactionOptions,
         types::{OutputData, TransactionWithMetadata},
         Wallet,
@@ -34,7 +35,7 @@ pub struct CreateAccountParams {
     pub metadata: Option<Vec<u8>>,
 }
 
-impl<S: 'static + SecretManage> Wallet<S> {
+impl<S: SecretManage> Wallet<SecretData<S>> {
     /// Creates an account output.
     /// ```ignore
     /// let params = CreateAccountParams {
@@ -61,7 +62,9 @@ impl<S: 'static + SecretManage> Wallet<S> {
         self.sign_and_submit_transaction(prepared_transaction, None, options)
             .await
     }
+}
 
+impl<T> Wallet<T> {
     /// Prepares the transaction for [Wallet::create_account_output()].
     pub async fn prepare_create_account_output(
         &self,
