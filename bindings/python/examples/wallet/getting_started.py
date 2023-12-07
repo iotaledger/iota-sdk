@@ -10,7 +10,7 @@ from iota_sdk import (ClientOptions, CoinType, StrongholdSecretManager, Utils,
 
 load_dotenv()
 
-# A name to associate with the created account.
+# A name to associate with the created wallet.
 ACCOUNT_ALIAS = 'Alice'
 
 # The node to connect to.
@@ -21,7 +21,7 @@ node_url = os.environ.get('NODE_URL', 'https://api.testnet.shimmer.network')
 STRONGHOLD_PASSWORD = os.environ.get(
     'STRONGHOLD_PASSWORD', 'a-secure-password')
 
-# The path to store the account snapshot.
+# The path to store the wallet snapshot.
 STRONGHOLD_SNAPSHOT_PATH = 'vault.stronghold'
 
 # Setup Stronghold secret manager

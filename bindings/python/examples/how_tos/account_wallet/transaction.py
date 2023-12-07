@@ -2,15 +2,15 @@ import os
 
 from dotenv import load_dotenv
 
-from iota_sdk import Wallet, Utils, NodeIndexerAPI, SyncOptions, AccountSyncOptions, SendParams
+from iota_sdk import Wallet, WalletOptions, Utils, NodeIndexerAPI, SyncOptions, WalletSyncOptions, SendParams
 
 # In this example we send funds from an account wallet.
 
 load_dotenv()
 
-sync_options = SyncOptions(alias=AccountSyncOptions(basic_outputs=True))
+sync_options = SyncOptions(account=WalletSyncOptions(basic_outputs=True))
 
-wallet = Wallet(os.environ['WALLET_DB_PATH'])
+wallet = Wallet(WalletOptions(storage_path=os.environ.get('WALLET_DB_PATH')))
 
 if 'STRONGHOLD_PASSWORD' not in os.environ:
     raise Exception(".env STRONGHOLD_PASSWORD is undefined, see .env.example")
@@ -41,8 +41,8 @@ params = [SendParams(
 options = {
     'mandatoryInputs': inputs,
 }
-transaction = account.send_with_params(params, options)
-account.reissue_transaction_until_included(
+transaction = wallet.send_with_params(params, options)
+wallet.reissue_transaction_until_included(
     transaction.transaction_id)
 print(
     f'Transaction with custom input: https://explorer.shimmer.network/testnet/transaction/{transaction.transaction_id}')

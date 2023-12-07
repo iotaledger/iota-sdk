@@ -10,7 +10,7 @@ import time
 
 from dotenv import load_dotenv
 
-from iota_sdk import SyncOptions, Wallet, WalletEventType
+from iota_sdk import SyncOptions, Wallet, WalletOptions, WalletEventType
 
 # This example uses secrets in environment variables for simplicity which
 # should not be done in production.
@@ -19,7 +19,7 @@ load_dotenv()
 if 'WALLET_DB_PATH' not in os.environ:
     raise Exception(".env WALLET_DB_PATH is undefined, see .env.example")
 
-wallet = Wallet(os.environ.get('WALLET_DB_PATH'))
+wallet = Wallet(WalletOptions(storage_path=os.environ.get('WALLET_DB_PATH')))
 
 received_event = False
 
@@ -43,7 +43,7 @@ wallet.listen(callback, [WalletEventType.NewOutput])
 print('Fill your address with the faucet: https://faucet.testnet.shimmer.network/')
 
 address = wallet.address()
-print('Send funds to:', addresss)
+print('Send funds to:', address)
 
 # Sync every 5 seconds until the faucet transaction gets confirmed.
 for _ in range(100):

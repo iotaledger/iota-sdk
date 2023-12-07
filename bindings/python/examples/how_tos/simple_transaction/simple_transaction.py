@@ -2,13 +2,13 @@ import os
 
 from dotenv import load_dotenv
 
-from iota_sdk import SendParams, Wallet
+from iota_sdk import SendParams, Wallet, WalletOptions
 
 load_dotenv()
 
 # This example sends a transaction.
 
-wallet = Wallet(os.environ['WALLET_DB_PATH'])
+wallet = Wallet(WalletOptions(storage_path=os.environ.get('WALLET_DB_PATH')))
 
 # Sync account with the node
 response = wallet.sync()
@@ -23,5 +23,5 @@ params = [SendParams(
     amount=1000000,
 )]
 
-transaction = account.send_with_params(params)
+transaction = wallet.send_with_params(params)
 print(f'Block sent: {os.environ["EXPLORER_URL"]}/block/{transaction.block_id}')

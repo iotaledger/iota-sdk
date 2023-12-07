@@ -2,13 +2,13 @@ import os
 
 from dotenv import load_dotenv
 
-from iota_sdk import SendNativeTokenParams, Wallet
+from iota_sdk import SendNativeTokenParams, Wallet, WalletOptions
 
 load_dotenv()
 
 # In this example we will send native tokens
 
-wallet = Wallet(os.environ['WALLET_DB_PATH'])
+wallet = Wallet(WalletOptions(storage_path=os.environ.get('WALLET_DB_PATH')))
 
 # Sync account with the node
 balance = wallet.sync()
@@ -30,11 +30,11 @@ outputs = [SendNativeTokenParams(
     ),
 )]
 
-transaction = account.send_native_tokens(outputs, None)
+transaction = wallet.send_native_tokens(outputs, None)
 print(f'Transaction sent: {transaction.transaction_id}')
 
 # Wait for transaction to get included
-block_id = account.reissue_transaction_until_included(
+block_id = wallet.reissue_transaction_until_included(
     transaction.transaction_id)
 print(f'Block included: {os.environ["EXPLORER_URL"]}/block/{block_id}')
 

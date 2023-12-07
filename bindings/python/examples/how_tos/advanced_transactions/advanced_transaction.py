@@ -9,6 +9,7 @@ from iota_sdk import (
     Client,
     Ed25519Address,
     Wallet,
+    WalletOptions,
     Utils,
     TimelockUnlockCondition,
 )
@@ -18,7 +19,7 @@ load_dotenv()
 
 # This example sends a transaction with a timelock.
 
-wallet = Wallet(os.environ['WALLET_DB_PATH'])
+wallet = Wallet(WalletOptions(storage_path=os.environ.get('WALLET_DB_PATH')))
 
 # Sync account with the node
 response = wallet.sync()
@@ -44,10 +45,10 @@ basic_output = Client().build_basic_output(
     ],
 )
 
-transaction = account.send_outputs([basic_output])
+transaction = wallet.send_outputs([basic_output])
 print(f'Transaction sent: {transaction.transaction_id}')
 
-block_id = account.reissue_transaction_until_included(
+block_id = wallet.reissue_transaction_until_included(
     transaction.transaction_id)
 
 print(

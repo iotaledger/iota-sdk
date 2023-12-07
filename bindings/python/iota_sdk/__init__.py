@@ -8,7 +8,7 @@ from .client._high_level_api import GenerateAddressesOptions, GenerateAddressOpt
 from .utils import Utils
 from .wallet.wallet import Wallet, WalletOptions
 from .wallet.common import WalletError
-from .wallet.sync_options import AccountSyncOptions, NftSyncOptions, SyncOptions
+from .wallet.sync_options import AccountSyncOptions, NftSyncOptions, SyncOptions, WalletSyncOptions
 from .secret_manager.secret_manager import *
 from .prefix_hex import *
 from .types.address import *

@@ -2,13 +2,13 @@ import os
 
 from dotenv import load_dotenv
 
-from iota_sdk import Wallet, SendParams
+from iota_sdk import Wallet, WalletOptions, SendParams
 
 load_dotenv()
 
 # In this example we will send an amount below the minimum amount
 
-wallet = Wallet(os.environ['WALLET_DB_PATH'])
+wallet = Wallet(WalletOptions(storage_path=os.environ.get('WALLET_DB_PATH')))
 
 # Sync account with the node
 response = wallet.sync()
@@ -23,10 +23,10 @@ params = [SendParams(
     amount=1,
 )]
 
-transaction = account.send_with_params(params, {"allowMicroAmount": True})
+transaction = wallet.send_with_params(params, {"allowMicroAmount": True})
 print(f'Transaction sent: {transaction.transaction_id}')
 
-block_id = account.reissue_transaction_until_included(
+block_id = wallet.reissue_transaction_until_included(
     transaction.transaction_id)
 
 print(

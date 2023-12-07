@@ -2,13 +2,13 @@ import os
 
 from dotenv import load_dotenv
 
-from iota_sdk import SendNftParams, Wallet
+from iota_sdk import SendNftParams, Wallet, WalletOptions
 
 load_dotenv()
 
 # In this example we will send an nft
 
-wallet = Wallet(os.environ['WALLET_DB_PATH'])
+wallet = Wallet(WalletOptions(storage_path=os.environ.get('WALLET_DB_PATH')))
 
 if 'STRONGHOLD_PASSWORD' not in os.environ:
     raise Exception(".env STRONGHOLD_PASSWORD is undefined, see .env.example")
@@ -23,5 +23,5 @@ outputs = [SendNftParams(
     nft_id=balance.nfts[0],
 )]
 
-transaction = account.send_nft(outputs)
+transaction = wallet.send_nft(outputs)
 print(f'Block sent: {os.environ["EXPLORER_URL"]}/block/{transaction.block_id}')

@@ -9,7 +9,7 @@ import os
 
 from dotenv import load_dotenv
 
-from iota_sdk import ClientOptions, CoinType, StrongholdSecretManager, Wallet
+from iota_sdk import ClientOptions, CoinType, StrongholdSecretManager, Wallet, WalletOptions, Bip44
 
 load_dotenv()
 
@@ -28,20 +28,21 @@ for env_var in ['STRONGHOLD_PASSWORD', 'MNEMONIC']:
 secret_manager = StrongholdSecretManager(
     STRONGHOLD_SNAPSHOT_PATH, os.environ['STRONGHOLD_PASSWORD'])
 
-wallet = Wallet(OFFLINE_WALLET_DB_PATH, offline_client_options,
-                CoinType.IOTA, secret_manager)
+bib_path = Bip44(
+    coin_type=CoinType.SHIMMER
+)
+
+wallet_options = WalletOptions(None, None, bib_path, offline_client_options, secret_manager, OFFLINE_WALLET_DB_PATH)
+wallet = Wallet(wallet_options)
 
 # Store the mnemonic in the Stronghold snapshot, this only needs to be
 # done once
 wallet.store_mnemonic(os.environ['MNEMONIC'])
 
-account = wallet.create_account('Alice', "rms")
-print("Account created:", account.get_metadata())
-
-# Get the addresses from the account (by default only one)
+# Get the address from the wallet
 address = wallet.address()
 
-json_data = json.dumps(list(map(lambda x: x.__dict__, addresses)), indent=4)
+json_data = json.dumps(list(map(lambda x: x.__dict__, address)), indent=4)
 print(f"example.addresses.json:\n{json_data}")
 f = open(ADDRESSES_FILE_PATH, "w", encoding="utf-8")
 f.write(json_data)

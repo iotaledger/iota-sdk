@@ -3,16 +3,16 @@ import time
 
 from dotenv import load_dotenv
 
-from iota_sdk import Wallet, Utils, SyncOptions, AccountSyncOptions
+from iota_sdk import Wallet, WalletOptions, Utils, SyncOptions, WalletSyncOptions
 
-# In this example we request funds to an account wallet.
+# In this example we request funds to a wallet.
 
 load_dotenv()
 
 FAUCET_URL = os.environ.get(
     'FAUCET_URL', 'https://faucet.testnet.shimmer.network/api/enqueue')
 
-wallet = Wallet(os.environ['WALLET_DB_PATH'])
+wallet = Wallet(WalletOptions(storage_path=os.environ.get('WALLET_DB_PATH')))
 balance = wallet.sync(None)
 
 total_base_token_balance = balance.base_coin.total
@@ -31,7 +31,7 @@ print(faucet_response)
 
 time.sleep(10)
 
-sync_options = SyncOptions(alias=AccountSyncOptions(basic_outputs=True))
+sync_options = SyncOptions(wallet=WalletSyncOptions(basic_outputs=True))
 
 total_base_token_balance = wallet.sync(sync_options).base_coin.total
 print(

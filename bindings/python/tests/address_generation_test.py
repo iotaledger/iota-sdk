@@ -37,14 +37,14 @@ def test_address_generation_shimmer():
     secret_manager = MnemonicSecretManager(
         "acoustic trophy damage hint search taste love bicycle foster cradle brown govern endless depend situate athlete pudding blame question genius transfer van random vast")
 
-    
+
     bib_path = Bip44(
         coin_type=CoinType.IOTA
     )
     wallet_options = WalletOptions(None, None, bib_path, client_options, secret_manager, db_path)
     wallet = Wallet(wallet_options)
 
-    address = account.address()
+    address = wallet.address()
 
     assert 'smr1qzev36lk0gzld0k28fd2fauz26qqzh4hd4cwymlqlv96x7phjxcw6ckj80y' == address
     shutil.rmtree(db_path, ignore_errors=True)
