@@ -14,6 +14,7 @@ use crate::types::block::{
         UnlockCondition,
     },
     payload::signed_transaction::{Transaction, TransactionCapabilityFlag, TransactionSigningHash},
+    protocol::ProtocolParameters,
     unlock::Unlock,
     Error,
 };
@@ -206,6 +207,7 @@ pub struct SemanticValidationContext<'a> {
     pub(crate) unlocked_addresses: HashSet<Address>,
     pub(crate) storage_deposit_returns: HashMap<Address, u64>,
     pub(crate) simple_deposits: HashMap<Address, u64>,
+    pub(crate) protocol_parameters: ProtocolParameters,
 }
 
 impl<'a> SemanticValidationContext<'a> {
@@ -214,6 +216,7 @@ impl<'a> SemanticValidationContext<'a> {
         transaction: &'a Transaction,
         inputs: &'a [(&'a OutputId, &'a Output)],
         unlocks: Option<&'a [Unlock]>,
+        protocol_parameters: ProtocolParameters,
     ) -> Self {
         let transaction_id = transaction.id();
         let input_chains = inputs
@@ -258,6 +261,7 @@ impl<'a> SemanticValidationContext<'a> {
             unlocked_addresses: HashSet::new(),
             storage_deposit_returns: HashMap::new(),
             simple_deposits: HashMap::new(),
+            protocol_parameters,
         }
     }
 
@@ -279,20 +283,42 @@ impl<'a> SemanticValidationContext<'a> {
                 Output::Delegation(output) => (output.amount(), 0, None, output.unlock_conditions()),
             };
 
-            if unlock_conditions.is_time_locked(self.transaction.creation_slot()) {
-                return Ok(Some(TransactionFailureReason::TimelockNotExpired));
+            let commitment_slot_index = self
+                .transaction
+                .context_inputs()
+                .iter()
+                .find_map(|c| c.as_commitment_opt().map(|c| c.slot_index()));
+
+            if let Some(timelock) = unlock_conditions.timelock() {
+                if let Some(commitment_slot_index) = commitment_slot_index {
+                    if timelock.is_timelocked(commitment_slot_index, self.protocol_parameters.min_committable_age()) {
+                        return Ok(Some(TransactionFailureReason::TimelockNotExpired));
+                    }
+                } else {
+                    // Missing CommitmentContextInput
+                    return Ok(Some(TransactionFailureReason::InvalidCommitmentContextInput));
+                }
             }
 
-            if !unlock_conditions.is_expired(self.transaction.creation_slot()) {
-                if let Some(storage_deposit_return) = unlock_conditions.storage_deposit_return() {
-                    let amount = self
-                        .storage_deposit_returns
-                        .entry(storage_deposit_return.return_address().clone())
-                        .or_default();
+            if let Some(expiration) = unlock_conditions.expiration() {
+                if let Some(commitment_slot_index) = commitment_slot_index {
+                    if expiration.is_expired(commitment_slot_index, self.protocol_parameters.committable_age_range())
+                        == Some(false)
+                    {
+                        if let Some(storage_deposit_return) = unlock_conditions.storage_deposit_return() {
+                            let amount = self
+                                .storage_deposit_returns
+                                .entry(storage_deposit_return.return_address().clone())
+                                .or_default();
 
-                    *amount = amount
-                        .checked_add(storage_deposit_return.amount())
-                        .ok_or(Error::StorageDepositReturnOverflow)?;
+                            *amount = amount
+                                .checked_add(storage_deposit_return.amount())
+                                .ok_or(Error::StorageDepositReturnOverflow)?;
+                        }
+                    }
+                } else {
+                    // Missing CommitmentContextInput
+                    return Ok(Some(TransactionFailureReason::InvalidCommitmentContextInput));
                 }
             }
 

@@ -318,8 +318,21 @@ impl BasicOutput {
         unlock: &Unlock,
         context: &mut SemanticValidationContext<'_>,
     ) -> Result<(), TransactionFailureReason> {
+        let slot_index = context
+            .transaction
+            .context_inputs()
+            .iter()
+            .find_map(|c| c.as_commitment_opt().map(|c| c.slot_index()));
+
         self.unlock_conditions()
-            .locked_address(self.address(), context.transaction.creation_slot())
+            .locked_address(
+                self.address(),
+                slot_index,
+                context.protocol_parameters.committable_age_range(),
+            )
+            .map_err(|_| TransactionFailureReason::InvalidCommitmentContextInput)?
+            // because of expiration the input can't be unlocked at this time
+            .ok_or(TransactionFailureReason::SemanticValidationFailed)?
             .unlock(unlock, context)
     }
 

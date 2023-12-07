@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use alloc::{collections::BTreeSet, vec::Vec};
+use alloc::collections::BTreeSet;
 
 use hashbrown::HashMap;
 use packable::{
@@ -654,6 +654,7 @@ fn verify_unlock_conditions(unlock_conditions: &UnlockConditions, anchor_id: &An
 
 #[cfg(feature = "serde")]
 mod dto {
+    use alloc::vec::Vec;
 
     use serde::{Deserialize, Serialize};
 
