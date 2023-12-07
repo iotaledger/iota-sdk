@@ -79,12 +79,22 @@ class StorageScoreParameters:
         offset_staking_feature: Defines the offset to be used for staking feature.
         offset_delegation: Defines the offset to be used for delegation output.
     """
-    storage_cost: int
+    storage_cost: int = field(metadata=config(
+        encoder=str
+    ))
     factor_data: int
-    offset_output_overhead: int
-    offset_ed25519_block_issuer_key: int
-    offset_staking_feature: int
-    offset_delegation: int
+    offset_output_overhead: int = field(metadata=config(
+        encoder=str
+    ))
+    offset_ed25519_block_issuer_key: int = field(metadata=config(
+        encoder=str
+    ))
+    offset_staking_feature: int = field(metadata=config(
+        encoder=str
+    ))
+    offset_delegation: int = field(metadata=config(
+        encoder=str
+    ))
 
 
 @json
@@ -259,22 +269,14 @@ class ProtocolParameters:
     slot_duration_in_seconds: int
     slots_per_epoch_exponent: int
     mana_parameters: ManaParameters
-    staking_unbonding_period: int = field(metadata=config(
-        encoder=str
-    ))
+    staking_unbonding_period: int
     validation_blocks_per_slot: int
     punishment_epochs: int
     liveness_threshold_lower_bound: int
     liveness_threshold_upper_bound: int
-    min_committable_age: int = field(metadata=config(
-        encoder=str
-    ))
-    max_committable_age: int = field(metadata=config(
-        encoder=str
-    ))
-    epoch_nearing_threshold: int = field(metadata=config(
-        encoder=str
-    ))
+    min_committable_age: int
+    max_committable_age: int
+    epoch_nearing_threshold: int
     congestion_control_parameters: CongestionControlParameters
     version_signaling_parameters: VersionSignalingParameters
     rewards_parameters: RewardsParameters
