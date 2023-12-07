@@ -66,7 +66,7 @@ pub async fn get_secret_manager(method_handler: &WalletMethodHandler) -> Result<
         .await
         .as_ref()
         .ok_or_else(|| "wallet got destroyed".to_string())?
-        .get_secret_manager()
+        .secret_manager()
         .clone();
 
     Ok(SecretManagerMethodHandler { secret_manager })

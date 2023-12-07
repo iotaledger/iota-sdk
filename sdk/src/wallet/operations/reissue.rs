@@ -62,7 +62,7 @@ where
                     )
                     .await?
                     .sign_ed25519(
-                        &*self.get_secret_manager().read().await,
+                        &*self.secret_manager().read().await,
                         self.bip_path().await.ok_or(Error::MissingBipPath)?,
                     )
                     .await?
@@ -110,7 +110,7 @@ where
                             )
                             .await?
                             .sign_ed25519(
-                                &*self.get_secret_manager().read().await,
+                                &*self.secret_manager().read().await,
                                 self.bip_path().await.ok_or(Error::MissingBipPath)?,
                             )
                             .await?;
