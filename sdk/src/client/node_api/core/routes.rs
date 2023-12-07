@@ -16,12 +16,13 @@ use crate::{
     },
     types::{
         api::core::{
-            BlockMetadataResponse, CommitteeResponse, CongestionResponse, InfoResponse, IssuanceBlockHeaderResponse,
-            ManaRewardsResponse, PeerResponse, RoutesResponse, SubmitBlockResponse, UtxoChangesResponse,
-            ValidatorResponse, ValidatorsResponse,
+            BlockMetadataResponse, BlockWithMetadataResponse, CommitteeResponse, CongestionResponse, InfoResponse,
+            IssuanceBlockHeaderResponse, ManaRewardsResponse, PeerResponse, RoutesResponse, SubmitBlockResponse,
+            UtxoChangesResponse, ValidatorResponse, ValidatorsResponse,
         },
         block::{
-            output::{dto::OutputDto, AccountId, Output, OutputId, OutputMetadata},
+            address::ToBech32Ext,
+            output::{AccountId, Output, OutputId, OutputMetadata},
             payload::signed_transaction::TransactionId,
             slot::{EpochIndex, SlotCommitment, SlotCommitmentId, SlotIndex},
             Block, BlockDto, BlockId,
@@ -86,9 +87,10 @@ impl ClientInner {
     }
 
     /// Checks if the account is ready to issue a block.
-    /// GET /api/core/v3/accounts/{accountId}/congestion
+    /// GET /api/core/v3/accounts/{bech32Address}/congestion
     pub async fn get_account_congestion(&self, account_id: &AccountId) -> Result<CongestionResponse> {
-        let path = &format!("api/core/v3/accounts/{account_id}/congestion");
+        let bech32_address = account_id.to_bech32(self.get_bech32_hrp().await?);
+        let path = &format!("api/core/v3/accounts/{bech32_address}/congestion");
 
         self.get_request(path, None, false, false).await
     }
@@ -147,9 +149,10 @@ impl ClientInner {
     }
 
     /// Return information about a validator.
-    /// GET /api/core/v3/validators/{accountId}
+    /// GET /api/core/v3/validators/{bech32Address}
     pub async fn get_validator(&self, account_id: &AccountId) -> Result<ValidatorResponse> {
-        let path = &format!("api/core/v3/validators/{account_id}");
+        let bech32_address = account_id.to_bech32(self.get_bech32_hrp().await?);
+        let path = &format!("api/core/v3/validators/{bech32_address}");
 
         self.get_request(path, None, false, false).await
     }
@@ -219,6 +222,14 @@ impl ClientInner {
         self.get_request(path, None, true, true).await
     }
 
+    /// Returns a block with its metadata.
+    /// GET /api/core/v3/blocks/{blockId}/full
+    pub async fn get_block_with_metadata(&self, block_id: &BlockId) -> Result<BlockWithMetadataResponse> {
+        let path = &format!("api/core/v3/blocks/{block_id}/full");
+
+        self.get_request(path, None, true, true).await
+    }
+
     // UTXO routes.
 
     /// Finds an output by its ID and returns it as object.
@@ -226,9 +237,7 @@ impl ClientInner {
     pub async fn get_output(&self, output_id: &OutputId) -> Result<Output> {
         let path = &format!("api/core/v3/outputs/{output_id}");
 
-        Ok(Output::try_from(
-            self.get_request::<OutputDto>(path, None, false, true).await?,
-        )?)
+        self.get_request(path, None, false, true).await
     }
 
     /// Finds an output by its ID and returns it as raw bytes.
@@ -306,25 +315,25 @@ impl ClientInner {
     }
 
     /// Finds a slot commitment by slot index and returns it as object.
-    /// GET /api/core/v3/commitments/by-index/{index}
-    pub async fn get_slot_commitment_by_index(&self, slot_index: SlotIndex) -> Result<SlotCommitment> {
-        let path = &format!("api/core/v3/commitments/by-index/{slot_index}");
+    /// GET /api/core/v3/commitments/by-slot/{slot}
+    pub async fn get_slot_commitment_by_slot(&self, slot_index: SlotIndex) -> Result<SlotCommitment> {
+        let path = &format!("api/core/v3/commitments/by-slot/{slot_index}");
 
         self.get_request(path, None, false, true).await
     }
 
     /// Finds a slot commitment by slot index and returns it as raw bytes.
-    /// GET /api/core/v3/commitments/by-index/{index}
-    pub async fn get_slot_commitment_by_index_raw(&self, slot_index: SlotIndex) -> Result<Vec<u8>> {
-        let path = &format!("api/core/v3/commitments/by-index/{slot_index}");
+    /// GET /api/core/v3/commitments/by-slot/{slot}
+    pub async fn get_slot_commitment_by_slot_raw(&self, slot_index: SlotIndex) -> Result<Vec<u8>> {
+        let path = &format!("api/core/v3/commitments/by-slot/{slot_index}");
 
         self.get_request_bytes(path, None).await
     }
 
     /// Get all UTXO changes of a given slot by its index.
-    /// GET /api/core/v3/commitments/by-index/{index}/utxo-changes
-    pub async fn get_utxo_changes_by_slot_index(&self, slot_index: SlotIndex) -> Result<UtxoChangesResponse> {
-        let path = &format!("api/core/v3/commitments/by-index/{slot_index}/utxo-changes");
+    /// GET /api/core/v3/commitments/by-slot/{slot}/utxo-changes
+    pub async fn get_utxo_changes_by_slot(&self, slot_index: SlotIndex) -> Result<UtxoChangesResponse> {
+        let path = &format!("api/core/v3/commitments/by-slot/{slot_index}/utxo-changes");
 
         self.get_request(path, None, false, false).await
     }
@@ -371,7 +380,12 @@ impl Client {
                     .map_err(|_| crate::client::Error::UrlAuth("password"))?;
             }
         }
-        url.set_path(INFO_PATH);
+
+        if url.path().ends_with('/') {
+            url.set_path(&format!("{}{}", url.path(), INFO_PATH));
+        } else {
+            url.set_path(&format!("{}/{}", url.path(), INFO_PATH));
+        }
 
         let resp: InfoResponse =
             crate::client::node_manager::http_client::HttpClient::new(DEFAULT_USER_AGENT.to_string())

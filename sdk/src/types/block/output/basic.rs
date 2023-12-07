@@ -160,7 +160,7 @@ impl BasicOutputBuilder {
                         .amount();
                     // Add a temporary storage deposit unlock condition so the new storage requirement can be calculated
                     self =
-                        self.add_unlock_condition(StorageDepositReturnUnlockCondition::new(return_address.clone(), 1));
+                        self.add_unlock_condition(StorageDepositReturnUnlockCondition::new(return_address.clone(), 1)?);
                     // Get the min amount of the output with the added storage deposit return unlock condition
                     let min_amount_with_sdruc = self.clone().finish()?.minimum_amount(params);
                     // If the return storage cost and amount are less than the required min
@@ -177,7 +177,7 @@ impl BasicOutputBuilder {
                         .replace_unlock_condition(StorageDepositReturnUnlockCondition::new(
                             return_address,
                             sdruc_amount,
-                        ))
+                        )?)
                 } else {
                     self
                 }
@@ -246,7 +246,7 @@ pub struct BasicOutput {
 }
 
 impl BasicOutput {
-    /// The [`Output`](crate::types::block::output::Output) kind of an [`BasicOutput`].
+    /// The [`Output`] kind of an [`BasicOutput`].
     pub const KIND: u8 = 0;
     /// The set of allowed [`UnlockCondition`]s for an [`BasicOutput`].
     pub const ALLOWED_UNLOCK_CONDITIONS: UnlockConditionFlags = UnlockConditionFlags::ADDRESS
@@ -407,27 +407,27 @@ fn verify_features_packable<const VERIFY: bool>(features: &Features, _: &Protoco
 }
 
 #[cfg(feature = "serde")]
-pub(crate) mod dto {
+mod dto {
     use alloc::vec::Vec;
 
     use serde::{Deserialize, Serialize};
 
     use super::*;
     use crate::{
-        types::block::{output::unlock_condition::dto::UnlockConditionDto, Error},
+        types::block::{output::unlock_condition::UnlockCondition, Error},
         utils::serde::string,
     };
 
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
     #[serde(rename_all = "camelCase")]
-    pub struct BasicOutputDto {
+    pub(crate) struct BasicOutputDto {
         #[serde(rename = "type")]
         pub kind: u8,
         #[serde(with = "string")]
         pub amount: u64,
         #[serde(with = "string")]
         pub mana: u64,
-        pub unlock_conditions: Vec<UnlockConditionDto>,
+        pub unlock_conditions: Vec<UnlockCondition>,
         #[serde(skip_serializing_if = "Vec::is_empty", default)]
         pub features: Vec<Feature>,
     }
@@ -438,7 +438,7 @@ pub(crate) mod dto {
                 kind: BasicOutput::KIND,
                 amount: value.amount(),
                 mana: value.mana(),
-                unlock_conditions: value.unlock_conditions().iter().map(Into::into).collect::<_>(),
+                unlock_conditions: value.unlock_conditions().to_vec(),
                 features: value.features().to_vec(),
             }
         }
@@ -453,7 +453,7 @@ pub(crate) mod dto {
                 .with_features(dto.features);
 
             for u in dto.unlock_conditions {
-                builder = builder.add_unlock_condition(UnlockCondition::from(u));
+                builder = builder.add_unlock_condition(u);
             }
 
             builder.finish()
@@ -464,7 +464,7 @@ pub(crate) mod dto {
         pub fn try_from_dtos(
             amount: OutputBuilderAmount,
             mana: u64,
-            unlock_conditions: Vec<UnlockConditionDto>,
+            unlock_conditions: Vec<UnlockCondition>,
             features: Option<Vec<Feature>>,
         ) -> Result<Self, Error> {
             let mut builder = match amount {
@@ -486,6 +486,8 @@ pub(crate) mod dto {
             builder.finish()
         }
     }
+
+    crate::impl_serde_typed_dto!(BasicOutput, BasicOutputDto, "basic output");
 }
 
 #[cfg(test)]
@@ -494,7 +496,7 @@ mod tests {
 
     use super::*;
     use crate::types::block::{
-        output::{dto::OutputDto, FoundryId, SimpleTokenScheme, TokenId},
+        output::{basic::dto::BasicOutputDto, FoundryId, SimpleTokenScheme, TokenId},
         protocol::protocol_parameters,
         rand::{
             address::rand_account_address,
@@ -507,21 +509,19 @@ mod tests {
     #[test]
     fn to_from_dto() {
         let protocol_parameters = protocol_parameters();
-        let output = rand_basic_output(protocol_parameters.token_supply());
-        let dto = OutputDto::Basic((&output).into());
-        let output_unver = Output::try_from(dto.clone()).unwrap();
-        assert_eq!(&output, output_unver.as_basic());
-        let output_ver = Output::try_from(dto).unwrap();
-        assert_eq!(&output, output_ver.as_basic());
+        let basic_output = rand_basic_output(protocol_parameters.token_supply());
+        let dto = BasicOutputDto::from(&basic_output);
+        let output = Output::Basic(BasicOutput::try_from(dto).unwrap());
+        assert_eq!(&basic_output, output.as_basic());
 
         let output_split = BasicOutput::try_from_dtos(
-            OutputBuilderAmount::Amount(output.amount()),
-            output.mana(),
-            output.unlock_conditions().iter().map(Into::into).collect(),
-            Some(output.features().to_vec()),
+            OutputBuilderAmount::Amount(basic_output.amount()),
+            basic_output.mana(),
+            basic_output.unlock_conditions().to_vec(),
+            Some(basic_output.features().to_vec()),
         )
         .unwrap();
-        assert_eq!(output, output_split);
+        assert_eq!(basic_output, output_split);
 
         let foundry_id = FoundryId::build(&rand_account_address(), 0, SimpleTokenScheme::KIND);
         let address = rand_address_unlock_condition();
@@ -530,7 +530,7 @@ mod tests {
             let output_split = BasicOutput::try_from_dtos(
                 builder.amount,
                 builder.mana,
-                builder.unlock_conditions.iter().map(Into::into).collect(),
+                builder.unlock_conditions.iter().cloned().collect(),
                 Some(builder.features.iter().cloned().collect()),
             )
             .unwrap();

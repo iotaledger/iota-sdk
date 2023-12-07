@@ -10,12 +10,12 @@ use iota_sdk::{
             transaction::validate_signed_transaction_payload_length, verify_semantic, GetAddressesOptions,
             PreparedTransactionData,
         },
-        constants::{SHIMMER_COIN_TYPE, SHIMMER_TESTNET_BECH32_HRP},
+        constants::SHIMMER_COIN_TYPE,
         secret::{SecretManage, SecretManager},
         Client, Result,
     },
     types::block::{
-        address::{AccountAddress, Address, ToBech32Ext},
+        address::{AccountAddress, Address},
         input::{Input, UtxoInput},
         output::AccountId,
         payload::{signed_transaction::Transaction, SignedTransactionPayload},
@@ -36,7 +36,7 @@ use crate::client::{
 async fn sign_account_state_transition() -> Result<()> {
     let secret_manager = SecretManager::try_from_mnemonic(Client::generate_mnemonic()?)?;
 
-    let bech32_address = &secret_manager
+    let address = secret_manager
         .generate_ed25519_addresses(
             GetAddressesOptions::default()
                 .with_coin_type(SHIMMER_COIN_TYPE)
@@ -44,7 +44,7 @@ async fn sign_account_state_transition() -> Result<()> {
         )
         .await?[0]
         .clone()
-        .to_bech32(SHIMMER_TESTNET_BECH32_HRP);
+        .into_inner();
 
     let protocol_parameters = protocol_parameters();
     let account_id = AccountId::from_str(ACCOUNT_ID_1)?;
@@ -52,20 +52,13 @@ async fn sign_account_state_transition() -> Result<()> {
     let inputs = build_inputs([Account(
         1_000_000,
         account_id,
-        &bech32_address.to_string(),
+        address.clone(),
         None,
         None,
         Some(Bip44::new(SHIMMER_COIN_TYPE)),
     )]);
 
-    let outputs = build_outputs([Account(
-        1_000_000,
-        account_id,
-        &bech32_address.to_string(),
-        None,
-        None,
-        None,
-    )]);
+    let outputs = build_outputs([Account(1_000_000, account_id, address.clone(), None, None, None)]);
 
     let transaction = Transaction::builder(protocol_parameters.network_id())
         .with_inputs(
@@ -87,7 +80,7 @@ async fn sign_account_state_transition() -> Result<()> {
     let unlocks = secret_manager.transaction_unlocks(&prepared_transaction_data).await?;
 
     assert_eq!(unlocks.len(), 1);
-    assert_eq!((*unlocks).get(0).unwrap().kind(), SignatureUnlock::KIND);
+    assert_eq!((*unlocks).first().unwrap().kind(), SignatureUnlock::KIND);
 
     let tx_payload = SignedTransactionPayload::new(prepared_transaction_data.transaction.clone(), unlocks)?;
 
@@ -106,7 +99,7 @@ async fn sign_account_state_transition() -> Result<()> {
 async fn account_reference_unlocks() -> Result<()> {
     let secret_manager = SecretManager::try_from_mnemonic(Client::generate_mnemonic()?)?;
 
-    let bech32_address = &secret_manager
+    let address = secret_manager
         .generate_ed25519_addresses(
             GetAddressesOptions::default()
                 .with_coin_type(SHIMMER_COIN_TYPE)
@@ -114,56 +107,28 @@ async fn account_reference_unlocks() -> Result<()> {
         )
         .await?[0]
         .clone()
-        .to_bech32(SHIMMER_TESTNET_BECH32_HRP);
+        .into_inner();
 
     let protocol_parameters = protocol_parameters();
     let account_id = AccountId::from_str(ACCOUNT_ID_1)?;
-    let account_bech32_address =
-        &Address::Account(AccountAddress::new(account_id)).to_bech32(SHIMMER_TESTNET_BECH32_HRP);
+    let account_address = Address::Account(AccountAddress::new(account_id));
 
     let inputs = build_inputs([
         Account(
             1_000_000,
             account_id,
-            &bech32_address.to_string(),
+            address.clone(),
             None,
             None,
             Some(Bip44::new(SHIMMER_COIN_TYPE)),
         ),
-        Basic(
-            1_000_000,
-            &account_bech32_address.to_string(),
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-        ),
-        Basic(
-            1_000_000,
-            &account_bech32_address.to_string(),
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-        ),
+        Basic(1_000_000, account_address.clone(), None, None, None, None, None, None),
+        Basic(1_000_000, account_address.clone(), None, None, None, None, None, None),
     ]);
 
     let outputs = build_outputs([
-        Account(1_000_000, account_id, &bech32_address.to_string(), None, None, None),
-        Basic(
-            2_000_000,
-            &account_bech32_address.to_string(),
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-        ),
+        Account(1_000_000, account_id, address, None, None, None),
+        Basic(2_000_000, account_address, None, None, None, None, None, None),
     ]);
 
     let transaction = Transaction::builder(protocol_parameters.network_id())
@@ -186,7 +151,7 @@ async fn account_reference_unlocks() -> Result<()> {
     let unlocks = secret_manager.transaction_unlocks(&prepared_transaction_data).await?;
 
     assert_eq!(unlocks.len(), 3);
-    assert_eq!((*unlocks).get(0).unwrap().kind(), SignatureUnlock::KIND);
+    assert_eq!((*unlocks).first().unwrap().kind(), SignatureUnlock::KIND);
     match (*unlocks).get(1).unwrap() {
         Unlock::Account(a) => {
             assert_eq!(a.index(), 0);

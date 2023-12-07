@@ -101,6 +101,11 @@ impl TransactionBuilder {
         self
     }
 
+    pub fn add_capabilities(mut self, capabilities: impl IntoIterator<Item = TransactionCapabilityFlag>) -> Self {
+        self.capabilities.add_capabilities(capabilities);
+        self
+    }
+
     /// Sets the payload of a [`TransactionBuilder`].
     pub fn with_payload(mut self, payload: impl Into<OptionalPayload>) -> Self {
         self.payload = payload.into();
@@ -144,7 +149,7 @@ impl TransactionBuilder {
                         std::time::SystemTime::now()
                             .duration_since(std::time::UNIX_EPOCH)
                             .unwrap()
-                            .as_nanos() as u64,
+                            .as_secs(),
                     )
                 });
                 #[cfg(not(feature = "std"))]
@@ -536,7 +541,7 @@ pub(crate) mod dto {
 
     use super::*;
     use crate::types::{
-        block::{mana::ManaAllotmentDto, output::dto::OutputDto, payload::dto::PayloadDto, Error},
+        block::{mana::ManaAllotmentDto, payload::dto::PayloadDto, Error},
         TryFromDto,
     };
 
@@ -545,14 +550,16 @@ pub(crate) mod dto {
     pub struct TransactionDto {
         pub network_id: String,
         pub creation_slot: SlotIndex,
+        #[serde(default, skip_serializing_if = "Vec::is_empty")]
         pub context_inputs: Vec<ContextInput>,
         pub inputs: Vec<Input>,
+        #[serde(default, skip_serializing_if = "Vec::is_empty")]
         pub allotments: Vec<ManaAllotmentDto>,
         #[serde(default, skip_serializing_if = "TransactionCapabilities::is_none")]
         pub capabilities: TransactionCapabilities,
         #[serde(default, skip_serializing_if = "Option::is_none")]
         pub payload: Option<PayloadDto>,
-        pub outputs: Vec<OutputDto>,
+        pub outputs: Vec<Output>,
     }
 
     impl From<&Transaction> for TransactionDto {
@@ -569,7 +576,7 @@ pub(crate) mod dto {
                     Some(_) => unimplemented!(),
                     None => None,
                 },
-                outputs: value.outputs().iter().map(Into::into).collect(),
+                outputs: value.outputs().to_vec(),
             }
         }
     }
@@ -590,11 +597,7 @@ pub(crate) mod dto {
                 .into_iter()
                 .map(|o| ManaAllotment::try_from_dto_with_params_inner(o, params))
                 .collect::<Result<Vec<ManaAllotment>, Error>>()?;
-            let outputs = dto
-                .outputs
-                .into_iter()
-                .map(Output::try_from)
-                .collect::<Result<Vec<Output>, Error>>()?;
+            let outputs = dto.outputs;
 
             let mut builder = Self::builder(network_id)
                 .with_creation_slot(dto.creation_slot)

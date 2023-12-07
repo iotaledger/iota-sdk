@@ -19,6 +19,7 @@ impl ClientInner {
     pub async fn build_basic_block(&self, issuer_id: AccountId, payload: Option<Payload>) -> Result<UnsignedBlock> {
         let issuance = self.get_issuance().await?;
 
+        // TODO https://github.com/iotaledger/iota-sdk/issues/1753
         let issuing_time = {
             #[cfg(feature = "std")]
             let issuing_time = std::time::SystemTime::now()
@@ -39,16 +40,21 @@ impl ClientInner {
                 protocol_params.version(),
                 protocol_params.network_id(),
                 issuing_time,
-                issuance.commitment.id(),
+                issuance.latest_commitment.id(),
                 issuance.latest_finalized_slot,
                 issuer_id,
             ),
-            // TODO: burned mana calculation
-            BlockBody::build_basic(issuance.strong_parents()?, 0)
-                .with_weak_parents(issuance.weak_parents()?)
-                .with_shallow_like_parents(issuance.shallow_like_parents()?)
-                .with_payload(payload)
-                .finish_block_body()?,
+            BlockBody::build_basic(
+                issuance.strong_parents()?,
+                (
+                    protocol_params.work_score_parameters,
+                    issuance.latest_commitment.reference_mana_cost(),
+                ),
+            )
+            .with_weak_parents(issuance.weak_parents()?)
+            .with_shallow_like_parents(issuance.shallow_like_parents()?)
+            .with_payload(payload)
+            .finish_block_body()?,
         ))
     }
 }

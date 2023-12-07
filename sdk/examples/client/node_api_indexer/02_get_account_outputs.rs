@@ -24,7 +24,7 @@ async fn main() -> Result<()> {
     // Take the node URL from command line argument or use one from env as default.
     let node_url = std::env::args()
         .nth(2)
-        .unwrap_or_else(|| std::env::var("NODE_URL").unwrap());
+        .unwrap_or_else(|| std::env::var("NODE_URL").expect("NODE_URL not set"));
 
     // Create a node client.
     let client = Client::builder()

@@ -6,7 +6,7 @@ use core::str::FromStr;
 use derive_more::{AsRef, Deref, Display, From};
 
 use crate::types::block::{
-    output::{AccountId, StorageScore},
+    output::{AccountId, OutputId, StorageScore},
     Error,
 };
 
@@ -51,6 +51,12 @@ impl FromStr for AccountAddress {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         Ok(Self::new(AccountId::from_str(s)?))
+    }
+}
+
+impl From<&OutputId> for AccountAddress {
+    fn from(output_id: &OutputId) -> Self {
+        Self(AccountId::from(output_id))
     }
 }
 

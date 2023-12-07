@@ -3,7 +3,7 @@
 
 //! A general purpose IOTA client for interaction with the IOTA network (Tangle)
 //!
-//! High-level functions are accessible via the [`Client`][client::Client].
+//! High-level functions are accessible via the [`Client`].
 //!
 //! ## Sending a block without a payload
 //!  ```no_run

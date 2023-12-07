@@ -21,7 +21,7 @@ use crate::{
     types::{
         api::core::OutputWithMetadataResponse,
         block::{
-            output::{dto::OutputDto, Output},
+            output::{AccountId, Output},
             payload::signed_transaction::SignedTransactionPayload,
         },
     },
@@ -92,7 +92,7 @@ where
 
         let prepared_transaction_data = self.prepare_transaction(outputs, options.clone()).await?;
 
-        self.sign_and_submit_transaction(prepared_transaction_data, options)
+        self.sign_and_submit_transaction(prepared_transaction_data, None, options)
             .await
     }
 
@@ -100,6 +100,7 @@ where
     pub async fn sign_and_submit_transaction(
         &self,
         prepared_transaction_data: PreparedTransactionData,
+        issuer_id: impl Into<Option<AccountId>> + Send,
         options: impl Into<Option<TransactionOptions>> + Send,
     ) -> crate::wallet::Result<TransactionWithMetadata> {
         log::debug!("[TRANSACTION] sign_and_submit_transaction");
@@ -113,7 +114,7 @@ where
             }
         };
 
-        self.submit_and_store_transaction(signed_transaction_data, options)
+        self.submit_and_store_transaction(signed_transaction_data, issuer_id, options)
             .await
     }
 
@@ -121,6 +122,7 @@ where
     pub async fn submit_and_store_transaction(
         &self,
         signed_transaction_data: SignedTransactionData,
+        issuer_id: impl Into<Option<AccountId>> + Send,
         options: impl Into<Option<TransactionOptions>> + Send,
     ) -> crate::wallet::Result<TransactionWithMetadata> {
         log::debug!(
@@ -144,7 +146,7 @@ where
 
         // Ignore errors from sending, we will try to send it again during [`sync_pending_transactions`]
         let block_id = match self
-            .submit_signed_transaction(signed_transaction_data.payload.clone())
+            .submit_signed_transaction(signed_transaction_data.payload.clone(), issuer_id)
             .await
         {
             Ok(block_id) => Some(block_id),
@@ -164,7 +166,7 @@ where
             .into_iter()
             .map(|input| OutputWithMetadataResponse {
                 metadata: input.output_metadata,
-                output: OutputDto::from(&input.output),
+                output: input.output,
             })
             .collect();
 

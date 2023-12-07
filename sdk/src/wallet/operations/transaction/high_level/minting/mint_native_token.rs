@@ -41,13 +41,12 @@ where
         let prepared = self
             .prepare_mint_native_token(token_id, mint_amount, options.clone())
             .await?;
-        let transaction = self.sign_and_submit_transaction(prepared, options).await?;
+        let transaction = self.sign_and_submit_transaction(prepared, None, options).await?;
 
         Ok(transaction)
     }
 
-    /// Prepares the transaction for
-    /// [Account::mint_native_token()](crate::wallet::Account::mint_native_token).
+    /// Prepares the transaction for [Wallet::mint_native_token()].
     pub async fn prepare_mint_native_token(
         &self,
         token_id: TokenId,

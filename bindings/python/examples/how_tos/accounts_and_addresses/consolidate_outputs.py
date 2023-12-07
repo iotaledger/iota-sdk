@@ -35,13 +35,10 @@ print('Outputs BEFORE consolidation:')
 for i, output_data in enumerate(outputs):
     print(f'OUTPUT #{i}')
     print(
-        '- address: {}\n- amount: {}\n- native tokens: {}'.format(
-            Utils.hex_to_bech32(output_data.address.pub_key_hash, 'rms'),
-            output_data.output.amount,
-            [feature for feature in output_data.output.features if feature.type
-                == FeatureType.NativeToken]
-        )
-    )
+        f'- address: #{Utils.hex_to_bech32(output_data.address.pub_key_hash, "rms")}')
+    print(f'- amount: #{output_data.output.amount}')
+    print(f'- native tokens: #{}', [feature for feature in output_data.output.features if feature.type
+                                    == FeatureType.NativeToken])
 
 print('Sending consolidation transaction...')
 
@@ -56,7 +53,7 @@ block_id = account.reissue_transaction_until_included(
     transaction.transaction_id)
 
 print(
-    f'Transaction included: {os.environ["EXPLORER_ID"]}/block/{block_id}'
+    f'Transaction included: {os.environ["EXPLORER_URL"]}/block/{block_id}'
 )
 
 # Sync account
@@ -69,10 +66,7 @@ print('Outputs AFTER consolidation:')
 for i, output_data in enumerate(outputs):
     print(f'OUTPUT #{i}')
     print(
-        '- address: {}\n- amount: {}\n- native tokens: {}'.format(
-            Utils.hex_to_bech32(output_data.address.pub_key_hash, 'rms'),
-            output_data.output.amount,
-            [feature for feature in output_data.output.features if feature.type
-                == FeatureType.NativeToken]
-        )
-    )
+        f'- address: #{Utils.hex_to_bech32(output_data.address.pub_key_hash, "rms")}')
+    print(f'- amount: #{output_data.output.amount}')
+    print(f'- native tokens: #{}', [feature for feature in output_data.output.features if feature.type
+                                    == FeatureType.NativeToken])

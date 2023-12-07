@@ -23,6 +23,11 @@ async fn main() -> Result<()> {
     // This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
+    #[allow(clippy::single_element_loop)]
+    for var in ["MNEMONIC"] {
+        std::env::var(var).unwrap_or_else(|_| panic!(".env variable '{var}' is undefined, see .env.example"));
+    }
+
     let node_1 = std::env::args().nth(1).expect("missing example argument: NODE 1");
     let node_2 = std::env::args().nth(2).expect("missing example argument: NODE 2");
     let node_3 = std::env::args().nth(3).expect("missing example argument: NODE 3");

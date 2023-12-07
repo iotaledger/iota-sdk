@@ -6,7 +6,7 @@ use core::str::FromStr;
 use derive_more::{AsRef, Deref, Display, From};
 
 use crate::types::block::{
-    output::{NftId, StorageScore},
+    output::{NftId, OutputId, StorageScore},
     Error,
 };
 
@@ -50,6 +50,12 @@ impl FromStr for NftAddress {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         Ok(Self::from(NftId::from_str(s)?))
+    }
+}
+
+impl From<&OutputId> for NftAddress {
+    fn from(output_id: &OutputId) -> Self {
+        Self(NftId::from(output_id))
     }
 }
 

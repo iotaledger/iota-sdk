@@ -6,7 +6,7 @@ use std::collections::{HashMap, HashSet};
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    client::secret::SecretManage,
+    client::{api::PreparedTransactionData, secret::SecretManage},
     types::block::{
         address::{Address, Ed25519Address},
         output::{
@@ -16,6 +16,7 @@ use crate::{
         slot::SlotIndex,
     },
     wallet::{
+        core::WalletData,
         operations::{helpers::time::can_output_be_unlocked_now, transaction::TransactionOptions},
         types::{OutputData, TransactionWithMetadata},
         Wallet,
@@ -33,32 +34,29 @@ pub enum OutputsToClaim {
     All,
 }
 
-impl<S: 'static + SecretManage> Wallet<S>
-where
-    crate::wallet::Error: From<S::Error>,
-    crate::client::Error: From<S::Error>,
-{
+impl WalletData {
     /// Get basic and nft outputs that have
     /// [`ExpirationUnlockCondition`](crate::types::block::output::unlock_condition::ExpirationUnlockCondition),
     /// [`StorageDepositReturnUnlockCondition`] or
     /// [`TimelockUnlockCondition`](crate::types::block::output::unlock_condition::TimelockUnlockCondition) and can be
     /// unlocked now and also get basic outputs with only an [`AddressUnlockCondition`] unlock condition, for
     /// additional inputs
-    pub async fn claimable_outputs(&self, outputs_to_claim: OutputsToClaim) -> crate::wallet::Result<Vec<OutputId>> {
+    pub(crate) fn claimable_outputs(
+        &self,
+        outputs_to_claim: OutputsToClaim,
+        slot_index: SlotIndex,
+    ) -> crate::wallet::Result<Vec<OutputId>> {
         log::debug!("[OUTPUT_CLAIMING] claimable_outputs");
-        let wallet_data = self.data().await;
-
-        let slot_index = self.client().get_slot_index().await?;
 
         // Get outputs for the claim
         let mut output_ids_to_claim: HashSet<OutputId> = HashSet::new();
-        for (output_id, output_data) in wallet_data
+        for (output_id, output_data) in self
             .unspent_outputs
             .iter()
             .filter(|(_, o)| o.output.is_basic() || o.output.is_nft())
         {
             // Don't use outputs that are locked for other transactions
-            if !wallet_data.locked_outputs.contains(output_id) && wallet_data.outputs.contains_key(output_id) {
+            if !self.locked_outputs.contains(output_id) && self.outputs.contains_key(output_id) {
                 if let Some(unlock_conditions) = output_data.output.unlock_conditions() {
                     // If there is a single [UnlockCondition], then it's an
                     // [AddressUnlockCondition] and we own it already without
@@ -67,7 +65,7 @@ where
                         && can_output_be_unlocked_now(
                             // We use the addresses with unspent outputs, because other addresses of the
                             // account without unspent outputs can't be related to this output
-                            wallet_data.address.inner(),
+                            self.address.inner(),
                             output_data,
                             slot_index,
                         )?
@@ -122,6 +120,26 @@ where
         );
         Ok(output_ids_to_claim.into_iter().collect())
     }
+}
+
+impl<S: 'static + SecretManage> Wallet<S>
+where
+    crate::wallet::Error: From<S::Error>,
+    crate::client::Error: From<S::Error>,
+{
+    /// Get basic and nft outputs that have
+    /// [`ExpirationUnlockCondition`](crate::types::block::output::unlock_condition::ExpirationUnlockCondition),
+    /// [`StorageDepositReturnUnlockCondition`] or
+    /// [`TimelockUnlockCondition`](crate::types::block::output::unlock_condition::TimelockUnlockCondition) and can be
+    /// unlocked now and also get basic outputs with only an [`AddressUnlockCondition`] unlock condition, for
+    /// additional inputs
+    pub async fn claimable_outputs(&self, outputs_to_claim: OutputsToClaim) -> crate::wallet::Result<Vec<OutputId>> {
+        let wallet_data = self.data().await;
+
+        let slot_index = self.client().get_slot_index().await?;
+
+        wallet_data.claimable_outputs(outputs_to_claim, slot_index)
+    }
 
     /// Get basic outputs that have only one unlock condition which is [AddressUnlockCondition], so they can be used as
     /// additional inputs
@@ -159,7 +177,7 @@ where
     }
 
     /// Try to claim basic or nft outputs that have additional unlock conditions to their [AddressUnlockCondition]
-    /// from [`Account::claimable_outputs()`].
+    /// from [`Wallet::claimable_outputs()`].
     pub async fn claim_outputs<I: IntoIterator<Item = OutputId> + Send>(
         &self,
         output_ids_to_claim: I,
@@ -168,37 +186,46 @@ where
         I::IntoIter: Send,
     {
         log::debug!("[OUTPUT_CLAIMING] claim_outputs");
-        let basic_outputs = self.get_basic_outputs_for_additional_inputs().await?;
-        self.claim_outputs_internal(output_ids_to_claim, basic_outputs)
-            .await
-            .map_err(|error| {
-                // Map InsufficientStorageDepositAmount error here because it's the result of InsufficientFunds in this
-                // case and then easier to handle
-                match error {
-                    crate::wallet::Error::Block(block_error) => match *block_error {
-                        crate::types::block::Error::InsufficientStorageDepositAmount { amount, required } => {
-                            crate::wallet::Error::InsufficientFunds {
-                                available: amount,
-                                required,
-                            }
+        let prepared_transaction = self.prepare_claim_outputs(output_ids_to_claim).await.map_err(|error| {
+            // Map InsufficientStorageDepositAmount error here because it's the result of InsufficientFunds in this
+            // case and then easier to handle
+            match error {
+                crate::wallet::Error::Block(block_error) => match *block_error {
+                    crate::types::block::Error::InsufficientStorageDepositAmount { amount, required } => {
+                        crate::wallet::Error::InsufficientFunds {
+                            available: amount,
+                            required,
                         }
-                        _ => crate::wallet::Error::Block(block_error),
-                    },
-                    _ => error,
-                }
-            })
+                    }
+                    _ => crate::wallet::Error::Block(block_error),
+                },
+                _ => error,
+            }
+        })?;
+
+        let claim_tx = self
+            .sign_and_submit_transaction(prepared_transaction, None, None)
+            .await?;
+
+        log::debug!(
+            "[OUTPUT_CLAIMING] Claiming transaction created: block_id: {:?} tx_id: {:?}",
+            claim_tx.block_id,
+            claim_tx.transaction_id
+        );
+        Ok(claim_tx)
     }
 
     /// Try to claim basic outputs that have additional unlock conditions to their [AddressUnlockCondition].
-    pub(crate) async fn claim_outputs_internal<I: IntoIterator<Item = OutputId> + Send>(
+    pub async fn prepare_claim_outputs<I: IntoIterator<Item = OutputId> + Send>(
         &self,
         output_ids_to_claim: I,
-        mut possible_additional_inputs: Vec<OutputData>,
-    ) -> crate::wallet::Result<TransactionWithMetadata>
+    ) -> crate::wallet::Result<PreparedTransactionData>
     where
         I::IntoIter: Send,
     {
-        log::debug!("[OUTPUT_CLAIMING] claim_outputs_internal");
+        log::debug!("[OUTPUT_CLAIMING] prepare_claim_outputs");
+
+        let mut possible_additional_inputs = self.get_basic_outputs_for_additional_inputs().await?;
 
         let slot_index = self.client().get_slot_index().await?;
         let storage_score_params = self.client().get_storage_score_parameters().await?;
@@ -378,29 +405,21 @@ where
             })?;
         }
 
-        let claim_tx = self
-            .finish_transaction(
-                outputs_to_send,
-                Some(TransactionOptions {
-                    custom_inputs: Some(
-                        outputs_to_claim
-                            .iter()
-                            .map(|o| o.output_id)
-                            // add additional inputs
-                            .chain(additional_inputs)
-                            .collect::<Vec<OutputId>>(),
-                    ),
-                    ..Default::default()
-                }),
-            )
-            .await?;
-
-        log::debug!(
-            "[OUTPUT_CLAIMING] Claiming transaction created: block_id: {:?} tx_id: {:?}",
-            claim_tx.block_id,
-            claim_tx.transaction_id
-        );
-        Ok(claim_tx)
+        self.prepare_transaction(
+            outputs_to_send,
+            Some(TransactionOptions {
+                custom_inputs: Some(
+                    outputs_to_claim
+                        .iter()
+                        .map(|o| o.output_id)
+                        // add additional inputs
+                        .chain(additional_inputs)
+                        .collect::<Vec<OutputId>>(),
+                ),
+                ..Default::default()
+            }),
+        )
+        .await
     }
 }
 
