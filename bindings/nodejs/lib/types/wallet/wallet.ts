@@ -9,8 +9,6 @@ import { Bech32Address } from '../block';
 
 /** Options for the Wallet builder. */
 export interface WalletOptions {
-    /** The wallet address. */
-    address?: Bech32Address;
     /** The alias of the wallet. */
     alias?: string;
     /** The the BIP44 path of the wallet. */
