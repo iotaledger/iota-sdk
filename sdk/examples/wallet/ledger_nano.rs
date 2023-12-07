@@ -16,7 +16,6 @@
 
 use iota_sdk::{
     client::{
-        api::GetAddressesOptions,
         constants::SHIMMER_COIN_TYPE,
         secret::{ledger_nano::LedgerSecretManager, SecretManager},
     },
@@ -24,8 +23,6 @@ use iota_sdk::{
     wallet::{ClientOptions, Result, Wallet},
 };
 
-// The address to send coins to
-const RECV_ADDRESS: &str = "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu";
 // The amount of base coins we'll send
 const SEND_AMOUNT: u64 = 1_000_000;
 
@@ -41,25 +38,16 @@ async fn main() -> Result<()> {
     let client_options = ClientOptions::new().with_node(&std::env::var("NODE_URL").unwrap())?;
     let secret_manager = SecretManager::LedgerNano(LedgerSecretManager::new(true));
 
-    println!("Generating address...");
-    let now = tokio::time::Instant::now();
-    let address = secret_manager
-        .generate_ed25519_addresses(GetAddressesOptions::default().with_coin_type(SHIMMER_COIN_TYPE))
-        .await?
-        .pop()
-        .unwrap();
-    println!("took: {:.2?}", now.elapsed());
-
-    println!("ADDRESS:\n{address:#?}");
     let wallet = Wallet::builder()
         .with_secret_manager(secret_manager)
         .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
         .with_client_options(client_options)
         .with_bip_path(Bip44::new(SHIMMER_COIN_TYPE))
-        .with_address(address)
         .finish()
         .await?;
 
+    let recv_address = wallet.address().await;
+    println!("receive address: {recv_address}");
     println!("{:?}", wallet.get_ledger_nano_status().await?);
 
     let now = tokio::time::Instant::now();
@@ -69,7 +57,7 @@ async fn main() -> Result<()> {
     println!("Balance BEFORE:\n{:?}", balance.base_coin());
 
     println!("Sending the coin-transfer transaction...");
-    let transaction = wallet.send(SEND_AMOUNT, RECV_ADDRESS, None).await?;
+    let transaction = wallet.send(SEND_AMOUNT, recv_address, None).await?;
     println!("Transaction sent: {}", transaction.transaction_id);
 
     let block_id = wallet

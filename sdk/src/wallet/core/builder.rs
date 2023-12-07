@@ -16,7 +16,10 @@ use crate::wallet::storage::adapter::memory::Memory;
 #[cfg(feature = "storage")]
 use crate::wallet::storage::{StorageManager, StorageOptions};
 use crate::{
-    client::secret::{GenerateAddressOptions, SecretManage, SecretManager},
+    client::{
+        api::GetAddressesOptions,
+        secret::{GenerateAddressOptions, SecretManage, SecretManager},
+    },
     types::block::address::{Address, Bech32Address},
     wallet::{
         core::{Bip44, WalletData, WalletInner},
@@ -71,11 +74,12 @@ where
         self
     }
 
-    /// Set the wallet address.
-    pub fn with_address(mut self, address: impl Into<Option<Bech32Address>>) -> Self {
-        self.address = address.into();
-        self
-    }
+    // TODO: only add this fn if the SecretManager is optional. Otherwise the address should be generated.
+    // /// Set the wallet address.
+    // pub fn with_address(mut self, address: impl Into<Option<Bech32Address>>) -> Self {
+    //     self.address = address.into();
+    //     self
+    // }
 
     /// Set the alias of the wallet.
     pub fn with_alias(mut self, alias: impl Into<Option<String>>) -> Self {
@@ -169,19 +173,31 @@ where
             true
         };
 
+        // Panic: client options must exist at this point
+        let client_options = self.client_options.as_ref().unwrap();
+
         // May use a previously stored secret manager if it wasn't provided
         if self.secret_manager.is_none() {
-            let secret_manager = loaded_wallet_builder
+            self.secret_manager = loaded_wallet_builder
                 .as_ref()
                 .and_then(|builder| builder.secret_manager.clone());
-
-            self.secret_manager = secret_manager;
+            if self.secret_manager.is_none() {
+                return Err(crate::wallet::Error::MissingParameter("secret_manager"));
+            }
         }
+
+        // Panic: a secret manager must exist at this point
+        let secret_manager = self.secret_manager.as_ref().unwrap();
 
         // May use a previously stored BIP path if it wasn't provided
         if self.bip_path.is_none() {
             self.bip_path = loaded_wallet_builder.as_ref().and_then(|builder| builder.bip_path);
+            if self.bip_path.is_none() {
+                return Err(crate::wallet::Error::MissingParameter("bip_path"));
+            }
         }
+        // Panic: a bip path must exist at this point
+        let bip_path = self.bip_path.as_ref().unwrap();
 
         // May use a previously stored wallet alias if it wasn't provided
         if self.alias.is_none() {
@@ -189,22 +205,24 @@ where
         }
 
         // May use a previously stored wallet address if it wasn't provided
-        if self.address.is_none() {
-            self.address = loaded_wallet_builder
-                .as_ref()
-                .and_then(|builder| builder.address.clone());
-        }
+        // Since we don't allow setting it `address` must be None at this point.
+        self.address = loaded_wallet_builder
+            .as_ref()
+            .and_then(|builder| builder.address.clone());
 
-        // May create a default Ed25519 wallet address if there's a secret manager.
-        if self.address.is_none() {
-            if self.secret_manager.is_some() {
-                let address = self.create_default_wallet_address().await?;
-                self.address = Some(address);
-            } else {
+        let generated_address = Self::generate_wallet_address(client_options, bip_path, secret_manager).await?;
+        if let Some(address) = &self.address {
+            // Make sure the provided or loaded address doesn't conflict with the secret manager (private key) and the
+            // bip path.
+            if address != &generated_address {
+                // TODO: change to appropriate error, e.g. Error::ConflictingWalletAddress or smth.
                 return Err(crate::wallet::Error::MissingParameter("address"));
             }
+        } else {
+            self.address = Some(generated_address);
         }
-        // Panic: can be safely unwrapped now
+
+        // Panic: an address must exist at this point
         let address = self.address.as_ref().unwrap().clone();
 
         #[cfg(feature = "storage")]
@@ -278,39 +296,6 @@ where
         Ok(wallet)
     }
 
-    /// Generate the wallet address.
-    pub(crate) async fn create_default_wallet_address(&self) -> crate::wallet::Result<Bech32Address> {
-        let bech32_hrp = self
-            .client_options
-            .as_ref()
-            .unwrap()
-            .network_info
-            .protocol_parameters
-            .bech32_hrp;
-        let bip_path = self.bip_path.as_ref().unwrap();
-
-        Ok(Bech32Address::new(
-            bech32_hrp,
-            Address::Ed25519(
-                self.secret_manager
-                    .as_ref()
-                    .unwrap()
-                    .read()
-                    .await
-                    .generate_ed25519_addresses(
-                        bip_path.coin_type,
-                        bip_path.account,
-                        bip_path.address_index..bip_path.address_index + 1,
-                        GenerateAddressOptions {
-                            internal: bip_path.change != 0,
-                            ledger_nano_prompt: false,
-                        },
-                    )
-                    .await?[0],
-            ),
-        ))
-    }
-
     #[cfg(feature = "storage")]
     pub(crate) async fn from_wallet(wallet: &Wallet<S>) -> Self {
         Self {
@@ -321,6 +306,36 @@ where
             storage_options: Some(wallet.storage_options.clone()),
             secret_manager: Some(wallet.secret_manager.clone()),
         }
+    }
+
+    async fn generate_wallet_address(
+        client_options: &ClientOptions,
+        bip_path: &Bip44,
+        secret_manager: &Arc<RwLock<S>>,
+    ) -> crate::wallet::Result<Bech32Address> {
+        let hrp = client_options.network_info.protocol_parameters.bech32_hrp;
+
+        let ed25519_address = secret_manager
+            .read()
+            .await
+            .generate_ed25519_addresses(
+                bip_path.coin_type,
+                bip_path.account,
+                bip_path.address_index..bip_path.address_index + 1,
+                Some(GenerateAddressOptions {
+                    internal: bip_path.change != 0,
+                    ledger_nano_prompt: false,
+                }),
+            )
+            .await?
+            .pop()
+            // Panic: there must be at least one address
+            .unwrap();
+
+        Ok(Bech32Address {
+            hrp,
+            inner: ed25519_address.into(),
+        })
     }
 }
 

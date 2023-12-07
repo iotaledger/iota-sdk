@@ -89,7 +89,6 @@ impl WalletOptions {
     pub async fn build(self) -> iota_sdk::wallet::Result<Wallet> {
         log::debug!("wallet options: {self:?}");
         let mut builder = Wallet::builder()
-            .with_address(self.address)
             .with_alias(self.alias)
             .with_bip_path(self.bip_path)
             .with_client_options(self.client_options);

@@ -43,17 +43,10 @@ async fn main() -> Result<()> {
         std::env::var("MNEMONIC").unwrap(),
     )?);
 
-    let address = secret_manager
-        .generate_ed25519_addresses(GetAddressesOptions::default().with_coin_type(SHIMMER_COIN_TYPE))
-        .await?
-        .pop()
-        .unwrap();
-
     let wallet = Wallet::<MnemonicSecretManager>::builder()
         .with_storage_path(&std::env::var("WALLET_DB_PATH").unwrap())
         .with_client_options(client_options)
         .with_bip_path(Bip44::new(SHIMMER_COIN_TYPE))
-        .with_address(address)
         .finish()
         .await?;
 

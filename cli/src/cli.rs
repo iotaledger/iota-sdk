@@ -66,9 +66,6 @@ pub struct InitParameters {
     /// Set the BIP path, `4219/0/0/0` if not provided.
     #[arg(short, long, value_parser = parse_bip_path)]
     pub bip_path: Option<Bip44>,
-    /// Set the Bech32-encoded wallet address.
-    #[arg(short, long)]
-    pub address: Option<String>,
 }
 
 impl Default for InitParameters {
@@ -77,7 +74,6 @@ impl Default for InitParameters {
             mnemonic_file_path: None,
             node_url: DEFAULT_NODE_URL.to_string(),
             bip_path: Some(Bip44::new(SHIMMER_COIN_TYPE)),
-            address: None,
         }
     }
 }
@@ -280,17 +276,11 @@ pub async fn init_command(
         None
     };
 
-    let address = init_params
-        .address
-        .map(|addr| Bech32Address::from_str(&addr))
-        .transpose()?;
-
     Ok(Wallet::builder()
         .with_secret_manager(secret_manager)
         .with_client_options(ClientOptions::new().with_node(init_params.node_url.as_str())?)
         .with_storage_path(storage_path.to_str().expect("invalid unicode"))
         .with_bip_path(init_params.bip_path)
-        .with_address(address)
         .with_alias(alias)
         .finish()
         .await?)
