@@ -347,7 +347,13 @@ impl InputSelection {
             if let Output::Basic(output) = &input.output {
                 output
                     .unlock_conditions()
-                    .locked_address(output.address(), self.slot_index)
+                    .locked_address(
+                        output.address(),
+                        self.slot_index,
+                        self.protocol_parameters.committable_age_range(),
+                    )
+                    .expect("slot index was provided")
+                    .expect("expiration unlockable outputs already filtered out")
                     .is_ed25519()
             } else {
                 false
@@ -362,7 +368,13 @@ impl InputSelection {
             if let Output::Basic(output) = &input.output {
                 !output
                     .unlock_conditions()
-                    .locked_address(output.address(), self.slot_index)
+                    .locked_address(
+                        output.address(),
+                        self.slot_index,
+                        self.protocol_parameters.committable_age_range(),
+                    )
+                    .expect("slot index was provided")
+                    .expect("expiration unlockable outputs already filtered out")
                     .is_ed25519()
             } else {
                 false
