@@ -70,30 +70,39 @@ where
     crate::wallet::Error: From<S::Error>,
     crate::client::Error: From<S::Error>,
 {
-    fn should_consolidate_output(
+    async fn should_consolidate_output(
         &self,
         output_data: &OutputData,
         slot_index: SlotIndex,
         wallet_address: &Address,
     ) -> Result<bool> {
         Ok(if let Output::Basic(basic_output) = &output_data.output {
+            let protocol_parameters = self.client().get_protocol_parameters().await?;
             let unlock_conditions = basic_output.unlock_conditions();
 
-            let is_time_locked = unlock_conditions.is_time_locked(slot_index);
+            let is_time_locked = unlock_conditions.is_timelocked(slot_index, protocol_parameters.min_committable_age());
             if is_time_locked {
                 // If the output is timelocked, then it cannot be consolidated.
                 return Ok(false);
             }
 
             let has_storage_deposit_return = unlock_conditions.storage_deposit_return().is_some();
-            let has_expiration = unlock_conditions.expiration().is_some();
-            let is_expired = unlock_conditions.is_expired(slot_index);
-            if has_storage_deposit_return && (!has_expiration || !is_expired) {
+            let is_expired = unlock_conditions.is_expired(slot_index, protocol_parameters.committable_age_range());
+            if is_expired.is_none() {
+                // If the output is in a deadzone because of expiration, then it cannot be consolidated.
+                return Ok(false);
+            }
+            if has_storage_deposit_return && is_expired == Some(false) {
                 // If the output has not expired and must return a storage deposit, then it cannot be consolidated.
                 return Ok(false);
             }
 
-            can_output_be_unlocked_now(wallet_address, output_data, slot_index)?
+            can_output_be_unlocked_now(
+                wallet_address,
+                output_data,
+                slot_index,
+                protocol_parameters.committable_age_range(),
+            )?
         } else {
             false
         })
@@ -139,7 +148,9 @@ where
             }
 
             let is_locked_output = wallet_data.locked_outputs.contains(output_id);
-            let should_consolidate_output = self.should_consolidate_output(output_data, slot_index, &wallet_address)?;
+            let should_consolidate_output = self
+                .should_consolidate_output(output_data, slot_index, &wallet_address)
+                .await?;
             if !is_locked_output && should_consolidate_output {
                 outputs_to_consolidate.push(output_data.clone());
             }

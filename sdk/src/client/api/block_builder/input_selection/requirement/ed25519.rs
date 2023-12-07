@@ -7,12 +7,12 @@ use crate::{client::secret::types::InputSigningData, types::block::address::Addr
 impl InputSelection {
     // Checks if a selected input unlocks a given ED25519 address.
     fn selected_unlocks_ed25519_address(&self, input: &InputSigningData, address: &Address) -> bool {
-        // PANIC: safe to unwrap as outputs with no address have been filtered out already.
         let required_address = input
             .output
-            .required_and_unlocked_address(self.slot_index, input.output_id())
+            .required_address(self.slot_index, self.protocol_parameters.committable_age_range())
+            // PANIC: safe to unwrap as outputs with no address have been filtered out already.
             .unwrap()
-            .0;
+            .expect("expiration unlockable outputs already filtered out");
 
         &required_address == address
     }
@@ -20,10 +20,12 @@ impl InputSelection {
     // Checks if an available input can unlock a given ED25519 address.
     // In case an account input is selected, also tells if it needs to be state or governance transitioned.
     fn available_has_ed25519_address(&self, input: &InputSigningData, address: &Address) -> bool {
-        let (required_address, _) = input
+        let required_address = input
             .output
-            .required_and_unlocked_address(self.slot_index, input.output_id())
-            .unwrap();
+            .required_address(self.slot_index, self.protocol_parameters.committable_age_range())
+            // PANIC: safe to unwrap as outputs with no address have been filtered out already.
+            .unwrap()
+            .expect("expiration unlockable outputs already filtered out");
 
         &required_address == address
     }

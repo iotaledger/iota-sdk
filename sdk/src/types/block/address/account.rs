@@ -10,13 +10,17 @@ use crate::types::block::{
     Error,
 };
 
-/// An account address.
+/// An [`Address`](super::Address) derived from an account ID which can be unlocked by unlocking the corresponding
+/// account.
 #[derive(Clone, Copy, Eq, PartialEq, Ord, PartialOrd, Hash, From, AsRef, Deref, Display, packable::Packable)]
 #[as_ref(forward)]
-pub struct AccountAddress(AccountId);
+pub struct AccountAddress(
+    /// BLAKE2b-256 hash of the Output ID that created the account.
+    AccountId,
+);
 
 impl AccountAddress {
-    /// The [`Address`](crate::types::block::address::Address) kind of an [`AccountAddress`].
+    /// The [`Address`](super::Address) kind of an [`AccountAddress`].
     pub const KIND: u8 = 8;
     /// The length of an [`AccountAddress`].
     pub const LENGTH: usize = AccountId::LENGTH;

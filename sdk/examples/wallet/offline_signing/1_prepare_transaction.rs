@@ -9,11 +9,7 @@
 //! ```
 
 use iota_sdk::{
-    client::{
-        api::{PreparedTransactionData, PreparedTransactionDataDto},
-        constants::SHIMMER_COIN_TYPE,
-        secret::SecretManager,
-    },
+    client::{api::PreparedTransactionDataDto, constants::SHIMMER_COIN_TYPE, secret::SecretManager},
     crypto::keys::bip44::Bip44,
     wallet::{types::Bip44Address, ClientOptions, Result, SendParams, Wallet},
 };
@@ -21,6 +17,7 @@ use iota_sdk::{
 const ONLINE_WALLET_DB_PATH: &str = "./examples/wallet/offline_signing/example-online-walletdb";
 const ADDRESS_FILE_PATH: &str = "./examples/wallet/offline_signing/example.address.json";
 const PREPARED_TRANSACTION_FILE_PATH: &str = "./examples/wallet/offline_signing/example.prepared_transaction.json";
+const PROTOCOL_PARAMETERS_FILE_PATH: &str = "./examples/wallet/offline_signing/example.protocol_parameters.json";
 // Address to which we want to send the amount.
 const RECV_ADDRESS: &str = "rms1qpszqzadsym6wpppd6z037dvlejmjuke7s24hm95s9fg9vpua7vluaw60xu";
 // The amount to send.
@@ -60,7 +57,17 @@ async fn main() -> Result<()> {
 
     println!("Prepared transaction sending {params:?}");
 
-    write_transaction_to_file(prepared_transaction).await?;
+    write_data_to_file(
+        PreparedTransactionDataDto::from(&prepared_transaction),
+        PREPARED_TRANSACTION_FILE_PATH,
+    )
+    .await?;
+
+    write_data_to_file(
+        wallet.client().get_protocol_parameters().await?,
+        PROTOCOL_PARAMETERS_FILE_PATH,
+    )
+    .await?;
 
     Ok(())
 }
@@ -75,12 +82,12 @@ async fn read_address_from_file() -> Result<Bip44Address> {
     Ok(serde_json::from_str(&json)?)
 }
 
-async fn write_transaction_to_file(prepared_transaction: PreparedTransactionData) -> Result<()> {
+async fn write_data_to_file(data: impl serde::Serialize, path: &str) -> Result<()> {
     use tokio::io::AsyncWriteExt;
 
-    let json = serde_json::to_string_pretty(&PreparedTransactionDataDto::from(&prepared_transaction))?;
-    let mut file = tokio::io::BufWriter::new(tokio::fs::File::create(PREPARED_TRANSACTION_FILE_PATH).await?);
-    println!("example.prepared_transaction.json:\n{json}");
+    let json = serde_json::to_string_pretty(&data)?;
+    let mut file = tokio::io::BufWriter::new(tokio::fs::File::create(path).await?);
+    println!("{path}:\n{json}");
     file.write_all(json.as_bytes()).await?;
     file.flush().await?;
     Ok(())

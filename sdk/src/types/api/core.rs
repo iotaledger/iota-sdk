@@ -277,6 +277,9 @@ pub struct IssuanceBlockHeaderResponse {
     /// Blocks that are directly referenced to adjust opinion.
     #[serde(default, skip_serializing_if = "BTreeSet::is_empty")]
     pub shallow_like_parents: BTreeSet<BlockId>,
+    // Latest issuing time of the returned parents.
+    #[serde(with = "string")]
+    pub latest_parent_block_issuing_time: u64,
     /// The slot index of the latest finalized slot.
     pub latest_finalized_slot: SlotIndex,
     /// The latest slot commitment.
@@ -521,7 +524,7 @@ pub struct RoutesResponse {
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct UtxoChangesResponse {
-    pub index: u32,
+    pub commitment_id: SlotCommitmentId,
     pub created_outputs: Vec<OutputId>,
     pub consumed_outputs: Vec<OutputId>,
 }
