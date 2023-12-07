@@ -7,9 +7,9 @@ use crate::{
 };
 
 // Check if an output can be unlocked by the wallet address at the current time
-pub(crate) fn can_output_be_unlocked_now<O>(
+pub(crate) fn can_output_be_unlocked_now(
     wallet_address: &Address,
-    output_data: &OutputData<O>,
+    output_data: &OutputData,
     slot_index: SlotIndex,
 ) -> crate::wallet::Result<bool> {
     if let Some(unlock_conditions) = output_data.output.unlock_conditions() {

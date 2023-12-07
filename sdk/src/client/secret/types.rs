@@ -115,15 +115,14 @@ impl LedgerNanoStatus {
 /// Data for transaction inputs for signing and ordering of unlock blocks
 #[derive(Clone, Debug, Eq, PartialEq, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct InputSigningData<O> {
+pub struct InputSigningData {
     /// The output
     pub output: Output,
     /// The output metadata
     pub output_metadata: OutputMetadata,
-    pub signing_options: Option<O>,
 }
 
-impl<O> InputSigningData<O> {
+impl InputSigningData {
     /// Return the [OutputId]
     pub fn output_id(&self) -> &OutputId {
         self.output_metadata.output_id()

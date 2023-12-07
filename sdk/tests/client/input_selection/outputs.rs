@@ -29,10 +29,9 @@ fn no_inputs() {
         None,
         None,
         None,
-        None,
     )]);
 
-    let selected = InputSelection::<Bip44>::new(
+    let selected = InputSelection::new(
         inputs,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
@@ -50,7 +49,6 @@ fn no_outputs() {
     let inputs = build_inputs([Basic(
         1_000_000,
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-        None,
         None,
         None,
         None,
@@ -79,7 +77,6 @@ fn no_outputs_but_burn() {
         2_000_000,
         account_id_2,
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-        None,
         None,
         None,
     )]);
@@ -117,12 +114,10 @@ fn no_address_provided() {
         None,
         None,
         None,
-        None,
     )]);
     let outputs = build_outputs([Basic(
         1_000_000,
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-        None,
         None,
         None,
         None,
@@ -147,12 +142,10 @@ fn no_matching_address_provided() {
         None,
         None,
         None,
-        None,
     )]);
     let outputs = build_outputs([Basic(
         1_000_000,
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-        None,
         None,
         None,
         None,
@@ -184,12 +177,10 @@ fn two_addresses_one_missing() {
             None,
             None,
             None,
-            None,
         ),
         Basic(
             1_000_000,
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
-            None,
             None,
             None,
             None,
@@ -200,7 +191,6 @@ fn two_addresses_one_missing() {
     let outputs = build_outputs([Basic(
         2_000_000,
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-        None,
         None,
         None,
         None,
@@ -238,12 +228,10 @@ fn two_addresses() {
             None,
             None,
             None,
-            None,
         ),
         Basic(
             1_000_000,
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
-            None,
             None,
             None,
             None,
@@ -254,7 +242,6 @@ fn two_addresses() {
     let outputs = build_outputs([Basic(
         2_000_000,
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-        None,
         None,
         None,
         None,

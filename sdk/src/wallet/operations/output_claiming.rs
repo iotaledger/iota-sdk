@@ -142,16 +142,14 @@ impl<S: 'static + SecretManage> Wallet<S> {
 
     /// Get basic outputs that have only one unlock condition which is [AddressUnlockCondition], so they can be used as
     /// additional inputs
-    pub(crate) async fn get_basic_outputs_for_additional_inputs(
-        &self,
-    ) -> crate::wallet::Result<Vec<OutputData<S::SigningOptions>>> {
+    pub(crate) async fn get_basic_outputs_for_additional_inputs(&self) -> crate::wallet::Result<Vec<OutputData>> {
         log::debug!("[OUTPUT_CLAIMING] get_basic_outputs_for_additional_inputs");
         #[cfg(feature = "participation")]
         let voting_output = self.get_voting_output().await?;
         let wallet_data = self.data().await;
 
         // Get basic outputs only with AddressUnlockCondition and no other unlock condition
-        let mut basic_outputs: Vec<OutputData<S::SigningOptions>> = Vec::new();
+        let mut basic_outputs: Vec<OutputData> = Vec::new();
         for (output_id, output_data) in &wallet_data.unspent_outputs {
             #[cfg(feature = "participation")]
             if let Some(ref voting_output) = voting_output {
@@ -220,7 +218,7 @@ impl<S: 'static + SecretManage> Wallet<S> {
     pub async fn prepare_claim_outputs<I: IntoIterator<Item = OutputId> + Send>(
         &self,
         output_ids_to_claim: I,
-    ) -> crate::wallet::Result<PreparedTransactionData<S::SigningOptions>>
+    ) -> crate::wallet::Result<PreparedTransactionData>
     where
         I::IntoIter: Send,
     {

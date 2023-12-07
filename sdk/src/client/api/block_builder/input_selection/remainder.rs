@@ -16,9 +16,9 @@ use crate::{
     },
 };
 
-impl<O: Clone> InputSelection<O> {
+impl InputSelection {
     // Gets the remainder address from configuration of finds one from the inputs.
-    fn get_remainder_address(&self) -> Result<Option<(Address, Option<O>)>, Error> {
+    fn get_remainder_address(&self) -> Result<Option<Address>, Error> {
         if let Some(remainder_address) = &self.remainder_address {
             // Search in inputs for the Bip44 chain for the remainder address, so the ledger can regenerate it
             for input in self.available_inputs.iter().chain(self.selected_inputs.iter()) {
@@ -27,10 +27,10 @@ impl<O: Clone> InputSelection<O> {
                     .required_and_unlocked_address(self.slot_index, input.output_id())?;
 
                 if &required_address == remainder_address {
-                    return Ok(Some((remainder_address.clone(), input.signing_options.clone())));
+                    return Ok(Some(remainder_address.clone()));
                 }
             }
-            return Ok(Some((remainder_address.clone(), None)));
+            return Ok(Some(remainder_address.clone()));
         }
 
         for input in &self.selected_inputs {
@@ -40,7 +40,7 @@ impl<O: Clone> InputSelection<O> {
                 .0;
 
             if required_address.is_ed25519() {
-                return Ok(Some((required_address, input.signing_options.clone())));
+                return Ok(Some(required_address));
             }
         }
 
@@ -79,7 +79,7 @@ impl<O: Clone> InputSelection<O> {
 
     pub(crate) fn remainder_and_storage_deposit_return_outputs(
         &self,
-    ) -> Result<(Option<RemainderData<O>>, Vec<Output>), Error> {
+    ) -> Result<(Option<RemainderData>, Vec<Output>), Error> {
         let (inputs_sum, outputs_sum, inputs_sdr, outputs_sdr) =
             amount_sums(&self.selected_inputs, &self.outputs, self.slot_index);
         let mut storage_deposit_returns = Vec::new();
@@ -120,7 +120,7 @@ impl<O: Clone> InputSelection<O> {
             return Ok((None, storage_deposit_returns));
         }
 
-        let Some((remainder_address, chain)) = self.get_remainder_address()? else {
+        let Some(remainder_address) = self.get_remainder_address()? else {
             return Err(Error::MissingInputWithEd25519Address);
         };
 
@@ -145,7 +145,6 @@ impl<O: Clone> InputSelection<O> {
         Ok((
             Some(RemainderData {
                 output: remainder,
-                signing_options: chain,
                 address: remainder_address,
             }),
             storage_deposit_returns,

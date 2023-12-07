@@ -48,7 +48,7 @@ impl<S: 'static + SecretManage> Wallet<S> {
         token_id: TokenId,
         mint_amount: impl Into<U256> + Send,
         options: impl Into<Option<TransactionOptions>> + Send,
-    ) -> crate::wallet::Result<PreparedTransactionData<S::SigningOptions>> {
+    ) -> crate::wallet::Result<PreparedTransactionData> {
         log::debug!("[TRANSACTION] mint_native_token");
 
         let mint_amount = mint_amount.into();

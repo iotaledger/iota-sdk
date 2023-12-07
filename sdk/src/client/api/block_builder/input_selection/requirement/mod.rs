@@ -41,10 +41,10 @@ pub enum Requirement {
     Amount,
 }
 
-impl<O: 'static + Clone + std::fmt::Debug> InputSelection<O> {
+impl InputSelection {
     /// Fulfills a requirement by selecting the appropriate available inputs.
     /// Returns the selected inputs and an optional new requirement.
-    pub(crate) fn fulfill_requirement(&mut self, requirement: Requirement) -> Result<Vec<InputSigningData<O>>, Error> {
+    pub(crate) fn fulfill_requirement(&mut self, requirement: Requirement) -> Result<Vec<InputSigningData>, Error> {
         log::debug!("Fulfilling requirement {requirement:?}");
 
         match requirement {

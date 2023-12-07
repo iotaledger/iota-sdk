@@ -313,8 +313,9 @@ impl Sign<Ed25519Signature> for LedgerSecretManager {
 impl SignTransaction for LedgerSecretManager {
     async fn transaction_unlocks(
         &self,
-        prepared_transaction: &PreparedTransactionData<Self::Options>,
+        prepared_transaction: &PreparedTransactionData,
         _protocol_parameters: &ProtocolParameters,
+        chain: &Self::Options,
     ) -> crate::client::Result<Unlocks> {
         let mut input_bip32_indices = Vec::new();
         let mut coin_type = None;
@@ -323,8 +324,6 @@ impl SignTransaction for LedgerSecretManager {
         let input_len = prepared_transaction.inputs_data.len();
 
         for input in &prepared_transaction.inputs_data {
-            let chain = input.signing_options.ok_or(Error::MissingBip32Chain)?;
-
             // coin_type and account_index should be the same in each output
             if (coin_type.is_some() && coin_type != Some(chain.coin_type))
                 || (account_index.is_some() && account_index != Some(chain.account))
@@ -371,19 +370,13 @@ impl SignTransaction for LedgerSecretManager {
             // figure out the remainder output and bip32 index (if there is one)
             #[allow(clippy::option_if_let_else)]
             let (remainder_output, remainder_bip32) = match &prepared_transaction.remainder {
-                Some(remainder) => {
-                    if let Some(chain) = remainder.signing_options {
-                        (
-                            Some(&remainder.output),
-                            LedgerBIP32Index {
-                                bip32_change: chain.change.harden().into(),
-                                bip32_index: chain.address_index.harden().into(),
-                            },
-                        )
-                    } else {
-                        (None, LedgerBIP32Index::default())
-                    }
-                }
+                Some(remainder) => (
+                    Some(&remainder.output),
+                    LedgerBIP32Index {
+                        bip32_change: chain.change.harden().into(),
+                        bip32_index: chain.address_index.harden().into(),
+                    },
+                ),
                 None => (None, LedgerBIP32Index::default()),
             };
 
@@ -492,7 +485,7 @@ impl SecretManagerConfig for LedgerSecretManager {
 /// is signed but only with BasicOutputs, without extra-features and if the transaction is not too large.
 /// If criteria are not met, blind signing is needed.
 /// This method finds out if we have to switch to blind signing mode.
-pub fn needs_blind_signing(prepared_transaction: &PreparedTransactionData<Bip44>, buffer_size: usize) -> bool {
+pub fn needs_blind_signing(prepared_transaction: &PreparedTransactionData, buffer_size: usize) -> bool {
     if !prepared_transaction
         .transaction
         .outputs()
@@ -576,7 +569,7 @@ impl LedgerSecretManager {
 
 // Merge signature unlocks with Account/Nft/Reference unlocks
 fn merge_unlocks(
-    prepared_transaction_data: &PreparedTransactionData<Bip44>,
+    prepared_transaction_data: &PreparedTransactionData,
     mut unlocks: impl Iterator<Item = Unlock>,
 ) -> Result<Vec<Unlock>, Error> {
     let slot_index = prepared_transaction_data.transaction.creation_slot();

@@ -57,8 +57,10 @@ pub enum SecretManagerMethod {
     #[serde(rename_all = "camelCase")]
     SignTransaction {
         /// Prepared transaction data
-        prepared_transaction_data: PreparedTransactionDataDto<serde_json::Value>,
+        prepared_transaction_data: PreparedTransactionDataDto,
         protocol_parameters: ProtocolParameters,
+        /// Options used to sign the transaction
+        signing_options: serde_json::Value,
     },
     // Sign a block.
     #[serde(rename_all = "camelCase")]

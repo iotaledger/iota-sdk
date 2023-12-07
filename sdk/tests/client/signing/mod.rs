@@ -68,72 +68,20 @@ async fn all_combined() -> Result<()> {
     let nft_4 = Address::Nft(NftAddress::new(nft_id_4));
 
     let inputs = build_inputs([
-        Account(1_000_000, account_id_1, nft_1.clone(), None, None, None),
-        Account(
-            1_000_000,
-            account_id_2,
-            ed25519_0.into(),
-            None,
-            None,
-            Some(Bip44::new(SHIMMER_COIN_TYPE)),
-        ),
-        Basic(1_000_000, account_1.clone(), None, None, None, None, None, None),
-        Basic(1_000_000, account_2.clone(), None, None, None, None, None, None),
-        Basic(1_000_000, account_2, None, None, None, None, None, None),
-        Basic(1_000_000, nft_2.clone(), None, None, None, None, None, None),
-        Basic(1_000_000, nft_2, None, None, None, None, None, None),
-        Basic(1_000_000, nft_4.clone(), None, None, None, None, None, None),
-        Basic(
-            1_000_000,
-            ed25519_0.into(),
-            None,
-            None,
-            None,
-            None,
-            None,
-            Some(Bip44::new(SHIMMER_COIN_TYPE)),
-        ),
-        Basic(
-            1_000_000,
-            ed25519_1.into(),
-            None,
-            None,
-            None,
-            None,
-            None,
-            Some(Bip44::new(SHIMMER_COIN_TYPE).with_address_index(1)),
-        ),
-        Basic(
-            1_000_000,
-            ed25519_2.into(),
-            None,
-            None,
-            None,
-            None,
-            None,
-            Some(Bip44::new(SHIMMER_COIN_TYPE).with_address_index(2)),
-        ),
-        Basic(
-            1_000_000,
-            ed25519_2.into(),
-            None,
-            None,
-            None,
-            None,
-            None,
-            Some(Bip44::new(SHIMMER_COIN_TYPE).with_address_index(2)),
-        ),
-        Nft(
-            1_000_000,
-            nft_id_1,
-            ed25519_0.into(),
-            None,
-            None,
-            None,
-            None,
-            Some(Bip44::new(SHIMMER_COIN_TYPE)),
-        ),
-        Nft(1_000_000, nft_id_2, account_1.clone(), None, None, None, None, None),
+        Account(1_000_000, account_id_1, nft_1.clone(), None, None),
+        Account(1_000_000, account_id_2, ed25519_0.into(), None, None),
+        Basic(1_000_000, account_1.clone(), None, None, None, None, None),
+        Basic(1_000_000, account_2.clone(), None, None, None, None, None),
+        Basic(1_000_000, account_2, None, None, None, None, None),
+        Basic(1_000_000, nft_2.clone(), None, None, None, None, None),
+        Basic(1_000_000, nft_2, None, None, None, None, None),
+        Basic(1_000_000, nft_4.clone(), None, None, None, None, None),
+        Basic(1_000_000, ed25519_0.into(), None, None, None, None, None),
+        Basic(1_000_000, ed25519_1.into(), None, None, None, None, None),
+        Basic(1_000_000, ed25519_2.into(), None, None, None, None, None),
+        Basic(1_000_000, ed25519_2.into(), None, None, None, None, None),
+        Nft(1_000_000, nft_id_1, ed25519_0.into(), None, None, None, None),
+        Nft(1_000_000, nft_id_2, account_1.clone(), None, None, None, None),
         // Expirations
         Basic(
             2_000_000,
@@ -143,7 +91,6 @@ async fn all_combined() -> Result<()> {
             None,
             None,
             Some((account_1.clone(), 50)),
-            None,
         ),
         Basic(
             2_000_000,
@@ -153,7 +100,6 @@ async fn all_combined() -> Result<()> {
             None,
             None,
             Some((nft_3.clone(), 50)),
-            None,
         ),
         Basic(
             2_000_000,
@@ -163,7 +109,6 @@ async fn all_combined() -> Result<()> {
             None,
             None,
             Some((nft_3.clone(), 150)),
-            Some(Bip44::new(SHIMMER_COIN_TYPE)),
         ),
         Nft(
             1_000_000,
@@ -173,28 +118,18 @@ async fn all_combined() -> Result<()> {
             None,
             None,
             Some((nft_4, 50)),
-            None,
         ),
-        Nft(
-            1_000_000,
-            nft_id_4,
-            account_1,
-            None,
-            None,
-            None,
-            Some((nft_3, 150)),
-            None,
-        ),
+        Nft(1_000_000, nft_id_4, account_1, None, None, None, Some((nft_3, 150))),
     ]);
 
     let outputs = build_outputs([
-        Account(1_000_000, account_id_1, nft_1, None, None, None),
-        Account(1_000_000, account_id_2, ed25519_0.into(), None, None, None),
-        Basic(10_000_000, ed25519_0.into(), None, None, None, None, None, None),
-        Nft(1_000_000, nft_id_1, ed25519_0.into(), None, None, None, None, None),
-        Nft(1_000_000, nft_id_2, ed25519_0.into(), None, None, None, None, None),
-        Nft(1_000_000, nft_id_3, ed25519_0.into(), None, None, None, None, None),
-        Nft(1_000_000, nft_id_4, ed25519_0.into(), None, None, None, None, None),
+        Account(1_000_000, account_id_1, nft_1, None, None),
+        Account(1_000_000, account_id_2, ed25519_0.into(), None, None),
+        Basic(10_000_000, ed25519_0.into(), None, None, None, None, None),
+        Nft(1_000_000, nft_id_1, ed25519_0.into(), None, None, None, None),
+        Nft(1_000_000, nft_id_2, ed25519_0.into(), None, None, None, None),
+        Nft(1_000_000, nft_id_3, ed25519_0.into(), None, None, None, None),
+        Nft(1_000_000, nft_id_4, ed25519_0.into(), None, None, None, None),
     ]);
 
     let slot_index = SlotIndex::from(100);
@@ -228,8 +163,10 @@ async fn all_combined() -> Result<()> {
         remainder: None,
     };
 
+    let signing_options = Bip44::new(SHIMMER_COIN_TYPE);
+
     let unlocks = secret_manager
-        .transaction_unlocks(&prepared_transaction_data, &protocol_parameters)
+        .transaction_unlocks(&prepared_transaction_data, &protocol_parameters, &signing_options)
         .await?;
 
     assert_eq!(unlocks.len(), 15);

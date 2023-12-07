@@ -111,7 +111,7 @@ impl<S: 'static + SecretManage> Wallet<S> {
         let (addresses_with_unspent_outputs, spent_or_not_synced_output_ids, outputs_data): (
             Vec<AddressWithUnspentOutputs>,
             Vec<OutputId>,
-            Vec<OutputData<S::SigningOptions>>,
+            Vec<OutputData>,
         ) = self.request_outputs_recursively(address_to_sync, options).await?;
 
         // Request possible spent outputs
@@ -166,11 +166,7 @@ impl<S: 'static + SecretManage> Wallet<S> {
         &self,
         addresses_to_sync: Vec<AddressWithUnspentOutputs>,
         options: &SyncOptions,
-    ) -> crate::wallet::Result<(
-        Vec<AddressWithUnspentOutputs>,
-        Vec<OutputId>,
-        Vec<OutputData<S::SigningOptions>>,
-    )> {
+    ) -> crate::wallet::Result<(Vec<AddressWithUnspentOutputs>, Vec<OutputId>, Vec<OutputData>)> {
         // Cache the account and nft address with the related ed2559 address, so we can update the account address with
         // the new output ids
 

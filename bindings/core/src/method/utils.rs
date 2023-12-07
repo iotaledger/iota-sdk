@@ -124,7 +124,7 @@ pub enum UtilsMethod {
     /// Verifies the semantic of a transaction.
     VerifyTransactionSemantic {
         transaction: TransactionDto,
-        inputs: Vec<InputSigningData<serde_json::Value>>,
+        inputs: Vec<InputSigningData>,
         unlocks: Option<Vec<Unlock>>,
     },
 }

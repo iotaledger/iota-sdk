@@ -23,10 +23,7 @@ use crate::wallet::events::{
 #[cfg(feature = "storage")]
 use crate::wallet::storage::{StorageManager, StorageOptions};
 use crate::{
-    client::{
-        secret::{SecretManage, SecretManager},
-        verify_mnemonic, Client,
-    },
+    client::{secret::SecretManage, verify_mnemonic, Client},
     types::{
         block::{
             address::{Address, Bech32Address, Hrp, ImplicitAccountCreationAddress},
@@ -83,7 +80,7 @@ pub struct WalletInner<S: SecretManage> {
     pub(crate) client: Client,
     pub(crate) secret_manager: Arc<RwLock<S>>,
     #[cfg(feature = "events")]
-    pub(crate) event_emitter: tokio::sync::RwLock<EventEmitter<S::SigningOptions>>,
+    pub(crate) event_emitter: tokio::sync::RwLock<EventEmitter>,
     #[cfg(feature = "storage")]
     pub(crate) storage_options: StorageOptions,
     #[cfg(feature = "storage")]
@@ -102,14 +99,14 @@ pub struct WalletData<S: SecretManage> {
     pub(crate) alias: Option<String>,
     /// Outputs
     // stored separated from the wallet for performance?
-    pub(crate) outputs: HashMap<OutputId, OutputData<S::SigningOptions>>,
+    pub(crate) outputs: HashMap<OutputId, OutputData>,
     /// Unspent outputs that are currently used as input for transactions
     // outputs used in transactions should be locked here so they don't get used again, which would result in a
     // conflicting transaction
     pub(crate) locked_outputs: HashSet<OutputId>,
     /// Unspent outputs
     // have unspent outputs in a separated hashmap so we don't need to iterate over all outputs we have
-    pub(crate) unspent_outputs: HashMap<OutputId, OutputData<S::SigningOptions>>,
+    pub(crate) unspent_outputs: HashMap<OutputId, OutputData>,
     /// Sent transactions
     // stored separated from the wallet for performance and only the transaction id here? where to add the network id?
     // transactions: HashSet<TransactionId>,
@@ -152,9 +149,9 @@ impl<S: SecretManage> WalletData<S> {
     }
 
     fn filter_outputs<'a>(
-        outputs: impl Iterator<Item = &'a OutputData<S::SigningOptions>>,
+        outputs: impl Iterator<Item = &'a OutputData>,
         filter: FilterOptions,
-    ) -> impl Iterator<Item = &'a OutputData<S::SigningOptions>> {
+    ) -> impl Iterator<Item = &'a OutputData> {
         outputs.filter(move |output| {
             match &output.output {
                 Output::Account(account) => {
@@ -242,30 +239,27 @@ impl<S: SecretManage> WalletData<S> {
     }
 
     /// Returns outputs map of the wallet.
-    pub fn outputs(&self) -> &HashMap<OutputId, OutputData<S::SigningOptions>> {
+    pub fn outputs(&self) -> &HashMap<OutputId, OutputData> {
         &self.outputs
     }
 
     /// Returns unspent outputs map of the wallet.
-    pub fn unspent_outputs(&self) -> &HashMap<OutputId, OutputData<S::SigningOptions>> {
+    pub fn unspent_outputs(&self) -> &HashMap<OutputId, OutputData> {
         &self.unspent_outputs
     }
 
     /// Returns outputs of the wallet.
-    pub fn filtered_outputs(&self, filter: FilterOptions) -> impl Iterator<Item = &OutputData<S::SigningOptions>> {
+    pub fn filtered_outputs(&self, filter: FilterOptions) -> impl Iterator<Item = &OutputData> {
         Self::filter_outputs(self.outputs.values(), filter)
     }
 
     /// Returns unspent outputs of the wallet.
-    pub fn filtered_unspent_outputs(
-        &self,
-        filter: FilterOptions,
-    ) -> impl Iterator<Item = &OutputData<S::SigningOptions>> {
+    pub fn filtered_unspent_outputs(&self, filter: FilterOptions) -> impl Iterator<Item = &OutputData> {
         Self::filter_outputs(self.unspent_outputs.values(), filter)
     }
 
     /// Gets the unspent account output matching the given ID.
-    pub fn unspent_account_output(&self, account_id: &AccountId) -> Option<&OutputData<S::SigningOptions>> {
+    pub fn unspent_account_output(&self, account_id: &AccountId) -> Option<&OutputData> {
         self.filtered_unspent_outputs(FilterOptions {
             account_ids: Some([*account_id].into()),
             ..Default::default()
@@ -274,7 +268,7 @@ impl<S: SecretManage> WalletData<S> {
     }
 
     /// Gets the unspent anchor output matching the given ID.
-    pub fn unspent_anchor_output(&self, anchor_id: &AnchorId) -> Option<&OutputData<S::SigningOptions>> {
+    pub fn unspent_anchor_output(&self, anchor_id: &AnchorId) -> Option<&OutputData> {
         self.filtered_unspent_outputs(FilterOptions {
             anchor_ids: Some([*anchor_id].into()),
             ..Default::default()
@@ -283,7 +277,7 @@ impl<S: SecretManage> WalletData<S> {
     }
 
     /// Gets the unspent foundry output matching the given ID.
-    pub fn unspent_foundry_output(&self, foundry_id: &FoundryId) -> Option<&OutputData<S::SigningOptions>> {
+    pub fn unspent_foundry_output(&self, foundry_id: &FoundryId) -> Option<&OutputData> {
         self.filtered_unspent_outputs(FilterOptions {
             foundry_ids: Some([*foundry_id].into()),
             ..Default::default()
@@ -292,7 +286,7 @@ impl<S: SecretManage> WalletData<S> {
     }
 
     /// Gets the unspent nft output matching the given ID.
-    pub fn unspent_nft_output(&self, nft_id: &NftId) -> Option<&OutputData<S::SigningOptions>> {
+    pub fn unspent_nft_output(&self, nft_id: &NftId) -> Option<&OutputData> {
         self.filtered_unspent_outputs(FilterOptions {
             nft_ids: Some([*nft_id].into()),
             ..Default::default()
@@ -301,7 +295,7 @@ impl<S: SecretManage> WalletData<S> {
     }
 
     /// Gets the unspent delegation output matching the given ID.
-    pub fn unspent_delegation_output(&self, delegation_id: &DelegationId) -> Option<&OutputData<S::SigningOptions>> {
+    pub fn unspent_delegation_output(&self, delegation_id: &DelegationId) -> Option<&OutputData> {
         self.filtered_unspent_outputs(FilterOptions {
             delegation_ids: Some([*delegation_id].into()),
             ..Default::default()
@@ -310,21 +304,21 @@ impl<S: SecretManage> WalletData<S> {
     }
 
     /// Returns implicit accounts of the wallet.
-    pub fn implicit_accounts(&self) -> impl Iterator<Item = &OutputData<S::SigningOptions>> {
+    pub fn implicit_accounts(&self) -> impl Iterator<Item = &OutputData> {
         self.unspent_outputs
             .values()
             .filter(|output_data| output_data.output.is_implicit_account())
     }
 
     /// Returns accounts of the wallet.
-    pub fn accounts(&self) -> impl Iterator<Item = &OutputData<S::SigningOptions>> {
+    pub fn accounts(&self) -> impl Iterator<Item = &OutputData> {
         self.unspent_outputs
             .values()
             .filter(|output_data| output_data.output.is_account())
     }
 
     /// Get the [`OutputData`] of an output stored in the wallet.
-    pub fn get_output(&self, output_id: &OutputId) -> Option<&OutputData<S::SigningOptions>> {
+    pub fn get_output(&self, output_id: &OutputId) -> Option<&OutputData> {
         self.outputs.get(output_id)
     }
 
@@ -485,7 +479,7 @@ impl<S: 'static + SecretManage> Wallet<S> {
     }
 
     #[cfg(feature = "events")]
-    pub(crate) async fn emit(&self, wallet_event: super::events::types::WalletEvent<S::SigningOptions>) {
+    pub(crate) async fn emit(&self, wallet_event: super::events::types::WalletEvent) {
         self.inner.emit(wallet_event).await
     }
 
@@ -539,7 +533,7 @@ impl<S: SecretManage> WalletInner<S> {
     pub async fn listen<F, I: IntoIterator<Item = WalletEventType> + Send>(&self, events: I, handler: F)
     where
         I::IntoIter: Send,
-        F: Fn(&WalletEvent<S::SigningOptions>) + 'static + Send + Sync,
+        F: Fn(&WalletEvent) + 'static + Send + Sync,
     {
         let mut emitter = self.event_emitter.write().await;
         emitter.on(events, handler);
@@ -568,14 +562,14 @@ impl<S: SecretManage> WalletInner<S> {
     }
 
     #[cfg(feature = "events")]
-    pub(crate) async fn emit(&self, event: crate::wallet::events::types::WalletEvent<S::SigningOptions>) {
+    pub(crate) async fn emit(&self, event: crate::wallet::events::types::WalletEvent) {
         self.event_emitter.read().await.emit(event);
     }
 
     /// Helper function to test events.
     #[cfg(feature = "events")]
     #[cfg_attr(docsrs, doc(cfg(feature = "events")))]
-    pub async fn emit_test_event(&self, event: crate::wallet::events::types::WalletEvent<S::SigningOptions>) {
+    pub async fn emit_test_event(&self, event: crate::wallet::events::types::WalletEvent) {
         self.emit(event).await
     }
 }
@@ -594,9 +588,9 @@ pub struct WalletDataDto<G, S> {
     pub signing_options: S,
     pub address: Bech32Address,
     pub alias: Option<String>,
-    pub outputs: HashMap<OutputId, OutputData<S>>,
+    pub outputs: HashMap<OutputId, OutputData>,
     pub locked_outputs: HashSet<OutputId>,
-    pub unspent_outputs: HashMap<OutputId, OutputData<S>>,
+    pub unspent_outputs: HashMap<OutputId, OutputData>,
     pub transactions: HashMap<TransactionId, TransactionWithMetadataDto>,
     pub pending_transactions: HashSet<TransactionId>,
     pub incoming_transactions: HashMap<TransactionId, TransactionWithMetadataDto>,

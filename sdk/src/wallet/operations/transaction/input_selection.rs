@@ -30,7 +30,7 @@ impl<S: 'static + SecretManage> Wallet<S> {
         mandatory_inputs: Option<HashSet<OutputId>>,
         remainder_address: Option<Address>,
         burn: Option<&Burn>,
-    ) -> crate::wallet::Result<Selected<S::SigningOptions>> {
+    ) -> crate::wallet::Result<Selected> {
         log::debug!("[TRANSACTION] select_inputs");
         // Voting output needs to be requested before to prevent a deadlock
         #[cfg(feature = "participation")]
@@ -213,11 +213,11 @@ impl<S: 'static + SecretManage> Wallet<S> {
 #[allow(clippy::too_many_arguments)]
 fn filter_inputs<S: SecretManage>(
     wallet_data: &WalletData<S>,
-    available_outputs: Values<'_, OutputId, OutputData<S::SigningOptions>>,
+    available_outputs: Values<'_, OutputId, OutputData>,
     slot_index: SlotIndex,
     custom_inputs: Option<&HashSet<OutputId>>,
     mandatory_inputs: Option<&HashSet<OutputId>>,
-) -> crate::wallet::Result<Vec<InputSigningData<S::SigningOptions>>> {
+) -> crate::wallet::Result<Vec<InputSigningData>> {
     let mut available_outputs_signing_data = Vec::new();
 
     for output_data in available_outputs {
@@ -242,7 +242,7 @@ fn filter_inputs<S: SecretManage>(
             }
         }
 
-        if let Some(available_input) = output_data.input_signing_data(wallet_data, slot_index)? {
+        if let Some(available_input) = output_data.input_signing_data(slot_index)? {
             available_outputs_signing_data.push(available_input);
         }
     }

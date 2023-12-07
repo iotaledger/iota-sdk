@@ -42,16 +42,11 @@ async fn sign_account_state_transition() -> Result<()> {
     let protocol_parameters = protocol_parameters();
     let account_id = AccountId::from_str(ACCOUNT_ID_1)?;
 
-    let inputs = build_inputs([Account(
-        1_000_000,
-        account_id,
-        address.clone(),
-        None,
-        None,
-        Some(Bip44::new(SHIMMER_COIN_TYPE)),
-    )]);
+    let signing_options = Bip44::new(SHIMMER_COIN_TYPE);
 
-    let outputs = build_outputs([Account(1_000_000, account_id, address.clone(), None, None, None)]);
+    let inputs = build_inputs([Account(1_000_000, account_id, address.clone(), None, None)]);
+
+    let outputs = build_outputs([Account(1_000_000, account_id, address.clone(), None, None)]);
 
     let transaction = Transaction::builder(protocol_parameters.network_id())
         .with_inputs(
@@ -71,7 +66,7 @@ async fn sign_account_state_transition() -> Result<()> {
     };
 
     let unlocks = secret_manager
-        .transaction_unlocks(&prepared_transaction_data, &protocol_parameters)
+        .transaction_unlocks(&prepared_transaction_data, &protocol_parameters, &signing_options)
         .await?;
 
     assert_eq!(unlocks.len(), 1);
@@ -104,22 +99,17 @@ async fn account_reference_unlocks() -> Result<()> {
     let account_id = AccountId::from_str(ACCOUNT_ID_1)?;
     let account_address = Address::Account(AccountAddress::new(account_id));
 
+    let signing_options = Bip44::new(SHIMMER_COIN_TYPE);
+
     let inputs = build_inputs([
-        Account(
-            1_000_000,
-            account_id,
-            address.clone(),
-            None,
-            None,
-            Some(Bip44::new(SHIMMER_COIN_TYPE)),
-        ),
-        Basic(1_000_000, account_address.clone(), None, None, None, None, None, None),
-        Basic(1_000_000, account_address.clone(), None, None, None, None, None, None),
+        Account(1_000_000, account_id, address.clone(), None, None),
+        Basic(1_000_000, account_address.clone(), None, None, None, None, None),
+        Basic(1_000_000, account_address.clone(), None, None, None, None, None),
     ]);
 
     let outputs = build_outputs([
-        Account(1_000_000, account_id, address, None, None, None),
-        Basic(2_000_000, account_address, None, None, None, None, None, None),
+        Account(1_000_000, account_id, address, None, None),
+        Basic(2_000_000, account_address, None, None, None, None, None),
     ]);
 
     let transaction = Transaction::builder(protocol_parameters.network_id())
@@ -140,7 +130,7 @@ async fn account_reference_unlocks() -> Result<()> {
     };
 
     let unlocks = secret_manager
-        .transaction_unlocks(&prepared_transaction_data, &protocol_parameters)
+        .transaction_unlocks(&prepared_transaction_data, &protocol_parameters, &signing_options)
         .await?;
 
     assert_eq!(unlocks.len(), 3);

@@ -34,7 +34,7 @@ impl<S: 'static + SecretManage> Wallet<S> {
     /// Update wallet with newly synced data and emit events for outputs.
     pub(crate) async fn update_after_sync(
         &self,
-        unspent_outputs: Vec<OutputData<S::SigningOptions>>,
+        unspent_outputs: Vec<OutputData>,
         spent_or_unsynced_output_metadata_map: HashMap<OutputId, Option<OutputMetadata>>,
     ) -> crate::wallet::Result<()> {
         log::debug!("[SYNC] Update wallet with new synced transactions");

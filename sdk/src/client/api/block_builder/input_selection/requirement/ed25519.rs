@@ -4,9 +4,9 @@
 use super::{Error, InputSelection, Requirement};
 use crate::{client::secret::types::InputSigningData, types::block::address::Address};
 
-impl<O> InputSelection<O> {
+impl InputSelection {
     // Checks if a selected input unlocks a given ED25519 address.
-    fn selected_unlocks_ed25519_address(&self, input: &InputSigningData<O>, address: &Address) -> bool {
+    fn selected_unlocks_ed25519_address(&self, input: &InputSigningData, address: &Address) -> bool {
         // PANIC: safe to unwrap as outputs with no address have been filtered out already.
         let required_address = input
             .output
@@ -19,7 +19,7 @@ impl<O> InputSelection<O> {
 
     // Checks if an available input can unlock a given ED25519 address.
     // In case an account input is selected, also tells if it needs to be state or governance transitioned.
-    fn available_has_ed25519_address(&self, input: &InputSigningData<O>, address: &Address) -> bool {
+    fn available_has_ed25519_address(&self, input: &InputSigningData, address: &Address) -> bool {
         let (required_address, _) = input
             .output
             .required_and_unlocked_address(self.slot_index, input.output_id())
@@ -29,7 +29,7 @@ impl<O> InputSelection<O> {
     }
 
     /// Fulfills an ed25519 sender requirement by selecting an available input that unlocks its address.
-    pub(crate) fn fulfill_ed25519_requirement(&mut self, address: &Address) -> Result<Vec<InputSigningData<O>>, Error> {
+    pub(crate) fn fulfill_ed25519_requirement(&mut self, address: &Address) -> Result<Vec<InputSigningData>, Error> {
         // Checks if the requirement is already fulfilled.
         if let Some(input) = self
             .selected_inputs

@@ -25,29 +25,29 @@ use crate::{
 
 /// Helper struct for offline signing
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct PreparedTransactionData<O> {
+pub struct PreparedTransactionData {
     /// Transaction
     pub transaction: Transaction,
     /// Required input information for signing. Inputs need to be ordered by address type
-    pub inputs_data: Vec<InputSigningData<O>>,
+    pub inputs_data: Vec<InputSigningData>,
     /// Optional remainder output information
-    pub remainder: Option<RemainderData<O>>,
+    pub remainder: Option<RemainderData>,
 }
 
 /// PreparedTransactionData Dto
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct PreparedTransactionDataDto<O> {
+pub struct PreparedTransactionDataDto {
     /// Transaction
     pub transaction: TransactionDto,
     /// Required address information for signing
-    pub inputs_data: Vec<InputSigningData<O>>,
+    pub inputs_data: Vec<InputSigningData>,
     /// Optional remainder output information
-    pub remainder: Option<RemainderData<O>>,
+    pub remainder: Option<RemainderData>,
 }
 
-impl<O: Clone> From<&PreparedTransactionData<O>> for PreparedTransactionDataDto<O> {
-    fn from(value: &PreparedTransactionData<O>) -> Self {
+impl From<&PreparedTransactionData> for PreparedTransactionDataDto {
+    fn from(value: &PreparedTransactionData) -> Self {
         Self {
             transaction: TransactionDto::from(&value.transaction),
             inputs_data: value.inputs_data.clone(),
@@ -56,11 +56,11 @@ impl<O: Clone> From<&PreparedTransactionData<O>> for PreparedTransactionDataDto<
     }
 }
 
-impl<O> TryFromDto<PreparedTransactionDataDto<O>> for PreparedTransactionData<O> {
+impl TryFromDto<PreparedTransactionDataDto> for PreparedTransactionData {
     type Error = Error;
 
     fn try_from_dto_with_params_inner(
-        dto: PreparedTransactionDataDto<O>,
+        dto: PreparedTransactionDataDto,
         params: Option<&ProtocolParameters>,
     ) -> Result<Self, Self::Error> {
         Ok(Self {
@@ -74,25 +74,25 @@ impl<O> TryFromDto<PreparedTransactionDataDto<O>> for PreparedTransactionData<O>
 
 /// Helper struct for offline signing
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct SignedTransactionData<O> {
+pub struct SignedTransactionData {
     /// Signed transaction payload
     pub payload: SignedTransactionPayload,
     /// Required address information for signing
-    pub inputs_data: Vec<InputSigningData<O>>,
+    pub inputs_data: Vec<InputSigningData>,
 }
 
 /// SignedTransactionData Dto
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct SignedTransactionDataDto<O> {
+pub struct SignedTransactionDataDto {
     /// Signed transaction payload
     pub payload: SignedTransactionPayloadDto,
     /// Required address information for signing
-    pub inputs_data: Vec<InputSigningData<O>>,
+    pub inputs_data: Vec<InputSigningData>,
 }
 
-impl<O: Clone> From<&SignedTransactionData<O>> for SignedTransactionDataDto<O> {
-    fn from(value: &SignedTransactionData<O>) -> Self {
+impl From<&SignedTransactionData> for SignedTransactionDataDto {
+    fn from(value: &SignedTransactionData) -> Self {
         Self {
             payload: SignedTransactionPayloadDto::from(&value.payload),
             inputs_data: value.inputs_data.clone(),
@@ -100,11 +100,11 @@ impl<O: Clone> From<&SignedTransactionData<O>> for SignedTransactionDataDto<O> {
     }
 }
 
-impl<O> TryFromDto<SignedTransactionDataDto<O>> for SignedTransactionData<O> {
+impl TryFromDto<SignedTransactionDataDto> for SignedTransactionData {
     type Error = Error;
 
     fn try_from_dto_with_params_inner(
-        dto: SignedTransactionDataDto<O>,
+        dto: SignedTransactionDataDto,
         params: Option<&ProtocolParameters>,
     ) -> Result<Self, Self::Error> {
         Ok(Self {
@@ -117,11 +117,9 @@ impl<O> TryFromDto<SignedTransactionDataDto<O>> for SignedTransactionData<O> {
 
 /// Data for a remainder output, used for ledger nano
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-pub struct RemainderData<O> {
+pub struct RemainderData {
     /// The remainder output
     pub output: Output,
-    /// The signing options for the remainder addresses
-    pub signing_options: Option<O>,
     /// The remainder address
     pub address: Address,
 }

@@ -16,7 +16,7 @@ pub use self::{
     balance::{Balance, BaseCoinBalance, NativeTokensBalance, RequiredStorageDeposit},
 };
 use crate::{
-    client::secret::{types::InputSigningData, SecretManage},
+    client::secret::types::InputSigningData,
     types::{
         api::core::OutputWithMetadataResponse,
         block::{
@@ -29,13 +29,12 @@ use crate::{
         },
         TryFromDto,
     },
-    wallet::core::WalletData,
 };
 
 /// An output with metadata
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct OutputData<O> {
+pub struct OutputData {
     /// The output id
     pub output_id: OutputId,
     pub metadata: OutputMetadata,
@@ -48,36 +47,13 @@ pub struct OutputData<O> {
     /// Network ID
     pub network_id: u64,
     pub remainder: bool,
-    // bip44 path
-    pub signing_options: Option<O>,
 }
 
-impl<O: Clone> OutputData<O> {
-    pub fn input_signing_data<S: SecretManage<SigningOptions = O>>(
-        &self,
-        wallet_data: &WalletData<S>,
-        slot_index: SlotIndex,
-    ) -> crate::wallet::Result<Option<InputSigningData<S::SigningOptions>>> {
-        let (unlock_address, _unlocked_account_or_nft_address) =
-            self.output.required_and_unlocked_address(slot_index, &self.output_id)?;
-
-        let chain = if unlock_address == self.address {
-            self.signing_options.clone()
-        } else if let Address::Ed25519(_) = unlock_address {
-            if wallet_data.address.inner() == &unlock_address {
-                Some(wallet_data.signing_options.clone())
-            } else {
-                return Ok(None);
-            }
-        } else {
-            // Account and NFT addresses have no chain
-            None
-        };
-
+impl OutputData {
+    pub fn input_signing_data(&self, slot_index: SlotIndex) -> crate::wallet::Result<Option<InputSigningData>> {
         Ok(Some(InputSigningData {
             output: self.output.clone(),
             output_metadata: self.metadata,
-            signing_options: self.signing_options.clone(),
         }))
     }
 }

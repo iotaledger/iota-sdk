@@ -38,7 +38,7 @@ impl<S: 'static + SecretManage> Wallet<S> {
         &self,
         burn: impl Into<Burn> + Send,
         options: impl Into<Option<TransactionOptions>> + Send,
-    ) -> crate::wallet::Result<PreparedTransactionData<S::SigningOptions>> {
+    ) -> crate::wallet::Result<PreparedTransactionData> {
         let mut options: TransactionOptions = options.into().unwrap_or_default();
         options.burn = Some(burn.into());
 

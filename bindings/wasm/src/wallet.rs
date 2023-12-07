@@ -114,10 +114,7 @@ pub async fn listen_wallet(
         event_types.push(wallet_event_type);
     }
 
-    let (tx, mut rx): (
-        UnboundedSender<WalletEvent<serde_json::Value>>,
-        UnboundedReceiver<WalletEvent<serde_json::Value>>,
-    ) = unbounded_channel();
+    let (tx, mut rx): (UnboundedSender<WalletEvent>, UnboundedReceiver<WalletEvent>) = unbounded_channel();
     method_handler
         .wallet
         .lock()

@@ -18,7 +18,7 @@ impl<S: 'static + SecretManage> Wallet<S> {
     pub(crate) async fn get_outputs_from_address_output_ids(
         &self,
         addresses_with_unspent_outputs: Vec<AddressWithUnspentOutputs>,
-    ) -> crate::wallet::Result<(Vec<AddressWithUnspentOutputs>, Vec<OutputData<S::SigningOptions>>)> {
+    ) -> crate::wallet::Result<(Vec<AddressWithUnspentOutputs>, Vec<OutputData>)> {
         log::debug!("[SYNC] start get_outputs_from_address_output_ids");
         let address_outputs_start_time = Instant::now();
 
@@ -47,7 +47,7 @@ impl<S: 'static + SecretManage> Wallet<S> {
             }
             let results = futures::future::try_join_all(tasks).await?;
             for res in results {
-                let (address, outputs): (AddressWithUnspentOutputs, Vec<OutputData<S::SigningOptions>>) = res?;
+                let (address, outputs): (AddressWithUnspentOutputs, Vec<OutputData>) = res?;
                 addresses_with_outputs.push(address);
                 outputs_data.extend(outputs);
             }

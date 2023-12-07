@@ -42,7 +42,7 @@ impl<S: 'static + SecretManage> Wallet<S> {
         &self,
         output_id: &OutputId,
         key_source: impl Into<Option<BlockIssuerKeySource<S::GenerationOptions>>> + Send,
-    ) -> Result<PreparedTransactionData<S::SigningOptions>> {
+    ) -> Result<PreparedTransactionData> {
         let implicit_account_data = self.data().await.unspent_outputs.get(output_id).cloned();
 
         let implicit_account = if let Some(implicit_account_data) = &implicit_account_data {

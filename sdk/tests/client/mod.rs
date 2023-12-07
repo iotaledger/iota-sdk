@@ -17,7 +17,6 @@ mod signing;
 
 use std::{collections::HashMap, hash::Hash, str::FromStr};
 
-use crypto::keys::bip44::Bip44;
 use iota_sdk::{
     client::secret::types::InputSigningData,
     types::block::{
@@ -64,7 +63,6 @@ enum Build<'a> {
         Option<(Address, u64)>,
         Option<u32>,
         Option<(Address, u32)>,
-        Option<Bip44>,
     ),
     Nft(
         u64,
@@ -74,9 +72,8 @@ enum Build<'a> {
         Option<Address>,
         Option<(Address, u64)>,
         Option<(Address, u32)>,
-        Option<Bip44>,
     ),
-    Account(u64, AccountId, Address, Option<Address>, Option<Address>, Option<Bip44>),
+    Account(u64, AccountId, Address, Option<Address>, Option<Address>),
     Foundry(u64, AccountId, u32, SimpleTokenScheme, Option<(&'a str, u64)>),
 }
 
@@ -188,43 +185,39 @@ fn build_foundry_output(
     builder.finish_output().unwrap()
 }
 
-fn build_output_inner(build: Build) -> (Output, Option<Bip44>) {
+fn build_output_inner(build: Build) -> Output {
     match build {
-        Build::Basic(amount, address, native_token, sender, sdruc, timelock, expiration, chain) => (
-            build_basic_output(amount, address, native_token, sender, sdruc, timelock, expiration),
-            chain,
-        ),
-        Build::Nft(amount, nft_id, address, sender, issuer, sdruc, expiration, chain) => (
-            build_nft_output(amount, nft_id, address, sender, issuer, sdruc, expiration),
-            chain,
-        ),
-        Build::Account(amount, account_id, address, sender, issuer, chain) => {
-            (build_account_output(amount, account_id, address, sender, issuer), chain)
+        Build::Basic(amount, address, native_token, sender, sdruc, timelock, expiration) => {
+            build_basic_output(amount, address, native_token, sender, sdruc, timelock, expiration)
         }
-        Build::Foundry(amount, account_id, serial_number, token_scheme, native_token) => (
-            build_foundry_output(amount, account_id, serial_number, token_scheme, native_token),
-            None,
-        ),
+        Build::Nft(amount, nft_id, address, sender, issuer, sdruc, expiration) => {
+            build_nft_output(amount, nft_id, address, sender, issuer, sdruc, expiration)
+        }
+        Build::Account(amount, account_id, address, sender, issuer) => {
+            build_account_output(amount, account_id, address, sender, issuer)
+        }
+        Build::Foundry(amount, account_id, serial_number, token_scheme, native_token) => {
+            build_foundry_output(amount, account_id, serial_number, token_scheme, native_token)
+        }
     }
 }
 
-fn build_inputs<'a>(outputs: impl IntoIterator<Item = Build<'a>>) -> Vec<InputSigningData<Bip44>> {
+fn build_inputs<'a>(outputs: impl IntoIterator<Item = Build<'a>>) -> Vec<InputSigningData> {
     outputs
         .into_iter()
         .map(|build| {
-            let (output, chain) = build_output_inner(build);
+            let output = build_output_inner(build);
 
             InputSigningData {
                 output,
                 output_metadata: rand_output_metadata_with_id(OutputId::new(rand_transaction_id(), 0)),
-                signing_options: chain,
             }
         })
         .collect()
 }
 
 fn build_outputs<'a>(outputs: impl IntoIterator<Item = Build<'a>>) -> Vec<Output> {
-    outputs.into_iter().map(|build| build_output_inner(build).0).collect()
+    outputs.into_iter().map(|build| build_output_inner(build)).collect()
 }
 
 fn unsorted_eq<T>(a: &[T], b: &[T]) -> bool

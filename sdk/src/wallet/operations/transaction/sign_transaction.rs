@@ -23,8 +23,8 @@ impl<S: 'static + SecretManage> Wallet<S> {
     /// Signs a transaction.
     pub async fn sign_transaction(
         &self,
-        prepared_transaction_data: &PreparedTransactionData<S::SigningOptions>,
-    ) -> crate::wallet::Result<SignedTransactionData<S::SigningOptions>> {
+        prepared_transaction_data: &PreparedTransactionData,
+    ) -> crate::wallet::Result<SignedTransactionData> {
         log::debug!("[TRANSACTION] sign_transaction");
         log::debug!("[TRANSACTION] prepared_transaction_data {prepared_transaction_data:?}");
         #[cfg(feature = "events")]
@@ -73,7 +73,11 @@ impl<S: 'static + SecretManage> Wallet<S> {
             .secret_manager
             .read()
             .await
-            .transaction_unlocks(prepared_transaction_data, &protocol_parameters)
+            .transaction_unlocks(
+                prepared_transaction_data,
+                &protocol_parameters,
+                self.data().await.signing_options(),
+            )
             .await
         {
             Ok(res) => res,

@@ -152,7 +152,7 @@ impl<S: 'static + SecretManage> Wallet<S> {
         &self,
         params: I,
         options: impl Into<Option<TransactionOptions>> + Send,
-    ) -> crate::wallet::Result<PreparedTransactionData<S::SigningOptions>>
+    ) -> crate::wallet::Result<PreparedTransactionData>
     where
         I::IntoIter: Send,
     {

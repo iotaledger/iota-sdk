@@ -68,7 +68,7 @@ impl ConsolidationParams {
 impl<S: 'static + SecretManage> Wallet<S> {
     fn should_consolidate_output(
         &self,
-        output_data: &OutputData<S::SigningOptions>,
+        output_data: &OutputData,
         slot_index: SlotIndex,
         wallet_address: &Address,
     ) -> Result<bool> {
@@ -115,10 +115,7 @@ impl<S: 'static + SecretManage> Wallet<S> {
     }
 
     /// Prepares the transaction for [Wallet::consolidate_outputs()].
-    pub async fn prepare_consolidate_outputs(
-        &self,
-        params: ConsolidationParams,
-    ) -> Result<PreparedTransactionData<S::SigningOptions>> {
+    pub async fn prepare_consolidate_outputs(&self, params: ConsolidationParams) -> Result<PreparedTransactionData> {
         log::debug!("[OUTPUT_CONSOLIDATION] prepare consolidating outputs if needed");
         #[cfg(feature = "participation")]
         let voting_output = self.get_voting_output().await?;

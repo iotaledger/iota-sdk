@@ -31,13 +31,11 @@ fn input_account_eq_output_account() {
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
         None,
-        None,
     )]);
     let outputs = build_outputs([Account(
         1_000_000,
         account_id_2,
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-        None,
         None,
         None,
     )]);
@@ -66,14 +64,12 @@ fn transition_account_id_zero() {
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
         None,
-        None,
     )]);
     let account_id = AccountId::from(inputs[0].output_id());
     let outputs = build_outputs([Account(
         1_000_000,
         account_id,
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-        None,
         None,
         None,
     )]);
@@ -238,13 +234,11 @@ fn create_account() {
         None,
         None,
         None,
-        None,
     )]);
     let outputs = build_outputs([Account(
         1_000_000,
         account_id_0,
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-        None,
         None,
         None,
     )]);
@@ -282,12 +276,10 @@ fn burn_account() {
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
         None,
-        None,
     )]);
     let outputs = build_outputs([Basic(
         2_000_000,
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-        None,
         None,
         None,
         None,
@@ -367,13 +359,11 @@ fn missing_input_for_account_output() {
         None,
         None,
         None,
-        None,
     )]);
     let outputs = build_outputs([Account(
         1_000_000,
         account_id_2,
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-        None,
         None,
         None,
     )]);
@@ -405,12 +395,10 @@ fn missing_input_for_account_output_2() {
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
             None,
             None,
-            None,
         ),
         Basic(
             1_000_000,
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-            None,
             None,
             None,
             None,
@@ -422,7 +410,6 @@ fn missing_input_for_account_output_2() {
         1_000_000,
         account_id_2,
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-        None,
         None,
         None,
     )]);
@@ -454,13 +441,11 @@ fn missing_input_for_account_output_but_created() {
         None,
         None,
         None,
-        None,
     )]);
     let outputs = build_outputs([Account(
         1_000_000,
         account_id_0,
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-        None,
         None,
         None,
     )]);
@@ -488,12 +473,10 @@ fn account_in_output_and_sender() {
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
             None,
             None,
-            None,
         ),
         Basic(
             1_000_000,
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-            None,
             None,
             None,
             None,
@@ -509,7 +492,6 @@ fn account_in_output_and_sender() {
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
         Some(Address::try_from_bech32(BECH32_ADDRESS_ACCOUNT_1).unwrap()),
-        None,
         None,
         None,
         None,
@@ -540,14 +522,12 @@ fn missing_ed25519_sender() {
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
         None,
-        None,
     )]);
     let outputs = build_outputs([Account(
         1_000_000,
         account_id_2,
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         Some(Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap()),
-        None,
         None,
     )]);
 
@@ -578,7 +558,6 @@ fn missing_ed25519_issuer_created() {
         None,
         None,
         None,
-        None,
     )]);
     let outputs = build_outputs([Account(
         1_000_000,
@@ -586,7 +565,6 @@ fn missing_ed25519_issuer_created() {
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
         Some(Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap()),
-        None,
     )]);
 
     let selected = InputSelection::new(
@@ -614,7 +592,6 @@ fn missing_ed25519_issuer_transition() {
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
         Some(Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap()),
-        None,
     )]);
     let outputs = build_outputs([Account(
         1_000_000,
@@ -622,7 +599,6 @@ fn missing_ed25519_issuer_transition() {
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
         Some(Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap()),
-        None,
     )]);
 
     let selected = InputSelection::new(
@@ -647,14 +623,12 @@ fn missing_account_sender() {
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
         None,
-        None,
     )]);
     let outputs = build_outputs([Account(
         1_000_000,
         account_id_2,
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         Some(Address::try_from_bech32(BECH32_ADDRESS_ACCOUNT_1).unwrap()),
-        None,
         None,
     )]);
 
@@ -685,7 +659,6 @@ fn missing_account_issuer_created() {
         None,
         None,
         None,
-        None,
     )]);
     let outputs = build_outputs([Account(
         1_000_000,
@@ -693,7 +666,6 @@ fn missing_account_issuer_created() {
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
         Some(Address::try_from_bech32(BECH32_ADDRESS_ACCOUNT_1).unwrap()),
-        None,
     )]);
 
     let selected = InputSelection::new(
@@ -721,7 +693,6 @@ fn missing_account_issuer_transition() {
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
         Some(Address::try_from_bech32(BECH32_ADDRESS_ACCOUNT_1).unwrap()),
-        None,
     )]);
     let outputs = build_outputs([Account(
         1_000_000,
@@ -729,7 +700,6 @@ fn missing_account_issuer_transition() {
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
         Some(Address::try_from_bech32(BECH32_ADDRESS_ACCOUNT_1).unwrap()),
-        None,
     )]);
 
     let selected = InputSelection::new(
@@ -754,14 +724,12 @@ fn missing_nft_sender() {
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
         None,
-        None,
     )]);
     let outputs = build_outputs([Account(
         1_000_000,
         account_id_2,
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         Some(Address::try_from_bech32(BECH32_ADDRESS_NFT_1).unwrap()),
-        None,
         None,
     )]);
 
@@ -792,7 +760,6 @@ fn missing_nft_issuer_created() {
         None,
         None,
         None,
-        None,
     )]);
     let outputs = build_outputs([Account(
         1_000_000,
@@ -800,7 +767,6 @@ fn missing_nft_issuer_created() {
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
         Some(Address::try_from_bech32(BECH32_ADDRESS_NFT_1).unwrap()),
-        None,
     )]);
 
     let selected = InputSelection::new(
@@ -828,7 +794,6 @@ fn missing_nft_issuer_transition() {
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
         Some(Address::try_from_bech32(BECH32_ADDRESS_NFT_1).unwrap()),
-        None,
     )]);
     let outputs = build_outputs([Account(
         1_000_000,
@@ -836,7 +801,6 @@ fn missing_nft_issuer_transition() {
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
         Some(Address::try_from_bech32(BECH32_ADDRESS_NFT_1).unwrap()),
-        None,
     )]);
 
     let selected = InputSelection::new(
@@ -862,12 +826,10 @@ fn increase_account_amount() {
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
             None,
             None,
-            None,
         ),
         Basic(
             1_000_000,
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-            None,
             None,
             None,
             None,
@@ -879,7 +841,6 @@ fn increase_account_amount() {
         3_000_000,
         account_id_1,
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-        None,
         None,
         None,
     )]);
@@ -909,12 +870,10 @@ fn decrease_account_amount() {
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
             None,
             None,
-            None,
         ),
         Basic(
             1_000_000,
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-            None,
             None,
             None,
             None,
@@ -926,7 +885,6 @@ fn decrease_account_amount() {
         1_000_000,
         account_id_1,
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-        None,
         None,
         None,
     )]);
@@ -968,12 +926,10 @@ fn prefer_basic_to_account() {
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
             None,
             None,
-            None,
         ),
         Basic(
             1_000_000,
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-            None,
             None,
             None,
             None,
@@ -984,7 +940,6 @@ fn prefer_basic_to_account() {
     let outputs = build_outputs([Basic(
         1_000_000,
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-        None,
         None,
         None,
         None,
@@ -1018,12 +973,10 @@ fn take_amount_from_account_to_fund_basic() {
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
             None,
             None,
-            None,
         ),
         Basic(
             1_000_000,
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-            None,
             None,
             None,
             None,
@@ -1034,7 +987,6 @@ fn take_amount_from_account_to_fund_basic() {
     let outputs = build_outputs([Basic(
         1_200_000,
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-        None,
         None,
         None,
         None,
@@ -1084,13 +1036,11 @@ fn account_burn_should_validate_account_sender() {
             None,
             None,
             None,
-            None,
         ),
         Account(
             1_000_000,
             account_id_1,
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-            None,
             None,
             None,
         ),
@@ -1100,7 +1050,6 @@ fn account_burn_should_validate_account_sender() {
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
         Some(Address::try_from_bech32(BECH32_ADDRESS_ACCOUNT_1).unwrap()),
-        None,
         None,
         None,
         None,
@@ -1146,7 +1095,6 @@ fn account_burn_should_validate_account_address() {
             None,
             None,
             None,
-            None,
         ),
         Account(
             1_000_000,
@@ -1154,13 +1102,11 @@ fn account_burn_should_validate_account_address() {
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
             None,
             None,
-            None,
         ),
     ]);
     let outputs = build_outputs([Basic(
         2_000_000,
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-        None,
         None,
         None,
         None,
@@ -1205,12 +1151,10 @@ fn transitioned_zero_account_id_no_longer_is_zero() {
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
         None,
-        None,
     )]);
     let outputs = build_outputs([Basic(
         1_000_000,
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-        None,
         None,
         None,
         None,
@@ -1259,7 +1203,6 @@ fn two_accounts_required() {
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
             None,
             None,
-            None,
         ),
         Account(
             2_000_000,
@@ -1267,13 +1210,11 @@ fn two_accounts_required() {
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
             None,
             None,
-            None,
         ),
     ]);
     let outputs = build_outputs([Basic(
         3_000_000,
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-        None,
         None,
         None,
         None,
@@ -1326,14 +1267,12 @@ fn state_controller_sender_required() {
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
         None,
-        None,
     )]);
     let outputs = build_outputs([Basic(
         1_000_000,
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
         Some(Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()),
-        None,
         None,
         None,
         None,
@@ -1364,7 +1303,6 @@ fn state_controller_sender_required_already_selected() {
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
         None,
-        None,
     )]);
     let outputs = build_outputs([
         Account(
@@ -1373,14 +1311,12 @@ fn state_controller_sender_required_already_selected() {
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
             None,
             None,
-            None,
         ),
         Basic(
             1_000_000,
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
             None,
             Some(Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()),
-            None,
             None,
             None,
             None,
@@ -1412,13 +1348,11 @@ fn state_transition_and_required() {
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
         None,
-        None,
     )]);
     let outputs = build_outputs([Account(
         2_000_000,
         account_id_1,
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-        None,
         None,
         None,
     )]);
@@ -1448,13 +1382,11 @@ fn remainder_address_in_state_controller() {
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
         None,
-        None,
     )]);
     let outputs = build_outputs([Account(
         1_000_000,
         account_id_1,
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-        None,
         None,
         None,
     )]);

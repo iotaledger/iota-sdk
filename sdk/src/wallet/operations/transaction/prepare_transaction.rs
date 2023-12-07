@@ -24,7 +24,7 @@ impl<S: 'static + SecretManage> Wallet<S> {
         &self,
         outputs: impl Into<Vec<Output>> + Send,
         options: impl Into<Option<TransactionOptions>> + Send,
-    ) -> crate::wallet::Result<PreparedTransactionData<S::SigningOptions>> {
+    ) -> crate::wallet::Result<PreparedTransactionData> {
         log::debug!("[TRANSACTION] prepare_transaction");
         let options = options.into();
         let outputs = outputs.into();

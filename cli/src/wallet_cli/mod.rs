@@ -1236,7 +1236,7 @@ pub async fn prompt_internal(
     Ok(PromptResponse::Reprompt)
 }
 
-fn print_outputs(mut outputs: Vec<OutputData<Bip44>>, title: &str) -> Result<(), Error> {
+fn print_outputs(mut outputs: Vec<OutputData>, title: &str) -> Result<(), Error> {
     if outputs.is_empty() {
         println_log_info!("No outputs found");
     } else {

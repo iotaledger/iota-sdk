@@ -200,8 +200,9 @@ pub trait SignTransaction: Sign<Ed25519Signature> {
 
     async fn transaction_unlocks(
         &self,
-        prepared_transaction_data: &PreparedTransactionData<Self::Options>,
+        prepared_transaction_data: &PreparedTransactionData,
         _protocol_parameters: &ProtocolParameters,
+        options: &Self::Options,
     ) -> crate::client::Result<Unlocks> {
         let transaction_signing_hash = prepared_transaction_data.transaction.signing_hash();
         let mut blocks = Vec::new();
@@ -239,8 +240,6 @@ pub trait SignTransaction: Sign<Ed25519Signature> {
                         _ => Err(InputSelectionError::MissingInputWithEd25519Address)?,
                     }
 
-                    let options = input.signing_options.as_ref().ok_or(Error::MissingSigningOptions)?;
-
                     let block = self.signature_unlock(&transaction_signing_hash, options).await?;
                     blocks.push(block.into());
 
@@ -271,13 +270,14 @@ pub trait SignTransaction: Sign<Ed25519Signature> {
 
     async fn sign_transaction(
         &self,
-        prepared_transaction_data: PreparedTransactionData<Self::Options>,
+        prepared_transaction_data: PreparedTransactionData,
         protocol_parameters: &ProtocolParameters,
+        options: &Self::Options,
     ) -> crate::client::Result<SignedTransactionPayload> {
         log::debug!("[sign_transaction] {:?}", prepared_transaction_data);
 
         let unlocks = self
-            .transaction_unlocks(&prepared_transaction_data, protocol_parameters)
+            .transaction_unlocks(&prepared_transaction_data, protocol_parameters, options)
             .await?;
 
         let PreparedTransactionData {

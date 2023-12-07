@@ -98,7 +98,7 @@ impl<S: 'static + SecretManage> Wallet<S> {
     /// Signs a transaction, submit it to a node and store it in the wallet
     pub async fn sign_and_submit_transaction(
         &self,
-        prepared_transaction_data: PreparedTransactionData<S::SigningOptions>,
+        prepared_transaction_data: PreparedTransactionData,
         issuer_id: impl Into<Option<AccountId>> + Send,
         options: impl Into<Option<TransactionOptions>> + Send,
     ) -> crate::wallet::Result<TransactionWithMetadata> {
@@ -120,7 +120,7 @@ impl<S: 'static + SecretManage> Wallet<S> {
     /// Validates the transaction, submit it to a node and store it in the wallet
     pub async fn submit_and_store_transaction(
         &self,
-        signed_transaction_data: SignedTransactionData<S::SigningOptions>,
+        signed_transaction_data: SignedTransactionData,
         issuer_id: impl Into<Option<AccountId>> + Send,
         options: impl Into<Option<TransactionOptions>> + Send,
     ) -> crate::wallet::Result<TransactionWithMetadata> {
@@ -196,7 +196,7 @@ impl<S: 'static + SecretManage> Wallet<S> {
     }
 
     // unlock outputs
-    async fn unlock_inputs(&self, inputs: &[InputSigningData<S::SigningOptions>]) -> crate::wallet::Result<()> {
+    async fn unlock_inputs(&self, inputs: &[InputSigningData]) -> crate::wallet::Result<()> {
         let mut wallet_data = self.data_mut().await;
         for input_signing_data in inputs {
             let output_id = input_signing_data.output_id();

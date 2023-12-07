@@ -43,7 +43,7 @@ impl<S: 'static + SecretManage> Wallet<S> {
         token_id: TokenId,
         melt_amount: impl Into<U256> + Send,
         options: impl Into<Option<TransactionOptions>> + Send,
-    ) -> crate::wallet::Result<PreparedTransactionData<S::SigningOptions>> {
+    ) -> crate::wallet::Result<PreparedTransactionData> {
         log::debug!("[TRANSACTION] prepare_melt_native_token");
 
         let foundry_id = FoundryId::from(token_id);
@@ -86,7 +86,7 @@ impl<S: 'static + SecretManage> Wallet<S> {
         &self,
         account_id: AccountId,
         foundry_id: FoundryId,
-    ) -> crate::wallet::Result<(OutputData<S::SigningOptions>, OutputData<S::SigningOptions>)> {
+    ) -> crate::wallet::Result<(OutputData, OutputData)> {
         let mut existing_account_output_data = None;
         let mut existing_foundry_output = None;
 

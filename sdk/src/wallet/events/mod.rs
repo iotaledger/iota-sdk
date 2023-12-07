@@ -13,11 +13,11 @@ pub use self::types::{WalletEvent, WalletEventType};
 
 type Handler<T> = Arc<dyn Fn(&T) + Send + Sync + 'static>;
 
-pub struct EventEmitter<O> {
-    handlers: HashMap<WalletEventType, Vec<Handler<WalletEvent<O>>>>,
+pub struct EventEmitter {
+    handlers: HashMap<WalletEventType, Vec<Handler<WalletEvent>>>,
 }
 
-impl<O> EventEmitter<O> {
+impl EventEmitter {
     /// Creates a new instance of `EventEmitter`.
     pub fn new() -> Self {
         Self {
@@ -29,7 +29,7 @@ impl<O> EventEmitter<O> {
     /// multiple listeners for a single event.
     pub fn on<F>(&mut self, events: impl IntoIterator<Item = WalletEventType>, handler: F)
     where
-        F: Fn(&WalletEvent<O>) + 'static + Send + Sync,
+        F: Fn(&WalletEvent) + 'static + Send + Sync,
     {
         let mut events = events.into_iter().peekable();
         let handler = Arc::new(handler);
@@ -68,7 +68,7 @@ impl<O> EventEmitter<O> {
 
     /// Invokes all listeners of `event`, passing a reference to `payload` as an
     /// argument to each of them.
-    pub fn emit(&self, event: WalletEvent<O>) {
+    pub fn emit(&self, event: WalletEvent) {
         let event_type = match &event {
             WalletEvent::NewOutput(_) => WalletEventType::NewOutput,
             WalletEvent::SpentOutput(_) => WalletEventType::SpentOutput,
@@ -86,13 +86,13 @@ impl<O> EventEmitter<O> {
     }
 }
 
-impl<O> Default for EventEmitter<O> {
+impl Default for EventEmitter {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl<O> Debug for EventEmitter<O> {
+impl Debug for EventEmitter {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         write!(
             f,
@@ -122,7 +122,7 @@ mod tests {
 
     #[test]
     fn events() {
-        let mut emitter = EventEmitter::<()>::new();
+        let mut emitter = EventEmitter::new();
         let event_counter = Arc::new(AtomicUsize::new(0));
 
         // single event

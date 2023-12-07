@@ -23,12 +23,10 @@ fn one_output_timelock_not_expired() {
         None,
         Some(200),
         None,
-        None,
     )]);
     let outputs = build_outputs([Basic(
         1_000_000,
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
-        None,
         None,
         None,
         None,
@@ -60,12 +58,10 @@ fn timelock_equal_timestamp() {
         None,
         Some(200),
         None,
-        None,
     )]);
     let outputs = build_outputs([Basic(
         2_000_000,
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
-        None,
         None,
         None,
         None,
@@ -100,7 +96,6 @@ fn two_outputs_one_timelock_expired() {
             None,
             Some(200),
             None,
-            None,
         ),
         Basic(
             2_000_000,
@@ -110,13 +105,11 @@ fn two_outputs_one_timelock_expired() {
             None,
             Some(50),
             None,
-            None,
         ),
     ]);
     let outputs = build_outputs([Basic(
         2_000_000,
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
-        None,
         None,
         None,
         None,
@@ -152,12 +145,10 @@ fn two_outputs_one_timelocked_one_missing() {
             None,
             Some(200),
             None,
-            None,
         ),
         Basic(
             2_000_000,
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-            None,
             None,
             None,
             None,
@@ -168,7 +159,6 @@ fn two_outputs_one_timelocked_one_missing() {
     let outputs = build_outputs([Basic(
         2_000_000,
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
-        None,
         None,
         None,
         None,
@@ -203,12 +193,10 @@ fn one_output_timelock_expired() {
         None,
         Some(50),
         None,
-        None,
     )]);
     let outputs = build_outputs([Basic(
         2_000_000,
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
-        None,
         None,
         None,
         None,

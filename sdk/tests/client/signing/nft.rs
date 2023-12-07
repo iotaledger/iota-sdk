@@ -44,23 +44,14 @@ async fn nft_reference_unlocks() -> Result<()> {
     let nft_address = Address::Nft(NftAddress::new(nft_id));
 
     let inputs = build_inputs([
-        Nft(
-            1_000_000,
-            nft_id,
-            address_0.clone(),
-            None,
-            None,
-            None,
-            None,
-            Some(Bip44::new(SHIMMER_COIN_TYPE)),
-        ),
-        Basic(1_000_000, nft_address.clone(), None, None, None, None, None, None),
-        Basic(1_000_000, nft_address.clone(), None, None, None, None, None, None),
+        Nft(1_000_000, nft_id, address_0.clone(), None, None, None, None),
+        Basic(1_000_000, nft_address.clone(), None, None, None, None, None),
+        Basic(1_000_000, nft_address.clone(), None, None, None, None, None),
     ]);
 
     let outputs = build_outputs([
-        Nft(1_000_000, nft_id, address_0, None, None, None, None, None),
-        Basic(2_000_000, nft_address, None, None, None, None, None, None),
+        Nft(1_000_000, nft_id, address_0, None, None, None, None),
+        Basic(2_000_000, nft_address, None, None, None, None, None),
     ]);
 
     let transaction = Transaction::builder(protocol_parameters.network_id())
@@ -80,8 +71,10 @@ async fn nft_reference_unlocks() -> Result<()> {
         remainder: None,
     };
 
+    let signing_options = Bip44::new(SHIMMER_COIN_TYPE);
+
     let unlocks = secret_manager
-        .transaction_unlocks(&prepared_transaction_data, &protocol_parameters)
+        .transaction_unlocks(&prepared_transaction_data, &protocol_parameters, &signing_options)
         .await?;
 
     assert_eq!(unlocks.len(), 3);

@@ -45,7 +45,7 @@ impl<S: 'static + SecretManage> Wallet<S> {
         &self,
         event_id: impl Into<Option<ParticipationEventId>> + Send,
         answers: impl Into<Option<Vec<u8>>> + Send,
-    ) -> Result<PreparedTransactionData<S::SigningOptions>> {
+    ) -> Result<PreparedTransactionData> {
         let event_id = event_id.into();
         let answers = answers.into();
         if let Some(event_id) = event_id {
@@ -131,10 +131,7 @@ impl<S: 'static + SecretManage> Wallet<S> {
     }
 
     /// Prepares the transaction for [Wallet::stop_participating()].
-    pub async fn prepare_stop_participating(
-        &self,
-        event_id: ParticipationEventId,
-    ) -> Result<PreparedTransactionData<S::SigningOptions>> {
+    pub async fn prepare_stop_participating(&self, event_id: ParticipationEventId) -> Result<PreparedTransactionData> {
         let voting_output = self
             .get_voting_output()
             .await?

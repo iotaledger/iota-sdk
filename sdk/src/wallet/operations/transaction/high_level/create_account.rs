@@ -67,7 +67,7 @@ impl<S: 'static + SecretManage> Wallet<S> {
         &self,
         params: Option<CreateAccountParams>,
         options: impl Into<Option<TransactionOptions>> + Send,
-    ) -> crate::wallet::Result<PreparedTransactionData<S::SigningOptions>> {
+    ) -> crate::wallet::Result<PreparedTransactionData> {
         log::debug!("[TRANSACTION] prepare_create_account_output");
         let storage_score_params = self.client().get_storage_score_parameters().await?;
 
@@ -104,10 +104,7 @@ impl<S: 'static + SecretManage> Wallet<S> {
     }
 
     /// Gets an existing account output.
-    pub(crate) async fn get_account_output(
-        &self,
-        account_id: Option<AccountId>,
-    ) -> Option<(AccountId, OutputData<S::SigningOptions>)> {
+    pub(crate) async fn get_account_output(&self, account_id: Option<AccountId>) -> Option<(AccountId, OutputData)> {
         log::debug!("[get_account_output]");
         self.data()
             .await

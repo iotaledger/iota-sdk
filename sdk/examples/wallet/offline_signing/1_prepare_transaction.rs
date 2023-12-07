@@ -76,9 +76,7 @@ async fn read_address_from_file() -> Result<Bip44Address> {
     Ok(serde_json::from_str(&json)?)
 }
 
-async fn write_transaction_to_file<O: Clone + Serialize>(
-    prepared_transaction: PreparedTransactionData<O>,
-) -> Result<()> {
+async fn write_transaction_to_file(prepared_transaction: PreparedTransactionData) -> Result<()> {
     use tokio::io::AsyncWriteExt;
 
     let json = serde_json::to_string_pretty(&PreparedTransactionDataDto::from(&prepared_transaction))?;

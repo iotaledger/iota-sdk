@@ -54,11 +54,13 @@ pub(crate) async fn call_secret_manager_method_internal(
         SecretManagerMethod::SignTransaction {
             prepared_transaction_data,
             protocol_parameters,
+            signing_options,
         } => {
             let transaction = &secret_manager
                 .sign_transaction(
                     PreparedTransactionData::try_from_dto(prepared_transaction_data)?,
                     &protocol_parameters,
+                    &signing_options,
                 )
                 .await
                 .map_err(iota_sdk::client::Error::from)?;

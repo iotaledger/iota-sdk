@@ -231,7 +231,7 @@ impl<S: 'static + SecretManage> Wallet<S> {
         recipient_address: Bech32Address,
         nft_id: Option<NftId>,
         params: StorageScoreParameters,
-    ) -> crate::wallet::Result<(OutputBuilder, Option<OutputData<S::SigningOptions>>)> {
+    ) -> crate::wallet::Result<(OutputBuilder, Option<OutputData>)> {
         let (mut first_output_builder, existing_nft_output_data) = if let Some(nft_id) = &nft_id {
             if nft_id.is_null() {
                 // Mint a new NFT output

@@ -32,12 +32,10 @@ fn one_output_expiration_not_expired() {
         None,
         None,
         Some((Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(), 200)),
-        None,
     )]);
     let outputs = build_outputs([Basic(
         2_000_000,
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-        None,
         None,
         None,
         None,
@@ -69,12 +67,10 @@ fn expiration_equal_timestamp() {
         None,
         None,
         Some((Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(), 200)),
-        None,
     )]);
     let outputs = build_outputs([Basic(
         2_000_000,
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-        None,
         None,
         None,
         None,
@@ -108,12 +104,10 @@ fn one_output_expiration_expired() {
         None,
         None,
         Some((Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(), 50)),
-        None,
     )]);
     let outputs = build_outputs([Basic(
         2_000_000,
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-        None,
         None,
         None,
         None,
@@ -148,7 +142,6 @@ fn two_outputs_one_expiration_expired() {
             None,
             None,
             Some((Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(), 200)),
-            None,
         ),
         Basic(
             2_000_000,
@@ -158,13 +151,11 @@ fn two_outputs_one_expiration_expired() {
             None,
             None,
             Some((Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(), 50)),
-            None,
         ),
     ]);
     let outputs = build_outputs([Basic(
         2_000_000,
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
-        None,
         None,
         None,
         None,
@@ -200,12 +191,10 @@ fn two_outputs_one_unexpired_one_missing() {
             None,
             None,
             Some((Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(), 200)),
-            None,
         ),
         Basic(
             2_000_000,
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-            None,
             None,
             None,
             None,
@@ -216,7 +205,6 @@ fn two_outputs_one_unexpired_one_missing() {
     let outputs = build_outputs([Basic(
         2_000_000,
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
-        None,
         None,
         None,
         None,
@@ -252,7 +240,6 @@ fn two_outputs_two_expired() {
             None,
             None,
             Some((Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(), 100)),
-            None,
         ),
         Basic(
             2_000_000,
@@ -262,12 +249,10 @@ fn two_outputs_two_expired() {
             None,
             None,
             Some((Address::try_from_bech32(BECH32_ADDRESS_ED25519_2).unwrap(), 100)),
-            None,
         ),
         Basic(
             2_000_000,
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-            None,
             None,
             None,
             None,
@@ -278,7 +263,6 @@ fn two_outputs_two_expired() {
     let outputs = build_outputs([Basic(
         2_000_000,
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
-        None,
         None,
         None,
         None,
@@ -314,7 +298,6 @@ fn two_outputs_two_expired_2() {
             None,
             None,
             Some((Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(), 100)),
-            None,
         ),
         Basic(
             2_000_000,
@@ -324,13 +307,11 @@ fn two_outputs_two_expired_2() {
             None,
             None,
             Some((Address::try_from_bech32(BECH32_ADDRESS_ED25519_2).unwrap(), 100)),
-            None,
         ),
     ]);
     let outputs = build_outputs([Basic(
         4_000_000,
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
-        None,
         None,
         None,
         None,
@@ -367,12 +348,10 @@ fn expiration_expired_with_sdr() {
         Some((Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(), 1_000_000)),
         None,
         Some((Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(), 50)),
-        None,
     )]);
     let outputs = build_outputs([Basic(
         2_000_000,
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
-        None,
         None,
         None,
         None,
@@ -406,12 +385,10 @@ fn expiration_expired_with_sdr_2() {
         Some((Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(), 1_000_000)),
         None,
         Some((Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(), 50)),
-        None,
     )]);
     let outputs = build_outputs([Basic(
         2_000_000,
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-        None,
         None,
         None,
         None,
@@ -445,12 +422,10 @@ fn expiration_expired_with_sdr_and_timelock() {
         Some((Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(), 1_000_000)),
         Some(50),
         Some((Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(), 50)),
-        None,
     )]);
     let outputs = build_outputs([Basic(
         2_000_000,
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
-        None,
         None,
         None,
         None,
@@ -484,12 +459,10 @@ fn expiration_expired_with_sdr_and_timelock_2() {
         Some((Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(), 1_000_000)),
         Some(50),
         Some((Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(), 50)),
-        None,
     )]);
     let outputs = build_outputs([Basic(
         2_000_000,
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
-        None,
         None,
         None,
         None,
@@ -524,12 +497,10 @@ fn sender_in_expiration() {
             None,
             None,
             None,
-            None,
         ),
         Basic(
             1_000_000,
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-            None,
             None,
             None,
             None,
@@ -544,7 +515,6 @@ fn sender_in_expiration() {
             None,
             None,
             Some((Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(), 50)),
-            None,
         ),
         Basic(
             1_000_000,
@@ -554,12 +524,10 @@ fn sender_in_expiration() {
             None,
             None,
             None,
-            None,
         ),
         Basic(
             1_000_000,
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-            None,
             None,
             None,
             None,
@@ -572,7 +540,6 @@ fn sender_in_expiration() {
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
         Some(Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap()),
-        None,
         None,
         None,
         None,
@@ -608,14 +575,12 @@ fn sender_in_expiration_already_selected() {
         None,
         None,
         Some((Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(), 50)),
-        None,
     )]);
     let outputs = build_outputs([Basic(
         1_000_000,
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
         Some(Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap()),
-        None,
         None,
         None,
         None,
@@ -651,14 +616,12 @@ fn remainder_in_expiration() {
         None,
         None,
         Some((Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(), 50)),
-        None,
     )]);
     let outputs = build_outputs([Basic(
         1_000_000,
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
         Some(Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap()),
-        None,
         None,
         None,
         None,
@@ -704,12 +667,10 @@ fn expiration_expired_non_ed25519_in_address_unlock_condition() {
         None,
         None,
         Some((Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(), 50)),
-        None,
     )]);
     let outputs = build_outputs([Basic(
         2_000_000,
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-        None,
         None,
         None,
         None,
@@ -745,13 +706,11 @@ fn expiration_expired_only_account_addresses() {
             None,
             None,
             Some((Address::try_from_bech32(BECH32_ADDRESS_ACCOUNT_1).unwrap(), 50)),
-            None,
         ),
         Account(
             1_000_000,
             account_id_1,
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-            None,
             None,
             None,
         ),
@@ -760,7 +719,6 @@ fn expiration_expired_only_account_addresses() {
     let outputs = build_outputs([Basic(
         2_000_000,
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-        None,
         None,
         None,
         None,
@@ -795,13 +753,11 @@ fn one_nft_output_expiration_unexpired() {
         None,
         None,
         Some((Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(), 150)),
-        None,
     )]);
     let outputs = build_outputs([Nft(
         2_000_000,
         nft_id_1,
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
-        None,
         None,
         None,
         None,
@@ -835,13 +791,11 @@ fn one_nft_output_expiration_expired() {
         None,
         None,
         Some((Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(), 50)),
-        None,
     )]);
     let outputs = build_outputs([Nft(
         2_000_000,
         nft_id_1,
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
-        None,
         None,
         None,
         None,

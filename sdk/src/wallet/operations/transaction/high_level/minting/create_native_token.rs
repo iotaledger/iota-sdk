@@ -64,21 +64,21 @@ impl From<&CreateNativeTokenTransaction> for CreateNativeTokenTransactionDto {
 
 /// The result of preparing a transaction to create a native token
 #[derive(Debug)]
-pub struct PreparedCreateNativeTokenTransaction<O> {
+pub struct PreparedCreateNativeTokenTransaction {
     pub token_id: TokenId,
-    pub transaction: PreparedTransactionData<O>,
+    pub transaction: PreparedTransactionData,
 }
 
 /// Dto for PreparedNativeTokenTransaction
 #[derive(Debug, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub struct PreparedCreateNativeTokenTransactionDto<O> {
+pub struct PreparedCreateNativeTokenTransactionDto {
     pub token_id: TokenId,
-    pub transaction: PreparedTransactionDataDto<O>,
+    pub transaction: PreparedTransactionDataDto,
 }
 
-impl<O: Clone> From<&PreparedCreateNativeTokenTransaction<O>> for PreparedCreateNativeTokenTransactionDto<O> {
-    fn from(value: &PreparedCreateNativeTokenTransaction<O>) -> Self {
+impl From<&PreparedCreateNativeTokenTransaction> for PreparedCreateNativeTokenTransactionDto {
+    fn from(value: &PreparedCreateNativeTokenTransaction) -> Self {
         Self {
             token_id: value.token_id,
             transaction: PreparedTransactionDataDto::from(&value.transaction),
@@ -126,7 +126,7 @@ impl<S: 'static + SecretManage> Wallet<S> {
         &self,
         params: CreateNativeTokenParams,
         options: impl Into<Option<TransactionOptions>> + Send,
-    ) -> crate::wallet::Result<PreparedCreateNativeTokenTransaction<S::SigningOptions>> {
+    ) -> crate::wallet::Result<PreparedCreateNativeTokenTransaction> {
         log::debug!("[TRANSACTION] create_native_token");
         let storage_score_params = self.client().get_storage_score_parameters().await?;
 

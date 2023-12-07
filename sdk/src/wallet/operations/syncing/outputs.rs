@@ -27,7 +27,7 @@ impl<S: 'static + SecretManage> Wallet<S> {
         &self,
         outputs_with_meta: Vec<OutputWithMetadata>,
         associated_address: &AddressWithUnspentOutputs,
-    ) -> crate::wallet::Result<Vec<OutputData<S::SigningOptions>>> {
+    ) -> crate::wallet::Result<Vec<OutputData>> {
         log::debug!("[SYNC] convert output_responses");
         // store outputs with network_id
         let network_id = self.client().get_network_id().await?;
@@ -51,9 +51,6 @@ impl<S: 'static + SecretManage> Wallet<S> {
                     address: associated_address.address.inner.clone(),
                     network_id,
                     remainder,
-                    // TODO: previously we set the internal and address index here, but
-                    // they were always default values anyway. Do we need some mechanism here tho?
-                    signing_options: Some(wallet_data.signing_options.clone()),
                 }
             })
             .collect())

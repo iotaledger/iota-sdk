@@ -8,24 +8,22 @@
 //! cargo run --release --all-features --example 2_sign_transaction
 //! ```
 
+use crypto::keys::bip44::Bip44;
 use iota_sdk::{
     client::{
         api::{
             transaction::validate_signed_transaction_payload_length, PreparedTransactionData, SignedTransactionData,
             SignedTransactionDataDto,
         },
+        constants::IOTA_COIN_TYPE,
         secret::{stronghold::StrongholdSecretManager, SignTransaction},
     },
     types::{
-        block::{
-            payload::SignedTransactionPayload,
-            protocol::{protocol_parameters, ProtocolParameters},
-        },
+        block::{payload::SignedTransactionPayload, protocol::protocol_parameters},
         TryFromDto,
     },
     wallet::Result,
 };
-use serde::{de::DeserializeOwned, Serialize};
 
 const STRONGHOLD_SNAPSHOT_PATH: &str = "./examples/wallet/offline_signing/example.stronghold";
 const PREPARED_TRANSACTION_FILE_PATH: &str = "./examples/wallet/offline_signing/example.prepared_transaction.json";
@@ -46,13 +44,15 @@ async fn main() -> Result<()> {
         .password(std::env::var("STRONGHOLD_PASSWORD").unwrap())
         .build(STRONGHOLD_SNAPSHOT_PATH)?;
 
+    let signing_options = Bip44::new(IOTA_COIN_TYPE);
+
     let prepared_transaction_data = read_prepared_transaction_from_file().await?;
 
     let protocol_parameters = protocol_parameters();
 
     // Signs prepared transaction offline.
     let unlocks = secret_manager
-        .transaction_unlocks(&prepared_transaction_data, &protocol_parameters)
+        .transaction_unlocks(&prepared_transaction_data, &protocol_parameters, &signing_options)
         .await?;
 
     let signed_transaction = SignedTransactionPayload::new(prepared_transaction_data.transaction.clone(), unlocks)?;
@@ -71,7 +71,7 @@ async fn main() -> Result<()> {
     Ok(())
 }
 
-async fn read_prepared_transaction_from_file<O: DeserializeOwned>() -> Result<PreparedTransactionData<O>> {
+async fn read_prepared_transaction_from_file() -> Result<PreparedTransactionData> {
     use tokio::io::AsyncReadExt;
 
     let mut file = tokio::io::BufReader::new(tokio::fs::File::open(PREPARED_TRANSACTION_FILE_PATH).await?);
@@ -81,9 +81,7 @@ async fn read_prepared_transaction_from_file<O: DeserializeOwned>() -> Result<Pr
     Ok(PreparedTransactionData::try_from_dto(serde_json::from_str(&json)?)?)
 }
 
-async fn write_signed_transaction_to_file<O: Clone + Serialize>(
-    signed_transaction_data: &SignedTransactionData<O>,
-) -> Result<()> {
+async fn write_signed_transaction_to_file(signed_transaction_data: &SignedTransactionData) -> Result<()> {
     use tokio::io::AsyncWriteExt;
 
     let dto = SignedTransactionDataDto::from(signed_transaction_data);

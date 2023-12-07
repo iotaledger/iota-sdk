@@ -39,7 +39,6 @@ fn missing_input_account_for_foundry() {
         None,
         None,
         None,
-        None,
     )]);
     let outputs = build_outputs([Foundry(
         1_000_000,
@@ -115,13 +114,11 @@ fn minted_native_tokens_in_new_remainder() {
             None,
             None,
             None,
-            None,
         ),
         Account(
             1_000_000,
             account_id_2,
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-            None,
             None,
             None,
         ),
@@ -171,13 +168,11 @@ fn minted_native_tokens_in_provided_output() {
             None,
             None,
             None,
-            None,
         ),
         Account(
             1_000_000,
             account_id_2,
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-            None,
             None,
             None,
         ),
@@ -194,7 +189,6 @@ fn minted_native_tokens_in_provided_output() {
             1_000_000,
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
             Some((&token_id.to_string(), 100)),
-            None,
             None,
             None,
             None,
@@ -232,7 +226,6 @@ fn melt_native_tokens() {
             None,
             None,
             None,
-            None,
         ),
         Foundry(
             1_000_000,
@@ -255,7 +248,6 @@ fn melt_native_tokens() {
     inputs.push(InputSigningData {
         output: account_output,
         output_metadata: rand_output_metadata(),
-        signing_options: None,
     });
     let outputs = build_outputs([Foundry(
         1_000_000,
@@ -297,7 +289,6 @@ fn destroy_foundry_with_account_state_transition() {
             50_300,
             account_id_2,
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-            None,
             None,
             None,
         ),
@@ -343,7 +334,6 @@ fn destroy_foundry_with_account_burn() {
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
             None,
             None,
-            None,
         ),
         Foundry(
             1_000_000,
@@ -356,7 +346,6 @@ fn destroy_foundry_with_account_burn() {
     let outputs = build_outputs([Basic(
         1_000_000,
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-        None,
         None,
         None,
         None,
@@ -405,7 +394,6 @@ fn prefer_basic_to_foundry() {
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
             None,
             None,
-            None,
         ),
         Foundry(
             1_000_000,
@@ -422,13 +410,11 @@ fn prefer_basic_to_foundry() {
             None,
             None,
             None,
-            None,
         ),
     ]);
     let outputs = build_outputs([Basic(
         1_000_000,
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-        None,
         None,
         None,
         None,
@@ -464,7 +450,6 @@ fn simple_foundry_transition_basic_not_needed() {
             None,
             None,
             None,
-            None,
         ),
         Foundry(
             1_000_000,
@@ -484,7 +469,6 @@ fn simple_foundry_transition_basic_not_needed() {
     inputs.push(InputSigningData {
         output: account_output,
         output_metadata: rand_output_metadata(),
-        signing_options: None,
     });
 
     let outputs = build_outputs([Foundry(
@@ -539,7 +523,6 @@ fn simple_foundry_transition_basic_not_needed_with_remainder() {
             None,
             None,
             None,
-            None,
         ),
         Foundry(
             2_000_000,
@@ -559,7 +542,6 @@ fn simple_foundry_transition_basic_not_needed_with_remainder() {
     inputs.push(InputSigningData {
         output: account_output,
         output_metadata: rand_output_metadata(),
-        signing_options: None,
     });
     let outputs = build_outputs([Foundry(
         1_000_000,
@@ -700,7 +682,6 @@ fn mint_and_burn_at_the_same_time() {
     inputs.push(InputSigningData {
         output: account_output,
         output_metadata: rand_output_metadata(),
-        signing_options: None,
     });
 
     let outputs = build_outputs([Foundry(
@@ -742,7 +723,6 @@ fn take_amount_from_account_and_foundry_to_fund_basic() {
             None,
             None,
             None,
-            None,
         ),
         Foundry(
             1_000_000,
@@ -762,12 +742,10 @@ fn take_amount_from_account_and_foundry_to_fund_basic() {
     inputs.push(InputSigningData {
         output: account_output,
         output_metadata: rand_output_metadata(),
-        signing_options: None,
     });
     let outputs = build_outputs([Basic(
         3_200_000,
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-        None,
         None,
         None,
         None,
@@ -807,7 +785,6 @@ fn create_native_token_but_burn_account() {
             2_000_000,
             account_id_1,
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-            None,
             None,
             None,
         ),
@@ -867,7 +844,6 @@ fn melted_tokens_not_provided() {
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
             None,
             None,
-            None,
         ),
         Foundry(
             1_000_000,
@@ -914,7 +890,6 @@ fn burned_tokens_not_provided() {
             2_000_000,
             account_id_1,
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-            None,
             None,
             None,
         ),
@@ -974,7 +949,6 @@ fn foundry_in_outputs_and_required() {
     inputs.push(InputSigningData {
         output: account_output,
         output_metadata: rand_output_metadata(),
-        signing_options: None,
     });
     let outputs = build_outputs([Foundry(
         1_000_000,
@@ -1020,7 +994,6 @@ fn melt_and_burn_native_tokens() {
             None,
             None,
             None,
-            None,
         ),
         Foundry(
             1_000_000,
@@ -1040,7 +1013,6 @@ fn melt_and_burn_native_tokens() {
     inputs.push(InputSigningData {
         output: account_output,
         output_metadata: rand_output_metadata(),
-        signing_options: None,
     });
     let outputs = build_outputs([Foundry(
         1_000_000,

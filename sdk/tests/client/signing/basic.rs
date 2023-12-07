@@ -34,27 +34,9 @@ async fn single_ed25519_unlock() -> Result<()> {
 
     let protocol_parameters = protocol_parameters();
 
-    let inputs = build_inputs([Basic(
-        1_000_000,
-        address_0.clone(),
-        None,
-        None,
-        None,
-        None,
-        None,
-        Some(Bip44::new(SHIMMER_COIN_TYPE)),
-    )]);
+    let inputs = build_inputs([Basic(1_000_000, address_0.clone(), None, None, None, None, None)]);
 
-    let outputs = build_outputs([Basic(
-        1_000_000,
-        address_0,
-        None,
-        None,
-        None,
-        None,
-        None,
-        Some(Bip44::new(SHIMMER_COIN_TYPE)),
-    )]);
+    let outputs = build_outputs([Basic(1_000_000, address_0, None, None, None, None, None)]);
 
     let transaction = Transaction::builder(protocol_parameters.network_id())
         .with_inputs(
@@ -73,8 +55,10 @@ async fn single_ed25519_unlock() -> Result<()> {
         remainder: None,
     };
 
+    let signing_options = Bip44::new(SHIMMER_COIN_TYPE);
+
     let unlocks = secret_manager
-        .transaction_unlocks(&prepared_transaction_data, &protocol_parameters)
+        .transaction_unlocks(&prepared_transaction_data, &protocol_parameters, &signing_options)
         .await?;
 
     assert_eq!(unlocks.len(), 1);
@@ -106,48 +90,12 @@ async fn ed25519_reference_unlocks() -> Result<()> {
     let protocol_parameters = protocol_parameters();
 
     let inputs = build_inputs([
-        Basic(
-            1_000_000,
-            address_0.clone(),
-            None,
-            None,
-            None,
-            None,
-            None,
-            Some(Bip44::new(SHIMMER_COIN_TYPE)),
-        ),
-        Basic(
-            1_000_000,
-            address_0.clone(),
-            None,
-            None,
-            None,
-            None,
-            None,
-            Some(Bip44::new(SHIMMER_COIN_TYPE)),
-        ),
-        Basic(
-            1_000_000,
-            address_0.clone(),
-            None,
-            None,
-            None,
-            None,
-            None,
-            Some(Bip44::new(SHIMMER_COIN_TYPE)),
-        ),
+        Basic(1_000_000, address_0.clone(), None, None, None, None, None),
+        Basic(1_000_000, address_0.clone(), None, None, None, None, None),
+        Basic(1_000_000, address_0.clone(), None, None, None, None, None),
     ]);
 
-    let outputs = build_outputs([Basic(
-        3_000_000,
-        address_0,
-        None,
-        None,
-        None,
-        None,
-        None,
-        Some(Bip44::new(SHIMMER_COIN_TYPE)),
-    )]);
+    let outputs = build_outputs([Basic(3_000_000, address_0, None, None, None, None, None)]);
 
     let transaction = Transaction::builder(protocol_parameters.network_id())
         .with_inputs(
@@ -166,8 +114,10 @@ async fn ed25519_reference_unlocks() -> Result<()> {
         remainder: None,
     };
 
+    let signing_options = Bip44::new(SHIMMER_COIN_TYPE);
+
     let unlocks = secret_manager
-        .transaction_unlocks(&prepared_transaction_data, &protocol_parameters)
+        .transaction_unlocks(&prepared_transaction_data, &protocol_parameters, &signing_options)
         .await?;
 
     assert_eq!(unlocks.len(), 3);
@@ -216,38 +166,11 @@ async fn two_signature_unlocks() -> Result<()> {
     let protocol_parameters = protocol_parameters();
 
     let inputs = build_inputs([
-        Basic(
-            1_000_000,
-            address_0.clone(),
-            None,
-            None,
-            None,
-            None,
-            None,
-            Some(Bip44::new(SHIMMER_COIN_TYPE)),
-        ),
-        Basic(
-            1_000_000,
-            address_1,
-            None,
-            None,
-            None,
-            None,
-            None,
-            Some(Bip44::new(SHIMMER_COIN_TYPE).with_address_index(1)),
-        ),
+        Basic(1_000_000, address_0.clone(), None, None, None, None, None),
+        Basic(1_000_000, address_1, None, None, None, None, None),
     ]);
 
-    let outputs = build_outputs([Basic(
-        2_000_000,
-        address_0,
-        None,
-        None,
-        None,
-        None,
-        None,
-        Some(Bip44::new(SHIMMER_COIN_TYPE)),
-    )]);
+    let outputs = build_outputs([Basic(2_000_000, address_0, None, None, None, None, None)]);
 
     let transaction = Transaction::builder(protocol_parameters.network_id())
         .with_inputs(
@@ -266,8 +189,10 @@ async fn two_signature_unlocks() -> Result<()> {
         remainder: None,
     };
 
+    let signing_options = Bip44::new(SHIMMER_COIN_TYPE);
+
     let unlocks = secret_manager
-        .transaction_unlocks(&prepared_transaction_data, &protocol_parameters)
+        .transaction_unlocks(&prepared_transaction_data, &protocol_parameters, &signing_options)
         .await?;
 
     assert_eq!(unlocks.len(), 2);

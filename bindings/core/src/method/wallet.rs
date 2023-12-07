@@ -4,7 +4,6 @@
 #[cfg(feature = "stronghold")]
 use std::path::PathBuf;
 
-use crypto::keys::bip44::Bip44;
 use derivative::Derivative;
 #[cfg(feature = "events")]
 use iota_sdk::wallet::events::types::{WalletEvent, WalletEventType};
@@ -390,19 +389,19 @@ pub enum WalletMethod {
     /// Expected response: [`SentTransaction`](crate::Response::SentTransaction)
     #[serde(rename_all = "camelCase")]
     SignAndSubmitTransaction {
-        prepared_transaction_data: PreparedTransactionDataDto<serde_json::Value>,
+        prepared_transaction_data: PreparedTransactionDataDto,
     },
     /// Sign a prepared transaction.
     /// Expected response: [`SignedTransactionData`](crate::Response::SignedTransactionData)
     #[serde(rename_all = "camelCase")]
     SignTransaction {
-        prepared_transaction_data: PreparedTransactionDataDto<serde_json::Value>,
+        prepared_transaction_data: PreparedTransactionDataDto,
     },
     /// Validate the transaction, submit it to a node and store it in the wallet.
     /// Expected response: [`SentTransaction`](crate::Response::SentTransaction)
     #[serde(rename_all = "camelCase")]
     SubmitAndStoreTransaction {
-        signed_transaction_data: SignedTransactionDataDto<serde_json::Value>,
+        signed_transaction_data: SignedTransactionDataDto,
     },
     /// Sync the wallet by fetching new information from the nodes. Will also reissue pending transactions
     /// if necessary. A custom default can be set using SetDefaultSyncOptions.
@@ -423,7 +422,7 @@ pub enum WalletMethod {
     /// Expected response: [`Ok`](crate::Response::Ok)
     #[cfg(feature = "events")]
     #[cfg_attr(docsrs, doc(cfg(feature = "events")))]
-    EmitTestEvent { event: WalletEvent<serde_json::Value> },
+    EmitTestEvent { event: WalletEvent },
 
     // TODO: reconsider whether to have the following methods on the wallet
     /// Get the ledger nano status

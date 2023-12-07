@@ -16,12 +16,12 @@ pub(crate) fn is_foundry_with_id(output: &Output, foundry_id: &FoundryId) -> boo
     }
 }
 
-impl<O> InputSelection<O> {
+impl InputSelection {
     /// Fulfills a foundry requirement by selecting the appropriate foundry from the available inputs.
     pub(crate) fn fulfill_foundry_requirement(
         &mut self,
         foundry_id: FoundryId,
-    ) -> Result<Vec<InputSigningData<O>>, Error> {
+    ) -> Result<Vec<InputSigningData>, Error> {
         // Check if the requirement is already fulfilled.
         if let Some(input) = self
             .selected_inputs
