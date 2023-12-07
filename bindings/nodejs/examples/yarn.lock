@@ -235,7 +235,7 @@
     "@ethersproject/strings" "^5.7.0"
 
 "@iota/sdk@file:..":
-  version "1.1.3"
+  version "1.1.4"
   dependencies:
     "@types/node" "^18.15.12"
     cargo-cp-artifact "^0.1.6"
@@ -2433,6 +2433,11 @@ ultron@~1.1.0:
   version "1.1.1"
   resolved "https://registry.npmjs.org/ultron/-/ultron-1.1.1.tgz"
   integrity sha512-UIEXBNeYmKptWH6z8ZnqTeS8fV74zG0/eRU9VGkpzz+LIJNs8W/zM/L+7ctCkRrgbNnnR0xxw4bKOr0cW0N0Og==
+
+undici-types@^6.0.1:
+  version "6.0.1"
+  resolved "https://registry.yarnpkg.com/undici-types/-/undici-types-6.0.1.tgz#62e2af9fcd3ce359634175658de39df8d0f37197"
+  integrity sha512-i9dNdkCziyqGpFxhatR9LITcInbFWh+ExlWkrZQpZHje8FfCcJKgps0IbmMd7D1o8c8syG4pIOV+aKIoC9JEyA==
 
 undici-types@~5.26.4:
   version "5.26.5"
