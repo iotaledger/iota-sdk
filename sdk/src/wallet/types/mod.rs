@@ -24,7 +24,7 @@ use crate::{
             address::Address,
             output::{Output, OutputId, OutputMetadata},
             payload::signed_transaction::{dto::SignedTransactionPayloadDto, SignedTransactionPayload, TransactionId},
-            protocol::ProtocolParameters,
+            protocol::{CommittableAgeRange, ProtocolParameters},
             slot::SlotIndex,
             BlockId, Error as BlockError,
         },
@@ -59,15 +59,18 @@ impl OutputData {
     pub fn input_signing_data(
         &self,
         wallet_data: &WalletData,
-        slot_index: SlotIndex,
+        slot_index: impl Into<SlotIndex>,
+        committable_age_range: CommittableAgeRange,
     ) -> crate::wallet::Result<Option<InputSigningData>> {
-        let (unlock_address, _unlocked_account_or_nft_address) =
-            self.output.required_and_unlocked_address(slot_index, &self.output_id)?;
+        let required_address = self
+            .output
+            .required_address(slot_index.into(), committable_age_range)?
+            .ok_or(crate::client::Error::ExpirationDeadzone)?;
 
-        let chain = if unlock_address == self.address {
+        let chain = if required_address == self.address {
             self.chain
-        } else if let Address::Ed25519(_) = unlock_address {
-            if wallet_data.address.inner() == &unlock_address {
+        } else if required_address.is_ed25519() {
+            if wallet_data.address.inner() == &required_address {
                 // TODO #1279: do we need a check to make sure that `wallet_data.address` and `wallet_data.bip_path` are
                 // never conflicting?
                 wallet_data.bip_path

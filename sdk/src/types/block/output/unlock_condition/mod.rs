@@ -26,7 +26,7 @@ pub use self::{
 use crate::types::block::{
     address::Address,
     output::{StorageScore, StorageScoreParameters},
-    protocol::{ProtocolParameters, WorkScore},
+    protocol::{CommittableAgeRange, ProtocolParameters, WorkScore},
     slot::SlotIndex,
     Error,
 };
@@ -248,11 +248,32 @@ impl UnlockConditions {
             .map(UnlockCondition::as_timelock)
     }
 
+    /// Checks whether a timelock exists and is still relevant.
+    #[inline(always)]
+    pub fn is_timelocked(&self, slot_index: impl Into<SlotIndex>, min_committable_age: impl Into<SlotIndex>) -> bool {
+        self.timelock().map_or(false, |timelock| {
+            timelock.is_timelocked(slot_index, min_committable_age)
+        })
+    }
+
     /// Gets a reference to an [`ExpirationUnlockCondition`], if any.
     #[inline(always)]
     pub fn expiration(&self) -> Option<&ExpirationUnlockCondition> {
         self.get(ExpirationUnlockCondition::KIND)
             .map(UnlockCondition::as_expiration)
+    }
+
+    /// Checks whether an expiration exists and is expired. If None is returned, then expiration is in the deadzone
+    /// where it can't be unlocked.
+    #[inline(always)]
+    pub fn is_expired(
+        &self,
+        slot_index: impl Into<SlotIndex>,
+        committable_age_range: CommittableAgeRange,
+    ) -> Option<bool> {
+        self.expiration().map_or(Some(false), |expiration| {
+            expiration.is_expired(slot_index, committable_age_range)
+        })
     }
 
     /// Gets a reference to a [`StateControllerAddressUnlockCondition`], if any.
@@ -278,28 +299,20 @@ impl UnlockConditions {
 
     /// Returns the address to be unlocked.
     #[inline(always)]
-    pub fn locked_address<'a>(&'a self, address: &'a Address, slot_index: SlotIndex) -> &'a Address {
-        self.expiration()
-            .and_then(|e| e.return_address_expired(slot_index))
-            .unwrap_or(address)
-    }
+    pub fn locked_address<'a>(
+        &'a self,
+        address: &'a Address,
+        slot_index: impl Into<Option<SlotIndex>>,
+        committable_age_range: CommittableAgeRange,
+    ) -> Result<Option<&'a Address>, Error> {
+        let address = if let Some(expiration) = self.expiration() {
+            let slot_index = slot_index.into().ok_or(Error::MissingSlotIndex)?;
+            expiration.return_address_expired(address, slot_index, committable_age_range)
+        } else {
+            Some(address)
+        };
 
-    /// Returns whether a time lock exists and is still relevant.
-    #[inline(always)]
-    pub fn is_time_locked(&self, slot_index: impl Into<SlotIndex>) -> bool {
-        let slot_index = slot_index.into();
-
-        self.timelock()
-            .map_or(false, |timelock| slot_index < timelock.slot_index())
-    }
-
-    /// Returns whether an expiration exists and is expired.
-    #[inline(always)]
-    pub fn is_expired(&self, slot_index: impl Into<SlotIndex>) -> bool {
-        let slot_index = slot_index.into();
-
-        self.expiration()
-            .map_or(false, |expiration| slot_index >= expiration.slot_index())
+        Ok(address)
     }
 }
 

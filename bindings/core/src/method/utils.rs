@@ -126,5 +126,6 @@ pub enum UtilsMethod {
         transaction: TransactionDto,
         inputs: Vec<InputSigningData>,
         unlocks: Option<Vec<Unlock>>,
+        protocol_parameters: ProtocolParameters,
     },
 }

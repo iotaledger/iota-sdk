@@ -971,6 +971,7 @@ async fn print_wallet_address(wallet: &Wallet) -> Result<(), Error> {
     );
 
     let slot_index = wallet.client().get_slot_index().await?;
+    let protocol_parameters = wallet.client().get_protocol_parameters().await?;
 
     let mut output_ids = Vec::new();
     let mut amount = 0;
@@ -986,11 +987,14 @@ async fn print_wallet_address(wallet: &Wallet) -> Result<(), Error> {
         output_ids.push(output_id);
 
         // Output might be associated with the address, but can't be unlocked by it, so we check that here.
-        let (required_address, _) = &output_data
+        let required_address = &output_data
             .output
-            .required_and_unlocked_address(slot_index, &output_id)?;
+            .required_address(slot_index, protocol_parameters.committable_age_range())?;
 
-        if address.inner() == required_address {
+        if required_address
+            .as_ref()
+            .is_some_and(|required_address| required_address == address.inner())
+        {
             if let Some(nt) = output_data.output.native_token() {
                 native_tokens.add_native_token(*nt)?;
             }
