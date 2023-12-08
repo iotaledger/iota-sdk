@@ -2,7 +2,7 @@ import os
 
 from dotenv import load_dotenv
 
-from iota_sdk import ClientOptions, CoinType, StrongholdSecretManager, Wallet, WalletOptions, Bip44
+from iota_sdk import ClientOptions, CoinType, StrongholdSecretManager, SecretManager, Wallet, WalletOptions, Bip44
 
 load_dotenv()
 
@@ -17,6 +17,11 @@ for env_var in ['STRONGHOLD_PASSWORD', 'MNEMONIC']:
 
 secret_manager = StrongholdSecretManager(
     os.environ['STRONGHOLD_SNAPSHOT_PATH'], os.environ['STRONGHOLD_PASSWORD'])
+
+# Store the mnemonic in the Stronghold snapshot, this only needs to be
+# done once.
+SecretManager(secret_manager).store_mnemonic(os.environ['MNEMONIC'])
+
 bib_path = Bip44(
     coin_type=CoinType.SHIMMER
 )
@@ -24,6 +29,6 @@ bib_path = Bip44(
 wallet_options = WalletOptions(None, None, bib_path, client_options, secret_manager, os.environ.get('WALLET_DB_PATH'))
 wallet = Wallet(wallet_options)
 
-# Store the mnemonic in the Stronghold snapshot, this only needs to be
-# done once.
-wallet.store_mnemonic(os.environ['MNEMONIC'])
+# Update the wallet to the latest state
+balance = wallet.sync()
+print('Generated new wallet')

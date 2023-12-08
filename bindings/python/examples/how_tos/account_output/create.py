@@ -6,18 +6,27 @@ from iota_sdk import Wallet, WalletOptions
 
 load_dotenv()
 
+for env_var in ['WALLET_DB_PATH', 'STRONGHOLD_PASSWORD', 'EXPLORER_URL']:
+    if env_var not in os.environ:
+        raise Exception(f".env {env_var} is undefined, see .env.example")
+
 # In this example we will create an account output
 
 wallet = Wallet(WalletOptions(storage_path=os.environ.get('WALLET_DB_PATH')))
 
 # Sync account with the node
-wallet.sync()
-
-if 'STRONGHOLD_PASSWORD' not in os.environ:
-    raise Exception(".env STRONGHOLD_PASSWORD is undefined, see .env.example")
+balance = wallet.sync()
+print( f'Accounts BEFORE: {balance.accounts}')
 
 wallet.set_stronghold_password(os.environ["STRONGHOLD_PASSWORD"])
+
+print("Sending the create-account transaction...")
 
 # Send transaction.
 transaction = wallet.create_account_output(None, None)
 print(f'Block sent: {os.environ["EXPLORER_URL"]}/block/{transaction.block_id}')
+
+time.sleep(10)
+
+balance = wallet.sync()
+print( f'Accounts AFTER: {balance.accounts}')
