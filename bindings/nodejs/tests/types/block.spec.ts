@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import 'reflect-metadata';
-import { plainToInstance } from 'class-transformer';
 
 import { expect, describe, it } from '@jest/globals';
 import * as basic_block_tagged_data_payload_json from '../../../../sdk/tests/types/fixtures/basic_block_tagged_data_payload.json';
