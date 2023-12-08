@@ -42,6 +42,7 @@ pub use self::{
     native_token::{NativeToken, NativeTokens, NativeTokensBuilder, TokenId},
     nft::{NftId, NftOutput, NftOutputBuilder},
     output_id::OutputId,
+    output_id_proof::{HashableNode, LeafHash, OutputCommitmentProof, OutputIdProof, ValueHash},
     state_transition::{StateTransitionError, StateTransitionVerifier},
     storage_score::{StorageScore, StorageScoreParameters},
     token_scheme::{SimpleTokenScheme, TokenScheme},
@@ -51,7 +52,6 @@ pub(crate) use self::{
     feature::{MetadataFeatureLength, TagFeatureLength},
     native_token::NativeTokenCount,
     output_id::OutputIndex,
-    output_id_proof::OutputIdProof,
     unlock_condition::AddressUnlockCondition,
 };
 use crate::types::block::{

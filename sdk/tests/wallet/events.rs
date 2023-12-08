@@ -3,20 +3,20 @@
 
 use iota_sdk::{
     client::api::PreparedTransactionDataDto,
-    types::{
-        api::core::{LeafHash, OutputCommitmentProof, OutputIdProof},
-        block::{
-            address::{Address, Bech32Address, Ed25519Address},
-            input::{Input, UtxoInput},
-            output::{unlock_condition::AddressUnlockCondition, BasicOutput, Output},
-            payload::signed_transaction::{Transaction, TransactionHash, TransactionId},
-            protocol::protocol_parameters,
-            rand::{
-                mana::rand_mana_allotment,
-                output::{rand_basic_output, rand_output_metadata},
-            },
-            slot::SlotIndex,
+    types::block::{
+        address::{Address, Bech32Address, Ed25519Address},
+        input::{Input, UtxoInput},
+        output::{
+            unlock_condition::AddressUnlockCondition, BasicOutput, LeafHash, Output, OutputCommitmentProof,
+            OutputIdProof,
         },
+        payload::signed_transaction::{Transaction, TransactionHash, TransactionId},
+        protocol::protocol_parameters,
+        rand::{
+            mana::rand_mana_allotment,
+            output::{rand_basic_output, rand_output_metadata},
+        },
+        slot::SlotIndex,
     },
     wallet::{
         events::types::{
