@@ -7,6 +7,7 @@ mod delegation;
 mod metadata;
 mod native_token;
 mod output_id;
+mod output_id_proof;
 mod state_transition;
 mod storage_score;
 mod token_scheme;
@@ -50,17 +51,15 @@ pub(crate) use self::{
     feature::{MetadataFeatureLength, TagFeatureLength},
     native_token::NativeTokenCount,
     output_id::OutputIndex,
+    output_id_proof::OutputIdProof,
     unlock_condition::AddressUnlockCondition,
 };
-use crate::types::{
-    api::core::OutputIdProof,
-    block::{
-        address::Address,
-        protocol::{CommittableAgeRange, ProtocolParameters, WorkScore, WorkScoreParameters},
-        semantic::SemanticValidationContext,
-        slot::SlotIndex,
-        Error,
-    },
+use crate::types::block::{
+    address::Address,
+    protocol::{CommittableAgeRange, ProtocolParameters, WorkScore, WorkScoreParameters},
+    semantic::SemanticValidationContext,
+    slot::SlotIndex,
+    Error,
 };
 
 /// The maximum number of outputs of a transaction.
