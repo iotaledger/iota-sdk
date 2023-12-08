@@ -10,6 +10,7 @@ import { BlockBody } from './block-body';
 import { BasicBlockBody } from './basic';
 import { ValidationBlockBody } from './validation';
 import { BlockBodyDiscriminator } from '.';
+import { Utils, ProtocolParameters, BlockId } from '../../..';
 
 /**
  * The block header.
@@ -117,6 +118,13 @@ class Block {
      */
     asValidation(): ValidationBlockBody {
         return this.body.asValidation();
+    }
+
+    /**
+     * Gets the block id.
+     */
+    id(params: ProtocolParameters): BlockId {
+        return Utils.blockId(this, params);
     }
 }
 

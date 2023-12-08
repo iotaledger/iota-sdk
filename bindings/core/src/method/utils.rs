@@ -57,6 +57,7 @@ pub enum UtilsMethod {
     #[serde(rename_all = "camelCase")]
     BlockId {
         block: BlockDto,
+        #[serde(rename = "params")]
         protocol_parameters: ProtocolParameters,
     },
     /// Returns the transaction ID (Blake2b256 hash of the provided transaction payload)

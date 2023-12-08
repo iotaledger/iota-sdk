@@ -192,13 +192,15 @@ export class Utils {
      * @returns The corresponding block ID.
      */
     static blockId(block: Block, params: ProtocolParameters): BlockId {
-        return callUtilsMethod({
+        const temp = callUtilsMethod({
             name: 'blockId',
             data: {
                 block,
                 params,
             },
         });
+        console.log(temp);
+        return temp
     }
 
     /**

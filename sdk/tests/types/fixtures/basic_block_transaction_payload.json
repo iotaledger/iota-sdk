@@ -2,7 +2,7 @@
     "block":{
        "header":{
           "protocolVersion":3,
-          "networkId":"0",
+          "networkId":"8342982141227064571",
           "issuingTime":"1701088600401978103",
           "slotCommitmentId":"0x01771954516b4c066163025c2671145a57041368613a434a0c445d2f1e06732f2bab32c3",
           "latestFinalizedSlot":500,
