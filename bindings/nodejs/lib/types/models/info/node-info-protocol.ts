@@ -3,7 +3,6 @@
 
 import type { StorageScoreParameters } from '../storage-score';
 import { EpochIndex } from '../../block/slot';
-// import { plainToInstance } from 'class-transformer';
 
 /**
  * The Protocol Info.
@@ -23,7 +22,7 @@ interface ProtocolInfo {
  * The Protocol Parameters.
  */
 interface ProtocolParameters {
-    /*
+    /**
      * Set to value 0 to denote a IOTA 2.0 protocol parameter.
      */
     type: number;
@@ -292,4 +291,13 @@ interface VersionSignalingParameters {
 //     return plainToInstance(ProtocolParameters, data) as any as ProtocolParameters;
 // }
 
-export { ProtocolInfo, ProtocolParameters, RewardsParameters, WorkScoreParameters, StorageScoreParameters, ManaParameters, VersionSignalingParameters, CongestionControlParameters};
+export {
+    ProtocolInfo,
+    ProtocolParameters,
+    RewardsParameters,
+    WorkScoreParameters,
+    StorageScoreParameters,
+    ManaParameters,
+    VersionSignalingParameters,
+    CongestionControlParameters,
+};
