@@ -49,7 +49,6 @@ fn wallet_events_serde() {
         metadata: rand_output_metadata(),
         output: Output::from(rand_basic_output(1_813_620_509_061_365)),
         is_spent: false,
-        address: Address::Ed25519(Ed25519Address::new([0; Ed25519Address::LENGTH])),
         network_id: 42,
         remainder: true,
         chain: None,

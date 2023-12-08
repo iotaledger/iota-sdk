@@ -3,6 +3,7 @@
 
 use iota_sdk::types::block::protocol::ProtocolParameters;
 use packable::PackableExt;
+use pretty_assertions::assert_eq;
 
 // Test from https://github.com/iotaledger/tips/blob/tip49/tips/TIP-0049/tip-0049.md#protocol-parameter-hash
 #[test]
