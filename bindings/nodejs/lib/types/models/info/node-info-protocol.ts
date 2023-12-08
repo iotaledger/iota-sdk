@@ -287,10 +287,6 @@ interface VersionSignalingParameters {
     activationOffset: number;
 }
 
-// function parseProtocolParameters(data: any): ProtocolParameters {
-//     return plainToInstance(ProtocolParameters, data) as any as ProtocolParameters;
-// }
-
 export {
     ProtocolInfo,
     ProtocolParameters,
