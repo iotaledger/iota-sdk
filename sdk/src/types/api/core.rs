@@ -4,6 +4,7 @@
 use alloc::{
     boxed::Box,
     collections::{BTreeMap, BTreeSet},
+    format,
     string::String,
     vec::Vec,
 };
