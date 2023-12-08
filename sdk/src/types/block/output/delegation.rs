@@ -216,7 +216,7 @@ impl From<&DelegationOutput> for DelegationOutputBuilder {
 #[packable(unpack_error = Error)]
 #[packable(unpack_visitor = ProtocolParameters)]
 pub struct DelegationOutput {
-    /// Amount of IOTA coins to deposit with this output.
+    /// Amount of IOTA coins held by the output.
     amount: u64,
     /// Amount of delegated IOTA coins.
     delegated_amount: u64,
@@ -324,7 +324,14 @@ impl DelegationOutput {
         context: &mut SemanticValidationContext<'_>,
     ) -> Result<(), TransactionFailureReason> {
         self.unlock_conditions()
-            .locked_address(self.address(), context.transaction.creation_slot())
+            .locked_address(
+                self.address(),
+                None,
+                context.protocol_parameters.committable_age_range(),
+            )
+            // Safe to unwrap, DelegationOutput can't have an expiration unlock condition.
+            .unwrap()
+            .unwrap()
             .unlock(unlock, context)
     }
 

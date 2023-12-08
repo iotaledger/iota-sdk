@@ -29,6 +29,11 @@ impl TimelockUnlockCondition {
     pub fn slot_index(&self) -> SlotIndex {
         self.0
     }
+
+    /// Checks whether the timelock is still relevant.
+    pub fn is_timelocked(&self, slot_index: impl Into<SlotIndex>, min_committable_age: impl Into<SlotIndex>) -> bool {
+        (slot_index.into() + min_committable_age.into()) < self.0
+    }
 }
 
 impl StorageScore for TimelockUnlockCondition {}

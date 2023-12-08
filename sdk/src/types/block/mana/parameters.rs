@@ -27,7 +27,7 @@ pub struct ManaParameters {
     /// The actual generation rate of Mana is given by generation_rate * 2^(-generation_rate_exponent).
     pub(crate) generation_rate_exponent: u8,
     /// A lookup table of epoch index diff to mana decay factor.
-    /// The actual decay factor is given by decay_factors[epoch_diff] * 2^(-decay_factors_exponent).
+    /// The actual decay factor is given by decay_factors\[epoch_diff\] * 2^(-decay_factors_exponent).
     #[packable(unpack_error_with = |_| Error::InvalidManaDecayFactors)]
     #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::boxed_slice_prefix"))]
     #[getset(skip)]
