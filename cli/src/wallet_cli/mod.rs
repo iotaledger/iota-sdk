@@ -571,15 +571,18 @@ pub async fn faucet_command(wallet: &Wallet, address: Option<Bech32Address>, url
     };
 
     let faucet_url = url.as_deref().unwrap_or("http://localhost:8088/api/enqueue");
+    let response = request_funds_from_faucet(faucet_url, &address).await?;
 
-    println_log_info!("{}", request_funds_from_faucet(faucet_url, &address).await?);
+    println_log_info!("{response}");
 
     Ok(())
 }
 
 // `implicit-account-creation-address` command
 pub async fn implicit_account_creation_address_command(wallet: &Wallet) -> Result<(), Error> {
-    println_log_info!("{}", wallet.implicit_account_creation_address().await?);
+    let address = wallet.implicit_account_creation_address().await?;
+
+    println_log_info!("{address}");
 
     Ok(())
 }
@@ -689,9 +692,9 @@ pub async fn mint_nft_command(
 
 // `node-info` command
 pub async fn node_info_command(wallet: &Wallet) -> Result<(), Error> {
-    let node_info = wallet.client().get_info().await?;
+    let node_info = serde_json::to_string_pretty(&wallet.client().get_info().await?)?;
 
-    println_log_info!("Current node info: {}", serde_json::to_string_pretty(&node_info)?);
+    println_log_info!("Current node info: {node_info}");
 
     Ok(())
 }
@@ -971,6 +974,7 @@ async fn print_wallet_address(wallet: &Wallet) -> Result<(), Error> {
     );
 
     let slot_index = wallet.client().get_slot_index().await?;
+    let protocol_parameters = wallet.client().get_protocol_parameters().await?;
 
     let mut output_ids = Vec::new();
     let mut amount = 0;
@@ -986,11 +990,14 @@ async fn print_wallet_address(wallet: &Wallet) -> Result<(), Error> {
         output_ids.push(output_id);
 
         // Output might be associated with the address, but can't be unlocked by it, so we check that here.
-        let (required_address, _) = &output_data
+        let required_address = &output_data
             .output
-            .required_and_unlocked_address(slot_index, &output_id)?;
+            .required_address(slot_index, protocol_parameters.committable_age_range())?;
 
-        if address.inner() == required_address {
+        if required_address
+            .as_ref()
+            .is_some_and(|required_address| required_address == address.inner())
+        {
             if let Some(nt) = output_data.output.native_token() {
                 native_tokens.add_native_token(*nt)?;
             }
