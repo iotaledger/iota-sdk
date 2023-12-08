@@ -191,12 +191,15 @@ export class Utils {
      * @param params The network protocol parameters.
      * @returns The corresponding block ID.
      */
-    static blockId(block: Block, params: ProtocolParameters): BlockId {
+    static blockId(
+        block: Block,
+        protocolParameters: ProtocolParameters,
+    ): BlockId {
         return callUtilsMethod({
             name: 'blockId',
             data: {
                 block,
-                params,
+                protocolParameters,
             },
         });
     }
