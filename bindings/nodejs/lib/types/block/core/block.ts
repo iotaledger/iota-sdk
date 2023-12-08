@@ -123,8 +123,7 @@ class Block {
     /**
      * Gets the block id.
      */
-    // id(params: ProtocolParameters): BlockId {
-    id(params: any): BlockId {
+    id(params: ProtocolParameters): BlockId {
         return Utils.blockId(this, params);
     }
 }
