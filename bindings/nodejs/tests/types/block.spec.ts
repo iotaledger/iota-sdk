@@ -8,7 +8,7 @@ import { expect, describe, it } from '@jest/globals';
 import * as basic_block_tagged_data_payload_json from '../../../../sdk/tests/types/fixtures/basic_block_tagged_data_payload.json';
 import * as basic_block_transaction_payload_json from '../../../../sdk/tests/types/fixtures/basic_block_transaction_payload.json';
 import * as validation_block_json from '../../../../sdk/tests/types/fixtures/validation_block.json';
-import * as protocol_parameters_json from '../../../../sdk/tests/types/fixtures/protocol_parameters2.json';
+import * as protocol_parameters_json from '../../../../sdk/tests/types/fixtures/protocol_parameters.json';
 import { ProtocolParameters, Block, BlockId, parseBlock, parseProtocolParameters } from '../../';
 
 describe('Block tests', () => {
