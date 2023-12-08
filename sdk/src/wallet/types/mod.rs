@@ -21,7 +21,6 @@ use crate::{
     types::{
         api::core::{OutputIdProof, OutputWithMetadataResponse},
         block::{
-            address::Address,
             output::{Output, OutputId, OutputMetadata},
             payload::signed_transaction::{dto::SignedTransactionPayloadDto, SignedTransactionPayload, TransactionId},
             protocol::{CommittableAgeRange, ProtocolParameters},
@@ -47,8 +46,6 @@ pub struct OutputData {
     pub output_id_proof: OutputIdProof,
     /// If an output is spent
     pub is_spent: bool,
-    /// Associated wallet address.
-    pub address: Address,
     /// Network ID
     pub network_id: u64,
     pub remainder: bool,
@@ -69,7 +66,7 @@ impl OutputData {
             .required_address(slot_index.into(), committable_age_range)?
             .ok_or(crate::client::Error::ExpirationDeadzone)?;
 
-        let chain = if required_address == self.address {
+        let chain = if &required_address == wallet_data.address.inner() {
             self.chain
         } else if required_address.is_ed25519() {
             if wallet_data.address.inner() == &required_address {
