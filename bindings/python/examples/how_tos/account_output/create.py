@@ -16,7 +16,7 @@ wallet = Wallet(WalletOptions(storage_path=os.environ.get('WALLET_DB_PATH')))
 
 # Sync account with the node
 balance = wallet.sync()
-print( f'Accounts BEFORE: {balance.accounts}')
+print(f'Accounts BEFORE: {balance.accounts}')
 
 wallet.set_stronghold_password(os.environ["STRONGHOLD_PASSWORD"])
 
@@ -29,4 +29,4 @@ print(f'Block sent: {os.environ["EXPLORER_URL"]}/block/{transaction.block_id}')
 time.sleep(10)
 
 balance = wallet.sync()
-print( f'Accounts AFTER: {balance.accounts}')
+print(f'Accounts AFTER: {balance.accounts}')
