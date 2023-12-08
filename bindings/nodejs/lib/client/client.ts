@@ -341,12 +341,7 @@ export class Client {
      * Get the token supply.
      */
     async getTokenSupply(): Promise<bigint> {
-        const tokenSupply = (await this.getProtocolParameters()).tokenSupply;
-        if (tokenSupply !== undefined) {
-            return BigInt(tokenSupply);
-        } else {
-            throw new Error("ProtocolParameters.tokenSupply is undefined");
-        }
+        return BigInt((await this.getProtocolParameters()).tokenSupply);
     }
 
     /**
