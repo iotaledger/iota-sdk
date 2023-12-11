@@ -56,7 +56,8 @@
           ],
           "decayFactorsExponent": 32,
           "decayFactorEpochsSum": 2420916375,
-          "decayFactorEpochsSumExponent": 21
+          "decayFactorEpochsSumExponent": 21,
+          "annualDecayFactorPercentage": 50
         },
         "tokenSupply": "2779530283277761",
         "genesisSlot": 0,
@@ -94,7 +95,8 @@
           "decayBalancingConstant": "1",
           "poolCoefficientExponent": 11
         },
-        "targetCommitteeSize": 32
+        "targetCommitteeSize": 32,
+        "chainSwitchingThreshold": 2
       }
     }
   ],
