@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from typing import Optional
 from iota_sdk.types.common import HexStr, json
 # TODO rename change to Block
-from iota_sdk.types.block.signed_block import SignedBlock
+from iota_sdk.types.block.signed_block import Block
 
 
 @json
@@ -196,5 +196,5 @@ class BlockWithMetadata:
         block: The block.
         metadata: The block metadata.
     """
-    block: SignedBlock
+    block: Block
     metadata: BlockMetadata

@@ -3,7 +3,7 @@
 
 from typing import get_args
 import pytest
-from iota_sdk import BasicBlockBody, BlockBodyType, SignedBlock, Payload, PayloadType
+from iota_sdk import BasicBlockBody, BlockBodyType, Block, Payload, PayloadType
 
 
 def test_basic_block_with_tagged_data_payload():
@@ -63,7 +63,7 @@ def test_signed_block_with_tagged_data_payload():
             "signature": "0x7c274e5e771d5d60202d334f06773d3672484b1e4e6f03231b4e69305329267a4834374b0f2e0d5c6c2f7779620f4f534c773b1679400c52303d1f23121a4049"
         }
     }
-    signed_block = SignedBlock.from_dict(block_dict)
+    signed_block = Block.from_dict(block_dict)
     assert signed_block.to_dict() == block_dict
     assert isinstance(signed_block.block, BasicBlockBody)
     assert signed_block.block.type == BlockBodyType.Basic

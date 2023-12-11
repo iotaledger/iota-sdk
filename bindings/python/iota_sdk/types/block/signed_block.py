@@ -15,8 +15,8 @@ from iota_sdk.types.block.validation import ValidationBlockBody
 
 @json
 @dataclass
-class SignedBlock:
-    """A signed block type that can hold either a `BasicBlock` or a `ValidationBlock`.
+class Block:
+    """A signed block that can hold either a `BasicBlockBody` or a `ValidationBlockBody`.
     Shared data is stored alongside such a block in the header fields.
 
     Attributes:
