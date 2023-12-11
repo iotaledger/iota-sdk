@@ -19,7 +19,7 @@ if 'WALLET_DB_PATH' not in os.environ:
 wallet = Wallet(WalletOptions(storage_path=os.environ.get('WALLET_DB_PATH')))
 
 address = wallet.address()
-print('address:', address)
+print('Address:', address)
 
 # Set sync_only_most_basic_outputs to True if not interested in outputs that are timelocked,
 # have a storage deposit return, expiration or are nft/account/foundry outputs.

@@ -8,7 +8,7 @@ import os
 from dotenv import load_dotenv
 
 from iota_sdk import (ClientOptions, CoinType, StrongholdSecretManager,
-                      SyncOptions, Wallet, WalletOptions, Bip44)
+                      SecretManager, SyncOptions, Wallet, WalletOptions, Bip44)
 
 # This example uses secrets in environment variables for simplicity which
 # should not be done in production.
@@ -24,15 +24,15 @@ client_options = ClientOptions(nodes=[os.environ.get('NODE_URL')])
 secret_manager = StrongholdSecretManager(
     os.environ.get('STRONGHOLD_SNAPSHOT_PATH'), os.environ['STRONGHOLD_PASSWORD'])
 
+# Store the mnemonic in the Stronghold snapshot, this only needs to be
+# done once.
+SecretManager(secret_manager).store_mnemonic(os.environ['MNEMONIC'])
+
 bib_path = Bip44(
     coin_type=CoinType.SHIMMER
 )
 wallet_options = WalletOptions(None, None, bib_path, client_options, secret_manager, os.environ.get('WALLET_DB_PATH'))
 wallet = Wallet(wallet_options)
-
-# Store the mnemonic in the Stronghold snapshot, this only needs to be
-# done once.
-wallet.store_mnemonic(os.environ['MNEMONIC'])
 
 # Set sync_only_most_basic_outputs to True if not interested in outputs that are timelocked,
 # have a storage deposit return, expiration or are nft/account/foundry outputs.

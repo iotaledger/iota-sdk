@@ -17,10 +17,8 @@ for env_var in ['STRONGHOLD_SNAPSHOT_PATH', 'STRONGHOLD_PASSWORD']:
     if env_var not in os.environ:
         raise Exception(f'.env {env_var} is undefined, see .env.example')
 
-client_options = ClientOptions(nodes=[os.environ.get('NODE_URL')])
-
 secret_manager = SecretManager(StrongholdSecretManager(
     os.environ.get('STRONGHOLD_SNAPSHOT_PATH'), os.environ['STRONGHOLD_PASSWORD']))
 
 address = secret_manager.generate_ed25519_addresses(1)[0]
-print('Address:', address.address)
+print('Address:', address)

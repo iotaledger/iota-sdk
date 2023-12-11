@@ -26,7 +26,7 @@ if 'STRONGHOLD_PASSWORD' not in os.environ:
 
 wallet.set_stronghold_password(os.environ["STRONGHOLD_PASSWORD"])
 
-# Sync account with the node
+# Sync wallet with the node
 wallet.sync()
 
 bech32_hrp = wallet.get_client().get_bech32_hrp()

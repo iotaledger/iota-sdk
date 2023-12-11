@@ -10,7 +10,7 @@ load_dotenv()
 
 wallet = Wallet(WalletOptions(storage_path=os.environ.get('WALLET_DB_PATH')))
 
-# Sync account with the node
+# Sync wallet with the node
 balance = wallet.sync()
 
 # Find first foundry and corresponding token id

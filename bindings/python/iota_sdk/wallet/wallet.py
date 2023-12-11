@@ -737,7 +737,7 @@ class Wallet():
 
     def sign_and_submit_transaction(
             self, prepared_transaction_data: PreparedTransactionData) -> TransactionWithMetadata:
-        """Validate the transaction, sign it, submit it to a node and store it in the account.
+        """Validate the transaction, sign it, submit it to a node and store it in the wallet.
         """
         return TransactionWithMetadata.from_dict(self._call_method(
             'signAndSubmitTransaction', {

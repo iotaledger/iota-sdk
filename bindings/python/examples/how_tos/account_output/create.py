@@ -15,7 +15,7 @@ for env_var in ['WALLET_DB_PATH', 'STRONGHOLD_PASSWORD', 'EXPLORER_URL']:
 
 wallet = Wallet(WalletOptions(storage_path=os.environ.get('WALLET_DB_PATH')))
 
-# Sync account with the node
+# Sync wallet with the node
 balance = wallet.sync()
 print(f'Accounts BEFORE: {balance.accounts}')
 

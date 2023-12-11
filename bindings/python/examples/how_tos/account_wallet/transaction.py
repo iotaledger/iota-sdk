@@ -12,12 +12,11 @@ for env_var in ['WALLET_DB_PATH', 'STRONGHOLD_PASSWORD']:
     if env_var not in os.environ:
         raise Exception(f".env {env_var} is undefined, see .env.example")
 
-sync_options = SyncOptions(account=WalletSyncOptions(basic_outputs=True))
-
 wallet = Wallet(WalletOptions(storage_path=os.environ.get('WALLET_DB_PATH')))
 
 wallet.set_stronghold_password(os.environ["STRONGHOLD_PASSWORD"])
 
+sync_options = SyncOptions(account=WalletSyncOptions(basic_outputs=True))
 balance = wallet.sync(sync_options)
 
 total_base_token_balance = balance.base_coin.total

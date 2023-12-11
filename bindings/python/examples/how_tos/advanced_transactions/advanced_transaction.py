@@ -21,7 +21,7 @@ load_dotenv()
 
 wallet = Wallet(WalletOptions(storage_path=os.environ.get('WALLET_DB_PATH')))
 
-# Sync account with the node
+# Sync wallet with the node
 response = wallet.sync()
 
 if 'STRONGHOLD_PASSWORD' not in os.environ:

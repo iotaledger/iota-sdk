@@ -16,7 +16,7 @@ if 'STRONGHOLD_PASSWORD' not in os.environ:
 
 wallet.set_stronghold_password(os.environ["STRONGHOLD_PASSWORD"])
 
-# Sync account with the node
+# Sync wallet with the node
 response = wallet.sync()
 
 # Only the unspent outputs in the account
