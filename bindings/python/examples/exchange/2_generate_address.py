@@ -7,7 +7,7 @@ import os
 
 from dotenv import load_dotenv
 
-from iota_sdk import ClientOptions, StrongholdSecretManager, SecretManager
+from iota_sdk import StrongholdSecretManager, SecretManager
 
 # This example uses secrets in environment variables for simplicity which
 # should not be done in production.
