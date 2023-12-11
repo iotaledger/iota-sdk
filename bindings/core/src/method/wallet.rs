@@ -4,7 +4,7 @@
 #[cfg(feature = "stronghold")]
 use std::path::PathBuf;
 
-use crypto::{keys::bip44::Bip44, signatures::ed25519::PublicKey};
+use crypto::keys::bip44::Bip44;
 use derivative::Derivative;
 #[cfg(feature = "events")]
 use iota_sdk::wallet::events::types::{WalletEvent, WalletEventType};

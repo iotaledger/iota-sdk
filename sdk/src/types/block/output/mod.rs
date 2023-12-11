@@ -54,7 +54,7 @@ pub(crate) use self::{
 };
 use crate::types::block::{
     address::Address,
-    protocol::{ProtocolParameters, WorkScore, WorkScoreParameters},
+    protocol::{CommittableAgeRange, ProtocolParameters, WorkScore, WorkScoreParameters},
     semantic::SemanticValidationContext,
     slot::SlotIndex,
     Error,
@@ -269,46 +269,26 @@ impl Output {
 
     crate::def_is_as_opt!(Output: Basic, Account, Foundry, Nft, Delegation, Anchor);
 
-    /// Returns the address that is required to unlock this [`Output`] and the account or nft address that gets
-    /// unlocked by it, if it's an account or nft.
-    /// If no `account_transition` has been provided, assumes a state transition.
-    pub fn required_and_unlocked_address(
+    /// Returns the address that is required to unlock this [`Output`].
+    pub fn required_address(
         &self,
-        slot_index: SlotIndex,
-        output_id: &OutputId,
-    ) -> Result<(Address, Option<Address>), Error> {
-        match self {
-            Self::Basic(output) => Ok((
-                output
-                    .unlock_conditions()
-                    .locked_address(output.address(), slot_index)
-                    .clone(),
-                None,
-            )),
-            Self::Account(output) => Ok((
-                output
-                    .unlock_conditions()
-                    .locked_address(output.address(), slot_index)
-                    .clone(),
-                Some(Address::Account(output.account_address(output_id))),
-            )),
-            Self::Anchor(_) => Err(Error::UnsupportedOutputKind(AnchorOutput::KIND)),
-            Self::Foundry(output) => Ok((Address::Account(*output.account_address()), None)),
-            Self::Nft(output) => Ok((
-                output
-                    .unlock_conditions()
-                    .locked_address(output.address(), slot_index)
-                    .clone(),
-                Some(Address::Nft(output.nft_address(output_id))),
-            )),
-            Self::Delegation(output) => Ok((
-                output
-                    .unlock_conditions()
-                    .locked_address(output.address(), slot_index)
-                    .clone(),
-                None,
-            )),
-        }
+        slot_index: impl Into<Option<SlotIndex>>,
+        committable_age_range: CommittableAgeRange,
+    ) -> Result<Option<Address>, Error> {
+        Ok(match self {
+            Self::Basic(output) => output
+                .unlock_conditions()
+                .locked_address(output.address(), slot_index, committable_age_range)?
+                .cloned(),
+            Self::Account(output) => Some(output.address().clone()),
+            Self::Anchor(_) => return Err(Error::UnsupportedOutputKind(AnchorOutput::KIND)),
+            Self::Foundry(output) => Some(Address::Account(*output.account_address())),
+            Self::Nft(output) => output
+                .unlock_conditions()
+                .locked_address(output.address(), slot_index, committable_age_range)?
+                .cloned(),
+            Self::Delegation(output) => Some(output.address().clone()),
+        })
     }
 
     ///

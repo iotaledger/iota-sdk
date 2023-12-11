@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use alloc::{collections::BTreeSet, vec::Vec};
+use alloc::collections::BTreeSet;
 
 use hashbrown::HashMap;
 use packable::{
@@ -299,6 +299,7 @@ impl From<&AnchorOutput> for AnchorOutputBuilder {
 pub struct AnchorOutput {
     /// Amount of IOTA coins held by the output.
     amount: u64,
+    /// Amount of stored Mana held by the output.
     mana: u64,
     /// Unique identifier of the anchor.
     anchor_id: AnchorId,
@@ -653,6 +654,7 @@ fn verify_unlock_conditions(unlock_conditions: &UnlockConditions, anchor_id: &An
 
 #[cfg(feature = "serde")]
 mod dto {
+    use alloc::vec::Vec;
 
     use serde::{Deserialize, Serialize};
 
