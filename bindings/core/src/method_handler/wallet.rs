@@ -8,7 +8,7 @@ use iota_sdk::{
     client::api::{
         PreparedTransactionData, PreparedTransactionDataDto, SignedTransactionData, SignedTransactionDataDto,
     },
-    types::{block::address::ToBech32Ext, TryFromDto},
+    types::TryFromDto,
     wallet::{types::TransactionWithMetadataDto, PreparedCreateNativeTokenTransactionDto, Wallet},
 };
 

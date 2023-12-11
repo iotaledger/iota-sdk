@@ -16,11 +16,8 @@ use crate::wallet::storage::adapter::memory::Memory;
 #[cfg(feature = "storage")]
 use crate::wallet::storage::{StorageManager, StorageOptions};
 use crate::{
-    client::{
-        api::GetAddressesOptions,
-        secret::{GenerateAddressOptions, SecretManage, SecretManager},
-    },
-    types::block::address::{Address, Bech32Address},
+    client::secret::{GenerateAddressOptions, SecretManage, SecretManager},
+    types::block::address::Bech32Address,
     wallet::{
         core::{Bip44, WalletData, WalletInner},
         operations::syncing::SyncOptions,
@@ -74,12 +71,11 @@ where
         self
     }
 
-    // TODO: only add this fn if the SecretManager is optional. Otherwise the address should be generated.
-    // /// Set the wallet address.
-    // pub fn with_address(mut self, address: impl Into<Option<Bech32Address>>) -> Self {
-    //     self.address = address.into();
-    //     self
-    // }
+    /// Set the wallet address.
+    pub fn with_address(mut self, address: impl Into<Option<Bech32Address>>) -> Self {
+        self.address = address.into();
+        self
+    }
 
     /// Set the alias of the wallet.
     pub fn with_alias(mut self, alias: impl Into<Option<String>>) -> Self {
@@ -204,23 +200,25 @@ where
             self.alias = loaded_wallet_builder.as_ref().and_then(|builder| builder.alias.clone());
         }
 
-        // May use a previously stored wallet address if it wasn't provided
-        // Since we don't allow setting it `address` must be None at this point.
-        self.address = loaded_wallet_builder
+        let provided_address = self.address;
+        let restored_address = loaded_wallet_builder
             .as_ref()
             .and_then(|builder| builder.address.clone());
 
-        let generated_address = Self::generate_wallet_address(client_options, bip_path, secret_manager).await?;
-        if let Some(address) = &self.address {
-            // Make sure the provided or loaded address doesn't conflict with the secret manager (private key) and the
-            // bip path.
-            if address != &generated_address {
-                // TODO: change to appropriate error, e.g. Error::ConflictingWalletAddress or smth.
-                return Err(crate::wallet::Error::MissingParameter("address"));
+        self.address = Some(match (provided_address, restored_address) {
+            (Some(provided), Some(restored)) => {
+                // error early if they conflict
+                if provided != restored {
+                    // TODO: change to appropriate error, e.g. Error::ConflictingWalletAddress or smth.
+                    return Err(crate::wallet::Error::MissingParameter("address"));
+                } else {
+                    restored
+                }
             }
-        } else {
-            self.address = Some(generated_address);
-        }
+            (Some(provided), None) => provided,
+            (None, Some(restored)) => restored,
+            (None, None) => Self::generate_wallet_address(client_options, bip_path, secret_manager).await?,
+        });
 
         // Panic: an address must exist at this point
         let address = self.address.as_ref().unwrap().clone();

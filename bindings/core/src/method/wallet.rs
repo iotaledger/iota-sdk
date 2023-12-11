@@ -18,7 +18,6 @@ use iota_sdk::{
     client::{
         api::{input_selection::Burn, PreparedTransactionDataDto, SignedTransactionDataDto},
         node_manager::node::NodeAuth,
-        secret::GenerateAddressOptions,
     },
     types::block::{
         address::{Bech32Address, Hrp},
