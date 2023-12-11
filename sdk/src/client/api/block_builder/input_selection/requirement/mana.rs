@@ -5,7 +5,7 @@ use super::{Error, InputSelection};
 use crate::client::secret::types::InputSigningData;
 
 impl InputSelection {
-    pub(crate) fn fulfill_mana_requirement(&mut self) -> Result<Vec<InputSigningData>, Error> {
+    pub(crate) fn fulfill_mana_requirement(&mut self, allotments: u64) -> Result<Vec<InputSigningData>, Error> {
         Ok(vec![])
     }
 }

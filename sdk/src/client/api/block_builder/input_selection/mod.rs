@@ -21,7 +21,7 @@ use crate::{
     types::block::{
         address::{AccountAddress, Address, NftAddress},
         input::INPUT_COUNT_RANGE,
-        mana::ManaAllotment,
+        mana::{ManaAllotment, ManaAllotments},
         output::{
             AccountOutput, ChainId, FoundryOutput, NativeTokensBuilder, NftOutput, Output, OutputId, OUTPUT_COUNT_RANGE,
         },
@@ -46,7 +46,7 @@ pub struct InputSelection {
     slot_index: SlotIndex,
     requirements: Vec<Requirement>,
     automatically_transitioned: HashSet<ChainId>,
-    mana_allotments: Vec<ManaAllotment>,
+    mana_allotments: u64,
 }
 
 /// Result of the input selection algorithm.
@@ -183,7 +183,7 @@ impl InputSelection {
             slot_index: SlotIndex::from(0),
             requirements: Vec::new(),
             automatically_transitioned: HashSet::new(),
-            mana_allotments: Vec::new(),
+            mana_allotments: 0,
         }
     }
 
@@ -214,6 +214,12 @@ impl InputSelection {
     /// Sets the slot index of an [`InputSelection`].
     pub fn with_slot_index(mut self, slot_index: impl Into<SlotIndex>) -> Self {
         self.slot_index = slot_index.into();
+        self
+    }
+
+    /// Sets the mana allotments sum of an [`InputSelection`].
+    pub fn with_mana_allotments(mut self, mana_allotments: ManaAllotments) -> Self {
+        self.mana_allotments = mana_allotments.iter().map(ManaAllotment::mana).sum();
         self
     }
 

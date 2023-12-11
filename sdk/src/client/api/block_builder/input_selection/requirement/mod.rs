@@ -41,7 +41,7 @@ pub enum Requirement {
     /// Amount requirement.
     Amount,
     /// Mana requirement.
-    Mana,
+    Mana(u64),
 }
 
 impl InputSelection {
@@ -59,7 +59,7 @@ impl InputSelection {
             Requirement::Nft(nft_id) => self.fulfill_nft_requirement(nft_id),
             Requirement::NativeTokens => self.fulfill_native_tokens_requirement(),
             Requirement::Amount => self.fulfill_amount_requirement(),
-            Requirement::Mana => self.fulfill_mana_requirement(),
+            Requirement::Mana(allotments) => self.fulfill_mana_requirement(allotments),
         }
     }
 
