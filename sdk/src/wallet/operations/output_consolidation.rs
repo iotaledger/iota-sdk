@@ -135,7 +135,7 @@ impl<S: 'static + SecretManage> Wallet<SecretData<S>> {
         let mut outputs_to_consolidate = Vec::new();
         let wallet_data = self.data().await;
 
-        let wallet_address = &wallet_data.address;
+        let wallet_address = wallet_data.address.clone();
 
         for (output_id, output_data) in &wallet_data.unspent_outputs {
             #[cfg(feature = "participation")]
@@ -148,7 +148,7 @@ impl<S: 'static + SecretManage> Wallet<SecretData<S>> {
 
             let is_locked_output = wallet_data.locked_outputs.contains(output_id);
             let should_consolidate_output = self
-                .should_consolidate_output(output_data, slot_index, wallet_address)
+                .should_consolidate_output(output_data, slot_index, &wallet_address)
                 .await?;
             if !is_locked_output && should_consolidate_output {
                 outputs_to_consolidate.push(output_data.clone());
@@ -233,7 +233,7 @@ impl<S: 'static + SecretManage> Wallet<SecretData<S>> {
                 params
                     .target_address
                     .map(|bech32| bech32.into_inner())
-                    .unwrap_or_else(|| outputs_to_consolidate[0].address.clone()),
+                    .unwrap_or_else(|| wallet_address.into_inner()),
             ))
             // TODO https://github.com/iotaledger/iota-sdk/issues/1632
             // .with_native_tokens(total_native_tokens.finish()?)

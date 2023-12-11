@@ -571,15 +571,18 @@ pub async fn faucet_command(wallet: &Wallet, address: Option<Bech32Address>, url
     };
 
     let faucet_url = url.as_deref().unwrap_or("http://localhost:8088/api/enqueue");
+    let response = request_funds_from_faucet(faucet_url, &address).await?;
 
-    println_log_info!("{}", request_funds_from_faucet(faucet_url, &address).await?);
+    println_log_info!("{response}");
 
     Ok(())
 }
 
 // `implicit-account-creation-address` command
 pub async fn implicit_account_creation_address_command(wallet: &Wallet) -> Result<(), Error> {
-    println_log_info!("{}", wallet.implicit_account_creation_address().await?);
+    let address = wallet.implicit_account_creation_address().await?;
+
+    println_log_info!("{address}");
 
     Ok(())
 }
@@ -690,9 +693,9 @@ pub async fn mint_nft_command(
 
 // `node-info` command
 pub async fn node_info_command(wallet: &Wallet) -> Result<(), Error> {
-    let node_info = wallet.client().get_info().await?;
+    let node_info = serde_json::to_string_pretty(&wallet.client().get_info().await?)?;
 
-    println_log_info!("Current node info: {}", serde_json::to_string_pretty(&node_info)?);
+    println_log_info!("Current node info: {node_info}");
 
     Ok(())
 }
