@@ -1,8 +1,10 @@
 {
-    "blockId": "0xd3a0a0c76ab2d9b406a32c30c43e102fe0f39a12a3f6c1e3b19d239db2f18d75",
-    "transactionId": "0x1c52e8e630d1c6e45ab6f46c63d8d6cb02e6c2ed6e31b6c97d6f5c5f5a5d5c5b",
-    "outputIndex": 3,
-    "isSpent": false,
-    "includedCommitmentId": "0x7c62d9b9ed3c1f3ef942a7ea17ec1270d77c109f0ba57b6c2d2b9e9fb3e69a3a",
-    "latestCommitmentId": "0x7c62d9b9ed3c1f3ef942a7ea17ec1270d77c109f0ba57b6c2d2b9e9fb3e69a3a"
-  }
+  "outputId": "0x3477de28a45c565eed3603ab9e90ce0f0d38e8860a3c5ff64ccc70252aab7c9d000000004600",
+  "blockId": "0x1aaaa9ad9c15c6cd601a5aa5bd61b85428263978a26343949dad9ff89635e7104f1f271b",
+  "included": {
+    "slot": 5,
+    "transactionId": "0xfdd9e96bac5e4f029b3261c00cd3c74fb4c389184a2018c979d4f31fc1ef53c99add5c74",
+    "commitmentId": "0xd20959ac38938fddee472bbfd47644da3087a39499cd04e86c9c70fa9c8c0516a81b8aea"
+  },
+  "latestCommitmentId": "0xba4456279dce23cfca37938685c039ea7c72001c1cd8becf72b195a8727cdfd07949d697"
+}

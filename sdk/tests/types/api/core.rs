@@ -72,8 +72,8 @@ fn responses() {
     // GET /api/core/v3/outputs/{outputId}
     // json_response("get-outputs-by-id-response-example.json").unwrap();
     // GET /api/core/v3/outputs/{outputId}/metadata
-    // json_response::<OutputMetadata>("get-output-metadata-by-id-response-unspent-example.json").unwrap();
-    // json_response::<OutputMetadata>("get-output-metadata-by-id-response-spent-example.json").unwrap();
+    json_response::<OutputMetadata>("get-output-metadata-by-id-response-unspent-example.json").unwrap();
+    json_response::<OutputMetadata>("get-output-metadata-by-id-response-spent-example.json").unwrap();
     // GET /api/core/v3/outputs/{outputId}/full
     // json_response("get-full-output-metadata-example.json").unwrap();
     // GET /api/core/v3/commitments/{commitmentId}
