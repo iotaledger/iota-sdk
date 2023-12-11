@@ -305,9 +305,9 @@ pub async fn mnemonic_command(output_file_name: Option<String>, output_stdout: O
 
 pub async fn node_info_command(storage_path: &Path) -> Result<Wallet, Error> {
     let wallet = unlock_wallet(storage_path, None, None).await?;
-    let node_info = wallet.client().get_info().await?;
+    let node_info = serde_json::to_string_pretty(&wallet.client().get_info().await?)?;
 
-    println_log_info!("Current node info: {}", serde_json::to_string_pretty(&node_info)?);
+    println_log_info!("Current node info: {node_info}");
 
     Ok(wallet)
 }
