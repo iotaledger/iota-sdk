@@ -13,7 +13,7 @@ pub use self::options::SyncOptions;
 use crate::{
     client::secret::SecretManage,
     types::block::{
-        address::{AccountAddress, Address, Bech32Address, NftAddress, ToBech32Ext},
+        address::{AccountAddress, Address, Bech32Address, NftAddress},
         output::{FoundryId, Output, OutputId, OutputMetadata},
     },
     wallet::{
