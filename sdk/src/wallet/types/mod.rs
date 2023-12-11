@@ -21,7 +21,7 @@ use crate::{
     types::{
         api::core::OutputWithMetadataResponse,
         block::{
-            output::{Output, OutputId, OutputMetadata},
+            output::{Output, OutputId, OutputIdProof, OutputMetadata},
             payload::signed_transaction::{dto::SignedTransactionPayloadDto, SignedTransactionPayload, TransactionId},
             protocol::{CommittableAgeRange, ProtocolParameters},
             slot::SlotIndex,
@@ -42,6 +42,8 @@ pub struct OutputData {
     pub metadata: OutputMetadata,
     /// The actual Output
     pub output: Output,
+    /// The output ID proof
+    pub output_id_proof: OutputIdProof,
     /// If an output is spent
     pub is_spent: bool,
     /// Network ID
