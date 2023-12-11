@@ -6,7 +6,11 @@ use iota_sdk::types::{
         CommitteeResponse, CongestionResponse, InfoResponse, IssuanceBlockHeaderResponse, ManaRewardsResponse,
         RoutesResponse, UtxoChangesResponse, ValidatorResponse, ValidatorsResponse,
     },
-    block::{output::OutputMetadata, slot::SlotCommitment, BlockDto, BlockId},
+    block::{
+        output::{OutputMetadata, OutputWithMetadata},
+        slot::SlotCommitment,
+        BlockDto, BlockId,
+    },
 };
 use packable::{
     error::{UnexpectedEOF, UnpackError},
@@ -75,7 +79,7 @@ fn responses() {
     json_response::<OutputMetadata>("get-output-metadata-by-id-response-unspent-example.json").unwrap();
     json_response::<OutputMetadata>("get-output-metadata-by-id-response-spent-example.json").unwrap();
     // GET /api/core/v3/outputs/{outputId}/full
-    // json_response("get-full-output-metadata-example.json").unwrap();
+    json_response::<OutputWithMetadata>("get-full-output-metadata-example.json").unwrap();
     // GET /api/core/v3/commitments/{commitmentId}
     json_response::<SlotCommitment>("get-commitment-response-example.json").unwrap();
     // GET /api/core/v3/commitments/{commitmentId}/utxo-changes

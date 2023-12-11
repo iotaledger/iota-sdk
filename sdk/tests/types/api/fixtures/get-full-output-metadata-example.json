@@ -1,32 +1,40 @@
 {
-    "output": {
-      "type": 3,
-      "amount": "1000",
-      "unlockConditions": [
-        {
+  "output": {
+    "type": 3,
+    "amount": "1000",
+    "unlockConditions": [
+      {
+        "type": 0,
+        "address": {
           "type": 0,
-          "address": {
-            "type": 0,
-            "pubKeyHash": "0x8eaf87ac1f52eb05f2c7c0c15502df990a228838dc37bd18de9503d69afd257d"
-          }
+          "pubKeyHash": "0x8eaf87ac1f52eb05f2c7c0c15502df990a228838dc37bd18de9503d69afd257d"
         }
-      ],
-      "mana": "2000"
-    },
-    "outputIdProof": {
-      "slot": 20,
-      "outputIndex": 0,
-      "transactionCommitment": "0x897dr69bfa60c8cf80afd730741862d200405d5df7cabfe9b564361dce1f7036",
-      "outputCommitmentProof": "0xd3a0a0c76ab2d9b406a32c30c43e102fe0f39a12a3f6c1e3b19d239db2f18d75"
-    },
-    "metadata": {
-      "blockId": "0xd3a0a0c76ab2d9b406a32c30c43e102fe0f39a12a3f6c1e3b19d239db2f18d75",
-      "transactionId": "0x1c52e8e630d1c6e45ab6f46c63d8d6cb02e6c2ed6e31b6c97d6f5c5f5a5d5c5b",
-      "outputIndex": 3,
-      "isSpent": true,
-      "commitmentIdSpent": "0x4b91c935926c77d0ac9b4a569c3eb3b0f0c9918f2d4f4d9bb1c7dfc19b41e4c2",
-      "transactionIdSpent": "0x1ee46e19f4219ee65afc10227d0ca22753f76ef32d1e922e5cbe3fbc9b5a5298",
-      "includedCommitmentId": "0x7c62d9b9ed3c1f3ef942a7ea17ec1270d77c109f0ba57b6c2d2b9e9fb3e69a3a",
-      "latestCommitmentId": "0x7c62d9b9ed3c1f3ef942a7ea17ec1270d77c109f0ba57b6c2d2b9e9fb3e69a3a"
+      }
+    ],
+    "mana": "2000"
+  },
+  "outputIdProof": {
+    "slot": 1893592032,
+    "outputIndex": 0,
+    "transactionCommitment": "0xa0687905318860e64db6932d8423bf7a4418627baee62be8089d5f48aaa1af3a",
+    "outputCommitmentProof": {
+      "type": 2,
+      "hash": "0x7f9289b104a55e6fb93d60d70f6e85c9706c761b05ccc034f76b465837ca6070"
     }
+  },
+  "metadata": {
+    "outputId": "0x3130f21c723fa597805763739f3a2a40b674af6b4071ef0494331b644a7e4d52000000001300",
+    "blockId": "0x19e589687082d8f535779df3244908ad6a7b380906fb7ae24efb5fad8a5cfb92a8f8d9a3",
+    "included": {
+      "slot": 5,
+      "transactionId": "0x3e766157614a3a0e13dbb937b5fb1ef5d1555479c19df80445d03a6710f39d75668bd326",
+      "commitmentId": "0x7387ebe23a3ac1732fcdb6cef77fc003e1fa6e2dad89dd664df249d6aa2dbdc157dec2c6"
+    },
+    "spent": {
+      "slot": 8,
+      "transactionId": "0x3896f1ede7cbdacbbb4b17f13e953ad45ce0969ea34cc766b5dafe2a15b3e46f998ef4e5",
+      "commitmentId": "0x26fa9fcbddcf944ced3fd16a73d9c8b2b49dc54dba7629b02da69f7e01249063e7398b2c"
+    },
+    "latestCommitmentId": "0x42a88617c2c4ba2b58f82c8b85524720cdbe3642401e7c613f215658d617c569d1219909"
   }
+}
