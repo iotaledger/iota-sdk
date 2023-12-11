@@ -21,6 +21,7 @@ use crate::{
     types::block::{
         address::{AccountAddress, Address, NftAddress},
         input::INPUT_COUNT_RANGE,
+        mana::ManaAllotment,
         output::{
             AccountOutput, ChainId, FoundryOutput, NativeTokensBuilder, NftOutput, Output, OutputId, OUTPUT_COUNT_RANGE,
         },
@@ -45,6 +46,7 @@ pub struct InputSelection {
     slot_index: SlotIndex,
     requirements: Vec<Requirement>,
     automatically_transitioned: HashSet<ChainId>,
+    mana_allotments: Vec<ManaAllotment>,
 }
 
 /// Result of the input selection algorithm.
@@ -181,6 +183,7 @@ impl InputSelection {
             slot_index: SlotIndex::from(0),
             requirements: Vec::new(),
             automatically_transitioned: HashSet::new(),
+            mana_allotments: Vec::new(),
         }
     }
 
