@@ -53,7 +53,7 @@ fn responses() {
     // GET /api/core/v3/committee
     json_response::<CommitteeResponse>("get-committee-example.json").unwrap();
     // GET /api/core/v3/blocks/issuance
-    // json_response::<IssuanceBlockHeaderResponse>("get-buildingBlock-response-example.json").unwrap();
+    json_response::<IssuanceBlockHeaderResponse>("get-buildingBlock-response-example.json").unwrap();
     // POST /api/core/v3/blocks
     // json_response::<BlockId>("post-blocks-response-example.json").unwrap();
     // GET /api/core/v3/blocks/{blockId}

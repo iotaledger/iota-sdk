@@ -1,23 +1,24 @@
 {
-    "strongParents": [
-      "0x4f746934d0075179a37ca3e807b7e793ec4ec9189ba31c9ad092d7497b01118c1000000000000000",
-      "0x59daaaba1cd10cd268966376e17710d100c90826fe258753d461acac99b7e3341500000000000000"
-    ],
-    "weakParents": [
-      "0xebb058f1f1c8f1ac6508465deeee1dd090396f9e6e2b5c103eef5583f20a0c133a00000000000000",
-      "0xb173e2d2b6f72600f00da84492ddb6eadee703dc39fb846725828059272093fb3b00000000000000"
-    ],
-    "shallowLikeParents": [
-      "0xdbf86c778d69f413296c2d4d3086d76c74bf4d719e6e95c03a3d9a955ed39bcf3e00000000000000",
-      "0xf15b2ec698e396c9d2e69bc753246631aedebb657da09ba0e0c8d42518a1e8953e00000000000000"
-    ],
-    "latestFinalizedSlot": 1422,
-    "commitment": {
-      "protocolVersion": 3,
-      "slot": 1432,
-      "previousCommitmentId": "0xbf07dc16986166953f5a72c19d78642aab6cbde63964a2369ec3d425144eb42b3800000000000000",
-      "rootsId": "0xa4dd36465af63d495d35a05f592d42a51511c153e1bae8fad00453c8cbb48727",
-      "cumulativeWeight": "45678",
-      "referenceManaCost": "12345"
-    }
+  "strongParents": [
+    "0x0482f0eba39a23c9a13072c93d828b55543132c47f5f57514d9e55535e9d4f4f35000000",
+    "0xae7c4f55a6db8bf4841e4a38f06d32ab9bd88b927a6ba0bc19bcb19c625ff8b63c000000"
+  ],
+  "weakParents": [
+    "0x67e57f7446b5a6f152afabb17c6077c26512278a275310a7ff2fa513f4e0b7383d000000",
+    "0x2e65c319e9a2c4a6ff7195f9a1ed896c43d0dded1b906979316d502b158965c23d000000"
+  ],
+  "shallowLikeParents": [
+    "0xe5fe5231630afaaba609af76787ff1ec9c6088dd17e9cf922152b3facd7bd5883e000000",
+    "0xed4b771b5413f5118dd80021ca07fb727e4c54eec9d28d6566c28cc81e7d267c3f000000"
+  ],
+  "latestParentBlockIssuingTime": "1690879505000000000",
+  "latestFinalizedSlot": 1422,
+  "latestCommitment": {
+    "protocolVersion": 3,
+    "slot": 1432,
+    "previousCommitmentId": "0xc0300d55fe2cdc93191e52685da009f53d40883ae111291e550eed4e7eb7752746010000",
+    "rootsId": "0x6a8f424929e1f08d87a204efc8a60499b789465aaa28178b77debe75cc2915d3",
+    "cumulativeWeight": "45678",
+    "referenceManaCost": "12345"
   }
+}
