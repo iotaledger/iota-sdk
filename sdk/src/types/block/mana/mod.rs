@@ -5,7 +5,7 @@ mod allotment;
 mod parameters;
 mod rewards;
 
-pub(crate) use self::allotment::{dto::ManaAllotmentDto, verify_mana_allotments_sum, ManaAllotmentCount};
+pub(crate) use self::allotment::{verify_mana_allotments_sum, ManaAllotmentCount};
 pub use self::{
     allotment::{ManaAllotment, ManaAllotments},
     parameters::ManaParameters,
