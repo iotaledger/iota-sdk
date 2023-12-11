@@ -57,6 +57,10 @@ where
             if let Some(capabilities) = options.capabilities {
                 builder = builder.add_capabilities(capabilities.capabilities_iter());
             }
+
+            if let Some(mana_allotments) = options.mana_allotments {
+                builder = builder.with_mana_allotments(mana_allotments);
+            }
         }
 
         let transaction = builder.finish_with_params(&protocol_parameters)?;
