@@ -185,6 +185,7 @@ class ManaParameters:
         decay_factors_exponent: The scaling of decay_factors expressed as an exponent of 2.
         decay_factor_epochs_sum: An integer approximation of the sum of decay over epochs.
         decay_factor_epochs_sum_exponent: The scaling of decay_factor_epochs_sum expressed as an exponent of 2.
+        annual_decay_factor_percentage: Decay factor for 1 year.
     """
     bits_count: int
     generation_rate: int
@@ -193,6 +194,7 @@ class ManaParameters:
     decay_factors_exponent: int
     decay_factor_epochs_sum: int
     decay_factor_epochs_sum_exponent: int
+    annual_decay_factor_percentage: int
 
 
 @json
@@ -252,6 +254,7 @@ class ProtocolParameters:
         version_signaling_parameters: The version signaling parameters.
         rewards_parameters: Rewards Parameters defines the parameters that are used to calculate Mana rewards.
         target_committee_size: Defines the target size of the committee. If there's fewer candidates the actual committee size could be smaller in a given epoch.
+        chain_switching_threshold: Defines the number of heavier slots that a chain needs to be ahead of the current chain to be considered for switching.
     """
     type: int
     version: int
@@ -281,6 +284,7 @@ class ProtocolParameters:
     version_signaling_parameters: VersionSignalingParameters
     rewards_parameters: RewardsParameters
     target_committee_size: int
+    chain_switching_threshold: int
 
 
 @json
