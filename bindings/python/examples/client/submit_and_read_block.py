@@ -11,7 +11,7 @@
 # Make sure you have first installed it with `pip install iota_sdk`
 import os
 from dotenv import load_dotenv
-from iota_sdk import BasicBlock, Bip44, Client, CoinType, hex_to_utf8, utf8_to_hex, TaggedDataPayload, MnemonicSecretManager, SecretManager
+from iota_sdk import BasicBlockBody, Bip44, Client, CoinType, hex_to_utf8, utf8_to_hex, TaggedDataPayload, MnemonicSecretManager, SecretManager
 
 load_dotenv()
 
@@ -92,7 +92,7 @@ metadata = client.get_block_metadata(block_id)
 
 # Get the whole block
 block = client.get_block(block_id).block
-if isinstance(block, BasicBlock):
+if isinstance(block, BasicBlockBody):
     payload_out = block.payload
     tag_hex_out = block.payload.tag
     message_hex_out = block.payload.data

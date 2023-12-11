@@ -3,7 +3,7 @@ import json
 import os
 from dataclasses import asdict
 from dotenv import load_dotenv
-from iota_sdk import BasicBlock, Bip44, CoinType, Client, utf8_to_hex, hex_to_utf8, TaggedDataPayload, MnemonicSecretManager, SecretManager
+from iota_sdk import BasicBlockBody, Bip44, CoinType, Client, utf8_to_hex, hex_to_utf8, TaggedDataPayload, MnemonicSecretManager, SecretManager
 
 load_dotenv()
 
@@ -34,7 +34,7 @@ print(f'Data block sent: {os.environ["EXPLORER_URL"]}/block/{block_id}')
 
 block = client.get_block(block_id).block
 
-if isinstance(block, BasicBlock):
+if isinstance(block, BasicBlockBody):
     print(f'Block data: {json.dumps(asdict(block), indent=4)}')
 
     payload = block.payload

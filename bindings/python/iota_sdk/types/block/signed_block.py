@@ -9,8 +9,8 @@ from iota_sdk.utils import Utils
 from iota_sdk.types.common import HexStr, json, SlotIndex
 from iota_sdk.types.node_info import ProtocolParameters
 from iota_sdk.types.signature import Signature
-from iota_sdk.types.block.basic import BasicBlock
-from iota_sdk.types.block.validation import ValidationBlock
+from iota_sdk.types.block.basic import BasicBlockBody
+from iota_sdk.types.block.validation import ValidationBlockBody
 
 
 @json
@@ -26,7 +26,7 @@ class SignedBlock:
         slot_commitment_id: The identifier of the slot to which this block commits.
         latest_finalized_slot: The slot index of the latest finalized slot.
         issuer_id: The identifier of the account that issued this block.
-        block: Holds either a `BasicBlock` or a `ValidationBlock`.
+        body: Holds either a `BasicBlockBody` or a `ValidationBlockBody`.
         signature: The Block signature.
     """
     protocol_version: int
@@ -39,7 +39,7 @@ class SignedBlock:
     slot_commitment_id: HexStr
     latest_finalized_slot: SlotIndex
     issuer_id: HexStr
-    block: Block
+    body: BlockBody
     signature: Signature
 
     def id(self, params: ProtocolParameters) -> HexStr:
@@ -73,7 +73,7 @@ class UnsignedBlock:
     slot_commitment_id: HexStr
     latest_finalized_slot: SlotIndex
     issuer_id: HexStr
-    block: Block
+    body: BlockBody
 
 
-Block: TypeAlias = Union[BasicBlock, ValidationBlock]
+BlockBody: TypeAlias = Union[BasicBlockBody, ValidationBlockBody]
