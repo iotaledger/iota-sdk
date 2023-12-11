@@ -209,3 +209,100 @@ async fn wallet_address_generation_ledger() -> Result<()> {
 
 //     tear_down(storage_path)
 // }
+
+#[tokio::test]
+async fn wallet_address_generation_custom_secret_manager() -> Result<()> {
+    let storage_path = "test-storage/wallet_address_generation_custom_secret_manager";
+    setup(storage_path)?;
+
+    #[derive(Debug, serde::Serialize, serde::Deserialize)]
+    pub struct CustomSecretManager {
+        pub public_key: String,
+        // Will obviously be invalid, just to have something
+        pub signature: String,
+    }
+
+    #[async_trait::async_trait]
+    impl iota_sdk::client::secret::Generate<crypto::signatures::ed25519::PublicKey> for CustomSecretManager {
+        type Options = ();
+
+        async fn generate(
+            &self,
+            _options: &Self::Options,
+        ) -> iota_sdk::client::Result<crypto::signatures::ed25519::PublicKey> {
+            Ok(crypto::signatures::ed25519::PublicKey::try_from_bytes(
+                prefix_hex::decode(&self.public_key)?,
+            )?)
+        }
+    }
+
+    #[async_trait::async_trait]
+    impl iota_sdk::client::secret::Sign<iota_sdk::types::block::signature::Ed25519Signature> for CustomSecretManager {
+        type Options = ();
+
+        async fn sign(
+            &self,
+            _msg: &[u8],
+            _options: &Self::Options,
+        ) -> iota_sdk::client::Result<iota_sdk::types::block::signature::Ed25519Signature> {
+            Ok(iota_sdk::types::block::signature::Ed25519Signature::try_from_bytes(
+                prefix_hex::decode(&self.public_key)?,
+                prefix_hex::decode(&self.signature)?,
+            )?)
+        }
+    }
+    impl iota_sdk::client::secret::SignTransaction for CustomSecretManager {}
+
+    impl iota_sdk::client::secret::SecretManagerConfig for CustomSecretManager {
+        type Config = String;
+
+        fn to_config(&self) -> Option<Self::Config> {
+            Some(serde_json::to_string(self).unwrap())
+        }
+
+        fn from_config(config: &Self::Config) -> iota_sdk::client::Result<Self> {
+            Ok(serde_json::from_str(config)?)
+        }
+    }
+
+    let custom_secret_manager = CustomSecretManager {
+        public_key: "0x503b258b32c586e2c66c99d3af45086d1c96fbcd86b3d04f464081589d1a51b2".to_string(),
+        signature: "0xbb36dc62c92d35175b6ccee15341a776d188a71c50fed86204ca01555cd344303611a836c546c7fcfa983af75fe941ae1533a10d692ccd0008578b351b170f03".to_string(),
+    };
+
+    assert_eq!(
+        Ed25519Address::from_public_key_bytes(
+            custom_secret_manager
+                .generate::<crypto::signatures::ed25519::PublicKey>(&())
+                .await?
+                .to_bytes()
+        ),
+        <Ed25519Address as std::str::FromStr>::from_str(
+            "0x69da7d3cf43670a6585763eb05d4a9272d424bcc921d550fd726a183501a8539"
+        )
+        .unwrap()
+    );
+
+    let client_options = ClientOptions::new().with_node(NODE_LOCAL)?;
+
+    #[allow(unused_mut)]
+    let mut wallet_builder = Wallet::<CustomSecretManager>::builder()
+        .with_secret_manager(custom_secret_manager)
+        .with_client_options(client_options);
+
+    #[cfg(feature = "storage")]
+    {
+        wallet_builder = wallet_builder.with_storage_path(storage_path);
+    }
+    let wallet = wallet_builder.finish().await?;
+
+    assert_eq!(
+        *wallet.address().await.inner().as_ed25519(),
+        <Ed25519Address as std::str::FromStr>::from_str(
+            "0x69da7d3cf43670a6585763eb05d4a9272d424bcc921d550fd726a183501a8539"
+        )
+        .unwrap()
+    );
+
+    tear_down(storage_path)
+}
