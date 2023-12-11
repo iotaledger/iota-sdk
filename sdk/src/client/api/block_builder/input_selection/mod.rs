@@ -21,7 +21,7 @@ use crate::{
     types::block::{
         address::{AccountAddress, Address, NftAddress},
         input::INPUT_COUNT_RANGE,
-        mana::{ManaAllotment, ManaAllotments},
+        mana::ManaAllotment,
         output::{
             AccountOutput, ChainId, FoundryOutput, NativeTokensBuilder, NftOutput, Output, OutputId, OUTPUT_COUNT_RANGE,
         },
@@ -218,8 +218,8 @@ impl InputSelection {
     }
 
     /// Sets the mana allotments sum of an [`InputSelection`].
-    pub fn with_mana_allotments(mut self, mana_allotments: ManaAllotments) -> Self {
-        self.mana_allotments = mana_allotments.iter().map(ManaAllotment::mana).sum();
+    pub fn with_mana_allotments<'a>(mut self, mana_allotments: impl Iterator<Item = &'a ManaAllotment>) -> Self {
+        self.mana_allotments = mana_allotments.map(ManaAllotment::mana).sum();
         self
     }
 

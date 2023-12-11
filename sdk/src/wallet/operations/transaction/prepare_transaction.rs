@@ -88,6 +88,7 @@ where
                     .map(|inputs| HashSet::from_iter(inputs.clone())),
                 remainder_address,
                 options.as_ref().and_then(|options| options.burn.as_ref()),
+                options.as_ref().and_then(|options| options.mana_allotments.clone()),
             )
             .await?;
 
