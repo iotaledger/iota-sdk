@@ -410,11 +410,12 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         is_start_set = 'input_range_start' in options
         is_end_set = 'input_range_end' in options
         if is_start_set or is_end_set:
-            options['range'] = {}
+            options['input_range'] = {}
             if is_start_set:
-                options['range']['start'] = options.pop('start')
+                options['input_range']['start'] = options.pop(
+                    'input_range_start')
             if is_end_set:
-                options['range']['end'] = options.pop('end')
+                options['input_range']['end'] = options.pop('input_range_end')
 
         options = humps.camelize(options)
 
