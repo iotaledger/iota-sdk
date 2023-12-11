@@ -1,13 +1,10 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use std::collections::HashMap;
-
 use instant::Instant;
 
 use crate::{
     client::secret::SecretManage,
-    types::block::address::Address,
     wallet::{
         constants::PARALLEL_REQUESTS_AMOUNT,
         task,
@@ -25,7 +22,7 @@ where
     pub(crate) async fn get_outputs_from_address_output_ids(
         &self,
         addresses_with_unspent_outputs: Vec<AddressWithUnspentOutputs>,
-    ) -> crate::wallet::Result<(Vec<(AddressWithUnspentOutputs, Vec<OutputData>)>)> {
+    ) -> crate::wallet::Result<Vec<(AddressWithUnspentOutputs, Vec<OutputData>)>> {
         log::debug!("[SYNC] start get_outputs_from_address_output_ids");
         let address_outputs_start_time = Instant::now();
 
