@@ -55,7 +55,7 @@ use crate::{
         Error,
     },
     types::block::{
-        address::{Address, AnchorAddress, Ed25519Address},
+        address::{Address, Ed25519Address},
         core::UnsignedBlock,
         output::Output,
         payload::SignedTransactionPayload,
@@ -567,17 +567,22 @@ where
             .required_address(slot_index, protocol_parameters.committable_age_range())?
             .ok_or(crate::client::Error::ExpirationDeadzone)?;
 
+        let required_address = if let Address::Restricted(restricted) = &required_address {
+            restricted.address()
+        } else {
+            &required_address
+        };
+
         // Check if we already added an [Unlock] for this address
         match block_indexes.get(&required_address) {
             // If we already have an [Unlock] for this address, add a [Unlock] based on the address type
             Some(block_index) => match required_address {
-                Address::Ed25519(_ed25519) => {
+                Address::Ed25519(_) | Address::ImplicitAccountCreation(_) => {
                     blocks.push(Unlock::Reference(ReferenceUnlock::new(*block_index as u16)?));
                 }
-                Address::Account(_account) => blocks.push(Unlock::Account(AccountUnlock::new(*block_index as u16)?)),
-                Address::Nft(_nft) => blocks.push(Unlock::Nft(NftUnlock::new(*block_index as u16)?)),
-                Address::Anchor(_) => Err(BlockError::UnsupportedAddressKind(AnchorAddress::KIND))?,
-                _ => todo!("What do we do here?"),
+                Address::Account(_) => blocks.push(Unlock::Account(AccountUnlock::new(*block_index as u16)?)),
+                Address::Nft(_) => blocks.push(Unlock::Nft(NftUnlock::new(*block_index as u16)?)),
+                _ => Err(BlockError::UnsupportedAddressKind(required_address.kind()))?,
             },
             None => {
                 // We can only sign ed25519 addresses and block_indexes needs to contain the account or nft
@@ -585,7 +590,6 @@ where
                 // than the current block index
                 match &required_address {
                     Address::Ed25519(_) | Address::ImplicitAccountCreation(_) => {}
-                    Address::Restricted(restricted) if restricted.address().is_ed25519() => {}
                     _ => Err(InputSelectionError::MissingInputWithEd25519Address)?,
                 }
 
@@ -598,7 +602,7 @@ where
 
                 // Add the ed25519 address to the block_indexes, so it gets referenced if further inputs have
                 // the same address in their unlock condition
-                block_indexes.insert(required_address, current_block_index);
+                block_indexes.insert(required_address.clone(), current_block_index);
             }
         }
 

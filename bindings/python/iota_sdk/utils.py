@@ -18,7 +18,7 @@ from iota_sdk.types.transaction_data import InputSigningData
 
 # Required to prevent circular import
 if TYPE_CHECKING:
-    from iota_sdk.types.block.signed_block import SignedBlock
+    from iota_sdk.types.block.block import Block
 
 # pylint: disable=too-many-public-methods
 
@@ -163,7 +163,7 @@ class Utils():
         })
 
     @staticmethod
-    def block_id(block: SignedBlock, params: ProtocolParameters) -> HexStr:
+    def block_id(block: Block, params: ProtocolParameters) -> HexStr:
         """ Return a block ID (Blake2b256 hash of block bytes) from a block.
         """
         return _call_method('blockId', {
