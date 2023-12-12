@@ -14,7 +14,7 @@ use crate::{
     types::block::{
         address::Bech32Address,
         core::Parents,
-        output::{Output, OutputId, OutputMetadata, OutputWithMetadata},
+        output::{Output, OutputId, OutputIdProof, OutputMetadata, OutputWithMetadata},
         payload::signed_transaction::TransactionId,
         protocol::{ProtocolParameters, ProtocolParametersHash},
         semantic::TransactionFailureReason,
@@ -277,6 +277,9 @@ pub struct IssuanceBlockHeaderResponse {
     /// Blocks that are directly referenced to adjust opinion.
     #[serde(default, skip_serializing_if = "BTreeSet::is_empty")]
     pub shallow_like_parents: BTreeSet<BlockId>,
+    // Latest issuing time of the returned parents.
+    #[serde(with = "string")]
+    pub latest_parent_block_issuing_time: u64,
     /// The slot index of the latest finalized slot.
     pub latest_finalized_slot: SlotIndex,
     /// The latest slot commitment.
@@ -307,7 +310,7 @@ impl IssuanceBlockHeaderResponse {
 #[serde(rename_all = "camelCase")]
 pub struct CongestionResponse {
     /// The slot index for which the congestion estimate is provided.
-    pub slot_index: SlotIndex,
+    pub slot: SlotIndex,
     /// Indicates if a node is ready to issue a block in a current congestion or should wait.
     pub ready: bool,
     /// The cost in mana for issuing a block in a current congestion estimated based on RMC and slot index.
@@ -521,7 +524,15 @@ pub struct RoutesResponse {
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct UtxoChangesResponse {
-    pub index: u32,
+    pub commitment_id: SlotCommitmentId,
     pub created_outputs: Vec<OutputId>,
     pub consumed_outputs: Vec<OutputId>,
+}
+
+/// Contains the generic [`Output`] with associated [`OutputIdProof`].
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct OutputResponse {
+    pub output: Output,
+    pub output_id_proof: OutputIdProof,
 }

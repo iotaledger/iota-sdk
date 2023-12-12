@@ -41,7 +41,7 @@ where
 
         // Update account with new foundries.
         for foundry in results.into_iter().flatten() {
-            if let Output::Foundry(foundry) = foundry {
+            if let Output::Foundry(foundry) = foundry.output {
                 foundries.insert(foundry.id(), foundry);
             }
         }

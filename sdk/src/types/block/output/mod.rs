@@ -7,6 +7,7 @@ mod delegation;
 mod metadata;
 mod native_token;
 mod output_id;
+mod output_id_proof;
 mod state_transition;
 mod storage_score;
 mod token_scheme;
@@ -41,6 +42,7 @@ pub use self::{
     native_token::{NativeToken, NativeTokens, NativeTokensBuilder, TokenId},
     nft::{NftId, NftOutput, NftOutputBuilder},
     output_id::OutputId,
+    output_id_proof::{HashableNode, LeafHash, OutputCommitmentProof, OutputIdProof, ValueHash},
     state_transition::{StateTransitionError, StateTransitionVerifier},
     storage_score::{StorageScore, StorageScoreParameters},
     token_scheme::{SimpleTokenScheme, TokenScheme},
@@ -54,7 +56,7 @@ pub(crate) use self::{
 };
 use crate::types::block::{
     address::Address,
-    protocol::{ProtocolParameters, WorkScore, WorkScoreParameters},
+    protocol::{CommittableAgeRange, ProtocolParameters, WorkScore, WorkScoreParameters},
     semantic::SemanticValidationContext,
     slot::SlotIndex,
     Error,
@@ -75,17 +77,27 @@ pub enum OutputBuilderAmount {
     MinimumAmount(StorageScoreParameters),
 }
 
-/// Contains the generic [`Output`] with associated [`OutputMetadata`].
+/// Contains the generic [`Output`] with associated [`OutputIdProof`] and [`OutputMetadata`].
 #[derive(Clone, Debug)]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize),
+    serde(rename_all = "camelCase")
+)]
 pub struct OutputWithMetadata {
-    pub(crate) output: Output,
-    pub(crate) metadata: OutputMetadata,
+    pub output: Output,
+    pub output_id_proof: OutputIdProof,
+    pub metadata: OutputMetadata,
 }
 
 impl OutputWithMetadata {
     /// Creates a new [`OutputWithMetadata`].
-    pub fn new(output: Output, metadata: OutputMetadata) -> Self {
-        Self { output, metadata }
+    pub fn new(output: Output, output_id_proof: OutputIdProof, metadata: OutputMetadata) -> Self {
+        Self {
+            output,
+            output_id_proof,
+            metadata,
+        }
     }
 
     /// Returns the [`Output`].
@@ -96,6 +108,16 @@ impl OutputWithMetadata {
     /// Consumes self and returns the [`Output`].
     pub fn into_output(self) -> Output {
         self.output
+    }
+
+    /// Returns the [`OutputIdProof`].
+    pub fn output_id_proof(&self) -> &OutputIdProof {
+        &self.output_id_proof
+    }
+
+    /// Consumes self and returns the [`OutputIdProof`].
+    pub fn into_output_id_proof(self) -> OutputIdProof {
+        self.output_id_proof
     }
 
     /// Returns the [`OutputMetadata`].
@@ -269,46 +291,26 @@ impl Output {
 
     crate::def_is_as_opt!(Output: Basic, Account, Foundry, Nft, Delegation, Anchor);
 
-    /// Returns the address that is required to unlock this [`Output`] and the account or nft address that gets
-    /// unlocked by it, if it's an account or nft.
-    /// If no `account_transition` has been provided, assumes a state transition.
-    pub fn required_and_unlocked_address(
+    /// Returns the address that is required to unlock this [`Output`].
+    pub fn required_address(
         &self,
-        slot_index: SlotIndex,
-        output_id: &OutputId,
-    ) -> Result<(Address, Option<Address>), Error> {
-        match self {
-            Self::Basic(output) => Ok((
-                output
-                    .unlock_conditions()
-                    .locked_address(output.address(), slot_index)
-                    .clone(),
-                None,
-            )),
-            Self::Account(output) => Ok((
-                output
-                    .unlock_conditions()
-                    .locked_address(output.address(), slot_index)
-                    .clone(),
-                Some(Address::Account(output.account_address(output_id))),
-            )),
-            Self::Anchor(_) => Err(Error::UnsupportedOutputKind(AnchorOutput::KIND)),
-            Self::Foundry(output) => Ok((Address::Account(*output.account_address()), None)),
-            Self::Nft(output) => Ok((
-                output
-                    .unlock_conditions()
-                    .locked_address(output.address(), slot_index)
-                    .clone(),
-                Some(Address::Nft(output.nft_address(output_id))),
-            )),
-            Self::Delegation(output) => Ok((
-                output
-                    .unlock_conditions()
-                    .locked_address(output.address(), slot_index)
-                    .clone(),
-                None,
-            )),
-        }
+        slot_index: impl Into<Option<SlotIndex>>,
+        committable_age_range: CommittableAgeRange,
+    ) -> Result<Option<Address>, Error> {
+        Ok(match self {
+            Self::Basic(output) => output
+                .unlock_conditions()
+                .locked_address(output.address(), slot_index, committable_age_range)?
+                .cloned(),
+            Self::Account(output) => Some(output.address().clone()),
+            Self::Anchor(_) => return Err(Error::UnsupportedOutputKind(AnchorOutput::KIND)),
+            Self::Foundry(output) => Some(Address::Account(*output.account_address())),
+            Self::Nft(output) => output
+                .unlock_conditions()
+                .locked_address(output.address(), slot_index, committable_age_range)?
+                .cloned(),
+            Self::Delegation(output) => Some(output.address().clone()),
+        })
     }
 
     ///

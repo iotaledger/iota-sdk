@@ -233,9 +233,9 @@ impl From<&BasicOutput> for BasicOutputBuilder {
 #[packable(unpack_error = Error)]
 #[packable(unpack_visitor = ProtocolParameters)]
 pub struct BasicOutput {
-    /// Amount of IOTA coins to deposit with this output.
+    /// Amount of IOTA coins held by the output.
     amount: u64,
-    /// Amount of stored Mana held by this output.
+    /// Amount of stored Mana held by the output.
     mana: u64,
     /// Define how the output can be unlocked in a transaction.
     #[packable(verify_with = verify_unlock_conditions_packable)]
@@ -248,9 +248,8 @@ pub struct BasicOutput {
 impl BasicOutput {
     /// The [`Output`] kind of an [`BasicOutput`].
     pub const KIND: u8 = 0;
-
     /// The set of allowed [`UnlockCondition`]s for an [`BasicOutput`].
-    const ALLOWED_UNLOCK_CONDITIONS: UnlockConditionFlags = UnlockConditionFlags::ADDRESS
+    pub const ALLOWED_UNLOCK_CONDITIONS: UnlockConditionFlags = UnlockConditionFlags::ADDRESS
         .union(UnlockConditionFlags::STORAGE_DEPOSIT_RETURN)
         .union(UnlockConditionFlags::TIMELOCK)
         .union(UnlockConditionFlags::EXPIRATION);
@@ -319,8 +318,21 @@ impl BasicOutput {
         unlock: &Unlock,
         context: &mut SemanticValidationContext<'_>,
     ) -> Result<(), TransactionFailureReason> {
+        let slot_index = context
+            .transaction
+            .context_inputs()
+            .iter()
+            .find_map(|c| c.as_commitment_opt().map(|c| c.slot_index()));
+
         self.unlock_conditions()
-            .locked_address(self.address(), context.transaction.creation_slot())
+            .locked_address(
+                self.address(),
+                slot_index,
+                context.protocol_parameters.committable_age_range(),
+            )
+            .map_err(|_| TransactionFailureReason::InvalidCommitmentContextInput)?
+            // because of expiration the input can't be unlocked at this time
+            .ok_or(TransactionFailureReason::SemanticValidationFailed)?
             .unlock(unlock, context)
     }
 

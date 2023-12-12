@@ -19,18 +19,19 @@ pub use self::{burn::Burn, error::Error, requirement::Requirement};
 use crate::{
     client::{api::types::RemainderData, secret::types::InputSigningData},
     types::block::{
-        address::{AccountAddress, Address, AnchorAddress, NftAddress},
+        address::{AccountAddress, Address, NftAddress},
         input::INPUT_COUNT_RANGE,
         output::{
             AccountOutput, ChainId, FoundryOutput, NativeTokensBuilder, NftOutput, Output, OutputId, OUTPUT_COUNT_RANGE,
         },
         payload::signed_transaction::TransactionCapabilities,
-        protocol::ProtocolParameters,
+        protocol::{CommittableAgeRange, ProtocolParameters},
         slot::SlotIndex,
     },
 };
 
 /// Working state for the input selection algorithm.
+#[derive(Debug)]
 pub struct InputSelection {
     available_inputs: Vec<InputSigningData>,
     required_inputs: HashSet<OutputId>,
@@ -61,17 +62,19 @@ impl InputSelection {
     fn required_account_nft_addresses(&self, input: &InputSigningData) -> Result<Option<Requirement>, Error> {
         let required_address = input
             .output
-            .required_and_unlocked_address(self.slot_index, input.output_id())?
-            .0;
+            .required_address(self.slot_index, self.protocol_parameters.committable_age_range())?
+            .expect("expiration unlockable outputs already filtered out");
+
+        let required_address = if let Address::Restricted(restricted) = &required_address {
+            restricted.address()
+        } else {
+            &required_address
+        };
 
         match required_address {
-            Address::Ed25519(_) => Ok(None),
             Address::Account(account_address) => Ok(Some(Requirement::Account(*account_address.account_id()))),
             Address::Nft(nft_address) => Ok(Some(Requirement::Nft(*nft_address.nft_id()))),
-            Address::Anchor(_) => Err(Error::UnsupportedAddressType(AnchorAddress::KIND)),
-            Address::ImplicitAccountCreation(_) => Ok(None),
-            Address::Restricted(_) => Ok(None),
-            _ => todo!("What do we do here?"),
+            _ => Ok(None),
         }
     }
 
@@ -174,6 +177,7 @@ impl InputSelection {
             remainder_address: None,
             protocol_parameters,
             // TODO may want to make this mandatory at some point
+            // Should be set from a commitment context input
             slot_index: SlotIndex::from(0),
             requirements: Vec::new(),
             automatically_transitioned: HashSet::new(),
@@ -225,24 +229,38 @@ impl InputSelection {
             // PANIC: safe to unwrap as non basic/account/foundry/nft outputs are already filtered out.
             let unlock_conditions = input.output.unlock_conditions().unwrap();
 
-            if unlock_conditions.is_time_locked(self.slot_index) {
+            if unlock_conditions.is_timelocked(self.slot_index, self.protocol_parameters.min_committable_age()) {
                 return false;
             }
 
             let required_address = input
                 .output
                 // Account transition is irrelevant here as we keep accounts anyway.
-                .required_and_unlocked_address(self.slot_index, input.output_id())
+                .required_address(self.slot_index, self.protocol_parameters.committable_age_range())
                 // PANIC: safe to unwrap as non basic/account/foundry/nft outputs are already filtered out.
-                .unwrap()
-                .0;
+                .unwrap();
+
+            let required_address = match &required_address {
+                Some(address) => {
+                    if let Address::Restricted(restricted) = address {
+                        restricted.address()
+                    } else {
+                        address
+                    }
+                }
+                // Time in which no address can unlock the output because of an expiration unlock condition
+                None => return false,
+            };
 
             match required_address {
-                Address::ImplicitAccountCreation(implicit_account_creation) => self
-                    .addresses
-                    .contains(&Address::from(*implicit_account_creation.ed25519_address())),
-                Address::Restricted(restricted) => self.addresses.contains(restricted.address()),
-                _ => self.addresses.contains(&required_address),
+                Address::Anchor(_) => false,
+                Address::ImplicitAccountCreation(implicit_account_creation) => {
+                    self.required_inputs.contains(input.output_id())
+                        && self
+                            .addresses
+                            .contains(&Address::from(*implicit_account_creation.ed25519_address()))
+                }
+                _ => self.addresses.contains(required_address),
             }
         })
     }
@@ -251,6 +269,7 @@ impl InputSelection {
     pub(crate) fn sort_input_signing_data(
         mut inputs: Vec<InputSigningData>,
         slot_index: SlotIndex,
+        committable_age_range: CommittableAgeRange,
     ) -> Result<Vec<InputSigningData>, Error> {
         // initially sort by output to make it deterministic
         // TODO: rethink this, we only need it deterministic for tests, for the protocol it doesn't matter, also there
@@ -259,38 +278,42 @@ impl InputSelection {
         // filter for ed25519 address first
         let (mut sorted_inputs, account_nft_address_inputs): (Vec<InputSigningData>, Vec<InputSigningData>) =
             inputs.into_iter().partition(|input_signing_data| {
-                let (input_address, _) = input_signing_data
+                let required_address = input_signing_data
                     .output
-                    .required_and_unlocked_address(slot_index, input_signing_data.output_id())
-                    // PANIC: safe to unwrap, because we filtered irrelevant outputs out before
-                    .unwrap();
+                    .required_address(slot_index, committable_age_range)
+                    // PANIC: safe to unwrap as non basic/alias/foundry/nft outputs are already filtered out.
+                    .unwrap()
+                    .expect("expiration unlockable outputs already filtered out");
 
-                input_address.is_ed25519()
+                required_address.is_ed25519()
             });
 
         for input in account_nft_address_inputs {
-            let (input_address, _) = input
+            let required_address = input
                 .output
-                .required_and_unlocked_address(slot_index, input.output_id())?;
+                .required_address(slot_index, committable_age_range)?
+                .expect("expiration unlockable outputs already filtered out");
 
-            match sorted_inputs.iter().position(|input_signing_data| match input_address {
-                Address::Account(unlock_address) => {
-                    if let Output::Account(account_output) = &input_signing_data.output {
-                        *unlock_address.account_id()
-                            == account_output.account_id_non_null(input_signing_data.output_id())
-                    } else {
-                        false
+            match sorted_inputs
+                .iter()
+                .position(|input_signing_data| match required_address {
+                    Address::Account(unlock_address) => {
+                        if let Output::Account(account_output) = &input_signing_data.output {
+                            *unlock_address.account_id()
+                                == account_output.account_id_non_null(input_signing_data.output_id())
+                        } else {
+                            false
+                        }
                     }
-                }
-                Address::Nft(unlock_address) => {
-                    if let Output::Nft(nft_output) = &input_signing_data.output {
-                        *unlock_address.nft_id() == nft_output.nft_id_non_null(input_signing_data.output_id())
-                    } else {
-                        false
+                    Address::Nft(unlock_address) => {
+                        if let Output::Nft(nft_output) = &input_signing_data.output {
+                            *unlock_address.nft_id() == nft_output.nft_id_non_null(input_signing_data.output_id())
+                        } else {
+                            false
+                        }
                     }
-                }
-                _ => false,
-            }) {
+                    _ => false,
+                }) {
                 Some(position) => {
                     // Insert after the output we need
                     sorted_inputs.insert(position + 1, input);
@@ -310,13 +333,14 @@ impl InputSelection {
                     if let Some(account_or_nft_address) = account_or_nft_address {
                         // Check for existing outputs for this address, and insert before
                         match sorted_inputs.iter().position(|input_signing_data| {
-                            let (input_address, _) = input_signing_data
+                            let required_address = input_signing_data
                                 .output
-                                .required_and_unlocked_address(slot_index, input.output_id())
-                                // PANIC: safe to unwrap, because we filtered irrelevant outputs out before
-                                .unwrap();
+                                .required_address(slot_index, committable_age_range)
+                                // PANIC: safe to unwrap as non basic/alias/foundry/nft outputs are already filtered
+                                .unwrap()
+                                .expect("expiration unlockable outputs already filtered out");
 
-                            input_address == account_or_nft_address
+                            required_address == account_or_nft_address
                         }) {
                             Some(position) => {
                                 // Insert before the output with this address required for unlocking
@@ -386,7 +410,11 @@ impl InputSelection {
         self.validate_transitions()?;
 
         Ok(Selected {
-            inputs: Self::sort_input_signing_data(self.selected_inputs, self.slot_index)?,
+            inputs: Self::sort_input_signing_data(
+                self.selected_inputs,
+                self.slot_index,
+                self.protocol_parameters.committable_age_range(),
+            )?,
             outputs: self.outputs,
             remainder,
         })

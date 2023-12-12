@@ -127,6 +127,15 @@ pub enum Error {
     /// Implicit account not found.
     #[error("implicit account not found")]
     ImplicitAccountNotFound,
+    /// No account was provided or found to issue the block.
+    #[error("no account was provided or found to issue the block")]
+    NoAccountToIssueBlock,
+}
+
+impl Error {
+    pub fn other<E: 'static + std::error::Error + Send + Sync>(err: E) -> Self {
+        Self::Other(Box::new(err) as _)
+    }
 }
 
 // Serialize type with Display error

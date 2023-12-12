@@ -202,7 +202,9 @@ where
 
         for mut transaction in transactions_to_reissue {
             log::debug!("[SYNC] reissue transaction");
-            let reissued_block = self.submit_signed_transaction(transaction.payload.clone()).await?;
+            let reissued_block = self
+                .submit_signed_transaction(transaction.payload.clone(), None)
+                .await?;
             transaction.block_id.replace(reissued_block);
             updated_transactions.push(transaction);
         }

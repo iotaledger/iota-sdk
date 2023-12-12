@@ -7,10 +7,11 @@ pub mod secret_manager;
 pub mod utils;
 pub mod wallet;
 
-pub use error::NodejsError;
 use iota_sdk_bindings_core::{init_logger as rust_init_logger, Response};
 use napi::{Error, Result, Status};
 use napi_derive::napi;
+
+pub use self::error::NodejsError;
 
 #[napi(js_name = "initLogger")]
 pub fn init_logger(config: String) -> Result<()> {

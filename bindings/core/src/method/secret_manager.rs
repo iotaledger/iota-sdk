@@ -5,7 +5,7 @@ use crypto::keys::bip44::Bip44;
 use derivative::Derivative;
 use iota_sdk::{
     client::api::{GetAddressesOptions, PreparedTransactionDataDto},
-    types::block::UnsignedBlockDto,
+    types::block::{protocol::ProtocolParameters, UnsignedBlockDto},
     utils::serde::bip44::Bip44Def,
 };
 use serde::{Deserialize, Serialize};
@@ -61,6 +61,7 @@ pub enum SecretManagerMethod {
     SignTransaction {
         /// Prepared transaction data
         prepared_transaction_data: PreparedTransactionDataDto,
+        protocol_parameters: Box<ProtocolParameters>,
     },
     // Sign a block.
     #[serde(rename_all = "camelCase")]

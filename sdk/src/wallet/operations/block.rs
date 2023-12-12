@@ -12,13 +12,27 @@ where
     crate::wallet::Error: From<S::Error>,
     crate::client::Error: From<S::Error>,
 {
-    pub(crate) async fn submit_basic_block(&self, payload: Option<Payload>) -> Result<BlockId> {
+    pub(crate) async fn submit_basic_block(
+        &self,
+        payload: Option<Payload>,
+        issuer_id: impl Into<Option<AccountId>> + Send,
+    ) -> Result<BlockId> {
         log::debug!("submit_basic_block");
+
+        let issuer_id = match issuer_id.into() {
+            Some(issuer_id) => Some(issuer_id),
+            None => self
+                .data()
+                .await
+                .accounts()
+                .next()
+                .map(|o| o.output.as_account().account_id_non_null(&o.output_id)),
+        }
+        .ok_or(Error::NoAccountToIssueBlock)?;
 
         let block = self
             .client()
-            // TODO https://github.com/iotaledger/iota-sdk/issues/1665 to set AccountId
-            .build_basic_block(AccountId::null(), payload)
+            .build_basic_block(issuer_id, payload)
             .await?
             .sign_ed25519(
                 &*self.get_secret_manager().read().await,
