@@ -218,13 +218,14 @@ class Utils():
 
     @staticmethod
     def verify_transaction_semantic(
-            transaction: Transaction, inputs: List[InputSigningData], unlocks: Optional[List[Unlock]] = None) -> str:
+            transaction: Transaction, inputs: List[InputSigningData], protocol_parameters: ProtocolParameters, unlocks: Optional[List[Unlock]] = None) -> str:
         """Verifies the semantic of a transaction.
         """
         return _call_method('verifyTransactionSemantic', {
             'transaction': transaction.as_dict(),
             'inputs': [i.as_dict() for i in inputs],
             'unlocks': [u.as_dict() for u in unlocks],
+            'protocol_parameters': protocol_parameters.as_dict(),
         })
 
 
