@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 
 from iota_sdk import Wallet, WalletOptions, Utils, SyncOptions, WalletSyncOptions
 
-# In this example we request funds to a wallet.
+# In this example we request funds to an account wallet.
 
 load_dotenv()
 
@@ -22,7 +22,7 @@ print(f'{balance}')
 
 total_base_token_balance = balance.base_coin.total
 print(
-    f'Balance before requesting funds on wallet address: {total_base_token_balance}')
+    f'Balance before requesting funds on account address: {total_base_token_balance}')
 
 account_id = balance.accounts[0]
 print(f'Account Id: {account_id}')
@@ -40,4 +40,4 @@ sync_options = SyncOptions(wallet=WalletSyncOptions(basic_outputs=True))
 
 total_base_token_balance = wallet.sync(sync_options).base_coin.total
 print(
-    f'Balance after requesting funds on wallet address: {total_base_token_balance}')
+    f'Balance after requesting funds on account address: {total_base_token_balance}')

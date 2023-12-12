@@ -225,7 +225,7 @@ class Utils():
             'transaction': transaction.as_dict(),
             'inputs': [i.as_dict() for i in inputs],
             'unlocks': [u.as_dict() for u in unlocks],
-            'protocol_parameters': protocol_parameters.as_dict(),
+            'protocolParameters': protocol_parameters.as_dict(),
         })
 
 

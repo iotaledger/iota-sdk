@@ -24,8 +24,8 @@ class WalletDestroy(unittest.TestCase):
         wallet_options = WalletOptions(None, None, bib_path, client_options, secret_manager, db_path)
         wallet = Wallet(wallet_options)
 
-        addresses = wallet.address()
-        assert 'smr1qzev36lk0gzld0k28fd2fauz26qqzh4hd4cwymlqlv96x7phjxcw6ckj80y' == addresses
+        address = wallet.address()
+        assert 'smr1qzev36lk0gzld0k28fd2fauz26qqzh4hd4cwymlqlv96x7phjxcw6ckj80y' == address
 
         # Destroy the wallet
         wallet.destroy()
@@ -33,8 +33,8 @@ class WalletDestroy(unittest.TestCase):
         # Afterwards destroying we can recreate the wallet again
         wallet = Wallet(wallet_options)
 
-        addresses = wallet.address()
-        assert 'smr1qzev36lk0gzld0k28fd2fauz26qqzh4hd4cwymlqlv96x7phjxcw6ckj80y' == addresses
+        address = wallet.address()
+        assert 'smr1qzev36lk0gzld0k28fd2fauz26qqzh4hd4cwymlqlv96x7phjxcw6ckj80y' == address
         shutil.rmtree(db_path, ignore_errors=True)
 
     def test_wallet_destroy_error(self):

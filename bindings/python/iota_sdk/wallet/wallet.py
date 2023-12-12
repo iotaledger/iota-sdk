@@ -112,7 +112,7 @@ class Wallet():
         return destroy_wallet(self.handle)
 
     def emit_test_event(self, event) -> bool:
-        """Return whether a Stronghold password is available.
+        """Helper function to test events.
         """
         return self._call_method(
             'emitTestEvent', {
