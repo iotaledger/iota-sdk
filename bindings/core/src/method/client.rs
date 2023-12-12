@@ -175,8 +175,8 @@ pub enum ClientMethod {
         /// Starts the search from the cursor (requested slot index+start index).
         cursor: Option<String>,
     },
-    #[serde(rename_all = "camelCase")]
     /// Return information about a validator.
+    #[serde(rename_all = "camelCase")]
     GetValidator {
         /// The Account ID of the account.
         account_id: AccountId,

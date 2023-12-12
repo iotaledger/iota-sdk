@@ -103,7 +103,7 @@ pub enum Response {
     Info(NodeInfoWrapper),
     /// Response for:
     /// - [`GetAccountCongestion`](crate::method::ClientMethod::GetAccountCongestion)
-    CongestionResponse(CongestionResponse),
+    Congestion(CongestionResponse),
     /// Response for:
     /// - [`GetRewards`](crate::method::ClientMethod::GetRewards)
     ManaRewards(ManaRewardsResponse),
