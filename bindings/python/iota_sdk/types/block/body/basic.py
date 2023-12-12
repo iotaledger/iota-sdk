@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import List, Optional
 from dataclasses_json import config
-from iota_sdk.types.block.body.kind import BlockBodyType
+from iota_sdk.types.block.body.type import BlockBodyType
 from iota_sdk.types.common import HexStr, json
 from iota_sdk.types.payload import Payload
 
