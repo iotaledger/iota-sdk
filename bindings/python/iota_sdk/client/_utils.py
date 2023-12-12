@@ -34,7 +34,7 @@ class ClientUtils(metaclass=ABCMeta):
         """
 
     # pylint: disable=redefined-builtin
-    def hex_to_bech32(self, hex: HexStr, bech32_hrp: str) -> str:
+    def hex_to_bech32(self, hex_str: HexStr, bech32_hrp: str) -> str:
         """Transforms a hex encoded address to a bech32 encoded address.
         """
         return self._call_method('hexToBech32', {
