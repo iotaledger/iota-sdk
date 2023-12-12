@@ -21,9 +21,8 @@ use crate::types::block::{
         BasicOutputBuilder, ChainId, MinimumOutputAmount, Output, OutputBuilderAmount, OutputId, StorageScore,
         StorageScoreParameters,
     },
-    payload::signed_transaction::TransactionCapabilityFlag,
     protocol::{ProtocolParameters, WorkScore, WorkScoreParameters},
-    semantic::{SemanticValidationContext, StateTransitionError, StateTransitionVerifier, TransactionFailureReason},
+    semantic::{SemanticValidationContext, StateTransitionError, TransactionFailureReason},
     unlock::Unlock,
     Error,
 };
@@ -45,11 +44,7 @@ impl From<&OutputId> for NftId {
 impl NftId {
     ///
     pub fn or_from_output_id(self, output_id: &OutputId) -> Self {
-        if self.is_null() {
-            Self::from(output_id)
-        } else {
-            self
-        }
+        if self.is_null() { Self::from(output_id) } else { self }
     }
 }
 
@@ -478,40 +473,6 @@ impl WorkScore for NftOutput {
 }
 
 impl MinimumOutputAmount for NftOutput {}
-
-impl StateTransitionVerifier for NftOutput {
-    fn creation(next_state: &Self, context: &SemanticValidationContext<'_>) -> Result<(), StateTransitionError> {
-        if !next_state.nft_id.is_null() {
-            return Err(StateTransitionError::NonZeroCreatedId);
-        }
-
-        if let Some(issuer) = next_state.immutable_features().issuer() {
-            if !context.unlocked_addresses.contains(issuer.address()) {
-                return Err(StateTransitionError::IssuerNotUnlocked);
-            }
-        }
-
-        Ok(())
-    }
-
-    fn transition(
-        current_state: &Self,
-        next_state: &Self,
-        _context: &SemanticValidationContext<'_>,
-    ) -> Result<(), StateTransitionError> {
-        Self::transition_inner(current_state, next_state)
-    }
-
-    fn destruction(_current_state: &Self, context: &SemanticValidationContext<'_>) -> Result<(), StateTransitionError> {
-        if !context
-            .transaction
-            .has_capability(TransactionCapabilityFlag::DestroyNftOutputs)
-        {
-            return Err(TransactionFailureReason::TransactionCapabilityNftDestructionNotAllowed)?;
-        }
-        Ok(())
-    }
-}
 
 impl Packable for NftOutput {
     type UnpackError = Error;

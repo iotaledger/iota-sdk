@@ -18,9 +18,8 @@ use crate::types::block::{
         unlock_condition::{verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions},
         ChainId, MinimumOutputAmount, Output, OutputBuilderAmount, OutputId, StorageScore, StorageScoreParameters,
     },
-    payload::signed_transaction::TransactionCapabilityFlag,
     protocol::{ProtocolParameters, WorkScore, WorkScoreParameters},
-    semantic::{SemanticValidationContext, StateTransitionError, StateTransitionVerifier, TransactionFailureReason},
+    semantic::{SemanticValidationContext, StateTransitionError, TransactionFailureReason},
     unlock::Unlock,
     Error,
 };
@@ -41,11 +40,7 @@ impl From<&OutputId> for AccountId {
 impl AccountId {
     ///
     pub fn or_from_output_id(self, output_id: &OutputId) -> Self {
-        if self.is_null() {
-            Self::from(output_id)
-        } else {
-            self
-        }
+        if self.is_null() { Self::from(output_id) } else { self }
     }
 }
 
@@ -463,45 +458,6 @@ impl AccountOutput {
             return Err(StateTransitionError::InconsistentCreatedFoundriesCount);
         }
 
-        Ok(())
-    }
-}
-
-impl StateTransitionVerifier for AccountOutput {
-    fn creation(next_state: &Self, context: &SemanticValidationContext<'_>) -> Result<(), StateTransitionError> {
-        if !next_state.account_id.is_null() {
-            return Err(StateTransitionError::NonZeroCreatedId);
-        }
-
-        if let Some(issuer) = next_state.immutable_features().issuer() {
-            if !context.unlocked_addresses.contains(issuer.address()) {
-                return Err(StateTransitionError::IssuerNotUnlocked);
-            }
-        }
-
-        Ok(())
-    }
-
-    fn transition(
-        current_state: &Self,
-        next_state: &Self,
-        context: &SemanticValidationContext<'_>,
-    ) -> Result<(), StateTransitionError> {
-        Self::transition_inner(
-            current_state,
-            next_state,
-            &context.input_chains,
-            context.transaction.outputs(),
-        )
-    }
-
-    fn destruction(_current_state: &Self, context: &SemanticValidationContext<'_>) -> Result<(), StateTransitionError> {
-        if !context
-            .transaction
-            .has_capability(TransactionCapabilityFlag::DestroyAccountOutputs)
-        {
-            return Err(TransactionFailureReason::TransactionCapabilityAccountDestructionNotAllowed)?;
-        }
         Ok(())
     }
 }
