@@ -163,7 +163,7 @@ async fn test_get_output_raw() {
     )
     .unwrap();
 
-    assert_eq!(output, output_raw);
+    assert_eq!(output.output, output_raw);
 }
 
 #[ignore]
