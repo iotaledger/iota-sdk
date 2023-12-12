@@ -6,7 +6,7 @@ from typing import Optional, Union
 import humps
 
 from iota_sdk.external import create_secret_manager, call_secret_manager_method
-from iota_sdk.types.block.signed_block import SignedBlock, UnsignedBlock
+from iota_sdk.types.block.block import Block, UnsignedBlock
 from iota_sdk.types.common import HexStr
 from iota_sdk.types.node_info import ProtocolParameters
 from iota_sdk.types.signature import Ed25519Signature, Bip44
@@ -282,14 +282,14 @@ class SecretManager():
         }))
 
     def sign_block(
-            self, unsigned_block: UnsignedBlock, chain: Bip44) -> SignedBlock:
+            self, unsigned_block: UnsignedBlock, chain: Bip44) -> Block:
         """Sign a block.
 
         Args:
             unsigned_block: The unsigned block data.
             chain: The Bip44 chain to use.
         """
-        return SignedBlock.from_dict(self._call_method('signBlock', {
+        return Block.from_dict(self._call_method('signBlock', {
             'unsignedBlock': unsigned_block.to_dict(),
             'chain': chain.to_dict()
         }))
