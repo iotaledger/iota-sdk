@@ -151,7 +151,11 @@ pub enum ClientMethod {
     GetInfo,
     /// Check the readiness of the node to issue a new block, the reference mana cost based on the rate setter and
     /// current network congestion, and the block issuance credits of the requested account.
-    GetAccountCongestion { address: Bech32Address },
+    #[serde(rename_all = "camelCase")]
+    GetAccountCongestion {
+        /// The Account ID of the account.
+        account_id: AccountId,
+    },
     /// Returns the totally available Mana rewards of an account or delegation output decayed up to endEpoch index
     /// provided in the response.
     #[serde(rename_all = "camelCase")]
@@ -171,10 +175,11 @@ pub enum ClientMethod {
         /// Starts the search from the cursor (requested slot index+start index).
         cursor: Option<String>,
     },
+    #[serde(rename_all = "camelCase")]
     /// Return information about a validator.
     GetValidator {
-        /// The Account Address of the account.
-        address: Bech32Address,
+        /// The Account ID of the account.
+        account_id: AccountId,
     },
     /// Return the information of committee members at the given epoch index. If epoch index is not provided, the
     /// current committee members are returned.

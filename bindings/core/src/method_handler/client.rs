@@ -173,9 +173,8 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         ClientMethod::GetHealth { url } => Response::Bool(client.get_health(&url).await?),
         ClientMethod::GetNodeInfo { url, auth } => Response::NodeInfo(Client::get_node_info(&url, auth).await?),
         ClientMethod::GetInfo => Response::Info(client.get_info().await?),
-        ClientMethod::GetAccountCongestion { address } => {
-            // TODO: .as_account() can panic, accept account id or bech32 address?
-            Response::CongestionResponse(client.get_account_congestion(address.as_account().account_id()).await?)
+        ClientMethod::GetAccountCongestion { account_id } => {
+            Response::CongestionResponse(client.get_account_congestion(&account_id).await?)
         }
         ClientMethod::GetRewards { output_id, slot_index } => {
             Response::ManaRewards(client.get_output_mana_rewards(&output_id, slot_index).await?)
@@ -183,10 +182,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         ClientMethod::GetValidators { page_size, cursor } => {
             Response::Validators(client.get_validators(page_size, cursor).await?)
         }
-        ClientMethod::GetValidator { address } => {
-            // TODO: .as_account() can panic, accept account id or bech32 address?
-            Response::Validator(client.get_validator(address.as_account().account_id()).await?)
-        }
+        ClientMethod::GetValidator { account_id } => Response::Validator(client.get_validator(&account_id).await?),
         ClientMethod::GetCommittee { epoch_index } => Response::Committee(client.get_committee(epoch_index).await?),
         ClientMethod::GetIssuance => Response::Issuance(client.get_issuance().await?),
         ClientMethod::PostBlockRaw { block_bytes } => Response::BlockId(
