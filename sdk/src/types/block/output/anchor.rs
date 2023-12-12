@@ -427,11 +427,7 @@ impl AnchorOutput {
         unlock: &Unlock,
         context: &mut SemanticValidationContext<'_>,
     ) -> Result<(), TransactionFailureReason> {
-        let anchor_id = if self.anchor_id().is_null() {
-            AnchorId::from(output_id)
-        } else {
-            *self.anchor_id()
-        };
+        let anchor_id = self.anchor_id_non_null(output_id);
         let next_state = context.output_chains.get(&ChainId::from(anchor_id));
 
         match next_state {

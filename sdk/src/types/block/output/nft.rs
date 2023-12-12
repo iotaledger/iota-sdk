@@ -431,13 +431,9 @@ impl NftOutput {
 
         context.address_unlock(locked_address, unlock)?;
 
-        let nft_id = if self.nft_id().is_null() {
-            NftId::from(output_id)
-        } else {
-            *self.nft_id()
-        };
-
-        context.unlocked_addresses.insert(Address::from(nft_id));
+        context
+            .unlocked_addresses
+            .insert(Address::from(self.nft_id_non_null(output_id)));
 
         Ok(())
     }

@@ -395,13 +395,9 @@ impl AccountOutput {
 
         context.address_unlock(locked_address, unlock)?;
 
-        let account_id = if self.account_id().is_null() {
-            AccountId::from(output_id)
-        } else {
-            *self.account_id()
-        };
-
-        context.unlocked_addresses.insert(Address::from(account_id));
+        context
+            .unlocked_addresses
+            .insert(Address::from(self.account_id_non_null(output_id)));
 
         Ok(())
     }
