@@ -63,14 +63,14 @@ def test_signed_block_with_tagged_data_payload():
             "signature": "0x7c274e5e771d5d60202d334f06773d3672484b1e4e6f03231b4e69305329267a4834374b0f2e0d5c6c2f7779620f4f534c773b1679400c52303d1f23121a4049"
         }
     }
-    signed_block = Block.from_dict(block_dict)
-    assert signed_block.to_dict() == block_dict
-    assert isinstance(signed_block.block, BasicBlockBody)
-    assert signed_block.block.type == BlockBodyType.Basic
-    assert isinstance(signed_block.block.payload, get_args(Payload))
-    assert signed_block.block.payload.type == PayloadType.TaggedData
+    block = Block.from_dict(block_dict)
+    assert block.to_dict() == block_dict
+    assert isinstance(block.body, BasicBlockBody)
+    assert block.body.type == BlockBodyType.Basic
+    assert isinstance(block.body.payload, get_args(Payload))
+    assert block.body.payload.type == PayloadType.TaggedData
     # TODO: determine the actual hash of the block
-    # assert signed_block.id() == "0x7ce5ad074d4162e57f83cfa01cd2303ef5356567027ce0bcee0c9f57bc11656e"
+    # assert block.id() == "0x7ce5ad074d4162e57f83cfa01cd2303ef5356567027ce0bcee0c9f57bc11656e"
 
 
 @pytest.mark.skip(reason="https://github.com/iotaledger/iota-sdk/issues/1387")

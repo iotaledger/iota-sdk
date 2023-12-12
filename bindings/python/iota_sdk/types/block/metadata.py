@@ -6,7 +6,6 @@ from enum import Enum, IntEnum
 from dataclasses import dataclass
 from typing import Optional
 from iota_sdk.types.common import HexStr, json
-# TODO rename change to Block
 from iota_sdk.types.block.block import Block
 
 

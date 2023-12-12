@@ -70,14 +70,14 @@ unsigned_block = client.build_basic_block(
     TaggedDataPayload(
         utf8_to_hex("tag"),
         utf8_to_hex("data")))
-signed_block = secret_manager.sign_block(unsigned_block, chain)
-block_id = client.post_block(signed_block)
+block = secret_manager.sign_block(unsigned_block, chain)
+block_id = client.post_block(block)
 
 print('\nThe block ID for your submitted block is:')
 print(f'  {block_id}')
 
 print('\nMetadata for your submitted block is:')
-print(f'  {signed_block}')
+print(f'  {block}')
 
 ########################################################
 # Step 3: Use the block ID to read the payload back

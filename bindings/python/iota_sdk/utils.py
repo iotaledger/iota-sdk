@@ -18,7 +18,7 @@ from iota_sdk.types.transaction_data import InputSigningData
 
 # Required to prevent circular import
 if TYPE_CHECKING:
-    from iota_sdk.types.block.signed_block import Block
+    from iota_sdk.types.block.block import Block
 
 # pylint: disable=too-many-public-methods
 
