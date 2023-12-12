@@ -10,11 +10,10 @@ use crate::types::block::{
     output::{
         chain_id::ChainId,
         unlock_condition::{verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions},
-        MinimumOutputAmount, Output, OutputBuilderAmount, OutputId, StateTransitionError, StateTransitionVerifier,
-        StorageScore, StorageScoreParameters,
+        MinimumOutputAmount, Output, OutputBuilderAmount, OutputId, StorageScore, StorageScoreParameters,
     },
     protocol::{ProtocolParameters, WorkScore, WorkScoreParameters},
-    semantic::{SemanticValidationContext, TransactionFailureReason},
+    semantic::{SemanticValidationContext, StateTransitionError, TransactionFailureReason},
     slot::EpochIndex,
     unlock::Unlock,
     Error,
@@ -349,40 +348,6 @@ impl DelegationOutput {
             return Err(StateTransitionError::MutatedImmutableField);
         }
         // TODO add end_epoch validation rules
-        Ok(())
-    }
-}
-
-impl StateTransitionVerifier for DelegationOutput {
-    fn creation(next_state: &Self, _context: &SemanticValidationContext<'_>) -> Result<(), StateTransitionError> {
-        if !next_state.delegation_id.is_null() {
-            return Err(StateTransitionError::NonZeroCreatedId);
-        }
-
-        if next_state.amount != next_state.delegated_amount {
-            return Err(StateTransitionError::InvalidDelegatedAmount);
-        }
-
-        if next_state.end_epoch != 0 {
-            return Err(StateTransitionError::NonZeroDelegationEndEpoch);
-        }
-
-        Ok(())
-    }
-
-    fn transition(
-        current_state: &Self,
-        next_state: &Self,
-        _context: &SemanticValidationContext<'_>,
-    ) -> Result<(), StateTransitionError> {
-        Self::transition_inner(current_state, next_state)
-    }
-
-    fn destruction(
-        _current_state: &Self,
-        _context: &SemanticValidationContext<'_>,
-    ) -> Result<(), StateTransitionError> {
-        // TODO handle mana rewards
         Ok(())
     }
 }
