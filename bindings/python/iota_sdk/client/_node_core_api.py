@@ -5,7 +5,7 @@ from typing import List, Optional, Union
 from abc import ABCMeta, abstractmethod
 from dacite import from_dict
 
-from iota_sdk.types.block.signed_block import SignedBlock
+from iota_sdk.types.block.block import Block
 from iota_sdk.types.block.metadata import BlockMetadata, BlockWithMetadata
 from iota_sdk.types.common import HexStr
 from iota_sdk.types.node_info import NodeInfo, NodeInfoWrapper
@@ -75,7 +75,7 @@ class NodeCoreAPI(metaclass=ABCMeta):
         """
         return self._call_method('getTips')
 
-    def post_block(self, block: SignedBlock) -> HexStr:
+    def post_block(self, block: Block) -> HexStr:
         """Post a block.
 
         Args:
@@ -88,10 +88,10 @@ class NodeCoreAPI(metaclass=ABCMeta):
             'block': block.__dict__
         })
 
-    def get_block(self, block_id: HexStr) -> SignedBlock:
+    def get_block(self, block_id: HexStr) -> Block:
         """Get the block corresponding to the given block id.
         """
-        return SignedBlock.from_dict(self._call_method('getBlock', {
+        return Block.from_dict(self._call_method('getBlock', {
             'blockId': block_id
         }))
 
@@ -152,13 +152,13 @@ class NodeCoreAPI(metaclass=ABCMeta):
             'outputId': output_id_str
         }))
 
-    def get_included_block(self, transaction_id: HexStr) -> SignedBlock:
+    def get_included_block(self, transaction_id: HexStr) -> Block:
         """Returns the included block of the given transaction.
 
         Returns:
             The included block.
         """
-        return SignedBlock.from_dict(self._call_method('getIncludedBlock', {
+        return Block.from_dict(self._call_method('getIncludedBlock', {
             'transactionId': transaction_id
         }))
 
