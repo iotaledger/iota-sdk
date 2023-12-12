@@ -168,14 +168,6 @@ async fn test_get_output_raw() {
 
 #[ignore]
 #[tokio::test]
-async fn test_get_peers() {
-    let r = setup_client_with_node_health_ignored().await.get_peers().await.unwrap();
-
-    println!("{r:#?}");
-}
-
-#[ignore]
-#[tokio::test]
 async fn test_get_included_block() {
     let client = setup_client_with_node_health_ignored().await;
     let (_block_id, transaction_id) = setup_transaction_block(&client).await;
