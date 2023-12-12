@@ -13,11 +13,9 @@ use crate::types::block::{
             verify_allowed_unlock_conditions, AddressUnlockCondition, StorageDepositReturnUnlockCondition,
             UnlockCondition, UnlockConditionFlags, UnlockConditions,
         },
-        MinimumOutputAmount, NativeToken, Output, OutputBuilderAmount, OutputId, StorageScore, StorageScoreParameters,
+        MinimumOutputAmount, NativeToken, Output, OutputBuilderAmount, StorageScore, StorageScoreParameters,
     },
     protocol::{ProtocolParameters, WorkScore, WorkScoreParameters},
-    semantic::{SemanticValidationContext, TransactionFailureReason},
-    unlock::Unlock,
     Error,
 };
 
@@ -309,32 +307,6 @@ impl BasicOutput {
             .address()
             .map(|unlock_condition| unlock_condition.address())
             .unwrap()
-    }
-
-    ///
-    pub fn unlock(
-        &self,
-        _output_id: &OutputId,
-        unlock: &Unlock,
-        context: &mut SemanticValidationContext<'_>,
-    ) -> Result<(), TransactionFailureReason> {
-        let slot_index = context
-            .transaction
-            .context_inputs()
-            .iter()
-            .find_map(|c| c.as_commitment_opt().map(|c| c.slot_index()));
-        let locked_address = self
-            .unlock_conditions()
-            .locked_address(
-                self.address(),
-                slot_index,
-                context.protocol_parameters.committable_age_range(),
-            )
-            .map_err(|_| TransactionFailureReason::InvalidCommitmentContextInput)?
-            // because of expiration the input can't be unlocked at this time
-            .ok_or(TransactionFailureReason::SemanticValidationFailed)?;
-
-        context.address_unlock(locked_address, unlock)
     }
 
     /// Returns the address of the unlock conditions if the output is a simple deposit.

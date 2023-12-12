@@ -18,13 +18,12 @@ use crate::types::block::{
         account::AccountId,
         feature::{verify_allowed_features, Feature, FeatureFlags, Features, NativeTokenFeature},
         unlock_condition::{verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions},
-        ChainId, MinimumOutputAmount, NativeToken, Output, OutputBuilderAmount, OutputId, StorageScore,
-        StorageScoreParameters, TokenId, TokenScheme,
+        ChainId, MinimumOutputAmount, NativeToken, Output, OutputBuilderAmount, StorageScore, StorageScoreParameters,
+        TokenId, TokenScheme,
     },
     payload::signed_transaction::{TransactionCapabilities, TransactionCapabilityFlag},
     protocol::{ProtocolParameters, WorkScore, WorkScoreParameters},
-    semantic::{SemanticValidationContext, StateTransitionError, TransactionFailureReason},
-    unlock::Unlock,
+    semantic::{StateTransitionError, TransactionFailureReason},
     Error,
 };
 
@@ -400,16 +399,6 @@ impl FoundryOutput {
     #[inline(always)]
     pub fn chain_id(&self) -> ChainId {
         ChainId::Foundry(self.id())
-    }
-
-    ///
-    pub fn unlock(
-        &self,
-        _output_id: &OutputId,
-        unlock: &Unlock,
-        context: &mut SemanticValidationContext<'_>,
-    ) -> Result<(), TransactionFailureReason> {
-        context.address_unlock(&Address::from(*self.account_address()), unlock)
     }
 
     // Transition, just without full SemanticValidationContext

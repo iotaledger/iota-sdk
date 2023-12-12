@@ -178,17 +178,7 @@ impl<'a> SemanticValidationContext<'a> {
                     return Ok(Some(TransactionFailureReason::InvalidInputUnlock));
                 }
 
-                let unlock = &unlocks[index];
-                let conflict = match consumed_output {
-                    Output::Basic(output) => output.unlock(output_id, unlock, &mut self),
-                    Output::Account(output) => output.unlock(output_id, unlock, &mut self),
-                    Output::Anchor(_) => return Err(Error::UnsupportedOutputKind(AnchorOutput::KIND)),
-                    Output::Foundry(output) => output.unlock(output_id, unlock, &mut self),
-                    Output::Nft(output) => output.unlock(output_id, unlock, &mut self),
-                    Output::Delegation(output) => output.unlock(output_id, unlock, &mut self),
-                };
-
-                if let Err(conflict) = conflict {
+                if let Err(conflict) = self.output_unlock(&consumed_output, &output_id, &unlocks[index]) {
                     return Ok(Some(conflict));
                 }
             }

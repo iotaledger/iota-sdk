@@ -3,7 +3,7 @@
 
 use crate::types::block::{
     address::Address,
-    output::Output,
+    output::{Output, OutputId},
     semantic::{SemanticValidationContext, TransactionFailureReason},
     signature::Signature,
     unlock::Unlock,
@@ -91,6 +91,85 @@ impl SemanticValidationContext<'_> {
                 return self.address_unlock(restricted_address.address(), unlock);
             }
             _ => return Err(TransactionFailureReason::InvalidInputUnlock),
+        }
+
+        Ok(())
+    }
+
+    pub fn output_unlock(
+        &mut self,
+        output: &Output,
+        output_id: &OutputId,
+        unlock: &Unlock,
+    ) -> Result<(), TransactionFailureReason> {
+        match output {
+            Output::Basic(output) => {
+                let slot_index = self
+                    .transaction
+                    .context_inputs()
+                    .iter()
+                    .find_map(|c| c.as_commitment_opt().map(|c| c.slot_index()));
+                let locked_address = output
+                    .unlock_conditions()
+                    .locked_address(
+                        output.address(),
+                        slot_index,
+                        self.protocol_parameters.committable_age_range(),
+                    )
+                    .map_err(|_| TransactionFailureReason::InvalidCommitmentContextInput)?
+                    // because of expiration the input can't be unlocked at this time
+                    .ok_or(TransactionFailureReason::SemanticValidationFailed)?;
+
+                self.address_unlock(locked_address, unlock)?;
+            }
+            Output::Account(output) => {
+                let locked_address = output
+                    .unlock_conditions()
+                    .locked_address(output.address(), None, self.protocol_parameters.committable_age_range())
+                    // Safe to unwrap, AccountOutput can't have an expiration unlock condition.
+                    .unwrap()
+                    .unwrap();
+
+                self.address_unlock(locked_address, unlock)?;
+
+                self.unlocked_addresses
+                    .insert(Address::from(output.account_id_non_null(output_id)));
+            }
+            Output::Anchor(_) => panic!(),
+            // Output::Anchor(_) => return Err(Error::UnsupportedOutputKind(AnchorOutput::KIND)),
+            Output::Foundry(output) => self.address_unlock(&Address::from(*output.account_address()), unlock)?,
+            Output::Nft(output) => {
+                let slot_index = self
+                    .transaction
+                    .context_inputs()
+                    .iter()
+                    .find_map(|c| c.as_commitment_opt().map(|c| c.slot_index()));
+                let locked_address = output
+                    .unlock_conditions()
+                    .locked_address(
+                        output.address(),
+                        slot_index,
+                        self.protocol_parameters.committable_age_range(),
+                    )
+                    .map_err(|_| TransactionFailureReason::InvalidCommitmentContextInput)?
+                    // because of expiration the input can't be unlocked at this time
+                    .ok_or(TransactionFailureReason::SemanticValidationFailed)?;
+
+                self.address_unlock(locked_address, unlock)?;
+
+                self.unlocked_addresses
+                    .insert(Address::from(output.nft_id_non_null(output_id)));
+            }
+            Output::Delegation(output) => {
+                let locked_address: &Address = output
+                    .unlock_conditions()
+                    .locked_address(output.address(), None, self.protocol_parameters.committable_age_range())
+                    // Safe to unwrap, DelegationOutput can't have an expiration unlock condition.
+                    .unwrap()
+                    .unwrap();
+
+                self.address_unlock(locked_address, unlock)?;
+            }
         }
 
         Ok(())
