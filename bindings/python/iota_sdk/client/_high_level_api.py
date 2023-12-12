@@ -4,7 +4,7 @@
 from typing import List, Optional
 from dataclasses import dataclass
 from abc import ABCMeta, abstractmethod
-from iota_sdk.types.block.signed_block import SignedBlock
+from iota_sdk.types.block.block import Block
 from iota_sdk.types.common import CoinType, HexStr, json
 from iota_sdk.types.output_metadata import OutputWithMetadata
 from iota_sdk.types.output_id import OutputId
@@ -111,7 +111,7 @@ class HighLevelAPI(metaclass=ABCMeta):
         })
         return [OutputWithMetadata.from_dict(o) for o in outputs]
 
-    def find_blocks(self, block_ids: List[HexStr]) -> List[SignedBlock]:
+    def find_blocks(self, block_ids: List[HexStr]) -> List[Block]:
         """Find all blocks by provided block IDs.
 
         Args:
@@ -123,7 +123,7 @@ class HighLevelAPI(metaclass=ABCMeta):
         blocks = self._call_method('findBlocks', {
             'blockIds': block_ids
         })
-        return [SignedBlock.from_dict(block) for block in blocks]
+        return [Block.from_dict(block) for block in blocks]
 
     def find_inputs(self, addresses: List[str], amount: int):
         """Function to find inputs from addresses for a provided amount(useful for offline signing).
