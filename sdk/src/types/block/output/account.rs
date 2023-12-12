@@ -401,9 +401,7 @@ impl AccountOutput {
             *self.account_id()
         };
 
-        context
-            .unlocked_addresses
-            .insert(Address::from(AccountAddress::from(account_id)));
+        context.unlocked_addresses.insert(Address::from(account_id));
 
         Ok(())
     }

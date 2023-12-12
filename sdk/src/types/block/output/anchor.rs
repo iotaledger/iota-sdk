@@ -442,9 +442,7 @@ impl AnchorOutput {
                     context.address_unlock(self.state_controller_address(), unlock)?;
                     // Only a state transition can be used to consider the anchor address for output unlocks and
                     // sender/issuer validations.
-                    context
-                        .unlocked_addresses
-                        .insert(Address::from(AnchorAddress::from(anchor_id)));
+                    context.unlocked_addresses.insert(Address::from(anchor_id));
                 }
             }
             None => context.address_unlock(self.governor_address(), unlock)?,

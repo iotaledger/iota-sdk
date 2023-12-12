@@ -437,9 +437,7 @@ impl NftOutput {
             *self.nft_id()
         };
 
-        context
-            .unlocked_addresses
-            .insert(Address::from(NftAddress::from(nft_id)));
+        context.unlocked_addresses.insert(Address::from(nft_id));
 
         Ok(())
     }
