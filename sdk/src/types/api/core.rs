@@ -14,7 +14,7 @@ use crate::{
     types::block::{
         address::Bech32Address,
         core::Parents,
-        output::{Output, OutputId, OutputMetadata, OutputWithMetadata},
+        output::{Output, OutputId, OutputIdProof, OutputMetadata, OutputWithMetadata},
         payload::signed_transaction::TransactionId,
         protocol::{ProtocolParameters, ProtocolParametersHash},
         semantic::TransactionFailureReason,
@@ -529,11 +529,10 @@ pub struct UtxoChangesResponse {
     pub consumed_outputs: Vec<OutputId>,
 }
 
-// TODO use for outputs route https://github.com/iotaledger/iota-sdk/issues/1686
-// /// Contains the generic [`Output`] with associated [`OutputIdProof`].
-// #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-// #[serde(rename_all = "camelCase")]
-// pub struct OutputResponse {
-//     pub output: Output,
-//     pub output_id_proof: OutputIdProof,
-// }
+/// Contains the generic [`Output`] with associated [`OutputIdProof`].
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct OutputResponse {
+    pub output: Output,
+    pub output_id_proof: OutputIdProof,
+}
