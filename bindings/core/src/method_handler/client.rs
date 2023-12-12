@@ -230,13 +230,13 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         ClientMethod::GetTransactionMetadata { transaction_id } => {
             Response::TransactionMetadata(client.get_transaction_metadata(&transaction_id).await?)
         }
-        ClientMethod::GetCommitments { commitment_id } => {
+        ClientMethod::GetCommitment { commitment_id } => {
             Response::SlotCommitment(client.get_slot_commitment_by_id(&commitment_id).await?)
         }
         ClientMethod::GetUtxoChanges { commitment_id } => {
             Response::UtxoChanges(client.get_utxo_changes_by_slot_commitment_id(&commitment_id).await?)
         }
-        ClientMethod::GetCommitmentsByIndex { index } => {
+        ClientMethod::GetCommitmentByIndex { index } => {
             Response::SlotCommitment(client.get_slot_commitment_by_slot(index).await?)
         }
         ClientMethod::GetUtxoChangesByIndex { index } => {

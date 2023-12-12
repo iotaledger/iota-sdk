@@ -134,8 +134,8 @@ pub enum Response {
     /// - [`GetTransactionMetadata`](crate::method::ClientMethod::GetTransactionMetadata)
     TransactionMetadata(TransactionMetadataResponse),
     /// Response for:
-    /// - [`GetCommitments`](crate::method::ClientMethod::GetCommitments)
-    /// - [`GetCommitmentsByIndex`](crate::method::ClientMethod::GetCommitmentsByIndex)
+    /// - [`GetCommitment`](crate::method::ClientMethod::GetCommitment)
+    /// - [`GetCommitmentByIndex`](crate::method::ClientMethod::GetCommitmentByIndex)
     SlotCommitment(SlotCommitment),
     /// Response for:
     /// - [`GetUtxoChanges`](crate::method::ClientMethod::GetUtxoChanges)

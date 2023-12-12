@@ -263,7 +263,7 @@ pub enum ClientMethod {
     },
     /// Look up a commitment by a given commitment ID.
     #[serde(rename_all = "camelCase")]
-    GetCommitments {
+    GetCommitment {
         /// Commitment ID of the commitment to look up.
         commitment_id: SlotCommitmentId,
     },
@@ -274,7 +274,7 @@ pub enum ClientMethod {
         commitment_id: SlotCommitmentId,
     },
     /// Look up a commitment by a given commitment index.
-    GetCommitmentsByIndex {
+    GetCommitmentByIndex {
         /// Index of the commitment to look up.
         index: SlotIndex,
     },
