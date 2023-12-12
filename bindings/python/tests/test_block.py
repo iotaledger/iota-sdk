@@ -38,7 +38,7 @@ def test_block_with_tagged_data_payload():
         "slotCommitmentId": "0x498bf08a5ed287bc87340341ffab28706768cd3a7035ae5e33932d9a12bb30940000000000000000",
         "latestFinalizedSlot": 21,
         "issuerId": "0x3370746f30705b7d0b42597459714d45241e5a64761b09627c447b751c7e145c",
-        "block": {
+        "body": {
             "type": 0,
             "strongParents": [
                 "0x304442486c7a05361408585e4b5f7a67441c437528755a70041e0e557a6d4b2d7d4362083d492b57",
