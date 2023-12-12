@@ -63,11 +63,12 @@ where
                 )?);
             }
 
-            if let Some(metadata) = features.metadata {
-                first_output_builder = first_output_builder.add_feature(MetadataFeature::new(
-                    prefix_hex::decode::<Vec<u8>>(metadata).map_err(|_| Error::InvalidField("metadata"))?,
-                )?);
-            }
+            // TODO: enable again when MetadataFeature is cleared up
+            // if let Some(metadata) = features.metadata {
+            //     first_output_builder = first_output_builder.add_feature(MetadataFeature::new(
+            //         prefix_hex::decode::<Vec<u8>>(metadata).map_err(|_| Error::InvalidField("metadata"))?,
+            //     )?);
+            // }
 
             if let Some(sender) = features.sender {
                 first_output_builder = first_output_builder.add_feature(SenderFeature::new(sender))

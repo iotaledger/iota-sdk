@@ -10,17 +10,14 @@ use colored::Colorize;
 use iota_sdk::{
     client::request_funds_from_faucet,
     crypto::signatures::ed25519::PublicKey,
-    types::{
-        api::plugins::participation::types::ParticipationEventId,
-        block::{
-            address::{Bech32Address, ToBech32Ext},
-            output::{
-                unlock_condition::AddressUnlockCondition, AccountId, BasicOutputBuilder, FoundryId, NativeToken,
-                NativeTokensBuilder, NftId, Output, OutputId, TokenId,
-            },
-            payload::signed_transaction::TransactionId,
-            slot::SlotIndex,
+    types::block::{
+        address::{Bech32Address, ToBech32Ext},
+        output::{
+            unlock_condition::AddressUnlockCondition, AccountId, BasicOutputBuilder, FoundryId, NativeToken,
+            NativeTokensBuilder, NftId, Output, OutputId, TokenId,
         },
+        payload::signed_transaction::TransactionId,
+        slot::SlotIndex,
     },
     utils::ConvertTo,
     wallet::{
@@ -238,40 +235,40 @@ pub enum WalletCommand {
     },
     /// List the unspent outputs.
     UnspentOutputs,
-    /// Cast votes for an event.
-    Vote {
-        /// Event ID for which to cast votes, e.g. 0xdc049a721dc65ec342f836c876ec15631ed915cd55213cee39e8d1c821c751f2.
-        event_id: ParticipationEventId,
-        /// Answers to the event questions.
-        answers: Vec<u8>,
-    },
-    /// Stop participating to an event.
-    StopParticipating {
-        /// Event ID for which to stop participation, e.g.
-        /// 0xdc049a721dc65ec342f836c876ec15631ed915cd55213cee39e8d1c821c751f2.
-        event_id: ParticipationEventId,
-    },
-    /// Get the participation overview of the wallet.
-    ParticipationOverview {
-        /// Event IDs for which to get the participation overview, e.g.
-        /// 0xdc049a721dc65ec342f836c876ec15631ed915cd55213cee39e8d1c821c751f2...
-        #[arg(short, long, num_args = 1.., value_delimiter = ' ')]
-        event_ids: Vec<ParticipationEventId>,
-    },
-    /// Get the voting power of the wallet.
-    VotingPower,
-    /// Increase the voting power of the wallet.
-    IncreaseVotingPower {
-        /// Amount to increase the voting power by, e.g. 100.
-        amount: u64,
-    },
-    /// Decrease the voting power of the wallet.
-    DecreaseVotingPower {
-        /// Amount to decrease the voting power by, e.g. 100.
-        amount: u64,
-    },
-    /// Get the voting output of the wallet.
-    VotingOutput,
+    // /// Cast votes for an event.
+    // Vote {
+    //     /// Event ID for which to cast votes, e.g.
+    // 0xdc049a721dc65ec342f836c876ec15631ed915cd55213cee39e8d1c821c751f2.     event_id: ParticipationEventId,
+    //     /// Answers to the event questions.
+    //     answers: Vec<u8>,
+    // },
+    // /// Stop participating to an event.
+    // StopParticipating {
+    //     /// Event ID for which to stop participation, e.g.
+    //     /// 0xdc049a721dc65ec342f836c876ec15631ed915cd55213cee39e8d1c821c751f2.
+    //     event_id: ParticipationEventId,
+    // },
+    // /// Get the participation overview of the wallet.
+    // ParticipationOverview {
+    //     /// Event IDs for which to get the participation overview, e.g.
+    //     /// 0xdc049a721dc65ec342f836c876ec15631ed915cd55213cee39e8d1c821c751f2...
+    //     #[arg(short, long, num_args = 1.., value_delimiter = ' ')]
+    //     event_ids: Vec<ParticipationEventId>,
+    // },
+    // /// Get the voting power of the wallet.
+    // VotingPower,
+    // /// Increase the voting power of the wallet.
+    // IncreaseVotingPower {
+    //     /// Amount to increase the voting power by, e.g. 100.
+    //     amount: u64,
+    // },
+    // /// Decrease the voting power of the wallet.
+    // DecreaseVotingPower {
+    //     /// Amount to decrease the voting power by, e.g. 100.
+    //     amount: u64,
+    // },
+    // /// Get the voting output of the wallet.
+    // VotingOutput,
 }
 
 /// Select by transaction ID or list index
@@ -920,80 +917,80 @@ pub async fn unspent_outputs_command(wallet: &Wallet) -> Result<(), Error> {
     )
 }
 
-pub async fn vote_command(wallet: &Wallet, event_id: ParticipationEventId, answers: Vec<u8>) -> Result<(), Error> {
-    let transaction = wallet.vote(Some(event_id), Some(answers)).await?;
+// pub async fn vote_command(wallet: &Wallet, event_id: ParticipationEventId, answers: Vec<u8>) -> Result<(), Error> {
+//     let transaction = wallet.vote(Some(event_id), Some(answers)).await?;
 
-    println_log_info!(
-        "Voting transaction sent:\n{:?}\n{:?}",
-        transaction.transaction_id,
-        transaction.block_id
-    );
+//     println_log_info!(
+//         "Voting transaction sent:\n{:?}\n{:?}",
+//         transaction.transaction_id,
+//         transaction.block_id
+//     );
 
-    Ok(())
-}
+//     Ok(())
+// }
 
-pub async fn stop_participating_command(wallet: &Wallet, event_id: ParticipationEventId) -> Result<(), Error> {
-    let transaction = wallet.stop_participating(event_id).await?;
+// pub async fn stop_participating_command(wallet: &Wallet, event_id: ParticipationEventId) -> Result<(), Error> {
+//     let transaction = wallet.stop_participating(event_id).await?;
 
-    println_log_info!(
-        "Stop participating transaction sent:\n{:?}\n{:?}",
-        transaction.transaction_id,
-        transaction.block_id
-    );
+//     println_log_info!(
+//         "Stop participating transaction sent:\n{:?}\n{:?}",
+//         transaction.transaction_id,
+//         transaction.block_id
+//     );
 
-    Ok(())
-}
+//     Ok(())
+// }
 
-pub async fn participation_overview_command(
-    wallet: &Wallet,
-    event_ids: Option<Vec<ParticipationEventId>>,
-) -> Result<(), Error> {
-    let participation_overview = wallet.get_participation_overview(event_ids).await?;
+// pub async fn participation_overview_command(
+//     wallet: &Wallet,
+//     event_ids: Option<Vec<ParticipationEventId>>,
+// ) -> Result<(), Error> {
+//     let participation_overview = wallet.get_participation_overview(event_ids).await?;
 
-    println_log_info!("Participation overview: {participation_overview:?}");
+//     println_log_info!("Participation overview: {participation_overview:?}");
 
-    Ok(())
-}
+//     Ok(())
+// }
 
-pub async fn voting_power_command(wallet: &Wallet) -> Result<(), Error> {
-    let voting_power = wallet.get_voting_power().await?;
+// pub async fn voting_power_command(wallet: &Wallet) -> Result<(), Error> {
+//     let voting_power = wallet.get_voting_power().await?;
 
-    println_log_info!("Voting power: {voting_power}");
+//     println_log_info!("Voting power: {voting_power}");
 
-    Ok(())
-}
+//     Ok(())
+// }
 
-pub async fn increase_voting_power_command(wallet: &Wallet, amount: u64) -> Result<(), Error> {
-    let transaction = wallet.increase_voting_power(amount).await?;
+// pub async fn increase_voting_power_command(wallet: &Wallet, amount: u64) -> Result<(), Error> {
+//     let transaction = wallet.increase_voting_power(amount).await?;
 
-    println_log_info!(
-        "Increase voting power transaction sent:\n{:?}\n{:?}",
-        transaction.transaction_id,
-        transaction.block_id
-    );
+//     println_log_info!(
+//         "Increase voting power transaction sent:\n{:?}\n{:?}",
+//         transaction.transaction_id,
+//         transaction.block_id
+//     );
 
-    Ok(())
-}
+//     Ok(())
+// }
 
-pub async fn decrease_voting_power_command(wallet: &Wallet, amount: u64) -> Result<(), Error> {
-    let transaction = wallet.decrease_voting_power(amount).await?;
+// pub async fn decrease_voting_power_command(wallet: &Wallet, amount: u64) -> Result<(), Error> {
+//     let transaction = wallet.decrease_voting_power(amount).await?;
 
-    println_log_info!(
-        "Decrease voting power transaction sent:\n{:?}\n{:?}",
-        transaction.transaction_id,
-        transaction.block_id
-    );
+//     println_log_info!(
+//         "Decrease voting power transaction sent:\n{:?}\n{:?}",
+//         transaction.transaction_id,
+//         transaction.block_id
+//     );
 
-    Ok(())
-}
+//     Ok(())
+// }
 
-pub async fn voting_output_command(wallet: &Wallet) -> Result<(), Error> {
-    let output = wallet.get_voting_output().await?;
+// pub async fn voting_output_command(wallet: &Wallet) -> Result<(), Error> {
+//     let output = wallet.get_voting_output().await?;
 
-    println_log_info!("Voting output: {output:?}");
+//     println_log_info!("Voting output: {output:?}");
 
-    Ok(())
-}
+//     Ok(())
+// }
 
 async fn print_wallet_address(wallet: &Wallet) -> Result<(), Error> {
     let address = wallet.address().await;
@@ -1241,22 +1238,22 @@ pub async fn prompt_internal(
                             transactions_command(wallet, show_details).await
                         }
                         WalletCommand::UnspentOutputs => unspent_outputs_command(wallet).await,
-                        WalletCommand::Vote { event_id, answers } => vote_command(wallet, event_id, answers).await,
-                        WalletCommand::StopParticipating { event_id } => {
-                            stop_participating_command(wallet, event_id).await
-                        }
-                        WalletCommand::ParticipationOverview { event_ids } => {
-                            let event_ids = (!event_ids.is_empty()).then_some(event_ids);
-                            participation_overview_command(wallet, event_ids).await
-                        }
-                        WalletCommand::VotingPower => voting_power_command(wallet).await,
-                        WalletCommand::IncreaseVotingPower { amount } => {
-                            increase_voting_power_command(wallet, amount).await
-                        }
-                        WalletCommand::DecreaseVotingPower { amount } => {
-                            decrease_voting_power_command(wallet, amount).await
-                        }
-                        WalletCommand::VotingOutput => voting_output_command(wallet).await,
+                        // WalletCommand::Vote { event_id, answers } => vote_command(wallet, event_id, answers).await,
+                        // WalletCommand::StopParticipating { event_id } => {
+                        //     stop_participating_command(wallet, event_id).await
+                        // }
+                        // WalletCommand::ParticipationOverview { event_ids } => {
+                        //     let event_ids = (!event_ids.is_empty()).then_some(event_ids);
+                        //     participation_overview_command(wallet, event_ids).await
+                        // }
+                        // WalletCommand::VotingPower => voting_power_command(wallet).await,
+                        // WalletCommand::IncreaseVotingPower { amount } => {
+                        //     increase_voting_power_command(wallet, amount).await
+                        // }
+                        // WalletCommand::DecreaseVotingPower { amount } => {
+                        //     decrease_voting_power_command(wallet, amount).await
+                        // }
+                        // WalletCommand::VotingOutput => voting_output_command(wallet).await,
                     }
                     .unwrap_or_else(|err| {
                         println_log_error!("{err}");

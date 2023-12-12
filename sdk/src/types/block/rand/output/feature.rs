@@ -1,7 +1,13 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use alloc::{collections::BTreeSet, vec::Vec};
+use alloc::{
+    collections::{BTreeMap, BTreeSet},
+    vec::Vec,
+};
+use core::ops::Range;
+
+use rand::distributions::{Alphanumeric, DistString};
 
 use crate::types::block::{
     output::feature::{
@@ -29,8 +35,38 @@ pub fn rand_issuer_feature() -> IssuerFeature {
 
 /// Generates a random [`MetadataFeature`].
 pub fn rand_metadata_feature() -> MetadataFeature {
-    let bytes = rand_bytes(rand_number_range(MetadataFeature::LENGTH_RANGE) as usize);
-    MetadataFeature::new(bytes).unwrap()
+    let mut map = BTreeMap::new();
+    let mut total_size = 0;
+    for _ in 0..10 {
+        if total_size >= *MetadataFeature::LENGTH_RANGE.end() as usize - u8::MAX as usize {
+            break;
+        }
+        // Key length
+        total_size += 1;
+        let key = Alphanumeric.sample_string(
+            &mut rand::thread_rng(),
+            rand_number_range(Range {
+                start: 1,
+                end: u8::MAX.into(),
+            }),
+        );
+        total_size += key.as_bytes().len();
+
+        if total_size >= *MetadataFeature::LENGTH_RANGE.end() as usize - 2 {
+            break;
+        }
+        // Value length
+        total_size += 2;
+        let bytes = rand_bytes(rand_number_range(Range {
+            start: 0,
+            end: *MetadataFeature::LENGTH_RANGE.end() as usize - total_size,
+        }) as usize);
+        total_size += bytes.len();
+
+        map.insert(key.into(), bytes);
+    }
+
+    MetadataFeature::new(map).unwrap()
 }
 
 /// Generates a random [`TagFeature`].

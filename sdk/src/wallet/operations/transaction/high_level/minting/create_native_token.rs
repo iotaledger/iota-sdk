@@ -169,9 +169,11 @@ where
                         account_id,
                     )));
 
-                    if let Some(foundry_metadata) = params.foundry_metadata {
-                        foundry_builder = foundry_builder.add_immutable_feature(MetadataFeature::new(foundry_metadata)?)
-                    }
+                    // TODO: enable again when MetadataFeature is cleared up
+                    // if let Some(foundry_metadata) = params.foundry_metadata {
+                    //     foundry_builder =
+                    // foundry_builder.add_immutable_feature(MetadataFeature::new(foundry_metadata)?)
+                    // }
 
                     foundry_builder.finish_output()?
                 }, // Native Tokens will be added automatically in the remainder output in try_select_inputs()

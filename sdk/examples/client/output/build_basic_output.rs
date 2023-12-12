@@ -41,11 +41,12 @@ async fn main() -> Result<()> {
     let outputs = [
         // most simple output
         basic_output_builder.clone().finish_output()?,
-        // with metadata feature block
-        basic_output_builder
-            .clone()
-            .add_feature(MetadataFeature::new(METADATA)?)
-            .finish_output()?,
+        // TODO: enable again when MetadataFeature is cleared up
+        // // with metadata feature block
+        // basic_output_builder
+        //     .clone()
+        //     .add_feature(MetadataFeature::new(METADATA)?)
+        //     .finish_output()?,
         // with storage deposit return
         basic_output_builder
             .clone()

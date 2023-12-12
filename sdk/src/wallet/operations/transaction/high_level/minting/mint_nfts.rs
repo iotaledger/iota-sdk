@@ -191,9 +191,10 @@ where
                 nft_builder = nft_builder.add_feature(SenderFeature::new(sender));
             }
 
-            if let Some(metadata) = metadata {
-                nft_builder = nft_builder.add_feature(MetadataFeature::new(metadata)?);
-            }
+            // TODO: enable again when MetadataFeature is cleared up
+            // if let Some(metadata) = metadata {
+            //     nft_builder = nft_builder.add_feature(MetadataFeature::new(metadata)?);
+            // }
 
             if let Some(tag) = tag {
                 nft_builder = nft_builder.add_feature(TagFeature::new(tag)?);
@@ -203,9 +204,10 @@ where
                 nft_builder = nft_builder.add_immutable_feature(IssuerFeature::new(issuer));
             }
 
-            if let Some(immutable_metadata) = immutable_metadata {
-                nft_builder = nft_builder.add_immutable_feature(MetadataFeature::new(immutable_metadata)?);
-            }
+            // TODO: enable again when MetadataFeature is cleared up
+            // if let Some(immutable_metadata) = immutable_metadata {
+            //     nft_builder = nft_builder.add_immutable_feature(MetadataFeature::new(immutable_metadata)?);
+            // }
 
             outputs.push(nft_builder.finish_output()?);
         }

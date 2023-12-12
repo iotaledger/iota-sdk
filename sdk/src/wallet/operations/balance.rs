@@ -299,17 +299,19 @@ where
                 }
             });
 
-            let metadata = wallet_data
-                .native_token_foundries
-                .get(&FoundryId::from(*native_token.token_id()))
-                .and_then(|foundry| foundry.immutable_features().metadata())
-                .cloned();
+            // TODO: enable again when MetadataFeature is cleared up
+            // let metadata = wallet_data
+            //     .native_token_foundries
+            //     .get(&FoundryId::from(*native_token.token_id()))
+            //     .and_then(|foundry| foundry.immutable_features().metadata())
+            //     .cloned();
 
             balance.native_tokens.push(NativeTokensBalance {
                 token_id: *native_token.token_id(),
                 total: native_token.amount(),
                 available: native_token.amount() - *locked_native_token_amount.unwrap_or(&U256::from(0u8)),
-                metadata,
+                // TODO: enable again when MetadataFeature is cleared up
+                // metadata,
             })
         }
 

@@ -129,10 +129,11 @@ pub struct NativeTokensBalance {
     /// Balance that can currently be spent
     #[getset(get_copy = "pub")]
     pub(crate) available: U256,
-    /// Token foundry immutable metadata
-    #[getset(get = "pub")]
-    #[serde(with = "crate::utils::serde::option_string")]
-    pub(crate) metadata: Option<MetadataFeature>,
+    // TODO: enable again when MetadataFeature is cleared up
+    // /// Token foundry immutable metadata
+    // #[getset(get = "pub")]
+    // #[serde(with = "crate::utils::serde::option_string")]
+    // pub(crate) metadata: Option<MetadataFeature>,
 }
 
 impl Default for NativeTokensBalance {
@@ -141,7 +142,8 @@ impl Default for NativeTokensBalance {
             token_id: TokenId::null(),
             total: U256::from(0u8),
             available: U256::from(0u8),
-            metadata: None,
+            // TODO: enable again when MetadataFeature is cleared up
+            // metadata: None,
         }
     }
 }
@@ -150,9 +152,10 @@ impl std::ops::AddAssign for NativeTokensBalance {
     fn add_assign(&mut self, rhs: Self) {
         self.total += rhs.total;
         self.available += rhs.available;
-        if self.metadata.is_none() {
-            self.metadata = rhs.metadata;
-        }
+        // TODO: enable again when MetadataFeature is cleared up
+        // if self.metadata.is_none() {
+        //     self.metadata = rhs.metadata;
+        // }
     }
 }
 

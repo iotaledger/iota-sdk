@@ -18,7 +18,8 @@ use crate::types::block::{
     output::{
         feature::{BlockIssuerKeyCount, FeatureCount},
         unlock_condition::UnlockConditionCount,
-        AccountId, AnchorId, ChainId, MetadataFeatureLength, NativeTokenCount, NftId, OutputIndex, TagFeatureLength,
+        AccountId, AnchorId, ChainId, MetadataFeatureKeyLength, MetadataFeatureLength, MetadataFeatureValueLength,
+        NativeTokenCount, NftId, OutputIndex, TagFeatureLength,
     },
     payload::{
         tagged_data::{TagLength, TaggedDataLength},
@@ -56,6 +57,7 @@ pub enum Error {
     InvalidAccountIndex(<UnlockIndex as TryFrom<u16>>::Error),
     InvalidAnchorIndex(<UnlockIndex as TryFrom<u16>>::Error),
     InvalidBlockBodyKind(u8),
+    NonAsciiMetadataKey(Vec<u8>),
     InvalidRewardInputIndex(<RewardContextInputIndex as TryFrom<u16>>::Error),
     InvalidStorageDepositAmount(u64),
     /// Invalid transaction failure reason byte.
@@ -104,7 +106,10 @@ pub enum Error {
     },
     InvalidBlockLength(usize),
     InvalidManaValue(u64),
+    InvalidMetadataFeature(String),
     InvalidMetadataFeatureLength(<MetadataFeatureLength as TryFrom<usize>>::Error),
+    InvalidMetadataFeatureKeyLength(<MetadataFeatureKeyLength as TryFrom<usize>>::Error),
+    InvalidMetadataFeatureValueLength(<MetadataFeatureValueLength as TryFrom<usize>>::Error),
     InvalidNativeTokenCount(<NativeTokenCount as TryFrom<usize>>::Error),
     InvalidNetworkName(FromUtf8Error),
     InvalidManaDecayFactors,
@@ -249,6 +254,7 @@ impl fmt::Display for Error {
                 write!(f, "invalid capability byte at index {index}: {byte:x}")
             }
             Self::InvalidBlockBodyKind(k) => write!(f, "invalid block body kind: {k}"),
+            Self::NonAsciiMetadataKey(b) => write!(f, "non ASCII key: {b:?}"),
             Self::InvalidRewardInputIndex(idx) => write!(f, "invalid reward input index: {idx}"),
             Self::InvalidStorageDepositAmount(amount) => {
                 write!(f, "invalid storage deposit amount: {amount}")
@@ -303,8 +309,17 @@ impl fmt::Display for Error {
             Self::InvalidInputOutputIndex(index) => write!(f, "invalid input or output index: {index}"),
             Self::InvalidBlockLength(length) => write!(f, "invalid block length {length}"),
             Self::InvalidManaValue(mana) => write!(f, "invalid mana value: {mana}"),
+            Self::InvalidMetadataFeature(e) => {
+                write!(f, "invalid metadata feature: {e}")
+            }
             Self::InvalidMetadataFeatureLength(length) => {
                 write!(f, "invalid metadata feature length: {length}")
+            }
+            Self::InvalidMetadataFeatureKeyLength(length) => {
+                write!(f, "invalid metadata feature key length: {length}")
+            }
+            Self::InvalidMetadataFeatureValueLength(length) => {
+                write!(f, "invalid metadata feature value length: {length}")
             }
             Self::InvalidNativeTokenCount(count) => write!(f, "invalid native token count: {count}"),
             Self::InvalidNetworkName(err) => write!(f, "invalid network name: {err}"),

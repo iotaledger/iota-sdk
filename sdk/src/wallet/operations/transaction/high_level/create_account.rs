@@ -83,24 +83,25 @@ where
             None => self.address().await.inner().clone(),
         };
 
-        let mut account_output_builder =
+        let account_output_builder =
             AccountOutputBuilder::new_with_minimum_amount(storage_score_params, AccountId::null())
                 .with_foundry_counter(0)
                 .add_unlock_condition(AddressUnlockCondition::new(address.clone()));
-        if let Some(CreateAccountParams {
-            immutable_metadata,
-            metadata,
-            ..
-        }) = params
-        {
-            if let Some(immutable_metadata) = immutable_metadata {
-                account_output_builder =
-                    account_output_builder.add_immutable_feature(MetadataFeature::new(immutable_metadata)?);
-            }
-            if let Some(metadata) = metadata {
-                account_output_builder = account_output_builder.add_feature(MetadataFeature::new(metadata)?);
-            }
-        }
+        // TODO: enable again when MetadataFeature is cleared up
+        // if let Some(CreateAccountParams {
+        //     immutable_metadata,
+        //     metadata,
+        //     ..
+        // }) = params
+        // {
+        //     if let Some(immutable_metadata) = immutable_metadata {
+        //         account_output_builder =
+        //             account_output_builder.add_immutable_feature(MetadataFeature::new(immutable_metadata)?);
+        //     }
+        //     if let Some(metadata) = metadata {
+        //         account_output_builder = account_output_builder.add_feature(MetadataFeature::new(metadata)?);
+        //     }
+        // }
 
         let outputs = [account_output_builder.finish_output()?];
 

@@ -12,7 +12,7 @@ cargo-fuzz = true
 iota-types = { path = "..", default-features = false }
 
 libfuzzer-sys = { version = "0.4.7", default-features = false }
-packable = { version = "0.10.0", default-features = false }
+packable = { git = "https://github.com/iotaledger/common-rs", rev = "c72287fa24254b349f6e935b847485b0be141557", default-features = false }
 
 # Prevent this from interfering with workspaces
 [workspace]

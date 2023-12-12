@@ -45,7 +45,7 @@ iota-crypto = { version = "0.23.0", default-features = false, features = [
     "secp256k1",
 ] }
 iterator-sorted = { version = "0.1.0", default-features = false }
-packable = { version = "0.10.0", default-features = false, features = [
+packable = { git = "https://github.com/iotaledger/common-rs", rev = "c72287fa24254b349f6e935b847485b0be141557", default-features = false, features = [
     "primitive-types",
 ] }
 paste = { version = "1.0.14", default-features = false }
@@ -639,10 +639,10 @@ name = "wallet_ledger_nano"
 path = "examples/wallet/ledger_nano.rs"
 required-features = ["wallet", "ledger_nano"]
 
-[[example]]
-name = "wallet_participation"
-path = "examples/wallet/participation.rs"
-required-features = ["wallet", "participation"]
+# [[example]]
+# name = "wallet_participation"
+# path = "examples/wallet/participation.rs"
+# required-features = ["wallet", "participation"]
 
 [[example]]
 name = "logger"

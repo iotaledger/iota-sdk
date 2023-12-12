@@ -20,7 +20,11 @@ use packable::{bounded::BoundedU8, prefix::BoxedSlicePrefix, Packable};
 pub use self::metadata::irc_27::{Attribute, Irc27Metadata};
 #[cfg(feature = "irc_30")]
 pub use self::metadata::irc_30::Irc30Metadata;
-pub(crate) use self::{block_issuer::BlockIssuerKeyCount, metadata::MetadataFeatureLength, tag::TagFeatureLength};
+pub(crate) use self::{
+    block_issuer::BlockIssuerKeyCount,
+    metadata::{MetadataFeatureKeyLength, MetadataFeatureLength, MetadataFeatureValueLength},
+    tag::TagFeatureLength,
+};
 pub use self::{
     block_issuer::{BlockIssuerFeature, BlockIssuerKey, BlockIssuerKeys, Ed25519BlockIssuerKey},
     issuer::IssuerFeature,
