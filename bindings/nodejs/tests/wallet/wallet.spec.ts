@@ -79,7 +79,7 @@ describe('Wallet', () => {
 
         const walletOptions: WalletOptions = {
             address: wallet_address[0],
-            storagePath: './test-recreate-wallet',
+            storagePath,
             clientOptions: {
                 nodes: ['https://api.testnet.shimmer.network'],
             },
@@ -98,9 +98,9 @@ describe('Wallet', () => {
 
         await wallet.destroy();
 
-        const recreatedWallet = await Wallet.create({ storagePath: './test-recreate-wallet' });
+        const recreatedWallet = await Wallet.create({ storagePath });
 
-        // TODO: make accounts test 
+        // TODO: make add test to verify wallet equality
         // expect(accounts.length).toStrictEqual(0);
 
         await recreatedWallet.destroy();

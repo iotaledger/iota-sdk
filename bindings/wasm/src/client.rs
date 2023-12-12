@@ -15,15 +15,11 @@ use crate::{build_js_error, destroyed_err, map_err, ArrayString};
 
 /// The Client method handler.
 #[wasm_bindgen(js_name = ClientMethodHandler)]
-pub struct ClientMethodHandler {
-    pub(crate) inner: Arc<RwLock<Option<Client>>>,
-}
+pub struct ClientMethodHandler(Arc<RwLock<Option<Client>>>);
 
 impl ClientMethodHandler {
     pub(crate) fn new(client: Client) -> Self {
-        Self {
-            inner: Arc::new(RwLock::new(Some(client))),
-        }
+        Self(Arc::new(RwLock::new(Some(client))))
     }
 }
 
@@ -37,13 +33,13 @@ pub async fn create_client(options: String) -> Result<ClientMethodHandler, JsErr
         .await
         .map_err(map_err)?;
 
-    Ok(ClientMethodHandler::new(client))
+    Ok(ClientMethodHandler(Arc::new(RwLock::new(Some(client)))))
 }
 
 /// Necessary for compatibility with the node.js bindings.
 #[wasm_bindgen(js_name = destroyClient)]
 pub async fn destroy_client(method_handler: &ClientMethodHandler) -> Result<(), JsError> {
-    let mut lock = method_handler.inner.write().await;
+    let mut lock = method_handler.0.write().await;
     if let Some(_) = &*lock {
         *lock = None;
     }
@@ -58,7 +54,7 @@ pub async fn destroy_client(method_handler: &ClientMethodHandler) -> Result<(), 
 #[wasm_bindgen(js_name = callClientMethod)]
 pub async fn call_client_method(method_handler: &ClientMethodHandler, method: String) -> Result<String, JsError> {
     let method = serde_json::from_str(&method).map_err(map_err)?;
-    match &*method_handler.inner.read().await {
+    match &*method_handler.0.read().await {
         Some(client) => {
             let response = rust_call_client_method(&client, method).await;
             let ser = serde_json::to_string(&response)?;

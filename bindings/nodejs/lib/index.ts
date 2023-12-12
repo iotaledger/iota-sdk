@@ -70,7 +70,7 @@ function errorHandle(error: any): Error {
         } else if (err.type == 'error') {
             // Error example:
             // {"type":"error","payload":{"type":"client","error":"no healthy node available"}}
-            // TODO: switch on type and create proper js errors
+            // TODO: switch on type and create proper js errors https://github.com/iotaledger/iota-sdk/issues/1417
             return Error(err.payload.error);
         } else {
             return Error(

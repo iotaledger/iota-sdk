@@ -21,9 +21,7 @@ use crate::{client::ClientMethodHandler, destroyed_err, map_err, secret_manager:
 
 /// The Wallet method handler.
 #[wasm_bindgen(js_name = WalletMethodHandler)]
-pub struct WalletMethodHandler {
-    pub(crate) inner: Arc<RwLock<Option<Wallet>>>,
-}
+pub struct WalletMethodHandler(Arc<RwLock<Option<Wallet>>>);
 
 /// Creates a method handler with the given options.
 #[wasm_bindgen(js_name = createWallet)]
@@ -32,14 +30,12 @@ pub async fn create_wallet(options: String) -> Result<WalletMethodHandler, JsErr
     let wallet_options: WalletOptions = serde_json::from_str::<WalletOptions>(&options).map_err(map_err)?;
     let wallet_method_handler = wallet_options.build().await.map_err(map_err)?;
 
-    Ok(WalletMethodHandler {
-        inner: Arc::new(RwLock::new(Some(wallet_method_handler))),
-    })
+    Ok(WalletMethodHandler(Arc::new(RwLock::new(Some(wallet_method_handler)))))
 }
 
 #[wasm_bindgen(js_name = destroyWallet)]
 pub async fn destroy_wallet(method_handler: &WalletMethodHandler) -> Result<(), JsError> {
-    let mut lock = method_handler.inner.write().await;
+    let mut lock = method_handler.0.write().await;
     if let Some(_) = &*lock {
         *lock = None;
     }
@@ -50,7 +46,7 @@ pub async fn destroy_wallet(method_handler: &WalletMethodHandler) -> Result<(), 
 
 #[wasm_bindgen(js_name = getClient)]
 pub async fn get_client(method_handler: &WalletMethodHandler) -> Result<ClientMethodHandler, JsError> {
-    if let Some(wallet) = &*method_handler.inner.read().await {
+    if let Some(wallet) = &*method_handler.0.read().await {
         Ok(ClientMethodHandler::new(wallet.client().clone()))
     } else {
         // Notify that the wallet was destroyed
@@ -60,7 +56,7 @@ pub async fn get_client(method_handler: &WalletMethodHandler) -> Result<ClientMe
 
 #[wasm_bindgen(js_name = getSecretManager)]
 pub async fn get_secret_manager(method_handler: &WalletMethodHandler) -> Result<SecretManagerMethodHandler, JsError> {
-    if let Some(wallet) = &*method_handler.inner.read().await {
+    if let Some(wallet) = &*method_handler.0.read().await {
         Ok(SecretManagerMethodHandler::new(wallet.get_secret_manager().clone()))
     } else {
         // Notify that the wallet was destroyed
@@ -74,7 +70,7 @@ pub async fn get_secret_manager(method_handler: &WalletMethodHandler) -> Result<
 #[wasm_bindgen(js_name = callWalletMethod)]
 pub async fn call_wallet_method(method_handler: &WalletMethodHandler, method: String) -> Result<String, JsError> {
     let method = serde_json::from_str(&method).map_err(map_err)?;
-    match &*method_handler.inner.read().await {
+    match &*method_handler.0.read().await {
         Some(wallet) => {
             let response = rust_call_wallet_method(&wallet, method).await;
             let ser = serde_json::to_string(&response)?;
@@ -110,7 +106,7 @@ pub async fn listen_wallet(
         event_types.push(wallet_event_type);
     }
 
-    if let Some(wallet) = &*method_handler.inner.read().await {
+    if let Some(wallet) = &*method_handler.0.read().await {
         let (tx, mut rx): (UnboundedSender<WalletEvent>, UnboundedReceiver<WalletEvent>) = unbounded_channel();
         wallet
             .listen(event_types, move |wallet_event| {

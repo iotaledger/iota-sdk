@@ -15,13 +15,11 @@ use crate::{build_js_error, map_err};
 
 /// The SecretManager method handler.
 #[wasm_bindgen(js_name = SecretManagerMethodHandler)]
-pub struct SecretManagerMethodHandler {
-    pub(crate) inner: Arc<RwLock<SecretManager>>,
-}
+pub struct SecretManagerMethodHandler(Arc<RwLock<SecretManager>>);
 
 impl SecretManagerMethodHandler {
     pub(crate) fn new(secret_manager: Arc<RwLock<SecretManager>>) -> Self {
-        Self { inner: secret_manager }
+        Self(secret_manager)
     }
 }
 
@@ -31,9 +29,7 @@ pub fn create_secret_manager(options: String) -> Result<SecretManagerMethodHandl
     let secret_manager_dto = serde_json::from_str::<SecretManagerDto>(&options).map_err(map_err)?;
     let secret_manager = SecretManager::try_from(secret_manager_dto).map_err(map_err)?;
 
-    Ok(SecretManagerMethodHandler {
-        inner: Arc::new(RwLock::new(secret_manager)),
-    })
+    Ok(SecretManagerMethodHandler(Arc::new(RwLock::new(secret_manager))))
 }
 
 /// Handles a method, returns the response as a JSON-encoded string.
@@ -45,7 +41,7 @@ pub async fn call_secret_manager_method(
     method: String,
 ) -> Result<String, JsError> {
     let method = serde_json::from_str(&method).map_err(map_err)?;
-    let secret_manager = &*method_handler.inner.read().await;
+    let secret_manager = &*method_handler.0.read().await;
     let response = rust_call_secret_manager_method(secret_manager, method).await;
     let ser = serde_json::to_string(&response).map_err(map_err)?;
     match response {
