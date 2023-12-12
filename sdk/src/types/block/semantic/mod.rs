@@ -1,18 +1,18 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+mod state_transition;
+
 use alloc::collections::BTreeMap;
 use core::fmt;
 
 use hashbrown::{HashMap, HashSet};
 use primitive_types::U256;
 
+pub use self::state_transition::{StateTransitionError, StateTransitionVerifier};
 use crate::types::block::{
     address::{Address, AddressCapabilityFlag},
-    output::{
-        AccountId, AnchorOutput, ChainId, FoundryId, NativeTokens, Output, OutputId, StateTransitionError, TokenId,
-        UnlockCondition,
-    },
+    output::{AccountId, AnchorOutput, ChainId, FoundryId, NativeTokens, Output, OutputId, TokenId, UnlockCondition},
     payload::signed_transaction::{Transaction, TransactionCapabilityFlag, TransactionSigningHash},
     protocol::ProtocolParameters,
     unlock::Unlock,
@@ -516,10 +516,9 @@ impl<'a> SemanticValidationContext<'a> {
 
         // Validation of state transitions and destructions.
         for (chain_id, current_state) in self.input_chains.iter() {
-            match Output::verify_state_transition(
+            match self.verify_state_transition(
                 Some(current_state),
                 self.output_chains.get(chain_id).map(core::ops::Deref::deref),
-                &self,
             ) {
                 Err(StateTransitionError::TransactionFailure(f)) => return Ok(Some(f)),
                 Err(_) => {
@@ -532,7 +531,7 @@ impl<'a> SemanticValidationContext<'a> {
         // Validation of state creations.
         for (chain_id, next_state) in self.output_chains.iter() {
             if self.input_chains.get(chain_id).is_none() {
-                match Output::verify_state_transition(None, Some(next_state), &self) {
+                match self.verify_state_transition(None, Some(next_state)) {
                     Err(StateTransitionError::TransactionFailure(f)) => return Ok(Some(f)),
                     Err(_) => {
                         return Ok(Some(TransactionFailureReason::InvalidChainStateTransition));
