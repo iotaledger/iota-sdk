@@ -12,11 +12,11 @@ from .secret_manager.secret_manager import *
 from .prefix_hex import *
 from .types.address import *
 from .types.balance import *
-from .types.block.basic import *
 from .types.block.block import *
+from .types.block.body.basic import *
+from .types.block.body.type import *
+from .types.block.body.validation import *
 from .types.block.metadata import *
-from .types.block.signed_block import *
-from .types.block.validation import *
 from .types.block_builder_options import *
 from .types.block_issuer_key import *
 from .types.burn import *
