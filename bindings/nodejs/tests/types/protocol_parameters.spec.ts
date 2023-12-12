@@ -12,7 +12,7 @@ describe('ProtocolParameters tests', () => {
 
     it('compares ProtocolParameters hash from a fixture', async () => {
 
-        const params = protocol_parameters.params as unknown as ProtocolParameters;
+        const params: ProtocolParameters = JSON.parse(JSON.stringify(protocol_parameters.params));
         const hash = Utils.protocolParametersHash(params);
         const expected_hash = protocol_parameters.hash;
         

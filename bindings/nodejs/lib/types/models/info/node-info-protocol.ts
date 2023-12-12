@@ -3,6 +3,7 @@
 
 import type { StorageScoreParameters } from '../storage-score';
 import { EpochIndex } from '../../block/slot';
+import { u64 } from '../../utils/type-aliases';
 
 /**
  * The Protocol Info.
@@ -53,7 +54,7 @@ interface ProtocolParameters {
     /**
      * Current supply of base token.
      */
-    tokenSupply: string;
+    tokenSupply: u64;
     /**
      * Genesis Slot defines the slot of the genesis.
      */
@@ -61,7 +62,7 @@ interface ProtocolParameters {
     /**
      * The genesis timestamp at which the slots start to count.
      */
-    genesisUnixTimestamp: string;
+    genesisUnixTimestamp: u64;
     /**
      * The duration of a slot, in seconds.
      */
@@ -135,7 +136,7 @@ interface RewardsParameters {
     /**
      * Mana Share Coefficient is the coefficient used for calculation of initial rewards.
      */
-    manaShareCoefficient: string;
+    manaShareCoefficient: u64;
     /**
      * Decay Balancing Constant Exponent is the exponent used for calculation of the initial reward.
      */
@@ -143,7 +144,7 @@ interface RewardsParameters {
     /**
      * Decay Balancing Constant is an integer approximation calculated based on chosen Decay Balancing Constant Exponent.
      */
-    decayBalancingConstant: string;
+    decayBalancingConstant: u64;
     /**
      * Pool Coefficient Exponent is the exponent used for shifting operation
      * in the pool rewards calculations.
@@ -238,15 +239,15 @@ interface CongestionControlParameters {
     /**
      * The minimum value of the reference Mana cost.
      */
-    minReferenceManaCost: string;
+    minReferenceManaCost: u64;
     /**
      * The increase step size of the reference Mana cost.
      */
-    increase: string;
+    increase: u64;
     /**
      * The decrease step size of the reference Mana cost.
      */
-    decrease: string;
+    decrease: u64;
     /**
      * The threshold for increasing the reference Mana cost.
      */
