@@ -293,7 +293,7 @@ impl ClientInner {
         self.get_request(path, None, true, true).await
     }
 
-    /// Find the metadata of a transaction.
+    /// Finds the metadata of a transaction.
     /// GET /api/core/v3/transactions/{transactionId}/metadata
     pub async fn get_transaction_metadata(
         &self,
