@@ -16,12 +16,11 @@ use crate::types::block::{
     output::{
         feature::{verify_allowed_features, Feature, FeatureFlags, Features},
         unlock_condition::{verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions},
-        ChainId, MinimumOutputAmount, Output, OutputBuilderAmount, OutputId, StateTransitionError,
-        StateTransitionVerifier, StorageScore, StorageScoreParameters,
+        ChainId, MinimumOutputAmount, Output, OutputBuilderAmount, OutputId, StorageScore, StorageScoreParameters,
     },
     payload::signed_transaction::TransactionCapabilityFlag,
     protocol::{ProtocolParameters, WorkScore, WorkScoreParameters},
-    semantic::{SemanticValidationContext, TransactionFailureReason},
+    semantic::{SemanticValidationContext, StateTransitionError, StateTransitionVerifier, TransactionFailureReason},
     unlock::Unlock,
     Error,
 };
@@ -42,7 +41,11 @@ impl From<&OutputId> for AnchorId {
 impl AnchorId {
     ///
     pub fn or_from_output_id(self, output_id: &OutputId) -> Self {
-        if self.is_null() { Self::from(output_id) } else { self }
+        if self.is_null() {
+            Self::from(output_id)
+        } else {
+            self
+        }
     }
 }
 

@@ -8,7 +8,6 @@ mod metadata;
 mod native_token;
 mod output_id;
 mod output_id_proof;
-mod state_transition;
 mod storage_score;
 mod token_scheme;
 
@@ -43,7 +42,6 @@ pub use self::{
     nft::{NftId, NftOutput, NftOutputBuilder},
     output_id::OutputId,
     output_id_proof::{HashableNode, LeafHash, OutputCommitmentProof, OutputIdProof, ValueHash},
-    state_transition::{StateTransitionError, StateTransitionVerifier},
     storage_score::{StorageScore, StorageScoreParameters},
     token_scheme::{SimpleTokenScheme, TokenScheme},
     unlock_condition::{UnlockCondition, UnlockConditions},
@@ -57,7 +55,7 @@ pub(crate) use self::{
 use crate::types::block::{
     address::Address,
     protocol::{CommittableAgeRange, ProtocolParameters, WorkScore, WorkScoreParameters},
-    semantic::SemanticValidationContext,
+    semantic::{SemanticValidationContext, StateTransitionError, StateTransitionVerifier},
     slot::SlotIndex,
     Error,
 };

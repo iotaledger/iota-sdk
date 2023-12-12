@@ -10,11 +10,10 @@ use crate::types::block::{
     output::{
         chain_id::ChainId,
         unlock_condition::{verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions},
-        MinimumOutputAmount, Output, OutputBuilderAmount, OutputId, StateTransitionError, StateTransitionVerifier,
-        StorageScore, StorageScoreParameters,
+        MinimumOutputAmount, Output, OutputBuilderAmount, OutputId, StorageScore, StorageScoreParameters,
     },
     protocol::{ProtocolParameters, WorkScore, WorkScoreParameters},
-    semantic::{SemanticValidationContext, TransactionFailureReason},
+    semantic::{SemanticValidationContext, StateTransitionError, StateTransitionVerifier, TransactionFailureReason},
     slot::EpochIndex,
     unlock::Unlock,
     Error,
@@ -36,7 +35,11 @@ impl From<&OutputId> for DelegationId {
 
 impl DelegationId {
     pub fn or_from_output_id(self, output_id: &OutputId) -> Self {
-        if self.is_null() { Self::from(output_id) } else { self }
+        if self.is_null() {
+            Self::from(output_id)
+        } else {
+            self
+        }
     }
 }
 
