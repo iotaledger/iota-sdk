@@ -30,7 +30,7 @@ def test_basic_block_with_tagged_data_payload():
     assert block_to_dict == block_dict
 
 
-def test_signed_block_with_tagged_data_payload():
+def test_block_with_tagged_data_payload():
     block_dict = {
         "protocolVersion": 3,
         "networkId": "10549460113735494767",
