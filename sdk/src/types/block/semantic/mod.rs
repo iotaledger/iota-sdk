@@ -3,6 +3,7 @@
 
 mod error;
 mod state_transition;
+mod unlock;
 
 use alloc::collections::BTreeMap;
 

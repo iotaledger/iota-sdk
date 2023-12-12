@@ -323,8 +323,8 @@ impl BasicOutput {
             .context_inputs()
             .iter()
             .find_map(|c| c.as_commitment_opt().map(|c| c.slot_index()));
-
-        self.unlock_conditions()
+        let locked_address = self
+            .unlock_conditions()
             .locked_address(
                 self.address(),
                 slot_index,
@@ -332,8 +332,9 @@ impl BasicOutput {
             )
             .map_err(|_| TransactionFailureReason::InvalidCommitmentContextInput)?
             // because of expiration the input can't be unlocked at this time
-            .ok_or(TransactionFailureReason::SemanticValidationFailed)?
-            .unlock(unlock, context)
+            .ok_or(TransactionFailureReason::SemanticValidationFailed)?;
+
+        context.address_unlock(locked_address, unlock)
     }
 
     /// Returns the address of the unlock conditions if the output is a simple deposit.

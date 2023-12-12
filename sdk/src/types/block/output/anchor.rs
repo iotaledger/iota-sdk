@@ -437,9 +437,9 @@ impl AnchorOutput {
         match next_state {
             Some(Output::Anchor(next_state)) => {
                 if self.state_index() == next_state.state_index() {
-                    self.governor_address().unlock(unlock, context)?;
+                    context.address_unlock(self.governor_address(), unlock)?;
                 } else {
-                    self.state_controller_address().unlock(unlock, context)?;
+                    context.address_unlock(self.state_controller_address(), unlock)?;
                     // Only a state transition can be used to consider the anchor address for output unlocks and
                     // sender/issuer validations.
                     context
@@ -447,7 +447,7 @@ impl AnchorOutput {
                         .insert(Address::from(AnchorAddress::from(anchor_id)));
                 }
             }
-            None => self.governor_address().unlock(unlock, context)?,
+            None => context.address_unlock(self.governor_address(), unlock)?,
             // The next state can only be an anchor output since it is identified by an anchor chain identifier.
             Some(_) => unreachable!(),
         };
