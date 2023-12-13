@@ -37,8 +37,8 @@ for i, output_data in enumerate(outputs):
     print(f'- amount: #{output_data.output.amount}')
 
     native_tokens = [feature for feature in output_data.output.features if feature.type == FeatureType.NativeToken]
-    first_native_token = next(iter(native_tokens), None)
-    print(f'- native tokens: #{first_native_token}')
+    opt_native_token = next(iter(native_tokens), None)
+    print(f'- native tokens: #{opt_native_token}')
 
 print('Sending consolidation transaction...')
 
@@ -70,5 +70,5 @@ for i, output_data in enumerate(outputs):
     print(f'- amount: #{output_data.output.amount}')
 
     native_tokens = [feature for feature in output_data.output.features if feature.type == FeatureType.NativeToken]
-    first_native_token = next(iter(native_tokens), None)
-    print(f'- native tokens: #{first_native_token}')
+    opt_native_token = next(iter(native_tokens), None)
+    print(f'- native tokens: #{opt_native_token}')
