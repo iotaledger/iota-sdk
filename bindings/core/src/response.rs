@@ -16,20 +16,21 @@ use iota_sdk::{
     types::{
         api::{
             core::{
-                BlockMetadataResponse, BlockWithMetadataResponse, InfoResponse as NodeInfo,
-                IssuanceBlockHeaderResponse, OutputWithMetadataResponse, PeerResponse,
+                BlockMetadataResponse, BlockWithMetadataResponse, CommitteeResponse, CongestionResponse,
+                InfoResponse as NodeInfo, IssuanceBlockHeaderResponse, ManaRewardsResponse, OutputWithMetadataResponse,
+                TransactionMetadataResponse, UtxoChangesResponse, ValidatorResponse, ValidatorsResponse,
             },
             plugins::indexer::OutputIdsResponse,
         },
         block::{
             address::{Address, Bech32Address, Hrp},
             input::UtxoInput,
-            output::{AccountId, FoundryId, NftId, Output, OutputId, OutputMetadata, TokenId},
+            output::{AccountId, FoundryId, NftId, Output, OutputId, OutputMetadata, OutputWithMetadata, TokenId},
             payload::{dto::SignedTransactionPayloadDto, signed_transaction::TransactionId},
             protocol::ProtocolParameters,
             semantic::TransactionFailureReason,
             signature::Ed25519Signature,
-            slot::SlotCommitmentId,
+            slot::{SlotCommitment, SlotCommitmentId},
             unlock::Unlock,
             BlockDto, BlockId, UnsignedBlockDto,
         },
@@ -101,8 +102,20 @@ pub enum Response {
     /// - [`GetInfo`](crate::method::ClientMethod::GetInfo)
     Info(NodeInfoWrapper),
     /// Response for:
-    /// - [`GetPeers`](crate::method::ClientMethod::GetPeers)
-    Peers(Vec<PeerResponse>),
+    /// - [`GetAccountCongestion`](crate::method::ClientMethod::GetAccountCongestion)
+    Congestion(CongestionResponse),
+    /// Response for:
+    /// - [`GetRewards`](crate::method::ClientMethod::GetRewards)
+    ManaRewards(ManaRewardsResponse),
+    /// Response for:
+    /// - [`GetValidators`](crate::method::ClientMethod::GetValidators)
+    Validators(ValidatorsResponse),
+    /// Response for:
+    /// - [`GetValidator`](crate::method::ClientMethod::GetValidator)
+    Validator(ValidatorResponse),
+    /// Response for:
+    /// - [`GetCommittee`](crate::method::ClientMethod::GetCommittee)
+    Committee(CommitteeResponse),
     /// Response for:
     /// - [`GetIssuance`](crate::method::ClientMethod::GetIssuance)
     Issuance(IssuanceBlockHeaderResponse),
@@ -118,6 +131,17 @@ pub enum Response {
     /// - [`GetBlockMetadata`](crate::method::ClientMethod::GetBlockMetadata)
     BlockMetadata(BlockMetadataResponse),
     /// Response for:
+    /// - [`GetTransactionMetadata`](crate::method::ClientMethod::GetTransactionMetadata)
+    TransactionMetadata(TransactionMetadataResponse),
+    /// Response for:
+    /// - [`GetCommitment`](crate::method::ClientMethod::GetCommitment)
+    /// - [`GetCommitmentByIndex`](crate::method::ClientMethod::GetCommitmentByIndex)
+    SlotCommitment(SlotCommitment),
+    /// Response for:
+    /// - [`GetUtxoChanges`](crate::method::ClientMethod::GetUtxoChanges)
+    /// - [`GetUtxoChangesByIndex`](crate::method::ClientMethod::GetUtxoChangesByIndex)
+    UtxoChanges(UtxoChangesResponse),
+    /// Response for:
     /// - [`GetBlockWithMetadata`](crate::method::ClientMethod::GetBlockWithMetadata)
     BlockWithMetadata(BlockWithMetadataResponse),
     /// Response for:
@@ -129,6 +153,9 @@ pub enum Response {
     /// Response for:
     /// - [`GetOutputMetadata`](crate::method::ClientMethod::GetOutputMetadata)
     OutputMetadata(OutputMetadata),
+    /// Response for:
+    /// - [`GetOutputWithMetadata`](crate::method::ClientMethod::GetOutputWithMetadata)
+    OutputWithMetadata(OutputWithMetadata),
     /// Response for:
     /// - [`GetOutputs`](crate::method::ClientMethod::GetOutputs)
     /// - [`GetOutputsIgnoreErrors`](crate::method::ClientMethod::GetOutputsIgnoreErrors)

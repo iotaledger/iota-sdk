@@ -5,6 +5,7 @@ import { __UtilsMethods__ } from './types/utils';
 
 // @ts-ignore: path is set to match runtime transpiled js path
 import addon = require('../build/Release/index.node');
+import { errorHandle } from '.';
 
 const {
     callUtilsMethodRust,
@@ -19,17 +20,19 @@ const {
     createWallet,
     listenWallet,
     destroyWallet,
-    getClientFromWallet,
-    getSecretManagerFromWallet,
+    getClient,
+    getSecretManager,
     migrateStrongholdSnapshotV2ToV3,
 } = addon;
 
 const callUtilsMethod = (method: __UtilsMethods__): any => {
-    const response = JSON.parse(callUtilsMethodRust(JSON.stringify(method)));
-    if (response.type == 'error' || response.type == 'panic') {
-        throw response;
-    } else {
+    try {
+        const response = JSON.parse(
+            callUtilsMethodRust(JSON.stringify(method)),
+        );
         return response.payload;
+    } catch (error: any) {
+        throw errorHandle(error);
     }
 };
 
@@ -45,8 +48,8 @@ export {
     callWalletMethod,
     destroyWallet,
     listenWallet,
-    getClientFromWallet,
-    getSecretManagerFromWallet,
+    getClient,
+    getSecretManager,
     listenMqtt,
     migrateStrongholdSnapshotV2ToV3,
 };

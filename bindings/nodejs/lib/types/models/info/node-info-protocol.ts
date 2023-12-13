@@ -16,7 +16,7 @@ export interface ProtocolInfo {
     /**
      * The protocol parameters.
      */
-    parameters: ProtocolParameters[];
+    parameters: ProtocolParameters;
 }
 
 /**

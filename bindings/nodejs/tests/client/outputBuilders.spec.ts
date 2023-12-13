@@ -5,16 +5,18 @@ import { describe, it } from '@jest/globals';
 import 'reflect-metadata';
 import 'dotenv/config';
 
-import { AddressUnlockCondition, AccountAddress, Client, SecretManager, Ed25519Address, ImmutableAccountAddressUnlockCondition, SimpleTokenScheme, Utils } from '../../';
+import { AddressUnlockCondition, AccountAddress, Client, SecretManager, Ed25519Address, ImmutableAccountAddressUnlockCondition, SimpleTokenScheme, Utils } from '../../lib';
 import '../customMatchers';
 
-const client = new Client({
-    nodes: [
-        {
-            url: process.env.NODE_URL || 'http://localhost:14265',
-        },
-    ],
-});
+async function makeClient(): Promise<Client> {
+    return Client.create({
+        nodes: [
+            {
+                url: process.env.NODE_URL || 'http://localhost:8050',
+            },
+        ],
+    });
+}
 
 const secretManager = {
     mnemonic:
@@ -24,7 +26,7 @@ const secretManager = {
 // Skip for CI
 describe.skip('Output builder methods', () => {
     it('builds a basic output', async () => {
-        const addresses = await new SecretManager(secretManager).generateEd25519Addresses({
+        const addresses = await SecretManager.create(secretManager).generateEd25519Addresses({
             range: {
                 start: 0,
                 end: 1,
@@ -32,6 +34,7 @@ describe.skip('Output builder methods', () => {
         });
 
         const hexAddress = Utils.bech32ToHex(addresses[0]);
+        const client = await makeClient();
 
         // most simple basic output
         const basicOutput = await client.buildBasicOutput({
@@ -47,7 +50,7 @@ describe.skip('Output builder methods', () => {
     });
 
     it('builds an account output', async () => {
-        const addresses = await new SecretManager(secretManager).generateEd25519Addresses({
+        const addresses = await SecretManager.create(secretManager).generateEd25519Addresses({
             range: {
                 start: 0,
                 end: 1,
@@ -55,6 +58,7 @@ describe.skip('Output builder methods', () => {
         });
 
         const hexAddress = Utils.bech32ToHex(addresses[0]);
+        const client = await makeClient();
 
         const accountId =
             '0xa5c28d5baa951de05e375fb19134ea51a918f03acc2d0cee011a42b298d3effa';
@@ -72,6 +76,7 @@ describe.skip('Output builder methods', () => {
     });
 
     it('builds a foundry output', async () => {
+        const client = await makeClient();
         const accountId =
             '0xa5c28d5baa951de05e375fb19134ea51a918f03acc2d0cee011a42b298d3effa';
 
@@ -97,7 +102,8 @@ describe.skip('Output builder methods', () => {
     });
 
     it('builds an nft output', async () => {
-        const addresses = await new SecretManager(secretManager).generateEd25519Addresses({
+        const client = await makeClient();
+        const addresses = await SecretManager.create(secretManager).generateEd25519Addresses({
             range: {
                 start: 0,
                 end: 1,

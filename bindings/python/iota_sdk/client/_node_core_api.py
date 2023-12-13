@@ -65,11 +65,6 @@ class NodeCoreAPI(metaclass=ABCMeta):
         """
         return from_dict(NodeInfoWrapper, self._call_method('getInfo'))
 
-    def get_peers(self):
-        """Get the peers of the node.
-        """
-        return self._call_method('getPeers')
-
     def get_tips(self) -> List[HexStr]:
         """Request tips from the node.
         """

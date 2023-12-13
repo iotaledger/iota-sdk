@@ -19,8 +19,7 @@ use crate::types::block::{
         ChainId, MinimumOutputAmount, Output, OutputBuilderAmount, OutputId, StorageScore, StorageScoreParameters,
     },
     protocol::{ProtocolParameters, WorkScore, WorkScoreParameters},
-    semantic::{SemanticValidationContext, StateTransitionError, TransactionFailureReason},
-    unlock::Unlock,
+    semantic::StateTransitionError,
     Error,
 };
 
@@ -373,37 +372,6 @@ impl AccountOutput {
     /// Returns the account address for this output.
     pub fn account_address(&self, output_id: &OutputId) -> AccountAddress {
         AccountAddress::new(self.account_id_non_null(output_id))
-    }
-
-    ///
-    pub fn unlock(
-        &self,
-        output_id: &OutputId,
-        unlock: &Unlock,
-        context: &mut SemanticValidationContext<'_>,
-    ) -> Result<(), TransactionFailureReason> {
-        self.unlock_conditions()
-            .locked_address(
-                self.address(),
-                None,
-                context.protocol_parameters.committable_age_range(),
-            )
-            // Safe to unwrap, AccountOutput can't have an expiration unlock condition.
-            .unwrap()
-            .unwrap()
-            .unlock(unlock, context)?;
-
-        let account_id = if self.account_id().is_null() {
-            AccountId::from(output_id)
-        } else {
-            *self.account_id()
-        };
-
-        context
-            .unlocked_addresses
-            .insert(Address::from(AccountAddress::from(account_id)));
-
-        Ok(())
     }
 
     // Transition, just without full SemanticValidationContext
