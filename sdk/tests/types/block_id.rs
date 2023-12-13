@@ -5,7 +5,7 @@ use core::str::FromStr;
 
 use iota_sdk::types::{
     block::{
-        output::StorageScoreParameters, protocol::ProtocolParameters, rand::bytes::rand_bytes_array, slot::SlotIndex,
+        protocol::ProtocolParameters, rand::bytes::rand_bytes_array, slot::SlotIndex,
         Block, BlockDto, BlockHash, BlockId,
     },
     TryFromDto,
@@ -67,17 +67,12 @@ fn memory_layout() {
 }
 
 fn protocol_parameters() -> ProtocolParameters {
-    ProtocolParameters::new(
-        3,
-        "test",
-        "rms",
-        StorageScoreParameters::default(),
-        0,
-        1695275822,
-        10,
-        0,
-    )
-    .unwrap()
+    let file = std::fs::read_to_string("./tests/types/fixtures/protocol_parameters.json").unwrap();
+    let json = serde_json::from_str::<serde_json::Value>(&file).unwrap();
+    let params_json = &json["params"];
+    let params = serde_json::from_value::<ProtocolParameters>(params_json.clone()).unwrap();
+    assert_eq!(params.hash().to_string(), json["hash"]);
+    serde_json::from_value::<ProtocolParameters>(params_json.clone()).unwrap()
 }
 
 #[test]
@@ -92,7 +87,7 @@ fn basic_block_tagged_data_payload_id() {
 
     assert_eq!(prefix_hex::encode(&block_bytes), json["bytes"]);
     assert_eq!(block, Block::unpack_unverified(block_bytes).unwrap());
-    assert_eq!(block.id(&protocol_parameters()).to_string(), json["id"]);
+    assert_eq!(serde_json::Value::String(block.id(&protocol_parameters()).to_string()), json["id"]);
 }
 
 // TODO waiting for the ContextInput discussion

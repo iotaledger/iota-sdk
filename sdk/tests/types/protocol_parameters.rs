@@ -8,7 +8,7 @@ use pretty_assertions::assert_eq;
 // Test from https://github.com/iotaledger/tips/blob/tip49/tips/TIP-0049/tip-0049.md#protocol-parameter-hash
 #[test]
 fn serde_packable_hash() {
-    let file = std::fs::read_to_string("./tests/types/fixtures/protocol_parameters.json").unwrap();
+    let file = std::fs::read_to_string("./tests/types/fixtures/protocol_parameters3.json").unwrap();
     let json = serde_json::from_str::<serde_json::Value>(&file).unwrap();
     let params_json = &json["params"];
     let params = serde_json::from_value::<ProtocolParameters>(params_json.clone()).unwrap();

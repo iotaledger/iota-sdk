@@ -1,142 +1,138 @@
 {
-    "block":{
-       "header":{
-          "protocolVersion":3,
-          "networkId":"8342982141227064571",
-          "issuingTime":"1701088600401978103",
-          "slotCommitmentId":"0x01771954516b4c066163025c2671145a57041368613a434a0c445d2f1e06732f2bab32c3",
-          "latestFinalizedSlot":500,
-          "issuerId":"0x267d4c21194e1d775a2f355f296c4c057e7e3907143a467c415d57244261311f"
-       },
-       "body":{
-          "type":0,
-          "strongParents":[
-             "0x081446226d2158064559542c47511c344741405b58030109120552017967337522210a3e",
-             "0x0b2836550a6328063d21626b522c22151e1b232a5004155a727b237b6c063f5e51122e40",
-             "0x113e261616674f1634040b493f39146c0527670a0d5a381c1c254a2e0b5b343d19781008",
-             "0x1a4a01006e1b744839280411415b5a0c4e655d3927051c26782b41285003730657192262",
-             "0x37663d0977340229137d5b5140680766434b7b0b243c084025015d46671f3136275e6e26",
-             "0x4d7c4b734b5b70434a3709390415174a502c692f43723c7b360a20064b101028555c0548"
-          ],
-          "weakParents":[
-             
-          ],
-          "shallowLikeParents":[
-             
-          ],
-          "payload":{
-             "type":1,
-             "transaction":{
-                "networkId":"14147312347886322761",
-                "creationSlot":1048576,
-                "contextInputs":[
-                   {
-                      "type":1,
-                      "commitmentId":"0x0c196b3742624d707905684465112e09592a1e290d1a547c401d6f731650504355000000"
-                   },
-                   {
-                      "type":2,
-                      "accountId":"0x0b35717008475819485056503a6d4a332a103037284538745c302d5f6f02300f"
-                   },
-                   {
-                      "type":3,
-                      "index":0
-                   }
-                ],
-                "inputs":[
-                   {
-                      "type":0,
-                      "transactionId":"0xf09d3cd648a7246c7c1b2ba2f9182465ae5742b78c592392b4b455ab8ed7195200000000",
-                      "transactionOutputIndex":0
-                   },
-                   {
-                      "type":0,
-                      "transactionId":"0xd2c5ccba12b6fad51652131289867492799c9fc5710244418aa6e955f8fa826100000000",
-                      "transactionOutputIndex":0
-                   }
-                ],
-                "allotments":[
-                   {
-                      "accountId":"0x7e0d0a5848362b23120f55115b096774036d7610137a631413221f5573344507",
-                      "mana":"2285"
-                   },
-                   {
-                      "accountId":"0x476820096e7038107d071a4e473f1e295f346e2d0824263e5e3e7d004f6b6915",
-                      "mana":"2189"
-                   }
-                ],
-                "capabilities":"0x01",
-                "outputs":[
-                   {
-                      "type":0,
-                      "amount":"100000",
-                      "mana":"0",
-                      "unlockConditions":[
-                         {
-                            "type":0,
-                            "address":{
-                               "type":0,
-                               "pubKeyHash":"0x6cec8d9549441d06f3ab2de30f7c0c6cb67c86de30d427eb5a756ef37f702f80"
-                            }
-                         }
-                      ],
-                      "features":[
-                         {
-                            "type":5,
-                            "id":"0x086372557616532f714f104e5f44297b7a286d077956291a6d4f59081f484463712a64300c00",
-                            "amount":"0x14be8149371263f4"
-                         }
-                      ]
-                   },
-                   {
-                      "type":1,
-                      "amount":"100000",
-                      "mana":"5000",
-                      "accountId":"0x0000000000000000000000000000000000000000000000000000000000000000",
-                      "foundryCounter":0,
-                      "unlockConditions":[
-                         {
-                            "type":0,
-                            "address":{
-                               "type":0,
-                               "pubKeyHash":"0x6cec8d9549441d06f3ab2de30f7c0c6cb67c86de30d427eb5a756ef37f702f80"
-                            }
-                         }
-                      ],
-                      "features":[
-                         {
-                            "type":3,
-                            "entries":{
-                               "hello":"0x776f726c64"
-                            }
-                         }
-                      ]
-                   }
-                ]
-             },
-             "unlocks":[
-                {
-                   "type":0,
-                   "signature":{
-                      "type":0,
-                      "publicKey":"0xe1274a4c7390f7d8e6cc830bf233b321a3357e633cf05d42d6af1afb22d6c09f",
-                      "signature":"0x2573975a837005b08886be98b60c10a67ada55bbe20d813f35b53c4fb45762e3a2cde0fb4e1ab2f270075d807f29dffb813582cc03a50c1f1859c2bb4c4ad809"
-                   }
-                },
-                {
-                   "type":1,
-                   "reference":0
-                }
-             ]
-          },
-          "maxBurnedMana":"119"
-       },
-       "signature":{
-          "type":0,
-          "publicKey":"0xb63209ab6f30d38eaadc1b72ae3193bc53c5d751de7ecbd80aa4375db9068e38",
-          "signature":"0x4f4a6ec504fd414d3842b4dddf9ace4ceca077e826a0e37182b85df41a4c9048637baa01c9e2685d54398f3bec0fe88bf2928c6509664a7a0326b60afdd7410e"
-       }
+  "block": {
+    "header": {
+      "protocolVersion": 3,
+      "networkId": "8342982141227064571",
+      "issuingTime": "1695275852000000000",
+      "slotCommitmentId": "0x3a1e3b617060146e0362361a4b752833186108395f3b2b3d3e6c655e287d70767ea58d2a",
+      "latestFinalizedSlot": 500,
+      "issuerId": "0x17432c5a7a672503480241125e3952414a7a320441080c624c264b004e09614a"
     },
-    "bytes":"0x030000000000000000f7226dbe117b9b1701771954516b4c066163025c2671145a57041368613a434a0c445d2f1e06732f2bab32c3f4010000267d4c21194e1d775a2f355f296c4c057e7e3907143a467c415d57244261311f0006081446226d2158064559542c47511c344741405b58030109120552017967337522210a3e0b2836550a6328063d21626b522c22151e1b232a5004155a727b237b6c063f5e51122e40113e261616674f1634040b493f39146c0527670a0d5a381c1c254a2e0b5b343d197810081a4a01006e1b744839280411415b5a0c4e655d3927051c26782b4128500373065719226237663d0977340229137d5b5140680766434b7b0b243c084025015d46671f3136275e6e264d7c4b734b5b70434a3709390415174a502c692f43723c7b360a20064b101028555c054800004e02000001490443ee9f5955c4000010000300010c196b3742624d707905684465112e09592a1e290d1a547c401d6f731650504355000000020b35717008475819485056503a6d4a332a103037284538745c302d5f6f02300f030000020000f09d3cd648a7246c7c1b2ba2f9182465ae5742b78c592392b4b455ab8ed7195200000000000000d2c5ccba12b6fad51652131289867492799c9fc5710244418aa6e955f8fa826100000000000002007e0d0a5848362b23120f55115b096774036d7610137a631413221f5573344507ed08000000000000476820096e7038107d071a4e473f1e295f346e2d0824263e5e3e7d004f6b69158d08000000000000010100000000020000a08601000000000000000000000000000100006cec8d9549441d06f3ab2de30f7c0c6cb67c86de30d427eb5a756ef37f702f800105086372557616532f714f104e5f44297b7a286d077956291a6d4f59081f484463712a64300c00f46312374981be1400000000000000000000000000000000000000000000000001a08601000000000088130000000000000000000000000000000000000000000000000000000000000000000000000000000000000100006cec8d9549441d06f3ab2de30f7c0c6cb67c86de30d427eb5a756ef37f702f800103010568656c6c6f0500776f726c640002000000e1274a4c7390f7d8e6cc830bf233b321a3357e633cf05d42d6af1afb22d6c09f2573975a837005b08886be98b60c10a67ada55bbe20d813f35b53c4fb45762e3a2cde0fb4e1ab2f270075d807f29dffb813582cc03a50c1f1859c2bb4c4ad809010000770000000000000000b63209ab6f30d38eaadc1b72ae3193bc53c5d751de7ecbd80aa4375db9068e384f4a6ec504fd414d3842b4dddf9ace4ceca077e826a0e37182b85df41a4c9048637baa01c9e2685d54398f3bec0fe88bf2928c6509664a7a0326b60afdd7410e",
-    "id":"0x4ece1018c2387eb5925ac208ad4a530177335c7e0a894afae04014ddd5239eac9ede0800"
- }
+    "body": {
+      "type": 0,
+      "strongParents": [
+        "0x27e0461873f37040c9e59c35ad8a106fa1b94f5ec9ef89499b31904f9a3de59be58dd44a",
+        "0x714821f8f257e0a502b71ac7ee57530bb9dc29fe12ff3936f925b835a297680400b76948",
+        "0x9951e512546cd9c9fbdab348b6cba91a601a29b50854e55a6e14f6803ca1d81ac7eff5ce",
+        "0xaaa7bacf26f1aa4754d42edeab45d6169ea723b7fdf0f6ff3b6ebe90d09dbff6bc553936",
+        "0xba75a143de4ac932986fbe7b1d78f639bc6ee8aee10d510d41572851530be884778052aa",
+        "0xea5315941f4337752905599710b55e64018c71f4d8f299d0636d50484d05e6ac5667b503"
+      ],
+      "weakParents": [],
+      "shallowLikeParents": [],
+      "payload": {
+        "type": 1,
+        "transaction": {
+          "networkId": "8342982141227064571",
+          "creationSlot": 1048576,
+          "contextInputs": [
+            {
+              "type": 1,
+              "commitmentId": "0x3a1e3b617060146e0362361a4b752833186108395f3b2b3d3e6c655e287d70767ea58d2a"
+            },
+            {
+              "type": 2,
+              "accountId": "0x17432c5a7a672503480241125e3952414a7a320441080c624c264b004e09614a"
+            },
+            {
+              "type": 3,
+              "index": 0
+            }
+          ],
+          "inputs": [
+            {
+              "type": 0,
+              "transactionId": "0xf09d3cd648a7246c7c1b2ba2f9182465ae5742b78c592392b4b455ab8ed7195200000000",
+              "transactionOutputIndex": 0
+            },
+            {
+              "type": 0,
+              "transactionId": "0xd2c5ccba12b6fad51652131289867492799c9fc5710244418aa6e955f8fa826100000000",
+              "transactionOutputIndex": 0
+            }
+          ],
+          "allotments": [
+            {
+              "accountId": "0x7e0d0a5848362b23120f55115b096774036d7610137a631413221f5573344507",
+              "mana": "2285"
+            },
+            {
+              "accountId": "0x476820096e7038107d071a4e473f1e295f346e2d0824263e5e3e7d004f6b6915",
+              "mana": "2189"
+            }
+          ],
+          "capabilities": "0x01",
+          "outputs": [
+            {
+              "type": 0,
+              "amount": "100000",
+              "mana": "0",
+              "unlockConditions": [
+                {
+                  "type": 0,
+                  "address": {
+                    "type": 0,
+                    "pubKeyHash": "0xed1484f4d1f7d8c037087fed661dd92faccae1eed3c01182d6fdd6828cea144a"
+                  }
+                }
+              ],
+              "features": [
+                {
+                  "type": 5,
+                  "id": "0x086372557616532f714f104e5f44297b7a286d077956291a6d4f59081f484463712a64300c00",
+                  "amount": "0x14be8149371263f4"
+                }
+              ]
+            },
+            {
+              "type": 1,
+              "amount": "100000",
+              "mana": "5000",
+              "accountId": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "foundryCounter": 0,
+              "unlockConditions": [
+                {
+                  "type": 0,
+                  "address": {
+                    "type": 0,
+                    "pubKeyHash": "0xed1484f4d1f7d8c037087fed661dd92faccae1eed3c01182d6fdd6828cea144a"
+                  }
+                }
+              ],
+              "features": [
+                {
+                  "type": 3,
+                  "entries": {
+                    "hello": "0x776f726c64"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        "unlocks": [
+          {
+            "type": 0,
+            "signature": {
+              "type": 0,
+              "publicKey": "0x2daefbcbadd044da470acd2f7fcf6fcb04b873cc801e7ee408018e1dfa0257ac",
+              "signature": "0x328034c1701ae304fcf69b542ceeacf7aa2e94df6e2191b0e1e345c62c49d4afa5f4f58ccc8fa3d400e8c01a19719cf26820337d5c35d5cb5fcafe6d97eab402"
+            }
+          },
+          {
+            "type": 1,
+            "reference": 0
+          }
+        ]
+      },
+      "maxBurnedMana": "864"
+    },
+    "signature": {
+      "type": 0,
+      "publicKey": "0x2daefbcbadd044da470acd2f7fcf6fcb04b873cc801e7ee408018e1dfa0257ac",
+      "signature": "0x95830802c10334d917b9b9c82a5144754b4e7955667acd3ce8e502877ff716c5e45bfddf4aa6b83c0432538e317c732edbba8f047919418bbb50a54fbe45810b"
+    }
+  },
+  "bytes": "0x03fb5c44ef0d3ac87300f8c1ca67d486173a1e3b617060146e0362361a4b752833186108395f3b2b3d3e6c655e287d70767ea58d2af401000017432c5a7a672503480241125e3952414a7a320441080c624c264b004e09614a000627e0461873f37040c9e59c35ad8a106fa1b94f5ec9ef89499b31904f9a3de59be58dd44a714821f8f257e0a502b71ac7ee57530bb9dc29fe12ff3936f925b835a297680400b769489951e512546cd9c9fbdab348b6cba91a601a29b50854e55a6e14f6803ca1d81ac7eff5ceaaa7bacf26f1aa4754d42edeab45d6169ea723b7fdf0f6ff3b6ebe90d09dbff6bc553936ba75a143de4ac932986fbe7b1d78f639bc6ee8aee10d510d41572851530be884778052aaea5315941f4337752905599710b55e64018c71f4d8f299d0636d50484d05e6ac5667b50300004e02000001fb5c44ef0d3ac873000010000300013a1e3b617060146e0362361a4b752833186108395f3b2b3d3e6c655e287d70767ea58d2a0217432c5a7a672503480241125e3952414a7a320441080c624c264b004e09614a030000020000f09d3cd648a7246c7c1b2ba2f9182465ae5742b78c592392b4b455ab8ed7195200000000000000d2c5ccba12b6fad51652131289867492799c9fc5710244418aa6e955f8fa826100000000000002007e0d0a5848362b23120f55115b096774036d7610137a631413221f5573344507ed08000000000000476820096e7038107d071a4e473f1e295f346e2d0824263e5e3e7d004f6b69158d08000000000000010100000000020000a0860100000000000000000000000000010000ed1484f4d1f7d8c037087fed661dd92faccae1eed3c01182d6fdd6828cea144a0105086372557616532f714f104e5f44297b7a286d077956291a6d4f59081f484463712a64300c00f46312374981be1400000000000000000000000000000000000000000000000001a0860100000000008813000000000000000000000000000000000000000000000000000000000000000000000000000000000000010000ed1484f4d1f7d8c037087fed661dd92faccae1eed3c01182d6fdd6828cea144a0103010568656c6c6f0500776f726c6400020000002daefbcbadd044da470acd2f7fcf6fcb04b873cc801e7ee408018e1dfa0257ac328034c1701ae304fcf69b542ceeacf7aa2e94df6e2191b0e1e345c62c49d4afa5f4f58ccc8fa3d400e8c01a19719cf26820337d5c35d5cb5fcafe6d97eab4020100006003000000000000002daefbcbadd044da470acd2f7fcf6fcb04b873cc801e7ee408018e1dfa0257ac95830802c10334d917b9b9c82a5144754b4e7955667acd3ce8e502877ff716c5e45bfddf4aa6b83c0432538e317c732edbba8f047919418bbb50a54fbe45810b",
+  "id": "0xedcd454ff664cb13cdebc46fb41f86b072e97f4f545e0989892736e38cf3c3b904000000"
+}
