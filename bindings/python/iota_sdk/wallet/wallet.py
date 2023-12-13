@@ -756,7 +756,7 @@ class Wallet():
         ))
 
     def sync(self, options: Optional[SyncOptions] = None) -> Balance:
-        """Sync the account by fetching new information from the nodes.
+        """Sync the wallet by fetching new information from the nodes.
         Will also reissue pending transactions and consolidate outputs if necessary.
         A custom default can be set using set_default_sync_options.
         """

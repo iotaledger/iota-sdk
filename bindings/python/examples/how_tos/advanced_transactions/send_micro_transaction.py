@@ -4,17 +4,21 @@ from dotenv import load_dotenv
 
 from iota_sdk import Wallet, WalletOptions, SendParams
 
+# This example uses secrets in environment variables for simplicity which
+# should not be done in production.
 load_dotenv()
 
 # In this example we will send an amount below the minimum amount
 
+for env_var in ['WALLET_DB_PATH', 'STRONGHOLD_PASSWORD']:
+    if env_var not in os.environ:
+        raise Exception(f'.env {env_var} is undefined, see .env.example')
+
+
 wallet = Wallet(WalletOptions(storage_path=os.environ.get('WALLET_DB_PATH')))
 
 # Sync wallet with the node
-response = wallet.sync()
-
-if 'STRONGHOLD_PASSWORD' not in os.environ:
-    raise Exception(".env STRONGHOLD_PASSWORD is undefined, see .env.example")
+wallet.sync()
 
 wallet.set_stronghold_password(os.environ["STRONGHOLD_PASSWORD"])
 

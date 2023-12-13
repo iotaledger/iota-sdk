@@ -28,13 +28,17 @@ secret_manager = StrongholdSecretManager(
 # done once.
 SecretManager(secret_manager).store_mnemonic(os.environ['MNEMONIC'])
 
-bib_path = Bip44(
+bip_path = Bip44(
     coin_type=CoinType.SHIMMER
 )
-wallet_options = WalletOptions(None, None, bib_path, client_options, secret_manager, os.environ.get('WALLET_DB_PATH'))
+wallet_options = WalletOptions(None, None, bip_path, client_options, secret_manager, os.environ.get('WALLET_DB_PATH'))
 wallet = Wallet(wallet_options)
 
 # Set sync_only_most_basic_outputs to True if not interested in outputs that are timelocked,
 # have a storage deposit return, expiration or are nft/account/foundry outputs.
 wallet.set_default_sync_options(
     SyncOptions(sync_only_most_basic_outputs=True))
+
+# Update the wallet to the latest state
+balance = wallet.sync()
+print('Generated new wallet')

@@ -4,20 +4,23 @@ from dotenv import load_dotenv
 
 from iota_sdk import Wallet, WalletOptions
 
+# This example uses secrets in environment variables for simplicity which
+# should not be done in production.
 load_dotenv()
 
 # In this example we will claim outputs that have additional unlock
 # conditions as expiration or storage deposit return.
 
-wallet = Wallet(WalletOptions(storage_path=os.environ.get('WALLET_DB_PATH')))
+for env_var in ['WALLET_DB_PATH', 'STRONGHOLD_PASSWORD']:
+    if env_var not in os.environ:
+        raise Exception(f'.env {env_var} is undefined, see .env.example')
 
-if 'STRONGHOLD_PASSWORD' not in os.environ:
-    raise Exception(".env STRONGHOLD_PASSWORD is undefined, see .env.example")
+wallet = Wallet(WalletOptions(storage_path=os.environ.get('WALLET_DB_PATH')))
 
 wallet.set_stronghold_password(os.environ["STRONGHOLD_PASSWORD"])
 
 # Sync wallet with the node
-response = wallet.sync()
+wallet.sync()
 
 # Only the unspent outputs in the account
 output_ids = wallet.claimable_outputs('All')

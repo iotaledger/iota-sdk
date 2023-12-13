@@ -18,7 +18,7 @@ class PreparedTransaction:
     """A helper class for offline signing.
 
     Attributes:
-        wallet: An wallet object used to continue building this transaction.
+        wallet: A wallet object used to continue building this transaction.
         prepared_transaction_data_dto: A prepared transaction data object.
     """
 

@@ -37,14 +37,14 @@ def test_sign_verify_ed25519():
         "acoustic trophy damage hint search taste love bicycle foster cradle brown govern endless depend situate athlete pudding blame question genius transfer van random vast")
     message = utf8_to_hex('IOTA')
 
-    bib_path = Bip44(
+    bip_path = Bip44(
         coin_type=CoinType.IOTA
     )
 
     secret_manager = SecretManager(secret_manager)
     signature = secret_manager.sign_ed25519(
         message,
-        bib_path,
+        bip_path,
     )
     assert signature.signature == '0x72bf2bc8fbc5dc56d657d7de8afa5208be1db025851e81031c754b371c7a29ce9f352d12df8207f9163316f81f59eb7725e5c0e4f3228e71ffe3764a9de6b10e'
 
