@@ -22,8 +22,7 @@ use crate::types::block::{
         StorageScoreParameters,
     },
     protocol::{ProtocolParameters, WorkScore, WorkScoreParameters},
-    semantic::{SemanticValidationContext, StateTransitionError, TransactionFailureReason},
-    unlock::Unlock,
+    semantic::StateTransitionError,
     Error,
 };
 
@@ -404,43 +403,6 @@ impl NftOutput {
     /// Returns the nft address for this output.
     pub fn nft_address(&self, output_id: &OutputId) -> NftAddress {
         NftAddress::new(self.nft_id_non_null(output_id))
-    }
-
-    ///
-    pub fn unlock(
-        &self,
-        output_id: &OutputId,
-        unlock: &Unlock,
-        context: &mut SemanticValidationContext<'_>,
-    ) -> Result<(), TransactionFailureReason> {
-        let slot_index = context
-            .transaction
-            .context_inputs()
-            .iter()
-            .find_map(|c| c.as_commitment_opt().map(|c| c.slot_index()));
-
-        self.unlock_conditions()
-            .locked_address(
-                self.address(),
-                slot_index,
-                context.protocol_parameters.committable_age_range(),
-            )
-            .map_err(|_| TransactionFailureReason::InvalidCommitmentContextInput)?
-            // because of expiration the input can't be unlocked at this time
-            .ok_or(TransactionFailureReason::SemanticValidationFailed)?
-            .unlock(unlock, context)?;
-
-        let nft_id = if self.nft_id().is_null() {
-            NftId::from(output_id)
-        } else {
-            *self.nft_id()
-        };
-
-        context
-            .unlocked_addresses
-            .insert(Address::from(NftAddress::from(nft_id)));
-
-        Ok(())
     }
 
     // Transition, just without full SemanticValidationContext

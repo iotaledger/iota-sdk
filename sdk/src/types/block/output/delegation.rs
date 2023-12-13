@@ -13,9 +13,8 @@ use crate::types::block::{
         MinimumOutputAmount, Output, OutputBuilderAmount, OutputId, StorageScore, StorageScoreParameters,
     },
     protocol::{ProtocolParameters, WorkScore, WorkScoreParameters},
-    semantic::{SemanticValidationContext, StateTransitionError, TransactionFailureReason},
+    semantic::StateTransitionError,
     slot::EpochIndex,
-    unlock::Unlock,
     Error,
 };
 
@@ -313,25 +312,6 @@ impl DelegationOutput {
     #[inline(always)]
     pub fn chain_id(&self) -> ChainId {
         ChainId::Delegation(self.delegation_id)
-    }
-
-    /// Tries to unlock the [`DelegationOutput`].
-    pub fn unlock(
-        &self,
-        _output_id: &OutputId,
-        unlock: &Unlock,
-        context: &mut SemanticValidationContext<'_>,
-    ) -> Result<(), TransactionFailureReason> {
-        self.unlock_conditions()
-            .locked_address(
-                self.address(),
-                None,
-                context.protocol_parameters.committable_age_range(),
-            )
-            // Safe to unwrap, DelegationOutput can't have an expiration unlock condition.
-            .unwrap()
-            .unwrap()
-            .unlock(unlock, context)
     }
 
     // Transition, just without full SemanticValidationContext.
