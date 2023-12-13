@@ -48,16 +48,7 @@ class UnsignedBlock:
         header: The block header.
         body: Holds either a `BasicBlockBody` or a `ValidationBlockBody`.
     """
-    protocol_version: int
-    network_id: int = field(metadata=config(
-        encoder=str
-    ))
-    issuing_time: int = field(metadata=config(
-        encoder=str
-    ))
-    slot_commitment_id: HexStr
-    latest_finalized_slot: SlotIndex
-    issuer_id: HexStr
+    header: BlockHeader
     body: BlockBody
 
 
