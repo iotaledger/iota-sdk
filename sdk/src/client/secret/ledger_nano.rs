@@ -438,7 +438,7 @@ impl SecretManagerConfig for LedgerSecretManager {
 /// This method finds out if we have to switch to blind signing mode.
 pub fn needs_blind_signing(prepared_transaction: &PreparedTransactionData, buffer_size: usize) -> bool {
     if !prepared_transaction.transaction.outputs().iter().all(
-        |output| matches!(output, Output::Basic(o) if o.simple_deposit_address().is_some()&& o.address().is_ed25519()),
+        |output| matches!(output, Output::Basic(o) if o.simple_deposit_address().is_some() && o.address().is_ed25519()),
     ) {
         return true;
     }
