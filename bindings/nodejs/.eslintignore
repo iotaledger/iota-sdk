@@ -4,3 +4,5 @@ target
 **/out/
 **/tests/
 **/dist
+jest.config.js
+.eslintrc.js

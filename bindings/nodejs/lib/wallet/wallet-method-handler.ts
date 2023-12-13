@@ -6,20 +6,22 @@ import {
     createWallet,
     listenWallet,
     destroyWallet,
-    getClientFromWallet,
-    getSecretManagerFromWallet,
+    getClient,
+    getSecretManager,
 } from '../bindings';
-import type {
+import {
     WalletEventType,
     WalletOptions,
     __WalletMethod__,
     Event,
 } from '../types/wallet';
-import { Client } from '../client';
-import { SecretManager } from '../secret_manager';
+import { Client, ClientMethodHandler } from '../client';
+import { SecretManager, SecretManagerMethodHandler } from '../secret_manager';
+import { errorHandle } from '..';
 
 // The WalletMethodHandler class interacts with methods with the rust bindings.
 export class WalletMethodHandler {
+    // External rust object
     methodHandler: any;
 
     /**
@@ -33,14 +35,19 @@ export class WalletMethodHandler {
      * @param options The wallet options.
      */
     static async create(options: WalletOptions): Promise<WalletMethodHandler> {
-        const methodHandler = await createWallet(JSON.stringify(options));
-        return new WalletMethodHandler(methodHandler);
+        try {
+            const methodHandler = await createWallet(JSON.stringify(options));
+            return new WalletMethodHandler(methodHandler);
+        } catch (error: any) {
+            throw errorHandle(error);
+        }
     }
 
     /**
      * Call a wallet method on the Rust backend.
      *
      * @param method The wallet method to call.
+     * @returns A promise that resolves to a JSON string response holding the result of the wallet method.
      */
     async callMethod(method: __WalletMethod__): Promise<string> {
         return callWalletMethod(
@@ -53,17 +60,9 @@ export class WalletMethodHandler {
                     return value;
                 }
             }),
-        ).catch((error: Error) => {
-            try {
-                if (error.message !== undefined) {
-                    error = JSON.parse(error.message).payload;
-                } else {
-                    error = JSON.parse(error.toString()).payload;
-                }
-            } catch (e) {
-                console.error(e);
-            }
-            return Promise.reject(error);
+            this.methodHandler,
+        ).catch((error: any) => {
+            throw errorHandle(error);
         });
     }
 
@@ -77,42 +76,48 @@ export class WalletMethodHandler {
         eventTypes: WalletEventType[],
         callback: (error: Error, event: Event) => void,
     ): Promise<void> {
-        return listenWallet(this.methodHandler, eventTypes, callback);
+        return listenWallet(
+            this.methodHandler,
+            eventTypes,
+            function (err: any, data: string) {
+                const parsed = JSON.parse(data);
+                callback(
+                    // Send back raw error instead of parsing
+                    err,
+                    new Event(parsed.accountIndex, parsed.event),
+                );
+            },
+        ).catch((error: any) => {
+            throw errorHandle(error);
+        });
     }
 
     async destroy(): Promise<void> {
-        return destroyWallet(this.methodHandler);
+        try {
+            await destroyWallet(this.methodHandler);
+        } catch (error: any) {
+            throw errorHandle(error);
+        }
     }
 
-    /**
-     * Get the client associated with the wallet.
-     */
     async getClient(): Promise<Client> {
-        return new Promise((resolve, reject) => {
-            getClientFromWallet(this.methodHandler).then((result: any) => {
-                if (result.message !== undefined) {
-                    reject(JSON.parse(result.message).payload);
-                } else {
-                    resolve(new Client(result));
-                }
-            });
-        });
+        try {
+            const result = await getClient(this.methodHandler);
+            return new Client(new ClientMethodHandler(result));
+        } catch (error: any) {
+            throw errorHandle(error);
+        }
     }
 
     /**
      * Get the secret manager associated with the wallet.
      */
     async getSecretManager(): Promise<SecretManager> {
-        return new Promise((resolve, reject) => {
-            getSecretManagerFromWallet(this.methodHandler).then(
-                (result: any) => {
-                    if (result.message !== undefined) {
-                        reject(JSON.parse(result.message).payload);
-                    } else {
-                        resolve(new SecretManager(result));
-                    }
-                },
-            );
-        });
+        try {
+            const result = await getSecretManager(this.methodHandler);
+            return new SecretManager(new SecretManagerMethodHandler(result));
+        } catch (error: any) {
+            throw errorHandle(error);
+        }
     }
 }

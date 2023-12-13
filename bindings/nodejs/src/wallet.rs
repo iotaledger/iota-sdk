@@ -8,18 +8,20 @@ use iota_sdk_bindings_core::{
     iota_sdk::wallet::{events::WalletEventType, Wallet},
     Response, WalletMethod, WalletOptions,
 };
-use napi::{bindgen_prelude::External, threadsafe_function::ThreadsafeFunction, Error, Result, Status};
+use napi::{bindgen_prelude::External, threadsafe_function::ThreadsafeFunction, Error, Result};
 use napi_derive::napi;
 use tokio::sync::RwLock;
 
-use crate::{client::ClientMethodHandler, secret_manager::SecretManagerMethodHandler, NodejsError};
+use crate::{
+    build_js_error, client::ClientMethodHandler, destroyed_err, secret_manager::SecretManagerMethodHandler, NodejsError,
+};
 
 pub type WalletMethodHandler = Arc<RwLock<Option<Wallet>>>;
 
 #[napi(js_name = "createWallet")]
 pub async fn create_wallet(options: String) -> Result<External<WalletMethodHandler>> {
-    let wallet_options = serde_json::from_str::<WalletOptions>(&options).map_err(NodejsError::from)?;
-    let wallet = wallet_options.build().await.map_err(NodejsError::from)?;
+    let wallet_options = serde_json::from_str::<WalletOptions>(&options).map_err(NodejsError::new)?;
+    let wallet = wallet_options.build().await.map_err(NodejsError::new)?;
 
     Ok(External::new(Arc::new(RwLock::new(Some(wallet)))))
 }
@@ -31,23 +33,17 @@ pub async fn destroy_wallet(wallet: External<WalletMethodHandler>) {
 
 #[napi(js_name = "callWalletMethod")]
 pub async fn call_wallet_method(wallet: External<WalletMethodHandler>, method: String) -> Result<String> {
-    let wallet_method = serde_json::from_str::<WalletMethod>(&method).map_err(NodejsError::from)?;
+    let method = serde_json::from_str::<WalletMethod>(&method).map_err(NodejsError::new)?;
 
-    if let Some(wallet) = &*wallet.as_ref().read().await {
-        let res = rust_call_wallet_method(wallet, wallet_method).await;
-        if matches!(res, Response::Error(_) | Response::Panic(_)) {
-            return Err(Error::new(
-                Status::GenericFailure,
-                serde_json::to_string(&res).map_err(NodejsError::from)?,
-            ));
+    match &*wallet.as_ref().read().await {
+        Some(wallet) => {
+            let response = rust_call_wallet_method(&wallet, method).await;
+            match response {
+                Response::Error(_) | Response::Panic(_) => Err(build_js_error(response)),
+                _ => Ok(serde_json::to_string(&response).map_err(NodejsError::new)?),
+            }
         }
-
-        Ok(serde_json::to_string(&res).map_err(NodejsError::from)?)
-    } else {
-        Err(Error::new(
-            Status::GenericFailure,
-            serde_json::to_string(&Response::Panic("Wallet got destroyed".to_string())).map_err(NodejsError::from)?,
-        ))
+        None => Err(destroyed_err("Wallet")),
     }
 }
 
@@ -59,26 +55,24 @@ pub async fn listen_wallet(
 ) -> Result<()> {
     let mut validated_event_types = Vec::with_capacity(event_types.len());
     for event_type in event_types {
-        validated_event_types.push(WalletEventType::try_from(event_type).map_err(NodejsError::from)?);
+        validated_event_types.push(WalletEventType::try_from(event_type).map_err(NodejsError::new)?);
     }
 
-    if let Some(wallet) = &*wallet.as_ref().read().await {
-        wallet
-            .listen(validated_event_types, move |event_data| {
-                callback.call(
-                    serde_json::to_string(event_data)
-                        .map_err(NodejsError::from)
-                        .map_err(Error::from),
-                    napi::threadsafe_function::ThreadsafeFunctionCallMode::NonBlocking,
-                );
-            })
-            .await;
-        Ok(())
-    } else {
-        Err(Error::new(
-            Status::GenericFailure,
-            serde_json::to_string(&Response::Panic("Wallet got destroyed".to_string())).map_err(NodejsError::from)?,
-        ))
+    match &*wallet.as_ref().read().await {
+        Some(wallet) => {
+            wallet
+                .listen(validated_event_types, move |event_data| {
+                    callback.call(
+                        serde_json::to_string(event_data)
+                            .map_err(NodejsError::new)
+                            .map_err(Error::from),
+                        napi::threadsafe_function::ThreadsafeFunctionCallMode::NonBlocking,
+                    );
+                })
+                .await;
+            Ok(())
+        }
+        None => Err(destroyed_err("Wallet")),
     }
 }
 
@@ -87,10 +81,7 @@ pub async fn get_client(wallet: External<WalletMethodHandler>) -> Result<Externa
     if let Some(wallet) = &*wallet.as_ref().read().await {
         Ok(External::new(Arc::new(RwLock::new(Some(wallet.client().clone())))))
     } else {
-        Err(Error::new(
-            Status::GenericFailure,
-            serde_json::to_string(&Response::Panic("Wallet got destroyed".to_string())).map_err(NodejsError::from)?,
-        ))
+        Err(destroyed_err("Wallet"))
     }
 }
 
@@ -99,9 +90,6 @@ pub async fn get_secret_manager(wallet: External<WalletMethodHandler>) -> Result
     if let Some(wallet) = &*wallet.as_ref().read().await {
         Ok(External::new(wallet.get_secret_manager().clone()))
     } else {
-        Err(Error::new(
-            Status::GenericFailure,
-            serde_json::to_string(&Response::Panic("Wallet got destroyed".to_string())).map_err(NodejsError::from)?,
-        ))
+        Err(destroyed_err("Wallet"))
     }
 }

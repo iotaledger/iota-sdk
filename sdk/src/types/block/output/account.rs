@@ -16,13 +16,10 @@ use crate::types::block::{
     output::{
         feature::{verify_allowed_features, Feature, FeatureFlags, Features},
         unlock_condition::{verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions},
-        ChainId, MinimumOutputAmount, Output, OutputBuilderAmount, OutputId, StateTransitionError,
-        StateTransitionVerifier, StorageScore, StorageScoreParameters,
+        ChainId, MinimumOutputAmount, Output, OutputBuilderAmount, OutputId, StorageScore, StorageScoreParameters,
     },
-    payload::signed_transaction::TransactionCapabilityFlag,
     protocol::{ProtocolParameters, WorkScore, WorkScoreParameters},
-    semantic::{SemanticValidationContext, TransactionFailureReason},
-    unlock::Unlock,
+    semantic::StateTransitionError,
     Error,
 };
 
@@ -377,37 +374,6 @@ impl AccountOutput {
         AccountAddress::new(self.account_id_non_null(output_id))
     }
 
-    ///
-    pub fn unlock(
-        &self,
-        output_id: &OutputId,
-        unlock: &Unlock,
-        context: &mut SemanticValidationContext<'_>,
-    ) -> Result<(), TransactionFailureReason> {
-        self.unlock_conditions()
-            .locked_address(
-                self.address(),
-                None,
-                context.protocol_parameters.committable_age_range(),
-            )
-            // Safe to unwrap, AccountOutput can't have an expiration unlock condition.
-            .unwrap()
-            .unwrap()
-            .unlock(unlock, context)?;
-
-        let account_id = if self.account_id().is_null() {
-            AccountId::from(output_id)
-        } else {
-            *self.account_id()
-        };
-
-        context
-            .unlocked_addresses
-            .insert(Address::from(AccountAddress::from(account_id)));
-
-        Ok(())
-    }
-
     // Transition, just without full SemanticValidationContext
     pub(crate) fn transition_inner(
         current_state: &Self,
@@ -460,45 +426,6 @@ impl AccountOutput {
             return Err(StateTransitionError::InconsistentCreatedFoundriesCount);
         }
 
-        Ok(())
-    }
-}
-
-impl StateTransitionVerifier for AccountOutput {
-    fn creation(next_state: &Self, context: &SemanticValidationContext<'_>) -> Result<(), StateTransitionError> {
-        if !next_state.account_id.is_null() {
-            return Err(StateTransitionError::NonZeroCreatedId);
-        }
-
-        if let Some(issuer) = next_state.immutable_features().issuer() {
-            if !context.unlocked_addresses.contains(issuer.address()) {
-                return Err(StateTransitionError::IssuerNotUnlocked);
-            }
-        }
-
-        Ok(())
-    }
-
-    fn transition(
-        current_state: &Self,
-        next_state: &Self,
-        context: &SemanticValidationContext<'_>,
-    ) -> Result<(), StateTransitionError> {
-        Self::transition_inner(
-            current_state,
-            next_state,
-            &context.input_chains,
-            context.transaction.outputs(),
-        )
-    }
-
-    fn destruction(_current_state: &Self, context: &SemanticValidationContext<'_>) -> Result<(), StateTransitionError> {
-        if !context
-            .transaction
-            .has_capability(TransactionCapabilityFlag::DestroyAccountOutputs)
-        {
-            return Err(TransactionFailureReason::TransactionCapabilityAccountDestructionNotAllowed)?;
-        }
         Ok(())
     }
 }

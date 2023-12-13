@@ -25,7 +25,7 @@ const STRONGHOLD_PASSWORD = 'a-secure-password';
 // The path to store the wallet snapshot.
 const STRONGHOLD_SNAPSHOT_PATH = 'vault.stronghold';
 
-async function main() {
+async function run() {
     const strongholdSecretManager = {
         stronghold: {
             snapshotPath: STRONGHOLD_SNAPSHOT_PATH,
@@ -33,7 +33,7 @@ async function main() {
         },
     };
 
-    const secretManager = new SecretManager(strongholdSecretManager);
+    const secretManager = SecretManager.create(strongholdSecretManager);
 
     // Generate a mnemonic and store its seed in the Stronghold vault.
     // INFO: It is best practice to back up the mnemonic somewhere secure.
@@ -73,4 +73,4 @@ async function main() {
     process.exit(0);
 }
 
-main();
+void run().then(() => process.exit());

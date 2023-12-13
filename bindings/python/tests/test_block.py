@@ -3,7 +3,7 @@
 
 from typing import get_args
 import pytest
-from iota_sdk import BasicBlock, BlockType, SignedBlock, Payload, PayloadType
+from iota_sdk import BasicBlockBody, BlockBodyType, Block, Payload, PayloadType
 
 
 def test_basic_block_with_tagged_data_payload():
@@ -19,7 +19,7 @@ def test_basic_block_with_tagged_data_payload():
             "type": 0,
             "tag": "0x484f524e4554205370616d6d6572",
             "data": "0x57652061726520616c6c206d616465206f662073746172647573742e0a436f756e743a20353436333730330a54696d657374616d703a20323032332d30372d31395430373a32323a32385a0a54697073656c656374696f6e3a20343732c2b573"}}
-    block = BasicBlock.from_dict(block_dict)
+    block = BasicBlockBody.from_dict(block_dict)
     assert block.to_dict() == block_dict
     assert isinstance(block.payload, get_args(Payload))
     assert block.payload.type == PayloadType.TaggedData
@@ -30,7 +30,7 @@ def test_basic_block_with_tagged_data_payload():
     assert block_to_dict == block_dict
 
 
-def test_signed_block_with_tagged_data_payload():
+def test_block_with_tagged_data_payload():
     block_dict = {
         "protocolVersion": 3,
         "networkId": "10549460113735494767",
@@ -63,14 +63,14 @@ def test_signed_block_with_tagged_data_payload():
             "signature": "0x7c274e5e771d5d60202d334f06773d3672484b1e4e6f03231b4e69305329267a4834374b0f2e0d5c6c2f7779620f4f534c773b1679400c52303d1f23121a4049"
         }
     }
-    signed_block = SignedBlock.from_dict(block_dict)
-    assert signed_block.to_dict() == block_dict
-    assert isinstance(signed_block.block, BasicBlock)
-    assert signed_block.block.type == BlockType.Basic
-    assert isinstance(signed_block.block.payload, get_args(Payload))
-    assert signed_block.block.payload.type == PayloadType.TaggedData
+    block = Block.from_dict(block_dict)
+    assert block.to_dict() == block_dict
+    assert isinstance(block.body, BasicBlockBody)
+    assert block.body.type == BlockBodyType.Basic
+    assert isinstance(block.body.payload, get_args(Payload))
+    assert block.body.payload.type == PayloadType.TaggedData
     # TODO: determine the actual hash of the block
-    # assert signed_block.id() == "0x7ce5ad074d4162e57f83cfa01cd2303ef5356567027ce0bcee0c9f57bc11656e"
+    # assert block.id() == "0x7ce5ad074d4162e57f83cfa01cd2303ef5356567027ce0bcee0c9f57bc11656e"
 
 
 @pytest.mark.skip(reason="https://github.com/iotaledger/iota-sdk/issues/1387")
@@ -104,7 +104,7 @@ def test_basic_block_with_tx_payload():
                                  "signature": {"type": 0,
                                                "publicKey": "0xa7af600976f440ec97d7bddbf17eacf0bfbf710e8cfb4ae3eae475d4ae8e1b16",
                                                "signature": "0x6bbe2eed95300a3d707af1bb17e04f83087fe31261256020fd00c24a54543c084079bed29c6d1479ee5acfd1e2fa32316e88c4c1577b4fbea3fe247f71114500"}}]}}
-    block = BasicBlock.from_dict(block_dict)
+    block = BasicBlockBody.from_dict(block_dict)
     assert block.to_dict() == block_dict
     assert isinstance(block.payload, get_args(Payload))
     assert block.payload.type == PayloadType.SignedTransaction
@@ -245,7 +245,7 @@ def test_basic_block_with_tx_payload_all_output_types():
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     "type": 1, "reference": 0}, {
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         "type": 2, "reference": 1}, {
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             "type": 1, "reference": 0}]}}
-    block = BasicBlock.from_dict(block_dict)
+    block = BasicBlockBody.from_dict(block_dict)
     assert block.to_dict() == block_dict
     assert isinstance(block.payload, get_args(Payload))
     assert block.payload.type == PayloadType.SignedTransaction
@@ -291,7 +291,7 @@ def test_basic_block_with_tx_payload_with_tagged_data_payload():
                                                "signature": "0x30cb012af3402be1b4b2ed18e2aba86839da06ba38ff3277c481e17c003f0199ba26f5613199e0d24035628bb2b69a6ea2a7682e41c30244996baf3a2adc1c00"}},
                                 {"type": 1,
                                  "reference": 0}]}}
-    block = BasicBlock.from_dict(block_dict)
+    block = BasicBlockBody.from_dict(block_dict)
     assert block.to_dict() == block_dict
     assert isinstance(block.payload, get_args(Payload))
     assert block.payload.type == PayloadType.SignedTransaction
