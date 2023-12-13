@@ -66,20 +66,18 @@ impl OutputData {
             .required_address(slot_index.into(), committable_age_range)?
             .ok_or(crate::client::Error::ExpirationDeadzone)?;
 
-        let chain = if &required_address == wallet_data.address.inner() {
-            self.chain
-        } else if required_address.is_ed25519() {
-            if wallet_data.address.inner() == &required_address {
-                // TODO #1279: do we need a check to make sure that `wallet_data.address` and `wallet_data.bip_path` are
-                // never conflicting?
+        // TODO #1279: do we need a check to make sure that `wallet_data.address` and `wallet_data.bip_path` are never
+        // conflicting?
+
+        let chain = self.chain.or_else(|| {
+            if &required_address == wallet_data.address.inner()
+                || required_address.backing_ed25519() == wallet_data.address.inner().as_ed25519_opt()
+            {
                 wallet_data.bip_path
             } else {
-                return Ok(None);
+                None
             }
-        } else {
-            // Account and NFT addresses have no chain
-            None
-        };
+        });
 
         Ok(Some(InputSigningData {
             output: self.output.clone(),
