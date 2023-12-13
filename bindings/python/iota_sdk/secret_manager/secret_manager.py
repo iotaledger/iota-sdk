@@ -7,7 +7,7 @@ from dacite import from_dict
 import humps
 
 from iota_sdk.external import create_secret_manager, call_secret_manager_method
-from iota_sdk.types.block.signed_block import SignedBlock, UnsignedBlock
+from iota_sdk.types.block.block import Block, UnsignedBlock
 from iota_sdk.types.common import HexStr
 from iota_sdk.types.signature import Ed25519Signature, Bip44
 from iota_sdk.types.transaction_data import PreparedTransactionData
@@ -280,14 +280,14 @@ class SecretManager():
         }))
 
     def sign_block(
-            self, unsigned_block: UnsignedBlock, chain: Bip44) -> SignedBlock:
+            self, unsigned_block: UnsignedBlock, chain: Bip44) -> Block:
         """Sign a block.
 
         Args:
             unsigned_block: The unsigned block data.
             chain: The Bip44 chain to use.
         """
-        return from_dict(SignedBlock, self._call_method('signBlock', {
+        return from_dict(Block, self._call_method('signBlock', {
             'unsignedBlock': unsigned_block.to_dict(),
             'chain': chain.to_dict()
         }))

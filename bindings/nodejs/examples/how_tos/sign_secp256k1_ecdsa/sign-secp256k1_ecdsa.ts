@@ -32,7 +32,7 @@ async function run() {
             }
         }
 
-        const secretManager = new SecretManager({
+        const secretManager = SecretManager.create({
             stronghold: {
                 password: process.env.STRONGHOLD_PASSWORD,
                 snapshotPath: 'sign_secp256k1_ecdsa.stronghold',
@@ -63,4 +63,4 @@ async function run() {
     }
 }
 
-run().then(() => process.exit());
+void run().then(() => process.exit());

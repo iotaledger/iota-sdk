@@ -18,7 +18,7 @@
         "prebuild-windows-arm64": "prebuild --runtime napi --target 6 --prepack 'yarn run napi-build-windows-arm64' --strip --arch arm64",
         "napi-build-windows-arm64": "napi build --cargo-flags=--profile=production --target aarch64-pc-windows-msvc",
         "rebuild": "node scripts/build && tsc && node scripts/strip.js",
-        "install": "prebuild-install --runtime napi --tag-prefix=iota-sdk-nodejs-v && tsc || npm run rebuild",
+        "install": "prebuild-install --runtime napi --tag-prefix=iota-sdk-nodejs-v && tsc || yarn rebuild",
         "test": "jest",
         "test-webpack": "cd tests/webpack && webpack-cli build --config ./webpack.config.js ",
         "create-api-docs": "typedoc ./lib/index.ts --githubPages false --disableSources --excludePrivate --excludeInternal --plugin typedoc-plugin-markdown --theme markdown --hideBreadcrumbs --entryDocument api_ref.md --readme none --hideGenerator --sort source-order"

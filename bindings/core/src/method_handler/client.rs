@@ -173,7 +173,17 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         ClientMethod::GetHealth { url } => Response::Bool(client.get_health(&url).await?),
         ClientMethod::GetNodeInfo { url, auth } => Response::NodeInfo(Client::get_node_info(&url, auth).await?),
         ClientMethod::GetInfo => Response::Info(client.get_info().await?),
-        ClientMethod::GetPeers => Response::Peers(client.get_peers().await?),
+        ClientMethod::GetAccountCongestion { account_id } => {
+            Response::Congestion(client.get_account_congestion(&account_id).await?)
+        }
+        ClientMethod::GetRewards { output_id, slot_index } => {
+            Response::ManaRewards(client.get_output_mana_rewards(&output_id, slot_index).await?)
+        }
+        ClientMethod::GetValidators { page_size, cursor } => {
+            Response::Validators(client.get_validators(page_size, cursor).await?)
+        }
+        ClientMethod::GetValidator { account_id } => Response::Validator(client.get_validator(&account_id).await?),
+        ClientMethod::GetCommittee { epoch_index } => Response::Committee(client.get_committee(epoch_index).await?),
         ClientMethod::GetIssuance => Response::Issuance(client.get_issuance().await?),
         ClientMethod::PostBlockRaw { block_bytes } => Response::BlockId(
             client
@@ -208,11 +218,29 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         ClientMethod::GetOutputMetadata { output_id } => {
             Response::OutputMetadata(client.get_output_metadata(&output_id).await?)
         }
+        ClientMethod::GetOutputWithMetadata { output_id } => {
+            Response::OutputWithMetadata(client.get_output_with_metadata(&output_id).await?)
+        }
         ClientMethod::GetIncludedBlock { transaction_id } => {
             Response::Block(BlockDto::from(&client.get_included_block(&transaction_id).await?))
         }
         ClientMethod::GetIncludedBlockMetadata { transaction_id } => {
             Response::BlockMetadata(client.get_included_block_metadata(&transaction_id).await?)
+        }
+        ClientMethod::GetTransactionMetadata { transaction_id } => {
+            Response::TransactionMetadata(client.get_transaction_metadata(&transaction_id).await?)
+        }
+        ClientMethod::GetCommitment { commitment_id } => {
+            Response::SlotCommitment(client.get_slot_commitment_by_id(&commitment_id).await?)
+        }
+        ClientMethod::GetUtxoChanges { commitment_id } => {
+            Response::UtxoChanges(client.get_utxo_changes_by_slot_commitment_id(&commitment_id).await?)
+        }
+        ClientMethod::GetCommitmentByIndex { index } => {
+            Response::SlotCommitment(client.get_slot_commitment_by_slot(index).await?)
+        }
+        ClientMethod::GetUtxoChangesByIndex { index } => {
+            Response::UtxoChanges(client.get_utxo_changes_by_slot(index).await?)
         }
         ClientMethod::OutputIds { query_parameters } => {
             Response::OutputIdsResponse(client.output_ids(query_parameters).await?)

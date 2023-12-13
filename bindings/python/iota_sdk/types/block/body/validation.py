@@ -4,14 +4,14 @@
 from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import List, Optional
-from iota_sdk.types.block.block import BlockType
+from iota_sdk.types.block.body.type import BlockBodyType
 from iota_sdk.types.common import HexStr, json
 
 
 @json
 @dataclass
-class ValidationBlock:
-    """A Validation Block is a special type of block used by validators to secure the network. It is recognized by the
+class ValidationBlockBody:
+    """A Validation Block Body is a special type of block body used by validators to secure the network. It is recognized by the
     Congestion Control of the IOTA 2.0 protocol and can be issued without burning Mana within the constraints of the
     allowed validator throughput. It is allowed to reference more parent blocks than a normal Basic Block.
 
@@ -28,5 +28,5 @@ class ValidationBlock:
     weak_parents: Optional[List[HexStr]] = None
     shallow_like_parents: Optional[List[HexStr]] = None
     type: int = field(
-        default_factory=lambda: int(BlockType.Validation),
+        default_factory=lambda: int(BlockBodyType.Validation),
         init=False)
