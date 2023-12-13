@@ -14,15 +14,17 @@ import {
 } from '../../';
 import '../customMatchers';
 
-const client = new Client({
-    nodes: [
-        {
-            url: process.env.NODE_URL || 'http://localhost:14265',
-        },
-    ],
-});
+async function makeClient(): Promise<Client> {
+    return await Client.create({
+        nodes: [
+            {
+                url: process.env.NODE_URL || 'http://localhost:8050',
+            },
+        ],
+    });
+}
 
-const secretManager = new SecretManager({
+const secretManager = SecretManager.create({
     mnemonic:
         'endorse answer radar about source reunion marriage tag sausage weekend frost daring base attack because joke dream slender leisure group reason prepare broken river',
 });
@@ -31,7 +33,7 @@ const issuerId =
     '0x0000000000000000000000000000000000000000000000000000000000000000';
 
 const chain = {
-    coinType: CoinType.Iota,
+    coinType: CoinType.IOTA,
     account: 0,
     change: 0,
     addressIndex: 0,
@@ -40,6 +42,7 @@ const chain = {
 // Skip for CI
 describe.skip('Block methods', () => {
     it('sends a block raw', async () => {
+        const client = await makeClient();
         const unsignedBlock = await client.buildBasicBlock(
             issuerId,
             new TaggedDataPayload(utf8ToHex('Hello'), utf8ToHex('Tangle')),
@@ -52,6 +55,7 @@ describe.skip('Block methods', () => {
     });
 
     it('finds blocks by block IDs', async () => {
+        const client = await makeClient();
         const blockIds = await client.getTips();
         const blocks = await client.findBlocks(blockIds);
 
@@ -59,6 +63,7 @@ describe.skip('Block methods', () => {
     });
 
     it('gets block as raw bytes', async () => {
+        const client = await makeClient();
         const tips = await client.getTips();
 
         const blockRaw = await client.getBlockRaw(tips[0]);

@@ -32,7 +32,7 @@ async function run() {
             },
         };
 
-        const secretManager = new SecretManager(strongholdSecretManager);
+        const secretManager = SecretManager.create(strongholdSecretManager);
 
         // A mnemonic can be generated with `Utils.generateMnemonic()`.
         // Store the mnemonic in the Stronghold snapshot, this needs to be done only the first time.
@@ -65,10 +65,10 @@ async function run() {
 
         // Set syncOnlyMostBasicOutputs to true if not interested in outputs that are timelocked,
         // have a storage deposit return, expiration or are nft/account/foundry outputs.
-        wallet.setDefaultSyncOptions({ syncOnlyMostBasicOutputs: true });
+        await wallet.setDefaultSyncOptions({ syncOnlyMostBasicOutputs: true });
     } catch (error) {
         console.error(error);
     }
 }
 
-run().then(() => process.exit());
+void run().then(() => process.exit());

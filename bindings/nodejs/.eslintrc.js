@@ -6,6 +6,7 @@ const typescriptEslintRules = {
     '@typescript-eslint/no-empty-interface': 'off',
     '@typescript-eslint/no-var-requires': 'off', // cleanest way to set dotenv path
     '@typescript-eslint/no-explicit-any': 'off',
+    "@typescript-eslint/no-floating-promises": ["error"],
 };
 
 module.exports = {
@@ -24,6 +25,7 @@ module.exports = {
     parserOptions: {
         ecmaVersion: 12,
         sourceType: 'module',
+        project: ["./tsconfig.eslint.json"],
     },
     rules: typescriptEslintRules,
 };

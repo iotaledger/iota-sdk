@@ -8,7 +8,6 @@ mod metadata;
 mod native_token;
 mod output_id;
 mod output_id_proof;
-mod state_transition;
 mod storage_score;
 mod token_scheme;
 
@@ -43,7 +42,6 @@ pub use self::{
     nft::{NftId, NftOutput, NftOutputBuilder},
     output_id::OutputId,
     output_id_proof::{HashableNode, LeafHash, OutputCommitmentProof, OutputIdProof, ValueHash},
-    state_transition::{StateTransitionError, StateTransitionVerifier},
     storage_score::{StorageScore, StorageScoreParameters},
     token_scheme::{SimpleTokenScheme, TokenScheme},
     unlock_condition::{UnlockCondition, UnlockConditions},
@@ -57,7 +55,6 @@ pub(crate) use self::{
 use crate::types::block::{
     address::Address,
     protocol::{CommittableAgeRange, ProtocolParameters, WorkScore, WorkScoreParameters},
-    semantic::SemanticValidationContext,
     slot::SlotIndex,
     Error,
 };
@@ -311,52 +308,6 @@ impl Output {
                 .cloned(),
             Self::Delegation(output) => Some(output.address().clone()),
         })
-    }
-
-    ///
-    pub fn verify_state_transition(
-        current_state: Option<&Self>,
-        next_state: Option<&Self>,
-        context: &SemanticValidationContext<'_>,
-    ) -> Result<(), StateTransitionError> {
-        match (current_state, next_state) {
-            // Creations.
-            (None, Some(Self::Account(next_state))) => AccountOutput::creation(next_state, context),
-            (None, Some(Self::Foundry(next_state))) => FoundryOutput::creation(next_state, context),
-            (None, Some(Self::Nft(next_state))) => NftOutput::creation(next_state, context),
-            (None, Some(Self::Delegation(next_state))) => DelegationOutput::creation(next_state, context),
-
-            // Transitions.
-            (Some(Self::Basic(current_state)), Some(Self::Account(_next_state))) => {
-                if !current_state.is_implicit_account() {
-                    Err(StateTransitionError::UnsupportedStateTransition)
-                } else {
-                    // TODO https://github.com/iotaledger/iota-sdk/issues/1664
-                    Ok(())
-                }
-            }
-            (Some(Self::Account(current_state)), Some(Self::Account(next_state))) => {
-                AccountOutput::transition(current_state, next_state, context)
-            }
-            (Some(Self::Foundry(current_state)), Some(Self::Foundry(next_state))) => {
-                FoundryOutput::transition(current_state, next_state, context)
-            }
-            (Some(Self::Nft(current_state)), Some(Self::Nft(next_state))) => {
-                NftOutput::transition(current_state, next_state, context)
-            }
-            (Some(Self::Delegation(current_state)), Some(Self::Delegation(next_state))) => {
-                DelegationOutput::transition(current_state, next_state, context)
-            }
-
-            // Destructions.
-            (Some(Self::Account(current_state)), None) => AccountOutput::destruction(current_state, context),
-            (Some(Self::Foundry(current_state)), None) => FoundryOutput::destruction(current_state, context),
-            (Some(Self::Nft(current_state)), None) => NftOutput::destruction(current_state, context),
-            (Some(Self::Delegation(current_state)), None) => DelegationOutput::destruction(current_state, context),
-
-            // Unsupported.
-            _ => Err(StateTransitionError::UnsupportedStateTransition),
-        }
     }
 
     /// Verifies if a valid storage deposit was made. Each [`Output`] has to have an amount that covers its associated

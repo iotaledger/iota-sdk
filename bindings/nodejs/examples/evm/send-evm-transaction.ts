@@ -47,7 +47,7 @@ async function run(): Promise<void> {
             mnemonic: process.env.MNEMONIC as string,
         };
 
-        const secretManager = new SecretManager(mnemonicSecretManager);
+        const secretManager = SecretManager.create(mnemonicSecretManager);
 
         const addresses = await secretManager.generateEvmAddresses({
             coinType: ETHEREUM_COIN_TYPE,
@@ -170,4 +170,4 @@ function padHexString(str: string): string {
     return str.length % 2 !== 0 ? '0' + str : str;
 }
 
-run();
+void run().then(() => process.exit());

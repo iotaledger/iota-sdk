@@ -17,7 +17,7 @@ describe('Address tests', () => {
     it('calculates addresses according a fixture', async () => {
 
         for (const test of mnemonicAddressTestCases.general.address_generations) {
-            const secretManager = await new SecretManager({
+            const secretManager = SecretManager.create({
                 mnemonic: test['mnemonic']
             });
         
@@ -41,7 +41,7 @@ describe('Address tests', () => {
     });
 
     it('generates addresses', async () => {
-        const addresses = await new SecretManager(secretManager).generateEd25519Addresses({
+        const addresses = await SecretManager.create(secretManager).generateEd25519Addresses({
             accountIndex: 0,
             range: {
                 start: 0,

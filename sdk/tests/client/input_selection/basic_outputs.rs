@@ -6,7 +6,7 @@ use std::str::FromStr;
 use iota_sdk::{
     client::api::input_selection::{Error, InputSelection, Requirement},
     types::block::{
-        address::{AccountAddress, Address, MultiAddress, NftAddress, RestrictedAddress, WeightedAddress},
+        address::{Address, MultiAddress, RestrictedAddress, WeightedAddress},
         output::{AccountId, NftId},
         protocol::protocol_parameters,
     },
@@ -823,7 +823,7 @@ fn account_sender_zero_id() {
         2_000_000,
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
-        Some(Address::from(AccountAddress::from(account_id))),
+        Some(Address::from(account_id)),
         None,
         None,
         None,
@@ -1011,7 +1011,7 @@ fn nft_sender_zero_id() {
         2_000_000,
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
         None,
-        Some(Address::from(NftAddress::from(nft_id))),
+        Some(Address::from(nft_id)),
         None,
         None,
         None,

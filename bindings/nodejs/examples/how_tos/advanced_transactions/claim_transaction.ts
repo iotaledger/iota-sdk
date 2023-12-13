@@ -53,4 +53,4 @@ async function run() {
     }
 }
 
-run().then(() => process.exit());
+void run().then(() => process.exit());
