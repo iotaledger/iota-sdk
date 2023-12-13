@@ -7,7 +7,7 @@ use crate::{
     wallet::{
         core::{WalletData, WalletDataDto},
         migration::{latest_backup_migration_version, migrate, MIGRATION_VERSION_KEY},
-        ClientOptions, Error as WalletError, Wallet,
+        ClientOptions, Wallet,
     },
 };
 

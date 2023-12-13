@@ -28,7 +28,6 @@ async function run() {
         const wallet = await Wallet.create({
             storagePath: process.env.WALLET_DB_PATH,
         });
-
         const balance = await wallet.sync();
 
         const totalBaseTokenBalance = balance.baseCoin.total;
@@ -39,14 +38,18 @@ async function run() {
         const accountId = balance.accounts[0];
         console.log(`Account Id: ${accountId}`);
 
+        const client = await wallet.getClient();
+
         // Get Account address
         const accountAddress = Utils.accountIdToBech32(
             accountId,
-            await (await wallet.getClient()).getBech32Hrp(),
+            await client.getBech32Hrp(),
         );
-        const faucetResponse = await (
-            await wallet.getClient()
-        ).requestFundsFromFaucet(faucetUrl, accountAddress);
+
+        const faucetResponse = await client.requestFundsFromFaucet(
+            faucetUrl,
+            accountAddress,
+        );
         console.log(faucetResponse);
 
         await new Promise((resolve) => setTimeout(resolve, 10000));
@@ -66,4 +69,4 @@ async function run() {
     }
 }
 
-run().then(() => process.exit());
+void run().then(() => process.exit());

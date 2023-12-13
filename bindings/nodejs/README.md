@@ -90,7 +90,7 @@ const { Client, initLogger } = require('@iota/sdk');
 async function run() {
     initLogger();
 
-    const client = new Client({
+    const client = await Client.create({
         nodes: ['https://api.testnet.shimmer.network'],
     });
 
@@ -102,7 +102,7 @@ async function run() {
     }
 }
 
-run().then(() => process.exit());
+void run().then(() => process.exit());
 ```
 
 ## Wallet Usage

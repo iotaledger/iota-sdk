@@ -18,7 +18,7 @@ async fn main() -> Result<()> {
             r#"{
                 "nodes":[
                    {
-                      "url":"http://localhost:14265/",
+                      "url":"http://localhost:8050/",
                       "auth":null,
                       "disabled":false
                    },
