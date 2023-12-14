@@ -41,7 +41,7 @@ def callback(event):
 wallet.listen(callback, [WalletEventType.NewOutput])
 
 # Use the faucet to send testnet tokens to your address.
-print(f'Fill your address with the Faucet: {os.environ['FAUCET_URL']}')
+print(f'Fill your address with the Faucet: {os.environ["FAUCET_URL"]}')
 
 address = wallet.address()
 print('Send funds to:', address)

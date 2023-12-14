@@ -28,4 +28,4 @@ balance = wallet.sync(SyncOptions(sync_only_most_basic_outputs=True))
 print('Balance', balance)
 
 # Use the faucet to send tokens to your address.
-print(f'Fill your address with the Faucet: {os.environ['FAUCET_URL']}')
+print(f'Fill your address with the Faucet: {os.environ["FAUCET_URL"]}')

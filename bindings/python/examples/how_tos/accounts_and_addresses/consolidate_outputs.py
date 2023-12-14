@@ -17,8 +17,7 @@ if 'STRONGHOLD_PASSWORD' not in os.environ:
 wallet = Wallet(WalletOptions(storage_path=os.environ.get('WALLET_DB_PATH')))
 wallet.set_stronghold_password(os.environ['STRONGHOLD_PASSWORD'])
 
-# Sync wallet to make sure account is updated with outputs from previous
-# examples.
+# Sync wallet to make sure it is updated with outputs from the previous examples.
 wallet.sync()
 print('Wallet synced')
 
