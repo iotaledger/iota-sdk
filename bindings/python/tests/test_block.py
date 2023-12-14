@@ -32,12 +32,14 @@ def test_basic_block_with_tagged_data_payload():
 
 def test_block_with_tagged_data_payload():
     block_dict = {
-        "protocolVersion": 3,
-        "networkId": "10549460113735494767",
-        "issuingTime": "1675563954966263210",
-        "slotCommitmentId": "0x498bf08a5ed287bc87340341ffab28706768cd3a7035ae5e33932d9a12bb30940000000000000000",
-        "latestFinalizedSlot": 21,
-        "issuerId": "0x3370746f30705b7d0b42597459714d45241e5a64761b09627c447b751c7e145c",
+        "header": {
+            "protocolVersion": 3,
+            "networkId": "10549460113735494767",
+            "issuingTime": "1675563954966263210",
+            "slotCommitmentId": "0x498bf08a5ed287bc87340341ffab28706768cd3a7035ae5e33932d9a12bb30940000000000000000",
+            "latestFinalizedSlot": 21,
+            "issuerId": "0x3370746f30705b7d0b42597459714d45241e5a64761b09627c447b751c7e145c",
+        },
         "body": {
             "type": 0,
             "strongParents": [
