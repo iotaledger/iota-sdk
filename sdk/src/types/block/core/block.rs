@@ -222,7 +222,7 @@ impl Block {
         ]
         .concat();
         let block_hash = BlockHash::new(Blake2b256::digest(id).into());
-        block_hash.into_block_id(protocol_params.slot_index(self.header.issuing_time() / 1000000000))
+        block_hash.into_block_id(protocol_params.slot_index(self.header.issuing_time() / 1_000_000_000))
     }
 
     /// Unpacks a [`Block`] from a sequence of bytes doing syntactical checks and verifying that
