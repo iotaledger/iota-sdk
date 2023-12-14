@@ -236,11 +236,19 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
         ClientMethod::GetUtxoChanges { commitment_id } => {
             Response::UtxoChanges(client.get_utxo_changes_by_slot_commitment_id(&commitment_id).await?)
         }
+        ClientMethod::GetUtxoChangesFull { commitment_id } => Response::UtxoChangesFull(
+            client
+                .get_utxo_changes_full_by_slot_commitment_id(&commitment_id)
+                .await?,
+        ),
         ClientMethod::GetCommitmentByIndex { index } => {
             Response::SlotCommitment(client.get_slot_commitment_by_slot(index).await?)
         }
         ClientMethod::GetUtxoChangesByIndex { index } => {
             Response::UtxoChanges(client.get_utxo_changes_by_slot(index).await?)
+        }
+        ClientMethod::GetUtxoChangesFullByIndex { index } => {
+            Response::UtxoChangesFull(client.get_utxo_changes_full_by_slot(index).await?)
         }
         ClientMethod::OutputIds { query_parameters } => {
             Response::OutputIdsResponse(client.output_ids(query_parameters).await?)
