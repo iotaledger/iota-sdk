@@ -17,7 +17,10 @@ use tokio::sync::watch::Receiver as WatchReceiver;
 pub use self::{error::Error, types::*};
 use crate::{
     client::{Client, ClientInner},
-    types::block::Block,
+    types::{
+        block::{Block, BlockDto},
+        TryFromDto,
+    },
 };
 
 impl Client {
@@ -195,13 +198,21 @@ fn poll_mqtt(client: &Client, mut event_loop: EventLoop) {
                                         let payload = &*p.payload;
                                         let protocol_parameters = &client.network_info.read().await.protocol_parameters;
 
-                                        match Block::unpack_verified(payload, protocol_parameters) {
-                                            Ok(block) => Ok(TopicEvent {
-                                                topic: p.topic.clone(),
-                                                payload: MqttPayload::Block((&block).into()),
-                                            }),
+                                        match serde_json::from_slice::<BlockDto>(payload) {
+                                            Ok(block_dto) => {
+                                                match Block::try_from_dto_with_params(block_dto, &protocol_parameters) {
+                                                    Ok(block) => Ok(TopicEvent {
+                                                        topic: p.topic.clone(),
+                                                        payload: MqttPayload::Block((&block).into()),
+                                                    }),
+                                                    Err(e) => {
+                                                        warn!("Block dto conversion failed: {:?}", e);
+                                                        Err(())
+                                                    }
+                                                }
+                                            }
                                             Err(e) => {
-                                                warn!("Block unpacking failed: {:?}", e);
+                                                warn!("Block parsing failed: {:?}", e);
                                                 Err(())
                                             }
                                         }

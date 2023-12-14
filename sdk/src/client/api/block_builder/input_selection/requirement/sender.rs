@@ -50,8 +50,8 @@ impl InputSelection {
                     for input in self.selected_inputs.iter() {
                         let required_address = input
                             .output
-                            .required_and_unlocked_address(self.slot_index, input.output_id())?
-                            .0;
+                            .required_address(self.slot_index, self.protocol_parameters.committable_age_range())?
+                            .expect("expiration unlockable outputs already filtered out");
 
                         if &required_address == weight_address.address() {
                             cumulative_weight += weight_address.weight() as u16;

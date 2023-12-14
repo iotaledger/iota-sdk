@@ -20,7 +20,7 @@ async function run() {
             mnemonic: process.env.MNEMONIC as string,
         };
 
-        const secretManager = new SecretManager(mnemonicSecretManager);
+        const secretManager = SecretManager.create(mnemonicSecretManager);
 
         // Generate public address with default account index and range.
         const default_addresses = await secretManager.generateEd25519Addresses(
@@ -61,4 +61,4 @@ async function run() {
     }
 }
 
-run().then(() => process.exit());
+void run().then(() => process.exit());

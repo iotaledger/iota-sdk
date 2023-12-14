@@ -28,10 +28,7 @@ pub use self::{
 };
 use crate::{
     types::block::{
-        output::{Output, StorageScore, StorageScoreParameters},
-        semantic::{SemanticValidationContext, TransactionFailureReason},
-        signature::Signature,
-        unlock::Unlock,
+        output::{StorageScore, StorageScoreParameters},
         Error,
     },
     utils::ConvertTo,
@@ -116,6 +113,25 @@ impl Address {
 
     crate::def_is_as_opt!(Address: Ed25519, Account, Nft, Anchor, ImplicitAccountCreation, Multi, Restricted);
 
+    /// Checks whether the address is backed by an [`Ed25519Address`].
+    pub fn is_ed25519_backed(&self) -> bool {
+        match self {
+            Self::Ed25519(_) | Self::ImplicitAccountCreation(_) => true,
+            Self::Restricted(restricted) => restricted.address().is_ed25519(),
+            _ => false,
+        }
+    }
+
+    /// Returns the backing [`Ed25519Address`], if any.
+    pub fn backing_ed25519(&self) -> Option<&Ed25519Address> {
+        match self {
+            Self::Ed25519(ed25519) => Some(ed25519),
+            Self::ImplicitAccountCreation(implicit) => Some(implicit.ed25519_address()),
+            Self::Restricted(restricted) => restricted.address().as_ed25519_opt(),
+            _ => None,
+        }
+    }
+
     /// Tries to create an [`Address`] from a bech32 encoded string.
     pub fn try_from_bech32(address: impl AsRef<str>) -> Result<Self, Error> {
         Bech32Address::try_from_str(address).map(|res| res.inner)
@@ -125,93 +141,6 @@ impl Address {
     #[must_use]
     pub fn is_valid_bech32(address: &str) -> bool {
         Self::try_from_bech32(address).is_ok()
-    }
-
-    ///
-    pub fn unlock(
-        &self,
-        unlock: &Unlock,
-        context: &mut SemanticValidationContext<'_>,
-    ) -> Result<(), TransactionFailureReason> {
-        match (self, unlock) {
-            (Self::Ed25519(ed25519_address), Unlock::Signature(unlock)) => {
-                if context.unlocked_addresses.contains(self) {
-                    return Err(TransactionFailureReason::InvalidInputUnlock);
-                }
-
-                let Signature::Ed25519(signature) = unlock.signature();
-
-                if signature
-                    .is_valid(context.transaction_signing_hash.as_ref(), ed25519_address)
-                    .is_err()
-                {
-                    return Err(TransactionFailureReason::InvalidUnlockBlockSignature);
-                }
-
-                context.unlocked_addresses.insert(self.clone());
-            }
-            (Self::Ed25519(_), Unlock::Reference(_)) => {
-                // TODO actually check that it was unlocked by the same signature.
-                if !context.unlocked_addresses.contains(self) {
-                    return Err(TransactionFailureReason::InvalidInputUnlock);
-                }
-            }
-            (Self::Account(account_address), Unlock::Account(unlock)) => {
-                // PANIC: indexing is fine as it is already syntactically verified that indexes reference below.
-                if let (output_id, Output::Account(account_output)) = context.inputs[unlock.index() as usize] {
-                    if &account_output.account_id_non_null(output_id) != account_address.account_id() {
-                        return Err(TransactionFailureReason::InvalidInputUnlock);
-                    }
-                    if !context.unlocked_addresses.contains(self) {
-                        return Err(TransactionFailureReason::InvalidInputUnlock);
-                    }
-                } else {
-                    return Err(TransactionFailureReason::InvalidInputUnlock);
-                }
-            }
-            (Self::Nft(nft_address), Unlock::Nft(unlock)) => {
-                // PANIC: indexing is fine as it is already syntactically verified that indexes reference below.
-                if let (output_id, Output::Nft(nft_output)) = context.inputs[unlock.index() as usize] {
-                    if &nft_output.nft_id_non_null(output_id) != nft_address.nft_id() {
-                        return Err(TransactionFailureReason::InvalidInputUnlock);
-                    }
-                    if !context.unlocked_addresses.contains(self) {
-                        return Err(TransactionFailureReason::InvalidInputUnlock);
-                    }
-                } else {
-                    return Err(TransactionFailureReason::InvalidInputUnlock);
-                }
-            }
-            // TODO maybe shouldn't be a semantic error but this function currently returns a TransactionFailureReason.
-            (Self::Anchor(_), _) => return Err(TransactionFailureReason::SemanticValidationFailed),
-            (Self::ImplicitAccountCreation(implicit_account_creation_address), _) => {
-                return Self::from(*implicit_account_creation_address.ed25519_address()).unlock(unlock, context);
-            }
-            (Self::Multi(multi_address), Unlock::Multi(unlock)) => {
-                if multi_address.len() != unlock.len() {
-                    return Err(TransactionFailureReason::InvalidInputUnlock);
-                }
-
-                let mut cumulative_unlocked_weight = 0u16;
-
-                for (address, unlock) in multi_address.addresses().iter().zip(unlock.unlocks()) {
-                    if !unlock.is_empty() {
-                        address.unlock(unlock, context)?;
-                        cumulative_unlocked_weight += address.weight() as u16;
-                    }
-                }
-
-                if cumulative_unlocked_weight < multi_address.threshold() {
-                    return Err(TransactionFailureReason::InvalidInputUnlock);
-                }
-            }
-            (Self::Restricted(restricted_address), _) => {
-                return restricted_address.address().unlock(unlock, context);
-            }
-            _ => return Err(TransactionFailureReason::InvalidInputUnlock),
-        }
-
-        Ok(())
     }
 }
 

@@ -13,11 +13,9 @@ use crate::types::block::{
             verify_allowed_unlock_conditions, AddressUnlockCondition, StorageDepositReturnUnlockCondition,
             UnlockCondition, UnlockConditionFlags, UnlockConditions,
         },
-        MinimumOutputAmount, NativeToken, Output, OutputBuilderAmount, OutputId, StorageScore, StorageScoreParameters,
+        MinimumOutputAmount, NativeToken, Output, OutputBuilderAmount, StorageScore, StorageScoreParameters,
     },
     protocol::{ProtocolParameters, WorkScore, WorkScoreParameters},
-    semantic::{SemanticValidationContext, TransactionFailureReason},
-    unlock::Unlock,
     Error,
 };
 
@@ -233,9 +231,9 @@ impl From<&BasicOutput> for BasicOutputBuilder {
 #[packable(unpack_error = Error)]
 #[packable(unpack_visitor = ProtocolParameters)]
 pub struct BasicOutput {
-    /// Amount of IOTA coins to deposit with this output.
+    /// Amount of IOTA coins held by the output.
     amount: u64,
-    /// Amount of stored Mana held by this output.
+    /// Amount of stored Mana held by the output.
     mana: u64,
     /// Define how the output can be unlocked in a transaction.
     #[packable(verify_with = verify_unlock_conditions_packable)]
@@ -248,9 +246,8 @@ pub struct BasicOutput {
 impl BasicOutput {
     /// The [`Output`] kind of an [`BasicOutput`].
     pub const KIND: u8 = 0;
-
     /// The set of allowed [`UnlockCondition`]s for an [`BasicOutput`].
-    const ALLOWED_UNLOCK_CONDITIONS: UnlockConditionFlags = UnlockConditionFlags::ADDRESS
+    pub const ALLOWED_UNLOCK_CONDITIONS: UnlockConditionFlags = UnlockConditionFlags::ADDRESS
         .union(UnlockConditionFlags::STORAGE_DEPOSIT_RETURN)
         .union(UnlockConditionFlags::TIMELOCK)
         .union(UnlockConditionFlags::EXPIRATION);
@@ -310,18 +307,6 @@ impl BasicOutput {
             .address()
             .map(|unlock_condition| unlock_condition.address())
             .unwrap()
-    }
-
-    ///
-    pub fn unlock(
-        &self,
-        _output_id: &OutputId,
-        unlock: &Unlock,
-        context: &mut SemanticValidationContext<'_>,
-    ) -> Result<(), TransactionFailureReason> {
-        self.unlock_conditions()
-            .locked_address(self.address(), context.transaction.creation_slot())
-            .unlock(unlock, context)
     }
 
     /// Returns the address of the unlock conditions if the output is a simple deposit.

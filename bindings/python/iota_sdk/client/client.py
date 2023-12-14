@@ -11,7 +11,7 @@ from iota_sdk.client._node_core_api import NodeCoreAPI
 from iota_sdk.client._node_indexer_api import NodeIndexerAPI
 from iota_sdk.client._high_level_api import HighLevelAPI
 from iota_sdk.client._utils import ClientUtils
-from iota_sdk.types.block.signed_block import UnsignedBlock
+from iota_sdk.types.block.block import UnsignedBlock
 from iota_sdk.types.common import HexStr, Node
 from iota_sdk.types.feature import Feature
 from iota_sdk.types.network_info import NetworkInfo

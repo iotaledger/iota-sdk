@@ -1,45 +1,50 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use std::sync::Arc;
+
 use iota_sdk_bindings_core::{
     call_client_method as rust_call_client_method,
     iota_sdk::client::{Client, ClientBuilder},
-    ClientMethod, Response,
+    Response,
 };
-use wasm_bindgen::{prelude::wasm_bindgen, JsCast, JsValue};
-use wasm_bindgen_futures::future_to_promise;
+use tokio::sync::RwLock;
+use wasm_bindgen::{prelude::wasm_bindgen, JsError};
 
-use crate::{ArrayString, PromiseString};
+use crate::{build_js_error, destroyed_err, map_err, ArrayString};
 
 /// The Client method handler.
 #[wasm_bindgen(js_name = ClientMethodHandler)]
-pub struct ClientMethodHandler {
-    pub(crate) client: Client,
+pub struct ClientMethodHandler(Arc<RwLock<Option<Client>>>);
+
+impl ClientMethodHandler {
+    pub(crate) fn new(client: Client) -> Self {
+        Self(Arc::new(RwLock::new(Some(client))))
+    }
 }
 
 /// Creates a method handler with the given client options.
 #[wasm_bindgen(js_name = createClient)]
-#[allow(non_snake_case)]
-pub fn create_client(clientOptions: String) -> Result<ClientMethodHandler, JsValue> {
-    let runtime = tokio::runtime::Builder::new_current_thread()
-        .build()
-        .map_err(|err| err.to_string())?;
+pub async fn create_client(options: String) -> Result<ClientMethodHandler, JsError> {
+    let client = ClientBuilder::new()
+        .from_json(&options)
+        .map_err(map_err)?
+        .finish()
+        .await
+        .map_err(map_err)?;
 
-    let client = runtime.block_on(async move {
-        ClientBuilder::new()
-            .from_json(&clientOptions)
-            .map_err(|err| err.to_string())?
-            .finish()
-            .await
-            .map_err(|err| err.to_string())
-    })?;
-
-    Ok(ClientMethodHandler { client })
+    Ok(ClientMethodHandler(Arc::new(RwLock::new(Some(client)))))
 }
 
 /// Necessary for compatibility with the node.js bindings.
 #[wasm_bindgen(js_name = destroyClient)]
-pub async fn destroy_client(_client_method_handler: &ClientMethodHandler) -> Result<(), JsValue> {
+pub async fn destroy_client(method_handler: &ClientMethodHandler) -> Result<(), JsError> {
+    let mut lock = method_handler.0.write().await;
+    if let Some(_) = &*lock {
+        *lock = None;
+    }
+
+    // If None, was already destroyed
     Ok(())
 }
 
@@ -47,23 +52,19 @@ pub async fn destroy_client(_client_method_handler: &ClientMethodHandler) -> Res
 ///
 /// Returns an error if the response itself is an error or panic.
 #[wasm_bindgen(js_name = callClientMethod)]
-#[allow(non_snake_case)]
-pub fn call_client_method(methodHandler: &ClientMethodHandler, method: String) -> Result<PromiseString, JsValue> {
-    let client: Client = methodHandler.client.clone();
-
-    let promise: js_sys::Promise = future_to_promise(async move {
-        let method: ClientMethod = serde_json::from_str(&method).map_err(|err| err.to_string())?;
-
-        let response = rust_call_client_method(&client, method).await;
-        let ser = JsValue::from(serde_json::to_string(&response).map_err(|err| err.to_string())?);
-        match response {
-            Response::Error(_) | Response::Panic(_) => Err(ser),
-            _ => Ok(ser),
+pub async fn call_client_method(method_handler: &ClientMethodHandler, method: String) -> Result<String, JsError> {
+    let method = serde_json::from_str(&method).map_err(map_err)?;
+    match &*method_handler.0.read().await {
+        Some(client) => {
+            let response = rust_call_client_method(&client, method).await;
+            let ser = serde_json::to_string(&response)?;
+            match response {
+                Response::Error(_) | Response::Panic(_) => Err(JsError::new(&ser)),
+                _ => Ok(ser),
+            }
         }
-    });
-
-    // WARNING: this does not validate the return type. Check carefully.
-    Ok(promise.unchecked_into())
+        None => Err(destroyed_err("Client")),
+    }
 }
 
 /// MQTT is not supported for WebAssembly bindings.
@@ -71,8 +72,8 @@ pub fn call_client_method(methodHandler: &ClientMethodHandler, method: String) -
 /// Throws an error if called, only included for compatibility
 /// with the Node.js bindings TypeScript definitions.
 #[wasm_bindgen(js_name = listenMqtt)]
-pub fn listen_mqtt(_topics: ArrayString, _callback: &js_sys::Function) -> Result<(), JsValue> {
-    let js_error = js_sys::Error::new("Client MQTT not supported for WebAssembly");
-
-    Err(JsValue::from(js_error))
+pub async fn listen_mqtt(_topics: ArrayString, _callback: &js_sys::Function) -> Result<(), JsError> {
+    Err(build_js_error(Response::Panic(
+        "Client MQTT not supported for WebAssembly".to_string(),
+    )))
 }

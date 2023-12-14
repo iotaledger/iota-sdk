@@ -7,7 +7,7 @@ mod delegation;
 mod metadata;
 mod native_token;
 mod output_id;
-mod state_transition;
+mod output_id_proof;
 mod storage_score;
 mod token_scheme;
 
@@ -41,7 +41,7 @@ pub use self::{
     native_token::{NativeToken, NativeTokens, NativeTokensBuilder, TokenId},
     nft::{NftId, NftOutput, NftOutputBuilder},
     output_id::OutputId,
-    state_transition::{StateTransitionError, StateTransitionVerifier},
+    output_id_proof::{HashableNode, LeafHash, OutputCommitmentProof, OutputIdProof, ValueHash},
     storage_score::{StorageScore, StorageScoreParameters},
     token_scheme::{SimpleTokenScheme, TokenScheme},
     unlock_condition::{UnlockCondition, UnlockConditions},
@@ -54,8 +54,7 @@ pub(crate) use self::{
 };
 use crate::types::block::{
     address::Address,
-    protocol::{ProtocolParameters, WorkScore, WorkScoreParameters},
-    semantic::SemanticValidationContext,
+    protocol::{CommittableAgeRange, ProtocolParameters, WorkScore, WorkScoreParameters},
     slot::SlotIndex,
     Error,
 };
@@ -75,17 +74,27 @@ pub enum OutputBuilderAmount {
     MinimumAmount(StorageScoreParameters),
 }
 
-/// Contains the generic [`Output`] with associated [`OutputMetadata`].
+/// Contains the generic [`Output`] with associated [`OutputIdProof`] and [`OutputMetadata`].
 #[derive(Clone, Debug)]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize),
+    serde(rename_all = "camelCase")
+)]
 pub struct OutputWithMetadata {
-    pub(crate) output: Output,
-    pub(crate) metadata: OutputMetadata,
+    pub output: Output,
+    pub output_id_proof: OutputIdProof,
+    pub metadata: OutputMetadata,
 }
 
 impl OutputWithMetadata {
     /// Creates a new [`OutputWithMetadata`].
-    pub fn new(output: Output, metadata: OutputMetadata) -> Self {
-        Self { output, metadata }
+    pub fn new(output: Output, output_id_proof: OutputIdProof, metadata: OutputMetadata) -> Self {
+        Self {
+            output,
+            output_id_proof,
+            metadata,
+        }
     }
 
     /// Returns the [`Output`].
@@ -96,6 +105,16 @@ impl OutputWithMetadata {
     /// Consumes self and returns the [`Output`].
     pub fn into_output(self) -> Output {
         self.output
+    }
+
+    /// Returns the [`OutputIdProof`].
+    pub fn output_id_proof(&self) -> &OutputIdProof {
+        &self.output_id_proof
+    }
+
+    /// Consumes self and returns the [`OutputIdProof`].
+    pub fn into_output_id_proof(self) -> OutputIdProof {
+        self.output_id_proof
     }
 
     /// Returns the [`OutputMetadata`].
@@ -269,91 +288,26 @@ impl Output {
 
     crate::def_is_as_opt!(Output: Basic, Account, Foundry, Nft, Delegation, Anchor);
 
-    /// Returns the address that is required to unlock this [`Output`] and the account or nft address that gets
-    /// unlocked by it, if it's an account or nft.
-    /// If no `account_transition` has been provided, assumes a state transition.
-    pub fn required_and_unlocked_address(
+    /// Returns the address that is required to unlock this [`Output`].
+    pub fn required_address(
         &self,
-        slot_index: SlotIndex,
-        output_id: &OutputId,
-    ) -> Result<(Address, Option<Address>), Error> {
-        match self {
-            Self::Basic(output) => Ok((
-                output
-                    .unlock_conditions()
-                    .locked_address(output.address(), slot_index)
-                    .clone(),
-                None,
-            )),
-            Self::Account(output) => Ok((
-                output
-                    .unlock_conditions()
-                    .locked_address(output.address(), slot_index)
-                    .clone(),
-                Some(Address::Account(output.account_address(output_id))),
-            )),
-            Self::Anchor(_) => Err(Error::UnsupportedOutputKind(AnchorOutput::KIND)),
-            Self::Foundry(output) => Ok((Address::Account(*output.account_address()), None)),
-            Self::Nft(output) => Ok((
-                output
-                    .unlock_conditions()
-                    .locked_address(output.address(), slot_index)
-                    .clone(),
-                Some(Address::Nft(output.nft_address(output_id))),
-            )),
-            Self::Delegation(output) => Ok((
-                output
-                    .unlock_conditions()
-                    .locked_address(output.address(), slot_index)
-                    .clone(),
-                None,
-            )),
-        }
-    }
-
-    ///
-    pub fn verify_state_transition(
-        current_state: Option<&Self>,
-        next_state: Option<&Self>,
-        context: &SemanticValidationContext<'_>,
-    ) -> Result<(), StateTransitionError> {
-        match (current_state, next_state) {
-            // Creations.
-            (None, Some(Self::Account(next_state))) => AccountOutput::creation(next_state, context),
-            (None, Some(Self::Foundry(next_state))) => FoundryOutput::creation(next_state, context),
-            (None, Some(Self::Nft(next_state))) => NftOutput::creation(next_state, context),
-            (None, Some(Self::Delegation(next_state))) => DelegationOutput::creation(next_state, context),
-
-            // Transitions.
-            (Some(Self::Basic(current_state)), Some(Self::Account(next_state))) => {
-                if current_state.is_implicit_account() {
-                    AccountOutput::implicit_transition(current_state, next_state)
-                } else {
-                    Err(StateTransitionError::UnsupportedStateTransition)
-                }
-            }
-            (Some(Self::Account(current_state)), Some(Self::Account(next_state))) => {
-                AccountOutput::transition(current_state, next_state, context)
-            }
-            (Some(Self::Foundry(current_state)), Some(Self::Foundry(next_state))) => {
-                FoundryOutput::transition(current_state, next_state, context)
-            }
-            (Some(Self::Nft(current_state)), Some(Self::Nft(next_state))) => {
-                NftOutput::transition(current_state, next_state, context)
-            }
-            (Some(Self::Delegation(current_state)), Some(Self::Delegation(next_state))) => {
-                DelegationOutput::transition(current_state, next_state, context)
-            }
-
-            // Destructions.
-            (Some(Self::Account(current_state)), None) => AccountOutput::destruction(current_state, context),
-            (Some(Self::Foundry(current_state)), None) => FoundryOutput::destruction(current_state, context),
-            (Some(Self::Nft(current_state)), None) => NftOutput::destruction(current_state, context),
-            (Some(Self::Delegation(current_state)), None) => DelegationOutput::destruction(current_state, context),
-
-            // Unsupported.
-            _ => Err(StateTransitionError::UnsupportedStateTransition),
-        }
+        slot_index: impl Into<Option<SlotIndex>>,
+        committable_age_range: CommittableAgeRange,
+    ) -> Result<Option<Address>, Error> {
+        Ok(match self {
+            Self::Basic(output) => output
+                .unlock_conditions()
+                .locked_address(output.address(), slot_index, committable_age_range)?
+                .cloned(),
+            Self::Account(output) => Some(output.address().clone()),
+            Self::Anchor(_) => return Err(Error::UnsupportedOutputKind(AnchorOutput::KIND)),
+            Self::Foundry(output) => Some(Address::Account(*output.account_address())),
+            Self::Nft(output) => output
+                .unlock_conditions()
+                .locked_address(output.address(), slot_index, committable_age_range)?
+                .cloned(),
+            Self::Delegation(output) => Some(output.address().clone()),
+        })
     }
 
     /// Verifies if a valid storage deposit was made. Each [`Output`] has to have an amount that covers its associated

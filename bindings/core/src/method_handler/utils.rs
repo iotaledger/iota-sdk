@@ -70,6 +70,9 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
             let foundry_id = FoundryId::build(&AccountAddress::new(account_id), serial_number, token_scheme_type);
             Response::TokenId(TokenId::from(foundry_id))
         }
+        UtilsMethod::ProtocolParametersHash { protocol_parameters } => {
+            Response::Hash(protocol_parameters.hash().to_string())
+        }
         UtilsMethod::TransactionSigningHash { transaction } => {
             Response::Hash(Transaction::try_from_dto(transaction)?.signing_hash().to_string())
         }
@@ -107,6 +110,7 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
             transaction,
             inputs,
             unlocks,
+            protocol_parameters,
         } => {
             let transaction = Transaction::try_from_dto(transaction)?;
             let inputs = inputs
@@ -114,7 +118,8 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
                 .map(|input| (input.output_id(), &input.output))
                 .collect::<Vec<(&OutputId, &Output)>>();
 
-            let context = SemanticValidationContext::new(&transaction, &inputs, unlocks.as_deref());
+            let context =
+                SemanticValidationContext::new(&transaction, &inputs, unlocks.as_deref(), protocol_parameters);
 
             Response::TransactionFailureReason(context.validate()?)
         }

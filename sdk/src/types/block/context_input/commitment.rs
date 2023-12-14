@@ -5,7 +5,7 @@ use derive_more::{Display, From};
 
 use crate::types::block::{
     protocol::{WorkScore, WorkScoreParameters},
-    slot::SlotCommitmentId,
+    slot::{SlotCommitmentId, SlotIndex},
 };
 
 /// A Commitment Context Input references a commitment to a certain slot.
@@ -14,16 +14,21 @@ pub struct CommitmentContextInput(SlotCommitmentId);
 
 impl CommitmentContextInput {
     /// The context input kind of a [`CommitmentContextInput`].
-    pub const KIND: u8 = 0;
+    pub const KIND: u8 = 1;
 
     /// Creates a new [`CommitmentContextInput`].
     pub fn new(commitment_id: SlotCommitmentId) -> Self {
         Self(commitment_id)
     }
 
-    /// Returns the commitment id of the [`CommitmentContextInput`].
-    pub fn commitment_id(&self) -> SlotCommitmentId {
+    /// Returns the slot commitment id of the [`CommitmentContextInput`].
+    pub fn slot_commitment_id(&self) -> SlotCommitmentId {
         self.0
+    }
+
+    /// Returns the slot index of the [`CommitmentContextInput`].
+    pub fn slot_index(&self) -> SlotIndex {
+        self.0.slot_index()
     }
 }
 
@@ -52,7 +57,7 @@ mod dto {
         fn from(value: &CommitmentContextInput) -> Self {
             Self {
                 kind: CommitmentContextInput::KIND,
-                commitment_id: value.commitment_id(),
+                commitment_id: value.slot_commitment_id(),
             }
         }
     }

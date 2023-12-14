@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use alloc::{collections::BTreeSet, vec::Vec};
+use alloc::collections::BTreeSet;
 
 use hashbrown::HashMap;
 use packable::{
@@ -16,12 +16,10 @@ use crate::types::block::{
     output::{
         feature::{verify_allowed_features, Feature, FeatureFlags, Features},
         unlock_condition::{verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions},
-        ChainId, MinimumOutputAmount, Output, OutputBuilderAmount, OutputId, StateTransitionError,
-        StateTransitionVerifier, StorageScore, StorageScoreParameters,
+        ChainId, MinimumOutputAmount, Output, OutputBuilderAmount, OutputId, StorageScore, StorageScoreParameters,
     },
-    payload::signed_transaction::TransactionCapabilityFlag,
     protocol::{ProtocolParameters, WorkScore, WorkScoreParameters},
-    semantic::{SemanticValidationContext, TransactionFailureReason},
+    semantic::{SemanticValidationContext, StateTransitionError, TransactionFailureReason},
     unlock::Unlock,
     Error,
 };
@@ -299,6 +297,7 @@ impl From<&AnchorOutput> for AnchorOutputBuilder {
 pub struct AnchorOutput {
     /// Amount of IOTA coins held by the output.
     amount: u64,
+    /// Amount of stored Mana held by the output.
     mana: u64,
     /// Unique identifier of the anchor.
     anchor_id: AnchorId,
@@ -428,27 +427,21 @@ impl AnchorOutput {
         unlock: &Unlock,
         context: &mut SemanticValidationContext<'_>,
     ) -> Result<(), TransactionFailureReason> {
-        let anchor_id = if self.anchor_id().is_null() {
-            AnchorId::from(output_id)
-        } else {
-            *self.anchor_id()
-        };
+        let anchor_id = self.anchor_id_non_null(output_id);
         let next_state = context.output_chains.get(&ChainId::from(anchor_id));
 
         match next_state {
             Some(Output::Anchor(next_state)) => {
                 if self.state_index() == next_state.state_index() {
-                    self.governor_address().unlock(unlock, context)?;
+                    context.address_unlock(self.governor_address(), unlock)?;
                 } else {
-                    self.state_controller_address().unlock(unlock, context)?;
+                    context.address_unlock(self.state_controller_address(), unlock)?;
                     // Only a state transition can be used to consider the anchor address for output unlocks and
                     // sender/issuer validations.
-                    context
-                        .unlocked_addresses
-                        .insert(Address::from(AnchorAddress::from(anchor_id)));
+                    context.unlocked_addresses.insert(Address::from(anchor_id));
                 }
             }
-            None => self.governor_address().unlock(unlock, context)?,
+            None => context.address_unlock(self.governor_address(), unlock)?,
             // The next state can only be an anchor output since it is identified by an anchor chain identifier.
             Some(_) => unreachable!(),
         };
@@ -515,46 +508,6 @@ impl WorkScore for AnchorOutput {
 }
 
 impl MinimumOutputAmount for AnchorOutput {}
-
-impl StateTransitionVerifier for AnchorOutput {
-    fn creation(next_state: &Self, context: &SemanticValidationContext<'_>) -> Result<(), StateTransitionError> {
-        if !next_state.anchor_id.is_null() {
-            return Err(StateTransitionError::NonZeroCreatedId);
-        }
-
-        if let Some(issuer) = next_state.immutable_features().issuer() {
-            if !context.unlocked_addresses.contains(issuer.address()) {
-                return Err(StateTransitionError::IssuerNotUnlocked);
-            }
-        }
-
-        Ok(())
-    }
-
-    fn transition(
-        current_state: &Self,
-        next_state: &Self,
-        context: &SemanticValidationContext<'_>,
-    ) -> Result<(), StateTransitionError> {
-        Self::transition_inner(
-            current_state,
-            next_state,
-            &context.input_chains,
-            context.transaction.outputs(),
-        )
-    }
-
-    fn destruction(_current_state: &Self, context: &SemanticValidationContext<'_>) -> Result<(), StateTransitionError> {
-        if !context
-            .transaction
-            .capabilities()
-            .has_capability(TransactionCapabilityFlag::DestroyAnchorOutputs)
-        {
-            return Err(TransactionFailureReason::TransactionCapabilityAccountDestructionNotAllowed)?;
-        }
-        Ok(())
-    }
-}
 
 impl Packable for AnchorOutput {
     type UnpackError = Error;
@@ -653,6 +606,7 @@ fn verify_unlock_conditions(unlock_conditions: &UnlockConditions, anchor_id: &An
 
 #[cfg(feature = "serde")]
 mod dto {
+    use alloc::vec::Vec;
 
     use serde::{Deserialize, Serialize};
 

@@ -5,7 +5,7 @@
 use crate::wallet::events::types::{TransactionProgressEvent, WalletEvent};
 use crate::{
     client::secret::SecretManage,
-    types::block::{payload::Payload, BlockId},
+    types::block::{output::AccountId, payload::Payload, BlockId},
     wallet::{operations::transaction::SignedTransactionPayload, Wallet},
 };
 
@@ -18,6 +18,7 @@ where
     pub(crate) async fn submit_signed_transaction(
         &self,
         payload: SignedTransactionPayload,
+        issuer_id: impl Into<Option<AccountId>> + Send,
     ) -> crate::wallet::Result<BlockId> {
         log::debug!("[TRANSACTION] submit_signed_transaction");
 
@@ -25,6 +26,6 @@ where
         self.emit(WalletEvent::TransactionProgress(TransactionProgressEvent::Broadcasting))
             .await;
 
-        self.submit_basic_block(Some(Payload::from(payload))).await
+        self.submit_basic_block(Some(Payload::from(payload)), issuer_id).await
     }
 }

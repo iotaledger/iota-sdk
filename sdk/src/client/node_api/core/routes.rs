@@ -17,12 +17,12 @@ use crate::{
     types::{
         api::core::{
             BlockMetadataResponse, BlockWithMetadataResponse, CommitteeResponse, CongestionResponse, InfoResponse,
-            IssuanceBlockHeaderResponse, ManaRewardsResponse, PeerResponse, RoutesResponse, SubmitBlockResponse,
-            UtxoChangesResponse, ValidatorResponse, ValidatorsResponse,
+            IssuanceBlockHeaderResponse, ManaRewardsResponse, OutputResponse, RoutesResponse, SubmitBlockResponse,
+            TransactionMetadataResponse, UtxoChangesResponse, ValidatorResponse, ValidatorsResponse,
         },
         block::{
             address::ToBech32Ext,
-            output::{AccountId, Output, OutputId, OutputMetadata},
+            output::{AccountId, OutputId, OutputMetadata, OutputWithMetadata},
             payload::signed_transaction::TransactionId,
             slot::{EpochIndex, SlotCommitment, SlotCommitmentId, SlotIndex},
             Block, BlockDto, BlockId,
@@ -234,7 +234,7 @@ impl ClientInner {
 
     /// Finds an output by its ID and returns it as object.
     /// GET /api/core/v3/outputs/{outputId}
-    pub async fn get_output(&self, output_id: &OutputId) -> Result<Output> {
+    pub async fn get_output(&self, output_id: &OutputId) -> Result<OutputResponse> {
         let path = &format!("api/core/v3/outputs/{output_id}");
 
         self.get_request(path, None, false, true).await
@@ -252,6 +252,14 @@ impl ClientInner {
     /// GET /api/core/v3/outputs/{outputId}/metadata
     pub async fn get_output_metadata(&self, output_id: &OutputId) -> Result<OutputMetadata> {
         let path = &format!("api/core/v3/outputs/{output_id}/metadata");
+
+        self.get_request(path, None, false, true).await
+    }
+
+    /// Finds an output with its metadata by output ID.
+    /// GET /api/core/v3/outputs/{outputId}/full
+    pub async fn get_output_with_metadata(&self, output_id: &OutputId) -> Result<OutputWithMetadata> {
+        let path = &format!("api/core/v3/outputs/{output_id}/full");
 
         self.get_request(path, None, false, true).await
     }
@@ -281,6 +289,17 @@ impl ClientInner {
     /// GET /api/core/v3/transactions/{transactionId}/included-block/metadata
     pub async fn get_included_block_metadata(&self, transaction_id: &TransactionId) -> Result<BlockMetadataResponse> {
         let path = &format!("api/core/v3/transactions/{transaction_id}/included-block/metadata");
+
+        self.get_request(path, None, true, true).await
+    }
+
+    /// Finds the metadata of a transaction.
+    /// GET /api/core/v3/transactions/{transactionId}/metadata
+    pub async fn get_transaction_metadata(
+        &self,
+        transaction_id: &TransactionId,
+    ) -> Result<TransactionMetadataResponse> {
+        let path = &format!("api/core/v3/transactions/{transaction_id}/metadata");
 
         self.get_request(path, None, true, true).await
     }
@@ -337,35 +356,6 @@ impl ClientInner {
 
         self.get_request(path, None, false, false).await
     }
-
-    // Peers routes.
-
-    /// GET /api/core/v3/peers
-    pub async fn get_peers(&self) -> Result<Vec<PeerResponse>> {
-        const PATH: &str = "api/core/v3/peers";
-
-        self.get_request(PATH, None, false, false).await
-    }
-
-    // // RoutePeer is the route for getting peers by their peerID.
-    // // GET returns the peer
-    // // DELETE deletes the peer.
-    // RoutePeer = "/peers/:" + restapipkg.ParameterPeerID
-
-    // // RoutePeers is the route for getting all peers of the node.
-    // // GET returns a list of all peers.
-    // // POST adds a new peer.
-    // RoutePeers = "/peers"
-
-    // Control routes.
-
-    // // RouteControlDatabasePrune is the control route to manually prune the database.
-    // // POST prunes the database.
-    // RouteControlDatabasePrune = "/control/database/prune"
-
-    // // RouteControlSnapshotsCreate is the control route to manually create a snapshot files.
-    // // POST creates a snapshot (full, delta or both).
-    // RouteControlSnapshotsCreate = "/control/snapshots/create"
 }
 
 impl Client {

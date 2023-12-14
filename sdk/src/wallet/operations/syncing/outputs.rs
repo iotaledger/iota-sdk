@@ -60,8 +60,8 @@ where
                     output_id: output_with_meta.metadata().output_id().to_owned(),
                     metadata: *output_with_meta.metadata(),
                     output: output_with_meta.output().clone(),
+                    output_id_proof: output_with_meta.output_id_proof().clone(),
                     is_spent: output_with_meta.metadata().is_spent(),
-                    address: associated_address.address.inner.clone(),
                     network_id,
                     remainder,
                     chain,
@@ -91,6 +91,7 @@ where
                     unspent_outputs.push((output_id, output_data.clone()));
                     outputs.push(OutputWithMetadata::new(
                         output_data.output.clone(),
+                        output_data.output_id_proof.clone(),
                         output_data.metadata,
                     ));
                 }
