@@ -13,8 +13,9 @@ from iota_sdk import SyncOptions, Wallet, WalletOptions
 # should not be done in production.
 load_dotenv()
 
-if 'WALLET_DB_PATH' not in os.environ:
-    raise Exception(".env WALLET_DB_PATH is undefined, see .env.example")
+for env_var in ['WALLET_DB_PATH', 'FAUCET_URL']:
+    if env_var not in os.environ:
+        raise Exception(f'.env {env_var} is undefined, see .env.example')
 
 wallet = Wallet(WalletOptions(storage_path=os.environ.get('WALLET_DB_PATH')))
 
@@ -27,4 +28,4 @@ balance = wallet.sync(SyncOptions(sync_only_most_basic_outputs=True))
 print('Balance', balance)
 
 # Use the faucet to send tokens to your address.
-print('Fill your address with the Faucet: https://faucet.testnet.shimmer.network/')
+print(f'Fill your address with the Faucet: {os.environ[FAUCET_URL]}')

@@ -20,7 +20,7 @@ wallet.set_stronghold_password(os.environ['STRONGHOLD_PASSWORD'])
 # Sync wallet to make sure account is updated with outputs from previous
 # examples.
 wallet.sync()
-print('Account synced')
+print('Wallet synced')
 
 # List unspent outputs before consolidation.
 # The output we created with example `request_funds` and the basic output from `mint` have only one
@@ -56,9 +56,9 @@ print(
     f'Transaction included: {os.environ["EXPLORER_URL"]}/block/{block_id}'
 )
 
-# Sync account
+# Sync wallet
 wallet.sync()
-print('Account synced')
+print('Wallet synced')
 
 # Outputs after consolidation
 outputs = wallet.unspent_outputs()

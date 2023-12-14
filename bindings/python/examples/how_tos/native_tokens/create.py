@@ -57,6 +57,6 @@ print(f'Block included: {os.environ["EXPLORER_URL"]}/block/{block_id}')
 
 print(f'Created token: {prepared_transaction.token_id()}')
 
-# Ensure the account is synced after creating the native token.
+# Ensure the wallet is synced after creating the native token.
 wallet.sync()
-print('Account synced')
+print('Wallet synced')
