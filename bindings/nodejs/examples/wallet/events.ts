@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import {
-    Event,
+    WalletEvent,
     ConsolidationRequiredWalletEvent,
     TransactionProgressWalletEvent,
     SelectingInputsProgress,
@@ -24,7 +24,7 @@ async function run() {
         // Create the wallet
         const wallet = await getUnlockedWallet();
 
-        const callback = function (err: any, event: Event) {
+        const callback = function (err: any, event: WalletEvent) {
             console.log('Event:', event);
         };
 

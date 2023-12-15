@@ -29,8 +29,7 @@ received_event = False
 def callback(event):
     """Callback function for the event listener"""
     event_dict = json.loads(event)
-    print('AccountIndex:', event_dict["accountIndex"])
-    print('Event:', event_dict["event"])
+    print('Event:', event)
 
     # Exit after receiving an event.
     # pylint: disable=global-statement

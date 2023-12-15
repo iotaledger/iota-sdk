@@ -14,29 +14,6 @@ import { HexEncodedString } from '../utils';
 export type TransactionId = string;
 
 /**
- * An wallet account event.
- */
-class Event {
-    /**
-     * The account index for which the event was emitted.
-     */
-    accountIndex: number;
-    /**
-     * The wallet event.
-     */
-    event: WalletEvent;
-
-    /**
-     * @param accountIndex The account index.
-     * @param event The wallet event.
-     */
-    constructor(accountIndex: number, event: WalletEvent) {
-        this.accountIndex = accountIndex;
-        this.event = event;
-    }
-}
-
-/**
  * All of the wallet event types.
  */
 enum WalletEventType {
@@ -280,7 +257,6 @@ class BroadcastingProgress extends TransactionProgress {
 }
 
 export {
-    Event,
     WalletEventType,
     WalletEvent,
     ConsolidationRequiredWalletEvent,
