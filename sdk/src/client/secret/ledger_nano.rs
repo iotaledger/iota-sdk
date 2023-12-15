@@ -29,7 +29,7 @@ use crate::{
         LedgerNanoStatus, PreparedTransactionData,
     },
     types::block::{
-        address::{AccountAddress, Address, AnchorAddress, NftAddress},
+        address::{AccountAddress, Address, NftAddress},
         output::Output,
         payload::signed_transaction::SignedTransactionPayload,
         protocol::ProtocolParameters,
@@ -438,7 +438,7 @@ impl SecretManagerConfig for LedgerSecretManager {
 /// This method finds out if we have to switch to blind signing mode.
 pub fn needs_blind_signing(prepared_transaction: &PreparedTransactionData, buffer_size: usize) -> bool {
     if !prepared_transaction.transaction.outputs().iter().all(
-        |output| matches!(output, Output::Basic(o) if o.simple_deposit_address().is_some()&& o.address().is_ed25519()),
+        |output| matches!(output, Output::Basic(o) if o.simple_deposit_address().is_some() && o.address().is_ed25519()),
     ) {
         return true;
     }
@@ -540,19 +540,22 @@ fn merge_unlocks(
             // Time in which no address can unlock the output because of an expiration unlock condition
             .ok_or(Error::ExpirationDeadzone)?;
 
+        let required_address = if let Address::Restricted(restricted) = &required_address {
+            restricted.address()
+        } else {
+            &required_address
+        };
+
         // Check if we already added an [Unlock] for this address
         match block_indexes.get(&required_address) {
             // If we already have an [Unlock] for this address, add a [Unlock] based on the address type
             Some(block_index) => match required_address {
-                Address::Ed25519(_ed25519) => {
+                Address::Ed25519(_) | Address::ImplicitAccountCreation(_) => {
                     merged_unlocks.push(Unlock::Reference(ReferenceUnlock::new(*block_index as u16)?));
                 }
-                Address::Account(_account) => {
-                    merged_unlocks.push(Unlock::Account(AccountUnlock::new(*block_index as u16)?))
-                }
-                Address::Nft(_nft) => merged_unlocks.push(Unlock::Nft(NftUnlock::new(*block_index as u16)?)),
-                Address::Anchor(_) => Err(BlockError::UnsupportedAddressKind(AnchorAddress::KIND))?,
-                _ => todo!("What do we do here?"),
+                Address::Account(_) => merged_unlocks.push(Unlock::Account(AccountUnlock::new(*block_index as u16)?)),
+                Address::Nft(_) => merged_unlocks.push(Unlock::Nft(NftUnlock::new(*block_index as u16)?)),
+                _ => Err(BlockError::UnsupportedAddressKind(required_address.kind()))?,
             },
             None => {
                 // We can only sign ed25519 addresses and block_indexes needs to contain the account or nft
@@ -560,7 +563,6 @@ fn merge_unlocks(
                 // than the current block index
                 match &required_address {
                     Address::Ed25519(_) | Address::ImplicitAccountCreation(_) => {}
-                    Address::Restricted(restricted) if restricted.address().is_ed25519() => {}
                     _ => Err(Error::MissingInputWithEd25519Address)?,
                 }
 
@@ -579,7 +581,7 @@ fn merge_unlocks(
 
                 // Add the ed25519 address to the block_indexes, so it gets referenced if further inputs have
                 // the same address in their unlock condition
-                block_indexes.insert(required_address, current_block_index);
+                block_indexes.insert(required_address.clone(), current_block_index);
             }
         }
 

@@ -448,67 +448,6 @@ impl From<OutputWithMetadata> for OutputWithMetadataResponse {
     }
 }
 
-/// Describes the heartbeat of a node.
-#[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct Heartbeat {
-    pub solid_milestone_index: u32,
-    pub pruned_milestone_index: u32,
-    pub latest_milestone_index: u32,
-    pub connected_peers: u8,
-    pub synced_peers: u8,
-}
-
-/// Describes metrics of a gossip stream.
-#[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct Metrics {
-    pub new_blocks: u64,
-    pub received_blocks: u64,
-    pub known_blocks: u64,
-    pub received_block_requests: u64,
-    pub received_milestone_requests: u64,
-    pub received_heartbeats: u64,
-    pub sent_blocks: u64,
-    pub sent_block_requests: u64,
-    pub sent_milestone_requests: u64,
-    pub sent_heartbeats: u64,
-    pub dropped_packets: u64,
-}
-
-/// Returns all information about the gossip stream with the peer.
-#[derive(Clone, Debug, Eq, PartialEq, Default, Serialize, Deserialize)]
-pub struct Gossip {
-    pub heartbeat: Heartbeat,
-    pub metrics: Metrics,
-}
-
-/// Describes the relation with the peer.
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub enum Relation {
-    Known,
-    Unknown,
-    Autopeered,
-}
-
-/// Response of
-/// - GET /api/core/v3/peer/{peer_id}
-/// - POST /api/core/v3/peers
-/// Returns information about a peer.
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct PeerResponse {
-    pub id: String,
-    pub multi_addresses: Vec<String>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub alias: Option<String>,
-    pub relation: Relation,
-    pub connected: bool,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub gossip: Option<Gossip>,
-}
-
 /// Response of GET /api/routes.
 /// Returns the available API route groups of the node.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
@@ -527,6 +466,26 @@ pub struct UtxoChangesResponse {
     pub commitment_id: SlotCommitmentId,
     pub created_outputs: Vec<OutputId>,
     pub consumed_outputs: Vec<OutputId>,
+}
+
+/// Response of
+/// - GET /api/core/v3/commitments/{commitmentId}/utxo-changes/full
+/// - GET /api/core/v3/commitments/by-slot/{slot}/utxo-changes/full
+/// Returns all full UTXO changes that happened at a specific slot.
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct UtxoChangesFullResponse {
+    pub commitment_id: SlotCommitmentId,
+    pub created_outputs: Vec<OutputWithId>,
+    pub consumed_outputs: Vec<OutputWithId>,
+}
+
+/// An Output and its ID.
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct OutputWithId {
+    pub output_id: OutputId,
+    pub output: Output,
 }
 
 /// Contains the generic [`Output`] with associated [`OutputIdProof`].

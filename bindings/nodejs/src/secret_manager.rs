@@ -21,8 +21,8 @@ pub type SecretManagerMethodHandler = Arc<RwLock<SecretManager>>;
 
 #[napi(js_name = "createSecretManager")]
 pub fn create_secret_manager(options: String) -> Result<External<SecretManagerMethodHandler>> {
-    let secret_manager_dto = serde_json::from_str::<SecretManagerDto>(&options).map_err(NodejsError::from)?;
-    let secret_manager = SecretManager::try_from(secret_manager_dto).map_err(NodejsError::from)?;
+    let secret_manager_dto = serde_json::from_str::<SecretManagerDto>(&options).map_err(NodejsError::new)?;
+    let secret_manager = SecretManager::try_from(secret_manager_dto).map_err(NodejsError::new)?;
 
     Ok(External::new(Arc::new(RwLock::new(secret_manager))))
 }
@@ -32,17 +32,17 @@ pub async fn call_secret_manager_method(
     secret_manager: External<SecretManagerMethodHandler>,
     method: String,
 ) -> Result<String> {
-    let secret_manager_method = serde_json::from_str::<SecretManagerMethod>(&method).map_err(NodejsError::from)?;
+    let secret_manager_method = serde_json::from_str::<SecretManagerMethod>(&method).map_err(NodejsError::new)?;
 
     let res = rust_call_secret_manager_method(&*secret_manager.as_ref().read().await, secret_manager_method).await;
     if matches!(res, Response::Error(_) | Response::Panic(_)) {
         return Err(Error::new(
             Status::GenericFailure,
-            serde_json::to_string(&res).map_err(NodejsError::from)?,
+            serde_json::to_string(&res).map_err(NodejsError::new)?,
         ));
     }
 
-    Ok(serde_json::to_string(&res).map_err(NodejsError::from)?)
+    Ok(serde_json::to_string(&res).map_err(NodejsError::new)?)
 }
 
 #[napi(js_name = "migrateStrongholdSnapshotV2ToV3")]
@@ -66,7 +66,7 @@ pub fn migrate_stronghold_snapshot_v2_to_v3(
         new_password,
     )
     .map_err(iota_sdk_bindings_core::iota_sdk::client::Error::from)
-    .map_err(NodejsError::from)?;
+    .map_err(NodejsError::new)?;
 
     Ok(())
 }

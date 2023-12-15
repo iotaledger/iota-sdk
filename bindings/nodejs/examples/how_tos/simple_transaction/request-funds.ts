@@ -28,13 +28,15 @@ async function run() {
         const address = await wallet.address();
         console.log(address);
 
-        const faucetResponse = await (
-            await wallet.getClient()
-        ).requestFundsFromFaucet(faucetUrl, address);
+        const client = await wallet.getClient();
+        const faucetResponse = await client.requestFundsFromFaucet(
+            faucetUrl,
+            address,
+        );
         console.log(faucetResponse);
     } catch (error) {
         console.error('Error: ', error);
     }
 }
 
-run().then(() => process.exit());
+void run().then(() => process.exit());

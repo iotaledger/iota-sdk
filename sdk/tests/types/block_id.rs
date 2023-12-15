@@ -5,8 +5,8 @@ use core::str::FromStr;
 
 use iota_sdk::types::{
     block::{
-        protocol::ProtocolParameters, rand::bytes::rand_bytes_array, slot::SlotIndex,
-        Block, BlockDto, BlockHash, BlockId,
+        protocol::ProtocolParameters, rand::bytes::rand_bytes_array, slot::SlotIndex, Block, BlockDto, BlockHash,
+        BlockId,
     },
     TryFromDto,
 };
@@ -87,7 +87,10 @@ fn basic_block_tagged_data_payload_id() {
 
     assert_eq!(prefix_hex::encode(&block_bytes), json["bytes"]);
     assert_eq!(block, Block::unpack_unverified(block_bytes).unwrap());
-    assert_eq!(serde_json::Value::String(block.id(&protocol_parameters()).to_string()), json["id"]);
+    assert_eq!(
+        serde_json::Value::String(block.id(&protocol_parameters()).to_string()),
+        json["id"]
+    );
 }
 
 // TODO waiting for the ContextInput discussion

@@ -373,3 +373,10 @@ export interface __NftOutputIdMethod__ {
         nftId: NftId;
     };
 }
+
+export interface __BlockIdMethod__ {
+    name: 'blockId';
+    data: {
+        block: Block;
+    };
+}

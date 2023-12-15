@@ -68,13 +68,19 @@ export class Client {
     private methodHandler: ClientMethodHandler;
 
     /**
-     * @param options client options or a client method handler.
+     * @param methodHandler The Rust method handler created in `ClientMethodHandler.create()`.
      */
-    constructor(options: IClientOptions | ClientMethodHandler) {
-        this.methodHandler = new ClientMethodHandler(options);
+    constructor(methodHandler: ClientMethodHandler) {
+        this.methodHandler = methodHandler;
     }
 
-    async destroy() {
+    /**
+     * @param options The client options.
+     */
+    static async create(options: IClientOptions): Promise<Client> {
+        return new Client(await ClientMethodHandler.create(options));
+    }
+    async destroy(): Promise<void> {
         return this.methodHandler.destroy();
     }
 
@@ -691,7 +697,7 @@ export class Client {
         topics: string[],
         callback: (error: Error, result: string) => void,
     ): Promise<void> {
-        return this.methodHandler.listen(topics, callback);
+        return this.methodHandler.listenMqtt(topics, callback);
     }
 
     /**
@@ -984,6 +990,23 @@ export class Client {
             name: 'nftOutputId',
             data: {
                 nftId,
+            },
+        });
+
+        return JSON.parse(response).payload;
+    }
+
+    /**
+     * Compute the block ID (Blake2b256 hash of the block bytes) of a block.
+     *
+     * @param block A block.
+     * @returns The corresponding block ID.
+     */
+    async blockId(block: Block): Promise<BlockId> {
+        const response = await this.methodHandler.callMethod({
+            name: 'blockId',
+            data: {
+                block,
             },
         });
 

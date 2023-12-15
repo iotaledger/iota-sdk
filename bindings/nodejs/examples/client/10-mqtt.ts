@@ -18,7 +18,7 @@ async function run() {
     }
 
     // Connecting to a MQTT broker using raw ip doesn't work with TCP. This is a limitation of rustls.
-    const client = new Client({
+    const client = await Client.create({
         // Insert your node URL in the .env.
         nodes: [process.env.NODE_URL as string],
     });
@@ -55,4 +55,4 @@ async function run() {
     }, 10000);
 }
 
-run();
+void run().then(() => process.exit());

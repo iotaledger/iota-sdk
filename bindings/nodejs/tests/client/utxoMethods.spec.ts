@@ -7,50 +7,56 @@ import 'dotenv/config';
 import { Client } from '../../lib/client';
 import '../customMatchers';
 
-const client = new Client({
-    nodes: [
-        {
-            url: process.env.NODE_URL || 'http://localhost:14265',
-        },
-    ],
-});
+async function makeClient(): Promise<Client> {
+    return await Client.create({
+        nodes: [
+            {
+                url: process.env.NODE_URL || 'http://localhost:8050',
+            },
+        ],
+    });
+}
 
 // Skip for CI
 describe.skip('UTXO methods', () => {
     it('gets accounts output IDs', async () => {
-        const accountsOutputIds = await client.accountOutputIds([
+        const client = await makeClient();
+        const accountsOutputIds = await client.accountOutputIds(
             {
                 address:
                     'rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy',
             },
-        ]);
+        );
 
         expect(accountsOutputIds).toBeDefined();
     });
 
     it('gets nfts output IDs', async () => {
-        const nftsOutputIds = await client.nftOutputIds([
+        const client = await makeClient();
+        const nftsOutputIds = await client.nftOutputIds(
             {
                 address:
                     'rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy',
             },
-        ]);
+        );
 
         expect(nftsOutputIds).toBeDefined();
     });
 
     it('gets foundries output IDs', async () => {
-        const foundriesOutputIds = await client.foundryOutputIds([
+        const client = await makeClient();
+        const foundriesOutputIds = await client.foundryOutputIds(
             {
-                hasNativeTokens: true,
+                hasNativeToken: true,
             },
-        ]);
+        );
 
         expect(foundriesOutputIds).toBeDefined();
     });
 
     // TODO: get valid IDs to test with
     it('get account/nft/foundry outputId rejects with 404 for invalid IDs', async () => {
+        const client = await makeClient();
         await expect(
             client.accountOutputId(
                 '0x03119f37e7ad40608fc7ab15db49390abc233648c95e78141ff2e298f60d7a95',

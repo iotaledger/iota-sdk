@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 from json import dumps, loads
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING, List, Optional
 
 from iota_sdk.types.signature import Ed25519Signature
 from iota_sdk.types.address import Address, deserialize_address
@@ -11,14 +11,14 @@ from iota_sdk.types.common import HexStr
 from iota_sdk.types.transaction import Transaction
 from iota_sdk.types.node_info import ProtocolParameters
 from iota_sdk.types.output_id import OutputId
-from iota_sdk.types.output import Output
+from iota_sdk.types.unlock import Unlock
 from iota_sdk.external import call_utils_method
 from iota_sdk.types.payload import SignedTransactionPayload
 from iota_sdk.types.transaction_data import InputSigningData
 
 # Required to prevent circular import
 if TYPE_CHECKING:
-    from iota_sdk.types.block.signed_block import SignedBlock
+    from iota_sdk.types.block.block import Block
 
 # pylint: disable=too-many-public-methods
 
@@ -163,7 +163,7 @@ class Utils():
         })
 
     @staticmethod
-    def block_id(block: SignedBlock, params: ProtocolParameters) -> HexStr:
+    def block_id(block: Block, params: ProtocolParameters) -> HexStr:
         """ Return a block ID (Blake2b256 hash of block bytes) from a block.
         """
         return _call_method('blockId', {
@@ -218,7 +218,7 @@ class Utils():
 
     @staticmethod
     def verify_transaction_semantic(
-            inputs: transaction: Transaction, inputs: List[InputSigningData], unlocks: Optional[List[Unlock]] = None) -> str:
+            transaction: Transaction, inputs: List[InputSigningData], unlocks: Optional[List[Unlock]] = None) -> str:
         """Verifies the semantic of a transaction.
         """
         return _call_method('verifyTransactionSemantic', {

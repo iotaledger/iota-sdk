@@ -17,7 +17,7 @@ async function run() {
                 throw new Error(`.env ${envVar} is not defined`);
             }
         }
-        const strongholdSecretManager = new SecretManager({
+        const strongholdSecretManager = SecretManager.create({
             stronghold: {
                 password: process.env.STRONGHOLD_PASSWORD,
                 snapshotPath: 'client.stronghold',
@@ -46,4 +46,4 @@ async function run() {
     }
 }
 
-run().then(() => process.exit());
+void run().then(() => process.exit());

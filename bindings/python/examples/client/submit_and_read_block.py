@@ -11,7 +11,7 @@
 # Make sure you have first installed it with `pip install iota_sdk`
 import os
 from dotenv import load_dotenv
-from iota_sdk import BasicBlock, Bip44, Client, CoinType, hex_to_utf8, utf8_to_hex, TaggedDataPayload, MnemonicSecretManager, SecretManager
+from iota_sdk import BasicBlockBody, Bip44, Client, CoinType, hex_to_utf8, utf8_to_hex, TaggedDataPayload, MnemonicSecretManager, SecretManager
 
 load_dotenv()
 
@@ -70,14 +70,14 @@ unsigned_block = client.build_basic_block(
     TaggedDataPayload(
         utf8_to_hex("tag"),
         utf8_to_hex("data")))
-signed_block = secret_manager.sign_block(unsigned_block, chain)
-block_id = client.post_block(signed_block)
+block = secret_manager.sign_block(unsigned_block, chain)
+block_id = client.post_block(block)
 
 print('\nThe block ID for your submitted block is:')
 print(f'  {block_id}')
 
 print('\nMetadata for your submitted block is:')
-print(f'  {signed_block}')
+print(f'  {block}')
 
 ########################################################
 # Step 3: Use the block ID to read the payload back
@@ -92,7 +92,7 @@ metadata = client.get_block_metadata(block_id)
 
 # Get the whole block
 block = client.get_block(block_id).block
-if isinstance(block, BasicBlock):
+if isinstance(block, BasicBlockBody):
     payload_out = block.payload
     tag_hex_out = block.payload.tag
     message_hex_out = block.payload.data
