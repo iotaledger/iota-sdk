@@ -10,6 +10,10 @@ import type {
     __PostBlockMethod__,
     __GetTipsMethod__,
     __GetNetworkInfoMethod__,
+    __GetAccountCongestionMethod__,
+    __GetRewardsMethod__,
+    __GetValidatorsMethod__,
+    __GetValidatorMethod__,
     __GetBlockMethod__,
     __GetBlockMetadataMethod__,
     __GetBlockWithMetadataMethod__,
@@ -22,11 +26,15 @@ import type {
     __GetProtocolParametersMethod__,
     __GetHealthMethod__,
     __GetNodeInfoMethod__,
-    __GetPeersMethod__,
     __PostBlockRawMethod__,
     __GetBlockRawMethod__,
     __GetIncludedBlockMethod__,
     __GetIncludedBlockMetadataMethod__,
+    __GetTransactionMetadataMethod__,
+    __GetCommitmentMethod__,
+    __GetUtxoChangesMethod__,
+    __GetCommitmentByIndexMethod__,
+    __GetUtxoChangesByIndexMethod__,
     __HexToBech32Method__,
     __AccountIdToBech32Method__,
     __NftIdToBech32Method__,
@@ -65,6 +73,10 @@ export type __ClientMethods__ =
     | __PostBlockMethod__
     | __GetTipsMethod__
     | __GetNetworkInfoMethod__
+    | __GetAccountCongestionMethod__
+    | __GetRewardsMethod__
+    | __GetValidatorsMethod__
+    | __GetValidatorMethod__
     | __GetBlockMethod__
     | __GetBlockMetadataMethod__
     | __GetBlockWithMetadataMethod__
@@ -78,11 +90,15 @@ export type __ClientMethods__ =
     | __GetProtocolParametersMethod__
     | __GetHealthMethod__
     | __GetNodeInfoMethod__
-    | __GetPeersMethod__
     | __PostBlockRawMethod__
     | __GetBlockRawMethod__
     | __GetIncludedBlockMethod__
     | __GetIncludedBlockMetadataMethod__
+    | __GetTransactionMetadataMethod__
+    | __GetCommitmentMethod__
+    | __GetUtxoChangesMethod__
+    | __GetCommitmentByIndexMethod__
+    | __GetUtxoChangesByIndexMethod__
     | __HexToBech32Method__
     | __AccountIdToBech32Method__
     | __NftIdToBech32Method__

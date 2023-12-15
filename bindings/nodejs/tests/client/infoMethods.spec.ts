@@ -59,13 +59,6 @@ describe.skip('Client info methods', () => {
         expect(tips.length).toBeGreaterThan(0);
     });
 
-    it('gets peers', async () => {
-        const client = await makeClient();
-        await expect(client.getPeers()).rejects.toMatch(
-            'missing or malformed jwt',
-        );
-    });
-
     it('gets networkInfo', async () => {
         const client = await makeClient();
         const networkInfo = await client.getNetworkInfo();

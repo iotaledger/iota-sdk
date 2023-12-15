@@ -1,11 +1,11 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-import type { TransactionFailureReason } from './transaction-failure-reason';
 import type { HexEncodedString } from '../utils/hex-encoding';
 import { BlockState, TransactionState } from './state';
 import { BlockFailureReason } from './block-failure-reason';
 import { Block } from '../block';
+import { TransactionId } from '../wallet';
 
 /**
  * Response from the metadata endpoint.
@@ -20,17 +20,13 @@ export interface IBlockMetadata {
      */
     blockState: BlockState;
     /**
-     * The transaction state.
-     */
-    transactionState?: TransactionState;
-    /**
      * The block failure reason.
      */
     blockFailureReason?: BlockFailureReason;
     /**
-     * The transaction failure reason.
+     * The metadata of the transactions in the block.
      */
-    transactionFailureReason?: TransactionFailureReason;
+    transactionMetadata?: TransactionMetadata;
 }
 
 /**
@@ -45,4 +41,22 @@ export interface IBlockWithMetadata {
      * The block metadata.
      */
     metadata: IBlockMetadata;
+}
+
+/**
+ * Returns the metadata of a given transaction.
+ */
+export interface TransactionMetadata {
+    /**
+     * The transaction id.
+     */
+    transactionId: TransactionId;
+    /**
+     * The transaction state.
+     */
+    transactionState: TransactionState;
+    /**
+     * The transaction failure reason.
+     */
+    transactionFailureReason?: BlockFailureReason;
 }
