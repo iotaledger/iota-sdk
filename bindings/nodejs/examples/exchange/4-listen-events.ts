@@ -12,7 +12,7 @@ require('dotenv').config({ path: '.env' });
 
 async function run() {
     try {
-        for (const envVar of ['WALLET_DB_PATH']) {
+        for (const envVar of ['WALLET_DB_PATH', 'FAUCET_URL']) {
             if (!(envVar in process.env)) {
                 throw new Error(
                     `.env ${envVar} is undefined, see .env.example`,
@@ -36,7 +36,7 @@ async function run() {
 
         // Use the faucet to send testnet tokens to your address.
         console.log(
-            'Fill your address with the faucet: https://faucet.testnet.shimmer.network/',
+            `Fill your address with the faucet: ${process.env.FAUCET_URL}`,
         );
 
         const address = await wallet.address();
