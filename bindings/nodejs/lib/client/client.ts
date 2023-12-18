@@ -995,4 +995,21 @@ export class Client {
 
         return JSON.parse(response).payload;
     }
+
+    /**
+     * Compute the block ID (Blake2b256 hash of the block bytes) of a block.
+     *
+     * @param block A block.
+     * @returns The corresponding block ID.
+     */
+    async blockId(block: Block): Promise<BlockId> {
+        const response = await this.methodHandler.callMethod({
+            name: 'blockId',
+            data: {
+                block,
+            },
+        });
+
+        return JSON.parse(response).payload;
+    }
 }

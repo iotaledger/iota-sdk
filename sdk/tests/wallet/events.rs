@@ -62,7 +62,6 @@ fn wallet_events_serde() {
         is_spent: false,
         network_id: 42,
         remainder: true,
-        chain: None,
     };
 
     assert_serde_eq(WalletEvent::NewOutput(Box::new(NewOutputEvent {

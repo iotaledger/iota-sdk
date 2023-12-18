@@ -10,7 +10,6 @@ use std::{sync::Arc, time::Instant};
 
 use crypto::utils;
 use log::warn;
-use packable::PackableExt;
 use rumqttc::{AsyncClient, Event, EventLoop, Incoming, MqttOptions, NetworkOptions, QoS, SubscribeFilter, Transport};
 use tokio::sync::watch::Receiver as WatchReceiver;
 
@@ -200,7 +199,7 @@ fn poll_mqtt(client: &Client, mut event_loop: EventLoop) {
 
                                         match serde_json::from_slice::<BlockDto>(payload) {
                                             Ok(block_dto) => {
-                                                match Block::try_from_dto_with_params(block_dto, &protocol_parameters) {
+                                                match Block::try_from_dto_with_params(block_dto, protocol_parameters) {
                                                     Ok(block) => Ok(TopicEvent {
                                                         topic: p.topic.clone(),
                                                         payload: MqttPayload::Block((&block).into()),

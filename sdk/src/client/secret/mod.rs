@@ -574,7 +574,7 @@ where
         };
 
         // Check if we already added an [Unlock] for this address
-        match block_indexes.get(&required_address) {
+        match block_indexes.get(required_address) {
             // If we already have an [Unlock] for this address, add a [Unlock] based on the address type
             Some(block_index) => match required_address {
                 Address::Ed25519(_) | Address::ImplicitAccountCreation(_) => {
