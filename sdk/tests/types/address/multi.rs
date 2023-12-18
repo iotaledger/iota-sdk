@@ -6,6 +6,9 @@ use packable::PackableExt;
 use pretty_assertions::assert_eq;
 
 #[test]
+fn hash() {}
+
+#[test]
 fn json_packable_bech32() {
     // Test from https://github.com/iotaledger/tips/blob/tip52/tips/TIP-0052/tip-0052.md#bech32
 
@@ -53,6 +56,13 @@ fn json_packable_bech32() {
     let multi_address = serde_json::from_value::<Address>(multi_address_json).unwrap();
     let multi_address_bytes = multi_address.pack_to_vec();
     let multi_address_unpacked = Address::unpack_verified(multi_address_bytes, &()).unwrap();
+
+    let multi = multi_address.as_multi();
+    // TODO: confirm externally
+    assert_eq!(
+        "0xbe1c9aea43c6da13e34afa2dedd1ddeed7d72d779a2af96700b6cafbbc73d082",
+        format!("{}", multi)
+    );
 
     assert_eq!(multi_address, multi_address_unpacked);
     assert_eq!(

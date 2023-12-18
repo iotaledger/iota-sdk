@@ -1,12 +1,13 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use alloc::{boxed::Box, string::ToString, vec::Vec};
+use alloc::{boxed::Box, vec::Vec};
 use core::{fmt, ops::RangeInclusive};
 
+use crypto::hashes::{blake2b::Blake2b256, Digest};
 use derive_more::{AsRef, Deref, Display, From};
 use iterator_sorted::is_unique_sorted;
-use packable::{bounded::BoundedU8, prefix::BoxedSlicePrefix, Packable};
+use packable::{bounded::BoundedU8, prefix::BoxedSlicePrefix, Packable, PackableExt};
 
 use crate::types::block::{address::Address, output::StorageScore, Error};
 
@@ -121,6 +122,12 @@ impl MultiAddress {
     pub fn threshold(&self) -> u16 {
         self.threshold
     }
+
+    /// Hash the [`MultiAddress`] with BLAKE2b-256.
+    #[inline(always)]
+    pub fn hash(&self) -> [u8; 32] {
+        Blake2b256::digest(self.pack_to_vec()).into()
+    }
 }
 
 fn verify_addresses<const VERIFY: bool>(addresses: &[WeightedAddress]) -> Result<(), Error> {
@@ -157,15 +164,7 @@ impl StorageScore for MultiAddress {}
 
 impl fmt::Display for MultiAddress {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(
-            f,
-            "[{}]",
-            self.addresses()
-                .iter()
-                .map(|address| address.to_string())
-                .collect::<Vec<_>>()
-                .join(", ")
-        )
+        write!(f, "{}", prefix_hex::encode(self.hash()))
     }
 }
 
