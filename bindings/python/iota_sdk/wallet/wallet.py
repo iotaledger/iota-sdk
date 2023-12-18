@@ -151,8 +151,8 @@ class Wallet():
 
     def restore_backup(self, source: str, password: str):
         """Restore a backup from a Stronghold file.
-        Replaces `client_options`, `coin_type`, `secret_manager` and accounts.
-        Returns an error if accounts were already created. If Stronghold is used
+        Replaces `client_options`, `coin_type`, `secret_manager` and wallet.
+        Returns an error if the wallet was already created. If Stronghold is used
         as the secret_manager, the existing Stronghold file will be overwritten.
         Be aware that if a mnemonic was stored, it will be lost.
         """
@@ -164,7 +164,7 @@ class Wallet():
         )
 
     def set_client_options(self, client_options):
-        """Update the client options for all accounts.
+        """Update the options of the wallet client.
         """
         return self._call_method(
             'setClientOptions',
@@ -391,7 +391,7 @@ class Wallet():
         return PreparedTransaction(self, prepared)
 
     def get_balance(self) -> Balance:
-        """Get account balance information.
+        """Get wallet balance information.
         """
         return Balance.from_dict(self._call_method(
             'getBalance'
@@ -407,7 +407,7 @@ class Wallet():
         ))
 
     def get_foundry_output(self, token_id: HexStr):
-        """Get a `FoundryOutput` by native token ID. It will try to get the foundry from the account, if it isn't in the wallet it will try to get it from the node.
+        """Get a `FoundryOutput` by native token ID. It will try to get the foundry from the wallet, if it isn't in the wallet it will try to get it from the node.
         """
         return self._call_method(
             'getFoundryOutput', {
@@ -443,7 +443,7 @@ class Wallet():
 
     def outputs(
             self, filter_options: Optional[FilterOptions] = None) -> List[OutputData]:
-        """Returns all outputs of the account.
+        """Returns all outputs of the wallet.
         """
         outputs = self._call_method(
             'outputs', {
@@ -453,7 +453,7 @@ class Wallet():
         return [OutputData.from_dict(o) for o in outputs]
 
     def pending_transactions(self):
-        """Returns all pending transactions of the account.
+        """Returns all pending transactions of the wallet.
         """
         transactions = self._call_method(
             'pendingTransactions'
@@ -493,7 +493,7 @@ class Wallet():
         return [OutputData.from_dict(o) for o in outputs]
 
     def incoming_transactions(self) -> List[TransactionWithMetadata]:
-        """Returns all incoming transactions of the account.
+        """Returns all incoming transactions of the wallet.
         """
         transactions = self._call_method(
             'incomingTransactions'
@@ -501,7 +501,7 @@ class Wallet():
         return [TransactionWithMetadata.from_dict(tx) for tx in transactions]
 
     def transactions(self) -> List[TransactionWithMetadata]:
-        """Returns all transaction of the account.
+        """Returns all transaction of the wallet.
         """
         transactions = self._call_method(
             'transactions'
@@ -510,7 +510,7 @@ class Wallet():
 
     def unspent_outputs(
             self, filter_options: Optional[FilterOptions] = None) -> List[OutputData]:
-        """Returns all unspent outputs of the account.
+        """Returns all unspent outputs of the wallet.
         """
         outputs = self._call_method(
             'unspentOutputs', {
@@ -623,7 +623,7 @@ class Wallet():
 
     def reissue_transaction_until_included(
             self, transaction_id: HexStr, interval=None, max_attempts=None) -> HexStr:
-        """Reissues a transaction sent from the account for a provided transaction id until it's
+        """Reissues a transaction sent from the wallet for a provided transaction id until it's
         included (referenced by a milestone). Returns the included block id.
         """
         return self._call_method(
@@ -716,7 +716,7 @@ class Wallet():
         )
 
     def set_default_sync_options(self, options: SyncOptions):
-        """Set the fallback SyncOptions for account syncing.
+        """Set the fallback SyncOptions for wallet syncing.
         If storage is enabled, will persist during restarts.
         """
         return self._call_method(

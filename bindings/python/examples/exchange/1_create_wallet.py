@@ -31,7 +31,13 @@ SecretManager(secret_manager).store_mnemonic(os.environ['MNEMONIC'])
 bip_path = Bip44(
     coin_type=CoinType.SHIMMER
 )
-wallet_options = WalletOptions(None, None, bip_path, client_options, secret_manager, os.environ.get('WALLET_DB_PATH'))
+wallet_options = WalletOptions(
+    None,
+    None,
+    bip_path,
+    client_options,
+    secret_manager,
+    os.environ.get('WALLET_DB_PATH'))
 wallet = Wallet(wallet_options)
 
 # Set sync_only_most_basic_outputs to True if not interested in outputs that are timelocked,
