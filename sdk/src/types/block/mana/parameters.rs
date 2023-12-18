@@ -84,6 +84,7 @@ impl ManaParameters {
         if self.generation_rate() == 0 || slot_delta == 0 {
             return 0;
         }
+
         fixed_point_multiply(
             amount,
             slot_delta * self.generation_rate() as u32,
@@ -121,12 +122,14 @@ impl ProtocolParameters {
             self.epoch_index_of(slot_index_created),
             self.epoch_index_of(slot_index_target),
         );
+
         if epoch_index_created > epoch_index_target {
             return Err(Error::InvalidEpochDelta {
                 created: epoch_index_created,
                 target: epoch_index_target,
             });
         }
+
         Ok(self
             .mana_parameters()
             .decay(mana, epoch_index_target.0 - epoch_index_created.0))
@@ -140,12 +143,14 @@ impl ProtocolParameters {
         claimed_epoch: impl Into<EpochIndex>,
     ) -> Result<u64, Error> {
         let (reward_epoch, claimed_epoch) = (reward_epoch.into(), claimed_epoch.into());
+
         if reward_epoch > claimed_epoch {
             return Err(Error::InvalidEpochDelta {
                 created: reward_epoch,
                 target: claimed_epoch,
             });
         }
+
         Ok(self.mana_parameters().decay(reward, claimed_epoch.0 - reward_epoch.0))
     }
 
@@ -162,6 +167,7 @@ impl ProtocolParameters {
             self.epoch_index_of(slot_index_created),
             self.epoch_index_of(slot_index_target),
         );
+
         if epoch_index_created > epoch_index_target {
             return Err(Error::InvalidEpochDelta {
                 created: epoch_index_created,
@@ -171,6 +177,7 @@ impl ProtocolParameters {
         if slot_index_created >= slot_index_target {
             return Ok(0);
         }
+
         let mana_parameters = self.mana_parameters();
 
         Ok(if epoch_index_created == epoch_index_target {
