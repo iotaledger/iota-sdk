@@ -13,7 +13,7 @@ load_dotenv()
 wallet = Wallet(WalletOptions(storage_path=os.environ.get('WALLET_DB_PATH')))
 wallet.sync({'syncIncomingTransactions': True})
 
-# All transactions sent from the the account
+# All transactions sent from the wallet
 transactions = wallet.transactions()
 print('Sent transactions:')
 for transaction in transactions:

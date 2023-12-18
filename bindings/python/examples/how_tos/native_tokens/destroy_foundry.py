@@ -17,7 +17,7 @@ if 'STRONGHOLD_PASSWORD' not in os.environ:
 
 wallet.set_stronghold_password(os.environ["STRONGHOLD_PASSWORD"])
 
-# We try to destroy the first foundry in the account
+# We try to destroy the first foundry in the wallet
 foundry_id = balance.foundries[0]
 
 # Send transaction.

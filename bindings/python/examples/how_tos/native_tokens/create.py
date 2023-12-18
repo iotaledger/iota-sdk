@@ -32,7 +32,7 @@ if not balance.accounts:
     print(f'Block included: {os.environ["EXPLORER_URL"]}/block/{block_id}')
 
     wallet.sync()
-    print("Account synced")
+    print("Wallet synced")
 
 print('Preparing transaction to create native token...')
 
