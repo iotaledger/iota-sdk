@@ -58,13 +58,13 @@ impl ManaParameters {
         (1 << self.bits_count) - 1
     }
 
-    fn decay(&self, mut mana: u64, epoch_delta: u32) -> u64 {
-        if mana == 0 || epoch_delta == 0 || self.decay_factors().is_empty() {
+    fn decay(&self, mut mana: u64, epoch_diff: u32) -> u64 {
+        if mana == 0 || epoch_diff == 0 || self.decay_factors().is_empty() {
             return mana;
         }
 
         // we keep applying the lookup table factors as long as n epochs are left
-        let mut remaining_epochs = epoch_delta;
+        let mut remaining_epochs = epoch_diff;
 
         while remaining_epochs > 0 {
             let epochs_to_decay = remaining_epochs.min(self.decay_factors().len() as u32);
@@ -80,14 +80,14 @@ impl ManaParameters {
         mana
     }
 
-    fn generate_mana(&self, amount: u64, slot_delta: u32) -> u64 {
-        if self.generation_rate() == 0 || slot_delta == 0 {
+    fn generate_mana(&self, amount: u64, slot_diff: u32) -> u64 {
+        if self.generation_rate() == 0 || slot_diff == 0 {
             return 0;
         }
 
         fixed_point_multiply(
             amount,
-            slot_delta * self.generation_rate() as u32,
+            slot_diff * self.generation_rate() as u32,
             self.generation_rate_exponent(),
         )
     }
@@ -117,14 +117,13 @@ impl ProtocolParameters {
         slot_index_created: impl Into<SlotIndex>,
         slot_index_target: impl Into<SlotIndex>,
     ) -> Result<u64, Error> {
-        let (slot_index_created, slot_index_target) = (slot_index_created.into(), slot_index_target.into());
         let (epoch_index_created, epoch_index_target) = (
             self.epoch_index_of(slot_index_created),
             self.epoch_index_of(slot_index_target),
         );
 
         if epoch_index_created > epoch_index_target {
-            return Err(Error::InvalidEpochDelta {
+            return Err(Error::InvalidEpochDiff {
                 created: epoch_index_created,
                 target: epoch_index_target,
             });
@@ -145,7 +144,7 @@ impl ProtocolParameters {
         let (reward_epoch, claimed_epoch) = (reward_epoch.into(), claimed_epoch.into());
 
         if reward_epoch > claimed_epoch {
-            return Err(Error::InvalidEpochDelta {
+            return Err(Error::InvalidEpochDiff {
                 created: reward_epoch,
                 target: claimed_epoch,
             });
@@ -169,7 +168,7 @@ impl ProtocolParameters {
         );
 
         if epoch_index_created > epoch_index_target {
-            return Err(Error::InvalidEpochDelta {
+            return Err(Error::InvalidEpochDiff {
                 created: epoch_index_created,
                 target: epoch_index_target,
             });
@@ -196,14 +195,14 @@ impl ProtocolParameters {
                 mana_parameters.decay_factor_epochs_sum_exponent() + mana_parameters.generation_rate_exponent()
                     - self.slots_per_epoch_exponent(),
             );
-            let epoch_delta = epoch_index_target.0 - epoch_index_created.0;
+            let epoch_diff = epoch_index_target.0 - epoch_index_created.0;
             let slots_before_next_epoch = self.first_slot_of(epoch_index_created + 1) - slot_index_created;
             let slots_since_epoch_start = slot_index_target - self.first_slot_of(epoch_index_target);
             let potential_mana_n = mana_parameters.decay(
                 mana_parameters.generate_mana(amount, slots_before_next_epoch.0),
-                epoch_delta,
+                epoch_diff,
             );
-            let potential_mana_n_1 = mana_parameters.decay(c, epoch_delta - 1);
+            let potential_mana_n_1 = mana_parameters.decay(c, epoch_diff - 1);
             let potential_mana_0 = c + mana_parameters.generate_mana(amount, slots_since_epoch_start.0)
                 - (c >> mana_parameters.decay_factors_exponent());
             potential_mana_0 - potential_mana_n_1 + potential_mana_n
@@ -297,7 +296,7 @@ mod test {
     fn mana_decay_negative_delta() {
         assert_eq!(
             params().mana_with_decay(100, params().first_slot_of(2), params().first_slot_of(1)),
-            Err(Error::InvalidEpochDelta {
+            Err(Error::InvalidEpochDiff {
                 created: 2.into(),
                 target: 1.into()
             })
@@ -356,7 +355,7 @@ mod test {
     fn potential_mana_negative_delta() {
         assert_eq!(
             params().potential_mana(100, params().first_slot_of(2), params().first_slot_of(1)),
-            Err(Error::InvalidEpochDelta {
+            Err(Error::InvalidEpochDiff {
                 created: 2.into(),
                 target: 1.into()
             })
