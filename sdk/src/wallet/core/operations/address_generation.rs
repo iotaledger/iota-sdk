@@ -36,41 +36,34 @@ impl Wallet {
                 // needs to have it visible on the computer first, so we need to generate it without the
                 // prompt first
                 let options = options.into();
+                #[cfg(feature = "events")]
                 if options.as_ref().map_or(false, |o| o.ledger_nano_prompt) {
-                    #[cfg(feature = "events")]
-                    {
-                        let changed_options = options.map(|mut options| {
-                            // Change options so ledger will not show the prompt the first time
-                            options.ledger_nano_prompt = false;
-                            options
-                        });
-                        // Generate without prompt to be able to display it
-                        let address = ledger_nano
-                            .generate_ed25519_addresses(
-                                coin_type,
-                                account_index,
-                                address_index..address_index + 1,
-                                changed_options,
-                            )
-                            .await?;
+                    let changed_options = options.map(|mut options| {
+                        // Change options so ledger will not show the prompt the first time
+                        options.ledger_nano_prompt = false;
+                        options
+                    });
+                    // Generate without prompt to be able to display it
+                    let address = ledger_nano
+                        .generate_ed25519_addresses(
+                            coin_type,
+                            account_index,
+                            address_index..address_index + 1,
+                            changed_options,
+                        )
+                        .await?;
 
-                        let bech32_hrp = self.bech32_hrp().await;
+                    let bech32_hrp = self.bech32_hrp().await;
 
-                        self.emit(WalletEvent::LedgerAddressGeneration(AddressData {
-                            address: address[0].to_bech32(bech32_hrp),
-                        }))
-                        .await;
-                    }
-
-                    // Generate with prompt so the user can verify
-                    ledger_nano
-                        .generate_ed25519_addresses(coin_type, account_index, address_index..address_index + 1, options)
-                        .await?
-                } else {
-                    ledger_nano
-                        .generate_ed25519_addresses(coin_type, account_index, address_index..address_index + 1, options)
-                        .await?
+                    self.emit(WalletEvent::LedgerAddressGeneration(AddressData {
+                        address: address[0].to_bech32(bech32_hrp),
+                    }))
+                    .await;
                 }
+                // Generate with prompt so the user can verify
+                ledger_nano
+                    .generate_ed25519_addresses(coin_type, account_index, address_index..address_index + 1, options)
+                    .await?
             }
             #[cfg(feature = "stronghold")]
             SecretManager::Stronghold(stronghold) => {

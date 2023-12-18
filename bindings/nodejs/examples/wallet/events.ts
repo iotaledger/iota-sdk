@@ -3,7 +3,6 @@
 
 import {
     WalletEvent,
-    ConsolidationRequiredWalletEvent,
     TransactionProgressWalletEvent,
     SelectingInputsProgress,
 } from '@iota/sdk';
@@ -30,7 +29,6 @@ async function run() {
 
         await wallet.listen([], callback);
 
-        await wallet.emitTestEvent(new ConsolidationRequiredWalletEvent());
         await wallet.emitTestEvent(
             new TransactionProgressWalletEvent(new SelectingInputsProgress()),
         );

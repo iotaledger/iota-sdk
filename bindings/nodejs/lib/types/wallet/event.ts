@@ -17,18 +17,16 @@ export type TransactionId = string;
  * All of the wallet event types.
  */
 enum WalletEventType {
-    /** Consolidation is required. */
-    ConsolidationRequired = 0,
     /** Nano Ledger has generated an address. */
-    LedgerAddressGeneration = 1,
+    LedgerAddressGeneration = 0,
     /** A new output was created. */
-    NewOutput = 2,
+    NewOutput = 1,
     /** An output was spent. */
-    SpentOutput = 3,
+    SpentOutput = 2,
     /** A transaction was included into the ledger. */
-    TransactionInclusion = 4,
+    TransactionInclusion = 3,
     /** A progress update while submitting a transaction. */
-    TransactionProgress = 5,
+    TransactionProgress = 4,
 }
 
 /**
@@ -42,15 +40,6 @@ abstract class WalletEvent {
      */
     constructor(type: WalletEventType) {
         this.type = type;
-    }
-}
-
-/**
- * A 'consolidation required' wallet event.
- */
-class ConsolidationRequiredWalletEvent extends WalletEvent {
-    constructor() {
-        super(WalletEventType.ConsolidationRequired);
     }
 }
 
@@ -259,7 +248,6 @@ class BroadcastingProgress extends TransactionProgress {
 export {
     WalletEventType,
     WalletEvent,
-    ConsolidationRequiredWalletEvent,
     LedgerAddressGenerationWalletEvent,
     NewOutputWalletEvent,
     SpentOutputWalletEvent,
