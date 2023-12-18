@@ -89,7 +89,7 @@ impl MultiAddress {
     /// The [`Address`] kind of a [`MultiAddress`].
     pub const KIND: u8 = 40;
     /// The allowed range of inner [`Address`]es.
-    pub const ADDRESSES_COUNT: RangeInclusive<u8> = 1..=10;
+    pub const ADDRESSES_COUNT: RangeInclusive<u8> = 2..=10;
 
     /// Creates a new [`MultiAddress`].
     #[inline(always)]
