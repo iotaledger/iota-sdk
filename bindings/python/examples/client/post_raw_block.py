@@ -24,8 +24,8 @@ unsigned_block = client.build_basic_block(
     TaggedDataPayload(
         utf8_to_hex("tag"),
         utf8_to_hex("data")))[0]
-signed_block = secret_manager.sign_block(unsigned_block, chain)
-block_id = client.post_block(signed_block)
+block = secret_manager.sign_block(unsigned_block, chain)
+block_id = client.post_block(block)
 blockBytes = client.get_block_raw(block_id)
 
 # Post raw block

@@ -13,6 +13,7 @@ use crate::{
             unlock_condition::{AddressUnlockCondition, StorageDepositReturnUnlockCondition},
             BasicOutput, BasicOutputBuilder, NativeTokensBuilder, NftOutputBuilder, Output, OutputId,
         },
+        protocol::ProtocolParameters,
         slot::SlotIndex,
     },
     wallet::{
@@ -45,6 +46,7 @@ impl WalletData {
         &self,
         outputs_to_claim: OutputsToClaim,
         slot_index: SlotIndex,
+        protocol_parameters: &ProtocolParameters,
     ) -> crate::wallet::Result<Vec<OutputId>> {
         log::debug!("[OUTPUT_CLAIMING] claimable_outputs");
 
@@ -68,18 +70,24 @@ impl WalletData {
                             self.address.inner(),
                             output_data,
                             slot_index,
+                            protocol_parameters.committable_age_range(),
                         )?
                     {
                         match outputs_to_claim {
                             OutputsToClaim::MicroTransactions => {
                                 if let Some(sdr) = unlock_conditions.storage_deposit_return() {
                                     // If expired, it's not a micro transaction anymore
-                                    if unlock_conditions.is_expired(slot_index) {
-                                        continue;
-                                    }
-                                    // Only micro transaction if not the same
-                                    if sdr.amount() != output_data.output.amount() {
-                                        output_ids_to_claim.insert(output_data.output_id);
+                                    match unlock_conditions
+                                        .is_expired(slot_index, protocol_parameters.committable_age_range())
+                                    {
+                                        Some(false) => {
+                                            // Only micro transaction if not the same amount needs to be returned
+                                            // (resulting in 0 amount to claim)
+                                            if sdr.amount() != output_data.output.amount() {
+                                                output_ids_to_claim.insert(output_data.output_id);
+                                            }
+                                        }
+                                        _ => continue,
                                     }
                                 }
                             }
@@ -96,7 +104,9 @@ impl WalletData {
                             }
                             OutputsToClaim::Amount => {
                                 let mut claimable_amount = output_data.output.amount();
-                                if !unlock_conditions.is_expired(slot_index) {
+                                if unlock_conditions.is_expired(slot_index, protocol_parameters.committable_age_range())
+                                    == Some(false)
+                                {
                                     claimable_amount -= unlock_conditions
                                         .storage_deposit_return()
                                         .map(|s| s.amount())
@@ -137,8 +147,9 @@ where
         let wallet_data = self.data().await;
 
         let slot_index = self.client().get_slot_index().await?;
+        let protocol_parameters = self.client().get_protocol_parameters().await?;
 
-        wallet_data.claimable_outputs(outputs_to_claim, slot_index)
+        wallet_data.claimable_outputs(outputs_to_claim, slot_index, &protocol_parameters)
     }
 
     /// Get basic outputs that have only one unlock condition which is [AddressUnlockCondition], so they can be used as
@@ -177,7 +188,7 @@ where
     }
 
     /// Try to claim basic or nft outputs that have additional unlock conditions to their [AddressUnlockCondition]
-    /// from [`Account::claimable_outputs()`].
+    /// from [`Wallet::claimable_outputs()`].
     pub async fn claim_outputs<I: IntoIterator<Item = OutputId> + Send>(
         &self,
         output_ids_to_claim: I,
@@ -203,7 +214,9 @@ where
             }
         })?;
 
-        let claim_tx = self.sign_and_submit_transaction(prepared_transaction, None).await?;
+        let claim_tx = self
+            .sign_and_submit_transaction(prepared_transaction, None, None)
+            .await?;
 
         log::debug!(
             "[OUTPUT_CLAIMING] Claiming transaction created: block_id: {:?} tx_id: {:?}",

@@ -16,13 +16,10 @@ use crate::types::block::{
     output::{
         feature::{verify_allowed_features, Feature, FeatureFlags, Features},
         unlock_condition::{verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions},
-        ChainId, MinimumOutputAmount, Output, OutputBuilderAmount, OutputId, StateTransitionError,
-        StateTransitionVerifier, StorageScore, StorageScoreParameters,
+        ChainId, MinimumOutputAmount, Output, OutputBuilderAmount, OutputId, StorageScore, StorageScoreParameters,
     },
-    payload::signed_transaction::TransactionCapabilityFlag,
     protocol::{ProtocolParameters, WorkScore, WorkScoreParameters},
-    semantic::{SemanticValidationContext, TransactionFailureReason},
-    unlock::Unlock,
+    semantic::StateTransitionError,
     Error,
 };
 
@@ -267,17 +264,19 @@ impl From<&AccountOutput> for AccountOutputBuilder {
 /// Describes an account in the ledger that can be controlled by the state and governance controllers.
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct AccountOutput {
-    // Amount of IOTA coins held by the output.
+    /// Amount of IOTA coins held by the output.
     amount: u64,
+    /// Amount of stored Mana held by the output.
     mana: u64,
     // Unique identifier of the account.
     account_id: AccountId,
     // A counter that denotes the number of foundries created by this account.
     foundry_counter: u32,
+    /// Define how the output can be unlocked in a transaction.
     unlock_conditions: UnlockConditions,
-    //
+    /// Features of the output.
     features: Features,
-    //
+    /// Immutable features of the output.
     immutable_features: Features,
 }
 
@@ -375,30 +374,6 @@ impl AccountOutput {
         AccountAddress::new(self.account_id_non_null(output_id))
     }
 
-    ///
-    pub fn unlock(
-        &self,
-        output_id: &OutputId,
-        unlock: &Unlock,
-        context: &mut SemanticValidationContext<'_>,
-    ) -> Result<(), TransactionFailureReason> {
-        self.unlock_conditions()
-            .locked_address(self.address(), context.transaction.creation_slot())
-            .unlock(unlock, context)?;
-
-        let account_id = if self.account_id().is_null() {
-            AccountId::from(output_id)
-        } else {
-            *self.account_id()
-        };
-
-        context
-            .unlocked_addresses
-            .insert(Address::from(AccountAddress::from(account_id)));
-
-        Ok(())
-    }
-
     // Transition, just without full SemanticValidationContext
     pub(crate) fn transition_inner(
         current_state: &Self,
@@ -451,45 +426,6 @@ impl AccountOutput {
             return Err(StateTransitionError::InconsistentCreatedFoundriesCount);
         }
 
-        Ok(())
-    }
-}
-
-impl StateTransitionVerifier for AccountOutput {
-    fn creation(next_state: &Self, context: &SemanticValidationContext<'_>) -> Result<(), StateTransitionError> {
-        if !next_state.account_id.is_null() {
-            return Err(StateTransitionError::NonZeroCreatedId);
-        }
-
-        if let Some(issuer) = next_state.immutable_features().issuer() {
-            if !context.unlocked_addresses.contains(issuer.address()) {
-                return Err(StateTransitionError::IssuerNotUnlocked);
-            }
-        }
-
-        Ok(())
-    }
-
-    fn transition(
-        current_state: &Self,
-        next_state: &Self,
-        context: &SemanticValidationContext<'_>,
-    ) -> Result<(), StateTransitionError> {
-        Self::transition_inner(
-            current_state,
-            next_state,
-            &context.input_chains,
-            context.transaction.outputs(),
-        )
-    }
-
-    fn destruction(_current_state: &Self, context: &SemanticValidationContext<'_>) -> Result<(), StateTransitionError> {
-        if !context
-            .transaction
-            .has_capability(TransactionCapabilityFlag::DestroyAccountOutputs)
-        {
-            return Err(TransactionFailureReason::TransactionCapabilityAccountDestructionNotAllowed)?;
-        }
         Ok(())
     }
 }
@@ -603,14 +539,14 @@ fn verify_unlock_conditions(unlock_conditions: &UnlockConditions, account_id: &A
 }
 
 #[cfg(feature = "serde")]
-pub(crate) mod dto {
+mod dto {
     use alloc::vec::Vec;
 
     use serde::{Deserialize, Serialize};
 
     use super::*;
     use crate::{
-        types::block::{output::unlock_condition::dto::UnlockConditionDto, Error},
+        types::block::{output::unlock_condition::UnlockCondition, Error},
         utils::serde::string,
     };
 
@@ -626,7 +562,7 @@ pub(crate) mod dto {
         pub mana: u64,
         pub account_id: AccountId,
         pub foundry_counter: u32,
-        pub unlock_conditions: Vec<UnlockConditionDto>,
+        pub unlock_conditions: Vec<UnlockCondition>,
         #[serde(skip_serializing_if = "Vec::is_empty", default)]
         pub features: Vec<Feature>,
         #[serde(skip_serializing_if = "Vec::is_empty", default)]
@@ -641,7 +577,7 @@ pub(crate) mod dto {
                 mana: value.mana(),
                 account_id: *value.account_id(),
                 foundry_counter: value.foundry_counter(),
-                unlock_conditions: value.unlock_conditions().iter().map(Into::into).collect::<_>(),
+                unlock_conditions: value.unlock_conditions().to_vec(),
                 features: value.features().to_vec(),
                 immutable_features: value.immutable_features().to_vec(),
             }
@@ -659,7 +595,7 @@ pub(crate) mod dto {
                 .with_immutable_features(dto.immutable_features);
 
             for u in dto.unlock_conditions {
-                builder = builder.add_unlock_condition(UnlockCondition::from(u));
+                builder = builder.add_unlock_condition(u);
             }
 
             builder.finish()
@@ -673,7 +609,7 @@ pub(crate) mod dto {
             mana: u64,
             account_id: &AccountId,
             foundry_counter: Option<u32>,
-            unlock_conditions: Vec<UnlockConditionDto>,
+            unlock_conditions: Vec<UnlockCondition>,
             features: Option<Vec<Feature>>,
             immutable_features: Option<Vec<Feature>>,
         ) -> Result<Self, Error> {
@@ -737,7 +673,7 @@ mod tests {
             account_output.mana(),
             account_output.account_id(),
             account_output.foundry_counter().into(),
-            account_output.unlock_conditions().iter().map(Into::into).collect(),
+            account_output.unlock_conditions().to_vec(),
             Some(account_output.features().to_vec()),
             Some(account_output.immutable_features().to_vec()),
         )
@@ -753,7 +689,7 @@ mod tests {
                 builder.mana,
                 &builder.account_id,
                 builder.foundry_counter,
-                builder.unlock_conditions.iter().map(Into::into).collect(),
+                builder.unlock_conditions.iter().cloned().collect(),
                 Some(builder.features.iter().cloned().collect()),
                 Some(builder.immutable_features.iter().cloned().collect()),
             )

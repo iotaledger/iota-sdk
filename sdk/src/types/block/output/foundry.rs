@@ -18,13 +18,12 @@ use crate::types::block::{
         account::AccountId,
         feature::{verify_allowed_features, Feature, FeatureFlags, Features, NativeTokenFeature},
         unlock_condition::{verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions},
-        ChainId, MinimumOutputAmount, NativeToken, Output, OutputBuilderAmount, OutputId, StateTransitionError,
-        StateTransitionVerifier, StorageScore, StorageScoreParameters, TokenId, TokenScheme,
+        ChainId, MinimumOutputAmount, NativeToken, Output, OutputBuilderAmount, StorageScore, StorageScoreParameters,
+        TokenId, TokenScheme,
     },
     payload::signed_transaction::{TransactionCapabilities, TransactionCapabilityFlag},
     protocol::{ProtocolParameters, WorkScore, WorkScoreParameters},
-    semantic::{SemanticValidationContext, TransactionFailureReason},
-    unlock::Unlock,
+    semantic::{StateTransitionError, TransactionFailureReason},
     Error,
 };
 
@@ -72,7 +71,7 @@ impl FoundryId {
         )
     }
 
-    /// Returns the [`TokenScheme`](crate::types::block::output::TokenScheme) kind of the [`FoundryId`].
+    /// Returns the [`TokenScheme`] kind of the [`FoundryId`].
     pub fn token_scheme_kind(&self) -> u8 {
         // PANIC: the length is known.
         *self.0.last().unwrap()
@@ -293,7 +292,7 @@ impl From<&FoundryOutput> for FoundryOutputBuilder {
 /// Describes a foundry output that is controlled by an account.
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct FoundryOutput {
-    /// Amount of IOTA coins to deposit with this output.
+    /// Amount of IOTA coins held by the output.
     amount: u64,
     /// The serial number of the foundry with respect to the controlling account.
     serial_number: u32,
@@ -400,16 +399,6 @@ impl FoundryOutput {
     #[inline(always)]
     pub fn chain_id(&self) -> ChainId {
         ChainId::Foundry(self.id())
-    }
-
-    ///
-    pub fn unlock(
-        &self,
-        _output_id: &OutputId,
-        unlock: &Unlock,
-        context: &mut SemanticValidationContext<'_>,
-    ) -> Result<(), TransactionFailureReason> {
-        Address::from(*self.account_address()).unlock(unlock, context)
     }
 
     // Transition, just without full SemanticValidationContext
@@ -522,81 +511,6 @@ impl WorkScore for FoundryOutput {
 
 impl MinimumOutputAmount for FoundryOutput {}
 
-impl StateTransitionVerifier for FoundryOutput {
-    fn creation(next_state: &Self, context: &SemanticValidationContext<'_>) -> Result<(), StateTransitionError> {
-        let account_chain_id = ChainId::from(*next_state.account_address().account_id());
-
-        if let (Some(Output::Account(input_account)), Some(Output::Account(output_account))) = (
-            context.input_chains.get(&account_chain_id),
-            context.output_chains.get(&account_chain_id),
-        ) {
-            if input_account.foundry_counter() >= next_state.serial_number()
-                || next_state.serial_number() > output_account.foundry_counter()
-            {
-                return Err(StateTransitionError::InconsistentFoundrySerialNumber);
-            }
-        } else {
-            return Err(StateTransitionError::MissingAccountForFoundry);
-        }
-
-        let token_id = next_state.token_id();
-        let output_tokens = context.output_native_tokens.get(&token_id).copied().unwrap_or_default();
-        let TokenScheme::Simple(ref next_token_scheme) = next_state.token_scheme;
-
-        // No native tokens should be referenced prior to the foundry creation.
-        if context.input_native_tokens.contains_key(&token_id) {
-            return Err(StateTransitionError::InconsistentNativeTokensFoundryCreation);
-        }
-
-        if output_tokens != next_token_scheme.minted_tokens() || !next_token_scheme.melted_tokens().is_zero() {
-            return Err(StateTransitionError::InconsistentNativeTokensFoundryCreation);
-        }
-
-        Ok(())
-    }
-
-    fn transition(
-        current_state: &Self,
-        next_state: &Self,
-        context: &SemanticValidationContext<'_>,
-    ) -> Result<(), StateTransitionError> {
-        Self::transition_inner(
-            current_state,
-            next_state,
-            &context.input_native_tokens,
-            &context.output_native_tokens,
-            context.transaction.capabilities(),
-        )
-    }
-
-    fn destruction(current_state: &Self, context: &SemanticValidationContext<'_>) -> Result<(), StateTransitionError> {
-        if !context
-            .transaction
-            .has_capability(TransactionCapabilityFlag::DestroyFoundryOutputs)
-        {
-            return Err(TransactionFailureReason::TransactionCapabilityFoundryDestructionNotAllowed)?;
-        }
-
-        let token_id = current_state.token_id();
-        let input_tokens = context.input_native_tokens.get(&token_id).copied().unwrap_or_default();
-        let TokenScheme::Simple(ref current_token_scheme) = current_state.token_scheme;
-
-        // No native tokens should be referenced after the foundry destruction.
-        if context.output_native_tokens.contains_key(&token_id) {
-            return Err(StateTransitionError::InconsistentNativeTokensFoundryDestruction);
-        }
-
-        // This can't underflow as it is known that minted_tokens >= melted_tokens (syntactic rule).
-        let minted_melted_diff = current_token_scheme.minted_tokens() - current_token_scheme.melted_tokens();
-
-        if minted_melted_diff != input_tokens {
-            return Err(StateTransitionError::InconsistentNativeTokensFoundryDestruction);
-        }
-
-        Ok(())
-    }
-}
-
 impl Packable for FoundryOutput {
     type UnpackError = Error;
     type UnpackVisitor = ProtocolParameters;
@@ -660,14 +574,14 @@ fn verify_unlock_conditions(unlock_conditions: &UnlockConditions) -> Result<(), 
 }
 
 #[cfg(feature = "serde")]
-pub(crate) mod dto {
+mod dto {
     use alloc::vec::Vec;
 
     use serde::{Deserialize, Serialize};
 
     use super::*;
     use crate::{
-        types::block::{output::unlock_condition::dto::UnlockConditionDto, Error},
+        types::block::{output::unlock_condition::UnlockCondition, Error},
         utils::serde::string,
     };
 
@@ -680,7 +594,7 @@ pub(crate) mod dto {
         pub amount: u64,
         pub serial_number: u32,
         pub token_scheme: TokenScheme,
-        pub unlock_conditions: Vec<UnlockConditionDto>,
+        pub unlock_conditions: Vec<UnlockCondition>,
         #[serde(skip_serializing_if = "Vec::is_empty", default)]
         pub features: Vec<Feature>,
         #[serde(skip_serializing_if = "Vec::is_empty", default)]
@@ -694,7 +608,7 @@ pub(crate) mod dto {
                 amount: value.amount(),
                 serial_number: value.serial_number(),
                 token_scheme: value.token_scheme().clone(),
-                unlock_conditions: value.unlock_conditions().iter().map(Into::into).collect::<_>(),
+                unlock_conditions: value.unlock_conditions().to_vec(),
                 features: value.features().to_vec(),
                 immutable_features: value.immutable_features().to_vec(),
             }
@@ -717,7 +631,7 @@ pub(crate) mod dto {
             }
 
             for u in dto.unlock_conditions {
-                builder = builder.add_unlock_condition(UnlockCondition::from(u));
+                builder = builder.add_unlock_condition(u);
             }
 
             builder.finish()
@@ -730,7 +644,7 @@ pub(crate) mod dto {
             amount: OutputBuilderAmount,
             serial_number: u32,
             token_scheme: TokenScheme,
-            unlock_conditions: Vec<UnlockConditionDto>,
+            unlock_conditions: Vec<UnlockCondition>,
             features: Option<Vec<Feature>>,
             immutable_features: Option<Vec<Feature>>,
         ) -> Result<Self, Error> {
@@ -799,7 +713,7 @@ mod tests {
                 builder.amount,
                 builder.serial_number,
                 builder.token_scheme.clone(),
-                builder.unlock_conditions.iter().map(Into::into).collect(),
+                builder.unlock_conditions.iter().cloned().collect(),
                 Some(builder.features.iter().cloned().collect()),
                 Some(builder.immutable_features.iter().cloned().collect()),
             )

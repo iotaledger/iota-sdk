@@ -91,6 +91,9 @@ pub struct ProtocolParameters {
     /// Defines the target size of the committee. If there's fewer candidates the actual committee size could be
     /// smaller in a given epoch.
     pub(crate) target_committee_size: u8,
+    /// Defines the number of heavier slots that a chain needs to be ahead of the current chain to be considered for
+    /// switching.
+    pub(crate) chain_switching_threshold: u8,
 }
 
 // This implementation is required to make [`ProtocolParameters`] a [`Packable`] visitor.
@@ -128,6 +131,7 @@ impl Default for ProtocolParameters {
             version_signaling_parameters: Default::default(),
             rewards_parameters: Default::default(),
             target_committee_size: 32,
+            chain_switching_threshold: 3,
         }
     }
 }
@@ -178,10 +182,11 @@ impl ProtocolParameters {
         2_u32.pow(self.slots_per_epoch_exponent() as u32)
     }
 
-    /// Gets a [`SlotIndex`] from a unix timestamp.
+    /// Gets a [`SlotIndex`] from a unix timestamp in seconds.
     pub fn slot_index(&self, timestamp: u64) -> SlotIndex {
         SlotIndex::from_timestamp(
             timestamp,
+            self.genesis_slot(),
             self.genesis_unix_timestamp(),
             self.slot_duration_in_seconds(),
         )
@@ -206,6 +211,24 @@ impl ProtocolParameters {
     pub fn hash(&self) -> ProtocolParametersHash {
         ProtocolParametersHash::new(Blake2b256::digest(self.pack_to_vec()).into())
     }
+
+    /// Returns the [`CommittableAgeRange`].
+    pub fn committable_age_range(&self) -> CommittableAgeRange {
+        CommittableAgeRange {
+            min: self.min_committable_age(),
+            max: self.max_committable_age(),
+        }
+    }
+}
+
+/// Defines the age in which a block can be issued.
+#[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Packable, CopyGetters)]
+pub struct CommittableAgeRange {
+    /// Minimum age relative to the accepted tangle time slot index that a slot can be committed.
+    pub min: u32,
+    /// Maximum age for a slot commitment to be included in a block relative to the slot index of the block issuing
+    /// time.
+    pub max: u32,
 }
 
 /// Defines the parameters used to calculate the Reference Mana Cost (RMC).

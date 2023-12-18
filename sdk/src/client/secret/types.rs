@@ -134,27 +134,9 @@ impl LedgerNanoStatus {
 }
 
 /// Data for transaction inputs for signing and ordering of unlock blocks
-#[derive(Clone, Debug, Eq, PartialEq, Hash)]
-pub struct InputSigningData {
-    /// The output
-    pub output: Output,
-    /// The output metadata
-    pub output_metadata: OutputMetadata,
-    /// The chain derived from seed, only for ed25519 addresses
-    pub chain: Option<Bip44>,
-}
-
-impl InputSigningData {
-    /// Return the [OutputId]
-    pub fn output_id(&self) -> &OutputId {
-        self.output_metadata.output_id()
-    }
-}
-
-/// Dto for data for transaction inputs for signing and ordering of unlock blocks
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Eq, PartialEq, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct InputSigningDataDto {
+pub struct InputSigningData {
     /// The output
     pub output: Output,
     /// The output metadata
@@ -164,24 +146,9 @@ pub struct InputSigningDataDto {
     pub chain: Option<Bip44>,
 }
 
-impl TryFrom<InputSigningDataDto> for InputSigningData {
-    type Error = crate::client::Error;
-
-    fn try_from(dto: InputSigningDataDto) -> Result<Self, Self::Error> {
-        Ok(Self {
-            output: dto.output,
-            output_metadata: dto.output_metadata,
-            chain: dto.chain,
-        })
-    }
-}
-
-impl From<&InputSigningData> for InputSigningDataDto {
-    fn from(input: &InputSigningData) -> Self {
-        Self {
-            output: input.output.clone(),
-            output_metadata: input.output_metadata,
-            chain: input.chain,
-        }
+impl InputSigningData {
+    /// Return the [OutputId]
+    pub fn output_id(&self) -> &OutputId {
+        self.output_metadata.output_id()
     }
 }

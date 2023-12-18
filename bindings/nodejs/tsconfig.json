@@ -17,5 +17,5 @@
         "experimentalDecorators": true,
         "emitDecoratorMetadata": true
     },
-    "include": ["lib/**/*", "test"]
+    "include": ["lib/**/*"]
 }

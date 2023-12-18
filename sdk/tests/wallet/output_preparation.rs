@@ -7,6 +7,7 @@ use iota_sdk::{
     types::block::{
         address::{Address, Bech32Address, ToBech32Ext},
         output::{BasicOutput, MinimumOutputAmount, NativeToken, NftId, TokenId},
+        protocol::CommittableAgeRange,
         slot::SlotIndex,
     },
     wallet::{Assets, Features, MintNftParams, OutputParams, Result, ReturnStrategy, StorageDeposit, Unlocks},
@@ -352,8 +353,11 @@ async fn output_preparation() -> Result<()> {
     assert_eq!(sender_feature.address(), issuer_and_sender_address.inner());
     // Unlocks
     let conditions = output.unlock_conditions().unwrap();
-    assert!(conditions.is_time_locked(0));
-    assert!(conditions.is_expired(2));
+    assert!(conditions.is_timelocked(0, 0));
+    assert_eq!(
+        conditions.is_expired(2, CommittableAgeRange { min: 0, max: 0 }),
+        Some(false)
+    );
 
     // nft with expiration
     let output = wallet
@@ -766,14 +770,22 @@ async fn prepare_output_only_single_nft() -> Result<()> {
     let balance = wallet_1.sync(None).await?;
     assert_eq!(balance.nfts().len(), 1);
 
-    let nft_data = &wallet_1.unspent_outputs(None).await[0];
+    let nft_amount = wallet_1
+        .data()
+        .await
+        .unspent_outputs()
+        .values()
+        .next()
+        .unwrap()
+        .output
+        .amount();
     let nft_id = *balance.nfts().first().unwrap();
     // Send NFT back to first wallet
     let output = wallet_1
         .prepare_output(
             OutputParams {
                 recipient_address: wallet_0_address,
-                amount: nft_data.output.amount(),
+                amount: nft_amount,
                 assets: Some(Assets { nft_id: Some(nft_id) }),
                 features: None,
                 unlocks: None,

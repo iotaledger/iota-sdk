@@ -6,20 +6,24 @@ use iota_sdk::{
     types::block::{
         address::{Address, Bech32Address, Ed25519Address},
         input::{Input, UtxoInput},
-        output::{unlock_condition::AddressUnlockCondition, BasicOutput, Output},
+        output::{
+            unlock_condition::AddressUnlockCondition, BasicOutput, LeafHash, Output, OutputCommitmentProof,
+            OutputIdProof,
+        },
         payload::signed_transaction::{Transaction, TransactionHash, TransactionId},
         protocol::protocol_parameters,
         rand::{
             mana::rand_mana_allotment,
             output::{rand_basic_output, rand_output_metadata},
         },
+        slot::SlotIndex,
     },
     wallet::{
         events::types::{
             AddressData, NewOutputEvent, SpentOutputEvent, TransactionInclusionEvent, TransactionProgressEvent,
             WalletEvent,
         },
-        types::{InclusionState, OutputData, OutputDataDto},
+        types::{InclusionState, OutputData},
     },
 };
 use pretty_assertions::assert_eq;
@@ -44,25 +48,32 @@ fn wallet_events_serde() {
             .unwrap(),
     }));
 
-    let output_data_dto = OutputDataDto::from(&OutputData {
+    let output_data = OutputData {
         output_id: TransactionHash::null().into_transaction_id(0).into_output_id(0),
         metadata: rand_output_metadata(),
         output: Output::from(rand_basic_output(1_813_620_509_061_365)),
+        output_id_proof: OutputIdProof {
+            slot: SlotIndex(1),
+            output_index: 0,
+            transaction_commitment: "0x".to_string(),
+            output_commitment_proof: OutputCommitmentProof::LeafHash(LeafHash {
+                kind: 1,
+                hash: [0u8; 32],
+            }),
+        },
         is_spent: false,
-        address: Address::Ed25519(Ed25519Address::new([0; Ed25519Address::LENGTH])),
         network_id: 42,
         remainder: true,
-        chain: None,
-    });
+    };
 
     assert_serde_eq(WalletEvent::NewOutput(Box::new(NewOutputEvent {
-        output: output_data_dto.clone(),
+        output: output_data.clone(),
         transaction: None,
         transaction_inputs: None,
     })));
 
     assert_serde_eq(WalletEvent::SpentOutput(Box::new(SpentOutputEvent {
-        output: output_data_dto,
+        output: output_data,
     })));
 
     assert_serde_eq(WalletEvent::TransactionInclusion(TransactionInclusionEvent {

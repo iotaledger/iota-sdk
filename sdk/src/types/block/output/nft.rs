@@ -18,13 +18,11 @@ use crate::types::block::{
             verify_allowed_unlock_conditions, AddressUnlockCondition, StorageDepositReturnUnlockCondition,
             UnlockCondition, UnlockConditionFlags, UnlockConditions,
         },
-        BasicOutputBuilder, ChainId, MinimumOutputAmount, Output, OutputBuilderAmount, OutputId, StateTransitionError,
-        StateTransitionVerifier, StorageScore, StorageScoreParameters,
+        BasicOutputBuilder, ChainId, MinimumOutputAmount, Output, OutputBuilderAmount, OutputId, StorageScore,
+        StorageScoreParameters,
     },
-    payload::signed_transaction::TransactionCapabilityFlag,
     protocol::{ProtocolParameters, WorkScore, WorkScoreParameters},
-    semantic::{SemanticValidationContext, TransactionFailureReason},
-    unlock::Unlock,
+    semantic::StateTransitionError,
     Error,
 };
 
@@ -303,9 +301,9 @@ impl From<&NftOutput> for NftOutputBuilder {
 /// Describes an NFT output, a globally unique token with metadata attached.
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct NftOutput {
-    /// Amount of IOTA coins to deposit with this output.
+    /// Amount of IOTA coins held by the output.
     amount: u64,
-    /// Amount of stored Mana held by this output.
+    /// Amount of stored Mana held by the output.
     mana: u64,
     /// Unique identifier of the NFT.
     nft_id: NftId,
@@ -407,30 +405,6 @@ impl NftOutput {
         NftAddress::new(self.nft_id_non_null(output_id))
     }
 
-    ///
-    pub fn unlock(
-        &self,
-        output_id: &OutputId,
-        unlock: &Unlock,
-        context: &mut SemanticValidationContext<'_>,
-    ) -> Result<(), TransactionFailureReason> {
-        self.unlock_conditions()
-            .locked_address(self.address(), context.transaction.creation_slot())
-            .unlock(unlock, context)?;
-
-        let nft_id = if self.nft_id().is_null() {
-            NftId::from(output_id)
-        } else {
-            *self.nft_id()
-        };
-
-        context
-            .unlocked_addresses
-            .insert(Address::from(NftAddress::from(nft_id)));
-
-        Ok(())
-    }
-
     // Transition, just without full SemanticValidationContext
     pub(crate) fn transition_inner(current_state: &Self, next_state: &Self) -> Result<(), StateTransitionError> {
         if current_state.immutable_features != next_state.immutable_features {
@@ -461,40 +435,6 @@ impl WorkScore for NftOutput {
 }
 
 impl MinimumOutputAmount for NftOutput {}
-
-impl StateTransitionVerifier for NftOutput {
-    fn creation(next_state: &Self, context: &SemanticValidationContext<'_>) -> Result<(), StateTransitionError> {
-        if !next_state.nft_id.is_null() {
-            return Err(StateTransitionError::NonZeroCreatedId);
-        }
-
-        if let Some(issuer) = next_state.immutable_features().issuer() {
-            if !context.unlocked_addresses.contains(issuer.address()) {
-                return Err(StateTransitionError::IssuerNotUnlocked);
-            }
-        }
-
-        Ok(())
-    }
-
-    fn transition(
-        current_state: &Self,
-        next_state: &Self,
-        _context: &SemanticValidationContext<'_>,
-    ) -> Result<(), StateTransitionError> {
-        Self::transition_inner(current_state, next_state)
-    }
-
-    fn destruction(_current_state: &Self, context: &SemanticValidationContext<'_>) -> Result<(), StateTransitionError> {
-        if !context
-            .transaction
-            .has_capability(TransactionCapabilityFlag::DestroyNftOutputs)
-        {
-            return Err(TransactionFailureReason::TransactionCapabilityNftDestructionNotAllowed)?;
-        }
-        Ok(())
-    }
-}
 
 impl Packable for NftOutput {
     type UnpackError = Error;
@@ -565,14 +505,14 @@ fn verify_unlock_conditions(unlock_conditions: &UnlockConditions, nft_id: &NftId
 }
 
 #[cfg(feature = "serde")]
-pub(crate) mod dto {
+mod dto {
     use alloc::vec::Vec;
 
     use serde::{Deserialize, Serialize};
 
     use super::*;
     use crate::{
-        types::block::{output::unlock_condition::dto::UnlockConditionDto, Error},
+        types::block::{output::unlock_condition::UnlockCondition, Error},
         utils::serde::string,
     };
 
@@ -586,7 +526,7 @@ pub(crate) mod dto {
         #[serde(with = "string")]
         pub mana: u64,
         pub nft_id: NftId,
-        pub unlock_conditions: Vec<UnlockConditionDto>,
+        pub unlock_conditions: Vec<UnlockCondition>,
         #[serde(skip_serializing_if = "Vec::is_empty", default)]
         pub features: Vec<Feature>,
         #[serde(skip_serializing_if = "Vec::is_empty", default)]
@@ -600,7 +540,7 @@ pub(crate) mod dto {
                 amount: value.amount(),
                 mana: value.mana(),
                 nft_id: *value.nft_id(),
-                unlock_conditions: value.unlock_conditions().iter().map(Into::into).collect::<_>(),
+                unlock_conditions: value.unlock_conditions().to_vec(),
                 features: value.features().to_vec(),
                 immutable_features: value.immutable_features().to_vec(),
             }
@@ -617,7 +557,7 @@ pub(crate) mod dto {
                 .with_immutable_features(dto.immutable_features);
 
             for u in dto.unlock_conditions {
-                builder = builder.add_unlock_condition(UnlockCondition::from(u));
+                builder = builder.add_unlock_condition(u);
             }
 
             builder.finish()
@@ -630,7 +570,7 @@ pub(crate) mod dto {
             amount: OutputBuilderAmount,
             mana: u64,
             nft_id: &NftId,
-            unlock_conditions: Vec<UnlockConditionDto>,
+            unlock_conditions: Vec<UnlockCondition>,
             features: Option<Vec<Feature>>,
             immutable_features: Option<Vec<Feature>>,
         ) -> Result<Self, Error> {
@@ -688,7 +628,7 @@ mod tests {
             OutputBuilderAmount::Amount(nft_output.amount()),
             nft_output.mana(),
             nft_output.nft_id(),
-            nft_output.unlock_conditions().iter().map(Into::into).collect(),
+            nft_output.unlock_conditions().to_vec(),
             Some(nft_output.features().to_vec()),
             Some(nft_output.immutable_features().to_vec()),
         )
@@ -700,7 +640,7 @@ mod tests {
                 builder.amount,
                 builder.mana,
                 &builder.nft_id,
-                builder.unlock_conditions.iter().map(Into::into).collect(),
+                builder.unlock_conditions.iter().cloned().collect(),
                 Some(builder.features.iter().cloned().collect()),
                 Some(builder.immutable_features.iter().cloned().collect()),
             )

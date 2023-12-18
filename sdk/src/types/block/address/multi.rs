@@ -86,17 +86,18 @@ pub struct MultiAddress {
 }
 
 impl MultiAddress {
-    /// The [`Address`](crate::types::block::address::Address) kind of a [`MultiAddress`].
+    /// The [`Address`] kind of a [`MultiAddress`].
     pub const KIND: u8 = 40;
     /// The allowed range of inner [`Address`]es.
-    pub const ADDRESSES_COUNT: RangeInclusive<u8> = 1..=10;
+    pub const ADDRESSES_COUNT: RangeInclusive<u8> = 2..=10;
 
     /// Creates a new [`MultiAddress`].
     #[inline(always)]
     pub fn new(addresses: impl IntoIterator<Item = WeightedAddress>, threshold: u16) -> Result<Self, Error> {
-        let addresses = addresses.into_iter().collect::<Box<[_]>>();
+        let mut addresses = addresses.into_iter().collect::<Box<[_]>>();
 
-        verify_addresses::<true>(&addresses)?;
+        addresses.sort_by(|a, b| a.address().cmp(b.address()));
+
         verify_threshold::<true>(&threshold)?;
 
         let addresses = BoxedSlicePrefix::<WeightedAddress, WeightedAddressCount>::try_from(addresses)

@@ -16,7 +16,7 @@ async function run() {
     try {
         const isSimulator = false;
 
-        const ledgerNanoSecretManager = new SecretManager({
+        const ledgerNanoSecretManager = SecretManager.create({
             ledgerNano: isSimulator,
         });
 
@@ -39,4 +39,4 @@ async function run() {
     }
 }
 
-run().then(() => process.exit());
+void run().then(() => process.exit());

@@ -53,6 +53,7 @@ import type {
     __ComputeMinimumOutputAmountMethod__,
     __RequestFundsFromFaucetMethod__,
     __CallPluginRouteMethod__,
+    __BlockIdMethod__,
 } from './client';
 
 export type __ClientMethods__ =
@@ -106,4 +107,5 @@ export type __ClientMethods__ =
     | __ClearListenersMethod__
     | __ComputeMinimumOutputAmountMethod__
     | __RequestFundsFromFaucetMethod__
-    | __CallPluginRouteMethod__;
+    | __CallPluginRouteMethod__
+    | __BlockIdMethod__;

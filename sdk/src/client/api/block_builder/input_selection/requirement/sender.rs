@@ -42,6 +42,34 @@ impl InputSelection {
                     Err(e) => Err(e),
                 }
             }
+            // TODO https://github.com/iotaledger/iota-sdk/issues/1721
+            Address::Multi(multi_address) => {
+                let mut cumulative_weight = 0;
+
+                for weight_address in multi_address.addresses() {
+                    for input in self.selected_inputs.iter() {
+                        let required_address = input
+                            .output
+                            .required_address(self.slot_index, self.protocol_parameters.committable_age_range())?
+                            .expect("expiration unlockable outputs already filtered out");
+
+                        if &required_address == weight_address.address() {
+                            cumulative_weight += weight_address.weight() as u16;
+                            break;
+                        }
+                    }
+
+                    if cumulative_weight >= multi_address.threshold() {
+                        break;
+                    }
+                }
+
+                if cumulative_weight < multi_address.threshold() {
+                    Err(Error::UnfulfillableRequirement(Requirement::Sender(address.clone())))
+                } else {
+                    Ok(Vec::new())
+                }
+            }
             Address::Restricted(restricted_address) => {
                 log::debug!("Forwarding {address:?} sender requirement to inner address");
 

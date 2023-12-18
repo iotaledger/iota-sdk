@@ -31,7 +31,6 @@ pub fn verify_semantic(
     transaction_payload: &SignedTransactionPayload,
     protocol_parameters: ProtocolParameters,
 ) -> crate::client::Result<Option<TransactionFailureReason>> {
-    let transaction_id = transaction_payload.transaction().id();
     let inputs = input_signing_data
         .iter()
         .map(|input| (input.output_id(), &input.output))
@@ -39,9 +38,8 @@ pub fn verify_semantic(
 
     let context = SemanticValidationContext::new(
         transaction_payload.transaction(),
-        &transaction_id,
         &inputs,
-        transaction_payload.unlocks(),
+        Some(transaction_payload.unlocks()),
         protocol_parameters,
     );
 

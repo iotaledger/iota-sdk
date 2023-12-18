@@ -9,7 +9,6 @@ pub mod participation;
 
 use std::str::FromStr;
 
-use crypto::keys::bip44::Bip44;
 use serde::{Deserialize, Serialize};
 
 pub use self::{
@@ -21,59 +20,61 @@ use crate::{
     types::{
         api::core::OutputWithMetadataResponse,
         block::{
-            address::Address,
-            output::{Output, OutputId, OutputMetadata},
+            output::{Output, OutputId, OutputIdProof, OutputMetadata},
             payload::signed_transaction::{dto::SignedTransactionPayloadDto, SignedTransactionPayload, TransactionId},
-            protocol::ProtocolParameters,
+            protocol::{CommittableAgeRange, ProtocolParameters},
             slot::SlotIndex,
             BlockId, Error as BlockError,
         },
         TryFromDto,
     },
-    utils::serde::bip44::option_bip44,
     wallet::core::WalletData,
 };
 
 /// An output with metadata
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct OutputData {
     /// The output id
     pub output_id: OutputId,
     pub metadata: OutputMetadata,
     /// The actual Output
     pub output: Output,
+    /// The output ID proof
+    pub output_id_proof: OutputIdProof,
     /// If an output is spent
     pub is_spent: bool,
-    /// Associated wallet address.
-    pub address: Address,
     /// Network ID
     pub network_id: u64,
     pub remainder: bool,
-    // bip44 path
-    pub chain: Option<Bip44>,
 }
 
 impl OutputData {
     pub fn input_signing_data(
         &self,
         wallet_data: &WalletData,
-        slot_index: SlotIndex,
+        slot_index: impl Into<SlotIndex>,
+        committable_age_range: CommittableAgeRange,
     ) -> crate::wallet::Result<Option<InputSigningData>> {
-        let (unlock_address, _unlocked_account_or_nft_address) =
-            self.output.required_and_unlocked_address(slot_index, &self.output_id)?;
+        let required_address = self
+            .output
+            .required_address(slot_index.into(), committable_age_range)?
+            .ok_or(crate::client::Error::ExpirationDeadzone)?;
 
-        let chain = if unlock_address == self.address {
-            self.chain
-        } else if let Address::Ed25519(_) = unlock_address {
-            if wallet_data.address.inner() == &unlock_address {
-                // TODO #1279: do we need a check to make sure that `wallet_data.address` and `wallet_data.bip_path` are
-                // never conflicting?
-                wallet_data.bip_path
+        let chain = if let Some(required_ed25519) = required_address.backing_ed25519() {
+            if let Some(backing_ed25519) = wallet_data.address.inner().backing_ed25519() {
+                if required_ed25519 == backing_ed25519 {
+                    wallet_data.bip_path
+                } else {
+                    // Different ed25519 chain than the wallet one.
+                    None
+                }
             } else {
+                // Address can't be unlocked, wallet is not ed25519-based.
                 return Ok(None);
             }
         } else {
-            // Account and NFT addresses have no chain
+            // Non-chain based address.
             None
         };
 
@@ -82,64 +83,6 @@ impl OutputData {
             output_metadata: self.metadata,
             chain,
         }))
-    }
-}
-
-/// Dto for an output with metadata
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct OutputDataDto {
-    /// The output id
-    pub output_id: OutputId,
-    /// The metadata of the output
-    pub metadata: OutputMetadata,
-    /// The actual Output
-    pub output: Output,
-    /// If an output is spent
-    pub is_spent: bool,
-    /// Associated account address.
-    pub address: Address,
-    /// Network ID
-    pub network_id: String,
-    /// Remainder
-    pub remainder: bool,
-    /// Bip32 path
-    #[serde(with = "option_bip44", default)]
-    pub chain: Option<Bip44>,
-}
-
-impl From<&OutputData> for OutputDataDto {
-    fn from(value: &OutputData) -> Self {
-        Self {
-            output_id: value.output_id,
-            metadata: value.metadata,
-            output: value.output.clone(),
-            is_spent: value.is_spent,
-            address: value.address.clone(),
-            network_id: value.network_id.to_string(),
-            remainder: value.remainder,
-            chain: value.chain,
-        }
-    }
-}
-
-impl TryFrom<OutputDataDto> for OutputData {
-    type Error = BlockError;
-
-    fn try_from(dto: OutputDataDto) -> Result<Self, Self::Error> {
-        Ok(Self {
-            output_id: dto.output_id,
-            metadata: dto.metadata,
-            output: dto.output,
-            is_spent: dto.is_spent,
-            address: dto.address,
-            network_id: dto
-                .network_id
-                .parse()
-                .map_err(|_| BlockError::InvalidField("network id"))?,
-            remainder: dto.remainder,
-            chain: dto.chain,
-        })
     }
 }
 

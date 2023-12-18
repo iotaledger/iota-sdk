@@ -12,7 +12,7 @@ describe('Utils methods', () => {
             Utils.verifyMnemonic('invalid mnemonic '.repeat(12));
             throw 'should error';
         } catch (e) {
-            expect(e.payload.error).toContain('NoSuchWord');
+            expect(e.message).toContain('NoSuchWord');
         }
     });
 

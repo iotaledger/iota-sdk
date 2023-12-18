@@ -12,6 +12,7 @@ import {
     OutputId,
     NftId,
     Bech32Address,
+    Unlock,
 } from '../../';
 import { AccountId } from '../../block/id';
 import { SlotCommitment } from '../../block/slot';
@@ -87,7 +88,7 @@ export interface __BlockIdMethod__ {
     name: 'blockId';
     data: {
         block: Block;
-        params: ProtocolParameters;
+        protocolParameters: ProtocolParameters;
     };
 }
 
@@ -141,6 +142,13 @@ export interface __IsAddressValidMethod__ {
     name: 'isAddressValid';
     data: {
         address: string;
+    };
+}
+
+export interface __ProtocolParametersHashMethod__ {
+    name: 'protocolParametersHash';
+    data: {
+        protocolParameters: ProtocolParameters;
     };
 }
 
@@ -211,8 +219,8 @@ export interface __ComputeSlotCommitmentId__ {
 export interface __VerifyTransactionSemantic__ {
     name: 'verifyTransactionSemantic';
     data: {
-        inputs: InputSigningData[];
         transaction: SignedTransactionPayload;
-        time: number;
+        inputs: InputSigningData[];
+        unlocks?: Unlock[];
     };
 }

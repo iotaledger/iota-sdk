@@ -41,11 +41,10 @@ where
     ) -> Result<TransactionWithMetadata> {
         let prepared = self.prepare_vote(event_id, answers).await?;
 
-        self.sign_and_submit_transaction(prepared, None).await
+        self.sign_and_submit_transaction(prepared, None, None).await
     }
 
-    /// Prepares the transaction for
-    /// [Account::vote()](crate::wallet::Account::vote).
+    /// Prepares the transaction for [Wallet::vote()].
     pub async fn prepare_vote(
         &self,
         event_id: impl Into<Option<ParticipationEventId>> + Send,
@@ -132,11 +131,10 @@ where
     pub async fn stop_participating(&self, event_id: ParticipationEventId) -> Result<TransactionWithMetadata> {
         let prepared = self.prepare_stop_participating(event_id).await?;
 
-        self.sign_and_submit_transaction(prepared, None).await
+        self.sign_and_submit_transaction(prepared, None, None).await
     }
 
-    /// Prepares the transaction for
-    /// [Account::stop_participating()](crate::wallet::Account::stop_participating).
+    /// Prepares the transaction for [Wallet::stop_participating()].
     pub async fn prepare_stop_participating(&self, event_id: ParticipationEventId) -> Result<PreparedTransactionData> {
         let voting_output = self
             .get_voting_output()

@@ -10,13 +10,11 @@ use crate::types::block::{
     output::{
         chain_id::ChainId,
         unlock_condition::{verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions},
-        MinimumOutputAmount, Output, OutputBuilderAmount, OutputId, StateTransitionError, StateTransitionVerifier,
-        StorageScore, StorageScoreParameters,
+        MinimumOutputAmount, Output, OutputBuilderAmount, OutputId, StorageScore, StorageScoreParameters,
     },
     protocol::{ProtocolParameters, WorkScore, WorkScoreParameters},
-    semantic::{SemanticValidationContext, TransactionFailureReason},
+    semantic::StateTransitionError,
     slot::EpochIndex,
-    unlock::Unlock,
     Error,
 };
 
@@ -216,7 +214,7 @@ impl From<&DelegationOutput> for DelegationOutputBuilder {
 #[packable(unpack_error = Error)]
 #[packable(unpack_visitor = ProtocolParameters)]
 pub struct DelegationOutput {
-    /// Amount of IOTA coins to deposit with this output.
+    /// Amount of IOTA coins held by the output.
     amount: u64,
     /// Amount of delegated IOTA coins.
     delegated_amount: u64,
@@ -235,7 +233,7 @@ pub struct DelegationOutput {
 }
 
 impl DelegationOutput {
-    /// The [`Output`](crate::types::block::output::Output) kind of a [`DelegationOutput`].
+    /// The [`Output`] kind of a [`DelegationOutput`].
     pub const KIND: u8 = 5;
     /// The set of allowed [`UnlockCondition`]s for a [`DelegationOutput`].
     pub const ALLOWED_UNLOCK_CONDITIONS: UnlockConditionFlags = UnlockConditionFlags::ADDRESS;
@@ -316,18 +314,6 @@ impl DelegationOutput {
         ChainId::Delegation(self.delegation_id)
     }
 
-    /// Tries to unlock the [`DelegationOutput`].
-    pub fn unlock(
-        &self,
-        _output_id: &OutputId,
-        unlock: &Unlock,
-        context: &mut SemanticValidationContext<'_>,
-    ) -> Result<(), TransactionFailureReason> {
-        self.unlock_conditions()
-            .locked_address(self.address(), context.transaction.creation_slot())
-            .unlock(unlock, context)
-    }
-
     // Transition, just without full SemanticValidationContext.
     pub(crate) fn transition_inner(current_state: &Self, next_state: &Self) -> Result<(), StateTransitionError> {
         #[allow(clippy::nonminimal_bool)]
@@ -342,40 +328,6 @@ impl DelegationOutput {
             return Err(StateTransitionError::MutatedImmutableField);
         }
         // TODO add end_epoch validation rules
-        Ok(())
-    }
-}
-
-impl StateTransitionVerifier for DelegationOutput {
-    fn creation(next_state: &Self, _context: &SemanticValidationContext<'_>) -> Result<(), StateTransitionError> {
-        if !next_state.delegation_id.is_null() {
-            return Err(StateTransitionError::NonZeroCreatedId);
-        }
-
-        if next_state.amount != next_state.delegated_amount {
-            return Err(StateTransitionError::InvalidDelegatedAmount);
-        }
-
-        if next_state.end_epoch != 0 {
-            return Err(StateTransitionError::NonZeroDelegationEndEpoch);
-        }
-
-        Ok(())
-    }
-
-    fn transition(
-        current_state: &Self,
-        next_state: &Self,
-        _context: &SemanticValidationContext<'_>,
-    ) -> Result<(), StateTransitionError> {
-        Self::transition_inner(current_state, next_state)
-    }
-
-    fn destruction(
-        _current_state: &Self,
-        _context: &SemanticValidationContext<'_>,
-    ) -> Result<(), StateTransitionError> {
-        // TODO handle mana rewards
         Ok(())
     }
 }
@@ -441,7 +393,7 @@ mod dto {
     use super::*;
     use crate::{
         types::block::{
-            output::{unlock_condition::dto::UnlockConditionDto, OutputBuilderAmount},
+            output::{unlock_condition::UnlockCondition, OutputBuilderAmount},
             Error,
         },
         utils::serde::string,
@@ -460,7 +412,7 @@ mod dto {
         pub validator_address: AccountAddress,
         start_epoch: EpochIndex,
         end_epoch: EpochIndex,
-        pub unlock_conditions: Vec<UnlockConditionDto>,
+        pub unlock_conditions: Vec<UnlockCondition>,
     }
 
     impl From<&DelegationOutput> for DelegationOutputDto {
@@ -473,7 +425,7 @@ mod dto {
                 validator_address: *value.validator_address(),
                 start_epoch: value.start_epoch(),
                 end_epoch: value.end_epoch(),
-                unlock_conditions: value.unlock_conditions().iter().map(Into::into).collect::<_>(),
+                unlock_conditions: value.unlock_conditions().to_vec(),
             }
         }
     }
@@ -492,7 +444,7 @@ mod dto {
             .with_end_epoch(dto.end_epoch);
 
             for u in dto.unlock_conditions {
-                builder = builder.add_unlock_condition(UnlockCondition::from(u));
+                builder = builder.add_unlock_condition(u);
             }
 
             builder.finish()
@@ -508,7 +460,7 @@ mod dto {
             validator_address: &AccountAddress,
             start_epoch: impl Into<EpochIndex>,
             end_epoch: impl Into<EpochIndex>,
-            unlock_conditions: Vec<UnlockConditionDto>,
+            unlock_conditions: Vec<UnlockCondition>,
         ) -> Result<Self, Error> {
             let mut builder = match amount {
                 OutputBuilderAmount::Amount(amount) => DelegationOutputBuilder::new_with_amount(

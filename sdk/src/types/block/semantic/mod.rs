@@ -1,201 +1,37 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+mod error;
+mod state_transition;
+mod unlock;
+
 use alloc::collections::BTreeMap;
-use core::fmt;
 
 use hashbrown::{HashMap, HashSet};
 use primitive_types::U256;
 
+pub use self::{
+    error::TransactionFailureReason,
+    state_transition::{StateTransitionError, StateTransitionVerifier},
+};
 use crate::types::block::{
     address::{Address, AddressCapabilityFlag},
     output::{
-        AccountId, AnchorOutput, ChainId, FoundryId, MinimumOutputAmount, NativeTokens, Output, OutputId,
-        StateTransitionError, TokenId, UnlockCondition,
+        AccountId, AnchorOutput, ChainId, FoundryId, MinimumOutputAmount, NativeTokens, Output, OutputId, TokenId,
+        UnlockCondition,
     },
-    payload::signed_transaction::{Transaction, TransactionCapabilityFlag, TransactionId, TransactionSigningHash},
+    payload::signed_transaction::{Transaction, TransactionCapabilityFlag, TransactionSigningHash},
     protocol::ProtocolParameters,
-    unlock::Unlocks,
+    unlock::Unlock,
     Error,
 };
-
-/// Describes the reason of a transaction failure.
-#[repr(u8)]
-#[derive(Debug, Copy, Clone, Eq, PartialEq, packable::Packable)]
-#[cfg_attr(feature = "serde", derive(serde_repr::Serialize_repr, serde_repr::Deserialize_repr))]
-#[packable(unpack_error = Error)]
-#[packable(tag_type = u8, with_error = Error::InvalidTransactionFailureReason)]
-#[non_exhaustive]
-pub enum TransactionFailureReason {
-    /// The referenced UTXO was already spent.
-    InputUtxoAlreadySpent = 1,
-    /// The transaction is conflicting with another transaction. Conflicting specifically means a double spend
-    /// situation that both transaction pass all validation rules, eventually losing one(s) should have this reason.
-    ConflictingWithAnotherTx = 2,
-    /// The referenced UTXO is invalid.
-    InvalidReferencedUtxo = 3,
-    /// The transaction is invalid.
-    InvalidTransaction = 4,
-    /// The sum of the inputs and output base token amount does not match.
-    SumInputsOutputsAmountMismatch = 5,
-    /// The unlock block signature is invalid.
-    InvalidUnlockBlockSignature = 6,
-    /// The configured timelock is not yet expired.
-    TimelockNotExpired = 7,
-    /// The given native tokens are invalid.
-    InvalidNativeTokens = 8,
-    /// The return amount in a transaction is not fulfilled by the output side.
-    StorageDepositReturnUnfulfilled = 9,
-    /// An input unlock was invalid.
-    InvalidInputUnlock = 10,
-    /// The output contains a Sender with an ident (address) which is not unlocked.
-    SenderNotUnlocked = 11,
-    /// The chain state transition is invalid.
-    InvalidChainStateTransition = 12,
-    /// The referenced input is created after transaction issuing time.
-    InvalidTransactionIssuingTime = 13,
-    /// The mana amount is invalid.
-    InvalidManaAmount = 14,
-    /// The Block Issuance Credits amount is invalid.
-    InvalidBlockIssuanceCreditsAmount = 15,
-    /// Reward Context Input is invalid.
-    InvalidRewardContextInput = 16,
-    /// Commitment Context Input is invalid.
-    InvalidCommitmentContextInput = 17,
-    /// Staking Feature is not provided in account output when claiming rewards.
-    MissingStakingFeature = 18,
-    /// Failed to claim staking reward.
-    FailedToClaimStakingReward = 19,
-    /// Failed to claim delegation reward.
-    FailedToClaimDelegationReward = 20,
-    /// Burning of native tokens is not allowed in the transaction capabilities.
-    TransactionCapabilityNativeTokenBurningNotAllowed = 21,
-    /// Burning of mana is not allowed in the transaction capabilities.
-    TransactionCapabilityManaBurningNotAllowed = 22,
-    /// Destruction of accounts is not allowed in the transaction capabilities.
-    TransactionCapabilityAccountDestructionNotAllowed = 23,
-    /// Destruction of anchors is not allowed in the transaction capabilities.
-    TransactionCapabilityAnchorDestructionNotAllowed = 24,
-    /// Destruction of foundries is not allowed in the transaction capabilities.
-    TransactionCapabilityFoundryDestructionNotAllowed = 25,
-    /// Destruction of nfts is not allowed in the transaction capabilities.
-    TransactionCapabilityNftDestructionNotAllowed = 26,
-    /// The semantic validation failed for a reason not covered by the previous variants.
-    SemanticValidationFailed = 255,
-}
-
-impl fmt::Display for TransactionFailureReason {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            Self::InputUtxoAlreadySpent => write!(f, "The referenced UTXO was already spent."),
-            Self::ConflictingWithAnotherTx => write!(
-                f,
-                "The transaction is conflicting with another transaction. Conflicting specifically means a double spend situation that both transactions pass all validation rules, eventually losing one(s) should have this reason."
-            ),
-            Self::InvalidReferencedUtxo => write!(f, "The referenced UTXO is invalid."),
-            Self::InvalidTransaction => write!(f, "The transaction is invalid."),
-            Self::SumInputsOutputsAmountMismatch => {
-                write!(f, "The sum of the inputs and output base token amount does not match.")
-            }
-            Self::InvalidUnlockBlockSignature => write!(f, "The unlock block signature is invalid."),
-            Self::TimelockNotExpired => write!(f, "The configured timelock is not yet expired."),
-            Self::InvalidNativeTokens => write!(f, "The given native tokens are invalid."),
-            Self::StorageDepositReturnUnfulfilled => write!(
-                f,
-                "The return amount in a transaction is not fulfilled by the output side."
-            ),
-            Self::InvalidInputUnlock => write!(f, "An input unlock was invalid."),
-            Self::SenderNotUnlocked => write!(
-                f,
-                "The output contains a Sender with an ident (address) which is not unlocked."
-            ),
-            Self::InvalidChainStateTransition => write!(f, "The chain state transition is invalid."),
-            Self::InvalidTransactionIssuingTime => {
-                write!(f, "The referenced input is created after transaction issuing time.")
-            }
-            Self::InvalidManaAmount => write!(f, "The mana amount is invalid."),
-            Self::InvalidBlockIssuanceCreditsAmount => write!(f, "The Block Issuance Credits amount is invalid."),
-            Self::InvalidRewardContextInput => write!(f, "Reward Context Input is invalid."),
-            Self::InvalidCommitmentContextInput => write!(f, "Commitment Context Input is invalid."),
-            Self::MissingStakingFeature => write!(
-                f,
-                "Staking Feature is not provided in account output when claiming rewards."
-            ),
-            Self::FailedToClaimStakingReward => write!(f, "Failed to claim staking reward."),
-            Self::FailedToClaimDelegationReward => write!(f, "Failed to claim delegation reward."),
-            Self::TransactionCapabilityNativeTokenBurningNotAllowed => write!(
-                f,
-                "Burning of native tokens is not allowed in the transaction capabilities."
-            ),
-            Self::TransactionCapabilityManaBurningNotAllowed => {
-                write!(f, "Burning of mana is not allowed in the transaction capabilities.")
-            }
-            Self::TransactionCapabilityAccountDestructionNotAllowed => write!(
-                f,
-                "Destruction of accounts is not allowed in the transaction capabilities."
-            ),
-            Self::TransactionCapabilityAnchorDestructionNotAllowed => write!(
-                f,
-                "Destruction of anchors is not allowed in the transaction capabilities."
-            ),
-            Self::TransactionCapabilityFoundryDestructionNotAllowed => write!(
-                f,
-                "Destruction of foundries is not allowed in the transaction capabilities."
-            ),
-            Self::TransactionCapabilityNftDestructionNotAllowed => {
-                write!(f, "Destruction of nfts is not allowed in the transaction capabilities.")
-            }
-            Self::SemanticValidationFailed => write!(
-                f,
-                "The semantic validation failed for a reason not covered by the previous variants."
-            ),
-        }
-    }
-}
-
-impl TryFrom<u8> for TransactionFailureReason {
-    type Error = Error;
-
-    fn try_from(c: u8) -> Result<Self, Self::Error> {
-        Ok(match c {
-            1 => Self::InputUtxoAlreadySpent,
-            2 => Self::ConflictingWithAnotherTx,
-            3 => Self::InvalidReferencedUtxo,
-            4 => Self::InvalidTransaction,
-            5 => Self::SumInputsOutputsAmountMismatch,
-            6 => Self::InvalidUnlockBlockSignature,
-            7 => Self::TimelockNotExpired,
-            8 => Self::InvalidNativeTokens,
-            9 => Self::StorageDepositReturnUnfulfilled,
-            10 => Self::InvalidInputUnlock,
-            11 => Self::SenderNotUnlocked,
-            12 => Self::InvalidChainStateTransition,
-            13 => Self::InvalidTransactionIssuingTime,
-            14 => Self::InvalidManaAmount,
-            15 => Self::InvalidBlockIssuanceCreditsAmount,
-            16 => Self::InvalidRewardContextInput,
-            17 => Self::InvalidCommitmentContextInput,
-            18 => Self::MissingStakingFeature,
-            19 => Self::FailedToClaimStakingReward,
-            20 => Self::FailedToClaimDelegationReward,
-            21 => Self::TransactionCapabilityNativeTokenBurningNotAllowed,
-            22 => Self::TransactionCapabilityManaBurningNotAllowed,
-            23 => Self::TransactionCapabilityAccountDestructionNotAllowed,
-            24 => Self::TransactionCapabilityAnchorDestructionNotAllowed,
-            25 => Self::TransactionCapabilityFoundryDestructionNotAllowed,
-            26 => Self::TransactionCapabilityNftDestructionNotAllowed,
-            255 => Self::SemanticValidationFailed,
-            x => return Err(Self::Error::InvalidTransactionFailureReason(x)),
-        })
-    }
-}
 
 ///
 pub struct SemanticValidationContext<'a> {
     pub(crate) transaction: &'a Transaction,
     pub(crate) transaction_signing_hash: TransactionSigningHash,
     pub(crate) inputs: &'a [(&'a OutputId, &'a Output)],
-    pub(crate) unlocks: &'a Unlocks,
+    pub(crate) unlocks: Option<&'a [Unlock]>,
     pub(crate) input_amount: u64,
     pub(crate) input_mana: u64,
     pub(crate) input_native_tokens: BTreeMap<TokenId, U256>,
@@ -214,11 +50,11 @@ impl<'a> SemanticValidationContext<'a> {
     ///
     pub fn new(
         transaction: &'a Transaction,
-        transaction_id: &TransactionId,
         inputs: &'a [(&'a OutputId, &'a Output)],
-        unlocks: &'a Unlocks,
+        unlocks: Option<&'a [Unlock]>,
         protocol_parameters: ProtocolParameters,
     ) -> Self {
+        let transaction_id = transaction.id();
         let input_chains = inputs
             .iter()
             .filter_map(|(output_id, input)| {
@@ -238,7 +74,7 @@ impl<'a> SemanticValidationContext<'a> {
             .filter_map(|(index, output)| {
                 output.chain_id().map(|chain_id| {
                     (
-                        chain_id.or_from_output_id(&OutputId::new(*transaction_id, index as u16)),
+                        chain_id.or_from_output_id(&OutputId::new(transaction_id, index as u16)),
                         output,
                     )
                 })
@@ -268,64 +104,57 @@ impl<'a> SemanticValidationContext<'a> {
     ///
     pub fn validate(mut self) -> Result<Option<TransactionFailureReason>, Error> {
         // Validation of inputs.
-        for ((output_id, consumed_output), unlock) in self.inputs.iter().zip(self.unlocks.iter()) {
-            let (conflict, amount, mana, consumed_native_token, unlock_conditions) = match consumed_output {
+        for (index, (output_id, consumed_output)) in self.inputs.iter().enumerate() {
+            let (amount, mana, consumed_native_token, unlock_conditions) = match consumed_output {
                 Output::Basic(output) => (
-                    output.unlock(output_id, unlock, &mut self),
                     output.amount(),
                     output.mana(),
                     output.native_token(),
                     output.unlock_conditions(),
                 ),
-                Output::Account(output) => (
-                    output.unlock(output_id, unlock, &mut self),
-                    output.amount(),
-                    output.mana(),
-                    None,
-                    output.unlock_conditions(),
-                ),
+                Output::Account(output) => (output.amount(), output.mana(), None, output.unlock_conditions()),
                 Output::Anchor(_) => return Err(Error::UnsupportedOutputKind(AnchorOutput::KIND)),
-                Output::Foundry(output) => (
-                    output.unlock(output_id, unlock, &mut self),
-                    output.amount(),
-                    0,
-                    output.native_token(),
-                    output.unlock_conditions(),
-                ),
-                Output::Nft(output) => (
-                    output.unlock(output_id, unlock, &mut self),
-                    output.amount(),
-                    output.mana(),
-                    None,
-                    output.unlock_conditions(),
-                ),
-                Output::Delegation(output) => (
-                    output.unlock(output_id, unlock, &mut self),
-                    output.amount(),
-                    0,
-                    None,
-                    output.unlock_conditions(),
-                ),
+                Output::Foundry(output) => (output.amount(), 0, output.native_token(), output.unlock_conditions()),
+                Output::Nft(output) => (output.amount(), output.mana(), None, output.unlock_conditions()),
+                Output::Delegation(output) => (output.amount(), 0, None, output.unlock_conditions()),
             };
 
-            if let Err(conflict) = conflict {
-                return Ok(Some(conflict));
+            let commitment_slot_index = self
+                .transaction
+                .context_inputs()
+                .iter()
+                .find_map(|c| c.as_commitment_opt().map(|c| c.slot_index()));
+
+            if let Some(timelock) = unlock_conditions.timelock() {
+                if let Some(commitment_slot_index) = commitment_slot_index {
+                    if timelock.is_timelocked(commitment_slot_index, self.protocol_parameters.min_committable_age()) {
+                        return Ok(Some(TransactionFailureReason::TimelockNotExpired));
+                    }
+                } else {
+                    // Missing CommitmentContextInput
+                    return Ok(Some(TransactionFailureReason::InvalidCommitmentContextInput));
+                }
             }
 
-            if unlock_conditions.is_time_locked(self.transaction.creation_slot()) {
-                return Ok(Some(TransactionFailureReason::TimelockNotExpired));
-            }
+            if let Some(expiration) = unlock_conditions.expiration() {
+                if let Some(commitment_slot_index) = commitment_slot_index {
+                    if expiration.is_expired(commitment_slot_index, self.protocol_parameters.committable_age_range())
+                        == Some(false)
+                    {
+                        if let Some(storage_deposit_return) = unlock_conditions.storage_deposit_return() {
+                            let amount = self
+                                .storage_deposit_returns
+                                .entry(storage_deposit_return.return_address().clone())
+                                .or_default();
 
-            if !unlock_conditions.is_expired(self.transaction.creation_slot()) {
-                if let Some(storage_deposit_return) = unlock_conditions.storage_deposit_return() {
-                    let amount = self
-                        .storage_deposit_returns
-                        .entry(storage_deposit_return.return_address().clone())
-                        .or_default();
-
-                    *amount = amount
-                        .checked_add(storage_deposit_return.amount())
-                        .ok_or(Error::StorageDepositReturnOverflow)?;
+                            *amount = amount
+                                .checked_add(storage_deposit_return.amount())
+                                .ok_or(Error::StorageDepositReturnOverflow)?;
+                        }
+                    }
+                } else {
+                    // Missing CommitmentContextInput
+                    return Ok(Some(TransactionFailureReason::InvalidCommitmentContextInput));
                 }
             }
 
@@ -375,6 +204,16 @@ impl<'a> SemanticValidationContext<'a> {
                 *native_token_amount = native_token_amount
                     .checked_add(consumed_native_token.amount())
                     .ok_or(Error::ConsumedNativeTokensAmountOverflow)?;
+            }
+
+            if let Some(unlocks) = self.unlocks {
+                if unlocks.len() != self.inputs.len() {
+                    return Ok(Some(TransactionFailureReason::InvalidInputUnlock));
+                }
+
+                if let Err(conflict) = self.output_unlock(consumed_output, output_id, &unlocks[index]) {
+                    return Ok(Some(conflict));
+                }
             }
         }
 
@@ -549,10 +388,9 @@ impl<'a> SemanticValidationContext<'a> {
 
         // Validation of state transitions and destructions.
         for (chain_id, current_state) in self.input_chains.iter() {
-            match Output::verify_state_transition(
+            match self.verify_state_transition(
                 Some(current_state),
                 self.output_chains.get(chain_id).map(core::ops::Deref::deref),
-                &self,
             ) {
                 Err(StateTransitionError::TransactionFailure(f)) => return Ok(Some(f)),
                 Err(_) => {
@@ -565,7 +403,7 @@ impl<'a> SemanticValidationContext<'a> {
         // Validation of state creations.
         for (chain_id, next_state) in self.output_chains.iter() {
             if self.input_chains.get(chain_id).is_none() {
-                match Output::verify_state_transition(None, Some(next_state), &self) {
+                match self.verify_state_transition(None, Some(next_state)) {
                     Err(StateTransitionError::TransactionFailure(f)) => return Ok(Some(f)),
                     Err(_) => {
                         return Ok(Some(TransactionFailureReason::InvalidChainStateTransition));

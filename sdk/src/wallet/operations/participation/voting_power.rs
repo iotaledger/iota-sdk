@@ -44,11 +44,10 @@ where
     pub async fn increase_voting_power(&self, amount: u64) -> Result<TransactionWithMetadata> {
         let prepared = self.prepare_increase_voting_power(amount).await?;
 
-        self.sign_and_submit_transaction(prepared, None).await
+        self.sign_and_submit_transaction(prepared, None, None).await
     }
 
-    /// Prepares the transaction for
-    /// [Account::increase_voting_power()](crate::wallet::Account::increase_voting_power).
+    /// Prepares the transaction for [Wallet::increase_voting_power()].
     pub async fn prepare_increase_voting_power(&self, amount: u64) -> Result<PreparedTransactionData> {
         let (new_output, tx_options) = match self.get_voting_output().await? {
             Some(current_output_data) => {
@@ -93,11 +92,10 @@ where
     pub async fn decrease_voting_power(&self, amount: u64) -> Result<TransactionWithMetadata> {
         let prepared = self.prepare_decrease_voting_power(amount).await?;
 
-        self.sign_and_submit_transaction(prepared, None).await
+        self.sign_and_submit_transaction(prepared, None, None).await
     }
 
-    /// Prepares the transaction for
-    /// [Account::decrease_voting_power()](crate::wallet::Account::decrease_voting_power).
+    /// Prepares the transaction for [Wallet::decrease_voting_power()].
     pub async fn prepare_decrease_voting_power(&self, amount: u64) -> Result<PreparedTransactionData> {
         let current_output_data = self
             .get_voting_output()

@@ -163,15 +163,7 @@ async fn test_get_output_raw() {
     )
     .unwrap();
 
-    assert_eq!(output, output_raw);
-}
-
-#[ignore]
-#[tokio::test]
-async fn test_get_peers() {
-    let r = setup_client_with_node_health_ignored().await.get_peers().await.unwrap();
-
-    println!("{r:#?}");
+    assert_eq!(output.output, output_raw);
 }
 
 #[ignore]

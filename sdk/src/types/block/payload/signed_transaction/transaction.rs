@@ -101,6 +101,11 @@ impl TransactionBuilder {
         self
     }
 
+    pub fn add_capabilities(mut self, capabilities: impl IntoIterator<Item = TransactionCapabilityFlag>) -> Self {
+        self.capabilities.add_capabilities(capabilities);
+        self
+    }
+
     /// Sets the payload of a [`TransactionBuilder`].
     pub fn with_payload(mut self, payload: impl Into<OptionalPayload>) -> Self {
         self.payload = payload.into();
@@ -144,7 +149,7 @@ impl TransactionBuilder {
                         std::time::SystemTime::now()
                             .duration_since(std::time::UNIX_EPOCH)
                             .unwrap()
-                            .as_nanos() as u64,
+                            .as_secs(),
                     )
                 });
                 #[cfg(not(feature = "std"))]
@@ -371,6 +376,7 @@ fn verify_context_inputs(context_inputs: &[ContextInput]) -> Result<(), Error> {
 
     let mut reward_index_set = HashSet::new();
     let mut bic_account_id_set = HashSet::new();
+
     for input in context_inputs.iter() {
         match input {
             ContextInput::BlockIssuanceCredit(bic) => {

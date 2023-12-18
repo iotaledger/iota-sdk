@@ -2,9 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use iota_sdk::types::block::address::{Address, ToBech32Ext};
+use packable::PackableExt;
+use pretty_assertions::assert_eq;
 
 #[test]
-fn bech32() {
+fn json_packable_bech32() {
     // Test from https://github.com/iotaledger/tips/blob/tip52/tips/TIP-0052/tip-0052.md#bech32
 
     let multi_address_json = serde_json::json!({
@@ -49,7 +51,10 @@ fn bech32() {
         "threshold": 2
     });
     let multi_address = serde_json::from_value::<Address>(multi_address_json).unwrap();
+    let multi_address_bytes = multi_address.pack_to_vec();
+    let multi_address_unpacked = Address::unpack_verified(multi_address_bytes, &()).unwrap();
 
+    assert_eq!(multi_address, multi_address_unpacked);
     assert_eq!(
         multi_address.to_bech32_unchecked("iota"),
         "iota19qq0ezu97zl76wqnpdxxleuf55gk0eqhscjtdgqm5sqwav6gcarz6vvesnk"

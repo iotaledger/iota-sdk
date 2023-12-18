@@ -17,7 +17,7 @@ async function run() {
             'inhale gorilla deny three celery song category owner lottery rent author wealth penalty crawl hobby obtain glad warm early rain clutch slab august bleak',
     };
 
-    const secretManager = new SecretManager(mnemonicSecretManager);
+    const secretManager = SecretManager.create(mnemonicSecretManager);
 
     const walletAddress = await secretManager.generateEd25519Addresses({
         coinType: CoinType.IOTA,
@@ -47,4 +47,4 @@ async function run() {
     console.log(balance);
 }
 
-run();
+void run().then(() => process.exit());

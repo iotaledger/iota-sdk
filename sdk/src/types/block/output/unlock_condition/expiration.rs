@@ -6,6 +6,7 @@ use derive_more::From;
 use crate::types::block::{
     address::Address,
     output::{StorageScore, StorageScoreParameters},
+    protocol::CommittableAgeRange,
     slot::SlotIndex,
     Error,
 };
@@ -53,13 +54,37 @@ impl ExpirationUnlockCondition {
         self.slot_index
     }
 
-    /// Returns the return address if the condition has expired.
-    pub fn return_address_expired(&self, slot_index: SlotIndex) -> Option<&Address> {
-        if slot_index >= self.slot_index() {
-            Some(&self.return_address)
+    /// Checks whether the expiration is expired. If None is returned, then expiration is in the deadzone where it can't
+    /// be unlocked.
+    pub fn is_expired(
+        &self,
+        slot_index: impl Into<SlotIndex>,
+        committable_age_range: CommittableAgeRange,
+    ) -> Option<bool> {
+        let slot_index = slot_index.into();
+
+        if self.slot_index() > (slot_index + committable_age_range.max) {
+            Some(false)
+        } else if self.slot_index() <= (slot_index + committable_age_range.min) {
+            Some(true)
         } else {
             None
         }
+    }
+
+    /// Returns the address that can unlock the output. If there is an expiration unlock condition, then there is a
+    /// small interval around the expiration slot index in which no address can unlock the output.
+    pub fn return_address_expired<'a>(
+        &'a self,
+        address: &'a Address,
+        slot_index: impl Into<SlotIndex>,
+        committable_age_range: CommittableAgeRange,
+    ) -> Option<&'a Address> {
+        self.is_expired(slot_index, committable_age_range).map(
+            |expired| {
+                if expired { &self.return_address } else { address }
+            },
+        )
     }
 }
 

@@ -345,7 +345,7 @@ required-features = ["wallet", "stronghold"]
 [[example]]
 name = "implicit_account_creation"
 path = "examples/how_tos/account/implicit_account_creation.rs"
-required-features = ["wallet"]
+required-features = ["wallet", "storage"]
 
 # Outputs
 
@@ -451,6 +451,11 @@ required-features = ["client"]
 [[example]]
 name = "node_api_core_get_output_metadata"
 path = "examples/client/node_api_core/11_get_output_metadata.rs"
+required-features = ["client"]
+
+[[example]]
+name = "node_api_core_get_output_full"
+path = "examples/client/node_api_core/12_get_output_full.rs"
 required-features = ["client"]
 
 [[example]]

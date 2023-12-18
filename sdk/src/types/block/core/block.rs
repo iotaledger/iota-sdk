@@ -7,7 +7,7 @@ use core::mem::size_of;
 use crypto::hashes::{blake2b::Blake2b256, Digest};
 use getset::{CopyGetters, Getters};
 use packable::{
-    error::{UnexpectedEOF, UnpackError, UnpackErrorExt},
+    error::{UnexpectedEOF, UnpackError},
     packer::{Packer, SlicePacker},
     unpacker::{CounterUnpacker, SliceUnpacker, Unpacker},
     Packable, PackableExt,
@@ -51,8 +51,7 @@ impl UnsignedBlock {
         self
     }
 
-    /// Get the signing input that can be used to generate a [`Signature`](crate::types::block::signature::Signature)
-    /// for the resulting block.
+    /// Get the signing input that can be used to generate a [`Signature`] for the resulting block.
     pub fn signing_input(&self) -> Vec<u8> {
         [self.header.hash(), self.body.hash()].concat()
     }
@@ -62,12 +61,16 @@ impl UnsignedBlock {
     }
 }
 
-#[derive(Clone, Debug, Eq, PartialEq, CopyGetters)]
+#[derive(Clone, Debug, Eq, PartialEq, CopyGetters, Packable)]
+#[packable(unpack_error = Error)]
+#[packable(unpack_visitor = ProtocolParameters)]
 #[getset(get_copy = "pub")]
 pub struct BlockHeader {
     /// Protocol version of the network to which this block belongs.
+    #[packable(verify_with = verify_protocol_version)]
     protocol_version: u8,
     /// The identifier of the network to which this block belongs.
+    #[packable(verify_with = verify_network_id)]
     network_id: u64,
     /// The time at which the block was issued. It is a Unix timestamp in nanoseconds.
     issuing_time: u64,
@@ -112,60 +115,29 @@ impl BlockHeader {
 
 impl WorkScore for BlockHeader {}
 
-impl Packable for BlockHeader {
-    type UnpackError = Error;
-    type UnpackVisitor = ProtocolParameters;
-
-    fn pack<P: Packer>(&self, packer: &mut P) -> Result<(), P::Error> {
-        self.protocol_version.pack(packer)?;
-        self.network_id.pack(packer)?;
-        self.issuing_time.pack(packer)?;
-        self.slot_commitment_id.pack(packer)?;
-        self.latest_finalized_slot.pack(packer)?;
-        self.issuer_id.pack(packer)?;
-
-        Ok(())
+fn verify_protocol_version<const VERIFY: bool>(
+    protocol_version: &u8,
+    params: &ProtocolParameters,
+) -> Result<(), Error> {
+    if VERIFY && *protocol_version != params.version() {
+        return Err(Error::ProtocolVersionMismatch {
+            expected: params.version(),
+            actual: *protocol_version,
+        });
     }
 
-    fn unpack<U: Unpacker, const VERIFY: bool>(
-        unpacker: &mut U,
-        protocol_params: &Self::UnpackVisitor,
-    ) -> Result<Self, UnpackError<Self::UnpackError, U::Error>> {
-        let protocol_version = u8::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
+    Ok(())
+}
 
-        if VERIFY && protocol_version != protocol_params.version() {
-            return Err(UnpackError::Packable(Error::ProtocolVersionMismatch {
-                expected: protocol_params.version(),
-                actual: protocol_version,
-            }));
-        }
-
-        let network_id = u64::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
-
-        if VERIFY && network_id != protocol_params.network_id() {
-            return Err(UnpackError::Packable(Error::NetworkIdMismatch {
-                expected: protocol_params.network_id(),
-                actual: network_id,
-            }));
-        }
-
-        let issuing_time = u64::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
-
-        let slot_commitment_id = SlotCommitmentId::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
-
-        let latest_finalized_slot = SlotIndex::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
-
-        let issuer_id = AccountId::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
-
-        Ok(Self {
-            protocol_version,
-            network_id,
-            issuing_time,
-            slot_commitment_id,
-            latest_finalized_slot,
-            issuer_id,
-        })
+fn verify_network_id<const VERIFY: bool>(network_id: &u64, params: &ProtocolParameters) -> Result<(), Error> {
+    if VERIFY && *network_id != params.network_id() {
+        return Err(Error::NetworkIdMismatch {
+            expected: params.network_id(),
+            actual: *network_id,
+        });
     }
+
+    Ok(())
 }
 
 /// Represent the object that nodes gossip around the network.
@@ -250,7 +222,7 @@ impl Block {
         ]
         .concat();
         let block_hash = BlockHash::new(Blake2b256::digest(id).into());
-        block_hash.into_block_id(protocol_params.slot_index(self.header.issuing_time() / 1000000000))
+        block_hash.into_block_id(protocol_params.slot_index(self.header.issuing_time() / 1_000_000_000))
     }
 
     /// Unpacks a [`Block`] from a sequence of bytes doing syntactical checks and verifying that
