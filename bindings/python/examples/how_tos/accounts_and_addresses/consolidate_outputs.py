@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 
 from iota_sdk import ConsolidationParams, Utils, Wallet, WalletOptions, FeatureType
 
-# In this example we will consolidate basic outputs from an account with only an AddressUnlockCondition by sending
+# In this example we will consolidate basic outputs from a wallet with only an AddressUnlockCondition by sending
 # them to the same address again.
 
 # This example uses secrets in environment variables for simplicity which
@@ -17,7 +17,8 @@ if 'STRONGHOLD_PASSWORD' not in os.environ:
 wallet = Wallet(WalletOptions(storage_path=os.environ.get('WALLET_DB_PATH')))
 wallet.set_stronghold_password(os.environ['STRONGHOLD_PASSWORD'])
 
-# Sync wallet to make sure it is updated with outputs from the previous examples.
+# Sync wallet to make sure it is updated with outputs from the previous
+# examples.
 wallet.sync()
 print('Wallet synced')
 
@@ -35,7 +36,8 @@ for i, output_data in enumerate(outputs):
         f'- address: #{Utils.hex_to_bech32(output_data.address.pub_key_hash, "rms")}')
     print(f'- amount: #{output_data.output.amount}')
 
-    native_tokens = [feature for feature in output_data.output.features if feature.type == FeatureType.NativeToken]
+    native_tokens = [
+        feature for feature in output_data.output.features if feature.type == FeatureType.NativeToken]
     opt_native_token = next(iter(native_tokens), None)
     print(f'- native tokens: #{opt_native_token}')
 
@@ -68,6 +70,7 @@ for i, output_data in enumerate(outputs):
         f'- address: #{Utils.hex_to_bech32(output_data.address.pub_key_hash, "rms")}')
     print(f'- amount: #{output_data.output.amount}')
 
-    native_tokens = [feature for feature in output_data.output.features if feature.type == FeatureType.NativeToken]
+    native_tokens = [
+        feature for feature in output_data.output.features if feature.type == FeatureType.NativeToken]
     opt_native_token = next(iter(native_tokens), None)
     print(f'- native tokens: #{opt_native_token}')

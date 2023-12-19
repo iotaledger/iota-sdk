@@ -62,7 +62,7 @@ class StorageDeposit():
 @json
 @dataclass
 class OutputParams():
-    """Params for `Account.prepare_output()`.
+    """Params for `Wallet.prepare_output()`.
     """
     recipient_address: str
     amount: int = field(metadata=config(

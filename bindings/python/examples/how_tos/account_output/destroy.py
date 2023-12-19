@@ -17,7 +17,7 @@ wallet = Wallet(WalletOptions(storage_path=os.environ.get('WALLET_DB_PATH')))
 # Sync wallet with the node
 balance = wallet.sync()
 
-# We try to destroy the first account in the account
+# We try to destroy the first account in the wallet
 account_id = balance.accounts[0]
 
 if 'STRONGHOLD_PASSWORD' not in os.environ:

@@ -34,9 +34,11 @@ def json(cls):
         # recursive remove the None values
         def filter_none(value):
             if isinstance(value, dict):
-                return {k: filter_none(v) for k, v in value.items() if v is not None}
+                return {k: filter_none(v)
+                        for k, v in value.items() if v is not None}
             if isinstance(value, list):
-                return [filter_none(item) for item in value if item is not None]
+                return [filter_none(item)
+                        for item in value if item is not None]
             return value
 
         return filter_none(original_dict)

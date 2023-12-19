@@ -18,7 +18,13 @@ def test_address_generation_iota():
     bip_path = Bip44(
         coin_type=CoinType.IOTA
     )
-    wallet_options = WalletOptions(None, None, bip_path, client_options, secret_manager, db_path)
+    wallet_options = WalletOptions(
+        None,
+        None,
+        bip_path,
+        client_options,
+        secret_manager,
+        db_path)
     wallet = Wallet(wallet_options)
 
     address = wallet.address()
@@ -40,7 +46,13 @@ def test_address_generation_shimmer():
     bip_path = Bip44(
         coin_type=CoinType.IOTA
     )
-    wallet_options = WalletOptions(None, None, bip_path, client_options, secret_manager, db_path)
+    wallet_options = WalletOptions(
+        None,
+        None,
+        bip_path,
+        client_options,
+        secret_manager,
+        db_path)
     wallet = Wallet(wallet_options)
 
     address = wallet.address()

@@ -22,7 +22,7 @@ wallet.set_stronghold_password(os.environ["STRONGHOLD_PASSWORD"])
 # Sync wallet with the node
 wallet.sync()
 
-# Only the unspent outputs in the account
+# Only the unspent outputs in the wallet
 output_ids = wallet.claimable_outputs('All')
 
 print('Available outputs to claim:')

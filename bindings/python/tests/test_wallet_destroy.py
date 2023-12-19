@@ -21,7 +21,13 @@ class WalletDestroy(unittest.TestCase):
         bip_path = Bip44(
             coin_type=CoinType.SHIMMER
         )
-        wallet_options = WalletOptions(None, None, bip_path, client_options, secret_manager, db_path)
+        wallet_options = WalletOptions(
+            None,
+            None,
+            bip_path,
+            client_options,
+            secret_manager,
+            db_path)
         wallet = Wallet(wallet_options)
 
         address = wallet.address()
@@ -48,7 +54,13 @@ class WalletDestroy(unittest.TestCase):
         bip_path = Bip44(
             coin_type=CoinType.SHIMMER
         )
-        wallet_options = WalletOptions(None, None, bip_path, client_options, secret_manager, db_path)
+        wallet_options = WalletOptions(
+            None,
+            None,
+            bip_path,
+            client_options,
+            secret_manager,
+            db_path)
         wallet = Wallet(wallet_options)
 
         # Destroy the wallet

@@ -26,5 +26,11 @@ bip_path = Bip44(
     coin_type=CoinType.SHIMMER
 )
 
-wallet_options = WalletOptions(None, None, bip_path, client_options, secret_manager, os.environ.get('WALLET_DB_PATH'))
+wallet_options = WalletOptions(
+    None,
+    None,
+    bip_path,
+    client_options,
+    secret_manager,
+    os.environ.get('WALLET_DB_PATH'))
 wallet = Wallet(wallet_options)
