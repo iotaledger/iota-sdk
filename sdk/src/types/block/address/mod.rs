@@ -184,6 +184,7 @@ impl<T: Into<Address>> ToBech32Ext for T {
     }
 }
 
+#[cfg(test)]
 mod test {
     use crate::types::block::address::Address;
     use crate::types::block::rand::address::*;
