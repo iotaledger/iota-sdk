@@ -153,6 +153,7 @@ fn verify_multi_address<const VERIFY: bool>(address: &MultiAddress) -> Result<()
             });
         }
     }
+
     Ok(())
 }
 
