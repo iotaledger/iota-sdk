@@ -85,7 +85,6 @@ pub struct WalletInner<S: SecretManage = SecretManager> {
     // again, because sending transactions can change that
     pub(crate) last_synced: Mutex<u128>,
     pub(crate) default_sync_options: Mutex<SyncOptions>,
-    // 0 = not running, 1 = running, 2 = stopping
     pub(crate) background_syncing_status: (
         Arc<tokio::sync::watch::Sender<BackgroundSyncStatus>>,
         tokio::sync::watch::Receiver<BackgroundSyncStatus>,
