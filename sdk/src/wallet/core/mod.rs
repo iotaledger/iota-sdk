@@ -14,7 +14,7 @@ use crypto::keys::{
     bip44::Bip44,
 };
 use serde::{Deserialize, Serialize};
-use tokio::sync::{broadcast, Mutex, RwLock};
+use tokio::sync::{Mutex, RwLock};
 
 pub use self::builder::WalletBuilder;
 use self::operations::background_syncing::BackgroundSyncStatus;

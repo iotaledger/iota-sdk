@@ -3,11 +3,11 @@
 
 use std::time::Duration;
 
-use tokio::time::interval;
+use tokio::time::timeout;
 
 use crate::{
     client::secret::SecretManage,
-    wallet::{operations::syncing::SyncOptions, Wallet, task},
+    wallet::{operations::syncing::SyncOptions, task, Wallet},
 };
 
 /// The default interval for background syncing
@@ -17,7 +17,7 @@ pub(crate) const DEFAULT_BACKGROUNDSYNCING_INTERVAL: Duration = Duration::from_s
 pub(crate) enum BackgroundSyncStatus {
     NotRunning,
     Running,
-    Stopping
+    Stopping,
 }
 
 impl<S: 'static + SecretManage> Wallet<S>
@@ -29,24 +29,27 @@ where
     pub async fn start_background_syncing(
         &self,
         options: Option<SyncOptions>,
-        requested_interval: Option<Duration>,
+        interval: Option<Duration>,
     ) -> crate::wallet::Result<()> {
         log::debug!("[start_background_syncing]");
 
         let (tx_background_sync, mut rx_background_sync) = self.background_syncing_status.clone();
-       
+
         // stop existing process if running
         if *rx_background_sync.borrow() == BackgroundSyncStatus::Running {
             tx_background_sync.send(BackgroundSyncStatus::Stopping).ok();
         }
 
         log::debug!("[background_syncing]: waiting for the old process to stop");
-        rx_background_sync.wait_for(|status| *status != BackgroundSyncStatus::Stopping).await.ok();
+        rx_background_sync
+            .wait_for(|status| *status != BackgroundSyncStatus::Stopping)
+            .await
+            .ok();
 
         tx_background_sync.send(BackgroundSyncStatus::Running).ok();
 
         let wallet = self.clone();
-     
+
         task::spawn(async move {
             'outer: loop {
                 log::debug!("[background_syncing]: syncing wallet");
@@ -55,15 +58,19 @@ where
                     log::debug!("[background_syncing] error: {}", err)
                 }
 
-                // split interval syncing to seconds so stopping the process doesn't have to wait long
-                let seconds = requested_interval.unwrap_or(DEFAULT_BACKGROUNDSYNCING_INTERVAL).as_secs();
-                let mut interval = interval(Duration::from_secs(1));
-                for _ in 0..seconds {
-                    if *rx_background_sync.borrow() == BackgroundSyncStatus::Stopping  {
-                        log::debug!("[background_syncing]: stopping");
-                        break 'outer;
-                    }
-                    interval.tick().await;
+                let seconds = interval.unwrap_or(DEFAULT_BACKGROUNDSYNCING_INTERVAL);
+                let res = timeout(seconds, async {
+                    rx_background_sync
+                        .wait_for(|status| *status == BackgroundSyncStatus::Stopping)
+                        .await
+                        .is_ok()
+                })
+                .await;
+
+                // If true it means rx_background_sync changed to BackgroundSyncStatus::Stopping
+                if Ok(true) == res {
+                    log::debug!("[background_syncing]: stopping");
+                    break 'outer;
                 }
             }
             tx_background_sync.send(BackgroundSyncStatus::NotRunning).ok();
@@ -75,7 +82,10 @@ where
     /// Request to stop the background syncing of the wallet
     pub fn request_stop_background_syncing(&self) {
         log::debug!("[request_stop_background_syncing]");
-        self.background_syncing_status.0.send(BackgroundSyncStatus::Stopping).ok();
+        self.background_syncing_status
+            .0
+            .send(BackgroundSyncStatus::Stopping)
+            .ok();
     }
 
     /// Stop the background syncing of the wallet
@@ -88,12 +98,15 @@ where
         if *rx_background_sync.borrow() == BackgroundSyncStatus::NotRunning {
             return Ok(());
         }
-        
+
         // send stop request
         self.request_stop_background_syncing();
 
         // wait until it stopped
-        rx_background_sync.wait_for(|status| *status == BackgroundSyncStatus::NotRunning).await.ok();
+        rx_background_sync
+            .wait_for(|status| *status == BackgroundSyncStatus::NotRunning)
+            .await
+            .ok();
 
         Ok(())
     }
