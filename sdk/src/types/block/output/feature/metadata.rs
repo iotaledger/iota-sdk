@@ -125,12 +125,14 @@ impl core::fmt::Display for MetadataFeature {
 
 impl core::fmt::Debug for MetadataFeature {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        let dbg_map: BTreeMap<&str, String> = self
-            .0
-            .iter()
-            .map(|(k, v)| (alloc::str::from_utf8(k).unwrap(), prefix_hex::encode(v.as_ref())))
-            .collect();
-        write!(f, "MetadataFeature({dbg_map:?})")
+        write!(
+            f,
+            "MetadataFeature({:?})",
+            self.0
+                .iter()
+                .map(|(k, v)| (alloc::str::from_utf8(k).unwrap(), prefix_hex::encode(v.as_ref())))
+                .collect::<BTreeMap<&str, String>>()
+        )
     }
 }
 
@@ -517,14 +519,18 @@ pub(crate) mod dto {
 
     impl From<&MetadataFeature> for MetadataFeatureDto {
         fn from(value: &MetadataFeature) -> Self {
-            let mut entries = BTreeMap::new();
-            for (k, v) in value.0.iter() {
-                entries.insert(
-                    // Safe to unwrap, keys must be ascii
-                    alloc::str::from_utf8(k.as_ref()).expect("invalid ascii").to_string(),
-                    prefix_hex::encode(v.as_ref()),
-                );
-            }
+            let entries = value
+                .0
+                .iter()
+                .map(|(k, v)| {
+                    (
+                        // Safe to unwrap, keys must be ascii
+                        alloc::str::from_utf8(k.as_ref()).expect("invalid ascii").to_string(),
+                        prefix_hex::encode(v.as_ref()),
+                    )
+                })
+                .collect::<BTreeMap<_, _>>();
+
             Self {
                 kind: MetadataFeature::KIND,
                 entries,
