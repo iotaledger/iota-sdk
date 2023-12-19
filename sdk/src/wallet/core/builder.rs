@@ -3,10 +3,10 @@
 
 #[cfg(feature = "storage")]
 use std::collections::HashSet;
-use std::sync::{atomic::AtomicUsize, Arc};
+use std::sync::Arc;
 
 use serde::Serialize;
-use tokio::sync::{Mutex, RwLock};
+use tokio::sync::{Mutex, RwLock, broadcast};
 
 use super::operations::storage::SaveLoadWallet;
 #[cfg(feature = "events")]
@@ -249,7 +249,7 @@ where
         let wallet_inner = WalletInner {
             default_sync_options: Mutex::new(SyncOptions::default()),
             last_synced: Mutex::new(0),
-            background_syncing_status: AtomicUsize::new(0),
+            background_syncing_status: broadcast::channel(16),
             client,
             secret_manager: self.secret_manager.expect("make WalletInner::secret_manager optional?"),
             #[cfg(feature = "events")]

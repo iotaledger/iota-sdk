@@ -1,17 +1,24 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use std::{sync::atomic::Ordering, time::Duration};
+use std::time::Duration;
 
-use tokio::time::sleep;
+use tokio::time::interval;
 
 use crate::{
     client::secret::SecretManage,
-    wallet::{operations::syncing::SyncOptions, Wallet},
+    wallet::{operations::syncing::SyncOptions, Wallet, task},
 };
 
 /// The default interval for background syncing
 pub(crate) const DEFAULT_BACKGROUNDSYNCING_INTERVAL: Duration = Duration::from_secs(7);
+
+#[derive(Clone, PartialEq)]
+pub(crate) enum BackgroundSyncStatus {
+    NotRunning,
+    Running,
+    Stopping
+}
 
 impl<S: 'static + SecretManage> Wallet<S>
 where
@@ -20,54 +27,47 @@ where
 {
     /// Start the background syncing process for the wallet, default interval is 7 seconds
     pub async fn start_background_syncing(
-        &self,
+        &mut self,
         options: Option<SyncOptions>,
-        interval: Option<Duration>,
+        requested_interval: Option<Duration>,
     ) -> crate::wallet::Result<()> {
         log::debug!("[start_background_syncing]");
+
+        let (notify_background_sync, mut receive_bakground_sync) = (self.background_syncing_status.0.clone(), self.background_syncing_status.1.resubscribe());
+       
         // stop existing process if running
-        if self.background_syncing_status.load(Ordering::Relaxed) == 1 {
-            self.background_syncing_status.store(2, Ordering::Relaxed);
-        };
-        while self.background_syncing_status.load(Ordering::Relaxed) == 2 {
+        if receive_bakground_sync.try_recv() == Ok(BackgroundSyncStatus::Running) {
+            notify_background_sync.send(BackgroundSyncStatus::Stopping).ok();
+        }
+        while receive_bakground_sync.recv().await == Ok(BackgroundSyncStatus::Stopping) {
             log::debug!("[background_syncing]: waiting for the old process to stop");
-            sleep(Duration::from_secs(1)).await;
         }
 
-        self.background_syncing_status.store(1, Ordering::Relaxed);
+        notify_background_sync.send(BackgroundSyncStatus::Running).ok();
+
         let wallet = self.clone();
-        let _background_syncing = std::thread::spawn(move || {
-            #[cfg(not(target_family = "wasm"))]
-            let runtime = tokio::runtime::Builder::new_multi_thread()
-                .enable_all()
-                .build()
-                .unwrap();
-            #[cfg(target_family = "wasm")]
-            let runtime = tokio::runtime::Builder::new_current_thread()
-                .enable_all()
-                .build()
-                .unwrap();
-            runtime.block_on(async {
-                'outer: loop {
-                    log::debug!("[background_syncing]: syncing wallet");
+     
+        task::spawn(async move {
+            'outer: loop {
+                log::debug!("[background_syncing]: syncing wallet");
 
-                    if let Err(err) = wallet.sync(options.clone()).await {
-                        log::debug!("[background_syncing] error: {}", err)
-                    }
-
-                    // split interval syncing to seconds so stopping the process doesn't have to wait long
-                    let seconds = interval.unwrap_or(DEFAULT_BACKGROUNDSYNCING_INTERVAL).as_secs();
-                    for _ in 0..seconds {
-                        if wallet.background_syncing_status.load(Ordering::Relaxed) == 2 {
-                            log::debug!("[background_syncing]: stopping");
-                            break 'outer;
-                        }
-                        sleep(Duration::from_secs(1)).await;
-                    }
+                if let Err(err) = wallet.sync(options.clone()).await {
+                    log::debug!("[background_syncing] error: {}", err)
                 }
-                wallet.background_syncing_status.store(0, Ordering::Relaxed);
-                log::debug!("[background_syncing]: stopped");
-            });
+
+                // split interval syncing to seconds so stopping the process doesn't have to wait long
+                let seconds = requested_interval.unwrap_or(DEFAULT_BACKGROUNDSYNCING_INTERVAL).as_secs();
+                let mut interval = interval(Duration::from_secs(1));
+                for _ in 0..seconds {
+                    if receive_bakground_sync.try_recv() == Ok(BackgroundSyncStatus::Stopping)  {
+                        log::debug!("[background_syncing]: stopping");
+                        break 'outer;
+                    }
+                    interval.tick().await;
+                }
+            }
+            notify_background_sync.send(BackgroundSyncStatus::NotRunning).ok();
+            log::debug!("[background_syncing]: stopped");
         });
         Ok(())
     }
@@ -75,19 +75,18 @@ where
     /// Stop the background syncing of the wallet
     pub async fn stop_background_syncing(&self) -> crate::wallet::Result<()> {
         log::debug!("[stop_background_syncing]");
+
+        let (notify_background_sync, mut receive_bakground_sync) = (self.background_syncing_status.0.clone(), self.background_syncing_status.1.resubscribe());
+
         // immediately return if not running
-        if self.background_syncing_status.load(Ordering::Relaxed) == 0 {
+        if receive_bakground_sync.try_recv() == Ok(BackgroundSyncStatus::NotRunning) {
             return Ok(());
         }
         // send stop request
-        self.background_syncing_status.store(2, Ordering::Relaxed);
+        notify_background_sync.send(BackgroundSyncStatus::Stopping).ok();
+
         // wait until it stopped
-        while self.background_syncing_status.load(Ordering::Relaxed) != 0 {
-            #[cfg(target_family = "wasm")]
-            gloo_timers::future::TimeoutFuture::new(10).await;
-            #[cfg(not(target_family = "wasm"))]
-            tokio::time::sleep(std::time::Duration::from_millis(10)).await;
-        }
+        while receive_bakground_sync.recv().await != Ok(BackgroundSyncStatus::Stopping) { }
         Ok(())
     }
 }

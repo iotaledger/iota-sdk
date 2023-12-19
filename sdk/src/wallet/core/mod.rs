@@ -6,7 +6,7 @@ pub(crate) mod operations;
 
 use std::{
     collections::{HashMap, HashSet},
-    sync::{atomic::AtomicUsize, Arc},
+    sync::Arc,
 };
 
 use crypto::keys::{
@@ -14,9 +14,10 @@ use crypto::keys::{
     bip44::Bip44,
 };
 use serde::{Deserialize, Serialize};
-use tokio::sync::{Mutex, RwLock};
+use tokio::sync::{Mutex, RwLock, broadcast};
 
 pub use self::builder::WalletBuilder;
+use self::operations::background_syncing::BackgroundSyncStatus;
 use super::types::{TransactionWithMetadata, TransactionWithMetadataDto};
 #[cfg(feature = "events")]
 use crate::wallet::events::{
@@ -85,7 +86,7 @@ pub struct WalletInner<S: SecretManage = SecretManager> {
     pub(crate) last_synced: Mutex<u128>,
     pub(crate) default_sync_options: Mutex<SyncOptions>,
     // 0 = not running, 1 = running, 2 = stopping
-    pub(crate) background_syncing_status: AtomicUsize,
+    pub(crate) background_syncing_status: (broadcast::Sender<BackgroundSyncStatus>, broadcast::Receiver<BackgroundSyncStatus>),
     pub(crate) client: Client,
     // TODO: make this optional?
     pub(crate) secret_manager: Arc<RwLock<S>>,
