@@ -59,7 +59,9 @@ impl MetadataFeature {
 
     /// Creates a new [`MetadataFeature`].
     #[inline(always)]
-    pub fn new(data: BTreeMap<Vec<u8>, Vec<u8>>) -> Result<Self, Error> {
+    pub fn new(data: impl Into<BTreeMap<Vec<u8>, Vec<u8>>>) -> Result<Self, Error> {
+        let data = data.into();
+
         for key in data.keys() {
             if !key.is_ascii() {
                 return Err(Error::NonAsciiMetadataKey(key.to_vec()));
@@ -236,7 +238,7 @@ pub(crate) mod irc_27 {
         }
 
         pub fn to_bytes(&self) -> Vec<u8> {
-            // Unwrap: Safe because this struct is known to be valid
+            // Unwrap: safe because this struct is known to be valid.
             serde_json::to_string(self).unwrap().into_bytes()
         }
     }
@@ -245,7 +247,7 @@ pub(crate) mod irc_27 {
         type Error = Error;
 
         fn try_from(value: Irc27Metadata) -> Result<Self, Error> {
-            Self::new(value.to_bytes())
+            Self::new([("irc-27".as_bytes().to_vec(), value.to_bytes())])
         }
     }
 
@@ -411,7 +413,7 @@ pub(crate) mod irc_30 {
         }
 
         pub fn to_bytes(&self) -> Vec<u8> {
-            // Unwrap: Safe because this struct is known to be valid
+            // Unwrap: safe because this struct is known to be valid.
             serde_json::to_string(self).unwrap().into_bytes()
         }
     }
@@ -420,7 +422,7 @@ pub(crate) mod irc_30 {
         type Error = Error;
 
         fn try_from(value: Irc30Metadata) -> Result<Self, Error> {
-            Self::new(value.to_bytes())
+            Self::new([("irc-30".as_bytes().to_vec(), value.to_bytes())])
         }
     }
 
