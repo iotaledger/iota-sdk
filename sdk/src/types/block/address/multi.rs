@@ -10,7 +10,7 @@ use packable::{bounded::BoundedU8, prefix::BoxedSlicePrefix, Packable, PackableE
 
 use crate::types::block::{address::Address, output::StorageScore, Error};
 
-/// An address with an assigned weight.
+/// An [`Address`] with an assigned weight.
 #[derive(Clone, Debug, Display, Eq, PartialEq, Ord, PartialOrd, Hash, From, AsRef, Deref, Packable)]
 #[display(fmt = "{address}")]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -70,9 +70,8 @@ fn verify_weight<const VERIFY: bool>(weight: &u8) -> Result<(), Error> {
 pub(crate) type WeightedAddressCount =
     BoundedU8<{ *MultiAddress::ADDRESSES_COUNT.start() }, { *MultiAddress::ADDRESSES_COUNT.end() }>;
 
-/// An address that consists of addresses with weights and a threshold value.
-/// The Multi Address can be unlocked if the cumulative weight of all unlocked addresses is equal to or exceeds the
-/// threshold.
+/// An [`Address`] that consists of addresses with weights and a threshold value.
+/// It can be unlocked if the cumulative weight of all unlocked addresses is equal to or exceeds the threshold.
 #[derive(Clone, Debug, Deref, Eq, PartialEq, Ord, PartialOrd, Hash, Packable)]
 #[packable(unpack_error = Error)]
 #[packable(verify_with = verify_multi_address)]
