@@ -39,12 +39,7 @@ pub async fn create_client(options: String) -> Result<ClientMethodHandler, JsErr
 /// Necessary for compatibility with the node.js bindings.
 #[wasm_bindgen(js_name = destroyClient)]
 pub async fn destroy_client(method_handler: &ClientMethodHandler) -> Result<(), JsError> {
-    let mut lock = method_handler.0.write().await;
-    if let Some(_) = &*lock {
-        *lock = None;
-    }
-
-    // If None, was already destroyed
+    method_handler.0.write().await.take();
     Ok(())
 }
 
@@ -56,7 +51,7 @@ pub async fn call_client_method(method_handler: &ClientMethodHandler, method: St
     let method = serde_json::from_str(&method).map_err(map_err)?;
     match &*method_handler.0.read().await {
         Some(client) => {
-            let response = rust_call_client_method(&client, method).await;
+            let response = rust_call_client_method(client, method).await;
             let ser = serde_json::to_string(&response)?;
             match response {
                 Response::Error(_) | Response::Panic(_) => Err(JsError::new(&ser)),
