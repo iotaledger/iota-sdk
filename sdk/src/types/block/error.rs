@@ -1,7 +1,10 @@
 // Copyright 2020-2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use alloc::string::{FromUtf8Error, String};
+use alloc::{
+    string::{FromUtf8Error, String},
+    vec::Vec,
+};
 use core::{convert::Infallible, fmt};
 
 use bech32::primitives::hrp::Error as Bech32HrpError;

@@ -1,7 +1,11 @@
 // Copyright 2021-2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use alloc::{collections::BTreeMap, string::String, vec::Vec};
+use alloc::{
+    collections::BTreeMap,
+    string::{String, ToString},
+    vec::Vec,
+};
 use core::ops::{Deref, RangeInclusive};
 
 use packable::{
@@ -239,6 +243,7 @@ pub(crate) mod irc_27 {
 
     impl TryFrom<Irc27Metadata> for MetadataFeature {
         type Error = Error;
+
         fn try_from(value: Irc27Metadata) -> Result<Self, Error> {
             Self::new(value.to_bytes())
         }
@@ -413,6 +418,7 @@ pub(crate) mod irc_30 {
 
     impl TryFrom<Irc30Metadata> for MetadataFeature {
         type Error = Error;
+
         fn try_from(value: Irc30Metadata) -> Result<Self, Error> {
             Self::new(value.to_bytes())
         }
@@ -461,7 +467,7 @@ pub(crate) mod irc_30 {
 
 #[cfg(feature = "serde")]
 pub(crate) mod dto {
-    use alloc::collections::BTreeMap;
+    use alloc::{collections::BTreeMap, format};
 
     use serde::{de, Deserialize, Deserializer, Serialize};
     use serde_json::Value;
