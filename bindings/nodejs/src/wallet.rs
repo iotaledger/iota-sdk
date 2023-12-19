@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use std::sync::Arc;
+use std::{sync::Arc, ops::{Deref, DerefMut}};
 
 use iota_sdk_bindings_core::{
     call_wallet_method as rust_call_wallet_method,
@@ -16,26 +16,52 @@ use crate::{
     build_js_error, client::ClientMethodHandler, destroyed_err, secret_manager::SecretManagerMethodHandler, NodejsError,
 };
 
-pub type WalletMethodHandler = Arc<RwLock<Option<Wallet>>>;
+pub struct WalletMethodHandlerInner(Option<Wallet>);
+
+impl Drop for WalletMethodHandlerInner {
+    fn drop(&mut self) {
+        log::debug!("drop WalletMethodHandlerInner");
+        // Request to stop the background syncing silently if this wallet hasn't been destroyed yet
+        if let Some(wallet) = self.0.take() {
+            wallet.request_stop_background_syncing();
+        }
+    }
+}
+
+impl Deref for WalletMethodHandlerInner {
+    type Target = Option<Wallet>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl DerefMut for WalletMethodHandlerInner {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
+    }
+}
+
+pub type WalletMethodHandler = Arc<RwLock<WalletMethodHandlerInner>>;
 
 #[napi(js_name = "createWallet")]
 pub async fn create_wallet(options: String) -> Result<External<WalletMethodHandler>> {
     let wallet_options = serde_json::from_str::<WalletOptions>(&options).map_err(NodejsError::new)?;
     let wallet = wallet_options.build().await.map_err(NodejsError::new)?;
 
-    Ok(External::new(Arc::new(RwLock::new(Some(wallet)))))
+    Ok(External::new(Arc::new(RwLock::new(WalletMethodHandlerInner(Some(wallet))))))
 }
 
 #[napi(js_name = "destroyWallet")]
 pub async fn destroy_wallet(wallet: External<WalletMethodHandler>) {
-    *wallet.as_ref().write().await = None;
+    **wallet.as_ref().write().await = None;
 }
 
 #[napi(js_name = "callWalletMethod")]
 pub async fn call_wallet_method(wallet: External<WalletMethodHandler>, method: String) -> Result<String> {
     let method = serde_json::from_str::<WalletMethod>(&method).map_err(NodejsError::new)?;
 
-    match &*wallet.as_ref().read().await {
+    match &**wallet.as_ref().read().await {
         Some(wallet) => {
             let response = rust_call_wallet_method(wallet, method).await;
             match response {
@@ -58,7 +84,7 @@ pub async fn listen_wallet(
         validated_event_types.push(WalletEventType::try_from(event_type).map_err(NodejsError::new)?);
     }
 
-    match &*wallet.as_ref().read().await {
+    match &**wallet.as_ref().read().await {
         Some(wallet) => {
             wallet
                 .listen(validated_event_types, move |event_data| {
@@ -78,7 +104,7 @@ pub async fn listen_wallet(
 
 #[napi(js_name = "getClient")]
 pub async fn get_client(wallet: External<WalletMethodHandler>) -> Result<External<ClientMethodHandler>> {
-    if let Some(wallet) = &*wallet.as_ref().read().await {
+    if let Some(wallet) = &**wallet.as_ref().read().await {
         Ok(External::new(Arc::new(RwLock::new(Some(wallet.client().clone())))))
     } else {
         Err(destroyed_err("Wallet"))
@@ -87,7 +113,7 @@ pub async fn get_client(wallet: External<WalletMethodHandler>) -> Result<Externa
 
 #[napi(js_name = "getSecretManager")]
 pub async fn get_secret_manager(wallet: External<WalletMethodHandler>) -> Result<External<SecretManagerMethodHandler>> {
-    if let Some(wallet) = &*wallet.as_ref().read().await {
+    if let Some(wallet) = &**wallet.as_ref().read().await {
         Ok(External::new(wallet.get_secret_manager().clone()))
     } else {
         Err(destroyed_err("Wallet"))

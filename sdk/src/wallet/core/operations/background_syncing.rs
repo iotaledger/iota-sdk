@@ -72,19 +72,24 @@ where
         Ok(())
     }
 
+    /// Request to stop the background syncing of the wallet
+    pub fn request_stop_background_syncing(&self) {
+        log::debug!("[request_stop_background_syncing]");
+        self.background_syncing_status.0.send(BackgroundSyncStatus::Stopping).ok();
+    }
+
     /// Stop the background syncing of the wallet
     pub async fn stop_background_syncing(&self) -> crate::wallet::Result<()> {
         log::debug!("[stop_background_syncing]");
 
-        let (notify_background_sync, mut receive_bakground_sync) = (self.background_syncing_status.0.clone(), self.background_syncing_status.1.resubscribe());
+        let mut receive_bakground_sync = self.background_syncing_status.1.resubscribe();
 
         // immediately return if not running
         if receive_bakground_sync.try_recv() == Ok(BackgroundSyncStatus::NotRunning) {
             return Ok(());
         }
         // send stop request
-        notify_background_sync.send(BackgroundSyncStatus::Stopping).ok();
-
+        self.request_stop_background_syncing();
         // wait until it stopped
         while receive_bakground_sync.recv().await != Ok(BackgroundSyncStatus::Stopping) { }
         Ok(())
