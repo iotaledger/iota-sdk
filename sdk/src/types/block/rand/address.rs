@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use crate::types::block::{
-    address::{AccountAddress, Address, AnchorAddress, Ed25519Address, NftAddress},
+    address::{AccountAddress, Address, AnchorAddress, Ed25519Address, NftAddress, ImplicitAccountCreationAddress, RestrictedAddress, MultiAddress, AddressCapabilities, WeightedAddress, AddressCapabilityFlag},
     output::{AccountId, AnchorId, NftId},
-    rand::{bytes::rand_bytes_array, number::rand_number},
+    rand::{bytes::rand_bytes_array, number::rand_number}, capabilities::CapabilityFlag,
 };
 
 /// Generates a random Ed25519 address.
@@ -25,6 +25,26 @@ pub fn rand_nft_address() -> NftAddress {
 /// Generates a random anchor address.
 pub fn rand_anchor_address() -> AnchorAddress {
     AnchorAddress::new(AnchorId::from(rand_bytes_array()))
+}
+
+/// Generates a random implicit address.
+pub fn rand_implicit_address() -> ImplicitAccountCreationAddress {
+    ImplicitAccountCreationAddress::new(*rand_ed25519_address())
+}
+
+/// Generates a random restricted address.
+pub fn rand_restricted_address() -> RestrictedAddress {
+    RestrictedAddress::new(rand_address()).unwrap().with_allowed_capabilities(AddressCapabilities::all())
+}
+
+/// Generates a random Multi address.
+pub fn rand_multi_address() -> MultiAddress {
+    MultiAddress::new([rand_weighted_address()], 1).unwrap()
+}
+
+/// Generates a random Multi address.
+pub fn rand_weighted_address() -> WeightedAddress {
+    WeightedAddress::new(rand_address(), 1).unwrap()
 }
 
 // TODO handle all address kinds
