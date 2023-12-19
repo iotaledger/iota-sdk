@@ -53,17 +53,22 @@ async fn main() -> Result<()> {
             .clone()
             .add_immutable_feature(IssuerFeature::new(address))
             .finish_output()?,
-        // TODO: enable again when MetadataFeature is cleared up
-        // // with metadata feature block
-        // nft_output_builder
-        //     .clone()
-        //     .add_feature(MetadataFeature::new("Hello, World!")?)
-        //     .finish_output()?,
-        // // with immutable metadata feature block
-        // nft_output_builder
-        //     .clone()
-        //     .add_immutable_feature(MetadataFeature::new("Hello, World!")?)
-        //     .finish_output()?,
+        // with metadata feature block
+        nft_output_builder
+            .clone()
+            .add_feature(MetadataFeature::new(std::collections::BTreeMap::from_iter(vec![(
+                b"Hello".to_vec(),
+                b"World!".to_vec(),
+            )]))?)
+            .finish_output()?,
+        // with immutable metadata feature block
+        nft_output_builder
+            .clone()
+            .add_immutable_feature(MetadataFeature::new(std::collections::BTreeMap::from_iter(vec![(
+                b"Hello".to_vec(),
+                b"World!".to_vec(),
+            )]))?)
+            .finish_output()?,
         // with tag feature
         nft_output_builder
             .add_feature(TagFeature::new("Hello, World!")?)

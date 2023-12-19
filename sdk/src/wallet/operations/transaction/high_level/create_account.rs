@@ -11,7 +11,6 @@ use crate::{
             feature::MetadataFeature, unlock_condition::AddressUnlockCondition, AccountId, AccountOutputBuilder, Output,
         },
     },
-    utils::serde::option_prefix_hex_bytes,
     wallet::{
         operations::transaction::TransactionOptions,
         types::{OutputData, TransactionWithMetadata},
@@ -27,11 +26,9 @@ pub struct CreateAccountParams {
     /// ed25519 wallet address
     pub address: Option<Bech32Address>,
     /// Immutable account metadata
-    #[serde(default, with = "option_prefix_hex_bytes")]
-    pub immutable_metadata: Option<Vec<u8>>,
+    pub immutable_metadata: Option<MetadataFeature>,
     /// Account metadata
-    #[serde(default, with = "option_prefix_hex_bytes")]
-    pub metadata: Option<Vec<u8>>,
+    pub metadata: Option<MetadataFeature>,
 }
 
 impl<S: 'static + SecretManage> Wallet<S>
@@ -83,25 +80,24 @@ where
             None => self.address().await.inner().clone(),
         };
 
-        let account_output_builder =
+        let mut account_output_builder =
             AccountOutputBuilder::new_with_minimum_amount(storage_score_params, AccountId::null())
                 .with_foundry_counter(0)
                 .add_unlock_condition(AddressUnlockCondition::new(address.clone()));
-        // TODO: enable again when MetadataFeature is cleared up
-        // if let Some(CreateAccountParams {
-        //     immutable_metadata,
-        //     metadata,
-        //     ..
-        // }) = params
-        // {
-        //     if let Some(immutable_metadata) = immutable_metadata {
-        //         account_output_builder =
-        //             account_output_builder.add_immutable_feature(MetadataFeature::new(immutable_metadata)?);
-        //     }
-        //     if let Some(metadata) = metadata {
-        //         account_output_builder = account_output_builder.add_feature(MetadataFeature::new(metadata)?);
-        //     }
-        // }
+
+        if let Some(CreateAccountParams {
+            immutable_metadata,
+            metadata,
+            ..
+        }) = params
+        {
+            if let Some(immutable_metadata) = immutable_metadata {
+                account_output_builder = account_output_builder.add_immutable_feature(immutable_metadata);
+            }
+            if let Some(metadata) = metadata {
+                account_output_builder = account_output_builder.add_feature(metadata);
+            }
+        }
 
         let outputs = [account_output_builder.finish_output()?];
 

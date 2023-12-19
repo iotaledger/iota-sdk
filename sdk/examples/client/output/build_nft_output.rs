@@ -63,12 +63,16 @@ async fn main() -> Result<()> {
     let nft_output = NftOutputBuilder::new_with_minimum_amount(storage_score_params, NftId::null())
         .add_unlock_condition(AddressUnlockCondition::new(address.clone()))
         .add_feature(SenderFeature::new(address.clone()))
-        // TODO: enable again when MetadataFeature is cleared up
-        // .add_feature(MetadataFeature::new(MUTABLE_METADATA)?)
+        .add_feature(MetadataFeature::new(std::collections::BTreeMap::from_iter(vec![(
+            "mutable".as_bytes().to_vec(),
+            MUTABLE_METADATA.as_bytes().to_vec(),
+        )]))?)
         .add_feature(TagFeature::new(TAG)?)
         .add_immutable_feature(IssuerFeature::new(address))
-        // TODO: enable again when MetadataFeature is cleared up
-        // .add_immutable_feature(MetadataFeature::new(tip_27_immutable_metadata)?)
+        .add_immutable_feature(MetadataFeature::new(std::collections::BTreeMap::from_iter(vec![(
+            "IRC27".as_bytes().to_vec(),
+            tip_27_immutable_metadata.as_bytes().to_vec(),
+        )]))?)
         .finish_output()?;
 
     println!("{nft_output:#?}");

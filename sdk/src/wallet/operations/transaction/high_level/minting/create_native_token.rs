@@ -1,6 +1,8 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use alloc::collections::BTreeMap;
+
 use primitive_types::U256;
 use serde::{Deserialize, Serialize};
 
@@ -169,11 +171,12 @@ where
                         account_id,
                     )));
 
-                    // TODO: enable again when MetadataFeature is cleared up
-                    // if let Some(foundry_metadata) = params.foundry_metadata {
-                    //     foundry_builder =
-                    // foundry_builder.add_immutable_feature(MetadataFeature::new(foundry_metadata)?)
-                    // }
+                    if let Some(foundry_metadata) = params.foundry_metadata {
+                        foundry_builder = foundry_builder.add_immutable_feature(MetadataFeature::new(
+                            // TODO: what hardcoded key or let user provide the full metadata?
+                            BTreeMap::from_iter(vec![(b"foundry".to_vec(), foundry_metadata)]),
+                        )?);
+                    }
 
                     foundry_builder.finish_output()?
                 }, // Native Tokens will be added automatically in the remainder output in try_select_inputs()

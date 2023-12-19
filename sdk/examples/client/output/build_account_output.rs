@@ -49,11 +49,15 @@ async fn main() -> Result<()> {
     // Account id needs to be null the first time
     let account_output = AccountOutputBuilder::new_with_minimum_amount(storage_score_params, AccountId::null())
         .add_feature(SenderFeature::new(address.clone()))
-        // TODO: enable again when MetadataFeature is cleared up
-        // .add_feature(MetadataFeature::new(metadata)?)
+        .add_feature(MetadataFeature::new(std::collections::BTreeMap::from_iter(vec![(
+            metadata.to_vec(),
+            metadata.to_vec(),
+        )]))?)
         .add_immutable_feature(IssuerFeature::new(address.clone()))
-        // TODO: enable again when MetadataFeature is cleared up
-        // .add_immutable_feature(MetadataFeature::new(metadata)?)
+        .add_immutable_feature(MetadataFeature::new(std::collections::BTreeMap::from_iter(vec![(
+            metadata.to_vec(),
+            metadata.to_vec(),
+        )]))?)
         .add_unlock_condition(AddressUnlockCondition::new(address))
         .finish_output()?;
 

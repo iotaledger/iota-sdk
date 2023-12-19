@@ -6,7 +6,7 @@ use std::str::FromStr;
 use iota_sdk::{
     types::block::{
         address::{Address, Bech32Address, ToBech32Ext},
-        output::{BasicOutput, MinimumOutputAmount, NativeToken, NftId, TokenId},
+        output::{feature::MetadataFeature, BasicOutput, MinimumOutputAmount, NativeToken, NftId, TokenId},
         protocol::CommittableAgeRange,
         slot::SlotIndex,
     },
@@ -551,10 +551,16 @@ async fn prepare_nft_output_features_update() -> Result<()> {
     let nft_options = [MintNftParams::new()
         .with_address(wallet_address.clone())
         .with_sender(wallet_address.clone())
-        .with_metadata(b"some nft metadata".to_vec())
+        .with_metadata(MetadataFeature::new(std::collections::BTreeMap::from_iter(vec![(
+            vec![42],
+            vec![42],
+        )]))?)
         .with_tag(b"some nft tag".to_vec())
         .with_issuer(wallet_address.clone())
-        .with_immutable_metadata(b"some immutable nft metadata".to_vec())];
+        .with_immutable_metadata(MetadataFeature::new(std::collections::BTreeMap::from_iter(vec![(
+            vec![42],
+            vec![42],
+        )]))?)];
 
     let transaction = wallet.mint_nfts(nft_options, None).await.unwrap();
     wallet
@@ -589,12 +595,28 @@ async fn prepare_nft_output_features_update() -> Result<()> {
     assert_eq!(nft.address(), wallet.address().await.inner());
     assert!(nft.features().sender().is_none());
     assert!(nft.features().tag().is_none());
-    // TODO: enable again when MetadataFeature is cleared up
-    // assert_eq!(nft.features().metadata().unwrap().data(), &[42]);
-    // assert_eq!(
-    //     nft.immutable_features().metadata().unwrap().data(),
-    //     b"some immutable nft metadata"
-    // );
+    assert_eq!(
+        nft.features()
+            .metadata()
+            .unwrap()
+            .data()
+            .first_key_value()
+            .unwrap()
+            .1
+            .to_vec(),
+        [42]
+    );
+    assert_eq!(
+        nft.immutable_features()
+            .metadata()
+            .unwrap()
+            .data()
+            .first_key_value()
+            .unwrap()
+            .1
+            .to_vec(),
+        [42]
+    );
     assert_eq!(
         nft.immutable_features().issuer().unwrap().address(),
         wallet.address().await.inner()
@@ -828,10 +850,16 @@ async fn prepare_existing_nft_output_gift() -> Result<()> {
     let nft_options = [MintNftParams::new()
         .with_address(address.clone())
         .with_sender(address.clone())
-        .with_metadata(b"some nft metadata".to_vec())
+        .with_metadata(MetadataFeature::new(std::collections::BTreeMap::from_iter(vec![(
+            vec![42],
+            vec![42],
+        )]))?)
         .with_tag(b"some nft tag".to_vec())
         .with_issuer(address.clone())
-        .with_immutable_metadata(b"some immutable nft metadata".to_vec())];
+        .with_immutable_metadata(MetadataFeature::new(std::collections::BTreeMap::from_iter(vec![(
+            vec![43],
+            vec![43],
+        )]))?)];
 
     let transaction = wallet.mint_nfts(nft_options, None).await.unwrap();
     wallet
@@ -866,11 +894,17 @@ async fn prepare_existing_nft_output_gift() -> Result<()> {
     assert_eq!(nft.amount(), 52300);
     assert_eq!(nft.address(), wallet.address().await.inner());
     assert!(nft.features().is_empty());
-    // TODO: enable again when MetadataFeature is cleared up
-    // assert_eq!(
-    //     nft.immutable_features().metadata().unwrap().data(),
-    //     b"some immutable nft metadata"
-    // );
+    assert_eq!(
+        nft.immutable_features()
+            .metadata()
+            .unwrap()
+            .data()
+            .first_key_value()
+            .unwrap()
+            .1
+            .to_vec(),
+        [43]
+    );
     assert_eq!(
         nft.immutable_features().issuer().unwrap().address(),
         wallet.address().await.inner()

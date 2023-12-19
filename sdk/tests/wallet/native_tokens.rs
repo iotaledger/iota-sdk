@@ -110,20 +110,22 @@ async fn native_token_foundry_metadata() -> Result<()> {
         }))
         .await?;
     assert_eq!(balance.native_tokens().len(), 1);
-    // TODO: enable again when MetadataFeature is cleared up
-    // // Metadata should exist and be the same
-    // assert_eq!(
-    //     balance
-    //         .native_tokens()
-    //         .iter()
-    //         .find(|t| t.token_id() == &create_tx.token_id)
-    //         .unwrap()
-    //         .metadata()
-    //         .as_ref()
-    //         .unwrap()
-    //         .data(),
-    //     &foundry_metadata
-    // );
+    // Metadata should exist and be the same
+    assert_eq!(
+        balance
+            .native_tokens()
+            .iter()
+            .find(|t| t.token_id() == &create_tx.token_id)
+            .unwrap()
+            .metadata()
+            .as_ref()
+            .unwrap()
+            .data()
+            .get(&packable::prefix::BoxedSlicePrefix::try_from(b"foundry".to_vec().into_boxed_slice()).unwrap())
+            .unwrap()
+            .to_vec(),
+        foundry_metadata.to_vec()
+    );
 
     tear_down(storage_path)
 }

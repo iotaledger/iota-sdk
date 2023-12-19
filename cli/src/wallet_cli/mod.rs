@@ -13,8 +13,8 @@ use iota_sdk::{
     types::block::{
         address::{Bech32Address, ToBech32Ext},
         output::{
-            unlock_condition::AddressUnlockCondition, AccountId, BasicOutputBuilder, FoundryId, NativeToken,
-            NativeTokensBuilder, NftId, Output, OutputId, TokenId,
+            feature::MetadataFeature, unlock_condition::AddressUnlockCondition, AccountId, BasicOutputBuilder,
+            FoundryId, NativeToken, NativeTokensBuilder, NftId, Output, OutputId, TokenId,
         },
         payload::signed_transaction::TransactionId,
         slot::SlotIndex,
@@ -702,13 +702,23 @@ pub async fn mint_nft_command(
         None
     };
 
-    let nft_options = MintNftParams::new()
+    let mut nft_options = MintNftParams::new()
         .with_address(address)
-        .with_immutable_metadata(immutable_metadata)
-        .with_metadata(metadata)
         .with_tag(tag)
         .with_sender(sender)
         .with_issuer(issuer);
+    if let Some(metadata) = metadata {
+        nft_options = nft_options.with_metadata(MetadataFeature::new(std::collections::BTreeMap::from_iter(vec![(
+            metadata.clone(),
+            metadata,
+        )]))?);
+    }
+    if let Some(immutable_metadata) = immutable_metadata {
+        nft_options = nft_options.with_immutable_metadata(MetadataFeature::new(
+            std::collections::BTreeMap::from_iter(vec![(immutable_metadata.clone(), immutable_metadata)]),
+        )?);
+    }
+
     let transaction = wallet.mint_nfts([nft_options], None).await?;
 
     println_log_info!(

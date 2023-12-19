@@ -23,7 +23,8 @@ use iota_sdk::{
     },
 };
 
-const METADATA: &str = "Hello, World!";
+const KEY: &'static [u8; 5] = b"Hello";
+const METADATA: &'static [u8; 6] = b"World!";
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -41,12 +42,14 @@ async fn main() -> Result<()> {
     let outputs = [
         // most simple output
         basic_output_builder.clone().finish_output()?,
-        // TODO: enable again when MetadataFeature is cleared up
-        // // with metadata feature block
-        // basic_output_builder
-        //     .clone()
-        //     .add_feature(MetadataFeature::new(METADATA)?)
-        //     .finish_output()?,
+        // with metadata feature block
+        basic_output_builder
+            .clone()
+            .add_feature(MetadataFeature::new(std::collections::BTreeMap::from_iter(vec![(
+                KEY.to_vec(),
+                METADATA.to_vec(),
+            )]))?)
+            .finish_output()?,
         // with storage deposit return
         basic_output_builder
             .clone()
@@ -65,7 +68,7 @@ async fn main() -> Result<()> {
         // with tag feature
         basic_output_builder
             .clone()
-            .add_feature(TagFeature::new(METADATA)?)
+            .add_feature(TagFeature::new(KEY)?)
             .finish_output()?,
         // with sender feature
         basic_output_builder
