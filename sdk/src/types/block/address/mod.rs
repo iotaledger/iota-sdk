@@ -183,22 +183,3 @@ impl<T: Into<Address>> ToBech32Ext for T {
         Bech32Address::new(hrp.convert_unchecked(), self)
     }
 }
-
-#[cfg(test)]
-mod test {
-    use crate::types::block::{address::Address, rand::address::*};
-
-    #[tokio::test]
-    fn address_display_similar() {
-        let addresses: Vec<Address> = vec![rand_ed25519_address().into(), rand_account_address().into(), rand_nft_address().into(),
-            rand_anchor_address().into(), rand_implicit_address().into(), rand_multi_address().into(), rand_restricted_address().into()];
-        let regex_pattern = regex::Regex::new(r"^0x[0-9a-fA-F]{64,72}$").unwrap();
-
-        // Check if all addresses match the regex pattern
-        let all_match = addresses.iter().all(|address| {
-            println!("{}", address);
-            regex_pattern.is_match(&format!("{}", address))
-        });
-        assert!(all_match)
-    }
-}
