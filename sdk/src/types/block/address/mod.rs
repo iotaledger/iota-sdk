@@ -186,11 +186,10 @@ impl<T: Into<Address>> ToBech32Ext for T {
 
 #[cfg(test)]
 mod test {
-    use crate::types::block::address::Address;
-    use crate::types::block::rand::address::*;
+    use crate::types::block::{address::Address, rand::address::*};
 
     #[tokio::test]
-    async fn address_display_similar() {
+    fn address_display_similar() {
         let addresses: Vec<Address> = vec![rand_ed25519_address().into(), rand_account_address().into(), rand_nft_address().into(),
             rand_anchor_address().into(), rand_implicit_address().into(), rand_multi_address().into(), rand_restricted_address().into()];
         let regex_pattern = regex::Regex::new(r"^0x[0-9a-fA-F]{64,72}$").unwrap();

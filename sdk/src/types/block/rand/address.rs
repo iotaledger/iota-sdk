@@ -42,7 +42,7 @@ pub fn rand_multi_address() -> MultiAddress {
     MultiAddress::new([rand_weighted_address()], 1).unwrap()
 }
 
-/// Generates a random Multi address.
+/// Generates a random weighted address.
 pub fn rand_weighted_address() -> WeightedAddress {
     WeightedAddress::new(rand_address(), 1).unwrap()
 }
