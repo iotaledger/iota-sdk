@@ -101,7 +101,7 @@ async fn output_preparation() -> Result<()> {
                 amount: 300000,
                 assets: None,
                 features: Some(Features {
-                    metadata: Some(prefix_hex::encode(b"Hello world")),
+                    metadata: Some(MetadataFeature::new([(b"data".to_vec(), b"Hello world".to_vec())]).unwrap()),
                     tag: Some(prefix_hex::encode(b"My Tag")),
                     issuer: None,
                     sender: None,
@@ -127,7 +127,7 @@ async fn output_preparation() -> Result<()> {
                 amount: 1,
                 assets: None,
                 features: Some(Features {
-                    metadata: Some(prefix_hex::encode(b"Hello world")),
+                    metadata: Some(MetadataFeature::new([(b"data".to_vec(), b"Hello world".to_vec())]).unwrap()),
                     tag: Some(prefix_hex::encode(b"My Tag")),
                     issuer: None,
                     sender: None,
@@ -156,7 +156,7 @@ async fn output_preparation() -> Result<()> {
                 amount: 12000,
                 assets: None,
                 features: Some(Features {
-                    metadata: Some(prefix_hex::encode(b"Hello world")),
+                    metadata: Some(MetadataFeature::new([(b"data".to_vec(), b"Hello world".to_vec())]).unwrap()),
                     tag: Some(prefix_hex::encode(b"My Tag")),
                     issuer: None,
                     sender: None,
@@ -182,7 +182,7 @@ async fn output_preparation() -> Result<()> {
                 amount: 1,
                 assets: None,
                 features: Some(Features {
-                    metadata: Some(prefix_hex::encode(b"Hello world")),
+                    metadata: Some(MetadataFeature::new([(b"data".to_vec(), b"Hello world".to_vec())]).unwrap()),
                     tag: Some(prefix_hex::encode(b"My Tag")),
                     issuer: None,
                     sender: None,
@@ -398,7 +398,9 @@ async fn output_preparation() -> Result<()> {
                 amount: 42600,
                 assets: None,
                 features: Some(Features {
-                    metadata: Some(prefix_hex::encode(b"Large metadata".repeat(100))),
+                    metadata: Some(
+                        MetadataFeature::new([(b"data".to_vec(), b"Large metadata".repeat(100).to_vec())]).unwrap(),
+                    ),
                     tag: Some(prefix_hex::encode(b"My Tag")),
                     issuer: None,
                     sender: None,
@@ -576,7 +578,7 @@ async fn prepare_nft_output_features_update() -> Result<()> {
                 amount: 1_000_000,
                 assets: Some(Assets { nft_id: Some(nft_id) }),
                 features: Some(Features {
-                    metadata: Some("0x2a".to_string()),
+                    metadata: Some(MetadataFeature::new([(b"data".to_vec(), b"0x2a".to_vec())]).unwrap()),
                     tag: None,
                     issuer: None,
                     sender: None,

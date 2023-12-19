@@ -13,7 +13,7 @@
 
 use iota_sdk::{
     types::block::output::{
-        feature::{Irc27Metadata, IssuerFeature, SenderFeature},
+        feature::{Irc27Metadata, IssuerFeature, MetadataFeature, SenderFeature},
         unlock_condition::AddressUnlockCondition,
         NftId, NftOutputBuilder,
     },
@@ -68,10 +68,10 @@ async fn main() -> Result<()> {
     let nft_params = [MintNftParams::new()
         .try_with_address(NFT1_OWNER_ADDRESS)?
         .try_with_sender(sender_address.clone())?
-        .with_metadata(NFT1_METADATA.as_bytes().to_vec())
+        .with_metadata(MetadataFeature::new([(b"data".to_vec(), NFT1_METADATA.as_bytes().to_vec())]).unwrap())
         .with_tag(NFT1_TAG.as_bytes().to_vec())
         .try_with_issuer(sender_address.clone())?
-        .with_immutable_metadata(metadata.to_bytes())];
+        .with_immutable_metadata(MetadataFeature::try_from(metadata).unwrap())];
 
     let transaction = wallet.mint_nfts(nft_params, None).await?;
     println!("Transaction sent: {}", transaction.transaction_id);

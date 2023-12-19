@@ -151,8 +151,10 @@ mod tests {
 
         let params_some_1 = CreateAccountParams {
             address: None,
-            immutable_metadata: Some(b"immutable_metadata".to_vec()),
-            metadata: Some(b"metadata".to_vec()),
+            immutable_metadata: Some(
+                MetadataFeature::new([(b"data".to_vec(), b"immutable_metadata".to_vec())]).unwrap(),
+            ),
+            metadata: Some(MetadataFeature::new([(b"data".to_vec(), b"metadata".to_vec())]).unwrap()),
         };
         let json_some = serde_json::to_string(&params_some_1).unwrap();
         let params_some_2 = serde_json::from_str(&json_some).unwrap();
