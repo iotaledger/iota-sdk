@@ -144,14 +144,12 @@ mod tests {
         assert_eq!(reward.as_reward().index(), 10);
 
         // Test wrong type returns error.
-        let reward_serialization_result: Result<ContextInput, _> = serde_json::from_str(
-            r#"
+        let reward_serialization_result: Result<ContextInput, _> = serde_json::from_value(serde_json::json!(
             {
                 "type": 0,
-                "index": 10 
+                "index": 10
             }
-            "#,
-        );
+        ));
         assert!(reward_serialization_result.is_err())
     }
 }
