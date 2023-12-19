@@ -56,7 +56,7 @@ fn json_packable_bech32() {
 
     assert_eq!(multi_address, multi_address_unpacked);
     assert_eq!(
-        format!("{}", multi_address.as_multi()),
+        multi_address.as_multi().to_string(),
         "0x00fc8b85f0bfed38130b4c6fe789a51167e4178624b6a01ba400eeb348c7462d",
     );
     assert_eq!(
