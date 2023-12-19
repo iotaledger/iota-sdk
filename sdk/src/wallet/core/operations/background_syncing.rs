@@ -27,7 +27,7 @@ where
 {
     /// Start the background syncing process for the wallet, default interval is 7 seconds
     pub async fn start_background_syncing(
-        &mut self,
+        &self,
         options: Option<SyncOptions>,
         requested_interval: Option<Duration>,
     ) -> crate::wallet::Result<()> {
