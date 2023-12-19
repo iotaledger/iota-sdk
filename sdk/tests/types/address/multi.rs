@@ -1,9 +1,31 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use iota_sdk::types::block::address::{Address, ToBech32Ext};
+use iota_sdk::types::block::{
+    address::{AccountAddress, Address, Ed25519Address, MultiAddress, ToBech32Ext, WeightedAddress},
+    output::AccountId,
+    rand::bytes::rand_bytes_array,
+};
 use packable::PackableExt;
 use pretty_assertions::assert_eq;
+
+#[test]
+fn ordered_by_packed_bytes() {
+    let mut bytes_1 = rand_bytes_array::<32>();
+    bytes_1[0] = 0;
+    let mut bytes_2 = bytes_1.clone();
+    bytes_2[0] = 1;
+
+    let weighted_1 = WeightedAddress::new(AccountAddress::from(AccountId::from(bytes_1)), 1).unwrap();
+    let weighted_2 = WeightedAddress::new(Ed25519Address::from(bytes_2), 1).unwrap();
+
+    let multi_1 = MultiAddress::new([weighted_1, weighted_2], 2).unwrap();
+    let bytes = multi_1.pack_to_vec();
+    let multi_2 = MultiAddress::unpack_verified(bytes, &()).unwrap();
+
+    assert!(multi_2.addresses()[0].address().is_ed25519());
+    assert!(multi_2.addresses()[1].address().is_account());
+}
 
 #[test]
 fn json_packable_bech32() {

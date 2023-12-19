@@ -6,12 +6,9 @@ use core::{fmt, ops::RangeInclusive};
 
 use derive_more::{AsRef, Deref, Display, From};
 use iterator_sorted::is_unique_sorted;
-use packable::{bounded::BoundedU8, prefix::BoxedSlicePrefix, Packable};
+use packable::{bounded::BoundedU8, prefix::BoxedSlicePrefix, Packable, PackableExt};
 
 use crate::types::block::{address::Address, output::StorageScore, Error};
-
-pub(crate) type WeightedAddressCount =
-    BoundedU8<{ *MultiAddress::ADDRESSES_COUNT.start() }, { *MultiAddress::ADDRESSES_COUNT.end() }>;
 
 /// An address with an assigned weight.
 #[derive(Clone, Debug, Display, Eq, PartialEq, Ord, PartialOrd, Hash, From, AsRef, Deref, Packable)]
@@ -29,7 +26,9 @@ pub struct WeightedAddress {
 
 impl WeightedAddress {
     /// Creates a new [`WeightedAddress`].
-    pub fn new(address: Address, weight: u8) -> Result<Self, Error> {
+    pub fn new(address: impl Into<Address>, weight: u8) -> Result<Self, Error> {
+        let address = address.into();
+
         verify_address::<true>(&address)?;
         verify_weight::<true>(&weight)?;
 
@@ -68,6 +67,9 @@ fn verify_weight<const VERIFY: bool>(weight: &u8) -> Result<(), Error> {
     }
 }
 
+pub(crate) type WeightedAddressCount =
+    BoundedU8<{ *MultiAddress::ADDRESSES_COUNT.start() }, { *MultiAddress::ADDRESSES_COUNT.end() }>;
+
 /// An address that consists of addresses with weights and a threshold value.
 /// The Multi Address can be unlocked if the cumulative weight of all unlocked addresses is equal to or exceeds the
 /// threshold.
@@ -96,8 +98,9 @@ impl MultiAddress {
     pub fn new(addresses: impl IntoIterator<Item = WeightedAddress>, threshold: u16) -> Result<Self, Error> {
         let mut addresses = addresses.into_iter().collect::<Box<[_]>>();
 
-        addresses.sort_by(|a, b| a.address().cmp(b.address()));
+        addresses.sort_by(|a, b| a.address().pack_to_vec().cmp(&b.address().pack_to_vec()));
 
+        verify_addresses::<true>(&addresses)?;
         verify_threshold::<true>(&threshold)?;
 
         let addresses = BoxedSlicePrefix::<WeightedAddress, WeightedAddressCount>::try_from(addresses)
@@ -124,7 +127,7 @@ impl MultiAddress {
 }
 
 fn verify_addresses<const VERIFY: bool>(addresses: &[WeightedAddress]) -> Result<(), Error> {
-    if VERIFY && !is_unique_sorted(addresses.iter().map(WeightedAddress::address)) {
+    if VERIFY && !is_unique_sorted(addresses.iter().map(|a| a.address.pack_to_vec())) {
         Err(Error::WeightedAddressesNotUniqueSorted)
     } else {
         Ok(())
