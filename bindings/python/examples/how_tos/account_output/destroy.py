@@ -20,6 +20,9 @@ balance = wallet.sync()
 # We try to destroy the first account in the account
 account_id = balance.accounts[0]
 
+if 'STRONGHOLD_PASSWORD' not in os.environ:
+    raise Exception(".env STRONGHOLD_PASSWORD is undefined, see .env.example")
+
 wallet.set_stronghold_password(os.environ["STRONGHOLD_PASSWORD"])
 
 # Send transaction.

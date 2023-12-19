@@ -9,16 +9,11 @@ from iota_sdk import Wallet, WalletOptions, Utils, SyncOptions, WalletSyncOption
 
 load_dotenv()
 
-for env_var in ['FAUCET_URL', 'WALLET_DB_PATH', 'EXPLORER_URL']:
-    if env_var not in os.environ:
-        raise Exception(f".env {env_var} is undefined, see .env.example")
-
 FAUCET_URL = os.environ.get(
     'FAUCET_URL', 'https://faucet.testnet.shimmer.network/api/enqueue')
 
 wallet = Wallet(WalletOptions(storage_path=os.environ.get('WALLET_DB_PATH')))
 balance = wallet.sync(None)
-print(f'{balance}')
 
 total_base_token_balance = balance.base_coin.total
 print(

@@ -19,11 +19,6 @@ async fn main() -> Result<()> {
     //  This example uses secrets in environment variables for simplicity which should not be done in production.
     dotenvy::dotenv().ok();
 
-    #[allow(clippy::single_element_loop)]
-    for var in ["MNEMONIC"] {
-        std::env::var(var).unwrap_or_else(|_| panic!(".env variable '{var}' is undefined, see .env.example"));
-    }
-
     let secret_manager = SecretManager::try_from_mnemonic(std::env::var("MNEMONIC").unwrap())?;
     let client_options = ClientOptions::new().with_node("https://api.testnet.shimmer.network")?;
 
@@ -37,7 +32,7 @@ async fn main() -> Result<()> {
 
     let implicit_account_creation_address = wallet.implicit_account_creation_address().await?;
 
-    println!("Fund the following address: {implicit_account_creation_address}");
+    println!("{implicit_account_creation_address}");
 
     Ok(())
 }
