@@ -27,7 +27,7 @@ console_error_panic_hook = { version = "0.1.7", default-features = false }
 js-sys = { version = "0.3.66", default-features = false, features = [] }
 log = { version = "0.4.20", default-features = false }
 serde_json = { version = "1.0.108", default-features = false }
-tokio = { version = "1.34.0", default-features = false, features = ["sync"] }
+tokio = { version = "1.35.0", default-features = false, features = ["sync"] }
 wasm-bindgen = { version = "0.2.89", default-features = false, features = [
     "spans",
     "std",
