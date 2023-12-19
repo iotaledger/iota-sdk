@@ -11,7 +11,7 @@
 //                 AddressUnlockCondition, GovernorAddressUnlockCondition, ImmutableAliasAddressUnlockCondition,
 //                 StateControllerAddressUnlockCondition, UnlockCondition,
 //             },
-//             AliasId, AccountOutputBuilder, FoundryId, FoundryOutputBuilder, NftId, NftOutputBuilder,
+//             AccountId, AccountOutputBuilder, FoundryId, FoundryOutputBuilder, NftId, NftOutputBuilder,
 // SimpleTokenScheme,             TokenScheme,
 //         },
 //     },
@@ -33,7 +33,7 @@
 
 //     let alias_output =
 //         AccountOutputBuilder::new_with_minimum_storage_deposit(*protocol_parameters.rent_structure(),
-// AliasId::null())             .with_state_metadata([1, 2, 3])
+// AccountId::null())             .with_state_metadata([1, 2, 3])
 //             .add_unlock_condition(StateControllerAddressUnlockCondition::new(address))
 //             .add_unlock_condition(GovernorAddressUnlockCondition::new(address))
 //             .finish_output(protocol_parameters.token_supply())?;
@@ -46,7 +46,7 @@
 //         .await?;
 
 //     let output_id_0 = get_alias_output_id(block.payload().unwrap())?;
-//     let output_id_1 = client.alias_output_id(AliasId::from(&output_id_0)).await?;
+//     let output_id_1 = client.alias_output_id(AccountId::from(&output_id_0)).await?;
 
 //     assert_eq!(output_id_0, output_id_1);
 
@@ -95,7 +95,7 @@
 
 //     let alias_output_0 =
 //         AccountOutputBuilder::new_with_minimum_storage_deposit(*protocol_parameters.rent_structure(),
-// AliasId::null())             .with_state_metadata([1, 2, 3])
+// AccountId::null())             .with_state_metadata([1, 2, 3])
 //             .add_unlock_condition(StateControllerAddressUnlockCondition::new(address))
 //             .add_unlock_condition(GovernorAddressUnlockCondition::new(address))
 //             .finish_output(protocol_parameters.token_supply())?;
@@ -107,15 +107,15 @@
 //         .finish()
 //         .await?;
 
-//     let alias_id = AliasId::from(&get_alias_output_id(block.payload().unwrap())?);
+//     let account_id = AccountId::from(&get_alias_output_id(block.payload().unwrap())?);
 
 //     let alias_output_1 = AccountOutputBuilder::from(alias_output_0.as_alias())
-//         .with_alias_id(alias_id)
+//         .with_account_id(account_id)
 //         .with_foundry_counter(alias_output_0.as_alias().foundry_counter() + 1)
 //         .finish_output(protocol_parameters.token_supply())?;
 
 //     let foundry_id = FoundryId::build(
-//         &AliasAddress::new(alias_id),
+//         &AliasAddress::new(account_id),
 //         alias_output_0.as_alias().foundry_counter() + 1,
 //         SimpleTokenScheme::KIND,
 //     );
@@ -125,7 +125,7 @@
 //         alias_output_0.as_alias().foundry_counter() + 1,
 //         TokenScheme::Simple(SimpleTokenScheme::new(100, 0, 500)?),
 //     )
-//     .add_unlock_condition(ImmutableAliasAddressUnlockCondition::new(AliasAddress::from(alias_id)))
+//     .add_unlock_condition(ImmutableAliasAddressUnlockCondition::new(AliasAddress::from(account_id)))
 //     .finish_output(protocol_parameters.token_supply())?;
 
 //     let block = client
