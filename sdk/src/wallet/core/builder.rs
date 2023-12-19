@@ -6,7 +6,7 @@ use std::collections::HashSet;
 use std::sync::Arc;
 
 use serde::Serialize;
-use tokio::sync::{Mutex, RwLock, broadcast};
+use tokio::sync::{Mutex, RwLock};
 
 use super::operations::storage::SaveLoadWallet;
 #[cfg(feature = "events")]
@@ -19,7 +19,7 @@ use crate::{
     client::secret::{GenerateAddressOptions, SecretManage, SecretManager},
     types::block::address::{Address, Bech32Address},
     wallet::{
-        core::{Bip44, WalletData, WalletInner},
+        core::{Bip44, WalletData, WalletInner, operations::background_syncing::BackgroundSyncStatus},
         operations::syncing::SyncOptions,
         ClientOptions, Wallet,
     },
@@ -245,11 +245,14 @@ where
             .finish()
             .await?;
 
+        let background_syncing_status = tokio::sync::watch::channel(BackgroundSyncStatus::NotRunning);
+        let background_syncing_status = (Arc::new(background_syncing_status.0), background_syncing_status.1);
+
         // Build the wallet.
         let wallet_inner = WalletInner {
             default_sync_options: Mutex::new(SyncOptions::default()),
             last_synced: Mutex::new(0),
-            background_syncing_status: broadcast::channel(16),
+            background_syncing_status,
             client,
             secret_manager: self.secret_manager.expect("make WalletInner::secret_manager optional?"),
             #[cfg(feature = "events")]

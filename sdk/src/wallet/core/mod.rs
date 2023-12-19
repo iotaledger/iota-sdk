@@ -14,7 +14,7 @@ use crypto::keys::{
     bip44::Bip44,
 };
 use serde::{Deserialize, Serialize};
-use tokio::sync::{Mutex, RwLock, broadcast};
+use tokio::sync::{broadcast, Mutex, RwLock};
 
 pub use self::builder::WalletBuilder;
 use self::operations::background_syncing::BackgroundSyncStatus;
@@ -86,7 +86,10 @@ pub struct WalletInner<S: SecretManage = SecretManager> {
     pub(crate) last_synced: Mutex<u128>,
     pub(crate) default_sync_options: Mutex<SyncOptions>,
     // 0 = not running, 1 = running, 2 = stopping
-    pub(crate) background_syncing_status: (broadcast::Sender<BackgroundSyncStatus>, broadcast::Receiver<BackgroundSyncStatus>),
+    pub(crate) background_syncing_status: (
+        Arc<tokio::sync::watch::Sender<BackgroundSyncStatus>>,
+        tokio::sync::watch::Receiver<BackgroundSyncStatus>,
+    ),
     pub(crate) client: Client,
     // TODO: make this optional?
     pub(crate) secret_manager: Arc<RwLock<S>>,

@@ -13,7 +13,7 @@ use crate::{
 /// The default interval for background syncing
 pub(crate) const DEFAULT_BACKGROUNDSYNCING_INTERVAL: Duration = Duration::from_secs(7);
 
-#[derive(Clone, PartialEq)]
+#[derive(Clone, PartialEq, Debug)]
 pub(crate) enum BackgroundSyncStatus {
     NotRunning,
     Running,
@@ -33,17 +33,17 @@ where
     ) -> crate::wallet::Result<()> {
         log::debug!("[start_background_syncing]");
 
-        let (notify_background_sync, mut receive_bakground_sync) = (self.background_syncing_status.0.clone(), self.background_syncing_status.1.resubscribe());
+        let (tx_background_sync, mut rx_background_sync) = self.background_syncing_status.clone();
        
         // stop existing process if running
-        if receive_bakground_sync.try_recv() == Ok(BackgroundSyncStatus::Running) {
-            notify_background_sync.send(BackgroundSyncStatus::Stopping).ok();
-        }
-        while receive_bakground_sync.recv().await == Ok(BackgroundSyncStatus::Stopping) {
-            log::debug!("[background_syncing]: waiting for the old process to stop");
+        if *rx_background_sync.borrow() == BackgroundSyncStatus::Running {
+            tx_background_sync.send(BackgroundSyncStatus::Stopping).ok();
         }
 
-        notify_background_sync.send(BackgroundSyncStatus::Running).ok();
+        log::debug!("[background_syncing]: waiting for the old process to stop");
+        rx_background_sync.wait_for(|status| *status != BackgroundSyncStatus::Stopping).await.ok();
+
+        tx_background_sync.send(BackgroundSyncStatus::Running).ok();
 
         let wallet = self.clone();
      
@@ -59,14 +59,14 @@ where
                 let seconds = requested_interval.unwrap_or(DEFAULT_BACKGROUNDSYNCING_INTERVAL).as_secs();
                 let mut interval = interval(Duration::from_secs(1));
                 for _ in 0..seconds {
-                    if receive_bakground_sync.try_recv() == Ok(BackgroundSyncStatus::Stopping)  {
+                    if *rx_background_sync.borrow() == BackgroundSyncStatus::Stopping  {
                         log::debug!("[background_syncing]: stopping");
                         break 'outer;
                     }
                     interval.tick().await;
                 }
             }
-            notify_background_sync.send(BackgroundSyncStatus::NotRunning).ok();
+            tx_background_sync.send(BackgroundSyncStatus::NotRunning).ok();
             log::debug!("[background_syncing]: stopped");
         });
         Ok(())
@@ -82,16 +82,19 @@ where
     pub async fn stop_background_syncing(&self) -> crate::wallet::Result<()> {
         log::debug!("[stop_background_syncing]");
 
-        let mut receive_bakground_sync = self.background_syncing_status.1.resubscribe();
+        let mut rx_background_sync = self.background_syncing_status.1.clone();
 
         // immediately return if not running
-        if receive_bakground_sync.try_recv() == Ok(BackgroundSyncStatus::NotRunning) {
+        if *rx_background_sync.borrow() == BackgroundSyncStatus::NotRunning {
             return Ok(());
         }
+        
         // send stop request
         self.request_stop_background_syncing();
+
         // wait until it stopped
-        while receive_bakground_sync.recv().await != Ok(BackgroundSyncStatus::Stopping) { }
+        rx_background_sync.wait_for(|status| *status == BackgroundSyncStatus::NotRunning).await.ok();
+
         Ok(())
     }
 }
