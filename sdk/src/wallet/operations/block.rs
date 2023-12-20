@@ -19,16 +19,21 @@ where
     ) -> Result<BlockId> {
         log::debug!("submit_basic_block");
 
-        let issuer_id = match issuer_id.into() {
-            Some(issuer_id) => Some(issuer_id),
-            None => self
+        let issuer_id = issuer_id
+            .into()
+            .or(self
                 .data()
                 .await
                 .accounts()
                 .next()
-                .map(|o| o.output.as_account().account_id_non_null(&o.output_id)),
-        }
-        .ok_or(Error::AccountNotFound)?;
+                .map(|o| o.output.as_account().account_id_non_null(&o.output_id)))
+            .or(self
+                .data()
+                .await
+                .implicit_accounts()
+                .next()
+                .map(|o| AccountId::from(&o.output_id)))
+            .ok_or(Error::AccountNotFound)?;
 
         let block = self
             .client()

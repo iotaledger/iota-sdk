@@ -311,8 +311,8 @@ impl<'a> SemanticValidationContext<'a> {
         }
 
         // TODO re-enable in mana semantic PR
-        // if self.input_mana > self.output_mana && !self.transaction.has_capability(TransactionCapabilityFlag::BurnMana) {
-        //     // TODO: add a variant https://github.com/iotaledger/iota-sdk/issues/1430
+        // if self.input_mana > self.output_mana &&
+        // !self.transaction.has_capability(TransactionCapabilityFlag::BurnMana) {     // TODO: add a variant https://github.com/iotaledger/iota-sdk/issues/1430
         //     return Ok(Some(TransactionFailureReason::SemanticValidationFailed));
         // }
 
