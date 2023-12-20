@@ -5,6 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from enum import IntEnum
 from typing import Dict, List, TypeAlias, Union, Any
+from dataclasses_json import config
 from iota_sdk.types.signature import Ed25519Signature
 from iota_sdk.types.common import json
 
@@ -88,6 +89,13 @@ class NftUnlock:
     type: int = field(default_factory=lambda: int(UnlockType.Nft), init=False)
 
 
+# pylint: disable=missing-function-docstring,unused-argument
+def deserialize_unlocks(dicts: List[Dict[str, Any]]) -> List[Unlock]:
+    # Function gets overwritten further below, but needs to be defined here
+    # already
+    pass
+
+
 @json
 @dataclass
 class MultiUnlock:
@@ -121,6 +129,8 @@ Unlock: TypeAlias = Union[SignatureUnlock,
                           MultiUnlock,
                           EmptyUnlock]
 
+# pylint: disable=too-many-return-statements
+
 
 def deserialize_unlock(d: Dict[str, Any]) -> Unlock:
     """
@@ -147,6 +157,7 @@ def deserialize_unlock(d: Dict[str, Any]) -> Unlock:
     raise Exception(f'invalid unlock type: {unlock_type}')
 
 
+# pylint: disable=function-redefined
 def deserialize_unlocks(dicts: List[Dict[str, Any]]) -> List[Unlock]:
     """
     Takes a list of dictionaries as input and returns a list with specific instances of classes based on the value of the 'type' key in the dictionary.

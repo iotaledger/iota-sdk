@@ -9,24 +9,25 @@ from iota_sdk import (
     Client,
     Ed25519Address,
     Wallet,
+    WalletOptions,
     Utils,
     TimelockUnlockCondition,
 )
 
-
+# This example uses secrets in environment variables for simplicity which
+# should not be done in production.
 load_dotenv()
 
 # This example sends a transaction with a timelock.
 
-wallet = Wallet(os.environ['WALLET_DB_PATH'])
+for env_var in ['WALLET_DB_PATH', 'STRONGHOLD_PASSWORD']:
+    if env_var not in os.environ:
+        raise Exception(f'.env {env_var} is undefined, see .env.example')
 
-account = wallet.get_account('Alice')
+wallet = Wallet(WalletOptions(storage_path=os.environ.get('WALLET_DB_PATH')))
 
-# Sync account with the node
-response = account.sync()
-
-if 'STRONGHOLD_PASSWORD' not in os.environ:
-    raise Exception(".env STRONGHOLD_PASSWORD is undefined, see .env.example")
+# Sync wallet with the node
+wallet.sync()
 
 wallet.set_stronghold_password(os.environ["STRONGHOLD_PASSWORD"])
 
@@ -46,10 +47,10 @@ basic_output = Client().build_basic_output(
     ],
 )
 
-transaction = account.send_outputs([basic_output])
+transaction = wallet.send_outputs([basic_output])
 print(f'Transaction sent: {transaction.transaction_id}')
 
-block_id = account.reissue_transaction_until_included(
+block_id = wallet.reissue_transaction_until_included(
     transaction.transaction_id)
 
 print(
