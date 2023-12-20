@@ -14,6 +14,7 @@ use crate::types::block::{
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Getters, Packable)]
 #[getset(get = "pub")]
 pub struct RestrictedAddress {
+    #[packable(verify_with = verify_address)]
     address: Address,
     allowed_capabilities: AddressCapabilities,
 }
@@ -26,9 +27,9 @@ impl RestrictedAddress {
     #[inline(always)]
     pub fn new(address: impl Into<Address>) -> Result<Self, Error> {
         let address = address.into();
-        if matches!(address, Address::Restricted(_)) {
-            return Err(Error::InvalidAddressKind(Self::KIND));
-        }
+
+        verify_address::<true>(&address)?;
+
         Ok(Self {
             address,
             allowed_capabilities: Default::default(),
@@ -72,6 +73,19 @@ impl TryFrom<Address> for RestrictedAddress {
 impl core::fmt::Display for RestrictedAddress {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         write!(f, "{}", prefix_hex::encode(self.pack_to_vec()))
+    }
+}
+
+fn verify_address<const VERIFY: bool>(address: &Address) -> Result<(), Error> {
+    if VERIFY
+        && !matches!(
+            address,
+            Address::Ed25519(_) | Address::Account(_) | Address::Nft(_) | Address::Anchor(_) | Address::Multi(_)
+        )
+    {
+        Err(Error::InvalidAddressKind(address.kind()))
+    } else {
+        Ok(())
     }
 }
 
