@@ -236,7 +236,7 @@
 
 "@iota/sdk@file:../":
   "resolved" "file:.."
-  "version" "1.1.3"
+  "version" "1.1.4"
   dependencies:
     "@types/node" "^18.15.12"
     "class-transformer" "^0.5.1"
@@ -2271,6 +2271,11 @@
   "integrity" "sha512-UIEXBNeYmKptWH6z8ZnqTeS8fV74zG0/eRU9VGkpzz+LIJNs8W/zM/L+7ctCkRrgbNnnR0xxw4bKOr0cW0N0Og=="
   "resolved" "https://registry.npmjs.org/ultron/-/ultron-1.1.1.tgz"
   "version" "1.1.1"
+
+"undici-types@^6.0.1":
+  "integrity" "sha512-i9dNdkCziyqGpFxhatR9LITcInbFWh+ExlWkrZQpZHje8FfCcJKgps0IbmMd7D1o8c8syG4pIOV+aKIoC9JEyA=="
+  "resolved" "https://registry.npmjs.org/undici-types/-/undici-types-6.0.1.tgz"
+  "version" "6.0.1"
 
 "universalify@^0.1.0":
   "integrity" "sha512-rBJeI5CXAlmy1pV+617WB9J63U6XcazHHF2f2dbJix4XzpUF0RS3Zbj0FGIOCAva5P/d/GBOYaACQ1w+0azUkg=="

@@ -38,7 +38,7 @@ pub async fn call_client_method(client: External<ClientMethodHandler>, method: S
 
     match &*client.as_ref().read().await {
         Some(client) => {
-            let response = rust_call_client_method(&client, method).await;
+            let response = rust_call_client_method(client, method).await;
             match response {
                 Response::Error(_) | Response::Panic(_) => Err(build_js_error(response)),
                 _ => Ok(serde_json::to_string(&response).map_err(NodejsError::new)?),

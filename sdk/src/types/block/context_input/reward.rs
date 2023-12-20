@@ -19,7 +19,7 @@ pub struct RewardContextInput(#[packable(unpack_error_with = Error::InvalidRewar
 
 impl RewardContextInput {
     /// The context input kind of a [`RewardContextInput`].
-    pub const KIND: u8 = 3;
+    pub const KIND: u8 = 2;
 
     /// Creates a new [`RewardContextInput`].
     pub fn new(index: u16) -> Result<Self, Error> {

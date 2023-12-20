@@ -17,7 +17,7 @@ use iota_sdk::types::block::{
 use pretty_assertions::assert_eq;
 
 const ED25519_ADDRESS: &str = "0xebe40a263480190dcd7939447ee01aefa73d6f3cc33c90ef7bf905abf8728655";
-const ALIAS_ID: &str = "0xe9ba80ad1561e437b663a1f1efbfabd544b0d7da7bb33e0a62e99b20ee450bee";
+const ACCOUNT_ID: &str = "0xe9ba80ad1561e437b663a1f1efbfabd544b0d7da7bb33e0a62e99b20ee450bee";
 const NFT_ID: &str = "0xa9ede98a7f0223fa7a49fbc586f7a88bb4f0d152f282b19bcebd05c9e8a02370";
 const ED25519_ADDRESS_INVALID: &str = "0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c64x";
 
@@ -37,7 +37,7 @@ fn debug() {
         "Ed25519Address(0xebe40a263480190dcd7939447ee01aefa73d6f3cc33c90ef7bf905abf8728655)"
     );
 
-    let address = Address::from(AccountAddress::from_str(ALIAS_ID).unwrap());
+    let address = Address::from(AccountAddress::from_str(ACCOUNT_ID).unwrap());
 
     assert_eq!(
         format!("{address:?}"),
