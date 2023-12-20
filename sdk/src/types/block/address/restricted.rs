@@ -4,13 +4,14 @@
 use getset::Getters;
 use packable::{Packable, PackableExt};
 
-use super::Address;
 use crate::types::block::{
+    address::Address,
     capabilities::{Capabilities, CapabilityFlag},
     output::{StorageScore, StorageScoreParameters},
     Error,
 };
 
+/// An [`Address`] that contains another address and allows for configuring its capabilities.
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Getters, Packable)]
 #[getset(get = "pub")]
 pub struct RestrictedAddress {
