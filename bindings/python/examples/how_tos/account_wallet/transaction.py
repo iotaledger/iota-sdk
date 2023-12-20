@@ -16,7 +16,7 @@ wallet = Wallet(WalletOptions(storage_path=os.environ.get('WALLET_DB_PATH')))
 
 wallet.set_stronghold_password(os.environ["STRONGHOLD_PASSWORD"])
 
-sync_options = SyncOptions(account=WalletSyncOptions(basic_outputs=True))
+sync_options = SyncOptions(wallet=WalletSyncOptions(basic_outputs=True))
 balance = wallet.sync(sync_options)
 
 total_base_token_balance = balance.base_coin.total
