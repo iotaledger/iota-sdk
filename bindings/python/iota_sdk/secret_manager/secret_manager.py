@@ -3,12 +3,12 @@
 
 from json import dumps, loads
 from typing import Optional, Union
-from dacite import from_dict
 import humps
 
 from iota_sdk.external import create_secret_manager, call_secret_manager_method
 from iota_sdk.types.block.block import Block, UnsignedBlock
 from iota_sdk.types.common import HexStr
+from iota_sdk.types.node_info import ProtocolParameters
 from iota_sdk.types.signature import Ed25519Signature, Bip44
 from iota_sdk.types.transaction_data import PreparedTransactionData
 from iota_sdk.types.payload import SignedTransactionPayload
@@ -269,14 +269,16 @@ class SecretManager():
         })
 
     def sign_transaction(
-            self, prepared_transaction_data: PreparedTransactionData) -> SignedTransactionPayload:
+            self, prepared_transaction_data: PreparedTransactionData, protocol_parameters: ProtocolParameters) -> SignedTransactionPayload:
         """Sign a transaction.
 
         Args:
             prepare_transaction_data: The prepared transaction data that needs to be signed.
+            protocol_parameters: The protocol parameters used in creating the signed transaction.
         """
-        return from_dict(SignedTransactionPayload, self._call_method('signTransaction', {
-            'preparedTransactionData': prepared_transaction_data.to_dict()
+        return SignedTransactionPayload.from_dict(self._call_method('signTransaction', {
+            'preparedTransactionData': prepared_transaction_data.to_dict(),
+            'protocolParameters': protocol_parameters
         }))
 
     def sign_block(
@@ -287,7 +289,7 @@ class SecretManager():
             unsigned_block: The unsigned block data.
             chain: The Bip44 chain to use.
         """
-        return from_dict(Block, self._call_method('signBlock', {
+        return Block.from_dict(self._call_method('signBlock', {
             'unsignedBlock': unsigned_block.to_dict(),
             'chain': chain.to_dict()
         }))

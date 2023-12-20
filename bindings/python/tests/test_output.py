@@ -46,8 +46,9 @@ def test_output():
         "type": 0,
         "mana": "57600",
         "amount": "57600",
-        "nativeTokens": [
+        "features": [
             {
+                "type": 5,
                 "id": "0x086326539ce1b78eb606a75950f31698ddcb51200b4ee6e870050e6ef658cd3bab0100000000",
                 "amount": "0x32"
             }
@@ -85,8 +86,9 @@ def test_output():
         "type": 0,
         "mana": "50100",
         "amount": "50100",
-        "nativeTokens": [
+        "features": [
             {
+                "type": 5,
                 "id": "0x087f3221adb3be9ef74a69595ef282b4ca47fd98b6bf1142e7d8f9f7b265efeedc0100000000",
                 "amount": "0x1"
             }

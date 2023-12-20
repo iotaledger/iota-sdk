@@ -28,7 +28,7 @@ class BaseCoinBalance:
 @json
 @dataclass
 class RequiredStorageDeposit:
-    """Required storage deposit for the outputs in the account.
+    """Required storage deposit for the outputs in the wallet.
 
     Attributes:
         basic: The required amount for basic outputs.
