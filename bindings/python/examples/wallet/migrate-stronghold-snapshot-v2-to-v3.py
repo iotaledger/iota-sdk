@@ -42,7 +42,13 @@ migrate_stronghold_snapshot_v2_to_v3(
 
 secret_manager = StrongholdSecretManager(v3_path, "new_password")
 
-wallet_options = WalletOptions(None, None, bib_path, client_options, secret_manager, os.environ.get('WALLET_DB_PATH'))
+wallet_options = WalletOptions(
+    None,
+    None,
+    bib_path,
+    client_options,
+    secret_manager,
+    os.environ.get('WALLET_DB_PATH'))
 
 # This shouldn't fail anymore as snapshot has been migrated.
 wallet = Wallet(wallet_options)

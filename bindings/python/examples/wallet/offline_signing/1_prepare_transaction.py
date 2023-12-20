@@ -38,7 +38,13 @@ client_options = ClientOptions(nodes=[os.environ.get('NODE_URL')])
 bib_path = Bip44(
     coin_type=CoinType.SHIMMER
 )
-wallet_options = WalletOptions(None, None, bib_path, client_options, "placeholder", ONLINE_WALLET_DB_PATH)
+wallet_options = WalletOptions(
+    None,
+    None,
+    bib_path,
+    client_options,
+    "placeholder",
+    ONLINE_WALLET_DB_PATH)
 wallet = Wallet(wallet_options)
 
 wallet.sync()

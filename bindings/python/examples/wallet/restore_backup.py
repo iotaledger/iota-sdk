@@ -16,7 +16,13 @@ bib_path = Bip44(
     coin_type=CoinType.SHIMMER
 )
 
-wallet_options = WalletOptions(None, None, bib_path, client_options, 'Placeholder', './restore-backup-database')
+wallet_options = WalletOptions(
+    None,
+    None,
+    bib_path,
+    client_options,
+    'Placeholder',
+    './restore-backup-database')
 wallet = Wallet(wallet_options)
 
 if 'STRONGHOLD_PASSWORD' not in os.environ:

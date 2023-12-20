@@ -41,7 +41,12 @@ client_options = ClientOptions(nodes=[node_url])
 bib_path = Bip44(
     coin_type=CoinType.SHIMMER
 )
-wallet_options = WalletOptions(None, None, bib_path, client_options, secret_manager)
+wallet_options = WalletOptions(
+    None,
+    None,
+    bib_path,
+    client_options,
+    secret_manager)
 
 wallet = Wallet(wallet_options)
 

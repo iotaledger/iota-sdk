@@ -2,7 +2,7 @@ import os
 
 from dotenv import load_dotenv
 
-from iota_sdk import ClientOptions, CoinType, StrongholdSecretManager, Wallet, WalletOptions, Bip44
+from iota_sdk import ClientOptions, CoinType, StrongholdSecretManager, SecretManager, Wallet, WalletOptions, Bip44
 
 load_dotenv()
 

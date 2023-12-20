@@ -22,7 +22,13 @@ bib_path = Bip44(
     coin_type=CoinType.SHIMMER
 )
 
-wallet_options = WalletOptions(None, None, bib_path, client_options, secret_manager, './backup-database')
+wallet_options = WalletOptions(
+    None,
+    None,
+    bib_path,
+    client_options,
+    secret_manager,
+    './backup-database')
 wallet = Wallet(wallet_options)
 
 # Store the mnemonic in the Stronghold snapshot, this only needs to be
