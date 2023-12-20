@@ -17,7 +17,7 @@ where
 {
     pub async fn allot_mana(
         &self,
-        allotments: impl Iterator<Item = impl Into<ManaAllotment>>,
+        allotments: impl IntoIterator<Item = impl Into<ManaAllotment>>,
         options: impl Into<Option<TransactionOptions>> + Send,
     ) -> crate::wallet::Result<TransactionWithMetadata> {
         let options = options.into();
@@ -29,7 +29,7 @@ where
 
     pub async fn prepare_allot_mana(
         &self,
-        allotments: impl Iterator<Item = impl Into<ManaAllotment>>,
+        allotments: impl IntoIterator<Item = impl Into<ManaAllotment>>,
         options: impl Into<Option<TransactionOptions>> + Send,
     ) -> crate::wallet::Result<PreparedTransactionData> {
         log::debug!("[TRANSACTION] prepare_allot_mana");

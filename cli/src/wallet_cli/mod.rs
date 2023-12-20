@@ -14,6 +14,7 @@ use iota_sdk::{
         api::plugins::participation::types::ParticipationEventId,
         block::{
             address::Bech32Address,
+            mana::ManaAllotment,
             output::{
                 unlock_condition::AddressUnlockCondition, AccountId, BasicOutputBuilder, FoundryId, NativeToken,
                 NativeTokensBuilder, NftId, Output, OutputId, TokenId,
@@ -24,8 +25,8 @@ use iota_sdk::{
     },
     utils::ConvertTo,
     wallet::{
-        types::OutputData, ConsolidationParams, CreateNativeTokenParams, MintNftParams, OutputsToClaim,
-        SendNativeTokenParams, SendNftParams, SendParams, SyncOptions, TransactionOptions, Wallet,
+        types::OutputData, ConsolidationParams, CreateNativeTokenParams, Error as WalletError, MintNftParams,
+        OutputsToClaim, SendNativeTokenParams, SendNftParams, SendParams, SyncOptions, TransactionOptions, Wallet,
     },
     U256,
 };
@@ -60,6 +61,8 @@ pub enum WalletCommand {
     Accounts,
     /// Print the wallet address.
     Address,
+    /// Allots mana to an account.
+    AllotMana { mana: u64, account_id: Option<AccountId> },
     /// Print the wallet balance.
     Balance,
     /// Burn an amount of native token.
@@ -320,6 +323,25 @@ pub async fn accounts_command(wallet: &Wallet) -> Result<(), Error> {
 // `address` command
 pub async fn address_command(wallet: &Wallet) -> Result<(), Error> {
     print_wallet_address(wallet).await?;
+
+    Ok(())
+}
+
+// `allot-mana` command
+pub async fn allot_mana_command(wallet: &Wallet, mana: u64, account_id: Option<AccountId>) -> Result<(), Error> {
+    let wallet_data = wallet.data().await;
+    let account_id = account_id
+        .or(wallet_data
+            .accounts()
+            .next()
+            .map(|o| o.output.as_account().account_id_non_null(&o.output_id)))
+        .or(wallet_data
+            .implicit_accounts()
+            .next()
+            .map(|o| AccountId::from(&o.output_id)))
+        .ok_or(WalletError::AccountNotFound)?;
+
+    wallet.allot_mana([ManaAllotment::new(account_id, mana)?], None).await?;
 
     Ok(())
 }
@@ -1111,6 +1133,9 @@ pub async fn prompt_internal(
                     match protocol_cli.command {
                         WalletCommand::Accounts => accounts_command(wallet).await,
                         WalletCommand::Address => address_command(wallet).await,
+                        WalletCommand::AllotMana { mana, account_id } => {
+                            allot_mana_command(wallet, mana, account_id).await
+                        }
                         WalletCommand::Balance => balance_command(wallet).await,
                         WalletCommand::BurnNativeToken { token_id, amount } => {
                             burn_native_token_command(wallet, token_id, amount).await

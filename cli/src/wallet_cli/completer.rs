@@ -11,6 +11,7 @@ use rustyline::{
 const WALLET_COMMANDS: &[&str] = &[
     "accounts",
     "address",
+    "allot-mana",
     "balance",
     "burn-native-token",
     "burn-nft",
