@@ -104,6 +104,8 @@ impl InputSelection {
 
     fn init(&mut self) -> Result<(), Error> {
         // Adds an initial amount requirement.
+        self.requirements.push(Requirement::Mana(self.mana_allotments));
+        // Adds an initial amount requirement.
         self.requirements.push(Requirement::Amount);
         // Adds an initial native tokens requirement.
         self.requirements.push(Requirement::NativeTokens);
@@ -372,12 +374,12 @@ impl InputSelection {
     /// Selects inputs that meet the requirements of the outputs to satisfy the semantic validation of the overall
     /// transaction. Also creates a remainder output and chain transition outputs if required.
     pub fn select(mut self) -> Result<Selected, Error> {
-        if !OUTPUT_COUNT_RANGE.contains(&(self.outputs.len() as u16)) {
-            // If burn is provided, outputs will be added later
-            if !(self.outputs.is_empty() && self.burn.is_some()) {
-                return Err(Error::InvalidOutputCount(self.outputs.len()));
-            }
-        }
+        // if !OUTPUT_COUNT_RANGE.contains(&(self.outputs.len() as u16)) {
+        //     // If burn is provided, outputs will be added later
+        //     if !(self.outputs.is_empty() && self.burn.is_some()) {
+        //         return Err(Error::InvalidOutputCount(self.outputs.len()));
+        //     }
+        // }
 
         self.filter_inputs();
 
