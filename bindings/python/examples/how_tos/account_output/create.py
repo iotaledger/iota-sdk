@@ -19,9 +19,6 @@ wallet = Wallet(WalletOptions(storage_path=os.environ.get('WALLET_DB_PATH')))
 balance = wallet.sync()
 print(f'Accounts BEFORE: {balance.accounts}')
 
-if 'STRONGHOLD_PASSWORD' not in os.environ:
-    raise Exception(".env STRONGHOLD_PASSWORD is undefined, see .env.example")
-
 wallet.set_stronghold_password(os.environ["STRONGHOLD_PASSWORD"])
 
 # Send transaction.

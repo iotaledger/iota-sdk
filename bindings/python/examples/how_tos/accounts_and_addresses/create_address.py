@@ -8,8 +8,9 @@ load_dotenv()
 
 # This example generates a new address.
 
-if 'STRONGHOLD_PASSWORD' not in os.environ:
-    raise Exception(".env STRONGHOLD_PASSWORD is undefined, see .env.example")
+for env_var in ['STRONGHOLD_PASSWORD', 'STRONGHOLD_SNAPSHOT_PATH']:
+    if env_var not in os.environ:
+        raise Exception(f".env {env_var} is undefined, see .env.example")
 
 secret_manager = SecretManager(StrongholdSecretManager(
     os.environ.get('STRONGHOLD_SNAPSHOT_PATH'),

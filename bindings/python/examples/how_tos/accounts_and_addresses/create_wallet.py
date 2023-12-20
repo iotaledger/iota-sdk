@@ -34,3 +34,7 @@ wallet_options = WalletOptions(
     secret_manager,
     os.environ.get('WALLET_DB_PATH'))
 wallet = Wallet(wallet_options)
+
+# Update the wallet to the latest state
+balance = wallet.sync()
+print('Generated new wallet')

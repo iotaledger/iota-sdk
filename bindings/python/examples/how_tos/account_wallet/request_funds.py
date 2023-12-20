@@ -9,6 +9,10 @@ from iota_sdk import Wallet, WalletOptions, Utils, SyncOptions, WalletSyncOption
 
 load_dotenv()
 
+for env_var in ['FAUCET_URL', 'WALLET_DB_PATH', 'EXPLORER_URL']:
+    if env_var not in os.environ:
+        raise Exception(f".env {env_var} is undefined, see .env.example")
+
 FAUCET_URL = os.environ.get(
     'FAUCET_URL', 'https://faucet.testnet.shimmer.network/api/enqueue')
 
