@@ -341,7 +341,13 @@ pub async fn allot_mana_command(wallet: &Wallet, mana: u64, account_id: Option<A
             .map(|o| AccountId::from(&o.output_id)))
         .ok_or(WalletError::AccountNotFound)?;
 
-    wallet.allot_mana([ManaAllotment::new(account_id, mana)?], None).await?;
+    let transaction = wallet.allot_mana([ManaAllotment::new(account_id, mana)?], None).await?;
+
+    println_log_info!(
+        "Mana allotment transaction sent:\n{:?}\n{:?}",
+        transaction.transaction_id,
+        transaction.block_id
+    );
 
     Ok(())
 }
