@@ -186,6 +186,7 @@ impl ProtocolParameters {
     pub fn slot_index(&self, timestamp: u64) -> SlotIndex {
         SlotIndex::from_timestamp(
             timestamp,
+            self.genesis_slot(),
             self.genesis_unix_timestamp(),
             self.slot_duration_in_seconds(),
         )

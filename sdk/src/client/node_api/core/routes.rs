@@ -18,7 +18,8 @@ use crate::{
         api::core::{
             BlockMetadataResponse, BlockWithMetadataResponse, CommitteeResponse, CongestionResponse, InfoResponse,
             IssuanceBlockHeaderResponse, ManaRewardsResponse, OutputResponse, RoutesResponse, SubmitBlockResponse,
-            TransactionMetadataResponse, UtxoChangesResponse, ValidatorResponse, ValidatorsResponse,
+            TransactionMetadataResponse, UtxoChangesFullResponse, UtxoChangesResponse, ValidatorResponse,
+            ValidatorsResponse,
         },
         block::{
             address::ToBech32Ext,
@@ -333,6 +334,17 @@ impl ClientInner {
         self.get_request(path, None, false, false).await
     }
 
+    /// Get all full UTXO changes of a given slot by slot commitment ID.
+    /// GET /api/core/v3/commitments/{commitmentId}/utxo-changes/full
+    pub async fn get_utxo_changes_full_by_slot_commitment_id(
+        &self,
+        slot_commitment_id: &SlotCommitmentId,
+    ) -> Result<UtxoChangesFullResponse> {
+        let path = &format!("api/core/v3/commitments/{slot_commitment_id}/utxo-changes/full");
+
+        self.get_request(path, None, false, false).await
+    }
+
     /// Finds a slot commitment by slot index and returns it as object.
     /// GET /api/core/v3/commitments/by-slot/{slot}
     pub async fn get_slot_commitment_by_slot(&self, slot_index: SlotIndex) -> Result<SlotCommitment> {
@@ -353,6 +365,14 @@ impl ClientInner {
     /// GET /api/core/v3/commitments/by-slot/{slot}/utxo-changes
     pub async fn get_utxo_changes_by_slot(&self, slot_index: SlotIndex) -> Result<UtxoChangesResponse> {
         let path = &format!("api/core/v3/commitments/by-slot/{slot_index}/utxo-changes");
+
+        self.get_request(path, None, false, false).await
+    }
+
+    /// Get all full UTXO changes of a given slot by its index.
+    /// GET /api/core/v3/commitments/by-slot/{slot}/utxo-changes/full
+    pub async fn get_utxo_changes_full_by_slot(&self, slot_index: SlotIndex) -> Result<UtxoChangesFullResponse> {
+        let path = &format!("api/core/v3/commitments/by-slot/{slot_index}/utxo-changes/full");
 
         self.get_request(path, None, false, false).await
     }

@@ -468,6 +468,26 @@ pub struct UtxoChangesResponse {
     pub consumed_outputs: Vec<OutputId>,
 }
 
+/// Response of
+/// - GET /api/core/v3/commitments/{commitmentId}/utxo-changes/full
+/// - GET /api/core/v3/commitments/by-slot/{slot}/utxo-changes/full
+/// Returns all full UTXO changes that happened at a specific slot.
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct UtxoChangesFullResponse {
+    pub commitment_id: SlotCommitmentId,
+    pub created_outputs: Vec<OutputWithId>,
+    pub consumed_outputs: Vec<OutputWithId>,
+}
+
+/// An Output and its ID.
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct OutputWithId {
+    pub output_id: OutputId,
+    pub output: Output,
+}
+
 /// Contains the generic [`Output`] with associated [`OutputIdProof`].
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
