@@ -85,7 +85,7 @@ mod tests {
     fn commitment() {
         let commitment: ContextInput = serde_json::from_value(serde_json::json!(
             {
-                "type": 1,
+                "type": 0,
                 "commitmentId": "0xedf5f572c58ddf4b4f9567d82bf96689cc68b730df796d822b4b9fb643f5efda4f9567d8"
             }
         ))
@@ -99,7 +99,7 @@ mod tests {
         // Test wrong type returns error.
         let commitment_deserialization_result: Result<ContextInput, _> = serde_json::from_value(serde_json::json!(
             {
-                "type": 2,
+                "type": 1,
                 "commitmentId": "0xedf5f572c58ddf4b4f9567d82bf96689cc68b730df796d822b4b9fb643f5efda4f9567d8"
             }
         ));
@@ -110,7 +110,7 @@ mod tests {
     fn block_issuance_credit() {
         let bic: ContextInput = serde_json::from_value(serde_json::json!(
             {
-                "type": 2,
+                "type": 1,
                 "accountId": "0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c649"
             }
         ))
@@ -124,7 +124,7 @@ mod tests {
         // Test wrong type returns error.
         let bic_deserialization_result: Result<ContextInput, _> = serde_json::from_value(serde_json::json!(
             {
-                "type": 3,
+                "type": 2,
                 "accountId": "0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c649"
             }
         ));
@@ -135,7 +135,7 @@ mod tests {
     fn reward() {
         let reward: ContextInput = serde_json::from_value(serde_json::json!(
             {
-                "type": 3,
+                "type": 2,
                 "index": 10
             }
         ))
@@ -144,14 +144,12 @@ mod tests {
         assert_eq!(reward.as_reward().index(), 10);
 
         // Test wrong type returns error.
-        let reward_serialization_result: Result<ContextInput, _> = serde_json::from_str(
-            r#"
+        let reward_serialization_result: Result<ContextInput, _> = serde_json::from_value(serde_json::json!(
             {
                 "type": 0,
-                "index": 10 
+                "index": 10
             }
-            "#,
-        );
+        ));
         assert!(reward_serialization_result.is_err())
     }
 }
