@@ -24,7 +24,7 @@ pub use self::{
     storage_deposit_return::StorageDepositReturnUnlockCondition, timelock::TimelockUnlockCondition,
 };
 use crate::types::block::{
-    address::Address,
+    address::{Address, RestrictedAddress},
     output::{StorageScore, StorageScoreParameters},
     protocol::{CommittableAgeRange, ProtocolParameters, WorkScore},
     slot::SlotIndex,
@@ -313,6 +313,22 @@ impl UnlockConditions {
         };
 
         Ok(address)
+    }
+
+    /// Returns an iterator over all addresses.
+    #[inline(always)]
+    pub fn addresses(&self) -> impl Iterator<Item = &Address> {
+        self.iter().filter_map(|uc| match uc {
+            UnlockCondition::Address(uc) => Some(uc.address()),
+            UnlockCondition::Expiration(uc) => Some(uc.return_address()),
+            UnlockCondition::StateControllerAddress(uc) => Some(uc.address()),
+            UnlockCondition::GovernorAddress(uc) => Some(uc.address()),
+            _ => None,
+        })
+    }
+
+    pub fn restricted_addresses(&self) -> impl Iterator<Item = &RestrictedAddress> {
+        self.addresses().filter_map(Address::as_restricted_opt)
     }
 }
 

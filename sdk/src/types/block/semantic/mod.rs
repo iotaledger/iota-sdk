@@ -16,7 +16,7 @@ pub use self::{
 };
 use crate::types::block::{
     address::{Address, AddressCapabilityFlag},
-    output::{AccountId, AnchorOutput, ChainId, FoundryId, NativeTokens, Output, OutputId, TokenId, UnlockCondition},
+    output::{AccountId, AnchorOutput, ChainId, FoundryId, NativeTokens, Output, OutputId, TokenId},
     payload::signed_transaction::{Transaction, TransactionCapabilityFlag, TransactionSigningHash},
     protocol::ProtocolParameters,
     unlock::Unlock,
@@ -212,16 +212,8 @@ impl<'a> SemanticValidationContext<'a> {
 
             if let Some(unlock_conditions) = created_output.unlock_conditions() {
                 // Check the possibly restricted address-containing conditions
-                let addresses = unlock_conditions
-                    .iter()
-                    .filter_map(|uc| match uc {
-                        UnlockCondition::Address(uc) => Some(uc.address()),
-                        UnlockCondition::Expiration(uc) => Some(uc.return_address()),
-                        UnlockCondition::StateControllerAddress(uc) => Some(uc.address()),
-                        UnlockCondition::GovernorAddress(uc) => Some(uc.address()),
-                        _ => None,
-                    })
-                    .filter_map(Address::as_restricted_opt);
+                let addresses = unlock_conditions.restricted_addresses();
+
                 for address in addresses {
                     if created_native_token.is_some()
                         && !address.has_capability(AddressCapabilityFlag::OutputsWithNativeTokens)
