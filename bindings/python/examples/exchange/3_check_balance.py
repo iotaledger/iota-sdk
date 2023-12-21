@@ -1,32 +1,31 @@
 # Copyright 2023 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
-# This example gets the balance of an account.
+# This example gets the balance of a wallet.
 
 import os
 
 from dotenv import load_dotenv
 
-from iota_sdk import SyncOptions, Wallet
+from iota_sdk import SyncOptions, Wallet, WalletOptions
 
 # This example uses secrets in environment variables for simplicity which
 # should not be done in production.
 load_dotenv()
 
-if 'WALLET_DB_PATH' not in os.environ:
-    raise Exception(".env WALLET_DB_PATH is undefined, see .env.example")
+for env_var in ['WALLET_DB_PATH', 'FAUCET_URL']:
+    if env_var not in os.environ:
+        raise Exception(f'.env {env_var} is undefined, see .env.example')
 
-wallet = Wallet(os.environ.get('WALLET_DB_PATH'))
+wallet = Wallet(WalletOptions(storage_path=os.environ.get('WALLET_DB_PATH')))
 
-account = wallet.get_account('Alice')
-
-addresses = account.addresses()
-print('Addresses:', addresses)
+address = wallet.address()
+print('Address:', address)
 
 # Set sync_only_most_basic_outputs to True if not interested in outputs that are timelocked,
 # have a storage deposit return, expiration or are nft/account/foundry outputs.
-balance = account.sync(SyncOptions(sync_only_most_basic_outputs=True))
+balance = wallet.sync(SyncOptions(sync_only_most_basic_outputs=True))
 print('Balance', balance)
 
 # Use the faucet to send tokens to your address.
-print('Fill your address with the Faucet: https://faucet.testnet.shimmer.network/')
+print(f'Fill your address with the Faucet: {os.environ["FAUCET_URL"]}')

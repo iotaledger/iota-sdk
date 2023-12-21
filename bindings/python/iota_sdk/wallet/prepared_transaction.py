@@ -11,25 +11,25 @@ from iota_sdk.types.transaction_data import PreparedTransactionData
 
 # Required to prevent circular import
 if TYPE_CHECKING:
-    from iota_sdk.wallet.wallet import Account
+    from iota_sdk.wallet.wallet import Wallet
 
 
 class PreparedTransaction:
     """A helper class for offline signing.
 
     Attributes:
-        account: An account object used to continue building this transaction.
+        wallet: A wallet object used to continue building this transaction.
         prepared_transaction_data_dto: A prepared transaction data object.
     """
 
     def __init__(
         self,
-        account: Account,
+        wallet: Wallet,
         prepared_transaction_data: Union[PreparedTransactionData, Dict]
     ):
         """Initialize `Self`.
         """
-        self.account = account
+        self.wallet = wallet
         self.prepared_transaction_data_dto = prepared_transaction_data
 
     def prepared_transaction_data(self) -> PreparedTransactionData:
@@ -51,10 +51,10 @@ class PreparedTransaction:
         return self.sign_and_submit_transaction()
 
     def sign(self):
-        """Sign a prepared transaction using the account's private key and returns
+        """Sign a prepared transaction using the wallet's private key and returns
         the signed transaction.
         """
-        return self.account.sign_transaction(
+        return self.wallet.sign_transaction(
             self.prepared_transaction_data())
 
     def sign_and_submit_transaction(self) -> TransactionWithMetadata:
@@ -63,7 +63,7 @@ class PreparedTransaction:
         Returns:
             The transaction after it has been signed and submitted.
         """
-        return self.account.sign_and_submit_transaction(
+        return self.wallet.sign_and_submit_transaction(
             self.prepared_transaction_data())
 
 

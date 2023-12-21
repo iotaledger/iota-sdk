@@ -2,37 +2,28 @@ import os
 
 from dotenv import load_dotenv
 
-from iota_sdk import OutputParams, Utils, Wallet
+from iota_sdk import OutputParams, Utils, Wallet, WalletOptions
 
 load_dotenv()
 
 # In this example we check if an output has only an address unlock
-# condition and that the address is from the account.
+# condition and that the address is from the wallet.
 
-wallet = Wallet(os.environ['WALLET_DB_PATH'])
-
-account = wallet.get_account("Alice")
-
-accountAddresses = account.addresses()
+wallet = Wallet(WalletOptions(storage_path=os.environ.get('WALLET_DB_PATH')))
+address = wallet.address()
 
 # using prepare_output
-output = account.prepare_output(OutputParams(
-    accountAddresses[0].address, 1000000))
+output = wallet.prepare_output(OutputParams(
+    address, 1000000))
 
+hexEncodedWalletAddress = Utils.bech32_to_hex(address)
 
-def hexAddress(address):
-    """Converts an address to hex"""
-    return Utils.bech32_to_hex(address.address)
-
-
-hexEncodedAccountAddresses = map(hexAddress, accountAddresses)
-
-controlled_by_account = False
+controlled_by_wallet = False
 
 if len(
         output.unlock_conditions) == 1 and output.unlock_conditions[0].type == 0:
-    if output.unlock_conditions[0].address.pub_key_hash in hexEncodedAccountAddresses:
-        controlled_by_account = True
+    if output.unlock_conditions[0].address.pub_key_hash == hexEncodedWalletAddress:
+        controlled_by_wallet = True
 
 print(
-    f'The output has only an address unlock condition and the address is from the account: {controlled_by_account}')
+    f'The output has only an address unlock condition and the address is from the wallet: {controlled_by_wallet}')

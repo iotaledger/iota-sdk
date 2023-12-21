@@ -8,8 +8,8 @@ from iota_sdk.types.common import json
 
 @json
 @dataclass
-class AccountSyncOptions():
-    """Sync options for addresses from the account.
+class WalletSyncOptions():
+    """Specifies what outputs should be synced for the ed25519 address from the wallet.
 
     Attributes:
         basic_outputs: Whether to sync basic outputs.
@@ -24,8 +24,8 @@ class AccountSyncOptions():
 
 @json
 @dataclass
-class AliasSyncOptions():
-    """Sync options for addresses from account outputs.
+class AccountSyncOptions():
+    """Specifies what outputs should be synced for the address of an account output.
 
     Attributes:
         basic_outputs: Whether to sync basic outputs.
@@ -43,7 +43,7 @@ class AliasSyncOptions():
 @json
 @dataclass
 class NftSyncOptions():
-    """Sync options for addresses from NFT outputs.
+    """Specifies what outputs should be synced for the address of an nft output.
 
     Attributes:
         basic_outputs: Whether to sync basic outputs.
@@ -73,25 +73,26 @@ class SyncOptions():
     sync_pending_transactions :
         Checks pending transactions and reissues them if necessary.
     account :
-        Specifies what outputs should be synced for the Ed25519 addresses from the account.
-    alias :
+        Specifies what outputs should be synced for the address of an account output.
+    wallet :
         Specifies what outputs should be synced for the address of an account output.
     nft :
         Specifies what outputs should be synced for the address of an nft output.
     sync_only_most_basic_outputs :
         Specifies if only basic outputs with just an address unlock condition should be synced.
-        This will overwrite the `account`, `alias` and `nft` options.
+        This will overwrite the `wallet`, `alias` and `nft` options.
     sync_native_token_foundries :
         Sync native token foundries, so their metadata can be returned in the balance.
+    sync_implicit_accounts :
+        Sync implicit accounts.
     """
 
     force_syncing: Optional[bool] = None
     sync_incoming_transactions: Optional[bool] = None
     sync_pending_transactions: Optional[bool] = None
     account: Optional[AccountSyncOptions] = None
-    # TODO Rename when we are done with Account changes
-    # https://github.com/iotaledger/iota-sdk/issues/647.
-    alias: Optional[AliasSyncOptions] = None
+    wallet: Optional[WalletSyncOptions] = None
     nft: Optional[NftSyncOptions] = None
     sync_only_most_basic_outputs: Optional[bool] = None
     sync_native_token_foundries: Optional[bool] = None
+    sync_implicit_accounts: Optional[bool] = None
