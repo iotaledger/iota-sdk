@@ -18,7 +18,11 @@ use crate::types::block::{
 /// in the form of Block Issuance Credits to the account.
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Packable)]
 #[packable(unpack_error = Error)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize),
+    serde(rename_all = "camelCase")
+)]
 pub struct ManaAllotment {
     pub(crate) account_id: AccountId,
     #[packable(verify_with = verify_mana)]
