@@ -12,6 +12,10 @@ use core::str::FromStr;
 
 use iota_sdk::types::block::{
     address::{AccountAddress, Address, Ed25519Address, NftAddress},
+    rand::address::{
+        rand_account_address, rand_anchor_address, rand_ed25519_address, rand_implicit_address, rand_multi_address,
+        rand_nft_address, rand_restricted_address,
+    },
     Error,
 };
 use pretty_assertions::assert_eq;
@@ -65,8 +69,6 @@ fn is_valid_bech32() {
 
 #[test]
 fn address_display_similar() {
-    use iota_sdk::types::block::rand::address::*;
-
     let addresses: Vec<Address> = vec![
         rand_ed25519_address().into(),
         rand_account_address().into(),
