@@ -6,11 +6,11 @@ use alloc::collections::BTreeSet;
 use packable::{Packable, PackableExt};
 
 use crate::types::block::{
-    address::{AccountAddress, Address},
+    address::Address,
     output::{
         chain_id::ChainId,
         unlock_condition::{verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions},
-        MinimumOutputAmount, Output, OutputBuilderAmount, OutputId, StorageScore, StorageScoreParameters,
+        AccountId, MinimumOutputAmount, Output, OutputBuilderAmount, OutputId, StorageScore, StorageScoreParameters,
     },
     protocol::{ProtocolParameters, WorkScore, WorkScoreParameters},
     semantic::StateTransitionError,
@@ -45,7 +45,7 @@ pub struct DelegationOutputBuilder {
     amount: OutputBuilderAmount,
     delegated_amount: u64,
     delegation_id: DelegationId,
-    validator_address: AccountAddress,
+    validator_address: AccountId,
     start_epoch: EpochIndex,
     end_epoch: EpochIndex,
     unlock_conditions: BTreeSet<UnlockCondition>,
@@ -57,7 +57,7 @@ impl DelegationOutputBuilder {
         amount: u64,
         delegated_amount: u64,
         delegation_id: DelegationId,
-        validator_address: AccountAddress,
+        validator_address: AccountId,
     ) -> Self {
         Self::new(
             OutputBuilderAmount::Amount(amount),
@@ -73,7 +73,7 @@ impl DelegationOutputBuilder {
         params: StorageScoreParameters,
         delegated_amount: u64,
         delegation_id: DelegationId,
-        validator_address: AccountAddress,
+        validator_address: AccountId,
     ) -> Self {
         Self::new(
             OutputBuilderAmount::MinimumAmount(params),
@@ -87,7 +87,7 @@ impl DelegationOutputBuilder {
         amount: OutputBuilderAmount,
         delegated_amount: u64,
         delegation_id: DelegationId,
-        validator_address: AccountAddress,
+        validator_address: AccountId,
     ) -> Self {
         Self {
             amount,
@@ -119,7 +119,7 @@ impl DelegationOutputBuilder {
     }
 
     /// Sets the validator address to the provided value.
-    pub fn with_validator_address(mut self, validator_address: AccountAddress) -> Self {
+    pub fn with_validator_address(mut self, validator_address: AccountId) -> Self {
         self.validator_address = validator_address;
         self
     }
@@ -220,9 +220,9 @@ pub struct DelegationOutput {
     delegated_amount: u64,
     /// Unique identifier of the delegation output.
     delegation_id: DelegationId,
-    /// Account address of the validator to which this output is delegating.
+    /// Account identifier of the validator to which this output is delegating.
     #[packable(verify_with = verify_validator_address_packable)]
-    validator_address: AccountAddress,
+    validator_address: AccountId,
     /// Index of the first epoch for which this output delegates.
     start_epoch: EpochIndex,
     /// Index of the last epoch for which this output delegates.
@@ -243,7 +243,7 @@ impl DelegationOutput {
         amount: u64,
         delegated_amount: u64,
         delegation_id: DelegationId,
-        validator_address: AccountAddress,
+        validator_address: AccountId,
     ) -> DelegationOutputBuilder {
         DelegationOutputBuilder::new_with_amount(amount, delegated_amount, delegation_id, validator_address)
     }
@@ -254,7 +254,7 @@ impl DelegationOutput {
         params: StorageScoreParameters,
         delegated_amount: u64,
         delegation_id: DelegationId,
-        validator_address: AccountAddress,
+        validator_address: AccountId,
     ) -> DelegationOutputBuilder {
         DelegationOutputBuilder::new_with_minimum_amount(params, delegated_amount, delegation_id, validator_address)
     }
@@ -280,7 +280,7 @@ impl DelegationOutput {
     }
 
     /// Returns the validator address of the [`DelegationOutput`].
-    pub fn validator_address(&self) -> &AccountAddress {
+    pub fn validator_address(&self) -> &AccountId {
         &self.validator_address
     }
 
@@ -350,7 +350,7 @@ impl WorkScore for DelegationOutput {
 
 impl MinimumOutputAmount for DelegationOutput {}
 
-fn verify_validator_address<const VERIFY: bool>(validator_address: &AccountAddress) -> Result<(), Error> {
+fn verify_validator_address<const VERIFY: bool>(validator_address: &AccountId) -> Result<(), Error> {
     if VERIFY && validator_address.is_null() {
         Err(Error::NullDelegationValidatorId)
     } else {
@@ -359,7 +359,7 @@ fn verify_validator_address<const VERIFY: bool>(validator_address: &AccountAddre
 }
 
 fn verify_validator_address_packable<const VERIFY: bool>(
-    validator_address: &AccountAddress,
+    validator_address: &AccountId,
     _: &ProtocolParameters,
 ) -> Result<(), Error> {
     verify_validator_address::<VERIFY>(validator_address)
@@ -409,7 +409,7 @@ mod dto {
         #[serde(with = "string")]
         pub delegated_amount: u64,
         pub delegation_id: DelegationId,
-        pub validator_address: AccountAddress,
+        pub validator_address: AccountId,
         start_epoch: EpochIndex,
         end_epoch: EpochIndex,
         pub unlock_conditions: Vec<UnlockCondition>,
@@ -457,7 +457,7 @@ mod dto {
             amount: OutputBuilderAmount,
             delegated_amount: u64,
             delegation_id: &DelegationId,
-            validator_address: &AccountAddress,
+            validator_address: &AccountId,
             start_epoch: impl Into<EpochIndex>,
             end_epoch: impl Into<EpochIndex>,
             unlock_conditions: Vec<UnlockCondition>,
