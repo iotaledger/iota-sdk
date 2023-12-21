@@ -12,6 +12,10 @@ use core::str::FromStr;
 
 use iota_sdk::types::block::{
     address::{AccountAddress, Address, Ed25519Address, NftAddress},
+    rand::address::{
+        rand_account_address, rand_anchor_address, rand_ed25519_address, rand_implicit_address, rand_multi_address,
+        rand_nft_address, rand_restricted_address,
+    },
     Error,
 };
 use pretty_assertions::assert_eq;
@@ -61,4 +65,26 @@ fn is_valid_bech32() {
     assert!(!Address::is_valid_bech32(
         "rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zY"
     ));
+}
+
+#[test]
+fn address_display_similar() {
+    let addresses: Vec<Address> = vec![
+        rand_ed25519_address().into(),
+        rand_account_address().into(),
+        rand_nft_address().into(),
+        rand_anchor_address().into(),
+        rand_implicit_address().into(),
+        rand_multi_address().into(),
+        rand_restricted_address().into(),
+    ];
+    // Restricted address is 72 length, the rest 64.
+    let regex_pattern = regex::Regex::new(r"^0x[0-9a-fA-F]{64,72}$").unwrap();
+
+    // Check if all addresses match the regex pattern.
+    assert!(
+        addresses
+            .iter()
+            .all(|address| { regex_pattern.is_match(&address.to_string()) })
+    );
 }
