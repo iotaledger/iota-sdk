@@ -70,3 +70,8 @@ export interface __SignSecp256k1EcdsaMethod__ {
 export interface __GetLedgerNanoStatusMethod__ {
     name: 'getLedgerNanoStatus';
 }
+
+export type __SetStrongholdPasswordMethod__ = {
+    name: 'setStrongholdPassword';
+    data: { password: string };
+};

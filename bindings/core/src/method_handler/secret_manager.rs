@@ -135,6 +135,18 @@ where
                 return Err(iota_sdk::client::Error::SecretManagerMismatch.into());
             }
         }
+        #[cfg(feature = "stronghold")]
+        SecretManagerMethod::SetStrongholdPassword { password } => {
+            if let Some(secret_manager) = secret_manager.downcast::<StrongholdSecretManager>() {
+                secret_manager.set_password(password).await?;
+                Response::Ok
+            } else if let Some(SecretManager::Stronghold(secret_manager)) = secret_manager.downcast::<SecretManager>() {
+                secret_manager.set_password(password).await?;
+                Response::Ok
+            } else {
+                return Err(iota_sdk::client::Error::SecretManagerMismatch.into())
+            }
+        }
     };
     Ok(response)
 }
