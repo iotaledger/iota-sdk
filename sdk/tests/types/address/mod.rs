@@ -78,12 +78,13 @@ fn address_display_similar() {
         rand_multi_address().into(),
         rand_restricted_address().into(),
     ];
-    // restricted address is 72 length, the rest 64
+    // Restricted address is 72 length, the rest 64.
     let regex_pattern = regex::Regex::new(r"^0x[0-9a-fA-F]{64,72}$").unwrap();
 
-    // Check if all addresses match the regex pattern
-    assert!(addresses.iter().all(|address| {
-        println!("{}", address);
-        regex_pattern.is_match(&format!("{}", address))
-    }));
+    // Check if all addresses match the regex pattern.
+    assert!(
+        addresses
+            .iter()
+            .all(|address| { regex_pattern.is_match(&address.to_string()) })
+    );
 }
