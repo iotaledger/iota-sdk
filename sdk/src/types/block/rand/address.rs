@@ -52,14 +52,16 @@ pub fn rand_restricted_address() -> RestrictedAddress {
         .with_allowed_capabilities(AddressCapabilities::all())
 }
 
-// TODO handle all address kinds
 /// Generates a random [`Address`].
 pub fn rand_address() -> Address {
-    match rand_number::<u64>() % 4 {
+    match rand_number::<u64>() % 7 {
         0 => rand_ed25519_address().into(),
         1 => rand_account_address().into(),
         2 => rand_nft_address().into(),
         3 => rand_anchor_address().into(),
+        4 => rand_implicit_address().into(),
+        5 => rand_multi_address().into(),
+        6 => rand_restricted_address().into(),
         _ => unreachable!(),
     }
 }
