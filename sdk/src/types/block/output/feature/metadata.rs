@@ -43,7 +43,7 @@ fn verify_keys_packable<const VERIFY: bool>(
 ) -> Result<(), Error> {
     if VERIFY {
         for key in map.keys() {
-            if !key.is_ascii() {
+            if !key.iter().all(|b| b.is_ascii_graphic()) {
                 return Err(Error::NonAsciiMetadataKey(key.to_vec()));
             }
         }
@@ -63,7 +63,7 @@ impl MetadataFeature {
         let data = data.into();
 
         for key in data.keys() {
-            if !key.is_ascii() {
+            if !key.iter().all(|b| b.is_ascii_graphic()) {
                 return Err(Error::NonAsciiMetadataKey(key.to_vec()));
             }
         }
@@ -93,7 +93,7 @@ impl TryFrom<BTreeMap<Vec<u8>, Vec<u8>>> for MetadataFeature {
             BoxedSlicePrefix<u8, MetadataFeatureValueLength>,
         >::new();
         for (k, v) in data {
-            if !k.is_ascii() {
+            if !k.iter().all(|b| b.is_ascii_graphic()) {
                 return Err(Error::NonAsciiMetadataKey(k.to_vec()));
             }
             res.insert(
