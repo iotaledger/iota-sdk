@@ -3,10 +3,7 @@
 
 use crate::{
     client::{api::PreparedTransactionData, secret::SecretManage},
-    types::block::{
-        mana::ManaAllotment,
-        payload::signed_transaction::{TransactionCapabilities, TransactionCapabilityFlag},
-    },
+    types::block::mana::ManaAllotment,
     wallet::{
         operations::transaction::{TransactionOptions, TransactionWithMetadata},
         Wallet,
@@ -53,18 +50,6 @@ where
                     }
                 }
                 None => options.mana_allotments = Some(vec![allotment]),
-            }
-        }
-
-        // TODO remove when https://github.com/iotaledger/iota-sdk/issues/1744 is done
-        match options.capabilities.as_mut() {
-            Some(capabilities) => {
-                capabilities.add_capability(TransactionCapabilityFlag::BurnMana);
-            }
-            None => {
-                let mut capabilities = TransactionCapabilities::default();
-                capabilities.add_capability(TransactionCapabilityFlag::BurnMana);
-                options.capabilities = Some(capabilities);
             }
         }
 
