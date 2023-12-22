@@ -2,23 +2,21 @@ import os
 
 from dotenv import load_dotenv
 
-from iota_sdk import MintNftParams, Utils, Wallet, utf8_to_hex
+from iota_sdk import MintNftParams, Utils, Wallet, WalletOptions, utf8_to_hex
 
 load_dotenv()
 
 # In this example we will mint the issuer NFT for the NFT collection.
 
-wallet = Wallet(os.environ['WALLET_DB_PATH'])
+wallet = Wallet(WalletOptions(storage_path=os.environ.get('WALLET_DB_PATH')))
 
 if 'STRONGHOLD_PASSWORD' not in os.environ:
     raise Exception(".env STRONGHOLD_PASSWORD is undefined, see .env.example")
 
 wallet.set_stronghold_password(os.environ["STRONGHOLD_PASSWORD"])
 
-account = wallet.get_account('Alice')
-
-# Sync account with the node
-account.sync()
+# Sync wallet with the node
+wallet.sync()
 
 # Issue the minting transaction and wait for its inclusion
 print('Sending NFT minting transaction...')
@@ -28,10 +26,10 @@ params = MintNftParams(
 )
 
 
-tx = account.mint_nfts([params])
+tx = wallet.mint_nfts([params])
 
 # Wait for transaction to get included
-block_id = account.reissue_transaction_until_included(
+block_id = wallet.reissue_transaction_until_included(
     tx.transaction_id)
 
 print(
