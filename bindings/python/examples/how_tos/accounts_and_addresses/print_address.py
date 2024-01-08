@@ -1,21 +1,20 @@
-import json
 import os
 
 from dotenv import load_dotenv
 
 from iota_sdk import Wallet, WalletOptions
 
-# This example checks the balance of a wallet.
-
 # This example uses secrets in environment variables for simplicity which
 # should not be done in production.
 load_dotenv()
 
+# This example prints the wallet address.
+
+if 'WALLET_DB_PATH' not in os.environ:
+    raise Exception(".env WALLET_DB_PATH is undefined, see .env.example")
+
 wallet = Wallet(WalletOptions(storage_path=os.environ.get('WALLET_DB_PATH')))
 
-# Sync wallet with the node
-_balance = wallet.sync()
+address = wallet.address()
 
-# Just calculate the balance with the known state
-balance = wallet.get_balance()
-print(f'Balance {json.dumps(balance.to_dict(), indent=4)}')
+print(address)

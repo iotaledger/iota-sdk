@@ -525,6 +525,12 @@ impl<S: SecretManage> Drop for Wallet<S> {
     }
 }
 
+impl<S: SecretManage> Drop for WalletInner<S> {
+    fn drop(&mut self) {
+        log::debug!("drop WalletInner");
+    }
+}
+
 /// Dto for the wallet data.
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]

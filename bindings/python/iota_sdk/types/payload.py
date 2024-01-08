@@ -5,6 +5,7 @@ from __future__ import annotations
 from enum import IntEnum
 from typing import Any, Dict, List, TypeAlias, Union
 from dataclasses import dataclass, field
+from dataclasses_json import config
 from iota_sdk.types.common import HexStr, json
 from iota_sdk.types.transaction import Transaction
 from iota_sdk.types.unlock import Unlock, deserialize_unlocks
