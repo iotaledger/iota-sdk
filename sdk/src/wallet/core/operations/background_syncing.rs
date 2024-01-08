@@ -51,7 +51,7 @@ where
         let wallet = self.clone();
 
         task::spawn(async move {
-            'outer: loop {
+            loop {
                 log::debug!("[background_syncing]: syncing wallet");
 
                 if let Err(err) = wallet.sync(options.clone()).await {
@@ -70,7 +70,7 @@ where
                 // If true it means rx_background_sync changed to BackgroundSyncStatus::Stopping
                 if Ok(true) == res {
                     log::debug!("[background_syncing]: stopping");
-                    break 'outer;
+                    break;
                 }
             }
             tx_background_sync.send(BackgroundSyncStatus::NotRunning).ok();
