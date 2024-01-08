@@ -79,15 +79,20 @@ impl Wallet {
             return Err(crate::wallet::Error::Backup("backup path doesn't exist"));
         }
 
-        let mut wallet_data = self.data.write().await;
+        let wallet_data = self.data().await;
 
-        let mut secret_manager = self.secret_manager.as_ref().write().await;
-        // Get the current snapshot path if set
-        let new_snapshot_path = if let SecretManager::Stronghold(stronghold) = &mut *secret_manager {
-            stronghold.snapshot_path.clone()
-        } else {
-            PathBuf::from("wallet.stronghold")
-        };
+        // We don't want to overwrite a possible existing wallet
+        // TODO not too sure about this, it used to check the presence of accounts, this is not 100% equivalent
+        if !wallet_data.outputs.is_empty() {
+            return Err(crate::wallet::Error::Backup(
+                "can't restore backup when there is already a wallet",
+            ));
+        }
+
+        let curr_bip_path = wallet_data.bip_path;
+
+        // Explicitly drop the data to avoid contention
+        drop(wallet_data);
 
         // We'll create a new stronghold to load the backup
         let new_stronghold = StrongholdSecretManager::builder()
@@ -103,15 +108,23 @@ impl Wallet {
         let ignore_backup_values = ignore_if_bip_path_mismatch.map_or(false, |ignore| {
             if ignore {
                 // TODO: #1279 okay that if both are none we always load the backup values?
-                wallet_data.bip_path != read_bip_path
+                curr_bip_path != read_bip_path
             } else {
                 false
             }
         });
 
+        // TODO: Do we even need to do this, since it should get set when we restore below?
         if !ignore_backup_values {
-            wallet_data.bip_path = read_bip_path;
+            self.data_mut().await.bip_path = read_bip_path;
         }
+
+        // Get the current snapshot path if set
+        let new_snapshot_path = if let SecretManager::Stronghold(stronghold) = &*self.secret_manager.read().await {
+            stronghold.snapshot_path.clone()
+        } else {
+            PathBuf::from("wallet.stronghold")
+        };
 
         if let Some(mut read_secret_manager) = read_secret_manager {
             // We have to replace the snapshot path with the current one, when building stronghold
@@ -129,15 +142,12 @@ impl Wallet {
                 // Set password to restored secret manager
                 stronghold.set_password(stronghold_password).await?;
             }
-            *secret_manager = restored_secret_manager;
+            *self.secret_manager.write().await = restored_secret_manager;
         } else {
             // If no secret manager data was in the backup, just copy the Stronghold file so the seed is available in
             // the new location.
             fs::copy(backup_path, new_snapshot_path)?;
         }
-
-        // drop secret manager, otherwise we get a deadlock in set_client_options() (there inside of save_wallet_data())
-        drop(secret_manager);
 
         if ignore_if_bip_path_mismatch.is_none() {
             if let Some(read_client_options) = read_client_options {
@@ -153,7 +163,7 @@ impl Wallet {
                 });
 
                 if restore_wallet {
-                    *wallet_data = read_wallet_data;
+                    *self.data_mut().await = read_wallet_data;
                 }
             }
         }
@@ -176,10 +186,10 @@ impl Wallet {
                 .with_client_options(self.client_options().await)
                 .with_bip_path(self.data().await.bip_path);
 
-            wallet_builder.save(&*self.storage_manager.read().await).await?;
+            wallet_builder.save(self.storage_manager()).await?;
 
             // also save wallet data to db
-            self.save(Some(&wallet_data)).await?;
+            self.storage_manager().save_wallet_data(&*self.data().await).await?;
         }
 
         Ok(())
@@ -231,8 +241,7 @@ impl Wallet<StrongholdSecretManager> {
             return Err(crate::wallet::Error::Backup("backup path doesn't exist"));
         }
 
-        // Will be replaced by the restored wallet data
-        let mut wallet_data = self.data_mut().await;
+        let wallet_data = self.data().await;
 
         // We don't want to overwrite a possible existing wallet
         // TODO not too sure about this, it used to check the presence of accounts, this is not 100% equivalent
@@ -242,9 +251,10 @@ impl Wallet<StrongholdSecretManager> {
             ));
         }
 
-        let mut secret_manager = self.secret_manager.as_ref().write().await;
-        // Get the current snapshot path if set
-        let new_snapshot_path = secret_manager.snapshot_path.clone();
+        let curr_bip_path = wallet_data.bip_path;
+
+        // Explicitly drop the data to avoid contention
+        drop(wallet_data);
 
         // We'll create a new stronghold to load the backup
         let new_stronghold = StrongholdSecretManager::builder()
@@ -260,17 +270,21 @@ impl Wallet<StrongholdSecretManager> {
         let ignore_backup_values = ignore_if_bip_path_mismatch.map_or(false, |ignore| {
             if ignore {
                 // TODO: #1279 okay that if both are none we always load the backup values?
-                wallet_data.bip_path != read_bip_path
+                curr_bip_path != read_bip_path
             } else {
                 false
             }
         });
 
+        // TODO: Do we even need to do this, since it should get set when we restore below?
         if !ignore_backup_values {
-            wallet_data.bip_path = read_bip_path;
+            self.data_mut().await.bip_path = read_bip_path;
         }
 
         if let Some(mut read_secret_manager) = read_secret_manager {
+            // Get the current snapshot path if set
+            let new_snapshot_path = self.secret_manager.read().await.snapshot_path.clone();
+
             read_secret_manager.snapshot_path = new_snapshot_path.to_string_lossy().into_owned();
 
             let restored_secret_manager = StrongholdSecretManager::from_config(&read_secret_manager)
@@ -281,11 +295,8 @@ impl Wallet<StrongholdSecretManager> {
 
             // Set password to restored secret manager
             restored_secret_manager.set_password(stronghold_password).await?;
-            *secret_manager = restored_secret_manager;
+            *self.secret_manager.write().await = restored_secret_manager;
         }
-
-        // drop secret manager, otherwise we get a deadlock in set_client_options()
-        drop(secret_manager);
 
         // Update Wallet with read data
         if ignore_if_bip_path_mismatch.is_none() {
@@ -303,7 +314,7 @@ impl Wallet<StrongholdSecretManager> {
                 });
 
                 if restore_wallet {
-                    *wallet_data = read_wallet_data;
+                    *self.data_mut().await = read_wallet_data;
                 }
             }
         }
@@ -326,10 +337,10 @@ impl Wallet<StrongholdSecretManager> {
                 .with_client_options(self.client_options().await)
                 .with_bip_path(self.data().await.bip_path);
 
-            wallet_builder.save(&*self.storage_manager.read().await).await?;
+            wallet_builder.save(self.storage_manager()).await?;
 
             // also save wallet data to db
-            self.save(Some(&wallet_data)).await?;
+            self.storage_manager().save_wallet_data(&*self.data().await).await?;
         }
 
         Ok(())

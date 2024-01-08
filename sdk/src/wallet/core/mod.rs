@@ -94,7 +94,7 @@ pub struct WalletInner<S: SecretManage = SecretManager> {
     #[cfg(feature = "storage")]
     pub(crate) storage_options: StorageOptions,
     #[cfg(feature = "storage")]
-    pub(crate) storage_manager: tokio::sync::RwLock<StorageManager>,
+    pub(crate) storage_manager: StorageManager,
 }
 
 /// Wallet data.
@@ -354,8 +354,6 @@ where
         #[cfg(feature = "storage")]
         let default_sync_options = inner
             .storage_manager
-            .read()
-            .await
             .get_default_sync_options()
             .await?
             .unwrap_or_default();
@@ -396,28 +394,6 @@ where
         Ok(output_response.output)
     }
 
-    /// Save the wallet to the database, accepts the updated wallet data as option so we don't need to drop it before
-    /// saving
-    #[cfg(feature = "storage")]
-    pub(crate) async fn save(&self, updated_wallet: Option<&WalletData>) -> Result<()> {
-        log::debug!("[save] wallet data");
-        match updated_wallet {
-            Some(wallet) => {
-                let mut storage_manager = self.storage_manager.write().await;
-                storage_manager.save_wallet_data(wallet).await?;
-                drop(storage_manager);
-            }
-            None => {
-                let wallet_data = self.data.read().await;
-                let mut storage_manager = self.storage_manager.write().await;
-                storage_manager.save_wallet_data(&wallet_data).await?;
-                drop(storage_manager);
-                drop(wallet_data);
-            }
-        }
-        Ok(())
-    }
-
     #[cfg(feature = "events")]
     pub(crate) async fn emit(&self, wallet_event: super::events::types::WalletEvent) {
         self.inner.emit(wallet_event).await
@@ -429,6 +405,11 @@ where
 
     pub(crate) async fn data_mut(&self) -> tokio::sync::RwLockWriteGuard<'_, WalletData> {
         self.data.write().await
+    }
+
+    #[cfg(feature = "storage")]
+    pub(crate) fn storage_manager(&self) -> &StorageManager {
+        &self.storage_manager
     }
 
     /// Get the alias of the wallet if one was set.

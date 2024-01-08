@@ -33,8 +33,7 @@ where
     pub async fn set_default_sync_options(&self, options: SyncOptions) -> crate::wallet::Result<()> {
         #[cfg(feature = "storage")]
         {
-            let storage_manager = self.storage_manager.read().await;
-            storage_manager.set_default_sync_options(&options).await?;
+            self.storage_manager().set_default_sync_options(&options).await?;
         }
 
         *self.default_sync_options.lock().await = options;

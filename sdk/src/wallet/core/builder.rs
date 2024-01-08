@@ -148,7 +148,7 @@ where
         let storage = Memory::default();
 
         #[cfg(feature = "storage")]
-        let mut storage_manager = StorageManager::new(storage, storage_options.encryption_key.clone()).await?;
+        let storage_manager = StorageManager::new(storage, storage_options.encryption_key.clone()).await?;
 
         #[cfg(feature = "storage")]
         let loaded_wallet_builder = Self::load(&storage_manager).await?;
@@ -257,7 +257,7 @@ where
             #[cfg(feature = "storage")]
             storage_options,
             #[cfg(feature = "storage")]
-            storage_manager: tokio::sync::RwLock::new(storage_manager),
+            storage_manager,
         };
         #[cfg(feature = "storage")]
         let wallet_data = wallet_data.unwrap_or_else(|| WalletData::new(self.bip_path, address, self.alias.clone()));

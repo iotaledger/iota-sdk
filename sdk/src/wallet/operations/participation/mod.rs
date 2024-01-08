@@ -60,12 +60,7 @@ where
         log::debug!("[get_participation_overview]");
         // TODO: Could use the address endpoint in the future when https://github.com/iotaledger/inx-participation/issues/50 is done.
 
-        let mut spent_cached_outputs = self
-            .storage_manager
-            .read()
-            .await
-            .get_cached_participation_output_status()
-            .await?;
+        let mut spent_cached_outputs = self.storage_manager().get_cached_participation_output_status().await?;
         let restored_spent_cached_outputs_len = spent_cached_outputs.len();
         log::debug!(
             "[get_participation_overview] restored_spent_cached_outputs_len: {}",
@@ -210,9 +205,7 @@ where
         );
         // Only store updated data if new outputs got added
         if spent_cached_outputs.len() > restored_spent_cached_outputs_len {
-            self.storage_manager
-                .read()
-                .await
+            self.storage_manager()
                 .set_cached_participation_output_status(&spent_cached_outputs)
                 .await?;
         }
@@ -231,7 +224,7 @@ where
     /// If event isn't found, the client from the account will be returned.
     pub(crate) async fn get_client_for_event(&self, id: &ParticipationEventId) -> crate::wallet::Result<Client> {
         log::debug!("[get_client_for_event]");
-        let events = self.storage_manager.read().await.get_participation_events().await?;
+        let events = self.storage_manager().get_participation_events().await?;
 
         let event_with_nodes = match events.get(id) {
             Some(event_with_nodes) => event_with_nodes,
@@ -256,7 +249,7 @@ where
         let latest_milestone_index = 0;
         // let latest_milestone_index = self.client().get_info().await?.node_info.status.latest_milestone.index;
 
-        let events = self.storage_manager.read().await.get_participation_events().await?;
+        let events = self.storage_manager().get_participation_events().await?;
 
         for participation in participations.participations.clone().iter() {
             if let Some(event_with_nodes) = events.get(&participation.event_id) {
