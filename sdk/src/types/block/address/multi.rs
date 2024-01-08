@@ -128,7 +128,7 @@ impl MultiAddress {
     pub fn hash(&self) -> [u8; 32] {
         let mut digest = Blake2b256::new();
 
-        digest.update([MultiAddress::KIND]);
+        digest.update([Self::KIND]);
         digest.update(self.pack_to_vec());
 
         digest.finalize().into()
