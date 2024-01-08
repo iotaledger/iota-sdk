@@ -3,7 +3,7 @@ import sys
 
 from dotenv import load_dotenv
 
-from iota_sdk import MintNftParams, Utils, Wallet, Irc27Metadata
+from iota_sdk import MintNftParams, Utils, Wallet, WalletOptions, Irc27Metadata
 
 load_dotenv()
 
@@ -19,17 +19,15 @@ if len(sys.argv) < 2:
 
 issuer_nft_id = sys.argv[1]
 
-wallet = Wallet(os.environ['WALLET_DB_PATH'])
+wallet = Wallet(WalletOptions(storage_path=os.environ.get('WALLET_DB_PATH')))
 
 if 'STRONGHOLD_PASSWORD' not in os.environ:
     raise Exception(".env STRONGHOLD_PASSWORD is undefined, see .env.example")
 
 wallet.set_stronghold_password(os.environ["STRONGHOLD_PASSWORD"])
 
-account = wallet.get_account('Alice')
-
-# Sync account with the node
-account.sync()
+# Sync wallet with the node
+wallet.sync()
 
 bech32_hrp = wallet.get_client().get_bech32_hrp()
 issuer = Utils.nft_id_to_bech32(issuer_nft_id, bech32_hrp)
@@ -65,13 +63,13 @@ while nft_mint_params:
     print(
         f'Minting {len(chunk)} NFTs... ({NFT_COLLECTION_SIZE-len(nft_mint_params)}/{NFT_COLLECTION_SIZE})'
     )
-    transaction = account.mint_nfts(chunk)
+    transaction = wallet.mint_nfts(chunk)
 
     # Wait for transaction to get included
-    block_id = account.reissue_transaction_until_included(
+    block_id = wallet.reissue_transaction_until_included(
         transaction.transaction_id)
 
     print(f'Block sent: {os.environ["EXPLORER_URL"]}/block/{block_id}')
 
     # Sync so the new outputs are available again for new transactions
-    account.sync()
+    wallet.sync()

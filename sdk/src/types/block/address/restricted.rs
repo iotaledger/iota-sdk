@@ -14,6 +14,7 @@ use crate::types::block::{
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Getters, Packable)]
 #[getset(get = "pub")]
 pub struct RestrictedAddress {
+    #[packable(verify_with = verify_address)]
     address: Address,
     allowed_capabilities: AddressCapabilities,
 }
@@ -26,9 +27,9 @@ impl RestrictedAddress {
     #[inline(always)]
     pub fn new(address: impl Into<Address>) -> Result<Self, Error> {
         let address = address.into();
-        if matches!(address, Address::Restricted(_)) {
-            return Err(Error::InvalidAddressKind(Self::KIND));
-        }
+
+        verify_address::<true>(&address)?;
+
         Ok(Self {
             address,
             allowed_capabilities: Default::default(),
@@ -75,6 +76,19 @@ impl core::fmt::Display for RestrictedAddress {
     }
 }
 
+fn verify_address<const VERIFY: bool>(address: &Address) -> Result<(), Error> {
+    if VERIFY
+        && !matches!(
+            address,
+            Address::Ed25519(_) | Address::Account(_) | Address::Nft(_) | Address::Anchor(_) | Address::Multi(_)
+        )
+    {
+        Err(Error::InvalidAddressKind(address.kind()))
+    } else {
+        Ok(())
+    }
+}
+
 /// All possible capabilities that an [`Address`] can have.
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
 #[non_exhaustive]
@@ -91,12 +105,12 @@ pub enum AddressCapabilityFlag {
     OutputsWithStorageDepositReturn,
     /// Can receive Account Outputs.
     AccountOutputs,
+    /// Can receive Anchor Outputs.
+    AnchorOutputs,
     /// Can receive NFT Outputs.
     NftOutputs,
     /// Can receive Delegation Outputs.
     DelegationOutputs,
-    /// Can receive Anchor Outputs.
-    AnchorOutputs,
 }
 
 impl AddressCapabilityFlag {
@@ -107,10 +121,10 @@ impl AddressCapabilityFlag {
     const OUTPUTS_WITH_EXPIRATION: u8 = 0b00001000;
     const OUTPUTS_WITH_STORAGE_DEPOSIT_RETURN: u8 = 0b00010000;
     const ACCOUNT_OUTPUTS: u8 = 0b00100000;
-    const NFT_OUTPUTS: u8 = 0b01000000;
-    const DELEGATION_OUTPUTS: u8 = 0b10000000;
+    const ANCHOR_OUTPUTS: u8 = 0b01000000;
+    const NFT_OUTPUTS: u8 = 0b10000000;
     // Byte 1
-    const ANCHOR_OUTPUTS: u8 = 0b00000001;
+    const DELEGATION_OUTPUTS: u8 = 0b00000001;
 }
 
 impl CapabilityFlag for AddressCapabilityFlag {
@@ -124,9 +138,9 @@ impl CapabilityFlag for AddressCapabilityFlag {
             Self::OutputsWithExpiration => Self::OUTPUTS_WITH_EXPIRATION,
             Self::OutputsWithStorageDepositReturn => Self::OUTPUTS_WITH_STORAGE_DEPOSIT_RETURN,
             Self::AccountOutputs => Self::ACCOUNT_OUTPUTS,
+            Self::AnchorOutputs => Self::ANCHOR_OUTPUTS,
             Self::NftOutputs => Self::NFT_OUTPUTS,
             Self::DelegationOutputs => Self::DELEGATION_OUTPUTS,
-            Self::AnchorOutputs => Self::ANCHOR_OUTPUTS,
         }
     }
 
@@ -138,9 +152,9 @@ impl CapabilityFlag for AddressCapabilityFlag {
             | Self::OutputsWithExpiration
             | Self::OutputsWithStorageDepositReturn
             | Self::AccountOutputs
-            | Self::NftOutputs
-            | Self::DelegationOutputs => 0,
-            Self::AnchorOutputs => 1,
+            | Self::AnchorOutputs
+            | Self::NftOutputs => 0,
+            Self::DelegationOutputs => 1,
         }
     }
 
@@ -152,9 +166,9 @@ impl CapabilityFlag for AddressCapabilityFlag {
             Self::OutputsWithExpiration,
             Self::OutputsWithStorageDepositReturn,
             Self::AccountOutputs,
+            Self::AnchorOutputs,
             Self::NftOutputs,
             Self::DelegationOutputs,
-            Self::AnchorOutputs,
         ]
         .into_iter()
     }

@@ -165,7 +165,9 @@ impl DelegationOutputBuilder {
 
     /// Finishes the builder into a [`DelegationOutput`] without parameters verification.
     pub fn finish(self) -> Result<DelegationOutput, Error> {
-        verify_validator_address::<true>(&self.validator_address)?;
+        let validator_address = Address::from(self.validator_address);
+
+        verify_validator_address::<true>(&validator_address)?;
 
         let unlock_conditions = UnlockConditions::from_set(self.unlock_conditions)?;
 
@@ -175,7 +177,7 @@ impl DelegationOutputBuilder {
             amount: 0,
             delegated_amount: self.delegated_amount,
             delegation_id: self.delegation_id,
-            validator_address: self.validator_address,
+            validator_address,
             start_epoch: self.start_epoch,
             end_epoch: self.end_epoch,
             unlock_conditions,
@@ -201,7 +203,7 @@ impl From<&DelegationOutput> for DelegationOutputBuilder {
             amount: OutputBuilderAmount::Amount(output.amount),
             delegated_amount: output.delegated_amount,
             delegation_id: output.delegation_id,
-            validator_address: output.validator_address,
+            validator_address: *output.validator_address.as_account(),
             start_epoch: output.start_epoch,
             end_epoch: output.end_epoch,
             unlock_conditions: output.unlock_conditions.iter().cloned().collect(),
@@ -222,7 +224,7 @@ pub struct DelegationOutput {
     delegation_id: DelegationId,
     /// Account address of the validator to which this output is delegating.
     #[packable(verify_with = verify_validator_address_packable)]
-    validator_address: AccountAddress,
+    validator_address: Address,
     /// Index of the first epoch for which this output delegates.
     start_epoch: EpochIndex,
     /// Index of the last epoch for which this output delegates.
@@ -281,7 +283,7 @@ impl DelegationOutput {
 
     /// Returns the validator address of the [`DelegationOutput`].
     pub fn validator_address(&self) -> &AccountAddress {
-        &self.validator_address
+        &self.validator_address.as_account()
     }
 
     /// Returns the start epoch of the [`DelegationOutput`].
@@ -350,16 +352,22 @@ impl WorkScore for DelegationOutput {
 
 impl MinimumOutputAmount for DelegationOutput {}
 
-fn verify_validator_address<const VERIFY: bool>(validator_address: &AccountAddress) -> Result<(), Error> {
-    if VERIFY && validator_address.is_null() {
-        Err(Error::NullDelegationValidatorId)
-    } else {
-        Ok(())
+fn verify_validator_address<const VERIFY: bool>(validator_address: &Address) -> Result<(), Error> {
+    if VERIFY {
+        if let Address::Account(validator_address) = validator_address {
+            if validator_address.is_null() {
+                return Err(Error::NullDelegationValidatorId);
+            }
+        } else {
+            return Err(Error::InvalidAddressKind(validator_address.kind()));
+        }
     }
+
+    Ok(())
 }
 
 fn verify_validator_address_packable<const VERIFY: bool>(
-    validator_address: &AccountAddress,
+    validator_address: &Address,
     _: &ProtocolParameters,
 ) -> Result<(), Error> {
     verify_validator_address::<VERIFY>(validator_address)
