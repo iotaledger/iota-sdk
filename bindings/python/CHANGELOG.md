@@ -19,6 +19,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security -->
 
+## 1.1.3 - 202Y-MM-DD
+
+### Added
+
+- Optional `max_parallel_api_requests` to `Client` constructor;
+
 ## 1.1.2 - 2023-12-01
 
 ### Added
