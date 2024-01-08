@@ -20,13 +20,13 @@ async function run() {
 
         console.log(
             await client.getUtxoChanges(
-                '0x35663bfc387096d0c248f86b0877f90da5dd83b0b8163316330c3277f6d2ffb20a000000',
+                '0xa2d90c226abbefec86a12aecf4c3e04c062fa1799458bd6af5f2d1a5a89e107c09000000',
             ),
         );
         console.log(await client.getUtxoChangesByIndex(10));
         console.log(
             await client.getCommitment(
-                '0x35663bfc387096d0c248f86b0877f90da5dd83b0b8163316330c3277f6d2ffb20a000000',
+                '0xa2d90c226abbefec86a12aecf4c3e04c062fa1799458bd6af5f2d1a5a89e107c09000000',
             ),
         );
         console.log(await client.getCommitmentByIndex(10));
@@ -45,10 +45,12 @@ async function run() {
                 '0x907c02e9302e0f0571f10f885594e56d8c54ff0708ab7a39bc1b74d396b93b12',
             ),
         );
-        // Error: node error: error decoding response body: missing field `validators` at line 1 column 29
-        // console.log(await client.getValidators())
-        //  Error: node error: error decoding response body: unknown variant `accepted`, expected one of `pending`, `confirmed`, `finalized`, `failed` at line 1 column 123
-        // console.log(await client.getTransactionMetadata("0x6f6648fcadd2ef645935d6cc052b3804bc7ff7a5d75166e46862912fb278377259000000"))
+        console.log(await client.getValidators());
+        console.log(
+            await client.getTransactionMetadata(
+                '0x1afdc211c167ec58529b85a3dc848370d789bd6df16cc7d37d97021d5a37cc3917000000',
+            ),
+        );
     } catch (error) {
         console.error('Error: ', error);
     }

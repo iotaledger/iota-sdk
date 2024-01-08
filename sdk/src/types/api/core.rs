@@ -206,7 +206,7 @@ pub struct ValidatorResponse {
 #[serde(rename_all = "camelCase")]
 pub struct ValidatorsResponse {
     /// List of registered validators ready for the next epoch.
-    validators: Vec<ValidatorResponse>,
+    stakers: Vec<ValidatorResponse>,
     /// The number of validators returned per one API request with pagination.
     page_size: u32,
     /// The cursor that needs to be provided as cursor query parameter to request the next page. If empty, this was the
@@ -356,11 +356,13 @@ pub enum BlockState {
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum TransactionState {
-    // Stored but not confirmed.
+    // Not included yet.
     Pending,
-    // Confirmed with the first level of knowledge.
+    // Included.
+    Accepted,
+    // Included and its included block is confirmed.
     Confirmed,
-    // Included and can no longer be reverted.
+    // Included, its included block is finalized and cannot be reverted anymore.
     Finalized,
     // The block is not successfully issued due to failure reason.
     Failed,

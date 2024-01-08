@@ -6,6 +6,7 @@ import { BlockState, TransactionState } from './state';
 import { BlockFailureReason } from './block-failure-reason';
 import { Block } from '../block';
 import { TransactionId } from '../wallet';
+import { TransactionFailureReason } from './transaction-failure-reason';
 
 /**
  * Response from the metadata endpoint.
@@ -58,5 +59,5 @@ export interface TransactionMetadata {
     /**
      * The transaction failure reason.
      */
-    transactionFailureReason?: BlockFailureReason;
+    transactionFailureReason?: TransactionFailureReason;
 }
