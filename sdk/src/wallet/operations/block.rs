@@ -19,6 +19,7 @@ where
     ) -> Result<BlockId> {
         log::debug!("submit_basic_block");
 
+        // If an issuer ID is provided, use it; otherwise, use the first available account or implicit account.
         let issuer_id = issuer_id
             .into()
             .or(self
