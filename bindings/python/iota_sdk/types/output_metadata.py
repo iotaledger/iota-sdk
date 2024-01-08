@@ -65,7 +65,7 @@ class OutputWithMetadata:
         """
         d = {}
 
-        d['metadata'] = self.metadata.__dict__
+        d['metadata'] = self.metadata.to_dict()
         d['output'] = self.output.as_dict()
 
         return d

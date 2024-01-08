@@ -1,7 +1,6 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use crypto::keys::bip44::Bip44;
 use instant::Instant;
 
 use crate::{
@@ -15,11 +14,7 @@ use crate::{
             payload::{signed_transaction::TransactionId, Payload, SignedTransactionPayload},
         },
     },
-    wallet::{
-        build_transaction_from_payload_and_inputs, task,
-        types::{AddressWithUnspentOutputs, OutputData},
-        Wallet,
-    },
+    wallet::{build_transaction_from_payload_and_inputs, task, types::OutputData, Wallet},
 };
 
 impl<S: 'static + SecretManage> Wallet<S>
@@ -31,7 +26,6 @@ where
     pub(crate) async fn output_response_to_output_data(
         &self,
         outputs_with_meta: Vec<OutputWithMetadata>,
-        associated_address: &AddressWithUnspentOutputs,
     ) -> crate::wallet::Result<Vec<OutputData>> {
         log::debug!("[SYNC] convert output_responses");
         // store outputs with network_id
@@ -48,14 +42,6 @@ where
                     .get(output_with_meta.metadata().output_id().transaction_id())
                     .map_or(false, |tx| !tx.incoming);
 
-                let chain = wallet_data.bip_path.map(|bip_path| {
-                    // BIP 44 (HD wallets) and 4218 is the registered index for IOTA https://github.com/satoshilabs/slips/blob/master/slip-0044.md
-                    Bip44::new(bip_path.coin_type)
-                        .with_account(bip_path.account)
-                        .with_change(associated_address.internal as _)
-                        .with_address_index(associated_address.key_index)
-                });
-
                 OutputData {
                     output_id: output_with_meta.metadata().output_id().to_owned(),
                     metadata: *output_with_meta.metadata(),
@@ -64,7 +50,6 @@ where
                     is_spent: output_with_meta.metadata().is_spent(),
                     network_id,
                     remainder,
-                    chain,
                 }
             })
             .collect())

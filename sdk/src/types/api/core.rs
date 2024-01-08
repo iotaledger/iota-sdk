@@ -220,14 +220,21 @@ pub struct ValidatorsResponse {
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ManaRewardsResponse {
-    /// The starting epoch index for which the mana rewards are returned.
+    /// First epoch for which rewards can be claimed.
+    /// This value is useful for checking if rewards have expired (by comparing against the staking or delegation
+    /// start) or would expire soon (by checking its relation to the rewards retention period).
     pub start_epoch: EpochIndex,
-    /// The ending epoch index for which the mana rewards are returned, the decay is applied up to this point
-    /// included.
+    /// Last epoch for which rewards can be claimed.
     pub end_epoch: EpochIndex,
-    /// The amount of totally available rewards the requested output may claim.
+    /// Amount of totally available decayed rewards the requested output may claim.
     #[serde(with = "string")]
     pub rewards: u64,
+    /// Rewards of the latest committed epoch of the staking pool to which this validator or delegator belongs.
+    /// The ratio of this value and the maximally possible rewards for the latest committed epoch can be used to
+    /// determine how well the validator of this staking pool performed in that epoch.
+    /// Note that if the pool was not part of the committee in the latest committed epoch, this value is 0.
+    #[serde(with = "string")]
+    pub latest_committed_epoch_pool_rewards: u64,
 }
 
 /// Response of GET /api/core/v3/committee
@@ -466,6 +473,26 @@ pub struct UtxoChangesResponse {
     pub commitment_id: SlotCommitmentId,
     pub created_outputs: Vec<OutputId>,
     pub consumed_outputs: Vec<OutputId>,
+}
+
+/// Response of
+/// - GET /api/core/v3/commitments/{commitmentId}/utxo-changes/full
+/// - GET /api/core/v3/commitments/by-slot/{slot}/utxo-changes/full
+/// Returns all full UTXO changes that happened at a specific slot.
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct UtxoChangesFullResponse {
+    pub commitment_id: SlotCommitmentId,
+    pub created_outputs: Vec<OutputWithId>,
+    pub consumed_outputs: Vec<OutputWithId>,
+}
+
+/// An Output and its ID.
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct OutputWithId {
+    pub output_id: OutputId,
+    pub output: Output,
 }
 
 /// Contains the generic [`Output`] with associated [`OutputIdProof`].

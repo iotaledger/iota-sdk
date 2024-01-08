@@ -42,10 +42,7 @@ where
                             .get_outputs(address_with_unspent_outputs.output_ids.clone())
                             .await?;
                         let unspent_outputs_data = wallet
-                            .output_response_to_output_data(
-                                unspent_outputs_with_metadata,
-                                &address_with_unspent_outputs,
-                            )
+                            .output_response_to_output_data(unspent_outputs_with_metadata)
                             .await?;
                         crate::wallet::Result::Ok((address_with_unspent_outputs, unspent_outputs_data))
                     })

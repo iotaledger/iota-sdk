@@ -3,18 +3,16 @@ import os
 from dotenv import load_dotenv
 
 from iota_sdk import (RemainderValueStrategy, TaggedDataPayload, SendParams,
-                      TransactionOptions, Wallet, utf8_to_hex)
+                      TransactionOptions, Wallet, WalletOptions, utf8_to_hex)
 
 load_dotenv()
 
 # This example sends a transaction with a tagged data payload.
 
-wallet = Wallet(os.environ['WALLET_DB_PATH'])
-
-account = wallet.get_account('Alice')
+wallet = Wallet(WalletOptions(storage_path=os.environ.get('WALLET_DB_PATH')))
 
 # Sync account with the node
-response = account.sync()
+response = wallet.sync()
 
 if 'STRONGHOLD_PASSWORD' not in os.environ:
     raise Exception(".env STRONGHOLD_PASSWORD is undefined, see .env.example")
@@ -26,7 +24,7 @@ params = [SendParams(
     amount=1000000,
 )]
 
-transaction = account.send_with_params(
+transaction = wallet.send_with_params(
     params,
     TransactionOptions(
         remainder_value_strategy=RemainderValueStrategy.ReuseAddress,

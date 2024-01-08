@@ -178,7 +178,7 @@ impl<'a> SemanticValidationContext<'a> {
                     return Ok(Some(TransactionFailureReason::InvalidInputUnlock));
                 }
 
-                if let Err(conflict) = self.output_unlock(&consumed_output, &output_id, &unlocks[index]) {
+                if let Err(conflict) = self.output_unlock(consumed_output, output_id, &unlocks[index]) {
                     return Ok(Some(conflict));
                 }
             }

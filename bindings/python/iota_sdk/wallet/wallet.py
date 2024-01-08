@@ -2,13 +2,45 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from json import dumps
-from typing import Any, Dict, List, Optional, Union
+from typing import List, Optional, Union
+from dataclasses import dataclass
 
 from iota_sdk import destroy_wallet, create_wallet, listen_wallet, get_client_from_wallet, get_secret_manager_from_wallet, Client
 from iota_sdk.secret_manager.secret_manager import LedgerNanoSecretManager, MnemonicSecretManager, StrongholdSecretManager, SeedSecretManager, SecretManager
-from iota_sdk.types.address import AccountAddress
-from iota_sdk.wallet.account import Account, _call_method_routine
+
+from iota_sdk.wallet.common import _call_method_routine
+from iota_sdk.wallet.prepared_transaction import PreparedTransaction, PreparedCreateTokenTransaction
 from iota_sdk.wallet.sync_options import SyncOptions
+from iota_sdk.types.balance import Balance
+from iota_sdk.types.burn import Burn
+from iota_sdk.types.common import HexStr, json
+from iota_sdk.types.client_options import ClientOptions
+from iota_sdk.types.filter_options import FilterOptions
+from iota_sdk.types.native_token import NativeToken
+from iota_sdk.types.output_data import OutputData
+from iota_sdk.types.output_id import OutputId
+from iota_sdk.types.output import BasicOutput, NftOutput, Output, deserialize_output
+from iota_sdk.types.output_params import OutputParams
+from iota_sdk.types.transaction_data import PreparedTransactionData, SignedTransactionData
+from iota_sdk.types.send_params import CreateAccountOutputParams, CreateNativeTokenParams, MintNftParams, SendNativeTokenParams, SendNftParams, SendParams
+from iota_sdk.types.signature import Bip44
+from iota_sdk.types.transaction_with_metadata import TransactionWithMetadata
+from iota_sdk.types.transaction_options import TransactionOptions
+from iota_sdk.types.consolidation_params import ConsolidationParams
+
+
+@json
+@dataclass
+class WalletOptions:
+    """Options for the Wallet builder."""
+    address: Optional[str] = None
+    alias: Optional[str] = None
+    bip_path: Optional[Bip44] = None
+    client_options: Optional[ClientOptions] = None
+    secret_manager: Optional[Union[LedgerNanoSecretManager,
+                                   MnemonicSecretManager, SeedSecretManager, StrongholdSecretManager]] = None
+    storage_path: Optional[str] = None
+
 
 # pylint: disable=too-many-public-methods
 
@@ -20,73 +52,16 @@ class Wallet():
         handle: The wallet handle.
     """
 
-    def __init__(self,
-                 storage_path: Optional[str] = None,
-                 client_options: Optional[Dict[str, Any]] = None,
-                 coin_type: Optional[int] = None,
-                 secret_manager: Optional[Union[LedgerNanoSecretManager, MnemonicSecretManager, SeedSecretManager, StrongholdSecretManager]] = None):
+    def __init__(self, options: WalletOptions):
         """Initialize `self`.
         """
-
-        # Setup the options
-        options: Dict[str, Any] = {'storagePath': storage_path}
-        if client_options:
-            options['clientOptions'] = client_options.to_dict()
-        if coin_type:
-            options['coinType'] = coin_type
-        if secret_manager:
-            options['secretManager'] = secret_manager
-
-        options_str: str = dumps(options)
-
         # Create the message handler
-        self.handle = create_wallet(options_str)
+        self.handle = create_wallet(dumps(options.to_dict()))
 
     def get_handle(self):
         """Return the wallet handle.
         """
         return self.handle
-
-    def create_account(self, alias: Optional[str] = None, bech32_hrp: Optional[str]
-                       = None, addresses: Optional[AccountAddress] = None) -> Account:
-        """Create a new account.
-
-        Args:
-            alias: The alias of the new account.
-            bech32_hrp: The Bech32 HRP of the new account.
-
-        Returns:
-            An account object.
-        """
-        account_data = self._call_method(
-            'createAccount', {
-                'alias': self.__return_str_or_none(alias),
-                'bech32Hrp': self.__return_str_or_none(bech32_hrp),
-                'addresses': addresses,
-            }
-        )
-        return Account(account_data, self.handle)
-
-    def get_account(self, account_id: Union[str, int]) -> Account:
-        """Get the account associated with the given account ID or index.
-        """
-        account_data = self._call_method(
-            'getAccount', {
-                'accountId': account_id,
-            }
-        )
-        return Account(account_data, self.handle)
-
-    def get_client(self):
-        """Get the client associated with the wallet.
-        """
-        return Client(client_handle=get_client_from_wallet(self.handle))
-
-    def get_secret_manager(self):
-        """Get the secret manager associated with the wallet.
-        """
-        return SecretManager(
-            secret_manager_handle=get_secret_manager_from_wallet(self.handle))
 
     @_call_method_routine
     def _call_method(self, name: str, data=None):
@@ -96,24 +71,6 @@ class Wallet():
         if data:
             message['data'] = data
         return message
-
-    def get_account_data(self, account_id: Union[str, int]):
-        """Get account data associated with the given account ID or index.
-        """
-        return self._call_method(
-            'getAccount', {
-                'accountId': account_id
-            }
-        )
-
-    def get_accounts(self):
-        """Get all accounts.
-        """
-        accounts_data = self._call_method(
-            'getAccounts',
-        )
-        return [Account(account_data, self.handle)
-                for account_data in accounts_data]
 
     def backup(self, destination: str, password: str):
         """Backup storage.
@@ -149,30 +106,53 @@ class Wallet():
             'isStrongholdPasswordAvailable'
         )
 
-    def recover_accounts(self, account_start_index: int, account_gap_limit: int,
-                         address_gap_limit: int, sync_options: Optional[SyncOptions] = None):
-        """Recover accounts.
+    def destroy(self):
+        """Destroys the wallet instance.
+        """
+        return destroy_wallet(self.handle)
+
+    def emit_test_event(self, event) -> bool:
+        """Helper function to test events.
         """
         return self._call_method(
-            'recoverAccounts', {
-                'accountStartIndex': account_start_index,
-                'accountGapLimit': account_gap_limit,
-                'addressGapLimit': address_gap_limit,
-                'syncOptions': sync_options
-            }
+            'emitTestEvent', {
+                'event': event,
+            },
         )
 
-    def remove_latest_account(self):
-        """Remove latest account.
+    def get_client(self):
+        """Get the client associated with the wallet.
         """
+        return Client(client_handle=get_client_from_wallet(self.handle))
+
+    def get_secret_manager(self):
+        """Get the secret manager associated with the wallet.
+        """
+        return SecretManager(
+            secret_manager_handle=get_secret_manager_from_wallet(self.handle))
+
+    def listen(self, handler, events: Optional[List[int]] = None):
+        """Listen to wallet events, empty array or None will listen to all events.
+        The default value for events is None.
+        """
+        events_array = [] if events is None else events
+        listen_wallet(self.handle, events_array, handler)
+
+    def clear_listeners(self, events: Optional[List[int]] = None):
+        """Remove wallet event listeners, empty array or None will remove all listeners.
+        The default value for events is None.
+        """
+        events_array = [] if events is None else events
         return self._call_method(
-            'removeLatestAccount'
+            'clearListeners', {
+                'eventTypes': events_array
+            }
         )
 
     def restore_backup(self, source: str, password: str):
         """Restore a backup from a Stronghold file.
-        Replaces `client_options`, `coin_type`, `secret_manager` and accounts.
-        Returns an error if accounts were already created. If Stronghold is used
+        Replaces `client_options`, `coin_type`, `secret_manager` and wallet.
+        Returns an error if the wallet was already created. If Stronghold is used
         as the secret_manager, the existing Stronghold file will be overwritten.
         Be aware that if a mnemonic was stored, it will be lost.
         """
@@ -184,26 +164,12 @@ class Wallet():
         )
 
     def set_client_options(self, client_options):
-        """Update the client options for all accounts.
+        """Update the options of the wallet client.
         """
         return self._call_method(
             'setClientOptions',
             {
                 'clientOptions': client_options.to_dict()
-            }
-        )
-
-    def generate_ed25519_address(self, account_index: int, internal: bool, address_index: int,
-                                 options=None, bech32_hrp: Optional[str] = None) -> List[str]:
-        """Generate an address without storing it.
-        """
-        return self._call_method(
-            'generateEd25519Address', {
-                'accountIndex': account_index,
-                'internal': internal,
-                'addressIndex': address_index,
-                'options': options,
-                'bech32Hrp': bech32_hrp
             }
         )
 
@@ -227,16 +193,6 @@ class Wallet():
             }
         )
 
-    def store_mnemonic(self, mnemonic: str):
-        """Store mnemonic.
-        """
-        return self._call_method(
-            'storeMnemonic', {
-                'mnemonic': mnemonic
-            }
-
-        )
-
     def start_background_sync(
             self, options: Optional[SyncOptions] = None, interval_in_milliseconds: Optional[int] = None):
         """Start background syncing.
@@ -255,32 +211,557 @@ class Wallet():
             'stopBackgroundSync',
         )
 
-    def listen(self, handler, events: Optional[List[int]] = None):
-        """Listen to wallet events, empty array or None will listen to all events.
-        The default value for events is None.
+    def store_mnemonic(self, mnemonic: str):
+        """Store mnemonic.
         """
-        events_array = [] if events is None else events
-        listen_wallet(self.handle, events_array, handler)
-
-    def clear_listeners(self, events: Optional[List[int]] = None):
-        """Remove wallet event listeners, empty array or None will remove all listeners.
-        The default value for events is None.
-        """
-        events_array = [] if events is None else events
         return self._call_method(
-            'clearListeners', {
-                'eventTypes': events_array
+            'storeMnemonic', {
+                'mnemonic': mnemonic
             }
         )
 
-    def destroy(self):
-        """Destroys the wallet instance.
+    def update_node_auth(self, url: str, auth=None):
+        """Update the authentication for the provided node.
         """
-        return destroy_wallet(self.handle)
+        return self._call_method(
+            'updateNodeAuth', {
+                'url': url,
+                'auth': auth
+            }
+        )
 
-    # pylint: disable=redefined-builtin
-    @staticmethod
-    def __return_str_or_none(opt_str):
-        if opt_str:
-            return opt_str
-        return None
+    def accounts(self) -> List[OutputData]:
+        """Returns the accounts of the wallet.
+        """
+        outputs = self._call_method(
+            'accounts'
+        )
+        return [OutputData.from_dict(o) for o in outputs]
+
+    def burn(
+            self, burn: Burn, options: Optional[TransactionOptions] = None) -> TransactionWithMetadata:
+        """A generic function that can be used to burn native tokens, nfts, foundries and aliases.
+        """
+        return self.prepare_burn(burn, options).send()
+
+    def prepare_burn(
+            self, burn: Burn, options: Optional[TransactionOptions] = None) -> PreparedTransaction:
+        """A generic `prepare_burn()` function that can be used to prepare the burn of native tokens, nfts, foundries and accounts.
+        """
+        prepared = self._call_method(
+            'prepareBurn', {
+                'burn': burn.to_dict(),
+                'options': options
+            },
+        )
+        return PreparedTransaction(self, prepared)
+
+    def prepare_burn_native_token(self,
+                                  token_id: HexStr,
+                                  burn_amount: int,
+                                  options: Optional[TransactionOptions] = None) -> PreparedTransaction:
+        """Burn native tokens. This doesn't require the foundry output which minted them, but will not increase
+        the foundries `melted_tokens` field, which makes it impossible to destroy the foundry output. Therefore it's
+        recommended to use melting, if the foundry output is available.
+        """
+        prepared = self._call_method(
+            'prepareBurn', {
+                'burn': Burn().add_native_token(NativeToken(token_id, hex(burn_amount))).to_dict(),
+                'options': options
+            },
+        )
+        return PreparedTransaction(self, prepared)
+
+    def prepare_burn_nft(self,
+                         nft_id: HexStr,
+                         options: Optional[TransactionOptions] = None) -> PreparedTransaction:
+        """Burn an nft output.
+        """
+        prepared = self._call_method(
+            'prepareBurn', {
+                'burn': Burn().add_nft(nft_id).to_dict(),
+                'options': options
+            },
+        )
+        return PreparedTransaction(self, prepared)
+
+    def claim_outputs(
+            self, output_ids_to_claim: List[OutputId]) -> TransactionWithMetadata:
+        """Claim outputs.
+        """
+        return self.prepare_claim_outputs(output_ids_to_claim).send()
+
+    def prepare_claim_outputs(
+            self, output_ids_to_claim: List[OutputId]) -> PreparedTransaction:
+        """Claim outputs.
+        """
+        return PreparedTransaction(self, self._call_method(
+            'prepareClaimOutputs', {
+                'outputIdsToClaim': output_ids_to_claim
+            }
+        ))
+
+    def consolidate_outputs(
+            self, params: ConsolidationParams) -> TransactionWithMetadata:
+        """Consolidate outputs.
+        """
+        return self.prepare_consolidate_outputs(params).send()
+
+    def prepare_consolidate_outputs(
+            self, params: ConsolidationParams) -> PreparedTransaction:
+        """Consolidate outputs.
+        """
+        prepared = self._call_method(
+            'prepareConsolidateOutputs', {
+                'params': params
+            }
+        )
+        return PreparedTransaction(self, prepared)
+
+    def create_account_output(self,
+                              params: Optional[CreateAccountOutputParams] = None,
+                              options: Optional[TransactionOptions] = None) -> TransactionWithMetadata:
+        """Create an account output.
+        """
+        return self.prepare_create_account_output(params, options).send()
+
+    def prepare_create_account_output(self,
+                                      params: Optional[CreateAccountOutputParams] = None,
+                                      options: Optional[TransactionOptions] = None) -> PreparedTransaction:
+        """Create an account output.
+        """
+        prepared = self._call_method(
+            'prepareCreateAccountOutput', {
+                'params': params,
+                'options': options
+            }
+        )
+        return PreparedTransaction(self, prepared)
+
+    def melt_native_token(self,
+                          token_id: HexStr,
+                          melt_amount: int,
+                          options: Optional[TransactionOptions] = None) -> TransactionWithMetadata:
+        """Melt native tokens. This happens with the foundry output which minted them, by increasing it's
+        `melted_tokens` field.
+        """
+        return self.prepare_melt_native_token(
+            token_id, melt_amount, options).send()
+
+    def prepare_melt_native_token(self,
+                                  token_id: HexStr,
+                                  melt_amount: int,
+                                  options: Optional[TransactionOptions] = None) -> PreparedTransaction:
+        """Melt native tokens. This happens with the foundry output which minted them, by increasing it's
+        `melted_tokens` field.
+        """
+        prepared = self._call_method(
+            'prepareMeltNativeToken', {
+                'tokenId': token_id,
+                'meltAmount': hex(melt_amount),
+                'options': options
+            }
+        )
+        return PreparedTransaction(self, prepared)
+
+    def prepare_destroy_account(self,
+                                account_id: HexStr,
+                                options: Optional[TransactionOptions] = None) -> PreparedTransaction:
+        """Destroy an account output.
+        """
+        prepared = self._call_method(
+            'prepareBurn', {
+                'burn': Burn().add_account(account_id).to_dict(),
+                'options': options
+            },
+        )
+        return PreparedTransaction(self, prepared)
+
+    def prepare_destroy_foundry(self,
+                                foundry_id: HexStr,
+                                options: Optional[TransactionOptions] = None) -> PreparedTransaction:
+        """Destroy a foundry output with a circulating supply of 0.
+        """
+        prepared = self._call_method(
+            'prepareBurn', {
+                'burn': Burn().add_foundry(foundry_id).to_dict(),
+                'options': options
+            },
+        )
+        return PreparedTransaction(self, prepared)
+
+    def get_balance(self) -> Balance:
+        """Get wallet balance information.
+        """
+        return Balance.from_dict(self._call_method(
+            'getBalance'
+        ))
+
+    def get_output(self, output_id: OutputId) -> OutputData:
+        """Get output.
+        """
+        return OutputData.from_dict(self._call_method(
+            'getOutput', {
+                'outputId': output_id
+            }
+        ))
+
+    def get_foundry_output(self, token_id: HexStr):
+        """Get a `FoundryOutput` by native token ID. It will try to get the foundry from the wallet, if it isn't in the wallet it will try to get it from the node.
+        """
+        return self._call_method(
+            'getFoundryOutput', {
+                'tokenId': token_id
+            }
+        )
+
+    def claimable_outputs(self, outputs_to_claim: List[OutputId]):
+        """Get outputs with additional unlock conditions.
+        """
+        return self._call_method(
+            'claimableOutputs', {
+                'outputsToClaim': outputs_to_claim
+            }
+        )
+
+    def get_transaction(
+            self, transaction_id: HexStr) -> TransactionWithMetadata:
+        """Get transaction.
+        """
+        return TransactionWithMetadata.from_dict(self._call_method(
+            'getTransaction', {
+                'transactionId': transaction_id
+            }
+        ))
+
+    def address(self) -> str:
+        """Get the address of the wallet.
+        """
+        return self._call_method(
+            'getAddress'
+        )
+
+    def outputs(
+            self, filter_options: Optional[FilterOptions] = None) -> List[OutputData]:
+        """Returns all outputs of the wallet.
+        """
+        outputs = self._call_method(
+            'outputs', {
+                'filterOptions': filter_options
+            }
+        )
+        return [OutputData.from_dict(o) for o in outputs]
+
+    def pending_transactions(self):
+        """Returns all pending transactions of the wallet.
+        """
+        transactions = self._call_method(
+            'pendingTransactions'
+        )
+        return [TransactionWithMetadata.from_dict(tx) for tx in transactions]
+
+    def implicit_account_creation_address(self) -> str:
+        """Returns the implicit account creation address of the wallet if it is Ed25519 based.
+        """
+        return self._call_method(
+            'implicitAccountCreationAddress'
+        )
+
+    def implicit_account_transition(
+            self, output_id: OutputId) -> TransactionWithMetadata:
+        """Transitions an implicit account to an account.
+        """
+        return self.prepare_implicit_account_transition(output_id).send()
+
+    def prepare_implicit_account_transition(
+            self, output_id: OutputId) -> PreparedTransaction:
+        """Prepares to transition an implicit account to an account.
+        """
+        prepared = self._call_method(
+            'implicitAccountTransition', {
+                'outputId': output_id
+            }
+        )
+        return PreparedTransaction(self, prepared)
+
+    def implicit_accounts(self) -> List[OutputData]:
+        """Returns the implicit accounts of the wallet.
+        """
+        outputs = self._call_method(
+            'implicitAccounts'
+        )
+        return [OutputData.from_dict(o) for o in outputs]
+
+    def incoming_transactions(self) -> List[TransactionWithMetadata]:
+        """Returns all incoming transactions of the wallet.
+        """
+        transactions = self._call_method(
+            'incomingTransactions'
+        )
+        return [TransactionWithMetadata.from_dict(tx) for tx in transactions]
+
+    def transactions(self) -> List[TransactionWithMetadata]:
+        """Returns all transaction of the wallet.
+        """
+        transactions = self._call_method(
+            'transactions'
+        )
+        return [TransactionWithMetadata.from_dict(tx) for tx in transactions]
+
+    def unspent_outputs(
+            self, filter_options: Optional[FilterOptions] = None) -> List[OutputData]:
+        """Returns all unspent outputs of the wallet.
+        """
+        outputs = self._call_method(
+            'unspentOutputs', {
+                'filterOptions': filter_options
+            }
+        )
+        return [OutputData.from_dict(o) for o in outputs]
+
+    def mint_native_token(self, token_id: HexStr, mint_amount: int,
+                          options: Optional[TransactionOptions] = None) -> TransactionWithMetadata:
+        """Mint additional native tokens.
+        """
+        return self.prepare_mint_native_token(
+            token_id, mint_amount, options).send()
+
+    def prepare_mint_native_token(self, token_id: HexStr, mint_amount: int,
+                                  options: Optional[TransactionOptions] = None) -> PreparedTransaction:
+        """Mint additional native tokens.
+        """
+        prepared = self._call_method(
+            'prepareMintNativeToken', {
+                'tokenId': token_id,
+                'mintAmount': hex(mint_amount),
+                'options': options
+            }
+        )
+        return PreparedTransaction(self, prepared)
+
+    def create_native_token(self, params: CreateNativeTokenParams,
+                            options: Optional[TransactionOptions] = None) -> TransactionWithMetadata:
+        """Create native token.
+        """
+        return self.prepare_create_native_token(params, options).send()
+
+    def prepare_create_native_token(self, params: CreateNativeTokenParams,
+                                    options: Optional[TransactionOptions] = None) -> PreparedTransaction:
+        """Create native token.
+        """
+        prepared = self._call_method(
+            'prepareCreateNativeToken', {
+                'params': params,
+                'options': options
+            }
+        )
+        return PreparedCreateTokenTransaction(self, prepared)
+
+    def mint_nfts(self, params: List[MintNftParams],
+                  options: Optional[TransactionOptions] = None) -> TransactionWithMetadata:
+        """Mint NFTs.
+        """
+        return self.prepare_mint_nfts(params, options).send()
+
+    def prepare_mint_nfts(self, params: List[MintNftParams],
+                          options: Optional[TransactionOptions] = None) -> PreparedTransaction:
+        """Mint NFTs.
+        """
+        prepared = self._call_method(
+            'prepareMintNfts', {
+                'params': params,
+                'options': options
+            }
+        )
+        return PreparedTransaction(self, prepared)
+
+    def prepare_output(self, params: OutputParams,
+                       transaction_options: Optional[TransactionOptions] = None) -> Union[BasicOutput, NftOutput]:
+        """Prepare an output for sending.
+           If the amount is below the minimum required storage deposit, by default the remaining amount will automatically
+           be added with a StorageDepositReturn UnlockCondition, when setting the ReturnStrategy to `gift`, the full
+           minimum required storage deposit will be sent to the recipient.
+           When the assets contain an nft_id, the data from the existing nft output will be used, just with the address
+           unlock conditions replaced
+        """
+        return deserialize_output(self._call_method(
+            'prepareOutput', {
+                'params': params,
+                'transactionOptions': transaction_options
+            })
+        )
+
+    def prepare_send(self, params: List[SendParams],
+                     options: Optional[TransactionOptions] = None) -> PreparedTransaction:
+        """Prepare to send base coins.
+        """
+        prepared = self._call_method(
+            'prepareSend', {
+                'params': params,
+                'options': options
+            }
+        )
+        return PreparedTransaction(self, prepared)
+
+    def send_transaction(
+            self, outputs: List[Output], options: Optional[TransactionOptions] = None) -> TransactionWithMetadata:
+        """Send a transaction.
+        """
+        return self.prepare_transaction(outputs, options).send()
+
+    def prepare_transaction(
+            self, outputs: List[Output], options: Optional[TransactionOptions] = None) -> PreparedTransaction:
+        """Prepare transaction.
+        """
+        prepared = self._call_method(
+            'prepareTransaction', {
+                'outputs': outputs,
+                'options': options
+            }
+        )
+        return PreparedTransaction(self, prepared)
+
+    def reissue_transaction_until_included(
+            self, transaction_id: HexStr, interval=None, max_attempts=None) -> HexStr:
+        """Reissues a transaction sent from the wallet for a provided transaction id until it's
+        included (referenced by a milestone). Returns the included block id.
+        """
+        return self._call_method(
+            'reissueTransactionUntilIncluded', {
+                'transactionId': transaction_id,
+                'interval': interval,
+                'maxAttempts': max_attempts
+            }
+        )
+
+    def send(self, amount: int, address: str,
+             options: Optional[TransactionOptions] = None) -> TransactionWithMetadata:
+        """Send base coins.
+        """
+        return TransactionWithMetadata.from_dict(self._call_method(
+            'send', {
+                'amount': str(amount),
+                'address': address,
+                'options': options
+            }
+        ))
+
+    def send_with_params(
+            self, params: List[SendParams], options: Optional[TransactionOptions] = None) -> TransactionWithMetadata:
+        """Send base coins to multiple addresses or with additional parameters.
+        """
+        return TransactionWithMetadata.from_dict(self._call_method(
+            'sendWithParams', {
+                'params': [param.to_dict() for param in params],
+                'options': options
+            }
+        ))
+
+    def send_native_tokens(
+            self, params: List[SendNativeTokenParams], options: Optional[TransactionOptions] = None) -> TransactionWithMetadata:
+        """Send native tokens.
+        """
+        return self.prepare_send_native_tokens(params, options).send()
+
+    def prepare_send_native_tokens(
+            self,
+            params: List[SendNativeTokenParams],
+            options: Optional[TransactionOptions] = None) -> PreparedTransaction:
+        """Send native tokens.
+        """
+        prepared = self._call_method(
+            'prepareSendNativeTokens', {
+                'params': params,
+                'options': options
+            }
+        )
+        return PreparedTransaction(self, prepared)
+
+    def send_nft(self, params: List[SendNftParams],
+                 options: Optional[TransactionOptions] = None) -> TransactionWithMetadata:
+        """Send nft.
+        """
+        return self.prepare_send_nft(params, options).send()
+
+    def prepare_send_nft(self, params: List[SendNftParams],
+                         options: Optional[TransactionOptions] = None) -> PreparedTransaction:
+        """Send nft.
+        """
+        prepared = self._call_method(
+            'prepareSendNft', {
+                'params': params,
+                'options': options
+            }
+        )
+        return PreparedTransaction(self, prepared)
+
+    def send_outputs(
+            self, outputs: List[Output], options: Optional[TransactionOptions] = None) -> TransactionWithMetadata:
+        """Send outputs in a transaction.
+        """
+        return TransactionWithMetadata.from_dict(self._call_method(
+            'sendOutputs', {
+                'outputs': outputs,
+                'options': options,
+            }
+        ))
+
+    def set_alias(self, alias: str):
+        """Set alias.
+        """
+        return self._call_method(
+            'setAlias', {
+                'alias': alias
+            }
+        )
+
+    def set_default_sync_options(self, options: SyncOptions):
+        """Set the fallback SyncOptions for wallet syncing.
+        If storage is enabled, will persist during restarts.
+        """
+        return self._call_method(
+            'setDefaultSyncOptions', {
+                'options': options
+            }
+        )
+
+    def sign_transaction(
+            self, prepared_transaction_data: PreparedTransactionData) -> SignedTransactionData:
+        """Sign a transaction.
+        """
+        return SignedTransactionData.from_dict(self._call_method(
+            'signTransaction', {
+                'preparedTransactionData': prepared_transaction_data
+            }
+        ))
+
+    def sign_and_submit_transaction(
+            self, prepared_transaction_data: PreparedTransactionData) -> TransactionWithMetadata:
+        """Validate the transaction, sign it, submit it to a node and store it in the wallet.
+        """
+        return TransactionWithMetadata.from_dict(self._call_method(
+            'signAndSubmitTransaction', {
+                'preparedTransactionData': prepared_transaction_data
+            }
+        ))
+
+    def submit_and_store_transaction(
+            self, signed_transaction_data: SignedTransactionData) -> TransactionWithMetadata:
+        """Submit and store transaction.
+        """
+        return TransactionWithMetadata.from_dict(self._call_method(
+            'submitAndStoreTransaction', {
+                'signedTransactionData': signed_transaction_data
+            }
+        ))
+
+    def sync(self, options: Optional[SyncOptions] = None) -> Balance:
+        """Sync the wallet by fetching new information from the nodes.
+        Will also reissue pending transactions and consolidate outputs if necessary.
+        A custom default can be set using set_default_sync_options.
+        """
+        return Balance.from_dict(self._call_method(
+            'sync', {
+                'options': options,
+            }
+        ))

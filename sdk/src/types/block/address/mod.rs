@@ -113,6 +113,25 @@ impl Address {
 
     crate::def_is_as_opt!(Address: Ed25519, Account, Nft, Anchor, ImplicitAccountCreation, Multi, Restricted);
 
+    /// Checks whether the address is backed by an [`Ed25519Address`].
+    pub fn is_ed25519_backed(&self) -> bool {
+        match self {
+            Self::Ed25519(_) | Self::ImplicitAccountCreation(_) => true,
+            Self::Restricted(restricted) => restricted.address().is_ed25519(),
+            _ => false,
+        }
+    }
+
+    /// Returns the backing [`Ed25519Address`], if any.
+    pub fn backing_ed25519(&self) -> Option<&Ed25519Address> {
+        match self {
+            Self::Ed25519(ed25519) => Some(ed25519),
+            Self::ImplicitAccountCreation(implicit) => Some(implicit.ed25519_address()),
+            Self::Restricted(restricted) => restricted.address().as_ed25519_opt(),
+            _ => None,
+        }
+    }
+
     /// Tries to create an [`Address`] from a bech32 encoded string.
     pub fn try_from_bech32(address: impl AsRef<str>) -> Result<Self, Error> {
         Bech32Address::try_from_str(address).map(|res| res.inner)

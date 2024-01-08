@@ -12,7 +12,7 @@ fn valid_topics() {
     assert!(Topic::new("blocks/tagged-data").is_ok());
     assert!(Topic::new("blocks/tagged-data/0x0123456789abcdef").is_ok());
     assert!(Topic::new("block-metadata/0x36845227a59864ac12d3d2389fcb4ea0bdd1a5d1d4ed464bde3154216c3246c4").is_ok());
-    assert!(Topic::new("block-metadata/referenced").is_ok());
+    assert!(Topic::new("block-metadata/accepted").is_ok());
     assert!(
         Topic::new("transactions/0x36845227a59864ac12d3d2389fcb4ea0bdd1a5d1d4ed464bde3154216c3246c4/included-block")
             .is_ok()

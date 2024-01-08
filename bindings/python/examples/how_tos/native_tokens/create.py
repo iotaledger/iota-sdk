@@ -2,39 +2,37 @@ import os
 
 from dotenv import load_dotenv
 
-from iota_sdk import CreateNativeTokenParams, Wallet, Irc30Metadata
+from iota_sdk import CreateNativeTokenParams, Wallet, WalletOptions, Irc30Metadata
 
 load_dotenv()
 
 # In this example we will create native tokens
 
-wallet = Wallet(os.environ['WALLET_DB_PATH'])
-
-account = wallet.get_account('Alice')
+wallet = Wallet(WalletOptions(storage_path=os.environ.get('WALLET_DB_PATH')))
 
 if 'STRONGHOLD_PASSWORD' not in os.environ:
     raise Exception(".env STRONGHOLD_PASSWORD is undefined, see .env.example")
 
 wallet.set_stronghold_password(os.environ["STRONGHOLD_PASSWORD"])
 
-# Sync account with the node
-balance = account.sync()
+# Sync wallet with the node
+balance = wallet.sync()
 
 # We can first check if we already have an account output in our account, because
 # an account can have many foundry outputs and therefore we can reuse an
 # existing one.
 if not balance.accounts:
     # If we don't have an account, we need to create one
-    transaction = account.create_account_output(None, None)
+    transaction = wallet.create_account_output(None, None)
     print(f'Transaction sent: {transaction.transaction_id}')
 
     # Wait for transaction to get included
-    block_id = account.reissue_transaction_until_included(
+    block_id = wallet.reissue_transaction_until_included(
         transaction.transaction_id)
     print(f'Block included: {os.environ["EXPLORER_URL"]}/block/{block_id}')
 
-    account.sync()
-    print("Account synced")
+    wallet.sync()
+    print("Wallet synced")
 
 print('Preparing transaction to create native token...')
 
@@ -48,17 +46,17 @@ params = CreateNativeTokenParams(
     metadata.as_hex(),
 )
 
-prepared_transaction = account.prepare_create_native_token(params, None)
+prepared_transaction = wallet.prepare_create_native_token(params, None)
 transaction = prepared_transaction.send()
 print(f'Transaction sent: {transaction.transaction_id}')
 
 # Wait for transaction to get included
-block_id = account.reissue_transaction_until_included(
+block_id = wallet.reissue_transaction_until_included(
     transaction.transaction_id)
 print(f'Block included: {os.environ["EXPLORER_URL"]}/block/{block_id}')
 
 print(f'Created token: {prepared_transaction.token_id()}')
 
-# Ensure the account is synced after creating the native token.
-account.sync()
-print('Account synced')
+# Ensure the wallet is synced after creating the native token.
+wallet.sync()
+print('Wallet synced')

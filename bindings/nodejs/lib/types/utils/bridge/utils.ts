@@ -88,7 +88,7 @@ export interface __BlockIdMethod__ {
     name: 'blockId';
     data: {
         block: Block;
-        params: ProtocolParameters;
+        protocolParameters: ProtocolParameters;
     };
 }
 
