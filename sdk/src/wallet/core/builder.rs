@@ -245,7 +245,7 @@ where
             .finish()
             .await?;
 
-        let background_syncing_status = tokio::sync::watch::channel(BackgroundSyncStatus::NotRunning);
+        let background_syncing_status = tokio::sync::watch::channel(BackgroundSyncStatus::Stopped);
         let background_syncing_status = (Arc::new(background_syncing_status.0), background_syncing_status.1);
 
         // Build the wallet.
