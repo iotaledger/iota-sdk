@@ -56,7 +56,7 @@ fn transaction() {
 
     let pub_key_bytes = prefix_hex::decode(ED25519_PUBLIC_KEY).unwrap();
     let sig_bytes = prefix_hex::decode(ED25519_SIGNATURE).unwrap();
-    let signature = Ed25519Signature::try_from_bytes(pub_key_bytes, sig_bytes).unwrap();
+    let signature = Ed25519Signature::from_bytes(pub_key_bytes, sig_bytes);
     let sig_unlock = Unlock::Signature(SignatureUnlock::from(Signature::from(signature)));
     let ref_unlock = Unlock::Reference(ReferenceUnlock::new(0).unwrap());
     let unlocks = Unlocks::new(vec![sig_unlock, ref_unlock]).unwrap();
@@ -93,9 +93,7 @@ fn milestone() {
             MilestoneOptions::from_vec(vec![]).unwrap(),
         )
         .unwrap(),
-        vec![Signature::from(
-            Ed25519Signature::try_from_bytes(pub_key_bytes, sig_bytes).unwrap(),
-        )],
+        vec![Signature::from(Ed25519Signature::from_bytes(pub_key_bytes, sig_bytes))],
     )
     .unwrap()
     .into();

@@ -94,9 +94,10 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
             Response::Ok
         }
         UtilsMethod::VerifyEd25519Signature { signature, message } => {
+            use iota_sdk::types::block::Error;
             let signature = Ed25519Signature::try_from(signature)?;
             let message: Vec<u8> = prefix_hex::decode(message)?;
-            Response::Bool(signature.verify(&message))
+            Response::Bool(signature.verify(&message).map_err(Error::from)?)
         }
         UtilsMethod::VerifySecp256k1EcdsaSignature {
             public_key,

@@ -126,7 +126,10 @@ impl MilestonePayload {
                 )));
             }
 
-            if !signature.verify(&essence_hash) {
+            if !signature
+                .verify(&essence_hash)
+                .map_err(|e| MilestoneValidationError::Crypto(e))?
+            {
                 return Err(MilestoneValidationError::InvalidSignature(
                     index,
                     prefix_hex::encode(signature.public_key().as_ref()),

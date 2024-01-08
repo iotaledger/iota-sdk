@@ -19,7 +19,7 @@ use crate::types::block::{address::Ed25519Address, Error};
 /// An Ed25519 signature.
 #[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct Ed25519Signature {
-    public_key: PublicKey,
+    public_key: [u8; Self::PUBLIC_KEY_LENGTH],
     signature: Signature,
 }
 
@@ -33,22 +33,27 @@ impl Ed25519Signature {
 
     /// Creates a new [`Ed25519Signature`].
     pub fn new(public_key: PublicKey, signature: Signature) -> Self {
-        Self { public_key, signature }
+        Self {
+            public_key: public_key.to_bytes(),
+            signature,
+        }
     }
 
     /// Creates a new [`Ed25519Signature`] from bytes.
-    pub fn try_from_bytes(
-        public_key: [u8; Self::PUBLIC_KEY_LENGTH],
-        signature: [u8; Self::SIGNATURE_LENGTH],
-    ) -> Result<Self, Error> {
-        Ok(Self::new(
-            PublicKey::try_from_bytes(public_key)?,
-            Signature::from_bytes(signature),
-        ))
+    pub fn from_bytes(public_key: [u8; Self::PUBLIC_KEY_LENGTH], signature: [u8; Self::SIGNATURE_LENGTH]) -> Self {
+        Self {
+            public_key,
+            signature: Signature::from_bytes(signature),
+        }
+    }
+
+    /// Converts the public key bytes to a [`PublicKey`], if valid.
+    pub fn to_public_key(&self) -> Result<PublicKey, crypto::Error> {
+        Ok(PublicKey::try_from_bytes(self.public_key)?)
     }
 
     /// Returns the public key of an [`Ed25519Signature`].
-    pub fn public_key(&self) -> &PublicKey {
+    pub fn public_key(&self) -> &[u8; Self::PUBLIC_KEY_LENGTH] {
         &self.public_key
     }
 
@@ -57,8 +62,8 @@ impl Ed25519Signature {
         &self.signature
     }
 
-    pub fn verify(&self, message: &[u8]) -> bool {
-        self.public_key.verify(&self.signature, message)
+    pub fn verify(&self, message: &[u8]) -> Result<bool, crypto::Error> {
+        Ok(self.to_public_key()?.verify(&self.signature, message))
     }
 
     /// Verifies the [`Ed25519Signature`] for a message against an [`Ed25519Address`].
@@ -72,7 +77,7 @@ impl Ed25519Signature {
             });
         }
 
-        if !self.verify(message) {
+        if !self.verify(message)? {
             return Err(Error::InvalidSignature);
         }
 
@@ -109,7 +114,7 @@ impl Packable for Ed25519Signature {
     type UnpackVisitor = ();
 
     fn pack<P: Packer>(&self, packer: &mut P) -> Result<(), P::Error> {
-        self.public_key.to_bytes().pack(packer)?;
+        self.public_key.pack(packer)?;
         self.signature.to_bytes().pack(packer)?;
 
         Ok(())
@@ -121,9 +126,7 @@ impl Packable for Ed25519Signature {
     ) -> Result<Self, UnpackError<Self::UnpackError, U::Error>> {
         let public_key = <[u8; Self::PUBLIC_KEY_LENGTH]>::unpack::<_, VERIFY>(unpacker, visitor).coerce()?;
         let signature = <[u8; Self::SIGNATURE_LENGTH]>::unpack::<_, VERIFY>(unpacker, visitor).coerce()?;
-        Self::try_from_bytes(public_key, signature)
-            .map_err(UnpackError::Packable)
-            .coerce()
+        Ok(Self::from_bytes(public_key, signature))
     }
 }
 
@@ -150,7 +153,7 @@ pub(crate) mod dto {
         fn from(value: &Ed25519Signature) -> Self {
             Self {
                 kind: Ed25519Signature::KIND,
-                public_key: prefix_hex::encode(value.public_key.as_slice()),
+                public_key: prefix_hex::encode(&value.public_key),
                 signature: prefix_hex::encode(value.signature.to_bytes()),
             }
         }
@@ -160,10 +163,10 @@ pub(crate) mod dto {
         type Error = Error;
 
         fn try_from(value: Ed25519SignatureDto) -> Result<Self, Self::Error> {
-            Self::try_from_bytes(
+            Ok(Self::from_bytes(
                 prefix_hex::decode(&value.public_key).map_err(|_| Error::InvalidField("publicKey"))?,
                 prefix_hex::decode(&value.signature).map_err(|_| Error::InvalidField("signature"))?,
-            )
+            ))
         }
     }
 }
