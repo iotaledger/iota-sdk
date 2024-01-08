@@ -547,7 +547,7 @@ fn merge_unlocks(
         };
 
         // Check if we already added an [Unlock] for this address
-        match block_indexes.get(&required_address) {
+        match block_indexes.get(required_address) {
             // If we already have an [Unlock] for this address, add a [Unlock] based on the address type
             Some(block_index) => match required_address {
                 Address::Ed25519(_) | Address::ImplicitAccountCreation(_) => {
@@ -574,7 +574,7 @@ fn merge_unlocks(
                         Address::Ed25519(ed25519_address) => ed25519_address,
                         _ => return Err(Error::MissingInputWithEd25519Address),
                     };
-                    ed25519_signature.is_valid(transaction_signing_hash.as_ref(), &ed25519_address)?;
+                    ed25519_signature.is_valid(transaction_signing_hash.as_ref(), ed25519_address)?;
                 }
 
                 merged_unlocks.push(unlock);
