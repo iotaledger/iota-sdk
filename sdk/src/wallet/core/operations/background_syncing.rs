@@ -55,11 +55,11 @@ where
             loop {
                 log::debug!("[background_syncing]: syncing wallet");
 
-                if let Err(err) = wallet.sync(interval_seconds.clone()).await {
+                if let Err(err) = wallet.sync(options.clone()).await {
                     log::debug!("[background_syncing] error: {}", err)
                 }
 
-                let res = timeout(seconds, async {
+                let res = timeout(interval_seconds, async {
                     rx_background_sync
                         .wait_for(|status| *status == BackgroundSyncStatus::Stopping)
                         .await
