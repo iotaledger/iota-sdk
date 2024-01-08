@@ -268,7 +268,7 @@ pub(crate) mod irc_27 {
         use pretty_assertions::assert_eq;
 
         use super::*;
-        use crate::types::block::{address::ToBech32Ext, rand::address::rand_address};
+        use crate::types::block::{address::ToBech32Ext, rand::address::rand_base_address};
 
         #[test]
         fn serialization() {
@@ -278,8 +278,8 @@ pub(crate) mod irc_27 {
                 "My NFT #0001",
             )
             .with_collection_name("My Collection of Art")
-            .add_royalty(rand_address().to_bech32_unchecked("iota1"), 0.025)
-            .add_royalty(rand_address().to_bech32_unchecked("iota1"), 0.025)
+            .add_royalty(rand_base_address().to_bech32_unchecked("iota1"), 0.025)
+            .add_royalty(rand_base_address().to_bech32_unchecked("iota1"), 0.025)
             .with_issuer_name("My Artist Name")
             .with_description("A little information about my NFT collection")
             .add_attribute(Attribute::new("Background", "Purple"))
