@@ -489,10 +489,13 @@ pub(crate) mod dto {
         fn deserialize<D: Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
             let value = Value::deserialize(d)?;
             Ok(
-                match value
-                    .get("type")
-                    .and_then(Value::as_u64)
-                    .ok_or_else(|| de::Error::custom("invalid metadata type"))? as u8
+                match u8::try_from(
+                    value
+                        .get("type")
+                        .and_then(Value::as_u64)
+                        .ok_or_else(|| de::Error::custom("invalid metadata type"))?,
+                )
+                .map_err(|_| de::Error::custom("invalid metadata type: {e}"))?
                 {
                     Self::KIND => {
                         let map: BTreeMap<String, String> = serde_json::from_value(
