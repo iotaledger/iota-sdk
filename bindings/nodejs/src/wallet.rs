@@ -1,7 +1,10 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use std::{sync::Arc, ops::{Deref, DerefMut}};
+use std::{
+    ops::{Deref, DerefMut},
+    sync::Arc,
+};
 
 use iota_sdk_bindings_core::{
     call_wallet_method as rust_call_wallet_method,
@@ -49,7 +52,9 @@ pub async fn create_wallet(options: String) -> Result<External<WalletMethodHandl
     let wallet_options = serde_json::from_str::<WalletOptions>(&options).map_err(NodejsError::new)?;
     let wallet = wallet_options.build().await.map_err(NodejsError::new)?;
 
-    Ok(External::new(Arc::new(RwLock::new(WalletMethodHandlerInner(Some(wallet))))))
+    Ok(External::new(Arc::new(RwLock::new(WalletMethodHandlerInner(Some(
+        wallet,
+    ))))))
 }
 
 #[napi(js_name = "destroyWallet")]
