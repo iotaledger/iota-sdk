@@ -42,6 +42,11 @@ fn verify_keys_packable<const VERIFY: bool>(
     >,
 ) -> Result<(), Error> {
     if VERIFY {
+        if map.is_empty() {
+            return Err(Error::InvalidMetadataFeatureKeyLength(
+                MetadataFeatureKeyLength::try_from(0u8).unwrap_err().into(),
+            ));
+        }
         for key in map.keys() {
             if !key.iter().all(|b| b.is_ascii_graphic()) {
                 return Err(Error::NonAsciiMetadataKey(key.to_vec()));
