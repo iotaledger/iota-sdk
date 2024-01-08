@@ -28,7 +28,7 @@ received_event = False
 
 def callback(event):
     """Callback function for the event listener"""
-    event_dict = json.loads(event)
+    event = json.loads(event)
     print('Event:', event)
 
     # Exit after receiving an event.
