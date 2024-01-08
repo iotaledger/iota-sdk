@@ -164,6 +164,10 @@ impl Topic {
     pub(crate) fn is_valid(&self) -> bool {
         let valid_topics = lazy_static!(
             RegexSet::new([
+                // Commitment topics.
+                r"^commitment-info/latest$",
+                r"^commitment-info/finalized$",
+                r"^commitments$",
                 // Block topics.
                 r"^blocks$",
                 r"^blocks/transaction$",
@@ -172,12 +176,14 @@ impl Topic {
                 r"^blocks/tagged-data$",
                 r"^blocks/tagged-data/0x((?:[a-f0-9]{2}){1,64})$",
                 r"^block-metadata/0x([a-f0-9]{64})$",
-                r"^block-metadata/referenced$",
+                r"^block-metadata/accepted$",
+                r"^block-metadata/confirmed$",
                 // Transaction topics.
                 r"^transactions/0x([a-f0-9]{64})/included-block$",
                 // Output topics.
                 r"^outputs/0x([a-f0-9]{64})(\d{4})$",
                 r"^outputs/account/0x([a-f0-9]{64})$",
+                r"^outputs/anchor/0x([a-f0-9]{64})$",
                 r"^outputs/nft/0x([a-f0-9]{64})$",
                 r"^outputs/foundry/0x([a-f0-9]{76})$",
                 r"^outputs/unlock/(\+|address|storage-return|expiration|state-controller|governor|immutable-account)/[\x21-\x7E]{1,30}1[A-Za-z0-9]+(?:/spent)?$",

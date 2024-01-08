@@ -35,12 +35,7 @@ pub async fn create_wallet(options: String) -> Result<WalletMethodHandler, JsErr
 
 #[wasm_bindgen(js_name = destroyWallet)]
 pub async fn destroy_wallet(method_handler: &WalletMethodHandler) -> Result<(), JsError> {
-    let mut lock = method_handler.0.write().await;
-    if let Some(_) = &*lock {
-        *lock = None;
-    }
-
-    // If None, was already destroyed
+    method_handler.0.write().await.take();
     Ok(())
 }
 
@@ -72,7 +67,7 @@ pub async fn call_wallet_method(method_handler: &WalletMethodHandler, method: St
     let method = serde_json::from_str(&method).map_err(map_err)?;
     match &*method_handler.0.read().await {
         Some(wallet) => {
-            let response = rust_call_wallet_method(&wallet, method).await;
+            let response = rust_call_wallet_method(wallet, method).await;
             let ser = serde_json::to_string(&response)?;
             match response {
                 Response::Error(_) | Response::Panic(_) => Err(JsError::new(&ser)),

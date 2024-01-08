@@ -28,7 +28,7 @@ async fn main() -> Result<()> {
 
     // Create a node client.
     let client = Client::builder()
-        .with_node("https://api.testnet.shimmer.network")?
+        .with_node("http://localhost:8050")?
         .with_mqtt_broker_options(BrokerOptions::new().use_ws(true))
         .finish()
         .await?;
@@ -59,7 +59,7 @@ async fn main() -> Result<()> {
             _ = rx.recv() => {
                 event_count += 1;
                 if event_count == num_events {
-                    client.unsubscribe([Topic::new("milestone-info/latest")?]).await?;
+                    client.unsubscribe([Topic::new("commitment-info/latest")?]).await?;
                     client.unsubscribe([Topic::new("blocks")?]).await?;
                     client.unsubscribe([Topic::new(format!("outputs/unlock/address/{address}"))?]).await?;
                     break;
