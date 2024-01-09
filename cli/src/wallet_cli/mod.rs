@@ -24,8 +24,8 @@ use iota_sdk::{
     },
     utils::ConvertTo,
     wallet::{
-        types::OutputData, ConsolidationParams, CreateNativeTokenParams, MintNftParams, OutputsToClaim,
-        SendNativeTokenParams, SendNftParams, SendParams, SyncOptions, TransactionOptions, Wallet,
+        types::OutputData, ConsolidationParams, CreateNativeTokenParams, Error as WalletError, MintNftParams,
+        OutputsToClaim, SendNativeTokenParams, SendNftParams, SendParams, SyncOptions, TransactionOptions, Wallet,
     },
     U256,
 };
@@ -81,6 +81,8 @@ pub enum WalletCommand {
     },
     /// Print details about claimable outputs - if there are any.
     ClaimableOutputs,
+    /// Checks if an account is ready to issue a block.
+    Congestion { account_id: Option<AccountId> },
     /// Consolidate all basic outputs into one address.
     Consolidate,
     /// Create a new account output.
@@ -474,6 +476,28 @@ pub async fn claimable_outputs_command(wallet: &Wallet) -> Result<(), Error> {
             }
         }
     }
+
+    Ok(())
+}
+
+// `congestion` command
+pub async fn congestion_command(wallet: &Wallet, account_id: Option<AccountId>) -> Result<(), Error> {
+    let wallet_data = wallet.data().await;
+    let account_id = account_id
+        .or(wallet_data
+            .accounts()
+            .next()
+            .map(|o| o.output.as_account().account_id_non_null(&o.output_id)))
+        .or(wallet_data
+            .implicit_accounts()
+            .next()
+            .map(|o| AccountId::from(&o.output_id)))
+        .ok_or(WalletError::NoAccountToIssueBlock)?;
+    drop(wallet_data);
+
+    let congestion = wallet.client().get_account_congestion(&account_id).await?;
+
+    println_log_info!("{congestion:#?}");
 
     Ok(())
 }
@@ -1151,6 +1175,7 @@ pub async fn prompt_internal(
                         WalletCommand::BurnNft { nft_id } => burn_nft_command(wallet, nft_id).await,
                         WalletCommand::Claim { output_id } => claim_command(wallet, output_id).await,
                         WalletCommand::ClaimableOutputs => claimable_outputs_command(wallet).await,
+                        WalletCommand::Congestion { account_id } => congestion_command(wallet, account_id).await,
                         WalletCommand::Consolidate => consolidate_command(wallet).await,
                         WalletCommand::CreateAccountOutput => create_account_output_command(wallet).await,
                         WalletCommand::CreateNativeToken {
