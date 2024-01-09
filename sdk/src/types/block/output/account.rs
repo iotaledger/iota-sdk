@@ -602,47 +602,6 @@ mod dto {
         }
     }
 
-    impl AccountOutput {
-        #[allow(clippy::too_many_arguments)]
-        pub fn try_from_dtos(
-            amount: OutputBuilderAmount,
-            mana: u64,
-            account_id: &AccountId,
-            foundry_counter: Option<u32>,
-            unlock_conditions: Vec<UnlockCondition>,
-            features: Option<Vec<Feature>>,
-            immutable_features: Option<Vec<Feature>>,
-        ) -> Result<Self, Error> {
-            let mut builder = match amount {
-                OutputBuilderAmount::Amount(amount) => AccountOutputBuilder::new_with_amount(amount, *account_id),
-                OutputBuilderAmount::MinimumAmount(params) => {
-                    AccountOutputBuilder::new_with_minimum_amount(params, *account_id)
-                }
-            }
-            .with_mana(mana);
-
-            if let Some(foundry_counter) = foundry_counter {
-                builder = builder.with_foundry_counter(foundry_counter);
-            }
-
-            let unlock_conditions = unlock_conditions
-                .into_iter()
-                .map(UnlockCondition::from)
-                .collect::<Vec<UnlockCondition>>();
-            builder = builder.with_unlock_conditions(unlock_conditions);
-
-            if let Some(features) = features {
-                builder = builder.with_features(features);
-            }
-
-            if let Some(immutable_features) = immutable_features {
-                builder = builder.with_immutable_features(immutable_features);
-            }
-
-            builder.finish()
-        }
-    }
-
     crate::impl_serde_typed_dto!(AccountOutput, AccountOutputDto, "account output");
 }
 
@@ -667,47 +626,5 @@ mod tests {
         let dto = AccountOutputDto::from(&account_output);
         let output = Output::Account(AccountOutput::try_from(dto).unwrap());
         assert_eq!(&account_output, output.as_account());
-
-        let output_split = AccountOutput::try_from_dtos(
-            OutputBuilderAmount::Amount(account_output.amount()),
-            account_output.mana(),
-            account_output.account_id(),
-            account_output.foundry_counter().into(),
-            account_output.unlock_conditions().to_vec(),
-            Some(account_output.features().to_vec()),
-            Some(account_output.immutable_features().to_vec()),
-        )
-        .unwrap();
-        assert_eq!(account_output, output_split);
-
-        let account_id = rand_account_id();
-        let address = rand_address_unlock_condition_different_from_account_id(&account_id);
-
-        let test_split_dto = |builder: AccountOutputBuilder| {
-            let output_split = AccountOutput::try_from_dtos(
-                builder.amount,
-                builder.mana,
-                &builder.account_id,
-                builder.foundry_counter,
-                builder.unlock_conditions.iter().cloned().collect(),
-                Some(builder.features.iter().cloned().collect()),
-                Some(builder.immutable_features.iter().cloned().collect()),
-            )
-            .unwrap();
-            assert_eq!(builder.finish().unwrap(), output_split);
-        };
-
-        let builder = AccountOutput::build_with_amount(100, account_id)
-            .add_unlock_condition(address.clone())
-            .with_features(rand_allowed_features(AccountOutput::ALLOWED_FEATURES))
-            .with_immutable_features(rand_allowed_features(AccountOutput::ALLOWED_IMMUTABLE_FEATURES));
-        test_split_dto(builder);
-
-        let builder =
-            AccountOutput::build_with_minimum_amount(protocol_parameters.storage_score_parameters(), account_id)
-                .add_unlock_condition(address)
-                .with_features(rand_allowed_features(AccountOutput::ALLOWED_FEATURES))
-                .with_immutable_features(rand_allowed_features(AccountOutput::ALLOWED_IMMUTABLE_FEATURES));
-        test_split_dto(builder);
     }
 }

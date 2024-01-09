@@ -310,17 +310,18 @@ impl Output {
         })
     }
 
-    /// Verifies if a valid storage deposit was made. Each [`Output`] has to have an amount that covers its associated
-    /// byte cost, given by [`StorageScoreParameters`].
+    /// Verifies if a valid storage deposit was made.
+    /// Each [`Output`] has to have an amount that covers its associated byte cost, given by [`StorageScoreParameters`].
     /// If there is a [`StorageDepositReturnUnlockCondition`](unlock_condition::StorageDepositReturnUnlockCondition),
     /// its amount is also checked.
     pub fn verify_storage_deposit(&self, params: StorageScoreParameters) -> Result<(), Error> {
-        let required_output_amount = self.minimum_amount(params);
+        let minimum_storage_deposit = self.minimum_amount(params);
 
-        if self.amount() < required_output_amount {
+        // For any created `Output` in a transaction, it must hold that `Output::Amount >= Minimum Storage Deposit`.
+        if self.amount() < minimum_storage_deposit {
             return Err(Error::InsufficientStorageDepositAmount {
                 amount: self.amount(),
-                required: required_output_amount,
+                required: minimum_storage_deposit,
             });
         }
 
@@ -337,13 +338,13 @@ impl Output {
                 });
             }
 
-            let minimum_deposit = BasicOutput::minimum_amount(return_condition.return_address(), params);
+            let minimum_storage_deposit = BasicOutput::minimum_amount(return_condition.return_address(), params);
 
             // `Minimum Storage Deposit` ≤ `Return Amount`
-            if return_condition.amount() < minimum_deposit {
+            if return_condition.amount() < minimum_storage_deposit {
                 return Err(Error::InsufficientStorageDepositReturnAmount {
                     deposit: return_condition.amount(),
-                    required: minimum_deposit,
+                    required: minimum_storage_deposit,
                 });
             }
         }
