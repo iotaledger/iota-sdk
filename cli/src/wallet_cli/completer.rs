@@ -18,6 +18,7 @@ const WALLET_COMMANDS: &[&str] = &[
     "claim",
     "claimable-outputs",
     "clear",
+    "congestion",
     "consolidate",
     "create-alias-output",
     "create-native-token",

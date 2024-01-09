@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use alloc::{boxed::Box, vec::Vec};
+use alloc::{boxed::Box, collections::BTreeMap, vec::Vec};
 use core::{fmt, ops::RangeInclusive};
 
 use crypto::hashes::{blake2b::Blake2b256, Digest};
@@ -11,10 +11,7 @@ use packable::{bounded::BoundedU8, prefix::BoxedSlicePrefix, Packable, PackableE
 
 use crate::types::block::{address::Address, output::StorageScore, Error};
 
-pub(crate) type WeightedAddressCount =
-    BoundedU8<{ *MultiAddress::ADDRESSES_COUNT.start() }, { *MultiAddress::ADDRESSES_COUNT.end() }>;
-
-/// An address with an assigned weight.
+/// An [`Address`] with an assigned weight.
 #[derive(Clone, Debug, Display, Eq, PartialEq, Ord, PartialOrd, Hash, From, AsRef, Deref, Packable)]
 #[display(fmt = "{address}")]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
@@ -30,7 +27,9 @@ pub struct WeightedAddress {
 
 impl WeightedAddress {
     /// Creates a new [`WeightedAddress`].
-    pub fn new(address: Address, weight: u8) -> Result<Self, Error> {
+    pub fn new(address: impl Into<Address>, weight: u8) -> Result<Self, Error> {
+        let address = address.into();
+
         verify_address::<true>(&address)?;
         verify_weight::<true>(&weight)?;
 
@@ -69,9 +68,11 @@ fn verify_weight<const VERIFY: bool>(weight: &u8) -> Result<(), Error> {
     }
 }
 
-/// An address that consists of addresses with weights and a threshold value.
-/// The Multi Address can be unlocked if the cumulative weight of all unlocked addresses is equal to or exceeds the
-/// threshold.
+pub(crate) type WeightedAddressCount =
+    BoundedU8<{ *MultiAddress::ADDRESSES_COUNT.start() }, { *MultiAddress::ADDRESSES_COUNT.end() }>;
+
+/// An [`Address`] that consists of addresses with weights and a threshold value.
+/// It can be unlocked if the cumulative weight of all unlocked addresses is equal to or exceeds the threshold.
 #[derive(Clone, Debug, Deref, Eq, PartialEq, Ord, PartialOrd, Hash, Packable)]
 #[packable(unpack_error = Error)]
 #[packable(verify_with = verify_multi_address)]
@@ -95,10 +96,15 @@ impl MultiAddress {
     /// Creates a new [`MultiAddress`].
     #[inline(always)]
     pub fn new(addresses: impl IntoIterator<Item = WeightedAddress>, threshold: u16) -> Result<Self, Error> {
-        let mut addresses = addresses.into_iter().collect::<Box<[_]>>();
+        // Using an intermediate BTreeMap to sort the addresses without having to repeatedly packing them.
+        let addresses = addresses
+            .into_iter()
+            .map(|address| (address.address().pack_to_vec(), address))
+            .collect::<BTreeMap<_, _>>()
+            .into_values()
+            .collect::<Box<[_]>>();
 
-        addresses.sort_by(|a, b| a.address().cmp(b.address()));
-
+        verify_addresses::<true>(&addresses)?;
         verify_threshold::<true>(&threshold)?;
 
         let addresses = BoxedSlicePrefix::<WeightedAddress, WeightedAddressCount>::try_from(addresses)
@@ -136,7 +142,7 @@ impl MultiAddress {
 }
 
 fn verify_addresses<const VERIFY: bool>(addresses: &[WeightedAddress]) -> Result<(), Error> {
-    if VERIFY && !is_unique_sorted(addresses.iter().map(WeightedAddress::address)) {
+    if VERIFY && !is_unique_sorted(addresses.iter().map(|a| a.address.pack_to_vec())) {
         Err(Error::WeightedAddressesNotUniqueSorted)
     } else {
         Ok(())
@@ -162,6 +168,7 @@ fn verify_multi_address<const VERIFY: bool>(address: &MultiAddress) -> Result<()
             });
         }
     }
+
     Ok(())
 }
 
