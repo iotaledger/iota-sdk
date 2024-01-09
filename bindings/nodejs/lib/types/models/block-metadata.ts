@@ -25,7 +25,7 @@ export interface IBlockMetadata {
      */
     blockFailureReason?: BlockFailureReason;
     /**
-     * The metadata of the transactions in the block.
+     * The metadata of the transaction in the block.
      */
     transactionMetadata?: TransactionMetadata;
 }
