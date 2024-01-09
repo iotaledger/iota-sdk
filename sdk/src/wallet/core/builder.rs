@@ -19,7 +19,7 @@ use crate::{
     client::secret::{GenerateAddressOptions, SecretManage, SecretManager},
     types::block::address::{Address, Bech32Address},
     wallet::{
-        core::{Bip44, WalletData, WalletInner, operations::background_syncing::BackgroundSyncStatus},
+        core::{operations::background_syncing::BackgroundSyncStatus, Bip44, WalletData, WalletInner},
         operations::syncing::SyncOptions,
         ClientOptions, Wallet,
     },
