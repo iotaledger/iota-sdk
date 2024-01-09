@@ -668,44 +668,6 @@ mod dto {
         }
     }
 
-    impl AnchorOutput {
-        #[allow(clippy::too_many_arguments)]
-        pub fn try_from_dtos(
-            amount: OutputBuilderAmount,
-            mana: u64,
-            anchor_id: &AnchorId,
-            state_index: u32,
-            unlock_conditions: Vec<UnlockCondition>,
-            features: Option<Vec<Feature>>,
-            immutable_features: Option<Vec<Feature>>,
-        ) -> Result<Self, Error> {
-            let mut builder = match amount {
-                OutputBuilderAmount::Amount(amount) => AnchorOutputBuilder::new_with_amount(amount, *anchor_id),
-                OutputBuilderAmount::MinimumAmount(params) => {
-                    AnchorOutputBuilder::new_with_minimum_amount(params, *anchor_id)
-                }
-            }
-            .with_mana(mana)
-            .with_state_index(state_index);
-
-            let unlock_conditions = unlock_conditions
-                .into_iter()
-                .map(UnlockCondition::from)
-                .collect::<Vec<UnlockCondition>>();
-            builder = builder.with_unlock_conditions(unlock_conditions);
-
-            if let Some(features) = features {
-                builder = builder.with_features(features);
-            }
-
-            if let Some(immutable_features) = immutable_features {
-                builder = builder.with_immutable_features(immutable_features);
-            }
-
-            builder.finish()
-        }
-    }
-
     crate::impl_serde_typed_dto!(AnchorOutput, AnchorOutputDto, "anchor output");
 }
 
@@ -732,50 +694,5 @@ mod tests {
         let dto = AnchorOutputDto::from(&anchor_output);
         let output = Output::Anchor(AnchorOutput::try_from(dto).unwrap());
         assert_eq!(&anchor_output, output.as_anchor());
-
-        let output_split = AnchorOutput::try_from_dtos(
-            OutputBuilderAmount::Amount(output.amount()),
-            anchor_output.mana(),
-            anchor_output.anchor_id(),
-            anchor_output.state_index(),
-            anchor_output.unlock_conditions().to_vec(),
-            Some(anchor_output.features().to_vec()),
-            Some(anchor_output.immutable_features().to_vec()),
-        )
-        .unwrap();
-        assert_eq!(anchor_output, output_split);
-
-        let anchor_id = rand_anchor_id();
-        let gov_address = rand_governor_address_unlock_condition_different_from(&anchor_id);
-        let state_address = rand_state_controller_address_unlock_condition_different_from(&anchor_id);
-
-        let test_split_dto = |builder: AnchorOutputBuilder| {
-            let output_split = AnchorOutput::try_from_dtos(
-                builder.amount,
-                builder.mana,
-                &builder.anchor_id,
-                builder.state_index,
-                builder.unlock_conditions.iter().cloned().collect(),
-                Some(builder.features.iter().cloned().collect()),
-                Some(builder.immutable_features.iter().cloned().collect()),
-            )
-            .unwrap();
-            assert_eq!(builder.finish().unwrap(), output_split);
-        };
-
-        let builder = AnchorOutput::build_with_amount(100, anchor_id)
-            .add_unlock_condition(gov_address.clone())
-            .add_unlock_condition(state_address.clone())
-            .with_features(rand_allowed_features(AnchorOutput::ALLOWED_FEATURES))
-            .with_immutable_features(rand_allowed_features(AnchorOutput::ALLOWED_IMMUTABLE_FEATURES));
-        test_split_dto(builder);
-
-        let builder =
-            AnchorOutput::build_with_minimum_amount(protocol_parameters.storage_score_parameters(), anchor_id)
-                .add_unlock_condition(gov_address)
-                .add_unlock_condition(state_address)
-                .with_features(rand_allowed_features(AnchorOutput::ALLOWED_FEATURES))
-                .with_immutable_features(rand_allowed_features(AnchorOutput::ALLOWED_IMMUTABLE_FEATURES));
-        test_split_dto(builder);
     }
 }
