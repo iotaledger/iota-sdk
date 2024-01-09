@@ -26,7 +26,7 @@ use crate::types::block::{
 pub struct ManaAllotment {
     pub(crate) account_id: AccountId,
     #[packable(verify_with = verify_mana)]
-    #[serde(with = "crate::utils::serde::string")]
+    #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
     pub(crate) mana: u64,
 }
 
