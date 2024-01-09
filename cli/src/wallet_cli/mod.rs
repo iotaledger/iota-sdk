@@ -483,17 +483,21 @@ pub async fn claimable_outputs_command(wallet: &Wallet) -> Result<(), Error> {
 // `congestion` command
 pub async fn congestion_command(wallet: &Wallet, account_id: Option<AccountId>) -> Result<(), Error> {
     let account_id = {
-      let wallet_data = wallet.data().await;
-      account_id
-          .or_else(|| wallet_data
-              .accounts()
-              .next()
-              .map(|o| o.output.as_account().account_id_non_null(&o.output_id)))
-          .or_else(|| wallet_data
-              .implicit_accounts()
-              .next()
-              .map(|o| AccountId::from(&o.output_id)))
-          .ok_or(WalletError::NoAccountToIssueBlock)?
+        let wallet_data = wallet.data().await;
+        account_id
+            .or_else(|| {
+                wallet_data
+                    .accounts()
+                    .next()
+                    .map(|o| o.output.as_account().account_id_non_null(&o.output_id))
+            })
+            .or_else(|| {
+                wallet_data
+                    .implicit_accounts()
+                    .next()
+                    .map(|o| AccountId::from(&o.output_id))
+            })
+            .ok_or(WalletError::NoAccountToIssueBlock)?
     };
 
     let congestion = wallet.client().get_account_congestion(&account_id).await?;
