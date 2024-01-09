@@ -13,7 +13,7 @@ use iota_sdk::{
     types::{
         api::plugins::participation::types::ParticipationEventId,
         block::{
-            address::Bech32Address,
+            address::{Bech32Address, ToBech32Ext},
             output::{
                 unlock_condition::AddressUnlockCondition, AccountId, BasicOutputBuilder, FoundryId, NativeToken,
                 NativeTokensBuilder, NftId, Output, OutputId, TokenId,
@@ -314,7 +314,25 @@ impl FromStr for OutputSelector {
 
 // `accounts` command
 pub async fn accounts_command(wallet: &Wallet) -> Result<(), Error> {
-    print_outputs(wallet.data().await.accounts().cloned().collect(), "Accounts:")
+    let wallet_data = wallet.data().await;
+    let accounts = wallet_data.accounts();
+
+    println_log_info!("Accounts:\n");
+
+    for account in accounts {
+        let output_id = account.output_id;
+        let account_id = account.output.as_account().account_id_non_null(&output_id);
+        let account_address = account_id.to_bech32(wallet.client().get_bech32_hrp().await?);
+
+        println_log_info!(
+            "{:<16} {output_id}\n{:<16} {account_id}\n{:<16} {account_address}\n",
+            "Output ID:",
+            "Account ID:",
+            "Account Address:"
+        );
+    }
+
+    Ok(())
 }
 
 // `address` command
@@ -612,10 +630,25 @@ pub async fn implicit_account_transition_command(
 
 // `implicit-accounts` command
 pub async fn implicit_accounts_command(wallet: &Wallet) -> Result<(), Error> {
-    print_outputs(
-        wallet.data().await.implicit_accounts().cloned().collect(),
-        "Implicit accounts:",
-    )
+    let wallet_data = wallet.data().await;
+    let implicit_accounts = wallet_data.implicit_accounts();
+
+    println_log_info!("Implicit accounts:\n");
+
+    for implicit_account in implicit_accounts {
+        let output_id = implicit_account.output_id;
+        let account_id = AccountId::from(&output_id);
+        let account_address = account_id.to_bech32(wallet.client().get_bech32_hrp().await?);
+
+        println_log_info!(
+            "{:<16} {output_id}\n{:<16} {account_id}\n{:<16} {account_address}\n",
+            "Output ID:",
+            "Account ID:",
+            "Account Address:"
+        );
+    }
+
+    Ok(())
 }
 
 // `melt-native-token` command
