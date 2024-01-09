@@ -29,6 +29,8 @@ pub struct RewardsParameters {
     decay_balancing_constant: u64,
     /// The exponent used for shifting operation during the pool rewards calculations.
     pool_coefficient_exponent: u8,
+    // The number of epochs for which rewards are retained.
+    retention_period: EpochIndex,
 }
 
 impl Default for RewardsParameters {
@@ -41,6 +43,7 @@ impl Default for RewardsParameters {
             decay_balancing_constant_exponent: Default::default(),
             decay_balancing_constant: Default::default(),
             pool_coefficient_exponent: Default::default(),
+            retention_period: Default::default(),
         }
     }
 }
