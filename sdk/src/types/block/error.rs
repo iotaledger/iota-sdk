@@ -201,6 +201,7 @@ pub enum Error {
         target: EpochIndex,
     },
     TrailingCapabilityBytes,
+    RestrictedAddressCapability,
 }
 
 #[cfg(feature = "std")]
@@ -432,6 +433,7 @@ impl fmt::Display for Error {
                 write!(f, "invalid epoch delta: created {created}, target {target}")
             }
             Self::TrailingCapabilityBytes => write!(f, "capability bytes have trailing zeroes"),
+            Self::RestrictedAddressCapability => write!(f, "restricted address capability"),
         }
     }
 }

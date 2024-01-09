@@ -24,8 +24,11 @@ pub use self::{
     storage_deposit_return::StorageDepositReturnUnlockCondition, timelock::TimelockUnlockCondition,
 };
 use crate::types::block::{
-    address::{Address, RestrictedAddress},
-    output::{StorageScore, StorageScoreParameters},
+    address::{Address, AddressCapabilityFlag, RestrictedAddress},
+    output::{
+        feature::NativeTokenFeature, AccountOutput, AnchorOutput, DelegationOutput, NftOutput, StorageScore,
+        StorageScoreParameters,
+    },
     protocol::{CommittableAgeRange, ProtocolParameters, WorkScore},
     slot::SlotIndex,
     Error,
@@ -316,7 +319,6 @@ impl UnlockConditions {
     }
 
     /// Returns an iterator over all addresses.
-    #[inline(always)]
     pub fn addresses(&self) -> impl Iterator<Item = &Address> {
         self.iter().filter_map(|uc| match uc {
             UnlockCondition::Address(uc) => Some(uc.address()),
@@ -327,8 +329,53 @@ impl UnlockConditions {
         })
     }
 
+    /// Returns an iterator over all restricted addresses.
     pub fn restricted_addresses(&self) -> impl Iterator<Item = &RestrictedAddress> {
         self.addresses().filter_map(Address::as_restricted_opt)
+    }
+
+    pub(crate) fn verify_restricted_addresses(
+        &self,
+        output_kind: u8,
+        native_token: Option<&NativeTokenFeature>,
+        mana: u64,
+    ) -> Result<(), Error> {
+        let addresses = self.restricted_addresses();
+
+        for address in addresses {
+            if native_token.is_some() && !address.has_capability(AddressCapabilityFlag::OutputsWithNativeTokens) {
+                return Err(Error::RestrictedAddressCapability);
+            }
+
+            if mana > 0 && !address.has_capability(AddressCapabilityFlag::OutputsWithMana) {
+                return Err(Error::RestrictedAddressCapability);
+            }
+
+            if self.timelock().is_some() && !address.has_capability(AddressCapabilityFlag::OutputsWithTimelock) {
+                return Err(Error::RestrictedAddressCapability);
+            }
+
+            if self.expiration().is_some() && !address.has_capability(AddressCapabilityFlag::OutputsWithExpiration) {
+                return Err(Error::RestrictedAddressCapability);
+            }
+
+            if self.storage_deposit_return().is_some()
+                && !address.has_capability(AddressCapabilityFlag::OutputsWithStorageDepositReturn)
+            {
+                return Err(Error::RestrictedAddressCapability);
+            }
+
+            if match output_kind {
+                AccountOutput::KIND => !address.has_capability(AddressCapabilityFlag::AccountOutputs),
+                AnchorOutput::KIND => !address.has_capability(AddressCapabilityFlag::AnchorOutputs),
+                NftOutput::KIND => !address.has_capability(AddressCapabilityFlag::NftOutputs),
+                DelegationOutput::KIND => !address.has_capability(AddressCapabilityFlag::DelegationOutputs),
+                _ => return Err(Error::UnsupportedOutputKind(output_kind)),
+            } {
+                return Err(Error::RestrictedAddressCapability);
+            }
+        }
+        Ok(())
     }
 }
 
