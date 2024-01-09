@@ -103,7 +103,7 @@ impl InputSelection {
     }
 
     fn init(&mut self) -> Result<(), Error> {
-        // Adds an initial amount requirement.
+        // Adds an initial mana requirement.
         self.requirements.push(Requirement::Mana(self.mana_allotments));
         // Adds an initial amount requirement.
         self.requirements.push(Requirement::Amount);
