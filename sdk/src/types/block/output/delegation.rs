@@ -459,43 +459,5 @@ mod dto {
         }
     }
 
-    impl DelegationOutput {
-        #[allow(clippy::too_many_arguments)]
-        pub fn try_from_dtos(
-            amount: OutputBuilderAmount,
-            delegated_amount: u64,
-            delegation_id: &DelegationId,
-            validator_address: &AccountAddress,
-            start_epoch: impl Into<EpochIndex>,
-            end_epoch: impl Into<EpochIndex>,
-            unlock_conditions: Vec<UnlockCondition>,
-        ) -> Result<Self, Error> {
-            let mut builder = match amount {
-                OutputBuilderAmount::Amount(amount) => DelegationOutputBuilder::new_with_amount(
-                    amount,
-                    delegated_amount,
-                    *delegation_id,
-                    *validator_address,
-                ),
-                OutputBuilderAmount::MinimumAmount(params) => DelegationOutputBuilder::new_with_minimum_amount(
-                    params,
-                    delegated_amount,
-                    *delegation_id,
-                    *validator_address,
-                ),
-            }
-            .with_start_epoch(start_epoch)
-            .with_end_epoch(end_epoch);
-
-            let unlock_conditions = unlock_conditions
-                .into_iter()
-                .map(UnlockCondition::from)
-                .collect::<Vec<UnlockCondition>>();
-            builder = builder.with_unlock_conditions(unlock_conditions);
-
-            builder.finish()
-        }
-    }
-
     crate::impl_serde_typed_dto!(DelegationOutput, DelegationOutputDto, "delegation output");
 }
