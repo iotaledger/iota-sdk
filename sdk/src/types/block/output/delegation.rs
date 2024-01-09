@@ -400,10 +400,7 @@ mod dto {
 
     use super::*;
     use crate::{
-        types::block::{
-            output::{unlock_condition::UnlockCondition, OutputBuilderAmount},
-            Error,
-        },
+        types::block::{output::unlock_condition::UnlockCondition, Error},
         utils::serde::string,
     };
 
