@@ -45,7 +45,7 @@ export interface IBlockWithMetadata {
 }
 
 /**
- * Returns the metadata of a given transaction.
+ * Metadata of a transaction.
  */
 export interface TransactionMetadata {
     /**
