@@ -1,9 +1,10 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! Storage deposit is a concept that creates a monetary incentive to keep the ledger state small. This is achieved by
-//! enforcing a minimum IOTA coin deposit in every output based on the disk space that will actually be used to store
-//! it. [TIP-47: Storage Deposit Dust Protection](https://github.com/iotaledger/tips/blob/tip47/tips/TIP-0047/tip-0047.md).
+//! Storage deposit is a concept that creates a monetary incentive to keep the ledger state small.
+//! This is achieved by enforcing a minimum IOTA coin deposit in every output based on the disk space that will actually
+//! be used to store it.
+//! [TIP-47: Storage Deposit Dust Protection](https://github.com/iotaledger/tips/blob/tip47/tips/TIP-0047/tip-0047.md).
 
 use packable::Packable;
 
