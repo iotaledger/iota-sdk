@@ -26,6 +26,7 @@
     "author": "IOTA Foundation <contact@iota.org>",
     "license": "Apache-2.0",
     "dependencies": {
+        "@babel/traverse": "^7.23.2",
         "@types/node": "^18.15.12",
         "class-transformer": "^0.5.1",
         "prebuild-install": "^7.1.1",
