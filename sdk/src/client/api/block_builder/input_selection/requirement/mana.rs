@@ -15,6 +15,7 @@ impl InputSelection {
         } else {
             let mut inputs = Vec::new();
 
+            // TODO we should do as for the amount and have preferences on which inputs to pick.
             while let Some(input) = self.available_inputs.pop() {
                 selected_mana += input.output.mana();
                 inputs.push(input);
