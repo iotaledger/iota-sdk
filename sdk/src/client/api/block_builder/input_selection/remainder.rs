@@ -42,7 +42,7 @@ impl InputSelection {
                 .required_address(self.slot_index, self.protocol_parameters.committable_age_range())?
                 .expect("expiration unlockable outputs already filtered out");
 
-            if required_address.backing_ed25519().is_some() {
+            if required_address.is_backing_ed25519() {
                 return Ok(Some((required_address, input.chain)));
             }
         }
