@@ -72,6 +72,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
             .with_mana(mana)
             .with_foundry_counter(foundry_counter)
             .with_unlock_conditions(unlock_conditions);
+
             if let Some(features) = features {
                 output_builder = output_builder.with_features(features);
             }
@@ -94,6 +95,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
             }
             .with_mana(mana)
             .with_unlock_conditions(unlock_conditions);
+
             if let Some(features) = features {
                 output_builder = output_builder.with_features(features);
             }
@@ -118,6 +120,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
                 )
             }
             .with_unlock_conditions(unlock_conditions);
+
             if let Some(features) = features {
                 output_builder = output_builder.with_features(features);
             }
@@ -142,6 +145,7 @@ pub(crate) async fn call_client_method_internal(client: &Client, method: ClientM
             }
             .with_mana(mana)
             .with_unlock_conditions(unlock_conditions);
+
             if let Some(features) = features {
                 output_builder = output_builder.with_features(features);
             }
