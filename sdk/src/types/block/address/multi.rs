@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use alloc::{boxed::Box, vec::Vec};
+use alloc::{boxed::Box, collections::BTreeMap, vec::Vec};
 use core::{fmt, ops::RangeInclusive};
 
 use crypto::hashes::{blake2b::Blake2b256, Digest};
@@ -96,9 +96,13 @@ impl MultiAddress {
     /// Creates a new [`MultiAddress`].
     #[inline(always)]
     pub fn new(addresses: impl IntoIterator<Item = WeightedAddress>, threshold: u16) -> Result<Self, Error> {
-        let mut addresses = addresses.into_iter().collect::<Box<[_]>>();
-
-        addresses.sort_by(|a, b| a.address().pack_to_vec().cmp(&b.address().pack_to_vec()));
+        // Using an intermediate BTreeMap to sort the addresses without having to repeatedly packing them.
+        let addresses = addresses
+            .into_iter()
+            .map(|address| (address.address().pack_to_vec(), address))
+            .collect::<BTreeMap<_, _>>()
+            .into_values()
+            .collect::<Box<[_]>>();
 
         verify_addresses::<true>(&addresses)?;
         verify_threshold::<true>(&threshold)?;
