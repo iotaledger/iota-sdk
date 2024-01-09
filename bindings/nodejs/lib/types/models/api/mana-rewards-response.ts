@@ -5,7 +5,7 @@ import { EpochIndex } from '../../block/slot';
 import { u64 } from '../../utils';
 
 /**
- * Returns the mana rewards of an account or delegation output.
+ * The mana rewards of an account or delegation output.
  */
 export class ManaRewardsResponse {
     /**

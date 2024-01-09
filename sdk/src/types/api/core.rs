@@ -25,7 +25,7 @@ use crate::{
 };
 
 /// Response of GET /api/core/v3/info.
-/// Returns general information about the node.
+/// General information about the node.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct InfoResponse {
@@ -216,7 +216,7 @@ pub struct ValidatorsResponse {
 }
 
 /// Response of GET /api/core/v3/rewards/{outputId}.
-/// Returns the mana rewards of an account or delegation output.
+/// The mana rewards of an account or delegation output.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ManaRewardsResponse {
@@ -254,7 +254,7 @@ pub struct CommitteeResponse {
     pub epoch: EpochIndex,
 }
 
-/// Returns information of a committee member.
+/// Information of a committee member.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct CommitteeMember {
@@ -413,7 +413,7 @@ pub struct TransactionMetadataResponse {
 }
 
 /// Response of GET /api/core/v3/blocks/{blockId}/metadata.
-/// Returns the metadata of a block.
+/// The metadata of a block.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct BlockMetadataResponse {
@@ -426,7 +426,7 @@ pub struct BlockMetadataResponse {
 }
 
 /// Response of GET /api/core/v3/blocks/{blockId}/full.
-/// Returns a block and its metadata.
+/// A block and its metadata.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub struct BlockWithMetadataResponse {
     pub block: BlockDto,
@@ -434,7 +434,7 @@ pub struct BlockWithMetadataResponse {
 }
 
 /// Response of GET /api/core/v3/outputs/{output_id}.
-/// Returns an output and its metadata.
+/// An output and its metadata.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct OutputWithMetadataResponse {
@@ -458,7 +458,7 @@ impl From<OutputWithMetadata> for OutputWithMetadataResponse {
 }
 
 /// Response of GET /api/routes.
-/// Returns the available API route groups of the node.
+/// The available API route groups of the node.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct RoutesResponse {
@@ -468,7 +468,7 @@ pub struct RoutesResponse {
 /// Response of
 /// - GET /api/core/v3/commitments/{commitmentId}/utxo-changes
 /// - GET /api/core/v3/commitments/by-slot/{slot}/utxo-changes
-/// Returns all UTXO changes that happened at a specific slot.
+/// All UTXO changes that happened at a specific slot.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct UtxoChangesResponse {
@@ -480,7 +480,7 @@ pub struct UtxoChangesResponse {
 /// Response of
 /// - GET /api/core/v3/commitments/{commitmentId}/utxo-changes/full
 /// - GET /api/core/v3/commitments/by-slot/{slot}/utxo-changes/full
-/// Returns all full UTXO changes that happened at a specific slot.
+/// All full UTXO changes that happened at a specific slot.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct UtxoChangesFullResponse {

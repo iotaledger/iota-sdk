@@ -49,7 +49,7 @@ export interface ValidatorResponse {
  */
 export interface ValidatorsResponse {
     /**
-     * ist of registered validators ready for the next epoch.
+     * List of registered validators ready for the next epoch.
      */
     validators: ValidatorResponse[];
     /**

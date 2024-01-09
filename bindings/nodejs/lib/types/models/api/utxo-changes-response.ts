@@ -7,7 +7,7 @@ import { Output, OutputDiscriminator } from '../../block/output';
 import { Type } from 'class-transformer';
 
 /**
- * Returns all UTXO changes that happened at a specific slot.
+ * All UTXO changes that happened at a specific slot.
  */
 export class UtxoChangesResponse {
     /**
@@ -42,7 +42,7 @@ export class OutputWithId {
 }
 
 /**
- * Returns all full UTXO changes that happened at a specific slot.
+ * All full UTXO changes that happened at a specific slot.
  */
 export class UtxoChangesFullResponse {
     /**
