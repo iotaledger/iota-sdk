@@ -285,17 +285,17 @@ pub enum ClientMethod {
     /// Look up a commitment by a given commitment index.
     GetCommitmentByIndex {
         /// Index of the commitment to look up.
-        index: SlotIndex,
+        slot: SlotIndex,
     },
     /// Get all UTXO changes of a given slot by commitment index.
     GetUtxoChangesByIndex {
         /// Index of the commitment to look up.
-        index: SlotIndex,
+        slot: SlotIndex,
     },
     /// Get all full UTXO changes of a given slot by commitment index.
     GetUtxoChangesFullByIndex {
         /// Index of the commitment to look up.
-        index: SlotIndex,
+        slot: SlotIndex,
     },
 
     //////////////////////////////////////////////////////////////////////

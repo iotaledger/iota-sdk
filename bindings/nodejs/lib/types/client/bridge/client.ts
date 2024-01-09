@@ -233,17 +233,31 @@ export interface __GetUtxoChangesMethod__ {
     };
 }
 
+export interface __GetUtxoChangesFullMethod__ {
+    name: 'getUtxoChangesFull';
+    data: {
+        commitmentId: HexEncodedString;
+    };
+}
+
 export interface __GetCommitmentByIndexMethod__ {
     name: 'getCommitmentByIndex';
     data: {
-        index: SlotIndex;
+        slot: SlotIndex;
     };
 }
 
 export interface __GetUtxoChangesByIndexMethod__ {
     name: 'getUtxoChangesByIndex';
     data: {
-        index: SlotIndex;
+        slot: SlotIndex;
+    };
+}
+
+export interface __GetUtxoChangesFullByIndexMethod__ {
+    name: 'getUtxoChangesFullByIndex';
+    data: {
+        slot: SlotIndex;
     };
 }
 

@@ -67,6 +67,7 @@ import {
     IOutputsResponse,
     CongestionResponse,
     UtxoChangesResponse,
+    UtxoChangesFullResponse,
 } from '../types/models/api';
 
 import { plainToInstance } from 'class-transformer';
@@ -595,16 +596,34 @@ export class Client {
     }
 
     /**
+     * Get all full UTXO changes of a given slot by Commitment ID.
+     *
+     * @param commitmentId Commitment ID of the commitment to look up.
+     * @returns The UTXO changes.
+     */
+    async getUtxoChangesFull(
+        commitmentId: SlotCommitmentId,
+    ): Promise<UtxoChangesFullResponse> {
+        const response = await this.methodHandler.callMethod({
+            name: 'getUtxoChangesFull',
+            data: {
+                commitmentId,
+            },
+        });
+        return JSON.parse(response).payload;
+    }
+
+    /**
      * Look up a commitment by a given commitment index.
      *
-     * @param index Index of the commitment to look up.
+     * @param slot Index of the commitment to look up.
      * @returns The commitment.
      */
-    async getCommitmentByIndex(index: SlotIndex): Promise<SlotCommitment> {
+    async getCommitmentByIndex(slot: SlotIndex): Promise<SlotCommitment> {
         const response = await this.methodHandler.callMethod({
             name: 'getCommitmentByIndex',
             data: {
-                index,
+                slot,
             },
         });
         return JSON.parse(response).payload;
@@ -613,16 +632,32 @@ export class Client {
     /**
      * Get all UTXO changes of a given slot by commitment index.
      *
-     * @param index Index of the commitment to look up.
+     * @param slot Index of the commitment to look up.
      * @returns The UTXO changes.
      */
-    async getUtxoChangesByIndex(
-        index: SlotIndex,
-    ): Promise<UtxoChangesResponse> {
+    async getUtxoChangesByIndex(slot: SlotIndex): Promise<UtxoChangesResponse> {
         const response = await this.methodHandler.callMethod({
             name: 'getUtxoChangesByIndex',
             data: {
-                index,
+                slot,
+            },
+        });
+        return JSON.parse(response).payload;
+    }
+
+    /**
+     * Get all full UTXO changes of a given slot by commitment index.
+     *
+     * @param slot Index of the commitment to look up.
+     * @returns The UTXO changes.
+     */
+    async getUtxoChangesFullByIndex(
+        slot: SlotIndex,
+    ): Promise<UtxoChangesFullResponse> {
+        const response = await this.methodHandler.callMethod({
+            name: 'getUtxoChangesFullByIndex',
+            data: {
+                slot,
             },
         });
         return JSON.parse(response).payload;

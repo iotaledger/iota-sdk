@@ -33,8 +33,10 @@ import type {
     __GetTransactionMetadataMethod__,
     __GetCommitmentMethod__,
     __GetUtxoChangesMethod__,
+    __GetUtxoChangesFullMethod__,
     __GetCommitmentByIndexMethod__,
     __GetUtxoChangesByIndexMethod__,
+    __GetUtxoChangesFullByIndexMethod__,
     __HexToBech32Method__,
     __AccountIdToBech32Method__,
     __NftIdToBech32Method__,
@@ -97,8 +99,10 @@ export type __ClientMethods__ =
     | __GetTransactionMetadataMethod__
     | __GetCommitmentMethod__
     | __GetUtxoChangesMethod__
+    | __GetUtxoChangesFullMethod__
     | __GetCommitmentByIndexMethod__
     | __GetUtxoChangesByIndexMethod__
+    | __GetUtxoChangesFullByIndexMethod__
     | __HexToBech32Method__
     | __AccountIdToBech32Method__
     | __NftIdToBech32Method__
