@@ -154,7 +154,16 @@ impl InputSelection {
         protocol_parameters: ProtocolParameters,
     ) -> Self {
         let available_inputs = available_inputs.into();
-        let mut addresses = HashSet::from_iter(addresses);
+
+        let mut addresses = HashSet::from_iter(addresses.into_iter().map(|a| {
+            // Get a potential Ed25519 address directly since we're only interested in that
+            #[allow(clippy::option_if_let_else)] // clippy's suggestion requires a clone
+            if let Some(address) = a.backing_ed25519() {
+                Address::Ed25519(*address)
+            } else {
+                a
+            }
+        }));
 
         addresses.extend(available_inputs.iter().filter_map(|input| match &input.output {
             Output::Account(output) => Some(Address::Account(AccountAddress::from(

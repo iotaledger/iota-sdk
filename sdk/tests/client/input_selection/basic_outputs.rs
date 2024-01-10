@@ -6,7 +6,10 @@ use std::str::FromStr;
 use iota_sdk::{
     client::api::input_selection::{Error, InputSelection, Requirement},
     types::block::{
-        address::{Address, MultiAddress, RestrictedAddress, WeightedAddress},
+        address::{
+            Address, AddressCapabilities, ImplicitAccountCreationAddress, MultiAddress, RestrictedAddress,
+            WeightedAddress,
+        },
         output::{AccountId, NftId},
         protocol::protocol_parameters,
     },
@@ -2059,4 +2062,65 @@ fn multi_address_sender_already_fulfilled() {
 
     assert!(unsorted_eq(&selected.inputs, &inputs));
     assert!(unsorted_eq(&selected.outputs, &outputs));
+}
+
+#[test]
+fn ed25519_backed_available_address() {
+    let protocol_parameters = protocol_parameters();
+    let ed25519 = Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap();
+    let restricted_address = Address::from(
+        RestrictedAddress::new(ed25519.clone())
+            .unwrap()
+            .with_allowed_capabilities(AddressCapabilities::all()),
+    );
+
+    let inputs = build_inputs([
+        Basic(
+            1_000_000,
+            restricted_address.clone(),
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+        ),
+        Basic(1_000_000, ed25519.clone(), None, None, None, None, None, None),
+    ]);
+    let outputs = build_outputs([
+        Basic(
+            1_000_000,
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+        ),
+        Basic(
+            1_000_000,
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            None,
+            Some(restricted_address.clone()),
+            None,
+            None,
+            None,
+            None,
+        ),
+    ]);
+
+    let selected = InputSelection::new(
+        inputs.clone(),
+        outputs.clone(),
+        // Restricted address is provided, but it can also unlock the ed25519 one
+        [restricted_address],
+        protocol_parameters,
+    )
+    .select()
+    .unwrap();
+
+    assert!(unsorted_eq(&selected.inputs, &inputs));
+    // Provided outputs
+    assert_eq!(selected.outputs, outputs);
 }
