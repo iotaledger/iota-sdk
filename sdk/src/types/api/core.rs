@@ -25,7 +25,7 @@ use crate::{
 };
 
 /// Response of GET /api/core/v3/info.
-/// Returns general information about the node.
+/// General information about the node.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct InfoResponse {
@@ -206,8 +206,8 @@ pub struct ValidatorResponse {
 #[serde(rename_all = "camelCase")]
 pub struct ValidatorsResponse {
     /// List of registered validators ready for the next epoch.
-    validators: Vec<ValidatorResponse>,
-    ///  The number of validators returned per one API request with pagination.
+    stakers: Vec<ValidatorResponse>,
+    /// The number of validators returned per one API request with pagination.
     page_size: u32,
     /// The cursor that needs to be provided as cursor query parameter to request the next page. If empty, this was the
     /// last page.
@@ -216,18 +216,25 @@ pub struct ValidatorsResponse {
 }
 
 /// Response of GET /api/core/v3/rewards/{outputId}.
-/// Returns the mana rewards of an account or delegation output.
+/// The mana rewards of an account or delegation output.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ManaRewardsResponse {
-    /// The starting epoch index for which the mana rewards are returned.
+    /// First epoch for which rewards can be claimed.
+    /// This value is useful for checking if rewards have expired (by comparing against the staking or delegation
+    /// start) or would expire soon (by checking its relation to the rewards retention period).
     pub start_epoch: EpochIndex,
-    /// The ending epoch index for which the mana rewards are returned, the decay is applied up to this point
-    /// included.
+    /// Last epoch for which rewards can be claimed.
     pub end_epoch: EpochIndex,
-    /// The amount of totally available rewards the requested output may claim.
+    /// Amount of totally available decayed rewards the requested output may claim.
     #[serde(with = "string")]
     pub rewards: u64,
+    /// Rewards of the latest committed epoch of the staking pool to which this validator or delegator belongs.
+    /// The ratio of this value and the maximally possible rewards for the latest committed epoch can be used to
+    /// determine how well the validator of this staking pool performed in that epoch.
+    /// Note that if the pool was not part of the committee in the latest committed epoch, this value is 0.
+    #[serde(with = "string")]
+    pub latest_committed_epoch_pool_rewards: u64,
 }
 
 /// Response of GET /api/core/v3/committee
@@ -247,7 +254,7 @@ pub struct CommitteeResponse {
     pub epoch: EpochIndex,
 }
 
-/// Returns information of a committee member.
+/// Information of a committee member.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct CommitteeMember {
@@ -318,7 +325,7 @@ pub struct CongestionResponse {
     pub reference_mana_cost: u64,
     /// The Block Issuance Credits of the requested account.
     #[serde(with = "string")]
-    pub block_issuance_credits: u64,
+    pub block_issuance_credits: i128,
 }
 
 /// Response of POST /api/core/v3/blocks.
@@ -349,11 +356,13 @@ pub enum BlockState {
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum TransactionState {
-    // Stored but not confirmed.
+    // Not included yet.
     Pending,
-    // Confirmed with the first level of knowledge.
+    // Included.
+    Accepted,
+    // Included and its included block is confirmed.
     Confirmed,
-    // Included and can no longer be reverted.
+    // Included, its included block is finalized and cannot be reverted anymore.
     Finalized,
     // The block is not successfully issued due to failure reason.
     Failed,
@@ -404,7 +413,7 @@ pub struct TransactionMetadataResponse {
 }
 
 /// Response of GET /api/core/v3/blocks/{blockId}/metadata.
-/// Returns the metadata of a block.
+/// The metadata of a block.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct BlockMetadataResponse {
@@ -417,7 +426,7 @@ pub struct BlockMetadataResponse {
 }
 
 /// Response of GET /api/core/v3/blocks/{blockId}/full.
-/// Returns a block and its metadata.
+/// A block and its metadata.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub struct BlockWithMetadataResponse {
     pub block: BlockDto,
@@ -425,7 +434,7 @@ pub struct BlockWithMetadataResponse {
 }
 
 /// Response of GET /api/core/v3/outputs/{output_id}.
-/// Returns an output and its metadata.
+/// An output and its metadata.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct OutputWithMetadataResponse {
@@ -448,69 +457,8 @@ impl From<OutputWithMetadata> for OutputWithMetadataResponse {
     }
 }
 
-/// Describes the heartbeat of a node.
-#[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct Heartbeat {
-    pub solid_milestone_index: u32,
-    pub pruned_milestone_index: u32,
-    pub latest_milestone_index: u32,
-    pub connected_peers: u8,
-    pub synced_peers: u8,
-}
-
-/// Describes metrics of a gossip stream.
-#[derive(Clone, Debug, Default, Eq, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct Metrics {
-    pub new_blocks: u64,
-    pub received_blocks: u64,
-    pub known_blocks: u64,
-    pub received_block_requests: u64,
-    pub received_milestone_requests: u64,
-    pub received_heartbeats: u64,
-    pub sent_blocks: u64,
-    pub sent_block_requests: u64,
-    pub sent_milestone_requests: u64,
-    pub sent_heartbeats: u64,
-    pub dropped_packets: u64,
-}
-
-/// Returns all information about the gossip stream with the peer.
-#[derive(Clone, Debug, Eq, PartialEq, Default, Serialize, Deserialize)]
-pub struct Gossip {
-    pub heartbeat: Heartbeat,
-    pub metrics: Metrics,
-}
-
-/// Describes the relation with the peer.
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub enum Relation {
-    Known,
-    Unknown,
-    Autopeered,
-}
-
-/// Response of
-/// - GET /api/core/v3/peer/{peer_id}
-/// - POST /api/core/v3/peers
-/// Returns information about a peer.
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct PeerResponse {
-    pub id: String,
-    pub multi_addresses: Vec<String>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub alias: Option<String>,
-    pub relation: Relation,
-    pub connected: bool,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub gossip: Option<Gossip>,
-}
-
 /// Response of GET /api/routes.
-/// Returns the available API route groups of the node.
+/// The available API route groups of the node.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct RoutesResponse {
@@ -520,13 +468,33 @@ pub struct RoutesResponse {
 /// Response of
 /// - GET /api/core/v3/commitments/{commitmentId}/utxo-changes
 /// - GET /api/core/v3/commitments/by-slot/{slot}/utxo-changes
-/// Returns all UTXO changes that happened at a specific slot.
+/// All UTXO changes that happened at a specific slot.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct UtxoChangesResponse {
     pub commitment_id: SlotCommitmentId,
     pub created_outputs: Vec<OutputId>,
     pub consumed_outputs: Vec<OutputId>,
+}
+
+/// Response of
+/// - GET /api/core/v3/commitments/{commitmentId}/utxo-changes/full
+/// - GET /api/core/v3/commitments/by-slot/{slot}/utxo-changes/full
+/// All full UTXO changes that happened at a specific slot.
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct UtxoChangesFullResponse {
+    pub commitment_id: SlotCommitmentId,
+    pub created_outputs: Vec<OutputWithId>,
+    pub consumed_outputs: Vec<OutputWithId>,
+}
+
+/// An Output and its ID.
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct OutputWithId {
+    pub output_id: OutputId,
+    pub output: Output,
 }
 
 /// Contains the generic [`Output`] with associated [`OutputIdProof`].

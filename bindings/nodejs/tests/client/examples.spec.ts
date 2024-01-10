@@ -11,20 +11,24 @@ import {
     TaggedDataPayload,
     CommonOutput,
     CoinType,
+    Ed25519Address,
 } from '../../';
 import '../customMatchers';
 import 'dotenv/config';
 import * as addressOutputs from '../fixtures/addressOutputs.json';
+import { AddressUnlockCondition } from '../../lib';
 
-const client = new Client({
-    nodes: [
-        {
-            url: process.env.NODE_URL || 'http://localhost:14265',
-        },
-    ],
-});
+async function makeClient(): Promise<Client> {
+    return await Client.create({
+        nodes: [
+            {
+                url: 'http://localhost:8050',
+            },
+        ],
+    });
+}
 
-const secretManager = new SecretManager({
+const secretManager = SecretManager.create({
     mnemonic:
         'endorse answer radar about source reunion marriage tag sausage weekend frost daring base attack because joke dream slender leisure group reason prepare broken river',
 });
@@ -33,7 +37,7 @@ const issuerId =
     '0x0000000000000000000000000000000000000000000000000000000000000000';
 
 const chain = {
-    coinType: CoinType.Iota,
+    coinType: CoinType.IOTA,
     account: 0,
     change: 0,
     addressIndex: 0,
@@ -42,10 +46,11 @@ const chain = {
 // Skip for CI
 describe.skip('Main examples', () => {
     it('gets info about the node', async () => {
+        const client = await makeClient();
         const info = await client.getInfo();
 
         expect(
-            info.nodeInfo.protocolParameters[0].parameters[0].bech32Hrp,
+            info.nodeInfo.protocolParameters[0].parameters.bech32Hrp,
         ).toBe('rms');
     });
 
@@ -57,7 +62,7 @@ describe.skip('Main examples', () => {
 
     // TODO
     // it('generates addresses', async () => {
-    //     const addresses = await new SecretManager(
+    //     const addresses = await SecretManager.create(
     //         secretManager,
     //     ).generateEd25519Addresses({
     //         accountIndex: 0,
@@ -76,15 +81,13 @@ describe.skip('Main examples', () => {
     // });
 
     it('gets address outputs', async () => {
-        const outputIdsResponse = await client.basicOutputIds([
-            {
-                address:
-                    'rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy',
-            },
-            { hasExpiration: false },
-            { hasTimelock: false },
-            { hasStorageDepositReturn: false },
-        ]);
+        const client = await makeClient();
+        const outputIdsResponse = await client.basicOutputIds({
+            address: 'rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy',
+            hasExpiration: false,
+            hasTimelock: false,
+            hasStorageDepositReturn: false
+        });
 
         outputIdsResponse.items.forEach((id) => expect(id).toBeValidOutputId());
 
@@ -98,6 +101,7 @@ describe.skip('Main examples', () => {
     });
 
     it('gets the output of a known output ID', async () => {
+        const client = await makeClient();
         const output = await client.getOutput(
             '0xc1d95ac9c8c0237c6929faf427556c3562055a7155c6d336ee7891691d5525c90100',
         );
@@ -116,13 +120,14 @@ describe.skip('Main examples', () => {
         });
         expect(addresses[0]).toBeValidAddress();
 
+        const client = await makeClient();
         // Get output ids of outputs that can be controlled by this address without further unlock constraints
-        const outputIdsResponse = await client.basicOutputIds([
-            { address: addresses[0] },
-            { hasExpiration: false },
-            { hasTimelock: false },
-            { hasStorageDepositReturn: false },
-        ]);
+        const outputIdsResponse = await client.basicOutputIds({
+            address: addresses[0],
+            hasExpiration: false,
+            hasTimelock: false,
+            hasStorageDepositReturn: false,
+        });
         outputIdsResponse.items.forEach((id) => expect(id).toBeValidOutputId());
 
         // Get outputs by their IDs
@@ -139,14 +144,10 @@ describe.skip('Main examples', () => {
         for (const outputResponse of testOutputs) {
             const output = outputResponse['output'];
             if (output instanceof CommonOutput) {
-                (output as CommonOutput)
-                    .getNativeTokens()
-                    ?.forEach(
-                        (token) =>
-                        (totalNativeTokens[token.id] =
-                            (totalNativeTokens[token.id] || 0) +
-                            Number(token.amount)),
-                    );
+                const token = (output as CommonOutput).getNativeToken();
+                if (token) {
+                    totalNativeTokens[token.id] = (totalNativeTokens[token.id] || 0) + Number(token.amount);
+                }
             }
 
             totalAmount += Number(output.getAmount());
@@ -169,10 +170,12 @@ describe.skip('Main examples', () => {
     // });
 
     it('gets block data', async () => {
+        const client = await makeClient();
         const tips = await client.getTips();
+        const params = await client.getProtocolParameters();
 
         const blockData = await client.getBlock(tips[0]);
-        const blockId = Utils.blockId(blockData);
+        const blockId = Utils.blockId(blockData, params);
         expect(tips[0]).toStrictEqual(blockId);
 
         const blockMetadata = await client.getBlockMetadata(tips[0]);
@@ -180,6 +183,7 @@ describe.skip('Main examples', () => {
     });
 
     it('sends a block with a tagged data payload', async () => {
+        const client = await makeClient();
         const unsignedBlock = await client.buildBasicBlock(
             issuerId,
             new TaggedDataPayload(utf8ToHex('Hello'), utf8ToHex('Tangle')),
@@ -189,8 +193,46 @@ describe.skip('Main examples', () => {
 
         const fetchedBlock = await client.getBlock(blockId);
 
-        expect(fetchedBlock.payload).toStrictEqual(
+        expect(fetchedBlock.body.asBasic().payload).toStrictEqual(
             new TaggedDataPayload(utf8ToHex('Hello'), utf8ToHex('Tangle')),
         );
     });
+
+    it('sends a transaction', async () => {
+        const client = await makeClient();
+        const addresses = await secretManager.generateEd25519Addresses({
+            range: {
+                start: 1,
+                end: 2,
+            },
+        });
+
+        const basicOutput = await client.buildBasicOutput({
+            amount: BigInt(1000000),
+            unlockConditions: [
+                new AddressUnlockCondition(
+                    new Ed25519Address(addresses[0]),
+                ),
+            ],
+        });
+        
+        //let payload = await secretManager.signTransaction(prepared);
+        const unsignedBlock = await client.buildBasicBlock("", undefined);
+        const signedBlock = await secretManager.signBlock(unsignedBlock, chain);
+        const blockId = await client.postBlock(signedBlock);
+
+        expect(blockId).toBeValidBlockId();
+    });
+
+    it('destroy', async () => {
+        const client = await makeClient();
+        await client.destroy();
+
+        try {
+            const _info = await client.getInfo();
+            throw 'Should return an error because the client was destroyed';
+        } catch (err: any) {
+            expect(err.message).toEqual('Client was destroyed');
+        }
+    })
 });

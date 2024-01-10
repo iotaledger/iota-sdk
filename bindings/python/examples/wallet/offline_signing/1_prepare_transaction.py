@@ -10,7 +10,7 @@ from dacite import from_dict
 from dotenv import load_dotenv
 
 from iota_sdk import (AccountAddress, ClientOptions, CoinType, SendParams,
-                      Wallet)
+                      Wallet, WalletOptions, Bip44)
 
 load_dotenv()
 
@@ -35,15 +35,21 @@ if 'NODE_URL' not in os.environ:
 
 client_options = ClientOptions(nodes=[os.environ.get('NODE_URL')])
 
-wallet = Wallet(ONLINE_WALLET_DB_PATH, client_options,
-                CoinType.IOTA, "placeholder")
+bib_path = Bip44(
+    coin_type=CoinType.SHIMMER
+)
+wallet_options = WalletOptions(
+    None,
+    None,
+    bib_path,
+    client_options,
+    "placeholder",
+    ONLINE_WALLET_DB_PATH)
+wallet = Wallet(wallet_options)
 
-account = wallet.create_account('Alice', "rms", addresses)
-print("Account created:", account.get_metadata())
+wallet.sync()
 
-account.sync()
-
-prepared_transaction = account.prepare_send(params)
+prepared_transaction = wallet.prepare_send(params)
 
 json_data = json.dumps(
     prepared_transaction.prepared_transaction_data().to_dict(),

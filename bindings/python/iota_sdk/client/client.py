@@ -11,7 +11,7 @@ from iota_sdk.client._node_core_api import NodeCoreAPI
 from iota_sdk.client._node_indexer_api import NodeIndexerAPI
 from iota_sdk.client._high_level_api import HighLevelAPI
 from iota_sdk.client._utils import ClientUtils
-from iota_sdk.types.block.signed_block import UnsignedBlock
+from iota_sdk.types.block.block import UnsignedBlock
 from iota_sdk.types.common import HexStr, Node
 from iota_sdk.types.feature import Feature
 from iota_sdk.types.network_info import NetworkInfo
@@ -45,6 +45,7 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         min_quorum_size: Optional[int] = None,
         quorum_threshold: Optional[int] = None,
         user_agent: Optional[str] = None,
+        max_parallel_api_requests: Optional[int] = None,
         client_handle=None
     ):
         """Initialize the IOTA Client.
@@ -70,6 +71,8 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
             % of nodes that have to return the same response so it gets accepted.
         user_agent :
             The User-Agent header for requests.
+        max_parallel_api_requests :
+            Set maximum parallel API requests.
         client_handle :
             An instance of a node client.
         """

@@ -10,14 +10,12 @@ use crate::types::block::{
     output::{
         feature::{verify_allowed_features, Feature, FeatureFlags, Features, NativeTokenFeature},
         unlock_condition::{
-            verify_allowed_unlock_conditions, AddressUnlockCondition, StorageDepositReturnUnlockCondition,
-            UnlockCondition, UnlockConditionFlags, UnlockConditions,
+            verify_allowed_unlock_conditions, verify_restricted_addresses, AddressUnlockCondition,
+            StorageDepositReturnUnlockCondition, UnlockCondition, UnlockConditionFlags, UnlockConditions,
         },
-        MinimumOutputAmount, NativeToken, Output, OutputBuilderAmount, OutputId, StorageScore, StorageScoreParameters,
+        MinimumOutputAmount, NativeToken, Output, OutputBuilderAmount, StorageScore, StorageScoreParameters,
     },
     protocol::{ProtocolParameters, WorkScore, WorkScoreParameters},
-    semantic::{SemanticValidationContext, TransactionFailureReason},
-    unlock::Unlock,
     Error,
 };
 
@@ -194,6 +192,12 @@ impl BasicOutputBuilder {
 
         let features = Features::from_set(self.features)?;
 
+        verify_restricted_addresses(
+            &unlock_conditions,
+            BasicOutput::KIND,
+            features.native_token(),
+            self.mana,
+        )?;
         verify_features::<true>(&features)?;
 
         let mut output = BasicOutput {
@@ -232,6 +236,7 @@ impl From<&BasicOutput> for BasicOutputBuilder {
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Packable)]
 #[packable(unpack_error = Error)]
 #[packable(unpack_visitor = ProtocolParameters)]
+#[packable(verify_with = verify_basic_output)]
 pub struct BasicOutput {
     /// Amount of IOTA coins held by the output.
     amount: u64,
@@ -309,31 +314,6 @@ impl BasicOutput {
             .address()
             .map(|unlock_condition| unlock_condition.address())
             .unwrap()
-    }
-
-    ///
-    pub fn unlock(
-        &self,
-        _output_id: &OutputId,
-        unlock: &Unlock,
-        context: &mut SemanticValidationContext<'_>,
-    ) -> Result<(), TransactionFailureReason> {
-        let slot_index = context
-            .transaction
-            .context_inputs()
-            .iter()
-            .find_map(|c| c.as_commitment_opt().map(|c| c.slot_index()));
-
-        self.unlock_conditions()
-            .locked_address(
-                self.address(),
-                slot_index,
-                context.protocol_parameters.committable_age_range(),
-            )
-            .map_err(|_| TransactionFailureReason::InvalidCommitmentContextInput)?
-            // because of expiration the input can't be unlocked at this time
-            .ok_or(TransactionFailureReason::SemanticValidationFailed)?
-            .unlock(unlock, context)
     }
 
     /// Returns the address of the unlock conditions if the output is a simple deposit.
@@ -419,6 +399,15 @@ fn verify_features_packable<const VERIFY: bool>(features: &Features, _: &Protoco
     verify_features::<VERIFY>(features)
 }
 
+fn verify_basic_output<const VERIFY: bool>(output: &BasicOutput, _: &ProtocolParameters) -> Result<(), Error> {
+    verify_restricted_addresses(
+        output.unlock_conditions(),
+        BasicOutput::KIND,
+        output.features.native_token(),
+        output.mana,
+    )
+}
+
 #[cfg(feature = "serde")]
 mod dto {
     use alloc::vec::Vec;
@@ -473,33 +462,6 @@ mod dto {
         }
     }
 
-    impl BasicOutput {
-        pub fn try_from_dtos(
-            amount: OutputBuilderAmount,
-            mana: u64,
-            unlock_conditions: Vec<UnlockCondition>,
-            features: Option<Vec<Feature>>,
-        ) -> Result<Self, Error> {
-            let mut builder = match amount {
-                OutputBuilderAmount::Amount(amount) => BasicOutputBuilder::new_with_amount(amount),
-                OutputBuilderAmount::MinimumAmount(params) => BasicOutputBuilder::new_with_minimum_amount(params),
-            }
-            .with_mana(mana);
-
-            let unlock_conditions = unlock_conditions
-                .into_iter()
-                .map(UnlockCondition::from)
-                .collect::<Vec<UnlockCondition>>();
-            builder = builder.with_unlock_conditions(unlock_conditions);
-
-            if let Some(features) = features {
-                builder = builder.with_features(features);
-            }
-
-            builder.finish()
-        }
-    }
-
     crate::impl_serde_typed_dto!(BasicOutput, BasicOutputDto, "basic output");
 }
 
@@ -526,41 +488,6 @@ mod tests {
         let dto = BasicOutputDto::from(&basic_output);
         let output = Output::Basic(BasicOutput::try_from(dto).unwrap());
         assert_eq!(&basic_output, output.as_basic());
-
-        let output_split = BasicOutput::try_from_dtos(
-            OutputBuilderAmount::Amount(basic_output.amount()),
-            basic_output.mana(),
-            basic_output.unlock_conditions().to_vec(),
-            Some(basic_output.features().to_vec()),
-        )
-        .unwrap();
-        assert_eq!(basic_output, output_split);
-
-        let foundry_id = FoundryId::build(&rand_account_address(), 0, SimpleTokenScheme::KIND);
-        let address = rand_address_unlock_condition();
-
-        let test_split_dto = |builder: BasicOutputBuilder| {
-            let output_split = BasicOutput::try_from_dtos(
-                builder.amount,
-                builder.mana,
-                builder.unlock_conditions.iter().cloned().collect(),
-                Some(builder.features.iter().cloned().collect()),
-            )
-            .unwrap();
-            assert_eq!(builder.finish().unwrap(), output_split);
-        };
-
-        let builder = BasicOutput::build_with_amount(100)
-            .with_native_token(NativeToken::new(TokenId::from(foundry_id), 1000).unwrap())
-            .add_unlock_condition(address.clone())
-            .with_features(rand_allowed_features(BasicOutput::ALLOWED_FEATURES));
-        test_split_dto(builder);
-
-        let builder = BasicOutput::build_with_minimum_amount(protocol_parameters.storage_score_parameters())
-            .with_native_token(NativeToken::new(TokenId::from(foundry_id), 1000).unwrap())
-            .add_unlock_condition(address)
-            .with_features(rand_allowed_features(BasicOutput::ALLOWED_FEATURES));
-        test_split_dto(builder);
     }
 
     // TODO: re-enable when rent is figured out

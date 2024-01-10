@@ -49,19 +49,19 @@ async function run() {
         const accountId = balance.accounts[0];
         console.log(`Account Id: ${accountId}`);
 
+        const client = await wallet.getClient();
+
         // Get Account address
         const accountAddress = Utils.accountIdToBech32(
             accountId,
-            await (await wallet.getClient()).getBech32Hrp(),
+            await client.getBech32Hrp(),
         );
 
         // Find first output unlockable by the account address
         const queryParameters = {
             address: accountAddress,
         };
-        const input = (
-            await (await wallet.getClient()).basicOutputIds(queryParameters)
-        ).items[0];
+        const input = (await client.basicOutputIds(queryParameters)).items[0];
 
         const params = [
             {
@@ -90,4 +90,4 @@ async function run() {
     }
 }
 
-run().then(() => process.exit());
+void run().then(() => process.exit());

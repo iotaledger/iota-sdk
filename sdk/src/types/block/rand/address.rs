@@ -2,34 +2,79 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use crate::types::block::{
-    address::{AccountAddress, Address, AnchorAddress, Ed25519Address, NftAddress},
+    address::{
+        AccountAddress, Address, AddressCapabilities, AnchorAddress, Ed25519Address, ImplicitAccountCreationAddress,
+        MultiAddress, NftAddress, RestrictedAddress, WeightedAddress,
+    },
     output::{AccountId, AnchorId, NftId},
-    rand::{bytes::rand_bytes_array, number::rand_number},
+    rand::{
+        bytes::rand_bytes_array,
+        number::{rand_number, rand_number_range},
+    },
 };
 
-/// Generates a random Ed25519 address.
+/// Generates a random [`Ed25519Address`].
 pub fn rand_ed25519_address() -> Ed25519Address {
     Ed25519Address::new(rand_bytes_array())
 }
 
-/// Generates a random account address.
+/// Generates a random [`AccountAddress`].
 pub fn rand_account_address() -> AccountAddress {
     AccountAddress::new(AccountId::from(rand_bytes_array()))
 }
 
-/// Generates a random NFT address.
+/// Generates a random [`NftAddress`].
 pub fn rand_nft_address() -> NftAddress {
     NftAddress::new(NftId::from(rand_bytes_array()))
 }
 
-/// Generates a random anchor address.
+/// Generates a random [`AnchorAddress`].
 pub fn rand_anchor_address() -> AnchorAddress {
     AnchorAddress::new(AnchorId::from(rand_bytes_array()))
 }
 
-// TODO handle all address kinds
-/// Generates a random address.
+/// Generates a random [`ImplicitAccountCreationAddress`].
+pub fn rand_implicit_address() -> ImplicitAccountCreationAddress {
+    ImplicitAccountCreationAddress::from(rand_ed25519_address())
+}
+
+/// Generates a random [`WeightedAddress`].
+pub fn rand_weighted_address() -> WeightedAddress {
+    WeightedAddress::new(rand_base_address(), 1).unwrap()
+}
+
+/// Generates a random [`MultiAddress`].
+pub fn rand_multi_address() -> MultiAddress {
+    let addresses = (0..rand_number_range(MultiAddress::ADDRESSES_COUNT))
+        .map(|_| rand_weighted_address())
+        .collect::<Vec<_>>();
+    let threshold = addresses.len() as u16;
+    MultiAddress::new(addresses, threshold).unwrap()
+}
+
+/// Generates a random [`RestrictedAddress`].
+pub fn rand_restricted_address() -> RestrictedAddress {
+    RestrictedAddress::new(rand_base_address())
+        .unwrap()
+        .with_allowed_capabilities(AddressCapabilities::all())
+}
+
+/// Generates a random [`Address`].
 pub fn rand_address() -> Address {
+    match rand_number::<u64>() % 7 {
+        0 => rand_ed25519_address().into(),
+        1 => rand_account_address().into(),
+        2 => rand_nft_address().into(),
+        3 => rand_anchor_address().into(),
+        4 => rand_implicit_address().into(),
+        5 => rand_multi_address().into(),
+        6 => rand_restricted_address().into(),
+        _ => unreachable!(),
+    }
+}
+
+/// Generates a random base [`Address`].
+pub fn rand_base_address() -> Address {
     match rand_number::<u64>() % 4 {
         0 => rand_ed25519_address().into(),
         1 => rand_account_address().into(),

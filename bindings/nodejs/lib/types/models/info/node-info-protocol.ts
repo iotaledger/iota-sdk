@@ -16,7 +16,7 @@ export interface ProtocolInfo {
     /**
      * The protocol parameters.
      */
-    parameters: ProtocolParameters[];
+    parameters: ProtocolParameters;
 }
 
 /**
@@ -119,6 +119,11 @@ export interface ProtocolParameters {
      * Target Committee Size defines the target size of the committee. If there's fewer candidates the actual committee size could be smaller in a given epoch.
      */
     targetCommitteeSize: number;
+    /**
+     * Defines the number of heavier slots that a chain needs to be ahead of the current chain to be considered for
+     * switching.
+     */
+    chainSwitchingThreshold: number;
 }
 
 /**

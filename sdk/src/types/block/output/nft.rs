@@ -15,16 +15,14 @@ use crate::types::block::{
     output::{
         feature::{verify_allowed_features, Feature, FeatureFlags, Features},
         unlock_condition::{
-            verify_allowed_unlock_conditions, AddressUnlockCondition, StorageDepositReturnUnlockCondition,
-            UnlockCondition, UnlockConditionFlags, UnlockConditions,
+            verify_allowed_unlock_conditions, verify_restricted_addresses, AddressUnlockCondition,
+            StorageDepositReturnUnlockCondition, UnlockCondition, UnlockConditionFlags, UnlockConditions,
         },
-        BasicOutputBuilder, ChainId, MinimumOutputAmount, Output, OutputBuilderAmount, OutputId, StateTransitionError,
-        StateTransitionVerifier, StorageScore, StorageScoreParameters,
+        BasicOutputBuilder, ChainId, MinimumOutputAmount, Output, OutputBuilderAmount, OutputId, StorageScore,
+        StorageScoreParameters,
     },
-    payload::signed_transaction::TransactionCapabilityFlag,
     protocol::{ProtocolParameters, WorkScore, WorkScoreParameters},
-    semantic::{SemanticValidationContext, TransactionFailureReason},
-    unlock::Unlock,
+    semantic::StateTransitionError,
     Error,
 };
 
@@ -258,6 +256,7 @@ impl NftOutputBuilder {
 
         let features = Features::from_set(self.features)?;
 
+        verify_restricted_addresses(&unlock_conditions, NftOutput::KIND, features.native_token(), self.mana)?;
         verify_allowed_features(&features, NftOutput::ALLOWED_FEATURES)?;
 
         let immutable_features = Features::from_set(self.immutable_features)?;
@@ -407,43 +406,6 @@ impl NftOutput {
         NftAddress::new(self.nft_id_non_null(output_id))
     }
 
-    ///
-    pub fn unlock(
-        &self,
-        output_id: &OutputId,
-        unlock: &Unlock,
-        context: &mut SemanticValidationContext<'_>,
-    ) -> Result<(), TransactionFailureReason> {
-        let slot_index = context
-            .transaction
-            .context_inputs()
-            .iter()
-            .find_map(|c| c.as_commitment_opt().map(|c| c.slot_index()));
-
-        self.unlock_conditions()
-            .locked_address(
-                self.address(),
-                slot_index,
-                context.protocol_parameters.committable_age_range(),
-            )
-            .map_err(|_| TransactionFailureReason::InvalidCommitmentContextInput)?
-            // because of expiration the input can't be unlocked at this time
-            .ok_or(TransactionFailureReason::SemanticValidationFailed)?
-            .unlock(unlock, context)?;
-
-        let nft_id = if self.nft_id().is_null() {
-            NftId::from(output_id)
-        } else {
-            *self.nft_id()
-        };
-
-        context
-            .unlocked_addresses
-            .insert(Address::from(NftAddress::from(nft_id)));
-
-        Ok(())
-    }
-
     // Transition, just without full SemanticValidationContext
     pub(crate) fn transition_inner(current_state: &Self, next_state: &Self) -> Result<(), StateTransitionError> {
         if current_state.immutable_features != next_state.immutable_features {
@@ -474,40 +436,6 @@ impl WorkScore for NftOutput {
 }
 
 impl MinimumOutputAmount for NftOutput {}
-
-impl StateTransitionVerifier for NftOutput {
-    fn creation(next_state: &Self, context: &SemanticValidationContext<'_>) -> Result<(), StateTransitionError> {
-        if !next_state.nft_id.is_null() {
-            return Err(StateTransitionError::NonZeroCreatedId);
-        }
-
-        if let Some(issuer) = next_state.immutable_features().issuer() {
-            if !context.unlocked_addresses.contains(issuer.address()) {
-                return Err(StateTransitionError::IssuerNotUnlocked);
-            }
-        }
-
-        Ok(())
-    }
-
-    fn transition(
-        current_state: &Self,
-        next_state: &Self,
-        _context: &SemanticValidationContext<'_>,
-    ) -> Result<(), StateTransitionError> {
-        Self::transition_inner(current_state, next_state)
-    }
-
-    fn destruction(_current_state: &Self, context: &SemanticValidationContext<'_>) -> Result<(), StateTransitionError> {
-        if !context
-            .transaction
-            .has_capability(TransactionCapabilityFlag::DestroyNftOutputs)
-        {
-            return Err(TransactionFailureReason::TransactionCapabilityNftDestructionNotAllowed)?;
-        }
-        Ok(())
-    }
-}
 
 impl Packable for NftOutput {
     type UnpackError = Error;
@@ -542,6 +470,8 @@ impl Packable for NftOutput {
         let features = Features::unpack::<_, VERIFY>(unpacker, &())?;
 
         if VERIFY {
+            verify_restricted_addresses(&unlock_conditions, Self::KIND, features.native_token(), mana)
+                .map_err(UnpackError::Packable)?;
             verify_allowed_features(&features, Self::ALLOWED_FEATURES).map_err(UnpackError::Packable)?;
         }
 
@@ -637,42 +567,6 @@ mod dto {
         }
     }
 
-    impl NftOutput {
-        #[allow(clippy::too_many_arguments)]
-        pub fn try_from_dtos(
-            amount: OutputBuilderAmount,
-            mana: u64,
-            nft_id: &NftId,
-            unlock_conditions: Vec<UnlockCondition>,
-            features: Option<Vec<Feature>>,
-            immutable_features: Option<Vec<Feature>>,
-        ) -> Result<Self, Error> {
-            let mut builder = match amount {
-                OutputBuilderAmount::Amount(amount) => NftOutputBuilder::new_with_amount(amount, *nft_id),
-                OutputBuilderAmount::MinimumAmount(params) => {
-                    NftOutputBuilder::new_with_minimum_amount(params, *nft_id)
-                }
-            }
-            .with_mana(mana);
-
-            let unlock_conditions = unlock_conditions
-                .into_iter()
-                .map(UnlockCondition::from)
-                .collect::<Vec<UnlockCondition>>();
-            builder = builder.with_unlock_conditions(unlock_conditions);
-
-            if let Some(features) = features {
-                builder = builder.with_features(features);
-            }
-
-            if let Some(immutable_features) = immutable_features {
-                builder = builder.with_immutable_features(immutable_features);
-            }
-
-            builder.finish()
-        }
-    }
-
     crate::impl_serde_typed_dto!(NftOutput, NftOutputDto, "nft output");
 }
 
@@ -682,11 +576,7 @@ mod tests {
 
     use super::*;
     use crate::types::block::{
-        output::nft::dto::NftOutputDto,
-        protocol::protocol_parameters,
-        rand::output::{
-            feature::rand_allowed_features, rand_nft_output, unlock_condition::rand_address_unlock_condition,
-        },
+        output::nft::dto::NftOutputDto, protocol::protocol_parameters, rand::output::rand_nft_output,
     };
 
     #[test]
@@ -696,42 +586,5 @@ mod tests {
         let dto = NftOutputDto::from(&nft_output);
         let output = Output::Nft(NftOutput::try_from(dto).unwrap());
         assert_eq!(&nft_output, output.as_nft());
-
-        let output_split = NftOutput::try_from_dtos(
-            OutputBuilderAmount::Amount(nft_output.amount()),
-            nft_output.mana(),
-            nft_output.nft_id(),
-            nft_output.unlock_conditions().to_vec(),
-            Some(nft_output.features().to_vec()),
-            Some(nft_output.immutable_features().to_vec()),
-        )
-        .unwrap();
-        assert_eq!(nft_output, output_split);
-
-        let test_split_dto = |builder: NftOutputBuilder| {
-            let output_split = NftOutput::try_from_dtos(
-                builder.amount,
-                builder.mana,
-                &builder.nft_id,
-                builder.unlock_conditions.iter().cloned().collect(),
-                Some(builder.features.iter().cloned().collect()),
-                Some(builder.immutable_features.iter().cloned().collect()),
-            )
-            .unwrap();
-            assert_eq!(builder.finish().unwrap(), output_split);
-        };
-
-        let builder = NftOutput::build_with_amount(100, NftId::null())
-            .add_unlock_condition(rand_address_unlock_condition())
-            .with_features(rand_allowed_features(NftOutput::ALLOWED_FEATURES))
-            .with_immutable_features(rand_allowed_features(NftOutput::ALLOWED_IMMUTABLE_FEATURES));
-        test_split_dto(builder);
-
-        let builder =
-            NftOutput::build_with_minimum_amount(protocol_parameters.storage_score_parameters(), NftId::null())
-                .add_unlock_condition(rand_address_unlock_condition())
-                .with_features(rand_allowed_features(NftOutput::ALLOWED_FEATURES))
-                .with_immutable_features(rand_allowed_features(NftOutput::ALLOWED_IMMUTABLE_FEATURES));
-        test_split_dto(builder);
     }
 }

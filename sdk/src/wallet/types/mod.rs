@@ -9,7 +9,6 @@ pub mod participation;
 
 use std::str::FromStr;
 
-use crypto::keys::bip44::Bip44;
 use serde::{Deserialize, Serialize};
 
 pub use self::{
@@ -29,7 +28,6 @@ use crate::{
         },
         TryFromDto,
     },
-    utils::serde::bip44::option_bip44,
     wallet::core::WalletData,
 };
 
@@ -49,9 +47,6 @@ pub struct OutputData {
     /// Network ID
     pub network_id: u64,
     pub remainder: bool,
-    // bip44 path
-    #[serde(with = "option_bip44", default)]
-    pub chain: Option<Bip44>,
 }
 
 impl OutputData {
@@ -66,18 +61,20 @@ impl OutputData {
             .required_address(slot_index.into(), committable_age_range)?
             .ok_or(crate::client::Error::ExpirationDeadzone)?;
 
-        let chain = if &required_address == wallet_data.address.inner() {
-            self.chain
-        } else if required_address.is_ed25519() {
-            if wallet_data.address.inner() == &required_address {
-                // TODO #1279: do we need a check to make sure that `wallet_data.address` and `wallet_data.bip_path` are
-                // never conflicting?
-                wallet_data.bip_path
+        let chain = if let Some(required_ed25519) = required_address.backing_ed25519() {
+            if let Some(backing_ed25519) = wallet_data.address.inner().backing_ed25519() {
+                if required_ed25519 == backing_ed25519 {
+                    wallet_data.bip_path
+                } else {
+                    // Different ed25519 chain than the wallet one.
+                    None
+                }
             } else {
+                // Address can't be unlocked, wallet is not ed25519-based.
                 return Ok(None);
             }
         } else {
-            // Account and NFT addresses have no chain
+            // Non-chain based address.
             None
         };
 

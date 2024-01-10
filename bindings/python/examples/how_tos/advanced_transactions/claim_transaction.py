@@ -2,35 +2,36 @@ import os
 
 from dotenv import load_dotenv
 
-from iota_sdk import Wallet
+from iota_sdk import Wallet, WalletOptions
 
+# This example uses secrets in environment variables for simplicity which
+# should not be done in production.
 load_dotenv()
 
 # In this example we will claim outputs that have additional unlock
 # conditions as expiration or storage deposit return.
 
-wallet = Wallet(os.environ['WALLET_DB_PATH'])
+for env_var in ['WALLET_DB_PATH', 'STRONGHOLD_PASSWORD']:
+    if env_var not in os.environ:
+        raise Exception(f'.env {env_var} is undefined, see .env.example')
 
-account = wallet.get_account('Alice')
-
-if 'STRONGHOLD_PASSWORD' not in os.environ:
-    raise Exception(".env STRONGHOLD_PASSWORD is undefined, see .env.example")
+wallet = Wallet(WalletOptions(storage_path=os.environ.get('WALLET_DB_PATH')))
 
 wallet.set_stronghold_password(os.environ["STRONGHOLD_PASSWORD"])
 
-# Sync account with the node
-response = account.sync()
+# Sync wallet with the node
+wallet.sync()
 
-# Only the unspent outputs in the account
-output_ids = account.claimable_outputs('All')
+# Only the unspent outputs in the wallet
+output_ids = wallet.claimable_outputs('All')
 
 print('Available outputs to claim:')
 for output_id in output_ids:
     print(f'{output_id}')
 
-transaction = account.claim_outputs(output_ids)
+transaction = wallet.claim_outputs(output_ids)
 print(f'Transaction sent: {transaction.transaction_id}')
 
-block_id = account.reissue_transaction_until_included(
+block_id = wallet.reissue_transaction_until_included(
     transaction.transaction_id)
 print(f'Block sent: {os.environ["EXPLORER_URL"]}/block/{block_id}')

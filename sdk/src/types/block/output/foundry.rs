@@ -18,13 +18,12 @@ use crate::types::block::{
         account::AccountId,
         feature::{verify_allowed_features, Feature, FeatureFlags, Features, NativeTokenFeature},
         unlock_condition::{verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions},
-        ChainId, MinimumOutputAmount, NativeToken, Output, OutputBuilderAmount, OutputId, StateTransitionError,
-        StateTransitionVerifier, StorageScore, StorageScoreParameters, TokenId, TokenScheme,
+        ChainId, MinimumOutputAmount, NativeToken, Output, OutputBuilderAmount, StorageScore, StorageScoreParameters,
+        TokenId, TokenScheme,
     },
     payload::signed_transaction::{TransactionCapabilities, TransactionCapabilityFlag},
     protocol::{ProtocolParameters, WorkScore, WorkScoreParameters},
-    semantic::{SemanticValidationContext, TransactionFailureReason},
-    unlock::Unlock,
+    semantic::{StateTransitionError, TransactionFailureReason},
     Error,
 };
 
@@ -402,16 +401,6 @@ impl FoundryOutput {
         ChainId::Foundry(self.id())
     }
 
-    ///
-    pub fn unlock(
-        &self,
-        _output_id: &OutputId,
-        unlock: &Unlock,
-        context: &mut SemanticValidationContext<'_>,
-    ) -> Result<(), TransactionFailureReason> {
-        Address::from(*self.account_address()).unlock(unlock, context)
-    }
-
     // Transition, just without full SemanticValidationContext
     pub(crate) fn transition_inner(
         current_state: &Self,
@@ -521,81 +510,6 @@ impl WorkScore for FoundryOutput {
 }
 
 impl MinimumOutputAmount for FoundryOutput {}
-
-impl StateTransitionVerifier for FoundryOutput {
-    fn creation(next_state: &Self, context: &SemanticValidationContext<'_>) -> Result<(), StateTransitionError> {
-        let account_chain_id = ChainId::from(*next_state.account_address().account_id());
-
-        if let (Some(Output::Account(input_account)), Some(Output::Account(output_account))) = (
-            context.input_chains.get(&account_chain_id),
-            context.output_chains.get(&account_chain_id),
-        ) {
-            if input_account.foundry_counter() >= next_state.serial_number()
-                || next_state.serial_number() > output_account.foundry_counter()
-            {
-                return Err(StateTransitionError::InconsistentFoundrySerialNumber);
-            }
-        } else {
-            return Err(StateTransitionError::MissingAccountForFoundry);
-        }
-
-        let token_id = next_state.token_id();
-        let output_tokens = context.output_native_tokens.get(&token_id).copied().unwrap_or_default();
-        let TokenScheme::Simple(ref next_token_scheme) = next_state.token_scheme;
-
-        // No native tokens should be referenced prior to the foundry creation.
-        if context.input_native_tokens.contains_key(&token_id) {
-            return Err(StateTransitionError::InconsistentNativeTokensFoundryCreation);
-        }
-
-        if output_tokens != next_token_scheme.minted_tokens() || !next_token_scheme.melted_tokens().is_zero() {
-            return Err(StateTransitionError::InconsistentNativeTokensFoundryCreation);
-        }
-
-        Ok(())
-    }
-
-    fn transition(
-        current_state: &Self,
-        next_state: &Self,
-        context: &SemanticValidationContext<'_>,
-    ) -> Result<(), StateTransitionError> {
-        Self::transition_inner(
-            current_state,
-            next_state,
-            &context.input_native_tokens,
-            &context.output_native_tokens,
-            context.transaction.capabilities(),
-        )
-    }
-
-    fn destruction(current_state: &Self, context: &SemanticValidationContext<'_>) -> Result<(), StateTransitionError> {
-        if !context
-            .transaction
-            .has_capability(TransactionCapabilityFlag::DestroyFoundryOutputs)
-        {
-            return Err(TransactionFailureReason::TransactionCapabilityFoundryDestructionNotAllowed)?;
-        }
-
-        let token_id = current_state.token_id();
-        let input_tokens = context.input_native_tokens.get(&token_id).copied().unwrap_or_default();
-        let TokenScheme::Simple(ref current_token_scheme) = current_state.token_scheme;
-
-        // No native tokens should be referenced after the foundry destruction.
-        if context.output_native_tokens.contains_key(&token_id) {
-            return Err(StateTransitionError::InconsistentNativeTokensFoundryDestruction);
-        }
-
-        // This can't underflow as it is known that minted_tokens >= melted_tokens (syntactic rule).
-        let minted_melted_diff = current_token_scheme.minted_tokens() - current_token_scheme.melted_tokens();
-
-        if minted_melted_diff != input_tokens {
-            return Err(StateTransitionError::InconsistentNativeTokensFoundryDestruction);
-        }
-
-        Ok(())
-    }
-}
 
 impl Packable for FoundryOutput {
     type UnpackError = Error;
@@ -724,43 +638,6 @@ mod dto {
         }
     }
 
-    impl FoundryOutput {
-        #[allow(clippy::too_many_arguments)]
-        pub fn try_from_dtos(
-            amount: OutputBuilderAmount,
-            serial_number: u32,
-            token_scheme: TokenScheme,
-            unlock_conditions: Vec<UnlockCondition>,
-            features: Option<Vec<Feature>>,
-            immutable_features: Option<Vec<Feature>>,
-        ) -> Result<Self, Error> {
-            let mut builder = match amount {
-                OutputBuilderAmount::Amount(amount) => {
-                    FoundryOutputBuilder::new_with_amount(amount, serial_number, token_scheme)
-                }
-                OutputBuilderAmount::MinimumAmount(params) => {
-                    FoundryOutputBuilder::new_with_minimum_amount(params, serial_number, token_scheme)
-                }
-            };
-
-            let unlock_conditions = unlock_conditions
-                .into_iter()
-                .map(UnlockCondition::from)
-                .collect::<Vec<UnlockCondition>>();
-            builder = builder.with_unlock_conditions(unlock_conditions);
-
-            if let Some(features) = features {
-                builder = builder.with_features(features);
-            }
-
-            if let Some(immutable_features) = immutable_features {
-                builder = builder.with_immutable_features(immutable_features);
-            }
-
-            builder.finish()
-        }
-    }
-
     crate::impl_serde_typed_dto!(FoundryOutput, FoundryOutputDto, "foundry output");
 }
 
@@ -770,18 +647,7 @@ mod tests {
 
     use super::*;
     use crate::types::block::{
-        output::{
-            foundry::dto::FoundryOutputDto, unlock_condition::ImmutableAccountAddressUnlockCondition, FoundryId,
-            SimpleTokenScheme, TokenId,
-        },
-        protocol::protocol_parameters,
-        rand::{
-            address::rand_account_address,
-            output::{
-                feature::{rand_allowed_features, rand_metadata_feature},
-                rand_foundry_output, rand_token_scheme,
-            },
-        },
+        output::foundry::dto::FoundryOutputDto, protocol::protocol_parameters, rand::output::rand_foundry_output,
     };
 
     #[test]
@@ -791,38 +657,5 @@ mod tests {
         let dto = FoundryOutputDto::from(&foundry_output);
         let output = Output::Foundry(FoundryOutput::try_from(dto).unwrap());
         assert_eq!(&foundry_output, output.as_foundry());
-
-        let foundry_id = FoundryId::build(&rand_account_address(), 0, SimpleTokenScheme::KIND);
-
-        let test_split_dto = |builder: FoundryOutputBuilder| {
-            let output_split = FoundryOutput::try_from_dtos(
-                builder.amount,
-                builder.serial_number,
-                builder.token_scheme.clone(),
-                builder.unlock_conditions.iter().cloned().collect(),
-                Some(builder.features.iter().cloned().collect()),
-                Some(builder.immutable_features.iter().cloned().collect()),
-            )
-            .unwrap();
-            assert_eq!(builder.finish().unwrap(), output_split);
-        };
-
-        let builder = FoundryOutput::build_with_amount(100, 123, rand_token_scheme())
-            .with_native_token(NativeToken::new(TokenId::from(foundry_id), 1000).unwrap())
-            .add_unlock_condition(ImmutableAccountAddressUnlockCondition::new(rand_account_address()))
-            .add_immutable_feature(rand_metadata_feature())
-            .with_features(rand_allowed_features(FoundryOutput::ALLOWED_FEATURES));
-        test_split_dto(builder);
-
-        let builder = FoundryOutput::build_with_minimum_amount(
-            protocol_parameters.storage_score_parameters(),
-            123,
-            rand_token_scheme(),
-        )
-        .with_native_token(NativeToken::new(TokenId::from(foundry_id), 1000).unwrap())
-        .add_unlock_condition(ImmutableAccountAddressUnlockCondition::new(rand_account_address()))
-        .add_immutable_feature(rand_metadata_feature())
-        .with_features(rand_allowed_features(FoundryOutput::ALLOWED_FEATURES));
-        test_split_dto(builder);
     }
 }
