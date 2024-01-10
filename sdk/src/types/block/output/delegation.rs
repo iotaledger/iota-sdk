@@ -9,7 +9,10 @@ use crate::types::block::{
     address::{AccountAddress, Address},
     output::{
         chain_id::ChainId,
-        unlock_condition::{verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions},
+        unlock_condition::{
+            verify_allowed_unlock_conditions, verify_restricted_addresses, UnlockCondition, UnlockConditionFlags,
+            UnlockConditions,
+        },
         MinimumOutputAmount, Output, OutputBuilderAmount, OutputId, StorageScore, StorageScoreParameters,
     },
     protocol::{ProtocolParameters, WorkScore, WorkScoreParameters},
@@ -172,6 +175,7 @@ impl DelegationOutputBuilder {
         let unlock_conditions = UnlockConditions::from_set(self.unlock_conditions)?;
 
         verify_unlock_conditions::<true>(&unlock_conditions)?;
+        verify_restricted_addresses(&unlock_conditions, DelegationOutput::KIND, None, 0)?;
 
         let mut output = DelegationOutput {
             amount: 0,
@@ -215,6 +219,7 @@ impl From<&DelegationOutput> for DelegationOutputBuilder {
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Packable)]
 #[packable(unpack_error = Error)]
 #[packable(unpack_visitor = ProtocolParameters)]
+#[packable(verify_with = verify_delegation_output)]
 pub struct DelegationOutput {
     /// Amount of IOTA coins held by the output.
     amount: u64,
@@ -392,6 +397,13 @@ fn verify_unlock_conditions_packable<const VERIFY: bool>(
     verify_unlock_conditions::<VERIFY>(unlock_conditions)
 }
 
+fn verify_delegation_output<const VERIFY: bool>(
+    output: &DelegationOutput,
+    _: &ProtocolParameters,
+) -> Result<(), Error> {
+    verify_restricted_addresses(output.unlock_conditions(), DelegationOutput::KIND, None, 0)
+}
+
 #[cfg(feature = "serde")]
 mod dto {
     use alloc::vec::Vec;
@@ -400,10 +412,7 @@ mod dto {
 
     use super::*;
     use crate::{
-        types::block::{
-            output::{unlock_condition::UnlockCondition, OutputBuilderAmount},
-            Error,
-        },
+        types::block::{output::unlock_condition::UnlockCondition, Error},
         utils::serde::string,
     };
 
@@ -454,44 +463,6 @@ mod dto {
             for u in dto.unlock_conditions {
                 builder = builder.add_unlock_condition(u);
             }
-
-            builder.finish()
-        }
-    }
-
-    impl DelegationOutput {
-        #[allow(clippy::too_many_arguments)]
-        pub fn try_from_dtos(
-            amount: OutputBuilderAmount,
-            delegated_amount: u64,
-            delegation_id: &DelegationId,
-            validator_address: &AccountAddress,
-            start_epoch: impl Into<EpochIndex>,
-            end_epoch: impl Into<EpochIndex>,
-            unlock_conditions: Vec<UnlockCondition>,
-        ) -> Result<Self, Error> {
-            let mut builder = match amount {
-                OutputBuilderAmount::Amount(amount) => DelegationOutputBuilder::new_with_amount(
-                    amount,
-                    delegated_amount,
-                    *delegation_id,
-                    *validator_address,
-                ),
-                OutputBuilderAmount::MinimumAmount(params) => DelegationOutputBuilder::new_with_minimum_amount(
-                    params,
-                    delegated_amount,
-                    *delegation_id,
-                    *validator_address,
-                ),
-            }
-            .with_start_epoch(start_epoch)
-            .with_end_epoch(end_epoch);
-
-            let unlock_conditions = unlock_conditions
-                .into_iter()
-                .map(UnlockCondition::from)
-                .collect::<Vec<UnlockCondition>>();
-            builder = builder.with_unlock_conditions(unlock_conditions);
 
             builder.finish()
         }

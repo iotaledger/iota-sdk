@@ -1,16 +1,22 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+//! An extension to the address format to make them configurable.
+//! This enables an address to opt-in or -out of certain functionality, like disabling the receipt of Native Tokens, NFT
+//! Outputs or Timelock Unlock Conditions.
+//! [TIP-50: Configurable Addresses](https://github.com/iotaledger/tips/blob/tip50/tips/TIP-0050/tip-0050.md).
+
 use getset::Getters;
 use packable::{Packable, PackableExt};
 
-use super::Address;
 use crate::types::block::{
+    address::Address,
     capabilities::{Capabilities, CapabilityFlag},
     output::{StorageScore, StorageScoreParameters},
     Error,
 };
 
+/// An [`Address`] that contains another address and allows for configuring its capabilities.
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Getters, Packable)]
 #[getset(get = "pub")]
 pub struct RestrictedAddress {

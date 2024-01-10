@@ -41,7 +41,6 @@ impl EventEmitter {
                 WalletEventType::SpentOutput,
                 WalletEventType::TransactionInclusion,
                 WalletEventType::TransactionProgress,
-                WalletEventType::ConsolidationRequired,
                 #[cfg(feature = "ledger_nano")]
                 WalletEventType::LedgerAddressGeneration,
             ] {
@@ -74,7 +73,6 @@ impl EventEmitter {
             WalletEvent::SpentOutput(_) => WalletEventType::SpentOutput,
             WalletEvent::TransactionInclusion(_) => WalletEventType::TransactionInclusion,
             WalletEvent::TransactionProgress(_) => WalletEventType::TransactionProgress,
-            WalletEvent::ConsolidationRequired => WalletEventType::ConsolidationRequired,
             #[cfg(feature = "ledger_nano")]
             WalletEvent::LedgerAddressGeneration(_) => WalletEventType::LedgerAddressGeneration,
         };
@@ -126,18 +124,18 @@ mod tests {
         let event_counter = Arc::new(AtomicUsize::new(0));
 
         // single event
-        emitter.on([WalletEventType::ConsolidationRequired], |_name| {
-            // println!("ConsolidationRequired: {:?}", name);
+        emitter.on([WalletEventType::TransactionInclusion], |_name| {
+            // println!("TransactionInclusion: {:?}", name);
         });
 
         // listen to two events
         emitter.on(
             [
                 WalletEventType::TransactionProgress,
-                WalletEventType::ConsolidationRequired,
+                WalletEventType::TransactionInclusion,
             ],
             move |_name| {
-                // println!("TransactionProgress or ConsolidationRequired: {:?}", name);
+                // println!("TransactionProgress or TransactionInclusion: {:?}", name);
             },
         );
 
@@ -149,7 +147,6 @@ mod tests {
         });
 
         // emit events
-        emitter.emit(WalletEvent::ConsolidationRequired);
         emitter.emit(WalletEvent::TransactionProgress(
             TransactionProgressEvent::SelectingInputs,
         ));
@@ -161,14 +158,16 @@ mod tests {
             inclusion_state: InclusionState::Confirmed,
         }));
 
-        assert_eq!(3, event_counter.load(Ordering::SeqCst));
+        assert_eq!(2, event_counter.load(Ordering::SeqCst));
 
         // remove handlers of single event
-        emitter.clear([WalletEventType::ConsolidationRequired]);
+        emitter.clear([WalletEventType::TransactionProgress]);
         // emit event of removed type
-        emitter.emit(WalletEvent::ConsolidationRequired);
+        emitter.emit(WalletEvent::TransactionProgress(
+            TransactionProgressEvent::SelectingInputs,
+        ));
 
-        assert_eq!(3, event_counter.load(Ordering::SeqCst));
+        assert_eq!(2, event_counter.load(Ordering::SeqCst));
 
         // remove handlers of all events
         emitter.clear([]);
@@ -183,18 +182,20 @@ mod tests {
             .expect("invalid tx id"),
             inclusion_state: InclusionState::Confirmed,
         }));
-        assert_eq!(3, event_counter.load(Ordering::SeqCst));
+        assert_eq!(2, event_counter.load(Ordering::SeqCst));
 
         // listen to a single event
         let event_counter_clone = Arc::clone(&event_counter);
-        emitter.on([WalletEventType::ConsolidationRequired], move |_name| {
+        emitter.on([WalletEventType::TransactionProgress], move |_name| {
             // println!("Any event: {:?}", name);
             event_counter_clone.fetch_add(1, Ordering::SeqCst);
         });
 
         for _ in 0..1_000_000 {
-            emitter.emit(WalletEvent::ConsolidationRequired);
+            emitter.emit(WalletEvent::TransactionProgress(
+                TransactionProgressEvent::SelectingInputs,
+            ));
         }
-        assert_eq!(1_000_003, event_counter.load(Ordering::SeqCst));
+        assert_eq!(1_000_002, event_counter.load(Ordering::SeqCst));
     }
 }
