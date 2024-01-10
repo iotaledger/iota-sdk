@@ -558,6 +558,8 @@ impl Packable for AnchorOutput {
         let features = Features::unpack::<_, VERIFY>(unpacker, &())?;
 
         if VERIFY {
+            verify_restricted_addresses(&unlock_conditions, AnchorOutput::KIND, features.native_token(), mana)
+                .map_err(UnpackError::Packable)?;
             verify_allowed_features(&features, Self::ALLOWED_FEATURES).map_err(UnpackError::Packable)?;
         }
 
@@ -684,16 +686,7 @@ mod dto {
 mod tests {
     use super::*;
     use crate::types::block::{
-        output::anchor::dto::AnchorOutputDto,
-        protocol::protocol_parameters,
-        rand::output::{
-            feature::rand_allowed_features,
-            rand_anchor_id, rand_anchor_output,
-            unlock_condition::{
-                rand_governor_address_unlock_condition_different_from,
-                rand_state_controller_address_unlock_condition_different_from,
-            },
-        },
+        output::anchor::dto::AnchorOutputDto, protocol::protocol_parameters, rand::output::rand_anchor_output,
     };
 
     #[test]

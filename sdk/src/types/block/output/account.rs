@@ -502,6 +502,8 @@ impl Packable for AccountOutput {
         let features = Features::unpack::<_, VERIFY>(unpacker, &())?;
 
         if VERIFY {
+            verify_restricted_addresses(&unlock_conditions, AccountOutput::KIND, features.native_token(), mana)
+                .map_err(UnpackError::Packable)?;
             verify_allowed_features(&features, Self::ALLOWED_FEATURES).map_err(UnpackError::Packable)?;
         }
 
@@ -620,12 +622,7 @@ mod tests {
 
     use super::*;
     use crate::types::block::{
-        output::account::dto::AccountOutputDto,
-        protocol::protocol_parameters,
-        rand::output::{
-            feature::rand_allowed_features, rand_account_id, rand_account_output,
-            unlock_condition::rand_address_unlock_condition_different_from_account_id,
-        },
+        output::account::dto::AccountOutputDto, protocol::protocol_parameters, rand::output::rand_account_output,
     };
 
     #[test]

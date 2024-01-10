@@ -219,6 +219,7 @@ impl From<&DelegationOutput> for DelegationOutputBuilder {
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Packable)]
 #[packable(unpack_error = Error)]
 #[packable(unpack_visitor = ProtocolParameters)]
+#[packable(verify_with = verify_delegation_output)]
 pub struct DelegationOutput {
     /// Amount of IOTA coins held by the output.
     amount: u64,
@@ -394,6 +395,13 @@ fn verify_unlock_conditions_packable<const VERIFY: bool>(
     _: &ProtocolParameters,
 ) -> Result<(), Error> {
     verify_unlock_conditions::<VERIFY>(unlock_conditions)
+}
+
+fn verify_delegation_output<const VERIFY: bool>(
+    output: &DelegationOutput,
+    _: &ProtocolParameters,
+) -> Result<(), Error> {
+    verify_restricted_addresses(output.unlock_conditions(), DelegationOutput::KIND, None, 0)
 }
 
 #[cfg(feature = "serde")]

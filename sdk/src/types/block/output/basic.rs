@@ -236,6 +236,7 @@ impl From<&BasicOutput> for BasicOutputBuilder {
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Packable)]
 #[packable(unpack_error = Error)]
 #[packable(unpack_visitor = ProtocolParameters)]
+#[packable(verify_with = verify_basic_output)]
 pub struct BasicOutput {
     /// Amount of IOTA coins held by the output.
     amount: u64,
@@ -396,6 +397,15 @@ fn verify_features<const VERIFY: bool>(features: &Features) -> Result<(), Error>
 
 fn verify_features_packable<const VERIFY: bool>(features: &Features, _: &ProtocolParameters) -> Result<(), Error> {
     verify_features::<VERIFY>(features)
+}
+
+fn verify_basic_output<const VERIFY: bool>(output: &BasicOutput, _: &ProtocolParameters) -> Result<(), Error> {
+    verify_restricted_addresses(
+        output.unlock_conditions(),
+        BasicOutput::KIND,
+        output.features.native_token(),
+        output.mana,
+    )
 }
 
 #[cfg(feature = "serde")]
