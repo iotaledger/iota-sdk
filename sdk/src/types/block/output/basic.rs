@@ -10,8 +10,8 @@ use crate::types::block::{
     output::{
         feature::{verify_allowed_features, Feature, FeatureFlags, Features, NativeTokenFeature},
         unlock_condition::{
-            verify_allowed_unlock_conditions, AddressUnlockCondition, StorageDepositReturnUnlockCondition,
-            UnlockCondition, UnlockConditionFlags, UnlockConditions,
+            verify_allowed_unlock_conditions, verify_restricted_addresses, AddressUnlockCondition,
+            StorageDepositReturnUnlockCondition, UnlockCondition, UnlockConditionFlags, UnlockConditions,
         },
         MinimumOutputAmount, NativeToken, Output, OutputBuilderAmount, StorageScore, StorageScoreParameters,
     },
@@ -192,6 +192,12 @@ impl BasicOutputBuilder {
 
         let features = Features::from_set(self.features)?;
 
+        verify_restricted_addresses(
+            &unlock_conditions,
+            BasicOutput::KIND,
+            features.native_token(),
+            self.mana,
+        )?;
         verify_features::<true>(&features)?;
 
         let mut output = BasicOutput {
@@ -230,6 +236,7 @@ impl From<&BasicOutput> for BasicOutputBuilder {
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Packable)]
 #[packable(unpack_error = Error)]
 #[packable(unpack_visitor = ProtocolParameters)]
+#[packable(verify_with = verify_basic_output)]
 pub struct BasicOutput {
     /// Amount of IOTA coins held by the output.
     amount: u64,
@@ -390,6 +397,15 @@ fn verify_features<const VERIFY: bool>(features: &Features) -> Result<(), Error>
 
 fn verify_features_packable<const VERIFY: bool>(features: &Features, _: &ProtocolParameters) -> Result<(), Error> {
     verify_features::<VERIFY>(features)
+}
+
+fn verify_basic_output<const VERIFY: bool>(output: &BasicOutput, _: &ProtocolParameters) -> Result<(), Error> {
+    verify_restricted_addresses(
+        output.unlock_conditions(),
+        BasicOutput::KIND,
+        output.features.native_token(),
+        output.mana,
+    )
 }
 
 #[cfg(feature = "serde")]
