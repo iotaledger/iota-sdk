@@ -356,16 +356,7 @@ pub async fn address_command(wallet: &Wallet) -> Result<(), Error> {
 // `allot-mana` command
 pub async fn allot_mana_command(wallet: &Wallet, mana: u64, account_id: Option<AccountId>) -> Result<(), Error> {
     let wallet_data = wallet.data().await;
-    let account_id = account_id
-        .or(wallet_data
-            .accounts()
-            .next()
-            .map(|o| o.output.as_account().account_id_non_null(&o.output_id)))
-        .or(wallet_data
-            .implicit_accounts()
-            .next()
-            .map(|o| AccountId::from(&o.output_id)))
-        .ok_or(WalletError::AccountNotFound)?;
+    let account_id = account_id.unwrap_or(wallet_data.first_account_id()?);
     drop(wallet_data);
 
     let transaction = wallet.allot_mana([ManaAllotment::new(account_id, mana)?], None).await?;

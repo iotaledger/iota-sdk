@@ -313,6 +313,14 @@ impl WalletData {
             .filter(|output_data| output_data.output.is_account())
     }
 
+    pub fn first_account_id(&self) -> Result<AccountId> {
+        self.accounts()
+            .next()
+            .map(|o| o.output.as_account().account_id_non_null(&o.output_id))
+            .or(self.implicit_accounts().next().map(|o| AccountId::from(&o.output_id)))
+            .ok_or(Error::AccountNotFound)
+    }
+
     /// Get the [`OutputData`] of an output stored in the wallet.
     pub fn get_output(&self, output_id: &OutputId) -> Option<&OutputData> {
         self.outputs.get(output_id)
