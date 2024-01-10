@@ -502,7 +502,7 @@ impl Packable for AccountOutput {
         let features = Features::unpack::<_, VERIFY>(unpacker, &())?;
 
         if VERIFY {
-            verify_restricted_addresses(&unlock_conditions, AccountOutput::KIND, features.native_token(), mana)
+            verify_restricted_addresses(&unlock_conditions, Self::KIND, features.native_token(), mana)
                 .map_err(UnpackError::Packable)?;
             verify_allowed_features(&features, Self::ALLOWED_FEATURES).map_err(UnpackError::Packable)?;
         }
