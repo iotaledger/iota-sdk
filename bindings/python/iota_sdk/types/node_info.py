@@ -209,6 +209,7 @@ class RewardsParameters:
         decay_balancing_constant_exponent: The exponent used for calculation of the initial reward.
         decay_balancing_constant: An integer approximation which is calculated using the `decay_balancing_constant_exponent`.
         pool_coefficient_exponent: The exponent used for shifting operation during the pool rewards calculations.
+        retention_period: The number of epochs for which rewards are retained.
     """
     profit_margin_exponent: int
     bootstrapping_duration: int
@@ -220,6 +221,7 @@ class RewardsParameters:
         encoder=str
     ))
     pool_coefficient_exponent: int
+    retention_period: int
 
 
 @json

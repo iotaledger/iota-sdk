@@ -6,9 +6,6 @@ export * from './info';
 
 export * from './transaction-failure-reason';
 export * from './block-metadata';
-export * from './gossip-metrics';
-export * from './gossip-heartbeat';
 export * from './native-token';
-export * from './peer';
 export * from './storage-score';
 export * from './state';
