@@ -1,7 +1,7 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! The [SecretManage] implementation for [StrongholdAdapter].
+//! The secret implementations for [StrongholdAdapter].
 
 use core::{borrow::Borrow, time::Duration};
 

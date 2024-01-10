@@ -459,7 +459,7 @@ impl<T> Wallet<T> {
 }
 
 impl<S: SecretManage> Wallet<SecretData<S>> {
-    /// Get the [SecretManager]
+    /// Gets the secret manager.
     pub fn secret_manager(&self) -> &Arc<RwLock<S>> {
         &self.secret_data.secret_manager
     }
