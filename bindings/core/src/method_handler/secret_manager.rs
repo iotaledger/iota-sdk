@@ -119,14 +119,7 @@ pub(crate) async fn call_secret_manager_method_internal(
         }
         #[cfg(feature = "stronghold")]
         SecretManagerMethod::SetStrongholdPassword { password } => {
-            let stronghold = if let Some(secret_manager) = secret_manager.downcast::<StrongholdSecretManager>() {
-                secret_manager
-            } else if let Some(SecretManager::Stronghold(secret_manager)) = secret_manager.downcast::<SecretManager>() {
-                secret_manager
-            } else {
-                return Err(iota_sdk::client::Error::SecretManagerMismatch.into());
-            };
-            stronghold.set_password(password).await?;
+            secret_manager.as_stronghold()?.set_password(password).await?;
             Response::Ok
         }
     };
