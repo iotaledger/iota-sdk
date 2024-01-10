@@ -313,6 +313,8 @@ impl WalletData {
             .filter(|output_data| output_data.output.is_account())
     }
 
+    // Returns the first possible Account id, which can be an implicit account.
+    // If none are found, returns AccountNotFound.
     pub fn first_account_id(&self) -> Result<AccountId> {
         self.accounts()
             .next()
