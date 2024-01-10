@@ -2120,7 +2120,7 @@ fn ed25519_backed_available_address() {
     .select()
     .unwrap();
 
-    assert_eq!(selected.inputs.len(), 2);
+    assert!(unsorted_eq(&selected.inputs, &inputs));
     // Provided outputs
-    assert_eq!(selected.outputs.len(), 2);
+    assert_eq!(selected.outputs, outputs);
 }
