@@ -14,6 +14,7 @@ use iota_sdk::{
         api::plugins::participation::types::ParticipationEventId,
         block::{
             address::{Bech32Address, ToBech32Ext},
+            mana::ManaAllotment,
             output::{
                 unlock_condition::AddressUnlockCondition, AccountId, BasicOutputBuilder, FoundryId, NativeToken,
                 NativeTokensBuilder, NftId, Output, OutputId, TokenId,
@@ -60,6 +61,8 @@ pub enum WalletCommand {
     Accounts,
     /// Print the wallet address.
     Address,
+    /// Allots mana to an account.
+    AllotMana { mana: u64, account_id: Option<AccountId> },
     /// Print the wallet balance.
     Balance,
     /// Burn an amount of native token.
@@ -344,6 +347,32 @@ pub async fn address_command(wallet: &Wallet) -> Result<(), Error> {
     Ok(())
 }
 
+// `allot-mana` command
+pub async fn allot_mana_command(wallet: &Wallet, mana: u64, account_id: Option<AccountId>) -> Result<(), Error> {
+    let wallet_data = wallet.data().await;
+    let account_id = account_id
+        .or(wallet_data
+            .accounts()
+            .next()
+            .map(|o| o.output.as_account().account_id_non_null(&o.output_id)))
+        .or(wallet_data
+            .implicit_accounts()
+            .next()
+            .map(|o| AccountId::from(&o.output_id)))
+        .ok_or(WalletError::AccountNotFound)?;
+    drop(wallet_data);
+
+    let transaction = wallet.allot_mana([ManaAllotment::new(account_id, mana)?], None).await?;
+
+    println_log_info!(
+        "Mana allotment transaction sent:\n{:?}\n{:?}",
+        transaction.transaction_id,
+        transaction.block_id
+    );
+
+    Ok(())
+}
+
 // `balance` command
 pub async fn balance_command(wallet: &Wallet) -> Result<(), Error> {
     let balance = wallet.balance().await?;
@@ -497,7 +526,7 @@ pub async fn congestion_command(wallet: &Wallet, account_id: Option<AccountId>) 
                     .next()
                     .map(|o| AccountId::from(&o.output_id))
             })
-            .ok_or(WalletError::NoAccountToIssueBlock)?
+            .ok_or(WalletError::AccountNotFound)?
     };
 
     let congestion = wallet.client().get_account_congestion(&account_id).await?;
@@ -1173,6 +1202,9 @@ pub async fn prompt_internal(
                     match protocol_cli.command {
                         WalletCommand::Accounts => accounts_command(wallet).await,
                         WalletCommand::Address => address_command(wallet).await,
+                        WalletCommand::AllotMana { mana, account_id } => {
+                            allot_mana_command(wallet, mana, account_id).await
+                        }
                         WalletCommand::Balance => balance_command(wallet).await,
                         WalletCommand::BurnNativeToken { token_id, amount } => {
                             burn_native_token_command(wallet, token_id, amount).await

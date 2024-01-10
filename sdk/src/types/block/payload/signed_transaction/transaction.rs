@@ -542,7 +542,7 @@ pub(crate) mod dto {
 
     use super::*;
     use crate::types::{
-        block::{mana::ManaAllotmentDto, payload::dto::PayloadDto, Error},
+        block::{payload::dto::PayloadDto, Error},
         TryFromDto,
     };
 
@@ -555,7 +555,7 @@ pub(crate) mod dto {
         pub context_inputs: Vec<ContextInput>,
         pub inputs: Vec<Input>,
         #[serde(default, skip_serializing_if = "Vec::is_empty")]
-        pub allotments: Vec<ManaAllotmentDto>,
+        pub allotments: Vec<ManaAllotment>,
         #[serde(default, skip_serializing_if = "TransactionCapabilities::is_none")]
         pub capabilities: TransactionCapabilities,
         #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -570,7 +570,7 @@ pub(crate) mod dto {
                 creation_slot: value.creation_slot(),
                 context_inputs: value.context_inputs().to_vec(),
                 inputs: value.inputs().to_vec(),
-                allotments: value.allotments().iter().map(Into::into).collect(),
+                allotments: value.allotments().to_vec(),
                 capabilities: value.capabilities().clone(),
                 payload: match value.payload() {
                     Some(p @ Payload::TaggedData(_)) => Some(p.into()),
@@ -593,20 +593,14 @@ pub(crate) mod dto {
                 .network_id
                 .parse::<u64>()
                 .map_err(|_| Error::InvalidField("network_id"))?;
-            let mana_allotments = dto
-                .allotments
-                .into_iter()
-                .map(|o| ManaAllotment::try_from_dto_with_params_inner(o, params))
-                .collect::<Result<Vec<ManaAllotment>, Error>>()?;
-            let outputs = dto.outputs;
 
             let mut builder = Self::builder(network_id)
                 .with_creation_slot(dto.creation_slot)
                 .with_context_inputs(dto.context_inputs)
                 .with_inputs(dto.inputs)
-                .with_mana_allotments(mana_allotments)
+                .with_mana_allotments(dto.allotments)
                 .with_capabilities(dto.capabilities)
-                .with_outputs(outputs);
+                .with_outputs(dto.outputs);
 
             builder = if let Some(p) = dto.payload {
                 if let PayloadDto::TaggedData(i) = p {

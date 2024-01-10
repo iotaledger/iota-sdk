@@ -8,6 +8,7 @@ use crate::{
     types::block::{
         address::Address,
         context_input::ContextInput,
+        mana::ManaAllotment,
         output::OutputId,
         payload::{signed_transaction::TransactionCapabilities, tagged_data::TaggedDataPayload},
     },
@@ -35,6 +36,8 @@ pub struct TransactionOptions {
     pub allow_micro_amount: bool,
     #[serde(default)]
     pub capabilities: Option<TransactionCapabilities>,
+    #[serde(default)]
+    pub mana_allotments: Option<Vec<ManaAllotment>>,
 }
 
 #[allow(clippy::enum_variant_names)]
