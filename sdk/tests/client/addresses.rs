@@ -239,8 +239,6 @@ async fn address_generation() {
 
 #[tokio::test]
 async fn address_search() -> Result<()> {
-    let client = Client::builder().finish().await.unwrap();
-
     let secret_manager = MnemonicSecretManager::try_from_mnemonic(generate_mnemonic()?)?;
 
     // Public
@@ -255,7 +253,11 @@ async fn address_search() -> Result<()> {
 
     // Internal
     let address = secret_manager
-        .generate::<Ed25519Address>(&PublicKeyOptions::new(IOTA_COIN_TYPE).with_address_index(9))
+        .generate::<Ed25519Address>(
+            &PublicKeyOptions::new(IOTA_COIN_TYPE)
+                .with_address_index(9)
+                .with_internal(true),
+        )
         .await?;
 
     let res = search_address(&secret_manager, IOTA_BECH32_HRP, IOTA_COIN_TYPE, 0, 0..10, &address).await?;
