@@ -19,13 +19,11 @@ use crate::client::secret::ledger_nano::{self, LedgerSecretManager};
 #[cfg(feature = "private_key_secret_manager")]
 use crate::client::secret::private_key::PrivateKeySecretManager;
 #[cfg(feature = "stronghold")]
-use crate::client::secret::stronghold::StrongholdSecretManager;
+use crate::client::secret::{stronghold::StrongholdSecretManager, types::StrongholdDto};
 use crate::{
     client::{
         secret::{
-            mnemonic::MnemonicSecretManager,
-            types::{EvmSignature, StrongholdDto},
-            Generate, SecretManagerConfig, Sign, SignTransaction,
+            mnemonic::MnemonicSecretManager, types::EvmSignature, Generate, SecretManagerConfig, Sign, SignTransaction,
         },
         Error,
     },

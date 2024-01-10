@@ -46,7 +46,7 @@ use crate::{
         Error,
     },
     types::block::{
-        address::{Address, AnchorAddress, Ed25519Address},
+        address::Address,
         core::UnsignedBlock,
         output::Output,
         payload::SignedTransactionPayload,
