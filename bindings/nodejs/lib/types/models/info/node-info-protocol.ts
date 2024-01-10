@@ -158,7 +158,7 @@ export interface RewardsParameters {
     /**
      * The number of epochs for which rewards are retained.
      */
-    retentionPeriod: number,
+    retentionPeriod: number;
 }
 
 /**
