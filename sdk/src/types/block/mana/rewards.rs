@@ -30,7 +30,7 @@ pub struct RewardsParameters {
     /// The exponent used for shifting operation during the pool rewards calculations.
     pool_coefficient_exponent: u8,
     // The number of epochs for which rewards are retained.
-    retention_period: EpochIndex,
+    retention_period: u16,
 }
 
 impl Default for RewardsParameters {
