@@ -15,7 +15,10 @@ use crate::types::block::{
     address::{Address, AnchorAddress},
     output::{
         feature::{verify_allowed_features, Feature, FeatureFlags, Features},
-        unlock_condition::{verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions},
+        unlock_condition::{
+            verify_allowed_unlock_conditions, verify_restricted_addresses, UnlockCondition, UnlockConditionFlags,
+            UnlockConditions,
+        },
         ChainId, MinimumOutputAmount, Output, OutputBuilderAmount, OutputId, StorageScore, StorageScoreParameters,
     },
     protocol::{ProtocolParameters, WorkScore, WorkScoreParameters},
@@ -248,6 +251,12 @@ impl AnchorOutputBuilder {
 
         let features = Features::from_set(self.features)?;
 
+        verify_restricted_addresses(
+            &unlock_conditions,
+            AnchorOutput::KIND,
+            features.native_token(),
+            self.mana,
+        )?;
         verify_allowed_features(&features, AnchorOutput::ALLOWED_FEATURES)?;
 
         let immutable_features = Features::from_set(self.immutable_features)?;

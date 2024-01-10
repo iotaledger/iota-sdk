@@ -15,8 +15,8 @@ use crate::types::block::{
     output::{
         feature::{verify_allowed_features, Feature, FeatureFlags, Features},
         unlock_condition::{
-            verify_allowed_unlock_conditions, AddressUnlockCondition, StorageDepositReturnUnlockCondition,
-            UnlockCondition, UnlockConditionFlags, UnlockConditions,
+            verify_allowed_unlock_conditions, verify_restricted_addresses, AddressUnlockCondition,
+            StorageDepositReturnUnlockCondition, UnlockCondition, UnlockConditionFlags, UnlockConditions,
         },
         BasicOutputBuilder, ChainId, MinimumOutputAmount, Output, OutputBuilderAmount, OutputId, StorageScore,
         StorageScoreParameters,
@@ -256,6 +256,7 @@ impl NftOutputBuilder {
 
         let features = Features::from_set(self.features)?;
 
+        verify_restricted_addresses(&unlock_conditions, NftOutput::KIND, features.native_token(), self.mana)?;
         verify_allowed_features(&features, NftOutput::ALLOWED_FEATURES)?;
 
         let immutable_features = Features::from_set(self.immutable_features)?;

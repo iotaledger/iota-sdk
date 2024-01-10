@@ -10,8 +10,8 @@ use crate::types::block::{
     output::{
         feature::{verify_allowed_features, Feature, FeatureFlags, Features, NativeTokenFeature},
         unlock_condition::{
-            verify_allowed_unlock_conditions, AddressUnlockCondition, StorageDepositReturnUnlockCondition,
-            UnlockCondition, UnlockConditionFlags, UnlockConditions,
+            verify_allowed_unlock_conditions, verify_restricted_addresses, AddressUnlockCondition,
+            StorageDepositReturnUnlockCondition, UnlockCondition, UnlockConditionFlags, UnlockConditions,
         },
         MinimumOutputAmount, NativeToken, Output, OutputBuilderAmount, StorageScore, StorageScoreParameters,
     },
@@ -192,6 +192,12 @@ impl BasicOutputBuilder {
 
         let features = Features::from_set(self.features)?;
 
+        verify_restricted_addresses(
+            &unlock_conditions,
+            BasicOutput::KIND,
+            features.native_token(),
+            self.mana,
+        )?;
         verify_features::<true>(&features)?;
 
         let mut output = BasicOutput {

@@ -333,50 +333,6 @@ impl UnlockConditions {
     pub fn restricted_addresses(&self) -> impl Iterator<Item = &RestrictedAddress> {
         self.addresses().filter_map(Address::as_restricted_opt)
     }
-
-    pub(crate) fn verify_restricted_addresses(
-        &self,
-        output_kind: u8,
-        native_token: Option<&NativeTokenFeature>,
-        mana: u64,
-    ) -> Result<(), Error> {
-        let addresses = self.restricted_addresses();
-
-        for address in addresses {
-            if native_token.is_some() && !address.has_capability(AddressCapabilityFlag::OutputsWithNativeTokens) {
-                return Err(Error::RestrictedAddressCapability);
-            }
-
-            if mana > 0 && !address.has_capability(AddressCapabilityFlag::OutputsWithMana) {
-                return Err(Error::RestrictedAddressCapability);
-            }
-
-            if self.timelock().is_some() && !address.has_capability(AddressCapabilityFlag::OutputsWithTimelock) {
-                return Err(Error::RestrictedAddressCapability);
-            }
-
-            if self.expiration().is_some() && !address.has_capability(AddressCapabilityFlag::OutputsWithExpiration) {
-                return Err(Error::RestrictedAddressCapability);
-            }
-
-            if self.storage_deposit_return().is_some()
-                && !address.has_capability(AddressCapabilityFlag::OutputsWithStorageDepositReturn)
-            {
-                return Err(Error::RestrictedAddressCapability);
-            }
-
-            if match output_kind {
-                AccountOutput::KIND => !address.has_capability(AddressCapabilityFlag::AccountOutputs),
-                AnchorOutput::KIND => !address.has_capability(AddressCapabilityFlag::AnchorOutputs),
-                NftOutput::KIND => !address.has_capability(AddressCapabilityFlag::NftOutputs),
-                DelegationOutput::KIND => !address.has_capability(AddressCapabilityFlag::DelegationOutputs),
-                _ => return Err(Error::UnsupportedOutputKind(output_kind)),
-            } {
-                return Err(Error::RestrictedAddressCapability);
-            }
-        }
-        Ok(())
-    }
 }
 
 impl StorageScore for UnlockConditions {
@@ -415,6 +371,53 @@ pub(crate) fn verify_allowed_unlock_conditions(
         }
     }
 
+    Ok(())
+}
+
+pub(crate) fn verify_restricted_addresses(
+    unlock_conditions: &UnlockConditions,
+    output_kind: u8,
+    native_token: Option<&NativeTokenFeature>,
+    mana: u64,
+) -> Result<(), Error> {
+    let addresses = unlock_conditions.restricted_addresses();
+
+    for address in addresses {
+        if native_token.is_some() && !address.has_capability(AddressCapabilityFlag::OutputsWithNativeTokens) {
+            return Err(Error::RestrictedAddressCapability);
+        }
+
+        if mana > 0 && !address.has_capability(AddressCapabilityFlag::OutputsWithMana) {
+            return Err(Error::RestrictedAddressCapability);
+        }
+
+        if unlock_conditions.timelock().is_some() && !address.has_capability(AddressCapabilityFlag::OutputsWithTimelock)
+        {
+            return Err(Error::RestrictedAddressCapability);
+        }
+
+        if unlock_conditions.expiration().is_some()
+            && !address.has_capability(AddressCapabilityFlag::OutputsWithExpiration)
+        {
+            return Err(Error::RestrictedAddressCapability);
+        }
+
+        if unlock_conditions.storage_deposit_return().is_some()
+            && !address.has_capability(AddressCapabilityFlag::OutputsWithStorageDepositReturn)
+        {
+            return Err(Error::RestrictedAddressCapability);
+        }
+
+        if match output_kind {
+            AccountOutput::KIND => !address.has_capability(AddressCapabilityFlag::AccountOutputs),
+            AnchorOutput::KIND => !address.has_capability(AddressCapabilityFlag::AnchorOutputs),
+            NftOutput::KIND => !address.has_capability(AddressCapabilityFlag::NftOutputs),
+            DelegationOutput::KIND => !address.has_capability(AddressCapabilityFlag::DelegationOutputs),
+            _ => return Err(Error::UnsupportedOutputKind(output_kind)),
+        } {
+            return Err(Error::RestrictedAddressCapability);
+        }
+    }
     Ok(())
 }
 
