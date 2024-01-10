@@ -20,7 +20,6 @@ use iota_sdk::{
         output::NftId,
         payload::{signed_transaction::Transaction, SignedTransactionPayload},
         protocol::protocol_parameters,
-        rand::mana::rand_mana_allotment,
         unlock::{SignatureUnlock, Unlock},
     },
 };
@@ -50,20 +49,23 @@ async fn nft_reference_unlocks() -> Result<()> {
     let nft_id = NftId::from_str(NFT_ID_1)?;
     let nft_address = Address::Nft(NftAddress::new(nft_id));
 
-    let inputs = build_inputs([
-        Nft(
-            1_000_000,
-            nft_id,
-            address_0.clone(),
-            None,
-            None,
-            None,
-            None,
-            Some(Bip44::new(SHIMMER_COIN_TYPE)),
-        ),
-        Basic(1_000_000, nft_address.clone(), None, None, None, None, None, None),
-        Basic(1_000_000, nft_address.clone(), None, None, None, None, None, None),
-    ]);
+    let inputs = build_inputs(
+        [
+            Nft(
+                1_000_000,
+                nft_id,
+                address_0.clone(),
+                None,
+                None,
+                None,
+                None,
+                Some(Bip44::new(SHIMMER_COIN_TYPE)),
+            ),
+            Basic(1_000_000, nft_address.clone(), None, None, None, None, None, None),
+            Basic(1_000_000, nft_address.clone(), None, None, None, None, None, None),
+        ],
+        None,
+    );
 
     let outputs = build_outputs([
         Nft(1_000_000, nft_id, address_0, None, None, None, None, None),
@@ -78,7 +80,14 @@ async fn nft_reference_unlocks() -> Result<()> {
                 .collect::<Vec<_>>(),
         )
         .with_outputs(outputs)
-        .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
+        .with_creation_slot(
+            inputs
+                .iter()
+                .map(|i| i.output_id().transaction_id().slot_index())
+                .max()
+                .unwrap()
+                + 1,
+        )
         .finish_with_params(&protocol_parameters)?;
 
     let prepared_transaction_data = PreparedTransactionData {

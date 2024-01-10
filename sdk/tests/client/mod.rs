@@ -31,7 +31,11 @@ use iota_sdk::{
             AccountId, AccountOutputBuilder, BasicOutputBuilder, FoundryOutputBuilder, NativeToken, NftId,
             NftOutputBuilder, Output, OutputId, SimpleTokenScheme, TokenId, TokenScheme,
         },
-        rand::{output::rand_output_metadata_with_id, transaction::rand_transaction_id},
+        rand::{
+            output::rand_output_metadata_with_id,
+            transaction::{rand_transaction_id, rand_transaction_id_with_slot_index},
+        },
+        slot::SlotIndex,
     },
 };
 
@@ -208,15 +212,22 @@ fn build_output_inner(build: Build) -> (Output, Option<Bip44>) {
     }
 }
 
-fn build_inputs<'a>(outputs: impl IntoIterator<Item = Build<'a>>) -> Vec<InputSigningData> {
+fn build_inputs<'a>(
+    outputs: impl IntoIterator<Item = Build<'a>>,
+    slot_index: Option<SlotIndex>,
+) -> Vec<InputSigningData> {
     outputs
         .into_iter()
         .map(|build| {
             let (output, chain) = build_output_inner(build);
+            let transaction_id = slot_index.map_or_else(
+                || rand_transaction_id(),
+                |index| rand_transaction_id_with_slot_index(index),
+            );
 
             InputSigningData {
                 output,
-                output_metadata: rand_output_metadata_with_id(OutputId::new(rand_transaction_id(), 0)),
+                output_metadata: rand_output_metadata_with_id(OutputId::new(transaction_id, 0)),
                 chain,
             }
         })
