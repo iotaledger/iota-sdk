@@ -23,8 +23,8 @@ use crate::{
 };
 
 impl Wallet {
-    /// Backup the wallet data in a Stronghold file
-    /// stronghold_password must be the current one when Stronghold is used as SecretManager.
+    /// Backup the wallet data in a Stronghold file.
+    /// `stronghold_password` must be the current one when Stronghold is used as SecretManager.
     pub async fn backup(
         &self,
         backup_path: PathBuf,
@@ -60,7 +60,7 @@ impl Wallet {
         Ok(())
     }
 
-    /// Restore a backup from a Stronghold file
+    /// Restore the wallet from a Stronghold backup file.
     /// Replaces client_options, coin_type, secret_manager and accounts. Returns an error if accounts were already
     /// created If Stronghold is used as secret_manager, the existing Stronghold file will be overwritten. If a
     /// mnemonic was stored, it will be gone.
@@ -69,7 +69,7 @@ impl Wallet {
     /// coin type doesn't match
     /// if ignore_if_bech32_hrp_mismatch == Some("rms"), but addresses have something different like "smr", no accounts
     /// will be restored.
-    pub async fn restore_backup(
+    pub async fn restore_from_backup(
         &self,
         backup_path: PathBuf,
         stronghold_password: impl Into<Password> + Send,
@@ -96,6 +96,7 @@ impl Wallet {
         let new_snapshot_path = if let SecretManager::Stronghold(stronghold) = &mut *secret_manager {
             stronghold.snapshot_path.clone()
         } else {
+            // TODO: move and use default constant from cli?
             PathBuf::from("wallet.stronghold")
         };
 

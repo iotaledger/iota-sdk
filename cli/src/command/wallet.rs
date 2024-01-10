@@ -205,7 +205,7 @@ pub async fn mnemonic_command(output_file_name: Option<String>, output_stdout: O
 }
 
 pub async fn new_account_command(wallet: &Wallet, alias: Option<String>) -> Result<AccountIdentifier, Error> {
-    let alias = add_account(&wallet, alias).await?;
+    let alias = add_account(wallet, alias).await?;
 
     Ok(alias)
 }
@@ -220,24 +220,27 @@ pub async fn node_info_command(wallet: &Wallet) -> Result<(), Error> {
 
 pub async fn restore_command_stronghold(
     storage_path: &Path,
+    password: Option<Password>,
     snapshot_path: &Path,
     backup_path: &Path,
 ) -> Result<Wallet, Error> {
     check_file_exists(backup_path).await?;
 
     let mut builder = Wallet::builder();
-    if check_file_exists(snapshot_path).await.is_ok() {
-        println!(
-            "Detected a stronghold file at {}. Enter password to unlock:",
-            snapshot_path.to_str().unwrap()
-        );
-        let password = get_password("Stronghold password", false)?;
+    // providing a password means that a Stronghold snapshot exists (verified by the caller)
+    if let Some(password) = password {
+        println!("Detected a stronghold file at {}.", snapshot_path.to_str().unwrap());
         let secret_manager = SecretManager::Stronghold(
             StrongholdSecretManager::builder()
                 .password(password)
                 .build(snapshot_path)?,
         );
         builder = builder.with_secret_manager(secret_manager);
+    } else {
+        // If there is no db, set the placeholder so the wallet builder doesn't fail.
+        if check_file_exists(storage_path).await.is_err() {
+            builder = builder.with_secret_manager(SecretManager::Placeholder);
+        }
     }
 
     let wallet = builder
@@ -250,7 +253,9 @@ pub async fn restore_command_stronghold(
         .await?;
 
     let password = get_password("Stronghold backup password", false)?;
-    wallet.restore_backup(backup_path.into(), password, None, None).await?;
+    wallet
+        .restore_from_backup(backup_path.into(), password, None, None)
+        .await?;
 
     println_log_info!(
         "Wallet has been restored from the backup file \"{}\".",

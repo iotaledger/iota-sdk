@@ -121,7 +121,7 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
             ignore_if_bech32_mismatch,
         } => {
             wallet
-                .restore_backup(
+                .restore_from_backup(
                     source,
                     password,
                     ignore_if_coin_type_mismatch,

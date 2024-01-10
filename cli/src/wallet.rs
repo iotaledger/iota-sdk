@@ -28,48 +28,53 @@ pub async fn new_wallet(cli: WalletCli) -> Result<(Option<Wallet>, Option<Accoun
 
     enum LinkedSecretManager {
         Stronghold {
-            password: iota_sdk::client::Password,
             snapshot_path: std::path::PathBuf,
+            snapshot_exists: Option<iota_sdk::client::Password>,
         },
-        LedgerNano,
-        LedgerNanoSimulator,
-        NotFound,
+        LedgerNano {
+            is_connected: bool,
+        },
     }
 
-    let wallet_and_secret_manager = if let Ok(wallet) = Wallet::builder().with_storage_path(storage_path).finish().await
-    {
-        let linked_secret_manager = match &mut *wallet.get_secret_manager().write().await {
-            SecretManager::Stronghold(stronghold) => {
-                let snapshot_path = stronghold.snapshot_path.clone();
-                // `set_password` will trigger writing the snapshot file, so we need to make sure it already exists,
-                // otherwise we could run into an inconsistent wallet.
-                if snapshot_path.exists() {
-                    let password = get_password("Stronghold password", false)?;
-                    stronghold.set_password(password.clone()).await?;
-                    LinkedSecretManager::Stronghold {
-                        password,
-                        snapshot_path,
-                    }
-                } else {
-                    LinkedSecretManager::NotFound
+    let wallet_and_secret_manager = {
+        if storage_path.is_dir() {
+            match Wallet::builder().with_storage_path(storage_path).finish().await {
+                Ok(wallet) => {
+                    let linked_secret_manager = match &mut *wallet.get_secret_manager().write().await {
+                        SecretManager::Stronghold(stronghold) => {
+                            let snapshot_path = stronghold.snapshot_path.clone();
+                            // `set_password` will trigger writing the snapshot file, so we need to make sure it already
+                            // exists, otherwise we could run into an inconsistent wallet.
+                            if snapshot_path.exists() {
+                                let password = get_password("Stronghold password", false)?;
+                                stronghold.set_password(password.clone()).await?;
+                                LinkedSecretManager::Stronghold {
+                                    snapshot_path,
+                                    snapshot_exists: Some(password),
+                                }
+                            } else {
+                                LinkedSecretManager::Stronghold {
+                                    snapshot_path,
+                                    snapshot_exists: None,
+                                }
+                            }
+                        }
+                        SecretManager::LedgerNano(ledger_nano) => LinkedSecretManager::LedgerNano {
+                            // is_simulator: ledger_nano.is_simulator,
+                            is_connected: ledger_nano.get_ledger_nano_status().await.connected(),
+                        },
+                        _ => panic!("only Stronghold and LedgerNano supported at the moment."),
+                    };
+                    Some((wallet, linked_secret_manager))
+                }
+                Err(e) => {
+                    println_log_error!("failed to load wallet db from storage: {e}");
+                    return Ok((None, None));
                 }
             }
-            SecretManager::LedgerNano(ledger_nano) => {
-                if ledger_nano.get_ledger_nano_status().await.connected() {
-                    if ledger_nano.is_simulator {
-                        LinkedSecretManager::LedgerNanoSimulator
-                    } else {
-                        LinkedSecretManager::LedgerNano
-                    }
-                } else {
-                    LinkedSecretManager::NotFound
-                }
-            }
-            _ => panic!("only Stronghold and LedgerNano supported at the moment."),
-        };
-        Some((wallet, linked_secret_manager))
-    } else {
-        None
+        } else {
+            None
+        }
     };
 
     let (wallet, account_id) = if let Some(command) = cli.command {
@@ -101,9 +106,18 @@ pub async fn new_wallet(cli: WalletCli) -> Result<(Option<Wallet>, Option<Accoun
             WalletCommand::Backup { backup_path } => {
                 if let Some((wallet, secret_manager)) = wallet_and_secret_manager {
                     match secret_manager {
-                        LinkedSecretManager::Stronghold { password, .. } => {
+                        LinkedSecretManager::Stronghold {
+                            snapshot_exists: Some(password),
+                            ..
+                        } => {
                             backup_command_stronghold(&wallet, &password, Path::new(&backup_path)).await?;
                             return Ok((None, None));
+                        }
+                        LinkedSecretManager::Stronghold { snapshot_path, .. } => {
+                            return Err(Error::Miscellaneous(format!(
+                                "Stronghold snapshot does not exist at '{}'",
+                                snapshot_path.display()
+                            )));
                         }
                         _ => {
                             println_log_info!("only Stronghold backup supported");
@@ -120,9 +134,18 @@ pub async fn new_wallet(cli: WalletCli) -> Result<(Option<Wallet>, Option<Accoun
             WalletCommand::ChangePassword => {
                 if let Some((wallet, secret_manager)) = wallet_and_secret_manager {
                     match secret_manager {
-                        LinkedSecretManager::Stronghold { password, .. } => {
+                        LinkedSecretManager::Stronghold {
+                            snapshot_exists: Some(password),
+                            ..
+                        } => {
                             change_password_command(&wallet, password).await?;
                             (Some(wallet), None)
+                        }
+                        LinkedSecretManager::Stronghold { snapshot_path, .. } => {
+                            return Err(Error::Miscellaneous(format!(
+                                "Stronghold snapshot does not exist at '{}'",
+                                snapshot_path.display()
+                            )));
                         }
                         _ => {
                             println_log_info!("only Stronghold password change supported");
@@ -195,12 +218,18 @@ pub async fn new_wallet(cli: WalletCli) -> Result<(Option<Wallet>, Option<Accoun
                 }
             }
             WalletCommand::Restore { backup_path } => {
-                // TODO: not sure how we do this here is correct
-                if let Some((_, linked_secret_manager)) = wallet_and_secret_manager {
+                if let Some((wallet, linked_secret_manager)) = wallet_and_secret_manager {
                     match linked_secret_manager {
-                        LinkedSecretManager::Stronghold { snapshot_path, .. } => {
+                        LinkedSecretManager::Stronghold {
+                            snapshot_path,
+                            snapshot_exists,
+                        } => {
+                            // we need to explicitly drop the current wallet here to prevent:
+                            // "error accessing storage: IO error: lock hold by current process"
+                            drop(wallet);
                             let wallet = restore_command_stronghold(
                                 storage_path,
+                                snapshot_exists,
                                 snapshot_path.as_path(),
                                 Path::new(&backup_path),
                             )
@@ -213,10 +242,12 @@ pub async fn new_wallet(cli: WalletCli) -> Result<(Option<Wallet>, Option<Accoun
                         }
                     }
                 } else {
-                    return Err(Error::Miscellaneous(format!(
-                        "wallet db does not exist at '{}'",
-                        storage_path.display()
-                    )));
+                    // the wallet db does not exist
+                    let init_params = InitParameters::default();
+                    let snapshot_path = Path::new(&init_params.stronghold_snapshot_path);
+                    let wallet =
+                        restore_command_stronghold(storage_path, None, snapshot_path, Path::new(&backup_path)).await?;
+                    (Some(wallet), None)
                 }
             }
             WalletCommand::MigrateStrongholdSnapshotV2ToV3 { path } => {
@@ -234,10 +265,24 @@ pub async fn new_wallet(cli: WalletCli) -> Result<(Option<Wallet>, Option<Accoun
     } else {
         // no wallet command provided
         if let Some((wallet, linked_secret_manager)) = wallet_and_secret_manager {
-            if let LinkedSecretManager::NotFound = linked_secret_manager {
-                println_log_error!("The secret manager linked with the wallet was not found");
-                return Ok((None, None));
+            match linked_secret_manager {
+                LinkedSecretManager::Stronghold {
+                    snapshot_exists: None,
+                    snapshot_path,
+                } => {
+                    println_log_error!(
+                        "Snapshot file for Stronghold secret manager linked with the wallet not found at '{}'",
+                        snapshot_path.display()
+                    );
+                    return Ok((None, None));
+                }
+                LinkedSecretManager::LedgerNano { is_connected: false } => {
+                    println_log_error!("Ledger Nano linked with the wallet not connected");
+                    return Ok((None, None));
+                }
+                _ => {}
             }
+
             if wallet.get_accounts().await?.is_empty() {
                 create_initial_account(wallet).await?
             } else if let Some(alias) = cli.account {
