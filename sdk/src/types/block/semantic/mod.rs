@@ -292,6 +292,7 @@ impl<'a> SemanticValidationContext<'a> {
             return Ok(Some(TransactionFailureReason::SumInputsOutputsAmountMismatch));
         }
 
+        // TODO re-enable with https://github.com/iotaledger/iota-sdk/issues/1692
         if self.input_mana != self.output_mana {
             if self.input_mana > self.output_mana
                 && !self.transaction.has_capability(TransactionCapabilityFlag::BurnMana)

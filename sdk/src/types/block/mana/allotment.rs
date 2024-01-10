@@ -18,16 +18,21 @@ use crate::types::block::{
 /// in the form of Block Issuance Credits to the account.
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Packable)]
 #[packable(unpack_error = Error)]
-#[packable(unpack_visitor = ProtocolParameters)]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize),
+    serde(rename_all = "camelCase")
+)]
 pub struct ManaAllotment {
     pub(crate) account_id: AccountId,
     #[packable(verify_with = verify_mana)]
+    #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
     pub(crate) mana: u64,
 }
 
 impl ManaAllotment {
-    pub fn new(account_id: AccountId, mana: u64, protocol_params: &ProtocolParameters) -> Result<Self, Error> {
-        verify_mana::<true>(&mana, protocol_params)?;
+    pub fn new(account_id: AccountId, mana: u64) -> Result<Self, Error> {
+        verify_mana::<true>(&mana)?;
 
         Ok(Self { account_id, mana })
     }
@@ -59,8 +64,8 @@ impl WorkScore for ManaAllotment {
     }
 }
 
-fn verify_mana<const VERIFY: bool>(mana: &u64, params: &ProtocolParameters) -> Result<(), Error> {
-    if VERIFY && *mana > params.mana_parameters().max_mana() {
+fn verify_mana<const VERIFY: bool>(mana: &u64) -> Result<(), Error> {
+    if VERIFY && *mana == 0 {
         return Err(Error::InvalidManaValue(*mana));
     }
 
@@ -84,7 +89,7 @@ impl ManaAllotments {
     /// The maximum number of mana allotments of a transaction.
     pub const COUNT_MAX: u16 = 128;
     /// The range of valid numbers of mana allotments of a transaction.
-    pub const COUNT_RANGE: RangeInclusive<u16> = Self::COUNT_MIN..=Self::COUNT_MAX; // [1..128]
+    pub const COUNT_RANGE: RangeInclusive<u16> = Self::COUNT_MIN..=Self::COUNT_MAX; // [0..128]
 
     /// Creates a new [`ManaAllotments`] from a vec.
     pub fn from_vec(allotments: Vec<ManaAllotment>) -> Result<Self, Error> {
@@ -185,48 +190,5 @@ impl IntoIterator for ManaAllotments {
 
     fn into_iter(self) -> Self::IntoIter {
         Vec::from(Into::<Box<[ManaAllotment]>>::into(self.0)).into_iter()
-    }
-}
-
-#[cfg(feature = "serde")]
-pub(super) mod dto {
-    use serde::{Deserialize, Serialize};
-
-    use super::*;
-    use crate::{types::TryFromDto, utils::serde::string};
-
-    #[derive(Copy, Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-    #[serde(rename_all = "camelCase")]
-    pub struct ManaAllotmentDto {
-        pub account_id: AccountId,
-        #[serde(with = "string")]
-        pub mana: u64,
-    }
-
-    impl From<&ManaAllotment> for ManaAllotmentDto {
-        fn from(value: &ManaAllotment) -> Self {
-            Self {
-                account_id: value.account_id,
-                mana: value.mana,
-            }
-        }
-    }
-
-    impl TryFromDto<ManaAllotmentDto> for ManaAllotment {
-        type Error = Error;
-
-        fn try_from_dto_with_params_inner(
-            dto: ManaAllotmentDto,
-            params: Option<&ProtocolParameters>,
-        ) -> Result<Self, Self::Error> {
-            Ok(if let Some(params) = params {
-                Self::new(dto.account_id, dto.mana, params)?
-            } else {
-                Self {
-                    account_id: dto.account_id,
-                    mana: dto.mana,
-                }
-            })
-        }
     }
 }

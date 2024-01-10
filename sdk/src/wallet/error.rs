@@ -124,9 +124,9 @@ pub enum Error {
     /// Implicit account not found.
     #[error("implicit account not found")]
     ImplicitAccountNotFound,
-    /// No account was provided or found to issue the block.
-    #[error("no account was provided or found to issue the block")]
-    NoAccountToIssueBlock,
+    /// Account not found.
+    #[error("account not found")]
+    AccountNotFound,
 }
 
 impl Error {

@@ -5,8 +5,6 @@ mod allotment;
 mod parameters;
 mod rewards;
 
-#[cfg(feature = "serde")]
-pub use self::allotment::dto::ManaAllotmentDto;
 pub(crate) use self::allotment::{verify_mana_allotments_sum, ManaAllotmentCount};
 pub use self::{
     allotment::{ManaAllotment, ManaAllotments},
