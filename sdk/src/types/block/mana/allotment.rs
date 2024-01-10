@@ -89,7 +89,7 @@ impl ManaAllotments {
     /// The maximum number of mana allotments of a transaction.
     pub const COUNT_MAX: u16 = 128;
     /// The range of valid numbers of mana allotments of a transaction.
-    pub const COUNT_RANGE: RangeInclusive<u16> = Self::COUNT_MIN..=Self::COUNT_MAX; // [1..128]
+    pub const COUNT_RANGE: RangeInclusive<u16> = Self::COUNT_MIN..=Self::COUNT_MAX; // [0..128]
 
     /// Creates a new [`ManaAllotments`] from a vec.
     pub fn from_vec(allotments: Vec<ManaAllotment>) -> Result<Self, Error> {
