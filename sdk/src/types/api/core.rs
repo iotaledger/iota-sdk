@@ -325,7 +325,7 @@ pub struct CongestionResponse {
     pub reference_mana_cost: u64,
     /// The Block Issuance Credits of the requested account.
     #[serde(with = "string")]
-    pub block_issuance_credits: u64,
+    pub block_issuance_credits: i128,
 }
 
 /// Response of POST /api/core/v3/blocks.
