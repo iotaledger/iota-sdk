@@ -71,7 +71,7 @@ export interface __GetLedgerNanoStatusMethod__ {
     name: 'getLedgerNanoStatus';
 }
 
-export interface __SetStrongholdPasswordMethod__ = {
+export interface __SetStrongholdPasswordMethod__ {
     name: 'setStrongholdPassword';
     data: { password: string };
 };
