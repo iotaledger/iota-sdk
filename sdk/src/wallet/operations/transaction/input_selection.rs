@@ -185,22 +185,7 @@ where
             input_selection = input_selection.with_mana_allotments(mana_allotments.iter());
         }
 
-        let selected_transaction_data = match input_selection.select() {
-            Ok(r) => r,
-            // TODO this error doesn't exist with the new ISA
-            // Err(crate::client::Error::ConsolidationRequired(output_count)) => {
-            //     #[cfg(feature = "events")]
-            //     self.event_emitter
-            //         .lock()
-            //         .await
-            //         .emit(account.index, WalletEvent::ConsolidationRequired);
-            //     return Err(crate::wallet::Error::ConsolidationRequired {
-            //         output_count,
-            //         output_count_max: INPUT_COUNT_MAX,
-            //     });
-            // }
-            Err(e) => return Err(e.into()),
-        };
+        let selected_transaction_data = input_selection.select()?;
 
         // lock outputs so they don't get used by another transaction
         for output in &selected_transaction_data.inputs {
