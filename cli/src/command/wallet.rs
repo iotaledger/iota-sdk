@@ -7,7 +7,7 @@ use clap::{builder::BoolishValueParser, Args, CommandFactory, Parser, Subcommand
 use iota_sdk::{
     client::{
         constants::SHIMMER_COIN_TYPE,
-        secret::{ledger_nano::LedgerSecretManager, stronghold::StrongholdSecretManager, SecretManager},
+        secret::{stronghold::StrongholdSecretManager, SecretManager},
         stronghold::StrongholdAdapter,
         utils::Password,
     },
@@ -18,7 +18,7 @@ use log::LevelFilter;
 use crate::{
     error::Error,
     helper::{check_file_exists, generate_mnemonic, get_password, SecretManagerChoice},
-    println_log_error, println_log_info,
+    println_log_info,
 };
 
 const DEFAULT_LOG_LEVEL: &str = "debug";
@@ -33,13 +33,6 @@ pub struct WalletCli {
     /// Set the path to the wallet database.
     #[arg(long, value_name = "PATH", env = "WALLET_DATABASE_PATH", default_value = DEFAULT_WALLET_DATABASE_PATH)]
     pub wallet_db_path: String,
-    /// Set the secret manager to use.
-    #[arg(short, long, value_name = "SECRET_MANAGER", default_value = DEFAULT_SECRET_MANAGER)]
-    pub secret_manager: SecretManagerChoice,
-    /// Set the path to the stronghold snapshot file. Ignored if the <SECRET_MANAGER> is not a Stronghold secret
-    /// manager.
-    #[arg(long, value_name = "PATH", env = "STRONGHOLD_SNAPSHOT_PATH", default_value = DEFAULT_STRONGHOLD_SNAPSHOT_PATH)]
-    pub stronghold_snapshot_path: String,
     /// Set the account to enter.
     pub account: Option<AccountIdentifier>,
     /// Set the log level.
@@ -113,27 +106,15 @@ pub enum WalletCommand {
     Sync,
 }
 
-impl WalletCommand {
-    pub fn is_unlock_command(&self) -> bool {
-        match self {
-            Self::Accounts
-            | Self::Backup { .. }
-            | Self::ChangePassword { .. }
-            | Self::NewAccount { .. }
-            | Self::NodeInfo
-            | Self::SetNodeUrl { .. }
-            | Self::SetPow { .. }
-            | Self::Sync => true,
-            Self::Init(_)
-            | Self::MigrateStrongholdSnapshotV2ToV3 { .. }
-            | Self::Mnemonic { .. }
-            | Self::Restore { .. } => false,
-        }
-    }
-}
-
 #[derive(Debug, Clone, Args)]
 pub struct InitParameters {
+    /// Set the secret manager to use.
+    #[arg(short, long, value_name = "SECRET_MANAGER", default_value = DEFAULT_SECRET_MANAGER)]
+    pub secret_manager: SecretManagerChoice,
+    /// Set the path to the stronghold snapshot file. Ignored if the <SECRET_MANAGER> is not a Stronghold secret
+    /// manager.
+    #[arg(short = 't', long, value_name = "PATH", env = "STRONGHOLD_SNAPSHOT_PATH", default_value = DEFAULT_STRONGHOLD_SNAPSHOT_PATH)]
+    pub stronghold_snapshot_path: String,
     // TODO: remove this field to make `InitParameters` independ from the secret manager being used?
     /// Set the path to a file containing mnemonics. If empty, a mnemonic has to be entered or will be randomly
     /// generated. Only used by some secret managers.
@@ -150,6 +131,8 @@ pub struct InitParameters {
 impl Default for InitParameters {
     fn default() -> Self {
         Self {
+            secret_manager: SecretManagerChoice::Stronghold,
+            stronghold_snapshot_path: DEFAULT_STRONGHOLD_SNAPSHOT_PATH.to_string(),
             mnemonic_file_path: None,
             node_url: DEFAULT_NODE_URL.to_string(),
             coin_type: SHIMMER_COIN_TYPE,
@@ -193,13 +176,13 @@ pub async fn change_password_command(wallet: &Wallet, current_password: Password
 pub async fn init_command(
     storage_path: &Path,
     secret_manager: SecretManager,
-    parameters: InitParameters,
+    init_params: InitParameters,
 ) -> Result<Wallet, Error> {
     Ok(Wallet::builder()
         .with_secret_manager(secret_manager)
-        .with_client_options(ClientOptions::new().with_node(parameters.node_url.as_str())?)
+        .with_client_options(ClientOptions::new().with_node(init_params.node_url.as_str())?)
         .with_storage_path(storage_path.to_str().expect("invalid wallet db path"))
-        .with_coin_type(parameters.coin_type)
+        .with_coin_type(init_params.coin_type)
         .finish()
         .await?)
 }
@@ -301,39 +284,6 @@ pub async fn sync_command(wallet: &Wallet) -> Result<(), Error> {
     println_log_info!("Synchronized all accounts: {:?}", total_balance);
 
     Ok(())
-}
-
-pub async fn unlock_wallet_stronghold(
-    storage_path: &Path,
-    snapshot_path: &Path,
-    password: Password,
-) -> Result<Wallet, Error> {
-    let secret_manager = SecretManager::Stronghold(
-        StrongholdSecretManager::builder()
-            .password(password)
-            .build(snapshot_path)?,
-    );
-
-    unlock_wallet_inner(storage_path, secret_manager).await
-}
-
-pub async fn unlock_wallet_ledgernano(storage_path: &Path, is_simulator: bool) -> Result<Wallet, Error> {
-    let secret_manager = SecretManager::LedgerNano(LedgerSecretManager::new(is_simulator));
-    unlock_wallet_inner(storage_path, secret_manager).await
-}
-
-async fn unlock_wallet_inner(storage_path: &Path, secret_manager: SecretManager) -> Result<Wallet, Error> {
-    let maybe_wallet = Wallet::builder()
-        .with_secret_manager(secret_manager)
-        .with_storage_path(storage_path.to_str().expect("invalid wallet db path"))
-        .finish()
-        .await;
-
-    if let Err(iota_sdk::wallet::Error::MissingParameter(_)) = maybe_wallet {
-        println_log_error!("Please make sure the wallet is initialized.");
-    }
-
-    Ok(maybe_wallet?)
 }
 
 pub async fn add_account(wallet: &Wallet, alias: Option<String>) -> Result<AccountIdentifier, Error> {

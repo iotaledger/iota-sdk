@@ -100,7 +100,7 @@ pub struct StrongholdAdapter {
     timeout_task: Arc<Mutex<Option<TaskHandle>>>,
 
     /// The path to a Stronghold snapshot file.
-    pub(crate) snapshot_path: PathBuf,
+    pub snapshot_path: PathBuf,
 }
 
 fn check_or_create_snapshot(
