@@ -638,43 +638,6 @@ mod dto {
         }
     }
 
-    impl FoundryOutput {
-        #[allow(clippy::too_many_arguments)]
-        pub fn try_from_dtos(
-            amount: OutputBuilderAmount,
-            serial_number: u32,
-            token_scheme: TokenScheme,
-            unlock_conditions: Vec<UnlockCondition>,
-            features: Option<Vec<Feature>>,
-            immutable_features: Option<Vec<Feature>>,
-        ) -> Result<Self, Error> {
-            let mut builder = match amount {
-                OutputBuilderAmount::Amount(amount) => {
-                    FoundryOutputBuilder::new_with_amount(amount, serial_number, token_scheme)
-                }
-                OutputBuilderAmount::MinimumAmount(params) => {
-                    FoundryOutputBuilder::new_with_minimum_amount(params, serial_number, token_scheme)
-                }
-            };
-
-            let unlock_conditions = unlock_conditions
-                .into_iter()
-                .map(UnlockCondition::from)
-                .collect::<Vec<UnlockCondition>>();
-            builder = builder.with_unlock_conditions(unlock_conditions);
-
-            if let Some(features) = features {
-                builder = builder.with_features(features);
-            }
-
-            if let Some(immutable_features) = immutable_features {
-                builder = builder.with_immutable_features(immutable_features);
-            }
-
-            builder.finish()
-        }
-    }
-
     crate::impl_serde_typed_dto!(FoundryOutput, FoundryOutputDto, "foundry output");
 }
 
@@ -684,18 +647,7 @@ mod tests {
 
     use super::*;
     use crate::types::block::{
-        output::{
-            foundry::dto::FoundryOutputDto, unlock_condition::ImmutableAccountAddressUnlockCondition, FoundryId,
-            SimpleTokenScheme, TokenId,
-        },
-        protocol::protocol_parameters,
-        rand::{
-            address::rand_account_address,
-            output::{
-                feature::{rand_allowed_features, rand_metadata_feature},
-                rand_foundry_output, rand_token_scheme,
-            },
-        },
+        output::foundry::dto::FoundryOutputDto, protocol::protocol_parameters, rand::output::rand_foundry_output,
     };
 
     #[test]
@@ -705,38 +657,5 @@ mod tests {
         let dto = FoundryOutputDto::from(&foundry_output);
         let output = Output::Foundry(FoundryOutput::try_from(dto).unwrap());
         assert_eq!(&foundry_output, output.as_foundry());
-
-        let foundry_id = FoundryId::build(&rand_account_address(), 0, SimpleTokenScheme::KIND);
-
-        let test_split_dto = |builder: FoundryOutputBuilder| {
-            let output_split = FoundryOutput::try_from_dtos(
-                builder.amount,
-                builder.serial_number,
-                builder.token_scheme.clone(),
-                builder.unlock_conditions.iter().cloned().collect(),
-                Some(builder.features.iter().cloned().collect()),
-                Some(builder.immutable_features.iter().cloned().collect()),
-            )
-            .unwrap();
-            assert_eq!(builder.finish().unwrap(), output_split);
-        };
-
-        let builder = FoundryOutput::build_with_amount(100, 123, rand_token_scheme())
-            .with_native_token(NativeToken::new(TokenId::from(foundry_id), 1000).unwrap())
-            .add_unlock_condition(ImmutableAccountAddressUnlockCondition::new(rand_account_address()))
-            .add_immutable_feature(rand_metadata_feature())
-            .with_features(rand_allowed_features(FoundryOutput::ALLOWED_FEATURES));
-        test_split_dto(builder);
-
-        let builder = FoundryOutput::build_with_minimum_amount(
-            protocol_parameters.storage_score_parameters(),
-            123,
-            rand_token_scheme(),
-        )
-        .with_native_token(NativeToken::new(TokenId::from(foundry_id), 1000).unwrap())
-        .add_unlock_condition(ImmutableAccountAddressUnlockCondition::new(rand_account_address()))
-        .add_immutable_feature(rand_metadata_feature())
-        .with_features(rand_allowed_features(FoundryOutput::ALLOWED_FEATURES));
-        test_split_dto(builder);
     }
 }

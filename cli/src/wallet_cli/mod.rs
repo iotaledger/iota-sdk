@@ -13,7 +13,8 @@ use iota_sdk::{
     types::{
         api::plugins::participation::types::ParticipationEventId,
         block::{
-            address::Bech32Address,
+            address::{Bech32Address, ToBech32Ext},
+            mana::ManaAllotment,
             output::{
                 unlock_condition::AddressUnlockCondition, AccountId, BasicOutputBuilder, FoundryId, NativeToken,
                 NativeTokensBuilder, NftId, Output, OutputId, TokenId,
@@ -24,8 +25,8 @@ use iota_sdk::{
     },
     utils::ConvertTo,
     wallet::{
-        types::OutputData, ConsolidationParams, CreateNativeTokenParams, MintNftParams, OutputsToClaim,
-        SendNativeTokenParams, SendNftParams, SendParams, SyncOptions, TransactionOptions, Wallet,
+        types::OutputData, ConsolidationParams, CreateNativeTokenParams, Error as WalletError, MintNftParams,
+        OutputsToClaim, SendNativeTokenParams, SendNftParams, SendParams, SyncOptions, TransactionOptions, Wallet,
     },
     U256,
 };
@@ -60,6 +61,8 @@ pub enum WalletCommand {
     Accounts,
     /// Print the wallet address.
     Address,
+    /// Allots mana to an account.
+    AllotMana { mana: u64, account_id: Option<AccountId> },
     /// Print the wallet balance.
     Balance,
     /// Burn an amount of native token.
@@ -81,6 +84,8 @@ pub enum WalletCommand {
     },
     /// Print details about claimable outputs - if there are any.
     ClaimableOutputs,
+    /// Checks if an account is ready to issue a block.
+    Congestion { account_id: Option<AccountId> },
     /// Consolidate all basic outputs into one address.
     Consolidate,
     /// Create a new account output.
@@ -314,12 +319,62 @@ impl FromStr for OutputSelector {
 
 // `accounts` command
 pub async fn accounts_command(wallet: &Wallet) -> Result<(), Error> {
-    print_outputs(wallet.data().await.accounts().cloned().collect(), "Accounts:")
+    let wallet_data = wallet.data().await;
+    let accounts = wallet_data.accounts();
+
+    println_log_info!("Accounts:\n");
+
+    for account in accounts {
+        let output_id = account.output_id;
+        let account_id = account.output.as_account().account_id_non_null(&output_id);
+        let account_address = account_id.to_bech32(wallet.client().get_bech32_hrp().await?);
+        let bic = wallet
+            .client()
+            .get_account_congestion(&account_id)
+            .await?
+            .block_issuance_credits;
+
+        println_log_info!(
+            "{:<16} {output_id}\n{:<16} {account_id}\n{:<16} {account_address}\n{:<16} {bic}\n",
+            "Output ID:",
+            "Account ID:",
+            "Account Address:",
+            "BIC:"
+        );
+    }
+
+    Ok(())
 }
 
 // `address` command
 pub async fn address_command(wallet: &Wallet) -> Result<(), Error> {
     print_wallet_address(wallet).await?;
+
+    Ok(())
+}
+
+// `allot-mana` command
+pub async fn allot_mana_command(wallet: &Wallet, mana: u64, account_id: Option<AccountId>) -> Result<(), Error> {
+    let wallet_data = wallet.data().await;
+    let account_id = account_id
+        .or(wallet_data
+            .accounts()
+            .next()
+            .map(|o| o.output.as_account().account_id_non_null(&o.output_id)))
+        .or(wallet_data
+            .implicit_accounts()
+            .next()
+            .map(|o| AccountId::from(&o.output_id)))
+        .ok_or(WalletError::AccountNotFound)?;
+    drop(wallet_data);
+
+    let transaction = wallet.allot_mana([ManaAllotment::new(account_id, mana)?], None).await?;
+
+    println_log_info!(
+        "Mana allotment transaction sent:\n{:?}\n{:?}",
+        transaction.transaction_id,
+        transaction.block_id
+    );
 
     Ok(())
 }
@@ -456,6 +511,33 @@ pub async fn claimable_outputs_command(wallet: &Wallet) -> Result<(), Error> {
             }
         }
     }
+
+    Ok(())
+}
+
+// `congestion` command
+pub async fn congestion_command(wallet: &Wallet, account_id: Option<AccountId>) -> Result<(), Error> {
+    let account_id = {
+        let wallet_data = wallet.data().await;
+        account_id
+            .or_else(|| {
+                wallet_data
+                    .accounts()
+                    .next()
+                    .map(|o| o.output.as_account().account_id_non_null(&o.output_id))
+            })
+            .or_else(|| {
+                wallet_data
+                    .implicit_accounts()
+                    .next()
+                    .map(|o| AccountId::from(&o.output_id))
+            })
+            .ok_or(WalletError::AccountNotFound)?
+    };
+
+    let congestion = wallet.client().get_account_congestion(&account_id).await?;
+
+    println_log_info!("{congestion:#?}");
 
     Ok(())
 }
@@ -612,10 +694,31 @@ pub async fn implicit_account_transition_command(
 
 // `implicit-accounts` command
 pub async fn implicit_accounts_command(wallet: &Wallet) -> Result<(), Error> {
-    print_outputs(
-        wallet.data().await.implicit_accounts().cloned().collect(),
-        "Implicit accounts:",
-    )
+    let wallet_data = wallet.data().await;
+    let implicit_accounts = wallet_data.implicit_accounts();
+
+    println_log_info!("Implicit accounts:\n");
+
+    for implicit_account in implicit_accounts {
+        let output_id = implicit_account.output_id;
+        let account_id = AccountId::from(&output_id);
+        let account_address = account_id.to_bech32(wallet.client().get_bech32_hrp().await?);
+        let bic = wallet
+            .client()
+            .get_account_congestion(&account_id)
+            .await?
+            .block_issuance_credits;
+
+        println_log_info!(
+            "{:<16} {output_id}\n{:<16} {account_id}\n{:<16} {account_address}\n{:<16} {bic}\n",
+            "Output ID:",
+            "Account ID:",
+            "Account Address:",
+            "BIC:"
+        );
+    }
+
+    Ok(())
 }
 
 // `melt-native-token` command
@@ -1111,6 +1214,9 @@ pub async fn prompt_internal(
                     match protocol_cli.command {
                         WalletCommand::Accounts => accounts_command(wallet).await,
                         WalletCommand::Address => address_command(wallet).await,
+                        WalletCommand::AllotMana { mana, account_id } => {
+                            allot_mana_command(wallet, mana, account_id).await
+                        }
                         WalletCommand::Balance => balance_command(wallet).await,
                         WalletCommand::BurnNativeToken { token_id, amount } => {
                             burn_native_token_command(wallet, token_id, amount).await
@@ -1118,6 +1224,7 @@ pub async fn prompt_internal(
                         WalletCommand::BurnNft { nft_id } => burn_nft_command(wallet, nft_id).await,
                         WalletCommand::Claim { output_id } => claim_command(wallet, output_id).await,
                         WalletCommand::ClaimableOutputs => claimable_outputs_command(wallet).await,
+                        WalletCommand::Congestion { account_id } => congestion_command(wallet, account_id).await,
                         WalletCommand::Consolidate => consolidate_command(wallet).await,
                         WalletCommand::CreateAccountOutput => create_account_output_command(wallet).await,
                         WalletCommand::CreateNativeToken {

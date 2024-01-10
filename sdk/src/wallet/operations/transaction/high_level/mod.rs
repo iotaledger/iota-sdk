@@ -1,6 +1,7 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+pub(crate) mod allot_mana;
 pub(crate) mod burning_melting;
 pub(crate) mod create_account;
 pub(crate) mod minting;
