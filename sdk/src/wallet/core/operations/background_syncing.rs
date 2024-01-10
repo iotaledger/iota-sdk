@@ -15,7 +15,7 @@ pub(crate) const DEFAULT_BACKGROUNDSYNCING_INTERVAL: Duration = Duration::from_s
 
 #[derive(Clone, PartialEq, Debug)]
 pub(crate) enum BackgroundSyncStatus {
-    NotRunning,
+    Stopped,
     Running,
     Stopping,
 }
@@ -49,17 +49,17 @@ where
         tx_background_sync.send(BackgroundSyncStatus::Running).ok();
 
         let wallet = self.clone();
+        let interval_seconds = interval.unwrap_or(DEFAULT_BACKGROUNDSYNCING_INTERVAL);
 
         task::spawn(async move {
-            'outer: loop {
+            loop {
                 log::debug!("[background_syncing]: syncing wallet");
 
                 if let Err(err) = wallet.sync(options.clone()).await {
                     log::debug!("[background_syncing] error: {}", err)
                 }
 
-                let seconds = interval.unwrap_or(DEFAULT_BACKGROUNDSYNCING_INTERVAL);
-                let res = timeout(seconds, async {
+                let res = timeout(interval_seconds, async {
                     rx_background_sync
                         .wait_for(|status| *status == BackgroundSyncStatus::Stopping)
                         .await
@@ -70,10 +70,10 @@ where
                 // If true it means rx_background_sync changed to BackgroundSyncStatus::Stopping
                 if Ok(true) == res {
                     log::debug!("[background_syncing]: stopping");
-                    break 'outer;
+                    break;
                 }
             }
-            tx_background_sync.send(BackgroundSyncStatus::NotRunning).ok();
+            tx_background_sync.send(BackgroundSyncStatus::Stopped).ok();
             log::debug!("[background_syncing]: stopped");
         });
         Ok(())
@@ -94,17 +94,17 @@ where
 
         let mut rx_background_sync = self.background_syncing_status.1.clone();
 
-        // immediately return if not running
-        if *rx_background_sync.borrow() == BackgroundSyncStatus::NotRunning {
+        // immediately return if is stopped
+        if *rx_background_sync.borrow() == BackgroundSyncStatus::Stopped {
             return Ok(());
         }
 
         // send stop request
         self.request_stop_background_syncing();
 
-        // wait until it stopped
+        // wait until it has stopped
         rx_background_sync
-            .wait_for(|status| *status == BackgroundSyncStatus::NotRunning)
+            .wait_for(|status| *status == BackgroundSyncStatus::Stopped)
             .await
             .ok();
 

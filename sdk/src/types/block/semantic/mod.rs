@@ -15,8 +15,8 @@ pub use self::{
     state_transition::{StateTransitionError, StateTransitionVerifier},
 };
 use crate::types::block::{
-    address::{Address, AddressCapabilityFlag},
-    output::{AccountId, AnchorOutput, ChainId, FoundryId, NativeTokens, Output, OutputId, TokenId, UnlockCondition},
+    address::Address,
+    output::{AccountId, AnchorOutput, ChainId, FoundryId, NativeTokens, Output, OutputId, TokenId},
     payload::signed_transaction::{Transaction, TransactionCapabilityFlag, TransactionSigningHash},
     protocol::ProtocolParameters,
     unlock::Unlock,
@@ -210,65 +210,6 @@ impl<'a> SemanticValidationContext<'a> {
                 Output::Delegation(output) => (output.amount(), 0, None, None),
             };
 
-            if let Some(unlock_conditions) = created_output.unlock_conditions() {
-                // Check the possibly restricted address-containing conditions
-                let addresses = unlock_conditions
-                    .iter()
-                    .filter_map(|uc| match uc {
-                        UnlockCondition::Address(uc) => Some(uc.address()),
-                        UnlockCondition::Expiration(uc) => Some(uc.return_address()),
-                        UnlockCondition::StateControllerAddress(uc) => Some(uc.address()),
-                        UnlockCondition::GovernorAddress(uc) => Some(uc.address()),
-                        _ => None,
-                    })
-                    .filter_map(Address::as_restricted_opt);
-                for address in addresses {
-                    if created_native_token.is_some()
-                        && !address.has_capability(AddressCapabilityFlag::OutputsWithNativeTokens)
-                    {
-                        // TODO: add a variant https://github.com/iotaledger/iota-sdk/issues/1430
-                        return Ok(Some(TransactionFailureReason::SemanticValidationFailed));
-                    }
-
-                    if mana > 0 && !address.has_capability(AddressCapabilityFlag::OutputsWithMana) {
-                        // TODO: add a variant https://github.com/iotaledger/iota-sdk/issues/1430
-                        return Ok(Some(TransactionFailureReason::SemanticValidationFailed));
-                    }
-
-                    if unlock_conditions.timelock().is_some()
-                        && !address.has_capability(AddressCapabilityFlag::OutputsWithTimelock)
-                    {
-                        // TODO: add a variant https://github.com/iotaledger/iota-sdk/issues/1430
-                        return Ok(Some(TransactionFailureReason::SemanticValidationFailed));
-                    }
-
-                    if unlock_conditions.expiration().is_some()
-                        && !address.has_capability(AddressCapabilityFlag::OutputsWithExpiration)
-                    {
-                        // TODO: add a variant https://github.com/iotaledger/iota-sdk/issues/1430
-                        return Ok(Some(TransactionFailureReason::SemanticValidationFailed));
-                    }
-
-                    if unlock_conditions.storage_deposit_return().is_some()
-                        && !address.has_capability(AddressCapabilityFlag::OutputsWithStorageDepositReturn)
-                    {
-                        // TODO: add a variant https://github.com/iotaledger/iota-sdk/issues/1430
-                        return Ok(Some(TransactionFailureReason::SemanticValidationFailed));
-                    }
-
-                    if match &created_output {
-                        Output::Account(_) => !address.has_capability(AddressCapabilityFlag::AccountOutputs),
-                        Output::Anchor(_) => !address.has_capability(AddressCapabilityFlag::AnchorOutputs),
-                        Output::Nft(_) => !address.has_capability(AddressCapabilityFlag::NftOutputs),
-                        Output::Delegation(_) => !address.has_capability(AddressCapabilityFlag::DelegationOutputs),
-                        _ => false,
-                    } {
-                        // TODO: add a variant https://github.com/iotaledger/iota-sdk/issues/1430
-                        return Ok(Some(TransactionFailureReason::SemanticValidationFailed));
-                    }
-                }
-            }
-
             if let Some(sender) = features.and_then(|f| f.sender()) {
                 if !self.unlocked_addresses.contains(sender.address()) {
                     return Ok(Some(TransactionFailureReason::SenderNotUnlocked));
@@ -310,10 +251,11 @@ impl<'a> SemanticValidationContext<'a> {
             return Ok(Some(TransactionFailureReason::SumInputsOutputsAmountMismatch));
         }
 
-        if self.input_mana > self.output_mana && !self.transaction.has_capability(TransactionCapabilityFlag::BurnMana) {
-            // TODO: add a variant https://github.com/iotaledger/iota-sdk/issues/1430
-            return Ok(Some(TransactionFailureReason::SemanticValidationFailed));
-        }
+        // TODO re-enable with https://github.com/iotaledger/iota-sdk/issues/1692
+        // if self.input_mana > self.output_mana &&
+        // !self.transaction.has_capability(TransactionCapabilityFlag::BurnMana) {     // TODO: add a variant https://github.com/iotaledger/iota-sdk/issues/1430
+        //     return Ok(Some(TransactionFailureReason::SemanticValidationFailed));
+        // }
 
         // Validation of input native tokens.
         let mut native_token_ids = self.input_native_tokens.keys().collect::<HashSet<_>>();

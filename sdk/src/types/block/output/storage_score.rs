@@ -1,6 +1,11 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+//! Storage deposit is a concept that creates a monetary incentive to keep the ledger state small.
+//! This is achieved by enforcing a minimum IOTA coin deposit in every output based on the disk space that will actually
+//! be used to store it.
+//! [TIP-47: Storage Deposit Dust Protection](https://github.com/iotaledger/tips/blob/tip47/tips/TIP-0047/tip-0047.md).
+
 use packable::Packable;
 
 use crate::types::block::{
@@ -13,16 +18,14 @@ use crate::types::block::{
     BlockId,
 };
 
-const DEFAULT_STORAGE_COST: u64 = 500;
+const DEFAULT_STORAGE_COST: u64 = 100;
 const DEFAULT_FACTOR_DATA: u8 = 1;
 const DEFAULT_OFFSET_OUTPUT_OVERHEAD: u64 = 10;
-const DEFAULT_OFFSET_ED25519_BLOCK_ISSUER_KEY: u64 = 50;
+const DEFAULT_OFFSET_ED25519_BLOCK_ISSUER_KEY: u64 = 100;
 const DEFAULT_OFFSET_STAKING_FEATURE: u64 = 100;
 const DEFAULT_OFFSET_DELEGATION: u64 = 100;
 
-// Defines the parameters of storage score calculations on objects which take node resources.
-// This structure defines the minimum base token deposit required on an object. This deposit does not
-// generate Mana, which serves as a payment in Mana for storing the object.
+// Parameters of storage score calculations on objects which take node resources.
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Packable)]
 #[cfg_attr(
     feature = "serde",
@@ -30,21 +33,21 @@ const DEFAULT_OFFSET_DELEGATION: u64 = 100;
     serde(rename_all = "camelCase")
 )]
 pub struct StorageScoreParameters {
-    /// Defines the number of IOTA tokens required per unit of storage score.
+    /// Number of IOTA tokens required per unit of storage score.
     #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
     storage_cost: u64,
-    /// Defines the factor to be used for data only fields.
+    /// Factor to be used for data only fields.
     factor_data: u8,
-    /// Defines the offset to be applied to all outputs for the overhead of handling them in storage.
+    /// Offset to be applied to all outputs for the overhead of handling them in storage.
     #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
     offset_output_overhead: u64,
-    /// Defines the offset to be used for block issuer feature public keys.
+    /// Offset to be used for Ed25519-based block issuer keys.
     #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
     offset_ed25519_block_issuer_key: u64,
-    /// Defines the offset to be used for staking feature.
+    /// Offset to be used for staking feature.
     #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
     offset_staking_feature: u64,
-    /// Defines the offset to be used for delegation output.
+    /// Offset to be used for delegation.
     #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
     offset_delegation: u64,
 }

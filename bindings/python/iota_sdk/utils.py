@@ -201,7 +201,7 @@ class Utils():
         """Verify an Ed25519 signature against a message.
         """
         return _call_method('verifyEd25519Signature', {
-            'signature': signature.__dict__,
+            'signature': signature.to_dict(),
             'message': message,
         })
 
@@ -218,13 +218,14 @@ class Utils():
 
     @staticmethod
     def verify_transaction_semantic(
-            transaction: Transaction, inputs: List[InputSigningData], unlocks: Optional[List[Unlock]] = None) -> str:
+            transaction: Transaction, inputs: List[InputSigningData], protocol_parameters: ProtocolParameters, unlocks: Optional[List[Unlock]] = None) -> str:
         """Verifies the semantic of a transaction.
         """
         return _call_method('verifyTransactionSemantic', {
             'transaction': transaction.as_dict(),
             'inputs': [i.as_dict() for i in inputs],
             'unlocks': [u.as_dict() for u in unlocks],
+            'protocolParameters': protocol_parameters.as_dict(),
         })
 
 
