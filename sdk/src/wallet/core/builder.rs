@@ -227,9 +227,6 @@ where
         #[cfg(feature = "storage")]
         self.save(&storage_manager).await?;
 
-        #[cfg(feature = "events")]
-        let event_emitter = tokio::sync::RwLock::new(EventEmitter::new());
-
         // It happened that inputs got locked, the transaction failed, but they weren't unlocked again, so we do this
         // here
         #[cfg(feature = "storage")]
@@ -253,7 +250,7 @@ where
             client,
             secret_manager: self.secret_manager.expect("make WalletInner::secret_manager optional?"),
             #[cfg(feature = "events")]
-            event_emitter,
+            event_emitter: tokio::sync::RwLock::new(EventEmitter::new()),
             #[cfg(feature = "storage")]
             storage_options,
             #[cfg(feature = "storage")]
