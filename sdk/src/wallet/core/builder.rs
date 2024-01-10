@@ -513,7 +513,6 @@ pub trait BuilderFrom {
     async fn from(&self) -> Self::Builder;
 }
 
-#[cfg(feature = "storage")]
 mod builder_from {
     use async_trait::async_trait;
 
@@ -557,6 +556,7 @@ mod builder_from {
                 address: Some(self.address().await),
                 alias: self.alias().await,
                 client_options: Some(self.client_options().await),
+                #[cfg(feature = "storage")]
                 storage_options: Some(self.storage_options.clone()),
                 secret_data: BuilderFrom::from(&self.secret_data).await,
             }
