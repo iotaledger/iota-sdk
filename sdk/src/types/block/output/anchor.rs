@@ -15,13 +15,14 @@ use crate::types::block::{
     address::{Address, AnchorAddress},
     output::{
         feature::{verify_allowed_features, Feature, FeatureFlags, Features},
-        unlock_condition::{verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions},
-        ChainId, MinimumOutputAmount, Output, OutputBuilderAmount, OutputId, StateTransitionError,
-        StateTransitionVerifier, StorageScore, StorageScoreParameters,
+        unlock_condition::{
+            verify_allowed_unlock_conditions, verify_restricted_addresses, UnlockCondition, UnlockConditionFlags,
+            UnlockConditions,
+        },
+        ChainId, MinimumOutputAmount, Output, OutputBuilderAmount, OutputId, StorageScore, StorageScoreParameters,
     },
-    payload::signed_transaction::TransactionCapabilityFlag,
     protocol::{ProtocolParameters, WorkScore, WorkScoreParameters},
-    semantic::{SemanticValidationContext, TransactionFailureReason},
+    semantic::{SemanticValidationContext, StateTransitionError, TransactionFailureReason},
     unlock::Unlock,
     Error,
 };
@@ -250,6 +251,12 @@ impl AnchorOutputBuilder {
 
         let features = Features::from_set(self.features)?;
 
+        verify_restricted_addresses(
+            &unlock_conditions,
+            AnchorOutput::KIND,
+            features.native_token(),
+            self.mana,
+        )?;
         verify_allowed_features(&features, AnchorOutput::ALLOWED_FEATURES)?;
 
         let immutable_features = Features::from_set(self.immutable_features)?;
@@ -429,27 +436,21 @@ impl AnchorOutput {
         unlock: &Unlock,
         context: &mut SemanticValidationContext<'_>,
     ) -> Result<(), TransactionFailureReason> {
-        let anchor_id = if self.anchor_id().is_null() {
-            AnchorId::from(output_id)
-        } else {
-            *self.anchor_id()
-        };
+        let anchor_id = self.anchor_id_non_null(output_id);
         let next_state = context.output_chains.get(&ChainId::from(anchor_id));
 
         match next_state {
             Some(Output::Anchor(next_state)) => {
                 if self.state_index() == next_state.state_index() {
-                    self.governor_address().unlock(unlock, context)?;
+                    context.address_unlock(self.governor_address(), unlock)?;
                 } else {
-                    self.state_controller_address().unlock(unlock, context)?;
+                    context.address_unlock(self.state_controller_address(), unlock)?;
                     // Only a state transition can be used to consider the anchor address for output unlocks and
                     // sender/issuer validations.
-                    context
-                        .unlocked_addresses
-                        .insert(Address::from(AnchorAddress::from(anchor_id)));
+                    context.unlocked_addresses.insert(Address::from(anchor_id));
                 }
             }
-            None => self.governor_address().unlock(unlock, context)?,
+            None => context.address_unlock(self.governor_address(), unlock)?,
             // The next state can only be an anchor output since it is identified by an anchor chain identifier.
             Some(_) => unreachable!(),
         };
@@ -517,46 +518,6 @@ impl WorkScore for AnchorOutput {
 
 impl MinimumOutputAmount for AnchorOutput {}
 
-impl StateTransitionVerifier for AnchorOutput {
-    fn creation(next_state: &Self, context: &SemanticValidationContext<'_>) -> Result<(), StateTransitionError> {
-        if !next_state.anchor_id.is_null() {
-            return Err(StateTransitionError::NonZeroCreatedId);
-        }
-
-        if let Some(issuer) = next_state.immutable_features().issuer() {
-            if !context.unlocked_addresses.contains(issuer.address()) {
-                return Err(StateTransitionError::IssuerNotUnlocked);
-            }
-        }
-
-        Ok(())
-    }
-
-    fn transition(
-        current_state: &Self,
-        next_state: &Self,
-        context: &SemanticValidationContext<'_>,
-    ) -> Result<(), StateTransitionError> {
-        Self::transition_inner(
-            current_state,
-            next_state,
-            &context.input_chains,
-            context.transaction.outputs(),
-        )
-    }
-
-    fn destruction(_current_state: &Self, context: &SemanticValidationContext<'_>) -> Result<(), StateTransitionError> {
-        if !context
-            .transaction
-            .capabilities()
-            .has_capability(TransactionCapabilityFlag::DestroyAnchorOutputs)
-        {
-            return Err(TransactionFailureReason::TransactionCapabilityAccountDestructionNotAllowed)?;
-        }
-        Ok(())
-    }
-}
-
 impl Packable for AnchorOutput {
     type UnpackError = Error;
     type UnpackVisitor = ProtocolParameters;
@@ -597,6 +558,8 @@ impl Packable for AnchorOutput {
         let features = Features::unpack::<_, VERIFY>(unpacker, &())?;
 
         if VERIFY {
+            verify_restricted_addresses(&unlock_conditions, Self::KIND, features.native_token(), mana)
+                .map_err(UnpackError::Packable)?;
             verify_allowed_features(&features, Self::ALLOWED_FEATURES).map_err(UnpackError::Packable)?;
         }
 
@@ -716,44 +679,6 @@ mod dto {
         }
     }
 
-    impl AnchorOutput {
-        #[allow(clippy::too_many_arguments)]
-        pub fn try_from_dtos(
-            amount: OutputBuilderAmount,
-            mana: u64,
-            anchor_id: &AnchorId,
-            state_index: u32,
-            unlock_conditions: Vec<UnlockCondition>,
-            features: Option<Vec<Feature>>,
-            immutable_features: Option<Vec<Feature>>,
-        ) -> Result<Self, Error> {
-            let mut builder = match amount {
-                OutputBuilderAmount::Amount(amount) => AnchorOutputBuilder::new_with_amount(amount, *anchor_id),
-                OutputBuilderAmount::MinimumAmount(params) => {
-                    AnchorOutputBuilder::new_with_minimum_amount(params, *anchor_id)
-                }
-            }
-            .with_mana(mana)
-            .with_state_index(state_index);
-
-            let unlock_conditions = unlock_conditions
-                .into_iter()
-                .map(UnlockCondition::from)
-                .collect::<Vec<UnlockCondition>>();
-            builder = builder.with_unlock_conditions(unlock_conditions);
-
-            if let Some(features) = features {
-                builder = builder.with_features(features);
-            }
-
-            if let Some(immutable_features) = immutable_features {
-                builder = builder.with_immutable_features(immutable_features);
-            }
-
-            builder.finish()
-        }
-    }
-
     crate::impl_serde_typed_dto!(AnchorOutput, AnchorOutputDto, "anchor output");
 }
 
@@ -761,16 +686,7 @@ mod dto {
 mod tests {
     use super::*;
     use crate::types::block::{
-        output::anchor::dto::AnchorOutputDto,
-        protocol::protocol_parameters,
-        rand::output::{
-            feature::rand_allowed_features,
-            rand_anchor_id, rand_anchor_output,
-            unlock_condition::{
-                rand_governor_address_unlock_condition_different_from,
-                rand_state_controller_address_unlock_condition_different_from,
-            },
-        },
+        output::anchor::dto::AnchorOutputDto, protocol::protocol_parameters, rand::output::rand_anchor_output,
     };
 
     #[test]
@@ -780,50 +696,5 @@ mod tests {
         let dto = AnchorOutputDto::from(&anchor_output);
         let output = Output::Anchor(AnchorOutput::try_from(dto).unwrap());
         assert_eq!(&anchor_output, output.as_anchor());
-
-        let output_split = AnchorOutput::try_from_dtos(
-            OutputBuilderAmount::Amount(output.amount()),
-            anchor_output.mana(),
-            anchor_output.anchor_id(),
-            anchor_output.state_index(),
-            anchor_output.unlock_conditions().to_vec(),
-            Some(anchor_output.features().to_vec()),
-            Some(anchor_output.immutable_features().to_vec()),
-        )
-        .unwrap();
-        assert_eq!(anchor_output, output_split);
-
-        let anchor_id = rand_anchor_id();
-        let gov_address = rand_governor_address_unlock_condition_different_from(&anchor_id);
-        let state_address = rand_state_controller_address_unlock_condition_different_from(&anchor_id);
-
-        let test_split_dto = |builder: AnchorOutputBuilder| {
-            let output_split = AnchorOutput::try_from_dtos(
-                builder.amount,
-                builder.mana,
-                &builder.anchor_id,
-                builder.state_index,
-                builder.unlock_conditions.iter().cloned().collect(),
-                Some(builder.features.iter().cloned().collect()),
-                Some(builder.immutable_features.iter().cloned().collect()),
-            )
-            .unwrap();
-            assert_eq!(builder.finish().unwrap(), output_split);
-        };
-
-        let builder = AnchorOutput::build_with_amount(100, anchor_id)
-            .add_unlock_condition(gov_address.clone())
-            .add_unlock_condition(state_address.clone())
-            .with_features(rand_allowed_features(AnchorOutput::ALLOWED_FEATURES))
-            .with_immutable_features(rand_allowed_features(AnchorOutput::ALLOWED_IMMUTABLE_FEATURES));
-        test_split_dto(builder);
-
-        let builder =
-            AnchorOutput::build_with_minimum_amount(protocol_parameters.storage_score_parameters(), anchor_id)
-                .add_unlock_condition(gov_address)
-                .add_unlock_condition(state_address)
-                .with_features(rand_allowed_features(AnchorOutput::ALLOWED_FEATURES))
-                .with_immutable_features(rand_allowed_features(AnchorOutput::ALLOWED_IMMUTABLE_FEATURES));
-        test_split_dto(builder);
     }
 }

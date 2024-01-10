@@ -4,7 +4,7 @@
 //! In this example we will get outputs with quorum, which will compare the responses from the nodes.
 //!
 //! Make sure to have 3 nodes available for this example to run successfully, e.g.:
-//! - http://localhost:14265
+//! - http://localhost:8050
 //! - http://your-vps:14265
 //! - https://api.testnet.shimmer.network
 //!

@@ -17,12 +17,13 @@ use crate::{
     types::{
         api::core::{
             BlockMetadataResponse, BlockWithMetadataResponse, CommitteeResponse, CongestionResponse, InfoResponse,
-            IssuanceBlockHeaderResponse, ManaRewardsResponse, PeerResponse, RoutesResponse, SubmitBlockResponse,
-            UtxoChangesResponse, ValidatorResponse, ValidatorsResponse,
+            IssuanceBlockHeaderResponse, ManaRewardsResponse, OutputResponse, RoutesResponse, SubmitBlockResponse,
+            TransactionMetadataResponse, UtxoChangesFullResponse, UtxoChangesResponse, ValidatorResponse,
+            ValidatorsResponse,
         },
         block::{
             address::ToBech32Ext,
-            output::{AccountId, Output, OutputId, OutputMetadata, OutputWithMetadata},
+            output::{AccountId, OutputId, OutputMetadata, OutputWithMetadata},
             payload::signed_transaction::TransactionId,
             slot::{EpochIndex, SlotCommitment, SlotCommitmentId, SlotIndex},
             Block, BlockDto, BlockId,
@@ -234,7 +235,7 @@ impl ClientInner {
 
     /// Finds an output by its ID and returns it as object.
     /// GET /api/core/v3/outputs/{outputId}
-    pub async fn get_output(&self, output_id: &OutputId) -> Result<Output> {
+    pub async fn get_output(&self, output_id: &OutputId) -> Result<OutputResponse> {
         let path = &format!("api/core/v3/outputs/{output_id}");
 
         self.get_request(path, None, false, true).await
@@ -293,6 +294,17 @@ impl ClientInner {
         self.get_request(path, None, true, true).await
     }
 
+    /// Finds the metadata of a transaction.
+    /// GET /api/core/v3/transactions/{transactionId}/metadata
+    pub async fn get_transaction_metadata(
+        &self,
+        transaction_id: &TransactionId,
+    ) -> Result<TransactionMetadataResponse> {
+        let path = &format!("api/core/v3/transactions/{transaction_id}/metadata");
+
+        self.get_request(path, None, true, true).await
+    }
+
     // Commitments routes.
 
     /// Finds a slot commitment by its ID and returns it as object.
@@ -322,6 +334,17 @@ impl ClientInner {
         self.get_request(path, None, false, false).await
     }
 
+    /// Get all full UTXO changes of a given slot by slot commitment ID.
+    /// GET /api/core/v3/commitments/{commitmentId}/utxo-changes/full
+    pub async fn get_utxo_changes_full_by_slot_commitment_id(
+        &self,
+        slot_commitment_id: &SlotCommitmentId,
+    ) -> Result<UtxoChangesFullResponse> {
+        let path = &format!("api/core/v3/commitments/{slot_commitment_id}/utxo-changes/full");
+
+        self.get_request(path, None, false, false).await
+    }
+
     /// Finds a slot commitment by slot index and returns it as object.
     /// GET /api/core/v3/commitments/by-slot/{slot}
     pub async fn get_slot_commitment_by_slot(&self, slot_index: SlotIndex) -> Result<SlotCommitment> {
@@ -346,34 +369,13 @@ impl ClientInner {
         self.get_request(path, None, false, false).await
     }
 
-    // Peers routes.
+    /// Get all full UTXO changes of a given slot by its index.
+    /// GET /api/core/v3/commitments/by-slot/{slot}/utxo-changes/full
+    pub async fn get_utxo_changes_full_by_slot(&self, slot_index: SlotIndex) -> Result<UtxoChangesFullResponse> {
+        let path = &format!("api/core/v3/commitments/by-slot/{slot_index}/utxo-changes/full");
 
-    /// GET /api/core/v3/peers
-    pub async fn get_peers(&self) -> Result<Vec<PeerResponse>> {
-        const PATH: &str = "api/core/v3/peers";
-
-        self.get_request(PATH, None, false, false).await
+        self.get_request(path, None, false, false).await
     }
-
-    // // RoutePeer is the route for getting peers by their peerID.
-    // // GET returns the peer
-    // // DELETE deletes the peer.
-    // RoutePeer = "/peers/:" + restapipkg.ParameterPeerID
-
-    // // RoutePeers is the route for getting all peers of the node.
-    // // GET returns a list of all peers.
-    // // POST adds a new peer.
-    // RoutePeers = "/peers"
-
-    // Control routes.
-
-    // // RouteControlDatabasePrune is the control route to manually prune the database.
-    // // POST prunes the database.
-    // RouteControlDatabasePrune = "/control/database/prune"
-
-    // // RouteControlSnapshotsCreate is the control route to manually create a snapshot files.
-    // // POST creates a snapshot (full, delta or both).
-    // RouteControlSnapshotsCreate = "/control/snapshots/create"
 }
 
 impl Client {

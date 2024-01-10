@@ -9,7 +9,7 @@ After downloading the CLI, initialize the signer for the wallet. On Mac and Linu
 ```
 ./wallet init --node http://node.url:port --mnemonic MNEMONIC
 // Example:
-./wallet init --node "http://localhost:14265" --mnemonic "giant dynamic museum toddler six deny defense ostrich bomb access mercy
+./wallet init --node "http://localhost:8050" --mnemonic "giant dynamic museum toddler six deny defense ostrich bomb access mercy
 blood explain muscle shoot shallow glad autumn author calm heavy hawk abuse rally"
 ```
 

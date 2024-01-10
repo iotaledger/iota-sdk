@@ -32,9 +32,6 @@ pub enum Error {
         new: serde_json::Value,
         old: serde_json::Value,
     },
-    /// Funds are spread over too many outputs
-    #[error("funds are spread over too many outputs {output_count}/{output_count_max}, consolidation required")]
-    ConsolidationRequired { output_count: usize, output_count_max: u16 },
     /// Crypto.rs error
     #[error("{0}")]
     Crypto(#[from] crypto::Error),
@@ -126,9 +123,9 @@ pub enum Error {
     /// Implicit account not found.
     #[error("implicit account not found")]
     ImplicitAccountNotFound,
-    /// No account was provided or found to issue the block.
-    #[error("no account was provided or found to issue the block")]
-    NoAccountToIssueBlock,
+    /// Account not found.
+    #[error("account not found")]
+    AccountNotFound,
 }
 
 impl Error {

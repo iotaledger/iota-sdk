@@ -99,8 +99,10 @@ impl<T> Wallet<T> {
                     Ok(metadata) => {
                         if let Some(tx_state) = metadata.transaction_metadata.map(|m| m.transaction_state) {
                             match tx_state {
-                                // TODO: Separate TransactionState::Finalized?
-                                TransactionState::Finalized | TransactionState::Confirmed => {
+                                // TODO: Separate TransactionState::Finalized, TransactionState::Accepted? https://github.com/iotaledger/iota-sdk/issues/1814
+                                TransactionState::Accepted
+                                | TransactionState::Confirmed
+                                | TransactionState::Finalized => {
                                     log::debug!(
                                         "[SYNC] confirmed transaction {transaction_id} in block {}",
                                         metadata.block_id

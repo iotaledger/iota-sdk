@@ -14,11 +14,7 @@ use crate::{
             payload::{signed_transaction::TransactionId, Payload, SignedTransactionPayload},
         },
     },
-    wallet::{
-        build_transaction_from_payload_and_inputs, task,
-        types::{AddressWithUnspentOutputs, OutputData},
-        Wallet,
-    },
+    wallet::{build_transaction_from_payload_and_inputs, task, types::OutputData, Wallet},
 };
 
 impl<T> Wallet<T> {
@@ -26,7 +22,6 @@ impl<T> Wallet<T> {
     pub(crate) async fn output_response_to_output_data(
         &self,
         outputs_with_meta: Vec<OutputWithMetadata>,
-        associated_address: &AddressWithUnspentOutputs,
     ) -> crate::wallet::Result<Vec<OutputData>> {
         log::debug!("[SYNC] convert output_responses");
         // store outputs with network_id

@@ -47,7 +47,8 @@ async function run() {
         // Get the id we generated with `00_mint_issuer_nft`
         const issuerNftId: NftId = process.argv[2];
 
-        const bech32Hrp = await (await wallet.getClient()).getBech32Hrp();
+        const client = await wallet.getClient();
+        const bech32Hrp = await client.getBech32Hrp();
         const issuer = Utils.nftIdToBech32(issuerNftId, bech32Hrp);
 
         const nftMintParams = [];
@@ -115,4 +116,4 @@ function getImmutableMetadata(index: number) {
         .withCollectionName('Shimmer OG');
 }
 
-run();
+void run().then(() => process.exit());

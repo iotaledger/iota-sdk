@@ -9,14 +9,15 @@ use crate::types::block::{
     address::{AccountAddress, Address},
     output::{
         chain_id::ChainId,
-        unlock_condition::{verify_allowed_unlock_conditions, UnlockCondition, UnlockConditionFlags, UnlockConditions},
-        MinimumOutputAmount, Output, OutputBuilderAmount, OutputId, StateTransitionError, StateTransitionVerifier,
-        StorageScore, StorageScoreParameters,
+        unlock_condition::{
+            verify_allowed_unlock_conditions, verify_restricted_addresses, UnlockCondition, UnlockConditionFlags,
+            UnlockConditions,
+        },
+        MinimumOutputAmount, Output, OutputBuilderAmount, OutputId, StorageScore, StorageScoreParameters,
     },
     protocol::{ProtocolParameters, WorkScore, WorkScoreParameters},
-    semantic::{SemanticValidationContext, TransactionFailureReason},
+    semantic::StateTransitionError,
     slot::EpochIndex,
-    unlock::Unlock,
     Error,
 };
 
@@ -167,17 +168,20 @@ impl DelegationOutputBuilder {
 
     /// Finishes the builder into a [`DelegationOutput`] without parameters verification.
     pub fn finish(self) -> Result<DelegationOutput, Error> {
-        verify_validator_address::<true>(&self.validator_address)?;
+        let validator_address = Address::from(self.validator_address);
+
+        verify_validator_address::<true>(&validator_address)?;
 
         let unlock_conditions = UnlockConditions::from_set(self.unlock_conditions)?;
 
         verify_unlock_conditions::<true>(&unlock_conditions)?;
+        verify_restricted_addresses(&unlock_conditions, DelegationOutput::KIND, None, 0)?;
 
         let mut output = DelegationOutput {
             amount: 0,
             delegated_amount: self.delegated_amount,
             delegation_id: self.delegation_id,
-            validator_address: self.validator_address,
+            validator_address,
             start_epoch: self.start_epoch,
             end_epoch: self.end_epoch,
             unlock_conditions,
@@ -203,7 +207,7 @@ impl From<&DelegationOutput> for DelegationOutputBuilder {
             amount: OutputBuilderAmount::Amount(output.amount),
             delegated_amount: output.delegated_amount,
             delegation_id: output.delegation_id,
-            validator_address: output.validator_address,
+            validator_address: *output.validator_address.as_account(),
             start_epoch: output.start_epoch,
             end_epoch: output.end_epoch,
             unlock_conditions: output.unlock_conditions.iter().cloned().collect(),
@@ -215,6 +219,7 @@ impl From<&DelegationOutput> for DelegationOutputBuilder {
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Packable)]
 #[packable(unpack_error = Error)]
 #[packable(unpack_visitor = ProtocolParameters)]
+#[packable(verify_with = verify_delegation_output)]
 pub struct DelegationOutput {
     /// Amount of IOTA coins held by the output.
     amount: u64,
@@ -224,7 +229,7 @@ pub struct DelegationOutput {
     delegation_id: DelegationId,
     /// Account address of the validator to which this output is delegating.
     #[packable(verify_with = verify_validator_address_packable)]
-    validator_address: AccountAddress,
+    validator_address: Address,
     /// Index of the first epoch for which this output delegates.
     start_epoch: EpochIndex,
     /// Index of the last epoch for which this output delegates.
@@ -283,7 +288,7 @@ impl DelegationOutput {
 
     /// Returns the validator address of the [`DelegationOutput`].
     pub fn validator_address(&self) -> &AccountAddress {
-        &self.validator_address
+        self.validator_address.as_account()
     }
 
     /// Returns the start epoch of the [`DelegationOutput`].
@@ -316,25 +321,6 @@ impl DelegationOutput {
         ChainId::Delegation(self.delegation_id)
     }
 
-    /// Tries to unlock the [`DelegationOutput`].
-    pub fn unlock(
-        &self,
-        _output_id: &OutputId,
-        unlock: &Unlock,
-        context: &mut SemanticValidationContext<'_>,
-    ) -> Result<(), TransactionFailureReason> {
-        self.unlock_conditions()
-            .locked_address(
-                self.address(),
-                None,
-                context.protocol_parameters.committable_age_range(),
-            )
-            // Safe to unwrap, DelegationOutput can't have an expiration unlock condition.
-            .unwrap()
-            .unwrap()
-            .unlock(unlock, context)
-    }
-
     // Transition, just without full SemanticValidationContext.
     pub(crate) fn transition_inner(current_state: &Self, next_state: &Self) -> Result<(), StateTransitionError> {
         #[allow(clippy::nonminimal_bool)]
@@ -349,40 +335,6 @@ impl DelegationOutput {
             return Err(StateTransitionError::MutatedImmutableField);
         }
         // TODO add end_epoch validation rules
-        Ok(())
-    }
-}
-
-impl StateTransitionVerifier for DelegationOutput {
-    fn creation(next_state: &Self, _context: &SemanticValidationContext<'_>) -> Result<(), StateTransitionError> {
-        if !next_state.delegation_id.is_null() {
-            return Err(StateTransitionError::NonZeroCreatedId);
-        }
-
-        if next_state.amount != next_state.delegated_amount {
-            return Err(StateTransitionError::InvalidDelegatedAmount);
-        }
-
-        if next_state.end_epoch != 0 {
-            return Err(StateTransitionError::NonZeroDelegationEndEpoch);
-        }
-
-        Ok(())
-    }
-
-    fn transition(
-        current_state: &Self,
-        next_state: &Self,
-        _context: &SemanticValidationContext<'_>,
-    ) -> Result<(), StateTransitionError> {
-        Self::transition_inner(current_state, next_state)
-    }
-
-    fn destruction(
-        _current_state: &Self,
-        _context: &SemanticValidationContext<'_>,
-    ) -> Result<(), StateTransitionError> {
-        // TODO handle mana rewards
         Ok(())
     }
 }
@@ -405,16 +357,22 @@ impl WorkScore for DelegationOutput {
 
 impl MinimumOutputAmount for DelegationOutput {}
 
-fn verify_validator_address<const VERIFY: bool>(validator_address: &AccountAddress) -> Result<(), Error> {
-    if VERIFY && validator_address.is_null() {
-        Err(Error::NullDelegationValidatorId)
-    } else {
-        Ok(())
+fn verify_validator_address<const VERIFY: bool>(validator_address: &Address) -> Result<(), Error> {
+    if VERIFY {
+        if let Address::Account(validator_address) = validator_address {
+            if validator_address.is_null() {
+                return Err(Error::NullDelegationValidatorId);
+            }
+        } else {
+            return Err(Error::InvalidAddressKind(validator_address.kind()));
+        }
     }
+
+    Ok(())
 }
 
 fn verify_validator_address_packable<const VERIFY: bool>(
-    validator_address: &AccountAddress,
+    validator_address: &Address,
     _: &ProtocolParameters,
 ) -> Result<(), Error> {
     verify_validator_address::<VERIFY>(validator_address)
@@ -439,6 +397,13 @@ fn verify_unlock_conditions_packable<const VERIFY: bool>(
     verify_unlock_conditions::<VERIFY>(unlock_conditions)
 }
 
+fn verify_delegation_output<const VERIFY: bool>(
+    output: &DelegationOutput,
+    _: &ProtocolParameters,
+) -> Result<(), Error> {
+    verify_restricted_addresses(output.unlock_conditions(), DelegationOutput::KIND, None, 0)
+}
+
 #[cfg(feature = "serde")]
 mod dto {
     use alloc::vec::Vec;
@@ -447,10 +412,7 @@ mod dto {
 
     use super::*;
     use crate::{
-        types::block::{
-            output::{unlock_condition::UnlockCondition, OutputBuilderAmount},
-            Error,
-        },
+        types::block::{output::unlock_condition::UnlockCondition, Error},
         utils::serde::string,
     };
 
@@ -501,44 +463,6 @@ mod dto {
             for u in dto.unlock_conditions {
                 builder = builder.add_unlock_condition(u);
             }
-
-            builder.finish()
-        }
-    }
-
-    impl DelegationOutput {
-        #[allow(clippy::too_many_arguments)]
-        pub fn try_from_dtos(
-            amount: OutputBuilderAmount,
-            delegated_amount: u64,
-            delegation_id: &DelegationId,
-            validator_address: &AccountAddress,
-            start_epoch: impl Into<EpochIndex>,
-            end_epoch: impl Into<EpochIndex>,
-            unlock_conditions: Vec<UnlockCondition>,
-        ) -> Result<Self, Error> {
-            let mut builder = match amount {
-                OutputBuilderAmount::Amount(amount) => DelegationOutputBuilder::new_with_amount(
-                    amount,
-                    delegated_amount,
-                    *delegation_id,
-                    *validator_address,
-                ),
-                OutputBuilderAmount::MinimumAmount(params) => DelegationOutputBuilder::new_with_minimum_amount(
-                    params,
-                    delegated_amount,
-                    *delegation_id,
-                    *validator_address,
-                ),
-            }
-            .with_start_epoch(start_epoch)
-            .with_end_epoch(end_epoch);
-
-            let unlock_conditions = unlock_conditions
-                .into_iter()
-                .map(UnlockCondition::from)
-                .collect::<Vec<UnlockCondition>>();
-            builder = builder.with_unlock_conditions(unlock_conditions);
 
             builder.finish()
         }

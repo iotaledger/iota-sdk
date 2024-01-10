@@ -20,6 +20,7 @@ use iota_sdk::{
             Output, OutputId, TokenScheme,
         },
         payload::{dto::PayloadDto, signed_transaction::TransactionId},
+        slot::{EpochIndex, SlotCommitmentId, SlotIndex},
         BlockDto, BlockId,
     },
     utils::serde::{option_string, string},
@@ -148,8 +149,48 @@ pub enum ClientMethod {
     },
     /// Returns the node information together with the url of the used node
     GetInfo,
-    /// Get peers
-    GetPeers,
+    /// Check the readiness of the node to issue a new block, the reference mana cost based on the rate setter and
+    /// current network congestion, and the block issuance credits of the requested account.
+    #[serde(rename_all = "camelCase")]
+    GetAccountCongestion {
+        /// The Account ID of the account.
+        account_id: AccountId,
+    },
+    /// Returns all the available Mana rewards of an account or delegation output in the returned range of epochs.
+    #[serde(rename_all = "camelCase")]
+    GetRewards {
+        /// Output ID of an account or delegation output.
+        output_id: OutputId,
+        /// A client can specify a slot index explicitly, which should be equal to the slot it uses as the commitment
+        /// input for the claiming transaction to ensure the node calculates the rewards identically as during
+        /// transaction execution. Rewards are decayed up to the epoch corresponding to the given slotIndex +
+        /// MinCommittableAge. For a Delegation Output in delegating state (i.e. when Delegation ID is zeroed), that
+        /// epoch - 1 is also used as the last epoch for which rewards are fetched. Callers that do not build
+        /// transactions with the returned values may omit this value in which case it defaults to the latest committed
+        /// slot, which is good enough to, e.g. display estimated rewards to users.
+        slot_index: Option<SlotIndex>,
+    },
+    /// Returns information of all registered validators and if they are active, ordered by their holding stake.
+    #[serde(rename_all = "camelCase")]
+    GetValidators {
+        /// The page number of validators.
+        page_size: Option<u32>,
+        /// Starts the search from the cursor (requested slot index+start index).
+        cursor: Option<String>,
+    },
+    /// Return information about a validator.
+    #[serde(rename_all = "camelCase")]
+    GetValidator {
+        /// The Account ID of the account.
+        account_id: AccountId,
+    },
+    /// Return the information of committee members at the given epoch index. If epoch index is not provided, the
+    /// current committee members are returned.
+    #[serde(rename_all = "camelCase")]
+    GetCommittee {
+        /// The epoch index to query.
+        epoch_index: Option<EpochIndex>,
+    },
     /// Get issuance
     GetIssuance,
     /// Post block (JSON)
@@ -199,6 +240,12 @@ pub enum ClientMethod {
         /// Output ID
         output_id: OutputId,
     },
+    /// Get output with its metadata
+    #[serde(rename_all = "camelCase")]
+    GetOutputWithMetadata {
+        /// Output ID
+        output_id: OutputId,
+    },
     /// Returns the included block of the transaction.
     #[serde(rename_all = "camelCase")]
     GetIncludedBlock {
@@ -210,6 +257,45 @@ pub enum ClientMethod {
     GetIncludedBlockMetadata {
         /// Transaction ID
         transaction_id: TransactionId,
+    },
+    /// Find the metadata of a transaction.
+    #[serde(rename_all = "camelCase")]
+    GetTransactionMetadata {
+        /// Transaction ID
+        transaction_id: TransactionId,
+    },
+    /// Look up a commitment by a given commitment ID.
+    #[serde(rename_all = "camelCase")]
+    GetCommitment {
+        /// Commitment ID of the commitment to look up.
+        commitment_id: SlotCommitmentId,
+    },
+    /// Get all UTXO changes of a given slot by Commitment ID.
+    #[serde(rename_all = "camelCase")]
+    GetUtxoChanges {
+        /// Commitment ID of the commitment to look up.
+        commitment_id: SlotCommitmentId,
+    },
+    /// Get all full UTXO changes of a given slot by Commitment ID.
+    #[serde(rename_all = "camelCase")]
+    GetUtxoChangesFull {
+        /// Commitment ID of the commitment to look up.
+        commitment_id: SlotCommitmentId,
+    },
+    /// Look up a commitment by a given commitment index.
+    GetCommitmentByIndex {
+        /// Index of the commitment to look up.
+        slot: SlotIndex,
+    },
+    /// Get all UTXO changes of a given slot by commitment index.
+    GetUtxoChangesByIndex {
+        /// Index of the commitment to look up.
+        slot: SlotIndex,
+    },
+    /// Get all full UTXO changes of a given slot by commitment index.
+    GetUtxoChangesFullByIndex {
+        /// Index of the commitment to look up.
+        slot: SlotIndex,
     },
 
     //////////////////////////////////////////////////////////////////////

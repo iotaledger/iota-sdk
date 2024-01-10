@@ -19,7 +19,6 @@ use crate::{
 #[derive(Clone, Debug, Eq, PartialEq)]
 #[non_exhaustive]
 pub enum WalletEvent {
-    ConsolidationRequired,
     #[cfg(feature = "ledger_nano")]
     #[cfg_attr(docsrs, doc(cfg(feature = "ledger_nano")))]
     LedgerAddressGeneration(AddressData),
@@ -42,13 +41,12 @@ impl Serialize for WalletEvent {
         #[derive(Serialize)]
         #[serde(untagged)]
         enum WalletEvent_<'a> {
-            T0,
             #[cfg(feature = "ledger_nano")]
-            T1(&'a AddressData),
-            T2(&'a NewOutputEvent),
-            T3(&'a SpentOutputEvent),
-            T4(&'a TransactionInclusionEvent),
-            T5(TransactionProgressEvent_<'a>),
+            T0(&'a AddressData),
+            T1(&'a NewOutputEvent),
+            T2(&'a SpentOutputEvent),
+            T3(&'a TransactionInclusionEvent),
+            T4(TransactionProgressEvent_<'a>),
         }
         #[derive(Serialize)]
         struct TypedWalletEvent_<'a> {
@@ -58,30 +56,26 @@ impl Serialize for WalletEvent {
             event: WalletEvent_<'a>,
         }
         let event = match self {
-            Self::ConsolidationRequired => TypedWalletEvent_ {
-                kind: WalletEventType::ConsolidationRequired as u8,
-                event: WalletEvent_::T0,
-            },
             #[cfg(feature = "ledger_nano")]
             Self::LedgerAddressGeneration(e) => TypedWalletEvent_ {
                 kind: WalletEventType::LedgerAddressGeneration as u8,
-                event: WalletEvent_::T1(e),
+                event: WalletEvent_::T0(e),
             },
             Self::NewOutput(e) => TypedWalletEvent_ {
                 kind: WalletEventType::NewOutput as u8,
-                event: WalletEvent_::T2(e),
+                event: WalletEvent_::T1(e),
             },
             Self::SpentOutput(e) => TypedWalletEvent_ {
                 kind: WalletEventType::SpentOutput as u8,
-                event: WalletEvent_::T3(e),
+                event: WalletEvent_::T2(e),
             },
             Self::TransactionInclusion(e) => TypedWalletEvent_ {
                 kind: WalletEventType::TransactionInclusion as u8,
-                event: WalletEvent_::T4(e),
+                event: WalletEvent_::T3(e),
             },
             Self::TransactionProgress(e) => TypedWalletEvent_ {
                 kind: WalletEventType::TransactionProgress as u8,
-                event: WalletEvent_::T5(TransactionProgressEvent_ { progress: e }),
+                event: WalletEvent_::T4(TransactionProgressEvent_ { progress: e }),
             },
         };
         event.serialize(serializer)
@@ -105,7 +99,6 @@ impl<'de> Deserialize<'de> for WalletEvent {
             )
             .map_err(serde::de::Error::custom)?
             {
-                WalletEventType::ConsolidationRequired => Self::ConsolidationRequired,
                 #[cfg(feature = "ledger_nano")]
                 WalletEventType::LedgerAddressGeneration => {
                     Self::LedgerAddressGeneration(AddressData::deserialize(value).map_err(|e| {
@@ -143,14 +136,13 @@ impl<'de> Deserialize<'de> for WalletEvent {
 #[repr(u8)]
 #[non_exhaustive]
 pub enum WalletEventType {
-    ConsolidationRequired = 0,
     #[cfg(feature = "ledger_nano")]
     #[cfg_attr(docsrs, doc(cfg(feature = "ledger_nano")))]
-    LedgerAddressGeneration = 1,
-    NewOutput = 2,
-    SpentOutput = 3,
-    TransactionInclusion = 4,
-    TransactionProgress = 5,
+    LedgerAddressGeneration = 0,
+    NewOutput = 1,
+    SpentOutput = 2,
+    TransactionInclusion = 3,
+    TransactionProgress = 4,
 }
 
 impl TryFrom<u8> for WalletEventType {
@@ -158,13 +150,12 @@ impl TryFrom<u8> for WalletEventType {
 
     fn try_from(value: u8) -> Result<Self, Self::Error> {
         let event_type = match value {
-            0 => Self::ConsolidationRequired,
             #[cfg(feature = "ledger_nano")]
-            1 => Self::LedgerAddressGeneration,
-            2 => Self::NewOutput,
-            3 => Self::SpentOutput,
-            4 => Self::TransactionInclusion,
-            5 => Self::TransactionProgress,
+            0 => Self::LedgerAddressGeneration,
+            1 => Self::NewOutput,
+            2 => Self::SpentOutput,
+            3 => Self::TransactionInclusion,
+            4 => Self::TransactionProgress,
             _ => return Err(Error::InvalidEventType(value)),
         };
         Ok(event_type)

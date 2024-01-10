@@ -4,6 +4,7 @@
 from typing import Optional
 from abc import ABCMeta, abstractmethod
 
+from iota_sdk.types.block.block import Block
 from iota_sdk.types.common import HexStr
 from iota_sdk.types.output import Output
 
@@ -34,7 +35,7 @@ class ClientUtils(metaclass=ABCMeta):
         """
 
     # pylint: disable=redefined-builtin
-    def hex_to_bech32(self, hex: HexStr, bech32_hrp: str) -> str:
+    def hex_to_bech32(self, hex_str: HexStr, bech32_hrp: str) -> str:
         """Transforms a hex encoded address to a bech32 encoded address.
         """
         return self._call_method('hexToBech32', {
@@ -86,3 +87,10 @@ class ClientUtils(metaclass=ABCMeta):
                 'address': address,
             }
         )
+
+    def block_id(self, block: Block) -> HexStr:
+        """ Return a block ID (Blake2b256 hash of block bytes) from a block.
+        """
+        return self._call_method('blockId', {
+            'block': block.to_dict(),
+        })

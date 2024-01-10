@@ -1,7 +1,12 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use packable::Packable;
+use alloc::{boxed::Box, collections::BTreeSet, vec::Vec};
+use core::ops::RangeInclusive;
+
+use derive_more::Deref;
+use iterator_sorted::is_unique_sorted;
+use packable::{bounded::BoundedU16, prefix::BoxedSlicePrefix, Packable};
 
 use crate::types::block::{
     output::AccountId,
@@ -13,16 +18,21 @@ use crate::types::block::{
 /// in the form of Block Issuance Credits to the account.
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Packable)]
 #[packable(unpack_error = Error)]
-#[packable(unpack_visitor = ProtocolParameters)]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize),
+    serde(rename_all = "camelCase")
+)]
 pub struct ManaAllotment {
     pub(crate) account_id: AccountId,
     #[packable(verify_with = verify_mana)]
+    #[cfg_attr(feature = "serde", serde(with = "crate::utils::serde::string"))]
     pub(crate) mana: u64,
 }
 
 impl ManaAllotment {
-    pub fn new(account_id: AccountId, mana: u64, protocol_params: &ProtocolParameters) -> Result<Self, Error> {
-        verify_mana::<true>(&mana, protocol_params)?;
+    pub fn new(account_id: AccountId, mana: u64) -> Result<Self, Error> {
+        verify_mana::<true>(&mana)?;
 
         Ok(Self { account_id, mana })
     }
@@ -54,53 +64,131 @@ impl WorkScore for ManaAllotment {
     }
 }
 
-fn verify_mana<const VERIFY: bool>(mana: &u64, params: &ProtocolParameters) -> Result<(), Error> {
-    if VERIFY && *mana > params.mana_parameters().max_mana() {
+fn verify_mana<const VERIFY: bool>(mana: &u64) -> Result<(), Error> {
+    if VERIFY && *mana == 0 {
         return Err(Error::InvalidManaValue(*mana));
     }
 
     Ok(())
 }
 
-#[cfg(feature = "serde")]
-pub(super) mod dto {
-    use serde::{Deserialize, Serialize};
+pub(crate) type ManaAllotmentCount =
+    BoundedU16<{ *ManaAllotments::COUNT_RANGE.start() }, { *ManaAllotments::COUNT_RANGE.end() }>;
 
-    use super::*;
-    use crate::{types::TryFromDto, utils::serde::string};
+/// A list of [`ManaAllotment`]s with unique [`AccountId`]s.
+#[derive(Clone, Debug, Eq, PartialEq, Deref, Packable)]
+#[packable(unpack_visitor = ProtocolParameters)]
+#[packable(unpack_error = Error, with = |e| e.unwrap_item_err_or_else(|p| Error::InvalidManaAllotmentCount(p.into())))]
+pub struct ManaAllotments(
+    #[packable(verify_with = verify_mana_allotments)] BoxedSlicePrefix<ManaAllotment, ManaAllotmentCount>,
+);
 
-    #[derive(Copy, Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
-    #[serde(rename_all = "camelCase")]
-    pub struct ManaAllotmentDto {
-        pub account_id: AccountId,
-        #[serde(with = "string")]
-        pub mana: u64,
+impl ManaAllotments {
+    /// The minimum number of mana allotments of a transaction.
+    pub const COUNT_MIN: u16 = 0;
+    /// The maximum number of mana allotments of a transaction.
+    pub const COUNT_MAX: u16 = 128;
+    /// The range of valid numbers of mana allotments of a transaction.
+    pub const COUNT_RANGE: RangeInclusive<u16> = Self::COUNT_MIN..=Self::COUNT_MAX; // [0..128]
+
+    /// Creates a new [`ManaAllotments`] from a vec.
+    pub fn from_vec(allotments: Vec<ManaAllotment>) -> Result<Self, Error> {
+        verify_mana_allotments_unique_sorted(&allotments)?;
+
+        Ok(Self(
+            allotments
+                .into_boxed_slice()
+                .try_into()
+                .map_err(Error::InvalidManaAllotmentCount)?,
+        ))
     }
 
-    impl From<&ManaAllotment> for ManaAllotmentDto {
-        fn from(value: &ManaAllotment) -> Self {
-            Self {
-                account_id: value.account_id,
-                mana: value.mana,
-            }
+    /// Creates a new [`ManaAllotments`] from an ordered set.
+    pub fn from_set(allotments: BTreeSet<ManaAllotment>) -> Result<Self, Error> {
+        Ok(Self(
+            allotments
+                .into_iter()
+                .collect::<Box<[_]>>()
+                .try_into()
+                .map_err(Error::InvalidManaAllotmentCount)?,
+        ))
+    }
+
+    /// Gets a reference to an [`ManaAllotment`], if one exists, using an [`AccountId`].
+    #[inline(always)]
+    pub fn get(&self, account_id: &AccountId) -> Option<&ManaAllotment> {
+        self.0.iter().find(|a| a.account_id() == account_id)
+    }
+}
+
+fn verify_mana_allotments<const VERIFY: bool>(
+    allotments: &[ManaAllotment],
+    protocol_params: &ProtocolParameters,
+) -> Result<(), Error> {
+    if VERIFY {
+        verify_mana_allotments_unique_sorted(allotments)?;
+        verify_mana_allotments_sum(allotments, protocol_params)?;
+    }
+
+    Ok(())
+}
+
+fn verify_mana_allotments_unique_sorted<'a>(
+    allotments: impl IntoIterator<Item = &'a ManaAllotment>,
+) -> Result<(), Error> {
+    if !is_unique_sorted(allotments.into_iter()) {
+        return Err(Error::ManaAllotmentsNotUniqueSorted);
+    }
+    Ok(())
+}
+
+pub(crate) fn verify_mana_allotments_sum<'a>(
+    allotments: impl IntoIterator<Item = &'a ManaAllotment>,
+    protocol_params: &ProtocolParameters,
+) -> Result<(), Error> {
+    let mut mana_sum: u64 = 0;
+    let max_mana = protocol_params.mana_parameters().max_mana();
+
+    for ManaAllotment { mana, .. } in allotments {
+        mana_sum = mana_sum.checked_add(*mana).ok_or(Error::InvalidManaAllotmentSum {
+            sum: mana_sum as u128 + *mana as u128,
+            max: max_mana,
+        })?;
+
+        if mana_sum > max_mana {
+            return Err(Error::InvalidManaAllotmentSum {
+                sum: mana_sum as u128,
+                max: max_mana,
+            });
         }
     }
 
-    impl TryFromDto<ManaAllotmentDto> for ManaAllotment {
-        type Error = Error;
+    Ok(())
+}
 
-        fn try_from_dto_with_params_inner(
-            dto: ManaAllotmentDto,
-            params: Option<&ProtocolParameters>,
-        ) -> Result<Self, Self::Error> {
-            Ok(if let Some(params) = params {
-                Self::new(dto.account_id, dto.mana, params)?
-            } else {
-                Self {
-                    account_id: dto.account_id,
-                    mana: dto.mana,
-                }
-            })
-        }
+impl TryFrom<Vec<ManaAllotment>> for ManaAllotments {
+    type Error = Error;
+
+    #[inline(always)]
+    fn try_from(allotments: Vec<ManaAllotment>) -> Result<Self, Self::Error> {
+        Self::from_vec(allotments)
+    }
+}
+
+impl TryFrom<BTreeSet<ManaAllotment>> for ManaAllotments {
+    type Error = Error;
+
+    #[inline(always)]
+    fn try_from(allotments: BTreeSet<ManaAllotment>) -> Result<Self, Self::Error> {
+        Self::from_set(allotments)
+    }
+}
+
+impl IntoIterator for ManaAllotments {
+    type Item = ManaAllotment;
+    type IntoIter = alloc::vec::IntoIter<Self::Item>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        Vec::from(Into::<Box<[ManaAllotment]>>::into(self.0)).into_iter()
     }
 }

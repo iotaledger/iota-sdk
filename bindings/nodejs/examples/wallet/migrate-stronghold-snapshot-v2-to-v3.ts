@@ -26,7 +26,7 @@ async function run() {
 
     try {
         // This should fail with error, migration required.
-        new SecretManager(strongholdSecretManager);
+        SecretManager.create(strongholdSecretManager);
     } catch (error) {
         console.error(error);
     }
@@ -41,7 +41,7 @@ async function run() {
     );
 
     // This shouldn't fail anymore as snapshot has been migrated.
-    new SecretManager(strongholdSecretManager);
+    SecretManager.create(strongholdSecretManager);
 }
 
-run().then(() => process.exit());
+void run().then(() => process.exit());

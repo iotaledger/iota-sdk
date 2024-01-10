@@ -6,7 +6,7 @@ pub(crate) mod operations;
 
 use std::{
     collections::{HashMap, HashSet},
-    sync::{atomic::AtomicUsize, Arc},
+    sync::Arc,
 };
 
 use crypto::keys::bip39::{Mnemonic, MnemonicRef};
@@ -14,6 +14,7 @@ use serde::{Deserialize, Serialize};
 use tokio::sync::{Mutex, RwLock};
 
 pub use self::builder::WalletBuilder;
+use self::operations::background_syncing::BackgroundSyncStatus;
 use super::types::{TransactionWithMetadata, TransactionWithMetadataDto};
 #[cfg(feature = "events")]
 use crate::wallet::events::{
@@ -86,10 +87,11 @@ pub struct WalletInner {
     // again, because sending transactions can change that
     pub(crate) last_synced: Mutex<u128>,
     pub(crate) default_sync_options: Mutex<SyncOptions>,
-    // 0 = not running, 1 = running, 2 = stopping
-    pub(crate) background_syncing_status: AtomicUsize,
+    pub(crate) background_syncing_status: (
+        Arc<tokio::sync::watch::Sender<BackgroundSyncStatus>>,
+        tokio::sync::watch::Receiver<BackgroundSyncStatus>,
+    ),
     pub(crate) client: Client,
-
     #[cfg(feature = "events")]
     pub(crate) event_emitter: tokio::sync::RwLock<EventEmitter>,
     #[cfg(feature = "storage")]
@@ -386,9 +388,9 @@ impl<T> Wallet<T> {
 
         // Foundry was not found in the wallet, try to get it from the node
         let foundry_output_id = self.client().foundry_output_id(foundry_id).await?;
-        let output = self.client().get_output(&foundry_output_id).await?;
+        let output_response = self.client().get_output(&foundry_output_id).await?;
 
-        Ok(output)
+        Ok(output_response.output)
     }
 
     /// Save the wallet to the database, accepts the updated wallet data as option so we don't need to drop it before

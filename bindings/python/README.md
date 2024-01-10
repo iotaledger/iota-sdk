@@ -96,7 +96,7 @@ The following example creates a Client instance connected to the Shimmer Testnet
 
 ## Wallet Usage
 
-The following example will create a new Wallet Account  using a StrongholdSecretManager, and then print the account's information.
+The following example will create a new Wallet using a StrongholdSecretManager, and then print the wallet's information.
 
 [examples/wallet/getting_started.py](examples/wallet/getting_started.py)
 

@@ -6,8 +6,7 @@ from enum import Enum, IntEnum
 from dataclasses import dataclass
 from typing import Optional
 from iota_sdk.types.common import HexStr, json
-# TODO rename change to Block
-from iota_sdk.types.block.signed_block import SignedBlock
+from iota_sdk.types.block.block import Block
 
 
 @json
@@ -50,15 +49,17 @@ class TransactionState(Enum):
     """Describes the state of a transaction.
 
     Attributes:
-        Pending: Stored but not confirmed.
-        Confirmed: Confirmed with the first level of knowledge.
-        Finalized: Included and can no longer be reverted.
-        Failed: The block is not successfully issued due to failure reason.
+        Pending: Not included yet.
+        Accepted: Included.
+        Confirmed: Included and its included block is confirmed.
+        Finalized: Included, its included block is finalized and cannot be reverted anymore.
+        Failed: Not successfully issued due to failure reason.
     """
     Pending = 0
-    Confirmed = 1
-    Finalized = 2
-    Failed = 3
+    Accepted = 1
+    Confirmed = 2
+    Finalized = 3
+    Failed = 4
 
 
 class BlockFailureReason(IntEnum):
@@ -196,5 +197,5 @@ class BlockWithMetadata:
         block: The block.
         metadata: The block metadata.
     """
-    block: SignedBlock
+    block: Block
     metadata: BlockMetadata

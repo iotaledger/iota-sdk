@@ -61,7 +61,8 @@ impl OutputData {
             .required_address(slot_index.into(), committable_age_range)?
             .ok_or(crate::client::Error::ExpirationDeadzone)?;
 
-        if required_address.is_ed25519() && wallet_data.address.inner() != &required_address {
+        // Address can't be unlocked, wallet is not ed25519-based.
+        if required_address.is_ed25519_backed() && !wallet_data.address.inner().is_ed25519_backed() {
             return Ok(None);
         }
 

@@ -6,3 +6,6 @@ target/
 **/dist
 node/
 web/
+
+jest.config.js
+.eslintrc.js

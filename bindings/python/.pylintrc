@@ -9,7 +9,7 @@ disable=missing-module-docstring,
 	fixme, # TODOS 
 	too-many-instance-attributes,
 	too-many-arguments,
-	too-few-public-methods
+	too-few-public-methods,
 	too-many-public-methods,
 	too-many-locals
 
