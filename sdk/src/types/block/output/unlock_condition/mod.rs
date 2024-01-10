@@ -318,7 +318,7 @@ impl UnlockConditions {
         Ok(address)
     }
 
-    /// Returns an iterator over all addresses.
+    /// Returns an iterator over all addresses except StorageDepositReturn address.
     pub fn addresses(&self) -> impl Iterator<Item = &Address> {
         self.iter().filter_map(|uc| match uc {
             UnlockCondition::Address(uc) => Some(uc.address()),
