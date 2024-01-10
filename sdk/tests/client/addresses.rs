@@ -148,7 +148,7 @@ async fn mnemonic_address_generation_shimmer() {
 
     // account 1
     let address = secret_manager
-        .generate::<Ed25519Address>(&PublicKeyOptions::new(SHIMMER_COIN_TYPE))
+        .generate::<Ed25519Address>(&PublicKeyOptions::new(SHIMMER_COIN_TYPE).with_account_index(1))
         .await
         .unwrap()
         .to_bech32(SHIMMER_BECH32_HRP);

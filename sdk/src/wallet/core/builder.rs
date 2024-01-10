@@ -113,7 +113,7 @@ impl WalletBuilder {
 
     /// Set the public key options.
     pub fn with_public_key_options<S: SecretManage>(
-        mut self,
+        self,
         public_key_options: impl Into<Option<S::GenerationOptions>>,
     ) -> WalletBuilder<SecretDataBuilder<S>> {
         self.with_secret_type::<S>().with_public_key_options(public_key_options)
@@ -121,7 +121,7 @@ impl WalletBuilder {
 
     /// Set the signing options.
     pub fn with_signing_options<S: SecretManage>(
-        mut self,
+        self,
         signing_options: impl Into<Option<S::SigningOptions>>,
     ) -> WalletBuilder<SecretDataBuilder<S>> {
         self.with_secret_type::<S>().with_signing_options(signing_options)
@@ -129,7 +129,7 @@ impl WalletBuilder {
 
     /// Set the secret_manager to be used.
     pub fn with_secret_manager<S: SecretManage>(
-        mut self,
+        self,
         secret_manager: impl Into<Option<S>>,
     ) -> WalletBuilder<SecretDataBuilder<S>> {
         self.with_secret_type::<S>().with_secret_manager(secret_manager)
@@ -138,7 +138,7 @@ impl WalletBuilder {
     /// Set the secret_manager to be used wrapped in an Arc<RwLock<>> so it can be cloned and mutated also outside of
     /// the Wallet.
     pub fn with_secret_manager_arc<S: SecretManage>(
-        mut self,
+        self,
         secret_manager: impl Into<Option<Arc<RwLock<S>>>>,
     ) -> WalletBuilder<SecretDataBuilder<S>> {
         self.with_secret_type::<S>().with_secret_manager_arc(secret_manager)
@@ -345,22 +345,18 @@ where
                 .and_then(|builder| builder.secret_data.public_key_options.clone());
         }
 
-        #[cfg(feature = "storage")]
-        let secret_data = storage_manager.load_secret_data::<S>().await?;
-
         // The public key options must not change.
         #[cfg(feature = "storage")]
-        if let Some(secret_data) = &secret_data {
-            let old = &secret_data.public_key_options;
-            if let Some(new) = self.secret_data.public_key_options.as_ref() {
-                if new != old {
+        if let Some(secret_data) = loaded_wallet_builder.as_ref().map(|b| &b.secret_data) {
+            if self.secret_data.public_key_options.is_some() {
+                if self.secret_data.public_key_options != secret_data.public_key_options {
                     return Err(crate::wallet::Error::PublicKeyOptionsMismatch {
-                        new: serde_json::to_value(new)?,
-                        old: serde_json::to_value(old)?,
+                        new: serde_json::to_value(&self.secret_data.public_key_options)?,
+                        old: serde_json::to_value(&secret_data.public_key_options)?,
                     });
                 }
             } else {
-                self.secret_data.public_key_options = Some(old.clone());
+                self.secret_data.public_key_options = secret_data.public_key_options.clone();
             }
         }
 

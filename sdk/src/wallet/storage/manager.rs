@@ -61,17 +61,6 @@ impl StorageManager {
         self.set(WALLET_DATA_KEY, &WalletDataDto::from(wallet_data)).await
     }
 
-    pub(crate) async fn load_secret_data<S: SecretManage>(&mut self) -> crate::wallet::Result<Option<SecretData<S>>> {
-        todo!()
-    }
-
-    pub(crate) async fn save_secret_data<S: SecretManage>(
-        &mut self,
-        secret_data: &SecretData<S>,
-    ) -> crate::wallet::Result<()> {
-        todo!()
-    }
-
     pub(crate) async fn set_default_sync_options(&self, sync_options: &SyncOptions) -> crate::wallet::Result<()> {
         let key = format!("{WALLET_DATA_KEY}-{WALLET_SYNC_OPTIONS}");
         self.set(&key, &sync_options).await
