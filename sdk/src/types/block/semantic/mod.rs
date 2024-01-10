@@ -17,7 +17,7 @@ pub use self::{
 use crate::types::block::{
     address::Address,
     output::{AccountId, AnchorOutput, ChainId, FoundryId, NativeTokens, Output, OutputId, TokenId},
-    payload::signed_transaction::{Transaction, TransactionCapabilityFlag, TransactionSigningHash},
+    payload::signed_transaction::{Transaction, TransactionSigningHash},
     protocol::ProtocolParameters,
     unlock::Unlock,
     Error,
