@@ -40,6 +40,7 @@ pub enum SecretManagerMethod {
         signing_options: serde_json::Value,
     },
     /// Signs a message with an Ed25519 private key.
+    #[serde(rename_all = "camelCase")]
     SignEd25519 {
         /// The message to sign, hex encoded String
         message: String,
@@ -47,6 +48,7 @@ pub enum SecretManagerMethod {
         signing_options: serde_json::Value,
     },
     /// Signs a message with an Secp256k1Ecdsa private key.
+    #[serde(rename_all = "camelCase")]
     SignSecp256k1Ecdsa {
         /// The message to sign, hex encoded String
         message: String,
@@ -89,14 +91,16 @@ pub enum SecretManagerMethod {
 
 #[cfg(test)]
 mod test {
+    use crypto::keys::bip44::Bip44;
+    use iota_sdk::client::constants::{ETHER_COIN_TYPE, IOTA_COIN_TYPE};
     use pretty_assertions::assert_eq;
 
     #[test]
     fn bip44_deserialization() {
-        let signature_unlock_method: super::SecretManagerMethod = serde_json::from_str(
-            r#"{"name": "signatureUnlock", "data": {"transactionSigningHash": "txhash", "chain": {"addressIndex": 1}}}"#,
-        )
-        .unwrap();
+        let signature_unlock_method = super::SecretManagerMethod::SignatureUnlock {
+            transaction_signing_hash: "txhash".to_owned(),
+            signing_options: serde_json::to_value(Bip44::new(IOTA_COIN_TYPE).with_address_index(1)).unwrap(),
+        };
 
         assert_eq!(
             serde_json::to_value(&signature_unlock_method).unwrap(),
@@ -104,20 +108,20 @@ mod test {
                 "name": "signatureUnlock",
                 "data": {
                     "transactionSigningHash": "txhash",
-                    "chain": {
-                        "coinType": 4218,
+                    "signingOptions": {
+                        "coin_type": 4218,
                         "account": 0,
                         "change": 0,
-                        "addressIndex": 1
+                        "address_index": 1
                     }
                 }
             })
         );
 
-        let sign_ed25519_method: super::SecretManagerMethod = serde_json::from_str(
-            r#"{"name": "signEd25519", "data": {"message": "0xFFFFFFFF", "chain": {"coinType": 60, "change": 1}}}"#,
-        )
-        .unwrap();
+        let sign_ed25519_method = super::SecretManagerMethod::SignEd25519 {
+            message: "0xFFFFFFFF".to_owned(),
+            signing_options: serde_json::to_value(Bip44::new(ETHER_COIN_TYPE).with_change(1)).unwrap(),
+        };
 
         assert_eq!(
             serde_json::to_value(&sign_ed25519_method).unwrap(),
@@ -125,20 +129,21 @@ mod test {
                 "name": "signEd25519",
                 "data": {
                     "message": "0xFFFFFFFF",
-                    "chain": {
-                        "coinType": 60,
+                    "signingOptions": {
+                        "coin_type": 60,
                         "account": 0,
                         "change": 1,
-                        "addressIndex": 0
+                        "address_index": 0
                     }
                 }
             })
         );
 
-        let sign_secp256k1_ecdsa_method: super::SecretManagerMethod = serde_json::from_str(
-            r#"{"name": "signSecp256k1Ecdsa", "data": {"message": "0xFFFFFFFF", "chain": {"account": 2, "addressIndex": 1}}}"#,
-        )
-        .unwrap();
+        let sign_secp256k1_ecdsa_method = super::SecretManagerMethod::SignSecp256k1Ecdsa {
+            message: "0xFFFFFFFF".to_owned(),
+            signing_options: serde_json::to_value(Bip44::new(IOTA_COIN_TYPE).with_account(2).with_address_index(1))
+                .unwrap(),
+        };
 
         assert_eq!(
             serde_json::to_value(&sign_secp256k1_ecdsa_method).unwrap(),
@@ -146,11 +151,11 @@ mod test {
                 "name": "signSecp256k1Ecdsa",
                 "data": {
                     "message": "0xFFFFFFFF",
-                    "chain": {
-                        "coinType": 4218,
+                    "signingOptions": {
+                        "coin_type": 4218,
                         "account": 2,
                         "change": 0,
-                        "addressIndex": 1
+                        "address_index": 1
                     }
                 }
             })

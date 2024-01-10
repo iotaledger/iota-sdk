@@ -79,7 +79,7 @@ async fn update_client_options() -> Result<()> {
 async fn changed_bip_path() -> Result<()> {
     use iota_sdk::crypto::keys::bip44::Bip44;
 
-    let storage_path = "test-storage/changed_coin_type";
+    let storage_path = "test-storage/changed_bip_path";
     setup(storage_path)?;
 
     let mnemonic = Mnemonic::from(DEFAULT_MNEMONIC.to_owned());
@@ -104,14 +104,14 @@ async fn changed_bip_path() -> Result<()> {
     ));
 
     // Building the wallet with the same coin type still works
-    assert!(
-        WalletBuilder::new()
-            .with_secret_manager(MnemonicSecretManager::try_from_mnemonic(mnemonic,)?)
-            .with_storage_path(storage_path)
-            .finish()
-            .await
-            .is_ok()
-    );
+    WalletBuilder::new()
+        .with_secret_manager(MnemonicSecretManager::try_from_mnemonic(mnemonic)?)
+        .with_public_key_options(PublicKeyOptions::new(SHIMMER_COIN_TYPE))
+        .with_signing_options(Bip44::new(SHIMMER_COIN_TYPE))
+        .with_storage_path(storage_path)
+        .finish()
+        .await
+        .unwrap();
 
     tear_down(storage_path)
 }

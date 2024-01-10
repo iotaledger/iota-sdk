@@ -286,8 +286,10 @@ async fn wallet_address_generation_custom_secret_manager() -> Result<()> {
     let client_options = ClientOptions::new().with_node(NODE_LOCAL)?;
 
     #[allow(unused_mut)]
-    let mut wallet_builder = Wallet::<CustomSecretManager>::builder()
+    let mut wallet_builder = Wallet::<()>::builder()
         .with_secret_manager(custom_secret_manager)
+        .with_public_key_options(()) // TODO: Should we have a default bound somewhere?
+        .with_signing_options(())
         .with_client_options(client_options);
 
     #[cfg(feature = "storage")]

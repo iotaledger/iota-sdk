@@ -449,11 +449,11 @@ where
                 public_key_options: self
                     .secret_data
                     .public_key_options
-                    .ok_or(crate::wallet::Error::MissingParameter("signing_options"))?,
+                    .ok_or(crate::wallet::Error::MissingParameter("public_key_options"))?,
                 signing_options: self
                     .secret_data
                     .signing_options
-                    .ok_or(crate::wallet::Error::MissingParameter("public_key_options"))?,
+                    .ok_or(crate::wallet::Error::MissingParameter("signing_options"))?,
                 secret_manager: self
                     .secret_data
                     .secret_manager
