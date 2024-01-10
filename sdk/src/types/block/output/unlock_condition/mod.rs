@@ -413,7 +413,7 @@ pub(crate) fn verify_restricted_addresses(
             AnchorOutput::KIND => !address.has_capability(AddressCapabilityFlag::AnchorOutputs),
             NftOutput::KIND => !address.has_capability(AddressCapabilityFlag::NftOutputs),
             DelegationOutput::KIND => !address.has_capability(AddressCapabilityFlag::DelegationOutputs),
-            _ => return Err(Error::UnsupportedOutputKind(output_kind)),
+            _ => false,
         } {
             return Err(Error::RestrictedAddressCapability);
         }
