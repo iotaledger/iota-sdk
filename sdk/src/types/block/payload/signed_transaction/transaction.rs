@@ -593,7 +593,6 @@ pub(crate) mod dto {
                 .network_id
                 .parse::<u64>()
                 .map_err(|_| Error::InvalidField("network_id"))?;
-            let outputs = dto.outputs;
 
             let mut builder = Self::builder(network_id)
                 .with_creation_slot(dto.creation_slot)
@@ -601,7 +600,7 @@ pub(crate) mod dto {
                 .with_inputs(dto.inputs)
                 .with_mana_allotments(dto.allotments)
                 .with_capabilities(dto.capabilities)
-                .with_outputs(outputs);
+                .with_outputs(dto.outputs);
 
             builder = if let Some(p) = dto.payload {
                 if let PayloadDto::TaggedData(i) = p {
