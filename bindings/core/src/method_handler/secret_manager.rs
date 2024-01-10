@@ -144,7 +144,7 @@ where
                 secret_manager.set_password(password).await?;
                 Response::Ok
             } else {
-                return Err(iota_sdk::client::Error::SecretManagerMismatch.into())
+                return Err(iota_sdk::client::Error::SecretManagerMismatch.into());
             }
         }
     };
