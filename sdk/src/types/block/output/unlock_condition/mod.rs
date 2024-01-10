@@ -384,38 +384,58 @@ pub(crate) fn verify_restricted_addresses(
 
     for address in addresses {
         if native_token.is_some() && !address.has_capability(AddressCapabilityFlag::OutputsWithNativeTokens) {
-            return Err(Error::RestrictedAddressCapability);
+            return Err(Error::RestrictedAddressCapability(
+                AddressCapabilityFlag::OutputsWithNativeTokens,
+            ));
         }
 
         if mana > 0 && !address.has_capability(AddressCapabilityFlag::OutputsWithMana) {
-            return Err(Error::RestrictedAddressCapability);
+            return Err(Error::RestrictedAddressCapability(
+                AddressCapabilityFlag::OutputsWithMana,
+            ));
         }
 
         if unlock_conditions.timelock().is_some() && !address.has_capability(AddressCapabilityFlag::OutputsWithTimelock)
         {
-            return Err(Error::RestrictedAddressCapability);
+            return Err(Error::RestrictedAddressCapability(
+                AddressCapabilityFlag::OutputsWithTimelock,
+            ));
         }
 
         if unlock_conditions.expiration().is_some()
             && !address.has_capability(AddressCapabilityFlag::OutputsWithExpiration)
         {
-            return Err(Error::RestrictedAddressCapability);
+            return Err(Error::RestrictedAddressCapability(
+                AddressCapabilityFlag::OutputsWithExpiration,
+            ));
         }
 
         if unlock_conditions.storage_deposit_return().is_some()
             && !address.has_capability(AddressCapabilityFlag::OutputsWithStorageDepositReturn)
         {
-            return Err(Error::RestrictedAddressCapability);
+            return Err(Error::RestrictedAddressCapability(
+                AddressCapabilityFlag::OutputsWithStorageDepositReturn,
+            ));
         }
 
-        if match output_kind {
-            AccountOutput::KIND => !address.has_capability(AddressCapabilityFlag::AccountOutputs),
-            AnchorOutput::KIND => !address.has_capability(AddressCapabilityFlag::AnchorOutputs),
-            NftOutput::KIND => !address.has_capability(AddressCapabilityFlag::NftOutputs),
-            DelegationOutput::KIND => !address.has_capability(AddressCapabilityFlag::DelegationOutputs),
-            _ => false,
-        } {
-            return Err(Error::RestrictedAddressCapability);
+        match output_kind {
+            AccountOutput::KIND if !address.has_capability(AddressCapabilityFlag::AccountOutputs) => {
+                return Err(Error::RestrictedAddressCapability(
+                    AddressCapabilityFlag::AccountOutputs,
+                ));
+            }
+            AnchorOutput::KIND if !address.has_capability(AddressCapabilityFlag::AnchorOutputs) => {
+                return Err(Error::RestrictedAddressCapability(AddressCapabilityFlag::AnchorOutputs));
+            }
+            NftOutput::KIND if !address.has_capability(AddressCapabilityFlag::NftOutputs) => {
+                return Err(Error::RestrictedAddressCapability(AddressCapabilityFlag::NftOutputs));
+            }
+            DelegationOutput::KIND if !address.has_capability(AddressCapabilityFlag::DelegationOutputs) => {
+                return Err(Error::RestrictedAddressCapability(
+                    AddressCapabilityFlag::DelegationOutputs,
+                ));
+            }
+            _ => {}
         }
     }
     Ok(())
