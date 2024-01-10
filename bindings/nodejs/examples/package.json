@@ -8,7 +8,7 @@
         "run-example": "ts-node"
     },
     "dependencies": {
-        "@iota/sdk": "file:../",
+        "@iota/sdk": "file:..",
         "class-transformer": "^0.5.1",
         "dotenv": "^16.0.0",
         "ts-node": "^10.9.1"
