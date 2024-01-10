@@ -44,12 +44,14 @@ import {
     DelegationId,
     UnsignedBlock,
     parseUnsignedBlock,
+    SlotIndex,
+    SlotCommitmentId,
+    SlotCommitment,
 } from '../types/block';
 import { HexEncodedString } from '../utils';
 import {
     IBlockMetadata,
     INodeInfo,
-    IPeer,
     UTXOInput,
     Response,
     OutputId,
@@ -58,10 +60,19 @@ import {
     TransactionId,
     Bech32Address,
     IBlockWithMetadata,
+    TransactionMetadata,
 } from '../types';
-import { OutputResponse, IOutputsResponse } from '../types/models/api';
+import {
+    OutputResponse,
+    IOutputsResponse,
+    CongestionResponse,
+    UtxoChangesResponse,
+    UtxoChangesFullResponse,
+} from '../types/models/api';
 
 import { plainToInstance } from 'class-transformer';
+import { ManaRewardsResponse } from '../types/models/api/mana-rewards-response';
+import { ValidatorsResponse } from '../types/models/api/validators-response';
 
 /** The Client to interact with nodes. */
 export class Client {
@@ -101,6 +112,74 @@ export class Client {
     async getNetworkInfo(): Promise<INetworkInfo> {
         const response = await this.methodHandler.callMethod({
             name: 'getNetworkInfo',
+        });
+
+        return JSON.parse(response).payload;
+    }
+
+    /**
+     * Check the readiness of the node to issue a new block, the reference mana cost based on the rate setter and
+     * current network congestion, and the block issuance credits of the requested account.
+     */
+    async getAccountCongestion(
+        accountId: AccountId,
+    ): Promise<CongestionResponse> {
+        const response = await this.methodHandler.callMethod({
+            name: 'getAccountCongestion',
+            data: {
+                accountId,
+            },
+        });
+
+        return JSON.parse(response).payload;
+    }
+
+    /**
+     * Returns the totally available Mana rewards of an account or delegation output decayed up to endEpoch index
+     * provided in the response.
+     */
+    async getRewards(
+        outputId: OutputId,
+        slotIndex?: SlotIndex,
+    ): Promise<ManaRewardsResponse> {
+        const response = await this.methodHandler.callMethod({
+            name: 'getRewards',
+            data: {
+                outputId,
+                slotIndex,
+            },
+        });
+
+        return JSON.parse(response).payload;
+    }
+
+    /**
+     * Returns information of all registered validators and if they are active, ordered by their holding stake.
+     */
+    async getValidators(
+        pageSize?: number,
+        cursor?: string,
+    ): Promise<ValidatorsResponse> {
+        const response = await this.methodHandler.callMethod({
+            name: 'getValidators',
+            data: {
+                pageSize,
+                cursor,
+            },
+        });
+
+        return JSON.parse(response).payload;
+    }
+
+    /**
+     * Return information about a validator.
+     */
+    async getValidator(accountId: AccountId): Promise<ValidatorsResponse> {
+        const response = await this.methodHandler.callMethod({
+            name: 'getValidator',
+            data: {
+                accountId,
+            },
         });
 
         return JSON.parse(response).payload;
@@ -394,17 +473,6 @@ export class Client {
     }
 
     /**
-     * Get the peers of the node.
-     */
-    async getPeers(): Promise<IPeer[]> {
-        const response = await this.methodHandler.callMethod({
-            name: 'getPeers',
-        });
-
-        return JSON.parse(response).payload;
-    }
-
-    /**
      * Post block as raw bytes, returns the block ID.
      *
      * @param block The block.
@@ -463,15 +531,136 @@ export class Client {
      */
     async getIncludedBlockMetadata(
         transactionId: TransactionId,
-    ): Promise<Block> {
+    ): Promise<IBlockMetadata> {
         const response = await this.methodHandler.callMethod({
             name: 'getIncludedBlockMetadata',
             data: {
                 transactionId,
             },
         });
-        const parsed = JSON.parse(response) as Response<Block>;
-        return parseBlock(parsed.payload);
+        return JSON.parse(response).payload;
+    }
+
+    /**
+     * Find the metadata of a transaction.
+     *
+     * @param transactionId The ID of the transaction.
+     * @returns The transaction metadata.
+     */
+    async getTransactionMetadata(
+        transactionId: TransactionId,
+    ): Promise<TransactionMetadata> {
+        const response = await this.methodHandler.callMethod({
+            name: 'getTransactionMetadata',
+            data: {
+                transactionId,
+            },
+        });
+        return JSON.parse(response).payload;
+    }
+
+    /**
+     * Look up a commitment by a given commitment ID.
+     *
+     * @param commitmentId Commitment ID of the commitment to look up.
+     * @returns The commitment.
+     */
+    async getCommitment(
+        commitmentId: SlotCommitmentId,
+    ): Promise<SlotCommitment> {
+        const response = await this.methodHandler.callMethod({
+            name: 'getCommitment',
+            data: {
+                commitmentId,
+            },
+        });
+        return JSON.parse(response).payload;
+    }
+
+    /**
+     * Get all UTXO changes of a given slot by Commitment ID.
+     *
+     * @param commitmentId Commitment ID of the commitment to look up.
+     * @returns The UTXO changes.
+     */
+    async getUtxoChanges(
+        commitmentId: SlotCommitmentId,
+    ): Promise<UtxoChangesResponse> {
+        const response = await this.methodHandler.callMethod({
+            name: 'getUtxoChanges',
+            data: {
+                commitmentId,
+            },
+        });
+        return JSON.parse(response).payload;
+    }
+
+    /**
+     * Get all full UTXO changes of a given slot by Commitment ID.
+     *
+     * @param commitmentId Commitment ID of the commitment to look up.
+     * @returns The UTXO changes.
+     */
+    async getUtxoChangesFull(
+        commitmentId: SlotCommitmentId,
+    ): Promise<UtxoChangesFullResponse> {
+        const response = await this.methodHandler.callMethod({
+            name: 'getUtxoChangesFull',
+            data: {
+                commitmentId,
+            },
+        });
+        return JSON.parse(response).payload;
+    }
+
+    /**
+     * Look up a commitment by a given commitment index.
+     *
+     * @param slot Index of the commitment to look up.
+     * @returns The commitment.
+     */
+    async getCommitmentByIndex(slot: SlotIndex): Promise<SlotCommitment> {
+        const response = await this.methodHandler.callMethod({
+            name: 'getCommitmentByIndex',
+            data: {
+                slot,
+            },
+        });
+        return JSON.parse(response).payload;
+    }
+
+    /**
+     * Get all UTXO changes of a given slot by commitment index.
+     *
+     * @param slot Index of the commitment to look up.
+     * @returns The UTXO changes.
+     */
+    async getUtxoChangesByIndex(slot: SlotIndex): Promise<UtxoChangesResponse> {
+        const response = await this.methodHandler.callMethod({
+            name: 'getUtxoChangesByIndex',
+            data: {
+                slot,
+            },
+        });
+        return JSON.parse(response).payload;
+    }
+
+    /**
+     * Get all full UTXO changes of a given slot by commitment index.
+     *
+     * @param slot Index of the commitment to look up.
+     * @returns The UTXO changes.
+     */
+    async getUtxoChangesFullByIndex(
+        slot: SlotIndex,
+    ): Promise<UtxoChangesFullResponse> {
+        const response = await this.methodHandler.callMethod({
+            name: 'getUtxoChangesFullByIndex',
+            data: {
+                slot,
+            },
+        });
+        return JSON.parse(response).payload;
     }
 
     /**
