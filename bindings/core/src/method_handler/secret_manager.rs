@@ -2,12 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use crypto::signatures::secp256k1_ecdsa::EvmAddress;
-#[cfg(feature = "stronghold")]
-use iota_sdk::client::secret::SecretManager;
 use iota_sdk::{
     client::{
         api::PreparedTransactionData,
-        secret::{types::EvmSignature, BlockSignExt, DowncastSecretManager, Generate, Sign, SignTransaction},
+        secret::{
+            types::EvmSignature, BlockSignExt, DowncastSecretManager, Generate, SecretManager, Sign, SignTransaction,
+        },
     },
     types::{
         block::{
