@@ -277,7 +277,7 @@ impl WalletBuilder {
             None => WalletData::new(address, self.alias.clone()),
         };
         #[cfg(not(feature = "storage"))]
-        let wallet_data = WalletData::new(self.bip_path, address, self.alias.clone());
+        let wallet_data = WalletData::new(address, self.alias.clone());
         let wallet = Wallet {
             inner: Arc::new(wallet_inner),
             data: Arc::new(RwLock::new(wallet_data)),
@@ -441,7 +441,7 @@ where
             None => WalletData::new(address, self.alias.clone()),
         };
         #[cfg(not(feature = "storage"))]
-        let wallet_data = WalletData::new(self.bip_path, address, self.alias.clone());
+        let wallet_data = WalletData::new(address, self.alias.clone());
         let wallet = Wallet {
             inner: Arc::new(wallet_inner),
             data: Arc::new(RwLock::new(wallet_data)),
