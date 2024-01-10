@@ -107,6 +107,7 @@ impl WalletBuilder {
             address: self.address,
             alias: self.alias,
             client_options: self.client_options,
+            #[cfg(feature = "storage")]
             storage_options: self.storage_options,
         }
     }
