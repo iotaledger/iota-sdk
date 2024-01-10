@@ -56,6 +56,7 @@ impl Generate<ed25519::PublicKey> for StrongholdAdapter {
 
         let chain = Bip44::new(options.coin_type)
             .with_account(options.account_index)
+            .with_address_index(options.address_index)
             .with_change(options.internal as _);
 
         let derive_location = Location::generic(
@@ -198,6 +199,7 @@ impl Generate<secp256k1_ecdsa::PublicKey> for StrongholdAdapter {
 
         let chain = Bip44::new(options.coin_type)
             .with_account(options.account_index)
+            .with_address_index(options.address_index)
             .with_change(options.internal as _);
 
         let derive_location = Location::generic(

@@ -42,6 +42,7 @@ impl Generate<ed25519::PublicKey> for MnemonicSecretManager {
     async fn generate(&self, options: &Self::Options) -> crate::client::Result<ed25519::PublicKey> {
         let chain = Bip44::new(options.coin_type)
             .with_account(options.account_index)
+            .with_address_index(options.address_index)
             .with_change(options.internal as _);
 
         let public_key = chain
@@ -104,6 +105,7 @@ impl Generate<secp256k1_ecdsa::PublicKey> for MnemonicSecretManager {
     async fn generate(&self, options: &Self::Options) -> crate::client::Result<secp256k1_ecdsa::PublicKey> {
         let chain = Bip44::new(options.coin_type)
             .with_account(options.account_index)
+            .with_address_index(options.address_index)
             .with_change(options.internal as _);
 
         let public_key = chain

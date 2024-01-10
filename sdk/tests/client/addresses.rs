@@ -112,7 +112,7 @@ async fn mnemonic_address_generation_iota() {
 
     // account 1
     let address = secret_manager
-        .generate::<Ed25519Address>(&PublicKeyOptions::new(IOTA_COIN_TYPE))
+        .generate::<Ed25519Address>(&PublicKeyOptions::new(IOTA_COIN_TYPE).with_account_index(1))
         .await
         .unwrap()
         .to_bech32(IOTA_BECH32_HRP);
