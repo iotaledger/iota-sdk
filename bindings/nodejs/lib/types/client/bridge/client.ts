@@ -16,6 +16,7 @@ import type {
     Output,
     OutputId,
     Payload,
+    SlotIndex,
 } from '../../block';
 import type { PreparedTransactionData } from '../prepared-transaction-data';
 import type {
@@ -66,6 +67,36 @@ export interface __GetTipsMethod__ {
 
 export interface __GetNetworkInfoMethod__ {
     name: 'getNetworkInfo';
+}
+
+export interface __GetAccountCongestionMethod__ {
+    name: 'getAccountCongestion';
+    data: {
+        accountId: AccountId;
+    };
+}
+
+export interface __GetRewardsMethod__ {
+    name: 'getRewards';
+    data: {
+        outputId: OutputId;
+        slotIndex?: SlotIndex;
+    };
+}
+
+export interface __GetValidatorsMethod__ {
+    name: 'getValidators';
+    data: {
+        pageSize?: number;
+        cursor?: string;
+    };
+}
+
+export interface __GetValidatorMethod__ {
+    name: 'getValidator';
+    data: {
+        accountId: AccountId;
+    };
 }
 
 export interface __GetBlockMethod__ {
@@ -153,10 +184,6 @@ export interface __GetNodeInfoMethod__ {
     };
 }
 
-export interface __GetPeersMethod__ {
-    name: 'getPeers';
-}
-
 export interface __PostBlockRawMethod__ {
     name: 'postBlockRaw';
     data: {
@@ -182,6 +209,55 @@ export interface __GetIncludedBlockMetadataMethod__ {
     name: 'getIncludedBlockMetadata';
     data: {
         transactionId: TransactionId;
+    };
+}
+
+export interface __GetTransactionMetadataMethod__ {
+    name: 'getTransactionMetadata';
+    data: {
+        transactionId: TransactionId;
+    };
+}
+
+export interface __GetCommitmentMethod__ {
+    name: 'getCommitment';
+    data: {
+        commitmentId: HexEncodedString;
+    };
+}
+
+export interface __GetUtxoChangesMethod__ {
+    name: 'getUtxoChanges';
+    data: {
+        commitmentId: HexEncodedString;
+    };
+}
+
+export interface __GetUtxoChangesFullMethod__ {
+    name: 'getUtxoChangesFull';
+    data: {
+        commitmentId: HexEncodedString;
+    };
+}
+
+export interface __GetCommitmentByIndexMethod__ {
+    name: 'getCommitmentByIndex';
+    data: {
+        slot: SlotIndex;
+    };
+}
+
+export interface __GetUtxoChangesByIndexMethod__ {
+    name: 'getUtxoChangesByIndex';
+    data: {
+        slot: SlotIndex;
+    };
+}
+
+export interface __GetUtxoChangesFullByIndexMethod__ {
+    name: 'getUtxoChangesFullByIndex';
+    data: {
+        slot: SlotIndex;
     };
 }
 

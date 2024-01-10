@@ -14,7 +14,7 @@ use primitive_types::U256;
 
 use super::slot::EpochIndex;
 use crate::types::block::{
-    address::WeightedAddressCount,
+    address::{AddressCapabilityFlag, WeightedAddressCount},
     context_input::RewardContextInputIndex,
     input::UtxoInput,
     mana::ManaAllotmentCount,
@@ -209,6 +209,7 @@ pub enum Error {
         target: EpochIndex,
     },
     TrailingCapabilityBytes,
+    RestrictedAddressCapability(AddressCapabilityFlag),
 }
 
 #[cfg(feature = "std")]
@@ -450,6 +451,7 @@ impl fmt::Display for Error {
                 write!(f, "invalid epoch delta: created {created}, target {target}")
             }
             Self::TrailingCapabilityBytes => write!(f, "capability bytes have trailing zeroes"),
+            Self::RestrictedAddressCapability(cap) => write!(f, "restricted address capability: {cap:?}"),
         }
     }
 }

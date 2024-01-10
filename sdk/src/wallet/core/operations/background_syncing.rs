@@ -72,6 +72,12 @@ where
         Ok(())
     }
 
+    /// Request to stop the background syncing of the wallet
+    pub fn request_stop_background_syncing(&self) {
+        log::debug!("[request_stop_background_syncing]");
+        self.background_syncing_status.store(2, Ordering::Relaxed);
+    }
+
     /// Stop the background syncing of the wallet
     pub async fn stop_background_syncing(&self) -> crate::wallet::Result<()> {
         log::debug!("[stop_background_syncing]");
@@ -80,7 +86,7 @@ where
             return Ok(());
         }
         // send stop request
-        self.background_syncing_status.store(2, Ordering::Relaxed);
+        self.request_stop_background_syncing();
         // wait until it stopped
         while self.background_syncing_status.load(Ordering::Relaxed) != 0 {
             #[cfg(target_family = "wasm")]
