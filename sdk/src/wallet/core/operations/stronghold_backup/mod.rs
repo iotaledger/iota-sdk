@@ -3,7 +3,11 @@
 
 pub(crate) mod stronghold_snapshot;
 
-use std::{fs, path::PathBuf, sync::atomic::Ordering};
+use std::{
+    fs,
+    path::{Path, PathBuf},
+    sync::atomic::Ordering,
+};
 
 use futures::{future::try_join_all, FutureExt};
 
@@ -71,7 +75,8 @@ impl Wallet {
     /// will be restored.
     pub async fn restore_from_backup(
         &self,
-        backup_path: PathBuf,
+        backup_path: &Path,
+        snapshot_path: &Path,
         stronghold_password: impl Into<Password> + Send,
         ignore_if_coin_type_mismatch: Option<bool>,
         ignore_if_bech32_hrp_mismatch: Option<Hrp>,
@@ -96,14 +101,13 @@ impl Wallet {
         let new_snapshot_path = if let SecretManager::Stronghold(stronghold) = &mut *secret_manager {
             stronghold.snapshot_path.clone()
         } else {
-            // TODO: move and use default constant from cli?
-            PathBuf::from("wallet.stronghold")
+            snapshot_path.into()
         };
 
         // We'll create a new stronghold to load the backup
         let new_stronghold = StrongholdSecretManager::builder()
             .password(stronghold_password.clone())
-            .build(backup_path.clone())?;
+            .build(backup_path)?;
 
         #[cfg_attr(not(feature = "storage"), allow(unused))]
         let chrysalis_data = stronghold_snapshot::migrate_snapshot_from_chrysalis_to_stardust(&new_stronghold).await?;
@@ -132,7 +136,7 @@ impl Wallet {
         if let Some(mut read_secret_manager) = read_secret_manager {
             // We have to replace the snapshot path with the current one, when building stronghold
             if let SecretManagerDto::Stronghold(stronghold_dto) = &mut read_secret_manager {
-                stronghold_dto.snapshot_path = new_snapshot_path.to_string_lossy().into_owned();
+                stronghold_dto.snapshot_path = new_snapshot_path.display().to_string();
             }
 
             let restored_secret_manager = SecretManager::from_config(&read_secret_manager)

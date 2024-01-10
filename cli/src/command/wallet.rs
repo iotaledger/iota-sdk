@@ -152,8 +152,6 @@ pub async fn accounts_command(wallet: &Wallet) -> Result<(), Error> {
     Ok(())
 }
 
-// TODO: should we allow the backup to have a different password?
-// TODO: allow backup wallet with ledger nano?
 pub async fn backup_command_stronghold(wallet: &Wallet, password: &Password, backup_path: &Path) -> Result<(), Error> {
     wallet.backup(backup_path.into(), password.clone()).await?;
 
@@ -253,16 +251,22 @@ pub async fn restore_command_stronghold(
         .await?;
 
     let password = get_password("Stronghold backup password", false)?;
-    wallet
-        .restore_from_backup(backup_path.into(), password, None, None)
-        .await?;
-
-    println_log_info!(
-        "Wallet has been restored from the backup file \"{}\".",
-        backup_path.display()
-    );
-
-    Ok(wallet)
+    if let Err(e) = wallet
+        .restore_from_backup(backup_path, snapshot_path, password, None, None)
+        .await
+    {
+        // Clean up a failed restore (typically produces a wallet without a secret manager)
+        // TODO: a better way would be to not create any files/dirs in the first place when it's not clear yet whether
+        // the restore will be successful
+        std::fs::remove_dir_all(storage_path)?;
+        Err(e.into())
+    } else {
+        println_log_info!(
+            "Wallet has been restored from the backup file \"{}\".",
+            backup_path.display()
+        );
+        Ok(wallet)
+    }
 }
 
 pub async fn set_node_url_command(wallet: &Wallet, url: String) -> Result<(), Error> {
