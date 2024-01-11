@@ -20,6 +20,7 @@ use iota_sdk::{
         output::AccountId,
         payload::{signed_transaction::Transaction, SignedTransactionPayload},
         protocol::protocol_parameters,
+        slot::SlotIndex,
         unlock::{SignatureUnlock, Unlock},
     },
 };
@@ -47,6 +48,7 @@ async fn sign_account_state_transition() -> Result<()> {
 
     let protocol_parameters = protocol_parameters();
     let account_id = AccountId::from_str(ACCOUNT_ID_1)?;
+    let slot_index = SlotIndex::from(10);
 
     let inputs = build_inputs(
         [Account(
@@ -57,7 +59,7 @@ async fn sign_account_state_transition() -> Result<()> {
             None,
             Some(Bip44::new(SHIMMER_COIN_TYPE)),
         )],
-        None,
+        Some(slot_index),
     );
 
     let outputs = build_outputs([Account(1_000_000, account_id, address.clone(), None, None, None)]);
@@ -70,14 +72,7 @@ async fn sign_account_state_transition() -> Result<()> {
                 .collect::<Vec<_>>(),
         )
         .with_outputs(outputs)
-        .with_creation_slot(
-            inputs
-                .iter()
-                .map(|i| i.output_id().transaction_id().slot_index())
-                .max()
-                .unwrap()
-                + 1,
-        )
+        .with_creation_slot(slot_index + 1)
         .finish_with_params(&protocol_parameters)?;
 
     let prepared_transaction_data = PreparedTransactionData {
@@ -123,6 +118,7 @@ async fn account_reference_unlocks() -> Result<()> {
     let protocol_parameters = protocol_parameters();
     let account_id = AccountId::from_str(ACCOUNT_ID_1)?;
     let account_address = Address::Account(AccountAddress::new(account_id));
+    let slot_index = SlotIndex::from(10);
 
     let inputs = build_inputs(
         [
@@ -137,7 +133,7 @@ async fn account_reference_unlocks() -> Result<()> {
             Basic(1_000_000, account_address.clone(), None, None, None, None, None, None),
             Basic(1_000_000, account_address.clone(), None, None, None, None, None, None),
         ],
-        None,
+        Some(slot_index),
     );
 
     let outputs = build_outputs([
@@ -153,14 +149,7 @@ async fn account_reference_unlocks() -> Result<()> {
                 .collect::<Vec<_>>(),
         )
         .with_outputs(outputs)
-        .with_creation_slot(
-            inputs
-                .iter()
-                .map(|i| i.output_id().transaction_id().slot_index())
-                .max()
-                .unwrap()
-                + 1,
-        )
+        .with_creation_slot(slot_index + 1)
         .finish_with_params(&protocol_parameters)?;
 
     let prepared_transaction_data = PreparedTransactionData {
