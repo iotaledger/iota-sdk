@@ -201,7 +201,13 @@ impl fmt::Display for SecretManager {
             #[cfg(feature = "stronghold")]
             Self::Stronghold(_) => write!(f, "Stronghold"),
             #[cfg(feature = "ledger_nano")]
-            Self::LedgerNano(_) => write!(f, "LedgerNano"),
+            Self::LedgerNano(l) => {
+                if l.is_simulator {
+                    write!(f, "LedgerNano Simulator")
+                } else {
+                    write!(f, "LedgerNano")
+                }
+            }
             Self::Mnemonic(_) => write!(f, "Mnemonic"),
             #[cfg(feature = "private_key_secret_manager")]
             Self::PrivateKey(_) => write!(f, "PrivateKey"),
