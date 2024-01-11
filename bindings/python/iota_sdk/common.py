@@ -8,7 +8,7 @@ import humps
 
 
 def custom_encoder(func, *args, **kwargs):
-    """The routine of dump json string.
+    """Converts the parameters to a JSON string and removes None values.
     """
     class MyEncoder(JSONEncoder):
         """Custom encoder
@@ -31,7 +31,6 @@ def custom_encoder(func, *args, **kwargs):
                 if callable(items_method):
                     for k, v in obj_dict.items():
                         obj_dict[k] = dumps(v, cls=MyEncoder)
-                        return obj_dict
                 return obj_dict
             return o
     message = func(*args, **kwargs)
