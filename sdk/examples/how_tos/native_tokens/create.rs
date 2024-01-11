@@ -73,7 +73,7 @@ async fn main() -> Result<()> {
         account_id: None,
         circulating_supply: U256::from(CIRCULATING_SUPPLY),
         maximum_supply: U256::from(MAXIMUM_SUPPLY),
-        foundry_metadata: Some(metadata.to_bytes()),
+        foundry_metadata: Some(metadata.try_into()?),
     };
 
     let transaction = wallet.create_native_token(params, None).await?;
