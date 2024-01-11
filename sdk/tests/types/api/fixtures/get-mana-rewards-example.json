@@ -1,5 +1,6 @@
 {
   "startEpoch": 60,
   "endEpoch": 80,
-  "rewards": "800000"
+  "rewards": "800000",
+  "latestCommittedEpochPoolRewards": "0"
 }
