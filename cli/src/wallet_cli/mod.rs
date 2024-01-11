@@ -777,6 +777,7 @@ pub async fn mint_nft_command(
         .with_tag(tag)
         .with_sender(sender)
         .with_issuer(issuer);
+
     if let Some(metadata) = metadata {
         nft_options = nft_options.with_metadata(MetadataFeature::new([(metadata.clone(), metadata)])?);
     }
