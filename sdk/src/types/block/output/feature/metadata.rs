@@ -49,7 +49,7 @@ fn verify_keys_packable<const VERIFY: bool>(
         }
         for key in map.keys() {
             if !key.iter().all(|b| b.is_ascii_graphic()) {
-                return Err(Error::NonAsciiMetadataKey(key.to_vec()));
+                return Err(Error::NonGraphicAsciiMetadataKey(key.to_vec()));
             }
         }
     }
@@ -69,7 +69,7 @@ impl MetadataFeature {
 
         for key in data.keys() {
             if !key.iter().all(|b| b.is_ascii_graphic()) {
-                return Err(Error::NonAsciiMetadataKey(key.to_vec()));
+                return Err(Error::NonGraphicAsciiMetadataKey(key.to_vec()));
             }
         }
         Self::try_from(data)
@@ -99,7 +99,7 @@ impl TryFrom<Vec<(Vec<u8>, Vec<u8>)>> for MetadataFeature {
         >::new();
         for (k, v) in data {
             if !k.iter().all(|b| b.is_ascii_graphic()) {
-                return Err(Error::NonAsciiMetadataKey(k.to_vec()));
+                return Err(Error::NonGraphicAsciiMetadataKey(k.to_vec()));
             }
             res.insert(
                 k.into_boxed_slice()
@@ -124,7 +124,7 @@ impl TryFrom<BTreeMap<Vec<u8>, Vec<u8>>> for MetadataFeature {
         >::new();
         for (k, v) in data {
             if !k.iter().all(|b| b.is_ascii_graphic()) {
-                return Err(Error::NonAsciiMetadataKey(k.to_vec()));
+                return Err(Error::NonGraphicAsciiMetadataKey(k.to_vec()));
             }
             res.insert(
                 k.into_boxed_slice()

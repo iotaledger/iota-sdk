@@ -60,7 +60,7 @@ pub enum Error {
     InvalidAccountIndex(<UnlockIndex as TryFrom<u16>>::Error),
     InvalidAnchorIndex(<UnlockIndex as TryFrom<u16>>::Error),
     InvalidBlockBodyKind(u8),
-    NonAsciiMetadataKey(Vec<u8>),
+    NonGraphicAsciiMetadataKey(Vec<u8>),
     InvalidRewardInputIndex(<RewardContextInputIndex as TryFrom<u16>>::Error),
     InvalidStorageDepositAmount(u64),
     /// Invalid transaction failure reason byte.
@@ -258,7 +258,7 @@ impl fmt::Display for Error {
                 write!(f, "invalid capability byte at index {index}: {byte:x}")
             }
             Self::InvalidBlockBodyKind(k) => write!(f, "invalid block body kind: {k}"),
-            Self::NonAsciiMetadataKey(b) => write!(f, "non ASCII key: {b:?}"),
+            Self::NonGraphicAsciiMetadataKey(b) => write!(f, "non graphic ASCII key: {b:?}"),
             Self::InvalidRewardInputIndex(idx) => write!(f, "invalid reward input index: {idx}"),
             Self::InvalidStorageDepositAmount(amount) => {
                 write!(f, "invalid storage deposit amount: {amount}")
