@@ -3,7 +3,7 @@
 
 #[cfg(feature = "storage")]
 use std::collections::HashSet;
-use std::sync::{atomic::AtomicUsize, Arc};
+use std::sync::Arc;
 
 use serde::Serialize;
 use tokio::sync::{Mutex, RwLock};
@@ -19,7 +19,7 @@ use crate::{
     client::secret::{GenerateAddressOptions, SecretManage, SecretManager},
     types::block::address::{Address, Bech32Address},
     wallet::{
-        core::{Bip44, WalletData, WalletInner},
+        core::{operations::background_syncing::BackgroundSyncStatus, Bip44, WalletData, WalletInner},
         operations::syncing::SyncOptions,
         ClientOptions, Wallet,
     },
@@ -227,9 +227,6 @@ where
         #[cfg(feature = "storage")]
         self.save(&storage_manager).await?;
 
-        #[cfg(feature = "events")]
-        let event_emitter = tokio::sync::RwLock::new(EventEmitter::new());
-
         // It happened that inputs got locked, the transaction failed, but they weren't unlocked again, so we do this
         // here
         #[cfg(feature = "storage")]
@@ -245,15 +242,18 @@ where
             .finish()
             .await?;
 
+        let background_syncing_status = tokio::sync::watch::channel(BackgroundSyncStatus::Stopped);
+        let background_syncing_status = (Arc::new(background_syncing_status.0), background_syncing_status.1);
+
         // Build the wallet.
         let wallet_inner = WalletInner {
             default_sync_options: Mutex::new(SyncOptions::default()),
             last_synced: Mutex::new(0),
-            background_syncing_status: AtomicUsize::new(0),
+            background_syncing_status,
             client,
             secret_manager: self.secret_manager.expect("make WalletInner::secret_manager optional?"),
             #[cfg(feature = "events")]
-            event_emitter,
+            event_emitter: tokio::sync::RwLock::new(EventEmitter::new()),
             #[cfg(feature = "storage")]
             storage_options,
             #[cfg(feature = "storage")]

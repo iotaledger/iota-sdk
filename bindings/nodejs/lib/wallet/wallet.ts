@@ -52,7 +52,6 @@ import type {
     WalletOptions,
     WalletEventType,
     WalletEvent,
-    Event,
 } from '../types/wallet';
 import { IAuth, IClientOptions, LedgerNanoStatus } from '../types/client';
 import { SecretManager } from '../secret_manager';
@@ -169,7 +168,7 @@ export class Wallet {
      */
     async listen(
         eventTypes: WalletEventType[],
-        callback: (error: Error, event: Event) => void,
+        callback: (error: Error, event: WalletEvent) => void,
     ): Promise<void> {
         return this.methodHandler.listen(eventTypes, callback);
     }

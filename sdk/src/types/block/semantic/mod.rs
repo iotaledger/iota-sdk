@@ -251,10 +251,11 @@ impl<'a> SemanticValidationContext<'a> {
             return Ok(Some(TransactionFailureReason::SumInputsOutputsAmountMismatch));
         }
 
-        if self.input_mana > self.output_mana && !self.transaction.has_capability(TransactionCapabilityFlag::BurnMana) {
-            // TODO: add a variant https://github.com/iotaledger/iota-sdk/issues/1430
-            return Ok(Some(TransactionFailureReason::SemanticValidationFailed));
-        }
+        // TODO re-enable with https://github.com/iotaledger/iota-sdk/issues/1692
+        // if self.input_mana > self.output_mana &&
+        // !self.transaction.has_capability(TransactionCapabilityFlag::BurnMana) {     // TODO: add a variant https://github.com/iotaledger/iota-sdk/issues/1430
+        //     return Ok(Some(TransactionFailureReason::SemanticValidationFailed));
+        // }
 
         // Validation of input native tokens.
         let mut native_token_ids = self.input_native_tokens.keys().collect::<HashSet<_>>();

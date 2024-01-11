@@ -5,14 +5,14 @@
 // Run with command:
 // yarn run-example ./exchange/4-listen-events.ts
 
-import { Wallet, Event, WalletEventType } from '@iota/sdk';
+import { Wallet, WalletEvent, WalletEventType } from '@iota/sdk';
 
 // This example uses secrets in environment variables for simplicity which should not be done in production.
 require('dotenv').config({ path: '.env' });
 
 async function run() {
     try {
-        for (const envVar of ['WALLET_DB_PATH']) {
+        for (const envVar of ['WALLET_DB_PATH', 'FAUCET_URL']) {
             if (!(envVar in process.env)) {
                 throw new Error(
                     `.env ${envVar} is undefined, see .env.example`,
@@ -24,9 +24,8 @@ async function run() {
             storagePath: process.env.WALLET_DB_PATH,
         });
 
-        const callback = function (err: any, event: Event) {
-            console.log('AccountIndex:', event.accountIndex);
-            console.log('Event:', event.event);
+        const callback = function (err: any, event: WalletEvent) {
+            console.log('Event:', event);
 
             // Exit after receiving an event.
             process.exit(0);
@@ -37,7 +36,7 @@ async function run() {
 
         // Use the faucet to send testnet tokens to your address.
         console.log(
-            'Fill your address with the faucet: https://faucet.testnet.shimmer.network/',
+            `Fill your address with the faucet: ${process.env.FAUCET_URL}`,
         );
 
         const address = await wallet.address();
