@@ -93,7 +93,8 @@
           "manaShareCoefficient": "2",
           "decayBalancingConstantExponent": 8,
           "decayBalancingConstant": "1",
-          "poolCoefficientExponent": 11
+          "poolCoefficientExponent": 11,
+          "retentionPeriod": 684
         },
         "targetCommitteeSize": 32,
         "chainSwitchingThreshold": 2
