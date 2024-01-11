@@ -80,3 +80,7 @@ export interface __ChangeStrongholdPasswordMethod__ {
     name: 'changeStrongholdPassword';
     data: { password: string };
 }
+
+export interface __ClearStrongholdPasswordMethod__ {
+    name: 'clearStrongholdPassword';
+}
