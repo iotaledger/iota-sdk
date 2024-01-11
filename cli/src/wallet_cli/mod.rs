@@ -781,9 +781,10 @@ pub async fn mint_nft_command(
         nft_options = nft_options.with_metadata(MetadataFeature::new([(metadata.clone(), metadata)])?);
     }
     if let Some(immutable_metadata) = immutable_metadata {
-        nft_options = nft_options.with_immutable_metadata(MetadataFeature::new(
-            std::collections::BTreeMap::from_iter(vec![(immutable_metadata.clone(), immutable_metadata)]),
-        )?);
+        nft_options = nft_options.with_immutable_metadata(MetadataFeature::new([(
+            immutable_metadata.clone(),
+            immutable_metadata,
+        )])?);
     }
 
     let transaction = wallet.mint_nfts([nft_options], None).await?;
