@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use iota_sdk::{
+    types::block::output::feature::MetadataFeature,
     wallet::{CreateNativeTokenParams, Result, SyncOptions},
     U256,
 };
@@ -86,7 +87,7 @@ async fn native_token_foundry_metadata() -> Result<()> {
         .await?;
     wallet.sync(None).await?;
 
-    let foundry_metadata = [1, 3, 3, 7];
+    let foundry_metadata = MetadataFeature::new([(vec![1, 3], vec![3, 7])])?;
 
     let create_tx = wallet
         .create_native_token(
@@ -94,7 +95,7 @@ async fn native_token_foundry_metadata() -> Result<()> {
                 account_id: None,
                 circulating_supply: U256::from(50),
                 maximum_supply: U256::from(100),
-                foundry_metadata: Some(foundry_metadata.to_vec()),
+                foundry_metadata: Some(foundry_metadata.clone()),
             },
             None,
         )
@@ -119,12 +120,8 @@ async fn native_token_foundry_metadata() -> Result<()> {
             .unwrap()
             .metadata()
             .as_ref()
-            .unwrap()
-            .data()
-            .get(&packable::prefix::BoxedSlicePrefix::try_from(b"foundry".to_vec().into_boxed_slice()).unwrap())
-            .unwrap()
-            .to_vec(),
-        foundry_metadata.to_vec()
+            .unwrap(),
+        &foundry_metadata
     );
 
     tear_down(storage_path)
