@@ -236,4 +236,13 @@ export class SecretManager {
             data: { password },
         });
     }
+
+    /**
+     * Clear the Stronghold password.
+     */
+    async clearStrongholdPassword(): Promise<void> {
+        await this.methodHandler.callMethod({
+            name: 'clearStrongholdPassword',
+        });
+    }
 }
