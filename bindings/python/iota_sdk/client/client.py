@@ -1,12 +1,12 @@
 # Copyright 2023 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
-from json import dumps, loads
+from json import dumps
 from datetime import timedelta
 from typing import Any, Dict, List, Optional, Union
 import humps
 
-from iota_sdk.external import create_client, call_client_method, listen_mqtt
+from iota_sdk.external import create_client, listen_mqtt
 from iota_sdk.client._node_core_api import NodeCoreAPI
 from iota_sdk.client._node_indexer_api import NodeIndexerAPI
 from iota_sdk.client._high_level_api import HighLevelAPI

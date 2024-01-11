@@ -169,7 +169,7 @@ class NodeCoreAPI(metaclass=ABCMeta):
         }))
 
     def call_plugin_route(self, base_plugin_path: str, method: str,
-                          endpoint: str, query_params: Optional[List[str]] = [], request: Optional[str] = None):
+                          endpoint: str, query_params: Optional[List[str]] = None, request: Optional[str] = None):
         """Extension method which provides request methods for plugins.
 
         Args:
@@ -179,6 +179,8 @@ class NodeCoreAPI(metaclass=ABCMeta):
             query_params: The parameters of the query.
             request: The request object sent to the endpoint of the plugin.
         """
+        if query_params is None:
+            query_params = []
         return self._call_method('callPluginRoute', {
             'basePluginPath': base_plugin_path,
             'method': method,
