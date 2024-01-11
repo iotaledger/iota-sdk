@@ -97,7 +97,8 @@ where
                 protocol_parameters.clone(),
             )
             .with_required_inputs(custom_inputs)
-            .with_forbidden_inputs(forbidden_inputs);
+            .with_forbidden_inputs(forbidden_inputs)
+            .with_slot_index(slot_index);
 
             if let Some(address) = remainder_address {
                 input_selection = input_selection.with_remainder_address(address);
@@ -136,7 +137,8 @@ where
                 protocol_parameters.clone(),
             )
             .with_required_inputs(mandatory_inputs)
-            .with_forbidden_inputs(forbidden_inputs);
+            .with_forbidden_inputs(forbidden_inputs)
+            .with_slot_index(slot_index);
 
             if let Some(address) = remainder_address {
                 input_selection = input_selection.with_remainder_address(address);
@@ -171,7 +173,8 @@ where
             Some(wallet_data.address.clone().into_inner()),
             protocol_parameters.clone(),
         )
-        .with_forbidden_inputs(forbidden_inputs);
+        .with_forbidden_inputs(forbidden_inputs)
+        .with_slot_index(slot_index);
 
         if let Some(address) = remainder_address {
             input_selection = input_selection.with_remainder_address(address);

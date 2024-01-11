@@ -14,7 +14,10 @@ use crate::{
     client::api::RemainderData,
     types::block::{
         address::{Address, Ed25519Address},
-        output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder, NativeTokensBuilder, Output},
+        output::{
+            unlock_condition::AddressUnlockCondition, BasicOutputBuilder, MinimumOutputAmount, NativeTokensBuilder,
+            Output,
+        },
     },
 };
 
@@ -118,7 +121,43 @@ impl InputSelection {
 
         let native_tokens_diff = get_native_tokens_diff(&input_native_tokens, &output_native_tokens)?;
 
-        if inputs_sum == outputs_sum && native_tokens_diff.is_none() {
+        let mut input_mana = 0;
+
+        for input in &self.selected_inputs {
+            let potential_mana = {
+                let min_deposit = input
+                    .output
+                    .minimum_amount(self.protocol_parameters.storage_score_parameters());
+                let generation_amount = input.output.amount().saturating_sub(min_deposit);
+
+                self.protocol_parameters.potential_mana(
+                    generation_amount,
+                    input.output_id().transaction_id().slot_index(),
+                    self.slot_index,
+                )
+            }?;
+            let stored_mana = self.protocol_parameters.mana_with_decay(
+                input.output.mana(),
+                input.output_id().transaction_id().slot_index(),
+                self.slot_index,
+            )?;
+
+            println!(
+                "ISA created {}, target {}",
+                input.output_id().transaction_id().slot_index(),
+                self.slot_index,
+            );
+
+            input_mana += potential_mana + stored_mana;
+            // TODO rewards
+        }
+
+        let output_mana = self.outputs.iter().map(|o| o.mana()).sum::<u64>();
+        //  TODO allotment
+
+        println!("ISA input_mana {input_mana}, output_mana {output_mana}");
+
+        if inputs_sum == outputs_sum && input_mana == output_mana && native_tokens_diff.is_none() {
             log::debug!("No remainder required");
             return Ok((None, storage_deposit_returns));
         }
@@ -127,8 +166,9 @@ impl InputSelection {
             return Err(Error::MissingInputWithEd25519Address);
         };
 
-        let diff = inputs_sum - outputs_sum;
-        let mut remainder_builder = BasicOutputBuilder::new_with_amount(diff);
+        let amount_diff = inputs_sum - outputs_sum;
+        let mana_diff = input_mana - output_mana;
+        let mut remainder_builder = BasicOutputBuilder::new_with_amount(amount_diff).with_mana(mana_diff);
 
         remainder_builder =
             remainder_builder.add_unlock_condition(AddressUnlockCondition::new(remainder_address.clone()));
@@ -141,7 +181,10 @@ impl InputSelection {
 
         let remainder = remainder_builder.finish_output()?;
 
-        log::debug!("Created remainder output of {diff} for {remainder_address:?}");
+        println!("remainder {remainder:?}");
+
+        // TODO add log
+        log::debug!("Created remainder output of {amount_diff} for {remainder_address:?}");
 
         remainder.verify_storage_deposit(self.protocol_parameters.storage_score_parameters())?;
 

@@ -53,9 +53,9 @@ where
     {
         let implicit_account_data = self.data().await.unspent_outputs.get(output_id).cloned();
 
-        let implicit_account = if let Some(implicit_account_data) = &implicit_account_data {
+        let implicit_account = if let Some(implicit_account_data) = implicit_account_data.clone() {
             if implicit_account_data.output.is_implicit_account() {
-                implicit_account_data.output.as_basic()
+                implicit_account_data.output.as_basic().clone()
             } else {
                 return Err(Error::ImplicitAccountNotFound);
             }
@@ -86,7 +86,11 @@ where
 
         let account_id = AccountId::from(output_id);
         let account = AccountOutput::build_with_amount(implicit_account.amount(), account_id)
-            .with_mana(implicit_account.mana())
+            .with_mana(implicit_account_data.clone().unwrap().output.all_mana(
+                &self.client().get_protocol_parameters().await?,
+                implicit_account_data.unwrap().output_id.transaction_id().slot_index(),
+                self.client().get_slot_index().await?,
+            )?)
             .with_unlock_conditions([AddressUnlockCondition::from(Address::from(
                 *implicit_account
                     .address()

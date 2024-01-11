@@ -54,17 +54,17 @@ where
                 builder = builder.with_context_inputs(context_inputs);
             }
 
-            // TODO remove when https://github.com/iotaledger/iota-sdk/issues/1744 is done
-            match options.capabilities.as_mut() {
-                Some(capabilities) => {
-                    capabilities.add_capability(TransactionCapabilityFlag::BurnMana);
-                }
-                None => {
-                    let mut capabilities = TransactionCapabilities::default();
-                    capabilities.add_capability(TransactionCapabilityFlag::BurnMana);
-                    options.capabilities = Some(capabilities);
-                }
-            }
+            // // TODO remove when https://github.com/iotaledger/iota-sdk/issues/1744 is done
+            // match options.capabilities.as_mut() {
+            //     Some(capabilities) => {
+            //         capabilities.add_capability(TransactionCapabilityFlag::BurnMana);
+            //     }
+            //     None => {
+            //         let mut capabilities = TransactionCapabilities::default();
+            //         capabilities.add_capability(TransactionCapabilityFlag::BurnMana);
+            //         options.capabilities = Some(capabilities);
+            //     }
+            // }
 
             if let Some(capabilities) = options.capabilities {
                 builder = builder.add_capabilities(capabilities.capabilities_iter());

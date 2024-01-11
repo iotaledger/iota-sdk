@@ -217,6 +217,30 @@ impl Output {
         }
     }
 
+    ///
+    pub fn all_mana(
+        &self,
+        protocol_parameters: &ProtocolParameters,
+        creation_index: SlotIndex,
+        target_index: SlotIndex,
+    ) -> Result<u64, Error> {
+        let (amount, mana) = match self {
+            Self::Basic(output) => (output.amount(), output.mana()),
+            Self::Account(output) => (output.amount(), output.mana()),
+            Self::Anchor(output) => (output.amount(), output.mana()),
+            Self::Foundry(output) => (output.amount(), 0),
+            Self::Nft(output) => (output.amount(), output.mana()),
+            Self::Delegation(output) => (output.amount(), 0),
+        };
+
+        let min_deposit = self.minimum_amount(protocol_parameters.storage_score_parameters());
+        let generation_amount = amount.saturating_sub(min_deposit);
+        let potential_mana = protocol_parameters.potential_mana(generation_amount, creation_index, target_index)?;
+        let stored_mana = protocol_parameters.mana_with_decay(mana, creation_index, target_index)?;
+
+        Ok(potential_mana + stored_mana)
+    }
+
     /// Returns the unlock conditions of an [`Output`], if any.
     pub fn unlock_conditions(&self) -> Option<&UnlockConditions> {
         match self {
