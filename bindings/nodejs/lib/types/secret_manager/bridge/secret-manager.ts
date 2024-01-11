@@ -75,3 +75,12 @@ export interface __SetStrongholdPasswordMethod__ {
     name: 'setStrongholdPassword';
     data: { password: string };
 }
+
+export interface __ChangeStrongholdPasswordMethod__ {
+    name: 'changeStrongholdPassword';
+    data: { password: string };
+}
+
+export interface __ClearStrongholdPasswordMethod__ {
+    name: 'clearStrongholdPassword';
+}
