@@ -1210,7 +1210,7 @@ fn transitioned_zero_nft_id_no_longer_is_zero() {
     });
 }
 
-// TODO: enable again when MetadataFeature is cleared up
+// TODO: enable again when Irc27Metadata is updated
 // #[test]
 // fn changed_immutable_metadata() {
 //     let protocol_parameters = protocol_parameters();
