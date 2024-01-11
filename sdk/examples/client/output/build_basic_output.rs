@@ -45,10 +45,7 @@ async fn main() -> Result<()> {
         // with metadata feature block
         basic_output_builder
             .clone()
-            .add_feature(MetadataFeature::new(std::collections::BTreeMap::from_iter(vec![(
-                KEY.to_vec(),
-                METADATA.to_vec(),
-            )]))?)
+            .add_feature(MetadataFeature::new([(KEY.to_vec(), METADATA.to_vec())])?)
             .finish_output()?,
         // with storage deposit return
         basic_output_builder

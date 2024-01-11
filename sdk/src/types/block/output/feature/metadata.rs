@@ -64,8 +64,8 @@ impl MetadataFeature {
 
     /// Creates a new [`MetadataFeature`].
     #[inline(always)]
-    pub fn new(data: impl Into<BTreeMap<Vec<u8>, Vec<u8>>>) -> Result<Self, Error> {
-        let data = data.into();
+    pub fn new(data: impl IntoIterator<Item = (Vec<u8>, Vec<u8>)>) -> Result<Self, Error> {
+        let data: BTreeMap<Vec<u8>, Vec<u8>> = data.into_iter().collect();
 
         for key in data.keys() {
             if !key.iter().all(|b| b.is_ascii_graphic()) {

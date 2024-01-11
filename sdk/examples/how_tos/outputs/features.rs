@@ -56,18 +56,12 @@ async fn main() -> Result<()> {
         // with metadata feature block
         nft_output_builder
             .clone()
-            .add_feature(MetadataFeature::new(std::collections::BTreeMap::from_iter(vec![(
-                b"Hello".to_vec(),
-                b"World!".to_vec(),
-            )]))?)
+            .add_feature(MetadataFeature::new([(b"Hello".to_vec(), b"World!".to_vec())])?)
             .finish_output()?,
         // with immutable metadata feature block
         nft_output_builder
             .clone()
-            .add_immutable_feature(MetadataFeature::new(std::collections::BTreeMap::from_iter(vec![(
-                b"Hello".to_vec(),
-                b"World!".to_vec(),
-            )]))?)
+            .add_immutable_feature(MetadataFeature::new([(b"Hello".to_vec(), b"World!".to_vec())])?)
             .finish_output()?,
         // with tag feature
         nft_output_builder
