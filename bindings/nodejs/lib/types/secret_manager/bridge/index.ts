@@ -9,6 +9,8 @@ import type {
     __SignEd25519Method__,
     __SignSecp256k1EcdsaMethod__,
     __SetStrongholdPasswordMethod__,
+    __ChangeStrongholdPasswordMethod__,
+    __ClearStrongholdPasswordMethod__,
 } from './secret-manager';
 
 export type __SecretManagerMethods__ =
@@ -21,4 +23,6 @@ export type __SecretManagerMethods__ =
     | __StoreMnemonicMethod__
     | __SignEd25519Method__
     | __SignSecp256k1EcdsaMethod__
-    | __SetStrongholdPasswordMethod__;
+    | __SetStrongholdPasswordMethod__
+    | __ChangeStrongholdPasswordMethod__
+    | __ClearStrongholdPasswordMethod__;
