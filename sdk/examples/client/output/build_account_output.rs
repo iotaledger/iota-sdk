@@ -51,10 +51,7 @@ async fn main() -> Result<()> {
         .add_feature(SenderFeature::new(address.clone()))
         .add_feature(MetadataFeature::new([(metadata.to_vec(), metadata.to_vec())])?)
         .add_immutable_feature(IssuerFeature::new(address.clone()))
-        .add_immutable_feature(MetadataFeature::new(std::collections::BTreeMap::from_iter(vec![(
-            metadata.to_vec(),
-            metadata.to_vec(),
-        )]))?)
+        .add_immutable_feature(MetadataFeature::new([(metadata.to_vec(), metadata.to_vec())])?)
         .add_unlock_condition(AddressUnlockCondition::new(address))
         .finish_output()?;
 

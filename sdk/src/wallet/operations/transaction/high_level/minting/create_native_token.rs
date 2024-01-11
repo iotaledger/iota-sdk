@@ -174,7 +174,7 @@ where
                     if let Some(foundry_metadata) = params.foundry_metadata {
                         foundry_builder = foundry_builder.add_immutable_feature(MetadataFeature::new(
                             // TODO: what hardcoded key or let user provide the full metadata?
-                            BTreeMap::from_iter(vec![(b"foundry".to_vec(), foundry_metadata)]),
+                            [(b"foundry".to_vec(), foundry_metadata)],
                         )?);
                     }
 

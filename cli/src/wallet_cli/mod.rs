@@ -778,10 +778,7 @@ pub async fn mint_nft_command(
         .with_sender(sender)
         .with_issuer(issuer);
     if let Some(metadata) = metadata {
-        nft_options = nft_options.with_metadata(MetadataFeature::new(std::collections::BTreeMap::from_iter(vec![(
-            metadata.clone(),
-            metadata,
-        )]))?);
+        nft_options = nft_options.with_metadata(MetadataFeature::new([(metadata.clone(), metadata)])?);
     }
     if let Some(immutable_metadata) = immutable_metadata {
         nft_options = nft_options.with_immutable_metadata(MetadataFeature::new(
