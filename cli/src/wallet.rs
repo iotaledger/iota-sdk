@@ -60,7 +60,6 @@ pub async fn new_wallet(cli: WalletCli) -> Result<(Option<Wallet>, Option<Accoun
                             }
                         }
                         SecretManager::LedgerNano(ledger_nano) => LinkedSecretManager::LedgerNano {
-                            // is_simulator: ledger_nano.is_simulator,
                             is_connected: ledger_nano.get_ledger_nano_status().await.connected(),
                         },
                         _ => panic!("only Stronghold and LedgerNano supported at the moment."),

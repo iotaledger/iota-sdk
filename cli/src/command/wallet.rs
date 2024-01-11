@@ -115,7 +115,6 @@ pub struct InitParameters {
     /// manager.
     #[arg(short = 't', long, value_name = "PATH", env = "STRONGHOLD_SNAPSHOT_PATH", default_value = DEFAULT_STRONGHOLD_SNAPSHOT_PATH)]
     pub stronghold_snapshot_path: String,
-    // TODO: remove this field to make `InitParameters` independ from the secret manager being used?
     /// Set the path to a file containing mnemonics. If empty, a mnemonic has to be entered or will be randomly
     /// generated. Only used by some secret managers.
     #[arg(short, long, value_name = "PATH")]
