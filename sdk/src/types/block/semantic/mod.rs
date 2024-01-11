@@ -16,7 +16,9 @@ pub use self::{
 };
 use crate::types::block::{
     address::Address,
-    output::{AccountId, AnchorOutput, ChainId, FoundryId, NativeTokens, Output, OutputId, TokenId},
+    output::{
+        AccountId, AnchorOutput, ChainId, FoundryId, MinimumOutputAmount, NativeTokens, Output, OutputId, TokenId,
+    },
     payload::signed_transaction::{Transaction, TransactionCapabilityFlag, TransactionSigningHash},
     protocol::ProtocolParameters,
     unlock::Unlock,
@@ -160,7 +162,37 @@ impl<'a> SemanticValidationContext<'a> {
                 .checked_add(amount)
                 .ok_or(Error::ConsumedAmountOverflow)?;
 
-            self.input_mana = self.input_mana.checked_add(mana).ok_or(Error::ConsumedManaOverflow)?;
+            let potential_mana = {
+                // Deposit amount doesn't generate mana
+                let min_deposit = consumed_output.minimum_amount(self.protocol_parameters.storage_score_parameters());
+                let generation_amount = consumed_output.amount().saturating_sub(min_deposit);
+
+                self.protocol_parameters.generate_mana_with_decay(
+                    generation_amount,
+                    output_id.transaction_id().slot_index(),
+                    self.transaction.creation_slot(),
+                )
+            }?;
+
+            // Add potential mana
+            self.input_mana = self
+                .input_mana
+                .checked_add(potential_mana)
+                .ok_or(Error::ConsumedManaOverflow)?;
+
+            let stored_mana = self.protocol_parameters.mana_with_decay(
+                mana,
+                output_id.transaction_id().slot_index(),
+                self.transaction.creation_slot(),
+            )?;
+
+            // Add stored mana
+            self.input_mana = self
+                .input_mana
+                .checked_add(stored_mana)
+                .ok_or(Error::ConsumedManaOverflow)?;
+
+            // TODO: Add reward mana https://github.com/iotaledger/iota-sdk/issues/1310
 
             if let Some(consumed_native_token) = consumed_native_token {
                 let native_token_amount = self
@@ -221,7 +253,16 @@ impl<'a> SemanticValidationContext<'a> {
                 .checked_add(amount)
                 .ok_or(Error::CreatedAmountOverflow)?;
 
+            // Add stored mana
             self.output_mana = self.output_mana.checked_add(mana).ok_or(Error::CreatedManaOverflow)?;
+
+            // Add allotted mana
+            for mana_allotment in self.transaction.allotments() {
+                self.output_mana = self
+                    .output_mana
+                    .checked_add(mana_allotment.mana())
+                    .ok_or(Error::CreatedManaOverflow)?;
+            }
 
             if let Some(created_native_token) = created_native_token {
                 let native_token_amount = self
@@ -251,11 +292,17 @@ impl<'a> SemanticValidationContext<'a> {
             return Ok(Some(TransactionFailureReason::SumInputsOutputsAmountMismatch));
         }
 
-        // TODO re-enable with https://github.com/iotaledger/iota-sdk/issues/1692
-        // if self.input_mana > self.output_mana &&
-        // !self.transaction.has_capability(TransactionCapabilityFlag::BurnMana) {     // TODO: add a variant https://github.com/iotaledger/iota-sdk/issues/1430
-        //     return Ok(Some(TransactionFailureReason::SemanticValidationFailed));
-        // }
+        if self.input_mana != self.output_mana {
+            if self.input_mana > self.output_mana {
+                if !self.transaction.has_capability(TransactionCapabilityFlag::BurnMana) {
+                    return Ok(Some(
+                        TransactionFailureReason::TransactionCapabilityManaBurningNotAllowed,
+                    ));
+                }
+            } else {
+                return Ok(Some(TransactionFailureReason::InvalidManaAmount));
+            }
+        }
 
         // Validation of input native tokens.
         let mut native_token_ids = self.input_native_tokens.keys().collect::<HashSet<_>>();

@@ -63,13 +63,13 @@ impl ManaParameters {
         (1 << self.bits_count) - 1
     }
 
-    fn decay(&self, mut mana: u64, epoch_delta: u32) -> u64 {
-        if mana == 0 || epoch_delta == 0 || self.decay_factors().is_empty() {
+    fn decay(&self, mut mana: u64, epoch_diff: u32) -> u64 {
+        if mana == 0 || epoch_diff == 0 || self.decay_factors().is_empty() {
             return mana;
         }
 
         // we keep applying the lookup table factors as long as n epochs are left
-        let mut remaining_epochs = epoch_delta;
+        let mut remaining_epochs = epoch_diff;
 
         while remaining_epochs > 0 {
             let epochs_to_decay = remaining_epochs.min(self.decay_factors().len() as u32);
@@ -85,13 +85,14 @@ impl ManaParameters {
         mana
     }
 
-    fn generate_mana(&self, amount: u64, slot_delta: u32) -> u64 {
-        if self.generation_rate() == 0 || slot_delta == 0 {
+    fn generate_mana(&self, amount: u64, slot_diff: u32) -> u64 {
+        if self.generation_rate() == 0 || slot_diff == 0 {
             return 0;
         }
+
         fixed_point_multiply(
             amount,
-            slot_delta * self.generation_rate() as u32,
+            slot_diff * self.generation_rate() as u32,
             self.generation_rate_exponent(),
         )
     }
@@ -121,17 +122,18 @@ impl ProtocolParameters {
         slot_index_created: impl Into<SlotIndex>,
         slot_index_target: impl Into<SlotIndex>,
     ) -> Result<u64, Error> {
-        let (slot_index_created, slot_index_target) = (slot_index_created.into(), slot_index_target.into());
         let (epoch_index_created, epoch_index_target) = (
             self.epoch_index_of(slot_index_created),
             self.epoch_index_of(slot_index_target),
         );
+
         if epoch_index_created > epoch_index_target {
-            return Err(Error::InvalidEpochDelta {
+            return Err(Error::InvalidEpochDiff {
                 created: epoch_index_created,
                 target: epoch_index_target,
             });
         }
+
         Ok(self
             .mana_parameters()
             .decay(mana, epoch_index_target.0 - epoch_index_created.0))
@@ -145,12 +147,14 @@ impl ProtocolParameters {
         claimed_epoch: impl Into<EpochIndex>,
     ) -> Result<u64, Error> {
         let (reward_epoch, claimed_epoch) = (reward_epoch.into(), claimed_epoch.into());
+
         if reward_epoch > claimed_epoch {
-            return Err(Error::InvalidEpochDelta {
+            return Err(Error::InvalidEpochDiff {
                 created: reward_epoch,
                 target: claimed_epoch,
             });
         }
+
         Ok(self.mana_parameters().decay(reward, claimed_epoch.0 - reward_epoch.0))
     }
 
@@ -167,8 +171,9 @@ impl ProtocolParameters {
             self.epoch_index_of(slot_index_created),
             self.epoch_index_of(slot_index_target),
         );
+
         if epoch_index_created > epoch_index_target {
-            return Err(Error::InvalidEpochDelta {
+            return Err(Error::InvalidEpochDiff {
                 created: epoch_index_created,
                 target: epoch_index_target,
             });
@@ -176,6 +181,7 @@ impl ProtocolParameters {
         if slot_index_created >= slot_index_target {
             return Ok(0);
         }
+
         let mana_parameters = self.mana_parameters();
 
         Ok(if epoch_index_created == epoch_index_target {
@@ -305,7 +311,7 @@ mod test {
                 stored_mana: 0,
                 created_slot: params().first_slot_of(2),
                 target_slot: params().first_slot_of(1),
-                err: Some(Error::InvalidEpochDelta {
+                err: Some(Error::InvalidEpochDiff {
                     created: 2.into(),
                     target: 1.into(),
                 }),
@@ -391,7 +397,7 @@ mod test {
                 amount: 0,
                 created_slot: params().first_slot_of(2),
                 target_slot: params().first_slot_of(1),
-                err: Some(Error::InvalidEpochDelta {
+                err: Some(Error::InvalidEpochDiff {
                     created: 2.into(),
                     target: 1.into(),
                 }),

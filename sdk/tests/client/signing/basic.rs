@@ -16,7 +16,7 @@ use iota_sdk::{
         input::{Input, UtxoInput},
         payload::{signed_transaction::Transaction, SignedTransactionPayload},
         protocol::protocol_parameters,
-        rand::mana::rand_mana_allotment,
+        slot::SlotIndex,
         unlock::{SignatureUnlock, Unlock},
     },
 };
@@ -39,17 +39,21 @@ async fn single_ed25519_unlock() -> Result<()> {
         .into_inner();
 
     let protocol_parameters = protocol_parameters();
+    let slot_index = SlotIndex::from(10);
 
-    let inputs = build_inputs([Basic(
-        1_000_000,
-        address_0.clone(),
-        None,
-        None,
-        None,
-        None,
-        None,
-        Some(Bip44::new(SHIMMER_COIN_TYPE)),
-    )]);
+    let inputs = build_inputs(
+        [Basic(
+            1_000_000,
+            address_0.clone(),
+            None,
+            None,
+            None,
+            None,
+            None,
+            Some(Bip44::new(SHIMMER_COIN_TYPE)),
+        )],
+        Some(slot_index),
+    );
 
     let outputs = build_outputs([Basic(
         1_000_000,
@@ -70,7 +74,7 @@ async fn single_ed25519_unlock() -> Result<()> {
                 .collect::<Vec<_>>(),
         )
         .with_outputs(outputs)
-        .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
+        .with_creation_slot(slot_index + 1)
         .finish_with_params(&protocol_parameters)?;
 
     let prepared_transaction_data = PreparedTransactionData {
@@ -114,39 +118,43 @@ async fn ed25519_reference_unlocks() -> Result<()> {
         .into_inner();
 
     let protocol_parameters = protocol_parameters();
+    let slot_index = SlotIndex::from(10);
 
-    let inputs = build_inputs([
-        Basic(
-            1_000_000,
-            address_0.clone(),
-            None,
-            None,
-            None,
-            None,
-            None,
-            Some(Bip44::new(SHIMMER_COIN_TYPE)),
-        ),
-        Basic(
-            1_000_000,
-            address_0.clone(),
-            None,
-            None,
-            None,
-            None,
-            None,
-            Some(Bip44::new(SHIMMER_COIN_TYPE)),
-        ),
-        Basic(
-            1_000_000,
-            address_0.clone(),
-            None,
-            None,
-            None,
-            None,
-            None,
-            Some(Bip44::new(SHIMMER_COIN_TYPE)),
-        ),
-    ]);
+    let inputs = build_inputs(
+        [
+            Basic(
+                1_000_000,
+                address_0.clone(),
+                None,
+                None,
+                None,
+                None,
+                None,
+                Some(Bip44::new(SHIMMER_COIN_TYPE)),
+            ),
+            Basic(
+                1_000_000,
+                address_0.clone(),
+                None,
+                None,
+                None,
+                None,
+                None,
+                Some(Bip44::new(SHIMMER_COIN_TYPE)),
+            ),
+            Basic(
+                1_000_000,
+                address_0.clone(),
+                None,
+                None,
+                None,
+                None,
+                None,
+                Some(Bip44::new(SHIMMER_COIN_TYPE)),
+            ),
+        ],
+        Some(slot_index),
+    );
 
     let outputs = build_outputs([Basic(
         3_000_000,
@@ -167,7 +175,7 @@ async fn ed25519_reference_unlocks() -> Result<()> {
                 .collect::<Vec<_>>(),
         )
         .with_outputs(outputs)
-        .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
+        .with_creation_slot(slot_index + 1)
         .finish_with_params(&protocol_parameters)?;
 
     let prepared_transaction_data = PreparedTransactionData {
@@ -232,29 +240,33 @@ async fn two_signature_unlocks() -> Result<()> {
         .into_inner();
 
     let protocol_parameters = protocol_parameters();
+    let slot_index = SlotIndex::from(10);
 
-    let inputs = build_inputs([
-        Basic(
-            1_000_000,
-            address_0.clone(),
-            None,
-            None,
-            None,
-            None,
-            None,
-            Some(Bip44::new(SHIMMER_COIN_TYPE)),
-        ),
-        Basic(
-            1_000_000,
-            address_1,
-            None,
-            None,
-            None,
-            None,
-            None,
-            Some(Bip44::new(SHIMMER_COIN_TYPE).with_address_index(1)),
-        ),
-    ]);
+    let inputs = build_inputs(
+        [
+            Basic(
+                1_000_000,
+                address_0.clone(),
+                None,
+                None,
+                None,
+                None,
+                None,
+                Some(Bip44::new(SHIMMER_COIN_TYPE)),
+            ),
+            Basic(
+                1_000_000,
+                address_1,
+                None,
+                None,
+                None,
+                None,
+                None,
+                Some(Bip44::new(SHIMMER_COIN_TYPE).with_address_index(1)),
+            ),
+        ],
+        Some(slot_index),
+    );
 
     let outputs = build_outputs([Basic(
         2_000_000,
@@ -275,7 +287,7 @@ async fn two_signature_unlocks() -> Result<()> {
                 .collect::<Vec<_>>(),
         )
         .with_outputs(outputs)
-        .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
+        .with_creation_slot(slot_index + 1)
         .finish_with_params(&protocol_parameters)?;
 
     let prepared_transaction_data = PreparedTransactionData {
