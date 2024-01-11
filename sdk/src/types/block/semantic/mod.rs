@@ -191,7 +191,7 @@ impl<'a> SemanticValidationContext<'a> {
                 .checked_add(stored_mana)
                 .ok_or(Error::ConsumedManaOverflow)?;
 
-            // TODO: Add reward mana
+            // TODO: Add reward mana https://github.com/iotaledger/iota-sdk/issues/1310
 
             if let Some(consumed_native_token) = consumed_native_token {
                 let native_token_amount = self
