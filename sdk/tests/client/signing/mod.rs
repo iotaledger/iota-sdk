@@ -71,6 +71,8 @@ async fn all_combined() -> Result<()> {
     let nft_3 = Address::Nft(NftAddress::new(nft_id_3));
     let nft_4 = Address::Nft(NftAddress::new(nft_id_4));
 
+    let slot_index = SlotIndex::from(90);
+
     let inputs = build_inputs(
         [
             Account(1_000_000, account_id_1, nft_1.clone(), None, None, None),
@@ -191,7 +193,7 @@ async fn all_combined() -> Result<()> {
                 None,
             ),
         ],
-        None,
+        Some(slot_index),
     );
 
     let outputs = build_outputs([
@@ -203,8 +205,6 @@ async fn all_combined() -> Result<()> {
         Nft(1_000_000, nft_id_3, ed25519_0.clone(), None, None, None, None, None),
         Nft(1_000_000, nft_id_4, ed25519_0.clone(), None, None, None, None, None),
     ]);
-
-    let slot_index = SlotIndex::from(90);
 
     let selected = InputSelection::new(
         inputs.clone(),
