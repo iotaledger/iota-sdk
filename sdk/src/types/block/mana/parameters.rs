@@ -255,11 +255,11 @@ mod test {
             .try_into()
             .unwrap();
             params.mana_parameters.decay_factor_epochs_sum = {
-                let epochs_per_year = 2f64.powi(params.slots_per_epoch_exponent() as _)
-                    * ((365_u64 * 24 * 60 * 60) as f64).recip()
-                    * params.slot_duration_in_seconds() as f64;
-                let beta = -params.mana_parameters().annual_decay_factor().ln();
-                (epochs_per_year / beta).floor() as _
+                let delta = params.epochs_per_year().recip();
+                let annual_decay_factor = params.mana_parameters().annual_decay_factor();
+                (annual_decay_factor.powf(delta) / (1.0 - annual_decay_factor.powf(delta))
+                    * (2f64.powi(params.mana_parameters().decay_factor_epochs_sum_exponent() as _)))
+                .floor() as _
             };
             params
         });
@@ -459,7 +459,7 @@ mod test {
                 );
 
                 if result != 0 {
-                    let float_res = mana_generation_with_decay_float(amount, created_slot, target_slot);
+                    let float_res = mana_generation_with_decay_float(amount as _, created_slot, target_slot);
                     let epsilon = 0.001;
                     let allowed_delta = float_res.abs().min(result as f64) * epsilon;
                     let dt = float_res - result as f64;
@@ -472,18 +472,17 @@ mod test {
         }
     }
 
-    fn mana_decay_float(mana: u64, creation_slot: SlotIndex, target_slot: SlotIndex) -> f64 {
+    fn mana_decay_float(mana: f64, creation_slot: SlotIndex, target_slot: SlotIndex) -> f64 {
         let (creation_epoch, target_epoch) = (
             params().epoch_index_of(creation_slot),
             params().epoch_index_of(target_slot),
         );
-        mana as f64
-            * params()
-                .decay_per_epoch()
-                .powi((target_epoch.0 - creation_epoch.0) as _)
+        mana * params()
+            .decay_per_epoch()
+            .powi((target_epoch.0 - creation_epoch.0) as _)
     }
 
-    fn mana_generation_with_decay_float(amount: u64, creation_slot: SlotIndex, target_slot: SlotIndex) -> f64 {
+    fn mana_generation_with_decay_float(amount: f64, creation_slot: SlotIndex, target_slot: SlotIndex) -> f64 {
         let (creation_epoch, target_epoch) = (
             params().epoch_index_of(creation_slot),
             params().epoch_index_of(target_slot),
@@ -491,7 +490,6 @@ mod test {
         let decay_per_epoch = params().decay_per_epoch();
         let generation_rate = params().mana_parameters().generation_rate() as f64
             * 2f64.powi(-(params().mana_parameters().generation_rate_exponent() as i32));
-        let amount = amount as f64;
 
         if creation_epoch == target_epoch {
             (target_slot.0 - creation_slot.0) as f64 * amount * generation_rate
@@ -517,16 +515,16 @@ mod test {
     }
 
     fn upper_bound_mana_decay(mana: u64, creation_slot: SlotIndex, target_slot: SlotIndex) -> f64 {
-        mana_decay_float(mana, creation_slot, target_slot)
+        mana_decay_float(mana as _, creation_slot, target_slot)
     }
 
     fn lower_bound_mana_decay(mana: u64, creation_slot: SlotIndex, target_slot: SlotIndex) -> f64 {
-        mana_decay_float(mana, creation_slot, target_slot)
+        mana_decay_float(mana as _, creation_slot, target_slot)
             - (mana as f64 * 2f64.powi(-(params().mana_parameters().decay_factors_exponent() as i32)) + 1.0)
     }
 
     fn upper_bound_mana_generation(amount: u64, creation_slot: SlotIndex, target_slot: SlotIndex) -> f64 {
-        mana_generation_with_decay_float(amount, creation_slot, target_slot) + 2.0
+        mana_generation_with_decay_float(amount as _, creation_slot, target_slot) + 2.0
             - 2f64.powi(-(params().mana_parameters().decay_factors_exponent() as i32) - 1)
     }
 
@@ -534,7 +532,7 @@ mod test {
         let decay_per_epoch = params().decay_per_epoch();
         let c = decay_per_epoch / (1.0 - decay_per_epoch);
 
-        mana_generation_with_decay_float(amount, creation_slot, target_slot)
+        mana_generation_with_decay_float(amount as _, creation_slot, target_slot)
             - (4.0
                 + amount as f64
                     * params().mana_parameters().generation_rate() as f64
