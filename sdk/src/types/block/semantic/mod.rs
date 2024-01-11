@@ -163,6 +163,7 @@ impl<'a> SemanticValidationContext<'a> {
                 .ok_or(Error::ConsumedAmountOverflow)?;
 
             let potential_mana = {
+                // Deposit amount doesn't generate mana
                 let min_deposit = consumed_output.minimum_amount(self.protocol_parameters.storage_score_parameters());
                 let generation_amount = consumed_output.amount().saturating_sub(min_deposit);
 
