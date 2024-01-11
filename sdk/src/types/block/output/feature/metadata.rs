@@ -279,6 +279,7 @@ pub(crate) mod irc_27 {
         type Error = Error;
 
         fn try_from(value: Irc27Metadata) -> Result<Self, Error> {
+            // TODO: is this hardcoded key correct or should users provide it?
             Self::new([("irc-27".as_bytes().to_vec(), value.to_bytes())])
         }
     }
@@ -454,6 +455,7 @@ pub(crate) mod irc_30 {
         type Error = Error;
 
         fn try_from(value: Irc30Metadata) -> Result<Self, Error> {
+            // TODO: is this hardcoded key correct or should users provide it?
             Self::new([("irc-30".as_bytes().to_vec(), value.to_bytes())])
         }
     }

@@ -34,8 +34,8 @@ pub struct CreateNativeTokenParams {
     /// Maximum supply
     pub maximum_supply: U256,
     /// Foundry metadata
-    #[serde(default, with = "crate::utils::serde::option_prefix_hex_bytes")]
-    pub foundry_metadata: Option<Vec<u8>>,
+    #[serde(default)]
+    pub foundry_metadata: Option<MetadataFeature>,
 }
 
 /// The result of a transaction to create a native token
@@ -170,10 +170,7 @@ where
                     )));
 
                     if let Some(foundry_metadata) = params.foundry_metadata {
-                        foundry_builder = foundry_builder.add_immutable_feature(MetadataFeature::new(
-                            // TODO: what hardcoded key or let user provide the full metadata?
-                            [(b"foundry".to_vec(), foundry_metadata)],
-                        )?);
+                        foundry_builder = foundry_builder.add_immutable_feature(foundry_metadata);
                     }
 
                     foundry_builder.finish_output()?

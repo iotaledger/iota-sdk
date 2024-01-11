@@ -576,7 +576,7 @@ pub async fn create_native_token_command(
     wallet: &Wallet,
     circulating_supply: String,
     maximum_supply: String,
-    foundry_metadata: Option<Vec<u8>>,
+    foundry_metadata: Option<MetadataFeature>,
 ) -> Result<(), Error> {
     // If no account output exists, create one first
     if wallet.balance().await?.accounts().is_empty() {
@@ -779,10 +779,12 @@ pub async fn mint_nft_command(
         .with_issuer(issuer);
 
     if let Some(metadata) = metadata {
+        // TODO: Let user specify key or the full metadata
         nft_options = nft_options.with_metadata(MetadataFeature::new([(metadata.clone(), metadata)])?);
     }
     if let Some(immutable_metadata) = immutable_metadata {
         nft_options = nft_options.with_immutable_metadata(MetadataFeature::new([(
+            // TODO: Let user specify key or the full metadata
             immutable_metadata.clone(),
             immutable_metadata,
         )])?);
@@ -1243,7 +1245,10 @@ pub async fn prompt_internal(
                                 wallet,
                                 circulating_supply,
                                 maximum_supply,
-                                bytes_from_hex_or_file(foundry_metadata_hex, foundry_metadata_file).await?,
+                                bytes_from_hex_or_file(foundry_metadata_hex, foundry_metadata_file)
+                                    .await?
+                                    // TODO: Let user specify key or the full metadata
+                                    .map(|d| MetadataFeature::new([(b"data".to_vec(), d)]).unwrap()),
                             )
                             .await
                         }
