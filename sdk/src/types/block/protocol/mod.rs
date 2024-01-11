@@ -238,6 +238,7 @@ impl ProtocolParameters {
     }
 
     /// Calculates the decay per epoch based on the annual decay factor and number of epochs in a year.
+    #[cfg(feature = "std")]
     pub fn decay_per_epoch(&self) -> f64 {
         self.mana_parameters()
             .annual_decay_factor()
