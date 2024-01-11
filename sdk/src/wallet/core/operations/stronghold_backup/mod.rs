@@ -113,7 +113,6 @@ impl Wallet {
             }
         });
 
-        // TODO: Do we even need to do this, since it should get set when we restore below?
         if !ignore_backup_values {
             self.data_mut().await.bip_path = read_bip_path;
         }
@@ -274,7 +273,6 @@ impl Wallet<StrongholdSecretManager> {
             }
         });
 
-        // TODO: Do we even need to do this, since it should get set when we restore below?
         if !ignore_backup_values {
             self.data_mut().await.bip_path = read_bip_path;
         }
