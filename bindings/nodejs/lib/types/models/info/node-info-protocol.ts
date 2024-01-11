@@ -155,6 +155,10 @@ export interface RewardsParameters {
      * in the pool rewards calculations.
      */
     poolCoefficientExponent: number;
+    /**
+     * The number of epochs for which rewards are retained.
+     */
+    retentionPeriod: number;
 }
 
 /**

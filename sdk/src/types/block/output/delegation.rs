@@ -288,7 +288,7 @@ impl DelegationOutput {
 
     /// Returns the validator address of the [`DelegationOutput`].
     pub fn validator_address(&self) -> &AccountAddress {
-        &self.validator_address.as_account()
+        self.validator_address.as_account()
     }
 
     /// Returns the start epoch of the [`DelegationOutput`].

@@ -21,6 +21,7 @@ use crate::{
     types::block::{
         address::{AccountAddress, Address, NftAddress},
         input::INPUT_COUNT_RANGE,
+        mana::ManaAllotment,
         output::{
             AccountOutput, ChainId, FoundryOutput, NativeTokensBuilder, NftOutput, Output, OutputId, OUTPUT_COUNT_RANGE,
         },
@@ -45,6 +46,7 @@ pub struct InputSelection {
     slot_index: SlotIndex,
     requirements: Vec<Requirement>,
     automatically_transitioned: HashSet<ChainId>,
+    mana_allotments: u64,
 }
 
 /// Result of the input selection algorithm.
@@ -101,6 +103,8 @@ impl InputSelection {
     }
 
     fn init(&mut self) -> Result<(), Error> {
+        // Adds an initial mana requirement.
+        self.requirements.push(Requirement::Mana(self.mana_allotments));
         // Adds an initial amount requirement.
         self.requirements.push(Requirement::Amount);
         // Adds an initial native tokens requirement.
@@ -190,6 +194,7 @@ impl InputSelection {
             slot_index: SlotIndex::from(0),
             requirements: Vec::new(),
             automatically_transitioned: HashSet::new(),
+            mana_allotments: 0,
         }
     }
 
@@ -220,6 +225,12 @@ impl InputSelection {
     /// Sets the slot index of an [`InputSelection`].
     pub fn with_slot_index(mut self, slot_index: impl Into<SlotIndex>) -> Self {
         self.slot_index = slot_index.into();
+        self
+    }
+
+    /// Sets the mana allotments sum of an [`InputSelection`].
+    pub fn with_mana_allotments<'a>(mut self, mana_allotments: impl Iterator<Item = &'a ManaAllotment>) -> Self {
+        self.mana_allotments = mana_allotments.map(ManaAllotment::mana).sum();
         self
     }
 
@@ -373,8 +384,8 @@ impl InputSelection {
     /// transaction. Also creates a remainder output and chain transition outputs if required.
     pub fn select(mut self) -> Result<Selected, Error> {
         if !OUTPUT_COUNT_RANGE.contains(&(self.outputs.len() as u16)) {
-            // If burn is provided, outputs will be added later
-            if !(self.outputs.is_empty() && self.burn.is_some()) {
+            // If burn or mana allotments are provided, outputs will be added later.
+            if !(self.outputs.is_empty() && (self.burn.is_some() || self.mana_allotments != 0)) {
                 return Err(Error::InvalidOutputCount(self.outputs.len()));
             }
         }
