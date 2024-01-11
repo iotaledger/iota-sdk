@@ -89,6 +89,31 @@ impl StorageScore for MetadataFeature {}
 
 impl WorkScore for MetadataFeature {}
 
+impl TryFrom<Vec<(Vec<u8>, Vec<u8>)>> for MetadataFeature {
+    type Error = Error;
+
+    fn try_from(data: Vec<(Vec<u8>, Vec<u8>)>) -> Result<Self, Error> {
+        let mut res = BTreeMap::<
+            BoxedSlicePrefix<u8, MetadataFeatureKeyLength>,
+            BoxedSlicePrefix<u8, MetadataFeatureValueLength>,
+        >::new();
+        for (k, v) in data {
+            if !k.iter().all(|b| b.is_ascii_graphic()) {
+                return Err(Error::NonAsciiMetadataKey(k.to_vec()));
+            }
+            res.insert(
+                k.into_boxed_slice()
+                    .try_into()
+                    .map_err(Error::InvalidMetadataFeatureKeyLength)?,
+                v.into_boxed_slice()
+                    .try_into()
+                    .map_err(Error::InvalidMetadataFeatureValueLength)?,
+            );
+        }
+        Ok(Self(res.try_into().map_err(Error::InvalidMetadataFeatureLength)?))
+    }
+}
+
 impl TryFrom<BTreeMap<Vec<u8>, Vec<u8>>> for MetadataFeature {
     type Error = Error;
 
