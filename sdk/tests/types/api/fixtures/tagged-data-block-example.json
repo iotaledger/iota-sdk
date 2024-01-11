@@ -17,11 +17,16 @@
       "0xba75a143de4ac932986fbe7b1d78f639bc6ee8aee10d510d41572851530be884778052aa",
       "0xea5315941f4337752905599710b55e64018c71f4d8f299d0636d50484d05e6ac5667b503"
     ],
+    "payload": {
+      "type": 0,
+      "tag": "0x746167",
+      "data": "0x6c754128356c071e5549764a48427b"
+    },
     "maxBurnedMana": "864"
   },
   "signature": {
     "type": 0,
     "publicKey": "0x2daefbcbadd044da470acd2f7fcf6fcb04b873cc801e7ee408018e1dfa0257ac",
-    "signature": "0x74e57aa62358bb91ee931c05337a3af2e624fa9b20b04fcb4e15da0a9a4b4281a50ef6384ab7977179d16bd326cebb714c4653e1711447f18cefe1066aa1610d"
+    "signature": "0xc2982c2476379db0c8d39a204801163fc05dc1c7aa7df537e6041f91491943ab1de29a2dfe6076588c53b8d2ccf5eabe49f2cb64198303682859fd0c58348b0d"
   }
 }

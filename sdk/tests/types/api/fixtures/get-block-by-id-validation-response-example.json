@@ -1,26 +1,28 @@
 {
-    "header": {
-      "protocolVersion": 3,
-      "networkId": "0",
-      "issuingTime": "1692966346513784862",
-      "slotCommitmentId": "0x8633b2eb1845fdecf12ee6c5e789c3cf1f0d0bbb3cee65cb5fb2757e995b5cd70000000000000000",
-      "latestFinalizedSlot": 0,
-      "issuerId": "0x375358f92cc94750669598b0aaa55a6ff73310b90710e1fad524c0f911be0fea"
-    },
-    "body": {
-      "type": 1,
-      "strongParents": [
-        "0x2de585533d9c9684747e49f70e5e620a4e6c3fd1c7d8b73520c198c7def29a050200000000000000",
-        "0x5853745388056fb59c193dc6fe6f8c3f76bf8d82a42ed340eba621a9f5bb79790200000000000000"
-      ],
-      "weakParents": [],
-      "shallowLikeParents": [],
-      "highestSupportedVersion": 3,
-      "protocolParametersHash": "0x69449327e1973152a1d2fdff1c8f27428fc52e4f1cf0bb8006eae397714e1968"
-    },
-    "signature": {
-      "type": 0,
-      "publicKey": "0x05c1de274451db8de8182d64c6ee0dca3ae0c9077e0b4330c976976171d79064",
-      "signature": "0xae8a0ad932ff958576bcd787fd578dfb740b8a319d63595a3af7307f56f0afcbc6187d67eee20026aa39b6ba62c93d1a6e27111607b1b1d8f2206889284e9408"
-    }
+  "header": {
+    "protocolVersion": 3,
+    "networkId": "8342982141227064571",
+    "issuingTime": "1695275852000000000",
+    "slotCommitmentId": "0x3a1e3b617060146e0362361a4b752833186108395f3b2b3d3e6c655e287d70767ea58d2a",
+    "latestFinalizedSlot": 500,
+    "issuerId": "0x17432c5a7a672503480241125e3952414a7a320441080c624c264b004e09614a"
+  },
+  "body": {
+    "type": 1,
+    "strongParents": [
+      "0x27e0461873f37040c9e59c35ad8a106fa1b94f5ec9ef89499b31904f9a3de59be58dd44a",
+      "0x714821f8f257e0a502b71ac7ee57530bb9dc29fe12ff3936f925b835a297680400b76948",
+      "0x9951e512546cd9c9fbdab348b6cba91a601a29b50854e55a6e14f6803ca1d81ac7eff5ce",
+      "0xaaa7bacf26f1aa4754d42edeab45d6169ea723b7fdf0f6ff3b6ebe90d09dbff6bc553936",
+      "0xba75a143de4ac932986fbe7b1d78f639bc6ee8aee10d510d41572851530be884778052aa",
+      "0xea5315941f4337752905599710b55e64018c71f4d8f299d0636d50484d05e6ac5667b503"
+    ],
+    "highestSupportedVersion": 3,
+    "protocolParametersHash": "0x0c0a5be47669365426b3e34ecd68f8fe6c70656a54139a1e1cd6fd779bfb476f"
+  },
+  "signature": {
+    "type": 0,
+    "publicKey": "0x2daefbcbadd044da470acd2f7fcf6fcb04b873cc801e7ee408018e1dfa0257ac",
+    "signature": "0x3b6185bb5757d5e7fd576eeedf0c765c44cbcfe148261b8558a942867528f2cfe5a39a6ecd7bf7e82e134867a75df05385624be8c4102b3b77b397163459460b"
   }
+}
