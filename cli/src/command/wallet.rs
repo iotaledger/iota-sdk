@@ -240,6 +240,8 @@ pub async fn restore_command_stronghold(
         }
     }
 
+    // If the restore fails we do not want to remove an already existing wallet
+    let restore_into_existing_wallet = storage_path.is_dir();
     let wallet = builder
         // Will be overwritten by the backup's value.
         .with_client_options(ClientOptions::new().with_node(DEFAULT_NODE_URL)?)
@@ -251,10 +253,12 @@ pub async fn restore_command_stronghold(
 
     let password = get_password("Stronghold backup password", false)?;
     if let Err(e) = wallet.restore_backup(backup_path.into(), password, None, None).await {
-        // Clean up a failed restore (typically produces a wallet without a secret manager)
+        // Clean up the file system after a failed restore (typically produces a wallet without a secret manager).
         // TODO: a better way would be to not create any files/dirs in the first place when it's not clear yet whether
-        // the restore will be successful
-        std::fs::remove_dir_all(storage_path)?;
+        // the restore will be successful.
+        if storage_path.is_dir() && !restore_into_existing_wallet {
+            std::fs::remove_dir_all(storage_path)?;
+        }
         Err(e.into())
     } else {
         println_log_info!(
