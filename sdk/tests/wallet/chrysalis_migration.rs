@@ -287,7 +287,7 @@ async fn migrate_chrysalis_stronghold() -> Result<()> {
         .await?;
 
     wallet
-        .restore_from_backup(
+        .restore_backup(
             "./tests/wallet/fixtures/chrysalis-backup-work-factor-0.stronghold".into(),
             Password::from("password".to_string()),
             None,

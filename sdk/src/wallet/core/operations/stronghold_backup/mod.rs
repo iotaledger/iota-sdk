@@ -3,11 +3,7 @@
 
 pub(crate) mod stronghold_snapshot;
 
-use std::{
-    fs,
-    path::{Path, PathBuf},
-    sync::atomic::Ordering,
-};
+use std::{fs, path::PathBuf, sync::atomic::Ordering};
 
 use futures::{future::try_join_all, FutureExt};
 
@@ -73,10 +69,9 @@ impl Wallet {
     /// coin type doesn't match
     /// if ignore_if_bech32_hrp_mismatch == Some("rms"), but addresses have something different like "smr", no accounts
     /// will be restored.
-    pub async fn restore_from_backup(
+    pub async fn restore_backup(
         &self,
-        backup_path: &Path,
-        snapshot_path: &Path,
+        backup_path: PathBuf,
         stronghold_password: impl Into<Password> + Send,
         ignore_if_coin_type_mismatch: Option<bool>,
         ignore_if_bech32_hrp_mismatch: Option<Hrp>,
@@ -101,13 +96,13 @@ impl Wallet {
         let new_snapshot_path = if let SecretManager::Stronghold(stronghold) = &mut *secret_manager {
             stronghold.snapshot_path.clone()
         } else {
-            snapshot_path.into()
+            PathBuf::from("wallet.stronghold")
         };
 
         // We'll create a new stronghold to load the backup
         let new_stronghold = StrongholdSecretManager::builder()
             .password(stronghold_password.clone())
-            .build(backup_path)?;
+            .build(backup_path.clone())?;
 
         #[cfg_attr(not(feature = "storage"), allow(unused))]
         let chrysalis_data = stronghold_snapshot::migrate_snapshot_from_chrysalis_to_stardust(&new_stronghold).await?;

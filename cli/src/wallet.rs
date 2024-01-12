@@ -31,9 +31,7 @@ pub async fn new_wallet(cli: WalletCli) -> Result<(Option<Wallet>, Option<Accoun
             snapshot_path: std::path::PathBuf,
             snapshot_exists: Option<iota_sdk::client::Password>,
         },
-        LedgerNano {
-            is_connected: bool,
-        },
+        LedgerNano,
     }
 
     let wallet_and_secret_manager = {
@@ -59,9 +57,7 @@ pub async fn new_wallet(cli: WalletCli) -> Result<(Option<Wallet>, Option<Accoun
                                 }
                             }
                         }
-                        SecretManager::LedgerNano(ledger_nano) => LinkedSecretManager::LedgerNano {
-                            is_connected: ledger_nano.get_ledger_nano_status().await.connected(),
-                        },
+                        SecretManager::LedgerNano(_) => LinkedSecretManager::LedgerNano,
                         _ => panic!("only Stronghold and LedgerNano supported at the moment."),
                     };
                     Some((wallet, linked_secret_manager))
@@ -264,22 +260,16 @@ pub async fn new_wallet(cli: WalletCli) -> Result<(Option<Wallet>, Option<Accoun
     } else {
         // no wallet command provided
         if let Some((wallet, linked_secret_manager)) = wallet_and_secret_manager {
-            match linked_secret_manager {
-                LinkedSecretManager::Stronghold {
-                    snapshot_exists: None,
-                    snapshot_path,
-                } => {
-                    println_log_error!(
-                        "Snapshot file for Stronghold secret manager linked with the wallet not found at '{}'",
-                        snapshot_path.display()
-                    );
-                    return Ok((None, None));
-                }
-                LinkedSecretManager::LedgerNano { is_connected: false } => {
-                    println_log_error!("Ledger Nano linked with the wallet not connected");
-                    return Ok((None, None));
-                }
-                _ => {}
+            if let LinkedSecretManager::Stronghold {
+                snapshot_exists: None,
+                snapshot_path,
+            } = linked_secret_manager
+            {
+                println_log_error!(
+                    "Snapshot file for Stronghold secret manager linked with the wallet not found at '{}'",
+                    snapshot_path.display()
+                );
+                return Ok((None, None));
             }
 
             if wallet.get_accounts().await?.is_empty() {
