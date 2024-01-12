@@ -12,7 +12,7 @@ use iota_sdk::{
         address::Address,
         output::{feature::MetadataFeature, unlock_condition::AddressUnlockCondition, NftId, NftOutputBuilder, Output},
         protocol::protocol_parameters,
-        rand::output::rand_output_metadata,
+        rand::output::{rand_output_id_with_slot_index, rand_output_metadata_with_id},
     },
 };
 use pretty_assertions::{assert_eq, assert_ne};
@@ -453,7 +453,7 @@ fn nft_in_output_and_sender() {
                 None,
             ),
         ],
-        None,
+        Some(SLOT_INDEX),
     );
     let outputs = build_outputs([
         Nft(
@@ -915,7 +915,7 @@ fn increase_nft_amount() {
                 None,
             ),
         ],
-        None,
+        Some(SLOT_INDEX),
     );
     let outputs = build_outputs([Nft(
         3_000_000,
@@ -970,7 +970,7 @@ fn decrease_nft_amount() {
                 None,
             ),
         ],
-        None,
+        Some(SLOT_INDEX),
     );
     let outputs = build_outputs([Nft(
         1_000_000,
@@ -1037,7 +1037,7 @@ fn prefer_basic_to_nft() {
                 None,
             ),
         ],
-        None,
+        Some(SLOT_INDEX),
     );
     let outputs = build_outputs([Basic(
         1_000_000,
@@ -1093,7 +1093,7 @@ fn take_amount_from_nft_to_fund_basic() {
                 None,
             ),
         ],
-        None,
+        Some(SLOT_INDEX),
     );
     let outputs = build_outputs([Basic(
         1_200_000,
@@ -1161,7 +1161,7 @@ fn nft_burn_should_validate_nft_sender() {
                 None,
             ),
         ],
-        None,
+        Some(SLOT_INDEX),
     );
     let outputs = build_outputs([Basic(
         3_000_000,
@@ -1217,7 +1217,7 @@ fn nft_burn_should_validate_nft_address() {
                 None,
             ),
         ],
-        None,
+        Some(SLOT_INDEX),
     );
     let outputs = build_outputs([Basic(
         3_000_000,
@@ -1328,7 +1328,7 @@ fn changed_immutable_metadata() {
 
     let inputs = [InputSigningData {
         output: nft_output.clone(),
-        output_metadata: rand_output_metadata(),
+        output_metadata: rand_output_metadata_with_id(rand_output_id_with_slot_index(SLOT_INDEX)),
         chain: None,
     }];
 
