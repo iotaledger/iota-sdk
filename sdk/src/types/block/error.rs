@@ -204,7 +204,7 @@ pub enum Error {
     DuplicateOutputChain(ChainId),
     InvalidField(&'static str),
     NullDelegationValidatorId,
-    InvalidEpochDelta {
+    InvalidEpochDiff {
         created: EpochIndex,
         target: EpochIndex,
     },
@@ -447,8 +447,8 @@ impl fmt::Display for Error {
             Self::DuplicateOutputChain(chain_id) => write!(f, "duplicate output chain {chain_id}"),
             Self::InvalidField(field) => write!(f, "invalid field: {field}"),
             Self::NullDelegationValidatorId => write!(f, "null delegation validator ID"),
-            Self::InvalidEpochDelta { created, target } => {
-                write!(f, "invalid epoch delta: created {created}, target {target}")
+            Self::InvalidEpochDiff { created, target } => {
+                write!(f, "invalid epoch diff: created {created}, target {target}")
             }
             Self::TrailingCapabilityBytes => write!(f, "capability bytes have trailing zeroes"),
             Self::RestrictedAddressCapability(cap) => write!(f, "restricted address capability: {cap:?}"),
