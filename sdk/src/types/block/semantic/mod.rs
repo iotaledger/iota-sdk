@@ -167,7 +167,7 @@ impl<'a> SemanticValidationContext<'a> {
                 let min_deposit = consumed_output.minimum_amount(self.protocol_parameters.storage_score_parameters());
                 let generation_amount = consumed_output.amount().saturating_sub(min_deposit);
 
-                self.protocol_parameters.potential_mana(
+                self.protocol_parameters.generate_mana_with_decay(
                     generation_amount,
                     output_id.transaction_id().slot_index(),
                     self.transaction.creation_slot(),

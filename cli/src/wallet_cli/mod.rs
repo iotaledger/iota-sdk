@@ -181,6 +181,8 @@ pub enum WalletCommand {
         /// Selector for output.
         /// Either by ID (e.g. 0xbce525324af12eda02bf7927e92cea3a8e8322d0f41966271443e6c3b245a4400000) or index.
         selector: OutputSelector,
+        #[arg(short, long)]
+        metadata: bool,
     },
     /// List all outputs.
     Outputs,
@@ -803,7 +805,7 @@ pub async fn node_info_command(wallet: &Wallet) -> Result<(), Error> {
 }
 
 /// `output` command
-pub async fn output_command(wallet: &Wallet, selector: OutputSelector) -> Result<(), Error> {
+pub async fn output_command(wallet: &Wallet, selector: OutputSelector, metadata: bool) -> Result<(), Error> {
     let wallet_data = wallet.data().await;
     let output = match selector {
         OutputSelector::Id(id) => wallet_data.get_output(&id),
@@ -815,7 +817,11 @@ pub async fn output_command(wallet: &Wallet, selector: OutputSelector) -> Result
     };
 
     if let Some(output) = output {
-        println_log_info!("{output:#?}");
+        if metadata {
+            println_log_info!("{output:#?}");
+        } else {
+            println_log_info!("{:#?}", output.output);
+        }
     } else {
         println_log_info!("Output not found");
     }
@@ -1286,7 +1292,9 @@ pub async fn prompt_internal(
                             .await
                         }
                         WalletCommand::NodeInfo => node_info_command(wallet).await,
-                        WalletCommand::Output { selector } => output_command(wallet, selector).await,
+                        WalletCommand::Output { selector, metadata } => {
+                            output_command(wallet, selector, metadata).await
+                        }
                         WalletCommand::Outputs => outputs_command(wallet).await,
                         WalletCommand::Send {
                             address,

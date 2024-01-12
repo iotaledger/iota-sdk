@@ -80,7 +80,7 @@ class NodeCoreAPI(metaclass=ABCMeta):
             The block id of the posted block.
         """
         return self._call_method('postBlock', {
-            'block': block.to_dict()
+            'block': block
         })
 
     def get_block(self, block_id: HexStr) -> Block:
