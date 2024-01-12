@@ -203,7 +203,7 @@ fn two_sdrucs_to_the_same_address_both_needed() {
                 None,
             ),
         ],
-        None,
+        Some(SLOT_INDEX),
     );
     let outputs = build_outputs([Basic(
         2_000_000,
@@ -268,7 +268,7 @@ fn two_sdrucs_to_the_same_address_one_needed() {
                 None,
             ),
         ],
-        None,
+        Some(SLOT_INDEX),
     );
     let outputs = build_outputs([Basic(
         1_000_000,
@@ -334,7 +334,7 @@ fn two_sdrucs_to_different_addresses_both_needed() {
                 None,
             ),
         ],
-        None,
+        Some(SLOT_INDEX),
     );
     let outputs = build_outputs([Basic(
         2_000_000,
@@ -405,7 +405,7 @@ fn two_sdrucs_to_different_addresses_one_needed() {
                 None,
             ),
         ],
-        None,
+        Some(SLOT_INDEX),
     );
     let outputs = build_outputs([Basic(
         1_000_000,
@@ -517,7 +517,7 @@ fn useless_sdruc_required_for_sender_feature() {
                 None,
             ),
         ],
-        None,
+        Some(SLOT_INDEX),
     );
     let outputs = build_outputs([Basic(
         1_000_000,
@@ -584,7 +584,7 @@ fn sdruc_required_non_ed25519_in_address_unlock() {
                 None,
             ),
         ],
-        None,
+        Some(SLOT_INDEX),
     );
     let outputs = build_outputs([Basic(
         1_000_000,
@@ -658,7 +658,7 @@ fn useless_sdruc_non_ed25519_in_address_unlock() {
                 None,
             ),
         ],
-        None,
+        Some(SLOT_INDEX),
     );
     let outputs = build_outputs([Basic(
         1_000_000,
