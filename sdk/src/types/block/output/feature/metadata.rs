@@ -103,6 +103,7 @@ fn metadata_feature_from_iter(data: impl IntoIterator<Item = (Vec<u8>, Vec<u8>)>
         BoxedSlicePrefix<u8, MetadataFeatureKeyLength>,
         BoxedSlicePrefix<u8, MetadataFeatureValueLength>,
     >::new();
+    
     for (k, v) in data {
         if !k.iter().all(|b| b.is_ascii_graphic()) {
             return Err(Error::NonGraphicAsciiMetadataKey(k.to_vec()));
