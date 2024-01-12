@@ -42,7 +42,7 @@ fn missing_input_account_for_foundry() {
             None,
             None,
         )],
-        None,
+        Some(SLOT_INDEX),
     );
     let outputs = build_outputs([Foundry(
         1_000_000,
@@ -131,7 +131,7 @@ fn minted_native_tokens_in_new_remainder() {
                 None,
             ),
         ],
-        None,
+        Some(SLOT_INDEX),
     );
     let outputs = build_outputs([Foundry(
         1_000_000,
@@ -191,7 +191,7 @@ fn minted_native_tokens_in_provided_output() {
                 None,
             ),
         ],
-        None,
+        Some(SLOT_INDEX),
     );
     let outputs = build_outputs([
         Foundry(
@@ -258,7 +258,7 @@ fn melt_native_tokens() {
                 )),
             ),
         ],
-        None,
+        Some(SLOT_INDEX),
     );
     let account_output = AccountOutputBuilder::new_with_amount(1_000_000, account_id_1)
         .add_unlock_condition(AddressUnlockCondition::new(
@@ -326,7 +326,7 @@ fn destroy_foundry_with_account_state_transition() {
                 None,
             ),
         ],
-        None,
+        Some(SLOT_INDEX),
     );
     let account_output = AccountOutputBuilder::from(inputs[0].output.as_account())
         .with_amount(103_100)
@@ -374,7 +374,7 @@ fn destroy_foundry_with_account_burn() {
                 None,
             ),
         ],
-        None,
+        Some(SLOT_INDEX),
     );
     let outputs = build_outputs([Basic(
         1_000_000,
@@ -450,7 +450,7 @@ fn prefer_basic_to_foundry() {
                 None,
             ),
         ],
-        None,
+        Some(SLOT_INDEX),
     );
     let outputs = build_outputs([Basic(
         1_000_000,
@@ -503,7 +503,7 @@ fn simple_foundry_transition_basic_not_needed() {
                 None,
             ),
         ],
-        None,
+        Some(SLOT_INDEX),
     );
     let account_output = AccountOutputBuilder::new_with_amount(2_000_000, account_id_1)
         .add_unlock_condition(AddressUnlockCondition::new(
@@ -582,7 +582,7 @@ fn simple_foundry_transition_basic_not_needed_with_remainder() {
                 None,
             ),
         ],
-        None,
+        Some(SLOT_INDEX),
     );
     let account_output = AccountOutputBuilder::new_with_amount(2_000_000, account_id_1)
         .add_unlock_condition(AddressUnlockCondition::new(
@@ -727,7 +727,7 @@ fn mint_and_burn_at_the_same_time() {
             SimpleTokenScheme::new(100, 0, 200).unwrap(),
             Some((&token_id.to_string(), 100)),
         )],
-        None,
+        Some(SLOT_INDEX),
     );
     let account_output = AccountOutputBuilder::new_with_amount(2_000_000, account_id_1)
         .add_unlock_condition(AddressUnlockCondition::new(
@@ -793,7 +793,7 @@ fn take_amount_from_account_and_foundry_to_fund_basic() {
                 Some((&token_id.to_string(), 100)),
             ),
         ],
-        None,
+        Some(SLOT_INDEX),
     );
     let account_output = AccountOutputBuilder::new_with_amount(2_000_000, account_id_1)
         .add_unlock_condition(AddressUnlockCondition::new(
@@ -864,7 +864,7 @@ fn create_native_token_but_burn_account() {
                 None,
             ),
         ],
-        None,
+        Some(SLOT_INDEX),
     );
     let outputs = build_outputs([Foundry(
         1_000_000,
@@ -926,7 +926,7 @@ fn melted_tokens_not_provided() {
                 None,
             ),
         ],
-        None,
+        Some(SLOT_INDEX),
     );
     let outputs = build_outputs([Foundry(
         1_000_000,
@@ -979,7 +979,7 @@ fn burned_tokens_not_provided() {
                 None,
             ),
         ],
-        None,
+        Some(SLOT_INDEX),
     );
     let outputs = build_outputs([Foundry(
         1_000_000,
@@ -1021,7 +1021,7 @@ fn foundry_in_outputs_and_required() {
             SimpleTokenScheme::new(0, 0, 10).unwrap(),
             None,
         )],
-        None,
+        Some(SLOT_INDEX),
     );
     let account_output = AccountOutputBuilder::new_with_amount(1_251_500, account_id_2)
         .add_unlock_condition(AddressUnlockCondition::new(
@@ -1091,7 +1091,7 @@ fn melt_and_burn_native_tokens() {
                 Some((&token_id.to_string(), 1000)),
             ),
         ],
-        None,
+        Some(SLOT_INDEX),
     );
     let account_output = AccountOutputBuilder::new_with_amount(1_000_000, account_id)
         .add_unlock_condition(AddressUnlockCondition::new(

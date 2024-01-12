@@ -31,7 +31,7 @@ fn sdruc_output_not_provided_no_remainder() {
             None,
             None,
         )],
-        None,
+        Some(SLOT_INDEX),
     );
     let outputs = build_outputs([Basic(
         1_000_000,
@@ -84,7 +84,7 @@ fn sdruc_output_provided_no_remainder() {
             None,
             None,
         )],
-        None,
+        Some(SLOT_INDEX),
     );
     let outputs = build_outputs([
         Basic(
@@ -138,7 +138,7 @@ fn sdruc_output_provided_remainder() {
             None,
             None,
         )],
-        None,
+        Some(SLOT_INDEX),
     );
     let outputs = build_outputs([Basic(
         1_000_000,
@@ -459,7 +459,7 @@ fn insufficient_amount_because_of_sdruc() {
             None,
             None,
         )],
-        None,
+        Some(SLOT_INDEX),
     );
     let outputs = build_outputs([Basic(
         2_000_000,

@@ -35,7 +35,7 @@ fn input_amount_equal_output_amount() {
             None,
             None,
         )],
-        None,
+        Some(SLOT_INDEX),
     );
     let outputs = build_outputs([Basic(
         1_000_000,
@@ -77,7 +77,7 @@ fn input_amount_lower_than_output_amount() {
             None,
             None,
         )],
-        None,
+        Some(SLOT_INDEX),
     );
     let outputs = build_outputs([Basic(
         2_000_000,
@@ -135,7 +135,7 @@ fn input_amount_lower_than_output_amount_2() {
                 None,
             ),
         ],
-        None,
+        Some(SLOT_INDEX),
     );
     let outputs = build_outputs([Basic(
         3_500_000,
@@ -181,7 +181,7 @@ fn input_amount_greater_than_output_amount() {
             None,
             None,
         )],
-        None,
+        Some(SLOT_INDEX),
     );
     let outputs = build_outputs([Basic(
         500_000,
@@ -236,7 +236,7 @@ fn input_amount_greater_than_output_amount_with_remainder_address() {
             None,
             None,
         )],
-        None,
+        Some(SLOT_INDEX),
     );
     let outputs = build_outputs([Basic(
         500_000,
@@ -303,7 +303,7 @@ fn two_same_inputs_one_needed() {
                 None,
             ),
         ],
-        None,
+        Some(SLOT_INDEX),
     );
     let outputs = build_outputs([Basic(
         500_000,
@@ -370,7 +370,7 @@ fn two_inputs_one_needed() {
                 None,
             ),
         ],
-        None,
+        Some(SLOT_INDEX),
     );
     let outputs = build_outputs([Basic(
         1_000_000,
@@ -424,7 +424,7 @@ fn two_inputs_one_needed_reversed() {
                 None,
             ),
         ],
-        None,
+        Some(SLOT_INDEX),
     );
     let outputs = build_outputs([Basic(
         1_000_000,
@@ -478,7 +478,7 @@ fn two_inputs_both_needed() {
                 None,
             ),
         ],
-        None,
+        Some(SLOT_INDEX),
     );
     let outputs = build_outputs([Basic(
         3_000_000,
@@ -532,7 +532,7 @@ fn two_inputs_remainder() {
                 None,
             ),
         ],
-        None,
+        Some(SLOT_INDEX),
     );
     let outputs = build_outputs([Basic(
         2_500_000,
@@ -671,7 +671,7 @@ fn ed25519_sender() {
                 None,
             ),
         ],
-        None,
+        Some(SLOT_INDEX),
     );
     let outputs = build_outputs([Basic(
         2_000_000,
@@ -699,10 +699,12 @@ fn ed25519_sender() {
 
     // Sender + another for amount
     assert_eq!(selected.inputs.len(), 2);
-    assert!(selected
-        .inputs
-        .iter()
-        .any(|input| *input.output.as_basic().address() == sender));
+    assert!(
+        selected
+            .inputs
+            .iter()
+            .any(|input| *input.output.as_basic().address() == sender)
+    );
     // Provided output + remainder
     assert_eq!(selected.outputs.len(), 2);
 }
@@ -722,7 +724,7 @@ fn missing_ed25519_sender() {
             None,
             None,
         )],
-        None,
+        Some(SLOT_INDEX),
     );
     let outputs = build_outputs([Basic(
         1_000_000,
@@ -806,7 +808,7 @@ fn account_sender() {
                 None,
             ),
         ],
-        None,
+        Some(SLOT_INDEX),
     );
     let outputs = build_outputs([Basic(
         2_000_000,
@@ -831,10 +833,12 @@ fn account_sender() {
 
     // Sender + another for amount
     assert_eq!(selected.inputs.len(), 2);
-    assert!(selected
-        .inputs
-        .iter()
-        .any(|input| input.output.is_account() && *input.output.as_account().account_id() == account_id_1));
+    assert!(
+        selected
+            .inputs
+            .iter()
+            .any(|input| input.output.is_account() && *input.output.as_account().account_id() == account_id_1)
+    );
     // Provided output + account
     assert_eq!(selected.outputs.len(), 2);
     assert!(selected.outputs.contains(&outputs[0]));
@@ -866,7 +870,7 @@ fn account_sender_zero_id() {
                 None,
             ),
         ],
-        None,
+        Some(SLOT_INDEX),
     );
     let account_id = AccountId::from(inputs[1].output_id());
     let outputs = build_outputs([Basic(
@@ -892,10 +896,12 @@ fn account_sender_zero_id() {
 
     assert!(unsorted_eq(&selected.inputs, &inputs));
     assert_eq!(selected.outputs.len(), 2);
-    assert!(selected
-        .outputs
-        .iter()
-        .any(|output| output.is_account() && *output.as_account().account_id() == account_id));
+    assert!(
+        selected
+            .outputs
+            .iter()
+            .any(|output| output.is_account() && *output.as_account().account_id() == account_id)
+    );
 }
 
 #[test]
@@ -913,7 +919,7 @@ fn missing_account_sender() {
             None,
             None,
         )],
-        None,
+        Some(SLOT_INDEX),
     );
     let outputs = build_outputs([Basic(
         1_000_000,
@@ -999,7 +1005,7 @@ fn nft_sender() {
                 None,
             ),
         ],
-        None,
+        Some(SLOT_INDEX),
     );
     let outputs = build_outputs([Basic(
         2_000_000,
@@ -1024,10 +1030,12 @@ fn nft_sender() {
 
     // Sender + another for amount
     assert_eq!(selected.inputs.len(), 2);
-    assert!(selected
-        .inputs
-        .iter()
-        .any(|input| input.output.is_nft() && *input.output.as_nft().nft_id() == nft_id_1));
+    assert!(
+        selected
+            .inputs
+            .iter()
+            .any(|input| input.output.is_nft() && *input.output.as_nft().nft_id() == nft_id_1)
+    );
     // Provided output + nft
     assert_eq!(selected.outputs.len(), 2);
     assert!(selected.outputs.contains(&inputs[2].output));
@@ -1062,7 +1070,7 @@ fn nft_sender_zero_id() {
                 None,
             ),
         ],
-        None,
+        Some(SLOT_INDEX),
     );
     let nft_id = NftId::from(inputs[1].output_id());
     let outputs = build_outputs([Basic(
@@ -1088,10 +1096,12 @@ fn nft_sender_zero_id() {
 
     assert!(unsorted_eq(&selected.inputs, &inputs));
     assert_eq!(selected.outputs.len(), 2);
-    assert!(selected
-        .outputs
-        .iter()
-        .any(|output| output.is_nft() && *output.as_nft().nft_id() == nft_id));
+    assert!(
+        selected
+            .outputs
+            .iter()
+            .any(|output| output.is_nft() && *output.as_nft().nft_id() == nft_id)
+    );
 }
 
 #[test]
@@ -1109,7 +1119,7 @@ fn missing_nft_sender() {
             None,
             None,
         )],
-        None,
+        Some(SLOT_INDEX),
     );
     let outputs = build_outputs([Basic(
         1_000_000,
@@ -1152,7 +1162,7 @@ fn simple_remainder() {
             None,
             None,
         )],
-        None,
+        Some(SLOT_INDEX),
     );
     let outputs = build_outputs([Basic(
         500_000,
@@ -1285,7 +1295,7 @@ fn one_provided_one_needed() {
             None,
             None,
         )],
-        None,
+        Some(SLOT_INDEX),
     );
     let outputs = build_outputs([Basic(
         1_000_000,
@@ -1327,7 +1337,7 @@ fn insufficient_amount() {
             None,
             None,
         )],
-        None,
+        Some(SLOT_INDEX),
     );
     let outputs = build_outputs([Basic(
         1_250_000,
@@ -1385,7 +1395,7 @@ fn two_inputs_remainder_2() {
                 None,
             ),
         ],
-        None,
+        Some(SLOT_INDEX),
     );
     let outputs = build_outputs([Basic(
         500_000,
@@ -1451,7 +1461,7 @@ fn two_inputs_remainder_3() {
                 None,
             ),
         ],
-        None,
+        Some(SLOT_INDEX),
     );
     let outputs = build_outputs([Basic(
         1_750_000,
@@ -1544,7 +1554,7 @@ fn sender_already_selected() {
             None,
             None,
         )],
-        None,
+        Some(SLOT_INDEX),
     );
     let outputs = build_outputs([Basic(
         1_000_000,
@@ -1590,7 +1600,7 @@ fn single_mandatory_input() {
             None,
             None,
         )],
-        None,
+        Some(SLOT_INDEX),
     );
     let outputs = build_outputs([Basic(
         1_000_000,
@@ -1701,7 +1711,7 @@ fn more_than_max_inputs_only_one_needed() {
             None,
             None,
         )],
-        None,
+        Some(SLOT_INDEX),
     );
     inputs.push(needed_input[0].clone());
 
@@ -1745,7 +1755,7 @@ fn too_many_outputs() {
             None,
             None,
         )],
-        None,
+        Some(SLOT_INDEX),
     );
     let outputs = build_outputs(
         std::iter::repeat_with(|| {
@@ -1793,7 +1803,7 @@ fn too_many_outputs_with_remainder() {
             None,
             None,
         )],
-        None,
+        Some(SLOT_INDEX),
     );
 
     let outputs = build_outputs(
@@ -1878,7 +1888,7 @@ fn restricted_ed25519() {
                 None,
             ),
         ],
-        None,
+        Some(SLOT_INDEX),
     );
     let outputs = build_outputs([Basic(
         1_000_000,
@@ -1927,7 +1937,7 @@ fn restricted_nft() {
                 None,
             ),
         ],
-        None,
+        Some(SLOT_INDEX),
     );
     let outputs = build_outputs([Basic(
         3_000_000,
@@ -1974,7 +1984,7 @@ fn restricted_account() {
                 None,
             ),
         ],
-        None,
+        Some(SLOT_INDEX),
     );
     let outputs = build_outputs([Basic(
         3_000_000,
@@ -2061,7 +2071,7 @@ fn restricted_ed25519_sender() {
                 None,
             ),
         ],
-        None,
+        Some(SLOT_INDEX),
     );
     let outputs = build_outputs([Basic(
         2_000_000,
@@ -2089,10 +2099,12 @@ fn restricted_ed25519_sender() {
 
     // Sender + another for amount
     assert_eq!(selected.inputs.len(), 2);
-    assert!(selected
-        .inputs
-        .iter()
-        .any(|input| *input.output.as_basic().address() == sender));
+    assert!(
+        selected
+            .inputs
+            .iter()
+            .any(|input| *input.output.as_basic().address() == sender)
+    );
     // Provided output + remainder
     assert_eq!(selected.outputs.len(), 2);
 }
@@ -2148,7 +2160,7 @@ fn multi_address_sender_already_fulfilled() {
                 None,
             ),
         ],
-        None,
+        Some(SLOT_INDEX),
     );
     let outputs = build_outputs([Basic(
         3_000_000,
@@ -2204,7 +2216,7 @@ fn ed25519_backed_available_address() {
             ),
             Basic(1_000_000, ed25519.clone(), None, None, None, None, None, None),
         ],
-        None,
+        Some(SLOT_INDEX),
     );
     let outputs = build_outputs([
         Basic(

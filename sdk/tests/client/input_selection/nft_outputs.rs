@@ -40,7 +40,7 @@ fn input_nft_eq_output_nft() {
             None,
             None,
         )],
-        None,
+        Some(SLOT_INDEX),
     );
     let outputs = build_outputs([Nft(
         1_000_000,
@@ -83,7 +83,7 @@ fn transition_nft_id_zero() {
             None,
             None,
         )],
-        None,
+        Some(SLOT_INDEX),
     );
     let nft_id = NftId::from(inputs[0].output_id());
     let outputs = build_outputs([Nft(
@@ -215,7 +215,7 @@ fn mint_nft() {
             None,
             None,
         )],
-        None,
+        Some(SLOT_INDEX),
     );
     let outputs = build_outputs([Nft(
         1_000_000,
@@ -267,7 +267,7 @@ fn burn_nft() {
             None,
             None,
         )],
-        None,
+        Some(SLOT_INDEX),
     );
     let outputs = build_outputs([Basic(
         2_000_000,
@@ -356,7 +356,7 @@ fn missing_input_for_nft_output() {
             None,
             None,
         )],
-        None,
+        Some(SLOT_INDEX),
     );
     let outputs = build_outputs([Nft(
         1_000_000,
@@ -400,7 +400,7 @@ fn missing_input_for_nft_output_but_created() {
             None,
             None,
         )],
-        None,
+        Some(SLOT_INDEX),
     );
     let outputs = build_outputs([Nft(
         1_000_000,
@@ -516,7 +516,7 @@ fn missing_ed25519_sender() {
             None,
             None,
         )],
-        None,
+        Some(SLOT_INDEX),
     );
     let outputs = build_outputs([Nft(
         1_000_000,
@@ -560,7 +560,7 @@ fn missing_ed25519_issuer_created() {
             None,
             None,
         )],
-        None,
+        Some(SLOT_INDEX),
     );
     let outputs = build_outputs([Nft(
         1_000_000,
@@ -604,7 +604,7 @@ fn missing_ed25519_issuer_transition() {
             None,
             None,
         )],
-        None,
+        Some(SLOT_INDEX),
     );
     let outputs = build_outputs([Nft(
         1_000_000,
@@ -645,7 +645,7 @@ fn missing_account_sender() {
             None,
             None,
         )],
-        None,
+        Some(SLOT_INDEX),
     );
     let outputs = build_outputs([Nft(
         1_000_000,
@@ -689,7 +689,7 @@ fn missing_account_issuer_created() {
             None,
             None,
         )],
-        None,
+        Some(SLOT_INDEX),
     );
     let outputs = build_outputs([Nft(
         1_000_000,
@@ -733,7 +733,7 @@ fn missing_account_issuer_transition() {
             None,
             None,
         )],
-        None,
+        Some(SLOT_INDEX),
     );
     let outputs = build_outputs([Nft(
         1_000_000,
@@ -774,7 +774,7 @@ fn missing_nft_sender() {
             None,
             None,
         )],
-        None,
+        Some(SLOT_INDEX),
     );
     let outputs = build_outputs([Nft(
         1_000_000,
@@ -818,7 +818,7 @@ fn missing_nft_issuer_created() {
             None,
             None,
         )],
-        None,
+        Some(SLOT_INDEX),
     );
     let outputs = build_outputs([Nft(
         1_000_000,
@@ -862,7 +862,7 @@ fn missing_nft_issuer_transition() {
             None,
             None,
         )],
-        None,
+        Some(SLOT_INDEX),
     );
     let outputs = build_outputs([Nft(
         1_000_000,
@@ -1261,7 +1261,7 @@ fn transitioned_zero_nft_id_no_longer_is_zero() {
             None,
             None,
         )],
-        None,
+        Some(SLOT_INDEX),
     );
     let outputs = build_outputs([Basic(
         1_000_000,
