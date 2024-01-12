@@ -18,7 +18,7 @@ use crate::client::{
     build_inputs, build_outputs, is_remainder_or_return, unsorted_eq,
     Build::{Account, Basic, Nft},
     ACCOUNT_ID_1, BECH32_ADDRESS_ACCOUNT_1, BECH32_ADDRESS_ED25519_0, BECH32_ADDRESS_ED25519_1,
-    BECH32_ADDRESS_ED25519_2, NFT_ID_1, SLOT_INDEX,
+    BECH32_ADDRESS_ED25519_2, NFT_ID_1,
 };
 
 #[test]
@@ -36,7 +36,7 @@ fn one_output_expiration_not_expired() {
             Some((Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(), 200)),
             None,
         )],
-        Some(SLOT_INDEX),
+        Some(SlotIndex::from(100)),
     );
     let outputs = build_outputs([Basic(
         2_000_000,
@@ -53,7 +53,7 @@ fn one_output_expiration_not_expired() {
         inputs,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
-        SLOT_INDEX,
+        100,
         protocol_parameters,
     )
     .select();
@@ -227,7 +227,7 @@ fn two_outputs_one_unexpired_one_missing() {
                 None,
             ),
         ],
-        Some(SLOT_INDEX),
+        Some(SlotIndex::from(100)),
     );
     let outputs = build_outputs([Basic(
         2_000_000,
@@ -244,7 +244,7 @@ fn two_outputs_one_unexpired_one_missing() {
         inputs.clone(),
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
-        SLOT_INDEX,
+        100,
         protocol_parameters,
     )
     .select()
@@ -347,7 +347,7 @@ fn two_outputs_two_expired_2() {
                 None,
             ),
         ],
-        Some(SLOT_INDEX),
+        Some(SlotIndex::from(200)),
     );
     let outputs = build_outputs([Basic(
         4_000_000,
@@ -367,7 +367,7 @@ fn two_outputs_two_expired_2() {
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_2).unwrap(),
         ],
-        SLOT_INDEX,
+        200,
         protocol_parameters,
     )
     .select()
@@ -803,7 +803,7 @@ fn expiration_expired_only_account_addresses() {
                 None,
             ),
         ],
-        Some(SLOT_INDEX),
+        Some(SlotIndex::from(100)),
     );
 
     let outputs = build_outputs([Basic(
@@ -821,7 +821,7 @@ fn expiration_expired_only_account_addresses() {
         inputs.clone(),
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
-        SLOT_INDEX,
+        100,
         protocol_parameters,
     )
     .select()
@@ -847,7 +847,7 @@ fn one_nft_output_expiration_unexpired() {
             Some((Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(), 150)),
             None,
         )],
-        Some(SLOT_INDEX),
+        Some(SlotIndex::from(100)),
     );
     let outputs = build_outputs([Nft(
         2_000_000,
@@ -864,7 +864,7 @@ fn one_nft_output_expiration_unexpired() {
         inputs.clone(),
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap()],
-        SLOT_INDEX,
+        100,
         protocol_parameters,
     )
     .select()
