@@ -122,6 +122,7 @@ fn metadata_feature_from_iter(data: impl IntoIterator<Item = (Vec<u8>, Vec<u8>)>
             return Err(Error::InvalidMetadataFeature("Duplicated metadata key".to_string()));
         };
     }
+    
     Ok(MetadataFeature(
         res.try_into().map_err(Error::InvalidMetadataFeatureLength)?,
     ))
