@@ -1,16 +1,17 @@
 # Copyright 2023 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
-from json import dumps, loads
+from json import dumps
 from datetime import timedelta
 from typing import Any, Dict, List, Optional, Union
 import humps
 
-from iota_sdk.external import create_client, call_client_method, listen_mqtt
+from iota_sdk.external import create_client, listen_mqtt
 from iota_sdk.client._node_core_api import NodeCoreAPI
 from iota_sdk.client._node_indexer_api import NodeIndexerAPI
 from iota_sdk.client._high_level_api import HighLevelAPI
 from iota_sdk.client._utils import ClientUtils
+from iota_sdk.client.common import _call_client_method_routine
 from iota_sdk.types.block.block import UnsignedBlock
 from iota_sdk.types.common import HexStr, Node
 from iota_sdk.types.feature import Feature
@@ -19,10 +20,6 @@ from iota_sdk.types.output import AccountOutput, BasicOutput, FoundryOutput, Nft
 from iota_sdk.types.payload import Payload
 from iota_sdk.types.token_scheme import SimpleTokenScheme
 from iota_sdk.types.unlock_condition import UnlockCondition
-
-
-class ClientError(Exception):
-    """Represents a client error."""
 
 
 class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
@@ -117,6 +114,7 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         else:
             self.handle = client_handle
 
+    @_call_client_method_routine
     def _call_method(self, name, data=None):
         """Dumps json string and calls `call_client_method()`
         """
@@ -125,20 +123,7 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         }
         if data:
             message['data'] = data
-        message = dumps(message)
-
-        # Send message to the Rust library
-        response = call_client_method(self.handle, message)
-
-        json_response = loads(response)
-
-        if "type" in json_response:
-            if json_response["type"] == "error":
-                raise ClientError(json_response['payload'])
-
-        if "payload" in json_response:
-            return json_response['payload']
-        return response
+        return message
 
     def get_handle(self):
         """Get the client handle.
@@ -171,26 +156,11 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
             The account output as dict.
         """
 
-        unlock_conditions = [unlock_condition.to_dict()
-                             for unlock_condition in unlock_conditions]
-
-        if features:
-            features = [feature.to_dict() for feature in features]
-        if immutable_features:
-            immutable_features = [immutable_feature.to_dict()
-                                  for immutable_feature in immutable_features]
-
-        if amount:
-            amount = str(amount)
-
-        if mana:
-            mana = str(mana)
-
         return deserialize_output(self._call_method('buildAccountOutput', {
             'accountId': account_id,
             'unlockConditions': unlock_conditions,
-            'amount': amount,
-            'mana': mana,
+            'amount': None if amount is None else str(amount),
+            'mana': None if mana is None else str(mana),
             'foundryCounter': foundry_counter,
             'features': features,
             'immutableFeatures': immutable_features
@@ -213,22 +183,10 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
             The basic output as dict.
         """
 
-        unlock_conditions = [unlock_condition.to_dict()
-                             for unlock_condition in unlock_conditions]
-
-        if features:
-            features = [feature.to_dict() for feature in features]
-
-        if amount:
-            amount = str(amount)
-
-        if mana:
-            mana = str(mana)
-
         return deserialize_output(self._call_method('buildBasicOutput', {
             'unlockConditions': unlock_conditions,
-            'amount': amount,
-            'mana': mana,
+            'amount': None if amount is None else str(amount),
+            'mana': None if mana is None else str(mana),
             'features': features,
         }))
 
@@ -253,23 +211,11 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
             The foundry output as dict.
         """
 
-        unlock_conditions = [unlock_condition.to_dict()
-                             for unlock_condition in unlock_conditions]
-
-        if features:
-            features = [feature.to_dict() for feature in features]
-        if immutable_features:
-            immutable_features = [immutable_feature.to_dict()
-                                  for immutable_feature in immutable_features]
-
-        if amount:
-            amount = str(amount)
-
         return deserialize_output(self._call_method('buildFoundryOutput', {
             'serialNumber': serial_number,
-            'tokenScheme': token_scheme.to_dict(),
+            'tokenScheme': token_scheme,
             'unlockConditions': unlock_conditions,
-            'amount': amount,
+            'amount': None if amount is None else str(amount),
             'features': features,
             'immutableFeatures': immutable_features
         }))
@@ -295,26 +241,11 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
             The NFT output as dict.
         """
 
-        unlock_conditions = [unlock_condition.to_dict()
-                             for unlock_condition in unlock_conditions]
-
-        if features:
-            features = [feature.to_dict() for feature in features]
-        if immutable_features:
-            immutable_features = [immutable_feature.to_dict()
-                                  for immutable_feature in immutable_features]
-
-        if amount:
-            amount = str(amount)
-
-        if mana:
-            mana = str(mana)
-
         return deserialize_output(self._call_method('buildNftOutput', {
             'nftId': nft_id,
             'unlockConditions': unlock_conditions,
-            'amount': amount,
-            'mana': mana,
+            'amount': None if amount is None else str(amount),
+            'mana': None if mana is None else str(mana),
             'features': features,
             'immutableFeatures': immutable_features
         }))
@@ -358,8 +289,6 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         Returns:
             An unsigned block.
         """
-        if payload is not None:
-            payload = payload.to_dict()
         result = self._call_method('buildBasicBlock', {
             'issuerId': issuer_id,
             'payload': payload,
