@@ -53,7 +53,7 @@ fn one_output_expiration_not_expired() {
         inputs,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
-        SLOT_INDEX + 1,
+        SLOT_INDEX,
         protocol_parameters,
     )
     .select();
@@ -244,7 +244,7 @@ fn two_outputs_one_unexpired_one_missing() {
         inputs.clone(),
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
-        SLOT_INDEX + 1,
+        SLOT_INDEX,
         protocol_parameters,
     )
     .select()
@@ -367,7 +367,7 @@ fn two_outputs_two_expired_2() {
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_2).unwrap(),
         ],
-        SLOT_INDEX + 1,
+        SLOT_INDEX,
         protocol_parameters,
     )
     .select()
@@ -821,7 +821,7 @@ fn expiration_expired_only_account_addresses() {
         inputs.clone(),
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
-        SLOT_INDEX + 1,
+        SLOT_INDEX,
         protocol_parameters,
     )
     .select()
@@ -864,7 +864,7 @@ fn one_nft_output_expiration_unexpired() {
         inputs.clone(),
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap()],
-        SLOT_INDEX + 1,
+        SLOT_INDEX,
         protocol_parameters,
     )
     .select()

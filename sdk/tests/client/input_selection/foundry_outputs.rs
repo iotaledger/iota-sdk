@@ -56,7 +56,7 @@ fn missing_input_account_for_foundry() {
         inputs,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
-        SLOT_INDEX + 1,
+        SLOT_INDEX,
         protocol_parameters,
     )
     .select();
@@ -145,7 +145,7 @@ fn minted_native_tokens_in_new_remainder() {
         inputs.clone(),
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
-        SLOT_INDEX + 1,
+        SLOT_INDEX,
         protocol_parameters,
     )
     .select()
@@ -217,7 +217,7 @@ fn minted_native_tokens_in_provided_output() {
         inputs.clone(),
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
-        SLOT_INDEX + 1,
+        SLOT_INDEX,
         protocol_parameters,
     )
     .select()
@@ -285,7 +285,7 @@ fn melt_native_tokens() {
         inputs.clone(),
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
-        SLOT_INDEX + 1,
+        SLOT_INDEX,
         protocol_parameters,
     )
     .select()
@@ -339,7 +339,7 @@ fn destroy_foundry_with_account_state_transition() {
         inputs.clone(),
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
-        SLOT_INDEX + 1,
+        SLOT_INDEX,
         protocol_parameters,
     )
     .with_burn(Burn::new().add_foundry(inputs[1].output.as_foundry().id()))
@@ -391,7 +391,7 @@ fn destroy_foundry_with_account_burn() {
         inputs.clone(),
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
-        SLOT_INDEX + 1,
+        SLOT_INDEX,
         protocol_parameters,
     )
     .with_burn(
@@ -467,7 +467,7 @@ fn prefer_basic_to_foundry() {
         inputs.clone(),
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
-        SLOT_INDEX + 1,
+        SLOT_INDEX,
         protocol_parameters,
     )
     .select()
@@ -530,7 +530,7 @@ fn simple_foundry_transition_basic_not_needed() {
         inputs.clone(),
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
-        SLOT_INDEX + 1,
+        SLOT_INDEX,
         protocol_parameters,
     )
     .select()
@@ -608,7 +608,7 @@ fn simple_foundry_transition_basic_not_needed_with_remainder() {
         inputs.clone(),
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
-        SLOT_INDEX + 1,
+        SLOT_INDEX,
         protocol_parameters,
     )
     .select()
@@ -754,7 +754,7 @@ fn mint_and_burn_at_the_same_time() {
         inputs.clone(),
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
-        SLOT_INDEX + 1,
+        SLOT_INDEX,
         protocol_parameters,
     )
     .with_burn(Burn::new().add_native_token(token_id, 10))
@@ -822,7 +822,7 @@ fn take_amount_from_account_and_foundry_to_fund_basic() {
         inputs.clone(),
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
-        SLOT_INDEX + 1,
+        SLOT_INDEX,
         protocol_parameters,
     )
     .select()
@@ -878,7 +878,7 @@ fn create_native_token_but_burn_account() {
         inputs.clone(),
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
-        SLOT_INDEX + 1,
+        SLOT_INDEX,
         protocol_parameters,
     )
     .with_burn(Burn::new().add_account(account_id_1))
@@ -940,7 +940,7 @@ fn melted_tokens_not_provided() {
         inputs,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
-        SLOT_INDEX + 1,
+        SLOT_INDEX,
         protocol_parameters,
     )
     .select();
@@ -993,7 +993,7 @@ fn burned_tokens_not_provided() {
         inputs,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
-        SLOT_INDEX + 1,
+        SLOT_INDEX,
         protocol_parameters,
     )
     .with_burn(Burn::new().add_native_token(token_id_1, 100))
@@ -1047,7 +1047,7 @@ fn foundry_in_outputs_and_required() {
         inputs.clone(),
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
-        SLOT_INDEX + 1,
+        SLOT_INDEX,
         protocol_parameters,
     )
     .with_required_inputs([*inputs[1].output_id()])
@@ -1118,7 +1118,7 @@ fn melt_and_burn_native_tokens() {
         inputs.clone(),
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
-        SLOT_INDEX + 1,
+        SLOT_INDEX,
         protocol_parameters,
     )
     // Burn 456 native tokens
