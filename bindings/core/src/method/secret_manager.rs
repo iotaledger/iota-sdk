@@ -99,7 +99,7 @@ pub enum SecretManagerMethod {
     /// Expected response: [`Ok`](crate::Response::Ok)
     #[cfg(feature = "stronghold")]
     #[cfg_attr(docsrs, doc(cfg(feature = "stronghold")))]
-    ClearStrongholdPassword
+    ClearStrongholdPassword,
 }
 
 #[cfg(test)]
