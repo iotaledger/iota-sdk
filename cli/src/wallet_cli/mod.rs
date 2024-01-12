@@ -143,7 +143,7 @@ pub enum WalletCommand {
         /// Address to send the NFT to, e.g. rms1qztwng6cty8cfm42nzvq099ev7udhrnk0rw8jt8vttf9kpqnxhpsx869vr3.
         address: Option<Bech32Address>,
         /// Immutable metadata key, e.g. --immutable-metadata-key data.
-        #[arg(long, group = "immutable_metadata", default_value = "data")]
+        #[arg(long, default_value = "data")]
         immutable_metadata_key: String,
         #[arg(long, group = "immutable_metadata")]
         /// Immutable metadata to attach to the NFT, e.g. --immutable-metadata-hex 0xdeadbeef.
@@ -152,7 +152,7 @@ pub enum WalletCommand {
         #[arg(long, group = "immutable_metadata")]
         immutable_metadata_file: Option<String>,
         /// Metadata key, e.g. --metadata-key data.
-        #[arg(long, group = "metadata", default_value = "data")]
+        #[arg(long, default_value = "data")]
         metadata_key: String,
         /// Metadata to attach to the NFT, e.g. --metadata-hex 0xdeadbeef.
         #[arg(long, group = "metadata")]

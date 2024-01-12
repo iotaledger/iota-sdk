@@ -62,12 +62,9 @@ impl MetadataFeature {
     pub fn new(data: impl IntoIterator<Item = (Vec<u8>, Vec<u8>)>) -> Result<Self, Error> {
         let data: BTreeMap<Vec<u8>, Vec<u8>> = data.into_iter().collect();
 
-        for key in data.keys() {
-            if !key.iter().all(|b| b.is_ascii_graphic()) {
-                return Err(Error::NonGraphicAsciiMetadataKey(key.to_vec()));
-            }
-        }
-        Self::try_from(data)
+        let metadata = Self::try_from(data)?;
+        verify_keys_packable::<true>(&metadata.0)?;
+        Ok(metadata)
     }
 
     /// Returns the data.
