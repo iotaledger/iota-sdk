@@ -15,7 +15,7 @@ use iota_sdk::{
             SimpleTokenScheme, TokenId,
         },
         protocol::protocol_parameters,
-        rand::output::rand_output_metadata,
+        rand::output::{rand_output_id_with_slot_index, rand_output_metadata_with_id},
     },
 };
 use pretty_assertions::assert_eq;
@@ -269,7 +269,7 @@ fn melt_native_tokens() {
         .unwrap();
     inputs.push(InputSigningData {
         output: account_output,
-        output_metadata: rand_output_metadata(),
+        output_metadata: rand_output_metadata_with_id(rand_output_id_with_slot_index(SLOT_INDEX)),
         chain: None,
     });
     let outputs = build_outputs([Foundry(
@@ -514,7 +514,7 @@ fn simple_foundry_transition_basic_not_needed() {
         .unwrap();
     inputs.push(InputSigningData {
         output: account_output,
-        output_metadata: rand_output_metadata(),
+        output_metadata: rand_output_metadata_with_id(rand_output_id_with_slot_index(SLOT_INDEX)),
         chain: None,
     });
 
@@ -593,7 +593,7 @@ fn simple_foundry_transition_basic_not_needed_with_remainder() {
         .unwrap();
     inputs.push(InputSigningData {
         output: account_output,
-        output_metadata: rand_output_metadata(),
+        output_metadata: rand_output_metadata_with_id(rand_output_id_with_slot_index(SLOT_INDEX)),
         chain: None,
     });
     let outputs = build_outputs([Foundry(
@@ -738,7 +738,7 @@ fn mint_and_burn_at_the_same_time() {
         .unwrap();
     inputs.push(InputSigningData {
         output: account_output,
-        output_metadata: rand_output_metadata(),
+        output_metadata: rand_output_metadata_with_id(rand_output_id_with_slot_index(SLOT_INDEX)),
         chain: None,
     });
 
@@ -804,7 +804,7 @@ fn take_amount_from_account_and_foundry_to_fund_basic() {
         .unwrap();
     inputs.push(InputSigningData {
         output: account_output,
-        output_metadata: rand_output_metadata(),
+        output_metadata: rand_output_metadata_with_id(rand_output_id_with_slot_index(SLOT_INDEX)),
         chain: None,
     });
     let outputs = build_outputs([Basic(
@@ -1032,7 +1032,7 @@ fn foundry_in_outputs_and_required() {
         .unwrap();
     inputs.push(InputSigningData {
         output: account_output,
-        output_metadata: rand_output_metadata(),
+        output_metadata: rand_output_metadata_with_id(rand_output_id_with_slot_index(SLOT_INDEX)),
         chain: None,
     });
     let outputs = build_outputs([Foundry(
@@ -1102,7 +1102,7 @@ fn melt_and_burn_native_tokens() {
         .unwrap();
     inputs.push(InputSigningData {
         output: account_output,
-        output_metadata: rand_output_metadata(),
+        output_metadata: rand_output_metadata_with_id(rand_output_id_with_slot_index(SLOT_INDEX)),
         chain: None,
     });
     let outputs = build_outputs([Foundry(
