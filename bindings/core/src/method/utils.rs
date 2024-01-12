@@ -76,7 +76,7 @@ pub enum UtilsMethod {
     ComputeNftId { output_id: OutputId },
     /// Computes the output ID from transaction id and output index
     ComputeOutputId { id: TransactionId, index: u16 },
-    /// Computes a tokenId from the aliasId, serial number and token scheme type.
+    /// Computes a tokenId from the accountId, serial number and token scheme type.
     #[serde(rename_all = "camelCase")]
     ComputeTokenId {
         account_id: AccountId,

@@ -163,17 +163,6 @@ class RestrictedAddress:
             self.allowed_capabilities = None
 
 
-@json
-@dataclass
-class AddressWithUnspentOutputs():
-    """An Address with unspent outputs.
-    """
-    address: str
-    key_index: int
-    internal: bool
-    output_ids: bool
-
-
 Address: TypeAlias = Union[Ed25519Address,
                            AccountAddress,
                            NFTAddress,
@@ -183,6 +172,7 @@ Address: TypeAlias = Union[Ed25519Address,
                            RestrictedAddress]
 
 
+# pylint: disable=too-many-return-statements
 def deserialize_address(d: Dict[str, Any]) -> Address:
     """
     Takes a dictionary as input and returns an instance of a specific class based on the value of the 'type' key in the dictionary.

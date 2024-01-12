@@ -27,7 +27,9 @@ impl InputSelection {
             .unwrap()
             .expect("expiration unlockable outputs already filtered out");
 
-        &required_address == address
+        required_address
+            .backing_ed25519()
+            .map_or(false, |a| a == address.as_ed25519())
     }
 
     /// Fulfills an ed25519 sender requirement by selecting an available input that unlocks its address.

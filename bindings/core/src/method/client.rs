@@ -156,15 +156,18 @@ pub enum ClientMethod {
         /// The Account ID of the account.
         account_id: AccountId,
     },
-    /// Returns the totally available Mana rewards of an account or delegation output decayed up to endEpoch index
-    /// provided in the response.
+    /// Returns all the available Mana rewards of an account or delegation output in the returned range of epochs.
     #[serde(rename_all = "camelCase")]
     GetRewards {
         /// Output ID of an account or delegation output.
         output_id: OutputId,
         /// A client can specify a slot index explicitly, which should be equal to the slot it uses as the commitment
-        /// input for the claiming transaction. This parameter is only recommended to be provided when requesting
-        /// rewards for a Delegation Output in delegating state (i.e. when Delegation ID is zeroed).
+        /// input for the claiming transaction to ensure the node calculates the rewards identically as during
+        /// transaction execution. Rewards are decayed up to the epoch corresponding to the given slotIndex +
+        /// MinCommittableAge. For a Delegation Output in delegating state (i.e. when Delegation ID is zeroed), that
+        /// epoch - 1 is also used as the last epoch for which rewards are fetched. Callers that do not build
+        /// transactions with the returned values may omit this value in which case it defaults to the latest committed
+        /// slot, which is good enough to, e.g. display estimated rewards to users.
         slot_index: Option<SlotIndex>,
     },
     /// Returns information of all registered validators and if they are active, ordered by their holding stake.
@@ -273,15 +276,26 @@ pub enum ClientMethod {
         /// Commitment ID of the commitment to look up.
         commitment_id: SlotCommitmentId,
     },
+    /// Get all full UTXO changes of a given slot by Commitment ID.
+    #[serde(rename_all = "camelCase")]
+    GetUtxoChangesFull {
+        /// Commitment ID of the commitment to look up.
+        commitment_id: SlotCommitmentId,
+    },
     /// Look up a commitment by a given commitment index.
     GetCommitmentByIndex {
         /// Index of the commitment to look up.
-        index: SlotIndex,
+        slot: SlotIndex,
     },
     /// Get all UTXO changes of a given slot by commitment index.
     GetUtxoChangesByIndex {
         /// Index of the commitment to look up.
-        index: SlotIndex,
+        slot: SlotIndex,
+    },
+    /// Get all full UTXO changes of a given slot by commitment index.
+    GetUtxoChangesFullByIndex {
+        /// Index of the commitment to look up.
+        slot: SlotIndex,
     },
 
     //////////////////////////////////////////////////////////////////////

@@ -188,15 +188,18 @@ export class Utils {
      * Compute the block ID (Blake2b256 hash of the block bytes) of a block.
      *
      * @param block A block.
-     * @param params The network protocol parameters.
+     * @param protocolParameters The network protocol parameters.
      * @returns The corresponding block ID.
      */
-    static blockId(block: Block, params: ProtocolParameters): BlockId {
+    static blockId(
+        block: Block,
+        protocolParameters: ProtocolParameters,
+    ): BlockId {
         return callUtilsMethod({
             name: 'blockId',
             data: {
                 block,
-                params,
+                protocolParameters,
             },
         });
     }

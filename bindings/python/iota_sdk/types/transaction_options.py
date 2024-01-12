@@ -52,7 +52,7 @@ class RemainderValueStrategy(Enum):
     ChangeAddress = None
     ReuseAddress = None
 
-    def to_dict(self):
+    def to_dict(self) -> dict:
         """Custom dict conversion.
         """
 

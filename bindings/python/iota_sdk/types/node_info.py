@@ -79,12 +79,22 @@ class StorageScoreParameters:
         offset_staking_feature: Defines the offset to be used for staking feature.
         offset_delegation: Defines the offset to be used for delegation output.
     """
-    storage_cost: int
+    storage_cost: int = field(metadata=config(
+        encoder=str
+    ))
     factor_data: int
-    offset_output_overhead: int
-    offset_ed25519_block_issuer_key: int
-    offset_staking_feature: int
-    offset_delegation: int
+    offset_output_overhead: int = field(metadata=config(
+        encoder=str
+    ))
+    offset_ed25519_block_issuer_key: int = field(metadata=config(
+        encoder=str
+    ))
+    offset_staking_feature: int = field(metadata=config(
+        encoder=str
+    ))
+    offset_delegation: int = field(metadata=config(
+        encoder=str
+    ))
 
 
 @json
@@ -175,6 +185,7 @@ class ManaParameters:
         decay_factors_exponent: The scaling of decay_factors expressed as an exponent of 2.
         decay_factor_epochs_sum: An integer approximation of the sum of decay over epochs.
         decay_factor_epochs_sum_exponent: The scaling of decay_factor_epochs_sum expressed as an exponent of 2.
+        annual_decay_factor_percentage: Decay factor for 1 year.
     """
     bits_count: int
     generation_rate: int
@@ -183,6 +194,7 @@ class ManaParameters:
     decay_factors_exponent: int
     decay_factor_epochs_sum: int
     decay_factor_epochs_sum_exponent: int
+    annual_decay_factor_percentage: int
 
 
 @json
@@ -197,6 +209,7 @@ class RewardsParameters:
         decay_balancing_constant_exponent: The exponent used for calculation of the initial reward.
         decay_balancing_constant: An integer approximation which is calculated using the `decay_balancing_constant_exponent`.
         pool_coefficient_exponent: The exponent used for shifting operation during the pool rewards calculations.
+        retention_period: The number of epochs for which rewards are retained.
     """
     profit_margin_exponent: int
     bootstrapping_duration: int
@@ -208,6 +221,7 @@ class RewardsParameters:
         encoder=str
     ))
     pool_coefficient_exponent: int
+    retention_period: int
 
 
 @json
@@ -242,6 +256,7 @@ class ProtocolParameters:
         version_signaling_parameters: The version signaling parameters.
         rewards_parameters: Rewards Parameters defines the parameters that are used to calculate Mana rewards.
         target_committee_size: Defines the target size of the committee. If there's fewer candidates the actual committee size could be smaller in a given epoch.
+        chain_switching_threshold: Defines the number of heavier slots that a chain needs to be ahead of the current chain to be considered for switching.
     """
     type: int
     version: int
@@ -259,26 +274,19 @@ class ProtocolParameters:
     slot_duration_in_seconds: int
     slots_per_epoch_exponent: int
     mana_parameters: ManaParameters
-    staking_unbonding_period: int = field(metadata=config(
-        encoder=str
-    ))
+    staking_unbonding_period: int
     validation_blocks_per_slot: int
     punishment_epochs: int
     liveness_threshold_lower_bound: int
     liveness_threshold_upper_bound: int
-    min_committable_age: int = field(metadata=config(
-        encoder=str
-    ))
-    max_committable_age: int = field(metadata=config(
-        encoder=str
-    ))
-    epoch_nearing_threshold: int = field(metadata=config(
-        encoder=str
-    ))
+    min_committable_age: int
+    max_committable_age: int
+    epoch_nearing_threshold: int
     congestion_control_parameters: CongestionControlParameters
     version_signaling_parameters: VersionSignalingParameters
     rewards_parameters: RewardsParameters
     target_committee_size: int
+    chain_switching_threshold: int
 
 
 @json

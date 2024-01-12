@@ -1,7 +1,8 @@
 // Copyright 2020-2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-//! Module describing the tagged data payload.
+//! A basic payload type that allows the addition of arbitrary data.
+//! [TIP-53: Tagged Data](https://github.com/iotaledger/tips/blob/tip53/tips/TIP-0053/tip-0053.md).
 
 use alloc::boxed::Box;
 use core::ops::RangeInclusive;
@@ -22,7 +23,7 @@ pub(crate) type TagLength =
 pub(crate) type TaggedDataLength =
     BoundedU32<{ *TaggedDataPayload::DATA_LENGTH_RANGE.start() }, { *TaggedDataPayload::DATA_LENGTH_RANGE.end() }>;
 
-/// A payload which holds a tag and associated data.
+/// A payload which holds optional data with an optional tag.
 #[derive(Clone, Eq, PartialEq, Packable)]
 #[packable(unpack_error = Error)]
 pub struct TaggedDataPayload {
@@ -35,9 +36,9 @@ pub struct TaggedDataPayload {
 impl TaggedDataPayload {
     /// The [`Payload`](crate::types::block::payload::Payload) kind of a [`TaggedDataPayload`].
     pub const KIND: u8 = 0;
-    /// Valid length range for the tag.
+    /// Valid tag length range.
     pub const TAG_LENGTH_RANGE: RangeInclusive<u8> = 0..=64;
-    /// Valid length range for the data.
+    /// Valid data length range.
     pub const DATA_LENGTH_RANGE: RangeInclusive<u32> = 0..=8192;
 
     /// Creates a new [`TaggedDataPayload`].

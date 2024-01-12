@@ -152,6 +152,7 @@ Feature: TypeAlias = Union[SenderFeature, IssuerFeature,
                            MetadataFeature, TagFeature, NativeTokenFeature, BlockIssuerFeature, StakingFeature]
 
 
+# pylint: disable=too-many-return-statements
 def deserialize_feature(d: Dict[str, Any]) -> Feature:
     """
     Takes a dictionary as input and returns an instance of a specific class based on the value of the 'type' key in the dictionary.

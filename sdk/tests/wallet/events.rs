@@ -40,8 +40,6 @@ fn assert_serde_eq(event_0: WalletEvent) {
 
 #[test]
 fn wallet_events_serde() {
-    assert_serde_eq(WalletEvent::ConsolidationRequired);
-
     #[cfg(feature = "ledger_nano")]
     assert_serde_eq(WalletEvent::LedgerAddressGeneration(AddressData {
         address: Bech32Address::try_from_str("rms1qpllaj0pyveqfkwxmnngz2c488hfdtmfrj3wfkgxtk4gtyrax0jaxzt70zy")
@@ -64,7 +62,6 @@ fn wallet_events_serde() {
         is_spent: false,
         network_id: 42,
         remainder: true,
-        chain: None,
     };
 
     assert_serde_eq(WalletEvent::NewOutput(Box::new(NewOutputEvent {

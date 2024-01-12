@@ -18,7 +18,8 @@ use iota_sdk::{
             core::{
                 BlockMetadataResponse, BlockWithMetadataResponse, CommitteeResponse, CongestionResponse,
                 InfoResponse as NodeInfo, IssuanceBlockHeaderResponse, ManaRewardsResponse, OutputWithMetadataResponse,
-                TransactionMetadataResponse, UtxoChangesResponse, ValidatorResponse, ValidatorsResponse,
+                TransactionMetadataResponse, UtxoChangesFullResponse, UtxoChangesResponse, ValidatorResponse,
+                ValidatorsResponse,
             },
             plugins::indexer::OutputIdsResponse,
         },
@@ -141,6 +142,10 @@ pub enum Response {
     /// - [`GetUtxoChanges`](crate::method::ClientMethod::GetUtxoChanges)
     /// - [`GetUtxoChangesByIndex`](crate::method::ClientMethod::GetUtxoChangesByIndex)
     UtxoChanges(UtxoChangesResponse),
+    /// Response for:
+    /// - [`GetUtxoChangesFull`](crate::method::ClientMethod::GetUtxoChangesFull)
+    /// - [`GetUtxoChangesFullByIndex`](crate::method::ClientMethod::GetUtxoChangesFullByIndex)
+    UtxoChangesFull(UtxoChangesFullResponse),
     /// Response for:
     /// - [`GetBlockWithMetadata`](crate::method::ClientMethod::GetBlockWithMetadata)
     BlockWithMetadata(BlockWithMetadataResponse),
