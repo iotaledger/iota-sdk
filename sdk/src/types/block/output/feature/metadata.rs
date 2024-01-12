@@ -101,14 +101,19 @@ impl TryFrom<Vec<(Vec<u8>, Vec<u8>)>> for MetadataFeature {
             if !k.iter().all(|b| b.is_ascii_graphic()) {
                 return Err(Error::NonGraphicAsciiMetadataKey(k.to_vec()));
             }
-            res.insert(
-                k.into_boxed_slice()
-                    .try_into()
-                    .map_err(Error::InvalidMetadataFeatureKeyLength)?,
-                v.into_boxed_slice()
-                    .try_into()
-                    .map_err(Error::InvalidMetadataFeatureValueLength)?,
-            );
+            if res
+                .insert(
+                    k.into_boxed_slice()
+                        .try_into()
+                        .map_err(Error::InvalidMetadataFeatureKeyLength)?,
+                    v.into_boxed_slice()
+                        .try_into()
+                        .map_err(Error::InvalidMetadataFeatureValueLength)?,
+                )
+                .is_some()
+            {
+                return Err(Error::InvalidMetadataFeature("Duplicated metadata key".to_string()));
+            };
         }
         Ok(Self(res.try_into().map_err(Error::InvalidMetadataFeatureLength)?))
     }
