@@ -88,7 +88,7 @@ fn no_outputs_but_burn() {
             None,
             None,
         )],
-        None,
+        Some(SLOT_INDEX),
     );
     let outputs = Vec::new();
 
@@ -128,7 +128,7 @@ fn no_address_provided() {
             None,
             None,
         )],
-        None,
+        Some(SLOT_INDEX),
     );
     let outputs = build_outputs([Basic(
         1_000_000,
@@ -213,7 +213,7 @@ fn two_addresses_one_missing() {
                 None,
             ),
         ],
-        None,
+        Some(SLOT_INDEX),
     );
     let outputs = build_outputs([Basic(
         2_000_000,
@@ -271,7 +271,7 @@ fn two_addresses() {
                 None,
             ),
         ],
-        None,
+        Some(SLOT_INDEX),
     );
     let outputs = build_outputs([Basic(
         2_000_000,
