@@ -142,12 +142,18 @@ pub enum WalletCommand {
     MintNft {
         /// Address to send the NFT to, e.g. rms1qztwng6cty8cfm42nzvq099ev7udhrnk0rw8jt8vttf9kpqnxhpsx869vr3.
         address: Option<Bech32Address>,
+        /// Immutable metadata key, e.g. --immutable-metadata-key data.
+        #[arg(long, group = "immutable_metadata", default_value = "data")]
+        immutable_metadata_key: String,
         #[arg(long, group = "immutable_metadata")]
         /// Immutable metadata to attach to the NFT, e.g. --immutable-metadata-hex 0xdeadbeef.
         immutable_metadata_hex: Option<String>,
         /// Immutable metadata to attach to the NFT, e.g. --immutable-metadata-file ./nft-immutable-metadata.json.
         #[arg(long, group = "immutable_metadata")]
         immutable_metadata_file: Option<String>,
+        /// Metadata key, e.g. --metadata-key data.
+        #[arg(long, group = "metadata", default_value = "data")]
+        metadata_key: String,
         /// Metadata to attach to the NFT, e.g. --metadata-hex 0xdeadbeef.
         #[arg(long, group = "metadata")]
         metadata_hex: Option<String>,
@@ -760,7 +766,9 @@ pub async fn mint_native_token_command(wallet: &Wallet, token_id: String, amount
 pub async fn mint_nft_command(
     wallet: &Wallet,
     address: Option<Bech32Address>,
+    immutable_metadata_key: String,
     immutable_metadata: Option<Vec<u8>>,
+    metadata_key: String,
     metadata: Option<Vec<u8>>,
     tag: Option<String>,
     sender: Option<Bech32Address>,
@@ -779,13 +787,11 @@ pub async fn mint_nft_command(
         .with_issuer(issuer);
 
     if let Some(metadata) = metadata {
-        // TODO: Let user specify key or the full metadata
-        nft_options = nft_options.with_metadata(MetadataFeature::new([(metadata.clone(), metadata)])?);
+        nft_options = nft_options.with_metadata(MetadataFeature::new([(metadata_key.into_bytes(), metadata)])?);
     }
     if let Some(immutable_metadata) = immutable_metadata {
         nft_options = nft_options.with_immutable_metadata(MetadataFeature::new([(
-            // TODO: Let user specify key or the full metadata
-            immutable_metadata.clone(),
+            immutable_metadata_key.into_bytes(),
             immutable_metadata,
         )])?);
     }
@@ -1277,8 +1283,10 @@ pub async fn prompt_internal(
                         }
                         WalletCommand::MintNft {
                             address,
+                            immutable_metadata_key,
                             immutable_metadata_hex,
                             immutable_metadata_file,
+                            metadata_key,
                             metadata_hex,
                             metadata_file,
                             tag,
@@ -1288,7 +1296,9 @@ pub async fn prompt_internal(
                             mint_nft_command(
                                 wallet,
                                 address,
+                                immutable_metadata_key,
                                 bytes_from_hex_or_file(immutable_metadata_hex, immutable_metadata_file).await?,
+                                metadata_key,
                                 bytes_from_hex_or_file(metadata_hex, metadata_file).await?,
                                 tag,
                                 sender,
