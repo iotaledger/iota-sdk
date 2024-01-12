@@ -10,7 +10,7 @@ use crate::{
     },
     types::block::{
         input::{Input, UtxoInput},
-        payload::signed_transaction::{Transaction, TransactionCapabilities, TransactionCapabilityFlag},
+        payload::signed_transaction::Transaction,
     },
     wallet::{operations::transaction::TransactionOptions, Wallet},
 };
@@ -46,25 +46,13 @@ where
             .with_inputs(inputs)
             .with_outputs(selected_transaction_data.outputs);
 
-        if let Some(mut options) = options.into() {
+        if let Some(options) = options.into() {
             // Optional add a tagged payload
             builder = builder.with_payload(options.tagged_data_payload);
 
             if let Some(context_inputs) = options.context_inputs {
                 builder = builder.with_context_inputs(context_inputs);
             }
-
-            // // TODO remove when https://github.com/iotaledger/iota-sdk/issues/1744 is done
-            // match options.capabilities.as_mut() {
-            //     Some(capabilities) => {
-            //         capabilities.add_capability(TransactionCapabilityFlag::BurnMana);
-            //     }
-            //     None => {
-            //         let mut capabilities = TransactionCapabilities::default();
-            //         capabilities.add_capability(TransactionCapabilityFlag::BurnMana);
-            //         options.capabilities = Some(capabilities);
-            //     }
-            // }
 
             if let Some(capabilities) = options.capabilities {
                 builder = builder.add_capabilities(capabilities.capabilities_iter());
