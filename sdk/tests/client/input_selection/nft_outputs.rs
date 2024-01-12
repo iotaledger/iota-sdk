@@ -21,7 +21,7 @@ use crate::client::{
     build_inputs, build_outputs, is_remainder_or_return, unsorted_eq,
     Build::{Basic, Nft},
     BECH32_ADDRESS_ACCOUNT_1, BECH32_ADDRESS_ED25519_0, BECH32_ADDRESS_ED25519_1, BECH32_ADDRESS_NFT_1, NFT_ID_0,
-    NFT_ID_1, NFT_ID_2,
+    NFT_ID_1, NFT_ID_2, SLOT_INDEX,
 };
 
 #[test]
@@ -57,6 +57,7 @@ fn input_nft_eq_output_nft() {
         inputs.clone(),
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX + 1,
         protocol_parameters,
     )
     .select()
@@ -100,6 +101,7 @@ fn transition_nft_id_zero() {
         inputs.clone(),
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX + 1,
         protocol_parameters,
     )
     .select()
@@ -230,6 +232,7 @@ fn mint_nft() {
         inputs.clone(),
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX + 1,
         protocol_parameters,
     )
     .select()
@@ -281,6 +284,7 @@ fn burn_nft() {
         inputs.clone(),
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX + 1,
         protocol_parameters,
     )
     .with_burn(Burn::new().add_nft(nft_id_2))
@@ -369,6 +373,7 @@ fn missing_input_for_nft_output() {
         inputs,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX + 1,
         protocol_parameters,
     )
     .select();
@@ -412,6 +417,7 @@ fn missing_input_for_nft_output_but_created() {
         inputs,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX + 1,
         protocol_parameters,
     )
     .select();
@@ -476,6 +482,7 @@ fn nft_in_output_and_sender() {
         inputs.clone(),
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX + 1,
         protocol_parameters,
     )
     .select()
@@ -526,6 +533,7 @@ fn missing_ed25519_sender() {
         inputs,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX + 1,
         protocol_parameters,
     )
     .select();
@@ -569,6 +577,7 @@ fn missing_ed25519_issuer_created() {
         inputs,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX + 1,
         protocol_parameters,
     )
     .select();
@@ -612,6 +621,7 @@ fn missing_ed25519_issuer_transition() {
         inputs,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX + 1,
         protocol_parameters,
     )
     .select();
@@ -652,6 +662,7 @@ fn missing_account_sender() {
         inputs,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX + 1,
         protocol_parameters,
     )
     .select();
@@ -695,6 +706,7 @@ fn missing_account_issuer_created() {
         inputs,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX + 1,
         protocol_parameters,
     )
     .select();
@@ -738,6 +750,7 @@ fn missing_account_issuer_transition() {
         inputs,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX + 1,
         protocol_parameters,
     )
     .select();
@@ -778,6 +791,7 @@ fn missing_nft_sender() {
         inputs,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX + 1,
         protocol_parameters,
     )
     .select();
@@ -821,6 +835,7 @@ fn missing_nft_issuer_created() {
         inputs,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX + 1,
         protocol_parameters,
     )
     .select();
@@ -864,6 +879,7 @@ fn missing_nft_issuer_transition() {
         inputs,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX + 1,
         protocol_parameters,
     )
     .select();
@@ -916,6 +932,7 @@ fn increase_nft_amount() {
         inputs.clone(),
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX + 1,
         protocol_parameters,
     )
     .select()
@@ -970,6 +987,7 @@ fn decrease_nft_amount() {
         inputs.clone(),
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX + 1,
         protocol_parameters,
     )
     .select()
@@ -1036,6 +1054,7 @@ fn prefer_basic_to_nft() {
         inputs.clone(),
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX + 1,
         protocol_parameters,
     )
     .select()
@@ -1091,6 +1110,7 @@ fn take_amount_from_nft_to_fund_basic() {
         inputs.clone(),
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX + 1,
         protocol_parameters,
     )
     .select()
@@ -1158,6 +1178,7 @@ fn nft_burn_should_validate_nft_sender() {
         inputs.clone(),
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX + 1,
         protocol_parameters,
     )
     .with_burn(Burn::new().add_nft(nft_id_1))
@@ -1213,6 +1234,7 @@ fn nft_burn_should_validate_nft_address() {
         inputs.clone(),
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX + 1,
         protocol_parameters,
     )
     .with_burn(Burn::new().add_nft(nft_id_1))
@@ -1256,6 +1278,7 @@ fn transitioned_zero_nft_id_no_longer_is_zero() {
         inputs.clone(),
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX + 1,
         protocol_parameters,
     )
     .select()
@@ -1332,6 +1355,7 @@ fn changed_immutable_metadata() {
         inputs,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX + 1,
         protocol_parameters,
     )
     .select();

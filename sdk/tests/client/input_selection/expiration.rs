@@ -17,7 +17,7 @@ use crate::client::{
     build_inputs, build_outputs, is_remainder_or_return, unsorted_eq,
     Build::{Account, Basic, Nft},
     ACCOUNT_ID_1, BECH32_ADDRESS_ACCOUNT_1, BECH32_ADDRESS_ED25519_0, BECH32_ADDRESS_ED25519_1,
-    BECH32_ADDRESS_ED25519_2, NFT_ID_1,
+    BECH32_ADDRESS_ED25519_2, NFT_ID_1, SLOT_INDEX,
 };
 
 #[test]
@@ -52,9 +52,9 @@ fn one_output_expiration_not_expired() {
         inputs,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX + 1,
         protocol_parameters,
     )
-    .with_slot_index(100)
     .select();
 
     assert!(matches!(selected, Err(Error::NoAvailableInputsProvided)));
@@ -92,9 +92,9 @@ fn expiration_equal_timestamp() {
         inputs.clone(),
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX + 1,
         protocol_parameters,
     )
-    .with_slot_index(200)
     .select()
     .unwrap();
 
@@ -134,9 +134,9 @@ fn one_output_expiration_expired() {
         inputs.clone(),
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX + 1,
         protocol_parameters,
     )
-    .with_slot_index(100)
     .select()
     .unwrap();
 
@@ -188,9 +188,9 @@ fn two_outputs_one_expiration_expired() {
         inputs.clone(),
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX + 1,
         protocol_parameters,
     )
-    .with_slot_index(100)
     .select()
     .unwrap();
 
@@ -243,9 +243,9 @@ fn two_outputs_one_unexpired_one_missing() {
         inputs.clone(),
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX + 1,
         protocol_parameters,
     )
-    .with_slot_index(100)
     .select()
     .unwrap();
 
@@ -308,9 +308,9 @@ fn two_outputs_two_expired() {
         inputs.clone(),
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_2).unwrap()],
+        SLOT_INDEX + 1,
         protocol_parameters,
     )
-    .with_slot_index(200)
     .select()
     .unwrap();
 
@@ -366,9 +366,9 @@ fn two_outputs_two_expired_2() {
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_2).unwrap(),
         ],
+        SLOT_INDEX + 1,
         protocol_parameters,
     )
-    .with_slot_index(200)
     .select()
     .unwrap();
 
@@ -408,9 +408,9 @@ fn expiration_expired_with_sdr() {
         inputs.clone(),
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX + 1,
         protocol_parameters,
     )
-    .with_slot_index(100)
     .select()
     .unwrap();
 
@@ -450,9 +450,9 @@ fn expiration_expired_with_sdr_2() {
         inputs.clone(),
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX + 1,
         protocol_parameters,
     )
-    .with_slot_index(100)
     .select()
     .unwrap();
 
@@ -492,9 +492,9 @@ fn expiration_expired_with_sdr_and_timelock() {
         inputs.clone(),
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX + 1,
         protocol_parameters,
     )
-    .with_slot_index(100)
     .select()
     .unwrap();
 
@@ -534,9 +534,9 @@ fn expiration_expired_with_sdr_and_timelock_2() {
         inputs.clone(),
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX + 1,
         protocol_parameters,
     )
-    .with_slot_index(100)
     .select()
     .unwrap();
 
@@ -621,9 +621,9 @@ fn sender_in_expiration() {
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
         ],
+        SLOT_INDEX + 1,
         protocol_parameters,
     )
-    .with_slot_index(100)
     .select()
     .unwrap();
 
@@ -667,9 +667,9 @@ fn sender_in_expiration_already_selected() {
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
         ],
+        SLOT_INDEX + 1,
         protocol_parameters,
     )
-    .with_slot_index(100)
     .with_required_inputs([*inputs[0].output_id()])
     .select()
     .unwrap();
@@ -713,9 +713,9 @@ fn remainder_in_expiration() {
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
         ],
+        SLOT_INDEX + 1,
         protocol_parameters,
     )
-    .with_slot_index(100)
     .select()
     .unwrap();
 
@@ -766,9 +766,9 @@ fn expiration_expired_non_ed25519_in_address_unlock_condition() {
         inputs.clone(),
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX + 1,
         protocol_parameters,
     )
-    .with_slot_index(100)
     .select()
     .unwrap();
 
@@ -820,9 +820,9 @@ fn expiration_expired_only_account_addresses() {
         inputs.clone(),
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX + 1,
         protocol_parameters,
     )
-    .with_slot_index(100)
     .select()
     .unwrap();
 
@@ -863,9 +863,9 @@ fn one_nft_output_expiration_unexpired() {
         inputs.clone(),
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap()],
+        SLOT_INDEX + 1,
         protocol_parameters,
     )
-    .with_slot_index(100)
     .select()
     .unwrap();
 
@@ -906,9 +906,9 @@ fn one_nft_output_expiration_expired() {
         inputs.clone(),
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX + 1,
         protocol_parameters,
     )
-    .with_slot_index(100)
     .select()
     .unwrap();
 

@@ -155,6 +155,7 @@ impl InputSelection {
         available_inputs: impl Into<Vec<InputSigningData>>,
         outputs: impl Into<Vec<Output>>,
         addresses: impl IntoIterator<Item = Address>,
+        slot_index: impl Into<SlotIndex>,
         protocol_parameters: ProtocolParameters,
     ) -> Self {
         let available_inputs = available_inputs.into();
@@ -189,9 +190,8 @@ impl InputSelection {
             burn: None,
             remainder_address: None,
             protocol_parameters,
-            // TODO may want to make this mandatory at some point
             // Should be set from a commitment context input
-            slot_index: SlotIndex::from(0),
+            slot_index: slot_index.into(),
             requirements: Vec::new(),
             automatically_transitioned: HashSet::new(),
             mana_allotments: 0,
@@ -219,12 +219,6 @@ impl InputSelection {
     /// Sets the remainder address of an [`InputSelection`].
     pub fn with_remainder_address(mut self, address: impl Into<Option<Address>>) -> Self {
         self.remainder_address = address.into();
-        self
-    }
-
-    /// Sets the slot index of an [`InputSelection`].
-    pub fn with_slot_index(mut self, slot_index: impl Into<SlotIndex>) -> Self {
-        self.slot_index = slot_index.into();
         self
     }
 

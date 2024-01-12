@@ -13,7 +13,7 @@ use crate::client::{
     build_inputs, build_outputs, is_remainder_or_return, unsorted_eq,
     Build::{Account, Basic},
     ACCOUNT_ID_1, BECH32_ADDRESS_ACCOUNT_1, BECH32_ADDRESS_ED25519_0, BECH32_ADDRESS_ED25519_1,
-    BECH32_ADDRESS_ED25519_2,
+    BECH32_ADDRESS_ED25519_2, SLOT_INDEX,
 };
 
 #[test]
@@ -48,6 +48,7 @@ fn sdruc_output_not_provided_no_remainder() {
         inputs.clone(),
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX + 1,
         protocol_parameters,
     )
     .select()
@@ -112,6 +113,7 @@ fn sdruc_output_provided_no_remainder() {
         inputs.clone(),
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX + 1,
         protocol_parameters,
     )
     .select()
@@ -153,6 +155,7 @@ fn sdruc_output_provided_remainder() {
         inputs.clone(),
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX + 1,
         protocol_parameters,
     )
     .select()
@@ -217,6 +220,7 @@ fn two_sdrucs_to_the_same_address_both_needed() {
         inputs.clone(),
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX + 1,
         protocol_parameters,
     )
     .select()
@@ -281,6 +285,7 @@ fn two_sdrucs_to_the_same_address_one_needed() {
         inputs.clone(),
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX + 1,
         protocol_parameters,
     )
     .select()
@@ -346,6 +351,7 @@ fn two_sdrucs_to_different_addresses_both_needed() {
         inputs.clone(),
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX + 1,
         protocol_parameters,
     )
     .select()
@@ -416,6 +422,7 @@ fn two_sdrucs_to_different_addresses_one_needed() {
         inputs.clone(),
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX + 1,
         protocol_parameters,
     )
     .select()
@@ -469,6 +476,7 @@ fn insufficient_amount_because_of_sdruc() {
         inputs,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX + 1,
         protocol_parameters,
     )
     .select();
@@ -529,6 +537,7 @@ fn useless_sdruc_required_for_sender_feature() {
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
         ],
+        SLOT_INDEX + 1,
         protocol_parameters,
     )
     .select()
@@ -592,6 +601,7 @@ fn sdruc_required_non_ed25519_in_address_unlock() {
         inputs.clone(),
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX + 1,
         protocol_parameters,
     )
     .select()
@@ -665,6 +675,7 @@ fn useless_sdruc_non_ed25519_in_address_unlock() {
         inputs.clone(),
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX + 1,
         protocol_parameters,
     )
     .select()
