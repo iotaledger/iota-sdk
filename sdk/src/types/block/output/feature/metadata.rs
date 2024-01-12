@@ -86,29 +86,7 @@ impl TryFrom<Vec<(Vec<u8>, Vec<u8>)>> for MetadataFeature {
     type Error = Error;
 
     fn try_from(data: Vec<(Vec<u8>, Vec<u8>)>) -> Result<Self, Error> {
-        let mut res = BTreeMap::<
-            BoxedSlicePrefix<u8, MetadataFeatureKeyLength>,
-            BoxedSlicePrefix<u8, MetadataFeatureValueLength>,
-        >::new();
-        for (k, v) in data {
-            if !k.iter().all(|b| b.is_ascii_graphic()) {
-                return Err(Error::NonGraphicAsciiMetadataKey(k.to_vec()));
-            }
-            if res
-                .insert(
-                    k.into_boxed_slice()
-                        .try_into()
-                        .map_err(Error::InvalidMetadataFeatureKeyLength)?,
-                    v.into_boxed_slice()
-                        .try_into()
-                        .map_err(Error::InvalidMetadataFeatureValueLength)?,
-                )
-                .is_some()
-            {
-                return Err(Error::InvalidMetadataFeature("Duplicated metadata key".to_string()));
-            };
-        }
-        Ok(Self(res.try_into().map_err(Error::InvalidMetadataFeatureLength)?))
+        metadata_feature_from_iter(data)
     }
 }
 
@@ -116,25 +94,36 @@ impl TryFrom<BTreeMap<Vec<u8>, Vec<u8>>> for MetadataFeature {
     type Error = Error;
 
     fn try_from(data: BTreeMap<Vec<u8>, Vec<u8>>) -> Result<Self, Error> {
-        let mut res = BTreeMap::<
-            BoxedSlicePrefix<u8, MetadataFeatureKeyLength>,
-            BoxedSlicePrefix<u8, MetadataFeatureValueLength>,
-        >::new();
-        for (k, v) in data {
-            if !k.iter().all(|b| b.is_ascii_graphic()) {
-                return Err(Error::NonGraphicAsciiMetadataKey(k.to_vec()));
-            }
-            res.insert(
+        metadata_feature_from_iter(data)
+    }
+}
+
+fn metadata_feature_from_iter(data: impl IntoIterator<Item = (Vec<u8>, Vec<u8>)>) -> Result<MetadataFeature, Error> {
+    let mut res = BTreeMap::<
+        BoxedSlicePrefix<u8, MetadataFeatureKeyLength>,
+        BoxedSlicePrefix<u8, MetadataFeatureValueLength>,
+    >::new();
+    for (k, v) in data {
+        if !k.iter().all(|b| b.is_ascii_graphic()) {
+            return Err(Error::NonGraphicAsciiMetadataKey(k.to_vec()));
+        }
+        if res
+            .insert(
                 k.into_boxed_slice()
                     .try_into()
                     .map_err(Error::InvalidMetadataFeatureKeyLength)?,
                 v.into_boxed_slice()
                     .try_into()
                     .map_err(Error::InvalidMetadataFeatureValueLength)?,
-            );
-        }
-        Ok(Self(res.try_into().map_err(Error::InvalidMetadataFeatureLength)?))
+            )
+            .is_some()
+        {
+            return Err(Error::InvalidMetadataFeature("Duplicated metadata key".to_string()));
+        };
     }
+    Ok(MetadataFeature(
+        res.try_into().map_err(Error::InvalidMetadataFeatureLength)?,
+    ))
 }
 
 impl core::fmt::Display for MetadataFeature {
