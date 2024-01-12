@@ -61,12 +61,12 @@ class TestTypes(unittest.TestCase):
         output_index = 42
         output_id = OutputId(transaction_id, output_index)
         assert repr(
-            output_id) == '0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c6492a00'
+            output_id) == '0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c6492a000000'
 
         new_output_id = OutputId.from_string(
-            '0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c6492a00')
+            '0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c6492a0000000000')
         assert repr(
-            new_output_id) == '0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c6492a00'
+            new_output_id) == '0x52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c6492a0000000000'
         assert new_output_id.transaction_id == transaction_id
         assert new_output_id.output_index == output_index
 
@@ -79,16 +79,13 @@ class TestTypes(unittest.TestCase):
         transaction_id_invalid_hex_char = '0xz2fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c649'
         with self.assertRaises(ValueError):
             OutputId(transaction_id_invalid_hex_char, output_index)
-        invalid_output_index = 129
-        with self.assertRaises(ValueError):
-            OutputId(transaction_id, invalid_output_index)
-        output_id_missing_0x_prefix = '52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c6492a00'
+        output_id_missing_0x_prefix = '52fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c6492a00000000'
         with self.assertRaises(ValueError):
             OutputId.from_string(output_id_missing_0x_prefix)
-        output_id_invalid_hex_char = '0xz2fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c6492a00'
+        output_id_invalid_hex_char = '0xz2fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c6492a00000000'
         with self.assertRaises(ValueError):
             OutputId.from_string(output_id_invalid_hex_char)
-        output_id_invalid_hex_prefix = '0052fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c6492a00'
+        output_id_invalid_hex_prefix = '0052fdfc072182654f163f5f0f9a621d729566c74d10037c4d7bbb0407d1e2c6492a00000000'
         with self.assertRaises(ValueError):
             OutputId.from_string(output_id_invalid_hex_prefix)
 
