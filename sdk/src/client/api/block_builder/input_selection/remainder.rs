@@ -130,7 +130,7 @@ impl InputSelection {
                     .minimum_amount(self.protocol_parameters.storage_score_parameters());
                 let generation_amount = input.output.amount().saturating_sub(min_deposit);
 
-                self.protocol_parameters.potential_mana(
+                self.protocol_parameters.generate_mana_with_decay(
                     generation_amount,
                     input.output_id().transaction_id().slot_index(),
                     self.slot_index,

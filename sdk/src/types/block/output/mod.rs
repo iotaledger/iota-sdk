@@ -235,7 +235,8 @@ impl Output {
 
         let min_deposit = self.minimum_amount(protocol_parameters.storage_score_parameters());
         let generation_amount = amount.saturating_sub(min_deposit);
-        let potential_mana = protocol_parameters.potential_mana(generation_amount, creation_index, target_index)?;
+        let potential_mana =
+            protocol_parameters.generate_mana_with_decay(generation_amount, creation_index, target_index)?;
         let stored_mana = protocol_parameters.mana_with_decay(mana, creation_index, target_index)?;
 
         Ok(potential_mana + stored_mana)
