@@ -8,7 +8,7 @@ from dataclasses import dataclass
 from iota_sdk import destroy_wallet, create_wallet, listen_wallet, get_client_from_wallet, get_secret_manager_from_wallet, Client
 from iota_sdk.secret_manager.secret_manager import LedgerNanoSecretManager, MnemonicSecretManager, StrongholdSecretManager, SeedSecretManager, SecretManager
 
-from iota_sdk.wallet.common import _call_method_routine
+from iota_sdk.wallet.common import _call_wallet_method_routine
 from iota_sdk.wallet.prepared_transaction import PreparedTransaction, PreparedCreateTokenTransaction
 from iota_sdk.wallet.sync_options import SyncOptions
 from iota_sdk.types.balance import Balance
@@ -63,7 +63,7 @@ class Wallet():
         """
         return self.handle
 
-    @_call_method_routine
+    @_call_wallet_method_routine
     def _call_method(self, name: str, data=None):
         message = {
             'name': name

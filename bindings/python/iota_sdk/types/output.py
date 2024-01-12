@@ -301,7 +301,7 @@ def deserialize_output(d: Dict[str, Any]) -> Output:
     Arguments:
     * `d`: A dictionary that is expected to have a key called 'type' which specifies the type of the returned value.
     """
-    output_type = dict['type']
+    output_type = d['type']
     if output_type == OutputType.Basic:
         return BasicOutput.from_dict(d)
     if output_type == OutputType.Account:
