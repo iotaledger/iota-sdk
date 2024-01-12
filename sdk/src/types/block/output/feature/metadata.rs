@@ -62,8 +62,10 @@ impl MetadataFeature {
     pub fn new(data: impl IntoIterator<Item = (Vec<u8>, Vec<u8>)>) -> Result<Self, Error> {
         let data: BTreeMap<Vec<u8>, Vec<u8>> = data.into_iter().collect();
         let metadata = Self::try_from(data)?;
+
         verify_keys_packable::<true>(&metadata.0)?;
-    Ok(metadata)
+
+        Ok(metadata)
     }
 
     /// Returns the data.
