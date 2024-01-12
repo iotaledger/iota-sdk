@@ -9,7 +9,6 @@ use pretty_assertions::assert_eq;
 
 use crate::client::{
     build_inputs, build_outputs, unsorted_eq, Build::Basic, BECH32_ADDRESS_ED25519_0, BECH32_ADDRESS_ED25519_1,
-    SLOT_INDEX,
 };
 
 #[test]
@@ -44,7 +43,7 @@ fn one_output_timelock_not_expired() {
         inputs,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
-        SLOT_INDEX,
+        100,
         protocol_parameters,
     )
     .select();
