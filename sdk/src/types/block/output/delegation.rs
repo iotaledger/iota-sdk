@@ -18,7 +18,7 @@ use crate::types::block::{
     },
     protocol::{ProtocolParameters, WorkScore, WorkScoreParameters},
     semantic::StateTransitionError,
-    slot::EpochIndex,
+    slot::{EpochIndex, SlotIndex},
     Error,
 };
 
@@ -38,11 +38,7 @@ impl From<&OutputId> for DelegationId {
 
 impl DelegationId {
     pub fn or_from_output_id(self, output_id: &OutputId) -> Self {
-        if self.is_null() {
-            Self::from(output_id)
-        } else {
-            self
-        }
+        if self.is_null() { Self::from(output_id) } else { self }
     }
 }
 
@@ -348,7 +344,7 @@ impl DelegationOutput {
         let slot_commitment_id = context_inputs
             .iter()
             .find(|i| i.kind() == CommitmentContextInput::KIND)
-            .map(|s| s.as_commitment().commitment_id())
+            .map(|s| s.as_commitment().slot_commitment_id())
             .ok_or(StateTransitionError::MissingCommitmentContextInput)?;
 
         let future_bounded_slot: SlotIndex = slot_commitment_id.slot_index() + protocol_parameters.min_committable_age;

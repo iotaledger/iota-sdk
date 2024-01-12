@@ -50,7 +50,7 @@ use crate::{
     client::{
         api::{
             input_selection::Error as InputSelectionError, transaction::validate_signed_transaction_payload_length,
-            PreparedTransactionData,
+            verify_semantic, PreparedTransactionData,
         },
         Error,
     },
