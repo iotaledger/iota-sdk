@@ -205,6 +205,7 @@ impl ProtocolParameters {
     /// Calculates the number of slots before the next epoch.
     pub fn slots_before_next_epoch(&self, slot_index: impl Into<SlotIndex>) -> u32 {
         let slot_index = slot_index.into();
+
         if slot_index.0 < self.genesis_slot() {
             0
         } else {
@@ -215,6 +216,7 @@ impl ProtocolParameters {
     /// Calculates the number of slots since the start of the epoch.
     pub fn slots_since_epoch_start(&self, slot_index: impl Into<SlotIndex>) -> u32 {
         let slot_index = slot_index.into();
+
         if slot_index.0 < self.genesis_slot() {
             0
         } else {
