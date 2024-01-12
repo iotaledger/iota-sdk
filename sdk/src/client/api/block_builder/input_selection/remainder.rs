@@ -15,8 +15,8 @@ use crate::{
     types::block::{
         address::{Address, Ed25519Address},
         output::{
-            unlock_condition::AddressUnlockCondition, BasicOutputBuilder, MinimumOutputAmount, NativeTokensBuilder,
-            Output,
+            unlock_condition::AddressUnlockCondition, AccountOutputBuilder, BasicOutputBuilder, FoundryOutputBuilder,
+            MinimumOutputAmount, NativeTokensBuilder, NftOutputBuilder, Output,
         },
     },
 };
@@ -84,7 +84,7 @@ impl InputSelection {
     }
 
     pub(crate) fn remainder_and_storage_deposit_return_outputs(
-        &self,
+        &mut self,
     ) -> Result<(Option<RemainderData>, Vec<Output>), Error> {
         let (inputs_sum, outputs_sum, inputs_sdr, outputs_sdr) =
             amount_sums(&self.selected_inputs, &self.outputs, self.slot_index);
@@ -152,7 +152,7 @@ impl InputSelection {
             // TODO rewards
         }
 
-        let output_mana = self.outputs.iter().map(|o| o.mana()).sum::<u64>();
+        let output_mana = self.outputs.iter().map(|o| o.mana()).sum::<u64>() + self.mana_allotments;
         //  TODO allotment
 
         println!("ISA input_mana {input_mana}, output_mana {output_mana}");
@@ -162,12 +162,42 @@ impl InputSelection {
             return Ok((None, storage_deposit_returns));
         }
 
+        // TODO underflows?
+        let amount_diff = inputs_sum - outputs_sum;
+        let mana_diff = input_mana - output_mana;
+
+        if inputs_sum == outputs_sum && input_mana != output_mana && native_tokens_diff.is_none() {
+            let output = self
+                .outputs
+                .iter_mut()
+                .filter(|output| {
+                    output
+                        .chain_id()
+                        .as_ref()
+                        .map(|chain_id| self.automatically_transitioned.contains(chain_id))
+                        .unwrap_or(false)
+                })
+                .next();
+            if let Some(output) = output {
+                *output = match output {
+                    Output::Account(output) => AccountOutputBuilder::from(&*output)
+                        .with_mana(output.mana() + mana_diff)
+                        .finish_output()?,
+                    Output::Foundry(_) => panic!(),
+                    Output::Nft(output) => NftOutputBuilder::from(&*output)
+                        .with_mana(output.mana() + mana_diff)
+                        .finish_output()?,
+                    _ => panic!("only account, nft and foundry can be automatically created"),
+                };
+            }
+
+            return Ok((None, storage_deposit_returns));
+        }
+
         let Some((remainder_address, chain)) = self.get_remainder_address()? else {
             return Err(Error::MissingInputWithEd25519Address);
         };
 
-        let amount_diff = inputs_sum - outputs_sum;
-        let mana_diff = input_mana - output_mana;
         let mut remainder_builder = BasicOutputBuilder::new_with_amount(amount_diff).with_mana(mana_diff);
 
         remainder_builder =
@@ -182,6 +212,8 @@ impl InputSelection {
         let remainder = remainder_builder.finish_output()?;
 
         println!("remainder {remainder:?}");
+
+        println!("{:?}", self);
 
         // TODO add log
         log::debug!("Created remainder output of {amount_diff} for {remainder_address:?}");
