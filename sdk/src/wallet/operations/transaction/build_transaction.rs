@@ -9,7 +9,9 @@ use crate::{
         secret::{types::InputSigningData, SecretManage},
     },
     types::block::{
+        context_input::{BlockIssuanceCreditContextInput, ContextInput},
         input::{Input, UtxoInput},
+        output::Output,
         payload::signed_transaction::Transaction,
     },
     wallet::{operations::transaction::TransactionOptions, Wallet},
@@ -32,11 +34,20 @@ where
 
         let mut inputs: Vec<Input> = Vec::new();
         let mut inputs_for_signing: Vec<InputSigningData> = Vec::new();
+        let mut context_inputs = Vec::new();
 
-        for utxo in &selected_transaction_data.inputs {
-            let input = Input::Utxo(UtxoInput::from(*utxo.output_id()));
-            inputs.push(input.clone());
-            inputs_for_signing.push(utxo.clone());
+        for input in &selected_transaction_data.inputs {
+            if let Output::Account(account) = &input.output {
+                if account.features().block_issuer().is_some() {
+                    context_inputs.push(ContextInput::from(BlockIssuanceCreditContextInput::from(
+                        account.account_id_non_null(input.output_id()),
+                    )));
+                }
+                println!("account -- {account:?}");
+            }
+
+            inputs.push(Input::Utxo(UtxoInput::from(*input.output_id())));
+            inputs_for_signing.push(input.clone());
         }
 
         // Build transaction
@@ -50,8 +61,9 @@ where
             // Optional add a tagged payload
             builder = builder.with_payload(options.tagged_data_payload);
 
-            if let Some(context_inputs) = options.context_inputs {
-                builder = builder.with_context_inputs(context_inputs);
+            if let Some(context_inputs_opt) = options.context_inputs {
+                // TODO uniqueness ?
+                context_inputs.extend(context_inputs_opt);
             }
 
             if let Some(capabilities) = options.capabilities {
@@ -63,7 +75,11 @@ where
             }
         }
 
-        let transaction = builder.finish_with_params(&protocol_parameters)?;
+        let transaction = builder
+            .with_context_inputs(context_inputs)
+            .finish_with_params(&protocol_parameters)?;
+
+        println!("{transaction:?}");
 
         validate_transaction_length(&transaction)?;
 
