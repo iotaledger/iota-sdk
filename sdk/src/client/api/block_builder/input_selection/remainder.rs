@@ -192,8 +192,7 @@ impl InputSelection {
 
         let remainder = remainder_builder.finish_output()?;
 
-        // TODO add log
-        log::debug!("Created remainder output of {amount_diff} for {remainder_address:?}");
+        log::debug!("Created remainder output of amount {amount_diff} and mana {mana_diff} for {remainder_address:?}");
 
         remainder.verify_storage_deposit(self.protocol_parameters.storage_score_parameters())?;
 
