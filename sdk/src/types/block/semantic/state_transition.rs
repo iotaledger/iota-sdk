@@ -349,12 +349,36 @@ impl StateTransitionVerifier for DelegationOutput {
         next_state: &Self,
         context: &SemanticValidationContext<'_>,
     ) -> Result<(), StateTransitionError> {
-        Self::transition_inner(
-            current_state,
-            next_state,
-            context.transaction.context_inputs(),
-            &context.protocol_parameters,
-        )
+        let protocol_parameters = &context.protocol_parameters;
+
+        let slot_commitment_id = context
+            .transaction
+            .context_inputs()
+            .iter()
+            .find(|i| i.kind() == CommitmentContextInput::KIND)
+            .map(|s| s.as_commitment().slot_commitment_id())
+            .ok_or(StateTransitionError::MissingCommitmentContextInput)?;
+
+        let future_bounded_slot_index = slot_commitment_id.slot_index() + protocol_parameters.min_committable_age;
+        let future_bounded_epoch_index =
+            future_bounded_slot_index.to_epoch_index(protocol_parameters.slots_per_epoch_exponent);
+
+        let registration_slot = future_bounded_epoch_index.registration_slot(
+            protocol_parameters.slots_per_epoch_exponent,
+            protocol_parameters.epoch_nearing_threshold,
+        );
+
+        let expected_end_epoch = if future_bounded_slot_index <= registration_slot {
+            future_bounded_epoch_index
+        } else {
+            future_bounded_epoch_index + 1
+        };
+
+        if next_state.end_epoch() != expected_end_epoch {
+            return Err(StateTransitionError::NonDelayedClaimingTransition);
+        }
+
+        Self::transition_inner(current_state, next_state)
     }
 
     fn destruction(

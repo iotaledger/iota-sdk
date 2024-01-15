@@ -83,10 +83,7 @@ impl EpochIndex {
 
     /// Returns the slot at which delegation can happen for the following epoch.
     pub fn registration_slot(&self, slots_per_epoch_exponent: u8, epoch_nearing_threshold: u32) -> SlotIndex {
-        self.first_slot_index(slots_per_epoch_exponent)
-            - epoch_nearing_threshold
-            - self.activity_window_slot(slots_per_epoch_exponent, epoch_nearing_threshold)
-            - 1
+        self.last_slot_index(slots_per_epoch_exponent) - epoch_nearing_threshold
     }
 }
 

@@ -7,7 +7,6 @@ use packable::{Packable, PackableExt};
 
 use crate::types::block::{
     address::{AccountAddress, Address},
-    context_input::{CommitmentContextInput, ContextInput},
     output::{
         chain_id::ChainId,
         unlock_condition::{
@@ -18,7 +17,7 @@ use crate::types::block::{
     },
     protocol::{ProtocolParameters, WorkScore, WorkScoreParameters},
     semantic::StateTransitionError,
-    slot::{EpochIndex, SlotIndex},
+    slot::EpochIndex,
     Error,
 };
 
@@ -323,12 +322,7 @@ impl DelegationOutput {
     }
 
     // Transition, just without full SemanticValidationContext.
-    pub(crate) fn transition_inner(
-        current_state: &Self,
-        next_state: &Self,
-        context_inputs: &[ContextInput],
-        protocol_parameters: &ProtocolParameters,
-    ) -> Result<(), StateTransitionError> {
+    pub(crate) fn transition_inner(current_state: &Self, next_state: &Self) -> Result<(), StateTransitionError> {
         #[allow(clippy::nonminimal_bool)]
         if !(current_state.delegation_id.is_null() && !next_state.delegation_id().is_null()) {
             return Err(StateTransitionError::NonDelayedClaimingTransition);
@@ -339,30 +333,6 @@ impl DelegationOutput {
             || current_state.validator_address != next_state.validator_address
         {
             return Err(StateTransitionError::MutatedImmutableField);
-        }
-
-        let slot_commitment_id = context_inputs
-            .iter()
-            .find(|i| i.kind() == CommitmentContextInput::KIND)
-            .map(|s| s.as_commitment().slot_commitment_id())
-            .ok_or(StateTransitionError::MissingCommitmentContextInput)?;
-
-        let future_bounded_slot: SlotIndex = slot_commitment_id.slot_index() + protocol_parameters.min_committable_age;
-        let future_bounded_epoch = future_bounded_slot.to_epoch_index(protocol_parameters.slots_per_epoch_exponent);
-
-        let registration_slot = future_bounded_epoch.registration_slot(
-            protocol_parameters.slots_per_epoch_exponent,
-            protocol_parameters.epoch_nearing_threshold,
-        );
-
-        let expected_end_epoch = if future_bounded_slot <= registration_slot {
-            future_bounded_epoch
-        } else {
-            future_bounded_epoch + 1
-        };
-
-        if next_state.end_epoch != expected_end_epoch {
-            return Err(StateTransitionError::NonDelayedClaimingTransition);
         }
 
         Ok(())
