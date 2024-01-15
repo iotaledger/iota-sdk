@@ -144,6 +144,7 @@ impl InputSelection {
         let amount_diff = input_amount - output_amount;
         let mana_diff = input_mana - output_mana;
 
+        // If there is only a mana remainder, try to fit it in an automatically transitioned output.
         if input_amount == output_amount && input_mana != output_mana && native_tokens_diff.is_none() {
             let output = self
                 .outputs
@@ -154,10 +155,11 @@ impl InputSelection {
                         .as_ref()
                         .map(|chain_id| self.automatically_transitioned.contains(chain_id))
                         .unwrap_or(false)
-                        // Foundries can'ty hold mana so they are not considered here.
+                        // Foundries can't hold mana so they are not considered here.
                         && !output.is_foundry()
                 })
                 .next();
+
             if let Some(output) = output {
                 *output = match output {
                     Output::Account(output) => AccountOutputBuilder::from(&*output)
@@ -168,9 +170,9 @@ impl InputSelection {
                         .finish_output()?,
                     _ => panic!("only account, nft can be automatically created and can hold mana"),
                 };
-            }
 
-            return Ok((None, storage_deposit_returns));
+                return Ok((None, storage_deposit_returns));
+            }
         }
 
         let Some((remainder_address, chain)) = self.get_remainder_address()? else {
