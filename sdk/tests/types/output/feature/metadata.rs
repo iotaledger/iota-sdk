@@ -7,12 +7,10 @@ use packable::{error::UnpackError, PackableExt};
 #[test]
 fn invalid() {
     // Invalid key
-    assert!(
-        serde_json::from_str::<MetadataFeature>(
-            r#"{"type": 2, "entries": { "space is a non graphical ASCII value": "0x42" } }"#
-        )
-        .is_err()
-    );
+    assert!(serde_json::from_str::<MetadataFeature>(
+        r#"{"type": 2, "entries": { "space is a non graphical ASCII value": "0x42" } }"#
+    )
+    .is_err());
 
     // Invalid value
     assert!(serde_json::from_str::<MetadataFeature>(r#"{"type": 2, "entries": { "nothing": "" } }"#).is_err());
@@ -55,6 +53,6 @@ fn unpack_invalid_order() {
 fn unpack_invalid_length() {
     assert!(matches!(
         MetadataFeature::unpack_verified([vec![1, 0, 1, 33, 0, 32], vec![0u8; 8192]].concat(), &()),
-        Err(UnpackError::Packable(Error::InvalidMetadataFeature(len))) if &len == "8198"
+        Err(UnpackError::Packable(Error::InvalidMetadataFeature(len))) if &len == "8199"
     ));
 }

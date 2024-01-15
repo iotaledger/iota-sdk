@@ -39,7 +39,7 @@ pub fn rand_metadata_feature() -> MetadataFeature {
     let mut total_size = 0;
 
     for _ in 0..10 {
-        if total_size >= *MetadataFeature::LENGTH_RANGE.end() as usize - u8::MAX as usize {
+        if total_size >= (*MetadataFeature::LENGTH_RANGE.end() - 1) as usize - u8::MAX as usize {
             break;
         }
         // Key length
