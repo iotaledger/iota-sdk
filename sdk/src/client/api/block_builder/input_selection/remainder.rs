@@ -168,6 +168,8 @@ impl InputSelection {
                         .as_ref()
                         .map(|chain_id| self.automatically_transitioned.contains(chain_id))
                         .unwrap_or(false)
+                        // Foundries can'ty hold mana so they are not considered here.
+                        && !output.is_foundry()
                 })
                 .next();
             if let Some(output) = output {
@@ -175,11 +177,10 @@ impl InputSelection {
                     Output::Account(output) => AccountOutputBuilder::from(&*output)
                         .with_mana(output.mana() + mana_diff)
                         .finish_output()?,
-                    Output::Foundry(_) => panic!(),
                     Output::Nft(output) => NftOutputBuilder::from(&*output)
                         .with_mana(output.mana() + mana_diff)
                         .finish_output()?,
-                    _ => panic!("only account, nft and foundry can be automatically created"),
+                    _ => panic!("only account, nft can be automatically created and can hold mana"),
                 };
             }
 
