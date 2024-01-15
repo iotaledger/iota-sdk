@@ -330,14 +330,10 @@ pub async fn accounts_command(wallet: &Wallet) -> Result<(), Error> {
         let output_id = account.output_id;
         let account_id = account.output.as_account().account_id_non_null(&output_id);
         let account_address = account_id.to_bech32(wallet.client().get_bech32_hrp().await?);
-        let bic = wallet
-            .client()
-            .get_account_congestion(&account_id)
-            .await?
-            .block_issuance_credits;
+        let bic = wallet.client().get_account_congestion(&account_id).await.ok();
 
         println_log_info!(
-            "{:<16} {output_id}\n{:<16} {account_id}\n{:<16} {account_address}\n{:<16} {bic}\n",
+            "{:<16} {output_id}\n{:<16} {account_id}\n{:<16} {account_address}\n{:<16} {bic:?}\n",
             "Output ID:",
             "Account ID:",
             "Account Address:",
@@ -705,14 +701,10 @@ pub async fn implicit_accounts_command(wallet: &Wallet) -> Result<(), Error> {
         let output_id = implicit_account.output_id;
         let account_id = AccountId::from(&output_id);
         let account_address = account_id.to_bech32(wallet.client().get_bech32_hrp().await?);
-        let bic = wallet
-            .client()
-            .get_account_congestion(&account_id)
-            .await?
-            .block_issuance_credits;
+        let bic = wallet.client().get_account_congestion(&account_id).await.ok();
 
         println_log_info!(
-            "{:<16} {output_id}\n{:<16} {account_id}\n{:<16} {account_address}\n{:<16} {bic}\n",
+            "{:<16} {output_id}\n{:<16} {account_id}\n{:<16} {account_address}\n{:<16} {bic:?}\n",
             "Output ID:",
             "Account ID:",
             "Account Address:",
