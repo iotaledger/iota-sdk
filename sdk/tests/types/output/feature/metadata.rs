@@ -39,6 +39,8 @@ fn serde_roundtrip() {
         serde_json::from_str::<MetadataFeature>(&metadata_feature_ser).unwrap(),
         metadata_feature
     );
+    // Unordered keys are not removed
+    assert_eq!(metadata_feature.data().keys().count(), 3);
 }
 
 #[test]
@@ -51,6 +53,8 @@ fn unpack_invalid_order() {
 
 #[test]
 fn unpack_invalid_length() {
-    // TODO: this should fail
-    MetadataFeature::unpack_verified([vec![1, 0, 1, 33, 0, 32], vec![0u8; 8192]].concat(), &()).unwrap();
+    assert!(matches!(
+        MetadataFeature::unpack_verified([vec![1, 0, 1, 33, 0, 32], vec![0u8; 8192]].concat(), &()),
+        Err(UnpackError::Packable(Error::InvalidMetadataFeature(len))) if &len == "8198"
+    ));
 }

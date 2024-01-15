@@ -10,7 +10,11 @@ use core::ops::{Deref, RangeInclusive};
 
 use packable::{
     bounded::{BoundedU16, BoundedU8},
+    error::{UnpackError, UnpackErrorExt},
+    packer::Packer,
     prefix::{BTreeMapPrefix, BoxedSlicePrefix},
+    unpacker::Unpacker,
+    Packable, PackableExt,
 };
 
 use crate::types::block::{output::StorageScore, protocol::WorkScore, Error};
@@ -22,11 +26,9 @@ pub(crate) type MetadataFeatureKeyLength = BoundedU8<1, { u8::MAX }>;
 pub(crate) type MetadataFeatureValueLength = BoundedU16<0, { u16::MAX }>;
 
 /// Defines metadata, arbitrary binary data, that will be stored in the output.
-#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, packable::Packable)]
-#[packable(unpack_error = Error, with = |err| Error::InvalidMetadataFeature(err.to_string()))]
+#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct MetadataFeature(
     // Binary data.
-    #[packable(verify_with = verify_keys_packable)]
     pub(crate)  BTreeMapPrefix<
         BoxedSlicePrefix<u8, MetadataFeatureKeyLength>,
         BoxedSlicePrefix<u8, MetadataFeatureValueLength>,
@@ -51,6 +53,24 @@ fn verify_keys_packable<const VERIFY: bool>(
     Ok(())
 }
 
+fn verify_length_packable<const VERIFY: bool>(
+    map: &BTreeMapPrefix<
+        BoxedSlicePrefix<u8, MetadataFeatureKeyLength>,
+        BoxedSlicePrefix<u8, MetadataFeatureValueLength>,
+        MetadataFeatureLength,
+    >,
+) -> Result<(), Error> {
+    if VERIFY {
+        let len = map.packed_len();
+        if !MetadataFeature::LENGTH_RANGE
+            .contains(&u16::try_from(len).map_err(|e| Error::InvalidMetadataFeature(e.to_string()))?)
+        {
+            return Err(Error::InvalidMetadataFeature(len.to_string()));
+        }
+    }
+    Ok(())
+}
+
 impl MetadataFeature {
     /// The [`Feature`](crate::types::block::output::Feature) kind of [`MetadataFeature`].
     pub const KIND: u8 = 2;
@@ -64,6 +84,7 @@ impl MetadataFeature {
         let metadata = Self::try_from(data)?;
 
         verify_keys_packable::<true>(&metadata.0)?;
+        verify_length_packable::<true>(&metadata.0)?;
 
         Ok(metadata)
     }
@@ -81,6 +102,76 @@ impl MetadataFeature {
 impl StorageScore for MetadataFeature {}
 
 impl WorkScore for MetadataFeature {}
+
+impl Packable for MetadataFeature {
+    type UnpackError = Error;
+    type UnpackVisitor = ();
+
+    fn pack<P: Packer>(&self, packer: &mut P) -> Result<(), P::Error> {
+        (self.0.len() as u16).pack(packer)?;
+
+        for (k, v) in self.0.iter() {
+            k.pack(packer)?;
+            v.pack(packer)?;
+        }
+
+        Ok(())
+    }
+
+    fn unpack<U: Unpacker, const VERIFY: bool>(
+        unpacker: &mut U,
+        visitor: &Self::UnpackVisitor,
+    ) -> Result<Self, UnpackError<Self::UnpackError, U::Error>> {
+        let len = u16::unpack::<_, VERIFY>(unpacker, &()).coerce()?;
+
+        let mut map = BTreeMap::<
+            BoxedSlicePrefix<u8, MetadataFeatureKeyLength>,
+            BoxedSlicePrefix<u8, MetadataFeatureValueLength>,
+        >::new();
+
+        for _ in 0..len {
+            let key = BoxedSlicePrefix::<u8, MetadataFeatureKeyLength>::unpack::<_, VERIFY>(unpacker, visitor)
+                .map_err(|_| Error::InvalidMetadataFeature("invalid key".to_string()))
+                .map_err(UnpackError::Packable)?;
+
+            if let Some((last, _)) = map.last_key_value() {
+                match last.cmp(&key) {
+                    core::cmp::Ordering::Equal => {
+                        return Err(UnpackError::Packable(Error::InvalidMetadataFeature(
+                            "duplicated key".to_string(),
+                        )));
+                    }
+                    core::cmp::Ordering::Greater => {
+                        return Err(UnpackError::Packable(Error::InvalidMetadataFeature(
+                            "unordered map".to_string(),
+                        )));
+                    }
+                    core::cmp::Ordering::Less => (),
+                }
+            }
+
+            let value = BoxedSlicePrefix::<u8, MetadataFeatureValueLength>::unpack::<_, VERIFY>(unpacker, visitor)
+                .map_err(|_| Error::InvalidMetadataFeature("invalid value".to_string()))
+                .map_err(UnpackError::Packable)?;
+
+            map.insert(key, value);
+        }
+
+        let r: BTreeMapPrefix<
+            BoxedSlicePrefix<u8, MetadataFeatureKeyLength>,
+            BoxedSlicePrefix<u8, MetadataFeatureValueLength>,
+            MetadataFeatureLength,
+        > = map
+            .try_into()
+            .map_err(|_| Error::InvalidMetadataFeature("invalid metadata feature".to_string()))
+            .map_err(UnpackError::Packable)?;
+
+        verify_keys_packable::<true>(&r).map_err(UnpackError::Packable)?;
+        verify_length_packable::<true>(&r).map_err(UnpackError::Packable)?;
+
+        Ok(Self(r))
+    }
+}
 
 impl TryFrom<Vec<(Vec<u8>, Vec<u8>)>> for MetadataFeature {
     type Error = Error;
