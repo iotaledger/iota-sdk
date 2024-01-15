@@ -15,8 +15,8 @@ use crate::{
     types::block::{
         address::{Address, Ed25519Address},
         output::{
-            unlock_condition::AddressUnlockCondition, AccountOutputBuilder, BasicOutputBuilder, FoundryOutputBuilder,
-            MinimumOutputAmount, NativeTokensBuilder, NftOutputBuilder, Output,
+            unlock_condition::AddressUnlockCondition, AccountOutputBuilder, BasicOutputBuilder, MinimumOutputAmount,
+            NativeTokensBuilder, NftOutputBuilder, Output,
         },
     },
 };
@@ -87,7 +87,7 @@ impl InputSelection {
     pub(crate) fn remainder_and_storage_deposit_return_outputs(
         &mut self,
     ) -> Result<(Option<RemainderData>, Vec<Output>), Error> {
-        let (inputs_sum, outputs_sum, inputs_sdr, outputs_sdr) =
+        let (input_amount, output_amount, inputs_sdr, outputs_sdr) =
             amount_sums(&self.selected_inputs, &self.outputs, self.slot_index);
         let mut storage_deposit_returns = Vec::new();
 
@@ -149,16 +149,16 @@ impl InputSelection {
 
         let output_mana = self.outputs.iter().map(|o| o.mana()).sum::<u64>() + self.mana_allotments;
 
-        if inputs_sum == outputs_sum && input_mana == output_mana && native_tokens_diff.is_none() {
+        if input_amount == output_amount && input_mana == output_mana && native_tokens_diff.is_none() {
             log::debug!("No remainder required");
             return Ok((None, storage_deposit_returns));
         }
 
         // TODO underflows?
-        let amount_diff = inputs_sum - outputs_sum;
+        let amount_diff = input_amount - output_amount;
         let mana_diff = input_mana - output_mana;
 
-        if inputs_sum == outputs_sum && input_mana != output_mana && native_tokens_diff.is_none() {
+        if input_amount == output_amount && input_mana != output_mana && native_tokens_diff.is_none() {
             let output = self
                 .outputs
                 .iter_mut()
