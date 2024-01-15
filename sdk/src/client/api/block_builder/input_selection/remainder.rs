@@ -140,7 +140,6 @@ impl InputSelection {
             return Ok((None, storage_deposit_returns));
         }
 
-        // TODO underflows?
         let amount_diff = input_amount - output_amount;
         let mana_diff = input_mana - output_mana;
 
