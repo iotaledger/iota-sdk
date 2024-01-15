@@ -7,10 +7,12 @@ use packable::{error::UnpackError, PackableExt};
 #[test]
 fn invalid() {
     // Invalid key
-    assert!(serde_json::from_str::<MetadataFeature>(
-        r#"{"type": 2, "entries": { "space is a non graphical ASCII value": "0x42" } }"#
-    )
-    .is_err());
+    assert!(
+        serde_json::from_str::<MetadataFeature>(
+            r#"{"type": 2, "entries": { "space is a non graphical ASCII value": "0x42" } }"#
+        )
+        .is_err()
+    );
 
     // Invalid value
     assert!(serde_json::from_str::<MetadataFeature>(r#"{"type": 2, "entries": { "nothing": "" } }"#).is_err());
