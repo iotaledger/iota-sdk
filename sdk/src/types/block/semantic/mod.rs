@@ -174,14 +174,6 @@ impl<'a> SemanticValidationContext<'a> {
                 )
             }?;
 
-            println!(
-                "semantic created {}, target {}",
-                output_id.transaction_id().slot_index(),
-                self.transaction.creation_slot()
-            );
-
-            println!("potential_mana {potential_mana}");
-
             // Add potential mana
             self.input_mana = self
                 .input_mana
@@ -193,8 +185,6 @@ impl<'a> SemanticValidationContext<'a> {
                 output_id.transaction_id().slot_index(),
                 self.transaction.creation_slot(),
             )?;
-
-            println!("stored_mana {stored_mana}");
 
             // Add stored mana
             self.input_mana = self
@@ -301,11 +291,6 @@ impl<'a> SemanticValidationContext<'a> {
         if self.input_amount != self.output_amount {
             return Ok(Some(TransactionFailureReason::SumInputsOutputsAmountMismatch));
         }
-
-        println!(
-            "Semantic input_mana {} output_mana {}",
-            self.input_mana, self.output_mana
-        );
 
         if self.input_mana != self.output_mana {
             if self.input_mana > self.output_mana {
