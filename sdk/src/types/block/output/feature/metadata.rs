@@ -58,7 +58,8 @@ fn verify_keys_packable<const VERIFY: bool>(map: &MetadataBTreeMapPrefix) -> Res
 
 fn verify_length_packable<const VERIFY: bool>(map: &MetadataBTreeMapPrefix) -> Result<(), Error> {
     if VERIFY {
-        let len = map.packed_len();
+        // +1 for the feature type
+        let len = map.packed_len() + 1;
         if !MetadataFeature::LENGTH_RANGE
             .contains(&u16::try_from(len).map_err(|e| Error::InvalidMetadataFeature(e.to_string()))?)
         {
