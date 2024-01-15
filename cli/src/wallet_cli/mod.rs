@@ -329,21 +329,23 @@ impl FromStr for OutputSelector {
 pub async fn accounts_command(wallet: &Wallet) -> Result<(), Error> {
     let wallet_data = wallet.data().await;
     let accounts = wallet_data.accounts();
+    let hrp = wallet.client().get_bech32_hrp().await?;
 
     println_log_info!("Accounts:\n");
 
     for account in accounts {
         let output_id = account.output_id;
         let account_id = account.output.as_account().account_id_non_null(&output_id);
-        let account_address = account_id.to_bech32(wallet.client().get_bech32_hrp().await?);
+        let account_address = account_id.to_bech32(hrp);
         let bic = wallet
             .client()
             .get_account_congestion(&account_id)
-            .await?
-            .block_issuance_credits;
+            .await
+            .map(|r| r.block_issuance_credits)
+            .ok();
 
         println_log_info!(
-            "{:<16} {output_id}\n{:<16} {account_id}\n{:<16} {account_address}\n{:<16} {bic}\n",
+            "{:<16} {output_id}\n{:<16} {account_id}\n{:<16} {account_address}\n{:<16} {bic:?}\n",
             "Output ID:",
             "Account ID:",
             "Account Address:",
@@ -704,21 +706,23 @@ pub async fn implicit_account_transition_command(
 pub async fn implicit_accounts_command(wallet: &Wallet) -> Result<(), Error> {
     let wallet_data = wallet.data().await;
     let implicit_accounts = wallet_data.implicit_accounts();
+    let hrp = wallet.client().get_bech32_hrp().await?;
 
     println_log_info!("Implicit accounts:\n");
 
     for implicit_account in implicit_accounts {
         let output_id = implicit_account.output_id;
         let account_id = AccountId::from(&output_id);
-        let account_address = account_id.to_bech32(wallet.client().get_bech32_hrp().await?);
+        let account_address = account_id.to_bech32(hrp);
         let bic = wallet
             .client()
             .get_account_congestion(&account_id)
-            .await?
-            .block_issuance_credits;
+            .await
+            .map(|r| r.block_issuance_credits)
+            .ok();
 
         println_log_info!(
-            "{:<16} {output_id}\n{:<16} {account_id}\n{:<16} {account_address}\n{:<16} {bic}\n",
+            "{:<16} {output_id}\n{:<16} {account_id}\n{:<16} {account_address}\n{:<16} {bic:?}\n",
             "Output ID:",
             "Account ID:",
             "Account Address:",
