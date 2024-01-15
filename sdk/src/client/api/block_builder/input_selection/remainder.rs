@@ -125,25 +125,11 @@ impl InputSelection {
         let mut input_mana = 0;
 
         for input in &self.selected_inputs {
-            let potential_mana = {
-                let min_deposit = input
-                    .output
-                    .minimum_amount(self.protocol_parameters.storage_score_parameters());
-                let generation_amount = input.output.amount().saturating_sub(min_deposit);
-
-                self.protocol_parameters.generate_mana_with_decay(
-                    generation_amount,
-                    input.output_id().transaction_id().slot_index(),
-                    self.slot_index,
-                )
-            }?;
-            let stored_mana = self.protocol_parameters.mana_with_decay(
-                input.output.mana(),
+            input_mana += input.output.all_mana(
+                &self.protocol_parameters,
                 input.output_id().transaction_id().slot_index(),
                 self.slot_index,
             )?;
-
-            input_mana += potential_mana + stored_mana;
             // TODO rewards
         }
 
