@@ -433,8 +433,6 @@ impl InputSelection {
             remainder,
         };
 
-        println!("{selected:?}");
-
         Ok(selected)
     }
 

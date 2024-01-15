@@ -76,9 +76,10 @@ impl InputSelection {
                 ))));
 
         // TODO https://github.com/iotaledger/iota-sdk/issues/1631
-        // if let Some(native_tokens) = native_tokens_diff {
-        //     remainder_builder = remainder_builder.with_native_tokens(native_tokens);
-        // }
+        // TODO Only putting one in remainder atm so we can at least create foundries
+        if let Some(native_tokens) = native_tokens_diff {
+            remainder_builder = remainder_builder.with_native_token(*native_tokens.first().unwrap());
+        }
 
         Ok((remainder_builder.finish_output()?.amount(), native_tokens_remainder))
     }
@@ -142,20 +143,11 @@ impl InputSelection {
                 self.slot_index,
             )?;
 
-            println!(
-                "ISA created {}, target {}",
-                input.output_id().transaction_id().slot_index(),
-                self.slot_index,
-            );
-
             input_mana += potential_mana + stored_mana;
             // TODO rewards
         }
 
         let output_mana = self.outputs.iter().map(|o| o.mana()).sum::<u64>() + self.mana_allotments;
-        //  TODO allotment
-
-        println!("ISA input_mana {input_mana}, output_mana {output_mana}");
 
         if inputs_sum == outputs_sum && input_mana == output_mana && native_tokens_diff.is_none() {
             log::debug!("No remainder required");
@@ -204,16 +196,13 @@ impl InputSelection {
             remainder_builder.add_unlock_condition(AddressUnlockCondition::new(remainder_address.clone()));
 
         // TODO https://github.com/iotaledger/iota-sdk/issues/1631
-        // if let Some(native_tokens) = native_tokens_diff {
-        //     log::debug!("Adding {native_tokens:?} to remainder output for {remainder_address:?}");
-        //     remainder_builder = remainder_builder.with_native_tokens(native_tokens);
-        // }
+        // TODO Only putting one in remainder atm so we can at least create foundries
+        if let Some(native_tokens) = native_tokens_diff {
+            log::debug!("Adding {native_tokens:?} to remainder output for {remainder_address:?}");
+            remainder_builder = remainder_builder.with_native_token(*native_tokens.first().unwrap());
+        }
 
         let remainder = remainder_builder.finish_output()?;
-
-        println!("remainder {remainder:?}");
-
-        println!("{:?}", self);
 
         // TODO add log
         log::debug!("Created remainder output of {amount_diff} for {remainder_address:?}");
