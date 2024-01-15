@@ -1,6 +1,8 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
+use std::collections::HashSet;
+
 use instant::Instant;
 
 use crate::{
@@ -34,16 +36,16 @@ where
 
         let mut inputs: Vec<Input> = Vec::new();
         let mut inputs_for_signing: Vec<InputSigningData> = Vec::new();
-        let mut context_inputs = Vec::new();
+        let mut context_inputs = HashSet::new();
 
         for input in &selected_transaction_data.inputs {
+            // Transitioning an issuer account requires a BlockIssuanceCreditContextInput.
             if let Output::Account(account) = &input.output {
                 if account.features().block_issuer().is_some() {
-                    context_inputs.push(ContextInput::from(BlockIssuanceCreditContextInput::from(
+                    context_inputs.insert(ContextInput::from(BlockIssuanceCreditContextInput::from(
                         account.account_id_non_null(input.output_id()),
                     )));
                 }
-                println!("account -- {account:?}");
             }
 
             inputs.push(Input::Utxo(UtxoInput::from(*input.output_id())));
@@ -62,7 +64,6 @@ where
             builder = builder.with_payload(options.tagged_data_payload);
 
             if let Some(context_inputs_opt) = options.context_inputs {
-                // TODO uniqueness ?
                 context_inputs.extend(context_inputs_opt);
             }
 
@@ -78,8 +79,6 @@ where
         let transaction = builder
             .with_context_inputs(context_inputs)
             .finish_with_params(&protocol_parameters)?;
-
-        println!("{transaction:?}");
 
         validate_transaction_length(&transaction)?;
 
