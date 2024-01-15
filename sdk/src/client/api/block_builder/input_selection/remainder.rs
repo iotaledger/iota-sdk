@@ -15,8 +15,8 @@ use crate::{
     types::block::{
         address::{Address, Ed25519Address},
         output::{
-            unlock_condition::AddressUnlockCondition, AccountOutputBuilder, BasicOutputBuilder, MinimumOutputAmount,
-            NativeTokensBuilder, NftOutputBuilder, Output,
+            unlock_condition::AddressUnlockCondition, AccountOutputBuilder, BasicOutputBuilder, NativeTokensBuilder,
+            NftOutputBuilder, Output,
         },
     },
 };
@@ -130,7 +130,7 @@ impl InputSelection {
                 input.output_id().transaction_id().slot_index(),
                 self.slot_index,
             )?;
-            // TODO rewards
+            // TODO rewards https://github.com/iotaledger/iota-sdk/issues/1310
         }
 
         let output_mana = self.outputs.iter().map(|o| o.mana()).sum::<u64>() + self.mana_allotments;
