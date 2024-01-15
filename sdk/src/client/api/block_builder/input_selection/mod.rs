@@ -423,7 +423,7 @@ impl InputSelection {
 
         self.validate_transitions()?;
 
-        let selected = Selected {
+        Ok(Selected {
             inputs: Self::sort_input_signing_data(
                 self.selected_inputs,
                 self.slot_index,
@@ -431,9 +431,7 @@ impl InputSelection {
             )?,
             outputs: self.outputs,
             remainder,
-        };
-
-        Ok(selected)
+        })
     }
 
     fn validate_transitions(&self) -> Result<(), Error> {
