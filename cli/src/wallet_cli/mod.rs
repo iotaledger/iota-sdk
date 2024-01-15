@@ -93,6 +93,9 @@ pub enum WalletCommand {
         circulating_supply: String,
         /// Maximum supply of the native token to be minted, e.g. 500.
         maximum_supply: String,
+        /// Metadata key, e.g. --foundry-metadata-key data.
+        #[arg(long, default_value = "data")]
+        foundry_metadata_key: String,
         /// Metadata to attach to the associated foundry, e.g. --foundry-metadata-hex 0xdeadbeef.
         #[arg(long, group = "foundry_metadata")]
         foundry_metadata_hex: Option<String>,
@@ -1250,6 +1253,7 @@ pub async fn prompt_internal(
                         WalletCommand::CreateNativeToken {
                             circulating_supply,
                             maximum_supply,
+                            foundry_metadata_key,
                             foundry_metadata_hex,
                             foundry_metadata_file,
                         } => {
@@ -1259,8 +1263,7 @@ pub async fn prompt_internal(
                                 maximum_supply,
                                 bytes_from_hex_or_file(foundry_metadata_hex, foundry_metadata_file)
                                     .await?
-                                    // TODO: Let user specify key or the full metadata
-                                    .map(|d| MetadataFeature::new([(b"data".to_vec(), d)]).unwrap()),
+                                    .map(|d| MetadataFeature::new([(foundry_metadata_key.into_bytes(), d)]).unwrap()),
                             )
                             .await
                         }
