@@ -150,22 +150,23 @@ impl InputSelection {
 
         // If there is only a mana remainder, try to fit it in an automatically transitioned output.
         if input_amount == output_amount && input_mana != output_mana && native_tokens_diff.is_none() {
-            let output = self
+            let filter = |output: &Output| {
+                output
+                    .chain_id()
+                    .as_ref()
+                    .map(|chain_id| self.automatically_transitioned.contains(chain_id))
+                    .unwrap_or(false)
+                    // Foundries can't hold mana so they are not considered here.
+                    && !output.is_foundry()
+            };
+            let index = self
                 .outputs
-                .iter_mut()
-                .filter(|output| {
-                    output
-                        .chain_id()
-                        .as_ref()
-                        .map(|chain_id| self.automatically_transitioned.contains(chain_id))
-                        .unwrap_or(false)
-                        // Foundries can't hold mana so they are not considered here.
-                        && !output.is_foundry()
-                })
-                .next();
+                .iter()
+                .position(|output| filter(output) && output.is_account())
+                .or_else(|| self.outputs.iter().position(filter));
 
-            if let Some(output) = output {
-                *output = match output {
+            if let Some(index) = index {
+                self.outputs[index] = match &self.outputs[index] {
                     Output::Account(output) => AccountOutputBuilder::from(&*output)
                         .with_mana(output.mana() + mana_diff)
                         .finish_output()?,
