@@ -70,7 +70,7 @@ async fn main() -> Result<()> {
         .add_feature(TagFeature::new(TAG)?)
         .add_immutable_feature(IssuerFeature::new(address))
         .add_immutable_feature(MetadataFeature::new([(
-            "IRC27".as_bytes().to_vec(),
+            "irc-27".as_bytes().to_vec(),
             tip_27_immutable_metadata.as_bytes().to_vec(),
         )])?)
         .finish_output()?;
