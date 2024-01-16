@@ -18,6 +18,7 @@ use crate::{
             unlock_condition::AddressUnlockCondition, AccountOutputBuilder, BasicOutputBuilder, NativeTokensBuilder,
             NftOutputBuilder, Output,
         },
+        Error as BlockError,
     },
 };
 
@@ -140,8 +141,12 @@ impl InputSelection {
             return Ok((None, storage_deposit_returns));
         }
 
-        let amount_diff = input_amount - output_amount;
-        let mana_diff = input_mana - output_mana;
+        let amount_diff = input_amount
+            .checked_sub(output_amount)
+            .ok_or(BlockError::ConsumedAmountOverflow)?;
+        let mana_diff = input_mana
+            .checked_sub(output_mana)
+            .ok_or(BlockError::ConsumedManaOverflow)?;
 
         // If there is only a mana remainder, try to fit it in an automatically transitioned output.
         if input_amount == output_amount && input_mana != output_mana && native_tokens_diff.is_none() {
