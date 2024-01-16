@@ -40,7 +40,7 @@ pub async fn new_wallet(cli: WalletCli) -> Result<(Option<Wallet>, Option<Accoun
                 Ok(wallet) => {
                     let linked_secret_manager = match &mut *wallet.get_secret_manager().write().await {
                         SecretManager::Stronghold(stronghold) => {
-                            let snapshot_path = stronghold.snapshot_path.clone();
+                            let snapshot_path = stronghold.snapshot_path().to_path_buf();
                             // `set_password` will trigger writing the snapshot file, so we need to make sure it already
                             // exists, otherwise we could run into an inconsistent wallet.
                             if snapshot_path.exists() {
