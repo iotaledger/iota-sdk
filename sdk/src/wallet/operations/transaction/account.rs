@@ -51,17 +51,6 @@ where
     where
         crate::wallet::Error: From<S::Error>,
     {
-        let wallet_data = self.data().await;
-        let implicit_account_data = wallet_data
-            .unspent_outputs
-            .get(output_id)
-            .ok_or(Error::ImplicitAccountNotFound)?;
-        let implicit_account = if implicit_account_data.output.is_implicit_account() {
-            implicit_account_data.output.as_basic()
-        } else {
-            return Err(Error::ImplicitAccountNotFound);
-        };
-
         let key_source = match key_source.map(Into::into) {
             Some(key_source) => key_source,
             None => self.bip_path().await.ok_or(Error::MissingBipPath)?.into(),
@@ -81,6 +70,17 @@ where
                     )
                     .await?[0]
             }
+        };
+
+        let wallet_data = self.data().await;
+        let implicit_account_data = wallet_data
+            .unspent_outputs
+            .get(output_id)
+            .ok_or(Error::ImplicitAccountNotFound)?;
+        let implicit_account = if implicit_account_data.output.is_implicit_account() {
+            implicit_account_data.output.as_basic()
+        } else {
+            return Err(Error::ImplicitAccountNotFound);
         };
 
         let account_id = AccountId::from(output_id);
