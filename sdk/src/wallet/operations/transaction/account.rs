@@ -51,18 +51,6 @@ where
     where
         crate::wallet::Error: From<S::Error>,
     {
-        let implicit_account_data = self.data().await.unspent_outputs.get(output_id).cloned();
-
-        let implicit_account = if let Some(implicit_account_data) = &implicit_account_data {
-            if implicit_account_data.output.is_implicit_account() {
-                implicit_account_data.output.as_basic()
-            } else {
-                return Err(Error::ImplicitAccountNotFound);
-            }
-        } else {
-            return Err(Error::ImplicitAccountNotFound);
-        };
-
         let key_source = match key_source.map(Into::into) {
             Some(key_source) => key_source,
             None => self.bip_path().await.ok_or(Error::MissingBipPath)?.into(),
@@ -84,9 +72,24 @@ where
             }
         };
 
+        let wallet_data = self.data().await;
+        let implicit_account_data = wallet_data
+            .unspent_outputs
+            .get(output_id)
+            .ok_or(Error::ImplicitAccountNotFound)?;
+        let implicit_account = if implicit_account_data.output.is_implicit_account() {
+            implicit_account_data.output.as_basic()
+        } else {
+            return Err(Error::ImplicitAccountNotFound);
+        };
+
         let account_id = AccountId::from(output_id);
         let account = AccountOutput::build_with_amount(implicit_account.amount(), account_id)
-            .with_mana(implicit_account.mana())
+            .with_mana(implicit_account_data.output.available_mana(
+                &self.client().get_protocol_parameters().await?,
+                implicit_account_data.output_id.transaction_id().slot_index(),
+                self.client().get_slot_index().await?,
+            )?)
             .with_unlock_conditions([AddressUnlockCondition::from(Address::from(
                 *implicit_account
                     .address()
@@ -98,6 +101,8 @@ where
                 BlockIssuerKeys::from_vec(vec![BlockIssuerKey::from(Ed25519BlockIssuerKey::from(public_key))])?,
             )?])
             .finish_output()?;
+
+        drop(wallet_data);
 
         // TODO https://github.com/iotaledger/iota-sdk/issues/1740
         let issuance = self.client().get_issuance().await?;

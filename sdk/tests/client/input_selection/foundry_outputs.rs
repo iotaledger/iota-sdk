@@ -15,7 +15,7 @@ use iota_sdk::{
             SimpleTokenScheme, TokenId,
         },
         protocol::protocol_parameters,
-        rand::output::rand_output_metadata,
+        rand::output::{rand_output_id_with_slot_index, rand_output_metadata_with_id},
     },
 };
 use pretty_assertions::assert_eq;
@@ -23,7 +23,7 @@ use pretty_assertions::assert_eq;
 use crate::client::{
     build_inputs, build_outputs, is_remainder_or_return, unsorted_eq,
     Build::{Account, Basic, Foundry},
-    ACCOUNT_ID_1, ACCOUNT_ID_2, BECH32_ADDRESS_ED25519_0,
+    ACCOUNT_ID_1, ACCOUNT_ID_2, BECH32_ADDRESS_ED25519_0, SLOT_INDEX,
 };
 
 #[test]
@@ -42,7 +42,7 @@ fn missing_input_account_for_foundry() {
             None,
             None,
         )],
-        None,
+        Some(SLOT_INDEX),
     );
     let outputs = build_outputs([Foundry(
         1_000_000,
@@ -56,6 +56,7 @@ fn missing_input_account_for_foundry() {
         inputs,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         protocol_parameters,
     )
     .select();
@@ -130,7 +131,7 @@ fn minted_native_tokens_in_new_remainder() {
                 None,
             ),
         ],
-        None,
+        Some(SLOT_INDEX),
     );
     let outputs = build_outputs([Foundry(
         1_000_000,
@@ -144,6 +145,7 @@ fn minted_native_tokens_in_new_remainder() {
         inputs.clone(),
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         protocol_parameters,
     )
     .select()
@@ -189,7 +191,7 @@ fn minted_native_tokens_in_provided_output() {
                 None,
             ),
         ],
-        None,
+        Some(SLOT_INDEX),
     );
     let outputs = build_outputs([
         Foundry(
@@ -215,6 +217,7 @@ fn minted_native_tokens_in_provided_output() {
         inputs.clone(),
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         protocol_parameters,
     )
     .select()
@@ -255,7 +258,7 @@ fn melt_native_tokens() {
                 )),
             ),
         ],
-        None,
+        Some(SLOT_INDEX),
     );
     let account_output = AccountOutputBuilder::new_with_amount(1_000_000, account_id_1)
         .add_unlock_condition(AddressUnlockCondition::new(
@@ -266,7 +269,7 @@ fn melt_native_tokens() {
         .unwrap();
     inputs.push(InputSigningData {
         output: account_output,
-        output_metadata: rand_output_metadata(),
+        output_metadata: rand_output_metadata_with_id(rand_output_id_with_slot_index(SLOT_INDEX)),
         chain: None,
     });
     let outputs = build_outputs([Foundry(
@@ -282,6 +285,7 @@ fn melt_native_tokens() {
         inputs.clone(),
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         protocol_parameters,
     )
     .select()
@@ -322,7 +326,7 @@ fn destroy_foundry_with_account_state_transition() {
                 None,
             ),
         ],
-        None,
+        Some(SLOT_INDEX),
     );
     let account_output = AccountOutputBuilder::from(inputs[0].output.as_account())
         .with_amount(103_100)
@@ -335,6 +339,7 @@ fn destroy_foundry_with_account_state_transition() {
         inputs.clone(),
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         protocol_parameters,
     )
     .with_burn(Burn::new().add_foundry(inputs[1].output.as_foundry().id()))
@@ -369,7 +374,7 @@ fn destroy_foundry_with_account_burn() {
                 None,
             ),
         ],
-        None,
+        Some(SLOT_INDEX),
     );
     let outputs = build_outputs([Basic(
         1_000_000,
@@ -386,6 +391,7 @@ fn destroy_foundry_with_account_burn() {
         inputs.clone(),
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         protocol_parameters,
     )
     .with_burn(
@@ -444,7 +450,7 @@ fn prefer_basic_to_foundry() {
                 None,
             ),
         ],
-        None,
+        Some(SLOT_INDEX),
     );
     let outputs = build_outputs([Basic(
         1_000_000,
@@ -461,6 +467,7 @@ fn prefer_basic_to_foundry() {
         inputs.clone(),
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         protocol_parameters,
     )
     .select()
@@ -496,7 +503,7 @@ fn simple_foundry_transition_basic_not_needed() {
                 None,
             ),
         ],
-        None,
+        Some(SLOT_INDEX),
     );
     let account_output = AccountOutputBuilder::new_with_amount(2_000_000, account_id_1)
         .add_unlock_condition(AddressUnlockCondition::new(
@@ -507,7 +514,7 @@ fn simple_foundry_transition_basic_not_needed() {
         .unwrap();
     inputs.push(InputSigningData {
         output: account_output,
-        output_metadata: rand_output_metadata(),
+        output_metadata: rand_output_metadata_with_id(rand_output_id_with_slot_index(SLOT_INDEX)),
         chain: None,
     });
 
@@ -523,6 +530,7 @@ fn simple_foundry_transition_basic_not_needed() {
         inputs.clone(),
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         protocol_parameters,
     )
     .select()
@@ -574,7 +582,7 @@ fn simple_foundry_transition_basic_not_needed_with_remainder() {
                 None,
             ),
         ],
-        None,
+        Some(SLOT_INDEX),
     );
     let account_output = AccountOutputBuilder::new_with_amount(2_000_000, account_id_1)
         .add_unlock_condition(AddressUnlockCondition::new(
@@ -585,7 +593,7 @@ fn simple_foundry_transition_basic_not_needed_with_remainder() {
         .unwrap();
     inputs.push(InputSigningData {
         output: account_output,
-        output_metadata: rand_output_metadata(),
+        output_metadata: rand_output_metadata_with_id(rand_output_id_with_slot_index(SLOT_INDEX)),
         chain: None,
     });
     let outputs = build_outputs([Foundry(
@@ -600,6 +608,7 @@ fn simple_foundry_transition_basic_not_needed_with_remainder() {
         inputs.clone(),
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         protocol_parameters,
     )
     .select()
@@ -718,7 +727,7 @@ fn mint_and_burn_at_the_same_time() {
             SimpleTokenScheme::new(100, 0, 200).unwrap(),
             Some((&token_id.to_string(), 100)),
         )],
-        None,
+        Some(SLOT_INDEX),
     );
     let account_output = AccountOutputBuilder::new_with_amount(2_000_000, account_id_1)
         .add_unlock_condition(AddressUnlockCondition::new(
@@ -729,7 +738,7 @@ fn mint_and_burn_at_the_same_time() {
         .unwrap();
     inputs.push(InputSigningData {
         output: account_output,
-        output_metadata: rand_output_metadata(),
+        output_metadata: rand_output_metadata_with_id(rand_output_id_with_slot_index(SLOT_INDEX)),
         chain: None,
     });
 
@@ -745,6 +754,7 @@ fn mint_and_burn_at_the_same_time() {
         inputs.clone(),
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         protocol_parameters,
     )
     .with_burn(Burn::new().add_native_token(token_id, 10))
@@ -783,7 +793,7 @@ fn take_amount_from_account_and_foundry_to_fund_basic() {
                 Some((&token_id.to_string(), 100)),
             ),
         ],
-        None,
+        Some(SLOT_INDEX),
     );
     let account_output = AccountOutputBuilder::new_with_amount(2_000_000, account_id_1)
         .add_unlock_condition(AddressUnlockCondition::new(
@@ -794,7 +804,7 @@ fn take_amount_from_account_and_foundry_to_fund_basic() {
         .unwrap();
     inputs.push(InputSigningData {
         output: account_output,
-        output_metadata: rand_output_metadata(),
+        output_metadata: rand_output_metadata_with_id(rand_output_id_with_slot_index(SLOT_INDEX)),
         chain: None,
     });
     let outputs = build_outputs([Basic(
@@ -812,6 +822,7 @@ fn take_amount_from_account_and_foundry_to_fund_basic() {
         inputs.clone(),
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         protocol_parameters,
     )
     .select()
@@ -853,7 +864,7 @@ fn create_native_token_but_burn_account() {
                 None,
             ),
         ],
-        None,
+        Some(SLOT_INDEX),
     );
     let outputs = build_outputs([Foundry(
         1_000_000,
@@ -867,6 +878,7 @@ fn create_native_token_but_burn_account() {
         inputs.clone(),
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         protocol_parameters,
     )
     .with_burn(Burn::new().add_account(account_id_1))
@@ -914,7 +926,7 @@ fn melted_tokens_not_provided() {
                 None,
             ),
         ],
-        None,
+        Some(SLOT_INDEX),
     );
     let outputs = build_outputs([Foundry(
         1_000_000,
@@ -928,6 +940,7 @@ fn melted_tokens_not_provided() {
         inputs,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         protocol_parameters,
     )
     .select();
@@ -966,7 +979,7 @@ fn burned_tokens_not_provided() {
                 None,
             ),
         ],
-        None,
+        Some(SLOT_INDEX),
     );
     let outputs = build_outputs([Foundry(
         1_000_000,
@@ -980,6 +993,7 @@ fn burned_tokens_not_provided() {
         inputs,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         protocol_parameters,
     )
     .with_burn(Burn::new().add_native_token(token_id_1, 100))
@@ -1007,7 +1021,7 @@ fn foundry_in_outputs_and_required() {
             SimpleTokenScheme::new(0, 0, 10).unwrap(),
             None,
         )],
-        None,
+        Some(SLOT_INDEX),
     );
     let account_output = AccountOutputBuilder::new_with_amount(1_251_500, account_id_2)
         .add_unlock_condition(AddressUnlockCondition::new(
@@ -1018,7 +1032,7 @@ fn foundry_in_outputs_and_required() {
         .unwrap();
     inputs.push(InputSigningData {
         output: account_output,
-        output_metadata: rand_output_metadata(),
+        output_metadata: rand_output_metadata_with_id(rand_output_id_with_slot_index(SLOT_INDEX)),
         chain: None,
     });
     let outputs = build_outputs([Foundry(
@@ -1033,6 +1047,7 @@ fn foundry_in_outputs_and_required() {
         inputs.clone(),
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         protocol_parameters,
     )
     .with_required_inputs([*inputs[1].output_id()])
@@ -1076,7 +1091,7 @@ fn melt_and_burn_native_tokens() {
                 Some((&token_id.to_string(), 1000)),
             ),
         ],
-        None,
+        Some(SLOT_INDEX),
     );
     let account_output = AccountOutputBuilder::new_with_amount(1_000_000, account_id)
         .add_unlock_condition(AddressUnlockCondition::new(
@@ -1087,7 +1102,7 @@ fn melt_and_burn_native_tokens() {
         .unwrap();
     inputs.push(InputSigningData {
         output: account_output,
-        output_metadata: rand_output_metadata(),
+        output_metadata: rand_output_metadata_with_id(rand_output_id_with_slot_index(SLOT_INDEX)),
         chain: None,
     });
     let outputs = build_outputs([Foundry(
@@ -1103,6 +1118,7 @@ fn melt_and_burn_native_tokens() {
         inputs.clone(),
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         protocol_parameters,
     )
     // Burn 456 native tokens

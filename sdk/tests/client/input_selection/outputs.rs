@@ -12,7 +12,7 @@ use pretty_assertions::assert_eq;
 use crate::client::{
     build_inputs, build_outputs, is_remainder_or_return, unsorted_eq,
     Build::{Account, Basic},
-    ACCOUNT_ID_2, BECH32_ADDRESS_ED25519_0, BECH32_ADDRESS_ED25519_1,
+    ACCOUNT_ID_2, BECH32_ADDRESS_ED25519_0, BECH32_ADDRESS_ED25519_1, SLOT_INDEX,
 };
 
 #[test]
@@ -35,6 +35,7 @@ fn no_inputs() {
         inputs,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         protocol_parameters,
     )
     .select();
@@ -65,6 +66,7 @@ fn no_outputs() {
         inputs,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         protocol_parameters,
     )
     .select();
@@ -86,7 +88,7 @@ fn no_outputs_but_burn() {
             None,
             None,
         )],
-        None,
+        Some(SLOT_INDEX),
     );
     let outputs = Vec::new();
 
@@ -94,6 +96,7 @@ fn no_outputs_but_burn() {
         inputs.clone(),
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         protocol_parameters,
     )
     .with_burn(Burn::new().add_account(account_id_2))
@@ -125,7 +128,7 @@ fn no_address_provided() {
             None,
             None,
         )],
-        None,
+        Some(SLOT_INDEX),
     );
     let outputs = build_outputs([Basic(
         1_000_000,
@@ -138,7 +141,7 @@ fn no_address_provided() {
         None,
     )]);
 
-    let selected = InputSelection::new(inputs, outputs, [], protocol_parameters).select();
+    let selected = InputSelection::new(inputs, outputs, [], SLOT_INDEX, protocol_parameters).select();
 
     assert!(matches!(selected, Err(Error::NoAvailableInputsProvided)));
 }
@@ -175,6 +178,7 @@ fn no_matching_address_provided() {
         inputs,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap()],
+        SLOT_INDEX,
         protocol_parameters,
     )
     .select();
@@ -209,7 +213,7 @@ fn two_addresses_one_missing() {
                 None,
             ),
         ],
-        None,
+        Some(SLOT_INDEX),
     );
     let outputs = build_outputs([Basic(
         2_000_000,
@@ -226,6 +230,7 @@ fn two_addresses_one_missing() {
         inputs,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        SLOT_INDEX,
         protocol_parameters,
     )
     .select();
@@ -266,7 +271,7 @@ fn two_addresses() {
                 None,
             ),
         ],
-        None,
+        Some(SLOT_INDEX),
     );
     let outputs = build_outputs([Basic(
         2_000_000,
@@ -286,6 +291,7 @@ fn two_addresses() {
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
             Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
         ],
+        SLOT_INDEX,
         protocol_parameters,
     )
     .select()

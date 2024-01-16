@@ -210,9 +210,9 @@ async fn all_combined() -> Result<()> {
         inputs.clone(),
         outputs.clone(),
         [ed25519_0, ed25519_1, ed25519_2],
+        slot_index,
         protocol_parameters.clone(),
     )
-    .with_slot_index(slot_index)
     .select()
     .unwrap();
 
