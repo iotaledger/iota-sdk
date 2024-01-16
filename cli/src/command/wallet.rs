@@ -216,14 +216,19 @@ pub async fn node_info_command(wallet: &Wallet) -> Result<(), Error> {
 
 pub async fn restore_command_stronghold(
     storage_path: &Path,
-    password: Option<Password>,
     snapshot_path: &Path,
     backup_path: &Path,
 ) -> Result<Wallet, Error> {
     check_file_exists(backup_path).await?;
 
     let mut builder = Wallet::builder();
-    // providing a password means that a Stronghold snapshot exists (verified by the caller)
+
+    let password = if snapshot_path.exists() {
+        Some(get_password("Stronghold password", false)?)
+    } else {
+        None
+    };
+
     if let Some(password) = password {
         println!("Detected a stronghold file at {}.", snapshot_path.to_str().unwrap());
         let secret_manager = SecretManager::Stronghold(

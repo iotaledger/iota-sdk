@@ -29,7 +29,7 @@ pub async fn new_wallet(cli: WalletCli) -> Result<(Option<Wallet>, Option<Accoun
     enum LinkedSecretManager {
         Stronghold {
             snapshot_path: std::path::PathBuf,
-            snapshot_exists: Option<iota_sdk::client::Password>,
+            snapshot_exists: bool,
         },
         LedgerNano,
     }
@@ -41,20 +41,10 @@ pub async fn new_wallet(cli: WalletCli) -> Result<(Option<Wallet>, Option<Accoun
                     let linked_secret_manager = match &mut *wallet.get_secret_manager().write().await {
                         SecretManager::Stronghold(stronghold) => {
                             let snapshot_path = stronghold.snapshot_path().to_path_buf();
-                            // `set_password` will trigger writing the snapshot file, so we need to make sure it already
-                            // exists, otherwise we could run into an inconsistent wallet.
-                            if snapshot_path.exists() {
-                                let password = get_password("Stronghold password", false)?;
-                                stronghold.set_password(password.clone()).await?;
-                                LinkedSecretManager::Stronghold {
-                                    snapshot_path,
-                                    snapshot_exists: Some(password),
-                                }
-                            } else {
-                                LinkedSecretManager::Stronghold {
-                                    snapshot_path,
-                                    snapshot_exists: None,
-                                }
+                            let snapshot_exists = snapshot_path.exists();
+                            LinkedSecretManager::Stronghold {
+                                snapshot_path,
+                                snapshot_exists,
                             }
                         }
                         SecretManager::LedgerNano(_) => LinkedSecretManager::LedgerNano,
@@ -102,9 +92,9 @@ pub async fn new_wallet(cli: WalletCli) -> Result<(Option<Wallet>, Option<Accoun
                 if let Some((wallet, secret_manager)) = wallet_and_secret_manager {
                     match secret_manager {
                         LinkedSecretManager::Stronghold {
-                            snapshot_exists: Some(password),
-                            ..
+                            snapshot_exists: true, ..
                         } => {
+                            let password = get_password("Stronghold password", false)?;
                             backup_command_stronghold(&wallet, &password, Path::new(&backup_path)).await?;
                             return Ok((None, None));
                         }
@@ -130,10 +120,10 @@ pub async fn new_wallet(cli: WalletCli) -> Result<(Option<Wallet>, Option<Accoun
                 if let Some((wallet, secret_manager)) = wallet_and_secret_manager {
                     match secret_manager {
                         LinkedSecretManager::Stronghold {
-                            snapshot_exists: Some(password),
-                            ..
+                            snapshot_exists: true, ..
                         } => {
-                            change_password_command(&wallet, password).await?;
+                            let current_password = get_password("Stronghold password", false)?;
+                            change_password_command(&wallet, current_password).await?;
                             (Some(wallet), None)
                         }
                         LinkedSecretManager::Stronghold { snapshot_path, .. } => {
@@ -215,16 +205,12 @@ pub async fn new_wallet(cli: WalletCli) -> Result<(Option<Wallet>, Option<Accoun
             WalletCommand::Restore { backup_path } => {
                 if let Some((wallet, linked_secret_manager)) = wallet_and_secret_manager {
                     match linked_secret_manager {
-                        LinkedSecretManager::Stronghold {
-                            snapshot_path,
-                            snapshot_exists,
-                        } => {
+                        LinkedSecretManager::Stronghold { snapshot_path, .. } => {
                             // we need to explicitly drop the current wallet here to prevent:
                             // "error accessing storage: IO error: lock hold by current process"
                             drop(wallet);
                             let wallet = restore_command_stronghold(
                                 storage_path,
-                                snapshot_exists,
                                 snapshot_path.as_path(),
                                 Path::new(&backup_path),
                             )
@@ -241,7 +227,7 @@ pub async fn new_wallet(cli: WalletCli) -> Result<(Option<Wallet>, Option<Accoun
                     let init_params = InitParameters::default();
                     let snapshot_path = Path::new(&init_params.stronghold_snapshot_path);
                     let wallet =
-                        restore_command_stronghold(storage_path, None, snapshot_path, Path::new(&backup_path)).await?;
+                        restore_command_stronghold(storage_path, snapshot_path, Path::new(&backup_path)).await?;
                     (Some(wallet), None)
                 }
             }
@@ -261,7 +247,7 @@ pub async fn new_wallet(cli: WalletCli) -> Result<(Option<Wallet>, Option<Accoun
         // no wallet command provided
         if let Some((wallet, linked_secret_manager)) = wallet_and_secret_manager {
             if let LinkedSecretManager::Stronghold {
-                snapshot_exists: None,
+                snapshot_exists: false,
                 snapshot_path,
             } = linked_secret_manager
             {
