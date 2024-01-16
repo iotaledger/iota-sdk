@@ -16,9 +16,7 @@ pub use self::{
 };
 use crate::types::block::{
     address::Address,
-    output::{
-        AccountId, AnchorOutput, ChainId, FoundryId, MinimumOutputAmount, NativeTokens, Output, OutputId, TokenId,
-    },
+    output::{AccountId, AnchorOutput, ChainId, FoundryId, NativeTokens, Output, OutputId, TokenId},
     payload::signed_transaction::{Transaction, TransactionCapabilityFlag, TransactionSigningHash},
     protocol::ProtocolParameters,
     unlock::Unlock,
@@ -104,18 +102,13 @@ impl<'a> SemanticValidationContext<'a> {
     pub fn validate(mut self) -> Result<Option<TransactionFailureReason>, Error> {
         // Validation of inputs.
         for (index, (output_id, consumed_output)) in self.inputs.iter().enumerate() {
-            let (amount, mana, consumed_native_token, unlock_conditions) = match consumed_output {
-                Output::Basic(output) => (
-                    output.amount(),
-                    output.mana(),
-                    output.native_token(),
-                    output.unlock_conditions(),
-                ),
-                Output::Account(output) => (output.amount(), output.mana(), None, output.unlock_conditions()),
+            let (amount, consumed_native_token, unlock_conditions) = match consumed_output {
+                Output::Basic(output) => (output.amount(), output.native_token(), output.unlock_conditions()),
+                Output::Account(output) => (output.amount(), None, output.unlock_conditions()),
                 Output::Anchor(_) => return Err(Error::UnsupportedOutputKind(AnchorOutput::KIND)),
-                Output::Foundry(output) => (output.amount(), 0, output.native_token(), output.unlock_conditions()),
-                Output::Nft(output) => (output.amount(), output.mana(), None, output.unlock_conditions()),
-                Output::Delegation(output) => (output.amount(), 0, None, output.unlock_conditions()),
+                Output::Foundry(output) => (output.amount(), output.native_token(), output.unlock_conditions()),
+                Output::Nft(output) => (output.amount(), None, output.unlock_conditions()),
+                Output::Delegation(output) => (output.amount(), None, output.unlock_conditions()),
             };
 
             let commitment_slot_index = self
@@ -162,34 +155,13 @@ impl<'a> SemanticValidationContext<'a> {
                 .checked_add(amount)
                 .ok_or(Error::ConsumedAmountOverflow)?;
 
-            let potential_mana = {
-                // Deposit amount doesn't generate mana
-                let min_deposit = consumed_output.minimum_amount(self.protocol_parameters.storage_score_parameters());
-                let generation_amount = consumed_output.amount().saturating_sub(min_deposit);
-
-                self.protocol_parameters.generate_mana_with_decay(
-                    generation_amount,
+            self.input_mana = self
+                .input_mana
+                .checked_add(consumed_output.available_mana(
+                    &self.protocol_parameters,
                     output_id.transaction_id().slot_index(),
                     self.transaction.creation_slot(),
-                )
-            }?;
-
-            // Add potential mana
-            self.input_mana = self
-                .input_mana
-                .checked_add(potential_mana)
-                .ok_or(Error::ConsumedManaOverflow)?;
-
-            let stored_mana = self.protocol_parameters.mana_with_decay(
-                mana,
-                output_id.transaction_id().slot_index(),
-                self.transaction.creation_slot(),
-            )?;
-
-            // Add stored mana
-            self.input_mana = self
-                .input_mana
-                .checked_add(stored_mana)
+                )?)
                 .ok_or(Error::ConsumedManaOverflow)?;
 
             // TODO: Add reward mana https://github.com/iotaledger/iota-sdk/issues/1310
