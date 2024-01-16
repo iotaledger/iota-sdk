@@ -218,7 +218,7 @@ impl Output {
     }
 
     /// Returns all the mana held by the output, which is potential + stored, all decayed.
-    pub fn all_mana(
+    pub fn available_mana(
         &self,
         protocol_parameters: &ProtocolParameters,
         creation_index: SlotIndex,

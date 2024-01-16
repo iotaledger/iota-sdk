@@ -126,7 +126,7 @@ impl InputSelection {
         let mut input_mana = 0;
 
         for input in &self.selected_inputs {
-            input_mana += input.output.all_mana(
+            input_mana += input.output.available_mana(
                 &self.protocol_parameters,
                 input.output_id().transaction_id().slot_index(),
                 self.slot_index,

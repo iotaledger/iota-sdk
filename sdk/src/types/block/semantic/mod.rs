@@ -102,18 +102,13 @@ impl<'a> SemanticValidationContext<'a> {
     pub fn validate(mut self) -> Result<Option<TransactionFailureReason>, Error> {
         // Validation of inputs.
         for (index, (output_id, consumed_output)) in self.inputs.iter().enumerate() {
-            let (amount, mana, consumed_native_token, unlock_conditions) = match consumed_output {
-                Output::Basic(output) => (
-                    output.amount(),
-                    output.mana(),
-                    output.native_token(),
-                    output.unlock_conditions(),
-                ),
-                Output::Account(output) => (output.amount(), output.mana(), None, output.unlock_conditions()),
+            let (amount, consumed_native_token, unlock_conditions) = match consumed_output {
+                Output::Basic(output) => (output.amount(), output.native_token(), output.unlock_conditions()),
+                Output::Account(output) => (output.amount(), None, output.unlock_conditions()),
                 Output::Anchor(_) => return Err(Error::UnsupportedOutputKind(AnchorOutput::KIND)),
-                Output::Foundry(output) => (output.amount(), 0, output.native_token(), output.unlock_conditions()),
-                Output::Nft(output) => (output.amount(), output.mana(), None, output.unlock_conditions()),
-                Output::Delegation(output) => (output.amount(), 0, None, output.unlock_conditions()),
+                Output::Foundry(output) => (output.amount(), output.native_token(), output.unlock_conditions()),
+                Output::Nft(output) => (output.amount(), None, output.unlock_conditions()),
+                Output::Delegation(output) => (output.amount(), None, output.unlock_conditions()),
             };
 
             let commitment_slot_index = self
@@ -162,7 +157,7 @@ impl<'a> SemanticValidationContext<'a> {
 
             self.input_mana = self
                 .input_mana
-                .checked_add(consumed_output.all_mana(
+                .checked_add(consumed_output.available_mana(
                     &self.protocol_parameters,
                     output_id.transaction_id().slot_index(),
                     self.transaction.creation_slot(),
