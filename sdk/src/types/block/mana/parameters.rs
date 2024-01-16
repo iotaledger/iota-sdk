@@ -372,6 +372,7 @@ mod test {
         amount: u64,
         created_slot: SlotIndex,
         target_slot: SlotIndex,
+        potential_mana: Option<u64>,
         err: Option<Error>,
     }
 
@@ -383,6 +384,7 @@ mod test {
                 amount: 0,
                 created_slot: params().first_slot_of(1),
                 target_slot: params().first_slot_of(400),
+                potential_mana: None,
                 err: None,
             },
             ManaGenerationTest {
@@ -390,6 +392,7 @@ mod test {
                 amount: i64::MAX as _,
                 created_slot: params().first_slot_of(1),
                 target_slot: params().first_slot_of(1),
+                potential_mana: None,
                 err: None,
             },
             ManaGenerationTest {
@@ -397,6 +400,7 @@ mod test {
                 amount: 0,
                 created_slot: params().first_slot_of(2),
                 target_slot: params().first_slot_of(1),
+                potential_mana: None,
                 err: Some(Error::InvalidEpochDiff {
                     created: 2.into(),
                     target: 1.into(),
@@ -407,6 +411,7 @@ mod test {
                 amount: params().token_supply(),
                 created_slot: params().first_slot_of(1),
                 target_slot: params().first_slot_of(params().mana_parameters().decay_factors().len() as u32 + 1),
+                potential_mana: None,
                 err: None,
             },
             ManaGenerationTest {
@@ -414,6 +419,7 @@ mod test {
                 amount: params().token_supply(),
                 created_slot: params().first_slot_of(1),
                 target_slot: params().first_slot_of(3 * params().mana_parameters().decay_factors().len() as u32 + 1),
+                potential_mana: None,
                 err: None,
             },
             ManaGenerationTest {
@@ -421,6 +427,7 @@ mod test {
                 amount: params().token_supply(),
                 created_slot: params().first_slot_of(1),
                 target_slot: params().last_slot_of(1),
+                potential_mana: None,
                 err: None,
             },
             ManaGenerationTest {
@@ -428,6 +435,7 @@ mod test {
                 amount: params().token_supply(),
                 created_slot: params().first_slot_of(1),
                 target_slot: params().last_slot_of(2),
+                potential_mana: None,
                 err: None,
             },
             ManaGenerationTest {
@@ -435,6 +443,39 @@ mod test {
                 amount: params().token_supply(),
                 created_slot: params().first_slot_of(1),
                 target_slot: params().last_slot_of(3),
+                potential_mana: None,
+                err: None,
+            },
+            ManaGenerationTest {
+                name: "check exact value mana generation 1000000000 mana slot 1 to 10000",
+                amount: 1000000000,
+                created_slot: SlotIndex(1),
+                target_slot: SlotIndex(10000),
+                potential_mana: Some(76228441),
+                err: None,
+            },
+            ManaGenerationTest {
+                name: "check exact value mana generation 1000000000 mana slot 9000 to 10000",
+                amount: 1000000000,
+                created_slot: SlotIndex(9000),
+                target_slot: SlotIndex(10000),
+                potential_mana: Some(7629394),
+                err: None,
+            },
+            ManaGenerationTest {
+                name: "check exact value mana generation 800000000000000000 mana slot 1 to 10000",
+                amount: 800000000000000000,
+                created_slot: SlotIndex(1),
+                target_slot: SlotIndex(10000),
+                potential_mana: Some(60982753715241244),
+                err: None,
+            },
+            ManaGenerationTest {
+                name: "check exact value mana generation 800000000000000000 mana slot 9000 to 10000",
+                amount: 800000000000000000,
+                created_slot: SlotIndex(9000),
+                target_slot: SlotIndex(10000),
+                potential_mana: Some(6103515625000000),
                 err: None,
             },
         ];
@@ -444,6 +485,7 @@ mod test {
             amount,
             created_slot,
             target_slot,
+            potential_mana,
             err,
         } in tests
         {
@@ -452,27 +494,31 @@ mod test {
                 assert_eq!(result, Err(err), "{name}");
             } else {
                 let result = result.map_err(|e| format!("{name}: {e}")).unwrap();
-                let upper_bound = upper_bound_mana_generation(amount, created_slot, target_slot);
-                let lower_bound = lower_bound_mana_generation(amount, created_slot, target_slot);
+                if let Some(potential_mana) = potential_mana {
+                    assert_eq!(result, potential_mana);
+                } else {
+                    let upper_bound = upper_bound_mana_generation(amount, created_slot, target_slot);
+                    let lower_bound = lower_bound_mana_generation(amount, created_slot, target_slot);
 
-                assert!(
-                    result as f64 <= upper_bound,
-                    "{name}: result {result} above upper bound {upper_bound}",
-                );
-                assert!(
-                    result as f64 >= lower_bound,
-                    "{name}: result {result} below lower bound {upper_bound}",
-                );
-
-                if result != 0 {
-                    let float_res = mana_generation_with_decay_float(amount as _, created_slot, target_slot);
-                    let epsilon = 0.001;
-                    let allowed_delta = float_res.abs().min(result as f64) * epsilon;
-                    let dt = float_res - result as f64;
                     assert!(
-                        dt >= -allowed_delta && dt <= allowed_delta,
-                        "{name}: fixed point result varies too greatly from float result"
+                        result as f64 <= upper_bound,
+                        "{name}: result {result} above upper bound {upper_bound}",
                     );
+                    assert!(
+                        result as f64 >= lower_bound,
+                        "{name}: result {result} below lower bound {upper_bound}",
+                    );
+
+                    if result != 0 {
+                        let float_res = mana_generation_with_decay_float(amount as _, created_slot, target_slot);
+                        let epsilon = 0.001;
+                        let allowed_delta = float_res.abs().min(result as f64) * epsilon;
+                        let dt = float_res - result as f64;
+                        assert!(
+                            dt >= -allowed_delta && dt <= allowed_delta,
+                            "{name}: fixed point result varies too greatly from float result"
+                        );
+                    }
                 }
             }
         }
