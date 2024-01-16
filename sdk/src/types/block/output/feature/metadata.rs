@@ -11,39 +11,78 @@ use core::ops::{Deref, RangeInclusive};
 
 use packable::{
     bounded::{BoundedU16, BoundedU8},
+    error::{UnpackError, UnpackErrorExt},
+    packer::Packer,
     prefix::{BTreeMapPrefix, BoxedSlicePrefix},
-    PackableExt,
+    unpacker::{CounterUnpacker, Unpacker},
+    Packable, PackableExt,
 };
 
 use crate::types::block::{output::StorageScore, protocol::WorkScore, Error};
 
-pub(crate) type MetadataFeatureLength =
-    BoundedU16<{ *MetadataFeature::LENGTH_RANGE.start() }, { *MetadataFeature::LENGTH_RANGE.end() }>;
-
+pub(crate) type MetadataFeatureEntryCount = BoundedU8<1, { u8::MAX }>;
 pub(crate) type MetadataFeatureKeyLength = BoundedU8<1, { u8::MAX }>;
 pub(crate) type MetadataFeatureValueLength = BoundedU16<0, { u16::MAX }>;
 
 type MetadataBTreeMapPrefix = BTreeMapPrefix<
     BoxedSlicePrefix<u8, MetadataFeatureKeyLength>,
     BoxedSlicePrefix<u8, MetadataFeatureValueLength>,
-    MetadataFeatureLength,
+    MetadataFeatureEntryCount,
 >;
 
 type MetadataBTreeMap =
     BTreeMap<BoxedSlicePrefix<u8, MetadataFeatureKeyLength>, BoxedSlicePrefix<u8, MetadataFeatureValueLength>>;
 
 /// Defines metadata, arbitrary binary data, that will be stored in the output.
-#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, packable::Packable)]
-#[packable(unpack_error = Error, with = |err| Error::InvalidMetadataFeature(err.to_string()))]
+#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct MetadataFeature(
     // Binary data.
-    #[packable(verify_with = verify_packable)] pub(crate) MetadataBTreeMapPrefix,
+    pub(crate) MetadataBTreeMapPrefix,
 );
 
-fn verify_packable<const VERIFY: bool>(map: &MetadataBTreeMapPrefix) -> Result<(), Error> {
-    verify_keys_packable::<VERIFY>(map)?;
-    verify_length_packable::<VERIFY>(map)?;
-    Ok(())
+impl Packable for MetadataFeature {
+    type UnpackError = Error;
+    type UnpackVisitor = ();
+
+    fn pack<P: Packer>(&self, packer: &mut P) -> Result<(), P::Error> {
+        self.0.pack(packer)?;
+
+        Ok(())
+    }
+
+    fn unpack<U: Unpacker, const VERIFY: bool>(
+        unpacker: &mut U,
+        visitor: &Self::UnpackVisitor,
+    ) -> Result<Self, UnpackError<Self::UnpackError, U::Error>> {
+        let mut unpacker = CounterUnpacker::new(unpacker);
+        let start_opt = unpacker.read_bytes();
+
+        let map = MetadataBTreeMapPrefix::unpack::<_, VERIFY>(&mut unpacker, visitor)
+            .map_packable_err(|e| Error::InvalidMetadataFeature(e.to_string()))?;
+
+        verify_keys_packable::<true>(&map).map_err(UnpackError::Packable)?;
+
+        let packed_len = if let (Some(start), Some(end)) = (start_opt, unpacker.read_bytes()) {
+            end - start
+        } else {
+            map.packed_len()
+        };
+
+        let packed_len = u16::try_from(packed_len).map_err(|_| {
+            UnpackError::Packable(Error::InvalidMetadataFeature(format!(
+                "Out of bounds byte length: {}",
+                packed_len + 1
+            )))
+        })? + 1; // +1 for the type byte
+
+        if !Self::LENGTH_RANGE.contains(&(packed_len)) {
+            return Err(UnpackError::Packable(Error::InvalidMetadataFeature(format!(
+                "Out of bounds byte length: {packed_len}"
+            ))));
+        }
+
+        Ok(Self(map))
+    }
 }
 
 fn verify_keys_packable<const VERIFY: bool>(map: &MetadataBTreeMapPrefix) -> Result<(), Error> {
@@ -140,7 +179,7 @@ fn metadata_feature_from_iter(data: impl IntoIterator<Item = (Vec<u8>, Vec<u8>)>
     }
 
     Ok(MetadataFeature(
-        res.try_into().map_err(Error::InvalidMetadataFeatureLength)?,
+        res.try_into().map_err(Error::InvalidMetadataFeatureEntryCount)?,
     ))
 }
 

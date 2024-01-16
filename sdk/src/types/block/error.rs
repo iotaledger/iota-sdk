@@ -21,7 +21,7 @@ use crate::types::block::{
     output::{
         feature::{BlockIssuerKeyCount, FeatureCount},
         unlock_condition::UnlockConditionCount,
-        AccountId, AnchorId, ChainId, MetadataFeatureKeyLength, MetadataFeatureLength, MetadataFeatureValueLength,
+        AccountId, AnchorId, ChainId, MetadataFeatureEntryCount, MetadataFeatureKeyLength, MetadataFeatureValueLength,
         NativeTokenCount, NftId, OutputIndex, TagFeatureLength,
     },
     payload::{
@@ -110,7 +110,7 @@ pub enum Error {
     InvalidBlockLength(usize),
     InvalidManaValue(u64),
     InvalidMetadataFeature(String),
-    InvalidMetadataFeatureLength(<MetadataFeatureLength as TryFrom<usize>>::Error),
+    InvalidMetadataFeatureEntryCount(<MetadataFeatureEntryCount as TryFrom<usize>>::Error),
     InvalidMetadataFeatureKeyLength(<MetadataFeatureKeyLength as TryFrom<usize>>::Error),
     InvalidMetadataFeatureValueLength(<MetadataFeatureValueLength as TryFrom<usize>>::Error),
     InvalidNativeTokenCount(<NativeTokenCount as TryFrom<usize>>::Error),
@@ -316,8 +316,8 @@ impl fmt::Display for Error {
             Self::InvalidMetadataFeature(e) => {
                 write!(f, "invalid metadata feature: {e}")
             }
-            Self::InvalidMetadataFeatureLength(length) => {
-                write!(f, "invalid metadata feature length: {length}")
+            Self::InvalidMetadataFeatureEntryCount(count) => {
+                write!(f, "invalid metadata feature entry count: {count}")
             }
             Self::InvalidMetadataFeatureKeyLength(length) => {
                 write!(f, "invalid metadata feature key length: {length}")
