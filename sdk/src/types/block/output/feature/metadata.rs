@@ -3,6 +3,7 @@
 
 use alloc::{
     collections::BTreeMap,
+    format,
     string::{String, ToString},
     vec::Vec,
 };
