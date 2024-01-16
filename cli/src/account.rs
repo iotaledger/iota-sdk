@@ -3,7 +3,10 @@
 
 use clap::Parser;
 use colored::Colorize;
-use iota_sdk::wallet::{Account, Wallet};
+use iota_sdk::{
+    client::secret::SecretManager,
+    wallet::{Account, Wallet},
+};
 use rustyline::{error::ReadlineError, history::MemHistory, Config, Editor};
 
 use crate::{
@@ -63,10 +66,13 @@ pub enum AccountPromptResponse {
 }
 
 async fn ensure_password(wallet: &Wallet) -> Result<(), Error> {
-    if !wallet.is_stronghold_password_available().await? {
+    if matches!(*wallet.get_secret_manager().read().await, SecretManager::Stronghold(_))
+        && !wallet.is_stronghold_password_available().await?
+    {
         let password = get_password("Stronghold password", false)?;
         wallet.set_stronghold_password(password).await?;
     }
+
     Ok(())
 }
 
