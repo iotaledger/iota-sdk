@@ -63,7 +63,9 @@ fn verify_length_packable<const VERIFY: bool>(map: &MetadataBTreeMapPrefix) -> R
         if !MetadataFeature::LENGTH_RANGE
             .contains(&u16::try_from(len).map_err(|e| Error::InvalidMetadataFeature(e.to_string()))?)
         {
-            return Err(Error::InvalidMetadataFeature(len.to_string()));
+            return Err(Error::InvalidMetadataFeature(format!(
+                "Out of bounds byte length: {len}"
+            )));
         }
     }
     Ok(())

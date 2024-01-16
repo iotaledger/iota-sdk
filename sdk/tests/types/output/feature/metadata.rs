@@ -55,6 +55,6 @@ fn unpack_invalid_order() {
 fn unpack_invalid_length() {
     assert!(matches!(
         MetadataFeature::unpack_verified([vec![1, 0, 1, 33, 0, 32], vec![0u8; 8192]].concat(), &()),
-        Err(UnpackError::Packable(Error::InvalidMetadataFeature(len))) if &len == "8199"
+        Err(UnpackError::Packable(Error::InvalidMetadataFeature(len))) if &len == "Out of bounds byte length: 8199"
     ));
 }
