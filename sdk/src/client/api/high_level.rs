@@ -111,23 +111,23 @@ impl Client {
 
     // Returns the slot index corresponding to the current timestamp.
     pub async fn get_slot_index(&self) -> Result<SlotIndex> {
-        let current_time = unix_timestamp_now().as_nanos() as u64;
+        let unix_timestamp = unix_timestamp_now();
+        let current_time_nanos = unix_timestamp.as_nanos() as u64;
 
         let network_info = self.get_network_info().await?;
 
         if let Some(tangle_time) = network_info.tangle_time {
             // Check the local time is in the range of +-5 minutes of the node to prevent locking funds by accident
             if !(tangle_time - FIVE_MINUTES_IN_NANOSECONDS..tangle_time + FIVE_MINUTES_IN_NANOSECONDS)
-                .contains(&current_time)
+                .contains(&current_time_nanos)
             {
                 return Err(Error::TimeNotSynced {
-                    current_time,
+                    current_time: current_time_nanos,
                     tangle_time,
                 });
             }
         }
 
-        // TODO double check with TIP if this should be seconds or nanoseconds
-        Ok(network_info.protocol_parameters.slot_index(current_time))
+        Ok(network_info.protocol_parameters.slot_index(unix_timestamp.as_secs()))
     }
 }
