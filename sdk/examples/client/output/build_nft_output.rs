@@ -72,7 +72,7 @@ async fn main() -> Result<()> {
         .add_immutable_feature(IssuerFeature::new(address))
         .add_immutable_feature(
             MetadataFeature::build()
-                .with_key_value("IRC27", tip_27_immutable_metadata.as_bytes())
+                .with_key_value("irc-27", tip_27_immutable_metadata.as_bytes())
                 .finish()?,
         )
         .finish_output()?;

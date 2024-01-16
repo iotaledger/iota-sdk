@@ -36,32 +36,51 @@ pub fn rand_issuer_feature() -> IssuerFeature {
 /// Generates a random [`MetadataFeature`].
 pub fn rand_metadata_feature() -> MetadataFeature {
     let mut map = BTreeMap::new();
-    let mut total_size = 0;
+    // Starting at 2 for type + entries count bytes
+    let mut total_size = 2;
+    let max_size = *MetadataFeature::BYTE_LENGTH_RANGE.end() as usize;
+    let key_prefix_length = 1;
+    let value_prefix_length = 2;
 
     for _ in 0..10 {
-        if total_size >= (*MetadataFeature::BYTE_LENGTH_RANGE.end() - 1) as usize - u8::MAX as usize {
+        // +1 since min key size is 1
+        if total_size > (max_size - (key_prefix_length + value_prefix_length + 1)) as usize {
             break;
         }
+
         // Key length
-        total_size += 1;
-        let key = Alphanumeric.sample_string(
-            &mut rand::thread_rng(),
-            rand_number_range(Range {
-                start: 1,
-                end: u8::MAX.into(),
-            }),
-        );
+        total_size += key_prefix_length;
+        let max_val = if max_size - total_size - value_prefix_length < u8::MAX as usize {
+            max_size - total_size - value_prefix_length
+        } else {
+            u8::MAX.into()
+        };
+
+        let key = if max_val == 1 {
+            "a".to_string()
+        } else {
+            Alphanumeric.sample_string(
+                &mut rand::thread_rng(),
+                rand_number_range(Range { start: 1, end: max_val }),
+            )
+        };
         total_size += key.as_bytes().len();
 
-        if total_size >= *MetadataFeature::BYTE_LENGTH_RANGE.end() as usize - 2 {
+        if total_size > max_size - value_prefix_length {
+            // println!("breaking before adding more");
             break;
         }
+
         // Value length
-        total_size += 2;
-        let bytes = rand_bytes(rand_number_range(Range {
-            start: 0,
-            end: *MetadataFeature::BYTE_LENGTH_RANGE.end() as usize - total_size,
-        }) as usize);
+        total_size += value_prefix_length;
+        let bytes = if max_size - total_size == 0 {
+            vec![]
+        } else {
+            rand_bytes(rand_number_range(Range {
+                start: 0,
+                end: max_size - total_size,
+            }))
+        };
         total_size += bytes.len();
 
         map.insert(key.into(), bytes);

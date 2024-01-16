@@ -20,13 +20,14 @@ use packable::{
 
 use crate::types::block::{output::StorageScore, protocol::WorkScore, Error};
 
+pub(crate) type MetadataFeatureEntryCount = BoundedU8<1, { u8::MAX }>;
 pub(crate) type MetadataFeatureKeyLength = BoundedU8<1, { u8::MAX }>;
 pub(crate) type MetadataFeatureValueLength = BoundedU16<0, { u16::MAX }>;
 
 type MetadataBTreeMapPrefix = BTreeMapPrefix<
     BoxedSlicePrefix<u8, MetadataFeatureKeyLength>,
     BoxedSlicePrefix<u8, MetadataFeatureValueLength>,
-    u16,
+    MetadataFeatureEntryCount,
 >;
 
 type MetadataBTreeMap =
@@ -155,7 +156,7 @@ impl MetadataFeatureMap {
                     })
                     .collect::<Result<MetadataBTreeMap, Error>>()?,
             )
-            .map_err(Error::InvalidMetadataFeatureLength)?,
+            .map_err(Error::InvalidMetadataFeatureEntryCount)?,
         );
         verify_packable::<true>(&res)?;
         Ok(res)
