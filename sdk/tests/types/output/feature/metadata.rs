@@ -40,7 +40,7 @@ fn serde_roundtrip() {
         metadata_feature
     );
     // Unordered keys are not removed
-    assert_eq!(metadata_feature.data().keys().count(), 3);
+    assert_eq!(metadata_feature.len(), 3);
 }
 
 #[test]

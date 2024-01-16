@@ -49,9 +49,9 @@ async fn main() -> Result<()> {
     // Account id needs to be null the first time
     let account_output = AccountOutputBuilder::new_with_minimum_amount(storage_score_params, AccountId::null())
         .add_feature(SenderFeature::new(address.clone()))
-        .add_feature(MetadataFeature::new([(b"data".to_vec(), metadata.to_vec())])?)
+        .add_feature(MetadataFeature::build().with_key_value("data", metadata).finish()?)
         .add_immutable_feature(IssuerFeature::new(address.clone()))
-        .add_immutable_feature(MetadataFeature::new([(b"data".to_vec(), metadata.to_vec())])?)
+        .add_immutable_feature(MetadataFeature::build().with_key_value("data", metadata).finish()?)
         .add_unlock_condition(AddressUnlockCondition::new(address))
         .finish_output()?;
 

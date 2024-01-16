@@ -39,7 +39,7 @@ pub fn rand_metadata_feature() -> MetadataFeature {
     let mut total_size = 0;
 
     for _ in 0..10 {
-        if total_size >= (*MetadataFeature::LENGTH_RANGE.end() - 1) as usize - u8::MAX as usize {
+        if total_size >= (*MetadataFeature::BYTE_LENGTH_RANGE.end() - 1) as usize - u8::MAX as usize {
             break;
         }
         // Key length
@@ -53,14 +53,14 @@ pub fn rand_metadata_feature() -> MetadataFeature {
         );
         total_size += key.as_bytes().len();
 
-        if total_size >= *MetadataFeature::LENGTH_RANGE.end() as usize - 2 {
+        if total_size >= *MetadataFeature::BYTE_LENGTH_RANGE.end() as usize - 2 {
             break;
         }
         // Value length
         total_size += 2;
         let bytes = rand_bytes(rand_number_range(Range {
             start: 0,
-            end: *MetadataFeature::LENGTH_RANGE.end() as usize - total_size,
+            end: *MetadataFeature::BYTE_LENGTH_RANGE.end() as usize - total_size,
         }) as usize);
         total_size += bytes.len();
 

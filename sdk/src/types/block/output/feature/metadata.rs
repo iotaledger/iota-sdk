@@ -7,18 +7,18 @@ use alloc::{
     string::{String, ToString},
     vec::Vec,
 };
-use core::ops::{Deref, RangeInclusive};
+use core::ops::RangeInclusive;
 
 use packable::{
     bounded::{BoundedU16, BoundedU8},
+    error::{UnpackError, UnpackErrorExt},
+    packer::Packer,
     prefix::{BTreeMapPrefix, BoxedSlicePrefix},
-    PackableExt,
+    unpacker::{CounterUnpacker, Unpacker},
+    Packable, PackableExt,
 };
 
 use crate::types::block::{output::StorageScore, protocol::WorkScore, Error};
-
-pub(crate) type MetadataFeatureLength =
-    BoundedU16<{ *MetadataFeature::LENGTH_RANGE.start() }, { *MetadataFeature::LENGTH_RANGE.end() }>;
 
 pub(crate) type MetadataFeatureKeyLength = BoundedU8<1, { u8::MAX }>;
 pub(crate) type MetadataFeatureValueLength = BoundedU16<0, { u16::MAX }>;
@@ -26,30 +26,26 @@ pub(crate) type MetadataFeatureValueLength = BoundedU16<0, { u16::MAX }>;
 type MetadataBTreeMapPrefix = BTreeMapPrefix<
     BoxedSlicePrefix<u8, MetadataFeatureKeyLength>,
     BoxedSlicePrefix<u8, MetadataFeatureValueLength>,
-    MetadataFeatureLength,
+    u16,
 >;
 
 type MetadataBTreeMap =
     BTreeMap<BoxedSlicePrefix<u8, MetadataFeatureKeyLength>, BoxedSlicePrefix<u8, MetadataFeatureValueLength>>;
 
 /// Defines metadata, arbitrary binary data, that will be stored in the output.
-#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash, packable::Packable)]
-#[packable(unpack_error = Error, with = |err| Error::InvalidMetadataFeature(err.to_string()))]
-pub struct MetadataFeature(
-    // Binary data.
-    #[packable(verify_with = verify_packable)] pub(crate) MetadataBTreeMapPrefix,
-);
+#[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
+pub struct MetadataFeature(MetadataBTreeMapPrefix);
 
-fn verify_packable<const VERIFY: bool>(map: &MetadataBTreeMapPrefix) -> Result<(), Error> {
-    verify_keys_packable::<VERIFY>(map)?;
-    verify_length_packable::<VERIFY>(map)?;
+fn verify_packable<const VERIFY: bool>(feature: &MetadataFeature) -> Result<(), Error> {
+    verify_keys_packable::<VERIFY>(feature)?;
+    verify_byte_length_packable::<VERIFY>(feature.packed_len())?;
     Ok(())
 }
 
-fn verify_keys_packable<const VERIFY: bool>(map: &MetadataBTreeMapPrefix) -> Result<(), Error> {
+fn verify_keys_packable<const VERIFY: bool>(feature: &MetadataFeature) -> Result<(), Error> {
     if VERIFY {
-        for key in map.keys() {
-            if !key.iter().all(|b| b.is_ascii_graphic()) {
+        for key in feature.0.keys() {
+            if !key.iter().all(|c| c.is_ascii_graphic()) {
                 return Err(Error::NonGraphicAsciiMetadataKey(key.to_vec()));
             }
         }
@@ -57,11 +53,10 @@ fn verify_keys_packable<const VERIFY: bool>(map: &MetadataBTreeMapPrefix) -> Res
     Ok(())
 }
 
-fn verify_length_packable<const VERIFY: bool>(map: &MetadataBTreeMapPrefix) -> Result<(), Error> {
+fn verify_byte_length_packable<const VERIFY: bool>(len: usize) -> Result<(), Error> {
     if VERIFY {
         // +1 for the feature type
-        let len = map.packed_len() + 1;
-        if !MetadataFeature::LENGTH_RANGE
+        if !MetadataFeature::BYTE_LENGTH_RANGE
             .contains(&u16::try_from(len).map_err(|e| Error::InvalidMetadataFeature(e.to_string()))?)
         {
             return Err(Error::InvalidMetadataFeature(format!(
@@ -75,25 +70,109 @@ fn verify_length_packable<const VERIFY: bool>(map: &MetadataBTreeMapPrefix) -> R
 impl MetadataFeature {
     /// The [`Feature`](crate::types::block::output::Feature) kind of [`MetadataFeature`].
     pub const KIND: u8 = 2;
-    /// Valid lengths for a [`MetadataFeature`].
-    pub const LENGTH_RANGE: RangeInclusive<u16> = 1..=8192;
+    /// Valid byte lengths for a [`MetadataFeature`].
+    pub const BYTE_LENGTH_RANGE: RangeInclusive<u16> = 1..=8192;
 
     /// Creates a new [`MetadataFeature`].
     #[inline(always)]
-    pub fn new(data: impl IntoIterator<Item = (Vec<u8>, Vec<u8>)>) -> Result<Self, Error> {
-        let data: BTreeMap<Vec<u8>, Vec<u8>> = data.into_iter().collect();
-        let metadata = Self::try_from(data)?;
-
-        verify_keys_packable::<true>(&metadata.0)?;
-        verify_length_packable::<true>(&metadata.0)?;
-
-        Ok(metadata)
+    pub fn new(data: impl IntoIterator<Item = (String, Vec<u8>)>) -> Result<Self, Error> {
+        let mut builder = Self::build();
+        for (k, v) in data {
+            builder.insert(k, v);
+        }
+        builder.finish()
     }
 
-    /// Returns the data.
+    pub fn build() -> MetadataFeatureMap {
+        Default::default()
+    }
+
+    pub fn to_map(&self) -> MetadataFeatureMap {
+        // Unsafe: acceptable because of type level checking, i.e. keys must be ASCII
+        unsafe {
+            MetadataFeatureMap(
+                self.0
+                    .iter()
+                    .map(|(k, v)| {
+                        (
+                            String::from_utf8_unchecked(k.as_ref().to_owned()),
+                            v.as_ref().to_owned(),
+                        )
+                    })
+                    .collect(),
+            )
+        }
+    }
+
+    /// Returns the data for a given key.
     #[inline(always)]
-    pub fn data(&self) -> &MetadataBTreeMap {
-        self.0.deref()
+    pub fn get(&self, key: &str) -> Option<&[u8]> {
+        BoxedSlicePrefix::<u8, MetadataFeatureKeyLength>::try_from(key.as_bytes().to_vec().into_boxed_slice())
+            .ok()
+            .and_then(|key| self.0.get(&key))
+            .map(|v| v.as_ref())
+    }
+}
+
+impl core::ops::Deref for MetadataFeature {
+    type Target = MetadataBTreeMap;
+
+    fn deref(&self) -> &Self::Target {
+        &*self.0
+    }
+}
+
+/// A map of metadata feature keys to values. This type is not guaranteed to be valid.
+#[derive(Clone, Debug, Default)]
+pub struct MetadataFeatureMap(BTreeMap<String, Vec<u8>>);
+
+impl MetadataFeatureMap {
+    /// Creates a new [`MetadataFeatureBuilder`].
+    #[inline(always)]
+    pub fn new() -> Self {
+        Self(Default::default())
+    }
+
+    pub fn with_key_value(mut self, key: &str, value: impl Into<Vec<u8>>) -> Self {
+        self.insert(key.to_owned(), value.into());
+        self
+    }
+
+    pub fn finish(self) -> Result<MetadataFeature, Error> {
+        let res = MetadataFeature(
+            MetadataBTreeMapPrefix::try_from(
+                self.0
+                    .iter()
+                    .map(|(k, v)| {
+                        Ok((
+                            BoxedSlicePrefix::<u8, MetadataFeatureKeyLength>::try_from(
+                                k.as_bytes().to_vec().into_boxed_slice(),
+                            )
+                            .map_err(|e| Error::InvalidMetadataFeature(e.to_string()))?,
+                            BoxedSlicePrefix::<u8, MetadataFeatureValueLength>::try_from(v.clone().into_boxed_slice())
+                                .map_err(|e| Error::InvalidMetadataFeature(e.to_string()))?,
+                        ))
+                    })
+                    .collect::<Result<MetadataBTreeMap, Error>>()?,
+            )
+            .map_err(Error::InvalidMetadataFeatureLength)?,
+        );
+        verify_packable::<true>(&res)?;
+        Ok(res)
+    }
+}
+
+impl core::ops::Deref for MetadataFeatureMap {
+    type Target = BTreeMap<String, Vec<u8>>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl core::ops::DerefMut for MetadataFeatureMap {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
     }
 }
 
@@ -101,47 +180,53 @@ impl StorageScore for MetadataFeature {}
 
 impl WorkScore for MetadataFeature {}
 
-impl TryFrom<Vec<(Vec<u8>, Vec<u8>)>> for MetadataFeature {
-    type Error = Error;
+impl Packable for MetadataFeature {
+    type UnpackError = Error;
+    type UnpackVisitor = ();
 
-    fn try_from(data: Vec<(Vec<u8>, Vec<u8>)>) -> Result<Self, Error> {
-        metadata_feature_from_iter(data)
+    fn pack<P: Packer>(&self, packer: &mut P) -> Result<(), P::Error> {
+        self.0.pack(packer)
+    }
+
+    fn unpack<U: Unpacker, const VERIFY: bool>(
+        unpacker: &mut U,
+        visitor: &Self::UnpackVisitor,
+    ) -> Result<Self, UnpackError<Self::UnpackError, U::Error>> {
+        let mut unpacker = CounterUnpacker::new(unpacker);
+        let res = MetadataFeature(
+            MetadataBTreeMapPrefix::unpack::<_, VERIFY>(&mut unpacker, visitor)
+                .map_packable_err(|e| Error::InvalidMetadataFeature(e.to_string()))?,
+        );
+
+        verify_keys_packable::<VERIFY>(&res).map_err(UnpackError::Packable)?;
+        verify_byte_length_packable::<VERIFY>(unpacker.counter()).map_err(UnpackError::Packable)?;
+
+        Ok(res)
     }
 }
 
-impl TryFrom<BTreeMap<Vec<u8>, Vec<u8>>> for MetadataFeature {
+impl TryFrom<Vec<(String, Vec<u8>)>> for MetadataFeature {
     type Error = Error;
 
-    fn try_from(data: BTreeMap<Vec<u8>, Vec<u8>>) -> Result<Self, Error> {
-        metadata_feature_from_iter(data)
-    }
-}
-
-fn metadata_feature_from_iter(data: impl IntoIterator<Item = (Vec<u8>, Vec<u8>)>) -> Result<MetadataFeature, Error> {
-    let mut res = MetadataBTreeMap::new();
-
-    for (k, v) in data {
-        if !k.iter().all(|b| b.is_ascii_graphic()) {
-            return Err(Error::NonGraphicAsciiMetadataKey(k.to_vec()));
+    fn try_from(data: Vec<(String, Vec<u8>)>) -> Result<Self, Error> {
+        let mut builder = Self::build();
+        for (k, v) in data {
+            builder.insert(k, v);
         }
-        if res
-            .insert(
-                k.into_boxed_slice()
-                    .try_into()
-                    .map_err(Error::InvalidMetadataFeatureKeyLength)?,
-                v.into_boxed_slice()
-                    .try_into()
-                    .map_err(Error::InvalidMetadataFeatureValueLength)?,
-            )
-            .is_some()
-        {
-            return Err(Error::InvalidMetadataFeature("Duplicated metadata key".to_string()));
-        };
+        builder.finish()
     }
+}
 
-    Ok(MetadataFeature(
-        res.try_into().map_err(Error::InvalidMetadataFeatureLength)?,
-    ))
+impl TryFrom<BTreeMap<String, Vec<u8>>> for MetadataFeature {
+    type Error = Error;
+
+    fn try_from(data: BTreeMap<String, Vec<u8>>) -> Result<Self, Error> {
+        let mut builder = Self::build();
+        for (k, v) in data {
+            builder.insert(k, v);
+        }
+        builder.finish()
+    }
 }
 
 impl core::fmt::Display for MetadataFeature {
@@ -285,7 +370,7 @@ pub(crate) mod irc_27 {
 
         fn try_from(value: Irc27Metadata) -> Result<Self, Error> {
             // TODO: is this hardcoded key correct or should users provide it?
-            Self::new([("irc-27".as_bytes().to_vec(), value.to_bytes())])
+            Self::build().with_key_value("irc-27", value).finish()
         }
     }
 
@@ -461,7 +546,7 @@ pub(crate) mod irc_30 {
 
         fn try_from(value: Irc30Metadata) -> Result<Self, Error> {
             // TODO: is this hardcoded key correct or should users provide it?
-            Self::new([("irc-30".as_bytes().to_vec(), value.to_bytes())])
+            Self::build().with_key_value("irc-30", value).finish()
         }
     }
 
@@ -545,8 +630,8 @@ pub(crate) mod dto {
 
                         Self::try_from(
                             map.into_iter()
-                                .map(|(key, value)| Ok((key.into_bytes(), prefix_hex::decode::<Vec<u8>>(value)?)))
-                                .collect::<Result<BTreeMap<Vec<u8>, Vec<u8>>, prefix_hex::Error>>()
+                                .map(|(key, value)| Ok((key, prefix_hex::decode::<Vec<u8>>(value)?)))
+                                .collect::<Result<BTreeMap<String, Vec<u8>>, prefix_hex::Error>>()
                                 .map_err(de::Error::custom)?,
                         )
                         .map_err(de::Error::custom)?

@@ -87,7 +87,7 @@ async fn native_token_foundry_metadata() -> Result<()> {
         .await?;
     wallet.sync(None).await?;
 
-    let foundry_metadata = MetadataFeature::new([(vec![1, 3], vec![3, 7])])?;
+    let foundry_metadata = MetadataFeature::new([("13".to_owned(), vec![3, 7])])?;
 
     let create_tx = wallet
         .create_native_token(

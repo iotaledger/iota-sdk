@@ -5,7 +5,7 @@ use alloc::{
     string::{FromUtf8Error, String},
     vec::Vec,
 };
-use core::{convert::Infallible, fmt};
+use core::{convert::Infallible, fmt, num::TryFromIntError};
 
 use bech32::primitives::hrp::Error as Bech32HrpError;
 use crypto::Error as CryptoError;
@@ -21,8 +21,8 @@ use crate::types::block::{
     output::{
         feature::{BlockIssuerKeyCount, FeatureCount},
         unlock_condition::UnlockConditionCount,
-        AccountId, AnchorId, ChainId, MetadataFeatureKeyLength, MetadataFeatureLength, MetadataFeatureValueLength,
-        NativeTokenCount, NftId, OutputIndex, TagFeatureLength,
+        AccountId, AnchorId, ChainId, MetadataFeatureKeyLength, MetadataFeatureValueLength, NativeTokenCount, NftId,
+        OutputIndex, TagFeatureLength,
     },
     payload::{
         tagged_data::{TagLength, TaggedDataLength},
@@ -110,7 +110,7 @@ pub enum Error {
     InvalidBlockLength(usize),
     InvalidManaValue(u64),
     InvalidMetadataFeature(String),
-    InvalidMetadataFeatureLength(<MetadataFeatureLength as TryFrom<usize>>::Error),
+    InvalidMetadataFeatureLength(TryFromIntError),
     InvalidMetadataFeatureKeyLength(<MetadataFeatureKeyLength as TryFrom<usize>>::Error),
     InvalidMetadataFeatureValueLength(<MetadataFeatureValueLength as TryFrom<usize>>::Error),
     InvalidNativeTokenCount(<NativeTokenCount as TryFrom<usize>>::Error),

@@ -796,13 +796,11 @@ pub async fn mint_nft_command(
         .with_issuer(issuer);
 
     if let Some(metadata) = metadata {
-        nft_options = nft_options.with_metadata(MetadataFeature::new([(metadata_key.into_bytes(), metadata)])?);
+        nft_options = nft_options.with_metadata(MetadataFeature::new([(metadata_key, metadata)])?);
     }
     if let Some(immutable_metadata) = immutable_metadata {
-        nft_options = nft_options.with_immutable_metadata(MetadataFeature::new([(
-            immutable_metadata_key.into_bytes(),
-            immutable_metadata,
-        )])?);
+        nft_options =
+            nft_options.with_immutable_metadata(MetadataFeature::new([(immutable_metadata_key, immutable_metadata)])?);
     }
 
     let transaction = wallet.mint_nfts([nft_options], None).await?;
@@ -1267,7 +1265,7 @@ pub async fn prompt_internal(
                                 maximum_supply,
                                 bytes_from_hex_or_file(foundry_metadata_hex, foundry_metadata_file)
                                     .await?
-                                    .map(|d| MetadataFeature::new([(foundry_metadata_key.into_bytes(), d)]).unwrap()),
+                                    .map(|d| MetadataFeature::new([(foundry_metadata_key, d)]).unwrap()),
                             )
                             .await
                         }

@@ -22,7 +22,7 @@ pub use self::metadata::irc_27::{Attribute, Irc27Metadata};
 pub use self::metadata::irc_30::Irc30Metadata;
 pub(crate) use self::{
     block_issuer::BlockIssuerKeyCount,
-    metadata::{MetadataFeatureKeyLength, MetadataFeatureLength, MetadataFeatureValueLength},
+    metadata::{MetadataFeatureKeyLength, MetadataFeatureValueLength},
     tag::TagFeatureLength,
 };
 pub use self::{
