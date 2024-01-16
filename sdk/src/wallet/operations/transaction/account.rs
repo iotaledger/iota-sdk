@@ -51,12 +51,10 @@ where
     where
         crate::wallet::Error: From<S::Error>,
     {
-        let implicit_account_data = self
-            .data()
-            .await
+        let wallet_data = self.data().await;
+        let implicit_account_data = wallet_data
             .unspent_outputs
             .get(output_id)
-            .cloned()
             .ok_or(Error::ImplicitAccountNotFound)?;
         let implicit_account = if implicit_account_data.output.is_implicit_account() {
             implicit_account_data.output.as_basic()
@@ -103,6 +101,8 @@ where
                 BlockIssuerKeys::from_vec(vec![BlockIssuerKey::from(Ed25519BlockIssuerKey::from(public_key))])?,
             )?])
             .finish_output()?;
+
+        drop(wallet_data);
 
         // TODO https://github.com/iotaledger/iota-sdk/issues/1740
         let issuance = self.client().get_issuance().await?;
