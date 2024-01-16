@@ -75,7 +75,8 @@ pub async fn new_wallet(cli: WalletCli) -> Result<(Option<Wallet>, Option<Accoun
                 let secret_manager_variant = secret_manager.to_string();
                 let wallet = init_command(storage_path, secret_manager, init_params).await?;
                 println_log_info!("Created new wallet with '{}' secret manager.", secret_manager_variant);
-                (Some(wallet), None)
+                let initial_account = create_initial_account(&wallet).await?;
+                (Some(wallet), initial_account)
             }
             WalletCommand::Accounts => {
                 if let Some((wallet, _)) = wallet_and_secret_manager {
@@ -259,7 +260,8 @@ pub async fn new_wallet(cli: WalletCli) -> Result<(Option<Wallet>, Option<Accoun
             }
 
             if wallet.get_accounts().await?.is_empty() {
-                create_initial_account(wallet).await?
+                let initial_account = create_initial_account(&wallet).await?;
+                (Some(wallet), initial_account)
             } else if let Some(alias) = cli.account {
                 (Some(wallet), Some(alias))
             } else if let Some(account) = pick_account(&wallet).await? {
@@ -277,7 +279,8 @@ pub async fn new_wallet(cli: WalletCli) -> Result<(Option<Wallet>, Option<Accoun
                     let secret_manager_variant = secret_manager.to_string();
                     let wallet = init_command(storage_path, secret_manager, init_params).await?;
                     println_log_info!("Created new wallet with '{}' secret manager.", secret_manager_variant);
-                    create_initial_account(wallet).await?
+                    let initial_account = create_initial_account(&wallet).await?;
+                    (Some(wallet), initial_account)
                 } else {
                     WalletCli::print_help()?;
                     (None, None)
@@ -295,15 +298,15 @@ pub async fn new_wallet(cli: WalletCli) -> Result<(Option<Wallet>, Option<Accoun
     Ok((wallet, account_id))
 }
 
-async fn create_initial_account(wallet: Wallet) -> Result<(Option<Wallet>, Option<AccountIdentifier>), Error> {
+async fn create_initial_account(wallet: &Wallet) -> Result<Option<AccountIdentifier>, Error> {
     // Ask the user whether an initial account should be created.
     if get_decision("Create initial account?")? {
-        let alias = get_account_alias("New account alias", &wallet).await?;
-        let account_id = add_account(&wallet, Some(alias)).await?;
+        let alias = get_account_alias("New account alias", wallet).await?;
+        let account_id = add_account(wallet, Some(alias)).await?;
         println_log_info!("Created initial account.\nType `help` to see all available account commands.");
-        Ok((Some(wallet), Some(account_id)))
+        Ok(Some(account_id))
     } else {
-        Ok((Some(wallet), None))
+        Ok(None)
     }
 }
 
