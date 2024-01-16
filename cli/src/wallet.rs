@@ -322,7 +322,13 @@ async fn create_initial_account(wallet: Wallet) -> Result<(Option<Wallet>, Optio
 }
 
 async fn create_secret_manager(init_params: &InitParameters) -> Result<SecretManager, Error> {
-    Ok(match select_secret_manager().await? {
+    let choice = if let Some(choice) = &init_params.secret_manager {
+        *choice
+    } else {
+        select_secret_manager().await?
+    };
+
+    Ok(match choice {
         SecretManagerChoice::Stronghold => {
             let snapshot_path = Path::new(&init_params.stronghold_snapshot_path);
 

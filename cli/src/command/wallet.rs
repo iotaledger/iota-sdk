@@ -22,7 +22,6 @@ use crate::{
 };
 
 const DEFAULT_LOG_LEVEL: &str = "debug";
-const DEFAULT_SECRET_MANAGER: &str = "stronghold";
 const DEFAULT_NODE_URL: &str = "https://api.testnet.shimmer.network";
 const DEFAULT_STRONGHOLD_SNAPSHOT_PATH: &str = "./stardust-cli-wallet.stronghold";
 const DEFAULT_WALLET_DATABASE_PATH: &str = "./stardust-cli-wallet-db";
@@ -109,8 +108,8 @@ pub enum WalletCommand {
 #[derive(Debug, Clone, Args)]
 pub struct InitParameters {
     /// Set the secret manager to use.
-    #[arg(short, long, value_name = "SECRET_MANAGER", default_value = DEFAULT_SECRET_MANAGER)]
-    pub secret_manager: SecretManagerChoice,
+    #[arg(short, long, value_name = "SECRET_MANAGER")]
+    pub secret_manager: Option<SecretManagerChoice>,
     /// Set the path to the stronghold snapshot file. Ignored if the <SECRET_MANAGER> is not a Stronghold secret
     /// manager.
     #[arg(short = 't', long, value_name = "PATH", env = "STRONGHOLD_SNAPSHOT_PATH", default_value = DEFAULT_STRONGHOLD_SNAPSHOT_PATH)]
@@ -130,7 +129,7 @@ pub struct InitParameters {
 impl Default for InitParameters {
     fn default() -> Self {
         Self {
-            secret_manager: SecretManagerChoice::Stronghold,
+            secret_manager: Some(SecretManagerChoice::Stronghold),
             stronghold_snapshot_path: DEFAULT_STRONGHOLD_SNAPSHOT_PATH.to_string(),
             mnemonic_file_path: None,
             node_url: DEFAULT_NODE_URL.to_string(),

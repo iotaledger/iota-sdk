@@ -345,7 +345,7 @@ pub async fn check_file_exists(path: &Path) -> Result<(), Error> {
     Ok(())
 }
 
-#[derive(Clone, Debug, clap::ValueEnum)]
+#[derive(Copy, Clone, Debug, clap::ValueEnum)]
 pub enum SecretManagerChoice {
     Stronghold,
     LedgerNano,
