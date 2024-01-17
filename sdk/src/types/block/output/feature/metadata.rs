@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use alloc::{
+    borrow::ToOwned,
     collections::BTreeMap,
     format,
     string::{String, ToString},
