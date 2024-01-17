@@ -127,7 +127,7 @@ impl core::ops::Deref for MetadataFeature {
 pub struct MetadataFeatureMap(BTreeMap<String, Vec<u8>>);
 
 impl MetadataFeatureMap {
-    /// Creates a new [`MetadataFeatureBuilder`].
+    /// Creates a new [`MetadataFeatureMap`].
     #[inline(always)]
     pub fn new() -> Self {
         Self(Default::default())
