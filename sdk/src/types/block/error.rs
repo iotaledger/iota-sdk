@@ -5,7 +5,7 @@ use alloc::{
     string::{FromUtf8Error, String},
     vec::Vec,
 };
-use core::{convert::Infallible, fmt, num::TryFromIntError};
+use core::{convert::Infallible, fmt};
 
 use bech32::primitives::hrp::Error as Bech32HrpError;
 use crypto::Error as CryptoError;

@@ -55,15 +55,13 @@ fn verify_keys_packable<const VERIFY: bool>(feature: &MetadataFeature) -> Result
 }
 
 fn verify_byte_length_packable<const VERIFY: bool>(len: usize) -> Result<(), Error> {
-    if VERIFY {
-        // +1 for the feature type
-        if !MetadataFeature::BYTE_LENGTH_RANGE
+    if VERIFY
+        && !MetadataFeature::BYTE_LENGTH_RANGE
             .contains(&u16::try_from(len).map_err(|e| Error::InvalidMetadataFeature(e.to_string()))?)
-        {
-            return Err(Error::InvalidMetadataFeature(format!(
-                "Out of bounds byte length: {len}"
-            )));
-        }
+    {
+        return Err(Error::InvalidMetadataFeature(format!(
+            "Out of bounds byte length: {len}"
+        )));
     }
     Ok(())
 }
@@ -119,7 +117,7 @@ impl core::ops::Deref for MetadataFeature {
     type Target = MetadataBTreeMap;
 
     fn deref(&self) -> &Self::Target {
-        &*self.0
+        &self.0
     }
 }
 
@@ -194,7 +192,7 @@ impl Packable for MetadataFeature {
         visitor: &Self::UnpackVisitor,
     ) -> Result<Self, UnpackError<Self::UnpackError, U::Error>> {
         let mut unpacker = CounterUnpacker::new(unpacker);
-        let res = MetadataFeature(
+        let res = Self(
             MetadataBTreeMapPrefix::unpack::<_, VERIFY>(&mut unpacker, visitor)
                 .map_packable_err(|e| Error::InvalidMetadataFeature(e.to_string()))?,
         );
@@ -210,11 +208,7 @@ impl TryFrom<Vec<(String, Vec<u8>)>> for MetadataFeature {
     type Error = Error;
 
     fn try_from(data: Vec<(String, Vec<u8>)>) -> Result<Self, Error> {
-        let mut builder = Self::build();
-        for (k, v) in data {
-            builder.insert(k, v);
-        }
-        builder.finish()
+        Self::new(data)
     }
 }
 
@@ -222,11 +216,7 @@ impl TryFrom<BTreeMap<String, Vec<u8>>> for MetadataFeature {
     type Error = Error;
 
     fn try_from(data: BTreeMap<String, Vec<u8>>) -> Result<Self, Error> {
-        let mut builder = Self::build();
-        for (k, v) in data {
-            builder.insert(k, v);
-        }
-        builder.finish()
+        Self::new(data)
     }
 }
 
