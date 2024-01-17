@@ -366,7 +366,9 @@ pub async fn address_command(wallet: &Wallet) -> Result<(), Error> {
 // `allot-mana` command
 pub async fn allot_mana_command(wallet: &Wallet, mana: u64, account_id: Option<AccountId>) -> Result<(), Error> {
     let wallet_data = wallet.data().await;
-    let account_id = account_id.unwrap_or(wallet_data.first_account_id()?);
+    let account_id = account_id
+        .or_else(|| wallet_data.first_account_id())
+        .ok_or(WalletError::AccountNotFound)?;
     drop(wallet_data);
 
     let transaction = wallet.allot_mana([ManaAllotment::new(account_id, mana)?], None).await?;
@@ -1033,8 +1035,7 @@ pub async fn unspent_outputs_command(wallet: &Wallet) -> Result<(), Error> {
 // pub async fn participation_overview_command(
 //     wallet: &Wallet,
 //     event_ids: Option<Vec<ParticipationEventId>>,
-// ) -> Result<(), Error> {
-//     let participation_overview = wallet.get_participation_overview(event_ids).await?;
+// ) -> Result<(), Error> { let participation_overview = wallet.get_participation_overview(event_ids).await?;
 
 //     println_log_info!("Participation overview: {participation_overview:?}");
 

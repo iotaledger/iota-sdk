@@ -315,12 +315,11 @@ impl WalletData {
 
     // Returns the first possible Account id, which can be an implicit account.
     // If none are found, returns AccountNotFound.
-    pub fn first_account_id(&self) -> Result<AccountId> {
+    pub fn first_account_id(&self) -> Option<AccountId> {
         self.accounts()
             .next()
             .map(|o| o.output.as_account().account_id_non_null(&o.output_id))
-            .or(self.implicit_accounts().next().map(|o| AccountId::from(&o.output_id)))
-            .ok_or(Error::AccountNotFound)
+            .or_else(|| self.implicit_accounts().next().map(|o| AccountId::from(&o.output_id)))
     }
 
     /// Get the [`OutputData`] of an output stored in the wallet.

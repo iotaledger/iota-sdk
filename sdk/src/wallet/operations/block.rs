@@ -21,7 +21,10 @@ where
         let wallet_data = self.data().await;
 
         // If an issuer ID is provided, use it; otherwise, use the first available account or implicit account.
-        let issuer_id = issuer_id.into().unwrap_or(wallet_data.first_account_id()?);
+        let issuer_id = issuer_id
+            .into()
+            .or_else(|| wallet_data.first_account_id())
+            .ok_or(Error::AccountNotFound)?;
         drop(wallet_data);
 
         let block = self
