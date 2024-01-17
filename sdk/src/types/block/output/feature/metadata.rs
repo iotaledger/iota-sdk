@@ -258,7 +258,6 @@ pub(crate) mod irc_27 {
     use url::Url;
 
     use super::*;
-    use crate::types::block::address::Bech32Address;
 
     /// The IRC27 NFT standard schema.
     #[derive(Clone, Debug, Serialize, Deserialize, Getters, PartialEq)]
@@ -286,7 +285,7 @@ pub(crate) mod irc_27 {
         collection_name: Option<String>,
         /// Royalty payment addresses mapped to the payout percentage.
         #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
-        royalties: BTreeMap<Bech32Address, f64>,
+        royalties: BTreeMap<String, f64>,
         /// The human-readable name of the native token creator.
         #[serde(default, skip_serializing_if = "Option::is_none")]
         issuer_name: Option<String>,
@@ -318,12 +317,12 @@ pub(crate) mod irc_27 {
             self
         }
 
-        pub fn add_royalty(mut self, address: Bech32Address, percentage: f64) -> Self {
+        pub fn add_royalty(mut self, address: String, percentage: f64) -> Self {
             self.royalties.insert(address, percentage);
             self
         }
 
-        pub fn with_royalties(mut self, royalties: BTreeMap<Bech32Address, f64>) -> Self {
+        pub fn with_royalties(mut self, royalties: BTreeMap<String, f64>) -> Self {
             self.royalties = royalties;
             self
         }
@@ -424,8 +423,8 @@ pub(crate) mod irc_27 {
                 "My NFT #0001",
             )
             .with_collection_name("My Collection of Art")
-            .add_royalty(rand_base_address().to_bech32_unchecked("iota1"), 0.025)
-            .add_royalty(rand_base_address().to_bech32_unchecked("iota1"), 0.025)
+            .add_royalty(rand_base_address().to_bech32_unchecked("iota1").to_string(), 0.025)
+            .add_royalty(rand_base_address().to_bech32_unchecked("iota1").to_string(), 0.025)
             .with_issuer_name("My Artist Name")
             .with_description("A little information about my NFT collection")
             .add_attribute(Attribute::new("Background", "Purple"))

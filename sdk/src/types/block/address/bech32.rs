@@ -116,6 +116,7 @@ impl<T: AsRef<str> + Send> ConvertTo<Hrp> for T {
 
 /// An address and its network type.
 #[derive(Clone, Eq, PartialEq, Hash, AsRef, Deref, Ord, PartialOrd)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Bech32Address {
     pub(crate) hrp: Hrp,
     #[as_ref]
@@ -221,9 +222,6 @@ impl<T: core::borrow::Borrow<Bech32Address>> From<T> for Address {
         value.borrow().inner.clone()
     }
 }
-
-#[cfg(feature = "serde")]
-crate::string_serde_impl!(Bech32Address);
 
 impl<T: AsRef<str> + Send> ConvertTo<Bech32Address> for T {
     fn convert(self) -> Result<Bech32Address, Error> {
