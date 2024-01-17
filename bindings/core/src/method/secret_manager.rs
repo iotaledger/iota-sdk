@@ -79,6 +79,27 @@ pub enum SecretManagerMethod {
         #[derivative(Debug(format_with = "OmittedDebug::omitted_fmt"))]
         mnemonic: String,
     },
+    /// Set the stronghold password.
+    /// Expected response: [`Ok`](crate::Response::Ok)
+    #[cfg(feature = "stronghold")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "stronghold")))]
+    SetStrongholdPassword {
+        #[derivative(Debug(format_with = "OmittedDebug::omitted_fmt"))]
+        password: String,
+    },
+    /// Change the stronghold password.
+    /// Expected response: [`Ok`](crate::Response::Ok)
+    #[cfg(feature = "stronghold")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "stronghold")))]
+    ChangeStrongholdPassword {
+        #[derivative(Debug(format_with = "OmittedDebug::omitted_fmt"))]
+        password: String,
+    },
+    /// Clear the stronghold password.
+    /// Expected response: [`Ok`](crate::Response::Ok)
+    #[cfg(feature = "stronghold")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "stronghold")))]
+    ClearStrongholdPassword,
 }
 
 #[cfg(test)]

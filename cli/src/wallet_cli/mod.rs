@@ -10,22 +10,20 @@ use colored::Colorize;
 use iota_sdk::{
     client::request_funds_from_faucet,
     crypto::signatures::ed25519::PublicKey,
-    types::{
-        api::plugins::participation::types::ParticipationEventId,
-        block::{
-            address::Bech32Address,
-            output::{
-                unlock_condition::AddressUnlockCondition, AccountId, BasicOutputBuilder, FoundryId, NativeToken,
-                NativeTokensBuilder, NftId, Output, OutputId, TokenId,
-            },
-            payload::signed_transaction::TransactionId,
-            slot::SlotIndex,
+    types::block::{
+        address::{Bech32Address, ToBech32Ext},
+        mana::ManaAllotment,
+        output::{
+            feature::MetadataFeature, unlock_condition::AddressUnlockCondition, AccountId, BasicOutputBuilder,
+            FoundryId, NativeToken, NativeTokensBuilder, NftId, Output, OutputId, TokenId,
         },
+        payload::signed_transaction::TransactionId,
+        slot::SlotIndex,
     },
     utils::ConvertTo,
     wallet::{
-        types::OutputData, ConsolidationParams, CreateNativeTokenParams, MintNftParams, OutputsToClaim,
-        SendNativeTokenParams, SendNftParams, SendParams, SyncOptions, TransactionOptions, Wallet,
+        types::OutputData, ConsolidationParams, CreateNativeTokenParams, Error as WalletError, MintNftParams,
+        OutputsToClaim, SendNativeTokenParams, SendNftParams, SendParams, SyncOptions, TransactionOptions, Wallet,
     },
     U256,
 };
@@ -60,6 +58,8 @@ pub enum WalletCommand {
     Accounts,
     /// Print the wallet address.
     Address,
+    /// Allots mana to an account.
+    AllotMana { mana: u64, account_id: Option<AccountId> },
     /// Print the wallet balance.
     Balance,
     /// Burn an amount of native token.
@@ -81,6 +81,8 @@ pub enum WalletCommand {
     },
     /// Print details about claimable outputs - if there are any.
     ClaimableOutputs,
+    /// Checks if an account is ready to issue a block.
+    Congestion { account_id: Option<AccountId> },
     /// Consolidate all basic outputs into one address.
     Consolidate,
     /// Create a new account output.
@@ -91,6 +93,9 @@ pub enum WalletCommand {
         circulating_supply: String,
         /// Maximum supply of the native token to be minted, e.g. 500.
         maximum_supply: String,
+        /// Metadata key, e.g. --foundry-metadata-key data.
+        #[arg(long, default_value = "data")]
+        foundry_metadata_key: String,
         /// Metadata to attach to the associated foundry, e.g. --foundry-metadata-hex 0xdeadbeef.
         #[arg(long, group = "foundry_metadata")]
         foundry_metadata_hex: Option<String>,
@@ -140,12 +145,18 @@ pub enum WalletCommand {
     MintNft {
         /// Address to send the NFT to, e.g. rms1qztwng6cty8cfm42nzvq099ev7udhrnk0rw8jt8vttf9kpqnxhpsx869vr3.
         address: Option<Bech32Address>,
+        /// Immutable metadata key, e.g. --immutable-metadata-key data.
+        #[arg(long, default_value = "data")]
+        immutable_metadata_key: String,
         #[arg(long, group = "immutable_metadata")]
         /// Immutable metadata to attach to the NFT, e.g. --immutable-metadata-hex 0xdeadbeef.
         immutable_metadata_hex: Option<String>,
         /// Immutable metadata to attach to the NFT, e.g. --immutable-metadata-file ./nft-immutable-metadata.json.
         #[arg(long, group = "immutable_metadata")]
         immutable_metadata_file: Option<String>,
+        /// Metadata key, e.g. --metadata-key data.
+        #[arg(long, default_value = "data")]
+        metadata_key: String,
         /// Metadata to attach to the NFT, e.g. --metadata-hex 0xdeadbeef.
         #[arg(long, group = "metadata")]
         metadata_hex: Option<String>,
@@ -176,6 +187,8 @@ pub enum WalletCommand {
         /// Selector for output.
         /// Either by ID (e.g. 0xbce525324af12eda02bf7927e92cea3a8e8322d0f41966271443e6c3b245a4400000) or index.
         selector: OutputSelector,
+        #[arg(short, long)]
+        metadata: bool,
     },
     /// List all outputs.
     Outputs,
@@ -238,40 +251,40 @@ pub enum WalletCommand {
     },
     /// List the unspent outputs.
     UnspentOutputs,
-    /// Cast votes for an event.
-    Vote {
-        /// Event ID for which to cast votes, e.g. 0xdc049a721dc65ec342f836c876ec15631ed915cd55213cee39e8d1c821c751f2.
-        event_id: ParticipationEventId,
-        /// Answers to the event questions.
-        answers: Vec<u8>,
-    },
-    /// Stop participating to an event.
-    StopParticipating {
-        /// Event ID for which to stop participation, e.g.
-        /// 0xdc049a721dc65ec342f836c876ec15631ed915cd55213cee39e8d1c821c751f2.
-        event_id: ParticipationEventId,
-    },
-    /// Get the participation overview of the wallet.
-    ParticipationOverview {
-        /// Event IDs for which to get the participation overview, e.g.
-        /// 0xdc049a721dc65ec342f836c876ec15631ed915cd55213cee39e8d1c821c751f2...
-        #[arg(short, long, num_args = 1.., value_delimiter = ' ')]
-        event_ids: Vec<ParticipationEventId>,
-    },
-    /// Get the voting power of the wallet.
-    VotingPower,
-    /// Increase the voting power of the wallet.
-    IncreaseVotingPower {
-        /// Amount to increase the voting power by, e.g. 100.
-        amount: u64,
-    },
-    /// Decrease the voting power of the wallet.
-    DecreaseVotingPower {
-        /// Amount to decrease the voting power by, e.g. 100.
-        amount: u64,
-    },
-    /// Get the voting output of the wallet.
-    VotingOutput,
+    // /// Cast votes for an event.
+    // Vote {
+    //     /// Event ID for which to cast votes, e.g.
+    // 0xdc049a721dc65ec342f836c876ec15631ed915cd55213cee39e8d1c821c751f2.     event_id: ParticipationEventId,
+    //     /// Answers to the event questions.
+    //     answers: Vec<u8>,
+    // },
+    // /// Stop participating to an event.
+    // StopParticipating {
+    //     /// Event ID for which to stop participation, e.g.
+    //     /// 0xdc049a721dc65ec342f836c876ec15631ed915cd55213cee39e8d1c821c751f2.
+    //     event_id: ParticipationEventId,
+    // },
+    // /// Get the participation overview of the wallet.
+    // ParticipationOverview {
+    //     /// Event IDs for which to get the participation overview, e.g.
+    //     /// 0xdc049a721dc65ec342f836c876ec15631ed915cd55213cee39e8d1c821c751f2...
+    //     #[arg(short, long, num_args = 1.., value_delimiter = ' ')]
+    //     event_ids: Vec<ParticipationEventId>,
+    // },
+    // /// Get the voting power of the wallet.
+    // VotingPower,
+    // /// Increase the voting power of the wallet.
+    // IncreaseVotingPower {
+    //     /// Amount to increase the voting power by, e.g. 100.
+    //     amount: u64,
+    // },
+    // /// Decrease the voting power of the wallet.
+    // DecreaseVotingPower {
+    //     /// Amount to decrease the voting power by, e.g. 100.
+    //     amount: u64,
+    // },
+    // /// Get the voting output of the wallet.
+    // VotingOutput,
 }
 
 /// Select by transaction ID or list index
@@ -314,12 +327,64 @@ impl FromStr for OutputSelector {
 
 // `accounts` command
 pub async fn accounts_command(wallet: &Wallet) -> Result<(), Error> {
-    print_outputs(wallet.data().await.accounts().cloned().collect(), "Accounts:")
+    let wallet_data = wallet.data().await;
+    let accounts = wallet_data.accounts();
+    let hrp = wallet.client().get_bech32_hrp().await?;
+
+    println_log_info!("Accounts:\n");
+
+    for account in accounts {
+        let output_id = account.output_id;
+        let account_id = account.output.as_account().account_id_non_null(&output_id);
+        let account_address = account_id.to_bech32(hrp);
+        let bic = wallet
+            .client()
+            .get_account_congestion(&account_id)
+            .await
+            .map(|r| r.block_issuance_credits)
+            .ok();
+
+        println_log_info!(
+            "{:<16} {output_id}\n{:<16} {account_id}\n{:<16} {account_address}\n{:<16} {bic:?}\n",
+            "Output ID:",
+            "Account ID:",
+            "Account Address:",
+            "BIC:"
+        );
+    }
+
+    Ok(())
 }
 
 // `address` command
 pub async fn address_command(wallet: &Wallet) -> Result<(), Error> {
     print_wallet_address(wallet).await?;
+
+    Ok(())
+}
+
+// `allot-mana` command
+pub async fn allot_mana_command(wallet: &Wallet, mana: u64, account_id: Option<AccountId>) -> Result<(), Error> {
+    let wallet_data = wallet.data().await;
+    let account_id = account_id
+        .or(wallet_data
+            .accounts()
+            .next()
+            .map(|o| o.output.as_account().account_id_non_null(&o.output_id)))
+        .or(wallet_data
+            .implicit_accounts()
+            .next()
+            .map(|o| AccountId::from(&o.output_id)))
+        .ok_or(WalletError::AccountNotFound)?;
+    drop(wallet_data);
+
+    let transaction = wallet.allot_mana([ManaAllotment::new(account_id, mana)?], None).await?;
+
+    println_log_info!(
+        "Mana allotment transaction sent:\n{:?}\n{:?}",
+        transaction.transaction_id,
+        transaction.block_id
+    );
 
     Ok(())
 }
@@ -460,6 +525,33 @@ pub async fn claimable_outputs_command(wallet: &Wallet) -> Result<(), Error> {
     Ok(())
 }
 
+// `congestion` command
+pub async fn congestion_command(wallet: &Wallet, account_id: Option<AccountId>) -> Result<(), Error> {
+    let account_id = {
+        let wallet_data = wallet.data().await;
+        account_id
+            .or_else(|| {
+                wallet_data
+                    .accounts()
+                    .next()
+                    .map(|o| o.output.as_account().account_id_non_null(&o.output_id))
+            })
+            .or_else(|| {
+                wallet_data
+                    .implicit_accounts()
+                    .next()
+                    .map(|o| AccountId::from(&o.output_id))
+            })
+            .ok_or(WalletError::AccountNotFound)?
+    };
+
+    let congestion = wallet.client().get_account_congestion(&account_id).await?;
+
+    println_log_info!("{congestion:#?}");
+
+    Ok(())
+}
+
 // `consolidate` command
 pub async fn consolidate_command(wallet: &Wallet) -> Result<(), Error> {
     println_log_info!("Consolidating outputs.");
@@ -497,7 +589,7 @@ pub async fn create_native_token_command(
     wallet: &Wallet,
     circulating_supply: String,
     maximum_supply: String,
-    foundry_metadata: Option<Vec<u8>>,
+    foundry_metadata: Option<MetadataFeature>,
 ) -> Result<(), Error> {
     // If no account output exists, create one first
     if wallet.balance().await?.accounts().is_empty() {
@@ -612,10 +704,33 @@ pub async fn implicit_account_transition_command(
 
 // `implicit-accounts` command
 pub async fn implicit_accounts_command(wallet: &Wallet) -> Result<(), Error> {
-    print_outputs(
-        wallet.data().await.implicit_accounts().cloned().collect(),
-        "Implicit accounts:",
-    )
+    let wallet_data = wallet.data().await;
+    let implicit_accounts = wallet_data.implicit_accounts();
+    let hrp = wallet.client().get_bech32_hrp().await?;
+
+    println_log_info!("Implicit accounts:\n");
+
+    for implicit_account in implicit_accounts {
+        let output_id = implicit_account.output_id;
+        let account_id = AccountId::from(&output_id);
+        let account_address = account_id.to_bech32(hrp);
+        let bic = wallet
+            .client()
+            .get_account_congestion(&account_id)
+            .await
+            .map(|r| r.block_issuance_credits)
+            .ok();
+
+        println_log_info!(
+            "{:<16} {output_id}\n{:<16} {account_id}\n{:<16} {account_address}\n{:<16} {bic:?}\n",
+            "Output ID:",
+            "Account ID:",
+            "Account Address:",
+            "BIC:"
+        );
+    }
+
+    Ok(())
 }
 
 // `melt-native-token` command
@@ -660,7 +775,9 @@ pub async fn mint_native_token_command(wallet: &Wallet, token_id: String, amount
 pub async fn mint_nft_command(
     wallet: &Wallet,
     address: Option<Bech32Address>,
+    immutable_metadata_key: String,
     immutable_metadata: Option<Vec<u8>>,
+    metadata_key: String,
     metadata: Option<Vec<u8>>,
     tag: Option<String>,
     sender: Option<Bech32Address>,
@@ -672,13 +789,20 @@ pub async fn mint_nft_command(
         None
     };
 
-    let nft_options = MintNftParams::new()
+    let mut nft_options = MintNftParams::new()
         .with_address(address)
-        .with_immutable_metadata(immutable_metadata)
-        .with_metadata(metadata)
         .with_tag(tag)
         .with_sender(sender)
         .with_issuer(issuer);
+
+    if let Some(metadata) = metadata {
+        nft_options = nft_options.with_metadata(MetadataFeature::new([(metadata_key, metadata)])?);
+    }
+    if let Some(immutable_metadata) = immutable_metadata {
+        nft_options =
+            nft_options.with_immutable_metadata(MetadataFeature::new([(immutable_metadata_key, immutable_metadata)])?);
+    }
+
     let transaction = wallet.mint_nfts([nft_options], None).await?;
 
     println_log_info!(
@@ -700,7 +824,7 @@ pub async fn node_info_command(wallet: &Wallet) -> Result<(), Error> {
 }
 
 /// `output` command
-pub async fn output_command(wallet: &Wallet, selector: OutputSelector) -> Result<(), Error> {
+pub async fn output_command(wallet: &Wallet, selector: OutputSelector, metadata: bool) -> Result<(), Error> {
     let wallet_data = wallet.data().await;
     let output = match selector {
         OutputSelector::Id(id) => wallet_data.get_output(&id),
@@ -712,7 +836,11 @@ pub async fn output_command(wallet: &Wallet, selector: OutputSelector) -> Result
     };
 
     if let Some(output) = output {
-        println_log_info!("{output:#?}");
+        if metadata {
+            println_log_info!("{output:#?}");
+        } else {
+            println_log_info!("{:#?}", output.output);
+        }
     } else {
         println_log_info!("Output not found");
     }
@@ -887,80 +1015,80 @@ pub async fn unspent_outputs_command(wallet: &Wallet) -> Result<(), Error> {
     )
 }
 
-pub async fn vote_command(wallet: &Wallet, event_id: ParticipationEventId, answers: Vec<u8>) -> Result<(), Error> {
-    let transaction = wallet.vote(Some(event_id), Some(answers)).await?;
+// pub async fn vote_command(wallet: &Wallet, event_id: ParticipationEventId, answers: Vec<u8>) -> Result<(), Error> {
+//     let transaction = wallet.vote(Some(event_id), Some(answers)).await?;
 
-    println_log_info!(
-        "Voting transaction sent:\n{:?}\n{:?}",
-        transaction.transaction_id,
-        transaction.block_id
-    );
+//     println_log_info!(
+//         "Voting transaction sent:\n{:?}\n{:?}",
+//         transaction.transaction_id,
+//         transaction.block_id
+//     );
 
-    Ok(())
-}
+//     Ok(())
+// }
 
-pub async fn stop_participating_command(wallet: &Wallet, event_id: ParticipationEventId) -> Result<(), Error> {
-    let transaction = wallet.stop_participating(event_id).await?;
+// pub async fn stop_participating_command(wallet: &Wallet, event_id: ParticipationEventId) -> Result<(), Error> {
+//     let transaction = wallet.stop_participating(event_id).await?;
 
-    println_log_info!(
-        "Stop participating transaction sent:\n{:?}\n{:?}",
-        transaction.transaction_id,
-        transaction.block_id
-    );
+//     println_log_info!(
+//         "Stop participating transaction sent:\n{:?}\n{:?}",
+//         transaction.transaction_id,
+//         transaction.block_id
+//     );
 
-    Ok(())
-}
+//     Ok(())
+// }
 
-pub async fn participation_overview_command(
-    wallet: &Wallet,
-    event_ids: Option<Vec<ParticipationEventId>>,
-) -> Result<(), Error> {
-    let participation_overview = wallet.get_participation_overview(event_ids).await?;
+// pub async fn participation_overview_command(
+//     wallet: &Wallet,
+//     event_ids: Option<Vec<ParticipationEventId>>,
+// ) -> Result<(), Error> {
+//     let participation_overview = wallet.get_participation_overview(event_ids).await?;
 
-    println_log_info!("Participation overview: {participation_overview:?}");
+//     println_log_info!("Participation overview: {participation_overview:?}");
 
-    Ok(())
-}
+//     Ok(())
+// }
 
-pub async fn voting_power_command(wallet: &Wallet) -> Result<(), Error> {
-    let voting_power = wallet.get_voting_power().await?;
+// pub async fn voting_power_command(wallet: &Wallet) -> Result<(), Error> {
+//     let voting_power = wallet.get_voting_power().await?;
 
-    println_log_info!("Voting power: {voting_power}");
+//     println_log_info!("Voting power: {voting_power}");
 
-    Ok(())
-}
+//     Ok(())
+// }
 
-pub async fn increase_voting_power_command(wallet: &Wallet, amount: u64) -> Result<(), Error> {
-    let transaction = wallet.increase_voting_power(amount).await?;
+// pub async fn increase_voting_power_command(wallet: &Wallet, amount: u64) -> Result<(), Error> {
+//     let transaction = wallet.increase_voting_power(amount).await?;
 
-    println_log_info!(
-        "Increase voting power transaction sent:\n{:?}\n{:?}",
-        transaction.transaction_id,
-        transaction.block_id
-    );
+//     println_log_info!(
+//         "Increase voting power transaction sent:\n{:?}\n{:?}",
+//         transaction.transaction_id,
+//         transaction.block_id
+//     );
 
-    Ok(())
-}
+//     Ok(())
+// }
 
-pub async fn decrease_voting_power_command(wallet: &Wallet, amount: u64) -> Result<(), Error> {
-    let transaction = wallet.decrease_voting_power(amount).await?;
+// pub async fn decrease_voting_power_command(wallet: &Wallet, amount: u64) -> Result<(), Error> {
+//     let transaction = wallet.decrease_voting_power(amount).await?;
 
-    println_log_info!(
-        "Decrease voting power transaction sent:\n{:?}\n{:?}",
-        transaction.transaction_id,
-        transaction.block_id
-    );
+//     println_log_info!(
+//         "Decrease voting power transaction sent:\n{:?}\n{:?}",
+//         transaction.transaction_id,
+//         transaction.block_id
+//     );
 
-    Ok(())
-}
+//     Ok(())
+// }
 
-pub async fn voting_output_command(wallet: &Wallet) -> Result<(), Error> {
-    let output = wallet.get_voting_output().await?;
+// pub async fn voting_output_command(wallet: &Wallet) -> Result<(), Error> {
+//     let output = wallet.get_voting_output().await?;
 
-    println_log_info!("Voting output: {output:?}");
+//     println_log_info!("Voting output: {output:?}");
 
-    Ok(())
-}
+//     Ok(())
+// }
 
 async fn print_wallet_address(wallet: &Wallet) -> Result<(), Error> {
     let address = wallet.address().await;
@@ -1111,6 +1239,9 @@ pub async fn prompt_internal(
                     match protocol_cli.command {
                         WalletCommand::Accounts => accounts_command(wallet).await,
                         WalletCommand::Address => address_command(wallet).await,
+                        WalletCommand::AllotMana { mana, account_id } => {
+                            allot_mana_command(wallet, mana, account_id).await
+                        }
                         WalletCommand::Balance => balance_command(wallet).await,
                         WalletCommand::BurnNativeToken { token_id, amount } => {
                             burn_native_token_command(wallet, token_id, amount).await
@@ -1118,11 +1249,13 @@ pub async fn prompt_internal(
                         WalletCommand::BurnNft { nft_id } => burn_nft_command(wallet, nft_id).await,
                         WalletCommand::Claim { output_id } => claim_command(wallet, output_id).await,
                         WalletCommand::ClaimableOutputs => claimable_outputs_command(wallet).await,
+                        WalletCommand::Congestion { account_id } => congestion_command(wallet, account_id).await,
                         WalletCommand::Consolidate => consolidate_command(wallet).await,
                         WalletCommand::CreateAccountOutput => create_account_output_command(wallet).await,
                         WalletCommand::CreateNativeToken {
                             circulating_supply,
                             maximum_supply,
+                            foundry_metadata_key,
                             foundry_metadata_hex,
                             foundry_metadata_file,
                         } => {
@@ -1130,7 +1263,10 @@ pub async fn prompt_internal(
                                 wallet,
                                 circulating_supply,
                                 maximum_supply,
-                                bytes_from_hex_or_file(foundry_metadata_hex, foundry_metadata_file).await?,
+                                bytes_from_hex_or_file(foundry_metadata_hex, foundry_metadata_file)
+                                    .await?
+                                    .map(|d| MetadataFeature::new([(foundry_metadata_key, d)]))
+                                    .transpose()?,
                             )
                             .await
                         }
@@ -1159,8 +1295,10 @@ pub async fn prompt_internal(
                         }
                         WalletCommand::MintNft {
                             address,
+                            immutable_metadata_key,
                             immutable_metadata_hex,
                             immutable_metadata_file,
+                            metadata_key,
                             metadata_hex,
                             metadata_file,
                             tag,
@@ -1170,7 +1308,9 @@ pub async fn prompt_internal(
                             mint_nft_command(
                                 wallet,
                                 address,
+                                immutable_metadata_key,
                                 bytes_from_hex_or_file(immutable_metadata_hex, immutable_metadata_file).await?,
+                                metadata_key,
                                 bytes_from_hex_or_file(metadata_hex, metadata_file).await?,
                                 tag,
                                 sender,
@@ -1179,7 +1319,9 @@ pub async fn prompt_internal(
                             .await
                         }
                         WalletCommand::NodeInfo => node_info_command(wallet).await,
-                        WalletCommand::Output { selector } => output_command(wallet, selector).await,
+                        WalletCommand::Output { selector, metadata } => {
+                            output_command(wallet, selector, metadata).await
+                        }
                         WalletCommand::Outputs => outputs_command(wallet).await,
                         WalletCommand::Send {
                             address,
@@ -1208,22 +1350,22 @@ pub async fn prompt_internal(
                             transactions_command(wallet, show_details).await
                         }
                         WalletCommand::UnspentOutputs => unspent_outputs_command(wallet).await,
-                        WalletCommand::Vote { event_id, answers } => vote_command(wallet, event_id, answers).await,
-                        WalletCommand::StopParticipating { event_id } => {
-                            stop_participating_command(wallet, event_id).await
-                        }
-                        WalletCommand::ParticipationOverview { event_ids } => {
-                            let event_ids = (!event_ids.is_empty()).then_some(event_ids);
-                            participation_overview_command(wallet, event_ids).await
-                        }
-                        WalletCommand::VotingPower => voting_power_command(wallet).await,
-                        WalletCommand::IncreaseVotingPower { amount } => {
-                            increase_voting_power_command(wallet, amount).await
-                        }
-                        WalletCommand::DecreaseVotingPower { amount } => {
-                            decrease_voting_power_command(wallet, amount).await
-                        }
-                        WalletCommand::VotingOutput => voting_output_command(wallet).await,
+                        // WalletCommand::Vote { event_id, answers } => vote_command(wallet, event_id, answers).await,
+                        // WalletCommand::StopParticipating { event_id } => {
+                        //     stop_participating_command(wallet, event_id).await
+                        // }
+                        // WalletCommand::ParticipationOverview { event_ids } => {
+                        //     let event_ids = (!event_ids.is_empty()).then_some(event_ids);
+                        //     participation_overview_command(wallet, event_ids).await
+                        // }
+                        // WalletCommand::VotingPower => voting_power_command(wallet).await,
+                        // WalletCommand::IncreaseVotingPower { amount } => {
+                        //     increase_voting_power_command(wallet, amount).await
+                        // }
+                        // WalletCommand::DecreaseVotingPower { amount } => {
+                        //     decrease_voting_power_command(wallet, amount).await
+                        // }
+                        // WalletCommand::VotingOutput => voting_output_command(wallet).await,
                     }
                     .unwrap_or_else(|err| {
                         println_log_error!("{err}");

@@ -3,7 +3,7 @@
 
 use iota_sdk::{
     client::api::input_selection::{Error, InputSelection},
-    types::block::{address::Address, protocol::protocol_parameters},
+    types::block::{address::Address, protocol::protocol_parameters, slot::SlotIndex},
 };
 use pretty_assertions::assert_eq;
 
@@ -15,16 +15,19 @@ use crate::client::{
 fn one_output_timelock_not_expired() {
     let protocol_parameters = protocol_parameters();
 
-    let inputs = build_inputs([Basic(
-        2_000_000,
-        Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+    let inputs = build_inputs(
+        [Basic(
+            2_000_000,
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            None,
+            None,
+            None,
+            Some(200),
+            None,
+            None,
+        )],
         None,
-        None,
-        None,
-        Some(200),
-        None,
-        None,
-    )]);
+    );
     let outputs = build_outputs([Basic(
         1_000_000,
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
@@ -40,9 +43,9 @@ fn one_output_timelock_not_expired() {
         inputs,
         outputs,
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        100,
         protocol_parameters,
     )
-    .with_slot_index(100)
     .select();
 
     assert!(matches!(selected, Err(Error::NoAvailableInputsProvided)));
@@ -52,16 +55,19 @@ fn one_output_timelock_not_expired() {
 fn timelock_equal_timestamp() {
     let protocol_parameters = protocol_parameters();
 
-    let inputs = build_inputs([Basic(
-        2_000_000,
-        Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-        None,
-        None,
-        None,
-        Some(200),
-        None,
-        None,
-    )]);
+    let inputs = build_inputs(
+        [Basic(
+            2_000_000,
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            None,
+            None,
+            None,
+            Some(200),
+            None,
+            None,
+        )],
+        Some(SlotIndex::from(200)),
+    );
     let outputs = build_outputs([Basic(
         2_000_000,
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
@@ -77,9 +83,9 @@ fn timelock_equal_timestamp() {
         inputs.clone(),
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        200,
         protocol_parameters,
     )
-    .with_slot_index(200)
     .select()
     .unwrap();
 
@@ -91,28 +97,31 @@ fn timelock_equal_timestamp() {
 fn two_outputs_one_timelock_expired() {
     let protocol_parameters = protocol_parameters();
 
-    let inputs = build_inputs([
-        Basic(
-            2_000_000,
-            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-            None,
-            None,
-            None,
-            Some(200),
-            None,
-            None,
-        ),
-        Basic(
-            2_000_000,
-            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-            None,
-            None,
-            None,
-            Some(50),
-            None,
-            None,
-        ),
-    ]);
+    let inputs = build_inputs(
+        [
+            Basic(
+                2_000_000,
+                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+                None,
+                None,
+                None,
+                Some(200),
+                None,
+                None,
+            ),
+            Basic(
+                2_000_000,
+                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+                None,
+                None,
+                None,
+                Some(50),
+                None,
+                None,
+            ),
+        ],
+        Some(SlotIndex::from(100)),
+    );
     let outputs = build_outputs([Basic(
         2_000_000,
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
@@ -128,9 +137,9 @@ fn two_outputs_one_timelock_expired() {
         inputs.clone(),
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        100,
         protocol_parameters,
     )
-    .with_slot_index(100)
     .select()
     .unwrap();
 
@@ -143,28 +152,31 @@ fn two_outputs_one_timelock_expired() {
 fn two_outputs_one_timelocked_one_missing() {
     let protocol_parameters = protocol_parameters();
 
-    let inputs = build_inputs([
-        Basic(
-            2_000_000,
-            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-            None,
-            None,
-            None,
-            Some(200),
-            None,
-            None,
-        ),
-        Basic(
-            2_000_000,
-            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-        ),
-    ]);
+    let inputs = build_inputs(
+        [
+            Basic(
+                2_000_000,
+                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+                None,
+                None,
+                None,
+                Some(200),
+                None,
+                None,
+            ),
+            Basic(
+                2_000_000,
+                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+            ),
+        ],
+        Some(SlotIndex::from(100)),
+    );
     let outputs = build_outputs([Basic(
         2_000_000,
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
@@ -180,9 +192,9 @@ fn two_outputs_one_timelocked_one_missing() {
         inputs.clone(),
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        100,
         protocol_parameters,
     )
-    .with_slot_index(100)
     .select()
     .unwrap();
 
@@ -195,16 +207,19 @@ fn two_outputs_one_timelocked_one_missing() {
 fn one_output_timelock_expired() {
     let protocol_parameters = protocol_parameters();
 
-    let inputs = build_inputs([Basic(
-        2_000_000,
-        Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-        None,
-        None,
-        None,
-        Some(50),
-        None,
-        None,
-    )]);
+    let inputs = build_inputs(
+        [Basic(
+            2_000_000,
+            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            None,
+            None,
+            None,
+            Some(50),
+            None,
+            None,
+        )],
+        Some(SlotIndex::from(100)),
+    );
     let outputs = build_outputs([Basic(
         2_000_000,
         Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
@@ -220,9 +235,9 @@ fn one_output_timelock_expired() {
         inputs.clone(),
         outputs.clone(),
         [Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap()],
+        100,
         protocol_parameters,
     )
-    .with_slot_index(100)
     .select()
     .unwrap();
 

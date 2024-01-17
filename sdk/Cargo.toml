@@ -45,7 +45,7 @@ iota-crypto = { version = "0.23.0", default-features = false, features = [
     "secp256k1",
 ] }
 iterator-sorted = { version = "0.1.0", default-features = false }
-packable = { version = "0.10.0", default-features = false, features = [
+packable = { version = "0.10.1", default-features = false, features = [
     "primitive-types",
 ] }
 paste = { version = "1.0.14", default-features = false }
@@ -134,6 +134,8 @@ dotenvy = { version = "0.15.7", default-features = false }
 fern-logger = { version = "0.5.0", default-features = false }
 num_cpus = { version = "1.16.0", default-features = false }
 once_cell = { version = "1.19.0", default-features = false }
+regex = { version = "1.10.2", default-features = false }
+time = { version = "0.3.31", default-features = false }
 tokio = { version = "1.35.1", default-features = false, features = [
     "macros",
     "rt",
@@ -639,10 +641,10 @@ name = "wallet_ledger_nano"
 path = "examples/wallet/ledger_nano.rs"
 required-features = ["wallet", "ledger_nano"]
 
-[[example]]
-name = "wallet_participation"
-path = "examples/wallet/participation.rs"
-required-features = ["wallet", "participation"]
+# [[example]]
+# name = "wallet_participation"
+# path = "examples/wallet/participation.rs"
+# required-features = ["wallet", "participation"]
 
 [[example]]
 name = "logger"

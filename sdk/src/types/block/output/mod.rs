@@ -47,7 +47,7 @@ pub use self::{
     unlock_condition::{UnlockCondition, UnlockConditions},
 };
 pub(crate) use self::{
-    feature::{MetadataFeatureLength, TagFeatureLength},
+    feature::{MetadataFeatureEntryCount, MetadataFeatureKeyLength, MetadataFeatureValueLength, TagFeatureLength},
     native_token::NativeTokenCount,
     output_id::OutputIndex,
     unlock_condition::AddressUnlockCondition,
@@ -217,6 +217,33 @@ impl Output {
         }
     }
 
+    /// Returns all the mana held by the output, which is potential + stored, all decayed.
+    pub fn available_mana(
+        &self,
+        protocol_parameters: &ProtocolParameters,
+        creation_index: SlotIndex,
+        target_index: SlotIndex,
+    ) -> Result<u64, Error> {
+        let (amount, mana) = match self {
+            Self::Basic(output) => (output.amount(), output.mana()),
+            Self::Account(output) => (output.amount(), output.mana()),
+            Self::Anchor(output) => (output.amount(), output.mana()),
+            Self::Foundry(output) => (output.amount(), 0),
+            Self::Nft(output) => (output.amount(), output.mana()),
+            Self::Delegation(output) => (output.amount(), 0),
+        };
+
+        let min_deposit = self.minimum_amount(protocol_parameters.storage_score_parameters());
+        let generation_amount = amount.saturating_sub(min_deposit);
+        let potential_mana =
+            protocol_parameters.generate_mana_with_decay(generation_amount, creation_index, target_index)?;
+        let stored_mana = protocol_parameters.mana_with_decay(mana, creation_index, target_index)?;
+
+        potential_mana
+            .checked_add(stored_mana)
+            .ok_or(Error::ConsumedManaOverflow)
+    }
+
     /// Returns the unlock conditions of an [`Output`], if any.
     pub fn unlock_conditions(&self) -> Option<&UnlockConditions> {
         match self {
@@ -310,17 +337,18 @@ impl Output {
         })
     }
 
-    /// Verifies if a valid storage deposit was made. Each [`Output`] has to have an amount that covers its associated
-    /// byte cost, given by [`StorageScoreParameters`].
+    /// Verifies if a valid storage deposit was made.
+    /// Each [`Output`] has to have an amount that covers its associated byte cost, given by [`StorageScoreParameters`].
     /// If there is a [`StorageDepositReturnUnlockCondition`](unlock_condition::StorageDepositReturnUnlockCondition),
     /// its amount is also checked.
     pub fn verify_storage_deposit(&self, params: StorageScoreParameters) -> Result<(), Error> {
-        let required_output_amount = self.minimum_amount(params);
+        let minimum_storage_deposit = self.minimum_amount(params);
 
-        if self.amount() < required_output_amount {
+        // For any created `Output` in a transaction, it must hold that `Output::Amount >= Minimum Storage Deposit`.
+        if self.amount() < minimum_storage_deposit {
             return Err(Error::InsufficientStorageDepositAmount {
                 amount: self.amount(),
-                required: required_output_amount,
+                required: minimum_storage_deposit,
             });
         }
 
@@ -337,13 +365,13 @@ impl Output {
                 });
             }
 
-            let minimum_deposit = BasicOutput::minimum_amount(return_condition.return_address(), params);
+            let minimum_storage_deposit = BasicOutput::minimum_amount(return_condition.return_address(), params);
 
             // `Minimum Storage Deposit` ≤ `Return Amount`
-            if return_condition.amount() < minimum_deposit {
+            if return_condition.amount() < minimum_storage_deposit {
                 return Err(Error::InsufficientStorageDepositReturnAmount {
                     deposit: return_condition.amount(),
-                    required: minimum_deposit,
+                    required: minimum_storage_deposit,
                 });
             }
         }

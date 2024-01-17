@@ -11,9 +11,9 @@ import {
 } from '../bindings';
 import {
     WalletEventType,
+    WalletEvent,
     WalletOptions,
     __WalletMethod__,
-    Event,
 } from '../types/wallet';
 import { Client, ClientMethodHandler } from '../client';
 import { SecretManager, SecretManagerMethodHandler } from '../secret_manager';
@@ -74,17 +74,17 @@ export class WalletMethodHandler {
      */
     async listen(
         eventTypes: WalletEventType[],
-        callback: (error: Error, event: Event) => void,
+        callback: (error: Error, event: WalletEvent) => void,
     ): Promise<void> {
         return listenWallet(
             this.methodHandler,
             eventTypes,
             function (err: any, data: string) {
-                const parsed = JSON.parse(data);
+                const parsed: WalletEvent = JSON.parse(data);
                 callback(
                     // Send back raw error instead of parsing
                     err,
-                    new Event(parsed.accountIndex, parsed.event),
+                    parsed,
                 );
             },
         ).catch((error: any) => {

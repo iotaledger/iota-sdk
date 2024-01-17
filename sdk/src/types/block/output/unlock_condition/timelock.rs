@@ -55,6 +55,7 @@ pub(crate) mod dto {
     use crate::types::block::Error;
 
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+    #[serde(rename_all = "camelCase")]
     struct TimelockUnlockConditionDto {
         #[serde(rename = "type")]
         kind: u8,
