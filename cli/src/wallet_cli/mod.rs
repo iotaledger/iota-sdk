@@ -1265,7 +1265,8 @@ pub async fn prompt_internal(
                                 maximum_supply,
                                 bytes_from_hex_or_file(foundry_metadata_hex, foundry_metadata_file)
                                     .await?
-                                    .map(|d| MetadataFeature::new([(foundry_metadata_key, d)]).unwrap()),
+                                    .map(|d| MetadataFeature::new([(foundry_metadata_key, d)]))
+                                    .transpose()?,
                             )
                             .await
                         }
