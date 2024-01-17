@@ -19,6 +19,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security -->
 
+## 1.1.5 - 2024-01-DD
+
+### Added
+
+- `Utils:{verifyTransactionSyntactic(), blockHashWithoutNonce()}`;
+
 ## 1.1.4 - 2023-12-07
 
 ### Added

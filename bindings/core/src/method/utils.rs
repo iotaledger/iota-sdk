@@ -14,6 +14,7 @@ use iota_sdk::{
                 TransactionId,
             },
         },
+        protocol::ProtocolParameters,
         signature::dto::Ed25519SignatureDto,
         BlockDto,
     },
@@ -167,5 +168,16 @@ pub enum UtilsMethod {
         inputs: Vec<InputSigningDataDto>,
         transaction: TransactionPayloadDto,
         time: u32,
+    },
+    /// Verifies the syntactic of a transaction.
+    #[serde(rename_all = "camelCase")]
+    VerifyTransactionSyntactic {
+        transaction: TransactionPayloadDto,
+        protocol_parameters: ProtocolParameters,
+    },
+    /// Returns a block hash (Blake2b256 hash of block bytes without nonce) from a block for PoW
+    BlockHashWithoutNonce {
+        /// Block
+        block: BlockDto,
     },
 }
