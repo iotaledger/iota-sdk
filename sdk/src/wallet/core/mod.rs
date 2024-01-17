@@ -314,7 +314,6 @@ impl WalletData {
     }
 
     // Returns the first possible Account id, which can be an implicit account.
-    // If none are found, returns AccountNotFound.
     pub fn first_account_id(&self) -> Option<AccountId> {
         self.accounts()
             .next()

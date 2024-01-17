@@ -1035,7 +1035,7 @@ pub async fn unspent_outputs_command(wallet: &Wallet) -> Result<(), Error> {
 // pub async fn participation_overview_command(
 //     wallet: &Wallet,
 //     event_ids: Option<Vec<ParticipationEventId>>,
-// ) -> Result<(), Error> { 
+// ) -> Result<(), Error> {
 //     let participation_overview = wallet.get_participation_overview(event_ids).await?;
 
 //     println_log_info!("Participation overview: {participation_overview:?}");
