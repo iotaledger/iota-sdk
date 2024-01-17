@@ -1,10 +1,8 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use iota_sdk::{
-    types::block::output::{Output, StorageScore, StorageScoreParameters},
-    utils::serde::prefix_hex_bytes,
-};
+use iota_sdk::types::block::output::{Output, StorageScore, StorageScoreParameters};
+use packable::PackableExt;
 use pretty_assertions::assert_eq;
 use serde::Deserialize;
 
@@ -20,8 +18,7 @@ fn storage_score_parameters() -> Result<StorageScoreParameters, Box<dyn std::err
 #[derive(Deserialize)]
 struct OutputFixture {
     output: Output,
-    #[serde(with = "prefix_hex_bytes")]
-    bytes: Vec<u8>,
+    bytes: String,
     storage_score: u64,
 }
 
@@ -34,17 +31,24 @@ fn output_fixture(filename: &str) -> Result<OutputFixture, Box<dyn std::error::E
 // From https://github.com/iotaledger/tips/blob/tip41/tips/TIP-0041/tip-0041.md#storage-score
 #[test]
 fn output_storage_score() {
-    for fixture in [
-        output_fixture("tip41_basic_output.json").unwrap(),
-        output_fixture("tip42_account_output.json").unwrap(),
-        output_fixture("tip43_nft_output.json").unwrap(),
-        output_fixture("tip44_foundry_output.json").unwrap(),
-        output_fixture("tip54_anchor_output.json").unwrap(),
-        output_fixture("tip40_delegation_output.json").unwrap(),
+    for filename in [
+        "tip41_basic_output.json",
+        "tip42_account_output.json",
+        "tip43_nft_output.json",
+        "tip44_foundry_output.json",
+        "tip54_anchor_output.json",
+        "tip40_delegation_output.json",
     ] {
+        let fixture = output_fixture(filename).expect(&format!("failed to deserialize {filename}"));
         assert_eq!(
             fixture.output.storage_score(storage_score_parameters().unwrap()),
-            fixture.storage_score
+            fixture.storage_score,
+            "storage score mismatch for {filename}"
+        );
+        assert_eq!(
+            prefix_hex::encode(fixture.output.pack_to_vec()),
+            fixture.bytes,
+            "byte mismatch for {filename}"
         );
     }
 }
