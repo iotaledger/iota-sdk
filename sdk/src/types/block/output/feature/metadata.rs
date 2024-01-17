@@ -77,31 +77,28 @@ impl MetadataFeature {
     #[inline(always)]
     pub fn new(data: impl IntoIterator<Item = (String, Vec<u8>)>) -> Result<Self, Error> {
         let mut builder = Self::build();
-        for (k, v) in data {
-            builder.insert(k, v);
-        }
+        builder.extend(data.into_iter());
         builder.finish()
     }
 
+    /// Creates a new [`MetadataFeatureMap`].
     pub fn build() -> MetadataFeatureMap {
         Default::default()
     }
 
+    /// Creates a [`MetadataFeatureMap`] with the data so it can be mutated.
     pub fn to_map(&self) -> MetadataFeatureMap {
-        // Unsafe: acceptable because of type level checking, i.e. keys must be ASCII
-        unsafe {
-            MetadataFeatureMap(
-                self.0
-                    .iter()
-                    .map(|(k, v)| {
-                        (
-                            String::from_utf8_unchecked(k.as_ref().to_owned()),
-                            v.as_ref().to_owned(),
-                        )
-                    })
-                    .collect(),
-            )
-        }
+        MetadataFeatureMap(
+            self.0
+                .iter()
+                .map(|(k, v)| {
+                    (
+                        String::from_utf8(k.as_ref().to_owned()).expect("key must be ASCII"),
+                        v.as_ref().to_owned(),
+                    )
+                })
+                .collect(),
+        )
     }
 
     /// Returns the data for a given key.

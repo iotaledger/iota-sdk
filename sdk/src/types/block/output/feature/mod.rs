@@ -28,7 +28,7 @@ pub(crate) use self::{
 pub use self::{
     block_issuer::{BlockIssuerFeature, BlockIssuerKey, BlockIssuerKeys, Ed25519BlockIssuerKey},
     issuer::IssuerFeature,
-    metadata::MetadataFeature,
+    metadata::{MetadataFeature, MetadataFeatureMap},
     native_token::NativeTokenFeature,
     sender::SenderFeature,
     staking::StakingFeature,
