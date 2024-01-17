@@ -639,7 +639,7 @@ pub(crate) mod dto {
                 .map(|(k, v)| {
                     (
                         // Safe to unwrap, keys must be ascii
-                        alloc::str::from_utf8(k.as_ref()).expect("invalid ascii").to_string(),
+                        alloc::str::from_utf8(k.as_ref()).unwrap().to_string(),
                         prefix_hex::encode(v.as_ref()),
                     )
                 })
