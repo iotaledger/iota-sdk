@@ -101,7 +101,7 @@ async fn output_preparation() -> Result<()> {
                 amount: 300000,
                 assets: None,
                 features: Some(Features {
-                    metadata: Some(MetadataFeature::new([(b"data".to_vec(), b"Hello world".to_vec())]).unwrap()),
+                    metadata: Some(MetadataFeature::new([("data".to_owned(), b"Hello world".to_vec())]).unwrap()),
                     tag: Some(prefix_hex::encode(b"My Tag")),
                     issuer: None,
                     sender: None,
@@ -127,7 +127,7 @@ async fn output_preparation() -> Result<()> {
                 amount: 1,
                 assets: None,
                 features: Some(Features {
-                    metadata: Some(MetadataFeature::new([(b"data".to_vec(), b"Hello world".to_vec())]).unwrap()),
+                    metadata: Some(MetadataFeature::new([("data".to_owned(), b"Hello world".to_vec())]).unwrap()),
                     tag: Some(prefix_hex::encode(b"My Tag")),
                     issuer: None,
                     sender: None,
@@ -156,7 +156,7 @@ async fn output_preparation() -> Result<()> {
                 amount: 12000,
                 assets: None,
                 features: Some(Features {
-                    metadata: Some(MetadataFeature::new([(b"data".to_vec(), b"Hello world".to_vec())]).unwrap()),
+                    metadata: Some(MetadataFeature::new([("data".to_owned(), b"Hello world".to_vec())]).unwrap()),
                     tag: Some(prefix_hex::encode(b"My Tag")),
                     issuer: None,
                     sender: None,
@@ -182,7 +182,7 @@ async fn output_preparation() -> Result<()> {
                 amount: 1,
                 assets: None,
                 features: Some(Features {
-                    metadata: Some(MetadataFeature::new([(b"data".to_vec(), b"Hello world".to_vec())]).unwrap()),
+                    metadata: Some(MetadataFeature::new([("data".to_owned(), b"Hello world".to_vec())]).unwrap()),
                     tag: Some(prefix_hex::encode(b"My Tag")),
                     issuer: None,
                     sender: None,
@@ -399,7 +399,7 @@ async fn output_preparation() -> Result<()> {
                 assets: None,
                 features: Some(Features {
                     metadata: Some(
-                        MetadataFeature::new([(b"data".to_vec(), b"Large metadata".repeat(100).to_vec())]).unwrap(),
+                        MetadataFeature::new([("data".to_owned(), b"Large metadata".repeat(100).to_vec())]).unwrap(),
                     ),
                     tag: Some(prefix_hex::encode(b"My Tag")),
                     issuer: None,
@@ -553,10 +553,10 @@ async fn prepare_nft_output_features_update() -> Result<()> {
     let nft_options = [MintNftParams::new()
         .with_address(wallet_address.clone())
         .with_sender(wallet_address.clone())
-        .with_metadata(MetadataFeature::new([(vec![42], vec![42])])?)
+        .with_metadata(MetadataFeature::new([("42".to_owned(), vec![42])])?)
         .with_tag(b"some nft tag".to_vec())
         .with_issuer(wallet_address.clone())
-        .with_immutable_metadata(MetadataFeature::new([(vec![42], vec![42])])?)];
+        .with_immutable_metadata(MetadataFeature::new([("42".to_owned(), vec![42])])?)];
 
     let transaction = wallet.mint_nfts(nft_options, None).await.unwrap();
     wallet
@@ -572,7 +572,7 @@ async fn prepare_nft_output_features_update() -> Result<()> {
                 amount: 1_000_000,
                 assets: Some(Assets { nft_id: Some(nft_id) }),
                 features: Some(Features {
-                    metadata: Some(MetadataFeature::new([(b"data".to_vec(), b"0x2a".to_vec())]).unwrap()),
+                    metadata: Some(MetadataFeature::new([("data".to_owned(), b"0x2a".to_vec())]).unwrap()),
                     tag: None,
                     issuer: None,
                     sender: None,
@@ -592,21 +592,13 @@ async fn prepare_nft_output_features_update() -> Result<()> {
     assert!(nft.features().sender().is_none());
     assert!(nft.features().tag().is_none());
     assert_eq!(
-        nft.features()
-            .metadata()
-            .unwrap()
-            .data()
-            .first_key_value()
-            .unwrap()
-            .1
-            .to_vec(),
+        nft.features().metadata().unwrap().first_key_value().unwrap().1.to_vec(),
         [42]
     );
     assert_eq!(
         nft.immutable_features()
             .metadata()
             .unwrap()
-            .data()
             .first_key_value()
             .unwrap()
             .1
@@ -846,10 +838,10 @@ async fn prepare_existing_nft_output_gift() -> Result<()> {
     let nft_options = [MintNftParams::new()
         .with_address(address.clone())
         .with_sender(address.clone())
-        .with_metadata(MetadataFeature::new([(vec![42], vec![42])])?)
+        .with_metadata(MetadataFeature::new([("42".to_owned(), vec![42])])?)
         .with_tag(b"some nft tag".to_vec())
         .with_issuer(address.clone())
-        .with_immutable_metadata(MetadataFeature::new([(vec![43], vec![43])])?)];
+        .with_immutable_metadata(MetadataFeature::new([("43".to_owned(), vec![43])])?)];
 
     let transaction = wallet.mint_nfts(nft_options, None).await.unwrap();
     wallet
@@ -888,7 +880,6 @@ async fn prepare_existing_nft_output_gift() -> Result<()> {
         nft.immutable_features()
             .metadata()
             .unwrap()
-            .data()
             .first_key_value()
             .unwrap()
             .1

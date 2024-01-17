@@ -239,9 +239,9 @@ impl Output {
             protocol_parameters.generate_mana_with_decay(generation_amount, creation_index, target_index)?;
         let stored_mana = protocol_parameters.mana_with_decay(mana, creation_index, target_index)?;
 
-        Ok(potential_mana
+        potential_mana
             .checked_add(stored_mana)
-            .ok_or(Error::ConsumedManaOverflow)?)
+            .ok_or(Error::ConsumedManaOverflow)
     }
 
     /// Returns the unlock conditions of an [`Output`], if any.

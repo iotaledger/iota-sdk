@@ -40,7 +40,7 @@ fn serde_roundtrip() {
         metadata_feature
     );
     // Unordered keys are not removed
-    assert_eq!(metadata_feature.data().keys().count(), 3);
+    assert_eq!(metadata_feature.len(), 3);
 }
 
 #[test]
@@ -55,6 +55,6 @@ fn unpack_invalid_order() {
 fn unpack_invalid_length() {
     assert!(matches!(
         MetadataFeature::unpack_verified([vec![1, 1, 33, 0, 32], vec![0u8; 8192]].concat(), &()),
-        Err(UnpackError::Packable(Error::InvalidMetadataFeature(len))) if &len == "Out of bounds byte length: 8198"
+        Err(UnpackError::Packable(Error::InvalidMetadataFeature(len))) if &len == "Out of bounds byte length: 8197"
     ));
 }

@@ -26,9 +26,9 @@ async fn mint_and_burn_nft() -> Result<()> {
 
     let nft_options = [MintNftParams::new()
         .with_address(wallet.address().await)
-        .with_metadata(MetadataFeature::new([(b"data".to_vec(), b"some nft metadata".to_vec())]).unwrap())
+        .with_metadata(MetadataFeature::new([("data".to_owned(), b"some nft metadata".to_vec())]).unwrap())
         .with_immutable_metadata(
-            MetadataFeature::new([(b"data".to_vec(), b"some immutable nft metadata".to_vec())]).unwrap(),
+            MetadataFeature::new([("data".to_owned(), b"some immutable nft metadata".to_vec())]).unwrap(),
         )];
 
     let transaction = wallet.mint_nfts(nft_options, None).await.unwrap();
@@ -288,9 +288,9 @@ async fn mint_and_burn_nft_with_account() -> Result<()> {
     wallet.sync(None).await?;
 
     let nft_options = [MintNftParams::new()
-        .with_metadata(MetadataFeature::new([(b"data".to_vec(), b"some nft metadata".to_vec())]).unwrap())
+        .with_metadata(MetadataFeature::new([("data".to_owned(), b"some nft metadata".to_vec())]).unwrap())
         .with_immutable_metadata(
-            MetadataFeature::new([(b"data".to_vec(), b"some immutable nft metadata".to_vec())]).unwrap(),
+            MetadataFeature::new([("data".to_owned(), b"some immutable nft metadata".to_vec())]).unwrap(),
         )];
     let nft_tx = wallet.mint_nfts(nft_options, None).await.unwrap();
     wallet

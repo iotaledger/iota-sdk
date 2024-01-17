@@ -49,7 +49,7 @@ async fn main() -> Result<()> {
     println!("Sending NFT minting transaction...");
     let nft_mint_params = [MintNftParams::new().with_immutable_metadata(
         MetadataFeature::new([(
-            b"data".to_vec(),
+            "data".to_owned(),
             b"This NFT will be the issuer from the awesome NFT collection".to_vec(),
         )])
         .unwrap(),

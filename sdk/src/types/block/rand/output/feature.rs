@@ -36,9 +36,9 @@ pub fn rand_issuer_feature() -> IssuerFeature {
 /// Generates a random [`MetadataFeature`].
 pub fn rand_metadata_feature() -> MetadataFeature {
     let mut map = BTreeMap::new();
-    // Starting at 2 for type + entries count bytes
-    let mut total_size = 2;
-    let max_size = *MetadataFeature::LENGTH_RANGE.end() as usize;
+    // Starting at 1 for entries count bytes
+    let mut total_size = 1;
+    let max_size = *MetadataFeature::BYTE_LENGTH_RANGE.end() as usize;
     let key_prefix_length = 1;
     let value_prefix_length = 2;
 
