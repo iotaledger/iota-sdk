@@ -1,0 +1,25 @@
+{
+  "output": {
+    "type": 5,
+    "amount": "200000000",
+    "delegatedAmount": "500000000",
+    "delegationId": "0x08b987baffaacb9da156734275ee01a42a35fe06653823be654821a7ddf92380",
+    "validatorAddress": {
+      "type": 8,
+      "accountId": "0x17432c5a7a672503480241125e3952414a7a320441080c624c264b004e09614a"
+    },
+    "startEpoch": 30,
+    "endEpoch": 50,
+    "unlockConditions": [
+      {
+        "type": 0,
+        "address": {
+          "type": 0,
+          "pubKeyHash": "0xed1484f4d1f7d8c037087fed661dd92faccae1eed3c01182d6fdd6828cea144a"
+        }
+      }
+    ]
+  },
+  "bytes": "0x0500c2eb0b000000000065cd1d0000000008b987baffaacb9da156734275ee01a42a35fe06653823be654821a7ddf923800817432c5a7a672503480241125e3952414a7a320441080c624c264b004e09614a1e00000032000000010000ed1484f4d1f7d8c037087fed661dd92faccae1eed3c01182d6fdd6828cea144a",
+  "storage_score": 313
+}

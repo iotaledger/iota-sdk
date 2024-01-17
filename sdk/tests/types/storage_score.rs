@@ -1,25 +1,56 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-// TODO: Re-enable when storage score is figured out
+use iota_sdk::types::block::output::{Output, StorageScore, StorageScoreParameters};
+use packable::PackableExt;
+use pretty_assertions::assert_eq;
+use serde::Deserialize;
 
-// use iota_sdk::types::block::{
-//     output::{Output, Rent},
-//     protocol::protocol_parameters,
-//     rand::output::{rand_account_output, rand_basic_output, rand_foundry_output, rand_nft_output},
-// };
+// From https://github.com/iotaledger/tips/blob/tip49/tips/TIP-0049/tip-0049.md#test-vectors
+fn storage_score_parameters() -> Result<StorageScoreParameters, Box<dyn std::error::Error>> {
+    let json: serde_json::Value =
+        serde_json::from_reader(std::fs::File::open("./tests/types/fixtures/protocol_parameters.json")?)?;
 
-// fn output_in_range(output: Output, range: std::ops::RangeInclusive<u64>) {
-//     let cost = output.rent_cost(Default::default());
-//     assert!(range.contains(&cost), "{output:#?} has a required byte cost of {cost}");
-// }
+    Ok(StorageScoreParameters::deserialize(
+        &json["params"]["storageScoreParameters"],
+    )?)
+}
 
-// #[test]
-// fn valid_rent_cost_range() {
-//     let token_supply = protocol_parameters().token_supply();
+#[derive(Deserialize)]
+struct OutputFixture {
+    output: Output,
+    bytes: String,
+    storage_score: u64,
+}
 
-//     output_in_range(Output::Account(rand_account_output(token_supply)), 445..=29_620);
-//     output_in_range(Output::Basic(rand_basic_output(token_supply)), 414..=13_485);
-//     output_in_range(Output::Foundry(rand_foundry_output(token_supply)), 496..=21_365);
-//     output_in_range(Output::Nft(rand_nft_output(token_supply)), 435..=21_734);
-// }
+fn output_fixture(filename: &str) -> Result<OutputFixture, Box<dyn std::error::Error>> {
+    Ok(serde_json::from_value(serde_json::from_reader(std::fs::File::open(
+        format!("./tests/types/fixtures/{filename}"),
+    )?)?)?)
+}
+
+// From https://github.com/iotaledger/tips/blob/tip41/tips/TIP-0041/tip-0041.md#storage-score
+#[test]
+fn output_storage_score() {
+    for filename in [
+        "tip41_basic_output.json",
+        "tip42_account_output.json",
+        "tip43_nft_output.json",
+        "tip44_foundry_output.json",
+        "tip54_anchor_output.json",
+        "tip40_delegation_output.json",
+    ] {
+        let fixture = output_fixture(filename).expect(&format!("failed to deserialize {filename}"));
+
+        assert_eq!(
+            fixture.output.storage_score(storage_score_parameters().unwrap()),
+            fixture.storage_score,
+            "storage score mismatch for {filename}"
+        );
+        assert_eq!(
+            prefix_hex::encode(fixture.output.pack_to_vec()),
+            fixture.bytes,
+            "byte mismatch for {filename}"
+        );
+    }
+}
