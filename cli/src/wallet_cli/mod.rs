@@ -181,6 +181,8 @@ pub enum WalletCommand {
         /// Selector for output.
         /// Either by ID (e.g. 0xbce525324af12eda02bf7927e92cea3a8e8322d0f41966271443e6c3b245a4400000) or index.
         selector: OutputSelector,
+        #[arg(short, long)]
+        metadata: bool,
     },
     /// List all outputs.
     Outputs,
@@ -321,21 +323,23 @@ impl FromStr for OutputSelector {
 pub async fn accounts_command(wallet: &Wallet) -> Result<(), Error> {
     let wallet_data = wallet.data().await;
     let accounts = wallet_data.accounts();
+    let hrp = wallet.client().get_bech32_hrp().await?;
 
     println_log_info!("Accounts:\n");
 
     for account in accounts {
         let output_id = account.output_id;
         let account_id = account.output.as_account().account_id_non_null(&output_id);
-        let account_address = account_id.to_bech32(wallet.client().get_bech32_hrp().await?);
+        let account_address = account_id.to_bech32(hrp);
         let bic = wallet
             .client()
             .get_account_congestion(&account_id)
-            .await?
-            .block_issuance_credits;
+            .await
+            .map(|r| r.block_issuance_credits)
+            .ok();
 
         println_log_info!(
-            "{:<16} {output_id}\n{:<16} {account_id}\n{:<16} {account_address}\n{:<16} {bic}\n",
+            "{:<16} {output_id}\n{:<16} {account_id}\n{:<16} {account_address}\n{:<16} {bic:?}\n",
             "Output ID:",
             "Account ID:",
             "Account Address:",
@@ -687,21 +691,23 @@ pub async fn implicit_account_transition_command(
 pub async fn implicit_accounts_command(wallet: &Wallet) -> Result<(), Error> {
     let wallet_data = wallet.data().await;
     let implicit_accounts = wallet_data.implicit_accounts();
+    let hrp = wallet.client().get_bech32_hrp().await?;
 
     println_log_info!("Implicit accounts:\n");
 
     for implicit_account in implicit_accounts {
         let output_id = implicit_account.output_id;
         let account_id = AccountId::from(&output_id);
-        let account_address = account_id.to_bech32(wallet.client().get_bech32_hrp().await?);
+        let account_address = account_id.to_bech32(hrp);
         let bic = wallet
             .client()
             .get_account_congestion(&account_id)
-            .await?
-            .block_issuance_credits;
+            .await
+            .map(|r| r.block_issuance_credits)
+            .ok();
 
         println_log_info!(
-            "{:<16} {output_id}\n{:<16} {account_id}\n{:<16} {account_address}\n{:<16} {bic}\n",
+            "{:<16} {output_id}\n{:<16} {account_id}\n{:<16} {account_address}\n{:<16} {bic:?}\n",
             "Output ID:",
             "Account ID:",
             "Account Address:",
@@ -794,7 +800,7 @@ pub async fn node_info_command(wallet: &Wallet) -> Result<(), Error> {
 }
 
 /// `output` command
-pub async fn output_command(wallet: &Wallet, selector: OutputSelector) -> Result<(), Error> {
+pub async fn output_command(wallet: &Wallet, selector: OutputSelector, metadata: bool) -> Result<(), Error> {
     let wallet_data = wallet.data().await;
     let output = match selector {
         OutputSelector::Id(id) => wallet_data.get_output(&id),
@@ -806,7 +812,11 @@ pub async fn output_command(wallet: &Wallet, selector: OutputSelector) -> Result
     };
 
     if let Some(output) = output {
-        println_log_info!("{output:#?}");
+        if metadata {
+            println_log_info!("{output:#?}");
+        } else {
+            println_log_info!("{:#?}", output.output);
+        }
     } else {
         println_log_info!("Output not found");
     }
@@ -1277,7 +1287,9 @@ pub async fn prompt_internal(
                             .await
                         }
                         WalletCommand::NodeInfo => node_info_command(wallet).await,
-                        WalletCommand::Output { selector } => output_command(wallet, selector).await,
+                        WalletCommand::Output { selector, metadata } => {
+                            output_command(wallet, selector, metadata).await
+                        }
                         WalletCommand::Outputs => outputs_command(wallet).await,
                         WalletCommand::Send {
                             address,

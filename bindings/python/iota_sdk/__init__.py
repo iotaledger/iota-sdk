@@ -3,7 +3,9 @@
 
 from .external import *
 
-from .client.client import Client, NodeIndexerAPI, ClientError
+from .common import custom_encoder
+from .client.client import Client, NodeIndexerAPI
+from .client.common import ClientError
 from .client._high_level_api import GenerateAddressesOptions, GenerateAddressOptions
 from .utils import Utils
 from .wallet.wallet import Wallet, WalletOptions

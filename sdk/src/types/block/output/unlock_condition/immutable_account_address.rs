@@ -4,13 +4,14 @@
 use derive_more::From;
 
 use crate::types::block::{
-    address::AccountAddress,
+    address::{AccountAddress, Address},
+    error::Error,
     output::{StorageScore, StorageScoreParameters},
 };
 
 /// Defines the permanent [`AccountAddress`] that owns this output.
-#[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, From, packable::Packable)]
-pub struct ImmutableAccountAddressUnlockCondition(AccountAddress);
+#[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, From, packable::Packable)]
+pub struct ImmutableAccountAddressUnlockCondition(#[packable(verify_with = verify_address)] Address);
 
 impl ImmutableAccountAddressUnlockCondition {
     /// The [`UnlockCondition`](crate::types::block::output::UnlockCondition) kind of an
@@ -20,18 +21,27 @@ impl ImmutableAccountAddressUnlockCondition {
     /// Creates a new [`ImmutableAccountAddressUnlockCondition`].
     #[inline(always)]
     pub fn new(address: impl Into<AccountAddress>) -> Self {
-        Self(address.into())
+        Self(Address::from(address.into()))
     }
 
     /// Returns the account address of an [`ImmutableAccountAddressUnlockCondition`].
     pub fn address(&self) -> &AccountAddress {
-        &self.0
+        self.0.as_account()
     }
 }
 
 impl StorageScore for ImmutableAccountAddressUnlockCondition {
     fn storage_score(&self, params: StorageScoreParameters) -> u64 {
         self.address().storage_score(params)
+    }
+}
+
+#[inline]
+fn verify_address<const VERIFY: bool>(address: &Address) -> Result<(), Error> {
+    if VERIFY && !address.is_account() {
+        Err(Error::InvalidAddressKind(address.kind()))
+    } else {
+        Ok(())
     }
 }
 
@@ -45,14 +55,14 @@ mod dto {
     struct ImmutableAccountAddressUnlockConditionDto {
         #[serde(rename = "type")]
         kind: u8,
-        address: AccountAddress,
+        address: Address,
     }
 
     impl From<&ImmutableAccountAddressUnlockCondition> for ImmutableAccountAddressUnlockConditionDto {
         fn from(value: &ImmutableAccountAddressUnlockCondition) -> Self {
             Self {
                 kind: ImmutableAccountAddressUnlockCondition::KIND,
-                address: value.0,
+                address: value.0.clone(),
             }
         }
     }
