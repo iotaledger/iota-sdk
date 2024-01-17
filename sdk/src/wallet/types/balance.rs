@@ -131,7 +131,6 @@ pub struct NativeTokensBalance {
     pub(crate) available: U256,
     /// Token foundry immutable metadata
     #[getset(get = "pub")]
-    #[serde(with = "crate::utils::serde::option_string")]
     pub(crate) metadata: Option<MetadataFeature>,
 }
 
