@@ -10,6 +10,7 @@ use serde::Deserialize;
 fn storage_score_parameters() -> Result<StorageScoreParameters, Box<dyn std::error::Error>> {
     let json: serde_json::Value =
         serde_json::from_reader(std::fs::File::open("./tests/types/fixtures/protocol_parameters.json")?)?;
+
     Ok(StorageScoreParameters::deserialize(
         &json["params"]["storageScoreParameters"],
     )?)
@@ -40,6 +41,7 @@ fn output_storage_score() {
         "tip40_delegation_output.json",
     ] {
         let fixture = output_fixture(filename).expect(&format!("failed to deserialize {filename}"));
+
         assert_eq!(
             fixture.output.storage_score(storage_score_parameters().unwrap()),
             fixture.storage_score,
