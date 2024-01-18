@@ -85,7 +85,7 @@ impl Ed25519Signature {
 
     /// Verify a message using the signature.
     pub fn try_verify(&self, message: &[u8]) -> Result<bool, crypto::Error> {
-        Ok(self.public_key.verify(&self.signature, message)?)
+        self.public_key.verify(&self.signature, message)
     }
 
     /// Verifies the [`Ed25519Signature`] for a message against an [`Ed25519Address`].
