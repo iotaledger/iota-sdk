@@ -19,8 +19,7 @@ use crate::types::block::{
             verify_allowed_unlock_conditions, verify_restricted_addresses, UnlockCondition, UnlockConditionFlags,
             UnlockConditions,
         },
-        BasicOutput, ChainId, MinimumOutputAmount, Output, OutputBuilderAmount, OutputId, StorageScore,
-        StorageScoreParameters,
+        ChainId, MinimumOutputAmount, Output, OutputBuilderAmount, OutputId, StorageScore, StorageScoreParameters,
     },
     protocol::{ProtocolParameters, WorkScore, WorkScoreParameters},
     semantic::StateTransitionError,
@@ -435,33 +434,6 @@ impl AccountOutput {
         if current_state.foundry_counter + created_foundries_count != next_state.foundry_counter {
             return Err(StateTransitionError::InconsistentCreatedFoundriesCount);
         }
-
-        Ok(())
-    }
-
-    pub(crate) fn implicit_transition(
-        current_state: &BasicOutput,
-        next_state: &Self,
-    ) -> Result<(), StateTransitionError> {
-        if next_state.account_id.is_null() {
-            // TODO
-            return Err(StateTransitionError::NonZeroCreatedId);
-        }
-
-        if let Some(block_issuer) = next_state.features().block_issuer() {
-            // - The `Account` must have a Block Issuer Feature and it must pass semantic validation as if the implicit
-            //   account
-            // contained a Block Issuer Feature with its `Expiry Slot` set to the maximum value of slot indices and the
-            // feature was transitioned.
-        } else {
-            // TODO
-        }
-
-        // if let Some(issuer) = next_state.immutable_features().issuer() {
-        //     if !context.unlocked_addresses.contains(issuer.address()) {
-        //         return Err(StateTransitionError::IssuerNotUnlocked);
-        //     }
-        // }
 
         Ok(())
     }

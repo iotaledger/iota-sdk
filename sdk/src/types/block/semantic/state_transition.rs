@@ -2,7 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use crate::types::block::{
-    output::{AccountOutput, AnchorOutput, ChainId, DelegationOutput, FoundryOutput, NftOutput, Output, TokenScheme},
+    output::{
+        AccountOutput, AnchorOutput, BasicOutput, ChainId, DelegationOutput, FoundryOutput, NftOutput, Output,
+        TokenScheme,
+    },
     payload::signed_transaction::TransactionCapabilityFlag,
     semantic::{SemanticValidationContext, TransactionFailureReason},
 };
@@ -74,7 +77,7 @@ impl SemanticValidationContext<'_> {
             // Transitions.
             (Some(Output::Basic(current_state)), Some(Output::Account(next_state))) => {
                 if current_state.is_implicit_account() {
-                    AccountOutput::implicit_transition(current_state, next_state)
+                    AccountOutput::implicit_account_transition(current_state, next_state)
                 } else {
                     Err(StateTransitionError::UnsupportedStateTransition)
                 }
@@ -101,6 +104,33 @@ impl SemanticValidationContext<'_> {
             // Unsupported.
             _ => Err(StateTransitionError::UnsupportedStateTransition),
         }
+    }
+
+    pub(crate) fn implicit_account_transition(
+        &self,
+        _current_state: &BasicOutput,
+        next_state: &AccountOutput,
+    ) -> Result<(), StateTransitionError> {
+        if next_state.account_id().is_null() {
+            // TODO
+            return Err(StateTransitionError::NonZeroCreatedId);
+        }
+
+        if let Some(block_issuer) = next_state.features().block_issuer() {
+            // The Account must have a Block Issuer Feature and it must pass semantic validation as if the implicit
+            // account contained a Block Issuer Feature with its Expiry Slot set to the maximum value of
+            // slot indices and the feature was transitioned.
+        } else {
+            // TODO
+        }
+
+        if let Some(issuer) = next_state.immutable_features().issuer() {
+            if !self.unlocked_addresses.contains(issuer.address()) {
+                return Err(StateTransitionError::IssuerNotUnlocked);
+            }
+        }
+
+        Ok(())
     }
 }
 
