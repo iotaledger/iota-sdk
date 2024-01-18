@@ -367,14 +367,7 @@ pub async fn address_command(wallet: &Wallet) -> Result<(), Error> {
 pub async fn allot_mana_command(wallet: &Wallet, mana: u64, account_id: Option<AccountId>) -> Result<(), Error> {
     let wallet_data = wallet.data().await;
     let account_id = account_id
-        .or(wallet_data
-            .accounts()
-            .next()
-            .map(|o| o.output.as_account().account_id_non_null(&o.output_id)))
-        .or(wallet_data
-            .implicit_accounts()
-            .next()
-            .map(|o| AccountId::from(&o.output_id)))
+        .or_else(|| wallet_data.first_account_id())
         .ok_or(WalletError::AccountNotFound)?;
     drop(wallet_data);
 
@@ -530,18 +523,7 @@ pub async fn congestion_command(wallet: &Wallet, account_id: Option<AccountId>) 
     let account_id = {
         let wallet_data = wallet.data().await;
         account_id
-            .or_else(|| {
-                wallet_data
-                    .accounts()
-                    .next()
-                    .map(|o| o.output.as_account().account_id_non_null(&o.output_id))
-            })
-            .or_else(|| {
-                wallet_data
-                    .implicit_accounts()
-                    .next()
-                    .map(|o| AccountId::from(&o.output_id))
-            })
+            .or_else(|| wallet_data.first_account_id())
             .ok_or(WalletError::AccountNotFound)?
     };
 
