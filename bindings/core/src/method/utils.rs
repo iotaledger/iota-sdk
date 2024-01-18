@@ -164,19 +164,22 @@ pub enum UtilsMethod {
     #[serde(rename_all = "camelCase")]
     OutputHexBytes { output: OutputDto },
     /// Verifies the semantic of a transaction.
+    /// Expected response: [`Ok`](crate::Response::ConflictReason)
     VerifyTransactionSemantic {
         inputs: Vec<InputSigningDataDto>,
         transaction: TransactionPayloadDto,
         time: u32,
     },
     /// Verifies the syntactic of a transaction.
+    /// Expected response: [`Ok`](crate::Response::Ok)
     #[serde(rename_all = "camelCase")]
     VerifyTransactionSyntactic {
         transaction: TransactionPayloadDto,
         protocol_parameters: ProtocolParameters,
     },
-    /// Returns a block hash (Blake2b256 hash of block bytes without nonce) from a block for PoW
-    BlockHashWithoutNonce {
+    /// Returns the serialized bytes of a block..
+    /// Expected response: [`Ok`](crate::Response::Bytes)
+    BlockBytes {
         /// Block
         block: BlockDto,
     },

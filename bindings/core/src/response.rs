@@ -59,6 +59,9 @@ use crate::{error::Error, OmittedDebug};
 #[non_exhaustive]
 pub enum Response {
     /// Response for:
+    /// - [`BlockBytes`](crate::method::UtilsMethod::BlockBytes)
+    Bytes(Vec<u8>),
+    /// Response for:
     /// - [`GenerateEd25519Addresses`](crate::method::SecretManagerMethod::GenerateEd25519Addresses)
     GeneratedEd25519Addresses(Vec<Bech32Address>),
     /// Response for:
@@ -290,6 +293,7 @@ pub enum Response {
     /// - [`StartBackgroundSync`](crate::method::WalletMethod::StartBackgroundSync),
     /// - [`StoreMnemonic`](crate::method::WalletMethod::StoreMnemonic),
     /// - [`StopBackgroundSync`](crate::method::WalletMethod::StopBackgroundSync),
+    /// - [`VerifyTransactionSyntactic`](crate::method::UtilsMethod::VerifyTransactionSyntactic),
     Ok,
     /// Response for any method that returns an error.
     Error(Error),

@@ -468,18 +468,18 @@ export class Utils {
     }
 
     /**
-     * Returns a block hash (Blake2b256 hash of block bytes without nonce) from a block for PoW.
+     * Returns the serialized bytes of a block.
      *
      * @param block The block.
-     * @returns The Blake2b256 hash of the block bytes without nonce.
+     * @returns The block bytes.
      */
-    static blockHashWithoutNonce(block: Block): string {
-        const hash = callUtilsMethod({
-            name: 'blockHashWithoutNonce',
+    static blockBytes(block: Block): Uint8Array {
+        const blockBytes = callUtilsMethod({
+            name: 'blockBytes',
             data: {
                 block,
             },
         });
-        return hash;
+        return new Uint8Array(blockBytes);
     }
 }

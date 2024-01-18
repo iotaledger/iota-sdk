@@ -27,7 +27,7 @@ import type {
     __OutputHexBytes__,
     __VerifyTransactionSemantic__,
     __VerifyTransactionSyntactic__,
-    __BlockHashWithoutNonce__,
+    __BlockBytes__,
 } from './utils';
 
 export type __UtilsMethods__ =
@@ -59,4 +59,4 @@ export type __UtilsMethods__ =
     | __OutputHexBytes__
     | __VerifyTransactionSemantic__
     | __VerifyTransactionSyntactic__
-    | __BlockHashWithoutNonce__;
+    | __BlockBytes__;

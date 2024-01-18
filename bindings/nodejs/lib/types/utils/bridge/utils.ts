@@ -225,8 +225,8 @@ export interface __VerifyTransactionSyntactic__ {
     };
 }
 
-export interface __BlockHashWithoutNonce__ {
-    name: 'blockHashWithoutNonce';
+export interface __BlockBytes__ {
+    name: 'blockBytes';
     data: {
         block: Block;
     };
