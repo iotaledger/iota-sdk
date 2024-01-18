@@ -881,5 +881,5 @@ required-features = ["stronghold"]
 
 # Allowed only for examples, denied again in lib.rs
 [lints.clippy]
-single_element_loop = "allow"
 expect_fun_call = "allow"
+single_element_loop = "allow"
