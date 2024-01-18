@@ -22,6 +22,7 @@ pub enum StateTransitionError {
     InconsistentNativeTokensTransition,
     InconsistentNativeTokensMeltBurn,
     InvalidDelegatedAmount,
+    InvalidBlockIssuerTransition,
     IssuerNotUnlocked,
     MissingAccountForFoundry,
     MutatedFieldWithoutRights,
@@ -36,6 +37,7 @@ pub enum StateTransitionError {
     UnsupportedStateIndexOperation { current_state: u32, next_state: u32 },
     UnsupportedStateTransition,
     TransactionFailure(TransactionFailureReason),
+    ZeroCreatedId,
 }
 
 impl From<TransactionFailureReason> for StateTransitionError {
@@ -114,8 +116,7 @@ impl BasicOutput {
         context: &SemanticValidationContext<'_>,
     ) -> Result<(), StateTransitionError> {
         if next_state.account_id().is_null() {
-            // TODO
-            return Err(StateTransitionError::NonZeroCreatedId);
+            return Err(StateTransitionError::ZeroCreatedId);
         }
 
         if let Some(_block_issuer) = next_state.features().block_issuer() {
@@ -124,7 +125,7 @@ impl BasicOutput {
             // account contained a Block Issuer Feature with its Expiry Slot set to the maximum value of
             // slot indices and the feature was transitioned.
         } else {
-            // TODO
+            return Err(StateTransitionError::InvalidBlockIssuerTransition);
         }
 
         if let Some(issuer) = next_state.immutable_features().issuer() {
