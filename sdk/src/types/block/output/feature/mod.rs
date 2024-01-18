@@ -7,6 +7,7 @@ mod metadata;
 mod native_token;
 mod sender;
 mod staking;
+mod state_metadata;
 mod tag;
 
 use alloc::{boxed::Box, collections::BTreeSet, vec::Vec};
@@ -32,6 +33,7 @@ pub use self::{
     native_token::NativeTokenFeature,
     sender::SenderFeature,
     staking::StakingFeature,
+    state_metadata::StateMetadataFeature,
     tag::TagFeature,
 };
 use crate::types::block::{
@@ -55,6 +57,9 @@ pub enum Feature {
     /// A metadata feature.
     #[packable(tag = MetadataFeature::KIND)]
     Metadata(MetadataFeature),
+    /// A state metadata feature.
+    #[packable(tag = StateMetadataFeature::KIND)]
+    StateMetadata(StateMetadataFeature),
     /// A tag feature.
     #[packable(tag = TagFeature::KIND)]
     Tag(TagFeature),
@@ -87,6 +92,7 @@ impl StorageScore for Feature {
             Self::Sender(sender) => sender.storage_score(params),
             Self::Issuer(issuer) => issuer.storage_score(params),
             Self::Metadata(metadata) => metadata.storage_score(params),
+            Self::StateMetadata(state_metadata) => state_metadata.storage_score(params),
             Self::Tag(tag) => tag.storage_score(params),
             Self::NativeToken(native_token) => native_token.storage_score(params),
             Self::BlockIssuer(block_issuer) => block_issuer.storage_score(params),
@@ -101,6 +107,7 @@ impl WorkScore for Feature {
             Self::Sender(sender) => sender.work_score(params),
             Self::Issuer(issuer) => issuer.work_score(params),
             Self::Metadata(metadata) => metadata.work_score(params),
+            Self::StateMetadata(state_metadata) => state_metadata.work_score(params),
             Self::Tag(tag) => tag.work_score(params),
             Self::NativeToken(native_token) => native_token.work_score(params),
             Self::BlockIssuer(block_issuer) => block_issuer.work_score(params),
@@ -115,6 +122,7 @@ impl core::fmt::Debug for Feature {
             Self::Sender(feature) => feature.fmt(f),
             Self::Issuer(feature) => feature.fmt(f),
             Self::Metadata(feature) => feature.fmt(f),
+            Self::StateMetadata(feature) => feature.fmt(f),
             Self::Tag(feature) => feature.fmt(f),
             Self::NativeToken(feature) => feature.fmt(f),
             Self::BlockIssuer(feature) => feature.fmt(f),
@@ -130,6 +138,7 @@ impl Feature {
             Self::Sender(_) => SenderFeature::KIND,
             Self::Issuer(_) => IssuerFeature::KIND,
             Self::Metadata(_) => MetadataFeature::KIND,
+            Self::StateMetadata(_) => StateMetadataFeature::KIND,
             Self::Tag(_) => TagFeature::KIND,
             Self::NativeToken(_) => NativeTokenFeature::KIND,
             Self::BlockIssuer(_) => BlockIssuerFeature::KIND,
@@ -143,6 +152,7 @@ impl Feature {
             Self::Sender(_) => FeatureFlags::SENDER,
             Self::Issuer(_) => FeatureFlags::ISSUER,
             Self::Metadata(_) => FeatureFlags::METADATA,
+            Self::StateMetadata(_) => FeatureFlags::STATE_METADATA,
             Self::Tag(_) => FeatureFlags::TAG,
             Self::NativeToken(_) => FeatureFlags::NATIVE_TOKEN,
             Self::BlockIssuer(_) => FeatureFlags::BLOCK_ISSUER,
@@ -150,7 +160,7 @@ impl Feature {
         }
     }
 
-    crate::def_is_as_opt!(Feature: Sender, Issuer, Metadata, Tag, NativeToken, BlockIssuer, Staking);
+    crate::def_is_as_opt!(Feature: Sender, Issuer, Metadata, StateMetadata, Tag, NativeToken, BlockIssuer, Staking);
 }
 
 crate::create_bitflags!(
@@ -161,6 +171,7 @@ crate::create_bitflags!(
         (SENDER, SenderFeature),
         (ISSUER, IssuerFeature),
         (METADATA, MetadataFeature),
+        (STATE_METADATA, StateMetadataFeature),
         (TAG, TagFeature),
         (NATIVE_TOKEN, NativeTokenFeature),
         (BLOCK_ISSUER, BlockIssuerFeature),
@@ -251,6 +262,11 @@ impl Features {
         self.get(MetadataFeature::KIND).map(Feature::as_metadata)
     }
 
+    /// Gets a reference to a [`StateMetadataFeature`], if any.
+    pub fn state_metadata(&self) -> Option<&StateMetadataFeature> {
+        self.get(StateMetadataFeature::KIND).map(Feature::as_state_metadata)
+    }
+
     /// Gets a reference to a [`TagFeature`], if any.
     pub fn tag(&self) -> Option<&TagFeature> {
         self.get(TagFeature::KIND).map(Feature::as_tag)
@@ -314,6 +330,7 @@ mod test {
                 FeatureFlags::SENDER,
                 FeatureFlags::ISSUER,
                 FeatureFlags::METADATA,
+                FeatureFlags::STATE_METADATA,
                 FeatureFlags::TAG,
                 FeatureFlags::NATIVE_TOKEN,
                 FeatureFlags::BLOCK_ISSUER,

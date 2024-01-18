@@ -12,7 +12,8 @@ use rand::distributions::{Alphanumeric, DistString};
 use crate::types::block::{
     output::feature::{
         BlockIssuerFeature, BlockIssuerKey, BlockIssuerKeys, Ed25519BlockIssuerKey, Feature, FeatureFlags,
-        IssuerFeature, MetadataFeature, NativeTokenFeature, SenderFeature, StakingFeature, TagFeature,
+        IssuerFeature, MetadataFeature, NativeTokenFeature, SenderFeature, StakingFeature, StateMetadataFeature,
+        TagFeature,
     },
     rand::{
         address::rand_address,
@@ -33,8 +34,8 @@ pub fn rand_issuer_feature() -> IssuerFeature {
     IssuerFeature::new(rand_address())
 }
 
-/// Generates a random [`MetadataFeature`].
-pub fn rand_metadata_feature() -> MetadataFeature {
+/// Generates a random BTreeMap for metadata features.
+pub fn rand_metadata_map() -> BTreeMap<String, Vec<u8>> {
     let mut map = BTreeMap::new();
     // Starting at 1 for entries count bytes
     let mut total_size = 1;
@@ -86,7 +87,17 @@ pub fn rand_metadata_feature() -> MetadataFeature {
         map.insert(key.into(), bytes);
     }
 
-    MetadataFeature::new(map).unwrap()
+    map
+}
+
+/// Generates a random [`MetadataFeature`].
+pub fn rand_metadata_feature() -> MetadataFeature {
+    MetadataFeature::new(rand_metadata_map()).unwrap()
+}
+
+/// Generates a random [`StateMetadataFeature`].
+pub fn rand_state_metadata_feature() -> StateMetadataFeature {
+    StateMetadataFeature::new(rand_metadata_map()).unwrap()
 }
 
 /// Generates a random [`TagFeature`].
@@ -145,6 +156,7 @@ fn rand_feature_from_flag(flag: &FeatureFlags) -> Feature {
         FeatureFlags::SENDER => Feature::Sender(rand_sender_feature()),
         FeatureFlags::ISSUER => Feature::Issuer(rand_issuer_feature()),
         FeatureFlags::METADATA => Feature::Metadata(rand_metadata_feature()),
+        FeatureFlags::STATE_METADATA => Feature::StateMetadata(rand_state_metadata_feature()),
         FeatureFlags::TAG => Feature::Tag(rand_tag_feature()),
         FeatureFlags::NATIVE_TOKEN => Feature::NativeToken(rand_native_token_feature()),
         FeatureFlags::BLOCK_ISSUER => Feature::BlockIssuer(rand_block_issuer_feature()),
