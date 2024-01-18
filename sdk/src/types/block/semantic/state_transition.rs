@@ -109,7 +109,7 @@ impl SemanticValidationContext<'_> {
 
 impl BasicOutput {
     pub(crate) fn implicit_account_transition(
-        _current_state: &BasicOutput,
+        _current_state: &Self,
         next_state: &AccountOutput,
         context: &SemanticValidationContext<'_>,
     ) -> Result<(), StateTransitionError> {
@@ -118,7 +118,7 @@ impl BasicOutput {
             return Err(StateTransitionError::NonZeroCreatedId);
         }
 
-        if let Some(block_issuer) = next_state.features().block_issuer() {
+        if let Some(_block_issuer) = next_state.features().block_issuer() {
             // TODO https://github.com/iotaledger/iota-sdk/issues/1853
             // The Account must have a Block Issuer Feature and it must pass semantic validation as if the implicit
             // account contained a Block Issuer Feature with its Expiry Slot set to the maximum value of
