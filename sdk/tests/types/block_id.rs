@@ -75,7 +75,6 @@ fn protocol_parameters() -> ProtocolParameters {
     serde_json::from_value::<ProtocolParameters>(params_json.clone()).unwrap()
 }
 
-// FIXME: test vector out of date and test fails with different bytes and block id (also with the updated test vector)
 #[test]
 fn basic_block_tagged_data_payload_id() {
     // Test vector from https://github.com/iotaledger/tips/blob/tip46/tips/TIP-0046/tip-0046.md#basic-block-id-tagged-data-payload
@@ -88,10 +87,7 @@ fn basic_block_tagged_data_payload_id() {
 
     assert_eq!(prefix_hex::encode(&block_bytes), json["bytes"]);
     assert_eq!(block, Block::unpack_unverified(block_bytes).unwrap());
-    assert_eq!(
-        serde_json::Value::String(block.id(&protocol_parameters()).to_string()),
-        json["id"]
-    );
+    assert_eq!(block.id(&protocol_parameters()).to_string(), json["id"]);
 }
 
 // FIXME: fails with "cannot deserialize basic block body: data did not match any variant of untagged enum PayloadDto"
@@ -110,7 +106,6 @@ fn basic_block_transaction_payload_id() {
     assert_eq!(block.id(&protocol_parameters()).to_string(), json["id"]);
 }
 
-// FIXME: test vector out of date and test fails with different bytes and block id (also with the updated test vector)
 #[test]
 fn validation_block_id() {
     // Test vector from https://github.com/iotaledger/tips/blob/tip46/tips/TIP-0046/tip-0046.md#validation-block-id
