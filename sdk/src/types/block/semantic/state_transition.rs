@@ -117,6 +117,7 @@ impl SemanticValidationContext<'_> {
         }
 
         if let Some(block_issuer) = next_state.features().block_issuer() {
+            // TODO https://github.com/iotaledger/iota-sdk/issues/1853
             // The Account must have a Block Issuer Feature and it must pass semantic validation as if the implicit
             // account contained a Block Issuer Feature with its Expiry Slot set to the maximum value of
             // slot indices and the feature was transitioned.
