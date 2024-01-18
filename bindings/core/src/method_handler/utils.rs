@@ -1,4 +1,4 @@
-// Copyright 2023 IOTA Stiftung
+// Copyright 2024 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
 use crypto::keys::bip39::Mnemonic;
@@ -97,7 +97,7 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
             use iota_sdk::types::block::Error;
             let signature = Ed25519Signature::try_from(signature)?;
             let message: Vec<u8> = prefix_hex::decode(message)?;
-            Response::Bool(signature.verify(&message).map_err(Error::from)?)
+            Response::Bool(signature.try_verify(&message).map_err(Error::from)?)
         }
         UtilsMethod::VerifySecp256k1EcdsaSignature {
             public_key,

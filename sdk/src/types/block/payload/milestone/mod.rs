@@ -1,4 +1,4 @@
-// Copyright 2020-2021 IOTA Stiftung
+// Copyright 2024 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
 //! Module describing the milestone payload.
@@ -120,19 +120,19 @@ impl MilestonePayload {
         for (index, signature) in self.signatures().iter().enumerate() {
             let Signature::Ed25519(signature) = signature;
 
-            if !applicable_public_keys.contains(&hex::encode(signature.public_key())) {
+            if !applicable_public_keys.contains(&hex::encode(signature.public_key_bytes())) {
                 return Err(MilestoneValidationError::UnapplicablePublicKey(prefix_hex::encode(
-                    signature.public_key().as_ref(),
+                    signature.public_key_bytes().as_ref(),
                 )));
             }
 
             if !signature
-                .verify(&essence_hash)
+                .try_verify(&essence_hash)
                 .map_err(|e| MilestoneValidationError::Crypto(e))?
             {
                 return Err(MilestoneValidationError::InvalidSignature(
                     index,
-                    prefix_hex::encode(signature.public_key().as_ref()),
+                    prefix_hex::encode(signature.public_key_bytes().as_ref()),
                 ));
             }
         }
@@ -145,7 +145,7 @@ fn verify_signatures<const VERIFY: bool>(signatures: &[Signature]) -> Result<(),
     if VERIFY
         && !is_unique_sorted(signatures.iter().map(|signature| {
             let Signature::Ed25519(signature) = signature;
-            signature.public_key()
+            signature.public_key_bytes()
         }))
     {
         Err(Error::MilestoneSignaturesNotUniqueSorted)

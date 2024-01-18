@@ -1,11 +1,11 @@
-// Copyright 2020-2021 IOTA Stiftung
+// Copyright 2024 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
 use core::{fmt, ops::Deref};
 
 use crypto::{
     hashes::{blake2b::Blake2b256, Digest},
-    signatures::ed25519::{PublicKey, Signature},
+    signatures::ed25519::{PublicKey, PublicKeyBytes, Signature},
 };
 use packable::{
     error::{UnpackError, UnpackErrorExt},
@@ -19,7 +19,7 @@ use crate::types::block::{address::Ed25519Address, Error};
 /// An Ed25519 signature.
 #[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct Ed25519Signature {
-    public_key: [u8; Self::PUBLIC_KEY_LENGTH],
+    public_key: PublicKeyBytes,
     signature: Signature,
 }
 
@@ -31,29 +31,44 @@ impl Ed25519Signature {
     /// Length of an ED25519 signature.
     pub const SIGNATURE_LENGTH: usize = Signature::LENGTH;
 
-    /// Creates a new [`Ed25519Signature`].
+    /// Creates a new [`Ed25519Signature`] from a validated public key and signature.
     pub fn new(public_key: PublicKey, signature: Signature) -> Self {
         Self {
-            public_key: public_key.to_bytes(),
+            public_key: public_key.to_bytes().into(),
             signature,
         }
+    }
+
+    /// Creates a new [`Ed25519Signature`] from public key bytes and signature.
+    pub fn new_from_bytes(public_key: PublicKeyBytes, signature: Signature) -> Self {
+        Self { public_key, signature }
+    }
+
+    /// Creates a new [`Ed25519Signature`] from bytes.
+    #[deprecated(since = "1.1.4", note = "use Ed25519Signature::from_bytes instead")]
+    pub fn try_from_bytes(
+        public_key: [u8; Self::PUBLIC_KEY_LENGTH],
+        signature: [u8; Self::SIGNATURE_LENGTH],
+    ) -> Result<Self, Error> {
+        Ok(Self::from_bytes(public_key, signature))
     }
 
     /// Creates a new [`Ed25519Signature`] from bytes.
     pub fn from_bytes(public_key: [u8; Self::PUBLIC_KEY_LENGTH], signature: [u8; Self::SIGNATURE_LENGTH]) -> Self {
         Self {
-            public_key,
+            public_key: PublicKeyBytes::from_bytes(public_key),
             signature: Signature::from_bytes(signature),
         }
     }
 
-    /// Converts the public key bytes to a [`PublicKey`], if valid.
-    pub fn to_public_key(&self) -> Result<PublicKey, crypto::Error> {
-        Ok(PublicKey::try_from_bytes(self.public_key)?)
+    /// Returns the public key of an [`Ed25519Signature`].
+    #[deprecated(since = "1.1.4", note = "use Ed25519Signature::public_key_bytes instead")]
+    pub fn public_key(&self) -> &PublicKey {
+        panic!("deprecated method: use Ed25519Signature::public_key_bytes instead")
     }
 
     /// Returns the public key of an [`Ed25519Signature`].
-    pub fn public_key(&self) -> &[u8; Self::PUBLIC_KEY_LENGTH] {
+    pub fn public_key_bytes(&self) -> &PublicKeyBytes {
         &self.public_key
     }
 
@@ -62,8 +77,15 @@ impl Ed25519Signature {
         &self.signature
     }
 
-    pub fn verify(&self, message: &[u8]) -> Result<bool, crypto::Error> {
-        Ok(self.to_public_key()?.verify(&self.signature, message))
+    /// Verify a message using the signature.
+    #[deprecated(since = "1.1.4", note = "use Ed25519Signature::try_verify instead")]
+    pub fn verify(&self, message: &[u8]) -> bool {
+        self.public_key.verify(&self.signature, message).unwrap_or_default()
+    }
+
+    /// Verify a message using the signature.
+    pub fn try_verify(&self, message: &[u8]) -> Result<bool, crypto::Error> {
+        Ok(self.public_key.verify(&self.signature, message)?)
     }
 
     /// Verifies the [`Ed25519Signature`] for a message against an [`Ed25519Address`].
@@ -77,7 +99,7 @@ impl Ed25519Signature {
             });
         }
 
-        if !self.verify(message)? {
+        if !self.try_verify(message)? {
             return Err(Error::InvalidSignature);
         }
 
@@ -114,7 +136,7 @@ impl Packable for Ed25519Signature {
     type UnpackVisitor = ();
 
     fn pack<P: Packer>(&self, packer: &mut P) -> Result<(), P::Error> {
-        self.public_key.pack(packer)?;
+        self.public_key.to_bytes().pack(packer)?;
         self.signature.to_bytes().pack(packer)?;
 
         Ok(())
@@ -153,7 +175,7 @@ pub(crate) mod dto {
         fn from(value: &Ed25519Signature) -> Self {
             Self {
                 kind: Ed25519Signature::KIND,
-                public_key: prefix_hex::encode(&value.public_key),
+                public_key: prefix_hex::encode(value.public_key.as_slice()),
                 signature: prefix_hex::encode(value.signature.to_bytes()),
             }
         }

@@ -1,4 +1,4 @@
-// Copyright 2023 IOTA Stiftung
+// Copyright 2024 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
 //! In this example we will sign with Ed25519.
@@ -53,12 +53,13 @@ async fn main() -> Result<()> {
         .await?;
     println!(
         "Public key: {}\nSignature: {}",
-        prefix_hex::encode(signature.public_key()),
+        prefix_hex::encode(signature.public_key_bytes().as_ref()),
         prefix_hex::encode(signature.signature().to_bytes()),
     );
 
     // Hash the public key to get the address
-    let bech32_address = hex_public_key_to_bech32_address(&prefix_hex::encode(signature.public_key()), "rms")?;
+    let bech32_address =
+        hex_public_key_to_bech32_address(&prefix_hex::encode(signature.public_key_bytes().as_ref()), "rms")?;
     println!("Address: {bech32_address}");
 
     Ok(())
