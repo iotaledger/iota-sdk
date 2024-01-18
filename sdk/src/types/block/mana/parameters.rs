@@ -572,7 +572,10 @@ mod test {
 
     fn lower_bound_mana_decay(mana: u64, creation_slot: SlotIndex, target_slot: SlotIndex) -> f64 {
         mana_decay_float(mana as _, creation_slot, target_slot)
-            - (mana as f64 * 2f64.powi(-(params().mana_parameters().decay_factors_exponent() as i32)) + 1.0)
+            - (mana as f64).mul_add(
+                2f64.powi(-(params().mana_parameters().decay_factors_exponent() as i32)),
+                1.0,
+            )
     }
 
     fn upper_bound_mana_generation(amount: u64, creation_slot: SlotIndex, target_slot: SlotIndex) -> f64 {
@@ -585,13 +588,18 @@ mod test {
         let c = decay_per_epoch / (1.0 - decay_per_epoch);
 
         mana_generation_with_decay_float(amount as _, creation_slot, target_slot)
-            - (4.0
-                + amount as f64
-                    * params().mana_parameters().generation_rate() as f64
-                    * 2f64.powi(
-                        params().slots_per_epoch_exponent() as i32
-                            - params().mana_parameters().generation_rate_exponent() as i32,
-                    )
-                    * (1.0 + c * 2f64.powi(-(params().mana_parameters().decay_factors_exponent() as i32))))
+            - (amount as f64
+                * params().mana_parameters().generation_rate() as f64
+                * 2f64.powi(
+                    params().slots_per_epoch_exponent() as i32
+                        - params().mana_parameters().generation_rate_exponent() as i32,
+                ))
+            .mul_add(
+                c.mul_add(
+                    2f64.powi(-(params().mana_parameters().decay_factors_exponent() as i32)),
+                    1.0,
+                ),
+                4.0,
+            )
     }
 }

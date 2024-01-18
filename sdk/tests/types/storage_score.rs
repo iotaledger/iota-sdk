@@ -40,7 +40,7 @@ fn output_storage_score() {
         "tip54_anchor_output.json",
         "tip40_delegation_output.json",
     ] {
-        let fixture = output_fixture(filename).expect(&format!("failed to deserialize {filename}"));
+        let fixture = output_fixture(filename).unwrap_or_else(|_| panic!("failed to deserialize {filename}"));
 
         assert_eq!(
             fixture.output.storage_score(storage_score_parameters().unwrap()),
