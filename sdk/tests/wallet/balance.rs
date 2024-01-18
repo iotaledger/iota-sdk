@@ -259,46 +259,46 @@ async fn balance_transfer() -> Result<()> {
     Ok(())
 }
 
-#[ignore]
-#[tokio::test]
-#[cfg(feature = "participation")]
-async fn balance_voting_power() -> Result<()> {
-    let storage_path = "test-storage/balance_voting_power";
-    setup(storage_path)?;
+// #[ignore]
+// #[tokio::test]
+// #[cfg(feature = "participation")]
+// async fn balance_voting_power() -> Result<()> {
+//     let storage_path = "test-storage/balance_voting_power";
+//     setup(storage_path)?;
 
-    let wallet = make_wallet(storage_path, None, None).await?;
+//     let wallet = make_wallet(storage_path, None, None).await?;
 
-    request_funds(&wallet).await?;
+//     request_funds(&wallet).await?;
 
-    let faucet_amount = 100_000_000_000;
+//     let faucet_amount = 100_000_000_000;
 
-    let balance = wallet.balance().await?;
-    assert_eq!(balance.base_coin().total(), faucet_amount);
-    assert_eq!(balance.base_coin().available(), faucet_amount);
+//     let balance = wallet.balance().await?;
+//     assert_eq!(balance.base_coin().total(), faucet_amount);
+//     assert_eq!(balance.base_coin().available(), faucet_amount);
 
-    let voting_power = 1_000_000;
-    // Only use a part as voting power
-    let tx = wallet.increase_voting_power(voting_power).await?;
-    wallet
-        .reissue_transaction_until_included(&tx.transaction_id, None, None)
-        .await?;
-    let balance = wallet.sync(None).await?;
-    assert_eq!(balance.base_coin().total(), faucet_amount);
-    assert_eq!(balance.base_coin().available(), faucet_amount - voting_power);
-    let wallet_voting_power = wallet.get_voting_power().await?;
-    assert_eq!(wallet_voting_power, voting_power);
+//     let voting_power = 1_000_000;
+//     // Only use a part as voting power
+//     let tx = wallet.increase_voting_power(voting_power).await?;
+//     wallet
+//         .reissue_transaction_until_included(&tx.transaction_id, None, None)
+//         .await?;
+//     let balance = wallet.sync(None).await?;
+//     assert_eq!(balance.base_coin().total(), faucet_amount);
+//     assert_eq!(balance.base_coin().available(), faucet_amount - voting_power);
+//     let wallet_voting_power = wallet.get_voting_power().await?;
+//     assert_eq!(wallet_voting_power, voting_power);
 
-    // Increase voting power to total amount
-    let tx = wallet.increase_voting_power(faucet_amount - voting_power).await?;
-    wallet
-        .reissue_transaction_until_included(&tx.transaction_id, None, None)
-        .await?;
-    let balance = wallet.sync(None).await?;
-    assert_eq!(balance.base_coin().total(), faucet_amount);
-    assert_eq!(balance.base_coin().available(), 0);
-    let wallet_voting_power = wallet.get_voting_power().await?;
-    assert_eq!(wallet_voting_power, faucet_amount);
+//     // Increase voting power to total amount
+//     let tx = wallet.increase_voting_power(faucet_amount - voting_power).await?;
+//     wallet
+//         .reissue_transaction_until_included(&tx.transaction_id, None, None)
+//         .await?;
+//     let balance = wallet.sync(None).await?;
+//     assert_eq!(balance.base_coin().total(), faucet_amount);
+//     assert_eq!(balance.base_coin().available(), 0);
+//     let wallet_voting_power = wallet.get_voting_power().await?;
+//     assert_eq!(wallet_voting_power, faucet_amount);
 
-    tear_down(storage_path)?;
-    Ok(())
-}
+//     tear_down(storage_path)?;
+//     Ok(())
+// }

@@ -1,0 +1,39 @@
+{
+  "output": {
+    "type": 0,
+    "amount": "200000000",
+    "mana": "555000000",
+    "unlockConditions": [
+      {
+        "type": 0,
+        "address": {
+          "type": 0,
+          "pubKeyHash": "0xed1484f4d1f7d8c037087fed661dd92faccae1eed3c01182d6fdd6828cea144a"
+        }
+      },
+      {
+        "type": 2,
+        "slot": 999
+      }
+    ],
+    "features": [
+      {
+        "type": 2,
+        "entries": {
+          "iota": "0x322e30"
+        }
+      },
+      {
+        "type": 4,
+        "tag": "0x73746f726167655f73636f7265"
+      },
+      {
+        "type": 5,
+        "id": "0x083ef5555d65ba314fb1680147da0d54b08cecfd9a728bdcf5f1ebda1fedb9f852435d8d1000",
+        "amount": "0x2a"
+      }
+    ]
+  },
+  "bytes": "0x0000c2eb0b00000000c0a0142100000000020000ed1484f4d1f7d8c037087fed661dd92faccae1eed3c01182d6fdd6828cea144a02e703000003020104696f74610300322e30040d73746f726167655f73636f726505083ef5555d65ba314fb1680147da0d54b08cecfd9a728bdcf5f1ebda1fedb9f852435d8d10002a00000000000000000000000000000000000000000000000000000000000000",
+  "storage_score": 244
+}

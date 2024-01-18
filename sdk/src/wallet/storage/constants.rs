@@ -24,7 +24,7 @@ pub(crate) const WALLET_SYNC_OPTIONS: &str = "wallet-sync-options";
 
 pub(crate) const SECRET_MANAGER_KEY: &str = "secret-manager";
 
-#[cfg(feature = "participation")]
-pub(crate) const PARTICIPATION_EVENTS: &str = "participation-events";
-#[cfg(feature = "participation")]
-pub(crate) const PARTICIPATION_CACHED_OUTPUTS: &str = "participation-cached-outputs";
+// #[cfg(feature = "participation")]
+// pub(crate) const PARTICIPATION_EVENTS: &str = "participation-events";
+// #[cfg(feature = "participation")]
+// pub(crate) const PARTICIPATION_CACHED_OUTPUTS: &str = "participation-cached-outputs";
