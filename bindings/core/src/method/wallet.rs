@@ -8,12 +8,12 @@ use crypto::keys::bip44::Bip44;
 use derivative::Derivative;
 #[cfg(feature = "events")]
 use iota_sdk::wallet::events::types::{WalletEvent, WalletEventType};
-#[cfg(feature = "participation")]
-use iota_sdk::{
-    client::node_manager::node::Node,
-    types::api::plugins::participation::types::{ParticipationEventId, ParticipationEventType},
-    wallet::types::participation::ParticipationEventRegistrationOptions,
-};
+// #[cfg(feature = "participation")]
+// use iota_sdk::{
+//     client::node_manager::node::Node,
+//     types::api::plugins::participation::types::{ParticipationEventId, ParticipationEventType},
+//     wallet::types::participation::ParticipationEventRegistrationOptions,
+// };
 use iota_sdk::{
     client::{
         api::{input_selection::Burn, PreparedTransactionDataDto, SignedTransactionDataDto},
@@ -122,12 +122,12 @@ pub enum WalletMethod {
     /// Expected response: [`SentTransaction`](crate::Response::SentTransaction)
     #[serde(rename_all = "camelCase")]
     ClaimOutputs { output_ids_to_claim: Vec<OutputId> },
-    /// Removes a previously registered participation event from local storage.
-    /// Expected response: [`Ok`](crate::Response::Ok)
-    #[cfg(feature = "participation")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
-    #[serde(rename_all = "camelCase")]
-    DeregisterParticipationEvent { event_id: ParticipationEventId },
+    // /// Removes a previously registered participation event from local storage.
+    // /// Expected response: [`Ok`](crate::Response::Ok)
+    // #[cfg(feature = "participation")]
+    // #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
+    // #[serde(rename_all = "camelCase")]
+    // DeregisterParticipationEvent { event_id: ParticipationEventId },
     /// Get the wallet address.
     /// Expected response: [`Address`](crate::Response::Address)
     GetAddress,
@@ -147,48 +147,48 @@ pub enum WalletMethod {
     /// Expected response: [`OutputData`](crate::Response::OutputData)
     #[serde(rename_all = "camelCase")]
     GetOutput { output_id: OutputId },
-    /// Expected response: [`ParticipationEvent`](crate::Response::ParticipationEvent)
-    #[cfg(feature = "participation")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
-    #[serde(rename_all = "camelCase")]
-    GetParticipationEvent { event_id: ParticipationEventId },
-    /// Expected response: [`ParticipationEventIds`](crate::Response::ParticipationEventIds)
-    #[cfg(feature = "participation")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
-    #[serde(rename_all = "camelCase")]
-    GetParticipationEventIds {
-        node: Node,
-        event_type: Option<ParticipationEventType>,
-    },
-    /// Expected response:
-    /// [`ParticipationEventStatus`](crate::Response::ParticipationEventStatus)
-    #[cfg(feature = "participation")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
-    #[serde(rename_all = "camelCase")]
-    GetParticipationEventStatus { event_id: ParticipationEventId },
-    /// Expected response: [`ParticipationEvents`](crate::Response::ParticipationEvents)
-    #[cfg(feature = "participation")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
-    GetParticipationEvents,
-    /// Calculates a participation overview for the wallet. If event_ids are provided, only return outputs and tracked
-    /// participations for them.
-    /// Expected response: [`ParticipationOverview`](crate::Response::ParticipationOverview)
-    #[cfg(feature = "participation")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
-    #[serde(rename_all = "camelCase")]
-    GetParticipationOverview {
-        event_ids: Option<Vec<ParticipationEventId>>,
-    },
+    // /// Expected response: [`ParticipationEvent`](crate::Response::ParticipationEvent)
+    // #[cfg(feature = "participation")]
+    // #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
+    // #[serde(rename_all = "camelCase")]
+    // GetParticipationEvent { event_id: ParticipationEventId },
+    // /// Expected response: [`ParticipationEventIds`](crate::Response::ParticipationEventIds)
+    // #[cfg(feature = "participation")]
+    // #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
+    // #[serde(rename_all = "camelCase")]
+    // GetParticipationEventIds {
+    //     node: Node,
+    //     event_type: Option<ParticipationEventType>,
+    // },
+    // /// Expected response:
+    // /// [`ParticipationEventStatus`](crate::Response::ParticipationEventStatus)
+    // #[cfg(feature = "participation")]
+    // #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
+    // #[serde(rename_all = "camelCase")]
+    // GetParticipationEventStatus { event_id: ParticipationEventId },
+    // /// Expected response: [`ParticipationEvents`](crate::Response::ParticipationEvents)
+    // #[cfg(feature = "participation")]
+    // #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
+    // GetParticipationEvents,
+    // /// Calculates a participation overview for the wallet. If event_ids are provided, only return outputs and
+    // tracked /// participations for them.
+    // /// Expected response: [`ParticipationOverview`](crate::Response::ParticipationOverview)
+    // #[cfg(feature = "participation")]
+    // #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
+    // #[serde(rename_all = "camelCase")]
+    // GetParticipationOverview {
+    //     event_ids: Option<Vec<ParticipationEventId>>,
+    // },
     /// Get the [`TransactionWithMetadata`](iota_sdk::wallet::types::TransactionWithMetadata) of a transaction stored
     /// in the wallet.
     /// Expected response: [`Transaction`](crate::Response::Transaction)
     #[serde(rename_all = "camelCase")]
     GetTransaction { transaction_id: TransactionId },
-    /// Get the wallet's total voting power (voting or NOT voting).
-    /// Expected response: [`VotingPower`](crate::Response::VotingPower)
-    #[cfg(feature = "participation")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
-    GetVotingPower,
+    // /// Get the wallet's total voting power (voting or NOT voting).
+    // /// Expected response: [`VotingPower`](crate::Response::VotingPower)
+    // #[cfg(feature = "participation")]
+    // #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
+    // GetVotingPower,
     /// Returns the implicit account creation address of the wallet if it is Ed25519 based.
     /// Expected response: [`Bech32Address`](crate::Response::Bech32Address)
     ImplicitAccountCreationAddress,
@@ -246,26 +246,26 @@ pub enum WalletMethod {
         params: CreateNativeTokenParams,
         options: Option<TransactionOptions>,
     },
-    /// Reduces a wallet's "voting power" by a given amount.
-    /// This will stop voting, but the voting data isn't lost and calling `Vote` without parameters will revote.
-    /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
-    #[cfg(feature = "participation")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
-    PrepareDecreaseVotingPower {
-        #[serde(with = "iota_sdk::utils::serde::string")]
-        amount: u64,
-    },
-    /// Designates a given amount of tokens towards a wallet's "voting power" by creating a
-    /// special output, which is really a basic one with some metadata.
-    /// This will stop voting in most cases (if there is a remainder output), but the voting data isn't lost and
-    /// calling `Vote` without parameters will revote. Expected response:
-    /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
-    #[cfg(feature = "participation")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
-    PrepareIncreaseVotingPower {
-        #[serde(with = "iota_sdk::utils::serde::string")]
-        amount: u64,
-    },
+    // /// Reduces a wallet's "voting power" by a given amount.
+    // /// This will stop voting, but the voting data isn't lost and calling `Vote` without parameters will revote.
+    // /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
+    // #[cfg(feature = "participation")]
+    // #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
+    // PrepareDecreaseVotingPower {
+    //     #[serde(with = "iota_sdk::utils::serde::string")]
+    //     amount: u64,
+    // },
+    // /// Designates a given amount of tokens towards a wallet's "voting power" by creating a
+    // /// special output, which is really a basic one with some metadata.
+    // /// This will stop voting in most cases (if there is a remainder output), but the voting data isn't lost and
+    // /// calling `Vote` without parameters will revote. Expected response:
+    // /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
+    // #[cfg(feature = "participation")]
+    // #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
+    // PrepareIncreaseVotingPower {
+    //     #[serde(with = "iota_sdk::utils::serde::string")]
+    //     amount: u64,
+    // },
     /// Prepare to melt native tokens. This happens with the foundry output which minted them, by increasing it's
     /// `melted_tokens` field.
     /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
@@ -318,36 +318,36 @@ pub enum WalletMethod {
         params: Vec<SendNftParams>,
         options: Option<TransactionOptions>,
     },
-    /// Stop participating for an event.
-    /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
-    #[cfg(feature = "participation")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
-    #[serde(rename_all = "camelCase")]
-    PrepareStopParticipating { event_id: ParticipationEventId },
+    // /// Stop participating for an event.
+    // /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
+    // #[cfg(feature = "participation")]
+    // #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
+    // #[serde(rename_all = "camelCase")]
+    // PrepareStopParticipating { event_id: ParticipationEventId },
     /// Prepare transaction.
     /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
     PrepareTransaction {
         outputs: Vec<Output>,
         options: Option<TransactionOptions>,
     },
-    /// Vote for a participation event.
-    /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
-    #[cfg(feature = "participation")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
-    #[serde(rename_all = "camelCase")]
-    PrepareVote {
-        event_id: Option<ParticipationEventId>,
-        answers: Option<Vec<u8>>,
-    },
-    /// Stores participation information locally and returns the event.
-    ///
-    /// This will NOT store the node url and auth inside the client options.
-    /// Expected response: [`ParticipationEvents`](crate::Response::ParticipationEvents)
-    #[cfg(feature = "participation")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
-    RegisterParticipationEvents {
-        options: ParticipationEventRegistrationOptions,
-    },
+    // /// Vote for a participation event.
+    // /// Expected response: [`PreparedTransaction`](crate::Response::PreparedTransaction)
+    // #[cfg(feature = "participation")]
+    // #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
+    // #[serde(rename_all = "camelCase")]
+    // PrepareVote {
+    //     event_id: Option<ParticipationEventId>,
+    //     answers: Option<Vec<u8>>,
+    // },
+    // /// Stores participation information locally and returns the event.
+    // ///
+    // /// This will NOT store the node url and auth inside the client options.
+    // /// Expected response: [`ParticipationEvents`](crate::Response::ParticipationEvents)
+    // #[cfg(feature = "participation")]
+    // #[cfg_attr(docsrs, doc(cfg(feature = "participation")))]
+    // RegisterParticipationEvents {
+    //     options: ParticipationEventRegistrationOptions,
+    // },
     /// Reissues a transaction sent from the wallet for a provided transaction id until it's
     /// included (referenced by a milestone). Returns the included block id.
     /// Expected response: [`BlockId`](crate::Response::BlockId)

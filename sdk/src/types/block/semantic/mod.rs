@@ -101,6 +101,8 @@ impl<'a> SemanticValidationContext<'a> {
     ///
     pub fn validate(mut self) -> Result<Option<TransactionFailureReason>, Error> {
         // Validation of inputs.
+        let mut has_implicit_account_creation_address = false;
+
         for (index, (output_id, consumed_output)) in self.inputs.iter().enumerate() {
             let (amount, consumed_native_token, unlock_conditions) = match consumed_output {
                 Output::Basic(output) => (output.amount(), output.native_token(), output.unlock_conditions()),
@@ -110,6 +112,14 @@ impl<'a> SemanticValidationContext<'a> {
                 Output::Nft(output) => (output.amount(), None, output.unlock_conditions()),
                 Output::Delegation(output) => (output.amount(), None, output.unlock_conditions()),
             };
+
+            if unlock_conditions.addresses().any(Address::is_implicit_account_creation) {
+                if has_implicit_account_creation_address {
+                    return Ok(Some(TransactionFailureReason::SemanticValidationFailed));
+                } else {
+                    has_implicit_account_creation_address = true;
+                }
+            }
 
             let commitment_slot_index = self
                 .transaction

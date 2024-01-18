@@ -221,10 +221,7 @@ fn build_inputs<'a>(
         .into_iter()
         .map(|build| {
             let (output, chain) = build_output_inner(build);
-            let transaction_id = slot_index.map_or_else(
-                || rand_transaction_id(),
-                |index| rand_transaction_id_with_slot_index(index),
-            );
+            let transaction_id = slot_index.map_or_else(rand_transaction_id, rand_transaction_id_with_slot_index);
 
             InputSigningData {
                 output,

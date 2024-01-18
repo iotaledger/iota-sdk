@@ -167,10 +167,10 @@ impl InputSelection {
 
             if let Some(index) = index {
                 self.outputs[index] = match &self.outputs[index] {
-                    Output::Account(output) => AccountOutputBuilder::from(&*output)
+                    Output::Account(output) => AccountOutputBuilder::from(output)
                         .with_mana(output.mana() + mana_diff)
                         .finish_output()?,
-                    Output::Nft(output) => NftOutputBuilder::from(&*output)
+                    Output::Nft(output) => NftOutputBuilder::from(output)
                         .with_mana(output.mana() + mana_diff)
                         .finish_output()?,
                     _ => panic!("only account, nft can be automatically created and can hold mana"),

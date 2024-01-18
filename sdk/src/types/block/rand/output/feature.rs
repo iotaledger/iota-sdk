@@ -1,7 +1,13 @@
 // Copyright 2021 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use alloc::{collections::BTreeSet, vec::Vec};
+use alloc::{
+    collections::{BTreeMap, BTreeSet},
+    vec::Vec,
+};
+use core::ops::Range;
+
+use rand::distributions::{Alphanumeric, DistString};
 
 use crate::types::block::{
     output::feature::{
@@ -29,8 +35,58 @@ pub fn rand_issuer_feature() -> IssuerFeature {
 
 /// Generates a random [`MetadataFeature`].
 pub fn rand_metadata_feature() -> MetadataFeature {
-    let bytes = rand_bytes(rand_number_range(MetadataFeature::LENGTH_RANGE) as usize);
-    MetadataFeature::new(bytes).unwrap()
+    let mut map = BTreeMap::new();
+    // Starting at 1 for entries count bytes
+    let mut total_size = 1;
+    let max_size = *MetadataFeature::BYTE_LENGTH_RANGE.end() as usize;
+    let key_prefix_length = 1;
+    let value_prefix_length = 2;
+
+    for _ in 0..10 {
+        // +1 since min key size is 1
+        if total_size > (max_size - (key_prefix_length + value_prefix_length + 1)) {
+            break;
+        }
+
+        // Key length
+        total_size += key_prefix_length;
+        let max_val = if max_size - total_size - value_prefix_length < u8::MAX as usize {
+            max_size - total_size - value_prefix_length
+        } else {
+            u8::MAX.into()
+        };
+
+        let key = if max_val == 1 {
+            "a".to_string()
+        } else {
+            Alphanumeric.sample_string(
+                &mut rand::thread_rng(),
+                rand_number_range(Range { start: 1, end: max_val }),
+            )
+        };
+        total_size += key.as_bytes().len();
+
+        if total_size > max_size - value_prefix_length {
+            // println!("breaking before adding more");
+            break;
+        }
+
+        // Value length
+        total_size += value_prefix_length;
+        let bytes = if max_size - total_size == 0 {
+            vec![]
+        } else {
+            rand_bytes(rand_number_range(Range {
+                start: 0,
+                end: max_size - total_size,
+            }))
+        };
+        total_size += bytes.len();
+
+        map.insert(key, bytes);
+    }
+
+    MetadataFeature::new(map).unwrap()
 }
 
 /// Generates a random [`TagFeature`].

@@ -138,11 +138,11 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
             let transaction = wallet.claim_outputs(output_ids_to_claim.to_vec()).await?;
             Response::SentTransaction(TransactionWithMetadataDto::from(&transaction))
         }
-        #[cfg(feature = "participation")]
-        WalletMethod::DeregisterParticipationEvent { event_id } => {
-            wallet.deregister_participation_event(&event_id).await?;
-            Response::Ok
-        }
+        // #[cfg(feature = "participation")]
+        // WalletMethod::DeregisterParticipationEvent { event_id } => {
+        //     wallet.deregister_participation_event(&event_id).await?;
+        //     Response::Ok
+        // }
         WalletMethod::GetAddress => {
             let address = wallet.address().await;
             Response::Address(address)
@@ -163,31 +163,31 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
         WalletMethod::GetOutput { output_id } => {
             Response::OutputData(wallet.data().await.get_output(&output_id).cloned().map(Box::new))
         }
-        #[cfg(feature = "participation")]
-        WalletMethod::GetParticipationEvent { event_id } => {
-            let event_and_nodes = wallet.get_participation_event(event_id).await?;
-            Response::ParticipationEvent(event_and_nodes)
-        }
-        #[cfg(feature = "participation")]
-        WalletMethod::GetParticipationEventIds { node, event_type } => {
-            let event_ids = wallet.get_participation_event_ids(&node, event_type).await?;
-            Response::ParticipationEventIds(event_ids)
-        }
-        #[cfg(feature = "participation")]
-        WalletMethod::GetParticipationEventStatus { event_id } => {
-            let event_status = wallet.get_participation_event_status(&event_id).await?;
-            Response::ParticipationEventStatus(event_status)
-        }
-        #[cfg(feature = "participation")]
-        WalletMethod::GetParticipationEvents => {
-            let events = wallet.get_participation_events().await?;
-            Response::ParticipationEvents(events)
-        }
-        #[cfg(feature = "participation")]
-        WalletMethod::GetParticipationOverview { event_ids } => {
-            let overview = wallet.get_participation_overview(event_ids).await?;
-            Response::ParticipationOverview(overview)
-        }
+        // #[cfg(feature = "participation")]
+        // WalletMethod::GetParticipationEvent { event_id } => {
+        //     let event_and_nodes = wallet.get_participation_event(event_id).await?;
+        //     Response::ParticipationEvent(event_and_nodes)
+        // }
+        // #[cfg(feature = "participation")]
+        // WalletMethod::GetParticipationEventIds { node, event_type } => {
+        //     let event_ids = wallet.get_participation_event_ids(&node, event_type).await?;
+        //     Response::ParticipationEventIds(event_ids)
+        // }
+        // #[cfg(feature = "participation")]
+        // WalletMethod::GetParticipationEventStatus { event_id } => {
+        //     let event_status = wallet.get_participation_event_status(&event_id).await?;
+        //     Response::ParticipationEventStatus(event_status)
+        // }
+        // #[cfg(feature = "participation")]
+        // WalletMethod::GetParticipationEvents => {
+        //     let events = wallet.get_participation_events().await?;
+        //     Response::ParticipationEvents(events)
+        // }
+        // #[cfg(feature = "participation")]
+        // WalletMethod::GetParticipationOverview { event_ids } => {
+        //     let overview = wallet.get_participation_overview(event_ids).await?;
+        //     Response::ParticipationOverview(overview)
+        // }
         WalletMethod::GetTransaction { transaction_id } => Response::Transaction(
             wallet
                 .data()
@@ -196,11 +196,11 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
                 .map(TransactionWithMetadataDto::from)
                 .map(Box::new),
         ),
-        #[cfg(feature = "participation")]
-        WalletMethod::GetVotingPower => {
-            let voting_power = wallet.get_voting_power().await?;
-            Response::VotingPower(voting_power.to_string())
-        }
+        // #[cfg(feature = "participation")]
+        // WalletMethod::GetVotingPower => {
+        //     let voting_power = wallet.get_voting_power().await?;
+        //     Response::VotingPower(voting_power.to_string())
+        // }
         WalletMethod::ImplicitAccountCreationAddress => {
             let implicit_account_creation_address = wallet.implicit_account_creation_address().await?;
             Response::Bech32Address(implicit_account_creation_address)
@@ -273,11 +273,11 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
             let data = wallet.prepare_melt_native_token(token_id, melt_amount, options).await?;
             Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
         }
-        #[cfg(feature = "participation")]
-        WalletMethod::PrepareDecreaseVotingPower { amount } => {
-            let data = wallet.prepare_decrease_voting_power(amount).await?;
-            Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
-        }
+        // #[cfg(feature = "participation")]
+        // WalletMethod::PrepareDecreaseVotingPower { amount } => {
+        //     let data = wallet.prepare_decrease_voting_power(amount).await?;
+        //     Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
+        // }
         WalletMethod::PrepareMintNativeToken {
             token_id,
             mint_amount,
@@ -286,11 +286,11 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
             let data = wallet.prepare_mint_native_token(token_id, mint_amount, options).await?;
             Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
         }
-        #[cfg(feature = "participation")]
-        WalletMethod::PrepareIncreaseVotingPower { amount } => {
-            let data = wallet.prepare_increase_voting_power(amount).await?;
-            Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
-        }
+        // #[cfg(feature = "participation")]
+        // WalletMethod::PrepareIncreaseVotingPower { amount } => {
+        //     let data = wallet.prepare_increase_voting_power(amount).await?;
+        //     Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
+        // }
         WalletMethod::PrepareMintNfts { params, options } => {
             let data = wallet.prepare_mint_nfts(params, options).await?;
             Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
@@ -318,25 +318,25 @@ pub(crate) async fn call_wallet_method_internal(wallet: &Wallet, method: WalletM
             let data = wallet.prepare_send_nft(params.clone(), options).await?;
             Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
         }
-        #[cfg(feature = "participation")]
-        WalletMethod::PrepareStopParticipating { event_id } => {
-            let data = wallet.prepare_stop_participating(event_id).await?;
-            Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
-        }
+        // #[cfg(feature = "participation")]
+        // WalletMethod::PrepareStopParticipating { event_id } => {
+        //     let data = wallet.prepare_stop_participating(event_id).await?;
+        //     Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
+        // }
         WalletMethod::PrepareTransaction { outputs, options } => {
             let data = wallet.prepare_transaction(outputs, options).await?;
             Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
         }
-        #[cfg(feature = "participation")]
-        WalletMethod::PrepareVote { event_id, answers } => {
-            let data = wallet.prepare_vote(event_id, answers).await?;
-            Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
-        }
-        #[cfg(feature = "participation")]
-        WalletMethod::RegisterParticipationEvents { options } => {
-            let events = wallet.register_participation_events(&options).await?;
-            Response::ParticipationEvents(events)
-        }
+        // #[cfg(feature = "participation")]
+        // WalletMethod::PrepareVote { event_id, answers } => {
+        //     let data = wallet.prepare_vote(event_id, answers).await?;
+        //     Response::PreparedTransaction(PreparedTransactionDataDto::from(&data))
+        // }
+        // #[cfg(feature = "participation")]
+        // WalletMethod::RegisterParticipationEvents { options } => {
+        //     let events = wallet.register_participation_events(&options).await?;
+        //     Response::ParticipationEvents(events)
+        // }
         WalletMethod::ReissueTransactionUntilIncluded {
             transaction_id,
             interval,
