@@ -23,8 +23,8 @@ use iota_sdk::{
     },
 };
 
-const KEY: &'static str = "Hello";
-const METADATA: &'static [u8; 6] = b"World!";
+const KEY: &str = "Hello";
+const METADATA: &[u8; 6] = b"World!";
 
 #[tokio::main]
 async fn main() -> Result<()> {
