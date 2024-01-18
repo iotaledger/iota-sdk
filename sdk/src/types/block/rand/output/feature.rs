@@ -44,7 +44,7 @@ pub fn rand_metadata_feature() -> MetadataFeature {
 
     for _ in 0..10 {
         // +1 since min key size is 1
-        if total_size > (max_size - (key_prefix_length + value_prefix_length + 1)) as usize {
+        if total_size > (max_size - (key_prefix_length + value_prefix_length + 1)) {
             break;
         }
 
@@ -83,7 +83,7 @@ pub fn rand_metadata_feature() -> MetadataFeature {
         };
         total_size += bytes.len();
 
-        map.insert(key.into(), bytes);
+        map.insert(key, bytes);
     }
 
     MetadataFeature::new(map).unwrap()
