@@ -33,7 +33,7 @@ pub use self::{
     native_token::NativeTokenFeature,
     sender::SenderFeature,
     staking::StakingFeature,
-    state_metadata::StateMetadataFeature,
+    state_metadata::{StateMetadataFeature, StateMetadataFeatureMap},
     tag::TagFeature,
 };
 use crate::types::block::{
