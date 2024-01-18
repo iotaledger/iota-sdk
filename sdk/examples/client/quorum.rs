@@ -24,7 +24,7 @@ async fn main() -> Result<()> {
     dotenvy::dotenv().ok();
 
     for var in ["MNEMONIC"] {
-        std::env::var(var).unwrap_or_else(|_| panic!(".env variable '{var}' is undefined, see .env.example"));
+        std::env::var(var).expect(&format!(".env variable '{var}' is undefined, see .env.example"));
     }
 
     let node_1 = std::env::args().nth(1).expect("missing example argument: NODE 1");

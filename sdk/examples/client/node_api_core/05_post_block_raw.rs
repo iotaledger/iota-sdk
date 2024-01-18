@@ -16,7 +16,7 @@ async fn main() -> Result<()> {
     dotenvy::dotenv().ok();
 
     for var in ["EXPLORER_URL"] {
-        std::env::var(var).unwrap_or_else(|_| panic!(".env variable '{var}' is undefined, see .env.example"));
+        std::env::var(var).expect(&format!(".env variable '{var}' is undefined, see .env.example"));
     }
 
     // Take the node URL from command line argument or use one from env as default.
