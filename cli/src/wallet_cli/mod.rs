@@ -757,10 +757,8 @@ pub async fn mint_native_token_command(wallet: &Wallet, token_id: String, amount
 pub async fn mint_nft_command(
     wallet: &Wallet,
     address: Option<Bech32Address>,
-    immutable_metadata_key: String,
-    immutable_metadata: Option<Vec<u8>>,
-    metadata_key: String,
-    metadata: Option<Vec<u8>>,
+    metadata: Option<(String, Vec<u8>)>,
+    immutable_metadata: Option<(String, Vec<u8>)>,
     tag: Option<String>,
     sender: Option<Bech32Address>,
     issuer: Option<Bech32Address>,
@@ -778,11 +776,10 @@ pub async fn mint_nft_command(
         .with_issuer(issuer);
 
     if let Some(metadata) = metadata {
-        nft_options = nft_options.with_metadata(MetadataFeature::new([(metadata_key, metadata)])?);
+        nft_options = nft_options.with_metadata(MetadataFeature::new([metadata])?);
     }
     if let Some(immutable_metadata) = immutable_metadata {
-        nft_options =
-            nft_options.with_immutable_metadata(MetadataFeature::new([(immutable_metadata_key, immutable_metadata)])?);
+        nft_options = nft_options.with_immutable_metadata(MetadataFeature::new([immutable_metadata])?);
     }
 
     let transaction = wallet.mint_nfts([nft_options], None).await?;
@@ -1290,10 +1287,12 @@ pub async fn prompt_internal(
                             mint_nft_command(
                                 wallet,
                                 address,
-                                immutable_metadata_key,
-                                bytes_from_hex_or_file(immutable_metadata_hex, immutable_metadata_file).await?,
-                                metadata_key,
-                                bytes_from_hex_or_file(metadata_hex, metadata_file).await?,
+                                bytes_from_hex_or_file(metadata_hex, metadata_file)
+                                    .await?
+                                    .map(|value| (metadata_key, value)),
+                                bytes_from_hex_or_file(immutable_metadata_hex, immutable_metadata_file)
+                                    .await?
+                                    .map(|value| (immutable_metadata_key, value)),
                                 tag,
                                 sender,
                                 issuer,
