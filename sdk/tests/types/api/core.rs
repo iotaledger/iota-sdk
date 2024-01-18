@@ -3,8 +3,8 @@
 
 use iota_sdk::types::{
     api::core::{
-        CommitteeResponse, CongestionResponse, InfoResponse, IssuanceBlockHeaderResponse, ManaRewardsResponse,
-        RoutesResponse, UtxoChangesResponse, ValidatorResponse, ValidatorsResponse,
+        BlockMetadataResponse, CommitteeResponse, CongestionResponse, InfoResponse, IssuanceBlockHeaderResponse,
+        ManaRewardsResponse, RoutesResponse, UtxoChangesResponse, ValidatorResponse, ValidatorsResponse,
     },
     block::{
         output::{OutputMetadata, OutputWithMetadata},
@@ -66,11 +66,11 @@ fn responses() {
     // json_response::<BlockDto>("transaction-block-example.json").unwrap();
     json_response::<BlockDto>("get-block-by-id-validation-response-example.json").unwrap();
     // GET /api/core/v3/blocks/{blockId}/metadata
-    // json_response::<BlockDto>("get-block-by-id-response-example-new-transaction.json").unwrap();
-    // json_response::<BlockDto>("get-block-by-id-response-example-new.json").unwrap();
-    // json_response::<BlockDto>("get-block-by-id-response-example-confirmed-transaction.json").unwrap();
-    // json_response::<BlockDto>("get-block-by-id-response-example-confirmed.json").unwrap();
-    // json_response::<BlockDto>("get-block-by-id-response-example-conflicting-transaction.json").unwrap();
+    // json_response::<BlockMetadataResponse>("get-block-by-id-response-example-new-transaction.json").unwrap();
+    // json_response::<BlockMetadataResponse>("get-block-by-id-response-example-new.json").unwrap();
+    // json_response::<BlockMetadataResponse>("get-block-by-id-response-example-confirmed-transaction.json").unwrap();
+    // json_response::<BlockMetadataResponse>("get-block-by-id-response-example-confirmed.json").unwrap();
+    // json_response::<BlockMetadataResponse>("get-block-by-id-response-example-conflicting-transaction.json").unwrap();
     // GET /api/core/v3/blocks/{blockId}/full
     // TODO ?
     // GET /api/core/v3/outputs/{outputId}
