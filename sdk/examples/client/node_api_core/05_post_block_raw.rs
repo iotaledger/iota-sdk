@@ -15,7 +15,6 @@ async fn main() -> Result<()> {
     // If not provided we use the default node from the `.env` file.
     dotenvy::dotenv().ok();
 
-    #[allow(clippy::single_element_loop)]
     for var in ["EXPLORER_URL"] {
         std::env::var(var).unwrap_or_else(|_| panic!(".env variable '{var}' is undefined, see .env.example"));
     }
