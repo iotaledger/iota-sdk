@@ -77,7 +77,7 @@ impl SemanticValidationContext<'_> {
             // Transitions.
             (Some(Output::Basic(current_state)), Some(Output::Account(next_state))) => {
                 if current_state.is_implicit_account() {
-                    AccountOutput::implicit_account_transition(current_state, next_state)
+                    BasicOutput::implicit_account_transition(current_state, next_state, self)
                 } else {
                     Err(StateTransitionError::UnsupportedStateTransition)
                 }
@@ -105,11 +105,13 @@ impl SemanticValidationContext<'_> {
             _ => Err(StateTransitionError::UnsupportedStateTransition),
         }
     }
+}
 
+impl BasicOutput {
     pub(crate) fn implicit_account_transition(
-        &self,
         _current_state: &BasicOutput,
         next_state: &AccountOutput,
+        context: &SemanticValidationContext<'_>,
     ) -> Result<(), StateTransitionError> {
         if next_state.account_id().is_null() {
             // TODO
@@ -126,7 +128,7 @@ impl SemanticValidationContext<'_> {
         }
 
         if let Some(issuer) = next_state.immutable_features().issuer() {
-            if !self.unlocked_addresses.contains(issuer.address()) {
+            if !context.unlocked_addresses.contains(issuer.address()) {
                 return Err(StateTransitionError::IssuerNotUnlocked);
             }
         }
