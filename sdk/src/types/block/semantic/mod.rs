@@ -115,7 +115,7 @@ impl<'a> SemanticValidationContext<'a> {
 
             if unlock_conditions.addresses().any(Address::is_implicit_account_creation) {
                 if has_implicit_account_creation_address {
-                    // TODO which error?
+                    return Ok(Some(TransactionFailureReason::SemanticValidationFailed));
                 } else {
                     has_implicit_account_creation_address = true;
                 }
