@@ -25,9 +25,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `Ed25519Signature` methods `new_from_bytes`, `public_key_bytes`, `from_bytes`, `try_verify`;
 
-### Changed
+### Deprecated
 
-- Deprecated `Ed25519Signature` methods `public_key`, `try_from_bytes`, `verify`;
+- `Ed25519Signature` methods `public_key`, `try_from_bytes`, `verify`;
 
 ### Fixed
 
