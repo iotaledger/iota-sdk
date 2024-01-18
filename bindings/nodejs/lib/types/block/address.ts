@@ -91,11 +91,11 @@ class Ed25519Address extends Address {
     readonly pubKeyHash: HexEncodedString;
 
     /**
-     * @param address An Ed25519 address as hex-encoded string.
+     * @param pubKeyHash BLAKE2b-256 hash of an Ed25519 public key as hex-encoded string.
      */
-    constructor(address: HexEncodedString) {
+    constructor(pubKeyHash: HexEncodedString) {
         super(AddressType.Ed25519);
-        this.pubKeyHash = address;
+        this.pubKeyHash = pubKeyHash;
     }
 
     toString(): string {
@@ -172,11 +172,11 @@ class AnchorAddress extends Address {
 class ImplicitAccountCreationAddress extends Address {
     private pubKeyHash: HexEncodedString;
     /**
-     * @param address An Ed25519 address.
+     * @param pubKeyHash BLAKE2b-256 hash of an Ed25519 public key as hex-encoded string.
      */
-    constructor(address: Ed25519Address) {
+    constructor(pubKeyHash: HexEncodedString) {
         super(AddressType.ImplicitAccountCreation);
-        this.pubKeyHash = address.pubKeyHash;
+        this.pubKeyHash = pubKeyHash;
     }
 
     address(): Ed25519Address {

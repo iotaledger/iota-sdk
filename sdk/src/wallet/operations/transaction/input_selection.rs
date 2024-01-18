@@ -94,6 +94,7 @@ where
                 available_outputs_signing_data,
                 outputs,
                 Some(wallet_data.address.clone().into_inner()),
+                slot_index,
                 protocol_parameters.clone(),
             )
             .with_required_inputs(custom_inputs)
@@ -133,6 +134,7 @@ where
                 available_outputs_signing_data,
                 outputs,
                 Some(wallet_data.address.clone().into_inner()),
+                slot_index,
                 protocol_parameters.clone(),
             )
             .with_required_inputs(mandatory_inputs)
@@ -169,6 +171,7 @@ where
             available_outputs_signing_data,
             outputs,
             Some(wallet_data.address.clone().into_inner()),
+            slot_index,
             protocol_parameters.clone(),
         )
         .with_forbidden_inputs(forbidden_inputs);

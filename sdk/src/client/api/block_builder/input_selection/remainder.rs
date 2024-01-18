@@ -14,7 +14,11 @@ use crate::{
     client::api::RemainderData,
     types::block::{
         address::{Address, Ed25519Address},
-        output::{unlock_condition::AddressUnlockCondition, BasicOutputBuilder, NativeTokensBuilder, Output},
+        output::{
+            unlock_condition::AddressUnlockCondition, AccountOutputBuilder, BasicOutputBuilder, NativeTokensBuilder,
+            NftOutputBuilder, Output,
+        },
+        Error as BlockError,
     },
 };
 
@@ -73,17 +77,18 @@ impl InputSelection {
                 ))));
 
         // TODO https://github.com/iotaledger/iota-sdk/issues/1631
-        // if let Some(native_tokens) = native_tokens_diff {
-        //     remainder_builder = remainder_builder.with_native_tokens(native_tokens);
-        // }
+        // TODO Only putting one in remainder atm so we can at least create foundries
+        if let Some(native_tokens) = native_tokens_diff {
+            remainder_builder = remainder_builder.with_native_token(*native_tokens.first().unwrap());
+        }
 
         Ok((remainder_builder.finish_output()?.amount(), native_tokens_remainder))
     }
 
     pub(crate) fn remainder_and_storage_deposit_return_outputs(
-        &self,
+        &mut self,
     ) -> Result<(Option<RemainderData>, Vec<Output>), Error> {
-        let (inputs_sum, outputs_sum, inputs_sdr, outputs_sdr) =
+        let (input_amount, output_amount, inputs_sdr, outputs_sdr) =
             amount_sums(&self.selected_inputs, &self.outputs, self.slot_index);
         let mut storage_deposit_returns = Vec::new();
 
@@ -118,30 +123,82 @@ impl InputSelection {
 
         let native_tokens_diff = get_native_tokens_diff(&input_native_tokens, &output_native_tokens)?;
 
-        if inputs_sum == outputs_sum && native_tokens_diff.is_none() {
+        let mut input_mana = 0;
+
+        for input in &self.selected_inputs {
+            input_mana += input.output.available_mana(
+                &self.protocol_parameters,
+                input.output_id().transaction_id().slot_index(),
+                self.slot_index,
+            )?;
+            // TODO rewards https://github.com/iotaledger/iota-sdk/issues/1310
+        }
+
+        let output_mana = self.outputs.iter().map(|o| o.mana()).sum::<u64>() + self.mana_allotments;
+
+        if input_amount == output_amount && input_mana == output_mana && native_tokens_diff.is_none() {
             log::debug!("No remainder required");
             return Ok((None, storage_deposit_returns));
+        }
+
+        let amount_diff = input_amount
+            .checked_sub(output_amount)
+            .ok_or(BlockError::ConsumedAmountOverflow)?;
+        let mana_diff = input_mana
+            .checked_sub(output_mana)
+            .ok_or(BlockError::ConsumedManaOverflow)?;
+
+        // If there is only a mana remainder, try to fit it in an automatically transitioned output.
+        if input_amount == output_amount && input_mana != output_mana && native_tokens_diff.is_none() {
+            let filter = |output: &Output| {
+                output
+                    .chain_id()
+                    .as_ref()
+                    .map(|chain_id| self.automatically_transitioned.contains(chain_id))
+                    .unwrap_or(false)
+                    // Foundries can't hold mana so they are not considered here.
+                    && !output.is_foundry()
+            };
+            let index = self
+                .outputs
+                .iter()
+                .position(|output| filter(output) && output.is_account())
+                .or_else(|| self.outputs.iter().position(filter));
+
+            if let Some(index) = index {
+                self.outputs[index] = match &self.outputs[index] {
+                    Output::Account(output) => AccountOutputBuilder::from(output)
+                        .with_mana(output.mana() + mana_diff)
+                        .finish_output()?,
+                    Output::Nft(output) => NftOutputBuilder::from(output)
+                        .with_mana(output.mana() + mana_diff)
+                        .finish_output()?,
+                    _ => panic!("only account, nft can be automatically created and can hold mana"),
+                };
+
+                return Ok((None, storage_deposit_returns));
+            }
         }
 
         let Some((remainder_address, chain)) = self.get_remainder_address()? else {
             return Err(Error::MissingInputWithEd25519Address);
         };
 
-        let diff = inputs_sum - outputs_sum;
-        let mut remainder_builder = BasicOutputBuilder::new_with_amount(diff);
+        let mut remainder_builder = BasicOutputBuilder::new_with_amount(amount_diff).with_mana(mana_diff);
 
         remainder_builder =
             remainder_builder.add_unlock_condition(AddressUnlockCondition::new(remainder_address.clone()));
 
         // TODO https://github.com/iotaledger/iota-sdk/issues/1631
-        // if let Some(native_tokens) = native_tokens_diff {
-        //     log::debug!("Adding {native_tokens:?} to remainder output for {remainder_address:?}");
-        //     remainder_builder = remainder_builder.with_native_tokens(native_tokens);
-        // }
+        // TODO Only putting one in remainder atm so we can at least create foundries
+        if let Some(native_tokens) = native_tokens_diff {
+            log::debug!("Adding {native_tokens:?} to remainder output for {remainder_address:?}");
+            remainder_builder = remainder_builder.with_native_token(*native_tokens.first().unwrap());
+        }
 
         let remainder = remainder_builder.finish_output()?;
 
-        log::debug!("Created remainder output of {diff} for {remainder_address:?}");
+        log::debug!("Created remainder output of amount {amount_diff} and mana {mana_diff} for {remainder_address:?}");
 
         remainder.verify_storage_deposit(self.protocol_parameters.storage_score_parameters())?;
 

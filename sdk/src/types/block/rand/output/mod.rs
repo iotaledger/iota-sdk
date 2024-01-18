@@ -35,13 +35,22 @@ use crate::types::block::{
                 rand_state_controller_address_unlock_condition_different_from,
             },
         },
-        transaction::rand_transaction_id,
+        transaction::rand_transaction_id_with_slot_index,
     },
+    slot::SlotIndex,
 };
+
+/// Generates a random output id with a given slot index.
+pub fn rand_output_id_with_slot_index(slot_index: impl Into<SlotIndex>) -> OutputId {
+    OutputId::new(
+        rand_transaction_id_with_slot_index(slot_index),
+        rand_number_range(OUTPUT_INDEX_RANGE),
+    )
+}
 
 /// Generates a random [`OutputId`].
 pub fn rand_output_id() -> OutputId {
-    OutputId::new(rand_transaction_id(), rand_number_range(OUTPUT_INDEX_RANGE))
+    rand_output_id_with_slot_index(rand_number::<u32>())
 }
 
 /// Generates a random [`BasicOutput`].
