@@ -38,8 +38,9 @@ class NodeCoreAPI(metaclass=ABCMeta):
         no payload.
         """
 
-    def get_health(self, url: str):
-        """ Get node health.
+    def get_health(self, url: str) -> bool:
+        """Returns the health of the node.
+        GET /health
 
         Args:
             url: The node's url.
@@ -48,30 +49,79 @@ class NodeCoreAPI(metaclass=ABCMeta):
             'url': url
         })
 
-    def get_node_info(self, url: str, auth=None) -> NodeInfo:
-        """Get node info.
-
-        Args:
-            url: The node's url.
-            auth: A JWT or username/password authentication object.
-        """
-        return NodeInfo.from_dict(self._call_method('getNodeInfo', {
-            'url': url,
-            'auth': auth
-        }))
-
     def get_info(self) -> NodeInfoWrapper:
-        """Return node information together with the url of the used node.
+        """Returns general information about the node.
+        GET /api/core/v3/info
         """
         return from_dict(NodeInfoWrapper, self._call_method('getInfo'))
 
-    def get_tips(self) -> List[HexStr]:
-        """Request tips from the node.
+
+    def get_account_congestion(self, account_id: HexStr) -> Congestion:
+        """Checks if the account is ready to issue a block.
+        GET /api/core/v3/accounts/{bech32Address}/congestion
         """
-        return self._call_method('getTips')
+        return self._call_method('getAccountCongestion', {
+            'accountId': account_id
+        })
+
+
+    ### Rewards routes.
+
+    def get_output_mana_rewards(self, output_id: HexStr, slot_index: int) -> ManaRewards:
+        """Returns the total available Mana rewards of an account or delegation output decayed up to `epochEnd` index
+        provided in the response.
+        Note that rewards for an epoch only become available at the beginning of the next epoch. If the end epoch of a
+        staking feature is equal or greater than the current epoch, the rewards response will not include the potential
+        future rewards for those epochs. `epochStart` and `epochEnd` indicates the actual range for which reward value
+        is returned and decayed for.
+        GET /api/core/v3/rewards/{outputId}
+        """
+        return self._call_method('getOutputManaRewards', {
+            'outputId': output_id,
+            'slotIndex': slot_index
+        })
+
+    ### Committee routes.
+
+    def get_committee(self, epoch_index: int) -> Committee:
+        """Returns the information of committee members at the given epoch index. If epoch index is not provided, the
+        current committee members are returned.
+        GET /api/core/v3/committee/?epochIndex
+        """
+        return self._call_method('getCommittee', {
+            'epochIndex': epoch_index
+        })
+
+    ### Validators routes.
+
+    def get_validators(self, page_size, cursor) -> Validators:
+        """Returns information of all registered validators and if they are active.
+        GET JSON to /api/core/v3/validators
+        """
+        return self._call_method('getValidators', {
+            'epochIndex': epoch_index
+        })
+
+    def get_validator(self, account_id: HexStr) -> Validator:
+        """Return information about a validator.
+        GET /api/core/v3/validators/{bech32Address}
+        """
+        return self._call_method('getValidator', {
+            'accountId': account_id
+        })
+
+
+    ### Block routes.
+
+    def get_issuance(self) -> IssuanceBlockHeader:
+        """Returns information that is ideal for attaching a block in the network.
+        GET /api/core/v3/blocks/issuance
+        """
+        return self._call_method('getIssuance')
 
     def post_block(self, block: Block) -> HexStr:
-        """Post a block.
+        """Returns the BlockId of the submitted block.
+        POST JSON to /api/core/v3/blocks
 
         Args:
             block: The block to post.
@@ -83,60 +133,95 @@ class NodeCoreAPI(metaclass=ABCMeta):
             'block': block
         })
 
+    def post_block_raw(self, block: Block) -> HexStr:
+        """Returns the BlockId of the submitted block.
+        POST /api/core/v3/blocks
+
+        Returns:
+            The corresponding block id of the block.
+        """
+        return self._call_method('postBlockRaw', {
+            'block': block
+        })
+
     def get_block(self, block_id: HexStr) -> Block:
-        """Get the block corresponding to the given block id.
+        """Finds a block by its ID and returns it as object.
+        GET /api/core/v3/blocks/{blockId}
+
+        Returns:
+            The corresponding block.
         """
         return Block.from_dict(self._call_method('getBlock', {
             'blockId': block_id
         }))
 
+    def get_block_raw(self, block_id: HexStr) -> List[int]:
+        """Finds a block by its ID and returns it as raw bytes.
+        GET /api/core/v3/blocks/{blockId}
+
+        Returns:
+            The corresponding raw bytes of a block.
+        """
+        return self._call_method('getBlockRaw', {
+            'blockId': block_id
+        })
+
     def get_block_metadata(self, block_id: HexStr) -> BlockMetadata:
-        """Get the block metadata corresponding to the given block id.
+        """Returns the metadata of a block.
+        GET /api/core/v3/blocks/{blockId}/metadata
+
+        Returns:
+            The corresponding block metadata.
         """
         return BlockMetadata.from_dict(self._call_method('getBlockMetadata', {
             'blockId': block_id
         }))
 
     def get_block_with_metadata(self, block_id: HexStr) -> BlockWithMetadata:
-        """Get a block with its metadata corresponding to the given block id.
+        """Returns a block with its metadata.
+        GET /api/core/v2/blocks/{blockId}/full
+
+        Returns:
+            The corresponding block with it metadata.
         """
         return BlockWithMetadata.from_dict(self._call_method('getBlockWithMetadata', {
             'blockId': block_id
         }))
 
-    def get_block_raw(self, block_id: HexStr) -> List[int]:
-        """Get the raw bytes of the block corresponding to the given block id.
-        """
-        return self._call_method('getBlockRaw', {
-            'blockId': block_id
-        })
-
-    def post_block_raw(self, block_bytes: List[int]) -> HexStr:
-        """Post a block as raw bytes.
-
-        Returns:
-            The corresponding block id of the block.
-        """
-        return self._call_method('postBlockRaw', {
-            'blockBytes': block_bytes
-        })
+    ### UTXO routes.
 
     def get_output(
-            self, output_id: Union[OutputId, HexStr]) -> OutputWithMetadata:
-        """Get the output corresponding to the given output id.
+            self, output_id: Union[OutputId, HexStr]) -> Output:
+        """Finds an output by its ID and returns it as object.
+        GET /api/core/v3/outputs/{outputId}
 
         Returns:
-            The output itself with its metadata.
+            The corresponding output.
         """
         output_id_str = output_id.output_id if isinstance(
             output_id, OutputId) else output_id
-        return OutputWithMetadata.from_dict(self._call_method('getOutput', {
+        return Output.from_dict(self._call_method('getOutput', {
             'outputId': output_id_str
         }))
 
+    def get_output_raw(
+            self, output_id: Union[OutputId, HexStr]) -> List[int]:
+        """Finds an output by its ID and returns it as raw bytes.
+        GET /api/core/v3/outputs/{outputId}
+
+        Returns:
+            The raw bytes of the corresponding output.
+        """
+        output_id_str = output_id.output_id if isinstance(
+            output_id, OutputId) else output_id
+        return self._call_method('getOutputRaw', {
+            'outputId': output_id_str
+        })
+
     def get_output_metadata(
             self, output_id: Union[OutputId, HexStr]) -> OutputMetadata:
-        """Get the output metadata corresponding to the given output id.
+        """Finds output metadata by output ID.
+        GET /api/core/v3/outputs/{outputId}/metadata
 
         Returns:
             The output metadata.
@@ -147,8 +232,23 @@ class NodeCoreAPI(metaclass=ABCMeta):
             'outputId': output_id_str
         }))
 
+    def get_output_with_metadata(
+            self, output_id: Union[OutputId, HexStr]) -> OutputWithMetadata:
+        """Finds an output with its metadata by output ID.
+        GET /api/core/v3/outputs/{outputId}/full
+
+        Returns:
+            The corresponding output.
+        """
+        output_id_str = output_id.output_id if isinstance(
+            output_id, OutputId) else output_id
+        return OutputWithMetadata.from_dict(self._call_method('getOutputWithMetadata', {
+            'outputId': output_id_str
+        }))
+
     def get_included_block(self, transaction_id: HexStr) -> Block:
-        """Returns the included block of the given transaction.
+        """Returns the earliest confirmed block containing the transaction with the given ID.
+        GET /api/core/v3/transactions/{transactionId}/included-block
 
         Returns:
             The included block.
@@ -157,15 +257,144 @@ class NodeCoreAPI(metaclass=ABCMeta):
             'transactionId': transaction_id
         }))
 
+    def get_included_block_raw(self, transaction_id: HexStr) -> List[int]:
+        """Returns the earliest confirmed block containing the transaction with the given ID, as raw bytes.
+        GET /api/core/v3/transactions/{transactionId}/included-block
+
+        Returns:
+            The raw bytes of the included block.
+        """
+        return self._call_method('getIncludedBlockRaw', {
+            'transactionId': transaction_id
+        })
+
     def get_included_block_metadata(
             self, transaction_id: HexStr) -> BlockMetadata:
-        """Returns the metadata of the included block of the given transaction.
+        """Returns the metadata of the earliest block containing the tx that was confirmed.
+        GET /api/core/v3/transactions/{transactionId}/included-block/metadata
 
         Returns:
             The metadata of the included block.
         """
         return BlockMetadata.from_dict(self._call_method('getIncludedBlockMetadata', {
             'transactionId': transaction_id
+        }))
+
+    def get_transaction_metadata(self, transaction_id: HexStr) -> TransactionMetadta:
+        """Finds the metadata of a transaction.
+        GET /api/core/v3/transactions/{transactionId}/metadata
+
+        Returns:
+            The transaction metadata.
+        """
+        return TransactionMetadata.from_dict(self._call_method('getTransactionMetadata', {
+            'transactionId': transaction_id
+        }))
+        
+    ### Commitments routes.
+
+    def get_slot_commitment_by_id(self, slot_commitment_id: HexStr) -> SlotCommitment:
+        """Finds a slot commitment by its ID and returns it as object.
+        GET /api/core/v3/commitments/{commitmentId}
+
+        Returns:
+            The corresponding slot commitment.
+        """
+        return SlotCommitment.from_dict(self._call_method('getSlotCommitmentById', {
+            'slotCommitmentId': slot_commitment_id
+        }))
+
+    def get_slot_commitment_by_id_raw(self, slot_commitment_id: HexStr) -> List[int]:
+        """Finds a slot commitment by its ID and returns it as raw bytes.
+        GET /api/core/v3/commitments/{commitmentId}
+
+        Returns:
+            The raw bytes of the corresponding slot commitment.
+        """
+        return self._call_method('getSlotCommitmentByIdRaw', {
+            'slotCommitmentId': slot_commitment_id
+        })
+
+    def get_utxo_changes_by_slot_commitment_id(self, slot_commitment_id: HexStr) -> UtxoChanges:
+        """Get all UTXO changes of a given slot by slot commitment ID.
+        GET /api/core/v3/commitments/{commitmentId}/utxo-changes
+
+        Returns:
+            The corresponding UTXO changes.
+        """
+        return UtxoChanges.from_dict(self._call_method('getUtxoChangesBySlotCommitmentId', {
+            'slotCommitmentId': slot_commitment_id
+        }))
+
+    def get_utxo_changes_full_by_slot_commitment_id(self, slot_commitment_id: HexStr) -> UtxoChangesFull:
+        """Get all full UTXO changes of a given slot by slot commitment ID.
+        GET /api/core/v3/commitments/{commitmentId}/utxo-changes/full
+
+        Returns:
+            The full UTXO changes.
+        """
+        return UtxoChangesFull.from_dict(self._call_method('getUtxoChangesBySlotCommitmentIdFull', {
+            'slotCommitmentId': slot_commitment_id
+        }))
+
+    def get_slot_commitment_by_slot(self, slot_index: int) -> SlotCommitment:
+        """Finds a slot commitment by slot index and returns it as object.
+        GET /api/core/v3/commitments/by-slot/{slot}
+
+        Returns:
+            The corresponding slot commitment.
+        """
+        return SlotCommitment.from_dict(self._call_method('getSlotCommitmentBySlot', {
+            'slotCommitmentId': slot_commitment_id
+        }))
+
+    def get_slot_commitment_by_slot_raw(self, slot_index: int) -> List[int]:
+        """Finds a slot commitment by slot index and returns it as raw bytes.
+        GET /api/core/v3/commitments/by-slot/{slot}
+
+        Returns:
+            The raw bytes of the corresponding slot commitment.
+        """
+        return self._call_method('getSlotCommitmentBySlotRaw', {
+            'slotCommitmentId': slot_commitment_id
+        })
+
+    def get_utxo_changes_by_slot(self, slot_index: SlotIndex) -> UtxoChanges:
+        """Get all UTXO changes of a given slot by its index.
+        GET /api/core/v3/commitments/by-slot/{slot}/utxo-changes
+
+        Returns:
+            The corresponding UTXO changes.
+        """
+        return UtxoChanges.from_dict(self._call_method('getUtxoChangesBySlot', {
+            'slotIndex': slot_index
+        }))
+
+    def get_utxo_changes_full_by_slot(self, slot_index: SlotIndex) -> UtxoChangesFull:
+        """Get all full UTXO changes of a given slot by its index.
+        GET /api/core/v3/commitments/by-slot/{slot}/utxo-changes/full
+
+        Returns:
+            The full UTXO changes.
+        """
+        return UtxoChanges.from_dict(self._call_method('getUtxoChangesFullBySlot', {
+            'slotIndex': slot_index
+        }))
+
+    def get_node_info(self, url: str, auth=None) -> NodeInfo:
+        """Get node info.
+        GET /api/core/v3/info endpoint
+
+        Args:
+            url: The node's url.
+            auth: A JWT or username/password authentication object.
+
+        Returns:
+            The node info.
+        """
+        return NodeInfo.from_dict(self._call_method('getNodeInfo', {
+            'url': url,
+            'auth': auth
         }))
 
     def call_plugin_route(self, base_plugin_path: str, method: str,
