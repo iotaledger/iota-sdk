@@ -178,13 +178,13 @@ pub enum UtilsMethod {
         protocol_parameters: ProtocolParameters,
     },
     /// Returns the serialized bytes of a block..
-    /// Expected response: [`Ok`](crate::Response::Raw)
+    /// Expected response: [`Raw`](crate::Response::Raw)
     BlockBytes {
         /// Block
         block: BlockDto,
     },
     /// Returns a block hash (Blake2b256 hash of block bytes without nonce) from a block for PoW.
-    /// Expected response: [`Ok`](crate::Response::Hash)
+    /// Expected response: [`Hash`](crate::Response::Hash)
     BlockHashWithoutNonce {
         /// Block
         block: BlockDto,
