@@ -292,7 +292,7 @@ pub enum Response {
     /// - [`StartBackgroundSync`](crate::method::WalletMethod::StartBackgroundSync),
     /// - [`StoreMnemonic`](crate::method::WalletMethod::StoreMnemonic),
     /// - [`StopBackgroundSync`](crate::method::WalletMethod::StopBackgroundSync),
-    /// - [`VerifyTransactionSyntactic`](crate::method::UtilsMethod::VerifyTransactionSyntactic),
+    /// - [`VerifyTransactionSyntax`](crate::method::UtilsMethod::VerifyTransactionSyntax),
     Ok,
     /// Response for any method that returns an error.
     Error(Error),

@@ -454,12 +454,12 @@ export class Utils {
      * @param protocolParameters The protocol parameters used for the validation.
      * @returns void.
      */
-    static verifyTransactionSyntactic(
+    static verifyTransactionSyntax(
         transaction: TransactionPayload,
         protocolParameters: INodeInfoProtocol,
     ): void {
         return callUtilsMethod({
-            name: 'verifyTransactionSyntactic',
+            name: 'verifyTransactionSyntax',
             data: {
                 transaction,
                 protocolParameters,

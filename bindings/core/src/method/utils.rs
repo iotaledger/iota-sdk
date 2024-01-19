@@ -173,7 +173,7 @@ pub enum UtilsMethod {
     /// Verifies the syntax of a transaction.
     /// Expected response: [`Ok`](crate::Response::Ok)
     #[serde(rename_all = "camelCase")]
-    VerifyTransactionSyntactic {
+    VerifyTransactionSyntax {
         transaction: TransactionPayloadDto,
         protocol_parameters: ProtocolParameters,
     },

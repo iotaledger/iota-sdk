@@ -232,11 +232,11 @@ class Utils():
         })
 
     @staticmethod
-    def verify_transaction_syntactic(
+    def verify_transaction_syntax(
             transaction: TransactionPayload, protocol_parameters: NodeInfoProtocol):
         """Verifies the syntax of a transaction.
         """
-        _call_method('verifyTransactionSyntactic', {
+        _call_method('verifyTransactionSyntax', {
             'transaction': transaction.as_dict(),
             'protocolParameters': protocol_parameters.as_dict(),
         })

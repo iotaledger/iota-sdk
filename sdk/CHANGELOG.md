@@ -19,6 +19,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security -->
 
+## 1.1.4 - 2024-MM-DD
+
+### Added
+
+- `Block::hash_without_nonce()` method;
+
 ## 1.1.3 - 2023-12-07
 
 ### Added

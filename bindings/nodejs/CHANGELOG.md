@@ -23,7 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- `Utils::{verifyTransactionSyntactic(), blockBytes(), blockHashWithoutNonce()}`;
+- `Utils::{verifyTransactionSyntax(), blockBytes(), blockHashWithoutNonce()}`;
 
 ## 1.1.4 - 2023-12-07
 

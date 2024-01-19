@@ -26,7 +26,7 @@ import type {
     __OutputIdToUtxoInput__,
     __OutputHexBytes__,
     __VerifyTransactionSemantic__,
-    __VerifyTransactionSyntactic__,
+    __VerifyTransactionSyntax__,
     __BlockBytes__,
     __BlockHashWithoutNonce__,
 } from './utils';
@@ -59,6 +59,6 @@ export type __UtilsMethods__ =
     | __OutputIdToUtxoInput__
     | __OutputHexBytes__
     | __VerifyTransactionSemantic__
-    | __VerifyTransactionSyntactic__
+    | __VerifyTransactionSyntax__
     | __BlockBytes__
     | __BlockHashWithoutNonce__;

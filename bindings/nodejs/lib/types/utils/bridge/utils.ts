@@ -217,8 +217,8 @@ export interface __VerifyTransactionSemantic__ {
     };
 }
 
-export interface __VerifyTransactionSyntactic__ {
-    name: 'verifyTransactionSyntactic';
+export interface __VerifyTransactionSyntax__ {
+    name: 'verifyTransactionSyntax';
     data: {
         transaction: TransactionPayload;
         protocolParameters: INodeInfoProtocol;
