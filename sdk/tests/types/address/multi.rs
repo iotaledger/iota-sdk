@@ -13,7 +13,7 @@ use pretty_assertions::assert_eq;
 fn ordered_by_packed_bytes() {
     let mut bytes_1 = rand_bytes_array::<32>();
     bytes_1[0] = 0;
-    let mut bytes_2 = bytes_1.clone();
+    let mut bytes_2 = bytes_1;
     bytes_2[0] = 1;
 
     let weighted_1 = WeightedAddress::new(AccountAddress::from(AccountId::from(bytes_1)), 1).unwrap();
