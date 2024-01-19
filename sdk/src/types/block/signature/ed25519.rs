@@ -67,7 +67,7 @@ impl Ed25519Signature {
         panic!("deprecated method: use Ed25519Signature::public_key_bytes instead")
     }
 
-    /// Returns the public key of an [`Ed25519Signature`].
+    /// Returns the unvalidated public key bytes of an [`Ed25519Signature`].
     pub fn public_key_bytes(&self) -> &PublicKeyBytes {
         &self.public_key
     }
