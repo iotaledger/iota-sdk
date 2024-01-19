@@ -4,7 +4,6 @@
 use alloc::{
     borrow::ToOwned,
     collections::BTreeMap,
-    format,
     string::{String, ToString},
     vec::Vec,
 };
@@ -19,7 +18,7 @@ use packable::{
 };
 
 use super::{
-    metadata::{MetadataBTreeMap, MetadataBTreeMapPrefix},
+    metadata::{verify_byte_length_packable, verify_keys_packable, MetadataBTreeMap, MetadataBTreeMapPrefix},
     MetadataFeatureKeyLength, MetadataFeatureValueLength,
 };
 use crate::types::block::{output::StorageScore, protocol::WorkScore, Error};
@@ -27,35 +26,6 @@ use crate::types::block::{output::StorageScore, protocol::WorkScore, Error};
 /// Defines metadata, arbitrary binary data, that will be stored in the output.
 #[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct StateMetadataFeature(pub(crate) MetadataBTreeMapPrefix);
-
-pub(crate) fn verify_packable<const VERIFY: bool>(feature: &StateMetadataFeature) -> Result<(), Error> {
-    verify_keys_packable::<VERIFY>(feature)?;
-    verify_byte_length_packable::<VERIFY>(feature.packed_len())?;
-    Ok(())
-}
-
-fn verify_keys_packable<const VERIFY: bool>(feature: &StateMetadataFeature) -> Result<(), Error> {
-    if VERIFY {
-        for key in feature.0.keys() {
-            if !key.iter().all(|c| c.is_ascii_graphic()) {
-                return Err(Error::NonGraphicAsciiMetadataKey(key.to_vec()));
-            }
-        }
-    }
-    Ok(())
-}
-
-fn verify_byte_length_packable<const VERIFY: bool>(len: usize) -> Result<(), Error> {
-    if VERIFY
-        && !StateMetadataFeature::BYTE_LENGTH_RANGE
-            .contains(&u16::try_from(len).map_err(|e| Error::InvalidMetadataFeature(e.to_string()))?)
-    {
-        return Err(Error::InvalidMetadataFeature(format!(
-            "Out of bounds byte length: {len}"
-        )));
-    }
-    Ok(())
-}
 
 impl StateMetadataFeature {
     /// The [`Feature`](crate::types::block::output::Feature) kind of [`StateMetadataFeature`].
@@ -144,7 +114,10 @@ impl StateMetadataFeatureMap {
             )
             .map_err(Error::InvalidMetadataFeatureEntryCount)?,
         );
-        verify_packable::<true>(&res)?;
+
+        verify_keys_packable::<true>(&res.0)?;
+        verify_byte_length_packable::<true>(res.packed_len(), StateMetadataFeature::BYTE_LENGTH_RANGE)?;
+
         Ok(res)
     }
 }
@@ -185,8 +158,9 @@ impl Packable for StateMetadataFeature {
                 .map_packable_err(|e| Error::InvalidMetadataFeature(e.to_string()))?,
         );
 
-        verify_keys_packable::<VERIFY>(&res).map_err(UnpackError::Packable)?;
-        verify_byte_length_packable::<VERIFY>(unpacker.counter()).map_err(UnpackError::Packable)?;
+        verify_keys_packable::<VERIFY>(&res.0).map_err(UnpackError::Packable)?;
+        verify_byte_length_packable::<VERIFY>(unpacker.counter(), StateMetadataFeature::BYTE_LENGTH_RANGE)
+            .map_err(UnpackError::Packable)?;
 
         Ok(res)
     }

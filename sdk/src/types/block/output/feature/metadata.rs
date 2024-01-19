@@ -37,15 +37,9 @@ pub(crate) type MetadataBTreeMap =
 #[derive(Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct MetadataFeature(MetadataBTreeMapPrefix);
 
-fn verify_packable<const VERIFY: bool>(feature: &MetadataFeature) -> Result<(), Error> {
-    verify_keys_packable::<VERIFY>(feature)?;
-    verify_byte_length_packable::<VERIFY>(feature.packed_len())?;
-    Ok(())
-}
-
-fn verify_keys_packable<const VERIFY: bool>(feature: &MetadataFeature) -> Result<(), Error> {
+pub(crate) fn verify_keys_packable<const VERIFY: bool>(map: &MetadataBTreeMapPrefix) -> Result<(), Error> {
     if VERIFY {
-        for key in feature.0.keys() {
+        for key in map.keys() {
             if !key.iter().all(|c| c.is_ascii_graphic()) {
                 return Err(Error::NonGraphicAsciiMetadataKey(key.to_vec()));
             }
@@ -54,10 +48,12 @@ fn verify_keys_packable<const VERIFY: bool>(feature: &MetadataFeature) -> Result
     Ok(())
 }
 
-fn verify_byte_length_packable<const VERIFY: bool>(len: usize) -> Result<(), Error> {
+pub(crate) fn verify_byte_length_packable<const VERIFY: bool>(
+    len: usize,
+    bytes_length_range: RangeInclusive<u16>,
+) -> Result<(), Error> {
     if VERIFY
-        && !MetadataFeature::BYTE_LENGTH_RANGE
-            .contains(&u16::try_from(len).map_err(|e| Error::InvalidMetadataFeature(e.to_string()))?)
+        && !bytes_length_range.contains(&u16::try_from(len).map_err(|e| Error::InvalidMetadataFeature(e.to_string()))?)
     {
         return Err(Error::InvalidMetadataFeature(format!(
             "Out of bounds byte length: {len}"
@@ -153,7 +149,10 @@ impl MetadataFeatureMap {
             )
             .map_err(Error::InvalidMetadataFeatureEntryCount)?,
         );
-        verify_packable::<true>(&res)?;
+
+        verify_keys_packable::<true>(&res.0)?;
+        verify_byte_length_packable::<true>(res.packed_len(), MetadataFeature::BYTE_LENGTH_RANGE)?;
+
         Ok(res)
     }
 }
@@ -194,8 +193,9 @@ impl Packable for MetadataFeature {
                 .map_packable_err(|e| Error::InvalidMetadataFeature(e.to_string()))?,
         );
 
-        verify_keys_packable::<VERIFY>(&res).map_err(UnpackError::Packable)?;
-        verify_byte_length_packable::<VERIFY>(unpacker.counter()).map_err(UnpackError::Packable)?;
+        verify_keys_packable::<VERIFY>(&res.0).map_err(UnpackError::Packable)?;
+        verify_byte_length_packable::<VERIFY>(unpacker.counter(), MetadataFeature::BYTE_LENGTH_RANGE)
+            .map_err(UnpackError::Packable)?;
 
         Ok(res)
     }
