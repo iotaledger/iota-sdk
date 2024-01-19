@@ -61,7 +61,13 @@ impl Serialize for Error {
         // Safe to unwrap because kind_dbg is never an empty string
         let kind = kind_dbg.split([' ', '(']).next().unwrap();
         seq.serialize_entry("type", &kind)?;
-        seq.serialize_entry("error", &self.to_string())?;
+        let value: serde_json::Value = match &self {
+            // Only Client and wallet have a proper serde impl
+            Self::Client(e) => serde_json::from_str(&serde_json::to_string(&e).expect("json to string error")).unwrap(),
+            Self::Wallet(e) => serde_json::from_str(&serde_json::to_string(&e).expect("json to string error")).unwrap(),
+            _ => self.to_string().into()
+        };
+        seq.serialize_entry("error", &value)?;
         seq.end()
     }
 }
