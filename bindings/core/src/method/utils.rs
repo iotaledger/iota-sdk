@@ -164,7 +164,7 @@ pub enum UtilsMethod {
     #[serde(rename_all = "camelCase")]
     OutputHexBytes { output: OutputDto },
     /// Verifies the semantic of a transaction.
-    /// Expected response: [`Ok`](crate::Response::ConflictReason)
+    /// Expected response: [`ConflictReason)`](crate::Response::ConflictReason)
     VerifyTransactionSemantic {
         inputs: Vec<InputSigningDataDto>,
         transaction: TransactionPayloadDto,
