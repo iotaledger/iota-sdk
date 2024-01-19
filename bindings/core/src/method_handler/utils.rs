@@ -1,4 +1,4 @@
-// Copyright 2023 IOTA Stiftung
+// Copyright 2024 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
 use crypto::keys::bip39::Mnemonic;
@@ -14,7 +14,7 @@ use iota_sdk::{
             output::{AliasId, FoundryId, InputsCommitment, NftId, Output, OutputId, Rent, TokenId},
             payload::{transaction::TransactionEssence, MilestonePayload, TransactionPayload},
             signature::Ed25519Signature,
-            Block,
+            Block, Error,
         },
         TryFromDto,
     },
@@ -96,7 +96,7 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
         UtilsMethod::VerifyEd25519Signature { signature, message } => {
             let signature = Ed25519Signature::try_from(signature)?;
             let message: Vec<u8> = prefix_hex::decode(message)?;
-            Response::Bool(signature.verify(&message))
+            Response::Bool(signature.try_verify(&message).map_err(Error::from)?)
         }
         UtilsMethod::VerifySecp256k1EcdsaSignature {
             public_key,
@@ -104,7 +104,6 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
             message,
         } => {
             use crypto::signatures::secp256k1_ecdsa;
-            use iota_sdk::types::block::Error;
             let public_key = prefix_hex::decode(public_key)?;
             let public_key = secp256k1_ecdsa::PublicKey::try_from_bytes(&public_key).map_err(Error::from)?;
             let signature = prefix_hex::decode(signature)?;

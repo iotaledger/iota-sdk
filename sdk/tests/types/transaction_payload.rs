@@ -1,4 +1,4 @@
-// Copyright 2020-2021 IOTA Stiftung
+// Copyright 2024 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
 use iota_sdk::types::block::{
@@ -53,7 +53,7 @@ fn builder_no_essence_too_few_unlocks() {
     // Construct a list with a single unlock, whereas we have 2 tx inputs.
     let pub_key_bytes = prefix_hex::decode(ED25519_PUBLIC_KEY).unwrap();
     let sig_bytes = prefix_hex::decode(ED25519_SIGNATURE).unwrap();
-    let signature = Ed25519Signature::try_from_bytes(pub_key_bytes, sig_bytes).unwrap();
+    let signature = Ed25519Signature::from_bytes(pub_key_bytes, sig_bytes);
     let sig_unlock = Unlock::Signature(SignatureUnlock::from(Signature::from(signature)));
     let unlocks = Unlocks::new([sig_unlock]).unwrap();
 
@@ -90,7 +90,7 @@ fn builder_no_essence_too_many_unlocks() {
     // Construct a list of two unlocks, whereas we only have 1 tx input.
     let pub_key_bytes = prefix_hex::decode(ED25519_PUBLIC_KEY).unwrap();
     let sig_bytes = prefix_hex::decode(ED25519_SIGNATURE).unwrap();
-    let signature = Ed25519Signature::try_from_bytes(pub_key_bytes, sig_bytes).unwrap();
+    let signature = Ed25519Signature::from_bytes(pub_key_bytes, sig_bytes);
     let sig_unlock = Unlock::Signature(SignatureUnlock::from(Signature::from(signature)));
     let ref_unlock = Unlock::Reference(ReferenceUnlock::new(0).unwrap());
 
@@ -130,7 +130,7 @@ fn pack_unpack_valid() {
     // Construct a list of two unlocks, whereas we only have 1 tx input.
     let pub_key_bytes = prefix_hex::decode(ED25519_PUBLIC_KEY).unwrap();
     let sig_bytes = prefix_hex::decode(ED25519_SIGNATURE).unwrap();
-    let signature = Ed25519Signature::try_from_bytes(pub_key_bytes, sig_bytes).unwrap();
+    let signature = Ed25519Signature::from_bytes(pub_key_bytes, sig_bytes);
     let sig_unlock = Unlock::Signature(SignatureUnlock::from(Signature::from(signature)));
     let ref_unlock = Unlock::Reference(ReferenceUnlock::new(0).unwrap());
     let unlocks = Unlocks::new([sig_unlock, ref_unlock]).unwrap();
@@ -172,7 +172,7 @@ fn getters() {
     // Construct a list of two unlocks, whereas we only have 1 tx input.
     let pub_key_bytes = prefix_hex::decode(ED25519_PUBLIC_KEY).unwrap();
     let sig_bytes = prefix_hex::decode(ED25519_SIGNATURE).unwrap();
-    let signature = Ed25519Signature::try_from_bytes(pub_key_bytes, sig_bytes).unwrap();
+    let signature = Ed25519Signature::from_bytes(pub_key_bytes, sig_bytes);
     let sig_unlock = Unlock::Signature(SignatureUnlock::from(Signature::from(signature)));
     let ref_unlock = Unlock::Reference(ReferenceUnlock::new(0).unwrap());
     let unlocks = Unlocks::new([sig_unlock, ref_unlock]).unwrap();
