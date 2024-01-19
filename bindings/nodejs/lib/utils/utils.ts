@@ -448,11 +448,11 @@ export class Utils {
     }
 
     /**
-     * Verifies the syntactic of a transaction.
+     * Verifies the syntax of a transaction.
      *
      * @param transaction The transaction payload.
      * @param protocolParameters The protocol parameters used for the validation.
-     * @returns Ok.
+     * @returns void.
      */
     static verifyTransactionSyntactic(
         transaction: TransactionPayload,
@@ -481,5 +481,21 @@ export class Utils {
             },
         });
         return new Uint8Array(blockBytes);
+    }
+
+    /**
+     * Returns a block hash (Blake2b256 hash of block bytes without nonce) from a block for PoW.
+     *
+     * @param block The block.
+     * @returns The Blake2b256 hash of the block bytes without nonce.
+     */
+    static blockHashWithoutNonce(block: Block): HexEncodedString {
+        const hash = callUtilsMethod({
+            name: 'blockHashWithoutNonce',
+            data: {
+                block,
+            },
+        });
+        return hash;
     }
 }

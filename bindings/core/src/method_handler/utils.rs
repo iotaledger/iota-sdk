@@ -1,7 +1,10 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use crypto::keys::bip39::Mnemonic;
+use crypto::{
+    hashes::{blake2b::Blake2b256, Digest},
+    keys::bip39::Mnemonic,
+};
 use iota_sdk::{
     client::{
         api::verify_semantic, hex_public_key_to_bech32_address, hex_to_bech32, secret::types::InputSigningData,
@@ -141,7 +144,14 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
         }
         UtilsMethod::BlockBytes { block } => {
             let block = Block::try_from_dto(block)?;
-            Response::Bytes(block.pack_to_vec())
+            Response::Raw(block.pack_to_vec())
+        }
+        UtilsMethod::BlockHashWithoutNonce { block } => {
+            let block = Block::try_from_dto(block)?;
+            let block_bytes = block.pack_to_vec();
+            let hash: [u8; 32] =
+                Blake2b256::digest(&block_bytes[..block_bytes.len() - core::mem::size_of::<u64>()]).into();
+            Response::Hash(prefix_hex::encode(hash))
         }
     };
     Ok(response)

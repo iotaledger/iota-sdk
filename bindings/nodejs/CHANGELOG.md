@@ -23,13 +23,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- `Utils:{verifyTransactionSyntactic(), blockBytes()}`;
+- `Utils::{verifyTransactionSyntactic(), blockBytes(), blockHashWithoutNonce()}`;
 
 ## 1.1.4 - 2023-12-07
 
 ### Added
 
-- `Utils:verifyTransactionSemantic()`;
+- `Utils::verifyTransactionSemantic()`;
 - `Account::prepareClaimOutputs()` method;
 
 ### Fixed

@@ -64,6 +64,12 @@ class RentStructure:
     vByteFactorData: int
     vByteFactorKey: int
 
+    def as_dict(self):
+        """Converts this object to a dict.
+        """
+        res = {k: v for k, v in self.__dict__.items() if v is not None}
+        return res
+
 
 @dataclass
 class NodeInfoProtocol:
@@ -74,6 +80,7 @@ class NodeInfoProtocol:
         bech32Hrp: The HRP prefix used for Bech32 addresses in the network.
         tokenSupply: TokenSupply defines the current token supply on the network.
         version: The version of the protocol running.
+        belowMaxDepth: The below max depth parameter of the network.
         minPowScore: The minimum pow score of the network.
         rentStructure: The rent structure used by given node/network.
     """
@@ -81,8 +88,17 @@ class NodeInfoProtocol:
     bech32Hrp: str
     tokenSupply: str
     version: int
+    belowMaxDepth: int
     minPowScore: float
     rentStructure: RentStructure
+
+    def as_dict(self):
+        """Converts this object to a dict.
+        """
+        res = {k: v for k, v in self.__dict__.items() if v is not None}
+        if res["rentStructure"]:
+            res["rentStructure"] = res["rentStructure"].as_dict()
+        return res
 
 
 @dataclass

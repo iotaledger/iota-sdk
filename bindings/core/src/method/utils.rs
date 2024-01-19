@@ -170,7 +170,7 @@ pub enum UtilsMethod {
         transaction: TransactionPayloadDto,
         time: u32,
     },
-    /// Verifies the syntactic of a transaction.
+    /// Verifies the syntax of a transaction.
     /// Expected response: [`Ok`](crate::Response::Ok)
     #[serde(rename_all = "camelCase")]
     VerifyTransactionSyntactic {
@@ -178,8 +178,14 @@ pub enum UtilsMethod {
         protocol_parameters: ProtocolParameters,
     },
     /// Returns the serialized bytes of a block..
-    /// Expected response: [`Ok`](crate::Response::Bytes)
+    /// Expected response: [`Ok`](crate::Response::Raw)
     BlockBytes {
+        /// Block
+        block: BlockDto,
+    },
+    /// Returns a block hash (Blake2b256 hash of block bytes without nonce) from a block for PoW.
+    /// Expected response: [`Ok`](crate::Response::Hash)
+    BlockHashWithoutNonce {
         /// Block
         block: BlockDto,
     },

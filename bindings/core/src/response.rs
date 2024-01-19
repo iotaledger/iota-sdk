@@ -59,9 +59,6 @@ use crate::{error::Error, OmittedDebug};
 #[non_exhaustive]
 pub enum Response {
     /// Response for:
-    /// - [`BlockBytes`](crate::method::UtilsMethod::BlockBytes)
-    Bytes(Vec<u8>),
-    /// Response for:
     /// - [`GenerateEd25519Addresses`](crate::method::SecretManagerMethod::GenerateEd25519Addresses)
     GeneratedEd25519Addresses(Vec<Bech32Address>),
     /// Response for:
@@ -136,6 +133,7 @@ pub enum Response {
     /// - [`GetBlockRaw`](crate::method::ClientMethod::GetBlockRaw)
     /// - [`GetMilestoneByIdRaw`](crate::method::ClientMethod::GetMilestoneByIdRaw)
     /// - [`GetMilestoneByIndexRaw`](crate::method::ClientMethod::GetMilestoneByIndexRaw)
+    /// - [`BlockBytes`](crate::method::UtilsMethod::BlockBytes)
     Raw(Vec<u8>),
     /// Response for:
     /// - [`GetOutput`](crate::method::ClientMethod::GetOutput)
@@ -227,6 +225,7 @@ pub enum Response {
     /// Response for:
     /// - [`HashTransactionEssence`](crate::method::UtilsMethod::HashTransactionEssence)
     /// - [`ComputeInputsCommitment`](crate::method::UtilsMethod::ComputeInputsCommitment)
+    /// - [`ComputeInputsCommitment`](crate::method::UtilsMethod::BlockHashWithoutNonce)
     Hash(String),
     /// Response for [`GetNodeInfo`](crate::method::ClientMethod::GetNodeInfo)
     NodeInfoWrapper(NodeInfoWrapper),

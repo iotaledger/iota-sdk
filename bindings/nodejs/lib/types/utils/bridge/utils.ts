@@ -231,3 +231,10 @@ export interface __BlockBytes__ {
         block: Block;
     };
 }
+
+export interface __BlockHashWithoutNonce__ {
+    name: 'blockHashWithoutNonce';
+    data: {
+        block: Block;
+    };
+}
