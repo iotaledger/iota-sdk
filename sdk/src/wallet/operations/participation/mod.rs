@@ -60,25 +60,20 @@ where
     //     log::debug!("[get_participation_overview]");
     //     // TODO: Could use the address endpoint in the future when https://github.com/iotaledger/inx-participation/issues/50 is done.
 
-    //     let mut spent_cached_outputs = self
-    //         .storage_manager
-    //         .read()
-    //         .await
-    //         .get_cached_participation_output_status()
-    //         .await?;
-    //     let restored_spent_cached_outputs_len = spent_cached_outputs.len();
-    //     log::debug!(
-    //         "[get_participation_overview] restored_spent_cached_outputs_len: {}",
-    //         restored_spent_cached_outputs_len
-    //     );
-    //     let wallet_data = self.data().await;
-    //     let participation_outputs = wallet_data.outputs().values().filter(|output_data| {
-    //         is_valid_participation_output(&output_data.output)
-    //             // Check that the metadata exists, because otherwise we aren't participating for anything
-    //                 && output_data.output.features().and_then(|f| f.metadata()).is_some()
-    //                 // Don't add spent cached outputs, we have their data already and it can't change anymore
-    //                 && !spent_cached_outputs.contains_key(&output_data.output_id)
-    //     });
+    // let mut spent_cached_outputs = self.storage_manager().get_cached_participation_output_status().await?;
+    // let restored_spent_cached_outputs_len = spent_cached_outputs.len();
+    // log::debug!(
+    //     "[get_participation_overview] restored_spent_cached_outputs_len: {}",
+    //     restored_spent_cached_outputs_len
+    // );
+    // let wallet_data = self.data().await;
+    // let participation_outputs = wallet_data.outputs().values().filter(|output_data| {
+    //     is_valid_participation_output(&output_data.output)
+    //         // Check that the metadata exists, because otherwise we aren't participating for anything
+    //             && output_data.output.features().and_then(|f| f.metadata()).is_some()
+    //             // Don't add spent cached outputs, we have their data already and it can't change anymore
+    //             && !spent_cached_outputs.contains_key(&output_data.output_id)
+    // });
 
     //     let mut events = HashMap::new();
     //     let mut spent_outputs = HashSet::new();
@@ -205,18 +200,16 @@ where
     //         }
     //     }
 
-    //     log::debug!(
-    //         "[get_participation_overview] new spent_cached_outputs: {}",
-    //         spent_cached_outputs.len()
-    //     );
-    //     // Only store updated data if new outputs got added
-    //     if spent_cached_outputs.len() > restored_spent_cached_outputs_len {
-    //         self.storage_manager
-    //             .read()
-    //             .await
-    //             .set_cached_participation_output_status(&spent_cached_outputs)
-    //             .await?;
-    //     }
+    // log::debug!(
+    //     "[get_participation_overview] new spent_cached_outputs: {}",
+    //     spent_cached_outputs.len()
+    // );
+    // // Only store updated data if new outputs got added
+    // if spent_cached_outputs.len() > restored_spent_cached_outputs_len {
+    //     self.storage_manager()
+    //         .set_cached_participation_output_status(&spent_cached_outputs)
+    //         .await?;
+    // }
 
     //     Ok(ParticipationOverview { participations })
     // }
@@ -232,7 +225,7 @@ where
     // /// If event isn't found, the client from the account will be returned.
     // pub(crate) async fn get_client_for_event(&self, id: &ParticipationEventId) -> crate::wallet::Result<Client> {
     //     log::debug!("[get_client_for_event]");
-    //     let events = self.storage_manager.read().await.get_participation_events().await?;
+    //     let events = self.storage_manager().get_participation_events().await?;
 
     //     let event_with_nodes = match events.get(id) {
     //         Some(event_with_nodes) => event_with_nodes,
@@ -257,7 +250,7 @@ where
     //     let latest_milestone_index = 0;
     //     // let latest_milestone_index = self.client().get_info().await?.node_info.status.latest_milestone.index;
 
-    //     let events = self.storage_manager.read().await.get_participation_events().await?;
+    // let events = self.storage_manager().get_participation_events().await?;
 
     //     for participation in participations.participations.clone().iter() {
     //         if let Some(event_with_nodes) = events.get(&participation.event_id) {
