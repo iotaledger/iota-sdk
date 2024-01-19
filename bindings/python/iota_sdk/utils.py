@@ -13,6 +13,7 @@ from iota_sdk.types.output_id import OutputId
 from iota_sdk.types.output import Output
 from iota_sdk.types.transaction_data import InputSigningData
 from iota_sdk.external import call_utils_method
+from iota_sdk.types.node_info import NodeInfoProtocol
 from iota_sdk.types.payload import TransactionPayload
 
 # Required to prevent circular import
@@ -228,6 +229,34 @@ class Utils():
             'inputs': [i.as_dict() for i in inputs],
             'transaction': transaction.as_dict(),
             'time': time,
+        })
+
+    @staticmethod
+    def verify_transaction_syntax(
+            transaction: TransactionPayload, protocol_parameters: NodeInfoProtocol):
+        """Verifies the syntax of a transaction.
+        """
+        _call_method('verifyTransactionSyntax', {
+            'transaction': transaction.as_dict(),
+            'protocolParameters': protocol_parameters.as_dict(),
+        })
+
+    @staticmethod
+    def block_bytes(
+            block: Block) -> bytes:
+        """Returns the serialized bytes of a block.
+        """
+        return bytes(_call_method('blockBytes', {
+            'block': block.as_dict(),
+        }))
+
+    @staticmethod
+    def block_hash_without_nonce(
+            block: Block) -> HexStr:
+        """Returns a block hash (Blake2b256 hash of block bytes without nonce) from a block for PoW.
+        """
+        return _call_method('blockHashWithoutNonce', {
+            'block': block.as_dict(),
         })
 
 

@@ -131,6 +131,21 @@ pub(crate) fn call_utils_method_internal(method: UtilsMethod) -> Result<Response
             )?;
             Response::ConflictReason(conflict)
         }
+        UtilsMethod::VerifyTransactionSyntax {
+            transaction,
+            protocol_parameters,
+        } => {
+            TransactionPayload::try_from_dto_with_params(transaction, protocol_parameters)?;
+            Response::Ok
+        }
+        UtilsMethod::BlockBytes { block } => {
+            let block = Block::try_from_dto(block)?;
+            Response::Raw(block.pack_to_vec())
+        }
+        UtilsMethod::BlockHashWithoutNonce { block } => {
+            let block = Block::try_from_dto(block)?;
+            Response::Hash(prefix_hex::encode(block.hash_without_nonce()))
+        }
     };
     Ok(response)
 }

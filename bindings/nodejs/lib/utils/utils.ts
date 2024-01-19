@@ -18,6 +18,7 @@ import {
     OutputId,
     Bech32Address,
     InputSigningData,
+    INodeInfoProtocol,
 } from '../types';
 import { AliasId, BlockId, FoundryId, NftId, TokenId } from '../types/block/id';
 
@@ -444,5 +445,57 @@ export class Utils {
             },
         });
         return conflictReason;
+    }
+
+    /**
+     * Verifies the syntax of a transaction.
+     *
+     * @param transaction The transaction payload.
+     * @param protocolParameters The protocol parameters used for the validation.
+     * @returns void.
+     */
+    static verifyTransactionSyntax(
+        transaction: TransactionPayload,
+        protocolParameters: INodeInfoProtocol,
+    ): void {
+        return callUtilsMethod({
+            name: 'verifyTransactionSyntax',
+            data: {
+                transaction,
+                protocolParameters,
+            },
+        });
+    }
+
+    /**
+     * Returns the serialized bytes of a block.
+     *
+     * @param block The block.
+     * @returns The block bytes.
+     */
+    static blockBytes(block: Block): Uint8Array {
+        const blockBytes = callUtilsMethod({
+            name: 'blockBytes',
+            data: {
+                block,
+            },
+        });
+        return new Uint8Array(blockBytes);
+    }
+
+    /**
+     * Returns a block hash (Blake2b256 hash of block bytes without nonce) from a block for PoW.
+     *
+     * @param block The block.
+     * @returns The Blake2b256 hash of the block bytes without nonce.
+     */
+    static blockHashWithoutNonce(block: Block): HexEncodedString {
+        const hash = callUtilsMethod({
+            name: 'blockHashWithoutNonce',
+            data: {
+                block,
+            },
+        });
+        return hash;
     }
 }

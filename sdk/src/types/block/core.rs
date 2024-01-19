@@ -176,6 +176,12 @@ impl Block {
 
         Ok(block)
     }
+
+    /// Returns a Blake2b256 hash of block bytes without nonce for PoW.
+    pub fn hash_without_nonce(&self) -> [u8; 32] {
+        let block_bytes = self.pack_to_vec();
+        Blake2b256::digest(&block_bytes[..block_bytes.len() - core::mem::size_of::<u64>()]).into()
+    }
 }
 
 impl Packable for Block {

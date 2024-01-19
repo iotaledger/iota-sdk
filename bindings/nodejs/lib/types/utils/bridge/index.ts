@@ -26,6 +26,9 @@ import type {
     __OutputIdToUtxoInput__,
     __OutputHexBytes__,
     __VerifyTransactionSemantic__,
+    __VerifyTransactionSyntax__,
+    __BlockBytes__,
+    __BlockHashWithoutNonce__,
 } from './utils';
 
 export type __UtilsMethods__ =
@@ -55,4 +58,7 @@ export type __UtilsMethods__ =
     | __FaucetMethod__
     | __OutputIdToUtxoInput__
     | __OutputHexBytes__
-    | __VerifyTransactionSemantic__;
+    | __VerifyTransactionSemantic__
+    | __VerifyTransactionSyntax__
+    | __BlockBytes__
+    | __BlockHashWithoutNonce__;

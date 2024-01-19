@@ -24,6 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - `Ed25519Signature` methods `new_from_bytes`, `public_key_bytes`, `from_bytes`, `try_verify`;
+- `Block::hash_without_nonce()` method;
 
 ### Deprecated
 
