@@ -14,7 +14,7 @@ use iota_sdk::{
         secret::{mnemonic::MnemonicSecretManager, SecretManager},
     },
     crypto::keys::bip44::Bip44,
-    wallet::{types::Bip44Address, ClientOptions, Result, Wallet},
+    wallet::{ClientOptions, Result, Wallet},
 };
 
 #[tokio::main]

@@ -13,7 +13,6 @@
 //! ```
 
 use iota_sdk::{
-    types::block::address::ToBech32Ext,
     wallet::{ConsolidationParams, Result},
     Wallet,
 };
