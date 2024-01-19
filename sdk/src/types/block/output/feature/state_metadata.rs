@@ -306,6 +306,7 @@ pub(crate) mod dto {
             }
         }
     }
+
     impl Serialize for StateMetadataFeature {
         fn serialize<S>(&self, s: S) -> Result<S::Ok, S::Error>
         where
