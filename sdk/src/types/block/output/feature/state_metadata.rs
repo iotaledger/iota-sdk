@@ -18,7 +18,7 @@ use packable::{
 };
 
 use super::{
-    metadata::{verify_byte_length_packable, verify_keys_packable, MetadataBTreeMap, MetadataBTreeMapPrefix},
+    metadata::{verify_keys, verify_packed_len, MetadataBTreeMap, MetadataBTreeMapPrefix},
     MetadataFeatureKeyLength, MetadataFeatureValueLength,
 };
 use crate::types::block::{output::StorageScore, protocol::WorkScore, Error};
@@ -115,8 +115,8 @@ impl StateMetadataFeatureMap {
             .map_err(Error::InvalidMetadataFeatureEntryCount)?,
         );
 
-        verify_keys_packable::<true>(&res.0)?;
-        verify_byte_length_packable::<true>(res.packed_len(), StateMetadataFeature::BYTE_LENGTH_RANGE)?;
+        verify_keys::<true>(&res.0)?;
+        verify_packed_len::<true>(res.packed_len(), StateMetadataFeature::BYTE_LENGTH_RANGE)?;
 
         Ok(res)
     }
@@ -158,8 +158,8 @@ impl Packable for StateMetadataFeature {
                 .map_packable_err(|e| Error::InvalidMetadataFeature(e.to_string()))?,
         );
 
-        verify_keys_packable::<VERIFY>(&res.0).map_err(UnpackError::Packable)?;
-        verify_byte_length_packable::<VERIFY>(unpacker.counter(), StateMetadataFeature::BYTE_LENGTH_RANGE)
+        verify_keys::<VERIFY>(&res.0).map_err(UnpackError::Packable)?;
+        verify_packed_len::<VERIFY>(unpacker.counter(), StateMetadataFeature::BYTE_LENGTH_RANGE)
             .map_err(UnpackError::Packable)?;
 
         Ok(res)
