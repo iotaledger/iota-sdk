@@ -214,10 +214,7 @@ impl ClientInner {
 
         let dto = self.get_request::<BlockDto>(path, None, false, true).await?;
 
-        Ok(Block::try_from_dto_with_params(
-            dto,
-            self.get_protocol_parameters().await?,
-        )?)
+        Ok(Block::try_from_dto(dto)?)
     }
 
     /// Finds a block by its BlockId. This method returns the given block raw data.
@@ -303,10 +300,7 @@ impl ClientInner {
 
         let dto = self.get_request::<BlockDto>(path, None, true, true).await?;
 
-        Ok(Block::try_from_dto_with_params(
-            dto,
-            self.get_protocol_parameters().await?,
-        )?)
+        Ok(Block::try_from_dto(dto)?)
     }
 
     /// Returns the block, as raw bytes, that was included in the ledger for a given TransactionId.
@@ -334,10 +328,7 @@ impl ClientInner {
 
         let dto = self.get_request::<MilestonePayloadDto>(path, None, false, true).await?;
 
-        Ok(MilestonePayload::try_from_dto_with_params(
-            dto,
-            self.get_protocol_parameters().await?,
-        )?)
+        Ok(MilestonePayload::try_from_dto(dto)?)
     }
 
     /// Gets the milestone by the given milestone id.
@@ -363,10 +354,7 @@ impl ClientInner {
 
         let dto = self.get_request::<MilestonePayloadDto>(path, None, false, true).await?;
 
-        Ok(MilestonePayload::try_from_dto_with_params(
-            dto,
-            self.get_protocol_parameters().await?,
-        )?)
+        Ok(MilestonePayload::try_from_dto(dto)?)
     }
 
     /// Gets the milestone by the given milestone index.
