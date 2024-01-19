@@ -584,86 +584,79 @@ pub(crate) mod irc_30 {
 pub(crate) mod dto {
     use alloc::{collections::BTreeMap, format};
 
+    use serde::{de, Deserialize, Deserializer, Serialize};
+    use serde_json::Value;
+
     use super::*;
 
-    #[macro_export]
-    macro_rules! impl_serde_typed_metadata_dto {
-        ($base:ty, $type_str:literal) => {
-            use serde::{de, Deserialize, Deserializer, Serialize};
-            use serde_json::Value;
-
-            #[derive(Serialize)]
-            struct MetadataFeatureDto {
-                #[serde(rename = "type")]
-                kind: u8,
-                entries: BTreeMap<String, String>,
-            }
-
-            impl<'de> Deserialize<'de> for $base {
-                fn deserialize<D: Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
-                    let value = Value::deserialize(d)?;
-                    Ok(
-                        match u8::try_from(
-                            value
-                                .get("type")
-                                .and_then(Value::as_u64)
-                                .ok_or_else(|| de::Error::custom(alloc::format!("invalid {} type", $type_str)))?,
-                        )
-                        .map_err(|e| de::Error::custom(alloc::format!("invalid {} type: {}", $type_str, e)))?
-                        {
-                            <$base>::KIND => {
-                                let map: BTreeMap<String, String> = serde_json::from_value(
-                                    value
-                                        .get("entries")
-                                        .ok_or_else(|| de::Error::custom("missing metadata entries"))?
-                                        .clone(),
-                                )
-                                .map_err(|e| de::Error::custom(format!("cannot deserialize metadata feature: {e}")))?;
-
-                                <$base>::try_from(
-                                    map.into_iter()
-                                        .map(|(key, value)| Ok((key, prefix_hex::decode::<Vec<u8>>(value)?)))
-                                        .collect::<Result<BTreeMap<String, Vec<u8>>, prefix_hex::Error>>()
-                                        .map_err(de::Error::custom)?,
-                                )
-                                .map_err(de::Error::custom)?
-                            }
-                            _ => return Err(de::Error::custom(alloc::format!("invalid {} feature", $type_str))),
-                        },
-                    )
-                }
-            }
-
-            impl Serialize for $base {
-                fn serialize<S>(&self, s: S) -> Result<S::Ok, S::Error>
-                where
-                    S: serde::Serializer,
-                {
-                    MetadataFeatureDto::from(self).serialize(s)
-                }
-            }
-            impl From<&$base> for MetadataFeatureDto {
-                fn from(value: &$base) -> Self {
-                    let entries = value
-                        .0
-                        .iter()
-                        .map(|(k, v)| {
-                            (
-                                // Safe to unwrap, keys must be ascii
-                                alloc::str::from_utf8(k.as_ref()).unwrap().to_string(),
-                                prefix_hex::encode(v.as_ref()),
-                            )
-                        })
-                        .collect::<BTreeMap<_, _>>();
-
-                    Self {
-                        kind: <$base>::KIND,
-                        entries,
-                    }
-                }
-            }
-        };
+    #[derive(Serialize)]
+    struct MetadataFeatureDto {
+        #[serde(rename = "type")]
+        kind: u8,
+        entries: BTreeMap<String, String>,
     }
 
-    impl_serde_typed_metadata_dto!(MetadataFeature, "metadata feature");
+    impl<'de> Deserialize<'de> for MetadataFeature {
+        fn deserialize<D: Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
+            let value = Value::deserialize(d)?;
+            Ok(
+                match u8::try_from(
+                    value
+                        .get("type")
+                        .and_then(Value::as_u64)
+                        .ok_or_else(|| de::Error::custom("invalid metadata type"))?,
+                )
+                .map_err(|_| de::Error::custom("invalid metadata type: {e}"))?
+                {
+                    Self::KIND => {
+                        let map: BTreeMap<String, String> = serde_json::from_value(
+                            value
+                                .get("entries")
+                                .ok_or_else(|| de::Error::custom("missing metadata entries"))?
+                                .clone(),
+                        )
+                        .map_err(|e| de::Error::custom(format!("cannot deserialize metadata feature: {e}")))?;
+
+                        Self::try_from(
+                            map.into_iter()
+                                .map(|(key, value)| Ok((key, prefix_hex::decode::<Vec<u8>>(value)?)))
+                                .collect::<Result<BTreeMap<String, Vec<u8>>, prefix_hex::Error>>()
+                                .map_err(de::Error::custom)?,
+                        )
+                        .map_err(de::Error::custom)?
+                    }
+                    _ => return Err(de::Error::custom("invalid metadata feature")),
+                },
+            )
+        }
+    }
+
+    impl From<&MetadataFeature> for MetadataFeatureDto {
+        fn from(value: &MetadataFeature) -> Self {
+            let entries = value
+                .0
+                .iter()
+                .map(|(k, v)| {
+                    (
+                        // Safe to unwrap, keys must be ascii
+                        alloc::str::from_utf8(k.as_ref()).unwrap().to_string(),
+                        prefix_hex::encode(v.as_ref()),
+                    )
+                })
+                .collect::<BTreeMap<_, _>>();
+
+            Self {
+                kind: MetadataFeature::KIND,
+                entries,
+            }
+        }
+    }
+    impl Serialize for MetadataFeature {
+        fn serialize<S>(&self, s: S) -> Result<S::Ok, S::Error>
+        where
+            S: serde::Serializer,
+        {
+            MetadataFeatureDto::from(self).serialize(s)
+        }
+    }
 }

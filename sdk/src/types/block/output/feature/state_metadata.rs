@@ -237,9 +237,81 @@ impl core::fmt::Debug for StateMetadataFeature {
 
 #[cfg(feature = "serde")]
 pub(crate) mod dto {
+    use alloc::{collections::BTreeMap, format};
+
+    use serde::{de, Deserialize, Deserializer, Serialize};
+    use serde_json::Value;
 
     use super::*;
-    use crate::impl_serde_typed_metadata_dto;
 
-    impl_serde_typed_metadata_dto!(StateMetadataFeature, "state metadata feature");
+    #[derive(Serialize)]
+    struct StateMetadataFeatureDto {
+        #[serde(rename = "type")]
+        kind: u8,
+        entries: BTreeMap<String, String>,
+    }
+
+    impl<'de> Deserialize<'de> for StateMetadataFeature {
+        fn deserialize<D: Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
+            let value = Value::deserialize(d)?;
+            Ok(
+                match u8::try_from(
+                    value
+                        .get("type")
+                        .and_then(Value::as_u64)
+                        .ok_or_else(|| de::Error::custom("invalid state metadata type"))?,
+                )
+                .map_err(|_| de::Error::custom("invalid state metadata type: {e}"))?
+                {
+                    Self::KIND => {
+                        let map: BTreeMap<String, String> = serde_json::from_value(
+                            value
+                                .get("entries")
+                                .ok_or_else(|| de::Error::custom("missing state metadata entries"))?
+                                .clone(),
+                        )
+                        .map_err(|e| de::Error::custom(format!("cannot deserialize state metadata feature: {e}")))?;
+
+                        Self::try_from(
+                            map.into_iter()
+                                .map(|(key, value)| Ok((key, prefix_hex::decode::<Vec<u8>>(value)?)))
+                                .collect::<Result<BTreeMap<String, Vec<u8>>, prefix_hex::Error>>()
+                                .map_err(de::Error::custom)?,
+                        )
+                        .map_err(de::Error::custom)?
+                    }
+                    _ => return Err(de::Error::custom("invalid state metadata feature")),
+                },
+            )
+        }
+    }
+
+    impl From<&StateMetadataFeature> for StateMetadataFeatureDto {
+        fn from(value: &StateMetadataFeature) -> Self {
+            let entries = value
+                .0
+                .iter()
+                .map(|(k, v)| {
+                    (
+                        // Safe to unwrap, keys must be ascii
+                        alloc::str::from_utf8(k.as_ref()).unwrap().to_string(),
+                        prefix_hex::encode(v.as_ref()),
+                    )
+                })
+                .collect::<BTreeMap<_, _>>();
+
+            Self {
+                kind: StateMetadataFeature::KIND,
+                entries,
+            }
+        }
+    }
+    impl Serialize for StateMetadataFeature {
+        fn serialize<S>(&self, s: S) -> Result<S::Ok, S::Error>
+        where
+            S: serde::Serializer,
+        {
+            StateMetadataFeatureDto::from(self).serialize(s)
+        }
+    }
 }
