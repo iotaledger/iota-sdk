@@ -177,7 +177,7 @@ pub enum UtilsMethod {
         transaction: TransactionPayloadDto,
         protocol_parameters: ProtocolParameters,
     },
-    /// Returns the serialized bytes of a block..
+    /// Returns the serialized bytes of a block.
     /// Expected response: [`Raw`](crate::Response::Raw)
     BlockBytes {
         /// Block
