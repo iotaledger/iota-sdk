@@ -28,11 +28,11 @@ describe('Block tests', () => {
         expect(block.id(params)).toEqual(expected_id);
     });
 
-    // it('compares validation block from a fixture', async () => {
-    //     const block = parseBlock(validation_block_json.block);
-    //     expect(block).toBeInstanceOf(Block);
-    //     const params: ProtocolParameters = JSON.parse(JSON.stringify(protocol_parameters_json.params));
-    //     const expected_id = validation_block_json.id as BlockId;
-    //     expect(block.id(params)).toEqual(expected_id);
-    // });
+    it('compares validation block from a fixture', async () => {
+        const block = parseBlock(validation_block_json.block);
+        expect(block).toBeInstanceOf(Block);
+        const params: ProtocolParameters = JSON.parse(JSON.stringify(protocol_parameters_json.params));
+        const expected_id = validation_block_json.id as BlockId;
+        expect(block.id(params)).toEqual(expected_id);
+    });
 });
