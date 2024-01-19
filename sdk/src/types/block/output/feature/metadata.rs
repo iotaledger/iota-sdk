@@ -30,7 +30,6 @@ pub(crate) type MetadataBTreeMapPrefix = BTreeMapPrefix<
     BoxedSlicePrefix<u8, MetadataFeatureValueLength>,
     MetadataFeatureEntryCount,
 >;
-
 pub(crate) type MetadataBTreeMap =
     BTreeMap<BoxedSlicePrefix<u8, MetadataFeatureKeyLength>, BoxedSlicePrefix<u8, MetadataFeatureValueLength>>;
 
