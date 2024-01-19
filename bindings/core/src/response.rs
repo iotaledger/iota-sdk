@@ -225,7 +225,7 @@ pub enum Response {
     /// Response for:
     /// - [`HashTransactionEssence`](crate::method::UtilsMethod::HashTransactionEssence)
     /// - [`ComputeInputsCommitment`](crate::method::UtilsMethod::ComputeInputsCommitment)
-    /// - [`ComputeInputsCommitment`](crate::method::UtilsMethod::BlockHashWithoutNonce)
+    /// - [`BlockHashWithoutNonce`](crate::method::UtilsMethod::BlockHashWithoutNonce)
     Hash(String),
     /// Response for [`GetNodeInfo`](crate::method::ClientMethod::GetNodeInfo)
     NodeInfoWrapper(NodeInfoWrapper),
