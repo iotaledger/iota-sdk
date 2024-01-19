@@ -168,7 +168,7 @@ class Utils():
         """
         return _call_method('blockId', {
             'block': block.to_dict(),
-            'protocol_parameters': params.to_dict(),
+            'protocolParameters': params.to_dict(),
         })
 
     @staticmethod
