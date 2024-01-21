@@ -1,10 +1,10 @@
 # Copyright 2024 IOTA Stiftung
 # SPDX-License-Identifier: Apache-2.0
 
-from typing import List
+from typing import List, Optional
 from dataclasses import dataclass, field
 from dataclasses_json import config
-from iota_sdk.types.common import HexStr, json
+from iota_sdk.types.common import EpochIndex, HexStr, json
 
 
 @json
@@ -49,7 +49,7 @@ class Committee:
     total_validator_stake: int = field(metadata=config(
         encoder=str
     ))
-    epoch: int
+    epoch: EpochIndex
 
 
 @json
@@ -68,7 +68,7 @@ class Validator:
         latest_supported_protocol_hash: The protocol hash of the latest supported protocol of the validator.
     """
     address: HexStr
-    staking_end_epoch: int
+    staking_end_epoch: EpochIndex
     pool_stake: int = field(metadata=config(
         encoder=str
     ))
@@ -97,4 +97,4 @@ class Validators:
     """
     stakers: List[Validator]
     page_size: int
-    cursor: str
+    cursor: Optional[str] = None

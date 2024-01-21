@@ -328,11 +328,12 @@ pub struct CongestionResponse {
     pub block_issuance_credits: i128,
 }
 
+// FIXME: can this response be removed ... seems like it's not exposed anymore!
 /// Response of POST /api/core/v3/blocks.
 /// Returns the block identifier of the submitted block.
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct SubmitBlockResponse {
+pub(crate) struct SubmitBlockResponse {
     pub block_id: BlockId,
 }
 

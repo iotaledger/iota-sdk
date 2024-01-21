@@ -6,7 +6,7 @@ from typing import Dict, Optional, Union
 from dataclasses import dataclass, field
 from dataclasses_json import config
 from iota_sdk.types.common import HexStr, json
-from iota_sdk.types.output import AccountOutput, BasicOutput, DelegationOutput, FoundryOutput, NftOutput, deserialize_output
+from iota_sdk.types.output import AccountOutput, AnchorOutput, BasicOutput, DelegationOutput, FoundryOutput, NftOutput, deserialize_output
 
 
 @json
@@ -37,7 +37,8 @@ class OutputMetadata:
 @json
 @dataclass
 class OutputWithMetadata:
-    """An output with its metadata.
+    """An output and its metadata.
+    Response of GET /api/core/v3/outputs/{output_id}.
 
     Attributes:
         metadata: The `OutputMetadata` object that belongs to `output`.
@@ -45,8 +46,8 @@ class OutputWithMetadata:
     """
 
     metadata: OutputMetadata
-    output: Union[AccountOutput, FoundryOutput,
-                  NftOutput, BasicOutput, DelegationOutput] = field(metadata=config(
+    output: Union[BasicOutput, AccountOutput, AnchorOutput, FoundryOutput,
+                  NftOutput, DelegationOutput] = field(metadata=config(
                       decoder=deserialize_output
                   ))
 

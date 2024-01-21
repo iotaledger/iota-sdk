@@ -26,6 +26,7 @@ class UtxoChanges():
     created_outputs: List[OutputId]
     consumed_outputs: List[OutputId]
 
+
 @json
 @dataclass
 class OutputWithId():
@@ -37,6 +38,7 @@ class OutputWithId():
     """
     output_id: OutputId
     output: Output
+
 
 @json
 @dataclass

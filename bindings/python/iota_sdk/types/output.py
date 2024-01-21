@@ -347,18 +347,18 @@ class OutputIdProof:
     slot: SlotIndex
     output_index: int
     transaction_commitment: str
-    # TODO
-    # output_commitment_proof: OutputCommitmentProof
+    # TODO: do we need the specific types that make up the proof?
+    output_commitment_proof: Dict[str, Any]
 
 
 @json
 @dataclass
-class OutputResponse:
+class OutputWrapper:
     """Contains the generic Output with associated OutputIdProof.
 
     Attributes:
         output: One of the possible outputs.
-        output_id_proof: todo.
+        output_id_proof: The associated Output ID proof.
     """
     output: Output
     output_id_proof: OutputIdProof

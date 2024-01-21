@@ -149,6 +149,8 @@ pub enum ClientMethod {
     },
     /// Returns the node information together with the url of the used node
     GetInfo,
+    /// Returns the available API route groups of the node.
+    GetRoutes,
     /// Check the readiness of the node to issue a new block, the reference mana cost based on the rate setter and
     /// current network congestion, and the block issuance credits of the requested account.
     #[serde(rename_all = "camelCase")]

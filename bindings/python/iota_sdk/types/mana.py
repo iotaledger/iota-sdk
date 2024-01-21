@@ -3,7 +3,7 @@
 
 from dataclasses import dataclass, field
 from dataclasses_json import config
-from iota_sdk.types.common import HexStr, json
+from iota_sdk.types.common import EpochIndex, HexStr, json
 
 
 @json
@@ -21,6 +21,7 @@ class ManaAllotment:
         encoder=str
     ))
 
+
 @json
 @dataclass
 class ManaRewards:
@@ -33,8 +34,8 @@ class ManaRewards:
         rewards: Amount of totally available decayed rewards the requested output may claim.
         latest_committed_epoch_pool_rewards: Rewards of the latest committed epoch of the staking pool to which this validator or delegator belongs. The ratio of this value and the maximally possible rewards for the latest committed epoch can be used to determine how well the validator of this staking pool performed in that epoch. Note that if the pool was not part of the committee in the latest committed epoch, this value is 0.
     """
-    start_epoch: int
-    end_epoch: int
+    start_epoch: EpochIndex
+    end_epoch: EpochIndex
     rewards: int = field(metadata=config(
         encoder=str
     ))

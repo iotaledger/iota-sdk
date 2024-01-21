@@ -317,14 +317,15 @@ class NodeInfoBaseToken:
     name: str
     ticker_symbol: str
     unit: str
-    decimals: int
     subunit: Optional[str] = None
+    decimals: int
 
 
 @json
 @dataclass
 class NodeInfo:
-    """Response from the /info endpoint.
+    """General information about the node.
+    GET /api/core/v3/info.
 
     Attributes:
         name: The name of the node (e.g. Hornet).
@@ -349,7 +350,8 @@ class NodeInfo:
 @json
 @dataclass
 class NodeInfoWrapper:
-    """NodeInfo wrapper which contains the node info and the url from the node.
+    """General information about the node and its URL.
+    GET /api/core/v3/info.
 
     Attributes:
         node_info: A NodeInfo object.
@@ -357,3 +359,15 @@ class NodeInfoWrapper:
     """
     node_info: NodeInfo
     url: str
+
+
+@json
+@dataclass
+class Routes:
+    """API route groups of the node.
+    GET /api/routes.
+
+    Attributes:
+        routes: The available API route groups of the node.
+    """
+    routes: List[str]

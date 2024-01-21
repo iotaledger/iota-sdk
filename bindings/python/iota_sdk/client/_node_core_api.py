@@ -3,16 +3,15 @@
 
 from typing import List, Optional, Union
 from abc import ABCMeta, abstractmethod
-from dacite import from_dict
 
 from iota_sdk.types.block.block import Block
 from iota_sdk.types.block.metadata import BlockMetadata, BlockWithMetadata
 from iota_sdk.types.committee import Committee, Validator, Validators
 from iota_sdk.types.common import HexStr, EpochIndex, SlotIndex
-from iota_sdk.types.congestion import Congestion, IssuanceBlockHeader
+from iota_sdk.types.issuance import Congestion, IssuanceBlockHeader
 from iota_sdk.types.mana import ManaRewards
-from iota_sdk.types.node_info import NodeInfo, NodeInfoWrapper
-from iota_sdk.types.output import OutputResponse
+from iota_sdk.types.node_info import NodeInfo, NodeInfoWrapper, Routes
+from iota_sdk.types.output import OutputWrapper
 from iota_sdk.types.output_metadata import OutputWithMetadata, OutputMetadata
 from iota_sdk.types.output_id import OutputId
 from iota_sdk.types.slot import SlotCommitment
@@ -45,6 +44,8 @@ class NodeCoreAPI(metaclass=ABCMeta):
         no payload.
         """
 
+    # Node routes.
+
     def get_health(self, url: str) -> bool:
         """Returns the health of the node.
         GET /health
@@ -60,8 +61,53 @@ class NodeCoreAPI(metaclass=ABCMeta):
         """Returns general information about the node.
         GET /api/core/v3/info
         """
-        return from_dict(NodeInfoWrapper, self._call_method('getInfo'))
+        return NodeInfoWrapper.from_dict(self._call_method('getInfo'))
 
+    def get_routes(self) -> Routes:
+        """Returns the available API route groups of the node.
+        GET /api/routes
+        """
+        return Routes.from_dict(self._call_method('getRoutes'))
+
+    # FIXME: Remove or move? (not part of official IOTA 2.0 Core API)
+    def get_node_info(self, url: str, auth=None) -> NodeInfo:
+        """Get node info.
+        GET /api/core/v3/info endpoint
+
+        Args:
+            url: The node's url.
+            auth: A JWT or username/password authentication object.
+
+        Returns:
+            The node info.
+        """
+        return NodeInfo.from_dict(self._call_method('getNodeInfo', {
+            'url': url,
+            'auth': auth
+        }))
+
+    def call_plugin_route(self, base_plugin_path: str, method: str,
+                          endpoint: str, query_params: Optional[List[str]] = None, request: Optional[str] = None):
+        """Extension method which provides request methods for plugins.
+
+        Args:
+            base_plugin_path: The base path of the routes provided by the plugin.
+            method: The HTTP method.
+            endpoint: The endpoint to query provided by the plugin.
+            query_params: The parameters of the query.
+            request: The request object sent to the endpoint of the plugin.
+        """
+        if query_params is None:
+            query_params = []
+        return self._call_method('callPluginRoute', {
+            'basePluginPath': base_plugin_path,
+            'method': method,
+            'endpoint': endpoint,
+            'queryParams': query_params,
+            'request': request,
+        })
+
+    # Accounts routes.
 
     def get_account_congestion(self, account_id: HexStr) -> Congestion:
         """Checks if the account is ready to issue a block.
@@ -71,10 +117,10 @@ class NodeCoreAPI(metaclass=ABCMeta):
             'accountId': account_id
         })
 
+    # Rewards routes.
 
-    ### Rewards routes.
-
-    def get_output_mana_rewards(self, output_id: HexStr, slot_index: int) -> ManaRewards:
+    def get_output_mana_rewards(
+            self, output_id: HexStr, slot_index: SlotIndex) -> ManaRewards:
         """Returns the total available Mana rewards of an account or delegation output decayed up to `epochEnd` index
         provided in the response.
         Note that rewards for an epoch only become available at the beginning of the next epoch. If the end epoch of a
@@ -88,7 +134,7 @@ class NodeCoreAPI(metaclass=ABCMeta):
             'slotIndex': slot_index
         })
 
-    ### Committee routes.
+    # Committee routes.
 
     def get_committee(self, epoch_index: EpochIndex) -> Committee:
         """Returns the information of committee members at the given epoch index. If epoch index is not provided, the
@@ -99,7 +145,7 @@ class NodeCoreAPI(metaclass=ABCMeta):
             'epochIndex': epoch_index
         })
 
-    ### Validators routes.
+    # Validators routes.
 
     def get_validators(self, page_size, cursor) -> Validators:
         """Returns information of all registered validators and if they are active.
@@ -118,8 +164,7 @@ class NodeCoreAPI(metaclass=ABCMeta):
             'accountId': account_id
         })
 
-
-    ### Block routes.
+    # Block routes.
 
     def get_issuance(self) -> IssuanceBlockHeader:
         """Returns information that is ideal for attaching a block in the network.
@@ -196,10 +241,10 @@ class NodeCoreAPI(metaclass=ABCMeta):
             'blockId': block_id
         }))
 
-    ### UTXO routes.
+    # UTXO routes.
 
     def get_output(
-            self, output_id: Union[OutputId, HexStr]) -> OutputResponse:
+            self, output_id: Union[OutputId, HexStr]) -> OutputWrapper:
         """Finds an output by its ID and returns it as object.
         GET /api/core/v3/outputs/{outputId}
 
@@ -208,7 +253,7 @@ class NodeCoreAPI(metaclass=ABCMeta):
         """
         output_id_str = output_id.output_id if isinstance(
             output_id, OutputId) else output_id
-        return OutputResponse.from_dict(self._call_method('getOutput', {
+        return OutputWrapper.from_dict(self._call_method('getOutput', {
             'outputId': output_id_str
         }))
 
@@ -237,7 +282,8 @@ class NodeCoreAPI(metaclass=ABCMeta):
         output_id_str = output_id.output_id if isinstance(
             output_id, OutputId) else output_id
         # TODO: remove
-        # return from_dict(OutputMetadata, self._call_method('getOutputMetadata', {
+        # return from_dict(OutputMetadata,
+        # self._call_method('getOutputMetadata', {
         return OutputMetadata.from_dict(self._call_method('getOutputMetadata', {
             'outputId': output_id_str
         }))
@@ -290,7 +336,8 @@ class NodeCoreAPI(metaclass=ABCMeta):
             'transactionId': transaction_id
         }))
 
-    def get_transaction_metadata(self, transaction_id: HexStr) -> TransactionMetadata:
+    def get_transaction_metadata(
+            self, transaction_id: HexStr) -> TransactionMetadata:
         """Finds the metadata of a transaction.
         GET /api/core/v3/transactions/{transactionId}/metadata
 
@@ -301,9 +348,10 @@ class NodeCoreAPI(metaclass=ABCMeta):
             'transactionId': transaction_id
         }))
 
-    ### Commitments routes.
+    # Commitments routes.
 
-    def get_slot_commitment_by_id(self, slot_commitment_id: HexStr) -> SlotCommitment:
+    def get_slot_commitment_by_id(
+            self, slot_commitment_id: HexStr) -> SlotCommitment:
         """Finds a slot commitment by its ID and returns it as object.
         GET /api/core/v3/commitments/{commitmentId}
 
@@ -314,7 +362,8 @@ class NodeCoreAPI(metaclass=ABCMeta):
             'slotCommitmentId': slot_commitment_id
         }))
 
-    def get_slot_commitment_by_id_raw(self, slot_commitment_id: HexStr) -> List[int]:
+    def get_slot_commitment_by_id_raw(
+            self, slot_commitment_id: HexStr) -> List[int]:
         """Finds a slot commitment by its ID and returns it as raw bytes.
         GET /api/core/v3/commitments/{commitmentId}
 
@@ -325,7 +374,8 @@ class NodeCoreAPI(metaclass=ABCMeta):
             'slotCommitmentId': slot_commitment_id
         })
 
-    def get_utxo_changes_by_slot_commitment_id(self, slot_commitment_id: HexStr) -> UtxoChanges:
+    def get_utxo_changes_by_slot_commitment_id(
+            self, slot_commitment_id: HexStr) -> UtxoChanges:
         """Get all UTXO changes of a given slot by slot commitment ID.
         GET /api/core/v3/commitments/{commitmentId}/utxo-changes
 
@@ -336,7 +386,8 @@ class NodeCoreAPI(metaclass=ABCMeta):
             'slotCommitmentId': slot_commitment_id
         }))
 
-    def get_utxo_changes_full_by_slot_commitment_id(self, slot_commitment_id: HexStr) -> UtxoChangesFull:
+    def get_utxo_changes_full_by_slot_commitment_id(
+            self, slot_commitment_id: HexStr) -> UtxoChangesFull:
         """Get all full UTXO changes of a given slot by slot commitment ID.
         GET /api/core/v3/commitments/{commitmentId}/utxo-changes/full
 
@@ -347,7 +398,8 @@ class NodeCoreAPI(metaclass=ABCMeta):
             'slotCommitmentId': slot_commitment_id
         }))
 
-    def get_slot_commitment_by_slot(self, slot_index: SlotIndex) -> SlotCommitment:
+    def get_slot_commitment_by_slot(
+            self, slot_index: SlotIndex) -> SlotCommitment:
         """Finds a slot commitment by slot index and returns it as object.
         GET /api/core/v3/commitments/by-slot/{slot}
 
@@ -358,7 +410,8 @@ class NodeCoreAPI(metaclass=ABCMeta):
             'slotIndex': slot_index
         }))
 
-    def get_slot_commitment_by_slot_raw(self, slot_index: SlotIndex) -> List[int]:
+    def get_slot_commitment_by_slot_raw(
+            self, slot_index: SlotIndex) -> List[int]:
         """Finds a slot commitment by slot index and returns it as raw bytes.
         GET /api/core/v3/commitments/by-slot/{slot}
 
@@ -380,7 +433,8 @@ class NodeCoreAPI(metaclass=ABCMeta):
             'slotIndex': slot_index
         }))
 
-    def get_utxo_changes_full_by_slot(self, slot_index: SlotIndex) -> UtxoChangesFull:
+    def get_utxo_changes_full_by_slot(
+            self, slot_index: SlotIndex) -> UtxoChangesFull:
         """Get all full UTXO changes of a given slot by its index.
         GET /api/core/v3/commitments/by-slot/{slot}/utxo-changes/full
 
@@ -390,40 +444,3 @@ class NodeCoreAPI(metaclass=ABCMeta):
         return UtxoChangesFull.from_dict(self._call_method('getUtxoChangesFullBySlot', {
             'slotIndex': slot_index
         }))
-
-    def get_node_info(self, url: str, auth=None) -> NodeInfo:
-        """Get node info.
-        GET /api/core/v3/info endpoint
-
-        Args:
-            url: The node's url.
-            auth: A JWT or username/password authentication object.
-
-        Returns:
-            The node info.
-        """
-        return NodeInfo.from_dict(self._call_method('getNodeInfo', {
-            'url': url,
-            'auth': auth
-        }))
-
-    def call_plugin_route(self, base_plugin_path: str, method: str,
-                          endpoint: str, query_params: Optional[List[str]] = None, request: Optional[str] = None):
-        """Extension method which provides request methods for plugins.
-
-        Args:
-            base_plugin_path: The base path of the routes provided by the plugin.
-            method: The HTTP method.
-            endpoint: The endpoint to query provided by the plugin.
-            query_params: The parameters of the query.
-            request: The request object sent to the endpoint of the plugin.
-        """
-        if query_params is None:
-            query_params = []
-        return self._call_method('callPluginRoute', {
-            'basePluginPath': base_plugin_path,
-            'method': method,
-            'endpoint': endpoint,
-            'queryParams': query_params,
-            'request': request,
-        })
