@@ -7,10 +7,17 @@ from dacite import from_dict
 
 from iota_sdk.types.block.block import Block
 from iota_sdk.types.block.metadata import BlockMetadata, BlockWithMetadata
-from iota_sdk.types.common import HexStr
+from iota_sdk.types.committee import Committee, Validator, Validators
+from iota_sdk.types.common import HexStr, EpochIndex, SlotIndex
+from iota_sdk.types.congestion import Congestion, IssuanceBlockHeader
+from iota_sdk.types.mana import ManaRewards
 from iota_sdk.types.node_info import NodeInfo, NodeInfoWrapper
+from iota_sdk.types.output import OutputResponse
 from iota_sdk.types.output_metadata import OutputWithMetadata, OutputMetadata
 from iota_sdk.types.output_id import OutputId
+from iota_sdk.types.slot import SlotCommitment
+from iota_sdk.types.transaction_metadata import TransactionMetadata
+from iota_sdk.types.utxo_changes import UtxoChanges, UtxoChangesFull
 
 
 class NodeCoreAPI(metaclass=ABCMeta):
@@ -83,7 +90,7 @@ class NodeCoreAPI(metaclass=ABCMeta):
 
     ### Committee routes.
 
-    def get_committee(self, epoch_index: int) -> Committee:
+    def get_committee(self, epoch_index: EpochIndex) -> Committee:
         """Returns the information of committee members at the given epoch index. If epoch index is not provided, the
         current committee members are returned.
         GET /api/core/v3/committee/?epochIndex
@@ -99,7 +106,8 @@ class NodeCoreAPI(metaclass=ABCMeta):
         GET JSON to /api/core/v3/validators
         """
         return self._call_method('getValidators', {
-            'epochIndex': epoch_index
+            'pageSize': page_size,
+            'cursor': cursor
         })
 
     def get_validator(self, account_id: HexStr) -> Validator:
@@ -191,7 +199,7 @@ class NodeCoreAPI(metaclass=ABCMeta):
     ### UTXO routes.
 
     def get_output(
-            self, output_id: Union[OutputId, HexStr]) -> Output:
+            self, output_id: Union[OutputId, HexStr]) -> OutputResponse:
         """Finds an output by its ID and returns it as object.
         GET /api/core/v3/outputs/{outputId}
 
@@ -200,7 +208,7 @@ class NodeCoreAPI(metaclass=ABCMeta):
         """
         output_id_str = output_id.output_id if isinstance(
             output_id, OutputId) else output_id
-        return Output.from_dict(self._call_method('getOutput', {
+        return OutputResponse.from_dict(self._call_method('getOutput', {
             'outputId': output_id_str
         }))
 
@@ -228,7 +236,9 @@ class NodeCoreAPI(metaclass=ABCMeta):
         """
         output_id_str = output_id.output_id if isinstance(
             output_id, OutputId) else output_id
-        return from_dict(OutputMetadata, self._call_method('getOutputMetadata', {
+        # TODO: remove
+        # return from_dict(OutputMetadata, self._call_method('getOutputMetadata', {
+        return OutputMetadata.from_dict(self._call_method('getOutputMetadata', {
             'outputId': output_id_str
         }))
 
@@ -280,7 +290,7 @@ class NodeCoreAPI(metaclass=ABCMeta):
             'transactionId': transaction_id
         }))
 
-    def get_transaction_metadata(self, transaction_id: HexStr) -> TransactionMetadta:
+    def get_transaction_metadata(self, transaction_id: HexStr) -> TransactionMetadata:
         """Finds the metadata of a transaction.
         GET /api/core/v3/transactions/{transactionId}/metadata
 
@@ -290,7 +300,7 @@ class NodeCoreAPI(metaclass=ABCMeta):
         return TransactionMetadata.from_dict(self._call_method('getTransactionMetadata', {
             'transactionId': transaction_id
         }))
-        
+
     ### Commitments routes.
 
     def get_slot_commitment_by_id(self, slot_commitment_id: HexStr) -> SlotCommitment:
@@ -333,11 +343,11 @@ class NodeCoreAPI(metaclass=ABCMeta):
         Returns:
             The full UTXO changes.
         """
-        return UtxoChangesFull.from_dict(self._call_method('getUtxoChangesBySlotCommitmentIdFull', {
+        return UtxoChangesFull.from_dict(self._call_method('getUtxoChangesFullBySlotCommitmentId', {
             'slotCommitmentId': slot_commitment_id
         }))
 
-    def get_slot_commitment_by_slot(self, slot_index: int) -> SlotCommitment:
+    def get_slot_commitment_by_slot(self, slot_index: SlotIndex) -> SlotCommitment:
         """Finds a slot commitment by slot index and returns it as object.
         GET /api/core/v3/commitments/by-slot/{slot}
 
@@ -345,10 +355,10 @@ class NodeCoreAPI(metaclass=ABCMeta):
             The corresponding slot commitment.
         """
         return SlotCommitment.from_dict(self._call_method('getSlotCommitmentBySlot', {
-            'slotCommitmentId': slot_commitment_id
+            'slotIndex': slot_index
         }))
 
-    def get_slot_commitment_by_slot_raw(self, slot_index: int) -> List[int]:
+    def get_slot_commitment_by_slot_raw(self, slot_index: SlotIndex) -> List[int]:
         """Finds a slot commitment by slot index and returns it as raw bytes.
         GET /api/core/v3/commitments/by-slot/{slot}
 
@@ -356,7 +366,7 @@ class NodeCoreAPI(metaclass=ABCMeta):
             The raw bytes of the corresponding slot commitment.
         """
         return self._call_method('getSlotCommitmentBySlotRaw', {
-            'slotCommitmentId': slot_commitment_id
+            'slotIndex': slot_index
         })
 
     def get_utxo_changes_by_slot(self, slot_index: SlotIndex) -> UtxoChanges:
@@ -377,7 +387,7 @@ class NodeCoreAPI(metaclass=ABCMeta):
         Returns:
             The full UTXO changes.
         """
-        return UtxoChanges.from_dict(self._call_method('getUtxoChangesFullBySlot', {
+        return UtxoChangesFull.from_dict(self._call_method('getUtxoChangesFullBySlot', {
             'slotIndex': slot_index
         }))
 

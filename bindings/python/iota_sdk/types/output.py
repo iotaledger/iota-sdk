@@ -6,7 +6,7 @@ from enum import IntEnum
 from typing import Dict, Optional, List, TypeAlias, Union, Any
 from dataclasses import dataclass, field
 from dataclasses_json import config
-from iota_sdk.types.common import HexStr, json, EpochIndex
+from iota_sdk.types.common import HexStr, json, EpochIndex, SlotIndex
 from iota_sdk.types.feature import deserialize_features, SenderFeature, IssuerFeature, MetadataFeature, TagFeature, NativeTokenFeature
 from iota_sdk.types.token_scheme import SimpleTokenScheme
 from iota_sdk.types.unlock_condition import deserialize_unlock_conditions, AddressUnlockCondition, StateControllerAddressUnlockCondition, GovernorAddressUnlockCondition, StorageDepositReturnUnlockCondition, TimelockUnlockCondition, ExpirationUnlockCondition, ImmutableAccountAddressUnlockCondition
@@ -36,6 +36,7 @@ class OutputType(IntEnum):
 @dataclass
 class BasicOutput:
     """Describes a basic output.
+
     Attributes:
         amount :
             The base coin amount of the output.
@@ -73,6 +74,7 @@ class BasicOutput:
 @dataclass
 class AccountOutput:
     """Describes an account output.
+
     Attributes:
         amount :
             The base coin amount of the output.
@@ -123,6 +125,7 @@ class AccountOutput:
 @dataclass
 class AnchorOutput:
     """Describes an anchor output.
+
     Attributes:
         amount :
             The base coin amount of the output.
@@ -174,6 +177,7 @@ class AnchorOutput:
 @dataclass
 class FoundryOutput:
     """Describes a foundry output.
+
     Attributes:
         amount :
             The base coin amount of the output.
@@ -214,6 +218,7 @@ class FoundryOutput:
 @dataclass
 class NftOutput:
     """Describes an NFT output.
+
     Attributes:
         amount :
             The base coin amount of the output.
@@ -259,6 +264,7 @@ class NftOutput:
 @dataclass
 class DelegationOutput:
     """An output which delegates its contained IOTA coins as voting power to a validator.
+
     Attributes:
         amount: The amount of IOTA coins held by the output.
         delegated_amount: The amount of delegated IOTA coins.
@@ -325,3 +331,34 @@ def deserialize_outputs(dicts: List[Dict[str, Any]]) -> List[Output]:
     * `dicts`: A list of dictionaries that are expected to have a key called 'type' which specifies the type of the returned value.
     """
     return list(map(deserialize_output, dicts))
+
+
+@json
+@dataclass
+class OutputIdProof:
+    """The proof of the output identifier.
+
+    Attributes:
+        slot: TODO.
+        output_index: TODO
+        transaction_commitment: TODO
+        output_commitment_proof: TODO
+    """
+    slot: SlotIndex
+    output_index: int
+    transaction_commitment: str
+    # TODO
+    # output_commitment_proof: OutputCommitmentProof
+
+
+@json
+@dataclass
+class OutputResponse:
+    """Contains the generic Output with associated OutputIdProof.
+
+    Attributes:
+        output: One of the possible outputs.
+        output_id_proof: todo.
+    """
+    output: Output
+    output_id_proof: OutputIdProof
