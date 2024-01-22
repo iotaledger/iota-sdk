@@ -1,7 +1,7 @@
 // Copyright 2023 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 use super::{Error, InputSelection, Requirement};
 use crate::{
@@ -11,7 +11,7 @@ use crate::{
         input::INPUT_COUNT_MAX,
         output::{
             unlock_condition::StorageDepositReturnUnlockCondition, AliasOutputBuilder, AliasTransition,
-            FoundryOutputBuilder, NftOutputBuilder, Output, OutputId, Rent,
+            FoundryOutputBuilder, NativeTokens, NftOutputBuilder, Output, OutputId, Rent, TokenId,
         },
     },
 };
@@ -81,6 +81,7 @@ struct AmountSelection {
     remainder_amount: u64,
     native_tokens_remainder: bool,
     timestamp: u32,
+    selected_native_tokens: HashSet<TokenId>,
 }
 
 impl AmountSelection {
@@ -89,6 +90,17 @@ impl AmountSelection {
             &input_selection.selected_inputs,
             &input_selection.outputs,
             input_selection.timestamp,
+        );
+        let selected_native_tokens = HashSet::<TokenId>::from_iter(
+            input_selection
+                .selected_inputs
+                .iter()
+                .flat_map(|i| {
+                    i.output
+                        .native_tokens()
+                        .map(|n| n.iter().copied().map(|n| *n.token_id()).collect::<Vec<TokenId>>())
+                })
+                .flatten(),
         );
         let (remainder_amount, native_tokens_remainder) = input_selection.remainder_amount()?;
 
@@ -101,6 +113,7 @@ impl AmountSelection {
             remainder_amount,
             native_tokens_remainder,
             timestamp: input_selection.timestamp,
+            selected_native_tokens,
         })
     }
 
@@ -144,6 +157,19 @@ impl AmountSelection {
                 }
 
                 *self.inputs_sdr.entry(*sdruc.return_address()).or_default() += sdruc.amount();
+            }
+
+            if let Some(nt) = input.output.native_tokens() {
+                let mut selected_native_tokens = self.selected_native_tokens.clone();
+
+                selected_native_tokens.extend(nt.iter().map(|t| t.token_id()));
+                // Don't select input if the tx would end up with more than allowed native tokens.
+                if selected_native_tokens.len() > NativeTokens::COUNT_MAX.into() {
+                    continue;
+                } else {
+                    // Update selected with NTs from this output.
+                    self.selected_native_tokens = selected_native_tokens;
+                }
             }
 
             self.inputs_sum += input.output.amount();
@@ -308,7 +334,25 @@ impl InputSelection {
             return Ok(r);
         }
 
-        if self.selected_inputs.len() + amount_selection.newly_selected_inputs.len() > INPUT_COUNT_MAX.into() {
+        // If the available inputs have more NTs than are allowed in a single tx, we might not be able to find inputs
+        // without exceeding the threshold, so in this case we also try again with the outputs ordered the other way
+        // around.
+        let potentially_too_many_native_tokens = HashSet::<TokenId>::from_iter(
+            self.available_inputs
+                .iter()
+                .flat_map(|i| {
+                    i.output
+                        .native_tokens()
+                        .map(|n| n.iter().copied().map(|n| *n.token_id()).collect::<Vec<TokenId>>())
+                })
+                .flatten(),
+        )
+        .len()
+            > NativeTokens::COUNT_MAX.into();
+
+        if self.selected_inputs.len() + amount_selection.newly_selected_inputs.len() > INPUT_COUNT_MAX.into()
+            || potentially_too_many_native_tokens
+        {
             // Clear before trying with reversed ordering.
             log::debug!("Clearing amount selection");
             amount_selection = AmountSelection::new(self)?;
