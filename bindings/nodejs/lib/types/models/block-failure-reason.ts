@@ -34,7 +34,7 @@ export enum BlockFailureReason {
 }
 
 /**
- * Transaction failure reason strings.
+ * Block failure reason strings.
  */
 export const BLOCK_FAILURE_REASON_STRINGS: {
     [key in BlockFailureReason]: string;
