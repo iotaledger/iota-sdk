@@ -1,5 +1,8 @@
 {
-    "blockId": "0x8e7c2d36c236f7d44f26cf8c70b3d99e18e7d7390b32c9637c08c086d9475e6a",
-    "blockState": "confirmed",
+  "blockId": "0xf7ac0552041789a3931ae76eafa47df063632cddd3f8b11bd0bfffba1bc8c46800000000",
+  "blockState": "confirmed",
+  "transactionMetadata": {
+    "transactionId": "0x72f0dfa9ad116ade8bdac8ef291ed2fb8065c6c75d5d3666e8b2053696c94a9e00001000",
     "transactionState": "confirmed"
   }
+}
