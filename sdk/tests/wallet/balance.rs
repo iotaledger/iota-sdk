@@ -73,7 +73,7 @@ fn rand_balance_add_assign() {
             .iter()
             .chain(add_balance.accounts().iter())
             .cloned()
-            .collect::<Vec<_>>()
+            .collect()
     );
     assert_eq!(
         new_balance.foundries(),
@@ -82,7 +82,7 @@ fn rand_balance_add_assign() {
             .iter()
             .chain(add_balance.foundries().iter())
             .cloned()
-            .collect::<Vec<_>>()
+            .collect()
     );
     assert_eq!(
         new_balance.nfts(),
@@ -91,7 +91,7 @@ fn rand_balance_add_assign() {
             .iter()
             .chain(add_balance.nfts().iter())
             .cloned()
-            .collect::<Vec<_>>()
+            .collect()
     );
     assert_eq!(
         new_balance.delegations(),
@@ -100,29 +100,26 @@ fn rand_balance_add_assign() {
             .iter()
             .chain(add_balance.delegations().iter())
             .cloned()
-            .collect::<Vec<_>>()
+            .collect()
     );
     let mut expected_native_tokens = std::collections::HashMap::new();
-    for native_token in old_balance
+    for (token_id, native_token) in old_balance
         .native_tokens()
         .iter()
         .chain(add_balance.native_tokens().iter())
     {
         let v = expected_native_tokens
-            .entry(native_token.token_id())
+            .entry(token_id)
             .or_insert((U256::default(), U256::default()));
         v.0 += native_token.total();
         v.1 += native_token.available();
     }
     assert_eq!(new_balance.native_tokens().len(), expected_native_tokens.len());
-    for native_token in new_balance.native_tokens().iter() {
-        assert_eq!(
-            native_token.total(),
-            expected_native_tokens.get(native_token.token_id()).unwrap().0
-        );
+    for (token_id, native_token) in new_balance.native_tokens().iter() {
+        assert_eq!(native_token.total(), expected_native_tokens.get(token_id).unwrap().0);
         assert_eq!(
             native_token.available(),
-            expected_native_tokens.get(native_token.token_id()).unwrap().1
+            expected_native_tokens.get(token_id).unwrap().1
         );
     }
 }

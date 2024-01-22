@@ -1,7 +1,7 @@
 // Copyright 2022 IOTA Stiftung
 // SPDX-License-Identifier: Apache-2.0
 
-use std::collections::HashMap;
+use alloc::collections::{BTreeMap, BTreeSet};
 
 use getset::{CopyGetters, Getters};
 use primitive_types::U256;
@@ -23,20 +23,23 @@ pub struct Balance {
     /// Current required storage deposit amount
     pub(crate) required_storage_deposit: RequiredStorageDeposit,
     /// Native tokens
-    pub(crate) native_tokens: Vec<NativeTokensBalance>,
+    pub(crate) native_tokens: BTreeMap<TokenId, NativeTokensBalance>,
     /// Accounts
-    pub(crate) accounts: Vec<AccountId>,
+    pub(crate) accounts: BTreeSet<AccountId>,
     /// Foundries
-    pub(crate) foundries: Vec<FoundryId>,
+    pub(crate) foundries: BTreeSet<FoundryId>,
     /// Nfts
-    pub(crate) nfts: Vec<NftId>,
+    pub(crate) nfts: BTreeSet<NftId>,
     /// Delegations
-    pub(crate) delegations: Vec<DelegationId>,
+    pub(crate) delegations: BTreeSet<DelegationId>,
     /// Outputs with multiple unlock conditions and if they can currently be spent or not. If there is a
     /// [`TimelockUnlockCondition`](crate::types::block::output::unlock_condition::TimelockUnlockCondition) or
     /// [`ExpirationUnlockCondition`](crate::types::block::output::unlock_condition::ExpirationUnlockCondition) this
     /// can change at any time
-    pub(crate) potentially_locked_outputs: HashMap<OutputId, bool>,
+    pub(crate) potentially_locked_outputs: BTreeMap<OutputId, bool>,
+    pub(crate) potential_mana: u64,
+    pub(crate) stored_mana: u64,
+    pub(crate) block_issuance_credits: BTreeMap<AccountId, i128>,
 }
 
 impl std::ops::AddAssign for Balance {
@@ -44,22 +47,19 @@ impl std::ops::AddAssign for Balance {
         self.base_coin += rhs.base_coin;
         self.required_storage_deposit += rhs.required_storage_deposit;
 
-        for rhs_native_token_balance in rhs.native_tokens.into_iter() {
-            if let Some(total_native_token_balance) = self
-                .native_tokens
-                .iter_mut()
-                .find(|lhs_native_token_balance| lhs_native_token_balance.token_id == rhs_native_token_balance.token_id)
-            {
-                *total_native_token_balance += rhs_native_token_balance;
-            } else {
-                self.native_tokens.push(rhs_native_token_balance);
-            }
+        for (token_id, rhs_native_token_balance) in rhs.native_tokens.into_iter() {
+            *self.native_tokens.entry(token_id).or_default() += rhs_native_token_balance;
         }
 
         self.accounts.extend(rhs.accounts);
         self.foundries.extend(rhs.foundries);
         self.nfts.extend(rhs.nfts);
         self.delegations.extend(rhs.delegations);
+        self.potential_mana += rhs.potential_mana;
+        self.stored_mana += rhs.stored_mana;
+        for (account_id, rhs_bic) in rhs.block_issuance_credits.into_iter() {
+            *self.block_issuance_credits.entry(account_id).or_default() += rhs_bic;
+        }
     }
 }
 
@@ -120,9 +120,6 @@ impl std::ops::AddAssign for RequiredStorageDeposit {
 #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize, Getters, CopyGetters)]
 #[serde(rename_all = "camelCase")]
 pub struct NativeTokensBalance {
-    /// Token id
-    #[getset(get = "pub")]
-    pub(crate) token_id: TokenId,
     /// Total amount
     #[getset(get_copy = "pub")]
     pub(crate) total: U256,
@@ -137,7 +134,6 @@ pub struct NativeTokensBalance {
 impl Default for NativeTokensBalance {
     fn default() -> Self {
         Self {
-            token_id: TokenId::null(),
             total: U256::from(0u8),
             available: U256::from(0u8),
             metadata: None,
@@ -170,12 +166,14 @@ impl Balance {
         let native_tokens = std::iter::repeat_with(|| {
             let token_id = TokenId::from(rand_bytes_array());
             let total = rand::thread_rng().gen_range(1..10000u32);
-            NativeTokensBalance {
+            (
                 token_id,
-                total: U256::from(total),
-                available: U256::from(rand::thread_rng().gen_range(1..total)),
-                ..Default::default()
-            }
+                NativeTokensBalance {
+                    total: U256::from(total),
+                    available: U256::from(rand::thread_rng().gen_range(1..total)),
+                    ..Default::default()
+                },
+            )
         })
         .take(rand::thread_rng().gen_range(1..10))
         // up to 10 deterministic native token ids
@@ -184,29 +182,31 @@ impl Balance {
                 generator += 1;
                 let token_id = TokenId::from([generator; TokenId::LENGTH]);
                 let total = rand::thread_rng().gen_range(1..10000u32);
-                NativeTokensBalance {
+                (
                     token_id,
-                    total: U256::from(total),
-                    available: U256::from(rand::thread_rng().gen_range(1..total)),
-                    ..Default::default()
-                }
+                    NativeTokensBalance {
+                        total: U256::from(total),
+                        available: U256::from(rand::thread_rng().gen_range(1..total)),
+                        ..Default::default()
+                    },
+                )
             })
             .take(rand::thread_rng().gen_range(1..10)),
         )
-        .collect::<Vec<_>>();
+        .collect();
 
         let accounts = std::iter::repeat_with(|| AccountId::from(rand_bytes_array()))
             .take(rand::thread_rng().gen_range(0..10))
-            .collect::<Vec<_>>();
+            .collect();
         let nfts = std::iter::repeat_with(|| NftId::from(rand_bytes_array()))
             .take(rand::thread_rng().gen_range(0..10))
-            .collect::<Vec<_>>();
+            .collect();
         let foundries = std::iter::repeat_with(|| FoundryId::from(rand_bytes_array()))
             .take(rand::thread_rng().gen_range(0..10))
-            .collect::<Vec<_>>();
+            .collect();
         let delegations = std::iter::repeat_with(|| DelegationId::from(rand_bytes_array()))
             .take(rand::thread_rng().gen_range(0..10))
-            .collect::<Vec<_>>();
+            .collect();
 
         Self {
             base_coin: BaseCoinBalance {

@@ -44,10 +44,7 @@ async fn main() -> Result<()> {
             .await?;
 
         // Find the native tokens balance for this foundry if one exists.
-        let native_tokens = balance
-            .native_tokens()
-            .iter()
-            .find(|native_token| *native_token.token_id() == token_id);
+        let native_tokens = balance.native_tokens().get(&token_id);
         if let Some(native_token) = native_tokens {
             let output = wallet.get_foundry_output(token_id).await?;
             // Check if all tokens are melted.

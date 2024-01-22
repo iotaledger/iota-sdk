@@ -9,7 +9,6 @@ use crate::{
         unlock_condition::UnlockCondition, FoundryId, MinimumOutputAmount, NativeTokensBuilder, Output,
     },
     wallet::{
-        core::WalletData,
         operations::{helpers::time::can_output_be_unlocked_forever_from_now_on, output_claiming::OutputsToClaim},
         types::{Balance, NativeTokensBalance},
         Result, Wallet,
@@ -25,18 +24,10 @@ where
     pub async fn balance(&self) -> Result<Balance> {
         log::debug!("[BALANCE] balance");
 
-        let wallet_data = self.data().await;
-
-        self.balance_inner(&wallet_data).await
-    }
-
-    async fn balance_inner(
-        &self,
-        // addresses_with_unspent_outputs: impl Iterator<Item = &AddressWithUnspentOutputs> + Send,
-        wallet_data: &WalletData,
-    ) -> Result<Balance> {
         let protocol_parameters = self.client().get_protocol_parameters().await?;
         let slot_index = self.client().get_slot_index().await?;
+
+        let wallet_data = self.data().await;
         let network_id = protocol_parameters.network_id();
         let storage_score_params = protocol_parameters.storage_score_parameters();
 
@@ -58,6 +49,22 @@ where
             }
         }
 
+        // Add block issuance credits
+        for account in wallet_data.accounts() {
+            let account_id = *account.output.as_account().account_id();
+            // TODO: Maybe cache this in the wallet?
+            *balance.block_issuance_credits.entry(account_id).or_default() += self
+                .client()
+                .get_account_congestion(&account_id)
+                .await?
+                .block_issuance_credits;
+        }
+
+        log::debug!(
+            "[BALANCE] block issuance credits: {:#?}",
+            balance.block_issuance_credits
+        );
+
         for (output_id, output_data) in &wallet_data.unspent_outputs {
             // Check if output is from the network we're currently connected to
             if output_data.network_id != network_id {
@@ -73,6 +80,19 @@ where
                 Output::Account(account) => {
                     // Add amount
                     balance.base_coin.total += account.amount();
+                    // Add stored mana
+                    balance.stored_mana += protocol_parameters.mana_with_decay(
+                        account.mana(),
+                        output_id.transaction_id().slot_index(),
+                        slot_index,
+                    )?;
+                    // Add potential mana
+                    balance.potential_mana += protocol_parameters.generate_mana_with_decay(
+                        account.amount(),
+                        output_id.transaction_id().slot_index(),
+                        slot_index,
+                    )?;
+
                     // Add storage deposit
                     balance.required_storage_deposit.account += storage_cost;
                     if !wallet_data.locked_outputs.contains(output_id) {
@@ -80,7 +100,7 @@ where
                     }
 
                     let account_id = account.account_id_non_null(output_id);
-                    balance.accounts.push(account_id);
+                    balance.accounts.insert(account_id);
                 }
                 Output::Foundry(foundry) => {
                     // Add amount
@@ -96,7 +116,7 @@ where
                         total_native_tokens.add_native_token(*native_token)?;
                     }
 
-                    balance.foundries.push(foundry.id());
+                    balance.foundries.insert(foundry.id());
                 }
                 Output::Delegation(delegation) => {
                     // Add amount
@@ -108,7 +128,7 @@ where
                     }
 
                     let delegation_id = delegation.delegation_id_non_null(output_id);
-                    balance.delegations.push(delegation_id);
+                    balance.delegations.insert(delegation_id);
                 }
                 _ => {
                     // If there is only an [AddressUnlockCondition], then we can spend the output at any time
@@ -121,11 +141,23 @@ where
                         // add nft_id for nft outputs
                         if let Output::Nft(nft) = &output {
                             let nft_id = nft.nft_id_non_null(output_id);
-                            balance.nfts.push(nft_id);
+                            balance.nfts.insert(nft_id);
                         }
 
                         // Add amount
                         balance.base_coin.total += output.amount();
+                        // Add stored mana
+                        balance.stored_mana += protocol_parameters.mana_with_decay(
+                            output.mana(),
+                            output_id.transaction_id().slot_index(),
+                            slot_index,
+                        )?;
+                        // Add potential mana
+                        balance.potential_mana += protocol_parameters.generate_mana_with_decay(
+                            output.amount(),
+                            output_id.transaction_id().slot_index(),
+                            slot_index,
+                        )?;
 
                         // Add storage deposit
                         if output.is_basic() {
@@ -190,11 +222,23 @@ where
                                 // add nft_id for nft outputs
                                 if let Output::Nft(output) = &output {
                                     let nft_id = output.nft_id_non_null(output_id);
-                                    balance.nfts.push(nft_id);
+                                    balance.nfts.insert(nft_id);
                                 }
 
                                 // Add amount
                                 balance.base_coin.total += amount;
+                                // Add stored mana
+                                balance.stored_mana += protocol_parameters.mana_with_decay(
+                                    output.mana(),
+                                    output_id.transaction_id().slot_index(),
+                                    slot_index,
+                                )?;
+                                // Add potential mana
+                                balance.potential_mana += protocol_parameters.generate_mana_with_decay(
+                                    output.amount(),
+                                    output_id.transaction_id().slot_index(),
+                                    slot_index,
+                                )?;
 
                                 // Add storage deposit
                                 if output.is_basic() {
@@ -241,23 +285,6 @@ where
             }
         }
 
-        self.finish(
-            balance,
-            wallet_data,
-            network_id,
-            total_storage_cost,
-            total_native_tokens,
-        )
-    }
-
-    fn finish(
-        &self,
-        mut balance: Balance,
-        wallet_data: &WalletData,
-        network_id: u64,
-        total_storage_cost: u64,
-        total_native_tokens: NativeTokensBuilder,
-    ) -> Result<Balance> {
         // for `available` get locked_outputs, sum outputs amount and subtract from total_amount
         log::debug!("[BALANCE] locked outputs: {:#?}", wallet_data.locked_outputs);
 
@@ -281,8 +308,10 @@ where
         }
 
         log::debug!(
-            "[BALANCE] total_amount: {}, locked_amount: {}, total_storage_cost: {}",
+            "[BALANCE] total_amount: {}, potential_mana: {}, stored_mana: {}, locked_amount: {}, total_storage_cost: {}",
             balance.base_coin.total,
+            balance.potential_mana,
+            balance.stored_mana,
             locked_amount,
             total_storage_cost,
         );
@@ -305,12 +334,14 @@ where
                 .and_then(|foundry| foundry.immutable_features().metadata())
                 .cloned();
 
-            balance.native_tokens.push(NativeTokensBalance {
-                token_id: *native_token.token_id(),
-                total: native_token.amount(),
-                available: native_token.amount() - *locked_native_token_amount.unwrap_or(&U256::from(0u8)),
-                metadata,
-            })
+            balance.native_tokens.insert(
+                *native_token.token_id(),
+                NativeTokensBalance {
+                    total: native_token.amount(),
+                    available: native_token.amount() - *locked_native_token_amount.unwrap_or(&U256::from(0u8)),
+                    metadata,
+                },
+            );
         }
 
         #[cfg(not(feature = "participation"))]

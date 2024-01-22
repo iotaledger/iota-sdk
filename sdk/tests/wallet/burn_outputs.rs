@@ -131,8 +131,8 @@ async fn create_and_melt_native_token() -> Result<()> {
 
     let search = balance
         .native_tokens()
-        .iter()
-        .find(|token| token.token_id() == &create_transaction.token_id && token.available() == circulating_supply);
+        .get(&create_transaction.token_id)
+        .filter(|token| token.available() == circulating_supply);
     println!("wallet balance -> {}", serde_json::to_string(&balance).unwrap());
     assert!(search.is_some());
 
@@ -149,9 +149,10 @@ async fn create_and_melt_native_token() -> Result<()> {
     let balance = wallet.sync(None).await.unwrap();
     println!("wallet balance -> {}", serde_json::to_string(&balance).unwrap());
 
-    let search = balance.native_tokens().iter().find(|token| {
-        (token.token_id() == &create_transaction.token_id) && (token.available() == circulating_supply - melt_amount)
-    });
+    let search = balance
+        .native_tokens()
+        .get(&create_transaction.token_id)
+        .filter(|token| token.available() == circulating_supply - melt_amount);
     assert!(search.is_some());
 
     // Then melt the rest of the supply
@@ -167,10 +168,7 @@ async fn create_and_melt_native_token() -> Result<()> {
     let balance = wallet.sync(None).await.unwrap();
     println!("wallet balance -> {}", serde_json::to_string(&balance).unwrap());
 
-    let search = balance
-        .native_tokens()
-        .iter()
-        .find(|token| token.token_id() == &create_transaction.token_id);
+    let search = balance.native_tokens().get(&create_transaction.token_id);
     assert!(search.is_none());
 
     // Call to run tests in sequence
