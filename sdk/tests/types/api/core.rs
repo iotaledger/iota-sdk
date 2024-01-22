@@ -5,7 +5,7 @@ use iota_sdk::types::{
     api::core::{
         BlockMetadataResponse, BlockWithMetadataResponse, CommitteeResponse, CongestionResponse, InfoResponse,
         IssuanceBlockHeaderResponse, ManaRewardsResponse, OutputResponse, RoutesResponse, TransactionMetadataResponse,
-        UtxoChangesResponse, ValidatorResponse, ValidatorsResponse,
+        UtxoChangesFullResponse, UtxoChangesResponse, ValidatorResponse, ValidatorsResponse,
     },
     block::{
         output::{Output, OutputMetadata, OutputWithMetadata},
@@ -95,6 +95,8 @@ fn responses() {
     json_response::<SlotCommitment>("get-commitment-response-example.json").unwrap();
     // GET /api/core/v3/commitments/{commitmentId}/utxo-changes
     json_response::<UtxoChangesResponse>("get-utxo-changes-response-example.json").unwrap();
+    // GET /api/core/v3/commitments/{commitmentId}/utxo-changes/full
+    // json_response::<UtxoChangesFullResponse>("get-utxo-changes-full-response-example.json").unwrap();
 
     binary_response::<SlotCommitment>("get-commitment-response-binary-example", &()).unwrap();
     // TODO add all remaining binary responses
