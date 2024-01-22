@@ -4,8 +4,8 @@
 use iota_sdk::types::{
     api::core::{
         BlockMetadataResponse, BlockWithMetadataResponse, CommitteeResponse, CongestionResponse, InfoResponse,
-        IssuanceBlockHeaderResponse, ManaRewardsResponse, OutputResponse, RoutesResponse, UtxoChangesResponse,
-        ValidatorResponse, ValidatorsResponse,
+        IssuanceBlockHeaderResponse, ManaRewardsResponse, OutputResponse, RoutesResponse, TransactionMetadataResponse,
+        UtxoChangesResponse, ValidatorResponse, ValidatorsResponse,
     },
     block::{
         output::{Output, OutputMetadata, OutputWithMetadata},
@@ -89,6 +89,8 @@ fn responses() {
     json_response::<OutputMetadata>("get-output-metadata-by-id-response-spent-example.json").unwrap();
     // GET /api/core/v3/outputs/{outputId}/full
     json_response::<OutputWithMetadata>("get-full-output-metadata-example.json").unwrap();
+    // GET /api/core/v3/transactions/{transactionId}/metadata
+    json_response::<TransactionMetadataResponse>("get-transaction-metadata-by-id-response-example.json").unwrap();
     // GET /api/core/v3/commitments/{commitmentId}
     json_response::<SlotCommitment>("get-commitment-response-example.json").unwrap();
     // GET /api/core/v3/commitments/{commitmentId}/utxo-changes
