@@ -35,8 +35,7 @@ pub struct MintNftParams {
     sender: Option<Bech32Address>,
     /// NFT metadata feature.
     #[getset(get = "pub")]
-    #[serde(default, with = "crate::utils::serde::option_prefix_hex_bytes")]
-    metadata: Option<Vec<u8>>,
+    metadata: Option<MetadataFeature>,
     /// NFT tag feature.
     #[getset(get = "pub")]
     #[serde(default, with = "crate::utils::serde::option_prefix_hex_bytes")]
@@ -46,8 +45,7 @@ pub struct MintNftParams {
     issuer: Option<Bech32Address>,
     /// NFT immutable metadata feature.
     #[getset(get = "pub")]
-    #[serde(default, with = "crate::utils::serde::option_prefix_hex_bytes")]
-    immutable_metadata: Option<Vec<u8>>,
+    immutable_metadata: Option<MetadataFeature>,
 }
 
 impl MintNftParams {
@@ -80,7 +78,7 @@ impl MintNftParams {
     }
 
     /// Set the metadata
-    pub fn with_metadata(mut self, metadata: impl Into<Option<Vec<u8>>>) -> Self {
+    pub fn with_metadata(mut self, metadata: impl Into<Option<MetadataFeature>>) -> Self {
         self.metadata = metadata.into();
         self
     }
@@ -104,7 +102,7 @@ impl MintNftParams {
     }
 
     /// Set the immutable metadata
-    pub fn with_immutable_metadata(mut self, immutable_metadata: impl Into<Option<Vec<u8>>>) -> Self {
+    pub fn with_immutable_metadata(mut self, immutable_metadata: impl Into<Option<MetadataFeature>>) -> Self {
         self.immutable_metadata = immutable_metadata.into();
         self
     }
@@ -191,7 +189,7 @@ impl<T> Wallet<T> {
             }
 
             if let Some(metadata) = metadata {
-                nft_builder = nft_builder.add_feature(MetadataFeature::new(metadata)?);
+                nft_builder = nft_builder.add_feature(metadata);
             }
 
             if let Some(tag) = tag {
@@ -203,7 +201,7 @@ impl<T> Wallet<T> {
             }
 
             if let Some(immutable_metadata) = immutable_metadata {
-                nft_builder = nft_builder.add_immutable_feature(MetadataFeature::new(immutable_metadata)?);
+                nft_builder = nft_builder.add_immutable_feature(immutable_metadata);
             }
 
             outputs.push(nft_builder.finish_output()?);

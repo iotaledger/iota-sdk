@@ -79,15 +79,17 @@ impl<S: 'static + SecretManagerConfig> Wallet<SecretData<S>> {
             return Err(crate::wallet::Error::Backup("backup path doesn't exist"));
         }
 
-        let mut wallet_data = self.data.write().await;
+        let wallet_data = self.data().await;
 
-        let mut secret_manager = self.secret_manager().as_ref().write().await;
-        // Get the current snapshot path if set
-        let new_snapshot_path = if let Ok(stronghold) = (&*secret_manager).as_stronghold() {
-            stronghold.snapshot_path.clone()
-        } else {
-            PathBuf::from("wallet.stronghold")
-        };
+        // We don't want to overwrite a possible existing wallet
+        if !wallet_data.outputs.is_empty() {
+            return Err(crate::wallet::Error::Backup(
+                "can't restore backup when there is already a wallet",
+            ));
+        }
+
+        // Explicitly drop the data to avoid contention
+        drop(wallet_data);
 
         // We'll create a new stronghold to load the backup
         let new_stronghold = StrongholdSecretManager::builder()
@@ -116,30 +118,34 @@ impl<S: 'static + SecretManagerConfig> Wallet<SecretData<S>> {
             }
         }
 
+        // Get the current snapshot path if set
+        let new_snapshot_path = if let Ok(stronghold) = (&*self.secret_manager().read().await).as_stronghold() {
+            stronghold.snapshot_path.clone()
+        } else {
+            PathBuf::from("wallet.stronghold")
+        };
+
         if let Some(config) = loaded_secret_manager_config {
-            let mut loaded_secret_manager =
+            let mut restored_secret_manager =
                 S::from_config(&config).map_err(|_| crate::wallet::Error::Backup("invalid secret_manager"))?;
             // We have to replace the snapshot path with the current one, when building stronghold
-            if let Ok(stronghold_dto) = loaded_secret_manager.as_stronghold_mut() {
+            if let Ok(stronghold_dto) = restored_secret_manager.as_stronghold_mut() {
                 stronghold_dto.snapshot_path = new_snapshot_path.clone();
             }
 
             // Copy Stronghold file so the seed is available in the new location
             fs::copy(backup_path, new_snapshot_path)?;
 
-            if let Ok(stronghold) = loaded_secret_manager.as_stronghold() {
+            if let Ok(stronghold) = restored_secret_manager.as_stronghold() {
                 // Set password to restored secret manager
                 stronghold.set_password(stronghold_password).await?;
             }
-            *secret_manager = loaded_secret_manager;
+            *self.secret_manager().write().await = restored_secret_manager;
         } else {
             // If no secret manager data was in the backup, just copy the Stronghold file so the seed is available in
             // the new location.
             fs::copy(backup_path, new_snapshot_path)?;
         }
-
-        // drop secret manager, otherwise we get a deadlock in set_client_options() (there inside of save_wallet_data())
-        drop(secret_manager);
 
         if ignore_if_bip_path_mismatch.is_none() {
             if let Some(read_client_options) = loaded_client_options {
@@ -155,7 +161,7 @@ impl<S: 'static + SecretManagerConfig> Wallet<SecretData<S>> {
                 });
 
                 if restore_wallet {
-                    *wallet_data = read_wallet_data;
+                    *self.data_mut().await = read_wallet_data;
                 }
             }
         }
@@ -178,10 +184,10 @@ impl<S: 'static + SecretManagerConfig> Wallet<SecretData<S>> {
                 .with_public_key_options(self.public_key_options().clone())
                 .with_signing_options(self.signing_options().clone());
 
-            wallet_builder.save(&*self.storage_manager.read().await).await?;
+            wallet_builder.save(self.storage_manager()).await?;
 
             // also save wallet data to db
-            self.save(Some(&wallet_data)).await?;
+            self.storage_manager().save_wallet_data(&*self.data().await).await?;
         }
 
         Ok(())

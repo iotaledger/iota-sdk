@@ -125,7 +125,7 @@ pub(crate) mod dto {
         #[serde(rename = "type")]
         kind: u8,
         return_address: Address,
-        slot_index: SlotIndex,
+        slot: SlotIndex,
     }
 
     impl From<&ExpirationUnlockCondition> for ExpirationUnlockConditionDto {
@@ -133,7 +133,7 @@ pub(crate) mod dto {
             Self {
                 kind: ExpirationUnlockCondition::KIND,
                 return_address: value.return_address().clone(),
-                slot_index: value.slot_index(),
+                slot: value.slot_index(),
             }
         }
     }
@@ -142,8 +142,7 @@ pub(crate) mod dto {
         type Error = Error;
 
         fn try_from(value: ExpirationUnlockConditionDto) -> Result<Self, Error> {
-            Self::new(value.return_address, value.slot_index)
-                .map_err(|_| Error::InvalidField("expirationUnlockCondition"))
+            Self::new(value.return_address, value.slot).map_err(|_| Error::InvalidField("expirationUnlockCondition"))
         }
     }
 

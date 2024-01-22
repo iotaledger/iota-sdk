@@ -55,17 +55,18 @@ pub(crate) mod dto {
     use crate::types::block::Error;
 
     #[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
+    #[serde(rename_all = "camelCase")]
     struct TimelockUnlockConditionDto {
         #[serde(rename = "type")]
         kind: u8,
-        slot_index: SlotIndex,
+        slot: SlotIndex,
     }
 
     impl From<&TimelockUnlockCondition> for TimelockUnlockConditionDto {
         fn from(value: &TimelockUnlockCondition) -> Self {
             Self {
                 kind: TimelockUnlockCondition::KIND,
-                slot_index: value.slot_index(),
+                slot: value.slot_index(),
             }
         }
     }
@@ -74,7 +75,7 @@ pub(crate) mod dto {
         type Error = Error;
 
         fn try_from(value: TimelockUnlockConditionDto) -> Result<Self, Error> {
-            Self::new(value.slot_index).map_err(|_| Error::InvalidField("timelockUnlockCondition"))
+            Self::new(value.slot).map_err(|_| Error::InvalidField("timelockUnlockCondition"))
         }
     }
 

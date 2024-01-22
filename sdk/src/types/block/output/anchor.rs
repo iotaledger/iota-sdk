@@ -327,7 +327,7 @@ impl AnchorOutput {
     pub const ALLOWED_UNLOCK_CONDITIONS: UnlockConditionFlags =
         UnlockConditionFlags::STATE_CONTROLLER_ADDRESS.union(UnlockConditionFlags::GOVERNOR_ADDRESS);
     /// The set of allowed [`Feature`]s for an [`AnchorOutput`].
-    pub const ALLOWED_FEATURES: FeatureFlags = FeatureFlags::METADATA;
+    pub const ALLOWED_FEATURES: FeatureFlags = FeatureFlags::METADATA.union(FeatureFlags::STATE_METADATA);
     /// The set of allowed immutable [`Feature`]s for an [`AnchorOutput`].
     pub const ALLOWED_IMMUTABLE_FEATURES: FeatureFlags = FeatureFlags::ISSUER.union(FeatureFlags::METADATA);
 
@@ -372,13 +372,6 @@ impl AnchorOutput {
     pub fn state_index(&self) -> u32 {
         self.state_index
     }
-
-    // TODO https://github.com/iotaledger/iota-sdk/issues/1650
-    // ///
-    // #[inline(always)]
-    // pub fn state_metadata(&self) -> &[u8] {
-    //     &self.state_metadata
-    // }
 
     ///
     #[inline(always)]

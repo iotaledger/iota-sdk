@@ -57,9 +57,7 @@ impl<T> Wallet<T> {
                 data: event_data,
                 nodes: vec![options.node.clone()],
             };
-            self.storage_manager
-                .read()
-                .await
+            self.storage_manager()
                 .insert_participation_event(event_with_node.clone())
                 .await?;
             registered_participation_events.insert(event_id, event_with_node.clone());
@@ -70,7 +68,7 @@ impl<T> Wallet<T> {
 
     /// Removes a previously registered participation event from local storage.
     pub async fn deregister_participation_event(&self, id: &ParticipationEventId) -> crate::wallet::Result<()> {
-        self.storage_manager.read().await.remove_participation_event(id).await?;
+        self.storage_manager().remove_participation_event(id).await?;
         Ok(())
     }
 
@@ -80,9 +78,7 @@ impl<T> Wallet<T> {
         id: ParticipationEventId,
     ) -> crate::wallet::Result<Option<ParticipationEventWithNodes>> {
         Ok(self
-            .storage_manager
-            .read()
-            .await
+            .storage_manager()
             .get_participation_events()
             .await?
             .get(&id)
@@ -93,7 +89,7 @@ impl<T> Wallet<T> {
     pub async fn get_participation_events(
         &self,
     ) -> crate::wallet::Result<HashMap<ParticipationEventId, ParticipationEventWithNodes>> {
-        self.storage_manager.read().await.get_participation_events().await
+        self.storage_manager().get_participation_events().await
     }
 
     /// Retrieves IDs of all events tracked by the client options node.

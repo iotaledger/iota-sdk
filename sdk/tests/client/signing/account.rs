@@ -17,7 +17,7 @@ use iota_sdk::{
         output::AccountId,
         payload::{signed_transaction::Transaction, SignedTransactionPayload},
         protocol::protocol_parameters,
-        rand::mana::rand_mana_allotment,
+        slot::SlotIndex,
         unlock::{SignatureUnlock, Unlock},
     },
 };
@@ -31,7 +31,7 @@ use crate::client::{
 
 #[tokio::test]
 async fn sign_account_state_transition() -> Result<()> {
-    let secret_manager = MnemonicSecretManager::generate()?;
+    let secret_manager = MnemonicSecretManager::generate_random()?;
 
     let address = Address::from(
         secret_manager
@@ -41,10 +41,14 @@ async fn sign_account_state_transition() -> Result<()> {
 
     let protocol_parameters = protocol_parameters();
     let account_id = AccountId::from_str(ACCOUNT_ID_1)?;
+    let slot_index = SlotIndex::from(10);
 
     let signing_options = Bip44::new(SHIMMER_COIN_TYPE);
 
-    let inputs = build_inputs([Account(1_000_000, account_id, address.clone(), None, None)]);
+    let inputs = build_inputs(
+        [Account(1_000_000, account_id, address.clone(), None, None)],
+        Some(slot_index),
+    );
 
     let outputs = build_outputs([Account(1_000_000, account_id, address.clone(), None, None)]);
 
@@ -56,7 +60,7 @@ async fn sign_account_state_transition() -> Result<()> {
                 .collect::<Vec<_>>(),
         )
         .with_outputs(outputs)
-        .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
+        .with_creation_slot(slot_index + 1)
         .finish_with_params(&protocol_parameters)?;
 
     let prepared_transaction_data = PreparedTransactionData {
@@ -87,7 +91,7 @@ async fn sign_account_state_transition() -> Result<()> {
 
 #[tokio::test]
 async fn account_reference_unlocks() -> Result<()> {
-    let secret_manager = MnemonicSecretManager::generate()?;
+    let secret_manager = MnemonicSecretManager::generate_random()?;
 
     let address = Address::from(
         secret_manager
@@ -98,14 +102,18 @@ async fn account_reference_unlocks() -> Result<()> {
     let protocol_parameters = protocol_parameters();
     let account_id = AccountId::from_str(ACCOUNT_ID_1)?;
     let account_address = Address::Account(AccountAddress::new(account_id));
+    let slot_index = SlotIndex::from(10);
 
     let signing_options = Bip44::new(SHIMMER_COIN_TYPE);
 
-    let inputs = build_inputs([
-        Account(1_000_000, account_id, address.clone(), None, None),
-        Basic(1_000_000, account_address.clone(), None, None, None, None, None),
-        Basic(1_000_000, account_address.clone(), None, None, None, None, None),
-    ]);
+    let inputs = build_inputs(
+        [
+            Account(1_000_000, account_id, address.clone(), None, None),
+            Basic(1_000_000, account_address.clone(), None, None, None, None, None),
+            Basic(1_000_000, account_address.clone(), None, None, None, None, None),
+        ],
+        Some(slot_index),
+    );
 
     let outputs = build_outputs([
         Account(1_000_000, account_id, address, None, None),
@@ -120,7 +128,7 @@ async fn account_reference_unlocks() -> Result<()> {
                 .collect::<Vec<_>>(),
         )
         .with_outputs(outputs)
-        .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
+        .with_creation_slot(slot_index + 1)
         .finish_with_params(&protocol_parameters)?;
 
     let prepared_transaction_data = PreparedTransactionData {

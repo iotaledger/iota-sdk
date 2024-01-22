@@ -18,7 +18,10 @@ use iota_sdk::{
     client::secret::SecretManager,
     types::block::{
         address::{Bech32Address, NftAddress},
-        output::{feature::Irc27Metadata, NftId},
+        output::{
+            feature::{Irc27Metadata, MetadataFeature},
+            NftId,
+        },
         payload::signed_transaction::TransactionId,
     },
     wallet::{MintNftParams, Result},
@@ -65,7 +68,7 @@ async fn main() -> Result<()> {
     let nft_mint_params = (0..NFT_COLLECTION_SIZE)
         .map(|index| {
             MintNftParams::new()
-                .with_immutable_metadata(get_immutable_metadata(index).to_bytes())
+                .with_immutable_metadata(MetadataFeature::try_from(get_immutable_metadata(index)).unwrap())
                 // The NFT address from the NFT we minted in mint_issuer_nft example
                 .with_issuer(issuer.clone())
         })

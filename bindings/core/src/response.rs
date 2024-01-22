@@ -52,6 +52,9 @@ use {
 
 use crate::{error::Error, OmittedDebug};
 
+// TODO: disallow when https://github.com/iotaledger/iota-sdk/issues/1822 is done
+#[allow(rustdoc::broken_intra_doc_links)]
+
 /// The response message.
 #[derive(Serialize, Derivative)]
 #[derivative(Debug)]

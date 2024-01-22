@@ -60,9 +60,7 @@ impl<T> Wallet<T> {
             }
 
             if let Some(metadata) = features.metadata {
-                first_output_builder = first_output_builder.add_feature(MetadataFeature::new(
-                    prefix_hex::decode::<Vec<u8>>(metadata).map_err(|_| Error::InvalidField("metadata"))?,
-                )?);
+                first_output_builder = first_output_builder.add_feature(metadata);
             }
 
             if let Some(sender) = features.sender {
@@ -312,7 +310,7 @@ pub struct Assets {
 #[derive(Debug, Default, Clone, Eq, PartialEq, Serialize, Deserialize)]
 pub struct Features {
     pub tag: Option<String>,
-    pub metadata: Option<String>,
+    pub metadata: Option<MetadataFeature>,
     pub issuer: Option<Bech32Address>,
     pub sender: Option<Bech32Address>,
     pub native_token: Option<NativeToken>,

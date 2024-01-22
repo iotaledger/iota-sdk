@@ -71,7 +71,7 @@ where
         {
             WalletBuilder::from_wallet(self)
                 .await
-                .save(&*self.storage_manager.read().await)
+                .save(self.storage_manager())
                 .await?;
         }
         Ok(())
@@ -141,7 +141,7 @@ where
         {
             WalletBuilder::from_wallet(self)
                 .await
-                .save(&*self.storage_manager.read().await)
+                .save(self.storage_manager())
                 .await?;
         }
 

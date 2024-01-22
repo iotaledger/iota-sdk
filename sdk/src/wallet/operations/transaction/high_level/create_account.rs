@@ -11,7 +11,6 @@ use crate::{
             feature::MetadataFeature, unlock_condition::AddressUnlockCondition, AccountId, AccountOutputBuilder, Output,
         },
     },
-    utils::serde::option_prefix_hex_bytes,
     wallet::{
         core::SecretData,
         operations::transaction::TransactionOptions,
@@ -28,11 +27,9 @@ pub struct CreateAccountParams {
     /// ed25519 wallet address
     pub address: Option<Bech32Address>,
     /// Immutable account metadata
-    #[serde(default, with = "option_prefix_hex_bytes")]
-    pub immutable_metadata: Option<Vec<u8>>,
+    pub immutable_metadata: Option<MetadataFeature>,
     /// Account metadata
-    #[serde(default, with = "option_prefix_hex_bytes")]
-    pub metadata: Option<Vec<u8>>,
+    pub metadata: Option<MetadataFeature>,
 }
 
 impl<S: SecretManage> Wallet<SecretData<S>> {
@@ -86,6 +83,7 @@ impl<T> Wallet<T> {
             AccountOutputBuilder::new_with_minimum_amount(storage_score_params, AccountId::null())
                 .with_foundry_counter(0)
                 .add_unlock_condition(AddressUnlockCondition::new(address.clone()));
+
         if let Some(CreateAccountParams {
             immutable_metadata,
             metadata,
@@ -93,11 +91,10 @@ impl<T> Wallet<T> {
         }) = params
         {
             if let Some(immutable_metadata) = immutable_metadata {
-                account_output_builder =
-                    account_output_builder.add_immutable_feature(MetadataFeature::new(immutable_metadata)?);
+                account_output_builder = account_output_builder.add_immutable_feature(immutable_metadata);
             }
             if let Some(metadata) = metadata {
-                account_output_builder = account_output_builder.add_feature(MetadataFeature::new(metadata)?);
+                account_output_builder = account_output_builder.add_feature(metadata);
             }
         }
 
@@ -153,8 +150,10 @@ mod tests {
 
         let params_some_1 = CreateAccountParams {
             address: None,
-            immutable_metadata: Some(b"immutable_metadata".to_vec()),
-            metadata: Some(b"metadata".to_vec()),
+            immutable_metadata: Some(
+                MetadataFeature::new([("data".to_owned(), b"immutable_metadata".to_vec())]).unwrap(),
+            ),
+            metadata: Some(MetadataFeature::new([("data".to_owned(), b"metadata".to_vec())]).unwrap()),
         };
         let json_some = serde_json::to_string(&params_some_1).unwrap();
         let params_some_2 = serde_json::from_str(&json_some).unwrap();

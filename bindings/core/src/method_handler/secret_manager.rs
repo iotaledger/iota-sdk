@@ -122,6 +122,16 @@ pub(crate) async fn call_secret_manager_method_internal(
             secret_manager.as_stronghold()?.set_password(password).await?;
             Response::Ok
         }
+        #[cfg(feature = "stronghold")]
+        SecretManagerMethod::ChangeStrongholdPassword { password } => {
+            secret_manager.as_stronghold()?.change_password(password).await?;
+            Response::Ok
+        }
+        #[cfg(feature = "stronghold")]
+        SecretManagerMethod::ClearStrongholdPassword => {
+            secret_manager.as_stronghold()?.clear_key().await;
+            Response::Ok
+        }
     };
     Ok(response)
 }

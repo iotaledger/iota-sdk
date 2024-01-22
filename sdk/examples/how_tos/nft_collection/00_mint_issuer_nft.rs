@@ -17,7 +17,7 @@
 use iota_sdk::{
     client::secret::{stronghold::StrongholdSecretManager, SecretManager},
     types::block::{
-        output::{NftId, Output, OutputId},
+        output::{feature::MetadataFeature, NftId, Output, OutputId},
         payload::signed_transaction::TransactionId,
     },
     wallet::{MintNftParams, Result},
@@ -49,8 +49,13 @@ async fn main() -> Result<()> {
 
     // Issue the minting transaction and wait for its inclusion
     println!("Sending NFT minting transaction...");
-    let nft_mint_params = [MintNftParams::new()
-        .with_immutable_metadata(b"This NFT will be the issuer from the awesome NFT collection".to_vec())];
+    let nft_mint_params = [MintNftParams::new().with_immutable_metadata(
+        MetadataFeature::new([(
+            "data".to_owned(),
+            b"This NFT will be the issuer from the awesome NFT collection".to_vec(),
+        )])
+        .unwrap(),
+    )];
     let transaction = dbg!(wallet.mint_nfts(nft_mint_params, None).await)?;
 
     wait_for_inclusion(&transaction.transaction_id, &wallet).await?;

@@ -30,7 +30,11 @@ use iota_sdk::{
             AccountId, AccountOutputBuilder, BasicOutputBuilder, FoundryOutputBuilder, NativeToken, NftId,
             NftOutputBuilder, Output, OutputId, SimpleTokenScheme, TokenId, TokenScheme,
         },
-        rand::{output::rand_output_metadata_with_id, transaction::rand_transaction_id},
+        rand::{
+            output::rand_output_metadata_with_id,
+            transaction::{rand_transaction_id, rand_transaction_id_with_slot_index},
+        },
+        slot::SlotIndex,
     },
 };
 
@@ -52,6 +56,7 @@ const BECH32_ADDRESS_ACCOUNT_1: &str = "rms1pqg3zyg3zyg3zyg3zyg3zyg3zyg3zyg3zyg3
 const BECH32_ADDRESS_ACCOUNT_2: &str = "rms1pq3zyg3zyg3zyg3zyg3zyg3zyg3zyg3zyg3zyg3zyg3zyg3zyg3zymxrh9z"; // Corresponds to ACCOUNT_ID_2
 const BECH32_ADDRESS_NFT_1: &str = "rms1zqg3zyg3zyg3zyg3zyg3zyg3zyg3zyg3zyg3zyg3zyg3zyg3zyg3zxddmy7"; // Corresponds to NFT_ID_1
 const _BECH32_ADDRESS_NFT_2: &str = "rms1zq3zyg3zyg3zyg3zyg3zyg3zyg3zyg3zyg3zyg3zyg3zyg3zyg3zynm6ctf"; // Corresponds to NFT_ID_2
+const SLOT_INDEX: SlotIndex = SlotIndex(10);
 
 #[derive(Debug, Clone)]
 enum Build<'a> {
@@ -202,15 +207,19 @@ fn build_output_inner(build: Build) -> Output {
     }
 }
 
-fn build_inputs<'a>(outputs: impl IntoIterator<Item = Build<'a>>) -> Vec<InputSigningData> {
+fn build_inputs<'a>(
+    outputs: impl IntoIterator<Item = Build<'a>>,
+    slot_index: Option<SlotIndex>,
+) -> Vec<InputSigningData> {
     outputs
         .into_iter()
         .map(|build| {
             let output = build_output_inner(build);
+            let transaction_id = slot_index.map_or_else(rand_transaction_id, rand_transaction_id_with_slot_index);
 
             InputSigningData {
                 output,
-                output_metadata: rand_output_metadata_with_id(OutputId::new(rand_transaction_id(), 0)),
+                output_metadata: rand_output_metadata_with_id(OutputId::new(transaction_id, 0)),
             }
         })
         .collect()

@@ -61,8 +61,8 @@ impl TransactionBuilder {
     }
 
     /// Sets the context inputs of a [`TransactionBuilder`].
-    pub fn with_context_inputs(mut self, context_inputs: impl Into<Vec<ContextInput>>) -> Self {
-        self.context_inputs = context_inputs.into();
+    pub fn with_context_inputs(mut self, context_inputs: impl IntoIterator<Item = ContextInput>) -> Self {
+        self.context_inputs = context_inputs.into_iter().collect();
         self
     }
 
@@ -163,6 +163,8 @@ impl TransactionBuilder {
             .into_boxed_slice()
             .try_into()
             .map_err(Error::InvalidContextInputCount)?;
+
+        verify_context_inputs(&context_inputs)?;
 
         let inputs: BoxedSlicePrefix<Input, InputCount> = self
             .inputs

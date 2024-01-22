@@ -4,6 +4,7 @@
 use iota_sdk::{
     client::{api::input_selection::Burn, secret::SecretManage},
     types::block::output::{
+        feature::MetadataFeature,
         unlock_condition::{AddressUnlockCondition, ExpirationUnlockCondition},
         NativeToken, NftId, NftOutputBuilder, OutputId, UnlockCondition,
     },
@@ -25,8 +26,10 @@ async fn mint_and_burn_nft() -> Result<()> {
 
     let nft_options = [MintNftParams::new()
         .with_address(wallet.address().await)
-        .with_metadata(b"some nft metadata".to_vec())
-        .with_immutable_metadata(b"some immutable nft metadata".to_vec())];
+        .with_metadata(MetadataFeature::new([("data".to_owned(), b"some nft metadata".to_vec())]).unwrap())
+        .with_immutable_metadata(
+            MetadataFeature::new([("data".to_owned(), b"some immutable nft metadata".to_vec())]).unwrap(),
+        )];
 
     let transaction = wallet.mint_nfts(nft_options, None).await.unwrap();
     wallet
@@ -285,8 +288,10 @@ async fn mint_and_burn_nft_with_account() -> Result<()> {
     wallet.sync(None).await?;
 
     let nft_options = [MintNftParams::new()
-        .with_metadata(b"some nft metadata".to_vec())
-        .with_immutable_metadata(b"some immutable nft metadata".to_vec())];
+        .with_metadata(MetadataFeature::new([("data".to_owned(), b"some nft metadata".to_vec())]).unwrap())
+        .with_immutable_metadata(
+            MetadataFeature::new([("data".to_owned(), b"some immutable nft metadata".to_vec())]).unwrap(),
+        )];
     let nft_tx = wallet.mint_nfts(nft_options, None).await.unwrap();
     wallet
         .reissue_transaction_until_included(&nft_tx.transaction_id, None, None)

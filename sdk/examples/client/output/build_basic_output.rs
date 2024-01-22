@@ -23,7 +23,8 @@ use iota_sdk::{
     },
 };
 
-const METADATA: &str = "Hello, World!";
+const KEY: &str = "Hello";
+const METADATA: &[u8; 6] = b"World!";
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -44,7 +45,7 @@ async fn main() -> Result<()> {
         // with metadata feature block
         basic_output_builder
             .clone()
-            .add_feature(MetadataFeature::new(METADATA)?)
+            .add_feature(MetadataFeature::new([(KEY.to_owned(), METADATA.to_vec())])?)
             .finish_output()?,
         // with storage deposit return
         basic_output_builder
@@ -64,7 +65,7 @@ async fn main() -> Result<()> {
         // with tag feature
         basic_output_builder
             .clone()
-            .add_feature(TagFeature::new(METADATA)?)
+            .add_feature(TagFeature::new(KEY)?)
             .finish_output()?,
         // with sender feature
         basic_output_builder

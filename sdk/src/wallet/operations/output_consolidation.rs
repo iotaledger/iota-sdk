@@ -129,8 +129,8 @@ impl<S: 'static + SecretManage> Wallet<SecretData<S>> {
     /// Prepares the transaction for [Wallet::consolidate_outputs()].
     pub async fn prepare_consolidate_outputs(&self, params: ConsolidationParams) -> Result<PreparedTransactionData> {
         log::debug!("[OUTPUT_CONSOLIDATION] prepare consolidating outputs if needed");
-        #[cfg(feature = "participation")]
-        let voting_output = self.get_voting_output().await?;
+        // #[cfg(feature = "participation")]
+        // let voting_output = self.get_voting_output().await?;
         let slot_index = self.client().get_slot_index().await?;
         let mut outputs_to_consolidate = Vec::new();
         let wallet_data = self.data().await;
@@ -138,13 +138,13 @@ impl<S: 'static + SecretManage> Wallet<SecretData<S>> {
         let wallet_address = wallet_data.address.clone();
 
         for (output_id, output_data) in &wallet_data.unspent_outputs {
-            #[cfg(feature = "participation")]
-            if let Some(ref voting_output) = voting_output {
-                // Remove voting output from inputs, because we want to keep its features and not consolidate it.
-                if output_data.output_id == voting_output.output_id {
-                    continue;
-                }
-            }
+            // #[cfg(feature = "participation")]
+            // if let Some(ref voting_output) = voting_output {
+            //     // Remove voting output from inputs, because we want to keep its features and not consolidate it.
+            //     if output_data.output_id == voting_output.output_id {
+            //         continue;
+            //     }
+            // }
 
             let is_locked_output = wallet_data.locked_outputs.contains(output_id);
             let should_consolidate_output = self

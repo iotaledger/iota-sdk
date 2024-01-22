@@ -208,7 +208,7 @@ impl MnemonicSecretManager {
     }
 
     /// Generate a random mnemonic to use for the secret manager.
-    pub fn generate() -> Result<Self, Error> {
+    pub fn generate_random() -> Result<Self, Error> {
         Self::try_from_mnemonic(Client::generate_mnemonic()?)
     }
 }

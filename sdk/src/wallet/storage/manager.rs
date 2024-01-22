@@ -49,7 +49,7 @@ impl StorageManager {
         Ok(storage_manager)
     }
 
-    pub(crate) async fn load_wallet_data(&mut self) -> crate::wallet::Result<Option<WalletData>> {
+    pub(crate) async fn load_wallet_data(&self) -> crate::wallet::Result<Option<WalletData>> {
         if let Some(dto) = self.get::<WalletDataDto>(WALLET_DATA_KEY).await? {
             Ok(Some(WalletData::try_from_dto(dto)?))
         } else {
@@ -57,7 +57,7 @@ impl StorageManager {
         }
     }
 
-    pub(crate) async fn save_wallet_data(&mut self, wallet_data: &WalletData) -> crate::wallet::Result<()> {
+    pub(crate) async fn save_wallet_data(&self, wallet_data: &WalletData) -> crate::wallet::Result<()> {
         self.set(WALLET_DATA_KEY, &WalletDataDto::from(wallet_data)).await
     }
 
@@ -127,7 +127,7 @@ mod tests {
 
     #[tokio::test]
     async fn save_load_wallet_data() {
-        let mut storage_manager = StorageManager::new(Memory::default(), None).await.unwrap();
+        let storage_manager = StorageManager::new(Memory::default(), None).await.unwrap();
         assert!(storage_manager.load_wallet_data().await.unwrap().is_none());
 
         let wallet_data = WalletData::mock();

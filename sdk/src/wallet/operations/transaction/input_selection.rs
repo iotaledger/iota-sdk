@@ -38,9 +38,10 @@ impl<T> Wallet<T> {
         // Voting output needs to be requested before to prevent a deadlock
         #[cfg(feature = "participation")]
         let voting_output = self.get_voting_output().await?;
+        let protocol_parameters = self.client().get_protocol_parameters().await?;
+        let slot_index = self.client().get_slot_index().await?;
         // lock so the same inputs can't be selected in multiple transactions
         let mut wallet_data = self.data_mut().await;
-        let protocol_parameters = self.client().get_protocol_parameters().await?;
 
         #[cfg(feature = "events")]
         self.emit(WalletEvent::TransactionProgress(
@@ -48,7 +49,6 @@ impl<T> Wallet<T> {
         ))
         .await;
 
-        let slot_index = self.client().get_slot_index().await?;
         #[allow(unused_mut)]
         let mut forbidden_inputs = wallet_data.locked_outputs.clone();
 
@@ -90,6 +90,7 @@ impl<T> Wallet<T> {
                 available_outputs_signing_data,
                 outputs,
                 Some(wallet_data.address.clone().into_inner()),
+                slot_index,
                 protocol_parameters.clone(),
             )
             .with_required_inputs(custom_inputs)
@@ -129,6 +130,7 @@ impl<T> Wallet<T> {
                 available_outputs_signing_data,
                 outputs,
                 Some(wallet_data.address.clone().into_inner()),
+                slot_index,
                 protocol_parameters.clone(),
             )
             .with_required_inputs(mandatory_inputs)
@@ -165,6 +167,7 @@ impl<T> Wallet<T> {
             available_outputs_signing_data,
             outputs,
             Some(wallet_data.address.clone().into_inner()),
+            slot_index,
             protocol_parameters.clone(),
         )
         .with_forbidden_inputs(forbidden_inputs);

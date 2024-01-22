@@ -25,7 +25,6 @@ use iota_sdk::{
         output::{AccountId, NftId},
         payload::{signed_transaction::Transaction, SignedTransactionPayload},
         protocol::protocol_parameters,
-        rand::mana::rand_mana_allotment,
         slot::{SlotCommitmentId, SlotIndex},
         unlock::{SignatureUnlock, Unlock},
     },
@@ -68,60 +67,65 @@ async fn all_combined() -> Result<()> {
     let nft_3 = Address::Nft(NftAddress::new(nft_id_3));
     let nft_4 = Address::Nft(NftAddress::new(nft_id_4));
 
-    let inputs = build_inputs([
-        Account(1_000_000, account_id_1, nft_1.clone(), None, None),
-        Account(1_000_000, account_id_2, ed25519_0.into(), None, None),
-        Basic(1_000_000, account_1.clone(), None, None, None, None, None),
-        Basic(1_000_000, account_2.clone(), None, None, None, None, None),
-        Basic(1_000_000, account_2, None, None, None, None, None),
-        Basic(1_000_000, nft_2.clone(), None, None, None, None, None),
-        Basic(1_000_000, nft_2, None, None, None, None, None),
-        Basic(1_000_000, nft_4.clone(), None, None, None, None, None),
-        Basic(1_000_000, ed25519_0.into(), None, None, None, None, None),
-        Basic(1_000_000, ed25519_1.into(), None, None, None, None, None),
-        Basic(1_000_000, ed25519_2.into(), None, None, None, None, None),
-        Basic(1_000_000, ed25519_2.into(), None, None, None, None, None),
-        Nft(1_000_000, nft_id_1, ed25519_0.into(), None, None, None, None),
-        Nft(1_000_000, nft_id_2, account_1.clone(), None, None, None, None),
-        // Expirations
-        Basic(
-            2_000_000,
-            ed25519_0.into(),
-            None,
-            None,
-            None,
-            None,
-            Some((account_1.clone(), 50)),
-        ),
-        Basic(
-            2_000_000,
-            ed25519_0.into(),
-            None,
-            None,
-            None,
-            None,
-            Some((nft_3.clone(), 50)),
-        ),
-        Basic(
-            2_000_000,
-            ed25519_0.into(),
-            None,
-            None,
-            None,
-            None,
-            Some((nft_3.clone(), 150)),
-        ),
-        Nft(
-            1_000_000,
-            nft_id_3,
-            account_1.clone(),
-            None,
-            None,
-            None,
-            Some((nft_4, 50)),
-        ),
-        Nft(1_000_000, nft_id_4, account_1, None, None, None, Some((nft_3, 150))),
-    ]);
+    let slot_index = SlotIndex::from(100);
+
+    let inputs = build_inputs(
+        [
+            Account(1_000_000, account_id_1, nft_1.clone(), None, None),
+            Account(1_000_000, account_id_2, ed25519_0.into(), None, None),
+            Basic(1_000_000, account_1.clone(), None, None, None, None, None),
+            Basic(1_000_000, account_2.clone(), None, None, None, None, None),
+            Basic(1_000_000, account_2, None, None, None, None, None),
+            Basic(1_000_000, nft_2.clone(), None, None, None, None, None),
+            Basic(1_000_000, nft_2, None, None, None, None, None),
+            Basic(1_000_000, nft_4.clone(), None, None, None, None, None),
+            Basic(1_000_000, ed25519_0.into(), None, None, None, None, None),
+            Basic(1_000_000, ed25519_1.into(), None, None, None, None, None),
+            Basic(1_000_000, ed25519_2.into(), None, None, None, None, None),
+            Basic(1_000_000, ed25519_2.into(), None, None, None, None, None),
+            Nft(1_000_000, nft_id_1, ed25519_0.into(), None, None, None, None),
+            Nft(1_000_000, nft_id_2, account_1.clone(), None, None, None, None),
+            // Expirations
+            Basic(
+                2_000_000,
+                ed25519_0.into(),
+                None,
+                None,
+                None,
+                None,
+                Some((account_1.clone(), 50)),
+            ),
+            Basic(
+                2_000_000,
+                ed25519_0.into(),
+                None,
+                None,
+                None,
+                None,
+                Some((nft_3.clone(), 50)),
+            ),
+            Basic(
+                2_000_000,
+                ed25519_0.into(),
+                None,
+                None,
+                None,
+                None,
+                Some((nft_3.clone(), 150)),
+            ),
+            Nft(
+                1_000_000,
+                nft_id_3,
+                account_1.clone(),
+                None,
+                None,
+                None,
+                Some((nft_4, 50)),
+            ),
+            Nft(1_000_000, nft_id_4, account_1, None, None, None, Some((nft_3, 150))),
+        ],
+        Some(slot_index),
+    );
 
     let outputs = build_outputs([
         Account(1_000_000, account_id_1, nft_1, None, None),
@@ -133,15 +137,13 @@ async fn all_combined() -> Result<()> {
         Nft(1_000_000, nft_id_4, ed25519_0.into(), None, None, None, None),
     ]);
 
-    let slot_index = SlotIndex::from(90);
-
     let selected = InputSelection::new(
         inputs.clone(),
         outputs.clone(),
         [ed25519_0.into(), ed25519_1.into(), ed25519_2.into()],
+        slot_index,
         protocol_parameters.clone(),
     )
-    .with_slot_index(slot_index)
     .select()
     .unwrap();
 
@@ -158,7 +160,6 @@ async fn all_combined() -> Result<()> {
         )
         .with_outputs(outputs)
         .with_creation_slot(slot_index)
-        .add_mana_allotment(rand_mana_allotment(&protocol_parameters))
         .finish_with_params(&protocol_parameters)?;
 
     let prepared_transaction_data = PreparedTransactionData {
