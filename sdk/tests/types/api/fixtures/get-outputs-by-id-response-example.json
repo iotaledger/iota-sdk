@@ -1,22 +1,46 @@
 {
-    "output": {
-      "type": 3,
-      "amount": "1000",
-      "unlockConditions": [
-        {
+  "output": {
+    "type": 0,
+    "amount": "1000",
+    "unlockConditions": [
+      {
+        "type": 0,
+        "address": {
           "type": 0,
-          "address": {
-            "type": 0,
-            "pubKeyHash": "0x8eaf87ac1f52eb05f2c7c0c15502df990a228838dc37bd18de9503d69afd257d"
+          "pubKeyHash": "0x8eaf87ac1f52eb05f2c7c0c15502df990a228838dc37bd18de9503d69afd257d"
+        }
+      }
+    ],
+    "mana": "2000"
+  },
+  "outputIdProof": {
+    "slot": 429632486,
+    "outputIndex": 2,
+    "transactionCommitment": "0x46934d8c62df21e94553f6686a7f9368d9ab4159bcb96f598a94883a866467da",
+    "outputCommitmentProof": {
+      "type": 0,
+      "l": {
+        "type": 0,
+        "l": {
+          "type": 1,
+          "hash": "0x193a27f187c46a386f0e2a25a884351692b7378aae5e7dd78433f2be85106219"
+        },
+        "r": {
+          "type": 0,
+          "l": {
+            "type": 2,
+            "hash": "0x19e4cdd6b17223a935883ddbb80ee6d239a48ea214c29b8b593cc7b3152d15aa"
+          },
+          "r": {
+            "type": 1,
+            "hash": "0xf1faa521d1b1e85393efd63a6ed1f33bb851bfc90a681e011989d9c6056948cc"
           }
         }
-      ],
-      "mana": "2000"
-    },
-    "outputIdProof": {
-      "slot": 20,
-      "outputIndex": 0,
-      "transactionCommitment": "0x897dr69bfa60c8cf80afd730741862d200405d5df7cabfe9b564361dce1f7036",
-      "outputCommitmentProof": "0xd3a0a0c76ab2d9b406a32c30c43e102fe0f39a12a3f6c1e3b19d239db2f18d75"
+      },
+      "r": {
+        "type": 1,
+        "hash": "0xe9cef2152da49d2a78a490bb7e42c6bcd1c96b41ebe156ba90a5b22cb78e3229"
+      }
     }
   }
+}
