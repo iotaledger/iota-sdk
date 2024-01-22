@@ -52,7 +52,7 @@ export * from './wallet';
 export * from './logger';
 
 // For future reference to see what we return from rust as a serialized string
-export type Result = OkResult | NotOkResult;
+export type Result = OkResult | PanicResult | ErrorResult;
 
 export type OkResult = {
     // "Response" enum name, we consider "ok".
@@ -65,8 +65,6 @@ export type OkResult = {
         payload: string;
     };
 };
-
-export type NotOkResult = PanicResult | ErrorResult;
 
 export type ErrorResult = {
     type: 'error';
@@ -99,7 +97,7 @@ function errorHandle(error: any): Error {
         }
 
         // Guaranteed error
-        err = err as NotOkResult;
+        err = err as PanicResult | ErrorResult;
         if (err.type == 'panic') {
             // Panic example:
             // {"type":"panic","payload":"Client was destroyed"}
