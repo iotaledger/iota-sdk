@@ -5,8 +5,9 @@ from __future__ import annotations
 from typing import Dict, Optional, Union
 from dataclasses import dataclass, field
 from dataclasses_json import config
-from iota_sdk.types.common import HexStr, json
+from iota_sdk.types.common import HexStr, SlotIndex, json
 from iota_sdk.types.output import AccountOutput, AnchorOutput, BasicOutput, DelegationOutput, FoundryOutput, NftOutput, deserialize_output
+from iota_sdk.types.output_id import OutputId
 
 
 @json
@@ -15,23 +16,17 @@ class OutputMetadata:
     """Metadata about an output.
 
     Attributes:
+        output_id: The ID of the output.
         block_id: The ID of the block in which the output appeared in.
-        transaction_id: The ID of the transaction in which the output was created.
-        output_index: The index of the output within the corresponding transaction.
-        is_spent: Tells if the output is spent in a confirmed transaction or not.
-        latest_commitment_id: The current latest commitment id for which the request was made.
-        commitment_id_spent: The commitment ID of the slot at which this output was spent.
-        transaction_id_spent: The transaction this output was spent with.
-        included_commitment_id: The commitment ID at which the output was included into the ledger.
+        included: Metadata of the output if it is included in the ledger.
+        latest_commitment_id: Latest commitment ID of the node.
+        spent: Metadata of the output if it is marked as spent in the ledger.
     """
+    output_id: OutputId
     block_id: HexStr
-    transaction_id: HexStr
-    output_index: int
-    is_spent: bool
+    included: OutputInclusionMetadata
     latest_commitment_id: HexStr
-    commitment_id_spent: Optional[HexStr] = None
-    transaction_id_spent: Optional[HexStr] = None
-    included_commitment_id: Optional[HexStr] = None
+    spent: Optional[OutputConsumptionMetadata] = None
 
 
 @json
@@ -70,3 +65,33 @@ class OutputWithMetadata:
         d['output'] = self.output.as_dict()
 
         return d
+
+
+@json
+@dataclass
+class OutputInclusionMetadata:
+    """Metadata about a created (unspent) output.
+
+    Attributes:
+        slot: Slot in which the output was included.
+        transaction_id: Transaction ID that created the output.
+        commitment_id: Commitment ID that includes the creation of the output.
+    """
+    slot: SlotIndex
+    transaction_id: HexStr
+    commitment_id: Optional[HexStr] = None
+
+
+@json
+@dataclass
+class OutputConsumptionMetadata:
+    """Metadata about a consumed (spent) output.
+
+    Attributes:
+        slot: Slot in which the output was spent.
+        transaction_id: Transaction ID that spent the output.
+        commitment_id: Commitment ID that includes the spending of the output.
+    """
+    slot: SlotIndex
+    transaction_id: HexStr
+    commitment_id: Optional[HexStr] = None
