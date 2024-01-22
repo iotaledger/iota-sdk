@@ -161,6 +161,7 @@ impl AmountSelection {
 
             if let Some(nt) = input.output.native_tokens() {
                 let mut selected_native_tokens = self.selected_native_tokens.clone();
+                
                 selected_native_tokens.extend(nt.iter().map(|t| t.token_id()));
                 // Don't select input if the tx would end up with more than allowed native tokens.
                 if selected_native_tokens.len() > NativeTokens::COUNT_MAX.into() {
