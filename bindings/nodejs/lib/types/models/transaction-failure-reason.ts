@@ -168,7 +168,7 @@ export const TRANSACTION_FAILURE_REASON_STRINGS: {
     [TransactionFailureReason.StorageDepositReturnUnfulfilled]:
         'The return amount in a transaction is not fulfilled by the output side.',
     [TransactionFailureReason.InvalidInputUnlock]:
-        'An input unlock was Invalid.',
+        'An input unlock was invalid.',
     [TransactionFailureReason.SenderNotUnlocked]:
         'The output contains a Sender with an ident (address) which is not unlocked.',
     [TransactionFailureReason.InvalidChainStateTransition]:
