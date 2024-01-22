@@ -11,7 +11,7 @@ from iota_sdk.types.slot import SlotCommitment
 @json
 @dataclass
 class IssuanceBlockHeader:
-    """Information that is ideal for attaching a block in the network.
+    """Information that is used to attach a block in the network.
     Response of GET /api/core/v3/blocks/issuance
 
     Attributes:
@@ -23,13 +23,13 @@ class IssuanceBlockHeader:
         latest_commitment: The latest slot commitment.
     """
     strong_parents: List[HexStr]
-    weak_parents: Optional[List[HexStr]]
-    shallow_like_parents: Optional[List[HexStr]]
     latest_parent_block_issuing_time: int = field(metadata=config(
         encoder=str
     ))
     latest_finalized_slot: SlotIndex
     latest_commitment: SlotCommitment
+    weak_parents: Optional[List[HexStr]] = None
+    shallow_like_parents: Optional[List[HexStr]] = None
 
 
 @json

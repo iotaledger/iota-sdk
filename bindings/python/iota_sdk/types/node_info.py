@@ -317,8 +317,8 @@ class NodeInfoBaseToken:
     name: str
     ticker_symbol: str
     unit: str
-    subunit: Optional[str] = None
     decimals: int
+    subunit: Optional[str] = None
 
 
 @json
