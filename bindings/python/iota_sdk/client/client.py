@@ -55,6 +55,7 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
         local_pow: Optional[bool] = None,
         fallback_to_local_pow: Optional[bool] = None,
         pow_worker_count: Optional[int] = None,
+        max_parallel_api_requests: Optional[int] = None,
         client_handle=None
     ):
         """Initialize the IOTA Client.
@@ -92,6 +93,8 @@ class Client(NodeCoreAPI, NodeIndexerAPI, HighLevelAPI, ClientUtils):
             Fallback to local proof of work if the node doesn't support remote PoW.
         pow_worker_count :
             The amount of threads to be used for proof of work.
+        max_parallel_api_requests :
+            Set maximum parallel API requests.
         client_handle :
             An instance of a node client.
         """
