@@ -59,162 +59,164 @@ const _BECH32_ADDRESS_NFT_2: &str = "rms1zq3zyg3zyg3zyg3zyg3zyg3zyg3zyg3zyg3zyg3
 const SLOT_INDEX: SlotIndex = SlotIndex(10);
 
 #[derive(Debug, Clone)]
-enum Build<'a> {
-    Basic(
-        u64,
-        Address,
-        Option<(&'a str, u64)>,
-        Option<Address>,
-        Option<(Address, u64)>,
-        Option<u32>,
-        Option<(Address, u32)>,
-    ),
-    Nft(
-        u64,
-        NftId,
-        Address,
-        Option<Address>,
-        Option<Address>,
-        Option<(Address, u64)>,
-        Option<(Address, u32)>,
-    ),
-    Account(u64, AccountId, Address, Option<Address>, Option<Address>),
-    Foundry(u64, AccountId, u32, SimpleTokenScheme, Option<(&'a str, u64)>),
+enum Build {
+    Basic {
+        amount: u64,
+        address: Address,
+        native_token: Option<(String, u64)>,
+        sender: Option<Address>,
+        sdruc: Option<(Address, u64)>,
+        timelock: Option<u32>,
+        expiration: Option<(Address, u32)>,
+    },
+    Nft {
+        amount: u64,
+        nft_id: NftId,
+        address: Address,
+        sender: Option<Address>,
+        issuer: Option<Address>,
+        sdruc: Option<(Address, u64)>,
+        expiration: Option<(Address, u32)>,
+    },
+    Account {
+        amount: u64,
+        account_id: AccountId,
+        address: Address,
+        sender: Option<Address>,
+        issuer: Option<Address>,
+    },
+    Foundry {
+        amount: u64,
+        account_id: AccountId,
+        serial_number: u32,
+        token_scheme: SimpleTokenScheme,
+        native_token: Option<(String, u64)>,
+    },
 }
 
-fn build_basic_output(
-    amount: u64,
-    address: Address,
-    native_token: Option<(&str, u64)>,
-    sender: Option<Address>,
-    sdruc: Option<(Address, u64)>,
-    timelock: Option<u32>,
-    expiration: Option<(Address, u32)>,
-) -> Output {
-    let mut builder =
-        BasicOutputBuilder::new_with_amount(amount).add_unlock_condition(AddressUnlockCondition::new(address.clone()));
+impl Build {
+    fn build(self) -> Output {
+        match self {
+            Build::Basic {
+                amount,
+                address,
+                native_token,
+                sender,
+                sdruc,
+                timelock,
+                expiration,
+            } => {
+                let mut builder = BasicOutputBuilder::new_with_amount(amount)
+                    .add_unlock_condition(AddressUnlockCondition::new(address.clone()));
 
-    if let Some((id, amount)) = native_token {
-        builder = builder.with_native_token(NativeToken::new(TokenId::from_str(id).unwrap(), amount).unwrap());
-    }
+                if let Some((id, amount)) = native_token {
+                    builder =
+                        builder.with_native_token(NativeToken::new(TokenId::from_str(&id).unwrap(), amount).unwrap());
+                }
 
-    if let Some(sender) = sender {
-        builder = builder.add_feature(SenderFeature::new(sender.clone()));
-    }
+                if let Some(sender) = sender {
+                    builder = builder.add_feature(SenderFeature::new(sender.clone()));
+                }
 
-    if let Some((address, amount)) = sdruc {
-        builder =
-            builder.add_unlock_condition(StorageDepositReturnUnlockCondition::new(address.clone(), amount).unwrap());
-    }
+                if let Some((address, amount)) = sdruc {
+                    builder = builder.add_unlock_condition(
+                        StorageDepositReturnUnlockCondition::new(address.clone(), amount).unwrap(),
+                    );
+                }
 
-    if let Some(timelock) = timelock {
-        builder = builder.add_unlock_condition(TimelockUnlockCondition::new(timelock).unwrap());
-    }
+                if let Some(timelock) = timelock {
+                    builder = builder.add_unlock_condition(TimelockUnlockCondition::new(timelock).unwrap());
+                }
 
-    if let Some((address, timestamp)) = expiration {
-        builder = builder.add_unlock_condition(ExpirationUnlockCondition::new(address.clone(), timestamp).unwrap());
-    }
+                if let Some((address, timestamp)) = expiration {
+                    builder = builder
+                        .add_unlock_condition(ExpirationUnlockCondition::new(address.clone(), timestamp).unwrap());
+                }
 
-    builder.finish_output().unwrap()
-}
+                builder.finish_output().unwrap()
+            }
+            Build::Nft {
+                amount,
+                nft_id,
+                address,
+                sender,
+                issuer,
+                sdruc,
+                expiration,
+            } => {
+                let mut builder = NftOutputBuilder::new_with_amount(amount, nft_id)
+                    .add_unlock_condition(AddressUnlockCondition::new(address.clone()));
 
-fn build_nft_output(
-    amount: u64,
-    nft_id: NftId,
-    address: Address,
-    sender: Option<Address>,
-    issuer: Option<Address>,
-    sdruc: Option<(Address, u64)>,
-    expiration: Option<(Address, u32)>,
-) -> Output {
-    let mut builder = NftOutputBuilder::new_with_amount(amount, nft_id)
-        .add_unlock_condition(AddressUnlockCondition::new(address.clone()));
+                if let Some(sender) = sender {
+                    builder = builder.add_feature(SenderFeature::new(sender.clone()));
+                }
 
-    if let Some(sender) = sender {
-        builder = builder.add_feature(SenderFeature::new(sender.clone()));
-    }
+                if let Some(issuer) = issuer {
+                    builder = builder.add_immutable_feature(IssuerFeature::new(issuer.clone()));
+                }
 
-    if let Some(issuer) = issuer {
-        builder = builder.add_immutable_feature(IssuerFeature::new(issuer.clone()));
-    }
+                if let Some((address, amount)) = sdruc {
+                    builder = builder.add_unlock_condition(
+                        StorageDepositReturnUnlockCondition::new(address.clone(), amount).unwrap(),
+                    );
+                }
 
-    if let Some((address, amount)) = sdruc {
-        builder =
-            builder.add_unlock_condition(StorageDepositReturnUnlockCondition::new(address.clone(), amount).unwrap());
-    }
+                if let Some((address, timestamp)) = expiration {
+                    builder = builder
+                        .add_unlock_condition(ExpirationUnlockCondition::new(address.clone(), timestamp).unwrap());
+                }
 
-    if let Some((address, timestamp)) = expiration {
-        builder = builder.add_unlock_condition(ExpirationUnlockCondition::new(address.clone(), timestamp).unwrap());
-    }
+                builder.finish_output().unwrap()
+            }
+            Build::Account {
+                amount,
+                account_id,
+                address,
+                sender,
+                issuer,
+            } => {
+                let mut builder = AccountOutputBuilder::new_with_amount(amount, account_id)
+                    .add_unlock_condition(AddressUnlockCondition::new(address.clone()));
 
-    builder.finish_output().unwrap()
-}
+                if let Some(sender) = sender {
+                    builder = builder.add_feature(SenderFeature::new(sender.clone()));
+                }
 
-fn build_account_output(
-    amount: u64,
-    account_id: AccountId,
-    address: Address,
-    sender: Option<Address>,
-    issuer: Option<Address>,
-) -> Output {
-    let mut builder = AccountOutputBuilder::new_with_amount(amount, account_id)
-        .add_unlock_condition(AddressUnlockCondition::new(address.clone()));
+                if let Some(issuer) = issuer {
+                    builder = builder.add_immutable_feature(IssuerFeature::new(issuer.clone()));
+                }
 
-    if let Some(sender) = sender {
-        builder = builder.add_feature(SenderFeature::new(sender.clone()));
-    }
+                builder.finish_output().unwrap()
+            }
+            Build::Foundry {
+                amount,
+                account_id,
+                serial_number,
+                token_scheme,
+                native_token,
+            } => {
+                let mut builder =
+                    FoundryOutputBuilder::new_with_amount(amount, serial_number, TokenScheme::Simple(token_scheme))
+                        .add_unlock_condition(ImmutableAccountAddressUnlockCondition::new(AccountAddress::new(
+                            account_id,
+                        )));
 
-    if let Some(issuer) = issuer {
-        builder = builder.add_immutable_feature(IssuerFeature::new(issuer.clone()));
-    }
+                if let Some((id, amount)) = native_token {
+                    builder =
+                        builder.with_native_token(NativeToken::new(TokenId::from_str(&id).unwrap(), amount).unwrap());
+                }
 
-    builder.finish_output().unwrap()
-}
-
-fn build_foundry_output(
-    amount: u64,
-    account_id: AccountId,
-    serial_number: u32,
-    token_scheme: SimpleTokenScheme,
-    native_token: Option<(&str, u64)>,
-) -> Output {
-    let mut builder = FoundryOutputBuilder::new_with_amount(amount, serial_number, TokenScheme::Simple(token_scheme))
-        .add_unlock_condition(ImmutableAccountAddressUnlockCondition::new(AccountAddress::new(
-            account_id,
-        )));
-
-    if let Some((id, amount)) = native_token {
-        builder = builder.with_native_token(NativeToken::new(TokenId::from_str(id).unwrap(), amount).unwrap());
-    }
-
-    builder.finish_output().unwrap()
-}
-
-fn build_output_inner(build: Build) -> Output {
-    match build {
-        Build::Basic(amount, address, native_token, sender, sdruc, timelock, expiration) => {
-            build_basic_output(amount, address, native_token, sender, sdruc, timelock, expiration)
+                builder.finish_output().unwrap()
+            }
         }
-        Build::Nft(amount, nft_id, address, sender, issuer, sdruc, expiration) => {
-            build_nft_output(amount, nft_id, address, sender, issuer, sdruc, expiration)
-        }
-        Build::Account(amount, account_id, address, sender, issuer) => {
-            build_account_output(amount, account_id, address, sender, issuer)
-        }
-        Build::Foundry(amount, account_id, serial_number, token_scheme, native_token) => {
-            build_foundry_output(amount, account_id, serial_number, token_scheme, native_token)
-        }
     }
 }
 
-fn build_inputs<'a>(
-    outputs: impl IntoIterator<Item = Build<'a>>,
-    slot_index: Option<SlotIndex>,
-) -> Vec<InputSigningData> {
+fn build_inputs(outputs: impl IntoIterator<Item = Build>, slot_index: Option<SlotIndex>) -> Vec<InputSigningData> {
     outputs
         .into_iter()
         .map(|build| {
-            let output = build_output_inner(build);
+            let output = build.build();
             let transaction_id = slot_index.map_or_else(rand_transaction_id, rand_transaction_id_with_slot_index);
 
             InputSigningData {
@@ -225,8 +227,8 @@ fn build_inputs<'a>(
         .collect()
 }
 
-fn build_outputs<'a>(outputs: impl IntoIterator<Item = Build<'a>>) -> Vec<Output> {
-    outputs.into_iter().map(|build| build_output_inner(build)).collect()
+fn build_outputs(outputs: impl IntoIterator<Item = Build>) -> Vec<Output> {
+    outputs.into_iter().map(Build::build).collect()
 }
 
 fn unsorted_eq<T>(a: &[T], b: &[T]) -> bool

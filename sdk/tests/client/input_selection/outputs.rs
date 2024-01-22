@@ -3,7 +3,6 @@
 
 use std::str::FromStr;
 
-use crypto::keys::bip44::Bip44;
 use iota_sdk::{
     client::api::input_selection::{Burn, Error, InputSelection},
     types::block::{address::Address, output::AccountId, protocol::protocol_parameters},
@@ -21,15 +20,15 @@ fn no_inputs() {
     let protocol_parameters = protocol_parameters();
 
     let inputs = Vec::new();
-    let outputs = build_outputs([Basic(
-        1_000_000,
-        Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-        None,
-        None,
-        None,
-        None,
-        None,
-    )]);
+    let outputs = build_outputs([Basic {
+        amount: 1_000_000,
+        address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+        native_token: None,
+        sender: None,
+        sdruc: None,
+        timelock: None,
+        expiration: None,
+    }]);
 
     let selected = InputSelection::new(
         inputs,
@@ -48,15 +47,15 @@ fn no_outputs() {
     let protocol_parameters = protocol_parameters();
 
     let inputs = build_inputs(
-        [Basic(
-            1_000_000,
-            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-            None,
-            None,
-            None,
-            None,
-            None,
-        )],
+        [Basic {
+            amount: 1_000_000,
+            address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            native_token: None,
+            sender: None,
+            sdruc: None,
+            timelock: None,
+            expiration: None,
+        }],
         None,
     );
     let outputs = Vec::new();
@@ -79,13 +78,13 @@ fn no_outputs_but_burn() {
     let account_id_2 = AccountId::from_str(ACCOUNT_ID_2).unwrap();
 
     let inputs = build_inputs(
-        [Account(
-            2_000_000,
-            account_id_2,
-            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-            None,
-            None,
-        )],
+        [Account {
+            amount: 2_000_000,
+            account_id: account_id_2,
+            address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            sender: None,
+            issuer: None,
+        }],
         Some(SLOT_INDEX),
     );
     let outputs = Vec::new();
@@ -116,26 +115,26 @@ fn no_address_provided() {
     let protocol_parameters = protocol_parameters();
 
     let inputs = build_inputs(
-        [Basic(
-            1_000_000,
-            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-            None,
-            None,
-            None,
-            None,
-            None,
-        )],
+        [Basic {
+            amount: 1_000_000,
+            address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            native_token: None,
+            sender: None,
+            sdruc: None,
+            timelock: None,
+            expiration: None,
+        }],
         Some(SLOT_INDEX),
     );
-    let outputs = build_outputs([Basic(
-        1_000_000,
-        Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-        None,
-        None,
-        None,
-        None,
-        None,
-    )]);
+    let outputs = build_outputs([Basic {
+        amount: 1_000_000,
+        address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+        native_token: None,
+        sender: None,
+        sdruc: None,
+        timelock: None,
+        expiration: None,
+    }]);
 
     let selected = InputSelection::new(inputs, outputs, [], SLOT_INDEX, protocol_parameters).select();
 
@@ -147,26 +146,26 @@ fn no_matching_address_provided() {
     let protocol_parameters = protocol_parameters();
 
     let inputs = build_inputs(
-        [Basic(
-            1_000_000,
-            Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-            None,
-            None,
-            None,
-            None,
-            None,
-        )],
+        [Basic {
+            amount: 1_000_000,
+            address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+            native_token: None,
+            sender: None,
+            sdruc: None,
+            timelock: None,
+            expiration: None,
+        }],
         None,
     );
-    let outputs = build_outputs([Basic(
-        1_000_000,
-        Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-        None,
-        None,
-        None,
-        None,
-        None,
-    )]);
+    let outputs = build_outputs([Basic {
+        amount: 1_000_000,
+        address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+        native_token: None,
+        sender: None,
+        sdruc: None,
+        timelock: None,
+        expiration: None,
+    }]);
 
     let selected = InputSelection::new(
         inputs,
@@ -186,36 +185,36 @@ fn two_addresses_one_missing() {
 
     let inputs = build_inputs(
         [
-            Basic(
-                1_000_000,
-                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-                None,
-                None,
-                None,
-                None,
-                None,
-            ),
-            Basic(
-                1_000_000,
-                Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
-                None,
-                None,
-                None,
-                None,
-                None,
-            ),
+            Basic {
+                amount: 1_000_000,
+                address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+                native_token: None,
+                sender: None,
+                sdruc: None,
+                timelock: None,
+                expiration: None,
+            },
+            Basic {
+                amount: 1_000_000,
+                address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
+                native_token: None,
+                sender: None,
+                sdruc: None,
+                timelock: None,
+                expiration: None,
+            },
         ],
         Some(SLOT_INDEX),
     );
-    let outputs = build_outputs([Basic(
-        2_000_000,
-        Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-        None,
-        None,
-        None,
-        None,
-        None,
-    )]);
+    let outputs = build_outputs([Basic {
+        amount: 2_000_000,
+        address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+        native_token: None,
+        sender: None,
+        sdruc: None,
+        timelock: None,
+        expiration: None,
+    }]);
 
     let selected = InputSelection::new(
         inputs,
@@ -241,36 +240,36 @@ fn two_addresses() {
 
     let inputs = build_inputs(
         [
-            Basic(
-                1_000_000,
-                Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-                None,
-                None,
-                None,
-                None,
-                None,
-            ),
-            Basic(
-                1_000_000,
-                Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
-                None,
-                None,
-                None,
-                None,
-                None,
-            ),
+            Basic {
+                amount: 1_000_000,
+                address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+                native_token: None,
+                sender: None,
+                sdruc: None,
+                timelock: None,
+                expiration: None,
+            },
+            Basic {
+                amount: 1_000_000,
+                address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_1).unwrap(),
+                native_token: None,
+                sender: None,
+                sdruc: None,
+                timelock: None,
+                expiration: None,
+            },
         ],
         Some(SLOT_INDEX),
     );
-    let outputs = build_outputs([Basic(
-        2_000_000,
-        Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
-        None,
-        None,
-        None,
-        None,
-        None,
-    )]);
+    let outputs = build_outputs([Basic {
+        amount: 2_000_000,
+        address: Address::try_from_bech32(BECH32_ADDRESS_ED25519_0).unwrap(),
+        native_token: None,
+        sender: None,
+        sdruc: None,
+        timelock: None,
+        expiration: None,
+    }]);
 
     let selected = InputSelection::new(
         inputs.clone(),
