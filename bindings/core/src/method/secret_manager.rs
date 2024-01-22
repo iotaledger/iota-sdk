@@ -18,6 +18,7 @@ use crate::OmittedDebug;
 #[non_exhaustive]
 pub enum SecretManagerMethod {
     /// Generate Ed25519 addresses.
+    #[serde(rename_all = "camelCase")]
     GenerateEd25519Addresses {
         /// The Bech32 human-readable part
         bech32_hrp: Hrp,
