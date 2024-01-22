@@ -106,7 +106,7 @@ impl BasicBlockBodyBuilder {
             MaxBurnedManaAmount::MinimumAmount {
                 params,
                 reference_mana_cost,
-            } => body.work_score(params) as u64 * reference_mana_cost,
+            } => (body.work_score(params) as u64 + params.signature_ed25519() as u64) * reference_mana_cost,
         };
 
         Ok(body)
