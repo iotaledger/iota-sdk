@@ -19,7 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security -->
 
-## 1.1.4 - 2024-MM-DD
+## 1.1.4 - 2024-01-22
 
 ### Added
 
@@ -33,6 +33,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - `Ed25519Signature` type no longer requires validated public key bytes to construct;
+- `SelfControlledAliasOutput` and `SelfDepositNft` conditions;
 
 ## 1.1.3 - 2023-12-07
 
