@@ -39,6 +39,8 @@ pub enum Error {
     /// Custom input error
     #[error("custom input error {0}")]
     CustomInput(String),
+    #[error("delay delegation claiming failed {0}")]
+    DelegationTransitionFailed(String),
     /// Insufficient funds to send transaction.
     #[error("address owns insufficient funds: {required} base unit required, but {available} base unit available")]
     InsufficientFunds { available: u64, required: u64 },

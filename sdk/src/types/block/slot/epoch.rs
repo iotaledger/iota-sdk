@@ -74,6 +74,12 @@ impl EpochIndex {
     pub fn last_slot_index(self, slots_per_epoch_exponent: u8) -> SlotIndex {
         SlotIndex::from_epoch_index(self + 1, slots_per_epoch_exponent) - 1
     }
+
+    /// Returns the slot at the end of which the validator and delegator registration ends and the voting power
+    /// for the epoch with index epoch + 1 is calculated.
+    pub fn registration_slot(&self, slots_per_epoch_exponent: u8, epoch_nearing_threshold: u32) -> SlotIndex {
+        self.last_slot_index(slots_per_epoch_exponent) - epoch_nearing_threshold
+    }
 }
 
 impl From<EpochIndex> for u32 {
