@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use crate::types::block::{
+    context_input::CommitmentContextInput,
     output::{
         AccountOutput, AnchorOutput, BasicOutput, ChainId, DelegationOutput, FoundryOutput, NftOutput, Output,
         TokenScheme,
@@ -359,7 +360,9 @@ impl StateTransitionVerifier for DelegationOutput {
             .map(|s| s.as_commitment().slot_commitment_id())
             .ok_or(StateTransitionError::MissingCommitmentContextInput)?;
 
-        let future_bounded_slot_index = slot_commitment_id.slot_index() + protocol_parameters.min_committable_age;
+        let future_bounded_slot_index = slot_commitment_id
+            .slot_index()
+            .future_bounded_slot(protocol_parameters.min_committable_age);
         let future_bounded_epoch_index =
             future_bounded_slot_index.to_epoch_index(protocol_parameters.slots_per_epoch_exponent);
 

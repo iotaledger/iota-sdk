@@ -77,6 +77,15 @@ impl SlotIndex {
             .map(|adjusted_slot| (adjusted_slot as u64 * slot_duration_in_seconds as u64) + genesis_unix_timestamp)
             .unwrap_or_default()
     }
+
+    /// Calculates the future bounded slot for the given slot.
+    /// Given any slot index of a commitment input, the result of this function is a slot index
+    /// that is at most equal to the slot of the block in which it was issued, or lower.
+    /// That means no commitment input can be chosen such that the index lies ahead of the slot index of the block,
+    /// hence the future is bounded.
+    pub fn future_bounded_slot(self, min_commitable_age: u32) -> SlotIndex {
+        Self(self.0 + min_commitable_age)
+    }
 }
 
 impl PartialEq<u32> for SlotIndex {
