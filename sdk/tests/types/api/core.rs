@@ -88,7 +88,7 @@ fn responses() {
     json_response::<OutputMetadata>("get-output-metadata-by-id-response-unspent-example.json").unwrap();
     json_response::<OutputMetadata>("get-output-metadata-by-id-response-spent-example.json").unwrap();
     // GET /api/core/v3/outputs/{outputId}/full
-    // json_response::<OutputWithMetadata>("get-full-output-metadata-example.json").unwrap();
+    json_response::<OutputWithMetadata>("get-full-output-metadata-example.json").unwrap();
     // GET /api/core/v3/commitments/{commitmentId}
     json_response::<SlotCommitment>("get-commitment-response-example.json").unwrap();
     // GET /api/core/v3/commitments/{commitmentId}/utxo-changes
