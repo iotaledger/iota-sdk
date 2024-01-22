@@ -154,17 +154,17 @@ export const TRANSACTION_FAILURE_REASON_STRINGS: {
     [TransactionFailureReason.ConflictingWithAnotherTx]:
         'The transaction is conflicting with another transaction. Conflicting specifically means a double spend situation that both transactions pass all validation rules, eventually losing one(s) should have this reason.',
     [TransactionFailureReason.InvalidReferencedUtxo]:
-        'The referenced UTXO is Invalid.',
+        'The referenced UTXO is invalid.',
     [TransactionFailureReason.InvalidTransaction]:
-        'The transaction is Invalid.',
+        'The transaction is invalid.',
     [TransactionFailureReason.SumInputsOutputsAmountMismatch]:
         'The sum of the inputs and output base token amount does not match.',
     [TransactionFailureReason.InvalidUnlockBlockSignature]:
-        'The unlock block signature is Invalid.',
+        'The unlock block signature is invalid.',
     [TransactionFailureReason.TimelockNotExpired]:
         'The configured timelock is not yet expired.',
     [TransactionFailureReason.InvalidNativeTokens]:
-        'The given native tokens are Invalid.',
+        'The given native tokens are invalid.',
     [TransactionFailureReason.StorageDepositReturnUnfulfilled]:
         'The return amount in a transaction is not fulfilled by the output side.',
     [TransactionFailureReason.InvalidInputUnlock]:
@@ -172,16 +172,16 @@ export const TRANSACTION_FAILURE_REASON_STRINGS: {
     [TransactionFailureReason.SenderNotUnlocked]:
         'The output contains a Sender with an ident (address) which is not unlocked.',
     [TransactionFailureReason.InvalidChainStateTransition]:
-        'The chain state transition is Invalid.',
+        'The chain state transition is invalid.',
     [TransactionFailureReason.InvalidTransactionIssuingTime]:
         'The referenced input is created after transaction issuing time.',
-    [TransactionFailureReason.InvalidManaAmount]: 'The mana amount is Invalid.',
+    [TransactionFailureReason.InvalidManaAmount]: 'The mana amount is invalid.',
     [TransactionFailureReason.InvalidBlockIssuanceCreditsAmount]:
-        'The Block Issuance Credits amount is Invalid.',
+        'The Block Issuance Credits amount is invalid.',
     [TransactionFailureReason.InvalidRewardContextInput]:
-        'Reward Context Input is Invalid.',
+        'Reward Context Input is invalid.',
     [TransactionFailureReason.InvalidCommitmentContextInput]:
-        'Commitment Context Input is Invalid.',
+        'Commitment Context Input is invalid.',
     [TransactionFailureReason.MissingStakingFeature]:
         'Staking Feature is not provided in account output when claiming rewards.',
     [TransactionFailureReason.FailedToClaimStakingReward]:
