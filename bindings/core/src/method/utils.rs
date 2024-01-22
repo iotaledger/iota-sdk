@@ -14,6 +14,7 @@ use iota_sdk::{
                 TransactionId,
             },
         },
+        protocol::ProtocolParameters,
         signature::dto::Ed25519SignatureDto,
         BlockDto,
     },
@@ -163,9 +164,29 @@ pub enum UtilsMethod {
     #[serde(rename_all = "camelCase")]
     OutputHexBytes { output: OutputDto },
     /// Verifies the semantic of a transaction.
+    /// Expected response: [`ConflictReason`](crate::Response::ConflictReason)
     VerifyTransactionSemantic {
         inputs: Vec<InputSigningDataDto>,
         transaction: TransactionPayloadDto,
         time: u32,
+    },
+    /// Verifies the syntax of a transaction.
+    /// Expected response: [`Ok`](crate::Response::Ok)
+    #[serde(rename_all = "camelCase")]
+    VerifyTransactionSyntax {
+        transaction: TransactionPayloadDto,
+        protocol_parameters: ProtocolParameters,
+    },
+    /// Returns the serialized bytes of a block.
+    /// Expected response: [`Raw`](crate::Response::Raw)
+    BlockBytes {
+        /// Block
+        block: BlockDto,
+    },
+    /// Returns a block hash (Blake2b256 hash of block bytes without nonce) from a block for PoW.
+    /// Expected response: [`Hash`](crate::Response::Hash)
+    BlockHashWithoutNonce {
+        /// Block
+        block: BlockDto,
     },
 }

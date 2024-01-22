@@ -18,7 +18,7 @@ backtrace = { version = "0.3.69", default-features = false, features = ["std"] }
 derivative = { version = "2.2.0", default-features = false }
 fern-logger = { version = "0.5.0", default-features = false }
 futures = { version = "0.3.30", default-features = false }
-iota-crypto = { version = "0.23.0", default-features = false, features = [
+iota-crypto = { version = "0.23.1", default-features = false, features = [
     "slip10",
     "bip44",
 ] }

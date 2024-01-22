@@ -12,6 +12,7 @@ import {
     OutputId,
     NftId,
     Bech32Address,
+    INodeInfoProtocol,
 } from '../../';
 import { AliasId } from '../../block/id';
 import { InputSigningData } from '../../client';
@@ -213,5 +214,27 @@ export interface __VerifyTransactionSemantic__ {
         inputs: InputSigningData[];
         transaction: TransactionPayload;
         time: number;
+    };
+}
+
+export interface __VerifyTransactionSyntax__ {
+    name: 'verifyTransactionSyntax';
+    data: {
+        transaction: TransactionPayload;
+        protocolParameters: INodeInfoProtocol;
+    };
+}
+
+export interface __BlockBytes__ {
+    name: 'blockBytes';
+    data: {
+        block: Block;
+    };
+}
+
+export interface __BlockHashWithoutNonce__ {
+    name: 'blockHashWithoutNonce';
+    data: {
+        block: Block;
     };
 }
