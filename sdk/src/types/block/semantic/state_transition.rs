@@ -2,7 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use crate::types::block::{
-    output::{AccountOutput, AnchorOutput, ChainId, DelegationOutput, FoundryOutput, NftOutput, Output, TokenScheme},
+    output::{
+        AccountOutput, AnchorOutput, BasicOutput, ChainId, DelegationOutput, FoundryOutput, NftOutput, Output,
+        TokenScheme,
+    },
     payload::signed_transaction::TransactionCapabilityFlag,
     semantic::{SemanticValidationContext, TransactionFailureReason},
 };
@@ -19,6 +22,7 @@ pub enum StateTransitionError {
     InconsistentNativeTokensTransition,
     InconsistentNativeTokensMeltBurn,
     InvalidDelegatedAmount,
+    InvalidBlockIssuerTransition,
     IssuerNotUnlocked,
     MissingAccountForFoundry,
     MutatedFieldWithoutRights,
@@ -33,6 +37,7 @@ pub enum StateTransitionError {
     UnsupportedStateIndexOperation { current_state: u32, next_state: u32 },
     UnsupportedStateTransition,
     TransactionFailure(TransactionFailureReason),
+    ZeroCreatedId,
 }
 
 impl From<TransactionFailureReason> for StateTransitionError {
@@ -72,12 +77,11 @@ impl SemanticValidationContext<'_> {
             (None, Some(Output::Delegation(next_state))) => DelegationOutput::creation(next_state, self),
 
             // Transitions.
-            (Some(Output::Basic(current_state)), Some(Output::Account(_next_state))) => {
-                if !current_state.is_implicit_account() {
-                    Err(StateTransitionError::UnsupportedStateTransition)
+            (Some(Output::Basic(current_state)), Some(Output::Account(next_state))) => {
+                if current_state.is_implicit_account() {
+                    BasicOutput::implicit_account_transition(current_state, next_state, self)
                 } else {
-                    // TODO https://github.com/iotaledger/iota-sdk/issues/1664
-                    Ok(())
+                    Err(StateTransitionError::UnsupportedStateTransition)
                 }
             }
             (Some(Output::Account(current_state)), Some(Output::Account(next_state))) => {
@@ -102,6 +106,35 @@ impl SemanticValidationContext<'_> {
             // Unsupported.
             _ => Err(StateTransitionError::UnsupportedStateTransition),
         }
+    }
+}
+
+impl BasicOutput {
+    pub(crate) fn implicit_account_transition(
+        _current_state: &Self,
+        next_state: &AccountOutput,
+        context: &SemanticValidationContext<'_>,
+    ) -> Result<(), StateTransitionError> {
+        if next_state.account_id().is_null() {
+            return Err(StateTransitionError::ZeroCreatedId);
+        }
+
+        if let Some(_block_issuer) = next_state.features().block_issuer() {
+            // TODO https://github.com/iotaledger/iota-sdk/issues/1853
+            // The Account must have a Block Issuer Feature and it must pass semantic validation as if the implicit
+            // account contained a Block Issuer Feature with its Expiry Slot set to the maximum value of
+            // slot indices and the feature was transitioned.
+        } else {
+            return Err(StateTransitionError::InvalidBlockIssuerTransition);
+        }
+
+        if let Some(issuer) = next_state.immutable_features().issuer() {
+            if !context.unlocked_addresses.contains(issuer.address()) {
+                return Err(StateTransitionError::IssuerNotUnlocked);
+            }
+        }
+
+        Ok(())
     }
 }
 

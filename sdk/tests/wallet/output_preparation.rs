@@ -6,7 +6,7 @@ use std::str::FromStr;
 use iota_sdk::{
     types::block::{
         address::{Address, Bech32Address, ToBech32Ext},
-        output::{BasicOutput, MinimumOutputAmount, NativeToken, NftId, TokenId},
+        output::{feature::MetadataFeature, BasicOutput, MinimumOutputAmount, NativeToken, NftId, TokenId},
         protocol::CommittableAgeRange,
         slot::SlotIndex,
     },
@@ -101,7 +101,7 @@ async fn output_preparation() -> Result<()> {
                 amount: 300000,
                 assets: None,
                 features: Some(Features {
-                    metadata: Some(prefix_hex::encode(b"Hello world")),
+                    metadata: Some(MetadataFeature::new([("data".to_owned(), b"Hello world".to_vec())]).unwrap()),
                     tag: Some(prefix_hex::encode(b"My Tag")),
                     issuer: None,
                     sender: None,
@@ -127,7 +127,7 @@ async fn output_preparation() -> Result<()> {
                 amount: 1,
                 assets: None,
                 features: Some(Features {
-                    metadata: Some(prefix_hex::encode(b"Hello world")),
+                    metadata: Some(MetadataFeature::new([("data".to_owned(), b"Hello world".to_vec())]).unwrap()),
                     tag: Some(prefix_hex::encode(b"My Tag")),
                     issuer: None,
                     sender: None,
@@ -156,7 +156,7 @@ async fn output_preparation() -> Result<()> {
                 amount: 12000,
                 assets: None,
                 features: Some(Features {
-                    metadata: Some(prefix_hex::encode(b"Hello world")),
+                    metadata: Some(MetadataFeature::new([("data".to_owned(), b"Hello world".to_vec())]).unwrap()),
                     tag: Some(prefix_hex::encode(b"My Tag")),
                     issuer: None,
                     sender: None,
@@ -182,7 +182,7 @@ async fn output_preparation() -> Result<()> {
                 amount: 1,
                 assets: None,
                 features: Some(Features {
-                    metadata: Some(prefix_hex::encode(b"Hello world")),
+                    metadata: Some(MetadataFeature::new([("data".to_owned(), b"Hello world".to_vec())]).unwrap()),
                     tag: Some(prefix_hex::encode(b"My Tag")),
                     issuer: None,
                     sender: None,
@@ -398,7 +398,9 @@ async fn output_preparation() -> Result<()> {
                 amount: 42600,
                 assets: None,
                 features: Some(Features {
-                    metadata: Some(prefix_hex::encode(b"Large metadata".repeat(100))),
+                    metadata: Some(
+                        MetadataFeature::new([("data".to_owned(), b"Large metadata".repeat(100).to_vec())]).unwrap(),
+                    ),
                     tag: Some(prefix_hex::encode(b"My Tag")),
                     issuer: None,
                     sender: None,
@@ -551,10 +553,10 @@ async fn prepare_nft_output_features_update() -> Result<()> {
     let nft_options = [MintNftParams::new()
         .with_address(wallet_address.clone())
         .with_sender(wallet_address.clone())
-        .with_metadata(b"some nft metadata".to_vec())
+        .with_metadata(MetadataFeature::new([("42".to_owned(), vec![42])])?)
         .with_tag(b"some nft tag".to_vec())
         .with_issuer(wallet_address.clone())
-        .with_immutable_metadata(b"some immutable nft metadata".to_vec())];
+        .with_immutable_metadata(MetadataFeature::new([("42".to_owned(), vec![42])])?)];
 
     let transaction = wallet.mint_nfts(nft_options, None).await.unwrap();
     wallet
@@ -570,7 +572,7 @@ async fn prepare_nft_output_features_update() -> Result<()> {
                 amount: 1_000_000,
                 assets: Some(Assets { nft_id: Some(nft_id) }),
                 features: Some(Features {
-                    metadata: Some("0x2a".to_string()),
+                    metadata: Some(MetadataFeature::new([("data".to_owned(), b"0x2a".to_vec())]).unwrap()),
                     tag: None,
                     issuer: None,
                     sender: None,
@@ -589,10 +591,19 @@ async fn prepare_nft_output_features_update() -> Result<()> {
     assert_eq!(nft.address(), wallet.address().await.inner());
     assert!(nft.features().sender().is_none());
     assert!(nft.features().tag().is_none());
-    assert_eq!(nft.features().metadata().unwrap().data(), &[42]);
     assert_eq!(
-        nft.immutable_features().metadata().unwrap().data(),
-        b"some immutable nft metadata"
+        nft.features().metadata().unwrap().first_key_value().unwrap().1.to_vec(),
+        [42]
+    );
+    assert_eq!(
+        nft.immutable_features()
+            .metadata()
+            .unwrap()
+            .first_key_value()
+            .unwrap()
+            .1
+            .to_vec(),
+        [42]
     );
     assert_eq!(
         nft.immutable_features().issuer().unwrap().address(),
@@ -827,10 +838,10 @@ async fn prepare_existing_nft_output_gift() -> Result<()> {
     let nft_options = [MintNftParams::new()
         .with_address(address.clone())
         .with_sender(address.clone())
-        .with_metadata(b"some nft metadata".to_vec())
+        .with_metadata(MetadataFeature::new([("42".to_owned(), vec![42])])?)
         .with_tag(b"some nft tag".to_vec())
         .with_issuer(address.clone())
-        .with_immutable_metadata(b"some immutable nft metadata".to_vec())];
+        .with_immutable_metadata(MetadataFeature::new([("43".to_owned(), vec![43])])?)];
 
     let transaction = wallet.mint_nfts(nft_options, None).await.unwrap();
     wallet
@@ -866,8 +877,14 @@ async fn prepare_existing_nft_output_gift() -> Result<()> {
     assert_eq!(nft.address(), wallet.address().await.inner());
     assert!(nft.features().is_empty());
     assert_eq!(
-        nft.immutable_features().metadata().unwrap().data(),
-        b"some immutable nft metadata"
+        nft.immutable_features()
+            .metadata()
+            .unwrap()
+            .first_key_value()
+            .unwrap()
+            .1
+            .to_vec(),
+        [43]
     );
     assert_eq!(
         nft.immutable_features().issuer().unwrap().address(),

@@ -1315,7 +1315,7 @@ fn changed_immutable_metadata() {
     )
     .with_issuer_name("Alice");
     #[cfg(not(feature = "irc_27"))]
-    let metadata = [1, 2, 3];
+    let metadata = vec![("42".to_owned(), vec![42])];
 
     let nft_output =
         NftOutputBuilder::new_with_minimum_amount(protocol_parameters.storage_score_parameters(), nft_id_1)
@@ -1340,7 +1340,7 @@ fn changed_immutable_metadata() {
     )
     .with_issuer_name("Alice");
     #[cfg(not(feature = "irc_27"))]
-    let metadata = [4, 5, 6];
+    let metadata = vec![("43".to_owned(), vec![43])];
 
     // New nft output with changed immutable metadata feature
     let updated_nft_output = NftOutputBuilder::from(nft_output.as_nft())

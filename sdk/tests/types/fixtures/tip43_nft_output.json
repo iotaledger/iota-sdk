@@ -1,0 +1,43 @@
+{
+  "output": {
+    "type": 4,
+    "amount": "421000000",
+    "mana": "0",
+    "nftId": "0x3163482ff326658dd1bfead468a609bc6b3e74cb2e5094e0da9b63eae7e0166c",
+    "unlockConditions": [
+      {
+        "type": 0,
+        "address": {
+          "type": 8,
+          "accountId": "0x17432c5a7a672503480241125e3952414a7a320441080c624c264b004e09614a"
+        }
+      },
+      {
+        "type": 1,
+        "returnAddress": {
+          "type": 0,
+          "pubKeyHash": "0xed1484f4d1f7d8c037087fed661dd92faccae1eed3c01182d6fdd6828cea144a"
+        },
+        "amount": "4000000"
+      }
+    ],
+    "features": [
+      {
+        "type": 2,
+        "entries": {
+          "iota": "0x322e30"
+        }
+      }
+    ],
+    "immutableFeatures": [
+      {
+        "type": 2,
+        "entries": {
+          "nft": "0x696f7461"
+        }
+      }
+    ]
+  },
+  "bytes": "0x0440f317190000000000000000000000003163482ff326658dd1bfead468a609bc6b3e74cb2e5094e0da9b63eae7e0166c02000817432c5a7a672503480241125e3952414a7a320441080c624c264b004e09614a0100ed1484f4d1f7d8c037087fed661dd92faccae1eed3c01182d6fdd6828cea144a00093d000000000001020104696f74610300322e30010201036e66740400696f7461",
+  "storage_score": 240
+}
